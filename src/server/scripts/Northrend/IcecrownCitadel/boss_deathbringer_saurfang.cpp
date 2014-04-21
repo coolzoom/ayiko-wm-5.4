@@ -1093,7 +1093,7 @@ class spell_deathbringer_blood_link_aura : public SpellScriptLoader
                 return true;
             }
 
-            void HandlePeriodicTick(AuraEffect const */*aurEff*/)
+            void HandlePeriodicTick(AuraEffect const * /*aurEff*/)
             {
                 PreventDefaultAction();
                 if (GetUnitOwner()->getPowerType() == POWER_ENERGY && GetUnitOwner()->GetPower(POWER_ENERGY) == GetUnitOwner()->GetMaxPower(POWER_ENERGY))
@@ -1139,7 +1139,7 @@ class spell_deathbringer_blood_power : public SpellScriptLoader
         {
             PrepareAuraScript(spell_deathbringer_blood_power_AuraScript);
 
-            void RecalculateHook(AuraEffect const */*aurEffect*/, int32& amount, bool& canBeRecalculated)
+            void RecalculateHook(AuraEffect const * /*aurEffect*/, int32& amount, bool& canBeRecalculated)
             {
                 amount = int32(GetUnitOwner()->GetPower(POWER_ENERGY));
                 canBeRecalculated = true;

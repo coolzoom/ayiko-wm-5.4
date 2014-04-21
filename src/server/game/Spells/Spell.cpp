@@ -2158,7 +2158,7 @@ void Spell::SearchChainTargets(std::list<WorldObject*>& targets, uint32 chainTar
     }
 }
 
-void Spell::prepareDataForTriggerSystem(AuraEffect const */*triggeredByAura*/)
+void Spell::prepareDataForTriggerSystem(AuraEffect const * /*triggeredByAura*/)
 {
     //==========================================================================================
     // Now fill data for trigger system, need know:

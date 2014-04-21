@@ -2120,5 +2120,5 @@ void WorldSession::HandleUpgradeItemOpcode(WorldPacket& recvData)
     if (item->IsEquipped())
         player->ApplyItemUpgrade(item, true);
 
-    player->ModifyCurrency(itemUpEntry->currencyId, -itemUpEntry->currencyCost, false, true, true);
+    player->ModifyCurrency(itemUpEntry->currencyId, -int32(itemUpEntry->currencyCost), false, true, true);
 }

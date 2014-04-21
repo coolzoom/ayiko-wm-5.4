@@ -120,7 +120,7 @@ static void clearAcceptTradeMode(TradeData* /*myTrade*/, TradeData* /*hisTrade*/
 
 }
 
-static void clearAcceptTradeMode(Item* */*myItems*/, Item* */*hisItems*/)
+static void clearAcceptTradeMode(Item* * /*myItems*/, Item* * /*hisItems*/)
 {
 
 }

@@ -1,7 +1,7 @@
 #ifndef TRINITY_GAME_CUFPROFILES_H
 #define TRINITY_GAME_CUFPROFILES_H
 
-#include <cstddef>
+#include <cstdint>
 #include <bitset>
 #include <string>
 

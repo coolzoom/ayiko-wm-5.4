@@ -451,7 +451,7 @@ class spell_mogu_petrification : public SpellScriptLoader
 
             uint32 stack;
 
-            void OnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (GetCaster())
                 {

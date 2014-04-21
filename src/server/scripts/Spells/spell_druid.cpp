@@ -135,13 +135,13 @@ class spell_dru_glyph_of_the_treant : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_glyph_of_the_treant_AuraScript);
 
-            void OnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Player* _player = GetTarget()->ToPlayer())
                     _player->learnSpell(SPELL_DRUID_GLYPH_OF_THE_TREANT, false);
             }
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Player* _player = GetTarget()->ToPlayer())
                     if (_player->HasSpell(SPELL_DRUID_GLYPH_OF_THE_TREANT))
@@ -171,13 +171,13 @@ class spell_dru_incarnation_chosen_of_elune : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_incarnation_chosen_of_elune_AuraScript);
 
-            void OnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Player* _player = GetTarget()->ToPlayer())
                     _player->CastSpell(_player, SPELL_DRUID_INCARNATION_CHOSEN_OF_ELUNE, true);
             }
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Player* _player = GetTarget()->ToPlayer())
                     _player->RemoveAura(SPELL_DRUID_INCARNATION_CHOSEN_OF_ELUNE);
@@ -207,13 +207,13 @@ class spell_dru_incarnation_skins : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_incarnation_skins_AuraScript);
 
-            void OnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Player* _player = GetTarget()->ToPlayer())
                     _player->SetDisplayId(_player->GetModelForForm(_player->GetShapeshiftForm()));
             }
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Player* _player = GetTarget()->ToPlayer())
                     _player->SetDisplayId(_player->GetModelForForm(_player->GetShapeshiftForm()));
@@ -258,7 +258,7 @@ class spell_dru_glyph_of_shred : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_glyph_of_shred_AuraScript);
 
-            void OnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 GetTarget()->CastSpell(GetTarget(), SPELL_DRUID_GLYPH_OF_SHRED_OVERRIDE, true);
             }
@@ -316,7 +316,7 @@ class spell_dru_item_pvp_feral_4p : public SpellScriptLoader
                 return true;
             }
 
-            void OnUpdate(uint32 diff, AuraEffect */*aurEff*/)
+            void OnUpdate(uint32 diff, AuraEffect * /*aurEff*/)
             {
                 if (!GetCaster())
                     return;
@@ -395,7 +395,7 @@ class spell_dru_thrash_bear : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_thrash_bear_AuraScript);
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (!GetCaster())
                     return;
@@ -584,13 +584,13 @@ class spell_dru_play_death : public SpellScriptLoader
             int32 health;
             int32 mana;
 
-            void HandleEffectApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleEffectApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 health = GetTarget()->GetHealth();
                 mana = GetTarget()->GetPower(POWER_MANA);
             }
 
-            void HandleEffectRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleEffectRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (health && mana)
                 {
@@ -622,7 +622,7 @@ class spell_dru_consecration : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_consecration_AuraScript);
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (DynamicObject* dynObj = GetCaster()->GetDynObject(SPELL_DRUID_CONSECRATION_DUMMY))
                     GetCaster()->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), SPELL_DRUID_CONSECRATION_DAMAGE, true);
@@ -1398,7 +1398,7 @@ class spell_dru_natures_vigil : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_natures_vigil_AuraScript);
 
-            void OnProc(AuraEffect const */*aurEff*/, ProcEventInfo& eventInfo)
+            void OnProc(AuraEffect const * /*aurEff*/, ProcEventInfo& eventInfo)
             {
                 PreventDefaultAction();
 
@@ -1480,7 +1480,7 @@ class spell_dru_cenarion_ward : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_cenarion_ward_AuraScript);
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* caster = GetCaster())
                 {
@@ -1616,7 +1616,7 @@ class spell_dru_solar_beam : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_solar_beam_AuraScript);
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (DynamicObject* dynObj = GetCaster()->GetDynObject(SPELL_DRUID_SOLAR_BEAM))
                     GetCaster()->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), SPELL_DRUID_SOLAR_BEAM_SILENCE, true);
@@ -1821,7 +1821,7 @@ class spell_dru_bear_hug : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_bear_hug_AuraScript);
 
-            void CalculateAmount(AuraEffect const */*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
+            void CalculateAmount(AuraEffect const * /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
             {
                 if (Unit* caster = GetCaster())
                 {
@@ -2038,7 +2038,7 @@ class spell_dru_omen_of_clarity : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_omen_of_clarity_AuraScript);
 
-            void HandleEffectPeriodic(AuraEffect const */*aurEff*/)
+            void HandleEffectPeriodic(AuraEffect const * /*aurEff*/)
             {
                 if (Unit* caster = GetCaster())
                     if (caster->HasAura(SPELL_DRUID_OMEN_OF_CLARITY))
@@ -2159,7 +2159,7 @@ class spell_dru_glyph_of_regrowth : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_glyph_of_regrowth_AuraScript);
 
-            void HandleApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 // Increases the critical strike chance of your Regrowth by 40%, but removes the periodic component of the spell.
                 if (GetCaster())
@@ -2167,7 +2167,7 @@ class spell_dru_glyph_of_regrowth : public SpellScriptLoader
                         GetTarget()->RemoveAura(SPELL_DRUID_REGROWTH, GetCaster()->GetGUID());
             }
 
-            void HandleEffectPeriodic(AuraEffect const */*aurEff*/)
+            void HandleEffectPeriodic(AuraEffect const * /*aurEff*/)
             {
                 // Duration automatically refreshes to 6 sec each time Regrowth heals targets at or below 50% health
                 if (Unit* caster = GetCaster())
@@ -2227,7 +2227,7 @@ class spell_dru_cat_form : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_cat_form_AuraScript);
 
-            void OnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* caster = GetCaster())
                     if (Aura *dash = caster->GetAura(SPELL_DRUID_DASH))
@@ -2236,7 +2236,7 @@ class spell_dru_cat_form : public SpellScriptLoader
                                 dash->GetEffect(0)->SetAmount(70);
             }
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* caster = GetCaster())
                 {
@@ -2613,7 +2613,7 @@ class spell_dru_swiftmend : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_swiftmend_AuraScript);
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (DynamicObject* dynObj = GetCaster()->GetDynObject(SPELL_DRUID_SWIFTMEND))
                     GetCaster()->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), SPELL_DRUID_SWIFTMEND_TICK, true);
@@ -2649,7 +2649,7 @@ class spell_dru_astral_communion : public SpellScriptLoader
                 return true;
             }
 
-            void OnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (!GetCaster())
                     return;
@@ -2658,7 +2658,7 @@ class spell_dru_astral_communion : public SpellScriptLoader
                     beginningEclipse = _player->GetEclipsePower();
             }
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (!GetCaster())
                     return;
@@ -2762,7 +2762,7 @@ class spell_dru_celestial_alignment : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_celestial_alignment_AuraScript);
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (!GetCaster())
                     return;
@@ -3376,7 +3376,7 @@ class spell_dru_swift_flight_passive : public SpellScriptLoader
                 return GetCaster()->GetTypeId() == TYPEID_PLAYER;
             }
 
-            void CalculateAmount(AuraEffect const */*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+            void CalculateAmount(AuraEffect const * /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
             {
                 if (Player* caster = GetCaster()->ToPlayer())
                     if (caster->GetSkillValue(SKILL_RIDING) >= 375)
@@ -3481,7 +3481,7 @@ class spell_dru_savage_roar : public SpellScriptLoader
                 target->CastSpell(target, DRUID_SAVAGE_ROAR, true, NULL, aurEff, GetCasterGUID());
             }
 
-            void AfterRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void AfterRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 GetTarget()->RemoveAurasDueToSpell(DRUID_SAVAGE_ROAR);
             }
@@ -3514,12 +3514,12 @@ class spell_dru_survival_instincts : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_survival_instincts_AuraScript);
 
-            void AfterApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void AfterApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 GetTarget()->CastSpell(GetTarget(), DRUID_SURVIVAL_INSTINCTS, true);
             }
 
-            void AfterRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void AfterRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 GetTarget()->RemoveAurasDueToSpell(DRUID_SURVIVAL_INSTINCTS);
             }

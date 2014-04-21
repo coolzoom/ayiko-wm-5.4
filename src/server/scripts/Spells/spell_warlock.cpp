@@ -116,13 +116,13 @@ class spell_warl_soulburn_drain_life : public SpellScriptLoader
         {
             PrepareAuraScript(spell_warl_soulburn_drain_life_AuraScript);
 
-            void HandleApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (GetCaster())
                     GetCaster()->RemoveAura(WARLOCK_SOULBURN_AURA);
             }
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (GetCaster())
                 {
@@ -295,7 +295,7 @@ class spell_warl_soulburn_override : public SpellScriptLoader
         {
             PrepareAuraScript(spell_warl_soulburn_override_AuraScript);
 
-            void OnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (!GetCaster())
                     return;
@@ -319,7 +319,7 @@ class spell_warl_soulburn_override : public SpellScriptLoader
                 }
             }
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (!GetCaster())
                     return;
@@ -462,13 +462,13 @@ class spell_warl_glyph_of_imp_swarm : public SpellScriptLoader
         {
             PrepareAuraScript(spell_warl_glyph_of_imp_swarm_AuraScript);
 
-            void OnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Player* _player = GetTarget()->ToPlayer())
                     _player->learnSpell(WARLOCK_IMP_SWARM, false);
             }
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Player* _player = GetTarget()->ToPlayer())
                     if (_player->HasSpell(WARLOCK_IMP_SWARM))
@@ -600,13 +600,13 @@ class spell_warl_kil_jaedens_cunning : public SpellScriptLoader
         {
             PrepareAuraScript(spell_warl_kil_jaedens_cunning_AuraScript);
 
-            void HandleApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (GetCaster())
                     GetCaster()->RemoveAura(WARLOCK_KIL_JAEDENS_CUNNING_PASSIVE);
             }
 
-            void HandleRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (GetCaster())
                     GetCaster()->CastSpell(GetCaster(), WARLOCK_KIL_JAEDENS_CUNNING_PASSIVE, true);
@@ -635,7 +635,7 @@ class spell_warl_shield_of_shadow : public SpellScriptLoader
         {
             PrepareAuraScript(spell_warl_shield_of_shadow_AuraScript);
 
-            void OnUpdate(uint32 /*diff*/, AuraEffect */*aurEff*/)
+            void OnUpdate(uint32 /*diff*/, AuraEffect * /*aurEff*/)
             {
                 if (Player* player = GetCaster()->ToPlayer())
                 {
@@ -831,7 +831,7 @@ class spell_warl_grimoire_of_sacrifice : public SpellScriptLoader
         {
             PrepareAuraScript(spell_warl_grimoire_of_sacrifice_AuraScript);
 
-            void HandleRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (!GetTarget())
                     return;
@@ -941,7 +941,7 @@ class spell_warl_soul_link_dummy : public SpellScriptLoader
         {
             PrepareAuraScript(spell_warl_soul_link_dummy_AuraScript);
 
-            void HandleRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (!GetCaster() || !GetTarget())
                     return;
@@ -1373,7 +1373,7 @@ class spell_warl_metamorphosis_cost : public SpellScriptLoader
         {
             PrepareAuraScript(spell_warl_metamorphosis_cost_AuraScript);
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (GetCaster())
                     GetCaster()->EnergizeBySpell(GetCaster(), WARLOCK_METAMORPHOSIS, -6, POWER_DEMONIC_FURY);
@@ -1401,7 +1401,7 @@ class spell_warl_immolation_aura : public SpellScriptLoader
         {
             PrepareAuraScript(spell_warl_immolation_aura_AuraScript);
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (GetCaster())
                     GetCaster()->EnergizeBySpell(GetCaster(), GetSpellInfo()->Id, -25, POWER_DEMONIC_FURY);
@@ -1437,17 +1437,17 @@ class spell_warl_dark_bargain_on_absorb : public SpellScriptLoader
                 return true;
             }
 
-            void CalculateAmount(AuraEffect const */*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+            void CalculateAmount(AuraEffect const * /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
             {
                 amount = 100000000;
             }
 
-            void OnAbsorb(AuraEffect */*aurEff*/, DamageInfo& dmgInfo, uint32& /*absorbAmount*/)
+            void OnAbsorb(AuraEffect * /*aurEff*/, DamageInfo& dmgInfo, uint32& /*absorbAmount*/)
             {
                 totalAbsorbAmount += dmgInfo.GetDamage();
             }
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 // (totalAbsorbAmount / 16) it's for totalAbsorbAmount 50% & totalAbsorbAmount / 8 (for each tick of custom spell)
                 if (Unit* caster = GetCaster())
@@ -1478,7 +1478,7 @@ class spell_warl_dark_regeneration : public SpellScriptLoader
         {
             PrepareAuraScript(spell_warl_dark_regeneration_AuraScript);
 
-            void HandleApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (GetTarget())
                     if (Guardian* pet = GetTarget()->GetGuardianPet())
@@ -1776,7 +1776,7 @@ class spell_warl_burning_rush : public SpellScriptLoader
         {
             PrepareAuraScript(spell_warl_burning_rush_AuraScript);
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (GetCaster())
                 {
@@ -1894,7 +1894,7 @@ class spell_warl_nightfall : public SpellScriptLoader
         {
             PrepareAuraScript(spell_warl_nightfall_AuraScript);
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (!GetCaster())
                     return;
@@ -1932,7 +1932,7 @@ class spell_warl_drain_soul : public SpellScriptLoader
         {
             PrepareAuraScript(spell_warl_drain_soul_AuraScript);
 
-            void HandleRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (GetCaster())
                 {
@@ -1964,7 +1964,7 @@ class spell_warl_demonic_gateway_charges : public SpellScriptLoader
         {
             PrepareAuraScript(spell_warl_demonic_gateway_charges_AuraScript);
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (Unit* target = GetTarget())
                     if (Aura *demonicGateway = target->GetAura(WARLOCK_DEMONIC_GATEWAY_PERIODIC_CHARGE))
@@ -2021,7 +2021,7 @@ class spell_warl_rain_of_fire : public SpellScriptLoader
         {
             PrepareAuraScript(spell_warl_rain_of_fire_AuraScript);
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (GetCaster())
                     if (DynamicObject* dynObj = GetCaster()->GetDynObject(WARLOCK_RAIN_OF_FIRE))
@@ -2194,7 +2194,7 @@ class spell_warl_shadowburn : public SpellScriptLoader
         {
             PrepareAuraScript(spell_warl_shadowburn_AuraScript);
 
-            void HandleRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (GetCaster())
                 {
@@ -2351,7 +2351,7 @@ class spell_warl_drain_life : public SpellScriptLoader
         {
             PrepareAuraScript(spell_warl_drain_life_AuraScript);
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (Unit* caster = GetCaster())
                 {
@@ -2487,7 +2487,7 @@ class spell_warl_soulburn_harvest_life : public SpellScriptLoader
         {
             PrepareAuraScript(spell_warl_soulburn_harvest_life_AuraScript);
 
-            void OnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (!GetCaster())
                     return;

@@ -900,7 +900,7 @@ class spell_rotface_unstable_ooze_explosion_suicide : public SpellScriptLoader
         {
             PrepareAuraScript(spell_rotface_unstable_ooze_explosion_suicide_AuraScript);
 
-            void DespawnSelf(AuraEffect const */*aurEff*/)
+            void DespawnSelf(AuraEffect const * /*aurEff*/)
             {
                 PreventDefaultAction();
                 Unit* target = GetTarget();

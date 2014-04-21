@@ -363,7 +363,7 @@ class spell_shadopan_apparitions : public SpellScriptLoader
         {
             PrepareAuraScript(spell_shadopan_apparitions_AuraScript);
 
-            void OnPeriodic(AuraEffect const */*aurEff*/)
+            void OnPeriodic(AuraEffect const * /*aurEff*/)
             {
                 PreventDefaultAction();
 

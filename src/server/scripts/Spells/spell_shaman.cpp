@@ -102,7 +102,7 @@ class spell_sha_hex : public SpellScriptLoader
         {
             PrepareAuraScript(spell_sha_hex_AuraScript);
 
-            void OnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* target = GetTarget())
                 {
@@ -142,7 +142,7 @@ class spell_sha_water_ascendant : public SpellScriptLoader
         {
             PrepareAuraScript(spell_sha_water_ascendant_AuraScript);
 
-            void OnProc(AuraEffect const */*aurEff*/, ProcEventInfo& eventInfo)
+            void OnProc(AuraEffect const * /*aurEff*/, ProcEventInfo& eventInfo)
             {
                 PreventDefaultAction();
 
@@ -251,7 +251,7 @@ class spell_sha_solar_beam : public SpellScriptLoader
         {
             PrepareAuraScript(spell_sha_solar_beam_AuraScript);
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (DynamicObject* dynObj = GetCaster()->GetDynObject(SPELL_SHA_SOLAR_BEAM))
                     GetCaster()->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), SPELL_SHA_SOLAR_BEAM_SILENCE, true);
@@ -475,7 +475,7 @@ class spell_sha_ancestral_guidance : public SpellScriptLoader
         {
             PrepareAuraScript(spell_sha_ancestral_guidance_AuraScript);
 
-            void OnProc(AuraEffect const */*aurEff*/, ProcEventInfo& eventInfo)
+            void OnProc(AuraEffect const * /*aurEff*/, ProcEventInfo& eventInfo)
             {
                 PreventDefaultAction();
 
@@ -535,7 +535,7 @@ class spell_sha_echo_of_the_elements : public SpellScriptLoader
         {
             PrepareAuraScript(spell_sha_echo_of_the_elements_AuraScript);
 
-            void OnProc(AuraEffect const */*aurEff*/, ProcEventInfo& eventInfo)
+            void OnProc(AuraEffect const * /*aurEff*/, ProcEventInfo& eventInfo)
             {
                 PreventDefaultAction();
 
@@ -689,7 +689,7 @@ class spell_sha_mail_specialization : public SpellScriptLoader
         {
             PrepareAuraScript(spell_sha_mail_specialization_AuraScript);
 
-            void OnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (!GetCaster())
                     return;
@@ -704,7 +704,7 @@ class spell_sha_mail_specialization : public SpellScriptLoader
                 }
             }
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (!GetCaster())
                     return;
@@ -741,7 +741,7 @@ class spell_sha_frozen_power : public SpellScriptLoader
         {
             PrepareSpellScript(spell_sha_frozen_power_SpellScript);
 
-            bool Validate(SpellInfo const */*spellEntry*/)
+            bool Validate(SpellInfo const * /*spellEntry*/)
             {
                 if (!sSpellMgr->GetSpellInfo(8056))
                     return false;
@@ -876,7 +876,7 @@ class spell_sha_tidal_waves : public SpellScriptLoader
         {
             PrepareSpellScript(spell_sha_tidal_waves_SpellScript)
 
-            bool Validate(SpellInfo const */*spellEntry*/)
+            bool Validate(SpellInfo const * /*spellEntry*/)
             {
                 if (!sSpellMgr->GetSpellInfo(1064) || !sSpellMgr->GetSpellInfo(61295))
                     return false;
@@ -1234,7 +1234,7 @@ class spell_sha_lava_surge : public SpellScriptLoader
         {
             PrepareAuraScript(spell_sha_lava_surge_AuraScript);
 
-            void HandleEffectPeriodic(AuraEffect const */*aurEff*/)
+            void HandleEffectPeriodic(AuraEffect const * /*aurEff*/)
             {
                 // 20% chance to reset the cooldown of Lavaburst and make the next to be instantly casted
                 if (GetCaster())
@@ -1487,7 +1487,7 @@ class spell_sha_earthquake : public SpellScriptLoader
         {
             PrepareAuraScript(spell_sha_earthquake_AuraScript);
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (!GetCaster())
                     return;
@@ -1518,7 +1518,7 @@ class spell_sha_healing_rain : public SpellScriptLoader
         {
             PrepareAuraScript(spell_sha_healing_rain_AuraScript);
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (!GetCaster())
                     return;

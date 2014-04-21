@@ -144,7 +144,7 @@ class spell_mage_greater_invisibility_removed : public SpellScriptLoader
         {
             PrepareAuraScript(spell_mage_greater_invisibility_removed_AuraScript);
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Player* _player = GetTarget()->ToPlayer())
                     if (_player->HasAura(SPELL_MAGE_GREATER_INVISIBILITY_LESS_DAMAGE))
@@ -173,13 +173,13 @@ class spell_mage_greater_invisibility_triggered : public SpellScriptLoader
         {
             PrepareAuraScript(spell_mage_greater_invisibility_triggered_AuraScript);
 
-            void OnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Player* _player = GetTarget()->ToPlayer())
                     _player->CastSpell(_player, SPELL_MAGE_GREATER_INVISIBILITY_LESS_DAMAGE, true);
             }
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Player* _player = GetTarget()->ToPlayer())
                     _player->CastSpell(_player, SPELL_MAGE_REMOVE_INVISIBILITY_REMOVED_TIMER, true);
@@ -349,7 +349,7 @@ class spell_mage_glyph_of_ice_block : public SpellScriptLoader
         {
             PrepareAuraScript(spell_mage_glyph_of_ice_block_AuraScript);
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (!GetCaster())
                     return;
@@ -386,13 +386,13 @@ class spell_mage_incanters_ward_cooldown : public SpellScriptLoader
         {
             PrepareAuraScript(spell_mage_incanters_ward_cooldown_AuraScript);
 
-            void OnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* caster = GetCaster())
                     caster->RemoveAura(SPELL_MAGE_INCANTERS_ABSORBTION_PASSIVE);
             }
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* caster = GetCaster())
                     if (!caster->HasAura(SPELL_MAGE_INCANTERS_ABSORBTION_PASSIVE))
@@ -459,7 +459,7 @@ class spell_mage_incanters_ward : public SpellScriptLoader
                 }
             }
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* caster = GetCaster())
                 {
@@ -498,7 +498,7 @@ class spell_mage_arcane_missile : public SpellScriptLoader
         {
             PrepareAuraScript(spell_mage_arcane_missile_AuraScript);
 
-            void OnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (!GetCaster())
                     return;
@@ -543,12 +543,12 @@ class spell_mage_cauterize : public SpellScriptLoader
                 return GetUnitOwner()->ToPlayer();
             }
 
-            void CalculateAmount(AuraEffect const */*auraEffect*/, int32& amount, bool& /*canBeRecalculated*/)
+            void CalculateAmount(AuraEffect const * /*auraEffect*/, int32& amount, bool& /*canBeRecalculated*/)
             {
                 amount = -1;
             }
 
-            void Absorb(AuraEffect */*auraEffect*/, DamageInfo& dmgInfo, uint32& absorbAmount)
+            void Absorb(AuraEffect * /*auraEffect*/, DamageInfo& dmgInfo, uint32& absorbAmount)
             {
                 Unit* target = GetTarget();
 
@@ -849,7 +849,7 @@ class spell_mage_invocation : public SpellScriptLoader
         {
             PrepareAuraScript(spell_mage_invocation_AuraScript);
 
-            void AfterRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void AfterRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 AuraRemoveMode removeMode = GetTargetApplication()->GetRemoveMode();
                 if (removeMode != AURA_REMOVE_BY_EXPIRE)
@@ -889,7 +889,7 @@ class spell_mage_frost_bomb : public SpellScriptLoader
         {
             PrepareAuraScript(spell_mage_frost_bomb_AuraScript);
 
-            void AfterRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void AfterRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 AuraRemoveMode removeMode = GetTargetApplication()->GetRemoveMode();
                 if (removeMode != AURA_REMOVE_BY_EXPIRE)
@@ -959,7 +959,7 @@ class spell_mage_nether_tempest : public SpellScriptLoader
         {
             PrepareAuraScript(spell_mage_nether_tempest_AuraScript);
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (GetCaster())
                 {
@@ -1453,7 +1453,7 @@ class spell_mage_alter_time : public SpellScriptLoader
         {
             PrepareAuraScript(spell_mage_alter_time_AuraScript);
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Player* _player = GetTarget()->ToPlayer())
                 {
@@ -1608,7 +1608,7 @@ class spell_mage_living_bomb : public SpellScriptLoader
         {
             PrepareAuraScript(spell_mage_living_bomb_AuraScript);
 
-            void AfterRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void AfterRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 AuraRemoveMode removeMode = GetTargetApplication()->GetRemoveMode();
                 if (removeMode != AURA_REMOVE_BY_DEATH && removeMode != AURA_REMOVE_BY_EXPIRE)

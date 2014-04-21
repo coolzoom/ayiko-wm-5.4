@@ -590,7 +590,7 @@ struct npc_gunship_adds_AI : ScriptedAI
         me->setFaction(14);
     }
 
-    void JustDied(Unit */*victim*/)
+    void JustDied(Unit * /*victim*/)
     {
         if (mustBeRespawned)
             pInstance->SetData64(DATA_GUNSHIP_ADD_RESPAWN, me->GetGUID());
@@ -723,7 +723,7 @@ public:
             }
         }
 
-        void JustDied(Unit */*victim*/)
+        void JustDied(Unit * /*victim*/)
         {}
 
         void DamageTaken(Unit* pDone_by, uint32& uiDamage)
@@ -1152,7 +1152,7 @@ public:
             }
         }
 
-        void JustDied(Unit */*victim*/)
+        void JustDied(Unit * /*victim*/)
         {
             if (!pInstance)
                 return;
@@ -1246,7 +1246,7 @@ public:
         void Reset()
         {}
 
-        void JustDied(Unit */*victim*/)
+        void JustDied(Unit * /*victim*/)
         {}
 
         void MoveInLineOfSight(Unit* /*who*/)

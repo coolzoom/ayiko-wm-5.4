@@ -70,7 +70,7 @@ include_directories(
   ${CMAKE_BINARY_DIR}
   ${ACE_INCLUDE_DIRS}
   ${MYSQL_INCLUDE_DIR}
-  ${OPENSSL_INCLUDE_DIRS}
+  ${OPENSSL_INCLUDE_DIR}
 )
 
 add_library(collision STATIC

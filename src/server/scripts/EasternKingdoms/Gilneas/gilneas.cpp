@@ -2568,13 +2568,13 @@ class spell_keg_placed : public SpellScriptLoader
 
             uint32 tick, tickcount;
 
-            void HandleEffectApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleEffectApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 tick = urand(1, 4);
                 tickcount = 0;
             }
 
-            void HandlePeriodic(AuraEffect const */*aurEff*/)
+            void HandlePeriodic(AuraEffect const * /*aurEff*/)
             {
                 PreventDefaultAction();
                 if (Unit* caster = GetCaster())

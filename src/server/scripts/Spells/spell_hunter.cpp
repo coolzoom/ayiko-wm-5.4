@@ -131,13 +131,13 @@ class spell_hun_glyph_of_aspect_of_the_beast : public SpellScriptLoader
         {
             PrepareAuraScript(spell_hun_glyph_of_aspect_of_the_beast_AuraScript);
 
-            void OnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Player* _player = GetTarget()->ToPlayer())
                     _player->learnSpell(HUNTER_SPELL_ASPECT_OF_THE_BEAST, false);
             }
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Player* _player = GetTarget()->ToPlayer())
                     if (_player->HasSpell(HUNTER_SPELL_ASPECT_OF_THE_BEAST))
@@ -353,13 +353,13 @@ class spell_hun_glyph_of_fetch : public SpellScriptLoader
         {
             PrepareAuraScript(spell_hun_glyph_of_fetch_AuraScript);
 
-            void OnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Player* _player = GetTarget()->ToPlayer())
                     _player->learnSpell(HUNTER_SPELL_FETCH, false);
             }
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Player* _player = GetTarget()->ToPlayer())
                     if (_player->HasSpell(HUNTER_SPELL_FETCH))
@@ -389,7 +389,7 @@ class spell_hun_tracking : public SpellScriptLoader
         {
             PrepareAuraScript(spell_hun_tracking_AuraScript);
 
-            void OnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (!GetCaster())
                     return;
@@ -830,7 +830,7 @@ class spell_hun_frenzy : public SpellScriptLoader
         {
             PrepareAuraScript(spell_hun_frenzy_AuraScript);
 
-            void HandleRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (GetTarget()->GetOwner())
                     if (GetTarget()->GetOwner()->HasAura(HUNTER_SPELL_FOCUS_FIRE_READY))
@@ -859,7 +859,7 @@ class spell_hun_lynx_rush : public SpellScriptLoader
         {
             PrepareAuraScript(spell_hun_lynx_rush_AuraScript);
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const * /*aurEff*/)
             {
                 std::list<Unit*> tempList;
                 std::list<Unit*> targetList;
@@ -1153,7 +1153,7 @@ class spell_hun_binding_shot : public SpellScriptLoader
         {
             PrepareAuraScript(spell_hun_binding_shot_zone_AuraScript);
 
-            void OnUpdate(uint32 /*diff*/, AuraEffect */*aurEff*/)
+            void OnUpdate(uint32 /*diff*/, AuraEffect * /*aurEff*/)
             {
                 if (Unit* caster = GetCaster())
                 {
@@ -1219,7 +1219,7 @@ class spell_hun_binding_shot_zone : public SpellScriptLoader
         {
             PrepareAuraScript(spell_hun_binding_shot_zone_AuraScript);
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (DynamicObject* dynObj = GetCaster()->GetDynObject(HUNTER_SPELL_BINDING_SHOT_AREA))
                     GetCaster()->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), HUNTER_SPELL_BINDING_SHOT_LINK, true);
@@ -1287,7 +1287,7 @@ class spell_hun_improved_serpent_sting : public SpellScriptLoader
         {
             PrepareAuraScript(spell_hun_improved_serpent_sting_AuraScript);
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (!GetCaster())
                     return;
@@ -1398,13 +1398,13 @@ class spell_hun_feign_death : public SpellScriptLoader
             int32 health;
             int32 focus;
 
-            void HandleEffectApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleEffectApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 health = GetTarget()->GetHealth();
                 focus = GetTarget()->GetPower(POWER_FOCUS);
             }
 
-            void HandleEffectRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleEffectRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (health && focus)
                 {
@@ -1436,7 +1436,7 @@ class spell_hun_camouflage_visual : public SpellScriptLoader
         {
             PrepareAuraScript(spell_hun_camouflage_visual_AuraScript);
 
-            void HandleEffectRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleEffectRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (GetCaster())
                 {
@@ -2079,7 +2079,7 @@ class spell_hun_misdirection : public SpellScriptLoader
 
             bool _hasGlyph;
 
-            void OnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (!GetCaster())
                 {
@@ -2097,7 +2097,7 @@ class spell_hun_misdirection : public SpellScriptLoader
                                     _hasGlyph = true;
             }
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (!GetCaster())
                     return;
@@ -2142,7 +2142,7 @@ class spell_hun_misdirection_proc : public SpellScriptLoader
         {
             PrepareAuraScript(spell_hun_misdirection_proc_AuraScript);
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (GetCaster())
                     GetCaster()->SetReducedThreatPercent(0, 0);

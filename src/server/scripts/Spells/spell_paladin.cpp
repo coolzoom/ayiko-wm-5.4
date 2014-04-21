@@ -246,12 +246,12 @@ class spell_pal_hand_of_purity : public SpellScriptLoader
                 return GetUnitOwner()->ToPlayer();
             }
 
-            void CalculateAmount(AuraEffect const */*auraEffect*/, int32& amount, bool& /*canBeRecalculated*/)
+            void CalculateAmount(AuraEffect const * /*auraEffect*/, int32& amount, bool& /*canBeRecalculated*/)
             {
                 amount = -1;
             }
 
-            void Absorb(AuraEffect */*auraEffect*/, DamageInfo& dmgInfo, uint32& absorbAmount)
+            void Absorb(AuraEffect * /*auraEffect*/, DamageInfo& dmgInfo, uint32& absorbAmount)
             {
                 Unit* target = GetTarget();
                 if (!target)
@@ -427,7 +427,7 @@ class spell_pal_sacred_shield : public SpellScriptLoader
         {
             PrepareAuraScript(spell_pal_sacred_shield_AuraScript);
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (Unit* _player = GetCaster())
                     if (Unit* target = GetTarget())
@@ -844,7 +844,7 @@ class spell_pal_lights_hammer : public SpellScriptLoader
         {
             PrepareAuraScript(spell_pal_lights_hammer_AuraScript);
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (GetCaster() && GetCaster()->GetOwner())
                 {
@@ -999,7 +999,7 @@ class spell_pal_consecration : public SpellScriptLoader
         {
             PrepareAuraScript(spell_pal_consecration_AuraScript);
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (DynamicObject* dynObj = GetCaster()->GetDynObject(PALADIN_SPELL_CONSECRATION_AREA_DUMMY))
                     GetCaster()->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), PALADIN_SPELL_CONSECRATION_DAMAGE, true);
@@ -1186,7 +1186,7 @@ class spell_pal_ardent_defender : public SpellScriptLoader
                 return GetUnitOwner()->GetTypeId() == TYPEID_PLAYER;
             }
 
-            void CalculateAmount(AuraEffect const */*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+            void CalculateAmount(AuraEffect const * /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
             {
                 // Set absorbtion amount to unlimited
                 amount = -1;

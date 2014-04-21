@@ -131,12 +131,12 @@ class spell_rog_cheat_death : public SpellScriptLoader
         {
             PrepareAuraScript(spell_rog_cheat_death_AuraScript);
 
-            void CalculateAmount(AuraEffect const */*auraEffect*/, int32& amount, bool& /*canBeRecalculated*/)
+            void CalculateAmount(AuraEffect const * /*auraEffect*/, int32& amount, bool& /*canBeRecalculated*/)
             {
                 amount = -1;
             }
 
-            void Absorb(AuraEffect */*auraEffect*/, DamageInfo& dmgInfo, uint32& absorbAmount)
+            void Absorb(AuraEffect * /*auraEffect*/, DamageInfo& dmgInfo, uint32& absorbAmount)
             {
                 if (Unit* target = GetTarget())
                 {
@@ -183,7 +183,7 @@ class spell_rog_blade_flurry : public SpellScriptLoader
         {
             PrepareAuraScript(spell_rog_blade_flurry_AuraScript);
 
-            void OnProc(AuraEffect const */*aurEff*/, ProcEventInfo& eventInfo)
+            void OnProc(AuraEffect const * /*aurEff*/, ProcEventInfo& eventInfo)
             {
                 PreventDefaultAction();
 
@@ -320,7 +320,7 @@ class spell_rog_combat_readiness : public SpellScriptLoader
             uint32 update;
             bool hit;
 
-            void HandleApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (GetCaster())
                 {
@@ -367,7 +367,7 @@ class spell_rog_nerve_strike : public SpellScriptLoader
         {
             PrepareAuraScript(spell_rog_combat_readiness_AuraScript);
 
-            void HandleRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (GetCaster() && GetTarget())
                     if (GetCaster()->HasAura(ROGUE_SPELL_NERVE_STRIKE_AURA))
@@ -424,7 +424,7 @@ class spell_rog_nightstalker : public SpellScriptLoader
         {
             PrepareAuraScript(spell_rog_nightstalker_AuraScript);
 
-            void HandleRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (GetCaster())
                 {
@@ -459,7 +459,7 @@ class spell_rog_sanguinary_vein : public SpellScriptLoader
         {
             PrepareAuraScript(spell_rog_sanguinary_vein_AuraScript);
 
-            void OnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (!GetCaster())
                     return;
@@ -469,7 +469,7 @@ class spell_rog_sanguinary_vein : public SpellScriptLoader
                         _player->CastSpell(target, ROGUE_SPELL_SANGUINARY_VEIN_DEBUFF, true);
             }
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (!GetCaster())
                     return;
@@ -619,7 +619,7 @@ class spell_rog_venomous_wounds : public SpellScriptLoader
         {
             PrepareAuraScript(spell_rog_venomous_wounds_AuraScript);
 
-            void HandleEffectPeriodic(AuraEffect const */*aurEff*/)
+            void HandleEffectPeriodic(AuraEffect const * /*aurEff*/)
             {
                 if (Unit* caster = GetCaster())
                 {

@@ -52,7 +52,7 @@ class spell_gen_absorb0_hitlimit1 : public SpellScriptLoader
                 return true;
             }
 
-            void Absorb(AuraEffect */*aurEff*/, DamageInfo& /*dmgInfo*/, uint32& absorbAmount)
+            void Absorb(AuraEffect * /*aurEff*/, DamageInfo& /*dmgInfo*/, uint32& absorbAmount)
             {
                 absorbAmount = std::min(limit, absorbAmount);
             }
@@ -246,7 +246,7 @@ class spell_gen_parachute : public SpellScriptLoader
                 return true;
             }
 
-            void HandleEffectPeriodic(AuraEffect const */*aurEff*/)
+            void HandleEffectPeriodic(AuraEffect const * /*aurEff*/)
             {
                 if (Player* target = GetTarget()->ToPlayer())
                     if (target->IsFalling())
@@ -490,7 +490,7 @@ class spell_creature_permanent_feign_death : public SpellScriptLoader
         {
             PrepareAuraScript(spell_creature_permanent_feign_death_AuraScript);
 
-            void HandleEffectApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleEffectApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 Unit* target = GetTarget();
                 target->SetFlag(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
@@ -580,14 +580,14 @@ class spell_gen_animal_blood : public SpellScriptLoader
                 return true;
             }
 
-            void OnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 // Remove all auras with spell id 46221, except the one currently being applied
                 while (Aura *aur = GetUnitOwner()->GetOwnedAura(SPELL_ANIMAL_BLOOD, 0, 0, 0, GetAura()))
                     GetUnitOwner()->RemoveOwnedAura(aur);
             }
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* owner = GetUnitOwner())
                     if (owner->IsInWater())
@@ -701,7 +701,7 @@ class spell_gen_parachute_ic : public SpellScriptLoader
         {
             PrepareAuraScript(spell_gen_parachute_ic_AuraScript)
 
-            void HandleTriggerSpell(AuraEffect const */*aurEff*/)
+            void HandleTriggerSpell(AuraEffect const * /*aurEff*/)
             {
                 if (Player* target = GetTarget()->ToPlayer())
                     if (target->m_movementInfo.fallTime > 2000)
@@ -892,7 +892,7 @@ class spell_gen_clone_weapon_aura : public SpellScriptLoader
                     return true;
                 }
 
-                void OnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+                void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
                 {
                     Unit* caster = GetCaster();
                     Unit* target = GetTarget();
@@ -951,7 +951,7 @@ class spell_gen_clone_weapon_aura : public SpellScriptLoader
                 }
             }
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 Unit* target = GetTarget();
 
@@ -1065,7 +1065,7 @@ class spell_gen_turkey_marker : public SpellScriptLoader
                     target->CastSpell(target, SPELL_TURKEY_VENGEANCE, true, NULL, aurEff, GetCasterGUID());
             }
 
-            void OnPeriodic(AuraEffect const */*aurEff*/)
+            void OnPeriodic(AuraEffect const * /*aurEff*/)
             {
                 if (_applyTimes.empty())
                     return;
@@ -1268,7 +1268,7 @@ class spell_gen_vehicle_scaling : public SpellScriptLoader
                 return GetCaster() && GetCaster()->GetTypeId() == TYPEID_PLAYER;
             }
 
-            void CalculateAmount(AuraEffect const */*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
+            void CalculateAmount(AuraEffect const * /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
             {
                 Unit* caster = GetCaster();
                 float factor;
@@ -1368,13 +1368,13 @@ class spell_gen_luck_of_the_draw : public SpellScriptLoader
             }
 
             // cheap hax to make it have update calls
-            void CalcPeriodic(AuraEffect const */*effect*/, bool& isPeriodic, int32& amplitude)
+            void CalcPeriodic(AuraEffect const * /*effect*/, bool& isPeriodic, int32& amplitude)
             {
                 isPeriodic = true;
                 amplitude = 5 * IN_MILLISECONDS;
             }
 
-            void Update(AuraEffect */*effect*/)
+            void Update(AuraEffect * /*effect*/)
             {
                 if (Player* owner = GetUnitOwner()->ToPlayer())
                 {
@@ -1973,13 +1973,13 @@ class spell_gen_defend : public SpellScriptLoader
                     GetTarget()->RemoveAurasDueToSpell(GetId());
             }
 
-            void RemoveVisualShields(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void RemoveVisualShields(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 for (uint8 i = 0; i < GetSpellInfo()->StackAmount; ++i)
                     GetTarget()->RemoveAurasDueToSpell(SPELL_VISUAL_SHIELD_1 + i);
             }
 
-            void RemoveDummyFromDriver(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void RemoveDummyFromDriver(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* caster = GetCaster())
                     if (TempSummon* vehicle = caster->ToTempSummon())
@@ -2229,7 +2229,7 @@ class spell_gen_on_tournament_mount : public SpellScriptLoader
                 return GetCaster() && GetCaster()->GetTypeId() == TYPEID_PLAYER;
             }
 
-            void HandleApplyEffect(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleApplyEffect(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* caster = GetCaster())
                 {
@@ -2241,7 +2241,7 @@ class spell_gen_on_tournament_mount : public SpellScriptLoader
                 }
             }
 
-            void HandleRemoveEffect(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleRemoveEffect(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* caster = GetCaster())
                     caster->RemoveAurasDueToSpell(_pennantSpellId);
@@ -2384,7 +2384,7 @@ class spell_gen_tournament_pennant : public SpellScriptLoader
                 return GetCaster() && GetCaster()->GetTypeId() == TYPEID_PLAYER;
             }
 
-            void HandleApplyEffect(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleApplyEffect(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* caster = GetCaster())
                     if (!caster->GetVehicleBase())
@@ -2578,7 +2578,7 @@ public:
     {
         PrepareAuraScript(spell_gen_dream_funnel_AuraScript);
 
-        void HandleEffectCalcAmount(AuraEffect const */*aurEff*/, int32& amount, bool& canBeRecalculated)
+        void HandleEffectCalcAmount(AuraEffect const * /*aurEff*/, int32& amount, bool& canBeRecalculated)
         {
             if (GetCaster())
                 amount = GetCaster()->GetMaxHealth() * 0.05f;
@@ -2730,14 +2730,14 @@ class spell_gen_summon_elemental : public SpellScriptLoader
                 return true;
             }
 
-            void AfterApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void AfterApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (GetCaster())
                     if (Unit* owner = GetCaster()->GetOwner())
                         owner->CastSpell(owner, _spellId, true);
             }
 
-            void AfterRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void AfterRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (!GetCaster())
                     return;
@@ -3081,7 +3081,7 @@ class spell_gen_gift_of_the_naaru : public SpellScriptLoader
         {
             PrepareAuraScript(spell_gen_gift_of_the_naaru_AuraScript);
 
-            void CalculateAmount(AuraEffect const */*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
+            void CalculateAmount(AuraEffect const * /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
             {
                 if (!GetCaster())
                     return;
@@ -3306,7 +3306,7 @@ class spell_gen_gobelin_gumbo : public SpellScriptLoader
                 return true;
             }
 
-            void OnUpdate(uint32 diff, AuraEffect */*aurEff*/)
+            void OnUpdate(uint32 diff, AuraEffect * /*aurEff*/)
             {
                 if (GetCaster())
                 {
@@ -3409,7 +3409,7 @@ class spell_gen_hardened_shell : public SpellScriptLoader
         {
             PrepareAuraScript(spell_gen_hardened_shell_AuraScript);
 
-            void HandleOnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleOnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (GetCaster())
                 {
@@ -3446,7 +3446,7 @@ class spell_gen_battle_fatigue : public SpellScriptLoader
         {
             PrepareAuraScript(spell_gen_battle_fatigue_AuraScript);
 
-            void HandleRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* target = GetTarget())
                     if (target->GetTypeId() == TYPEID_PLAYER)

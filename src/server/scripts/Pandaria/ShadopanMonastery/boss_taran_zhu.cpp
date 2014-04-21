@@ -177,7 +177,7 @@ class spell_taran_zhu_hate : public SpellScriptLoader
         {
             PrepareAuraScript(spell_taran_zhu_hate_AuraScript);
 
-            void HandlePeriodic(AuraEffect const */*aurEff*/)
+            void HandlePeriodic(AuraEffect const * /*aurEff*/)
             {
                 if (Unit* target = GetTarget())
                     if (target->GetPower(POWER_ALTERNATE_POWER) >= 100)

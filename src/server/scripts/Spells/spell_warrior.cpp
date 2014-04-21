@@ -167,7 +167,7 @@ class spell_warr_shield_barrier : public SpellScriptLoader
         {
             PrepareAuraScript(spell_warr_shield_barrier_AuraScript);
 
-            void CalculateAmount(AuraEffect const */*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+            void CalculateAmount(AuraEffect const * /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
             {
                 if (GetCaster())
                 {
@@ -433,7 +433,7 @@ class spell_warr_second_wind : public SpellScriptLoader
         {
             PrepareAuraScript(spell_warr_second_wind_AuraScript);
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* caster = GetCaster())
                     if (caster->HasAura(WARRIOR_SPELL_SECOND_WIND_REGEN))
@@ -632,7 +632,7 @@ class spell_warr_mocking_banner : public SpellScriptLoader
         {
             PrepareAuraScript(spell_warr_mocking_banner_AuraScript);
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (Player* player = GetTarget()->ToPlayer())
                 {
@@ -867,7 +867,7 @@ class spell_warr_heroic_leap : public SpellScriptLoader
         {
             PrepareAuraScript(spell_warr_heroic_leap_AuraScript);
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* caster = GetCaster())
                     caster->CastSpell(caster, WARRIOR_SPELL_HEROIC_LEAP_DAMAGE, true);

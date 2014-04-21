@@ -230,7 +230,7 @@ class spell_dk_might_of_ursoc : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dk_might_of_ursoc_AuraScript);
 
-            void OnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* caster = GetCaster())
                     if (caster->GetHealthPct() < 15.0f)
@@ -259,7 +259,7 @@ class spell_dk_wild_mushroom_plague : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dk_wild_mushroom_plague_AuraScript);
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (!GetCaster())
                     return;
@@ -375,7 +375,7 @@ class spell_dk_desecrated_ground : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dk_desecrated_ground_AuraScript);
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (GetCaster())
                     if (DynamicObject* dynObj = GetCaster()->GetDynObject(DK_SPELL_DESECRATED_GROUND))
@@ -703,7 +703,7 @@ class spell_dk_conversion : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dk_conversion_AuraScript);
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (GetCaster())
                 {
@@ -775,7 +775,7 @@ class spell_dk_soul_reaper : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dk_soul_reaper_AuraScript);
 
-            void HandleRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (GetCaster())
                 {
@@ -809,13 +809,13 @@ class spell_dk_pillar_of_frost : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dk_pillar_of_frost_AuraScript);
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Player* _player = GetTarget()->ToPlayer())
                     _player->ApplySpellImmune(DK_SPELL_PILLAR_OF_FROST, IMMUNITY_MECHANIC, MECHANIC_KNOCKOUT, false);
             }
 
-            void OnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Player* _player = GetTarget()->ToPlayer())
                     _player->ApplySpellImmune(DK_SPELL_PILLAR_OF_FROST, IMMUNITY_MECHANIC, MECHANIC_KNOCKOUT, true);
@@ -1040,13 +1040,13 @@ class spell_dk_unholy_presence : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dk_unholy_presence_AuraScript);
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Player* _player = GetTarget()->ToPlayer())
                     _player->UpdateAllRunesRegen();
             }
 
-            void OnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Player* _player = GetTarget()->ToPlayer())
                     _player->UpdateAllRunesRegen();
@@ -1139,7 +1139,7 @@ class spell_dk_purgatory : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dk_purgatory_AuraScript);
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Player* _player = GetTarget()->ToPlayer())
                 {
@@ -1171,12 +1171,12 @@ class spell_dk_purgatory_absorb : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dk_purgatory_absorb_AuraScript);
 
-            void CalculateAmount(AuraEffect const */*auraEffect*/, int32& amount, bool& /*canBeRecalculated*/)
+            void CalculateAmount(AuraEffect const * /*auraEffect*/, int32& amount, bool& /*canBeRecalculated*/)
             {
                 amount = -1;
             }
 
-            void Absorb(AuraEffect */*auraEffect*/, DamageInfo& dmgInfo, uint32& absorbAmount)
+            void Absorb(AuraEffect * /*auraEffect*/, DamageInfo& dmgInfo, uint32& absorbAmount)
             {
                 Unit* target = GetTarget();
 
@@ -1443,13 +1443,13 @@ class spell_dk_anti_magic_shell_raid : public SpellScriptLoader
                 return true;
             }
 
-            void CalculateAmount(AuraEffect const */*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+            void CalculateAmount(AuraEffect const * /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
             {
                 // TODO: this should absorb limited amount of damage, but no info on calculation formula
                 amount = -1;
             }
 
-            void Absorb(AuraEffect */*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
+            void Absorb(AuraEffect * /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
             {
                  absorbAmount = CalculatePct(dmgInfo.GetDamage(), absorbPct);
             }
@@ -1492,13 +1492,13 @@ class spell_dk_anti_magic_shell_self : public SpellScriptLoader
                 return true;
             }
 
-            void CalculateAmount(AuraEffect const */*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+            void CalculateAmount(AuraEffect const * /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
             {
                 if (GetCaster())
                     amount = GetCaster()->CountPctFromMaxHealth(hpPct);
             }
 
-            void Absorb(AuraEffect */*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
+            void Absorb(AuraEffect * /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
             {
                 absorbAmount = std::min(CalculatePct(dmgInfo.GetDamage(), absorbPct), GetTarget()->CountPctFromMaxHealth(hpPct));
             }
@@ -1551,14 +1551,14 @@ class spell_dk_anti_magic_zone : public SpellScriptLoader
                 return true;
             }
 
-            void CalculateAmount(AuraEffect const */*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+            void CalculateAmount(AuraEffect const * /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
             {
                 amount = 136800;
                 if (Player* player = GetCaster()->ToPlayer())
                      amount += int32(player->GetStat(STAT_STRENGTH) * 4);
             }
 
-            void Absorb(AuraEffect */*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
+            void Absorb(AuraEffect * /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
             {
                  absorbAmount = CalculatePct(dmgInfo.GetDamage(), absorbPct);
             }

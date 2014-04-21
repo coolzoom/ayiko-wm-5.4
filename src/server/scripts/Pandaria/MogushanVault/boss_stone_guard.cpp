@@ -689,7 +689,7 @@ class spell_petrification : public SpellScriptLoader
         {
             PrepareAuraScript(spell_petrification_AuraScript);
 
-            void HandleTriggerSpell(AuraEffect const */*aurEff*/)
+            void HandleTriggerSpell(AuraEffect const * /*aurEff*/)
             {
                 PreventDefaultAction();
 
@@ -762,7 +762,7 @@ class spell_jasper_chains : public SpellScriptLoader
                 playerLinkedGuid = guid;
             }
 
-            void HandlePeriodic(AuraEffect const */*aurEff*/)
+            void HandlePeriodic(AuraEffect const * /*aurEff*/)
             {
                 Unit* caster = GetCaster();
                 Unit* target = GetTarget();

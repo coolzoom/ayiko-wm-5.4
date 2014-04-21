@@ -97,7 +97,7 @@ class spell_gen_pet_calculate : public SpellScriptLoader
                 return true;
             }
 
-            void CalculateAmountCritSpell(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+            void CalculateAmountCritSpell(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
             {
                 if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
                 {
@@ -116,7 +116,7 @@ class spell_gen_pet_calculate : public SpellScriptLoader
                 }
             }
 
-            void CalculateAmountCritMelee(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+            void CalculateAmountCritMelee(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
             {
                 if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
                 {
@@ -135,7 +135,7 @@ class spell_gen_pet_calculate : public SpellScriptLoader
                 }
             }
 
-            void CalculateAmountMeleeHit(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+            void CalculateAmountMeleeHit(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
             {
                 if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
                 {
@@ -150,7 +150,7 @@ class spell_gen_pet_calculate : public SpellScriptLoader
                 }
             }
 
-            void CalculateAmountSpellHit(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+            void CalculateAmountSpellHit(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
             {
                 if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
                 {
@@ -165,7 +165,7 @@ class spell_gen_pet_calculate : public SpellScriptLoader
                 }
             }
 
-            void CalculateAmountExpertise(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+            void CalculateAmountExpertise(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
             {
                 if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
                 {
@@ -232,7 +232,7 @@ public:
             return true;
         }
 
-        void CalculateStaminaAmount(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateStaminaAmount(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Unit* pet = GetUnitOwner())
                 if (pet->isPet())
@@ -244,7 +244,7 @@ public:
                     }
         }
 
-        void ApplyEffect(AuraEffect const */* aurEff */, AuraEffectHandleModes /*mode*/)
+        void ApplyEffect(AuraEffect const * /* aurEff */, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* pet = GetUnitOwner())
                 if (_tempBonus)
@@ -276,7 +276,7 @@ public:
                 }
         }
 
-        void RemoveEffect(AuraEffect const */* aurEff */, AuraEffectHandleModes /*mode*/)
+        void RemoveEffect(AuraEffect const * /* aurEff */, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* pet = GetUnitOwner())
                 if (pet->isPet())
@@ -286,7 +286,7 @@ public:
                 }
         }
 
-        void CalculateAttackPowerAmount(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateAttackPowerAmount(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Unit* pet = GetUnitOwner())
                 if (pet->isPet())
@@ -305,7 +305,7 @@ public:
                     // Glyph of felguard
                     if (pet->GetEntry() == ENTRY_FELGUARD)
                     {
-                        if (AuraEffect */* aurEff */ect = owner->GetAuraEffect(56246, EFFECT_0))
+                        if (AuraEffect * /* aurEff */ect = owner->GetAuraEffect(56246, EFFECT_0))
                         {
                             float base_attPower = pet->GetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE) * pet->GetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_PCT);
                             amount += CalculatePct(amount+base_attPower, /* aurEff */ect->GetAmount());
@@ -314,7 +314,7 @@ public:
                 }
         }
 
-        void CalculateDamageDoneAmount(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateDamageDoneAmount(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Unit* pet = GetUnitOwner())
                 if (pet->isPet())
@@ -369,7 +369,7 @@ public:
             return true;
         }
 
-        void CalculateIntellectAmount(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateIntellectAmount(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Unit* pet = GetUnitOwner())
                 if (pet->isPet())
@@ -384,7 +384,7 @@ public:
                     }
         }
 
-        void ApplyEffect(AuraEffect const */* aurEff */, AuraEffectHandleModes /*mode*/)
+        void ApplyEffect(AuraEffect const * /* aurEff */, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* pet = GetUnitOwner())
                 if (_tempBonus)
@@ -412,7 +412,7 @@ public:
                 }
         }
 
-        void RemoveEffect(AuraEffect const */* aurEff */, AuraEffectHandleModes /*mode*/)
+        void RemoveEffect(AuraEffect const * /* aurEff */, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* pet = GetUnitOwner())
                 if (pet->isPet())
@@ -422,7 +422,7 @@ public:
                 }
         }
 
-        void CalculateArmorAmount(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateArmorAmount(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Unit* pet = GetUnitOwner())
                 if (pet->isPet())
@@ -434,7 +434,7 @@ public:
                     }
         }
 
-        void CalculateFireResistanceAmount(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateFireResistanceAmount(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Unit* pet = GetUnitOwner())
                 if (pet->isPet())
@@ -481,7 +481,7 @@ public:
             return true;
         }
 
-        void CalculateFrostResistanceAmount(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateFrostResistanceAmount(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Unit* pet = GetUnitOwner())
                 if (pet->isPet())
@@ -493,7 +493,7 @@ public:
                     }
         }
 
-        void CalculateArcaneResistanceAmount(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateArcaneResistanceAmount(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Unit* pet = GetUnitOwner())
                 if (pet->isPet())
@@ -505,7 +505,7 @@ public:
                     }
         }
 
-        void CalculateNatureResistanceAmount(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateNatureResistanceAmount(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Unit* pet = GetUnitOwner())
                 if (pet->isPet())
@@ -548,7 +548,7 @@ public:
             return true;
         }
 
-        void CalculateShadowResistanceAmount(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateShadowResistanceAmount(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Unit* pet = GetUnitOwner())
                 if (pet->isPet())
@@ -588,7 +588,7 @@ public:
             return true;
         }
 
-        void CalculateAmountMeleeHit(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateAmountMeleeHit(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
             {
@@ -603,7 +603,7 @@ public:
             }
         }
 
-        void CalculateAmountSpellHit(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateAmountSpellHit(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
             {
@@ -618,7 +618,7 @@ public:
             }
         }
 
-        void CalculateAmountExpertise(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateAmountExpertise(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
             {
@@ -663,7 +663,7 @@ public:
             return true;
         }
 
-        void CalculateAmountCritSpell(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateAmountCritSpell(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
             {
@@ -685,7 +685,7 @@ public:
             }
         }
 
-        void CalculateAmountCritMelee(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateAmountCritMelee(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
             {
@@ -736,7 +736,7 @@ public:
             return true;
         }
 
-        void CalculateAmountDamageDone(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateAmountDamageDone(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (!GetCaster() || !GetCaster()->GetOwner())
                 return;
@@ -787,12 +787,12 @@ public:
             return true;
         }
 
-        void CalculateAmount(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateAmount(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Unit* pet = GetUnitOwner())
                 if (pet->isPet())
                     if (Unit* owner = pet->ToPet()->GetOwner())
-                        if (AuraEffect */* aurEff */ect = owner->GetAuraEffect(SPELL_WARLOCK_GLYPH_OF_VOIDWALKER, EFFECT_0))
+                        if (AuraEffect * /* aurEff */ect = owner->GetAuraEffect(SPELL_WARLOCK_GLYPH_OF_VOIDWALKER, EFFECT_0))
                             amount += /* aurEff */ect->GetAmount();
         }
 
@@ -825,7 +825,7 @@ public:
             return true;
         }
 
-        void CalculateAmountMeleeHit(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateAmountMeleeHit(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
             {
@@ -840,7 +840,7 @@ public:
             }
         }
 
-        void CalculateAmountSpellHit(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateAmountSpellHit(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
             {
@@ -877,7 +877,7 @@ public:
     {
         PrepareAuraScript(spell_hun_pet_scaling_01_AuraScript);
 
-        void CalculateStaminaAmount(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateStaminaAmount(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Unit* pet = GetUnitOwner())
                 if (pet->isPet())
@@ -902,20 +902,20 @@ public:
                     }
         }
 
-        void ApplyEffect(AuraEffect const */* aurEff */, AuraEffectHandleModes /*mode*/)
+        void ApplyEffect(AuraEffect const * /* aurEff */, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* pet = GetUnitOwner())
                 if (_tempHealth)
                     pet->SetHealth(_tempHealth);
         }
 
-        void RemoveEffect(AuraEffect const */* aurEff */, AuraEffectHandleModes /*mode*/)
+        void RemoveEffect(AuraEffect const * /* aurEff */, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* pet = GetUnitOwner())
                 _tempHealth = pet->GetHealth();
         }
 
-        void CalculateAttackPowerAmount(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateAttackPowerAmount(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Unit* pet = GetUnitOwner())
             {
@@ -945,7 +945,7 @@ public:
             }
         }
 
-        void CalculateDamageDoneAmount(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateDamageDoneAmount(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Unit* pet = GetUnitOwner())
             {
@@ -1010,7 +1010,7 @@ public:
             return true;
         }
 
-        void CalculateFrostResistanceAmount(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateFrostResistanceAmount(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Unit* pet = GetUnitOwner())
             {
@@ -1029,7 +1029,7 @@ public:
             }
         }
 
-        void CalculateFireResistanceAmount(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateFireResistanceAmount(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Unit* pet = GetUnitOwner())
             {
@@ -1048,7 +1048,7 @@ public:
             }
         }
 
-        void CalculateNatureResistanceAmount(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateNatureResistanceAmount(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Unit* pet = GetUnitOwner())
             {
@@ -1097,7 +1097,7 @@ public:
             return true;
         }
 
-        void CalculateShadowResistanceAmount(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateShadowResistanceAmount(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Unit* pet = GetUnitOwner())
             {
@@ -1116,7 +1116,7 @@ public:
             }
         }
 
-        void CalculateArcaneResistanceAmount(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateArcaneResistanceAmount(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Unit* pet = GetUnitOwner())
             {
@@ -1135,7 +1135,7 @@ public:
             }
         }
 
-        void CalculateArmorAmount(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateArmorAmount(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Unit* pet = GetUnitOwner())
             {
@@ -1184,7 +1184,7 @@ public:
             return true;
         }
 
-        void CalculateAmountMeleeHit(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateAmountMeleeHit(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (!GetCaster() || !GetCaster()->GetOwner())
                 return;
@@ -1201,7 +1201,7 @@ public:
             }
         }
 
-        void CalculateAmountSpellHit(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateAmountSpellHit(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (!GetCaster() || !GetCaster()->GetOwner())
                 return;
@@ -1218,7 +1218,7 @@ public:
             }
         }
 
-        void CalculateAmountExpertise(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateAmountExpertise(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (!GetCaster() || !GetCaster()->GetOwner())
                 return;
@@ -1265,7 +1265,7 @@ public:
             return true;
         }
 
-        void CalculateAmountCritSpell(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateAmountCritSpell(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (!GetCaster() || !GetCaster()->GetOwner())
                 return;
@@ -1286,7 +1286,7 @@ public:
             }
         }
 
-        void CalculateAmountCritMelee(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateAmountCritMelee(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (!GetCaster() || !GetCaster()->GetOwner())
                 return;
@@ -1336,7 +1336,7 @@ public:
             return true;
         }
 
-        void CalculateAmountDamageDone(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateAmountDamageDone(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (!GetCaster() || !GetCaster()->GetOwner())
                 return;
@@ -1376,13 +1376,13 @@ public:
             return true;
         }
 
-        void CalculateAmountDamageDone(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateAmountDamageDone(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (!GetCaster() || !GetCaster()->GetOwner())
                 return;
             if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
             {
-                if (AuraEffect */* aurEff */ect = owner->GetAuraEffectOfRankedSpell(SPELL_HUNTER_ANIMAL_HANDLER, EFFECT_1))
+                if (AuraEffect * /* aurEff */ect = owner->GetAuraEffectOfRankedSpell(SPELL_HUNTER_ANIMAL_HANDLER, EFFECT_1))
                     amount = /* aurEff */ect->GetAmount();
                 else
                     amount = 0;
@@ -1418,7 +1418,7 @@ public:
             return true;
         }
 
-        void CalculateAvoidanceAmount(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateAvoidanceAmount(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Unit* pet = GetUnitOwner())
             {
@@ -1463,7 +1463,7 @@ public:
             return true;
         }
 
-        void CalculateStaminaAmount(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateStaminaAmount(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Unit* pet = GetUnitOwner())
             {
@@ -1489,20 +1489,20 @@ public:
             }
         }
 
-        void ApplyEffect(AuraEffect const */* aurEff */, AuraEffectHandleModes /*mode*/)
+        void ApplyEffect(AuraEffect const * /* aurEff */, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* pet = GetUnitOwner())
                 if (_tempHealth)
                     pet->SetHealth(_tempHealth);
         }
 
-        void RemoveEffect(AuraEffect const */* aurEff */, AuraEffectHandleModes /*mode*/)
+        void RemoveEffect(AuraEffect const * /* aurEff */, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* pet = GetUnitOwner())
                 _tempHealth = pet->GetHealth();
         }
 
-        void CalculateStrengthAmount(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateStrengthAmount(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Unit* pet = GetUnitOwner())
             {
@@ -1566,7 +1566,7 @@ public:
             return true;
         }
 
-        void CalculateAmountMeleeHaste(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateAmountMeleeHaste(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (!GetCaster() || !GetCaster()->GetOwner())
                 return;
@@ -1609,7 +1609,7 @@ public:
             return true;
         }
 
-        void CalculateAmountMeleeHit(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateAmountMeleeHit(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (!GetCaster() || !GetCaster()->GetOwner())
                 return;
@@ -1626,7 +1626,7 @@ public:
             }
         }
 
-        void CalculateAmountSpellHit(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateAmountSpellHit(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (!GetCaster() || !GetCaster()->GetOwner())
                 return;
@@ -1672,7 +1672,7 @@ public:
             return true;
         }
 
-        void CalculateDamageDoneAmount(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateDamageDoneAmount(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Unit* pet = GetUnitOwner())
             {
@@ -1687,7 +1687,7 @@ public:
             }
         }
 
-        void CalculateAmountMeleeHaste(AuraEffect const */* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateAmountMeleeHaste(AuraEffect const * /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (!GetCaster() || !GetCaster()->GetOwner())
                 return;

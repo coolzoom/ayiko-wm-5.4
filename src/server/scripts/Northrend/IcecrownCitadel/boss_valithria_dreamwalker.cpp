@@ -1290,7 +1290,7 @@ class spell_dreamwalker_summon_suppresser : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dreamwalker_summon_suppresser_AuraScript);
 
-            void PeriodicTick(AuraEffect const */*aurEff*/)
+            void PeriodicTick(AuraEffect const * /*aurEff*/)
             {
                 PreventDefaultAction();
                 Unit* caster = GetCaster();
@@ -1436,7 +1436,7 @@ class spell_dreamwalker_nightmare_cloud : public SpellScriptLoader
                 return _instance != NULL;
             }
 
-            void PeriodicTick(AuraEffect const */*aurEff*/)
+            void PeriodicTick(AuraEffect const * /*aurEff*/)
             {
                 if (_instance->GetBossState(DATA_VALITHRIA_DREAMWALKER) != IN_PROGRESS)
                     PreventDefaultAction();

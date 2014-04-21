@@ -177,7 +177,7 @@ class spell_pri_spectral_guise_charges : public SpellScriptLoader
         {
             PrepareAuraScript(spell_pri_spectral_guise_charges_AuraScript);
 
-            void OnProc(AuraEffect const */*aurEff*/, ProcEventInfo& eventInfo)
+            void OnProc(AuraEffect const * /*aurEff*/, ProcEventInfo& eventInfo)
             {
                 PreventDefaultAction();
 
@@ -197,7 +197,7 @@ class spell_pri_spectral_guise_charges : public SpellScriptLoader
                             spectralGuiseCharges->DropCharge();
             }
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* caster = GetCaster())
                     if (caster->ToCreature())
@@ -227,7 +227,7 @@ class spell_pri_psyfiend_hit_me_driver : public SpellScriptLoader
         {
             PrepareAuraScript(spell_pri_psyfiend_hit_me_driver_AuraScript);
 
-            void OnProc(AuraEffect const */*aurEff*/, ProcEventInfo& eventInfo)
+            void OnProc(AuraEffect const * /*aurEff*/, ProcEventInfo& eventInfo)
             {
                 PreventDefaultAction();
 
@@ -374,7 +374,7 @@ class spell_pri_spirit_of_redemption_form : public SpellScriptLoader
         {
             PrepareAuraScript(spell_pri_spirit_of_redemption_form_AuraScript);
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* caster = GetCaster())
                 {
@@ -407,12 +407,12 @@ class spell_pri_spirit_of_redemption : public SpellScriptLoader
         {
             PrepareAuraScript(spell_pri_spirit_of_redemption_AuraScript);
 
-            void CalculateAmount(AuraEffect const */*auraEffect*/, int32& amount, bool& /*canBeRecalculated*/)
+            void CalculateAmount(AuraEffect const * /*auraEffect*/, int32& amount, bool& /*canBeRecalculated*/)
             {
                 amount = -1;
             }
 
-            void Absorb(AuraEffect */*auraEffect*/, DamageInfo& dmgInfo, uint32& absorbAmount)
+            void Absorb(AuraEffect * /*auraEffect*/, DamageInfo& dmgInfo, uint32& absorbAmount)
             {
                 if (Unit* caster = GetCaster())
                 {
@@ -977,7 +977,7 @@ class spell_pri_holy_word_sanctuary : public SpellScriptLoader
         {
             PrepareAuraScript(spell_pri_holy_word_sanctuary_AuraScript);
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (DynamicObject* dynObj = GetCaster()->GetDynObject(PRIEST_HOLY_WORD_SANCTUARY_AREA))
                     GetCaster()->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), PRIEST_HOLY_WORD_SANCTUARY_HEAL, true);
@@ -1153,7 +1153,7 @@ class spell_pri_rapture : public SpellScriptLoader
         {
             PrepareAuraScript(spell_pri_rapture_AuraScript);
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* caster = GetCaster())
                 {
@@ -1387,7 +1387,7 @@ class spell_pri_devouring_plague : public SpellScriptLoader
                 return true;
             }
 
-            void CalculateAmount(AuraEffect const */*auraEffect*/, int32& amount, bool& /*canBeRecalculated*/)
+            void CalculateAmount(AuraEffect const * /*auraEffect*/, int32& amount, bool& /*canBeRecalculated*/)
             {
                 if (!GetCaster())
                     return;
@@ -1398,7 +1398,7 @@ class spell_pri_devouring_plague : public SpellScriptLoader
                 amount *= powerUsed;
             }
 
-            void CalculateSecondAmount(AuraEffect const */*auraEffect*/, int32& amount, bool& /*canBeRecalculated*/)
+            void CalculateSecondAmount(AuraEffect const * /*auraEffect*/, int32& amount, bool& /*canBeRecalculated*/)
             {
                 if (!GetCaster())
                     return;
@@ -2190,13 +2190,13 @@ class spell_pri_guardian_spirit : public SpellScriptLoader
                 return true;
             }
 
-            void CalculateAmount(AuraEffect const */*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+            void CalculateAmount(AuraEffect const * /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
             {
                 // Set absorbtion amount to unlimited
                 amount = -1;
             }
 
-            void Absorb(AuraEffect */*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
+            void Absorb(AuraEffect * /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
             {
                 Unit* target = GetTarget();
                 if (dmgInfo.GetDamage() < target->GetHealth())
@@ -2396,7 +2396,7 @@ class spell_pri_vampiric_touch : public SpellScriptLoader
         {
             PrepareAuraScript(spell_pri_vampiric_touch_AuraScript);
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (GetCaster())
                 {
@@ -2488,12 +2488,12 @@ class spell_pri_shadowform : public SpellScriptLoader
                 return true;
             }
 
-            void HandleEffectApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleEffectApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 GetTarget()->CastSpell(GetTarget(), GetTarget()->HasAura(PRIEST_GLYPH_OF_SHADOW) ? PRIEST_SHADOWFORM_VISUAL_WITH_GLYPH : PRIEST_SHADOWFORM_VISUAL_WITHOUT_GLYPH, true);
             }
 
-            void HandleEffectRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleEffectRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 GetTarget()->RemoveAurasDueToSpell(GetTarget()->HasAura(PRIEST_GLYPH_OF_SHADOW) ? PRIEST_SHADOWFORM_VISUAL_WITH_GLYPH : PRIEST_SHADOWFORM_VISUAL_WITHOUT_GLYPH);
             }

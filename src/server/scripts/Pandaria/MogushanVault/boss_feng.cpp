@@ -772,13 +772,13 @@ class spell_wildfire_infusion_stacks : public SpellScriptLoader
         {
             PrepareAuraScript(spell_wildfire_infusion_stacks_AuraScript);
 
-            void OnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (GetTarget())
                     GetTarget()->AddAura(SPELL_WILDFIRE_INFUSION, GetTarget());
             }
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (GetTarget())
                     GetTarget()->RemoveAura(SPELL_WILDFIRE_INFUSION);
@@ -946,13 +946,13 @@ class spell_mogu_inversion : public SpellScriptLoader
         {
             PrepareAuraScript(spell_mogu_inversion_AuraScript);
 
-            void OnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (GetTarget())
                     GetTarget()->RemoveAurasDueToSpell(SPELL_INVERSION);
             }
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (GetTarget())
                     GetTarget()->CastSpell(GetTarget(), SPELL_INVERSION, true);

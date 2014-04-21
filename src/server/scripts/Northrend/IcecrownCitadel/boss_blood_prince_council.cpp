@@ -1465,7 +1465,7 @@ class spell_taldaram_flame_ball_visual : public SpellScriptLoader
                 return false;
             }
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 Creature* target = GetTarget()->ToCreature();
                 if (!target)
@@ -1548,7 +1548,7 @@ class spell_valanar_kinetic_bomb : public SpellScriptLoader
         {
             PrepareAuraScript(spell_valanar_kinetic_bomb_AuraScript);
 
-            void HandleDummyTick(AuraEffect const */*aurEff*/)
+            void HandleDummyTick(AuraEffect const * /*aurEff*/)
             {
                 Unit* target = GetTarget();
                 if (target->GetTypeId() != TYPEID_UNIT)
@@ -1589,7 +1589,7 @@ class spell_valanar_kinetic_bomb_absorb : public SpellScriptLoader
         {
             PrepareAuraScript(spell_valanar_kinetic_bomb_absorb_AuraScript);
 
-            void OnAbsorb(AuraEffect */*aurEff*/, DamageInfo& dmgInfo, uint32& absorbAmount)
+            void OnAbsorb(AuraEffect * /*aurEff*/, DamageInfo& dmgInfo, uint32& absorbAmount)
             {
                 //absorbAmount = CalculatePctN(dmgInfo.GetDamage(), aurEff->GetAmount());
                 RoundToInterval<uint32>(absorbAmount, 0, dmgInfo.GetDamage());

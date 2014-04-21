@@ -1241,14 +1241,14 @@ class spell_maddening_shout : public SpellScriptLoader
         {
             PrepareAuraScript(spell_maddening_shout_AuraScript);
 
-            void OnAbsorb(AuraEffect */*aurEff*/, DamageInfo& dmgInfo, uint32& absorbAmount)
+            void OnAbsorb(AuraEffect * /*aurEff*/, DamageInfo& dmgInfo, uint32& absorbAmount)
             {
                 if (Unit* attacker = dmgInfo.GetAttacker())
                     if (attacker->GetTypeId() != TYPEID_PLAYER)
                         absorbAmount = 0;
             }
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* target = GetTarget())
                 {
@@ -1280,7 +1280,7 @@ class spell_crazed_cowardice : public SpellScriptLoader
         {
             PrepareAuraScript(spell_crazed_cowardice_AuraScript);
 
-            void HandlePeriodic(AuraEffect const */*aurEff*/)
+            void HandlePeriodic(AuraEffect const * /*aurEff*/)
             {
                 PreventDefaultAction();
 

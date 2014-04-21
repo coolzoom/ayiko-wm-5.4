@@ -956,7 +956,7 @@ class spell_huo_benediction: public SpellScriptLoader
         {
             PrepareAuraScript(spell_huo_benediction_AuraScript);
 
-            void OnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 Unit* target = GetTarget();
 
@@ -979,7 +979,7 @@ class spell_huo_benediction: public SpellScriptLoader
                 }
             }
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 Unit* target = GetTarget();
 

@@ -229,20 +229,20 @@ class spell_ex_66244 : public SpellScriptLoader
             }
 
 
-            void HandleOnEffectApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleOnEffectApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 sLog->outInfo(LOG_FILTER_GENERAL, "Aura Effect is about to be applied on target!");
                 // this hook allows you to prevent execution of AuraEffect handler, or to replace it with your own handler
                 //PreventDefaultAction();
             }
-            void HandleOnEffectRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleOnEffectRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 sLog->outInfo(LOG_FILTER_GENERAL, "Aura Effect is about to be removed from target!");
                 // this hook allows you to prevent execution of AuraEffect handler, or to replace it with your own handler
                 //PreventDefaultAction();
             }
 
-            void HandleAfterEffectApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleAfterEffectApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 sLog->outInfo(LOG_FILTER_GENERAL, "Aura Effect has just been applied on target!");
                 Unit* target = GetTarget();
@@ -250,7 +250,7 @@ class spell_ex_66244 : public SpellScriptLoader
                 target->CastSpell(target, SPELL_TRIGGERED, true);
             }
 
-            void HandleAfterEffectRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleAfterEffectRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 sLog->outInfo(LOG_FILTER_GENERAL, "Aura Effect has just been just removed from target!");
                 Unit* target = GetTarget();
@@ -262,7 +262,7 @@ class spell_ex_66244 : public SpellScriptLoader
                 target->CastSpell(caster, SPELL_TRIGGERED, true);
             }
 
-            void HandleEffectPeriodic(AuraEffect const */*aurEff*/)
+            void HandleEffectPeriodic(AuraEffect const * /*aurEff*/)
             {
                 sLog->outInfo(LOG_FILTER_GENERAL, "Perioidic Aura Effect is does a tick on target!");
                 Unit* target = GetTarget();
@@ -277,7 +277,7 @@ class spell_ex_66244 : public SpellScriptLoader
                 aurEff->ChangeAmount(aurEff->GetAmount() * 2);
             }
 
-            void HandleEffectCalcAmount(AuraEffect const */*aurEff*/, int32& amount, bool& canBeRecalculated)
+            void HandleEffectCalcAmount(AuraEffect const * /*aurEff*/, int32& amount, bool& canBeRecalculated)
             {
                 sLog->outInfo(LOG_FILTER_GENERAL, "Amount of Aura Effect is being calculated now!");
                 // we're setting amount to 100
@@ -286,7 +286,7 @@ class spell_ex_66244 : public SpellScriptLoader
                 canBeRecalculated = false;
             }
 
-            void HandleEffectCalcPeriodic(AuraEffect const */*aurEff*//*, bool& isPeriodic, int32& amplitude)
+            void HandleEffectCalcPeriodic(AuraEffect const * /*aurEff*//*, bool& isPeriodic, int32& amplitude)
             {
                 sLog->outInfo(LOG_FILTER_GENERAL, "Periodic data of Aura Effect is being calculated now!");
                 // we're setting aura to be periodic and tick every 10 seconds
@@ -294,7 +294,7 @@ class spell_ex_66244 : public SpellScriptLoader
                 amplitude = 2 * IN_MILLISECONDS;
             }
 
-            void HandleEffectCalcSpellMod(AuraEffect const */*aurEff*/, SpellModifier*& spellMod)
+            void HandleEffectCalcSpellMod(AuraEffect const * /*aurEff*/, SpellModifier*& spellMod)
             {
                 sLog->outInfo(LOG_FILTER_GENERAL, "SpellMod data of Aura Effect is being calculated now!");
                 // we don't want spellmod for example
@@ -365,14 +365,14 @@ class spell_ex_absorb_aura : public SpellScriptLoader
         {
             PrepareAuraScript(spell_ex_absorb_auraAuraScript);
 
-            void HandleOnEffectAbsorb(AuraEffect */*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
+            void HandleOnEffectAbsorb(AuraEffect * /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
             {
                 sLog->outInfo(LOG_FILTER_GENERAL, "Our aura is now absorbing damage done to us!");
                 // absorb whole damage done to us
                 absorbAmount = dmgInfo.GetDamage();
             }
 
-            void HandleAfterEffectAbsorb(AuraEffect */*aurEff*/, DamageInfo & /*dmgInfo*/, uint32 & absorbAmount)
+            void HandleAfterEffectAbsorb(AuraEffect * /*aurEff*/, DamageInfo & /*dmgInfo*/, uint32 & absorbAmount)
             {
                 sLog->outInfo(LOG_FILTER_GENERAL, "Our aura has absorbed %u damage!", absorbAmount);
             }

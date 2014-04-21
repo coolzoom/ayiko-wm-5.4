@@ -722,7 +722,7 @@ class spell_final_destination : public SpellScriptLoader
         {
             PrepareAuraScript(spell_final_destination_AuraScript);
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (Unit* Garajal = GetCaster())
                 {

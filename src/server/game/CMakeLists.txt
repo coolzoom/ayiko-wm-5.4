@@ -198,7 +198,7 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/World
   ${ACE_INCLUDE_DIRS}
   ${MYSQL_INCLUDE_DIR}
-  ${OPENSSL_INCLUDE_DIRS}
+  ${OPENSSL_INCLUDE_DIR}
 )
 
 add_library(game STATIC

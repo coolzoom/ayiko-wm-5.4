@@ -1253,7 +1253,7 @@ class spell_sindragosa_frost_beacon : public SpellScriptLoader
                 return true;
             }
 
-            void PeriodicTick(AuraEffect const */*aurEff*/)
+            void PeriodicTick(AuraEffect const * /*aurEff*/)
             {
                 PreventDefaultAction();
                 if (Unit* caster = GetCaster())
@@ -1315,7 +1315,7 @@ class spell_sindragosa_ice_tomb : public SpellScriptLoader
         {
             PrepareAuraScript(spell_sindragosa_ice_tomb_AuraScript);
 
-            void PeriodicTick(AuraEffect const */*aurEff*/)
+            void PeriodicTick(AuraEffect const * /*aurEff*/)
             {
                 PreventDefaultAction();
             }
@@ -1568,7 +1568,7 @@ class spell_frostwarden_handler_focus_fire : public SpellScriptLoader
         {
             PrepareAuraScript(spell_frostwarden_handler_focus_fire_AuraScript);
 
-            void PeriodicTick(AuraEffect const */*aurEff*/)
+            void PeriodicTick(AuraEffect const * /*aurEff*/)
             {
                 PreventDefaultAction();
                 if (Unit* caster = GetCaster())

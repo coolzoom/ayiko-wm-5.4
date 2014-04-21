@@ -217,7 +217,7 @@ bool FollowMovementGenerator<Player>::EnableWalking() const
 }
 
 template<>
-void FollowMovementGenerator<Player>::_updateSpeed(Player */*u*/)
+void FollowMovementGenerator<Player>::_updateSpeed(Player * /*u*/)
 {
     // nothing to do for Player
 }

@@ -181,11 +181,9 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recvData)
 
     if (CreatureTemplate const* ci = sObjectMgr->GetCreatureTemplate(entry))
     {
-
-        std::string Name, SubName, Unk505;
-        Name = ci->Name;
-        SubName = ci->SubName;
-        Unk505 = "";
+        std::string Name = ci->Name;
+        std::string SubName = ci->SubName;
+        std::string Unk505;
 
         int loc_idx = GetSessionDbLocaleIndex();
         if (loc_idx >= 0)

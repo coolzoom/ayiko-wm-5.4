@@ -141,17 +141,53 @@ public:
 
     struct mob_training_targetAI : public ScriptedAI
     {
-        mob_training_targetAI(Creature* creature) : ScriptedAI(creature) {}
+        uint32 resetTimer;
+
+        mob_training_targetAI(Creature* creature) : ScriptedAI(creature)
+        {
+            SetCombatMovement(false);
+        }
 
         void Reset()
         {
             me->SetReactState(REACT_PASSIVE);
+            // disable rotate
+            me->SetControlled(true, UNIT_STATE_STUNNED);
+            // imune to knock aways like blast wave
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+
+            resetTimer = 5000;
         }
 
-        void EnterCombat(Unit *)
+        void EnterEvadeMode()
         {
-            return;
+            if (_EnterEvadeMode())
+                Reset();
         }
+
+        void DamageTaken(Unit* /*doneBy*/, uint32& /*damage*/)
+        {
+            resetTimer = 5000;
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (!me->HasUnitState(UNIT_STATE_STUNNED))
+                me->SetControlled(true, UNIT_STATE_STUNNED);
+
+            if (resetTimer <= diff)
+            {
+                EnterEvadeMode();
+                resetTimer = 5000;
+            }
+            else
+                resetTimer -= diff;
+        }
+
+        void MoveInLineOfSight(Unit* /*who*/) { }
     };
 };
 

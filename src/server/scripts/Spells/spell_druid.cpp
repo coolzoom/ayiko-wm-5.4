@@ -754,12 +754,12 @@ class spell_dru_soul_swap : public SpellScriptLoader
 
                             for (auto itr : targetList)
                             {
-                                int32 ripDuration;
-                                int32 ripMaxDuration;
-                                int32 ripAmount;
-                                int32 rakeDuration;
-                                int32 rakeMaxDuration;
-                                int32 rakeAmount;
+                                int32 ripDuration = 0;
+                                int32 ripMaxDuration = 0;
+                                int32 ripAmount = 0;
+                                int32 rakeDuration = 0;
+                                int32 rakeMaxDuration = 0;
+                                int32 rakeAmount = 0;
 
                                 if (Aura *rip = itr->GetAura(SPELL_DRUID_RIP, _player->GetGUID()))
                                 {

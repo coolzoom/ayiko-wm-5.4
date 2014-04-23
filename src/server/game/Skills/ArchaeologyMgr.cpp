@@ -251,7 +251,7 @@ void ArchaeologyMgr::ShowResearchProjects()
         return;
 
     uint8 count = 0;
-    uint32 newvalue;
+    uint32 newvalue = 0;
 
     for (ResearchProjectSet::const_iterator itr = _researchProjects.begin(); itr != _researchProjects.end(); ++itr)
     {

@@ -48,6 +48,11 @@ enum PhaseUpdateFlag
 
 struct PhaseDefinition
 {
+    PhaseDefinition() :
+        zoneId(), entry(), phasemask(), phaseId(), terrainswapmap(),
+        flags()
+    { }
+
     uint32 zoneId;
     uint32 entry;
     uint32 phasemask;

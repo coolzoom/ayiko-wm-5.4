@@ -3074,7 +3074,7 @@ bool AchievementMgr<T>::AdditionalRequirementsSatisfied(AchievementCriteriaEntry
      for (uint8 i = 0; i < MAX_ADDITIONAL_CRITERIA_CONDITIONS; ++i)
     {
         uint32 reqType = criteria->additionalConditionType[i];
-        uint32 reqValue;
+        uint32 reqValue = 0;
 
         // There is missing additionalConditionValue[2] field in DBC.
         // So we need to set values for those criterias manually.

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -133,7 +133,7 @@ namespace Trinity
                     nBaseExp = 7512;
                     break;
                 default:
-                    sLog->outError(LOG_FILTER_GENERAL, "BaseGain: Unsupported content level %u", content);
+                    sLog->outError("misc", "BaseGain: Unsupported content level %u", content);
                     nBaseExp = 45;
                     break;
             }

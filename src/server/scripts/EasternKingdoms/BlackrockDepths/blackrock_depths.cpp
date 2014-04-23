@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -209,7 +209,7 @@ public:
                     {
                         instance->UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, NPC_GRIMSTONE, me);
                         instance->SetData(TYPE_RING_OF_LAW, DONE);
-                        sLog->outDebug(LOG_FILTER_TSCR, "npc_grimstone: event reached end and set complete.");
+                        sLog->outDebug("scripts", "npc_grimstone: event reached end and set complete.");
                     }
                     break;
             }

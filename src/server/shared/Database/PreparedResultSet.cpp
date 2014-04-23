@@ -74,7 +74,7 @@ std::size_t SizeForType(enum_field_types type)
             MYSQL_TYPE_SET:
             */
     default:
-        sLog->outError(LOG_FILTER_SQL, "SQL::SizeForType(): invalid field type %u", uint32(type));
+        sLog->outError("sql.sql", "SQL::SizeForType(): invalid field type %u", uint32(type));
         return 0;
     }
 }
@@ -89,7 +89,7 @@ PreparedResultSet::PreparedResultSet(MYSQL_STMT *stmt)
     MYSQL_RES * const metadata = mysql_stmt_result_metadata(stmt);
     if (!metadata)
     {
-        sLog->outError(LOG_FILTER_SQL, "PreparedResultSet: mysql_stmt_result_metadata failed. Error: %s", mysql_stmt_error(stmt));
+        sLog->outError("sql.sql", "PreparedResultSet: mysql_stmt_result_metadata failed. Error: %s", mysql_stmt_error(stmt));
         return;
     }
 

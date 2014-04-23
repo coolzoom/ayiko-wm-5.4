@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -93,7 +93,7 @@ Channel::Channel(const std::string& name, uint32 channel_id, uint32 Team)
                         uint64 banned_guid = atol(*iter);
                         if (banned_guid)
                         {
-                            sLog->outDebug(LOG_FILTER_CHATSYS, "Channel(%s) loaded banned guid:" UI64FMTD "", name.c_str(), banned_guid);
+                            sLog->outDebug("chat.system", "Channel(%s) loaded banned guid:" UI64FMTD "", name.c_str(), banned_guid);
                             banned.insert(banned_guid);
                         }
                     }
@@ -105,7 +105,7 @@ Channel::Channel(const std::string& name, uint32 channel_id, uint32 Team)
                 stmt->setString(0, name);
                 stmt->setUInt32(1, m_Team);
                 CharacterDatabase.Execute(stmt);
-                sLog->outDebug(LOG_FILTER_CHATSYS, "Channel(%s) saved in database", name.c_str());
+                sLog->outDebug("chat.system", "Channel(%s) saved in database", name.c_str());
             }
 
             m_IsSaved = true;
@@ -146,7 +146,7 @@ void Channel::UpdateChannelInDB() const
         stmt->setUInt32(5, m_Team);
         CharacterDatabase.Execute(stmt);
 
-        sLog->outDebug(LOG_FILTER_CHATSYS, "Channel(%s) updated in database", m_name.c_str());
+        sLog->outDebug("chat.system", "Channel(%s) updated in database", m_name.c_str());
     }
 
 }
@@ -167,7 +167,7 @@ void Channel::CleanOldChannelsInDB()
         stmt->setUInt32(0, sWorld->getIntConfig(CONFIG_PRESERVE_CUSTOM_CHANNEL_DURATION) * DAY);
         CharacterDatabase.Execute(stmt);
 
-        sLog->outDebug(LOG_FILTER_CHATSYS, "Cleaned out unused custom chat channels.");
+        sLog->outDebug("chat.system", "Cleaned out unused custom chat channels.");
     }
 }
 

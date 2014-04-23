@@ -46,7 +46,7 @@ void npc_escortAI::AttackStart(Unit* who)
 
     if (me->Attack(who, true))
     {
-        sLog->outError(LOG_FILTER_OPCODES, "npc_escortAI::AttackStart - attacker " UI64FMTD " (entry %u), attacking target " UI64FMTD " (entry %u)", me->GetGUID(), me->GetEntry(), who->GetGUID(), who->GetEntry());
+        sLog->outError("network.opcode", "npc_escortAI::AttackStart - attacker " UI64FMTD " (entry %u), attacking target " UI64FMTD " (entry %u)", me->GetGUID(), me->GetEntry(), who->GetGUID(), who->GetEntry());
         if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == POINT_MOTION_TYPE)
             me->GetMotionMaster()->MovementExpired();
 
@@ -221,7 +221,7 @@ void npc_escortAI::UpdateAI(uint32 const diff)
 
                 if (DespawnAtEnd)
                 {
-                    sLog->outDebug(LOG_FILTER_TSCR, "EscortAI reached end of waypoints");
+                    sLog->outDebug("scripts", "EscortAI reached end of waypoints");
 
                     if (m_bCanReturnToStart)
                     {
@@ -232,7 +232,7 @@ void npc_escortAI::UpdateAI(uint32 const diff)
 
                         m_uiWPWaitTimer = 0;
 
-                        sLog->outDebug(LOG_FILTER_TSCR, "EscortAI are returning home to spawn location: %u, %f, %f, %f", POINT_HOME, fRetX, fRetY, fRetZ);
+                        sLog->outDebug("scripts", "EscortAI are returning home to spawn location: %u, %f, %f, %f", POINT_HOME, fRetX, fRetY, fRetZ);
                         return;
                     }
 
@@ -248,7 +248,7 @@ void npc_escortAI::UpdateAI(uint32 const diff)
                 }
                 else
                 {
-                    sLog->outDebug(LOG_FILTER_TSCR, "EscortAI reached end of waypoints with Despawn off");
+                    sLog->outDebug("scripts", "EscortAI reached end of waypoints with Despawn off");
 
                     return;
                 }
@@ -257,7 +257,7 @@ void npc_escortAI::UpdateAI(uint32 const diff)
             if (!HasEscortState(STATE_ESCORT_PAUSED))
             {
                 me->GetMotionMaster()->MovePoint(CurrentWP->id, CurrentWP->x, CurrentWP->y, CurrentWP->z);
-                sLog->outDebug(LOG_FILTER_TSCR, "EscortAI start waypoint %u (%f, %f, %f).", CurrentWP->id, CurrentWP->x, CurrentWP->y, CurrentWP->z);
+                sLog->outDebug("scripts", "EscortAI start waypoint %u (%f, %f, %f).", CurrentWP->id, CurrentWP->x, CurrentWP->y, CurrentWP->z);
 
                 WaypointStart(CurrentWP->id);
 
@@ -275,7 +275,7 @@ void npc_escortAI::UpdateAI(uint32 const diff)
         {
             if (DespawnAtFar && !IsPlayerOrGroupInRange())
             {
-                sLog->outDebug(LOG_FILTER_TSCR, "EscortAI failed because player/group was to far away or not found");
+                sLog->outDebug("scripts", "EscortAI failed because player/group was to far away or not found");
 
                 if (m_bCanInstantRespawn)
                 {
@@ -313,7 +313,7 @@ void npc_escortAI::MovementInform(uint32 moveType, uint32 pointId)
     //Combat start position reached, continue waypoint movement
     if (pointId == POINT_LAST_POINT)
     {
-        sLog->outDebug(LOG_FILTER_TSCR, "EscortAI has returned to original position before combat");
+        sLog->outDebug("scripts", "EscortAI has returned to original position before combat");
 
         me->SetWalk(!m_bIsRunning);
         RemoveEscortState(STATE_ESCORT_RETURNING);
@@ -323,7 +323,7 @@ void npc_escortAI::MovementInform(uint32 moveType, uint32 pointId)
     }
     else if (pointId == POINT_HOME)
     {
-        sLog->outDebug(LOG_FILTER_TSCR, "EscortAI has returned to original home location and will continue from beginning of waypoint list.");
+        sLog->outDebug("scripts", "EscortAI has returned to original home location and will continue from beginning of waypoint list.");
 
         CurrentWP = WaypointList.begin();
         m_uiWPWaitTimer = 1;
@@ -333,11 +333,11 @@ void npc_escortAI::MovementInform(uint32 moveType, uint32 pointId)
         //Make sure that we are still on the right waypoint
         if (CurrentWP->id != pointId)
         {
-            sLog->outError(LOG_FILTER_GENERAL, "TSCR ERROR: EscortAI reached waypoint out of order %u, expected %u, creature entry %u", pointId, CurrentWP->id, me->GetEntry());
+            sLog->outError("misc", "TSCR ERROR: EscortAI reached waypoint out of order %u, expected %u, creature entry %u", pointId, CurrentWP->id, me->GetEntry());
             return;
         }
 
-        sLog->outDebug(LOG_FILTER_TSCR, "EscortAI Waypoint %u reached", CurrentWP->id);
+        sLog->outDebug("scripts", "EscortAI Waypoint %u reached", CurrentWP->id);
 
         //Call WP function
         WaypointReached(CurrentWP->id);
@@ -406,14 +406,14 @@ void npc_escortAI::SetRun(bool on)
         if (!m_bIsRunning)
             me->SetWalk(false);
         else
-            sLog->outDebug(LOG_FILTER_TSCR, "EscortAI attempt to set run mode, but is already running.");
+            sLog->outDebug("scripts", "EscortAI attempt to set run mode, but is already running.");
     }
     else
     {
         if (m_bIsRunning)
             me->SetWalk(true);
         else
-            sLog->outDebug(LOG_FILTER_TSCR, "EscortAI attempt to set walk mode, but is already walking.");
+            sLog->outDebug("scripts", "EscortAI attempt to set walk mode, but is already walking.");
     }
 
     m_bIsRunning = on;
@@ -424,13 +424,13 @@ void npc_escortAI::Start(bool isActiveAttacker /* = true*/, bool run /* = false 
 {
     if (me->getVictim())
     {
-        sLog->outError(LOG_FILTER_GENERAL, "TSCR ERROR: EscortAI (script: %s, creature entry: %u) attempts to Start while in combat", me->GetScriptName().c_str(), me->GetEntry());
+        sLog->outError("misc", "TSCR ERROR: EscortAI (script: %s, creature entry: %u) attempts to Start while in combat", me->GetScriptName().c_str(), me->GetEntry());
         return;
     }
 
     if (HasEscortState(STATE_ESCORT_ESCORTING))
     {
-        sLog->outError(LOG_FILTER_TSCR, "EscortAI (script: %s, creature entry: %u) attempts to Start while already escorting", me->GetScriptName().c_str(), me->GetEntry());
+        sLog->outError("scripts", "EscortAI (script: %s, creature entry: %u) attempts to Start while already escorting", me->GetScriptName().c_str(), me->GetEntry());
         return;
     }
 
@@ -443,7 +443,7 @@ void npc_escortAI::Start(bool isActiveAttacker /* = true*/, bool run /* = false 
 
     if (WaypointList.empty())
     {
-        sLog->outError(LOG_FILTER_SQL, "TSCR: EscortAI (script: %s, creature entry: %u) starts with 0 waypoints (possible missing entry in script_waypoint. Quest: %u).",
+        sLog->outError("sql.sql", "TSCR: EscortAI (script: %s, creature entry: %u) starts with 0 waypoints (possible missing entry in script_waypoint. Quest: %u).",
             me->GetScriptName().c_str(), me->GetEntry(), quest ? quest->GetQuestId() : 0);
         return;
     }
@@ -459,13 +459,13 @@ void npc_escortAI::Start(bool isActiveAttacker /* = true*/, bool run /* = false 
     m_bCanReturnToStart = canLoopPath;
 
     if (m_bCanReturnToStart && m_bCanInstantRespawn)
-        sLog->outDebug(LOG_FILTER_TSCR, "EscortAI is set to return home after waypoint end and instant respawn at waypoint end. Creature will never despawn.");
+        sLog->outDebug("scripts", "EscortAI is set to return home after waypoint end and instant respawn at waypoint end. Creature will never despawn.");
 
     if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
     {
         me->GetMotionMaster()->MovementExpired();
         me->GetMotionMaster()->MoveIdle();
-        sLog->outDebug(LOG_FILTER_TSCR, "EscortAI start with WAYPOINT_MOTION_TYPE, changed to MoveIdle.");
+        sLog->outDebug("scripts", "EscortAI start with WAYPOINT_MOTION_TYPE, changed to MoveIdle.");
     }
 
     //disable npcflags
@@ -477,7 +477,7 @@ void npc_escortAI::Start(bool isActiveAttacker /* = true*/, bool run /* = false 
         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
     }
 
-    sLog->outDebug(LOG_FILTER_TSCR, "EscortAI started with " UI64FMTD " waypoints. ActiveAttacker = %d, Run = %d, PlayerGUID = " UI64FMTD "", uint64(WaypointList.size()), m_bIsActiveAttacker, m_bIsRunning, m_uiPlayerGUID);
+    sLog->outDebug("scripts", "EscortAI started with " UI64FMTD " waypoints. ActiveAttacker = %d, Run = %d, PlayerGUID = " UI64FMTD "", uint64(WaypointList.size()), m_bIsActiveAttacker, m_bIsRunning, m_uiPlayerGUID);
 
     CurrentWP = WaypointList.begin();
 

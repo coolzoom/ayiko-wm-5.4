@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -143,7 +143,7 @@ namespace Arena
             default:
                 break;
         }
-        sLog->outError(LOG_FILTER_ARENAS, "FATAL: Unknown arena team type %u for some arena team", type);
+        sLog->outError("bg.arena", "FATAL: Unknown arena team type %u for some arena team", type);
         return 0xFF;
     }
 
@@ -160,7 +160,7 @@ namespace Arena
             default:
                 break;
         }
-        sLog->outError(LOG_FILTER_ARENAS, "FATAL: Unknown arena team slot %u for some arena team", slot);
+        sLog->outError("bg.arena", "FATAL: Unknown arena team slot %u for some arena team", slot);
         return 0xFF;
     }
 

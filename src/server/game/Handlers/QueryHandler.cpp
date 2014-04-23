@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -145,17 +145,17 @@ void WorldSession::HandleNameQueryOpcode(WorldPacket& recvData)
     if (hasUnkBit2)
     {
         uint32 unk = recvData.read<uint32>();
-        sLog->outInfo(LOG_FILTER_NETWORKIO, "CMSG_NAME_QUERY uint32 unk : %u\r\n", unk);
+        sLog->outInfo("network", "CMSG_NAME_QUERY uint32 unk : %u\r\n", unk);
     }
 
     if (hasUnkBit1)
     {
         uint32 unk1 = recvData.read<uint32>();
-        sLog->outInfo(LOG_FILTER_NETWORKIO, "CMSG_NAME_QUERY uint32 unk1 (realm flags / id ?) : %u\r\n", unk1);
+        sLog->outInfo("network", "CMSG_NAME_QUERY uint32 unk1 (realm flags / id ?) : %u\r\n", unk1);
     }
 
     // This is disable by default to prevent lots of console spam
-    // sLog->outInfo(LOG_FILTER_NETWORKIO, "HandleNameQueryOpcode %u", guid);
+    // sLog->outInfo("network", "HandleNameQueryOpcode %u", guid);
 
     SendNameQueryOpcode(guid);
 }
@@ -196,7 +196,7 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recvData)
                 ObjectMgr::GetLocaleString(cl->SubName, loc_idx, SubName);
             }
         }
-        sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: CMSG_CREATURE_QUERY '%s' - Entry: %u.", ci->Name.c_str(), entry);
+        sLog->outDebug("network", "WORLD: CMSG_CREATURE_QUERY '%s' - Entry: %u.", ci->Name.c_str(), entry);
 
         WorldPacket data(SMSG_CREATURE_QUERY_RESPONSE);
 
@@ -259,16 +259,16 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recvData)
         data << uint32(ci->movementId);                     // CreatureMovementInfo.dbc
 
         SendPacket(&data);
-        sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Sent SMSG_CREATURE_QUERY_RESPONSE");
+        sLog->outDebug("network", "WORLD: Sent SMSG_CREATURE_QUERY_RESPONSE");
     }
     else
     {
-        sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: CMSG_CREATURE_QUERY - NO CREATURE INFO! (ENTRY: %u)", entry);
+        sLog->outDebug("network", "WORLD: CMSG_CREATURE_QUERY - NO CREATURE INFO! (ENTRY: %u)", entry);
         WorldPacket data(SMSG_CREATURE_QUERY_RESPONSE, 4);
         data << uint32(entry | 0x80000000);
         data.WriteBit(0); // has no valid data
         SendPacket(&data);
-        sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Sent SMSG_CREATURE_QUERY_RESPONSE");
+        sLog->outDebug("network", "WORLD: Sent SMSG_CREATURE_QUERY_RESPONSE");
     }
 }
 
@@ -302,7 +302,7 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket& recvData)
             }
         }
 
-        sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: CMSG_GAMEOBJECT_QUERY '%s' - Entry: %u. ", info->name.c_str(), entry);
+        sLog->outDebug("network", "WORLD: CMSG_GAMEOBJECT_QUERY '%s' - Entry: %u. ", info->name.c_str(), entry);
         WorldPacket data (SMSG_GAMEOBJECT_QUERY_RESPONSE);
         ByteBuffer byteBuffer;
 
@@ -347,22 +347,22 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket& recvData)
         data.append(byteBuffer);
 
         SendPacket(&data);
-        sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Sent SMSG_GAMEOBJECT_QUERY_RESPONSE");
+        sLog->outDebug("network", "WORLD: Sent SMSG_GAMEOBJECT_QUERY_RESPONSE");
     }
     else
     {
-        sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: CMSG_GAMEOBJECT_QUERY - Missing gameobject info for (GUID: %u, ENTRY: %u)",
+        sLog->outDebug("network", "WORLD: CMSG_GAMEOBJECT_QUERY - Missing gameobject info for (GUID: %u, ENTRY: %u)",
             GUID_LOPART(guid), entry);
         WorldPacket data (SMSG_GAMEOBJECT_QUERY_RESPONSE, 4);
         data << uint32(entry | 0x80000000);
         SendPacket(&data);
-        sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Sent SMSG_GAMEOBJECT_QUERY_RESPONSE");
+        sLog->outDebug("network", "WORLD: Sent SMSG_GAMEOBJECT_QUERY_RESPONSE");
     }
 }
 
 void WorldSession::HandleCorpseQueryOpcode(WorldPacket& /*recvData*/)
 {
-    sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Received CMSG_CORPSE_QUERY");
+    sLog->outDebug("network", "WORLD: Received CMSG_CORPSE_QUERY");
 
     Corpse* corpse = GetPlayer()->GetCorpse();
 
@@ -444,7 +444,7 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket& recvData)
     ObjectGuid guid;
 
     recvData >> textID;
-    sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: CMSG_NPC_TEXT_QUERY ID '%u'", textID);
+    sLog->outDebug("network", "WORLD: CMSG_NPC_TEXT_QUERY ID '%u'", textID);
 
     recvData.ReadBitSeq<7, 3, 1, 5, 6, 4, 0, 2>(guid);
     recvData.ReadByteSeq<1, 5, 2, 7, 3, 6, 4, 0>(guid);
@@ -537,7 +537,7 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket& recvData)
 
     SendPacket(&data);
 
-    sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Sent SMSG_NPC_TEXT_UPDATE");
+    sLog->outDebug("network", "WORLD: Sent SMSG_NPC_TEXT_UPDATE");
 }
 
 #define DEFAULT_GREETINGS_GOSSIP      68
@@ -591,7 +591,7 @@ void WorldSession::SendBroadcastTextDb2Reply(uint32 entry)
 /// Only _static_ data is sent in this packet !!!
 void WorldSession::HandlePageTextQueryOpcode(WorldPacket& recvData)
 {
-    sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Received CMSG_PAGE_TEXT_QUERY");
+    sLog->outDebug("network", "WORLD: Received CMSG_PAGE_TEXT_QUERY");
 
     ObjectGuid objectGuid;
     uint32 pageID;
@@ -603,12 +603,12 @@ void WorldSession::HandlePageTextQueryOpcode(WorldPacket& recvData)
     if (IS_UNIT_GUID(objectGuid))
     {
         if (Unit* unit = Unit::GetUnit(*(GetPlayer()), objectGuid))
-            sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Received CMSG_PAGE_TEXT_QUERY. Unit Entry: %u", unit->GetEntry());
+            sLog->outInfo("server.loading", "Received CMSG_PAGE_TEXT_QUERY. Unit Entry: %u", unit->GetEntry());
     }
     else if (IS_GAMEOBJECT_GUID(objectGuid))
     {
         if (GameObject* go = GetPlayer()->GetMap()->GetGameObject(objectGuid))
-            sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Received CMSG_PAGE_TEXT_QUERY. Gameobject Entry: %u", go->GetEntry());
+            sLog->outInfo("server.loading", "Received CMSG_PAGE_TEXT_QUERY. Gameobject Entry: %u", go->GetEntry());
     }
 
     while (pageID)
@@ -644,13 +644,13 @@ void WorldSession::HandlePageTextQueryOpcode(WorldPacket& recvData)
 
         SendPacket(&data);
 
-        sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Sent SMSG_PAGE_TEXT_QUERY_RESPONSE");
+        sLog->outDebug("network", "WORLD: Sent SMSG_PAGE_TEXT_QUERY_RESPONSE");
     }
 }
 
 void WorldSession::HandleCorpseMapPositionQuery(WorldPacket& recvData)
 {
-    sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Recv CMSG_CORPSE_MAP_POSITION_QUERY");
+    sLog->outDebug("network", "WORLD: Recv CMSG_CORPSE_MAP_POSITION_QUERY");
 
     // Read guid, useless
     recvData.rfinish();

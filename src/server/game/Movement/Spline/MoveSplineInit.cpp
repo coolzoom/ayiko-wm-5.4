@@ -157,7 +157,7 @@ namespace Movement
         {
             if (!(args.velocity > 0.1f))
             {
-                sLog->outInfo(LOG_FILTER_SERVER_LOADING , "MoveSplineInitArgs::Validate: args.velocity '%f', flags: %u, speedType: %u, speed %f, hasVelocity %u", args.velocity, moveFlags, SelectSpeedType(moveFlags), unit.GetSpeed(SelectSpeedType(moveFlags)), args.HasVelocity);
+                sLog->outInfo("server.loading" , "MoveSplineInitArgs::Validate: args.velocity '%f', flags: %u, speedType: %u, speed %f, hasVelocity %u", args.velocity, moveFlags, SelectSpeedType(moveFlags), unit.GetSpeed(SelectSpeedType(moveFlags)), args.HasVelocity);
             }
             return;
         }

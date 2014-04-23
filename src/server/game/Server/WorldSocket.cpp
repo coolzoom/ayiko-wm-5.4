@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+* Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
 * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
 *
 * This program is free software; you can redistribute it and/or modify it
@@ -130,7 +130,7 @@ WorldSocket::WorldSocket (void): WorldHandler(),
     int z_res = deflateInit(m_zstream, sWorld->getIntConfig(CONFIG_COMPRESSION));
     if (z_res != Z_OK)
     {
-        sLog->outError(LOG_FILTER_NETWORKIO, "WorldSocket: Can't initialize packet compression deflateInit failed with code %d", z_res);
+        sLog->outError("network", "WorldSocket: Can't initialize packet compression deflateInit failed with code %d", z_res);
         ASSERT(z_res == Z_OK);
     }
 }
@@ -145,7 +145,7 @@ WorldSocket::~WorldSocket (void)
     int z_res = deflateEnd(m_zstream);
     if (z_res != Z_OK && z_res != Z_DATA_ERROR)
     {
-        sLog->outError(LOG_FILTER_NETWORKIO, "WorldSocket: Can't close packet compression stream. deflateEnd failed with code %d", z_res);
+        sLog->outError("network", "WorldSocket: Can't close packet compression stream. deflateEnd failed with code %d", z_res);
         return;
     }
 
@@ -196,7 +196,7 @@ int WorldSocket::SendPacket(WorldPacket const* pct)
     if (sPacketLog->CanLogPacket())
         sPacketLog->LogPacket(*pct, SERVER_TO_CLIENT);
 
-    sLog->outInfo(LOG_FILTER_OPCODES, "S->C: %s", GetOpcodeNameForLogging(pct->GetOpcode(), WOW_SERVER).c_str());
+    sLog->outInfo("network.opcode", "S->C: %s", GetOpcodeNameForLogging(pct->GetOpcode(), WOW_SERVER).c_str());
 
     WorldPacket compressed;
     size_t size = pct->size();
@@ -231,7 +231,7 @@ int WorldSocket::SendPacket(WorldPacket const* pct)
         int z_res = deflate(m_zstream, Z_SYNC_FLUSH);
 
         size_t totalOut = m_zstream->next_out - compressed.contents();
-        sLog->outError(LOG_FILTER_NETWORKIO, "totalOut = %u, reserved_size = %u, m_zstream->avail_out = %u", (uint32)totalOut, (uint32)reserved_size, (uint32)m_zstream->avail_out);
+        sLog->outError("network", "totalOut = %u, reserved_size = %u, m_zstream->avail_out = %u", (uint32)totalOut, (uint32)reserved_size, (uint32)m_zstream->avail_out);
         ASSERT(totalOut == reserved_size - m_zstream->avail_out);
 
         uint32 adler_2 = (uint32)adler32(2552748273u, (const Bytef*)(compressed.contents() + 12), totalOut - 12);
@@ -240,11 +240,11 @@ int WorldSocket::SendPacket(WorldPacket const* pct)
 
         if (z_res != Z_OK)
         {
-            sLog->outError(LOG_FILTER_NETWORKIO, "Can't compress packet (zlib: deflate) Error code: %i (%s)",z_res,zError(z_res));
+            sLog->outError("network", "Can't compress packet (zlib: deflate) Error code: %i (%s)",z_res,zError(z_res));
         }
         else if (m_zstream->avail_in != 0)
         {
-            sLog->outError(LOG_FILTER_NETWORKIO, "Can't compress packet (zlib: deflate not greedy)");
+            sLog->outError("network", "Can't compress packet (zlib: deflate not greedy)");
         }
         else
         {
@@ -287,7 +287,7 @@ int WorldSocket::SendPacket(WorldPacket const* pct)
 
         if (msg_queue()->enqueue_tail(mb, (ACE_Time_Value*)&ACE_Time_Value::zero) == -1)
         {
-            sLog->outError(LOG_FILTER_NETWORKIO, "WorldSocket::SendPacket enqueue_tail failed");
+            sLog->outError("network", "WorldSocket::SendPacket enqueue_tail failed");
             mb->release();
             return -1;
         }
@@ -330,7 +330,7 @@ int WorldSocket::open (void *a)
 
     if (peer().get_remote_addr(remote_addr) == -1)
     {
-        sLog->outError(LOG_FILTER_NETWORKIO, "WorldSocket::open: peer().get_remote_addr errno = %s", ACE_OS::strerror (errno));
+        sLog->outError("network", "WorldSocket::open: peer().get_remote_addr errno = %s", ACE_OS::strerror (errno));
         return -1;
     }
 
@@ -347,7 +347,7 @@ int WorldSocket::open (void *a)
     // Register with ACE Reactor
     if (reactor()->register_handler(this, ACE_Event_Handler::READ_MASK | ACE_Event_Handler::WRITE_MASK) == -1)
     {
-        sLog->outError(LOG_FILTER_NETWORKIO, "WorldSocket::open: unable to register client handler errno = %s", ACE_OS::strerror (errno));
+        sLog->outError("network", "WorldSocket::open: unable to register client handler errno = %s", ACE_OS::strerror (errno));
         return -1;
     }
 
@@ -383,14 +383,14 @@ int WorldSocket::handle_input (ACE_HANDLE)
                 return Update();                           // interesting line, isn't it ?
             }
 
-            sLog->outDebug(LOG_FILTER_NETWORKIO, "WorldSocket::handle_input: Peer error closing connection errno = %s", ACE_OS::strerror (errno));
+            sLog->outDebug("network", "WorldSocket::handle_input: Peer error closing connection errno = %s", ACE_OS::strerror (errno));
 
             errno = ECONNRESET;
             return -1;
         }
     case 0:
         {
-            sLog->outDebug(LOG_FILTER_NETWORKIO, "WorldSocket::handle_input: Peer has closed connection");
+            sLog->outDebug("network", "WorldSocket::handle_input: Peer has closed connection");
 
             errno = ECONNRESET;
             return -1;
@@ -459,7 +459,7 @@ int WorldSocket::handle_output_queue (GuardType& g)
 
     if (msg_queue()->dequeue_head(mblk, (ACE_Time_Value*)&ACE_Time_Value::zero) == -1)
     {
-        sLog->outError(LOG_FILTER_NETWORKIO, "WorldSocket::handle_output_queue dequeue_head");
+        sLog->outError("network", "WorldSocket::handle_output_queue dequeue_head");
         return -1;
     }
 
@@ -494,7 +494,7 @@ int WorldSocket::handle_output_queue (GuardType& g)
 
         if (msg_queue()->enqueue_head(mblk, (ACE_Time_Value*) &ACE_Time_Value::zero) == -1)
         {
-            sLog->outError(LOG_FILTER_NETWORKIO, "WorldSocket::handle_output_queue enqueue_head");
+            sLog->outError("network", "WorldSocket::handle_output_queue enqueue_head");
             mblk->release();
             return -1;
         }
@@ -583,7 +583,7 @@ int WorldSocket::handle_input_header (void)
     if (size > 10240)  // LR (from MSG_VERIFY_CONNECTIVITY)
     {
         Player* _player = m_Session ? m_Session->GetPlayer() : NULL;
-        sLog->outError(LOG_FILTER_NETWORKIO, "WorldSocket::handle_input_header(): client (account: %u, char [GUID: %u, name: %s])"
+        sLog->outError("network", "WorldSocket::handle_input_header(): client (account: %u, char [GUID: %u, name: %s])"
                        " sent malformed packet (size: %d, cmd: %d)",
                        m_Session ? m_Session->GetAccountId() : 0,
                        _player ? _player->GetGUIDLow() : 0,
@@ -692,7 +692,7 @@ int WorldSocket::handle_input_missing_data (void)
         // hope this is not hack, as proper m_RecvWPct is asserted around
         if (!m_RecvWPct)
         {
-            sLog->outError(LOG_FILTER_NETWORKIO, "Forcing close on input m_RecvWPct = NULL");
+            sLog->outError("network", "Forcing close on input m_RecvWPct = NULL");
             errno = EINVAL;
             return -1;
         }
@@ -738,7 +738,7 @@ int WorldSocket::cancel_wakeup_output (GuardType& g)
         (this, ACE_Event_Handler::WRITE_MASK) == -1)
     {
         // would be good to store errno from reactor with errno guard
-        sLog->outError(LOG_FILTER_NETWORKIO, "WorldSocket::cancel_wakeup_output");
+        sLog->outError("network", "WorldSocket::cancel_wakeup_output");
         return -1;
     }
 
@@ -757,7 +757,7 @@ int WorldSocket::schedule_wakeup_output (GuardType& g)
     if (reactor()->schedule_wakeup
         (this, ACE_Event_Handler::WRITE_MASK) == -1)
     {
-        sLog->outError(LOG_FILTER_NETWORKIO, "WorldSocket::schedule_wakeup_output");
+        sLog->outError("network", "WorldSocket::schedule_wakeup_output");
         return -1;
     }
 
@@ -782,7 +782,7 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
 
     std::string opcodeName = GetOpcodeNameForLogging(opcode, WOW_CLIENT);
     if (opcode != CMSG_PLAYER_MOVE)
-        sLog->outInfo(LOG_FILTER_OPCODES, "C->S: %s", opcodeName.c_str());
+        sLog->outInfo("network.opcode", "C->S: %s", opcodeName.c_str());
 
     try
     {
@@ -794,7 +794,7 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
             {
                 if (m_Session)
                 {
-                    sLog->outError(LOG_FILTER_NETWORKIO, "WorldSocket::ProcessIncoming: received duplicate CMSG_AUTH_SESSION from %s", m_Session->GetPlayerName(false).c_str());
+                    sLog->outError("network", "WorldSocket::ProcessIncoming: received duplicate CMSG_AUTH_SESSION from %s", m_Session->GetPlayerName(false).c_str());
                     return -1;
                 }
 
@@ -803,14 +803,14 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
             }
             case CMSG_KEEP_ALIVE:
             {
-                sLog->outDebug(LOG_FILTER_NETWORKIO, "%s", GetOpcodeNameForLogging(opcode, WOW_CLIENT).c_str());
+                sLog->outDebug("network", "%s", GetOpcodeNameForLogging(opcode, WOW_CLIENT).c_str());
                 sScriptMgr->OnPacketReceive(this, WorldPacket(*new_pct));
                 return 0;
             }
             case CMSG_LOG_DISCONNECT:
             {
                 new_pct->rfinish(); // contains uint32 disconnectReason;
-                sLog->outDebug(LOG_FILTER_NETWORKIO, "%s", opcodeName.c_str());
+                sLog->outDebug("network", "%s", opcodeName.c_str());
                 sScriptMgr->OnPacketReceive(this, WorldPacket(*new_pct));
                 return 0;
             }
@@ -828,7 +828,7 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
             // first 4 bytes become the opcode (2 dropped)
             case MSG_VERIFY_CONNECTIVITY:
             {
-                sLog->outDebug(LOG_FILTER_NETWORKIO, "%s", opcodeName.c_str());
+                sLog->outDebug("network", "%s", opcodeName.c_str());
                 sScriptMgr->OnPacketReceive(this, WorldPacket(*new_pct));
                 std::string str;
                 *new_pct >> str;
@@ -838,7 +838,7 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
             }
             /*case CMSG_ENABLE_NAGLE:
             {
-                sLog->outDebug(LOG_FILTER_NETWORKIO, "%s", opcodeName.c_str());
+                sLog->outDebug("network", "%s", opcodeName.c_str());
                 sScriptMgr->OnPacketReceive(this, WorldPacket(*new_pct));
                 return m_Session ? m_Session->HandleEnableNagleAlgorithm() : -1;
             }*/
@@ -847,7 +847,7 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
                 ACE_GUARD_RETURN(LockType, Guard, m_SessionLock, -1);
                 if (!m_Session)
                 {
-                    sLog->outError(LOG_FILTER_OPCODES, "ProcessIncoming: Client not authed opcode = %u", uint32(opcode));
+                    sLog->outError("network.opcode", "ProcessIncoming: Client not authed opcode = %u", uint32(opcode));
                     return -1;
                 }
 
@@ -858,7 +858,7 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
                 OpcodeHandler* handler = opcodeTable[WOW_CLIENT][opcode];
                 if (!handler || handler->status == STATUS_UNHANDLED)
                 {
-                    sLog->outError(LOG_FILTER_OPCODES, "No defined handler for opcode %s sent by %s", GetOpcodeNameForLogging(new_pct->GetOpcode(), WOW_CLIENT).c_str(), m_Session->GetPlayerName(false).c_str());
+                    sLog->outError("network.opcode", "No defined handler for opcode %s sent by %s", GetOpcodeNameForLogging(new_pct->GetOpcode(), WOW_CLIENT).c_str(), m_Session->GetPlayerName(false).c_str());
                     return 0;
                 }
 
@@ -877,7 +877,7 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
     }
     catch (ByteBufferException &)
     {
-        sLog->outError(LOG_FILTER_NETWORKIO, "WorldSocket::ProcessIncoming ByteBufferException occured while parsing an instant handled packet %s from client %s, accountid=%i. Disconnected client.",
+        sLog->outError("network", "WorldSocket::ProcessIncoming ByteBufferException occured while parsing an instant handled packet %s from client %s, accountid=%i. Disconnected client.",
             opcodeName.c_str(), GetRemoteAddress().c_str(), m_Session ? int32(m_Session->GetAccountId()) : -1);
         new_pct->hexlike();
         return -1;
@@ -1088,7 +1088,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     if (sWorld->IsClosed())
     {
         SendAuthResponse(AUTH_REJECT, false, 0);
-        sLog->outError(LOG_FILTER_NETWORKIO, "WorldSocket::HandleAuthSession: World closed, denying client (%s).", GetRemoteAddress().c_str());
+        sLog->outError("network", "WorldSocket::HandleAuthSession: World closed, denying client (%s).", GetRemoteAddress().c_str());
         return -1;
     }
 
@@ -1105,7 +1105,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     if (!result)
     {
         SendAuthResponse(AUTH_UNKNOWN_ACCOUNT, false, 0);
-        sLog->outError(LOG_FILTER_NETWORKIO, "WorldSocket::HandleAuthSession: Sent Auth Response (unknown account).");
+        sLog->outError("network", "WorldSocket::HandleAuthSession: Sent Auth Response (unknown account).");
         return -1;
     }
 
@@ -1116,7 +1116,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     if (expansion > world_expansion)
         expansion = world_expansion;
 
-    sLog->outDebug(LOG_FILTER_NETWORKIO, "WorldSocket::HandleAuthSession: (s,v) check s: %s v: %s",
+    sLog->outDebug("network", "WorldSocket::HandleAuthSession: (s,v) check s: %s v: %s",
         fields[5].GetCString(),
         fields[4].GetCString());
 
@@ -1126,7 +1126,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         if (strcmp (fields[2].GetCString(), GetRemoteAddress().c_str()))
         {
             SendAuthResponse(AUTH_FAILED, false, 0);
-            sLog->outDebug(LOG_FILTER_NETWORKIO, "WorldSocket::HandleAuthSession: Sent Auth Response (Account IP differs).");
+            sLog->outDebug("network", "WorldSocket::HandleAuthSession: Sent Auth Response (Account IP differs).");
             return -1;
         }
     }
@@ -1189,17 +1189,17 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     if (banresult) // if account banned
     {
         SendAuthResponse(AUTH_BANNED, false, 0);
-        sLog->outError(LOG_FILTER_NETWORKIO, "WorldSocket::HandleAuthSession: Sent Auth Response (Account banned).");
+        sLog->outError("network", "WorldSocket::HandleAuthSession: Sent Auth Response (Account banned).");
         return -1;
     }
 
     // Check locked state for server
     AccountTypes allowedAccountType = sWorld->GetPlayerSecurityLimit();
-    sLog->outDebug(LOG_FILTER_NETWORKIO, "Allowed Level: %u Player Level %u", allowedAccountType, AccountTypes(security));
+    sLog->outDebug("network", "Allowed Level: %u Player Level %u", allowedAccountType, AccountTypes(security));
     if (allowedAccountType > SEC_PLAYER && AccountTypes(security) < allowedAccountType)
     {
         SendAuthResponse(AUTH_UNAVAILABLE, false, 0);
-        sLog->outInfo(LOG_FILTER_NETWORKIO, "WorldSocket::HandleAuthSession: User tries to login but his security level is not enough");
+        sLog->outInfo("network", "WorldSocket::HandleAuthSession: User tries to login but his security level is not enough");
         return -1;
     }
 
@@ -1224,11 +1224,11 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     packet << uint8(AUTH_FAILED);
     SendPacket(packet);
 
-    sLog->outError(LOG_FILTER_NETWORKIO, "WorldSocket::HandleAuthSession: Authentication failed for account: %u ('%s') address: %s", id, account.c_str(), address.c_str());
+    sLog->outError("network", "WorldSocket::HandleAuthSession: Authentication failed for account: %u ('%s') address: %s", id, account.c_str(), address.c_str());
     return -1;
     }*/
 
-    sLog->outDebug(LOG_FILTER_NETWORKIO, "WorldSocket::HandleAuthSession: Client '%s' authenticated successfully from %s.",
+    sLog->outDebug("network", "WorldSocket::HandleAuthSession: Client '%s' authenticated successfully from %s.",
         account.c_str(),
         address.c_str());
 
@@ -1291,7 +1291,7 @@ int WorldSocket::HandlePing(WorldPacket& recvPacket)
 
                 if (m_Session && AccountMgr::IsPlayerAccount(m_Session->GetSecurity()))
                 {
-                    sLog->outError(LOG_FILTER_NETWORKIO, "WorldSocket::HandlePing: %s kicked for over-speed pings (address: %s)",
+                    sLog->outError("network", "WorldSocket::HandlePing: %s kicked for over-speed pings (address: %s)",
                         m_Session->GetPlayerName(false).c_str(), GetRemoteAddress().c_str());
 
                     return -1;
@@ -1310,7 +1310,7 @@ int WorldSocket::HandlePing(WorldPacket& recvPacket)
             m_Session->SetLatency (latency);
         else
         {
-            sLog->outError(LOG_FILTER_NETWORKIO, "WorldSocket::HandlePing: peer sent CMSG_PING, "
+            sLog->outError("network", "WorldSocket::HandlePing: peer sent CMSG_PING, "
                 "but is not authenticated or got recently kicked, "
                 " address = %s",
                 GetRemoteAddress().c_str());

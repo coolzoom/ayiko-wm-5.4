@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -43,7 +43,7 @@ void WardenCheckMgr::LoadWardenChecks()
     // Check if Warden is enabled by config before loading anything
     if (!sWorld->getBoolConfig(CONFIG_WARDEN_ENABLED))
     {
-        sLog->outInfo(LOG_FILTER_WARDEN, ">> Warden disabled, loading checks skipped.");
+        sLog->outInfo("warden", ">> Warden disabled, loading checks skipped.");
 
         return;
     }
@@ -52,7 +52,7 @@ void WardenCheckMgr::LoadWardenChecks()
 
     if (!result)
     {
-        sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Loaded 0 Warden checks. DB table `warden_checks` is empty!");
+        sLog->outInfo("server.loading", ">> Loaded 0 Warden checks. DB table `warden_checks` is empty!");
 
         return;
     }
@@ -145,7 +145,7 @@ void WardenCheckMgr::LoadWardenChecks()
     }
     while (result->NextRow());
 
-    sLog->outInfo(LOG_FILTER_WARDEN, ">> Loaded %u warden checks.", count);
+    sLog->outInfo("warden", ">> Loaded %u warden checks.", count);
 
 }
 
@@ -154,7 +154,7 @@ void WardenCheckMgr::LoadWardenOverrides()
     // Check if Warden is enabled by config before loading anything
     if (!sWorld->getBoolConfig(CONFIG_WARDEN_ENABLED))
     {
-        sLog->outInfo(LOG_FILTER_WARDEN, ">> Warden disabled, loading check overrides skipped.");
+        sLog->outInfo("warden", ">> Warden disabled, loading check overrides skipped.");
 
         return;
     }
@@ -164,7 +164,7 @@ void WardenCheckMgr::LoadWardenOverrides()
 
     if (!result)
     {
-        sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Loaded 0 Warden action overrides. DB table `warden_action` is empty!");
+        sLog->outInfo("server.loading", ">> Loaded 0 Warden action overrides. DB table `warden_action` is empty!");
 
         return;
     }
@@ -182,10 +182,10 @@ void WardenCheckMgr::LoadWardenOverrides()
 
         // Check if action value is in range (0-2, see WardenActions enum)
         if (action > WARDEN_ACTION_BAN)
-            sLog->outError(LOG_FILTER_WARDEN, "Warden check override action out of range (ID: %u, action: %u)", checkId, action);
+            sLog->outError("warden", "Warden check override action out of range (ID: %u, action: %u)", checkId, action);
         // Check if check actually exists before accessing the CheckStore vector
         else if (checkId > CheckStore.size())
-            sLog->outError(LOG_FILTER_WARDEN, "Warden check action override for non-existing check (ID: %u, action: %u), skipped", checkId, action);
+            sLog->outError("warden", "Warden check action override for non-existing check (ID: %u, action: %u), skipped", checkId, action);
         else
         {
             CheckStore[checkId]->Action = WardenActions(action);
@@ -194,7 +194,7 @@ void WardenCheckMgr::LoadWardenOverrides()
     }
     while (result->NextRow());
 
-    sLog->outInfo(LOG_FILTER_WARDEN, ">> Loaded %u warden action overrides.", count);
+    sLog->outInfo("warden", ">> Loaded %u warden action overrides.", count);
 
 }
 

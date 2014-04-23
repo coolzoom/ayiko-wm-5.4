@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -755,7 +755,7 @@ public:
                                 if (pRandomPlayer)
                                     DoCast(pRandomPlayer, SPELL_LEGION_LIGHTNING, false);
                                 else
-                                    sLog->outError(LOG_FILTER_TSCR, "try to cast SPELL_LEGION_LIGHTNING on invalid target");
+                                    sLog->outError("scripts", "try to cast SPELL_LEGION_LIGHTNING on invalid target");
 
                                 Timer[TIMER_LEGION_LIGHTNING] = (Phase == PHASE_SACRIFICE) ? 18000 : 30000; // 18 seconds in PHASE_SACRIFICE
                                 Timer[TIMER_SOUL_FLAY] = 2500;
@@ -1412,7 +1412,7 @@ public:
                     DoMeleeAttackIfReady();
                     break;
                 }
-                sLog->outDebug(LOG_FILTER_TSCR, "Sinister-Timer");
+                sLog->outDebug("scripts", "Sinister-Timer");
                 for (uint8 i = 0; i < 3; ++i)
                     uiTimer[i] -= diff;
             }

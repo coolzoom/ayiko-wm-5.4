@@ -1,5 +1,5 @@
  /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -195,17 +195,17 @@ class instance_zulaman : public InstanceMapScript
                     return;
 
                 std::istringstream ss(load);
-                //sLog->outError(LOG_FILTER_TSCR, "Zul'aman loaded, %s.", ss.str().c_str());
+                //sLog->outError("scripts", "Zul'aman loaded, %s.", ss.str().c_str());
                 char dataHead; // S
                 uint16 data1, data2, data3;
                 ss >> dataHead >> data1 >> data2 >> data3;
-                //sLog->outError(LOG_FILTER_TSCR, "Zul'aman loaded, %d %d %d.", data1, data2, data3);
+                //sLog->outError("scripts", "Zul'aman loaded, %d %d %d.", data1, data2, data3);
                 if (dataHead == 'S')
                 {
                     BossKilled = data1;
                     ChestLooted = data2;
                     QuestMinute = data3;
-                } else sLog->outError(LOG_FILTER_TSCR, "Zul'aman: corrupted save data.");
+                } else sLog->outError("scripts", "Zul'aman: corrupted save data.");
             }
 
             void SetData(uint32 type, uint32 data)

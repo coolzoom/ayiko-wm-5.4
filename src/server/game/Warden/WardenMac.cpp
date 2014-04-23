@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -58,16 +58,16 @@ void WardenMac::Init(WorldSession *pClient, BigNumber *K)
 
     _inputCrypto.Init(_inputKey);
     _outputCrypto.Init(_outputKey);
-    sLog->outDebug(LOG_FILTER_WARDEN, "Server side warden for client %u initializing...", pClient->GetAccountId());
-    sLog->outDebug(LOG_FILTER_WARDEN, "C->S Key: %s", ByteArrayToHexStr(_inputKey, 16).c_str());
-    sLog->outDebug(LOG_FILTER_WARDEN, "S->C Key: %s", ByteArrayToHexStr(_outputKey, 16).c_str());
-    sLog->outDebug(LOG_FILTER_WARDEN, "  Seed: %s", ByteArrayToHexStr(_seed, 16).c_str());
-    sLog->outDebug(LOG_FILTER_WARDEN, "Loading Module...");
+    sLog->outDebug("warden", "Server side warden for client %u initializing...", pClient->GetAccountId());
+    sLog->outDebug("warden", "C->S Key: %s", ByteArrayToHexStr(_inputKey, 16).c_str());
+    sLog->outDebug("warden", "S->C Key: %s", ByteArrayToHexStr(_outputKey, 16).c_str());
+    sLog->outDebug("warden", "  Seed: %s", ByteArrayToHexStr(_seed, 16).c_str());
+    sLog->outDebug("warden", "Loading Module...");
 
     _module = GetModuleForClient();
 
-    sLog->outDebug(LOG_FILTER_WARDEN, "Module Key: %s", ByteArrayToHexStr(_module->Key, 16).c_str());
-    sLog->outDebug(LOG_FILTER_WARDEN, "Module ID: %s", ByteArrayToHexStr(_module->Id, 16).c_str());
+    sLog->outDebug("warden", "Module Key: %s", ByteArrayToHexStr(_module->Key, 16).c_str());
+    sLog->outDebug("warden", "Module ID: %s", ByteArrayToHexStr(_module->Id, 16).c_str());
     RequestModule();
 }
 
@@ -94,12 +94,12 @@ ClientWardenModule* WardenMac::GetModuleForClient()
 
 void WardenMac::InitializeModule()
 {
-    sLog->outDebug(LOG_FILTER_WARDEN, "Initialize module");
+    sLog->outDebug("warden", "Initialize module");
 }
 
 void WardenMac::RequestHash()
 {
-    sLog->outDebug(LOG_FILTER_WARDEN, "Request hash");
+    sLog->outDebug("warden", "Request hash");
 
     // Create packet structure
     WardenHashRequest Request;
@@ -152,11 +152,11 @@ void WardenMac::HandleHashResult(ByteBuffer &buff)
     // Verify key
     if (memcmp(buff.contents() + 1, sha1.GetDigest(), 20) != 0)
     {
-        sLog->outWarn(LOG_FILTER_WARDEN, "%s failed hash reply. Action: %s", _session->GetPlayerName(false).c_str(), Penalty().c_str());
+        sLog->outWarn("warden", "%s failed hash reply. Action: %s", _session->GetPlayerName(false).c_str(), Penalty().c_str());
         return;
     }
 
-    sLog->outDebug(LOG_FILTER_WARDEN, "Request hash reply: succeed");
+    sLog->outDebug("warden", "Request hash reply: succeed");
 
     // client 7F96EEFDA5B63D20A4DF8E00CBF48304
     //const uint8 client_key[16] = { 0x7F, 0x96, 0xEE, 0xFD, 0xA5, 0xB6, 0x3D, 0x20, 0xA4, 0xDF, 0x8E, 0x00, 0xCB, 0xF4, 0x83, 0x04 };
@@ -178,7 +178,7 @@ void WardenMac::HandleHashResult(ByteBuffer &buff)
 
 void WardenMac::RequestData()
 {
-    sLog->outDebug(LOG_FILTER_WARDEN, "Request data");
+    sLog->outDebug("warden", "Request data");
 
     ByteBuffer buff;
     buff << uint8(WARDEN_SMSG_CHEAT_CHECKS_REQUEST);
@@ -202,7 +202,7 @@ void WardenMac::RequestData()
 
 void WardenMac::HandleData(ByteBuffer &buff)
 {
-    sLog->outDebug(LOG_FILTER_WARDEN, "Handle data");
+    sLog->outDebug("warden", "Handle data");
 
     _dataSent = false;
     _clientResponseTimer = 0;
@@ -235,7 +235,7 @@ void WardenMac::HandleData(ByteBuffer &buff)
 
     if (memcmp(sha1Hash, sha1.GetDigest(), 20))
     {
-        sLog->outDebug(LOG_FILTER_WARDEN, "Handle data failed: SHA1 hash is wrong!");
+        sLog->outDebug("warden", "Handle data failed: SHA1 hash is wrong!");
         //found = true;
     }
 
@@ -250,7 +250,7 @@ void WardenMac::HandleData(ByteBuffer &buff)
 
     if (memcmp(ourMD5Hash, theirsMD5Hash, 16))
     {
-        sLog->outDebug(LOG_FILTER_WARDEN, "Handle data failed: MD5 hash is wrong!");
+        sLog->outDebug("warden", "Handle data failed: MD5 hash is wrong!");
         //found = true;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -268,13 +268,13 @@ void WorldSession::HandleSendMail(WorldPacket& recvData)
     player->SaveInventoryAndGoldToDB(trans);
     CharacterDatabase.CommitTransaction(trans);
 
-    sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Time diss on mail send %u ms", GetMSTimeDiffToNow(oldMSTime));
+    sLog->outInfo("server.loading", "Time diss on mail send %u ms", GetMSTimeDiffToNow(oldMSTime));
 }
 
 // Called when mail is read
 void WorldSession::HandleMailMarkAsRead(WorldPacket& recvData)
 {
-    sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: CMSG_MAIL_MARK_AS_READ");
+    sLog->outDebug("network", "WORLD: CMSG_MAIL_MARK_AS_READ");
 
     ObjectGuid mailbox;
     uint32 mailId;
@@ -302,7 +302,7 @@ void WorldSession::HandleMailMarkAsRead(WorldPacket& recvData)
 // Called when client deletes mail
 void WorldSession::HandleMailDelete(WorldPacket& recvData)
 {
-    sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: CMSG_MAIL_DELETE");
+    sLog->outDebug("network", "WORLD: CMSG_MAIL_DELETE");
 
     uint32 mailId;
     recvData.read_skip<uint32>();
@@ -327,7 +327,7 @@ void WorldSession::HandleMailDelete(WorldPacket& recvData)
 
 void WorldSession::HandleMailReturnToSender(WorldPacket& recvData)
 {
-    sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: CMSG_MAIL_RETURN_TO_SENDER");
+    sLog->outDebug("network", "WORLD: CMSG_MAIL_RETURN_TO_SENDER");
 
     ObjectGuid owner;
     uint32 mailId;
@@ -394,7 +394,7 @@ void WorldSession::HandleMailReturnToSender(WorldPacket& recvData)
 // Called when player takes item attached in mail
 void WorldSession::HandleMailTakeItem(WorldPacket& recvData)
 {
-    sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: CMSG_MAIL_TAKE_ITEM");
+    sLog->outDebug("network", "WORLD: CMSG_MAIL_TAKE_ITEM");
 
     ObjectGuid mailbox;
     uint32 mailId;
@@ -495,7 +495,7 @@ void WorldSession::HandleMailTakeItem(WorldPacket& recvData)
 
 void WorldSession::HandleMailTakeMoney(WorldPacket& recvData)
 {
-    sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: CMSG_MAIL_TAKE_MONEY");
+    sLog->outDebug("network", "WORLD: CMSG_MAIL_TAKE_MONEY");
 
     ObjectGuid mailbox;
     uint64 money;
@@ -544,7 +544,7 @@ void WorldSession::HandleMailTakeMoney(WorldPacket& recvData)
 // Called when player lists his received mails
 void WorldSession::HandleGetMailList(WorldPacket& recvData)
 {
-    sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: CMSG_GET_MAIL_LIST");
+    sLog->outDebug("network", "WORLD: CMSG_GET_MAIL_LIST");
 
     ObjectGuid mailBoxGuid;
 
@@ -708,7 +708,7 @@ void WorldSession::HandleGetMailList(WorldPacket& recvData)
 // Used when player copies mail body to his inventory
 void WorldSession::HandleMailCreateTextItem(WorldPacket& recvData)
 {
-    sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: CMSG_MAIL_CREATE_TEXT_ITEM");
+    sLog->outDebug("network", "WORLD: CMSG_MAIL_CREATE_TEXT_ITEM");
 
     ObjectGuid mailbox;
     uint32 mailId;
@@ -755,7 +755,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket& recvData)
     bodyItem->SetUInt32Value(ITEM_FIELD_CREATOR, m->sender);
     bodyItem->SetFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_MAIL_TEXT_MASK);
 
-    sLog->outInfo(LOG_FILTER_NETWORKIO, "HandleMailCreateTextItem mailid=%u", mailId);
+    sLog->outInfo("network", "HandleMailCreateTextItem mailid=%u", mailId);
 
     ItemPosCountVec dest;
     uint8 msg = _player->CanStoreItem(NULL_BAG, NULL_SLOT, dest, bodyItem, false);

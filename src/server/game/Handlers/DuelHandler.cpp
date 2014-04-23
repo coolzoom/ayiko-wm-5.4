@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -141,8 +141,8 @@ void WorldSession::HandleDuelResponseOpcode(WorldPacket& recvPacket)
         if (player == player->duel->initiator || !plTarget || player == plTarget || player->duel->startTime != 0 || plTarget->duel->startTime != 0)
             return;
 
-        sLog->outDebug(LOG_FILTER_NETWORKIO, "Player 1 is: %u (%s)", player->GetGUIDLow(), player->GetName());
-        sLog->outDebug(LOG_FILTER_NETWORKIO, "Player 2 is: %u (%s)", plTarget->GetGUIDLow(), plTarget->GetName());
+        sLog->outDebug("network", "Player 1 is: %u (%s)", player->GetGUIDLow(), player->GetName());
+        sLog->outDebug("network", "Player 2 is: %u (%s)", plTarget->GetGUIDLow(), plTarget->GetName());
 
         time_t now = time(NULL);
         player->duel->startTimer = now;

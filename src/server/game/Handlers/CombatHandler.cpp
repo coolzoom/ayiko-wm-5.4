@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -33,7 +33,7 @@ void WorldSession::HandleAttackSwingOpcode(WorldPacket& recvData)
     recvData.ReadBitSeq<7, 6, 4, 3, 5, 0, 2, 1>(guid);
     recvData.ReadByteSeq<6, 3, 2, 5, 4, 7, 1, 0>(guid);
 
-    sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Recvd CMSG_ATTACKSWING Message guidlow:%u guidhigh:%u", GUID_LOPART(guid), GUID_HIPART(guid));
+    sLog->outDebug("network", "WORLD: Recvd CMSG_ATTACKSWING Message guidlow:%u guidhigh:%u", GUID_LOPART(guid), GUID_HIPART(guid));
 
     Unit* pEnemy = ObjectAccessor::GetUnit(*_player, guid);
 
@@ -84,7 +84,7 @@ void WorldSession::HandleSetSheathedOpcode(WorldPacket& recvData)
 
     if (sheathed >= MAX_SHEATH_STATE)
     {
-        sLog->outError(LOG_FILTER_NETWORKIO, "Unknown sheath state %u ??", sheathed);
+        sLog->outError("network", "Unknown sheath state %u ??", sheathed);
         return;
     }
 

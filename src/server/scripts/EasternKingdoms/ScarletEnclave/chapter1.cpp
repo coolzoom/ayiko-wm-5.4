@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -189,7 +189,7 @@ public:
                         anchorGUID = anchor->GetGUID();
                     }
                     else
-                        sLog->outError(LOG_FILTER_TSCR, "npc_unworthy_initiateAI: unable to find anchor!");
+                        sLog->outError("scripts", "npc_unworthy_initiateAI: unable to find anchor!");
 
                     float dist = 99.0f;
                     GameObject* prison = NULL;
@@ -209,7 +209,7 @@ public:
                     if (prison)
                         prison->ResetDoorOrButton();
                     else
-                        sLog->outError(LOG_FILTER_TSCR, "npc_unworthy_initiateAI: unable to find prison!");
+                        sLog->outError("scripts", "npc_unworthy_initiateAI: unable to find prison!");
                 }
                 break;
             case PHASE_TO_EQUIP:
@@ -220,7 +220,7 @@ public:
                     else
                     {
                         me->GetMotionMaster()->MovePoint(1, anchorX, anchorY, me->GetPositionZ());
-                        //sLog->outDebug(LOG_FILTER_TSCR, "npc_unworthy_initiateAI: move to %f %f %f", anchorX, anchorY, me->GetPositionZ());
+                        //sLog->outDebug("scripts", "npc_unworthy_initiateAI: move to %f %f %f", anchorX, anchorY, me->GetPositionZ());
                         phase = PHASE_EQUIPING;
                         wait_timer = 0;
                     }
@@ -1086,9 +1086,9 @@ public:
                         car->GetPlayer(*car, car->GetCreatorGUID())->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                         car->GetPlayer(*car, car->GetCreatorGUID())->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                         CAST_AI(npc_scarlet_miner::npc_scarlet_minerAI, miner->AI())->InitCartQuest(player);
-                    } else sLog->outError(LOG_FILTER_TSCR, "OnGossipHello vehicle entry is not correct.");
-                } else sLog->outError(LOG_FILTER_TSCR, "OnGossipHello player is not on the vehicle.");
-            } else sLog->outError(LOG_FILTER_TSCR, "OnGossipHello Scarlet Miner cant be found by script.");
+                    } else sLog->outError("scripts", "OnGossipHello vehicle entry is not correct.");
+                } else sLog->outError("scripts", "OnGossipHello player is not on the vehicle.");
+            } else sLog->outError("scripts", "OnGossipHello Scarlet Miner cant be found by script.");
         }
         return true;
     }

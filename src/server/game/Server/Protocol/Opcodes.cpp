@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -53,7 +53,7 @@ void ValidateAndSetOpcode<true, true>(uint16 opcode, char const* name, SessionSt
 
             if (opcodeTable[i][opcode] != NULL) // register MSG opcode as client and server
             {
-                sLog->outError(LOG_FILTER_NETWORKIO, "Tried to override handler of %s with %s (opcode %u)", opcodeTable[i][opcode]->name, name, opcode);
+                sLog->outError("network", "Tried to override handler of %s with %s (opcode %u)", opcodeTable[i][opcode]->name, name, opcode);
                 return;
             }
 
@@ -64,7 +64,7 @@ void ValidateAndSetOpcode<true, true>(uint16 opcode, char const* name, SessionSt
 
     if (opcodeTable[dir][opcode] != NULL)
     {
-        sLog->outError(LOG_FILTER_NETWORKIO, "Tried to override handler of %s with %s (opcode %u)", opcodeTable[dir][opcode]->name, name, opcode);
+        sLog->outError("network", "Tried to override handler of %s with %s (opcode %u)", opcodeTable[dir][opcode]->name, name, opcode);
         return;
     }
 
@@ -74,13 +74,13 @@ void ValidateAndSetOpcode<true, true>(uint16 opcode, char const* name, SessionSt
 template<>
 void ValidateAndSetOpcode<false, true>(uint16 opcode, char const* /*name*/, SessionStatus /*status*/, PacketProcessing /*processing*/, pOpcodeHandler /*handler*/)
 {
-    sLog->outError(LOG_FILTER_NETWORKIO, "Tried to set handler for an invalid opcode %d", opcode);
+    sLog->outError("network", "Tried to set handler for an invalid opcode %d", opcode);
 }
 
 template<>
 void ValidateAndSetOpcode<true, false>(uint16 /*opcode*/, char const* name, SessionStatus /*status*/, PacketProcessing /*processing*/, pOpcodeHandler /*handler*/)
 {
-    sLog->outError(LOG_FILTER_NETWORKIO, "Opcode %s got value 0", name);
+    sLog->outError("network", "Opcode %s got value 0", name);
 }
 
 #define DEFINE_OPCODE_HANDLER(opcode, status, processing, handler)                                      \

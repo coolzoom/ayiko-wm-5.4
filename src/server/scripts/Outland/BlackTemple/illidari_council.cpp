@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -159,7 +159,7 @@ public:
                 Council[1] = instance->GetData64(DATA_VERASDARKSHADOW);
                 Council[2] = instance->GetData64(DATA_LADYMALANDE);
                 Council[3] = instance->GetData64(DATA_HIGHNETHERMANCERZEREVOR);
-            } else sLog->outError(LOG_FILTER_TSCR, ERROR_INST_DATA);
+            } else sLog->outError("scripts", ERROR_INST_DATA);
         }
 
         void EnterCombat(Unit* /*who*/) {}
@@ -406,7 +406,7 @@ struct boss_illidari_councilAI : public ScriptedAI
         }
         else
         {
-            sLog->outError(LOG_FILTER_TSCR, ERROR_INST_DATA);
+            sLog->outError("scripts", ERROR_INST_DATA);
             EnterEvadeMode();
             return;
         }
@@ -454,7 +454,7 @@ struct boss_illidari_councilAI : public ScriptedAI
     {
         if (!instance)
         {
-            sLog->outError(LOG_FILTER_TSCR, ERROR_INST_DATA);
+            sLog->outError("scripts", ERROR_INST_DATA);
             return;
         }
 

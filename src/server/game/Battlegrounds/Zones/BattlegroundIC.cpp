@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -297,7 +297,7 @@ void BattlegroundIC::StartingEventOpenDoors()
             BG_IC_Teleporters[i].x, BG_IC_Teleporters[i].y,
             BG_IC_Teleporters[i].z, BG_IC_Teleporters[i].o,
             0, 0, 0, 0, RESPAWN_ONE_DAY))
-            sLog->outError(LOG_FILTER_BATTLEGROUND, "Isle of Conquest | Starting Event Open Doors: There was an error spawning gameobject %u", BG_IC_Teleporters[i].entry);
+            sLog->outError("bg.battleground", "Isle of Conquest | Starting Event Open Doors: There was an error spawning gameobject %u", BG_IC_Teleporters[i].entry);
     }
 }
 
@@ -391,7 +391,7 @@ bool BattlegroundIC::SetupBattleground()
             BG_IC_ObjSpawnlocs[i].z, BG_IC_ObjSpawnlocs[i].o,
             0, 0, 0, 0, RESPAWN_ONE_DAY))
         {
-            sLog->outError(LOG_FILTER_BATTLEGROUND, "Isle of Conquest: There was an error spawning gameobject %u", BG_IC_ObjSpawnlocs[i].entry);
+            sLog->outError("bg.battleground", "Isle of Conquest: There was an error spawning gameobject %u", BG_IC_ObjSpawnlocs[i].entry);
             return false;
         }
     }
@@ -403,7 +403,7 @@ bool BattlegroundIC::SetupBattleground()
             BG_IC_NpcSpawnlocs[i].z, BG_IC_NpcSpawnlocs[i].o,
             RESPAWN_ONE_DAY))
         {
-            sLog->outError(LOG_FILTER_BATTLEGROUND, "Isle of Conquest: There was an error spawning creature %u", BG_IC_NpcSpawnlocs[i].entry);
+            sLog->outError("bg.battleground", "Isle of Conquest: There was an error spawning creature %u", BG_IC_NpcSpawnlocs[i].entry);
             return false;
         }
     }
@@ -413,7 +413,7 @@ bool BattlegroundIC::SetupBattleground()
         || !AddSpiritGuide(BG_IC_NPC_SPIRIT_GUIDE_1+3, BG_IC_SpiritGuidePos[7][0], BG_IC_SpiritGuidePos[7][1], BG_IC_SpiritGuidePos[7][2], BG_IC_SpiritGuidePos[7][3], ALLIANCE)
         || !AddSpiritGuide(BG_IC_NPC_SPIRIT_GUIDE_1+4, BG_IC_SpiritGuidePos[8][0], BG_IC_SpiritGuidePos[8][1], BG_IC_SpiritGuidePos[8][2], BG_IC_SpiritGuidePos[8][3], HORDE))
     {
-        sLog->outError(LOG_FILTER_BATTLEGROUND, "Isle of Conquest: Failed to spawn initial spirit guide!");
+        sLog->outError("bg.battleground", "Isle of Conquest: Failed to spawn initial spirit guide!");
         return false;
     }
 
@@ -422,7 +422,7 @@ bool BattlegroundIC::SetupBattleground()
 
     if (!gunshipAlliance || !gunshipHorde)
     {
-        sLog->outError(LOG_FILTER_BATTLEGROUND, "Isle of Conquest: There was an error creating gunships!");
+        sLog->outError("bg.battleground", "Isle of Conquest: There was an error creating gunships!");
         return false;
     }
 
@@ -616,7 +616,7 @@ uint32 BattlegroundIC::GetNextBanner(ICNodePoint* nodePoint, uint32 team, bool r
         return nodePoint->last_entry;
 
     // We should never be here...
-    sLog->outError(LOG_FILTER_BATTLEGROUND, "Isle Of Conquest: Unexpected return in GetNextBanner function");
+    sLog->outError("bg.battleground", "Isle Of Conquest: Unexpected return in GetNextBanner function");
     return 0;
 }
 
@@ -640,7 +640,7 @@ void BattlegroundIC::HandleCapturedNodes(ICNodePoint* nodePoint, bool recapture)
             BG_IC_SpiritGuidePos[nodePoint->nodeType][0], BG_IC_SpiritGuidePos[nodePoint->nodeType][1],
             BG_IC_SpiritGuidePos[nodePoint->nodeType][2], BG_IC_SpiritGuidePos[nodePoint->nodeType][3],
             (nodePoint->faction == TEAM_ALLIANCE ? ALLIANCE : HORDE)))
-            sLog->outError(LOG_FILTER_BATTLEGROUND, "Isle of Conquest: Failed to spawn spirit guide! point: %u, team: %u, ", nodePoint->nodeType, nodePoint->faction);
+            sLog->outError("bg.battleground", "Isle of Conquest: Failed to spawn spirit guide! point: %u, team: %u, ", nodePoint->nodeType, nodePoint->faction);
     }
 
     switch (nodePoint->gameobject_type)
@@ -659,7 +659,7 @@ void BattlegroundIC::HandleCapturedNodes(ICNodePoint* nodePoint, bool recapture)
                     0, 0, 0, 0, RESPAWN_ONE_DAY);
             }
 
-            //sLog->outError(LOG_FILTER_BATTLEGROUND, "BG_IC_GO_HANGAR_BANNER CAPTURED Faction: %u", nodePoint->faction);
+            //sLog->outError("bg.battleground", "BG_IC_GO_HANGAR_BANNER CAPTURED Faction: %u", nodePoint->faction);
 
             (nodePoint->faction == TEAM_ALLIANCE ? gunshipAlliance : gunshipHorde)->BuildStartMovePacket(GetBgMap());
             (nodePoint->faction == TEAM_ALLIANCE ? gunshipHorde : gunshipAlliance)->BuildStopMovePacket(GetBgMap());
@@ -940,7 +940,7 @@ Transport* BattlegroundIC::CreateTransport(uint32 goEntry, uint32 period)
 
     if (!goinfo)
     {
-        sLog->outError(LOG_FILTER_SQL, "Transport ID: %u will not be loaded, gameobject_template missing", goEntry);
+        sLog->outError("sql.sql", "Transport ID: %u will not be loaded, gameobject_template missing", goEntry);
         delete t;
         return NULL;
     }
@@ -950,7 +950,7 @@ Transport* BattlegroundIC::CreateTransport(uint32 goEntry, uint32 period)
     if (!t->GenerateWaypoints(goinfo->moTransport.taxiPathId, mapsUsed))
         // Skip transports with empty waypoints list
     {
-        sLog->outError(LOG_FILTER_SQL, "Transport (path id %u) path size = 0. Transport ignored, check DBC files or transport GO data0 field.", goinfo->moTransport.taxiPathId);
+        sLog->outError("sql.sql", "Transport (path id %u) path size = 0. Transport ignored, check DBC files or transport GO data0 field.", goinfo->moTransport.taxiPathId);
         delete t;
         return NULL;
     }

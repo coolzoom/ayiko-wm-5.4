@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -41,7 +41,7 @@ void WorldSession::HandleEjectPassenger(WorldPacket& /*data*/)
 
 void WorldSession::HandleRequestVehicleExit(WorldPacket& /*recvData*/)
 {
-    sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Recvd CMSG_REQUEST_VEHICLE_EXIT");
+    sLog->outDebug("network", "WORLD: Recvd CMSG_REQUEST_VEHICLE_EXIT");
 
     if (Vehicle* vehicle = GetPlayer()->GetVehicle())
     {
@@ -50,7 +50,7 @@ void WorldSession::HandleRequestVehicleExit(WorldPacket& /*recvData*/)
             if (seat->CanEnterOrExit())
                 GetPlayer()->ExitVehicle();
             else
-                sLog->outError(LOG_FILTER_NETWORKIO, "Player %u tried to exit vehicle, but seatflags %u (ID: %u) don't permit that.",
+                sLog->outError("network", "Player %u tried to exit vehicle, but seatflags %u (ID: %u) don't permit that.",
                 GetPlayer()->GetGUIDLow(), seat->m_ID, seat->m_flags);
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -944,7 +944,7 @@ public:
 
         if (dontdel_str)
         {
-            //sLog->outError(LOG_FILTER_GENERAL, "DEBUG: All 3 params are set");
+            //sLog->outError("misc", "DEBUG: All 3 params are set");
 
             // All 3 params are set
             // GUID
@@ -952,7 +952,7 @@ public:
             // doNotDEL
             if (stricmp(dontdel_str, "NODEL") == 0)
             {
-                //sLog->outError(LOG_FILTER_GENERAL, "DEBUG: doNotDelete = true;");
+                //sLog->outError("misc", "DEBUG: doNotDelete = true;");
                 doNotDelete = true;
             }
         }
@@ -961,10 +961,10 @@ public:
             // Only 2 params - but maybe NODEL is set
             if (type_str)
             {
-                sLog->outError(LOG_FILTER_GENERAL, "DEBUG: Only 2 params ");
+                sLog->outError("misc", "DEBUG: Only 2 params ");
                 if (stricmp(type_str, "NODEL") == 0)
                 {
-                    //sLog->outError(LOG_FILTER_GENERAL, "DEBUG: type_str, NODEL ");
+                    //sLog->outError("misc", "DEBUG: type_str, NODEL ");
                     doNotDelete = true;
                     type_str = NULL;
                 }

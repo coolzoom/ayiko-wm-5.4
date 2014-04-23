@@ -250,7 +250,7 @@ void BattlegroundKT::HandleAreaTrigger(Player* source, uint32 trigger)
             break;
         }
         default:
-            sLog->outError("bg.battleground", "WARNING: Unhandled AreaTrigger in Battleground: %u", trigger);
+            TC_LOG_ERROR("bg.battleground", "WARNING: Unhandled AreaTrigger in Battleground: %u", trigger);
             //source->GetSession()->SendAreaTriggerMessage("Warning: Unhandled AreaTrigger in Battleground: %u", trigger);
             break;
     }

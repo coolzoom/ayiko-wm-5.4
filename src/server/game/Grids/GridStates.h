@@ -32,7 +32,7 @@ class GridState
         {
             if (i_Magic != MAGIC_TESTVAL)
             {
-                sLog->outError("misc", "!!! GridState: Magic value gone !!!");
+                TC_LOG_ERROR("misc", "!!! GridState: Magic value gone !!!");
                 return false;
             }
             return true;

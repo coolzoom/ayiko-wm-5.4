@@ -65,7 +65,7 @@ void WorldSession::HandleActivateTaxiExpressOpcode(WorldPacket& /*recvData*/)
 
 void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recvData)
 {
-    sLog->outDebug("network", "WORLD: Received CMSG_MOVE_SPLINE_DONE");
+    TC_LOG_DEBUG("network", "WORLD: Received CMSG_MOVE_SPLINE_DONE");
     recvData.rfinish();
 
     // in taxi flight packet received in 2 case:
@@ -112,7 +112,7 @@ void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recvData)
             }
         }
 
-        sLog->outDebug("network", "WORLD: Taxi has to go from %u to %u", sourcenode, destinationnode);
+        TC_LOG_DEBUG("network", "WORLD: Taxi has to go from %u to %u", sourcenode, destinationnode);
 
         uint32 mountDisplayId = sObjectMgr->GetTaxiMountDisplayId(sourcenode, GetPlayer()->GetTeam());
 

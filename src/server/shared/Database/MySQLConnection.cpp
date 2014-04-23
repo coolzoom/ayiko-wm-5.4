@@ -58,7 +58,7 @@ bool MySQLConnection::DoOpen()
     mysqlInit = mysql_init(NULL);
     if (!mysqlInit)
     {
-        sLog->outError("sql.sql", "Could not initialize Mysql connection to database `%s`", m_connectionInfo->database.c_str());
+        TC_LOG_ERROR("sql.sql", "Could not initialize Mysql connection to database `%s`", m_connectionInfo->database.c_str());
         return false;
     }
 
@@ -104,13 +104,13 @@ bool MySQLConnection::DoOpen()
     {
         if (!m_reconnecting)
         {
-            sLog->outInfo("sql.sql", "MySQL client library: %s", mysql_get_client_info());
-            sLog->outInfo("sql.sql", "MySQL server ver: %s ", mysql_get_server_info(m_handle));
+            TC_LOG_INFO("sql.sql", "MySQL client library: %s", mysql_get_client_info());
+            TC_LOG_INFO("sql.sql", "MySQL server ver: %s ", mysql_get_server_info(m_handle));
             if (mysql_get_server_version(m_handle) != mysql_get_client_version())
-                sLog->outInfo("sql.sql", "[WARNING] MySQL client/server version mismatch; may conflict with behaviour of prepared statements.");
+                TC_LOG_INFO("sql.sql", "[WARNING] MySQL client/server version mismatch; may conflict with behaviour of prepared statements.");
         }
 
-        sLog->outInfo("sql.sql", "Connected to MySQL database at %s", m_connectionInfo->host.c_str());
+        TC_LOG_INFO("sql.sql", "Connected to MySQL database at %s", m_connectionInfo->host.c_str());
         mysql_autocommit(m_handle, 1);
 
         // set connection properties to UTF8 to properly handle locales for different
@@ -120,7 +120,7 @@ bool MySQLConnection::DoOpen()
     }
     else
     {
-        sLog->outError("sql.sql", "Could not connect to MySQL database at %s: %s\n", m_connectionInfo->host.c_str(), mysql_error(mysqlInit));
+        TC_LOG_ERROR("sql.sql", "Could not connect to MySQL database at %s: %s\n", m_connectionInfo->host.c_str(), mysql_error(mysqlInit));
         mysql_close(mysqlInit);
         return false;
     }
@@ -166,13 +166,13 @@ PreparedResultSet * MySQLConnection::Query(PreparedStatement *data)
 
 MYSQL_RES * MySQLConnection::_Query(char const *sql)
 {
-    sLog->outTrace("sql.sql", "%s", sql);
+    TC_LOG_TRACE("sql.sql", "%s", sql);
     if (mysql_query(m_handle, sql))
     {
         uint32 const errnum = mysql_errno(m_handle);
 
-        sLog->outError("sql.sql", "SQL: %s", sql);
-        sLog->outError("sql.sql", "ERROR: [%u] %s", errnum, mysql_error(m_handle));
+        TC_LOG_ERROR("sql.sql", "SQL: %s", sql);
+        TC_LOG_ERROR("sql.sql", "ERROR: [%u] %s", errnum, mysql_error(m_handle));
 
         // If it returns true, an error was handled successfully (i.e. reconnection)
         // and we try again
@@ -191,10 +191,10 @@ MYSQL_STMT * MySQLConnection::_Query(PreparedStatement *data)
 {
     MySQLPreparedStatement *stmt = m_stmts[data->index()];
     ACE_ASSERT(stmt);
-    sLog->outTrace("sql.sql", "%s", stmt->queryPattern());
+    TC_LOG_TRACE("sql.sql", "%s", stmt->queryPattern());
     if (uint32 const errnum = stmt->execute(data))
     {
-        sLog->outError("sql.sql", "SQL(p): %s\n [ERROR]: [%u] %s", stmt->queryPattern(), errnum, mysql_stmt_error(stmt->handle()));
+        TC_LOG_ERROR("sql.sql", "SQL(p): %s\n [ERROR]: [%u] %s", stmt->queryPattern(), errnum, mysql_stmt_error(stmt->handle()));
 
         // If it returns true, an error was handled successfully (i.e. reconnection)
         // and we try again
@@ -217,13 +217,13 @@ void MySQLConnection::BeginTransaction()
 void MySQLConnection::RollbackTransaction()
 {
     mysql_rollback(m_handle);
-    sLog->outTrace("sql.sql", "ROLLBACK TRANSACTION");
+    TC_LOG_TRACE("sql.sql", "ROLLBACK TRANSACTION");
 }
 
 void MySQLConnection::CommitTransaction()
 {
     mysql_commit(m_handle);
-    sLog->outTrace("sql.sql", "COMMIT TRANSACTION");
+    TC_LOG_TRACE("sql.sql", "COMMIT TRANSACTION");
 }
 
 void MySQLConnection::prepareStatement(uint32 index, std::string const &sql)
@@ -235,8 +235,8 @@ void MySQLConnection::prepareStatement(uint32 index, std::string const &sql)
     MYSQL_STMT *stmt = mysql_stmt_init(m_handle);
     if (!stmt)
     {
-        sLog->outError("sql.sql", "[ERROR]: In mysql_stmt_init() id: %u, sql: \"%s\"", index, sql.c_str());
-        sLog->outError("sql.sql", "[ERROR]: %s", mysql_error(m_handle));
+        TC_LOG_ERROR("sql.sql", "[ERROR]: In mysql_stmt_init() id: %u, sql: \"%s\"", index, sql.c_str());
+        TC_LOG_ERROR("sql.sql", "[ERROR]: %s", mysql_error(m_handle));
         m_prepareError = true;
     }
     else
@@ -245,8 +245,8 @@ void MySQLConnection::prepareStatement(uint32 index, std::string const &sql)
             m_stmts[index] = new MySQLPreparedStatement(stmt, sql);
         else
         {
-            sLog->outError("sql.sql", "[ERROR]: In mysql_stmt_prepare() id: %u, sql: \"%s\"", index, sql.c_str());
-            sLog->outError("sql.sql", "[ERROR]: %s", mysql_stmt_error(stmt));
+            TC_LOG_ERROR("sql.sql", "[ERROR]: In mysql_stmt_prepare() id: %u, sql: \"%s\"", index, sql.c_str());
+            TC_LOG_ERROR("sql.sql", "[ERROR]: %s", mysql_stmt_error(stmt));
             mysql_stmt_close(stmt);
             m_prepareError = true;
         }
@@ -272,10 +272,10 @@ bool MySQLConnection::_HandleMySQLErrno(uint32 errNo)
             mysql_close(m_handle);
             if (DoOpen())
             {
-                sLog->outInfo("sql.sql", "Connection to the MySQL server is active.");
+                TC_LOG_INFO("sql.sql", "Connection to the MySQL server is active.");
                 if (oldThreadId != mysql_thread_id(m_handle))
                 {
-                    sLog->outInfo("sql.sql", "Successfully reconnected to %s @%s:%s.",
+                    TC_LOG_INFO("sql.sql", "Successfully reconnected to %s @%s:%s.",
                                 m_connectionInfo->database.c_str(), m_connectionInfo->host.c_str(), m_connectionInfo->port_or_socket.c_str());
                 }
                 m_reconnecting = false;
@@ -303,13 +303,13 @@ bool MySQLConnection::_HandleMySQLErrno(uint32 errNo)
         // Outdated table or database structure - terminate core
         case ER_BAD_FIELD_ERROR:
         case ER_NO_SUCH_TABLE:
-            sLog->outError("sql.sql", "Your database structure is not up to date. Please make sure you've executed all queries in the sql/updates folders.");
+            TC_LOG_ERROR("sql.sql", "Your database structure is not up to date. Please make sure you've executed all queries in the sql/updates folders.");
             ACE_OS::sleep(10);
             std::abort();
             return false;
 
         default:
-            sLog->outError("sql.sql", "Unhandled MySQL errno %u. Unexpected behaviour possible.", errNo);
+            TC_LOG_ERROR("sql.sql", "Unhandled MySQL errno %u. Unexpected behaviour possible.", errNo);
             return false;
     }
 }

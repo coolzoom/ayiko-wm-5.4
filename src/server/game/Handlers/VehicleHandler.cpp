@@ -41,7 +41,7 @@ void WorldSession::HandleEjectPassenger(WorldPacket& /*data*/)
 
 void WorldSession::HandleRequestVehicleExit(WorldPacket& /*recvData*/)
 {
-    sLog->outDebug("network", "WORLD: Recvd CMSG_REQUEST_VEHICLE_EXIT");
+    TC_LOG_DEBUG("network", "WORLD: Recvd CMSG_REQUEST_VEHICLE_EXIT");
 
     if (Vehicle* vehicle = GetPlayer()->GetVehicle())
     {
@@ -50,7 +50,7 @@ void WorldSession::HandleRequestVehicleExit(WorldPacket& /*recvData*/)
             if (seat->CanEnterOrExit())
                 GetPlayer()->ExitVehicle();
             else
-                sLog->outError("network", "Player %u tried to exit vehicle, but seatflags %u (ID: %u) don't permit that.",
+                TC_LOG_ERROR("network", "Player %u tried to exit vehicle, but seatflags %u (ID: %u) don't permit that.",
                 GetPlayer()->GetGUIDLow(), seat->m_ID, seat->m_flags);
         }
     }

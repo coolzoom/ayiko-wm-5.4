@@ -412,7 +412,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
 
                 if (type < MAX_ENCOUNTERS)
                 {
-                    sLog->outInfo("scripts", "[ToCr] EncounterStatus[type %u] %u = data %u;", type, EncounterStatus[type], data);
+                    TC_LOG_INFO("scripts", "[ToCr] EncounterStatus[type %u] %u = data %u;", type, EncounterStatus[type], data);
                     if (data == FAIL)
                     {
                         --TrialCounter;

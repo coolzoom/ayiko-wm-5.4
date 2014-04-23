@@ -173,13 +173,13 @@ bool DatabaseWorkerPool::Open(std::string const &infoString, uint8 numThreads, M
     m_connectionInfo = MySQLConnectionInfo(infoString);
     m_initHookFnPtr = initHookFnPtr;
     m_asyncWorker = new DatabaseWorker(m_connectionInfo, numThreads, m_initHookFnPtr);
-    sLog->outInfo("sql.sql", "Opening databasepool '%s'. %u async connections running.", m_connectionInfo.database.c_str(), numThreads);
+    TC_LOG_INFO("sql.sql", "Opening databasepool '%s'. %u async connections running.", m_connectionInfo.database.c_str(), numThreads);
     return true;
 }
 
 void DatabaseWorkerPool::Close()
 {
-    sLog->outInfo("sql.sql", "Closing down databasepool '%s'.", m_connectionInfo.database.c_str());
+    TC_LOG_INFO("sql.sql", "Closing down databasepool '%s'.", m_connectionInfo.database.c_str());
     delete m_tssConn;
     delete m_asyncWorker;
 }

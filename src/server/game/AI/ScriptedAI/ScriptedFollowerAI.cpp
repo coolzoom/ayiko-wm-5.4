@@ -189,7 +189,7 @@ void FollowerAI::UpdateAI(const uint32 uiDiff)
         {
             if (HasFollowState(STATE_FOLLOW_COMPLETE) && !HasFollowState(STATE_FOLLOW_POSTEVENT))
             {
-                sLog->outDebug("scripts", "FollowerAI is set completed, despawns.");
+                TC_LOG_DEBUG("scripts", "FollowerAI is set completed, despawns.");
                 me->DespawnOrUnsummon();
                 return;
             }
@@ -200,7 +200,7 @@ void FollowerAI::UpdateAI(const uint32 uiDiff)
             {
                 if (HasFollowState(STATE_FOLLOW_RETURNING))
                 {
-                    sLog->outDebug("scripts", "FollowerAI is returning to leader.");
+                    TC_LOG_DEBUG("scripts", "FollowerAI is returning to leader.");
 
                     RemoveFollowState(STATE_FOLLOW_RETURNING);
                     me->GetMotionMaster()->MoveFollow(player, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
@@ -229,7 +229,7 @@ void FollowerAI::UpdateAI(const uint32 uiDiff)
 
             if (bIsMaxRangeExceeded)
             {
-                sLog->outDebug("scripts", "FollowerAI failed because player/group was to far away or not found");
+                TC_LOG_DEBUG("scripts", "FollowerAI failed because player/group was to far away or not found");
                 me->DespawnOrUnsummon();
                 return;
             }
@@ -272,13 +272,13 @@ void FollowerAI::StartFollow(Player* player, uint32 factionForFollower, const Qu
 {
     if (me->getVictim())
     {
-        sLog->outDebug("scripts", "FollowerAI attempt to StartFollow while in combat.");
+        TC_LOG_DEBUG("scripts", "FollowerAI attempt to StartFollow while in combat.");
         return;
     }
 
     if (HasFollowState(STATE_FOLLOW_INPROGRESS))
     {
-        sLog->outError("scripts", "FollowerAI attempt to StartFollow while already following.");
+        TC_LOG_ERROR("scripts", "FollowerAI attempt to StartFollow while already following.");
         return;
     }
 
@@ -294,7 +294,7 @@ void FollowerAI::StartFollow(Player* player, uint32 factionForFollower, const Qu
     {
         me->GetMotionMaster()->Clear();
         me->GetMotionMaster()->MoveIdle();
-        sLog->outDebug("scripts", "FollowerAI start with WAYPOINT_MOTION_TYPE, set to MoveIdle.");
+        TC_LOG_DEBUG("scripts", "FollowerAI start with WAYPOINT_MOTION_TYPE, set to MoveIdle.");
     }
 
     me->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
@@ -304,7 +304,7 @@ void FollowerAI::StartFollow(Player* player, uint32 factionForFollower, const Qu
 
     me->GetMotionMaster()->MoveFollow(player, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
 
-    sLog->outDebug("scripts", "FollowerAI start follow %s (GUID " UI64FMTD ")", player->GetName(), m_uiLeaderGUID);
+    TC_LOG_DEBUG("scripts", "FollowerAI start follow %s (GUID " UI64FMTD ")", player->GetName(), m_uiLeaderGUID);
 }
 
 Player* FollowerAI::GetLeaderForFollower()
@@ -323,7 +323,7 @@ Player* FollowerAI::GetLeaderForFollower()
 
                     if (member && member->isAlive() && me->IsWithinDistInMap(member, MAX_PLAYER_DISTANCE))
                     {
-                        sLog->outDebug("scripts", "FollowerAI GetLeader changed and returned new leader.");
+                        TC_LOG_DEBUG("scripts", "FollowerAI GetLeader changed and returned new leader.");
                         m_uiLeaderGUID = member->GetGUID();
                         return member;
                     }
@@ -332,7 +332,7 @@ Player* FollowerAI::GetLeaderForFollower()
         }
     }
 
-    sLog->outDebug("scripts", "FollowerAI GetLeader can not find suitable leader.");
+    TC_LOG_DEBUG("scripts", "FollowerAI GetLeader can not find suitable leader.");
     return NULL;
 }
 

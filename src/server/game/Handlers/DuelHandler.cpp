@@ -141,8 +141,8 @@ void WorldSession::HandleDuelResponseOpcode(WorldPacket& recvPacket)
         if (player == player->duel->initiator || !plTarget || player == plTarget || player->duel->startTime != 0 || plTarget->duel->startTime != 0)
             return;
 
-        sLog->outDebug("network", "Player 1 is: %u (%s)", player->GetGUIDLow(), player->GetName());
-        sLog->outDebug("network", "Player 2 is: %u (%s)", plTarget->GetGUIDLow(), plTarget->GetName());
+        TC_LOG_DEBUG("network", "Player 1 is: %u (%s)", player->GetGUIDLow(), player->GetName());
+        TC_LOG_DEBUG("network", "Player 2 is: %u (%s)", plTarget->GetGUIDLow(), plTarget->GetName());
 
         time_t now = time(NULL);
         player->duel->startTimer = now;

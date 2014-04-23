@@ -278,7 +278,7 @@ public:
                     break;
             }
 
-             sLog->outDebug("scripts", "Instance Hyjal: Instance data updated for event %u (Data=%u)", type, data);
+             TC_LOG_DEBUG("scripts", "Instance Hyjal: Instance data updated for event %u (Data=%u)", type, data);
 
             if (data == DONE)
             {

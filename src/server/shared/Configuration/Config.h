@@ -20,17 +20,60 @@
 #define CONFIG_H
 
 #include <string>
+#include <list>
+#include <ace/Auto_Ptr.h>
+#include <ace/Configuration_Import_Export.h>
+#include <ace/Thread_Mutex.h>
 
-namespace ConfigMgr
+class ConfigMgr
 {
-    bool Load(const char *file = NULL);
+    ConfigMgr() { }
+    ~ConfigMgr() { }
+
+public:
+    static ConfigMgr * instance();
+    /// Method used only for loading main configuration files (authserver.conf and worldserver.conf)
+    bool LoadInitial(char const* file);
+
+    /**
+     * This method loads additional configuration files
+     * It is recommended to use this method in WorldScript::OnConfigLoad hooks
+     *
+     * @return true if loading was successful
+     */
+    bool LoadMore(char const* file);
+
+    bool Reload();
 
     std::string GetStringDefault(const char* name, const std::string& def);
     bool GetBoolDefault(const char* name, bool def);
     int GetIntDefault(const char* name, int def);
     float GetFloatDefault(const char* name, float def);
 
-    const std::string & GetFilename();
+    std::string const& GetFilename();
+    std::list<std::string> GetKeysByString(std::string const& name);
+
+private:
+    bool GetValueHelper(const char* name, ACE_TString &result);
+    bool LoadData(char const* file);
+
+    typedef ACE_Thread_Mutex LockType;
+    typedef ACE_Guard<LockType> GuardType;
+
+    std::string _filename;
+    ACE_Auto_Ptr<ACE_Configuration_Heap> _config;
+    LockType _configLock;
+
+    ConfigMgr(ConfigMgr const&);
+    ConfigMgr& operator=(ConfigMgr const&);
+};
+
+inline ConfigMgr* ConfigMgr::instance()
+{
+    static ConfigMgr mgr;
+    return &mgr;
 }
+
+#define sConfigMgr ConfigMgr::instance()
 
 #endif

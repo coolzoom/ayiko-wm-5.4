@@ -14,9 +14,10 @@ if (USE_SCRIPTPCH)
 endif ()
 
 message(STATUS "SCRIPT PREPARATIONS")
-
 include(Spells/CMakeLists.txt)
+
 include(Commands/CMakeLists.txt)
+
 include(Examples/CMakeLists.txt)
 
 set(scripts_STAT_SRCS
@@ -27,13 +28,13 @@ set(scripts_STAT_SRCS
 )
 
 if(SCRIPTS)
+  include(Custom/CMakeLists.txt)
   include(World/CMakeLists.txt)
   include(OutdoorPvP/CMakeLists.txt)
   include(EasternKingdoms/CMakeLists.txt)
   include(Kalimdor/CMakeLists.txt)
   include(Outland/CMakeLists.txt)
   include(Northrend/CMakeLists.txt)
-  include(Pandaria/CMakeLists.txt)
 endif()
 
 message(STATUS "SCRIPT PREPARATION COMPLETE")
@@ -142,6 +143,10 @@ include_directories(
 add_library(scripts STATIC
   ${scripts_STAT_SRCS}
   ${scripts_STAT_PCH_SRC}
+)
+
+target_link_libraries(scripts
+  game
 )
 
 add_dependencies(scripts revision.h)

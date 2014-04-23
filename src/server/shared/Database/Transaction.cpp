@@ -108,7 +108,7 @@ bool Transaction::execute(MySQLConnection *conn)
                 ACE_ASSERT(stmtData);
                 if (!conn->Execute(stmtData))
                 {
-                    sLog->outError("sql.sql", "[Warning] Transaction aborted. %u queries not executed.", (uint32)m_queries.size());
+                    TC_LOG_ERROR("sql.sql", "[Warning] Transaction aborted. %u queries not executed.", (uint32)m_queries.size());
                     conn->RollbackTransaction();
                     return false;
                 }
@@ -120,7 +120,7 @@ bool Transaction::execute(MySQLConnection *conn)
                 ACE_ASSERT(sql);
                 if (!conn->Execute(sql))
                 {
-                    sLog->outError("sql.sql", "[Warning] Transaction aborted. %u queries not executed.", (uint32)m_queries.size());
+                    TC_LOG_ERROR("sql.sql", "[Warning] Transaction aborted. %u queries not executed.", (uint32)m_queries.size());
                     conn->RollbackTransaction();
                     return false;
                 }

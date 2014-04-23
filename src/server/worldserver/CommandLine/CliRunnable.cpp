@@ -139,7 +139,7 @@ int kb_hit_return()
 void CliRunnable::run()
 {
     ///- Display the list of available CLI functions then beep
-    //sLog->outInfo("server.worldserver", "");
+    //TC_LOG_INFO("server.worldserver", "");
 #if PLATFORM != PLATFORM_WINDOWS
     rl_attempted_completion_function = cli_completion;
     #if PLATFORM != PLATFORM_APPLE
@@ -147,7 +147,7 @@ void CliRunnable::run()
     #endif
 #endif
 
-    if (ConfigMgr::GetBoolDefault("BeepAtStart", true))
+    if (sConfigMgr->GetBoolDefault("BeepAtStart", true))
         printf("\a");                                       // \a = Alert
 
     // print this here the first time

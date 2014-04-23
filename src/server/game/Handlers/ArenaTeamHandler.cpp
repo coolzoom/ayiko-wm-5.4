@@ -29,57 +29,57 @@
 
 void WorldSession::HandleInspectArenaTeamsOpcode(WorldPacket & /*recvData*/)
 {
-    sLog->outDebug("network", "MSG_INSPECT_ARENA_TEAMS");
+    TC_LOG_DEBUG("network", "MSG_INSPECT_ARENA_TEAMS");
 }
 
 void WorldSession::HandleArenaTeamQueryOpcode(WorldPacket & /*recvData*/)
 {
-    sLog->outDebug("network", "WORLD: Received CMSG_ARENA_TEAM_QUERY");
+    TC_LOG_DEBUG("network", "WORLD: Received CMSG_ARENA_TEAM_QUERY");
 }
 
 void WorldSession::HandleArenaTeamRosterOpcode(WorldPacket & /*recvData*/)
 {
-    sLog->outDebug("network", "WORLD: Received CMSG_ARENA_TEAM_ROSTER");
+    TC_LOG_DEBUG("network", "WORLD: Received CMSG_ARENA_TEAM_ROSTER");
 }
 
 void WorldSession::HandleArenaTeamInviteOpcode(WorldPacket & /*recvData*/)
 {
-    sLog->outDebug("network", "CMSG_ARENA_TEAM_INVITE");
+    TC_LOG_DEBUG("network", "CMSG_ARENA_TEAM_INVITE");
 }
 
 void WorldSession::HandleArenaTeamAcceptOpcode(WorldPacket & /*recvData*/)
 {
-    sLog->outDebug("network", "CMSG_ARENA_TEAM_ACCEPT");                // empty opcode
+    TC_LOG_DEBUG("network", "CMSG_ARENA_TEAM_ACCEPT");                // empty opcode
 }
 
 void WorldSession::HandleArenaTeamCreateOpcode(WorldPacket & /*recvData*/)
 {
-    sLog->outDebug("network", "CMSG_ARENA_TEAM_CREATE");                // empty opcode
+    TC_LOG_DEBUG("network", "CMSG_ARENA_TEAM_CREATE");                // empty opcode
 }
 
 void WorldSession::HandleArenaTeamDeclineOpcode(WorldPacket & /*recvData*/)
 {
-    sLog->outDebug("network", "CMSG_ARENA_TEAM_DECLINE");               // empty opcode
+    TC_LOG_DEBUG("network", "CMSG_ARENA_TEAM_DECLINE");               // empty opcode
 }
 
 void WorldSession::HandleArenaTeamLeaveOpcode(WorldPacket & /*recvData*/)
 {
-    sLog->outDebug("network", "CMSG_ARENA_TEAM_LEAVE");
+    TC_LOG_DEBUG("network", "CMSG_ARENA_TEAM_LEAVE");
 }
 
 void WorldSession::HandleArenaTeamDisbandOpcode(WorldPacket & /*recvData*/)
 {
-    sLog->outDebug("network", "CMSG_ARENA_TEAM_DISBAND");
+    TC_LOG_DEBUG("network", "CMSG_ARENA_TEAM_DISBAND");
 }
 
 void WorldSession::HandleArenaTeamRemoveOpcode(WorldPacket & /*recvData*/)
 {
-    sLog->outDebug("network", "CMSG_ARENA_TEAM_REMOVE");
+    TC_LOG_DEBUG("network", "CMSG_ARENA_TEAM_REMOVE");
 }
 
 void WorldSession::HandleArenaTeamLeaderOpcode(WorldPacket & /*recvData*/)
 {
-    sLog->outDebug("network", "CMSG_ARENA_TEAM_LEADER");
+    TC_LOG_DEBUG("network", "CMSG_ARENA_TEAM_LEADER");
 }
 
 /*

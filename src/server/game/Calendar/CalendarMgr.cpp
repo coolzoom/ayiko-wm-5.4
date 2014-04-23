@@ -98,7 +98,7 @@ CalendarInvite* CalendarMgr::GetInvite(uint64 inviteId)
     if (itr != _invites.end())
         return &(itr->second);
 
-    sLog->outError("calendar", "CalendarMgr::GetInvite: [" UI64FMTD "] not found!", inviteId);
+    TC_LOG_ERROR("calendar", "CalendarMgr::GetInvite: [" UI64FMTD "] not found!", inviteId);
     return NULL;
 }
 
@@ -108,7 +108,7 @@ CalendarEvent* CalendarMgr::GetEvent(uint64 eventId)
     if (itr != _events.end())
         return &(itr->second);
 
-    sLog->outError("calendar", "CalendarMgr::GetEvent: [" UI64FMTD "] not found!", eventId);
+    TC_LOG_ERROR("calendar", "CalendarMgr::GetEvent: [" UI64FMTD "] not found!", eventId);
     return NULL;
 }
 
@@ -148,7 +148,7 @@ void CalendarMgr::LoadFromDB()
         }
         while (result->NextRow());
 
-    sLog->outInfo("calendar", ">> Loaded %u calendar events", count);
+    TC_LOG_INFO("calendar", ">> Loaded %u calendar events", count);
     count = 0;
 
     //                                                       0   1      2        3       4       5           6     7
@@ -175,7 +175,7 @@ void CalendarMgr::LoadFromDB()
         }
         while (result->NextRow());
 
-    sLog->outInfo("calendar", ">> Loaded %u calendar Invites", count);
+    TC_LOG_INFO("calendar", ">> Loaded %u calendar Invites", count);
     */
 }
 
@@ -441,7 +441,7 @@ bool CalendarMgr::AddEvent(CalendarEvent const& newEvent)
     uint64 eventId = newEvent.GetEventId();
     if (_events.find(eventId) != _events.end())
     {
-        sLog->outError("calendar", "CalendarMgr::AddEvent: Event [" UI64FMTD "] exists", eventId);
+        TC_LOG_ERROR("calendar", "CalendarMgr::AddEvent: Event [" UI64FMTD "] exists", eventId);
         return false;
     }
 
@@ -454,7 +454,7 @@ bool CalendarMgr::RemoveEvent(uint64 eventId)
     CalendarEventMap::iterator itr = _events.find(eventId);
     if (itr == _events.end())
     {
-        sLog->outError("calendar", "CalendarMgr::RemoveEvent: Event [" UI64FMTD "] does not exist", eventId);
+        TC_LOG_ERROR("calendar", "CalendarMgr::RemoveEvent: Event [" UI64FMTD "] does not exist", eventId);
         return false;
     }
 
@@ -493,13 +493,13 @@ bool CalendarMgr::AddInvite(CalendarInvite const& newInvite)
     uint64 inviteId = newInvite.GetInviteId();
     if (!inviteId)
     {
-        sLog->outError("calendar", "CalendarMgr::AddInvite: Cant add Invite 0");
+        TC_LOG_ERROR("calendar", "CalendarMgr::AddInvite: Cant add Invite 0");
         return false;
     }
 
     if (_invites.find(inviteId) != _invites.end())
     {
-        sLog->outError("calendar", "CalendarMgr::AddInvite: Invite [" UI64FMTD "] exists", inviteId);
+        TC_LOG_ERROR("calendar", "CalendarMgr::AddInvite: Invite [" UI64FMTD "] exists", inviteId);
         return false;
     }
 
@@ -515,7 +515,7 @@ uint64 CalendarMgr::RemoveInvite(uint64 inviteId)
     CalendarInviteMap::iterator itr = _invites.find(inviteId);
     if (itr == _invites.end())
     {
-        sLog->outError("calendar", "CalendarMgr::RemoveInvite: Invite [" UI64FMTD "] does not exist", inviteId);
+        TC_LOG_ERROR("calendar", "CalendarMgr::RemoveInvite: Invite [" UI64FMTD "] does not exist", inviteId);
         return 0;
     }
 

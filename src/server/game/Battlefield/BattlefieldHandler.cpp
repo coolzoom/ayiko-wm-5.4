@@ -200,7 +200,7 @@ void WorldSession::HandleBfQueueInviteResponse(WorldPacket & recvData)
     accepted = recvData.ReadBit();
     recvData.ReadByteSeq<6, 4, 0, 1, 5, 7, 3, 2>(guid);
 
-    sLog->outError("misc", "HandleQueueInviteResponse: GUID:" UI64FMTD " Accepted:%u", (uint64)guid, accepted);
+    TC_LOG_ERROR("misc", "HandleQueueInviteResponse: GUID:" UI64FMTD " Accepted:%u", (uint64)guid, accepted);
 
     if (!accepted)
         return;
@@ -224,7 +224,7 @@ void WorldSession::HandleBfEntryInviteResponse(WorldPacket & recvData)
 
     recvData.ReadByteSeq<3, 2, 4, 0, 5, 7, 6, 1>(guid);
 
-    sLog->outError("misc", "HandleBattlefieldInviteResponse: GUID:" UI64FMTD " Accepted:%u", uint64(guid), accepted);
+    TC_LOG_ERROR("misc", "HandleBattlefieldInviteResponse: GUID:" UI64FMTD " Accepted:%u", uint64(guid), accepted);
 
     Battlefield* bf = sBattlefieldMgr->GetBattlefieldByGUID(guid);
     if (!bf)
@@ -244,7 +244,7 @@ void WorldSession::HandleBfQueueRequest(WorldPacket& recvData)
     recvData.ReadBitSeq<3, 5, 7, 0, 6, 2, 1, 4>(guid);
     recvData.ReadByteSeq<1, 0, 3, 2, 4, 7, 5, 6>(guid);
 
-    sLog->outError("misc", "HandleBfQueueRequest: GUID:" UI64FMTD " ", uint64(guid));
+    TC_LOG_ERROR("misc", "HandleBfQueueRequest: GUID:" UI64FMTD " ", uint64(guid));
 
     if (Battlefield* bf = sBattlefieldMgr->GetBattlefieldByGUID(guid))
     {
@@ -267,7 +267,7 @@ void WorldSession::HandleBfExitQueueRequest(WorldPacket & recvData)
     recvData.ReadBitSeq<4, 0, 1, 5, 3, 7, 6, 2>(guid);
     recvData.ReadByteSeq<0, 6, 2, 5, 4, 1, 7, 3>(guid);
 
-    sLog->outError("misc", "HandleBfExitQueueRequest: GUID:" UI64FMTD " ", (uint64)guid);
+    TC_LOG_ERROR("misc", "HandleBfExitQueueRequest: GUID:" UI64FMTD " ", (uint64)guid);
 
     SendBfLeaveMessage(guid);
 
@@ -277,7 +277,7 @@ void WorldSession::HandleBfExitQueueRequest(WorldPacket & recvData)
 
 void WorldSession::HandleBfExitRequest(WorldPacket& /*recv_data*/)
 {
-    sLog->outError("misc", "HandleBfExitRequest");
+    TC_LOG_ERROR("misc", "HandleBfExitRequest");
     Battlefield* bf = sBattlefieldMgr->GetBattlefieldToZoneId(_player->GetZoneId());
     if (bf)
          bf->KickPlayerFromBattlefield(_player->GetGUID());
@@ -291,23 +291,23 @@ void WorldSession::HandleReportPvPAFK(WorldPacket & recvData)
 
     if (!reportedPlayer)
     {
-        sLog->outDebug("bg.battleground", "WorldSession::HandleReportPvPAFK: player not found");
+        TC_LOG_DEBUG("bg.battleground", "WorldSession::HandleReportPvPAFK: player not found");
         return;
     }
 
-    sLog->outDebug("bg.battleground", "WorldSession::HandleReportPvPAFK: %s reported %s", _player->GetName(), reportedPlayer->GetName());
+    TC_LOG_DEBUG("bg.battleground", "WorldSession::HandleReportPvPAFK: %s reported %s", _player->GetName(), reportedPlayer->GetName());
 
     reportedPlayer->ReportedAfkBy(_player);
 }
 
 void WorldSession::HandleRequestRatedBgInfo(WorldPacket & recvData)
 {
-    sLog->outDebug("network", "WORLD: CMSG_REQUEST_RATED_BG_INFO");
+    TC_LOG_DEBUG("network", "WORLD: CMSG_REQUEST_RATED_BG_INFO");
 
     uint8 unk;
     recvData >> unk;
 
-    sLog->outDebug("bg.battleground", "WorldSession::HandleRequestRatedBgInfo: get unk = %u", unk);
+    TC_LOG_DEBUG("bg.battleground", "WorldSession::HandleRequestRatedBgInfo: get unk = %u", unk);
 
     /// @Todo: perfome research in this case
     WorldPacket data(SMSG_RATED_BG_STATS, 72);
@@ -318,7 +318,7 @@ void WorldSession::HandleRequestRatedBgInfo(WorldPacket & recvData)
 
 void WorldSession::HandleRequestPvpOptions(WorldPacket& /*recvData*/)
 {
-    sLog->outDebug("network", "WORLD: CMSG_REQUEST_PVP_OPTIONS_ENABLED");
+    TC_LOG_DEBUG("network", "WORLD: CMSG_REQUEST_PVP_OPTIONS_ENABLED");
 
     /// @Todo: perfome research in this case
     WorldPacket data(SMSG_PVP_OPTIONS_ENABLED, 1);
@@ -333,14 +333,14 @@ void WorldSession::HandleRequestPvpOptions(WorldPacket& /*recvData*/)
 
 void WorldSession::HandleRequestPvpReward(WorldPacket& /*recvData*/)
 {
-    sLog->outDebug("network", "WORLD: CMSG_REQUEST_PVP_REWARDS");
+    TC_LOG_DEBUG("network", "WORLD: CMSG_REQUEST_PVP_REWARDS");
 
     _player->SendPvpRewards();
 }
 
 void WorldSession::HandleRequestRatedBgStats(WorldPacket& /*recvData*/)
 {
-    sLog->outDebug("network", "WORLD: CMSG_REQUEST_RATED_BG_STATS");
+    TC_LOG_DEBUG("network", "WORLD: CMSG_REQUEST_RATED_BG_STATS");
 
     WorldPacket data(SMSG_BATTLEFIELD_RATED_INFO, 29);
 

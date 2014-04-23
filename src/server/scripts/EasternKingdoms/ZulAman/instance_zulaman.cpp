@@ -195,17 +195,17 @@ class instance_zulaman : public InstanceMapScript
                     return;
 
                 std::istringstream ss(load);
-                //sLog->outError("scripts", "Zul'aman loaded, %s.", ss.str().c_str());
+                //TC_LOG_ERROR("scripts", "Zul'aman loaded, %s.", ss.str().c_str());
                 char dataHead; // S
                 uint16 data1, data2, data3;
                 ss >> dataHead >> data1 >> data2 >> data3;
-                //sLog->outError("scripts", "Zul'aman loaded, %d %d %d.", data1, data2, data3);
+                //TC_LOG_ERROR("scripts", "Zul'aman loaded, %d %d %d.", data1, data2, data3);
                 if (dataHead == 'S')
                 {
                     BossKilled = data1;
                     ChestLooted = data2;
                     QuestMinute = data3;
-                } else sLog->outError("scripts", "Zul'aman: corrupted save data.");
+                } else TC_LOG_ERROR("scripts", "Zul'aman: corrupted save data.");
             }
 
             void SetData(uint32 type, uint32 data)

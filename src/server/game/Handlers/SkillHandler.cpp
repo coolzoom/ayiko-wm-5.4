@@ -85,7 +85,7 @@ void WorldSession::HandleLearnTalents(WorldPacket& recvData)
 
 void WorldSession::HandleTalentWipeConfirmOpcode(WorldPacket& recvData)
 {
-    sLog->outDebug("network", "CMSG_CONFIRM_RESPEC_WIPE");
+    TC_LOG_DEBUG("network", "CMSG_CONFIRM_RESPEC_WIPE");
 
     uint8 specializationReset = recvData.read<uint8>();
 

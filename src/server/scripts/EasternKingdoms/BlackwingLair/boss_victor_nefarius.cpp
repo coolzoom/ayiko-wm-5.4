@@ -364,7 +364,7 @@ public:
                             Nefarian->setFaction(103);
                             NefarianGUID = Nefarian->GetGUID();
                         }
-                        else sLog->outError("scripts", "Blackwing Lair: Unable to spawn nefarian properly.");
+                        else TC_LOG_ERROR("scripts", "Blackwing Lair: Unable to spawn nefarian properly.");
                     }
 
                     AddSpawnTimer = 4000;

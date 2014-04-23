@@ -1265,7 +1265,7 @@ struct BfWGGameObjectBuilding
                 if (m_WG->GetRelic())
                     m_WG->GetRelic()->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
                 else
-                    sLog->outError("misc", "BattlefieldWG: Relic not found.");
+                    TC_LOG_ERROR("misc", "BattlefieldWG: Relic not found.");
                 break;
         }
 

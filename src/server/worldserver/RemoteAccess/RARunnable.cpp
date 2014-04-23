@@ -56,22 +56,22 @@ RARunnable::~RARunnable()
 
 void RARunnable::run()
 {
-    if (!ConfigMgr::GetBoolDefault("Ra.Enable", false))
+    if (!sConfigMgr->GetBoolDefault("Ra.Enable", false))
         return;
 
     ACE_Acceptor<RASocket, ACE_SOCK_ACCEPTOR> acceptor;
 
-    uint16 raport = ConfigMgr::GetIntDefault("Ra.Port", 3443);
-    std::string stringip = ConfigMgr::GetStringDefault("Ra.IP", "0.0.0.0");
+    uint16 raport = sConfigMgr->GetIntDefault("Ra.Port", 3443);
+    std::string stringip = sConfigMgr->GetStringDefault("Ra.IP", "0.0.0.0");
     ACE_INET_Addr listen_addr(raport, stringip.c_str());
 
     if (acceptor.open(listen_addr, m_Reactor) == -1)
     {
-        sLog->outError("server.worldserver", "Trinity RA can not bind to port %d on %s", raport, stringip.c_str());
+        TC_LOG_ERROR("server.worldserver", "Trinity RA can not bind to port %d on %s", raport, stringip.c_str());
         return;
     }
 
-    sLog->outInfo("server.worldserver", "Starting Trinity RA on port %d on %s", raport, stringip.c_str());
+    TC_LOG_INFO("server.worldserver", "Starting Trinity RA on port %d on %s", raport, stringip.c_str());
 
     while (!World::IsStopped())
     {
@@ -82,5 +82,5 @@ void RARunnable::run()
             break;
     }
 
-    sLog->outDebug("server.worldserver", "Trinity RA thread exiting");
+    TC_LOG_DEBUG("server.worldserver", "Trinity RA thread exiting");
 }

@@ -53,7 +53,7 @@ void ValidateAndSetOpcode<true, true>(uint16 opcode, char const* name, SessionSt
 
             if (opcodeTable[i][opcode] != NULL) // register MSG opcode as client and server
             {
-                sLog->outError("network", "Tried to override handler of %s with %s (opcode %u)", opcodeTable[i][opcode]->name, name, opcode);
+                TC_LOG_ERROR("network", "Tried to override handler of %s with %s (opcode %u)", opcodeTable[i][opcode]->name, name, opcode);
                 return;
             }
 
@@ -64,7 +64,7 @@ void ValidateAndSetOpcode<true, true>(uint16 opcode, char const* name, SessionSt
 
     if (opcodeTable[dir][opcode] != NULL)
     {
-        sLog->outError("network", "Tried to override handler of %s with %s (opcode %u)", opcodeTable[dir][opcode]->name, name, opcode);
+        TC_LOG_ERROR("network", "Tried to override handler of %s with %s (opcode %u)", opcodeTable[dir][opcode]->name, name, opcode);
         return;
     }
 
@@ -74,13 +74,13 @@ void ValidateAndSetOpcode<true, true>(uint16 opcode, char const* name, SessionSt
 template<>
 void ValidateAndSetOpcode<false, true>(uint16 opcode, char const* /*name*/, SessionStatus /*status*/, PacketProcessing /*processing*/, pOpcodeHandler /*handler*/)
 {
-    sLog->outError("network", "Tried to set handler for an invalid opcode %d", opcode);
+    TC_LOG_ERROR("network", "Tried to set handler for an invalid opcode %d", opcode);
 }
 
 template<>
 void ValidateAndSetOpcode<true, false>(uint16 /*opcode*/, char const* name, SessionStatus /*status*/, PacketProcessing /*processing*/, pOpcodeHandler /*handler*/)
 {
-    sLog->outError("network", "Opcode %s got value 0", name);
+    TC_LOG_ERROR("network", "Opcode %s got value 0", name);
 }
 
 #define DEFINE_OPCODE_HANDLER(opcode, status, processing, handler)                                      \

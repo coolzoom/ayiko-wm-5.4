@@ -97,7 +97,7 @@ public:
     {
         if (!_delaytime)
             return;
-        sLog->outInfo("server.worldserver", "Starting up anti-freeze thread (%u seconds max stuck time)...", _delaytime/1000);
+        TC_LOG_INFO("server.worldserver", "Starting up anti-freeze thread (%u seconds max stuck time)...", _delaytime/1000);
         m_loops = 0;
         w_loops = 0;
         m_lastchange = 0;
@@ -116,11 +116,11 @@ public:
             // possible freeze
             else if (getMSTimeDiff(w_lastchange, curtime) > _delaytime)
             {
-                sLog->outError("server.worldserver", "World Thread hangs, kicking out server!");
+                TC_LOG_ERROR("server.worldserver", "World Thread hangs, kicking out server!");
                 ASSERT(false);
             }
         }
-        sLog->outInfo("server.worldserver", "Anti-freeze thread exiting without problems.");
+        TC_LOG_INFO("server.worldserver", "Anti-freeze thread exiting without problems.");
     }
 };
 
@@ -138,31 +138,30 @@ int Master::Run()
     BigNumber seed1;
     seed1.SetRand(16 * 8);
 
-    sLog->outInfo("server.worldserver", "%s (worldserver-daemon)", _FULLVERSION);
-    sLog->outInfo("server.worldserver", "<Ctrl-C> to stop.\n");
+    TC_LOG_INFO("server.worldserver", "%s (worldserver-daemon)", _FULLVERSION);
+    TC_LOG_INFO("server.worldserver", "<Ctrl-C> to stop.\n");
 
-    sLog->outInfo("server.worldserver", " ______                       __");
-    sLog->outInfo("server.worldserver", "/\\__  _\\       __          __/\\ \\__");
-    sLog->outInfo("server.worldserver", "\\/_/\\ \\/ _ __ /\\_\\    ___ /\\_\\ \\, _\\  __  __");
-    sLog->outInfo("server.worldserver", "   \\ \\ \\/\\`'__\\/\\ \\ /' _ `\\/\\ \\ \\ \\/ /\\ \\/\\ \\");
-    sLog->outInfo("server.worldserver", "    \\ \\ \\ \\ \\/ \\ \\ \\/\\ \\/\\ \\ \\ \\ \\ \\_\\ \\ \\_\\ \\");
-    sLog->outInfo("server.worldserver", "     \\ \\_\\ \\_\\  \\ \\_\\ \\_\\ \\_\\ \\_\\ \\__\\\\/`____ \\");
-    sLog->outInfo("server.worldserver", "      \\/_/\\/_/   \\/_/\\/_/\\/_/\\/_/\\/__/ `/___/> \\");
-    sLog->outInfo("server.worldserver", "                                 C O R E  /\\___/");
-    sLog->outInfo("server.worldserver", "http://TrinityCore.org                    \\/__/\n");
+    TC_LOG_INFO("server.worldserver", " ______                       __");
+    TC_LOG_INFO("server.worldserver", "/\\__  _\\       __          __/\\ \\__");
+    TC_LOG_INFO("server.worldserver", "\\/_/\\ \\/ _ __ /\\_\\    ___ /\\_\\ \\, _\\  __  __");
+    TC_LOG_INFO("server.worldserver", "   \\ \\ \\/\\`'__\\/\\ \\ /' _ `\\/\\ \\ \\ \\/ /\\ \\/\\ \\");
+    TC_LOG_INFO("server.worldserver", "    \\ \\ \\ \\ \\/ \\ \\ \\/\\ \\/\\ \\ \\ \\ \\ \\_\\ \\ \\_\\ \\");
+    TC_LOG_INFO("server.worldserver", "     \\ \\_\\ \\_\\  \\ \\_\\ \\_\\ \\_\\ \\_\\ \\__\\\\/`____ \\");
+    TC_LOG_INFO("server.worldserver", "      \\/_/\\/_/   \\/_/\\/_/\\/_/\\/_/\\/__/ `/___/> \\");
+    TC_LOG_INFO("server.worldserver", "                                 C O R E  /\\___/");
+    TC_LOG_INFO("server.worldserver", "http://TrinityCore.org                    \\/__/\n");
 
     /// worldserver PID file creation
-    std::string pidfile = ConfigMgr::GetStringDefault("PidFile", "");
-    if (!pidfile.empty())
+    std::string pidFile = sConfigMgr->GetStringDefault("PidFile", "");
+    if (!pidFile.empty())
     {
-        uint32 pid = CreatePIDFile(pidfile);
-        if (!pid)
+        if (uint32 pid = CreatePIDFile(pidFile))
+            TC_LOG_INFO("server.worldserver", "Daemon PID: %u\n", pid);
+        else
         {
-            sLog->outError("server.worldserver", "Cannot create PID file %s.\n", pidfile.c_str());
+            TC_LOG_ERROR("server.worldserver", "Cannot create PID file %s.\n", pidFile.c_str());
             return 1;
         }
-
-        sLog->outInfo("server.worldserver", "Daemon PID: %u\n", pid);
     }
 
     ///- Start the databases
@@ -196,9 +195,9 @@ int Master::Run()
     ACE_Based::Thread* cliThread = NULL;
 
 #ifdef _WIN32
-    if (ConfigMgr::GetBoolDefault("Console.Enable", true) && (m_ServiceStatus == -1)/* need disable console in service mode*/)
+    if (sConfigMgr->GetBoolDefault("Console.Enable", true) && (m_ServiceStatus == -1)/* need disable console in service mode*/)
 #else
-    if (ConfigMgr::GetBoolDefault("Console.Enable", true))
+    if (sConfigMgr->GetBoolDefault("Console.Enable", true))
 #endif
     {
         ///- Launch CliRunnable thread
@@ -212,7 +211,7 @@ int Master::Run()
     {
         HANDLE hProcess = GetCurrentProcess();
 
-        uint32 Aff = ConfigMgr::GetIntDefault("UseProcessors", 0);
+        uint32 Aff = sConfigMgr->GetIntDefault("UseProcessors", 0);
         if (Aff > 0)
         {
             ULONG_PTR appAff;
@@ -224,33 +223,33 @@ int Master::Run()
 
                 if (!curAff)
                 {
-                    sLog->outError("server.worldserver", "Processors marked in UseProcessors bitmask (hex) %x are not accessible for the worldserver. Accessible processors bitmask (hex): %x", Aff, appAff);
+                    TC_LOG_ERROR("server.worldserver", "Processors marked in UseProcessors bitmask (hex) %x are not accessible for the worldserver. Accessible processors bitmask (hex): %x", Aff, appAff);
                 }
                 else
                 {
                     if (SetProcessAffinityMask(hProcess, curAff))
-                        sLog->outInfo("server.worldserver", "Using processors (bitmask, hex): %x", curAff);
+                        TC_LOG_INFO("server.worldserver", "Using processors (bitmask, hex): %x", curAff);
                     else
-                        sLog->outError("server.worldserver", "Can't set used processors (hex): %x", curAff);
+                        TC_LOG_ERROR("server.worldserver", "Can't set used processors (hex): %x", curAff);
                 }
             }
         }
 
-        bool Prio = ConfigMgr::GetBoolDefault("ProcessPriority", false);
+        bool Prio = sConfigMgr->GetBoolDefault("ProcessPriority", false);
 
         //if (Prio && (m_ServiceStatus == -1)  /* need set to default process priority class in service mode*/)
         if (Prio)
         {
             if (SetPriorityClass(hProcess, HIGH_PRIORITY_CLASS))
-                sLog->outInfo("server.worldserver", "worldserver process priority class set to HIGH");
+                TC_LOG_INFO("server.worldserver", "worldserver process priority class set to HIGH");
             else
-                sLog->outError("server.worldserver", "Can't set worldserver process priority class.");
+                TC_LOG_ERROR("server.worldserver", "Can't set worldserver process priority class.");
         }
     }
 #endif
 
     ///- Start up freeze catcher thread
-    if (uint32 freeze_delay = ConfigMgr::GetIntDefault("MaxCoreStuckTime", 0))
+    if (uint32 freeze_delay = sConfigMgr->GetIntDefault("MaxCoreStuckTime", 0))
     {
         FreezeDetectorRunnable* fdr = new FreezeDetectorRunnable();
         fdr->SetDelayTime(freeze_delay * 1000);
@@ -260,11 +259,11 @@ int Master::Run()
 
     ///- Launch the world listener socket
     uint16 wsport = sWorld->getIntConfig(CONFIG_PORT_WORLD);
-    std::string bind_ip = ConfigMgr::GetStringDefault("BindIP", "0.0.0.0");
+    std::string bind_ip = sConfigMgr->GetStringDefault("BindIP", "0.0.0.0");
 
     if (sWorldSocketMgr->StartNetwork(wsport, bind_ip.c_str()) == -1)
     {
-        sLog->outError("server.worldserver", "Failed to start network");
+        TC_LOG_ERROR("server.worldserver", "Failed to start network");
         World::StopNow(ERROR_EXIT_CODE);
         // go down and shutdown the server
     }
@@ -272,7 +271,7 @@ int Master::Run()
     // set server online (allow connecting now)
     LoginDatabase.DirectPExecute("UPDATE realmlist SET flag = flag & ~%u, population = 0 WHERE id = '%u'", REALM_FLAG_INVALID, realmID);
 
-    sLog->outInfo("server.worldserver", "%s (worldserver-daemon) ready...", _FULLVERSION);
+    TC_LOG_INFO("server.worldserver", "%s (worldserver-daemon) ready...", _FULLVERSION);
 
     // when the main thread closes the singletons get unloaded
     // since worldrunnable uses them, it will crash if unloaded after master
@@ -287,7 +286,7 @@ int Master::Run()
 
     _StopDB();
 
-    sLog->outInfo("server.worldserver", "Halting process...");
+    TC_LOG_INFO("server.worldserver", "Halting process...");
 
     if (cliThread)
     {
@@ -355,17 +354,17 @@ bool Master::_StartDB()
     std::string dbString;
     uint8 asyncThreads;
 
-    dbString = ConfigMgr::GetStringDefault("WorldDatabaseInfo", "");
+    dbString = sConfigMgr->GetStringDefault("WorldDatabaseInfo", "");
     if (dbString.empty())
     {
-        sLog->outError("server.worldserver", "World database not specified in configuration file");
+        TC_LOG_ERROR("server.worldserver", "World database not specified in configuration file");
         return false;
     }
 
-    asyncThreads = ConfigMgr::GetIntDefault("WorldDatabase.WorkerThreads", 1);
+    asyncThreads = sConfigMgr->GetIntDefault("WorldDatabase.WorkerThreads", 1);
     if (asyncThreads < 1 || asyncThreads > 32)
     {
-        sLog->outError("server.worldserver", "World database: invalid number of worker threads specified. "
+        TC_LOG_ERROR("server.worldserver", "World database: invalid number of worker threads specified. "
                        "Please pick a value between 1 and 32.");
         return false;
     }
@@ -373,22 +372,22 @@ bool Master::_StartDB()
     ///- Initialise the world database
     if (!WorldDatabase.Open(dbString, asyncThreads, WorldDatabaseConnection::DoPrepareStatements))
     {
-        sLog->outError("server.worldserver", "Cannot connect to world database %s", dbString.c_str());
+        TC_LOG_ERROR("server.worldserver", "Cannot connect to world database %s", dbString.c_str());
         return false;
     }
 
     ///- Get character database info from configuration file
-    dbString = ConfigMgr::GetStringDefault("CharacterDatabaseInfo", "");
+    dbString = sConfigMgr->GetStringDefault("CharacterDatabaseInfo", "");
     if (dbString.empty())
     {
-        sLog->outError("server.worldserver", "Character database not specified in configuration file");
+        TC_LOG_ERROR("server.worldserver", "Character database not specified in configuration file");
         return false;
     }
 
-    asyncThreads = ConfigMgr::GetIntDefault("CharacterDatabase.WorkerThreads", 1);
+    asyncThreads = sConfigMgr->GetIntDefault("CharacterDatabase.WorkerThreads", 1);
     if (asyncThreads < 1 || asyncThreads > 32)
     {
-        sLog->outError("server.worldserver", "Character database: invalid number of worker threads specified. "
+        TC_LOG_ERROR("server.worldserver", "Character database: invalid number of worker threads specified. "
                        "Please pick a value between 1 and 32.");
         return false;
     }
@@ -396,22 +395,22 @@ bool Master::_StartDB()
     ///- Initialise the Character database
     if (!CharacterDatabase.Open(dbString, asyncThreads, CharacterDatabaseConnection::DoPrepareStatements))
     {
-        sLog->outError("server.worldserver", "Cannot connect to Character database %s", dbString.c_str());
+        TC_LOG_ERROR("server.worldserver", "Cannot connect to Character database %s", dbString.c_str());
         return false;
     }
 
     ///- Get login database info from configuration file
-    dbString = ConfigMgr::GetStringDefault("LoginDatabaseInfo", "");
+    dbString = sConfigMgr->GetStringDefault("LoginDatabaseInfo", "");
     if (dbString.empty())
     {
-        sLog->outError("server.worldserver", "Login database not specified in configuration file");
+        TC_LOG_ERROR("server.worldserver", "Login database not specified in configuration file");
         return false;
     }
 
-    asyncThreads = ConfigMgr::GetIntDefault("LoginDatabase.WorkerThreads", 1);
+    asyncThreads = sConfigMgr->GetIntDefault("LoginDatabase.WorkerThreads", 1);
     if (asyncThreads < 1 || asyncThreads > 32)
     {
-        sLog->outError("server.worldserver", "Login database: invalid number of worker threads specified. "
+        TC_LOG_ERROR("server.worldserver", "Login database: invalid number of worker threads specified. "
                        "Please pick a value between 1 and 32.");
         return false;
     }
@@ -419,20 +418,18 @@ bool Master::_StartDB()
     ///- Initialise the login database
     if (!LoginDatabase.Open(dbString, asyncThreads, LoginDatabaseConnection::DoPrepareStatements))
     {
-        sLog->outError("server.worldserver", "Cannot connect to login database %s", dbString.c_str());
+        TC_LOG_ERROR("server.worldserver", "Cannot connect to login database %s", dbString.c_str());
         return false;
     }
 
     ///- Get the realm Id from the configuration file
-    realmID = ConfigMgr::GetIntDefault("RealmID", 0);
+    realmID = sConfigMgr->GetIntDefault("RealmID", 0);
     if (!realmID)
     {
-        sLog->outError("server.worldserver", "Realm ID not defined in configuration file");
+        TC_LOG_ERROR("server.worldserver", "Realm ID not defined in configuration file");
         return false;
     }
-    sLog->outInfo("server.worldserver", "Realm running as realm ID %d", realmID);
-
-    sLog->SetRealmID(realmID);
+    TC_LOG_INFO("server.worldserver", "Realm running as realm ID %d", realmID);
 
     ///- Clean the database before starting
     ClearOnlineAccounts();
@@ -442,7 +439,7 @@ bool Master::_StartDB()
 
     sWorld->LoadDBVersion();
 
-    sLog->outInfo("server.worldserver", "Using World DB: %s", sWorld->GetDBVersion());
+    TC_LOG_INFO("server.worldserver", "Using World DB: %s", sWorld->GetDBVersion());
     return true;
 }
 

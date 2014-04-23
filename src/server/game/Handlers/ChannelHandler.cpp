@@ -22,7 +22,7 @@
 
 void WorldSession::HandleJoinChannel(WorldPacket& recvPacket)
 {
-    sLog->outDebug("network", "Opcode %u", recvPacket.GetOpcode());
+    TC_LOG_DEBUG("network", "Opcode %u", recvPacket.GetOpcode());
 
     uint32 channelId;
     uint32 channelLength = 0;
@@ -72,7 +72,7 @@ void WorldSession::HandleJoinChannel(WorldPacket& recvPacket)
 
 void WorldSession::HandleLeaveChannel(WorldPacket& recvPacket)
 {
-    sLog->outDebug("network", "Opcode %u", recvPacket.GetOpcode());
+    TC_LOG_DEBUG("network", "Opcode %u", recvPacket.GetOpcode());
 
     uint32 unk;
     std::string channelname;
@@ -94,7 +94,7 @@ void WorldSession::HandleLeaveChannel(WorldPacket& recvPacket)
 
 void WorldSession::HandleChannelList(WorldPacket& recvPacket)
 {
-    sLog->outDebug("network", "Opcode %u", recvPacket.GetOpcode());
+    TC_LOG_DEBUG("network", "Opcode %u", recvPacket.GetOpcode());
 
     uint32 length = recvPacket.ReadBits(7);
     recvPacket.FlushBits();
@@ -116,7 +116,7 @@ void WorldSession::HandleChannelPassword(WorldPacket& recvPacket)
     else
         timeLastChannelPassCommand = now;
 
-    sLog->outDebug("network", "Opcode %u", recvPacket.GetOpcode());
+    TC_LOG_DEBUG("network", "Opcode %u", recvPacket.GetOpcode());
     uint32 passLength = recvPacket.ReadBits(6);
     uint32 nameLength = recvPacket.ReadBits(7);
 
@@ -138,7 +138,7 @@ void WorldSession::HandleChannelSetOwner(WorldPacket& recvPacket)
     else
        timeLastChannelSetownerCommand = now;
 
-    sLog->outDebug("network", "Opcode %u", recvPacket.GetOpcode());
+    TC_LOG_DEBUG("network", "Opcode %u", recvPacket.GetOpcode());
 
     uint32 channelLength = recvPacket.ReadBits(7);
     uint32 nameLength = recvPacket.ReadBits(6);
@@ -164,7 +164,7 @@ void WorldSession::HandleChannelOwner(WorldPacket& recvPacket)
     else
        timeLastChannelOwnerCommand = now;
 
-    sLog->outDebug("network", "Opcode %u", recvPacket.GetOpcode());
+    TC_LOG_DEBUG("network", "Opcode %u", recvPacket.GetOpcode());
 
     uint32 length = recvPacket.ReadBits(7);
 
@@ -185,7 +185,7 @@ void WorldSession::HandleChannelModerator(WorldPacket& recvPacket)
     else
        timeLastChannelModerCommand = now;
 
-    sLog->outDebug("network", "Opcode %u", recvPacket.GetOpcode());
+    TC_LOG_DEBUG("network", "Opcode %u", recvPacket.GetOpcode());
 
     uint32 nameLength = recvPacket.ReadBits(6);
     uint32 channelLength = recvPacket.ReadBits(7);
@@ -211,7 +211,7 @@ void WorldSession::HandleChannelUnmoderator(WorldPacket& recvPacket)
     else
        timeLastChannelUnmoderCommand = now;
 
-    sLog->outDebug("network", "Opcode %u", recvPacket.GetOpcode());
+    TC_LOG_DEBUG("network", "Opcode %u", recvPacket.GetOpcode());
 
     uint32 nameLength = recvPacket.ReadBits(6);
     uint32 channelLength = recvPacket.ReadBits(7);
@@ -237,7 +237,7 @@ void WorldSession::HandleChannelMute(WorldPacket& recvPacket)
     else
         timeLastChannelMuteCommand = now;
 
-    sLog->outDebug("network", "Opcode %u", recvPacket.GetOpcode());
+    TC_LOG_DEBUG("network", "Opcode %u", recvPacket.GetOpcode());
 
     uint32 nameLength = recvPacket.ReadBits(6);
     uint32 channelLength = recvPacket.ReadBits(7);
@@ -263,7 +263,7 @@ void WorldSession::HandleChannelUnmute(WorldPacket& recvPacket)
     else
        timeLastChannelUnmuteCommand = now;
 
-    sLog->outDebug("network", "Opcode %u", recvPacket.GetOpcode());
+    TC_LOG_DEBUG("network", "Opcode %u", recvPacket.GetOpcode());
 
     uint32 channelLength = recvPacket.ReadBits(7);
     uint32 nameLength = recvPacket.ReadBits(6);
@@ -289,7 +289,7 @@ void WorldSession::HandleChannelInvite(WorldPacket& recvPacket)
     else
        timeLastChannelInviteCommand = now;
 
-    sLog->outDebug("network", "Opcode %u", recvPacket.GetOpcode());
+    TC_LOG_DEBUG("network", "Opcode %u", recvPacket.GetOpcode());
     uint32 channelLength = recvPacket.ReadBits(7);
     uint32 nameLength = recvPacket.ReadBits(6);
 
@@ -317,7 +317,7 @@ void WorldSession::HandleChannelKick(WorldPacket& recvPacket)
     else
        timeLastChannelKickCommand = now;
 
-    sLog->outDebug("network", "Opcode %u", recvPacket.GetOpcode());
+    TC_LOG_DEBUG("network", "Opcode %u", recvPacket.GetOpcode());
     uint32 nameLength = recvPacket.ReadBits(6);
     uint32 channelLength = recvPacket.ReadBits(7);
 
@@ -342,7 +342,7 @@ void WorldSession::HandleChannelBan(WorldPacket& recvPacket)
     else
        timeLastChannelBanCommand = now;
 
-    sLog->outDebug("network", "Opcode %u", recvPacket.GetOpcode());
+    TC_LOG_DEBUG("network", "Opcode %u", recvPacket.GetOpcode());
     uint32 channelLength, nameLength;
     std::string channelname, otp;
 
@@ -370,7 +370,7 @@ void WorldSession::HandleChannelUnban(WorldPacket& recvPacket)
     else
        timeLastChannelUnbanCommand = now;
 
-    sLog->outDebug("network", "Opcode %u", recvPacket.GetOpcode());
+    TC_LOG_DEBUG("network", "Opcode %u", recvPacket.GetOpcode());
 
     uint32 channelLength = recvPacket.ReadBits(7);
     uint32 nameLength = recvPacket.ReadBits(6);
@@ -396,7 +396,7 @@ void WorldSession::HandleChannelAnnouncements(WorldPacket& recvPacket)
     else
        timeLastChannelAnnounceCommand = now;
 
-    sLog->outDebug("network", "Opcode %u", recvPacket.GetOpcode());
+    TC_LOG_DEBUG("network", "Opcode %u", recvPacket.GetOpcode());
 
     uint32 length = recvPacket.ReadBits(7);
     recvPacket.FlushBits();
@@ -415,7 +415,7 @@ void WorldSession::HandleChannelDisplayListQuery(WorldPacket &recvPacket)
 
 void WorldSession::HandleGetChannelMemberCount(WorldPacket &recvPacket)
 {
-    sLog->outDebug("network", "Opcode %u", recvPacket.GetOpcode());
+    TC_LOG_DEBUG("network", "Opcode %u", recvPacket.GetOpcode());
     std::string channelname;
     recvPacket >> channelname;
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
@@ -433,7 +433,7 @@ void WorldSession::HandleGetChannelMemberCount(WorldPacket &recvPacket)
 
 void WorldSession::HandleSetChannelWatch(WorldPacket& recvPacket)
 {
-    sLog->outDebug("network", "Opcode %u", recvPacket.GetOpcode());
+    TC_LOG_DEBUG("network", "Opcode %u", recvPacket.GetOpcode());
     std::string channelname;
     recvPacket >> channelname;
     /*if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))

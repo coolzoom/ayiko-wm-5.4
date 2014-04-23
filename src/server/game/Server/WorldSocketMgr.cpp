@@ -155,7 +155,7 @@ class ReactorRunnable : protected ACE_Task_Base
 
         virtual int svc()
         {
-            sLog->outDebug("misc", "Network Thread Starting");
+            TC_LOG_DEBUG("misc", "Network Thread Starting");
 
             ACE_ASSERT (m_Reactor);
 
@@ -192,7 +192,7 @@ class ReactorRunnable : protected ACE_Task_Base
                 }
             }
 
-            sLog->outDebug("misc", "Network Thread exits");
+            TC_LOG_DEBUG("misc", "Network Thread exits");
 
             return 0;
         }
@@ -230,13 +230,13 @@ WorldSocketMgr::~WorldSocketMgr()
 int
 WorldSocketMgr::StartReactiveIO (ACE_UINT16 port, const char* address)
 {
-    m_UseNoDelay = ConfigMgr::GetBoolDefault ("Network.TcpNodelay", true);
+    m_UseNoDelay = sConfigMgr->GetBoolDefault ("Network.TcpNodelay", true);
 
-    int num_threads = ConfigMgr::GetIntDefault ("Network.Threads", 1);
+    int num_threads = sConfigMgr->GetIntDefault ("Network.Threads", 1);
 
     if (num_threads <= 0)
     {
-        sLog->outError("misc", "Network.Threads is wrong in your config file");
+        TC_LOG_ERROR("misc", "Network.Threads is wrong in your config file");
         return -1;
     }
 
@@ -244,16 +244,16 @@ WorldSocketMgr::StartReactiveIO (ACE_UINT16 port, const char* address)
 
     m_NetThreads = new ReactorRunnable[m_NetThreadsCount];
 
-    sLog->outDebug("misc", "Max allowed socket connections %d", ACE::max_handles());
+    TC_LOG_DEBUG("misc", "Max allowed socket connections %d", ACE::max_handles());
 
     // -1 means use default
-    m_SockOutKBuff = ConfigMgr::GetIntDefault ("Network.OutKBuff", -1);
+    m_SockOutKBuff = sConfigMgr->GetIntDefault ("Network.OutKBuff", -1);
 
-    m_SockOutUBuff = ConfigMgr::GetIntDefault ("Network.OutUBuff", 65536);
+    m_SockOutUBuff = sConfigMgr->GetIntDefault ("Network.OutUBuff", 65536);
 
     if (m_SockOutUBuff <= 0)
     {
-        sLog->outError("misc", "Network.OutUBuff is wrong in your config file");
+        TC_LOG_ERROR("misc", "Network.OutUBuff is wrong in your config file");
         return -1;
     }
 
@@ -263,7 +263,7 @@ WorldSocketMgr::StartReactiveIO (ACE_UINT16 port, const char* address)
 
     if (m_Acceptor->open(listen_addr, m_NetThreads[0].GetReactor(), ACE_NONBLOCK) == -1)
     {
-        sLog->outError("misc", "Failed to open acceptor, check if the port is free");
+        TC_LOG_ERROR("misc", "Failed to open acceptor, check if the port is free");
         return -1;
     }
 
@@ -327,7 +327,7 @@ WorldSocketMgr::OnSocketOpen (WorldSocket* sock)
             (void*) & m_SockOutKBuff,
             sizeof (int)) == -1 && errno != ENOTSUP)
         {
-            sLog->outError("misc", "WorldSocketMgr::OnSocketOpen set_option SO_SNDBUF");
+            TC_LOG_ERROR("misc", "WorldSocketMgr::OnSocketOpen set_option SO_SNDBUF");
             return -1;
         }
     }
@@ -342,7 +342,7 @@ WorldSocketMgr::OnSocketOpen (WorldSocket* sock)
             (void*)&ndoption,
             sizeof (int)) == -1)
         {
-            sLog->outError("misc", "WorldSocketMgr::OnSocketOpen: peer().set_option TCP_NODELAY errno = %s", ACE_OS::strerror (errno));
+            TC_LOG_ERROR("misc", "WorldSocketMgr::OnSocketOpen: peer().set_option TCP_NODELAY errno = %s", ACE_OS::strerror (errno));
             return -1;
         }
     }

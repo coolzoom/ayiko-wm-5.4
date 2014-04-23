@@ -77,7 +77,7 @@ bool AddonHandler::BuildAddonPacket(WorldPacket* source, WorldPacket* target)
 
             addonPacked >> enabled >> crc >> unk2;
 
-            sLog->outDebug("network", "ADDON: Name: %s, Enabled: 0x%x, CRC: 0x%x, Unknown2: 0x%x", addonName.c_str(), enabled, crc, unk2);
+            TC_LOG_DEBUG("network", "ADDON: Name: %s, Enabled: 0x%x, CRC: 0x%x, Unknown2: 0x%x", addonName.c_str(), enabled, crc, unk2);
 
             uint8 state = (enabled ? 2 : 1);
             *target << uint8(state);
@@ -131,11 +131,11 @@ bool AddonHandler::BuildAddonPacket(WorldPacket* source, WorldPacket* target)
         *target << uint32(count);
 
         if (addonPacked.rpos() != addonPacked.size())
-            sLog->outDebug("network", "packet under read!");
+            TC_LOG_DEBUG("network", "packet under read!");
     }
     else
     {
-        sLog->outError("network", "Addon packet uncompress error :(");
+        TC_LOG_ERROR("network", "Addon packet uncompress error :(");
         return false;
     }
     return true;

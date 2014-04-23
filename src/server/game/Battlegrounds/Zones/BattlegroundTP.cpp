@@ -220,12 +220,12 @@ void BattlegroundTP::RespawnFlag(uint32 Team, bool captured)
 {
     if (Team == ALLIANCE)
     {
-        sLog->outDebug("bg.battleground", "Respawning Alliance flag");
+        TC_LOG_DEBUG("bg.battleground", "Respawning Alliance flag");
         m_FlagState[TEAM_ALLIANCE] = BG_TP_FLAG_STATE_ON_BASE;
     }
     else
     {
-        sLog->outDebug("bg.battleground", "Respawning Horde flag");
+        TC_LOG_DEBUG("bg.battleground", "Respawning Horde flag");
         m_FlagState[TEAM_HORDE] = BG_TP_FLAG_STATE_ON_BASE;
     }
 
@@ -265,7 +265,7 @@ void BattlegroundTP::RespawnFlagAfterDrop(uint32 team)
     if (object)
         object->Delete();
     else
-        sLog->outError("bg.battleground", "unknown dropped flag bg, guid: %u", GUID_LOPART(GetDroppedFlagGUID(team)));
+        TC_LOG_ERROR("bg.battleground", "unknown dropped flag bg, guid: %u", GUID_LOPART(GetDroppedFlagGUID(team)));
 
     SetDroppedFlagGUID(0, team);
     m_BothFlagsKept = false;
@@ -613,7 +613,7 @@ void BattlegroundTP::RemovePlayer(Player *player, uint64 guid, uint32)
     {
         if (!player)
         {
-            sLog->outError("bg.battleground", "BattlegroundTP: Removing offline player who has the FLAG!!");
+            TC_LOG_ERROR("bg.battleground", "BattlegroundTP: Removing offline player who has the FLAG!!");
             this->SetAllianceFlagPicker(0);
             this->RespawnFlag(ALLIANCE, false);
         }
@@ -624,7 +624,7 @@ void BattlegroundTP::RemovePlayer(Player *player, uint64 guid, uint32)
     {
         if (!player)
         {
-            sLog->outError("bg.battleground", "BattlegroundTP: Removing offline player who has the FLAG!!");
+            TC_LOG_ERROR("bg.battleground", "BattlegroundTP: Removing offline player who has the FLAG!!");
             this->SetHordeFlagPicker(0);
             this->RespawnFlag(HORDE, false);
         }
@@ -681,7 +681,7 @@ void BattlegroundTP::HandleAreaTrigger(Player *Source, uint32 Trigger)
         case 5921:                                          // Horde Start left Water channel
             break;
         default:
-            sLog->outError("bg.battleground", "WARNING: Unhandled AreaTrigger in Battleground: %u", Trigger);
+            TC_LOG_ERROR("bg.battleground", "WARNING: Unhandled AreaTrigger in Battleground: %u", Trigger);
             Source->GetSession()->SendAreaTriggerMessage("Warning: Unhandled AreaTrigger in Battleground: %u", Trigger);
             break;
     }
@@ -714,39 +714,39 @@ bool BattlegroundTP::SetupBattleground()
         || !AddObject(BG_TP_OBJECT_DOOR_H_4, BG_OBJECT_DOOR_H_4_TP_ENTRY, 1558.315f, 372.709f, 1.4840f, 6.179126f, 0, 0, 0, 0, RESPAWN_IMMEDIATELY)
        )
     {
-        sLog->outError("bg.battleground", "BatteGroundTP: Failed to spawn some objects Battleground not created!");
+        TC_LOG_ERROR("bg.battleground", "BatteGroundTP: Failed to spawn some objects Battleground not created!");
         return false;
     }
 
     WorldSafeLocsEntry const *sg = sWorldSafeLocsStore.LookupEntry(TP_GRAVEYARD_MIDDLE_ALLIANCE);
     if (!sg || !AddSpiritGuide(TP_SPIRIT_ALLIANCE, sg->x, sg->y, sg->z, 3.641396f, ALLIANCE))
     {
-        sLog->outError("bg.battleground", "BatteGroundTP: Failed to spawn Alliance spirit guides! Battleground not created!");
+        TC_LOG_ERROR("bg.battleground", "BatteGroundTP: Failed to spawn Alliance spirit guides! Battleground not created!");
         return false;
     }
 
     sg = sWorldSafeLocsStore.LookupEntry(TP_GRAVEYARD_START_ALLIANCE);
     if (!sg || !AddSpiritGuide(TP_SPIRIT_ALLIANCE, sg->x, sg->y, sg->z, 3.641396f, ALLIANCE))
     {
-        sLog->outError("bg.battleground", "BatteGroundTP: Failed to spawn Alliance start spirit guides! Battleground not created!");
+        TC_LOG_ERROR("bg.battleground", "BatteGroundTP: Failed to spawn Alliance start spirit guides! Battleground not created!");
         return false;
     }
 
     sg = sWorldSafeLocsStore.LookupEntry(TP_GRAVEYARD_MIDDLE_HORDE);
     if (!sg || !AddSpiritGuide(TP_SPIRIT_HORDE, sg->x, sg->y, sg->z, 3.641396f, HORDE))
     {
-        sLog->outError("bg.battleground", "BatteGroundTP: Failed to spawn Horde spirit guides! Battleground not created!");
+        TC_LOG_ERROR("bg.battleground", "BatteGroundTP: Failed to spawn Horde spirit guides! Battleground not created!");
         return false;
     }
 
     sg = sWorldSafeLocsStore.LookupEntry(TP_GRAVEYARD_START_HORDE);
     if (!sg || !AddSpiritGuide(TP_SPIRIT_ALLIANCE, sg->x, sg->y, sg->z, 3.641396f, HORDE))
     {
-        sLog->outError("bg.battleground", "BatteGroundTP: Failed to spawn Horde start spirit guides! Battleground not created!");
+        TC_LOG_ERROR("bg.battleground", "BatteGroundTP: Failed to spawn Horde start spirit guides! Battleground not created!");
         return false;
     }
 
-    sLog->outDebug("bg.battleground", "BatteGroundTP: BG objects and spirit guides spawned");
+    TC_LOG_DEBUG("bg.battleground", "BatteGroundTP: BG objects and spirit guides spawned");
 
     return true;
 }

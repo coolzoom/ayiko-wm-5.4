@@ -193,39 +193,31 @@ class Object
 
         int32 GetInt32Value(uint16 index) const
         {
-            ASSERT(index < m_valuesCount || PrintIndexError(index, false));
             return m_int32Values[index];
         }
 
         uint32 GetUInt32Value(uint16 index) const
         {
-            ASSERT(index < m_valuesCount || PrintIndexError(index, false));
             return m_uint32Values[index];
         }
 
         uint64 GetUInt64Value(uint16 index) const
         {
-            ASSERT(index + 1 < m_valuesCount || PrintIndexError(index, false));
             return *((uint64*)&(m_uint32Values[index]));
         }
 
         float GetFloatValue(uint16 index) const
         {
-            ASSERT(index < m_valuesCount || PrintIndexError(index, false));
             return m_floatValues[index];
         }
 
         uint8 GetByteValue(uint16 index, uint8 offset) const
         {
-            ASSERT(index < m_valuesCount || PrintIndexError(index, false));
-            ASSERT(offset < 4);
             return *(((uint8*)&m_uint32Values[index])+offset);
         }
 
         uint16 GetUInt16Value(uint16 index, uint8 offset) const
         {
-            ASSERT(index < m_valuesCount || PrintIndexError(index, false));
-            ASSERT(offset < 2);
             return *(((uint16*)&m_uint32Values[index])+offset);
         }
 

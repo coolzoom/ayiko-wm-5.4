@@ -76,7 +76,6 @@ void WorldSession::HandlePetAction(WorldPacket & recvData)
     recvData.ReadBitSeq<4>(guid1);
     recvData.ReadBitSeq<5, 7>(guid2);
     recvData.ReadBitSeq<5, 7>(guid1);
-    recvData.FlushBits();
 
     recvData.ReadByteSeq<7>(guid2);
     recvData.ReadByteSeq<7>(guid1);
@@ -660,7 +659,6 @@ void WorldSession::HandlePetRename(WorldPacket & recvData)
     if (hasName)
     {
         uint8 nameLenght = recvData.ReadBits(8);
-        recvData.FlushBits();
         name = recvData.ReadString(nameLenght);
     }
 

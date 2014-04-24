@@ -66,7 +66,6 @@ void WorldSession::HandleSetSpecialization(WorldPacket& recvData)
 void WorldSession::HandleLearnTalents(WorldPacket& recvData)
 {
     uint32 count = recvData.ReadBits(23);
-    recvData.FlushBits();
 
     if (count > MAX_TALENT_SPELLS)
         return;

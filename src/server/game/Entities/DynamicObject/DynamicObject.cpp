@@ -95,18 +95,18 @@ bool DynamicObject::CreateDynamicObject(uint32 guidlow, Unit* caster, uint32 spe
     SetObjectScale(1.0f);
     SetUInt64Value(DYNAMICOBJECT_CASTER, caster->GetGUID());
 
-    // The lower word of DYNAMICOBJECT_FIELD_TYPE_AND_VISUAL_ID must be 0x0001. This value means that the visual radius will be overriden
+    // The lower word of DYNAMICOBJECT_BYTES must be 0x0001. This value means that the visual radius will be overriden
     // by client for most of the "ground patch" visual effect spells and a few "skyfall" ones like Hurricane.
     // If any other value is used, the client will _always_ use the radius provided in DYNAMICOBJECT_RADIUS, but
     // precompensation is necessary (eg radius *= 2) for many spells. Anyway, blizz sends 0x0001 for all the spells
     // I saw sniffed...
 
-    // Blizz set visual spell Id in 3 first byte of DYNAMICOBJECT_FIELD_TYPE_AND_VISUAL_ID after 5.X
+    // Blizz set visual spell Id in 3 first byte of DYNAMICOBJECT_BYTES after 5.X
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
     if (spellInfo)
     {
         uint32 visual = spellInfo->SpellVisual[0] ? spellInfo->SpellVisual[0] : spellInfo->SpellVisual[1];
-        SetUInt32Value(DYNAMICOBJECT_FIELD_TYPE_AND_VISUAL_ID, 0x10000000 | visual);
+        SetUInt32Value(DYNAMICOBJECT_BYTES, 0x10000000 | visual);
     }
 
     SetUInt32Value(DYNAMICOBJECT_SPELLID, spellId);

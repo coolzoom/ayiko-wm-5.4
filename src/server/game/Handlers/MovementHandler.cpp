@@ -406,10 +406,6 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
         plrMover->SetInWater(!plrMover->IsInWater() || plrMover->GetBaseMap()->IsUnderWater(movementInfo.pos.GetPositionX(), movementInfo.pos.GetPositionY(), movementInfo.pos.GetPositionZ()));
     }
 
-    // Hack Fix, clean emotes when moving
-    if (plrMover && plrMover->GetLastPlayedEmote())
-        plrMover->HandleEmoteCommand(0);
-
     /* process position-change */
     WorldPacket data(SMSG_MOVE_UPDATE, recvPacket.size());
     movementInfo.Alive32 = movementInfo.time; // hack, but it's work in 505 in this way ...

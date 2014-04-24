@@ -45,8 +45,6 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recvData)
     recvData.ReadBit();
     length = recvData.ReadBits(8);
 
-    recvData.FlushBits();
-
     if (!numDungeons)
     {
         TC_LOG_DEBUG("network", "CMSG_LFG_JOIN [" UI64FMTD "] no dungeons selected", GetPlayer()->GetGUID());
@@ -125,8 +123,6 @@ void WorldSession::HandleLfgProposalResultOpcode(WorldPacket& recvData)
     recvData.ReadBitSeq<2, 7>(guid2);
     recvData.ReadBitSeq<6>(guid1);
     recvData.ReadBitSeq<6, 5>(guid2);
-
-    recvData.FlushBits();
 
     recvData.ReadByteSeq<2, 3, 4>(guid1);
     recvData.ReadByteSeq<2, 0>(guid2);

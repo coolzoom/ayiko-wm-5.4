@@ -736,8 +736,6 @@ Player::Player(WorldSession* session)
 
     m_lastEclipseState = ECLIPSE_NONE;
 
-    m_lastPlayedEmote = 0;
-
     m_pmChatTime = 0;
     m_pmChatCount = 0;
 
@@ -947,8 +945,6 @@ Player::Player(WorldSession* session)
     m_ignoreMovementCount = 0;
 
     m_groupUpdateDelay = 5000;
-
-    m_emote = 0;
 
     memset(_voidStorageItems, 0, VOID_STORAGE_MAX_SLOT * sizeof(VoidStorageItem*));
 
@@ -11716,71 +11712,6 @@ Item* Player::GetItemByGuid(uint64 guid) const
     return NULL;
 }
 
-bool Player::RemoveItemByDelete(Item* item)
-{
-    for (uint8 i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
-    {
-        if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
-        {
-            if (pItem == item)
-            {
-                RemoveItem(INVENTORY_SLOT_BAG_0, i, false);
-                return true;
-            }
-        }
-    }
-
-    for (int i = BANK_SLOT_ITEM_START; i < BANK_SLOT_BAG_END; ++i)
-    {
-        if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
-        {
-            if (pItem == item)
-            {
-                RemoveItem(INVENTORY_SLOT_BAG_0, i, false);
-                return true;
-            }
-        }
-    }
-
-    for (uint8 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
-    {
-        if (Bag* pBag = GetBagByPos(i))
-        {
-            for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
-            {
-                if (Item* pItem = pBag->GetItemByPos(j))
-                {
-                    if (pItem == item)
-                    {
-                        pBag->RemoveItem(j, false);
-                        return true;
-                    }
-                }
-            }
-        }
-    }
-
-    for (uint8 i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; ++i)
-    {
-        if (Bag* pBag = GetBagByPos(i))
-        {
-            for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
-            {
-                if (Item* pItem = pBag->GetItemByPos(j))
-                {
-                    if (pItem == item)
-                    {
-                        pBag->RemoveItem(j, false);
-                        return true;
-                    }
-                }
-            }
-        }
-    }
-
-    return false;
-}
-
 Item* Player::GetItemByPos(uint16 pos) const
 {
     uint8 bag = pos >> 8;
@@ -13887,8 +13818,10 @@ void Player::MoveItemFromInventory(uint8 bag, uint8 slot, bool update)
     {
         ItemRemovedQuestCheck(it->GetEntry(), it->GetCount());
         RemoveItem(bag, slot, update);
+
         it->SetNotRefundable(this, false);
         it->RemoveFromUpdateQueueOf(this);
+
         if (it->IsInWorld())
         {
             it->RemoveFromWorld();
@@ -21329,6 +21262,7 @@ void Player::_SaveInventory(SQLTransaction& trans)
                 trans->PAppend("REPLACE INTO character_inventory (guid, bag, slot, item) VALUES ('%u', '%u', '%u', '%u')", lowGuid, bag_guid, item->GetSlot(), item->GetGUIDLow());
                 break;
             case ITEM_REMOVED:
+                item->RemoveFromUpdateQueueOf(this);
                 trans->PAppend("DELETE FROM character_inventory WHERE item = '%u'", item->GetGUIDLow());
                 break;
             case ITEM_UNCHANGED:
@@ -23173,7 +23107,7 @@ void Player::SetRestBonus (float rest_bonus_new)
     else if (m_rest_bonus <= 1)
         SetByteValue(PLAYER_BYTES_2, 3, REST_STATE_NOT_RAF_LINKED);              // Set Reststate = Normal
 
-    //RestTickUpdate
+    // RestTickUpdate
     SetUInt32Value(PLAYER_FIELD_REST_STATE_BONUS_POOL, uint32(m_rest_bonus));
 }
 
@@ -29135,12 +29069,6 @@ void Player::FinishWeek()
         m_WeekGames[slot] = 0;
         m_WeekWins[slot] = 0;
     }
-}
-
-void Player::SetEmoteState(uint32 anim_id)
-{
-    HandleEmoteCommand(anim_id);
-    m_emote = anim_id;
 }
 
 Pet* Player::CreateTamedPetFrom(Creature* creatureTarget, uint32 spellId)

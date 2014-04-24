@@ -87,7 +87,6 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recvData)
     joinAsGroup = recvData.ReadBit();
     recvData.ReadBitSeq<0, 6, 2, 4>(guid);
     role = recvData.ReadBit() == 1 ? ROLE_DAMAGE : 0;
-    recvData.FlushBits();
 
     recvData.ReadByteSeq<7, 2, 1, 5, 3, 0, 4, 6>(guid);
 

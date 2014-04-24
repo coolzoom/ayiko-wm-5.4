@@ -1103,9 +1103,6 @@ void GameObject::Use(Unit* user)
 
     if (Player* playerUser = user->ToPlayer())
     {
-        if (playerUser->GetEmoteState())
-            playerUser->SetEmoteState(0);
-
         if (sScriptMgr->OnGossipHello(playerUser, this))
             return;
 
@@ -2142,10 +2139,8 @@ void GameObject::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* t
     UpdateMask updateMask;
     updateMask.SetCount(m_valuesCount);
 
-    uint32* flags = GameObjectUpdateFieldFlags;
-    uint32 visibleFlag = UF_FLAG_PUBLIC;
-    if (GetOwnerGUID() == target->GetGUID())
-        visibleFlag |= UF_FLAG_OWNER;
+    uint32 const *flags = NULL;
+    uint32 const visibleFlag = GetUpdateFieldData(target, flags);
 
     for (uint16 index = 0; index < m_valuesCount; ++index)
     {

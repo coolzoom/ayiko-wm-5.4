@@ -174,8 +174,6 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recvData)
 
     recvData.ReadBitSeq<4, 1>(auctioneer);
 
-    recvData.FlushBits();
-
     for (uint8 i = 0; i < itemsCount; i++)
     {
         recvData.ReadByteSeq<6, 7, 4, 1, 0, 2>(itemGUIDs[i]);
@@ -423,8 +421,6 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket& recvData)
     recvData >> price;
 
     recvData.ReadBitSeq<6, 7, 3, 5, 4, 1, 0, 2>(auctioneer);
-    recvData.FlushBits();
-
     recvData.ReadByteSeq<2, 5, 1, 3, 4, 7, 0, 6>(auctioneer);
 
     if (!auctionId || !price)
@@ -745,7 +741,6 @@ void WorldSession::HandleAuctionListItems(WorldPacket & recvData)
     usable = recvData.ReadBit();
     recvData.ReadBitSeq<1, 7, 3, 0>(guid);
     recvData.ReadBit(); // byte135
-    recvData.FlushBits();
 
     recvData.ReadByteSeq<4, 6, 2, 7, 1, 3, 5, 0>(guid);
     searchedname = recvData.ReadString(searchedname_len);

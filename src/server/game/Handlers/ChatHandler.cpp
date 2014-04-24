@@ -261,13 +261,11 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
         case CHAT_MSG_RAID_WARNING:
         case CHAT_MSG_INSTANCE_CHAT:
             textLength = recvData.ReadBits(8);
-            recvData.FlushBits();
             msg = recvData.ReadString(textLength);
             break;
         case CHAT_MSG_WHISPER:
             receiverLength = recvData.ReadBits(9);
             textLength = recvData.ReadBits(8);
-            recvData.FlushBits();
             to = recvData.ReadString(receiverLength);
             msg = recvData.ReadString(textLength);
             break;
@@ -275,14 +273,12 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
             textLength = recvData.ReadBits(8);
             receiverLength = 2 * recvData.ReadBits(8);
             receiverLength += recvData.ReadBit();
-            recvData.FlushBits();
             msg = recvData.ReadString(textLength);
             channel = recvData.ReadString(receiverLength);
             break;
         case CHAT_MSG_AFK:
         case CHAT_MSG_DND:
             textLength = recvData.ReadBits(8);
-            recvData.FlushBits();
             msg = recvData.ReadString(textLength);
             ignoreChecks = true;
             break;
@@ -594,7 +590,6 @@ void WorldSession::HandleAddonMessagechatOpcode(WorldPacket& recvData)
             uint32 msgLen = recvData.ReadBits(9);
             uint32 prefixLen = recvData.ReadBits(5);
             uint32 targetLen = recvData.ReadBits(8);
-            recvData.FlushBits();
             targetName = recvData.ReadString(targetLen);
             message = recvData.ReadString(msgLen);
             prefix = recvData.ReadString(prefixLen);
@@ -604,7 +599,6 @@ void WorldSession::HandleAddonMessagechatOpcode(WorldPacket& recvData)
         {
             uint32 prefixLen = recvData.ReadBits(5);
             uint32 msgLen = recvData.ReadBits(8);
-            recvData.FlushBits();
             prefix = recvData.ReadString(prefixLen);
             message = recvData.ReadString(msgLen);
             break;
@@ -613,7 +607,6 @@ void WorldSession::HandleAddonMessagechatOpcode(WorldPacket& recvData)
         {
             uint32 msgLen = recvData.ReadBits(8);
             uint32 prefixLen = recvData.ReadBits(5);
-            recvData.FlushBits();
             prefix = recvData.ReadString(prefixLen);
             message = recvData.ReadString(msgLen);
             break;
@@ -624,7 +617,6 @@ void WorldSession::HandleAddonMessagechatOpcode(WorldPacket& recvData)
         {
             uint32 msgLen = recvData.ReadBits(8);
             uint32 prefixLen = recvData.ReadBits(5);
-            recvData.FlushBits();
             prefix = recvData.ReadString(prefixLen);
             message = recvData.ReadString(msgLen);
             break;
@@ -790,16 +782,25 @@ void WorldSession::HandleTextEmoteOpcode(WorldPacket & recvData)
     switch (emote_anim)
     {
         case EMOTE_STATE_SLEEP:
+            GetPlayer()->SetStandState(UNIT_STAND_STATE_SLEEP);
+            break;
         case EMOTE_STATE_SIT:
+            GetPlayer()->SetStandState(UNIT_STAND_STATE_SIT);
+            break;
         case EMOTE_STATE_KNEEL:
+            GetPlayer()->SetStandState(UNIT_STAND_STATE_KNEEL);
+            break;
         case EMOTE_ONESHOT_NONE:
+            break;
+        case EMOTE_STATE_READ:
+            GetPlayer()->SetUInt32Value(UNIT_NPC_EMOTESTATE, emote_anim);
             break;
         default:
             // Only allow text-emotes for "dead" entities (feign death included)
             if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
                 break;
-             GetPlayer()->HandleEmoteCommand(emote_anim);
-             break;
+            GetPlayer()->HandleEmoteCommand(emote_anim);
+            break;
     }
 
     Unit* unit = ObjectAccessor::GetUnit(*_player, guid);

@@ -64,7 +64,7 @@ namespace Movement
         data.WriteBit(flags.parabolic);
     }
 
-    void PacketBuilder::WriteCreateData(MoveSpline const& moveSpline, ByteBuffer& data, Unit* /*unit*/)
+    void PacketBuilder::WriteCreateData(MoveSpline const& moveSpline, ByteBuffer& data)
     {
         if (/*!moveSpline.Finalized()*/true)
         {

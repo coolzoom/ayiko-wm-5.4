@@ -37,8 +37,6 @@ void WorldSession::HandleJoinChannel(WorldPacket& recvPacket)
     passLength = recvPacket.ReadBits(7);
     recvPacket.ReadBit(); // If pass's length is odd ? Not used ...
 
-    recvPacket.FlushBits();
-
     channelName = recvPacket.ReadString(channelLength);
     pass = recvPacket.ReadString(passLength);
 
@@ -78,7 +76,6 @@ void WorldSession::HandleLeaveChannel(WorldPacket& recvPacket)
     std::string channelname;
     recvPacket >> unk;                                      // channel id?
     uint32 length = recvPacket.ReadBits(7);
-    recvPacket.FlushBits();
     channelname = recvPacket.ReadString(length);
 
     if (channelname.empty())
@@ -97,7 +94,6 @@ void WorldSession::HandleChannelList(WorldPacket& recvPacket)
     TC_LOG_DEBUG("network", "Opcode %u", recvPacket.GetOpcode());
 
     uint32 length = recvPacket.ReadBits(7);
-    recvPacket.FlushBits();
     std::string channelname = recvPacket.ReadString(length);
 
     if (!ChatHandler(this).isValidChatMessage(channelname.c_str()))
@@ -120,8 +116,6 @@ void WorldSession::HandleChannelPassword(WorldPacket& recvPacket)
     uint32 passLength = recvPacket.ReadBits(6);
     uint32 nameLength = recvPacket.ReadBits(7);
 
-    recvPacket.FlushBits();
-
     std::string channelname = recvPacket.ReadString(nameLength);
     std::string pass = recvPacket.ReadString(passLength);
 
@@ -142,8 +136,6 @@ void WorldSession::HandleChannelSetOwner(WorldPacket& recvPacket)
 
     uint32 channelLength = recvPacket.ReadBits(7);
     uint32 nameLength = recvPacket.ReadBits(6);
-
-    recvPacket.FlushBits();
 
     std::string newp = recvPacket.ReadString(nameLength);
     std::string channelname = recvPacket.ReadString(channelLength);
@@ -167,9 +159,6 @@ void WorldSession::HandleChannelOwner(WorldPacket& recvPacket)
     TC_LOG_DEBUG("network", "Opcode %u", recvPacket.GetOpcode());
 
     uint32 length = recvPacket.ReadBits(7);
-
-    recvPacket.FlushBits();
-
     std::string channelname = recvPacket.ReadString(length);
 
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
@@ -189,8 +178,6 @@ void WorldSession::HandleChannelModerator(WorldPacket& recvPacket)
 
     uint32 nameLength = recvPacket.ReadBits(6);
     uint32 channelLength = recvPacket.ReadBits(7);
-
-    recvPacket.FlushBits();
 
     std::string otp = recvPacket.ReadString(nameLength);
     std::string channelname = recvPacket.ReadString(channelLength);
@@ -216,8 +203,6 @@ void WorldSession::HandleChannelUnmoderator(WorldPacket& recvPacket)
     uint32 nameLength = recvPacket.ReadBits(6);
     uint32 channelLength = recvPacket.ReadBits(7);
 
-    recvPacket.FlushBits();
-
     std::string channelname = recvPacket.ReadString(channelLength);
     std::string otp = recvPacket.ReadString(nameLength);
 
@@ -241,8 +226,6 @@ void WorldSession::HandleChannelMute(WorldPacket& recvPacket)
 
     uint32 nameLength = recvPacket.ReadBits(6);
     uint32 channelLength = recvPacket.ReadBits(7);
-
-    recvPacket.FlushBits();
 
     std::string otp = recvPacket.ReadString(nameLength);
     std::string channelname = recvPacket.ReadString(channelLength);
@@ -268,8 +251,6 @@ void WorldSession::HandleChannelUnmute(WorldPacket& recvPacket)
     uint32 channelLength = recvPacket.ReadBits(7);
     uint32 nameLength = recvPacket.ReadBits(6);
 
-    recvPacket.FlushBits();
-
     std::string channelname = recvPacket.ReadString(channelLength);
     std::string otp = recvPacket.ReadString(nameLength);
 
@@ -292,8 +273,6 @@ void WorldSession::HandleChannelInvite(WorldPacket& recvPacket)
     TC_LOG_DEBUG("network", "Opcode %u", recvPacket.GetOpcode());
     uint32 channelLength = recvPacket.ReadBits(7);
     uint32 nameLength = recvPacket.ReadBits(6);
-
-    recvPacket.FlushBits();
 
     std::string channelname = recvPacket.ReadString(channelLength);
     std::string otp = recvPacket.ReadString(nameLength);
@@ -321,8 +300,6 @@ void WorldSession::HandleChannelKick(WorldPacket& recvPacket)
     uint32 nameLength = recvPacket.ReadBits(6);
     uint32 channelLength = recvPacket.ReadBits(7);
 
-    recvPacket.FlushBits();
-
     std::string channelname = recvPacket.ReadString(channelLength);
     std::string otp = recvPacket.ReadString(nameLength);
 
@@ -349,8 +326,6 @@ void WorldSession::HandleChannelBan(WorldPacket& recvPacket)
     channelLength = recvPacket.ReadBits(7);
     nameLength = recvPacket.ReadBits(6);
 
-    recvPacket.FlushBits();
-
     otp = recvPacket.ReadString(nameLength);
     channelname = recvPacket.ReadString(channelLength);
 
@@ -375,8 +350,6 @@ void WorldSession::HandleChannelUnban(WorldPacket& recvPacket)
     uint32 channelLength = recvPacket.ReadBits(7);
     uint32 nameLength = recvPacket.ReadBits(6);
 
-    recvPacket.FlushBits();
-
     std::string channelname = recvPacket.ReadString(channelLength);
     std::string otp = recvPacket.ReadString(nameLength);
 
@@ -399,7 +372,6 @@ void WorldSession::HandleChannelAnnouncements(WorldPacket& recvPacket)
     TC_LOG_DEBUG("network", "Opcode %u", recvPacket.GetOpcode());
 
     uint32 length = recvPacket.ReadBits(7);
-    recvPacket.FlushBits();
     std::string channelname = recvPacket.ReadString(length);
 
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))

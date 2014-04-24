@@ -738,8 +738,6 @@ void WorldSession::HandleRepairItemOpcode(WorldPacket& recvData)
     recvData.ReadBitSeq<3>(itemGUID);
     recvData.ReadBitSeq<4>(npcGUID);
 
-    recvData.FlushBits();
-
     recvData.ReadByteSeq<1>(npcGUID);
     recvData.ReadByteSeq<1, 3>(itemGUID);
     recvData.ReadByteSeq<7>(npcGUID);

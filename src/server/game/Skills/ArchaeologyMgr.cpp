@@ -258,11 +258,11 @@ void ArchaeologyMgr::ShowResearchProjects()
         if (count % 2 == 1)
         {
             newvalue |= (*itr);
-            _player->SetUInt32Value(PLAYER_FIELD_RESEARCHING + count / 2, newvalue);
+            _player->SetUInt32Value(PLAYER_FIELD_RESEARCHING_1 + count / 2, newvalue);
         }
         else if (count == 8)
         {
-            _player->SetUInt32Value(PLAYER_FIELD_RESEARCHING + count / 2, (*itr));
+            _player->SetUInt32Value(PLAYER_FIELD_RESEARCHING_1 + count / 2, (*itr));
             break;
         }
         else

@@ -53,45 +53,30 @@
 #pragma pack(push, 1)
 #endif
 
-// TODO : Large Packet
 struct ServerPktHeader
 {
+    enum { Length = 4 };
+
     /**
-    * size is the length of the payload _plus_ the length of the opcode
-    */
-    ServerPktHeader(uint32 size, uint16 cmd, bool encrypt) : size(size)
+     * size is the length of the payload _plus_ the length of the opcode
+     */
+    ServerPktHeader(uint32 size, uint16 cmd, bool willEncrypt)
     {
-        header[0] = size & 0xFF;
-        header[1] = size >> 8;
-        header[2] = cmd & 0xFF;
-        header[3] = cmd >> 8;
-
-        if (encrypt)
-        {
-            uint32 totalLenght = size-2;
-            totalLenght <<= 13;
-            totalLenght |= (cmd & 0x1FFF);
-
-            header[0] = ((uint8*)&totalLenght)[0];
-            header[1] = ((uint8*)&totalLenght)[1];
-            header[2] = ((uint8*)&totalLenght)[2];
-            header[3] = ((uint8*)&totalLenght)[3];
+        if (willEncrypt) {
+            uint32 const encrypted = ((size - 2) << 13) | (uint32(cmd) & 0x1FFF);
+            header[0] = 0xFF & encrypted;
+            header[1] = 0xFF & (encrypted >> 8);
+            header[2] = 0xFF & (encrypted >> 16);
+            header[3] = 0xFF & (encrypted >> 24);
+        } else {
+            header[0] = 0xFF & size;
+            header[1] = 0xFF & (size >> 8);
+            header[2] = 0xFF & cmd;
+            header[3] = 0xFF & (cmd >> 8);
         }
     }
 
-    uint8 getHeaderLength()
-    {
-        // cmd = 2 bytes, size= 2||3bytes
-        return 4;
-    }
-
-    bool isLargePacket() const
-    {
-        return size > 0x7FFF;
-    }
-
-    const uint32 size;
-    uint8 header[4];
+    uint8 header[ServerPktHeader::Length];
 };
 
 struct ClientPktHeader
@@ -197,7 +182,7 @@ int WorldSocket::SendPacket(WorldPacket const* pct)
         sPacketLog->LogPacket(*pct, SERVER_TO_CLIENT);
 
     TC_LOG_INFO("network.opcode", "S->C: %s", GetOpcodeNameForLogging(pct->GetOpcode(), WOW_SERVER).c_str());
-
+#if 0
     WorldPacket compressed;
     size_t size = pct->size();
 
@@ -259,18 +244,18 @@ int WorldSocket::SendPacket(WorldPacket const* pct)
         m_zstream->avail_in = 0;
         m_zstream->avail_out = 0;
     }
+#endif
+    ServerPktHeader header(pct->size() + 2, pct->GetOpcode(), m_Crypt.IsInitialized());
+    m_Crypt.EncryptSend(header.header, ServerPktHeader::Length);
 
-    ServerPktHeader header(pct->size()+2, pct->GetOpcode(), m_Crypt.IsInitialized());
-    m_Crypt.EncryptSend ((uint8*)header.header, header.getHeaderLength());
-
-    if (m_OutBuffer->space() >= pct->size() + header.getHeaderLength() && msg_queue()->is_empty())
+    if (m_OutBuffer->space() >= pct->size() + ServerPktHeader::Length && msg_queue()->is_empty())
     {
         // Put the packet on the buffer.
-        if (m_OutBuffer->copy((char*) header.header, header.getHeaderLength()) == -1)
+        if (m_OutBuffer->copy((char*)header.header, ServerPktHeader::Length) == -1)
             ACE_ASSERT (false);
 
         if (!pct->empty())
-            if (m_OutBuffer->copy((char*) pct->contents(), pct->size()) == -1)
+            if (m_OutBuffer->copy((char*)pct->contents(), pct->size()) == -1)
                 ACE_ASSERT (false);
     }
     else
@@ -278,9 +263,9 @@ int WorldSocket::SendPacket(WorldPacket const* pct)
         // Enqueue the packet.
         ACE_Message_Block* mb;
 
-        ACE_NEW_RETURN(mb, ACE_Message_Block(pct->size() + header.getHeaderLength()), -1);
+        ACE_NEW_RETURN(mb, ACE_Message_Block(pct->size() + ServerPktHeader::Length), -1);
 
-        mb->copy((char*) header.header, header.getHeaderLength());
+        mb->copy((char*) header.header, ServerPktHeader::Length);
 
         if (!pct->empty())
             mb->copy((const char*)pct->contents(), pct->size());
@@ -1082,7 +1067,6 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     uint32 accountNameLength = recvPacket.ReadBits(11);
     recvPacket.ReadBit();
-    recvPacket.FlushBits();
     account = recvPacket.ReadString(accountNameLength);
 
     if (sWorld->IsClosed())

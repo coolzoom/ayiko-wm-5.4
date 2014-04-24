@@ -1479,7 +1479,6 @@ class Player : public Unit, public GridObject<Player>
         }
         Item* BankItem(uint16 pos, Item* pItem, bool update);
         void RemoveItem(uint8 bag, uint8 slot, bool update);
-        bool RemoveItemByDelete(Item* item);
         void MoveItemFromInventory(uint8 bag, uint8 slot, bool update);
                                                             // in trade, auction, guild bank, mail....
         void MoveItemToInventory(ItemPosCountVec const& dest, Item* pItem, bool update, bool in_characterInventoryDB = false);
@@ -2357,7 +2356,6 @@ class Player : public Unit, public GridObject<Player>
         void DeleteEquipmentSet(uint64 setGuid);
 
         void SetEmoteState(uint32 anim_id);
-        uint32 GetEmoteState() { return m_emote; }
 
         void SendInitWorldStates(uint32 zone, uint32 area);
         void SendUpdateWorldState(uint32 Field, uint32 Value);
@@ -2867,9 +2865,6 @@ class Player : public Unit, public GridObject<Player>
         void SetKnockBackTime(uint32 timer) { m_knockBackTimer = timer; }
         uint32 GetKnockBackTime() const { return m_knockBackTimer; }
 
-        void SetLastPlayedEmote(uint32 id) { m_lastPlayedEmote = id; }
-        uint32 GetLastPlayedEmote() { return m_lastPlayedEmote; }
-
         void SetIgnoreMovementCount(uint8 count) { m_ignoreMovementCount = count; }
         uint8 GetIgnoreMovementCount() const { return m_ignoreMovementCount; }
 
@@ -3251,10 +3246,6 @@ class Player : public Unit, public GridObject<Player>
         uint8  m_ignoreMovementCount;
 
         uint32 m_groupUpdateDelay;
-
-        uint32 m_emote;
-
-        uint32 m_lastPlayedEmote;
 
         ArchaeologyMgr m_archaeologyMgr;
 

@@ -90,8 +90,6 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
     uint8 nameLen = recvData.ReadBits(9);
     recvData.ReadBit(); // unk
 
-    recvData.FlushBits();
-
     recvData.ReadByteSeq<0, 4, 5, 7, 1>(crossRealmGuid);
 
     if (realmLen > 0)
@@ -831,7 +829,6 @@ void WorldSession::HandleGroupEveryoneIsAssistantOpcode(WorldPacket& recvData)
         return;
     recvData.read_skip<uint8>();
     bool apply = recvData.ReadBit();
-    recvData.FlushBits();
 
     group->ChangeFlagEveryoneAssistant(apply);
 }

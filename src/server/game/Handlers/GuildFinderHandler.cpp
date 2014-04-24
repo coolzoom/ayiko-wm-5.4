@@ -365,7 +365,6 @@ void WorldSession::HandleGuildFinderSetGuildPost(WorldPacket& recvPacket)
         level = ANY_FINDER_LEVEL;
 
     uint16 length = recvPacket.ReadBits(10);
-    recvPacket.FlushBits();
     std::string comment = recvPacket.ReadString(length);
 
     if (!(classRoles & GUILDFINDER_ALL_ROLES) || classRoles > GUILDFINDER_ALL_ROLES)

@@ -1789,27 +1789,15 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
 
 void Unit::HandleEmoteCommand(uint32 anim_id)
 {
-    if (GetUInt32Value(UNIT_NPC_EMOTESTATE) == 483)
+    if (!anim_id)
+        SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
+    else
     {
-        SetUInt32Value(UNIT_NPC_EMOTESTATE, 0x0);
-        return;
+        WorldPacket data(SMSG_EMOTE, 4 + 8);
+        data << uint32(anim_id);
+        data << uint64(GetGUID());
+        SendMessageToSet(&data, true);
     }
-    else if (anim_id == 483)
-    {
-        SetUInt32Value(UNIT_NPC_EMOTESTATE, anim_id);
-        return;
-    }
-
-    // Hack fix for clear emote at moving
-    if (Player* plr = ToPlayer())
-        plr->SetLastPlayedEmote(anim_id);
-
-    WorldPacket data(SMSG_EMOTE);
-
-    data << uint32(anim_id);
-    data << uint64(GetGUID());
-
-    SendMessageToSet(&data, true);
 }
 
 bool Unit::IsDamageReducedByArmor(SpellSchoolMask schoolMask, SpellInfo const* spellInfo, uint8 effIndex)
@@ -5563,7 +5551,7 @@ void Unit::SendAttackStateUpdate(CalcDamageInfo* damageInfo)
     }
 
     data << uint8(damageInfo->TargetState);
-    data << uint32(0);  // Unknown attackerstate
+    data << uint32(1000);  // Unknown attackerstate
     data << uint32(0);  // Melee spellid
 
     if (damageInfo->HitInfo & HITINFO_BLOCK)
@@ -10162,10 +10150,6 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
         ToCreature()->CallAssistance();
     }
 
-    if (GetTypeId() == TYPEID_PLAYER)
-        if (ToPlayer()->GetEmoteState())
-            ToPlayer()->SetEmoteState(0);
-
     // delay offhand weapon attack to next attack time
     if (haveOffhandWeapon())
         resetAttackTimer(OFF_ATTACK);
@@ -10216,10 +10200,6 @@ bool Unit::AttackStop()
     }
 
     SendMeleeAttackStop(victim);
-
-    if (GetTypeId() == TYPEID_PLAYER)
-        if (ToPlayer()->GetEmoteState())
-            ToPlayer()->SetEmoteState(0);
 
     return true;
 }
@@ -13158,9 +13138,6 @@ void Unit::Mount(uint32 mount, uint32 VehicleId, uint32 creatureEntry)
 
     if (Player* player = ToPlayer())
     {
-        if (player->GetEmoteState())
-            player->SetEmoteState(0);
-
         // mount as a vehicle
         if (VehicleId)
         {
@@ -17467,6 +17444,9 @@ void Unit::Kill(Unit* victim, bool durabilityLoss, SpellInfo const* spellProto)
     Player* player = GetCharmerOrOwnerPlayerOrPlayerItself();
     Creature* creature = victim->ToCreature();
 
+    victim->RemoveAurasByType(SPELL_AURA_CONTROL_VEHICLE);
+    victim->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
+
     bool isRewardAllowed = true;
     if (creature)
     {
@@ -20794,30 +20774,16 @@ void Unit::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* target)
     UpdateMask updateMask;
     updateMask.SetCount(m_valuesCount);
 
-    uint32* flags = UnitUpdateFieldFlags;
-    uint32 visibleFlag = UF_FLAG_PUBLIC;
-
-    if (target == this)
-        visibleFlag |= UF_FLAG_PRIVATE;
-
-    Player* plr = GetCharmerOrOwnerPlayerOrPlayerItself();
-    if (GetOwnerGUID() == target->GetGUID())
-        visibleFlag |= UF_FLAG_OWNER;
-
-    if (HasFlag(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_SPECIALINFO))
-        if (HasAuraTypeWithCaster(SPELL_AURA_EMPATHY, target->GetGUID()))
-            visibleFlag |= UF_FLAG_SPECIAL_INFO;
-
-    if (plr && plr->IsInSameRaidWith(target))
-        visibleFlag |= UF_FLAG_PARTY_MEMBER;
+    uint32 const *flags = NULL;
+    uint32 const visibleFlag = GetUpdateFieldData(target, flags);
 
     Creature const* creature = ToCreature();
     for (uint16 index = 0; index < m_valuesCount; ++index)
     {
-        if (_fieldNotifyFlags & flags[index] ||
-            ((flags[index] & visibleFlag) & UF_FLAG_SPECIAL_INFO) ||
-            ((updateType == UPDATETYPE_VALUES ? _changedFields[index] : m_uint32Values[index]) && (flags[index] & visibleFlag)) ||
-            (index == UNIT_FIELD_AURASTATE && HasFlag(UNIT_FIELD_AURASTATE, PER_CASTER_AURA_STATE_MASK)))
+        if ((_fieldNotifyFlags & flags[index])
+                || ((flags[index] & visibleFlag) & UF_FLAG_EMPATH)
+                || ((updateType == UPDATETYPE_VALUES ? _changedFields[index] : m_uint32Values[index]) && (flags[index] & visibleFlag))
+                || (index == UNIT_FIELD_AURASTATE && HasFlag(UNIT_FIELD_AURASTATE, PER_CASTER_AURA_STATE_MASK)))
         {
             updateMask.SetBit(index);
 
@@ -20843,10 +20809,10 @@ void Unit::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* target)
                 fieldBuffer << uint32(m_floatValues[index] < 0 ? 0 : m_floatValues[index]);
             }
             // there are some float values which may be negative or can't get negative due to other checks
-            else if ((index >= UNIT_FIELD_NEGSTAT0 && index <= UNIT_FIELD_POSSTAT0+4) ||
+            else if ((index >= UNIT_FIELD_NEGSTAT0 && index <= UNIT_FIELD_POSSTAT0 + 4) ||
                 (index >= UNIT_FIELD_RESISTANCEBUFFMODSPOSITIVE && index <= (UNIT_FIELD_RESISTANCEBUFFMODSPOSITIVE + 6)) ||
                 (index >= UNIT_FIELD_RESISTANCEBUFFMODSNEGATIVE && index <= (UNIT_FIELD_RESISTANCEBUFFMODSNEGATIVE + 6)) ||
-                (index >= UNIT_FIELD_POSSTAT0 && index <= UNIT_FIELD_POSSTAT0+4))
+                (index >= UNIT_FIELD_POSSTAT0 && index <= UNIT_FIELD_POSSTAT0 + 4))
             {
                 fieldBuffer << uint32(m_floatValues[index]);
             }
@@ -20920,6 +20886,10 @@ void Unit::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* target)
                 if (dynamicFlags & UNIT_DYNFLAG_TRACK_UNIT)
                     if (!HasAuraTypeWithCaster(SPELL_AURA_MOD_STALKED, target->GetGUID()))
                         dynamicFlags &= ~UNIT_DYNFLAG_TRACK_UNIT;
+
+                // UNIT_DYNFLAG_DEAD should not be sent to self
+                if ((dynamicFlags & UNIT_DYNFLAG_DEAD) != 0 && target == this)
+                    dynamicFlags &= ~UNIT_DYNFLAG_DEAD;
 
                 fieldBuffer << dynamicFlags;
             }

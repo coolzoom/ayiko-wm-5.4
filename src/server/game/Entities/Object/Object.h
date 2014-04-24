@@ -385,7 +385,7 @@ class Object
         std::string _ConcatFields(uint16 startIndex, uint16 size) const;
         void _LoadIntoDataField(const char* data, uint32 startOffset, uint32 count);
 
-        uint32 GetUpdateFieldData(Player const* target, uint32*& flags) const;
+        uint32 GetUpdateFieldData(Player const* target, uint32 const *&flags) const;
 
         bool IsUpdateFieldVisible(uint32 flags, bool isSelf, bool isOwner, bool isItemOwner, bool isPartyMember) const;
 

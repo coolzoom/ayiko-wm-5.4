@@ -102,8 +102,6 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recvData)
     codeLen = recvData.ReadBits(8);
     recvData.ReadBitSeq<5, 2, 4, 3, 0>(guid);
 
-    recvData.FlushBits();
-
     recvData.ReadByteSeq<1, 0, 6, 3, 7, 5, 2>(guid);
     code = recvData.ReadString(codeLen);
     recvData.ReadByteSeq<4>(guid);
@@ -1099,7 +1097,6 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recvData)
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_REQUEST_ACCOUNT_DATA");
 
     uint32 type = recvData.ReadBits(3);
-    recvData.FlushBits();
 
     TC_LOG_DEBUG("network", "RAD: type %u", type);
 
@@ -1563,7 +1560,6 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recvData)
 void WorldSession::HandleClientReportError(WorldPacket& recvData)
 {
     auto len = recvData.ReadBits(9);
-    recvData.FlushBits();
     auto str = recvData.ReadString(len);
 }
 
@@ -1636,7 +1632,6 @@ void WorldSession::HandleWhoisOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "Received opcode CMSG_WHOIS");
     uint32 textLength = recvData.ReadBits(6);
-    recvData.FlushBits();
     std::string charname = recvData.ReadString(textLength);
 
     if (!AccountMgr::IsAdminAccount(GetSecurity()))

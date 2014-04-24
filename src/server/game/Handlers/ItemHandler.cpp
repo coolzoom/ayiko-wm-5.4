@@ -507,8 +507,6 @@ void WorldSession::HandleSellItemOpcode(WorldPacket& recvData)
     recvData.ReadBitSeq<7, 4, 0>(vendorguid);
     recvData.ReadBitSeq<0>(itemguid);
 
-    recvData.FlushBits();
-
     recvData.ReadByteSeq<2, 6>(itemguid);
     recvData.ReadByteSeq<1>(vendorguid);
     recvData.ReadByteSeq<5>(itemguid);
@@ -724,8 +722,6 @@ void WorldSession::HandleBuyItemOpcode(WorldPacket& recvData)
     itemType = recvData.ReadBits(2);
     recvData.ReadBitSeq<4>(bagGuid);
     recvData.ReadBitSeq<0>(vendorguid);
-
-    recvData.FlushBits();
 
     recvData.ReadByteSeq<1>(vendorguid);
     recvData.ReadByteSeq<1, 0, 2, 3, 7>(bagGuid);
@@ -996,8 +992,6 @@ void WorldSession::HandleAutoStoreBagItemOpcode(WorldPacket& recvData)
         recvData.ReadBit();
         recvData.ReadBit();
     }
-
-    recvData.FlushBits();
 
     for (uint8 i = 0; i < unkCounter; i++)
     {
@@ -2042,8 +2036,6 @@ void WorldSession::HandleUpgradeItemOpcode(WorldPacket& recvData)
     recvData.ReadBitSeq<7>(itemGuid);
     recvData.ReadBitSeq<1, 0>(npcGuid);
     recvData.ReadBitSeq<0>(itemGuid);
-
-    recvData.FlushBits();
 
     recvData.ReadByteSeq<4, 5>(itemGuid);
     recvData.ReadByteSeq<3, 0>(npcGuid);

@@ -70,9 +70,6 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     if (pUser->m_mover != pUser)
         return;
 
-    if (pUser->GetEmoteState())
-        pUser->SetEmoteState(0);
-
     float speed = 0.00f, elevation = 0.00f;
     std::string unkString;
     uint8 unkStringLen = 0;
@@ -613,12 +610,6 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         }
     }
 
-    if (mover->GetTypeId() == TYPEID_PLAYER)
-    {
-        if (mover->ToPlayer()->GetEmoteState())
-            mover->ToPlayer()->SetEmoteState(0);
-    }
-
     if (spellInfo->IsPassive())
     {
         recvPacket.rfinish(); // prevent spam at ignore packet
@@ -903,7 +894,6 @@ void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
 
     recvPacket.ReadBit();
     hasSpell = !recvPacket.ReadBit();
-    recvPacket.FlushBits();
 
     if (hasSpell)
         recvPacket >> spellId;

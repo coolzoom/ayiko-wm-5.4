@@ -31,7 +31,7 @@ namespace Movement
     struct PacketBuilder
     {
         static void WriteCreateBits(MoveSpline const& moveSpline, ByteBuffer& data);
-        static void WriteCreateData(MoveSpline const& moveSpline, ByteBuffer& data, Unit* unit);
+        static void WriteCreateData(MoveSpline const& moveSpline, ByteBuffer& data);
         static void WriteCreateGuid(MoveSpline const& moveSpline, ByteBuffer& data);
     };
 }

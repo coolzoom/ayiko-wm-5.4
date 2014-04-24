@@ -183,7 +183,6 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recvData)
     {
         std::string Name = ci->Name;
         std::string SubName = ci->SubName;
-        std::string Unk505;
 
         int loc_idx = GetSessionDbLocaleIndex();
         if (loc_idx >= 0)
@@ -208,13 +207,14 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recvData)
         uint8 itemCount = 0;
         for (uint32 i = 0; i < MAX_CREATURE_QUEST_ITEMS; ++i)
             if (ci->questItems[i])
-                itemCount++;                                // itemId[6], quest drop
+                ++itemCount;                                // itemId[6], quest drop
 
         data.WriteBits(itemCount, 22);
         data.WriteBits(ci->IconName.size() ? ci->IconName.size() + 1 : 0, 6);
         data.WriteBits(SubName.size() ? SubName.size() + 1 : 0, 11);
-        data.WriteBits(Unk505.size() ? Unk505.size() + 1 : 0, 11);
+        data.WriteBits(0, 11);                              // Unk 505 string
         data.WriteBit(ci->RacialLeader);                    // isRacialLeader
+
         data << uint32(ci->type);                           // CreatureType.dbc
         data << uint32(ci->KillCredit[1]);                  // new in 3.1, kill credit
         data << uint32(ci->Modelid4);                       // Modelid4
@@ -225,7 +225,7 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recvData)
             if (ci->questItems[i])
             {
                 data << uint32(ci->questItems[i]);
-                itemCount--;
+                --itemCount;
             }
         }
 
@@ -233,9 +233,6 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recvData)
 
         if (ci->Name.size())
             data << Name;                                   // Name
-
-        if (Unk505.size())
-            data << Unk505;                                 // Unknow string since 5.0.5
 
         data << float(ci->ModMana);                         // dmg/mana modifier
         data << uint32(ci->Modelid1);                       // Modelid1
@@ -665,7 +662,6 @@ void WorldSession::HandleQuestPOIQuery(WorldPacket& recvData)
 {
     uint32 count;
     count = recvData.ReadBits(22);
-    recvData.FlushBits();
 
     if (count >= MAX_QUEST_LOG_SIZE)
     {

@@ -97,7 +97,6 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
     if (pair)
         nameLength++;
 
-    recvPacket.FlushBits();
     std::string invitedName = recvPacket.ReadString(nameLength);
 
     if (normalizePlayerName(invitedName))
@@ -213,8 +212,6 @@ void WorldSession::HandleGuildLeaderOpcode(WorldPacket& recvPacket)
     if (pair)
         len++;
 
-    recvPacket.FlushBits();
-
     name = recvPacket.ReadString(len);
     realName.resize(name.size());
 
@@ -242,7 +239,6 @@ void WorldSession::HandleGuildMOTDOpcode(WorldPacket& recvPacket)
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_GUILD_MOTD");
 
     uint32 motdLength = recvPacket.ReadBits(10);
-    recvPacket.FlushBits();
     std::string motd = recvPacket.ReadString(motdLength);
 
     if (Guild* guild = _GetPlayerGuild(this, true))
@@ -272,8 +268,6 @@ void WorldSession::HandleGuildSetNoteOpcode(WorldPacket& recvPacket)
     recvPacket.ReadBitSeq<4>(playerGuid);
     uint32 noteLength = recvPacket.ReadBits(8);
     recvPacket.ReadBitSeq<7>(playerGuid);
-
-    recvPacket.FlushBits();
 
     recvPacket.ReadByteSeq<5, 7, 2, 3, 4>(playerGuid);
 
@@ -666,8 +660,6 @@ void WorldSession::HandleSetGuildBankTabText(WorldPacket& recvData)
 
     uint32 textLen = recvData.ReadBits(14);
 
-    recvData.FlushBits();
-
     std::string text = recvData.ReadString(textLen);
 
     if (Guild* guild = _GetPlayerGuild(this))
@@ -724,7 +716,6 @@ void WorldSession::HandleGuildSetRankPermissionsOpcode(WorldPacket& recvPacket)
     recvPacket >> unk;
     recvPacket >> oldRights;
     uint32 nameLength = recvPacket.ReadBits(7);
-    recvPacket.FlushBits();
     std::string rankName = recvPacket.ReadString(nameLength);
 
     guild->HandleSetRankInfo(this, rankId, rankName, newRights, moneyPerDay, rightsAndSlots);

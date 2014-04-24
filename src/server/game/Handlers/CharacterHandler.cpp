@@ -332,8 +332,6 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
     unkBit = recvData.ReadBit();
 
     name_length = recvData.ReadBits(6);
-    recvData.FlushBits();
-
     name = recvData.ReadString(name_length);
 
     if (unkBit)
@@ -1383,8 +1381,6 @@ void WorldSession::HandleCharRenameOpcode(WorldPacket& recvData)
     nameLen = recvData.ReadBits(6);
     recvData.ReadBitSeq<4, 2, 0, 7, 1>(guid);
 
-    recvData.FlushBits();
-
     recvData.ReadByteSeq<6, 7, 5, 1, 4, 0, 2>(guid);
     newName = recvData.ReadString(nameLen);
     recvData.ReadByteSeq<6>(guid);
@@ -1957,8 +1953,6 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
     recvData.ReadBitSeq<4, 1>(guid);
     hasSkin = recvData.ReadBit();
     recvData.ReadBitSeq<6>(guid);
-
-    recvData.FlushBits();
 
     recvData.ReadByteSeq<0, 3, 7>(guid);
     newname = recvData.ReadString(nameLen);

@@ -66,8 +66,6 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket& recvData)
     nameLen = recvData.ReadBits(7);
     recvData.ReadBitSeq<4, 7, 1, 5, 2, 6, 0>(npcGuid);
 
-    recvData.FlushBits();
-
     recvData.ReadByteSeq<6>(npcGuid);
     name = recvData.ReadString(nameLen);
     recvData.ReadByteSeq<1, 7, 0, 5, 3, 2, 4>(npcGuid);
@@ -586,8 +584,6 @@ void WorldSession::HandleOfferPetitionOpcode(WorldPacket& recvData)
     recvData.ReadBitSeq<1>(playerGuid);
     recvData.ReadBitSeq<1, 0>(ownerGuid);
     recvData.ReadBitSeq<7>(playerGuid);
-
-    recvData.FlushBits();
 
     recvData.ReadByteSeq<0>(ownerGuid);
     recvData.ReadByteSeq<2, 4>(playerGuid);

@@ -261,15 +261,8 @@ Item::Item()
 
 Item::~Item()
 {
-<<<<<<< HEAD
-    // WARNING : THAT CHECK MAY CAUSE LAGS !
-    if (Player * plr = GetOwner())
-        if (plr->RemoveItemByDelete(this))
-            TC_LOG_INFO("molten", "Item %u on player guid %u is in destructor, and pointer is still referenced in player's data ...", GetEntry(), plr->GetGUIDLow());
-=======
     // deleting and item that is still in queue may lead to crashes
     ASSERT(!IsInUpdateQueue());
->>>>>>> Multiple changes:
 }
 
 bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)

@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /*
  * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  *
@@ -16,8 +15,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-=======
->>>>>>> Multiple changes:
 #include "UpdateFieldFlags.h"
 
 // Auto generated for version 17359

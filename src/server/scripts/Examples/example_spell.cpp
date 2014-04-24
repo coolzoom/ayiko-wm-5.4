@@ -365,14 +365,14 @@ class spell_ex_absorb_aura : public SpellScriptLoader
         {
             PrepareAuraScript(spell_ex_absorb_auraAuraScript);
 
-            void HandleOnEffectAbsorb(AuraEffect * /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
+            void HandleOnEffectAbsorb(AuraEffect *aurEff, DamageInfo & dmgInfo, uint32 & absorbAmount)
             {
                 TC_LOG_INFO("misc", "Our aura is now absorbing damage done to us!");
                 // absorb whole damage done to us
                 absorbAmount = dmgInfo.GetDamage();
             }
 
-            void HandleAfterEffectAbsorb(AuraEffect * /*aurEff*/, DamageInfo & /*dmgInfo*/, uint32 & absorbAmount)
+            void HandleAfterEffectAbsorb(AuraEffect *aurEff, DamageInfo & /*dmgInfo*/, uint32 & absorbAmount)
             {
                 TC_LOG_INFO("misc", "Our aura has absorbed %u damage!", absorbAmount);
             }

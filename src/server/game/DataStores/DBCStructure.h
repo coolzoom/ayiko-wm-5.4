@@ -2108,28 +2108,28 @@ struct SpellEntry
 // @author Selenium: 5.4 valid
 struct SpellCategoriesEntry
 {
-    //uint32    Id;                                         // 0        m_ID
-    uint32    Category;                                     // 1        m_category
-    uint32    DmgClass;                                     // 2        m_defenseType
-    uint32    Dispel;                                       // 3        m_dispelType
-    uint32    Mechanic;                                     // 4        m_mechanic
-    uint32    PreventionType;                               // 5        m_preventionType
-    uint32    StartRecoveryCategory;                        // 6        m_startRecoveryCategory
-    //uint32    unk_1;                                      // 7
-    //uint32    unk_2;                                      // 8
-    //uint32    Unk_3;                                      // 9
+    uint32 Id;                                              // 0
+    uint32 SpellId;                                         // 1
+    uint32 Unk1;                                            // 2
+    uint32 Category;                                        // 3
+    uint32 DmgClass;                                        // 4
+    uint32 Dispel;                                          // 5
+    uint32 Mechanic;                                        // 6
+    uint32 PreventionType;                                  // 7
+    uint32 StartRecoveryCategory;                           // 8
+    uint32 ChargesCategory;                                 // 9
 };
 
 // SpellCategory.dbc
 // @author Selenium: 5.4 valid
 struct SpellCategoryEntry
 {
-    uint32  CategoryId;                                     // 0
-    uint32  Flags;                                          // 1
-    //uint32    unk_1;                                      // 2
-    //char*     name;                                       // 3
-    //uint32    unk_2;                                      // 4
-    //uint32    unk_3;                                      // 5 Timer ?
+    uint32 Id;                                              // 0
+    uint32 Flags;                                           // 1
+    uint32 Unk1;                                            // 2
+    char const *Description;                                // 3
+    uint32 MaxCharges;                                      // 4
+    uint32 ChargeRegenTime;                                 // 5
 };
 
 typedef std::list<const SpellEntry*> SpellSkillingList;

@@ -1785,6 +1785,9 @@ void Player::Update(uint32 p_time)
     if (!IsInWorld())
         return;
 
+    // Regenerate consumed spell charges
+    spellChargesTracker_.update(p_time);
+
     // Zone Skip Update
     if (sObjectMgr->IsSkipZone(GetZoneId()) || isAFK())
     {
@@ -24134,6 +24137,14 @@ void Player::AddSpellAndCategoryCooldowns(SpellInfo const* spellInfo, uint32 ite
             AddSpellCooldown(i->second, itemId, catrecTime);
         }
     }
+
+    // TODO: is charge regen time affected by any mods?
+    auto const categories = spellInfo->GetSpellCategories();
+    if (categories && categories->ChargesCategory != 0) {
+        auto const category = sSpellCategoryStore.LookupEntry(categories->ChargesCategory);
+        if (category && category->ChargeRegenTime != 0)
+            spellChargesTracker_.consume(spellInfo->Id, category->ChargeRegenTime);
+    }
 }
 
 void Player::AddSpellCooldown(uint32 spellid, uint32 itemid, uint32 delay)
@@ -29382,4 +29393,22 @@ void Player::SendBattlegroundTimer(uint32 currentTime, uint32 maxTime)
     data << uint32(currentTime);
     data << uint32(PVP_TIMER);
     SendDirectMessage(&data);
+}
+
+bool Player::HasSpellCharge(uint32 spellId, SpellCategoryEntry const &category)
+{
+    // Spell 127252 has charges category 133 with 0 regen time. Bad data in DBC?
+    if (category.ChargeRegenTime == 0)
+        return true;
+
+    uint32 const consumedCharges = spellChargesTracker_.consumedCount(spellId);
+    if (consumedCharges == 0)
+        return true;
+
+    // If MaxCharges is 0 and mod is 0 (e.g. Charge without Double Time), we
+    // should assume that spell has 1 charge only
+    int32 const mod = GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_CHARGES, category.Id);
+    uint32 const maxCharges = std::max(static_cast<int32>(category.MaxCharges) + mod, 1);
+
+    return consumedCharges < maxCharges;
 }

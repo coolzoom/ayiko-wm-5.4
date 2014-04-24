@@ -41,6 +41,7 @@
 #include "WorldSession.h"
 #include "PhaseMgr.h"
 #include "CUFProfiles.h"
+#include "SpellChargesTracker.hpp"
 
 // for template
 #include "SpellMgr.h"
@@ -2870,6 +2871,7 @@ class Player : public Unit, public GridObject<Player>
 
         void CheckSpellAreaOnQuestStatusChange(uint32 quest_id);
 
+        bool HasSpellCharge(uint32 spellId, SpellCategoryEntry const &category);
 
         /*********************************************************/
         /***              BATTLE PET SYSTEM                    ***/
@@ -3261,6 +3263,8 @@ class Player : public Unit, public GridObject<Player>
         uint32 m_SeasonGames[MAX_PVP_SLOT];
 
         std::vector<CufProfile> m_cufProfiles;
+
+        Trinity::SpellChargesTracker spellChargesTracker_;
 };
 
 void AddItemsSetItem(Player*player, Item* item);

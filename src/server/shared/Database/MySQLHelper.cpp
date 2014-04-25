@@ -5,7 +5,7 @@ namespace MySQLHelper {
 
 void startLibrary()
 {
-    mysql_library_init(0, NULL, NULL);
+    mysql_library_init(0, nullptr, nullptr);
 }
 
 void stopLibrary()

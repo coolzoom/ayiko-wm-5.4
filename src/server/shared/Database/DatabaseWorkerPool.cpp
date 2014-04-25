@@ -1,4 +1,5 @@
 #include "DatabaseWorkerPool.h"
+#include "Common.h"
 #include "DatabaseWorker.h"
 #include "MySQLConnection.h"
 #include "MySQLHelper.h"

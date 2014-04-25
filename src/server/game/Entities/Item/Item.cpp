@@ -1354,8 +1354,7 @@ bool Item::CanUpgrade() const
     if (proto->Quality == ITEM_QUALITY_LEGENDARY)
         return false;
 
-    if (proto->Class != ITEM_CLASS_ARMOR &&
-        proto->Class != ITEM_CLASS_WEAPON)
+    if (proto->Class != ITEM_CLASS_ARMOR && proto->Class != ITEM_CLASS_WEAPON)
         return false;
 
     if (proto->Class == ITEM_CLASS_WEAPON && proto->SubClass == ITEM_SUBCLASS_WEAPON_FISHING_POLE)
@@ -1376,9 +1375,8 @@ bool Item::HasStats() const
     if (GetItemRandomPropertyId() != 0)
         return true;
 
-    ItemTemplate const* proto = GetTemplate();
-    for (uint8 i = 0; i < MAX_ITEM_PROTO_STATS; ++i)
-        if (proto->ItemStat[i].ItemStatValue != 0)
+    for (auto const &stat : GetTemplate()->ItemStat)
+        if (stat.ItemStatValue != 0)
             return true;
 
     return false;

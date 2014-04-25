@@ -16,6 +16,7 @@
  */
 
 #include "Transaction.h"
+#include "Common.h"
 #include "MySQLConnection.h"
 #include "MySQLPreparedStatement.h"
 #include "PreparedStatement.h"

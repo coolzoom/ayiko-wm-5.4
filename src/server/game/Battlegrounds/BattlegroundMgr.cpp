@@ -700,6 +700,7 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
             }
             else
             {
+                //FIXME: duplicate?
                 *data << uint32(pointsLost);                    // Rating Lost
                 *data << uint32(MatchmakerRating);              // Matchmaking Value
                 *data << uint32(pointsGained);                  // Rating gained

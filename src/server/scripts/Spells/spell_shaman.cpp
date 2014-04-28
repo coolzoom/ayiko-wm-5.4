@@ -364,7 +364,7 @@ class spell_sha_call_of_the_elements : public SpellScriptLoader
 
                         if ((spellInfo->Id == 51485 || spellInfo->Id == 108273 || spellInfo->Id == 108270
                             || spellInfo->Id == 108269 || spellInfo->Id == 8143 || spellInfo->Id == 8177
-                            || spellInfo->Id == 5394 || spellInfo->Id == 2484 || spellInfo->Id == 108273)
+                            || spellInfo->Id == 5394 || spellInfo->Id == 2484)
                             && spellInfo->GetRecoveryTime() > 0)
                             _player->RemoveSpellCooldown((itr++)->first, true);
                         else

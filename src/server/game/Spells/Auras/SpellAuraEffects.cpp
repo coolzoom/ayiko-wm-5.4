@@ -4294,21 +4294,17 @@ void AuraEffect::HandleAuraModEffectImmunity(AuraApplication const* aurApp, uint
 
    target->ApplySpellImmune(GetId(), IMMUNITY_EFFECT, GetMiscValue(), apply);
 
-    // when removing flag aura, handle flag drop
-    if (!apply && target->GetTypeId() == TYPEID_PLAYER
-        && (GetSpellInfo()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_IMMUNE_OR_LOST_SELECTION))
-    {
-        if (target->GetTypeId() == TYPEID_PLAYER)
-        {
-            if (target->ToPlayer()->InBattleground())
-            {
-                if (Battleground* bg = target->ToPlayer()->GetBattleground())
-                    bg->EventPlayerDroppedFlag(target->ToPlayer());
-            }
-            else
-                sOutdoorPvPMgr->HandleDropFlag((Player*)target, GetSpellInfo()->Id);
-        }
-    }
+   // when removing flag aura, handle flag drop
+   if (!apply && target->GetTypeId() == TYPEID_PLAYER
+       && (GetSpellInfo()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_IMMUNE_OR_LOST_SELECTION))
+   {
+       if (target->ToPlayer()->InBattleground())
+       {
+           if (Battleground* bg = target->ToPlayer()->GetBattleground())
+               bg->EventPlayerDroppedFlag(target->ToPlayer());
+       } else
+           sOutdoorPvPMgr->HandleDropFlag((Player*)target, GetSpellInfo()->Id);
+   }
 }
 
 void AuraEffect::HandleAuraModStateImmunity(AuraApplication const* aurApp, uint8 mode, bool apply) const

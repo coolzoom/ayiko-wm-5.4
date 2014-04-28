@@ -232,9 +232,6 @@ class spell_hun_glaive_toss_damage : public SpellScriptLoader
                 if (!mainTargetGUID)
                     return;
 
-                if (!mainTargetGUID)
-                    return;
-
                 Unit* target = ObjectAccessor::FindUnit(mainTargetGUID);
                 if (!target)
                     return;

@@ -557,7 +557,7 @@ public:
             {
                 Map* map = target->GetMap();
 
-                if (map->Instanceable() && map->GetInstanceId() != map->GetInstanceId())
+                if (map->Instanceable() && _player->GetInstanceId() != map->GetInstanceId())
                     target->UnbindInstance(map->GetInstanceId(), target->GetDungeonDifficulty(), true);
 
                 // we are in instance, and can summon only player in our group with us as lead

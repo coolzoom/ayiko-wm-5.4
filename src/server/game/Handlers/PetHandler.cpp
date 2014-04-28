@@ -663,8 +663,6 @@ void WorldSession::HandlePetRename(WorldPacket & recvData)
     }
 
     Pet* pet = GetPlayer()->GetPet();
-    if (!pet)
-        return;
                                                             // check it!
     if (!pet || !pet->isPet() || pet->getPetType() != HUNTER_PET
             || !pet->HasByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_RENAMED)

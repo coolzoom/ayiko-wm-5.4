@@ -1863,6 +1863,7 @@ void WorldSession::HandleSetDungeonDifficultyOpcode(WorldPacket & recvData)
                 if (!groupGuy)
                     continue;
 
+                // FIXME obj1 IsInmap obj1
                 if (!groupGuy->IsInMap(groupGuy))
                     return;
 
@@ -1922,6 +1923,7 @@ void WorldSession::HandleSetRaidDifficultyOpcode(WorldPacket& recvData)
                 if (!groupGuy)
                     continue;
 
+                // FIXME obj1 IsInmap obj1
                 if (!groupGuy->IsInMap(groupGuy))
                     return;
 

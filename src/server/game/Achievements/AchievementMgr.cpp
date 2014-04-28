@@ -1592,10 +1592,7 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
                     else // Login case
                     {
                         for (uint32 arena_slot = 0; arena_slot < MAX_ARENA_SLOT; ++arena_slot)
-                        {
                             SetCriteriaProgress(achievementCriteria, referencePlayer->GetArenaPersonalRating(arena_slot), referencePlayer, PROGRESS_HIGHEST);
-                            break;
-                        }
                     }
                 }
                 break;
@@ -2643,13 +2640,14 @@ bool AchievementMgr<T>::CanUpdateCriteria(AchievementCriteriaEntry const* criter
     }
 
     if (referencePlayer)
+    {
         if (achievement->mapID != -1 && referencePlayer->GetMapId() != uint32(achievement->mapID))
             return false;
 
-    if (referencePlayer)
         if ((achievement->requiredFaction == ACHIEVEMENT_FACTION_HORDE    && referencePlayer->GetTeam() != HORDE) ||
             (achievement->requiredFaction == ACHIEVEMENT_FACTION_ALLIANCE && referencePlayer->GetTeam() != ALLIANCE))
             return false;
+    }
 
     if (IsCompletedCriteria(criteria, achievement))
         return false;

@@ -140,7 +140,7 @@ class spell_mastery_blood_shield : public SpellScriptLoader
                         if (_plr->GetTypeId() == TYPEID_PLAYER && _plr->HasAura(77513) && _plr->getLevel() >= 80)
                         {
                             // Check the Mastery aura while in Blood presence
-                            if (_plr->HasAura(77513) && _plr->HasAura(48263))
+                            if (_plr->HasAura(48263))
                             {
                                 float Mastery = _plr->GetFloatValue(PLAYER_MASTERY) * 6.25f / 100.0f;
 

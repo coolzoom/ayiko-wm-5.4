@@ -141,8 +141,10 @@ void PlayerTaxi::InitTaxiNodesForLevel(uint8 race, uint8 chrClass, uint8 oldLeve
         SetTaximaskNode(213);
     }
 
+    auto const maxLevel = std::min<size_t>(newLevel, DEFAULT_MAX_LEVEL);
+
     // Add Taxi Nodes available from player level
-    for (size_t i = oldLevel; i < newLevel; ++i)
+    for (size_t i = oldLevel; i < maxLevel; ++i)
         for (auto const &node : s_levelupNodes[team == HORDE ? 0 : 1][i])
             SetTaximaskNode(node.first, node.second);
 }

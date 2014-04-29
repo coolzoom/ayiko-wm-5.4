@@ -308,7 +308,9 @@ class WorldSession
         void SendAuthWaitQue(uint32 position);
 
         //void SendTestCreatureQueryOpcode(uint32 entry, uint64 guid, uint32 testvalue);
+        void SendNameQueryOpcode(Player const *player);
         void SendNameQueryOpcode(uint64 guid);
+        void SendNameQueryOpcodeCallBack(uint64 guid, PreparedQueryResult result);
 
         void SendTrainerList(uint64 guid);
         void SendTrainerList(uint64 guid, const std::string& strTitle);
@@ -1043,6 +1045,11 @@ class WorldSession
     private:
         void InitializeQueryCallbackParameters();
         void ProcessQueryCallbacks();
+
+        ACE_Thread_Mutex _nameQueryCallbacksLock;
+
+        typedef std::pair<uint64, PreparedQueryResultFuture> NameQueryInfo;
+        std::deque<NameQueryInfo> _nameQueryCallbacks;
 
         PreparedQueryResultFuture _charEnumCallback;
         PreparedQueryResultFuture _addIgnoreCallback;

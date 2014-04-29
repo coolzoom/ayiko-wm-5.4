@@ -1082,6 +1082,20 @@ void WorldSession::ProcessQueryCallbacks()
 {
     PreparedQueryResult result;
 
+    //! HandleNameQueryOpcode
+    {
+        ACE_Guard<ACE_Thread_Mutex> guard(_nameQueryCallbacksLock);
+        while (!_nameQueryCallbacks.empty())
+        {
+            NameQueryInfo &nameQuery = _nameQueryCallbacks.front();
+            if (!nameQuery.second.ready())
+                break;
+            if (nameQuery.second.get(result) == 0)
+                SendNameQueryOpcodeCallBack(nameQuery.first, result);
+            _nameQueryCallbacks.pop_front();
+        }
+    }
+
     //! HandleCharEnumOpcode
     if (_charEnumCallback.ready())
     {

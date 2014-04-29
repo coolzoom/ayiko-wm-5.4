@@ -6,6 +6,7 @@
 
 #include <deque>
 #include <string>
+#include <vector>
 
 class ByteBuffer;
 
@@ -17,18 +18,22 @@ class PlayerTaxi
 
     typedef std::deque<uint32> DestinationQueue;
 
+    typedef std::vector<std::pair<uint8, uint32>> LevelupTaxiNodes;
+
 public:
     PlayerTaxi();
 
+    static void CacheLevelupNodes();
+
     // Nodes
-    void InitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint8 level);
+    void InitTaxiNodesForLevel(uint8 race, uint8 chrClass, uint8 oldLevel, uint8 newLevel);
 
     void LoadTaxiMask(std::string const &data);
 
     bool IsTaximaskNodeKnown(uint32 nodeidx) const
     {
         uint8 field = uint8((nodeidx - 1) / 8);
-        uint32 submask = 1 << ((nodeidx-1) % 8);
+        uint32 submask = 1 << ((nodeidx - 1) % 8);
         return (m_mask[field] & submask) == submask;
     }
 
@@ -36,13 +41,18 @@ public:
     {
         uint8 field = uint8((nodeidx - 1) / 8);
         uint32 submask = 1 << ((nodeidx - 1) % 8);
+        return SetTaximaskNode(field, submask);
+    }
+
+    bool SetTaximaskNode(uint8 field, uint32 submask)
+    {
         if ((m_mask[field] & submask) != submask)
         {
             m_mask[field] |= submask;
             return true;
         }
-        else
-            return false;
+
+        return false;
     }
 
     void AppendTaximaskTo(ByteBuffer &data, ByteBuffer &dataBuffer, bool all);
@@ -73,6 +83,8 @@ public:
 private:
     TaxiMask m_mask;
     DestinationQueue m_destinations;
+
+    static LevelupTaxiNodes s_levelupNodes[2][DEFAULT_MAX_LEVEL];
 };
 
 std::ostringstream & operator<<(std::ostringstream &ss, PlayerTaxi const &taxi);

@@ -1002,7 +1002,7 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
 
     // base stats and related field values
     InitStatsForLevel();
-    InitTaxiNodesForLevel();
+    InitTaxiNodesForLevel(0, start_level);
     InitGlyphsForLevel();
     InitTalentForLevel();
     InitSpellForLevel();
@@ -3602,7 +3602,7 @@ void Player::GiveLevel(uint8 level)
 
     InitTalentForLevel();
     InitSpellForLevel();
-    InitTaxiNodesForLevel();
+    InitTaxiNodesForLevel(oldLevel, level);
     InitGlyphsForLevel();
 
     UpdateAllStats();
@@ -18897,7 +18897,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     SetSpecializationResetCost(fields[56].GetUInt32());
     SetSpecializationResetTime(time_t(fields[57].GetUInt32()));
 
-    m_taxi.LoadTaxiMask(fields[17].GetCString());            // must be before InitTaxiNodesForLevel
+    m_taxi.LoadTaxiMask(fields[17].GetCString());
 
     uint32 extraflags = fields[31].GetUInt16();
 
@@ -18940,7 +18940,6 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     // reset stats before loading any modifiers
     InitStatsForLevel();
     InitGlyphsForLevel();
-    InitTaxiNodesForLevel();
     InitRunes();
 
     // rest bonus can only be calculated after InitStatsForLevel()

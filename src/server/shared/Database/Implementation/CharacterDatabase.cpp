@@ -68,7 +68,6 @@ void DoPrepareStatements(MySQLConnection &conn)
     conn.prepareStatement(CHAR_SEL_CHAR_RACE, "SELECT race FROM characters WHERE guid = ?");
     conn.prepareStatement(CHAR_SEL_CHAR_LEVEL, "SELECT level FROM characters WHERE guid = ?");
     conn.prepareStatement(CHAR_SEL_CHAR_ZONE, "SELECT zone FROM characters WHERE guid = ?");
-    conn.prepareStatement(CHAR_SEL_CHARACTER_NAME_DATA, "SELECT race, class, gender, level FROM characters WHERE guid = ?");
     conn.prepareStatement(CHAR_SEL_CHAR_POSITION_XYZ, "SELECT map, position_x, position_y, position_z FROM characters WHERE guid = ?");
     conn.prepareStatement(CHAR_SEL_CHAR_POSITION, "SELECT position_x, position_y, position_z, orientation, map, taxi_path FROM characters WHERE guid = ?");
     conn.prepareStatement(CHAR_DEL_QUEST_STATUS_DAILY, "DELETE FROM character_queststatus_daily");
@@ -643,6 +642,11 @@ void DoPrepareStatements(MySQLConnection &conn)
     conn.prepareStatement(CHAR_SEL_CHAR_KNOWN_TITLES, "SELECT offset, value from character_known_titles WHERE guid = ?");
     conn.prepareStatement(CHAR_DEL_CHAR_KNOWN_TITLES, "DELETE FROM character_known_titles WHERE guid = ?");
     conn.prepareStatement(CHAR_INS_CHAR_KNOWN_TITLES, "INSERT INTO character_known_titles (guid, offset, value) VALUES (?, ?, ?)");
+
+    conn.prepareStatement(CHAR_SEL_NAME_QUERY_SIMPLE, "SELECT name, race, gender, class, level FROM characters WHERE guid = ?");
+    conn.prepareStatement(CHAR_SEL_NAME_QUERY_DECLINED, "SELECT name, race, gender, class, level, genitive, dative, accusative, instrumental, prepositional "
+                          "FROM characters LEFT JOIN character_declinedname ON characters.guid = character_declinedname.guid "
+                          "WHERE characters.guid = ?");
 }
 
 } // namespace CharacterDatabaseConnection

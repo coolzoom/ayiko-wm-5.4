@@ -581,15 +581,6 @@ struct CliCommandHolder
 
 typedef std::unordered_map<uint32, WorldSession*> SessionMap;
 
-struct CharacterNameData
-{
-    std::string m_name;
-    uint8 m_class;
-    uint8 m_race;
-    uint8 m_gender;
-    uint8 m_level;
-};
-
 enum RecordDiffType
 {
     RECORD_DIFF_MAP,
@@ -821,34 +812,11 @@ class World
 
         void UpdateAreaDependentAuras();
 
-        void ProcessStartEvent();
-        void ProcessStopEvent();
-        bool GetEventKill() const { return isEventKillStart; }
-
-        bool isEventKillStart;
-
-        CharacterNameData const* GetCharacterNameData(uint32 guid) const;
-        void AddCharacterNameData(uint32 guid, std::string const& name, uint8 gender, uint8 race, uint8 playerClass, uint8 level);
-        void UpdateCharacterNameData(uint32 guid, std::string const& name, uint8 gender = GENDER_NONE, uint8 race = RACE_NONE);
-        void UpdateCharacterNameDataLevel(uint32 guid, uint8 level);
-        void DeleteCharacterNameData(uint32 guid) { _characterNameDataMap.erase(guid); }
-
         uint32 GetCleaningFlags() const { return m_CleaningFlags; }
-        void   SetCleaningFlags(uint32 flags) { m_CleaningFlags = flags; }
-        void   ResetEventSeasonalQuests(uint16 event_id);
-        std::string GetRealmName() { return m_realmName; }
+        void SetCleaningFlags(uint32 flags) { m_CleaningFlags = flags; }
+        void ResetEventSeasonalQuests(uint16 event_id);
+        std::string const & GetRealmName() const { return m_realmName; }
         void UpdatePhaseDefinitions();
-
-        bool AddCharacterName(std::string name)
-        {
-            if (nameMap.find(name) != nameMap.end())
-                return false;
-
-            nameMap[name] = true;
-            return true;
-        }
-
-        void DeleteCharName(std::string name) { nameMap.erase(name); }
 
         void SetRecordDiff(RecordDiffType recordDiff, uint32 diff) { m_recordDiff[recordDiff] = diff; }
         uint32 GetRecordDiff(RecordDiffType recordDiff) { return m_recordDiff[recordDiff]; }
@@ -950,11 +918,6 @@ class World
         std::string m_DBVersion;
 
         std::list<std::string> m_Autobroadcasts;
-
-        std::map<uint32, CharacterNameData> _characterNameDataMap;
-        void LoadCharacterNameData();
-
-        std::map<std::string, bool> nameMap;
 
         void ProcessQueryCallbacks();
         ACE_Future_Set<PreparedQueryResult> m_realmCharCallbacks;

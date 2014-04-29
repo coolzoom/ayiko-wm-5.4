@@ -662,17 +662,6 @@ void WorldSession::HandleCharCreateCallback(PreparedQueryResult result, Characte
                 return;
             }
 
-            // Avoid exploit of create multiple characters with same name
-            if (!sWorld->AddCharacterName(createInfo->Name))
-            {
-                WorldPacket data(SMSG_CHAR_CREATE, 1);
-                data << uint8(CHAR_CREATE_NAME_IN_USE);
-                SendPacket(&data);
-                delete createInfo;
-                _charCreateCallback.Reset();
-                return;
-            }
-
             if (createInfo->Data.rpos() < createInfo->Data.wpos())
             {
                 uint8 unk;
@@ -726,7 +715,6 @@ void WorldSession::HandleCharCreateCallback(PreparedQueryResult result, Characte
             std::string IP_str = GetRemoteAddress();
             TC_LOG_INFO("entities.player.character", "Account: %d (IP: %s) Create Character:[%s] (GUID: %u)", GetAccountId(), IP_str.c_str(), createInfo->Name.c_str(), newChar.GetGUIDLow());
             sScriptMgr->OnPlayerCreate(&newChar);
-            sWorld->AddCharacterNameData(newChar.GetGUIDLow(), std::string(newChar.GetName()), newChar.getGender(), newChar.getRace(), newChar.getClass(), newChar.getLevel());
 
             newChar.CleanupsBeforeDelete();
             delete createInfo;
@@ -787,9 +775,6 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recvData)
 
     sGuildFinderMgr->RemoveAllMembershipRequestsFromPlayer(guid);
     Player::DeleteFromDB(guid, accountId);
-
-    sWorld->DeleteCharacterNameData(GUID_LOPART(guid));
-    sWorld->DeleteCharName(name);
 
     WorldPacket data(SMSG_CHAR_DELETE, 1);
     data << uint8(CHAR_DELETE_SUCCESS);
@@ -1268,9 +1253,6 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     if (totalTime > 50)
         TC_LOG_INFO("molten", "HandlePlayerLogin |****---> time1 : %u | time 2 : %u | time 3 : %u | time 4 : %u | time 5: %u | time 6 : %u | time 7 : %u | time 8 : %u | time 9 : %u | totaltime : %u", time1, time2, time3, time4, time5, time6, time7, time8, time9, totalTime);
 
-    // Fix chat with transfert / rename
-    sWorld->AddCharacterNameData(pCurrChar->GetGUIDLow(), pCurrChar->GetName(), pCurrChar->getGender(), pCurrChar->getRace(), pCurrChar->getClass(), pCurrChar->getLevel());
-
     delete holder;
 }
 
@@ -1470,8 +1452,6 @@ void WorldSession::HandleChangePlayerNameOpcodeCallBack(PreparedQueryResult resu
     data << uint64(guid);
     data << newName;
     SendPacket(&data);
-
-    sWorld->UpdateCharacterNameData(guidLow, newName);
 }
 
 void WorldSession::HandleSetPlayerDeclinedNames(WorldPacket& recvData)
@@ -1734,20 +1714,14 @@ void WorldSession::HandleCharCustomize(WorldPacket& recvData)
     Player::Customize(guid, gender, skin, face, hairStyle, hairColor, facialHair);
 
     stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHAR_NAME_AT_LOGIN);
-
     stmt->setString(0, newName);
     stmt->setUInt16(1, uint16(AT_LOGIN_CUSTOMIZE));
     stmt->setUInt32(2, GUID_LOPART(guid));
-
     CharacterDatabase.Execute(stmt);
 
     stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_DECLINED_NAME);
-
     stmt->setUInt32(0, GUID_LOPART(guid));
-
     CharacterDatabase.Execute(stmt);
-
-    sWorld->UpdateCharacterNameData(GUID_LOPART(guid), newName, gender);
 
     WorldPacket data(SMSG_CHAR_CUSTOMIZE, 1+8+(newName.size()+1)+6);
     data << uint8(RESPONSE_SUCCESS);
@@ -2139,8 +2113,6 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
     stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_DECLINED_NAME);
     stmt->setUInt32(0, lowGuid);
     trans->Append(stmt);
-
-    sWorld->UpdateCharacterNameData(GUID_LOPART(guid), newname, gender, race);
 
     // Switch Languages
     // delete all languages first

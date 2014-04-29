@@ -157,7 +157,6 @@ public:
 
         target->InitRunes();
         target->InitStatsForLevel(true);
-        target->InitTaxiNodesForLevel();
         target->InitGlyphsForLevel();
         target->InitTalentForLevel();
 

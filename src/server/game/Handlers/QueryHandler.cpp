@@ -31,89 +31,183 @@
 #include "Pet.h"
 #include "MapManager.h"
 
+void WorldSession::SendNameQueryOpcode(Player const *player)
+{
+    WorldPacket data(SMSG_NAME_QUERY_RESPONSE, 8 + 1 + 1 + 1 + 1 + 1 + 10);
+
+    ObjectGuid playerGuid = player->GetGUID();
+    ObjectGuid unkGuid = 0;
+
+    data.WriteBitSeq<5, 7, 3, 0, 4, 1, 6, 2>(playerGuid);
+    data.WriteByteSeq<7, 4, 3>(playerGuid);
+
+    data << uint8(0);
+    data << uint32(0);
+    data << uint8(player->getRace());
+    data << uint8(!player->getGender());
+    data << uint8(player->getLevel());
+    data << uint8(player->getClass());
+    data << uint32(realmID);
+
+    data.WriteByteSeq<1, 5, 0, 6, 2>(playerGuid);
+
+    data.WriteBitSeq<6>(playerGuid);
+    data.WriteBitSeq<7>(unkGuid);
+    data.WriteBits(std::strlen(player->GetName()), 6);
+    data.WriteBitSeq<1, 7, 2>(playerGuid);
+    data.WriteBitSeq<4>(unkGuid);
+    data.WriteBitSeq<4, 0>(playerGuid);
+    data.WriteBitSeq<1>(unkGuid);
+
+    auto const &declinedNames = player->GetDeclinedNames();
+
+    if (declinedNames)
+    {
+        for (auto const &name : declinedNames->name)
+            data.WriteBits(name.size(), 7);
+    }
+    else
+    {
+        for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
+            data.WriteBits(0, 7);
+    }
+
+    data.WriteBitSeq<3>(unkGuid);
+    data.WriteBitSeq<3>(playerGuid);
+    data.WriteBitSeq<5, 0>(unkGuid);
+    data.WriteBitSeq<5>(playerGuid);
+    data.WriteBit(false); // unk
+    data.WriteBitSeq<2, 6>(unkGuid);
+    data.FlushBits();
+    data.WriteString(player->GetName());
+    data.WriteByteSeq<4>(playerGuid);
+    data.WriteByteSeq<3>(unkGuid);
+    data.WriteByteSeq<6>(playerGuid);
+    data.WriteByteSeq<2, 4>(unkGuid);
+    data.WriteByteSeq<5, 1, 7>(playerGuid);
+
+    if (declinedNames)
+    {
+        for (auto const &name : declinedNames->name)
+            data.WriteString(name);
+    }
+    else
+    {
+        for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
+            data.WriteBits(0, 7);
+    }
+
+    data.WriteByteSeq<3>(playerGuid);
+    data.WriteByteSeq<7, 1, 6>(unkGuid);
+    data.WriteByteSeq<0>(playerGuid);
+    data.WriteByteSeq<0>(unkGuid);
+    data.WriteByteSeq<2>(playerGuid);
+    data.WriteByteSeq<5>(unkGuid);
+
+    SendPacket(&data);
+}
+
 void WorldSession::SendNameQueryOpcode(uint64 guid)
 {
-    Player* player = ObjectAccessor::FindPlayer(guid);
-    CharacterNameData const* nameData = sWorld->GetCharacterNameData(GUID_LOPART(guid));
+    uint32 statementId = sWorld->getBoolConfig(CONFIG_DECLINED_NAMES_USED)
+            ? CHAR_SEL_NAME_QUERY_DECLINED
+            : CHAR_SEL_NAME_QUERY_SIMPLE;
 
-    WorldPacket data(SMSG_NAME_QUERY_RESPONSE);
+    auto stmt = CharacterDatabase.GetPreparedStatement(statementId);
+    stmt->setUInt32(0, GUID_LOPART(guid));
 
-    ObjectGuid pGuid = guid;
+    PreparedQueryResultFuture result = CharacterDatabase.AsyncQuery(stmt);
 
-    data.WriteBitSeq<5, 7, 3, 0, 4, 1, 6, 2>(pGuid);
-    data.WriteByteSeq<7, 4, 3>(pGuid);
+    ACE_Guard<ACE_Thread_Mutex> guard(_nameQueryCallbacksLock);
+    _nameQueryCallbacks.emplace_back(guid, result);
+}
 
-    data << uint8(!nameData ? 1 : 0);
+void WorldSession::SendNameQueryOpcodeCallBack(uint64 guid, PreparedQueryResult result)
+{
+    WorldPacket data(SMSG_NAME_QUERY_RESPONSE, 8 + 1 + 1 + 1 + 1 + 1 + 10);
 
-    if (nameData)
+    ObjectGuid playerGuid = guid;
+    ObjectGuid unkGuid = 0;
+
+    data.WriteBitSeq<5, 7, 3, 0, 4, 1, 6, 2>(playerGuid);
+    data.WriteByteSeq<7, 4, 3>(playerGuid);
+
+    if (!result)
     {
-        data << uint32(0);
-        data << uint8(nameData->m_race);
-        data << uint8(!nameData->m_gender);
-        data << uint8(nameData->m_level);
-        data << uint8(nameData->m_class);
-        data << uint32(realmID);
+        data << uint8(1);
+        data.WriteByteSeq<1, 5, 0, 6, 2>(playerGuid);
+        SendPacket(&data);
+        return;
     }
 
-    data.WriteByteSeq<1, 5, 0, 6, 2>(pGuid);
+    auto const fields = result->Fetch();
 
-    if (nameData)
+    auto const playerName = fields[0].GetString();
+    auto const race = fields[1].GetUInt8();
+    auto const gender = fields[2].GetUInt8();
+    auto const level = fields[3].GetUInt8();
+    auto const playerClass = fields[4].GetUInt8();
+    auto const hasDeclinedName = sWorld->getBoolConfig(CONFIG_DECLINED_NAMES_USED) && *fields[5].GetCString() != '\0';
+
+    data << uint8(0);
+    data << uint32(0);
+    data << race;
+    data << gender;
+    data << level;
+    data << playerClass;
+    data << uint32(realmID);
+
+    data.WriteByteSeq<1, 5, 0, 6, 2>(playerGuid);
+
+    data.WriteBitSeq<6>(playerGuid);
+    data.WriteBitSeq<7>(unkGuid);
+    data.WriteBits(playerName.size(), 6);
+    data.WriteBitSeq<1, 7, 2>(playerGuid);
+    data.WriteBitSeq<4>(unkGuid);
+    data.WriteBitSeq<4, 0>(playerGuid);
+    data.WriteBitSeq<1>(unkGuid);
+
+    if (hasDeclinedName)
     {
-        ObjectGuid unkGuid = 0;
-        ObjectGuid pGuid2 = pGuid;
-
-        data.WriteBitSeq<6>(pGuid2);
-        data.WriteBitSeq<7>(unkGuid);
-        data.WriteBits(nameData->m_name.size(), 6);
-        data.WriteBitSeq<1, 7, 2>(pGuid2);
-        data.WriteBitSeq<4>(unkGuid);
-        data.WriteBitSeq<4, 0>(pGuid2);
-        data.WriteBitSeq<1>(unkGuid);
-
-        if (DeclinedName const* names = (player ? player->GetDeclinedNames() : NULL))
-        {
-            for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
-                data.WriteBits(names->name[i].size(), 7);
-        }
-        else
-        {
-            for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
-                data.WriteBits(0, 7);
-        }
-
-        data.WriteBitSeq<3>(unkGuid);
-        data.WriteBitSeq<3>(pGuid2);
-        data.WriteBitSeq<5, 0>(unkGuid);
-        data.WriteBitSeq<5>(pGuid2);
-        data.WriteBit(false); // unk
-        data.WriteBitSeq<2, 6>(unkGuid);
-        data.FlushBits();
-        data.WriteString(nameData->m_name);
-        data.WriteByteSeq<4>(pGuid2);
-        data.WriteByteSeq<3>(unkGuid);
-        data.WriteByteSeq<6>(pGuid2);
-        data.WriteByteSeq<2, 4>(unkGuid);
-        data.WriteByteSeq<5, 1, 7>(pGuid2);
-
-        if (DeclinedName const* names = (player ? player->GetDeclinedNames() : NULL))
-        {
-            for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
-                if (names->name[i].size())
-                    data.WriteString(names->name[i]);
-        }
-        else
-        {
-            for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
-                data.WriteBits(0, 7);
-        }
-
-        data.WriteByteSeq<3>(pGuid2);
-        data.WriteByteSeq<7, 1, 6>(unkGuid);
-        data.WriteByteSeq<0>(pGuid2);
-        data.WriteByteSeq<0>(unkGuid);
-        data.WriteByteSeq<2>(pGuid2);
-        data.WriteByteSeq<5>(unkGuid);
+        for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
+            data.WriteBits(fields[5 + i].GetString().size(), 7);
     }
+    else
+    {
+        for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
+            data.WriteBits(0, 7);
+    }
+
+    data.WriteBitSeq<3>(unkGuid);
+    data.WriteBitSeq<3>(playerGuid);
+    data.WriteBitSeq<5, 0>(unkGuid);
+    data.WriteBitSeq<5>(playerGuid);
+    data.WriteBit(false); // unk
+    data.WriteBitSeq<2, 6>(unkGuid);
+    data.WriteString(playerName);
+    data.WriteByteSeq<4>(playerGuid);
+    data.WriteByteSeq<3>(unkGuid);
+    data.WriteByteSeq<6>(playerGuid);
+    data.WriteByteSeq<2, 4>(unkGuid);
+    data.WriteByteSeq<5, 1, 7>(playerGuid);
+
+    if (hasDeclinedName)
+    {
+        for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
+            data.WriteString(fields[5 + i].GetString());
+    }
+    else
+    {
+        for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
+            data.WriteBits(0, 7);
+    }
+
+    data.WriteByteSeq<3>(playerGuid);
+    data.WriteByteSeq<7, 1, 6>(unkGuid);
+    data.WriteByteSeq<0>(playerGuid);
+    data.WriteByteSeq<0>(unkGuid);
+    data.WriteByteSeq<2>(playerGuid);
+    data.WriteByteSeq<5>(unkGuid);
 
     SendPacket(&data);
 }
@@ -145,19 +239,19 @@ void WorldSession::HandleNameQueryOpcode(WorldPacket& recvData)
     if (hasUnkBit2)
     {
         uint32 unk = recvData.read<uint32>();
-        TC_LOG_INFO("network", "CMSG_NAME_QUERY uint32 unk : %u\r\n", unk);
+        TC_LOG_DEBUG("network", "CMSG_NAME_QUERY uint32 unk : %u\r\n", unk);
     }
 
     if (hasUnkBit1)
     {
         uint32 unk1 = recvData.read<uint32>();
-        TC_LOG_INFO("network", "CMSG_NAME_QUERY uint32 unk1 (realm flags / id ?) : %u\r\n", unk1);
+        TC_LOG_DEBUG("network", "CMSG_NAME_QUERY uint32 unk1 (realm flags / id ?) : %u\r\n", unk1);
     }
 
-    // This is disable by default to prevent lots of console spam
-    // TC_LOG_INFO("network", "HandleNameQueryOpcode %u", guid);
-
-    SendNameQueryOpcode(guid);
+    if (Player const * const player = ObjectAccessor::FindPlayer(guid))
+        SendNameQueryOpcode(player);
+    else
+        SendNameQueryOpcode(guid);
 }
 
 void WorldSession::HandleQueryTimeOpcode(WorldPacket& /*recvData*/)

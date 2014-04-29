@@ -6,11 +6,71 @@
 
 namespace Trinity {
 
+PlayerTaxi::LevelupTaxiNodes PlayerTaxi::s_levelupNodes[2][DEFAULT_MAX_LEVEL];
+
 PlayerTaxi::PlayerTaxi()
-: m_mask()
+    : m_mask()
 { }
 
-void PlayerTaxi::InitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint8 level)
+void PlayerTaxi::CacheLevelupNodes()
+{
+    std::map<uint8, std::map<uint8, uint32>> nodeMap[2];
+
+    // Add Taxi Nodes availables from player level
+    for (uint32 i = 0; i < sTaxiNodesStore.GetNumRows(); i++)
+    {
+        auto const node = sTaxiNodesStore.LookupEntry(i);
+        if (!node || (node->MountCreatureID[0] == 0 && node->MountCreatureID[1] == 0))
+            continue;
+
+        auto const gridX = int(32 - node->x / SIZE_OF_GRIDS);
+        auto const gridY = int(32 - node->y / SIZE_OF_GRIDS);
+
+        // Bad positions
+        if (gridX < 0 || gridY < 0)
+            continue;
+
+        // Bad map id
+        if (!sMapStore.LookupEntry(node->map_id))
+            continue;
+
+        auto const zoneId = sMapMgr->GetZoneId(node->map_id, node->x, node->y, node->z);
+        if (zoneId == 0)
+            continue;
+
+        auto const worldMapArea = sWorldMapAreaStore.LookupEntry(zoneId);
+        if (!worldMapArea || worldMapArea->minRecommendedLevel == 0)
+            continue;
+
+        // Hackfix for TwilightHighlands map swapping
+        auto const minLevel = (worldMapArea->area_id != 4922)
+                ? worldMapArea->minRecommendedLevel
+                : 84u;
+
+        uint8 const field = uint8((node->ID - 1) / 8);
+        uint32 const submask = 1 << ((node->ID - 1) % 8);
+
+        if (node->MountCreatureID[0] != 0)
+            nodeMap[0][minLevel - 1][field] |= submask;
+
+        if (node->MountCreatureID[1] != 0)
+            nodeMap[1][minLevel - 1][field] |= submask;
+    }
+
+    for (size_t i = 0; i < 2; ++i)
+    {
+        auto &nodes = s_levelupNodes[i];
+
+        for (auto const &j : nodeMap[i])
+        {
+            nodes[j.first].reserve(j.second.size());
+            for (auto const &k : j.second)
+                nodes[j.first].emplace_back(k.first, k.second);
+        }
+    }
+}
+
+void PlayerTaxi::InitTaxiNodesForLevel(uint8 race, uint8 chrClass, uint8 oldLevel, uint8 newLevel)
 {
     // class specific initial known nodes
     switch (chrClass)
@@ -60,12 +120,6 @@ void PlayerTaxi::InitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint8 level
             break;
     }
 
-    // Level dependent taxi hubs
-    if (level >= 68) {
-        // Shattered Sun Staging Area
-        SetTaximaskNode(213);
-    }
-
     auto const team = Player::TeamForRace(race);
 
     // New continent starting masks (It will be accessible only at new map)
@@ -81,40 +135,16 @@ void PlayerTaxi::InitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint8 level
             return;
     }
 
-    // Add Taxi Nodes availables from player level
-    for (uint32 i = 0; i < sTaxiNodesStore.GetNumRows(); i++)
-    {
-        auto const node = sTaxiNodesStore.LookupEntry(i);
-        if (!node || node->MountCreatureID[team == ALLIANCE ? 1 : 0] == 0)
-            continue;
-
-        auto const gridX = int(32 - node->x / SIZE_OF_GRIDS);
-        auto const gridY = int(32 - node->y / SIZE_OF_GRIDS);
-
-        // Bad positions
-        if (gridX < 0 || gridY < 0)
-            continue;
-
-        // Bad map id
-        if (!sMapStore.LookupEntry(node->map_id))
-            continue;
-
-        auto const zoneId = sMapMgr->GetZoneId(node->map_id, node->x, node->y, node->z);
-        if (zoneId == 0)
-            continue;
-
-        auto const worldMapArea = sWorldMapAreaStore.LookupEntry(zoneId);
-        if (!worldMapArea || worldMapArea->minRecommendedLevel == 0)
-            continue;
-
-        // Hackfix for TwilightHighlands map swapping
-        auto const minLevel = (worldMapArea->area_id != 4922)
-                ? worldMapArea->minRecommendedLevel
-                : 84u;
-
-        if (minLevel <= level)
-            SetTaximaskNode(node->ID);
+    // Level dependent taxi hubs
+    if (newLevel >= 68) {
+        // Shattered Sun Staging Area
+        SetTaximaskNode(213);
     }
+
+    // Add Taxi Nodes available from player level
+    for (size_t i = oldLevel; i < newLevel; ++i)
+        for (auto const &node : s_levelupNodes[team == HORDE ? 0 : 1][i])
+            SetTaximaskNode(node.first, node.second);
 }
 
 void PlayerTaxi::LoadTaxiMask(std::string const &data)

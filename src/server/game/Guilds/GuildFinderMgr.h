@@ -92,24 +92,35 @@ struct MembershipRequest
 
         uint8 GetClass() const
         {
+#if 0
             const CharacterNameData *nameData = sWorld->GetCharacterNameData(GetPlayerGUID());
             return nameData ? nameData->m_class : 0;
+#endif
+            return 0;
         }
 
         uint8 GetLevel() const
         {
+#if 0
             const CharacterNameData *nameData = sWorld->GetCharacterNameData(GetPlayerGUID());
             return nameData ? nameData->m_level : 1;
+#endif
+            return 1;
         }
 
-        time_t GetSubmitTime() const   { return _time; }
-        time_t GetExpiryTime() const   { return time_t(_time + 30 * 24 * 3600); } // Adding 30 days
+        time_t GetSubmitTime() const { return _time; }
+        time_t GetExpiryTime() const { return time_t(_time + 30 * 24 * 3600); } // Adding 30 days
+
         std::string const& GetComment() const { return _comment; }
+
         std::string const& GetName() const
         {
             static std::string const defaultName;
+#if 0
             auto const nameData = sWorld->GetCharacterNameData(GetPlayerGUID());
             return nameData ? nameData->m_name : defaultName;
+#endif
+            return defaultName;
         }
 
     private:

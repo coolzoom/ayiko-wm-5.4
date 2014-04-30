@@ -1049,11 +1049,9 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     uint32 time3 = getMSTime() - time2;
 
     // Send item extended costs hotfix
-    std::set<uint32> extendedCostHotFix = sObjectMgr->GetOverwriteExtendedCosts();
-    for (auto itr : extendedCostHotFix)
+    for (auto const &id : sObjectMgr->GetOverwriteExtendedCosts())
     {
-        const ItemExtendedCostEntry* extendedCost = sItemExtendedCostStore.LookupEntry(itr);
-
+        auto const extendedCost = sItemExtendedCostStore.LookupEntry(id);
         if (!extendedCost)
             continue;
 
@@ -1065,20 +1063,20 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         buff << uint32(0); // reqarenapoints
         buff << uint32(extendedCost->RequiredArenaSlot);
 
-        for (uint32 i = 0; i < MAX_ITEM_EXT_COST_ITEMS; i++)
-            buff << uint32(extendedCost->RequiredItem[i]);
+        for (auto const &req : extendedCost->RequiredItem)
+            buff << req;
 
-        for (uint32 i = 0; i < MAX_ITEM_EXT_COST_ITEMS; i++)
-            buff << uint32(extendedCost->RequiredItemCount[i]);
+        for (auto const &req : extendedCost->RequiredItemCount)
+            buff << req;
 
         buff << uint32(extendedCost->RequiredPersonalArenaRating);
         buff << uint32(0); // ItemPurchaseGroup
 
-        for (uint32 i = 0; i < MAX_ITEM_EXT_COST_CURRENCIES; i++)
-            buff << uint32(extendedCost->RequiredCurrency[i]);
+        for (auto const &req : extendedCost->RequiredCurrency)
+            buff << req;
 
-        for (uint32 i = 0; i < MAX_ITEM_EXT_COST_CURRENCIES; i++)
-            buff << uint32(extendedCost->RequiredCurrencyCount[i]);
+        for (auto const & req : extendedCost->RequiredCurrencyCount)
+            buff << req;
 
         // Unk
         for (uint32 i = 0; i < MAX_ITEM_EXT_COST_CURRENCIES; i++)

@@ -3050,29 +3050,48 @@ void SpellMgr::LoadSpellCustomAttr()
             if (spellInfo->SpellVisual[0] == 3879 || spellInfo->Id == 74117)
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_BACK;
 
-        ////////////////////////////////////
-        ///      DEFINE BINARY SPELLS   ////
-        ////////////////////////////////////
-        for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)
-        {
-            switch (spellInfo->Effects[j].Effect)
+            ////////////////////////////////////
+            ///      DEFINE BINARY SPELLS   ////
+            ////////////////////////////////////
+            for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)
             {
-                case SPELL_EFFECT_DISPEL:
-                case SPELL_EFFECT_STEAL_BENEFICIAL_BUFF:
-                case SPELL_EFFECT_POWER_DRAIN:
-                case SPELL_EFFECT_POWER_BURN:
-                    spellInfo->AttributesCu |= SPELL_ATTR0_CU_BINARY;
-                    break;
+                switch (spellInfo->Effects[j].Effect)
+                {
+                    case SPELL_EFFECT_DISPEL:
+                    case SPELL_EFFECT_STEAL_BENEFICIAL_BUFF:
+                    case SPELL_EFFECT_POWER_DRAIN:
+                    case SPELL_EFFECT_POWER_BURN:
+                        spellInfo->AttributesCu |= SPELL_ATTR0_CU_BINARY;
+                        break;
+                }
+
+                switch (spellInfo->Effects[j].Mechanic)
+                {
+                    case MECHANIC_FEAR:
+                    case MECHANIC_CHARM:
+                    case MECHANIC_SNARE:
+                        // Frost Bolt is not binary
+                        if (spellInfo->Id == 116)
+                            break;
+                    case MECHANIC_FREEZE:
+                    case MECHANIC_BANISH:
+                    case MECHANIC_POLYMORPH:
+                    case MECHANIC_ROOT:
+                    case MECHANIC_INTERRUPT:
+                    case MECHANIC_SILENCE:
+                    case MECHANIC_HORROR:
+                        spellInfo->AttributesCu |= SPELL_ATTR0_CU_BINARY;
+                        break;
+                    default:
+                        break;
+                }
             }
 
-            switch (spellInfo->Effects[j].Mechanic)
+            switch (spellInfo->Mechanic)
             {
                 case MECHANIC_FEAR:
                 case MECHANIC_CHARM:
                 case MECHANIC_SNARE:
-                    // Frost Bolt is not binary
-                    if (spellInfo->Id == 116)
-                        break;
                 case MECHANIC_FREEZE:
                 case MECHANIC_BANISH:
                 case MECHANIC_POLYMORPH:
@@ -3082,34 +3101,22 @@ void SpellMgr::LoadSpellCustomAttr()
                 case MECHANIC_HORROR:
                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_BINARY;
                     break;
-                default:
-                    break;
             }
-        }
 
-        switch (spellInfo->Mechanic)
-        {
-            case MECHANIC_FEAR:
-            case MECHANIC_CHARM:
-            case MECHANIC_SNARE:
-            case MECHANIC_FREEZE:
-            case MECHANIC_BANISH:
-            case MECHANIC_POLYMORPH:
-            case MECHANIC_ROOT:
-            case MECHANIC_INTERRUPT:
-            case MECHANIC_SILENCE:
-            case MECHANIC_HORROR:
-                spellInfo->AttributesCu |= SPELL_ATTR0_CU_BINARY;
-                break;
-        }
-
-        ///////////////////////////
-        //////   END BINARY  //////
-        ///////////////////////////
-
+            ///////////////////////////
+            //////   END BINARY  //////
+            ///////////////////////////
 
             switch (spellInfo->Id)
             {
+                case 102401: // Wild Charge - not shapeshifted
+                    // should have same speed as cat form's leap. Spell::CalculateJumpSpeeds
+                    // is wrong most probably
+                    spellInfo->Effects[EFFECT_1].MiscValue = 5;
+                    break;
+                case 102417: // Wild Charge - travel form
+                    spellInfo->Effects[EFFECT_0].MiscValue = 5;
+                    break;
                 case 82366:
                 case 110704:
                 case 116467:

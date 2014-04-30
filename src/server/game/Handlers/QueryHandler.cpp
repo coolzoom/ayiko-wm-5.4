@@ -184,6 +184,7 @@ void WorldSession::SendNameQueryOpcodeCallBack(uint64 guid, PreparedQueryResult 
     data.WriteBitSeq<5>(playerGuid);
     data.WriteBit(false); // unk
     data.WriteBitSeq<2, 6>(unkGuid);
+    data.FlushBits();
     data.WriteString(playerName);
     data.WriteByteSeq<4>(playerGuid);
     data.WriteByteSeq<3>(unkGuid);

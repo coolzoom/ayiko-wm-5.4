@@ -3109,6 +3109,11 @@ void SpellMgr::LoadSpellCustomAttr()
 
             switch (spellInfo->Id)
             {
+                case 774: // Rejuvenation
+                    // TODO: is this duplicate periodic aura used for anything?
+                    spellInfo->Effects[EFFECT_2].Effect = 0;
+                    spellInfo->Effects[EFFECT_2].ApplyAuraName = SPELL_AURA_NONE;
+                    break;
                 case 102401: // Wild Charge - not shapeshifted
                     // should have same speed as cat form's leap. Spell::CalculateJumpSpeeds
                     // is wrong most probably

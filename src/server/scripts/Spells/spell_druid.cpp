@@ -3537,6 +3537,103 @@ class spell_dru_survival_instincts : public SpellScriptLoader
         }
 };
 
+class spell_dru_yseras_gift final : public SpellScriptLoader
+{
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        enum
+        {
+            YSERAS_GIFT_HEAL_SELF = 145109,
+            YSERAS_GIFT_HEAL_ALLY = 145110
+        };
+
+        void OnTick(AuraEffect const *eff)
+        {
+            PreventDefaultAction();
+
+            auto const caster = GetCaster();
+            if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            uint32 spellId = YSERAS_GIFT_HEAL_SELF;
+
+            if (caster->GetHealth() == caster->GetMaxHealth()) {
+                // No point in casting anything if character is not in group
+                if (!caster->ToPlayer()->GetGroup())
+                    return;
+                spellId = YSERAS_GIFT_HEAL_ALLY;
+            }
+
+            // It seems that it heals for 5% of druid's health for both cases
+            int32 const bp0 = caster->CountPctFromMaxHealth(eff->GetAmount());
+            caster->CastCustomSpell(caster, spellId, &bp0, nullptr, nullptr, true);
+        }
+
+        void Register() final
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(script_impl::OnTick, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+        }
+    };
+
+public:
+    spell_dru_yseras_gift()
+        : SpellScriptLoader("spell_dru_yseras_gift")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
+};
+
+class spell_dru_yseras_gift_heal_ally final : public SpellScriptLoader
+{
+    class script_impl final : public SpellScript
+    {
+        PrepareSpellScript(script_impl)
+
+        void FilterTargets(std::list<WorldObject*> &targets)
+        {
+            targets.remove(GetCaster());
+
+            if (targets.empty())
+                return;
+
+            // Can't use Trinity::HealthPctOrderPred for WorldObject types
+            auto const mostInjuredItr = std::min_element(targets.cbegin(), targets.cend(),
+                [](WorldObject const *a, WorldObject const *b)
+                {
+                    // This spell can not target anything except units, so no check
+                    return a->ToUnit()->GetHealthPct() < b->ToUnit()->GetHealthPct();
+                });
+
+            auto const mostInjured = (*mostInjuredItr)->ToUnit();
+            targets.clear();
+
+            // Do not cast anything if all group members are at full health
+            if (mostInjured->GetHealth() != mostInjured->GetMaxHealth())
+                targets.emplace_back(mostInjured);
+        }
+
+        void Register() final
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(script_impl::FilterTargets, EFFECT_0, TARGET_UNIT_CASTER_AREA_RAID);
+        }
+    };
+
+public:
+    spell_dru_yseras_gift_heal_ally()
+        : SpellScriptLoader("spell_dru_yseras_gift_heal_ally")
+    { }
+
+    SpellScript * GetSpellScript() const final
+    {
+        return new script_impl;
+    }
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_glyph_of_the_treant();
@@ -3604,4 +3701,6 @@ void AddSC_druid_spell_scripts()
     new spell_dru_starfall_dummy();
     new spell_dru_savage_roar();
     new spell_dru_survival_instincts();
+    new spell_dru_yseras_gift();
+    new spell_dru_yseras_gift_heal_ally();
 }

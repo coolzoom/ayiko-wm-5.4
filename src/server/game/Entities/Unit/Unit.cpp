@@ -13885,7 +13885,18 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
         }
         case MOVE_SWIM:
         {
-            main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_SWIM_SPEED);
+            int32 wildChargeBonus = 0;
+
+            for (auto const &eff : GetAuraEffectsByType(SPELL_AURA_MOD_INCREASE_SWIM_SPEED))
+            {
+                // Wild Charge provides additional speed bonus
+                if (eff->GetId() == 102416)
+                    wildChargeBonus = eff->GetAmount();
+                else if (eff->GetAmount() > main_speed_mod)
+                    main_speed_mod = eff->GetAmount();
+            }
+
+            main_speed_mod += wildChargeBonus;
             break;
         }
         case MOVE_FLIGHT:
@@ -14177,12 +14188,11 @@ void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
             case MOVE_SWIM:
             {
                 data.Initialize(SMSG_MOVE_SET_SWIM_SPEED, 1 + 8 + 4 + 4);
-
-                data.WriteBitSeq<6, 3, 4, 2, 5, 7, 0, 1>(guid);
-
-                data.WriteByteSeq<4>(guid);
+                data.WriteBitSeq<0, 5, 2, 6, 7, 4, 1, 3>(guid);
+                data.WriteByteSeq<4, 5, 3>(guid);
+                data << uint32(0);
+                data.WriteByteSeq<0, 6, 2, 1, 7>(guid);
                 data << float(GetSpeed(mtype));
-                data.WriteByteSeq<7, 1, 6, 3, 0, 2, 5>(guid);
                 break;
             }
             case MOVE_SWIM_BACK:

@@ -274,9 +274,6 @@ Unit::Unit(bool isWorldObject): WorldObject(isWorldObject)
     _lastLiquid = NULL;
     _isWalkingBeforeCharm = false;
 
-    // Don't send packet in constructor, it may cause crashes
-    SetEclipsePower(0, false); // Not sure of 0
-
     // Area Skip Update
     _skipCount = 0;
     _skipDiff = 0;
@@ -6763,18 +6760,18 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
 
                     ToPlayer()->AddSpellCooldown(fakeCooldownId, 0, 6 * IN_MILLISECONDS);
 
-                    if (GetEclipsePower() <= 0)
-                        SetEclipsePower(GetEclipsePower() - 20);
+                    if (GetPower(POWER_ECLIPSE) <= 0)
+                        SetEclipsePower(GetPower(POWER_ECLIPSE) - 20);
                     else
-                        SetEclipsePower(GetEclipsePower() + 20);
+                        SetEclipsePower(GetPower(POWER_ECLIPSE) + 20);
 
-                    if (GetEclipsePower() == 100)
+                    if (GetPower(POWER_ECLIPSE) == 100)
                     {
                         CastSpell(this, 48517, true, 0); // Cast Lunar Eclipse
                         CastSpell(this, 16886, true); // Cast Nature's Grace
                         CastSpell(this, 81070, true); // Cast Eclipse - Give 35% of POWER_MANA
                     }
-                    else if (GetEclipsePower() == -100)
+                    else if (GetPower(POWER_ECLIPSE) == -100)
                     {
                         CastSpell(this, 48518, true, 0); // Cast Lunar Eclipse
                         CastSpell(this, 16886, true); // Cast Nature's Grace
@@ -15319,7 +15316,7 @@ void Unit::SetPower(Powers power, int32 val, bool sendLog)
         data << uint8(power);
         data.WriteByteSeq<4, 2, 3, 7, 0, 6, 1, 5>(guid);
 
-        SendMessageToSet(&data, GetTypeId() == TYPEID_PLAYER ? true : false);
+        SendMessageToSet(&data, GetTypeId() == TYPEID_PLAYER);
     }
 
     // Custom MoP Script
@@ -17179,11 +17176,11 @@ void Unit::SetContestedPvP(Player* attackedPlayer)
 bool Unit::IsTriggeredAtSpellProcEvent(Unit* victim, Aura *aura, SpellInfo const* procSpell, uint32 procFlag, uint32 procExtra, WeaponAttackType attType, bool isVictim, bool active, SpellProcEventEntry const* & spellProcEvent)
 {
     SpellInfo const* spellProto = aura->GetSpellInfo();
-
+#if 0
     // let the aura be handled by new proc system if it has new entry
     if (sSpellMgr->GetSpellProcEntry(spellProto->Id))
         return false;
-
+#endif
     // Get proc Event Entry
     spellProcEvent = sSpellMgr->GetSpellProcEvent(spellProto->Id);
 
@@ -20614,28 +20611,7 @@ void Unit::SetEclipsePower(int32 power, bool send)
             RemoveAurasDueToSpell(48517); // Eclipse (Solar)
     }
 
-    _eclipsePower = power;
-
-    if (send)
-    {
-        WorldPacket data(SMSG_POWER_UPDATE);
-
-        ObjectGuid guid = GetGUID();
-
-        data.WriteBitSeq<7, 2, 4, 3, 6, 1>(guid);
-
-        int powerCounter = 1;
-        data.WriteBits(powerCounter, 21);
-
-        data.WriteBitSeq<0, 5>(guid);
-
-        data << int32(_eclipsePower);
-        data << uint8(POWER_ECLIPSE);
-
-        data.WriteByteSeq<4, 2, 3, 7, 0, 6, 1, 5>(guid);
-
-        SendMessageToSet(&data, GetTypeId() == TYPEID_PLAYER ? true : false);
-    }
+    SetPower(POWER_ECLIPSE, power, send);
 }
 
 /* In the next functions, we keep 1 minute of last damage */

@@ -341,8 +341,8 @@ class mob_dread_kunchong : public CreatureScript
                     case SPEC_MONK_MISTWEAVER:
                         DoCast(me, SPELL_SEEK_AND_DESTROY_2, true);
                         break;
-                    case SPEC_DRUID_CAT:
-                    case SPEC_DRUID_BEAR:
+                    case SPEC_DRUID_FERAL:
+                    case SPEC_DRUID_GUARDIAN:
                     case SPEC_HUNTER_BEASTMASTER:
                     case SPEC_HUNTER_MARKSMAN:
                     case SPEC_HUNTER_SURVIVAL:
@@ -888,8 +888,8 @@ class mob_ik_thik_terrorclaw : public CreatureScript
                     case SPEC_MONK_MISTWEAVER:
                         DoCast(me, SPELL_SEEK_AND_DESTROY_2, true);
                         break;
-                    case SPEC_DRUID_CAT:
-                    case SPEC_DRUID_BEAR:
+                    case SPEC_DRUID_FERAL:
+                    case SPEC_DRUID_GUARDIAN:
                     case SPEC_HUNTER_BEASTMASTER:
                     case SPEC_HUNTER_MARKSMAN:
                     case SPEC_HUNTER_SURVIVAL:
@@ -1377,8 +1377,8 @@ class mob_wake_of_horror : public CreatureScript
                     case SPEC_MONK_MISTWEAVER:
                         DoCast(me, SPELL_SEEK_AND_DESTROY_2, true);
                         break;
-                    case SPEC_DRUID_CAT:
-                    case SPEC_DRUID_BEAR:
+                    case SPEC_DRUID_FERAL:
+                    case SPEC_DRUID_GUARDIAN:
                     case SPEC_HUNTER_BEASTMASTER:
                     case SPEC_HUNTER_MARKSMAN:
                     case SPEC_HUNTER_SURVIVAL:

@@ -546,8 +546,6 @@ Player::Player(WorldSession* session)
     m_speakTime = 0;
     m_speakCount = 0;
 
-    m_lastEclipseState = ECLIPSE_NONE;
-
     m_pmChatTime = 0;
     m_pmChatCount = 0;
 
@@ -5384,7 +5382,7 @@ uint32 Player::GetRoleForGroup(uint32 specializationId)
         case SPEC_WARRIOR_ARMS:
         case SPEC_WARRIOR_FURY:
         case SPEC_DRUID_BALANCE:
-        case SPEC_DRUID_CAT:
+        case SPEC_DRUID_FERAL:
             roleId = ROLES_DPS;
             break;
         case SPEC_MONK_MISTWEAVER:
@@ -5398,7 +5396,7 @@ uint32 Player::GetRoleForGroup(uint32 specializationId)
         case SPEC_MONK_BREWMASTER:
         case SPEC_DK_BLOOD:
         case SPEC_WARRIOR_PROTECTION:
-        case SPEC_DRUID_BEAR:
+        case SPEC_DRUID_GUARDIAN:
         case SPEC_PALADIN_PROTECTION:
             roleId = ROLES_TANK;
             break;

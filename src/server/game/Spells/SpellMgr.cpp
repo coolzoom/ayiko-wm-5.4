@@ -4109,7 +4109,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 90174: // Divine Purpose
                 case 131567:// Holy Spark
                 case 69369: // Predator Swiftness
-                case 108382:// Dream of Cenarius (second proc)
                 case 113853:// Blazing Speed aurastate
                 case 114028:// Mass Spell Reflection
                     spellInfo->ProcCharges = 1;
@@ -4153,7 +4152,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_DONE_BONUS;
                     break;
                 case 131116:// Allow to use Raging Blow
-                case 108381:// Dream of Cenarius (first proc)
                     spellInfo->ProcCharges = 2;
                     break;
                 case 44544: // Fingers of Frost

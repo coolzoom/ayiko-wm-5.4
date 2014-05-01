@@ -6749,31 +6749,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                     ToPlayer()->ReduceSpellCooldown(18562, 1 * IN_MILLISECONDS);
                     break;
                 }
-                case 108373:// Dream of Cenarius
-                {
-                    if (GetTypeId() != TYPEID_PLAYER)
-                        return false;
-
-                    if (!procSpell)
-                        return false;
-
-                    // Nourish, Healing Touch, and Regrowth increase the damage done by your next 2 Moonfire or Sunfire casts by 50% or by your next 2 melee abilities by 25%.
-                    if (procSpell->Id == 50464 || procSpell->Id == 5185 || procSpell->Id == 8936)
-                    {
-                        triggered_spell_id = 108381;
-                        target = this;
-                    }
-                    // Wrath, Starfire, Starsurge, and melee abilities increase healing done by your next healing spell by 30%. Tranquility is not affected.
-                    else if ((procFlag & PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS) || (procSpell->Id == 5176 || procSpell->Id == 2912 || procSpell->Id == 78674))
-                    {
-                        triggered_spell_id = 108382;
-                        target = this;
-                    }
-                    else
-                        return false;
-
-                    break;
-                }
                 case 46832: // Sudden Eclipse (S12 - 2P Balance)
                 {
                     if (GetTypeId() != TYPEID_PLAYER)

@@ -1354,9 +1354,6 @@ void Battleground::AddPlayer(Player* player)
     PlayerAddedToBGCheckIfBGIsRunning(player);
     AddOrSetPlayerToCorrectBgGroup(player, team);
 
-    if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(134735))
-        Aura::TryRefreshStackOrCreate(spellInfo, MAX_EFFECT_MASK, player, player, spellInfo->spellPower);
-
     if (IsRatedBG())
     {
         if (player->GetTeam() != player->GetBGTeam())

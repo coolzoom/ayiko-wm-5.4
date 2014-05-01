@@ -3436,35 +3436,55 @@ class spell_gen_hardened_shell : public SpellScriptLoader
         }
 };
 
-// Battle Fatigue - 134735
-class spell_gen_battle_fatigue : public SpellScriptLoader
+class spell_gen_battle_fatigue final : public SpellScriptLoader
 {
-    public:
-        spell_gen_battle_fatigue() : SpellScriptLoader("spell_gen_battle_fatigue") { }
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
 
-        class spell_gen_battle_fatigue_AuraScript : public AuraScript
+        enum
         {
-            PrepareAuraScript(spell_gen_battle_fatigue_AuraScript);
-
-            void HandleRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
-            {
-                if (Unit* target = GetTarget())
-                    if (target->GetTypeId() == TYPEID_PLAYER)
-                        if (target->ToPlayer()->GetBattleground())
-                            if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(134735))
-                                Aura::TryRefreshStackOrCreate(spellInfo, MAX_EFFECT_MASK, target, target, spellInfo->spellPower);
-            }
-
-            void Register()
-            {
-                OnEffectRemove += AuraEffectRemoveFn(spell_gen_battle_fatigue_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_MOD_HEALING_PCT, AURA_EFFECT_HANDLE_REAL);
-            }
+            BATTLE_FATIGUE_HEAL_REDUCTION = 134735
         };
 
-        AuraScript* GetAuraScript() const
+        bool CheckProc(ProcEventInfo &eventInfo)
         {
-            return new spell_gen_battle_fatigue_AuraScript();
+            if (eventInfo.GetDamageInfo()->GetDamage() == 0)
+                return false;
+
+            auto const caster = eventInfo.GetActor();
+            if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
+                return false;
+
+            auto const target = eventInfo.GetActionTarget();
+            if (!target || target->GetTypeId() != TYPEID_PLAYER)
+                return false;
+
+            return true;
         }
+
+        void OnProc(AuraEffect const *, ProcEventInfo &eventInfo)
+        {
+            if (auto const target = eventInfo.GetActionTarget())
+                target->CastSpell(target, BATTLE_FATIGUE_HEAL_REDUCTION, true);
+        }
+
+        void Register() final
+        {
+            DoCheckProc += AuraCheckProcFn(script_impl::CheckProc);
+            OnEffectProc += AuraEffectProcFn(script_impl::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+public:
+    spell_gen_battle_fatigue()
+        : SpellScriptLoader("spell_gen_battle_fatigue")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
 };
 
 void AddSC_generic_spell_scripts()

@@ -126,7 +126,7 @@ void AuctionHouseMgr::SendAuctionWonMail(AuctionEntry* auction, SQLTransaction& 
 
             uint32 owner_accid = sObjectMgr->GetPlayerAccountIdByGUID(auction->owner);
 
-            sLog->outCommand(bidder_accId, "GM %s (Account: %u) won item in auction: %s (Entry: %u Count: %u) and pay money: %u. Original owner %s (Account: %u)",
+            sLog->outCommand(bidder_accId, "GM %s (Account: %u) won item in auction: %s (Entry: %u Count: %u) and pay money: " UI64FMTD ". Original owner %s (Account: %u)",
                              bidder_name.c_str(), bidder_accId, pItem->GetTemplate()->Name1.c_str(), pItem->GetEntry(), pItem->GetCount(), auction->bid, owner_name.c_str(), owner_accid);
         }
     }
@@ -484,8 +484,8 @@ void AuctionHouseObject::Update()
         auction->DeleteFromDB(trans);
         CharacterDatabase.CommitTransaction(trans);
 
-        RemoveAuction(auction, itemEntry);
         sAuctionMgr->RemoveAItem(auction->itemGUIDLow);
+        RemoveAuction(auction, itemEntry);
     }
     while (result->NextRow());
 }
@@ -630,20 +630,19 @@ bool AuctionEntry::BuildAuctionInfo(WorldPacket& data) const
         data << uint32(item->GetEnchantmentCharges(EnchantmentSlot(i)));
     }
 
-    data <<  uint32(0);
-
+    data << uint32(0);
     data << int32(item->GetItemRandomPropertyId());                 // Random item property id
     data << uint32(item->GetItemSuffixFactor());                    // SuffixFactor
     data << uint32(item->GetCount());                               // item->count
     data << uint32(item->GetSpellCharges());                        // item->charge FFFFFFF
-    data << uint32(0);                                              // Unknown
-    data << uint64(owner);                                          // Auction->owner
+    data << uint32(0);                                              // Unk
+    data << uint64(MAKE_NEW_GUID(owner, 0, HIGHGUID_PLAYER));       // Auction->owner
     data << uint64(startbid);                                       // Auction->startbid (not sure if useful)
     data << uint64(bid ? GetAuctionOutBid() : 0);
     // Minimal outbid
     data << uint64(buyout);                                         // Auction->buyout
     data << uint32((expire_time - time(NULL)) * IN_MILLISECONDS);   // time left
-    data << uint64(bidder);                                         // auction->bidder current
+    data << uint64(MAKE_NEW_GUID(bidder, 0, HIGHGUID_PLAYER));      // auction->bidder current
     data << uint64(bid);                                            // current bid
     return true;
 }
@@ -675,12 +674,12 @@ void AuctionEntry::SaveToDB(SQLTransaction& trans) const
     stmt->setUInt32(1, auctioneer);
     stmt->setUInt32(2, itemGUIDLow);
     stmt->setUInt32(3, owner);
-    stmt->setInt32 (4, int32(buyout));
+    stmt->setUInt64(4, buyout);
     stmt->setUInt64(5, uint64(expire_time));
     stmt->setUInt32(6, bidder);
-    stmt->setInt32 (7, int32(bid));
-    stmt->setInt32 (8, int32(startbid));
-    stmt->setInt32 (9, int32(deposit));
+    stmt->setUInt64(7, bid);
+    stmt->setUInt64(8, startbid);
+    stmt->setInt32(9, int32(deposit));
     trans->Append(stmt);
 }
 
@@ -694,11 +693,11 @@ bool AuctionEntry::LoadFromDB(Field* fields)
     itemEntry   = fields[index++].GetUInt32();
     itemCount   = fields[index++].GetUInt32();
     owner       = fields[index++].GetUInt32();
-    buyout      = fields[index++].GetUInt32();
+    buyout      = fields[index++].GetUInt64();
     expire_time = fields[index++].GetUInt32();
     bidder      = fields[index++].GetUInt32();
-    bid         = fields[index++].GetUInt32();
-    startbid    = fields[index++].GetUInt32();
+    bid         = fields[index++].GetUInt64();
+    startbid    = fields[index++].GetUInt64();
     deposit     = fields[index++].GetUInt32();
 
     CreatureData const* auctioneerData = sObjectMgr->GetCreatureData(auctioneer);

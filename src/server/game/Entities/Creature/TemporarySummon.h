@@ -68,7 +68,11 @@ class Minion : public TempSummon
         Minion(SummonPropertiesEntry const* properties, Unit* owner, bool isWorldObject);
         void InitStats(uint32 duration);
         void RemoveFromWorld();
+
         Unit* GetOwner() { return m_owner; }
+
+        Unit const * GetOwner() const { return m_owner; }
+
         float GetFollowAngle() const { return m_followAngle; }
         void SetFollowAngle(float angle) { m_followAngle = angle; }
 

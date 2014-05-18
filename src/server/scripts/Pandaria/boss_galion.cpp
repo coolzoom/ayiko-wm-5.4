@@ -1,5 +1,5 @@
 /*
-Custom
+Pandaria
 World boss
 Antoine Vallee for Pandashan Servers
 

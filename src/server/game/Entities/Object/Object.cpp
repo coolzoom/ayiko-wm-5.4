@@ -316,9 +316,9 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
     }
 #endif
 //    uint32 bitCounter2 = 0;
-//    bool hasAreaTriggerData = isType(TYPEMASK_AREATRIGGER) && ((AreaTrigger*)this)->GetVisualRadius() != 0.0f;
+    bool hasAreaTriggerData = isType(TYPEMASK_AREATRIGGER) && ((AreaTrigger const*)this)->GetVisualRadius() != 0.0f;
 
-    data->WriteBit(0);                                          // unk flags
+    data->WriteBit(hasAreaTriggerData);                         // unk flags
     data->WriteBit(flags & UPDATEFLAG_SCENE_OBJECT);            // isScenario
     data->WriteBit(0);                                          // unk bit 676
     data->WriteBit(flags & UPDATEFLAG_TRANSPORT);               // isTransport
@@ -356,6 +356,22 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
     }
 
     // TODO: scene objects
+
+    if (hasAreaTriggerData)
+    {
+        data->WriteBit(true);   // scale
+        data->WriteBit(false);
+        data->WriteBit(false);
+        data->WriteBit(false);
+        data->WriteBit(false);
+        data->WriteBit(false);
+        data->WriteBit(false);
+        data->WriteBit(false);
+        data->WriteBit(false);  // unk, always true on retail sniff
+        data->WriteBit(false);
+        data->WriteBit(false);
+        data->WriteBit(false);
+    }
 
     if (flags & UPDATEFLAG_LIVING)
     {
@@ -439,6 +455,13 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         if (GameObjectTemplate const* goinfo = sObjectMgr->GetGameObjectTemplate(GetEntry()))
             if (goinfo->type == GAMEOBJECT_TYPE_TRANSPORT)
                 (*data) << (uint32)goinfo->transport.pause;
+
+    if (hasAreaTriggerData)
+    {
+        *data << uint32(8);
+        *data << float(((AreaTrigger const *)this)->GetVisualRadius()); // scale
+        *data << float(((AreaTrigger const *)this)->GetVisualRadius()); // scale
+    }
 
     if (flags & UPDATEFLAG_LIVING)
     {
@@ -2292,8 +2315,6 @@ void WorldObject::BuildMonsterChat(WorldPacket* data, uint8 msgtype, char const*
 
     if (bit5264)
         *data << uint32(0);                                         // unk uint32
-
-    return;
 }
 
 void Unit::BuildHeartBeatMsg(WorldPacket* data) const

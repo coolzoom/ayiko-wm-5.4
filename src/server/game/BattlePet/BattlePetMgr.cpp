@@ -48,16 +48,17 @@ BattlePetMgr::BattlePetMgr(Player* owner) : m_player(owner)
 
 void BattlePetMgr::GetBattlePetList(PetBattleDataList &battlePetList) const
 {
-    auto const &spellMap = m_player->GetSpellMap();
-    for (auto const &itr : spellMap)
+    for (auto const &kvPair : m_player->GetSpellMap())
     {
-        if (itr.second->state == PLAYERSPELL_REMOVED)
+        auto const &playerSpell = kvPair.second;
+
+        if (playerSpell.state == PLAYERSPELL_REMOVED)
             continue;
 
-        if (!itr.second->active || itr.second->disabled)
+        if (!playerSpell.active || playerSpell.disabled)
             continue;
 
-        SpellInfo const* spell = sSpellMgr->GetSpellInfo(itr.first);
+        SpellInfo const* spell = sSpellMgr->GetSpellInfo(kvPair.first);
         if (!spell)
             continue;
 

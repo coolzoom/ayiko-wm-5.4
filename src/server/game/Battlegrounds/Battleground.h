@@ -176,26 +176,23 @@ struct BattlegroundObjectInfo
 // handle the queue types and bg types separately to enable joining queue for different sized arenas at the same time
 enum BattlegroundQueueTypeId
 {
-    BATTLEGROUND_QUEUE_NONE           = 0,
-    BATTLEGROUND_QUEUE_AV             = 1,
-    BATTLEGROUND_QUEUE_WS             = 2,
-    BATTLEGROUND_QUEUE_AB             = 3,
-    BATTLEGROUND_QUEUE_EY             = 4,
-    BATTLEGROUND_QUEUE_SA             = 5,
-    BATTLEGROUND_QUEUE_IC             = 6,
-    BATTLEGROUND_QUEUE_TP             = 7,
-    BATTLEGROUND_QUEUE_BFG            = 8,
-    BATTLEGROUND_QUEUE_RB             = 9,
-    BATTLEGROUND_QUEUE_2v2            = 10,
-    BATTLEGROUND_QUEUE_3v3            = 11,
-    BATTLEGROUND_QUEUE_5v5            = 12,
-    BATTLEGROUND_QUEUE_KT             = 13,
-    BATTLEGROUND_QUEUE_CTF3           = 14,
-    BATTLEGROUND_QUEUE_SSM            = 15,
-    BATTLEGROUND_QUEUE_TV             = 16,
-    BATTLEGROUND_QUEUE_RATED_10_VS_10 = 17,
-    BATTLEGROUND_QUEUE_RATED_15_VS_15 = 18,
-    BATTLEGROUND_QUEUE_RATED_25_VS_25 = 19,
+    BATTLEGROUND_QUEUE_NONE     = 0,
+    BATTLEGROUND_QUEUE_AV       = 1,
+    BATTLEGROUND_QUEUE_WS       = 2,
+    BATTLEGROUND_QUEUE_AB       = 3,
+    BATTLEGROUND_QUEUE_EY       = 4,
+    BATTLEGROUND_QUEUE_SA       = 5,
+    BATTLEGROUND_QUEUE_IC       = 6,
+    BATTLEGROUND_QUEUE_TP       = 7,
+    BATTLEGROUND_QUEUE_BFG      = 8,
+    BATTLEGROUND_QUEUE_RB       = 9,
+    BATTLEGROUND_QUEUE_2v2      = 10,
+    BATTLEGROUND_QUEUE_3v3      = 11,
+    BATTLEGROUND_QUEUE_5v5      = 12,
+    BATTLEGROUND_QUEUE_KT       = 13,
+    BATTLEGROUND_QUEUE_CTF3     = 14,
+    BATTLEGROUND_QUEUE_SSM      = 15,
+    BATTLEGROUND_QUEUE_TV       = 16,
     MAX_BATTLEGROUND_QUEUE_TYPES
 };
 
@@ -326,7 +323,7 @@ enum BGHonorMode
 };
 
 #define BG_AWARD_ARENA_POINTS_MIN_LEVEL 71
-#define ARENA_TIMELIMIT_POINTS_LOSS    -12
+#define ARENA_TIMELIMIT_POINTS_LOSS    -16
 
 /*
 This class is used to:
@@ -389,7 +386,6 @@ class Battleground
         uint32 GetScriptId() const          { return ScriptId; }
         uint32 GetBonusHonorFromKill(uint32 kills) const;
         bool IsRandom() const { return m_IsRandom; }
-        bool IsRatedBG() const { return m_IsRatedBg; }
 
         // Set methods:
         void SetName(char const* Name)      { m_Name = Name; }
@@ -432,7 +428,6 @@ class Battleground
         void IncreaseInvitedCount(uint32 team)      { (team == ALLIANCE) ? ++m_InvitedAlliance : ++m_InvitedHorde; }
 
         void SetRandom(bool isRandom) { m_IsRandom = isRandom; }
-        void SetRatedBG(bool isRatedBg) { m_IsRatedBg = isRatedBg; }
         uint32 GetInvitedCount(uint32 team) const   { return (team == ALLIANCE) ? m_InvitedAlliance : m_InvitedHorde; }
         bool HasFreeSlots() const;
         uint32 GetFreeSlotsForTeam(uint32 Team) const;
@@ -519,7 +514,7 @@ class Battleground
         Group* GetBgRaid(uint32 TeamID) const { return TeamID == ALLIANCE ? m_BgRaids[BG_TEAM_ALLIANCE] : m_BgRaids[BG_TEAM_HORDE]; }
         void SetBgRaid(uint32 TeamID, Group* bg_raid);
 
-        virtual void UpdatePlayerScore(Player* source, Player* victim, uint32 type, uint32 value, bool doAddHonor = true);
+        virtual void UpdatePlayerScore(Player* Source, uint32 type, uint32 value, bool doAddHonor = true);
 
         static BattlegroundTeamId GetTeamIndexByTeamId(uint32 Team) { return Team == ALLIANCE ? BG_TEAM_ALLIANCE : BG_TEAM_HORDE; }
         uint32 GetPlayersCountByTeam(uint32 Team) const { return m_PlayersCount[GetTeamIndexByTeamId(Team)]; }
@@ -542,8 +537,6 @@ class Battleground
         void CheckArenaAfterTimerConditions();
         void CheckArenaWinConditions();
         void UpdateArenaWorldState();
-
-        void AddCrowdChoseYouEffect();
 
         // Triggers handle
         // must be implemented in BG subclass
@@ -651,7 +644,6 @@ class Battleground
 
         bool   m_BuffChange;
         bool   m_IsRandom;
-        bool   m_IsRatedBg;
 
         BGHonorMode m_HonorMode;
     private:
@@ -680,10 +672,6 @@ class Battleground
         char const* m_Name;
         uint64 m_Guid;
         uint32 m_PlayersPositionsTimer;
-
-        bool m_CrowdChosed;
-        uint32 m_minHealth;
-        uint32 m_teamDealMaxDamage;
 
         /* Pre- and post-update hooks */
 

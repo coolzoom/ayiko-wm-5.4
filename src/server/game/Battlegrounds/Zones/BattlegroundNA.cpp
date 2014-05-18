@@ -102,7 +102,7 @@ bool BattlegroundNA::HandlePlayerUnderMap(Player* player)
     return true;
 }
 
-void BattlegroundNA::HandleAreaTrigger(Player* Source, uint32 Trigger)
+void BattlegroundNA::HandleAreaTrigger(Player* /*Source*/, uint32 Trigger)
 {
     if (GetStatus() != STATUS_IN_PROGRESS)
         return;
@@ -115,8 +115,6 @@ void BattlegroundNA::HandleAreaTrigger(Player* Source, uint32 Trigger)
         case 4537:                                          // buff trigger?
             break;
         default:
-            TC_LOG_ERROR("bg.battleground", "WARNING: Unhandled AreaTrigger in Battleground: %u", Trigger);
-            Source->GetSession()->SendAreaTriggerMessage("Warning: Unhandled AreaTrigger in Battleground: %u", Trigger);
             break;
     }
 

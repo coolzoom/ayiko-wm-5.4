@@ -189,8 +189,8 @@ enum EUnitFields
     UNIT_FIELD_MIN_ITEM_LEVEL                        = OBJECT_END + 0x0093,
     UNIT_FIELD_MAXITEMLEVEL                          = OBJECT_END + 0x0094, // Size: 1, Type: INT, Flags: PUBLIC
     UNIT_FIELD_WILD_BATTLE_PET_LEVEL                 = OBJECT_END + 0x0095,
-    UNIT_FIELD_BATTLE_PET_COMPANION_GUID             = OBJECT_END + 0x0096,
-    UNIT_FIELD_BATTLE_PET_COMPANION_NAME_TIMESTAMP   = OBJECT_END + 0x0097, // Size: 1, Type: INT, Flags: PUBLIC
+    UNIT_FIELD_BATTLE_PET_COMPANION_NAME_TIMESTAMP   = OBJECT_END + 0x0096, // size 1, flags MIRROR_ALL
+    UNIT_FIELD_INTERACT_SPELL_ID                     = OBJECT_END + 0x0097, // size 1, flags MIRROR_ALL
     UNIT_END                                         = OBJECT_END + 0x0098
 };
 
@@ -253,7 +253,7 @@ enum EPlayerFields
     PLAYER_VISIBLE_ITEM_19_ENCHANTMENT               = UNIT_END + 0x031E,
     PLAYER_CHOSEN_TITLE                              = UNIT_END + 0x031F, // SIZE:1
     PLAYER_FAKE_INEBRIATION                          = UNIT_END + 0x0320, // SIZE:1
-    PLAYER_FIELD_HOME_PLAYER_REALM                   = UNIT_END + 0x0321, // SIZE:1
+    PLAYER_FIELD_VIRTUAL_PLAYER_REALM                = UNIT_END + 0x0321, // size 1
     PLAYER_CURRENT_SPEC_ID                           = UNIT_END + 0x0322, // SIZE:1
     PLAYER_FIELD_TAXI_MOUNT_ANIM_KIT_ID              = UNIT_END + 0x0323, // SIZE:1
     PLAYER_FIELD_CURRENT_BATTLE_PET_BREED_QUALITY    = UNIT_END + 0x0324, // SIZE:1

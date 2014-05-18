@@ -200,8 +200,6 @@ void BattlegroundDS::HandleAreaTrigger(Player* Source, uint32 Trigger)
                 setPipeKnockBackCount(0);
             break;
         default:
-            TC_LOG_ERROR("bg.battleground", "WARNING: Unhandled AreaTrigger in Battleground: %u", Trigger);
-            Source->GetSession()->SendAreaTriggerMessage("Warning: Unhandled AreaTrigger in Battleground: %u", Trigger);
             break;
     }
 }

@@ -355,6 +355,7 @@ void AddSC_thousand_needles();
 void AddSC_thunder_bluff();
 void AddSC_ungoro_crater();
 void AddSC_winterspring();
+void AddSC_uldum();
 
 //northrend
 void AddSC_boss_slad_ran();
@@ -617,6 +618,13 @@ void AddSC_boss_commander_rimok();
 void AddSC_boss_raigonn();
 void AddSC_boss_sha_of_anger();
 void AddSC_boss_galion();
+void AddSC_boss_oondasta();
+void AddSC_boss_nalak();
+void AddSC_boss_xuen();
+void AddSC_boss_yu_lon();
+void AddSC_boss_chi_ji();
+void AddSC_boss_niuzao();
+void AddSC_boss_ordos();
 void AddSC_instance_mogu_shan_palace();             // Mogu'Shan Palace
 void AddSC_boss_trial_of_the_king();
 void AddSC_boss_gekkan();
@@ -638,6 +646,36 @@ void AddSC_boss_garajal();
 void AddSC_boss_spirit_kings();
 void AddSC_boss_elegon();
 void AddSC_boss_will_of_emperor();
+void AddSC_instance_heart_of_fear();                // Heart of Fear
+void AddSC_heart_of_fear();
+void AddSC_boss_zorlok();
+void AddSC_boss_tayak();
+void AddSC_boss_garalon();
+void AddSC_boss_meljarak();
+void AddSC_boss_unsok();
+void AddSC_boss_shekzeer();
+void AddSC_instance_terrace_of_endless_spring();    // Terrace of Endless Spring
+void AddSC_terrace_of_endless_spring();
+void AddSC_boss_protectors_of_the_endless();
+void AddSC_boss_tsulong();
+void AddSC_boss_lei_shi();
+void AddSC_boss_sha_of_fear();
+void AddSC_instance_siege_of_orgrimmar();           // Siege of Orgrimmar
+void AddSC_siege_of_orgrimmar();
+void AddSC_immerseus();
+void AddSC_fallen_protectors();
+void AddSC_norushen();
+void AddSC_sha_of_pride();
+void AddSC_galakras();
+void AddSC_iron_juggernaut();
+void AddSC_korkron_dark_shamans();
+void AddSC_general_nazgrim();
+void AddSC_malkorok();
+void AddSC_spoils_of_pandaria();
+void AddSC_thok_the_bloodthirsty();
+void AddSC_siegecrafter_blackfuse();
+void AddSC_paragons_of_the_klaxxi();
+void AddSC_Garrosh_Hellscream();
 
 void AddSC_townlong_steppes();
 void AddSC_dread_wastes();
@@ -1037,6 +1075,7 @@ void AddKalimdorScripts()
     AddSC_thunder_bluff();
     AddSC_ungoro_crater();
     AddSC_winterspring();
+    AddSC_uldum();
 #endif
 }
 
@@ -1315,6 +1354,13 @@ void AddPandarieScripts()
     AddSC_boss_raigonn();
     AddSC_boss_sha_of_anger();                      // Pandaria World Bosses
     AddSC_boss_galion();
+    AddSC_boss_oondasta();
+    AddSC_boss_nalak();
+    AddSC_boss_xuen();
+    AddSC_boss_yu_lon();
+    AddSC_boss_chi_ji();
+    AddSC_boss_niuzao();
+    AddSC_boss_ordos();
     AddSC_instance_shadopan_monastery();            // Shadopan Monastery
     AddSC_shadopan_monastery();
     AddSC_boss_gu_cloudstrike();
@@ -1332,6 +1378,36 @@ void AddPandarieScripts()
     AddSC_boss_spirit_kings();
     AddSC_boss_elegon();
     AddSC_boss_will_of_emperor();
+    AddSC_instance_heart_of_fear();                 // Heart of fear
+    AddSC_heart_of_fear();
+    AddSC_boss_zorlok();
+    AddSC_boss_tayak();
+    AddSC_boss_garalon();
+    AddSC_boss_meljarak();
+    AddSC_boss_unsok();
+    AddSC_boss_shekzeer();
+    AddSC_instance_terrace_of_endless_spring();    // Terrace of Endless Spring
+    AddSC_terrace_of_endless_spring();
+    AddSC_boss_protectors_of_the_endless();
+    AddSC_boss_tsulong();
+    AddSC_boss_lei_shi();
+    AddSC_boss_sha_of_fear();
+    AddSC_instance_siege_of_orgrimmar();            // Siege of Orgrimmar
+    AddSC_siege_of_orgrimmar();
+    AddSC_immerseus();
+    AddSC_fallen_protectors();
+    AddSC_norushen();
+    AddSC_sha_of_pride();
+    AddSC_galakras();
+    AddSC_iron_juggernaut();
+    AddSC_korkron_dark_shamans();
+    AddSC_general_nazgrim();
+    AddSC_malkorok();
+    AddSC_spoils_of_pandaria();
+    AddSC_thok_the_bloodthirsty();
+    AddSC_siegecrafter_blackfuse();
+    AddSC_paragons_of_the_klaxxi();
+    AddSC_Garrosh_Hellscream();
 
     AddSC_townlong_steppes();
     AddSC_dread_wastes();

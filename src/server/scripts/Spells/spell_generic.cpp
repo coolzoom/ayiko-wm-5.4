@@ -391,6 +391,9 @@ class spell_gen_leeching_swarm : public SpellScriptLoader
             void HandleEffectPeriodic(AuraEffect const *aurEff)
             {
                 Unit* caster = GetCaster();
+                if (!caster)
+                    return;
+
                 if (Unit* target = GetTarget())
                 {
                     int32 lifeLeeched = target->CountPctFromCurHealth(aurEff->GetAmount());
@@ -922,7 +925,7 @@ class spell_gen_clone_weapon_aura : public SpellScriptLoader
                     case SPELL_COPY_OFFHAND_AURA:
                     case SPELL_COPY_OFFHAND_2_AURA:
                     {
-                        prevItem = target->GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID) + 1;
+                        prevItem = target->GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 1);
 
                         if (Player* player = caster->ToPlayer())
                         {
@@ -935,7 +938,7 @@ class spell_gen_clone_weapon_aura : public SpellScriptLoader
                     }
                     case SPELL_COPY_RANGED_AURA:
                     {
-                        prevItem = target->GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID) + 2;
+                        prevItem = target->GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 2);
 
                         if (Player* player = caster->ToPlayer())
                         {

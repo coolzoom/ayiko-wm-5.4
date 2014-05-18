@@ -176,7 +176,7 @@ enum SpellSpecificType
 
 enum SpellCustomAttributes
 {
-    SPELL_ATTR0_CU_ENCHANT_PROC                  = 0x00000001,
+    SPELL_ATTR0_CU_ENCHANT_STACK                 = 0x00000001,
     SPELL_ATTR0_CU_CONE_BACK                     = 0x00000002,
     SPELL_ATTR0_CU_CONE_LINE                     = 0x00000004,
     SPELL_ATTR0_CU_SHARE_DAMAGE                  = 0x00000008,
@@ -278,6 +278,7 @@ public:
     bool IsFarUnitTargetEffect() const;
     bool IsFarDestTargetEffect() const;
     bool IsUnitOwnedAuraEffect() const;
+    bool IsPeriodicEffect() const;
 
     int32 CalcValue(Unit const* caster = NULL, int32 const* basePoints = NULL, Unit const* target = NULL) const;
     int32 CalcBaseValue(int32 value) const;
@@ -289,6 +290,9 @@ public:
 
     uint32 GetProvidedTargetMask() const;
     uint32 GetMissingTargetMask(bool srcSet = false, bool destSet = false, uint32 mask = 0) const;
+
+    // correction helpers
+    void SetRadiusIndex(uint32 index);
 
     SpellEffectImplicitTargetTypes GetImplicitTargetType() const;
     SpellTargetObjectTypes GetUsedTargetObjectType() const;
@@ -461,6 +465,7 @@ public:
     bool NeedsToBeTriggeredByCaster() const;
 
     bool IsPassive() const;
+    bool IsRaidMarker() const;
     bool IsAutocastable() const;
     bool IsStackableWithRanks() const;
     bool IsPassiveStackableWithRanks() const;
@@ -475,7 +480,7 @@ public:
     bool NeedsComboPoints() const;
     bool IsRangedWeaponSpell() const;
     bool IsAutoRepeatRangedSpell() const;
-
+    bool IsPeriodic() const;
     bool IsCanBeStolen() const;
     bool IsNeedAdditionalLosChecks() const;
 
@@ -484,6 +489,8 @@ public:
 
     bool CanPierceImmuneAura(SpellInfo const* aura) const;
     bool CanDispelAura(SpellInfo const* aura) const;
+
+    bool CanCritDamageClassNone() const;
 
     bool IsSingleTarget() const;
     bool IsSingleTargetWith(SpellInfo const* spellInfo) const;
@@ -561,6 +568,7 @@ public:
     bool IsBreakingCamouflage() const;
     bool IsBreakingCamouflageAfterHit() const;
     bool IsBreakingStealth(Unit* m_caster = NULL) const;
+    bool IsPeriodicHeal() const;
     bool IsReducingCastTime() const;
     bool CanTriggerBladeFlurry() const;
     bool IsCustomCharged(SpellInfo const* procSpell) const;
@@ -571,6 +579,8 @@ public:
     bool IsLethalPoison() const;
     bool CanTriggerHotStreak() const;
     bool IsCustomCalculated() const;
+    bool IsInterruptSpell() const;
+    bool CannotBeAddedToCharm() const;
 
     // loading helpers
     uint32 _GetExplicitTargetMask() const;
@@ -579,6 +589,11 @@ public:
     static bool _IsPositiveTarget(uint32 targetA, uint32 targetB);
     bool _IsCrowdControl(uint8 effMask, bool nodamage) const;
     bool _IsNeedDelay() const;
+
+    // correction helpers
+    void SetDurationIndex(uint32 index);
+    void SetRangeIndex(uint32 index);
+    void SetCastTimeIndex(uint32 index);
 
     // unloading helpers
     void _UnloadImplicitTargetConditionLists();

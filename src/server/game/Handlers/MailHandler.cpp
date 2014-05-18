@@ -37,8 +37,6 @@ void WorldSession::HandleSendMail(WorldPacket& recvData)
     uint32 bodyLength, subjectLength, receiverLength;
     uint32 unk1, stationery;
 
-    uint32 oldMSTime = getMSTime();
-
     recvData >> COD >> money;
     recvData >> stationery;
     recvData >> unk1;
@@ -267,8 +265,6 @@ void WorldSession::HandleSendMail(WorldPacket& recvData)
 
     player->SaveInventoryAndGoldToDB(trans);
     CharacterDatabase.CommitTransaction(trans);
-
-    TC_LOG_INFO("server.loading", "Time diss on mail send %u ms", GetMSTimeDiffToNow(oldMSTime));
 }
 
 // Called when mail is read

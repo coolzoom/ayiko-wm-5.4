@@ -30,8 +30,14 @@
 #include "SpellInfo.h"
 #include "MoveSplineInit.h"
 
-Vehicle::Vehicle(Unit* unit, VehicleEntry const* vehInfo, uint32 creatureEntry) : _me(unit), _vehicleInfo(vehInfo), _usableSeatNum(0), _creatureEntry(creatureEntry),
-                                                                                  _isBeingDismissed(false), _passengersSpawnedByAI(false), _canBeCastedByPassengers(false)
+Vehicle::Vehicle(Unit* unit, VehicleEntry const* vehInfo, uint32 creatureEntry)
+    : _me(unit)
+    , _vehicleInfo(vehInfo)
+    , _usableSeatNum(0)
+    , _creatureEntry(creatureEntry)
+    , _status(STATUS_NONE)
+    , _passengersSpawnedByAI(false)
+    , _canBeCastedByPassengers(false)
 {
     for (uint32 i = 0; i < MAX_VEHICLE_SEATS; ++i)
     {
@@ -49,6 +55,8 @@ Vehicle::Vehicle(Unit* unit, VehicleEntry const* vehInfo, uint32 creatureEntry) 
 
 Vehicle::~Vehicle()
 {
+    /// @Uninstall must be called before this.
+    ASSERT(_status == STATUS_UNINSTALLING);
     for (SeatMap::const_iterator itr = Seats.begin(); itr != Seats.end(); ++itr)
         ASSERT(!itr->second.Passenger);
 }
@@ -92,6 +100,7 @@ void Vehicle::Install()
         }
     }
 
+    _status = STATUS_INSTALLED;
     if (GetBase()->GetTypeId() == TYPEID_UNIT)
         sScriptMgr->OnInstall(this);
 }
@@ -113,13 +122,18 @@ void Vehicle::InstallAllAccessories(bool evading)
             InstallAccessory(itr->AccessoryEntry, itr->SeatId, itr->IsMinion, itr->SummonedType, itr->SummonTime);
 }
 
-void Vehicle::Uninstall(bool uninstallBeforeDelete)
+void Vehicle::Uninstall(bool dismount/* = false*/)
 {
-    if (uninstallBeforeDelete)
-        _isBeingDismissed = true;
-
+    /// @Prevent recursive uninstall call. (Bad script in OnUninstall/OnRemovePassenger/PassengerBoarded hook.)
+    if (_status == STATUS_UNINSTALLING)
+    {
+        TC_LOG_DEBUG("entities.vehicle", "Vehicle GuidLow: %u, Entry: %u attempts to uninstall, but already has STATUS_UNINSTALLING! "
+            "Check Uninstall/PassengerBoarded script hooks for errors.", _me->GetGUIDLow(), _me->GetEntry());
+        return;
+    }
+    _status = STATUS_UNINSTALLING;
     TC_LOG_DEBUG("entities.vehicle", "Vehicle::Uninstall Entry: %u, GuidLow: %u", _creatureEntry, _me->GetGUIDLow());
-    RemoveAllPassengers();
+    RemoveAllPassengers(dismount);
 
     if (GetBase() && GetBase()->GetTypeId() == TYPEID_UNIT)
         sScriptMgr->OnUninstall(this);
@@ -168,6 +182,7 @@ void Vehicle::ApplyAllImmunities()
         _me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_SCHOOL_ABSORB, true);
         _me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SHIELD, true);
         _me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_IMMUNE_SHIELD, true);
+        _me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_BANISH, true);
 
         // ... Resistance, Split damage, Change stats ...
         _me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_DAMAGE_SHIELD, true);
@@ -183,6 +198,7 @@ void Vehicle::ApplyAllImmunities()
         // code below prevents a bug with movable cannons
         case 160: // Strand of the Ancients
         case 244: // Wintergrasp
+        case 321: // Pilgrim's Bounty chairs
         case 510: // Isle of Conquest
             _me->SetControlled(true, UNIT_STATE_ROOT);
             // why we need to apply this? we can simple add immunities to slow mechanic in DB
@@ -193,7 +209,7 @@ void Vehicle::ApplyAllImmunities()
     }
 }
 
-void Vehicle::RemoveAllPassengers()
+void Vehicle::RemoveAllPassengers(bool dismount/* = false*/)
 {
     TC_LOG_DEBUG("entities.vehicle", "Vehicle::RemoveAllPassengers. Entry: %u, GuidLow: %u", _creatureEntry, _me->GetGUIDLow());
 
@@ -202,19 +218,24 @@ void Vehicle::RemoveAllPassengers()
     // We don't need to iterate over Seats
     _me->RemoveAurasByType(SPELL_AURA_CONTROL_VEHICLE);
 
-    // Sometime aura do not work, so we iterate to be sure that every passengers have been removed
-    // We need a copy because passenger->_ExitVehicle() may modify the Seats list
-    SeatMap tempSeatMap = Seats;
-    for (auto itr: tempSeatMap)
+    if (dismount)
     {
-        if (itr.second.Passenger)
+        for (SeatMap::iterator itr = Seats.begin(); itr != Seats.end(); ++itr)
         {
-            if (Unit* passenger = ObjectAccessor::FindUnit(itr.second.Passenger))
-                passenger->_ExitVehicle();
-
-            itr.second.Passenger = 0;
+            if (itr->second.Passenger)
+            {
+                if (Unit* passenger = ObjectAccessor::GetUnit(*GetBase(), itr->second.Passenger))
+                    passenger->ExitVehicle();
+                else
+                    itr->second.Passenger = 0;
+            }
         }
     }
+    // Following the above logic, this assertion should NEVER fail.
+    // Even in 'hacky' cases, there should at least be VEHICLE_SPELL_RIDE_HARDCODED on us.
+    // SeatMap::const_iterator itr;
+    // for (itr = Seats.begin(); itr != Seats.end(); ++itr)
+    //    ASSERT(!itr->second.passenger);
 }
 
 bool Vehicle::HasEmptySeat(int8 seatId) const
@@ -264,6 +285,14 @@ int8 Vehicle::GetNextEmptySeat(int8 seatId, bool next) const
 
 void Vehicle::InstallAccessory(uint32 entry, int8 seatId, bool minion, uint8 type, uint32 summonTime)
 {
+    /// @Prevent adding accessories when vehicle is uninstalling. (Bad script in OnUninstall/OnRemovePassenger/PassengerBoarded hook.)
+    if (_status == STATUS_UNINSTALLING)
+    {
+        TC_LOG_DEBUG("entities.vehicle", "Vehicle GuidLow: %u, Entry: %u attempts to install accessory Entry: %u on seat %d with STATUS_UNINSTALLING! "
+            "Check Uninstall/PassengerBoarded script hooks for errors.", _me->GetGUIDLow(), _me->GetEntry(), entry, (int32)seatId);
+        return;
+    }
+
     TC_LOG_DEBUG("entities.vehicle", "Vehicle: Installing accessory entry %u on vehicle entry %u (seat:%i)", entry, GetCreatureEntry(), seatId);
     if (Unit* passenger = GetPassenger(seatId))
     {
@@ -293,14 +322,6 @@ void Vehicle::InstallAccessory(uint32 entry, int8 seatId, bool minion, uint8 typ
             return;
         }
 
-        // this cannot be checked instantly like this
-        // spellsystem is delaying everything to next update tick
-        //if (!accessory->IsOnVehicle(me))
-        //{
-        //    accessory->UnSummon();
-        //    return;         // Something went wrong in the spellsystem
-        //}
-
         if (GetBase()->GetTypeId() == TYPEID_UNIT)
             sScriptMgr->OnInstallAccessory(this, accessory);
     }
@@ -321,10 +342,18 @@ bool Vehicle::CheckCustomCanEnter()
 
 bool Vehicle::AddPassenger(Unit* unit, int8 seatId)
 {
-    if (!unit)
+    /// @Prevent adding passengers when vehicle is uninstalling. (Bad script in OnUninstall/OnRemovePassenger/PassengerBoarded hook.)
+    if (_status == STATUS_UNINSTALLING)
+    {
+        TC_LOG_DEBUG("entities.vehicle", "Passenger GuidLow: %u, Entry: %u, attempting to board vehicle GuidLow: %u, Entry: %u during uninstall! SeatId: %i",
+            unit->GetGUIDLow(), unit->GetEntry(), _me->GetGUIDLow(), _me->GetEntry(), (int32)seatId);
         return false;
+    }
 
     if (unit->GetVehicle() != this)
+        return false;
+
+    if (unit->GetTypeId() == TYPEID_PLAYER && unit->GetMap()->IsBattleArena())
         return false;
 
     SeatMap::iterator seat;
@@ -466,12 +495,12 @@ void Vehicle::RemovePassenger(Unit* unit)
         unit->m_movementInfo.t_seat = 0;
     }
 
-    if (_me->GetTypeId() == TYPEID_UNIT && _me->ToCreature()->IsAIEnabled)
-        _me->ToCreature()->AI()->PassengerBoarded(unit, seat->first, false);
-
     // only for flyable vehicles
     if (unit->IsFlying())
         _me->CastSpell(unit, VEHICLE_SPELL_PARACHUTE, true);
+
+    if (_me->GetTypeId() == TYPEID_UNIT && _me->ToCreature()->IsAIEnabled)
+        _me->ToCreature()->AI()->PassengerBoarded(unit, seat->first, false);
 
     if (GetBase()->GetTypeId() == TYPEID_UNIT)
         sScriptMgr->OnRemovePassenger(this, unit);
@@ -500,9 +529,6 @@ void Vehicle::RelocatePassengers()
 void Vehicle::Dismiss()
 {
     if (GetBase()->GetTypeId() != TYPEID_UNIT)
-        return;
-
-    if (_isBeingDismissed)
         return;
 
     TC_LOG_DEBUG("entities.vehicle", "Vehicle::Dismiss Entry: %u, GuidLow %u", _creatureEntry, _me->GetGUIDLow());
@@ -540,17 +566,10 @@ VehicleSeatEntry const* Vehicle::GetSeatForPassenger(Unit const* passenger)
     if (!passenger)
         return NULL;
 
-    // Critical section
-    {
-        TRINITY_WRITE_GUARD(LockType, i_lock);
-
-        SeatMap::iterator itr;
-        for (itr = Seats.begin(); itr != Seats.end(); ++itr)
-        {
-            if (itr->second.Passenger == passenger->GetGUID())
-                return itr->second.SeatInfo;
-        }
-    }
+    SeatMap::iterator itr;
+    for (itr = Seats.begin(); itr != Seats.end(); ++itr)
+        if (itr->second.Passenger == passenger->GetGUID())
+            return itr->second.SeatInfo;
 
     return NULL;
 }

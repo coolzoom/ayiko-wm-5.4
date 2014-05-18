@@ -68,7 +68,7 @@ void WorldSession::HandleIgnoreTradeOpcode(WorldPacket& /*recvPacket*/)
     TC_LOG_DEBUG("network", "WORLD: Ignore Trade %u", _player->GetGUIDLow());
     SendTradeStatus(TRADE_STATUS_TRADE_CANCELED);
 }
-//
+
 void WorldSession::SendUpdateTrade(bool trader_data /*= true*/)
 {
     TradeData* view_trade = trader_data ? _player->GetTradeData()->GetTraderData() : _player->GetTradeData();

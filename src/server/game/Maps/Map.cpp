@@ -157,8 +157,7 @@ void Map::LoadMap(int gx, int gy, bool reload)
     //map already load, delete it before reloading (Is it necessary? Do we really need the ability the reload maps during runtime?)
     if (GridMaps[gx][gy])
     {
-        TC_LOG_INFO("maps", "Unloading previously loaded map %u before reloading.", GetId());
-        sScriptMgr->OnUnloadGridMap(this, GridMaps[gx][gy], gx, gy);
+        TC_LOG_DEBUG("maps", "Unloading previously loaded map %u before reloading.", GetId());
 
         delete (GridMaps[gx][gy]);
         GridMaps[gx][gy]=NULL;
@@ -177,8 +176,6 @@ void Map::LoadMap(int gx, int gy, bool reload)
         TC_LOG_ERROR("maps", "Error loading map file: \n %s\n", tmp);
     }
     delete [] tmp;
-
-    sScriptMgr->OnLoadGridMap(this, GridMaps[gx][gy], gx, gy);
 }
 
 void Map::LoadMapAndVMap(int gx, int gy)
@@ -725,9 +722,9 @@ void Map::MoveAllCreaturesInMoveList()
         // do move or do move to respawn or remove creature if previous all fail
         if (CreatureCellRelocation(c, Cell(c->_newPosition.m_positionX, c->_newPosition.m_positionY)))
         {
-            // update position and visibility for server and client
+            // update pos
             c->Relocate(c->_newPosition);
-            c->SendMovementFlagUpdate();
+            //c->SendMovementFlagUpdate(); possible creature crash fix.
             c->UpdateObjectVisibility(false);
         }
         else
@@ -1582,8 +1579,17 @@ float Map::GetHeight(float x, float y, float z, bool checkVMap /*= true*/, float
         else
             return vmapHeight;                              // we have only vmapHeight (if have)
     }
+    else
+    {
+        if (!checkVMap)
+            return mapHeight;                               // explicitly use map data (if have)
+        else if (mapHeight > INVALID_HEIGHT && (z < mapHeight + 2 || z == MAX_HEIGHT))
+            return mapHeight;                               // explicitly use map data if original z < mapHeight but map found (z+2 > mapHeight)
+        else
+            return VMAP_INVALID_HEIGHT_VALUE;               // we not have any height
+    }
 
-    return mapHeight;                               // explicitly use map data
+   //return mapHeight;
 }
 
 inline bool IsOutdoorWMO(uint32 mogpFlags, int32 /*adtId*/, int32 /*rootId*/, int32 /*groupId*/, WMOAreaTableEntry const* wmoEntry, AreaTableEntry const* atEntry)
@@ -2614,17 +2620,23 @@ uint32 InstanceMap::GetMaxPlayers() const
     {
         switch (GetDifficulty())
         {
-        case Difficulty::HEROIC_DIFFICULTY:
-            return 5;
-        case Difficulty::MAN10_DIFFICULTY:
-        case Difficulty::MAN10_HEROIC_DIFFICULTY:
-            return 10;
-        case Difficulty::MAN25_DIFFICULTY:
-        case Difficulty::MAN25_HEROIC_DIFFICULTY:
-            return 25;
-        default:
-            break;
+            case Difficulty::SCENARIO_DIFFICULTY:
+            case Difficulty::SCENARIO_HEROIC_DIFFICULTY:
+                return 3;
+            case Difficulty::HEROIC_DIFFICULTY:
+            case Difficulty::CHALLENGE_MODE_DIFFICULTY:
+                return 5;
+            case Difficulty::MAN10_DIFFICULTY:
+            case Difficulty::MAN10_HEROIC_DIFFICULTY:
+                return 10;
+            case Difficulty::MAN25_DIFFICULTY:
+            case Difficulty::MAN25_HEROIC_DIFFICULTY:
+            case Difficulty::DYNAMIC_DIFFICULTY:
+                return 25;
+            default:
+                break;
         }
+
         return 0;
     }
 }

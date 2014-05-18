@@ -104,7 +104,7 @@ bool BattlegroundBE::HandlePlayerUnderMap(Player* player)
     return true;
 }
 
-void BattlegroundBE::HandleAreaTrigger(Player* Source, uint32 Trigger)
+void BattlegroundBE::HandleAreaTrigger(Player* /*Source*/, uint32 Trigger)
 {
     // this is wrong way to implement these things. On official it done by gameobject spell cast.
     if (GetStatus() != STATUS_IN_PROGRESS)
@@ -121,8 +121,6 @@ void BattlegroundBE::HandleAreaTrigger(Player* Source, uint32 Trigger)
             //buff_guid = BgObjects[BG_BE_OBJECT_BUFF_2];
             break;
         default:
-            TC_LOG_ERROR("bg.battleground", "WARNING: Unhandled AreaTrigger in Battleground: %u", Trigger);
-            Source->GetSession()->SendAreaTriggerMessage("Warning: Unhandled AreaTrigger in Battleground: %u", Trigger);
             break;
     }
 

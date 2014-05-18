@@ -396,19 +396,19 @@ void ObjectMgr::LoadCreatureTemplates()
                                              "difficulty_entry_7, difficulty_entry_8, difficulty_entry_9, difficulty_entry_10, difficulty_entry_11, difficulty_entry_12, "
     //                                                  13                  14              15                   16           17          18       19          20
                                              "difficulty_entry_13, difficulty_entry_14, difficulty_entry_15, KillCredit1, KillCredit2, modelid1, modelid2, modelid3, "
-    //                                           21      22      23       24           25           26        27     28      29        30        31         32         33        34
+    //                                           21      22      23       24           25           26        27     28      29        30        31         32         33        34         35
                                              "modelid4, name, subname, IconName, gossip_menu_id, minlevel, maxlevel, exp, exp_unk, faction_A, faction_H, npcflag, npcflag2, speed_walk, speed_run, "
-    //                                             35      36    37     38     39        40           41            42              43               44            45         46          47
+    //                                             36      37    38     39     40        41           42            43              44               45            46         47          48
                                              "speed_fly, scale, rank, mindmg, maxdmg, dmgschool, attackpower, dmg_multiplier, baseattacktime, rangeattacktime, unit_class, unit_flags, unit_flags2, "
-    //                                             48         49         50             51             52             53          54           55              56           57
+    //                                             49         50         51             52             53             54          55           56              57           58
                                              "dynamicflags, family, trainer_type, trainer_spell, trainer_class, trainer_race, minrangedmg, maxrangedmg, rangedattackpower, type, "
-    //                                            58           59        60         61            62          63          64           65           66           67           68
+    //                                            59           60        61         62            63          64          65           66           67           68           69
                                              "type_flags, type_flags2, lootid, pickpocketloot, skinloot, resistance1, resistance2, resistance3, resistance4, resistance5, resistance6, "
-    //                                          69      70      71      72      73      74      75      76         77            78       79       80       81         82
+    //                                          70      71      72      73      74      75      76      77         78            79       80       81       82         83
                                              "spell1, spell2, spell3, spell4, spell5, spell6, spell7, spell8, PetSpellDataId, VehicleId, mingold, maxgold, AIName, MovementType, "
-    //                                             83          84          85         86            87            88          89           90          91          92           93          94
+    //                                             84          85          86         87            88            89          90           91          92          93           94          95
                                              "InhabitType, HoverHeight, Health_mod, Mana_mod, Mana_mod_extra, Armor_mod, RacialLeader, questItem1, questItem2, questItem3, questItem4, questItem5, "
-    //                                            95           96            97         98               99                  100         101
+    //                                            96           97            98         99               100                  101         102
                                              " questItem6, movementId, RegenHealth, equipment_id, mechanic_immune_mask, flags_extra, ScriptName "
                                              "FROM creature_template;");
 
@@ -1099,10 +1099,11 @@ uint32 ObjectMgr::ChooseDisplayId(uint32 /*team*/, const CreatureTemplate* cinfo
     return display_id;
 }
 
-void ObjectMgr::ChooseCreatureFlags(const CreatureTemplate* cinfo, uint32& npcflag, uint32& unit_flags, uint32& dynamicflags, const CreatureData* data /*= NULL*/)
+void ObjectMgr::ChooseCreatureFlags(const CreatureTemplate* cinfo, uint32& npcflag, uint32& unit_flags, uint32& unit_flags2, uint32& dynamicflags, const CreatureData* data /*= NULL*/)
 {
     npcflag = cinfo->npcflag;
     unit_flags = cinfo->unit_flags;
+    unit_flags2 = cinfo->unit_flags2;
     dynamicflags = cinfo->dynamicflags;
 
     if (data)
@@ -1112,6 +1113,9 @@ void ObjectMgr::ChooseCreatureFlags(const CreatureTemplate* cinfo, uint32& npcfl
 
         if (data->unit_flags)
             unit_flags = data->unit_flags;
+
+        if (data->unit_flags2)
+            unit_flags2 = data->unit_flags2;
 
         if (data->dynamicflags)
             dynamicflags = data->dynamicflags;
@@ -1516,7 +1520,7 @@ void ObjectMgr::LoadCreatures()
     //                                               0              1   2       3      4       5           6           7           8            9            10            11          12
     QueryResult result = WorldDatabase.Query("SELECT creature.guid, id, map, zoneId, areaId, modelid, equipment_id, position_x, position_y, position_z, orientation, spawntimesecs, spawndist, "
     //        13            14         15       16            17         18         19          20          21                22                   23                     24
-        "currentwaypoint, curhealth, curmana, MovementType, spawnMask, phaseMask, eventEntry, pool_entry, creature.npcflag, creature.unit_flags, creature.dynamicflags, creature.isActive "
+        "currentwaypoint, curhealth, curmana, MovementType, spawnMask, phaseMask, eventEntry, pool_entry, creature.npcflag, creature.unit_flags, creature.unit_flags2,  creature.dynamicflags, creature.isActive "
         "FROM creature "
         "LEFT OUTER JOIN game_event_creature ON creature.guid = game_event_creature.guid "
         "LEFT OUTER JOIN pool_creature ON creature.guid = pool_creature.guid");
@@ -1577,6 +1581,7 @@ void ObjectMgr::LoadCreatures()
         uint32 PoolId       = fields[index++].GetUInt32();
         data.npcflag        = fields[index++].GetUInt32();
         data.unit_flags     = fields[index++].GetUInt32();
+        data.unit_flags2    = fields[index++].GetUInt32();
         data.dynamicflags   = fields[index++].GetUInt32();
         data.isActive       = fields[index++].GetBool();
 
@@ -1809,6 +1814,7 @@ uint32 ObjectMgr::AddCreData(uint32 entry, uint32 /*team*/, uint32 mapId, float 
     data.dbData = false;
     data.npcflag = cInfo->npcflag;
     data.unit_flags = cInfo->unit_flags;
+    data.unit_flags2 = cInfo->unit_flags2;
     data.dynamicflags = cInfo->dynamicflags;
 
     AddCreatureToGrid(guid, &data);
@@ -1860,7 +1866,6 @@ void ObjectMgr::LoadGameobjects()
                 if (GetMapDifficultyData(i, Difficulty(k)))
                     spawnMasks[i] |= (1 << k);
 
-    //_gameObjectDataStore.rehash(result->GetRowCount());
     do
     {
         Field* fields = result->Fetch();
@@ -3559,6 +3564,20 @@ void ObjectMgr::BuildPlayerLevelInfo(uint8 race, uint8 _class, uint8 level, Play
     }
 }
 
+/* Need to add new fields
+        RequiredFactionKills        after RequiredFactionValue2
+        RequiredFactionKillsCount   after RequiredFactionKills
+        RequiredPetBattleWith       after RequiredFactionKillsCount
+        RewardXPId                  after RewardXPId
+        move EndText                after RequestItemsText
+        Add RequiredNpcOrGo 5 to 10 after RequiredNpcOrGo4
+        RequiredNpcOrGoCount 5 to 10 after RequiredNpcOrGoCount4
+        RequiredItemId 7 to 10      after RequiredItemId6
+        RequiredItemCount 7 to 10   after RequiredItemCount6
+        RequiredSpellCast 5 to 6    after RequiredSpellCast4
+        ObjectiveText 5 to 10       after ObjectiveText4
+        remove QuestGiverTargetName
+*/
 void ObjectMgr::LoadQuests()
 {
     uint32 oldMSTime = getMSTime();

@@ -555,9 +555,9 @@ void WorldSession::HandleAddonMessagechatOpcode(WorldPacket& recvData)
 
     switch (recvData.GetOpcode())
     {
-        /*case CMSG_MESSAGECHAT_ADDON_BATTLEGROUND:
-            type = CHAT_MSG_BATTLEGROUND;
-            break;*/
+        case CMSG_MESSAGECHAT_ADDON_BATTLEGROUND:
+            type = CHAT_MSG_INSTANCE_CHAT;
+            break;
         case CMSG_MESSAGECHAT_ADDON_GUILD:
             type = CHAT_MSG_GUILD;
             break;
@@ -698,6 +698,16 @@ void WorldSession::HandleEmoteOpcode(WorldPacket & recvData)
     if (!GetPlayer()->isAlive() || GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         return;
 
+    if (!GetPlayer()->CanSpeak())
+    {
+        std::string timeStr = secsToTimeString(m_muteTime - time(NULL));
+        SendNotification(GetTrinityString(LANG_WAIT_BEFORE_SPEAKING), timeStr.c_str());
+        recvData.rfinish(); // Prevent warnings
+        return;
+    }
+
+    GetPlayer()->UpdateSpeakTime();
+
     uint32 emote;
     recvData >> emote;
 
@@ -761,6 +771,8 @@ void WorldSession::HandleTextEmoteOpcode(WorldPacket & recvData)
         SendNotification(GetTrinityString(LANG_WAIT_BEFORE_SPEAKING), timeStr.c_str());
         return;
     }
+
+    GetPlayer()->UpdateSpeakTime();
 
     uint32 text_emote, emoteNum;
     ObjectGuid guid;
@@ -851,7 +863,9 @@ void WorldSession::HandleChannelDeclineInvite(WorldPacket &recvPacket)
 void WorldSession::SendPlayerNotFoundNotice(std::string const &name)
 {
     WorldPacket data(SMSG_CHAT_PLAYER_NOT_FOUND, name.size()+1);
-    data.WriteBits(name.size(), 9);
+
+    data.WriteBits((name.size() - (name.size() % 2)) / 2, 8);
+    data.WriteBit((name.size() % 2));
     data.FlushBits();
     data.append(name.c_str(), name.size());
     SendPacket(&data);

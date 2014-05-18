@@ -272,6 +272,7 @@ enum UnitRename
 #define MAX_SPELL_POSSESS       8
 #define MAX_SPELL_CONTROL_BAR   10
 #define MAX_AGGRO_RESET_TIME    10 // in seconds
+#define MAX_AGGRO_RADIUS 45.0f  // yards
 
 enum Swing
 {
@@ -660,7 +661,15 @@ enum UnitFlags2
     UNIT_FLAG2_DISABLE_TURN                 = 0x00008000,
     UNIT_FLAG2_UNK2                         = 0x00010000,
     UNIT_FLAG2_PLAY_DEATH_ANIM              = 0x00020000,   // Plays special death animation upon death
-    UNIT_FLAG2_ALLOW_CHEAT_SPELLS           = 0x00040000    // allows casting spells with AttributesEx7 & SPELL_ATTR7_IS_CHEAT_SPELL
+    UNIT_FLAG2_ALLOW_CHEAT_SPELLS           = 0x00040000,   // allows casting spells with AttributesEx7 & SPELL_ATTR7_IS_CHEAT_SPELL
+    UNIT_FLAG2_UNK3                         = 0x00080000,
+    UNIT_FLAG2_UNK4                         = 0x00100000,
+    UNIT_FLAG2_UNK5                         = 0x00200000,
+    UNIT_FLAG2_UNK6                         = 0x00400000,
+    UNIT_FLAG2_UNK7                         = 0x00800000,
+    UNIT_FLAG2_UNK8                         = 0x01000000,
+    UNIT_FLAG2_UNK9                         = 0x02000000,
+    UNIT_FLAG2_UNK10                        = 0x04000000
 };
 
 /// Non Player Character flags
@@ -696,8 +705,8 @@ enum NPCFlags
     UNIT_NPC_FLAG_REFORGER              = 0x08000000,       // reforging
     UNIT_NPC_FLAG_TRANSMOGRIFIER        = 0x10000000,       // transmogrification
     UNIT_NPC_FLAG_VAULTKEEPER           = 0x20000000,       // void storage
-    UNIT_NPC_FLAG_UNK3                  = 0x40000000,
-    UNIT_NPC_FLAG_UNK4                  = 0x80000000
+    UNIT_NPC_FLAG_PETBATTLE             = 0x40000000,       // pet battle
+    UNIT_NPC_FLAG_BLACK_MARKET          = 0x80000000        // black market auction house
 };
 
 /// Non Player Character flags
@@ -931,9 +940,16 @@ public:
 
 class HealInfo
 {
+private:
+    Unit* const m_healer;
+    Unit* const m_target;
+    uint32 m_heal;
+    uint32 m_absorb;
+    SpellInfo const* const m_spellInfo;
+    SpellSchoolMask const m_schoolMask;
 public:
-    explicit HealInfo(uint32 _heal)
-        : m_heal(_heal)
+    explicit HealInfo(Unit* _healer, Unit* _target, uint32 _heal, SpellInfo const* _spellInfo, SpellSchoolMask _schoolMask)
+        : m_healer(_healer), m_target(_target), m_heal(_heal), m_spellInfo(_spellInfo), m_schoolMask(_schoolMask)
     {
         m_absorb = 0;
     }
@@ -946,10 +962,6 @@ public:
     }
 
     uint32 GetHeal() const { return m_heal; };
-
-private:
-    uint32 m_heal;
-    uint32 m_absorb;
 };
 
 class ProcEventInfo
@@ -1202,6 +1214,8 @@ struct CharmInfo
 
         void SetIsCommandAttack(bool val);
         bool IsCommandAttack();
+        void SetIsCommandFollow(bool val);
+        bool IsCommandFollow();
         void SetIsAtStay(bool val);
         bool IsAtStay();
         void SetIsFollowing(bool val);
@@ -1224,6 +1238,7 @@ struct CharmInfo
         ReactStates     m_oldReactState;
 
         bool m_isCommandAttack;
+        bool _isCommandFollow;
         bool m_isAtStay;
         bool m_isFollowing;
         bool m_isReturning;
@@ -1259,10 +1274,10 @@ enum PlayerTotemType
     SUMMON_TYPE_TOTEM_FIRE   = 63,
     SUMMON_TYPE_TOTEM_FIRE2  = 3403,
     SUMMON_TYPE_TOTEM_FIRE3  = 3599,
+    SUMMON_TYPE_TOTEM_FIRE4  = 3211,
 
     SUMMON_TYPE_TOTEM_EARTH  = 81,
     SUMMON_TYPE_TOTEM_EARTH2 = 3400,
-    SUMMON_TYPE_TOTEM_EARTH3 = 3404,
 
     SUMMON_TYPE_TOTEM_WATER  = 82,
     SUMMON_TYPE_TOTEM_WATER2 = 3402,
@@ -1270,8 +1285,7 @@ enum PlayerTotemType
     SUMMON_TYPE_TOTEM_AIR    = 83,
     SUMMON_TYPE_TOTEM_AIR2   = 3405,
     SUMMON_TYPE_TOTEM_AIR3   = 3407,
-    SUMMON_TYPE_TOTEM_AIR4   = 3406,
-    SUMMON_TYPE_TOTEM_AIR5   = 3399,
+    SUMMON_TYPE_TOTEM_AIR4   = 3406
 };
 
 enum Stagger
@@ -1378,7 +1392,7 @@ class Unit : public WorldObject
         Unit* SelectNearbyAlly(Unit* exclude = NULL, float dist = NOMINAL_MELEE_RANGE) const;
         void SendMeleeAttackStop(Unit* victim = NULL);
         void SendMeleeAttackStart(Unit* victim);
-        bool IsVisionObscured(Unit* victim);
+        bool IsVisionObscured(Unit* victim, SpellInfo const* spellInfo);
 
         // Part of Evade mechanics
         time_t GetLastDamagedTime() const { return _lastDamagedTime; }
@@ -1529,7 +1543,7 @@ class Unit : public WorldObject
         uint16 GetMaxSkillValueForLevel(Unit const* target = NULL) const { return (target ? getLevelForTarget(target) : getLevel()) * 5; }
         void DealDamageMods(Unit* victim, uint32 &damage, uint32* absorb);
         uint32 DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDamage = NULL, DamageEffectType damagetype = DIRECT_DAMAGE, SpellSchoolMask damageSchoolMask = SPELL_SCHOOL_MASK_NORMAL, SpellInfo const* spellProto = NULL, bool durabilityLoss = true);
-        uint32 CalcStaggerDamage(Player* victim, uint32 damage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellInfo const* spellProto = NULL);
+        uint32 CalcStaggerDamage(Player* victim, uint32 damage);
         void Kill(Unit* victim, bool durabilityLoss = true, SpellInfo const* spellProto = NULL);
         int32 DealHeal(Unit* victim, uint32 addhealth, SpellInfo const* spellProto = NULL);
 
@@ -1686,6 +1700,7 @@ class Unit : public WorldObject
         void SendSpellDamageImmune(Unit* target, uint32 spellId);
 
         void NearTeleportTo(float x, float y, float z, float orientation, bool casting = false);
+        void SendTeleportPacket(Position &oldPos);
         virtual bool UpdatePosition(float x, float y, float z, float ang, bool teleport = false);
         // returns true if unit's position really changed
         bool UpdatePosition(const Position &pos, bool teleport = false) { return UpdatePosition(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), teleport); }
@@ -1975,6 +1990,7 @@ class Unit : public WorldObject
         // set withDelayed to true to interrupt delayed spells too
         // delayed+channeled spells are always interrupted
         void InterruptNonMeleeSpells(bool withDelayed, uint32 spellid = 0, bool withInstant = true);
+        void InterruptNonMeleeSpellsExcept(bool withDelayed, uint32 except, bool withInstant = true);
 
         Spell* GetCurrentSpell(CurrentSpellTypes spellType) const { return m_currentSpells[spellType]; }
         Spell* GetCurrentSpell(uint32 spellType) const { return m_currentSpells[spellType]; }
@@ -2064,24 +2080,30 @@ class Unit : public WorldObject
         void removeHatedBy(HostileReference* /*pHostileReference*/) { /* nothing to do yet */ }
         HostileRefManager& getHostileRefManager() { return m_HostileRefManager; }
 
-        VisibleAuraMap const* GetVisibleAuras() { return &m_visibleAuras; }
+        VisibleAuraMap const* GetVisibleAuras() const { return &m_visibleAuras; }
+
         AuraApplication * GetVisibleAura(uint8 slot)
         {
-            VisibleAuraMap::iterator itr = m_visibleAuras.find(slot);
-            if (itr != m_visibleAuras.end())
-                return itr->second;
-            return 0;
+            auto const itr = m_visibleAuras.find(slot);
+            return (itr != m_visibleAuras.end()) ? itr->second : 0;
         }
-        void SetVisibleAura(uint8 slot, AuraApplication * aur){ m_visibleAuras[slot]=aur; UpdateAuraForGroup(slot);}
-        void RemoveVisibleAura(uint8 slot){ m_visibleAuras.erase(slot); UpdateAuraForGroup(slot);}
+
+        AuraApplication const * GetVisibleAura(uint8 slot) const
+        {
+            auto const itr = m_visibleAuras.find(slot);
+            return (itr != m_visibleAuras.end()) ? itr->second : 0;
+        }
+
+        void SetVisibleAura(uint8 slot, AuraApplication * aur) { m_visibleAuras[slot]=aur; UpdateAuraForGroup(slot); }
+        void RemoveVisibleAura(uint8 slot) { m_visibleAuras.erase(slot); UpdateAuraForGroup(slot); }
 
         uint32 GetInterruptMask() const { return m_interruptMask; }
         void AddInterruptMask(uint32 mask) { m_interruptMask |= mask; }
         void UpdateInterruptMask();
 
-        uint32 GetDisplayId() { return GetUInt32Value(UNIT_FIELD_DISPLAYID); }
+        uint32 GetDisplayId() const { return GetUInt32Value(UNIT_FIELD_DISPLAYID); }
         void SetDisplayId(uint32 modelId);
-        uint32 GetNativeDisplayId() { return GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID); }
+        uint32 GetNativeDisplayId() const { return GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID); }
         void RestoreDisplayId();
         void SetNativeDisplayId(uint32 modelId) { SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, modelId); }
         void setTransForm(uint32 spellid) { m_transform = spellid;}
@@ -2227,6 +2249,7 @@ class Unit : public WorldObject
         }
 
         void SetControlled(bool apply, UnitState state);
+        void SendLossOfControl(AuraApplication const* aurApp, Mechanics mechanic, SpellEffIndex index);
 
         void AddComboPointHolder(uint32 lowguid) { m_ComboPointHolders.insert(lowguid); }
         void RemoveComboPointHolder(uint32 lowguid) { m_ComboPointHolders.erase(lowguid); }
@@ -2275,7 +2298,7 @@ class Unit : public WorldObject
 
         bool IsAIEnabled, NeedChangeAI;
         bool CreateVehicleKit(uint32 id, uint32 creatureEntry);
-        void RemoveVehicleKit();
+        void RemoveVehicleKit(bool dismount = false);
         Vehicle* GetVehicleKit()const { return m_vehicleKit; }
         Vehicle* GetVehicle()   const { return m_vehicle; }
         bool IsOnVehicle() const { return m_vehicle != NULL; }
@@ -2295,7 +2318,7 @@ class Unit : public WorldObject
         bool m_ControlledByPlayer;
 
         bool HandleSpellClick(Unit* clicker, int8 seatId = -1);
-        void EnterVehicle(Unit* base, int8 seatId = -1);
+        void EnterVehicle(Unit* base, int8 seatId = -1, bool fullTriggered = false);
         void ExitVehicle(Position const* exitPosition = NULL);
         void ChangeSeat(int8 seatId, bool next = true);
 
@@ -2358,6 +2381,10 @@ class Unit : public WorldObject
         Unit* GetSimulacrumTarget();
         void setSimulacrumTarget(uint64 guid) { simulacrumTargetGUID = guid; }
         void removeSimulacrumTarget() { simulacrumTargetGUID = 0; }
+
+        // helpers for Icicles spells
+        uint64 GetIciclesTarget() const { return iciclesTargetGUID; }
+        void SetIciclesTarget(uint64 guid) { iciclesTargetGUID = guid; }
 
     protected:
         explicit Unit (bool isWorldObject);
@@ -2493,6 +2520,7 @@ class Unit : public WorldObject
         TimeTrackerSmall m_movesplineTimer;
 
         uint64 simulacrumTargetGUID;
+        uint64 iciclesTargetGUID;
 
         Diminishing m_Diminishing;
         // Manage all Units that are threatened by us

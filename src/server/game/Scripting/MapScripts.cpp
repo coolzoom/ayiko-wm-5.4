@@ -295,9 +295,6 @@ void Map::ScriptsProcess()
     {
         ScriptAction const& step = iter->second;
 
-        if (step.script->command != SCRIPT_COMMAND_ACTIVATE_OBJECT && step.script->id == 0)
-            continue;
-
         Object* source = NULL;
         if (step.sourceGUID)
         {

@@ -1750,7 +1750,7 @@ enum Targets
     TARGET_UNIT_CONE_ENEMY_104         = 104,
     TARGET_UNIT_UNK_105                = 105, // 1 spell
     TARGET_DEST_CHANNEL_CASTER         = 106,
-    TARGET_UNK_DEST_AREA_UNK_107       = 107, // not enough info - only generic spells avalible
+    TARGET_DEST_EXTRA_TARGETS          = 107, // not enough info - only generic spells avalible
     TARGET_GAMEOBJECT_CONE             = 108,
     TARGET_109                         = 109, // spell 89008
     TARGET_UNIT_CONE_ENEMY_110         = 110, // 1 spell
@@ -4024,8 +4024,8 @@ enum DiminishingGroup
     DIMINISHING_FEAR                = 10,
     DIMINISHING_HORROR              = 11,
     DIMINISHING_MIND_CONTROL        = 12,
-    DIMINISHING_ROOT                = 13,
-    DIMINISHING_STUN                = 14,
+    DIMINISHING_RANDOM_ROOT         = 13,
+    DIMINISHING_RANDOM_STUN         = 14,
     DIMINISHING_SCATTER_SHOT        = 15,
     DIMINISHING_SILENCE             = 16,
     DIMINISHING_SLEEP               = 17,
@@ -4034,7 +4034,10 @@ enum DiminishingGroup
     DIMINISHING_DRAGONS_BREATH      = 20,
     DIMINISHING_DEEP_FREEZE         = 21,
     DIMINISHING_RING_OF_FROST       = 22,
-    DIMINISHING_PARALYTIC_POISON    = 23
+    DIMINISHING_PARALYTIC_POISON    = 23,
+    DIMINISHING_ICE_WARD            = 24,
+    DIMINISHING_DOMINATE_MIND       = 25,
+    DIMINISHING_BIND_ELEMENTAL      = 26
 };
 
 enum SummonCategory
@@ -4068,6 +4071,7 @@ enum SummonType
 
 enum EventId
 {
+    EVENT_SPELLCLICK        = 1001,
     EVENT_CHARGE            = 1003,
     EVENT_JUMP              = 1004
 };
@@ -4233,7 +4237,7 @@ enum BattlegroundTypeId
     BATTLEGROUND_BFG                = 120,  // Battle For Gilneas
     // 441 = "Icecrown Citadel"
     // 443 = "The Ruby Sanctum"
-    BATTLEGROUND_EYR                = 656,  // Rated Eye of the Storm
+    // 656 = "Rated Eye of the Storm"
     BATTLEGROUND_KT                 = 699,  // Valley of Power
     BATTLEGROUND_CTF3               = 706,  // CTF3 not implemented on MoP
     BATTLEGROUND_SSM                = 708,  // Silver shard Mine
@@ -4506,6 +4510,20 @@ enum VoidTransferError
     VOID_TRANSFER_ERROR_INVENTORY_FULL    = 7,
     VOID_TRANSFER_ERROR_INTERNAL_ERROR_5  = 8,
     VOID_TRANSFER_ERROR_TRANSFER_UNKNOWN  = 9
+};
+
+enum MountResult
+{
+    ERROR_YOU_CANT_MOUNT_THIS_CREATURE        = 0,
+    ERROR_THIS_CREATURE_IS_TO_FAR             = 1,
+    ERROR_YOU_ALREADY_MOUNTED                 = 2,
+    ERROR_THIS_IS_NOT_MOUNT                   = 3,
+    ERROR_THIS_MOUNT_NOT_YOURS                = 4,
+    ERROR_UNKNOWN_MOUNT_ERROR                 = 5,
+    ERROR_YOU_CANT_RIDE_WHILE_LOOTING         = 6,
+    ERROR_YOUR_RACE_CANT_RIDE                 = 7,
+    ERROR_YOU_CANT_RIDE_WHILE_IN_ANOTHER_FORM = 8,
+    ERROR_YOU_CANT_CONTINUE                   = 9,
 };
 
 #define CURRENCY_PRECISION 100

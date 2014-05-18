@@ -89,10 +89,11 @@ struct PhaseInfo
     bool NeedsClientSideUpdate() const { return terrainswapmap || phaseId; }
 };
 
-typedef std::unordered_map<uint32 /*spellId*/, PhaseInfo> PhaseInfoContainer;
-
 struct PhaseData
 {
+    typedef std::unordered_map<uint32 /*spellId*/, PhaseInfo> PhaseInfoContainer;
+    typedef std::vector<PhaseDefinition const*> PhaseDefinitionVector;
+
     PhaseData(Player* _player)
         : _PhasemaskThroughDefinitions(0)
         , _PhasemaskThroughAuras(0)
@@ -117,9 +118,11 @@ struct PhaseData
     void SendPhaseMaskToPlayer();
     void SendPhaseshiftToPlayer();
 
+    void GetActivePhases(std::set<uint32>& phases) const;
+
 private:
     Player* player;
-    std::list<PhaseDefinition const*> activePhaseDefinitions;
+    PhaseDefinitionVector activePhaseDefinitions;
     PhaseInfoContainer spellPhaseInfo;
 };
 
@@ -165,6 +168,8 @@ public:
     void SendDebugReportToPlayer(Player* const debugger);
 
     static bool IsConditionTypeSupported(ConditionTypes const conditionType);
+
+    void GetActivePhases(std::set<uint32>& phases) const;
 
 private:
     void Recalculate();

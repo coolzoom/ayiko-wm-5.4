@@ -94,15 +94,42 @@ void WorldSession::HandleSwapInvItemOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleAutoEquipItemSlotOpcode(WorldPacket& recvData)
 {
-    uint64 itemguid;
+    ObjectGuid itemGuid;
     uint8 dstslot;
-    recvData >> itemguid >> dstslot;
+
+    recvData >> dstslot;
+
+    recvData.ReadBitSeq<3, 2, 1>(itemGuid);
+    uint8 itemCount = recvData.ReadBits(2);
+    recvData.ReadBitSeq<4>(itemGuid);
+
+    std::vector<bool> hasBag(itemCount, false);
+    std::vector<bool> hasSlot(itemCount, false);
+
+    for (uint8 i = 0; i < itemCount; ++i)
+    {
+        hasBag[i] = !recvData.ReadBit();
+        hasSlot[i] = !recvData.ReadBit();
+    }
+
+    recvData.ReadBitSeq<6, 0, 5, 7>(itemGuid);
+    recvData.ReadByteSeq<0, 3, 6, 2, 5, 7, 1, 4>(itemGuid);
+
+    std::vector<uint8> inventoryBags(itemCount, 0);
+    std::vector<uint8> inventorySlots(itemCount, 0);
+    for (uint8 i = 0; i < itemCount; ++i)
+    {
+        if (hasSlot[i])
+            recvData >> inventorySlots[i];
+        if (hasBag[i])
+            recvData >> inventoryBags[i];
+    }
 
     // cheating attempt, client should never send opcode in that case
     if (!Player::IsEquipmentPos(INVENTORY_SLOT_BAG_0, dstslot))
         return;
 
-    Item* item = _player->GetItemByGuid(itemguid);
+    Item* item = _player->GetItemByGuid(itemGuid);
     uint16 dstpos = dstslot | (INVENTORY_SLOT_BAG_0 << 8);
 
     if (!item || item->GetPos() == dstpos)
@@ -459,11 +486,10 @@ void WorldSession::HandleReadItem(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: CMSG_READ_ITEM");
 
-    uint64 itemGuid;
+    uint8 bag, slot;
+    recvData >> bag >> slot;
 
-    recvData >> itemGuid;
-
-    Item* pItem = _player->GetItemByGuid(itemGuid);
+    Item* pItem = _player->GetItemByPos(bag, slot);
     if (pItem && pItem->GetTemplate()->PageText)
     {
         WorldPacket data;
@@ -1271,10 +1297,47 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "Received opcode CMSG_WRAP_ITEM");
 
-    uint8 gift_bag, gift_slot, item_bag, item_slot;
+    bool hasGiftBag, hasGiftSlot, hasItemBag, hasItemSlot;
+    uint8 gift_bag = 0;
+    uint8 gift_slot = 0;
+    uint8 item_bag = 0;
+    uint8 item_slot = 0;
 
-    recvData >> gift_bag >> gift_slot;                     // paper
-    recvData >> item_bag >> item_slot;                     // item
+    uint8 itemCount = recvData.ReadBits(2);
+
+    for (uint8 i = 0; i < itemCount; ++i)
+    {
+        if (i == 0)
+        {
+            hasGiftBag = !recvData.ReadBit();
+            hasGiftSlot = !recvData.ReadBit();
+        }
+        else
+        {
+            hasItemBag = !recvData.ReadBit();
+            hasItemSlot = !recvData.ReadBit();
+        }
+    }
+
+    for (uint8 i = 0; i < itemCount; ++i)
+    {
+        if (i == 0)
+        {
+            if (hasGiftSlot)
+                recvData >> gift_slot;
+
+            if (hasGiftBag)
+                recvData >> gift_bag;
+        }
+        else
+        {
+            if (hasItemSlot)
+                recvData >> item_slot;
+
+            if (hasItemBag)
+                recvData >> item_bag;
+        }
+    }
 
     TC_LOG_DEBUG("network", "WRAP: receive gift_bag = %u, gift_slot = %u, item_bag = %u, item_slot = %u", gift_bag, gift_slot, item_bag, item_slot);
 
@@ -1336,7 +1399,7 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recvData)
     }
 
     // maybe not correct check  (it is better than nothing)
-    if (item->GetTemplate()->MaxCount > 0)
+    if (item->GetTemplate()->MaxCount > 0 || item->IsConjuredConsumable())
     {
         _player->SendEquipError(EQUIP_ERR_CANT_WRAP_UNIQUE, item, NULL);
         return;
@@ -1355,13 +1418,26 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recvData)
 
     switch (item->GetEntry())
     {
-        case 5042:  item->SetEntry(5043); break;
-        case 5048:  item->SetEntry(5044); break;
-        case 17303: item->SetEntry(17302); break;
-        case 17304: item->SetEntry(17305); break;
-        case 17307: item->SetEntry(17308); break;
-        case 21830: item->SetEntry(21831); break;
+        case 5042:
+            item->SetEntry(5043);
+            break;
+        case 5048:
+            item->SetEntry(5044);
+            break;
+        case 17303:
+            item->SetEntry(17302);
+            break;
+        case 17304:
+            item->SetEntry(17305);
+            break;
+        case 17307:
+            item->SetEntry(17308);
+            break;
+        case 21830:
+            item->SetEntry(21831);
+            break;
     }
+
     item->SetUInt64Value(ITEM_FIELD_GIFTCREATOR, _player->GetGUID());
     item->SetUInt32Value(ITEM_FIELD_FLAGS, ITEM_FLAG_WRAPPED);
     item->SetState(ITEM_CHANGED, _player);
@@ -1372,6 +1448,7 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recvData)
         item->RemoveFromUpdateQueueOf(_player);
         item->SaveToDB(trans);                                   // item gave inventory record unchanged and can be save standalone
     }
+
     CharacterDatabase.CommitTransaction(trans);
 
     uint32 count = 1;
@@ -1868,7 +1945,7 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket& recvData)
         if (!newEntries[i]) // reset look
         {
             itemTransmogrified->SetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 1, 0);
-            itemTransmogrified->RemoveFlag(ITEM_FIELD_MODIFIERS_MASK, 0x3);
+            itemTransmogrified->RemoveFlag(ITEM_FIELD_MODIFIERS_MASK, 2);
             player->SetVisibleItemSlot(slots[i], itemTransmogrified);
         }
         else
@@ -1881,7 +1958,7 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket& recvData)
 
             // All okay, proceed
             itemTransmogrified->SetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 1, newEntries[i]);
-            itemTransmogrified->SetFlag(ITEM_FIELD_MODIFIERS_MASK, 0x3);
+            itemTransmogrified->SetFlag(ITEM_FIELD_MODIFIERS_MASK, 2);
             player->SetVisibleItemSlot(slots[i], itemTransmogrified);
 
             itemTransmogrified->UpdatePlayedTime(player);
@@ -1951,7 +2028,7 @@ void WorldSession::HandleReforgeItemOpcode(WorldPacket& recvData)
             player->ApplyReforgeEnchantment(item, false);
 
         item->SetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 0, 0);
-        //item->RemoveFlag(ITEM_FIELD_MODIFIERS_MASK, 0x1);
+        item->RemoveFlag(ITEM_FIELD_MODIFIERS_MASK, 1);
         item->SetState(ITEM_CHANGED, player);
         SendReforgeResult(true);
         return;
@@ -1986,7 +2063,7 @@ void WorldSession::HandleReforgeItemOpcode(WorldPacket& recvData)
     player->ModifyMoney(-int64(item->GetSpecialPrice()));
 
     item->SetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 0, reforgeEntry);
-    item->SetFlag(ITEM_FIELD_MODIFIERS_MASK, 0x1);
+    item->SetFlag(ITEM_FIELD_MODIFIERS_MASK, 1);
     item->SetState(ITEM_CHANGED, player);
 
     SendReforgeResult(true);
@@ -2103,7 +2180,7 @@ void WorldSession::HandleUpgradeItemOpcode(WorldPacket& recvData)
     }
 
     item->SetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 2, itemUpEntry->Id);
-    item->SetFlag(ITEM_FIELD_MODIFIERS_MASK, 0x4);
+    item->SetFlag(ITEM_FIELD_MODIFIERS_MASK, 0x1|0x2|0x4);
     item->SetState(ITEM_CHANGED, player);
 
     // Don't forget to remove currency cost
@@ -2113,4 +2190,10 @@ void WorldSession::HandleUpgradeItemOpcode(WorldPacket& recvData)
         player->ApplyItemUpgrade(item, true);
 
     player->ModifyCurrency(itemUpEntry->currencyId, -int32(itemUpEntry->currencyCost), false, true, true);
+}
+
+void WorldSession::HandleSetLootSpecialization(WorldPacket& /*recvData*/)
+{
+    TC_LOG_DEBUG("network", "WORLD: Received CMSG_SET_LOOT_SPECIALIZATION");
+    // GetPlayer()->SetLootSpecId(recvData.read<uint32>());
 }

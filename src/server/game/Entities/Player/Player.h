@@ -158,7 +158,7 @@ struct PlayerCurrency
 };
 
 typedef std::unordered_map<uint32, PlayerTalent> PlayerTalentMap;
-typedef std::unordered_map<uint32, PlayerSpell*> PlayerSpellMap;
+typedef std::unordered_map<uint32, PlayerSpell> PlayerSpellMap;
 typedef std::list<SpellModifier*> SpellModList;
 typedef std::unordered_map<uint32, PlayerCurrency> PlayerCurrenciesMap;
 
@@ -433,55 +433,10 @@ enum PlayerFlags
     PLAYER_FLAGS_UNK31                  = 0x80000000,
 };
 
-// used for PLAYER_FIELD_KNOWN_TITLES field (uint64), (1<<bit_index) without (-1)
-// can't use enum for uint64 values
-#define PLAYER_TITLE_DISABLED              UI64LIT(0x0000000000000000)
-#define PLAYER_TITLE_NONE                  UI64LIT(0x0000000000000001)
-#define PLAYER_TITLE_PRIVATE               UI64LIT(0x0000000000000002) // 1
-#define PLAYER_TITLE_CORPORAL              UI64LIT(0x0000000000000004) // 2
-#define PLAYER_TITLE_SERGEANT_A            UI64LIT(0x0000000000000008) // 3
-#define PLAYER_TITLE_MASTER_SERGEANT       UI64LIT(0x0000000000000010) // 4
-#define PLAYER_TITLE_SERGEANT_MAJOR        UI64LIT(0x0000000000000020) // 5
-#define PLAYER_TITLE_KNIGHT                UI64LIT(0x0000000000000040) // 6
-#define PLAYER_TITLE_KNIGHT_LIEUTENANT     UI64LIT(0x0000000000000080) // 7
-#define PLAYER_TITLE_KNIGHT_CAPTAIN        UI64LIT(0x0000000000000100) // 8
-#define PLAYER_TITLE_KNIGHT_CHAMPION       UI64LIT(0x0000000000000200) // 9
-#define PLAYER_TITLE_LIEUTENANT_COMMANDER  UI64LIT(0x0000000000000400) // 10
-#define PLAYER_TITLE_COMMANDER             UI64LIT(0x0000000000000800) // 11
-#define PLAYER_TITLE_MARSHAL               UI64LIT(0x0000000000001000) // 12
-#define PLAYER_TITLE_FIELD_MARSHAL         UI64LIT(0x0000000000002000) // 13
-#define PLAYER_TITLE_GRAND_MARSHAL         UI64LIT(0x0000000000004000) // 14
-#define PLAYER_TITLE_SCOUT                 UI64LIT(0x0000000000008000) // 15
-#define PLAYER_TITLE_GRUNT                 UI64LIT(0x0000000000010000) // 16
-#define PLAYER_TITLE_SERGEANT_H            UI64LIT(0x0000000000020000) // 17
-#define PLAYER_TITLE_SENIOR_SERGEANT       UI64LIT(0x0000000000040000) // 18
-#define PLAYER_TITLE_FIRST_SERGEANT        UI64LIT(0x0000000000080000) // 19
-#define PLAYER_TITLE_STONE_GUARD           UI64LIT(0x0000000000100000) // 20
-#define PLAYER_TITLE_BLOOD_GUARD           UI64LIT(0x0000000000200000) // 21
-#define PLAYER_TITLE_LEGIONNAIRE           UI64LIT(0x0000000000400000) // 22
-#define PLAYER_TITLE_CENTURION             UI64LIT(0x0000000000800000) // 23
-#define PLAYER_TITLE_CHAMPION              UI64LIT(0x0000000001000000) // 24
-#define PLAYER_TITLE_LIEUTENANT_GENERAL    UI64LIT(0x0000000002000000) // 25
-#define PLAYER_TITLE_GENERAL               UI64LIT(0x0000000004000000) // 26
-#define PLAYER_TITLE_WARLORD               UI64LIT(0x0000000008000000) // 27
-#define PLAYER_TITLE_HIGH_WARLORD          UI64LIT(0x0000000010000000) // 28
-#define PLAYER_TITLE_GLADIATOR             UI64LIT(0x0000000020000000) // 29
-#define PLAYER_TITLE_DUELIST               UI64LIT(0x0000000040000000) // 30
-#define PLAYER_TITLE_RIVAL                 UI64LIT(0x0000000080000000) // 31
-#define PLAYER_TITLE_CHALLENGER            UI64LIT(0x0000000100000000) // 32
-#define PLAYER_TITLE_SCARAB_LORD           UI64LIT(0x0000000200000000) // 33
-#define PLAYER_TITLE_CONQUEROR             UI64LIT(0x0000000400000000) // 34
-#define PLAYER_TITLE_JUSTICAR              UI64LIT(0x0000000800000000) // 35
-#define PLAYER_TITLE_CHAMPION_OF_THE_NAARU UI64LIT(0x0000001000000000) // 36
-#define PLAYER_TITLE_MERCILESS_GLADIATOR   UI64LIT(0x0000002000000000) // 37
-#define PLAYER_TITLE_OF_THE_SHATTERED_SUN  UI64LIT(0x0000004000000000) // 38
-#define PLAYER_TITLE_HAND_OF_ADAL          UI64LIT(0x0000008000000000) // 39
-#define PLAYER_TITLE_VENGEFUL_GLADIATOR    UI64LIT(0x0000010000000000) // 40
-
 #define KNOWN_TITLES_SIZE   4
 #define MAX_TITLE_INDEX     (KNOWN_TITLES_SIZE*64)          // 4 uint64 fields
 
-// used in PLAYER_BYTES values
+// used in PLAYER_FIELD_BYTES values
 enum PlayerFieldByteFlags
 {
     PLAYER_FIELD_BYTE_TRACK_STEALTHED   = 0x00000002,
@@ -489,7 +444,7 @@ enum PlayerFieldByteFlags
     PLAYER_FIELD_BYTE_NO_RELEASE_WINDOW = 0x00000010        // Display no "release spirit" window at all
 };
 
-// used in PLAYER_BYTES2 values
+// used in PLAYER_FIELD_BYTES2 values
 enum PlayerFieldByte2Flags
 {
     PLAYER_FIELD_BYTE2_NONE                 = 0x00,
@@ -1155,7 +1110,7 @@ enum BattlegroundTimerTypes
     CHALLENGE_TIMER
 };
 
-class Player : public Unit, public GridObject<Player>
+class Player final : public Unit, public GridObject<Player>
 {
     friend class WorldSession;
     friend void Item::AddToUpdateQueueOf(Player* player);
@@ -1383,7 +1338,7 @@ class Player : public Unit, public GridObject<Player>
         bool StoreNewItemInBestSlots(uint32 item_id, uint32 item_count);
         void AutoStoreLoot(uint8 bag, uint8 slot, uint32 loot_id, LootStore const& store, bool broadcast = false);
         void AutoStoreLoot(uint32 loot_id, LootStore const& store, bool broadcast = false) { AutoStoreLoot(NULL_BAG, NULL_SLOT, loot_id, store, broadcast); }
-        void StoreLootItem(uint8 lootSlot, Loot* loot);
+        void StoreLootItem(uint8 lootSlot, Loot* loot, uint8 linkedLootSlot = 255);
 
         InventoryResult CanTakeMoreSimilarItems(uint32 entry, uint32 count, Item* pItem, uint32* no_space_count = NULL) const;
         InventoryResult CanStoreItem(uint8 bag, uint8 slot, ItemPosCountVec& dest, uint32 entry, uint32 count, Item* pItem = NULL, bool swap = false, uint32* no_space_count = NULL) const;
@@ -1786,7 +1741,6 @@ class Player : public Unit, public GridObject<Player>
         bool IsNeedCastPassiveSpellAtLearn(SpellInfo const* spellInfo) const;
 
         void SendProficiency(ItemClass itemClass, uint32 itemSubclassMask);
-        void SendInitialSpells();
         bool addSpell(uint32 spellId, bool active, bool learning, bool dependent, bool disabled, bool loading = false);
         void learnSpell(uint32 spell_id, bool dependent);
         void removeSpell(uint32 spell_id, bool disabled = false, bool learn_low_rank = true);
@@ -1802,26 +1756,26 @@ class Player : public Unit, public GridObject<Player>
         std::string GetGuildName();
 
         // Talents
-        uint32 GetFreeTalentPoints() const { return _talentMgr->FreeTalentPoints; }
-        void SetFreeTalentPoints(uint32 points) { _talentMgr->FreeTalentPoints = points; }
-        uint32 GetUsedTalentCount() const { return _talentMgr->UsedTalentCount; }
-        void SetUsedTalentCount(uint32 talents) { _talentMgr->UsedTalentCount = talents; }
-        uint32 GetQuestRewardedTalentCount() const { return _talentMgr->QuestRewardedTalentCount; }
-        void AddQuestRewardedTalentCount(uint32 points) { _talentMgr->QuestRewardedTalentCount += points; }
-        uint32 GetTalentResetCost() const { return _talentMgr->ResetTalentsCost; }
-        void SetTalentResetCost(uint32 cost)  { _talentMgr->ResetTalentsCost = cost; }
-        uint32 GetSpecializationResetCost() const { return _talentMgr->ResetSpecializationCost; }
-        void SetSpecializationResetCost(uint32 cost) { _talentMgr->ResetSpecializationCost = cost; }
-        uint32 GetSpecializationResetTime() const { return _talentMgr->ResetSpecializationTime; }
-        void SetSpecializationResetTime(time_t time_) { _talentMgr->ResetSpecializationTime = time_; }
-        uint32 GetTalentResetTime() const { return _talentMgr->ResetTalentsTime; }
-        void SetTalentResetTime(time_t time_)  { _talentMgr->ResetTalentsTime = time_; }
-        uint8 GetActiveSpec() const { return _talentMgr->ActiveSpec; }
-        void SetActiveSpec(uint8 spec){ _talentMgr->ActiveSpec = spec; }
-        uint8 GetSpecsCount() const { return _talentMgr->SpecsCount; }
-        void SetSpecsCount(uint8 count) { _talentMgr->SpecsCount = count; }
+        uint32 GetFreeTalentPoints() const { return _talentMgr.FreeTalentPoints; }
+        void SetFreeTalentPoints(uint32 points) { _talentMgr.FreeTalentPoints = points; }
+        uint32 GetUsedTalentCount() const { return _talentMgr.UsedTalentCount; }
+        void SetUsedTalentCount(uint32 talents) { _talentMgr.UsedTalentCount = talents; }
+        uint32 GetQuestRewardedTalentCount() const { return _talentMgr.QuestRewardedTalentCount; }
+        void AddQuestRewardedTalentCount(uint32 points) { _talentMgr.QuestRewardedTalentCount += points; }
+        uint32 GetTalentResetCost() const { return _talentMgr.ResetTalentsCost; }
+        void SetTalentResetCost(uint32 cost)  { _talentMgr.ResetTalentsCost = cost; }
+        uint32 GetSpecializationResetCost() const { return _talentMgr.ResetSpecializationCost; }
+        void SetSpecializationResetCost(uint32 cost) { _talentMgr.ResetSpecializationCost = cost; }
+        uint32 GetSpecializationResetTime() const { return _talentMgr.ResetSpecializationTime; }
+        void SetSpecializationResetTime(time_t time_) { _talentMgr.ResetSpecializationTime = time_; }
+        uint32 GetTalentResetTime() const { return _talentMgr.ResetTalentsTime; }
+        void SetTalentResetTime(time_t time_)  { _talentMgr.ResetTalentsTime = time_; }
+        uint8 GetActiveSpec() const { return _talentMgr.ActiveSpec; }
+        void SetActiveSpec(uint8 spec){ _talentMgr.ActiveSpec = spec; }
+        uint8 GetSpecsCount() const { return _talentMgr.SpecsCount; }
+        void SetSpecsCount(uint8 count) { _talentMgr.SpecsCount = count; }
         void SetSpecializationId(uint8 spec, uint32 id);
-        uint32 GetSpecializationId(uint8 spec) const { return _talentMgr->SpecInfo[spec].SpecializationId; }
+        uint32 GetSpecializationId(uint8 spec) const { return _talentMgr.SpecInfo[spec].SpecializationId; }
         uint32 GetRoleForGroup(uint32 specializationId);
 
         bool ResetTalents(bool no_cost = false);
@@ -1850,27 +1804,26 @@ class Player : public Unit, public GridObject<Player>
         uint32 GetGlyphSlot(uint8 slot) const { return GetUInt32Value(PLAYER_FIELD_GLYPH_SLOTS_1 + slot); }
         void SetGlyph(uint8 slot, uint32 glyph)
         {
-            _talentMgr->SpecInfo[GetActiveSpec()].Glyphs[slot] = glyph;
+            _talentMgr.SpecInfo[GetActiveSpec()].Glyphs[slot] = glyph;
             SetUInt32Value(PLAYER_FIELD_GLYPHS_1 + slot, glyph);
         }
-        uint32 GetGlyph(uint8 spec, uint8 slot) const { return _talentMgr->SpecInfo[spec].Glyphs[slot]; }
+        uint32 GetGlyph(uint8 spec, uint8 slot) const { return _talentMgr.SpecInfo[spec].Glyphs[slot]; }
 
-        PlayerTalentMap const & GetTalentMap(uint8 spec) const { return _talentMgr->SpecInfo[spec].Talents; }
-        PlayerTalentMap & GetTalentMap(uint8 spec) { return _talentMgr->SpecInfo[spec].Talents; }
+        PlayerTalentMap const & GetTalentMap(uint8 spec) const { return _talentMgr.SpecInfo[spec].Talents; }
+        PlayerTalentMap & GetTalentMap(uint8 spec) { return _talentMgr.SpecInfo[spec].Talents; }
         ActionButtonList const& GetActionButtons() const { return m_actionButtons; }
 
         uint32 GetFreePrimaryProfessionPoints() const { return GetUInt32Value(PLAYER_CHARACTER_POINTS); }
         void SetFreePrimaryProfessions(uint16 profs) { SetUInt32Value(PLAYER_CHARACTER_POINTS, profs); }
         void InitPrimaryProfessions();
 
-        PlayerSpellMap const& GetSpellMap() const { return m_spells; }
-        PlayerSpellMap      & GetSpellMap()       { return m_spells; }
+        PlayerSpellMap const & GetSpellMap() const { return m_spells; }
 
         SpellCooldowns const& GetSpellCooldownMap() const { return m_spellCooldowns; }
 
         void AddSpellMod(SpellModifier* mod, bool apply);
         bool IsAffectedBySpellmod(SpellInfo const* spellInfo, SpellModifier* mod, Spell* spell = NULL);
-        template <class T> T ApplySpellMod(uint32 spellId, SpellModOp op, T &basevalue, Spell* spell = NULL);
+        template <class T> T ApplySpellMod(uint32 spellId, SpellModOp op, T &basevalue, Spell* spell = NULL, bool removestacks = true);
         void RemoveSpellMods(Spell* spell);
         void RestoreSpellMods(Spell* spell, uint32 ownerAuraId = 0, Aura *aura = NULL);
         void RestoreAllSpellMods(uint32 ownerAuraId = 0, Aura *aura = NULL);
@@ -1995,6 +1948,7 @@ class Player : public Unit, public GridObject<Player>
         void SetGuildIdInvited(uint32 GuildId) { m_GuildIdInvited = GuildId; }
         uint32 GetGuildId() const { return GetUInt32Value(OBJECT_FIELD_DATA); /* return only lower part */ }
         Guild* GetGuild();
+        Guild const * GetGuild() const;
         static uint32 GetGuildIdFromDB(uint64 guid);
         static uint8 GetRankFromDB(uint64 guid);
         int GetGuildIdInvited() { return m_GuildIdInvited; }
@@ -2015,7 +1969,7 @@ class Player : public Unit, public GridObject<Player>
         {
             uint32 max_value = 0;
 
-            for (uint8 i = 0; i < MAX_PVP_SLOT; i++)
+            for (uint8 i = 0; i < MAX_ARENA_SLOT; i++)
                 if (max_value < GetArenaPersonalRating(i))
                     max_value = GetArenaPersonalRating(i);
 
@@ -2333,7 +2287,6 @@ class Player : public Unit, public GridObject<Player>
 
         bool InBattleground()       const                { return m_bgData.bgInstanceID != 0; }
         bool InArena()              const;
-        bool InRatedBattleGround()  const;
         uint32 GetBattlegroundId()  const                { return m_bgData.bgInstanceID; }
         BattlegroundTypeId GetBattlegroundTypeId() const { return m_bgData.bgTypeID; }
         Battleground* GetBattleground() const;
@@ -2560,9 +2513,6 @@ class Player : public Unit, public GridObject<Player>
         void RemoveAtLoginFlag(AtLoginFlags flags, bool persist = false);
 
         bool isUsingLfg();
-
-        typedef std::set<uint32> DFQuestsDoneList;
-        DFQuestsDoneList m_DFQuests;
 
         // Temporarily removed pet cache
         uint32 GetTemporaryUnsummonedPetNumber() const { return m_temporaryUnsummonedPetNumber; }
@@ -2824,6 +2774,9 @@ class Player : public Unit, public GridObject<Player>
 
         bool HasSpellCharge(uint32 spellId, SpellCategoryEntry const &category);
 
+        void SendCUFProfiles();
+
+
         /*********************************************************/
         /***              BATTLE PET SYSTEM                    ***/
         /*********************************************************/
@@ -2833,10 +2786,13 @@ class Player : public Unit, public GridObject<Player>
 
         void SendBattlePetJournal();
 
-        void SendCUFProfiles();
+        uint8 GetBattleGroundRoles() const { return m_bgRoles; }
+        void SetBattleGroundRoles(uint8 roles) { m_bgRoles = roles; }
 
+    private:
+        typedef std::unordered_set<uint32> DFQuestsDoneList;
+        DFQuestsDoneList m_dfQuests;
 
-    protected:
         // Gamemaster whisper whitelist
         WhisperListContainer WhisperList;
         uint32 m_regenTimer;
@@ -3002,7 +2958,7 @@ class Player : public Unit, public GridObject<Player>
 
         GlobalCooldownMgr m_GlobalCooldownMgr;
 
-        PlayerTalentInfo* _talentMgr;
+        PlayerTalentInfo _talentMgr;
 
         ActionButtonList m_actionButtons;
 
@@ -3057,8 +3013,6 @@ class Player : public Unit, public GridObject<Player>
         bool m_canBlock;
         bool m_canTitanGrip;
         uint8 m_swingErrorMsg;
-
-        bool m_needSummonPetAlterStopFlying;
 
         ////////////////////Rest System/////////////////////
         time_t time_inn_enter;
@@ -3202,16 +3156,18 @@ class Player : public Unit, public GridObject<Player>
 
         ArchaeologyMgr m_archaeologyMgr;
 
+        uint8 m_bgRoles;
+
         // Arena
-        uint32 m_ArenaPersonalRating[MAX_PVP_SLOT];
-        uint32 m_BestRatingOfWeek[MAX_PVP_SLOT];
-        uint32 m_BestRatingOfSeason[MAX_PVP_SLOT];
-        uint32 m_ArenaMatchMakerRating[MAX_PVP_SLOT];
-        uint32 m_WeekWins[MAX_PVP_SLOT];
-        uint32 m_PrevWeekWins[MAX_PVP_SLOT];
-        uint32 m_SeasonWins[MAX_PVP_SLOT];
-        uint32 m_WeekGames[MAX_PVP_SLOT];
-        uint32 m_SeasonGames[MAX_PVP_SLOT];
+        uint32 m_ArenaPersonalRating[MAX_ARENA_SLOT];
+        uint32 m_BestRatingOfWeek[MAX_ARENA_SLOT];
+        uint32 m_BestRatingOfSeason[MAX_ARENA_SLOT];
+        uint32 m_ArenaMatchMakerRating[MAX_ARENA_SLOT];
+        uint32 m_WeekWins[MAX_ARENA_SLOT];
+        uint32 m_PrevWeekWins[MAX_ARENA_SLOT];
+        uint32 m_SeasonWins[MAX_ARENA_SLOT];
+        uint32 m_WeekGames[MAX_ARENA_SLOT];
+        uint32 m_SeasonGames[MAX_ARENA_SLOT];
 
         std::vector<CufProfile> m_cufProfiles;
 
@@ -3222,7 +3178,7 @@ void AddItemsSetItem(Player*player, Item* item);
 void RemoveItemsSetItem(Player*player, ItemTemplate const* proto);
 
 // "the bodies of template functions must be made available in a header file"
-template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T &basevalue, Spell* spell)
+template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T &basevalue, Spell* spell, bool removestacks)
 {
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
     if (!spellInfo)
@@ -3238,17 +3194,6 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T &bas
     if (m_spellModTakingSpell)
         spell = m_spellModTakingSpell;
 
-    int32 playerWeaponMask = 0;
-
-    for (uint8 i = 0; i < MAX_ATTACK; ++i)
-    {
-        Item* tmpitem = GetWeaponForAttack(WeaponAttackType(i), true);
-        if (!tmpitem || tmpitem->IsBroken() || !tmpitem->GetTemplate())
-            continue;
-
-        playerWeaponMask |= 1 << tmpitem->GetTemplate()->SubClass;
-    }
-
     for (SpellModList::iterator itr = m_spellMods[op].begin(); itr != m_spellMods[op].end(); ++itr)
     {
         SpellModifier* mod = *itr;
@@ -3259,22 +3204,6 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T &bas
 
         if (!IsAffectedBySpellmod(spellInfo, mod, spell))
             continue;
-
-        int32 spellWeaponMask = 0;
-        if (mod->ownerAura)
-        {
-            const auto temp = mod->ownerAura->GetSpellInfo();
-            if (temp)
-            {
-                spellWeaponMask = temp->EquippedItemSubClassMask;
-            }
-        }
-
-        if (spellWeaponMask > 0 && playerWeaponMask > 0)
-        {
-            if (!(playerWeaponMask & spellWeaponMask))
-                continue;
-        }
 
         if (mod->type == SPELLMOD_FLAT)
             totalflat += mod->value;
@@ -3317,7 +3246,7 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T &bas
             totalmul += CalculatePct(1.0f, value);
         }
 
-        if (!m_isMoltenCored)
+        if (removestacks && !m_isMoltenCored)
             DropModCharge(mod, spell);
     }
 

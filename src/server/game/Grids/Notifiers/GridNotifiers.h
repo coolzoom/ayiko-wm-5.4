@@ -1224,6 +1224,35 @@ namespace Trinity
             NearestHostileUnitInAttackDistanceCheck(NearestHostileUnitInAttackDistanceCheck const&);
     };
 
+    class NearestHostileUnitInAggroRangeCheck
+    {
+        public:
+            explicit NearestHostileUnitInAggroRangeCheck(Creature const* creature, bool useLOS = false) : _me(creature), _useLOS(useLOS)
+            {
+            }
+            bool operator()(Unit* u)
+            {
+                if (!u->IsHostileTo(_me))
+                    return false;
+
+                if (!u->IsWithinDistInMap(_me, _me->GetAggroRange(u)))
+                    return false;
+
+                if (!_me->IsValidAttackTarget(u))
+                    return false;
+
+                if (_useLOS && !u->IsWithinLOSInMap(_me))
+                    return false;
+
+                return true;
+            }
+
+    private:
+            Creature const* _me;
+            bool _useLOS;
+            NearestHostileUnitInAggroRangeCheck(NearestHostileUnitInAggroRangeCheck const&);
+    };
+
     class AnyAssistCreatureInRangeCheck
     {
         public:
@@ -1431,6 +1460,30 @@ namespace Trinity
             const WorldObject* m_pObject;
             uint32 m_uiEntry;
             float m_fRange;
+    };
+
+
+    class AllDeadCreaturesInRange
+    {
+        public:
+            AllDeadCreaturesInRange(const WorldObject* object, float maxRange, uint64 excludeGUID)
+                : m_pObject(object)
+                , m_fRange(maxRange)
+                , m_excludeGUID(excludeGUID)
+            { }
+
+            bool operator()(Unit const *unit) const
+            {
+                return unit->GetTypeId() == TYPEID_UNIT
+                        && unit->GetGUID() != m_excludeGUID
+                        && !unit->isAlive()
+                        && m_pObject->IsWithinDist(unit, m_fRange, false);
+            }
+
+        private:
+            const WorldObject* m_pObject;
+            float m_fRange;
+            uint64 m_excludeGUID;
     };
 
     class PlayerAtMinimumRangeAway

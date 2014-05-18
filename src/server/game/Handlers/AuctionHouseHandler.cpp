@@ -82,12 +82,13 @@ void WorldSession::SendAuctionCommandResult(AuctionEntry* auction, uint32 action
     ObjectGuid guid = 0;
 
     WorldPacket data(SMSG_AUCTION_COMMAND_RESULT);
-    data << uint32(action); // dword30
-    data << uint32(errorCode); // dword28
-    data << uint32(auction ? auction->Id : 0); // dword34
-    data << uint32(bidError); // dword2C
+    data << uint32(action);
+    data << uint32(errorCode);
+    data << uint32(auction ? auction->Id : 0);
+    data << uint32(bidError);
 
     data.WriteBit(!(action == AUCTION_PLACE_BID || action == ERR_AUCTION_HIGHER_BID));
+    data.WriteBit(!false);
     data.WriteBitSeq<6, 4, 1, 5, 0, 3, 7, 2>(guid);
     data.WriteBit(!(action == ERR_AUCTION_HIGHER_BID));
     data.FlushBits();
@@ -95,10 +96,10 @@ void WorldSession::SendAuctionCommandResult(AuctionEntry* auction, uint32 action
     data.WriteByteSeq<0, 6, 7, 1, 5, 4, 3, 2>(guid);
 
     if (action == AUCTION_PLACE_BID || action == ERR_AUCTION_HIGHER_BID)
-        data << uint64(auction->bid ? auction->GetAuctionOutBid() : 0);
+        data << uint64(auction ? (auction->bid ? auction->GetAuctionOutBid() : 0) : 0);
 
     if (action == ERR_AUCTION_HIGHER_BID)
-        data << uint64(auction->bid ? auction->GetAuctionOutBid() : 0);
+        data << uint64(auction ? (auction->bid ? auction->GetAuctionOutBid() : 0) : 0);
 
     SendPacket(&data);
 }
@@ -106,38 +107,67 @@ void WorldSession::SendAuctionCommandResult(AuctionEntry* auction, uint32 action
 //this function sends notification, if bidder is online
 void WorldSession::SendAuctionBidderNotification(uint32 location, uint32 auctionId, uint64 bidder, uint32 bidSum, uint32 diff, uint32 itemEntry)
 {
-    WorldPacket data(SMSG_AUCTION_BIDDER_NOTIFICATION, (8*4));
-    data << uint32(location);
-    data << uint32(auctionId);
-    data << uint64(bidder);
-    data << uint64(bidSum);
-    data << uint64(diff);
-    data << uint32(itemEntry);
-    data << uint32(0);
-    SendPacket(&data);
+    ObjectGuid bidderGuid = bidder;
+
+    // Buyout
+    if (!bidSum && !diff)
+    {
+        WorldPacket data(SMSG_AUCTION_BUYOUT_NOTIFICATION, 5 * 4 + 1 + 8);
+        data << uint32(itemEntry);
+        data << uint32(location);
+        data << uint32(bidSum);
+        data << uint32(auctionId);
+        data << uint32(diff);
+        data.WriteBitSeq<4, 3, 6, 2, 7, 0, 5, 1>(bidderGuid);
+        data.WriteByteSeq<3, 1, 4, 6, 5, 7, 0, 2>(bidderGuid);
+
+        SendPacket(&data);
+    }
+    else
+    {
+        WorldPacket data(SMSG_AUCTION_BIDDER_NOTIFICATION, 5 * 4 + 2 * 8 + 1 + 8);
+        data.WriteBitSeq<3, 6, 2, 0, 4, 1, 5, 7>(bidderGuid);
+        data << uint32(location);
+        data << uint32(auctionId);
+        data.WriteByteSeq<3, 2, 1>(bidderGuid);
+        data << uint32(itemEntry);
+        data << uint32(0);
+        data.WriteByteSeq<4>(bidderGuid);
+        data << uint64(diff);
+        data.WriteByteSeq<0, 5>(bidderGuid);
+        data << uint64(bidSum);
+        data << uint32(0);
+        data.WriteByteSeq<7, 6>(bidderGuid);
+
+        SendPacket(&data);
+    }
 }
 
 // this void causes on client to display: "Your auction sold"
 void WorldSession::SendAuctionOwnerNotification(AuctionEntry* auction)
 {
     WorldPacket data(SMSG_AUCTION_OWNER_BID_NOTIFICATION, 40);
-    data << uint32(auction->Id);
+
     data << uint64(auction->bid);
-    data << uint64(0);                                     //unk
-    data << uint64(0);                                     //unk
+    data << uint32(0);
+    data << uint32(0);                      // Unk
+    data << float(3600);                    // Time in seconds before money received
+    data << uint32(auction->Id);
     data << uint32(auction->itemEntry);
-    data << uint32(0);                                     //unk
-    data << float(0);                                      //unk
+    data.WriteBit(true);
+    data.FlushBits();
+
     SendPacket(&data);
 }
 
-void WorldSession::SendAuctionRemovedNotification(uint32 auctionId, uint32 itemEntry, int32 randomPropertyId)
+void WorldSession::SendAuctionRemovedNotification(uint32 /*auctionId*/, uint32 /*itemEntry*/, int32 /*randomPropertyId*/)
 {
-    WorldPacket data(SMSG_AUCTION_REMOVED_NOTIFICATION, (4+4+4));
+    // No more sended on 5.4.x official
+    /*WorldPacket data(SMSG_AUCTION_REMOVED_NOTIFICATION, (4+4+4));
     data << uint32(auctionId);
     data << uint32(itemEntry);
     data << uint32(randomPropertyId);
-    SendPacket(&data);
+    SendPacket(&data);*/
 }
 
 //this void creates new auction and adds auction to some auctionhouse

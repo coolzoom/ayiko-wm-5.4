@@ -281,9 +281,16 @@ bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)
         return false;
 
     // For Item Upgrade
-    if (itemProto->ItemLevel >= 458)
+    if (CanUpgrade())
     {
-        if (CanUpgrade())
+        if (IsPvPItem())
+        {
+            if (itemProto->Quality == ITEM_QUALITY_EPIC)
+                SetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 2, 456);
+            else
+                SetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 2, 453);
+        }
+        else
         {
             if (itemProto->Quality == ITEM_QUALITY_EPIC)
                 SetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 2, 445);
@@ -293,10 +300,7 @@ bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)
                 SetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 2, 451);
         }
 
-        SetFlag(ITEM_FIELD_MODIFIERS_MASK, 0x7);
-
-        if (Player* player = ObjectAccessor::FindPlayer(owner ? owner->GetGUID() : 0))
-            SetState(ITEM_CHANGED, player);
+        SetFlag(ITEM_FIELD_MODIFIERS_MASK, 0x1|0x2|0x4);
     }
 
     SetUInt32Value(ITEM_FIELD_STACK_COUNT, 1);
@@ -485,32 +489,36 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, Field* fields, uint32 entr
     if (uint32 reforgeEntry = fields[8].GetUInt32())
     {
         SetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 0, reforgeEntry);
-        SetFlag(ITEM_FIELD_MODIFIERS_MASK, 0x1);
+        SetFlag(ITEM_FIELD_MODIFIERS_MASK, 1);
     }
 
     if (uint32 transmogId = fields[9].GetUInt32())
     {
         SetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 1, transmogId);
-        SetFlag(ITEM_FIELD_MODIFIERS_MASK, 0x3);
+        SetFlag(ITEM_FIELD_MODIFIERS_MASK, 2);
     }
 
     if (uint32 upgradeId = fields[10].GetUInt32())
     {
         if (CanUpgrade())
         {
-            SetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 2, upgradeId);
-            SetFlag(ITEM_FIELD_MODIFIERS_MASK, 0x7);
-
-            if (Player* player = ObjectAccessor::FindPlayer(owner_guid))
-                SetState(ITEM_CHANGED, player);
+             SetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 2, upgradeId);
+             SetFlag(ITEM_FIELD_MODIFIERS_MASK, 0x1|0x2|0x4);
         }
     }
     else
     {
         // For Item Upgrade
-        if (proto->ItemLevel >= 458)
+        if (CanUpgrade())
         {
-            if (CanUpgrade())
+            if (IsPvPItem())
+            {
+                if (proto->Quality == ITEM_QUALITY_EPIC)
+                    SetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 2, 456);
+                else
+                    SetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 2, 453);
+            }
+            else
             {
                 if (proto->Quality == ITEM_QUALITY_EPIC)
                     SetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 2, 445);
@@ -520,10 +528,7 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, Field* fields, uint32 entr
                     SetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 2, 451);
             }
 
-            SetFlag(ITEM_FIELD_MODIFIERS_MASK, 0x7);
-
-            if (Player* player = ObjectAccessor::FindPlayer(owner_guid))
-                SetState(ITEM_CHANGED, player);
+            SetFlag(ITEM_FIELD_MODIFIERS_MASK, 0x1|0x2|0x4);
         }
     }
 
@@ -594,41 +599,9 @@ Player* Item::GetOwner()const
     return ObjectAccessor::FindPlayer(GetOwnerGUID());
 }
 
-uint32 Item::GetSkill()
+uint32 Item::GetSkill() const
 {
-    const static uint32 item_weapon_skills[MAX_ITEM_SUBCLASS_WEAPON] =
-    {
-        SKILL_AXES,     SKILL_2H_AXES,  SKILL_BOWS,          SKILL_GUNS,      SKILL_MACES,
-        SKILL_2H_MACES, SKILL_POLEARMS, SKILL_SWORDS,        SKILL_2H_SWORDS, 0,
-        SKILL_STAVES,   0,              0,                   SKILL_FIST_WEAPONS,   0,
-        SKILL_DAGGERS,  SKILL_THROWN,   SKILL_ASSASSINATION, SKILL_CROSSBOWS, SKILL_WANDS,
-        SKILL_FISHING
-    };
-
-    const static uint32 item_armor_skills[MAX_ITEM_SUBCLASS_ARMOR] =
-    {
-        0, SKILL_CLOTH, SKILL_LEATHER, SKILL_MAIL, SKILL_PLATE_MAIL, 0, SKILL_SHIELD, 0, 0, 0, 0
-    };
-
-    ItemTemplate const* proto = GetTemplate();
-
-    switch (proto->Class)
-    {
-        case ITEM_CLASS_WEAPON:
-            if (proto->SubClass >= MAX_ITEM_SUBCLASS_WEAPON)
-                return 0;
-            else
-                return item_weapon_skills[proto->SubClass];
-
-        case ITEM_CLASS_ARMOR:
-            if (proto->SubClass >= MAX_ITEM_SUBCLASS_ARMOR)
-                return 0;
-            else
-                return item_armor_skills[proto->SubClass];
-
-        default:
-            return 0;
-    }
+    return GetTemplate()->GetSkill();
 }
 
 int32 Item::GenerateItemRandomPropertyId(uint32 item_id)
@@ -1068,9 +1041,15 @@ void Item::SendTimeUpdate(Player* owner)
     if (!duration)
         return;
 
+    ObjectGuid guid = GetGUID();
+
     WorldPacket data(SMSG_ITEM_TIME_UPDATE, (8+4));
-    data << uint64(GetGUID());
-    data << uint32(duration);
+
+    data.WriteBitSeq<0, 4, 2, 5, 7, 1, 6, 3>(guid);
+    data.WriteByteSeq<7, 0, 6>(guid);
+    data << duration;
+    data.WriteByteSeq<4, 1, 2, 3, 5>(guid);
+
     owner->GetSession()->SendPacket(&data);
 }
 
@@ -1283,7 +1262,7 @@ bool Item::CanBeTransmogrified() const
     if (proto->Flags2 & ITEM_FLAGS_EXTRA_CANNOT_BE_TRANSMOG)
         return false;
 
-    if (!HasStats())
+    if (!HasStats() && !HasSpells() && (proto->Quality < ITEM_QUALITY_RARE))
         return false;
 
     return true;
@@ -1312,7 +1291,7 @@ bool Item::CanTransmogrify() const
     if (proto->Flags2 & ITEM_FLAGS_EXTRA_CAN_TRANSMOG)
         return true;
 
-    if (!HasStats())
+    if (!HasStats() && !HasSpells())
         return false;
 
     return true;
@@ -1338,42 +1317,62 @@ bool Item::CanTransmogrifyItemWithItem(Item const* transmogrified, Item const* t
         proto1->InventoryType == INVTYPE_FINGER ||
         proto1->InventoryType == INVTYPE_TRINKET ||
         proto1->InventoryType == INVTYPE_AMMO ||
-        proto1->InventoryType == INVTYPE_QUIVER)
+        proto1->InventoryType == INVTYPE_QUIVER ||
+        proto1->InventoryType == INVTYPE_NON_EQUIP ||
+        proto1->InventoryType == INVTYPE_TABARD ||
+        proto1->InventoryType == INVTYPE_HOLDABLE)
         return false;
 
-    if (proto1->SubClass != proto2->SubClass && (proto1->Class != ITEM_CLASS_WEAPON || !proto2->IsRangedWeapon() || !proto1->IsRangedWeapon()))
+    if (proto2->InventoryType == INVTYPE_BAG ||
+        proto2->InventoryType == INVTYPE_RELIC ||
+        proto2->InventoryType == INVTYPE_BODY ||
+        proto2->InventoryType == INVTYPE_FINGER ||
+        proto2->InventoryType == INVTYPE_TRINKET ||
+        proto2->InventoryType == INVTYPE_AMMO ||
+        proto2->InventoryType == INVTYPE_QUIVER ||
+        proto2->InventoryType == INVTYPE_NON_EQUIP ||
+        proto2->InventoryType == INVTYPE_TABARD ||
+        proto2->InventoryType == INVTYPE_HOLDABLE)
         return false;
 
-    if (proto1->InventoryType != proto2->InventoryType &&
-        (proto1->Class != ITEM_CLASS_WEAPON || (proto2->InventoryType != INVTYPE_WEAPONMAINHAND && proto2->InventoryType != INVTYPE_WEAPONOFFHAND)) &&
-        (proto1->Class != ITEM_CLASS_ARMOR || (proto1->InventoryType != INVTYPE_CHEST && proto2->InventoryType != INVTYPE_ROBE && proto1->InventoryType != INVTYPE_ROBE && proto2->InventoryType != INVTYPE_CHEST)))
+    if (proto1->Class != proto2->Class)
         return false;
 
-    return true;
-}
-
-bool Item::CanUpgrade() const
-{
-    ItemTemplate const* proto = GetTemplate();
-
-    if (!proto)
+    if (proto1->SubClass != proto2->SubClass && !proto1->IsRangedWeapon() && !proto2->IsRangedWeapon())
         return false;
 
-    if (proto->Quality == ITEM_QUALITY_LEGENDARY)
-        return false;
+    if (proto1->IsRangedWeapon() && proto2->IsRangedWeapon())
+        return true;
 
-    if (proto->Class != ITEM_CLASS_ARMOR && proto->Class != ITEM_CLASS_WEAPON)
-        return false;
+    if (proto1->InventoryType != proto2->InventoryType)
+    {
+        if (proto1->Class == ITEM_CLASS_WEAPON && proto2->Class == ITEM_CLASS_WEAPON)
+        {
+            if (!((proto1->InventoryType == INVTYPE_WEAPON || proto1->InventoryType == INVTYPE_WEAPONMAINHAND || proto1->InventoryType == INVTYPE_WEAPONOFFHAND) &&
+                (proto2->InventoryType == INVTYPE_WEAPON || proto2->InventoryType == INVTYPE_WEAPONMAINHAND ||proto2->InventoryType == INVTYPE_WEAPONOFFHAND)))
+                return false;
+        }
+        else if (proto2->Class == ITEM_CLASS_ARMOR && proto2->Class == ITEM_CLASS_ARMOR)
+        {
+            if (!((proto1->InventoryType == INVTYPE_CHEST || proto1->InventoryType == INVTYPE_ROBE) &&
+                (proto1->InventoryType == INVTYPE_CHEST || proto1->InventoryType == INVTYPE_ROBE)))
+                return false;
+        }
+    }
 
-    if (proto->Class == ITEM_CLASS_WEAPON && proto->SubClass == ITEM_SUBCLASS_WEAPON_FISHING_POLE)
-        return false;
+    // Check armor types
+    if (proto1->Class == ITEM_CLASS_ARMOR || proto2->Class == ITEM_CLASS_ARMOR)
+    {
+        uint32 skill1 = proto1->GetSkill();
+        uint32 skill2 = proto2->GetSkill();
 
-    if (!HasStats())
-        return false;
-
-    // PvP item can't be upgraded after Season 12
-    if (IsPvPItem() && proto->ItemLevel > 483)
-        return false;
+        if ((skill1 == SKILL_PLATE_MAIL || skill1 == SKILL_LEATHER ||
+            skill1 == SKILL_MAIL || skill1 == SKILL_CLOTH) ||
+            (skill2 == SKILL_PLATE_MAIL || skill2 == SKILL_LEATHER ||
+            skill2 == SKILL_MAIL || skill2 == SKILL_CLOTH))
+            if (skill1 != skill2)
+                return false;
+    }
 
     return true;
 }
@@ -1383,8 +1382,19 @@ bool Item::HasStats() const
     if (GetItemRandomPropertyId() != 0)
         return true;
 
-    for (auto const &stat : GetTemplate()->ItemStat)
-        if (stat.ItemStatValue != 0)
+    ItemTemplate const* proto = GetTemplate();
+    for (uint8 i = 0; i < MAX_ITEM_PROTO_STATS; ++i)
+        if (proto->ItemStat[i].ItemStatValue != 0)
+            return true;
+
+    return false;
+}
+
+bool Item::HasSpells() const
+{
+    ItemTemplate const* proto = GetTemplate();
+    for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
+        if (proto->Spells[i].SpellId != 0)
             return true;
 
     return false;
@@ -1592,6 +1602,11 @@ int32 Item::GetReforgableStat(ItemModType statType) const
     return 0;
 }
 
+bool Item::IsPotion() const
+{
+    return GetTemplate()->IsPotion();
+}
+
 bool Item::IsPvPItem() const
 {
     ItemTemplate const* proto = GetTemplate();
@@ -1610,5 +1625,84 @@ bool Item::IsPvPItem() const
         if (spell == 132586 || spell == 139891)
             return true;
     }
+
+    return false;
+}
+
+bool Item::IsStuffItem() const
+{
+    ItemTemplate const* proto = GetTemplate();
+    if (!proto)
+        return false;
+
+    uint32 invType = proto->InventoryType;
+
+    switch (invType)
+    {
+        case INVTYPE_NON_EQUIP:
+        case INVTYPE_BODY:
+        case INVTYPE_BAG:
+        case INVTYPE_TABARD:
+        case INVTYPE_HOLDABLE:
+        case INVTYPE_AMMO:
+        case INVTYPE_THROWN:
+        case INVTYPE_QUIVER:
+        case INVTYPE_RELIC:
+        case INVTYPE_RANGEDRIGHT:
+            return false;
+        default:
+            return true;
+    }
+
+    return false;
+}
+
+bool Item::CanUpgrade() const
+{
+    ItemTemplate const* proto = GetTemplate();
+    if (!proto)
+        return false;
+
+    if (proto->ItemLevel < 458)
+        return false;
+
+    if (proto->Quality == ITEM_QUALITY_LEGENDARY && !IsLegendaryCloak())
+        return false;
+
+    if (!IsStuffItem())
+        return false;
+
+    if (proto->Class == ITEM_CLASS_WEAPON && proto->SubClass == ITEM_SUBCLASS_WEAPON_FISHING_POLE)
+        return false;
+
+    if (!HasStats())
+        return false;
+
+    // PvP item can't be upgraded after Season 12
+    if (IsPvPItem() && proto->ItemLevel > 483)
+        return false;
+
+    return true;
+}
+
+bool Item::IsLegendaryCloak() const
+{
+    ItemTemplate const* proto = GetTemplate();
+    if (!proto)
+        return false;
+
+    switch (proto->ItemId)
+    {
+        case 102245: // Qian-Le, Courage of Niuzao
+        case 102246: // Xing-Ho, Breath of Yu'lon
+        case 102247: // Jina-Kang, Kindness of Chi-Ji
+        case 102248: // Fen-Yu, Fury of Xuen
+        case 102249: // Gong-Lu, Strength of Xuen
+        case 102250: // Qian-Ying, Fortitude of Niuzao
+            return true;
+        default:
+            break;
+    }
+
     return false;
 }

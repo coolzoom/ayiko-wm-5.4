@@ -164,8 +164,8 @@ public:
         {
             if (submitter->IsInWorld())
             {
-                WorldPacket data(SMSG_GM_TICKET_DELETE_TICKET, 4);
-                data << uint32(GMTICKET_RESPONSE_TICKET_DELETED);
+                WorldPacket data(SMSG_GM_RESPONSE_STATUS_UPDATE, 4);
+                data << uint8(GMTICKET_RESPONSE_TICKET_DELETED);
                 submitter->GetSession()->SendPacket(&data);
             }
         }
@@ -267,19 +267,20 @@ public:
         std::string msg = ticket->FormatMessageString(*handler, NULL, NULL, NULL, handler->GetSession() ? handler->GetSession()->GetPlayer()->GetName() : "Console");
         handler->SendGlobalGMSysMessage(msg.c_str());
 
-        sTicketMgr->RemoveTicket(ticket->GetId());
-        sTicketMgr->UpdateLastChange();
-
         if (Player* player = ticket->GetPlayer())
         {
             if (player->IsInWorld())
             {
                 // Force abandon ticket
-                WorldPacket data(SMSG_GM_TICKET_DELETE_TICKET, 4);
-                data << uint32(GMTICKET_RESPONSE_TICKET_DELETED);
+                WorldPacket data(SMSG_GM_RESPONSE_STATUS_UPDATE, 4);
+                data << uint8(GMTICKET_RESPONSE_TICKET_DELETED);
                 player->GetSession()->SendPacket(&data);
             }
         }
+
+        // Ticket pointer must be delete AFTER last use !!
+        sTicketMgr->RemoveTicket(ticket->GetId());
+        sTicketMgr->UpdateLastChange();
 
         return true;
     }

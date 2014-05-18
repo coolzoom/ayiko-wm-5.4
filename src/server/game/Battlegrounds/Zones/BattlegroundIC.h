@@ -889,7 +889,7 @@ class BattlegroundIC : public Battleground
         virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player);
 
         /* Scorekeeping */
-        void UpdatePlayerScore(Player* source, Player *victim, uint32 type, uint32 value, bool doAddHonor = true);
+        void UpdatePlayerScore(Player* Source, uint32 type, uint32 value, bool doAddHonor = true);
 
         void FillInitialWorldStates(WorldPacket& data);
 

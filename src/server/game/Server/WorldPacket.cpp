@@ -15,9 +15,40 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*#include <zlib.h>
 #include "WorldPacket.h"
+#include "Log.h"
 #include "World.h"
+
+#include <zlib.h>
+
+namespace {
+
+void DoCompress(z_stream* compressionStream, void* dst, uint32 *dst_size, const void* src, int src_size)
+{
+    compressionStream->next_out = (Bytef*)dst;
+    compressionStream->avail_out = *dst_size;
+    compressionStream->next_in = (Bytef*)src;
+    compressionStream->avail_in = (uInt)src_size;
+
+    int32 z_res = deflate(compressionStream, Z_SYNC_FLUSH);
+    if (z_res != Z_OK)
+    {
+        TC_LOG_ERROR("network", "Can't compress packet (zlib: deflate) Error code: %i (%s, msg: %s)", z_res, zError(z_res), compressionStream->msg);
+        *dst_size = 0;
+        return;
+    }
+
+    if (compressionStream->avail_in != 0)
+    {
+        TC_LOG_ERROR("network", "Can't compress packet (zlib: deflate not greedy)");
+        *dst_size = 0;
+        return;
+    }
+
+    *dst_size -= compressionStream->avail_out;
+}
+
+} // namespace
 
 //! Compresses packet in place
 void WorldPacket::Compress(z_stream* compressionStream)
@@ -33,17 +64,17 @@ void WorldPacket::Compress(z_stream* compressionStream)
     uint32 size = wpos();
     uint32 destsize = compressBound(size);
 
-    std::vector<uint8> storage(destsize);
+    std::vector<uint8> storage(sizeof(uint32) + destsize);
 
-    _compressionStream = compressionStream;
-    Compress(static_cast<void*>(&storage[0]), &destsize, static_cast<const void*>(contents()), size);
+    DoCompress(compressionStream, &storage[0] + sizeof(uint32), &destsize, contents(), size);
     if (destsize == 0)
         return;
 
-    clear();
-    reserve(destsize + sizeof(uint32));
-    *this << uint32(size);
-    append(&storage[0], destsize);
+    std::swap(storage, _storage);
+
+    resize(sizeof(uint32) + destsize);
+
+    put<uint32>(0, size);
     SetOpcode(opcode);
 
     TC_LOG_INFO("network", "Successfully compressed opcode %u (len %u) to %u (len %u)", uncompressedOpcode, size, opcode, destsize);
@@ -65,43 +96,16 @@ void WorldPacket::Compress(z_stream* compressionStream, WorldPacket const* sourc
     uint32 size = source->size();
     uint32 destsize = compressBound(size);
 
-    size_t sizePos = 0;
-    resize(destsize + sizeof(uint32));
+    resize(sizeof(uint32) + destsize);
 
-    _compressionStream = compressionStream;
-    Compress(static_cast<void*>(&_storage[0] + sizeof(uint32)), &destsize, static_cast<const void*>(source->contents()), size);
+    DoCompress(compressionStream, &_storage[0] + sizeof(uint32), &destsize, source->contents(), size);
     if (destsize == 0)
         return;
 
-    put<uint32>(sizePos, size);
-    resize(destsize + sizeof(uint32));
+    resize(sizeof(uint32) + destsize);
 
+    put<uint32>(0, size);
     SetOpcode(opcode);
 
     TC_LOG_INFO("network", "Successfully compressed opcode %u (len %u) to %u (len %u)", uncompressedOpcode, size, opcode, destsize);
 }
-
-void WorldPacket::Compress(void* dst, uint32 *dst_size, const void* src, int src_size)
-{
-    _compressionStream->next_out = (Bytef*)dst;
-    _compressionStream->avail_out = *dst_size;
-    _compressionStream->next_in = (Bytef*)src;
-    _compressionStream->avail_in = (uInt)src_size;
-
-    int32 z_res = deflate(_compressionStream, Z_SYNC_FLUSH);
-    if (z_res != Z_OK)
-    {
-        TC_LOG_ERROR("network", "Can't compress packet (zlib: deflate) Error code: %i (%s, msg: %s)", z_res, zError(z_res), _compressionStream->msg);
-        *dst_size = 0;
-        return;
-    }
-
-    if (_compressionStream->avail_in != 0)
-    {
-        TC_LOG_ERROR("network", "Can't compress packet (zlib: deflate not greedy)");
-        *dst_size = 0;
-        return;
-    }
-
-    *dst_size -= _compressionStream->avail_out;
-}*/

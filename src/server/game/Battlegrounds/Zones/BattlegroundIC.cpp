@@ -72,12 +72,12 @@ void BattlegroundIC::HandlePlayerResurrect(Player* player)
         player->CastSpell(player, SPELL_OIL_REFINERY, true);
 }
 
-void BattlegroundIC::SendTransportInit(Player* player)
+void BattlegroundIC::SendTransportInit(Player* /*player*/)
 {
     if (!gunshipAlliance || !gunshipHorde)
         return;
 
-    UpdateData transData(player->GetMapId());
+    /*UpdateData transData(player->GetMapId());
 
     gunshipAlliance->BuildCreateUpdateBlockForPlayer(&transData, player);
     gunshipHorde->BuildCreateUpdateBlockForPlayer(&transData, player);
@@ -85,7 +85,7 @@ void BattlegroundIC::SendTransportInit(Player* player)
     WorldPacket packet;
 
     if (transData.BuildPacket(&packet))
-        player->GetSession()->SendPacket(&packet);
+        player->GetSession()->SendPacket(&packet);*/
 }
 
 void BattlegroundIC::DoAction(uint32 action, uint64 var)
@@ -344,9 +344,9 @@ void BattlegroundIC::HandleAreaTrigger(Player* /*Source*/, uint32 /*Trigger*/)
         return;
 }
 
-void BattlegroundIC::UpdatePlayerScore(Player* source, Player *victim, uint32 type, uint32 value, bool doAddHonor)
+void BattlegroundIC::UpdatePlayerScore(Player* Source, uint32 type, uint32 value, bool doAddHonor)
 {
-    std::map<uint64, BattlegroundScore*>::iterator itr = PlayerScores.find(source->GetGUID());
+    std::map<uint64, BattlegroundScore*>::iterator itr = PlayerScores.find(Source->GetGUID());
 
     if (itr == PlayerScores.end())                         // Player not found...
         return;
@@ -360,7 +360,7 @@ void BattlegroundIC::UpdatePlayerScore(Player* source, Player *victim, uint32 ty
             ((BattlegroundICScore*)itr->second)->BasesDefended += value;
             break;
         default:
-            Battleground::UpdatePlayerScore(source, victim, type, value, doAddHonor);
+            Battleground::UpdatePlayerScore(Source, type, value, doAddHonor);
             break;
     }
 }
@@ -528,7 +528,7 @@ void BattlegroundIC::EventPlayerClickedOnFlag(Player* player, GameObject* target
                     if (BgCreatures[BG_IC_NPC_SPIRIT_GUIDE_1+(nodePoint[i].nodeType)-2])
                         DelCreature(BG_IC_NPC_SPIRIT_GUIDE_1+(nodePoint[i].nodeType)-2);
 
-                UpdatePlayerScore(player, NULL, SCORE_BASES_ASSAULTED, 1);
+                UpdatePlayerScore(player, SCORE_BASES_ASSAULTED, 1);
 
                 SendMessage2ToAll(LANG_BG_IC_TEAM_ASSAULTED_NODE_1, CHAT_MSG_BG_SYSTEM_NEUTRAL, player, nodePoint[i].string);
                 SendMessage2ToAll(LANG_BG_IC_TEAM_ASSAULTED_NODE_2, CHAT_MSG_BG_SYSTEM_NEUTRAL, player, nodePoint[i].string, (player->GetTeamId() == TEAM_ALLIANCE ? LANG_BG_IC_ALLIANCE : LANG_BG_IC_HORDE));
@@ -542,7 +542,7 @@ void BattlegroundIC::EventPlayerClickedOnFlag(Player* player, GameObject* target
                 nodePoint[i].needChange = false;
                 SendMessage2ToAll(LANG_BG_IC_TEAM_DEFENDED_NODE, CHAT_MSG_BG_SYSTEM_NEUTRAL, player, nodePoint[i].string);
                 HandleCapturedNodes(&nodePoint[i], true);
-                UpdatePlayerScore(player, NULL, SCORE_BASES_DEFENDED, 1);
+                UpdatePlayerScore(player, SCORE_BASES_DEFENDED, 1);
                 player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, 246, 1);
             }
 
@@ -975,7 +975,7 @@ Transport* BattlegroundIC::CreateTransport(uint32 goEntry, uint32 period)
     t->SetMap(GetBgMap());
 
     for (uint8 i = 0; i < 5; i++)
-        t->AddNPCPassenger(0, (goEntry == GO_HORDE_GUNSHIP ? NPC_HORDE_GUNSHIP_CANNON : NPC_ALLIANCE_GUNSHIP_CANNON), (goEntry == GO_HORDE_GUNSHIP ? hordeGunshipPassengers[i].GetPositionX() : allianceGunshipPassengers[i].GetPositionX()), (goEntry == GO_HORDE_GUNSHIP ? hordeGunshipPassengers[i].GetPositionY() : allianceGunshipPassengers[i].GetPositionY()), (goEntry == GO_HORDE_GUNSHIP ? hordeGunshipPassengers[i].GetPositionZ() : allianceGunshipPassengers[i].GetPositionZ()), (goEntry == GO_HORDE_GUNSHIP ? hordeGunshipPassengers[i].GetOrientation() : allianceGunshipPassengers[i].GetOrientation()));
+        t->AddNPCPassenger((goEntry == GO_HORDE_GUNSHIP ? NPC_HORDE_GUNSHIP_CANNON : NPC_ALLIANCE_GUNSHIP_CANNON), (goEntry == GO_HORDE_GUNSHIP ? hordeGunshipPassengers[i].GetPositionX() : allianceGunshipPassengers[i].GetPositionX()), (goEntry == GO_HORDE_GUNSHIP ? hordeGunshipPassengers[i].GetPositionY() : allianceGunshipPassengers[i].GetPositionY()), (goEntry == GO_HORDE_GUNSHIP ? hordeGunshipPassengers[i].GetPositionZ() : allianceGunshipPassengers[i].GetPositionZ()), (goEntry == GO_HORDE_GUNSHIP ? hordeGunshipPassengers[i].GetOrientation() : allianceGunshipPassengers[i].GetOrientation()));
 
     return t;
 }

@@ -61,7 +61,7 @@ Group::Group() : m_leaderGuid(0), m_leaderName(""), m_groupType(GROUPTYPE_NORMAL
     m_dungeonDifficulty(REGULAR_DIFFICULTY), m_raidDifficulty(MAN10_DIFFICULTY),
     m_bgGroup(NULL), m_bfGroup(NULL), m_lootMethod(FREE_FOR_ALL), m_lootThreshold(ITEM_QUALITY_UNCOMMON),
     m_looterGuid(0), m_subGroupsCounts(NULL), m_guid(0), m_counter(0), m_maxEnchantingLevel(0),
-    m_dbStoreId(0), m_readyCheckCount(0), m_membersInInstance(0), m_readyCheck(false)
+    m_dbStoreId(0), m_readyCheckCount(0), m_readyCheck(false)
 {
     for (uint8 i = 0; i < TARGETICONCOUNT; ++i)
         m_targetIcons[i] = 0;
@@ -353,11 +353,11 @@ void Group::RemoveInvite(Player* player)
 
     // Critical section
     {
-        TRINITY_WRITE_GUARD(ACE_RW_Thread_Mutex, m_invitesLock);
-
+        TRINITY_WRITE_GUARD(ACE_Thread_Mutex, m_inviteesLock);
         m_invitees.erase(player);
-        player->SetGroupInvite(NULL);
     }
+
+    player->SetGroupInvite(NULL);
 }
 
 void Group::RemoveAllInvites()
@@ -993,40 +993,40 @@ void Group::Disband(bool hideDestroy /* = false */)
 
 void Group::SendLootStartRoll(uint32 countDown, uint32 mapid, const Roll& r)
 {
-    WorldPacket data(SMSG_LOOT_START_ROLL, (8+4+4+4+4+4+4+1));
     ObjectGuid guid = r.lootedGUID;
 
-    data.WriteBitSeq<4, 2, 6, 3, 0>(guid);
-    data.WriteBit(r.itemSlot == 0);
-    data.WriteBit(1);
-    data.WriteBitSeq<7, 5, 1>(guid);
+    WorldPacket data(SMSG_LOOT_START_ROLL, (8+4+4+4+4+4+4+1));
 
-    data << uint32(0);                                      // randomSuffix
-    data.WriteByteSeq<3, 4>(guid);
+    data.WriteBits(1, 2);
+    data.WriteBitSeq<6, 4>(guid);
+    data.WriteBit(!false);  // unk bit (60)
+    data.WriteBits(3, 3);
+    data.WriteBitSeq<5>(guid);
+    data.WriteBit(r.itemSlot == 0);
+    data.WriteBitSeq<1, 0, 2, 7, 3>(guid);
+    data.WriteBit(false);   // unk bit
+
+    data << uint32(0);  // bytes counter ... unk
+    data.WriteByteSeq<6>(guid);
     if (r.itemSlot)
         data << uint8(r.itemSlot);
-    data.WriteByteSeq<6>(guid);
-    data << uint32(r.itemRandomPropId);                     // the countdown time to choose "need" or "greed"
+    data.WriteByteSeq<2, 3>(guid);
+    data << uint32(r.itemCount);                            // items in stack
+    data.WriteByteSeq<0>(guid);
+    data << uint32(0);                                      // unk entry
+    data.WriteByteSeq<7>(guid);
+    // if(bit60)
+    //  data << uint8(0);
     data.WriteByteSeq<5>(guid);
-    data << uint32(countDown);                              // the countdown time to choose "need" or "greed"
     data << uint8(r.rollVoteMask);                          // roll type mask
-    data.WriteByteSeq<7, 1, 2, 0>(guid);
-    data << uint32(r.itemCount);                            // items in stack
     data << uint32(r.itemRandomSuffix);                     // item random property ID
-    data << uint32(mapid);                                  // 3.3.3 mapid
+    data << uint32(r.itemRandomPropId);                     // the countdown time to choose "need" or "greed"
+    data.WriteByteSeq<4>(guid);
     data << uint8(r.totalPlayersRolling);                   // maybe the number of players rolling for it???
-    data << uint32(r.itemid);                               // the itemEntryId for the item that shall be rolled for
-
-    /*data << uint64(r.itemGUID);                             // guid of rolled item
     data << uint32(mapid);                                  // 3.3.3 mapid
-    data << uint32(r.itemSlot);                             // itemslot
+    data.WriteByteSeq<1>(guid);
     data << uint32(r.itemid);                               // the itemEntryId for the item that shall be rolled for
-    data << uint32(r.itemRandomSuffix);                     // randomSuffix
-    data << uint32(r.itemRandomPropId);                     // item random property ID
-    data << uint32(r.itemCount);                            // items in stack
     data << uint32(countDown);                              // the countdown time to choose "need" or "greed"
-    data << uint8(r.rollVoteMask);                          // roll type mask
-    data << uint8(r.totalPlayersRolling);                   // maybe the number of players rolling for it???*/
 
     for (Roll::PlayerVote::const_iterator itr=r.playerVote.begin(); itr != r.playerVote.end(); ++itr)
     {
@@ -1044,89 +1044,90 @@ void Group::SendLootStartRollToPlayer(uint32 countDown, uint32 mapId, Player* p,
     if (!p || !p->GetSession())
         return;
 
-    WorldPacket data(SMSG_LOOT_START_ROLL, (8 + 4 + 4 + 4 + 4 + 4 + 4 + 1));
     ObjectGuid guid = r.lootedGUID;
 
-    data.WriteBitSeq<4, 2, 6, 3, 0>(guid);
-    data.WriteBit(r.itemSlot == 0);
-    data.WriteBit(1);
-    data.WriteBitSeq<7, 5, 1>(guid);
+    WorldPacket data(SMSG_LOOT_START_ROLL, (8 + 4 + 4 + 4 + 4 + 4 + 4 + 1));
 
-    data << uint32(0);
-    data.WriteByteSeq<3, 4>(guid);
+    data.WriteBits(1, 2);
+    data.WriteBitSeq<6, 4>(guid);
+    data.WriteBit(!false);  // unk bit (60)
+    data.WriteBits(3, 3);
+    data.WriteBitSeq<5>(guid);
+    data.WriteBit(r.itemSlot == 0);
+    data.WriteBitSeq<1, 0, 2, 7, 3>(guid);
+    data.WriteBit(false);   // unk bit
+
+    data << uint32(0);  // bytes counter ... unk
+    data.WriteByteSeq<6>(guid);
     if (r.itemSlot)
         data << uint8(r.itemSlot);
-    data.WriteByteSeq<6>(guid);
-    data << uint32(r.itemRandomPropId);
-    data.WriteByteSeq<5>(guid);
-    data << uint32(countDown);                              // the countdown time to choose "need" or "greed"
-    data << uint8(r.rollVoteMask);                          // roll type mask
-    data.WriteByteSeq<7, 1, 2, 0>(guid);
+    data.WriteByteSeq<2, 3>(guid);
     data << uint32(r.itemCount);                            // items in stack
+    data.WriteByteSeq<0>(guid);
+    data << uint32(0);                                      // unk entry
+    data.WriteByteSeq<7>(guid);
+    // if(bit60)
+    //  data << uint8(0);
+    data.WriteByteSeq<5>(guid);
+    data << uint8(r.rollVoteMask);                          // roll type mask
     data << uint32(r.itemRandomSuffix);                     // item random property ID
-    data << uint32(mapId);                                  // 3.3.3 mapid
+    data << uint32(r.itemRandomPropId);                     // the countdown time to choose "need" or "greed"
+    data.WriteByteSeq<4>(guid);
     data << uint8(r.totalPlayersRolling);                   // maybe the number of players rolling for it???
+    data << uint32(mapId);                                  // 3.3.3 mapid
+    data.WriteByteSeq<1>(guid);
     data << uint32(r.itemid);                               // the itemEntryId for the item that shall be rolled for
+    data << uint32(countDown);                              // the countdown time to choose "need" or "greed"
 
     p->GetSession()->SendPacket(&data);
 }
 
 void Group::SendLootRoll(uint64 /*sourceGuid*/, uint64 targetGuid, uint8 rollNumber, uint8 rollType, Roll const& roll)
 {
-    WorldPacket data(SMSG_LOOT_ROLL, (8+4+8+4+4+4+1+1+1));
     ObjectGuid target = targetGuid;
     ObjectGuid guid = roll.lootedGUID;
 
-    data.WriteBitSeq<3, 4>(target);
-    data.WriteBitSeq<7>(guid);
-    data.WriteBit(0);                                       // 1: "You automatically passed on: %s because you cannot loot that item." - Possibly used in need befor greed
-    data.WriteBitSeq<7>(target);
-    data.WriteBitSeq<3>(guid);
-    data.WriteBitSeq<5>(target);
-    data.WriteBit(1); //!Bit56
-    data.WriteBitSeq<2>(guid);
-    data.WriteBitSeq<1, 0>(target);
-    data.WriteBitSeq<0>(guid);
-    data.WriteBitSeq<2, 6>(target);
-    data.WriteBitSeq<1, 4, 6>(guid);
-    data.WriteBit(roll.itemSlot == 0);//!Bit57
-    data.WriteBitSeq<5>(guid);
+    WorldPacket data(SMSG_LOOT_ROLL, (8+4+8+4+4+4+1+1+1));
 
-    data << uint32(roll.itemRandomSuffix);                  // Item random property ID
-    data.WriteByteSeq<3>(guid);
-    data.WriteByteSeq<1>(target);
-    //if (Bit56)
-    //data << uint8(1);
-    data.WriteByteSeq<2>(guid);
+    data.WriteBitSeq<7>(target);
+    data.WriteBitSeq<7>(guid);
+    data.WriteBit(false);
+    data.WriteBitSeq<2, 5>(guid);
+    data.WriteBitSeq<6, 3>(target);
+    data.WriteBit(roll.itemSlot == 0);
+    data.WriteBitSeq<0>(guid);
+    data.WriteBitSeq<5, 2>(target);
+    data.WriteBits(6, 3);
+    data.WriteBitSeq<4>(guid);
+    data.WriteBits(1, 2);
+    data.WriteBitSeq<3>(guid);
+    data.WriteBitSeq<4>(target);
+    data.WriteBitSeq<6>(guid);
+    data.WriteBitSeq<0>(target);
+    data.WriteBit(false);
+    data.WriteBitSeq<7>(guid);
+    data.WriteBit(true);
+    data.WriteBitSeq<1>(target);
+
+    data << uint32(0);
+    data.WriteByteSeq<0, 5, 4>(target);
+    data.WriteByteSeq<5>(guid);
+    data.WriteByteSeq<7, 2>(target);
+    data << uint32(roll.itemRandomSuffix);
+    data << uint32(roll.itemid);                            // the itemEntryId for the item that shall be rolled for
+    data << uint32(rollNumber);                             // 0: "Need for: [item name]" > 127: "you passed on: [item name]"      Roll number
+    data.WriteByteSeq<7, 4>(guid);
+    data << uint8(rollType);                                // 0: "Need for: [item name]" 0: "You have selected need for [item name] 1: need roll 2: greed roll
+    data << uint32(roll.itemRandomPropId);
     if (roll.itemSlot)
         data << uint8(roll.itemSlot);
-
-    data << uint32(roll.itemid);                            // the itemEntryId for the item that shall be rolled for
-
-    data.WriteByteSeq<0>(guid);
-    data << uint8(rollType);                                // 0: "Need for: [item name]" 0: "You have selected need for [item name] 1: need roll 2: greed roll
-    data.WriteByteSeq<6, 2>(target);
-
-    data << uint32(1);
-    data.WriteByteSeq<5>(target);
-    data.WriteByteSeq<7, 4, 6>(guid);
-    data.WriteByteSeq<7>(target);
-    data.WriteByteSeq<5>(guid);
-    data.WriteByteSeq<4>(target);
-    data << uint32(roll.itemRandomPropId);
-    data.WriteByteSeq<1>(guid);
-    data << uint32(0);                  // randomSuffix
-    data << uint32(rollNumber);                             // 0: "Need for: [item name]" > 127: "you passed on: [item name]"      Roll number
-    data.WriteByteSeq<0, 3>(target);
-    /*data << uint64(sourceGuid);                             // guid of the item rolled
-    data << uint32(roll.itemSlot);                          // slot
-    data << uint64(targetGuid);
-    data << uint32(roll.itemid);                            // the itemEntryId for the item that shall be rolled for
-    data << uint32(roll.itemRandomSuffix);                  // randomSuffix
-    data << uint32(roll.itemRandomPropId);                  // Item random property ID
-    data << uint32(rollNumber);                             // 0: "Need for: [item name]" > 127: "you passed on: [item name]"      Roll number
-    data << uint8(rollType);                                // 0: "Need for: [item name]" 0: "You have selected need for [item name] 1: need roll 2: greed roll
-    data << uint8(0);                                       // 1: "You automatically passed on: %s because you cannot loot that item." - Possibly used in need befor greed*/
+    data.WriteByteSeq<6, 3>(guid);
+    data.WriteByteSeq<6, 3>(target);
+    data.WriteByteSeq<0, 1>(guid);
+    data << uint32(0);  // unk bytes counter
+    data.WriteByteSeq<2>(guid);
+    data.WriteByteSeq<1>(target);
+    data << uint32(roll.itemCount);
 
     for (Roll::PlayerVote::const_iterator itr = roll.playerVote.begin(); itr != roll.playerVote.end(); ++itr)
     {
@@ -1141,58 +1142,50 @@ void Group::SendLootRoll(uint64 /*sourceGuid*/, uint64 targetGuid, uint8 rollNum
 
 void Group::SendLootRollWon(uint64 /*sourceGuid*/, uint64 targetGuid, uint8 rollNumber, uint8 rollType, Roll const& roll)
 {
-    WorldPacket data(SMSG_LOOT_ROLL_WON, (8 + 4 + 4 + 4 + 4 + 8 + 1 + 1));
     ObjectGuid target = targetGuid;
     ObjectGuid guid = roll.lootedGUID;
 
-    data.WriteBit(1);
-    data.WriteBitSeq<1, 4>(guid);
-    data.WriteBitSeq<4>(target);
+    WorldPacket data(SMSG_LOOT_ROLL_WON, (8 + 4 + 4 + 4 + 4 + 8 + 1 + 1));
+
+    data.WriteBitSeq<7>(guid);
+    data.WriteBitSeq<0, 5, 7, 6>(target);
+    data.WriteBit(true);
+    data.WriteBitSeq<2, 3>(guid);
     data.WriteBit(roll.itemSlot == 0);
-    data.WriteBitSeq<0, 2>(guid);
-    data.WriteBitSeq<0, 2, 6>(target);
-    data.WriteBitSeq<5>(guid);
-    data.WriteBitSeq<5, 1>(target);
-    data.WriteBitSeq<7, 6>(guid);
+    data.WriteBit(false);
+    data.WriteBitSeq<5, 6>(guid);
+    data.WriteBitSeq<1>(target);
+    data.WriteBitSeq<1, 4>(guid);
     data.WriteBitSeq<3>(target);
+    data.WriteBitSeq<0>(guid);
+    data.WriteBitSeq<4>(target);
+    data.WriteBits(1, 2);
+    data.WriteBits(6, 3);
+    data.WriteBitSeq<2>(target);
 
-    data.WriteBitSeq<3>(guid);
-    data.WriteBitSeq<7>(target);
-
-    data << uint8(rollType);                                // rollType related to SMSG_LOOT_ROLL
-    data.WriteByteSeq<3>(target);
-    data << uint32(roll.itemid);                            // the itemEntryId for the item that shall be rolled for
-    data.WriteByteSeq<2, 4>(guid);
-    data.WriteByteSeq<4>(target);
-    data.WriteByteSeq<6, 5>(guid);
-    //if (bit56)
-    //  bit56
     data.WriteByteSeq<0>(target);
-    data.WriteByteSeq<0, 7>(guid);
-    data.WriteByteSeq<2>(target);
-    data.WriteByteSeq<3>(guid);
-
-    data << uint32(roll.itemRandomSuffix);                  // Item random property ID
-    data << uint32(rollNumber);                             // rollnumber realted to SMSG_LOOT_ROLL
-
-    data.WriteByteSeq<1>(guid);
-    data << uint32(0);
+    data.WriteByteSeq<0, 1>(guid);
     data.WriteByteSeq<5>(target);
-    data << uint32(0);
-    data << uint32(roll.itemid);                            // the itemEntryId for the item that shall be rolled for
+    data.WriteByteSeq<4, 2>(guid);
+    data << uint8(rollType);                                // rollType related to SMSG_LOOT_ROLL
     data.WriteByteSeq<6>(target);
     if (roll.itemSlot)
         data << roll.itemSlot;
-    data.WriteByteSeq<7, 1>(target);
-
-    /*data << uint64(sourceGuid);                             // guid of the item rolled
-    data << uint32(roll.itemSlot);                          // slot
-    data << uint32(roll.itemid);                            // the itemEntryId for the item that shall be rolled for
-    data << uint32(roll.itemRandomSuffix);                  // randomSuffix
-    data << uint32(roll.itemRandomPropId);                  // Item random property
-    data << uint64(targetGuid);                             // guid of the player who won.
+    data.WriteByteSeq<1>(target);
     data << uint32(rollNumber);                             // rollnumber realted to SMSG_LOOT_ROLL
-    data << uint8(rollType);                                // rollType related to SMSG_LOOT_ROLL*/
+    data << uint32(0);                                      // unk bytes counter
+    data.WriteByteSeq<6>(guid);
+    data << uint32(0);                                      // unk, related to automatic distribution 5.x ?
+    data.WriteByteSeq<3>(guid);
+    data.WriteByteSeq<7>(target);
+    data.WriteByteSeq<5>(guid);
+    data << uint32(roll.itemid);                            // the itemEntryId for the item that shall be rolled for
+    data.WriteByteSeq<7, 3>(guid);
+    data << uint32(roll.itemRandomSuffix);                  // Item random property ID
+    data.WriteByteSeq<2>(target);
+    data << uint32(roll.itemCount);
+    data << uint32(roll.itemRandomPropId);
+    data.WriteByteSeq<4>(target);
 
     for (Roll::PlayerVote::const_iterator itr = roll.playerVote.begin(); itr != roll.playerVote.end(); ++itr)
     {
@@ -1207,32 +1200,27 @@ void Group::SendLootRollWon(uint64 /*sourceGuid*/, uint64 targetGuid, uint8 roll
 
 void Group::SendLootAllPassed(Roll const& roll)
 {
-    WorldPacket data(SMSG_LOOT_ALL_PASSED, (8+4+4+4+4));
     ObjectGuid guid = roll.lootedGUID;
 
-    data.WriteBitSeq<4, 5, 0, 2, 7, 3>(guid);
+    WorldPacket data(SMSG_LOOT_ALL_PASSED, (8+4+4+4+4));
+    data << uint32(roll.itemid);
+    data << uint32(0);              // unk byte count
+    data << uint32(roll.itemid);
+    data << uint32(roll.itemid);
+    data << uint32(roll.itemid);
+    data << uint32(roll.itemid);
     data.WriteBit(roll.itemSlot == 0);
-    data.WriteBit(1);
-
-    data.WriteBitSeq<6, 1>(guid);
-
-    //We don't know where to send the different values and but it works this way.
-    data.WriteByteSeq<1>(guid);
+    data.WriteBitSeq<5, 4, 0>(guid);
+    data.WriteBit(true);
+    data.WriteBit(false);
+    data.WriteBitSeq<3, 2>(guid);
+    data.WriteBits(6, 3);
+    data.WriteBitSeq<6, 1, 7>(guid);
+    data.WriteBits(1, 2);
+    data.WriteByteSeq<3, 7, 2, 1, 5, 6>(guid);
     if (roll.itemSlot)
         data << uint8(roll.itemSlot);
-    data << uint32(roll.itemid);
-    data.WriteByteSeq<6, 2, 5, 7>(guid);
-    data << uint32(roll.itemid);
-    data << uint32(roll.itemid);
-    //if (bit56) send it
-    data.WriteByteSeq<0, 4, 3>(guid);
-    data << uint32(roll.itemid);
-    data << uint32(roll.itemid);
-
-    /*data << uint32(roll.itemSlot);                             // Item loot slot
-    data << uint32(roll.itemid);                               // The itemEntryId for the item that shall be rolled for
-    data << uint32(roll.itemRandomPropId);                     // Item random property ID
-    data << uint32(roll.itemRandomSuffix);                     // Item random suffix ID*/
+    data.WriteByteSeq<0, 4>(guid);
 
     for (Roll::PlayerVote::const_iterator itr = roll.playerVote.begin(); itr != roll.playerVote.end(); ++itr)
     {
@@ -1246,16 +1234,34 @@ void Group::SendLootAllPassed(Roll const& roll)
 }
 
 // notify group members which player is the allowed looter for the given creature
-void Group::SendLooter(Creature* creature, Player* /*groupLooter*/)
+void Group::SendLooter(Creature* creature, Player* groupLooter)
 {
     ASSERT(creature);
 
-    WorldPacket data(SMSG_LOOT_LIST);
+    // groupLooter->GetPackGUID() 40 - 44
 
     ObjectGuid creatureGuid = creature->GetGUID();
+    ObjectGuid groupLooterGuid = groupLooter ? groupLooter->GetGUID() : 0;
 
-    data.WriteBitSeq<6, 7, 3, 5, 1, 2, 0, 4>(creatureGuid);
-    data.WriteByteSeq<5, 6, 2, 0, 1, 3, 4, 7>(creatureGuid);
+    WorldPacket data(SMSG_LOOT_LIST);
+
+    data.WriteBitSeq<4, 5, 2, 3, 7>(creatureGuid);
+    data.WriteBit(groupLooterGuid != 0);
+
+    if (groupLooterGuid)
+        data.WriteBitSeq<5, 1, 3, 0, 7, 6, 2, 4>(groupLooterGuid);
+
+    data.WriteBit(false); // unk guid
+    data.WriteBitSeq<1, 6, 0>(creatureGuid);
+
+    if (false) // unk guid
+    {
+    }
+
+    if (groupLooterGuid)
+        data.WriteByteSeq<3, 2, 7, 0, 5, 1, 6, 4>(groupLooterGuid);
+
+    data.WriteByteSeq<0, 2, 5, 4, 3, 1, 6, 7>(creatureGuid);
 
     BroadcastPacket(&data, false);
 }
@@ -1562,14 +1568,8 @@ void Group::NeedBeforeGreed(Loot* loot, WorldObject* lootedObject)
 
 void Group::MasterLoot(Loot* /*loot*/, WorldObject* pLootedObject)
 {
-    TC_LOG_DEBUG("network", "Group::MasterLoot (SMSG_LOOT_MASTER_LIST)");
+    TC_LOG_DEBUG("network", "Group::MasterLoot (SMSG_MASTER_LOOT_CANDIDATE_LIST)");
     uint32 real_count = 0;
-    ByteBuffer dataBuffer;
-    ObjectGuid guid_looted = pLootedObject->GetGUID();
-    WorldPacket data(SMSG_LOOT_MASTER_LIST);
-    data.WriteBitSeq<0, 5, 7, 6>(guid_looted);
-    uint32 pos = data.bitwpos();
-    data.WriteBits(0, 26);
 
     for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
     {
@@ -1578,17 +1578,16 @@ void Group::MasterLoot(Loot* /*loot*/, WorldObject* pLootedObject)
             continue;
 
         if (looter->IsWithinDistInMap(pLootedObject, sWorld->getFloatConfig(CONFIG_GROUP_XP_DISTANCE), false))
-        {
-            ObjectGuid guid = looter->GetGUID();
-
-            data.WriteBitSeq<1, 0, 7, 2, 6, 5, 4, 3>(guid);
-
             ++real_count;
-        }
     }
-    data.WriteBitSeq<1, 4, 3, 2>(guid_looted);
 
-    data.WriteByteSeq<3>(guid_looted);
+    ObjectGuid guid_looted = MAKE_NEW_GUID(pLootedObject->GetGUIDLow(), 0, HIGHGUID_LOOT);
+    sObjectMgr->setLootViewGUID(guid_looted, pLootedObject->GetGUID());
+
+    WorldPacket data(SMSG_MASTER_LOOT_CANDIDATE_LIST);
+    data.WriteBitSeq<2, 4, 1, 3, 5, 6, 7>(guid_looted);
+    data.WriteBits(real_count, 24);
+
     for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
     {
         Player* looter = itr->getSource();
@@ -1598,14 +1597,26 @@ void Group::MasterLoot(Loot* /*loot*/, WorldObject* pLootedObject)
         if (looter->IsWithinDistInMap(pLootedObject, sWorld->getFloatConfig(CONFIG_GROUP_XP_DISTANCE), false))
         {
             ObjectGuid guid = looter->GetGUID();
-
-            data.WriteByteSeq<1, 4, 7, 6, 5, 2, 0, 3>(guid);
+            data.WriteBitSeq<5, 1, 4, 6, 3, 2, 7, 0>(guid);
         }
     }
 
-    data.WriteByteSeq<5, 7, 1, 2, 4, 0, 6>(guid_looted);
+    data.WriteBitSeq<0>(guid_looted);
+    data.WriteByteSeq<7>(guid_looted);
+    for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
+    {
+        Player* looter = itr->getSource();
+        if (!looter->IsInWorld())
+            continue;
 
-    data.PutBits<uint32>(pos, real_count, 26);
+        if (looter->IsWithinDistInMap(pLootedObject, sWorld->getFloatConfig(CONFIG_GROUP_XP_DISTANCE), false))
+        {
+            ObjectGuid guid = looter->GetGUID();
+            data.WriteByteSeq<0, 4, 1, 3, 6, 5, 7, 2>(guid);
+        }
+    }
+
+    data.WriteByteSeq<0, 2, 4, 1, 6, 5, 3>(guid_looted);
 
     for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
     {
@@ -1866,7 +1877,7 @@ void Group::SetTargetIcon(uint8 id, ObjectGuid whoGuid, ObjectGuid targetGuid)
 
     WorldPacket data(SMSG_RAID_TARGET_UPDATE_SINGLE, (1+8+1+8));
 
-    data.WriteBitSeq<1, 4>(whoGuid);
+    data.WriteBitSeq<2, 4>(whoGuid);
     data.WriteBitSeq<1, 2>(targetGuid);
     data.WriteBitSeq<0, 5>(whoGuid);
     data.WriteBitSeq<4>(targetGuid);
@@ -2114,7 +2125,7 @@ void Group::UpdatePlayerOutOfRange(Player* player)
         return;
 
     WorldPacket data;
-    player->GetSession()->BuildPartyMemberStatsChangedPacket(player, &data);
+    player->GetSession()->BuildPartyMemberStatsChangedPacket(player, &data, player->GetGroupUpdateFlag(), player->GetGUID());
 
     Player* member;
     for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
@@ -2432,6 +2443,9 @@ GroupJoinBattlegroundResult Group::CanJoinBattlegroundQueue(Battleground const* 
         // check if someone in party is using dungeon system
         if (member->isUsingLfg())
             return ERR_LFG_CANT_USE_BATTLEGROUND;
+        // check is someone in party is loading or teleporting
+        if (member->GetSession()->PlayerLoading() || member->IsBeingTeleported())
+            return ERR_BATTLEGROUND_JOIN_FAILED;
     }
 
     // only check for MinPlayerCount since MinPlayerCount == MaxPlayerCount for arenas...
@@ -2473,6 +2487,8 @@ void Group::SetDungeonDifficulty(Difficulty difficulty)
         player->SetDungeonDifficulty(difficulty);
         player->SendDungeonDifficulty(true);
     }
+
+    SendUpdate();
 }
 
 void Group::SetRaidDifficulty(Difficulty difficulty)
@@ -2497,6 +2513,8 @@ void Group::SetRaidDifficulty(Difficulty difficulty)
         player->SetRaidDifficulty(difficulty);
         player->SendRaidDifficulty(true);
     }
+
+    SendUpdate();
 }
 
 bool Group::InCombatToInstance(uint32 instanceId)
@@ -2863,6 +2881,129 @@ bool Group::HasFreeSlotSubGroup(uint8 subgroup) const
     return (m_subGroupsCounts && m_subGroupsCounts[subgroup] < MAXGROUPSIZE);
 }
 
+void Group::SendRaidMarkersUpdate()
+{
+    /*uint32 mask = RAID_MARKER_NONE;
+
+    for (auto itr : GetRaidMarkers())
+        mask |= itr.mask;
+
+    WorldPacket data(SMSG_RAID_MARKERS_CHANGED, 10);
+    ByteBuffer dataBuffer;
+
+    data << uint8(0);
+    data << uint32(mask);
+
+    data.WriteBits(GetRaidMarkers().size(), 3);
+
+    // @TODO: Send in classic order instead of summon order
+    for (auto itr : GetRaidMarkers())
+    {
+        ObjectGuid guid = NULL;
+
+        uint8 bits[8] = { 6, 3, 1, 4, 7, 2, 5, 0 };
+        data.WriteBitInOrder(guid, bits);
+
+        dataBuffer << float(itr.posZ);
+        dataBuffer.WriteByteSeq(guid[6]);
+        dataBuffer << uint32(itr.mapId);
+        dataBuffer.WriteByteSeq(guid[4]);
+        dataBuffer << float(itr.posX);
+        dataBuffer << float(itr.posY);
+        dataBuffer.WriteByteSeq(guid[1]);
+        dataBuffer.WriteByteSeq(guid[2]);
+        dataBuffer.WriteByteSeq(guid[7]);
+        dataBuffer.WriteByteSeq(guid[0]);
+        dataBuffer.WriteByteSeq(guid[5]);
+        dataBuffer.WriteByteSeq(guid[3]);
+    }
+
+    data.FlushBits();
+    if (dataBuffer.size())
+        data.append(dataBuffer);
+
+    BroadcastPacket(&data, true);*/
+}
+
+void Group::AddRaidMarker(uint32 /*spellId*/, uint32 /*mapId*/, float /*x*/, float /*y*/, float /*z*/)
+{
+   /* uint32 mask = RAID_MARKER_NONE;
+
+    RaidMarker marker;
+    marker.mapId = mapId;
+    marker.posX  = x;
+    marker.posY  = y;
+    marker.posZ  = z;
+
+    switch (spellId)
+    {
+        case 84996: // Raid Marker 1
+            mask = RAID_MARKER_BLUE;
+            break;
+        case 84997: // Raid Marker 2
+            mask = RAID_MARKER_GREEN;
+            break;
+        case 84998: // Raid Marker 3
+            mask = RAID_MARKER_PURPLE;
+            break;
+        case 84999: // Raid Marker 4
+            mask = RAID_MARKER_RED;
+            break;
+        case 85000: // Raid Marker 5
+            mask = RAID_MARKER_YELLOW;
+            break;
+        default:
+            break;
+    }
+
+    marker.mask = mask;
+
+    m_raidMarkers.push_back(marker);
+    SendRaidMarkersUpdate();*/
+}
+
+void Group::RemoveRaidMarker(uint8 /*markerId*/)
+{
+   /* uint32 mask = RAID_MARKER_NONE;
+
+    switch (markerId)
+    {
+        case 0: // Blue
+            mask = RAID_MARKER_BLUE;
+            break;
+        case 1: // Green
+            mask = RAID_MARKER_GREEN;
+            break;
+        case 2: // Purple
+            mask = RAID_MARKER_PURPLE;
+            break;
+        case 3: // Red
+            mask = RAID_MARKER_RED;
+            break;
+        case 4: // Yellow
+            mask = RAID_MARKER_YELLOW;
+            break;
+        default:
+            break;
+    }
+
+    for (RaidMarkerList::iterator itr = m_raidMarkers.begin(); itr != m_raidMarkers.end();)
+    {
+        if (mask == (*itr).mask)
+            m_raidMarkers.erase(itr++);
+        else
+            ++itr;
+    }
+
+    SendRaidMarkersUpdate();*/
+}
+
+void Group::RemoveAllRaidMarkers()
+{
+    //m_raidMarkers.clear();
+    //SendRaidMarkersUpdate();
+}
+
 uint8 Group::GetMemberGroup(uint64 guid) const
 {
     member_citerator mslot = _getMemberCSlot(guid);
@@ -3085,9 +3226,6 @@ void Group::OfflineMemberLost(uint64 guid, uint32 againstMatchmakerRating, uint8
 
 void Group::MemberLost(Player* player, uint32 againstMatchmakerRating, uint8 slot, int32 MatchmakerRatingChange)
 {
-    if (!player)
-        return;
-
     // Called for each participant of a match after losing
     for (member_witerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
     {
@@ -3187,61 +3325,6 @@ void Group::LostAgainst(uint32 Own_MMRating, uint32 Opponent_MMRating, int32& ra
             player->SetArenaPersonalRating(slot, player->GetArenaPersonalRating(slot) + rating_change);
             player->SetArenaMatchMakerRating(slot, player->GetArenaMatchMakerRating(slot) + mod);
 
-            player->IncrementWeekGames(slot);
-            player->IncrementSeasonGames(slot);
-        }
-    }
-}
-
-bool Group::CanEnterInInstance()
-{
-    uint8 maxplayers = 0;
-
-    if (!isRaidGroup())
-    {
-        maxplayers = 5;
-    }
-    else
-    {
-        switch (GetRaidDifficulty())
-        {
-            case MAN10_DIFFICULTY:
-            case MAN10_HEROIC_DIFFICULTY:
-                maxplayers = 10;
-                break;
-            case MAN25_DIFFICULTY:
-            case MAN25_HEROIC_DIFFICULTY:
-                maxplayers = 25;
-                break;
-            case MAN40_DIFFICULTY:
-                maxplayers = 40;
-                break;
-            default:
-                break;
-        }
-    }
-
-    if (m_membersInInstance < maxplayers)
-        return true;
-    else
-        return false;
-}
-
-void Group::FinishGame(int32 rating_change, uint8 slot)
-{
-    for (member_witerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
-    {
-        if (Player* player = ObjectAccessor::FindPlayer(itr->guid))
-        {
-            if (player->GetArenaPersonalRating(slot) < 1000 && rating_change < 0)
-                rating_change = 0;
-
-            if (player->GetBattleground())
-                for (Battleground::BattlegroundScoreMap::const_iterator itr2 = player->GetBattleground()->GetPlayerScoresBegin(); itr2 != player->GetBattleground()->GetPlayerScoresEnd(); ++itr2)
-                    if (itr2->first == itr->guid)
-                        itr2->second->RatingChange = rating_change;
-
-            player->SetArenaPersonalRating(slot, player->GetArenaPersonalRating(slot) + rating_change);
             player->IncrementWeekGames(slot);
             player->IncrementSeasonGames(slot);
         }

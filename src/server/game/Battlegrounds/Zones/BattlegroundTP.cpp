@@ -56,6 +56,10 @@ BattlegroundTP::BattlegroundTP()
     StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_TP_START_ONE_MINUTE;
     StartMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_BG_TP_START_HALF_MINUTE;
     StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_TP_HAS_BEGUN;
+
+    m_BothFlagsKept = true;
+    m_FlagDebuffState = 0;
+    m_FlagSpellForceTimer = 0;
 }
 
 BattlegroundTP::~BattlegroundTP() {}
@@ -69,7 +73,7 @@ void BattlegroundTP::PostUpdateImpl(uint32 diff)
             if (GetTeamScore(ALLIANCE) == 0)
             {
                 if (GetTeamScore(HORDE) == 0)        // No one scored - result is tie
-                    EndBattleground(WINNER_NONE);
+                    EndBattleground(0);
                 else                                 // Horde has more points and thus wins
                     EndBattleground(HORDE);
             }
@@ -271,15 +275,15 @@ void BattlegroundTP::RespawnFlagAfterDrop(uint32 team)
     m_BothFlagsKept = false;
 }
 
-void BattlegroundTP::EventPlayerCapturedFlag(Player *source)
+void BattlegroundTP::EventPlayerCapturedFlag(Player *Source)
 {
     if (GetStatus() != STATUS_IN_PROGRESS)
         return;
 
     uint32 winner = 0;
 
-    source->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
-    if (source->GetBGTeam() == ALLIANCE)
+    Source->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
+    if (Source->GetTeam() == ALLIANCE)
     {
         if (!this->IsHordeFlagPickedup())
             return;
@@ -288,13 +292,13 @@ void BattlegroundTP::EventPlayerCapturedFlag(Player *source)
                                                             // horde flag in base (but not respawned yet)
         m_FlagState[TEAM_HORDE] = BG_TP_FLAG_STATE_WAIT_RESPAWN;
                                                             // Drop Horde Flag from Player
-        source->RemoveAurasDueToSpell(BG_TP_SPELL_HORDE_FLAG);
+        Source->RemoveAurasDueToSpell(BG_TP_SPELL_HORDE_FLAG);
 
         if (m_FlagDebuffState == 1)
-            source->RemoveAurasDueToSpell(TP_SPELL_FOCUSED_ASSAULT);
+          Source->RemoveAurasDueToSpell(TP_SPELL_FOCUSED_ASSAULT);
 
         if (m_FlagDebuffState == 2)
-            source->RemoveAurasDueToSpell(TP_SPELL_BRUTAL_ASSAULT);
+          Source->RemoveAurasDueToSpell(TP_SPELL_BRUTAL_ASSAULT);
 
         if (GetTeamScore(ALLIANCE) < BG_TP_MAX_TEAM_SCORE)
             AddPoint(ALLIANCE, 1);
@@ -311,13 +315,13 @@ void BattlegroundTP::EventPlayerCapturedFlag(Player *source)
                                                             // alliance flag in base (but not respawned yet)
         m_FlagState[TEAM_ALLIANCE] = BG_TP_FLAG_STATE_WAIT_RESPAWN;
                                                             // Drop Alliance Flag from Player
-        source->RemoveAurasDueToSpell(BG_TP_SPELL_ALLIANCE_FLAG);
+        Source->RemoveAurasDueToSpell(BG_TP_SPELL_ALLIANCE_FLAG);
 
         if (m_FlagDebuffState == 1)
-            source->RemoveAurasDueToSpell(TP_SPELL_FOCUSED_ASSAULT);
+          Source->RemoveAurasDueToSpell(TP_SPELL_FOCUSED_ASSAULT);
 
         if (m_FlagDebuffState == 2)
-            source->RemoveAurasDueToSpell(TP_SPELL_BRUTAL_ASSAULT);
+          Source->RemoveAurasDueToSpell(TP_SPELL_BRUTAL_ASSAULT);
 
         if (GetTeamScore(HORDE) < BG_TP_MAX_TEAM_SCORE)
             AddPoint(HORDE, 1);
@@ -326,24 +330,24 @@ void BattlegroundTP::EventPlayerCapturedFlag(Player *source)
         RewardReputationToTeam(1172, m_ReputationCapture, HORDE);
     }
     //for flag capture is reward 2 honorable kills
-    RewardHonorToTeam(GetBonusHonorFromKill(2), source->GetBGTeam());
+    RewardHonorToTeam(GetBonusHonorFromKill(2), Source->GetTeam());
 
     SpawnBGObject(BG_TP_OBJECT_H_FLAG, BG_TP_FLAG_RESPAWN_TIME);
     SpawnBGObject(BG_TP_OBJECT_A_FLAG, BG_TP_FLAG_RESPAWN_TIME);
 
-    if (source->GetBGTeam() == ALLIANCE)
-        SendMessageToAll(LANG_BG_TP_CAPTURED_HF, CHAT_MSG_BG_SYSTEM_ALLIANCE, source);
+    if (Source->GetTeam() == ALLIANCE)
+        SendMessageToAll(LANG_BG_TP_CAPTURED_HF, CHAT_MSG_BG_SYSTEM_ALLIANCE, Source);
     else
-        SendMessageToAll(LANG_BG_TP_CAPTURED_AF, CHAT_MSG_BG_SYSTEM_HORDE, source);
+        SendMessageToAll(LANG_BG_TP_CAPTURED_AF, CHAT_MSG_BG_SYSTEM_HORDE, Source);
 
-    UpdateFlagState(source->GetBGTeam(), 1);                  // flag state none
-    UpdateTeamScore(source->GetBGTeam());
+    UpdateFlagState(Source->GetTeam(), 1);                  // flag state none
+    UpdateTeamScore(Source->GetTeam());
 
     // only flag capture should be updated
-    UpdatePlayerScore(source, NULL, SCORE_FLAG_CAPTURES, 1);      // +1 flag captures
+    UpdatePlayerScore(Source, SCORE_FLAG_CAPTURES, 1);      // +1 flag captures
 
     // update last flag capture to be used if teamscore is equal
-    SetLastFlagCapture(source->GetBGTeam());
+    SetLastFlagCapture(Source->GetTeam());
 
     if (GetTeamScore(ALLIANCE) == BG_TP_MAX_TEAM_SCORE)
         winner = ALLIANCE;
@@ -364,7 +368,7 @@ void BattlegroundTP::EventPlayerCapturedFlag(Player *source)
     }
     else
     {
-        m_FlagsTimer[GetTeamIndexByTeamId(source->GetBGTeam()) ? 0 : 1] = BG_TP_FLAG_RESPAWN_TIME;
+        m_FlagsTimer[GetTeamIndexByTeamId(Source->GetTeam()) ? 0 : 1] = BG_TP_FLAG_RESPAWN_TIME;
     }
 }
 
@@ -374,7 +378,7 @@ void BattlegroundTP::EventPlayerDroppedFlag(Player *Source)
     {
         // if not running, do not cast things at the dropper player (prevent spawning the "dropped" flag), neither send unnecessary messages
         // just take off the aura
-        if (Source->GetBGTeam() == ALLIANCE)
+        if (Source->GetTeam() == ALLIANCE)
         {
             if (!this->IsHordeFlagPickedup())
                 return;
@@ -401,7 +405,7 @@ void BattlegroundTP::EventPlayerDroppedFlag(Player *Source)
 
     bool set = false;
 
-    if (Source->GetBGTeam() == ALLIANCE)
+    if (Source->GetTeam() == ALLIANCE)
     {
         if (!IsHordeFlagPickedup())
             return;
@@ -447,9 +451,9 @@ void BattlegroundTP::EventPlayerDroppedFlag(Player *Source)
     if (set)
     {
         Source->CastSpell(Source, SPELL_RECENTLY_DROPPED_FLAG, true);
-        UpdateFlagState(Source->GetBGTeam(), 1);
+        UpdateFlagState(Source->GetTeam(), 1);
 
-        if (Source->GetBGTeam() == ALLIANCE)
+        if (Source->GetTeam() == ALLIANCE)
         {
             SendMessageToAll(LANG_BG_TP_DROPPED_HF, CHAT_MSG_BG_SYSTEM_HORDE, Source);
             UpdateWorldState(BG_TP_FLAG_UNK_HORDE, uint32(-1));
@@ -459,11 +463,11 @@ void BattlegroundTP::EventPlayerDroppedFlag(Player *Source)
             SendMessageToAll(LANG_BG_TP_DROPPED_AF, CHAT_MSG_BG_SYSTEM_ALLIANCE, Source);
             UpdateWorldState(BG_TP_FLAG_UNK_ALLIANCE, uint32(-1));
         }
-        m_FlagsDropTimer[GetTeamIndexByTeamId(Source->GetBGTeam()) ? 0 : 1] = BG_TP_FLAG_DROP_TIME;
+        m_FlagsDropTimer[GetTeamIndexByTeamId(Source->GetTeam()) ? 0 : 1] = BG_TP_FLAG_DROP_TIME;
     }
 }
 
-void BattlegroundTP::EventPlayerClickedOnFlag(Player *source, GameObject* target_obj)
+void BattlegroundTP::EventPlayerClickedOnFlag(Player *Source, GameObject* target_obj)
 {
     if (GetStatus() != STATUS_IN_PROGRESS)
         return;
@@ -472,7 +476,7 @@ void BattlegroundTP::EventPlayerClickedOnFlag(Player *source, GameObject* target
     ChatMsg type = CHAT_MSG_BG_SYSTEM_NEUTRAL;
 
     // alliance flag picked up from base
-    if (source->GetBGTeam() == HORDE && this->GetFlagState(ALLIANCE) == BG_TP_FLAG_STATE_ON_BASE
+    if (Source->GetTeam() == HORDE && this->GetFlagState(ALLIANCE) == BG_TP_FLAG_STATE_ON_BASE
         && this->BgObjects[BG_TP_OBJECT_A_FLAG] == target_obj->GetGUID())
     {
         message_id = LANG_BG_TP_PICKEDUP_AF;
@@ -481,21 +485,21 @@ void BattlegroundTP::EventPlayerClickedOnFlag(Player *source, GameObject* target
         PlaySoundToAll(BG_TP_SOUND_ALLIANCE_FLAG_PICKED_UP);
         SpawnBGObject(BG_TP_OBJECT_A_FLAG, RESPAWN_ONE_DAY);
 
-        SetAllianceFlagPicker(source->GetGUID());
+        SetAllianceFlagPicker(Source->GetGUID());
         m_FlagState[TEAM_ALLIANCE] = BG_TP_FLAG_STATE_ON_PLAYER;
 
         //update world state to show correct flag carrier
         UpdateFlagState(HORDE, BG_TP_FLAG_STATE_ON_PLAYER);
         UpdateWorldState(BG_TP_FLAG_UNK_ALLIANCE, 1);
-        source->CastSpell(source, BG_TP_SPELL_ALLIANCE_FLAG, true);
+        Source->CastSpell(Source, BG_TP_SPELL_ALLIANCE_FLAG, true);
 
-        source->GetAchievementMgr().StartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_SPELL_TARGET, BG_TP_SPELL_ALLIANCE_FLAG_PICKED);
+        Source->GetAchievementMgr().StartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_SPELL_TARGET, BG_TP_SPELL_ALLIANCE_FLAG_PICKED);
         if (m_FlagState[1] == BG_TP_FLAG_STATE_ON_PLAYER)
             m_BothFlagsKept = true;
     }
 
     //horde flag picked up from base
-    if (source->GetBGTeam() == ALLIANCE && this->GetFlagState(HORDE) == BG_TP_FLAG_STATE_ON_BASE
+    if (Source->GetTeam() == ALLIANCE && this->GetFlagState(HORDE) == BG_TP_FLAG_STATE_ON_BASE
         && this->BgObjects[BG_TP_OBJECT_H_FLAG] == target_obj->GetGUID())
     {
         message_id = LANG_BG_TP_PICKEDUP_HF;
@@ -504,23 +508,23 @@ void BattlegroundTP::EventPlayerClickedOnFlag(Player *source, GameObject* target
         PlaySoundToAll(BG_TP_SOUND_HORDE_FLAG_PICKED_UP);
         SpawnBGObject(BG_TP_OBJECT_H_FLAG, RESPAWN_ONE_DAY);
 
-        SetHordeFlagPicker(source->GetGUID());
+        SetHordeFlagPicker(Source->GetGUID());
         m_FlagState[TEAM_HORDE] = BG_TP_FLAG_STATE_ON_PLAYER;
 
         // update world state to show correct flag carrier
         UpdateFlagState(ALLIANCE, BG_TP_FLAG_STATE_ON_PLAYER);
         UpdateWorldState(BG_TP_FLAG_UNK_HORDE, 1);
-        source->CastSpell(source, BG_TP_SPELL_HORDE_FLAG, true);
-        source->GetAchievementMgr().StartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_SPELL_TARGET, BG_TP_SPELL_HORDE_FLAG_PICKED);
+        Source->CastSpell(Source, BG_TP_SPELL_HORDE_FLAG, true);
+        Source->GetAchievementMgr().StartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_SPELL_TARGET, BG_TP_SPELL_HORDE_FLAG_PICKED);
 
         if (m_FlagState[0] == BG_TP_FLAG_STATE_ON_PLAYER)
             m_BothFlagsKept = true;
     }
 
     // Alliance flag on ground(not in base) (returned or picked up again from ground!)
-    if (GetFlagState(ALLIANCE) == BG_TP_FLAG_STATE_ON_GROUND && source->IsWithinDistInMap(target_obj, 10))
+    if (GetFlagState(ALLIANCE) == BG_TP_FLAG_STATE_ON_GROUND && Source->IsWithinDistInMap(target_obj, 10))
     {
-        if (source->GetBGTeam() == ALLIANCE)
+        if (Source->GetTeam() == ALLIANCE)
         {
             message_id = LANG_BG_TP_RETURNED_AF;
             type = CHAT_MSG_BG_SYSTEM_ALLIANCE;
@@ -530,7 +534,7 @@ void BattlegroundTP::EventPlayerClickedOnFlag(Player *source, GameObject* target
             SpawnBGObject(BG_TP_OBJECT_A_FLAG, RESPAWN_IMMEDIATELY);
 
             PlaySoundToAll(BG_TP_SOUND_FLAG_RETURNED);
-            UpdatePlayerScore(source, NULL, SCORE_FLAG_RETURNS, 1);
+            UpdatePlayerScore(Source, SCORE_FLAG_RETURNS, 1);
             m_BothFlagsKept = false;
         }
         else
@@ -541,16 +545,16 @@ void BattlegroundTP::EventPlayerClickedOnFlag(Player *source, GameObject* target
             PlaySoundToAll(BG_TP_SOUND_ALLIANCE_FLAG_PICKED_UP);
             SpawnBGObject(BG_TP_OBJECT_A_FLAG, RESPAWN_ONE_DAY);
 
-            SetAllianceFlagPicker(source->GetGUID());
-            source->CastSpell(source, BG_TP_SPELL_ALLIANCE_FLAG, true);
+            SetAllianceFlagPicker(Source->GetGUID());
+            Source->CastSpell(Source, BG_TP_SPELL_ALLIANCE_FLAG, true);
             m_FlagState[TEAM_ALLIANCE] = BG_TP_FLAG_STATE_ON_PLAYER;
             UpdateFlagState(HORDE, BG_TP_FLAG_STATE_ON_PLAYER);
 
             if (m_FlagDebuffState == 1)
-                source->CastSpell(source, TP_SPELL_FOCUSED_ASSAULT, true);
+              Source->CastSpell(Source, TP_SPELL_FOCUSED_ASSAULT, true);
 
             if (m_FlagDebuffState == 2)
-                source->CastSpell(source, TP_SPELL_BRUTAL_ASSAULT, true);
+              Source->CastSpell(Source, TP_SPELL_BRUTAL_ASSAULT, true);
 
             UpdateWorldState(BG_TP_FLAG_UNK_ALLIANCE, 1);
         }
@@ -559,9 +563,9 @@ void BattlegroundTP::EventPlayerClickedOnFlag(Player *source, GameObject* target
     }
 
     // Horde flag on ground(not in base) (returned or picked up again)
-    if (GetFlagState(HORDE) == BG_TP_FLAG_STATE_ON_GROUND && source->IsWithinDistInMap(target_obj, 10))
+    if (GetFlagState(HORDE) == BG_TP_FLAG_STATE_ON_GROUND && Source->IsWithinDistInMap(target_obj, 10))
     {
-        if (source->GetBGTeam() == HORDE)
+        if (Source->GetTeam() == HORDE)
         {
             message_id = LANG_BG_TP_RETURNED_HF;
             type = CHAT_MSG_BG_SYSTEM_HORDE;
@@ -571,7 +575,7 @@ void BattlegroundTP::EventPlayerClickedOnFlag(Player *source, GameObject* target
             SpawnBGObject(BG_TP_OBJECT_H_FLAG, RESPAWN_IMMEDIATELY);
 
             PlaySoundToAll(BG_TP_SOUND_FLAG_RETURNED);
-            UpdatePlayerScore(source, NULL, SCORE_FLAG_RETURNS, 1);
+            UpdatePlayerScore(Source, SCORE_FLAG_RETURNS, 1);
             m_BothFlagsKept = false;
         }
         else
@@ -581,17 +585,17 @@ void BattlegroundTP::EventPlayerClickedOnFlag(Player *source, GameObject* target
 
             PlaySoundToAll(BG_TP_SOUND_HORDE_FLAG_PICKED_UP);
             SpawnBGObject(BG_TP_OBJECT_H_FLAG, RESPAWN_ONE_DAY);
-            SetHordeFlagPicker(source->GetGUID());
+            SetHordeFlagPicker(Source->GetGUID());
 
-            source->CastSpell(source, BG_TP_SPELL_HORDE_FLAG, true);
+            Source->CastSpell(Source, BG_TP_SPELL_HORDE_FLAG, true);
             m_FlagState[TEAM_HORDE] = BG_TP_FLAG_STATE_ON_PLAYER;
             UpdateFlagState(ALLIANCE, BG_TP_FLAG_STATE_ON_PLAYER);
 
             if (m_FlagDebuffState == 1)
-                source->CastSpell(source, TP_SPELL_FOCUSED_ASSAULT, true);
+              Source->CastSpell(Source, TP_SPELL_FOCUSED_ASSAULT, true);
 
             if (m_FlagDebuffState == 2)
-                source->CastSpell(source, TP_SPELL_BRUTAL_ASSAULT, true);
+              Source->CastSpell(Source, TP_SPELL_BRUTAL_ASSAULT, true);
 
             UpdateWorldState(BG_TP_FLAG_UNK_HORDE, 1);
         }
@@ -602,8 +606,8 @@ void BattlegroundTP::EventPlayerClickedOnFlag(Player *source, GameObject* target
     if (!message_id)
         return;
 
-    SendMessageToAll(message_id, type, source);
-    source->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
+    SendMessageToAll(message_id, type, Source);
+    Source->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
 }
 
 void BattlegroundTP::RemovePlayer(Player *player, uint64 guid, uint32)
@@ -681,8 +685,6 @@ void BattlegroundTP::HandleAreaTrigger(Player *Source, uint32 Trigger)
         case 5921:                                          // Horde Start left Water channel
             break;
         default:
-            TC_LOG_ERROR("bg.battleground", "WARNING: Unhandled AreaTrigger in Battleground: %u", Trigger);
-            Source->GetSession()->SendAreaTriggerMessage("Warning: Unhandled AreaTrigger in Battleground: %u", Trigger);
             break;
     }
 
@@ -806,9 +808,9 @@ void BattlegroundTP::HandleKillPlayer(Player *player, Player *killer)
     Battleground::HandleKillPlayer(player, killer);
 }
 
-void BattlegroundTP::UpdatePlayerScore(Player *source, Player *victim, uint32 type, uint32 value, bool doAddHonor)
+void BattlegroundTP::UpdatePlayerScore(Player *Source, uint32 type, uint32 value, bool doAddHonor)
 {
-    BattlegroundScoreMap::iterator itr = PlayerScores.find(source->GetGUID());
+    BattlegroundScoreMap::iterator itr = PlayerScores.find(Source->GetGUID());
     if (itr == PlayerScores.end())                         // player not found
         return;
 
@@ -816,14 +818,14 @@ void BattlegroundTP::UpdatePlayerScore(Player *source, Player *victim, uint32 ty
     {
         case SCORE_FLAG_CAPTURES:                           // flags captured
             ((BattlegroundTPScore*)itr->second)->FlagCaptures += value;
-            source->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, TP_OBJECTIVE_CAPTURE_FLAG);
+            Source->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, TP_OBJECTIVE_CAPTURE_FLAG);
             break;
         case SCORE_FLAG_RETURNS:                            // flags returned
             ((BattlegroundTPScore*)itr->second)->FlagReturns += value;
-            source->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, TP_OBJECTIVE_RETURN_FLAG);
+            Source->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, TP_OBJECTIVE_RETURN_FLAG);
             break;
         default:
-            Battleground::UpdatePlayerScore(source, victim, type, value, doAddHonor);
+            Battleground::UpdatePlayerScore(Source, type, value, doAddHonor);
             break;
     }
 }
@@ -835,7 +837,7 @@ WorldSafeLocsEntry const* BattlegroundTP::GetClosestGraveYard(Player* player)
     // if a player dies in preparation phase - then the player can't cheat
     // and teleport to the graveyard outside the flagroom
     // and start running around, while the doors are still closed
-    if (player->GetBGTeam() == ALLIANCE)
+    if (player->GetTeam() == ALLIANCE)
     {
         if (GetStatus() == STATUS_IN_PROGRESS)
         {

@@ -74,17 +74,16 @@ public:
 
         static ChatCommand serverCommandTable[] =
         {
-            { "corpses",          SEC_GAMEMASTER,     true,  &HandleServerCorpsesCommand,             "", NULL },
-            { "exit",             SEC_CONSOLE,        true,  &HandleServerExitCommand,                "", NULL },
-            { "idlerestart",      SEC_ADMINISTRATOR,  true,  NULL,                                    "", serverIdleRestartCommandTable },
-            { "idleshutdown",     SEC_ADMINISTRATOR,  true,  NULL,                                    "", serverIdleShutdownCommandTable },
-            { "info",             SEC_PLAYER,         true,  &HandleServerInfoCommand,                "", NULL },
-            { "motd",             SEC_PLAYER,         true,  &HandleServerMotdCommand,                "", NULL },
-            { "plimit",           SEC_ADMINISTRATOR,  true,  &HandleServerPLimitCommand,              "", NULL },
-            { "restart",          SEC_ADMINISTRATOR,  true,  NULL,                                    "", serverRestartCommandTable },
-            { "shutdown",         SEC_ADMINISTRATOR,  true,  NULL,                                    "", serverShutdownCommandTable },
-            { "set",              SEC_ADMINISTRATOR,  true,  NULL,                                    "", serverSetCommandTable },
-            { "resetcurrencycap", SEC_ADMINISTRATOR,  true,  &HandleServerResetCurrencyCap,           "", NULL },
+            { "corpses",        SEC_GAMEMASTER,     true,  &HandleServerCorpsesCommand,             "", NULL },
+            { "exit",           SEC_CONSOLE,        true,  &HandleServerExitCommand,                "", NULL },
+            { "idlerestart",    SEC_ADMINISTRATOR,  true,  NULL,                                    "", serverIdleRestartCommandTable },
+            { "idleshutdown",   SEC_ADMINISTRATOR,  true,  NULL,                                    "", serverIdleShutdownCommandTable },
+            { "info",           SEC_PLAYER,         true,  &HandleServerInfoCommand,                "", NULL },
+            { "motd",           SEC_PLAYER,         true,  &HandleServerMotdCommand,                "", NULL },
+            { "plimit",         SEC_ADMINISTRATOR,  true,  &HandleServerPLimitCommand,              "", NULL },
+            { "restart",        SEC_ADMINISTRATOR,  true,  NULL,                                    "", serverRestartCommandTable },
+            { "shutdown",       SEC_ADMINISTRATOR,  true,  NULL,                                    "", serverShutdownCommandTable },
+            { "set",            SEC_ADMINISTRATOR,  true,  NULL,                                    "", serverSetCommandTable },
             { NULL,             0,                  false, NULL,                                    "", NULL }
         };
 
@@ -94,14 +93,6 @@ public:
             { NULL,             0,                  false, NULL,                                    "", NULL }
         };
         return commandTable;
-    }
-
-    static bool HandleServerResetCurrencyCap(ChatHandler* handler, char const* /*args*/)
-    {
-        handler->PSendSysMessage("Start reset currency week cap.");
-        sWorld->ResetCurrencyWeekCap();
-        handler->PSendSysMessage("Currency week cap reseted.");
-        return true;
     }
 
     // Triggering corpses expire check in world
@@ -128,8 +119,6 @@ public:
             handler->PSendSysMessage("LFG Mgr diff : %u ms", sWorld->GetRecordDiff(RECORD_DIFF_LFG));
             handler->PSendSysMessage("Callback diff : %u ms", sWorld->GetRecordDiff(RECORD_DIFF_CALLBACK));
         }
-
-        std::string uptime = secsToTimeString(sWorld->GetUptime());
 
         // Can't use sWorld->ShutdownMsg here in case of console command
         if (sWorld->IsShuttingDown())

@@ -1982,6 +1982,102 @@ class mob_nalash_verdantis : public CreatureScript
         };
 };
 
+class mob_hisek_the_swarmkeeper : public CreatureScript
+{
+    public:
+        mob_hisek_the_swarmkeeper() : CreatureScript("mob_hisek_the_swarmkeeper") { }
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new mob_hisek_the_swarmkeeperAI(creature);
+        }
+
+        struct mob_hisek_the_swarmkeeperAI : public ScriptedAI
+        {
+            mob_hisek_the_swarmkeeperAI(Creature* creature) : ScriptedAI(creature) { }
+
+            void UpdateAI(const uint32 /*diff*/)
+            {
+                std::list<Player*> playerList;
+                playerList.clear();
+                GetPlayerListInGrid(playerList, me, 5.0f);
+
+                for (auto player: playerList)
+                    if (player->GetQuestStatus(31439) == QUEST_STATUS_INCOMPLETE)
+                        player->KilledMonsterCredit(64645);
+            }
+        };
+};
+
+enum eVengefulSpiritEvents
+{
+    EVENT_UNSTABLE_SERUM_21       = 1,
+    EVENT_RAIN_DANCE_2            = 2
+};
+
+#define SPELL_ICE_TRAP 135382
+
+class mob_vengeful_spirit : public CreatureScript
+{
+    public:
+        mob_vengeful_spirit() : CreatureScript("mob_vengeful_spirit")
+        {
+        }
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new mob_vengeful_spiritAI(creature);
+        }
+
+        struct mob_vengeful_spiritAI : public ScriptedAI
+        {
+            mob_vengeful_spiritAI(Creature* creature) : ScriptedAI(creature)
+            { }
+
+            EventMap events;
+
+            void Reset()
+            {
+                events.Reset();
+
+                events.ScheduleEvent(EVENT_RAIN_DANCE_2,         5000);
+                events.ScheduleEvent(EVENT_UNSTABLE_SERUM_21,   12000);
+            }
+
+            void UpdateAI(const uint32 diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+                events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_UNSTABLE_SERUM_21:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO))
+                                me->CastSpell(target, SPELL_UNSTABLE_SERUM, false);
+                            events.ScheduleEvent(EVENT_UNSTABLE_SERUM_21, 15000);
+                            break;
+                        case EVENT_RAIN_DANCE_2:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO))
+                                me->CastSpell(target, SPELL_RAIN_DANCE, false);
+                            events.ScheduleEvent(EVENT_RAIN_DANCE_2, 15000);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+        };
+};
+
 void AddSC_dread_wastes()
 {
     //Rare Mobs
@@ -2006,6 +2102,8 @@ void AddSC_dread_wastes()
     new mob_shox_tik();
     new mob_wake_of_horror();
     new mob_warlord_gurthan();
+    new mob_vengeful_spirit();
     //Standard Mobs
     new mob_overgrown_seacarp();
+    new mob_hisek_the_swarmkeeper();
 }

@@ -251,14 +251,14 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     }
 
     // only allow conjured consumable, bandage, poisons (all should have the 2^21 item flag set in DB)
-    if (proto->Class == ITEM_CLASS_CONSUMABLE && !(proto->Flags & ITEM_PROTO_FLAG_USEABLE_IN_ARENA) && (pUser->InArena() || pUser->InRatedBattleGround()))
+    if (proto->Class == ITEM_CLASS_CONSUMABLE && !(proto->Flags & ITEM_PROTO_FLAG_USEABLE_IN_ARENA) && pUser->InArena())
     {
         pUser->SendEquipError(EQUIP_ERR_NOT_DURING_ARENA_MATCH, pItem, NULL);
         return;
     }
 
     // don't allow items banned in arena
-    if (proto->Flags & ITEM_PROTO_FLAG_NOT_USEABLE_IN_ARENA && (pUser->InArena() || pUser->InRatedBattleGround()))
+    if (proto->Flags & ITEM_PROTO_FLAG_NOT_USEABLE_IN_ARENA && pUser->InArena())
     {
         pUser->SendEquipError(EQUIP_ERR_NOT_DURING_ARENA_MATCH, pItem, NULL);
         return;
@@ -1075,9 +1075,11 @@ void WorldSession::HandleSpellClick(WorldPacket& recvData)
 void WorldSession::HandleMirrorImageDataRequest(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: CMSG_GET_MIRRORIMAGE_DATA");
-    uint64 guid;
-    uint32 displayId;
-    recvData >> guid >> displayId;
+    ObjectGuid guid;
+    recvData.read<uint32>(); // displayId
+
+    recvData.ReadBitSeq<0, 4, 1, 7, 6, 2, 5, 3>(guid);
+    recvData.ReadByteSeq<4, 0, 6, 7, 3, 2, 1, 5>(guid);
 
     // Get unit for which data is needed by client
     Unit* unit = ObjectAccessor::GetObjectInWorld(guid, (Unit*)NULL);
@@ -1096,26 +1098,35 @@ void WorldSession::HandleMirrorImageDataRequest(WorldPacket& recvData)
         creator = creator->GetSimulacrumTarget();
 
     WorldPacket data(SMSG_MIRROR_IMAGE_DATA, 68);
-    data << uint64(guid);
-    data << uint32(creator->GetDisplayId());
-    data << uint8(creator->getRace());
-    data << uint8(creator->getGender());
-    data << uint8(creator->getClass());
 
-    if (creator->GetTypeId() == TYPEID_PLAYER)
+    if (Player const * const player = creator->ToPlayer())
     {
-        Player* player = creator->ToPlayer();
-        Guild* guild = NULL;
+        Guild const *guild = player->GetGuild();
+        ObjectGuid guildGuid = guild ? guild->GetGUID() : 0;
 
-        if (uint32 guildId = player->GetGuildId())
-            guild = sGuildMgr->GetGuildById(guildId);
+        data << uint8(player->GetByteValue(PLAYER_BYTES, 3));       // haircolor
+        data << uint8(player->GetByteValue(PLAYER_BYTES, 2));       // hair
+        data << uint8(player->getRace());
+        data << uint8(player->getGender());
+        data << uint8(player->GetByteValue(PLAYER_BYTES_2, 0));     // facialhair
+        data << uint8(player->GetByteValue(PLAYER_BYTES, 0));       // skin
+        data << uint32(player->GetDisplayId());
+        data << uint8(player->GetByteValue(PLAYER_BYTES, 1));       // face
+        data << uint8(player->getClass());
 
-        data << uint8(player->GetByteValue(PLAYER_BYTES, 0));   // skin
-        data << uint8(player->GetByteValue(PLAYER_BYTES, 1));   // face
-        data << uint8(player->GetByteValue(PLAYER_BYTES, 2));   // hair
-        data << uint8(player->GetByteValue(PLAYER_BYTES, 3));   // haircolor
-        data << uint8(player->GetByteValue(PLAYER_BYTES_2, 0)); // facialhair
-        data << uint64(guild ? guild->GetGUID() : 0);
+        data.WriteBitSeq<7>(guid);
+        data.WriteBitSeq<3, 1, 5, 7>(guildGuid);
+        data.WriteBitSeq<6>(guid);
+        data.WriteBitSeq<4>(guildGuid);
+        data.WriteBitSeq<3>(guid);
+        data.WriteBitSeq<6>(guildGuid);
+        data.WriteBits(11, 22);
+        data.WriteBitSeq<5, 1, 4>(guid);
+        data.WriteBitSeq<2, 0>(guildGuid);
+        data.WriteBitSeq<0, 2>(guid);
+
+        data.WriteByteSeq<5, 2>(guildGuid);
+        data.WriteByteSeq<4, 6>(guid);
 
         static EquipmentSlots const itemSlots[] =
         {
@@ -1145,24 +1156,50 @@ void WorldSession::HandleMirrorImageDataRequest(WorldPacket& recvData)
             else
                 data << uint32(0);
         }
+
+        data.WriteByteSeq<1>(guildGuid);
+        data.WriteByteSeq<1, 3, 2, 7>(guid);
+        data.WriteByteSeq<3>(guildGuid);
+        data.WriteByteSeq<5>(guid);
+        data.WriteByteSeq<4, 0, 6>(guildGuid);
+        data.WriteByteSeq<0>(guid);
+        data.WriteByteSeq<7>(guildGuid);
     }
     else
     {
-        // Skip player data for creatures
-        data << uint8(0);
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);
+        ObjectGuid guildGuid = 0;
+
+        data << uint8(0);   // skin
+        data << uint8(creator->getRace());
+        data << uint8(0);   // face
+        data << uint8(creator->getGender());
+        data << uint8(0);   // hair
+        data << uint8(0);   // haircolor
+        data << uint32(creator->GetDisplayId());
+        data << uint8(0);   // facialhair
+        data << uint8(creator->getClass());
+
+        data.WriteBitSeq<7>(guid);
+        data.WriteBitSeq<3, 1, 5, 7>(guildGuid);
+        data.WriteBitSeq<6>(guid);
+        data.WriteBitSeq<4>(guildGuid);
+        data.WriteBitSeq<3>(guid);
+        data.WriteBitSeq<6>(guildGuid);
+        data.WriteBits(0, 22);
+        data.WriteBitSeq<5, 1, 4>(guid);
+        data.WriteBitSeq<2, 0>(guildGuid);
+        data.WriteBitSeq<0, 2>(guid);
+
+        data.WriteByteSeq<5, 2>(guildGuid);
+        data.WriteByteSeq<4, 6>(guid);
+
+        data.WriteByteSeq<1>(guildGuid);
+        data.WriteByteSeq<1, 3, 2, 7>(guid);
+        data.WriteByteSeq<3>(guildGuid);
+        data.WriteByteSeq<5>(guid);
+        data.WriteByteSeq<4, 0, 6>(guildGuid);
+        data.WriteByteSeq<0>(guid);
+        data.WriteByteSeq<7>(guildGuid);
     }
 
     SendPacket(&data);

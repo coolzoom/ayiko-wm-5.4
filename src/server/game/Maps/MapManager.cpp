@@ -220,7 +220,7 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player, bool loginCheck)
         else
             TC_LOG_DEBUG("maps", "Map::CanPlayerEnter - player '%s' is dead but does not have a corpse!", player->GetName());
     }
-    
+
     Group* group = player->GetGroup();
     if (entry->IsRaid())
     {
@@ -253,9 +253,6 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player, bool loginCheck)
                     //TODO: send some kind of error message to the player
                     return false;
                 }*/
-
-        if (!group->CanEnterInInstance())
-            return false;
     }
 
     // players are only allowed to enter 5 instances per hour
@@ -334,8 +331,7 @@ void MapManager::UnloadAll()
 {
     for (TransportSet::iterator i = m_Transports.begin(); i != m_Transports.end(); ++i)
     {
-        if ((*i))
-            (*i)->RemoveFromWorld();
+        (*i)->RemoveFromWorld();
         delete *i;
     }
 
@@ -451,4 +447,251 @@ void MapManager::FreeInstanceId(uint32 instanceId)
         SetNextInstanceId(instanceId);
 
     _instanceIds[instanceId] = false;
+}
+
+Transport* MapManager::LoadTransportInMap(Map* instance, uint32 goEntry, uint32 period)
+{
+    const GameObjectTemplate* goInfo = sObjectMgr->GetGameObjectTemplate(goEntry);
+
+    if (!goInfo || goInfo->type != GAMEOBJECT_TYPE_MO_TRANSPORT)
+        return NULL;
+
+    Transport* Ship = new Transport(period, goInfo->ScriptId);
+    std::set<uint32> mapsUsed;
+    if (!Ship->GenerateWaypoints(goInfo->moTransport.taxiPathId, mapsUsed))
+    {
+        delete Ship;
+        return NULL;
+    }
+    uint32 transportLowGuid = sObjectMgr->GenerateLowGuid(HIGHGUID_MO_TRANSPORT);
+
+    if (!Ship->Create(transportLowGuid, goEntry, Ship->m_WayPoints[0].mapid, Ship->m_WayPoints[0].x, Ship->m_WayPoints[0].y, Ship->m_WayPoints[0].z-10, 0.0f, 0, 0))
+    {
+        delete Ship;
+        return NULL;
+    }
+
+    m_Transports.insert(Ship);
+    m_TransportsByInstanceIdMap[instance->GetInstanceId()].insert(Ship);
+    Ship->SetMap(instance);
+    Ship->AddToWorld();
+
+    return Ship;
+}
+
+void MapManager::UnLoadTransportFromMap(Transport* t)
+{
+    Map* map = t->GetMap();
+
+    for (Transport::CreatureSet::iterator itr = t->m_NPCPassengerSet.begin(); itr != t->m_NPCPassengerSet.end();)
+    {
+        if (Creature* npc = *itr)
+        {
+            npc->SetTransport(NULL);
+            npc->setActive(false);
+            npc->RemoveFromWorld();
+        }
+        ++itr;
+    }
+
+    UpdateData transData (t->GetMapId());
+    t->BuildOutOfRangeUpdateBlock(&transData);
+    WorldPacket out_packet;
+
+    if (transData.BuildPacket(&out_packet))
+        for (Map::PlayerList::const_iterator itr = map->GetPlayers().begin(); itr != map->GetPlayers().end(); ++itr)
+            if (t != itr->getSource()->GetTransport())
+                itr->getSource()->SendDirectMessage(&out_packet);
+
+    t->m_NPCPassengerSet.clear();
+    m_TransportsByInstanceIdMap[t->GetInstanceId()].erase(t);
+    m_Transports.erase(t);
+    t->m_WayPoints.clear();
+    t->RemoveFromWorld();
+
+}
+
+void MapManager::LoadTransportForPlayers(Player* player)
+{
+    MapManager::TransportMap& tmap = sMapMgr->m_TransportsByInstanceIdMap;
+
+    UpdateData transData (player->GetMapId());
+
+    MapManager::TransportSet& tset = tmap[player->GetInstanceId()];
+
+    for (MapManager::TransportSet::const_iterator i = tset.begin(); i != tset.end(); ++i)
+    {
+        (*i)->BuildCreateUpdateBlockForPlayer(&transData, player);
+    }
+
+    WorldPacket packet;
+    if (transData.BuildPacket(&packet))
+        player->SendDirectMessage(&packet);
+}
+
+void MapManager::UnLoadTransportForPlayers(Player* player)
+{
+    MapManager::TransportMap& tmap = sMapMgr->m_TransportsByInstanceIdMap;
+
+    UpdateData transData(player->GetMapId());
+
+    MapManager::TransportSet& tset = tmap[player->GetInstanceId()];
+
+    for (MapManager::TransportSet::const_iterator i = tset.begin(); i != tset.end(); ++i)
+    {
+        for (Transport::CreatureSet::iterator itr = (*i)->m_NPCPassengerSet.begin(); itr != (*i)->m_NPCPassengerSet.end();)
+        {
+            if (Creature* npc = *itr)
+            {
+                npc->SetTransport(NULL);
+                npc->setActive(false);
+                npc->RemoveFromWorld();
+            }
+            ++itr;
+        }
+
+        (*i)->BuildOutOfRangeUpdateBlock(&transData);
+    }
+
+    WorldPacket packet;
+    if (transData.BuildPacket(&packet))
+        player->SendDirectMessage(&packet);
+}
+
+void MapManager::LoadTransports()
+{
+    uint32 oldMSTime = getMSTime();
+
+    QueryResult result = WorldDatabase.Query("SELECT guid, entry, name, period, ScriptName FROM transports");
+
+    if (!result)
+    {
+        TC_LOG_INFO("server.loading", ">> Loaded 0 transports. DB table `transports` is empty!");
+        return;
+    }
+
+    uint32 count = 0;
+
+    do
+    {
+
+        Field* fields = result->Fetch();
+        uint32 lowguid = fields[0].GetUInt32();
+        uint32 entry = fields[1].GetUInt32();
+        std::string name = fields[2].GetString();
+        uint32 period = fields[3].GetUInt32();
+        uint32 scriptId = sObjectMgr->GetScriptId(fields[4].GetCString());
+
+        GameObjectTemplate const* goinfo = sObjectMgr->GetGameObjectTemplate(entry);
+
+        if (!goinfo)
+        {
+            TC_LOG_ERROR("sql.sql", "Transport ID:%u, Name: %s, will not be loaded, gameobject_template missing", entry, name.c_str());
+            continue;
+        }
+
+        if (goinfo->type != GAMEOBJECT_TYPE_MO_TRANSPORT)
+        {
+            TC_LOG_ERROR("sql.sql", "Transport ID:%u, Name: %s, will not be loaded, gameobject_template type wrong", entry, name.c_str());
+            continue;
+        }
+
+        // TC_LOG_INFO("server.loading", "Loading transport %d between %s, %s", entry, name.c_str(), goinfo->name);
+
+        std::set<uint32> mapsUsed;
+
+        Transport* t = new Transport(period, scriptId);
+        if (!t->GenerateWaypoints(goinfo->moTransport.taxiPathId, mapsUsed))
+            // skip transports with empty waypoints list
+        {
+            TC_LOG_ERROR("sql.sql", "Transport (path id %u) path size = 0. Transport ignored, check DBC files or transport GO data0 field.", goinfo->moTransport.taxiPathId);
+            delete t;
+            continue;
+        }
+
+        float x = t->m_WayPoints[0].x;
+        float y = t->m_WayPoints[0].y;
+        float z = t->m_WayPoints[0].z;
+        uint32 mapid = t->m_WayPoints[0].mapid;
+        float o = 1.0f;
+
+         // creates the Gameobject -- Gunship
+        if (!t->Create(lowguid, entry, mapid, x, y, z, o, 100, 0))
+        {
+            delete t;
+            continue;
+        }
+
+        m_Transports.insert(t);
+
+        for (std::set<uint32>::const_iterator i = mapsUsed.begin(); i != mapsUsed.end(); ++i)
+            m_TransportsByMap[*i].insert(t);
+
+        //If we someday decide to use the grid to track transports, here:
+        t->SetMap(sMapMgr->CreateBaseMap(mapid));
+        t->AddToWorld();
+
+        ++count;
+    }
+    while (result->NextRow());
+
+    // check transport data DB integrity
+    result = WorldDatabase.Query("SELECT gameobject.guid, gameobject.id, transports.name FROM gameobject, transports WHERE gameobject.id = transports.entry");
+    if (result)                                              // wrong data found
+    {
+        do
+        {
+            Field* fields = result->Fetch();
+
+            uint32 guid  = fields[0].GetUInt32();
+            uint32 entry = fields[1].GetUInt32();
+            std::string name = fields[2].GetString();
+            TC_LOG_ERROR("sql.sql", "Transport %u '%s' have record (GUID: %u) in `gameobject`. Transports must not have any records in `gameobject` or its behavior will be unpredictable/bugged.", entry, name.c_str(), guid);
+        }
+        while (result->NextRow());
+    }
+
+    TC_LOG_INFO("server.loading", ">> Loaded %u transports in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
+void MapManager::LoadTransportNPCs()
+{
+    uint32 oldMSTime = getMSTime();
+
+    //                                                 0       1            2                3             4             5             6        7
+    QueryResult result = WorldDatabase.Query("SELECT guid, npc_entry, transport_entry, TransOffsetX, TransOffsetY, TransOffsetZ, TransOffsetO, emote FROM creature_transport");
+
+    if (!result)
+    {
+        TC_LOG_INFO("server.loading", ">> Loaded 0 transport NPCs. DB table `creature_transport` is empty!");
+        return;
+    }
+
+    uint32 count = 0;
+
+    do
+    {
+        Field* fields = result->Fetch();
+        uint32 entry = fields[1].GetInt32();
+        uint32 transportEntry = fields[2].GetInt32();
+        float tX = fields[3].GetFloat();
+        float tY = fields[4].GetFloat();
+        float tZ = fields[5].GetFloat();
+        float tO = fields[6].GetFloat();
+        uint32 anim = fields[7].GetInt32();
+
+        for (MapManager::TransportSet::iterator itr = m_Transports.begin(); itr != m_Transports.end(); ++itr)
+        {
+            if ((*itr)->GetEntry() == transportEntry)
+            {
+                (*itr)->AddNPCPassenger(entry, tX, tY, tZ, tO, anim);
+                break;
+            }
+        }
+
+        ++count;
+    }
+    while (result->NextRow());
+
+    TC_LOG_INFO("server.loading", ">> Loaded %u transport npcs in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }

@@ -259,7 +259,6 @@ void WorldSession::HandleBfQueueRequest(WorldPacket& recvData)
     }
 }
 
-
 void WorldSession::HandleBfExitQueueRequest(WorldPacket & recvData)
 {
     ObjectGuid guid;
@@ -283,12 +282,14 @@ void WorldSession::HandleBfExitRequest(WorldPacket& /*recv_data*/)
          bf->KickPlayerFromBattlefield(_player->GetGUID());
 }
 
-void WorldSession::HandleReportPvPAFK(WorldPacket & recvData)
+void WorldSession::HandleReportPvPAFK(WorldPacket& recvData)
 {
-    uint64 playerGuid;
-    recvData >> playerGuid;
-    Player* reportedPlayer = ObjectAccessor::FindPlayer(playerGuid);
+    ObjectGuid playerGuid;
 
+    recvData.ReadBitSeq<7, 6, 3, 0, 4, 5, 1, 2>(playerGuid);
+    recvData.ReadByteSeq<2, 4, 5, 7, 0, 1, 6, 3>(playerGuid);
+
+    Player* reportedPlayer = ObjectAccessor::FindPlayer(playerGuid);
     if (!reportedPlayer)
     {
         TC_LOG_DEBUG("bg.battleground", "WorldSession::HandleReportPvPAFK: player not found");
@@ -344,7 +345,7 @@ void WorldSession::HandleRequestRatedBgStats(WorldPacket& /*recvData*/)
 
     WorldPacket data(SMSG_BATTLEFIELD_RATED_INFO, 29);
 
-    for (int i = 0; i < MAX_PVP_SLOT; i++)
+    for (int i = 0; i < MAX_ARENA_SLOT; i++)
     {
         data << uint32(_player->GetWeekGames(i)); // games of week
         data << uint32(_player->GetSeasonGames(i)); // games of season
@@ -355,6 +356,16 @@ void WorldSession::HandleRequestRatedBgStats(WorldPacket& /*recvData*/)
         data << uint32(_player->GetBestRatingOfWeek(i)); // best rating of week
         data << uint32(_player->GetPrevWeekWins(i)); // wins of prev week
     }
+
+    // rated bg part
+    data << uint32(0); // games of week
+    data << uint32(0); // games of season
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0); // wins of current week
+    data << uint32(0); // best rating of season
+    data << uint32(0); // best rating of week
+    data << uint32(0); // wins of prev week
 
     SendPacket(&data);
 }

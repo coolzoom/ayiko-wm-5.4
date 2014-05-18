@@ -34,7 +34,7 @@ class Vehicle : public TransportBase
         virtual ~Vehicle();
 
         void Install();
-        void Uninstall(bool uninstallBeforeDelete = false);
+        void Uninstall(bool dismount = false);
         void Reset(bool evading = false);
         void InstallAllAccessories(bool evading);
         void ApplyAllImmunities();
@@ -54,7 +54,7 @@ class Vehicle : public TransportBase
         void EjectPassenger(Unit* passenger, Unit* controller);
         void RemovePassenger(Unit* passenger);
         void RelocatePassengers();
-        void RemoveAllPassengers();
+        void RemoveAllPassengers(bool dismount = false);
         void Dismiss();
         void TeleportVehicle(float x, float y, float z, float ang);
         bool IsVehicleInUse() const;
@@ -70,6 +70,13 @@ class Vehicle : public TransportBase
         VehicleSeatEntry const* GetSeatForPassenger(Unit const* passenger);
 
     private:
+        enum Status
+        {
+            STATUS_NONE,
+            STATUS_INSTALLED,
+            STATUS_UNINSTALLING,
+        };
+
         SeatMap::iterator GetSeatIteratorForPassenger(Unit* passenger);
         void InitMovementInfoForBase();
 
@@ -84,13 +91,9 @@ class Vehicle : public TransportBase
         GuidSet vehiclePlayers;
         uint32 _usableSeatNum;         // Number of seats that match VehicleSeatEntry::UsableByPlayer, used for proper display flags
         uint32 _creatureEntry;         // Can be different than me->GetBase()->GetEntry() in case of players
+        Status _status;
 
-        bool _isBeingDismissed;
         bool _passengersSpawnedByAI;
         bool _canBeCastedByPassengers;
-
-        typedef ACE_RW_Thread_Mutex LockType;
-
-        LockType i_lock;
 };
 #endif

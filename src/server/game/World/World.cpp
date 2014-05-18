@@ -78,6 +78,7 @@
 #include "Warden.h"
 #include "CalendarMgr.h"
 #include "BattlefieldMgr.h"
+#include "BlackMarketMgr.h"
 
 ACE_Atomic_Op<ACE_Thread_Mutex, bool> World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
@@ -1300,6 +1301,11 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_GUILD_DAILY_XP_CAP] = sConfigMgr->GetIntDefault("Guild.DailyXPCap", 7807500);
     m_int_configs[CONFIG_GUILD_WEEKLY_REP_CAP] = sConfigMgr->GetIntDefault("Guild.WeeklyReputationCap", 4375);
 
+    // Blackmarket
+    m_int_configs[CONFIG_BLACKMARKET_MAX_AUCTIONS] = sConfigMgr->GetIntDefault("BlackMarket.MaxAuctions", 10);
+    m_int_configs[CONFIG_BLACKMARKET_AUCTION_DELAY] = sConfigMgr->GetIntDefault("BlackMarket.AuctionDelay", 120);
+    m_int_configs[CONFIG_BLACKMARKET_AUCTION_DELAY_MOD] = sConfigMgr->GetIntDefault("BlackMarket.AuctionDelayMod", 60);
+
     // misc
     m_bool_configs[CONFIG_PDUMP_NO_PATHS] = sConfigMgr->GetBoolDefault("PlayerDump.DisallowPaths", true);
     m_bool_configs[CONFIG_PDUMP_NO_OVERWRITE] = sConfigMgr->GetBoolDefault("PlayerDump.DisallowOverwrite", true);
@@ -1846,6 +1852,8 @@ void World::SetInitialWorldSettings()
 
     m_timers[WUPDATE_GUILDSAVE].SetInterval(getIntConfig(CONFIG_GUILD_SAVE_INTERVAL) * MINUTE * IN_MILLISECONDS);
 
+    m_timers[WUPDATE_BLACKMARKET].SetInterval(MINUTE * IN_MILLISECONDS);
+
     //to set mailtimer to return mails every day between 4 and 5 am
     //mailtimer is increased when updating auctions
     //one second is 1000 -(tested on win system)
@@ -1935,6 +1943,12 @@ void World::SetInitialWorldSettings()
 
     TC_LOG_INFO("server.loading", "Loading guild challenge rewards...");
     sObjectMgr->LoadGuildChallengeRewardInfo();
+
+    TC_LOG_INFO("server.loading", "Loading black market templates...");
+    sBlackMarketMgr->LoadTemplates();
+
+    TC_LOG_INFO("server.loading", "Loading black market auctions...");
+    sBlackMarketMgr->LoadAuctions();
 
     TC_LOG_INFO("server.loading", "Loading realm name...");
 
@@ -2263,6 +2277,13 @@ void World::Update(uint32 diff)
     {
         m_timers[WUPDATE_GUILDSAVE].Reset();
         sGuildMgr->SaveGuilds();
+    }
+
+    // Update Blackmarket
+    if (m_timers[WUPDATE_BLACKMARKET].Passed())
+    {
+        m_timers[WUPDATE_BLACKMARKET].Reset();
+        sBlackMarketMgr->Update();
     }
 
     // update the instance reset times
@@ -2978,31 +2999,19 @@ void World::InitRandomBGResetTime()
 
 void World::InitCurrencyResetTime()
 {
-    time_t currencytime = uint64(sWorld->getWorldState(WS_CURRENCY_RESET_TIME));
-    if (!currencytime)
-        m_NextCurrencyReset = time_t(time(NULL));         // game time not yet init
+    uint32 nextResetDay = sWorld->getWorldState(WS_CURRENCY_RESET_TIME);
+    if (!nextResetDay)
+    {
+        nextResetDay = 16022; // 13.11.2013
+        uint32 currentDay = (time(NULL) + 3600) / 86400;
 
-    // generate time by config
-    time_t curTime = time(NULL);
-    tm localTm = *localtime(&curTime);
+        while (nextResetDay < currentDay)
+            nextResetDay += 7;
 
-    localTm.tm_wday = getIntConfig(CONFIG_CURRENCY_RESET_DAY);
-    localTm.tm_hour = getIntConfig(CONFIG_CURRENCY_RESET_HOUR);
-    localTm.tm_min = 0;
-    localTm.tm_sec = 0;
+        sWorld->setWorldState(WS_CURRENCY_RESET_TIME, nextResetDay);
+    }
 
-    // current week reset time
-    time_t nextWeekResetTime = mktime(&localTm);
-
-    // next reset time before current moment
-    if (curTime >= nextWeekResetTime)
-        nextWeekResetTime += getIntConfig(CONFIG_CURRENCY_RESET_INTERVAL) * DAY;
-
-    // normalize reset time
-    m_NextCurrencyReset = currencytime < curTime ? nextWeekResetTime - getIntConfig(CONFIG_CURRENCY_RESET_INTERVAL) * DAY : nextWeekResetTime;
-
-    if (!currencytime)
-        sWorld->setWorldState(WS_CURRENCY_RESET_TIME, uint64(m_NextCurrencyReset));
+    m_NextCurrencyReset = nextResetDay * 86400 + 5 * 3600;
 }
 
 void World::InitProfessionCooldownResetTime()

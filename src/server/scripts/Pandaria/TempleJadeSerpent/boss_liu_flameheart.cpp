@@ -208,7 +208,7 @@ class boss_liu_flameheart : public CreatureScript
                                 for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                                 {
                                     Player* plr = i->getSource();
-                                    if( !plr)
+                                    if (!plr)
                                         continue;
                                     if (plr->GetDistance2d(me) < 10.f)
                                         plr->KnockbackFrom(me->GetPositionX(), me->GetPositionY(), 10, 10);
@@ -274,7 +274,7 @@ class boss_liu_flameheart : public CreatureScript
                                 for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                                 {
                                     Player* plr = i->getSource();
-                                    if( !plr)
+                                    if (!plr)
                                         continue;
                                     if (plr->GetDistance2d(me) < 10.f)
                                         plr->KnockbackFrom(me->GetPositionX(), me->GetPositionY(), 10, 10);
@@ -352,19 +352,19 @@ class boss_liu_flameheart : public CreatureScript
         };
 };
 
-class boss_yu_lon : public CreatureScript
+class npc_yu_lon : public CreatureScript
 {
     public:
-        boss_yu_lon() : CreatureScript("boss_yu_lon") { }
+        npc_yu_lon() : CreatureScript("npc_yu_lon") { }
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return new boss_yu_lon_AI(creature);
+            return new npc_yu_lon_AI(creature);
         }
 
-        struct boss_yu_lon_AI : public BossAI
+        struct npc_yu_lon_AI : public BossAI
         {
-            boss_yu_lon_AI(Creature* creature) : BossAI(creature, BOSS_YU_LON)
+            npc_yu_lon_AI(Creature* creature) : BossAI(creature, BOSS_YU_LON)
             {
             }
 
@@ -537,7 +537,7 @@ class mob_lesser_sha: public CreatureScript
 void AddSC_boss_liu_flameheat()
 {
     new boss_liu_flameheart();
-    new boss_yu_lon();
+    new npc_yu_lon();
     new mob_trigger_liu_flameheart();
     //Trashes
     new mob_minion_of_doubt();

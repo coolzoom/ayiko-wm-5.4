@@ -56,6 +56,7 @@
 #include "BattlegroundMgr.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
+#include "TicketMgr.h"
 
 void WorldSession::HandleRepopRequestOpcode(WorldPacket& recvData)
 {
@@ -224,7 +225,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
     if (playerLen > 0)
         player_name = recvData.ReadString(playerLen); // player name, case sensitive...
 
-        std::wstring str[4]; // 4 is client limit
+    std::wstring str[4];                                    // 4 is client limit
     for (uint32 i = 0; i < str_count; ++i)
     {
         std::string temp = recvData.ReadString(unkLens[i]); // user entered string, it used as universal search pattern(guild+player name)?
@@ -809,29 +810,65 @@ void WorldSession::HandleSetContactNotesOpcode(WorldPacket& recvData)
     _player->GetSocial()->SetFriendNote(GUID_LOPART(guid), note);
 }
 
-void WorldSession::HandleBugOpcode(WorldPacket& recvData)
+void WorldSession::HandleReportBugOpcode(WorldPacket& recvData)
 {
-    uint32 suggestion, contentlen, typelen;
-    std::string content, type;
+    float posX, posY, posZ, orientation;
+    uint32 contentlen, mapId;
+    std::string content;
 
-    recvData >> suggestion >> contentlen >> content;
+    recvData >> posX >> posY >> orientation >> posZ;
+    recvData >> mapId;
 
-    recvData >> typelen >> type;
+    contentlen = recvData.ReadBits(10);
+    recvData.FlushBits();
+    content = recvData.ReadString(contentlen);
 
-    if (suggestion == 0)
-        TC_LOG_DEBUG("network", "WORLD: Received CMSG_BUG [Bug Report]");
-    else
-        TC_LOG_DEBUG("network", "WORLD: Received CMSG_BUG [Suggestion]");
-
-    TC_LOG_DEBUG("network", "%s", type.c_str());
     TC_LOG_DEBUG("network", "%s", content.c_str());
 
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_BUG_REPORT);
-
-    stmt->setString(0, type);
+    stmt->setString(0, "Bug");
     stmt->setString(1, content);
-
     CharacterDatabase.Execute(stmt);
+}
+
+void WorldSession::HandleReportSuggestionOpcode(WorldPacket& recvData)
+{
+    float posX, posY, posZ, orientation;
+    uint32 contentlen, mapId;
+    std::string content;
+
+    recvData >> mapId;
+    recvData >> posZ >> orientation >> posY >> posX;
+
+    contentlen = recvData.ReadBits(10);
+    recvData.FlushBits();
+    content = recvData.ReadString(contentlen);
+
+    TC_LOG_DEBUG("network", "%s", content.c_str());
+
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_BUG_REPORT);
+    stmt->setString(0, "Suggestion");
+    stmt->setString(1, content);
+    CharacterDatabase.Execute(stmt);
+}
+
+void WorldSession::HandleRequestBattlePetJournal(WorldPacket& /*recvPacket*/)
+{
+    WorldPacket data;
+    GetPlayer()->GetBattlePetMgr().BuildBattlePetJournal(&data);
+    SendPacket(&data);
+}
+
+void WorldSession::HandleRequestGmTicket(WorldPacket& /*recvPakcet*/)
+{
+    // Notify player if he has a ticket in progress
+    if (GmTicket* ticket = sTicketMgr->GetTicketByPlayer(GetPlayer()->GetGUID()))
+    {
+        if (ticket->IsCompleted())
+            ticket->SendResponse(this);
+        else
+            sTicketMgr->SendTicket(this, ticket);
+    }
 }
 
 void WorldSession::HandleReclaimCorpseOpcode(WorldPacket& recvData)
@@ -1078,7 +1115,7 @@ void WorldSession::HandleUpdateAccountData(WorldPacket& recvData)
     dest.resize(decompressedSize);
 
     uLongf realSize = decompressedSize;
-    if (uncompress(const_cast<uint8*>(dest.contents()), &realSize, const_cast<uint8*>(recvData.contents() + recvData.rpos()), recvData.size() - recvData.rpos()) != Z_OK)
+    if (uncompress(dest.contents(), &realSize, recvData.contents() + recvData.rpos(), recvData.size() - recvData.rpos()) != Z_OK)
     {
         recvData.rfinish();                   // unnneded warning spam in this case
         TC_LOG_ERROR("network", "UAD: Failed to decompress account data");
@@ -1112,7 +1149,7 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recvData)
     ByteBuffer dest;
     dest.resize(destSize);
 
-    if (size && compress(const_cast<uint8*>(dest.contents()), &destSize, (uint8*)adata->Data.c_str(), size) != Z_OK)
+    if (size && compress(dest.contents(), &destSize, (uint8*)adata->Data.c_str(), size) != Z_OK)
     {
         TC_LOG_DEBUG("network", "RAD: Failed to compress account data");
         return;
@@ -1557,12 +1594,6 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recvData)
     SendPacket(&data);
 }
 
-void WorldSession::HandleClientReportError(WorldPacket& recvData)
-{
-    auto len = recvData.ReadBits(9);
-    auto str = recvData.ReadString(len);
-}
-
 void WorldSession::HandleInspectRatedBGStatsOpcode(WorldPacket& recvData)
 {
     uint32 unk;
@@ -1724,14 +1755,6 @@ void WorldSession::HandleRealmSplitOpcode(WorldPacket& recvData)
     SendPacket(&data);
 }
 
-/* <packet date = "14995627" direction"StoC" opcode = "SMSG_REALM_QUERY_RESPONSE">
-08 00 01 3C realm id
-00 // code err
-01 // idk
-4D 65 6B 6B 61 74 6F 72 71 75 65 20 28 45 55 29 00 // realm name
-4D 65 6B 6B 61 74 6F 72 71 75 65 28 45 55 29 00 // realm name
-</packet>*/
-
 void WorldSession::HandleRealmQueryNameOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "CMSG_REALM_QUERY_NAME");
@@ -1741,14 +1764,18 @@ void WorldSession::HandleRealmQueryNameOpcode(WorldPacket& recvData)
     if (realmId != realmID)
         return; // Cheater ?
 
+    std::string realmName = sWorld->GetRealmName();
+
     WorldPacket data(SMSG_REALM_QUERY_RESPONSE);
+    // 0 : OK, 1 : Error, 2 : Retry, 3 : Show '?'
     data << uint8(0); // ok, realmId exist server-side
-    data << realmId;
-    data.WriteBits(sWorld->GetRealmName().size(), 8);
+    data << realmID;
+    data.WriteBits(realmName.size(), 8);
     data.WriteBit(1); // unk, if it's main realm ?
-    data.WriteBits(sWorld->GetRealmName().size(), 8);
-    data.WriteString(sWorld->GetRealmName());
-    data.WriteString(sWorld->GetRealmName());
+    data.WriteBits(realmName.size(), 8);
+    data.FlushBits();
+    data.append(realmName.c_str(), realmName.size());
+    data.append(realmName.c_str(), realmName.size());
 
     SendPacket(&data);
 }
@@ -1826,6 +1853,12 @@ void WorldSession::HandleResetInstancesOpcode(WorldPacket& /*recvData*/)
     }
     else
         _player->ResetInstances(INSTANCE_RESET_ALL, false);
+}
+
+void WorldSession::HandleResetChallengeModeOpcode(WorldPacket& /*recvData*/)
+{
+    TC_LOG_DEBUG("network", "WORLD: CMSG_RESET_CHALLENGE_MODE");
+    // TODO: Do something about challenge mode ...
 }
 
 void WorldSession::HandleSetDungeonDifficultyOpcode(WorldPacket & recvData)
@@ -2030,30 +2063,34 @@ void WorldSession::SendSetPhaseShift(std::set<uint32> const& phaseIds, std::set<
 {
     ObjectGuid guid = _player->GetGUID();
     uint32 unkValue = 0;
+    uint32 inactiveSwapsCount = 0;
 
     WorldPacket data(SMSG_SET_PHASE_SHIFT, 1 + 8 + 4 + 4 + 4 + 4 + 2 * phaseIds.size() + 4 + terrainswaps.size() * 2);
-
-    data << uint32(phaseIds.size()) * 2;        // Phase.dbc ids
-    for (std::set<uint32>::const_iterator itr = phaseIds.begin(); itr != phaseIds.end(); ++itr)
-        data << uint16(*itr); // Most of phase id on retail sniff have 0x8000 mask
 
     // 0x8 or 0x10 is related to areatrigger, if we send flags 0x00 areatrigger doesn't work in some case
     data << uint32(0x18); // flags, 0x18 most of time on retail sniff
 
-    data << uint32(0);                          // Inactive terrain swaps, may switch with active terrain
-    //for (uint8 i = 0; i < inactiveSwapsCount; ++i)
-    //    data << uint16(0);
-
-    data << uint32(terrainswaps.size()) * 2;    // Active terrain swaps, may switch with inactive terrain
-    for (std::set<uint32>::const_iterator itr = terrainswaps.begin(); itr != terrainswaps.end(); ++itr)
-        data << uint16(*itr);
-
-    data << uint32(unkValue);
+    // WorldMapAreaId ?
+    data << unkValue;
     //for (uint32 i = 0; i < unkValue; i++)
-    //    data << uint16(0); // WorldMapAreaId ?
+        //data << uint16(0);
 
-    data.WriteBitSeq<3, 7, 1, 6, 0, 4, 5, 2>(guid);
-    data.WriteByteSeq<4, 3, 0, 6, 2, 7, 5, 1>(guid);
+    // Inactive terrain swaps, may switch with active terrain
+    data << inactiveSwapsCount;
+    //for (uint8 i = 0; i < inactiveSwapsCount; ++i)
+        //data << uint16(0);
+
+    data << uint32(phaseIds.size() * 2);        // Phase.dbc ids
+    for (auto const &id : phaseIds)
+        data << uint16(id); // Most of phase id on retail sniff have 0x8000 mask
+
+    // Active terrain swaps, may switch with inactive terrain
+    data << uint32(terrainswaps.size() * 2);
+    for (auto const &id : terrainswaps)
+        data << uint16(id);
+
+    data.WriteBitSeq<0, 2, 1, 5, 3, 7, 4, 6>(guid);
+    data.WriteByteSeq<0, 5, 4, 7, 6, 2, 1, 3>(guid);
 
     SendPacket(&data);
 }
@@ -2065,8 +2102,10 @@ void WorldSession::HandleAreaSpiritHealerQueryOpcode(WorldPacket& recv_data)
 
     Battleground* bg = _player->GetBattleground();
 
-    uint64 guid;
-    recv_data >> guid;
+    ObjectGuid guid;
+
+    recv_data.ReadBitSeq<5, 3, 0, 6, 1, 7, 4, 2>(guid);
+    recv_data.ReadByteSeq<6, 7, 3, 0, 5, 4, 2, 1>(guid);
 
     Creature* unit = GetPlayer()->GetMap()->GetCreature(guid);
     if (!unit)
@@ -2087,11 +2126,12 @@ void WorldSession::HandleAreaSpiritHealerQueueOpcode(WorldPacket& recv_data)
     TC_LOG_DEBUG("network", "WORLD: CMSG_AREA_SPIRIT_HEALER_QUEUE");
 
     Battleground* bg = _player->GetBattleground();
+    ObjectGuid npcGuid;
 
-    uint64 guid;
-    recv_data >> guid;
+    recv_data.ReadBitSeq<6, 2, 0, 3, 5, 4, 1, 7>(npcGuid);
+    recv_data.ReadByteSeq<4, 2, 6, 0, 1, 7, 3, 5>(npcGuid);
 
-    Creature* unit = GetPlayer()->GetMap()->GetCreature(guid);
+    Creature* unit = GetPlayer()->GetMap()->GetCreature(npcGuid);
     if (!unit)
         return;
 
@@ -2099,10 +2139,10 @@ void WorldSession::HandleAreaSpiritHealerQueueOpcode(WorldPacket& recv_data)
         return;
 
     if (bg)
-        bg->AddPlayerToResurrectQueue(guid, _player->GetGUID());
+        bg->AddPlayerToResurrectQueue(npcGuid, _player->GetGUID());
 
     if (Battlefield* bf = sBattlefieldMgr->GetBattlefieldToZoneId(_player->GetZoneId()))
-        bf->AddPlayerToResurrectQueue(guid, _player->GetGUID());
+        bf->AddPlayerToResurrectQueue(npcGuid, _player->GetGUID());
 }
 
 void WorldSession::HandleHearthAndResurrect(WorldPacket& /*recvData*/)
@@ -2269,7 +2309,7 @@ void WorldSession::HandleSetFactionOpcode(WorldPacket& recvPacket)
         _player->SetByteValue(UNIT_FIELD_BYTES_0, 0, RACE_PANDAREN_HORDE);
         _player->setFactionForRace(RACE_PANDAREN_HORDE);
         _player->SaveToDB();
-        WorldLocation location(1, -618.518f, -4251.67f, 38.718f, M_PI);
+        WorldLocation location(1, 1366.730f, -4371.248f, 26.070f, 3.1266f);
         _player->TeleportTo(location);
         _player->SetHomebind(location, 363);
         _player->learnSpell(669, false); // Language Orcish
@@ -2280,7 +2320,7 @@ void WorldSession::HandleSetFactionOpcode(WorldPacket& recvPacket)
         _player->SetByteValue(UNIT_FIELD_BYTES_0, 0, RACE_PANDAREN_ALLI);
         _player->setFactionForRace(RACE_PANDAREN_ALLI);
         _player->SaveToDB();
-        WorldLocation location(0, -8914.57f, -133.909f, 80.5378f, M_PI);
+        WorldLocation location(0, -9096.236f, 411.380f, 92.257f, 3.649f);
         _player->TeleportTo(location);
         _player->SetHomebind(location, 9);
         _player->learnSpell(668, false); // Language Common

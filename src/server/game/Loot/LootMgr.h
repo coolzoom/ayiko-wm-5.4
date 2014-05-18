@@ -92,11 +92,11 @@ enum LootType
 // type of Loot Item in Loot View
 enum LootSlotType
 {
-    LOOT_SLOT_TYPE_ALLOW_LOOT   = 0,                        // player can loot the item.
-    LOOT_SLOT_TYPE_ROLL_ONGOING = 1,                        // roll is ongoing. player cannot loot.
-    LOOT_SLOT_TYPE_MASTER       = 2,                        // item can only be distributed by group loot master.
-    LOOT_SLOT_TYPE_LOCKED       = 3,                        // item is shown in red. player cannot loot.
-    LOOT_SLOT_TYPE_OWNER        = 4,                        // ignore binding confirmation and etc, for single player looting
+    LOOT_SLOT_TYPE_ALLOW_LOOT   = 1,                        // player can loot the item.
+    LOOT_SLOT_TYPE_ROLL_ONGOING = 3,                        // roll is ongoing. player cannot loot.
+    LOOT_SLOT_TYPE_MASTER       = 0,                        // item can only be distributed by group loot master.
+    LOOT_SLOT_TYPE_LOCKED       = 4,                        // item is shown in red. player cannot loot.
+    LOOT_SLOT_TYPE_OWNER        = 2,                        // ignore binding confirmation and etc, for single player looting
 };
 
 class Player;
@@ -274,6 +274,13 @@ struct LootView;
 ByteBuffer& operator<<(ByteBuffer& b, LootItem const& li);
 ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv);
 
+struct LinkedLootInfo
+{
+    uint64 creatureGUID;
+    uint32 slot;
+    PermissionTypes permission;
+};
+
 struct Loot
 {
     friend ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv);
@@ -282,17 +289,25 @@ struct Loot
     QuestItemMap const& GetPlayerFFAItems() const { return PlayerFFAItems; }
     QuestItemMap const& GetPlayerNonQuestNonFFAConditionalItems() const { return PlayerNonQuestNonFFAConditionalItems; }
 
-    bool alreadyAskedForRoll;
-
+    std::map<uint32, LinkedLootInfo> linkedLoot;
     std::vector<LootItem> items;
     std::vector<LootItem> quest_items;
     uint32 gold;
     uint8 unlootedCount;
     uint64 roundRobinPlayer;                                // GUID of the player having the Round-Robin ownership for the loot. If 0, round robin owner has released.
     LootType loot_type;                                     // required for achievement system
+    bool alreadyAskedForRoll;
+    uint32 maxLinkedSlot;
+    uint32 additionalLinkedGold;
 
     Loot(uint32 _gold = 0)
-        : alreadyAskedForRoll(false), gold(_gold), unlootedCount(0), loot_type(LOOT_CORPSE)
+        : gold(_gold)
+        , unlootedCount(0)
+        , roundRobinPlayer(0)
+        , loot_type(LOOT_CORPSE)
+        , alreadyAskedForRoll(false)
+        , maxLinkedSlot(0)
+        , additionalLinkedGold(0)
     { }
 
     ~Loot() { clear(); }
@@ -324,7 +339,32 @@ struct Loot
         gold = 0;
         unlootedCount = 0;
         roundRobinPlayer = 0;
+        additionalLinkedGold = 0;
         i_LootValidatorRefManager.clearReferences();
+    }
+
+    void addLinkedLoot(uint32 slot, uint64 linkedCreature, uint32 linkedSlot, PermissionTypes perm)
+    {
+        linkedLoot[slot].creatureGUID = linkedCreature;
+        linkedLoot[slot].slot = linkedSlot;
+        linkedLoot[slot].permission = perm;
+
+        if (maxLinkedSlot < slot)
+            maxLinkedSlot = slot;
+    }
+
+    bool isLinkedLoot(uint32 slot)
+    {
+        if (linkedLoot.find(slot) != linkedLoot.end())
+            return true;
+
+        return false;
+    }
+
+    // Must used only AFTER isLinkedLoot check
+    LinkedLootInfo& getLinkedLoot(uint32 slot)
+    {
+        return linkedLoot[slot];
     }
 
     bool empty() const { return items.empty() && gold == 0; }
@@ -335,6 +375,7 @@ struct Loot
     void NotifyMoneyRemoved();
     void AddLooter(uint64 GUID) { PlayersLooting.insert(GUID); }
     void RemoveLooter(uint64 GUID) { PlayersLooting.erase(GUID); }
+    bool IsLooter(uint64 GUID) { return PlayersLooting.find(GUID) != PlayersLooting.end(); }
 
     void generateMoneyLoot(uint32 minAmount, uint32 maxAmount);
     bool FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bool personal, bool noEmptyError = false, uint16 lootMode = LOOT_MODE_DEFAULT);
@@ -376,7 +417,7 @@ struct LootView
         , viewer(_viewer)
         , permission(_permission)
         , _loot_type(loot_type)
-        , _guid(ObjectGuid(guid))
+        , _guid(guid)
     { }
 };
 

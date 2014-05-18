@@ -715,7 +715,7 @@ void ChatHandler::FillMessageData(WorldPacket* data, WorldSession* session, uint
 
     data->WriteBitSeq<2, 4, 0, 6, 1, 3, 5, 7>(speakerGuid);
 
-    data->WriteBit(groupGuid);                                  // has group GUID - FAKE GUID
+    data->WriteBit(groupGuid != 0);                             // has group GUID - FAKE GUID
 
     data->WriteBitSeq<6, 0, 4, 1, 2, 3, 7, 5>(groupGuid);
 
@@ -727,7 +727,7 @@ void ChatHandler::FillMessageData(WorldPacket* data, WorldSession* session, uint
     if (speakerPlayer != NULL)
         data->WriteBits(speakerNameLength, 11);
 
-    data->WriteBit(targetGuid);                                 // has receiver GUID - FAKE GUID
+    data->WriteBit(targetGuid != 0);                            // has receiver GUID - FAKE GUID
 
     data->WriteBitSeq<4, 0, 6, 7, 5, 1, 3, 2>(targetGuid);
 
@@ -749,9 +749,9 @@ void ChatHandler::FillMessageData(WorldPacket* data, WorldSession* session, uint
 
     // Must be inversed
     if (hasChatTag)
-        data->WriteBits(session->GetPlayer()->GetChatTag(), 9);
+        data->WriteBits(speakerPlayer->GetChatTag(), 9);
 
-    data->WriteBit(guildGuid);                                  // has guild GUID - FAKE GUID
+    data->WriteBit(guildGuid != 0);                             // has guild GUID - FAKE GUID
 
     if (targetGuid)
         data->WriteBits(targetLength, 11);

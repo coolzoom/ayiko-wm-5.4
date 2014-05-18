@@ -100,24 +100,12 @@ WorldSocket::WorldSocket (void): WorldHandler(),
     m_LastPingTime(ACE_Time_Value::zero), m_OverSpeedPings(0), m_Session(0),
     m_RecvWPct(0), m_RecvPct(), m_Header(sizeof (ClientPktHeader)),
     m_OutBuffer(0), m_OutBufferSize(65536), m_OutActive(false),
-    m_Seed(static_cast<uint32> (rand32())), m_zstream()
+    m_Seed(static_cast<uint32> (rand32()))
 {
     reference_counting_policy().value (ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
 
     msg_queue()->high_water_mark(8 * 1024 * 1024);
     msg_queue()->low_water_mark(8 * 1024 * 1024);
-
-    m_zstream = new z_stream_s();
-    m_zstream->zalloc = (alloc_func)0;
-    m_zstream->zfree = (free_func)0;
-    m_zstream->opaque = (voidpf)0;
-
-    int z_res = deflateInit(m_zstream, sWorld->getIntConfig(CONFIG_COMPRESSION));
-    if (z_res != Z_OK)
-    {
-        TC_LOG_ERROR("network", "WorldSocket: Can't initialize packet compression deflateInit failed with code %d", z_res);
-        ASSERT(z_res == Z_OK);
-    }
 }
 
 WorldSocket::~WorldSocket (void)
@@ -126,13 +114,6 @@ WorldSocket::~WorldSocket (void)
 
     if (m_OutBuffer)
         m_OutBuffer->release();
-
-    int z_res = deflateEnd(m_zstream);
-    if (z_res != Z_OK && z_res != Z_DATA_ERROR)
-    {
-        TC_LOG_ERROR("network", "WorldSocket: Can't close packet compression stream. deflateEnd failed with code %d", z_res);
-        return;
-    }
 
     closing_ = true;
 
@@ -170,8 +151,6 @@ const std::string& WorldSocket::GetRemoteAddress (void) const
 
 int WorldSocket::SendPacket(WorldPacket const* pct)
 {
-    ASSERT(!(pct->GetOpcode() & COMPRESSED_OPCODE_MASK)); // Packet not compressed
-
     ACE_GUARD_RETURN (LockType, Guard, m_OutBufferLock, -1);
 
     if (closing_)
@@ -181,70 +160,6 @@ int WorldSocket::SendPacket(WorldPacket const* pct)
     if (sPacketLog->CanLogPacket())
         sPacketLog->LogPacket(*pct, SERVER_TO_CLIENT);
 
-    TC_LOG_INFO("network.opcode", "S->C: %s", GetOpcodeNameForLogging(pct->GetOpcode(), WOW_SERVER).c_str());
-#if 0
-    WorldPacket compressed;
-    size_t size = pct->size();
-
-    if (false && size >= 45
-        && pct->GetOpcode() != MSG_VERIFY_CONNECTIVITY
-        && pct->GetOpcode() != SMSG_MOTD
-        )
-    {
-        size += sizeof(uint32);
-
-        size_t reserved_size = deflateBound(m_zstream, size) + 12;
-        compressed.resize(reserved_size);
-        compressed.put<uint32>(0, size);
-
-        ByteBuffer buff(size);
-        {
-            buff.append((uint32)pct->GetOpcode());
-            buff.append(pct->contents(), pct->size());
-        }
-
-        uint32 adler_1 = (uint32)adler32(2552748273u, (const Bytef*)buff.contents(), buff.size());
-
-        compressed.put<uint32>(4, adler_1);
-
-        m_zstream->next_in = (Bytef*)buff.contents();
-        m_zstream->avail_in = buff.size();
-
-        m_zstream->next_out = (Bytef*)(compressed.contents() + 12);
-        m_zstream->avail_out = reserved_size - 12;
-
-        int z_res = deflate(m_zstream, Z_SYNC_FLUSH);
-
-        size_t totalOut = m_zstream->next_out - compressed.contents();
-        TC_LOG_ERROR("network", "totalOut = %u, reserved_size = %u, m_zstream->avail_out = %u", (uint32)totalOut, (uint32)reserved_size, (uint32)m_zstream->avail_out);
-        ASSERT(totalOut == reserved_size - m_zstream->avail_out);
-
-        uint32 adler_2 = (uint32)adler32(2552748273u, (const Bytef*)(compressed.contents() + 12), totalOut - 12);
-
-        compressed.put<uint32>(8, adler_2);
-
-        if (z_res != Z_OK)
-        {
-            TC_LOG_ERROR("network", "Can't compress packet (zlib: deflate) Error code: %i (%s)",z_res,zError(z_res));
-        }
-        else if (m_zstream->avail_in != 0)
-        {
-            TC_LOG_ERROR("network", "Can't compress packet (zlib: deflate not greedy)");
-        }
-        else
-        {
-            compressed.resize(totalOut + 12);
-            compressed.SetOpcode(SMSG_COMPRESSED_DATA);
-            pct = &compressed;
-            size = pct->size();
-        }
-
-        m_zstream->next_in = NULL;
-        m_zstream->next_out = NULL;
-        m_zstream->avail_in = 0;
-        m_zstream->avail_out = 0;
-    }
-#endif
     ServerPktHeader header(pct->size() + 2, pct->GetOpcode(), m_Crypt.IsInitialized());
     m_Crypt.EncryptSend(header.header, ServerPktHeader::Length);
 
@@ -1063,7 +978,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     recvPacket >> addonSize;
     addonsData.resize(addonSize);
-    recvPacket.read((uint8*)addonsData.contents(), addonSize);
+    recvPacket.read(addonsData.contents(), addonSize);
 
     uint32 accountNameLength = recvPacket.ReadBits(11);
     recvPacket.ReadBit();

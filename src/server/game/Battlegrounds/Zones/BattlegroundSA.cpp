@@ -487,9 +487,9 @@ void BattlegroundSA::HandleAreaTrigger(Player* /*Source*/, uint32 /*Trigger*/)
         return;
 }
 
-void BattlegroundSA::UpdatePlayerScore(Player* source, Player *victim, uint32 type, uint32 value, bool doAddHonor)
+void BattlegroundSA::UpdatePlayerScore(Player* Source, uint32 type, uint32 value, bool doAddHonor)
 {
-    BattlegroundScoreMap::iterator itr = PlayerScores.find(source->GetGUID());
+    BattlegroundScoreMap::iterator itr = PlayerScores.find(Source->GetGUID());
     if (itr == PlayerScores.end())                         // player not found...
         return;
 
@@ -498,7 +498,7 @@ void BattlegroundSA::UpdatePlayerScore(Player* source, Player *victim, uint32 ty
     else if (type == SCORE_DESTROYED_WALL)
         ((BattlegroundSAScore*)itr->second)->gates_destroyed += value;
     else
-        Battleground::UpdatePlayerScore(source, victim, type, value, doAddHonor);
+        Battleground::UpdatePlayerScore(Source, type, value, doAddHonor);
 }
 
 void BattlegroundSA::TeleportPlayers()
@@ -569,7 +569,7 @@ void BattlegroundSA::HandleKillUnit(Creature* creature, Player* killer)
 {
     if (creature->GetEntry() == NPC_DEMOLISHER_SA)
     {
-        UpdatePlayerScore(killer, NULL, SCORE_DESTROYED_DEMOLISHER, 1);
+        UpdatePlayerScore(killer, SCORE_DESTROYED_DEMOLISHER, 1);
         _notEvenAScratch[Attackers] = false;
     }
 }
@@ -681,9 +681,9 @@ void BattlegroundSA::DestroyGate(Player* player, GameObject* go)
 
             if (i < 5)
                 DelObject(i + 14);
-            UpdatePlayerScore(player, NULL, SCORE_DESTROYED_WALL, 1);
+            UpdatePlayerScore(player, SCORE_DESTROYED_WALL, 1);
             if (rewardHonor)
-                UpdatePlayerScore(player, NULL, SCORE_BONUS_HONOR, GetBonusHonorFromKill(1));
+                UpdatePlayerScore(player, SCORE_BONUS_HONOR, GetBonusHonorFromKill(1));
         }
     }
 }

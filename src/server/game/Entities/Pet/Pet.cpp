@@ -78,6 +78,7 @@ void Pet::AddToWorld()
     if (GetCharmInfo() && GetCharmInfo()->HasCommandState(COMMAND_FOLLOW))
     {
         GetCharmInfo()->SetIsCommandAttack(false);
+        GetCharmInfo()->SetIsCommandFollow(false);
         GetCharmInfo()->SetIsAtStay(false);
         GetCharmInfo()->SetIsFollowing(false);
         GetCharmInfo()->SetIsReturning(false);
@@ -1275,42 +1276,53 @@ void Pet::_LoadSpellCooldowns()
     stmt->setUInt32(0, m_charmInfo->GetPetNumber());
     PreparedQueryResult result = CharacterDatabase.Query(stmt);
 
-    if (result)
+    if (!result)
+        return;
+
+    ByteBuffer dataBuffer;
+    time_t curTime = time(NULL);
+
+    do
     {
-        time_t curTime = time(NULL);
+        Field* fields = result->Fetch();
 
-        WorldPacket data(SMSG_SPELL_COOLDOWN, size_t(8+1+result->GetRowCount()*8));
-        data << GetGUID();
-        data << uint8(0x0);                                 // flags (0x1, 0x2)
+        uint32 spell_id = fields[0].GetUInt32();
+        time_t db_time  = time_t(fields[1].GetUInt32());
 
-        do
+        if (!sSpellMgr->GetSpellInfo(spell_id))
         {
-            Field* fields = result->Fetch();
-
-            uint32 spell_id = fields[0].GetUInt32();
-            time_t db_time  = time_t(fields[1].GetUInt32());
-
-            if (!sSpellMgr->GetSpellInfo(spell_id))
-            {
-                TC_LOG_ERROR("entities.pet", "Pet %u have unknown spell %u in `pet_spell_cooldown`, skipping.", m_charmInfo->GetPetNumber(), spell_id);
-                continue;
-            }
-
-            // skip outdated cooldown
-            if (db_time <= curTime)
-                continue;
-
-            data << uint32(spell_id);
-            data << uint32(uint32(db_time-curTime)*IN_MILLISECONDS);
-
-            _AddCreatureSpellCooldown(spell_id, db_time);
-
-            TC_LOG_DEBUG("entities.pet", "Pet (Number: %u) spell %u cooldown loaded (%u secs).", m_charmInfo->GetPetNumber(), spell_id, uint32(db_time-curTime));
+            TC_LOG_ERROR("entities.pet", "Pet %u have unknown spell %u in `pet_spell_cooldown`, skipping.", m_charmInfo->GetPetNumber(), spell_id);
+            continue;
         }
-        while (result->NextRow());
 
-        if (!m_CreatureSpellCooldowns.empty() && GetOwner())
-            ((Player*)GetOwner())->GetSession()->SendPacket(&data);
+        // skip outdated cooldown
+        if (db_time <= curTime)
+            continue;
+
+        dataBuffer << uint32(spell_id);
+        dataBuffer << uint32((db_time - curTime) * IN_MILLISECONDS);
+
+        _AddCreatureSpellCooldown(spell_id, db_time);
+
+        TC_LOG_DEBUG("entities.pet", "Pet (Number: %u) spell %u cooldown loaded (%u secs).", m_charmInfo->GetPetNumber(), spell_id, uint32(db_time-curTime));
+    }
+    while (result->NextRow());
+
+    if (!dataBuffer.empty())
+    {
+        ObjectGuid petGuid = GetGUID();
+
+        WorldPacket data(SMSG_SPELL_COOLDOWN, 4 + dataBuffer.size() + 1 + 8);
+        data.WriteBits(dataBuffer.size() / sizeof(uint32) / 2, 21);
+        data.WriteBit(0);
+        data.WriteBitSeq<4, 2, 5, 6, 0, 3, 7, 1>(petGuid);
+        data.FlushBits();
+        data.append(dataBuffer);
+        data.WriteByteSeq<4>(petGuid);
+        data << uint8(1);
+        data.WriteByteSeq<1, 5, 7, 6, 0, 2, 3>(petGuid);
+
+        GetOwner()->SendDirectMessage(&data);
     }
 }
 
@@ -1971,25 +1983,21 @@ void Pet::LearnPetPassives()
 
 void Pet::CastPetAuras(bool current)
 {
-    Unit* owner = GetOwner();
+    Player * const owner = GetOwner();
     if (!owner)
         return;
 
-    Player* player = owner->ToPlayer();
-    if (!player)
+    if (!IsPermanentPetFor(owner))
         return;
 
-    if (!IsPermanentPetFor(player))
-        return;
-
-    PetAuraSet const &petAuras = player->GetPetAuras();
+    PetAuraSet const &petAuras = owner->GetPetAuras();
     for (PetAuraSet::const_iterator itr = petAuras.begin(); itr != petAuras.end();)
     {
         PetAura const* pa = *itr;
         ++itr;
 
         if (!current && pa->IsRemovedOnChangePet())
-            player->RemovePetAura(pa);
+            owner->RemovePetAura(pa);
         else
             CastPetAura(pa);
     }
@@ -2004,18 +2012,14 @@ void Pet::CastPetAura(PetAura const* aura)
     CastSpell(this, auraId, true);
 }
 
-bool Pet::IsPetAura(Aura const *aura)
+bool Pet::IsPetAura(Aura const *aura) const
 {
-    Unit* owner = GetOwner();
+    auto const owner = GetOwner();
     if (!owner)
         return false;
 
-    Player* player = owner->ToPlayer();
-    if (!player)
-        return false;
-
     // if the owner has that pet aura, return true
-    PetAuraSet const &petAuras = player->GetPetAuras();
+    PetAuraSet const &petAuras = owner->GetPetAuras();
     for (PetAuraSet::const_iterator itr = petAuras.begin(); itr != petAuras.end(); ++itr)
     {
         if ((*itr)->GetAura(GetEntry()) == aura->GetId())
@@ -2080,6 +2084,57 @@ void Pet::UnlearnSpecializationSpell()
             continue;
 
         unlearnSpell(specializationEntry->LearnSpell, false);
+    }
+}
+
+void Pet::ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs)
+{
+    ByteBuffer dataBuffer;
+    time_t curTime = time(NULL);
+
+    for (PetSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
+    {
+        if (itr->second.state == PETSPELL_REMOVED)
+            continue;
+
+        uint32 unSpellId = itr->first;
+        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(unSpellId);
+        if (!spellInfo)
+        {
+            ASSERT(spellInfo);
+            continue;
+        }
+
+        // Not send cooldown for this spells
+        if (spellInfo->Attributes & SPELL_ATTR0_DISABLED_WHILE_ACTIVE)
+            continue;
+
+        if (spellInfo->PreventionType != SPELL_PREVENTION_TYPE_SILENCE)
+            continue;
+
+        if ((idSchoolMask & spellInfo->GetSchoolMask()) && GetCreatureSpellCooldownDelay(unSpellId) < unTimeMs)
+        {
+            dataBuffer << uint32(unSpellId);
+            dataBuffer << uint32(unTimeMs);                       // in m.secs
+            _AddCreatureSpellCooldown(unSpellId, curTime + unTimeMs/IN_MILLISECONDS);
+        }
+    }
+
+    if (!dataBuffer.empty())
+    {
+        ObjectGuid petGuid = GetGUID();
+
+        WorldPacket data(SMSG_SPELL_COOLDOWN, 4 + dataBuffer.size() + 1 + 8);
+        data.WriteBits(dataBuffer.size() / sizeof(uint32) / 2, 21);
+        data.WriteBit(0);
+        data.WriteBitSeq<4, 2, 5, 6, 0, 3, 7, 1>(petGuid);
+        data.FlushBits();
+        data.append(dataBuffer);
+        data.WriteByteSeq<4>(petGuid);
+        data << uint8(0);
+        data.WriteByteSeq<1, 5, 7, 6, 0, 2, 3>(petGuid);
+
+        GetOwner()->SendDirectMessage(&data);
     }
 }
 

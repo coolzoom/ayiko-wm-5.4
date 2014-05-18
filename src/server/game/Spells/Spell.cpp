@@ -593,10 +593,7 @@ m_caster((info->AttributesEx6 & SPELL_ATTR6_CAST_BY_CHARMER && caster->GetCharme
     m_effectExecuteData.clear();
 
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-    {
-        if (m_caster)
-            m_destTargets[i] = SpellDestination(*m_caster);
-    }
+        m_destTargets[i] = SpellDestination(*m_caster);
 }
 
 Spell::~Spell()
@@ -1230,6 +1227,12 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
                     case 52759: // Ancestral Awakening
                     case 71610: // Echoes of Light (Althor's Abacus normal version)
                     case 71641: // Echoes of Light (Althor's Abacus heroic version)
+                    case 99152: // Cauterizing Flame, Item - Priest Healer T12 4P Bonus
+                    case 96966: // Blaze of Life, Eye of Blazing Power (Normal)
+                    case 97136: // Blaze of Life, Eye of Blazing Power (Heroic)
+                    case 109825: // Nick of Time, Windward Heart (heroic)
+                    case 108000: // Nick of Time, Windward Heart (normal)
+                    case 109822: // Nick of Time, Windward Heart (lfr)
                         maxSize = 1;
                         power = POWER_HEALTH;
                         break;
@@ -1260,7 +1263,7 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
                 }
                 else if (m_spellInfo->Id == 64844) // Divine Hymn
                 {
-                    maxSize = 3;
+                    maxSize = 5;
                     power = POWER_HEALTH;
                 }
                 else if (m_spellInfo->Id == 64904) // Hymn of Hope
@@ -1392,6 +1395,24 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
                 break;
             }
             case SPELLFAMILY_DRUID:
+                switch(m_spellInfo->Id)
+                {
+                    // Firebloom, Item  Druid T12 Restoration 4P Bonus
+                    case 99017:
+                        maxSize = 1;
+                        power = POWER_HEALTH;
+                        break;
+                    // Efflorescence
+                    case 81269:
+                        maxSize = 3;
+                        power = POWER_HEALTH;
+                        break;
+                    // Tranquility
+                    case 44203:
+                        maxSize = 5;
+                        power = POWER_HEALTH;
+                        break;
+                }
                 if (m_spellInfo->SpellFamilyFlags[1] == 0x04000000) // Wild Growth
                 {
                     maxSize = m_caster->HasAura(62970) ? 6 : 5; // Glyph of Wild Growth
@@ -2353,8 +2374,8 @@ void Spell::AddUnitTarget(Unit* target, uint32 effectMask, bool checkIfValid /*=
     {
         if (!IsTriggered() && m_spellInfo->_IsCrowdControl(0, false))
         {
-            targetInfo.timeDelay = 200LL;
-            m_delayMoment = 200LL;
+            targetInfo.timeDelay = 100LL;
+            m_delayMoment = 100LL;
         }
         if (m_spellInfo->IsPositive() && (!IsTriggered() || m_spellInfo->SpellIconID == 156) && m_spellInfo->Targets != 0x40 && m_spellInfo->Id != 64382)
         {
@@ -2365,8 +2386,8 @@ void Spell::AddUnitTarget(Unit* target, uint32 effectMask, bool checkIfValid /*=
                 case SPELL_EFFECT_POWER_BURN:
                 case SPELL_EFFECT_DISPEL:
                 {
-                    targetInfo.timeDelay = 200LL;
-                    m_delayMoment = 200LL;
+                    targetInfo.timeDelay = 100LL;
+                    m_delayMoment = 100LL;
                 }
                 default:
                     break;
@@ -3384,10 +3405,7 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const *triggered
     //TODO:Apply this to all casted spells if needed
     // Why check duration? 29350: channeled triggers channeled
     if ((_triggeredCastFlags & TRIGGERED_CAST_DIRECTLY) && (!m_spellInfo->IsChanneled() || !m_spellInfo->GetMaxDuration()))
-    {
-        CallScriptBeforeCastHandlers();
         cast(true);
-    }
     else
     {
         // stealth must be removed at cast starting (at show channel bar)
@@ -3407,8 +3425,6 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const *triggered
 
         m_caster->SetCurrentCastedSpell(this);
         SendSpellStart();
-
-        CallScriptBeforeCastHandlers();
 
         // set target for proper facing
         if ((m_casttime || m_spellInfo->IsChanneled()) && !(_triggeredCastFlags & TRIGGERED_IGNORE_SET_FACING))
@@ -3519,7 +3535,7 @@ void Spell::cast(bool skipCheck)
         m_caster->ToPlayer()->SetSpellModTakingSpell(this, true);
     }
 
-    //CallScriptBeforeCastHandlers();
+    CallScriptBeforeCastHandlers();
 
     // skip check if done already (for instant cast spells for example)
     if (!skipCheck)
@@ -3677,55 +3693,6 @@ void Spell::cast(bool skipCheck)
         //Clear spell cooldowns after every spell is cast if .cheat cooldown is enabled.
         if (m_caster->ToPlayer()->GetCommandStatus(CHEAT_COOLDOWN))
             m_caster->ToPlayer()->RemoveSpellCooldown(m_spellInfo->Id, true);
-
-        // Clemency
-        if (m_spellInfo->Id == 1022 || m_spellInfo->Id == 1038 || m_spellInfo->Id == 1044 || m_spellInfo->Id == 6940)
-        {
-            if (Aura *clemency = m_caster->GetAura(105622))
-            {
-                switch (m_spellInfo->Id)
-                {
-                    case 1022:
-                        if (clemency->GetEffect(0)->GetAmount() > 0)
-                        {
-                            clemency->GetEffect(0)->SetAmount(0);
-                            m_caster->ToPlayer()->RemoveSpellCooldown(m_spellInfo->Id, true);
-                        }
-                        else
-                            clemency->GetEffect(0)->SetAmount(1);
-                        break;
-                    case 1038:
-                        if (clemency->GetEffect(1)->GetAmount() > 0)
-                        {
-                            clemency->GetEffect(1)->SetAmount(0);
-                            m_caster->ToPlayer()->RemoveSpellCooldown(m_spellInfo->Id, true);
-                        }
-                        else
-                            clemency->GetEffect(1)->SetAmount(1);
-                        break;
-                    case 1044:
-                        if (clemency->GetEffect(2)->GetAmount() > 0)
-                        {
-                            clemency->GetEffect(2)->SetAmount(0);
-                            m_caster->ToPlayer()->RemoveSpellCooldown(m_spellInfo->Id, true);
-                        }
-                        else
-                            clemency->GetEffect(2)->SetAmount(1);
-                        break;
-                    case 6940:
-                        if (clemency->GetEffect(3)->GetAmount() > 0)
-                        {
-                            clemency->GetEffect(3)->SetAmount(0);
-                            m_caster->ToPlayer()->RemoveSpellCooldown(m_spellInfo->Id, true);
-                        }
-                        else
-                            clemency->GetEffect(3)->SetAmount(1);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
     }
 
     SetExecutedCurrently(false);
@@ -3909,7 +3876,7 @@ void Spell::_handle_finish_phase()
             // Anticipation
             if (Player* _player = m_caster->ToPlayer())
             {
-                if (_player->HasAura(115189))
+                if (_player->HasAura(115189) && m_spellInfo->Id != 5171 && m_spellInfo->Id != 73651)
                 {
                     int32 basepoints0 = _player->GetAura(115189) ? _player->GetAura(115189)->GetStackAmount() : 0;
                     _player->CastCustomSpell(m_caster->getVictim(), 115190, &basepoints0, NULL, NULL, true);
@@ -4483,10 +4450,10 @@ void Spell::SendSpellStart()
     uint32 powerCount = 0;
     uint32 unkCounter1 = 0;
     uint32 unkCounter2 = 0;
-    uint32 unkCounter3 = 0;
+    uint32 extraTargets = m_targets.GetExtraTargetsCount();
     uint32 unkCounter4 = 0;
 
-    ObjectGuid unk4;
+    ObjectGuid predictedHealOverrideTarget;
     ObjectGuid caster = m_caster->GetGUID();
     ObjectGuid powerUnit = caster;
     ObjectGuid itemCaster = m_CastItem ? m_CastItem->GetGUID() : uint64(caster);
@@ -4495,20 +4462,35 @@ void Spell::SendSpellStart()
     ObjectGuid unitTargetGUID = m_targets.GetObjectTargetGUID();
     ObjectGuid itemTargetGUID = m_targets.GetItemTargetGUID();
 
-
     bool unkBit = false;
     bool unkInt = false;
-    bool unkInt2 = false;
+    uint32 predictedHealAmount = 0;
     bool unkInt3 = false;
     bool unkInt4 = false;
     bool unkInt5 = false;
     bool hasRuneStateBefore = false; // don't needed in spell_start
     bool unkByte2 = false;
     bool hasRuneStateAfter = false; // don't needed in spell_start
-    bool unkByte4 = false;
+    uint8 predictedHealType = 0;
     bool unkByte5 = false;
     bool unkByte6 = false;
     bool unkFloat = false;
+
+    // Initialize predicated heal values
+    if (m_spellInfo->HasEffect(SPELL_EFFECT_HEAL))
+    {
+        if (Unit* target = sObjectAccessor->FindUnit(m_targets.GetObjectTargetGUID()))
+        {
+            castFlags |= CAST_FLAG_HEAL_PREDICTION;
+            predictedHealType = 2;
+            predictedHealOverrideTarget =  target->GetGUID();
+
+            // Guess spell healing amount
+            predictedHealAmount = m_caster->CalculateSpellDamage(target, m_spellInfo, 0);
+            predictedHealAmount = m_caster->SpellHealingBonusDone(target, m_spellInfo, predictedHealAmount, HEAL);
+            predictedHealAmount = m_caster->SpellHealingBonusTaken(target, m_spellInfo, predictedHealAmount, HEAL);
+        }
+    }
 
     data.WriteBit(m_targets.HasDst());
     data.WriteBitSeq<6, 7>(itemCaster);
@@ -4527,14 +4509,14 @@ void Spell::SendSpellStart()
     if (m_targets.HasDst())
         data.WriteBitSeq<4, 7, 5, 3, 6, 2, 1, 0>(destTransport);
 
-    data.WriteBit(1);                                       // !has unk guid 4
+    data.WriteBit(1);                                       // !fake bit guid, has type 2 target guid
 
-    data.WriteBitSeq<5, 3, 4, 6, 7, 1, 2, 0>(unk4);
+    data.WriteBitSeq<5, 3, 4, 6, 7, 1, 2, 0>(predictedHealOverrideTarget);
 
     data.WriteBit(!unkBit);                                 // !unkBit
     data.WriteBit(!unkInt);                                 // !has unk int
     data.WriteBit(!hasRuneStateBefore);                     // !has rune before
-    data.WriteBit(!unkInt2);                                // !has unk int 2
+    data.WriteBit(!predictedHealAmount);                    // !has unk int 2
     data.WriteBitSeq<7>(caster);
 
     std::vector<ObjectGuid> unkGuids1(unkCounter1);
@@ -4556,7 +4538,7 @@ void Spell::SendSpellStart()
         data.WriteBitSeq<4, 7, 6, 3, 2, 0, 5, 1>(sourceTransport);
 
     data.WriteBit(!hasRuneStateAfter);                               // !has rune after
-    data.WriteBit(!unkByte4);                               // !has unk byte 4
+    data.WriteBit(!predictedHealType);                               // !has unk byte 4
     data.WriteBitSeq<4>(itemCaster);
 
     if (castFlags & CAST_FLAG_POWER_LEFT_SELF)
@@ -4584,11 +4566,13 @@ void Spell::SendSpellStart()
     data.WriteBitSeq<2>(itemCaster);
     data.WriteBit(!unkByte5);                               // !has unk byte 5
     data.WriteBitSeq<3>(caster);
-    data.WriteBits(unkCounter3, 20);
+    data.WriteBits(extraTargets, 20);
 
-    std::vector<ObjectGuid> unkGuids3(unkCounter3);
-    for (uint32 i = 0; i < unkCounter3; i++)
-        data.WriteBitSeq<5, 1, 4, 7, 3, 6, 0, 2>(unkGuids3[i]);
+    for (auto itr : m_targets.GetExtraTargets())
+    {
+        ObjectGuid extraTargetGuid = itr._transportGUID;
+        data.WriteBitSeq<5, 1, 4, 7, 3, 6, 0, 2>(extraTargetGuid);
+    }
 
     data.WriteBitSeq<4, 1, 5, 2, 7, 6, 0, 3>(itemTargetGUID);
 
@@ -4687,7 +4671,7 @@ void Spell::SendSpellStart()
 
     data.WriteByteSeq<5, 7>(itemCaster);
 
-    data.WriteByteSeq<1, 7, 3, 0, 6, 2, 4, 5>(unk4);
+    data.WriteByteSeq<1, 7, 3, 0, 6, 2, 4, 5>(predictedHealOverrideTarget);
 
     if (unkByte6)
     {
@@ -4697,15 +4681,16 @@ void Spell::SendSpellStart()
 
     data.WriteByteSeq<4>(itemCaster);
 
-    for (uint32 i = 0; i < unkCounter3; i++)
+    for (auto itr : m_targets.GetExtraTargets())
     {
-        Unit* unkUnit3 = ObjectAccessor::FindUnit(unkGuids3[i]);
-        data.WriteByteSeq<4, 5>(unkGuids3[i]);
-        data << float(unkUnit3 ? unkUnit3->GetPositionY() : 0.0f);
-        data.WriteByteSeq<0, 1, 2, 3>(unkGuids3[i]);
-        data << float(unkUnit3 ? unkUnit3->GetPositionX() : 0.0f);
-        data << float(unkUnit3 ? unkUnit3->GetPositionZ() : 0.0f);
-        data.WriteByteSeq<6, 7>(unkGuids3[i]);
+        ObjectGuid extraTargetGuid = itr._transportGUID;
+
+        data.WriteByteSeq<4, 5>(extraTargetGuid);
+        data << float(itr._position.GetPositionY());
+        data.WriteByteSeq<0, 1, 2, 3>(extraTargetGuid);
+        data << float(itr._position.GetPositionX());
+        data << float(itr._position.GetPositionZ());
+        data.WriteByteSeq<6, 7>(extraTargetGuid);
     }
 
     if (castFlags & CAST_FLAG_POWER_LEFT_SELF)
@@ -4765,8 +4750,8 @@ void Spell::SendSpellStart()
 
     data.WriteByteSeq<7>(caster);
 
-    if (unkInt2)
-        data << uint32(0);
+    if (predictedHealAmount)
+        data << uint32(predictedHealAmount);
 
     if (unkFloat)
         data << float(0.0f);
@@ -4775,14 +4760,14 @@ void Spell::SendSpellStart()
     data.WriteByteSeq<4, 1>(caster);
     data << uint32(m_spellInfo->Id);                        // spellId
 
-    if (unkByte4)
-        data << float(0.0f);
+    if (predictedHealType)
+        data << uint8(predictedHealType);
 
     for (uint32 i = 0; i < powerCount; i++)
     {
         // not sure about this ...
-        data << int32((Powers)m_spellPowerData->powerType);
-        data << uint32(m_caster->GetPower((Powers)m_spellPowerData->powerType));
+        data << int32(m_spellPowerData->powerType);
+        data << int32(m_caster->GetPower((Powers)m_spellPowerData->powerType));
     }
 
     data.WriteByteSeq<0>(itemCaster);
@@ -4803,75 +4788,6 @@ void Spell::SendSpellStart()
 
     data.WriteByteSeq<5, 2>(caster);
 
-#if 0
-    // OLD DATAS 5.0.5
-
-    if (m_CastItem)
-        data.append(m_CastItem->GetPackGUID());
-    else
-        data.append(m_caster->GetPackGUID());
-
-    data.append(m_caster->GetPackGUID());
-    data << uint32(castFlags);                              // cast flags
-    data << uint32(m_timer);                                // delay?
-
-    m_targets.Write(data);
-
-    if (castFlags & CAST_FLAG_POWER_LEFT_SELF)
-    {
-        data << uint32(1);//m_caster->GetPower((Powers)m_spellInfo->PowerType));
-
-        data << int32((Powers)m_spellPowerData->powerType);
-        data << uint32(m_caster->GetPower((Powers)m_spellPowerData->powerType));
-        for int i = 0; i< ? ;++i
-            data << uint32
-            data << uint32
-    }
-    if (castFlags & CAST_FLAG_RUNE_LIST)                   // rune cooldowns list
-    {
-        //TODO: There is a crash caused by a spell with CAST_FLAG_RUNE_LIST casted by a creature
-        //The creature is the mover of a player, so HandleCastSpellOpcode uses it as the caster
-        if (Player* player = m_caster->ToPlayer())
-        {
-            data << uint8(m_runesState);                     // runes state before
-            data << uint8(player->GetRunesState());          // runes state after
-            for (uint8 i = 0; i < MAX_RUNES; ++i)
-            {
-                // float casts ensure the division is performed on floats as we need float result
-                float baseCd = float(player->GetRuneBaseCooldown(i));
-                data << uint8((baseCd - float(player->GetRuneCooldown(i))) / baseCd * 255); // rune cooldown passed
-            }
-        }
-        else
-        {
-            data << uint8(0);
-            data << uint8(0);
-            for (uint8 i = 0; i < MAX_RUNES; ++i)
-                data << uint8(0);
-        }
-    }
-
-    if (castFlags & CAST_FLAG_PROJECTILE)
-    {
-        data << uint32(0); // Ammo display ID
-        data << uint32(0); // Inventory Type
-    }
-
-    if (castFlags & CAST_FLAG_IMMUNITY)
-    {
-        data << uint32(0);
-        data << uint32(0);
-    }
-
-    if (castFlags & CAST_FLAG_HEAL_PREDICTION)
-    {
-        data << uint32(0);
-        data << uint8(0); // unkByte
-        // if (unkByte == 2)
-            // data.append(0);
-    }
-#endif
-
     m_caster->SendMessageToSet(&data, true);
 }
 
@@ -4886,8 +4802,8 @@ void Spell::SendSpellGo()
     uint32 castFlags = CAST_FLAG_UNKNOWN_9;
 
     // triggered spells with spell visual != 0
-    /*if ((IsTriggered() && !m_spellInfo->IsAutoRepeatRangedSpell()) || m_triggeredByAuraSpell)
-        castFlags |= CAST_FLAG_PENDING;*/
+    if ((IsTriggered() && !m_spellInfo->IsAutoRepeatRangedSpell()) || m_triggeredByAuraSpell)
+        castFlags |= CAST_FLAG_PENDING;
 
     if ((m_caster->GetTypeId() == TYPEID_PLAYER ||
         (m_caster->GetTypeId() == TYPEID_UNIT && m_caster->ToCreature()->isPet()))
@@ -4928,7 +4844,7 @@ void Spell::SendSpellGo()
     uint32 powerTypeCount = 1;
     uint32 runeCooldownCount = 0;
     uint32 unkStringLength = 0;
-    uint32 counter388 = 0;
+    uint32 extraTargets = m_targets.GetExtraTargetsCount();
 
     bool hasSrc = m_targets.HasSrc();
     bool hasDest = m_targets.HasDst();
@@ -4939,7 +4855,9 @@ void Spell::SendSpellGo()
     bool hasBit102 = false;
     bool hasBit106 = false;
     bool hasRuneStateBefore = m_runesState;
-    bool hasRuneStateAfter = m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->ToPlayer()->GetRunesState();
+    bool hasRuneStateAfter = false;
+    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->getClass() == CLASS_DEATH_KNIGHT &&  m_caster->ToPlayer()->GetRunesState())
+        hasRuneStateAfter = true;
     bool hasDelayMoment = m_delayMoment;
     bool hasBit368 = false;
     bool hasBit380 = false;
@@ -5006,9 +4924,9 @@ void Spell::SendSpellGo()
     data.WriteBit(hasBit380);                               // hasBit380
     data.WriteBit(hasSrc);                                  // hasGuid3
     data.WriteBitSeq<3>(itemCaster);
-    data.WriteBits(counter388, 20);                         // counter388
+    data.WriteBits(extraTargets, 20);                       // extraTargets
     data.WriteBitSeq<1>(itemCaster);
-    data.WriteBitSeq<0>(caster);
+    data.WriteBit(caster[0]);
     data.WriteBitSeq<6, 5>(itemCaster);
     data.WriteBit(!hasBit101);                              // !hasBit101
     data.WriteBits(missCount, 24);                          // missCount guid counter
@@ -5036,9 +4954,11 @@ void Spell::SendSpellGo()
     data.WriteBit(hasDest);                                 // hasDest
     data.WriteBit(1);                                       // !hasBit416
 
-    std::vector<ObjectGuid> Guids2(counter388);
-    for (uint32 i = 0; i < counter388; i++)
-        data.WriteBitSeq<0, 4, 3, 1, 6, 7, 2, 5>(Guids2[i]);
+    for (auto itr : m_targets.GetExtraTargets())
+    {
+        ObjectGuid extraTarget = itr._transportGUID;
+        data.WriteBitSeq<0, 4, 3, 1, 6, 7, 2, 5>(extraTarget);
+    }
 
     data.WriteBitSeq<4, 6, 7, 0, 1, 2, 3, 5>(guid6);
 
@@ -5047,7 +4967,7 @@ void Spell::SendSpellGo()
     if (hasDest)
         data.WriteBitSeq<4, 1, 7, 3, 0, 5, 6, 2>(transportDst);
 
-    data.WriteBit(powerUnit);                               // hasPowerUnitGuid
+    data.WriteBit(powerUnit != 0);                          // hasPowerUnitGuid
     data.WriteBits(hitCount, 24);                           // hit count
 
     if (powerUnit)
@@ -5236,16 +5156,16 @@ void Spell::SendSpellGo()
     data.WriteByteSeq<1>(caster);
     data << uint32(getMSTime());                            // timestamp
 
-    for (uint32 i = 0; i < counter388; i++) // TARGET_FLAG_EXTRA_TARGETS
+    for (auto itr : m_targets.GetExtraTargets())
     {
-        Unit* second = ObjectAccessor::FindUnit(Guids2[i]);
+        ObjectGuid extraTarget = itr._transportGUID;
 
-        data.WriteByteSeq<2>(Guids2[i]);
-        data << float(second ? second->GetPositionY() : 0.0f);
-        data.WriteByteSeq<6>(Guids2[i]);
-        data << float(second ? second->GetPositionZ() : 0.0f);
-        data << float(second ? second->GetPositionX() : 0.0f);
-        data.WriteByteSeq<4, 1, 3, 0, 7, 5>(Guids2[i]);
+        data.WriteByteSeq<2>(extraTarget);
+        data << float(itr._position.GetPositionY());
+        data.WriteByteSeq<6>(extraTarget);
+        data << float(itr._position.GetPositionZ());
+        data << float(itr._position.GetPositionX());
+        data.WriteByteSeq<4, 1, 3, 0, 7, 5>(extraTarget);
     }
 
     if (hasBit380)
@@ -5549,11 +5469,44 @@ void Spell::ExecuteLogEffectExtraAttacks(uint8 /*effIndex*/, Unit* /*victim*/, u
     *m_effectExecuteData[effIndex] << uint32(attCount);*/
 }
 
-void Spell::ExecuteLogEffectInterruptCast(uint8 /*effIndex*/, Unit* /*victim*/, uint32 /*spellId*/)
+void Spell::ExecuteLogEffectInterruptCast(uint8 /*effIndex*/, Unit* victim, uint32 spellId)
 {
-    /*InitEffectExecuteData(effIndex);
-    m_effectExecuteData[effIndex]->append(victim->GetPackGUID());
-    *m_effectExecuteData[effIndex] << uint32(spellId);*/
+    ObjectGuid casterGuid = m_caster->GetGUID();
+    ObjectGuid targetGuid = victim->GetGUID();
+
+    WorldPacket data(SMSG_SPELL_INTERRUPT_LOG, 8 + 8 + 4 + 4);
+    data.WriteBitSeq<5>(casterGuid);
+    data.WriteBitSeq<5, 4>(targetGuid);
+    data.WriteBitSeq<2>(casterGuid);
+    data.WriteBitSeq<0>(targetGuid);
+    data.WriteBitSeq<6>(casterGuid);
+    data.WriteBit(0);
+    data.WriteBitSeq<6>(targetGuid);
+    data.WriteBitSeq<4, 1>(casterGuid);
+    data.WriteBitSeq<2>(targetGuid);
+    data.WriteBitSeq<0>(casterGuid);
+    data.WriteBitSeq<3>(targetGuid);
+    data.WriteBitSeq<3>(casterGuid);
+    data.WriteBitSeq<1>(targetGuid);
+    data.WriteBitSeq<7>(casterGuid);
+    data.WriteBitSeq<7>(targetGuid);
+
+    data.WriteByteSeq<0, 4>(casterGuid);
+    data.WriteByteSeq<3>(targetGuid);
+    data.WriteByteSeq<3>(casterGuid);
+    data << uint32(m_spellInfo->Id);
+    data.WriteByteSeq<4>(targetGuid);
+    data.WriteByteSeq<1>(casterGuid);
+    data.WriteByteSeq<7, 0>(targetGuid);
+    data.WriteByteSeq<5>(casterGuid);
+    data << uint32(spellId);
+    data.WriteByteSeq<1, 5>(targetGuid);
+    data.WriteByteSeq<7>(casterGuid);
+    data.WriteByteSeq<6>(targetGuid);
+    data.WriteByteSeq<6, 2>(casterGuid);
+    data.WriteByteSeq<2>(targetGuid);
+
+    m_caster->SendMessageToSet(&data, true);
 }
 
 void Spell::ExecuteLogEffectDurabilityDamage(uint8 /*effIndex*/, Unit* /*victim*/, uint32 /*itemslot*/, uint32 /*damage*/)
@@ -5907,7 +5860,7 @@ SpellCastResult Spell::CheckRuneCost(uint32 runeCostID)
     {
         runeCost[i] = src->RuneCost[i];
         if (Player* modOwner = m_caster->GetSpellModOwner())
-            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, runeCost[i], this);
+            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, runeCost[i], this, false);
     }
 
     runeCost[RUNE_DEATH] = MAX_RUNES;                       // calculated later
@@ -5942,22 +5895,25 @@ void Spell::TakeRunePower(bool didHit)
     m_runesState = player->GetRunesState();                 // store previous state
 
     int32 runeCost[NUM_RUNE_TYPES];                         // blood, frost, unholy, death
+    SpellSchools school = GetFirstSchoolInMask(m_spellSchoolMask);
 
-    for (uint32 i = 0; i < NUM_RUNE_TYPES; ++i)
+    for (uint32 i = 0; i < RUNE_DEATH; ++i)
     {
         runeCost[i] = runeCostData->RuneCost[i];
         if (Player* modOwner = m_caster->GetSpellModOwner())
         {
             modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, runeCost[i], this);
 
+            // PCT mod from user auras by school
+            runeCost[i] = int32(runeCost[i] * (1.0f + m_caster->GetFloatValue(UNIT_FIELD_POWER_COST_MULTIPLIER + school)));
             if (runeCost[i] < 0)
                 runeCost[i] = 0;
         }
     }
 
-    /* In MOP there is a some spell, that use death rune, e.g - 73975, so don't reset it*/
-    //runeCost[RUNE_DEATH] = 0;                               // calculated later
+    runeCost[RUNE_DEATH] = 0;                               // calculated later
 
+    bool gain_runic = runeCostData->NoRuneCost();           //  if spell doesn't have runecost - player can have some runic power, Horn of Winter for example
     for (uint32 i = 0; i < MAX_RUNES; ++i)
     {
         RuneType rune = player->GetCurrentRune(i);
@@ -5968,32 +5924,11 @@ void Spell::TakeRunePower(bool didHit)
         player->SetRuneCooldown(i, cooldown);
         player->SetDeathRuneUsed(i, false);
 
-        switch (m_spellInfo->Id)
-        {
-            case 45477: // Icy Touch
-            case 45902: // Blood Strike
-            case 48721: // Blood Boil
-            case 50842: // Pestilence
-            case 85948: // Festering Strike
-            {
-                // Reaping
-                player->AddRuneBySpell(i, RUNE_DEATH, 56835);
-                break;
-            }
-            case 49998: // Death Strike
-            {
-                // Blood Rites
-                player->AddRuneBySpell(i, RUNE_DEATH, 50034);
-                break;
-            }
-            default:
-                break;
-        }
-
         runeCost[rune]--;
+        gain_runic = true;
     }
 
-    runeCost[RUNE_DEATH] += runeCost[RUNE_BLOOD] + runeCost[RUNE_UNHOLY] + runeCost[RUNE_FROST];
+    runeCost[RUNE_DEATH] = runeCost[RUNE_BLOOD] + runeCost[RUNE_UNHOLY] + runeCost[RUNE_FROST];
 
     if (runeCost[RUNE_DEATH] > 0)
     {
@@ -6005,6 +5940,8 @@ void Spell::TakeRunePower(bool didHit)
                 uint32 cooldown = ((m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_DK_DEATH_STRIKE) > 0 || didHit) ? player->GetRuneBaseCooldown(i) : uint32(RUNE_MISS_COOLDOWN);
                 player->SetRuneCooldown(i, cooldown);
                 runeCost[rune]--;
+
+                gain_runic = true;
 
                 bool takePower = didHit;
                 if (uint32 spell = player->GetRuneConvertSpell(i))
@@ -6049,7 +5986,7 @@ void Spell::TakeRunePower(bool didHit)
     }
 
     // you can gain some runic power when use runes
-    if (didHit)
+    if (didHit && gain_runic)
     {
         if (int32 rp = int32(runeCostData->runePowerGain * sWorld->getRate(RATE_POWER_RUNICPOWER_INCOME)))
         {
@@ -6440,10 +6377,10 @@ SpellCastResult Spell::CheckCast(bool strict)
             {
                 // Hackfix for Raigonn
                 if (m_caster->GetEntry() != WORLD_TRIGGER && target->GetEntry() != 56895) // Ignore LOS for gameobjects casts (wrongly casted by a trigger)
-                    if (!(m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS) /*&& VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id)*/ && !m_caster->IsWithinLOSInMap(target))
+                    if (!(m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS) && !m_caster->IsWithinLOSInMap(target))
                         return SPELL_FAILED_LINE_OF_SIGHT;
 
-                if (m_caster->IsVisionObscured(target))
+                if (m_caster->IsVisionObscured(target, m_spellInfo))
                     return SPELL_FAILED_VISION_OBSCURED; // smoke bomb, camouflage...
             }
         }
@@ -6455,7 +6392,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         float x, y, z;
         m_targets.GetDstPos()->GetPosition(x, y, z);
 
-        if (!(m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS) /*&& VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id)*/ && !m_caster->IsWithinLOS(x, y, z))
+        if (!(m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS) && !m_caster->IsWithinLOS(x, y, z))
             return SPELL_FAILED_LINE_OF_SIGHT;
     }
 
@@ -6482,7 +6419,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     // do not allow spells to be cast in arenas or rated battlegrounds
     if (Player * player = m_caster->ToPlayer())
-        if (player->InArena() || player->InRatedBattleGround())
+        if (player->InArena()/* || player->InRatedBattleGround() NYI*/)
         {
             SpellCastResult castResult = CheckArenaAndRatedBattlegroundCastRules();
             if (castResult != SPELL_CAST_OK)
@@ -6551,6 +6488,17 @@ SpellCastResult Spell::CheckCast(bool strict)
         // for effects of spells that have only one target
         switch (m_spellInfo->Effects[i].Effect)
         {
+            case SPELL_EFFECT_KNOCK_BACK_DEST:
+            {
+                switch (m_spellInfo->Id)
+                {
+                    case 68645: // Rocket Pack
+                        if (!m_caster->GetTransport())
+                            return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+                        break;
+                }
+                break;
+            }
             case SPELL_EFFECT_DUMMY:
             {
                 // Death Coil and Death Coil (Symbiosis)
@@ -6675,6 +6623,9 @@ SpellCastResult Spell::CheckCast(bool strict)
                 {
                     // Warbringer - can't be handled in proc system - should be done before checkcast root check and charge effect process
                     if (strict && m_caster->IsScriptOverriden(m_spellInfo, 6953))
+                        m_caster->RemoveMovementImpairingAuras();
+                    // Intervene and Safeguard can be casted in root effects, so we need to remove movement impairing auras before check cast result
+                    if (m_spellInfo->Id == 3411 || m_spellInfo->Id == 114029)
                         m_caster->RemoveMovementImpairingAuras();
                 }
                 if (m_caster->HasUnitState(UNIT_STATE_ROOT))
@@ -7243,6 +7194,10 @@ SpellCastResult Spell::CheckCasterAuras() const
     else if (unitflag & UNIT_FLAG_PACIFIED &&
         (m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_UNK2 ||
         m_spellInfo->Id == 1850) && m_spellInfo->Id != 781) // THIS ... IS ... HACKYYYY !
+        prevented_reason = SPELL_FAILED_PACIFIED;
+
+    // Barkskin & Hex hotfix 4.3 patch http://eu.battle.net/wow/ru/blog/10037151
+    if (m_spellInfo->Id == 22812 && m_caster->HasAura(51514))
         prevented_reason = SPELL_FAILED_PACIFIED;
 
     // Attr must make flag drop spell totally immune from all effects
@@ -7927,24 +7882,22 @@ SpellCastResult Spell::CheckItems()
     return SPELL_CAST_OK;
 }
 
-void Spell::Delayed() // only called in DealDamage()
+// Called only in Unit::DealDamage
+void Spell::Delayed()
 {
-    if (!m_caster)// || m_caster->GetTypeId() != TYPEID_PLAYER)
+    // Spell is active and can't be time-backed
+    if (!m_caster)
         return;
 
-    //if (m_spellState == SPELL_STATE_DELAYED)
-    //    return;                                             // spell is active and can't be time-backed
-
-    if (isDelayableNoMore())                                 // Spells may only be delayed twice
+    // Spells may only be delayed twice
+    if (isDelayableNoMore())
         return;
 
-    // spells not loosing casting time (slam, dynamites, bombs..)
-    //if (!(m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_DAMAGE))
-    //    return;
-
-    //check pushback reduce
-    int32 delaytime = 150;                                  // spellcasting delay is normally 500ms
-    int32 delayReduce = 100;                                // must be initialized to 100 for percent modifiers
+    // Check pushback reduce
+    // Spellcasting delay is normally 500ms
+    int32 delaytime = 150;
+    // Must be initialized to 100 for percent modifiers
+    int32 delayReduce = 100;
     m_caster->ToPlayer()->ApplySpellMod(m_spellInfo->Id, SPELLMOD_NOT_LOSE_CASTING_TIME, delayReduce, this);
     delayReduce += m_caster->GetTotalAuraModifier(SPELL_AURA_REDUCE_PUSHBACK) - 100;
     if (delayReduce >= 100)
@@ -7960,9 +7913,13 @@ void Spell::Delayed() // only called in DealDamage()
     else
         m_timer += delaytime;
 
+    ObjectGuid casterGuid = m_caster->GetGUID();
+
     WorldPacket data(SMSG_SPELL_DELAYED, 8+4);
-    data.append(m_caster->GetPackGUID());
+    data.WriteBitSeq<4, 6, 3, 7, 2, 5, 0, 1>(casterGuid);
+    data.WriteByteSeq<7, 0, 1, 4, 6, 2, 5>(casterGuid);
     data << uint32(delaytime);
+    data.WriteByteSeq<3>(casterGuid);
 
     m_caster->SendMessageToSet(&data, true);
 }
@@ -8594,9 +8551,6 @@ void Spell::CallScriptBeforeCastHandlers()
     uint32 scriptExecuteTime = getMSTime();
     for (std::list<SpellScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
     {
-        if (!(*scritr))
-            continue;
-
         (*scritr)->_PrepareScriptCall(SPELL_SCRIPT_HOOK_BEFORE_CAST);
         std::list<SpellScript::CastHandler>::iterator hookItrEnd = (*scritr)->BeforeCast.end(), hookItr = (*scritr)->BeforeCast.begin();
         for (; hookItr != hookItrEnd; ++hookItr)
@@ -9045,7 +8999,7 @@ bool Spell::IsMorePowerfulAura(Unit const* target) const
             case SPELL_AURA_MOD_STAT:
             case SPELL_AURA_MOD_RANGED_ATTACK_POWER:
             {
-                Unit::VisibleAuraMap const *visibleAuras = const_cast<Unit*>(target)->GetVisibleAuras();
+                Unit::VisibleAuraMap const *visibleAuras = target->GetVisibleAuras();
                 for (Unit::VisibleAuraMap::const_iterator itr = visibleAuras->begin(); itr != visibleAuras->end(); ++itr)
                     if (AuraEffect *auraeff = itr->second->GetBase()->GetEffect(0))
                     {

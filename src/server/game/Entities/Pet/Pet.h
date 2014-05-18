@@ -106,7 +106,7 @@ class Pet : public Guardian
         void LearnPetPassives();
         void CastPetAuras(bool current);
         void CastPetAura(PetAura const* aura);
-        bool IsPetAura(Aura const *aura);
+        bool IsPetAura(Aura const *aura) const;
 
         void _LoadSpellCooldowns();
         void _SaveSpellCooldowns(SQLTransaction& trans);
@@ -123,6 +123,7 @@ class Pet : public Guardian
         bool unlearnSpell(uint32 spell_id, bool learn_prev, bool clear_ab = true);
         bool removeSpell(uint32 spell_id, bool learn_prev, bool clear_ab = true);
         void CleanupActionBar();
+        virtual void ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs);
 
         PetSpellMap     m_spells;
         AutoSpellList   m_autospells;
@@ -137,7 +138,9 @@ class Pet : public Guardian
 
         bool    m_removed;                                  // prevent overwrite pet state in DB at next Pet::Update if pet already removed(saved)
 
-        Player* GetOwner() { return Minion::GetOwner()->ToPlayer(); }
+        Player * GetOwner() { return Minion::GetOwner()->ToPlayer(); }
+
+        Player const * GetOwner() const { return Minion::GetOwner()->ToPlayer(); }
 
         uint32 GetSpecializationId() const { return m_specialization; }
         void SetSpecializationId(uint32 id) { m_specialization = id; }

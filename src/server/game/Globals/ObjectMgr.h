@@ -316,11 +316,6 @@ struct ScriptInfo
         } PlayMovie;
     };
 
-    ScriptInfo()
-    {
-        memset(this, 0, sizeof(ScriptInfo));
-    }
-
     std::string GetDebugInfo() const;
 };
 
@@ -689,7 +684,7 @@ class ObjectMgr
         CreatureModelInfo const* GetCreatureModelInfo(uint32 modelId);
         CreatureModelInfo const* GetCreatureModelRandomGender(uint32* displayID);
         static uint32 ChooseDisplayId(uint32 team, const CreatureTemplate* cinfo, const CreatureData* data = NULL);
-        static void ChooseCreatureFlags(const CreatureTemplate* cinfo, uint32& npcflag, uint32& unit_flags, uint32& dynamicflags, const CreatureData* data = NULL);
+        static void ChooseCreatureFlags(const CreatureTemplate* cinfo, uint32& npcflag, uint32& unit_flags, uint32& unit_flags2, uint32& dynamicflags, const CreatureData* data = NULL);
         EquipmentInfo const* GetEquipmentInfo(uint32 entry);
         CreatureAddon const* GetCreatureAddon(uint32 lowguid);
         CreatureAddon const* GetCreatureTemplateAddon(uint32 entry);
@@ -1254,15 +1249,22 @@ class ObjectMgr
             return _skipUpdateCount;
         }
 
-
         UpdateSkipData skipData;
-
-        ///Temporaire pour la création des Z, a remettre en private après
-        GameObjectDataContainer _gameObjectDataStore;
 
         std::set<uint32> const& GetOverwriteExtendedCosts() const
         {
             return _overwriteExtendedCosts;
+        }
+
+        uint64 GetCreatureGUIDByLootViewGUID(uint64 lootview) const
+        {
+            auto itr = _lootViewGUID.find(lootview);
+            return itr != _lootViewGUID.end() ? itr->second : 0;
+        }
+
+        void setLootViewGUID(uint64 lootview, uint64 creature)
+        {
+            _lootViewGUID[lootview] = creature;
         }
 
     private:
@@ -1342,6 +1344,7 @@ class ObjectMgr
         SpellPhaseStore _SpellPhaseStore;
 
         uint32 _skipUpdateCount;
+        std::map<uint64, uint64> _lootViewGUID;
 
         ResearchZoneMap _researchZoneMap;
         ResearchLootVector _researchLoot;
@@ -1386,7 +1389,7 @@ class ObjectMgr
         EquipmentInfoContainer _equipmentInfoStore;
         LinkedRespawnContainer _linkedRespawnStore;
         CreatureLocaleContainer _creatureLocaleStore;
-        //GameObjectDataContainer _gameObjectDataStore;
+        GameObjectDataContainer _gameObjectDataStore;
         GameObjectLocaleContainer _gameObjectLocaleStore;
         GameObjectTemplateContainer _gameObjectTemplateStore;
         /// Stores temp summon data grouped by summoner's entry, summoner's type and group id

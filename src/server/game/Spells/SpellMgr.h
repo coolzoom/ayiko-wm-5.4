@@ -606,7 +606,7 @@ typedef std::vector<std::vector<uint32>> SpellClassVector;
 typedef std::set<uint32> TalentSpellSet;
 typedef std::vector<std::vector<uint32>> SpellPowerVector;
 
-typedef std::unordered_map<uint32, uint32> SpellsByCategoryStore;
+typedef std::unordered_multimap<uint32, uint32> SpellsByCategoryStore;
 typedef std::pair<
     SpellsByCategoryStore::const_iterator,
     SpellsByCategoryStore::const_iterator

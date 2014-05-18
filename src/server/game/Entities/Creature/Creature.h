@@ -300,6 +300,7 @@ struct CreatureData
     uint32 spawnMask;
     uint32 npcflag;
     uint32 unit_flags;                                      // enum UnitFlags mask values
+    uint32 unit_flags2;                                     // enum UnitFlags mask values
     uint32 dynamicflags;
     bool isActive;
     bool dbData;
@@ -590,6 +591,13 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
         void AddCreatureSpellCooldown(uint32 spellid);
         bool HasSpellCooldown(uint32 spell_id) const;
         bool HasCategoryCooldown(uint32 spell_id) const;
+        uint32 GetCreatureSpellCooldownDelay(uint32 spellId) const
+        {
+            CreatureSpellCooldowns::const_iterator itr = m_CreatureSpellCooldowns.find(spellId);
+            time_t t = time(NULL);
+            return uint32(itr != m_CreatureSpellCooldowns.end() && itr->second > t ? itr->second - t : 0);
+        }
+        virtual void ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs);
 
         bool HasSpell(uint32 spellID) const;
 
@@ -665,6 +673,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
 
         bool canStartAttack(Unit const* u, bool force) const;
         float GetAttackDistance(Unit const* player) const;
+        float GetAggroRange(Unit const* target) const;
 
         void SendAIReaction(AiReaction reactionType);
 
@@ -769,9 +778,6 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
 
         float m_SightDistance, m_CombatDistance;
 
-        void SetGUIDTransport(uint32 guid) { guid_transport=guid; }
-        uint32 GetGUIDTransport() { return guid_transport; }
-
         void FarTeleportTo(Map* map, float X, float Y, float Z, float O);
 
         bool m_isTempWorldObject; //true when possessed
@@ -828,7 +834,6 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
         CreatureData const* m_creatureData;
 
         uint16 m_LootMode;                                  // bitmask, default LOOT_MODE_DEFAULT, determines what loot will be lootable
-        uint32 guid_transport;
 
         bool IsInvisibleDueToDespawn() const;
         bool CanAlwaysSee(WorldObject const* obj) const;

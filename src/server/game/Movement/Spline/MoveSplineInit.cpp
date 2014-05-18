@@ -154,13 +154,7 @@ namespace Movement
             args.velocity = unit.GetSpeed(SelectSpeedType(moveFlags));
 
         if (!args.Validate())
-        {
-            if (!(args.velocity > 0.1f))
-            {
-                TC_LOG_INFO("server.loading" , "MoveSplineInitArgs::Validate: args.velocity '%f', flags: %u, speedType: %u, speed %f, hasVelocity %u", args.velocity, moveFlags, SelectSpeedType(moveFlags), unit.GetSpeed(SelectSpeedType(moveFlags)), args.HasVelocity);
-            }
             return;
-        }
 
         if (moveFlags & MOVEMENTFLAG_ROOT)
             moveFlags &= ~MOVEMENTFLAG_MASK_MOVING;

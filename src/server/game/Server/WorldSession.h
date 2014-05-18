@@ -389,7 +389,7 @@ class WorldSession
         void SendPetitionSignResult(ObjectGuid ownerGuid, ObjectGuid petitionGuid, uint8 result);
         void SendAlreadySigned(ObjectGuid playerGuid);
 
-        void BuildPartyMemberStatsChangedPacket(Player* player, WorldPacket* data);
+        void BuildPartyMemberStatsChangedPacket(Player* player, WorldPacket* data, uint16 mask, uint64 guid);
 
         void DoLootRelease(uint64 lguid);
 
@@ -486,8 +486,6 @@ class WorldSession
 
         void HandleMountSpecialAnimOpcode(WorldPacket& recvdata);
 
-        void HandleClientReportError(WorldPacket& recvData);
-
         // character view
         void HandleShowAccountAchievement(WorldPacket& recvData);
         void HandleShowingHelmOpcode(WorldPacket& recvData);
@@ -540,7 +538,8 @@ class WorldSession
         void HandleAddIgnoreOpcodeCallBack(PreparedQueryResult result);
         void HandleDelIgnoreOpcode(WorldPacket& recvPacket);
         void HandleSetContactNotesOpcode(WorldPacket& recvPacket);
-        void HandleBugOpcode(WorldPacket& recvPacket);
+        void HandleReportBugOpcode(WorldPacket& recvPacket);
+        void HandleReportSuggestionOpcode(WorldPacket& recvPacket);
 
         void HandleSendDuelRequest(WorldPacket& recvPacket);
 
@@ -608,6 +607,7 @@ class WorldSession
         void HandlePartyAssignmentOpcode(WorldPacket& recvData);
         void HandleRolePollBegin(WorldPacket& recvData);
         void HandleRequestJoinUpdates(WorldPacket& recvData);
+        void HandleClearRaidMarkerOpcode(WorldPacket& recvData);
 
         void HandlePetitionBuyOpcode(WorldPacket& recvData);
         void HandlePetitionShowSignOpcode(WorldPacket& recvData);
@@ -683,7 +683,6 @@ class WorldSession
 
         void HandleAcceptTradeOpcode(WorldPacket& recvPacket);
         void HandleBeginTradeOpcode(WorldPacket& recvPacket);
-        void HandleBusyTradeOpcode(WorldPacket& recvPacket);
         void HandleCancelTradeOpcode(WorldPacket& recvPacket);
         void HandleClearTradeItemOpcode(WorldPacket& recvPacket);
         void HandleIgnoreTradeOpcode(WorldPacket& recvPacket);
@@ -781,9 +780,12 @@ class WorldSession
         void HandleUnregisterAddonPrefixesOpcode(WorldPacket& recvPacket);
         void HandleAddonRegisteredPrefixesOpcode(WorldPacket& recvPacket);
 
+        void HandleRequestBattlePetJournal(WorldPacket& recvPacket);
+        void HandleRequestGmTicket(WorldPacket& recvPakcet);
         void HandleReclaimCorpseOpcode(WorldPacket& recvPacket);
         void HandleCorpseQueryOpcode(WorldPacket& recvPacket);
         void HandleCemeteryListOpcode(WorldPacket& recvData);
+        void HandleForcedReactionsOpcode(WorldPacket& recvData);
         void HandleCorpseMapPositionQuery(WorldPacket& recvPacket);
         void HandleResurrectResponseOpcode(WorldPacket& recvPacket);
         void HandleSummonResponseOpcode(WorldPacket& recvData);
@@ -848,7 +850,6 @@ class WorldSession
         void HandleBattlefieldListOpcode(WorldPacket& recvData);
         void HandleLeaveBattlefieldOpcode(WorldPacket& recvData);
         void HandleBattlemasterJoinArena(WorldPacket& recvData);
-        void HandleBattlemasterJoinRated(WorldPacket& recvData);
 
         void HandleReportPvPAFK(WorldPacket& recvData);
         void HandleRequestRatedBgInfo(WorldPacket & recvData);
@@ -870,6 +871,7 @@ class WorldSession
         void HandleTimeSyncResp(WorldPacket& recvData);
         void HandleWhoisOpcode(WorldPacket& recvData);
         void HandleResetInstancesOpcode(WorldPacket& recvData);
+        void HandleResetChallengeModeOpcode(WorldPacket& recvData);
         void HandleHearthAndResurrect(WorldPacket& recvData);
         void HandleInstanceLockResponse(WorldPacket& recvPacket);
 
@@ -1013,6 +1015,9 @@ class WorldSession
         void HandleUpgradeItemOpcode(WorldPacket& recvData);
         void SendItemUpgradeResult(bool success);
 
+        // Loot specialization
+        void HandleSetLootSpecialization(WorldPacket& recvData);
+
         // Miscellaneous
         void HandleTradeInfo (WorldPacket& recvData);
         void HandleSaveCUFProfiles(WorldPacket& recvData);
@@ -1041,6 +1046,14 @@ class WorldSession
         void HandleCategoryCooldownOpcode(WorldPacket& recvPacket);
         void HandleChangeCurrencyFlags(WorldPacket& recvPacket);
         int32 HandleEnableNagleAlgorithm();
+
+        // Black Market
+        void HandleBlackMarketHello(WorldPacket& recvData);
+        void SendBlackMarketHello(uint64 npcGuid);
+        void HandleBlackMarketRequestItems(WorldPacket& recvData);
+        void SendBlackMarketRequestItemsResult();
+        void HandleBlackMarketBid(WorldPacket& recvData);
+        void SendBlackMarketBidResult(uint32 itemEntry, uint32 auctionId);
 
     private:
         void InitializeQueryCallbackParameters();
@@ -1138,5 +1151,6 @@ class WorldSession
 
         uint8 playerLoginCounter;
 };
+
 #endif
 /// @}

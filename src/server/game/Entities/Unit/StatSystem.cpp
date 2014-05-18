@@ -344,7 +344,6 @@ void Player::UpdateMaxPower(Powers power)
     value += GetModifierValue(unitMod, TOTAL_VALUE);
     value *= GetModifierValue(unitMod, TOTAL_PCT);
 
-    value = floor(value + 0.5f);
     SetMaxPower(power, uint32(value));
 }
 
@@ -1294,7 +1293,7 @@ void Guardian::UpdateMaxHealth()
             multiplicator = 9.1f;
             break;
         case ENTRY_FELHUNTER:
-            multiplicator = 9.5f;
+            multiplicator = 14.46f;
             break;
         case ENTRY_GHOUL:
         case ENTRY_GARGOYLE:

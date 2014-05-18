@@ -161,8 +161,10 @@ private:
     GMTicketEscalationStatus _escalatedStatus;
     bool _viewed;
     bool _needResponse; // TODO: find out the use of this, and then store it in DB
+    bool _haveTicket;
     std::string _response;
 };
+
 typedef std::map<uint32, GmTicket*> GmTicketList;
 
 class TicketMgr

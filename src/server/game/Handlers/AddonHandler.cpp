@@ -52,7 +52,7 @@ bool AddonHandler::BuildAddonPacket(WorldPacket* source, WorldPacket* target)
 
     ByteBuffer addonPacked(addonRealSize);                  // resize target for zlib action
 
-    if (uncompress(const_cast<uint8*>(addonPacked.contents()), &addonRealSize, source->contents() + currentPosition, source->size() - currentPosition) == Z_OK)
+    if (uncompress(addonPacked.contents(), &addonRealSize, source->contents() + currentPosition, source->size() - currentPosition) == Z_OK)
     {
         target->Initialize(SMSG_ADDON_INFO);
 

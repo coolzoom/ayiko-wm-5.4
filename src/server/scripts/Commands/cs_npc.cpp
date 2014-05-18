@@ -156,7 +156,7 @@ public:
             { "entry",          SEC_ADMINISTRATOR,  false, &HandleNpcSetEntryCommand,          "", NULL },
             { "factionid",      SEC_GAMEMASTER,     false, &HandleNpcSetFactionIdCommand,      "", NULL },
             { "flag",           SEC_GAMEMASTER,     false, &HandleNpcSetFlagCommand,           "", NULL },
-            { "flag",           SEC_GAMEMASTER,     false, &HandleNpcSetFlag2Command,          "", NULL },
+            { "flag2",           SEC_GAMEMASTER,     false, &HandleNpcSetFlag2Command,         "", NULL },
             { "level",          SEC_GAMEMASTER,     false, &HandleNpcSetLevelCommand,          "", NULL },
             { "link",           SEC_GAMEMASTER,     false, &HandleNpcSetLinkCommand,           "", NULL },
             { "model",          SEC_GAMEMASTER,     false, &HandleNpcSetModelCommand,          "", NULL },
@@ -197,37 +197,6 @@ public:
         return commandTable;
     }
 
-    // Set npcflag2 of creature
-    static bool HandleNpcSetFlag2Command(ChatHandler* handler, const char* args)
-    {
-        if (!*args)
-            return false;
-
-        uint32 npcFlags = (uint32) atoi((char*)args);
-
-        Creature* creature = handler->getSelectedCreature();
-
-        if (!creature)
-        {
-            handler->SendSysMessage(LANG_SELECT_CREATURE);
-            handler->SetSentErrorMessage(true);
-            return false;
-        }
-
-        creature->SetUInt32Value(UNIT_NPC_FLAGS + 1, npcFlags);
-
-        PreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_UPD_CREATURE_NPCFLAG2);
-
-        stmt->setUInt32(0, npcFlags);
-        stmt->setUInt32(1, creature->GetEntry());
-
-        WorldDatabase.Execute(stmt);
-
-        handler->SendSysMessage(LANG_VALUE_SAVED_REJOIN);
-
-        return true;
-    }
-
     //add spawn of creature
     static bool HandleNpcAddCommand(ChatHandler* handler, const char* args)
     {
@@ -254,18 +223,17 @@ public:
 
         if (chr->GetTransport())
         {
-            uint32 tguid = chr->GetTransport()->AddNPCPassenger(0, id, chr->GetTransOffsetX(), chr->GetTransOffsetY(), chr->GetTransOffsetZ(), chr->GetTransOffsetO());
-            if (tguid > 0)
+            auto const creature = chr->GetTransport()->AddNPCPassenger(id, chr->GetTransOffsetX(), chr->GetTransOffsetY(), chr->GetTransOffsetZ(), chr->GetTransOffsetO());
+            if (creature)
             {
                 PreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_INS_CREATURE_TRANSPORT);
 
-                stmt->setInt32(0, int32(tguid));
-                stmt->setInt32(1, int32(id));
-                stmt->setInt32(2, int32(chr->GetTransport()->GetEntry()));
-                stmt->setFloat(3, chr->GetTransOffsetX());
-                stmt->setFloat(4, chr->GetTransOffsetY());
-                stmt->setFloat(5, chr->GetTransOffsetZ());
-                stmt->setFloat(6, chr->GetTransOffsetO());
+                stmt->setInt32(0, int32(id));
+                stmt->setInt32(1, int32(chr->GetTransport()->GetEntry()));
+                stmt->setFloat(2, chr->GetTransOffsetX());
+                stmt->setFloat(3, chr->GetTransOffsetY());
+                stmt->setFloat(4, chr->GetTransOffsetZ());
+                stmt->setFloat(5, chr->GetTransOffsetO());
 
                 WorldDatabase.Execute(stmt);
             }
@@ -345,7 +313,7 @@ public:
             return false;
         }
 
-        sObjectMgr->AddVendorItem(vendor_entry, itemId, maxcount, incrtime, type, extendedcost);
+        sObjectMgr->AddVendorItem(vendor_entry, itemId, maxcount, incrtime, extendedcost, type);
 
         ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(itemId);
 
@@ -653,6 +621,37 @@ public:
         return true;
     }
 
+    // Set npcflag2 of creature
+    static bool HandleNpcSetFlag2Command(ChatHandler* handler, const char* args)
+    {
+        if (!*args)
+            return false;
+
+        uint32 npcFlags = (uint32) atoi((char*)args);
+
+        Creature* creature = handler->getSelectedCreature();
+
+        if (!creature)
+        {
+            handler->SendSysMessage(LANG_SELECT_CREATURE);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        creature->SetUInt32Value(UNIT_NPC_FLAGS + 1, npcFlags);
+
+        PreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_UPD_CREATURE_NPCFLAG2);
+
+        stmt->setUInt32(0, npcFlags);
+        stmt->setUInt32(1, creature->GetEntry());
+
+        WorldDatabase.Execute(stmt);
+
+        handler->SendSysMessage(LANG_VALUE_SAVED_REJOIN);
+
+        return true;
+    }
+
     //set data of creature for testing scripting
     static bool HandleNpcSetDataCommand(ChatHandler* handler, const char* args)
     {
@@ -831,6 +830,12 @@ public:
             }
             creature->SetPosition(x, y, z, o);
             creature->GetMotionMaster()->Initialize();
+
+            Position oldPos;
+            creature->GetPosition(&oldPos);
+            creature->Relocate(x, y, z, o);
+            creature->SendTeleportPacket(oldPos);
+
             if (creature->isAlive())                            // dead creature will reset movement generator at respawn
             {
                 creature->setDeathState(JUST_DIED);
@@ -863,17 +868,6 @@ public:
             handler->SendSysMessage(LANG_SELECT_CREATURE);
             handler->SetSentErrorMessage(true);
             return false;
-        }
-
-        if (target->GetTransport() && target->GetGUIDTransport())
-        {
-            PreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_UPD_CREATURE_TRANSPORT_EMOTE);
-
-            stmt->setInt32(0, int32(emote));
-            stmt->setInt32(1, target->GetTransport()->GetEntry());
-            stmt->setInt32(2, target->GetGUIDTransport());
-
-            WorldDatabase.Execute(stmt);
         }
 
         target->SetUInt32Value(UNIT_NPC_EMOTESTATE, emote);

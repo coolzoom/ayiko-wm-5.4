@@ -27,6 +27,7 @@
 #include <list>
 #include <map>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 // Root of ByteBuffer exception hierarchy
@@ -35,7 +36,7 @@ class ByteBufferException : public std::exception
 public:
     ~ByteBufferException() throw() { }
 
-    char const* what() const throw() { return msg_.c_str(); }
+    char const* what() const throw() final { return msg_.c_str(); }
 
 protected:
     std::string & message() throw() { return msg_; }
@@ -44,7 +45,7 @@ private:
     std::string msg_;
 };
 
-class ByteBufferPositionException : public ByteBufferException
+class ByteBufferPositionException final : public ByteBufferException
 {
 public:
     ByteBufferPositionException(bool add, size_t pos, size_t size, size_t valueSize);
@@ -52,7 +53,7 @@ public:
     ~ByteBufferPositionException() throw() { }
 };
 
-class ByteBufferSourceException : public ByteBufferException
+class ByteBufferSourceException final : public ByteBufferException
 {
 public:
     ByteBufferSourceException(size_t pos, size_t size, size_t valueSize);
@@ -88,11 +89,21 @@ class ByteBuffer
             _rpos = _wpos = 0;
         }
 
-        template <typename T> void append(T value)
+        template <typename T>
+        typename std::enable_if<std::is_arithmetic<T>::value>::type
+        append(T value)
         {
             FlushBits();
             EndianConvert(value);
-            append((uint8 *)&value, sizeof(value));
+            append((uint8 const *)&value, sizeof(value));
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_enum<T>::value>::type
+        append(T value)
+        {
+            typedef typename std::underlying_type<T>::type UnderlyingType;
+            append(static_cast<UnderlyingType>(value));
         }
 
         void FlushBits()
@@ -100,13 +111,14 @@ class ByteBuffer
             if (_bitpos == 8)
                 return;
 
-            append((uint8 *)&_curbitval, sizeof(uint8));
+            append(&_curbitval, sizeof(uint8));
             _curbitval = 0;
             _bitpos = 8;
         }
 
         template <typename T>
-        bool WriteBit(T bit)
+        typename std::enable_if<std::is_arithmetic<T>::value, bool>::type
+        WriteBit(T bit)
         {
             bool const nonZero = bit != T();
 
@@ -126,10 +138,19 @@ class ByteBuffer
         }
 
         template <typename T>
-        void WriteBits(T value, size_t bits)
+        typename std::enable_if<std::is_arithmetic<T>::value>::type
+        WriteBits(T value, size_t bits)
         {
             for (int32 i = bits-1; i >= 0; --i)
                 WriteBit((value >> i) & 1);
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_enum<T>::value>::type
+        WriteBits(T value, size_t bits)
+        {
+            typedef typename std::underlying_type<T>::type UnderlyingType;
+            WriteBits(static_cast<UnderlyingType>(value), bits);
         }
 
         template <std::size_t B1>
@@ -438,10 +459,20 @@ class ByteBuffer
             ReadByteSeq<B8>(guid);
         }
 
-        template <typename T> void put(size_t pos, T value)
+        template <typename T>
+        typename std::enable_if<std::is_arithmetic<T>::value>::type
+        put(size_t pos, T value)
         {
             EndianConvert(value);
-            put(pos, (uint8 *)&value, sizeof(value));
+            put(pos, (uint8 const *)&value, sizeof(value));
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_enum<T>::value>::type
+        put(size_t pos, T value)
+        {
+            typedef typename std::underlying_type<T>::type UnderlyingType;
+            put(pos, static_cast<UnderlyingType>(value));
         }
 
         /**
@@ -457,7 +488,8 @@ class ByteBuffer
           * @param  bitCount Number of bits to store the value on.
         */
         template <typename T>
-        void PutBits(size_t pos, T value, uint32 bitCount)
+        typename std::enable_if<std::is_arithmetic<T>::value>::type
+        PutBits(size_t pos, T value, uint32 bitCount)
         {
             if (!bitCount)
                 throw ByteBufferSourceException((pos + bitCount) / 8, size(), 0);
@@ -477,6 +509,14 @@ class ByteBuffer
                 else
                     dest &= ~(1 << (7 - bit));
             }
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_enum<T>::value>::type
+        PutBits(size_t pos, T value, uint32 bitCount)
+        {
+            typedef typename std::underlying_type<T>::type UnderlyingType;
+            PutBits(pos, static_cast<UnderlyingType>(value), bitCount);
         }
 
         ByteBuffer &operator<<(uint8 value)
@@ -682,8 +722,24 @@ class ByteBuffer
             return _wpos * 8 + 8 - _bitpos;
         }
 
-        template<typename T>
-        void read_skip() { read_skip(sizeof(T)); }
+        template <typename T>
+        typename std::enable_if<std::is_arithmetic<T>::value>::type
+        read_skip()
+        {
+            read_skip(sizeof(T));
+        }
+
+        template <typename T>
+        typename std::enable_if<
+            std::is_same<T, char *>::value
+                || std::is_same<T, char const *>::value
+                || std::is_same<T, std::string>::value
+        >::type
+        read_skip()
+        {
+            std::string temp;
+            *this >> temp;
+        }
 
         void read_skip(size_t skip)
         {
@@ -692,14 +748,27 @@ class ByteBuffer
             _rpos += skip;
         }
 
-        template <typename T> T read()
+        template <typename T>
+        typename std::enable_if<std::is_arithmetic<T>::value, T>::type
+        read()
         {
             T r = read<T>(_rpos);
             _rpos += sizeof(T);
             return r;
         }
 
-        template <typename T> T read(size_t pos) const
+        template <typename T>
+        typename std::enable_if<std::is_same<T, std::string>::value, T>::type
+        read()
+        {
+            std::string tmp;
+            *this >> tmp;
+            return tmp;
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_arithmetic<T>::value, T>::type
+        read(size_t pos) const
         {
             if (pos + sizeof(T) > size())
                 throw ByteBufferPositionException(false, pos, sizeof(T), size());
@@ -759,6 +828,8 @@ class ByteBuffer
             if (size_t len = str.length())
                 append(str.c_str(), len);
         }
+
+        uint8 * contents() { return &_storage[0]; }
 
         const uint8 *contents() const { return &_storage[0]; }
 
@@ -944,32 +1015,6 @@ inline ByteBuffer &operator>>(ByteBuffer &b, std::map<K, V> &m)
         m.insert(make_pair(k, v));
     }
     return b;
-}
-
-template<> inline std::string ByteBuffer::read<std::string>()
-{
-    std::string tmp;
-    *this >> tmp;
-    return tmp;
-}
-
-template<>
-inline void ByteBuffer::read_skip<char*>()
-{
-    std::string temp;
-    *this >> temp;
-}
-
-template<>
-inline void ByteBuffer::read_skip<char const*>()
-{
-    read_skip<char*>();
-}
-
-template<>
-inline void ByteBuffer::read_skip<std::string>()
-{
-    read_skip<char*>();
 }
 
 #endif

@@ -251,26 +251,36 @@ void PhaseData::SendPhaseshiftToPlayer()
     std::set<uint32> phaseIds;
     std::set<uint32> terrainswaps;
 
-    for (PhaseInfoContainer::const_iterator itr = spellPhaseInfo.begin(); itr != spellPhaseInfo.end(); ++itr)
+    for (auto const &kvPair : spellPhaseInfo)
     {
-        if (itr->second.terrainswapmap)
-            terrainswaps.insert(itr->second.terrainswapmap);
-
-        if (itr->second.phaseId)
-            phaseIds.insert(itr->second.phaseId);
+        if (kvPair.second.terrainswapmap)
+            terrainswaps.insert(kvPair.second.terrainswapmap);
+        if (kvPair.second.phaseId)
+            phaseIds.insert(kvPair.second.phaseId);
     }
 
     // Phase Definitions
-    for (std::list<PhaseDefinition const*>::const_iterator itr = activePhaseDefinitions.begin(); itr != activePhaseDefinitions.end(); ++itr)
+    for (auto const &def : activePhaseDefinitions)
     {
-        if ((*itr)->phaseId)
-            phaseIds.insert((*itr)->phaseId);
-
-        if ((*itr)->terrainswapmap)
-            terrainswaps.insert((*itr)->terrainswapmap);
+        if (def->phaseId)
+            phaseIds.insert(def->phaseId);
+        if (def->terrainswapmap)
+            terrainswaps.insert(def->terrainswapmap);
     }
 
     player->GetSession()->SendSetPhaseShift(phaseIds, terrainswaps);
+}
+
+void PhaseData::GetActivePhases(std::set<uint32>& phases) const
+{
+    for (auto const &kvPair : spellPhaseInfo)
+        if (kvPair.second.phaseId)
+            phases.insert(kvPair.second.phaseId);
+
+    // Phase Definitions
+    for (auto const &def : activePhaseDefinitions)
+        if (def->phaseId)
+            phases.insert(def->phaseId);
 }
 
 void PhaseData::AddPhaseDefinition(PhaseDefinition const* phaseDefinition)
@@ -371,4 +381,9 @@ bool PhaseMgr::IsConditionTypeSupported(ConditionTypes const conditionType)
         default:
             return false;
     }
+}
+
+void PhaseMgr::GetActivePhases(std::set<uint32>& phases) const
+{
+    phaseData.GetActivePhases(phases);
 }

@@ -17296,15 +17296,10 @@ bool Player::SatisfyQuestDay(Quest const* qInfo, bool /*msg*/)
     if (!qInfo->IsDaily() && !qInfo->IsDFQuest())
         return true;
 
-    if (qInfo->IsDFQuest())
-    {
-        if (!m_dfQuests.empty())
-            return false;
+    if (m_dailyQuestStorage.find(qInfo->GetQuestId()) != m_dailyQuestStorage.end())
+        return false;
 
-        return true;
-    }
-
-    return true;
+    return qInfo->IsDFQuest() ? m_dfQuests.empty() : true;
 }
 
 bool Player::SatisfyQuestWeek(Quest const* qInfo, bool /*msg*/)

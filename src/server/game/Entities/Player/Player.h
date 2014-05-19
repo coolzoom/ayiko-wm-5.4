@@ -3055,8 +3055,8 @@ class Player final : public Unit, public GridObject<Player>
 
         uint8 m_grantableLevels;
 
-        typedef std::set<uint32> DailyQuestList;
-        DailyQuestList m_dailyQuestStorage;
+        typedef std::set<uint32> DailyQuestSet;
+        DailyQuestSet m_dailyQuestStorage;
 
     private:
         // internal common parts for CanStore/StoreItem functions

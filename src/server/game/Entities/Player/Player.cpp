@@ -19928,9 +19928,6 @@ void Player::_LoadDailyQuestStatus(PreparedQueryResult result)
             else
             {
                 m_dailyQuestStorage.insert(quest_id);
-                if (++quest_daily_idx < DynamicFields::COUNT)
-                    SetDynamicUInt32Value(PLAYER_DYNAMIC_DAILY_QUESTS_COMPLETED, quest_daily_idx, quest_id);
-
                 TC_LOG_DEBUG("entities.player.loading", "Daily quest (%u) cooldown for player (GUID: %u)", quest_id, GetGUIDLow());
             }
         }
@@ -25125,9 +25122,6 @@ void Player::SetDailyQuestStatus(uint32 quest_id)
             m_dailyQuestStorage.insert(quest_id);
             m_lastDailyQuestTime = time(NULL);              // last daily quest time
             m_DailyQuestChanged = true;
-
-            if (m_dailyQuestStorage.size() - 1 < DynamicFields::COUNT)
-                SetDynamicUInt32Value(PLAYER_DYNAMIC_DAILY_QUESTS_COMPLETED, m_dailyQuestStorage.size() - 1, quest_id);
         }
         else
         {

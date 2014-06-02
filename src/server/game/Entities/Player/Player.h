@@ -830,7 +830,7 @@ enum PlayerDelayedOperations
 
 // Player summoning auto-decline time (in secs)
 #define MAX_PLAYER_SUMMON_DELAY                   (2*MINUTE)
-#define MAX_MONEY_AMOUNT               (UI64LIT(9999999999)) // @TODO: Move this restriction to worldserver.conf, default to this value, hardcap at uint64.max
+#define MAX_MONEY_AMOUNT               (UI64LIT(10000000000)) // @TODO: Move this restriction to worldserver.conf, default to this value, hardcap at uint64.max
 
 struct InstancePlayerBind
 {
@@ -1427,7 +1427,7 @@ class Player final : public Unit, public GridObject<Player>
         void SendNewItem(Item* item, uint32 count, bool received, bool created, bool broadcast = false);
         bool BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot);
         bool BuyCurrencyFromVendorSlot(uint64 vendorGuid, uint32 vendorSlot, uint32 currency, uint32 count);
-        bool _StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot, int32 price, ItemTemplate const* pProto, Creature* pVendor, VendorItem const* crItem, bool bStore);
+        bool _StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot, int64 price, ItemTemplate const* pProto, Creature* pVendor, VendorItem const* crItem, bool bStore);
 
         float GetReputationPriceDiscount(Creature const* creature) const;
 
@@ -1572,7 +1572,7 @@ class Player final : public Unit, public GridObject<Player>
         void CastedCreatureOrGO(uint32 entry, uint64 guid, uint32 spell_id);
         void CastedCreatureOrGOForQuest(uint32 entry, bool isCreature, uint32 spell_id);
         void TalkedToCreature(uint32 entry, uint64 guid);
-        void MoneyChanged(uint32 value);
+        void MoneyChanged(uint64 value);
         void ReputationChanged(FactionEntry const* factionEntry);
         void ReputationChanged2(FactionEntry const* factionEntry);
         bool HasQuestForItem(uint32 itemid) const;

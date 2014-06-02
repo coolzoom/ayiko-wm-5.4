@@ -37,7 +37,9 @@ typedef std::unordered_map<uint32, AchievementEntryList>         AchievementList
 
 struct CriteriaProgress
 {
-    uint32 counter;
+    CriteriaProgress(): counter(0), date(0), CompletedGUID(0), changed(false) { }
+
+    uint64 counter;
     time_t date;                                            // latest update time.
     uint64 CompletedGUID;                                   // GUID of the player that completed this criteria (guild achievements)
     bool changed;

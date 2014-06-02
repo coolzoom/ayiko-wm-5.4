@@ -260,6 +260,12 @@ void TradeData::SetMoney(uint64 money)
     if (m_money == money)
         return;
 
+    if (!m_player->HasEnoughMoney(money))
+    {
+        m_player->GetSession()->SendTradeStatus(TRADE_STATUS_BUSY_2);
+        return;
+    }
+
     m_money = money;
 
     SetAccepted(false);
@@ -973,7 +979,7 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
 
     InitRunes();
 
-    SetUInt32Value(PLAYER_FIELD_COINAGE, sWorld->getIntConfig(CONFIG_START_PLAYER_MONEY));
+    SetUInt64Value(PLAYER_FIELD_COINAGE, sWorld->getIntConfig(CONFIG_START_PLAYER_MONEY));
     SetCurrency(CURRENCY_TYPE_HONOR_POINTS, sWorld->getIntConfig(CONFIG_CURRENCY_START_HONOR_POINTS));
     SetCurrency(CURRENCY_TYPE_JUSTICE_POINTS, sWorld->getIntConfig(CONFIG_CURRENCY_START_JUSTICE_POINTS));
     SetCurrency(CURRENCY_TYPE_CONQUEST_POINTS, sWorld->getIntConfig(CONFIG_CURRENCY_START_CONQUEST_POINTS));
@@ -7171,15 +7177,6 @@ void Player::SetSkill(uint16 id, uint16 step, uint16 newVal, uint16 maxVal)
                     return;
                 }
 
-                SetUInt16Value(PLAYER_SKILL_LINEID_0 + field, offset, id);
-                SetUInt16Value(PLAYER_SKILL_STEP_0 + field, offset, step);
-                SetUInt16Value(PLAYER_SKILL_RANK_0 + field, offset, newVal);
-                SetUInt16Value(PLAYER_SKILL_MAX_RANK_0 + field, offset, maxVal);
-
-                UpdateSkillEnchantments(id, currVal, newVal);
-                UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_SKILL_LEVEL, id);
-                UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LEARN_SKILL_LEVEL, id);
-
                 // insert new entry or update if not deleted old entry yet
                 if (itr != mSkillStatus.end())
                 {
@@ -7188,6 +7185,16 @@ void Player::SetSkill(uint16 id, uint16 step, uint16 newVal, uint16 maxVal)
                 }
                 else
                     mSkillStatus.insert(SkillStatusMap::value_type(id, SkillStatusData(i, SKILL_NEW)));
+
+                SetUInt16Value(PLAYER_SKILL_LINEID_0 + field, offset, id);
+                SetUInt16Value(PLAYER_SKILL_STEP_0 + field, offset, step);
+                SetUInt16Value(PLAYER_SKILL_RANK_0 + field, offset, newVal);
+                SetUInt16Value(PLAYER_SKILL_MAX_RANK_0 + field, offset, maxVal);
+
+                UpdateSkillEnchantments(id, currVal, newVal);
+
+                UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_SKILL_LEVEL, id);
+                UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LEARN_SKILL_LEVEL, id);
 
                 // apply skill bonuses
                 SetUInt16Value(PLAYER_SKILL_MODIFIER_0 + field, offset, 0);
@@ -14238,8 +14245,11 @@ void Player::SwapItem(uint16 src, uint16 dst)
                 return;
             }
 
+            // If we move trinket/ring from one slot to another, we should consider
+            // it as swap with NULL item to prevent unique equipped errors
+
             uint16 dest;
-            InventoryResult msg = CanEquipItem(dstslot, dest, pSrcItem, false);
+            InventoryResult msg = CanEquipItem(dstslot, dest, pSrcItem, IsEquipmentPos(src));
             if (msg != EQUIP_ERR_OK)
             {
                 SendEquipError(msg, pSrcItem, NULL);
@@ -15672,48 +15682,60 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
     }
 }
 
-void Player::UpdateSkillEnchantments(uint16 skill_id, uint16 curr_value, uint16 new_value)
+void Player::UpdateSkillEnchantments(uint16 skillId, uint16 curValue, uint16 newValue)
 {
-    for (uint8 i = 0; i < INVENTORY_SLOT_BAG_END; ++i)
+    for (uint8 i = 0; i < EQUIPMENT_SLOT_END; ++i)
     {
-        if (m_items[i])
+        if (!m_items[i])
+            continue;
+
+        for (uint8 slot = 0; slot < MAX_ENCHANTMENT_SLOT; ++slot)
         {
-            for (uint8 slot = 0; slot < MAX_ENCHANTMENT_SLOT; ++slot)
+            if (slot > PRISMATIC_ENCHANTMENT_SLOT && slot < PROP_ENCHANTMENT_SLOT_0)    // not holding enchantment id
+                continue;
+
+            uint32 ench_id = m_items[i]->GetEnchantmentId(EnchantmentSlot(slot));
+            if (!ench_id)
+                continue;
+
+            SpellItemEnchantmentEntry const* enchant = sSpellItemEnchantmentStore.LookupEntry(ench_id);
+            if (!enchant)
+                return;
+
+            if (enchant->requiredSkill == skillId)
             {
-                if (slot > PRISMATIC_ENCHANTMENT_SLOT && slot < PROP_ENCHANTMENT_SLOT_0)    // not holding enchantment id
-                    continue;
-
-                uint32 ench_id = m_items[i]->GetEnchantmentId(EnchantmentSlot(slot));
-                if (!ench_id)
-                    continue;
-
-                SpellItemEnchantmentEntry const* Enchant = sSpellItemEnchantmentStore.LookupEntry(ench_id);
-                if (!Enchant)
-                    return;
-
-                if (Enchant->requiredSkill == skill_id)
+                // Checks if the enchantment needs to be applied or removed
+                if (curValue < enchant->requiredSkillValue && newValue >= enchant->requiredSkillValue)
+                    ApplyEnchantment(m_items[i], EnchantmentSlot(slot), true);
+                else if (newValue < enchant->requiredSkillValue && curValue >= enchant->requiredSkillValue)
+                    ApplyEnchantment(m_items[i], EnchantmentSlot(slot), false);
+            }
+            else
+            {
+                // Cogwheel gems dont have requirement data set in SpellItemEnchantment.dbc, but they do have it in Item-sparse.db2
+                ItemTemplate const * const gem = sObjectMgr->GetItemTemplate(enchant->GemID);
+                if (gem && gem->RequiredSkill == skillId)
                 {
-                    // Checks if the enchantment needs to be applied or removed
-                    if (curr_value < Enchant->requiredSkillValue && new_value >= Enchant->requiredSkillValue)
+                    if (curValue < gem->RequiredSkillRank && newValue >= gem->RequiredSkillRank)
                         ApplyEnchantment(m_items[i], EnchantmentSlot(slot), true);
-                    else if (new_value < Enchant->requiredSkillValue && curr_value >= Enchant->requiredSkillValue)
+                    else if (newValue < gem->RequiredSkillRank && curValue >= gem->RequiredSkillRank)
                         ApplyEnchantment(m_items[i], EnchantmentSlot(slot), false);
                 }
+            }
 
-                // If we're dealing with a gem inside a prismatic socket we need to check the prismatic socket requirements
-                // rather than the gem requirements itself. If the socket has no color it is a prismatic socket.
-                if ((slot == SOCK_ENCHANTMENT_SLOT || slot == SOCK_ENCHANTMENT_SLOT_2 || slot == SOCK_ENCHANTMENT_SLOT_3)
-                    && !m_items[i]->GetTemplate()->Socket[slot-SOCK_ENCHANTMENT_SLOT].Color)
+            // If we're dealing with a gem inside a prismatic socket we need to check the prismatic socket requirements
+            // rather than the gem requirements itself. If the socket has no color it is a prismatic socket.
+            if ((slot == SOCK_ENCHANTMENT_SLOT || slot == SOCK_ENCHANTMENT_SLOT_2 || slot == SOCK_ENCHANTMENT_SLOT_3)
+                && !m_items[i]->GetTemplate()->Socket[slot-SOCK_ENCHANTMENT_SLOT].Color)
+            {
+                SpellItemEnchantmentEntry const* prismaticEnchant = sSpellItemEnchantmentStore.LookupEntry(m_items[i]->GetEnchantmentId(PRISMATIC_ENCHANTMENT_SLOT));
+
+                if (prismaticEnchant && prismaticEnchant->requiredSkill == skillId)
                 {
-                    SpellItemEnchantmentEntry const* pPrismaticEnchant = sSpellItemEnchantmentStore.LookupEntry(m_items[i]->GetEnchantmentId(PRISMATIC_ENCHANTMENT_SLOT));
-
-                    if (pPrismaticEnchant && pPrismaticEnchant->requiredSkill == skill_id)
-                    {
-                        if (curr_value < pPrismaticEnchant->requiredSkillValue && new_value >= pPrismaticEnchant->requiredSkillValue)
-                            ApplyEnchantment(m_items[i], EnchantmentSlot(slot), true);
-                        else if (new_value < pPrismaticEnchant->requiredSkillValue && curr_value >= pPrismaticEnchant->requiredSkillValue)
-                            ApplyEnchantment(m_items[i], EnchantmentSlot(slot), false);
-                    }
+                    if (curValue < prismaticEnchant->requiredSkillValue && newValue >= prismaticEnchant->requiredSkillValue)
+                        ApplyEnchantment(m_items[i], EnchantmentSlot(slot), true);
+                    else if (newValue < prismaticEnchant->requiredSkillValue && curValue >= prismaticEnchant->requiredSkillValue)
+                        ApplyEnchantment(m_items[i], EnchantmentSlot(slot), false);
                 }
             }
         }
@@ -17985,7 +18007,7 @@ void Player::TalkedToCreature(uint32 entry, uint64 guid)
     }
 }
 
-void Player::MoneyChanged(uint32 count)
+void Player::MoneyChanged(uint64 count)
 {
     for (uint8 i = 0; i < MAX_QUEST_LOG_SIZE; ++i)
     {
@@ -18000,7 +18022,7 @@ void Player::MoneyChanged(uint32 count)
 
             if (q_status.Status == QUEST_STATUS_INCOMPLETE)
             {
-                if (int32(count) >= -qInfo->GetRewOrReqMoney())
+                if (int64(count) >= -qInfo->GetRewOrReqMoney())
                 {
                     if (CanCompleteQuest(questid))
                         CompleteQuest(questid);
@@ -18008,7 +18030,7 @@ void Player::MoneyChanged(uint32 count)
             }
             else if (q_status.Status == QUEST_STATUS_COMPLETE)
             {
-                if (int32(count) < -qInfo->GetRewOrReqMoney())
+                if (int64(count) < -qInfo->GetRewOrReqMoney())
                     IncompleteQuest(questid);
             }
         }
@@ -18553,10 +18575,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
                                 holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADACCOUNTACHIEVEMENTS),
                                 holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADACCOUNTCRITERIAPROGRESS));
 
-    uint64 money = fields[8].GetUInt64();
-    if (money > MAX_MONEY_AMOUNT)
-        money = MAX_MONEY_AMOUNT;
-    SetMoney(money);
+    SetMoney(std::min<uint64>(fields[8].GetUInt64(), MAX_MONEY_AMOUNT));
 
     SetUInt32Value(PLAYER_BYTES, fields[9].GetUInt32());
     SetUInt32Value(PLAYER_BYTES_2, fields[10].GetUInt32());
@@ -23205,7 +23224,7 @@ void Player::InitDisplayIds()
     }
 }
 
-inline bool Player::_StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot, int32 price, ItemTemplate const *pProto, Creature *pVendor, VendorItem const* crItem, bool bStore)
+inline bool Player::_StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot, int64 price, ItemTemplate const *pProto, Creature *pVendor, VendorItem const* crItem, bool bStore)
 {
     ItemPosCountVec vDest;
     uint16 uiDest = 0;
@@ -23240,6 +23259,7 @@ inline bool Player::_StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 c
     Item* it = bStore ?
         StoreNewItem(vDest, item, true) :
         EquipNewItem(uiDest, item, true);
+
     if (it)
     {
         uint32 new_count = pVendor->UpdateVendorItemCurrentCount(crItem, count);
@@ -23575,28 +23595,17 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
             }
     }
 
-    uint32 price = 0;
-    if (crItem->IsGoldRequired(pProto) && pProto->BuyPrice > 0) //Assume price cannot be negative (do not know why it is int32)
+    float discountMod = GetReputationPriceDiscount(creature);
+    discountMod -= GetTotalAuraModifier(SPELL_AURA_MOD_VENDOR_ITEMS_PRICES) / 100.0f;
+
+    int64 const price = int64(crItem->IsGoldRequired(pProto)
+            ? discountMod * pProto->BuyPrice * count / pProto->BuyCount
+            : 0);
+
+    if (!HasEnoughMoney(price))
     {
-        uint32 maxCount = MAX_MONEY_AMOUNT / pProto->BuyPrice;
-        if ((uint32)count > maxCount)
-        {
-            TC_LOG_ERROR("entities.player", "Player %s tried to buy %u item id %u, causing overflow", GetName(), (uint32)count, pProto->ItemId);
-            count = (uint8)maxCount;
-        }
-        price = pProto->BuyPrice * count; //it should not exceed MAX_MONEY_AMOUNT
-
-        // reputation discount
-        price = uint32(floor(price * GetReputationPriceDiscount(creature)));
-
-        if (int32 priceMod = GetTotalAuraModifier(SPELL_AURA_MOD_VENDOR_ITEMS_PRICES))
-            price -= CalculatePct(price, priceMod);
-
-        if (!HasEnoughMoney(uint64(price)))
-        {
-            SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, creature, item, 0);
-            return false;
-        }
+        SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, creature, item, 0);
+        return false;
     }
 
     if ((bag == NULL_BAG && slot == NULL_SLOT) || IsInventoryPos(bag, slot))
@@ -28112,7 +28121,7 @@ void Player::RefundItem(Item* item)
 
     // Grant back money
     if (moneyRefund)
-        ModifyMoney(moneyRefund); // Saved in SaveInventoryAndGoldToDB
+        ModifyMoney((int64)moneyRefund); // Saved in SaveInventoryAndGoldToDB
 
     // Grant back Arena and Honor points ?
 

@@ -44,6 +44,7 @@
 #include "AccountMgr.h"
 #include "DBCStores.h"
 #include "LFGMgr.h"
+#include "DB2Stores.h"
 
 class LoginQueryHolder : public SQLQueryHolder
 {

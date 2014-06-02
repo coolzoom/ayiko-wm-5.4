@@ -3507,6 +3507,30 @@ void Spell::cast(bool skipCheck)
         return;
     }
 
+    // cancel if cast item is lost
+    if (!IsTriggered() && m_castItemGUID && !m_CastItem)
+    {
+        cancel();
+        return;
+    }
+
+    // Certain spells that trigger on equip, Cunning of the Cruel trinket's effect
+    // for example, have nonzero speed. It must be ignored and spell must be
+    // processed immediately to prevent exploit
+    bool isOnEquipSpell = false;
+    if (m_CastItem) {
+        ItemTemplate const * const proto = m_CastItem->GetTemplate();
+        for (std::size_t i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i) {
+            auto const &data = proto->Spells[i];
+            if (data.SpellId > 0
+                    && static_cast<uint32>(data.SpellId) == m_spellInfo->Id
+                    && data.SpellTrigger == ITEM_SPELLTRIGGER_ON_EQUIP) {
+                isOnEquipSpell = true;
+                break;
+            }
+        }
+    }
+
     if (Player* playerCaster = m_caster->ToPlayer())
     {
         // now that we've done the basic check, now run the scripts
@@ -3652,7 +3676,7 @@ void Spell::cast(bool skipCheck)
 
     // Okay, everything is prepared. Now we need to distinguish between immediate and evented delayed spells
     if (((m_spellInfo->Speed > 0.0f || (m_delayMoment && (m_caster->GetTypeId() == TYPEID_PLAYER || m_caster->ToCreature()->isPet())))
-        && !m_spellInfo->IsChanneled()) || m_spellInfo->_IsNeedDelay())
+            && !isOnEquipSpell && !m_spellInfo->IsChanneled()) || m_spellInfo->_IsNeedDelay())
     {
         // Remove used for cast item if need (it can be already NULL after TakeReagents call
         // in case delayed spell remove item at cast delay start
@@ -3961,6 +3985,12 @@ void Spell::update(uint32 difftime)
         {
             if (m_timer > 0)
             {
+                if (!IsTriggered() && m_castItemGUID && !m_CastItem)
+                {
+                    cancel();
+                    return;
+                }
+
                 if (difftime >= (uint32)m_timer)
                     m_timer = 0;
                 else
@@ -3977,10 +4007,11 @@ void Spell::update(uint32 difftime)
             if (m_timer)
             {
                 // check if there are alive targets left
-                if (!UpdateChanneledTargetList())
+                if (!UpdateChanneledTargetList() || (!IsTriggered() && m_castItemGUID && !m_CastItem))
                 {
                     SendChannelUpdate(0);
                     finish();
+                    return;
                 }
 
                 if (m_timer > 0)

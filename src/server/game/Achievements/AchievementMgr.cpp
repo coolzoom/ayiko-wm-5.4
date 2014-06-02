@@ -811,7 +811,7 @@ void AchievementMgr<Guild>::SaveToDB(SQLTransaction& trans)
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_GUILD_ACHIEVEMENT_CRITERIA);
         stmt->setUInt32(0, GetOwner()->GetId());
         stmt->setUInt16(1, itr->first);
-        stmt->setUInt32(2, itr->second.counter);
+        stmt->setUInt64(2, itr->second.counter);
         stmt->setUInt32(3, itr->second.date);
         stmt->setUInt32(4, GUID_LOPART(itr->second.CompletedGUID));
         trans->Append(stmt);
@@ -867,7 +867,7 @@ void AchievementMgr<Player>::LoadFromDB(PreparedQueryResult achievementResult, P
         {
             Field* fields = criteriaResult->Fetch();
             uint32 id      = fields[0].GetUInt16();
-            uint32 counter = fields[1].GetUInt32();
+            uint64 counter = fields[1].GetUInt64();
             time_t date    = time_t(fields[2].GetUInt32());
 
             AchievementCriteriaEntry const* criteria = sAchievementMgr->GetAchievementCriteria(id);
@@ -937,7 +937,7 @@ void AchievementMgr<Player>::LoadFromDB(PreparedQueryResult achievementResult, P
         {
             Field* fields = criteriaAccountResult->Fetch();
             uint32 id      = fields[0].GetUInt16();
-            uint32 counter = fields[1].GetUInt32();
+            uint64 counter = fields[1].GetUInt64();
             time_t date    = time_t(fields[2].GetUInt32());
 
             AchievementCriteriaEntry const* criteria = sAchievementMgr->GetAchievementCriteria(id);
@@ -1015,9 +1015,9 @@ void AchievementMgr<Guild>::LoadFromDB(PreparedQueryResult achievementResult, Pr
         {
             Field* fields = criteriaResult->Fetch();
             uint32 id      = fields[0].GetUInt16();
-            uint32 counter = fields[1].GetUInt32();
+            uint64 counter = fields[1].GetUInt64();
             time_t date    = time_t(fields[2].GetUInt32());
-            uint64 guid    = fields[3].GetUInt32();
+            uint64 guid    = MAKE_NEW_GUID(fields[3].GetUInt32(), 0, HIGHGUID_PLAYER);
 
             AchievementCriteriaEntry const* criteria = sAchievementMgr->GetAchievementCriteria(id);
             if (!criteria)
@@ -1046,7 +1046,7 @@ void AchievementMgr<Guild>::LoadFromDB(PreparedQueryResult achievementResult, Pr
             CriteriaProgress& progress = (*progressMap)[id];
             progress.counter = counter;
             progress.date    = date;
-            progress.CompletedGUID = MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER);
+            progress.CompletedGUID = guid;
             progress.changed = false;
         }
         while (criteriaResult->NextRow());

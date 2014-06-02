@@ -415,7 +415,7 @@ void WorldSession::HandleMailTakeItem(WorldPacket& recvData)
     }
 
     // prevent cheating with skip client money check
-    if (!player->HasEnoughMoney(uint64(m->COD)))
+    if (!player->HasEnoughMoney(m->COD))
     {
         player->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_ERR_NOT_ENOUGH_MONEY);
         return;
@@ -468,7 +468,7 @@ void WorldSession::HandleMailTakeItem(WorldPacket& recvData)
                     .SendMailTo(trans, MailReceiver(receive, m->sender), MailSender(MAIL_NORMAL, m->receiver), MAIL_CHECK_MASK_COD_PAYMENT);
             }
 
-            player->ModifyMoney(-int32(m->COD));
+            player->ModifyMoney(-int64(m->COD));
         }
         m->COD = 0;
         m->state = MAIL_STATE_CHANGED;
@@ -517,18 +517,19 @@ void WorldSession::HandleMailTakeMoney(WorldPacket& recvData)
     }
 
     // Don't take money if it exceed the max amount
-    if (player->GetMoney() + money > MAX_MONEY_AMOUNT)
+    if (m->money > MAX_MONEY_AMOUNT - player->GetMoney())
     {
         player->SendMailResult(mailId, MAIL_MONEY_TAKEN, MAIL_ERR_EQUIP_ERROR);
         return;
     }
 
-    player->SendMailResult(mailId, MAIL_MONEY_TAKEN, MAIL_OK);
+    player->ModifyMoney((int64)m->money);
 
-    player->ModifyMoney(money);
     m->money = 0;
     m->state = MAIL_STATE_CHANGED;
     player->m_mailsUpdated = true;
+
+    player->SendMailResult(mailId, MAIL_MONEY_TAKEN, MAIL_OK);
 
     // save money and mail to prevent cheating
     SQLTransaction trans = CharacterDatabase.BeginTransaction();

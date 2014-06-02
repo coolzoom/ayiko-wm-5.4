@@ -507,9 +507,9 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& /*recvPacket*/)
 
         // update money
         _player->ModifyMoney(-int64(my_trade->GetMoney()));
-        _player->ModifyMoney(his_trade->GetMoney());
+        _player->ModifyMoney((int64)his_trade->GetMoney());
         trader->ModifyMoney(-int64(his_trade->GetMoney()));
-        trader->ModifyMoney(my_trade->GetMoney());
+        trader->ModifyMoney((int64)my_trade->GetMoney());
 
         if (my_spell)
             my_spell->prepare(&my_targets);
@@ -702,7 +702,6 @@ void WorldSession::HandleSetTradeGoldOpcode(WorldPacket& recvPacket)
     if (!my_trade)
         return;
 
-    // gold can be incorrect, but this is checked at trade finished.
     my_trade->SetMoney(gold);
 }
 

@@ -28,6 +28,8 @@
 #include "ObjectAccessor.h"
 #include "SpellInfo.h"
 #include "GuildMgr.h"
+#include "DB2Stores.h"
+
 #include <vector>
 
 void WorldSession::HandleSplitItemOpcode(WorldPacket& recvData)
@@ -634,7 +636,7 @@ void WorldSession::HandleSellItemOpcode(WorldPacket& recvData)
                 }
 
                 uint32 money = pProto->SellPrice * count;
-                _player->ModifyMoney(money);
+                _player->ModifyMoney((int64)money);
                 _player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_MONEY_FROM_VENDORS, money);
             }
             else
@@ -684,7 +686,7 @@ void WorldSession::HandleBuybackItem(WorldPacket& recvData)
         InventoryResult msg = _player->CanStoreItem(NULL_BAG, NULL_SLOT, dest, pItem, false);
         if (msg == EQUIP_ERR_OK)
         {
-            _player->ModifyMoney(-(int32)price);
+            _player->ModifyMoney(-(int64)price);
             _player->RemoveItemFromBuyBackSlot(slot, false);
             _player->ItemAddedQuestCheck(pItem->GetEntry(), pItem->GetCount());
             _player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_RECEIVE_EPIC_ITEM, pItem->GetEntry(), pItem->GetCount());
@@ -706,6 +708,10 @@ void WorldSession::HandleBuyItemInSlotOpcode(WorldPacket& recvData)
     uint8 bagslot;
 
     recvData >> vendorguid >> item  >> slot >> bagguid >> bagslot >> count;
+
+    // Amount of items is limited to 20 at shift-click
+    if (count > 20)
+        return;
 
     // client expects count starting at 1, and we send vendorslot+1 to client already
     if (slot > 0)

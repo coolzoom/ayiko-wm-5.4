@@ -241,7 +241,7 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recvData*/)
             loot->NotifyMoneyRemoved();
             for (std::vector<Player*>::const_iterator i = playersNear.begin(); i != playersNear.end(); ++i)
             {
-                (*i)->ModifyMoney(goldPerPlayer);
+                (*i)->ModifyMoney((int64)goldPerPlayer);
                 (*i)->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_MONEY, goldPerPlayer);
 
                 if ((*i)->HasAuraType(SPELL_AURA_DEPOSIT_BONUS_MONEY_IN_GUILD_BANK_ON_LOOT))
@@ -271,7 +271,7 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recvData*/)
         }
         else
         {
-            player->ModifyMoney(loot->gold);
+            player->ModifyMoney((int64)loot->gold);
             player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_MONEY, loot->gold);
 
             if (player->HasAuraType(SPELL_AURA_DEPOSIT_BONUS_MONEY_IN_GUILD_BANK_ON_LOOT))

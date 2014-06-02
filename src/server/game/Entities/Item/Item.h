@@ -312,8 +312,10 @@ class Item : public Object
         void SetState(ItemUpdateState state, Player* forplayer = NULL);
         void AddToUpdateQueueOf(Player* player);
         void RemoveFromUpdateQueueOf(Player* player);
-        bool IsInUpdateQueue() const { return uQueuePos != -1; }
-        uint16 GetQueuePos() const { return uQueuePos; }
+        bool IsInUpdateQueue() const { return uQueuePos != std::numeric_limits<std::size_t>::max(); }
+
+        std::size_t GetQueuePos() const { return uQueuePos; }
+
         void FSetState(ItemUpdateState state)               // forced
         {
             uState = state;
@@ -373,11 +375,13 @@ class Item : public Object
         bool IsLegendaryCloak() const;
 
     private:
+        void ResetQueuePos() { uQueuePos = std::numeric_limits<std::size_t>::max(); }
+
         std::string m_text;
         uint8 m_slot;
         Bag* m_container;
         ItemUpdateState uState;
-        int16 uQueuePos;
+        std::size_t uQueuePos;
         bool mb_in_trade;                                   // true if item is currently in trade-window
         time_t m_lastPlayedTimeUpdate;
         uint32 m_refundRecipient;

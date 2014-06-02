@@ -19,19 +19,20 @@
 #ifndef __TRINITY_BATTLEPETMGR_H
 #define __TRINITY_BATTLEPETMGR_H
 
-#include <map>
-#include <string>
+#include "Define.h"
+#include <list>
 
-#include "Common.h"
-#include <ace/Singleton.h>
-#include "DatabaseEnv.h"
-#include "DBCEnums.h"
-#include "DBCStores.h"
-#include "DB2Stores.h"
+class Player;
+class WorldPacket;
 
 struct PetBattleData
 {
-    PetBattleData(uint32 entry, uint32 display, uint32 species, uint32 spell) : m_entry(entry), m_displayID(display), m_speciesID(species), m_summonSpellID(spell) {}
+    PetBattleData(uint32 entry, uint32 display, uint32 species, uint32 spell)
+        : m_entry(entry)
+        , m_displayID(display)
+        , m_speciesID(species)
+        , m_summonSpellID(spell)
+    { }
 
     uint32 m_entry;
     uint32 m_displayID;

@@ -68,32 +68,30 @@ enum MailAuctionAnswers
 struct AuctionEntry
 {
     uint32 Id;
-    uint32 auctioneer;                                      // creature low guid
     uint32 itemGUIDLow;
     uint32 itemEntry;
     uint32 itemCount;
-    uint32 owner;
+    uint64 owner;
     uint64 startbid;                                        //maybe useless
     uint64 bid;
     uint64 buyout;
     time_t expire_time;
-    uint32 bidder;
+    uint64 bidder;
     uint32 deposit;                                         //deposit can be calculated only when creating auction
     AuctionHouseEntry const* auctionHouseEntry;             // in AuctionHouse.dbc
-    uint32 factionTemplateId;
 
     // helpers
     uint32 GetHouseId() const { return auctionHouseEntry->houseId; }
     uint32 GetHouseFaction() const { return auctionHouseEntry->faction; }
-    uint32 GetAuctionCut() const;
-    uint32 GetAuctionOutBid() const;
+    uint64 GetAuctionCut() const;
+    uint64 GetAuctionOutBid() const;
     bool BuildAuctionInfo(WorldPacket & data) const;
     void DeleteFromDB(SQLTransaction& trans) const;
     void SaveToDB(SQLTransaction& trans) const;
     bool LoadFromDB(Field* fields);
     bool LoadFromFieldList(Field* fields);
     std::string BuildAuctionMailSubject(MailAuctionAnswers response) const;
-    static std::string BuildAuctionMailBody(uint32 lowGuid, uint32 bid, uint32 buyout, uint32 deposit, uint32 cut);
+    static std::string BuildAuctionMailBody(uint64 guid, uint64 bid, uint64 buyout, uint32 deposit, uint64 cut);
 
 };
 
@@ -101,8 +99,6 @@ struct AuctionEntry
 class AuctionHouseObject
 {
   public:
-    // Initialize storage
-    AuctionHouseObject() { next = AuctionsMap.begin(); }
     ~AuctionHouseObject()
     {
         for (AuctionEntryMap::iterator itr = AuctionsMap.begin(); itr != AuctionsMap.end(); ++itr)
@@ -137,9 +133,6 @@ class AuctionHouseObject
 
   private:
     AuctionEntryMap AuctionsMap;
-
-    // storage for "next" auction item for next Update()
-    AuctionEntryMap::const_iterator next;
 };
 
 class AuctionHouseMgr
@@ -154,8 +147,8 @@ class AuctionHouseMgr
 
         typedef std::unordered_map<uint32, Item*> ItemMap;
 
-        AuctionHouseObject* GetAuctionsMap(uint32 factionTemplateId);
-        AuctionHouseObject* GetBidsMap(uint32 factionTemplateId);
+        AuctionHouseObject* GetAuctionsMapByFaction(uint32 factionTemplateId);
+        AuctionHouseObject* GetAuctionsMapByHouseId(uint8 houseId);
 
         Item* GetAItem(uint32 id)
         {
@@ -171,7 +164,7 @@ class AuctionHouseMgr
         void SendAuctionSalePendingMail(AuctionEntry* auction, SQLTransaction& trans);
         void SendAuctionSuccessfulMail(AuctionEntry* auction, SQLTransaction& trans);
         void SendAuctionExpiredMail(AuctionEntry* auction, SQLTransaction& trans);
-        void SendAuctionOutbiddedMail(AuctionEntry* auction, uint32 newPrice, Player* newBidder, SQLTransaction& trans);
+        void SendAuctionOutbiddedMail(AuctionEntry* auction, uint64 newPrice, uint64 newBidderGuid, SQLTransaction& trans);
         void SendAuctionCancelledToBidderMail(AuctionEntry* auction, SQLTransaction& trans, Item* item);
 
         static uint32 GetAuctionDeposit(AuctionHouseEntry const* entry, uint32 time, Item* pItem, uint32 count);

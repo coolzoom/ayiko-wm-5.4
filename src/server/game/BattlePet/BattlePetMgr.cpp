@@ -16,35 +16,15 @@
 * with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Common.h"
-#include "DBCEnums.h"
-#include "ObjectMgr.h"
-#include "GuildMgr.h"
-#include "World.h"
-#include "WorldPacket.h"
-#include "DatabaseEnv.h"
-#include "AchievementMgr.h"
-#include "Arena.h"
-#include "CellImpl.h"
-#include "GameEventMgr.h"
-#include "GridNotifiersImpl.h"
-#include "Guild.h"
-#include "Language.h"
-#include "Player.h"
-#include "SpellMgr.h"
-#include "DisableMgr.h"
-#include "ScriptMgr.h"
-#include "MapManager.h"
-#include "Battleground.h"
-#include "BattlegroundAB.h"
-#include "Map.h"
-#include "InstanceScript.h"
-#include "Group.h"
 #include "BattlePetMgr.h"
+#include "DB2Stores.h"
+#include "ObjectMgr.h"
+#include "Player.h"
+#include "WorldPacket.h"
 
-BattlePetMgr::BattlePetMgr(Player* owner) : m_player(owner)
-{
-}
+BattlePetMgr::BattlePetMgr(Player* owner)
+    : m_player(owner)
+{ }
 
 void BattlePetMgr::GetBattlePetList(PetBattleDataList &battlePetList) const
 {
@@ -58,19 +38,19 @@ void BattlePetMgr::GetBattlePetList(PetBattleDataList &battlePetList) const
         if (!playerSpell.active || playerSpell.disabled)
             continue;
 
-        SpellInfo const* spell = sSpellMgr->GetSpellInfo(kvPair.first);
+        auto const spell = sSpellMgr->GetSpellInfo(kvPair.first);
         if (!spell)
             continue;
 
         // Is summon pet spell
-        if ((spell->Effects[0].Effect == SPELL_EFFECT_SUMMON && spell->Effects[0].MiscValueB == 3221) == 0)
+        if (spell->Effects[0].Effect != SPELL_EFFECT_SUMMON || spell->Effects[0].MiscValueB != 3221)
             continue;
 
-        const CreatureTemplate* creature = sObjectMgr->GetCreatureTemplate(spell->Effects[0].MiscValue);
+        auto const creature = sObjectMgr->GetCreatureTemplate(spell->Effects[0].MiscValue);
         if (!creature)
             continue;
 
-        const BattlePetSpeciesEntry* species = sBattlePetSpeciesStore.LookupEntry(creature->Entry);
+        auto const species = sBattlePetSpeciesStore.LookupEntry(creature->Entry);
         if (!species)
             continue;
 

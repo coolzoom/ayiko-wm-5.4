@@ -246,7 +246,7 @@ Item::Item()
     m_valuesCount = ITEM_END;
     m_slot = 0;
     uState = ITEM_NEW;
-    uQueuePos = -1;
+    ResetQueuePos();
     m_container = NULL;
     m_lootGenerated = false;
     mb_in_trade = false;
@@ -718,7 +718,7 @@ void Item::SetState(ItemUpdateState state, Player* forplayer)
     {
         // unset in queue
         // the item must be removed from the queue manually
-        uQueuePos = -1;
+        ResetQueuePos();
         uState = ITEM_UNCHANGED;
     }
 }
@@ -740,7 +740,7 @@ void Item::AddToUpdateQueueOf(Player* player)
         return;
 
     player->m_itemUpdateQueue.push_back(this);
-    uQueuePos = player->m_itemUpdateQueue.size()-1;
+    uQueuePos = player->m_itemUpdateQueue.size() - 1;
 }
 
 void Item::RemoveFromUpdateQueueOf(Player* player)
@@ -748,21 +748,19 @@ void Item::RemoveFromUpdateQueueOf(Player* player)
     if (!IsInUpdateQueue())
         return;
 
-    //ASSERT(player != NULL)
+    ASSERT(player);
 
-    if (player && player->GetGUID() != GetOwnerGUID())
+    if (player->GetGUID() != GetOwnerGUID())
     {
         TC_LOG_DEBUG("entities.player.items", "Item::RemoveFromUpdateQueueOf - Owner's guid (%u) and player's guid (%u) don't match!", GUID_LOPART(GetOwnerGUID()), player->GetGUIDLow());
         return;
     }
 
-    if (player && player->m_itemUpdateQueueBlocked)
+    if (player->m_itemUpdateQueueBlocked)
         return;
 
-    if (player)
-        player->m_itemUpdateQueue[uQueuePos] = NULL;
-
-    uQueuePos = -1;
+    player->m_itemUpdateQueue[uQueuePos] = NULL;
+    ResetQueuePos();
 }
 
 uint8 Item::GetBagSlot() const

@@ -1349,7 +1349,7 @@ public:
         void UpdateAI(const uint32 /*diff*/)
         {
             std::list<Player*> playerList;
-            GetPlayerListInGrid(playerList, me, 15.0f);
+            GetPlayerListInGrid(playerList, me, 20.0f);
 
             for (auto player : playerList)
                 if (!hasSaidIntro && player->GetQuestStatus(29409) == QUEST_STATUS_INCOMPLETE)

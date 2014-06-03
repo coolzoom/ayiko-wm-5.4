@@ -252,7 +252,7 @@ struct GuildNewsEntry
 {
     GuildNews EventType;
     time_t Date;
-    uint64 PlayerGuid;
+    uint32 PlayerGuid;
     uint32 Flags;
     uint32 Data;
 };
@@ -408,8 +408,9 @@ class Guild
 
                 void LoadFromDB(PreparedQueryResult result);
                 void BuildNewsData(WorldPacket& data);
-                void BuildNewsData(uint32 id, GuildNewsEntry& guildNew, WorldPacket& data);
+                void BuildNewsData(uint32 id, GuildNewsEntry const &guildNews, WorldPacket& data);
                 void AddNewEvent(GuildNews eventType, time_t date, uint64 playerGuid, uint32 flags, uint32 data);
+
                 GuildNewsEntry* GetNewsById(uint32 id)
                 {
                     GuildNewsLogMap::iterator itr = _newsLog.find(id);
@@ -417,6 +418,7 @@ class Guild
                         return &itr->second;
                     return NULL;
                 }
+
                 Guild* GetGuild() const { return _guild; }
 
             private:
@@ -886,12 +888,8 @@ class Guild
             SendCommandResult(session, GUILD_INVITE_S, ERR_GUILD_PLAYER_NOT_IN_GUILD_S, name);
             return NULL;
         }
-        inline void _DeleteMemberFromDB(uint32 lowguid) const
-        {
-            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GUILD_MEMBER);
-            stmt->setUInt32(0, lowguid);
-            CharacterDatabase.Execute(stmt);
-        }
+
+        static void _DeleteMemberFromDB(uint32 lowguid);
 
         // Creates log holders (either when loading or when creating guild)
         void _CreateLogHolders();

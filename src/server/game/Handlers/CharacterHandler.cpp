@@ -1437,12 +1437,9 @@ void WorldSession::HandleChangePlayerNameOpcodeCallBack(PreparedQueryResult resu
     CharacterDatabase.Execute(stmt);
 
     // Removed declined name from db
-    stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_DECLINED_NAME);
-
+    stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_DECLINED_NAME);
     stmt->setUInt32(0, guidLow);
-
     CharacterDatabase.Execute(stmt);
-
 
     TC_LOG_INFO("entities.player.character", "Account: %d (IP: %s) Character:[%s] (guid:%u) Changed name to: %s", GetAccountId(), GetRemoteAddress().c_str(), oldName.c_str(), guidLow, newName.c_str());
 
@@ -1748,7 +1745,7 @@ void WorldSession::HandleCharCustomize(WorldPacket& recvData)
     stmt->setUInt32(2, GUID_LOPART(playerGuid));
     CharacterDatabase.Execute(stmt);
 
-    stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_DECLINED_NAME);
+    stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_DECLINED_NAME);
     stmt->setUInt32(0, GUID_LOPART(playerGuid));
     CharacterDatabase.Execute(stmt);
 
@@ -2421,15 +2418,15 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
             uint32 reputation_alliance = it->first;
             uint32 reputation_horde = it->second;
 
-            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_REP_BY_FACTION);
-            stmt->setUInt32(0, uint16(team == BG_TEAM_ALLIANCE ? reputation_alliance : reputation_horde));
-            stmt->setUInt32(1, lowGuid);
+            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_REPUTATION_BY_FACTION);
+            stmt->setUInt32(0, lowGuid);
+            stmt->setUInt32(1, uint16(team == BG_TEAM_ALLIANCE ? reputation_alliance : reputation_horde));
             trans->Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHAR_REP_FACTION_CHANGE);
             stmt->setUInt16(0, uint16(team == BG_TEAM_ALLIANCE ? reputation_alliance : reputation_horde));
-            stmt->setUInt16(1, uint16(team == BG_TEAM_ALLIANCE ? reputation_horde : reputation_alliance));
-            stmt->setUInt32(2, lowGuid);
+            stmt->setUInt32(1, lowGuid);
+            stmt->setUInt16(2, uint16(team == BG_TEAM_ALLIANCE ? reputation_horde : reputation_alliance));
             trans->Append(stmt);
         }
 

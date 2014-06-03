@@ -114,8 +114,6 @@ void GroupMgr::LoadGroups()
     {
         uint32 oldMSTime = getMSTime();
 
-        // Delete all groups whose leader does not exist
-        CharacterDatabase.DirectExecute("DELETE FROM groups WHERE leaderGuid NOT IN (SELECT guid FROM characters)");
         // Delete all groups with less than 2 members
         CharacterDatabase.DirectExecute("DELETE FROM groups WHERE guid NOT IN (SELECT guid FROM group_member GROUP BY guid HAVING COUNT(guid) > 1)");
 
@@ -156,12 +154,6 @@ void GroupMgr::LoadGroups()
     TC_LOG_INFO("server.loading", "Loading Group members...");
     {
         uint32 oldMSTime = getMSTime();
-
-        // Delete all rows from group_member or group_instance with no group
-        CharacterDatabase.DirectExecute("DELETE FROM group_member WHERE guid NOT IN (SELECT guid FROM groups)");
-        CharacterDatabase.DirectExecute("DELETE FROM group_instance WHERE guid NOT IN (SELECT guid FROM groups)");
-        // Delete all members that does not exist
-        CharacterDatabase.DirectExecute("DELETE FROM group_member WHERE memberGuid NOT IN (SELECT guid FROM characters)");
 
         //                                                    0        1           2            3       4
         QueryResult result = CharacterDatabase.Query("SELECT guid, memberGuid, memberFlags, subgroup, roles FROM group_member ORDER BY guid");

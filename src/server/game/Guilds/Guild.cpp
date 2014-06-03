@@ -141,8 +141,17 @@ void Guild::EventLogEntry::SaveToDB(SQLTransaction& trans) const
     stmt->setUInt32(  index, m_guildId);
     stmt->setUInt32(++index, m_guid);
     stmt->setUInt8 (++index, uint8(m_eventType));
-    stmt->setUInt32(++index, m_playerGuid1);
-    stmt->setUInt32(++index, m_playerGuid2);
+
+    if (m_playerGuid1 != 0)
+        stmt->setUInt32(++index, m_playerGuid1);
+    else
+        stmt->setNull(++index);
+
+    if (m_playerGuid2 != 0)
+        stmt->setUInt32(++index, m_playerGuid2);
+    else
+        stmt->setNull(++index);
+
     stmt->setUInt8 (++index, m_newRank);
     stmt->setUInt64(++index, m_timestamp);
     CharacterDatabase.ExecuteOrAppend(trans, stmt);
@@ -1187,36 +1196,12 @@ void Guild::Disband()
         DeleteMember(itr->second->GetGUID(), true);
     }
 
-    PreparedStatement* stmt = NULL;
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
-    stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GUILD);
-    stmt->setUInt32(0, m_id);
-    trans->Append(stmt);
-
-    stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GUILD_RANKS);
-    stmt->setUInt32(0, m_id);
-    trans->Append(stmt);
-
-    stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GUILD_BANK_TABS);
-    stmt->setUInt32(0, m_id);
-    trans->Append(stmt);
 
     // Free bank tab used memory and delete items stored in them
     _DeleteBankItems(trans, true);
 
-    stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GUILD_BANK_ITEMS);
-    stmt->setUInt32(0, m_id);
-    trans->Append(stmt);
-
-    stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GUILD_BANK_RIGHTS);
-    stmt->setUInt32(0, m_id);
-    trans->Append(stmt);
-
-    stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GUILD_BANK_EVENTLOGS);
-    stmt->setUInt32(0, m_id);
-    trans->Append(stmt);
-
-    stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GUILD_EVENTLOGS);
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GUILD);
     stmt->setUInt32(0, m_id);
     trans->Append(stmt);
 
@@ -2920,6 +2905,14 @@ void Guild::SetBankTabText(uint8 tabId, const std::string& text)
 
 ///////////////////////////////////////////////////////////////////////////////
 // Private methods
+
+void Guild::_DeleteMemberFromDB(uint32 lowguid)
+{
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GUILD_MEMBER);
+    stmt->setUInt32(0, lowguid);
+    CharacterDatabase.Execute(stmt);
+}
+
 void Guild::_CreateLogHolders()
 {
     m_eventLog = new LogHolder(sWorld->getIntConfig(CONFIG_GUILD_EVENT_LOG_COUNT));
@@ -3558,7 +3551,7 @@ void Guild::GuildNewsLog::AddNewEvent(GuildNews eventType, time_t date, uint64 p
     uint32 id = _newsLog.size();
     GuildNewsEntry& log = _newsLog[id];
     log.EventType = eventType;
-    log.PlayerGuid = playerGuid;
+    log.PlayerGuid = GUID_LOPART(playerGuid);
     log.Data = data;
     log.Flags = flags;
     log.Date = date;
@@ -3567,7 +3560,12 @@ void Guild::GuildNewsLog::AddNewEvent(GuildNews eventType, time_t date, uint64 p
     stmt->setUInt32(0, GetGuild()->GetId());
     stmt->setUInt32(1, id);
     stmt->setUInt32(2, log.EventType);
-    stmt->setUInt64(3, log.PlayerGuid);
+
+    if (log.PlayerGuid != 0)
+        stmt->setUInt32(3, log.PlayerGuid);
+    else
+        stmt->setNull(3);
+
     stmt->setUInt32(4, log.Data);
     stmt->setUInt32(5, log.Flags);
     stmt->setUInt32(6, uint32(log.Date));
@@ -3585,36 +3583,36 @@ void Guild::GuildNewsLog::LoadFromDB(PreparedQueryResult result)
     do
     {
         Field* fields = result->Fetch();
-        uint32 id = fields[0].GetInt32();
+        uint32 id = fields[0].GetUInt32();
         GuildNewsEntry& log = _newsLog[id];
-        log.EventType = GuildNews(fields[1].GetInt32());
-        log.PlayerGuid = fields[2].GetInt64();
-        log.Data = fields[3].GetInt32();
-        log.Flags = fields[4].GetInt32();
+        log.EventType = GuildNews(fields[1].GetUInt32());
+        log.PlayerGuid = fields[2].GetUInt32();
+        log.Data = fields[3].GetUInt32();
+        log.Flags = fields[4].GetUInt32();
         log.Date = time_t(fields[5].GetInt32());
     }
     while (result->NextRow());
 }
 
-void Guild::GuildNewsLog::BuildNewsData(uint32 id, GuildNewsEntry& guildNew, WorldPacket& data)
+void Guild::GuildNewsLog::BuildNewsData(uint32 id, GuildNewsEntry const &guildNews, WorldPacket& data)
 {
     data.Initialize(SMSG_GUILD_NEWS_UPDATE);
 
     data.WriteBits(1, 19);
 
-    ObjectGuid guid = guildNew.PlayerGuid;
+    ObjectGuid guid = MAKE_NEW_GUID(guildNews.PlayerGuid, 0, HIGHGUID_PLAYER);
 
     data.WriteBits(0, 26); // Other Guids NYI
 
     data.WriteBitSeq<2, 0, 4, 1, 7, 3, 5, 6>(guid);
 
     data.WriteByteSeq<2>(guid);
-    data << uint32(guildNew.EventType);
-    data << uint32(secsToTimeBitFields(guildNew.Date));
+    data << uint32(guildNews.EventType);
+    data << uint32(secsToTimeBitFields(guildNews.Date));
     data.WriteByteSeq<1, 4, 6>(guid);
-    data << uint32(guildNew.Flags); // 1 sticky
+    data << uint32(guildNews.Flags); // 1 sticky
     data.WriteByteSeq<3, 7>(guid);
-    data << uint32(guildNew.Data);
+    data << uint32(guildNews.Data);
     data.WriteByteSeq<5>(guid);
     data << uint32(id);
     data << uint32(0);              // always 0
@@ -3629,8 +3627,7 @@ void Guild::GuildNewsLog::BuildNewsData(WorldPacket& data)
 
     for (GuildNewsLogMap::const_iterator it = _newsLog.begin(); it != _newsLog.end(); it++)
     {
-        ObjectGuid guid = it->second.PlayerGuid;
-
+        ObjectGuid guid = MAKE_NEW_GUID(it->second.PlayerGuid, 0, HIGHGUID_PLAYER);
         data.WriteBits(0, 24); // Not yet implemented used for guild achievements
         data.WriteBitSeq<2, 0, 4, 1, 7, 3, 5, 6>(guid);
     }
@@ -3639,7 +3636,7 @@ void Guild::GuildNewsLog::BuildNewsData(WorldPacket& data)
 
     for (GuildNewsLogMap::const_iterator it = _newsLog.begin(); it != _newsLog.end(); it++)
     {
-        ObjectGuid guid = it->second.PlayerGuid;
+        ObjectGuid guid = MAKE_NEW_GUID(it->second.PlayerGuid, 0, HIGHGUID_PLAYER);
 
         data.WriteByteSeq<2>(guid);
         data << uint32(it->second.EventType);

@@ -802,14 +802,12 @@ void WorldSession::HandleGuildQueryNewsOpcode(WorldPacket& recvPacket)
     recvPacket.ReadBitSeq<7, 3, 4, 1, 0, 6, 2, 5>(guildGuid);
     recvPacket.ReadByteSeq<2, 7, 6, 4, 3, 1, 0, 5>(guildGuid);
 
-    if (Guild* guild = sGuildMgr->GetGuildByGuid(guildGuid))
+    auto const guild = sGuildMgr->GetGuildByGuid(guildGuid);
+    if (guild && guild->IsMember(_player->GetGUID()))
     {
-        if (guild->IsMember(_player->GetGUID()))
-        {
-            WorldPacket data;
-            guild->GetNewsLog().BuildNewsData(data);
-            SendPacket(&data);
-        }
+        WorldPacket data;
+        guild->GetNewsLog().BuildNewsData(data);
+        SendPacket(&data);
     }
 }
 

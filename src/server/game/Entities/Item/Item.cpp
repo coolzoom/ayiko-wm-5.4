@@ -415,7 +415,7 @@ void Item::SaveToDB(SQLTransaction& trans)
 
             if (HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_WRAPPED))
             {
-                stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GIFT);
+                stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_GIFT);
                 stmt->setUInt32(0, guid);
                 trans->Append(stmt);
             }

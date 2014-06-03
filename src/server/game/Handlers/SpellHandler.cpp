@@ -398,10 +398,8 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
             return;
         }
 
-        stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GIFT);
-
+        stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_GIFT);
         stmt->setUInt32(0, item->GetGUIDLow());
-
         CharacterDatabase.Execute(stmt);
     }
     else

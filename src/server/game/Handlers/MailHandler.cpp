@@ -350,10 +350,6 @@ void WorldSession::HandleMailReturnToSender(WorldPacket& recvData)
     stmt->setUInt32(0, mailId);
     trans->Append(stmt);
 
-    stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_MAIL_ITEM_BY_ID);
-    stmt->setUInt32(0, mailId);
-    trans->Append(stmt);
-
     player->RemoveMail(mailId);
 
     // only return mail if the player exists (and delete if not existing)

@@ -2147,20 +2147,25 @@ SmartScriptHolder SmartScript::CreateEvent(SMART_EVENT e, uint32 event_flags, ui
 
 ObjectList* SmartScript::GetTargets(SmartScriptHolder const& e, Unit* invoker /*= NULL*/)
 {
-    Unit* trigger = NULL;
+    Unit* scriptTrigger = NULL;
     if (invoker)
-        trigger = invoker;
+        scriptTrigger = invoker;
     else if (Unit* tempLastInvoker = GetLastInvoker())
-        trigger = tempLastInvoker;
+        scriptTrigger = tempLastInvoker;
 
-    ObjectList* l = new ObjectList();
+    WorldObject* baseObject = GetBaseObject();
+    if (baseObject == NULL && trigger)
+        baseObject = scriptTrigger;
+
+    WorldObjectList* l = new WorldObjectList();
     switch (e.GetTargetType())
     {
         case SMART_TARGET_SELF:
-            if (GetBaseObject())
-                l->push_back(GetBaseObject());
+            if (baseObject)
+                l->push_back(baseObject);
             break;
         case SMART_TARGET_VICTIM:
+            if (me)
                 if (Unit* victim = me->getVictim())
                     l->push_back(victim);
             break;
@@ -2186,17 +2191,17 @@ ObjectList* SmartScript::GetTargets(SmartScriptHolder const& e, Unit* invoker /*
             break;
         case SMART_TARGET_NONE:
         case SMART_TARGET_ACTION_INVOKER:
-            if (trigger)
-                l->push_back(trigger);
+            if (scriptTrigger)
+                l->push_back(scriptTrigger);
             break;
         case SMART_TARGET_ACTION_INVOKER_VEHICLE:
-            if (trigger && trigger->GetVehicle() && trigger->GetVehicle()->GetBase())
-                l->push_back(trigger->GetVehicle()->GetBase());
+            if (scriptTrigger && scriptTrigger->GetVehicle() && scriptTrigger->GetVehicle()->GetBase())
+                l->push_back(scriptTrigger->GetVehicle()->GetBase());
             break;
         case SMART_TARGET_INVOKER_PARTY:
-            if (trigger)
+            if (scriptTrigger)
             {
-                if (Player* player = trigger->ToPlayer())
+                if (Player* player = scriptTrigger->ToPlayer())
                 {
                     if (Group* group = player->GetGroup())
                     {
@@ -2208,7 +2213,7 @@ ObjectList* SmartScript::GetTargets(SmartScriptHolder const& e, Unit* invoker /*
                     // this even if there is a group (thus the else-check), it will add the
                     // same player to the list twice. We don't want that to happen.
                     else
-                        l->push_back(trigger);
+                        l->push_back(scriptTrigger);
                 }
             }
             break;

@@ -5,85 +5,88 @@
 
 class mob_master_shang_xi : public CreatureScript
 {
-    public:
-        mob_master_shang_xi() : CreatureScript("mob_master_shang_xi") { }
+    enum master_shang
+    {
 
-        bool OnQuestAccept(Player* /*player*/, Creature* creature, Quest const* quest)
+        SPELL_MASTERS_FLAME         = 114610,
+        SPELL_CREATE_MASTERS_FLAME  = 114611,
+        SPELL_SNATCH_MASTERS_FLAME  = 114746,
+
+        ITEM_MASTERS_FLAME          = 80212,
+
+        QUEST_LESSONS_OF_BURNING_SCROLL = 29408,
+    };
+
+public:
+    mob_master_shang_xi() : CreatureScript("mob_master_shang_xi") { }
+
+    bool OnQuestAccept(Player* /*player*/, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_LESSONS_OF_BURNING_SCROLL) // The Lesson of the Burning Scroll
         {
-            if (quest->GetQuestId() == 29408) // La lecon du parchemin brulant
-            {
-                creature->AddAura(114610, creature);
-                creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
-                creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
-            }
-
-            return true;
+            creature->AddAura(SPELL_MASTERS_FLAME, creature);
+            creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
         }
 
-        CreatureAI* GetAI(Creature* creature) const
+        return true;
+    }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new mob_master_shang_xi_AI(creature);
+    }
+
+    struct mob_master_shang_xi_AI : public ScriptedAI
+    {
+        mob_master_shang_xi_AI(Creature* creature) : ScriptedAI(creature)
         {
-            return new mob_master_shang_xi_AI(creature);
+            resetTimer = 10000;
         }
 
-        struct mob_master_shang_xi_AI : public ScriptedAI
+        uint32 resetTimer;
+
+        void SpellHit(Unit* caster, const SpellInfo* pSpell) override
         {
-            mob_master_shang_xi_AI(Creature* creature) : ScriptedAI(creature)
+            if (pSpell->Id == SPELL_SNATCH_MASTERS_FLAME) // Snatch Master's Flame
             {
-                checkPlayersTime = 2000;
-            }
-
-            uint32 checkPlayersTime;
-
-            void SpellHit(Unit* caster, const SpellInfo* pSpell)
-            {
-                if (pSpell->Id == 114746) // Attraper la flamme
+                if (caster->GetTypeId() == TYPEID_PLAYER)
                 {
-                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    if (caster->ToPlayer()->GetQuestStatus(QUEST_LESSONS_OF_BURNING_SCROLL) == QUEST_STATUS_INCOMPLETE)
                     {
-                        if (caster->ToPlayer()->GetQuestStatus(29408) == QUEST_STATUS_INCOMPLETE)
-                        {
-                            me->CastSpell(caster, 114611, true);
-                            me->RemoveAurasDueToSpell(114610);
-                            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
-                            me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
-                        }
-                    }
-                }
-            }
-
-            void UpdateAI(const uint32 diff)
-            {
-                if (checkPlayersTime <= diff)
-                {
-                    std::list<Player*> playerList;
-                    GetPlayerListInGrid(playerList, me, 5.0f);
-
-                    bool playerWithQuestNear = false;
-
-                    for (auto player: playerList)
-                        if (player->GetQuestStatus(29408) == QUEST_STATUS_INCOMPLETE)
-                            if (!player->HasItemCount(80212))// Flamme du maitre
-                                playerWithQuestNear = true;
-
-                    if (playerWithQuestNear && !me->HasAura(114610))
-                    {
-                        me->AddAura(114610, me);
-                        me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
-                        me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
-                    }
-                    else if (!playerWithQuestNear && me->HasAura(114610))
-                    {
-                        me->RemoveAurasDueToSpell(114610);
+                        me->CastSpell(caster, SPELL_CREATE_MASTERS_FLAME, true);
+                        me->RemoveAurasDueToSpell(SPELL_MASTERS_FLAME);
                         me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
-                        me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+                        Talk(0);
                     }
-
-                    checkPlayersTime = 2000;
                 }
-                else
-                    checkPlayersTime -= diff;
             }
-        };
+        }
+
+        void MoveInLineOfSight(Unit * who) override
+        {
+            Player * const player = who->ToPlayer();
+            if (!player)
+                return;
+
+            if (player->GetQuestStatus(QUEST_LESSONS_OF_BURNING_SCROLL) == QUEST_STATUS_INCOMPLETE && !player->HasItemCount(ITEM_MASTERS_FLAME) && !me->HasAura(SPELL_MASTERS_FLAME))
+                me->AddAura(SPELL_MASTERS_FLAME, me);
+        }
+
+        void UpdateAI(uint32 const diff)
+        {
+            // In case noone used spellclick - reset questgiver flag in periodic way
+            if (me->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER))
+                return;
+
+            if (resetTimer <= diff)
+            {
+                me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+                resetTimer = 10000;
+            }
+            else
+                resetTimer -= diff;
+        }
+    };
 };
 
 class go_wandering_weapon_rack : public GameObjectScript

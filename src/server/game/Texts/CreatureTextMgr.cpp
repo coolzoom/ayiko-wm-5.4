@@ -38,7 +38,7 @@ class CreatureTextBuilder
 
         void operator()(WorldPacket* data, LocaleConstant locale, uint64 tguid) const
         {
-            std::string text = sCreatureTextMgr->GetLocalizedChatString(_source->GetEntry(), _textGroup, _textId, locale);
+            auto const &text = sCreatureTextMgr->GetLocalizedChatString(_source->GetEntry(), _textGroup, _textId, locale);
             auto const &localizedName = _source->GetNameForLocaleIdx(locale);
 
             _source->BuildMonsterChat(data, _msgType, text, _language, localizedName, tguid > 0 ? tguid : _targetGUID);

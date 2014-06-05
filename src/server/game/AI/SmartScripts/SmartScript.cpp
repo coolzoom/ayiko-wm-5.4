@@ -2157,7 +2157,7 @@ ObjectList* SmartScript::GetTargets(SmartScriptHolder const& e, Unit* invoker /*
     if (baseObject == NULL && trigger)
         baseObject = scriptTrigger;
 
-    WorldObjectList* l = new WorldObjectList();
+    ObjectList* l = new ObjectList();
     switch (e.GetTargetType())
     {
         case SMART_TARGET_SELF:
@@ -2303,13 +2303,13 @@ ObjectList* SmartScript::GetTargets(SmartScriptHolder const& e, Unit* invoker /*
             }
             else
             {
-                if (!trigger && !GetBaseObject())
+                if (!scriptTrigger && !GetBaseObject())
                 {
                     TC_LOG_ERROR("sql.sql", "SMART_TARGET_CREATURE_GUID can not be used without invoker and without entry");
                     break;
                 }
 
-                target = FindCreatureNear(trigger ? trigger : GetBaseObject(), e.target.unitGUID.guid);
+                target = FindCreatureNear(scriptTrigger ? scriptTrigger : GetBaseObject(), e.target.unitGUID.guid);
             }
 
             if (target)
@@ -2326,13 +2326,13 @@ ObjectList* SmartScript::GetTargets(SmartScriptHolder const& e, Unit* invoker /*
             }
             else
             {
-                if (!trigger && !GetBaseObject())
+                if (!scriptTrigger && !GetBaseObject())
                 {
                     TC_LOG_ERROR("sql.sql", "SMART_TARGET_GAMEOBJECT_GUID can not be used without invoker and without entry");
                     break;
                 }
 
-                target = FindGameObjectNear(trigger ? trigger : GetBaseObject(), e.target.goGUID.guid);
+                target = FindGameObjectNear(scriptTrigger ? scriptTrigger : GetBaseObject(), e.target.goGUID.guid);
             }
 
             if (target)

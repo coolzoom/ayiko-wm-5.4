@@ -693,7 +693,7 @@ public:
                     std::size_t qp = item->GetQueuePos();
                     if (qp > updateQueue.size())
                     {
-                        handler->PSendSysMessage("The item with slot %d and guid %u has its queuepos (%" PRIuPTR ") larger than the update queue size! ",
+                        handler->PSendSysMessage("The item with slot %d and guid %u has its queuepos (" SIZEFMTD ") larger than the update queue size! ",
                                                  item->GetSlot(), item->GetGUIDLow(), qp);
                         error = true;
                         continue;
@@ -701,7 +701,7 @@ public:
 
                     if (updateQueue[qp] == NULL)
                     {
-                        handler->PSendSysMessage("The item with slot %d and guid %u has its queuepos (%" PRIuPTR ") pointing to NULL in the queue!",
+                        handler->PSendSysMessage("The item with slot %d and guid %u has its queuepos (" SIZEFMTD ") pointing to NULL in the queue!",
                                                  item->GetSlot(), item->GetGUIDLow(), qp);
                         error = true;
                         continue;
@@ -709,7 +709,7 @@ public:
 
                     if (updateQueue[qp] != item)
                     {
-                        handler->PSendSysMessage("The item with slot %d and guid %u has a queuepos (%" PRIuPTR ") that points to another item in the queue (bag: %d, slot: %d, guid: %u)",
+                        handler->PSendSysMessage("The item with slot %d and guid %u has a queuepos (" SIZEFMTD ") that points to another item in the queue (bag: %d, slot: %d, guid: %u)",
                                                  item->GetSlot(), item->GetGUIDLow(), qp, updateQueue[qp]->GetBagSlot(), updateQueue[qp]->GetSlot(), updateQueue[qp]->GetGUIDLow());
                         error = true;
                         continue;
@@ -764,7 +764,7 @@ public:
                             std::size_t qp = item2->GetQueuePos();
                             if (qp > updateQueue.size())
                             {
-                                handler->PSendSysMessage("The item in bag %d at slot %d having guid %u has a queuepos (%" PRIuPTR ") larger than the update queue size!",
+                                handler->PSendSysMessage("The item in bag %d at slot %d having guid %u has a queuepos (" SIZEFMTD ") larger than the update queue size!",
                                                          bag->GetSlot(), item2->GetSlot(), item2->GetGUIDLow(), qp);
                                 error = true;
                                 continue;
@@ -772,7 +772,7 @@ public:
 
                             if (updateQueue[qp] == NULL)
                             {
-                                handler->PSendSysMessage("The item in bag %d at slot %d having guid %u has a queuepos (%" PRIuPTR ") that points to NULL in the queue!",
+                                handler->PSendSysMessage("The item in bag %d at slot %d having guid %u has a queuepos (" SIZEFMTD ") that points to NULL in the queue!",
                                                          bag->GetSlot(), item2->GetSlot(), item2->GetGUIDLow(), qp);
                                 error = true;
                                 continue;
@@ -780,7 +780,7 @@ public:
 
                             if (updateQueue[qp] != item2)
                             {
-                                handler->PSendSysMessage("The item in bag %d at slot %d having guid %u has a queuepos (%" PRIuPTR ") that points to another item in the queue (bag: %d, slot: %d, guid: %u)",
+                                handler->PSendSysMessage("The item in bag %d at slot %d having guid %u has a queuepos (" SIZEFMTD ") that points to another item in the queue (bag: %d, slot: %d, guid: %u)",
                                                          bag->GetSlot(), item2->GetSlot(), item2->GetGUIDLow(), qp, updateQueue[qp]->GetBagSlot(), updateQueue[qp]->GetSlot(), updateQueue[qp]->GetGUIDLow());
                                 error = true;
                                 continue;
@@ -804,14 +804,14 @@ public:
 
                 if (item->GetOwnerGUID() != player->GetGUID())
                 {
-                    handler->PSendSysMessage("queue(%" PRIuPTR "): For the item with guid %d, the owner's guid (%d) and the player's guid (%d) don't match!", i, item->GetGUIDLow(), GUID_LOPART(item->GetOwnerGUID()), player->GetGUIDLow());
+                    handler->PSendSysMessage("queue(" SIZEFMTD "): For the item with guid %d, the owner's guid (%d) and the player's guid (%d) don't match!", i, item->GetGUIDLow(), GUID_LOPART(item->GetOwnerGUID()), player->GetGUIDLow());
                     error = true;
                     continue;
                 }
 
                 if (item->GetQueuePos() != i)
                 {
-                    handler->PSendSysMessage("queue(%" PRIuPTR "): For the item with guid %d, the queuepos doesn't match it's position in the queue!", i, item->GetGUIDLow());
+                    handler->PSendSysMessage("queue(" SIZEFMTD "): For the item with guid %d, the queuepos doesn't match it's position in the queue!", i, item->GetGUIDLow());
                     error = true;
                     continue;
                 }
@@ -823,14 +823,14 @@ public:
 
                 if (test == NULL)
                 {
-                    handler->PSendSysMessage("queue(%" PRIuPTR "): The bag(%d) and slot(%d) values for the item with guid %d are incorrect, the player doesn't have any item at that position!", i, item->GetBagSlot(), item->GetSlot(), item->GetGUIDLow());
+                    handler->PSendSysMessage("queue(" SIZEFMTD "): The bag(%d) and slot(%d) values for the item with guid %d are incorrect, the player doesn't have any item at that position!", i, item->GetBagSlot(), item->GetSlot(), item->GetGUIDLow());
                     error = true;
                     continue;
                 }
 
                 if (test != item)
                 {
-                    handler->PSendSysMessage("queue(%" PRIuPTR "): The bag(%d) and slot(%d) values for the item with guid %d are incorrect, an item which guid is %d is there instead!", i, item->GetBagSlot(), item->GetSlot(), item->GetGUIDLow(), test->GetGUIDLow());
+                    handler->PSendSysMessage("queue(" SIZEFMTD "): The bag(%d) and slot(%d) values for the item with guid %d are incorrect, an item which guid is %d is there instead!", i, item->GetBagSlot(), item->GetSlot(), item->GetGUIDLow(), test->GetGUIDLow());
                     error = true;
                     continue;
                 }

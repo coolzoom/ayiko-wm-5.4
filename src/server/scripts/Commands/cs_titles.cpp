@@ -208,7 +208,7 @@ public:
 
         uint64 titles = 0;
 
-        sscanf(args, "%" SCNu64, &titles);
+        sscanf(args, UI64FMTD, &titles);
 
         Player* target = handler->getSelectedPlayer();
         if (!target)

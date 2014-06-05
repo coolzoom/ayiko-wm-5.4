@@ -272,7 +272,7 @@ void WorldSession::LogUnprocessedTail(WorldPacket* packet)
     if (!sLog->ShouldLog("network.opcode", LOG_LEVEL_TRACE) || packet->rpos() >= packet->wpos())
         return;
 
-    TC_LOG_TRACE("network.opcode", "Unprocessed tail data (read stop at %" PRIuPTR " from %" PRIuPTR ") Opcode 0x%04X from player %s, account %u",
+    TC_LOG_TRACE("network.opcode", "Unprocessed tail data (read stop at " SIZEFMTD " from " SIZEFMTD ") Opcode 0x%04X from player %s, account %u",
                  packet->rpos(), packet->wpos(), packet->GetOpcode(), GetPlayerName().c_str(), GetAccountId());
 
     packet->print_storage();

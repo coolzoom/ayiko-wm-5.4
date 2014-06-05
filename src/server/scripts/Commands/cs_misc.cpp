@@ -161,7 +161,7 @@ public:
 
         if(Transport * transport = object->GetTransport())
         {
-            handler->PSendSysMessage("Transport GUID: %" PRIu64, transport->GetGUID());
+            handler->PSendSysMessage("Transport GUID: " UI64FMTD, transport->GetGUID());
             handler->PSendSysMessage("Transport Entry: %u (%s)", transport->GetEntry(), transport->GetName().c_str());
             handler->PSendSysMessage("Offset %f %f %f O: %f", object->GetTransOffsetX(), object->GetTransOffsetY(), object->GetTransOffsetZ(), object->GetTransOffsetO());
         }

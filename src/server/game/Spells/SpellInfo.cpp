@@ -15,14 +15,15 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "SpellAuraDefines.h"
 #include "SpellInfo.h"
+#include "SpellAuraDefines.h"
 #include "SpellMgr.h"
 #include "Spell.h"
 #include "DBCStores.h"
 #include "DB2Stores.h"
 #include "ConditionMgr.h"
 #include "Vehicle.h"
+#include "SpellAuras.h"
 
 uint32 GetTargetFlagMask(SpellTargetObjectTypes objType)
 {
@@ -1409,7 +1410,7 @@ bool SpellInfo::CanCritDamageClassNone() const
     switch (Id)
     {
         case 379:   // Shaman - Earth Shield
-        case 73685: // Shaman - Unleash Elements - Unleash Life 
+        case 73685: // Shaman - Unleash Elements - Unleash Life
 
         case 86958: // Shaman - Cleansing Waters
         case 86961:
@@ -3685,7 +3686,7 @@ bool SpellInfo::IsBreakingStealth(Unit* m_caster) const
 
     if (HasAttribute(SPELL_ATTR4_DAMAGE_DOESNT_BREAK_AURAS) || HasAttribute(SPELL_ATTR1_NOT_BREAK_STEALTH))
         return false;
- 
+
     return true;
 }
 

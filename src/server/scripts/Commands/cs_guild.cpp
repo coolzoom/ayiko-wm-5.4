@@ -37,20 +37,18 @@ public:
     {
         static ChatCommand guildCommandTable[] =
         {
-            { "create",         SEC_GAMEMASTER,     true,  &HandleGuildCreateCommand,           "", NULL },
-            { "delete",         SEC_GAMEMASTER,     true,  &HandleGuildDeleteCommand,           "", NULL },
-            { "invite",         SEC_GAMEMASTER,     true,  &HandleGuildInviteCommand,           "", NULL },
-            { "uninvite",       SEC_GAMEMASTER,     true,  &HandleGuildUninviteCommand,         "", NULL },
-            { "rank",           SEC_GAMEMASTER,     true,  &HandleGuildRankCommand,             "", NULL },
-            { "rename",         SEC_GAMEMASTER,     true,  &HandleGuildRenameCommand,           "", NULL },
-            { "givexp",         SEC_GAMEMASTER,     true,  &HandleGuildXpCommand,               "", NULL },
-            { "levelup",        SEC_GAMEMASTER,     true,  &HandleGuildLevelUpCommand,          "", NULL },
+            { "create",     rbac::RBAC_PERM_COMMAND_GUILD_CREATE,     true, &HandleGuildCreateCommand,     "", NULL },
+            { "delete",     rbac::RBAC_PERM_COMMAND_GUILD_DELETE,     true, &HandleGuildDeleteCommand,     "", NULL },
+            { "invite",     rbac::RBAC_PERM_COMMAND_GUILD_INVITE,     true, &HandleGuildInviteCommand,     "", NULL },
+            { "uninvite",   rbac::RBAC_PERM_COMMAND_GUILD_UNINVITE,   true, &HandleGuildUninviteCommand,   "", NULL },
+            { "rank",       rbac::RBAC_PERM_COMMAND_GUILD_RANK,       true, &HandleGuildMemberRankCommand, "", NULL },
+            { "rename",     rbac::RBAC_PERM_COMMAND_GUILD_RENAME,     true, &HandleGuildRenameCommand,     "", NULL },
             { NULL,             0,                  false, NULL,                                "", NULL }
         };
         static ChatCommand commandTable[] =
         {
-            { "guild",          SEC_ADMINISTRATOR,  true, NULL,                                 "", guildCommandTable },
-            { NULL,             0,                  false, NULL,                                "", NULL }
+            { "guild", rbac::RBAC_PERM_COMMAND_GUILD,  true, NULL, "", guildCommandTable },
+            { NULL,    0,                       false, NULL, "", NULL }
         };
         return commandTable;
     }
@@ -170,7 +168,7 @@ public:
         return true;
     }
 
-    static bool HandleGuildRankCommand(ChatHandler* handler, char const* args)
+    static bool HandleGuildMemberRankCommand(ChatHandler* handler, char const* args)
     {
         char* nameStr;
         char* rankStr;
@@ -193,7 +191,7 @@ public:
             return false;
 
         uint8 newRank = uint8(atoi(rankStr));
-       return targetGuild->ChangeMemberRank(targetGuid, newRank);
+        return targetGuild->ChangeMemberRank(targetGuid, newRank);
     }
 
     static bool HandleGuildRenameCommand(ChatHandler* handler, char const* _args)

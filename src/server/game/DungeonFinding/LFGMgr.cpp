@@ -28,6 +28,7 @@
 #include "LFGScripts.h"
 #include "LFGGroupData.h"
 #include "LFGPlayerData.h"
+#include "RBAC.h"
 
 #include "Group.h"
 #include "Player.h"
@@ -72,6 +73,40 @@ LFGMgr::~LFGMgr()
 
     for (LfgRoleCheckMap::iterator it = m_RoleChecks.begin(); it != m_RoleChecks.end(); ++it)
         delete it->second;
+}
+
+std::string GetRolesString(uint8 roles)
+{
+    std::string rolesstr = "";
+
+    if (roles & ROLE_TANK)
+        rolesstr.append(sObjectMgr->GetTrinityStringForDBCLocale(LANG_LFG_ROLE_TANK));
+
+    if (roles & ROLE_HEALER)
+    {
+        if (!rolesstr.empty())
+            rolesstr.append(", ");
+        rolesstr.append(sObjectMgr->GetTrinityStringForDBCLocale(LANG_LFG_ROLE_HEALER));
+    }
+
+    if (roles & ROLE_DAMAGE)
+    {
+        if (!rolesstr.empty())
+            rolesstr.append(", ");
+        rolesstr.append(sObjectMgr->GetTrinityStringForDBCLocale(LANG_LFG_ROLE_DAMAGE));
+    }
+
+    if (roles & ROLE_LEADER)
+    {
+        if (!rolesstr.empty())
+            rolesstr.append(", ");
+        rolesstr.append(sObjectMgr->GetTrinityStringForDBCLocale(LANG_LFG_ROLE_LEADER));
+    }
+
+    if (rolesstr.empty())
+        rolesstr.append(sObjectMgr->GetTrinityStringForDBCLocale(LANG_LFG_ROLE_NONE));
+
+    return rolesstr;
 }
 
 void LFGMgr::_LoadFromDB(Field* fields, uint64 guid)
@@ -537,8 +572,10 @@ void LFGMgr::InitializeLockedDungeons(Player* player)
     uint64 guid = player->GetGUID();
     uint8 level = player->getLevel();
     uint8 expansion = player->GetSession()->Expansion();
-    LfgDungeonSet dungeons = GetDungeonsByRandom(0);
+
+    LfgDungeonSet const &dungeons = GetDungeonsByRandom(0);
     LfgLockMap lock;
+    bool denyJoin = !player->GetSession()->HasPermission(rbac::RBAC_PERM_JOIN_DUNGEON_FINDER);
 
     for (LfgDungeonSet::const_iterator it = dungeons.begin(); it != dungeons.end(); ++it)
     {
@@ -561,7 +598,9 @@ void LFGMgr::InitializeLockedDungeons(Player* player)
                 LevelMax = ar->levelMax;
         }
 
-        if (dungeon->expansion > expansion)
+        if (denyJoin)
+            lockData.lockstatus = LFG_LOCKSTATUS_ATTUNEMENT_TOO_HIGH_LEVEL;
+        else if (dungeon->expansion > expansion)
             lockData.lockstatus = LFG_LOCKSTATUS_INSUFFICIENT_EXPANSION;
         else if (DisableMgr::IsDisabledFor(DISABLE_TYPE_MAP, dungeon->map, player))
             lockData.lockstatus = LFG_LOCKSTATUS_RAID_LOCKED;

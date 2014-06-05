@@ -304,11 +304,20 @@ public:
 
                 if (SpectralBlastTimer <= diff)
                 {
-                    std::list<HostileReference*> &m_threatlist = me->getThreatManager().getThreatList();
+                    ThreatContainer::StorageType const& m_threatlist = me->getThreatManager().getThreatList();
                     std::list<Unit*> targetList;
-                    for (std::list<HostileReference*>::const_iterator itr = m_threatlist.begin(); itr!= m_threatlist.end(); ++itr)
-                        if (me->getVictim() && (*itr)->getTarget() && (*itr)->getTarget()->GetTypeId() == TYPEID_PLAYER && (*itr)->getTarget()->GetGUID() != me->getVictim()->GetGUID() && !(*itr)->getTarget()->HasAura(AURA_SPECTRAL_EXHAUSTION) && (*itr)->getTarget()->GetPositionZ() > me->GetPositionZ()-5)
-                            targetList.push_back((*itr)->getTarget());
+                    for (ThreatContainer::StorageType::const_iterator itr = m_threatlist.begin(); itr!= m_threatlist.end(); ++itr)
+                    {
+                        Unit* target = (*itr)->getTarget();
+                        if (target
+                                && target->GetTypeId() == TYPEID_PLAYER
+                                && target->GetGUID() != me->getVictim()->GetGUID()
+                                && target->GetPositionZ() > me->GetPositionZ() - 5
+                                && !target->HasAura(AURA_SPECTRAL_EXHAUSTION))
+                        {
+                            targetList.push_back(target);
+                        }
+                    }
                     if (targetList.empty())
                     {
                         SpectralBlastTimer = 1000;

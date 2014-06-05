@@ -75,49 +75,65 @@ bool GmTicket::LoadFromDB(Field* fields)
     //     0       1     2      3          4        5      6     7     8           9            10         11         12        13        14        15
     // ticketId, guid, name, message, createTime, mapId, posX, posY, posZ, lastModifiedTime, closedBy, assignedTo, comment, completed, escalated, viewed
     uint8 index = 0;
-    _id                 = fields[  index].GetUInt32();
-    _playerGuid         = MAKE_NEW_GUID(fields[++index].GetUInt32(), 0, HIGHGUID_PLAYER);
-    _playerName         = fields[++index].GetString();
-    _message            = fields[++index].GetString();
-    _createTime         = fields[++index].GetUInt32();
-    _mapId              = fields[++index].GetUInt16();
-    _posX               = fields[++index].GetFloat();
-    _posY               = fields[++index].GetFloat();
-    _posZ               = fields[++index].GetFloat();
-    _lastModifiedTime   = fields[++index].GetUInt32();
-    _closedBy           = fields[++index].GetInt32();
-    _assignedTo         = MAKE_NEW_GUID(fields[++index].GetUInt32(), 0, HIGHGUID_PLAYER);
-    _comment            = fields[++index].GetString();
-    _completed          = fields[++index].GetBool();
-    _escalatedStatus    = GMTicketEscalationStatus(fields[++index].GetUInt8());
-    _viewed             = fields[++index].GetBool();
-    _haveTicket         = fields[++index].GetBool();
+
+    _id = fields[index++].GetUInt32();
+
+    if (auto const lowGuid = fields[index++].GetUInt32())
+        _playerGuid = MAKE_NEW_GUID(lowGuid, 0, HIGHGUID_PLAYER);
+    else
+        _playerGuid = 0;
+
+    _playerName = fields[index++].GetString();
+    _message = fields[index++].GetString();
+    _createTime = fields[index++].GetUInt32();
+    _mapId = fields[index++].GetUInt16();
+    _posX = fields[index++].GetFloat();
+    _posY = fields[index++].GetFloat();
+    _posZ = fields[index++].GetFloat();
+    _lastModifiedTime = fields[index++].GetUInt32();
+
+    if (auto const lowGuid = fields[index++].GetUInt32())
+        _closedBy = MAKE_NEW_GUID(lowGuid, 0, HIGHGUID_PLAYER);
+    else
+        _closedBy = 0;
+
+    if (auto const lowGuid = fields[index++].GetUInt32())
+        _assignedTo = MAKE_NEW_GUID(lowGuid, 0, HIGHGUID_PLAYER);
+    else
+        _assignedTo = 0;
+
+    _comment = fields[index++].GetString();
+    _completed = fields[index++].GetBool();
+    _escalatedStatus = GMTicketEscalationStatus(fields[index++].GetUInt8());
+    _viewed = fields[index++].GetBool();
+    _haveTicket = fields[index++].GetBool();
+
     return true;
 }
 
-void GmTicket::SaveToDB(SQLTransaction& trans) const
+void GmTicket::SaveToDB(SQLTransaction trans) const
 {
     //     0       1     2      3          4        5      6     7     8           9            10         11         12        13        14        15
     // ticketId, guid, name, message, createTime, mapId, posX, posY, posZ, lastModifiedTime, closedBy, assignedTo, comment, completed, escalated, viewed
     uint8 index = 0;
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_GM_TICKET);
-    stmt->setUInt32(  index, _id);
-    stmt->setUInt32(++index, GUID_LOPART(_playerGuid));
-    stmt->setString(++index, _playerName);
-    stmt->setString(++index, _message);
-    stmt->setUInt32(++index, uint32(_createTime));
-    stmt->setUInt16(++index, _mapId);
-    stmt->setFloat (++index, _posX);
-    stmt->setFloat (++index, _posY);
-    stmt->setFloat (++index, _posZ);
-    stmt->setUInt32(++index, uint32(_lastModifiedTime));
-    stmt->setInt32 (++index, GUID_LOPART(_closedBy));
-    stmt->setUInt32(++index, GUID_LOPART(_assignedTo));
-    stmt->setString(++index, _comment);
-    stmt->setBool  (++index, _completed);
-    stmt->setUInt8 (++index, uint8(_escalatedStatus));
-    stmt->setBool  (++index, _viewed);
-    stmt->setBool  (++index, _haveTicket);
+    stmt->setUInt32(index++, _id);
+    stmt->setUInt32(index++, GUID_LOPART(_playerGuid));
+    stmt->setString(index++, _playerName);
+    stmt->setString(index++, _message);
+    stmt->setUInt32(index++, uint32(_createTime));
+    stmt->setUInt16(index++, _mapId);
+    stmt->setFloat(index++, _posX);
+    stmt->setFloat(index++, _posY);
+    stmt->setFloat(index++, _posZ);
+    stmt->setUInt32(index++, uint32(_lastModifiedTime));
+    stmt->setUInt32(index++, GUID_LOPART(_closedBy));
+    stmt->setUInt32(index++, GUID_LOPART(_assignedTo));
+    stmt->setString(index++, _comment);
+    stmt->setBool(index++, _completed);
+    stmt->setUInt8(index++, uint8(_escalatedStatus));
+    stmt->setBool(index++, _viewed);
+    stmt->setBool(index++, _haveTicket);
 
     CharacterDatabase.ExecuteOrAppend(trans, stmt);
 }
@@ -336,13 +352,13 @@ void TicketMgr::AddTicket(GmTicket* ticket)
     ticket->SaveToDB(trans);
 }
 
-void TicketMgr::CloseTicket(uint32 ticketId, int64 source)
+void TicketMgr::CloseTicket(uint32 ticketId, uint64 sourceGuid)
 {
     if (GmTicket* ticket = GetTicket(ticketId))
     {
         SQLTransaction trans = SQLTransaction(NULL);
-        ticket->SetClosedBy(source);
-        if (source)
+        ticket->SetClosedBy(sourceGuid);
+        if (sourceGuid)
             --_openTicketCount;
         ticket->SaveToDB(trans);
     }

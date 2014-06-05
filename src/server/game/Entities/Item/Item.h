@@ -223,9 +223,11 @@ class Item : public Object
 
         ItemTemplate const* GetTemplate() const;
 
-        uint64 GetOwnerGUID()    const { return GetUInt64Value(ITEM_FIELD_OWNER); }
+        uint64 GetOwnerGUID() const { return GetUInt64Value(ITEM_FIELD_OWNER); }
         void SetOwnerGUID(uint64 guid) { SetUInt64Value(ITEM_FIELD_OWNER, guid); }
-        Player* GetOwner()const;
+
+        Player const * GetOwner() const;
+        Player * GetOwner();
 
         void SetBinding(bool val) { ApplyModFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_SOULBOUND, val); }
         bool IsSoulBound() const { return HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_SOULBOUND); }
@@ -237,8 +239,9 @@ class Item : public Object
         static void DeleteFromDB(SQLTransaction& trans, uint32 itemGuid);
         virtual void DeleteFromDB(SQLTransaction& trans);
         static void DeleteFromInventoryDB(SQLTransaction& trans, uint32 itemGuid);
+
         void DeleteFromInventoryDB(SQLTransaction& trans);
-        void SaveRefundDataToDB();
+        void SaveRefundDataToDB(SQLTransaction& trans);
         void DeleteRefundDataFromDB(SQLTransaction* trans);
 
         Bag* ToBag() { if (IsBag()) return reinterpret_cast<Bag*>(this); else return NULL; }

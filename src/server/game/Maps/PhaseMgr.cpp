@@ -17,9 +17,11 @@
 
 #include "PhaseMgr.h"
 #include "Chat.h"
+#include "Group.h"
+#include "Language.h"
 #include "ObjectMgr.h"
-#include "ConditionMgr.h"
-
+#include "Player.h"
+#include "SpellAuraEffects.h"
 
 //////////////////////////////////////////////////////////////////
 // Updating
@@ -87,9 +89,9 @@ void PhaseMgr::Recalculate()
         _UpdateFlags |= (PHASE_UPDATE_FLAG_CLIENTSIDE_CHANGED | PHASE_UPDATE_FLAG_SERVERSIDE_CHANGED);
     }
 
-    PhaseDefinitionStore::const_iterator itr = _PhaseDefinitionStore->find(player->GetZoneId());
+    auto itr = _PhaseDefinitionStore->find(player->GetZoneId());
     if (itr != _PhaseDefinitionStore->end())
-        for (PhaseDefinitionContainer::const_iterator phase = itr->second.begin(); phase != itr->second.end(); ++phase)
+        for (auto phase = itr->second.begin(); phase != itr->second.end(); ++phase)
             if (CheckDefinition(&(*phase)))
             {
                 phaseData.AddPhaseDefinition(&(*phase));
@@ -112,10 +114,10 @@ inline bool PhaseMgr::CheckDefinition(PhaseDefinition const* phaseDefinition)
 
 bool PhaseMgr::NeedsPhaseUpdateWithData(PhaseUpdateData const updateData) const
 {
-    PhaseDefinitionStore::const_iterator itr = _PhaseDefinitionStore->find(player->GetZoneId());
+    auto itr = _PhaseDefinitionStore->find(player->GetZoneId());
     if (itr != _PhaseDefinitionStore->end())
     {
-        for (PhaseDefinitionContainer::const_iterator phase = itr->second.begin(); phase != itr->second.end(); ++phase)
+        for (auto phase = itr->second.begin(); phase != itr->second.end(); ++phase)
         {
             ConditionList conditionList = sConditionMgr->GetConditionsForPhaseDefinition(phase->zoneId, phase->entry);
             for (ConditionList::const_iterator condition = conditionList.begin(); condition != conditionList.end(); ++condition)
@@ -176,14 +178,15 @@ void PhaseMgr::UnRegisterPhasingAuraEffect(AuraEffect const* auraEffect)
 
 void PhaseMgr::SendDebugReportToPlayer(Player* const debugger)
 {
-    ChatHandler(debugger).PSendSysMessage(LANG_PHASING_REPORT_STATUS, player->GetName(), player->GetZoneId(), player->getLevel(), player->GetTeamId(), _UpdateFlags);
+    ChatHandler(debugger)
+        .PSendSysMessage(LANG_PHASING_REPORT_STATUS, player->GetName().c_str(), player->GetZoneId(), player->getLevel(), player->GetTeamId(), _UpdateFlags);
 
-    PhaseDefinitionStore::const_iterator itr = _PhaseDefinitionStore->find(player->GetZoneId());
+    auto itr = _PhaseDefinitionStore->find(player->GetZoneId());
     if (itr == _PhaseDefinitionStore->end())
         ChatHandler(debugger).PSendSysMessage(LANG_PHASING_NO_DEFINITIONS, player->GetZoneId());
     else
     {
-        for (PhaseDefinitionContainer::const_iterator phase = itr->second.begin(); phase != itr->second.end(); ++phase)
+        for (auto phase = itr->second.begin(); phase != itr->second.end(); ++phase)
         {
             if (CheckDefinition(&(*phase)))
                 ChatHandler(debugger).PSendSysMessage(LANG_PHASING_SUCCESS, phase->entry, phase->IsNegatingPhasemask() ? "negated Phase" : "Phase", phase->phasemask);
@@ -248,8 +251,8 @@ void PhaseData::SendPhaseMaskToPlayer()
 void PhaseData::SendPhaseshiftToPlayer()
 {
     // Client side update
-    std::set<uint32> phaseIds;
-    std::set<uint32> terrainswaps;
+    PhaseShiftSet phaseIds;
+    PhaseShiftSet terrainswaps;
 
     for (auto const &kvPair : spellPhaseInfo)
     {

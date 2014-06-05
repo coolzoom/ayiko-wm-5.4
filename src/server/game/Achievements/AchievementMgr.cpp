@@ -41,6 +41,7 @@
 #include "InstanceScript.h"
 #include "Group.h"
 #include "Chat.h"
+#include "LexicalCast.h"
 
 namespace Trinity
 {
@@ -51,8 +52,7 @@ namespace Trinity
                 : i_player(player), i_msgtype(msgtype), i_textId(textId), i_achievementId(ach_id) {}
             void operator()(WorldPacket& data, LocaleConstant loc_idx)
             {
-                char const* text = sObjectMgr->GetTrinityString(i_textId, loc_idx);
-
+                auto const &text = sObjectMgr->GetTrinityString(i_textId, loc_idx);
                 ChatHandler::FillMessageData(&data, i_player.GetSession(), i_msgtype, LANG_UNIVERSAL, NULL, i_player.GetGUID(), text, NULL, NULL, i_achievementId);
             }
 
@@ -999,7 +999,7 @@ void AchievementMgr<Guild>::LoadFromDB(PreparedQueryResult achievementResult, Pr
             ca.date = time_t(fields[1].GetUInt32());
             Tokenizer guids(fields[2].GetString(), ' ');
             for (uint32 i = 0; i < guids.size(); ++i)
-                ca.guids.insert(MAKE_NEW_GUID(atol(guids[i]), 0, HIGHGUID_PLAYER));
+                ca.guids.insert(MAKE_NEW_GUID(Trinity::lexicalCast<uint32>(guids[i]), 0, HIGHGUID_PLAYER));
 
             ca.changed = false;
             _achievementPoints += achievement->points;
@@ -1085,8 +1085,8 @@ void AchievementMgr<Player>::Reset()
     criteriaProgress->clear();
     DeleteFromDB(GetOwner()->GetGUIDLow());
 
-    // Re-fill data
-    CheckAllAchievementCriteria(GetOwner());
+    // re-fill data
+    GetOwner()->CheckAllAchievementCriteria();
 }
 
 template<>
@@ -1137,7 +1137,7 @@ void AchievementMgr<T>::SendAchievementEarned(AchievementEntry const* achievemen
     if (achievement->flags & (ACHIEVEMENT_FLAG_REALM_FIRST_KILL | ACHIEVEMENT_FLAG_REALM_FIRST_REACH))
     {
         // Broadcast realm first reached
-        WorldPacket data(SMSG_SERVER_FIRST_ACHIEVEMENT, strlen(GetOwner()->GetName()) + 1 + 8 + 4 + 4);
+        WorldPacket data(SMSG_SERVER_FIRST_ACHIEVEMENT, GetOwner()->GetName().length() + 1 + 8 + 4 + 4);
         data << GetOwner()->GetName();
         data << uint64(GetOwner()->GetGUID());
         data << uint32(achievement->ID);
@@ -1288,17 +1288,6 @@ template<class T>
 CriteriaProgressMap* AchievementMgr<T>::GetCriteriaProgressMap()
 {
     return &m_criteriaProgress;
-}
-
-/**
- * Called at player login. The player might have fulfilled some achievements when the achievement system wasn't working yet
- */
-template<class T>
-void AchievementMgr<T>::CheckAllAchievementCriteria(Player* referencePlayer)
-{
-    // Suppress sending packets
-    for (uint32 i=0; i<ACHIEVEMENT_CRITERIA_TYPE_TOTAL; ++i)
-        UpdateAchievementCriteria(AchievementCriteriaTypes(i), 0, 0, 0, NULL, referencePlayer);
 }
 
 static const uint32 achievIdByArenaSlot[MAX_ARENA_SLOT] = {1057, 1107, 1108};
@@ -2217,6 +2206,7 @@ void AchievementMgr<T>::CompletedAchievement(AchievementEntry const* achievement
         SQLTransaction trans = CharacterDatabase.BeginTransaction();
         if (item)
         {
+            item->SetOwnerGUID(0);
             // Save new item before send
             item->SaveToDB(trans);                               // Save for prevent lost at next mail load, if send fail then item will deleted
 

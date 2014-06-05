@@ -16,16 +16,15 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Chat.h"
 #include "Common.h"
 #include "ObjectMgr.h"
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "DatabaseEnv.h"
-
 #include "AccountMgr.h"
 #include "CellImpl.h"
-#include "Chat.h"
 #include "GridNotifiersImpl.h"
 #include "Language.h"
 #include "Log.h"
@@ -37,6 +36,7 @@
 #include "ScriptMgr.h"
 #include "ChatLink.h"
 #include "Guild.h"
+#include "LexicalCast.h"
 
 bool ChatHandler::load_command_table = true;
 
@@ -125,8 +125,7 @@ const char *ChatHandler::GetTrinityString(int32 entry) const
 
 bool ChatHandler::isAvailable(ChatCommand const& cmd) const
 {
-    // check security level only for simple  command (without child commands)
-    return m_session->GetSecurity() >= AccountTypes(cmd.SecurityLevel);
+    return HasPermission(cmd.Permission);
 }
 
 bool ChatHandler::HasLowerSecurity(Player* target, uint64 guid, bool strong)
@@ -149,7 +148,7 @@ bool ChatHandler::HasLowerSecurity(Player* target, uint64 guid, bool strong)
     return HasLowerSecurityAccount(target_session, target_account, strong);
 }
 
-bool ChatHandler::HasLowerSecurityAccount(WorldSession* target, uint32 target_account, bool strong)
+bool ChatHandler::HasLowerSecurityAccount(WorldSession const *target, uint32 target_account, bool strong)
 {
     uint32 target_sec;
 
@@ -158,15 +157,21 @@ bool ChatHandler::HasLowerSecurityAccount(WorldSession* target, uint32 target_ac
         return false;
 
     // ignore only for non-players for non strong checks (when allow apply command at least to same sec level)
-    if (!AccountMgr::IsPlayerAccount(m_session->GetSecurity()) && !strong && !sWorld->getBoolConfig(CONFIG_GM_LOWER_SECURITY))
+    if (m_session->HasPermission(rbac::RBAC_PERM_CHECK_FOR_LOWER_SECURITY) && !strong && !sWorld->getBoolConfig(CONFIG_GM_LOWER_SECURITY))
         return false;
 
-    if (target)
+    // our own account should not be affected by `strong` parameter
+    if (m_session == target || m_session->GetAccountId() == target_account)
+        return false;
+
+    if (target) {
         target_sec = target->GetSecurity();
-    else if (target_account)
+    } else if (target_account) {
         target_sec = AccountMgr::GetSecurity(target_account, realmID);
-    else
-        return true;                                        // caller must report error for (target == NULL && target_account == 0)
+    } else {
+        // caller must report error for (target == NULL && target_account == 0)
+        return true;
+    }
 
     AccountTypes target_ac_sec = AccountTypes(target_sec);
     if (m_session->GetSecurity() < target_ac_sec || (strong && m_session->GetSecurity() <= target_ac_sec))
@@ -308,9 +313,7 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand* table, const char* text, co
                 if (!hasStringAbbr(table[j].Name, cmd.c_str()))
                     continue;
 
-                if (strcmp(table[j].Name, cmd.c_str()) != 0)
-                    continue;
-                else
+                if (strcmp(table[j].Name, cmd.c_str()) == 0)
                 {
                     match = true;
                     break;
@@ -325,7 +328,7 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand* table, const char* text, co
         {
             if (!ExecuteCommandInTable(table[i].ChildCommands, text, fullcmd))
             {
-                if (text && text[0] != '\0')
+                if (text[0] != '\0')
                     SendSysMessage(LANG_NO_SUBCMD);
                 else
                     SendSysMessage(LANG_CMD_SYNTAX);
@@ -340,34 +343,39 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand* table, const char* text, co
         if (!table[i].Handler || !isAvailable(table[i]))
             continue;
 
-        SetSentErrorMessage(false);
-        // table[i].Name == "" is special case: send original command to handler
-        if ((table[i].Handler)(this, table[i].Name[0] != '\0' ? text : oldtext))
+
+        if (GetSession() && !AccountMgr::IsPlayerAccount(GetSession()->GetSecurity()))
         {
-            if (!AccountMgr::IsPlayerAccount(table[i].SecurityLevel))
+            Player const * const player = GetSession()->GetPlayer();
+
+            uint64 guid = player->GetSelection();
+            uint32 areaId = player->GetAreaId();
+            std::string areaName = "Unknown";
+            std::string zoneName = "Unknown";
+            if (AreaTableEntry const* area = GetAreaEntryByAreaID(areaId))
             {
-                // chat case
-                if (m_session)
-                {
-                    Player* p = m_session->GetPlayer();
-                    Player* selected = p->GetSelectedPlayer();
-                    uint32 sel_guid = 0;
-                    std::string sel_name = "ERROR";
-
-                    if (selected)
-                    {
-                        sel_guid = selected->GetGUIDLow();
-                        sel_name = selected->GetName();
-                    }
-
-                    sLog->outCommand(m_session->GetAccountId(), "Command: %s [Player: %s (Account: %u) X: %f Y: %f Z: %f Map: %u Selected %s: %s (GUID: %u)]",
-                                     fullcmd.c_str(), p->GetName(), m_session->GetAccountId(), p->GetPositionX(), p->GetPositionY(), p->GetPositionZ(), p->GetMapId(),
-                                     GetLogNameForGuid(sel_guid), (p->GetSelectedUnit()) ? p->GetSelectedUnit()->GetName() : "", GUID_LOPART(sel_guid));
-                }
+                areaName = area->area_name;
+                if (AreaTableEntry const* zone = GetAreaEntryByAreaID(area->zone))
+                    zoneName = zone->area_name;
             }
+
+            sLog->outCommand(m_session->GetAccountId(), "Command: %s [Player: %s (Guid: %u) (Account: %u) X: %f Y: %f Z: %f Map: %u (%s) Area: %u (%s) Zone: %s Selected %s: %s (GUID: %u)]",
+                             fullcmd.c_str(), player->GetName().c_str(), GUID_LOPART(player->GetGUID()),
+                             m_session->GetAccountId(), player->GetPositionX(), player->GetPositionY(),
+                             player->GetPositionZ(), player->GetMapId(),
+                             player->GetMap() ? player->GetMap()->GetMapName() : "Unknown",
+                             areaId, areaName.c_str(), zoneName.c_str(), GetLogNameForGuid(guid),
+                             (player->GetSelectedUnit()) ? player->GetSelectedUnit()->GetName().c_str() : "",
+                             GUID_LOPART(guid));
         }
+
+        SetSentErrorMessage(false);
+
+        // table[i].Name == "" is special case: send original command to handler
+        bool const ok = table[i].Handler(this, table[i].Name[0] != '\0' ? text : oldtext);
+
         // some commands have custom error messages. Don't send the default one in these cases.
-        else if (!HasSentErrorMessage())
+        if (!ok && !HasSentErrorMessage())
         {
             if (!table[i].Help.empty())
                 SendSysMessage(table[i].Help.c_str());
@@ -381,7 +389,7 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand* table, const char* text, co
     return false;
 }
 
-bool ChatHandler::SetDataForCommandInTable(ChatCommand* table, const char* text, uint32 security, std::string const& help, std::string const& fullcommand)
+bool ChatHandler::SetDataForCommandInTable(ChatCommand* table, char const* text, uint32 permission, std::string const& help, std::string const& fullcommand)
 {
     std::string cmd = "";
 
@@ -402,7 +410,7 @@ bool ChatHandler::SetDataForCommandInTable(ChatCommand* table, const char* text,
         // select subcommand from child commands list (including "")
         if (table[i].ChildCommands != NULL)
         {
-            if (SetDataForCommandInTable(table[i].ChildCommands, text, security, help, fullcommand))
+            if (SetDataForCommandInTable(table[i].ChildCommands, text, permission, help, fullcommand))
                 return true;
             else if (*text)
                 return false;
@@ -416,10 +424,10 @@ bool ChatHandler::SetDataForCommandInTable(ChatCommand* table, const char* text,
             return false;
         }
 
-        if (table[i].SecurityLevel != security)
-            TC_LOG_INFO("misc", "Table `command` overwrite for command '%s' default security (%u) by %u", fullcommand.c_str(), table[i].SecurityLevel, security);
+        if (table[i].Permission != permission)
+            TC_LOG_INFO("misc", "Table `command` overwrite for command '%s' default permission (%u) by %u", fullcommand.c_str(), table[i].Permission, permission);
 
-        table[i].SecurityLevel = security;
+        table[i].Permission = permission;
         table[i].Help          = help;
         return true;
     }
@@ -434,33 +442,31 @@ bool ChatHandler::SetDataForCommandInTable(ChatCommand* table, const char* text,
     }
 
     return false;
+
 }
 
-int ChatHandler::ParseCommands(const char* text)
+bool ChatHandler::ParseCommands(const char* text)
 {
     ASSERT(text);
     ASSERT(*text);
 
     std::string fullcmd = text;
 
-    if (m_session && AccountMgr::IsPlayerAccount(m_session->GetSecurity()) && !sWorld->getBoolConfig(CONFIG_ALLOW_PLAYER_COMMANDS))
-       return 0;
-
     /// chat case (.command or !command format)
     if (m_session)
     {
         if (text[0] != '!' && text[0] != '.')
-            return 0;
+            return false;
     }
 
     /// ignore single . and ! in line
     if (strlen(text) < 2)
-        return 0;
+        return false;
     // original `text` can't be used. It content destroyed in command code processing.
 
     /// ignore messages staring from many dots.
     if ((text[0] == '.' && text[1] == '.') || (text[0] == '!' && text[1] == '!'))
-        return 0;
+        return false;
 
     /// skip first . or ! (in console allowed use command with . and ! and without its)
     if (text[0] == '!' || text[0] == '.')
@@ -468,12 +474,12 @@ int ChatHandler::ParseCommands(const char* text)
 
     if (!ExecuteCommandInTable(getCommandTable(), text, fullcmd))
     {
-        if (m_session && AccountMgr::IsPlayerAccount(m_session->GetSecurity()))
-            return 0;
+        if (m_session && !m_session->HasPermission(rbac::RBAC_PERM_COMMANDS_NOTIFY_COMMAND_NOT_FOUND_ERROR))
+            return false;
 
         SendSysMessage(LANG_NO_CMD);
     }
-    return 1;
+    return true;
 }
 
 bool ChatHandler::isValidChatMessage(const char* message)
@@ -638,9 +644,9 @@ void ChatHandler::FillMessageData(WorldPacket* data, WorldSession* session, uint
 
     uint32 speakerNameLength = 0;
     if (speaker)
-        speakerNameLength = strlen(speaker->GetName());
+        speakerNameLength = speaker->GetName().length();
     else if (session)
-        speakerNameLength = strlen(session->GetPlayer()->GetName());
+        speakerNameLength = session->GetPlayer()->GetName().length();
 
     uint32 prefixeLength = addonPrefix ? strlen(addonPrefix) : 0;
 
@@ -650,7 +656,7 @@ void ChatHandler::FillMessageData(WorldPacket* data, WorldSession* session, uint
     {
         if (Unit* unit = ObjectAccessor::FindUnit(target_guid))
         {
-            targetLength = strlen(unit->GetName());
+            targetLength = unit->GetName().length();
             targetName = unit->GetName();
         }
     }
@@ -773,7 +779,7 @@ void ChatHandler::FillMessageData(WorldPacket* data, WorldSession* session, uint
     if (speakerNameLength && speakerPlayer)
     {
         data->FlushBits();
-        data->append(speakerPlayer->GetName(), speakerNameLength);
+        data->append(speakerPlayer->GetName().c_str(), speakerNameLength);
     }
 
     data->WriteByteSeq<6, 7, 1, 2, 4, 3, 0, 5>(groupGuid);
@@ -1041,7 +1047,7 @@ uint32 ChatHandler::extractSpellIdFromLink(char* text)
     if (!idS)
         return 0;
 
-    uint32 id = (uint32)atol(idS);
+    uint32 id = Trinity::lexicalCast<uint32>(idS);
 
     switch (type)
     {
@@ -1054,7 +1060,7 @@ uint32 ChatHandler::extractSpellIdFromLink(char* text)
             if (!talentEntry)
                 return 0;
 
-            int32 rank = param1_str ? (uint32)atol(param1_str) : 0;
+            int32 rank = param1_str ? Trinity::lexicalCast<int32>(param1_str) : 0;
             if (rank >= MAX_TALENT_RANK)
                 return 0;
 
@@ -1068,7 +1074,7 @@ uint32 ChatHandler::extractSpellIdFromLink(char* text)
             return id;
         case SPELL_LINK_GLYPH:
         {
-            uint32 glyph_prop_id = param1_str ? (uint32)atol(param1_str) : 0;
+            uint32 glyph_prop_id = param1_str ? Trinity::lexicalCast<uint32>(param1_str) : 0u;
 
             GlyphPropertiesEntry const* glyphPropEntry = sGlyphPropertiesStore.LookupEntry(glyph_prop_id);
             if (!glyphPropEntry)
@@ -1131,7 +1137,7 @@ uint64 ChatHandler::extractGuidFromLink(char* text)
             if (!normalizePlayerName(name))
                 return 0;
 
-            if (Player* player = sObjectAccessor->FindPlayerByName(name.c_str()))
+            if (Player* player = sObjectAccessor->FindPlayerByName(name))
                 return player->GetGUID();
 
             if (uint64 guid = sObjectMgr->GetPlayerGUIDByName(name))
@@ -1141,7 +1147,7 @@ uint64 ChatHandler::extractGuidFromLink(char* text)
         }
         case SPELL_LINK_CREATURE:
         {
-            uint32 lowguid = (uint32)atol(idS);
+            uint32 lowguid = Trinity::lexicalCast<uint32>(idS);
 
             if (CreatureData const* data = sObjectMgr->GetCreatureData(lowguid))
                 return MAKE_NEW_GUID(lowguid, data->id, HIGHGUID_UNIT);
@@ -1150,7 +1156,7 @@ uint64 ChatHandler::extractGuidFromLink(char* text)
         }
         case SPELL_LINK_GAMEOBJECT:
         {
-            uint32 lowguid = (uint32)atol(idS);
+            uint32 lowguid = Trinity::lexicalCast<uint32>(idS);
 
             if (GameObjectData const* data = sObjectMgr->GetGOData(lowguid))
                 return MAKE_NEW_GUID(lowguid, data->id, HIGHGUID_GAMEOBJECT);
@@ -1189,7 +1195,7 @@ bool ChatHandler::extractPlayerTarget(char* args, Player** player, uint64* playe
             return false;
         }
 
-        Player* pl = sObjectAccessor->FindPlayerByName(name.c_str());
+        Player* pl = sObjectAccessor->FindPlayerByName(name);
 
         // if allowed player pointer
         if (player)
@@ -1324,9 +1330,9 @@ bool ChatHandler::GetPlayerGroupAndGUIDByName(const char* cname, Player* &player
                 return false;
             }
 
-            player = sObjectAccessor->FindPlayerByName(name.c_str());
+            player = sObjectAccessor->FindPlayerByName(name);
             if (offline)
-                guid = sObjectMgr->GetPlayerGUIDByName(name.c_str());
+                guid = sObjectMgr->GetPlayerGUIDByName(name);
         }
     }
 

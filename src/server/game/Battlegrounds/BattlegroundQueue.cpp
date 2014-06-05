@@ -157,12 +157,6 @@ GroupQueueInfo* BattlegroundQueue::AddGroup(Player* leader, Group* grp, Battlegr
 
     uint32 lastOnlineTime = getMSTime();
 
-    //announce world (this don't need mutex)
-    /*if (isRated && sWorld->getBoolConfig(CONFIG_ARENA_QUEUE_ANNOUNCER_ENABLE))
-    {
-        sWorld->SendWorldText(LANG_ARENA_QUEUE_ANNOUNCE_WORLD_JOIN, Team->GetName().c_str(), ginfo->ArenaType, ginfo->ArenaType, ginfo->ArenaTeamRating);
-    }*/
-
     //add players from group to ginfo
     {
         //ACE_Guard<ACE_Recursive_Thread_Mutex> guard(m_Lock);
@@ -190,41 +184,6 @@ GroupQueueInfo* BattlegroundQueue::AddGroup(Player* leader, Group* grp, Battlegr
 
         //add GroupInfo to m_QueuedGroups
         m_QueuedGroups[bracketId][index].push_back(ginfo);
-
-        //announce to world, this code needs mutex
-        if (!isRated && !isPremade && sWorld->getBoolConfig(CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_ENABLE))
-        {
-            if (Battleground* bg = sBattlegroundMgr->GetBattlegroundTemplate(ginfo->BgTypeId))
-            {
-                char const* bgName = bg->GetName();
-                uint32 MinPlayers = bg->GetMinPlayersPerTeam();
-                uint32 qHorde = 0;
-                uint32 qAlliance = 0;
-                uint32 q_min_level = bracketEntry->minLevel;
-                uint32 q_max_level = bracketEntry->maxLevel;
-                GroupsQueueType::const_iterator itr;
-                for (itr = m_QueuedGroups[bracketId][BG_QUEUE_NORMAL_ALLIANCE].begin(); itr != m_QueuedGroups[bracketId][BG_QUEUE_NORMAL_ALLIANCE].end(); ++itr)
-                    if (!(*itr)->IsInvitedToBGInstanceGUID)
-                        qAlliance += (*itr)->Players.size();
-                for (itr = m_QueuedGroups[bracketId][BG_QUEUE_NORMAL_HORDE].begin(); itr != m_QueuedGroups[bracketId][BG_QUEUE_NORMAL_HORDE].end(); ++itr)
-                    if (!(*itr)->IsInvitedToBGInstanceGUID)
-                        qHorde += (*itr)->Players.size();
-
-                // Show queue status to player only (when joining queue)
-                if (sWorld->getBoolConfig(CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_PLAYERONLY))
-                {
-                    ChatHandler(leader).PSendSysMessage(LANG_BG_QUEUE_ANNOUNCE_SELF, bgName, q_min_level, q_max_level,
-                        qAlliance, (MinPlayers > qAlliance) ? MinPlayers - qAlliance : (uint32)0, qHorde, (MinPlayers > qHorde) ? MinPlayers - qHorde : (uint32)0);
-                }
-                // System message
-                else
-                {
-                    sWorld->SendWorldText(LANG_BG_QUEUE_ANNOUNCE_WORLD, bgName, q_min_level, q_max_level,
-                        qAlliance, (MinPlayers > qAlliance) ? MinPlayers - qAlliance : (uint32)0, qHorde, (MinPlayers > qHorde) ? MinPlayers - qHorde : (uint32)0);
-                }
-            }
-        }
-        //release mutex
     }
 
     return ginfo;
@@ -345,11 +304,6 @@ void BattlegroundQueue::RemovePlayer(uint64 guid, bool decreaseInvitedCount)
     // remove player queue info
     m_QueuedPlayers.erase(itr);
 
-    // announce to world if arena team left queue for rated match, show only once
-    /*if (group->ArenaType && group->IsRated && group->Players.empty() && sWorld->getBoolConfig(CONFIG_ARENA_QUEUE_ANNOUNCER_ENABLE))
-        if (ArenaTeam* Team = sArenaTeamMgr->GetArenaTeamById(group->ArenaTeamId))
-            sWorld->SendWorldText(LANG_ARENA_QUEUE_ANNOUNCE_WORLD_EXIT, Team->GetName().c_str(), group->ArenaType, group->ArenaType, group->ArenaTeamRating);*/
-
     // if player leaves queue and he is invited to rated arena match, then he have to lose
     if (group->IsInvitedToBGInstanceGUID && group->IsRated && decreaseInvitedCount)
     {
@@ -462,7 +416,9 @@ bool BattlegroundQueue::InviteGroupToBG(GroupQueueInfo* ginfo, Battleground* bg,
 
             uint32 queueSlot = player->GetBattlegroundQueueIndex(bgQueueTypeId);
 
-            TC_LOG_DEBUG("bg.battleground", "Battleground: invited player %s (%u) to BG instance %u queueindex %u bgtype %u, I can't help it if they don't press the enter battle button.", player->GetName(), player->GetGUIDLow(), bg->GetInstanceID(), queueSlot, bg->GetTypeID());
+            TC_LOG_DEBUG("bg.battleground", "Battleground: invited player %s (%u) to BG instance %u queueindex %u bgtype %u,"
+                         " I can't help it if they don't press the enter battle button.", player->GetName().c_str(), player->GetGUIDLow(),
+                         bg->GetInstanceID(), queueSlot, bg->GetTypeID());
 
             // send status packet
             sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, player, queueSlot, STATUS_WAIT_JOIN, INVITE_ACCEPT_WAIT_TIME, player->GetBattlegroundQueueJoinTime(bgTypeId), ginfo->ArenaType);

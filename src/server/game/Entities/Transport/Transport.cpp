@@ -375,7 +375,7 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z)
 bool Transport::AddPassenger(Player* passenger)
 {
     if (m_passengers.insert(passenger).second)
-        TC_LOG_INFO("entities.transport", "Player %s boarded transport %s.", passenger->GetName(), GetName());
+        TC_LOG_INFO("entities.transport", "Player %s boarded transport %s.", passenger->GetName().c_str(), GetName().c_str());
 
     sScriptMgr->OnAddPassenger(this, passenger);
     return true;
@@ -384,7 +384,7 @@ bool Transport::AddPassenger(Player* passenger)
 bool Transport::RemovePassenger(Player* passenger)
 {
     if (m_passengers.erase(passenger))
-        TC_LOG_INFO("entities.transport", "Player %s removed from transport %s.", passenger->GetName(), GetName());
+        TC_LOG_INFO("entities.transport", "Player %s removed from transport %s.", passenger->GetName().c_str(), GetName().c_str());
 
     sScriptMgr->OnRemovePassenger(this, passenger);
     return true;
@@ -479,7 +479,7 @@ void Transport::DoEventIfAny(WayPointMap::value_type const& node, bool departure
 {
     if (uint32 eventid = departure ? node.second.departureEventID : node.second.arrivalEventID)
     {
-        TC_LOG_DEBUG("maps.scripts", "Taxi %s event %u of node %u of %s path", departure ? "departure" : "arrival", eventid, node.first, GetName());
+        TC_LOG_DEBUG("maps.scripts", "Taxi %s event %u of node %u of %s path", departure ? "departure" : "arrival", eventid, node.first, GetName().c_str());
         GetMap()->ScriptsStart(sEventScripts, eventid, this, this);
         EventInform(eventid);
     }

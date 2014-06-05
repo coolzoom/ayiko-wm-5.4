@@ -80,7 +80,7 @@ class example_gossip_codebox : public CreatureScript
                 switch (action)
                 {
                 case GOSSIP_ACTION_INFO_DEF+1:
-                    if (std::strcmp(code, player->GetName()) != 0)
+                    if (player->GetName() != code)
                     {
                         DoScriptText(SAY_WRONG, creature);
                         creature->CastSpell(player, SPELL_POLYMORPH, true);

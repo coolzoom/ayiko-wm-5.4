@@ -1293,8 +1293,8 @@ class boss_grand_astromancer_capernian : public CreatureScript
                 {
                     bool InMeleeRange = false;
                     Unit* target = NULL;
-                    std::list<HostileReference*>& m_threatlist = me->getThreatManager().getThreatList();
-                    for (std::list<HostileReference*>::const_iterator i = m_threatlist.begin(); i!= m_threatlist.end(); ++i)
+                    ThreatContainer::StorageType const &threatlist = me->getThreatManager().getThreatList();
+                    for (ThreatContainer::StorageType::const_iterator i = threatlist.begin(); i!= threatlist.end(); ++i)
                     {
                         Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
                                                                     //if in melee range

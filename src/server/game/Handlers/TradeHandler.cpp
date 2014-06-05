@@ -31,6 +31,53 @@
 #include "AccountMgr.h"
 #include "SpellAuraEffects.h"
 
+namespace {
+
+void setAcceptTradeMode(TradeData* myTrade, TradeData* hisTrade, Item* *myItems, Item* *hisItems)
+{
+    myTrade->SetInAcceptProcess(true);
+    hisTrade->SetInAcceptProcess(true);
+
+    // store items in local list and set 'in-trade' flag
+    for (uint8 i = 0; i < TRADE_SLOT_TRADED_COUNT; ++i)
+    {
+        if (Item* item = myTrade->GetItem(TradeSlots(i)))
+        {
+            TC_LOG_DEBUG("network", "player trade item %u bag: %u slot: %u", item->GetGUIDLow(), item->GetBagSlot(), item->GetSlot());
+            //Can return NULL
+            myItems[i] = item;
+            myItems[i]->SetInTrade();
+        }
+
+        if (Item* item = hisTrade->GetItem(TradeSlots(i)))
+        {
+            TC_LOG_DEBUG("network", "partner trade item %u bag: %u slot: %u", item->GetGUIDLow(), item->GetBagSlot(), item->GetSlot());
+            hisItems[i] = item;
+            hisItems[i]->SetInTrade();
+        }
+    }
+}
+
+void clearAcceptTradeMode(TradeData* myTrade, TradeData* hisTrade)
+{
+    myTrade->SetInAcceptProcess(false);
+    hisTrade->SetInAcceptProcess(false);
+}
+
+void clearAcceptTradeMode(Item* *myItems, Item* *hisItems)
+{
+    // clear 'in-trade' flag
+    for (uint8 i = 0; i < TRADE_SLOT_TRADED_COUNT; ++i)
+    {
+        if (myItems[i])
+            myItems[i]->SetInTrade(false);
+        if (hisItems[i])
+            hisItems[i]->SetInTrade(false);
+    }
+}
+
+} // namespace
+
 void WorldSession::SendTradeStatus(TradeStatus status)
 {
     WorldPacket data(SMSG_TRADE_STATUS);
@@ -171,18 +218,13 @@ void WorldSession::moveItems(Item* myItems[], Item* hisItems[])
             {
                 // logging
                 TC_LOG_DEBUG("network", "partner storing: %u", myItems[i]->GetGUIDLow());
-                if (!AccountMgr::IsPlayerAccount(_player->GetSession()->GetSecurity()) && sWorld->getBoolConfig(CONFIG_GM_LOG_TRADE))
+                if (HasPermission(rbac::RBAC_PERM_LOG_GM_TRADE))
                 {
                     sLog->outCommand(_player->GetSession()->GetAccountId(), "GM %s (Account: %u) trade: %s (Entry: %d Count: %u) to player: %s (Account: %u)",
-                                    _player->GetName(), _player->GetSession()->GetAccountId(),
-                                    myItems[i]->GetTemplate()->Name1.c_str(), myItems[i]->GetEntry(), myItems[i]->GetCount(),
-                                    trader->GetName(), trader->GetSession()->GetAccountId());
+                                     _player->GetName().c_str(), _player->GetSession()->GetAccountId(),
+                                     myItems[i]->GetTemplate()->Name1.c_str(), myItems[i]->GetEntry(), myItems[i]->GetCount(),
+                                     trader->GetName().c_str(), trader->GetSession()->GetAccountId());
                 }
-
-                /*CharacterDatabase.PExecute("INSERT INTO log_trade (id, date, sc_accountid, sc_guid, sc_name, tar_accountid, tar_guid, tar_name, item_name, item_entry, item_count) VALUES (0, NOW(), %u, %u, '%s', %u, %u, '%s', '%s', %u, %u);",
-                                            _player->GetSession()->GetAccountId(), _player->GetGUIDLow(), _player->GetName(),
-                                            trader->GetSession()->GetAccountId(),  trader->GetGUIDLow(),  trader->GetName(),
-                                            myItems[i]->GetTemplate()->Name1.c_str(), myItems[i]->GetEntry(), myItems[i]->GetCount());*/
 
                 // adjust time (depends on /played)
                 if (myItems[i]->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_BOP_TRADEABLE))
@@ -194,18 +236,13 @@ void WorldSession::moveItems(Item* myItems[], Item* hisItems[])
             {
                 // logging
                 TC_LOG_DEBUG("network", "player storing: %u", hisItems[i]->GetGUIDLow());
-                if (!AccountMgr::IsPlayerAccount(trader->GetSession()->GetSecurity()) && sWorld->getBoolConfig(CONFIG_GM_LOG_TRADE))
+                if (HasPermission(rbac::RBAC_PERM_LOG_GM_TRADE))
                 {
                     sLog->outCommand(trader->GetSession()->GetAccountId(), "GM %s (Account: %u) trade: %s (Entry: %d Count: %u) to player: %s (Account: %u)",
-                                    trader->GetName(), trader->GetSession()->GetAccountId(),
-                                    hisItems[i]->GetTemplate()->Name1.c_str(), hisItems[i]->GetEntry(), hisItems[i]->GetCount(),
-                                    _player->GetName(), _player->GetSession()->GetAccountId());
+                                     trader->GetName().c_str(), trader->GetSession()->GetAccountId(),
+                                     hisItems[i]->GetTemplate()->Name1.c_str(), hisItems[i]->GetEntry(), hisItems[i]->GetCount(),
+                                     _player->GetName().c_str(), _player->GetSession()->GetAccountId());
                 }
-
-                /*CharacterDatabase.PExecute("INSERT INTO log_trade (id, date, sc_accountid, sc_guid, sc_name, tar_accountid, tar_guid, tar_name, item_name, item_entry, item_count) VALUES (0, NOW(), %u, %u, '%s', %u, %u, '%s', '%s', %u, %u);",
-                                            trader->GetSession()->GetAccountId(),  trader->GetGUIDLow(),  trader->GetName(),
-                                            _player->GetSession()->GetAccountId(), _player->GetGUIDLow(), _player->GetName(),
-                                            hisItems[i]->GetTemplate()->Name1.c_str(), hisItems[i]->GetEntry(), hisItems[i]->GetCount());*/
 
                 // adjust time (depends on /played)
                 if (hisItems[i]->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_BOP_TRADEABLE))
@@ -242,49 +279,6 @@ void WorldSession::moveItems(Item* myItems[], Item* hisItems[])
 }
 
 //==============================================================
-
-static void setAcceptTradeMode(TradeData* myTrade, TradeData* hisTrade, Item* *myItems, Item* *hisItems)
-{
-    myTrade->SetInAcceptProcess(true);
-    hisTrade->SetInAcceptProcess(true);
-
-    // store items in local list and set 'in-trade' flag
-    for (uint8 i = 0; i < TRADE_SLOT_TRADED_COUNT; ++i)
-    {
-        if (Item* item = myTrade->GetItem(TradeSlots(i)))
-        {
-            TC_LOG_DEBUG("network", "player trade item %u bag: %u slot: %u", item->GetGUIDLow(), item->GetBagSlot(), item->GetSlot());
-            //Can return NULL
-            myItems[i] = item;
-            myItems[i]->SetInTrade();
-        }
-
-        if (Item* item = hisTrade->GetItem(TradeSlots(i)))
-        {
-            TC_LOG_DEBUG("network", "partner trade item %u bag: %u slot: %u", item->GetGUIDLow(), item->GetBagSlot(), item->GetSlot());
-            hisItems[i] = item;
-            hisItems[i]->SetInTrade();
-        }
-    }
-}
-
-static void clearAcceptTradeMode(TradeData* myTrade, TradeData* hisTrade)
-{
-    myTrade->SetInAcceptProcess(false);
-    hisTrade->SetInAcceptProcess(false);
-}
-
-static void clearAcceptTradeMode(Item* *myItems, Item* *hisItems)
-{
-    // clear 'in-trade' flag
-    for (uint8 i = 0; i < TRADE_SLOT_TRADED_COUNT; ++i)
-    {
-        if (myItems[i])
-            myItems[i]->SetInTrade(false);
-        if (hisItems[i])
-            hisItems[i]->SetInTrade(false);
-    }
-}
 
 void WorldSession::HandleAcceptTradeOpcode(WorldPacket& /*recvPacket*/)
 {
@@ -487,21 +481,22 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& /*recvPacket*/)
         moveItems(myItems, hisItems);
 
         // logging money
-        if (sWorld->getBoolConfig(CONFIG_GM_LOG_TRADE))
+        if (HasPermission(rbac::RBAC_PERM_LOG_GM_TRADE))
         {
-            if (!AccountMgr::IsPlayerAccount(_player->GetSession()->GetSecurity()) && my_trade->GetMoney() > 0)
+            if (my_trade->GetMoney() > 0)
             {
-                sLog->outCommand(_player->GetSession()->GetAccountId(), "GM %s (Account: %u) give money (Amount: " UI64FMTD ") to player: %s (Account: %u)",
-                                _player->GetName(), _player->GetSession()->GetAccountId(),
-                                my_trade->GetMoney(),
-                                trader->GetName(), trader->GetSession()->GetAccountId());
+                sLog->outCommand(_player->GetSession()->GetAccountId(), "GM %s (Account: %u) give money (Amount: %" PRIu64 ") to player: %s (Account: %u)",
+                                 _player->GetName().c_str(), _player->GetSession()->GetAccountId(),
+                                 my_trade->GetMoney(),
+                                 trader->GetName().c_str(), trader->GetSession()->GetAccountId());
             }
-            if (!AccountMgr::IsPlayerAccount(trader->GetSession()->GetSecurity()) && his_trade->GetMoney() > 0)
+
+            if (his_trade->GetMoney() > 0)
             {
-                sLog->outCommand(trader->GetSession()->GetAccountId(), "GM %s (Account: %u) give money (Amount: " UI64FMTD ") to player: %s (Account: %u)",
-                                trader->GetName(), trader->GetSession()->GetAccountId(),
-                                his_trade->GetMoney(),
-                                _player->GetName(), _player->GetSession()->GetAccountId());
+                sLog->outCommand(trader->GetSession()->GetAccountId(), "GM %s (Account: %u) give money (Amount: %" PRIu64 ") to player: %s (Account: %u)",
+                                 trader->GetName().c_str(), trader->GetSession()->GetAccountId(),
+                                 his_trade->GetMoney(),
+                                 _player->GetName().c_str(), _player->GetSession()->GetAccountId());
             }
         }
 

@@ -623,7 +623,7 @@ class SpellMgr
     // Accessors (const or static functions)
     public:
         // Spell correctness for client using
-        static bool IsSpellValid(SpellInfo const* spellInfo, Player* player = NULL, bool msg = true);
+        bool IsSpellValid(SpellInfo const* spellInfo, Player* player = NULL, bool msg = true);
 
         // Spell difficulty
         uint32 GetSpellDifficultyId(uint32 spellId) const;

@@ -5667,12 +5667,14 @@ void Spell::SendResurrectRequest(Player* target)
 {
     // get ressurector name for creature resurrections, otherwise packet will be not accepted
     // for player resurrections the name is looked up by guid
-    char const* resurrectorName = m_caster->GetTypeId() == TYPEID_PLAYER ? "" : m_caster->GetNameForLocaleIdx(target->GetSession()->GetSessionDbLocaleIndex());
+    auto const &resurrectorName = m_caster->GetTypeId() == TYPEID_PLAYER
+            ? ""
+            : m_caster->GetNameForLocaleIdx(target->GetSession()->GetSessionDbLocaleIndex());
 
     ObjectGuid guid = m_caster->GetGUID();
 
-    WorldPacket data(SMSG_RESURRECT_REQUEST, (8+4+strlen(resurrectorName)+1+1+1+4));
-    data.WriteBits(strlen(resurrectorName), 6);
+    WorldPacket data(SMSG_RESURRECT_REQUEST, (8+4+resurrectorName.length()+1+1+1+4));
+    data.WriteBits(resurrectorName.length(), 6);
 
     data.WriteBitSeq<0, 5>(guid);
     data.WriteBit(m_caster->GetTypeId() == TYPEID_PLAYER ? 0 : 1);

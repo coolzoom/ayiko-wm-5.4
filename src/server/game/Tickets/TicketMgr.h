@@ -82,10 +82,10 @@ class GmTicket
 {
 public:
     GmTicket();
-    explicit GmTicket(Player* player, WorldPacket& recvData);
+    GmTicket(Player* player, WorldPacket& recvData);
     ~GmTicket();
 
-    bool IsClosed() const { return _closedBy; }
+    bool IsClosed() const { return _closedBy != 0; }
     bool IsCompleted() const { return _completed; }
     bool IsFromPlayer(uint64 guid) const { return guid == _playerGuid; }
     bool IsAssigned() const { return _assignedTo != 0; }
@@ -119,7 +119,8 @@ public:
         else if (_escalatedStatus == TICKET_UNASSIGNED)
             _escalatedStatus = TICKET_ASSIGNED;
     }
-    void SetClosedBy(const int64& value) { _closedBy = value; }
+    void SetClosedBy(uint64 guid) { _closedBy = guid; }
+    void SetCompleted() { _completed = true; }
     void SetMessage(const std::string& message)
     {
         _message = message;
@@ -128,12 +129,11 @@ public:
     void SetComment(const std::string& comment) { _comment = comment; }
     void SetViewed() { _viewed = true; }
     void SetUnassigned();
-    void SetCompleted(bool complete) { _completed = complete; }
 
     void AppendResponse(const std::string& response) { _response += response; }
 
     bool LoadFromDB(Field* fields);
-    void SaveToDB(SQLTransaction& trans) const;
+    void SaveToDB(SQLTransaction trans) const;
     void DeleteFromDB();
 
     void WritePacket(WorldPacket& data) const;
@@ -154,7 +154,7 @@ private:
     std::string _message;
     uint64 _createTime;
     uint64 _lastModifiedTime;
-    int64 _closedBy; // 0 = Open, -1 = Console, playerGuid = player abandoned ticket, other = GM who closed it.
+    uint64 _closedBy; // GUID_LOPART 0 = Open, UINT32_MAX = Console, playerGuid = player abandoned ticket, other = GM who closed it.
     uint64 _assignedTo;
     std::string _comment;
     bool _completed;
@@ -178,6 +178,12 @@ private:
 public:
     void LoadTickets();
     void LoadSurveys();
+
+    GmTicket* GetFirstTicket() const
+    {
+        GmTicketList::const_iterator i = _ticketList.begin();
+        return (i != _ticketList.end()) ? i->second : NULL;
+    }
 
     GmTicket* GetTicket(uint32 ticketId)
     {
@@ -207,7 +213,7 @@ public:
     }
 
     void AddTicket(GmTicket* ticket);
-    void CloseTicket(uint32 ticketId, int64 source = -1);
+    void CloseTicket(uint32 ticketId, uint64 sourceGuid);
     void RemoveTicket(uint32 ticketId);
 
     bool GetStatus() const { return _status; }

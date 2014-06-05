@@ -289,7 +289,6 @@ void ScriptMgr::Unload()
 
     // Clear scripts for every script type.
     SCR_CLEAR(SpellScriptLoader);
-    SCR_CLEAR(ServerScript);
     SCR_CLEAR(WorldScript);
     SCR_CLEAR(FormulaScript);
     SCR_CLEAR(WorldMapScript);
@@ -472,51 +471,6 @@ void ScriptMgr::CreateSpellScriptLoaders(uint32 spellId, std::vector<std::pair<S
 
         scriptVector.push_back(std::make_pair(tmpscript, itr));
     }
-}
-
-void ScriptMgr::OnNetworkStart()
-{
-    FOREACH_SCRIPT(ServerScript)->OnNetworkStart();
-}
-
-void ScriptMgr::OnNetworkStop()
-{
-    FOREACH_SCRIPT(ServerScript)->OnNetworkStop();
-}
-
-void ScriptMgr::OnSocketOpen(WorldSocket* socket)
-{
-    ASSERT(socket);
-
-    FOREACH_SCRIPT(ServerScript)->OnSocketOpen(socket);
-}
-
-void ScriptMgr::OnSocketClose(WorldSocket* socket, bool wasNew)
-{
-    ASSERT(socket);
-
-    FOREACH_SCRIPT(ServerScript)->OnSocketClose(socket, wasNew);
-}
-
-void ScriptMgr::OnPacketReceive(WorldSocket* socket, WorldPacket packet)
-{
-    ASSERT(socket);
-
-    FOREACH_SCRIPT(ServerScript)->OnPacketReceive(socket, packet);
-}
-
-void ScriptMgr::OnPacketSend(WorldSocket* socket, WorldPacket packet)
-{
-    ASSERT(socket);
-
-    FOREACH_SCRIPT(ServerScript)->OnPacketSend(socket, packet);
-}
-
-void ScriptMgr::OnUnknownPacketReceive(WorldSocket* socket, WorldPacket packet)
-{
-    ASSERT(socket);
-
-    FOREACH_SCRIPT(ServerScript)->OnUnknownPacketReceive(socket, packet);
 }
 
 void ScriptMgr::OnOpenStateChange(bool open)
@@ -1451,12 +1405,6 @@ SpellScriptLoader::SpellScriptLoader(const char* name)
     ScriptRegistry<SpellScriptLoader>::AddScript(this);
 }
 
-ServerScript::ServerScript(const char* name)
-    : ScriptObject(name)
-{
-    ScriptRegistry<ServerScript>::AddScript(this);
-}
-
 WorldScript::WorldScript(const char* name)
     : ScriptObject(name)
 {
@@ -1604,7 +1552,6 @@ template<class TScript> uint32 ScriptRegistry<TScript>::_scriptIdCounter = 0;
 
 // Specialize for each script type class like so:
 template class ScriptRegistry<SpellScriptLoader>;
-template class ScriptRegistry<ServerScript>;
 template class ScriptRegistry<WorldScript>;
 template class ScriptRegistry<FormulaScript>;
 template class ScriptRegistry<WorldMapScript>;

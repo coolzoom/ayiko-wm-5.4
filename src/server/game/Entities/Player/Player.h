@@ -162,8 +162,6 @@ typedef std::unordered_map<uint32, PlayerSpell> PlayerSpellMap;
 typedef std::list<SpellModifier*> SpellModList;
 typedef std::unordered_map<uint32, PlayerCurrency> PlayerCurrenciesMap;
 
-typedef std::list<uint64> WhisperListContainer;
-
 struct SpellCooldown
 {
     uint64 start;
@@ -483,7 +481,6 @@ enum AtLoginFlags
     AT_LOGIN_RESET_SPELLS           = 0x002,
     AT_LOGIN_RESET_TALENTS          = 0x004,
     AT_LOGIN_CUSTOMIZE              = 0x008,
-    AT_LOGIN_RESET_PET_TALENTS      = 0x010,
     AT_LOGIN_FIRST                  = 0x020,
     AT_LOGIN_CHANGE_FACTION         = 0x040,
     AT_LOGIN_CHANGE_RACE            = 0x080,
@@ -1115,6 +1112,9 @@ class Player final : public Unit, public GridObject<Player>
     friend class WorldSession;
     friend void Item::AddToUpdateQueueOf(Player* player);
     friend void Item::RemoveFromUpdateQueueOf(Player* player);
+
+    typedef std::unordered_set<uint64> WhisperWhitelist;
+
     public:
         explicit Player (WorldSession* session);
         ~Player();
@@ -1153,7 +1153,7 @@ class Player final : public Unit, public GridObject<Player>
 
         bool IsInWater() const { return m_isInWater; }
         bool IsUnderWater() const;
-        bool IsFalling() { return GetPositionZ() < m_lastFallZ; }
+        bool IsFalling() const { return GetPositionZ() < m_lastFallZ; }
 
         void SendInitialPacketsBeforeAddToMap();
         void SendInitialPacketsAfterAddToMap();
@@ -1189,7 +1189,7 @@ class Player final : public Unit, public GridObject<Player>
         void CleanupAfterTaxiFlight();
         void ContinueTaxiFlight();
                                                             // mount_id can be used in scripting calls
-        bool isAcceptWhispers() const { return m_ExtraFlags & PLAYER_EXTRA_ACCEPT_WHISPERS; }
+        bool acceptsWhispers() const { return m_ExtraFlags & PLAYER_EXTRA_ACCEPT_WHISPERS; }
         void SetAcceptWhispers(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_ACCEPT_WHISPERS; else m_ExtraFlags &= ~PLAYER_EXTRA_ACCEPT_WHISPERS; }
         bool isGameMaster() const { return m_ExtraFlags & PLAYER_EXTRA_GM_ON; }
         void SetGameMaster(bool on);
@@ -1402,6 +1402,7 @@ class Player final : public Unit, public GridObject<Player>
         void SwapItem(uint16 src, uint16 dst);
         void AddItemToBuyBackSlot(Item* pItem);
         Item* GetItemFromBuyBackSlot(uint32 slot);
+        bool HasItemInBuyBack(Item const *item) const;
         void RemoveItemFromBuyBackSlot(uint32 slot, bool del);
         void SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2 = NULL, uint32 itemid = 0);
         void SendBuyError(BuyResult msg, Creature* creature, uint32 item, uint32 param);
@@ -1489,6 +1490,7 @@ class Player final : public Unit, public GridObject<Player>
         bool CanRewardQuest(Quest const* quest, bool msg);
         bool CanRewardQuest(Quest const* quest, uint32 reward, bool msg);
         void AddQuest(Quest const* quest, Object* questGiver);
+        void AddQuestAndCheckCompletion(Quest const* quest, Object* questGiver);
         void CompleteQuest(uint32 quest_id);
         void IncompleteQuest(uint32 quest_id);
         void RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, bool announce = true);
@@ -1713,6 +1715,12 @@ class Player final : public Unit, public GridObject<Player>
         ItemMap mMitems;                                    //template defined in objectmgr.cpp
 
         Item* GetMItem(uint32 id)
+        {
+            ItemMap::iterator itr = mMitems.find(id);
+            return itr != mMitems.end() ? itr->second : NULL;
+        }
+
+        Item const * GetMItem(uint32 id) const
         {
             ItemMap::const_iterator itr = mMitems.find(id);
             return itr != mMitems.end() ? itr->second : NULL;
@@ -2267,7 +2275,7 @@ class Player final : public Unit, public GridObject<Player>
 
         void SendInitWorldStates(uint32 zone, uint32 area);
         void SendUpdateWorldState(uint32 Field, uint32 Value);
-        void SendDirectMessage(WorldPacket* data);
+        void SendDirectMessage(WorldPacket const *data) const;
         void SendBGWeekendWorldStates();
 
         void SendAurasForTarget(Unit* target);
@@ -2392,7 +2400,7 @@ class Player final : public Unit, public GridObject<Player>
         uint32 GetBGTeam() const { return m_bgData.bgTeam ? m_bgData.bgTeam : GetTeam(); }
 
         void LeaveBattleground(bool teleportToEntryPoint = true);
-        bool CanJoinToBattleground() const;
+        bool CanJoinToBattleground(Battleground const* bg) const;
         bool CanReportAfkDueToLimit();
         void ReportedAfkBy(Player* reporter);
         void ClearAfkReports() { m_bgData.bgAfkReporter.clear(); }
@@ -2496,7 +2504,7 @@ class Player final : public Unit, public GridObject<Player>
 
         bool IsNeverVisible() const;
 
-        bool IsVisibleGloballyFor(Player* player) const;
+        bool IsVisibleGloballyFor(Player const *player) const;
 
         void SendInitialVisiblePackets(Unit* target);
         void UpdateVisibilityForPlayer();
@@ -2668,6 +2676,7 @@ class Player final : public Unit, public GridObject<Player>
 
         AchievementMgr<Player>& GetAchievementMgr() { return m_achievementMgr; }
         AchievementMgr<Player> const& GetAchievementMgr() const { return m_achievementMgr; }
+        void CheckAllAchievementCriteria();
         void UpdateAchievementCriteria(AchievementCriteriaTypes type, uint64 miscValue1 = 0, uint64 miscValue2 = 0, uint64 miscValue3 = 0, Unit* unit = NULL);
         void CompletedAchievement(AchievementEntry const* entry);
 
@@ -2685,9 +2694,10 @@ class Player final : public Unit, public GridObject<Player>
         uint32 GetAverageItemLevel();
         bool isDebugAreaTriggers;
 
-        void ClearWhisperWhiteList() { WhisperList.clear(); }
-        void AddWhisperWhiteList(uint64 guid) { WhisperList.push_back(guid); }
-        bool IsInWhisperWhiteList(uint64 guid);
+        void ClearWhisperWhiteList() { whisperWhitelist_.clear(); }
+        void AddWhisperWhiteList(uint64 guid) { whisperWhitelist_.insert(guid); }
+        bool HasInWhisperWhiteList(uint64 guid) const { return whisperWhitelist_.find(guid) != whisperWhitelist_.end(); }
+        void RemoveFromWhisperWhiteList(uint64 guid) { whisperWhitelist_.erase(guid); }
 
         /*! These methods send different packets to the client in apply and unapply case.
             These methods are only sent to the current unit.
@@ -2794,7 +2804,7 @@ class Player final : public Unit, public GridObject<Player>
         DFQuestsDoneList m_dfQuests;
 
         // Gamemaster whisper whitelist
-        WhisperListContainer WhisperList;
+        WhisperWhitelist whisperWhitelist_;
         uint32 m_regenTimer;
         uint32 m_regenTimerCount;
         uint32 m_alternateRegenTimerCount;

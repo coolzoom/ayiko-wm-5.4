@@ -47,7 +47,7 @@ namespace Trinity
 
             void operator()(WorldPacket& data, LocaleConstant loc_idx)
             {
-                char const* text = sObjectMgr->GetTrinityString(_textId, loc_idx);
+                auto const &text = sObjectMgr->GetTrinityString(_textId, loc_idx);
                 if (_args)
                 {
                     // we need copy va_list before use or original va_list will corrupted
@@ -58,7 +58,7 @@ namespace Trinity
                     vsnprintf(str, 2048, text, ap);
                     va_end(ap);
 
-                    do_helper(data, &str[0]);
+                    do_helper(data, str);
                 }
                 else
                     do_helper(data, text);
@@ -84,9 +84,9 @@ namespace Trinity
 
             void operator()(WorldPacket& data, LocaleConstant loc_idx)
             {
-                char const* text = sObjectMgr->GetTrinityString(_textId, loc_idx);
-                char const* arg1str = _arg1 ? sObjectMgr->GetTrinityString(_arg1, loc_idx) : "";
-                char const* arg2str = _arg2 ? sObjectMgr->GetTrinityString(_arg2, loc_idx) : "";
+                auto const &text = sObjectMgr->GetTrinityString(_textId, loc_idx);
+                auto const &arg1str = _arg1 ? sObjectMgr->GetTrinityString(_arg1, loc_idx) : "";
+                auto const &arg2str = _arg2 ? sObjectMgr->GetTrinityString(_arg2, loc_idx) : "";
 
                 char str[2048];
                 snprintf(str, 2048, text, arg1str, arg2str);
@@ -317,7 +317,8 @@ inline void Battleground::_CheckSafePositions(uint32 diff)
                 GetTeamStartLoc(player->GetBGTeam(), x, y, z, o);
                 if (pos.GetExactDistSq(x, y, z) > maxDist)
                 {
-                    TC_LOG_DEBUG("bg.battleground", "BATTLEGROUND: Sending %s back to start location (map: %u) (possible exploit)", player->GetName(), GetMapId());
+                    TC_LOG_DEBUG("bg.battleground", "BATTLEGROUND: Sending %s back to start location (map: %u) (possible exploit)",
+                                 player->GetName().c_str(), GetMapId());
                     player->TeleportTo(GetMapId(), x, y, z, o);
                 }
             }
@@ -557,9 +558,6 @@ inline void Battleground::_ProcessJoin(uint32 diff)
                     player->RemoveAurasDueToSpell(SPELL_PREPARATION);
                     player->ResetAllPowers();
                 }
-            // Announce BG starting
-            if (sWorld->getBoolConfig(CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_ENABLE))
-                sWorld->SendWorldText(LANG_BG_STARTED_ANNOUNCE_WORLD, GetName(), GetMinLevel(), GetMaxLevel());
         }
     }
 
@@ -779,11 +777,6 @@ void Battleground::EndBattleground(uint32 winner)
             SetArenaMatchmakerRating(GetOtherTeam(winner), loser_matchmaker_rating + loser_matchmaker_change);
             SetArenaTeamRatingChangeForTeam(winner, winner_change);
             SetArenaTeamRatingChangeForTeam(GetOtherTeam(winner), loser_change);
-
-            //if (sWorld->getBoolConfig(CONFIG_ARENA_LOG_EXTENDED_INFO))
-            //    for (Battleground::BattlegroundScoreMap::const_iterator itr = GetPlayerScoresBegin(); itr != GetPlayerScoresEnd(); ++itr)
-            //        if (Player* player = ObjectAccessor::FindPlayer(itr->first))
-            //            sLog->outArena("Statistics match Type: %u for %s (GUID: " UI64FMTD ", IP: %s): %u damage, %u healing, %u killing blows", m_ArenaType, player->GetName(), itr->first, player->GetSession()->GetRemoteAddress().c_str(), itr->second->DamageDone, itr->second->HealingDone, itr->second->KillingBlows);
         }
         // Deduct 16 points from each teams arena-rating if there are no winners after 45+2 minutes
         else
@@ -1088,7 +1081,7 @@ void Battleground::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
         if (Transport)
             player->TeleportToBGEntryPoint();
 
-        TC_LOG_DEBUG("bg.battleground", "Removed player %s from Battleground.", player->GetName());
+        TC_LOG_DEBUG("bg.battleground", "Removed player %s from Battleground.", player->GetName().c_str());
     }
 
     //battleground object will be deleted next Battleground::Update() call
@@ -1295,7 +1288,7 @@ void Battleground::AddPlayer(Player* player)
     AddOrSetPlayerToCorrectBgGroup(player, team);
 
     // Log
-    TC_LOG_DEBUG("bg.battleground", "BATTLEGROUND: Player %s joined the battle.", player->GetName());
+    TC_LOG_DEBUG("bg.battleground", "BATTLEGROUND: Player %s joined the battle.", player->GetName().c_str());
 }
 
 // this method adds player to his team's bg group, or sets his correct group if player is already in bg group

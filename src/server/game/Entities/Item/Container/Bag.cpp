@@ -82,7 +82,7 @@ bool Bag::Create(uint32 guidlow, uint32 itemid, Player const* owner)
     SetEntry(itemid);
     SetObjectScale(1.0f);
 
-    SetUInt64Value(ITEM_FIELD_OWNER, owner ? owner->GetGUID() : 0);
+    SetOwnerGUID(owner ? owner->GetGUID() : 0);
     SetUInt64Value(ITEM_FIELD_CONTAINED, owner ? owner->GetGUID() : 0);
 
     SetUInt32Value(ITEM_FIELD_MAXDURABILITY, itemProto->MaxDurability);
@@ -166,7 +166,7 @@ void Bag::StoreItem(uint8 slot, Item* pItem, bool /*update*/)
         m_bagslot[slot] = pItem;
         SetUInt64Value(CONTAINER_FIELD_SLOT_1 + (slot * 2), pItem->GetGUID());
         pItem->SetUInt64Value(ITEM_FIELD_CONTAINED, GetGUID());
-        pItem->SetUInt64Value(ITEM_FIELD_OWNER, GetOwnerGUID());
+        pItem->SetOwnerGUID(GetOwnerGUID());
         pItem->SetContainer(this);
         pItem->SetSlot(slot);
     }

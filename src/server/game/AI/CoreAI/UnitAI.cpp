@@ -101,8 +101,8 @@ void UnitAI::DoAddAuraToAllHostilePlayers(uint32 spellid)
 {
     if (me->isInCombat())
     {
-        std::list<HostileReference*>& threatlist = me->getThreatManager().getThreatList();
-        for (std::list<HostileReference*>::iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr)
+        ThreatContainer::StorageType threatlist = me->getThreatManager().getThreatList();
+        for (ThreatContainer::StorageType::const_iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr)
         {
             if (Unit* unit = Unit::GetUnit(*me, (*itr)->getUnitGuid()))
                 if (unit->GetTypeId() == TYPEID_PLAYER)
@@ -117,8 +117,8 @@ void UnitAI::DoCastToAllHostilePlayers(uint32 spellid, bool triggered)
 {
     if (me->isInCombat())
     {
-        std::list<HostileReference*>& threatlist = me->getThreatManager().getThreatList();
-        for (std::list<HostileReference*>::iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr)
+        ThreatContainer::StorageType threatlist = me->getThreatManager().getThreatList();
+        for (ThreatContainer::StorageType::const_iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr)
         {
             if (Unit* unit = Unit::GetUnit(*me, (*itr)->getUnitGuid()))
                 if (unit->GetTypeId() == TYPEID_PLAYER)

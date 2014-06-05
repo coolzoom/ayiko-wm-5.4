@@ -265,7 +265,7 @@ void OutdoorPvP::HandlePlayerLeaveZone(Player* player, uint32 /*zone*/)
     if (player->GetTeamId() < 2)
         m_players[player->GetTeamId()].erase(player);
 
-    TC_LOG_DEBUG("outdoorpvp", "Player %s left an outdoorpvp zone", player->GetName());
+    TC_LOG_DEBUG("outdoorpvp", "Player %s left an outdoorpvp zone", player->GetName().c_str());
 }
 
 void OutdoorPvP::HandlePlayerResurrects(Player* /*player*/, uint32 /*zone*/)

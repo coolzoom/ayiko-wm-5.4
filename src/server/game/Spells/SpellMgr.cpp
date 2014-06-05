@@ -658,7 +658,7 @@ bool SpellMgr::IsSpellValid(SpellInfo const* spellInfo, Player* player, bool msg
             }
         case SPELL_EFFECT_LEARN_SPELL:
             {
-                SpellInfo const* spellInfo2 = sSpellMgr->GetSpellInfo(spellInfo->Effects[i].TriggerSpell);
+                SpellInfo const* spellInfo2 = GetSpellInfo(spellInfo->Effects[i].TriggerSpell);
                 if (!IsSpellValid(spellInfo2, player, msg))
                 {
                     if (msg)

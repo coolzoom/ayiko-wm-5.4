@@ -25,6 +25,10 @@
 #ifndef _WORLDSOCKET_H
 #define _WORLDSOCKET_H
 
+#include "Define.h"
+#include "AuthCrypt.h"
+#include "PacketLog.h"
+
 #include <ace/Basic_Types.h>
 #include <ace/Synch_Traits.h>
 #include <ace/Svc_Handler.h>
@@ -33,13 +37,6 @@
 #include <ace/Guard_T.h>
 #include <ace/Unbounded_Queue.h>
 #include <ace/Message_Block.h>
-
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-#pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
-
-#include "Common.h"
-#include "AuthCrypt.h"
 
 class ACE_Message_Block;
 class WorldPacket;
@@ -164,6 +161,8 @@ class WorldSocket : public WorldHandler
         /// Called by CMSG_VERIFY_CONNECTIVITY_RESPONSE
         int HandleSendAuthSession();
 
+        void LogPacket(WorldPacket const &packet, Direction direction);
+
         void SendAuthResponse(uint8 code, bool queued, uint32 queuePos);
 
     private:
@@ -209,6 +208,8 @@ class WorldSocket : public WorldHandler
         bool m_OutActive;
 
         uint32 m_Seed;
+
+        PacketLog m_packetLog;
 };
 
 #endif  /* _WORLDSOCKET_H */

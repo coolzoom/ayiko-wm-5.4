@@ -664,7 +664,7 @@ class GameObject : public WorldObject, public GridObject<GameObject>
         void YellToZone(int32 textId, uint32 language, uint64 TargetGuid) { MonsterYellToZone(textId, language, TargetGuid); }
 
         // overwrite WorldObject function for proper name localization
-        const char* GetNameForLocaleIdx(LocaleConstant locale_idx) const;
+        std::string const & GetNameForLocaleIdx(LocaleConstant locale_idx) const override;
 
         void SaveToDB();
         void SaveToDB(uint32 mapid, uint32 spawnMask, uint32 phaseMask);

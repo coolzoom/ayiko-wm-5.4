@@ -45,7 +45,7 @@ void WorldSession::HandleDismissCritter(WorldPacket& recvData)
     if (!pet)
     {
         TC_LOG_DEBUG("network", "Vanitypet (guid: %u) does not exist - player '%s' (guid: %u / account: %u) attempted to dismiss it (possibly lagged out)",
-                uint32(GUID_LOPART(guid)), GetPlayer()->GetName(), GetPlayer()->GetGUIDLow(), GetAccountId());
+                uint32(GUID_LOPART(guid)), GetPlayer()->GetName().c_str(), GetPlayer()->GetGUIDLow(), GetAccountId());
         return;
     }
 
@@ -91,17 +91,20 @@ void WorldSession::HandlePetAction(WorldPacket & recvData)
 
     // used also for charmed creature
     Unit* pet= ObjectAccessor::GetUnit(*_player, guid1);
-    TC_LOG_INFO("network", "HandlePetAction: Pet %u - flag: %u, spellid: %u, target: %u.", uint32(GUID_LOPART(guid1)), uint32(flag), spellid, uint32(GUID_LOPART(guid2)));
+    TC_LOG_INFO("network", "HandlePetAction: Pet %u - flag: %u, spellid: %u, target: %u.",
+                uint32(GUID_LOPART(guid1)), uint32(flag), spellid, uint32(GUID_LOPART(guid2)));
 
     if (!pet)
     {
-        TC_LOG_ERROR("network", "HandlePetAction: Pet (GUID: %u) doesn't exist for player '%s'", uint32(GUID_LOPART(guid1)), GetPlayer()->GetName());
+        TC_LOG_ERROR("network", "HandlePetAction: Pet (GUID: %u) doesn't exist for player '%s'",
+                     uint32(GUID_LOPART(guid1)), GetPlayer()->GetName().c_str());
         return;
     }
 
     if (pet != GetPlayer()->GetFirstControlled())
     {
-        TC_LOG_ERROR("network", "HandlePetAction: Pet (GUID: %u) does not belong to player '%s'", uint32(GUID_LOPART(guid1)), GetPlayer()->GetName());
+        TC_LOG_ERROR("network", "HandlePetAction: Pet (GUID: %u) does not belong to player '%s'",
+                     uint32(GUID_LOPART(guid1)), GetPlayer()->GetName().c_str());
         return;
     }
 
@@ -151,7 +154,8 @@ void WorldSession::HandlePetStopAttack(WorldPacket &recvData)
 
     if (pet != GetPlayer()->GetPet() && pet != GetPlayer()->GetCharm())
     {
-        TC_LOG_ERROR("network", "HandlePetStopAttack: Pet GUID %u isn't a pet or charmed creature of player %s", uint32(GUID_LOPART(guid)), GetPlayer()->GetName());
+        TC_LOG_ERROR("network", "HandlePetStopAttack: Pet GUID %u isn't a pet or charmed creature of player %s",
+                     uint32(GUID_LOPART(guid)), GetPlayer()->GetName().c_str());
         return;
     }
 
@@ -608,7 +612,8 @@ void WorldSession::HandlePetSetAction(WorldPacket & recvData)
     uint32 spell_id = UNIT_ACTION_BUTTON_ACTION(data);
     //uint8 act_state = UNIT_ACTION_BUTTON_TYPE(data);
 
-    TC_LOG_INFO("network", "Player %s has changed pet spell action. Position: %u, Spell: %u, State: 0x%X", _player->GetName(), position, spell_id, uint32(act_state));
+    TC_LOG_INFO("network", "Player %s has changed pet spell action. Position: %u, Spell: %u, State: 0x%X",
+                _player->GetName().c_str(), position, spell_id, uint32(act_state));
 
     //if it's act for spell (en/disable/cast) and there is a spell given (0 = remove spell) which pet doesn't know, don't add
     if (!((act_state == ACT_ENABLED || act_state == ACT_DISABLED || act_state == ACT_PASSIVE) && spell_id && !pet->HasSpell(spell_id)))
@@ -895,7 +900,7 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
 
     if (!caster || (caster != _player->GetGuardianPet() && caster != _player->GetCharm()))
     {
-        TC_LOG_ERROR("network", "HandlePetCastSpellOpcode: Pet %u isn't pet of player %s .", uint32(GUID_LOPART(casterGUID)), GetPlayer()->GetName());
+        TC_LOG_ERROR("network", "HandlePetCastSpellOpcode: Pet %u isn't pet of player %s .", uint32(GUID_LOPART(casterGUID)), GetPlayer()->GetName().c_str());
         return;
     }
 

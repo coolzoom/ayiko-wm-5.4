@@ -324,7 +324,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recvData)
         // Required stack size of auction matches to current item stack size, just move item to auctionhouse
         if (itemsCount == 1 && item->GetCount() == count[i])
         {
-            if (GetSecurity() > SEC_PLAYER && sWorld->getBoolConfig(CONFIG_GM_LOG_TRADE))
+            if (HasPermission(rbac::RBAC_PERM_LOG_GM_TRADE))
             {
                 sLog->outCommand(GetAccountId(), "GM %s (Account: %u) create auction: %s (Entry: %u Count: %u)",
                                  GetPlayerName().c_str(), GetAccountId(), item->GetTemplate()->Name1.c_str(), item->GetEntry(), item->GetCount());
@@ -345,7 +345,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recvData)
             TC_LOG_INFO("network", "CMSG_AUCTION_SELL_ITEM: Player %s (guid %u) is selling item %s entry"
                           " %u (guid %u) with count %u with initial bid " UI64FMTD " with buyout " UI64FMTD
                           " and with time %u (in sec) in auctionhouse %u",
-                          _player->GetName(), _player->GetGUIDLow(), item->GetTemplate()->Name1.c_str(), item->GetEntry(),
+                          _player->GetName().c_str(), _player->GetGUIDLow(), item->GetTemplate()->Name1.c_str(), item->GetEntry(),
                           item->GetGUIDLow(), item->GetCount(), bid, buyout, auctionTime, AH->GetHouseId());
 
             sAuctionMgr->AddAItem(item);
@@ -375,11 +375,14 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recvData)
                 return;
             }
 
-            if (GetSecurity() > SEC_PLAYER && sWorld->getBoolConfig(CONFIG_GM_LOG_TRADE))
+            if (HasPermission(rbac::RBAC_PERM_LOG_GM_TRADE))
             {
                 sLog->outCommand(GetAccountId(), "GM %s (Account: %u) create auction: %s (Entry: %u Count: %u)",
-                                 GetPlayerName().c_str(), GetAccountId(), item->GetTemplate()->Name1.c_str(), item->GetEntry(), item->GetCount());
+                                 GetPlayerName().c_str(), GetAccountId(), newItem->GetTemplate()->Name1.c_str(), newItem->GetEntry(), newItem->GetCount());
             }
+
+            // New item should not belong to anyone
+            newItem->SetOwnerGUID(0);
 
             AH->itemGUIDLow = newItem->GetGUIDLow();
             AH->itemEntry = newItem->GetEntry();
@@ -395,7 +398,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recvData)
 
             TC_LOG_INFO("network", "CMSG_AUCTION_SELL_ITEM: Player %s (guid %u) is selling item %s entry %u (guid %u)"
                         " with count %u with initial bid " UI64FMTD " with buyout " UI64FMTD " and with time %u (in sec) in auctionhouse %u",
-                        _player->GetName(), _player->GetGUIDLow(), newItem->GetTemplate()->Name1.c_str(), newItem->GetEntry(),
+                        _player->GetName().c_str(), _player->GetGUIDLow(), newItem->GetTemplate()->Name1.c_str(), newItem->GetEntry(),
                         newItem->GetGUIDLow(), newItem->GetCount(), bid, buyout, auctionTime, AH->GetHouseId());
 
             sAuctionMgr->AddAItem(newItem);

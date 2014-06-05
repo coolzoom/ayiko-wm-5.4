@@ -1263,7 +1263,7 @@ void BattlegroundMgr::SendToBattleground(Player* player, uint32 instanceId, Batt
             team = player->GetTeam();
         bg->GetTeamStartLoc(team, x, y, z, O);
 
-        TC_LOG_INFO("bg.battleground", "BATTLEGROUND: Sending %s to map %u, X %f, Y %f, Z %f, O %f", player->GetName(), mapid, x, y, z, O);
+        TC_LOG_INFO("bg.battleground", "BATTLEGROUND: Sending %s to map %u, X %f, Y %f, Z %f, O %f", player->GetName().c_str(), mapid, x, y, z, O);
         player->TeleportTo(mapid, x, y, z, O);
     }
     else

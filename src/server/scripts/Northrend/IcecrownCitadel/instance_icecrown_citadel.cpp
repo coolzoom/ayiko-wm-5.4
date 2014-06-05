@@ -1314,7 +1314,7 @@ class instance_icecrown_citadel : public InstanceMapScript
 
             bool CheckRequiredBosses(uint32 bossId, Player const* player = NULL) const
             {
-                if (player && player->isGameMaster())
+                if (player && player->GetSession()->HasPermission(rbac::RBAC_PERM_SKIP_CHECK_INSTANCE_REQUIRED_BOSSES))
                     return true;
 
                 if((instance->GetPlayersCountExceptGMs()) > instance->ToInstanceMap()->GetMaxPlayers())

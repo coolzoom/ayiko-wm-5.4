@@ -89,7 +89,8 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     Map* oldMap = GetPlayer()->GetMap();
     if (GetPlayer()->IsInWorld())
     {
-        TC_LOG_ERROR("network", "Player (Name %s) is still in world when teleported from map %u to new map %u", GetPlayer()->GetName(), oldMap->GetId(), loc.GetMapId());
+        TC_LOG_ERROR("network", "Player (Name %s) is still in world when teleported from map %u to new map %u",
+                     GetPlayer()->GetName().c_str(), oldMap->GetId(), loc.GetMapId());
         oldMap->RemovePlayerFromMap(GetPlayer(), false);
     }
 
@@ -113,7 +114,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     if (!GetPlayer()->GetMap()->AddPlayerToMap(GetPlayer()))
     {
         TC_LOG_ERROR("network", "WORLD: failed to teleport player %s (%d) to map %d (%s) because of unknown reason!",
-            GetPlayer()->GetName(), GetPlayer()->GetGUIDLow(), loc.GetMapId(), newMap ? newMap->GetMapName() : "Unknown");
+            GetPlayer()->GetName().c_str(), GetPlayer()->GetGUIDLow(), loc.GetMapId(), newMap ? newMap->GetMapName() : "Unknown");
         GetPlayer()->ResetMap();
         GetPlayer()->SetMap(oldMap);
         GetPlayer()->TeleportTo(GetPlayer()->m_homebindMapId, GetPlayer()->m_homebindX, GetPlayer()->m_homebindY, GetPlayer()->m_homebindZ, GetPlayer()->GetOrientation());
@@ -500,13 +501,13 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recvData)
         if (_player->GetSpeed(move_type) > newspeed)         // must be greater - just correct
         {
             TC_LOG_ERROR("network", "%sSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value",
-                move_type_name[move_type], _player->GetName(), _player->GetSpeed(move_type), newspeed);
+                move_type_name[move_type], _player->GetName().c_str(), _player->GetSpeed(move_type), newspeed);
             _player->SetSpeed(move_type, _player->GetSpeedRate(move_type), true);
         }
         else                                                // must be lesser - cheating
         {
             TC_LOG_DEBUG("misc", "Player %s from account id %u kicked for incorrect speed (must be %f instead %f)",
-                _player->GetName(), _player->GetSession()->GetAccountId(), _player->GetSpeed(move_type), newspeed);
+                _player->GetName().c_str(), _player->GetSession()->GetAccountId(), _player->GetSpeed(move_type), newspeed);
             _player->GetSession()->KickPlayer();
         }
     }
@@ -892,7 +893,7 @@ void WorldSession::ReadMovementInfo(WorldPacket& data, MovementInfo* mi)
         MOVEMENTFLAG_FALLING_SLOW);
 
     /*! Cannot fly if no fly auras present. Exception is being a GM.
-        Note that we check for account level instead of Player::IsGameMaster() because in some
+        Note that we check for account level instead of Player::isGameMaster() because in some
         situations it may be feasable to use .gm fly on as a GM without having .gm on,
         e.g. aerial combat.
     */

@@ -296,7 +296,8 @@ void WorldSession::HandleReportPvPAFK(WorldPacket& recvData)
         return;
     }
 
-    TC_LOG_DEBUG("bg.battleground", "WorldSession::HandleReportPvPAFK: %s reported %s", _player->GetName(), reportedPlayer->GetName());
+    TC_LOG_DEBUG("bg.battleground", "WorldSession::HandleReportPvPAFK: %s reported %s",
+                 _player->GetName().c_str(), reportedPlayer->GetName().c_str());
 
     reportedPlayer->ReportedAfkBy(_player);
 }

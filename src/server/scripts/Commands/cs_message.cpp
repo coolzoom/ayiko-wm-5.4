@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -25,6 +25,9 @@ EndScriptData */
 #include "ScriptMgr.h"
 #include "Chat.h"
 #include "ChannelMgr.h"
+#include "Language.h"
+#include "Player.h"
+#include "ObjectMgr.h"
 
 class message_commandscript : public CommandScript
 {
@@ -35,25 +38,26 @@ public:
     {
         static ChatCommand channelSetCommandTable[] =
         {
-            { "ownership",      SEC_ADMINISTRATOR,  false,  &HandleChannelSetOwnership,         "", NULL },
-            { NULL,             0,                  false,  NULL,                               "", NULL }
+            { "ownership", rbac::RBAC_PERM_COMMAND_CHANNEL_SET_OWNERSHIP, false, &HandleChannelSetOwnership, "", NULL },
+            { NULL,        0,                                       false, NULL,                       "", NULL }
         };
         static ChatCommand channelCommandTable[] =
         {
-            { "set",            SEC_ADMINISTRATOR,  true,   NULL,                               "", channelSetCommandTable },
-            { NULL,             0,                  false,  NULL,                               "", NULL }
+            { "set", rbac::RBAC_PERM_COMMAND_CHANNEL_SET, true, NULL, "", channelSetCommandTable },
+            { NULL,  0,                            false, NULL, "", NULL }
         };
         static ChatCommand commandTable[] =
         {
-            { "channel",        SEC_ADMINISTRATOR,  true,   NULL,                               "", channelCommandTable  },
-            { "nameannounce",   SEC_MODERATOR,      true,   &HandleNameAnnounceCommand,         "", NULL },
-            { "gmnameannounce", SEC_MODERATOR,      true,   &HandleGMNameAnnounceCommand,       "", NULL },
-            { "announce",       SEC_MODERATOR,      true,   &HandleAnnounceCommand,             "", NULL },
-            { "gmannounce",     SEC_MODERATOR,      true,   &HandleGMAnnounceCommand,           "", NULL },
-            { "notify",         SEC_MODERATOR,      true,   &HandleNotifyCommand,               "", NULL },
-            { "gmnotify",       SEC_MODERATOR,      true,   &HandleGMNotifyCommand,             "", NULL },
-            { "whispers",       SEC_MODERATOR,      false,  &HandleWhispersCommand,             "", NULL },
-            { NULL,             0,                  false,  NULL,                               "", NULL }
+            { "channel",        rbac::RBAC_PERM_COMMAND_CHANNEL,        true, NULL,                         "", channelCommandTable  },
+            { "nameannounce",   rbac::RBAC_PERM_COMMAND_NAMEANNOUNCE,   true, &HandleNameAnnounceCommand,   "", NULL },
+            { "gmnameannounce", rbac::RBAC_PERM_COMMAND_GMNAMEANNOUNCE, true, &HandleGMNameAnnounceCommand, "", NULL },
+            { "announce",       rbac::RBAC_PERM_COMMAND_ANNOUNCE,       true, &HandleAnnounceCommand,       "", NULL },
+            { "gmannounce",     rbac::RBAC_PERM_COMMAND_GMANNOUNCE,     true, &HandleGMAnnounceCommand,     "", NULL },
+            { "notify",         rbac::RBAC_PERM_COMMAND_NOTIFY,         true, &HandleNotifyCommand,         "", NULL },
+            { "gmnotify",       rbac::RBAC_PERM_COMMAND_GMNOTIFY,       true, &HandleGMNotifyCommand,       "", NULL },
+            { "whispers",       rbac::RBAC_PERM_COMMAND_WHISPERS,      false, &HandleWhispersCommand,       "", NULL },
+            { "qannounce",      rbac::RBAC_PERM_COMMAND_QANNOUNCE,     false, &HandleQAnnounceCommand,      "", NULL },
+            { NULL,             0,                               false, NULL,                         "", NULL }
         };
         return commandTable;
     }
@@ -71,7 +75,7 @@ public:
         Player* player = handler->GetSession()->GetPlayer();
         Channel* channcel = NULL;
 
-        if (ChannelMgr* cMgr = channelMgr(player->GetTeam()))
+        if (ChannelMgr* cMgr = ChannelMgr::forTeam(player->GetTeam()))
             channcel = cMgr->GetChannel(channelStr, player);
 
         if (strcmp(argStr, "on") == 0)
@@ -105,11 +109,20 @@ public:
         if (!*args)
             return false;
 
-        std::string name("Console");
-        if (WorldSession* session = handler->GetSession())
-            name = session->GetPlayer()->GetName();
+        WorldSession* session = handler->GetSession();
 
-        sWorld->SendWorldText(LANG_ANNOUNCE_COLOR, name.c_str(), args);
+        switch (session->GetSecurity())
+        {
+            case SEC_ADMINISTRATOR:
+                sWorld->SendWorldText(LANG_ANNOUNCE_COLOR_ADMIN, "Admin", session->GetPlayer()->GetName().c_str(), args);
+                break;
+            case SEC_GAMEMASTER:
+                sWorld->SendWorldText(LANG_ANNOUNCE_COLOR_GM, "GM", session->GetPlayer()->GetName().c_str(), args);
+                break;
+            default:
+                break;
+        }
+
         return true;
     }
 
@@ -118,13 +131,23 @@ public:
         if (!*args)
             return false;
 
-        std::string name("Console");
-        if (WorldSession* session = handler->GetSession())
-            name = session->GetPlayer()->GetName();
+        WorldSession* session = handler->GetSession();
+        sWorld->SendGMText(LANG_ANNOUNCE_COLOR_GM, session->GetPlayer()->GetName().c_str(), args);
 
-        sWorld->SendGMText(LANG_GM_ANNOUNCE_COLOR, name.c_str(), args);
         return true;
     }
+
+    static bool HandleQAnnounceCommand(ChatHandler* handler, char const* args)
+    {
+        if (!*args)
+            return false;
+
+        WorldSession* session = handler->GetSession();
+        sWorld->SendWorldText(LANG_ANNOUNCE_COLOR_QA, session->GetPlayer()->GetName().c_str(), args);
+
+        return true;
+    }
+
     // global announce
     static bool HandleAnnounceCommand(ChatHandler* handler, char const* args)
     {
@@ -153,11 +176,12 @@ public:
 
         std::string str = handler->GetTrinityString(LANG_GLOBAL_NOTIFY);
         str += args;
+        size_t len = str.length();
 
-        WorldPacket data(SMSG_NOTIFICATION, 2 + str.length());
-        data.WriteBits(str.length(), 12);
+        WorldPacket data(SMSG_NOTIFICATION, 2 + len);
+        data.WriteBits(len, 12);
         data.FlushBits();
-        data.WriteString(str);
+        data.append(str.c_str(), len);
         sWorld->SendGlobalMessage(&data);
 
         return true;
@@ -170,11 +194,12 @@ public:
 
         std::string str = handler->GetTrinityString(LANG_GM_NOTIFY);
         str += args;
+        size_t len = str.length();
 
-        WorldPacket data(SMSG_NOTIFICATION, 2 + str.length());
-        data.WriteBits(str.length(), 12);
+        WorldPacket data(SMSG_NOTIFICATION, 2 + len);
+        data.WriteBits(len, 12);
         data.FlushBits();
-        data.WriteString(str);
+        data.append(str.c_str(), len);
         sWorld->SendGlobalGMMessage(&data);
 
         return true;
@@ -184,11 +209,11 @@ public:
     {
         if (!*args)
         {
-            handler->PSendSysMessage(LANG_COMMAND_WHISPERACCEPTING, handler->GetSession()->GetPlayer()->isAcceptWhispers() ?  handler->GetTrinityString(LANG_ON) : handler->GetTrinityString(LANG_OFF));
+            handler->PSendSysMessage(LANG_COMMAND_WHISPERACCEPTING, handler->GetSession()->GetPlayer()->acceptsWhispers() ?  handler->GetTrinityString(LANG_ON) : handler->GetTrinityString(LANG_OFF));
             return true;
         }
 
-        std::string argStr = (char*)args;
+        std::string argStr = strtok((char*)args, " ");
         // whisper on
         if (argStr == "on")
         {
@@ -207,6 +232,25 @@ public:
             return true;
         }
 
+        if (argStr == "remove")
+        {
+            std::string name = strtok(NULL, " ");
+            if (normalizePlayerName(name))
+            {
+                if (Player* player = sObjectAccessor->FindPlayerByName(name))
+                {
+                    handler->GetSession()->GetPlayer()->RemoveFromWhisperWhiteList(player->GetGUID());
+                    handler->PSendSysMessage(LANG_COMMAND_WHISPEROFFPLAYER, name.c_str());
+                    return true;
+                }
+                else
+                {
+                    handler->PSendSysMessage(LANG_PLAYER_NOT_FOUND, name.c_str());
+                    handler->SetSentErrorMessage(true);
+                    return false;
+                }
+            }
+        }
         handler->SendSysMessage(LANG_USE_BOL);
         handler->SetSentErrorMessage(true);
         return false;

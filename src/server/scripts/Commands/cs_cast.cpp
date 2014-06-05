@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -24,30 +24,92 @@ EndScriptData */
 
 #include "ScriptMgr.h"
 #include "Chat.h"
+#include "Creature.h"
+#include "Language.h"
+#include "Player.h"
+#include "LexicalCast.h"
 
 class cast_commandscript : public CommandScript
 {
 public:
     cast_commandscript() : CommandScript("cast_commandscript") { }
 
-    ChatCommand* GetCommands() const
+    ChatCommand* GetCommands() const override
     {
+        static ChatCommand castVisualKitCommandTable[] =
+        {
+            { "self",   rbac::RBAC_PERM_COMMAND_CAST,   false, &HandleCastVisualKitSelfCommand,     "", NULL },
+            { "",       rbac::RBAC_PERM_COMMAND_CAST,   false, &HandleCastVisualKitCommand,         "", NULL },
+            { NULL,     0,                              false, NULL,                                "", NULL }
+        };
         static ChatCommand castCommandTable[] =
         {
-            { "back",           SEC_ADMINISTRATOR,  false, &HandleCastBackCommand,              "", NULL },
-            { "dist",           SEC_ADMINISTRATOR,  false, &HandleCastDistCommand,              "", NULL },
-            { "self",           SEC_ADMINISTRATOR,  false, &HandleCastSelfCommand,              "", NULL },
-            { "target",         SEC_ADMINISTRATOR,  false, &HandleCastTargetCommad,             "", NULL },
-            { "dest",           SEC_ADMINISTRATOR,  false, &HandleCastDestCommand,              "", NULL },
-            { "",               SEC_ADMINISTRATOR,  false, &HandleCastCommand,                  "", NULL },
-            { NULL,             0,                  false, NULL,                                "", NULL }
+            { "back",   rbac::RBAC_PERM_COMMAND_CAST_BACK,      false, &HandleCastBackCommand,  "", NULL },
+            { "dist",   rbac::RBAC_PERM_COMMAND_CAST_DIST,      false, &HandleCastDistCommand,  "", NULL },
+            { "self",   rbac::RBAC_PERM_COMMAND_CAST_SELF,      false, &HandleCastSelfCommand,  "", NULL },
+            { "target", rbac::RBAC_PERM_COMMAND_CAST_TARGET,    false, &HandleCastTargetCommad, "", NULL },
+            { "dest",   rbac::RBAC_PERM_COMMAND_CAST_DEST,      false, &HandleCastDestCommand,  "", NULL },
+            { "kit",    rbac::RBAC_PERM_COMMAND_CAST,           false, NULL,  "", castVisualKitCommandTable },
+            { "",       rbac::RBAC_PERM_COMMAND_CAST,           false, &HandleCastCommand,      "", NULL },
+            { NULL,     0,                                      false, NULL,                    "", NULL }
         };
         static ChatCommand commandTable[] =
         {
-            { "cast",           SEC_ADMINISTRATOR,  false, NULL,                                "", castCommandTable },
-            { NULL,             0,                  false, NULL,                                "", NULL }
+            { "cast",               rbac::RBAC_PERM_COMMAND_CAST,   false, NULL,    "", castCommandTable },
+            { NULL,     0,                             false, NULL,                    "", NULL }
         };
         return commandTable;
+    }
+
+    static bool HandleCastVisualKitSelfCommand(ChatHandler* handler, char const* args)
+    {
+        if (!*args)
+            return false;
+
+        Unit* target = handler->getSelectedUnit();
+
+        if (!target)
+        {
+            handler->SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
+        uint32 spellId = handler->extractSpellIdFromLink((char*)args);
+
+        if (!spellId)
+            return false;
+
+        uint32 param = 0;
+        char* paramStr = strtok(NULL, " ");
+
+        if (paramStr)
+            param = Trinity::lexicalCast<uint32>(paramStr);
+
+        target->SendPlaySpellVisualKit(spellId, param);
+        return true;
+    }
+
+    static bool HandleCastVisualKitCommand(ChatHandler* handler, char const* args)
+    {
+        if (!*args)
+            return false;
+
+        // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
+        uint32 spellId = handler->extractSpellIdFromLink((char*)args);
+
+        if (!spellId)
+            return false;
+
+        uint32 param = 0;
+        char* paramStr = strtok(NULL, " ");
+
+        if (paramStr)
+            param = Trinity::lexicalCast<uint32>(paramStr);
+
+        handler->GetSession()->GetPlayer()->SendPlaySpellVisualKit(spellId, param);
+        return true;
     }
 
     static bool HandleCastCommand(ChatHandler* handler, char const* args)
@@ -76,7 +138,7 @@ public:
             return false;
         }
 
-        if (!SpellMgr::IsSpellValid(spellInfo, handler->GetSession()->GetPlayer()))
+        if (!sSpellMgr->IsSpellValid(spellInfo, handler->GetSession()->GetPlayer()))
         {
             handler->PSendSysMessage(LANG_COMMAND_SPELL_BROKEN, spellId);
             handler->SetSentErrorMessage(true);
@@ -151,7 +213,7 @@ public:
             return false;
         }
 
-        if (!SpellMgr::IsSpellValid(spellInfo, handler->GetSession()->GetPlayer()))
+        if (!sSpellMgr->IsSpellValid(spellInfo, handler->GetSession()->GetPlayer()))
         {
             handler->PSendSysMessage(LANG_COMMAND_SPELL_BROKEN, spellId);
             handler->SetSentErrorMessage(true);
@@ -205,7 +267,7 @@ public:
         if (!spellInfo)
             return false;
 
-        if (!SpellMgr::IsSpellValid(spellInfo, handler->GetSession()->GetPlayer()))
+        if (!sSpellMgr->IsSpellValid(spellInfo, handler->GetSession()->GetPlayer()))
         {
             handler->PSendSysMessage(LANG_COMMAND_SPELL_BROKEN, spellId);
             handler->SetSentErrorMessage(true);

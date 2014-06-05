@@ -205,7 +205,8 @@ void WorldSession::HandlePetitionShowSignOpcode(WorldPacket& recvData)
 
     if (!result)
     {
-        TC_LOG_DEBUG("entities.player.items", "Petition %u is not found for player %u %s", GUID_LOPART(petitionguid), GetPlayer()->GetGUIDLow(), GetPlayer()->GetName());
+        TC_LOG_DEBUG("entities.player.items", "Petition %u is not found for player %u %s",
+                     GUID_LOPART(petitionguid), GetPlayer()->GetGUIDLow(), GetPlayer()->GetName().c_str());
         return;
     }
     Field* fields = result->Fetch();
@@ -463,7 +464,8 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket& recvData)
 
     if (!result)
     {
-        TC_LOG_ERROR("network", "Petition %u is not found for player %u %s", GUID_LOPART(petitionGuid), GetPlayer()->GetGUIDLow(), GetPlayer()->GetName());
+        TC_LOG_ERROR("network", "Petition %u is not found for player %u %s",
+                     GUID_LOPART(petitionGuid), GetPlayer()->GetGUIDLow(), GetPlayer()->GetName().c_str());
         return;
     }
 
@@ -524,7 +526,8 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket& recvData)
 
     CharacterDatabase.Execute(stmt);
 
-    TC_LOG_DEBUG("network", "PETITION SIGN: GUID %u by player: %s (GUID: %u Account: %u)", GUID_LOPART(petitionGuid), _player->GetName(), playerGuid, GetAccountId());
+    TC_LOG_DEBUG("network", "PETITION SIGN: GUID %u by player: %s (GUID: %u Account: %u)",
+                 GUID_LOPART(petitionGuid), _player->GetName().c_str(), playerGuid, GetAccountId());
 
     SendPetitionSignResult(_player->GetGUID(), petitionGuid, PETITION_SIGN_OK);
 
@@ -755,7 +758,8 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket& recvData)
     }
     else
     {
-        TC_LOG_ERROR("network", "Player %s (guid: %u) tried to turn in petition (guid: %u) that is not present in the database", _player->GetName(), _player->GetGUIDLow(), GUID_LOPART(petitionGuid));
+        TC_LOG_ERROR("network", "Player %s (guid: %u) tried to turn in petition (guid: %u) that is not present in the database",
+                     _player->GetName().c_str(), _player->GetGUIDLow(), GUID_LOPART(petitionGuid));
         return;
     }
 

@@ -987,8 +987,8 @@ public:
             {
                 if (Creature* pPortal = DoSpawnCreature(CREATURE_FELFIRE_PORTAL, 0, 0, 0, 0, TEMPSUMMON_TIMED_DESPAWN, 20000))
                 {
-                    std::list<HostileReference*>::iterator itr;
-                    for (itr = me->getThreatManager().getThreatList().begin(); itr != me->getThreatManager().getThreatList().end(); ++itr)
+                    ThreatContainer::StorageType const &threatlist = me->getThreatManager().getThreatList();
+                    for (ThreatContainer::StorageType::const_iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr)
                     {
                         Unit* unit = Unit::GetUnit(*me, (*itr)->getUnitGuid());
                         if (unit)

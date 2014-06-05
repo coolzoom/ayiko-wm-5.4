@@ -305,8 +305,9 @@ public:
             summons.DespawnAll();
             // players that used Hover Disk are no in the aggro list
             me->SetInCombatWithZone();
-            std::list<HostileReference*> &m_threatlist = me->getThreatManager().getThreatList();
-            for (std::list<HostileReference*>::const_iterator itr = m_threatlist.begin(); itr!= m_threatlist.end(); ++itr)
+
+            auto threatlist = me->getThreatManager().getThreatList();
+            for (auto itr = threatlist.begin(); itr!= threatlist.end(); ++itr)
             {
                 if (Unit* target = (*itr)->getTarget())
                 {
@@ -682,8 +683,8 @@ class spell_malygos_vortex_visual : public SpellScriptLoader
             {
                 if (Unit* caster = GetCaster())
                 {
-                    std::list<HostileReference*> &m_threatlist = caster->getThreatManager().getThreatList();
-                    for (std::list<HostileReference*>::const_iterator itr = m_threatlist.begin(); itr!= m_threatlist.end(); ++itr)
+                    auto threatlist = caster->getThreatManager().getThreatList();
+                    for (auto itr = threatlist.begin(); itr!= threatlist.end(); ++itr)
                     {
                         if (Unit* target = (*itr)->getTarget())
                         {

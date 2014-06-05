@@ -55,7 +55,7 @@ void WorldSession::HandleGMTicketCreateOpcode(WorldPacket& recvData)
             sTicketMgr->AddTicket(newTicket);
             sTicketMgr->UpdateLastChange();
 
-            sWorld->SendGMText(LANG_COMMAND_TICKETNEW, GetPlayer()->GetName(), newTicket->GetId());
+            sWorld->SendGMText(LANG_COMMAND_TICKETNEW, GetPlayer()->GetName().c_str(), newTicket->GetId());
 
             sTicketMgr->SendTicket(this, newTicket);
 
@@ -70,7 +70,7 @@ void WorldSession::HandleGMTicketCreateOpcode(WorldPacket& recvData)
         sTicketMgr->AddTicket(newTicket);
         sTicketMgr->UpdateLastChange();
 
-        sWorld->SendGMText(LANG_COMMAND_TICKETNEW, GetPlayer()->GetName(), newTicket->GetId());
+        sWorld->SendGMText(LANG_COMMAND_TICKETNEW, GetPlayer()->GetName().c_str(), newTicket->GetId());
 
         sTicketMgr->SendTicket(this, newTicket);
 
@@ -94,7 +94,7 @@ void WorldSession::HandleGMTicketUpdateOpcode(WorldPacket& recvData)
         ticket->SetMessage(message);
         ticket->SaveToDB(trans);
 
-        sWorld->SendGMText(LANG_COMMAND_TICKETUPDATED, GetPlayer()->GetName(), ticket->GetId());
+        sWorld->SendGMText(LANG_COMMAND_TICKETUPDATED, GetPlayer()->GetName().c_str(), ticket->GetId());
 
         sTicketMgr->SendTicket(this, ticket);
         response = GMTICKET_RESPONSE_UPDATE_SUCCESS;
@@ -113,7 +113,7 @@ void WorldSession::HandleGMTicketDeleteOpcode(WorldPacket& /*recvData*/)
         data << uint8(GMTICKET_RESPONSE_TICKET_DELETED);
         SendPacket(&data);
 
-        sWorld->SendGMText(LANG_COMMAND_TICKETPLAYERABANDON, GetPlayer()->GetName(), ticket->GetId());
+        sWorld->SendGMText(LANG_COMMAND_TICKETPLAYERABANDON, GetPlayer()->GetName().c_str(), ticket->GetId());
 
         sTicketMgr->CloseTicket(ticket->GetId(), GetPlayer()->GetGUID());
         sTicketMgr->SendTicket(this, NULL);

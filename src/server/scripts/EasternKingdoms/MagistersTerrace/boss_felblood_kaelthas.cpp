@@ -194,9 +194,9 @@ public:
             if (!SummonedUnit)
                 return;
 
-            std::list<HostileReference*>& m_threatlist = me->getThreatManager().getThreatList();
-            std::list<HostileReference*>::const_iterator i = m_threatlist.begin();
-            for (i = m_threatlist.begin(); i != m_threatlist.end(); ++i)
+            ThreatContainer::StorageType const &threatlist = me->getThreatManager().getThreatList();
+            ThreatContainer::StorageType::const_iterator i = threatlist.begin();
+            for (i = threatlist.begin(); i != threatlist.end(); ++i)
             {
                 Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
                 if (unit && unit->isAlive())
@@ -213,8 +213,9 @@ public:
             float y = KaelLocations[0][1];
             me->SetPosition(x, y, LOCATION_Z, 0.0f);
             //me->SendMonsterMove(x, y, LOCATION_Z, 0, 0, 0); // causes some issues...
-            std::list<HostileReference*>::const_iterator i = me->getThreatManager().getThreatList().begin();
-            for (i = me->getThreatManager().getThreatList().begin(); i!= me->getThreatManager().getThreatList().end(); ++i)
+            ThreatContainer::StorageType threatlist = me->getThreatManager().getThreatList();
+            ThreatContainer::StorageType::const_iterator i = threatlist.begin();
+            for (i = threatlist.begin(); i != threatlist.end(); ++i)
             {
                 Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
                 if (unit && (unit->GetTypeId() == TYPEID_PLAYER))

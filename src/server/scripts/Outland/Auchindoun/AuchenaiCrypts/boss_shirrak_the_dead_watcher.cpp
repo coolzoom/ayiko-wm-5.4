@@ -148,7 +148,7 @@ public:
                     std::string emote(EMOTE_FOCUSES_ON);
                     emote.append(target->GetName());
                     emote.push_back('!');
-                    me->MonsterTextEmote(emote.c_str(), 0, true);
+                    me->MonsterTextEmote(emote, 0, true);
                 }
                 FocusFire_Timer = 15000+(rand()%5000);
             } else FocusFire_Timer -= diff;

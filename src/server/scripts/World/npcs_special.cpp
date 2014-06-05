@@ -1808,7 +1808,7 @@ class mob_mojo : public CreatureScript
                             break;
                     }
 
-                    me->MonsterWhisper(whisp.c_str(), player->GetGUID());
+                    me->MonsterWhisper(whisp, player->GetGUID());
                     if (victimGUID)
                         if (Player* victim = Unit::GetPlayer(*me, victimGUID))
                             victim->RemoveAura(43906);//remove polymorph frog thing

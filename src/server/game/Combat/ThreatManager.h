@@ -142,20 +142,13 @@ class ThreatManager;
 
 class ThreatContainer
 {
-    private:
-        std::list<HostileReference*> iThreatList;
-        bool iDirty;
-    protected:
         friend class ThreatManager;
 
-        void remove(HostileReference* hostileRef) { iThreatList.remove(hostileRef); }
-        void addReference(HostileReference* hostileRef) { iThreatList.push_back(hostileRef); }
-        void clearReferences();
-
-        // Sort the list if necessary
-        void update();
     public:
-        ThreatContainer() { iDirty = false; }
+        typedef std::list<HostileReference*> StorageType;
+
+        ThreatContainer(): iDirty(false) { }
+
         ~ThreatContainer() { clearReferences(); }
 
         HostileReference* addThreat(Unit* victim, float threat);
@@ -168,13 +161,39 @@ class ThreatContainer
 
         bool isDirty() const { return iDirty; }
 
-        bool empty() const { return iThreatList.empty(); }
+        bool empty() const
+        {
+            return iThreatList.empty();
+        }
 
-        HostileReference* getMostHated() { return iThreatList.empty() ? NULL : iThreatList.front(); }
+        HostileReference* getMostHated()
+        {
+            return iThreatList.empty() ? NULL : iThreatList.front();
+        }
 
         HostileReference* getReferenceByTarget(Unit* victim);
 
-        std::list<HostileReference*>& getThreatList() { return iThreatList; }
+        StorageType const & getThreatList() const { return iThreatList; }
+
+    private:
+        void remove(HostileReference* hostileRef)
+        {
+            iThreatList.remove(hostileRef);
+        }
+
+        void addReference(HostileReference* hostileRef)
+        {
+            iThreatList.push_back(hostileRef);
+        }
+
+        void clearReferences();
+
+        // Sort the list if necessary
+        void update();
+
+        StorageType iThreatList;
+
+        bool iDirty;
 };
 
 //=================================================
@@ -223,11 +242,11 @@ class ThreatManager
         // Reset all aggro of unit in threadlist satisfying the predicate.
         template<class PREDICATE> void resetAggro(PREDICATE predicate)
         {
-            std::list<HostileReference*> &threatList = getThreatList();
+            ThreatContainer::StorageType &threatList = iThreatContainer.iThreatList;
             if (threatList.empty())
                 return;
 
-            for (std::list<HostileReference*>::iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+            for (auto itr = threatList.begin(); itr != threatList.end(); ++itr)
             {
                 HostileReference* ref = (*itr);
 
@@ -241,8 +260,8 @@ class ThreatManager
 
         // methods to access the lists from the outside to do some dirty manipulation (scriping and such)
         // I hope they are used as little as possible.
-        std::list<HostileReference*>& getThreatList() { return iThreatContainer.getThreatList(); }
-        std::list<HostileReference*>& getOfflineThreatList() { return iThreatOfflineContainer.getThreatList(); }
+        ThreatContainer::StorageType const & getThreatList() const { return iThreatContainer.getThreatList(); }
+        ThreatContainer::StorageType const & getOfflineThreatList() const { return iThreatOfflineContainer.getThreatList(); }
         ThreatContainer& getOnlineContainer() { return iThreatContainer; }
         ThreatContainer& getOfflineContainer() { return iThreatOfflineContainer; }
     private:

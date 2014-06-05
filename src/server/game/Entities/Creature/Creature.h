@@ -610,7 +610,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
         void UpdateMaxPower(Powers power);
         void UpdateAttackPowerAndDamage(bool ranged = false);
         void UpdateDamagePhysical(WeaponAttackType attType);
-        uint32 GetCurrentEquipmentId() { return m_equipmentId; }
+        uint32 GetCurrentEquipmentId() const { return m_equipmentId; }
         void SetCurrentEquipmentId(uint32 entry) { m_equipmentId = entry; }
         float GetSpellDamageMod(int32 Rank);
 
@@ -635,7 +635,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
         void YellToZone(int32 textId, uint32 language, uint64 TargetGuid) { MonsterYellToZone(textId, language, TargetGuid); }
 
         // override WorldObject function for proper name localization
-        const char* GetNameForLocaleIdx(LocaleConstant locale_idx) const;
+        std::string const & GetNameForLocaleIdx(LocaleConstant locale_idx) const override;
 
         void setDeathState(DeathState s);                   // override virtual Unit::setDeathState
 

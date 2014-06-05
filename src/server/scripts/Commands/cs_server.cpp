@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -22,77 +22,124 @@ Comment: All server related commands
 Category: commandscripts
 EndScriptData */
 
-#include "ScriptMgr.h"
 #include "Chat.h"
-#include "SystemConfig.h"
 #include "Config.h"
+#include "Language.h"
 #include "ObjectAccessor.h"
+#include "Player.h"
+#include "ScriptMgr.h"
+#include "SystemConfig.h"
 
 class server_commandscript : public CommandScript
 {
 public:
     server_commandscript() : CommandScript("server_commandscript") { }
 
-    ChatCommand* GetCommands() const
+    ChatCommand* GetCommands() const override
     {
         static ChatCommand serverIdleRestartCommandTable[] =
         {
-            { "cancel",         SEC_ADMINISTRATOR,  true,  &HandleServerShutDownCancelCommand,      "", NULL },
-            { ""   ,            SEC_ADMINISTRATOR,  true,  &HandleServerIdleRestartCommand,         "", NULL },
-            { NULL,             0,                  false, NULL,                                    "", NULL }
+            { "cancel", rbac::RBAC_PERM_COMMAND_SERVER_IDLERESTART_CANCEL, true, &HandleServerShutDownCancelCommand, "", NULL },
+            { ""   ,    rbac::RBAC_PERM_COMMAND_SERVER_IDLERESTART,        true, &HandleServerIdleRestartCommand,    "", NULL },
+            { NULL,     0,                                          false, NULL,                               "", NULL }
         };
 
         static ChatCommand serverIdleShutdownCommandTable[] =
         {
-            { "cancel",         SEC_ADMINISTRATOR,  true,  &HandleServerShutDownCancelCommand,      "", NULL },
-            { ""   ,            SEC_ADMINISTRATOR,  true,  &HandleServerIdleShutDownCommand,        "", NULL },
-            { NULL,             0,                  false, NULL,                                    "", NULL }
+            { "cancel", rbac::RBAC_PERM_COMMAND_SERVER_IDLESHUTDOWN_CANCEL, true, &HandleServerShutDownCancelCommand, "", NULL },
+            { ""   ,    rbac::RBAC_PERM_COMMAND_SERVER_IDLESHUTDOWN,        true, &HandleServerIdleShutDownCommand,   "", NULL },
+            { NULL,     0,                                           false, NULL,                               "", NULL }
         };
 
         static ChatCommand serverRestartCommandTable[] =
         {
-            { "cancel",         SEC_ADMINISTRATOR,  true,  &HandleServerShutDownCancelCommand,      "", NULL },
-            { ""   ,            SEC_ADMINISTRATOR,  true,  &HandleServerRestartCommand,             "", NULL },
-            { NULL,             0,                  false, NULL,                                    "", NULL }
+            { "cancel", rbac::RBAC_PERM_COMMAND_SERVER_RESTART_CANCEL, true, &HandleServerShutDownCancelCommand, "", NULL },
+            { ""   ,    rbac::RBAC_PERM_COMMAND_SERVER_RESTART,        true, &HandleServerRestartCommand,        "", NULL },
+            { NULL,     0,                                      false, NULL,                               "", NULL }
         };
 
         static ChatCommand serverShutdownCommandTable[] =
         {
-            { "cancel",         SEC_ADMINISTRATOR,  true,  &HandleServerShutDownCancelCommand,      "", NULL },
-            { ""   ,            SEC_ADMINISTRATOR,  true,  &HandleServerShutDownCommand,            "", NULL },
-            { NULL,             0,                  false, NULL,                                    "", NULL }
+            { "cancel", rbac::RBAC_PERM_COMMAND_SERVER_SHUTDOWN_CANCEL, true, &HandleServerShutDownCancelCommand, "", NULL },
+            { ""   ,    rbac::RBAC_PERM_COMMAND_SERVER_SHUTDOWN,        true, &HandleServerShutDownCommand,       "", NULL },
+            { NULL,     0,                                       false, NULL,                               "", NULL }
         };
 
         static ChatCommand serverSetCommandTable[] =
         {
-            { "difftime",       SEC_CONSOLE,        true,  &HandleServerSetDiffTimeCommand,         "", NULL },
-            { "loglevel",       SEC_CONSOLE,        true,  &HandleServerSetLogLevelCommand,         "", NULL },
-            { "motd",           SEC_ADMINISTRATOR,  true,  &HandleServerSetMotdCommand,             "", NULL },
-            { "closed",         SEC_ADMINISTRATOR,  true,  &HandleServerSetClosedCommand,           "", NULL },
+            { "loglevel", rbac::RBAC_PERM_COMMAND_SERVER_SET_LOGLEVEL, true, &HandleServerSetLogLevelCommand, "", NULL },
+            { "motd",     rbac::RBAC_PERM_COMMAND_SERVER_SET_MOTD,     true, &HandleServerSetMotdCommand,     "", NULL },
+            { "closed",   rbac::RBAC_PERM_COMMAND_SERVER_SET_CLOSED,   true, &HandleServerSetClosedCommand,   "", NULL },
+            { NULL,       0,                                false, NULL,                            "", NULL }
+        };
+
+        static ChatCommand serverDiffCommandTable[] =
+        {
+            { "last",     rbac::RBAC_PERM_COMMAND_SERVER_DIFF_LAST,     false, &HandleServerDiffLastCommand,            "", NULL },
+            { "average",  rbac::RBAC_PERM_COMMAND_SERVER_DIFF_AVERAGE,  false, &HandleServerDiffAverageCommand,         "", NULL },
+            { "interval", rbac::RBAC_PERM_COMMAND_SERVER_DIFF_INTERVAL, false, &HandleServerDiffIntervalCommand,        "", NULL },
             { NULL,             0,                  false, NULL,                                    "", NULL }
         };
 
         static ChatCommand serverCommandTable[] =
         {
-            { "corpses",        SEC_GAMEMASTER,     true,  &HandleServerCorpsesCommand,             "", NULL },
-            { "exit",           SEC_CONSOLE,        true,  &HandleServerExitCommand,                "", NULL },
-            { "idlerestart",    SEC_ADMINISTRATOR,  true,  NULL,                                    "", serverIdleRestartCommandTable },
-            { "idleshutdown",   SEC_ADMINISTRATOR,  true,  NULL,                                    "", serverIdleShutdownCommandTable },
-            { "info",           SEC_PLAYER,         true,  &HandleServerInfoCommand,                "", NULL },
-            { "motd",           SEC_PLAYER,         true,  &HandleServerMotdCommand,                "", NULL },
-            { "plimit",         SEC_ADMINISTRATOR,  true,  &HandleServerPLimitCommand,              "", NULL },
-            { "restart",        SEC_ADMINISTRATOR,  true,  NULL,                                    "", serverRestartCommandTable },
-            { "shutdown",       SEC_ADMINISTRATOR,  true,  NULL,                                    "", serverShutdownCommandTable },
-            { "set",            SEC_ADMINISTRATOR,  true,  NULL,                                    "", serverSetCommandTable },
-            { NULL,             0,                  false, NULL,                                    "", NULL }
+            { "corpses",      rbac::RBAC_PERM_COMMAND_SERVER_CORPSES,      true, &HandleServerCorpsesCommand, "", NULL },
+            { "exit",         rbac::RBAC_PERM_COMMAND_SERVER_EXIT,         true, &HandleServerExitCommand,    "", NULL },
+            { "idlerestart",  rbac::RBAC_PERM_COMMAND_SERVER_IDLERESTART,  true, NULL,                        "", serverIdleRestartCommandTable },
+            { "idleshutdown", rbac::RBAC_PERM_COMMAND_SERVER_IDLESHUTDOWN, true, NULL,                        "", serverIdleShutdownCommandTable },
+            { "info",         rbac::RBAC_PERM_COMMAND_SERVER_INFO,         true, &HandleServerInfoCommand,    "", NULL },
+            { "motd",         rbac::RBAC_PERM_COMMAND_SERVER_MOTD,         true, &HandleServerMotdCommand,    "", NULL },
+            { "plimit",       rbac::RBAC_PERM_COMMAND_SERVER_PLIMIT,       true, &HandleServerPLimitCommand,  "", NULL },
+            { "restart",      rbac::RBAC_PERM_COMMAND_SERVER_RESTART,      true, NULL,                        "", serverRestartCommandTable },
+            { "shutdown",     rbac::RBAC_PERM_COMMAND_SERVER_SHUTDOWN,     true, NULL,                        "", serverShutdownCommandTable },
+            { "set",          rbac::RBAC_PERM_COMMAND_SERVER_SET,          true, NULL,                        "", serverSetCommandTable },
+            { "diff",         rbac::RBAC_PERM_COMMAND_SERVER_DIFF,         true,  NULL,                       "", serverDiffCommandTable },
+            { NULL,           0,                                    false, NULL,                        "", NULL }
         };
 
-         static ChatCommand commandTable[] =
+        static ChatCommand commandTable[] =
         {
-            { "server",         SEC_ADMINISTRATOR,  true,  NULL,                                    "", serverCommandTable },
-            { NULL,             0,                  false, NULL,                                    "", NULL }
+            { "server", rbac::RBAC_PERM_COMMAND_SERVER, true, NULL, "", serverCommandTable },
+            { NULL,     0,                       false, NULL, "", NULL }
         };
+
         return commandTable;
+    }
+
+    static bool HandleServerDiffLastCommand(ChatHandler* handler, char const* /*args*/)
+    {
+        uint32 const latency = sWorld->GetLastServerLatency();
+        handler->PSendSysMessage(LANG_UPDATE_LAST_DIFF, latency);
+        return true;
+    }
+
+    static bool HandleServerDiffAverageCommand(ChatHandler* handler, char const* /*args*/)
+    {
+        uint32 const latency = sWorld->GetAverageServerLatency();
+        handler->PSendSysMessage(LANG_UPDATE_AVERAGE_DIFF, latency);
+        return true;
+    }
+
+    // set diff time record interval
+    static bool HandleServerDiffIntervalCommand(ChatHandler* handler, char const* args)
+    {
+        if (!*args)
+        {
+            uint32 const interval = sWorld->getIntConfig(CONFIG_INTERVAL_LOG_UPDATE);
+            handler->PSendSysMessage(LANG_CURRENT_DIFF_INTERVAL, interval);
+            return true;
+        }
+
+        char* newTimeStr = strtok((char*)args, " ");
+        if (!newTimeStr)
+            return false;
+
+        int32 newTime = atoi(newTimeStr);
+        if (newTime < 0)
+            return false;
+
+        sWorld->SetRecordDiffInterval(static_cast<uint32>(newTime * IN_MILLISECONDS));
+        return true;
     }
 
     // Triggering corpses expire check in world
@@ -104,21 +151,9 @@ public:
 
     static bool HandleServerInfoCommand(ChatHandler* handler, char const* /*args*/)
     {
-        uint32 updateTime = sWorld->GetUpdateTime();
+        std::string uptime = secsToTimeString(sWorld->GetUptime());
 
-        handler->PSendSysMessage("Server delay: %u ms", updateTime);
-
-        // Bypass player/VIP
-        if (handler->GetSession()->GetSecurity() > 1)
-        {
-            handler->PSendSysMessage("Map diff : %u ms", sWorld->GetRecordDiff(RECORD_DIFF_MAP));
-            handler->PSendSysMessage("Battleground diff : %u ms", sWorld->GetRecordDiff(RECORD_DIFF_BATTLEGROUND));
-            handler->PSendSysMessage("Session diff : %u ms", sWorld->GetRecordDiff(RECORD_DIFF_SESSION));
-            handler->PSendSysMessage("Battlefield diff : %u ms", sWorld->GetRecordDiff(RECORD_DIFF_BATTLEFIELD));
-            handler->PSendSysMessage("Outdoor PVP diff : %u ms", sWorld->GetRecordDiff(RECORD_DIFF_OUTDOORPVP));
-            handler->PSendSysMessage("LFG Mgr diff : %u ms", sWorld->GetRecordDiff(RECORD_DIFF_LFG));
-            handler->PSendSysMessage("Callback diff : %u ms", sWorld->GetRecordDiff(RECORD_DIFF_CALLBACK));
-        }
+        handler->PSendSysMessage(LANG_UPTIME, uptime.c_str());
 
         // Can't use sWorld->ShutdownMsg here in case of console command
         if (sWorld->IsShuttingDown())
@@ -126,6 +161,7 @@ public:
 
         return true;
     }
+
     // Display the 'Message of the day' for the realm
     static bool HandleServerMotdCommand(ChatHandler* handler, char const* /*args*/)
     {
@@ -175,7 +211,7 @@ public:
                 secName = "Player";
                 break;
             case SEC_MODERATOR:
-                secName = "Moderator";
+                secName = "Donor";
                 break;
             case SEC_GAMEMASTER:
                 secName = "Gamemaster";
@@ -268,7 +304,7 @@ public:
         else
             sWorld->ShutdownServ(time, SHUTDOWN_MASK_RESTART, RESTART_EXIT_CODE);
 
-            return true;
+        return true;
     }
 
     static bool HandleServerIdleRestartCommand(ChatHandler* /*handler*/, char const* args)
@@ -338,14 +374,15 @@ public:
         }
         else
             sWorld->ShutdownServ(time, SHUTDOWN_MASK_IDLE, SHUTDOWN_EXIT_CODE);
-            return true;
+
+        return true;
     }
 
     // Exit the realm
     static bool HandleServerExitCommand(ChatHandler* handler, char const* /*args*/)
     {
         handler->SendSysMessage(LANG_COMMAND_EXIT);
-        World::StopNow(SHUTDOWN_EXIT_CODE);
+        sWorld->StopNow(SHUTDOWN_EXIT_CODE);
         return true;
     }
 
@@ -392,26 +429,6 @@ public:
             return false;
 
         sLog->SetLogLevel(name, level, *type == 'l');
-        return true;
-    }
-
-    // set diff time record interval
-    static bool HandleServerSetDiffTimeCommand(ChatHandler* /*handler*/, char const* args)
-    {
-        if (!*args)
-            return false;
-
-        char* newTimeStr = strtok((char*)args, " ");
-        if (!newTimeStr)
-            return false;
-
-        int32 newTime = atoi(newTimeStr);
-        if (newTime < 0)
-            return false;
-
-        sWorld->SetRecordDiffInterval(newTime);
-        printf("Record diff every %u ms\n", newTime);
-
         return true;
     }
 };

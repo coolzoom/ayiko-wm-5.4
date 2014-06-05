@@ -18,14 +18,13 @@
 #ifndef TRINITY_PHASEMGR_H
 #define TRINITY_PHASEMGR_H
 
-#include "SharedDefines.h"
-#include "SpellAuras.h"
-#include "SpellAuraEffects.h"
+#include "Define.h"
 #include "ConditionMgr.h"
 
 #include <unordered_map>
 
-class ObjectMgr;
+class AuraEffect;
+struct Condition;
 class Player;
 
 // Phasing (visibility)
@@ -54,10 +53,10 @@ struct PhaseDefinition
     { }
 
     uint32 zoneId;
-    uint32 entry;
+    uint16 entry;
     uint32 phasemask;
-    uint32 phaseId;
-    uint32 terrainswapmap;
+    uint16 phaseId;
+    uint16 terrainswapmap;
     uint8 flags;
 
     bool IsOverwritingExistingPhases() const { return flags & PHASE_FLAG_OVERWRITE_EXISTING; }
@@ -65,14 +64,16 @@ struct PhaseDefinition
     bool IsNegatingPhasemask() const { return flags & PHASE_FLAG_NEGATE_PHASE; }
 };
 
-typedef std::list<PhaseDefinition> PhaseDefinitionContainer;
-typedef std::unordered_map<uint32 /*zoneId*/, PhaseDefinitionContainer> PhaseDefinitionStore;
+typedef std::set<uint16> PhaseShiftSet;
+
+typedef std::vector<PhaseDefinition> PhaseDefinitionVector;
+typedef std::unordered_map<uint32 /*zoneId*/, PhaseDefinitionVector> PhaseDefinitionMap;
 
 struct SpellPhaseInfo
 {
     uint32 spellId;
     uint32 phasemask;
-    uint32 terrainswapmap;
+    uint16 terrainswapmap;
 };
 
 typedef std::unordered_map<uint32 /*spellId*/, SpellPhaseInfo> SpellPhaseStore;
@@ -82,8 +83,8 @@ struct PhaseInfo
     PhaseInfo() : phasemask(0), terrainswapmap(0), phaseId(0) {}
 
     uint32 phasemask;
-    uint32 terrainswapmap;
-    uint32 phaseId;
+    uint16 terrainswapmap;
+    uint16 phaseId;
 
     bool NeedsServerSideUpdate() const { return phasemask; }
     bool NeedsClientSideUpdate() const { return terrainswapmap || phaseId; }
@@ -174,13 +175,13 @@ public:
 private:
     void Recalculate();
 
-    inline bool CheckDefinition(PhaseDefinition const* phaseDefinition);
+    bool CheckDefinition(PhaseDefinition const* phaseDefinition);
 
     bool NeedsPhaseUpdateWithData(PhaseUpdateData const updateData) const;
 
-    inline bool IsUpdateInProgress() const { return (_UpdateFlags & PHASE_UPDATE_FLAG_ZONE_UPDATE) || (_UpdateFlags & PHASE_UPDATE_FLAG_AREA_UPDATE); }
+    bool IsUpdateInProgress() const { return (_UpdateFlags & PHASE_UPDATE_FLAG_ZONE_UPDATE) || (_UpdateFlags & PHASE_UPDATE_FLAG_AREA_UPDATE); }
 
-    PhaseDefinitionStore const* _PhaseDefinitionStore;
+    PhaseDefinitionMap const* _PhaseDefinitionStore;
     SpellPhaseStore const* _SpellPhaseStore;
 
     Player* player;

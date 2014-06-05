@@ -1418,7 +1418,6 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recvData)
     stmt->setUInt32(1, item->GetGUIDLow());
     stmt->setUInt32(2, item->GetEntry());
     stmt->setUInt32(3, item->GetUInt32Value(ITEM_FIELD_FLAGS));
-    trans->Append(stmt);
 
     item->SetEntry(gift->GetEntry());
 
@@ -1448,12 +1447,15 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recvData)
     item->SetUInt32Value(ITEM_FIELD_FLAGS, ITEM_FLAG_WRAPPED);
     item->SetState(ITEM_CHANGED, _player);
 
-    if (item->GetState() == ITEM_NEW)                          // save new item, to have alway for `character_gifts` record in `item_instance`
+    // save new item, to have alway for `character_gifts` record in `item_instance`
+    if (item->GetState() == ITEM_NEW)
     {
         // after save it will be impossible to remove the item from the queue
         item->RemoveFromUpdateQueueOf(_player);
-        item->SaveToDB(trans);                                   // item gave inventory record unchanged and can be save standalone
+        item->SaveToDB(trans);
     }
+
+    trans->Append(stmt);
 
     CharacterDatabase.CommitTransaction(trans);
 
@@ -1856,7 +1858,8 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket& recvData)
 
     if (count >= EQUIPMENT_SLOT_END)
     {
-        TC_LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - Player (GUID: %u, name: %s) sent a wrong count (%u) when transmogrifying items.", player->GetGUIDLow(), player->GetName(), count);
+        TC_LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - Player (GUID: %u, name: %s) sent a wrong count (%u) when transmogrifying items.",
+                     player->GetGUIDLow(), player->GetName().c_str(), count);
         recvData.rfinish();
         return;
     }
@@ -1910,7 +1913,9 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket& recvData)
         // slot of the transmogrified item
         if (slots[i] >= EQUIPMENT_SLOT_END)
         {
-            TC_LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - Player (GUID: %u, name: %s) tried to transmogrify an item (lowguid: %u) with a wrong slot (%u) when transmogrifying items.", player->GetGUIDLow(), player->GetName(), GUID_LOPART(itemGuids[i]), slots[i]);
+            TC_LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - Player (GUID: %u, name: %s) tried to transmogrify"
+                         " an item (lowguid: %u) with a wrong slot (%u) when transmogrifying items.",
+                         player->GetGUIDLow(), player->GetName().c_str(), GUID_LOPART(itemGuids[i]), slots[i]);
             return;
         }
 
@@ -1920,7 +1925,8 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket& recvData)
             ItemTemplate const* proto = sObjectMgr->GetItemTemplate(newEntries[i]);
             if (!proto)
             {
-                TC_LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - Player (GUID: %u, name: %s) tried to transmogrify to an invalid item (entry: %u).", player->GetGUIDLow(), player->GetName(), newEntries[i]);
+                TC_LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - Player (GUID: %u, name: %s) tried to transmogrify"
+                             " to an invalid item (entry: %u).", player->GetGUIDLow(), player->GetName().c_str(), newEntries[i]);
                 return;
             }
 
@@ -1935,7 +1941,8 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket& recvData)
             itemTransmogrifier = player->GetItemByGuid(itemGuids[i]);
             if (!itemTransmogrifier)
             {
-                TC_LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - Player (GUID: %u, name: %s) tried to transmogrify with an invalid item (lowguid: %u).", player->GetGUIDLow(), player->GetName(), GUID_LOPART(itemGuids[i]));
+                TC_LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - Player (GUID: %u, name: %s) tried to transmogrify"
+                             " with an invalid item (lowguid: %u).", player->GetGUIDLow(), player->GetName().c_str(), GUID_LOPART(itemGuids[i]));
                 return;
             }
         }
@@ -1944,7 +1951,8 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket& recvData)
         Item* itemTransmogrified = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slots[i]);
         if (!itemTransmogrified)
         {
-            TC_LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - Player (GUID: %u, name: %s) tried to transmogrify an invalid item in a valid slot (slot: %u).", player->GetGUIDLow(), player->GetName(), slots[i]);
+            TC_LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - Player (GUID: %u, name: %s) tried to transmogrify"
+                         " an invalid item in a valid slot (slot: %u).", player->GetGUIDLow(), player->GetName().c_str(), slots[i]);
             return;
         }
 
@@ -1958,7 +1966,8 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket& recvData)
         {
             if (!Item::CanTransmogrifyItemWithItem(itemTransmogrified, itemTransmogrifier))
             {
-                TC_LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - Player (GUID: %u, name: %s) failed CanTransmogrifyItemWithItem (%u with %u).", player->GetGUIDLow(), player->GetName(), itemTransmogrified->GetEntry(), itemTransmogrifier->GetEntry());
+                TC_LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - Player (GUID: %u, name: %s) failed CanTransmogrifyItemWithItem (%u with %u).",
+                             player->GetGUIDLow(), player->GetName().c_str(), itemTransmogrified->GetEntry(), itemTransmogrifier->GetEntry());
                 return;
             }
 
@@ -2022,7 +2031,8 @@ void WorldSession::HandleReforgeItemOpcode(WorldPacket& recvData)
     Item* item = player->GetItemByPos(bag, slot);
     if (!item)
     {
-        TC_LOG_DEBUG("network", "WORLD: HandleReforgeItemOpcode - Player (Guid: %u Name: %s) tried to reforge an invalid/non-existant item.", player->GetGUIDLow(), player->GetName());
+        TC_LOG_DEBUG("network", "WORLD: HandleReforgeItemOpcode - Player (Guid: %u Name: %s) tried to reforge an invalid/non-existant item.",
+                     player->GetGUIDLow(), player->GetName().c_str());
         SendReforgeResult(false);
         return;
     }
@@ -2043,7 +2053,8 @@ void WorldSession::HandleReforgeItemOpcode(WorldPacket& recvData)
     ItemReforgeEntry const* stats = sItemReforgeStore.LookupEntry(reforgeEntry);
     if (!stats)
     {
-        TC_LOG_DEBUG("network", "WORLD: HandleReforgeItemOpcode - Player (Guid: %u Name: %s) tried to reforge an item with invalid reforge entry (%u).", player->GetGUIDLow(), player->GetName(), reforgeEntry);
+        TC_LOG_DEBUG("network", "WORLD: HandleReforgeItemOpcode - Player (Guid: %u Name: %s) tried to reforge an item with invalid reforge entry (%u).",
+                     player->GetGUIDLow(), player->GetName().c_str(), reforgeEntry);
         SendReforgeResult(false);
         return;
     }

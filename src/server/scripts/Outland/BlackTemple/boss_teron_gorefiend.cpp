@@ -169,17 +169,19 @@ public:
 
         void CheckPlayers()
         {
-            std::list<HostileReference*>& m_threatlist = me->getThreatManager().getThreatList();
-            if (m_threatlist.empty())
-                return;                                         // No threat list. Don't continue.
-            std::list<HostileReference*>::const_iterator itr = m_threatlist.begin();
+            auto const &threatlist = me->getThreatManager().getThreatList();
+            if (threatlist.empty())
+                return;
+
+            auto itr = threatlist.begin();
             std::list<Unit*> targets;
-            for (; itr != m_threatlist.end(); ++itr)
+            for (; itr != threatlist.end(); ++itr)
             {
                 Unit* unit = Unit::GetUnit(*me, (*itr)->getUnitGuid());
                 if (unit && unit->isAlive())
                     targets.push_back(unit);
             }
+
             targets.sort(Trinity::ObjectDistanceOrderPred(me));
             Unit* target = targets.front();
             if (target && me->IsWithinDistInMap(target, me->GetAttackDistance(target)))
@@ -322,9 +324,9 @@ public:
             if (!Blossom)
                 return;
 
-            std::list<HostileReference*>& m_threatlist = me->getThreatManager().getThreatList();
-            std::list<HostileReference*>::const_iterator i = m_threatlist.begin();
-            for (i = m_threatlist.begin(); i != m_threatlist.end(); ++i)
+            auto threatlist = me->getThreatManager().getThreatList();
+            auto i = threatlist.begin();
+            for (i = threatlist.begin(); i != threatlist.end(); ++i)
             {
                 Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
                 if (unit && unit->isAlive())

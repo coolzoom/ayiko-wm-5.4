@@ -415,8 +415,7 @@ void GuildFinderMgr::SendMembershipRequestListUpdate(Player& player)
             bufferData.WriteByteSeq<4>(guildGuid);
             bufferData << uint32(guildSettings.GetAvailability());
 
-            if (guild->GetName().size() > 0)
-                bufferData.append(guild->GetName().c_str(), guild->GetName().size());
+            bufferData.WriteString(guild->GetName());
 
             bufferData << uint32(time(NULL) - request.GetSubmitTime()); // Time since application (seconds)
             bufferData << uint32(guildSettings.GetInterests());

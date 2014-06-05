@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -22,27 +22,107 @@ Comment: All achievement related commands
 Category: commandscripts
 EndScriptData */
 
-#include "ScriptMgr.h"
+#include "AchievementMgr.h"
 #include "Chat.h"
+#include "Language.h"
+#include "Player.h"
+#include "ScriptMgr.h"
 
 class achievement_commandscript : public CommandScript
 {
 public:
     achievement_commandscript() : CommandScript("achievement_commandscript") { }
 
-    ChatCommand* GetCommands() const
+    ChatCommand* GetCommands() const override
     {
         static ChatCommand achievementCommandTable[] =
         {
-            { "add",            SEC_ADMINISTRATOR,  false,  &HandleAchievementAddCommand,      "", NULL },
-            { NULL,             0,                  false,  NULL,                              "", NULL }
+            { "add",      rbac::RBAC_PERM_COMMAND_ACHIEVEMENT_ADD,      false, &HandleAchievementAddCommand, "", NULL },
+            { "criteria", rbac::RBAC_PERM_COMMAND_ACHIEVEMENT_CRITERIA, false, &HandleAchievementCriteriaCommand, "", NULL },
+            { "check",    rbac::RBAC_PERM_COMMAND_ACHIEVEMENT_CHECK,    false, &HandleAchievementCheckCommand,    "", NULL },
+            { "start",    rbac::RBAC_PERM_COMMAND_ACHIEVEMENT_START,    false, &HandleAchievementStartTimedCriteriaCommand, "", NULL },
+            { NULL, 0, false, NULL, "", NULL }
         };
         static ChatCommand commandTable[] =
         {
-            { "achievement",    SEC_ADMINISTRATOR,  false, NULL,            "", achievementCommandTable },
-            { NULL,             0,                  false, NULL,                               "", NULL }
+            { "achievement", rbac::RBAC_PERM_COMMAND_ACHIEVEMENT,  false, NULL, "", achievementCommandTable },
+            { NULL, 0, false, NULL, "", NULL }
         };
         return commandTable;
+    }
+
+    static bool HandleAchievementCheckCommand(ChatHandler* handler, char const* /*args*/)
+    {
+        Player* target = handler->getSelectedPlayer();
+        if (!target)
+        {
+            handler->SendSysMessage(LANG_NO_CHAR_SELECTED);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        target->CheckAllAchievementCriteria();
+        return true;
+    }
+
+    static bool HandleAchievementStartTimedCriteriaCommand(ChatHandler* handler, char const* args)
+    {
+        if (!*args)
+            return false;
+
+        char* ctype = strtok((char*)args, " ");
+        uint32 type = ctype ? atoi(ctype) : 0;
+        uint32 entry = 0;
+
+        ctype = strtok(NULL, " ");
+        if (ctype)
+            entry = atoi(ctype);
+
+        Player* target = handler->getSelectedPlayer();
+        if (!target)
+        {
+            handler->SendSysMessage(LANG_NO_CHAR_SELECTED);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        target->GetAchievementMgr().StartTimedAchievement(AchievementCriteriaTimedTypes(type), entry);
+        return true;
+    }
+
+    static bool HandleAchievementCriteriaCommand(ChatHandler* handler, char const* args)
+    {
+        if (!*args)
+            return false;
+
+        char* ctype = strtok((char*)args, " ");
+        uint32 type = ctype ? atoi(ctype) : 0;
+        uint64 val1 = 0;
+        uint64 val2 = 0;
+        uint64 val3 = 0;
+
+        ctype = strtok(NULL, " ");
+        if (ctype)
+            val1 = atoi(ctype);
+
+        ctype = strtok(NULL, " ");
+        if (ctype)
+            val2 = atoi(ctype);
+
+        ctype = strtok(NULL, " ");
+        if (ctype)
+            val3 = atoi(ctype);
+
+        Player* target = handler->getSelectedPlayer();
+        if (!target)
+        {
+            handler->SendSysMessage(LANG_NO_CHAR_SELECTED);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        target->UpdateAchievementCriteria(AchievementCriteriaTypes(type), val1, val2, val3, target->GetSelectedUnit());
+        return true;
     }
 
     static bool HandleAchievementAddCommand(ChatHandler* handler, char const* args)
@@ -67,7 +147,7 @@ public:
             return false;
         }
 
-        if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(achievementId))
+        if (AchievementEntry const* achievementEntry = sAchievementMgr->GetAchievement(achievementId))
             target->CompletedAchievement(achievementEntry);
 
         return true;

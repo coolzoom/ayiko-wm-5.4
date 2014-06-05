@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -22,29 +22,32 @@ Comment: All quest related commands
 Category: commandscripts
 EndScriptData */
 
-#include "ScriptMgr.h"
-#include "ObjectMgr.h"
 #include "Chat.h"
+#include "ObjectMgr.h"
+#include "Player.h"
+#include "ReputationMgr.h"
+#include "ScriptMgr.h"
+#include "LexicalCast.h"
 
 class quest_commandscript : public CommandScript
 {
 public:
     quest_commandscript() : CommandScript("quest_commandscript") { }
 
-    ChatCommand* GetCommands() const
+    ChatCommand* GetCommands() const override
     {
         static ChatCommand questCommandTable[] =
         {
-            { "add",            SEC_ADMINISTRATOR,  false, &HandleQuestAdd,                    "", NULL },
-            { "complete",       SEC_ADMINISTRATOR,  false, &HandleQuestComplete,               "", NULL },
-            { "remove",         SEC_ADMINISTRATOR,  false, &HandleQuestRemove,                 "", NULL },
-            { "reward",         SEC_ADMINISTRATOR,  false, &HandleQuestReward,                 "", NULL },
-            { NULL,             SEC_PLAYER,         false, NULL,                               "", NULL }
+            { "add",      rbac::RBAC_PERM_COMMAND_QUEST_ADD,      false, &HandleQuestAdd,      "", NULL },
+            { "complete", rbac::RBAC_PERM_COMMAND_QUEST_COMPLETE, false, &HandleQuestComplete, "", NULL },
+            { "remove",   rbac::RBAC_PERM_COMMAND_QUEST_REMOVE,   false, &HandleQuestRemove,   "", NULL },
+            { "reward",   rbac::RBAC_PERM_COMMAND_QUEST_REWARD,   false, &HandleQuestReward,   "", NULL },
+            { NULL,       0,                                false, NULL,                 "", NULL }
         };
         static ChatCommand commandTable[] =
         {
-            { "quest",          SEC_ADMINISTRATOR,  false, NULL,                  "", questCommandTable },
-            { NULL,             SEC_PLAYER,         false, NULL,                               "", NULL }
+            { "quest", rbac::RBAC_PERM_COMMAND_QUEST,  false, NULL, "", questCommandTable },
+            { NULL,    0,                        false, NULL,              "", NULL }
         };
         return commandTable;
     }
@@ -65,7 +68,7 @@ public:
         if (!cId)
             return false;
 
-        uint32 entry = atol(cId);
+        uint32 entry = Trinity::lexicalCast<uint32>(cId);
 
         Quest const* quest = sObjectMgr->GetQuestTemplate(entry);
 
@@ -77,10 +80,10 @@ public:
         }
 
         // check item starting quest (it can work incorrectly if added without item in inventory)
-        auto const &itc = sObjectMgr->GetItemTemplateStore();
-        auto const result = std::find_if(itc.cbegin(), itc.cend(), Finder<uint32, ItemTemplate>(entry, &ItemTemplate::StartQuest));
+        ItemTemplateContainer const &itc = sObjectMgr->GetItemTemplateStore();
+        ItemTemplateContainer::const_iterator result = find_if (itc.begin(), itc.end(), Finder<uint32, ItemTemplate>(entry, &ItemTemplate::StartQuest));
 
-        if (result != itc.cend())
+        if (result != itc.end())
         {
             handler->PSendSysMessage(LANG_COMMAND_QUEST_STARTFROMITEM, entry, result->second.ItemId);
             handler->SetSentErrorMessage(true);
@@ -89,12 +92,7 @@ public:
 
         // ok, normal (creature/GO starting) quest
         if (player->CanAddQuest(quest, true))
-        {
-            player->AddQuest(quest, NULL);
-
-            if (player->CanCompleteQuest(entry))
-                player->CompleteQuest(entry);
-        }
+            player->AddQuestAndCheckCompletion(quest, NULL);
 
         return true;
     }
@@ -115,7 +113,7 @@ public:
         if (!cId)
             return false;
 
-        uint32 entry = atol(cId);
+        uint32 entry = Trinity::lexicalCast<uint32>(cId);
 
         Quest const* quest = sObjectMgr->GetQuestTemplate(entry);
 
@@ -162,7 +160,7 @@ public:
         if (!cId)
             return false;
 
-        uint32 entry = atol(cId);
+        uint32 entry = Trinity::lexicalCast<uint32>(cId);
 
         Quest const* quest = sObjectMgr->GetQuestTemplate(entry);
 
@@ -191,17 +189,6 @@ public:
                 Item* item = player->StoreNewItem(dest, id, true);
                 player->SendNewItem(item, count-curItemCount, true, false);
             }
-        }
-
-        for (uint8 y = 0; y < QUEST_REQUIRED_CURRENCY_COUNT; y++)
-        {
-            uint32 currency = quest->RequiredCurrencyId[y];
-            uint32 currencyCount = quest->RequiredCurrencyCount[y];
-
-            if(!currency || !currencyCount)
-                continue;
-
-            player->ModifyCurrency(currency, currencyCount);
         }
 
         // All creature/GO slain/casted (not required, but otherwise it will display "Creature slain 0/10")
@@ -276,7 +263,7 @@ public:
         if (!cId)
             return false;
 
-        uint32 entry = atol(cId);
+        uint32 entry = Trinity::lexicalCast<uint32>(cId);
 
         Quest const* quest = sObjectMgr->GetQuestTemplate(entry);
 

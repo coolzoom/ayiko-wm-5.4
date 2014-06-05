@@ -561,7 +561,8 @@ void WorldSession::HandleLootMasterAskForRoll(WorldPacket& recvData)
 
     if (slot >= loot->items.size() + loot->quest_items.size())
     {
-        TC_LOG_DEBUG("loot", "MasterLootItem: Player %s might be using a hack! (slot %d, size %lu)", GetPlayer()->GetName(), slot, (unsigned long)loot->items.size());
+        TC_LOG_DEBUG("loot", "MasterLootItem: Player %s might be using a hack! (slot %d, size %lu)",
+                     GetPlayer()->GetName().c_str(), slot, (unsigned long)loot->items.size());
         return;
     }
 
@@ -610,7 +611,7 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recvData)
     if (!target)
         return;
 
-    TC_LOG_DEBUG("network", "WorldSession::HandleLootMasterGiveOpcode (CMSG_LOOT_MASTER_GIVE, 0x02A3) Target = [%s].", target->GetName());
+    TC_LOG_DEBUG("network", "WorldSession::HandleLootMasterGiveOpcode (CMSG_LOOT_MASTER_GIVE, 0x02A3) Target = [%s].", target->GetName().c_str());
 
     for (uint32 i = 0; i < count; ++i)
     {
@@ -651,7 +652,8 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recvData)
 
         if (slotid >= loot->items.size() + loot->quest_items.size())
         {
-            TC_LOG_DEBUG("loot", "MasterLootItem: Player %s might be using a hack! (slot %d, size %lu)", GetPlayer()->GetName(), slotid, (unsigned long)loot->items.size());
+            TC_LOG_DEBUG("loot", "MasterLootItem: Player %s might be using a hack! (slot %d, size %lu)",
+                         GetPlayer()->GetName().c_str(), slotid, (unsigned long)loot->items.size());
             return;
         }
 

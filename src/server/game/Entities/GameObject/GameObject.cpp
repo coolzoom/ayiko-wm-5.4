@@ -1228,7 +1228,7 @@ void GameObject::Use(Unit* user)
                 Creature* helper = player->SummonCreature(14496, x_i, y_i, GetPositionZ(), GetOrientation(), TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 10000);
                 std::ostringstream output;
                 output << i << ": thisDist: " << thisDistance;
-                helper->MonsterSay(output.str().c_str(), LANG_UNIVERSAL, 0);
+                helper->MonsterSay(output.str(), LANG_UNIVERSAL, 0);
                 */
 
                 if (thisDistance <= lowestDist)
@@ -1679,7 +1679,7 @@ void GameObject::Use(Unit* user)
         default:
             if (GetGoType() >= MAX_GAMEOBJECT_TYPE)
                 TC_LOG_ERROR("misc", "GameObject::Use(): unit (type: %u, guid: %u, name: %s) tries to use object (guid: %u, entry: %u, name: %s) of unknown type (%u)",
-                    user->GetTypeId(), user->GetGUIDLow(), user->GetName(), GetGUIDLow(), GetEntry(), GetGOInfo()->name.c_str(), GetGoType());
+                    user->GetTypeId(), user->GetGUIDLow(), user->GetName().c_str(), GetGUIDLow(), GetEntry(), GetGOInfo()->name.c_str(), GetGoType());
             break;
     }
 
@@ -1808,14 +1808,14 @@ void GameObject::EventInform(uint32 eventId)
 }
 
 // overwrite WorldObject function for proper name localization
-const char* GameObject::GetNameForLocaleIdx(LocaleConstant loc_idx) const
+std::string const & GameObject::GetNameForLocaleIdx(LocaleConstant loc_idx) const
 {
     if (loc_idx != DEFAULT_LOCALE)
     {
         uint8 uloc_idx = uint8(loc_idx);
         if (GameObjectLocale const* cl = sObjectMgr->GetGameObjectLocale(GetEntry()))
             if (cl->Name.size() > uloc_idx && !cl->Name[uloc_idx].empty())
-                return cl->Name[uloc_idx].c_str();
+                return cl->Name[uloc_idx];
     }
 
     return GetName();

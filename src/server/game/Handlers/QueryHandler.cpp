@@ -53,7 +53,7 @@ void WorldSession::SendNameQueryOpcode(Player const *player)
 
     data.WriteBitSeq<6>(playerGuid);
     data.WriteBitSeq<7>(unkGuid);
-    data.WriteBits(std::strlen(player->GetName()), 6);
+    data.WriteBits(player->GetName().length(), 6);
     data.WriteBitSeq<1, 7, 2>(playerGuid);
     data.WriteBitSeq<4>(unkGuid);
     data.WriteBitSeq<4, 0>(playerGuid);
@@ -748,7 +748,7 @@ void WorldSession::HandlePageTextQueryOpcode(WorldPacket& recvData)
         }
 
         data << uint32(pageID);
-        
+
         if (pageText)
             pageID = pageText->NextPage;
 

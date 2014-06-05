@@ -19,9 +19,12 @@
 #ifndef _PLAYER_DUMP_H
 #define _PLAYER_DUMP_H
 
+#include "Define.h"
+
+#include <iosfwd>
 #include <string>
-#include <map>
 #include <set>
+#include <utility>
 
 enum DumpTableType
 {
@@ -64,41 +67,29 @@ enum DumpReturn
     DUMP_SYSTEM_LOCKED
 };
 
-class PlayerDump
+class PlayerDumpWriter
 {
-    protected:
-        PlayerDump() {}
+public:
+    bool GetDump(uint32 guid, std::string& dump);
+    DumpReturn WriteDump(std::string const& file, uint32 guid);
+
+private:
+    typedef std::set<uint32> GuidSet;
+
+    bool DumpTable(std::ostringstream& ss, uint32 guid, char const*tableFrom, char const*tableTo, DumpTableType type);
+    std::string GenerateWhereStr(char const* field, GuidSet const& guids, GuidSet::const_iterator& itr);
+    std::string GenerateWhereStr(char const* field, uint32 guid);
+
+    GuidSet pets;
+    GuidSet mails;
+    GuidSet items;
 };
 
-class PlayerDumpWriter : public PlayerDump
+class PlayerDumpReader
 {
-    public:
-        PlayerDumpWriter() {}
-
-        bool GetDump(uint32 guid, std::string& dump);
-        DumpReturn WriteDump(const std::string& file, uint32 guid);
-    private:
-        typedef std::set<uint32> GUIDs;
-
-        bool DumpTable(std::string& dump, uint32 guid, char const*tableFrom, char const*tableTo, DumpTableType type);
-        std::string GenerateWhereStr(char const* field, GUIDs const& guids, GUIDs::const_iterator& itr);
-        std::string GenerateWhereStr(char const* field, uint32 guid);
-
-        GUIDs pets;
-        GUIDs mails;
-        GUIDs items;
+public:
+    static std::pair<DumpReturn, uint32> LoadDump(char const *dump, uint32 account, std::string name);
 };
-
-class PlayerDumpReader : public PlayerDump
-{
-    public:
-        PlayerDumpReader() {}
-
-        DumpReturn LoadDump(const std::string& file, uint32 account, std::string name, uint32 guid, bool onlyBoundedItems = false);
-};
-
-#define sInterRealmTransfertReader ACE_Singleton<PlayerDumpReader, ACE_Thread_Mutex>::instance()
-#define sInterRealmTransfertWriter ACE_Singleton<PlayerDumpWriter, ACE_Thread_Mutex>::instance()
 
 #endif
 

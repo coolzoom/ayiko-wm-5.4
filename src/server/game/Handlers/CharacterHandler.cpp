@@ -45,6 +45,7 @@
 #include "DBCStores.h"
 #include "LFGMgr.h"
 #include "DB2Stores.h"
+#include "SpellAuraEffects.h"
 
 class LoginQueryHolder : public SQLQueryHolder
 {
@@ -340,7 +341,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
 
     WorldPacket data(SMSG_CHAR_CREATE, 1);                  // returned with diff.values in all cases
 
-    if (AccountMgr::IsPlayerAccount(GetSecurity()))
+    if (!HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHARACTER_CREATION_TEAMMASK))
     {
         if (uint32 mask = sWorld->getIntConfig(CONFIG_CHARACTER_CREATING_DISABLED))
         {
@@ -380,7 +381,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
         return;
     }
 
-    if (AccountMgr::IsPlayerAccount(GetSecurity()))
+    if (!HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHARACTER_CREATION_RACEMASK))
     {
         uint32 raceMaskDisabled = sWorld->getIntConfig(CONFIG_CHARACTER_CREATING_DISABLED_RACEMASK);
         if ((1 << (race_ - 1)) & raceMaskDisabled)
@@ -389,7 +390,10 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
             SendPacket(&data);
             return;
         }
+    }
 
+    if (!HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHARACTER_CREATION_CLASSMASK))
+    {
         uint32 classMaskDisabled = sWorld->getIntConfig(CONFIG_CHARACTER_CREATING_DISABLED_CLASSMASK);
         if ((1 << (class_ - 1)) & classMaskDisabled)
         {
@@ -417,29 +421,32 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
         return;
     }
 
-    if (AccountMgr::IsPlayerAccount(GetSecurity()) && sObjectMgr->IsReservedName(name))
+    if (!HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHARACTER_CREATION_RESERVEDNAME) && sObjectMgr->IsReservedName(name))
     {
         data << (uint8)CHAR_NAME_RESERVED;
         SendPacket(&data);
         return;
     }
 
-    // speedup check for heroic class disabled case
-    uint32 heroic_free_slots = sWorld->getIntConfig(CONFIG_HEROIC_CHARACTERS_PER_REALM);
-    if (heroic_free_slots == 0 && AccountMgr::IsPlayerAccount(GetSecurity()) && class_ == CLASS_DEATH_KNIGHT)
+    if (class_ == CLASS_DEATH_KNIGHT && !HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHARACTER_CREATION_HEROIC_CHARACTER))
     {
-        data << (uint8)CHAR_CREATE_UNIQUE_CLASS_LIMIT;
-        SendPacket(&data);
-        return;
-    }
+        // speedup check for heroic class disabled case
+        uint32 heroic_free_slots = sWorld->getIntConfig(CONFIG_HEROIC_CHARACTERS_PER_REALM);
+        if (heroic_free_slots == 0 && AccountMgr::IsPlayerAccount(GetSecurity()) && class_ == CLASS_DEATH_KNIGHT)
+        {
+            data << (uint8)CHAR_CREATE_UNIQUE_CLASS_LIMIT;
+            SendPacket(&data);
+            return;
+        }
 
-    // speedup check for heroic class disabled case
-    uint32 req_level_for_heroic = sWorld->getIntConfig(CONFIG_CHARACTER_CREATING_MIN_LEVEL_FOR_HEROIC_CHARACTER);
-    if (AccountMgr::IsPlayerAccount(GetSecurity()) && class_ == CLASS_DEATH_KNIGHT && req_level_for_heroic > sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
-    {
-        data << (uint8)CHAR_CREATE_LEVEL_REQUIREMENT;
-        SendPacket(&data);
-        return;
+        // speedup check for heroic class disabled case
+        uint32 req_level_for_heroic = sWorld->getIntConfig(CONFIG_CHARACTER_CREATING_MIN_LEVEL_FOR_HEROIC_CHARACTER);
+        if (AccountMgr::IsPlayerAccount(GetSecurity()) && class_ == CLASS_DEATH_KNIGHT && req_level_for_heroic > sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
+        {
+            data << (uint8)CHAR_CREATE_LEVEL_REQUIREMENT;
+            SendPacket(&data);
+            return;
+        }
     }
 
     delete _charCreateCallback.GetParam();  // Delete existing if any, to make the callback chain reset to stage 0
@@ -530,7 +537,7 @@ void WorldSession::HandleCharCreateCallback(PreparedQueryResult result, Characte
                 }
             }
 
-            bool allowTwoSideAccounts = !sWorld->IsPvPRealm() || sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_ACCOUNTS) || !AccountMgr::IsPlayerAccount(GetSecurity());
+            bool allowTwoSideAccounts = !sWorld->IsPvPRealm() || HasPermission(rbac::RBAC_PERM_TWO_SIDE_CHARACTER_CREATION);
             uint32 skipCinematics = sWorld->getIntConfig(CONFIG_SKIP_CINEMATICS);
 
             _charCreateCallback.FreeResult();
@@ -554,8 +561,9 @@ void WorldSession::HandleCharCreateCallback(PreparedQueryResult result, Characte
             bool haveSameRace = false;
             uint32 heroicReqLevel = sWorld->getIntConfig(CONFIG_CHARACTER_CREATING_MIN_LEVEL_FOR_HEROIC_CHARACTER);
             bool hasHeroicReqLevel = (heroicReqLevel == 0);
-            bool allowTwoSideAccounts = !sWorld->IsPvPRealm() || sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_ACCOUNTS) || !AccountMgr::IsPlayerAccount(GetSecurity());
+            bool allowTwoSideAccounts = !sWorld->IsPvPRealm() || HasPermission(rbac::RBAC_PERM_TWO_SIDE_CHARACTER_CREATION);
             uint32 skipCinematics = sWorld->getIntConfig(CONFIG_SKIP_CINEMATICS);
+            bool checkHeroicReqs = createInfo->Class == CLASS_DEATH_KNIGHT && !HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHARACTER_CREATION_HEROIC_CHARACTER);
 
             if (result)
             {
@@ -565,7 +573,7 @@ void WorldSession::HandleCharCreateCallback(PreparedQueryResult result, Characte
                 Field* field = result->Fetch();
                 uint8 accRace  = field[1].GetUInt8();
 
-                if (AccountMgr::IsPlayerAccount(GetSecurity()) && createInfo->Class == CLASS_DEATH_KNIGHT)
+                if (checkHeroicReqs)
                 {
                     uint8 accClass = field[2].GetUInt8();
                     if (accClass == CLASS_DEATH_KNIGHT)
@@ -784,14 +792,6 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recvData)
 
 void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recvData)
 {
-    // Prevent flood of CMSG_PLAYER_LOGIN
-    playerLoginCounter++;
-    if (playerLoginCounter > 5)
-    {
-        TC_LOG_INFO("molten", "Player kicked due to flood of CMSG_PLAYER_LOGIN");
-        KickPlayer();
-    }
-
     if (PlayerLoading() || GetPlayer() != NULL)
     {
         TC_LOG_ERROR("network", "Player tries to login again, AccountId = %d", GetAccountId());
@@ -1137,7 +1137,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     }
 
     sObjectAccessor->AddObject(pCurrChar);
-    //TC_LOG_DEBUG("misc", "Player %s added to Map.", pCurrChar->GetName());
+    //TC_LOG_DEBUG("misc", "Player %s added to Map.", pCurrChar->GetName().c_str());
 
     if (pCurrChar->GetGuildId() != 0)
     {
@@ -1146,7 +1146,8 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         else
         {
             // remove wrong guild data
-            TC_LOG_ERROR("misc", "Player %s (GUID: %u) marked as member of not existing guild (id: %u), removing guild membership for player.", pCurrChar->GetName(), pCurrChar->GetGUIDLow(), pCurrChar->GetGuildId());
+            TC_LOG_ERROR("misc", "Player %s (GUID: %u) marked as member of not existing guild (id: %u), removing guild membership for player.",
+                         pCurrChar->GetName().c_str(), pCurrChar->GetGUIDLow(), pCurrChar->GetGuildId());
             pCurrChar->SetInGuild(0);
         }
     }
@@ -1237,7 +1238,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     std::string IP_str = GetRemoteAddress();
     TC_LOG_INFO("entities.player.character", "Account: %d (IP: %s) Login Character:[%s] (GUID: %u) Level: %d",
-        GetAccountId(), IP_str.c_str(), pCurrChar->GetName(), pCurrChar->GetGUIDLow(), pCurrChar->getLevel());
+        GetAccountId(), IP_str.c_str(), pCurrChar->GetName().c_str(), pCurrChar->GetGUIDLow(), pCurrChar->getLevel());
 
     if (!pCurrChar->IsStandState() && !pCurrChar->HasUnitState(UNIT_STATE_STUNNED))
         pCurrChar->SetStandState(UNIT_STAND_STATE_STAND);
@@ -1334,20 +1335,20 @@ void WorldSession::HandleSetFactionInactiveOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleShowAccountAchievement(WorldPacket& recvData)
 {
-    TC_LOG_DEBUG("network", "CMSG_SHOW_ACCOUNT_ACHIEVEMENT for %s", _player->GetName());
+    TC_LOG_DEBUG("network", "CMSG_SHOW_ACCOUNT_ACHIEVEMENT for %s", _player->GetName().c_str());
     recvData.ReadBit();
 }
 
 void WorldSession::HandleShowingHelmOpcode(WorldPacket& recvData)
 {
-    TC_LOG_DEBUG("network", "CMSG_SHOWING_HELM for %s", _player->GetName());
+    TC_LOG_DEBUG("network", "CMSG_SHOWING_HELM for %s", _player->GetName().c_str());
     recvData.read_skip<uint8>(); // unknown, bool?
     _player->ToggleFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_HELM);
 }
 
 void WorldSession::HandleShowingCloakOpcode(WorldPacket& recvData)
 {
-    TC_LOG_DEBUG("network", "CMSG_SHOWING_CLOAK for %s", _player->GetName());
+    TC_LOG_DEBUG("network", "CMSG_SHOWING_CLOAK for %s", _player->GetName().c_str());
     recvData.read_skip<uint8>(); // unknown, bool?
     _player->ToggleFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK);
 }
@@ -1387,7 +1388,7 @@ void WorldSession::HandleCharRenameOpcode(WorldPacket& recvData)
     }
 
     // check name limitations
-    if (AccountMgr::IsPlayerAccount(GetSecurity()) && sObjectMgr->IsReservedName(newName))
+    if (!HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHARACTER_CREATION_RESERVEDNAME) && sObjectMgr->IsReservedName(newName))
     {
         WorldPacket data(SMSG_CHAR_RENAME, 1);
         data << uint8(CHAR_NAME_RESERVED);
@@ -1698,7 +1699,7 @@ void WorldSession::HandleCharCustomize(WorldPacket& recvData)
     }
 
     // check name limitations
-    if (AccountMgr::IsPlayerAccount(GetSecurity()) && sObjectMgr->IsReservedName(newName))
+    if (!HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHARACTER_CREATION_RESERVEDNAME) && sObjectMgr->IsReservedName(newName))
     {
         WorldPacket data(SMSG_CHAR_CUSTOMIZE, 1 + 8 + 1);
         data.WriteBitSeq<0, 5, 2, 4, 6, 7, 3, 1>(playerGuid);
@@ -2076,7 +2077,7 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
         return;
     }
 
-    if (AccountMgr::IsPlayerAccount(GetSecurity()))
+    if (!HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHARACTER_CREATION_RACEMASK))
     {
         uint32 raceMaskDisabled = sWorld->getIntConfig(CONFIG_CHARACTER_CREATING_DISABLED_RACEMASK);
         if ((1 << (race - 1)) & raceMaskDisabled)
@@ -2110,7 +2111,7 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
     }
 
     // check name limitations
-    if (AccountMgr::IsPlayerAccount(GetSecurity()) && sObjectMgr->IsReservedName(newname))
+    if (!HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHARACTER_CREATION_RESERVEDNAME) && sObjectMgr->IsReservedName(newname))
     {
         WorldPacket data(SMSG_CHAR_FACTION_OR_RACE_CHANGE, 1);
         data << uint8(CHAR_NAME_RESERVED);
@@ -2323,7 +2324,7 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
                     guild->DeleteMember(MAKE_NEW_GUID(lowGuid, 0, HIGHGUID_PLAYER), false, false, true);
         }
 
-        if (!sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_ADD_FRIEND))
+        if (!HasPermission(rbac::RBAC_PERM_TWO_SIDE_ADD_FRIEND))
         {
             // Delete Friend List
             PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_SOCIAL_BY_GUID);

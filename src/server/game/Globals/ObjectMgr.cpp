@@ -520,8 +520,8 @@ void ObjectMgr::LoadCreatureTemplates()
     while (result->NextRow());
 
     // Checking needs to be done after loading because of the difficulty self referencing
-    for (CreatureTemplateContainer::const_iterator itr = _creatureTemplateStore.begin(); itr != _creatureTemplateStore.end(); ++itr)
-        CheckCreatureTemplate(&itr->second);
+    for (CreatureTemplateContainer::iterator itr = _creatureTemplateStore.begin(); itr != _creatureTemplateStore.end(); ++itr)
+        FixCreatureTemplate(itr->second);
 
     TC_LOG_INFO("server.loading", ">> Loaded %u creature definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
@@ -596,23 +596,20 @@ void ObjectMgr::LoadCreatureTemplateAddons()
     TC_LOG_INFO("server.loading", ">> Loaded %u creature template addons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
-void ObjectMgr::CheckCreatureTemplate(CreatureTemplate const* cInfo)
+void ObjectMgr::FixCreatureTemplate(CreatureTemplate &cInfo)
 {
-    if (!cInfo)
-        return;
-
     bool ok = true;                                     // bool to allow continue outside this loop
     for (uint32 diff = 0; diff < MAX_DIFFICULTY - 1 && ok; ++diff)
     {
-        if (!cInfo->DifficultyEntry[diff])
+        if (!cInfo.DifficultyEntry[diff])
             continue;
         ok = false;                                     // will be set to true at the end of this loop again
 
-        CreatureTemplate const* difficultyInfo = GetCreatureTemplate(cInfo->DifficultyEntry[diff]);
+        CreatureTemplate const* difficultyInfo = GetCreatureTemplate(cInfo.DifficultyEntry[diff]);
         if (!difficultyInfo)
         {
             TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has `difficulty_entry_%u`=%u but creature entry %u does not exist.",
-                cInfo->Entry, diff + 1, cInfo->DifficultyEntry[diff], cInfo->DifficultyEntry[diff]);
+                cInfo.Entry, diff + 1, cInfo.DifficultyEntry[diff], cInfo.DifficultyEntry[diff]);
             continue;
         }
 
@@ -620,23 +617,23 @@ void ObjectMgr::CheckCreatureTemplate(CreatureTemplate const* cInfo)
         for (uint32 diff2 = 0; diff2 < MAX_DIFFICULTY - 1 && ok2; ++diff2)
         {
             ok2 = false;
-            if (_difficultyEntries[diff2].find(cInfo->Entry) != _difficultyEntries[diff2].end())
+            if (_difficultyEntries[diff2].find(cInfo.Entry) != _difficultyEntries[diff2].end())
             {
                 TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) is listed as `difficulty_entry_%u` of another creature, but itself lists %u in `difficulty_entry_%u`.",
-                    cInfo->Entry, diff2 + 1, cInfo->DifficultyEntry[diff], diff + 1);
+                    cInfo.Entry, diff2 + 1, cInfo.DifficultyEntry[diff], diff + 1);
                 continue;
             }
 
-            /*if (_difficultyEntries[diff2].find(cInfo->DifficultyEntry[diff]) != _difficultyEntries[diff2].end())
+            /*if (_difficultyEntries[diff2].find(cInfo.DifficultyEntry[diff]) != _difficultyEntries[diff2].end())
             {
-                TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) already listed as `difficulty_entry_%u` for another entry.", cInfo->DifficultyEntry[diff], diff2 + 1);
+                TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) already listed as `difficulty_entry_%u` for another entry.", cInfo.DifficultyEntry[diff], diff2 + 1);
                 continue;
             }*/
 
-            if (_hasDifficultyEntries[diff2].find(cInfo->DifficultyEntry[diff]) != _hasDifficultyEntries[diff2].end())
+            if (_hasDifficultyEntries[diff2].find(cInfo.DifficultyEntry[diff]) != _hasDifficultyEntries[diff2].end())
             {
                 TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has `difficulty_entry_%u`=%u but creature entry %u has itself a value in `difficulty_entry_%u`.",
-                    cInfo->Entry, diff + 1, cInfo->DifficultyEntry[diff], cInfo->DifficultyEntry[diff], diff2 + 1);
+                    cInfo.Entry, diff + 1, cInfo.DifficultyEntry[diff], cInfo.DifficultyEntry[diff], diff2 + 1);
                 continue;
             }
             ok2 = true;
@@ -644,268 +641,268 @@ void ObjectMgr::CheckCreatureTemplate(CreatureTemplate const* cInfo)
         if (!ok2)
             continue;
 
-        if (cInfo->unit_class != difficultyInfo->unit_class)
+        if (cInfo.unit_class != difficultyInfo->unit_class)
         {
             TC_LOG_ERROR("sql.sql", "Creature (Entry: %u, class %u) has different `unit_class` in difficulty %u mode (Entry: %u, class %u).",
-                cInfo->Entry, cInfo->unit_class, diff + 1, cInfo->DifficultyEntry[diff], difficultyInfo->unit_class);
+                cInfo.Entry, cInfo.unit_class, diff + 1, cInfo.DifficultyEntry[diff], difficultyInfo->unit_class);
             continue;
         }
 
-        if (cInfo->npcflag != difficultyInfo->npcflag)
+        if (cInfo.npcflag != difficultyInfo->npcflag)
         {
-            TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has different `npcflag` in difficulty %u mode (Entry: %u).", cInfo->Entry, diff + 1, cInfo->DifficultyEntry[diff]);
+            TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has different `npcflag` in difficulty %u mode (Entry: %u).", cInfo.Entry, diff + 1, cInfo.DifficultyEntry[diff]);
             continue;
         }
 
-        if (cInfo->trainer_class != difficultyInfo->trainer_class)
+        if (cInfo.trainer_class != difficultyInfo->trainer_class)
         {
-            TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has different `trainer_class` in difficulty %u mode (Entry: %u).", cInfo->Entry, diff + 1, cInfo->DifficultyEntry[diff]);
+            TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has different `trainer_class` in difficulty %u mode (Entry: %u).", cInfo.Entry, diff + 1, cInfo.DifficultyEntry[diff]);
             continue;
         }
 
-        if (cInfo->trainer_race != difficultyInfo->trainer_race)
+        if (cInfo.trainer_race != difficultyInfo->trainer_race)
         {
-            TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has different `trainer_race` in difficulty %u mode (Entry: %u).", cInfo->Entry, diff + 1, cInfo->DifficultyEntry[diff]);
+            TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has different `trainer_race` in difficulty %u mode (Entry: %u).", cInfo.Entry, diff + 1, cInfo.DifficultyEntry[diff]);
             continue;
         }
 
-        if (cInfo->trainer_type != difficultyInfo->trainer_type)
+        if (cInfo.trainer_type != difficultyInfo->trainer_type)
         {
-            TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has different `trainer_type` in difficulty %u mode (Entry: %u).", cInfo->Entry, diff + 1, cInfo->DifficultyEntry[diff]);
+            TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has different `trainer_type` in difficulty %u mode (Entry: %u).", cInfo.Entry, diff + 1, cInfo.DifficultyEntry[diff]);
             continue;
         }
 
-        if (cInfo->trainer_spell != difficultyInfo->trainer_spell)
+        if (cInfo.trainer_spell != difficultyInfo->trainer_spell)
         {
-            TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has different `trainer_spell` in difficulty %u mode (Entry: %u).", cInfo->Entry, diff + 1, cInfo->DifficultyEntry[diff]);
+            TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has different `trainer_spell` in difficulty %u mode (Entry: %u).", cInfo.Entry, diff + 1, cInfo.DifficultyEntry[diff]);
             continue;
         }
 
         if (!difficultyInfo->AIName.empty())
         {
             TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) lists difficulty %u mode entry %u with `AIName` filled in. `AIName` of difficulty 0 mode creature is always used instead.",
-                cInfo->Entry, diff + 1, cInfo->DifficultyEntry[diff]);
+                cInfo.Entry, diff + 1, cInfo.DifficultyEntry[diff]);
             continue;
         }
 
         if (difficultyInfo->ScriptID)
         {
             TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) lists difficulty %u mode entry %u with `ScriptName` filled in. `ScriptName` of difficulty 0 mode creature is always used instead.",
-                cInfo->Entry, diff + 1, cInfo->DifficultyEntry[diff]);
+                cInfo.Entry, diff + 1, cInfo.DifficultyEntry[diff]);
             continue;
         }
 
-        _hasDifficultyEntries[diff].insert(cInfo->Entry);
-        _difficultyEntries[diff].insert(cInfo->DifficultyEntry[diff]);
+        _hasDifficultyEntries[diff].insert(cInfo.Entry);
+        _difficultyEntries[diff].insert(cInfo.DifficultyEntry[diff]);
         ok = true;
     }
 
-    FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(cInfo->faction_A);
+    FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(cInfo.faction_A);
     if (!factionTemplate)
-        TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has non-existing faction_A template (%u).", cInfo->Entry, cInfo->faction_A);
+        TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has non-existing faction_A template (%u).", cInfo.Entry, cInfo.faction_A);
 
-    factionTemplate = sFactionTemplateStore.LookupEntry(cInfo->faction_H);
+    factionTemplate = sFactionTemplateStore.LookupEntry(cInfo.faction_H);
     if (!factionTemplate)
-        TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has non-existing faction_H template (%u).", cInfo->Entry, cInfo->faction_H);
+        TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has non-existing faction_H template (%u).", cInfo.Entry, cInfo.faction_H);
 
     // used later for scale
     CreatureDisplayInfoEntry const* displayScaleEntry = NULL;
 
-    if (cInfo->Modelid1)
+    if (cInfo.Modelid1)
     {
-        CreatureDisplayInfoEntry const* displayEntry = sCreatureDisplayInfoStore.LookupEntry(cInfo->Modelid1);
+        CreatureDisplayInfoEntry const* displayEntry = sCreatureDisplayInfoStore.LookupEntry(cInfo.Modelid1);
         if (!displayEntry)
         {
-            TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) lists non-existing Modelid1 id (%u), this can crash the client.", cInfo->Entry, cInfo->Modelid1);
-            const_cast<CreatureTemplate*>(cInfo)->Modelid1 = 0;
+            TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) lists non-existing Modelid1 id (%u), this can crash the client.", cInfo.Entry, cInfo.Modelid1);
+            cInfo.Modelid1 = 0;
         }
         else if (!displayScaleEntry)
             displayScaleEntry = displayEntry;
 
-        CreatureModelInfo const* modelInfo = GetCreatureModelInfo(cInfo->Modelid1);
+        CreatureModelInfo const* modelInfo = GetCreatureModelInfo(cInfo.Modelid1);
         if (!modelInfo)
-            TC_LOG_ERROR("sql.sql", "No model data exist for `Modelid1` = %u listed by creature (Entry: %u).", cInfo->Modelid1, cInfo->Entry);
+            TC_LOG_ERROR("sql.sql", "No model data exist for `Modelid1` = %u listed by creature (Entry: %u).", cInfo.Modelid1, cInfo.Entry);
     }
 
-    if (cInfo->Modelid2)
+    if (cInfo.Modelid2)
     {
-        CreatureDisplayInfoEntry const* displayEntry = sCreatureDisplayInfoStore.LookupEntry(cInfo->Modelid2);
+        CreatureDisplayInfoEntry const* displayEntry = sCreatureDisplayInfoStore.LookupEntry(cInfo.Modelid2);
         if (!displayEntry)
         {
-            TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) lists non-existing Modelid2 id (%u), this can crash the client.", cInfo->Entry, cInfo->Modelid2);
-            const_cast<CreatureTemplate*>(cInfo)->Modelid2 = 0;
+            TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) lists non-existing Modelid2 id (%u), this can crash the client.", cInfo.Entry, cInfo.Modelid2);
+            cInfo.Modelid2 = 0;
         }
         else if (!displayScaleEntry)
             displayScaleEntry = displayEntry;
 
-        CreatureModelInfo const* modelInfo = GetCreatureModelInfo(cInfo->Modelid2);
+        CreatureModelInfo const* modelInfo = GetCreatureModelInfo(cInfo.Modelid2);
         if (!modelInfo)
-            TC_LOG_ERROR("sql.sql", "No model data exist for `Modelid2` = %u listed by creature (Entry: %u).", cInfo->Modelid2, cInfo->Entry);
+            TC_LOG_ERROR("sql.sql", "No model data exist for `Modelid2` = %u listed by creature (Entry: %u).", cInfo.Modelid2, cInfo.Entry);
     }
 
-    if (cInfo->Modelid3)
+    if (cInfo.Modelid3)
     {
-        CreatureDisplayInfoEntry const* displayEntry = sCreatureDisplayInfoStore.LookupEntry(cInfo->Modelid3);
+        CreatureDisplayInfoEntry const* displayEntry = sCreatureDisplayInfoStore.LookupEntry(cInfo.Modelid3);
         if (!displayEntry)
         {
-            TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) lists non-existing Modelid3 id (%u), this can crash the client.", cInfo->Entry, cInfo->Modelid3);
-            const_cast<CreatureTemplate*>(cInfo)->Modelid3 = 0;
+            TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) lists non-existing Modelid3 id (%u), this can crash the client.", cInfo.Entry, cInfo.Modelid3);
+            cInfo.Modelid3 = 0;
         }
         else if (!displayScaleEntry)
             displayScaleEntry = displayEntry;
 
-        CreatureModelInfo const* modelInfo = GetCreatureModelInfo(cInfo->Modelid3);
+        CreatureModelInfo const* modelInfo = GetCreatureModelInfo(cInfo.Modelid3);
         if (!modelInfo)
-            TC_LOG_ERROR("sql.sql", "No model data exist for `Modelid3` = %u listed by creature (Entry: %u).", cInfo->Modelid3, cInfo->Entry);
+            TC_LOG_ERROR("sql.sql", "No model data exist for `Modelid3` = %u listed by creature (Entry: %u).", cInfo.Modelid3, cInfo.Entry);
     }
 
-    if (cInfo->Modelid4)
+    if (cInfo.Modelid4)
     {
-        CreatureDisplayInfoEntry const* displayEntry = sCreatureDisplayInfoStore.LookupEntry(cInfo->Modelid4);
+        CreatureDisplayInfoEntry const* displayEntry = sCreatureDisplayInfoStore.LookupEntry(cInfo.Modelid4);
         if (!displayEntry)
         {
-            TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) lists non-existing Modelid4 id (%u), this can crash the client.", cInfo->Entry, cInfo->Modelid4);
-            const_cast<CreatureTemplate*>(cInfo)->Modelid4 = 0;
+            TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) lists non-existing Modelid4 id (%u), this can crash the client.", cInfo.Entry, cInfo.Modelid4);
+            cInfo.Modelid4 = 0;
         }
         else if (!displayScaleEntry)
             displayScaleEntry = displayEntry;
 
-        CreatureModelInfo const* modelInfo = GetCreatureModelInfo(cInfo->Modelid4);
+        CreatureModelInfo const* modelInfo = GetCreatureModelInfo(cInfo.Modelid4);
         if (!modelInfo)
-            TC_LOG_ERROR("sql.sql", "No model data exist for `Modelid4` = %u listed by creature (Entry: %u).", cInfo->Modelid4, cInfo->Entry);
+            TC_LOG_ERROR("sql.sql", "No model data exist for `Modelid4` = %u listed by creature (Entry: %u).", cInfo.Modelid4, cInfo.Entry);
     }
 
     if (!displayScaleEntry)
-        TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) does not have any existing display id in Modelid1/Modelid2/Modelid3/Modelid4.", cInfo->Entry);
+        TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) does not have any existing display id in Modelid1/Modelid2/Modelid3/Modelid4.", cInfo.Entry);
 
     for (int k = 0; k < MAX_KILL_CREDIT; ++k)
     {
-        if (cInfo->KillCredit[k])
+        if (cInfo.KillCredit[k])
         {
-            if (!GetCreatureTemplate(cInfo->KillCredit[k]))
+            if (!GetCreatureTemplate(cInfo.KillCredit[k]))
             {
-                TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) lists non-existing creature entry %u in `KillCredit%d`.", cInfo->Entry, cInfo->KillCredit[k], k + 1);
-                const_cast<CreatureTemplate*>(cInfo)->KillCredit[k] = 0;
+                TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) lists non-existing creature entry %u in `KillCredit%d`.", cInfo.Entry, cInfo.KillCredit[k], k + 1);
+                cInfo.KillCredit[k] = 0;
             }
         }
     }
 
-    if (!cInfo->unit_class || ((1 << (cInfo->unit_class-1)) & CLASSMASK_ALL_CREATURES) == 0)
+    if (!cInfo.unit_class || ((1 << (cInfo.unit_class-1)) & CLASSMASK_ALL_CREATURES) == 0)
     {
-        TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has invalid unit_class (%u) in creature_template. Set to 1 (UNIT_CLASS_WARRIOR).", cInfo->Entry, cInfo->unit_class);
-        const_cast<CreatureTemplate*>(cInfo)->unit_class = UNIT_CLASS_WARRIOR;
+        TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has invalid unit_class (%u) in creature_template. Set to 1 (UNIT_CLASS_WARRIOR).", cInfo.Entry, cInfo.unit_class);
+        cInfo.unit_class = UNIT_CLASS_WARRIOR;
     }
 
-    if (cInfo->dmgschool >= MAX_SPELL_SCHOOL)
+    if (cInfo.dmgschool >= MAX_SPELL_SCHOOL)
     {
-        TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has invalid spell school value (%u) in `dmgschool`.", cInfo->Entry, cInfo->dmgschool);
-        const_cast<CreatureTemplate*>(cInfo)->dmgschool = SPELL_SCHOOL_NORMAL;
+        TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has invalid spell school value (%u) in `dmgschool`.", cInfo.Entry, cInfo.dmgschool);
+        cInfo.dmgschool = SPELL_SCHOOL_NORMAL;
     }
 
-    if (cInfo->baseattacktime == 0)
-        const_cast<CreatureTemplate*>(cInfo)->baseattacktime  = BASE_ATTACK_TIME;
+    if (cInfo.baseattacktime == 0)
+        cInfo.baseattacktime  = BASE_ATTACK_TIME;
 
-    if (cInfo->rangeattacktime == 0)
-        const_cast<CreatureTemplate*>(cInfo)->rangeattacktime = BASE_ATTACK_TIME;
+    if (cInfo.rangeattacktime == 0)
+        cInfo.rangeattacktime = BASE_ATTACK_TIME;
 
-    if ((cInfo->npcflag & UNIT_NPC_FLAG_TRAINER) && cInfo->trainer_type >= MAX_TRAINER_TYPE)
-        TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has wrong trainer type %u.", cInfo->Entry, cInfo->trainer_type);
+    if ((cInfo.npcflag & UNIT_NPC_FLAG_TRAINER) && cInfo.trainer_type >= MAX_TRAINER_TYPE)
+        TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has wrong trainer type %u.", cInfo.Entry, cInfo.trainer_type);
 
-    if (cInfo->type && !sCreatureTypeStore.LookupEntry(cInfo->type))
+    if (cInfo.type && !sCreatureTypeStore.LookupEntry(cInfo.type))
     {
-        TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has invalid creature type (%u) in `type`.", cInfo->Entry, cInfo->type);
-        const_cast<CreatureTemplate*>(cInfo)->type = CREATURE_TYPE_HUMANOID;
+        TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has invalid creature type (%u) in `type`.", cInfo.Entry, cInfo.type);
+        cInfo.type = CREATURE_TYPE_HUMANOID;
     }
 
     // must exist or used hidden but used in data horse case
-    if (cInfo->family && !sCreatureFamilyStore.LookupEntry(cInfo->family) && cInfo->family != CREATURE_FAMILY_HORSE_CUSTOM)
+    if (cInfo.family && !sCreatureFamilyStore.LookupEntry(cInfo.family) && cInfo.family != CREATURE_FAMILY_HORSE_CUSTOM)
     {
-        TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has invalid creature family (%u) in `family`.", cInfo->Entry, cInfo->family);
-        const_cast<CreatureTemplate*>(cInfo)->family = 0;
+        TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has invalid creature family (%u) in `family`.", cInfo.Entry, cInfo.family);
+        cInfo.family = 0;
     }
 
-    if (cInfo->InhabitType <= 0 || cInfo->InhabitType > INHABIT_ANYWHERE)
+    if (cInfo.InhabitType <= 0 || cInfo.InhabitType > INHABIT_ANYWHERE)
     {
-        TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has wrong value (%u) in `InhabitType`, creature will not correctly walk/swim/fly.", cInfo->Entry, cInfo->InhabitType);
-        const_cast<CreatureTemplate*>(cInfo)->InhabitType = INHABIT_ANYWHERE;
+        TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has wrong value (%u) in `InhabitType`, creature will not correctly walk/swim/fly.", cInfo.Entry, cInfo.InhabitType);
+        cInfo.InhabitType = INHABIT_ANYWHERE;
     }
 
-    if (cInfo->HoverHeight < 0.0f)
+    if (cInfo.HoverHeight < 0.0f)
     {
-        TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has wrong value (%f) in `HoverHeight`", cInfo->Entry, cInfo->HoverHeight);
-        const_cast<CreatureTemplate*>(cInfo)->HoverHeight = 1.0f;
+        TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has wrong value (%f) in `HoverHeight`", cInfo.Entry, cInfo.HoverHeight);
+        cInfo.HoverHeight = 1.0f;
     }
 
-    if (cInfo->VehicleId)
+    if (cInfo.VehicleId)
     {
-        VehicleEntry const* vehId = sVehicleStore.LookupEntry(cInfo->VehicleId);
+        VehicleEntry const* vehId = sVehicleStore.LookupEntry(cInfo.VehicleId);
         if (!vehId)
         {
-             TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has a non-existing VehicleId (%u). This *WILL* cause the client to freeze!", cInfo->Entry, cInfo->VehicleId);
-             const_cast<CreatureTemplate*>(cInfo)->VehicleId = 0;
+             TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has a non-existing VehicleId (%u). This *WILL* cause the client to freeze!", cInfo.Entry, cInfo.VehicleId);
+             cInfo.VehicleId = 0;
         }
     }
 
-    if (cInfo->PetSpellDataId)
+    if (cInfo.PetSpellDataId)
     {
-        CreatureSpellDataEntry const* spellDataId = sCreatureSpellDataStore.LookupEntry(cInfo->PetSpellDataId);
+        CreatureSpellDataEntry const* spellDataId = sCreatureSpellDataStore.LookupEntry(cInfo.PetSpellDataId);
         if (!spellDataId)
-            TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has non-existing PetSpellDataId (%u).", cInfo->Entry, cInfo->PetSpellDataId);
+            TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has non-existing PetSpellDataId (%u).", cInfo.Entry, cInfo.PetSpellDataId);
     }
 
     for (uint8 j = 0; j < CREATURE_MAX_SPELLS; ++j)
     {
-        if (cInfo->spells[j] && !sSpellMgr->GetSpellInfo(cInfo->spells[j]))
+        if (cInfo.spells[j] && !sSpellMgr->GetSpellInfo(cInfo.spells[j]))
         {
-            WorldDatabase.PExecute("UPDATE creature_template SET spell%d = 0 WHERE entry = %u", j+1, cInfo->Entry);
-            TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has non-existing Spell%d (%u), set to 0.", cInfo->Entry, j+1, cInfo->spells[j]);
-            const_cast<CreatureTemplate*>(cInfo)->spells[j] = 0;
+            WorldDatabase.PExecute("UPDATE creature_template SET spell%d = 0 WHERE entry = %u", j+1, cInfo.Entry);
+            TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has non-existing Spell%d (%u), set to 0.", cInfo.Entry, j+1, cInfo.spells[j]);
+            cInfo.spells[j] = 0;
         }
     }
 
-    if (cInfo->MovementType >= MAX_DB_MOTION_TYPE)
+    if (cInfo.MovementType >= MAX_DB_MOTION_TYPE)
     {
-        TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has wrong movement generator type (%u), ignored and set to IDLE.", cInfo->Entry, cInfo->MovementType);
-        const_cast<CreatureTemplate*>(cInfo)->MovementType = IDLE_MOTION_TYPE;
+        TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has wrong movement generator type (%u), ignored and set to IDLE.", cInfo.Entry, cInfo.MovementType);
+        cInfo.MovementType = IDLE_MOTION_TYPE;
     }
 
-    if (cInfo->equipmentId > 0)                          // 0 no equipment
+    if (cInfo.equipmentId > 0)                          // 0 no equipment
     {
-        if (!GetEquipmentInfo(cInfo->equipmentId))
+        if (!GetEquipmentInfo(cInfo.equipmentId))
         {
-            TC_LOG_ERROR("sql.sql", "Table `creature_template` lists creature (Entry: %u) with `equipment_id` %u not found in table `creature_equip_template`, set to no equipment.", cInfo->Entry, cInfo->equipmentId);
-            const_cast<CreatureTemplate*>(cInfo)->equipmentId = 0;
+            TC_LOG_ERROR("sql.sql", "Table `creature_template` lists creature (Entry: %u) with `equipment_id` %u not found in table `creature_equip_template`, set to no equipment.", cInfo.Entry, cInfo.equipmentId);
+            cInfo.equipmentId = 0;
         }
     }
 
     /// if not set custom creature scale then load scale from CreatureDisplayInfo.dbc
-    if (cInfo->scale <= 0.0f)
+    if (cInfo.scale <= 0.0f)
     {
         if (displayScaleEntry)
-            const_cast<CreatureTemplate*>(cInfo)->scale = displayScaleEntry->scale;
+            cInfo.scale = displayScaleEntry->scale;
         else
-            const_cast<CreatureTemplate*>(cInfo)->scale = 1.0f;
+            cInfo.scale = 1.0f;
     }
 
-    if (cInfo->expansion > MAX_CREATURE_BASE_HP)
+    if (cInfo.expansion > MAX_CREATURE_BASE_HP)
     {
-        TC_LOG_ERROR("sql.sql", "Table `creature_template` lists creature (Entry: %u) with `exp` %u. Ignored and set to 0.", cInfo->Entry, cInfo->expansion);
-        const_cast<CreatureTemplate*>(cInfo)->expansion = 0;
+        TC_LOG_ERROR("sql.sql", "Table `creature_template` lists creature (Entry: %u) with `exp` %u. Ignored and set to 0.", cInfo.Entry, cInfo.expansion);
+        cInfo.expansion = 0;
     }
 
-    if (cInfo->expansionUnknown > MAX_CREATURE_BASE_HP)
+    if (cInfo.expansionUnknown > MAX_CREATURE_BASE_HP)
     {
-        TC_LOG_ERROR("sql.sql", "Table `creature_template` lists creature (Entry: %u) with `exp_unk` %u. Ignored and set to 0.", cInfo->Entry, cInfo->expansionUnknown);
-        const_cast<CreatureTemplate*>(cInfo)->expansionUnknown = 0;
+        TC_LOG_ERROR("sql.sql", "Table `creature_template` lists creature (Entry: %u) with `exp_unk` %u. Ignored and set to 0.", cInfo.Entry, cInfo.expansionUnknown);
+        cInfo.expansionUnknown = 0;
     }
 
-    if (uint32 badFlags = (cInfo->flags_extra & ~CREATURE_FLAG_EXTRA_DB_ALLOWED))
+    if (uint32 badFlags = (cInfo.flags_extra & ~CREATURE_FLAG_EXTRA_DB_ALLOWED))
     {
-        TC_LOG_ERROR("sql.sql", "Table `creature_template` lists creature (Entry: %u) with disallowed `flags_extra` %u, removing incorrect flag.", cInfo->Entry, badFlags);
-        const_cast<CreatureTemplate*>(cInfo)->flags_extra &= CREATURE_FLAG_EXTRA_DB_ALLOWED;
+        TC_LOG_ERROR("sql.sql", "Table `creature_template` lists creature (Entry: %u) with disallowed `flags_extra` %u, removing incorrect flag.", cInfo.Entry, badFlags);
+        cInfo.flags_extra &= CREATURE_FLAG_EXTRA_DB_ALLOWED;
     }
 
-    const_cast<CreatureTemplate*>(cInfo)->dmg_multiplier *= Creature::_GetDamageMod(cInfo->rank);
+    cInfo.dmg_multiplier *= Creature::_GetDamageMod(cInfo.rank);
 }
 
 void ObjectMgr::LoadCreatureAddons()
@@ -2026,7 +2023,7 @@ Player* ObjectMgr::GetPlayerByLowGUID(uint32 lowguid) const
 }
 
 // name must be checked to correctness (if received) before call this function
-uint64 ObjectMgr::GetPlayerGUIDByName(std::string name) const
+uint64 ObjectMgr::GetPlayerGUIDByName(std::string const &name) const
 {
     uint64 guid = 0;
 
@@ -3904,7 +3901,7 @@ void ObjectMgr::LoadQuests()
                     qinfo->GetQuestId(), qinfo->SourceSpellid, qinfo->SourceSpellid);
                 qinfo->SourceSpellid = 0;                      // Quest can't be done for this requirement
             }
-            else if (!SpellMgr::IsSpellValid(spellInfo))
+            else if (!sSpellMgr->IsSpellValid(spellInfo))
             {
                 TC_LOG_ERROR("sql.sql", "Quest %u has `SourceSpellid` = %u but spell %u is broken, quest can't be done.",
                     qinfo->GetQuestId(), qinfo->SourceSpellid, qinfo->SourceSpellid);
@@ -4135,7 +4132,7 @@ void ObjectMgr::LoadQuests()
                     qinfo->GetQuestId(), qinfo->RewardSpell, qinfo->RewardSpell);
                 qinfo->RewardSpell = 0;                        // No spell reward will display for this quest
             }
-            else if (!SpellMgr::IsSpellValid(spellInfo))
+            else if (!sSpellMgr->IsSpellValid(spellInfo))
             {
                 TC_LOG_ERROR("sql.sql", "Quest %u has `RewardSpell` = %u but spell %u is broken, quest will not have a spell reward.",
                     qinfo->GetQuestId(), qinfo->RewardSpell, qinfo->RewardSpell);
@@ -4159,7 +4156,7 @@ void ObjectMgr::LoadQuests()
                     qinfo->GetQuestId(), qinfo->RewardSpellCast, qinfo->RewardSpellCast);
                 qinfo->RewardSpellCast = 0;                    // No spell will be casted on player
             }
-            else if (!SpellMgr::IsSpellValid(spellInfo))
+            else if (!sSpellMgr->IsSpellValid(spellInfo))
             {
                 TC_LOG_ERROR("sql.sql", "Quest %u has `RewardSpellCast` = %u but spell %u is broken, quest will not have a spell reward.",
                     qinfo->GetQuestId(), qinfo->RewardSpellCast, qinfo->RewardSpellCast);
@@ -4289,7 +4286,7 @@ void ObjectMgr::LoadQuests()
                     qinfo->GetQuestId(), qinfo->RequiredSpell, qinfo->RequiredSpell);
                 qinfo->RequiredSpell = 0;                      // No spell will be required
             }
-            else if (!SpellMgr::IsSpellValid(spellInfo))
+            else if (!sSpellMgr->IsSpellValid(spellInfo))
             {
                 TC_LOG_ERROR("sql.sql", "Quest %u has `RequiredSpell` = %u but spell %u is broken, quest will not require a spell.",
                     qinfo->GetQuestId(), qinfo->RequiredSpell, qinfo->RequiredSpell);
@@ -5203,13 +5200,18 @@ void ObjectMgr::LoadInstanceEncounters()
         {
             case ENCOUNTER_CREDIT_KILL_CREATURE:
             {
-                CreatureTemplate const* creatureInfo = GetCreatureTemplate(creditEntry);
+                auto const creatureInfo = GetMutableCreatureTemplate(creditEntry);
                 if (!creatureInfo)
                 {
                     TC_LOG_ERROR("sql.sql", "Table `instance_encounters` has an invalid creature (entry %u) linked to the encounter %u (%s), skipped!", creditEntry, entry, dungeonEncounter->encounterName);
                     continue;
                 }
-                const_cast<CreatureTemplate*>(creatureInfo)->flags_extra |= CREATURE_FLAG_EXTRA_DUNGEON_BOSS;
+
+                creatureInfo->flags_extra |= CREATURE_FLAG_EXTRA_DUNGEON_BOSS;
+                for (auto const &diffEntry : creatureInfo->DifficultyEntry)
+                    if (diffEntry != 0)
+                        GetMutableCreatureTemplate(diffEntry)->flags_extra |= CREATURE_FLAG_EXTRA_DUNGEON_BOSS;
+
                 break;
             }
             case ENCOUNTER_CREDIT_CAST_SPELL:
@@ -5353,11 +5355,13 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
     {
         PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_EMPTY_EXPIRED_MAIL);
         stmt->setUInt64(0, basetime);
-        CharacterDatabase.Execute(stmt);
+        CharacterDatabase.DirectExecute(stmt);
     }
+
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_EXPIRED_MAIL);
     stmt->setUInt64(0, basetime);
     PreparedQueryResult result = CharacterDatabase.Query(stmt);
+
     if (!result)
     {
         TC_LOG_INFO("server.loading", ">> No expired mails found.");
@@ -5400,7 +5404,7 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
 
         Player* player = NULL;
         if (serverUp)
-            player = ObjectAccessor::FindPlayer((uint64)m->receiver);
+            player = ObjectAccessor::FindPlayer(MAKE_NEW_GUID(m->receiver, 0, HIGHGUID_PLAYER));
 
         if (player && player->m_mailsLoaded)
         {                                                   // this code will run very improbably (the time is between 4 and 5 am, in game is online a player, who has old mail
@@ -5409,6 +5413,8 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
             continue;
         }
 
+        SQLTransaction trans = CharacterDatabase.BeginTransaction();
+
         // Delete or return mail
         if (has_items)
         {
@@ -5416,14 +5422,16 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
             m->items.swap(itemsCache[m->messageID]);
 
             // if it is mail from non-player, or if it's already return mail, it shouldn't be returned, but deleted
-            if (m->messageType != MAIL_NORMAL || (m->checked & (MAIL_CHECK_MASK_COD_PAYMENT | MAIL_CHECK_MASK_RETURNED)))
+            if (m->messageType != MAIL_NORMAL
+                    || (m->checked & (MAIL_CHECK_MASK_COD_PAYMENT | MAIL_CHECK_MASK_RETURNED))
+                    || !GetPlayerAccountIdByGUID(MAKE_NEW_GUID(m->sender, 0, HIGHGUID_PLAYER)))
             {
                 // mail open and then not returned
                 for (MailItemInfoVec::iterator itr2 = m->items.begin(); itr2 != m->items.end(); ++itr2)
                 {
                     stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ITEM_INSTANCE);
                     stmt->setUInt32(0, itr2->item_guid);
-                    CharacterDatabase.Execute(stmt);
+                    trans->Append(stmt);
                 }
             }
             else
@@ -5436,14 +5444,15 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
                 stmt->setUInt32(3, basetime);
                 stmt->setUInt8 (4, uint8(MAIL_CHECK_MASK_RETURNED));
                 stmt->setUInt32(5, m->messageID);
-                CharacterDatabase.Execute(stmt);
-                for (MailItemInfoVec::iterator itr2 = m->items.begin(); itr2 != m->items.end(); ++itr2)
-                {
-                    stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_ITEM_OWNER);
-                    stmt->setUInt32(0, m->sender);
-                    stmt->setUInt32(1, itr2->item_guid);
-                    CharacterDatabase.Execute(stmt);
-                }
+                trans->Append(stmt);
+
+                // Better to have synchronous execution at startup, as in case of long
+                // downtime there may be a lot of expired mails
+                if (!serverUp)
+                    CharacterDatabase.DirectCommitTransaction(trans);
+                else
+                    CharacterDatabase.CommitTransaction(trans);
+
                 delete m;
                 ++returnedCount;
                 continue;
@@ -5452,7 +5461,15 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
 
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_MAIL_BY_ID);
         stmt->setUInt32(0, m->messageID);
-        CharacterDatabase.Execute(stmt);
+        trans->Append(stmt);
+
+        // Better to have synchronous execution at startup, as in case of long
+        // downtime there may be a lot of expired mails
+        if (!serverUp)
+            CharacterDatabase.DirectCommitTransaction(trans);
+        else
+            CharacterDatabase.CommitTransaction(trans);
+
         delete m;
         ++deletedCount;
     }
@@ -7248,7 +7265,7 @@ void ObjectMgr::LoadNPCSpellClickSpells()
         Field* fields = result->Fetch();
 
         uint32 npc_entry = fields[0].GetUInt32();
-        CreatureTemplate const* cInfo = GetCreatureTemplate(npc_entry);
+        auto const cInfo = GetMutableCreatureTemplate(npc_entry);
         if (!cInfo)
         {
             TC_LOG_ERROR("sql.sql", "Table npc_spellclick_spells references unknown creature_template %u. Skipping entry.", npc_entry);
@@ -7262,6 +7279,9 @@ void ObjectMgr::LoadNPCSpellClickSpells()
             TC_LOG_ERROR("sql.sql", "Table npc_spellclick_spells references unknown spellid %u. Skipping entry.", spellid);
             continue;
         }
+
+        if (!(cInfo->npcflag & UNIT_NPC_FLAG_SPELLCLICK))
+            cInfo->npcflag |= UNIT_NPC_FLAG_SPELLCLICK;
 
         uint8 userType = fields[3].GetUInt16();
         if (userType >= SPELL_CLICK_USER_MAX)
@@ -7280,13 +7300,12 @@ void ObjectMgr::LoadNPCSpellClickSpells()
 
     // all spellclick data loaded, now we check if there are creatures with NPC_FLAG_SPELLCLICK but with no data
     // NOTE: It *CAN* be the other way around: no spellclick flag but with spellclick data, in case of creature-only vehicle accessories
-    CreatureTemplateContainer const* ctc = sObjectMgr->GetCreatureTemplates();
-    for (CreatureTemplateContainer::const_iterator itr = ctc->begin(); itr != ctc->end(); ++itr)
+    for (CreatureTemplateContainer::iterator itr = _creatureTemplateStore.begin(); itr != _creatureTemplateStore.end(); ++itr)
     {
         if ((itr->second.npcflag & UNIT_NPC_FLAG_SPELLCLICK) && _spellClickInfoStore.find(itr->second.Entry) == _spellClickInfoStore.end())
         {
             TC_LOG_ERROR("sql.sql", "npc_spellclick_spells: Creature template %u has UNIT_NPC_FLAG_SPELLCLICK but no data in spellclick table! Removing flag", itr->second.Entry);
-            const_cast<CreatureTemplate*>(&itr->second)->npcflag &= ~UNIT_NPC_FLAG_SPELLCLICK;
+            itr->second.npcflag &= ~UNIT_NPC_FLAG_SPELLCLICK;
         }
     }
 
@@ -7766,13 +7785,12 @@ bool ObjectMgr::LoadTrinityStrings(const char* table, int32 min_value, int32 max
     return true;
 }
 
-const char *ObjectMgr::GetTrinityString(int32 entry, LocaleConstant locale_idx) const
+char const * ObjectMgr::GetTrinityString(int32 entry, LocaleConstant locale_idx) const
 {
     if (TrinityStringLocale const* msl = GetTrinityStringLocale(entry))
     {
         if (msl->Content.size() > size_t(locale_idx) && !msl->Content[locale_idx].empty())
             return msl->Content[locale_idx].c_str();
-
         return msl->Content[DEFAULT_LOCALE].c_str();
     }
 
@@ -7780,6 +7798,7 @@ const char *ObjectMgr::GetTrinityString(int32 entry, LocaleConstant locale_idx) 
         TC_LOG_ERROR("sql.sql", "Entry %i not found in `trinity_string` table.", entry);
     else
         TC_LOG_ERROR("sql.sql", "Trinity string entry %i not found in DB.", entry);
+
     return "<error>";
 }
 
@@ -8113,7 +8132,7 @@ void ObjectMgr::AddSpellToTrainer(uint32 entry, uint32 spell, uint32 spellCost, 
         return;
     }
 
-    if (!SpellMgr::IsSpellValid(spellinfo))
+    if (!sSpellMgr->IsSpellValid(spellinfo))
     {
         TC_LOG_ERROR("sql.sql", "Table `npc_trainer` contains an entry (Entry: %u) for a broken spell (Spell: %u), ignoring", entry, spell);
         return;
@@ -9059,11 +9078,20 @@ GameObjectTemplate const* ObjectMgr::GetGameObjectTemplate(uint32 entry)
     return NULL;
 }
 
-CreatureTemplate const* ObjectMgr::GetCreatureTemplate(uint32 entry)
+CreatureTemplate const * ObjectMgr::GetCreatureTemplate(uint32 entry) const
 {
     CreatureTemplateContainer::const_iterator itr = _creatureTemplateStore.find(entry);
     if (itr != _creatureTemplateStore.end())
-        return &(itr->second);
+        return &itr->second;
+
+    return NULL;
+}
+
+CreatureTemplate * ObjectMgr::GetMutableCreatureTemplate(uint32 entry)
+{
+    CreatureTemplateContainer::iterator itr = _creatureTemplateStore.find(entry);
+    if (itr != _creatureTemplateStore.end())
+        return &itr->second;
 
     return NULL;
 }
@@ -9283,4 +9311,12 @@ void ObjectMgr::LoadGuildChallengeRewardInfo()
     while (result->NextRow());
 
     TC_LOG_INFO("server.loading", ">> Loaded %u guild challenge reward data in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
+void ObjectMgr::ReplaceCreatureTemplate(uint32 entry, CreatureTemplate const &newTemplate)
+{
+    CreatureTemplate &currTemplate = _creatureTemplateStore[entry];
+
+    currTemplate = newTemplate;
+    FixCreatureTemplate(currTemplate);
 }

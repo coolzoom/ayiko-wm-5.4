@@ -32,6 +32,7 @@
 #include "Cryptography/BigNumber.h"
 #include "Opcodes.h"
 #include "PetDefines.h"
+#include "PhaseMgr.h"
 
 class CalendarEvent;
 class CalendarInvite;
@@ -60,6 +61,8 @@ struct LfgReward;
 struct LfgRoleCheck;
 struct LfgUpdateData;
 struct MovementInfo;
+
+namespace rbac { class RBACData; }
 
 enum AccountDataType
 {
@@ -261,12 +264,17 @@ class WorldSession
         void SendPetNameInvalid(uint32 error, const std::string& name, DeclinedName *declinedName);
         void SendPartyResult(PartyOperation operation, const std::string& member, PartyResult res, uint32 val = 0);
         void SendAreaTriggerMessage(const char* Text, ...) ATTR_PRINTF(2, 3);
-        void SendSetPhaseShift(std::set<uint32> const& phaseIds, std::set<uint32> const& terrainswaps);
+        void SendSetPhaseShift(PhaseShiftSet const &phaseIds, PhaseShiftSet const &terrainswaps);
         void SendQueryTimeResponse();
         void HandleLearnPetSpecialization(WorldPacket& data);
 
         void SendAuthResponse(uint8 code, bool queued, uint32 queuePos = 0);
         void SendClientCacheVersion(uint32 version);
+
+        rbac::RBACData* GetRBACData();
+        bool HasPermission(uint32 permissionId) const;
+        void LoadPermissions();
+        void ReloadRBACData(); // Used to force LoadPermissions
 
         AccountTypes GetSecurity() const { return _security; }
         uint32 GetAccountId() const { return _accountId; }
@@ -419,29 +427,6 @@ class WorldSession
         // Recruit-A-Friend Handling
         uint32 GetRecruiterId() const { return recruiterId; }
         bool IsARecruiter() const { return isRecruiter; }
-
-        // Antispam Functions
-        void UpdateAntispamTimer(uint32 diff)
-        {
-            if (m_uiAntispamMailSentTimer <= diff)
-            {
-                m_uiAntispamMailSentTimer = sWorld->getIntConfig(CONFIG_ANTISPAM_MAIL_TIMER);
-                m_uiAntispamMailSentCount = 0;
-            }
-            else
-                m_uiAntispamMailSentTimer -= diff;
-        }
-
-        bool UpdateAntispamCount()
-        {
-            if (!sWorld->getBoolConfig(CONFIG_ANTISPAM_ENABLED))
-                return true;
-
-            m_uiAntispamMailSentCount++;
-            if (m_uiAntispamMailSentCount > sWorld->getIntConfig(CONFIG_ANTISPAM_MAIL_COUNT))
-                return false;
-            return true;
-        }
 
     public:                                                 // opcodes handlers
 
@@ -1146,10 +1131,7 @@ class WorldSession
         time_t timeLastChangeSubGroupCommand;
         time_t timeLastSellItemOpcode;
 
-        uint32 m_uiAntispamMailSentCount;
-        uint32 m_uiAntispamMailSentTimer;
-
-        uint8 playerLoginCounter;
+        rbac::RBACData* _RBACData;
 };
 
 #endif

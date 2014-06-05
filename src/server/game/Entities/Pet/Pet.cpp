@@ -530,7 +530,7 @@ void Pet::Update(uint32 diff)
             {
                 if (owner->GetPetGUID() != GetGUID() && !HasAura(130201)) // Stampede
                 {
-                    TC_LOG_ERROR("entities.pet", "Pet %u is not pet of owner %s, removed", GetEntry(), GetOwner()->GetName());
+                    TC_LOG_ERROR("entities.pet", "Pet %u is not pet of owner %s, removed", GetEntry(), GetOwner()->GetName().c_str());
                     Remove(PET_REMOVE_DISMISS, PET_REMOVE_FLAG_RESET_CURRENT);
                     return;
                 }

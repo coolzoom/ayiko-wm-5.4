@@ -88,7 +88,10 @@ enum WorldTimers
     WUPDATE_AUTOBROADCAST,
     WUPDATE_MAILBOXQUEUE,
     WUPDATE_DELETECHARS,
+    WUPDATE_TRANSFERCHARS,
     WUPDATE_GUILDSAVE,
+    WUPDATE_MAILRETURN,
+    WUPDATE_BANS,
     WUPDATE_COUNT
 };
 
@@ -138,8 +141,6 @@ enum WorldBoolConfigs
     CONFIG_DIE_COMMAND_MODE,
     CONFIG_DECLINED_NAMES_USED,
     CONFIG_BATTLEGROUND_CAST_DESERTER,
-    CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_ENABLE,
-    CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_PLAYERONLY,
     CONFIG_BG_XP_FOR_KILL,
     CONFIG_ARENA_AUTO_DISTRIBUTE_POINTS,
     CONFIG_ARENA_QUEUE_ANNOUNCER_ENABLE,
@@ -188,7 +189,6 @@ enum WorldBoolConfigs
     CONFIG_DUEL_RESET_COOLDOWN_ONLY_IN_ELWYNN_AND_DUROTAR,
     CONFIG_DUEL_RESET_COOLDOWN_RESET_ENERGY_ON_START,
     CONFIG_DUEL_RESET_COOLDOWN_MAX_ENERGY_ON_START,
-    CONFIG_ANTISPAM_ENABLED,
     BOOL_CONFIG_VALUE_COUNT
 };
 
@@ -297,6 +297,9 @@ enum WorldIntConfigs
     CONFIG_CHAT_CHANNEL_LEVEL_REQ,
     CONFIG_CHAT_WHISPER_LEVEL_REQ,
     CONFIG_CHAT_SAY_LEVEL_REQ,
+    CONFIG_CHAT_CHANNEL_PLAYED_TIME_REQ,
+    CONFIG_CHAT_WHISPER_PLAYED_TIME_REQ,
+    CONFIG_CHAT_YELL_PLAYED_TIME_REQ,
     CONFIG_TRADE_LEVEL_REQ,
     CONFIG_TICKET_LEVEL_REQ,
     CONFIG_AUCTION_LEVEL_REQ,
@@ -340,7 +343,6 @@ enum WorldIntConfigs
     CONFIG_CHARDELETE_KEEP_DAYS,
     CONFIG_CHARDELETE_METHOD,
     CONFIG_CHARDELETE_MIN_LEVEL,
-    CONFIG_AUTOBROADCAST_CENTER,
     CONFIG_AUTOBROADCAST_INTERVAL,
     CONFIG_MAX_RESULTS_LOOKUP_COMMANDS,
     CONFIG_DB_PING_INTERVAL,
@@ -370,10 +372,8 @@ enum WorldIntConfigs
     CONFIG_BLACKMARKET_MAX_AUCTIONS,
     CONFIG_BLACKMARKET_AUCTION_DELAY,
     CONFIG_BLACKMARKET_AUCTION_DELAY_MOD,
-    CONFIG_VIP_RATE_EXHANGE_HONOR_IN_ARENA,
-    CONFIG_VIP_RATE_EXHANGE_TRIUMPH_IN_FROST,
-    CONFIG_ANTISPAM_MAIL_TIMER,
-    CONFIG_ANTISPAM_MAIL_COUNT,
+    CONFIG_WHO_OPCODE_INTERVAL,
+    CONFIG_ACC_PASSCHANGESEC,
     INT_CONFIG_VALUE_COUNT
 };
 
@@ -585,18 +585,6 @@ struct CliCommandHolder
 
 typedef std::unordered_map<uint32, WorldSession*> SessionMap;
 
-enum RecordDiffType
-{
-    RECORD_DIFF_MAP,
-    RECORD_DIFF_BATTLEGROUND,
-    RECORD_DIFF_SESSION,
-    RECORD_DIFF_BATTLEFIELD,
-    RECORD_DIFF_OUTDOORPVP,
-    RECORD_DIFF_LFG,
-    RECORD_DIFF_CALLBACK,
-    RECORD_DIFF_MAX
-};
-
 /// The World
 class World
 {
@@ -668,24 +656,32 @@ class World
         uint32 GetMotdLineCount() const;
 
         /// Set the string for new characters (first login)
-        void SetNewCharString(std::string str) { m_newCharString = str; }
+        void SetNewCharString(std::string const &str) { m_newCharString = str; }
         /// Get the string for new characters (first login)
         const std::string& GetNewCharString() const { return m_newCharString; }
 
         LocaleConstant GetDefaultDbcLocale() const { return m_defaultDbcLocale; }
 
         /// Get the path where data (dbc, maps) are stored on disk
-        std::string GetDataPath() const { return m_dataPath; }
+        std::string const & GetDataPath() const { return m_dataPath; }
 
         /// When server started?
-        time_t const& GetStartTime() const { return m_startTime; }
+        time_t GetStartTime() const { return m_startTime; }
         /// What time is it?
-        time_t const& GetGameTime() const { return m_gameTime; }
+        time_t GetGameTime() const { return m_gameTime; }
         /// Uptime (in secs)
         uint32 GetUptime() const { return uint32(m_gameTime - m_startTime); }
+
         /// Update time
-        uint32 GetUpdateTime() const { return m_updateTime; }
-        void SetRecordDiffInterval(int32 t) { if (t >= 0) m_int_configs[CONFIG_INTERVAL_LOG_UPDATE] = (uint32)t; }
+        uint32 GetLastServerLatency() const { return m_updateTimeLast; }
+        uint32 GetAverageServerLatency() const { return m_updateTimeAverage; }
+
+        void SetRecordDiffInterval(uint32 t)
+        {
+            m_updateTimeSum = 0;
+            m_updateTimeCount = 0;
+            m_int_configs[CONFIG_INTERVAL_LOG_UPDATE] = t;
+        }
 
         /// Next daily quests and random bg reset time
         time_t GetNextDailyQuestsResetTime() const { return m_NextDailyQuestReset; }
@@ -779,10 +775,11 @@ class World
 
         void KickAll();
         void KickAllLess(AccountTypes sec);
-        BanReturn BanAccount(BanMode mode, std::string nameOrIP, std::string duration, std::string reason, std::string author);
-        bool RemoveBanAccount(BanMode mode, std::string nameOrIP);
-        BanReturn BanCharacter(std::string name, std::string duration, std::string reason, std::string author);
-        bool RemoveBanCharacter(std::string name);
+        BanReturn BanAccount(BanMode mode, std::string const& nameOrIP, std::string const& duration, std::string const& reason, std::string const& author);
+        BanReturn BanAccount(BanMode mode, std::string const& nameOrIP, uint32 duration_secs, std::string const& reason, std::string const& author);
+        bool RemoveBanAccount(BanMode mode, std::string const& nameOrIP);
+        BanReturn BanCharacter(std::string const& name, std::string const& duration, std::string const& reason, std::string const& author);
+        bool RemoveBanCharacter(std::string const& name);
 
         // for max speed access
         static float GetMaxVisibleDistanceOnContinents()    { return m_MaxVisibleDistanceOnContinents; }
@@ -813,6 +810,7 @@ class World
         void RecordTimeDiff(const char * text, ...);
 
         void LoadAutobroadcasts();
+        char const * GetBroadcastString(uint32 idx, LocaleConstant locale_idx) const;
 
         void UpdateAreaDependentAuras();
 
@@ -820,10 +818,9 @@ class World
         void SetCleaningFlags(uint32 flags) { m_CleaningFlags = flags; }
         void ResetEventSeasonalQuests(uint16 event_id);
         std::string const & GetRealmName() const { return m_realmName; }
-        void UpdatePhaseDefinitions();
 
-        void SetRecordDiff(RecordDiffType recordDiff, uint32 diff) { m_recordDiff[recordDiff] = diff; }
-        uint32 GetRecordDiff(RecordDiffType recordDiff) { return m_recordDiff[recordDiff]; }
+        void UpdatePhaseDefinitions();
+        void ReloadRBAC();
 
         void ResetCurrencyWeekCap();
 
@@ -858,11 +855,8 @@ class World
         time_t m_startTime;
         time_t m_gameTime;
         IntervalTimer m_timers[WUPDATE_COUNT];
-        time_t mail_timer;
-        time_t mail_timer_expires;
-        uint32 m_updateTime, m_updateTimeSum;
-        uint32 m_updateTimeCount;
-        uint32 m_currentTime;
+        uint32 m_updateTimeLast, m_updateTimeAverage, m_updateTimeSum;
+        size_t m_updateTimeCount;
 
         SessionMap m_sessions;
         typedef std::unordered_map<uint32, time_t> DisconnectMap;
@@ -921,11 +915,21 @@ class World
         // used versions
         std::string m_DBVersion;
 
-        std::list<std::string> m_Autobroadcasts;
+        struct BroadcastStringLocale
+        {
+            StringVector Content;
+        };
+
+        std::vector<BroadcastStringLocale> m_autoBroadcasts;
+        uint32 m_autoBroadcastIdx;
+
+        BroadcastStringLocale const * GetBroadcastStringLocale(uint32 idx) const
+        {
+            return (idx < m_autoBroadcasts.size()) ? &m_autoBroadcasts[idx] : NULL;
+        }
 
         void ProcessQueryCallbacks();
         ACE_Future_Set<PreparedQueryResult> m_realmCharCallbacks;
-        uint32 m_recordDiff[RECORD_DIFF_MAX];
 };
 
 extern uint32 realmID;

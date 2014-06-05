@@ -155,15 +155,10 @@ void MailDraft::SendReturnToSender(uint32 sender_acc, uint32 sender_guid, uint32
         needItemDelay = sender_acc != rc_account;
 
         // set owner to new receiver (to prevent delete item with sender char deleting)
-        for (MailItemMap::iterator mailItemIter = m_items.begin(); mailItemIter != m_items.end(); ++mailItemIter)
+        for (MailItemMap::iterator itr = m_items.begin(); itr != m_items.end(); ++itr)
         {
-            Item* item = mailItemIter->second;
-            item->SaveToDB(trans);                      // item not in inventory and can be save standalone
-            // owner in data will set at mail receive and item extracting
-            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_ITEM_OWNER);
-            stmt->setUInt32(0, receiver_guid);
-            stmt->setUInt32(1, item->GetGUIDLow());
-            trans->Append(stmt);
+            // item not in inventory and can be save standalone
+            itr->second->SaveToDB(trans);
         }
     }
 
@@ -223,9 +218,9 @@ void MailDraft::SendMailTo(SQLTransaction& trans, MailReceiver const& receiver, 
     stmt->setUInt8 (index, uint8(checked));
     trans->Append(stmt);
 
-    for (MailItemMap::const_iterator mailItemIter = m_items.begin(); mailItemIter != m_items.end(); ++mailItemIter)
+    for (MailItemMap::const_iterator itr = m_items.begin(); itr != m_items.end(); ++itr)
     {
-        Item* pItem = mailItemIter->second;
+        Item* pItem = itr->second;
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_MAIL_ITEM);
         stmt->setUInt32(0, mailId);
         stmt->setUInt32(1, pItem->GetGUIDLow());

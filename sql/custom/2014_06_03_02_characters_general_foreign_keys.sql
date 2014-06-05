@@ -224,6 +224,11 @@ alter table guild_bank_item
     foreign key (guildId) references guild (guildid)
     on delete cascade;
 
+alter table guild_bank_right
+  add constraint fk__guild_bank_right__guild
+    foreign key (guildid) references guild (guildid)
+    on delete cascade;
+
 alter table guild_bank_tab
   add constraint fk__guild_bank_tab__guild
     foreign key (guildId) references guild (guildid)

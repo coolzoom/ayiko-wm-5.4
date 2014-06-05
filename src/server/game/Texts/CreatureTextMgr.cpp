@@ -28,16 +28,20 @@ class CreatureTextBuilder
 {
     public:
         CreatureTextBuilder(WorldObject* obj, ChatMsg msgtype, uint8 textGroup, uint32 id, uint32 language, uint64 targetGUID)
-            : _source(obj), _msgType(msgtype), _textGroup(textGroup), _textId(id), _language(language), _targetGUID(targetGUID)
-        {
-        }
+            : _source(obj)
+            , _msgType(msgtype)
+            , _textGroup(textGroup)
+            , _textId(id)
+            , _language(language)
+            , _targetGUID(targetGUID)
+        { }
 
         void operator()(WorldPacket* data, LocaleConstant locale, uint64 tguid) const
         {
             std::string text = sCreatureTextMgr->GetLocalizedChatString(_source->GetEntry(), _textGroup, _textId, locale);
-            char const* localizedName = _source->GetNameForLocaleIdx(locale);
+            auto const &localizedName = _source->GetNameForLocaleIdx(locale);
 
-            _source->BuildMonsterChat(data, _msgType, text.c_str(), _language, localizedName, tguid > 0 ? tguid : _targetGUID);
+            _source->BuildMonsterChat(data, _msgType, text, _language, localizedName, tguid > 0 ? tguid : _targetGUID);
         }
 
         WorldObject* _source;
@@ -164,7 +168,8 @@ uint32 CreatureTextMgr::SendChat(Creature* source, uint8 textGroup, uint64 whisp
     CreatureTextMap::const_iterator sList = mTextMap.find(source->GetEntry());
     if (sList == mTextMap.end())
     {
-        TC_LOG_ERROR("sql.sql", "CreatureTextMgr: Could not find Text for Creature(%s) Entry %u in 'creature_text' table. Ignoring.", source->GetName(), source->GetEntry());
+        TC_LOG_ERROR("sql.sql", "CreatureTextMgr: Could not find Text for Creature(%s) Entry %u in 'creature_text' table. Ignoring.",
+                     source->GetName().c_str(), source->GetEntry());
         return 0;
     }
 
@@ -172,7 +177,8 @@ uint32 CreatureTextMgr::SendChat(Creature* source, uint8 textGroup, uint64 whisp
     CreatureTextHolder::const_iterator itr = textHolder.find(textGroup);
     if (itr == textHolder.end())
     {
-        TC_LOG_ERROR("sql.sql", "CreatureTextMgr: Could not find TextGroup %u for Creature(%s) GuidLow %u Entry %u. Ignoring.", uint32(textGroup), source->GetName(), source->GetGUIDLow(), source->GetEntry());
+        TC_LOG_ERROR("sql.sql", "CreatureTextMgr: Could not find TextGroup %u for Creature(%s) GuidLow %u Entry %u. Ignoring.",
+                     uint32(textGroup), source->GetName().c_str(), source->GetGUIDLow(), source->GetEntry());
         return 0;
     }
 
@@ -374,7 +380,10 @@ void CreatureTextMgr::SetRepeatId(Creature* source, uint8 textGroup, uint8 id)
     if (std::find(repeats.begin(), repeats.end(), id) == repeats.end())
         repeats.push_back(id);
     else
-        TC_LOG_ERROR("sql.sql", "CreatureTextMgr: TextGroup %u for Creature(%s) GuidLow %u Entry %u, id %u already added", uint32(textGroup), source->GetName(), source->GetGUIDLow(), source->GetEntry(), uint32(id));
+    {
+        TC_LOG_ERROR("sql.sql", "CreatureTextMgr: TextGroup %u for Creature(%s) GuidLow %u Entry %u, id %u already added",
+                     uint32(textGroup), source->GetName().c_str(), source->GetGUIDLow(), source->GetEntry(), uint32(id));
+    }
 }
 
 CreatureTextRepeatIds CreatureTextMgr::GetRepeatGroup(Creature* source, uint8 textGroup)

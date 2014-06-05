@@ -677,7 +677,10 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
 
     // Log damage > 1 000 000 on worldboss
     if (damage > 1000000 && GetTypeId() == TYPEID_PLAYER && victim->GetTypeId() == TYPEID_UNIT && victim->ToCreature()->GetCreatureTemplate()->rank)
-        TC_LOG_INFO("molten", "World Boss %u [%s] take more than 1M damage (%u) by player %u [%s] with spell %u", victim->GetEntry(), victim->GetName(), damage, GetGUIDLow(), GetName(), spellProto ? spellProto->Id : 0);
+    {
+        TC_LOG_INFO("molten", "World Boss %u [%s] take more than 1M damage (%u) by player %u [%s] with spell %u",
+                    victim->GetEntry(), victim->GetName().c_str(), damage, GetGUIDLow(), GetName().c_str(), spellProto ? spellProto->Id : 0);
+    }
 
     // Custom MoP Script
     if (ToPlayer() && getClass() == CLASS_MONK && ToPlayer()->GetSpecializationId(ToPlayer()->GetActiveSpec()) == SPEC_MONK_BREWMASTER && HasAura(115315))
@@ -11175,7 +11178,10 @@ void Unit::SetCharm(Unit* charm, bool apply)
         if (GetTypeId() == TYPEID_PLAYER)
         {
             if (!AddUInt64Value(UNIT_FIELD_CHARM, charm->GetGUID()))
-                TC_LOG_FATAL("entities.unit", "Player %s is trying to charm unit %u, but it already has a charmed unit " UI64FMTD "", GetName(), charm->GetEntry(), GetCharmGUID());
+            {
+                TC_LOG_FATAL("entities.unit", "Player %s is trying to charm unit %u, but it already has a charmed unit " UI64FMTD "",
+                             GetName().c_str(), charm->GetEntry(), GetCharmGUID());
+            }
 
             charm->m_ControlledByPlayer = true;
             // TODO: maybe we can use this flag to check if controlled by player
@@ -11204,7 +11210,10 @@ void Unit::SetCharm(Unit* charm, bool apply)
         if (GetTypeId() == TYPEID_PLAYER)
         {
             if (!RemoveUInt64Value(UNIT_FIELD_CHARM, charm->GetGUID()))
-                TC_LOG_FATAL("entities.unit", "Player %s is trying to uncharm unit %u, but it has another charmed unit " UI64FMTD "", GetName(), charm->GetEntry(), GetCharmGUID());
+            {
+                TC_LOG_FATAL("entities.unit", "Player %s is trying to uncharm unit %u, but it has another charmed unit " UI64FMTD,
+                             GetName().c_str(), charm->GetEntry(), GetCharmGUID());
+            }
         }
 
         if (!charm->RemoveUInt64Value(UNIT_FIELD_CHARMEDBY, GetGUID()))
@@ -20656,8 +20665,8 @@ void Unit::SendThreatListUpdate()
 
         data.WriteBits(count, 21);
 
-        std::list<HostileReference*>& tlist = getThreatManager().getThreatList();
-        for (std::list<HostileReference*>::const_iterator itr = tlist.begin(); itr != tlist.end(); ++itr)
+        auto const &tlist = getThreatManager().getThreatList();
+        for (auto itr = tlist.begin(); itr != tlist.end(); ++itr)
         {
             ObjectGuid unitGuid = (*itr)->getUnitGuid();
             data.WriteBitSeq<7, 4, 3, 2, 6, 1, 0, 5>(unitGuid);
@@ -20666,7 +20675,7 @@ void Unit::SendThreatListUpdate()
         ObjectGuid thisGuid = GetGUID();
         data.WriteBitSeq<2, 7, 4, 0, 1, 6, 3, 5>(thisGuid);
 
-        for (std::list<HostileReference*>::const_iterator itr = tlist.begin(); itr != tlist.end(); ++itr)
+        for (auto itr = tlist.begin(); itr != tlist.end(); ++itr)
         {
             ObjectGuid unitGuid = (*itr)->getUnitGuid();
 
@@ -20705,8 +20714,8 @@ void Unit::SendChangeCurrentVictimOpcode(HostileReference* pHostileReference)
         data.WriteBitSeq<7>(thisGuid);
         data.WriteBits(count, 21);
 
-        std::list<HostileReference*>& tlist = getThreatManager().getThreatList();
-        for (std::list<HostileReference*>::const_iterator itr = tlist.begin(); itr != tlist.end(); ++itr)
+        auto const &tlist = getThreatManager().getThreatList();
+        for (auto itr = tlist.begin(); itr != tlist.end(); ++itr)
         {
             ObjectGuid iterGuid = (*itr)->getUnitGuid();
             data.WriteBitSeq<5, 0, 6, 2, 7, 3, 4, 1>(iterGuid);
@@ -20718,7 +20727,7 @@ void Unit::SendChangeCurrentVictimOpcode(HostileReference* pHostileReference)
         data.WriteByteSeq<5, 3, 4, 7>(thisGuid);
         data.WriteByteSeq<0, 4>(hostileGuid);
 
-        for (std::list<HostileReference*>::const_iterator itr = tlist.begin(); itr != tlist.end(); ++itr)
+        for (auto itr = tlist.begin(); itr != tlist.end(); ++itr)
         {
             ObjectGuid iterGuid = (*itr)->getUnitGuid();
 
@@ -20842,7 +20851,7 @@ void Unit::StopAttackFaction(uint32 faction_id)
 void Unit::OutDebugInfo() const
 {
     TC_LOG_ERROR("entities.unit", "Unit::OutDebugInfo");
-    TC_LOG_INFO("entities.unit", "GUID " UI64FMTD ", entry %u, type %u, name %s", GetGUID(), GetEntry(), (uint32)GetTypeId(), GetName());
+    TC_LOG_INFO("entities.unit", "GUID " UI64FMTD ", entry %u, type %u, name %s", GetGUID(), GetEntry(), (uint32)GetTypeId(), GetName().c_str());
     TC_LOG_INFO("entities.unit", "OwnerGUID " UI64FMTD ", MinionGUID " UI64FMTD ", CharmerGUID " UI64FMTD ", CharmedGUID " UI64FMTD, GetOwnerGUID(), GetMinionGUID(), GetCharmerGUID(), GetCharmGUID());
     TC_LOG_INFO("entities.unit", "In world %u, unit type mask %u", (uint32)(IsInWorld() ? 1 : 0), m_unitTypeMask);
     if (IsInWorld())

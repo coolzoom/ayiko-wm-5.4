@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -25,8 +25,12 @@ EndScriptData */
 #include "ScriptMgr.h"
 #include "Chat.h"
 #include "SpellAuraEffects.h"
+#include "Language.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
+#include "Player.h"
+#include "LexicalCast.h"
+
 #include <iostream>
 
 class list_commandscript : public CommandScript
@@ -34,21 +38,21 @@ class list_commandscript : public CommandScript
 public:
     list_commandscript() : CommandScript("list_commandscript") { }
 
-    ChatCommand* GetCommands() const
+    ChatCommand* GetCommands() const override
     {
         static ChatCommand listCommandTable[] =
         {
-            { "creature",       SEC_ADMINISTRATOR,  true,  &HandleListCreatureCommand,          "", NULL },
-            { "item",           SEC_ADMINISTRATOR,  true,  &HandleListItemCommand,              "", NULL },
-            { "object",         SEC_ADMINISTRATOR,  true,  &HandleListObjectCommand,            "", NULL },
-            { "auras",          SEC_ADMINISTRATOR,  false, &HandleListAurasCommand,             "", NULL },
-            { "mail",           SEC_ADMINISTRATOR,  true,  &HandleListMailCommand,              "", NULL },
-            { NULL,             0,                  false, NULL,                                "", NULL }
+            { "creature", rbac::RBAC_PERM_COMMAND_LIST_CREATURE, true, &HandleListCreatureCommand, "", NULL },
+            { "item",     rbac::RBAC_PERM_COMMAND_LIST_ITEM,     true, &HandleListItemCommand,     "", NULL },
+            { "object",   rbac::RBAC_PERM_COMMAND_LIST_OBJECT,   true, &HandleListObjectCommand,   "", NULL },
+            { "auras",    rbac::RBAC_PERM_COMMAND_LIST_AURAS,   false, &HandleListAurasCommand,    "", NULL },
+            { "mail",     rbac::RBAC_PERM_COMMAND_LIST_MAIL,     true, &HandleListMailCommand,     "", NULL },
+            { NULL,       0,                              false, NULL,                       "", NULL }
         };
         static ChatCommand commandTable[] =
         {
-            { "list",          SEC_ADMINISTRATOR,   true, NULL,                                 "", listCommandTable },
-            { NULL,            0,                   false, NULL,                                "", NULL }
+            { "list", rbac::RBAC_PERM_COMMAND_LIST,true, NULL, "", listCommandTable },
+            { NULL,   0,                    false, NULL, "", NULL }
         };
         return commandTable;
     }
@@ -63,7 +67,7 @@ public:
         if (!id)
             return false;
 
-        uint32 creatureId = atol(id);
+        uint32 creatureId = Trinity::lexicalCast<uint32>(id);
         if (!creatureId)
         {
             handler->PSendSysMessage(LANG_COMMAND_INVALIDCREATUREID, creatureId);
@@ -80,7 +84,7 @@ public:
         }
 
         char* countStr = strtok(NULL, " ");
-        uint32 count = countStr ? atol(countStr) : 10;
+        uint32 count = countStr ? Trinity::lexicalCast<uint32>(countStr) : 10u;
 
         if (count == 0)
             return false;
@@ -135,7 +139,7 @@ public:
         if (!id)
             return false;
 
-        uint32 itemId = atol(id);
+        uint32 itemId = Trinity::lexicalCast<uint32>(id);
         if (!itemId)
         {
             handler->PSendSysMessage(LANG_COMMAND_ITEMIDINVALID, itemId);
@@ -152,7 +156,7 @@ public:
         }
 
         char* countStr = strtok(NULL, " ");
-        uint32 count = countStr ? atol(countStr) : 10;
+        uint32 count = countStr ? Trinity::lexicalCast<uint32>(countStr) : 10u;
 
         if (count == 0)
             return false;
@@ -226,7 +230,7 @@ public:
             result = CharacterDatabase.Query(stmt);
         }
         else
-            result = PreparedQueryResult(NULL);
+            result.reset();
 
         if (result)
         {
@@ -273,7 +277,7 @@ public:
             result = CharacterDatabase.Query(stmt);
         }
         else
-            result = PreparedQueryResult(NULL);
+            result.reset();
 
         if (result)
         {
@@ -352,7 +356,7 @@ public:
         if (!id)
             return false;
 
-        uint32 gameObjectId = atol(id);
+        uint32 gameObjectId = Trinity::lexicalCast<uint32>(id);
         if (!gameObjectId)
         {
             handler->PSendSysMessage(LANG_COMMAND_LISTOBJINVALIDID, gameObjectId);
@@ -369,7 +373,7 @@ public:
         }
 
         char* countStr = strtok(NULL, " ");
-        uint32 count = countStr ? atol(countStr) : 10;
+        uint32 count = countStr ? Trinity::lexicalCast<uint32>(countStr) : 10u;
 
         if (count == 0)
             return false;
@@ -401,10 +405,10 @@ public:
                 float y         = fields[2].GetFloat();
                 float z         = fields[3].GetFloat();
                 uint16 mapId    = fields[4].GetUInt16();
-                uint32 entry    = fields[5].GetUInt32();
+                //uint32 entry    = fields[5].GetUInt32();
 
                 if (handler->GetSession())
-                    handler->PSendSysMessage(LANG_GO_LIST_CHAT, guid, entry, guid, gInfo->name.c_str(), x, y, z, mapId);
+                    handler->PSendSysMessage(LANG_GO_LIST_CHAT, guid, guid, gInfo->name.c_str(), x, y, z, mapId);
                 else
                     handler->PSendSysMessage(LANG_GO_LIST_CONSOLE, guid, gInfo->name.c_str(), x, y, z, mapId);
             }
@@ -436,7 +440,7 @@ public:
             bool talent = sSpellMgr->IsTalent(itr->second->GetBase()->GetId());
 
             AuraApplication const* aurApp = itr->second;
-            Aura const *aura = aurApp->GetBase();
+            Aura const* aura = aurApp->GetBase();
             char const* name = aura->GetSpellInfo()->SpellName;
 
             std::ostringstream ss_name;
@@ -463,7 +467,6 @@ public:
 
         return true;
     }
-
     // handle list mail command
     static bool HandleListMailCommand(ChatHandler* handler, char const* args)
     {
@@ -474,7 +477,7 @@ public:
         if (!*args)
             return false;
 
-        uint32 parseGUID = MAKE_NEW_GUID(atol((char*)args), 0, HIGHGUID_PLAYER);
+        uint32 parseGUID = MAKE_NEW_GUID(Trinity::lexicalCast<uint32>(args), 0, HIGHGUID_PLAYER);
 
         if (sObjectMgr->GetPlayerNameByGUID(parseGUID, targetName))
         {
@@ -517,7 +520,7 @@ public:
                     uint32 copp = (money % GOLD) % SILVER;
                     std::string receiverStr = handler->playerLink(receiver);
                     std::string senderStr = handler->playerLink(sender);
-                    handler->PSendSysMessage(LANG_LIST_MAIL_INFO_1 , messageId, subject.c_str(),gold, silv, copp);
+                    handler->PSendSysMessage(LANG_LIST_MAIL_INFO_1, messageId, subject.c_str(), gold, silv, copp);
                     handler->PSendSysMessage(LANG_LIST_MAIL_INFO_2, senderStr.c_str(), senderId, receiverStr.c_str(), receiverId);
                     handler->PSendSysMessage(LANG_LIST_MAIL_INFO_3, TimeToTimestampStr(deliverTime).c_str(), TimeToTimestampStr(expireTime).c_str());
                     if (hasItem == 1)
@@ -540,7 +543,7 @@ public:
                                         uint32 item_entry       = fields[0].GetUInt32();
                                         uint32 item_count       = fields[1].GetUInt32();
                                         QueryResult result4;
-                                        result4 = WorldDatabase.PQuery("SELECT name,quality FROM item_template WHERE entry = '%u'", item_entry);
+                                        result4 = WorldDatabase.PQuery("SELECT name, quality FROM item_template WHERE entry = '%u'", item_entry);
                                         Field* fields1          = result4->Fetch();
                                         std::string item_name   = fields1[0].GetString();
                                         int item_quality        = fields1[1].GetUInt8();

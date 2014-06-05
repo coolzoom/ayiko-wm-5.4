@@ -395,7 +395,7 @@ void WorldSession::HandleLfrLeaveOpcode(WorldPacket& recvData)
 }
 void WorldSession::HandleLfgGetStatus(WorldPacket& /*recvData*/)
 {
-    TC_LOG_DEBUG("lfg", "CMSG_LFG_GET_STATUS %s", GetPlayer()->GetName());
+    TC_LOG_DEBUG("lfg", "CMSG_LFG_GET_STATUS %s", GetPlayer()->GetName().c_str());
 
     /*uint64 guid = GetPlayer()->GetGUID();
     LfgUpdateData updateData = sLFGMgr->GetLfgStatus(guid);

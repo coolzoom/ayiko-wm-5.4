@@ -352,7 +352,7 @@ class boss_zuljin : public CreatureScript
                     me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID, 0);
                     me->RemoveAurasDueToSpell(Transform[Phase].unaura);
                     DoCast(me, Transform[Phase].spell);
-                    me->MonsterYell(Transform[Phase].text.c_str(), LANG_UNIVERSAL, 0);
+                    me->MonsterYell(Transform[Phase].text, LANG_UNIVERSAL, 0);
                     DoPlaySoundToSet(me, Transform[Phase].sound);
                     if (Phase > 0)
                     {

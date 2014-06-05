@@ -598,7 +598,7 @@ class Guild
                 std::string const& GetText() const { return m_text; }
 
                 inline Item* GetItem(uint8 slotId) const { return slotId < GUILD_BANK_MAX_SLOTS ?  m_items[slotId] : NULL; }
-                bool SetItem(SQLTransaction& trans, uint8 slotId, Item* item);
+                void SetItem(SQLTransaction &trans, uint8 slotId, Item *item);
 
             private:
                 uint32 m_guildId;

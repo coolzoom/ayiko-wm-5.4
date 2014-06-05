@@ -45,7 +45,7 @@
 #include "PacketLog.h"
 #include "ScriptMgr.h"
 #include "AccountMgr.h"
-#include "zlib.h"
+#include "RBAC.h"
 
 #if defined(__GNUC__)
 #pragma pack(1)
@@ -157,8 +157,13 @@ int WorldSocket::SendPacket(WorldPacket const* pct)
         return -1;
 
     // Dump outgoing packet
-    if (sPacketLog->CanLogPacket())
-        sPacketLog->LogPacket(*pct, SERVER_TO_CLIENT);
+    LogPacket(*pct, SERVER_TO_CLIENT);
+
+    if (m_Session)
+    {
+        TC_LOG_TRACE("network.opcode", "S->C: %s %s",
+                     m_Session->GetPlayerName().c_str(), GetOpcodeNameForLogging(pct->GetOpcode(), WOW_SERVER).c_str());
+    }
 
     ServerPktHeader header(pct->size() + 2, pct->GetOpcode(), m_Crypt.IsInitialized());
     m_Crypt.EncryptSend(header.header, ServerPktHeader::Length);
@@ -487,7 +492,7 @@ int WorldSocket::handle_input_header (void)
                        " sent malformed packet (size: %d, cmd: %d)",
                        m_Session ? m_Session->GetAccountId() : 0,
                        _player ? _player->GetGUIDLow() : 0,
-                       _player ? _player->GetName() : "<none>",
+                       _player ? _player->GetName().c_str() : "<none>",
                        size, cmd);
 
         errno = EINVAL;
@@ -676,13 +681,13 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
     if (closing_)
         return -1;
 
-    // Dump received packet.
-    if (sPacketLog->CanLogPacket())
-        sPacketLog->LogPacket(*new_pct, CLIENT_TO_SERVER);
+    LogPacket(*new_pct, CLIENT_TO_SERVER);
 
-    std::string opcodeName = GetOpcodeNameForLogging(opcode, WOW_CLIENT);
-    if (opcode != CMSG_PLAYER_MOVE)
-        TC_LOG_INFO("network.opcode", "C->S: %s", opcodeName.c_str());
+    if (m_Session)
+    {
+        TC_LOG_TRACE("network.opcode", "C->S: %s %s",
+                     m_Session->GetPlayerName().c_str(), GetOpcodeNameForLogging(opcode, WOW_CLIENT).c_str());
+    }
 
     try
     {
@@ -698,26 +703,21 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
                     return -1;
                 }
 
-                sScriptMgr->OnPacketReceive(this, WorldPacket(*new_pct));
                 return HandleAuthSession(*new_pct);
             }
             case CMSG_KEEP_ALIVE:
             {
-                TC_LOG_DEBUG("network", "%s", GetOpcodeNameForLogging(opcode, WOW_CLIENT).c_str());
-                sScriptMgr->OnPacketReceive(this, WorldPacket(*new_pct));
+                TC_LOG_DEBUG("network", "CMSG_KEEP_ALIVE");
                 return 0;
             }
             case CMSG_LOG_DISCONNECT:
             {
                 new_pct->rfinish(); // contains uint32 disconnectReason;
-                TC_LOG_DEBUG("network", "%s", opcodeName.c_str());
-                sScriptMgr->OnPacketReceive(this, WorldPacket(*new_pct));
+                TC_LOG_DEBUG("network", "CMSG_LOG_DISCONNECT");
                 return 0;
             }
             /*case CMSG_REORDER_CHARACTERS:
             {
-                sScriptMgr->OnPacketReceive(this, WorldPacket(*new_pct));
-
                 if (m_Session)
                     if (OpcodeHandler* opHandle = opcodeTable[CMSG_REORDER_CHARACTERS])
                         (m_Session->*opHandle->handler)(*new_pct);
@@ -728,8 +728,7 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
             // first 4 bytes become the opcode (2 dropped)
             case MSG_VERIFY_CONNECTIVITY:
             {
-                TC_LOG_DEBUG("network", "%s", opcodeName.c_str());
-                sScriptMgr->OnPacketReceive(this, WorldPacket(*new_pct));
+                TC_LOG_DEBUG("network", "MSG_VERIFY_CONNECTIVITY");
                 std::string str;
                 *new_pct >> str;
                 if (str != "RLD OF WARCRAFT CONNECTION - CLIENT TO SERVER")
@@ -738,8 +737,7 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
             }
             /*case CMSG_ENABLE_NAGLE:
             {
-                TC_LOG_DEBUG("network", "%s", opcodeName.c_str());
-                sScriptMgr->OnPacketReceive(this, WorldPacket(*new_pct));
+                TC_LOG_DEBUG("network", "CMSG_ENABLE_NAGLE");
                 return m_Session ? m_Session->HandleEnableNagleAlgorithm() : -1;
             }*/
             default:
@@ -758,7 +756,8 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
                 OpcodeHandler* handler = opcodeTable[WOW_CLIENT][opcode];
                 if (!handler || handler->status == STATUS_UNHANDLED)
                 {
-                    TC_LOG_ERROR("network.opcode", "No defined handler for opcode %s sent by %s", GetOpcodeNameForLogging(new_pct->GetOpcode(), WOW_CLIENT).c_str(), m_Session->GetPlayerName(false).c_str());
+                    TC_LOG_ERROR("network.opcode", "No defined handler for opcode 0x%04X sent by player %s, account %u",
+                                 new_pct->GetOpcode(), m_Session->GetPlayerName().c_str(), m_Session->GetAccountId());
                     return 0;
                 }
 
@@ -777,8 +776,9 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
     }
     catch (ByteBufferException &)
     {
-        TC_LOG_ERROR("network", "WorldSocket::ProcessIncoming ByteBufferException occured while parsing an instant handled packet %s from client %s, accountid=%i. Disconnected client.",
-            opcodeName.c_str(), GetRemoteAddress().c_str(), m_Session ? int32(m_Session->GetAccountId()) : -1);
+        TC_LOG_ERROR("network", "WorldSocket::ProcessIncoming ByteBufferException occured while parsing an instant"
+                     " handled packet 0x%04X from client %s, accountid=%i. Disconnected client.",
+                     new_pct->GetOpcode(), GetRemoteAddress().c_str(), m_Session ? int32(m_Session->GetAccountId()) : -1);
         new_pct->hexlike();
         return -1;
     }
@@ -1044,7 +1044,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     {
         mutetime = time(NULL) + llabs(mutetime);
 
-        PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_MUTE_TIME);
+        PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_MUTE_TIME_LOGIN);
 
         stmt->setInt64(0, mutetime);
         stmt->setUInt32(1, id);
@@ -1151,6 +1151,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     m_Session->LoadGlobalAccountData();
     m_Session->LoadTutorialsData();
     m_Session->ReadAddonsInfo(addonsData);
+    m_Session->LoadPermissions();
 
     // Initialize Warden system only if it is enabled by config
     if (sWorld->getBoolConfig(CONFIG_WARDEN_ENABLED))
@@ -1188,7 +1189,7 @@ int WorldSocket::HandlePing(WorldPacket& recvPacket)
             {
                 ACE_GUARD_RETURN(LockType, Guard, m_SessionLock, -1);
 
-                if (m_Session && AccountMgr::IsPlayerAccount(m_Session->GetSecurity()))
+                if (m_Session && !m_Session->HasPermission(rbac::RBAC_PERM_SKIP_CHECK_OVERSPEED_PING))
                 {
                     TC_LOG_ERROR("network", "WorldSocket::HandlePing: %s kicked for over-speed pings (address: %s)",
                         m_Session->GetPlayerName(false).c_str(), GetRemoteAddress().c_str());
@@ -1220,4 +1221,26 @@ int WorldSocket::HandlePing(WorldPacket& recvPacket)
     WorldPacket packet(SMSG_PONG, 4);
     packet << ping;
     return SendPacket(&packet);
+}
+
+void WorldSocket::LogPacket(WorldPacket const &packet, Direction direction)
+{
+    if (m_Session && m_Session->HasPermission(rbac::RBAC_PERM_LOG_PACKETS))
+    {
+        // This permission can be enabled at runtime, so we perform
+        // lazy initialization
+        if (!m_packetLog.CanLogPacket())
+        {
+            std::string accountName;
+            AccountMgr::GetName(m_Session->GetAccountId(), accountName);
+
+            std::ostringstream ss;
+            ss << accountName << '_'
+               << TimeToTimestampStr(std::time(NULL)) << ".bin";
+
+            m_packetLog.Initialize(ss.str());
+        }
+
+        m_packetLog.LogPacket(packet, direction);
+    }
 }

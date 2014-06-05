@@ -183,9 +183,8 @@ public:
             uint32 health = 0;
             Unit* target = NULL;
 
-            std::list<HostileReference*>& m_threatlist = me->getThreatManager().getThreatList();
-            std::list<HostileReference*>::const_iterator i = m_threatlist.begin();
-            for (i = m_threatlist.begin(); i!= m_threatlist.end(); ++i)
+            auto const &threatlist = me->getThreatManager().getThreatList();
+            for (auto i = threatlist.begin(); i!= threatlist.end(); ++i)
             {
                 Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
                 if (unit && me->IsWithinMeleeRange(unit))

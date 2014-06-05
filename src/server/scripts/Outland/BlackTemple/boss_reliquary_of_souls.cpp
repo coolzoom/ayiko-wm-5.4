@@ -230,9 +230,9 @@ public:
             if (!target)
                 return;
 
-            std::list<HostileReference*>& m_threatlist = target->getThreatManager().getThreatList();
-            std::list<HostileReference*>::const_iterator itr = m_threatlist.begin();
-            for (; itr != m_threatlist.end(); ++itr)
+            auto threatlist = target->getThreatManager().getThreatList();
+            auto itr = threatlist.begin();
+            for (; itr != threatlist.end(); ++itr)
             {
                 Unit* unit = Unit::GetUnit(*me, (*itr)->getUnitGuid());
                 if (unit)
@@ -450,12 +450,13 @@ public:
 
         void CastFixate()
         {
-            std::list<HostileReference*>& m_threatlist = me->getThreatManager().getThreatList();
-            if (m_threatlist.empty())
-                return; // No point continuing if empty threatlist.
+            auto const &threatlist = me->getThreatManager().getThreatList();
+            if (threatlist.empty())
+                return;
+
             std::list<Unit*> targets;
-            std::list<HostileReference*>::const_iterator itr = m_threatlist.begin();
-            for (; itr != m_threatlist.end(); ++itr)
+            auto itr = threatlist.begin();
+            for (; itr != threatlist.end(); ++itr)
             {
                 Unit* unit = Unit::GetUnit(*me, (*itr)->getUnitGuid());
                 if (unit && unit->isAlive() && (unit->GetTypeId() == TYPEID_PLAYER)) // Only alive players

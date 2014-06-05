@@ -21,7 +21,6 @@
 */
 
 #include "WorldSocket.h"                                    // must be first to make ACE happy with ACE includes in it
-#include <zlib.h>
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "Log.h"
@@ -45,6 +44,9 @@
 #include "Transport.h"
 #include "WardenWin.h"
 #include "WardenMac.h"
+#include "AccountMgr.h"
+
+#include <zlib.h>
 
 bool MapSessionFilter::Process(WorldPacket* packet)
 {
@@ -112,8 +114,7 @@ WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec,
     , timeLastChannelKickCommand(0), timeLastServerCommand(0)
     , timeLastArenaTeamCommand(0), timeLastCalendarInvCommand(0)
     , timeLastChangeSubGroupCommand(0), timeLastSellItemOpcode(0)
-    , m_uiAntispamMailSentCount(0), m_uiAntispamMailSentTimer(0)
-    , playerLoginCounter(0)
+    , _RBACData()
 {
     _warden = NULL;
     _filterAddonMessages = false;
@@ -208,7 +209,8 @@ void WorldSession::SendPacket(WorldPacket const* packet, bool forced /*= false*/
         OpcodeHandler* handler = opcodeTable[WOW_SERVER][packet->GetOpcode()];
         if (!handler || handler->status == STATUS_UNHANDLED)
         {
-            TC_LOG_ERROR("network.opcode", "Prevented sending disabled opcode %s to %s", GetOpcodeNameForLogging(packet->GetOpcode(), WOW_SERVER).c_str(), GetPlayerName(false).c_str());
+            TC_LOG_ERROR("network.opcode", "Prevented sending disabled opcode 0x%04X to player %s, account %u",
+                         packet->GetOpcode(), GetPlayerName().c_str(), GetAccountId());
             return;
         }
     }
@@ -260,15 +262,19 @@ void WorldSession::QueuePacket(WorldPacket* new_packet)
 /// Logging helper for unexpected opcodes
 void WorldSession::LogUnexpectedOpcode(WorldPacket* packet, const char* status, const char *reason)
 {
-    TC_LOG_ERROR("network.opcode", "Received unexpected opcode %s Status: %s Reason: %s from %s",
-        GetOpcodeNameForLogging(packet->GetOpcode(), WOW_CLIENT).c_str(), status, reason, GetPlayerName(false).c_str());
+    TC_LOG_ERROR("network.opcode", "Received unexpected opcode 0x%04X Status: %s Reason: %s from player %s, account %u",
+                 packet->GetOpcode(), status, reason, GetPlayerName().c_str(), GetAccountId());
 }
 
 /// Logging helper for unexpected opcodes
 void WorldSession::LogUnprocessedTail(WorldPacket* packet)
 {
-    TC_LOG_ERROR("network.opcode", "Unprocessed tail data (read stop at %u from %u) Opcode %s from %s",
-        uint32(packet->rpos()), uint32(packet->wpos()), GetOpcodeNameForLogging(packet->GetOpcode(), WOW_CLIENT).c_str(), GetPlayerName(false).c_str());
+    if (!sLog->ShouldLog("network.opcode", LOG_LEVEL_TRACE) || packet->rpos() >= packet->wpos())
+        return;
+
+    TC_LOG_TRACE("network.opcode", "Unprocessed tail data (read stop at %" PRIuPTR " from %" PRIuPTR ") Opcode 0x%04X from player %s, account %u",
+                 packet->rpos(), packet->wpos(), packet->GetOpcode(), GetPlayerName().c_str(), GetAccountId());
+
     packet->print_storage();
 }
 
@@ -282,14 +288,6 @@ struct OpcodeInfo
 /// Update the WorldSession (triggered by World update)
 bool WorldSession::Update(uint32 diff, PacketFilter& updater)
 {
-    uint32 sessionDiff = getMSTime();
-    uint32 nbPacket = 0;
-    std::map<uint32, OpcodeInfo> pktHandle; // opcodeId / OpcodeInfo
-
-    /// Antispam Timer update
-    if (sWorld->getBoolConfig(CONFIG_ANTISPAM_ENABLED))
-        UpdateAntispamTimer(diff);
-
     /// Update Timeout timer.
     UpdateTimeOutTime(diff);
 
@@ -316,7 +314,6 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
             _recvQueue.next(packet, updater))
     {
         const OpcodeHandler* opHandle = opcodeTable[WOW_CLIENT][packet->GetOpcode()];
-        uint32 pktTime = getMSTime();
 
         try
         {
@@ -337,13 +334,12 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
                             deletePacket = false;
                             QueuePacket(packet);
                             //! Log
-                                TC_LOG_DEBUG("network", "Re-enqueueing packet with opcode %s with with status STATUS_LOGGEDIN. "
-                                    "Player is currently not in world yet.", GetOpcodeNameForLogging(packet->GetOpcode(), WOW_CLIENT).c_str());
+                            TC_LOG_DEBUG("network", "Re-enqueueing packet with opcode 0x%04X with with status STATUS_LOGGEDIN. "
+                                         "Player is currently not in world yet.", packet->GetOpcode());
                         }
                     }
                     else if (_player->IsInWorld())
                     {
-                        sScriptMgr->OnPacketReceive(m_Socket, WorldPacket(*packet));
                         (this->*opHandle->handler)(*packet);
                         if (sLog->ShouldLog("network", LOG_LEVEL_TRACE) && packet->rpos() < packet->wpos())
                             LogUnprocessedTail(packet);
@@ -357,7 +353,6 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
                     else
                     {
                         // not expected _player or must checked in packet hanlder
-                        sScriptMgr->OnPacketReceive(m_Socket, WorldPacket(*packet));
                         (this->*opHandle->handler)(*packet);
                         if (sLog->ShouldLog("network", LOG_LEVEL_TRACE) && packet->rpos() < packet->wpos())
                             LogUnprocessedTail(packet);
@@ -370,7 +365,6 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
                         LogUnexpectedOpcode(packet, "STATUS_TRANSFER", "the player is still in world");
                     else
                     {
-                        sScriptMgr->OnPacketReceive(m_Socket, WorldPacket(*packet));
                         (this->*opHandle->handler)(*packet);
                         if (sLog->ShouldLog("network", LOG_LEVEL_TRACE) && packet->rpos() < packet->wpos())
                             LogUnprocessedTail(packet);
@@ -389,18 +383,15 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
                     if (packet->GetOpcode() == CMSG_CHAR_ENUM)
                         m_playerRecentlyLogout = false;
 
-                    sScriptMgr->OnPacketReceive(m_Socket, WorldPacket(*packet));
                     (this->*opHandle->handler)(*packet);
                     if (sLog->ShouldLog("network", LOG_LEVEL_TRACE) && packet->rpos() < packet->wpos())
                         LogUnprocessedTail(packet);
                     break;
                 case STATUS_NEVER:
-                        TC_LOG_ERROR("network.opcode", "Received not allowed opcode %s from %s", GetOpcodeNameForLogging(packet->GetOpcode(), WOW_CLIENT).c_str()
-                            , GetPlayerName(false).c_str());
+                        TC_LOG_ERROR("network.opcode", "Received not allowed opcode %u from %s", packet->GetOpcode(), GetPlayerName(false).c_str());
                     break;
                 case STATUS_UNHANDLED:
-                        TC_LOG_ERROR("network.opcode", "Received not handled opcode %s from %s", GetOpcodeNameForLogging(packet->GetOpcode(), WOW_CLIENT).c_str()
-                            , GetPlayerName(false).c_str());
+                        TC_LOG_ERROR("network.opcode", "Received not handled opcode %u from %s", packet->GetOpcode(), GetPlayerName(false).c_str());
                     break;
             }
         }
@@ -410,19 +401,6 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
                     packet->GetOpcode(), GetRemoteAddress().c_str(), GetAccountId());
             packet->hexlike();
         }
-
-        nbPacket++;
-
-        std::map<uint32, OpcodeInfo>::iterator itr = pktHandle.find(packet->GetOpcode());
-        if (itr == pktHandle.end())
-            pktHandle.insert(std::make_pair(packet->GetOpcode(), OpcodeInfo(1, getMSTime() - pktTime)));
-        else
-        {
-            OpcodeInfo& data = (*itr).second;
-            data.nbPkt += 1;
-            data.totalTime += getMSTime() - pktTime;
-        }
-
 
         if (deletePacket)
             delete packet;
@@ -462,14 +440,6 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
 
         if (!m_Socket)
             return false;                                       //Will remove this session from the world session map
-    }
-
-    sessionDiff = getMSTime() - sessionDiff;
-    if (sessionDiff > 50)
-    {
-        TC_LOG_INFO("molten", "Session of account [%u] take more than 50 ms to execute (%u ms)", GetAccountId(), sessionDiff);
-        for (auto itr : pktHandle)
-            TC_LOG_INFO("molten", "-----> %u %s (%u ms)", itr.second.nbPkt, GetOpcodeNameForLogging((Opcodes)itr.first, WOW_CLIENT).c_str(), itr.second.totalTime);
     }
 
     return true;
@@ -620,7 +590,8 @@ void WorldSession::LogoutPlayer(bool Save)
         // e.g if he got disconnected during a transfer to another map
         // calls to GetMap in this case may cause crashes
         _player->CleanupsBeforeDelete();
-        TC_LOG_INFO("entities.player.character", "Account: %d (IP: %s) Logout Character:[%s] (GUID: %u) Level: %d", GetAccountId(), GetRemoteAddress().c_str(), _player->GetName(), _player->GetGUIDLow(), _player->getLevel());
+        TC_LOG_INFO("entities.player.character", "Account: %d (IP: %s) Logout Character:[%s] (GUID: %u) Level: %d",
+                    GetAccountId(), GetRemoteAddress().c_str(), _player->GetName().c_str(), _player->GetGUIDLow(), _player->getLevel());
         if (Map* _map = _player->FindMap())
             _map->RemovePlayerFromMap(_player, true);
 
@@ -699,26 +670,26 @@ const char *WorldSession::GetTrinityString(int32 entry) const
 
 void WorldSession::Handle_NULL(WorldPacket& recvPacket)
 {
-    TC_LOG_ERROR("network.opcode", "Received unhandled opcode %s from %s"
-        , GetOpcodeNameForLogging(recvPacket.GetOpcode(), WOW_CLIENT).c_str(), GetPlayerName(false).c_str());
+    TC_LOG_ERROR("network.opcode", "Received unhandled opcode 0x%04X from %s",
+                 recvPacket.GetOpcode(), GetPlayerName(false).c_str());
 }
 
 void WorldSession::Handle_EarlyProccess(WorldPacket& recvPacket)
 {
-    TC_LOG_ERROR("network.opcode", "Received opcode %s that must be processed in WorldSocket::OnRead from %s"
-        , GetOpcodeNameForLogging(recvPacket.GetOpcode(), WOW_CLIENT).c_str(), GetPlayerName(false).c_str());
+    TC_LOG_ERROR("network.opcode", "Received opcode 0x%04X that must be processed in WorldSocket::OnRead from %s",
+                 recvPacket.GetOpcode(), GetPlayerName(false).c_str());
 }
 
 void WorldSession::Handle_ServerSide(WorldPacket& recvPacket)
 {
-    TC_LOG_ERROR("network.opcode", "Received server-side opcode %s from %s"
-        , GetOpcodeNameForLogging(recvPacket.GetOpcode(), WOW_CLIENT).c_str(), GetPlayerName(false).c_str());
+    TC_LOG_ERROR("network.opcode", "Received server-side opcode 0x%04X from %s",
+                 recvPacket.GetOpcode(), GetPlayerName(false).c_str());
 }
 
 void WorldSession::Handle_Deprecated(WorldPacket& recvPacket)
 {
-    TC_LOG_ERROR("network.opcode", "Received deprecated opcode %s from %s"
-        , GetOpcodeNameForLogging(recvPacket.GetOpcode(), WOW_CLIENT).c_str(), GetPlayerName(false).c_str());
+    TC_LOG_ERROR("network.opcode", "Received deprecated opcode 0x%04X from %s",
+                 recvPacket.GetOpcode(), GetPlayerName(false).c_str());
 }
 
 void WorldSession::SendAuthWaitQue(uint32 position)
@@ -1177,4 +1148,40 @@ void WorldSession::InitWarden(BigNumber* k, std::string os)
         // _warden = new WardenMac();
         // _warden->Init(this, k);
     }
+}
+
+void WorldSession::LoadPermissions()
+{
+    uint32 id = GetAccountId();
+    std::string name;
+    AccountMgr::GetName(id, name);
+    uint8 secLevel = GetSecurity();
+
+    _RBACData = new rbac::RBACData(id, name, realmID, secLevel);
+    _RBACData->LoadFromDB();
+
+    TC_LOG_DEBUG("rbac", "WorldSession::LoadPermissions [AccountId: %u, Name: %s, realmId: %d, secLevel: %u]",
+                 id, name.c_str(), realmID, secLevel);
+}
+
+rbac::RBACData* WorldSession::GetRBACData()
+{
+    return _RBACData;
+}
+
+bool WorldSession::HasPermission(uint32 permission) const
+{
+    bool hasPermission = _RBACData->HasPermission(permission);
+    TC_LOG_DEBUG("rbac", "WorldSession::HasPermission [AccountId: %u, Name: %s, realmId: %d]",
+                 _RBACData->GetId(), _RBACData->GetName().c_str(), realmID);
+
+    return hasPermission;
+}
+
+void WorldSession::ReloadRBACData()
+{
+    TC_LOG_DEBUG("rbac", "WorldSession::Invalidaterbac::RBACData [AccountId: %u, Name: %s, realmId: %d]",
+                 _RBACData->GetId(), _RBACData->GetName().c_str(), realmID);
+    delete _RBACData;
+    LoadPermissions();
 }

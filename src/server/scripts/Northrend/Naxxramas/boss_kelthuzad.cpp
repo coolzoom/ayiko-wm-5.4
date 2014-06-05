@@ -607,19 +607,21 @@ public:
                         case EVENT_DETONATE:
                         {
                             std::vector<Unit*> unitList;
-                            std::list<HostileReference*> *threatList = &me->getThreatManager().getThreatList();
-                            for (std::list<HostileReference*>::const_iterator itr = threatList->begin(); itr != threatList->end(); ++itr)
+                            auto const &threatList = me->getThreatManager().getThreatList();
+                            for (auto itr = threatList.begin(); itr != threatList.end(); ++itr)
                             {
                                 if ((*itr)->getTarget()->GetTypeId() == TYPEID_PLAYER
-                                    && (*itr)->getTarget()->getPowerType() == POWER_MANA
-                                    && (*itr)->getTarget()->GetPower(POWER_MANA))
+                                        && (*itr)->getTarget()->getPowerType() == POWER_MANA
+                                        && (*itr)->getTarget()->GetPower(POWER_MANA))
+                                {
                                     unitList.push_back((*itr)->getTarget());
+                                }
                             }
 
                             if (!unitList.empty())
                             {
                                 std::vector<Unit*>::const_iterator itr = unitList.begin();
-                                advance(itr, rand()%unitList.size());
+                                std::advance(itr, rand()%unitList.size());
                                 DoCast(*itr, SPELL_MANA_DETONATION);
                                 DoScriptText(RAND(SAY_SPECIAL_1, SAY_SPECIAL_2, SAY_SPECIAL_3), me);
                             }

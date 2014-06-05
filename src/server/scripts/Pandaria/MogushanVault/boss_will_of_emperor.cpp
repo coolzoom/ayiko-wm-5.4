@@ -898,9 +898,10 @@ class mob_woe_add_generic : public CreatureScript
                                 GetPlayerListInGrid(playerList, me, 300.0f);
                                 if (!playerList.empty())
                                 {
+                                    auto emoteText(text.str());
                                     for (auto plr : playerList)
                                     {
-                                        plr->MonsterTextEmote(text.str().c_str(), 0, true);
+                                        plr->MonsterTextEmote(emoteText, 0, true);
                                         break;
                                     }
                                 }

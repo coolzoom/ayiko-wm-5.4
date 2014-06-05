@@ -530,13 +530,13 @@ void MotionMaster::MoveTaxiFlight(uint32 path, uint32 pathnode)
         else
         {
             TC_LOG_ERROR("misc", "%s attempt taxi to (not existed Path %u node %u)",
-            _owner->GetName(), path, pathnode);
+                         _owner->GetName().c_str(), path, pathnode);
         }
     }
     else
     {
         TC_LOG_ERROR("misc", "Creature (Entry: %u GUID: %u) attempt taxi to (Path %u node %u)",
-            _owner->GetEntry(), _owner->GetGUIDLow(), path, pathnode);
+                     _owner->GetEntry(), _owner->GetGUIDLow(), path, pathnode);
     }
 }
 

@@ -641,7 +641,7 @@ public:
                 if (Conversation[count].emote)
                     creature->HandleEmoteCommand(Conversation[count].emote); // Make the Creature do some animation!
                 if (Conversation[count].text.size())
-                    creature->MonsterYell(Conversation[count].text.c_str(), LANG_UNIVERSAL, 0); // Have the Creature yell out some text
+                    creature->MonsterYell(Conversation[count].text, LANG_UNIVERSAL, 0); // Have the Creature yell out some text
                 if (Conversation[count].sound)
                     DoPlaySoundToSet(creature, Conversation[count].sound); // Play some sound on the creature
             }
@@ -1030,7 +1030,7 @@ public:
                         uint32 random = rand()%4;
                         uint32 soundid = RandomTaunts[random].sound;
                         if (RandomTaunts[random].text.size())
-                            me->MonsterYell(RandomTaunts[random].text.c_str(), LANG_UNIVERSAL, 0);
+                            me->MonsterYell(RandomTaunts[random].text, LANG_UNIVERSAL, 0);
                         if (soundid)
                             DoPlaySoundToSet(me, soundid);
                     }
@@ -1335,7 +1335,7 @@ public:
                         uint32 random = rand()%4;
                         uint32 sound = MaievTaunts[random].sound;
                         if (MaievTaunts[random].text.size())
-                            me->MonsterYell(MaievTaunts[random].text.c_str(), LANG_UNIVERSAL, 0);
+                            me->MonsterYell(MaievTaunts[random].text, LANG_UNIVERSAL, 0);
                         DoPlaySoundToSet(me, sound);
                         Timer[EVENT_MAIEV_TAUNT] = urand(22, 43) * 1000;
                     }
@@ -1491,15 +1491,15 @@ public:
 
         void KillAllElites()
         {
-            std::list<HostileReference*>& threatList = me->getThreatManager().getThreatList();
+            auto const &threatList = me->getThreatManager().getThreatList();
             std::vector<Unit*> eliteList;
-            for (std::list<HostileReference*>::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+            for (auto itr = threatList.begin(); itr != threatList.end(); ++itr)
             {
                 Unit* unit = Unit::GetUnit(*me, (*itr)->getUnitGuid());
                 if (unit && unit->GetEntry() == ILLIDARI_ELITE)
                     eliteList.push_back(unit);
             }
-            for (std::vector<Unit*>::const_iterator itr = eliteList.begin(); itr != eliteList.end(); ++itr)
+            for (auto itr = eliteList.begin(); itr != eliteList.end(); ++itr)
                 (*itr)->setDeathState(JUST_DIED);
             EnterEvadeMode();
         }

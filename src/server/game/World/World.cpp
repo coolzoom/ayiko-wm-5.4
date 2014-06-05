@@ -80,6 +80,24 @@
 #include "BattlefieldMgr.h"
 #include "BlackMarketMgr.h"
 
+namespace {
+
+void createXML(uint32 activeClientsNum, uint32 queuedClientsNum, std::string const &upTime)
+{
+    FILE* pxmlFile;
+    pxmlFile = fopen("stats.xml", "w");
+    if (pxmlFile != NULL)
+    {
+        fprintf(pxmlFile, "<?xml version='1.0' encoding='utf-8' ?>"
+                "<root><activeClientsNum>%d</activeClientsNum><queuedClientsNum>%d</queuedClientsNum><upTime>%s</upTime></root>",
+                activeClientsNum, queuedClientsNum, upTime.c_str());
+        fflush(pxmlFile);
+        fclose(pxmlFile);
+    }
+}
+
+} // namespace
+
 ACE_Atomic_Op<ACE_Thread_Mutex, bool> World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
 ACE_Atomic_Op<ACE_Thread_Mutex, uint32> World::m_worldLoopCounter = 0;
@@ -118,15 +136,13 @@ World::World()
     m_defaultDbcLocale = LOCALE_enUS;
     m_availableDbcLocaleMask = 0;
 
+    m_updateTimeAverage = 0;
     m_updateTimeSum = 0;
     m_updateTimeCount = 0;
 
     m_isClosed = false;
 
     m_CleaningFlags = 0;
-
-    for (uint8 i = 0; i < RECORD_DIFF_MAX; i++)
-        m_recordDiff[i] = 0;
 }
 
 /// World destructor
@@ -294,7 +310,7 @@ void World::AddSession_(WorldSession* s)
     if (decrease_session)
         --Sessions;
 
-    if (pLimit > 0 && Sessions >= pLimit && AccountMgr::IsPlayerAccount(s->GetSecurity()) && !HasRecentlyDisconnected(s))
+    if (pLimit > 0 && Sessions >= pLimit && !s->HasPermission(rbac::RBAC_PERM_SKIP_QUEUE) && !HasRecentlyDisconnected(s))
     {
         AddQueuedPlayer (s);
         UpdateMaxSessionCounters();
@@ -304,7 +320,7 @@ void World::AddSession_(WorldSession* s)
 
     s->SendAuthResponse(AUTH_OK, false);
     s->SendAddonsInfo();
-    s->SendClientCacheVersion(sWorld->getIntConfig(CONFIG_CLIENTCACHE_VERSION));
+    s->SendClientCacheVersion(getIntConfig(CONFIG_CLIENTCACHE_VERSION));
     s->SendTutorialsData();
 
     UpdateMaxSessionCounters();
@@ -400,7 +416,7 @@ bool World::RemoveQueuedPlayer(WorldSession* sess)
         pop_sess->SendAuthWaitQue(0);
         pop_sess->SendAddonsInfo();
 
-        pop_sess->SendClientCacheVersion(sWorld->getIntConfig(CONFIG_CLIENTCACHE_VERSION));
+        pop_sess->SendClientCacheVersion(getIntConfig(CONFIG_CLIENTCACHE_VERSION));
         pop_sess->SendAccountDataTimes(GLOBAL_CACHE_MASK);
         pop_sess->SendTutorialsData();
 
@@ -611,6 +627,9 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_CHAT_CHANNEL_LEVEL_REQ] = sConfigMgr->GetIntDefault("ChatLevelReq.Channel", 1);
     m_int_configs[CONFIG_CHAT_WHISPER_LEVEL_REQ] = sConfigMgr->GetIntDefault("ChatLevelReq.Whisper", 1);
     m_int_configs[CONFIG_CHAT_SAY_LEVEL_REQ] = sConfigMgr->GetIntDefault("ChatLevelReq.Say", 1);
+    m_int_configs[CONFIG_CHAT_CHANNEL_PLAYED_TIME_REQ] = sConfigMgr->GetIntDefault("ChatPlayedTimeReq.Channel", 0);
+    m_int_configs[CONFIG_CHAT_WHISPER_PLAYED_TIME_REQ] = sConfigMgr->GetIntDefault("ChatPlayedTimeReq.Whisper", 0);
+    m_int_configs[CONFIG_CHAT_YELL_PLAYED_TIME_REQ] = sConfigMgr->GetIntDefault("ChatPlayedTimeReq.Yell", 0);
     m_int_configs[CONFIG_TRADE_LEVEL_REQ] = sConfigMgr->GetIntDefault("LevelReq.Trade", 1);
     m_int_configs[CONFIG_TICKET_LEVEL_REQ] = sConfigMgr->GetIntDefault("LevelReq.Ticket", 1);
     m_int_configs[CONFIG_AUCTION_LEVEL_REQ] = sConfigMgr->GetIntDefault("LevelReq.Auction", 1);
@@ -1079,8 +1098,6 @@ void World::LoadConfigSettings(bool reload)
     m_float_configs[CONFIG_LISTEN_RANGE_YELL]      = sConfigMgr->GetFloatDefault("ListenRange.Yell", 300.0f);
 
     m_bool_configs[CONFIG_BATTLEGROUND_CAST_DESERTER]                = sConfigMgr->GetBoolDefault("Battleground.CastDeserter", true);
-    m_bool_configs[CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_ENABLE]       = sConfigMgr->GetBoolDefault("Battleground.QueueAnnouncer.Enable", false);
-    m_bool_configs[CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_PLAYERONLY]   = sConfigMgr->GetBoolDefault("Battleground.QueueAnnouncer.PlayerOnly", false);
     m_int_configs[CONFIG_BATTLEGROUND_INVITATION_TYPE]               = sConfigMgr->GetIntDefault ("Battleground.InvitationType", 0);
     m_int_configs[CONFIG_BATTLEGROUND_PREMATURE_FINISH_TIMER]        = sConfigMgr->GetIntDefault ("Battleground.PrematureFinishTimer", 5 * MINUTE * IN_MILLISECONDS);
     m_int_configs[CONFIG_BATTLEGROUND_PREMADE_GROUP_WAIT_FOR_MATCH]  = sConfigMgr->GetIntDefault ("Battleground.PremadeGroupWaitForMatch", 30 * MINUTE * IN_MILLISECONDS);
@@ -1124,10 +1141,10 @@ void World::LoadConfigSettings(bool reload)
 
     //visibility on continents
     m_MaxVisibleDistanceOnContinents = sConfigMgr->GetFloatDefault("Visibility.Distance.Continents", DEFAULT_VISIBILITY_DISTANCE);
-    if (m_MaxVisibleDistanceOnContinents < 45*sWorld->getRate(RATE_CREATURE_AGGRO))
+    if (m_MaxVisibleDistanceOnContinents < 45*getRate(RATE_CREATURE_AGGRO))
     {
-        TC_LOG_ERROR("server.loading", "Visibility.Distance.Continents can't be less max aggro radius %f", 45*sWorld->getRate(RATE_CREATURE_AGGRO));
-        m_MaxVisibleDistanceOnContinents = 45*sWorld->getRate(RATE_CREATURE_AGGRO);
+        TC_LOG_ERROR("server.loading", "Visibility.Distance.Continents can't be less max aggro radius %f", 45*getRate(RATE_CREATURE_AGGRO));
+        m_MaxVisibleDistanceOnContinents = 45*getRate(RATE_CREATURE_AGGRO);
     }
     else if (m_MaxVisibleDistanceOnContinents > MAX_VISIBILITY_DISTANCE)
     {
@@ -1140,10 +1157,10 @@ void World::LoadConfigSettings(bool reload)
 
     //visibility in instances
     m_MaxVisibleDistanceInInstances = sConfigMgr->GetFloatDefault("Visibility.Distance.Instances", DEFAULT_VISIBILITY_INSTANCE);
-    if (m_MaxVisibleDistanceInInstances < 45*sWorld->getRate(RATE_CREATURE_AGGRO))
+    if (m_MaxVisibleDistanceInInstances < 45*getRate(RATE_CREATURE_AGGRO))
     {
-        TC_LOG_ERROR("server.loading", "Visibility.Distance.Instances can't be less max aggro radius %f", 45*sWorld->getRate(RATE_CREATURE_AGGRO));
-        m_MaxVisibleDistanceInInstances = 45*sWorld->getRate(RATE_CREATURE_AGGRO);
+        TC_LOG_ERROR("server.loading", "Visibility.Distance.Instances can't be less max aggro radius %f", 45*getRate(RATE_CREATURE_AGGRO));
+        m_MaxVisibleDistanceInInstances = 45*getRate(RATE_CREATURE_AGGRO);
     }
     else if (m_MaxVisibleDistanceInInstances > MAX_VISIBILITY_DISTANCE)
     {
@@ -1153,10 +1170,10 @@ void World::LoadConfigSettings(bool reload)
 
     //visibility in BG
     m_MaxVisibleDistanceInBG = sConfigMgr->GetFloatDefault("Visibility.Distance.BG", DEFAULT_VISIBILITY_BGARENAS);
-    if (m_MaxVisibleDistanceInBG < 45 * sWorld->getRate(RATE_CREATURE_AGGRO))
+    if (m_MaxVisibleDistanceInBG < 45 * getRate(RATE_CREATURE_AGGRO))
     {
-        TC_LOG_ERROR("server.loading", "Visibility.Distance.BG can't be less max aggro radius %f", 45*sWorld->getRate(RATE_CREATURE_AGGRO));
-        m_MaxVisibleDistanceInBG = 45 * sWorld->getRate(RATE_CREATURE_AGGRO);
+        TC_LOG_ERROR("server.loading", "Visibility.Distance.BG can't be less max aggro radius %f", 45*getRate(RATE_CREATURE_AGGRO));
+        m_MaxVisibleDistanceInBG = 45 * getRate(RATE_CREATURE_AGGRO);
     }
     else if (m_MaxVisibleDistanceInBG > MAX_VISIBILITY_DISTANCE)
     {
@@ -1166,10 +1183,10 @@ void World::LoadConfigSettings(bool reload)
 
     //visibility in Arenas
     m_MaxVisibleDistanceInArenas = sConfigMgr->GetFloatDefault("Visibility.Distance.Arenas", DEFAULT_VISIBILITY_BGARENAS);
-    if (m_MaxVisibleDistanceInArenas < 45 * sWorld->getRate(RATE_CREATURE_AGGRO))
+    if (m_MaxVisibleDistanceInArenas < 45 * getRate(RATE_CREATURE_AGGRO))
     {
-        TC_LOG_ERROR("server.loading", "Visibility.Distance.Arenas can't be less max aggro radius %f", 45*sWorld->getRate(RATE_CREATURE_AGGRO));
-        m_MaxVisibleDistanceInArenas = 45 * sWorld->getRate(RATE_CREATURE_AGGRO);
+        TC_LOG_ERROR("server.loading", "Visibility.Distance.Arenas can't be less max aggro radius %f", 45*getRate(RATE_CREATURE_AGGRO));
+        m_MaxVisibleDistanceInArenas = 45 * getRate(RATE_CREATURE_AGGRO);
     }
     else if (m_MaxVisibleDistanceInArenas > MAX_VISIBILITY_DISTANCE)
     {
@@ -1268,14 +1285,15 @@ void World::LoadConfigSettings(bool reload)
     // DBC_ItemAttributes
     m_bool_configs[CONFIG_DBC_ENFORCE_ITEM_ATTRIBUTES] = sConfigMgr->GetBoolDefault("DBC.EnforceItemAttributes", true);
 
+    // Accountpassword Secruity
+    m_int_configs[CONFIG_ACC_PASSCHANGESEC] = sConfigMgr->GetIntDefault("Account.PasswordChangeSecurity", 0);
+
     // Max instances per hour
     m_int_configs[CONFIG_MAX_INSTANCES_PER_HOUR] = sConfigMgr->GetIntDefault("AccountInstancesPerHour", 5);
 
     // AutoBroadcast
     m_bool_configs[CONFIG_AUTOBROADCAST] = sConfigMgr->GetBoolDefault("AutoBroadcast.On", false);
-    m_int_configs[CONFIG_AUTOBROADCAST_CENTER] = sConfigMgr->GetIntDefault("AutoBroadcast.Center", 0);
     m_int_configs[CONFIG_AUTOBROADCAST_INTERVAL] = sConfigMgr->GetIntDefault("AutoBroadcast.Timer", 60000);
-
     if (reload)
     {
         m_timers[WUPDATE_AUTOBROADCAST].SetInterval(m_int_configs[CONFIG_AUTOBROADCAST_INTERVAL]);
@@ -1319,6 +1337,8 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_WINTERGRASP_NOBATTLETIME] = sConfigMgr->GetIntDefault("Wintergrasp.NoBattleTimer", 150);
     m_int_configs[CONFIG_WINTERGRASP_RESTART_AFTER_CRASH] = sConfigMgr->GetIntDefault("Wintergrasp.CrashRestartTimer", 10);
 
+    m_int_configs[CONFIG_WHO_OPCODE_INTERVAL] = sConfigMgr->GetIntDefault("WhoOpcodeInterval", 15);
+
     // Stats limits
     m_bool_configs[CONFIG_STATS_LIMITS_ENABLE] = sConfigMgr->GetBoolDefault("Stats.Limits.Enable", false);
     m_float_configs[CONFIG_STATS_LIMITS_DODGE] = sConfigMgr->GetFloatDefault("Stats.Limits.Dodge", 95.0f);
@@ -1335,11 +1355,6 @@ void World::LoadConfigSettings(bool reload)
     // Announce server for a ban
     m_bool_configs[CONFIG_ANNOUNCE_BAN] = sConfigMgr->GetBoolDefault("AnnounceBan", false);
     m_bool_configs[CONFIG_ANNOUNCE_MUTE] = sConfigMgr->GetBoolDefault("AnnounceMute", false);
-
-    // Mail Antispam
-    m_bool_configs[CONFIG_ANTISPAM_ENABLED] = sConfigMgr->GetBoolDefault("Antispam.Mail.Enabled", false);
-    m_int_configs[CONFIG_ANTISPAM_MAIL_TIMER] = sConfigMgr->GetIntDefault("Antispam.Mail.Timer", 3600) * IN_MILLISECONDS;
-    m_int_configs[CONFIG_ANTISPAM_MAIL_COUNT] = sConfigMgr->GetIntDefault("Antispam.Mail.Count", 10);
 
     if (reload)
         sScriptMgr->OnConfigLoad(reload);
@@ -1463,6 +1478,8 @@ void World::SetInitialWorldSettings()
     sObjectMgr->SetDBCLocaleIndex(GetDefaultDbcLocale());        // Get once for all the locale index of DBC language (console/broadcasts)
     TC_LOG_INFO("server.loading", ">> Localization strings loaded in %u ms", GetMSTimeDiffToNow(oldMSTime));
 
+    TC_LOG_INFO("server.loading", "Loading Account Roles and Permissions...");
+    sAccountMgr->LoadRBAC();
 
     TC_LOG_INFO("server.loading", "Loading Page Texts...");
     sObjectMgr->LoadPageTexts();
@@ -1701,13 +1718,14 @@ void World::SetInitialWorldSettings()
     TC_LOG_INFO("server.loading", "Loading Completed Achievements...");
     sAchievementMgr->LoadCompletedAchievements();
 
+    ///- Load dynamic data tables from the database
+    TC_LOG_INFO("server.loading", "Loading Item Auctions...");
+    sAuctionMgr->LoadAuctionItems();
+
     // Delete expired auctions before loading
     TC_LOG_INFO("server.loading", "Deleting expired auctions...");
     sAuctionMgr->DeleteExpiredAuctionsAtStartup();
 
-    ///- Load dynamic data tables from the database
-    TC_LOG_INFO("server.loading", "Loading Item Auctions...");
-    sAuctionMgr->LoadAuctionItems();
     TC_LOG_INFO("server.loading", "Loading Auctions...");
     sAuctionMgr->LoadAuctions();
 
@@ -1848,20 +1866,27 @@ void World::SetInitialWorldSettings()
     m_timers[WUPDATE_CLEANDB].SetInterval(m_int_configs[CONFIG_LOGDB_CLEARINTERVAL]*MINUTE*IN_MILLISECONDS);
                                                             // clean logs table every 14 days by default
     m_timers[WUPDATE_AUTOBROADCAST].SetInterval(getIntConfig(CONFIG_AUTOBROADCAST_INTERVAL));
+    m_timers[WUPDATE_MAILBOXQUEUE].SetInterval(2 * MINUTE * IN_MILLISECONDS);
     m_timers[WUPDATE_DELETECHARS].SetInterval(DAY*IN_MILLISECONDS); // check for chars to delete every day
 
     m_timers[WUPDATE_GUILDSAVE].SetInterval(getIntConfig(CONFIG_GUILD_SAVE_INTERVAL) * MINUTE * IN_MILLISECONDS);
 
     m_timers[WUPDATE_BLACKMARKET].SetInterval(MINUTE * IN_MILLISECONDS);
 
-    //to set mailtimer to return mails every day between 4 and 5 am
-    //mailtimer is increased when updating auctions
-    //one second is 1000 -(tested on win system)
-    //TODO: Get rid of magic numbers
-    mail_timer = ((((localtime(&m_gameTime)->tm_hour + 20) % 24)* HOUR * IN_MILLISECONDS) / m_timers[WUPDATE_AUCTIONS].GetInterval());
-                                                            //1440
-    mail_timer_expires = ((DAY * IN_MILLISECONDS) / (m_timers[WUPDATE_AUCTIONS].GetInterval()));
-    TC_LOG_INFO("server.loading", "Mail timer set to: " UI64FMTD ", mail return is called every " UI64FMTD " minutes", uint64(mail_timer), uint64(mail_timer_expires));
+    // return mails every day at 4:30 am
+    {
+        m_timers[WUPDATE_MAILRETURN].SetInterval(DAY * IN_MILLISECONDS);
+
+        time_t resetAt = 4 * HOUR + 30 * MINUTE;
+        tm const* loc = localtime(&m_gameTime);
+        time_t current = loc->tm_hour * HOUR + loc->tm_min * MINUTE + loc->tm_sec;
+
+        time_t remaining = resetAt - current + (resetAt < current ? DAY : 0);
+
+        m_timers[WUPDATE_MAILRETURN].SetCurrent((DAY - remaining) * IN_MILLISECONDS);
+    }
+
+    m_timers[WUPDATE_BANS].SetInterval(5 * MINUTE * IN_MILLISECONDS);
 
     ///- Initilize static helper structures
     AIRegistry::Initialize();
@@ -2017,44 +2042,22 @@ void World::DetectDBCLang()
     TC_LOG_INFO("server.loading", "Using %s DBC Locale", localeNames[m_defaultDbcLocale]);
 }
 
-void World::RecordTimeDiff(const char *text, ...)
-{
-    if (m_updateTimeCount != 1)
-        return;
-    if (!text)
-    {
-        m_currentTime = getMSTime();
-        return;
-    }
-
-    uint32 thisTime = getMSTime();
-    uint32 diff = getMSTimeDiff(m_currentTime, thisTime);
-
-    if (diff > m_int_configs[CONFIG_MIN_LOG_UPDATE])
-    {
-        va_list ap;
-        char str[256];
-        va_start(ap, text);
-        vsnprintf(str, 256, text, ap);
-        va_end(ap);
-        TC_LOG_INFO("misc", "Difftime %s: %u.", str, diff);
-    }
-
-    m_currentTime = thisTime;
-}
-
 void World::LoadAutobroadcasts()
 {
     uint32 oldMSTime = getMSTime();
 
-    m_Autobroadcasts.clear();
+    m_autoBroadcasts.clear();
+    m_autoBroadcastIdx = 0;
 
-    QueryResult result = CharacterDatabase.Query("SELECT text FROM autobroadcast");
+    auto result = WorldDatabase.Query("SELECT content_default, content_loc1, content_loc2,"
+                                      " content_loc3, content_loc4, content_loc5, content_loc6,"
+                                      " content_loc7, content_loc8, content_loc9, content_loc10"
+                                      " FROM autobroadcast ORDER BY RAND()");
 
     if (!result)
     {
+        m_bool_configs[CONFIG_AUTOBROADCAST] = false;
         TC_LOG_INFO("server.loading", ">> Loaded 0 autobroadcasts definitions. DB table `autobroadcast` is empty!");
-
         return;
     }
 
@@ -2062,37 +2065,40 @@ void World::LoadAutobroadcasts()
 
     do
     {
-
         Field* fields = result->Fetch();
-        std::string message = fields[0].GetString();
 
-        m_Autobroadcasts.push_back(message);
+        BroadcastStringLocale data;
+        data.Content.resize(1);
+
+        for (uint8 i = 0; i < TOTAL_LOCALES; ++i)
+        {
+            std::string announcement = fields[i].GetString();
+            ObjectMgr::AddLocaleString(announcement, LocaleConstant(i), data.Content);
+        }
+
+        m_autoBroadcasts.push_back(data);
 
         ++count;
-    }
-    while (result->NextRow());
+    } while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u autobroadcasts definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-
+    TC_LOG_INFO("server.loading", ">> Loaded %u autobroadcast definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 /// Update the World !
 void World::Update(uint32 diff)
 {
-    m_updateTime = diff;
+    m_updateTimeLast = diff;
 
-    if (m_int_configs[CONFIG_INTERVAL_LOG_UPDATE] && diff > m_int_configs[CONFIG_MIN_LOG_UPDATE])
+    m_updateTimeSum += diff;
+    ++m_updateTimeCount;
+
     {
-        if (m_updateTimeSum > m_int_configs[CONFIG_INTERVAL_LOG_UPDATE])
+        uint32 const interval = m_int_configs[CONFIG_INTERVAL_LOG_UPDATE];
+        if (interval && m_updateTimeSum >= interval)
         {
-            TC_LOG_DEBUG("misc", "Update time diff: %u. Players online: %u.", m_updateTimeSum / m_updateTimeCount, GetActiveSessionCount());
-            m_updateTimeSum = m_updateTime;
-            m_updateTimeCount = 1;
-        }
-        else
-        {
-            m_updateTimeSum += m_updateTime;
-            ++m_updateTimeCount;
+            m_updateTimeAverage = m_updateTimeSum / m_updateTimeCount;
+            m_updateTimeSum = 0;
+            m_updateTimeCount = 0;
         }
     }
 
@@ -2142,28 +2148,24 @@ void World::Update(uint32 diff)
     {
         m_timers[WUPDATE_AUCTIONS].Reset();
 
-        ///- Update mails (return old mails with item, or delete them)
-        //(tested... works on win)
-        if (++mail_timer > mail_timer_expires)
-        {
-            mail_timer = 0;
-            sObjectMgr->ReturnOrDeleteOldMails(true);
-        }
+        //Save world active sessions count and uptime to XML file on filesystem
+        uint32 activeClientsNum = GetActiveSessionCount();
+        uint32 queuedClientsNum = GetQueuedSessionCount();
+
+        createXML(activeClientsNum, queuedClientsNum, secsToTimeString(GetUptime()));
 
         ///- Handle expired auctions
         sAuctionMgr->Update();
     }
 
-    uint32 diffTime = getMSTime();
+    /// <li> Return or delete old mails when the timer has passed
+    if (m_timers[WUPDATE_MAILRETURN].Passed())
+    {
+        m_timers[WUPDATE_MAILRETURN].Reset();
+        sObjectMgr->ReturnOrDeleteOldMails(true);
+    }
 
-    /// <li> Handle session updates when the timer has passed
-    RecordTimeDiff(NULL);
     UpdateSessions(diff);
-
-    SetRecordDiff(RECORD_DIFF_SESSION, getMSTime() - diffTime);
-    diffTime = getMSTime();
-
-    RecordTimeDiff("UpdateSessions");
 
     /// <li> Handle weather updates when the timer has passed
     if (m_timers[WUPDATE_WEATHERS].Passed())
@@ -2191,7 +2193,7 @@ void World::Update(uint32 diff)
     }
 
     /// <li> Clean logs table
-    if (sWorld->getIntConfig(CONFIG_LOGDB_CLEARTIME) > 0) // if not enabled, ignore the timer
+    if (getIntConfig(CONFIG_LOGDB_CLEARTIME) > 0) // if not enabled, ignore the timer
     {
         if (m_timers[WUPDATE_CLEANDB].Passed())
         {
@@ -2199,7 +2201,7 @@ void World::Update(uint32 diff)
 
             PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_DEL_OLD_LOGS);
 
-            stmt->setUInt32(0, sWorld->getIntConfig(CONFIG_LOGDB_CLEARTIME));
+            stmt->setUInt32(0, getIntConfig(CONFIG_LOGDB_CLEARTIME));
             stmt->setUInt32(1, uint32(time(0)));
 
             LoginDatabase.Execute(stmt);
@@ -2208,14 +2210,9 @@ void World::Update(uint32 diff)
 
     /// <li> Handle all other objects
     ///- Update objects when the timer has passed (maps, transport, creatures, ...)
-    RecordTimeDiff(NULL);
     sMapMgr->Update(diff);
 
-    SetRecordDiff(RECORD_DIFF_MAP, getMSTime() - diffTime);
-    diffTime = getMSTime();
-    RecordTimeDiff("UpdateMapMgr");
-
-    if (sWorld->getBoolConfig(CONFIG_AUTOBROADCAST))
+    if (getBoolConfig(CONFIG_AUTOBROADCAST))
     {
         if (m_timers[WUPDATE_AUTOBROADCAST].Passed())
         {
@@ -2225,19 +2222,10 @@ void World::Update(uint32 diff)
     }
 
     sBattlegroundMgr->Update(diff);
-    SetRecordDiff(RECORD_DIFF_BATTLEGROUND, getMSTime() - diffTime);
-    diffTime = getMSTime();
-    RecordTimeDiff("UpdateBattlegroundMgr");
 
     sOutdoorPvPMgr->Update(diff);
-    SetRecordDiff(RECORD_DIFF_OUTDOORPVP, getMSTime() - diffTime);
-    diffTime = getMSTime();
-    RecordTimeDiff("UpdateOutdoorPvPMgr");
 
     sBattlefieldMgr->Update(diff);
-    SetRecordDiff(RECORD_DIFF_BATTLEFIELD, getMSTime() - diffTime);
-    diffTime = getMSTime();
-    RecordTimeDiff("BattlefieldMgr");
 
     ///- Delete all characters which have been deleted X days before
     if (m_timers[WUPDATE_DELETECHARS].Passed())
@@ -2247,15 +2235,9 @@ void World::Update(uint32 diff)
     }
 
     sLFGMgr->Update(diff);
-    SetRecordDiff(RECORD_DIFF_LFG, getMSTime() - diffTime);
-    diffTime = getMSTime();
-    RecordTimeDiff("UpdateLFGMgr");
 
     // execute callbacks from sql queries that were queued recently
     ProcessQueryCallbacks();
-    SetRecordDiff(RECORD_DIFF_CALLBACK, getMSTime() - diffTime);
-    diffTime = getMSTime();
-    RecordTimeDiff("ProcessQueryCallbacks");
 
     ///- Erase corpses once every 20 minutes
     if (m_timers[WUPDATE_CORPSES].Passed())
@@ -2284,6 +2266,15 @@ void World::Update(uint32 diff)
     {
         m_timers[WUPDATE_BLACKMARKET].Reset();
         sBlackMarketMgr->Update();
+    }
+
+    if (m_timers[WUPDATE_BANS].Passed())
+    {
+        m_timers[WUPDATE_BANS].Reset();
+
+        SQLTransaction trans = CharacterDatabase.BeginTransaction();
+        trans->Append(CharacterDatabase.GetPreparedStatement(CHAR_DEL_EXPIRED_BANS));
+        CharacterDatabase.CommitTransaction(trans);
     }
 
     // update the instance reset times
@@ -2326,62 +2317,96 @@ void World::SendGlobalGMMessage(WorldPacket* packet, WorldSession* self, uint32 
     SessionMap::iterator itr;
     for (itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
     {
-        if (itr->second &&
-            itr->second->GetPlayer() &&
-            itr->second->GetPlayer()->IsInWorld() &&
-            itr->second != self &&
-            !AccountMgr::IsPlayerAccount(itr->second->GetSecurity()) &&
-            (team == 0 || itr->second->GetPlayer()->GetTeam() == team))
-        {
-            itr->second->SendPacket(packet);
-        }
+        // check if session and can receive global GM Messages and its not self
+        WorldSession* session = itr->second;
+        if (!session || session == self || !session->HasPermission(rbac::RBAC_PERM_RECEIVE_GLOBAL_GM_TEXTMESSAGE))
+            continue;
+
+        // Player should be in world
+        Player* player = session->GetPlayer();
+        if (!player || !player->IsInWorld())
+            continue;
+
+        // Send only to same team, if team is given
+        if (!team || player->GetTeam() == team)
+            session->SendPacket(packet);
     }
 }
 
-namespace Trinity
+namespace Trinity {
+
+class BaseTextBuilder
 {
-    class WorldWorldTextBuilder
+protected:
+    typedef std::vector<WorldPacket*> WorldPacketList;
+
+    BaseTextBuilder() { }
+
+    void do_helper(WorldPacketList &data_list, char *text)
     {
-        public:
-            typedef std::vector<WorldPacket*> WorldPacketList;
-            explicit WorldWorldTextBuilder(int32 textId, va_list* args = NULL) : i_textId(textId), i_args(args) {}
-            void operator()(WorldPacketList& data_list, LocaleConstant loc_idx)
-            {
-                char const* text = sObjectMgr->GetTrinityString(i_textId, loc_idx);
+        while (char *line = ACE_OS::strtok_r(NULL, "\n", &text))
+        {
+            WorldPacket* data = new WorldPacket();
+            ChatHandler::FillMessageData(data, NULL, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, NULL, 0, line, NULL);
+            data_list.push_back(data);
+        }
+    }
+};
 
-                if (i_args)
-                {
-                    // we need copy va_list before use or original va_list will corrupted
-                    va_list ap;
-                    va_copy(ap, *i_args);
+class BroadcastTextBuilder
+    : private BaseTextBuilder
+{
+public:
+    explicit BroadcastTextBuilder(uint32 announce_id)
+        : announce_id_(announce_id)
+    { }
 
-                    char str[2048];
-                    vsnprintf(str, 2048, text, ap);
-                    va_end(ap);
+    void operator()(WorldPacketList &data_list, LocaleConstant loc_idx)
+    {
+        char *text = ACE_OS::strdup(sWorld->GetBroadcastString(announce_id_, loc_idx));
+        do_helper(data_list, text);
+        ACE_OS::free(text);
+    }
 
-                    do_helper(data_list, &str[0]);
-                }
-                else
-                    do_helper(data_list, (char*)text);
-            }
-        private:
-            char* lineFromMessage(char*& pos) { char* start = strtok(pos, "\n"); pos = NULL; return start; }
-            void do_helper(WorldPacketList& data_list, char* text)
-            {
-                char* pos = text;
+private:
+    uint32 announce_id_;
+};
 
-                while (char* line = lineFromMessage(pos))
-                {
-                    WorldPacket* data = new WorldPacket();
-                    ChatHandler::FillMessageData(data, NULL, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, NULL, 0, line, NULL);
-                    data_list.push_back(data);
-                }
-            }
+class WorldTextBuilder
+    : private BaseTextBuilder
+{
+public:
+    explicit WorldTextBuilder(int32 textId, va_list *args = NULL)
+        : i_textId(textId), i_args(args)
+    { }
 
-            int32 i_textId;
-            va_list* i_args;
-    };
-}                                                           // namespace Trinity
+    void operator()(WorldPacketList& data_list, LocaleConstant loc_idx)
+    {
+        char *text = ACE_OS::strdup(sObjectMgr->GetTrinityString(i_textId, loc_idx));
+
+        if (i_args)
+        {
+            // we need copy va_list before use or original va_list will corrupted
+            va_list ap;
+            va_copy(ap, *i_args);
+
+            char str[2048];
+            vsnprintf(str, 2048, text, ap);
+            va_end(ap);
+
+            do_helper(data_list, str);
+        }
+        else
+            do_helper(data_list, text);
+
+        ACE_OS::free(text);
+    }
+private:
+    int32 i_textId;
+    va_list* i_args;
+};
+
+} // namespace Trinity
 
 /// Send a System Message to all players (except self if mentioned)
 void World::SendWorldText(int32 string_id, ...)
@@ -2389,8 +2414,8 @@ void World::SendWorldText(int32 string_id, ...)
     va_list ap;
     va_start(ap, string_id);
 
-    Trinity::WorldWorldTextBuilder wt_builder(string_id, &ap);
-    Trinity::LocalizedPacketListDo<Trinity::WorldWorldTextBuilder> wt_do(wt_builder);
+    Trinity::WorldTextBuilder wt_builder(string_id, &ap);
+    Trinity::LocalizedPacketListDo<Trinity::WorldTextBuilder> wt_do(wt_builder);
     for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
     {
         if (!itr->second || !itr->second->GetPlayer() || !itr->second->GetPlayer()->IsInWorld())
@@ -2408,17 +2433,21 @@ void World::SendGMText(int32 string_id, ...)
     va_list ap;
     va_start(ap, string_id);
 
-    Trinity::WorldWorldTextBuilder wt_builder(string_id, &ap);
-    Trinity::LocalizedPacketListDo<Trinity::WorldWorldTextBuilder> wt_do(wt_builder);
+    Trinity::WorldTextBuilder wt_builder(string_id, &ap);
+    Trinity::LocalizedPacketListDo<Trinity::WorldTextBuilder> wt_do(wt_builder);
     for (SessionMap::iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
     {
-        if (!itr->second || !itr->second->GetPlayer() || !itr->second->GetPlayer()->IsInWorld())
+        // Session should have permissions to receive global gm messages
+        WorldSession* session = itr->second;
+        if (!session || !session->HasPermission(rbac::RBAC_PERM_RECEIVE_GLOBAL_GM_TEXTMESSAGE))
             continue;
 
-        if (AccountMgr::IsPlayerAccount(itr->second->GetSecurity()))
+        // Player should be in world
+        Player* player = session->GetPlayer();
+        if (!player || !player->IsInWorld())
             continue;
 
-        wt_do(itr->second->GetPlayer());
+        wt_do(player);
     }
 
     va_end(ap);
@@ -2488,12 +2517,17 @@ void World::KickAllLess(AccountTypes sec)
 }
 
 /// Ban an account or ban an IP address, duration will be parsed using TimeStringToSecs if it is positive, otherwise permban
-BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, std::string duration, std::string reason, std::string author)
+BanReturn World::BanAccount(BanMode mode, std::string const& nameOrIP, std::string const& duration, std::string const& reason, std::string const& author)
 {
     uint32 duration_secs = TimeStringToSecs(duration);
-    PreparedQueryResult resultAccounts = PreparedQueryResult(NULL); //used for kicking
+    return BanAccount(mode, nameOrIP, duration_secs, reason, author);
+}
+
+/// Ban an account or ban an IP address, duration is in seconds if positive, otherwise permban
+BanReturn World::BanAccount(BanMode mode, std::string const& nameOrIP, uint32 duration_secs, std::string const& reason, std::string const& author)
+{
+    PreparedQueryResult resultAccounts;
     PreparedStatement* stmt = NULL;
-    PreparedStatement* stmtt = NULL;
 
     ///- Update the database with ban information
     switch (mode)
@@ -2543,39 +2577,8 @@ BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, std::string dura
 
         if (mode != BAN_IP)
         {
-            // Check account already banned
-
-            if (duration != "-1")
-            {
-                // temp banned
-                stmtt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_ALWAYS_BANNED);
-                stmtt->setUInt32(0, account);
-                PreparedQueryResult resultCheck = LoginDatabase.Query(stmtt);
-
-                if (resultCheck)
-                {
-                    Field* fieldsCheck = resultCheck->Fetch();
-                    uint32 timeRemaining = fieldsCheck[0].GetUInt32();
-                    if (timeRemaining > duration_secs)
-                    {
-                         return BAN_TOO_SMALL;
-                    }
-                }
-
-
-                //Permanent ban
-                stmtt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_BANNED);
-                stmtt->setUInt32(0, account);
-                PreparedQueryResult resultCheckBan = LoginDatabase.Query(stmtt);
-
-                if (resultCheckBan)
-                {
-                    return BAN_ALREADY_PERMANENT;
-                }
-            }
-
             // make sure there is only one active ban
-            stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_ACCOUNT_NOT_BANNED);
+            stmt = LoginDatabase.GetPreparedStatement(LOGIN_DEL_ACCOUNT_BANNED);
             stmt->setUInt32(0, account);
             trans->Append(stmt);
             // No SQL injection with prepared statements
@@ -2590,9 +2593,7 @@ BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, std::string dura
         if (WorldSession* sess = FindSession(account))
             if (std::string(sess->GetPlayerName()) != author)
                 sess->KickPlayer();
-    }
-    while
-        (resultAccounts->NextRow());
+    } while (resultAccounts->NextRow());
 
     LoginDatabase.CommitTransaction(trans);
 
@@ -2600,7 +2601,7 @@ BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, std::string dura
 }
 
 /// Remove a ban from an account or IP address
-bool World::RemoveBanAccount(BanMode mode, std::string nameOrIP)
+bool World::RemoveBanAccount(BanMode mode, std::string const& nameOrIP)
 {
     PreparedStatement* stmt = NULL;
     if (mode == BAN_IP)
@@ -2621,7 +2622,7 @@ bool World::RemoveBanAccount(BanMode mode, std::string nameOrIP)
             return false;
 
         //NO SQL injection as account is uint32
-        stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_ACCOUNT_NOT_BANNED);
+        stmt = LoginDatabase.GetPreparedStatement(LOGIN_DEL_ACCOUNT_BANNED);
         stmt->setUInt32(0, account);
         LoginDatabase.Execute(stmt);
     }
@@ -2629,9 +2630,9 @@ bool World::RemoveBanAccount(BanMode mode, std::string nameOrIP)
 }
 
 /// Ban an account or ban an IP address, duration will be parsed using TimeStringToSecs if it is positive, otherwise permban
-BanReturn World::BanCharacter(std::string name, std::string duration, std::string reason, std::string author)
+BanReturn World::BanCharacter(std::string const& name, std::string const& duration, std::string const& reason, std::string const& author)
 {
-    Player* pBanned = sObjectAccessor->FindPlayerByName(name.c_str());
+    Player* pBanned = sObjectAccessor->FindPlayerByName(name);
     uint32 guid = 0;
 
     uint32 duration_secs = TimeStringToSecs(duration);
@@ -2651,17 +2652,21 @@ BanReturn World::BanCharacter(std::string name, std::string duration, std::strin
     else
         guid = pBanned->GetGUIDLow();
 
+    SQLTransaction trans = CharacterDatabase.BeginTransaction();
+
     // make sure there is only one active ban
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHARACTER_BAN);
     stmt->setUInt32(0, guid);
-    CharacterDatabase.Execute(stmt);
+    trans->Append(stmt);
 
     stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_CHARACTER_BAN);
     stmt->setUInt32(0, guid);
     stmt->setUInt32(1, duration_secs);
     stmt->setString(2, author);
     stmt->setString(3, reason);
-    CharacterDatabase.Execute(stmt);
+    trans->Append(stmt);
+
+    CharacterDatabase.CommitTransaction(trans);
 
     if (pBanned)
         pBanned->GetSession()->KickPlayer();
@@ -2670,9 +2675,9 @@ BanReturn World::BanCharacter(std::string name, std::string duration, std::strin
 }
 
 /// Remove a ban from a character
-bool World::RemoveBanCharacter(std::string name)
+bool World::RemoveBanCharacter(std::string const& name)
 {
-    Player* pBanned = sObjectAccessor->FindPlayerByName(name.c_str());
+    Player* pBanned = sObjectAccessor->FindPlayerByName(name);
     uint32 guid = 0;
 
     /// Pick a player to ban if not online
@@ -2861,41 +2866,31 @@ void World::ProcessCliCommands()
     }
 }
 
+char const * World::GetBroadcastString(uint32 idx, LocaleConstant locale_idx) const
+{
+    if (BroadcastStringLocale const* msl = GetBroadcastStringLocale(idx))
+    {
+        return (msl->Content.size() > size_t(locale_idx) && !msl->Content[locale_idx].empty())
+            ? msl->Content[locale_idx].c_str()
+            : msl->Content[DEFAULT_LOCALE].c_str();
+    }
+    return "<error>";
+}
+
 void World::SendAutoBroadcast()
 {
-    if (m_Autobroadcasts.empty())
+    if (m_autoBroadcasts.empty())
         return;
 
-    std::string msg;
+    if (++m_autoBroadcastIdx == m_autoBroadcasts.size())
+        m_autoBroadcastIdx = 0;
 
-    msg = Trinity::Containers::SelectRandomContainerElement(m_Autobroadcasts);
+    Trinity::BroadcastTextBuilder at_builder(m_autoBroadcastIdx);
+    Trinity::LocalizedPacketListDo<Trinity::BroadcastTextBuilder> at_do(at_builder);
 
-    uint32 abcenter = sWorld->getIntConfig(CONFIG_AUTOBROADCAST_CENTER);
-
-    if (abcenter == 0)
-        sWorld->SendWorldText(LANG_AUTO_BROADCAST, msg.c_str());
-
-    else if (abcenter == 1)
-    {
-        WorldPacket data(SMSG_NOTIFICATION, 2 + msg.length());
-        data.WriteBits(msg.length(), 12);
-        data.FlushBits();
-        data.WriteString(msg);
-        sWorld->SendGlobalMessage(&data);
-    }
-
-    else if (abcenter == 2)
-    {
-        sWorld->SendWorldText(LANG_AUTO_BROADCAST, msg.c_str());
-
-        WorldPacket data(SMSG_NOTIFICATION, 2 + msg.length());
-        data.WriteBits(msg.length(), 12);
-        data.FlushBits();
-        data.WriteString(msg);
-        sWorld->SendGlobalMessage(&data);
-    }
-
-    TC_LOG_DEBUG("misc", "AutoBroadcast: '%s'", msg.c_str());
+    for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
+        if (itr->second && itr->second->GetPlayer() && itr->second->GetPlayer()->IsInWorld())
+            at_do(itr->second->GetPlayer());
 }
 
 void World::UpdateRealmCharCount(uint32 accountId)
@@ -2924,7 +2919,7 @@ void World::_UpdateRealmCharCount(PreparedQueryResult resultCharCount)
 
 void World::InitWeeklyQuestResetTime()
 {
-    time_t wstime = uint64(sWorld->getWorldState(WS_WEEKLY_QUEST_RESET_TIME));
+    time_t wstime = uint64(getWorldState(WS_WEEKLY_QUEST_RESET_TIME));
     time_t curtime = time(NULL);
     m_NextWeeklyQuestReset = wstime < curtime ? curtime : time_t(wstime);
 }
@@ -2965,14 +2960,14 @@ void World::InitDailyQuestResetTime()
 
 void World::InitMonthlyQuestResetTime()
 {
-    time_t wstime = uint64(sWorld->getWorldState(WS_MONTHLY_QUEST_RESET_TIME));
+    time_t wstime = uint64(getWorldState(WS_MONTHLY_QUEST_RESET_TIME));
     time_t curtime = time(NULL);
     m_NextMonthlyQuestReset = wstime < curtime ? curtime : time_t(wstime);
 }
 
 void World::InitRandomBGResetTime()
 {
-    time_t bgtime = uint64(sWorld->getWorldState(WS_BG_DAILY_RESET_TIME));
+    time_t bgtime = uint64(getWorldState(WS_BG_DAILY_RESET_TIME));
     if (!bgtime)
         m_NextRandomBGReset = time_t(time(NULL));         // game time not yet init
 
@@ -2994,12 +2989,12 @@ void World::InitRandomBGResetTime()
     m_NextRandomBGReset = bgtime < curTime ? nextDayResetTime - DAY : nextDayResetTime;
 
     if (!bgtime)
-        sWorld->setWorldState(WS_BG_DAILY_RESET_TIME, uint64(m_NextRandomBGReset));
+        setWorldState(WS_BG_DAILY_RESET_TIME, uint64(m_NextRandomBGReset));
 }
 
 void World::InitCurrencyResetTime()
 {
-    uint32 nextResetDay = sWorld->getWorldState(WS_CURRENCY_RESET_TIME);
+    uint32 nextResetDay = getWorldState(WS_CURRENCY_RESET_TIME);
     if (!nextResetDay)
     {
         nextResetDay = 16022; // 13.11.2013
@@ -3008,7 +3003,7 @@ void World::InitCurrencyResetTime()
         while (nextResetDay < currentDay)
             nextResetDay += 7;
 
-        sWorld->setWorldState(WS_CURRENCY_RESET_TIME, nextResetDay);
+        setWorldState(WS_CURRENCY_RESET_TIME, nextResetDay);
     }
 
     m_NextCurrencyReset = nextResetDay * 86400 + 5 * 3600;
@@ -3063,7 +3058,7 @@ void World::ResetCurrencyWeekCap()
             itr->second->GetPlayer()->ResetCurrencyWeekCap();
 
     m_NextCurrencyReset = time_t(m_NextCurrencyReset + DAY * getIntConfig(CONFIG_CURRENCY_RESET_INTERVAL));
-    sWorld->setWorldState(WS_CURRENCY_RESET_TIME, uint64(m_NextCurrencyReset));
+    setWorldState(WS_CURRENCY_RESET_TIME, uint64(m_NextCurrencyReset));
 
     TC_LOG_INFO("molten", "World::ResetCurrencyWeekCap()");
 }
@@ -3101,7 +3096,7 @@ void World::ResetWeeklyQuests()
             itr->second->GetPlayer()->ResetWeeklyQuestStatus();
 
     m_NextWeeklyQuestReset = time_t(m_NextWeeklyQuestReset + WEEK);
-    sWorld->setWorldState(WS_WEEKLY_QUEST_RESET_TIME, uint64(m_NextWeeklyQuestReset));
+    setWorldState(WS_WEEKLY_QUEST_RESET_TIME, uint64(m_NextWeeklyQuestReset));
 
     // change available weeklies
     sPoolMgr->ChangeWeeklyQuests();
@@ -3155,7 +3150,7 @@ void World::ResetMonthlyQuests()
     else // plan next reset time
         m_NextMonthlyQuestReset = (curTime >= nextMonthResetTime) ? nextMonthResetTime + MONTH : nextMonthResetTime;
 
-    sWorld->setWorldState(WS_MONTHLY_QUEST_RESET_TIME, uint64(m_NextMonthlyQuestReset));
+    setWorldState(WS_MONTHLY_QUEST_RESET_TIME, uint64(m_NextMonthlyQuestReset));
 }
 
 void World::ResetEventSeasonalQuests(uint16 event_id)
@@ -3181,7 +3176,7 @@ void World::ResetRandomBG()
             itr->second->GetPlayer()->SetRandomWinner(false);
 
     m_NextRandomBGReset = time_t(m_NextRandomBGReset + DAY);
-    sWorld->setWorldState(WS_BG_DAILY_RESET_TIME, uint64(m_NextRandomBGReset));
+    setWorldState(WS_BG_DAILY_RESET_TIME, uint64(m_NextRandomBGReset));
 }
 
 void World::UpdateMaxSessionCounters()
@@ -3301,4 +3296,12 @@ void World::UpdatePhaseDefinitions()
     for (itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
         if (itr->second && itr->second->GetPlayer() && itr->second->GetPlayer()->IsInWorld())
             itr->second->GetPlayer()->GetPhaseMgr().NotifyStoresReloaded();
+}
+
+void World::ReloadRBAC()
+{
+    // Pasive reload, we mark the data as invalidated and next time a permission is checked it will be reloaded
+    TC_LOG_INFO("rbac", "World::ReloadRBAC()");
+    for (SessionMap::iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
+        itr->second->ReloadRBACData();
 }

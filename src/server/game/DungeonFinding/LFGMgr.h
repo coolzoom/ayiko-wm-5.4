@@ -278,6 +278,8 @@ class LFGMgr
         ~LFGMgr();
 
     public:
+        static std::string GetRolesString(uint8 roles);
+
         void Update(uint32 diff);
 
         // Reward
@@ -399,4 +401,5 @@ class LFGMgr
 };
 
 #define sLFGMgr ACE_Singleton<LFGMgr, ACE_Null_Mutex>::instance()
+
 #endif

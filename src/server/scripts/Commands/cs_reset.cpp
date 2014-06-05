@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -22,32 +22,37 @@ Comment: All reset related commands
 Category: commandscripts
 EndScriptData */
 
-#include "ScriptMgr.h"
+#include "AchievementMgr.h"
 #include "Chat.h"
+#include "Language.h"
 #include "ObjectAccessor.h"
+#include "Player.h"
+#include "Pet.h"
+#include "ScriptMgr.h"
 
 class reset_commandscript : public CommandScript
 {
 public:
     reset_commandscript() : CommandScript("reset_commandscript") { }
 
-    ChatCommand* GetCommands() const
+    ChatCommand* GetCommands() const override
     {
         static ChatCommand resetCommandTable[] =
         {
-            { "achievements",   SEC_ADMINISTRATOR,  true,  &HandleResetAchievementsCommand,     "", NULL },
-            { "honor",          SEC_ADMINISTRATOR,  true,  &HandleResetHonorCommand,            "", NULL },
-            { "spells",         SEC_ADMINISTRATOR,  true,  &HandleResetSpellsCommand,           "", NULL },
-            { "stats",          SEC_ADMINISTRATOR,  true,  &HandleResetStatsCommand,            "", NULL },
-            { "talents",        SEC_ADMINISTRATOR,  true,  &HandleResetTalentsCommand,          "", NULL },
-            { "spec",           SEC_ADMINISTRATOR,  true,  &HandleResetSpecializationCommand,   "", NULL },
-            { "all",            SEC_ADMINISTRATOR,  true,  &HandleResetAllCommand,              "", NULL },
-            { NULL,             0,                  false, NULL,                                "", NULL }
+            { "achievements", rbac::RBAC_PERM_COMMAND_RESET_ACHIEVEMENTS, true, &HandleResetAchievementsCommand, "", NULL },
+            { "honor",        rbac::RBAC_PERM_COMMAND_RESET_HONOR,        true, &HandleResetHonorCommand,        "", NULL },
+            { "level",        rbac::RBAC_PERM_COMMAND_RESET_LEVEL,        true, &HandleResetLevelCommand,        "", NULL },
+            { "spells",       rbac::RBAC_PERM_COMMAND_RESET_SPELLS,       true, &HandleResetSpellsCommand,       "", NULL },
+            { "stats",        rbac::RBAC_PERM_COMMAND_RESET_STATS,        true, &HandleResetStatsCommand,        "", NULL },
+            { "talents",      rbac::RBAC_PERM_COMMAND_RESET_TALENTS,      true, &HandleResetTalentsCommand,      "", NULL },
+            { "spec",         rbac::RBAC_PERM_COMMAND_RESET_SPEC,         true, &HandleResetSpecializationCommand,   "", NULL },
+            { "currencycap",  rbac::RBAC_PERM_COMMAND_RESET_CURRENCY_CAP, true, &HandleResetCurrencyCapCommand, "", NULL },
+            { NULL,           0,                                   false, NULL,                            "", NULL }
         };
         static ChatCommand commandTable[] =
         {
-            { "reset",          SEC_ADMINISTRATOR,  true, NULL,                                 "", resetCommandTable },
-            { NULL,             0,                  false, NULL,                                "", NULL }
+            { "reset", rbac::RBAC_PERM_COMMAND_RESET, true, NULL, "", resetCommandTable },
+            { NULL,    0,                      false, NULL, "", NULL }
         };
         return commandTable;
     }
@@ -64,6 +69,13 @@ public:
         else
             AchievementMgr<Player>::DeleteFromDB(GUID_LOPART(targetGuid));
 
+        return true;
+    }
+
+    static bool HandleResetCurrencyCapCommand(ChatHandler *handler, char const *)
+    {
+        sWorld->ResetCurrencyWeekCap();
+        handler->SendSysMessage(LANG_DONE);
         return true;
     }
 
@@ -113,8 +125,42 @@ public:
 
         //-1 is default value
         player->SetUInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, uint32(-1));
+        return true;
+    }
 
-        //player->SetUInt32Value(PLAYER_BYTES, 0xEEE00000);
+    static bool HandleResetLevelCommand(ChatHandler* handler, char const* args)
+    {
+        Player* target;
+        if (!handler->extractPlayerTarget((char*)args, &target))
+            return false;
+
+        if (!HandleResetStatsOrLevelHelper(target))
+            return false;
+
+        uint8 oldLevel = target->getLevel();
+
+        // set starting level
+        uint32 startLevel = target->getClass() != CLASS_DEATH_KNIGHT
+            ? sWorld->getIntConfig(CONFIG_START_PLAYER_LEVEL)
+            : sWorld->getIntConfig(CONFIG_START_HEROIC_PLAYER_LEVEL);
+
+        target->_ApplyAllLevelScaleItemMods(false);
+        target->SetLevel(startLevel);
+        target->InitRunes();
+        target->InitStatsForLevel(true);
+        target->InitTaxiNodesForLevel(oldLevel, startLevel);
+        target->InitGlyphsForLevel();
+        target->InitTalentForLevel();
+        target->SetUInt32Value(PLAYER_XP, 0);
+
+        target->_ApplyAllLevelScaleItemMods(true);
+
+        // reset level for pet
+        if (Pet* pet = target->GetPet())
+            pet->SynchronizeLevelWithOwner();
+
+        sScriptMgr->OnPlayerLevelChanged(target, oldLevel);
+
         return true;
     }
 
@@ -130,7 +176,7 @@ public:
         {
             target->resetSpells(/* bool myClassOnly */);
 
-            ChatHandler(target).SendSysMessage(LANG_RESET_SPELLS);
+            ChatHandler(target->GetSession()).SendSysMessage(LANG_RESET_SPELLS);
             if (!handler->GetSession() || handler->GetSession()->GetPlayer() != target)
                 handler->PSendSysMessage(LANG_RESET_SPELLS_ONLINE, handler->GetNameLink(target).c_str());
         }
@@ -169,6 +215,7 @@ public:
         Player* target;
         uint64 targetGuid;
         std::string targetName;
+
         if (!handler->extractPlayerTarget((char*)args, &target, &targetGuid, &targetName))
         {
             handler->SendSysMessage(LANG_NO_CHAR_SELECTED);
@@ -180,7 +227,7 @@ public:
         {
             target->ResetTalents(true);
             target->SendTalentsInfoData(false);
-            ChatHandler(target).SendSysMessage(LANG_RESET_TALENTS);
+            ChatHandler(target->GetSession()).SendSysMessage(LANG_RESET_TALENTS);
             if (!handler->GetSession() || handler->GetSession()->GetPlayer() != target)
                 handler->PSendSysMessage(LANG_RESET_TALENTS_ONLINE, handler->GetNameLink(target).c_str());
 
@@ -192,7 +239,7 @@ public:
         else if (targetGuid)
         {
             PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_ADD_AT_LOGIN_FLAG);
-            stmt->setUInt16(0, uint16(AT_LOGIN_NONE | AT_LOGIN_RESET_PET_TALENTS));
+            stmt->setUInt16(0, uint16(AT_LOGIN_RESET_TALENTS));
             stmt->setUInt32(1, GUID_LOPART(targetGuid));
             CharacterDatabase.Execute(stmt);
 
@@ -213,50 +260,6 @@ public:
             return false;
 
         target->ResetSpec();
-
-        return true;
-    }
-
-    static bool HandleResetAllCommand(ChatHandler* handler, char const* args)
-    {
-        if (!*args)
-            return false;
-
-        std::string caseName = args;
-
-        AtLoginFlags atLogin;
-
-        // Command specially created as single command to prevent using short case names
-        if (caseName == "spells")
-        {
-            atLogin = AT_LOGIN_RESET_SPELLS;
-            sWorld->SendWorldText(LANG_RESETALL_SPELLS);
-            if (!handler->GetSession())
-                handler->SendSysMessage(LANG_RESETALL_SPELLS);
-        }
-        else if (caseName == "talents")
-        {
-            atLogin = AtLoginFlags(AT_LOGIN_RESET_TALENTS | AT_LOGIN_RESET_PET_TALENTS);
-            sWorld->SendWorldText(LANG_RESETALL_TALENTS);
-            if (!handler->GetSession())
-               handler->SendSysMessage(LANG_RESETALL_TALENTS);
-        }
-        else
-        {
-            handler->PSendSysMessage(LANG_RESETALL_UNKNOWN_CASE, args);
-            handler->SetSentErrorMessage(true);
-            return false;
-        }
-
-        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_ALL_AT_LOGIN_FLAGS);
-        stmt->setUInt16(0, uint16(atLogin));
-        CharacterDatabase.Execute(stmt);
-
-        TRINITY_READ_GUARD(HashMapHolder<Player>::LockType, *HashMapHolder<Player>::GetLock());
-        HashMapHolder<Player>::MapType const& plist = sObjectAccessor->GetPlayers();
-        for (HashMapHolder<Player>::MapType::const_iterator itr = plist.begin(); itr != plist.end(); ++itr)
-            itr->second->SetAtLoginFlag(atLogin);
-
         return true;
     }
 };

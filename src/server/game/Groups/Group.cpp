@@ -129,6 +129,8 @@ bool Group::Create(Player* leader)
 
         sGroupMgr->RegisterGroupDbStoreId(m_dbStoreId, this);
 
+        SQLTransaction trans = CharacterDatabase.BeginTransaction();
+
         // Store group in database
         PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_GROUP);
 
@@ -151,10 +153,14 @@ bool Group::Create(Player* leader)
         stmt->setUInt32(index++, uint8(m_dungeonDifficulty));
         stmt->setUInt32(index++, uint8(m_raidDifficulty));
 
-        CharacterDatabase.Execute(stmt);
+        trans->Append(stmt);
 
+        bool addResult = AddMember(leader, trans);
 
-        ASSERT(AddMember(leader)); // If the leader can't be added to a new group because it appears full, something is clearly wrong.
+        // If the leader can't be added to a new group because it appears full, something is clearly wrong.
+        ASSERT(addResult);
+
+        CharacterDatabase.DirectCommitTransaction(trans);
 
         Player::ConvertInstancesToGroup(leader, this, false);
     }
@@ -389,7 +395,7 @@ Player* Group::GetInvited(const std::string& name) const
     return NULL;
 }
 
-bool Group::AddMember(Player* player)
+bool Group::AddMember(Player* player, SQLTransaction trans)
 {
     // Get first not-full group
     uint8 subGroup = 0;
@@ -452,8 +458,7 @@ bool Group::AddMember(Player* player)
         stmt->setUInt8(3, member.group);
         stmt->setUInt8(4, member.roles);
 
-        CharacterDatabase.Execute(stmt);
-
+        CharacterDatabase.ExecuteOrAppend(trans, stmt);
     }
 
     SendUpdate();
@@ -1997,7 +2002,7 @@ void Group::SendUpdateToPlayer(uint64 playerGUID, MemberSlot* slot)
     data.WriteBits(memberCount, 21);
 
     // Send self first
-    data.WriteBits(strlen(player->GetName()), 6);
+    data.WriteBits(player->GetName().length(), 6);
     data.WriteBitSeq<3, 0, 4, 7, 6, 1, 5, 2>(playerGUID);
 
     for (uint32 i = 0; i < memberCount; i++)
@@ -2435,7 +2440,7 @@ GroupJoinBattlegroundResult Group::CanJoinBattlegroundQueue(Battleground const* 
         if (bgOrTemplate->GetTypeID() == BATTLEGROUND_RB && member->InBattlegroundQueue())
             return ERR_IN_NON_RANDOM_BG;
         // check for deserter debuff in case not arena queue
-        if (bgOrTemplate->GetTypeID() != BATTLEGROUND_AA && !member->CanJoinToBattleground())
+        if (bgOrTemplate->GetTypeID() != BATTLEGROUND_AA && !member->CanJoinToBattleground(bgOrTemplate))
             return ERR_GROUP_JOIN_BATTLEGROUND_DESERTERS;
         // check if member can join any more battleground queues
         if (!member->HasFreeBattlegroundQueueId())
@@ -2727,7 +2732,7 @@ void Group::BroadcastGroupUpdate(void)
         {
             pp->ForceValuesUpdateAtIndex(UNIT_FIELD_BYTES_2);
             pp->ForceValuesUpdateAtIndex(UNIT_FIELD_FACTIONTEMPLATE);
-            TC_LOG_DEBUG("misc", "-- Forced group value update for '%s'", pp->GetName());
+            TC_LOG_DEBUG("misc", "-- Forced group value update for '%s'", pp->GetName().c_str());
         }
     }
 }

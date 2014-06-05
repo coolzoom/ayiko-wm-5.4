@@ -111,7 +111,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
         return;
     }
 
-    Player* player = sObjectAccessor->FindPlayerByName(memberName.c_str());
+    Player* player = sObjectAccessor->FindPlayerByName(memberName);
 
     // no player
     if (!player)
@@ -173,7 +173,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
             data.WriteBit(0);                                   // Show RealmName
             data.WriteBit(0);                                   // Unk
             data.WriteBitSeq<4>(invitedGuid);
-            data.WriteBits(strlen(GetPlayer()->GetName()), 6);  // Inviter name length
+            data.WriteBits(GetPlayer()->GetName().length(), 6);  // Inviter name length
             data.WriteBitSeq<2>(invitedGuid);
             data.WriteBit(0);                                   // Unk
             data.WriteBit(0);                                   // Unk - This force sending invite pannel
@@ -189,8 +189,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
             data.WriteByteSeq<3, 5>(invitedGuid);
             data << uint32(0);
 
-            if (strlen(GetPlayer()->GetName()))
-                data.append(GetPlayer()->GetName(), strlen(GetPlayer()->GetName()));
+            data.WriteString(GetPlayer()->GetName());
 
             data << uint32(0);
             data.WriteByteSeq<7, 4, 1, 2, 6, 0>(invitedGuid);
@@ -254,7 +253,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
     data.WriteBit(0);                                   // Show RealmName
     data.WriteBit(0);
     data.WriteBitSeq<4>(invitedGuid);
-    data.WriteBits(strlen(GetPlayer()->GetName()), 6);  // Inviter name length
+    data.WriteBits(GetPlayer()->GetName().length(), 6); // Inviter name length
     data.WriteBitSeq<2>(invitedGuid);
     data.WriteBit(0);
     data.WriteBit(1);
@@ -270,8 +269,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
     data.WriteByteSeq<3, 5>(invitedGuid);
     data << uint32(0);                                  // Unk
 
-    if (strlen(GetPlayer()->GetName()))
-        data.append(GetPlayer()->GetName(), strlen(GetPlayer()->GetName()));
+    data.WriteString(GetPlayer()->GetName());
 
     data << uint32(0);                                  // Unk
     data.WriteByteSeq<7, 4, 1, 2, 6, 0>(invitedGuid);
@@ -300,7 +298,8 @@ void WorldSession::HandleGroupInviteResponseOpcode(WorldPacket& recvData)
 
         if (group->GetLeaderGUID() == GetPlayer()->GetGUID())
         {
-            TC_LOG_ERROR("network", "HandleGroupAcceptOpcode: player %s(%d) tried to accept an invite to his own group", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow());
+            TC_LOG_ERROR("network", "HandleGroupAcceptOpcode: player %s(%d) tried to accept an invite to his own group",
+                         GetPlayer()->GetName().c_str(), GetPlayer()->GetGUIDLow());
             return;
         }
 
@@ -348,9 +347,9 @@ void WorldSession::HandleGroupInviteResponseOpcode(WorldPacket& recvData)
             return;
 
         // report
-        std::string name = std::string(GetPlayer()->GetName());
+        std::string const &name = GetPlayer()->GetName();
         WorldPacket data(SMSG_GROUP_DECLINE, name.length());
-        data << name.c_str();
+        data << name;
         leader->GetSession()->SendPacket(&data);
     }
 }
@@ -376,7 +375,8 @@ void WorldSession::HandleGroupUninviteGuidOpcode(WorldPacket& recvData)
     // Can't uninvite yourself
     if (guid == GetPlayer()->GetGUID())
     {
-        TC_LOG_ERROR("network", "WorldSession::HandleGroupUninviteGuidOpcode: leader %s(%d) tried to uninvite himself from the group.", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow());
+        TC_LOG_ERROR("network", "WorldSession::HandleGroupUninviteGuidOpcode: leader %s(%d) tried to uninvite himself from the group.",
+                     GetPlayer()->GetName().c_str(), GetPlayer()->GetGUIDLow());
         return;
     }
 
@@ -426,7 +426,8 @@ void WorldSession::HandleGroupUninviteOpcode(WorldPacket& recvData)
     // can't uninvite yourself
     if (GetPlayer()->GetName() == membername)
     {
-        TC_LOG_ERROR("network", "WorldSession::HandleGroupUninviteOpcode: leader %s(%d) tried to uninvite himself from the group.", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow());
+        TC_LOG_ERROR("network", "WorldSession::HandleGroupUninviteOpcode: leader %s(%d) tried to uninvite himself from the group.",
+                     GetPlayer()->GetName().c_str(), GetPlayer()->GetGUIDLow());
         return;
     }
 
@@ -1304,7 +1305,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recvData)
     if (player && player->GetGroup() != GetPlayer()->GetGroup())
     {
         TC_LOG_ERROR("network", "Player %u (%s) sent CMSG_REQUEST_PARTY_MEMBER_STATS for player %u (%s) who is not in the same group!",
-                     GetPlayer()->GetGUIDLow(), GetPlayer()->GetName(), player->GetGUIDLow(), player->GetName());
+                     GetPlayer()->GetGUIDLow(), GetPlayer()->GetName().c_str(), player->GetGUIDLow(), player->GetName().c_str());
         return;
     }
 

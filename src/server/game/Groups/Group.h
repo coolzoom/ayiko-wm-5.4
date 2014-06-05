@@ -23,11 +23,11 @@
 #include "DBCEnums.h"
 #include "GroupRefManager.h"
 #include "LootMgr.h"
-#include "MySQLPtrTypesFwd.h"
 #include "SharedDefines.h"
 #include "Player.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
+#include "MySQLPtrTypesFwd.h"
 
 #include <unordered_map>
 
@@ -223,7 +223,7 @@ class Group
         void   RemoveInvite(Player* player);
         void   RemoveAllInvites();
         bool   AddLeaderInvite(Player* player);
-        bool   AddMember(Player* player);
+        bool   AddMember(Player* player, SQLTransaction trans = SQLTransaction());
         bool   RemoveMember(uint64 guid, const RemoveMethod &method = GROUP_REMOVEMETHOD_DEFAULT, uint64 kicker = 0, const char* reason = NULL);
         void   ChangeLeader(uint64 guid);
         void   SetLootMethod(LootMethod method);

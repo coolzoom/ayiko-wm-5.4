@@ -2780,7 +2780,7 @@ void Spell::SendLoot(uint64 guid, LootType loottype)
         if (!gameObjTarget->isSpawned() && !player->isGameMaster())
         {
             TC_LOG_ERROR("spells", "Possible hacking attempt: Player %s [guid: %u] tried to loot a gameobject [entry: %u id: %u] which is on respawn time without being in GM mode!",
-                            player->GetName(), player->GetGUIDLow(), gameObjTarget->GetEntry(), gameObjTarget->GetGUIDLow());
+                         player->GetName().c_str(), player->GetGUIDLow(), gameObjTarget->GetEntry(), gameObjTarget->GetGUIDLow());
             return;
         }
         // special case, already has GossipHello inside so return and avoid calling twice
@@ -3733,20 +3733,20 @@ void Spell::EffectEnchantItemPerm(SpellEffIndex effIndex)
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
 
-    if (m_caster->GetTypeId() != TYPEID_PLAYER)
-        return;
     if (!itemTarget)
         return;
 
-    Player* p_caster = (Player*)m_caster;
+    Player* player = m_caster->ToPlayer();
+    if (!player)
+        return;
 
     // Handle vellums
     if (itemTarget->IsVellum())
     {
         // destroy one vellum from stack
         uint32 count = 1;
-        p_caster->DestroyItemCount(itemTarget, count, true);
-        unitTarget=p_caster;
+        player->DestroyItemCount(itemTarget, count, true);
+        unitTarget = player;
         // and add a scroll
         DoCreateItem(effIndex, m_spellInfo->Effects[effIndex].ItemType);
         itemTarget=NULL;
@@ -3756,7 +3756,7 @@ void Spell::EffectEnchantItemPerm(SpellEffIndex effIndex)
     {
         // do not increase skill if vellum used
         if (!(m_CastItem && m_CastItem->GetTemplate()->Flags & ITEM_PROTO_FLAG_TRIGGERED_CAST))
-            p_caster->UpdateCraftSkill(m_spellInfo->Id);
+            player->UpdateCraftSkill(m_spellInfo->Id);
 
         uint32 enchant_id = m_spellInfo->Effects[effIndex].MiscValue;
         if (!enchant_id)
@@ -3771,13 +3771,13 @@ void Spell::EffectEnchantItemPerm(SpellEffIndex effIndex)
         if (!item_owner)
             return;
 
-        /*if (item_owner != p_caster && !AccountMgr::IsPlayerAccount(p_caster->GetSession()->GetSecurity()) && sWorld->getBoolConfig(CONFIG_GM_LOG_TRADE))
+        if (item_owner != player && player->GetSession()->HasPermission(rbac::RBAC_PERM_LOG_GM_TRADE))
         {
-            sLog->outCommand(p_caster->GetSession()->GetAccountId(), "GM %s (Account: %u) enchanting(perm): %s (Entry: %d) for player: %s (Account: %u)",
-                p_caster->GetName(), p_caster->GetSession()->GetAccountId(),
-                itemTarget->GetTemplate()->Name1.c_str(), itemTarget->GetEntry(),
-                item_owner->GetName(), item_owner->GetSession()->GetAccountId());
-        }*/
+            sLog->outCommand(player->GetSession()->GetAccountId(), "GM %s (Account: %u) enchanting(perm): %s (Entry: %d) for player: %s (Account: %u)",
+                             player->GetName().c_str(), player->GetSession()->GetAccountId(),
+                             itemTarget->GetTemplate()->Name1.c_str(), itemTarget->GetEntry(),
+                             item_owner->GetName().c_str(), item_owner->GetSession()->GetAccountId());
+        }
 
         // remove old enchanting before applying new if equipped
         item_owner->ApplyEnchantment(itemTarget, PERM_ENCHANTMENT_SLOT, false);
@@ -3797,9 +3797,11 @@ void Spell::EffectEnchantItemPrismatic(SpellEffIndex effIndex)
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
 
-    if (m_caster->GetTypeId() != TYPEID_PLAYER)
-        return;
     if (!itemTarget)
+        return;
+
+    Player* player = m_caster->ToPlayer();
+    if (!player)
         return;
 
     uint32 enchant_id = m_spellInfo->Effects[effIndex].MiscValue;
@@ -3834,13 +3836,13 @@ void Spell::EffectEnchantItemPrismatic(SpellEffIndex effIndex)
     if (!item_owner)
         return;
 
-    /*if (item_owner != p_caster && !AccountMgr::IsPlayerAccount(p_caster->GetSession()->GetSecurity()) && sWorld->getBoolConfig(CONFIG_GM_LOG_TRADE))
+    if (item_owner != player && player->GetSession()->HasPermission(rbac::RBAC_PERM_LOG_GM_TRADE))
     {
-        sLog->outCommand(p_caster->GetSession()->GetAccountId(), "GM %s (Account: %u) enchanting(perm): %s (Entry: %d) for player: %s (Account: %u)",
-            p_caster->GetName(), p_caster->GetSession()->GetAccountId(),
-            itemTarget->GetTemplate()->Name1.c_str(), itemTarget->GetEntry(),
-            item_owner->GetName(), item_owner->GetSession()->GetAccountId());
-    }*/
+        sLog->outCommand(player->GetSession()->GetAccountId(), "GM %s (Account: %u) enchanting(perm): %s (Entry: %d) for player: %s (Account: %u)",
+                         player->GetName().c_str(), player->GetSession()->GetAccountId(),
+                         itemTarget->GetTemplate()->Name1.c_str(), itemTarget->GetEntry(),
+                         item_owner->GetName().c_str(), item_owner->GetSession()->GetAccountId());
+    }
 
     // remove old enchanting before applying new if equipped
     item_owner->ApplyEnchantment(itemTarget, PRISMATIC_ENCHANTMENT_SLOT, false);
@@ -3859,14 +3861,14 @@ void Spell::EffectEnchantItemTmp(SpellEffIndex effIndex)
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
 
-    if (m_caster->GetTypeId() != TYPEID_PLAYER)
-        return;
-
     if (!itemTarget)
         return;
 
-    uint32 enchant_id = m_spellInfo->Effects[effIndex].MiscValue;
+    Player* player = m_caster->ToPlayer();
+    if (!player)
+        return;
 
+    uint32 enchant_id = m_spellInfo->Effects[effIndex].MiscValue;
     if (!enchant_id)
     {
         TC_LOG_ERROR("spells", "Spell %u Effect %u (SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY) have 0 as enchanting id", m_spellInfo->Id, effIndex);
@@ -3913,6 +3915,14 @@ void Spell::EffectEnchantItemTmp(SpellEffIndex effIndex)
     Player* item_owner = itemTarget->GetOwner();
     if (!item_owner)
         return;
+
+    if (item_owner != player && player->GetSession()->HasPermission(rbac::RBAC_PERM_LOG_GM_TRADE))
+    {
+        sLog->outCommand(player->GetSession()->GetAccountId(), "GM %s (Account: %u) enchanting(temp): %s (Entry: %d) for player: %s (Account: %u)",
+                         player->GetName().c_str(), player->GetSession()->GetAccountId(),
+                         itemTarget->GetTemplate()->Name1.c_str(), itemTarget->GetEntry(),
+                         item_owner->GetName().c_str(), item_owner->GetSession()->GetAccountId());
+    }
 
     // remove old enchanting before applying new if equipped
     item_owner->ApplyEnchantment(itemTarget, TEMP_ENCHANTMENT_SLOT, false);
@@ -4917,21 +4927,23 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                 }
                 case 47770: // Roll Dice - Decahedral Dwarven Dice
                 {
-                    char buf[128];
+                    char buf[256];
                     const char *gender = "his";
                     if (m_caster->getGender() > 0)
                         gender = "her";
-                    sprintf(buf, "%s rubs %s [Decahedral Dwarven Dice] between %s hands and rolls. One %u and one %u.", m_caster->GetName(), gender, gender, urand(1, 10), urand(1, 10));
+                    sprintf(buf, "%s rubs %s [Decahedral Dwarven Dice] between %s hands and rolls. One %u and one %u.",
+                            m_caster->GetName().c_str(), gender, gender, urand(1, 10), urand(1, 10));
                     m_caster->MonsterTextEmote(buf, 0);
                     break;
                 }
                 case 47776: // Roll 'dem Bones - Worn Troll Dice
                 {
-                    char buf[128];
+                    char buf[256];
                     const char *gender = "his";
                     if (m_caster->getGender() > 0)
                         gender = "her";
-                    sprintf(buf, "%s causually tosses %s [Worn Troll Dice]. One %u and one %u.", m_caster->GetName(), gender, urand(1, 6), urand(1, 6));
+                    sprintf(buf, "%s causually tosses %s [Worn Troll Dice]. One %u and one %u.",
+                            m_caster->GetName().c_str(), gender, urand(1, 6), urand(1, 6));
                     m_caster->MonsterTextEmote(buf, 0);
                     break;
                 }
@@ -7019,17 +7031,28 @@ void Spell::EffectQuestStart(SpellEffIndex effIndex)
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
 
-    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+    if (!unitTarget)
         return;
 
     Player* player = unitTarget->ToPlayer();
-    if (Quest const* qInfo = sObjectMgr->GetQuestTemplate(m_spellInfo->Effects[effIndex].MiscValue))
+    if (!player)
+        return;
+
+    if (Quest const* quest = sObjectMgr->GetQuestTemplate(m_spellInfo->Effects[effIndex].MiscValue))
     {
-        if (player->CanTakeQuest(qInfo, false) && player->CanAddQuest(qInfo, false))
-        {
-            player->AddQuest(qInfo, NULL);
-        }
+        Unit* questGiver = m_caster;
+
+        if (!questGiver->hasQuest(quest->GetQuestId()) && !questGiver->hasInvolvedQuest(quest->GetQuestId()))
+            questGiver = player;
+
+        if (quest->IsAutoAccept() && player->CanAddQuest(quest, true) && player->CanTakeQuest(quest, true))
+            player->AddQuestAndCheckCompletion(quest, questGiver);
+        else if (questGiver == player)
+            return;
+
+        player->PlayerTalkClass->SendQuestGiverQuestDetails(quest, questGiver->GetGUID(), true);
     }
+
 }
 
 void Spell::EffectActivateRune(SpellEffIndex effIndex)

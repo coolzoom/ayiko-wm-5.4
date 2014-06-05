@@ -52,6 +52,7 @@
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
 #include "MoveSpline.h"
+#include "LexicalCast.h"
 
 uint32 GuidHigh2TypeId(uint32 guid_hi)
 {
@@ -779,7 +780,7 @@ void Object::_LoadIntoDataField(char const* data, uint32 startOffset, uint32 cou
 
     for (uint32 index = 0; index < count; ++index)
     {
-        m_uint32Values[startOffset + index] = atol(tokens[index]);
+        m_uint32Values[startOffset + index] = Trinity::lexicalCast<uint32>(tokens[index]);
         _changedFields[startOffset + index] = true;
     }
 }
@@ -2059,12 +2060,16 @@ namespace Trinity
     {
         public:
             MonsterChatBuilder(WorldObject const& obj, ChatMsg msgtype, int32 textId, uint32 language, uint64 targetGUID)
-                : i_object(obj), i_msgtype(msgtype), i_textId(textId), i_language(language), i_targetGUID(targetGUID) {}
+                : i_object(obj)
+                , i_msgtype(msgtype)
+                , i_textId(textId)
+                , i_language(language)
+                , i_targetGUID(targetGUID)
+            { }
+
             void operator()(WorldPacket& data, LocaleConstant loc_idx)
             {
-                char const* text = sObjectMgr->GetTrinityString(i_textId, loc_idx);
-
-                // TODO: i_object.GetName() also must be localized?
+                auto const &text = sObjectMgr->GetTrinityString(i_textId, loc_idx);
                 i_object.BuildMonsterChat(&data, i_msgtype, text, i_language, i_object.GetNameForLocaleIdx(loc_idx), i_targetGUID);
             }
 
@@ -2079,8 +2084,14 @@ namespace Trinity
     class MonsterCustomChatBuilder
     {
         public:
-            MonsterCustomChatBuilder(WorldObject const& obj, ChatMsg msgtype, const char* text, uint32 language, uint64 targetGUID)
-                : i_object(obj), i_msgtype(msgtype), i_text(text), i_language(language), i_targetGUID(targetGUID) {}
+            MonsterCustomChatBuilder(WorldObject const& obj, ChatMsg msgtype, std::string const &text, uint32 language, uint64 targetGUID)
+                : i_object(obj)
+                , i_msgtype(msgtype)
+                , i_text(text)
+                , i_language(language)
+                , i_targetGUID(targetGUID)
+            { }
+
             void operator()(WorldPacket& data, LocaleConstant loc_idx)
             {
                 // TODO: i_object.GetName() also must be localized?
@@ -2090,13 +2101,13 @@ namespace Trinity
         private:
             WorldObject const& i_object;
             ChatMsg i_msgtype;
-            const char* i_text;
+            std::string i_text;
             uint32 i_language;
             uint64 i_targetGUID;
     };
 }                                                           // namespace Trinity
 
-void WorldObject::MonsterSay(const char* text, uint32 language, uint64 TargetGuid)
+void WorldObject::MonsterSay(std::string const &text, uint32 language, uint64 TargetGuid)
 {
     CellCoord p = Trinity::ComputeCellCoord(GetPositionX(), GetPositionY());
 
@@ -2124,7 +2135,7 @@ void WorldObject::MonsterSay(int32 textId, uint32 language, uint64 TargetGuid)
     cell.Visit(p, message, *GetMap(), *this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY));
 }
 
-void WorldObject::MonsterYell(const char* text, uint32 language, uint64 TargetGuid)
+void WorldObject::MonsterYell(std::string const &text, uint32 language, uint64 TargetGuid)
 {
     CellCoord p = Trinity::ComputeCellCoord(GetPositionX(), GetPositionY());
 
@@ -2165,7 +2176,7 @@ void WorldObject::MonsterYellToZone(int32 textId, uint32 language, uint64 Target
             say_do(itr->getSource());
 }
 
-void WorldObject::MonsterTextEmote(const char* text, uint64 TargetGuid, bool IsBossEmote)
+void WorldObject::MonsterTextEmote(std::string const &text, uint64 TargetGuid, bool IsBossEmote)
 {
     WorldPacket data;
     BuildMonsterChat(&data, IsBossEmote ? CHAT_MSG_RAID_BOSS_EMOTE : CHAT_MSG_MONSTER_EMOTE, text, LANG_UNIVERSAL, GetName(), TargetGuid);
@@ -2186,7 +2197,7 @@ void WorldObject::MonsterTextEmote(int32 textId, uint64 TargetGuid, bool IsBossE
     cell.Visit(p, message, *GetMap(), *this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE));
 }
 
-void WorldObject::MonsterWhisper(const char* text, uint64 receiver, bool IsBossWhisper)
+void WorldObject::MonsterWhisper(std::string const &text, uint64 receiver, bool IsBossWhisper)
 {
     Player* player = ObjectAccessor::FindPlayer(receiver);
     if (!player || !player->GetSession())
@@ -2207,7 +2218,7 @@ void WorldObject::MonsterWhisper(int32 textId, uint64 receiver, bool IsBossWhisp
         return;
 
     LocaleConstant loc_idx = player->GetSession()->GetSessionDbLocaleIndex();
-    char const* text = sObjectMgr->GetTrinityString(textId, loc_idx);
+    auto const &text = sObjectMgr->GetTrinityString(textId, loc_idx);
 
     WorldPacket data;
     BuildMonsterChat(&data, IsBossWhisper ? CHAT_MSG_RAID_BOSS_WHISPER : CHAT_MSG_MONSTER_WHISPER, text, LANG_UNIVERSAL, GetNameForLocaleIdx(loc_idx), receiver);
@@ -2215,13 +2226,13 @@ void WorldObject::MonsterWhisper(int32 textId, uint64 receiver, bool IsBossWhisp
     player->GetSession()->SendPacket(&data);
 }
 
-void WorldObject::BuildMonsterChat(WorldPacket* data, uint8 msgtype, char const* text, uint32 language, char const* name, uint64 targetGuid) const
+void WorldObject::BuildMonsterChat(WorldPacket* data, uint8 msgtype, std::string const &text, uint32 language, std::string const &name, uint64 targetGuid) const
 {
-    uint32 messageLength = text ? strlen(text) : 0;
-    uint32 speakerNameLength = name ? strlen(name) + 1 : 0;
+    uint32 messageLength = text.size();
+    uint32 speakerNameLength = name.size();
     uint32 prefixeLength = 0;
     Unit* target = ObjectAccessor::FindUnit(targetGuid);
-    uint32 receiverLength = target ? strlen(target->GetName()) : 0;
+    uint32 receiverLength = target ? target->GetName().length() : 0;
     uint32 channelLength = 0;
     std::string channel = ""; // no channel
 

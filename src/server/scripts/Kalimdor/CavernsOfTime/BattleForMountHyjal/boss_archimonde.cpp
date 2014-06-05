@@ -364,13 +364,13 @@ public:
             if (victim && me->IsWithinDistInMap(victim, me->GetAttackDistance(victim)))
                 return false;
 
-            std::list<HostileReference*>& m_threatlist = me->getThreatManager().getThreatList();
-            if (m_threatlist.empty())
+            ThreatContainer::StorageType const &threatlist = me->getThreatManager().getThreatList();
+            if (threatlist.empty())
                 return false;
 
             std::list<Unit*> targets;
-            std::list<HostileReference*>::const_iterator itr = m_threatlist.begin();
-            for (; itr != m_threatlist.end(); ++itr)
+            ThreatContainer::StorageType::const_iterator itr = threatlist.begin();
+            for (; itr != threatlist.end(); ++itr)
             {
                 Unit* unit = Unit::GetUnit(*me, (*itr)->getUnitGuid());
                 if (unit && unit->isAlive())

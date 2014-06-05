@@ -403,7 +403,10 @@ public:
 
                 if (FlyTimer <= diff) //landing
                 {
-                    me->MonsterYell(RAND(*YELL_LAND_PHASE_1, *YELL_LAND_PHASE_2), LANG_UNIVERSAL, 0);
+                    char const *first = YELL_LAND_PHASE_1;
+                    char const *second = YELL_LAND_PHASE_2;
+
+                    me->MonsterYell(RAND(first, second), LANG_UNIVERSAL, 0);
 
                     me->GetMotionMaster()->Clear(false);
                     me->GetMotionMaster()->MovePoint(3, IntroWay[3][0], IntroWay[3][1], IntroWay[3][2]);

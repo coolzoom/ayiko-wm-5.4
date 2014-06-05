@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -28,6 +28,10 @@ EndScriptData */
 #include "PoolMgr.h"
 #include "MapManager.h"
 #include "Chat.h"
+#include "Language.h"
+#include "Player.h"
+#include "Opcodes.h"
+#include "LexicalCast.h"
 
 class gobject_commandscript : public CommandScript
 {
@@ -38,66 +42,49 @@ public:
     {
         static ChatCommand gobjectAddCommandTable[] =
         {
-            { "temp",           SEC_GAMEMASTER,     false, &HandleGameObjectAddTempCommand,   "", NULL },
-            { "",               SEC_GAMEMASTER,     false, &HandleGameObjectAddCommand,       "", NULL },
-            { NULL,             0,                  false, NULL,                              "", NULL }
+            { "temp", rbac::RBAC_PERM_COMMAND_GOBJECT_ADD_TEMP, false, &HandleGameObjectAddTempCommand,   "", NULL },
+            { "",     rbac::RBAC_PERM_COMMAND_GOBJECT_ADD,      false, &HandleGameObjectAddCommand,       "", NULL },
+            { NULL,   0,                                  false, NULL,                              "", NULL }
         };
         static ChatCommand gobjectSetCommandTable[] =
         {
-            { "phase",          SEC_GAMEMASTER,     false, &HandleGameObjectSetPhaseCommand,  "", NULL },
-            { "state",          SEC_GAMEMASTER,     false, &HandleGameObjectSetStateCommand,  "", NULL },
-            { NULL,             0,                  false, NULL,                              "", NULL }
+            { "phase", rbac::RBAC_PERM_COMMAND_GOBJECT_SET_PHASE, false, &HandleGameObjectSetPhaseCommand,  "", NULL },
+            { "state", rbac::RBAC_PERM_COMMAND_GOBJECT_SET_STATE, false, &HandleGameObjectSetStateCommand,  "", NULL },
+            { NULL,    0,                                   false, NULL,                              "", NULL }
         };
         static ChatCommand gobjectCommandTable[] =
         {
-            { "activate",       SEC_GAMEMASTER,     false, &HandleGameObjectActivateCommand,  "", NULL },
-            { "map_activate",   SEC_GAMEMASTER,     false, &HandleGameObjectActivateMapCommand, "", NULL },
-            { "delete",         SEC_GAMEMASTER,     false, &HandleGameObjectDeleteCommand,    "", NULL },
-            { "info",           SEC_GAMEMASTER,     false, &HandleGameObjectInfoCommand,      "", NULL },
-            { "move",           SEC_GAMEMASTER,     false, &HandleGameObjectMoveCommand,      "", NULL },
-            { "near",           SEC_GAMEMASTER,     false, &HandleGameObjectNearCommand,      "", NULL },
-            { "target",         SEC_GAMEMASTER,     false, &HandleGameObjectTargetCommand,    "", NULL },
-            { "turn",           SEC_GAMEMASTER,     false, &HandleGameObjectTurnCommand,      "", NULL },
-            { "bindportal",     SEC_GAMEMASTER,     false, &HandleBindPortalCommand,          "", NULL },
-            { "damage",         SEC_GAMEMASTER,     false, &HandleDamageObjectCommand,        "", NULL },
-            { "add",            SEC_GAMEMASTER,     false, NULL,            "", gobjectAddCommandTable },
-            { "set",            SEC_GAMEMASTER,     false, NULL,            "", gobjectSetCommandTable },
-            { NULL,             0,                  false, NULL,                              "", NULL }
+            { "activate", rbac::RBAC_PERM_COMMAND_GOBJECT_ACTIVATE, false, &HandleGameObjectActivateCommand,  "", NULL },
+            { "delete",   rbac::RBAC_PERM_COMMAND_GOBJECT_DELETE,   false, &HandleGameObjectDeleteCommand,    "", NULL },
+            { "info",     rbac::RBAC_PERM_COMMAND_GOBJECT_INFO,     false, &HandleGameObjectInfoCommand,      "", NULL },
+            { "move",     rbac::RBAC_PERM_COMMAND_GOBJECT_MOVE,     false, &HandleGameObjectMoveCommand,      "", NULL },
+            { "near",     rbac::RBAC_PERM_COMMAND_GOBJECT_NEAR,     false, &HandleGameObjectNearCommand,      "", NULL },
+            { "target",   rbac::RBAC_PERM_COMMAND_GOBJECT_TARGET,   false, &HandleGameObjectTargetCommand,    "", NULL },
+            { "turn",     rbac::RBAC_PERM_COMMAND_GOBJECT_TURN,     false, &HandleGameObjectTurnCommand,      "", NULL },
+            { "add",      rbac::RBAC_PERM_COMMAND_GOBJECT_ADD,      false, NULL,            "", gobjectAddCommandTable },
+            { "set",      rbac::RBAC_PERM_COMMAND_GOBJECT_SET,      false, NULL,            "", gobjectSetCommandTable },
+            { "damage",   rbac::RBAC_PERM_COMMAND_GOBJECT_DAMAGE,   false, &HandleGameObjectDamageCommand,    "", NULL },
+            { "destroy",  rbac::RBAC_PERM_COMMAND_GOBJECT_DESTROY,  false, &HandleGameObjectDestroyCommand,   "", NULL },
+            { NULL,       0,                                  false, NULL,                              "", NULL }
         };
         static ChatCommand commandTable[] =
         {
-            { "gobject",        SEC_GAMEMASTER,     false, NULL,                "", gobjectCommandTable },
-            { NULL,             0,                  false, NULL,                               "", NULL }
+            { "gobject", rbac::RBAC_PERM_COMMAND_GOBJECT, false, NULL, "", gobjectCommandTable },
+            { NULL,      0,                         false, NULL, "", NULL }
         };
         return commandTable;
     }
 
-    static uint32 GetGuidLowFromArgsOrLastTargetedGo(ChatHandler* handler, char const* args)
-    {
-        Player* player = handler->GetSession()->GetPlayer();
-
-        if (*args)
-        {
-            // number or [name] Shift-click form |color|Hgameobject:go_guid|h[name]|h|r
-            char* cId = handler->extractKeyFromLink((char*)args,"Hgameobject");
-            if (!cId)
-                return 0;
-
-            return atoi(cId);
-        }
-        else
-        {
-            if(player->GetLastTargetedGO())
-                return player->GetLastTargetedGO();
-            else
-                return 0;
-        }
-    }
-
     static bool HandleGameObjectActivateCommand(ChatHandler* handler, char const* args)
     {
-        uint32 guidLow = GetGuidLowFromArgsOrLastTargetedGo(handler, args);
+        if (!*args)
+            return false;
 
+        char* id = handler->extractKeyFromLink((char*)args, "Hgameobject");
+        if (!id)
+            return false;
+
+        uint32 guidLow = atoi(id);
         if (!guidLow)
             return false;
 
@@ -123,38 +110,6 @@ public:
         return true;
     }
 
-    static bool HandleGameObjectActivateMapCommand(ChatHandler* handler, const char* args)
-    {
-        uint32 guidLow = GetGuidLowFromArgsOrLastTargetedGo(handler, args);
-
-        if (!guidLow)
-            return false;
-
-        GameObject* obj = NULL;
-
-        // by DB guid
-        if (GameObjectData const* go_data = sObjectMgr->GetGOData(guidLow))
-            obj = handler->GetObjectGlobalyWithGuidOrNearWithDbGuid(guidLow, go_data->id);
-
-        if (!obj)
-        {
-            handler->PSendSysMessage(LANG_COMMAND_OBJNOTFOUND, guidLow);
-            handler->SetSentErrorMessage(true);
-            return false;
-        }
-
-        // Activate
-        obj->setActive(!obj->isActiveObject());
-        WorldDatabase.PExecute("UPDATE gameobject SET isActive = %u WHERE guid = %u", uint8(obj->isActiveObject()), obj->GetGUIDLow());
-
-        if (obj->isActiveObject())
-            handler->PSendSysMessage("Object added to actived objects !");
-        else
-            handler->PSendSysMessage("Object removed from actived objects !");
-
-        return true;
-    }
-
     //spawn go
     static bool HandleGameObjectAddCommand(ChatHandler* handler, char const* args)
     {
@@ -166,7 +121,7 @@ public:
         if (!id)
             return false;
 
-        uint32 objectId = atol(id);
+        uint32 objectId = Trinity::lexicalCast<uint32>(id);
         if (!objectId)
             return false;
 
@@ -222,12 +177,8 @@ public:
             return false;
         }
 
-        // TODO: is it really necessary to add both the real and DB table guid here ?
+        /// @todo is it really necessary to add both the real and DB table guid here ?
         sObjectMgr->AddGameobjectToGrid(guidLow, sObjectMgr->GetGOData(guidLow));
-
-        if (handler->GetSession())
-            if (handler->GetSession()->GetPlayer())
-                handler->GetSession()->GetPlayer()->SetLastTargetedGO(guidLow);
 
         handler->PSendSysMessage(LANG_GAMEOBJECT_ADD, objectId, objectInfo->name.c_str(), guidLow, x, y, z);
         return true;
@@ -279,7 +230,7 @@ public:
             if (!id)
                 return false;
 
-            uint32 objectId = atol(id);
+            uint32 objectId = Trinity::lexicalCast<uint32>(id);
 
             if (objectId)
                 result = WorldDatabase.PQuery("SELECT guid, id, position_x, position_y, position_z, orientation, map, phaseMask, (POW(position_x - '%f', 2) + POW(position_y - '%f', 2) + POW(position_z - '%f', 2)) AS order_ FROM gameobject WHERE map = '%i' AND id = '%u' ORDER BY order_ ASC LIMIT 1",
@@ -331,8 +282,8 @@ public:
 
         bool found = false;
         float x, y, z, o;
-        uint32 guidLow, id;
-        uint16 mapId, phase;
+        uint32 guidLow, id, phase;
+        uint16 mapId;
         uint32 poolId;
 
         do
@@ -345,13 +296,11 @@ public:
             z =       fields[4].GetFloat();
             o =       fields[5].GetFloat();
             mapId =   fields[6].GetUInt16();
-            phase =   fields[7].GetUInt16();
+            phase =   fields[7].GetUInt32();
             poolId =  sPoolMgr->IsPartOfAPool<GameObject>(guidLow);
             if (!poolId || sPoolMgr->IsSpawnedObject<GameObject>(guidLow))
                 found = true;
-        }
-        while
-            (result->NextRow() && !found);
+        } while (result->NextRow() && !found);
 
         if (!found)
         {
@@ -370,7 +319,6 @@ public:
         GameObject* target = handler->GetSession()->GetPlayer()->GetMap()->GetGameObject(MAKE_NEW_GUID(guidLow, id, HIGHGUID_GAMEOBJECT));
 
         handler->PSendSysMessage(LANG_GAMEOBJECT_DETAIL, guidLow, objectInfo->name.c_str(), guidLow, id, x, y, z, mapId, o, phase);
-        player->SetLastTargetedGO(guidLow);
 
         if (target)
         {
@@ -386,11 +334,43 @@ public:
         return true;
     }
 
+    static bool HandleGameObjectDamageCommand(ChatHandler *handler, const char *args)
+    {
+        // number or [name] Shift-click form |color|Hgameobject:go_guid|h[name]|h|r
+        char* id = handler->extractKeyFromLink((char*)args, "Hgameobject");
+        if (!id)
+            return false;
+
+        uint32 guidLow = atoi(id);
+        if (!guidLow)
+            return false;
+
+        GameObject* object = NULL;
+
+        // by DB guid
+        if (GameObjectData const* gameObjectData = sObjectMgr->GetGOData(guidLow))
+            object = handler->GetObjectGlobalyWithGuidOrNearWithDbGuid(guidLow, gameObjectData->id);
+
+        if (!object || object->GetGoType() != GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING)
+        {
+            handler->PSendSysMessage(LANG_COMMAND_OBJNOTFOUND, guidLow);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        object->SetDestructibleState(GO_DESTRUCTIBLE_DAMAGED);
+        return true;
+    }
+
     //delete object by selection or guid
     static bool HandleGameObjectDeleteCommand(ChatHandler* handler, char const* args)
     {
-        uint32 guidLow = GetGuidLowFromArgsOrLastTargetedGo(handler, args);
+        // number or [name] Shift-click form |color|Hgameobject:go_guid|h[name]|h|r
+        char* id = handler->extractKeyFromLink((char*)args, "Hgameobject");
+        if (!id)
+            return false;
 
+        uint32 guidLow = atoi(id);
         if (!guidLow)
             return false;
 
@@ -430,11 +410,43 @@ public:
         return true;
     }
 
+    static bool HandleGameObjectDestroyCommand(ChatHandler *handler, const char *args)
+    {
+        // number or [name] Shift-click form |color|Hgameobject:go_guid|h[name]|h|r
+        char* id = handler->extractKeyFromLink((char*)args, "Hgameobject");
+        if (!id)
+            return false;
+
+        uint32 guidLow = atoi(id);
+        if (!guidLow)
+            return false;
+
+        GameObject* object = NULL;
+
+        // by DB guid
+        if (GameObjectData const* gameObjectData = sObjectMgr->GetGOData(guidLow))
+            object = handler->GetObjectGlobalyWithGuidOrNearWithDbGuid(guidLow, gameObjectData->id);
+
+        if (!object || object->GetGoType() != GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING)
+        {
+            handler->PSendSysMessage(LANG_COMMAND_OBJNOTFOUND, guidLow);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        object->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);
+        return true;
+    }
+
     //turn selected object
     static bool HandleGameObjectTurnCommand(ChatHandler* handler, char const* args)
     {
-        uint32 guidLow = GetGuidLowFromArgsOrLastTargetedGo(handler, args);
+        // number or [name] Shift-click form |color|Hgameobject:go_id|h[name]|h|r
+        char* id = handler->extractKeyFromLink((char*)args, "Hgameobject");
+        if (!id)
+            return false;
 
+        uint32 guidLow = atoi(id);
         if (!guidLow)
             return false;
 
@@ -478,8 +490,12 @@ public:
     //move selected object
     static bool HandleGameObjectMoveCommand(ChatHandler* handler, char const* args)
     {
-        uint32 guidLow = GetGuidLowFromArgsOrLastTargetedGo(handler, args);
+        // number or [name] Shift-click form |color|Hgameobject:go_guid|h[name]|h|r
+        char* id = handler->extractKeyFromLink((char*)args, "Hgameobject");
+        if (!id)
+            return false;
 
+        uint32 guidLow = atoi(id);
         if (!guidLow)
             return false;
 
@@ -539,8 +555,12 @@ public:
     //set phasemask for selected object
     static bool HandleGameObjectSetPhaseCommand(ChatHandler* handler, char const* args)
     {
-        uint32 guidLow = GetGuidLowFromArgsOrLastTargetedGo(handler, args);
+        // number or [name] Shift-click form |color|Hgameobject:go_id|h[name]|h|r
+        char* id = handler->extractKeyFromLink((char*)args, "Hgameobject");
+        if (!id)
+            return false;
 
+        uint32 guidLow = atoi(id);
         if (!guidLow)
             return false;
 
@@ -606,11 +626,10 @@ public:
                 if (!gameObjectInfo)
                     continue;
 
-                handler->PSendSysMessage(LANG_GO_LIST_CHAT, guid, entry, guid, gameObjectInfo->name.c_str(), x, y, z, mapId);
+                handler->PSendSysMessage(LANG_GO_LIST_CHAT, guid, entry, gameObjectInfo->name.c_str(), x, y, z, mapId);
 
                 ++count;
-            }
-            while (result->NextRow());
+            } while (result->NextRow());
         }
 
         handler->PSendSysMessage(LANG_COMMAND_NEAROBJMESSAGE, distance, count);
@@ -632,7 +651,8 @@ public:
                 entry = object->GetEntry();
             else
                 entry = atoi((char*)args);
-        }
+        } else
+                entry = atoi((char*)args);
 
         GameObjectTemplate const* gameObjectInfo = sObjectMgr->GetGameObjectTemplate(entry);
 
@@ -658,8 +678,12 @@ public:
 
     static bool HandleGameObjectSetStateCommand(ChatHandler* handler, char const* args)
     {
-        uint32 guidLow = GetGuidLowFromArgsOrLastTargetedGo(handler, args);
+        // number or [name] Shift-click form |color|Hgameobject:go_id|h[name]|h|r
+        char* id = handler->extractKeyFromLink((char*)args, "Hgameobject");
+        if (!id)
+            return false;
 
+        uint32 guidLow = atoi(id);
         if (!guidLow)
             return false;
 
@@ -705,79 +729,6 @@ public:
             object->SendMessageToSet(&data, true);
         }
         handler->PSendSysMessage("Set gobject type %d state %d", objectType, objectState);
-        return true;
-    }
-
-    static bool HandleBindPortalCommand(ChatHandler* handler, char const* args)
-    {
-        uint32 guidLow = GetGuidLowFromArgsOrLastTargetedGo(handler, args);
-
-        if (!guidLow)
-            return false;
-
-        if (!handler->GetSession())
-            return true;
-
-        Player* pPlayer = handler->GetSession()->GetPlayer();
-
-        if (!pPlayer)
-            return true;
-
-        uint32 mapId = pPlayer->GetMapId();
-        float  posX  = pPlayer->GetPositionX();
-        float  posY  = pPlayer->GetPositionY();
-        float  posZ  = pPlayer->GetPositionZ();
-        float  posO  = pPlayer->GetOrientation();
-
-        WorldDatabase.PExecute("DELETE FROM gameobject_scripts WHERE id = %u AND command = 6;", guidLow);
-        WorldDatabase.PExecute("INSERT INTO gameobject_scripts VALUES (%u, 0, 6, %u, 0, 0, %f, %f, %f, %f);", guidLow, mapId, posX, posY, posZ, posO);
-
-        handler->SendGlobalGMSysMessage("Portal Binded");
-
-        if (sScriptMgr->IsScriptScheduled())
-        {
-            handler->SendSysMessage("DB scripts used currently, please attempt reload later.");
-            handler->SetSentErrorMessage(true);
-            return true;
-        }
-
-        sObjectMgr->LoadGameObjectScripts();
-        return true;
-    }
-
-    static bool HandleDamageObjectCommand(ChatHandler* handler, char const* args)
-    {
-        uint32 guidLow = GetGuidLowFromArgsOrLastTargetedGo(handler, args);
-
-        if (!guidLow)
-            return false;
-
-        if (!handler->GetSession())
-            return false;
-
-        Player* pPlayer = handler->GetSession()->GetPlayer();
-
-        if (!pPlayer)
-            return false;
-
-        GameObject* object = NULL;
-
-        // by DB guid
-        if (GameObjectData const* gameObjectData = sObjectMgr->GetGOData(guidLow))
-            object = handler->GetObjectGlobalyWithGuidOrNearWithDbGuid(guidLow, gameObjectData->id);
-
-        if (!object)
-        {
-            handler->PSendSysMessage(LANG_COMMAND_OBJNOTFOUND, guidLow);
-            handler->SetSentErrorMessage(true);
-            return false;
-
-        }
-        char* damageStr = strtok (NULL, " ");
-        int32 damage = damageStr ? atoi(damageStr) : 0;
-
-        object->ModifyHealth(-damage, pPlayer);
-
         return true;
     }
 };

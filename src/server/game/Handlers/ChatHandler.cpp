@@ -52,7 +52,7 @@ bool WorldSession::processChatmessageFurtherAfterSecurityChecks(std::string& msg
         if (sWorld->getIntConfig(CONFIG_CHAT_STRICT_LINK_CHECKING_SEVERITY) && AccountMgr::IsPlayerAccount(GetSecurity())
                 && !ChatHandler(this).isValidChatMessage(msg.c_str()))
         {
-            TC_LOG_ERROR("network", "Player %s (GUID: %u) sent a chatmessage with an invalid link: %s", GetPlayer()->GetName(),
+            TC_LOG_ERROR("network", "Player %s (GUID: %u) sent a chatmessage with an invalid link: %s", GetPlayer()->GetName().c_str(),
                     GetPlayer()->GetGUIDLow(), msg.c_str());
             if (sWorld->getIntConfig(CONFIG_CHAT_STRICT_LINK_CHECKING_KICK))
                 KickPlayer();
@@ -196,7 +196,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
             else
             {
                 // send in universal language in two side iteration allowed mode
-                if (sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHAT))
+                if (HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHAT))
                     lang = LANG_UNIVERSAL;
                 else
                 {
@@ -241,7 +241,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
     if (sender->HasAura(1852) && type != CHAT_MSG_WHISPER)
     {
         recvData.rfinish();
-        SendNotification(GetTrinityString(LANG_GM_SILENCE), sender->GetName());
+        SendNotification(GetTrinityString(LANG_GM_SILENCE), sender->GetName().c_str());
         return;
     }
 
@@ -289,7 +289,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
         if (msg.empty())
             return;
 
-        if (ChatHandler(this).ParseCommands(msg.c_str()) > 0)
+        if (ChatHandler(this).ParseCommands(msg.c_str()))
             return;
 
         if (!processChatmessageFurtherAfterSecurityChecks(msg, lang))
@@ -305,12 +305,25 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
         case CHAT_MSG_EMOTE:
         case CHAT_MSG_YELL:
         {
-            if (sender->getLevel() < sWorld->getIntConfig(CONFIG_CHAT_SAY_LEVEL_REQ))
+            if (lang != LANG_ADDON && !HasPermission(rbac::RBAC_PERM_SKIP_CHECK_SAY_OR_YELL_REQ))
             {
-                SendNotification(GetTrinityString(LANG_SAY_REQ), sWorld->getIntConfig(CONFIG_CHAT_SAY_LEVEL_REQ));
-                return;
+                if (sender->getLevel() < sWorld->getIntConfig(CONFIG_CHAT_SAY_LEVEL_REQ))
+                {
+                    SendNotification(GetTrinityString(LANG_SAY_REQ), sWorld->getIntConfig(CONFIG_CHAT_SAY_LEVEL_REQ));
+                    return;
+                }
+                if (type == CHAT_MSG_YELL)
+                {
+                    if (uint32 minPlayedTime = sWorld->getIntConfig(CONFIG_CHAT_YELL_PLAYED_TIME_REQ))
+                    {
+                        if (sender->GetTotalPlayedTime() < minPlayedTime * HOUR)
+                        {
+                            SendNotification(GetTrinityString(LANG_YELL_PLAYED_TIME_REQ), minPlayedTime);
+                            return;
+                        }
+                    }
+                }
             }
-
             if (type == CHAT_MSG_SAY)
                 sender->Say(msg, lang);
             else if (type == CHAT_MSG_EMOTE)
@@ -322,43 +335,70 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
         }
         case CHAT_MSG_WHISPER:
         {
-            if (sender->getLevel() < sWorld->getIntConfig(CONFIG_CHAT_WHISPER_LEVEL_REQ))
-            {
-                SendNotification(GetTrinityString(LANG_WHISPER_REQ), sWorld->getIntConfig(CONFIG_CHAT_WHISPER_LEVEL_REQ));
-                return;
-            }
-
             if (!normalizePlayerName(to))
             {
                 SendPlayerNotFoundNotice(to);
                 break;
             }
 
-            Player* receiver = sObjectAccessor->FindPlayerByName(to.c_str());
-            bool senderIsPlayer = AccountMgr::IsPlayerAccount(GetSecurity());
-            bool receiverIsPlayer = AccountMgr::IsPlayerAccount(receiver ? receiver->GetSession()->GetSecurity() : SEC_PLAYER);
-            if (!receiver || (senderIsPlayer && !receiverIsPlayer && !receiver->isAcceptWhispers() && !receiver->IsInWhisperWhiteList(sender->GetGUID())))
+            Player * const receiver = sObjectAccessor->FindPlayerByName(to);
+            if (!receiver)
             {
                 SendPlayerNotFoundNotice(to);
-                return;
+                break;
             }
 
-            if (!sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHAT) && senderIsPlayer && receiverIsPlayer)
-                if (GetPlayer()->GetTeam() != receiver->GetTeam())
+            // Whitelist sender who tries to whisper to GM (if GM accepts whispers)
+            if (receiver->GetSession()->HasPermission(rbac::RBAC_PERM_CAN_FILTER_WHISPERS) && !receiver->HasInWhisperWhiteList(sender->GetGUID()))
+            {
+                if (!receiver->acceptsWhispers())
                 {
-                    SendWrongFactionNotice();
+                    SendPlayerNotFoundNotice(to);
                     return;
                 }
 
+                receiver->AddWhisperWhiteList(sender->GetGUID());
+            }
+
+            if (lang != LANG_ADDON && !sender->isGameMaster() && !receiver->HasInWhisperWhiteList(sender->GetGUID()))
+            {
+                if (sender->getLevel() < sWorld->getIntConfig(CONFIG_CHAT_WHISPER_LEVEL_REQ))
+                {
+                    SendNotification(GetTrinityString(LANG_WHISPER_REQ), sWorld->getIntConfig(CONFIG_CHAT_WHISPER_LEVEL_REQ));
+                    return;
+                }
+
+                if (uint32 minPlayedTime = sWorld->getIntConfig(CONFIG_CHAT_WHISPER_PLAYED_TIME_REQ))
+                {
+                    if (sender->GetTotalPlayedTime() < minPlayedTime * HOUR)
+                    {
+                        SendNotification(GetTrinityString(LANG_WHISPER_PLAYED_TIME_REQ), minPlayedTime);
+                        return;
+                    }
+                }
+            }
+
+            if (GetPlayer()->GetTeam() != receiver->GetTeam()
+                    && !HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHAT)
+                    && !receiver->GetSession()->HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHAT))
+            {
+                SendWrongFactionNotice();
+                return;
+            }
+
             if (GetPlayer()->HasAura(1852) && !receiver->isGameMaster())
             {
-                SendNotification(GetTrinityString(LANG_GM_SILENCE), GetPlayer()->GetName());
+                SendNotification(GetTrinityString(LANG_GM_SILENCE), GetPlayer()->GetName().c_str());
                 return;
             }
 
             // If player is a Gamemaster and doesn't accept whisper, we auto-whitelist every player that the Gamemaster is talking to
-            if (!senderIsPlayer && !sender->isAcceptWhispers() && !sender->IsInWhisperWhiteList(receiver->GetGUID()))
+            // We also do that if a player is under the required level for whispers.
+            if (receiver->getLevel() < sWorld->getIntConfig(CONFIG_CHAT_WHISPER_LEVEL_REQ)
+                    || (HasPermission(rbac::RBAC_PERM_CAN_FILTER_WHISPERS) && !sender->acceptsWhispers() && !sender->HasInWhisperWhiteList(receiver->GetGUID())))
+            {
                 sender->AddWhisperWhiteList(receiver->GetGUID());
+            }
 
             GetPlayer()->Whisper(msg, lang, receiver->GetGUID());
 
@@ -481,22 +521,29 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
         }
         case CHAT_MSG_CHANNEL:
         {
-            if (AccountMgr::IsPlayerAccount(GetSecurity()))
+            if (lang != LANG_ADDON && !HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHAT_CHANNEL_REQ))
             {
                 if (_player->getLevel() < sWorld->getIntConfig(CONFIG_CHAT_CHANNEL_LEVEL_REQ))
                 {
                     SendNotification(GetTrinityString(LANG_CHANNEL_REQ), sWorld->getIntConfig(CONFIG_CHAT_CHANNEL_LEVEL_REQ));
                     return;
                 }
+                if (uint32 minPlayedTime = sWorld->getIntConfig(CONFIG_CHAT_CHANNEL_PLAYED_TIME_REQ))
+                {
+                    if (_player->GetTotalPlayedTime() < minPlayedTime * HOUR)
+                    {
+                        SendNotification(GetTrinityString(LANG_CHANNEL_PLAYED_TIME_REQ), minPlayedTime);
+                        return;
+                    }
+                }
             }
 
-            if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
+            if (ChannelMgr* cMgr = ChannelMgr::forTeam(_player->GetTeam()))
             {
                 if (Channel* chn = cMgr->GetChannel(channel, _player))
                 {
                     sScriptMgr->OnPlayerChat(_player, type, lang, msg, chn);
-
-                    chn->Say(_player->GetGUID(), msg.c_str(), lang);
+                    chn->Say(_player->GetGUID(), msg, lang);
                 }
             }
 
@@ -664,7 +711,7 @@ void WorldSession::HandleAddonMessagechatOpcode(WorldPacket& recvData)
         {
             if (!normalizePlayerName(targetName))
                 break;
-            Player* receiver = sObjectAccessor->FindPlayerByName(targetName.c_str());
+            Player* receiver = sObjectAccessor->FindPlayerByName(targetName);
             if (!receiver)
                 break;
 
@@ -851,7 +898,7 @@ void WorldSession::HandleChatIgnoredOpcode(WorldPacket& recvData)
         return;
 
     WorldPacket data;
-    ChatHandler::FillMessageData(&data, this, CHAT_MSG_IGNORED, LANG_UNIVERSAL, NULL, GetPlayer()->GetGUID(), GetPlayer()->GetName(), NULL);
+    ChatHandler::FillMessageData(&data, this, CHAT_MSG_IGNORED, LANG_UNIVERSAL, NULL, GetPlayer()->GetGUID(), GetPlayer()->GetName().c_str(), NULL);
     player->GetSession()->SendPacket(&data);
 }
 

@@ -554,14 +554,14 @@ void BattlegroundSA::EventPlayerDamagedGO(Player* /*player*/, GameObject* go, ui
         if (uws)
             UpdateWorldState(uws, GateStatus[i]);
 
-        SendWarningToAll(LANG_BG_SA_IS_UNDER_ATTACK, go->GetNameForLocaleIdx(sObjectMgr->GetDBCLocaleIndex()));
+        SendWarningToAll(LANG_BG_SA_IS_UNDER_ATTACK, go->GetNameForLocaleIdx(sObjectMgr->GetDBCLocaleIndex()).c_str());
     }
     else if (eventType == go->GetGOInfo()->building.destroyedEvent)
     {
         if (go->GetGOInfo()->building.destroyedEvent == BG_SA_EVENT_ANCIENT_GATE_DESTROYED)
             SendWarningToAll(LANG_BG_SA_CHAMBER_BREACHED);
         else
-            SendWarningToAll(LANG_BG_SA_WAS_DESTROYED, go->GetNameForLocaleIdx(sObjectMgr->GetDBCLocaleIndex()));
+            SendWarningToAll(LANG_BG_SA_WAS_DESTROYED, go->GetNameForLocaleIdx(sObjectMgr->GetDBCLocaleIndex()).c_str());
     }
 }
 

@@ -112,62 +112,53 @@ void AuctionHouseMgr::SendAuctionWonMail(AuctionEntry* auction, SQLTransaction& 
     if (!pItem)
         return;
 
-    uint32 bidder_accId = 0;
-    uint64 bidder_guid = auction->bidder;
-    Player* bidder = ObjectAccessor::FindPlayer(bidder_guid);
+    uint32 bidderAccId = 0;
+    uint64 bidderGuid = auction->bidder;
+    Player* bidder = ObjectAccessor::FindPlayer(bidderGuid);
     // data for gm.log
-    if (sWorld->getBoolConfig(CONFIG_GM_LOG_TRADE))
+    std::string bidderName;
+    bool logGmTrade = false;
+
+    if (bidder)
     {
-        uint32 bidder_security = 0;
-        std::string bidder_name;
-        if (bidder)
-        {
-            bidder_accId = bidder->GetSession()->GetAccountId();
-            bidder_security = bidder->GetSession()->GetSecurity();
-            bidder_name = bidder->GetName();
-        }
-        else
-        {
-            bidder_accId = sObjectMgr->GetPlayerAccountIdByGUID(bidder_guid);
-            bidder_security = AccountMgr::GetSecurity(bidder_accId, realmID);
+        bidderAccId = bidder->GetSession()->GetAccountId();
+        bidderName = bidder->GetName();
+        logGmTrade = bidder->GetSession()->HasPermission(rbac::RBAC_PERM_LOG_GM_TRADE);
+    }
+    else
+    {
+        bidderAccId = sObjectMgr->GetPlayerAccountIdByGUID(bidderGuid);
+        logGmTrade = AccountMgr::HasPermission(bidderAccId, rbac::RBAC_PERM_LOG_GM_TRADE, realmID);
 
-            if (!AccountMgr::IsPlayerAccount(bidder_security)) // not do redundant DB requests
-            {
-                if (!sObjectMgr->GetPlayerNameByGUID(bidder_guid, bidder_name))
-                    bidder_name = sObjectMgr->GetTrinityStringForDBCLocale(LANG_UNKNOWN);
-            }
-        }
-        if (!AccountMgr::IsPlayerAccount(bidder_security))
-        {
-            std::string owner_name;
-            if (!sObjectMgr->GetPlayerNameByGUID(auction->owner, owner_name))
-                owner_name = sObjectMgr->GetTrinityStringForDBCLocale(LANG_UNKNOWN);
-
-            uint32 owner_accid = sObjectMgr->GetPlayerAccountIdByGUID(auction->owner);
-
-            sLog->outCommand(bidder_accId, "GM %s (Account: %u) won item in auction: %s (Entry: %u Count: %u) and pay money: " UI64FMTD ". Original owner %s (Account: %u)",
-                             bidder_name.c_str(), bidder_accId, pItem->GetTemplate()->Name1.c_str(), pItem->GetEntry(), pItem->GetCount(), auction->bid, owner_name.c_str(), owner_accid);
-        }
+        if (logGmTrade && !sObjectMgr->GetPlayerNameByGUID(bidderGuid, bidderName))
+            bidderName = sObjectMgr->GetTrinityStringForDBCLocale(LANG_UNKNOWN);
     }
 
-    // receiver exists
-    if (bidder || bidder_accId)
+    if (logGmTrade)
     {
-        // set owner to bidder (to prevent delete item with sender char deleting)
-        // owner in `data` will set at mail receive and item extracting
-        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_ITEM_OWNER);
-        stmt->setUInt32(0, GUID_LOPART(auction->bidder));
-        stmt->setUInt32(1, pItem->GetGUIDLow());
-        trans->Append(stmt);
+        std::string ownerName;
+        if (!sObjectMgr->GetPlayerNameByGUID(auction->owner, ownerName))
+            ownerName = sObjectMgr->GetTrinityStringForDBCLocale(LANG_UNKNOWN);
 
+        uint32 ownerAccId = sObjectMgr->GetPlayerAccountIdByGUID(auction->owner);
+
+        sLog->outCommand(bidderAccId, "GM %s (Account: %u) won item in auction: %s (Entry: %u Count: %u) and pay money: %" PRIu64
+                         ". Original owner %s (Account: %u)", bidderName.c_str(), bidderAccId, pItem->GetTemplate()->Name1.c_str(),
+                         pItem->GetEntry(), pItem->GetCount(), auction->bid, ownerName.c_str(), ownerAccId);
+    }
+
+    // receiver exist
+    if (bidder || bidderAccId)
+    {
         if (bidder)
         {
-            bidder->GetSession()->SendAuctionBidderNotification(auction->GetHouseId(), auction->Id, bidder_guid, 0, 0, auction->itemEntry);
+            bidder->GetSession()->SendAuctionBidderNotification(auction->GetHouseId(), auction->Id, bidderGuid, 0, 0, auction->itemEntry);
             // FIXME: for offline player need also
             bidder->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WON_AUCTIONS, 1);
         }
 
-        MailDraft(auction->BuildAuctionMailSubject(AUCTION_WON), AuctionEntry::BuildAuctionMailBody(auction->owner, auction->bid, auction->buyout, 0, 0))
+        MailDraft(auction->BuildAuctionMailSubject(AUCTION_WON),
+                  AuctionEntry::BuildAuctionMailBody(auction->owner, auction->bid, auction->buyout, 0, 0))
             .AddItem(pItem)
             .SendMailTo(trans, MailReceiver(bidder, GUID_LOPART(auction->bidder)), auction, MAIL_CHECK_MASK_COPIED);
     }
@@ -383,12 +374,7 @@ void AuctionHouseMgr::AddAItem(Item* it)
 
 bool AuctionHouseMgr::RemoveAItem(uint32 id)
 {
-    ItemMap::iterator i = mAitems.find(id);
-    if (i == mAitems.end())
-        return false;
-
-    mAitems.erase(i);
-    return true;
+    return mAitems.erase(id) != 0;
 }
 
 void AuctionHouseMgr::Update()
@@ -795,6 +781,10 @@ void AuctionHouseMgr::DeleteExpiredAuctionsAtStartup()
 
         // Delete the auction from the DB
         auction.DeleteFromDB(trans);
+
+        // Item's ownership was moved to mail system
+        if (auction.itemGUIDLow != 0)
+            RemoveAItem(auction.itemGUIDLow);
 
         CharacterDatabase.DirectCommitTransaction(trans);
 

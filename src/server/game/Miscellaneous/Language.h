@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -42,7 +42,7 @@ enum TrinityStrings
     LANG_GMS_ON_SRV                     = 16,
     LANG_GMS_NOT_LOGGED                 = 17,
     LANG_YOU_IN_FLIGHT                  = 18,
-    LANG_UPDATE_DIFF                    = 19,
+    LANG_UPDATE_LAST_DIFF               = 19,
     LANG_SHUTDOWN_TIMELEFT              = 20,
     LANG_CHAR_IN_FLIGHT                 = 21,
     LANG_CHAR_NON_MOUNTED               = 22,
@@ -86,9 +86,30 @@ enum TrinityStrings
     LANG_CONNECTED_PLAYERS              = 60,
     LANG_ACCOUNT_ADDON                  = 61,
     LANG_IMPROPER_VALUE                 = 62,
-    LANG_GUILD_RENAME_ALREADY_EXISTS    = 63,
-    LANG_GUILD_RENAME_DONE              = 64,
-    // Room for more level 0              65-99 not used
+    LANG_RBAC_WRONG_PARAMETER_ID        = 63,
+    LANG_RBAC_WRONG_PARAMETER_REALM     = 64,
+    LANG_RBAC_LIST_HEADER_GRANTED       = 65,
+    LANG_RBAC_LIST_HEADER_DENIED        = 66,
+    LANG_RBAC_LIST_HEADER_BY_SEC_LEVEL  = 67,
+    LANG_RBAC_LIST_PERMISSIONS_HEADER   = 68,
+    LANG_RBAC_LIST_PERMS_LINKED_HEADER  = 69,
+    LANG_RBAC_LIST_EMPTY                = 70,
+    LANG_RBAC_LIST_ELEMENT              = 71,
+    LANG_RBAC_PERM_GRANTED_IN_LIST      = 72,
+    LANG_RBAC_PERM_GRANTED_IN_DENIED_LIST = 73,
+    LANG_RBAC_PERM_GRANTED              = 74,
+    LANG_RBAC_PERM_DENIED_IN_LIST       = 75,
+    LANG_RBAC_PERM_DENIED_IN_GRANTED_LIST = 76,
+    LANG_RBAC_PERM_DENIED               = 77,
+    LANG_RBAC_PERM_REVOKED              = 78,
+    LANG_RBAC_PERM_REVOKED_NOT_IN_LIST  = 79,
+    // Free 80 - 95
+
+
+    LANG_GUILD_RENAME_ALREADY_EXISTS    = 96,
+    LANG_GUILD_RENAME_DONE              = 97,
+    LANG_RENAME_PLAYER_ALREADY_EXISTS   = 98,
+    LANG_RENAME_PLAYER_WITH_NEW_NAME    = 99,
 
     // level 1 chat
     LANG_GLOBAL_NOTIFY                  = 100,
@@ -165,7 +186,7 @@ enum TrinityStrings
     LANG_COMMAND_TELE_NOTFOUND          = 164,
     LANG_COMMAND_TELE_PARAMETER         = 165,
     LANG_COMMAND_TELE_NOLOCATION        = 166,
-    //                                    167               // not used
+    LANG_RESERVED_NAME                  = 167,
     LANG_COMMAND_TELE_LOCATION          = 168,
 
     LANG_MAIL_SENT                      = 169,
@@ -175,16 +196,16 @@ enum TrinityStrings
     LANG_YOU_CHANGE_RUNIC_POWER         = 173,
     LANG_YOURS_RUNIC_POWER_CHANGED      = 174,
     LANG_LIQUID_STATUS                  = 175,
+    LANG_INVALID_GAMEOBJECT_TYPE        = 176,
+    LANG_GAMEOBJECT_DAMAGED             = 177,
 
-    LANG_PHASING_REPORT_STATUS          = 176,
-    LANG_PHASING_NO_DEFINITIONS         = 177,              // Phasing
     LANG_PHASING_SUCCESS                = 178,
     LANG_PHASING_FAILED                 = 179,
     LANG_PHASING_LAST_PHASE             = 180,
     LANG_PHASING_LIST                   = 181,
     LANG_PHASING_PHASEMASK              = 182,
-    LANG_INVALID_GAMEOBJECT_TYPE        = 183,              // Damage on GO
-    LANG_GAMEOBJECT_DAMAGED             = 184,
+    LANG_PHASING_REPORT_STATUS          = 183,
+    LANG_PHASING_NO_DEFINITIONS         = 184,              // Phasing
     // Room for more level 1              185-199 not used
 
     // level 2 chat
@@ -355,7 +376,9 @@ enum TrinityStrings
     LANG_COMMAND_CHEAT_CD               = 360,
     LANG_COMMAND_CHEAT_POWER            = 361,
     LANG_COMMAND_CHEAT_WW               = 362,
-    // Room for more level 2              363-399 not used
+    LANG_COMMAND_WHISPEROFFPLAYER       = 363,
+
+    // Room for more level 2              364-399 not used
 
     // level 3 chat
     LANG_SCRIPTS_RELOADED               = 400,
@@ -417,7 +440,7 @@ enum TrinityStrings
     LANG_COMMAND_GRAVEYARDALRLINKED     = 450,
     LANG_COMMAND_GRAVEYARDLINKED        = 451,
     LANG_COMMAND_GRAVEYARDWRONGZONE     = 452,
-    //                                  = 453, see LANG_PINFO_BAN
+    //                                  = 453, see LANG_PINFO_PLAYER
     LANG_COMMAND_GRAVEYARDERROR         = 454,
     LANG_COMMAND_GRAVEYARD_NOTEAM       = 455,
     LANG_COMMAND_GRAVEYARD_ANY          = 456,
@@ -528,12 +551,9 @@ enum TrinityStrings
     LANG_NPCINFO_TRAINER                = 546,
     LANG_NPCINFO_DUNGEON_ID             = 547,
 
-    LANG_PINFO_ACCOUNT                  = 548,
-    LANG_PINFO_LEVEL                    = 549,
-    LANG_PINFO_MUTE                     = 550,
-    LANG_PINFO_BAN                      = 453,
-    LANG_PINFO_MAP_ONLINE               = 714,
-    LANG_PINFO_MAP_OFFLINE              = 716,
+    //                                  = 548, see LANG_PINFO_GM_ACTIVE
+    //                                  = 549, see LANG_PINFO_BANNED
+    //                                  = 550, see LANG_PINFO_MUTED
 
     LANG_YOU_SET_EXPLORE_ALL            = 551,
     LANG_YOU_SET_EXPLORE_NOTHING        = 552,
@@ -543,7 +563,7 @@ enum TrinityStrings
     LANG_NPC_SETDATA                    = 555,
 
     //! Old ones now free:
-    // LANG_HOVER_DISABLED              = 556,
+    LANG_COMMAND_NEAR_NPC_MESSAGE       = 556,
 
     LANG_YOURS_LEVEL_UP                 = 557,
     LANG_YOURS_LEVEL_DOWN               = 558,
@@ -678,15 +698,10 @@ enum TrinityStrings
     LANG_PLAYER_DND_DEFAULT             = 709,
     LANG_PLAYER_AFK_DEFAULT             = 710,
 
-    LANG_BG_QUEUE_ANNOUNCE_SELF         = 711,
-    LANG_BG_QUEUE_ANNOUNCE_WORLD        = 712,
     LANG_YOUR_ARENA_LEVEL_REQ_ERROR     = 713,
-//                                      = 714, see LANG_PINFO_MAP_ONLINE
+//                                      = 714, see LANG_PINFO_ACC_ACCOUNT
     LANG_YOUR_BG_LEVEL_REQ_ERROR        = 715,
-//                                      = 716, see LANG_PINFO_MAP_OFFLINE
-    LANG_BG_STARTED_ANNOUNCE_WORLD      = 717,
-    LANG_ARENA_QUEUE_ANNOUNCE_WORLD_JOIN= 718,
-    LANG_ARENA_QUEUE_ANNOUNCE_WORLD_EXIT= 719,
+//                                      = 716, see LANG_PINFO_ACC_LASTLOGIN
 
     LANG_BG_GROUP_TOO_LARGE             = 720,              // "Your group is too large for this battleground. Please regroup to join."
     LANG_ARENA_GROUP_TOO_LARGE          = 721,              // "Your group is too large for this arena. Please regroup to join."
@@ -710,18 +725,18 @@ enum TrinityStrings
     LANG_DEBUG_ARENA_OFF                = 738,
     LANG_DEBUG_BG_ON                    = 739,
     LANG_DEBUG_BG_OFF                   = 740,
-    LANG_DIST_ARENA_POINTS_START        = 741,
-    LANG_DIST_ARENA_POINTS_ONLINE_START = 742,
-    LANG_DIST_ARENA_POINTS_ONLINE_END   = 743,
-    LANG_DIST_ARENA_POINTS_TEAM_START   = 744,
-    LANG_DIST_ARENA_POINTS_TEAM_END     = 745,
-    LANG_DIST_ARENA_POINTS_END          = 746,
+//  LANG_DIST_ARENA_POINTS_START        = 741,
+//  LANG_DIST_ARENA_POINTS_ONLINE_START = 742,
+//  LANG_DIST_ARENA_POINTS_ONLINE_END   = 743,
+//  LANG_DIST_ARENA_POINTS_TEAM_START   = 744,
+//  LANG_DIST_ARENA_POINTS_TEAM_END     = 745,
+//  LANG_DIST_ARENA_POINTS_END          = 746,
     LANG_BG_DISABLED                    = 747,
     LANG_ARENA_DISABLED                 = 748,
-//                                      = 749, not used
+//                                      = 749, see LANG_PINFO_ACC_OS
     LANG_BATTLEGROUND_PREMATURE_FINISH_WARNING = 750,       // "Not enough players. This game will close in %u mins."
     LANG_BATTLEGROUND_PREMATURE_FINISH_WARNING_SECS = 751,  // "Not enough players. This game will close in %u seconds."
-//                                      = 752, not used
+//                                      = 752, see LANG_PINFO_ACC_IP
 //  LANG_BG_WS_START_TWO_MINUTES        = 753, - defined above
 //  LANG_BG_AB_START_TWO_MINUTES        = 754, - defined above
 //  LANG_BG_EY_START_TWO_MINUTES        = 755, - defined above
@@ -729,7 +744,9 @@ enum TrinityStrings
     // Room for BG/ARENA                = 773-784, 788-799 not used
     LANG_ARENA_TESTING                  = 785,
     LANG_AUTO_ANN                       = 786,
-    LANG_ANNOUNCE_COLOR                 = 787,
+    LANG_ANNOUNCE_COLOR_GM              = 787,
+    LANG_ANNOUNCE_COLOR_ADMIN           = 788,
+    LANG_ANNOUNCE_COLOR_QA              = 789,
 
     // in game strings
     LANG_PET_INVALID_NAME               = 800,
@@ -754,7 +771,84 @@ enum TrinityStrings
     LANG_COMMAND_CREATURESTORAGE_NOTFOUND  = 818,
 
     LANG_CHANNEL_CITY                   = 819,
-    // Room for in-game strings           820-999 not used
+
+    LANG_NPCINFO_GOSSIP                 = 820,
+    LANG_NPCINFO_QUESTGIVER             = 821,
+    LANG_NPCINFO_TRAINER_CLASS          = 822,
+    LANG_NPCINFO_TRAINER_PROFESSION     = 823,
+    LANG_NPCINFO_VENDOR_AMMO            = 824,
+    LANG_NPCINFO_VENDOR_FOOD            = 825,
+    LANG_NPCINFO_VENDOR_POISON          = 826,
+    LANG_NPCINFO_VENDOR_REAGENT         = 827,
+    LANG_NPCINFO_REPAIR                 = 828,
+    LANG_NPCINFO_FLIGHTMASTER           = 829,
+    LANG_NPCINFO_SPIRITHEALER           = 830,
+    LANG_NPCINFO_SPIRITGUIDE            = 831,
+    LANG_NPCINFO_INNKEEPER              = 832,
+    LANG_NPCINFO_BANKER                 = 833,
+    LANG_NPCINFO_PETITIONER             = 834,
+    LANG_NPCINFO_TABARDDESIGNER         = 835,
+    LANG_NPCINFO_BATTLEMASTER           = 836,
+    LANG_NPCINFO_AUCTIONEER             = 837,
+    LANG_NPCINFO_STABLEMASTER           = 838,
+    LANG_NPCINFO_GUILD_BANKER           = 839,
+    LANG_NPCINFO_SPELLCLICK             = 840,
+    LANG_NPCINFO_MAILBOX                = 841,
+    LANG_NPCINFO_PLAYER_VEHICLE         = 842,
+
+    // Pinfo commands
+    LANG_PINFO_PLAYER                   = 453,
+    LANG_PINFO_GM_ACTIVE                = 548,
+    LANG_PINFO_BANNED                   = 549,
+    LANG_PINFO_MUTED                    = 550,
+    LANG_PINFO_ACC_ACCOUNT              = 714,
+    LANG_PINFO_ACC_LASTLOGIN            = 716,
+    LANG_PINFO_ACC_OS                   = 749,
+    LANG_PINFO_ACC_REGMAILS             = 879,
+    LANG_PINFO_ACC_IP                   = 752,
+    LANG_PINFO_CHR_LEVEL_LOW            = 843,
+    LANG_PINFO_CHR_RACE                 = 844,
+    LANG_PINFO_CHR_ALIVE                = 845,
+    LANG_PINFO_CHR_PHASE                = 846,
+    LANG_PINFO_CHR_MONEY                = 847,
+    LANG_PINFO_CHR_MAP                  = 848,
+    LANG_PINFO_CHR_GUILD                = 849,
+    LANG_PINFO_CHR_GUILD_RANK           = 850,
+    LANG_PINFO_CHR_GUILD_NOTE           = 851,
+    LANG_PINFO_CHR_GUILD_ONOTE          = 852,
+    LANG_PINFO_CHR_PLAYEDTIME           = 853,
+    LANG_PINFO_CHR_MAILS                = 854,
+    LANG_PINFO_CHR_LEVEL_HIGH           = 871,
+
+    LANG_CHARACTER_GENDER_MALE          = 855,
+    LANG_CHARACTER_GENDER_FEMALE        = 856,
+
+    LANG_ARENA_ERROR_NOT_FOUND          = 857,
+    LANG_ARENA_ERROR_NAME_EXISTS        = 858,
+    LANG_ARENA_ERROR_SIZE               = 859,
+    LANG_ARENA_ERROR_COMBAT             = 860,
+    LANG_AREAN_ERROR_NAME_NOT_FOUND     = 861,
+    LANG_ARENA_ERROR_NOT_MEMBER         = 862,
+    LANG_ARENA_ERROR_CAPTAIN            = 863,
+    LANG_ARENA_CREATE                   = 864,
+    LANG_ARENA_DISBAND                  = 865,
+    LANG_ARENA_RENAME                   = 866,
+    LANG_ARENA_CAPTAIN                  = 867,
+    LANG_ARENA_INFO_HEADER              = 868,
+    LANG_ARENA_INFO_MEMBERS             = 869,
+    LANG_ARENA_LOOKUP                   = 870,
+    //                                  = 871, see LANG_PINFO_CHR_LEVEL_HIGH
+    LANG_COMMAND_WRONGEMAIL             = 872,
+    LANG_NEW_EMAILS_NOT_MATCH           = 873,
+    LANG_COMMAND_EMAIL                  = 874,
+    LANG_EMAIL_TOO_LONG                 = 875,
+    LANG_COMMAND_NOTCHANGEEMAIL         = 876,
+    LANG_OLD_EMAIL_IS_NEW_EMAIL         = 877,
+    LANG_COMMAND_EMAIL_OUTPUT           = 878,
+    //                                  = 879, see LANG_PINFO_CHR_REGMAILS
+    LANG_ACCOUNT_SEC_TYPE               = 880,
+    LANG_RBAC_EMAIL_REQUIRED            = 881,
+    // Room for in-game strings           882-999 not used
 
     // Level 4 (CLI only commands)
     LANG_COMMAND_EXIT                   = 1000,
@@ -834,7 +928,12 @@ enum TrinityStrings
     LANG_MOVEGENS_EFFECT                = 1142,
     LANG_MOVEFLAGS_GET                  = 1143,
     LANG_MOVEFLAGS_SET                  = 1144,
-    // Room for more level 3              1144-1150 not used
+    LANG_GROUP_ALREADY_IN_GROUP         = 1145,
+    LANG_GROUP_PLAYER_JOINED            = 1146,
+    LANG_GROUP_NOT_IN_GROUP             = 1147,
+    LANG_GROUP_FULL                     = 1148,
+    LANG_GROUP_TYPE                     = 1149,
+    LANG_GROUP_PLAYER_NAME_GUID         = 1150,
     LANG_LIST_MAIL_HEADER               = 1151,
     LANG_LIST_MAIL_INFO_1               = 1152,
     LANG_LIST_MAIL_INFO_2               = 1153,
@@ -872,8 +971,8 @@ enum TrinityStrings
     LANG_BG_IC_REFINERY                 = 1222,
     LANG_BG_IC_QUARRY                   = 1223,
     LANG_BG_IC_HANGAR                   = 1224,
-    LANG_BG_IC_ALLIANCE                 = 1300,
-    LANG_BG_IC_HORDE                    = 1301,
+    LANG_BG_IC_ALLIANCE                 = 1225,
+    LANG_BG_IC_HORDE                    = 1226,
 
     // Twin Peaks
     LANG_BG_TP_START_TWO_MINUTES        = 1230,
@@ -911,7 +1010,6 @@ enum TrinityStrings
     LANG_BG_BFG_A_NEAR_VICTORY          = 1263,
     LANG_BG_BFG_H_NEAR_VICTORY          = 1264,
     // FREE IDS                           1265-1299
-
     // AV
     LANG_BG_AV_ALLY                     = 1300,
     LANG_BG_AV_HORDE                    = 1301,
@@ -1004,6 +1102,7 @@ enum TrinityStrings
     LANG_COMMAND_TICKETSHOWESCALATEDLIST = 2026,
     LANG_COMMAND_TICKETPENDING          = 2027,
     LANG_COMMAND_TICKETRESET            = 2028,
+    LANG_COMMAND_TICKETLISTRESPONSE     = 2029,
 
     // Trinity strings                    5000-9999
     LANG_COMMAND_FREEZE                 = 5000,
@@ -1025,8 +1124,8 @@ enum TrinityStrings
     LANG_BATTLEGROUND                   = 5015,
     LANG_ARENA                          = 5016,
     LANG_RAID                           = 5017,
-    LANG_HEROIC                         = 5018,
-    LANG_MOUNTABLE                      = 5019,
+                                        //= 5018,
+                                        //= 5019,
     LANG_NPCINFO_PHASEMASK              = 5020,
     LANG_NPCINFO_ARMOR                  = 5021,
     LANG_CHANNEL_ENABLE_OWNERSHIP       = 5022,
@@ -1042,12 +1141,16 @@ enum TrinityStrings
     LANG_COMMAND_NO_BATTLEGROUND_FOUND  = 5032,
     LANG_COMMAND_NO_ACHIEVEMENT_CRITERIA_FOUND = 5033,
     LANG_COMMAND_NO_OUTDOOR_PVP_FORUND  = 5034,
+    LANG_CALL_FOR_HELP                  = 5035,
+    LANG_NPCINFO_EQUIPMENT              = 5036,
     LANG_NPCINFO_MECHANIC_IMMUNE        = 5037,
     LANG_NPCINFO_UNIT_FIELD_FLAGS       = 5038,
-    LANG_SCENARIO                       = 5039,
-    // Room for more Trinity strings      5040-9999
+    // Room for more Trinity strings      5039-9999
 
     // Level requirement notifications
+    LANG_YELL_PLAYED_TIME_REQ           = 6601,
+    LANG_WHISPER_PLAYED_TIME_REQ        = 6602,
+    LANG_CHANNEL_PLAYED_TIME_REQ        = 6603,
     LANG_SAY_REQ                        = 6604,
     LANG_WHISPER_REQ                    = 6605,
     LANG_CHANNEL_REQ                    = 6606,
@@ -1067,6 +1170,27 @@ enum TrinityStrings
 
     LANG_WORLD_CLOSED                    = 7523,
     LANG_WORLD_OPENED                    = 7524,
+
+    LANG_LFG_PLAYER_INFO                = 9980,
+    LANG_LFG_GROUP_INFO                 = 9981,
+    LANG_LFG_NOT_IN_GROUP               = 9982,
+    LANG_LFG_CLEAN                      = 9983,
+    LANG_LFG_OPTIONS                    = 9984,
+    LANG_LFG_OPTIONS_CHANGED            = 9985,
+    LANG_LFG_STATE_NONE                 = 9986,
+    LANG_LFG_STATE_ROLECHECK            = 9987,
+    LANG_LFG_STATE_QUEUED               = 9988,
+    LANG_LFG_STATE_PROPOSAL             = 9989,
+    LANG_LFG_STATE_BOOT                 = 9990,
+    LANG_LFG_STATE_DUNGEON              = 9991,
+    LANG_LFG_STATE_FINISHED_DUNGEON     = 9992,
+    LANG_LFG_STATE_RAIDBROWSER          = 9993,
+    LANG_LFG_ROLE_TANK                  = 9994,
+    LANG_LFG_ROLE_HEALER                = 9995,
+    LANG_LFG_ROLE_DAMAGE                = 9996,
+    LANG_LFG_ROLE_LEADER                = 9997,
+    LANG_LFG_ROLE_NONE                  = 9998,
+    LANG_LFG_ERROR                      = 9999,
 
     // Use for not-in-offcial-sources patches
     //                                    10000-10999
@@ -1153,15 +1277,18 @@ enum TrinityStrings
     LANG_BG_SA_H_GY_EAST                    = 10073, //The Horde captured the East Graveyard!
 
     // Use for custom patches             11000-11999
-    LANG_AUTO_BROADCAST                 = 11000,
     LANG_INVALID_REALMID                = 11001,
-    LANG_NPC_LIST_CHAT                  = 11002,
-
+    LANG_PLR_BANNED                     = 11003,
+    LANG_PLR_BANNED_PERMANENTLY         = 11004,
+    LANG_ACC_BANNED                     = 11005,
+    LANG_ACC_BANNED_PERMANENTLY         = 11006,
+    LANG_IP_BANNED                      = 11007,
+    LANG_IP_BANNED_PERMANENTLY          = 11008,
     LANG_TOO_MANY_PETS                  = 11009,
+    LANG_UPDATE_AVERAGE_DIFF            = 11010,
+    LANG_CURRENT_DIFF_INTERVAL          = 11011,
 
-    LANG_ANTISPAM_ERROR                 = 11013,
-
-    // NOT RESERVED IDS                   11014-1999999999
+    // NOT RESERVED IDS                   12000-1999999999
     // `db_script_string` table index     2000000000-2000009999 (MIN_DB_SCRIPT_STRING_ID-MAX_DB_SCRIPT_STRING_ID)
     // For other tables maybe             2000010000-2147483647 (max index)
 };

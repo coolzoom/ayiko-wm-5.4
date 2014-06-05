@@ -459,9 +459,8 @@ public:
                                 if (!player)
                                     return;
 
-                                std::string sText = ("The grand Amphitheater of Anguish awaits, " + std::string(player->GetName()) + ". Remember, once a battle starts you have to stay in the area. WIN OR DIE!");
-
-                                me->MonsterSay(sText.c_str(), LANG_UNIVERSAL, 0);
+                                std::string sText("The grand Amphitheater of Anguish awaits, " + player->GetName() + ". Remember, once a battle starts you have to stay in the area. WIN OR DIE!");
+                                me->MonsterSay(sText, LANG_UNIVERSAL, 0);
                                 uiTimer = 5000;
                                 uiPhase = 9;
                             }
@@ -471,8 +470,8 @@ public:
                                if (!player)
                                    return;
 
-                                std::string sText = ("Prepare to make you stand, " + std::string(player->GetName()) + "! Get in the Amphitheater and stand ready! Remember, you and your opponent must stay in the arena at all times or you will be disqualified!");
-                                me->MonsterSay(sText.c_str(), LANG_UNIVERSAL, 0);
+                                std::string sText("Prepare to make you stand, " + player->GetName() + "! Get in the Amphitheater and stand ready! Remember, you and your opponent must stay in the arena at all times or you will be disqualified!");
+                                me->MonsterSay(sText, LANG_UNIVERSAL, 0);
                                 uiTimer = 3000;
                                 uiPhase = 8;
                             }
@@ -487,8 +486,8 @@ public:
                                 if (!player)
                                     return;
 
-                                std::string sText = ("Here we are once again, ladies and gentlemen. The epic struggle between life and death in the Amphitheater of Anguish! For this round we have " + std::string(player->GetName()) + " versus the hulking jormungar, Yg... Yggd? Yggdoze? Who comes up with these names?! " + std::string(player->GetName()) + " versus big worm!");
-                                me->MonsterYell(sText.c_str(), LANG_UNIVERSAL, 0);
+                                std::string sText("Here we are once again, ladies and gentlemen. The epic struggle between life and death in the Amphitheater of Anguish! For this round we have " + player->GetName() + " versus the hulking jormungar, Yg... Yggd? Yggdoze? Who comes up with these names?! " + player->GetName() + " versus big worm!");
+                                me->MonsterYell(sText, LANG_UNIVERSAL, 0);
                                 uiTimer = 10000;
                                 uiPhase = 10;
                             }
@@ -508,8 +507,8 @@ public:
                             if (!player)
                                 return;
 
-                            std::string sText = ("Prepare to make you stand, " + std::string(player->GetName()) + "! Get in the Amphitheater and stand ready! Remember, you and your opponent must stay in the arena at all times or you will be disqualified!");
-                            me->MonsterSay(sText.c_str(), LANG_UNIVERSAL, 0);
+                            std::string sText("Prepare to make you stand, " + player->GetName() + "! Get in the Amphitheater and stand ready! Remember, you and your opponent must stay in the arena at all times or you will be disqualified!");
+                            me->MonsterSay(sText, LANG_UNIVERSAL, 0);
                             uiTimer = 5000;
                             uiPhase = 13;
                         }
@@ -889,8 +888,8 @@ public:
         {
             if (Unit* summoner = me->ToTempSummon()->GetSummoner())
             {
-                std::string sText = (std::string(killer->GetName()) + " has defeated Yg.. Yggg-really big worm!");
-                summoner->MonsterYell(sText.c_str(), LANG_UNIVERSAL, 0);
+                std::string sText(killer->GetName() + " has defeated Yg.. Yggg-really big worm!");
+                summoner->MonsterYell(sText, LANG_UNIVERSAL, 0);
             }
 
             if (Player* player = killer->GetCharmerOrOwnerPlayerOrPlayerItself())
@@ -1036,8 +1035,8 @@ public:
             if (Player* player = killer->GetCharmerOrOwnerPlayerOrPlayerItself())
                 player->GetCharmerOrOwnerPlayerOrPlayerItself()->GroupEventHappens(QUEST_AMPHITHEATER_ANGUISH_MAGNATAUR, killer);
 
-            std::string sText = ("And with AUTHORITY, " + std::string(killer->GetName()) + " dominates the magnataur lord! Stinkbeard's clan is gonna miss him back home in the Dragonblight!");
-            me->MonsterYell(sText.c_str(), LANG_UNIVERSAL, 0);
+            std::string sText("And with AUTHORITY, " + killer->GetName() + " dominates the magnataur lord! Stinkbeard's clan is gonna miss him back home in the Dragonblight!");
+            me->MonsterYell(sText, LANG_UNIVERSAL, 0);
         }
     };
 
@@ -1181,10 +1180,10 @@ public:
             if (Player* player = killer->GetCharmerOrOwnerPlayerOrPlayerItself())
                 player->GetCharmerOrOwnerPlayerOrPlayerItself()->GroupEventHappens(QUEST_AMPHITHEATER_ANGUISH_FROM_BEYOND, killer);
 
-            std::string sText = (std::string(killer->GetName()) + " is victorious once more!");
+            std::string sText(killer->GetName() + " is victorious once more!");
 
             if (Unit* summoner = me->ToTempSummon()->GetSummoner())
-                summoner->MonsterYell(sText.c_str(), LANG_UNIVERSAL, 0);
+                summoner->MonsterYell(sText, LANG_UNIVERSAL, 0);
         }
     };
 

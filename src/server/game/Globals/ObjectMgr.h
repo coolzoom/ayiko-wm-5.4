@@ -637,11 +637,8 @@ typedef std::vector<ResearchLootEntry> ResearchLootVector;
 typedef std::vector<ResearchPOIPoint> ResearchPOIPoints;
 typedef std::map<uint32 /*site id*/, ResearchZoneEntry> ResearchZoneMap;
 
-class PlayerDumpReader;
-
 class ObjectMgr
 {
-    friend class PlayerDumpReader;
     friend class ACE_Singleton<ObjectMgr, ACE_Null_Mutex>;
 
     private:
@@ -679,7 +676,7 @@ class ObjectMgr
         void LoadGameObjectTemplate();
         void AddGameobjectInfo(GameObjectTemplate* goinfo);
 
-        CreatureTemplate const* GetCreatureTemplate(uint32 entry);
+        CreatureTemplate const* GetCreatureTemplate(uint32 entry) const;
         CreatureTemplateContainer const* GetCreatureTemplates() const { return &_creatureTemplateStore; }
         CreatureModelInfo const* GetCreatureModelInfo(uint32 modelId);
         CreatureModelInfo const* GetCreatureModelRandomGender(uint32* displayID);
@@ -711,7 +708,7 @@ class ObjectMgr
 
         void GetPlayerLevelInfo(uint32 race, uint32 class_, uint8 level, PlayerLevelInfo* info) const;
 
-        uint64 GetPlayerGUIDByName(std::string name) const;
+        uint64 GetPlayerGUIDByName(std::string const &name) const;
         bool GetPlayerNameByGUID(uint64 guid, std::string &name) const;
         uint32 GetPlayerTeamByGUID(uint64 guid) const;
         uint32 GetPlayerAccountIdByGUID(uint64 guid) const;
@@ -892,7 +889,7 @@ class ObjectMgr
         void LoadCreatureLocales();
         void LoadCreatureTemplates();
         void LoadCreatureTemplateAddons();
-        void CheckCreatureTemplate(CreatureTemplate const* cInfo);
+        void ReplaceCreatureTemplate(uint32 entry, CreatureTemplate const &newTemplate);
         void LoadTempSummons();
         void LoadCreatures();
         void LoadLinkedRespawn();
@@ -968,7 +965,7 @@ class ObjectMgr
         ResearchZoneMap const& GetResearchZoneMap() const { return _researchZoneMap; }
         ResearchLootVector const& GetResearchLoot() const { return _researchLoot; }
 
-        PhaseDefinitionStore const* GetPhaseDefinitionStore() { return &_PhaseDefinitionStore; }
+        PhaseDefinitionMap const* GetPhaseDefinitionStore() { return &_PhaseDefinitionStore; }
         SpellPhaseStore const* GetSpellPhaseStore() { return &_SpellPhaseStore; }
 
         std::string GeneratePetName(uint32 entry);
@@ -1108,8 +1105,8 @@ class ObjectMgr
             if (itr == _trinityStringLocaleStore.end()) return NULL;
             return &itr->second;
         }
-        const char *GetTrinityString(int32 entry, LocaleConstant locale_idx) const;
-        const char *GetTrinityStringForDBCLocale(int32 entry) const { return GetTrinityString(entry, DBCLocaleIndex); }
+        char const * GetTrinityString(int32 entry, LocaleConstant locale_idx) const;
+        char const * GetTrinityStringForDBCLocale(int32 entry) const { return GetTrinityString(entry, DBCLocaleIndex); }
         LocaleConstant GetDBCLocaleIndex() const { return DBCLocaleIndex; }
         void SetDBCLocaleIndex(LocaleConstant locale) { DBCLocaleIndex = locale; }
 
@@ -1340,7 +1337,7 @@ class ObjectMgr
         PageTextContainer _pageTextStore;
         InstanceTemplateContainer _instanceTemplateStore;
 
-        PhaseDefinitionStore _PhaseDefinitionStore;
+        PhaseDefinitionMap _PhaseDefinitionStore;
         SpellPhaseStore _SpellPhaseStore;
 
         uint32 _skipUpdateCount;
@@ -1350,6 +1347,11 @@ class ObjectMgr
         ResearchLootVector _researchLoot;
 
     private:
+        // non-const version for internal use only
+        CreatureTemplate * GetMutableCreatureTemplate(uint32 entry);
+
+        void FixCreatureTemplate(CreatureTemplate &cInfo);
+
         void LoadScripts(ScriptsType type);
         void CheckScripts(ScriptsType type, std::set<int32>& ids);
         void LoadQuestRelationsHelper(QuestRelations& map, std::string table, bool starter, bool go);

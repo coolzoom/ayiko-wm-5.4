@@ -134,14 +134,12 @@ void WorldSession::HandleGuildFinderBrowse(WorldPacket& recvPacket)
         bufferData << uint32(50397223);                                                              // Unk Flags
         bufferData << uint32(guild->GetEmblemInfo().GetColor());
 
-        if (guild->GetName().size() > 0)
-            bufferData.append(guild->GetName().c_str(), guild->GetName().size());
+        bufferData.WriteString(guild->GetName());
 
         bufferData << uint32(guildSettings.GetClassRoles());
         bufferData << uint32(guildSettings.GetAvailability());
 
-        if (guildSettings.GetComment().size() > 0)
-            bufferData.append(guildSettings.GetComment().c_str(), guildSettings.GetComment().size());
+        bufferData.WriteString(guildSettings.GetComment());
 
         bufferData.WriteByteSeq<6, 7>(guildGUID);
         bufferData << uint8(0);                                                                     // Cached
@@ -209,16 +207,14 @@ void WorldSession::HandleGuildFinderGetApplications(WorldPacket& /*recvPacket*/)
             bufferData << uint32(50397223);                             // unk Flags
             bufferData.WriteByteSeq<1, 5, 6>(guildGuid);
 
-            if (request.GetComment().size() > 0)
-                bufferData.append(request.GetComment().c_str(), request.GetComment().size());
+            bufferData.WriteString(request.GetComment());
 
             bufferData.WriteByteSeq<0, 2>(guildGuid);
             bufferData << uint32(guildSettings.GetClassRoles());
             bufferData.WriteByteSeq<4>(guildGuid);
             bufferData << uint32(guildSettings.GetAvailability());
 
-            if (guild->GetName().size() > 0)
-                bufferData.append(guild->GetName().c_str(), guild->GetName().size());
+            bufferData.WriteString(guild->GetName());
 
             bufferData << uint32(time(NULL) - request.GetSubmitTime()); // Time since application (seconds)
             bufferData << uint32(guildSettings.GetInterests());

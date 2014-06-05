@@ -464,7 +464,7 @@ struct AchievementCriteriaEntry
         // ACHIEVEMENT_CRITERIA_TYPE_LOOT_EPIC_ITEM         = 90
         struct
         {
-            uint32  unused;                                 // 
+            uint32  unused;                                 //
             uint32  lootCount;                             // 4
         } loot_epic_item;
 
@@ -947,7 +947,7 @@ struct CreatureFamilyEntry
     uint32  petFoodMask;                                    // 7        m_petFoodMask
     int32   petTalentType;                                  // 8        m_petTalentType
                                                             // 9        m_categoryEnumID
-    char* Name;                                             // 10       m_name_lang
+    char const *Name;                                       // 10       m_name_lang
                                                             // 11       m_iconFile
 };
 

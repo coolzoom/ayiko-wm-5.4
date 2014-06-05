@@ -255,9 +255,9 @@ void ScriptedAI::DoResetThreat()
         return;
     }
 
-    std::list<HostileReference*>& threatlist = me->getThreatManager().getThreatList();
+    ThreatContainer::StorageType threatlist = me->getThreatManager().getThreatList();
 
-    for (std::list<HostileReference*>::iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr)
+    for (ThreatContainer::StorageType::const_iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr)
     {
         Unit* unit = Unit::GetUnit(*me, (*itr)->getUnitGuid());
 
@@ -514,8 +514,8 @@ void BossAI::TeleportCheaters()
 {
     float x, y, z;
     me->GetPosition(x, y, z);
-    std::list<HostileReference*>& threatList = me->getThreatManager().getThreatList();
-    for (std::list<HostileReference*>::iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+    ThreatContainer::StorageType threatList = me->getThreatManager().getThreatList();
+    for (ThreatContainer::StorageType::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
         if (Unit* target = (*itr)->getTarget())
             if (target->GetTypeId() == TYPEID_PLAYER && !CheckBoundary(target))
                 target->NearTeleportTo(x, y, z, 0);

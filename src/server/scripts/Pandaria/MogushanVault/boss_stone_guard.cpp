@@ -577,8 +577,7 @@ class boss_generic_guardian : public CreatureScript
                     case ACTION_PETRIFICATION:
                     {
                         char buf[128];
-                        const char *name = me->GetName();
-                        sprintf(buf, "%s begins to petrify all players !", name);
+                        sprintf(buf, "%s begins to petrify all players !", me->GetName().c_str());
                         me->MonsterTextEmote(buf, 0, true);
                         me->CastSpell(me, spellPetrificationId, true);
                         pInstance->DoCastSpellOnPlayers(spellPetrificationBarId);
@@ -642,7 +641,7 @@ class boss_generic_guardian : public CreatureScript
                         {
                             std::ostringstream text;
                             text << "|cffba2200|Hspell:" << spellOverloadId << "|h[" << sSpellMgr->GetSpellInfo(spellOverloadId)->SpellName << "]|h|r";
-                            me->MonsterTextEmote(text.str().c_str(), 0, true);
+                            me->MonsterTextEmote(text.str(), 0, true);
                             me->CastSpell(me, spellOverloadId, false);
                             me->RemoveAurasDueToSpell(spellPetrificationId);
                             if (pInstance)
@@ -651,8 +650,7 @@ class boss_generic_guardian : public CreatureScript
                         else if (me->GetPower(POWER_ENERGY) >= 85 && !warnedForOverload)
                         {
                             char buf[128];
-                            const char *name = me->GetName();
-                            sprintf(buf, "%s is about to Overload !", name);
+                            sprintf(buf, "%s is about to Overload !", me->GetName().c_str());
                             me->MonsterTextEmote(buf, 0, true);
                             warnedForOverload = true;
                         }

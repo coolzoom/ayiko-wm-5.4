@@ -261,7 +261,7 @@ Item::Item()
 
 Item::~Item()
 {
-    // deleting and item that is still in queue may lead to crashes
+    // deleting an item that is still in queue may lead to crashes
     ASSERT(!IsInUpdateQueue());
 }
 
@@ -272,7 +272,7 @@ bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)
     SetEntry(itemid);
     SetObjectScale(1.0f);
 
-    SetUInt64Value(ITEM_FIELD_OWNER, owner ? owner->GetGUID() : 0);
+    SetOwnerGUID(owner ? owner->GetGUID() : 0);
     SetUInt64Value(ITEM_FIELD_CONTAINED, owner ? owner->GetGUID() : 0);
     SetUInt32Value(ITEM_FIELD_MODIFIERS_MASK, 0);
 
@@ -355,11 +355,24 @@ void Item::SaveToDB(SQLTransaction& trans)
         case ITEM_CHANGED:
         {
             uint8 index = 0;
-            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(uState == ITEM_NEW ? CHAR_REP_ITEM_INSTANCE : CHAR_UPD_ITEM_INSTANCE);
+            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_ITEM_INSTANCE);
             stmt->setUInt32(  index, GetEntry());
-            stmt->setUInt32(++index, GUID_LOPART(GetOwnerGUID()));
-            stmt->setUInt32(++index, GUID_LOPART(GetUInt64Value(ITEM_FIELD_CREATOR)));
-            stmt->setUInt32(++index, GUID_LOPART(GetUInt64Value(ITEM_FIELD_GIFTCREATOR)));
+
+            if (uint32 guid = GUID_LOPART(GetOwnerGUID()))
+                stmt->setUInt32(++index, guid);
+            else
+                stmt->setNull(++index);
+
+            if (uint32 guid = GUID_LOPART(GetUInt64Value(ITEM_FIELD_CREATOR)))
+                stmt->setUInt32(++index, guid);
+            else
+                stmt->setNull(++index);
+
+            if (uint32 guid = GUID_LOPART(GetUInt64Value(ITEM_FIELD_GIFTCREATOR)))
+                stmt->setUInt32(++index, guid);
+            else
+                stmt->setNull(++index);
+
             stmt->setUInt32(++index, GetCount());
             stmt->setUInt32(++index, GetUInt32Value(ITEM_FIELD_DURATION));
 
@@ -379,7 +392,7 @@ void Item::SaveToDB(SQLTransaction& trans)
             }
             stmt->setString(++index, ssEnchants.str());
 
-            stmt->setInt16 (++index, GetItemRandomPropertyId());
+            stmt->setInt16(++index, GetItemRandomPropertyId());
 
             if (!IsBag()) {
                 stmt->setUInt32(++index, GetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 0)); // reforge Id
@@ -398,7 +411,7 @@ void Item::SaveToDB(SQLTransaction& trans)
 
             trans->Append(stmt);
 
-            if ((uState == ITEM_CHANGED) && HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_WRAPPED))
+            if (uState == ITEM_CHANGED && HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_WRAPPED))
             {
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_GIFT_OWNER);
                 stmt->setUInt32(0, GUID_LOPART(GetOwnerGUID()));
@@ -594,9 +607,14 @@ ItemTemplate const* Item::GetTemplate() const
     return sObjectMgr->GetItemTemplate(GetEntry());
 }
 
-Player* Item::GetOwner()const
+Player const * Item::GetOwner() const
 {
-    return ObjectAccessor::FindPlayer(GetOwnerGUID());
+    return ObjectAccessor::GetObjectInOrOutOfWorld(GetOwnerGUID(), (Player *)NULL);
+}
+
+Player * Item::GetOwner()
+{
+    return ObjectAccessor::GetObjectInOrOutOfWorld(GetOwnerGUID(), (Player *)NULL);
 }
 
 uint32 Item::GetSkill() const
@@ -706,12 +724,12 @@ void Item::SetState(ItemUpdateState state, Player* forplayer)
         delete this;
         return;
     }
+
     if (state != ITEM_UNCHANGED)
     {
         // new items must stay in new state until saved
         if (uState != ITEM_NEW)
             uState = state;
-
         AddToUpdateQueueOf(forplayer);
     }
     else
@@ -728,13 +746,7 @@ void Item::AddToUpdateQueueOf(Player* player)
     if (IsInUpdateQueue())
         return;
 
-    ASSERT(player != NULL);
-
-    if (player->GetGUID() != GetOwnerGUID())
-    {
-        TC_LOG_DEBUG("entities.player.items", "Item::AddToUpdateQueueOf - Owner's guid (%u) and player's guid (%u) don't match!", GUID_LOPART(GetOwnerGUID()), player->GetGUIDLow());
-        return;
-    }
+    ASSERT(player);
 
     if (player->m_itemUpdateQueueBlocked)
         return;
@@ -750,9 +762,10 @@ void Item::RemoveFromUpdateQueueOf(Player* player)
 
     ASSERT(player);
 
-    if (player->GetGUID() != GetOwnerGUID())
+    if (player->m_itemUpdateQueue.size() <= uQueuePos || player->m_itemUpdateQueue[uQueuePos] != this)
     {
-        TC_LOG_DEBUG("entities.player.items", "Item::RemoveFromUpdateQueueOf - Owner's guid (%u) and player's guid (%u) don't match!", GUID_LOPART(GetOwnerGUID()), player->GetGUIDLow());
+        TC_LOG_DEBUG("entities.player.items", "Item::RemoveFromUpdateQueueOf - Player (%u) does not own item (%u)!",
+                     player->GetGUIDLow(), GetGUIDLow());
         return;
     }
 
@@ -784,7 +797,7 @@ bool Item::CanBeTraded(bool mail, bool trade) const
     if (IsBag() && (Player::IsBagPos(GetPos()) || !((Bag const*)this)->IsEmpty()))
         return false;
 
-    if (Player* owner = GetOwner())
+    if (auto const owner = GetOwner())
     {
         if (owner->CanUnequipItem(GetPos(), false) != EQUIP_ERR_OK)
             return false;
@@ -1101,8 +1114,17 @@ bool Item::IsBindedNotWith(Player const* player) const
         return false;
 
     // own item
-    if (GetOwnerGUID() == player->GetGUID())
-        return false;
+    switch (auto const ownerGuid = GetOwnerGUID())
+    {
+        case 0:
+            if (player->GetMItem(GetGUIDLow()) || player->HasItemInBuyBack(this))
+                return false;
+            break;
+        default:
+            if (ownerGuid == player->GetGUID())
+                return false;
+            break;
+    }
 
     if (HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_BOP_TRADEABLE))
         if (allowedGUIDs.find(player->GetGUIDLow()) != allowedGUIDs.end())
@@ -1122,10 +1144,8 @@ void Item::BuildUpdate(UpdateDataMapType& data_map)
     ClearUpdateMask(false);
 }
 
-void Item::SaveRefundDataToDB()
+void Item::SaveRefundDataToDB(SQLTransaction& trans)
 {
-    SQLTransaction trans = CharacterDatabase.BeginTransaction();
-
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ITEM_REFUND_INSTANCE);
     stmt->setUInt32(0, GetGUIDLow());
     trans->Append(stmt);
@@ -1136,8 +1156,6 @@ void Item::SaveRefundDataToDB()
     stmt->setUInt32(2, GetPaidMoney());
     stmt->setUInt16(3, uint16(GetPaidExtendedCost()));
     trans->Append(stmt);
-
-    CharacterDatabase.CommitTransaction(trans);
 }
 
 void Item::DeleteRefundDataFromDB(SQLTransaction* trans)
@@ -1231,7 +1249,7 @@ void Item::ClearSoulboundTradeable(Player* currentOwner)
 bool Item::CheckSoulboundTradeExpire()
 {
     // called from owner's update - GetOwner() MUST be valid
-    if (GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME) + 2*HOUR < GetOwner()->GetTotalPlayedTime())
+    if (GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME) + 2 * HOUR < GetOwner()->GetTotalPlayedTime())
     {
         ClearSoulboundTradeable(GetOwner());
         return true; // remove from tradeable list

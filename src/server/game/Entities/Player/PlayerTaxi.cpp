@@ -3,6 +3,7 @@
 #include "MapManager.h"
 #include "ObjectMgr.h"
 #include "Util.h"
+#include "LexicalCast.h"
 
 namespace Trinity {
 
@@ -157,7 +158,7 @@ void PlayerTaxi::LoadTaxiMask(std::string const &data)
     for (auto iter = tokens.begin(); index < TaxiMaskSize && iter != tokens.end(); ++iter, ++index)
     {
         // load and set bits only for existing taxi nodes
-        m_mask[index] = sTaxiNodesMask[index] & uint32(atol(*iter));
+        m_mask[index] = sTaxiNodesMask[index] & Trinity::lexicalCast<uint32>(*iter);
     }
 }
 
@@ -184,7 +185,7 @@ bool PlayerTaxi::LoadTaxiDestinationsFromString(std::string const &values, uint3
     ClearTaxiDestinations();
 
     for (auto const &token : Tokenizer(values, ' '))
-        AddTaxiDestination(uint32(atol(token)));
+        AddTaxiDestination(Trinity::lexicalCast<uint32>(token));
 
     if (m_destinations.empty())
         return true;

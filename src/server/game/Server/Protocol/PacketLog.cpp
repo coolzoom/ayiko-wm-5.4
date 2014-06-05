@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -16,47 +16,44 @@
  */
 
 #include "PacketLog.h"
-#include "Config.h"
-#include "ByteBuffer.h"
 #include "WorldPacket.h"
+#include "Config.h"
 
-PacketLog::PacketLog() : _file(NULL)
-{
-    Initialize();
-}
+#include <ctime>
+
+PacketLog::PacketLog()
+    : file_(NULL)
+{ }
 
 PacketLog::~PacketLog()
 {
-    if (_file)
-        fclose(_file);
-
-    _file = NULL;
+    if (file_)
+        std::fclose(file_);
 }
 
-void PacketLog::Initialize()
+void PacketLog::Initialize(std::string const &logFileName)
 {
+    if (logFileName.empty())
+        return;
+
     std::string logsDir = sConfigMgr->GetStringDefault("LogsDir", "");
+    if (!logsDir.empty() && logsDir.back() != '/' && logsDir.back() != '\\')
+        logsDir.push_back('/');
 
-    if (!logsDir.empty())
-        if ((logsDir.at(logsDir.length()-1) != '/') && (logsDir.at(logsDir.length()-1) != '\\'))
-            logsDir.push_back('/');
-
-    std::string logname = sConfigMgr->GetStringDefault("PacketLogFile", "");
-    if (!logname.empty())
-        _file = fopen((logsDir + logname).c_str(), "wb");
+    file_ = std::fopen((logsDir + logFileName).c_str(), "wb");
 }
 
-void PacketLog::LogPacket(WorldPacket const& packet, Direction direction)
+void PacketLog::LogPacket(WorldPacket const &packet, Direction direction)
 {
-    ByteBuffer data(4+4+4+1+packet.size());
-    data << int32(packet.GetOpcode());
-    data << int32(packet.size());
-    data << uint32(time(NULL));
-    data << uint8(direction);
+    ByteBuffer data(4 + 4 + 4 + 1 + packet.size());
 
-    for (uint32 i = 0; i < packet.size(); i++)
-        data << const_cast<WorldPacket&>(packet)[i];
+    data << uint32(packet.GetOpcode())
+         << uint32(packet.size())
+         << uint32(std::time(NULL))
+         << uint8(direction);
 
-    fwrite(data.contents(), 1, data.size(), _file);
-    fflush(_file);
+    data.append(packet);
+
+    std::fwrite(data.contents(), 1, data.size(), file_);
+    std::fflush(file_);
 }

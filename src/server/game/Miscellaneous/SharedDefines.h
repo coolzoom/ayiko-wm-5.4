@@ -4208,9 +4208,7 @@ enum BanReturn
 {
     BAN_SUCCESS,
     BAN_SYNTAX_ERROR,
-    BAN_NOTFOUND,
-    BAN_TOO_SMALL,
-    BAN_ALREADY_PERMANENT
+    BAN_NOTFOUND
 };
 
 // indexes of BattlemasterList.dbc

@@ -19,245 +19,143 @@
 #include "ScriptedEscortAI.h"
 #include "Vehicle.h"
 
-/*######
-## npc_gnomeregan_survivor
-######*/
-
-class npc_gnomeregan_survivor : public CreatureScript
+class npc_sanitron_500 : public CreatureScript
 {
-public:
-    npc_gnomeregan_survivor() : CreatureScript("npc_gnomeregan_survivor") { }
-
-    CreatureAI* GetAI(Creature* creature) const
+    enum
     {
-        return new npc_gnomeregan_survivorAI (creature);
-    }
-
-    struct npc_gnomeregan_survivorAI : public ScriptedAI
-    {
-        npc_gnomeregan_survivorAI(Creature* creature) : ScriptedAI(creature) {}
-
-        void Reset() {}
-
-        void SpellHit(Unit* Caster, const SpellInfo* Spell)
-        {
-            if (Spell->Id == 86264)
-            {
-                if (Caster->ToPlayer())
-                    Caster->ToPlayer()->KilledMonsterCredit(46268, 0);
-
-                me->ForcedDespawn(1000);
-                me->SetRespawnDelay(15);
-            }
-        }
+        NPC_BUNNY               = 46165,
+        NPC_CLEAN_CANNON        = 46208,
+        SPELL_DECONTAMINATE_1   = 86075,
+        SPELL_DECONTAMINATE_2   = 86084,
+        SPELL_DECONTAMINATE_3   = 86086,
+        SPELL_CANNON_BURST      = 86080,
+        SPELL_IRRADIATED        = 80653,
     };
-};
 
-/*######
-## npc_flying_target_machin
-######*/
-
-class npc_flying_target_machin : public CreatureScript
-{
-public:
-    npc_flying_target_machin() : CreatureScript("npc_flying_target_machin") { }
-
-    CreatureAI* GetAI(Creature* creature) const
+    struct npc_sanitron_500AI : public ScriptedAI
     {
-        return new npc_flying_target_machinAI (creature);
-    }
-
-    struct npc_flying_target_machinAI : public ScriptedAI
-    {
-        npc_flying_target_machinAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_sanitron_500AI(Creature * c) : ScriptedAI(c)
+        {
+            me->SetCorpseDelay(5);
+        }
 
         void Reset()
         {
-            me->SetSpeed(MOVE_FLIGHT, 0.5f);
+            done = false;
+            stepTimer = 2000;
+            nextStep = false;
         }
 
-        void EnterCombat(Unit* /*who*/)
+        bool isClose(float y1, float y2, float size)
         {
-            return;
-        }
-    };
-};
-
-/*######
-## npc_carvo_blastbolt
-######*/
-
-#define QUEST_WITHDRAW_TO_THE_LOADING_ROOM  28169
-#define NPC_IMUN_AGENT                      47836
-
-class npc_carvo_blastbolt : public CreatureScript
-{
-public:
-    npc_carvo_blastbolt() : CreatureScript("npc_carvo_blastbolt") { }
-
-    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
-    {
-        if (quest->GetQuestId() == QUEST_WITHDRAW_TO_THE_LOADING_ROOM)
-            creature->SummonCreature(NPC_IMUN_AGENT, -4985.93f, 776.91f, 288.48f, 3.06f, TEMPSUMMON_MANUAL_DESPAWN, 0, player->GetGUID());
-
-        return true;
-    }
-};
-
-/*######
-## npc_imun_agent_escort
-######*/
-
-class npc_imun_agent_escort : public CreatureScript
-{
-public:
-    npc_imun_agent_escort() : CreatureScript("npc_imun_agent_escort") { }
-
-    struct npc_imun_agent_escortAI : public npc_escortAI
-    {
-        npc_imun_agent_escortAI(Creature* creature) : npc_escortAI(creature){}
-
-        uint32 IntroTimer;
-
-        void Reset()
-        {
-            IntroTimer = 2500;
-            SetEscortPaused(true);
+            float dy = fabs(y1 - y2);
+            return (dy - size) <= 10.0f;
         }
 
-        void WaypointReached(uint32 /*waypointId*/)
+        void CastSpellFromBunny(uint32 spellId)
         {
-            /*if (waypointId == 10)
-                Playemote garde a vous*/
-        }
-
-        void UpdateAI(const uint32 diff)
-        {
-            if (IntroTimer)
-            {
-                if (IntroTimer <= diff)
-                {
-                    IntroTimer = 0;
-                    Start(false, false);
-                }
-                else
-                    IntroTimer -= diff;
-            }
-
-            npc_escortAI::UpdateAI(diff);
-        }
-    };
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_imun_agent_escortAI(creature);
-    }
-};
-
-/*######
-## npc_sanitron
-######*/
-
-#define SPELL_IRRADIE   80653
-
-class npc_sanitron : public CreatureScript
-{
-public:
-    npc_sanitron() : CreatureScript("npc_sanitron") { }
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_sanitronAI (creature);
-    }
-
-    struct npc_sanitronAI : public ScriptedAI
-    {
-        npc_sanitronAI(Creature* creature) : ScriptedAI(creature) {}
-
-        uint32 timer;
-        uint8 phase;
-        Unit* Passenger;
-
-        void Reset()
-        {
-            timer = 0;
-            phase = 0;
-            Passenger = NULL;
-            me->SetWalk(true);
-        }
-
-        void PassengerBoarded(Unit* who, int8 /*seatId*/, bool /*apply*/)
-        {
-            timer = 3000;
-            phase = 1;
-            Passenger = who;
-        }
-
-        void MovementInform(uint32 /*type*/, uint32 id)
-        {
-            switch (id)
-            {
-                case 1:
-                    timer = 2000;
-                    ++phase;
-                    break;
-                case 2:
-                {
-                    timer = 5000;
-                    ++phase;
-
-                    std::list<Creature*> canonList;
-                    GetCreatureListWithEntryInGrid(canonList, me, 46208, 50.0f);
-
-                    for (auto canon : canonList)
-                        canon->CastSpell(me, 1000, false);
-
-                    if (Passenger->ToPlayer())
-                        Passenger->ToPlayer()->AreaExploredOrEventHappens(27635); // Decontamination
-
-                    break;
-                }
-                case 3:
-                    timer = 1000;
-                    ++phase;
-                    me->MonsterSay("Probleme technique, interruption de la sequence", 0, 0);
-                    break;
-            }
-        }
-
-        void UpdateAI(const uint32 diff)
-        {
-            if (!timer || !phase)
+            if (cList.empty())
                 return;
 
-            if (timer > diff)
+            if (Vehicle * veh = me->GetVehicleKit())
             {
-                timer -= diff;
-                return;
-            }
-
-            timer = 0;
-
-            switch(phase)
-            {
-                case 1:
-                    me->GetMotionMaster()->MovePoint(1, -5173.5f, 725.193f, 293.668f);
-                    break;
-                case 2:
-                    me->GetMotionMaster()->MovePoint(2, -5173.97f, 716.153f, 293.668f);
-                    break;
-                case 3:
-                    Passenger->RemoveAurasDueToSpell(SPELL_IRRADIE);
-                    me->GetMotionMaster()->MovePoint(3, -5175.65f, 699.32f, 293.668f);
-                    break;
-                case 4:
-                    me->Kill(me);
-                    me->SetRemoveCorpseDelay(1000);
-                    me->SetRespawnDelay(5);
-                    break;
+                if (Unit * passenger = veh->GetPassenger(0))
+                {
+                    for(NpcList::const_iterator itr = cList.begin(); itr != cList.end(); ++itr)
+                        if (isClose(me->GetPositionY(), (*itr)->GetPositionY(), me->GetObjectSize() + (*itr)->GetObjectSize()))
+                            (*itr)->CastSpell(me, spellId, true);
+                    passenger->CastSpell(passenger, spellId, true);
+                }
             }
         }
+
+        void MovementInform(uint32 type, uint32 id)
+        {
+            if (type == WAYPOINT_MOTION_TYPE)
+            {
+                switch(id)
+                {
+                case 0:
+                     CastSpellFromBunny(SPELL_DECONTAMINATE_1);
+                     break;
+                case 1:
+                    {
+                        Talk(1);
+                        if (Vehicle * veh = me->GetVehicleKit())
+                            if (Unit * passenger = veh->GetPassenger(0))
+                                passenger->RemoveAurasDueToSpell(SPELL_IRRADIATED); // remove Irradiated buff
+
+                        NpcList cannonList;
+                        me->GetCreatureListWithEntryInGrid(cannonList, NPC_CLEAN_CANNON, 30.0f);
+                        if (!cannonList.empty())
+                            for(NpcList::const_iterator itr = cannonList.begin(); itr != cannonList.end(); ++itr)
+                                (*itr)->CastSpell(me, SPELL_CANNON_BURST, true);
+                        break;
+                    }
+                case 2:
+                    {
+                        Talk(2);
+                        CastSpellFromBunny(SPELL_DECONTAMINATE_3);
+                        done = true;
+                        stepTimer = 5000;
+                        break;
+                    }
+                }
+            }
+        }
+
+         void PassengerBoarded(Unit* who, int8 seatId, bool apply)
+         {
+             if (apply)
+             {
+                 if (seatId)
+                 {
+                     who->ChangeSeat(0);
+                 }else
+                 {
+                     me->GetCreatureListWithEntryInGrid(cList, NPC_BUNNY, 50.0f);
+                     Talk(0);
+                     nextStep = true;
+                 }
+             }
+         }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (nextStep)
+            {
+                if (stepTimer <= diff)
+                {
+                    me->GetMotionMaster()->MovePath(4618501, false);
+                    nextStep = false;
+                }else stepTimer -= diff;
+            }
+            else if (done)
+            {
+                if (stepTimer <= diff)
+                {
+                    me->DealDamage(me, me->GetMaxHealth());
+                    me->DespawnOrUnsummon(5000);
+                    done = false;
+                }else stepTimer -= diff;
+            }
+        }
+
+    private:
+        bool nextStep;
+        bool done;
+        uint32 stepTimer;
+        typedef std::list<Creature*> NpcList;
+        NpcList cList;
     };
+
+public:
+    npc_sanitron_500() : CreatureScript("npc_sanitron_500") { }
+
+    CreatureAI * GetAI(Creature * creature) const
+    {
+        return new npc_sanitron_500AI(creature);
+    }
 };
 
 /*######
@@ -300,37 +198,6 @@ public:
             }
         }
     };
-};
-
-/*######
-## npc_carvo_blastbolt
-######*/
-
-#define GOSSIP_TEXT "Envoyez moi a la surface, Torben !"
-
-class npc_gnomeregan_torben : public CreatureScript
-{
-public:
-    npc_gnomeregan_torben() : CreatureScript("npc_gnomeregan_torben") { }
-
-    bool OnGossipHello(Player* player, Creature* creature)
-    {
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_TEXT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-        player->SEND_GOSSIP_MENU(1, creature->GetGUID());
-
-        return true;
-    }
-
-    bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 action)
-    {
-        player->PlayerTalkClass->ClearMenus();
-        if (action == GOSSIP_ACTION_INFO_DEF+1)
-        {
-            player->TeleportTo(0, -5201.58f, 477.98f, 388.47f, 5.13f);
-            player->PlayerTalkClass->SendCloseGossip();
-        }
-        return true;
-    }
 };
 
 /*######
@@ -396,12 +263,7 @@ public:
 
 void AddSC_dun_morogh()
 {
-    new npc_gnomeregan_survivor();
-    new npc_flying_target_machin();
-    new npc_carvo_blastbolt();
-    new npc_imun_agent_escort();
-    new npc_sanitron();
+    new npc_sanitron_500();
     new npc_canon_propre();
-    new npc_gnomeregan_torben();
     new npc_gnomeregan_recrue();
 }

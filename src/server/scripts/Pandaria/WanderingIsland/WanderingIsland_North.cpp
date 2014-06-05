@@ -253,9 +253,6 @@ public:
     {
         boss_jaomin_roAI(Creature* creature) : ScriptedAI(creature)
         {
-            me->SetReactState(REACT_DEFENSIVE);
-            me->SetDisplayId(39755);
-            me->setFaction(14); //mechant!
         }
 
         enum eEvents
@@ -281,12 +278,8 @@ public:
         void Reset()
         {
             isInFalcon = false;
-            me->SetReactState(REACT_DEFENSIVE);
             me->SetDisplayId(39755);
             me->setFaction(2357); //mechant!
-            me->CombatStop(true);
-
-            me->GetMotionMaster()->MovePoint(1, 1380.35f, 3170.68f, 136.93f);
         }
 
         void DamageTaken(Unit* /*attacker*/, uint32& damage)
@@ -357,7 +350,8 @@ public:
                 }
             }
 
-            DoMeleeAttackIfReady();
+            if (UpdateVictim())
+                DoMeleeAttackIfReady();
         }
     };
 };
@@ -1080,6 +1074,44 @@ class AreaTrigger_at_temple_entrance : public AreaTriggerScript
         }
 };
 
+class mob_trainee_nim : public CreatureScript
+{
+public:
+    mob_trainee_nim() : CreatureScript("mob_trainee_nim") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new mob_trainee_nimAI(creature);
+    }
+
+    struct mob_trainee_nimAI : public ScriptedAI
+    {
+        mob_trainee_nimAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+        std::set<uint64> guids;
+
+        void MoveInLineOfSight(Unit * who) override
+        {
+            Player * const player = who->ToPlayer();
+            if (!player)
+                return;
+
+            if(player->GetQuestStatus(29409) != QUEST_STATUS_INCOMPLETE)
+                return
+
+            if (who->GetDistance(me) < 20.f)
+            {
+                if (guids.find(player->GetGUID()) == guids.end())
+                {
+                    Talk(0, player->GetGUID());
+                    guids.insert(player->GetGUID());
+                }
+            }
+        }
+    };
+};
+
 void AddSC_WanderingIsland_North()
 {
     new mob_master_shang_xi();
@@ -1096,4 +1128,5 @@ void AddSC_WanderingIsland_North()
     new boss_li_fei_fight();
     new spell_huo_benediction();
     new AreaTrigger_at_temple_entrance();
+    new mob_trainee_nim();
 }

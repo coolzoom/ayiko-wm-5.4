@@ -671,15 +671,9 @@ void GameObject::SaveToDB(uint32 mapid, uint32 spawnMask, uint32 phaseMask)
     // update in loaded data (changing data only in this place)
     GameObjectData& data = sObjectMgr->NewGOData(m_DBTableGuid);
 
-    uint32 zoneId = 0;
-    uint32 areaId = 0;
-    sMapMgr->GetZoneAndAreaId(zoneId, areaId, mapid, GetPositionX(), GetPositionY(), GetPositionZ());
-
     // data->guid = guid must not be updated at save
     data.id = GetEntry();
     data.mapid = mapid;
-    data.zoneId = zoneId;
-    data.areaId = areaId;
     data.phaseMask = phaseMask;
     data.posX = GetPositionX();
     data.posY = GetPositionY();
@@ -709,8 +703,6 @@ void GameObject::SaveToDB(uint32 mapid, uint32 spawnMask, uint32 phaseMask)
     stmt->setUInt32(index++, m_DBTableGuid);
     stmt->setUInt32(index++, GetEntry());
     stmt->setUInt16(index++, uint16(mapid));
-    stmt->setUInt16(index++, zoneId);
-    stmt->setUInt16(index++, areaId);
     stmt->setUInt32(index++, spawnMask);
     stmt->setUInt16(index++, uint16(GetPhaseMask()));
     stmt->setFloat(index++, GetPositionX());

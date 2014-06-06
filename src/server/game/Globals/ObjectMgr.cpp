@@ -1514,9 +1514,9 @@ void ObjectMgr::LoadCreatures()
 {
     uint32 oldMSTime = getMSTime();
 
-    //                                               0              1   2       3      4       5           6           7           8            9            10            11          12
-    QueryResult result = WorldDatabase.Query("SELECT creature.guid, id, map, zoneId, areaId, modelid, equipment_id, position_x, position_y, position_z, orientation, spawntimesecs, spawndist, "
-    //        13            14         15       16            17         18         19          20          21                22                   23                     24
+    //                                               0              1   2    3        4             5           6           7           8            9              10
+    QueryResult result = WorldDatabase.Query("SELECT creature.guid, id, map, modelid, equipment_id, position_x, position_y, position_z, orientation, spawntimesecs, spawndist, "
+    //   11               12         13       14            15         16         17          18          19                20                   21                     22                     23
         "currentwaypoint, curhealth, curmana, MovementType, spawnMask, phaseMask, eventEntry, pool_entry, creature.npcflag, creature.unit_flags, creature.unit_flags2,  creature.dynamicflags, creature.isActive "
         "FROM creature "
         "LEFT OUTER JOIN game_event_creature ON creature.guid = game_event_creature.guid "
@@ -1537,7 +1537,7 @@ void ObjectMgr::LoadCreatures()
                 if (GetMapDifficultyData(i, Difficulty(k)))
                     spawnMasks[i] |= (1 << k);
 
-    //_creatureDataStore.rehash(result->GetRowCount());
+    _creatureDataStore.rehash(result->GetRowCount());
     uint32 count = 0;
     do
     {
@@ -1558,8 +1558,6 @@ void ObjectMgr::LoadCreatures()
         CreatureData& data = _creatureDataStore[guid];
         data.id             = entry;
         data.mapid          = fields[index++].GetUInt16();
-        data.zoneId         = fields[index++].GetUInt16();
-        data.areaId         = fields[index++].GetUInt16();
         data.displayid      = fields[index++].GetUInt32();
         data.equipmentId    = fields[index++].GetInt32();
         data.posX           = fields[index++].GetFloat();
@@ -1652,15 +1650,6 @@ void ObjectMgr::LoadCreatures()
         // Add to grid if not managed by the game event or pool system
         if (gameEvent == 0 && PoolId == 0)
             AddCreatureToGrid(guid, &data);
-
-        if (!data.zoneId || !data.areaId)
-        {
-            uint32 zoneId = 0;
-            uint32 areaId = 0;
-
-            sMapMgr->GetZoneAndAreaId(zoneId, areaId, data.mapid, data.posX, data.posY, data.posZ);
-            //WorldDatabase.PExecute("UPDATE creature SET zoneId = %u, areaId = %u WHERE guid = %u", zoneId, areaId, guid);
-        }
 
         ++count;
 
@@ -1841,9 +1830,9 @@ void ObjectMgr::LoadGameobjects()
 
     uint32 count = 0;
 
-    //                                                0                1   2    3         4           5           6        7           8
-    QueryResult result = WorldDatabase.Query("SELECT gameobject.guid, id, map, zoneId, areaId, position_x, position_y, position_z, orientation, "
-    //      9          10         11          12         13          14             15      16         17         18        19          20
+    //                                                0               1   2    3           4           5           6
+    QueryResult result = WorldDatabase.Query("SELECT gameobject.guid, id, map, position_x, position_y, position_z, orientation, "
+    //   7          8          9          10         11             12            13     14        15         16         17          18
         "rotation0, rotation1, rotation2, rotation3, spawntimesecs, animprogress, state, isActive, spawnMask, phaseMask, eventEntry, pool_entry "
         "FROM gameobject LEFT OUTER JOIN game_event_gameobject ON gameobject.guid = game_event_gameobject.guid "
         "LEFT OUTER JOIN pool_gameobject ON gameobject.guid = pool_gameobject.guid");
@@ -1863,12 +1852,16 @@ void ObjectMgr::LoadGameobjects()
                 if (GetMapDifficultyData(i, Difficulty(k)))
                     spawnMasks[i] |= (1 << k);
 
+    _gameObjectDataStore.rehash(result->GetRowCount());
+
     do
     {
         Field* fields = result->Fetch();
 
-        uint32 guid         = fields[0].GetUInt32();
-        uint32 entry        = fields[1].GetUInt32();
+        uint8 index = 0;
+
+        uint32 guid         = fields[index++].GetUInt32();
+        uint32 entry        = fields[index++].GetUInt32();
 
         GameObjectTemplate const* gInfo = GetGameObjectTemplate(entry);
         if (!gInfo)
@@ -1899,18 +1892,16 @@ void ObjectMgr::LoadGameobjects()
         GameObjectData& data = _gameObjectDataStore[guid];
 
         data.id             = entry;
-        data.mapid          = fields[2].GetUInt16();
-        data.zoneId         = fields[3].GetUInt16();
-        data.areaId         = fields[4].GetUInt16();
-        data.posX           = fields[5].GetFloat();
-        data.posY           = fields[6].GetFloat();
-        data.posZ           = fields[7].GetFloat();
-        data.orientation    = fields[8].GetFloat();
-        data.rotation0      = fields[9].GetFloat();
-        data.rotation1      = fields[10].GetFloat();
-        data.rotation2      = fields[11].GetFloat();
-        data.rotation3      = fields[12].GetFloat();
-        data.spawntimesecs  = fields[13].GetInt32();
+        data.mapid          = fields[index++].GetUInt16();
+        data.posX           = fields[index++].GetFloat();
+        data.posY           = fields[index++].GetFloat();
+        data.posZ           = fields[index++].GetFloat();
+        data.orientation    = fields[index++].GetFloat();
+        data.rotation0      = fields[index++].GetFloat();
+        data.rotation1      = fields[index++].GetFloat();
+        data.rotation2      = fields[index++].GetFloat();
+        data.rotation3      = fields[index++].GetFloat();
+        data.spawntimesecs  = fields[index++].GetInt32();
 
         MapEntry const* mapEntry = sMapStore.LookupEntry(data.mapid);
         if (!mapEntry)
@@ -1919,41 +1910,31 @@ void ObjectMgr::LoadGameobjects()
             continue;
         }
 
-        if (!data.zoneId || !data.areaId)
-        {
-            uint32 zoneId = 0;
-            uint32 areaId = 0;
-
-            sMapMgr->GetZoneAndAreaId(zoneId, areaId, data.mapid, data.posX, data.posY, data.posZ);
-            //WorldDatabase.PExecute("UPDATE gameobject SET zoneId = %u, areaId = %u WHERE guid = %u", zoneId, areaId, guid);
-        }
-
         if (data.spawntimesecs == 0 && gInfo->IsDespawnAtAction())
         {
             TC_LOG_ERROR("sql.sql", "Table `gameobject` has gameobject (GUID: %u Entry: %u) with `spawntimesecs` (0) value, but the gameobejct is marked as despawnable at action.", guid, data.id);
         }
 
-        data.animprogress   = fields[14].GetUInt8();
+        data.animprogress   = fields[index++].GetUInt8();
         data.artKit         = 0;
 
-        uint32 go_state     = fields[15].GetUInt8();
+        uint32 go_state     = fields[index++].GetUInt8();
         if (go_state >= MAX_GO_STATE)
         {
             TC_LOG_ERROR("sql.sql", "Table `gameobject` has gameobject (GUID: %u Entry: %u) with invalid `state` (%u) value, skip", guid, data.id, go_state);
             continue;
         }
+
         data.go_state       = GOState(go_state);
-
-        data.isActive       = fields[16].GetBool();
-
-        data.spawnMask      = fields[17].GetUInt32();
+        data.isActive       = fields[index++].GetBool();
+        data.spawnMask      = fields[index++].GetUInt32();
 
         if (data.spawnMask & ~spawnMasks[data.mapid])
             TC_LOG_ERROR("sql.sql", "Table `gameobject` has gameobject (GUID: %u Entry: %u) that has wrong spawn mask %u including not supported difficulty modes for map (Id: %u), skip", guid, data.id, data.spawnMask, data.mapid);
 
-        data.phaseMask      = fields[18].GetUInt16();
-        int16 gameEvent     = fields[19].GetInt8();
-        uint32 PoolId        = fields[20].GetUInt32();
+        data.phaseMask      = fields[index++].GetUInt16();
+        int16 gameEvent     = fields[index++].GetInt8();
+        uint32 poolId       = fields[index++].GetUInt32();
 
         if (data.rotation2 < -1.0f || data.rotation2 > 1.0f)
         {
@@ -1979,8 +1960,10 @@ void ObjectMgr::LoadGameobjects()
             data.phaseMask = 1;
         }
 
-        if (gameEvent == 0 && PoolId == 0)                      // if not this is to be managed by GameEvent System or Pool system
+        // if not this is to be managed by GameEvent System or Pool system
+        if (gameEvent == 0 && poolId == 0)
             AddGameobjectToGrid(guid, &data);
+
         ++count;
     }
     while (result->NextRow());

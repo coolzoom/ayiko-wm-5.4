@@ -1127,15 +1127,9 @@ void Creature::SaveToDB(uint32 mapid, uint32 spawnMask, uint32 phaseMask)
             unit_flags2 = 0;
     }
 
-    uint32 zoneId = 0;
-    uint32 areaId = 0;
-    sMapMgr->GetZoneAndAreaId(zoneId, areaId, mapid, GetPositionX(), GetPositionY(), GetPositionZ());
-
     // data->guid = guid must not be updated at save
     data.id = GetEntry();
     data.mapid = mapid;
-    data.zoneId = zoneId;
-    data.areaId = areaId;
     data.phaseMask = phaseMask;
     data.displayid = displayId;
     data.equipmentId = GetEquipmentId();
@@ -1172,8 +1166,6 @@ void Creature::SaveToDB(uint32 mapid, uint32 spawnMask, uint32 phaseMask)
     stmt->setUInt32(index++, m_DBTableGuid);
     stmt->setUInt32(index++, GetEntry());
     stmt->setUInt16(index++, uint16(mapid));
-    stmt->setUInt32(index++, zoneId);
-    stmt->setUInt32(index++, areaId);
     stmt->setUInt8(index++,  spawnMask);
     stmt->setUInt16(index++, uint16(GetPhaseMask()));
     stmt->setUInt32(index++, displayId);

@@ -269,7 +269,6 @@ public:
 
         void EnterCombat(Unit* /*unit*/)
         {
-            Talk(0);
             events.ScheduleEvent(EVENT_JAOMIN_JUMP, 1000);
             events.ScheduleEvent(EVENT_HIT_CIRCLE, 2000);
             events.ScheduleEvent(EVENT_CHECK_AREA, 2500);
@@ -280,6 +279,22 @@ public:
             isInFalcon = false;
             me->SetDisplayId(39755);
             me->setFaction(2357); //mechant!
+        }
+
+        void MoveInLineOfSight(Unit * who) override
+        {
+            Player * const player = who->ToPlayer();
+            if (!player)
+                return;
+
+            if(player->GetQuestStatus(29409) != QUEST_STATUS_INCOMPLETE)
+                return;
+
+            if (who->GetDistance(me) < 15.f)
+            {
+                me->SetStandState(UNIT_STAND_STATE_STAND);
+                Talk(0);
+            }
         }
 
         void DamageTaken(Unit* /*attacker*/, uint32& damage)
@@ -302,6 +317,7 @@ public:
                 for (auto player: playerList)
                     player->KilledMonsterCredit(me->GetEntry(), 0);
 
+                Talk(1);
                 me->CombatStop();
                 me->setFaction(35);
                 me->SetFullHealth();

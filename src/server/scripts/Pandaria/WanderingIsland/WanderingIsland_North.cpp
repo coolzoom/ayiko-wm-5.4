@@ -1098,7 +1098,7 @@ public:
                 return;
 
             if(player->GetQuestStatus(29409) != QUEST_STATUS_INCOMPLETE)
-                return
+                return;
 
             if (who->GetDistance(me) < 20.f)
             {

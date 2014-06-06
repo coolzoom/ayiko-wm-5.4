@@ -2229,10 +2229,10 @@ void WorldObject::MonsterWhisper(int32 textId, uint64 receiver, bool IsBossWhisp
 void WorldObject::BuildMonsterChat(WorldPacket* data, uint8 msgtype, std::string const &text, uint32 language, std::string const &name, uint64 targetGuid) const
 {
     uint32 messageLength = text.size();
-    uint32 speakerNameLength = name.size();
-    uint32 prefixeLength = 0;
+    uint32 speakerNameLength = !name.empty() ? name.size() + 1 : 0;
+    uint32 prefixLength = 0;
     Unit* target = ObjectAccessor::FindUnit(targetGuid);
-    uint32 receiverLength = target ? target->GetName().length() : 0;
+    uint32 receiverLength = target ? target->GetName().size() : 0;
     uint32 channelLength = 0;
     std::string channel = ""; // no channel
 
@@ -2270,8 +2270,8 @@ void WorldObject::BuildMonsterChat(WorldPacket* data, uint8 msgtype, std::string
     data->WriteBitSeq<4, 0, 6, 7, 5, 1, 3, 2>(receiverGuid);
 
     // Never happens for creature
-    if (prefixeLength)
-        data->WriteBits(prefixeLength, 5);
+    if (prefixLength)
+        data->WriteBits(prefixLength, 5);
 
     data->WriteBit(receiverGuid ? 0 : 1);                       // !has receiver
     data->WriteBit(0);                                          // !has chat tag
@@ -2291,6 +2291,8 @@ void WorldObject::BuildMonsterChat(WorldPacket* data, uint8 msgtype, std::string
     data->WriteBit(1);                                          // !has channel
     data->WriteBits(channelLength, 7);
 
+    data->FlushBits();
+
     if (channelLength)
         data->WriteString(channel);
 
@@ -2305,7 +2307,7 @@ void WorldObject::BuildMonsterChat(WorldPacket* data, uint8 msgtype, std::string
     data->WriteByteSeq<7, 6, 5, 4, 0, 2, 1, 3>(senderGuid);
 
     // Never happens for creatures
-    if (prefixeLength)
+    if (prefixLength)
         data->WriteString("");
 
     if (unkBit)

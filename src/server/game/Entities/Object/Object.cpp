@@ -2321,7 +2321,7 @@ void WorldObject::BuildMonsterChat(WorldPacket* data, uint8 msgtype, std::string
     data->WriteByteSeq<1, 0, 3, 7, 6, 5, 2, 4>(guildGuid);
 
     if (receiverLength)
-        data->WriteString("");
+        data->WriteString(target->GetName());
 
     if (bit5256)
         *data << uint32(0);                                         // unk uint32

@@ -1295,7 +1295,7 @@ public:
             if (!player)
                 return;
 
-            if (player->GetQuestStatus(29410) != QUEST_STATUS_COMPLETE)
+            if (player->GetQuestStatus(29410) == QUEST_STATUS_COMPLETE)
             {
                 if (who->GetDistance(me) < 20.f)
                 {

@@ -208,33 +208,170 @@ class mob_tushui_trainee : public CreatureScript
         {
             mob_tushui_trainee_AI(Creature* creature) : ScriptedAI(creature) {}
 
+            bool isInCombat;
+            uint32 punch1;
+            uint32 punch2;
+            uint32 punch3;
+
             void Reset()
             {
+                punch1 = 1000;
+                punch2 = 3500;
+                punch3 = 6000;
+                isInCombat = false;
+
                 me->SetReactState(REACT_DEFENSIVE);
                 me->setFaction(2357);
+                me->SetFullHealth();
             }
 
             void DamageTaken(Unit* attacker, uint32& damage)
             {
-                if (me->HealthBelowPctDamaged(5, damage))
+                if (me->HealthBelowPctDamaged(16.67f, damage))
                 {
+                    me->setFaction(35);
+
                     if(attacker && attacker->GetTypeId() == TYPEID_PLAYER)
                         attacker->ToPlayer()->KilledMonsterCredit(54586, 0);
+
+                    damage = 0;
+
                     me->CombatStop();
+                    isInCombat = false;
+
                     me->SetFullHealth();
                     me->HandleEmoteCommand(EMOTE_ONESHOT_SALUTE);
-                    me->setFaction(35);
                     me->DespawnOrUnsummon(3000);
-                    damage = 0;
                 }
             }
 
-            void UpdateAI(const uint32 /*diff*/)
+            void EnterCombat(Unit* /*unit*/)
             {
-                if (!UpdateVictim())
-                    return;
+                isInCombat = true;
+            }
 
-                DoMeleeAttackIfReady();
+            void JustRespawned()
+            {
+                Reset();
+            }
+
+            void UpdateAI(const uint32 diff)
+            {
+                if (isInCombat)
+                {
+                    if (!UpdateVictim())
+                        return;
+
+                    DoMeleeAttackIfReady();
+                }
+                else
+                {
+                    if (punch1 <= diff)
+                    {
+                        me->HandleEmoteCommand(35);
+                        punch1 = 7500;
+                    }
+                    else
+                        punch1 -= diff;
+
+                    if (punch2 <= diff)
+                    {
+                        me->HandleEmoteCommand(36);
+                        punch2 = 7500;
+                    }
+                    else
+                        punch2 -= diff;
+
+                    if (punch3 <= diff)
+                    {
+                        me->HandleEmoteCommand(37);
+                        punch3 = 7500;
+                    }
+                    else
+                        punch3 -= diff;
+                }
+            }
+        };
+};
+
+class mob_huojin_trainee : public CreatureScript
+{
+    public:
+        mob_huojin_trainee() : CreatureScript("mob_huojin_trainee") { }
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new mob_huojin_traineeAI(creature);
+        }
+
+        struct mob_huojin_traineeAI : public ScriptedAI
+        {
+            mob_huojin_traineeAI(Creature* creature) : ScriptedAI(creature)
+            {
+            }
+
+            uint8 punch;
+            bool isInCombat;
+
+            void Reset()
+            {
+                punch = urand(500, 3000);
+                isInCombat = false;
+
+                me->SetReactState(REACT_DEFENSIVE);
+                me->setFaction(2357);
+                me->SetFullHealth();
+            }
+
+            void DamageTaken(Unit* attacker, uint32& damage)
+            {
+                if (me->HealthBelowPctDamaged(16.67f, damage))
+                {
+                    me->setFaction(35);
+
+                    if(attacker && attacker->GetTypeId() == TYPEID_PLAYER)
+                        attacker->ToPlayer()->KilledMonsterCredit(54586, 0);
+
+                    damage = 0;
+
+                    me->CombatStop();
+                    isInCombat = false;
+
+                    me->SetFullHealth();
+                    me->HandleEmoteCommand(EMOTE_ONESHOT_SALUTE);
+                    me->DespawnOrUnsummon(3000);
+                }
+            }
+
+            void EnterCombat(Unit* /*unit*/)
+            {
+                isInCombat = true;
+            }
+
+            void JustRespawned()
+            {
+                Reset();
+            }
+
+            void UpdateAI(const uint32 diff)
+            {
+                if (isInCombat)
+                {
+                    if (!UpdateVictim())
+                        return;
+
+                    DoMeleeAttackIfReady();
+                }
+                else
+                {
+                    if (punch <= diff)
+                    {
+                        me->HandleEmoteCommand(35);
+                        punch = urand(500, 3000);
+                    }
+                    else
+                        punch -= diff;
+                }
             }
         };
 };
@@ -1128,12 +1265,128 @@ public:
     };
 };
 
+class mob_instructors : public CreatureScript
+{
+public:
+    mob_instructors() : CreatureScript("mob_instructors") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new mob_instructorsAI(creature);
+    }
+
+    struct mob_instructorsAI : public ScriptedAI
+    {
+        EventMap events;
+        uint8 rand;
+
+        mob_instructorsAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        uint32 punch1;
+        uint32 punch2;
+        uint32 punch3;
+
+        void Reset()
+        {
+            punch1 = 300;
+            punch2 = 2800;
+            punch3 = 5300;
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (punch1 <= diff)
+            {
+                me->HandleEmoteCommand(35);
+                punch1 = 7500;
+            }
+            else
+                punch1 -= diff;
+
+            if (punch2 <= diff)
+            {
+                me->HandleEmoteCommand(36);
+                punch2 = 7500;
+            }
+            else
+                punch2 -= diff;
+
+            if (punch3 <= diff)
+            {
+                me->HandleEmoteCommand(37);
+                punch3 = 7500;
+            }
+            else
+                punch3 -= diff;
+        }
+    };
+};
+
+class mob_aspiring_trainee : public CreatureScript
+{
+public:
+    mob_aspiring_trainee() : CreatureScript("mob_aspiring_trainee") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new mob_aspiring_traineeAI(creature);
+    }
+
+    struct mob_aspiring_traineeAI : public ScriptedAI
+    {
+        mob_aspiring_traineeAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        uint32 punch1;
+        uint32 punch2;
+        uint32 punch3;
+
+        void Reset()
+        {
+            punch1 = 1000;
+            punch2 = 3500;
+            punch3 = 6000;
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (punch1 <= diff)
+            {
+                me->HandleEmoteCommand(35);
+                punch1 = 7500;
+            }
+            else
+                punch1 -= diff;
+
+            if (punch2 <= diff)
+            {
+                me->HandleEmoteCommand(36);
+                punch2 = 7500;
+            }
+            else
+                punch2 -= diff;
+
+            if (punch3 <= diff)
+            {
+                me->HandleEmoteCommand(37);
+                punch3 = 7500;
+            }
+            else
+                punch3 -= diff;
+        }
+    };
+};
+
 void AddSC_WanderingIsland_North()
 {
     new mob_master_shang_xi();
     new go_wandering_weapon_rack();
     new mob_training_target();
     new mob_tushui_trainee();
+    new mob_huojin_trainee();
     new boss_jaomin_ro();
     new mob_attacker_dimwind();
     new mob_min_dimwind();
@@ -1145,4 +1398,6 @@ void AddSC_WanderingIsland_North()
     new spell_huo_benediction();
     new AreaTrigger_at_temple_entrance();
     new mob_trainee_nim();
+    new mob_instructors();
+    new mob_aspiring_trainee();
 }

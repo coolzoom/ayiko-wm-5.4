@@ -6,3 +6,6 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `probabil
 ('54611', '1', '3', 'It was an honor to be defeated by you.', '12', '100', 'Raufen - Talk on combat end'),
 ('54611', '1', '4', 'Well fought. Master Shang will be pleased.', '12', '100', 'Raufen - Talk on combat end'),
 ('54611', '1', '5', 'You\'ve been trained well.', '12', '100', 'Raufen - Talk on combat end');
+
+-- The Lesson of the Sandy Fist
+UPDATE `quest_template` SET `SuggestedPlayers`='0' WHERE (`Id`='29406');

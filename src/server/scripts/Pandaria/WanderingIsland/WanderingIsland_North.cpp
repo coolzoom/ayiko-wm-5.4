@@ -429,8 +429,11 @@ public:
 
             if (who->GetDistance(me) < 15.f)
             {
-                me->SetStandState(UNIT_STAND_STATE_STAND);
-                Talk(0);
+                if (me->getStandState() != UNIT_STAND_STATE_STAND)
+                {
+                    Talk(0);
+                    me->SetStandState(UNIT_STAND_STATE_STAND);
+                }
             }
         }
 

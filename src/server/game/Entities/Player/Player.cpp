@@ -28702,14 +28702,9 @@ void Player::CheckSpellAreaOnQuestStatusChange(uint32 quest_id)
             if (zone != itr->second->areaId && area != itr->second->areaId)
                 continue;
 
-            if (itr->second->IsFitToRequirements(this, zone, area))
-            {
-                if (itr->second->autocast)
-                    if (!HasAura(itr->second->spellId))
-                        CastSpell(this, itr->second->spellId, true);
-            }
-            else
-                RemoveAurasDueToSpell(itr->second->spellId);
+            if (itr->second->autocast && itr->second->IsFitToRequirements(this, zone, area))
+                if (!HasAura(itr->second->spellId))
+                    CastSpell(this, itr->second->spellId, true);
         }
     }
 
@@ -28724,13 +28719,7 @@ void Player::CheckSpellAreaOnQuestStatusChange(uint32 quest_id)
             if (zone != itr->second->areaId && area != itr->second->areaId)
                 continue;
 
-            if (itr->second->IsFitToRequirements(this, zone, area))
-            {
-                if (itr->second->autocast)
-                    if (!HasAura(itr->second->spellId))
-                        CastSpell(this, itr->second->spellId, true);
-            }
-            else
+            if (!itr->second->IsFitToRequirements(this, zone, area))
                 RemoveAurasDueToSpell(itr->second->spellId);
         }
     }

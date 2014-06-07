@@ -117,14 +117,16 @@ class AreaTrigger_at_wind_temple_entrance : public AreaTriggerScript
         {
             if (player->GetQuestStatus(29785) == QUEST_STATUS_INCOMPLETE)
             {
-                if (Creature* aysa = player->SummonCreature(55744, 665.60f, 4220.66f, 201.93f, 1.93f, TEMPSUMMON_MANUAL_DESPAWN, 0, player->GetGUID()))
-                    aysa->AI()->SetGUID(player->GetGUID());
+                if (player->m_lastEntrySummon != 55744)
+                    if (Creature* aysa = player->SummonCreature(55744, 665.60f, 4220.66f, 201.93f, 1.93f, TEMPSUMMON_MANUAL_DESPAWN, 0, player->GetGUID()))
+                        aysa->AI()->SetGUID(player->GetGUID());
             }
 
             return true;
         }
 };
 
+// @todo - script texts
 class mob_aysa_wind_temple_escort : public CreatureScript
 {
     public:
@@ -159,16 +161,18 @@ class mob_aysa_wind_temple_escort : public CreatureScript
         {
             switch (waypointId)
             {
-                case 1:
+                case 2:
                     SetEscortPaused(true);
                     me->SetFacingTo(2.38f);
                     break;
-                case 6:
+                case 7:
                     SetEscortPaused(true);
                     break;
-                case 8:
+                case 10:
                     if (Player* player = ObjectAccessor::GetPlayer(*me, playerGuid))
                         player->KilledMonsterCredit(55666);
+
+                    me->DespawnOrUnsummon(10000);
                     break;
                 default:
                     break;
@@ -235,7 +239,7 @@ public:
                 if (!me->HasAura(SPELL_TORNADE))
                 {
                     std::list<Creature*> aysaList;
-                    GetCreatureListWithEntryInGrid(aysaList, me, 55744, 35.0f);
+                    GetCreatureListWithEntryInGrid(aysaList, me, 55744, 50.0f);
 
                     for (auto aysa: aysaList)
                         aysa->AI()->DoAction(1);

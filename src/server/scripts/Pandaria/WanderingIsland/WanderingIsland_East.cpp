@@ -72,11 +72,11 @@ class vehicle_balance_pole : public VehicleScript
     public:
         vehicle_balance_pole() : VehicleScript("vehicle_balance_pole") {}
 
-        void OnAddPassenger(Vehicle* /*veh*/, Unit* passenger, int8 /*seatId*/)
-        {
-            if (passenger->HasAura(102938))
-                passenger->ExitVehicle();
-        }
+        //void OnAddPassenger(Vehicle* /*veh*/, Unit* passenger, int8 /*seatId*/)
+        //{
+        //    if (passenger->HasAura(102938))
+        //        passenger->ExitVehicle();
+        //}
 
         /*void OnRemovePassenger(Vehicle* veh, Unit* passenger)
         {

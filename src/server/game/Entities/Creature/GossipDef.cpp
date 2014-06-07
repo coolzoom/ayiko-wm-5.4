@@ -964,7 +964,7 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* quest) const
         data.append(questTurnTextWindow.c_str(), questTurnTextWindow.size());
     data << uint32(quest->GetSoundTurnIn());
     data << uint32(quest->GetXPId());
-    data << uint32(quest->GetFlags() & 0xFFFF);
+    data << uint32(quest->GetFlags() & QUEST_ALLOWED_FLAGS_MASK);
     if (questCompletedText.size())
         data.append(questCompletedText.c_str(), questCompletedText.size());
     data << uint32(quest->GetQuestLevel());

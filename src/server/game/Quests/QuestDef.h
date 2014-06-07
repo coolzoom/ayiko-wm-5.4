@@ -77,7 +77,7 @@ enum QuestShareMessages
     QUEST_PARTY_MSG_NOT_IN_PARTY            = 10
 };
 
-enum __QuestTradeSkill
+enum QuestTradeSkill
 {
     QUEST_TRSKILL_NONE           = 0,
     QUEST_TRSKILL_ALCHEMY        = 1,
@@ -108,7 +108,7 @@ enum QuestStatus
     MAX_QUEST_STATUS
 };
 
-enum __QuestGiverStatus
+enum QuestGiverStatus
 {
     DIALOG_STATUS_NONE                     = 0x000,
     DIALOG_STATUS_UNK                      = 0x001,
@@ -124,40 +124,46 @@ enum __QuestGiverStatus
     DIALOG_STATUS_REWARD                   = 0x400          // yellow dot on minimap
 };
 
-enum __QuestFlags
+enum QuestFlags
 {
-    // Flags used at server and sent to client
-    QUEST_FLAGS_NONE           = 0x00000000,
-    QUEST_FLAGS_STAY_ALIVE     = 0x00000001,                // Not used currently
-    QUEST_FLAGS_PARTY_ACCEPT   = 0x00000002,                // Not used currently. If player in party, all players that can accept this quest will receive confirmation box to accept quest CMSG_QUEST_CONFIRM_ACCEPT/SMSG_QUEST_CONFIRM_ACCEPT
-    QUEST_FLAGS_EXPLORATION    = 0x00000004,                // Not used currently
-    QUEST_FLAGS_SHARABLE       = 0x00000008,                // Can be shared: Player::CanShareQuest()
-    //QUEST_FLAGS_NONE2        = 0x00000010,                // Not used currently
-    QUEST_FLAGS_EPIC           = 0x00000020,                // Not used currently: Unsure of content
-    QUEST_FLAGS_RAID           = 0x00000040,                // Not used currently
-    QUEST_FLAGS_TBC            = 0x00000080,                // Not used currently: Available if TBC expansion enabled only
-    QUEST_FLAGS_DELIVER_MORE   = 0x00000100,                // Not used currently: _DELIVER_MORE Quest needs more than normal _q-item_ drops from mobs
-    QUEST_FLAGS_HIDDEN_REWARDS = 0x00000200,                // Items and money rewarded only sent in SMSG_QUESTGIVER_OFFER_REWARD (not in SMSG_QUESTGIVER_QUEST_DETAILS or in client quest log(SMSG_QUEST_QUERY_RESPONSE))
-    QUEST_FLAGS_AUTO_REWARDED  = 0x00000400,                // These quests are automatically rewarded on quest complete and they will never appear in quest log client side.
-    QUEST_FLAGS_TBC_RACES      = 0x00000800,                // Not used currently: Blood elf/Draenei starting zone quests
-    QUEST_FLAGS_DAILY          = 0x00001000,                // Used to know quest is Daily one
-    QUEST_FLAGS_REPEATABLE     = 0x00002000,                // Used on repeatable quests (3.0.0+)
-    QUEST_FLAGS_UNAVAILABLE    = 0x00004000,                // Used on quests that are not generically available
-    QUEST_FLAGS_WEEKLY         = 0x00008000,
-    QUEST_FLAGS_AUTOCOMPLETE   = 0x00010000,                // auto complete
-    QUEST_FLAGS_SPECIAL_ITEM   = 0x00020000,                // has something to do with RequiredItemId and SourceItemId
-    QUEST_FLAGS_OBJ_TEXT       = 0x00040000,                // use Objective text as Complete text
-    QUEST_FLAGS_AUTO_ACCEPT    = 0x00080000,                // The client recognizes this flag as auto-accept. However, NONE of the current quests (3.3.5a) have this flag. Maybe blizz used to use it, or will use it in the future.
-    QUEST_FLAGS_AUTO_SUBMIT    = 0x00100000,                // Quests with this flag player submit automatically by special button in player gui
-    QUEST_FLAGS_AUTO_TAKE      = 0x00200000,                // Automatically suggestion of accepting quest. Not from npc.
-    //QUEST_FLAGS_UNK2           = 0x00400000,
-    //QUEST_FLAGS_UNK3           = 0x00800000,                // Found in quest 14069
-    //QUEST_FLAGS_UNK4           = 0x01000000,
+    QUEST_FLAGS_NONE                      = 0x00000000,
+    QUEST_FLAGS_STAY_ALIVE                = 0x00000001,   // Not used currently
+    QUEST_FLAGS_PARTY_ACCEPT              = 0x00000002,   // Not used currently. If player in party, all players that can accept this quest will receive confirmation box to accept quest CMSG_QUEST_CONFIRM_ACCEPT/SMSG_QUEST_CONFIRM_ACCEPT
+    QUEST_FLAGS_EXPLORATION               = 0x00000004,   // Not used currently
+    QUEST_FLAGS_SHARABLE                  = 0x00000008,   // Can be shared: Player::CanShareQuest()
+    QUEST_FLAGS_HAS_CONDITION             = 0x00000010,   // Not used currently
+    QUEST_FLAGS_HIDE_REWARD_POI           = 0x00000020,   // Not used currently: Unsure of content
+    QUEST_FLAGS_RAID                      = 0x00000040,   // Not used currently
+    QUEST_FLAGS_TBC                       = 0x00000080,   // Not used currently: Available if TBC expansion enabled only
+    QUEST_FLAGS_NO_MONEY_FROM_XP          = 0x00000100,   // Not used currently: Experience is not converted to gold at max level
+    QUEST_FLAGS_HIDDEN_REWARDS            = 0x00000200,   // Items and money rewarded only sent in SMSG_QUESTGIVER_OFFER_REWARD (not in SMSG_QUESTGIVER_QUEST_DETAILS or in client quest log(SMSG_QUEST_QUERY_RESPONSE))
+    QUEST_FLAGS_TRACKING                  = 0x00000400,   // These quests are automatically rewarded on quest complete and they will never appear in quest log client side.
+    QUEST_FLAGS_DEPRECATE_REPUTATION      = 0x00000800,   // Not used currently
+    QUEST_FLAGS_DAILY                     = 0x00001000,   // Used to know quest is Daily one
+    QUEST_FLAGS_FLAGS_PVP                 = 0x00002000,   // Having this quest in log forces PvP flag
+    QUEST_FLAGS_UNAVAILABLE               = 0x00004000,   // Used on quests that are not generically available
+    QUEST_FLAGS_WEEKLY                    = 0x00008000,
+    QUEST_FLAGS_AUTOCOMPLETE              = 0x00010000,   // auto complete
+    QUEST_FLAGS_DISPLAY_ITEM_IN_TRACKER   = 0x00020000,   // Displays usable item in quest tracker
+    QUEST_FLAGS_OBJ_TEXT                  = 0x00040000,   // use Objective text as Complete text
+    QUEST_FLAGS_AUTO_ACCEPT               = 0x00080000,   // The client recognizes this flag as auto-accept. However, NONE of the current quests (3.3.5a) have this flag. Maybe blizz used to use it, or will use it in the future.
+    QUEST_FLAGS_AUTO_SUBMIT               = 0x00100000,   // Quests with this flag player submit automatically by special button in player gui
+    QUEST_FLAGS_AUTO_TAKE                 = 0x00200000,   // Automatically suggestion of accepting quest. Not from npc.
+    QUEST_FLAGS_UPDATE_PHASE_SHIFT        = 0x00400000,
+    QUEST_FLAGS_SOR_WHITE_LIST            = 0x00800000,   // Found in quest 14069
+    QUEST_FLAGS_LAUNCH_GOSSIP_COMPLETE    = 0x01000000,
+    QUEST_FLAGS_REMOVE_EXTRA_GET_ITEMS    = 0x02000000,
+    QUEST_FLAGS_HIDE_UNTIL_DISCOVERED     = 0x04000000,
+    QUEST_FLAGS_PORTRAIT_IN_QUEST_LOG     = 0x08000000,
+    QUEST_FLAGS_SHOW_ITEMS_WHEN_COMPLETED = 0x10000000,
+    QUEST_FLAGS_LAUNCH_GOSSIP_ACCEPT      = 0x20000000,
+    QUEST_FLAGS_ITEMS_GLOW_WHEN_DONE      = 0x40000000,
+    QUEST_FLAGS_FAIL_ON_LOGOUT            = 0x80000000,
 
-    // ... 4.x added flags up to 0x80000000 - all unknown for now
+    QUEST_ALLOWED_FLAGS_MASK              = 0x000FFFFF
 };
 
-enum __QuestSpecialFlags
+enum QuestSpecialFlags
 {
     QUEST_SPECIAL_FLAGS_NONE                 = 0x000,
     // Trinity flags for set SpecialFlags in DB if required but used only at server

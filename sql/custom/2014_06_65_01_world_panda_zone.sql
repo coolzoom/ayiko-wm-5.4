@@ -45,3 +45,9 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 ('54587', '0', '5', 'You fight honorably, friend.', '12', '0', '100', '0', '0', '0', ''),
 ('54587', '0', '6', 'You fought well. I must learn more from you in the future.', '12', '0', '100', '0', '0', '0', ''),
 ('54587', '0', '7', 'Your skills are too great. I yield.', '12', '0', '100', '0', '0', '0', '');
+
+-- Merchant Lorvo
+UPDATE `creature_template` SET `ScriptName`='mob_merchant_lorvo' WHERE (`entry`='54943');
+
+DELETE FROM `creature_text` WHERE `entry` = '54943';
+INSERT INTO `creature_text` (`entry`, `text`, `type`, `probability`, `comment`) VALUES ('54943', 'Shhhh! Come quietly. She\'s practicing.', '12', '100', 'Raufen - Merchant Lorvo - Talk on approach');

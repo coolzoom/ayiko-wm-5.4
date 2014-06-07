@@ -1272,6 +1272,44 @@ public:
     };
 };
 
+class mob_merchant_lorvo : public CreatureScript
+{
+public:
+    mob_merchant_lorvo() : CreatureScript("mob_merchant_lorvo") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new mob_merchant_lorvoAI(creature);
+    }
+
+    struct mob_merchant_lorvoAI : public ScriptedAI
+    {
+        mob_merchant_lorvoAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+        std::set<uint64> guids;
+
+        void MoveInLineOfSight(Unit * who) override
+        {
+            Player * const player = who->ToPlayer();
+            if (!player)
+                return;
+
+            if (player->GetQuestStatus(29410) != QUEST_STATUS_COMPLETE)
+            {
+                if (who->GetDistance(me) < 20.f)
+                {
+                    if (guids.find(player->GetGUID()) == guids.end())
+                    {
+                        Talk(0, player->GetGUID());
+                        guids.insert(player->GetGUID());
+                    }
+                }
+            }
+        }
+    };
+};
+
 class mob_instructors : public CreatureScript
 {
 public:
@@ -1407,4 +1445,5 @@ void AddSC_WanderingIsland_North()
     new mob_trainee_nim();
     new mob_instructors();
     new mob_aspiring_trainee();
+    new mob_merchant_lorvo();
 }

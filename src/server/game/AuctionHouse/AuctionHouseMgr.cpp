@@ -695,25 +695,27 @@ bool AuctionEntry::LoadFromDB(Field* fields)
 {
     uint8 index = 0;
 
-    Id          = fields[index++].GetUInt32();
+    Id = fields[index++].GetUInt32();
 
-    auctionHouseEntry = sAuctionHouseStore.LookupEntry(fields[1].GetUInt8());
+    auto const auctionHouseId = fields[index++].GetUInt8();
+
+    auctionHouseEntry = sAuctionHouseStore.LookupEntry(auctionHouseId);
     if (!auctionHouseEntry)
     {
-        TC_LOG_ERROR("misc", "Auction %u has wrong house id %u", Id, fields[1].GetUInt8());
+        TC_LOG_ERROR("misc", "Auction %u has wrong house id %u", Id, auctionHouseId);
         return false;
     }
 
     itemGUIDLow = fields[index++].GetUInt32();
-    itemEntry   = fields[index++].GetUInt32();
-    itemCount   = fields[index++].GetUInt32();
-    owner       = fields[index++].GetUInt64();
-    buyout      = fields[index++].GetUInt64();
+    itemEntry = fields[index++].GetUInt32();
+    itemCount = fields[index++].GetUInt32();
+    owner = fields[index++].GetUInt64();
+    buyout = fields[index++].GetUInt64();
     expire_time = fields[index++].GetUInt32();
-    bidder      = fields[index++].GetUInt64();
-    bid         = fields[index++].GetUInt64();
-    startbid    = fields[index++].GetUInt64();
-    deposit     = fields[index++].GetUInt32();
+    bidder = fields[index++].GetUInt64();
+    bid = fields[index++].GetUInt64();
+    startbid = fields[index++].GetUInt64();
+    deposit = fields[index++].GetUInt32();
 
     // check if sold item exists for guid
     // and itemEntry in fact (GetAItem will fail if problematic in result check in AuctionHouseMgr::LoadAuctionItems)

@@ -234,6 +234,8 @@ class mob_tushui_trainee : public CreatureScript
                     if(attacker && attacker->GetTypeId() == TYPEID_PLAYER)
                         attacker->ToPlayer()->KilledMonsterCredit(54586, 0);
 
+                    Talk(0);
+
                     damage = 0;
 
                     me->CombatStop();
@@ -331,6 +333,8 @@ class mob_huojin_trainee : public CreatureScript
 
                     if(attacker && attacker->GetTypeId() == TYPEID_PLAYER)
                         attacker->ToPlayer()->KilledMonsterCredit(54586, 0);
+
+                    Talk(0);
 
                     damage = 0;
 

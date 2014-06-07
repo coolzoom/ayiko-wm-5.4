@@ -9,3 +9,39 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `probabil
 
 -- The Lesson of the Sandy Fist
 UPDATE `quest_template` SET `SuggestedPlayers`='0' WHERE (`Id`='29406');
+
+-- Trainee texts for The Lesson of Stifled Pride
+DELETE FROM `creature_text` WHERE entry IN('54586', '65470', '65471', '54587');
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+('54586', '0', '0', 'I have never seen a trainee with skills such as yours. I must tell the others.', '12', '0', '100', '0', '0', '0', ''),
+('54586', '0', '1', 'My skills are no match for yours. I admit defeat.', '12', '0', '100', '0', '0', '0', ''),
+('54586', '0', '2', 'Thank you for reminding me that I must train more diligently.', '12', '0', '100', '0', '0', '0', ''),
+('54586', '0', '3', 'That was a good match. Thank you.', '12', '0', '100', '0', '0', '0', ''),
+('54586', '0', '4', 'You are an honorable opponent.', '12', '0', '100', '0', '0', '0', ''),
+('54586', '0', '5', 'You fight honorably, friend.', '12', '0', '100', '0', '0', '0', ''),
+('54586', '0', '6', 'You fought well. I must learn more from you in the future.', '12', '0', '100', '0', '0', '0', ''),
+('54586', '0', '7', 'Your skills are too great. I yield.', '12', '0', '100', '0', '0', '0', ''),
+('65470', '0', '0', 'I have never seen a trainee with skills such as yours. I must tell the others.', '12', '0', '100', '0', '0', '0', ''),
+('65470', '0', '1', 'My skills are no match for yours. I admit defeat.', '12', '0', '100', '0', '0', '0', ''),
+('65470', '0', '2', 'Thank you for reminding me that I must train more diligently.', '12', '0', '100', '0', '0', '0', ''),
+('65470', '0', '3', 'That was a good match. Thank you.', '12', '0', '100', '0', '0', '0', ''),
+('65470', '0', '4', 'You are an honorable opponent.', '12', '0', '100', '0', '0', '0', ''),
+('65470', '0', '5', 'You fight honorably, friend.', '12', '0', '100', '0', '0', '0', ''),
+('65470', '0', '6', 'You fought well. I must learn more from you in the future.', '12', '0', '100', '0', '0', '0', ''),
+('65470', '0', '7', 'Your skills are too great. I yield.', '12', '0', '100', '0', '0', '0', ''),
+('65471', '0', '0', 'I have never seen a trainee with skills such as yours. I must tell the others.', '12', '0', '100', '0', '0', '0', ''),
+('65471', '0', '1', 'My skills are no match for yours. I admit defeat.', '12', '0', '100', '0', '0', '0', ''),
+('65471', '0', '2', 'Thank you for reminding me that I must train more diligently.', '12', '0', '100', '0', '0', '0', ''),
+('65471', '0', '3', 'That was a good match. Thank you.', '12', '0', '100', '0', '0', '0', ''),
+('65471', '0', '4', 'You are an honorable opponent.', '12', '0', '100', '0', '0', '0', ''),
+('65471', '0', '5', 'You fight honorably, friend.', '12', '0', '100', '0', '0', '0', ''),
+('65471', '0', '6', 'You fought well. I must learn more from you in the future.', '12', '0', '100', '0', '0', '0', ''),
+('65471', '0', '7', 'Your skills are too great. I yield.', '12', '0', '100', '0', '0', '0', ''),
+('54587', '0', '0', 'I have never seen a trainee with skills such as yours. I must tell the others.', '12', '0', '100', '0', '0', '0', ''),
+('54587', '0', '1', 'My skills are no match for yours. I admit defeat.', '12', '0', '100', '0', '0', '0', ''),
+('54587', '0', '2', 'Thank you for reminding me that I must train more diligently.', '12', '0', '100', '0', '0', '0', ''),
+('54587', '0', '3', 'That was a good match. Thank you.', '12', '0', '100', '0', '0', '0', ''),
+('54587', '0', '4', 'You are an honorable opponent.', '12', '0', '100', '0', '0', '0', ''),
+('54587', '0', '5', 'You fight honorably, friend.', '12', '0', '100', '0', '0', '0', ''),
+('54587', '0', '6', 'You fought well. I must learn more from you in the future.', '12', '0', '100', '0', '0', '0', ''),
+('54587', '0', '7', 'Your skills are too great. I yield.', '12', '0', '100', '0', '0', '0', '');

@@ -483,7 +483,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, uint64 npcGUID, 
     }
 
     data << uint32(quest->RewardChoiceItemCount[3]);
-    data << uint32(0); // Unk 0
+    data << uint32(0); // Suggested players in "Quest Objectives" section
     data << uint32(quest->GetRewChoiceItemsCount());
     data << uint32(quest->RewardItemIdCount[3]);
     data << uint32(quest->RewardItemIdCount[2]);
@@ -551,9 +551,9 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, uint64 npcGUID, 
 
     data << uint32(quest->RewardItemId[2]);
     data << uint32(quest->RewardItemId[3]);
-    data << uint32(0); //unk 0
+    data << uint32(0); // Dynamic reward (id from QuestPackageItem.db2)
     data << uint32(quest->RewardChoiceItemCount[5]);
-    data << uint32(0); //unk 0
+    data << uint32(0); // Granted title
 
     if (ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(quest->RewardChoiceItemId[0]))
         data << uint32(itemTemplate->DisplayInfoID);
@@ -578,7 +578,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, uint64 npcGUID, 
     else
         data << uint32(0);
 
-    data << uint32(quest->GetSuggestedPlayers());
+    data << uint32(quest->GetSuggestedPlayers()); // May be wrong
 
     if (ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(quest->RewardChoiceItemId[5]))
         data << uint32(itemTemplate->DisplayInfoID);

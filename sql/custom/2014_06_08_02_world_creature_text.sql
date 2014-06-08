@@ -18,3 +18,5 @@ UPDATE `creature_text` SET `text`='HELP! HELP! ' WHERE (`entry`='28560') AND (`g
 UPDATE `creature_text` SET `text`='HELP! HELP! ' WHERE (`entry`='28941') AND (`groupid`='0') AND (`id`='7');
 UPDATE `creature_text` SET `text`='HELP! HELP! ' WHERE (`entry`='28942') AND (`groupid`='0') AND (`id`='7');
 UPDATE `creature_text` SET `text`='HELP! HELP! ' WHERE (`entry`='34851') AND (`groupid`='0') AND (`id`='7');
+
+UPDATE `gossip_menu_option` SET `action_menu_id`='9753' WHERE (`menu_id`='9754') AND (`id`='0');

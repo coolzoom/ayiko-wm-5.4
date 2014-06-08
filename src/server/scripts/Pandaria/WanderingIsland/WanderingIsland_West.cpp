@@ -517,7 +517,7 @@ class mob_master_shang_xi_after_zhao : public CreatureScript
 
         bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
         {
-            if (quest->GetQuestId() == 29787) // Digne de passer
+            if (quest->GetQuestId() == 29787) // Worthy of Passing
                 if (Creature* master = player->SummonCreature(56159, creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 0, player->GetGUID()))
                     master->AI()->SetGUID(player->GetGUID());
 
@@ -525,6 +525,7 @@ class mob_master_shang_xi_after_zhao : public CreatureScript
         }
 };
 
+// 56159 - Worthy of Passing(29787)
 class mob_master_shang_xi_after_zhao_escort : public CreatureScript
 {
     public:
@@ -533,7 +534,9 @@ class mob_master_shang_xi_after_zhao_escort : public CreatureScript
     struct mob_master_shang_xi_after_zhao_escortAI : public npc_escortAI
     {
         mob_master_shang_xi_after_zhao_escortAI(Creature* creature) : npc_escortAI(creature)
-        {}
+        {
+            summonGUID = 0;
+        }
 
         uint32 IntroTimer;
 
@@ -554,19 +557,47 @@ class mob_master_shang_xi_after_zhao_escort : public CreatureScript
         {
             switch (waypointId)
             {
+                case 1:
+                    Talk(0);
+                    break;
+                case 4:
+                    Talk(1);
+                    break;
                 case 6:
-                    me->SummonCreature(56274, 845.89f, 4372.62f, 223.98f, 4.78f, TEMPSUMMON_CORPSE_DESPAWN, 0, playerGuid);
+                    Talk(2);
                     break;
-                case 12:
-                    me->SetFacingTo(0.0f);
+                case 7:
+                    me->SetWalk(true);
+                    break;
+                case 8:
+                    Talk(3);
+                    break;
+                case 10:
+                    if (Creature * creature = me->SummonCreature(56274, 845.89f, 4372.62f, 223.98f, 4.78f, TEMPSUMMON_CORPSE_DESPAWN, 0, playerGuid))
+                    {
+                        summonGUID = creature->GetGUID();
+                        creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                        creature->SetReactState(REACT_DEFENSIVE);
+                    }
+                    break;
+                case 15:
+                    me->SetFacingTo(5.91f);
+                    if (Creature * creature = Creature::GetCreature(*me, summonGUID))
+                        creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     SetEscortPaused(true);
+                    me->SetWalk(false);
                     break;
-                case 17:
+                case 16:
                     me->SetFacingTo(4.537860f);
-                    me->DespawnOrUnsummon(1000);
 
                     if (Player* owner = ObjectAccessor::GetPlayer(*me, playerGuid))
                         owner->AddAura(59074, owner);
+                    break;
+                case 17:
+                    Talk(5);
+                    break;
+                case 21:
+                    me->DespawnOrUnsummon(1000);
                     break;
                 default:
                     break;
@@ -576,7 +607,10 @@ class mob_master_shang_xi_after_zhao_escort : public CreatureScript
         void SummonedCreatureDespawn(Creature* summon)
         {
             if (summon->GetEntry() == 56274)
+            {
                 SetEscortPaused(false);
+                Talk(4);
+            }
         }
 
         void UpdateAI(const uint32 diff)
@@ -594,6 +628,8 @@ class mob_master_shang_xi_after_zhao_escort : public CreatureScript
 
             npc_escortAI::UpdateAI(diff);
         }
+    private:
+        uint64 summonGUID;
     };
 
     CreatureAI* GetAI(Creature* creature) const

@@ -629,6 +629,7 @@ public:
     };
 };
 
+// NPC 56661 - The Way of the Tushui
 class mob_aysa_lake_escort : public CreatureScript
 {
 public:
@@ -643,6 +644,7 @@ public:
 
         void Reset()
         {
+            me->SetReactState(REACT_PASSIVE);
             IntroTimer = 2500;
         }
 
@@ -681,7 +683,7 @@ public:
             {
                 if (IntroTimer <= diff)
                 {
-                    me->MonsterYell("Follow me!", LANG_UNIVERSAL, 0);
+                    Talk(0);
                     IntroTimer = 0;
                     me->GetMotionMaster()->MoveJump(1216.78f, 3499.44f, 91.15f, 10, 20, 10);
                 }
@@ -700,15 +702,36 @@ public:
 
 };
 
+// NPC 54567
 class mob_aysa : public CreatureScript
 {
+    enum
+    {
+        QUEST_WAY_OF_THE_TUSHUI = 29414,
+        NPC_AYSA_LAKE_ESCORT    = 56661,
+        NPC_MASTER_LI_FEI       = 54856,
+        SPELL_MEDITATION_BAR    = 116421,
+        NPC_TROUBLEMAKER        = 59637,
+
+        SAY_INTRO               = 0,
+        SAY_END
+    };
+
+    enum eEvents
+    {
+        EVENT_START = 1,
+        EVENT_SPAWN_MOBS = 2,
+        EVENT_PROGRESS = 3,
+        EVENT_END = 4,
+    };
+
 public:
     mob_aysa() : CreatureScript("mob_aysa") { }
 
     bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
     {
-        if (quest->GetQuestId() == 29414) // La voie des tushui
-            if (Creature* tempSummon = creature->SummonCreature(56661, creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 0, player->GetGUID()))
+        if (quest->GetQuestId() == QUEST_WAY_OF_THE_TUSHUI)
+            if (Creature* tempSummon = creature->SummonCreature(NPC_AYSA_LAKE_ESCORT, *creature, TEMPSUMMON_MANUAL_DESPAWN, 0, player->GetGUID()))
                 tempSummon->SetPhaseMask(1, true);
 
         return true;
@@ -723,45 +746,35 @@ public:
     {
         EventMap events;
         std::list<Player*> playersInvolved;
-        TempSummon* lifei;
+
+        uint64 lifeiGUID;
+
         bool inCombat;
         uint32 timer;
 
         mob_aysaAI(Creature* creature) : ScriptedAI(creature)
         {
-            events.ScheduleEvent(1, 600); //Begin script
+            if (me->GetAreaId() == 5848) // Cave of Meditation
+                events.ScheduleEvent(EVENT_START, 600); //Begin script
             inCombat = false;
             timer = 0;
-            lifei = NULL;
+            lifeiGUID = 0;
             me->SetReactState(REACT_DEFENSIVE);
             me->setFaction(2263);
         }
-
-        enum eEvents
-        {
-            EVENT_START         = 1,
-            EVENT_SPAWN_MOBS    = 2,
-            EVENT_PROGRESS      = 3,
-            EVENT_END           = 4,
-        };
 
         void DamageTaken(Unit* /*pDoneBy*/, uint32 &uiDamage)
         {
             if(me->HealthBelowPctDamaged(5, uiDamage))
             {
-                if(lifei)
-                {
-                    lifei->UnSummon();
-                    lifei = NULL;
-                }
-
+                DespawnLifei();
                 uiDamage = 0;
                 me->MonsterSay("I can't meditate!", LANG_UNIVERSAL, 0);
                 me->SetFullHealth();
                 me->SetReactState(REACT_DEFENSIVE);
 
                 std::list<Creature*> unitlist;
-                GetCreatureListWithEntryInGrid(unitlist, me, 59637, 50.0f);
+                GetCreatureListWithEntryInGrid(unitlist, me, NPC_TROUBLEMAKER, 50.0f);
                 for (auto creature: unitlist)
                     me->Kill(creature);
 
@@ -780,8 +793,34 @@ public:
             GetPlayerListInGrid(PlayerList, me, 20.0f);
 
             for (auto player: PlayerList)
-                if(player->GetQuestStatus(29414) == QUEST_STATUS_INCOMPLETE)
+                if(!player->isGameMaster() && player->GetQuestStatus(QUEST_WAY_OF_THE_TUSHUI) == QUEST_STATUS_INCOMPLETE)
                     playersInvolved.push_back(player);
+        }
+
+        Creature * GetLifei()
+        {
+            if (lifeiGUID != 0)
+                return Creature::GetCreature(*me, lifeiGUID);
+            else
+            {
+                TempSummon * temp = me->SummonCreature(NPC_MASTER_LI_FEI, 1130.162231f, 3435.905518f, 105.496597f, 0.0f, TEMPSUMMON_MANUAL_DESPAWN);
+                temp->GetMotionMaster()->Clear();
+                temp->GetMotionMaster()->MoveRandom(10.0f);
+                lifeiGUID = temp->GetGUID();
+                return temp;
+            }
+        }
+
+        void DespawnLifei()
+        {
+            if (lifeiGUID)
+            {
+                if (Creature * lifei = GetLifei())
+                {
+                    lifei->DespawnOrUnsummon();
+                    lifeiGUID = 0;
+                }
+            }
         }
 
         void UpdateAI(const uint32 diff)
@@ -795,10 +834,10 @@ public:
                     {
                         updatePlayerList();
                         if(playersInvolved.empty())
-                            events.ScheduleEvent(1, 600);
+                            events.ScheduleEvent(EVENT_START, 600); // reschedule
                         else
                         {
-                            me->MonsterSay("Keep those creatures at bay while I meditate. We'll soon have the answers we seek...", LANG_UNIVERSAL, 0);
+                            Talk(SAY_INTRO);
                             me->SetReactState(REACT_PASSIVE);
                             timer = 0;
                             events.ScheduleEvent(EVENT_SPAWN_MOBS, 5000); //spawn mobs
@@ -811,8 +850,7 @@ public:
                     {
                         updatePlayerList();
                         for(int i = 0; i < std::max((int)playersInvolved.size()*3,3); i++)
-                        {
-                            if(TempSummon* temp = me->SummonCreature(59637, 1144.55f, 3435.65f, 104.97f, 3.3f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000))
+                            if(TempSummon* temp = me->SummonCreature(NPC_TROUBLEMAKER, 1171.71f, 3343.82f, 104.20f, 3.3f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000))
                             {
                                 if (temp->AI())
                                     temp->AI()->AttackStart(me);
@@ -821,7 +859,7 @@ public:
                                 temp->GetMotionMaster()->Clear();
                                 temp->GetMotionMaster()->MoveChase(me);
                             }
-                        }
+
                         events.ScheduleEvent(EVENT_SPAWN_MOBS, 20000); //spawn mobs
                         break;
                     }
@@ -829,47 +867,29 @@ public:
                     {
                         timer++;
 
-                        if(timer == 25 && !lifei)
-                        {
-                            if ((lifei = me->SummonCreature(54856, 1130.162231f, 3435.905518f, 105.496597f, 0.0f,TEMPSUMMON_MANUAL_DESPAWN)))
-                                lifei->MonsterSay("The way of the Tushui... enlightenment through patience and mediation... the principled life", LANG_UNIVERSAL, 0);
-                        }
+                        uint8 lafeiTalkThreshold[7] = { 25, 30, 42, 54, 66, 78, 85 };
 
-                        if(timer == 30)
-                            if (lifei)
-                                lifei->MonsterSay("It is good to see you again, Aysa. You've come with respect, and so I shall give you the answers you seek.", LANG_UNIVERSAL, 0);
+                        for (int i = 0; i < 7; ++i)
+                            if (timer == lafeiTalkThreshold[i])
+                            {
+                                Creature * lifei = GetLifei();
+                                lifei->AI()->Talk(i);
 
-                        if(timer == 42)
-                            if (lifei)
-                                lifei->MonsterSay("Huo, the spirit of fire, is known for his hunger. He wants for tinder to eat. He needs the caress of the wind to rouse him.", LANG_UNIVERSAL, 0);
-
-                        if(timer == 54)
-                            if (lifei)
-                                lifei->MonsterSay("If you find these things and bring them to his cave, on the far side of Wu-Song Village, you will face a challenge within.", LANG_UNIVERSAL, 0);
-
-                        if(timer == 66)
-                            if (lifei)
-                                lifei->MonsterSay("Overcome that challenge, and you shall be graced by Huo's presence. Rekindle his flame, and if your spirit is pure, he shall follow you.", LANG_UNIVERSAL, 0);
-
-                        if(timer == 78)
-                            if (lifei)
-                                lifei->MonsterSay("Go, children. We shall meet again very soon.", LANG_UNIVERSAL, 0);
-
-                        if(timer == 85)
-                        {
-                            if (lifei)
-                                lifei->UnSummon();
-
-                            lifei = NULL;
-                        }
+                                if (i == 6)
+                                {
+                                    lifei->DespawnOrUnsummon(500);
+                                    lifeiGUID = 0;
+                                }
+                                break;
+                            }
 
                         updatePlayerList();
                         for (auto player: playersInvolved)
                         {
-                            if(!player->HasAura(116421))
-                                player->CastSpell(player, 116421);
+                            if(!player->HasAura(SPELL_MEDITATION_BAR))
+                                player->CastSpell(player, SPELL_MEDITATION_BAR);
 
-                            player->ModifyPower(POWER_ALTERNATE_POWER, timer/25);
+                            player->SetPower(POWER_ALTERNATE_POWER, timer);
                             player->SetMaxPower(POWER_ALTERNATE_POWER, 90);
                         }
 
@@ -878,21 +898,23 @@ public:
                     }
                     case EVENT_END: //script end
                     {
-                        if(lifei)
+                        if(Creature * lifei = GetLifei())
                         {
-                            lifei->UnSummon();
-                            lifei = NULL;
+                            lifei->DespawnOrUnsummon();
+                            lifeiGUID = 0;
                         }
+
                         events.ScheduleEvent(EVENT_START, 10000);
                         events.CancelEvent(EVENT_SPAWN_MOBS);
                         events.CancelEvent(EVENT_PROGRESS);
-                        me->MonsterSay("And so our path lays before us. Speak to Master Shang Xi, he will tell you what comes next.", LANG_UNIVERSAL, 0);
-                        updatePlayerList();
+                        Talk(SAY_END);
                         me->SetReactState(REACT_DEFENSIVE);
+
+                        updatePlayerList();
                         for(auto player: playersInvolved)
                         {
-                            player->KilledMonsterCredit(54856, 0);
-                            player->RemoveAura(116421);
+                            player->KilledMonsterCredit(NPC_MASTER_LI_FEI, 0);
+                            player->RemoveAura(SPELL_MEDITATION_BAR);
                         }
                         break;
                     }
@@ -1006,7 +1028,7 @@ public:
         void Reset()
         {
             // This particular entry is also spawned on an other event
-            if (me->GetAreaId() != 5849) // Cavern areaid
+            if (me->GetAreaId() != 5849) // Cavern areaid - The Way of the Tushui
                 return;
 
             playerGuid = 0;

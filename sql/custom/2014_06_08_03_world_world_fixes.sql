@@ -37,3 +37,7 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `text`, `type`, `probability`, 
 DELETE FROM `creature_text` WHERE `entry` = '54855';
 INSERT INTO `creature_text` (`entry`, `text`, `type`, `probability`, `comment`) VALUES ('54855', 'Master Shang has trained you well. Thank you, friend!', '12', '100', 'Raufen - The Missing Driver');
 UPDATE `creature_template` SET `faction_A`='7', `faction_H`='7' WHERE (`entry`='54130');
+
+-- Deleted wrong spawns
+DELETE FROM `creature` WHERE (`guid`='941482');
+DELETE FROM `creature` WHERE `map` = '860' AND `position_x` = '0' AND `position_y` = '0';

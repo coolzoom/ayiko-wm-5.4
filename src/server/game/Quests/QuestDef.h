@@ -250,7 +250,7 @@ class Quest
         uint32 GetCharTitleId() const { return RewardTitleId; }
         uint32 GetPlayersSlain() const { return RequiredPlayerKills; }
         uint32 GetBonusTalents() const { return RewardTalents; }
-        int32  GetRewArenaPoints() const {return RewardArenaPoints; }
+        uint32 GetRewardPackage() const { return RewardPackage; }
         uint32 GetXPId() const { return RewardXPId; }
         uint32 GetSrcItemId() const { return SourceItemId; }
         uint32 GetSrcItemCount() const { return SourceItemIdCount; }
@@ -383,7 +383,7 @@ class Quest
         uint32 RewardTitleId;
         uint32 RequiredPlayerKills;
         uint32 RewardTalents;
-        int32  RewardArenaPoints;
+        uint32 RewardPackage;
         int32  PrevQuestId;
         int32  NextQuestId;
         int32  ExclusiveGroup;

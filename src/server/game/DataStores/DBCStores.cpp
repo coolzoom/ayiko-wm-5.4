@@ -209,7 +209,6 @@ DBCStorage <SpellAuraRestrictionsEntry> sSpellAuraRestrictionsStore(SpellAuraRes
 DBCStorage <SpellCastingRequirementsEntry> sSpellCastingRequirementsStore(SpellCastingRequirementsEntryfmt);
 
 SpellEffectMap sSpellEffectMap;
-SpellReagentMap sSpellReagentMap;
 SpellTotemMap sSpellTotemMap;
 
 DBCStorage <SpellCastTimesEntry> sSpellCastTimesStore(SpellCastTimefmt);
@@ -774,15 +773,6 @@ SpellEffectEntry const* GetSpellEffectEntry(uint32 spellId, uint32 effect, uint3
 SpellEffectScalingEntry const* GetSpellEffectScalingEntry(uint32 effectId)
 {
     return sSpellEffectScalingStore.LookupEntry(effectId);
-}
-
-SpellReagentsEntry const* GetSpellReagentEntry(uint32 spellId, uint8 reagent)
-{
-    SpellReagentMap::const_iterator itr = sSpellReagentMap.find(spellId);
-    if (itr == sSpellReagentMap.end())
-        return NULL;
-
-    return itr->second.reagents[reagent];
 }
 
 SpellTotemsEntry const* GetSpellTotemEntry(uint32 spellId, uint8 totem)

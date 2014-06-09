@@ -26,5 +26,6 @@ const char ItemExtendedCostEntryfmt[] = "nxxiiiiiiiiiiiixiiiiiiiiiixxxxx";
 const char BattlePetSpeciesEntryfmt[] = "inxxxxxxx";
 const char ItemUpgradeEntryfmt[] = "niiiii";
 const char RulesetItemUpgradeEntryfmt[] = "niii";
+const char QuestPackageItemEntryfmt[] = "niiii";
 
 #endif

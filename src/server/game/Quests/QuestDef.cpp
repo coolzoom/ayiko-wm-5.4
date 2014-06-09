@@ -69,7 +69,7 @@ Quest::Quest(Field* questRecord)
     RewardTitleId           = questRecord[index++].GetUInt8();
     RequiredPlayerKills     = questRecord[index++].GetUInt8();
     RewardTalents           = questRecord[index++].GetUInt8();
-    RewardArenaPoints       = questRecord[index++].GetUInt16();
+    RewardPackage           = questRecord[index++].GetUInt32();
     RewardSkillId           = questRecord[index++].GetUInt16();
     RewardSkillPoints       = questRecord[index++].GetUInt8();
     RewardReputationMask    = questRecord[index++].GetUInt8();
@@ -294,7 +294,7 @@ void Quest::BuildExtraQuestInfo(WorldPacket& data, Player* player) const
     data << int32(quest->GetRewSpellCast());                // casted spell
     data << uint32(0);                                      // unknown
     data << uint32(quest->GetBonusTalents());               // bonus talents
-    data << uint32(quest->GetRewArenaPoints());             // arena points
+    data << uint32(quest->GetRewArenaPoints());             // arena points (no longer rewarded, removed)
     data << uint32(0);
     */
 

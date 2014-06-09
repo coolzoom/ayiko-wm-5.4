@@ -18,18 +18,10 @@
 #ifndef TRINITY_DB2STRUCTURE_H
 #define TRINITY_DB2STRUCTURE_H
 
-#include "Common.h"
-#include "DBCEnums.h"
 #include "Define.h"
-#include "Path.h"
-#include "Util.h"
-#include "Vehicle.h"
-#include "SharedDefines.h"
 #include "ItemPrototype.h"
 
-#include <map>
-#include <set>
-#include <vector>
+#define MAX_SPELL_REAGENTS 8
 
 // GCC has alternative #pragma pack(N) syntax and old gcc version does not support pack(push, N), also any gcc version does not support it at some platform
 #if defined(__GNUC__)
@@ -97,7 +89,7 @@ struct ItemSparseEntry
     int32      SpellTrigger[MAX_ITEM_PROTO_SPELLS];          //
     int32      SpellCharges[MAX_ITEM_PROTO_SPELLS];          //
     int32      SpellCooldown[MAX_ITEM_PROTO_SPELLS];         //
-    int32      SpellCategory[MAX_ITEM_PROTO_SPELLS];         // 
+    int32      SpellCategory[MAX_ITEM_PROTO_SPELLS];         //
     int32      SpellCategoryCooldown[MAX_ITEM_PROTO_SPELLS]; //
     uint32     Bonding;                                      // 99
     char*      Name;                                         // 100
@@ -176,6 +168,24 @@ struct BattlePetSpeciesEntry
 {
     uint32 ID;
     uint32 CreatureEntry;
+};
+
+// SpellReagents.db2
+// @author Selenium: 5.4 valid
+struct SpellReagentsEntry
+{
+    //uint32    Id;                                         // 0        m_ID
+    int32     Reagent[MAX_SPELL_REAGENTS];                  // 1-9      m_reagent
+    uint32    ReagentCount[MAX_SPELL_REAGENTS];             // 10-18    m_reagentCount
+};
+
+struct QuestPackageItemEntry
+{
+    uint32 Id;
+    uint32 Package;
+    uint32 Item;
+    uint32 Unk1;
+    uint32 Unk2;
 };
 
 // GCC has alternative #pragma pack(N) syntax and old gcc version does not support pack(push, N), also any gcc version does not support it at some platform

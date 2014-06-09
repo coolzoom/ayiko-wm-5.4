@@ -3577,7 +3577,7 @@ void ObjectMgr::LoadQuests()
         //     22         23             24                25             26              27                    28                29            30              31              32
         "PrevQuestId, NextQuestId, ExclusiveGroup, NextQuestIdChain, RewardXPId, RewardOrRequiredMoney, RewardMoneyMaxLevel, RewardSpell, RewardSpellCast, RewardHonor, RewardHonorMultiplier, "
         //         33                  34            35             36               37         38         39            40                41                42               43                 44
-        "RewardMailTemplateId, RewardMailDelay, SourceItemId, SourceItemCount, SourceSpellId, Flags, SpecialFlags, MinimapTargetMark, RewardTitleId, RequiredPlayerKills, RewardTalents, RewardArenaPoints, "
+        "RewardMailTemplateId, RewardMailDelay, SourceItemId, SourceItemCount, SourceSpellId, Flags, SpecialFlags, MinimapTargetMark, RewardTitleId, RequiredPlayerKills, RewardTalents, RewardPackage, "
         //      45            46                    47                    48                  49               50             51              52             53                54                55                56               57
         "RewardSkillId, RewardSkillPoints, RewardReputationMask, QuestGiverPortrait, QuestTurnInPortrait, RewardItemId1, RewardItemId2, RewardItemId3, RewardItemId4, RewardItemCount1, RewardItemCount2, RewardItemCount3, RewardItemCount4, "
         //         58                  59                  60                    61                    62                   63                      64                  65                        66                       67                      68                      69
@@ -3637,9 +3637,19 @@ void ObjectMgr::LoadQuests()
         if (DisableMgr::IsDisabledFor(DISABLE_TYPE_QUEST, iter->first, NULL))
             continue;
 
-        Quest * qinfo = iter->second;
+        Quest * const qinfo = iter->second;
 
         // Additional quest integrity checks (GO, creature_template and item_template must be loaded already)
+
+        if (auto const packageId = qinfo->GetRewardPackage())
+        {
+            auto const range = GetQuestPackageItems(packageId);
+            if (range.first == range.second)
+            {
+                TC_LOG_ERROR("sql.sql", "Quest %u has `Package` = %u that does not exist.", qinfo->GetQuestId(), packageId);
+                qinfo->RewardPackage = 0;
+            }
+        }
 
         if (qinfo->GetQuestMethod() >= 3)
             TC_LOG_ERROR("sql.sql", "Quest %u has `Method` = %u, expected values are 0, 1 or 2.", qinfo->GetQuestId(), qinfo->GetQuestMethod());

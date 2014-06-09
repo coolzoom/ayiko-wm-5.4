@@ -21,38 +21,37 @@
 #include "SpellMgr.h"
 #include "DB2fmt.h"
 
-#include <map>
+#include <list>
+#include <string>
+#include <unordered_map>
 
-DB2Storage <ItemEntry> sItemStore(Itemfmt);
-DB2Storage <ItemCurrencyCostEntry> sItemCurrencyCostStore(ItemCurrencyCostfmt);
-DB2Storage <ItemExtendedCostEntry> sItemExtendedCostStore(ItemExtendedCostEntryfmt);
-DB2Storage <ItemSparseEntry> sItemSparseStore (ItemSparsefmt);
-DB2Storage <BattlePetSpeciesEntry> sBattlePetSpeciesStore(BattlePetSpeciesEntryfmt);
-DB2Storage <SpellReagentsEntry> sSpellReagentsStore(SpellReagentsEntryfmt);
-DB2Storage <ItemUpgradeEntry> sItemUpgradeStore(ItemUpgradeEntryfmt);
-DB2Storage <RulesetItemUpgradeEntry> sRulesetItemUpgradeStore(RulesetItemUpgradeEntryfmt);
+namespace {
+
+QuestPackageItemMap sQuestPackageItemMap;
 
 typedef std::list<std::string> StoreProblemList1;
 
 uint32 DB2FilesCount = 0;
 
-static bool LoadDB2_assert_print(uint32 fsize,uint32 rsize, const std::string& filename)
+bool LoadDB2_assert_print(uint32 fsize,uint32 rsize, const std::string& filename)
 {
-    TC_LOG_ERROR("misc", "Size of '%s' setted by format string (%u) not equal size of C++ structure (%u).", filename.c_str(), fsize, rsize);
+    TC_LOG_ERROR("misc", "Size of '%s' set by format string (%u) is not equal to size of C++ structure (%u).", filename.c_str(), fsize, rsize);
 
     // ASSERT must fail after function call
     return false;
 }
 
-struct LocalDB2Data
-{
-    LocalDB2Data(LocaleConstant loc) : defaultLocale(loc), availableDb2Locales(0xFFFFFFFF) {}
+} // namespace
 
-    LocaleConstant defaultLocale;
-
-    // bitmasks for index of fullLocaleNameList
-    uint32 availableDb2Locales;
-};
+DB2Storage<ItemEntry> sItemStore(Itemfmt);
+DB2Storage<ItemCurrencyCostEntry> sItemCurrencyCostStore(ItemCurrencyCostfmt);
+DB2Storage<ItemExtendedCostEntry> sItemExtendedCostStore(ItemExtendedCostEntryfmt);
+DB2Storage<ItemSparseEntry> sItemSparseStore (ItemSparsefmt);
+DB2Storage<BattlePetSpeciesEntry> sBattlePetSpeciesStore(BattlePetSpeciesEntryfmt);
+DB2Storage<SpellReagentsEntry> sSpellReagentsStore(SpellReagentsEntryfmt);
+DB2Storage<ItemUpgradeEntry> sItemUpgradeStore(ItemUpgradeEntryfmt);
+DB2Storage<RulesetItemUpgradeEntry> sRulesetItemUpgradeStore(RulesetItemUpgradeEntryfmt);
+DB2Storage<QuestPackageItemEntry> sQuestPackageItemStore(QuestPackageItemEntryfmt);
 
 template<class T>
 inline void LoadDB2(StoreProblemList1& errlist, DB2Storage<T>& storage, const std::string& db2_path, const std::string& filename)
@@ -92,6 +91,7 @@ void LoadDB2Stores(const std::string& dataPath)
     LoadDB2(bad_db2_files, sSpellReagentsStore, db2Path, "SpellReagents.db2");                                                 // 17399
     LoadDB2(bad_db2_files, sItemUpgradeStore, db2Path, "ItemUpgrade.db2");
     LoadDB2(bad_db2_files, sRulesetItemUpgradeStore, db2Path, "RulesetItemUpgrade.db2");
+    LoadDB2(bad_db2_files, sQuestPackageItemStore, db2Path, "QuestPackageItem.db2");
 
     // error checks
     if (bad_db2_files.size() >= DB2FilesCount)
@@ -117,5 +117,15 @@ void LoadDB2Stores(const std::string& dataPath)
         exit(1);
     }
 
+    for (size_t i = 1; i < sQuestPackageItemStore.GetNumRows(); ++i)
+        if (auto const entry = sQuestPackageItemStore.LookupEntry(i))
+            sQuestPackageItemMap.insert(std::make_pair(entry->Package, entry->Item));
+
     TC_LOG_INFO("misc", ">> Initialized %d DB2 data stores.", DB2FilesCount);
+}
+
+std::pair<QuestPackageItemMap::const_iterator, QuestPackageItemMap::const_iterator>
+GetQuestPackageItems(uint32 packageId)
+{
+    return sQuestPackageItemMap.equal_range(packageId);
 }

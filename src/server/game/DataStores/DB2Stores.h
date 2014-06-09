@@ -18,21 +18,27 @@
 #ifndef TRINITY_DB2STORES_H
 #define TRINITY_DB2STORES_H
 
-#include "Common.h"
 #include "DB2Store.h"
 #include "DB2Structure.h"
 
-#include <list>
+#include <string>
+#include <unordered_map>
 
-extern DB2Storage <ItemEntry> sItemStore;
-extern DB2Storage <ItemCurrencyCostEntry> sItemCurrencyCostStore;
-extern DB2Storage <ItemExtendedCostEntry> sItemExtendedCostStore;
-extern DB2Storage <ItemSparseEntry> sItemSparseStore;
-extern DB2Storage <BattlePetSpeciesEntry> sBattlePetSpeciesStore;
-extern DB2Storage <SpellReagentsEntry> sSpellReagentsStore;
-extern DB2Storage <ItemUpgradeEntry> sItemUpgradeStore;
-extern DB2Storage <RulesetItemUpgradeEntry> sRulesetItemUpgradeStore;
+typedef std::unordered_multimap<uint32, uint32> QuestPackageItemMap;
 
-void LoadDB2Stores(const std::string& dataPath);
+extern DB2Storage<ItemEntry> sItemStore;
+extern DB2Storage<ItemCurrencyCostEntry> sItemCurrencyCostStore;
+extern DB2Storage<ItemExtendedCostEntry> sItemExtendedCostStore;
+extern DB2Storage<ItemSparseEntry> sItemSparseStore;
+extern DB2Storage<BattlePetSpeciesEntry> sBattlePetSpeciesStore;
+extern DB2Storage<SpellReagentsEntry> sSpellReagentsStore;
+extern DB2Storage<ItemUpgradeEntry> sItemUpgradeStore;
+extern DB2Storage<RulesetItemUpgradeEntry> sRulesetItemUpgradeStore;
+extern DB2Storage<QuestPackageItemEntry> sQuestPackageItemStore;
+
+void LoadDB2Stores(std::string const &dataPath);
+
+std::pair<QuestPackageItemMap::const_iterator, QuestPackageItemMap::const_iterator>
+GetQuestPackageItems(uint32 packageId);
 
 #endif

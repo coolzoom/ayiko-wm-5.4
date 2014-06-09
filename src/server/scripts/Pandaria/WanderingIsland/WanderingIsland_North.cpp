@@ -550,19 +550,17 @@ public:
     struct mob_min_dimwindAI : public ScriptedAI
     {
         EventMap events;
-        uint64 guidMob[4];
+        SummonList summons;
 
         enum eEvents
         {
-            EVENT_CHECK_MOBS    = 1,
-            EVENT_RESET         = 2
+            EVENT_RESET    = 1,
         };
 
-        mob_min_dimwindAI(Creature* creature) : ScriptedAI(creature)
-        {
-            for(int i = 0; i < 4; i++)
-                guidMob[i] = 0;
+        mob_min_dimwindAI(Creature* creature) : ScriptedAI(creature), summons(creature) { }
 
+        void Reset()
+        {
             ResetMobs();
             me->HandleEmoteCommand(EMOTE_STATE_READY2H);
         }
@@ -573,52 +571,44 @@ public:
                 uiDamage = 0;
         }
 
-        bool VerifyMobs()
+        void JustSummoned(Creature* summoned)
         {
-            bool HasRemainingAttacker = false;
-            for(int i = 0; i < 4; i++)
+            if (summoned->GetEntry() == 54130)
             {
-                if(guidMob[i])
-                {
-                    if (Unit* unit = sObjectAccessor->FindUnit(guidMob[i]))
-                    {
-                        if(unit->isAlive())
-                            HasRemainingAttacker = true;
-                    }
-                    else
-                        guidMob[i] = 0;
-                }
-            }
+                summons.Summon(summoned);
 
-            return !HasRemainingAttacker;
+                summoned->SetFacingToObject(me);
+                summoned->HandleEmoteCommand(EMOTE_STATE_READY2H);
+            }
         }
 
         void ResetMobs()
         {
-            events.ScheduleEvent(EVENT_CHECK_MOBS, 1000);
+            events.CancelEvent(EVENT_RESET);
             me->HandleEmoteCommand(EMOTE_STATE_READY2H);
 
-            for(int i = 0; i < 4; i++)
+            summons.DespawnAll();
+
+            for(int i = 0; i < 4; ++i)
+                me->SummonCreature(54130, me->GetPositionX()-3+rand()%6, me->GetPositionY() + 4 + rand()%4, me->GetPositionZ()+2, 4.9f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000);
+        }
+
+        void MoveInLineOfSight(Unit* who) override
+        {
+            Player * player = who->ToPlayer();
+            if (!player || player->GetQuestStatus(29419) != QUEST_STATUS_INCOMPLETE)
+                return;
+
+            if (me->GetDistance(who) < 15.f)
             {
-                if(guidMob[i])
-                    if (Unit* unit = sObjectAccessor->FindUnit(guidMob[i]))
-                        if (unit->ToCreature())
-                            unit->ToCreature()->DespawnOrUnsummon();
+                me->HandleEmoteCommand(EMOTE_STATE_STAND);
+                Talk(0);
+                player->KilledMonsterCredit(54855);
+                events.ScheduleEvent(EVENT_RESET, 6000);
 
-                guidMob[i] = 0;
-
-                if(TempSummon* temp = me->SummonCreature(54130, me->GetPositionX()-3+rand()%6, me->GetPositionY() + 4 + rand()%4, me->GetPositionZ()+2, 3.3f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
-                {
-                    guidMob[i] = temp->GetGUID();
-
-                    temp->SetFacingToObject(me);
-                    temp->HandleEmoteCommand(EMOTE_STATE_READY2H);
-
-                    temp->GetMotionMaster()->Clear(false);
-                    temp->GetMotionMaster()->MoveChase(me);
-                    temp->Attack(me, true);
-                    temp->getThreatManager().addThreat(me, 250.0f);
-                }
+                for (auto guid : summons)
+                    if (Creature * const creature = Unit::GetCreature(*me, guid))
+                        creature->GetMotionMaster()->MoveFleeing(me, 5000);
             }
         }
 
@@ -629,25 +619,6 @@ public:
             {
                 switch (eventId)
                 {
-                    case EVENT_CHECK_MOBS:
-                    {
-                        if(VerifyMobs()) //plus de mobs, win!
-                        {
-                            me->HandleEmoteCommand(EMOTE_STATE_STAND);
-                            me->MonsterYell("Thank you!", LANG_UNIVERSAL, 0);
-
-                            std::list<Player*> PlayerList;
-                            GetPlayerListInGrid(PlayerList, me, 20.0f);
-                            for (auto player: PlayerList)
-                                player->KilledMonsterCredit(54855, 0);
-
-                            events.ScheduleEvent(EVENT_RESET, 30000);
-                        }
-                        else
-                            events.ScheduleEvent(EVENT_CHECK_MOBS, 1000);
-
-                        break;
-                    }
                     case EVENT_RESET:
                     {
                         ResetMobs();

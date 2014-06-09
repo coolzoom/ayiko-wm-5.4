@@ -32,3 +32,8 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `text`, `type`, `probability`, 
 ('56686', '3', 'Now Shen-zin Su is ill, and we are all in danger. With the help of the elements, you will break the silence. You will speak to him.', '12', '100', 'Raufen - Passing Wisdom quest'),
 ('56686', '4', 'Aysa and Ji have retrieved the spirits and brought them here. You are to go with them, speak to the great Shen-zin Su, and do what must be done to save our people.', '12', '100', 'Raufen - Passing Wisdom quest'),
 ('56686', '5', 'You\'ve come far, my young student. I see within you a great hero. I leave the fate of this land to you.', '12', '100', 'Raufen - Passing Wisdom quest'),
+
+-- The Missing Driver
+DELETE FROM `creature_text` WHERE `entry` = '54855';
+INSERT INTO `creature_text` (`entry`, `text`, `type`, `probability`, `comment`) VALUES ('54855', 'Master Shang has trained you well. Thank you, friend!', '12', '100', 'Raufen - The Missing Driver');
+UPDATE `creature_template` SET `faction_A`='7', `faction_H`='7' WHERE (`entry`='54130');

@@ -645,7 +645,7 @@ class mob_master_shang_xi_thousand_staff : public CreatureScript
 
         bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
         {
-            if (quest->GetQuestId() == 29790) // Digne de passer
+            if (quest->GetQuestId() == 29790) // Passing Wisdom
                 if (Creature* master = player->SummonCreature(56686, creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 0, player->GetGUID()))
                     master->AI()->SetGUID(player->GetGUID());
 
@@ -653,27 +653,27 @@ class mob_master_shang_xi_thousand_staff : public CreatureScript
         }
 };
 
+// Passing Wisdom (29790)
 class mob_master_shang_xi_thousand_staff_escort : public CreatureScript
 {
     public:
         mob_master_shang_xi_thousand_staff_escort() : CreatureScript("mob_master_shang_xi_thousand_staff_escort") { }
 
-    struct mob_master_shang_xi_thousand_staff_escortAI : public npc_escortAI
+    struct mob_master_shang_xi_thousand_staff_escortAI : public ScriptedAI
     {
-        mob_master_shang_xi_thousand_staff_escortAI(Creature* creature) : npc_escortAI(creature)
+        mob_master_shang_xi_thousand_staff_escortAI(Creature* creature) : ScriptedAI(creature)
         {}
 
         uint32 IntroTimer;
-        uint32 DespawnTimer;
+        uint8 phase;
 
         uint64 playerGuid;
 
         void Reset()
         {
+            phase = 0;
             IntroTimer = 250;
-            DespawnTimer = 0;
             me->SetReactState(REACT_PASSIVE);
-            SetRun(false);
         }
 
         void SetGUID(uint64 guid, int32)
@@ -681,50 +681,26 @@ class mob_master_shang_xi_thousand_staff_escort : public CreatureScript
             playerGuid = guid;
         }
 
-        void WaypointReached(uint32 waypointId)
-        {
-            switch (waypointId)
-            {
-                case 4:
-                    SetEscortPaused(true);
-                    me->SetFacingTo(4.522332f);
-                    DespawnTimer = 3000;
-                    break;
-                default:
-                    break;
-            }
-        }
-
         void UpdateAI(const uint32 diff)
         {
-            if (IntroTimer)
+            if (IntroTimer < diff)
             {
-                if (IntroTimer <= diff)
-                {
-                    Start(false, true);
-                    IntroTimer = 0;
-                }
-                else
-                    IntroTimer -= diff;
-            }
+                if (phase < 6)
+                    Talk(phase);
 
-            if (DespawnTimer)
-            {
-                if (DespawnTimer <= diff)
+                IntroTimer = 15000;
+                ++phase;
+
+                if (phase == 7)
                 {
-                    me->DespawnOrUnsummon();
-                    me->SummonCreature(57874, 873.09f, 4462.25f, 241.27f, 3.80f, TEMPSUMMON_MANUAL_DESPAWN, 0, playerGuid);
+                    me->SummonCreature(57874, 873.09f, 4462.25f, 241.27f, 3.80f, TEMPSUMMON_TIMED_DESPAWN, 60000, playerGuid);
+                    me->ForcedDespawn();
 
                     if (Player* owner = ObjectAccessor::GetPlayer(*me, playerGuid))
                         owner->KilledMonsterCredit(56688);
-
-                    DespawnTimer = 0;
                 }
-                else
-                    DespawnTimer -= diff;
             }
-
-            npc_escortAI::UpdateAI(diff);
+            else IntroTimer -= diff;
         }
     };
 

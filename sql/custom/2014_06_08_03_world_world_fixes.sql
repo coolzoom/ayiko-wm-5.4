@@ -20,3 +20,15 @@ INSERT INTO `creature_text` (`entry`, `id`, `text`, `type`, `probability`, `comm
 ('55999', '4', 'I\'m... alive? Thank you... thank you so much!', '12', '100', 'Raufen - Injured Soldier - Talk'),
 ('55999', '5', 'I... I am in your debt.', '12', '100', 'Raufen - Injured Soldier - Talk'),
 ('55999', '6', 'Thank you for the timely rescue, hero.', '12', '100', 'Raufen - Injured Soldier - Talk');
+
+-- Passing Wisdom
+UPDATE `quest_template` SET `Method`='2', `StartScript`='0' WHERE (`Id`='29790');
+
+DELETE FROM `creature_text` WHERE `entry` = '56686';
+INSERT INTO `creature_text` (`entry`, `groupid`, `text`, `type`, `probability`, `comment`) VALUES
+('56686', '0', 'For 3,000 years, we have passed the knowledge of our people down. Elder to youth. Master to student.', '12', '100', 'Raufen - Passing Wisdom quest'),
+('56686', '1', 'Every elder reaches the day where he must pass on and plant his stave with the staves of his ancestors. Today is the day when my staff joins these woods.', '12', '100', 'Raufen - Passing Wisdom quest'),
+('56686', '2', '$n, our people have lived the wholes of their lives on this great turtle, Shen-zin Su, but not in hundreds of years has anyone spoken to him.', '12', '100', 'Raufen - Passing Wisdom quest'),
+('56686', '3', 'Now Shen-zin Su is ill, and we are all in danger. With the help of the elements, you will break the silence. You will speak to him.', '12', '100', 'Raufen - Passing Wisdom quest'),
+('56686', '4', 'Aysa and Ji have retrieved the spirits and brought them here. You are to go with them, speak to the great Shen-zin Su, and do what must be done to save our people.', '12', '100', 'Raufen - Passing Wisdom quest'),
+('56686', '5', 'You\'ve come far, my young student. I see within you a great hero. I leave the fate of this land to you.', '12', '100', 'Raufen - Passing Wisdom quest'),

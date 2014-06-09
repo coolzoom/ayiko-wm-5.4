@@ -3646,7 +3646,7 @@ void ObjectMgr::LoadQuests()
             auto const range = GetQuestPackageItems(packageId);
             if (range.first == range.second)
             {
-                TC_LOG_ERROR("sql.sql", "Quest %u has `Package` = %u that does not exist.", qinfo->GetQuestId(), packageId);
+                TC_LOG_ERROR("sql.sql", "Quest %u has `RewardPackage` = %u that does not exist.", qinfo->GetQuestId(), packageId);
                 qinfo->RewardPackage = 0;
             }
         }

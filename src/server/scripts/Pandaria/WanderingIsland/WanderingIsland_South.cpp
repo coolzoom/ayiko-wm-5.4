@@ -1,6 +1,7 @@
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"
+#include "Vehicle.h"
 
 class AreaTrigger_at_mandori : public AreaTriggerScript
 {
@@ -311,9 +312,17 @@ class AreaTrigger_at_rescue_soldiers : public AreaTriggerScript
            if (!player->HasAura(129340))
                return true;
 
-           player->RemoveAurasDueToSpell(129340);
-           player->KilledMonsterCredit(55999);
+            Unit * const soldierUnit = player->GetVehicleKit()->GetPassenger(0);
+            if (!soldierUnit)
+                return true;
 
+            if (Creature const * const solider = soldierUnit->ToCreature())
+            {
+                solider->AI()->DoAction(1);
+
+                player->RemoveAurasDueToSpell(129340);
+                player->KilledMonsterCredit(55999);
+            }
             return true;
         }
 };
@@ -332,42 +341,22 @@ public:
     {
         npc_hurted_soldierAI(Creature* creature) : ScriptedAI(creature) {}
 
-        uint32 checkSavedTimer;
-        bool HasBeenSaved;
-
         void Reset()
         {
-            checkSavedTimer = 2500;
-            HasBeenSaved = false;
             me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
         }
 
-        void OnSpellClick(Unit* Clicker)
+        void OnSpellClick(Unit* Clicker) override
         {
             me->RemoveAurasDueToSpell(130966); // Feign Death
             me->EnterVehicle(Clicker);
             me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
-            HasBeenSaved = true;
         }
 
-        void UpdateAI(const uint32 diff)
+        void DoAction(int32 const action) override
         {
-            if (checkSavedTimer)
-            {
-                if (checkSavedTimer <= diff)
-                {
-                    if (HasBeenSaved && !me->GetVehicle())
-                    {
-                        me->MonsterSay("Thanks you, i'll never forget that.", LANG_UNIVERSAL, 0);
-                        me->DespawnOrUnsummon(5000);
-                        checkSavedTimer = 0;
-                    }
-                    else
-                        checkSavedTimer = 2500;
-                }
-                else
-                    checkSavedTimer -= diff;
-            }
+            Talk(0);
+            me->ForcedDespawn(5000);
         }
     };
 };

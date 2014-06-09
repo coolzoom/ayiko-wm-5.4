@@ -1,11 +1,11 @@
 DELETE FROM creature_text WHERE entry = 56159;
 INSERT INTO creature_text (entry, groupid, id, text, type, language, probability, emote, duration, sound, comment) VALUES
-(56159, 0, 0, 'Come child. We have one final journey to take together before your training is complete.', 12, 0, 100, 0, 0, 0, ''),
-(56159, 1, 0, 'Beyond the Elders'' Path is the Wood of Staves, a sacred place that only the worthy may enter.', 12, 0, 100, 0, 0, 0, ''),
-(56159, 2, 0, 'Of the many ways to prove your worth, I require the simplest of you now. I must know that you will fight for our people', 12, 0, 100, 1, 0, 0, ''),
-(56159, 3, 0, 'Defeat the Guardian of the Elders, and we may pass.', 12, 0, 100, 1, 0, 0, ''),
-(56159, 4, 0, 'You''ve become strong indeed, child. This is good. You will need that strength soon.', 12, 0, 100, 1, 0, 0, ''),
-(56159, 5, 0, 'And here we are. Help me with a couple small tasks while I prepare, if you would.', 12, 0, 100, 1, 0, 0, '');
+(56159, 0, 0, 'Come child. We have one final journey to take together before your training is complete.', 12, 0, 100, 0, 0, 27797, ''),
+(56159, 1, 0, 'Beyond the Elders'' Path is the Wood of Staves, a sacred place that only the worthy may enter.', 12, 0, 100, 0, 0, 27800, ''),
+(56159, 2, 0, 'Of the many ways to prove your worth, I require the simplest of you now. I must know that you will fight for our people', 12, 0, 100, 1, 0, 27801, ''),
+(56159, 3, 0, 'Defeat the Guardian of the Elders, and we may pass.', 12, 0, 100, 1, 0, 27802, ''),
+(56159, 4, 0, 'You''ve become strong indeed, child. This is good. You will need that strength soon.', 12, 0, 100, 1, 0, 27803, ''),
+(56159, 5, 0, 'And here we are. Help me with a couple small tasks while I prepare, if you would.', 12, 0, 100, 1, 0, 27805, '');
 
 UPDATE gameobject SET phaseMask = 2048 WHERE id = 209922; -- Gate
 

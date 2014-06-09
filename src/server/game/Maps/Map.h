@@ -265,6 +265,7 @@ class Map : public GridRefManager<NGridType>
         virtual void Update(const uint32);
 
         float GetVisibilityRange() const { return m_VisibleDistance; }
+        void  SetVisibilityRange(float range) { m_VisibleDistance = (range > SIZE_OF_GRIDS) ? SIZE_OF_GRIDS : range; }
         //function for setting up visibility distance for maps on per-type/per-Id basis
         virtual void InitVisibilityDistance();
 

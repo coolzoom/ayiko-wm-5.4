@@ -731,7 +731,7 @@ class spell_grab_air_balloon: public SpellScriptLoader
 
             void Register()
             {
-                OnEffectLaunch += SpellEffectFn(spell_grab_air_balloon_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+                OnEffectLaunchTarget += SpellEffectFn(spell_grab_air_balloon_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
             }
         };
 
@@ -746,11 +746,23 @@ class mob_shang_xi_air_balloon : public VehicleScript
     public:
         mob_shang_xi_air_balloon() : VehicleScript("mob_shang_xi_air_balloon") { }
 
-    void OnAddPassenger(Vehicle* /*veh*/, Unit* passenger, int8 seatId)
+    void OnAddPassenger(Vehicle* veh, Unit* passenger, int8 seatId) override
     {
         if (seatId == 0)
             if (Player* player = passenger->ToPlayer())
+            {
+                if (Creature * firepaw = player->SummonCreature(56660, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), 0.f, TEMPSUMMON_TIMED_DESPAWN, 300000))
+                    firepaw->_EnterVehicle(veh , -1);
+
+                if (Creature * aysa = player->SummonCreature(56662, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), 0.f, TEMPSUMMON_TIMED_DESPAWN, 300000))
+                    aysa->_EnterVehicle(veh , -1);
+
+                if (Creature * cre = veh->GetBase()->ToCreature())
+                    cre->AI()->SetGUID(player->GetGUID());
+
+                player->GetMap()->SetVisibilityRange(300.f);
                 player->KilledMonsterCredit(56378);
+            }
     }
 
     struct mob_shang_xi_air_balloonAI : public npc_escortAI
@@ -758,20 +770,29 @@ class mob_shang_xi_air_balloon : public VehicleScript
         mob_shang_xi_air_balloonAI(Creature* creature) : npc_escortAI(creature)
         {}
 
-        uint32 IntroTimer;
+        uint64 playerGUID;
+        uint32 eventTimer;
+        uint32 phase;
 
         void Reset()
         {
-            IntroTimer = 250;
+            playerGUID = 0;
+            eventTimer = 250;
+            phase = 0;
             me->setActive(true);
             me->SetReactState(REACT_PASSIVE);
+        }
+
+        void SetGUID(uint64 guid, int32)
+        {
+            playerGUID = guid;
         }
 
         void WaypointReached(uint32 waypointId)
         {
             switch (waypointId)
             {
-                case 19:
+                case 12:
                     if (me->GetVehicleKit())
                     {
                         if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
@@ -779,32 +800,179 @@ class mob_shang_xi_air_balloon : public VehicleScript
                             {
                                 player->KilledMonsterCredit(55939);
                                 player->AddAura(50550, player);
+                                //player->
                             }
 
                         me->GetVehicleKit()->RemoveAllPassengers();
                     }
-
-                    me->DespawnOrUnsummon();
                     break;
                 default:
                     break;
             }
         }
 
+        /*
+        seat 0 = player
+        seat 1 = Ji Firepaw
+        seat 2 = Aysa Cloudsinger
+        */
+
         void UpdateAI(const uint32 diff)
         {
-            if (IntroTimer)
+            if (eventTimer <= diff)
             {
-                if (IntroTimer <= diff)
+                if (phase == 0)
                 {
                     Start(false, true);
-                    IntroTimer = 0;
+                    eventTimer = 2000;
                 }
-                else
-                    IntroTimer -= diff;
+                else if (phase == 1)
+                {
+                    passengerTalk(0, 1);
+                    eventTimer = 5000;
+                }
+                else if (phase == 2)
+                {
+                    passengerTalk(0, 2);
+                    eventTimer = 8000;
+                }
+                else if (phase == 3)
+                {
+                    passengerTalk(1, 1);
+                    eventTimer = 6000;
+                }
+                else if (phase == 4)
+                {
+                    passengerTalk(1, 2);
+                    eventTimer = 6000;
+                }
+                else if (phase == 5)
+                {
+                    passengerTalk(2, 1);
+                    eventTimer = 6000;
+                }
+                else if (phase == 6)
+                {
+                    passengerTalk(2, 2);
+                    eventTimer = 6000;
+                }
+                else if (phase == 7)
+                {
+                    passengerTalk(3, 2);
+                    eventTimer = 6000;
+                }
+                else if (phase == 8)
+                {
+                    passengerTalk(4, 2);
+                    eventTimer = 6000;
+                }
+                // Need custom chat builder as creature is too far.
+                else if (phase == 9)
+                {
+                    shenzinTalk("I am in pain, but it warms my heart that Liu Lang's grandchildren have not forgotten me.");
+                    eventTimer = 7000;
+                }
+                else if (phase == 10)
+                {
+                    shenzinTalk("There is a thorn in my side. I cannot remove it.");
+                    eventTimer = 5000;
+                }
+                else if (phase == 11)
+                {
+                    shenzinTalk("The pain is unbearable, and I can no longer swim straight.");
+                    eventTimer = 5000;
+                }
+                else if (phase == 12)
+                {
+                    shenzinTalk("Please grandchildren, can you remove this thorn? I cannot do so on my own.");
+                    eventTimer = 6000;
+                }
+                else if (phase == 13)
+                {
+                    passengerTalk(5, 2);
+                    eventTimer = 6000;
+                }
+                else if (phase == 14)
+                {
+                    shenzinTalk("It is in the forest where your feet do not walk. Continue along the mountains and you will find it.");
+                    eventTimer = 8000;
+                }
+                else if (phase == 15)
+                {
+                    passengerTalk(6, 2);
+                    eventTimer = 6000;
+                }
+                else if (phase == 16)
+                {
+                    me->SetSpeed(MOVE_FLIGHT, 3.0f, true);
+                    shenzinTalk("Thank you, grandchildren.");
+                    eventTimer = 8000;
+                }
+                else if (phase == 17)
+                {
+                    passengerTalk(3, 1);
+                    eventTimer = 6000;
+                }
+                else if (phase == 18)
+                {
+                    passengerTalk(4, 1);
+                    eventTimer = 8000;
+                    me->SetSpeed(MOVE_FLIGHT, 4.0f, true);
+                }
+                else if (phase == 19)
+                {
+                    passengerTalk(7, 2);
+                    eventTimer = 8000;
+                }
+                else if (phase == 20)
+                {
+                    passengerTalk(5, 1);
+                    eventTimer = 8000;
+                }
+                else if (phase == 21)
+                {
+                    passengerTalk(8, 2);
+                    eventTimer = 6000;
+                }
+                else if (phase == 22)
+                {
+                    passengerTalk(6, 1);
+                    eventTimer = 6000;
+                }
+                else if (phase == 23)
+                {
+                    passengerTalk(9, 2);
+                    eventTimer = 6000;
+                }
+                else if (phase == 23)
+                {
+                    passengerTalk(10, 2);
+                    eventTimer = 6000;
+                }
+                ++phase;
             }
+            else
+                eventTimer -= diff;
 
             npc_escortAI::UpdateAI(diff);
+        }
+
+        void shenzinTalk(std::string text)
+        {
+            if (Player * player = me->GetVehicleKit()->GetPassenger(0)->ToPlayer())
+            {
+                WorldPacket packet(SMSG_MESSAGE_CHAT, 200);
+                me->BuildMonsterChat(&packet, CHAT_MSG_MONSTER_SAY, text, 0, "Shen-zin Su", playerGUID);
+                player->GetSession()->SendPacket(&packet);
+
+            }
+        }
+
+        void passengerTalk(uint32 talkId, uint32 seatId)
+        {
+            if (Unit * unit = me->GetVehicleKit()->GetPassenger(seatId))
+                if (Creature * creature = unit->ToCreature())
+                    creature->AI()->Talk(talkId, playerGUID);
         }
     };
 

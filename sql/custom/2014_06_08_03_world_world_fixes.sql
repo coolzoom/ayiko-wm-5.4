@@ -125,3 +125,28 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `probabil
 ('59988', '0', '0', 'Let me try.', '12', '100', 'Raufen - Bidden to Greatness'),
 ('59988', '1', '0', 'Did they prop this door up against a boulder? It won\'t budge!', '12', '100', 'Raufen - Bidden to Greatness'),
 ('59986', '3', '0', 'Well done. Jojo!', '12', '100', 'Raufen - Bidden to Greatness');
+
+-- The Horde Way
+
+DELETE FROM `creature_text` WHERE `entry` = '62087';
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(62087, 0, 0, 'You\'ve made a wise decision to join my Horde.', 12, 0, 100, 0, 0, 30746, 'Raufen - The Horde Way'),
+(62087, 1, 0, 'There are some that would call us barbarians... the \"mongrel races\" of Azeroth.', 12, 0, 100, 0, 0, 30747, 'Raufen - The Horde Way'),
+(62087, 2, 0, 'They are ignorant, and blind to reality. Look around you, pandaren.', 12, 0, 100, 0, 0, 30748, 'Raufen - The Horde Way'),
+(62087, 3, 0, 'You will find no better partner in battle than an orc.', 12, 0, 100, 0, 0, 30749, 'Raufen - The Horde Way'),
+(62087, 4, 0, 'The tauren have made themselves useful. Look - this one is a shaman.', 12, 0, 100, 0, 0, 30750, 'Raufen - The Horde Way'),
+(62087, 5, 0, 'Even a blood elf can hold a sword.', 12, 0, 100, 0, 0, 30751, 'Raufen - The Horde Way'),
+(62087, 6, 0, 'Do you see it? Everyone in my Horde earns their keep. You and your friends will be no exception.', 12, 0, 100, 0, 0, 30752, 'Raufen - The Horde Way'),
+(62087, 7, 0, 'Do you understand this, pandaren?', 12, 0, 100, 0, 0, 30753, 'Raufen - The Horde Way'),
+(62087, 8, 0, 'Hm. Good.', 12, 0, 100, 0, 0, 30754, 'Raufen - The Horde Way'),
+(62087, 9, 0, 'Moving on. I know that you are not the only pandaren to escape from that island.', 12, 0, 100, 0, 0, 30755, 'Raufen - The Horde Way'),
+(62087, 10, 0, 'Some of your kind chose to join the Alliance.', 12, 0, 100, 0, 0, 30756, 'Raufen - The Horde Way'),
+(62087, 11, 0, 'They are now your enemies.', 12, 0, 100, 0, 0, 30757, 'Raufen - The Horde Way'),
+(62087, 12, 0, 'You may have had friends and kin who chose to cast their lot with the enemies of the Horde. They are no longer your friends... no longer your family.', 12, 0, 100, 0, 0, 30758, 'Raufen - The Horde Way'),
+(62087, 13, 0, 'The minute they put on that Alliance tabard, they died. I will NOT tolerate any lingering ties across enemy lines. Traitors to the Horde will die a traitor\'s death!', 12, 0, 100, 0, 0, 30759, 'Raufen - The Horde Way'),
+(62087, 14, 0, 'Do I make myself clear?', 12, 0, 100, 0, 0, 30760, 'Raufen - The Horde Way'),
+(62087, 15, 0, 'Good.', 12, 0, 100, 0, 0, 30761, 'Raufen - The Horde Way'),
+('62087', '16', '0', 'Meet me in the Valley of Honor. I have a gift for you.', '12', '0', '100', '0', '0', '30762', 'Raufen - The Horde Way');
+
+UPDATE `creature_template` SET `ScriptName`='npc_garrosh_the_horde_way' WHERE (`entry`='62087');
+UPDATE `creature_template` SET `ScriptName`='npc_garrosh_quest' WHERE (`entry`='39605');

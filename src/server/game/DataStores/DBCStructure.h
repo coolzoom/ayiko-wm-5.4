@@ -1563,6 +1563,102 @@ struct ItemSetEntry
     uint32    required_skill_value;                         // 36       m_requiredSkillRank
 };
 
+struct ItemSpecEntry final
+{
+    uint32 Id;
+
+    // 1-40 and 41-90. Change from Leather to Mail for Shaman and Hunter. Change
+    // from Mail to Plate for Paladin and Warrior
+    uint32 LevelMin;
+    uint32 LevelMax;
+
+    // 0 - all specs. Contains items with these inventory types:
+    //       INVTYPE_SHOULDERS
+    //       INVTYPE_BODY
+    //       INVTYPE_CHEST
+    //       INVTYPE_WAIST
+    //       INVTYPE_AMMO
+    //       INVTYPE_THROWN
+    //       INVTYPE_RANGEDRIGHT
+    //     meaning of this group is not clear to me yet
+    // 1 - Cloth specs. Contains items with these inventory types:
+    //       INVTYPE_SHOULDERS
+    //       INVTYPE_BODY
+    //       INVTYPE_RANGEDRIGHT
+    // 2 - Leather specs. Hunter and Shaman are here for 1-40 level range.
+    //     Contains items with these inventory types:
+    //       INVTYPE_RANGEDRIGHT
+    // 3 - Mail specs. Hunter and Shaman are here for 41-90 level range. Warrior
+    //     and Paladin are here for 1-40 level range. Contains items with these
+    //     inventory types:
+    //       INVTYPE_CHEST
+    //       INVTYPE_WAIST
+    //       INVTYPE_AMMO
+    //       INVTYPE_THROWN
+    //       INVTYPE_RANGEDRIGHT
+    // 4 - Plate specs. Warrior and Paladin are here for 41-90 level range.
+    //     Contains items with these inventory types:
+    //       INVTYPE_CHEST
+    //       INVTYPE_WAIST
+    //       INVTYPE_AMMO
+    //       INVTYPE_THROWN
+    //       INVTYPE_RANGEDRIGHT
+    // 5 - all specs. Contains items with these inventory types:
+    //       INVTYPE_LEGS
+    //       INVTYPE_FEET
+    //       INVTYPE_WRISTS
+    //       INVTYPE_HANDS
+    //       INVTYPE_FINGER
+    //       INVTYPE_TRINKET
+    //       INVTYPE_WEAPON
+    //       INVTYPE_SHIELD
+    //       INVTYPE_RANGED
+    //       INVTYPE_CLOAK
+    //       INVTYPE_2HWEAPON
+    //       INVTYPE_BAG
+    //       INVTYPE_TABARD
+    //       INVTYPE_ROBE
+    //       INVTYPE_WEAPONMAINHAND
+    //     items with these inventory types are in group 5 only
+    // 6 - contains these specs:
+    //       SPEC_MAGE_ARCANE
+    //       SPEC_MAGE_FIRE
+    //       SPEC_MAGE_FROST
+    //       SPEC_PALADIN_HOLY
+    //       SPEC_PALADIN_PROTECTION
+    //       SPEC_WARRIOR_PROTECTION
+    //       SPEC_DRUID_BALANCE
+    //       SPEC_DRUID_RESTORATION
+    //       SPEC_PRIEST_DISCIPLINE
+    //       SPEC_PRIEST_HOLY
+    //       SPEC_PRIEST_SHADOW
+    //       SPEC_SHAMAN_ELEMENTAL
+    //       SPEC_SHAMAN_RESTORATION
+    //       SPEC_WARLOCK_AFFLICTION
+    //       SPEC_WARLOCK_DEMONOLOGY
+    //       SPEC_WARLOCK_DESTRUCTION
+    //       SPEC_MONK_MISTWEAVER
+    //     contains items with these inventory types:
+    //       INVTYPE_WEAPONOFFHAND
+    //       INVTYPE_HOLDABLE
+    //     may be defines specs that value offhand fillers?
+    uint32 Group;
+
+    // 0 - Intellect, 1 - Agility, 2 - Strength
+    uint32 PrimaryStat;
+
+    uint32 InventoryType;
+
+    uint32 Spec;
+};
+
+struct ItemSpecOverrideEntry final
+{
+    uint32 Id;
+    uint32 Item;
+    uint32 Spec;
+};
+
 // @author Selenium: 5.4 valid
 struct LFGDungeonEntry
 {

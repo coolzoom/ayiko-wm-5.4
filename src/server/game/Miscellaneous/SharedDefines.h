@@ -116,7 +116,6 @@ enum SpecIndex
 #define EFFECT_FIRST_FOUND 254
 #define EFFECT_ALL 255
 
-
 // loot modes for creatures and gameobjects, bitmask!
 enum LootModes
 {

@@ -115,6 +115,7 @@ public:
         stmt->setUInt32(11, petInfo.health);
         stmt->setUInt32(12, PET_START_MANA);
         stmt->setUInt32(13, static_cast<uint32>(time(NULL)));
+        stmt->setUInt32(14, 0);
 
         trans->Append(stmt);
 

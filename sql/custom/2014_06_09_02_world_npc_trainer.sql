@@ -3,6 +3,60 @@ UPDATE `npc_trainer` SET `reqskill` = 202 WHERE `spell` IN (40274, 41311, 41312,
 41320, 41321, 56480, 56481, 56483, 56484, 56486, 56487, 62271,81714, 81715, 81720, 81722, 81724, 81725, 127117,
 127118, 127119, 127121, 127122, 127123) AND `reqskillvalue` > 0 AND `reqskill` = 0; --  691 rows affected
 
+UPDATE `npc_trainer` SET `spell` = 2275 WHERE `spell` = 2259;
+UPDATE `npc_trainer` SET `spell` = 2280 WHERE `spell` = 3101;
+UPDATE `npc_trainer` SET `spell` = 3465 WHERE `spell` = 3464;
+
+UPDATE `npc_trainer` SET `spell` = 11612 WHERE `spell` = 11611;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+UPDATE `npc_trainer` SET `spell` = 0 WHERE `spell` = 0;
+
+
 UPDATE `npc_trainer` SET `reqlevel` = 5 WHERE `spell` = 2020; -- Apprentice Blacksmith
 UPDATE `npc_trainer` SET `reqlevel` = 5 WHERE `spell` = 2155; -- Apprentice Leatherworker
 UPDATE `npc_trainer` SET `reqlevel` = 5 WHERE `spell` = 3911; -- Apprentice Tailor

@@ -150,3 +150,30 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 
 UPDATE `creature_template` SET `ScriptName`='npc_garrosh_the_horde_way' WHERE (`entry`='62087');
 UPDATE `creature_template` SET `ScriptName`='npc_garrosh_quest' WHERE (`entry`='39605');
+
+-- New Allies
+DELETE FROM `script_waypoint` WHERE `entry` = '57743';
+INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `location_z`, `point_comment`) VALUES
+('57743', '0', '282', '3882', '75', 'Raufen - New Allies'),
+('57743', '1', '375', '3883', '79', 'Raufen - New Allies'),
+('57743', '2', '414', '3888', '79.3', 'Raufen - New Allies'),
+ ('57743', '3', '439', '3882', '79.4', 'Raufen - New Allies'),
+('57743', '4', '461', '3855', '79.7', 'Raufen - New Allies'),
+('57743', '5', '465', '3833', '80.5', 'Raufen - New Allies'),
+('57743', '6', '466', '3822', '85.6', 'Raufen - New Allies'),
+('57743', '7', '466', '3811', '81.5', 'Raufen - New Allies'),
+('57743', '8', '466', '3776', '81.8', 'Raufen - New Allies'),
+('57743', '9', '459', '3742', '82.2', 'Raufen - New Allies'),
+('57743', '10', '440', '3715', '82.6', 'Raufen - New Allies'),
+('57743', '11', '425', '3696', '81.4', 'Raufen - New Allies'),
+('57743', '12', '429', '3679', '78.8', 'Raufen - New Allies'),
+('57743', '13', '474', '3642', '79.2', 'Raufen - New Allies'),
+('57743', '14', '506', '3645', '83.1', 'Raufen - New Allies'),
+('57743', '15', '533', '3608', '91.4', 'Raufen - New Allies'),
+('57743', '16', '565', '3584', '94.5', 'Raufen - New Allies'),
+('57743', '17', '589', '3584', '97.6', 'Raufen - New Allies'),
+('57743', '18', '608', '3623', '121.5', 'Raufen - New Allies'),
+('57743', '19', '628', '3629', '133.6', 'Raufen - New Allies'),
+('57743', '20', '660', '3602', '146.9', 'Raufen - New Allies'),
+('57743', '21', '689', '3601', '144.3', 'Raufen - New Allies'),
+('57743', '22', '736', '3604', '140.6', 'Raufen - New Allies');

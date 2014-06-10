@@ -463,8 +463,8 @@ public:
                 else if (me->GetAreaId() == 5881) // Ferme Dai-Lo
                     waypointToEject = 22;
                 // Epave -> Temple
-                else if (me->GetAreaId() == 5833) // Epave du Chercheciel
-                    waypointToEject = 18;
+                else if (me->GetAreaId() == 5833) // New Allies quest Carraige
+                    waypointToEject = 22;
             }
             else
                 IntroTimer = 0;
@@ -475,8 +475,7 @@ public:
             if (waypointId == waypointToEject)
             {
                 if (Creature* vehicle = GetClosestCreatureWithEntry(me, 57208, 50.0f))
-                    if (vehicle->GetVehicleKit())
-                        vehicle->GetVehicleKit()->RemoveAllPassengers();
+                    vehicle->ForcedDespawn();
             }
         }
 

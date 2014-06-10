@@ -103,7 +103,7 @@ class mob_mandori_escort : public CreatureScript
         {
             switch (waypointId)
             {
-                case 5:
+                case 7:
                     SetEscortPaused(true);
 
                     // Jojo reach the waypoint 1 sec after the others
@@ -142,7 +142,7 @@ class mob_mandori_escort : public CreatureScript
                     {
                         case 1:
                             if (Is(NPC_AYSA))
-                                me->MonsterYell("Let's go !", LANG_UNIVERSAL, playerGuid);
+                                Talk(0, playerGuid);
                             IntroTimer = 1000;
                             break;
                         case 2:
@@ -174,29 +174,39 @@ class mob_mandori_escort : public CreatureScript
                     {
                         case 1:
                             if (Is(NPC_AYSA))
-                                me->MonsterSay("The door is blocked!", LANG_UNIVERSAL, playerGuid);
-                            doorEventTimer = 2500;
+                                Talk(1);
+                            doorEventTimer = 2000;
                             break;
                         case 2:
-                            if (Is(NPC_JI))
-                                me->MonsterSay("They blocked it with a rock on the other side, I can't open it!", LANG_UNIVERSAL, playerGuid);
+                            if (Is(NPC_AYSA))
+                                Talk(2);
                             doorEventTimer = 4000;
                             break;
                         case 3:
+                            if (Is(NPC_JI))
+                                Talk(0);
+                            doorEventTimer = 3000;
+                            break;
+                        case 4:
+                            if (Is(NPC_JI))
+                                Talk(1);
+                            doorEventTimer = 4000;
+                            break;
+                        case 5:
                             if (Is(NPC_JOJO))
                                 me->GetMotionMaster()->MoveCharge(567.99f, 3583.41f, 94.74f);
                             doorEventTimer = 150;
                             break;
-                        case 4:
+                        case 6:
                             if (Is(NPC_AYSA))
                                 if (GameObject* peiwuDoor = me->GetMap()->GetGameObject(peiwuDoorGuid))
                                     peiwuDoor->SetGoState(GO_STATE_ACTIVE);
                             doorEventTimer = 2000;
                             break;
-                       case 5:
+                        case 7:
                             if (Is(NPC_AYSA))
                             {
-                                me->MonsterSay("Well done, Jojo!", LANG_UNIVERSAL, playerGuid);
+                                Talk(3);
 
                                 if (Player* player = ObjectAccessor::FindPlayer(playerGuid))
                                     player->KilledMonsterCredit(59947);
@@ -205,7 +215,7 @@ class mob_mandori_escort : public CreatureScript
                                SetEscortPaused(false);
                             doorEventTimer = 2000;
                             break;
-                       case 6:
+                        case 8:
                            if (Is(NPC_JOJO))
                                SetEscortPaused(false);
                             doorEventTimer = 0;

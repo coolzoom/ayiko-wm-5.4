@@ -81,3 +81,47 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `probabil
 ('56660', '6', '0', 'And those aren\'t pandaren down there. They\'ve got no fur.', '12', '100', 'Raufen - The Suffering of Shen-zin Su'),
 ('56662', '9', '0', 'Someone has crashed into our island. Removing this thorn may be more complicated than we thought.', '12', '100', 'Raufen - The Suffering of Shen-zin Su'),
 ('56662', '10', '0', 'We should let Elder Shaopai know and then plan our next move.', '12', '100', 'Raufen - The Suffering of Shen-zin Su');
+
+-- Bidden to Greatness
+UPDATE `quest_template` SET `Method`='2' WHERE (`Id`='29792');
+
+DELETE FROM `script_waypoint` WHERE `entry` IN('59986', '59988', '59989');
+INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `location_z`, `point_comment`) VALUES
+('59986', '0', '675', '3600', '146.6', 'Raufen - Bidden to Greatness'),
+('59986', '1', '658', '3603', '146.8', 'Raufen - Bidden to Greatness'),
+('59986', '2', '643', '3619', '140', 'Raufen - Bidden to Greatness'),
+('59986', '3', '626', '3628', '132.6', 'Raufen - Bidden to Greatness'),
+('59986', '4', '609', '3624', '122.5', 'Raufen - Bidden to Greatness'),
+('59986', '5', '595', '3587', '100', 'Raufen - Bidden to Greatness'),
+('59986', '6', '585', '3581', '95.6', 'Raufen - Bidden to Greatness'),
+('59986', '7', '570', '3582', '94.9', 'Raufen - Bidden to Greatness'),
+('59986', '8', '516', '3598', '89.5', 'Raufen - Bidden to Greatness'),
+
+
+('59988', '0', '675', '3602', '146.6', 'Raufen - Bidden to Greatness'),
+('59988', '1', '658', '3605', '146.8', 'Raufen - Bidden to Greatness'),
+('59988', '2', '643', '3621', '140', 'Raufen - Bidden to Greatness'),
+('59988', '3', '626', '3630', '132.6', 'Raufen - Bidden to Greatness'),
+('59988', '4', '609', '3626', '122.5', 'Raufen - Bidden to Greatness'),
+('59988', '5', '595', '3589', '100', 'Raufen - Bidden to Greatness'),
+('59988', '6', '585', '3583', '95.6', 'Raufen - Bidden to Greatness'),
+('59988', '7', '570', '3584', '94.9', 'Raufen - Bidden to Greatness'),
+('59988', '8', '516', '3600', '89.5', 'Raufen - Bidden to Greatness'),
+
+('59989', '0', '675', '3598', '146.6', 'Raufen - Bidden to Greatness'),
+('59989', '1', '658', '3601', '146.8', 'Raufen - Bidden to Greatness'),
+('59989', '2', '643', '3617', '140', 'Raufen - Bidden to Greatness'),
+('59989', '3', '626', '3626', '132.6', 'Raufen - Bidden to Greatness'),
+('59989', '4', '609', '3622', '122.5', 'Raufen - Bidden to Greatness'),
+('59989', '5', '595', '3586', '100', 'Raufen - Bidden to Greatness'),
+('59989', '6', '585', '3579', '95.6', 'Raufen - Bidden to Greatness'),
+('59989', '7', '575', '3579', '94.9', 'Raufen - Bidden to Greatness'),
+('59989', '8', '516', '3596', '89.5', 'Raufen - Bidden to Greatness');
+
+DELETE FROM `creature_text` WHERE `entry` IN('59986', '59988');
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `probability`, `comment`) VALUES ('59986', '0', '0', '$n\'s here. Let\'s go.', '12', '100', 'Raufen - Bidden to Greatness'),
+('59986', '1', '0', 'Wha...', '12', '100', 'Raufen - Bidden to Greatness'),
+('59986', '2', '0', 'The gate is jammed.', '12', '100', 'Raufen - Bidden to Greatness'),
+('59988', '0', '0', 'Let me try.', '12', '100', 'Raufen - Bidden to Greatness'),
+('59988', '1', '0', 'Did they prop this door up against a boulder? It won\'t budge!', '12', '100', 'Raufen - Bidden to Greatness'),
+('59986', '3', '0', 'Well done. Jojo!', '12', '100', 'Raufen - Bidden to Greatness');

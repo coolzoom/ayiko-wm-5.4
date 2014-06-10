@@ -184,7 +184,13 @@ struct QuestPackageItemEntry
     uint32 Id;
     uint32 Package;
     uint32 Item;
-    uint32 Unk1;
+
+    // always 1, not interesting
+    // uint32 Unk1;
+
+    // some kind of group/flag. 2 is set for Hero's Purse, a special reward
+    // substituation that is provided for certain quests when nothing else fits
+    // in
     uint32 Unk2;
 };
 

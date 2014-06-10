@@ -800,7 +800,6 @@ class mob_shang_xi_air_balloon : public VehicleScript
                             {
                                 player->KilledMonsterCredit(55939);
                                 player->AddAura(50550, player);
-                                //player->
                             }
 
                         me->GetVehicleKit()->RemoveAllPassengers();
@@ -854,7 +853,7 @@ class mob_shang_xi_air_balloon : public VehicleScript
                 else if (phase == 6)
                 {
                     passengerTalk(2, 2);
-                    eventTimer = 6000;
+                    eventTimer = 7500;
                 }
                 else if (phase == 7)
                 {
@@ -885,12 +884,12 @@ class mob_shang_xi_air_balloon : public VehicleScript
                 else if (phase == 12)
                 {
                     shenzinTalk("Please grandchildren, can you remove this thorn? I cannot do so on my own.");
-                    eventTimer = 6000;
+                    eventTimer = 7000;
                 }
                 else if (phase == 13)
                 {
                     passengerTalk(5, 2);
-                    eventTimer = 6000;
+                    eventTimer = 7000;
                 }
                 else if (phase == 14)
                 {
@@ -944,7 +943,7 @@ class mob_shang_xi_air_balloon : public VehicleScript
                     passengerTalk(9, 2);
                     eventTimer = 6000;
                 }
-                else if (phase == 23)
+                else if (phase == 24)
                 {
                     passengerTalk(10, 2);
                     eventTimer = 6000;

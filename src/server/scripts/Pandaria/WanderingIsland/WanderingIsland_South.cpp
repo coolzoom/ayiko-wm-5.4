@@ -433,6 +433,11 @@ public:
     };
 };
 
+enum
+{
+    QUEST_RISKING_IT_ALL        = 30767
+};
+
 class mob_aysa_gunship_crash : public CreatureScript
 {
     public:
@@ -440,7 +445,7 @@ class mob_aysa_gunship_crash : public CreatureScript
 
         bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
         {
-            if (quest->GetQuestId() == 30767) // Tout risquer
+            if (quest->GetQuestId() == QUEST_RISKING_IT_ALL)
                 if (Creature* aysa = player->SummonCreature(60729, creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 0, player->GetGUID()))
                     aysa->AI()->SetGUID(player->GetGUID());
 
@@ -467,13 +472,34 @@ class mob_aysa_gunship_crash : public CreatureScript
 
 class mob_aysa_gunship_crash_escort : public CreatureScript
 {
+    enum
+    {
+        NPC_JI_FIREPAW      = 60741,
+        GO_EXPLOSIVES       = 215344,
+        NPC_CREDIT          = 60727,
+
+        EVENT_AYSA_START    = 1,
+        EVENT_AYSA_TALK_1,
+        EVENT_JI_TALK_1,
+        EVENT_AYSA_TALK_2,
+        EVENT_JI_TALK_2,
+        EVENT_AYSA_TALK_3,
+        EVENT_JI_TALK_3,
+        EVENT_AYSA_TALK_4,
+        EVENT_AYSA_SIGH,
+        EVENT_JI_TURN,
+        EVENT_JI_USE,
+        EVENT_RUN,
+        EVENT_START_CINEMATIC,
+        EVENT_TELEPORT_PLAYER,
+
+    };
 public:
     mob_aysa_gunship_crash_escort() : CreatureScript("mob_aysa_gunship_crash_escort") { }
 
     struct mob_aysa_gunship_crash_escortAI : public npc_escortAI
     {
-        mob_aysa_gunship_crash_escortAI(Creature* creature) : npc_escortAI(creature)
-        {}
+        mob_aysa_gunship_crash_escortAI(Creature* creature) : npc_escortAI(creature) {}
 
         uint64 playerGuid;
         uint64 jiGuid;
@@ -483,6 +509,8 @@ public:
         uint32 discussTimer;
 
         uint8  discussEvent;
+
+        EventMap events;
 
         void Reset()
         {
@@ -494,26 +522,39 @@ public:
             discussTimer    = 0;
 
             discussEvent    = 0;
+
+            events.Reset();
         }
 
         void SetGUID(uint64 guid, int32 /*type*/)
         {
             playerGuid = guid;
 
-            if (Creature* ji = me->SummonCreature(60741, 230.31f, 4006.67f, 87.27f, 3.38f, TEMPSUMMON_MANUAL_DESPAWN, 0, guid))
+            if (Creature* ji = me->SummonCreature(NPC_JI_FIREPAW, 230.31f, 4006.67f, 87.27f, 3.38f, TEMPSUMMON_MANUAL_DESPAWN, 0, guid))
                 jiGuid = ji->GetGUID();
 
-            if (GameObject* gob = me->SummonGameObject(215344, 227.75f, 4006.38f, 87.06f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, RESPAWN_IMMEDIATELY, guid))
+            if (GameObject* gob = me->SummonGameObject(GO_EXPLOSIVES, 227.75f, 4006.38f, 87.06f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, RESPAWN_IMMEDIATELY, guid))
                 fireGuid = gob->GetGUID();
+
+            events.ScheduleEvent(EVENT_AYSA_START, 1000);
         }
 
-        void WaypointReached(uint32 waypointId)
+        void MovementInform(uint32 type, uint32 id)
         {
-            if (waypointId == 8)
+            if (type == POINT_MOTION_TYPE)
             {
-                SetEscortPaused(true);
-                discussTimer = 1000;
+                if (id == 100)
+                {
+                    getJi()->GetMotionMaster()->MoveJump(231.176f, 3976.017f, 87.80869f, 10.0f, 15.0f, 5);
+                    me->GetMotionMaster()->MoveJump(237.478f, 3973.933f, 87.96973f, 10.0f, 15.0f, 5);
+                }
+            } else if (type == EFFECT_MOTION_TYPE)
+            {
+                if (id == 5)
+                    events.ScheduleEvent(EVENT_START_CINEMATIC, 200);
             }
+
+            npc_escortAI::MovementInform(type, id);
         }
 
         Creature* getJi()
@@ -523,80 +564,95 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if (IntroTimer)
-            {
-                if (IntroTimer <= diff)
-                {
-                    Start(false, true);
-                    IntroTimer = 0;
-                }
-                else
-                    IntroTimer -= diff;
-            }
-
-            if (discussTimer)
-            {
-                if (discussTimer <= diff)
-                {
-                    switch (++discussEvent)
-                    {
-                        case 1:
-                            me->MonsterSay("Ji, what are you doing ?! You can't do that !", LANG_UNIVERSAL, playerGuid);
-                            if (Creature* ji = getJi())
-                                ji->SetFacingToObject(me);
-                            discussTimer = 3000;
-                            break;
-                        case 2:
-                            if (Creature* ji = getJi())
-                                ji->MonsterSay("We have no choice Aysa.", LANG_UNIVERSAL, playerGuid);
-                            discussTimer = 3000;
-                            break;
-                        case 3:
-                            me->MonsterSay("You are going to kill him !", LANG_UNIVERSAL, playerGuid);
-                            discussTimer = 3000;
-                            break;
-                        case 4:
-                            if (Creature* ji = getJi())
-                                ji->MonsterSay("In our situation, inaction would be the greatest danger.", LANG_UNIVERSAL, playerGuid);
-                            discussTimer = 3000;
-                            break;
-                        case 5:
-                            me->MonsterSay("I hope you know what you're doing, Ji...", LANG_UNIVERSAL, playerGuid);
-                            discussTimer = 5000;
-                            break;
-                        case 6:
-                            SetEscortPaused(false);
-                            if (Creature* ji = getJi())
-                                ji->GetMotionMaster()->MovePoint(0, 227.21f, 3981.09f, 85.92f);
-                            discussTimer = 1000;
-                            break;
-                        case 7:
-                            if (Player* player = ObjectAccessor::GetPlayer(*me, playerGuid))
-                            {
-                                player->KilledMonsterCredit(60727);
-                                player->SendMovieStart(117);
-                            }
-                            discussTimer = 500;
-                            break;
-                        case 8:
-                            if (Player* player = ObjectAccessor::GetPlayer(*me, playerGuid))
-                                player->NearTeleportTo(249.38f, 3939.55f, 65.61f, 1.501471f);
-
-                            if (Creature* ji = getJi())
-                                ji->DespawnOrUnsummon();
-
-                            if (GameObject* gob = me->GetMap()->GetGameObject(fireGuid))
-                                gob->Delete();
-
-                            discussTimer = 0;
-                            break;
-                    }
-                }
-                else
-                    discussTimer -= diff;
-            }
-
             npc_escortAI::UpdateAI(diff);
+            events.Update(diff);
+
+            if (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_AYSA_START:
+                        Talk(0, playerGuid);
+                        Start(false, true);
+                        break;
+                    case EVENT_AYSA_TALK_1:
+                        Talk(1);
+                        getJi()->SetFacingToObject(me);
+                        events.ScheduleEvent(EVENT_JI_TALK_1, 4000);
+                        break;
+                    case EVENT_JI_TALK_1:
+                        getJi()->AI()->Talk(1);
+                        events.ScheduleEvent(EVENT_AYSA_TALK_2, 11000);
+                        break;
+                    case EVENT_AYSA_TALK_2:
+                        Talk(2);
+                        events.ScheduleEvent(EVENT_JI_TALK_2, 3000);
+                        break;
+                    case EVENT_JI_TALK_2:
+                        getJi()->AI()->Talk(2);
+                        events.ScheduleEvent(EVENT_AYSA_TALK_3, 10000);
+                        break;
+                    case EVENT_AYSA_TALK_3:
+                        Talk(3);
+                        events.ScheduleEvent(EVENT_JI_TALK_3, 4000);
+                        break;
+                    case EVENT_JI_TALK_3:
+                        getJi()->AI()->Talk(3);
+                        events.ScheduleEvent(EVENT_AYSA_TALK_4, 7000);
+                        break;
+                    case EVENT_AYSA_TALK_4:
+                        Talk(4);
+                        events.ScheduleEvent(EVENT_AYSA_SIGH, 5000);
+                        break;
+                    case EVENT_AYSA_SIGH:
+                        Talk(5);
+                        events.ScheduleEvent(EVENT_JI_TURN, 2000);
+                        break;
+                    case EVENT_JI_TURN:
+                        getJi()->SetFacingTo(me->GetHomePosition().GetOrientation());
+                        events.ScheduleEvent(EVENT_JI_USE, 2000);
+                        break;
+                    case EVENT_JI_USE:
+                        getJi()->HandleEmoteCommand(EMOTE_ONESHOT_USESTANDING);
+                        events.ScheduleEvent(EVENT_RUN, 2000);
+                        break;
+                    case EVENT_RUN:
+                        getJi()->GetMotionMaster()->MovePoint(100, 232.039f, 3981.756f, 85.9347f);
+                        me->GetMotionMaster()->MovePoint(100, 236.940f, 3982.803f, 86.68575f);
+                        break;
+                    case EVENT_START_CINEMATIC:
+
+                        if (Player* player = Player::GetPlayer(*me, playerGuid))
+                        {
+                            player->KilledMonsterCredit(NPC_CREDIT);
+                            player->SendMovieStart(117);
+                        }
+                        events.ScheduleEvent(EVENT_TELEPORT_PLAYER, 500);
+                        break;
+                    case EVENT_TELEPORT_PLAYER:
+                        getJi()->DespawnOrUnsummon(2000);
+                        me->DespawnOrUnsummon(2000);
+
+                        if (GameObject * fires = GameObject::GetGameObject(*me, fireGuid))
+                            fires->Delete();
+
+                        if (Player* player = Player::GetPlayer(*me, playerGuid))
+                            player->NearTeleportTo(249.38f, 3939.55f, 65.61f, 1.501471f);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+        }
+
+        void WaypointReached(uint32 id)
+        {
+            if (id == 18)
+            {
+                SetEscortPaused(true);
+                events.ScheduleEvent(EVENT_AYSA_TALK_1, 1000);
+            }
         }
     };
 

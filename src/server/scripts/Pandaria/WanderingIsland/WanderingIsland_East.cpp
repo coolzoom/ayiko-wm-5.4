@@ -616,14 +616,13 @@ public:
                             eventTimer = 0;
                             break;
                         case 3:
-                            if (Creature* wugou = GetClosestCreatureWithEntry(me, 60916, 20.0f))
-                                wugou->CastSpell(wugou, 118027, false);
-                            me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
-                            eventTimer = 3000;
+                            DoCast(me, 118027, false);
+                            eventTimer = 5500;
                             ++eventProgress;
                             break;
                         case 4:
                             eventTimer = 0;
+                            me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
                             if (Player* owner = ObjectAccessor::FindPlayer(playerGuid))
                             {
                                 owner->KilledMonsterCredit(55547);
@@ -631,7 +630,10 @@ public:
 
                                 if (Creature* wugou = GetClosestCreatureWithEntry(me, 60916, 20.0f))
                                     if (Creature* newWugou = owner->SummonCreature(60916, wugou->GetPositionX(), wugou->GetPositionY(), wugou->GetPositionZ(), wugou->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 0, owner->GetGUID()))
+                                    {
+                                        newWugou->RemoveAllAuras();
                                         newWugou->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+                                    }
 
                                 me->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, -PET_FOLLOW_ANGLE);
                             }

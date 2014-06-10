@@ -1,7 +1,7 @@
 UPDATE quest_template SET Method = 2, StartScript = 0 WHERE Id = 29414; -- The way of the Tushui
 DELETE FROM quest_start_scripts WHERE id = 29414;
 
-DELETE FROM creature_text WHERE entry IN (566661, 54567, 54856);
+DELETE FROM creature_text WHERE entry IN (56661, 54567, 54856);
 INSERT INTO creature_text (entry, groupid, id, text, type, language, probability, emote, duration, sound, comment) VALUES
 (56661, 0, 0, 'Meet me up in the cave if you would, friend.', 12, 0, 100, 1, 0, 27397, ''),
 

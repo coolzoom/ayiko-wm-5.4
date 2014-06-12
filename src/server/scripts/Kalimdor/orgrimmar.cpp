@@ -91,7 +91,7 @@ public:
                     me->ForcedDespawn(5000);
                 }
 
-                Talk(phaseId);
+                Talk(phaseId, playerGUID);
 
                 phaseTimer = 6500;
                 if (phaseId == 0)

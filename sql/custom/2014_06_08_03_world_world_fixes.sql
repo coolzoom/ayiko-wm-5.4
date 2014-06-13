@@ -195,7 +195,13 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `probabil
 ('61796', '11', '0', 'Those who you once considered friends, or even those you might have loved, are now your sworn adversaries.', '12', '100', '29585', 'Raufen - The Allianec Way'),
 ('61796', '12', '0', 'I am deeply sorry, but the battle lines have been drawn. I will not tolerate any fraternizing with the enemy, as you could expose our Alliance to danger.', '12', '100', '29586', 'Raufen - The Allianec Way'),
 ('61796', '13', '0', 'Do I make myself clear?', '12', '100', '29587', 'Raufen - The Alliance Way'),
-('61796', '14', '0', 'Very well. We are nearly finished, $n.', '12', '100', '29588', 'Raufen - The Alliance Way');
+('61796', '14', '0', 'Very well. We are nearly finished, $n.', '12', '100', '29588', 'Raufen - The Alliance Way'),
+('61796', '15', '0', 'Few people know this, but I was once a pit fighter myself. A gladiator for the Horde\'s amusement. So I know a thing or two about martial combat.', '12', '100', '29568', 'Raufen - An Old Pit Fighter'),
+('61796', '16', '0', 'Now, pandaren... let me see what you\'ve got!', '12', '100', '29569', 'Raufen - An Old Pit Fighter'),
+('61796', '17', '0', 'Don\'t hold back now! Let\'s have it!', '12', '100', '29570', 'Raufen - An Old Pit Fighter'),
+('61796', '18', '0', 'What\'s the matter? You\'ll have to do better than that.', '12', '100', '29571', 'Raufen - An Old Pit Fighter'),
+('61796', '19', '0', 'Come on, pandaren! HIT ME!', '14', '100', '29572', 'Raufen - An Old Pit Fighter'),
+('61796', '20', '0', 'Ha ha ha haaa! I haven\'t felt like this in YEARS! Don\'t worry, $n... I\'ve been in worse scraps than this. A fighting spirit like yours is welcome in the Alliance. Now, let\'s get back to business.', '12', '100', '29573', 'Raufen - An Old Pit Fighter');
 
 UPDATE `creature_template` SET `ScriptName`='npc_king_varian_wrynn_quest' WHERE (`entry`='29611');
 UPDATE `creature_template` SET `ScriptName`='npc_king_varian_wrynn_the_alliance_way' WHERE (`entry`='61796');

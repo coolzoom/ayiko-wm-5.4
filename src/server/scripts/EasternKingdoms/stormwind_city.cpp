@@ -56,19 +56,43 @@ public:
         return new npc_king_varian_wrynn_the_alliance_wayAI (creature);
     }
 
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == 30989) // The Alliance Way
+        {
+            creature->AI()->SetGUID(player->GetGUID());
+            creature->AI()->DoAction(1);
+        }
+        return true;
+    }
+
     struct npc_king_varian_wrynn_the_alliance_wayAI : public ScriptedAI
     {
         npc_king_varian_wrynn_the_alliance_wayAI(Creature* creature) : ScriptedAI(creature) {}
 
+        bool isPitFighter;
         uint32 phaseId;
         uint32 phaseTimer;
         uint64 playerGUID;
 
         void Reset()
         {
+            isPitFighter = false;
             playerGUID = 0;
             phaseId = 0;
             phaseTimer = 2000;
+        }
+
+        void DoAction(int32 const action)
+        {
+            if (action == 1)
+            {
+                me->CastSpell(me, 120411, true);
+                isPitFighter = true;
+                phaseTimer = 10000;
+                phaseId = 16;
+                Talk(15);
+            }
         }
 
         void SetGUID(uint64 guid , int32 /* = 0 */)
@@ -78,41 +102,73 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if (playerGUID == 0)
+            if (!playerGUID)
                 return;
 
-            if (phaseTimer < diff)
+            if (isPitFighter)
             {
-                if (phaseId > 14)
+                if (phaseTimer < diff)
                 {
-                    if (Player * player = Unit::GetPlayer(*me, playerGUID))
-                        player->KilledMonsterCredit(61798);
-                    playerGUID = 0;
-                }
+                    Talk(phaseId, playerGUID);
+                    if (phaseId == 16)
+                    {
+                        me->setFaction(7);
+                        if (Player * player = Unit::GetPlayer(*me, playerGUID))
+                            AttackStart(player);
+                    }
+                    if (phaseId == 20)
+                    {
+                        me->HandleEmoteCommand(EMOTE_ONESHOT_KNOCKDOWN);
+                        me->setFaction(35);
+                        if (Player * player = Unit::GetPlayer(*me, playerGUID))
+                            player->KilledMonsterCredit(61824);
 
-                Talk(phaseId, playerGUID);
-
-                phaseTimer = 6500;
-                
-                if (phaseId == 0 || phaseId == 1 || phaseId == 13)
-                    phaseTimer = 3000;
-                else if (phaseId == 7  || phaseId == 9)
+                        playerGUID = 0;
+                        me->ForcedDespawn(3000);
+                    }
+                    ++phaseId;
                     phaseTimer = 5000;
-                else if (phaseId == 6 || phaseId == 3)
-                    phaseTimer = 6000;
-                else if (phaseId == 11)
-                    phaseTimer = 9000;
-                else if (phaseId == 2)
-                    phaseTimer = 7000;
-                else if (phaseId == 5)
-                    phaseTimer = 10000;
-                else if (phaseId == 12)
-                    phaseTimer = 13000;
-
-                ++phaseId;
+                }
+                else
+                    phaseTimer -= diff;
+                return;
             }
             else
-                phaseTimer -= diff;
+            {
+                if (phaseTimer < diff)
+                {
+                    if (phaseId > 14)
+                    {
+                        if (Player * player = Unit::GetPlayer(*me, playerGUID))
+                            player->KilledMonsterCredit(61798);
+                        playerGUID = 0;
+                        return;
+                    }
+
+                    Talk(phaseId, playerGUID);
+
+                    phaseTimer = 6500;
+
+                    if (phaseId == 0 || phaseId == 1 || phaseId == 13)
+                        phaseTimer = 3000;
+                    else if (phaseId == 7  || phaseId == 9)
+                        phaseTimer = 5000;
+                    else if (phaseId == 6 || phaseId == 3)
+                        phaseTimer = 6000;
+                    else if (phaseId == 11)
+                        phaseTimer = 9000;
+                    else if (phaseId == 2)
+                        phaseTimer = 7000;
+                    else if (phaseId == 5)
+                        phaseTimer = 10000;
+                    else if (phaseId == 12)
+                        phaseTimer = 13000;
+
+                    ++phaseId;
+                }
+                else
+                    phaseTimer -= diff;
+            }
         }
     };
 };

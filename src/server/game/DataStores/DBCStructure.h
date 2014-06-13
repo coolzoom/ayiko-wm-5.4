@@ -2716,7 +2716,7 @@ struct WMOAreaTableEntry
     //uint32 unk_5;                                         // 8
     uint32 Flags;                                           // 9 used for indoor/outdoor determination
     uint32 areaId;                                          // 10 link to AreaTableEntry.ID
-    //char *Name;                                           // 11 m_AreaName_lang
+    char *Name;                                           // 11 m_AreaName_lang
     //uint32 unk_6;                                         // 12
     //uint32 unk_7;                                         // 13
     //uint32 unk_8;                                         // 14

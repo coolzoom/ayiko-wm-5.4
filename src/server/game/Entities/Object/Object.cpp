@@ -3313,3 +3313,29 @@ uint64 WorldObject::GetTransGUID() const
         return GetTransport()->GetGUID();
     return 0;
 }
+
+WMOAreaTableEntry const * WorldObject::GetWMOArea() const
+{
+    Map * map = GetMap();
+    if (!map)
+        return NULL;
+
+    uint32 mogpFlags;
+    int32 adtId, rootId, groupId;
+
+    if (map->GetAreaInfo(GetPositionX(), GetPositionY(), GetPositionZ(), mogpFlags, adtId, rootId, groupId))
+    {
+        const WMOAreaTableEntry * wmoEntry = GetWMOAreaTableEntryByTripple(rootId, adtId, groupId);
+        if (wmoEntry)
+            return wmoEntry;
+    }
+
+    return NULL;
+}
+
+uint32 WorldObject::GetWMOAreaId() const
+{
+    if (WMOAreaTableEntry const * wmoEntry = GetWMOArea())
+        return wmoEntry->Id;
+    return 0;
+}

@@ -165,6 +165,19 @@ UPDATE `creature_template` SET `InhabitType` = 4, `unit_flags` = 33554688, `Vehi
 
 -- Quests - Decontamination scripted
 UPDATE `creature_template` SET `subname` = 'With Dunk-o-Matic Action', `ScriptName` = 'npc_sanitron_500' WHERE `entry` = 46185;
+UPDATE quest_template SET StartScript = 0 WHERE Id = 27635;
+
+DELETE FROM waypoint_data WHERE id = 4618501;
+INSERT INTO waypoint_data (id, point, position_x, position_y, position_z, orientation, delay, move_flag, action, action_chance, wpguid) VALUES
+(4618501, 1, -5173.24, 726.755, 290.398, 0, 5000, 1, 0, 100, 0),
+(4618501, 2, -5174.43, 717.94, 290.398, 0, 6000, 1, 0, 100, 0),
+(4618501, 3, -5175.32, 703.42, 290.398, 0, 5000, 1, 0, 100, 0);
+
+DELETE FROM creature_text WHERE entry = 46185;
+INSERT INTO creature_text (entry, groupid, id, text, type, language, probability, emote, duration, sound, comment) VALUES
+(46185, 0, 0, 'Commencing decontamination sequence...', 12, 0, 100, 0, 0, 0, 'Sanitron 500'),
+(46185, 1, 0, 'Decontamination complete. Standby for delivery.', 12, 0, 100, 0, 0, 0, 'Sanitron 500'),
+(46185, 2, 0, 'Warning, system overload. Malfunction imminent!', 12, 0, 100, 0, 0, 0, 'Sanitron 500');
 
 -- Quests - To the Surface has been scripted
 -- Torben Zapblast

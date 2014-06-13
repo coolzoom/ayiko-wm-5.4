@@ -177,3 +177,31 @@ INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `
 ('57743', '20', '660', '3602', '146.9', 'Raufen - New Allies'),
 ('57743', '21', '689', '3601', '144.3', 'Raufen - New Allies'),
 ('57743', '22', '736', '3604', '140.6', 'Raufen - New Allies');
+
+-- The Alliance Way
+DELETE FROM `creature_text` WHERE `entry` = '61796';
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `probability`, `sound`, `comment`) VALUES
+('61796', '0', '0', 'Walk with me. All three of you.', '12', '100', '29574', 'Raufen - The Alliance Way'),
+('61796', '1', '0', 'I understand you want to join the Alliance.', '12', '100', '29575', 'Raufen - The Alliance Way'),
+('61796', '2', '0', 'We always have need of allies. I\'d be a fool to turn you away, especially at a time of war.', '12', '100', '29576', 'Raufen - The Allianec Way'),
+('61796', '3', '0', 'But there are a number of things I need to make clear to you.', '12', '100', '29577', 'Raufen - The Allianec Way'),
+('61796', '4', '0', 'First: the races of the Alliance look out for one another.', '12', '100', '29578', 'Raufen - The Allianec Way'),
+('61796', '5', '0', 'You are expected to provide aid to Alliance members in need, whether they be human, gnome, draenei... or pandaren like yourselves.', '12', '100', '29579', 'Raufen - The Allianec Way'),
+('61796', '6', '0', 'It is a simple guideline, but a meaningful one. Do you understand?', '12', '100', '29580', 'Raufen - The Allianec Way'),
+('61796', '7', '0', 'Good. Because that brings me to my second point.', '12', '100', '29581', 'Raufen - The Allianec Way'),
+('61796', '8', '0', 'Not all pandaren have chosen the same path as you three.', '12', '100', '29582', 'Raufen - The Allianec Way'),
+('61796', '9', '0', 'Some have sided with the Horde.', '12', '100', '29583', 'Raufen - The Allianec Way'),
+('61796', '10', '0', 'They, along with the other barbarian clans of the Horde, are your new enemies.', '12', '100', '29584', 'Raufen - The Allianec Way'),
+('61796', '11', '0', 'Those who you once considered friends, or even those you might have loved, are now your sworn adversaries.', '12', '100', '29585', 'Raufen - The Allianec Way'),
+('61796', '12', '0', 'I am deeply sorry, but the battle lines have been drawn. I will not tolerate any fraternizing with the enemy, as you could expose our Alliance to danger.', '12', '100', '29586', 'Raufen - The Allianec Way'),
+('61796', '13', '0', 'Do I make myself clear?', '12', '100', '29587', 'Raufen - The Alliance Way'),
+('61796', '14', '0', 'Very well. We are nearly finished, $n.', '12', '100', '29588', 'Raufen - The Alliance Way'),
+('61796', '15', '0', 'Few people know this, but I was once a pit fighter myself. A gladiator for the Horde\'s amusement. So I know a thing or two about martial combat.', '12', '100', '29568', 'Raufen - An Old Pit Fighter'),
+('61796', '16', '0', 'Now, pandaren... let me see what you\'ve got!', '12', '100', '29569', 'Raufen - An Old Pit Fighter'),
+('61796', '17', '0', 'Don\'t hold back now! Let\'s have it!', '12', '100', '29570', 'Raufen - An Old Pit Fighter'),
+('61796', '18', '0', 'What\'s the matter? You\'ll have to do better than that.', '12', '100', '29571', 'Raufen - An Old Pit Fighter'),
+('61796', '19', '0', 'Come on, pandaren! HIT ME!', '14', '100', '29572', 'Raufen - An Old Pit Fighter'),
+('61796', '20', '0', 'Ha ha ha haaa! I haven\'t felt like this in YEARS! Don\'t worry, $n... I\'ve been in worse scraps than this. A fighting spirit like yours is welcome in the Alliance. Now, let\'s get back to business.', '12', '100', '29573', 'Raufen - An Old Pit Fighter');
+
+UPDATE `creature_template` SET `ScriptName`='npc_king_varian_wrynn_quest' WHERE (`entry`='29611');
+UPDATE `creature_template` SET `ScriptName`='npc_king_varian_wrynn_the_alliance_way' WHERE (`entry`='61796');

@@ -250,6 +250,9 @@ public:
         if (status)
             handler->PSendSysMessage(LANG_LIQUID_STATUS, liquidStatus.level, liquidStatus.depth_level, liquidStatus.entry, liquidStatus.type_flags, status);
 
+        if (const WMOAreaTableEntry * wmoEntry = object->GetWMOArea())
+            handler->PSendSysMessage("WMO Area: %u (%s)", wmoEntry->Id, strlen(wmoEntry->Name) ? wmoEntry->Name : areaEntry->area_name);
+
         return true;
     }
 

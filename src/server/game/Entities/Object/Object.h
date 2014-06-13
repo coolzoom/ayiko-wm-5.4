@@ -949,6 +949,9 @@ class WorldObject : public Object, public WorldLocation
         virtual uint64 GetTransGUID()   const;
         void SetTransport(Transport* t) { m_transport = t; }
 
+        WMOAreaTableEntry const * GetWMOArea() const;
+        uint32 GetWMOAreaId() const;
+
         MovementInfo m_movementInfo;
 
         // Personal visibility system

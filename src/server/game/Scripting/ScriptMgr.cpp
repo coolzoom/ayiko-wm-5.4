@@ -801,7 +801,7 @@ bool ScriptMgr::OnQuestComplete(Player* player, Creature* creature, Quest const*
     return tmpscript->OnQuestComplete(player, creature, quest);
 }
 
-bool ScriptMgr::OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 opt)
+bool ScriptMgr::OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 itemId)
 {
     ASSERT(player);
     ASSERT(creature);
@@ -809,7 +809,7 @@ bool ScriptMgr::OnQuestReward(Player* player, Creature* creature, Quest const* q
 
     GET_SCRIPT_RET(CreatureScript, creature->GetScriptId(), tmpscript, false);
     player->PlayerTalkClass->ClearMenus();
-    return tmpscript->OnQuestReward(player, creature, quest, opt);
+    return tmpscript->OnQuestReward(player, creature, quest, itemId);
 }
 
 uint32 ScriptMgr::GetDialogStatus(Player* player, Creature* creature)
@@ -894,7 +894,7 @@ bool ScriptMgr::OnQuestAccept(Player* player, GameObject* go, Quest const* quest
     return tmpscript->OnQuestAccept(player, go, quest);
 }
 
-bool ScriptMgr::OnQuestReward(Player* player, GameObject* go, Quest const* quest, uint32 opt)
+bool ScriptMgr::OnQuestReward(Player* player, GameObject* go, Quest const* quest, uint32 itemId)
 {
     ASSERT(player);
     ASSERT(go);
@@ -902,7 +902,7 @@ bool ScriptMgr::OnQuestReward(Player* player, GameObject* go, Quest const* quest
 
     GET_SCRIPT_RET(GameObjectScript, go->GetScriptId(), tmpscript, false);
     player->PlayerTalkClass->ClearMenus();
-    return tmpscript->OnQuestReward(player, go, quest, opt);
+    return tmpscript->OnQuestReward(player, go, quest, itemId);
 }
 
 uint32 ScriptMgr::GetDialogStatus(Player* player, GameObject* go)

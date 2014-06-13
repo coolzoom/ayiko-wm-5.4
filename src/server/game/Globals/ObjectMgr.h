@@ -688,6 +688,9 @@ class ObjectMgr
         ItemTemplate const* GetItemTemplate(uint32 entry);
         ItemTemplateContainer const & GetItemTemplateStore() const { return _itemTemplateStore; }
 
+        GameObjectInvisibility const * gameObjectInvisibility(uint32 guid) const;
+        GameObjectInvisibility const * gameObjectTemplateInvisibility(uint32 entry) const;
+
         InstanceTemplate const* GetInstanceTemplate(uint32 mapId);
 
         PetLevelInfo const* GetPetLevelInfo(uint32 creature_id, uint8 level) const;
@@ -899,6 +902,8 @@ class ObjectMgr
         void LoadEquipmentTemplates();
         void LoadGameObjectLocales();
         void LoadGameobjects();
+        void loadGameObjectTemplateInvisibility();
+        void loadGameObjectInvisibility();
         void LoadItemTemplates();
         void LoadItemTemplateAddon();
         void LoadItemScriptNames();
@@ -1396,6 +1401,9 @@ class ObjectMgr
         GameObjectTemplateContainer _gameObjectTemplateStore;
         /// Stores temp summon data grouped by summoner's entry, summoner's type and group id
         TempSummonDataContainer _tempSummonDataStore;
+
+        std::unordered_map<uint32, GameObjectInvisibility> gameObjectTemplateInvisibilityStore_;
+        decltype(gameObjectTemplateInvisibilityStore_) gameObjectInvisibilityStore_;
 
         ItemTemplateContainer _itemTemplateStore;
         ItemLocaleContainer _itemLocaleStore;

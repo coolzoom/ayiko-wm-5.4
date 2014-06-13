@@ -1000,14 +1000,6 @@ public:
 
 class boss_li_fei_fight : public CreatureScript
 {
-public:
-    boss_li_fei_fight() : CreatureScript("boss_li_fei_fight") { }
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new boss_li_fei_fightAI(creature);
-    }
-
     struct boss_li_fei_fightAI : public ScriptedAI
     {
         EventMap events;
@@ -1017,12 +1009,11 @@ public:
         boss_li_fei_fightAI(Creature* creature) : ScriptedAI(creature)
         {}
 
-        enum eEvents
+        enum
         {
-            EVENT_CHECK_PLAYER      = 1,
-            EVENT_FEET_OF_FURY      = 2,
-            EVENT_SHADOW_KICK       = 3,
-            EVENT_SHADOW_KICK_STUN  = 4,
+            EVENT_FEET_OF_FURY      = 1,
+            EVENT_SHADOW_KICK       = 2,
+            EVENT_SHADOW_KICK_STUN  = 3,
         };
 
         void Reset()
@@ -1035,7 +1026,7 @@ public:
             me->SetReactState(REACT_AGGRESSIVE);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
             me->setFaction(16);
-            events.ScheduleEvent(EVENT_CHECK_PLAYER, 2500);
+
             events.ScheduleEvent(EVENT_FEET_OF_FURY, 5000);
             events.ScheduleEvent(EVENT_SHADOW_KICK,  1000);
         }
@@ -1079,34 +1070,6 @@ public:
             {
                 switch(eventId)
                 {
-                    case EVENT_CHECK_PLAYER:
-                    {
-                        Player* player = ObjectAccessor::FindPlayer(playerGuid);
-
-                        if (!player)
-                        {
-                            me->DespawnOrUnsummon(1000);
-                            playerGuid = 0;
-                            break;
-                        }
-
-                        if (!player->isAlive())
-                        {
-                            me->DespawnOrUnsummon(1000);
-                            playerGuid = 0;
-                            break;
-                        }
-
-                        if (player->GetQuestStatus(QUEST_PARCHEMIN_VOLANT) != QUEST_STATUS_INCOMPLETE)
-                        {
-                            me->DespawnOrUnsummon(1000);
-                            playerGuid = 0;
-                            break;
-                        }
-
-                        events.ScheduleEvent(EVENT_CHECK_PLAYER, 2500);
-                        break;
-                    }
                     case EVENT_FEET_OF_FURY:
                         if(me->getVictim())
                             me->CastSpell(me->getVictim(), 108958);
@@ -1120,7 +1083,7 @@ public:
                         events.ScheduleEvent(EVENT_SHADOW_KICK_STUN, 2500);
                         events.ScheduleEvent(EVENT_SHADOW_KICK, 30000);
                         break;
-                    case 4:
+                    case EVENT_SHADOW_KICK_STUN:
                         if(me->getVictim())
                             me->CastSpell(me->getVictim(), 108944);
                         break;
@@ -1130,6 +1093,14 @@ public:
             DoMeleeAttackIfReady();
         }
     };
+
+public:
+    boss_li_fei_fight() : CreatureScript("boss_li_fei_fight") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new boss_li_fei_fightAI(creature);
+    }
 };
 
 // Huo Benediction - 102630
@@ -1418,6 +1389,59 @@ public:
     };
 };
 
+class spell_lit_brazier_of_flame final : public SpellScriptLoader
+{
+    class script_impl final : public SpellScript
+    {
+        PrepareSpellScript(script_impl)
+
+        enum
+        {
+            QUEST_THE_CHALLENGERS_FIRES = 29664
+        };
+
+        SpellCastResult CheckCast()
+        {
+            auto const caster = GetCaster()->ToPlayer();
+            if (!caster)
+                return SPELL_FAILED_DONT_REPORT;
+
+            switch (caster->GetQuestStatus(QUEST_THE_CHALLENGERS_FIRES))
+            {
+                case QUEST_STATUS_NONE:
+                    return SPELL_FAILED_DONT_REPORT;
+                case QUEST_STATUS_COMPLETE:
+                case QUEST_STATUS_REWARDED:
+                    return SPELL_CAST_OK;
+                default:
+                    // For spell_area casts only
+                    if (GetSpell()->IsTriggered())
+                    {
+                        auto const killCredit = GetSpellInfo()->Effects[EFFECT_2].MiscValue;
+                        if (caster->GetReqKillOrCastCurrentCount(QUEST_THE_CHALLENGERS_FIRES, killCredit) == 0)
+                            return SPELL_FAILED_DONT_REPORT;
+                    }
+                    return SPELL_CAST_OK;
+            }
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(script_impl::CheckCast);
+        }
+    };
+
+public:
+    spell_lit_brazier_of_flame()
+        : SpellScriptLoader("spell_lit_brazier_of_flame")
+    { }
+
+    SpellScript * GetSpellScript() const final
+    {
+        return new script_impl;
+    }
+};
+
 void AddSC_WanderingIsland_North()
 {
     new mob_master_shang_xi();
@@ -1439,4 +1463,5 @@ void AddSC_WanderingIsland_North()
     new mob_instructors();
     new mob_aspiring_trainee();
     new mob_merchant_lorvo();
+    new spell_lit_brazier_of_flame();
 }

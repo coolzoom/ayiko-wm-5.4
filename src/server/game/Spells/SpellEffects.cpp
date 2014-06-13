@@ -6450,8 +6450,7 @@ void Spell::EffectQuestClear(SpellEffIndex effIndex)
         }
     }
 
-    player->RemoveActiveQuest(quest_id);
-    player->RemoveRewardedQuest(quest_id);
+    player->SetQuestStatus(quest_id, QUEST_STATUS_NONE);
 }
 
 void Spell::EffectSendTaxi(SpellEffIndex effIndex)

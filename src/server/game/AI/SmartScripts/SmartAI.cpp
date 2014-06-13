@@ -779,9 +779,9 @@ void SmartAI::sQuestAccept(Player* player, Quest const* quest)
     GetScript()->ProcessEventsFor(SMART_EVENT_ACCEPTED_QUEST, player, quest->GetQuestId());
 }
 
-void SmartAI::sQuestReward(Player* player, Quest const* quest, uint32 opt)
+void SmartAI::sQuestReward(Player* player, Quest const* quest, uint32 itemId)
 {
-    GetScript()->ProcessEventsFor(SMART_EVENT_REWARD_QUEST, player, quest->GetQuestId(), opt);
+    GetScript()->ProcessEventsFor(SMART_EVENT_REWARD_QUEST, player, quest->GetQuestId(), itemId);
 }
 
 bool SmartAI::sOnDummyEffect(Unit* caster, uint32 spellId, SpellEffIndex effIndex)
@@ -898,9 +898,9 @@ bool SmartGameObjectAI::QuestAccept(Player* player, Quest const* quest)
 }
 
 // Called when a player selects a quest reward.
-bool SmartGameObjectAI::QuestReward(Player* player, Quest const* quest, uint32 opt)
+bool SmartGameObjectAI::QuestReward(Player* player, Quest const* quest, uint32 itemId)
 {
-    GetScript()->ProcessEventsFor(SMART_EVENT_REWARD_QUEST, player, quest->GetQuestId(), opt, false, NULL, go);
+    GetScript()->ProcessEventsFor(SMART_EVENT_REWARD_QUEST, player, quest->GetQuestId(), itemId, false, NULL, go);
     return false;
 }
 

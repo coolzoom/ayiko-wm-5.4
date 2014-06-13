@@ -24,7 +24,8 @@
 #include <string>
 #include <unordered_map>
 
-typedef std::unordered_multimap<uint32, uint32> QuestPackageItemMap;
+// map<packageId, pair<itemId, itemCount>>
+typedef std::unordered_multimap<uint32, std::pair<uint32, uint32>> QuestPackageItemMap;
 
 extern DB2Storage<ItemEntry> sItemStore;
 extern DB2Storage<ItemCurrencyCostEntry> sItemCurrencyCostStore;

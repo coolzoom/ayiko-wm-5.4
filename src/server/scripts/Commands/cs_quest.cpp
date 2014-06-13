@@ -137,8 +137,7 @@ public:
             }
         }
 
-        player->RemoveActiveQuest(entry);
-        player->RemoveRewardedQuest(entry);
+        player->SetQuestStatus(entry, QUEST_STATUS_NONE);
 
         handler->SendSysMessage(LANG_COMMAND_QUEST_REMOVED);
         return true;
@@ -198,7 +197,7 @@ public:
             return false;
         }
 
-        player->RewardQuest(quest, 0, player);
+        player->RewardQuest(quest, quest->RewardChoiceItemId[0], player);
         return true;
     }
 };

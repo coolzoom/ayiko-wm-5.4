@@ -930,7 +930,7 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
 
     caster->ClearUnitState(UNIT_STATE_FOLLOW);
 
-    Spell* spell = new Spell(caster, spellInfo, TRIGGERED_NONE);
+    Spell* spell = new Spell(caster, spellInfo, TRIGGERED_NONE, 0, false, true);
     spell->m_cast_count = castCount;                    // probably pending spell cast
     spell->m_targets = targets;
 

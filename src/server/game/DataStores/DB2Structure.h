@@ -179,14 +179,12 @@ struct SpellReagentsEntry
     uint32    ReagentCount[MAX_SPELL_REAGENTS];             // 10-18    m_reagentCount
 };
 
-struct QuestPackageItemEntry
+struct QuestPackageItemEntry final
 {
     uint32 Id;
     uint32 Package;
     uint32 Item;
-
-    // always 1, not interesting
-    // uint32 Unk1;
+    uint32 Count;
 
     // some kind of group/flag. 2 is set for Hero's Purse, a special reward
     // substituation that is provided for certain quests when nothing else fits

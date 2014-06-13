@@ -489,10 +489,11 @@ SpellValue::SpellValue(SpellInfo const* proto)
     AuraStackAmount = 1;
 }
 
-Spell::Spell(Unit* caster, SpellInfo const* info, TriggerCastFlags triggerFlags, uint64 originalCasterGUID, bool skipCheck) :
-m_spellInfo(sSpellMgr->GetSpellForDifficultyFromSpell(info, caster)),
-m_caster((info->AttributesEx6 & SPELL_ATTR6_CAST_BY_CHARMER && caster->GetCharmerOrOwner()) ? caster->GetCharmerOrOwner() : caster)
-, m_spellValue(new SpellValue(m_spellInfo))
+Spell::Spell(Unit* caster, SpellInfo const* info, TriggerCastFlags triggerFlags,
+             uint64 originalCasterGUID, bool skipCheck, bool ignoreTriggeredAttribute) :
+    m_spellInfo(sSpellMgr->GetSpellForDifficultyFromSpell(info, caster)),
+    m_caster((info->AttributesEx6 & SPELL_ATTR6_CAST_BY_CHARMER && caster->GetCharmerOrOwner()) ? caster->GetCharmerOrOwner() : caster),
+    m_spellValue(new SpellValue(m_spellInfo))
 {
     m_spellPowerData = m_caster->GetSpellPowerEntryBySpell(m_spellInfo);
     m_customError = SPELL_CUSTOM_ERROR_NONE;
@@ -553,7 +554,7 @@ m_caster((info->AttributesEx6 & SPELL_ATTR6_CAST_BY_CHARMER && caster->GetCharme
 
     m_spellState = SPELL_STATE_NULL;
     _triggeredCastFlags = triggerFlags;
-    if (info->AttributesEx4 & SPELL_ATTR4_TRIGGERED)
+    if (!ignoreTriggeredAttribute && (info->AttributesEx4 & SPELL_ATTR4_TRIGGERED))
         _triggeredCastFlags = TRIGGERED_FULL_MASK;
 
     m_CastItem = NULL;

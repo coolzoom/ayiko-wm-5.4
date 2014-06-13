@@ -266,6 +266,8 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
     LastUsedScriptID = GetGOInfo()->ScriptId;
     AIM_Initialize();
 
+    loadInvisibility();
+
     return true;
 }
 
@@ -1689,9 +1691,17 @@ void GameObject::Use(Unit* user)
     }
 
     if (spellCaster)
-        spellCaster->CastSpell(user, spellInfo, triggered);
+    {
+        SpellCastTargets spellTargets;
+        spellTargets.SetUnitTarget(user);
+
+        auto const spell = new Spell(spellCaster, spellInfo, triggered ? TRIGGERED_FULL_MASK : TRIGGERED_NONE, 0, false, true);
+        spell->prepare(&spellTargets);
+    }
     else
+    {
         CastSpell(user, spellId);
+    }
 }
 
 void GameObject::CastSpell(Unit* target, uint32 spellId)
@@ -2182,4 +2192,20 @@ void GameObject::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* t
     *data << uint8(updateMask.GetBlockCount());
     updateMask.AppendToPacket(data);
     data->append(fieldBuffer);
+}
+
+void GameObject::loadInvisibility()
+{
+    GameObjectInvisibility const *invis = nullptr;
+
+    if (m_DBTableGuid != 0)
+        invis = sObjectMgr->gameObjectInvisibility(GetGUIDLow());
+
+    if (!invis)
+        invis = sObjectMgr->gameObjectTemplateInvisibility(GetEntry());
+
+    if (invis) {
+        m_invisibility.AddFlag(invis->type);
+        m_invisibility.AddValue(invis->type, invis->amount);
+    }
 }

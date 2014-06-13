@@ -1592,6 +1592,12 @@ void World::SetInitialWorldSettings()
     TC_LOG_INFO("server.loading", "Loading Gameobject Data...");
     sObjectMgr->LoadGameobjects();
 
+    TC_LOG_INFO("server.loading", "Loading gameobject template invisibilities...");
+    sObjectMgr->loadGameObjectTemplateInvisibility();
+
+    TC_LOG_INFO("server.loading", "Loading gameobject invisibilities...");
+    sObjectMgr->loadGameObjectInvisibility();
+
     TC_LOG_INFO("server.loading", "Loading Creature Linked Respawn...");
     sObjectMgr->LoadLinkedRespawn();                             // must be after LoadCreatures(), LoadGameObjects()
 

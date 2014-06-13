@@ -9601,7 +9601,7 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8
             return;
         }
 
-        Spell* spell = new Spell(this, spellInfo, TRIGGERED_NONE);
+        Spell* spell = new Spell(this, spellInfo, TRIGGERED_NONE, 0, false, true);
         spell->m_CastItem = item;
         spell->m_cast_count = cast_count;                   //set count of casts
         spell->SetSpellValue(SPELLVALUE_BASE_POINT0, learning_spell_id);
@@ -9632,7 +9632,7 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8
             continue;
         }
 
-        Spell* spell = new Spell(this, spellInfo, (count > 0) ? TRIGGERED_FULL_MASK : TRIGGERED_NONE);
+        Spell* spell = new Spell(this, spellInfo, (count > 0) ? TRIGGERED_FULL_MASK : TRIGGERED_NONE, 0, false, count == 0);
         spell->m_CastItem = item;
         spell->m_cast_count = cast_count;                   // set count of casts
         spell->m_glyphIndex = glyphIndex;                   // glyph index
@@ -9663,7 +9663,7 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8
                 continue;
             }
 
-            Spell* spell = new Spell(this, spellInfo, (count > 0) ? TRIGGERED_FULL_MASK : TRIGGERED_NONE);
+            Spell* spell = new Spell(this, spellInfo, (count > 0) ? TRIGGERED_FULL_MASK : TRIGGERED_NONE, 0, false, count == 0);
             spell->m_CastItem = item;
             spell->m_cast_count = cast_count;               // set count of casts
             spell->m_glyphIndex = glyphIndex;               // glyph index
@@ -16493,20 +16493,6 @@ bool Player::CanRewardQuest(Quest const* quest, uint32 reward, bool msg)
     if (!CanRewardQuest(quest, msg))
         return false;
 
-    if (quest->GetRewChoiceItemsCount() > 0)
-    {
-        if (quest->RewardChoiceItemId[reward])
-        {
-            ItemPosCountVec dest;
-            InventoryResult res = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, quest->RewardChoiceItemId[reward], quest->RewardChoiceItemCount[reward]);
-            if (res != EQUIP_ERR_OK)
-            {
-                SendEquipError(res, NULL, NULL, quest->RewardChoiceItemId[reward]);
-                return false;
-            }
-        }
-    }
-
     if (quest->GetRewItemsCount() > 0)
     {
         for (uint32 i = 0; i < quest->GetRewItemsCount(); ++i)
@@ -16521,6 +16507,57 @@ bool Player::CanRewardQuest(Quest const* quest, uint32 reward, bool msg)
                     return false;
                 }
             }
+        }
+    }
+
+    // TODO: is it possible for this function to be called with no reward?
+    if (reward == 0)
+        return true;
+
+    uint32 rewardCount = 0;
+
+    if (auto const packageId = quest->GetRewardPackage())
+    {
+        auto const range = GetQuestPackageItems(packageId);
+
+        auto const itr = std::find_if(range.first, range.second,
+            [reward](decltype(*range.first) kvPair)
+            {
+                return kvPair.second.first == reward;
+            });
+
+        if (itr == range.second)
+        {
+            SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL, reward);
+            return false;
+        }
+
+        // TODO: dynamic reward checks (ItemSpec.dbc and ItemSpecOverride.dbc)
+        rewardCount = itr->second.second;
+    }
+    else if (quest->GetRewChoiceItemsCount() > 0)
+    {
+        auto const first = std::begin(quest->RewardChoiceItemId);
+        auto const last = std::end(quest->RewardChoiceItemId);
+
+        auto const itr = std::find(first, last, reward);
+        if (itr == last)
+        {
+            SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL, reward);
+            return false;
+        }
+
+        rewardCount = quest->RewardChoiceItemCount[std::distance(first, itr)];
+    }
+
+    if (rewardCount != 0)
+    {
+        ItemPosCountVec dest;
+        auto const res = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, reward, rewardCount);
+        if (res != EQUIP_ERR_OK)
+        {
+            SendEquipError(res, NULL, NULL, reward);
+            return false;
         }
     }
 
@@ -16539,8 +16576,8 @@ void Player::AddQuest(Quest const* quest, Object* questGiver)
     // if not exist then created with set uState == NEW and rewarded=false
     QuestStatusData& questStatusData = m_QuestStatus[quest_id];
 
+    SetQuestStatus(quest_id, QUEST_STATUS_INCOMPLETE);
     // check for repeatable quests status reset
-    questStatusData.Status = QUEST_STATUS_INCOMPLETE;
     questStatusData.Explored = false;
 
     if (quest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_DELIVER))
@@ -16594,14 +16631,6 @@ void Player::AddQuest(Quest const* quest, Object* questGiver)
     //starting initial quest script
     if (questGiver && quest->GetQuestStartScript() != 0)
         GetMap()->ScriptsStart(sQuestStartScripts, quest->GetQuestStartScript(), questGiver, this);
-
-    CheckSpellAreaOnQuestStatusChange(quest_id);
-
-    PhaseUpdateData phaseUdateData;
-    phaseUdateData.AddQuestUpdate(quest_id);
-
-    m_phaseMgr.NotifyConditionChanged(phaseUdateData);
-
 
     UpdateForQuestWorldObjects();
 }
@@ -16754,15 +16783,40 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
     }
     RemoveTimedQuest(quest_id);
 
-    if (quest->GetRewChoiceItemsCount() > 0)
     {
-        if (uint32 itemId = quest->RewardChoiceItemId[reward])
+        uint32 rewardCount = 0;
+
+        if (auto const packageId = quest->GetRewardPackage())
+        {
+            auto const range = GetQuestPackageItems(packageId);
+
+            auto const itr = std::find_if(range.first, range.second,
+                [reward](decltype(*range.first) kvPair)
+                {
+                    return kvPair.second.first == reward;
+                });
+
+            if (itr != range.second)
+                rewardCount = itr->second.second;
+        }
+        else if (quest->GetRewChoiceItemsCount() > 0)
+        {
+            auto const first = std::begin(quest->RewardChoiceItemId);
+            auto const last = std::end(quest->RewardChoiceItemId);
+
+            auto const itr = std::find(first, last, reward);
+
+            if (itr != last)
+                rewardCount = quest->RewardChoiceItemCount[std::distance(first, itr)];
+        }
+
+        if (rewardCount != 0)
         {
             ItemPosCountVec dest;
-            if (CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, quest->RewardChoiceItemCount[reward]) == EQUIP_ERR_OK)
+            if (CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, reward, rewardCount) == EQUIP_ERR_OK)
             {
-                Item* item = StoreNewItem(dest, itemId, true, Item::GenerateItemRandomPropertyId(itemId));
-                SendNewItem(item, quest->RewardChoiceItemCount[reward], true, false);
+                auto const item = StoreNewItem(dest, reward, true, Item::GenerateItemRandomPropertyId(reward));
+                SendNewItem(item, rewardCount, true, false);
             }
         }
     }
@@ -16882,20 +16936,7 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
     else if (quest->IsSeasonal())
         SetSeasonalQuestStatus(quest_id);
 
-    m_RewardedQuests.insert(quest_id);
-    m_RewardedQuestsSave[quest_id] = true;
-
-    PhaseUpdateData phaseUdateData;
-    phaseUdateData.AddQuestUpdate(quest_id);
-    m_phaseMgr.NotifyConditionChanged(phaseUdateData);
-
-    // Must come after the insert in m_RewardedQuests because of spell_area check
-    RemoveActiveQuest(quest_id);
-
-    phaseUdateData.AddQuestUpdate(quest_id);
-
-    m_phaseMgr.NotifyConditionChanged(phaseUdateData);
-
+    SetQuestStatus(quest_id, QUEST_STATUS_REWARDED);
 
     // StoreNewItem, mail reward, etc. save data directly to the database
     // to prevent exploitable data desynchronisation we save the quest status to the database too
@@ -17487,20 +17528,63 @@ bool Player::CanShareQuest(uint32 quest_id) const
     return false;
 }
 
-void Player::SetQuestStatus(uint32 quest_id, QuestStatus status)
+void Player::SetQuestStatus(uint32 questId, QuestStatus newStatus)
 {
-    if (sObjectMgr->GetQuestTemplate(quest_id))
+    auto const oldStatus = GetQuestStatus(questId);
+    if (oldStatus == QUEST_STATUS_NONE && newStatus == QUEST_STATUS_NONE)
+        return;
+
+    switch (newStatus)
     {
-        m_QuestStatus[quest_id].Status = status;
-        m_QuestStatusSave[quest_id] = true;
+        case QUEST_STATUS_NONE:
+            RemoveActiveQuest(questId);
+            RemoveRewardedQuest(questId);
+            break;
+        case QUEST_STATUS_REWARDED:
+            RemoveActiveQuest(questId);
+            m_RewardedQuests.insert(questId);
+            m_RewardedQuestsSave[questId] = true;
+            break;
+        default:
+            if (sObjectMgr->GetQuestTemplate(questId))
+            {
+                m_QuestStatus[questId].Status = newStatus;
+                m_QuestStatusSave[questId] = true;
+            }
+            break;
     }
 
-    CheckSpellAreaOnQuestStatusChange(quest_id);
+    PhaseUpdateData phaseUpdateData;
+    phaseUpdateData.AddQuestUpdate(questId);
+    m_phaseMgr.NotifyConditionChanged(phaseUpdateData);
 
-    PhaseUpdateData phaseUdateData;
-    phaseUdateData.AddQuestUpdate(quest_id);
+    uint32 zone = 0, area = 0;
 
-    m_phaseMgr.NotifyConditionChanged(phaseUdateData);
+    auto saBounds = sSpellMgr->GetSpellAreaForQuestMapBounds(questId);
+    if (saBounds.first != saBounds.second)
+    {
+        GetZoneAndAreaId(zone, area);
+
+        for (auto itr = saBounds.first; itr != saBounds.second; ++itr)
+            if (itr->second->autocast && itr->second->IsFitToRequirements(this, zone, area))
+                if (!HasAura(itr->second->spellId))
+                    CastSpell(this, itr->second->spellId, true);
+    }
+
+    saBounds = sSpellMgr->GetSpellAreaForQuestEndMapBounds(questId);
+    if (saBounds.first != saBounds.second)
+    {
+        if (!zone || !area)
+            GetZoneAndAreaId(zone, area);
+
+        for (auto itr = saBounds.first; itr != saBounds.second; ++itr)
+            if (!itr->second->IsFitToRequirements(this, zone, area))
+                RemoveAurasDueToSpell(itr->second->spellId);
+    }
+
+    // TODO: review this
+    if (newStatus == QUEST_STATUS_REWARDED || (newStatus == QUEST_STATUS_NONE && oldStatus == QUEST_STATUS_REWARDED))
+        return;
 
     UpdateForQuestWorldObjects();
 }
@@ -17508,34 +17592,21 @@ void Player::SetQuestStatus(uint32 quest_id, QuestStatus status)
 void Player::RemoveActiveQuest(uint32 quest_id)
 {
     QuestStatusMap::iterator itr = m_QuestStatus.find(quest_id);
-    if (itr != m_QuestStatus.end())
-    {
-        m_QuestStatus.erase(itr);
-        m_QuestStatusSave[quest_id] = false;
-
-        CheckSpellAreaOnQuestStatusChange(quest_id);
-
-        PhaseUpdateData phaseUdateData;
-        phaseUdateData.AddQuestUpdate(quest_id);
-
-        m_phaseMgr.NotifyConditionChanged(phaseUdateData);
+    if (itr == m_QuestStatus.end())
         return;
-    }
+
+    m_QuestStatus.erase(itr);
+    m_QuestStatusSave[quest_id] = false;
 }
 
 void Player::RemoveRewardedQuest(uint32 quest_id)
 {
     RewardedQuestSet::iterator rewItr = m_RewardedQuests.find(quest_id);
-    if (rewItr != m_RewardedQuests.end())
-    {
-        m_RewardedQuests.erase(rewItr);
-        m_RewardedQuestsSave[quest_id] = false;
+    if (rewItr == m_RewardedQuests.end())
+        return;
 
-        PhaseUpdateData phaseUdateData;
-        phaseUdateData.AddQuestUpdate(quest_id);
-
-        m_phaseMgr.NotifyConditionChanged(phaseUdateData);
-    }
+    m_RewardedQuests.erase(rewItr);
+    m_RewardedQuestsSave[quest_id] = false;
 }
 
 // not used in Trinity, but used in scripting code
@@ -25419,7 +25490,7 @@ void Player::UpdateForQuestWorldObjects()
 
     UpdateData udata(GetMapId());
     WorldPacket packet;
-    for (ClientGUIDs::iterator itr=m_clientGUIDs.begin(); itr != m_clientGUIDs.end(); ++itr)
+    for (ClientGUIDs::iterator itr = m_clientGUIDs.begin(); itr != m_clientGUIDs.end(); ++itr)
     {
         if (IS_GAMEOBJECT_GUID(*itr))
         {
@@ -28757,43 +28828,6 @@ void Player::ShowNeutralPlayerFactionSelectUI()
 {
     WorldPacket data(SMSG_SHOW_NEUTRAL_PLAYER_FACTION_SELECT_UI);
     GetSession()->SendPacket(&data);
-}
-
-void Player::CheckSpellAreaOnQuestStatusChange(uint32 quest_id)
-{
-    uint32 zone = 0, area = 0;
-
-    SpellAreaForQuestMapBounds saBounds = sSpellMgr->GetSpellAreaForQuestMapBounds(quest_id);
-    if (saBounds.first != saBounds.second)
-    {
-        GetZoneAndAreaId(zone, area);
-
-        for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
-        {
-            if (zone != itr->second->areaId && area != itr->second->areaId)
-                continue;
-
-            if (itr->second->autocast && itr->second->IsFitToRequirements(this, zone, area))
-                if (!HasAura(itr->second->spellId))
-                    CastSpell(this, itr->second->spellId, true);
-        }
-    }
-
-    saBounds = sSpellMgr->GetSpellAreaForQuestEndMapBounds(quest_id);
-    if (saBounds.first != saBounds.second)
-    {
-        if (!zone || !area)
-            GetZoneAndAreaId(zone, area);
-
-        for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
-        {
-            if (zone != itr->second->areaId && area != itr->second->areaId)
-                continue;
-
-            if (!itr->second->IsFitToRequirements(this, zone, area))
-                RemoveAurasDueToSpell(itr->second->spellId);
-        }
-    }
 }
 
 void Player::CastPassiveTalentSpell(uint32 spellId)

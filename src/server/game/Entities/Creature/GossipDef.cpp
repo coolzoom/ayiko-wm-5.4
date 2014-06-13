@@ -1086,8 +1086,8 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* quest, uint64 npcGUID, b
 
     data << uint32(quest->RewardChoiceItemCount[0]);
 
-    data << uint32(0); // 78
-    data << uint32(0); // 144
+    data << uint32(quest->GetCharTitleId());
+    data << uint32(quest->GetRewardPackage());
 
     data << uint32(0);                       // unk
 
@@ -1131,7 +1131,7 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* quest, uint64 npcGUID, b
         data << uint32(0);
 
     data << uint32(0); // 101
-    data << uint32(0); // 79
+    data << uint32(quest->GetBonusTalents());
     data << uint32(quest->RewardItemIdCount[3]);
     if (ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(quest->RewardChoiceItemId[1]))
         data << uint32(itemTemplate->DisplayInfoID);
@@ -1238,44 +1238,6 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* quest, uint64 npcGUID, b
 
     data.WriteByteSeq<2, 3, 7>(guid);
 
-    //if (unknow.size())
-        //data.append(unknow.c_str(), unknow.size());
-    /*
-    data << uint64(npcGUID);
-    data << uint32(quest->GetQuestId());
-    data << uint32(0);
-    data << questTitle;
-    data << questOfferRewardText;
-
-    data << questGiverTextWindow;
-    data << questGiverTargetName;
-    data << questTurnTextWindow;
-    data << questTurnTargetName;
-    data << uint32(quest->GetQuestGiverPortrait());
-    data << uint32(quest->GetQuestTurnInPortrait());
-
-    data << uint8(enableNext ? 1 : 0);                      // Auto Finish
-    data << uint32(quest->GetFlags());                      // 3.3.3 questFlags
-    data << uint32(quest->GetSuggestedPlayers());           // SuggestedGroupNum
-    data << uint32(0);
-
-    uint32 emoteCount = 0;
-    for (uint8 i = 0; i < QUEST_EMOTE_COUNT; ++i)
-    {
-        if (quest->OfferRewardEmote[i] <= 0)
-            break;
-        ++emoteCount;
-    }
-
-    data << emoteCount;                                     // Emote Count
-    for (uint8 i = 0; i < emoteCount; ++i)
-    {
-        data << uint32(quest->OfferRewardEmoteDelay[i]);    // Delay Emote
-        data << uint32(quest->OfferRewardEmote[i]);
-    }
-    */
-    // quest->BuildExtraQuestInfo(data, _session->GetPlayer());
-
     _session->SendPacket(&data);
     TC_LOG_DEBUG("network", "WORLD: Sent SMSG_QUESTGIVER_OFFER_REWARD NPCGuid=%u, questid=%u", GUID_LOPART(npcGUID), quest->GetQuestId());
 }
@@ -1379,65 +1341,6 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* quest, uint64 npcGUID, 
     if (requestItemsText.size())
         data.append(requestItemsText.c_str(), requestItemsText.size());
     data.WriteByteSeq<0, 7, 2, 5, 1, 3>(guid);
-    /*
-
-    data << uint64(npcGUID);
-    data << uint32(quest->GetQuestId());
-    data << questTitle;
-    data << requestItemsText;
-
-
-
-    data << uint32(0);                                   // unknown
-
-    if (canComplete)
-        data << quest->GetCompleteEmote();
-    else
-        data << quest->GetIncompleteEmote();
-
-    // Close Window after cancel
-    data << uint32(closeOnCancel);
-
-    data << uint32(quest->GetFlags());                      // 3.3.3 questFlags
-    data << uint32(quest->GetSuggestedPlayers());           // SuggestedGroupNum
-
-    // Required Money
-    data << uint32(quest->GetRewOrReqMoney() < 0 ? -quest->GetRewOrReqMoney() : 0);
-    data << uint32(0);
-    data << uint32(quest->GetReqItemsCount());
-    for (int i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; ++i)
-    {
-        if (!quest->RequiredItemId[i])
-            continue;
-
-        data << uint32(quest->RequiredItemId[i]);
-        data << uint32(quest->RequiredItemCount[i]);
-
-        if (ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(quest->RequiredItemId[i]))
-            data << uint32(itemTemplate->DisplayInfoID);
-        else
-            data << uint32(0);
-    }
-
-    data << uint32(quest->GetReqCurrencyCount());
-    for (int i = 0; i < QUEST_REQUIRED_CURRENCY_COUNT; ++i)
-    {
-        if (!quest->RequiredCurrencyId[i])
-            continue;
-
-        data << uint32(quest->RequiredCurrencyId[i]);
-        data << uint32(quest->RequiredCurrencyCount[i]);
-    }
-
-    if (!canComplete)            // Experimental; there are 6 similar flags, if any of them
-        data << uint32(0x00);    // of them is 0 player can't complete quest (still unknown meaning)
-    else
-        data << uint32(0x02);
-
-    data << uint32(0x04);
-    data << uint32(0x08);
-    data << uint32(0x10);
-    data << uint32(0x40);*/
 
     _session->SendPacket(&data);
     TC_LOG_DEBUG("network", "WORLD: Sent SMSG_QUESTGIVER_REQUEST_ITEMS NPCGuid=%u, questid=%u", GUID_LOPART(npcGUID), quest->GetQuestId());

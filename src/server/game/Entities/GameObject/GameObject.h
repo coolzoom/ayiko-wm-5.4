@@ -610,6 +610,17 @@ struct GameObjectData
     bool dbData;
 };
 
+struct GameObjectInvisibility final
+{
+    GameObjectInvisibility(InvisibilityType t, int32 a)
+        : type(t)
+        , amount(a)
+    { }
+
+    InvisibilityType type;
+    int32 amount;
+};
+
 // For containers:  [GO_NOT_READY]->GO_READY (close)->GO_ACTIVATED (open) ->GO_JUST_DEACTIVATED->GO_READY        -> ...
 // For bobber:      GO_NOT_READY  ->GO_READY (close)->GO_ACTIVATED (open) ->GO_JUST_DEACTIVATED-><deleted>
 // For door(closed):[GO_NOT_READY]->GO_READY (close)->GO_ACTIVATED (open) ->GO_JUST_DEACTIVATED->GO_READY(close) -> ...
@@ -848,6 +859,8 @@ class GameObject : public WorldObject, public GridObject<GameObject>
         void RemoveFromOwner();
         void SwitchDoorOrButton(bool activate, bool alternative = false);
         void UpdateModel();                                 // updates model in case displayId were changed
+
+        void loadInvisibility();
 
         //! Object distance/size - overridden from Object::_IsWithinDist. Needs to take in account proper GO size.
         bool _IsWithinDist(WorldObject const* obj, float dist2compare, bool /*is3D*/) const

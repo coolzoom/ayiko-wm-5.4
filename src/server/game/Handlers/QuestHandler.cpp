@@ -270,20 +270,6 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvData)
     if (!quest)
         return;
 
-    uint32 reward = QUEST_REWARD_CHOICES_COUNT;
-
-    // TODO: Doing something less dirty
-    for (int i = 0; i < QUEST_REWARD_CHOICES_COUNT; ++i)
-        if (quest->RewardChoiceItemId[i] == itemId)
-            reward = i;
-
-    if (reward >= QUEST_REWARD_CHOICES_COUNT)
-    {
-        TC_LOG_ERROR("network", "Error in CMSG_QUESTGIVER_CHOOSE_REWARD: player %s (guid %d) tried"
-                     " to get invalid reward (%u) (probably packet hacking)", _player->GetName().c_str(), _player->GetGUIDLow(), reward);
-        return;
-    }
-
     Object* object = (guid == GetPlayer()->GetGUID() && quest->HasFlag(QUEST_FLAGS_AUTOCOMPLETE | QUEST_FLAGS_AUTO_SUBMIT))
             ? GetPlayer()
             : ObjectAccessor::GetObjectByTypeMask(*_player, guid, TYPEMASK_UNIT|TYPEMASK_GAMEOBJECT);
@@ -306,14 +292,14 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvData)
         return;
     }
 
-    if (_player->CanRewardQuest(quest, reward, true))
+    if (_player->CanRewardQuest(quest, itemId, true))
     {
-        _player->RewardQuest(quest, reward, object);
+        _player->RewardQuest(quest, itemId, object);
 
         switch (object->GetTypeId())
         {
         case TYPEID_UNIT:
-            if (!sScriptMgr->OnQuestReward(_player, object->ToCreature(), quest, reward))
+            if (!sScriptMgr->OnQuestReward(_player, object->ToCreature(), quest, itemId))
             {
                 // Send next quest
                 if (Quest const* nextQuest = _player->GetNextQuest(guid, quest))
@@ -327,11 +313,11 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvData)
                     }
                 }
 
-                object->ToCreature()->AI()->sQuestReward(_player, quest, reward);
+                object->ToCreature()->AI()->sQuestReward(_player, quest, itemId);
             }
             break;
         case TYPEID_GAMEOBJECT:
-            if (!sScriptMgr->OnQuestReward(_player, ((GameObject*)object), quest, reward))
+            if (!sScriptMgr->OnQuestReward(_player, ((GameObject*)object), quest, itemId))
             {
                 // Send next quest
                 if (Quest const* nextQuest = _player->GetNextQuest(guid, quest))
@@ -345,11 +331,11 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvData)
                     }
                 }
 
-                object->ToGameObject()->AI()->QuestReward(_player, quest, reward);
+                object->ToGameObject()->AI()->QuestReward(_player, quest, itemId);
             }
             break;
         case TYPEID_PLAYER:
-            if (quest->HasFlag(QUEST_FLAGS_AUTO_SUBMIT))
+            if (quest->HasFlag(QUEST_FLAGS_AUTOCOMPLETE))
             {
                 // Send next quest
                 if (Quest const* nextQuest = _player->GetNextQuest(guid, quest))
@@ -430,7 +416,7 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recvData)
             }
 
             _player->TakeQuestSourceItem(questId, true); // remove quest src item from player
-            _player->RemoveActiveQuest(questId);
+            _player->SetQuestStatus(questId, QUEST_STATUS_NONE);
             _player->GetAchievementMgr().RemoveTimedAchievement(ACHIEVEMENT_TIMED_TYPE_QUEST, questId);
 
             TC_LOG_INFO("network", "Player %u abandoned quest %u", _player->GetGUIDLow(), questId);

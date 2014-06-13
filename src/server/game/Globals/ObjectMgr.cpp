@@ -1000,6 +1000,18 @@ CreatureAddon const* ObjectMgr::GetCreatureTemplateAddon(uint32 entry)
     return NULL;
 }
 
+GameObjectInvisibility const * ObjectMgr::gameObjectTemplateInvisibility(uint32 entry) const
+{
+    auto const itr = gameObjectTemplateInvisibilityStore_.find(entry);
+    return itr != gameObjectTemplateInvisibilityStore_.end() ? &itr->second : nullptr;
+}
+
+GameObjectInvisibility const * ObjectMgr::gameObjectInvisibility(uint32 guid) const
+{
+    auto const itr = gameObjectInvisibilityStore_.find(guid);
+    return itr != gameObjectInvisibilityStore_.end() ? &itr->second : nullptr;
+}
+
 EquipmentInfo const* ObjectMgr::GetEquipmentInfo(uint32 entry)
 {
     EquipmentInfoContainer::const_iterator itr = _equipmentInfoStore.find(entry);
@@ -1969,6 +1981,68 @@ void ObjectMgr::LoadGameobjects()
     while (result->NextRow());
 
     TC_LOG_INFO("server.loading", ">> Loaded %lu gameobjects in %u ms", (unsigned long)_gameObjectDataStore.size(), GetMSTimeDiffToNow(oldMSTime));
+}
+
+void ObjectMgr::loadGameObjectTemplateInvisibility()
+{
+    gameObjectTemplateInvisibilityStore_.clear();
+
+    auto result = WorldDatabase.Query("SELECT entry, type, amount FROM gameobject_template_invisibility");
+    if (!result)
+    {
+        TC_LOG_INFO("server.loading", ">> DB table `gameobject_template_invisibility` is empty");
+        return;
+    }
+
+    auto const start = getMSTime();
+
+    do
+    {
+        auto const fields = result->Fetch();
+
+        auto const entry = fields[0].GetUInt32();
+        auto const type = static_cast<InvisibilityType>(fields[1].GetUInt8());
+        auto const amount = fields[2].GetInt32();
+
+        gameObjectTemplateInvisibilityStore_.emplace(
+            std::piecewise_construct,
+            std::forward_as_tuple(entry),
+            std::forward_as_tuple(type, amount));
+    }
+    while (result->NextRow());
+
+    TC_LOG_INFO("server.loading", ">> Loaded " SIZEFMTD " gameobject template invisibilities in %u ms", gameObjectTemplateInvisibilityStore_.size(), GetMSTimeDiffToNow(start));
+}
+
+void ObjectMgr::loadGameObjectInvisibility()
+{
+    gameObjectInvisibilityStore_.clear();
+
+    auto result = WorldDatabase.Query("SELECT guid, type, amount FROM gameobject_invisibility");
+    if (!result)
+    {
+        TC_LOG_INFO("server.loading", ">> DB table `gameobject_invisibility` is empty");
+        return;
+    }
+
+    auto const start = getMSTime();
+
+    do
+    {
+        auto const fields = result->Fetch();
+
+        auto const guid = fields[0].GetUInt32();
+        auto const type = static_cast<InvisibilityType>(fields[1].GetUInt8());
+        auto const amount = fields[2].GetInt32();
+
+        gameObjectInvisibilityStore_.emplace(
+            std::piecewise_construct,
+            std::forward_as_tuple(guid),
+            std::forward_as_tuple(type, amount));
+    }
+    while (result->NextRow());
+
+    TC_LOG_INFO("server.loading", ">> Loaded " SIZEFMTD " gameobject invisibilities in %u ms", gameObjectInvisibilityStore_.size(), GetMSTimeDiffToNow(start));
 }
 
 void ObjectMgr::AddGameobjectToGrid(uint32 guid, GameObjectData const* data)

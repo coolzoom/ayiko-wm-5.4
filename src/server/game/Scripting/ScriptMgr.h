@@ -393,7 +393,7 @@ class CreatureScript : public ScriptObject, public UpdatableScript<Creature>
         virtual bool OnQuestComplete(Player* /*player*/, Creature* /*creature*/, Quest const* /*quest*/) { return false; }
 
         // Called when a player selects a quest reward.
-        virtual bool OnQuestReward(Player* /*player*/, Creature* /*creature*/, Quest const* /*quest*/, uint32 /*opt*/) { return false; }
+        virtual bool OnQuestReward(Player* /*player*/, Creature* /*creature*/, Quest const* /*quest*/, uint32 /*itemId*/) { return false; }
 
         // Called when the dialog status between a player and the creature is requested.
         virtual uint32 GetDialogStatus(Player* /*player*/, Creature* /*creature*/) { return 100; }
@@ -428,7 +428,7 @@ class GameObjectScript : public ScriptObject, public UpdatableScript<GameObject>
         virtual bool OnQuestAccept(Player* /*player*/, GameObject* /*go*/, Quest const* /*quest*/) { return false; }
 
         // Called when a player selects a quest reward.
-        virtual bool OnQuestReward(Player* /*player*/, GameObject* /*go*/, Quest const* /*quest*/, uint32 /*opt*/) { return false; }
+        virtual bool OnQuestReward(Player* /*player*/, GameObject* /*go*/, Quest const* /*quest*/, uint32 /*itemId*/) { return false; }
 
         // Called when the dialog status between a player and the gameobject is requested.
         virtual uint32 GetDialogStatus(Player* /*player*/, GameObject* /*go*/) { return 100; }
@@ -865,7 +865,7 @@ class ScriptMgr
         bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest);
         bool OnQuestSelect(Player* player, Creature* creature, Quest const* quest);
         bool OnQuestComplete(Player* player, Creature* creature, Quest const* quest);
-        bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 opt);
+        bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 itemId);
         uint32 GetDialogStatus(Player* player, Creature* creature);
         CreatureAI* GetCreatureAI(Creature* creature);
         void OnCreatureUpdate(Creature* creature, uint32 diff);
@@ -877,7 +877,7 @@ class ScriptMgr
         bool OnGossipSelect(Player* player, GameObject* go, uint32 sender, uint32 action);
         bool OnGossipSelectCode(Player* player, GameObject* go, uint32 sender, uint32 action, const char* code);
         bool OnQuestAccept(Player* player, GameObject* go, Quest const* quest);
-        bool OnQuestReward(Player* player, GameObject* go, Quest const* quest, uint32 opt);
+        bool OnQuestReward(Player* player, GameObject* go, Quest const* quest, uint32 itemId);
         uint32 GetDialogStatus(Player* player, GameObject* go);
         void OnGameObjectDestroyed(GameObject* go, Player* player);
         void OnGameObjectDamaged(GameObject* go, Player* player);

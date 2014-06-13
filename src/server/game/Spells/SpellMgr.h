@@ -776,7 +776,6 @@ class SpellMgr
         EnchantCustomAttribute     mEnchantCustomAttr;
         SpellAreaMap               mSpellAreaMap;
         SpellAreaForQuestMap       mSpellAreaForQuestMap;
-        SpellAreaForQuestMap       mSpellAreaForActiveQuestMap;
         SpellAreaForQuestMap       mSpellAreaForQuestEndMap;
         SpellAreaForAuraMap        mSpellAreaForAuraMap;
         SpellAreaForAreaMap        mSpellAreaForAreaMap;

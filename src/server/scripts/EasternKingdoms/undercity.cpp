@@ -76,7 +76,7 @@ class npc_lady_sylvanas_windrunner : public CreatureScript
 public:
     npc_lady_sylvanas_windrunner() : CreatureScript("npc_lady_sylvanas_windrunner") { }
 
-    bool OnQuestReward(Player* /*player*/, Creature* creature, const Quest *_Quest, uint32 /*slot*/)
+    bool OnQuestReward(Player* /*player*/, Creature* creature, const Quest *_Quest, uint32 /*item*/)
     {
         if (_Quest->GetQuestId() == QUEST_JOURNEY_TO_UNDERCITY)
         {

@@ -2659,9 +2659,9 @@ void SpellMgr::LoadSpellAreas()
 
     mSpellAreaMap.clear();                                  // need for reload case
     mSpellAreaForQuestMap.clear();
-    mSpellAreaForActiveQuestMap.clear();
     mSpellAreaForQuestEndMap.clear();
     mSpellAreaForAuraMap.clear();
+    mSpellAreaForAreaMap.clear();
 
     //                                                  0     1         2              3               4                 5          6          7       8         9
     QueryResult result = WorldDatabase.Query("SELECT spell, area, quest_start, quest_start_status, quest_end_status, quest_end, aura_spell, racemask, gender, autocast FROM spell_area");
@@ -2712,6 +2712,8 @@ void SpellMgr::LoadSpellAreas()
                     continue;
                 if (spellArea.questStart != itr->second.questStart)
                     continue;
+                if (spellArea.questEnd != itr->second.questEnd)
+                    continue;
                 if (spellArea.auraSpell != itr->second.auraSpell)
                     continue;
                 if ((spellArea.raceMask & itr->second.raceMask) == 0)
@@ -2720,7 +2722,7 @@ void SpellMgr::LoadSpellAreas()
                     continue;
 
                 // duplicate by requirements
-                ok =false;
+                ok = false;
                 break;
             }
 

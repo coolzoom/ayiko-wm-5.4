@@ -183,7 +183,7 @@ class SmartAI : public CreatureAI
         void sQuestAccept(Player* player, Quest const* quest);
         //void sQuestSelect(Player* player, Quest const* quest);
         //void sQuestComplete(Player* player, Quest const* quest);
-        void sQuestReward(Player* player, Quest const* quest, uint32 opt);
+        void sQuestReward(Player* player, Quest const* quest, uint32 itemId);
         bool sOnDummyEffect(Unit* caster, uint32 spellId, SpellEffIndex effIndex);
         void sOnGameEvent(bool start, uint16 eventId);
 
@@ -251,7 +251,7 @@ class SmartGameObjectAI : public GameObjectAI
         bool GossipSelect(Player* player, uint32 sender, uint32 action);
         bool GossipSelectCode(Player* /*player*/, uint32 /*sender*/, uint32 /*action*/, const char* /*code*/);
         bool QuestAccept(Player* player, Quest const* quest);
-        bool QuestReward(Player* player, Quest const* quest, uint32 opt);
+        bool QuestReward(Player* player, Quest const* quest, uint32 itemId);
         uint32 GetDialogStatus(Player* /*player*/);
         void Destroyed(Player* player, uint32 eventId);
         void SetData(uint32 id, uint32 value);

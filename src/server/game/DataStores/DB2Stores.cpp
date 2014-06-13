@@ -118,8 +118,16 @@ void LoadDB2Stores(const std::string& dataPath)
     }
 
     for (size_t i = 1; i < sQuestPackageItemStore.GetNumRows(); ++i)
-        if (auto const entry = sQuestPackageItemStore.LookupEntry(i))
-            sQuestPackageItemMap.insert(std::make_pair(entry->Package, entry->Item));
+    {
+        auto const entry = sQuestPackageItemStore.LookupEntry(i);
+        if (!entry)
+            continue;
+
+        sQuestPackageItemMap.emplace(
+            std::piecewise_construct,
+            std::forward_as_tuple(entry->Package),
+            std::forward_as_tuple(entry->Item, entry->Count));
+    }
 
     TC_LOG_INFO("misc", ">> Initialized %d DB2 data stores.", DB2FilesCount);
 }

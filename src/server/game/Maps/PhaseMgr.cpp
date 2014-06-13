@@ -253,6 +253,7 @@ void PhaseData::SendPhaseshiftToPlayer()
     // Client side update
     PhaseShiftSet phaseIds;
     PhaseShiftSet terrainswaps;
+    PhaseShiftSet wmoAreaIds;
 
     for (auto const &kvPair : spellPhaseInfo)
     {
@@ -271,7 +272,7 @@ void PhaseData::SendPhaseshiftToPlayer()
             terrainswaps.insert(def->terrainswapmap);
     }
 
-    player->GetSession()->SendSetPhaseShift(phaseIds, terrainswaps);
+    player->GetSession()->SendSetPhaseShift(phaseIds, terrainswaps, wmoAreaIds);
 }
 
 void PhaseData::GetActivePhases(std::set<uint32>& phases) const

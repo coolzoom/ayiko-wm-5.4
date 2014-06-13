@@ -2070,34 +2070,37 @@ void WorldSession::HandleReadyForAccountDataTimes(WorldPacket& /*recvData*/)
     SendAccountDataTimes(GLOBAL_CACHE_MASK);
 }
 
-void WorldSession::SendSetPhaseShift(PhaseShiftSet const& phaseIds, PhaseShiftSet const& terrainswaps)
+void WorldSession::SendSetPhaseShift(PhaseShiftSet const& phaseIds, PhaseShiftSet const& terrainswaps, PhaseShiftSet const& worldMapAreaIds)
 {
     ObjectGuid guid = _player->GetGUID();
     uint32 unkValue = 0;
     uint32 inactiveSwapsCount = 0;
 
-    WorldPacket data(SMSG_SET_PHASE_SHIFT, 1 + 8 + 4 + 4 + 4 + 4 + 2 * phaseIds.size() + 4 + terrainswaps.size() * 2);
+    PhaseShiftSet inactives;
+
+    WorldPacket data(SMSG_SET_PHASE_SHIFT, 1 + 8 + 4 + 4 + 4 + 4 + 2 * inactives.size() + 2 * phaseIds.size() + 4 + terrainswaps.size() * 2);
 
     // 0x8 or 0x10 is related to areatrigger, if we send flags 0x00 areatrigger doesn't work in some case
     data << uint32(0x18); // flags, 0x18 most of time on retail sniff
 
-    // WorldMapAreaId ?
-    data << unkValue;
-    //for (uint32 i = 0; i < unkValue; i++)
-        //data << uint16(0);
-
-    // Inactive terrain swaps, may switch with active terrain
-    data << inactiveSwapsCount;
-    //for (uint8 i = 0; i < inactiveSwapsCount; ++i)
-        //data << uint16(0);
+    // Active terrain swaps, may switch with inactive terrain
+    data << uint32(terrainswaps.size() * 2); // Map.dbc Ids
+    for (auto const &id : terrainswaps)
+        data << uint16(id);
 
     data << uint32(phaseIds.size() * 2);        // Phase.dbc ids
     for (auto const &id : phaseIds)
         data << uint16(id); // Most of phase id on retail sniff have 0x8000 mask
 
-    // Active terrain swaps, may switch with inactive terrain
-    data << uint32(terrainswaps.size() * 2);
-    for (auto const &id : terrainswaps)
+    // WorldMapArea.dbc id (controls map display)
+    data << uint32(worldMapAreaIds.size() * 2); // WorldMapArea.dbc Ids
+    for (auto const &id : worldMapAreaIds)
+        data << uint16(id);
+
+    // Inactive terrain swaps
+    // Purpose unknown : terrain switch works without it
+    data << uint32(inactives.size() * 2);// Map.dbc Ids ?
+    for (auto const &id : inactives)
         data << uint16(id);
 
     data.WriteBitSeq<0, 2, 1, 5, 3, 7, 4, 6>(guid);

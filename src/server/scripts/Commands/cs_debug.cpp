@@ -93,13 +93,12 @@ public:
             { "areatriggers",  rbac::RBAC_PERM_COMMAND_DEBUG_AREATRIGGERS,  false, &HandleDebugAreaTriggersCommand,     "", NULL },
             { "los",           rbac::RBAC_PERM_COMMAND_DEBUG_LOS,           false, &HandleDebugLoSCommand,              "", NULL },
             { "moveflags",     rbac::RBAC_PERM_COMMAND_DEBUG_MOVEFLAGS,     false, &HandleDebugMoveflagsCommand,        "", NULL },
-            { "phase",         rbac::RBAC_PERM_COMMAND_DEBUG_PHASE,         false, &HandleDebugPhaseCommand,           "", NULL },
             { NULL,            0,                                     false, NULL,                                "", NULL }
         };
         static ChatCommand commandTable[] =
         {
             { "debug",         rbac::RBAC_PERM_COMMAND_DEBUG,   true,  NULL,               "", debugCommandTable },
-            { "wpgps",         rbac::RBAC_PERM_COMMAND_WPGPS,  false, &HandleWPGPSCommand, "", NULL },
+            { "phase",         rbac::RBAC_PERM_COMMAND_WPGPS,         false, &HandleDebugPhaseCommand,           "", NULL },
             { NULL,            0,                        false, NULL,                "", NULL }
         };
         return commandTable;
@@ -995,19 +994,28 @@ public:
 
         char* t = strtok((char*)args, " ");
         char* p = strtok(NULL, " ");
+        char* w = strtok(NULL, " ");
 
         if (!t)
             return false;
 
         PhaseShiftSet terrainswap;
         PhaseShiftSet phaseId;
+        PhaseShiftSet worldMapIds;
 
-        terrainswap.insert((uint32)atoi(t));
+        if ((uint32)atoi(t))
+            terrainswap.insert((uint32)atoi(t));
 
         if (p)
+        if ((uint32)atoi(p))
             phaseId.insert((uint32)atoi(p));
 
-        handler->GetSession()->SendSetPhaseShift(phaseId, terrainswap);
+        if (w)
+            if ((uint32)atoi(w))
+                worldMapIds.insert((uint32)atoi(w));
+
+
+        handler->GetSession()->SendSetPhaseShift(phaseId, terrainswap, worldMapIds);
         return true;
     }
 
@@ -1387,8 +1395,7 @@ public:
         Player* player = handler->GetSession()->GetPlayer();
 
         TC_LOG_INFO("sql.dev", "(@PATH, XX, %.3f, %.3f, %.5f, 0, 0, 0, 100, 0),", player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
-
-        handler->PSendSysMessage("Waypoint SQL written to SQL Developer log");
+        handler->PSendSysMessage("%.3f, %.3f, %.5f, %.3f", player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation());
         return true;
     }
 

@@ -635,6 +635,7 @@ public:
                         if (Player* player = Player::GetPlayer(*me, playerGuid))
                         {
                             player->KilledMonsterCredit(NPC_CREDIT);
+                            player->AreaExploredOrEventHappens(QUEST_RISKING_IT_ALL);
                             player->SendMovieStart(117);
                         }
                         events.ScheduleEvent(EVENT_TELEPORT_PLAYER, 500);

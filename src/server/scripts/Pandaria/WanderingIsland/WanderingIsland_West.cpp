@@ -170,7 +170,11 @@ class mob_aysa_wind_temple_escort : public CreatureScript
                     break;
                 case 10:
                     if (Player* player = ObjectAccessor::GetPlayer(*me, playerGuid))
+                    {
                         player->KilledMonsterCredit(55666);
+                        player->AreaExploredOrEventHappens(29785);
+                    }
+                    SetEscortPaused(true);
 
                     me->DespawnOrUnsummon(10000);
                     break;

@@ -1344,7 +1344,7 @@ class spell_terracota_spawn : public SpellScriptLoader
         {
             PrepareAuraScript(spell_terracota_spawn_AuraScript);
 
-            void Apply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void Apply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* caster = GetCaster())
                     caster->AddAura(SPELL_TERRACOTTA_SPAWN, GetCaster());
@@ -1372,7 +1372,7 @@ class spell_magnetized_qin : public SpellScriptLoader
         {
             PrepareAuraScript(spell_magnetized_qin_AuraScript);
 
-            void Apply(AuraEffect const */*aurAff*/, AuraEffectHandleModes /*mode*/)
+            void Apply(AuraEffect const * /*aurAff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Player* player = GetTarget()->ToPlayer())
                     player->AddAura(SPELL_MAGNETIZED_QIN, player);
@@ -1400,7 +1400,7 @@ class spell_magnetized_jan : public SpellScriptLoader
         {
             PrepareAuraScript(spell_magnetized_jan_AuraScript);
 
-            void Apply(AuraEffect const */*aurAff*/, AuraEffectHandleModes /*mode*/)
+            void Apply(AuraEffect const * /*aurAff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Player* player = GetTarget()->ToPlayer())
                     player->AddAura(SPELL_MAGNETIZED_JAN, player);
@@ -1428,7 +1428,7 @@ class spell_arc_visual : public SpellScriptLoader
         {
             PrepareAuraScript(spell_arc_visual_AuraScript);
 
-            void Apply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void Apply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 std::list<Player*> players;
                 GetPlayerListInGrid(players, GetCaster(), 10.0f);
@@ -1437,7 +1437,7 @@ class spell_arc_visual : public SpellScriptLoader
                         caster->AddAura(SPELL_ARC_VISUAL, target);
             }
 
-            void Stun(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void Stun(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 std::list<Player*> players;
                 GetPlayerListInGrid(players, GetCaster(), 100.0f);
@@ -1469,7 +1469,7 @@ class spell_devastating_arc : public SpellScriptLoader
         {
             PrepareAuraScript(spell_devastating_arc_AuraScript);
 
-            void Apply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void Apply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* caster = GetCaster())
                 {
@@ -1503,7 +1503,7 @@ class spell_impeding_thrust : public SpellScriptLoader
         {
             PrepareAuraScript(spell_impeding_thrust_AuraScript);
 
-            void Apply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void Apply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Player* player = GetTarget()->ToPlayer())
                 {
@@ -1535,7 +1535,7 @@ class spell_titan_gas : public SpellScriptLoader
         {
             PrepareAuraScript(spell_titan_gas_AuraScript);
 
-            void Apply(AuraEffect const */*aurAff*/, AuraEffectHandleModes /*mode*/)
+            void Apply(AuraEffect const * /*aurAff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* target = GetTarget())
                     target->AddAura(SPELL_TITAN_GAS_AURA, target);
@@ -1563,7 +1563,7 @@ class spell_titan_gas2 : public SpellScriptLoader
         {
             PrepareAuraScript(spell_titan_gas2_AuraScript);
 
-            void Apply(AuraEffect const */*aurAff*/, AuraEffectHandleModes /*mode*/)
+            void Apply(AuraEffect const * /*aurAff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* target = GetTarget())
                     target->AddAura(SPELL_TITAN_GAS_AURA2, target);
@@ -1631,7 +1631,7 @@ class spell_energizing_visual : public SpellScriptLoader
         {
             PrepareAuraScript(spell_energizing_visual_AuraScript);
 
-            void OnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* caster = GetCaster())
                 {
@@ -1666,7 +1666,7 @@ class spell_energized : public SpellScriptLoader
         {
             PrepareAuraScript(spell_energized_AuraScript);
 
-            void Apply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void Apply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* caster = GetCaster())
                     caster->AddAura(SPELL_ENERGIZED, caster);

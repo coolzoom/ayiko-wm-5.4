@@ -228,8 +228,8 @@ i_scriptLock(false)
 void Map::InitVisibilityDistance()
 {
     //init visibility for continents
-    m_VisibleDistance = World::GetMaxVisibleDistanceOnContinents();
-    m_VisibilityNotifyPeriod = World::GetVisibilityNotifyPeriodOnContinents();
+    m_VisibleDistance = sWorld->GetMaxVisibleDistanceOnContinents();
+    m_VisibilityNotifyPeriod = sWorld->GetVisibilityNotifyPeriodOnContinents();
 }
 
 // Template specialization of utility methods
@@ -2241,8 +2241,8 @@ InstanceMap::~InstanceMap()
 void InstanceMap::InitVisibilityDistance()
 {
     //init visibility distance for instances
-    m_VisibleDistance = World::GetMaxVisibleDistanceInInstances();
-    m_VisibilityNotifyPeriod = World::GetVisibilityNotifyPeriodInInstances();
+    m_VisibleDistance = sWorld->GetMaxVisibleDistanceInInstances();
+    m_VisibilityNotifyPeriod = sWorld->GetVisibilityNotifyPeriodInInstances();
 }
 
 /*
@@ -2697,8 +2697,8 @@ BattlegroundMap::~BattlegroundMap()
 void BattlegroundMap::InitVisibilityDistance()
 {
     //init visibility distance for BG/Arenas
-    m_VisibleDistance = GetBG()->isArena() ? World::GetMaxVisibleDistanceInArenas() : World::GetMaxVisibleDistanceInBG();
-    m_VisibilityNotifyPeriod = World::GetVisibilityNotifyPeriodInBGArenas();
+    m_VisibleDistance = GetBG()->isArena() ? sWorld->GetMaxVisibleDistanceInArenas() : sWorld->GetMaxVisibleDistanceInBG();
+    m_VisibilityNotifyPeriod = sWorld->GetVisibilityNotifyPeriodInBGArenas();
 }
 
 bool BattlegroundMap::CanEnter(Player* player)

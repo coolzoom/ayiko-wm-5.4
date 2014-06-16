@@ -420,7 +420,7 @@ uint32 MapManager::GenerateInstanceId()
     if (newInstanceId == _nextInstanceId)
     {
         TC_LOG_ERROR("maps", "Instance ID overflow!! Can't continue, shutting down server. ");
-        World::StopNow(ERROR_EXIT_CODE);
+        sWorld->StopNow(ERROR_EXIT_CODE);
     }
 
     // Allocate space if necessary

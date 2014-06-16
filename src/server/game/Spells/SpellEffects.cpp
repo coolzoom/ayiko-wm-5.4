@@ -1892,7 +1892,7 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
 
     ASSERT(unitTarget == m_spellAura->GetOwner());
 
-    for (int i = 0; i < MAX_SPELL_EFFECTS; i++)
+    for (uint8 i = 0; i < m_spellAura->GetSpellInfo()->Effects.size(); i++)
     {
         if (m_spellAura->GetEffect(i) && m_spellAura->GetEffect(i)->GetAuraType() == SPELL_AURA_SCHOOL_ABSORB)
         {
@@ -1903,7 +1903,7 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
 
             AbsorbMod2 = minval + maxval;
 
-            int currentValue = m_spellAura->GetEffect(i)->GetAmount();
+            int32 currentValue = m_spellAura->GetEffect(i)->GetAmount();
             AddPct(currentValue, AbsorbMod2);
             m_spellAura->GetEffect(i)->SetAmount(currentValue);
         }
@@ -3508,7 +3508,7 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
         // Glyph of Dispel Magic
         if (m_spellInfo->Id == 528)
         {
-            if (auto const aurEff = m_caster->GetAuraEffect(119864, 0))
+            if (m_caster->GetAuraEffect(119864, 0))
                 m_caster->CastSpell(unitTarget, 119856, true);
         }
     }
@@ -4173,7 +4173,7 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
     // multiple weapon dmg effect workaround
     // execute only the last weapon damage
     // and handle all effects at once
-    for (uint32 j = effIndex + 1; j < MAX_SPELL_EFFECTS; ++j)
+    for (uint32 j = effIndex + 1; j < m_spellInfo->Effects.size(); ++j)
     {
         switch (m_spellInfo->Effects[j].Effect)
         {
@@ -4392,7 +4392,7 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
 
     bool normalized = false;
     float weaponDamagePercentMod = 1.0f;
-    for (int j = 0; j < MAX_SPELL_EFFECTS; ++j)
+    for (size_t j = 0; j < m_spellInfo->Effects.size(); ++j)
     {
         switch (m_spellInfo->Effects[j].Effect)
         {
@@ -4437,11 +4437,11 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
     int32 weaponDamage = m_caster->CalculateDamage(m_attackType, normalized, true);
 
     // Sequence is important
-    for (int j = 0; j < MAX_SPELL_EFFECTS; ++j)
+    for (auto const &spellEffect : m_spellInfo->Effects)
     {
         // We assume that a spell have at most one fixed_bonus
         // and at most one weaponDamagePercentMod
-        switch (m_spellInfo->Effects[j].Effect)
+        switch (spellEffect.Effect)
         {
             case SPELL_EFFECT_WEAPON_DAMAGE:
             case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
@@ -7612,9 +7612,9 @@ void Spell::EffectUnlearnTalent(SpellEffIndex /*effIndex*/)
         plr->removeSpell(kvPair.first, true);
 
         // search for spells that the talent teaches and unlearn them
-        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-            if (spell->Effects[i].TriggerSpell > 0 && spell->Effects[i].Effect == SPELL_EFFECT_LEARN_SPELL)
-                plr->removeSpell(spell->Effects[i].TriggerSpell, true);
+        for (auto const &spellEffect : spell->Effects)
+            if (spellEffect.TriggerSpell > 0 && spellEffect.Effect == SPELL_EFFECT_LEARN_SPELL)
+                plr->removeSpell(spellEffect.TriggerSpell, true);
 
         kvPair.second.state = PLAYERSPELL_REMOVED;
 

@@ -30,7 +30,6 @@
 #include "Callback.h"
 
 #include <ace/Singleton.h>
-#include <ace/Atomic_Op.h>
 
 #include <map>
 #include <set>
@@ -589,8 +588,6 @@ typedef std::unordered_map<uint32, WorldSession*> SessionMap;
 class World
 {
     public:
-        static ACE_Atomic_Op<ACE_Thread_Mutex, uint32> m_worldLoopCounter;
-
         World();
         ~World();
 
@@ -714,9 +711,9 @@ class World
         void ShutdownServ(uint32 time, uint32 options, uint8 exitcode);
         void ShutdownCancel();
         void ShutdownMsg(bool show = false, Player* player = NULL);
-        static uint8 GetExitCode() { return m_ExitCode; }
-        static void StopNow(uint8 exitcode) { m_stopEvent = true; m_ExitCode = exitcode; }
-        static bool IsStopped() { return m_stopEvent.value(); }
+        uint8 GetExitCode() const { return m_ExitCode; }
+        void StopNow(uint8 exitcode) { m_stopEvent = true; m_ExitCode = exitcode; }
+        bool IsStopped() const { return m_stopEvent; }
 
         void Update(uint32 diff);
 
@@ -782,17 +779,17 @@ class World
         bool RemoveBanCharacter(std::string const& name);
 
         // for max speed access
-        static float GetMaxVisibleDistanceOnContinents()    { return m_MaxVisibleDistanceOnContinents; }
-        static float GetMaxVisibleDistanceInInstances()     { return m_MaxVisibleDistanceInInstances;  }
-        static float GetMaxVisibleDistanceInBG()            { return m_MaxVisibleDistanceInBG;         }
-        static float GetMaxVisibleDistanceInArenas()        { return m_MaxVisibleDistanceInArenas;     }
+        float GetMaxVisibleDistanceOnContinents() const { return m_MaxVisibleDistanceOnContinents; }
+        float GetMaxVisibleDistanceInInstances() const { return m_MaxVisibleDistanceInInstances; }
+        float GetMaxVisibleDistanceInBG() const { return m_MaxVisibleDistanceInBG; }
+        float GetMaxVisibleDistanceInArenas() const { return m_MaxVisibleDistanceInArenas; }
 
-        static int32 GetVisibilityNotifyPeriodOnContinents(){ return m_visibility_notify_periodOnContinents; }
-        static int32 GetVisibilityNotifyPeriodInInstances() { return m_visibility_notify_periodInInstances;  }
-        static int32 GetVisibilityNotifyPeriodInBGArenas()  { return m_visibility_notify_periodInBGArenas;   }
+        int32 GetVisibilityNotifyPeriodOnContinents() const { return m_visibility_notify_periodOnContinents; }
+        int32 GetVisibilityNotifyPeriodInInstances() const { return m_visibility_notify_periodInInstances; }
+        int32 GetVisibilityNotifyPeriodInBGArenas() const { return m_visibility_notify_periodInBGArenas;   }
 
-        static float Visibility_RelocationLowerLimit;
-        static uint32 Visibility_AINotifyDelay;
+        float Visibility_RelocationLowerLimit;
+        uint32 Visibility_AINotifyDelay;
 
         void ProcessCliCommands();
         void QueueCliCommand(CliCommandHolder* commandHolder) { cliCmdQueue.add(commandHolder); }
@@ -813,6 +810,9 @@ class World
         char const * GetBroadcastString(uint32 idx, LocaleConstant locale_idx) const;
 
         void UpdateAreaDependentAuras();
+
+        uint32 worldLoopCounter() const { return m_worldLoopCounter; }
+        void incrementWorldLoopCounter() { ++m_worldLoopCounter; }
 
         uint32 GetCleaningFlags() const { return m_CleaningFlags; }
         void SetCleaningFlags(uint32 flags) { m_CleaningFlags = flags; }
@@ -842,9 +842,8 @@ class World
         void ResetRandomBG();
         void ResetProfessionCooldowns();
 
-    private:
-        static ACE_Atomic_Op<ACE_Thread_Mutex, bool> m_stopEvent;
-        static uint8 m_ExitCode;
+        bool m_stopEvent;
+        uint8 m_ExitCode;
         uint32 m_ShutdownTimer;
         uint32 m_ShutdownMask;
 
@@ -885,14 +884,14 @@ class World
         std::string m_dataPath;
 
         // for max speed access
-        static float m_MaxVisibleDistanceOnContinents;
-        static float m_MaxVisibleDistanceInInstances;
-        static float m_MaxVisibleDistanceInBG;
-        static float m_MaxVisibleDistanceInArenas;
+        float m_MaxVisibleDistanceOnContinents;
+        float m_MaxVisibleDistanceInInstances;
+        float m_MaxVisibleDistanceInBG;
+        float m_MaxVisibleDistanceInArenas;
 
-        static int32 m_visibility_notify_periodOnContinents;
-        static int32 m_visibility_notify_periodInInstances;
-        static int32 m_visibility_notify_periodInBGArenas;
+        int32 m_visibility_notify_periodOnContinents;
+        int32 m_visibility_notify_periodInInstances;
+        int32 m_visibility_notify_periodInBGArenas;
 
         // CLI command holder to be thread safe
         ACE_Based::LockedQueue<CliCommandHolder*, ACE_Thread_Mutex> cliCmdQueue;
@@ -930,6 +929,8 @@ class World
 
         void ProcessQueryCallbacks();
         ACE_Future_Set<PreparedQueryResult> m_realmCharCallbacks;
+
+        uint32 m_worldLoopCounter;
 };
 
 extern uint32 realmID;

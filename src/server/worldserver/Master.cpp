@@ -72,14 +72,14 @@ class WorldServerSignalHandler : public Trinity::SignalHandler
             switch (SigNum)
             {
                 case SIGINT:
-                    World::StopNow(RESTART_EXIT_CODE);
+                    sWorld->StopNow(RESTART_EXIT_CODE);
                     break;
                 case SIGTERM:
-                #ifdef _WIN32
+#ifdef _WIN32
                 case SIGBREAK:
                     if (m_ServiceStatus != 1)
-                #endif /* _WIN32 */
-                    World::StopNow(SHUTDOWN_EXIT_CODE);
+#endif /* _WIN32 */
+                    sWorld->StopNow(SHUTDOWN_EXIT_CODE);
                     break;
             }
         }
@@ -102,12 +102,12 @@ public:
         w_loops = 0;
         m_lastchange = 0;
         w_lastchange = 0;
-        while (!World::IsStopped())
+        while (!sWorld->IsStopped())
         {
             ACE_Based::Thread::Sleep(1000);
             uint32 curtime = getMSTime();
             // normal work
-            uint32 worldLoopCounter = World::m_worldLoopCounter.value();
+            uint32 worldLoopCounter = sWorld->worldLoopCounter();
             if (w_loops != worldLoopCounter)
             {
                 w_lastchange = curtime;
@@ -264,7 +264,7 @@ int Master::Run()
     if (sWorldSocketMgr->StartNetwork(wsport, bind_ip.c_str()) == -1)
     {
         TC_LOG_ERROR("server.worldserver", "Failed to start network");
-        World::StopNow(ERROR_EXIT_CODE);
+        sWorld->StopNow(ERROR_EXIT_CODE);
         // go down and shutdown the server
     }
 
@@ -343,7 +343,7 @@ int Master::Run()
     //UnloadScriptingModule();
 
     // Exit the process with specified return value
-    return World::GetExitCode();
+    return sWorld->GetExitCode();
 }
 
 /// Initialize connection to the databases

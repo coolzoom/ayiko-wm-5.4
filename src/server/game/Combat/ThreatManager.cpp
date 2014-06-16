@@ -41,8 +41,8 @@ float ThreatCalcHelper::calcThreat(Unit* hatedUnit, Unit* /*hatingUnit*/, float 
                 threat *= threatEntry->pctMod;
 
         // Energize is not affected by Mods
-        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
-            if (threatSpell->Effects[i].Effect == SPELL_EFFECT_ENERGIZE || threatSpell->Effects[i].ApplyAuraName == SPELL_AURA_PERIODIC_ENERGIZE)
+        for (auto const &spellEffect : threatSpell->Effects)
+            if (spellEffect.Effect == SPELL_EFFECT_ENERGIZE || spellEffect.ApplyAuraName == SPELL_AURA_PERIODIC_ENERGIZE)
                 return threat;
 
         if (Player* modOwner = hatedUnit->GetSpellModOwner())

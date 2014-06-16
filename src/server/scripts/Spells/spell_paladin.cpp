@@ -673,9 +673,9 @@ class spell_pal_cleanse : public SpellScriptLoader
                     if (Unit* target = GetExplTargetUnit())
                     {
                         // Create dispel mask by dispel type
-                        for (int8 i = 0; i < MAX_SPELL_EFFECTS; i++)
+                        for (auto const &spellEffect : GetSpellInfo()->Effects)
                         {
-                            uint32 dispel_type = GetSpellInfo()->Effects[i].MiscValue;
+                            uint32 dispel_type = spellEffect.MiscValue;
                             uint32 dispelMask  = GetSpellInfo()->GetDispelMask(DispelType(dispel_type));
 
                             // Epuration can dispell Magic with Sacred Cleansing

@@ -4203,11 +4203,11 @@ bool Player::addSpell(uint32 spellId, bool active, bool learning, bool dependent
     {
         SpellInfo const* info = sSpellMgr->GetSpellInfo(spellId);
 
-        for (int i = 0; i < MAX_SPELL_EFFECTS; i++)
+        for (auto const &spellEffect : info->Effects)
         {
-            if (info->Effects[i].ApplyAuraName == SPELL_AURA_MOUNTED)
+            if (spellEffect.ApplyAuraName == SPELL_AURA_MOUNTED)
             {
-                MountTypeEntry const* mountTypeEntry = sMountTypeStore.LookupEntry(info->Effects[i].MiscValueB);
+                MountTypeEntry const* mountTypeEntry = sMountTypeStore.LookupEntry(spellEffect.MiscValueB);
                 if (!mountTypeEntry)
                     continue;
 
@@ -4910,8 +4910,8 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
         SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spell_id);
         if (spellInfo->IsPassive())
         {
-            for (int i = 0; i < MAX_SPELL_EFFECTS; i++)
-                if (spellInfo->Effects[i].Effect == SPELL_EFFECT_DUAL_WIELD)
+            for (auto const &spellEffect : spellInfo->Effects)
+                if (spellEffect.Effect == SPELL_EFFECT_DUAL_WIELD)
                 {
                     SetCanDualWield(false);
                     break;
@@ -5227,9 +5227,9 @@ bool Player::ResetTalents(bool no_cost)
         removeSpell(kvPair.first, true);
 
         // search for spells that the talent teaches and unlearn them
-        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-            if (spellEntry->Effects[i].TriggerSpell > 0 && spellEntry->Effects[i].Effect == SPELL_EFFECT_LEARN_SPELL)
-                removeSpell(spellEntry->Effects[i].TriggerSpell, true);
+        for (auto const &spellEffect : spellEntry->Effects)
+            if (spellEffect.TriggerSpell > 0 && spellEffect.Effect == SPELL_EFFECT_LEARN_SPELL)
+                removeSpell(spellEffect.TriggerSpell, true);
 
         kvPair.second.state = PLAYERSPELL_REMOVED;
     }
@@ -7461,8 +7461,6 @@ void Player::SendMessageToSet(WorldPacket* data, Player const* skipped_rcvr)
     if (skipped_rcvr != this)
         GetSession()->SendPacket(data);
 
-    // we use World::GetMaxVisibleDistance() because i cannot see why not use a distance
-    // update: replaced by GetMap()->GetVisibilityDistance()
     Trinity::MessageDistDeliverer notifier(this, data, GetVisibilityRange(), false, skipped_rcvr);
     VisitNearbyWorldObject(GetVisibilityRange(), notifier);
 }
@@ -20030,7 +20028,6 @@ void Player::_LoadDailyQuestStatus(PreparedQueryResult result)
 
     if (result)
     {
-        uint32 quest_daily_idx = 0;
         do
         {
             Field* fields = result->Fetch();
@@ -21047,7 +21044,7 @@ void Player::_SaveAuras(SQLTransaction& trans)
         uint8 index = 0;
         uint32 effMask = 0;
         uint32 recalculateMask = 0;
-        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        for (uint8 i = 0; i < aura->GetSpellInfo()->Effects.size(); ++i)
         {
             if (AuraEffect const *effect = aura->GetEffect(i))
             {
@@ -25126,9 +25123,9 @@ void Player::learnQuestRewardedSpells(Quest const* quest)
 
     // check learned spells state
     bool found = false;
-    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+    for (auto const &spellEffect : spellInfo->Effects)
     {
-        if (spellInfo->Effects[i].Effect == SPELL_EFFECT_LEARN_SPELL && !HasSpell(spellInfo->Effects[i].TriggerSpell))
+        if (spellEffect.Effect == SPELL_EFFECT_LEARN_SPELL && !HasSpell(spellEffect.TriggerSpell))
         {
             found = true;
             break;
@@ -28004,9 +28001,9 @@ void Player::ActivateSpec(uint8 spec)
 
         // remove any spells that the talent teaches
         if (auto const spellEntry = sSpellMgr->GetSpellInfo(kvPair.first))
-            for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-                if (spellEntry->Effects[i].TriggerSpell > 0 && spellEntry->Effects[i].Effect == SPELL_EFFECT_LEARN_SPELL)
-                    removeSpell(spellEntry->Effects[i].TriggerSpell, true);
+            for (auto const &spellEffect : spellEntry->Effects)
+                if (spellEffect.TriggerSpell > 0 && spellEffect.Effect == SPELL_EFFECT_LEARN_SPELL)
+                    removeSpell(spellEffect.TriggerSpell, true);
     }
 
     RemoveSpecializationSpells();

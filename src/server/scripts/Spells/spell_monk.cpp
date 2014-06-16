@@ -703,7 +703,7 @@ class spell_monk_diffuse_magic : public SpellScriptLoader
 
                         if (Aura *targetAura = caster->GetAura(aura->GetSpellInfo()->Id, _player->GetGUID()))
                         {
-                            for (int i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                            for (size_t i = 0; i < targetAura->GetSpellInfo()->Effects.size(); ++i)
                             {
                                 if (targetAura->GetEffect(i) && aura->GetEffect(i))
                                 {

@@ -1088,7 +1088,7 @@ class spell_putricide_choking_gas_bomb : public SpellScriptLoader
             void HandleScript(SpellEffIndex /*effIndex*/)
             {
                 uint32 skipIndex = urand(0, 2);
-                for (uint32 i = 0; i < 3; ++i)
+                for (uint32 i = 0; i < GetSpellInfo()->Effects.size(); ++i)
                 {
                     if (i == skipIndex)
                         continue;

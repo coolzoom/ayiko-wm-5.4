@@ -179,7 +179,7 @@ void UnitAI::DoCast(uint32 spellId)
         me->CastSpell(target, spellId, false);
 }
 
-#define UPDATE_TARGET(a) {if (AIInfo->target<a) AIInfo->target=a;}
+#define UPDATE_TARGET(a) do { if (AIInfo->target<a) AIInfo->target=a; } while(0)
 
 void UnitAI::FillAISpellInfo()
 {
@@ -205,25 +205,26 @@ void UnitAI::FillAISpellInfo()
             AIInfo->cooldown = spellInfo->RecoveryTime;
 
         if (!spellInfo->GetMaxRange(false))
-            UPDATE_TARGET(AITARGET_SELF)
+        {
+            UPDATE_TARGET(AITARGET_SELF);
+        }
         else
         {
-            for (uint32 j = 0; j < MAX_SPELL_EFFECTS; ++j)
+            for (auto const &spellEffect : spellInfo->Effects)
             {
-                uint32 targetType = spellInfo->Effects[j].TargetA.GetTarget();
+                uint32 targetType = spellEffect.TargetA.GetTarget();
 
-                if (targetType == TARGET_UNIT_TARGET_ENEMY
-                    || targetType == TARGET_DEST_TARGET_ENEMY)
-                    UPDATE_TARGET(AITARGET_VICTIM)
+                if (targetType == TARGET_UNIT_TARGET_ENEMY || targetType == TARGET_DEST_TARGET_ENEMY)
+                    UPDATE_TARGET(AITARGET_VICTIM);
                 else if (targetType == TARGET_UNIT_DEST_AREA_ENEMY)
-                    UPDATE_TARGET(AITARGET_ENEMY)
+                    UPDATE_TARGET(AITARGET_ENEMY);
 
-                if (spellInfo->Effects[j].Effect == SPELL_EFFECT_APPLY_AURA)
+                if (spellEffect.Effect == SPELL_EFFECT_APPLY_AURA)
                 {
                     if (targetType == TARGET_UNIT_TARGET_ENEMY)
-                        UPDATE_TARGET(AITARGET_DEBUFF)
+                        UPDATE_TARGET(AITARGET_DEBUFF);
                     else if (spellInfo->IsPositive())
-                        UPDATE_TARGET(AITARGET_BUFF)
+                        UPDATE_TARGET(AITARGET_BUFF);
                 }
             }
         }

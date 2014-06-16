@@ -105,27 +105,27 @@ enum ePhases
 
 class boss_sun_tenderheart : public CreatureScript
 {
-	public:
-		boss_sun_tenderheart() : CreatureScript("boss_sun_tenderheart") { }
+    public:
+        boss_sun_tenderheart() : CreatureScript("boss_sun_tenderheart") { }
 
-		struct boss_sun_tenderheartAI : public BossAI
-		{
-			boss_sun_tenderheartAI(Creature* creature) : BossAI(creature, DATA_FALLEN_PROTECTORS)
-			{
-				pInstance = creature->GetInstanceScript();
-			}
+        struct boss_sun_tenderheartAI : public BossAI
+        {
+            boss_sun_tenderheartAI(Creature* creature) : BossAI(creature, DATA_FALLEN_PROTECTORS)
+            {
+                pInstance = creature->GetInstanceScript();
+            }
 
-			EventMap events;
-			InstanceScript* pInstance;
+            EventMap events;
+            InstanceScript* pInstance;
 
-            uint8 nextPhaseHealthPct;
+            float nextPhaseHealthPct;
             uint8 phase;
 
-			void Reset()
-			{
-				Reset();
+            void Reset()
+            {
+                Reset();
 
-				events.Reset();
+                events.Reset();
 
                 events.ScheduleEvent(EVENT_SHA_SEAR,         5000);
                 events.ScheduleEvent(EVENT_SHADOW_WORD_BANE, 10000);
@@ -134,13 +134,13 @@ class boss_sun_tenderheart : public CreatureScript
                 phase = PHASE_COMBAT;
                 nextPhaseHealthPct = 66.66f;
 
-				summons.DespawnAll();
+                summons.DespawnAll();
 
-				if (pInstance)
+                if (pInstance)
                     pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-			}
+            }
 
-			void JustReachedHome()
+            void JustReachedHome()
             {
                 _JustReachedHome();
 
@@ -150,7 +150,7 @@ class boss_sun_tenderheart : public CreatureScript
                 Talk(TALK_SUN_WIPE);
             }
 
-			void EnterCombat(Unit* /*attacker*/)
+            void EnterCombat(Unit* /*attacker*/)
             {
                 if (pInstance)
                 {
@@ -161,7 +161,7 @@ class boss_sun_tenderheart : public CreatureScript
                 Talk(TALK_SUN_AGGRO);
             }
 
-			void JustSummoned(Creature* summon)
+            void JustSummoned(Creature* summon)
             {
                 summons.Summon(summon);
             }
@@ -171,11 +171,11 @@ class boss_sun_tenderheart : public CreatureScript
                 summons.Despawn(summon);
             }
 
-			void KilledUnit(Unit* /*who*/)
+            void KilledUnit(Unit* /*who*/)
             {
             }
 
-			void DamageTaken(Unit* attacker, uint32& damage)
+            void DamageTaken(Unit* attacker, uint32& damage)
             {
                 if (phase == PHASE_COMBAT && me->HealthBelowPctDamaged(nextPhaseHealthPct, damage) && nextPhaseHealthPct > 33.33f)
                 {
@@ -217,7 +217,7 @@ class boss_sun_tenderheart : public CreatureScript
                 }
             }
 
-			void JustDied(Unit* /*killer*/)
+            void JustDied(Unit* /*killer*/)
             {
                 _JustDied();
 
@@ -230,7 +230,7 @@ class boss_sun_tenderheart : public CreatureScript
                 Talk(TALK_SUN_DEATH);
             }
 
-			void UpdateAI(const uint32 diff)
+            void UpdateAI(const uint32 diff)
             {
                 if (!UpdateVictim())
                     return;
@@ -269,11 +269,11 @@ class boss_sun_tenderheart : public CreatureScript
                         break;
                     default:
                         break;
-				}
+                }
 
                 if (phase == PHASE_COMBAT)
                     DoMeleeAttackIfReady();
-			}
+            }
 
             bool fallenProtectorsAreReadyToDie()
             {
@@ -287,12 +287,12 @@ class boss_sun_tenderheart : public CreatureScript
 
                 return false;
             }
-		};
+        };
 
         CreatureAI* GetAI(Creature* pCreature) const
-		{
-			return new boss_sun_tenderheartAI(pCreature);
-		}
+        {
+            return new boss_sun_tenderheartAI(pCreature);
+        }
 };
 
 class boss_he_softfoot : public CreatureScript
@@ -310,14 +310,14 @@ class boss_he_softfoot : public CreatureScript
             InstanceScript* pInstance;
             EventMap events;
 
-            uint8 nextPhaseHealthPct;
+            float nextPhaseHealthPct;
             uint8 phase;
 
-			void Reset()
-			{
-				Reset();
+            void Reset()
+            {
+                Reset();
 
-				events.Reset();
+                events.Reset();
 
                 events.ScheduleEvent(EVENT_MASTER_POISONER,    10000);
                 events.ScheduleEvent(EVENT_SHADOWSTEP_GARROTE, 8000);
@@ -326,13 +326,13 @@ class boss_he_softfoot : public CreatureScript
                 phase = PHASE_COMBAT;
                 nextPhaseHealthPct = 66.66f;
 
-				summons.DespawnAll();
+                summons.DespawnAll();
 
-				if (pInstance)
-                    pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-			}
+                if (pInstance)
+                pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            }
 
-			void JustReachedHome()
+            void JustReachedHome()
             {
                 _JustReachedHome();
 
@@ -340,9 +340,9 @@ class boss_he_softfoot : public CreatureScript
                     pInstance->SetBossState(DATA_FALLEN_PROTECTORS, FAIL);
             }
 
-			void EnterCombat(Unit* /*attacker*/)
+            void EnterCombat(Unit* /*attacker*/)
             {
-				// @TODO: Set in combat for other protectors
+                // @TODO: Set in combat for other protectors
                 if (pInstance)
                 {
                     pInstance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
@@ -350,7 +350,7 @@ class boss_he_softfoot : public CreatureScript
                 }
             }
 
-			void JustSummoned(Creature* summon)
+            void JustSummoned(Creature* summon)
             {
                 summons.Summon(summon);
             }
@@ -360,11 +360,11 @@ class boss_he_softfoot : public CreatureScript
                 summons.Despawn(summon);
             }
 
-			void KilledUnit(Unit* /*who*/)
+            void KilledUnit(Unit* /*who*/)
             {
             }
 
-			void DamageTaken(Unit* attacker, uint32& damage)
+            void DamageTaken(Unit* attacker, uint32& damage)
             {
                 if (phase == PHASE_COMBAT && me->HealthBelowPctDamaged(nextPhaseHealthPct, damage) && nextPhaseHealthPct > 33.33f)
                 {
@@ -405,7 +405,7 @@ class boss_he_softfoot : public CreatureScript
                 }
             }
 
-			void JustDied(Unit* /*killer*/)
+            void JustDied(Unit* /*killer*/)
             {
                 _JustDied();
 
@@ -416,7 +416,7 @@ class boss_he_softfoot : public CreatureScript
                 }
             }
 
-			void UpdateAI(const uint32 diff)
+            void UpdateAI(const uint32 diff)
             {
                 if (!UpdateVictim())
                     return;
@@ -461,11 +461,11 @@ class boss_he_softfoot : public CreatureScript
                         break;
                     default:
                         break;
-				}
+                }
 
                 if (phase == PHASE_COMBAT)
                     DoMeleeAttackIfReady();
-			}
+            }
 
             bool fallenProtectorsAreReadyToDie()
             {
@@ -502,14 +502,14 @@ class boss_rook_stonetoe : public CreatureScript
             InstanceScript* pInstance;
             EventMap events;
 
-            uint8 nextPhaseHealthPct;
+            float nextPhaseHealthPct;
             uint8 phase;
 
-			void Reset()
-			{
-				Reset();
+            void Reset()
+            {
+                Reset();
 
-				events.Reset();
+                events.Reset();
 
                 events.ScheduleEvent(EVENT_VENGEFUL_STRIKES, 10000);
                 events.ScheduleEvent(EVENT_CORRUPTED_BREW,   7000);
@@ -518,13 +518,13 @@ class boss_rook_stonetoe : public CreatureScript
                 phase = PHASE_COMBAT;
                 nextPhaseHealthPct = 66.66f;
 
-				summons.DespawnAll();
+                summons.DespawnAll();
 
-				if (pInstance)
+                if (pInstance)
                     pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-			}
+            }
 
-			void JustReachedHome()
+            void JustReachedHome()
             {
                 _JustReachedHome();
 
@@ -532,9 +532,9 @@ class boss_rook_stonetoe : public CreatureScript
                     pInstance->SetBossState(DATA_FALLEN_PROTECTORS, FAIL);
             }
 
-			void EnterCombat(Unit* /*attacker*/)
+            void EnterCombat(Unit* /*attacker*/)
             {
-				// @TODO: Set in combat for other protectors
+                // @TODO: Set in combat for other protectors
                 if (pInstance)
                 {
                     pInstance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
@@ -542,7 +542,7 @@ class boss_rook_stonetoe : public CreatureScript
                 }
             }
 
-			void JustSummoned(Creature* summon)
+            void JustSummoned(Creature* summon)
             {
                 summons.Summon(summon);
             }
@@ -552,11 +552,11 @@ class boss_rook_stonetoe : public CreatureScript
                 summons.Despawn(summon);
             }
 
-			void KilledUnit(Unit* /*who*/)
+            void KilledUnit(Unit* /*who*/)
             {
             }
 
-			void DamageTaken(Unit* attacker, uint32& damage)
+            void DamageTaken(Unit* attacker, uint32& damage)
             {
                 if (phase == PHASE_COMBAT && me->HealthBelowPctDamaged(nextPhaseHealthPct, damage) && nextPhaseHealthPct > 33.33f)
                 {
@@ -597,7 +597,7 @@ class boss_rook_stonetoe : public CreatureScript
                 }
             }
 
-			void JustDied(Unit* /*killer*/)
+            void JustDied(Unit* /*killer*/)
             {
                 _JustDied();
 
@@ -608,7 +608,7 @@ class boss_rook_stonetoe : public CreatureScript
                 }
             }
 
-			void UpdateAI(const uint32 diff)
+            void UpdateAI(const uint32 diff)
             {
                 if (!UpdateVictim())
                     return;
@@ -649,11 +649,11 @@ class boss_rook_stonetoe : public CreatureScript
                         break;
                     default:
                         break;
-				}
+                }
 
                 if (phase == PHASE_COMBAT)
                     DoMeleeAttackIfReady();
-			}
+            }
 
             bool fallenProtectorsAreReadyToDie()
             {
@@ -719,7 +719,7 @@ class mob_embodied_misery : public CreatureScript
                         break;
                     default:
                         break;
-				}
+                }
             }
         };
 
@@ -773,7 +773,7 @@ class mob_embodied_sorrow : public CreatureScript
                         break;
                     default:
                         break;
-				}
+                }
             }
         };
 
@@ -827,7 +827,7 @@ class mob_embodied_gloom : public CreatureScript
                         break;
                     default:
                         break;
-				}
+                }
             }
         };
 

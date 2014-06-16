@@ -60,11 +60,9 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
     if (spellproto->IsPositive())
         return DIMINISHING_NONE;
 
-    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-    {
-        if (spellproto->Effects[i].ApplyAuraName == SPELL_AURA_MOD_TAUNT)
+    for (auto const &spellEffect : spellproto->Effects)
+        if (spellEffect.ApplyAuraName == SPELL_AURA_MOD_TAUNT)
             return DIMINISHING_TAUNT;
-    }
 
     // Explicit Diminishing Groups
     switch (spellproto->SpellFamilyName)
@@ -613,18 +611,15 @@ bool SpellMgr::IsSpellValid(SpellInfo const* spellInfo, Player* player, bool msg
     bool need_check_reagents = false;
 
     // check effects
-    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+    for (auto const &spellEffect : spellInfo->Effects)
     {
-        switch (spellInfo->Effects[i].Effect)
+        switch (spellEffect.Effect)
         {
-        case 0:
-            continue;
-
             // craft spell for crafting non-existed item (break client recipes list show)
-        case SPELL_EFFECT_CREATE_ITEM:
-        case SPELL_EFFECT_CREATE_ITEM_2:
+            case SPELL_EFFECT_CREATE_ITEM:
+            case SPELL_EFFECT_CREATE_ITEM_2:
             {
-                if (spellInfo->Effects[i].ItemType == 0)
+                if (spellEffect.ItemType == 0)
                 {
                     // skip auto-loot crafting spells, its not need explicit item info (but have special fake items sometime)
                     if (!spellInfo->IsLootCrafting())
@@ -641,14 +636,14 @@ bool SpellMgr::IsSpellValid(SpellInfo const* spellInfo, Player* player, bool msg
 
                 }
                 // also possible IsLootCrafting case but fake item must exist anyway
-                else if (!sObjectMgr->GetItemTemplate(spellInfo->Effects[i].ItemType))
+                else if (!sObjectMgr->GetItemTemplate(spellEffect.ItemType))
                 {
                     if (msg)
                     {
                         if (player)
-                            ChatHandler(player).PSendSysMessage("Craft spell %u create not-exist in DB item (Entry: %u) and then...", spellInfo->Id, spellInfo->Effects[i].ItemType);
+                            ChatHandler(player).PSendSysMessage("Craft spell %u create not-exist in DB item (Entry: %u) and then...", spellInfo->Id, spellEffect.ItemType);
                         else
-                            TC_LOG_ERROR("sql.sql", "Craft spell %u create not-exist in DB item (Entry: %u) and then...", spellInfo->Id, spellInfo->Effects[i].ItemType);
+                            TC_LOG_ERROR("sql.sql", "Craft spell %u create not-exist in DB item (Entry: %u) and then...", spellInfo->Id, spellEffect.ItemType);
                     }
                     return false;
                 }
@@ -656,17 +651,17 @@ bool SpellMgr::IsSpellValid(SpellInfo const* spellInfo, Player* player, bool msg
                 need_check_reagents = true;
                 break;
             }
-        case SPELL_EFFECT_LEARN_SPELL:
+            case SPELL_EFFECT_LEARN_SPELL:
             {
-                SpellInfo const* spellInfo2 = GetSpellInfo(spellInfo->Effects[i].TriggerSpell);
+                SpellInfo const* spellInfo2 = GetSpellInfo(spellEffect.TriggerSpell);
                 if (!IsSpellValid(spellInfo2, player, msg))
                 {
                     if (msg)
                     {
                         if (player)
-                            ChatHandler(player).PSendSysMessage("Spell %u learn to broken spell %u, and then...", spellInfo->Id, spellInfo->Effects[i].TriggerSpell);
+                            ChatHandler(player).PSendSysMessage("Spell %u learn to broken spell %u, and then...", spellInfo->Id, spellEffect.TriggerSpell);
                         else
-                            TC_LOG_ERROR("sql.sql", "Spell %u learn to invalid spell %u, and then...", spellInfo->Id, spellInfo->Effects[i].TriggerSpell);
+                            TC_LOG_ERROR("sql.sql", "Spell %u learn to invalid spell %u, and then...", spellInfo->Id, spellEffect.TriggerSpell);
                     }
                     return false;
                 }
@@ -1595,13 +1590,13 @@ void SpellMgr::LoadSpellLearnSkills()
         if (!entry)
             continue;
 
-        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        for (auto const &spellEffect : entry->Effects)
         {
-            if (entry->Effects[i].Effect == SPELL_EFFECT_SKILL)
+            if (spellEffect.Effect == SPELL_EFFECT_SKILL)
             {
                 SpellLearnSkillNode dbc_node;
-                dbc_node.skill = entry->Effects[i].MiscValue;
-                dbc_node.step  = entry->Effects[i].CalcValue();
+                dbc_node.skill = spellEffect.MiscValue;
+                dbc_node.step  = spellEffect.CalcValue();
                 if (dbc_node.skill != SKILL_RIDING)
                     dbc_node.value = 1;
                 else
@@ -1676,12 +1671,12 @@ void SpellMgr::LoadSpellLearnSpells()
         if (!entry)
             continue;
 
-        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        for (auto const &spellEffect : entry->Effects)
         {
-            if (entry->Effects[i].Effect == SPELL_EFFECT_LEARN_SPELL)
+            if (spellEffect.Effect == SPELL_EFFECT_LEARN_SPELL)
             {
                 SpellLearnSpellNode dbc_node;
-                dbc_node.spell = entry->Effects[i].TriggerSpell;
+                dbc_node.spell = spellEffect.TriggerSpell;
                 dbc_node.active = true;                     // all dbc based learned spells is active (show in spell book or hide by client itself)
 
                 // ignore learning not existed spells (broken/outdated/or generic learnig spell 483
@@ -1691,12 +1686,12 @@ void SpellMgr::LoadSpellLearnSpells()
                 // talent or passive spells or skill-step spells auto-casted and not need dependent learning,
                 // pet teaching spells must not be dependent learning (casted)
                 // other required explicit dependent learning
-                dbc_node.autoLearned = entry->Effects[i].TargetA.GetTarget() == TARGET_UNIT_PET || IsTalent(spell) || entry->IsPassive() || entry->HasEffect(SPELL_EFFECT_SKILL_STEP);
+                dbc_node.autoLearned = spellEffect.TargetA.GetTarget() == TARGET_UNIT_PET || IsTalent(spell) || entry->IsPassive() || entry->HasEffect(SPELL_EFFECT_SKILL_STEP);
 
                 SpellLearnSpellMapBounds db_node_bounds = GetSpellLearnSpellMapBounds(spell);
 
                 bool found = false;
-                for (SpellLearnSpellMap::const_iterator itr = db_node_bounds.first; itr != db_node_bounds.second; ++itr)
+                for (auto itr = db_node_bounds.first; itr != db_node_bounds.second; ++itr)
                 {
                     if (itr->second.spell == dbc_node.spell)
                     {
@@ -1782,41 +1777,6 @@ void SpellMgr::LoadSpellTargetPositions()
         }
 
     } while (result->NextRow());
-
-    /*
-    // Check all spells
-    for (uint32 i = 1; i < GetSpellInfoStoreSize; ++i)
-    {
-    SpellInfo const* spellInfo = GetSpellInfo(i);
-    if (!spellInfo)
-    continue;
-
-    bool found = false;
-    for (int j = 0; j < MAX_SPELL_EFFECTS; ++j)
-    {
-    switch (spellInfo->Effects[j].TargetA)
-    {
-    case TARGET_DEST_DB:
-    found = true;
-    break;
-    }
-    if (found)
-    break;
-    switch (spellInfo->Effects[j].TargetB)
-    {
-    case TARGET_DEST_DB:
-    found = true;
-    break;
-    }
-    if (found)
-    break;
-    }
-    if (found)
-    {
-    if (!sSpellMgr->GetSpellTargetPosition(i))
-    TC_LOG_DEBUG("spells", "Spell (ID: %u) does not have record in `spell_target_position`", i);
-    }
-    }*/
 
     TC_LOG_INFO("server.loading", ">> Loaded %u spell teleport coordinates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
@@ -2298,9 +2258,11 @@ void SpellMgr::LoadSpellPetAuras()
         uint32 pet = fields[2].GetUInt32();
         uint32 aura = fields[3].GetUInt32();
 
-        SpellPetAuraMap::iterator itr = mSpellPetAuraMap.find((spell<<8) + eff);
+        SpellPetAuraMap::iterator itr = mSpellPetAuraMap.find((spell << 8) + eff);
         if (itr != mSpellPetAuraMap.end())
+        {
             itr->second.AddAura(pet, aura);
+        }
         else
         {
             SpellInfo const* spellInfo = GetSpellInfo(spell);
@@ -2309,9 +2271,11 @@ void SpellMgr::LoadSpellPetAuras()
                 TC_LOG_ERROR("sql.sql", "Spell %u listed in `spell_pet_auras` does not exist", spell);
                 continue;
             }
-            if (spellInfo->Effects[eff].Effect != SPELL_EFFECT_DUMMY &&
-                (spellInfo->Effects[eff].Effect != SPELL_EFFECT_APPLY_AURA ||
-                spellInfo->Effects[eff].ApplyAuraName != SPELL_AURA_DUMMY))
+
+            auto const &spellEffect = spellInfo->Effects[eff];
+
+            if (spellEffect.Effect != SPELL_EFFECT_DUMMY
+                    && (spellEffect.Effect != SPELL_EFFECT_APPLY_AURA || spellEffect.ApplyAuraName != SPELL_AURA_DUMMY))
             {
                 TC_LOG_ERROR("spells", "Spell %u listed in `spell_pet_auras` does not have dummy aura or dummy effect", spell);
                 continue;
@@ -2324,8 +2288,8 @@ void SpellMgr::LoadSpellPetAuras()
                 continue;
             }
 
-            PetAura pa(pet, aura, spellInfo->Effects[eff].TargetA.GetTarget() == TARGET_UNIT_PET, spellInfo->Effects[eff].CalcValue());
-            mSpellPetAuraMap[(spell<<8) + eff] = pa;
+            PetAura pa(pet, aura, spellEffect.TargetA.GetTarget() == TARGET_UNIT_PET, spellEffect.CalcValue());
+            mSpellPetAuraMap[(spell << 8) + eff] = pa;
         }
 
         ++count;
@@ -2357,12 +2321,12 @@ void SpellMgr::LoadEnchantCustomAttr()
         if (!(spellInfo->AttributesEx2 & SPELL_ATTR2_PRESERVE_ENCHANT_IN_ARENA) || !(spellInfo->Attributes & SPELL_ATTR0_NOT_SHAPESHIFT))
             continue;
 
-        for (uint32 j = 0; j < MAX_SPELL_EFFECTS; ++j)
+        for (auto const &spellEffect : spellInfo->Effects)
         {
-            if (spellInfo->Effects[j].Effect == SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY)
+            if (spellEffect.Effect == SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY)
             {
-                uint32 enchId = spellInfo->Effects[j].MiscValue;
-                SpellItemEnchantmentEntry const* ench = sSpellItemEnchantmentStore.LookupEntry(enchId);
+                auto const enchId = spellEffect.MiscValue;
+                auto const ench = sSpellItemEnchantmentStore.LookupEntry(enchId);
                 if (!ench)
                     continue;
                 mEnchantCustomAttr[enchId] = true;
@@ -2619,12 +2583,12 @@ void SpellMgr::LoadPetDefaultSpells()
         if (!spellEntry)
             continue;
 
-        for (uint8 k = 0; k < MAX_SPELL_EFFECTS; ++k)
+        for (auto const &spellEffect : spellEntry->Effects)
         {
-            if (spellEntry->Effects[k].Effect == SPELL_EFFECT_SUMMON || spellEntry->Effects[k].Effect == SPELL_EFFECT_SUMMON_PET)
+            if (spellEffect.Effect == SPELL_EFFECT_SUMMON || spellEffect.Effect == SPELL_EFFECT_SUMMON_PET)
             {
-                uint32 creature_id = spellEntry->Effects[k].MiscValue;
-                CreatureTemplate const* cInfo = sObjectMgr->GetCreatureTemplate(creature_id);
+                uint32 creatureId = spellEffect.MiscValue;
+                auto const cInfo = sObjectMgr->GetCreatureTemplate(creatureId);
                 if (!cInfo)
                     continue;
 
@@ -2633,8 +2597,8 @@ void SpellMgr::LoadPetDefaultSpells()
                     continue;
 
                 // for creature without PetSpellDataId get default pet spells from creature_template
-                int32 petSpellsId = cInfo->Entry;
-                if (mPetDefaultSpellsMap.find(cInfo->Entry) != mPetDefaultSpellsMap.end())
+                auto const petSpellsId = cInfo->Entry;
+                if (mPetDefaultSpellsMap.find(petSpellsId) != mPetDefaultSpellsMap.end())
                     continue;
 
                 PetDefaultSpellsEntry petDefSpells;
@@ -3123,9 +3087,9 @@ void SpellMgr::LoadSpellCustomAttr()
             if (!spellInfo)
                 continue;
 
-            for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)
+            for (auto const &spellEffect : spellInfo->Effects)
             {
-                switch (spellInfo->Effects[j].ApplyAuraName)
+                switch (spellEffect.ApplyAuraName)
                 {
                     case SPELL_AURA_MOD_POSSESS:
                     case SPELL_AURA_MOD_CONFUSE:
@@ -3150,7 +3114,7 @@ void SpellMgr::LoadSpellCustomAttr()
                         break;
                 }
 
-                switch (spellInfo->Effects[j].Effect)
+                switch (spellEffect.Effect)
                 {
                     case SPELL_EFFECT_SCHOOL_DAMAGE:
                     case SPELL_EFFECT_WEAPON_DAMAGE:
@@ -3192,8 +3156,8 @@ void SpellMgr::LoadSpellCustomAttr()
                         // only enchanting profession enchantments procs can stack
                         if (IsPartOfSkillLine(SKILL_ENCHANTING, i))
                         {
-                            uint32 enchantId = spellInfo->Effects[j].MiscValue;
-                            SpellItemEnchantmentEntry const* enchant = sSpellItemEnchantmentStore.LookupEntry(enchantId);
+                            uint32 enchantId = spellEffect.MiscValue;
+                            auto const enchant = sSpellItemEnchantmentStore.LookupEntry(enchantId);
                             for (uint8 s = 0; s < MAX_ITEM_ENCHANTMENT_EFFECTS; ++s)
                             {
                                 if (enchant->type[s] != ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
@@ -3214,8 +3178,8 @@ void SpellMgr::LoadSpellCustomAttr()
                         }
                         else if (IsPartOfSkillLine(SKILL_RUNEFORGING, i))
                         {
-                            uint32 enchantId = spellInfo->Effects[j].MiscValue;
-                            SpellItemEnchantmentEntry const* enchant = sSpellItemEnchantmentStore.LookupEntry(enchantId);
+                            uint32 enchantId = spellEffect.MiscValue;
+                            auto const enchant = sSpellItemEnchantmentStore.LookupEntry(enchantId);
                             for (uint8 s = 0; s < MAX_ITEM_ENCHANTMENT_EFFECTS; ++s)
                             {
                                 SpellInfo* procInfo = (SpellInfo*)GetSpellInfo(enchant->spellid[s]);
@@ -3240,10 +3204,10 @@ void SpellMgr::LoadSpellCustomAttr()
             if (!spellInfo->_IsPositiveEffect(EFFECT_0, false))
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_NEGATIVE_EFF0;
 
-            if (!spellInfo->_IsPositiveEffect(EFFECT_1, false))
+            if (spellInfo->Effects.size() > EFFECT_1 && !spellInfo->_IsPositiveEffect(EFFECT_1, false))
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_NEGATIVE_EFF1;
 
-            if (!spellInfo->_IsPositiveEffect(EFFECT_2, false))
+            if (spellInfo->Effects.size() > EFFECT_2 && !spellInfo->_IsPositiveEffect(EFFECT_2, false))
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_NEGATIVE_EFF2;
 
             if (spellInfo->SpellVisual[0] == 3879 || spellInfo->Id == 74117)
@@ -3252,9 +3216,9 @@ void SpellMgr::LoadSpellCustomAttr()
             ////////////////////////////////////
             ///      DEFINE BINARY SPELLS   ////
             ////////////////////////////////////
-            for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)
+            for (auto const &spellEffect : spellInfo->Effects)
             {
-                switch (spellInfo->Effects[j].Effect)
+                switch (spellEffect.Effect)
                 {
                     case SPELL_EFFECT_DISPEL:
                     case SPELL_EFFECT_STEAL_BENEFICIAL_BUFF:
@@ -3264,7 +3228,7 @@ void SpellMgr::LoadSpellCustomAttr()
                         break;
                 }
 
-                switch (spellInfo->Effects[j].Mechanic)
+                switch (spellEffect.Mechanic)
                 {
                     case MECHANIC_FEAR:
                     case MECHANIC_CHARM:
@@ -3308,6 +3272,13 @@ void SpellMgr::LoadSpellCustomAttr()
 
             switch (spellInfo->Id)
             {
+                case 102508:
+                    spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_APPLY_AREA_AURA_ENEMY;
+                    // no break
+                case 102509:
+                case 102510:
+                    spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_APPLY_AREA_AURA_ENEMY;
+                    break;
                 case 145518:// Genesis
                     spellInfo->Effects[0].TargetA = TARGET_UNIT_CASTER;
                     spellInfo->Effects[0].TargetB = 0;
@@ -3880,9 +3851,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE;
                     spellInfo->Effects[0].ValueMultiplier = -200;
                     break;
-                case 51690: // Killing Spree
-                    spellInfo->Effects[3].Effect = SPELL_EFFECT_FORCE_DESELECT;
-                    break;
                 case 137619:// Marked for Death
                     spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
                     break;
@@ -3894,11 +3862,14 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REFLECTED;
                     break;
                 case 115098:// Chi Wave - Add Aura for bounce counting
-                    spellInfo->Effects[1].Effect = SPELL_EFFECT_APPLY_AURA;
-                    spellInfo->Effects[1].ApplyAuraName = SPELL_AURA_DUMMY;
-                    spellInfo->Effects[1].BasePoints = 1;
-                    spellInfo->Effects[1].TargetA = TARGET_UNIT_CASTER;
-                    spellInfo->Effects[1].TargetB = 0;
+                    // FIXME: custom effect
+                    ASSERT(spellInfo->Effects.size() == 1);
+                    spellInfo->Effects.emplace_back(spellInfo, nullptr, spellInfo->Effects.size());
+                    spellInfo->Effects.back().Effect = SPELL_EFFECT_APPLY_AURA;
+                    spellInfo->Effects.back().ApplyAuraName = SPELL_AURA_DUMMY;
+                    spellInfo->Effects.back().BasePoints = 1;
+                    spellInfo->Effects.back().TargetA = TARGET_UNIT_CASTER;
+                    spellInfo->Effects.back().TargetB = 0;
                     spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(1); // 10s
                     spellInfo->Speed = 100.0f;
                     break;
@@ -4136,11 +4107,14 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->OverrideSpellList.push_back(51485);
                     break;
                 case 6544:  // Heroic Leap
-                    spellInfo->Effects[2].Effect = SPELL_EFFECT_APPLY_AURA;
-                    spellInfo->Effects[2].ApplyAuraName = SPELL_AURA_DUMMY;
-                    spellInfo->Effects[2].TargetA = TARGET_UNIT_CASTER;
-                    spellInfo->Effects[2].TargetB = 0;
-                    spellInfo->Effects[2].BasePoints = 0;
+                    // FIXME: custom effect
+                    ASSERT(spellInfo->Effects.size() == 2);
+                    spellInfo->Effects.emplace_back(spellInfo, nullptr, spellInfo->Effects.size());
+                    spellInfo->Effects.back().Effect = SPELL_EFFECT_APPLY_AURA;
+                    spellInfo->Effects.back().ApplyAuraName = SPELL_AURA_DUMMY;
+                    spellInfo->Effects.back().TargetA = TARGET_UNIT_CASTER;
+                    spellInfo->Effects.back().TargetB = 0;
+                    spellInfo->Effects.back().BasePoints = 0;
                     break;
                 case 116198:// Enfeeblement Aura
                     spellInfo->Effects[0].Effect = SPELL_EFFECT_APPLY_AURA;
@@ -4344,12 +4318,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 102793:
                     spellInfo->Effects[0].Effect = SPELL_EFFECT_APPLY_AURA;
                     spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_MOD_DECREASE_SPEED;
-                    break;
-                case 172:   // Corruption
-                case 30108: // Unstable Affliction
-                    spellInfo->Effects[2].Effect = 0;
-                    spellInfo->Effects[2].ApplyAuraName = 0;
-                    spellInfo->Effects[2].BasePoints = 0;
                     break;
                 case 34433: // Shadowfiend
                     spellInfo->Effects[EFFECT_0].MiscValueB = 1561;
@@ -4588,9 +4556,12 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[0].MiscValue = 164639;
                     break;
                 case 110588:// Misdirection (Symbiosis)
-                    spellInfo->Effects[2].Effect = SPELL_EFFECT_APPLY_AURA;
-                    spellInfo->Effects[2].ApplyAuraName = SPELL_AURA_MOD_SCALE;
-                    spellInfo->Effects[2].BasePoints = 30;
+                    // FIXME: custom effect
+                    ASSERT(spellInfo->Effects.size() == 2);
+                    spellInfo->Effects.emplace_back(spellInfo, nullptr, spellInfo->Effects.size());
+                    spellInfo->Effects.back().Effect = SPELL_EFFECT_APPLY_AURA;
+                    spellInfo->Effects.back().ApplyAuraName = SPELL_AURA_MOD_SCALE;
+                    spellInfo->Effects.back().BasePoints = 30;
                     break;
                 case 122292:// Intervene (Symbiosis)
                     spellInfo->Effects[1].BasePoints = 100;

@@ -560,11 +560,15 @@ public:
         void SpellHit(Unit* /*caster*/, const SpellInfo* spell)
         {
             if (me->GetCurrentSpell(CURRENT_GENERIC_SPELL))
-                for (uint8 i = 0; i < 3; ++i)
-                    if (spell->Effects[i].Effect == SPELL_EFFECT_INTERRUPT_CAST)
+                for (auto const &spellEffect : spell->Effects)
+                {
+                    if (spellEffect.Effect == SPELL_EFFECT_INTERRUPT_CAST)
+                    {
                         if (me->GetCurrentSpell(CURRENT_GENERIC_SPELL)->m_spellInfo->Id == SPELL_SOUL_SHOCK
-                            || me->GetCurrentSpell(CURRENT_GENERIC_SPELL)->m_spellInfo->Id == SPELL_DEADEN)
+                                || me->GetCurrentSpell(CURRENT_GENERIC_SPELL)->m_spellInfo->Id == SPELL_DEADEN)
                             me->InterruptSpell(CURRENT_GENERIC_SPELL, false);
+                    }
+                }
         }
 
         void EnterCombat(Unit* /*who*/)

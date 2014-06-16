@@ -73,7 +73,7 @@ void RARunnable::run()
 
     TC_LOG_INFO("server.worldserver", "Starting Trinity RA on port %d on %s", raport, stringip.c_str());
 
-    while (!World::IsStopped())
+    while (!sWorld->IsStopped())
     {
         // don't be too smart to move this outside the loop
         // the run_reactor_event_loop will modify interval

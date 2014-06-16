@@ -20,14 +20,16 @@
 #define SC_SCRIPTMGR_H
 
 #include "Common.h"
-#include <ace/Singleton.h>
-#include <ace/Atomic_Op.h>
 
 #include "DBCStores.h"
 #include "Player.h"
 #include "SharedDefines.h"
 #include "World.h"
 #include "Weather.h"
+
+#include <ace/Singleton.h>
+
+#include <atomic>
 
 class AuctionHouseObject;
 class AuraScript;
@@ -1007,7 +1009,7 @@ class ScriptMgr
         uint32 _scriptCount;
 
         //atomic op counter for active scripts amount
-        ACE_Atomic_Op<ACE_Thread_Mutex, long> _scheduledScripts;
+        std::atomic<long> _scheduledScripts;
 };
 
 #endif

@@ -1063,14 +1063,16 @@ bool ConditionMgr::addToGossipMenuItems(Condition* cond)
 bool ConditionMgr::addToSpellImplicitTargetConditions(Condition* cond)
 {
     uint32 conditionEffMask = cond->SourceGroup;
+
     SpellInfo* spellInfo = const_cast<SpellInfo*>(sSpellMgr->GetSpellInfo(cond->SourceEntry));
     ASSERT(spellInfo);
-    std::list<uint32> sharedMasks;
-    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+
+    std::vector<uint32> sharedMasks;
+    for (uint8 i = 0; i < spellInfo->Effects.size(); ++i)
     {
         // check if effect is already a part of some shared mask
         bool found = false;
-        for (std::list<uint32>::iterator itr = sharedMasks.begin(); itr != sharedMasks.end(); ++itr)
+        for (auto itr = sharedMasks.begin(); itr != sharedMasks.end(); ++itr)
         {
             if ((1<<i) & *itr)
             {
@@ -1084,25 +1086,26 @@ bool ConditionMgr::addToSpellImplicitTargetConditions(Condition* cond)
         // build new shared mask with found effect
         uint32 sharedMask = (1<<i);
         ConditionList* cmp = spellInfo->Effects[i].ImplicitTargetConditions;
-        for (uint8 effIndex = i+1; effIndex < MAX_SPELL_EFFECTS; ++effIndex)
+        for (uint8 effIndex = i + 1; effIndex < spellInfo->Effects.size(); ++effIndex)
         {
             if (spellInfo->Effects[effIndex].ImplicitTargetConditions == cmp)
-                sharedMask |= 1<<effIndex;
+                sharedMask |= 1 << effIndex;
         }
+
         sharedMasks.push_back(sharedMask);
     }
 
-    for (std::list<uint32>::iterator itr = sharedMasks.begin(); itr != sharedMasks.end(); ++itr)
+    for (auto itr = sharedMasks.begin(); itr != sharedMasks.end(); ++itr)
     {
         // some effect indexes should have same data
         if (uint32 commonMask = *itr & conditionEffMask)
         {
             uint8 firstEffIndex = 0;
-            for (; firstEffIndex < MAX_SPELL_EFFECTS; ++firstEffIndex)
-                if ((1<<firstEffIndex) & *itr)
+            for (; firstEffIndex < spellInfo->Effects.size(); ++firstEffIndex)
+                if ((1 << firstEffIndex) & *itr)
                     break;
 
-            if (firstEffIndex >= MAX_SPELL_EFFECTS)
+            if (firstEffIndex >= spellInfo->Effects.size())
                 return false;
 
             // get shared data
@@ -1125,9 +1128,9 @@ bool ConditionMgr::addToSpellImplicitTargetConditions(Condition* cond)
                 // add new list, create new shared mask
                 sharedList = new ConditionList();
                 bool assigned = false;
-                for (uint8 i = firstEffIndex; i < MAX_SPELL_EFFECTS; ++i)
+                for (uint8 i = firstEffIndex; i < spellInfo->Effects.size(); ++i)
                 {
-                    if ((1<<i) & commonMask)
+                    if ((1 << i) & commonMask)
                     {
                         spellInfo->Effects[i].ImplicitTargetConditions = sharedList;
                         assigned = true;
@@ -1375,9 +1378,9 @@ bool ConditionMgr::isSourceTypeValid(Condition* cond)
 
             uint32 origGroup = cond->SourceGroup;
 
-            for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+            for (uint8 i = 0; i < spellInfo->Effects.size(); ++i)
             {
-                if (!((1<<i) & cond->SourceGroup))
+                if (!((1 << i) & cond->SourceGroup))
                     continue;
 
                 switch (spellInfo->Effects[i].TargetA.GetSelectionCategory())

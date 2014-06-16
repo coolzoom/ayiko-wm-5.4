@@ -23,6 +23,8 @@
 #include "SpellInfo.h"
 #include "Unit.h"
 
+#include <memory>
+
 class Unit;
 class SpellInfo;
 struct SpellModifier;
@@ -70,7 +72,7 @@ class AuraApplication
         uint8 GetSlot() const { return _slot; }
         uint8 GetFlags() const { return _flags; }
         uint32 GetEffectMask() const { return _effectMask; }
-        bool HasEffect(uint8 effect) const { ASSERT(effect < MAX_SPELL_EFFECTS);  return _effectMask & (1<<effect); }
+        bool HasEffect(uint8 effect) const { return _effectMask & (1 << effect); }
         bool IsPositive() const { return _flags & AFLAG_POSITIVE; }
         bool IsSelfcasted() const { return _flags & AFLAG_CASTER; }
         uint32 GetEffectsToApply() const { return _effectsToApply; }
@@ -172,8 +174,21 @@ class Aura
         // helpers for aura effects
         bool HasEffect(uint8 effIndex) const { return GetEffect(effIndex) != NULL; }
         bool HasEffectType(AuraType type) const;
-        AuraEffect *GetEffect(uint8 effIndex) const { ASSERT (effIndex < MAX_SPELL_EFFECTS); return m_effects[effIndex]; }
-        uint32 GetEffectMask() const { uint32 effMask = 0; for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i) if (m_effects[i]) effMask |= 1<<i; return effMask; }
+
+        AuraEffect * GetEffect(uint8 effIndex) const
+        {
+            return m_effects.at(effIndex).get();
+        }
+
+        uint32 GetEffectMask() const
+        {
+            uint32 effMask = 0;
+            for (uint8 i = 0; i < m_effects.size(); ++i)
+                if (m_effects[i])
+                    effMask |= 1 << i;
+            return effMask;
+        }
+
         void RecalculateAmountOfEffects();
         void HandleAllEffects(AuraApplication * aurApp, uint8 mode, bool apply);
 
@@ -253,7 +268,7 @@ class Aura
         uint8 m_procCharges;                                // Aura charges (0 for infinite)
         uint8 m_stackAmount;                                // Aura stack amount
 
-        AuraEffect *m_effects[MAX_SPELL_EFFECTS];
+        std::vector<std::unique_ptr<AuraEffect>> m_effects;
         ApplicationMap m_applications;
 
         bool m_isRemoved:1;

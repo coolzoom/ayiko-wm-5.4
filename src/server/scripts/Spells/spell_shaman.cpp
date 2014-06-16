@@ -558,11 +558,12 @@ class spell_sha_echo_of_the_elements : public SpellScriptLoader
                     return;
 
                 bool singleTarget = false;
-                for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-                    if ((procSpell->Effects[i].TargetA.GetTarget() == TARGET_UNIT_TARGET_ALLY ||
-                        procSpell->Effects[i].TargetA.GetTarget() == TARGET_UNIT_TARGET_ENEMY) &&
-                        procSpell->Effects[i].TargetB.GetTarget() == 0)
+                for (auto const &spellEffect : procSpell->Effects)
+                {
+                    if ((spellEffect.TargetA.GetTarget() == TARGET_UNIT_TARGET_ALLY || spellEffect.TargetA.GetTarget() == TARGET_UNIT_TARGET_ENEMY)
+                            && spellEffect.TargetB.GetTarget() == 0)
                         singleTarget = true;
+                }
 
                 if (!singleTarget)
                     return;

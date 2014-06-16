@@ -1262,7 +1262,7 @@ class spell_rog_deadly_poison : public SpellScriptLoader
                         if (!enchant)
                             continue;
 
-                        for (uint8 s = 0; s < 3; ++s)
+                        for (uint8 s = 0; s < MAX_ITEM_ENCHANTMENT_EFFECTS; ++s)
                         {
                             if (enchant->type[s] != ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
                                 continue;

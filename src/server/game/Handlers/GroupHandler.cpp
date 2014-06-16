@@ -1126,7 +1126,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
                     uint8 count = 0;
 
                     dataBuffer << uint8(0);
-                    for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                    for (uint32 i = 0; i < aurApp->GetBase()->GetSpellInfo()->Effects.size(); ++i)
                     {
                         if (AuraEffect const *eff = aurApp->GetBase()->GetEffect(i)) // NULL if effect flag not set
                         {
@@ -1238,7 +1238,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
                         uint8 count = 0;
 
                         dataBuffer << uint8(0);
-                        for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                        for (uint32 i = 0; i < aurApp->GetBase()->GetSpellInfo()->Effects.size(); ++i)
                         {
                             if (AuraEffect const *eff = aurApp->GetBase()->GetEffect(i)) // NULL if effect flag not set
                             {

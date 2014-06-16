@@ -43,7 +43,6 @@
 #include "ScriptMgr.h"
 #include "Transport.h"
 #include "WardenWin.h"
-#include "WardenMac.h"
 #include "AccountMgr.h"
 
 #include <zlib.h>
@@ -116,7 +115,7 @@ WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec,
     , timeLastChangeSubGroupCommand(0), timeLastSellItemOpcode(0)
     , _RBACData()
 {
-    _warden = NULL;
+        _warden = NULL;
     _filterAddonMessages = false;
 
     if (sock)
@@ -1135,18 +1134,12 @@ void WorldSession::ProcessQueryCallbacks()
     }
 }
 
-void WorldSession::InitWarden(BigNumber* k, std::string os)
+void WorldSession::InitWarden(BigNumber* k, std::string const &os)
 {
     if (os == "Win")
     {
         _warden = new WardenWin();
         _warden->Init(this, k);
-    }
-    else if (os == "OSX")
-    {
-        // Disabled as it is causing the client to crash
-        // _warden = new WardenMac();
-        // _warden->Init(this, k);
     }
 }
 

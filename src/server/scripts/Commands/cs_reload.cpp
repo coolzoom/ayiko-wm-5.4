@@ -146,7 +146,6 @@ public:
             { "spell_threats",                 rbac::RBAC_PERM_COMMAND_RELOAD_SPELL_THREATS, true,  &HandleReloadSpellThreatsCommand,               "", NULL },
             { "spell_group_stack_rules",       rbac::RBAC_PERM_COMMAND_RELOAD_SPELL_GROUP_STACK_RULES, true,  &HandleReloadSpellGroupStackRulesCommand,       "", NULL },
             { "trinity_string",                rbac::RBAC_PERM_COMMAND_RELOAD_TRINITY_STRING, true,  &HandleReloadTrinityStringCommand,              "", NULL },
-            { "warden_action",                 rbac::RBAC_PERM_COMMAND_RELOAD_WARDEN_ACTION, true,  &HandleReloadWardenactionCommand,               "", NULL },
             { "waypoint_scripts",              rbac::RBAC_PERM_COMMAND_RELOAD_WAYPOINT_SCRIPTS, true,  &HandleReloadWpScriptsCommand,                  "", NULL },
             { "waypoint_data",                 rbac::RBAC_PERM_COMMAND_RELOAD_WAYPOINT_DATA, true,  &HandleReloadWpCommand,                         "", NULL },
             { "vehicle_accessory",             rbac::RBAC_PERM_COMMAND_RELOAD_VEHICLE_ACCESORY, true,  &HandleReloadVehicleAccessoryCommand,           "", NULL },
@@ -718,21 +717,6 @@ public:
         TC_LOG_INFO("misc", "Re-Loading trinity_string Table!");
         sObjectMgr->LoadTrinityStrings();
         handler->SendGlobalGMSysMessage("DB table `trinity_string` reloaded.");
-        return true;
-    }
-
-    static bool HandleReloadWardenactionCommand(ChatHandler* handler, const char* /*args*/)
-    {
-        if (!sWorld->getBoolConfig(CONFIG_WARDEN_ENABLED))
-        {
-            handler->SendSysMessage("Warden system disabled by config - reloading warden_action skipped.");
-            handler->SetSentErrorMessage(true);
-            return false;
-        }
-
-        TC_LOG_INFO("misc", "Re-Loading warden_action Table!");
-        sWardenCheckMgr->LoadWardenOverrides();
-        handler->SendGlobalGMSysMessage("DB table `warden_action` reloaded.");
         return true;
     }
 

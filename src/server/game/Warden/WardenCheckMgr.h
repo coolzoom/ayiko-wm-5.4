@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -19,15 +19,14 @@
 #ifndef _WARDENCHECKMGR_H
 #define _WARDENCHECKMGR_H
 
-#include <map>
-#include "Cryptography/BigNumber.h"
+#include "BigNumber.h"
 
-enum WardenActions
-{
-    WARDEN_ACTION_LOG,
-    WARDEN_ACTION_KICK,
-    WARDEN_ACTION_BAN
-};
+#include <ace/Guard_T.h>
+#include <ace/RW_Thread_Mutex.h>
+
+#include <map>
+#include <string>
+#include <vector>
 
 struct WardenCheck
 {
@@ -38,7 +37,6 @@ struct WardenCheck
     std::string Str;                                        // LUA, MPQ, DRIVER
     std::string Comment;
     uint16 CheckId;
-    enum WardenActions Action;
 };
 
 struct WardenCheckResult
@@ -48,31 +46,41 @@ struct WardenCheckResult
 
 class WardenCheckMgr
 {
-    friend class ACE_Singleton<WardenCheckMgr, ACE_Null_Mutex>;
+public:
+    typedef ACE_RW_Thread_Mutex LockType;
+    typedef ACE_Write_Guard<LockType> WriteGuardType;
+    typedef ACE_Read_Guard<LockType> ReadGuardType;
+
+private:
     WardenCheckMgr();
     ~WardenCheckMgr();
 
-    public:
-        // We have a linear key without any gaps, so we use vector for fast access
-        typedef std::vector<WardenCheck*> CheckContainer;
-        typedef std::map<uint32, WardenCheckResult*> CheckResultContainer;
+public:
+    // We have a linear key without any gaps, so we use vector for fast access
+    typedef std::vector<WardenCheck*> CheckContainer;
+    typedef std::map<uint32, WardenCheckResult*> CheckResultContainer;
 
-        WardenCheck* GetWardenDataById(uint16 Id);
-        WardenCheckResult* GetWardenResultById(uint16 Id);
+    static WardenCheckMgr * instance()
+    {
+        static WardenCheckMgr mgr;
+        return &mgr;
+    }
 
-        std::vector<uint16> MemChecksIdPool;
-        std::vector<uint16> OtherChecksIdPool;
+    WardenCheck const * GetWardenDataById(uint16 Id) const;
+    WardenCheckResult const * GetWardenResultById(uint16 Id) const;
 
-        void LoadWardenChecks();
-        void LoadWardenOverrides();
+    std::vector<uint16> MemChecksIdPool;
+    std::vector<uint16> OtherChecksIdPool;
 
-        ACE_RW_Mutex _checkStoreLock;
+    void LoadWardenChecks();
 
-    private:
-        CheckContainer CheckStore;
-        CheckResultContainer CheckResultStore;
+    LockType _checkStoreLock;
+
+private:
+    CheckContainer CheckStore;
+    CheckResultContainer CheckResultStore;
 };
 
-#define sWardenCheckMgr ACE_Singleton<WardenCheckMgr, ACE_Null_Mutex>::instance()
+#define sWardenCheckMgr WardenCheckMgr::instance()
 
 #endif

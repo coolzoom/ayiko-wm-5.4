@@ -33,6 +33,10 @@ class WorldPacket : public ByteBuffer
         {
         }
 
+        WorldPacket(uint32 opcode, size_t res = 200) : ByteBuffer(res), m_opcode(Opcodes(opcode))
+        {
+        }
+
         WorldPacket(Opcodes opcode, size_t res = 200) : ByteBuffer(res), m_opcode(opcode)
         {
         }

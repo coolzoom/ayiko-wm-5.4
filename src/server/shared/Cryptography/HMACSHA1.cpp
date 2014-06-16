@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -19,11 +19,12 @@
 #include "HMACSHA1.h"
 #include "BigNumber.h"
 #include "Common.h"
+#include "Errors.h"
 
-HmacHash::HmacHash(uint32 len, uint8 *seed)
+HmacHash::HmacHash(void const *seed, size_t seedSize)
 {
     HMAC_CTX_init(&m_ctx);
-    HMAC_Init_ex(&m_ctx, seed, len, EVP_sha1(), NULL);
+    HMAC_Init_ex(&m_ctx, seed, static_cast<int>(seedSize), EVP_sha1(), NULL);
 }
 
 HmacHash::~HmacHash()
@@ -43,14 +44,14 @@ void HmacHash::UpdateData(const uint8* data, size_t len)
 
 void HmacHash::Finalize()
 {
-    uint32 length = 0;
-    HMAC_Final(&m_ctx, (uint8*)m_digest, &length);
+    unsigned int length = 0;
+    HMAC_Final(&m_ctx, m_digest, &length);
     ASSERT(length == SHA_DIGEST_LENGTH);
 }
 
-uint8 *HmacHash::ComputeHash(BigNumber* bn)
+uint8 const * HmacHash::ComputeHash(BigNumber* bn)
 {
-    HMAC_Update(&m_ctx, bn->AsByteArray(), bn->GetNumBytes());
+    HMAC_Update(&m_ctx, bn->AsByteArray().get(), bn->GetNumBytes());
     Finalize();
-    return (uint8*)m_digest;
+    return m_digest;
 }

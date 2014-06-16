@@ -801,6 +801,17 @@ class mob_shang_xi_air_balloon : public VehicleScript
         {
             switch (waypointId)
             {
+                case 11:
+                    if (me->GetVehicleKit())
+                    {
+                        if (Unit* passenger = me->GetVehicleKit()->GetPassenger(1))
+                            if (Creature * const creature = passenger->ToCreature())
+                                creature->ForcedDespawn(1000);
+                        if (Unit* passenger = me->GetVehicleKit()->GetPassenger(2))
+                            if (Creature * const creature = passenger->ToCreature())
+                                creature->ForcedDespawn(1000);
+                    }
+                    break;
                 case 12:
                     if (me->GetVehicleKit())
                     {

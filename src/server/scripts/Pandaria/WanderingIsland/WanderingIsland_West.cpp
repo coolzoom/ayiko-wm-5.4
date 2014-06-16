@@ -481,13 +481,15 @@ public:
             me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
         }
 
-        void OnSpellClick(Unit* /*Clicker*/)
+        void OnSpellClick(Unit* Clicker)
         {
             if (cooldown)
                 return;
 
-            if (Creature* zhao = GetClosestCreatureWithEntry(me, 55786, 50.0f))
+            if (Creature* const zhao = GetClosestCreatureWithEntry(me, 55786, 50.0f))
                 me->CastSpell(zhao, SPELL_ROCKET_LAUNCH, false);
+            else
+                Clicker->MonsterTextEmote("Wait until the Onyx Serpent is directly overhead.", Clicker->GetGUID(), true);
 
             cooldown = 5000;
             me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);

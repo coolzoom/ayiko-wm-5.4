@@ -456,10 +456,10 @@ public:
             {
                 IntroTimer = 2500;
 
-                // Bassins chantants -> Dai-Lo
+                // The Singing Pools -> Dai-Lo Farmstead
                 if (me->GetAreaId() == 5826)
                     waypointToEject = 24;
-                // Dai-Lo -> Temple
+                // Dai-Lo Farmstead -> Temple
                 else if (me->GetAreaId() == 5881) // Ferme Dai-Lo
                     waypointToEject = 22;
                 // Epave -> Temple

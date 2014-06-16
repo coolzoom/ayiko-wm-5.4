@@ -462,7 +462,7 @@ public:
                     player->KilledMonsterCredit(me->GetEntry(), 0);
 
                 Talk(1);
-                me->CombatStop();
+                EnterEvadeMode();
                 me->setFaction(35);
                 me->SetFullHealth();
                 me->HandleEmoteCommand(EMOTE_ONESHOT_SALUTE);

@@ -3906,7 +3906,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     break;
                 case 104220:// Soulburn : Health Funnel
                     spellInfo->Effects[0].TargetA = TARGET_UNIT_CASTER;
-                    spellInfo->Effects[1].TargetA = TARGET_UNIT_CASTER;
                     break;
                 case 87385: // Soulburn : Seed of Corruption - damage
                     spellInfo->Effects[0].TargetA = TARGET_UNIT_DEST_AREA_ENEMY;
@@ -4880,11 +4879,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[EFFECT_0].TargetB = TARGET_UNIT_DEST_AREA_ALLY;
                     spellInfo->Effects[EFFECT_1].TargetB = TARGET_UNIT_DEST_AREA_ALLY;
                     break;
-                // Improved Frost Presence (Rank 1/2)
-                case 50384:
-                case 50385:
-                    spellInfo->Effects[EFFECT_1].SpellClassMask = 0;
-                    break;
                 case 81262: // Efflorensence
                 case 88685: // Holy World: Sanctuary
                     spellInfo->AttributesEx5 &= ~SPELL_ATTR5_START_PERIODIC_AT_APPLY;
@@ -5334,7 +5328,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 // Baron Silverlaine
                 case 93956: // Cursed Veil
                     spellInfo->Effects[EFFECT_1].SetRadiusIndex(18);
-                    spellInfo->Effects[EFFECT_2].SetRadiusIndex(18);
                     break;
                 // Commander Springvale
                 case 93722: // Shield of Perfidious dmg

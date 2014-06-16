@@ -985,6 +985,46 @@ class mob_shang_xi_air_balloon : public VehicleScript
     }
 };
 
+class spell_monkey_wisdom : public SpellScriptLoader
+{;
+
+public:
+    spell_monkey_wisdom() : SpellScriptLoader("spell_monkey_wisdom") {}
+
+    class spell_monkey_wisdom_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_monkey_wisdom_SpellScript);
+
+        void HandleScript(SpellEffIndex /*eff*/)
+        {
+            std::string text_str[9] =
+            {
+                "Peel banana first, eat second.",
+                "Wet fur not fun to sleep on.",
+                "Don't roll in own poo unless you want to smell like poo all day.",
+                "Steal a banana from a hozen, expect an angry hozen.",
+                "Poo not good to eat, but very good to throw.",
+                "Mouth only hole that banana go in.",
+                "Don't throw banana peel where going to walk.",
+                "Firecracker for throwing, banana for eating.",
+                "Don't pull own tail when there are other tails to pull."
+            };
+
+            GetHitUnit()->MonsterTextEmote(text_str[urand(0, 8)], GetHitUnit()->GetGUID(), true);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_monkey_wisdom_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_KILL_CREDIT2);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_monkey_wisdom_SpellScript();
+    }
+};
+
 void AddSC_WanderingIsland_West()
 {
     new mob_master_shang_xi_temple();
@@ -1001,4 +1041,5 @@ void AddSC_WanderingIsland_West()
     new mob_master_shang_xi_thousand_staff_escort();
     new spell_grab_air_balloon();
     new mob_shang_xi_air_balloon();
+    new spell_monkey_wisdom();
 }

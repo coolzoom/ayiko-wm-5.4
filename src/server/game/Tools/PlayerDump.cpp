@@ -163,21 +163,6 @@ std::string getnth(std::string &str, int n)
     return str.substr(s, e-s);
 }
 
-bool changetoknth(std::string &str, int n, char const* with, bool insert = false, bool nonzero = false)
-{
-    std::string::size_type s = 0, e = 0;
-    if (!findtoknth(str, n, s, e))
-        return false;
-    if (nonzero && str.substr(s, e-s) == "0")
-        return true;                                        // not an error
-    if (!insert)
-        str.replace(s, e-s, with);
-    else
-        str.insert(s, with);
-
-    return true;
-}
-
 uint32 registerNewGuid(uint32 oldGuid, std::map<uint32, uint32> &guidMap, GuidType guidType)
 {
     std::map<uint32, uint32>::const_iterator itr = guidMap.find(oldGuid);

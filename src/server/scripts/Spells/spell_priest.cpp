@@ -1295,14 +1295,14 @@ class spell_pri_purify : public SpellScriptLoader
                     if (Unit* target = GetExplTargetUnit())
                     {
                         // Create dispel mask by dispel type
-                        for (int8 i = 0; i < MAX_SPELL_EFFECTS; i++)
+                        for (auto const &spellEffect : GetSpellInfo()->Effects)
                         {
-                            uint32 dispel_type = GetSpellInfo()->Effects[i].MiscValue;
+                            uint32 dispel_type = spellEffect.MiscValue;
                             uint32 dispelMask  = GetSpellInfo()->GetDispelMask(DispelType(dispel_type));
 
                             // Purity can dispell Magic.
                             if (GetSpellInfo()->Id == 527)
-                                dispelMask = ((1<<DISPEL_MAGIC));
+                                dispelMask = (1 << DISPEL_MAGIC);
 
                             DispelChargesList dispelList;
                             target->GetDispellableAuraList(caster, dispelMask, dispelList);

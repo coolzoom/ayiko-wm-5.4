@@ -40,6 +40,68 @@
 #include "BattlefieldMgr.h"
 #include "WeatherMgr.h"
 
+namespace Trinity {
+
+// Binary predicate for sorting the priority of absorption aura effects
+bool AbsorbAuraOrderPred::operator()(AuraEffect const *aurEffA, AuraEffect const *aurEffB) const
+{
+    SpellInfo const* spellProtoA = aurEffA->GetSpellInfo();
+    SpellInfo const* spellProtoB = aurEffB->GetSpellInfo();
+
+    // Wards
+    if (spellProtoA->SpellFamilyName == SPELLFAMILY_MAGE || spellProtoA->SpellFamilyName == SPELLFAMILY_WARLOCK)
+        if (spellProtoA->Category == 56)
+            return true;
+    if (spellProtoB->SpellFamilyName == SPELLFAMILY_MAGE || spellProtoB->SpellFamilyName == SPELLFAMILY_WARLOCK)
+        if (spellProtoB->Category == 56)
+            return false;
+
+    // Sacred Shield
+    if (spellProtoA->Id == 58597)
+        return true;
+    if (spellProtoB->Id == 58597)
+        return false;
+
+    // Fel Blossom
+    if (spellProtoA->Id == 28527)
+        return true;
+    if (spellProtoB->Id == 28527)
+        return false;
+
+    // Divine Aegis
+    if (spellProtoA->Id == 47753)
+        return true;
+    if (spellProtoB->Id == 47753)
+        return false;
+
+    // Ice Barrier
+    if (spellProtoA->Category == 471)
+        return true;
+    if (spellProtoB->Category == 471)
+        return false;
+
+    // Sacrifice
+    if (spellProtoA->SpellFamilyName == SPELLFAMILY_WARLOCK && spellProtoA->SpellIconID == 693)
+        return true;
+    if (spellProtoB->SpellFamilyName == SPELLFAMILY_WARLOCK && spellProtoB->SpellIconID == 693)
+        return false;
+
+    return false;
+}
+
+DurationOrderPred::DurationOrderPred(bool ascending)
+    : m_ascending(ascending)
+{ }
+
+bool DurationOrderPred::operator()(Aura const *a, Aura const *b) const
+{
+    uint32 rA = a->GetDuration();
+    uint32 rB = b->GetDuration();
+    return m_ascending ? rA < rB : rA > rB;
+}
+
+} // namespace Trinity
+
 class Aura;
 //
 // EFFECT HANDLER NOTES
@@ -1546,7 +1608,7 @@ void AuraEffect::ApplySpellMod(Unit* target, bool apply)
                 {
                     if (GetMiscValue() == SPELLMOD_ALL_EFFECTS)
                     {
-                        for (uint8 i = 0; i<MAX_SPELL_EFFECTS; ++i)
+                        for (uint8 i = 0; i < aura->GetSpellInfo()->Effects.size(); ++i)
                         {
                             if (AuraEffect *aurEff = aura->GetEffect(i))
                                 aurEff->RecalculateAmount();
@@ -3352,10 +3414,9 @@ void AuraEffect::HandleAuraMounted(AuraApplication const* aurApp, uint8 mode, bo
 
             vehicleId = ci->VehicleId;
 
-            //some spell has one aura of mount and one of vehicle
-            for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-                if (GetSpellInfo()->Effects[i].Effect == SPELL_EFFECT_SUMMON
-                    && GetSpellInfo()->Effects[i].MiscValue == GetMiscValue())
+            // some spell has one aura of mount and one of vehicle
+            for (auto const &spellEffect : GetSpellInfo()->Effects)
+                if (spellEffect.Effect == SPELL_EFFECT_SUMMON && spellEffect.MiscValue == GetMiscValue())
                     displayId = 0;
         }
 
@@ -7078,8 +7139,8 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
     }
 
     // Consecrate ticks can miss and will not show up in the combat log
-    if (GetSpellInfo()->Effects[GetEffIndex()].Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA &&
-        caster->SpellHitResult(target, GetSpellInfo(), false) != SPELL_MISS_NONE)
+    if (GetSpellInfo()->Effects[GetEffIndex()].Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA
+            && caster->SpellHitResult(target, GetSpellInfo(), false) != SPELL_MISS_NONE)
         return;
 
     // some auras remove at specific health level or more
@@ -7477,8 +7538,8 @@ void AuraEffect::HandlePeriodicHealthLeechAuraTick(Unit* target, Unit* caster) c
         return;
     }
 
-    if (GetSpellInfo()->Effects[GetEffIndex()].Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA &&
-        caster->SpellHitResult(target, GetSpellInfo(), false) != SPELL_MISS_NONE)
+    if (GetSpellInfo()->Effects[GetEffIndex()].Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA
+            && caster->SpellHitResult(target, GetSpellInfo(), false) != SPELL_MISS_NONE)
         return;
 
     uint32 absorb = 0;
@@ -7725,8 +7786,8 @@ void AuraEffect::HandlePeriodicManaLeechAuraTick(Unit* target, Unit* caster) con
         return;
     }
 
-    if (GetSpellInfo()->Effects[GetEffIndex()].Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA &&
-        caster->SpellHitResult(target, GetSpellInfo(), false) != SPELL_MISS_NONE)
+    if (GetSpellInfo()->Effects[GetEffIndex()].Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA
+            && caster->SpellHitResult(target, GetSpellInfo(), false) != SPELL_MISS_NONE)
         return;
 
     // ignore negative values (can be result apply spellmods to aura damage

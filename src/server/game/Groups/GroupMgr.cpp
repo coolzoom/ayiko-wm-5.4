@@ -47,7 +47,7 @@ uint32 GroupMgr::GenerateNewGroupDbStoreId()
     if (newStorageId == NextGroupDbStoreId)
     {
         TC_LOG_ERROR("misc", "Group storage ID overflow!! Can't continue, shutting down server. ");
-        World::StopNow(ERROR_EXIT_CODE);
+        sWorld->StopNow(ERROR_EXIT_CODE);
     }
 
     return newStorageId;
@@ -85,7 +85,7 @@ uint32 GroupMgr::GenerateGroupId()
     if (NextGroupId >= 0xFFFFFFFE)
     {
         TC_LOG_ERROR("misc", "Group guid overflow!! Can't continue, shutting down server. ");
-        World::StopNow(ERROR_EXIT_CODE);
+        sWorld->StopNow(ERROR_EXIT_CODE);
     }
     return NextGroupId++;
 }

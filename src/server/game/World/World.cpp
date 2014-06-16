@@ -98,22 +98,6 @@ void createXML(uint32 activeClientsNum, uint32 queuedClientsNum, std::string con
 
 } // namespace
 
-ACE_Atomic_Op<ACE_Thread_Mutex, bool> World::m_stopEvent = false;
-uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
-ACE_Atomic_Op<ACE_Thread_Mutex, uint32> World::m_worldLoopCounter = 0;
-
-float World::m_MaxVisibleDistanceOnContinents = DEFAULT_VISIBILITY_DISTANCE;
-float World::m_MaxVisibleDistanceInInstances  = DEFAULT_VISIBILITY_INSTANCE;
-float World::m_MaxVisibleDistanceInBG         = DEFAULT_VISIBILITY_BGARENAS;
-float World::m_MaxVisibleDistanceInArenas     = DEFAULT_VISIBILITY_BGARENAS;
-
-int32 World::m_visibility_notify_periodOnContinents = DEFAULT_VISIBILITY_NOTIFY_PERIOD;
-int32 World::m_visibility_notify_periodInInstances  = DEFAULT_VISIBILITY_NOTIFY_PERIOD;
-int32 World::m_visibility_notify_periodInBGArenas   = DEFAULT_VISIBILITY_NOTIFY_PERIOD;
-
-float World::Visibility_RelocationLowerLimit = 20.0f;
-uint32 World::Visibility_AINotifyDelay = 1000;
-
 /// World constructor
 World::World()
 {
@@ -141,6 +125,22 @@ World::World()
     m_updateTimeCount = 0;
 
     m_isClosed = false;
+
+    m_stopEvent = false;
+    m_ExitCode = SHUTDOWN_EXIT_CODE;
+    m_worldLoopCounter = 0;
+
+    m_MaxVisibleDistanceOnContinents = DEFAULT_VISIBILITY_DISTANCE;
+    m_MaxVisibleDistanceInInstances  = DEFAULT_VISIBILITY_INSTANCE;
+    m_MaxVisibleDistanceInBG         = DEFAULT_VISIBILITY_BGARENAS;
+    m_MaxVisibleDistanceInArenas     = DEFAULT_VISIBILITY_BGARENAS;
+
+    m_visibility_notify_periodOnContinents = DEFAULT_VISIBILITY_NOTIFY_PERIOD;
+    m_visibility_notify_periodInInstances  = DEFAULT_VISIBILITY_NOTIFY_PERIOD;
+    m_visibility_notify_periodInBGArenas   = DEFAULT_VISIBILITY_NOTIFY_PERIOD;
+
+    Visibility_RelocationLowerLimit = 20.0f;
+    Visibility_AINotifyDelay = 1000;
 
     m_CleaningFlags = 0;
 }
@@ -2795,7 +2795,7 @@ void World::ShutdownMsg(bool show, Player* player)
 void World::ShutdownCancel()
 {
     // nothing cancel or too later
-    if (!m_ShutdownTimer || m_stopEvent.value())
+    if (!m_ShutdownTimer || m_stopEvent)
         return;
 
     ServerMessageType msgid = (m_ShutdownMask & SHUTDOWN_MASK_RESTART) ? SERVER_MSG_RESTART_CANCELLED : SERVER_MSG_SHUTDOWN_CANCELLED;

@@ -19,11 +19,11 @@
 #ifndef TRINITY_SPELLAURAEFFECTS_H
 #define TRINITY_SPELLAURAEFFECTS_H
 
+#include "SpellAuras.h"
+
 class Unit;
 class AuraEffect;
 class Aura;
-
-#include "SpellAuras.h"
 
 typedef void(AuraEffect::*pAuraEffectHandler)(AuraApplication const* aurApp, uint8 mode, bool apply) const;
 
@@ -32,8 +32,10 @@ class AuraEffect
     friend void Aura::_InitEffects(uint32 effMask, Unit* caster, int32 *baseAmount);
     friend Aura *Unit::_TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint32 effMask, Unit* caster, int32* baseAmount, Item* castItem, uint64 casterGUID);
     friend Aura::~Aura();
+
     private:
         explicit AuraEffect(Aura *base, uint8 effIndex, int32 *baseAmount, Unit* caster);
+
     public:
         ~AuraEffect();
         Unit* GetCaster() const { return GetBase() ? GetBase()->GetCaster() : NULL; }
@@ -365,73 +367,21 @@ class AuraEffect
 namespace Trinity
 {
     // Binary predicate for sorting the priority of absorption aura effects
-    class AbsorbAuraOrderPred
+    struct AbsorbAuraOrderPred
     {
-        public:
-            AbsorbAuraOrderPred() { }
-            bool operator() (AuraEffect *aurEffA, AuraEffect *aurEffB) const
-            {
-                SpellInfo const* spellProtoA = aurEffA->GetSpellInfo();
-                SpellInfo const* spellProtoB = aurEffB->GetSpellInfo();
-
-                // Wards
-                if ((spellProtoA->SpellFamilyName == SPELLFAMILY_MAGE) ||
-                    (spellProtoA->SpellFamilyName == SPELLFAMILY_WARLOCK))
-                    if (spellProtoA->Category == 56)
-                        return true;
-                if ((spellProtoB->SpellFamilyName == SPELLFAMILY_MAGE) ||
-                    (spellProtoB->SpellFamilyName == SPELLFAMILY_WARLOCK))
-                    if (spellProtoB->Category == 56)
-                        return false;
-
-                // Sacred Shield
-                if (spellProtoA->Id == 58597)
-                    return true;
-                if (spellProtoB->Id == 58597)
-                    return false;
-
-                // Fel Blossom
-                if (spellProtoA->Id == 28527)
-                    return true;
-                if (spellProtoB->Id == 28527)
-                    return false;
-
-                // Divine Aegis
-                if (spellProtoA->Id == 47753)
-                    return true;
-                if (spellProtoB->Id == 47753)
-                    return false;
-
-                // Ice Barrier
-                if (spellProtoA->Category == 471)
-                    return true;
-                if (spellProtoB->Category == 471)
-                    return false;
-
-                // Sacrifice
-                if ((spellProtoA->SpellFamilyName == SPELLFAMILY_WARLOCK) &&
-                    (spellProtoA->SpellIconID == 693))
-                    return true;
-                if ((spellProtoB->SpellFamilyName == SPELLFAMILY_WARLOCK) &&
-                    (spellProtoB->SpellIconID == 693))
-                    return false;
-
-                return false;
-            }
+        bool operator()(AuraEffect const *aurEffA, AuraEffect const *aurEffB) const;
     };
 
     class DurationOrderPred
     {
-        public:
-            DurationOrderPred(bool ascending = true) : m_ascending(ascending) {}
-            bool operator() (Aura const *a, Aura const *b) const
-            {
-                uint32 rA = a->GetDuration();
-                uint32 rB = b->GetDuration();
-                return m_ascending ? rA < rB : rA > rB;
-            }
-        private:
-            const bool m_ascending;
+    public:
+        explicit DurationOrderPred(bool ascending = true);
+
+        bool operator()(Aura const *a, Aura const *b) const;
+
+    private:
+        bool m_ascending;
     };
 }
+
 #endif

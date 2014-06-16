@@ -4044,10 +4044,10 @@ void ObjectMgr::LoadQuests()
                 if (!qinfo->RequiredNpcOrGo[j])
                 {
                     bool found = false;
-                    for (uint8 k = 0; k < MAX_SPELL_EFFECTS; ++k)
+                    for (auto const &spellEffect : spellInfo->Effects)
                     {
-                        if ((spellInfo->Effects[k].Effect == SPELL_EFFECT_QUEST_COMPLETE && uint32(spellInfo->Effects[k].MiscValue) == qinfo->Id) ||
-                            spellInfo->Effects[k].Effect == SPELL_EFFECT_SEND_EVENT)
+                        if ((spellEffect.Effect == SPELL_EFFECT_QUEST_COMPLETE && uint32(spellEffect.MiscValue) == qinfo->Id)
+                                || spellEffect.Effect == SPELL_EFFECT_SEND_EVENT)
                         {
                             found = true;
                             break;
@@ -4426,12 +4426,12 @@ void ObjectMgr::LoadQuests()
         if (!spellInfo)
             continue;
 
-        for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)
+        for (auto const &spellEffect : spellInfo->Effects)
         {
-            if (spellInfo->Effects[j].Effect != SPELL_EFFECT_QUEST_COMPLETE)
+            if (spellEffect.Effect != SPELL_EFFECT_QUEST_COMPLETE)
                 continue;
 
-            uint32 quest_id = spellInfo->Effects[j].MiscValue;
+            uint32 quest_id = spellEffect.MiscValue;
 
             Quest const* quest = GetQuestTemplate(quest_id);
 
@@ -4894,9 +4894,11 @@ void ObjectMgr::LoadSpellScripts()
             continue;
         }
 
-        uint8 i = (uint8)((uint32(itr->first) >> 24) & 0x000000FF);
-        //check for correct spellEffect
-        if (!spellInfo->Effects[i].Effect || (spellInfo->Effects[i].Effect != SPELL_EFFECT_SCRIPT_EFFECT && spellInfo->Effects[i].Effect != SPELL_EFFECT_DUMMY))
+        uint8 const i = (uint8)((uint32(itr->first) >> 24) & 0x000000FF);
+
+        // check for correct spellEffect
+        auto const &spellEffect = spellInfo->Effects.at(i);
+        if (!spellEffect.Effect || (spellEffect.Effect != SPELL_EFFECT_SCRIPT_EFFECT && spellEffect.Effect != SPELL_EFFECT_DUMMY))
             TC_LOG_ERROR("sql.sql", "Table `spell_scripts` - spell %u effect %u is not SPELL_EFFECT_SCRIPT_EFFECT or SPELL_EFFECT_DUMMY", spellId, i);
     }
 }
@@ -4914,11 +4916,15 @@ void ObjectMgr::LoadEventScripts()
 
     // Load all possible script entries from spells
     for (uint32 i = 1; i < sSpellMgr->GetSpellInfoStoreSize(); ++i)
-        if (SpellInfo const* spell = sSpellMgr->GetSpellInfo(i))
-            for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)
-                if (spell->Effects[j].Effect == SPELL_EFFECT_SEND_EVENT)
-                    if (spell->Effects[j].MiscValue)
-                        evt_scripts.insert(spell->Effects[j].MiscValue);
+    {
+        auto const spell = sSpellMgr->GetSpellInfo(i);
+        if (!spell)
+            continue;
+
+        for (auto const &spellEffect : spell->Effects)
+            if (spellEffect.Effect == SPELL_EFFECT_SEND_EVENT && spellEffect.MiscValue)
+                evt_scripts.insert(spellEffect.MiscValue);
+    }
 
     for (size_t path_idx = 0; path_idx < sTaxiPathNodesByPath.size(); ++path_idx)
     {
@@ -6341,7 +6347,7 @@ uint32 ObjectMgr::GenerateAuctionID()
     if (_auctionId >= 0xFFFFFFFE)
     {
         TC_LOG_ERROR("misc", "Auctions ids overflow!! Can't continue, shutting down server. ");
-        World::StopNow(ERROR_EXIT_CODE);
+        sWorld->StopNow(ERROR_EXIT_CODE);
     }
     return _auctionId++;
 }
@@ -6351,7 +6357,7 @@ uint64 ObjectMgr::GenerateEquipmentSetGuid()
     if (_equipmentSetGuid >= uint64(0xFFFFFFFFFFFFFFFELL))
     {
         TC_LOG_ERROR("misc", "EquipmentSet guid overflow!! Can't continue, shutting down server. ");
-        World::StopNow(ERROR_EXIT_CODE);
+        sWorld->StopNow(ERROR_EXIT_CODE);
     }
     return _equipmentSetGuid++;
 }
@@ -6361,7 +6367,7 @@ uint32 ObjectMgr::GenerateMailID()
     if (_mailId >= 0xFFFFFFFE)
     {
         TC_LOG_ERROR("misc", "Mail ids overflow!! Can't continue, shutting down server. ");
-        World::StopNow(ERROR_EXIT_CODE);
+        sWorld->StopNow(ERROR_EXIT_CODE);
     }
     return _mailId++;
 }
@@ -8225,25 +8231,30 @@ void ObjectMgr::AddSpellToTrainer(uint32 entry, uint32 spell, uint32 spellCost, 
 
     // calculate learned spell for profession case when stored cast-spell
     trainerSpell.learnedSpell[0] = spell;
-    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+    for (uint8 i = 0; i < spellinfo->Effects.size(); ++i)
     {
-        if (spellinfo->Effects[i].Effect != SPELL_EFFECT_LEARN_SPELL)
+        auto const &spellEffect = spellinfo->Effects[i];
+        if (spellEffect.Effect != SPELL_EFFECT_LEARN_SPELL)
             continue;
+
         if (trainerSpell.learnedSpell[0] == spell)
             trainerSpell.learnedSpell[0] = 0;
+
         // player must be able to cast spell on himself
-        if (spellinfo->Effects[i].TargetA.GetTarget() != 0 && spellinfo->Effects[i].TargetA.GetTarget() != TARGET_UNIT_TARGET_ALLY
-            && spellinfo->Effects[i].TargetA.GetTarget() != TARGET_UNIT_TARGET_ANY && spellinfo->Effects[i].TargetA.GetTarget() != TARGET_UNIT_CASTER)
+        if (spellEffect.TargetA.GetTarget() != 0
+                && spellEffect.TargetA.GetTarget() != TARGET_UNIT_TARGET_ALLY
+                && spellEffect.TargetA.GetTarget() != TARGET_UNIT_TARGET_ANY
+                && spellEffect.TargetA.GetTarget() != TARGET_UNIT_CASTER)
         {
             TC_LOG_ERROR("sql.sql", "Table `npc_trainer` has spell %u for trainer entry %u with learn effect which has incorrect target type, ignoring learn effect!", spell, entry);
             continue;
         }
 
-        trainerSpell.learnedSpell[i] = spellinfo->Effects[i].TriggerSpell;
+        trainerSpell.learnedSpell[i] = spellEffect.TriggerSpell;
 
-        if (trainerSpell.learnedSpell[i])
+        if (auto const learnedSpell = trainerSpell.learnedSpell[i])
         {
-            SpellInfo const* learnedSpellInfo = sSpellMgr->GetSpellInfo(trainerSpell.learnedSpell[i]);
+            auto const learnedSpellInfo = sSpellMgr->GetSpellInfo(learnedSpell);
             if (learnedSpellInfo && learnedSpellInfo->IsProfession())
                 data.trainerType = 2;
         }

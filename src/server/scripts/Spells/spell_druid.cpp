@@ -1520,11 +1520,12 @@ class spell_dru_natures_vigil : public SpellScriptLoader
                     return;
 
                 bool singleTarget = false;
-                for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-                    if ((eventInfo.GetDamageInfo()->GetSpellInfo()->Effects[i].TargetA.GetTarget() == TARGET_UNIT_TARGET_ALLY ||
-                        eventInfo.GetDamageInfo()->GetSpellInfo()->Effects[i].TargetA.GetTarget() == TARGET_UNIT_TARGET_ENEMY) &&
-                        eventInfo.GetDamageInfo()->GetSpellInfo()->Effects[i].TargetB.GetTarget() == 0)
+                for (auto const &spellEffect : eventInfo.GetDamageInfo()->GetSpellInfo()->Effects)
+                {
+                    if ((spellEffect.TargetA.GetTarget() == TARGET_UNIT_TARGET_ALLY || spellEffect.TargetA.GetTarget() == TARGET_UNIT_TARGET_ENEMY)
+                            && spellEffect.TargetB.GetTarget() == 0)
                         singleTarget = true;
+                }
 
                 if (!singleTarget)
                     return;
@@ -2230,9 +2231,9 @@ class spell_dru_natures_cure : public SpellScriptLoader
                     if (Unit* target = GetExplTargetUnit())
                     {
                         // Create dispel mask by dispel type
-                        for (int8 i = 0; i < MAX_SPELL_EFFECTS; i++)
+                        for (auto const &spellEffect : GetSpellInfo()->Effects)
                         {
-                            uint32 dispel_type = GetSpellInfo()->Effects[i].MiscValue;
+                            uint32 dispel_type = spellEffect.MiscValue;
                             uint32 dispelMask  = GetSpellInfo()->GetDispelMask(DispelType(dispel_type));
 
                             // Nature's Cure can dispell all Magic, Curse and poison

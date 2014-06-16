@@ -1579,7 +1579,7 @@ void Pet::_SaveAuras(SQLTransaction& trans)
         uint32 effMask = 0;
         uint32 recalculateMask = 0;
         uint8 index = 0;
-        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        for (uint8 i = 0; i < aura->GetSpellInfo()->Effects.size(); ++i)
         {
             if (auto const auraEffect = aura->GetEffect(i))
             {

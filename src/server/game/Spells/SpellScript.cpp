@@ -67,21 +67,22 @@ _SpellScript::EffectHook::EffectHook(uint8 _effIndex)
 uint32 _SpellScript::EffectHook::GetAffectedEffectsMask(SpellInfo const* spellEntry)
 {
     uint32 mask = 0;
-    if ((effIndex == EFFECT_ALL) || (effIndex == EFFECT_FIRST_FOUND))
+    if (effIndex == EFFECT_ALL || effIndex == EFFECT_FIRST_FOUND)
     {
-        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        for (uint8 i = 0; i < spellEntry->Effects.size(); ++i)
         {
             if ((effIndex == EFFECT_FIRST_FOUND) && mask)
                 return mask;
             if (CheckEffect(spellEntry, i))
-                mask |= 1<<i;
+                mask |= 1 << i;
         }
     }
-    else
+    else if (effIndex < spellEntry->Effects.size())
     {
         if (CheckEffect(spellEntry, effIndex))
-            mask |= (uint8)1<<effIndex;
+            mask |= 1 << effIndex;
     }
+
     return mask;
 }
 

@@ -227,7 +227,7 @@ class mob_tushui_trainee : public CreatureScript
 
             void DamageTaken(Unit* attacker, uint32& damage)
             {
-                if (me->HealthBelowPctDamaged(16.67f, damage))
+                if (me->HealthBelowPctDamaged(16, damage))
                 {
                     me->setFaction(35);
 
@@ -327,7 +327,7 @@ class mob_huojin_trainee : public CreatureScript
 
             void DamageTaken(Unit* attacker, uint32& damage)
             {
-                if (me->HealthBelowPctDamaged(16.67f, damage))
+                if (me->HealthBelowPctDamaged(16, damage))
                 {
                     me->setFaction(35);
 
@@ -975,8 +975,6 @@ public:
     };
 };
 
-#define QUEST_PARCHEMIN_VOLANT  29421
-
 class boss_li_fei : public CreatureScript
 {
 public:
@@ -984,16 +982,6 @@ public:
 
     bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
     {
-        if (quest->GetQuestId() == QUEST_PARCHEMIN_VOLANT) // La lecon du parchemin brulant
-        {
-            if (Creature* tempSummon = creature->SummonCreature(54856, creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 0, player->GetGUID()))
-            {
-                tempSummon->SetPhaseMask(1024, true);
-                tempSummon->AI()->AttackStart(player);
-                tempSummon->AI()->SetGUID(player->GetGUID());
-            }
-        }
-
         return true;
     }
 };
@@ -1002,27 +990,23 @@ class boss_li_fei_fight : public CreatureScript
 {
     struct boss_li_fei_fightAI : public ScriptedAI
     {
-        EventMap events;
-        std::list<Player*> playersInvolved;
-        uint64 playerGuid;
-
-        boss_li_fei_fightAI(Creature* creature) : ScriptedAI(creature)
-        {}
-
         enum
         {
             EVENT_FEET_OF_FURY      = 1,
             EVENT_SHADOW_KICK       = 2,
             EVENT_SHADOW_KICK_STUN  = 3,
+
+            QUEST_ONLY_THE_WORTHY_SHALL_PASS = 29421,
         };
+
+        EventMap events;
+
+        boss_li_fei_fightAI(Creature* creature)
+            : ScriptedAI(creature)
+        { }
 
         void Reset()
         {
-            // This particular entry is also spawned on an other event
-            if (me->GetAreaId() != 5849) // Cavern areaid - The Way of the Tushui
-                return;
-
-            playerGuid = 0;
             me->SetReactState(REACT_AGGRESSIVE);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
             me->setFaction(16);
@@ -1031,12 +1015,7 @@ class boss_li_fei_fight : public CreatureScript
             events.ScheduleEvent(EVENT_SHADOW_KICK,  1000);
         }
 
-        void SetGUID(uint64 guid, int32 /*type*/)
-        {
-            playerGuid = guid;
-        }
-
-        void DamageTaken(Unit* /*attacker*/, uint32& damage)
+        void DamageTaken(Unit* attacker, uint32& damage)
         {
             if (me->HealthBelowPctDamaged(10, damage))
             {
@@ -1046,24 +1025,22 @@ class boss_li_fei_fight : public CreatureScript
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                 me->HandleEmoteCommand(EMOTE_ONESHOT_SALUTE);
 
-                if (Player* player = ObjectAccessor::FindPlayer(playerGuid))
+                if (auto const player = attacker->ToPlayer())
                     player->KilledMonsterCredit(54734, 0);
             }
         }
 
         void KilledUnit(Unit* victim)
         {
-            if (victim->GetTypeId() == TYPEID_PLAYER)
-            {
-                victim->ToPlayer()->SetQuestStatus(QUEST_PARCHEMIN_VOLANT, QUEST_STATUS_FAILED);
-
-                if (victim->GetGUID() == playerGuid)
-                    me->DespawnOrUnsummon(3000);
-            }
+            if (auto const player = victim->ToPlayer())
+                player->SetQuestStatus(QUEST_ONLY_THE_WORTHY_SHALL_PASS, QUEST_STATUS_FAILED);
         }
 
         void UpdateAI(const uint32 diff)
         {
+            if (!UpdateVictim())
+                return;
+
             events.Update(diff);
 
             while (uint32 eventId = events.ExecuteEvent())
@@ -1073,13 +1050,11 @@ class boss_li_fei_fight : public CreatureScript
                     case EVENT_FEET_OF_FURY:
                         if(me->getVictim())
                             me->CastSpell(me->getVictim(), 108958);
-
                         events.ScheduleEvent(EVENT_FEET_OF_FURY, 5000);
                         break;
                     case EVENT_SHADOW_KICK:
                         if(me->getVictim())
                             me->CastSpell(me->getVictim(), 108936);
-
                         events.ScheduleEvent(EVENT_SHADOW_KICK_STUN, 2500);
                         events.ScheduleEvent(EVENT_SHADOW_KICK, 30000);
                         break;

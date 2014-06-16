@@ -37,18 +37,6 @@
 #include "Player.h"
 #include "Util.h"
 
-uint32 GILNEAS_BG_HonorScoreTicks[BG_HONOR_MODE_NUM] =
-{
-    330, // normal honor
-    200  // holiday
-};
-
-uint32 GILNEAS_BG_Reputation[BG_HONOR_MODE_NUM][GILNEAS_BG_REWARD_NUM] =
-{
-    200, // normal honor
-    150  // holiday
-};
-
 BattlegroundBFG::BattlegroundBFG()
 {
     m_BuffChange = true;

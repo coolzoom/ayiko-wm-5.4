@@ -1639,9 +1639,9 @@ class npc_valkyr_shadowguard : public CreatureScript
 
             void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
             {
-                for (uint8 i = 0; i < 3; ++i)
+                for (auto const &spellEffect : spell->Effects)
                 {
-                    if (spell->Effects[i].ApplyAuraName == SPELL_AURA_MOD_STUN)
+                    if (spellEffect.ApplyAuraName == SPELL_AURA_MOD_STUN)
                     {
                         uint32 spellDuration = spell->GetMaxDuration();
 

@@ -624,7 +624,7 @@ class Spell
         bool m_executedCurrently;                           // mark as executed to prevent deleted and access by dead pointers
         bool m_needComboPoints;
         uint32 m_applyMultiplierMask;
-        float m_damageMultipliers[32];
+        float m_damageMultipliers[MAX_SPELL_EFFECTS];
         float m_periodicDamageModifier;
 
         // Current targets, to be used in SpellEffects (MUST BE USED ONLY IN SPELL EFFECTS)

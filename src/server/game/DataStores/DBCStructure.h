@@ -2837,16 +2837,10 @@ typedef std::unordered_map<uint32, TalentSpellPos> TalentSpellPosMap;
 struct SpellEffect
 {
     SpellEffect()
-    {
-        for (int i = 0; i < MAX_DIFFICULTY; i++)
-        {
-            for (int y = 0; y < MAX_SPELL_EFFECTS; y++)
-            {
-                effects[i][y] = 0;
-            }
-        }
-    }
-    SpellEffectEntry const* effects[MAX_DIFFICULTY][32];
+        : effects()
+    { }
+
+    SpellEffectEntry const* effects[MAX_DIFFICULTY][MAX_SPELL_EFFECTS];
 };
 
 typedef std::unordered_map<uint32, SpellEffect> SpellEffectMap;

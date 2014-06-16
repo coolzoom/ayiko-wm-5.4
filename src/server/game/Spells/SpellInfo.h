@@ -24,6 +24,8 @@
 #include "DB2Structure.h"
 #include "Object.h"
 
+#include <vector>
+
 class Unit;
 class Player;
 class Item;
@@ -222,17 +224,6 @@ public:
 
     Targets GetTarget() const;
     uint32 GetExplicitTargetMask(bool& srcSet, bool& dstSet) const;
-
-private:
-    struct StaticData
-    {
-        SpellTargetObjectTypes ObjectType;    // type of object returned by target type
-        SpellTargetReferenceTypes ReferenceType; // defines which object is used as a reference when selecting target
-        SpellTargetSelectionCategories SelectionCategory;
-        SpellTargetCheckTypes SelectionCheckType; // defines selection criteria
-        SpellTargetDirectionTypes DirectionType; // direction for cone and dest targets
-    };
-    static StaticData _data[TOTAL_SPELL_TARGETS];
 };
 
 class SpellEffectInfo
@@ -261,13 +252,12 @@ public:
     uint32    TriggerSpell;
     flag96    SpellClassMask;
     std::list<Condition*>* ImplicitTargetConditions;
-    // SpellScalingEntry
     float     ScalingMultiplier;
     float     DeltaScalingMultiplier;
     float     ComboScalingMultiplier;
 
-    SpellEffectInfo() {}
-    SpellEffectInfo(SpellEntry const* spellEntry, SpellInfo const* spellInfo, uint8 effIndex, uint32 difficulty);
+    SpellEffectInfo();
+    SpellEffectInfo(SpellInfo const* spellInfo, SpellEffectEntry const *effect, uint8 effectIndex);
 
     bool IsEffect() const;
     bool IsEffect(SpellEffects effectName) const;
@@ -297,14 +287,6 @@ public:
 
     SpellEffectImplicitTargetTypes GetImplicitTargetType() const;
     SpellTargetObjectTypes GetUsedTargetObjectType() const;
-
-private:
-    struct StaticData
-    {
-        SpellEffectImplicitTargetTypes ImplicitTargetType; // defines what target can be added to effect target list if there's no valid target type provided for effect
-        SpellTargetObjectTypes UsedTargetObjectType; // defines valid target object type for spell effect
-    };
-    static StaticData _data[TOTAL_SPELL_EFFECTS];
 };
 
 class SpellInfo
@@ -410,7 +392,7 @@ public:
     int32  ScalingClass;
     float  CoefBase;
     int32  CoefLevelBase;
-    SpellEffectInfo Effects[MAX_SPELL_EFFECTS];
+    std::vector<SpellEffectInfo> Effects;
     uint32 ExplicitTargetMask;
     SpellChainNode const* ChainEntry;
     SpellPowerEntry* spellPower;
@@ -556,7 +538,6 @@ public:
     bool IsHighRankOf(SpellInfo const* spellInfo) const;
     bool IsAfflictionPeriodicDamage() const;
     float GetGiftOfTheSerpentScaling(Unit* caster) const;
-    bool IsAllwaysStackModifers() const;
 
     bool IsIgnoringCombat() const;
     bool IsRequireAdditionalTargetCheck() const;

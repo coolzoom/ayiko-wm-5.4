@@ -87,10 +87,10 @@ char ** cli_completion(const char * text, int start, int /*end*/)
 int cli_hook_func(void)
 {
 #if PLATFORM != PLATFORM_APPLE
-       if (World::IsStopped())
-           rl_done = 1;
+    if (sWorld->IsStopped())
+        rl_done = 1;
 #endif
-       return 0;
+    return 0;
 }
 
 #endif
@@ -155,7 +155,7 @@ void CliRunnable::run()
     printf("TC>");
 
     ///- As long as the World is running (no World::m_stopEvent), get the command line and handle it
-    while (!World::IsStopped())
+    while (!sWorld->IsStopped())
     {
         fflush(stdout);
 
@@ -208,7 +208,7 @@ void CliRunnable::run()
         }
         else if (feof(stdin))
         {
-            World::StopNow(SHUTDOWN_EXIT_CODE);
+            sWorld->StopNow(SHUTDOWN_EXIT_CODE);
         }
     }
 }

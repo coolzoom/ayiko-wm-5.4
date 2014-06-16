@@ -16,4 +16,12 @@ values
   (67789, 5849, 29421, 29421, 0, 0, 2, 1,  8, 35),
   (67789, 5849,     0, 29421, 0, 0, 2, 1, 11, 35);
 
+-- blessing dummies should be present in arena phase only
+update creature set phaseMask = 1024 where id in (54900, 54901, 54902);
+
+-- and provide bonuses to players
+update creature_template_addon set auras = '102508' where entry = 54900;
+update creature_template_addon set auras = '102509' where entry = 54902;
+update creature_template_addon set auras = '102510' where entry = 54901;
+
 update quest_template set `Method` = 2 where Id = 29421;

@@ -3272,13 +3272,6 @@ void SpellMgr::LoadSpellCustomAttr()
 
             switch (spellInfo->Id)
             {
-                case 102508:
-                    spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_APPLY_AREA_AURA_ENEMY;
-                    // no break
-                case 102509:
-                case 102510:
-                    spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_APPLY_AREA_AURA_ENEMY;
-                    break;
                 case 145518:// Genesis
                     spellInfo->Effects[0].TargetA = TARGET_UNIT_CASTER;
                     spellInfo->Effects[0].TargetB = 0;

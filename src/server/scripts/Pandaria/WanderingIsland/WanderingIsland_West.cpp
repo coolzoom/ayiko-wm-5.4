@@ -481,13 +481,18 @@ public:
             me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
         }
 
-        void OnSpellClick(Unit* /*Clicker*/)
+        void OnSpellClick(Unit* Clicker)
         {
             if (cooldown)
                 return;
 
-            if (Creature* zhao = GetClosestCreatureWithEntry(me, 55786, 50.0f))
+            if (Creature* const zhao = GetClosestCreatureWithEntry(me, 55786, 50.0f))
                 me->CastSpell(zhao, SPELL_ROCKET_LAUNCH, false);
+            else
+            {
+                Clicker->MonsterTextEmote("Wait until the Onyx Serpent is directly overhead.", Clicker->GetGUID(), true);
+                return;
+            }
 
             cooldown = 5000;
             me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
@@ -690,7 +695,7 @@ class mob_master_shang_xi_thousand_staff_escort : public CreatureScript
             if (IntroTimer < diff)
             {
                 if (phase < 6)
-                    Talk(phase);
+                    Talk(phase, playerGuid);
 
                 IntroTimer = 15000;
                 ++phase;
@@ -796,6 +801,17 @@ class mob_shang_xi_air_balloon : public VehicleScript
         {
             switch (waypointId)
             {
+                case 11:
+                    if (me->GetVehicleKit())
+                    {
+                        if (Unit* passenger = me->GetVehicleKit()->GetPassenger(1))
+                            if (Creature * const creature = passenger->ToCreature())
+                                creature->ForcedDespawn(1000);
+                        if (Unit* passenger = me->GetVehicleKit()->GetPassenger(2))
+                            if (Creature * const creature = passenger->ToCreature())
+                                creature->ForcedDespawn(1000);
+                    }
+                    break;
                 case 12:
                     if (me->GetVehicleKit())
                     {
@@ -872,22 +888,22 @@ class mob_shang_xi_air_balloon : public VehicleScript
                 // Need custom chat builder as creature is too far.
                 else if (phase == 9)
                 {
-                    shenzinTalk("I am in pain, but it warms my heart that Liu Lang's grandchildren have not forgotten me.");
+                    shenzinTalk("I am in pain, but it warms my heart that Liu Lang's grandchildren have not forgotten me.", 27822);
                     eventTimer = 7000;
                 }
                 else if (phase == 10)
                 {
-                    shenzinTalk("There is a thorn in my side. I cannot remove it.");
+                    shenzinTalk("There is a thorn in my side. I cannot remove it.", 27823);
                     eventTimer = 5000;
                 }
                 else if (phase == 11)
                 {
-                    shenzinTalk("The pain is unbearable, and I can no longer swim straight.");
+                    shenzinTalk("The pain is unbearable, and I can no longer swim straight.", 27824);
                     eventTimer = 5000;
                 }
                 else if (phase == 12)
                 {
-                    shenzinTalk("Please grandchildren, can you remove this thorn? I cannot do so on my own.");
+                    shenzinTalk("Please grandchildren, can you remove this thorn? I cannot do so on my own.", 27825);
                     eventTimer = 7000;
                 }
                 else if (phase == 13)
@@ -897,7 +913,7 @@ class mob_shang_xi_air_balloon : public VehicleScript
                 }
                 else if (phase == 14)
                 {
-                    shenzinTalk("It is in the forest where your feet do not walk. Continue along the mountains and you will find it.");
+                    shenzinTalk("It is in the forest where your feet do not walk. Continue along the mountains and you will find it.", 27826);
                     eventTimer = 8000;
                 }
                 else if (phase == 15)
@@ -908,7 +924,7 @@ class mob_shang_xi_air_balloon : public VehicleScript
                 else if (phase == 16)
                 {
                     me->SetSpeed(MOVE_FLIGHT, 3.0f, true);
-                    shenzinTalk("Thank you, grandchildren.");
+                    shenzinTalk("Thank you, grandchildren.", 27827);
                     eventTimer = 8000;
                 }
                 else if (phase == 17)
@@ -960,7 +976,7 @@ class mob_shang_xi_air_balloon : public VehicleScript
             npc_escortAI::UpdateAI(diff);
         }
 
-        void shenzinTalk(std::string text)
+        void shenzinTalk(std::string text, uint32 soundId)
         {
             if (Player * player = me->GetVehicleKit()->GetPassenger(0)->ToPlayer())
             {
@@ -968,6 +984,7 @@ class mob_shang_xi_air_balloon : public VehicleScript
                 me->BuildMonsterChat(&packet, CHAT_MSG_MONSTER_SAY, text, 0, "Shen-zin Su", playerGUID);
                 player->GetSession()->SendPacket(&packet);
 
+                player->SendPlaySound(soundId, true);
             }
         }
 

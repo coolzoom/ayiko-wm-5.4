@@ -371,6 +371,32 @@ public:
     };
 };
 
+enum
+{
+    QUEST_AN_ANCIENT_EVIL   = 29798,
+    NPC_VORDRAKA            = 56009,
+};
+
+class npc_jojo_ironbrow : public CreatureScript
+{
+public:
+    npc_jojo_ironbrow() : CreatureScript("npc_jojo_ironbrow") { }
+
+    bool OnQuestAccept(Player* player, Creature* /*creature*/, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_AN_ANCIENT_EVIL)
+        {
+            if (Creature* const vordraka = player->SummonCreature(NPC_VORDRAKA, 281.74f, 4003.40f, 72.96f, 0.05f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 600000, player->GetGUID()))
+            {
+                vordraka->AI()->SetGUID(player->GetGUID());
+                vordraka->SetPhaseMask(12, true);
+            }
+        }
+
+        return true;
+    }
+};
+
 class boss_vordraka : public CreatureScript
 {
 public:
@@ -383,41 +409,94 @@ public:
 
     struct boss_vordrakaAI : public ScriptedAI
     {
-        boss_vordrakaAI(Creature* creature) : ScriptedAI(creature)
-        {}
+        boss_vordrakaAI(Creature* creature) : ScriptedAI(creature) {}
 
+        uint64 summonerGUID;
+        bool summonedAllies;
         EventMap _events;
 
         enum eEnums
         {
-            QUEST_ANCIEN_MAL        = 29798,
-
             EVENT_DEEP_ATTACK       = 1,
             EVENT_DEEP_SEA_RUPTURE  = 2,
 
             SPELL_DEEP_ATTACK       = 117287,
             SPELL_DEEP_SEA_RUPTURE  = 117456,
+
+            NPC_DEEPSCALE_AGGRESSOR = 60685,
+            NPC_AYSA                = 56416,
         };
 
         void Reset()
         {
+            summonedAllies = false;
             _events.ScheduleEvent(EVENT_DEEP_ATTACK, 10000);
             _events.ScheduleEvent(SPELL_DEEP_SEA_RUPTURE, 12500);
+        }
+
+        void SetGUID(uint64 guid, int32 /* = 0 */) override
+        {
+            summonerGUID = guid;
+        }
+
+        void DamageTaken(Unit* who, uint32& damage)
+        {
+            if (who->GetEntry() == NPC_AYSA)
+                damage /= 2;
+        }
+
+        void MoveInLineOfSight(Unit* who) override
+        {
+            Player * const player = who->ToPlayer();
+            if (!player || me->getVictim())
+                return;
+
+            if (player->GetQuestStatus(QUEST_AN_ANCIENT_EVIL) == QUEST_STATUS_INCOMPLETE)
+                if (Creature * const aysa = GetClosestCreatureWithEntry(me, NPC_AYSA, 30.f))
+                {
+                    aysa->AI()->AttackStart(me);
+                    AttackStart(aysa);
+                    me->AddThreat(aysa, 1000.0f);
+                }
+
+            ScriptedAI::MoveInLineOfSight(who);
         }
 
         void JustDied(Unit* /*attacker*/)
         {
             std::list<Player*> playerList;
-            GetPlayerListInGrid(playerList, me, 50.0f);
+            GetPlayerListInGrid(playerList, me, 30.0f);
 
             for (auto player : playerList)
-                if (player->GetQuestStatus(QUEST_ANCIEN_MAL) == QUEST_STATUS_INCOMPLETE)
+                if (player->GetQuestStatus(QUEST_AN_ANCIENT_EVIL) == QUEST_STATUS_INCOMPLETE)
                     if (player->isAlive())
                         player->KilledMonsterCredit(me->GetEntry());
         }
 
         void UpdateAI(const uint32 diff)
         {
+            if (!UpdateVictim())
+                return;
+
+            if (!summonedAllies && me->HealthBelowPct(50))
+            {
+                if (Creature * const aysa = GetClosestCreatureWithEntry(me, NPC_AYSA, 30.f))
+                {
+                    aysa->AI()->Talk(0);
+                    me->AddThreat(aysa, 1000.0f);
+                }
+
+                for (int i = 0; i < 3; ++i)
+                {
+                    Position pos;
+                    me->GetRandomNearPosition(pos, 20.f);
+                    if (Creature * const summon = me->SummonCreature(NPC_DEEPSCALE_AGGRESSOR, pos, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 120000))
+                        if (Player * const player = Unit::GetPlayer(*me, summonerGUID))
+                            summon->AI()->AttackStart(player);
+                }
+                summonedAllies = true;
+            }
+
             _events.Update(diff);
 
             switch (_events.ExecuteEvent())
@@ -439,6 +518,8 @@ public:
                     break;
                 }
             }
+
+            DoMeleeAttackIfReady();
         }
     };
 };
@@ -967,6 +1048,7 @@ void AddSC_WanderingIsland_South()
     new mob_ji_forest_escort();
     new AreaTrigger_at_rescue_soldiers();
     new npc_hurted_soldier();
+    new npc_jojo_ironbrow();
     new boss_vordraka();
     new mob_aysa_gunship_crash();
     new mob_aysa_gunship_crash_escort();

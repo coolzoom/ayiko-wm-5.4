@@ -243,9 +243,12 @@ class npc_korga : public CreatureScript
 
         bool OnQuestAccept(Player* player, Creature* /*creature*/, Quest const* quest)
         {
-            if (quest->GetQuestId() == 30589) // Détruire l'épave
+            if (quest->GetQuestId() == 30589) // Wrecking the Wreck
                 if (Creature* jiEscort = player->SummonCreature(60900, 424.71f, 3635.59f, 92.70f, 2.498430f, TEMPSUMMON_MANUAL_DESPAWN, 0, player->GetGUID()))
+                {
+                    jiEscort->SetReactState(REACT_PASSIVE);
                     jiEscort->AI()->SetGUID(player->GetGUID());
+                }
 
             return true;
         }
@@ -262,28 +265,36 @@ public:
         {}
 
         uint64 playerGuid;
-
         uint32 IntroTimer;
 
         void Reset()
         {
             playerGuid      = 0;
-
-            IntroTimer      = 100;
+            IntroTimer      = 2000;
         }
 
         void SetGUID(uint64 guid, int32 /*type*/)
         {
+            Talk(0);
             playerGuid = guid;
         }
 
-        void WaypointReached(uint32 /*waypointId*/)
-        {}
+        void WaypointReached(uint32 waypointId) { }
 
         void LastWaypointReached()
         {
             if (Player* player = ObjectAccessor::FindPlayer(playerGuid))
                 player->AddAura(68483, player); // Phase 16384
+        }
+
+        void MovementInform(uint32 type, uint32 id)
+        {
+            if (id == 100)
+                Start(false, true);
+            else
+            {
+                npc_escortAI::MovementInform(type, id);
+            }
         }
 
         void UpdateAI(const uint32 diff)
@@ -292,7 +303,7 @@ public:
             {
                 if (IntroTimer <= diff)
                 {
-                    Start(false, true);
+                    me->GetMotionMaster()->MoveJump(429.1f, 3674.f, 78.6f, 20.f, 20.f, 100);
                     IntroTimer = 0;
                 }
                 else

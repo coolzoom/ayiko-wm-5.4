@@ -137,7 +137,7 @@ void WardenWin::RequestData()
     buff << uint8(WARDEN_SMSG_CHEAT_CHECKS_REQUEST);
 
     // always "wow.exe"
-    std::string exename = "wow.exe";
+    std::string exename = "@exe";
     buff << uint8(exename.size());
     buff.append(exename.c_str(), exename.size());
 
@@ -245,7 +245,8 @@ void WardenWin::RequestData()
     }
 
     buff << uint8(CT_END ^ xorByte);
-    buff.hexlike();
+
+    TC_LOG_TRACE("warden", "%s", buff.hexlike().c_str());
 
     // Encrypt with warden RC4 key
     EncryptData(buff.contents(), buff.size());
@@ -277,6 +278,7 @@ void WardenWin::HandleData(ByteBuffer &buff)
     if (buff.wpos() - buff.rpos() < length)
     {
         TC_LOG_INFO("warden", "%u - Length is too large", _session->GetAccountId());
+        TC_LOG_INFO("warden", "%u - %s", _session->GetAccountId(), buff.hexlike().c_str());
 
         buff.rpos(buff.wpos());
         banAccountIfNeeded();
@@ -286,6 +288,7 @@ void WardenWin::HandleData(ByteBuffer &buff)
     if (!IsValidCheckSum(checksum, buff.contents() + buff.rpos(), length))
     {
         TC_LOG_INFO("warden", "%u - Checksum is invalid", _session->GetAccountId());
+        TC_LOG_INFO("warden", "%u - %s", _session->GetAccountId(), buff.hexlike().c_str());
 
         buff.rpos(buff.wpos());
         banAccountIfNeeded();
@@ -305,6 +308,8 @@ void WardenWin::HandleData(ByteBuffer &buff)
         if (result == 0x00)
         {
             TC_LOG_INFO("warden", "%u - failed timing check", _session->GetAccountId());
+            TC_LOG_INFO("warden", "%u - %s", _session->GetAccountId(), buff.hexlike().c_str());
+
             _session->KickPlayer();
             return;
         }
@@ -465,7 +470,10 @@ void WardenWin::HandleData(ByteBuffer &buff)
     }
 
     if (checkFailed)
+    {
+        TC_LOG_INFO("warden", "%u - %s", _session->GetAccountId(), buff.hexlike().c_str());
         banAccountIfNeeded();
+    }
 
     /// TODO [KVaks] unknown tail
     buff.rpos(buff.wpos());
@@ -495,6 +503,8 @@ void WardenWin::HandleHashResult(ByteBuffer &buff)
     if (buff.wpos() - buff.rpos() < _module.clientKeySeedHash.second)
     {
         TC_LOG_INFO("warden", "%u - Request hash truncated packet", _session->GetAccountId());
+        TC_LOG_INFO("warden", "%u - %s", _session->GetAccountId(), buff.hexlike().c_str());
+
         banAccountIfNeeded();
         return;
     }
@@ -503,6 +513,8 @@ void WardenWin::HandleHashResult(ByteBuffer &buff)
     if (std::memcmp(buff.contents() + buff.rpos(), _module.clientKeySeedHash.first, _module.clientKeySeedHash.second) != 0)
     {
         TC_LOG_INFO("warden", "%u - Request hash reply failed", _session->GetAccountId());
+        TC_LOG_INFO("warden", "%u - %s", _session->GetAccountId(), buff.hexlike().c_str());
+
         banAccountIfNeeded();
         return;
     }

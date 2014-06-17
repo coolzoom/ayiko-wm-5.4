@@ -779,7 +779,7 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
         TC_LOG_ERROR("network", "WorldSocket::ProcessIncoming ByteBufferException occured while parsing an instant"
                      " handled packet 0x%04X from client %s, accountid=%i. Disconnected client.",
                      new_pct->GetOpcode(), GetRemoteAddress().c_str(), m_Session ? int32(m_Session->GetAccountId()) : -1);
-        new_pct->hexlike();
+        TC_LOG_TRACE("network", "%s", new_pct->hexlike().c_str());
         return -1;
     }
 

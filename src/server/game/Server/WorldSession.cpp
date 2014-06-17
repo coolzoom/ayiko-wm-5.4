@@ -273,8 +273,7 @@ void WorldSession::LogUnprocessedTail(WorldPacket* packet)
 
     TC_LOG_TRACE("network.opcode", "Unprocessed tail data (read stop at " SIZEFMTD " from " SIZEFMTD ") Opcode 0x%04X from player %s, account %u",
                  packet->rpos(), packet->wpos(), packet->GetOpcode(), GetPlayerName().c_str(), GetAccountId());
-
-    packet->print_storage();
+    TC_LOG_TRACE("network.opcode", "%s", packet->hexlike().c_str());
 }
 
 struct OpcodeInfo
@@ -398,7 +397,7 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
         {
             TC_LOG_ERROR("network", "WorldSession::Update ByteBufferException occured while parsing a packet (opcode: %u) from client %s, accountid=%i. Skipped packet.",
                     packet->GetOpcode(), GetRemoteAddress().c_str(), GetAccountId());
-            packet->hexlike();
+            TC_LOG_TRACE("network", "%s", packet->hexlike().c_str());
         }
 
         if (deletePacket)

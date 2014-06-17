@@ -2017,7 +2017,7 @@ void WorldSession::HandleRequestPetInfoOpcode(WorldPacket& /*recvData */)
 {
     /*
     TC_LOG_DEBUG(LOG_FILTER_PACKETIO, "WORLD: CMSG_REQUEST_PET_INFO");
-    recvData.hexlike();
+    TC_LOG_TRACE("network", "%s", recvData.hexlike().c_str());
     */
 }
 

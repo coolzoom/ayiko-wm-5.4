@@ -156,7 +156,7 @@ void WorldSession::HandleWardenDataOpcode(WorldPacket& recvData)
     uint8 opcode;
     recvData >> opcode;
     TC_LOG_DEBUG("warden", "%u - Got packet, opcode %02X, size %u", GetAccountId(), opcode, uint32(recvData.size()));
-    recvData.hexlike();
+    TC_LOG_TRACE("warden", "%s", recvData.hexlike().c_str());
 
     switch (opcode)
     {

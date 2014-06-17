@@ -469,8 +469,10 @@ public:
                 break;
             }
         }
+
         TC_LOG_DEBUG("network", "Sending opcode %u", data.GetOpcode());
-        data.hexlike();
+        TC_LOG_DEBUG("network", "%s", data.hexlike().c_str());
+
         player->GetSession()->SendPacket(&data, true);
         handler->PSendSysMessage(LANG_COMMAND_OPCODESENT, data.GetOpcode(), unit->GetName().c_str());
         return true;

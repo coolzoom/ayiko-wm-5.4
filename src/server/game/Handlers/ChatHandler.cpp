@@ -111,7 +111,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
             break;
         default:
             TC_LOG_ERROR("network", "HandleMessagechatOpcode : Unknown chat opcode (%u)", recvData.GetOpcode());
-            recvData.hexlike();
+            TC_LOG_TRACE("network", "%s", recvData.hexlike().c_str());
             return;
     }
 
@@ -622,7 +622,7 @@ void WorldSession::HandleAddonMessagechatOpcode(WorldPacket& recvData)
             break;
         default:
             TC_LOG_ERROR("network", "HandleAddonMessagechatOpcode: Unknown addon chat opcode (%u)", recvData.GetOpcode());
-            recvData.hexlike();
+            TC_LOG_TRACE("network", "%s", recvData.hexlike().c_str());
             return;
     }
 

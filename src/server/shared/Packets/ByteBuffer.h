@@ -921,11 +921,9 @@ class ByteBuffer
             memcpy(&_storage[pos], src, cnt);
         }
 
-        void print_storage() const;
+        std::string textlike() const;
 
-        void textlike() const;
-
-        void hexlike() const;
+        std::string hexlike() const;
 
         size_t GetBitPos() const
         {

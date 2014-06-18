@@ -133,6 +133,7 @@ void LoadDisables()
                         break;
                     case MAP_INSTANCE:
                     case MAP_RAID:
+                    case MAP_SCENARIO:
                         if (flags & DUNGEON_STATUSFLAG_HEROIC && !GetMapDifficultyData(entry, HEROIC_DIFFICULTY))
                             flags -= DUNGEON_STATUSFLAG_HEROIC;
                         else if (flags & RAID_STATUSFLAG_10MAN_HEROIC && !GetMapDifficultyData(entry, MAN10_HEROIC_DIFFICULTY))

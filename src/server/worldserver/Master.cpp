@@ -114,11 +114,11 @@ public:
                 w_loops = worldLoopCounter;
             }
             // possible freeze
-            else if (getMSTimeDiff(w_lastchange, curtime) > _delaytime)
-            {
-                TC_LOG_ERROR("server.worldserver", "World Thread hangs, kicking out server!");
-                ASSERT(false);
-            }
+            //else if (getMSTimeDiff(w_lastchange, curtime) > _delaytime)
+            //{
+            //    TC_LOG_ERROR("server.worldserver", "World Thread hangs, kicking out server!");
+            //    ASSERT(false);
+            //}
         }
         TC_LOG_INFO("server.worldserver", "Anti-freeze thread exiting without problems.");
     }

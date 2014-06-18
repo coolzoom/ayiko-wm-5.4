@@ -70,6 +70,9 @@ add_library(shared STATIC
   ${shared_STAT_SRCS}
   ${shared_STAT_PCH_SRC}
 )
+target_link_libraries(shared
+  ${ACE_LIBRARY}
+)
 
 # Generate precompiled header
 if (USE_COREPCH)

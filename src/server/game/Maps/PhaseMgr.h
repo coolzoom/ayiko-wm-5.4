@@ -129,6 +129,11 @@ private:
 
 struct PhaseUpdateData
 {
+    PhaseUpdateData()
+        : _conditionTypeFlags()
+        , _questId()
+    { }
+
     void AddConditionType(ConditionTypes const conditionType) { _conditionTypeFlags |= (1 << conditionType); }
     void AddQuestUpdate(uint32 const questId);
 

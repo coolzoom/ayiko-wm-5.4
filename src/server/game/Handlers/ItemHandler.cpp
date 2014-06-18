@@ -1303,7 +1303,11 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "Received opcode CMSG_WRAP_ITEM");
 
-    bool hasGiftBag, hasGiftSlot, hasItemBag, hasItemSlot;
+    bool hasGiftBag = false;
+    bool hasGiftSlot = false;
+    bool hasItemBag = false;
+    bool hasItemSlot = false;
+
     uint8 gift_bag = 0;
     uint8 gift_slot = 0;
     uint8 item_bag = 0;

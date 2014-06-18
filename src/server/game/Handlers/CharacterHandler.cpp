@@ -432,7 +432,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
     {
         // speedup check for heroic class disabled case
         uint32 heroic_free_slots = sWorld->getIntConfig(CONFIG_HEROIC_CHARACTERS_PER_REALM);
-        if (heroic_free_slots == 0 && AccountMgr::IsPlayerAccount(GetSecurity()) && class_ == CLASS_DEATH_KNIGHT)
+        if (heroic_free_slots == 0 && AccountMgr::IsPlayerAccount(GetSecurity()))
         {
             data << (uint8)CHAR_CREATE_UNIQUE_CLASS_LIMIT;
             SendPacket(&data);
@@ -441,7 +441,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
 
         // speedup check for heroic class disabled case
         uint32 req_level_for_heroic = sWorld->getIntConfig(CONFIG_CHARACTER_CREATING_MIN_LEVEL_FOR_HEROIC_CHARACTER);
-        if (AccountMgr::IsPlayerAccount(GetSecurity()) && class_ == CLASS_DEATH_KNIGHT && req_level_for_heroic > sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
+        if (AccountMgr::IsPlayerAccount(GetSecurity()) && req_level_for_heroic > sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
         {
             data << (uint8)CHAR_CREATE_LEVEL_REQUIREMENT;
             SendPacket(&data);

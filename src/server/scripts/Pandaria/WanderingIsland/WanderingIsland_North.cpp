@@ -854,11 +854,10 @@ public:
                         for(int i = 0; i < std::max((int)playersInvolved.size()*3,3); i++)
                             if(TempSummon* temp = me->SummonCreature(NPC_TROUBLEMAKER, 1171.71f, 3443.82f, 104.20f, 3.3f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000))
                             {
-                                if (temp->AI())
-                                    temp->AI()->AttackStart(me);
-
                                 temp->AddThreat(me, 250.0f);
-                                temp->GetMotionMaster()->Clear();
+
+                                temp->SetInCombatWith(me);
+                                me->SetInCombatWith(me);
                                 temp->GetMotionMaster()->MoveChase(me);
                             }
 

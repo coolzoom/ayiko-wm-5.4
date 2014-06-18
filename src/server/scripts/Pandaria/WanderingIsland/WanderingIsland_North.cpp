@@ -980,8 +980,9 @@ class boss_li_fei : public CreatureScript
 public:
     boss_li_fei() : CreatureScript("boss_li_fei") {}
 
-    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    bool OnQuestAccept(Player */*player*/, Creature */*creature*/, Quest const */*quest*/)
     {
+        // TODO: there is some kick spell casted on retail at quest accept
         return true;
     }
 };
@@ -1001,37 +1002,49 @@ class boss_li_fei_fight : public CreatureScript
 
         EventMap events;
 
-        boss_li_fei_fightAI(Creature* creature)
+        boss_li_fei_fightAI(Creature *creature)
             : ScriptedAI(creature)
         { }
 
         void Reset()
         {
-            me->SetReactState(REACT_AGGRESSIVE);
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
-            me->setFaction(16);
+            me->SetFullHealth();
 
+            events.Reset();
             events.ScheduleEvent(EVENT_FEET_OF_FURY, 5000);
             events.ScheduleEvent(EVENT_SHADOW_KICK,  1000);
         }
 
-        void DamageTaken(Unit* attacker, uint32& damage)
-        {
-            if (me->HealthBelowPctDamaged(10, damage))
-            {
-                damage = 0;
-                me->setFaction(35);
-                me->CombatStop();
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
-                me->HandleEmoteCommand(EMOTE_ONESHOT_SALUTE);
+        // Li Fei does not aggro himself
+        void MoveInLineOfSight(Unit *) { }
 
-                if (auto const player = attacker->ToPlayer())
-                    player->KilledMonsterCredit(54734, 0);
+        void DamageTaken(Unit */*attacker*/, uint32 &damage)
+        {
+            if (!me->HealthBelowPctDamaged(10, damage))
+                return;
+
+            damage = 0;
+
+            // copy, just to make sure that kill credit that phases players out
+            // does not modify this threat list
+            auto const threatList = me->getThreatManager().getThreatList();
+            for (auto &hostileRef : threatList)
+            {
+                auto unit = hostileRef->getTarget();
+                if (unit && unit->GetTypeId() == TYPEID_PLAYER)
+                    unit->ToPlayer()->KilledMonsterCredit(54734, 0);
             }
+
+            // TODO: it seems that spell 106275 is used to display a text message
+            // after fight is over
+
+            me->CombatStop();
+            Reset();
         }
 
-        void KilledUnit(Unit* victim)
+        void KilledUnit(Unit *victim)
         {
+            // Player managed to die with Blessings of Fire on
             if (auto const player = victim->ToPlayer())
                 player->SetQuestStatus(QUEST_ONLY_THE_WORTHY_SHALL_PASS, QUEST_STATUS_FAILED);
         }
@@ -1043,24 +1056,24 @@ class boss_li_fei_fight : public CreatureScript
 
             events.Update(diff);
 
-            while (uint32 eventId = events.ExecuteEvent())
+            while (auto const eventId = events.ExecuteEvent())
             {
-                switch(eventId)
+                switch (eventId)
                 {
                     case EVENT_FEET_OF_FURY:
-                        if(me->getVictim())
-                            me->CastSpell(me->getVictim(), 108958);
-                        events.ScheduleEvent(EVENT_FEET_OF_FURY, 5000);
+                        if (auto const victim = me->getVictim())
+                            me->CastSpell(victim, 108958);
+                        events.ScheduleEvent(EVENT_FEET_OF_FURY, 13000);
                         break;
                     case EVENT_SHADOW_KICK:
-                        if(me->getVictim())
-                            me->CastSpell(me->getVictim(), 108936);
+                        if (auto const victim = me->getVictim())
+                            me->CastSpell(victim, 108936);
                         events.ScheduleEvent(EVENT_SHADOW_KICK_STUN, 2500);
                         events.ScheduleEvent(EVENT_SHADOW_KICK, 30000);
                         break;
                     case EVENT_SHADOW_KICK_STUN:
-                        if(me->getVictim())
-                            me->CastSpell(me->getVictim(), 108944);
+                        if (auto const victim = me->getVictim())
+                            me->CastSpell(victim, 108944);
                         break;
                 }
             }
@@ -1417,6 +1430,68 @@ public:
     }
 };
 
+class spell_feet_of_fury final : public SpellScriptLoader
+{
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        uint64 targetGuid;
+
+        bool Load() final
+        {
+            targetGuid = 0;
+            return true;
+        }
+
+        void OnApply(AuraEffect const *, AuraEffectHandleModes)
+        {
+            auto const caster = GetCaster();
+            if (!caster)
+                return;
+
+            if (auto const target = caster->getVictim())
+                targetGuid = target->GetGUID();
+        }
+
+        void PeriodicTick(AuraEffect const *)
+        {
+            PreventDefaultAction();
+
+            if (targetGuid == 0)
+                return;
+
+            auto const caster = GetCaster();
+            auto const target = ObjectAccessor::GetUnit(*caster, targetGuid);
+
+            if (!target)
+            {
+                targetGuid = 0;
+                return;
+            }
+
+            auto const spellId = GetSpellInfo()->Effects[EFFECT_0].TriggerSpell;
+            caster->CastSpell(target, spellId, true);
+        }
+
+        void Register() final
+        {
+            OnEffectApply += AuraEffectApplyFn(script_impl::OnApply,  EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+            OnEffectPeriodic += AuraEffectPeriodicFn(script_impl::PeriodicTick, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+        }
+    };
+
+public:
+    spell_feet_of_fury()
+        : SpellScriptLoader("spell_feet_of_fury")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
+};
+
 void AddSC_WanderingIsland_North()
 {
     new mob_master_shang_xi();
@@ -1439,4 +1514,5 @@ void AddSC_WanderingIsland_North()
     new mob_aspiring_trainee();
     new mob_merchant_lorvo();
     new spell_lit_brazier_of_flame();
+    new spell_feet_of_fury();
 }

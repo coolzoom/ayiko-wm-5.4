@@ -24,4 +24,23 @@ update creature_template_addon set auras = '102508' where entry = 54900;
 update creature_template_addon set auras = '102509' where entry = 54902;
 update creature_template_addon set auras = '102510' where entry = 54901;
 
+-- Red Ghost aura for hostile Li Fei
+update creature_template_addon set auras = '30987' where entry = 54734;
+
+-- and simple script for him
+update creature_template set ScriptName = 'boss_li_fei_fight' where entry = 54734;
+update creature_template set ScriptName = '' where entry = 54856;
+
+-- and actual spawn
+delete from creature where id = 54734;
+insert into creature (guid, id, map, spawnMask, phaseMask, position_x, position_y, position_z, orientation, curhealth)
+values
+  (5, 54734, 860, 1, 1024, 1348.01, 3940.05, 109.286, 5.93867, 12240);
+
+-- without this script Li Fei kicks his own ass. With his own feet. Flexible guy
+delete from spell_script_names where spell_id = 108958;
+insert into spell_script_names (spell_id, ScriptName)
+values
+  (108958, 'spell_feet_of_fury');
+
 update quest_template set `Method` = 2 where Id = 29421;

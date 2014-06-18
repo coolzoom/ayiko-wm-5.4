@@ -6,7 +6,7 @@ values
   (521393, 209375, 860, 5736, 5825, 1, 1024, 1368.99, 3924.17, 108.917, 0.96, 0, 0, 0, 1, 60, 100, 1),
   (521392, 209375, 860, 5736, 5849, 1, 1032, 1309.33, 3954.52, 124.807, 1.64, 0, 0, 0, 1, 60, 100, 1);
 
-delete from spell_area where spell in (59087, 67789) and area = 5849;
+delete from spell_area where spell in (59087, 67789, 68480) and area = 5849;
 insert into spell_area (spell, area, quest_start, quest_end, aura_spell, racemask, gender, autocast, quest_start_status, quest_end_status)
 values
   -- phase for fire walls on top and right sides
@@ -14,7 +14,10 @@ values
   (59087, 5849,     0, 29421, 0, 0, 2, 1, 11, 72),
   -- phase for fire walls on bottom side
   (67789, 5849, 29421, 29421, 0, 0, 2, 1,  8, 35),
-  (67789, 5849,     0, 29421, 0, 0, 2, 1, 11, 35);
+  (67789, 5849,     0, 29421, 0, 0, 2, 1, 11, 35),
+  -- no idea what exactly is it used for, but it is present in DB
+  (68480, 5849, 29421,     0, 0, 0, 2, 1, 64, 11),
+  (68480, 5849,     0, 29421, 0, 0, 2, 1, 11,  1);
 
 -- blessing dummies should be present in arena phase only
 update creature set phaseMask = 1024 where id in (54900, 54901, 54902);

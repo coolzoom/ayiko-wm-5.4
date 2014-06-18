@@ -238,6 +238,7 @@ class mob_tushui_trainee : public CreatureScript
 
                     damage = 0;
 
+                    me->DeleteThreatList();
                     me->CombatStop();
                     isInCombat = false;
 
@@ -338,6 +339,7 @@ class mob_huojin_trainee : public CreatureScript
 
                     damage = 0;
 
+                    me->DeleteThreatList();
                     me->CombatStop();
                     isInCombat = false;
 
@@ -1038,7 +1040,9 @@ class boss_li_fei_fight : public CreatureScript
             // TODO: it seems that spell 106275 is used to display a text message
             // after fight is over
 
-            me->CombatStop();
+            me->DeleteThreatList();
+            me->CombatStop(true);
+
             Reset();
         }
 

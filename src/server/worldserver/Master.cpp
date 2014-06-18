@@ -190,7 +190,6 @@ int Master::Run()
 
     ///- Launch WorldRunnable thread
     ACE_Based::Thread world_thread(new WorldRunnable);
-    world_thread.setPriority(ACE_Based::Highest);
 
     ACE_Based::Thread* cliThread = NULL;
 
@@ -254,7 +253,6 @@ int Master::Run()
         FreezeDetectorRunnable* fdr = new FreezeDetectorRunnable();
         fdr->SetDelayTime(freeze_delay * 1000);
         ACE_Based::Thread freeze_thread(fdr);
-        freeze_thread.setPriority(ACE_Based::Highest);
     }
 
     ///- Launch the world listener socket

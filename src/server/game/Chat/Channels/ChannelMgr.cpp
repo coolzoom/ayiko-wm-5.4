@@ -30,18 +30,23 @@ ChannelMgr * ChannelMgr::forTeam(uint32 team)
 {
     static ChannelMgr allianceMgr;
     static ChannelMgr hordeMgr;
+    static ChannelMgr pandarenNeutralMgr;
 
     // cross-faction
     if (sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHANNEL))
         return &allianceMgr;
 
-    if (team == ALLIANCE)
-        return &allianceMgr;
-
-    if (team == HORDE)
-        return &hordeMgr;
-
-    return NULL;
+    switch (team)
+    {
+        case ALLIANCE:
+            return &allianceMgr;
+        case HORDE:
+            return &hordeMgr;
+        case PANDAREN_NEUTRAL:
+            return &pandarenNeutralMgr;
+        default:
+            return nullptr;
+    }
 }
 
 Channel* ChannelMgr::GetJoinChannel(std::string const& name, uint32 channelId)

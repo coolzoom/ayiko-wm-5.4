@@ -9,6 +9,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 
 -- [SQL] Quests - The Direct Solution and Do No Evil fixed (fixes #206), also 119 creatures with 1 second respawn timer corrected
 UPDATE `creature` SET `spawntimesecs` = 120 WHERE `spawntimesecs` = 1 AND `map` != 369;
+UPDATE `creature` SET `spawntimesecs` = 10 WHERE `id` IN (SELECT `entry` FROM `creature_template` WHERE `ScriptName` IN ('mob_tushui_trainee', 'mob_huojin_trainee'));
 UPDATE `creature_template` SET `unit_flags` = 0, `dynamicflags` = 0 WHERE `entry` = 55632;
 DELETE FROM `creature_template_addon` WHERE `entry` IN (55632, 55634);
 DELETE FROM `creature_addon` WHERE `guid` IN (SELECT `guid` FROM `creature` WHERE `id` IN (55632, 55634));

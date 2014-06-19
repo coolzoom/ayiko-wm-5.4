@@ -1603,7 +1603,7 @@ void GameEventMgr::SendWorldStateUpdate(Player* player, uint16 event_id)
     }
 }
 
-void GameEventMgr::RunSmartAIScripts(uint16 event_id, bool activate)
+void GameEventMgr::RunSmartAIScripts(uint16 /*event_id*/, bool /*activate*/)
 {
 #if 0
     //! Iterate over every supported source type (creature and gameobject)

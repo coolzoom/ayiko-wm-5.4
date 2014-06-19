@@ -44,8 +44,6 @@ enum HunterSpells
     HUNTER_SPELL_SERPENT_STING                      = 118253,
     HUNTER_SPELL_SERPENT_SPREAD                     = 87935,
     HUNTER_SPELL_CHIMERA_SHOT_HEAL                  = 53353,
-    HUNTER_SPELL_RAPID_INTENSITY                    = 131564,
-    HUNTER_SPELL_RAPID_FIRE                         = 3045,
     HUNTER_SPELL_STEADY_SHOT_ENERGIZE               = 77443,
     HUNTER_SPELL_COBRA_SHOT_ENERGIZE                = 91954,
     HUNTER_SPELL_KILL_COMMAND                       = 34026,
@@ -1608,54 +1606,6 @@ class spell_hun_kill_command : public SpellScriptLoader
         }
 };
 
-// Rapid Fire - 3045
-class spell_hun_rapid_fire : public SpellScriptLoader
-{
-    public:
-        spell_hun_rapid_fire() : SpellScriptLoader("spell_hun_rapid_fire") { }
-
-        class spell_hun_rapid_fire_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_hun_rapid_fire_SpellScript);
-
-            void HandleOnHit()
-            {
-                if (Player* _player = GetCaster()->ToPlayer())
-                {
-                    // Item - Bonus season 12 PvP
-                    if (_player->HasAura(HUNTER_SPELL_RAPID_INTENSITY))
-                    {
-                        if (AuraApplication* aura = _player->GetAuraApplication(HUNTER_SPELL_RAPID_FIRE))
-                        {
-                            Aura *rapidFire = aura->GetBase();
-
-                            rapidFire->GetEffect(1)->ChangeAmount(3200);
-                        }
-                    }
-                    else
-                    {
-                        if (AuraApplication* aura = _player->GetAuraApplication(HUNTER_SPELL_RAPID_FIRE))
-                        {
-                            Aura *rapidFire = aura->GetBase();
-
-                            rapidFire->GetEffect(1)->ChangeAmount(0);
-                        }
-                    }
-                }
-            }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_hun_rapid_fire_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_hun_rapid_fire_SpellScript();
-        }
-};
-
 // Cobra Shot - 77767
 class spell_hun_cobra_shot : public SpellScriptLoader
 {
@@ -2327,7 +2277,6 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_serpent_spread();
     new spell_hun_ancient_hysteria();
     new spell_hun_kill_command();
-    new spell_hun_rapid_fire();
     new spell_hun_cobra_shot();
     new spell_hun_steady_shot();
     new spell_hun_chimera_shot();

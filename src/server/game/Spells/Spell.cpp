@@ -8535,22 +8535,27 @@ void Spell::SetSpellValue(SpellValueMod mod, int32 value)
     switch (mod)
     {
         case SPELLVALUE_BASE_POINT0:
-            m_spellValue->EffectBasePoints[0] = m_spellInfo->Effects.at(EFFECT_0).CalcBaseValue(value);
+            m_spellValue->EffectBasePoints[0] = m_spellInfo->Effects[EFFECT_0].CalcBaseValue(value);
             break;
         case SPELLVALUE_BASE_POINT1:
-            m_spellValue->EffectBasePoints[1] = m_spellInfo->Effects.at(EFFECT_1).CalcBaseValue(value);
+            if (m_spellInfo->Effects.size() > EFFECT_1)
+                m_spellValue->EffectBasePoints[1] = m_spellInfo->Effects[EFFECT_1].CalcBaseValue(value);
             break;
         case SPELLVALUE_BASE_POINT2:
-            m_spellValue->EffectBasePoints[2] = m_spellInfo->Effects.at(EFFECT_2).CalcBaseValue(value);
+            if (m_spellInfo->Effects.size() > EFFECT_2)
+                m_spellValue->EffectBasePoints[2] = m_spellInfo->Effects[EFFECT_2].CalcBaseValue(value);
             break;
         case SPELLVALUE_BASE_POINT3:
-            m_spellValue->EffectBasePoints[3] = m_spellInfo->Effects.at(EFFECT_3).CalcBaseValue(value);
+            if (m_spellInfo->Effects.size() > EFFECT_3)
+                m_spellValue->EffectBasePoints[3] = m_spellInfo->Effects[EFFECT_3].CalcBaseValue(value);
             break;
         case SPELLVALUE_BASE_POINT4:
-            m_spellValue->EffectBasePoints[4] = m_spellInfo->Effects.at(EFFECT_4).CalcBaseValue(value);
+            if (m_spellInfo->Effects.size() > EFFECT_4)
+                m_spellValue->EffectBasePoints[4] = m_spellInfo->Effects[EFFECT_4].CalcBaseValue(value);
             break;
         case SPELLVALUE_BASE_POINT5:
-            m_spellValue->EffectBasePoints[5] = m_spellInfo->Effects.at(EFFECT_5).CalcBaseValue(value);
+            if (m_spellInfo->Effects.size() > EFFECT_5)
+                m_spellValue->EffectBasePoints[5] = m_spellInfo->Effects[EFFECT_5].CalcBaseValue(value);
             break;
         case SPELLVALUE_RADIUS_MOD:
             m_spellValue->RadiusMod = (float)value / 10000;

@@ -1581,6 +1581,9 @@ class spell_hun_kill_command : public SpellScriptLoader
                         return;
 
                     pet->CastSpell(GetExplTargetUnit(), HUNTER_SPELL_KILL_COMMAND_TRIGGER, true);
+                    // apply Hunter's Mark
+                    if (Unit * const owner = pet->GetOwner())
+                        owner->CastSpell(GetExplTargetUnit(), 1130, true);
 
                     if (pet->getVictim())
                     {

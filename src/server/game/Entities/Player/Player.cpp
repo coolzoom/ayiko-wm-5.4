@@ -13977,7 +13977,7 @@ void Player::SplitItem(uint16 src, uint16 dst, uint32 count)
         if (IsInWorld())
             pSrcItem->SendUpdateToPlayer(this);
         pSrcItem->SetState(ITEM_CHANGED, this);
-        BankItem(dest, pNewItem, true);
+        StoreItem(dest, pNewItem, true);
     }
     else if (IsEquipmentPos(dst))
     {
@@ -14115,7 +14115,7 @@ void Player::SwapItem(uint16 src, uint16 dst)
             }
 
             RemoveItem(srcbag, srcslot, true);
-            BankItem(dest, pSrcItem, true);
+            StoreItem(dest, pSrcItem, true);
             ItemRemovedQuestCheck(pSrcItem->GetEntry(), pSrcItem->GetCount());
         }
         else if (IsEquipmentPos(dst))
@@ -14261,7 +14261,7 @@ void Player::SwapItem(uint16 src, uint16 dst)
                 if (IsInventoryPos(dst))
                     StoreItem(sDest, pSrcItem, true);
                 else if (IsBankPos(dst))
-                    BankItem(sDest, pSrcItem, true);
+                    StoreItem(sDest, pSrcItem, true);
                 else if (IsEquipmentPos(dst))
                 {
                     EquipItem(eDest, pSrcItem, true);
@@ -14409,7 +14409,7 @@ void Player::SwapItem(uint16 src, uint16 dst)
     if (IsInventoryPos(dst))
         StoreItem(sDest, pSrcItem, true);
     else if (IsBankPos(dst))
-        BankItem(sDest, pSrcItem, true);
+        StoreItem(sDest, pSrcItem, true);
     else if (IsEquipmentPos(dst))
         EquipItem(eDest, pSrcItem, true);
 
@@ -14417,7 +14417,7 @@ void Player::SwapItem(uint16 src, uint16 dst)
     if (IsInventoryPos(src))
         StoreItem(sDest2, pDstItem, true);
     else if (IsBankPos(src))
-        BankItem(sDest2, pDstItem, true);
+        StoreItem(sDest2, pDstItem, true);
     else if (IsEquipmentPos(src))
         EquipItem(eDest2, pDstItem, true);
 
@@ -19482,7 +19482,7 @@ void Player::_LoadInventory(PreparedQueryResult result, uint32 timeDiff)
                         ItemPosCountVec dest;
                         err = CanBankItem(INVENTORY_SLOT_BAG_0, slot, dest, item, false, false);
                         if (err == EQUIP_ERR_OK)
-                            item = BankItem(dest, item, true);
+                            item = StoreItem(dest, item, true);
                     }
 
                     // Remember bags that may contain items in them

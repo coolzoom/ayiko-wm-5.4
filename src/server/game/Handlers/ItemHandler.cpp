@@ -256,7 +256,7 @@ void WorldSession::HandleAutoEquipItemOpcode(WorldPacket& recvData)
         if (_player->IsInventoryPos(src))
             _player->StoreItem(sSrc, pDstItem, true);
         else if (_player->IsBankPos(src))
-            _player->BankItem(sSrc, pDstItem, true);
+            _player->StoreItem(sSrc, pDstItem, true);
         else if (_player->IsEquipmentPos(src))
             _player->EquipItem(eSrc, pDstItem, true);
 
@@ -1147,7 +1147,7 @@ void WorldSession::HandleAutoBankItemOpcode(WorldPacket& recvPacket)
 
     _player->RemoveItem(srcbag, srcslot, true);
     _player->ItemRemovedQuestCheck(pItem->GetEntry(), pItem->GetCount());
-    _player->BankItem(dest, pItem, true);
+    _player->StoreItem(dest, pItem, true);
 }
 
 void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket)
@@ -1187,7 +1187,7 @@ void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket)
         }
 
         _player->RemoveItem(srcbag, srcslot, true);
-        _player->BankItem(dest, pItem, true);
+        _player->StoreItem(dest, pItem, true);
     }
 }
 

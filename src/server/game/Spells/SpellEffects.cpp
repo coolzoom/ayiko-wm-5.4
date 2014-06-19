@@ -3011,7 +3011,7 @@ void Spell::EffectSummonChangeItem(SpellEffIndex effIndex)
 
             m_CastItem = NULL;
 
-            player->BankItem(dest, pNewItem, true);
+            player->StoreItem(dest, pNewItem, true);
             return;
         }
     }

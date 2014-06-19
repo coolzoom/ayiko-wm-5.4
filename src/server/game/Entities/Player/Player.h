@@ -1325,9 +1325,7 @@ class Player final : public Unit, public GridObject<Player>
         InventoryResult CanUnequipItem(uint16 src, bool swap) const;
         InventoryResult CanBankItem(uint8 bag, uint8 slot, ItemPosCountVec& dest, Item* pItem, bool swap, bool not_loading = true) const;
         InventoryResult CanUseItem(Item* pItem, bool not_loading = true) const;
-        bool HasItemTotemCategory(uint32 TotemCategory) const;
         InventoryResult CanUseItem(ItemTemplate const* pItem) const;
-        InventoryResult CanUseAmmo(uint32 item) const;
         InventoryResult CanRollForItemInLFG(ItemTemplate const* item, WorldObject const* lootedObject) const;
         Item* StoreNewItem(ItemPosCountVec const& pos, uint32 item, bool update, int32 randomPropertyId = 0);
         Item* StoreNewItem(ItemPosCountVec const& pos, uint32 item, bool update, int32 randomPropertyId, AllowedLooterSet &allowedLooters);
@@ -1382,11 +1380,7 @@ class Player final : public Unit, public GridObject<Player>
         void QuickEquipItem(uint16 pos, Item* pItem);
         void VisualizeItem(uint8 slot, Item* pItem);
         void SetVisibleItemSlot(uint8 slot, Item* pItem);
-        Item* BankItem(ItemPosCountVec const& dest, Item* pItem, bool update)
-        {
-            return StoreItem(dest, pItem, update);
-        }
-        Item* BankItem(uint16 pos, Item* pItem, bool update);
+
         void RemoveItem(uint8 bag, uint8 slot, bool update);
         void MoveItemFromInventory(uint8 bag, uint8 slot, bool update);
                                                             // in trade, auction, guild bank, mail....
@@ -1628,7 +1622,6 @@ class Player final : public Unit, public GridObject<Player>
         void SaveGoldToDB(SQLTransaction& trans);
 
         static void SetUInt32ValueInArray(Tokenizer& data, uint16 index, uint32 value);
-        static void SetFloatValueInArray(Tokenizer& data, uint16 index, float value);
         static void Customize(uint64 guid, uint8 gender, uint8 skin, uint8 face, uint8 hairStyle, uint8 hairColor, uint8 facialHair);
         static void SavePositionInDB(uint32 mapid, float x, float y, float z, float o, uint32 zone, uint64 guid);
 
@@ -1641,7 +1634,6 @@ class Player final : public Unit, public GridObject<Player>
 
         void SetBindPoint(uint64 guid);
         void SendTalentWipeConfirm(uint64 guid, bool specializaion);
-        void CalcRage(uint32 damage, bool attacker);
         void RegenerateAll();
         void Regenerate(Powers power);
         void RegenerateHealth();
@@ -2020,8 +2012,6 @@ class Player final : public Unit, public GridObject<Player>
         bool UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLevel, uint32 Multiplicator = 1);
         bool UpdateFishingSkill();
 
-        uint32 GetSpellByProto(ItemTemplate* proto);
-
         float GetHealthBonusFromStamina();
 
         bool UpdateStats(Stats stat);
@@ -2066,7 +2056,6 @@ class Player final : public Unit, public GridObject<Player>
 
         void UpdateAllSpellCritChances();
         void UpdateSpellCritChance(uint32 school);
-        void UpdateArmorPenetration(int32 amount);
         void UpdateExpertise(WeaponAttackType attType);
         void ApplyManaRegenBonus(int32 amount, bool apply);
         void ApplyHealthRegenBonus(int32 amount, bool apply);
@@ -2270,8 +2259,6 @@ class Player final : public Unit, public GridObject<Player>
         void SetEquipmentSet(uint32 index, EquipmentSet eqset);
         void DeleteEquipmentSet(uint64 setGuid);
 
-        void SetEmoteState(uint32 anim_id);
-
         void SendInitWorldStates(uint32 zone, uint32 area);
         void SendUpdateWorldState(uint32 Field, uint32 Value);
         void SendDirectMessage(WorldPacket const *data) const;
@@ -2444,7 +2431,6 @@ class Player final : public Unit, public GridObject<Player>
         void UpdateSpeakTime();
         bool UpdatePmChatTime();
         bool CanSpeak() const;
-        void ChangeSpeakTime(int utime);
 
         /*********************************************************/
         /***                 VARIOUS SYSTEMS                   ***/
@@ -2791,8 +2777,6 @@ class Player final : public Unit, public GridObject<Player>
         BattlePetMgr& GetBattlePetMgr() { return m_battlePetMgr; }
         BattlePetMgr const& GetBattlePetMgr() const { return m_battlePetMgr; }
 
-        void SendBattlePetJournal();
-
         uint8 GetBattleGroundRoles() const { return m_bgRoles; }
         void SetBattleGroundRoles(uint8 roles) { m_bgRoles = roles; }
 
@@ -2865,7 +2849,6 @@ class Player final : public Unit, public GridObject<Player>
         void _LoadGroup(PreparedQueryResult result);
         void _LoadSkills(PreparedQueryResult result);
         void _LoadSpells(PreparedQueryResult result);
-        void _LoadFriendList(PreparedQueryResult result);
         bool _LoadHomeBind(PreparedQueryResult result);
         void _LoadDeclinedNames(PreparedQueryResult result);
         void _LoadEquipmentSets(PreparedQueryResult result);

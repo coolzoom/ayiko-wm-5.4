@@ -845,7 +845,7 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                 else if (AuraEffect const *aurEff = caster->GetAuraEffect(60774, EFFECT_0))
                     amount += cp * aurEff->GetAmount();
 
-                amount /= int32(GetBase()->GetMaxDuration() / GetBase()->GetEffect(0)->GetAmplitude());
+                amount /= int32(GetBase()->GetMaxDuration() / GetAmplitude());
             }
             // Unholy Blight damage over time effect
             else if (GetId() == 50536)

@@ -4482,27 +4482,6 @@ void Unit::_ApplyAllAuraStatMods()
         (*i).second->GetBase()->HandleAllEffects(i->second, AURA_EFFECT_HANDLE_STAT, true);
 }
 
-std::list<AuraEffect *> Unit::GetAuraEffectsByMechanic(uint32 mechanic_mask) const
-{
-    AuraEffectList list;
-    for (AuraApplicationMap::const_iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end(); ++iter)
-    {
-        Aura const *aura = iter->second->GetBase();
-        for (uint8 i = 0; i < MAX_EFFECTS; ++i)
-        {
-            if (aura->GetSpellInfo()->GetEffectMechanicMask(i) & mechanic_mask)
-            {
-                if (iter->second)
-                    if (iter->second->GetBase())
-                        if (iter->second->GetBase()->GetEffect(i))
-                            list.push_back(iter->second->GetBase()->GetEffect(i));
-            }
-        }
-    }
-
-    return list;
-}
-
 AuraEffect *Unit::GetAuraEffect(uint32 spellId, uint8 effIndex, uint64 caster) const
 {
     for (AuraApplicationMap::const_iterator itr = m_appliedAuras.lower_bound(spellId); itr != m_appliedAuras.upper_bound(spellId); ++itr)
@@ -18478,19 +18457,21 @@ void Unit::SetRooted(bool apply)
 
 void Unit::SetFeared(bool apply)
 {
-    if (apply && !HasAuraType(SPELL_AURA_MOD_ROOT))
+    if (apply)
     {
         SetTarget(0);
 
-        uint32 mechanic_mask = (1 << MECHANIC_FEAR) | (1 << MECHANIC_HORROR) | (1 << MECHANIC_TURN);
+        Unit* caster = nullptr;
 
-        Unit* caster = NULL;
-        Unit::AuraEffectList const& fearAuras = GetAuraEffectsByMechanic(mechanic_mask);
+        auto const &fearAuras = GetAuraEffectsByType(SPELL_AURA_MOD_FEAR);
         if (!fearAuras.empty())
             caster = ObjectAccessor::GetUnit(*this, fearAuras.front()->GetCasterGUID());
+
         if (!caster)
             caster = getAttackerForHelper();
-        GetMotionMaster()->MoveFleeing(caster, fearAuras.empty() ? sWorld->getIntConfig(CONFIG_CREATURE_FAMILY_FLEE_DELAY) : 0);             // caster == NULL processed in MoveFleeing
+
+        // caster == NULL processed in MoveFleeing
+        GetMotionMaster()->MoveFleeing(caster, fearAuras.empty() ? sWorld->getIntConfig(CONFIG_CREATURE_FAMILY_FLEE_DELAY) : 0);
     }
     else
     {
@@ -18498,8 +18479,8 @@ void Unit::SetFeared(bool apply)
         {
             if (GetMotionMaster()->GetCurrentMovementGeneratorType() == FLEEING_MOTION_TYPE)
                 GetMotionMaster()->MovementExpired();
-            if (getVictim())
-                SetTarget(getVictim()->GetGUID());
+            if (auto const victim = getVictim())
+                SetTarget(victim->GetGUID());
         }
     }
 

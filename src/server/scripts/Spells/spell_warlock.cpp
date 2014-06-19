@@ -2362,6 +2362,10 @@ class spell_warl_drain_life : public SpellScriptLoader
                     // Restoring 2% of the caster's total health every 1s
                     int32 basepoints = player->GetMaxHealth() / 50;
 
+                    // Harvest Life
+                    if (Aura const * const harvest = player->GetAura(108371))
+                        AddPct(basepoints, harvest->GetSpellInfo()->Effects[EFFECT_1].BasePoints);
+
                     // In Demonology spec : Generates 10 Demonic Fury per second
                     if (player->GetSpecializationId(player->GetActiveSpec()) == SPEC_WARLOCK_DEMONOLOGY)
                         player->EnergizeBySpell(player, 689, 10, POWER_DEMONIC_FURY);
@@ -2530,51 +2534,6 @@ class spell_warl_soulburn_harvest_life : public SpellScriptLoader
         AuraScript* GetAuraScript() const
         {
             return new spell_warl_soulburn_harvest_life_AuraScript();
-        }
-};
-
-// Harvest Life - 108371
-class spell_warl_harvest_life : public SpellScriptLoader
-{
-    public:
-        spell_warl_harvest_life() : SpellScriptLoader("spell_warl_harvest_life") { }
-
-        class spell_warl_harvest_life_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_warl_harvest_life_AuraScript);
-
-            void OnTick(AuraEffect const *aurEff)
-            {
-                if (!GetCaster())
-                    return;
-
-                if (Player* player = GetCaster()->ToPlayer())
-                {
-                    float coeff = 0.03f;
-
-                    // Restoring 3-4.5% of the caster's total health every 1s
-                    int32 basepoints = int32(coeff * float(player->GetMaxHealth()));
-
-                    if (!player->HasSpellCooldown(WARLOCK_HARVEST_LIFE_HEAL))
-                    {
-                        player->CastCustomSpell(player, WARLOCK_HARVEST_LIFE_HEAL, &basepoints, NULL, NULL, true);
-                        // prevent the heal to proc off for each targets
-                        player->AddSpellCooldown(WARLOCK_HARVEST_LIFE_HEAL, 0, 1 * IN_MILLISECONDS);
-                    }
-
-                    player->EnergizeBySpell(player, aurEff->GetSpellInfo()->Id, 4, POWER_DEMONIC_FURY);
-                }
-            }
-
-            void Register()
-            {
-                OnEffectPeriodic += AuraEffectPeriodicFn(spell_warl_harvest_life_AuraScript::OnTick, EFFECT_2, SPELL_AURA_PERIODIC_DAMAGE);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_warl_harvest_life_AuraScript();
         }
 };
 
@@ -2969,7 +2928,6 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_soul_harverst();
     new spell_warl_life_tap();
     new spell_warl_soulburn_harvest_life();
-    new spell_warl_harvest_life();
     new spell_warl_fear();
     new spell_warl_banish();
     new spell_warl_create_healthstone();

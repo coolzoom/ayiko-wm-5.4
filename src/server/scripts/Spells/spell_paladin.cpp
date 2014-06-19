@@ -95,6 +95,7 @@ enum PaladinSpells
     PALADIN_SPELL_GLYPH_OF_DIVINE_STORM_HEAL     = 115515,
     PALADIN_SPELL_GLYPH_OF_DENOUNCE              = 56420,
     PALADIN_SPELL_GLYPH_OF_DENOUNCE_PROC         = 115654,
+    PALADIN_SPELL_WEAKENED_BLOWS                 = 115798,
 };
 
 class spell_pal_glyph_of_devotian_aura : public SpellScriptLoader
@@ -1552,6 +1553,38 @@ class spell_pal_righteous_defense : public SpellScriptLoader
         }
 };
 
+// Crusader Strike - 35395
+class spell_pal_crusader_strike : public SpellScriptLoader
+{
+public:
+    spell_pal_crusader_strike() : SpellScriptLoader("spell_pal_crusader_strike") { }
+
+    class spell_pal_crusader_strike_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_pal_crusader_strike_SpellScript);
+
+        void HandleOnHit()
+        {
+            if (Player* const _player = GetCaster()->ToPlayer())
+                if (Unit* const target = GetHitUnit())
+                {
+                    if (_player != target)
+                    _player->CastSpell(target, PALADIN_SPELL_WEAKENED_BLOWS, true);
+                }
+        }
+
+        void Register()
+        {
+            OnHit += SpellHitFn(spell_pal_crusader_strike_SpellScript::HandleOnHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_pal_crusader_strike_SpellScript();
+    }
+};
+
 void AddSC_paladin_spell_scripts()
 {
     new spell_pal_glyph_of_devotian_aura();
@@ -1590,4 +1623,5 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_divine_storm();
     new spell_pal_lay_on_hands();
     new spell_pal_righteous_defense();
+    new spell_pal_crusader_strike();
 }

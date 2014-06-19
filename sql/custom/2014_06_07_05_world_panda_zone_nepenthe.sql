@@ -29,3 +29,10 @@ UPDATE `creature` SET `spawntimesecs` = 10 WHERE `id` IN (SELECT `entry` FROM `c
 
 -- [SQL] [Ed's report] Quests - The Lesson of the Sandy Fist: Training Target will now respawn faster
 UPDATE `creature` SET `spawntimesecs` = 10 WHERE `id` IN (53714);
+
+-- [SQL] [Ramires' report] Quests - Still Good!: Quest objects will now sparkle when on quest
+UPDATE `gameobject_template` SET `flags` = 4 WHERE `entry` IN (209639, 209641, 209642);
+UPDATE `gameobject_template` SET `castBarCaption` = 'Recovering', `flags` = 4, `data1` = 209639 WHERE `entry` = 209640;
+DELETE FROM `gameobject_loot_template` WHERE `entry` = 209639;
+INSERT INTO `gameobject_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
+(209639, 74295, -100, 1, 0, 1, 1);

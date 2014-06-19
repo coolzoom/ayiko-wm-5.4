@@ -530,9 +530,6 @@ void WorldSession::HandleQuestgiverCompleteQuest(WorldPacket& recvData)
         else                                            // no items required
             _player->PlayerTalkClass->SendQuestGiverOfferReward(quest, playerGuid, !autoCompleteMode);
     }
-
-    // TODO: make sure that it does not rape database with frequent saves
-    _player->SaveToDB(false);
 }
 
 void WorldSession::HandlePushQuestToParty(WorldPacket& recvPacket)

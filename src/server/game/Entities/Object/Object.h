@@ -661,28 +661,55 @@ class GridObject
         GridReference<T> _gridRef;
 };
 
-template <class T_VALUES, class T_FLAGS, class FLAG_TYPE, uint8 ARRAY_SIZE>
-class FlaggedValuesArray32
+template <class ValueType, class FlagType, uint8 MaxFlags>
+class FlaggedValuesArray final
 {
-    public:
-        FlaggedValuesArray32()
-        {
-            memset(&m_values, 0x00, sizeof(T_VALUES) * ARRAY_SIZE);
-            m_flags = 0;
-        }
+public:
+    typedef std::bitset<MaxFlags> FlagsBitset;
 
-        T_FLAGS  GetFlags() const { return m_flags; }
-        bool     HasFlag(FLAG_TYPE flag) const { return m_flags & (1 << flag); }
-        void     AddFlag(FLAG_TYPE flag) { m_flags |= (1 << flag); }
-        void     DelFlag(FLAG_TYPE flag) { m_flags &= ~(1 << flag); }
+public:
+    FlaggedValuesArray()
+        : m_values()
+    { }
 
-        T_VALUES GetValue(FLAG_TYPE flag) const { return m_values[flag]; }
-        void     SetValue(FLAG_TYPE flag, T_VALUES value) { m_values[flag] = value; }
-        void     AddValue(FLAG_TYPE flag, T_VALUES value) { m_values[flag] += value; }
+    FlagsBitset const & GetFlags() const
+    {
+        return m_flags;
+    }
 
-    private:
-        T_VALUES m_values[ARRAY_SIZE];
-        T_FLAGS m_flags;
+    bool HasFlag(FlagType flag) const
+    {
+        return m_flags.test(flag);
+    }
+
+    void AddFlag(FlagType flag)
+    {
+        m_flags.set(flag);
+    }
+
+    void DelFlag(FlagType flag)
+    {
+        m_flags.reset(flag);
+    }
+
+    ValueType GetValue(FlagType flag) const
+    {
+        return m_values[flag];
+    }
+
+    void SetValue(FlagType flag, ValueType value)
+    {
+        m_values[flag] = value;
+    }
+
+    void AddValue(FlagType flag, ValueType value)
+    {
+        m_values[flag] += value;
+    }
+
+private:
+    ValueType m_values[MaxFlags];
+    FlagsBitset m_flags;
 };
 
 class WorldObject : public Object, public WorldLocation
@@ -876,14 +903,14 @@ class WorldObject : public Object, public WorldLocation
         float GetSightRange(const WorldObject* target = NULL) const;
         bool canSeeOrDetect(WorldObject const* obj, bool ignoreStealth = false, bool distanceCheck = false) const;
 
-        FlaggedValuesArray32<int32, uint32, StealthType, TOTAL_STEALTH_TYPES> m_stealth;
-        FlaggedValuesArray32<int32, uint32, StealthType, TOTAL_STEALTH_TYPES> m_stealthDetect;
+        FlaggedValuesArray<int32, StealthType, TOTAL_STEALTH_TYPES> m_stealth;
+        FlaggedValuesArray<int32, StealthType, TOTAL_STEALTH_TYPES> m_stealthDetect;
 
-        FlaggedValuesArray32<int32, uint32, InvisibilityType, TOTAL_INVISIBILITY_TYPES> m_invisibility;
-        FlaggedValuesArray32<int32, uint32, InvisibilityType, TOTAL_INVISIBILITY_TYPES> m_invisibilityDetect;
+        FlaggedValuesArray<int32, InvisibilityType, TOTAL_INVISIBILITY_TYPES> m_invisibility;
+        FlaggedValuesArray<int32, InvisibilityType, TOTAL_INVISIBILITY_TYPES> m_invisibilityDetect;
 
-        FlaggedValuesArray32<int32, uint32, ServerSideVisibilityType, TOTAL_SERVERSIDE_VISIBILITY_TYPES> m_serverSideVisibility;
-        FlaggedValuesArray32<int32, uint32, ServerSideVisibilityType, TOTAL_SERVERSIDE_VISIBILITY_TYPES> m_serverSideVisibilityDetect;
+        FlaggedValuesArray<int32, ServerSideVisibilityType, TOTAL_SERVERSIDE_VISIBILITY_TYPES> m_serverSideVisibility;
+        FlaggedValuesArray<int32, ServerSideVisibilityType, TOTAL_SERVERSIDE_VISIBILITY_TYPES> m_serverSideVisibilityDetect;
 
         // Low Level Packets
         void SendPlaySound(uint32 Sound, bool OnlySelf);

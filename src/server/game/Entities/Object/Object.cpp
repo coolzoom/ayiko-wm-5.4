@@ -1908,7 +1908,7 @@ bool WorldObject::CanDetect(WorldObject const* obj, bool ignoreStealth) const
 
 bool WorldObject::CanDetectInvisibilityOf(WorldObject const* obj) const
 {
-    uint32 mask = obj->m_invisibility.GetFlags() & m_invisibilityDetect.GetFlags();
+    auto const mask = obj->m_invisibility.GetFlags() & m_invisibilityDetect.GetFlags();
 
     // Check for not detected types
     if (mask != obj->m_invisibility.GetFlags())
@@ -1916,7 +1916,7 @@ bool WorldObject::CanDetectInvisibilityOf(WorldObject const* obj) const
 
     for (uint32 i = 0; i < TOTAL_INVISIBILITY_TYPES; ++i)
     {
-        if (!(mask & (1 << i)))
+        if (!mask.test(i))
             continue;
 
         int32 objInvisibilityValue = obj->m_invisibility.GetValue(InvisibilityType(i));
@@ -1933,49 +1933,33 @@ bool WorldObject::CanDetectInvisibilityOf(WorldObject const* obj) const
 bool WorldObject::CanDetectStealthOf(WorldObject const* obj) const
 {
     // Combat reach is the minimal distance (both in front and behind),
-    //   and it is also used in the range calculation.
+    // and it is also used in the range calculation.
     // One stealth point increases the visibility range by 0.3 yard.
 
-    if (!obj->m_stealth.GetFlags())
+    if (obj->m_stealth.GetFlags().none())
         return true;
 
     float distance = GetExactDist(obj);
+    float combatReach = 0.0f;
 
-    // stealth detection of traps = invisibility detection, calculate from compare detection and stealth values
-    if (obj->m_stealth.HasFlag(STEALTH_TRAP))
+    Unit const* unit = ToUnit();
+    if (unit)
+        combatReach = unit->GetCombatReach();
+
+    if (distance < combatReach)
+        return true;
+
+    if (!HasInArc(M_PI, obj))
+        return false;
+
+    GameObject const* go = ToGameObject();
+    for (uint32 i = 0; i < TOTAL_STEALTH_TYPES; ++i)
     {
-        if (!HasInArc(M_PI, obj))
-            return false;
+        if (!obj->m_stealth.HasFlag(StealthType(i)))
+            continue;
 
-        // rogue class - detect traps limit to 20 yards
-        float maxDetectDistance = 20.0f;
-        if (distance > maxDetectDistance)
-            return false;
-
-        int32 objTrapStealthValue = obj->m_stealth.GetValue(STEALTH_TRAP);
-        int32 ownTrapStealthDetectValue = m_stealthDetect.GetValue(STEALTH_TRAP);
-
-        if (ownTrapStealthDetectValue < objTrapStealthValue)
-            // not rogue class - detect traps limit to melee distance
-            if (distance > 4.0f)
-                return false;
-    }
-    else
-    {
-        float combatReach = 0.0f;
-
-        if (isType(TYPEMASK_UNIT))
-        {
-            combatReach = ((Unit*)this)->GetCombatReach();
-            if (distance < combatReach)
-                return true;
-
-            if (((Unit*)this)->HasAuraType(SPELL_AURA_DETECT_STEALTH))
-                return true;
-        }
-
-        if (!HasInArc(M_PI, obj))
-            return false;
+        if (unit && unit->HasAuraTypeWithMiscvalue(SPELL_AURA_DETECT_STEALTH, i))
+            return true;
 
         // Starting points
         int32 detectionValue = 30;
@@ -1986,12 +1970,12 @@ bool WorldObject::CanDetectStealthOf(WorldObject const* obj) const
         detectionValue += int32(getLevelForTarget(obj) - 1) * 5;
 
         // Apply modifiers
-        detectionValue += m_stealthDetect.GetValue(STEALTH_GENERAL);
-        if (obj->isType(TYPEMASK_GAMEOBJECT))
-            if (Unit* owner = ((GameObject*)obj)->GetOwner())
+        detectionValue += m_stealthDetect.GetValue(StealthType(i));
+        if (go)
+            if (Unit* owner = go->GetOwner())
                 detectionValue -= int32(owner->getLevelForTarget(this) - 1) * 5;
 
-        detectionValue -= obj->m_stealth.GetValue(STEALTH_GENERAL);
+        detectionValue -= obj->m_stealth.GetValue(StealthType(i));
 
         // Calculate max distance
         float visibilityRange = float(detectionValue) * 0.3f + combatReach;

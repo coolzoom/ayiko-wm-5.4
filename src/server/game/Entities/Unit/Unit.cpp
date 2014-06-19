@@ -274,10 +274,6 @@ Unit::Unit(bool isWorldObject): WorldObject(isWorldObject)
     _lastLiquid = NULL;
     _isWalkingBeforeCharm = false;
 
-    // Area Skip Update
-    _skipCount = 0;
-    _skipDiff = 0;
-
     m_IsInKillingProcess = false;
     m_VisibilityUpdScheduled = false;
 
@@ -16047,7 +16043,7 @@ void Unit::RemoveFromWorld()
             TC_LOG_FATAL("entities.unit", "Unit %u has charmer guid when removed from world", GetEntry());
             ASSERT(false);
         }
-
+#if 0
         if (Unit* owner = GetOwner())
         {
             if (owner->m_Controlled.find(this) != owner->m_Controlled.end())
@@ -16056,7 +16052,7 @@ void Unit::RemoveFromWorld()
                 ASSERT(false);
             }
         }
-
+#endif
         WorldObject::RemoveFromWorld();
         m_duringRemoveFromWorld = false;
     }

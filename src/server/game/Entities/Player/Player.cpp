@@ -1645,20 +1645,6 @@ void Player::Update(uint32 p_time)
     // Regenerate consumed spell charges
     spellChargesTracker_.update(p_time);
 
-    // Zone Skip Update
-    if (sObjectMgr->IsSkipZone(GetZoneId()) || isAFK())
-    {
-        _skipCount++;
-        _skipDiff += p_time;
-
-        if (_skipCount < sObjectMgr->GetSkipUpdateCount())
-            return;
-
-        p_time = _skipDiff;
-        _skipCount = 0;
-        _skipDiff = 0;
-    }
-
     // undelivered mail
     if (m_nextMailDelivereTime && m_nextMailDelivereTime <= time(NULL))
     {
@@ -22835,11 +22821,12 @@ void Player::RemoveSpellMods(Spell* spell)
 
 void Player::DropModCharge(SpellModifier* mod, Spell* spell)
 {
+#if 0
     // don't handle spells with proc_event entry defined
     // this is a temporary workaround, because all spellmods should be handled like that
     if (sSpellMgr->GetSpellProcEvent(mod->spellId))
         return;
-
+#endif
     if (spell && mod->ownerAura && mod->charges > 0)
     {
         if (--mod->charges == 0)

@@ -1241,23 +1241,6 @@ class ObjectMgr
 
         GuildChallengeRewardData const& GetGuildChallengeRewardData() const { return _challengeRewardData; }
 
-        void LoadSkipUpdateZone();
-
-        bool IsSkipZone(uint32 zone)
-        {
-            if (skipData.find(zone) != skipData.end())
-                return skipData[zone];
-
-            return false;
-        }
-
-        uint32 GetSkipUpdateCount()
-        {
-            return _skipUpdateCount;
-        }
-
-        UpdateSkipData skipData;
-
         std::set<uint32> const& GetOverwriteExtendedCosts() const
         {
             return _overwriteExtendedCosts;
@@ -1350,7 +1333,6 @@ class ObjectMgr
         PhaseDefinitionMap _PhaseDefinitionStore;
         SpellPhaseStore _SpellPhaseStore;
 
-        uint32 _skipUpdateCount;
         std::map<uint64, uint64> _lootViewGUID;
 
         ResearchZoneMap _researchZoneMap;

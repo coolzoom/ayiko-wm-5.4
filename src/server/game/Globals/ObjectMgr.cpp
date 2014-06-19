@@ -283,7 +283,7 @@ ObjectMgr::ObjectMgr() : _auctionId(1), _equipmentSetGuid(1),
     _itemTextId(1), _mailId(1), _hiPetNumber(1), _voidItemId(1), _hiCharGuid(1),
     _hiCreatureGuid(1), _hiPetGuid(1), _hiVehicleGuid(1), _hiItemGuid(1),
     _hiGoGuid(1), _hiDoGuid(1), _hiCorpseGuid(1), _hiAreaTriggerGuid(1),
-    _hiMoTransGuid(1), _skipUpdateCount(1)
+    _hiMoTransGuid(1)
 { }
 
 ObjectMgr::~ObjectMgr()
@@ -9289,30 +9289,6 @@ void ObjectMgr::LoadResearchSiteLoot()
     while (result->NextRow());
 
     TC_LOG_INFO("server.loading", ">> Loaded %u research site loot.", counter);
-}
-
-void ObjectMgr::LoadSkipUpdateZone()
-{
-    skipData.clear();
-
-    _skipUpdateCount = sConfigMgr->GetIntDefault("ZoneSkipUpdate.count", 1);
-
-    QueryResult result = WorldDatabase.PQuery("SELECT zone FROM zone_skip_update");
-    if (!result)
-        return;
-
-    uint32 count = 0;
-
-    do
-    {
-        Field* fields = result->Fetch();
-        uint32 zoneId = fields[0].GetUInt32();
-        skipData[zoneId] = true;
-        count++;
-    }
-    while (result->NextRow());
-
-     TC_LOG_INFO("server.loading", ">> Loaded %u zone skip update.", count);
 }
 
 void ObjectMgr::LoadItemExtendedCost()

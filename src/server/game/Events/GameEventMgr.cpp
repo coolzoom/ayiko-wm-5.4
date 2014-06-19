@@ -1605,6 +1605,7 @@ void GameEventMgr::SendWorldStateUpdate(Player* player, uint16 event_id)
 
 void GameEventMgr::RunSmartAIScripts(uint16 event_id, bool activate)
 {
+#if 0
     //! Iterate over every supported source type (creature and gameobject)
     //! Not entirely sure how this will affect units in non-loaded grids.
     {
@@ -1633,6 +1634,7 @@ void GameEventMgr::RunSmartAIScripts(uint16 event_id, bool activate)
                 go->AI()->OnGameEvent(activate, event_id);
         }
     }
+#endif
 }
 
 uint16 GameEventMgr::GetEventIdForQuest(Quest const* quest) const

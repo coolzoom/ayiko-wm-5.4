@@ -1993,9 +1993,6 @@ void World::SetInitialWorldSettings()
     if (realmResult)
         m_realmName = (*realmResult)[0].GetString();
 
-    TC_LOG_INFO("server.loading", "Loading area skip update...");
-    sObjectMgr->LoadSkipUpdateZone();
-
     TC_LOG_INFO("server.loading", "Initializing item upgrade datas...");
     sSpellMgr->InitializeItemUpgradeDatas();
 

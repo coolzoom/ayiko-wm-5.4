@@ -466,20 +466,6 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData* data)
 
 void Creature::Update(uint32 diff)
 {
-    // Zone Skip Update
-    if ((sObjectMgr->IsSkipZone(GetZoneId()) && (!isInCombat() && !GetMap()->Instanceable())) && (!isTotem() || GetOwner()))
-    {
-        _skipCount++;
-        _skipDiff += diff;
-
-        if (_skipCount != sObjectMgr->GetSkipUpdateCount())
-            return;
-
-        diff = _skipDiff;
-        _skipCount = 0;
-        _skipDiff = 0;
-    }
-
     if (IsAIEnabled && TriggerJustRespawned)
     {
         TriggerJustRespawned = false;

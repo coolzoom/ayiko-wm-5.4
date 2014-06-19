@@ -2465,10 +2465,6 @@ class Unit : public WorldObject
         uint32 m_unitTypeMask;
         LiquidTypeEntry const* _lastLiquid;
 
-        // Zone Skip Update
-        uint32 _skipCount;
-        uint32 _skipDiff;
-
         bool m_IsInKillingProcess;
 
         bool IsAlwaysVisibleFor(WorldObject const* seer) const;

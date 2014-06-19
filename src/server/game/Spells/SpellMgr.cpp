@@ -5493,6 +5493,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 1543: // Flare
                     spellInfo->Effects[0].TriggerSpell = 94528;
                     break;
+                case 1949: // Hellfire
+                    spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_PERIODIC_TRIGGER_SPELL;
+                    break;
                 default:
                     break;
             }

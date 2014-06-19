@@ -49,6 +49,35 @@
 #include "Configuration/Config.h"
 #include "Log.h"
 
+namespace {
+
+template <typename T>
+void loadInvisibilityHelper(T &invisContainer, char const *query)
+{
+    invisContainer.clear();
+
+    auto result = WorldDatabase.Query(query);
+    if (!result)
+        return;
+
+    do
+    {
+        auto const fields = result->Fetch();
+
+        auto const id = fields[0].GetUInt32();
+        auto const type = static_cast<InvisibilityType>(fields[1].GetUInt8());
+        auto const amount = fields[2].GetInt32();
+
+        invisContainer.emplace(
+            std::piecewise_construct,
+            std::forward_as_tuple(id),
+            std::forward_as_tuple(type, amount));
+    }
+    while (result->NextRow());
+}
+
+} // namespace
+
 ScriptMapMap sQuestEndScripts;
 ScriptMapMap sQuestStartScripts;
 ScriptMapMap sSpellScripts;
@@ -982,6 +1011,22 @@ void ObjectMgr::LoadCreatureAddons()
     TC_LOG_INFO("server.loading", ">> Loaded %u creature addons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
+void ObjectMgr::loadCreatureTemplateInvisibility()
+{
+    auto const start = getMSTime();
+    loadInvisibilityHelper(creatureTemplateInvisibilityStore_, "SELECT entry, type, amount FROM creature_template_invisibility");
+    TC_LOG_INFO("server.loading", ">> Loaded " SIZEFMTD " creature template invisibilities in %u ms",
+                creatureTemplateInvisibilityStore_.size(), GetMSTimeDiffToNow(start));
+}
+
+void ObjectMgr::loadCreatureInvisibility()
+{
+    auto const start = getMSTime();
+    loadInvisibilityHelper(creatureInvisibilityStore_, "SELECT guid, type, amount FROM creature_invisibility");
+    TC_LOG_INFO("server.loading", ">> Loaded " SIZEFMTD " creature invisibilities in %u ms",
+                creatureInvisibilityStore_.size(), GetMSTimeDiffToNow(start));
+}
+
 CreatureAddon const* ObjectMgr::GetCreatureAddon(uint32 lowguid)
 {
     CreatureAddonContainer::const_iterator itr = _creatureAddonStore.find(lowguid);
@@ -1000,16 +1045,28 @@ CreatureAddon const* ObjectMgr::GetCreatureTemplateAddon(uint32 entry)
     return NULL;
 }
 
-GameObjectInvisibility const * ObjectMgr::gameObjectTemplateInvisibility(uint32 entry) const
+ObjectInvisibility const * ObjectMgr::gameObjectTemplateInvisibility(uint32 entry) const
 {
     auto const itr = gameObjectTemplateInvisibilityStore_.find(entry);
     return itr != gameObjectTemplateInvisibilityStore_.end() ? &itr->second : nullptr;
 }
 
-GameObjectInvisibility const * ObjectMgr::gameObjectInvisibility(uint32 guid) const
+ObjectInvisibility const * ObjectMgr::gameObjectInvisibility(uint32 guid) const
 {
     auto const itr = gameObjectInvisibilityStore_.find(guid);
     return itr != gameObjectInvisibilityStore_.end() ? &itr->second : nullptr;
+}
+
+ObjectInvisibility const * ObjectMgr::creatureTemplateInvisibility(uint32 entry) const
+{
+    auto const itr = creatureTemplateInvisibilityStore_.find(entry);
+    return itr != creatureTemplateInvisibilityStore_.end() ? &itr->second : nullptr;
+}
+
+ObjectInvisibility const * ObjectMgr::creatureInvisibility(uint32 guid) const
+{
+    auto const itr = creatureInvisibilityStore_.find(guid);
+    return itr != creatureInvisibilityStore_.end() ? &itr->second : nullptr;
 }
 
 EquipmentInfo const* ObjectMgr::GetEquipmentInfo(uint32 entry)
@@ -1985,64 +2042,18 @@ void ObjectMgr::LoadGameobjects()
 
 void ObjectMgr::loadGameObjectTemplateInvisibility()
 {
-    gameObjectTemplateInvisibilityStore_.clear();
-
-    auto result = WorldDatabase.Query("SELECT entry, type, amount FROM gameobject_template_invisibility");
-    if (!result)
-    {
-        TC_LOG_INFO("server.loading", ">> DB table `gameobject_template_invisibility` is empty");
-        return;
-    }
-
     auto const start = getMSTime();
-
-    do
-    {
-        auto const fields = result->Fetch();
-
-        auto const entry = fields[0].GetUInt32();
-        auto const type = static_cast<InvisibilityType>(fields[1].GetUInt8());
-        auto const amount = fields[2].GetInt32();
-
-        gameObjectTemplateInvisibilityStore_.emplace(
-            std::piecewise_construct,
-            std::forward_as_tuple(entry),
-            std::forward_as_tuple(type, amount));
-    }
-    while (result->NextRow());
-
-    TC_LOG_INFO("server.loading", ">> Loaded " SIZEFMTD " gameobject template invisibilities in %u ms", gameObjectTemplateInvisibilityStore_.size(), GetMSTimeDiffToNow(start));
+    loadInvisibilityHelper(gameObjectTemplateInvisibilityStore_, "SELECT entry, type, amount FROM gameobject_template_invisibility");
+    TC_LOG_INFO("server.loading", ">> Loaded " SIZEFMTD " gameobject template invisibilities in %u ms",
+                gameObjectTemplateInvisibilityStore_.size(), GetMSTimeDiffToNow(start));
 }
 
 void ObjectMgr::loadGameObjectInvisibility()
 {
-    gameObjectInvisibilityStore_.clear();
-
-    auto result = WorldDatabase.Query("SELECT guid, type, amount FROM gameobject_invisibility");
-    if (!result)
-    {
-        TC_LOG_INFO("server.loading", ">> DB table `gameobject_invisibility` is empty");
-        return;
-    }
-
     auto const start = getMSTime();
-
-    do
-    {
-        auto const fields = result->Fetch();
-
-        auto const guid = fields[0].GetUInt32();
-        auto const type = static_cast<InvisibilityType>(fields[1].GetUInt8());
-        auto const amount = fields[2].GetInt32();
-
-        gameObjectInvisibilityStore_.emplace(
-            std::piecewise_construct,
-            std::forward_as_tuple(guid),
-            std::forward_as_tuple(type, amount));
-    }
-    while (result->NextRow());
-
-    TC_LOG_INFO("server.loading", ">> Loaded " SIZEFMTD " gameobject invisibilities in %u ms", gameObjectInvisibilityStore_.size(), GetMSTimeDiffToNow(start));
+    loadInvisibilityHelper(gameObjectInvisibilityStore_, "SELECT guid, type, amount FROM gameobject_invisibility");
+    TC_LOG_INFO("server.loading", ">> Loaded " SIZEFMTD " gameobject invisibilities in %u ms",
+                gameObjectInvisibilityStore_.size(), GetMSTimeDiffToNow(start));
 }
 
 void ObjectMgr::AddGameobjectToGrid(uint32 guid, GameObjectData const* data)

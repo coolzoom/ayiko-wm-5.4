@@ -610,17 +610,6 @@ struct GameObjectData
     bool dbData;
 };
 
-struct GameObjectInvisibility final
-{
-    GameObjectInvisibility(InvisibilityType t, int32 a)
-        : type(t)
-        , amount(a)
-    { }
-
-    InvisibilityType type;
-    int32 amount;
-};
-
 // For containers:  [GO_NOT_READY]->GO_READY (close)->GO_ACTIVATED (open) ->GO_JUST_DEACTIVATED->GO_READY        -> ...
 // For bobber:      GO_NOT_READY  ->GO_READY (close)->GO_ACTIVATED (open) ->GO_JUST_DEACTIVATED-><deleted>
 // For door(closed):[GO_NOT_READY]->GO_READY (close)->GO_ACTIVATED (open) ->GO_JUST_DEACTIVATED->GO_READY(close) -> ...

@@ -500,6 +500,8 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
         void SelectLevel(const CreatureTemplate* cinfo);
         void LoadEquipment(uint32 equip_entry, bool force=false);
 
+        void loadInvisibility();
+
         uint32 GetDBTableGUIDLow() const { return m_DBTableGuid; }
 
         void Update(uint32 time);                         // overwrited Unit::Update

@@ -870,6 +870,8 @@ bool Creature::Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, 
     if (Entry == VISUAL_WAYPOINT)
         SetVisible(false);
 
+    loadInvisibility();
+
     return true;
 }
 
@@ -1513,6 +1515,22 @@ void Creature::LoadEquipment(uint32 equip_entry, bool force)
     m_equipmentId = equip_entry;
     for (uint8 i = 0; i < MAX_EQUIPMENT_ITEMS; ++i)
         SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + i, einfo->ItemEntry[i]);
+}
+
+void Creature::loadInvisibility()
+{
+    ObjectInvisibility const *invis = nullptr;
+
+    if (m_DBTableGuid != 0)
+        invis = sObjectMgr->creatureInvisibility(GetGUIDLow());
+
+    if (!invis)
+        invis = sObjectMgr->creatureTemplateInvisibility(GetEntry());
+
+    if (invis) {
+        m_invisibility.AddFlag(invis->type);
+        m_invisibility.AddValue(invis->type, invis->amount);
+    }
 }
 
 bool Creature::hasQuest(uint32 quest_id) const

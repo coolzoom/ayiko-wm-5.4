@@ -123,6 +123,17 @@ class ZoneScript;
 class Unit;
 class Transport;
 
+struct ObjectInvisibility final
+{
+    ObjectInvisibility(InvisibilityType t, int32 a)
+        : type(t)
+        , amount(a)
+    { }
+
+    InvisibilityType type;
+    int32 amount;
+};
+
 typedef std::unordered_map<Player*, UpdateData> UpdateDataMapType;
 
 class DynamicFields
@@ -548,6 +559,7 @@ struct Position
         return o;
     }
 };
+
 ByteBuffer& operator>>(ByteBuffer& buf, Position::PositionXYZOStreamer const& streamer);
 ByteBuffer& operator<<(ByteBuffer& buf, Position::PositionXYZStreamer const& streamer);
 ByteBuffer& operator>>(ByteBuffer& buf, Position::PositionXYZStreamer const& streamer);

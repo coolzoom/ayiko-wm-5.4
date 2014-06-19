@@ -688,8 +688,11 @@ class ObjectMgr
         ItemTemplate const* GetItemTemplate(uint32 entry);
         ItemTemplateContainer const & GetItemTemplateStore() const { return _itemTemplateStore; }
 
-        GameObjectInvisibility const * gameObjectInvisibility(uint32 guid) const;
-        GameObjectInvisibility const * gameObjectTemplateInvisibility(uint32 entry) const;
+        ObjectInvisibility const * gameObjectInvisibility(uint32 guid) const;
+        ObjectInvisibility const * gameObjectTemplateInvisibility(uint32 entry) const;
+
+        ObjectInvisibility const * creatureInvisibility(uint32 guid) const;
+        ObjectInvisibility const * creatureTemplateInvisibility(uint32 entry) const;
 
         InstanceTemplate const* GetInstanceTemplate(uint32 mapId);
 
@@ -892,6 +895,7 @@ class ObjectMgr
         void LoadCreatureLocales();
         void LoadCreatureTemplates();
         void LoadCreatureTemplateAddons();
+        void loadCreatureTemplateInvisibility();
         void ReplaceCreatureTemplate(uint32 entry, CreatureTemplate const &newTemplate);
         void LoadTempSummons();
         void LoadCreatures();
@@ -899,6 +903,7 @@ class ObjectMgr
         bool SetCreatureLinkedRespawn(uint32 guid, uint32 linkedGuid);
         void LoadCreatureAddons();
         void LoadCreatureModelInfo();
+        void loadCreatureInvisibility();
         void LoadEquipmentTemplates();
         void LoadGameObjectLocales();
         void LoadGameobjects();
@@ -1402,8 +1407,13 @@ class ObjectMgr
         /// Stores temp summon data grouped by summoner's entry, summoner's type and group id
         TempSummonDataContainer _tempSummonDataStore;
 
-        std::unordered_map<uint32, GameObjectInvisibility> gameObjectTemplateInvisibilityStore_;
-        decltype(gameObjectTemplateInvisibilityStore_) gameObjectInvisibilityStore_;
+        typedef std::unordered_map<uint32, ObjectInvisibility> ObjectInvisibilityMap;
+
+        ObjectInvisibilityMap gameObjectTemplateInvisibilityStore_;
+        ObjectInvisibilityMap gameObjectInvisibilityStore_;
+
+        ObjectInvisibilityMap creatureTemplateInvisibilityStore_;
+        ObjectInvisibilityMap creatureInvisibilityStore_;
 
         ItemTemplateContainer _itemTemplateStore;
         ItemLocaleContainer _itemLocaleStore;

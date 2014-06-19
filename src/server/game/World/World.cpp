@@ -1586,6 +1586,12 @@ void World::SetInitialWorldSettings()
     TC_LOG_INFO("server.loading", "Loading Creature Addon Data...");
     sObjectMgr->LoadCreatureAddons();                            // must be after LoadCreatureTemplates() and LoadCreatures()
 
+    TC_LOG_INFO("server.loading", "Loading creature template invisibilities...");
+    sObjectMgr->loadCreatureTemplateInvisibility();
+
+    TC_LOG_INFO("server.loading", "Loading creature invisibilities...");
+    sObjectMgr->loadCreatureInvisibility();
+
     TC_LOG_INFO("server.loading", "Loading Gameobject Data...");
     sObjectMgr->LoadGameobjects();
 

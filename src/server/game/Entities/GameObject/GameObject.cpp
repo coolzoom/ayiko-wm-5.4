@@ -2196,7 +2196,7 @@ void GameObject::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* t
 
 void GameObject::loadInvisibility()
 {
-    GameObjectInvisibility const *invis = nullptr;
+    ObjectInvisibility const *invis = nullptr;
 
     if (m_DBTableGuid != 0)
         invis = sObjectMgr->gameObjectInvisibility(GetGUIDLow());

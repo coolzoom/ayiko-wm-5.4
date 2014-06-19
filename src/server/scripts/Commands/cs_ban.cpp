@@ -29,6 +29,7 @@ EndScriptData */
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "ScriptMgr.h"
+#include "ace/OS_NS_time.h"
 
 class ban_commandscript : public CommandScript
 {

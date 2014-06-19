@@ -13,7 +13,7 @@ class mob_master_shang_xi_temple : public CreatureScript
 
         bool OnQuestAccept(Player* player, Creature* /*creature*/, Quest const* quest)
         {
-            if (quest->GetQuestId() == 29776) // Brise du matin
+            if (quest->GetQuestId() == 29776) // Morning Breeze Village
             {
                 if (Creature* vehicle = player->SummonCreature(55685, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation()))
                 {

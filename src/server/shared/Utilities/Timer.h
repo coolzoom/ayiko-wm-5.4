@@ -19,8 +19,9 @@
 #ifndef TRINITY_TIMER_H
 #define TRINITY_TIMER_H
 
-#include "ace/OS_NS_sys_time.h"
-#include "Common.h"
+#include "Define.h"
+
+#include <ace/OS_NS_sys_time.h>
 
 inline uint32 getMSTime()
 {
@@ -48,8 +49,7 @@ struct IntervalTimer
 
         IntervalTimer()
             : _interval(0), _current(0)
-        {
-        }
+        { }
 
         void Update(time_t diff)
         {
@@ -169,8 +169,7 @@ struct PeriodicTimer
 
         PeriodicTimer(int32 period, int32 start_time)
             : i_period(period), i_expireTime(start_time)
-        {
-        }
+        { }
 
         bool Update(const uint32 diff)
         {

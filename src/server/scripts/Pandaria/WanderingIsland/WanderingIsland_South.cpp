@@ -319,33 +319,38 @@ public:
     }
 };
 
-class AreaTrigger_at_rescue_soldiers : public AreaTriggerScript
+struct AreaTrigger_at_rescue_soldiers final : public AreaTriggerScript
 {
-    public:
-        AreaTrigger_at_rescue_soldiers() : AreaTriggerScript("AreaTrigger_at_rescue_soldiers")
-        {}
+    AreaTrigger_at_rescue_soldiers()
+        : AreaTriggerScript("AreaTrigger_at_rescue_soldiers")
+    { }
 
-        bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/)
-        {
-           if (player->GetQuestStatus(29794) != QUEST_STATUS_INCOMPLETE)
-               return true;
-
-           if (!player->HasAura(129340))
-               return true;
-
-            Unit * const soldierUnit = player->GetVehicleKit()->GetPassenger(0);
-            if (!soldierUnit)
-                return true;
-
-            if (Creature const * const solider = soldierUnit->ToCreature())
-            {
-                solider->AI()->DoAction(1);
-
-                player->RemoveAurasDueToSpell(129340);
-                player->KilledMonsterCredit(55999);
-            }
+    bool OnTrigger(Player *player, AreaTriggerEntry const *)
+    {
+        if (player->GetQuestStatus(29794) != QUEST_STATUS_INCOMPLETE)
             return true;
+
+        if (!player->HasAura(129340))
+            return true;
+
+        auto const vehicleKit = player->GetVehicleKit();
+        if (!vehicleKit)
+            return true;
+
+        auto const soldierUnit = vehicleKit->GetPassenger(0);
+        if (!soldierUnit)
+            return true;
+
+        if (auto const solider = soldierUnit->ToCreature())
+        {
+            solider->AI()->DoAction(1);
+
+            player->RemoveAurasDueToSpell(129340);
+            player->KilledMonsterCredit(55999);
         }
+
+        return true;
+    }
 };
 
 class npc_hurted_soldier : public CreatureScript

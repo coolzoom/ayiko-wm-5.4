@@ -893,6 +893,13 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     CastSpell(this, 114355, true); // Dual-Wield
                     CastSpell(this, 115578, true); // Grimoire of Supremacy - +20% damage done
                     break;
+                case ENTRY_WATER_ELEMENTAL:
+                {
+                    SetCreateHealth(GetOwner()->CountPctFromMaxHealth(50));
+                    SetCreateMana(GetOwner()->GetMaxPower(POWER_MANA));
+                    SetBonusDamage(int32(GetOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FROST)));
+                    break;
+                }
                 default:
                     break;
             }
@@ -946,13 +953,6 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
 
                     SetMaxPower(POWER_ENERGY, GetCreatePowers(POWER_ENERGY));
                     SetPower(POWER_ENERGY, GetCreatePowers(POWER_ENERGY));
-                    break;
-                }
-                case ENTRY_WATER_ELEMENTAL:
-                {
-                    SetCreateHealth(GetOwner()->CountPctFromMaxHealth(50));
-                    SetCreateMana(GetOwner()->GetMaxPower(POWER_MANA));
-                    SetBonusDamage(int32(GetOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FROST)));
                     break;
                 }
                 case ENTRY_TREANT_GUARDIAN:

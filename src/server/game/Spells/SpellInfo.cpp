@@ -1546,7 +1546,6 @@ bool SpellInfo::IsAuraExclusiveBySpecificWith(SpellInfo const* spellInfo) const
     SpellSpecificType spellSpec2 = spellInfo->GetSpellSpecific();
     switch (spellSpec1)
     {
-        case SPELL_SPECIFIC_TRACKER:
         case SPELL_SPECIFIC_WARLOCK_ARMOR:
         case SPELL_SPECIFIC_MAGE_ARMOR:
         case SPELL_SPECIFIC_ELEMENTAL_SHIELD:
@@ -2373,10 +2372,6 @@ SpellSpecificType SpellInfo::GetSpellSpecific() const
                 case SPELL_AURA_MOD_POSSESS:
                 case SPELL_AURA_AOE_CHARM:
                     return SPELL_SPECIFIC_CHARM;
-                case SPELL_AURA_TRACK_CREATURES:
-                case SPELL_AURA_TRACK_RESOURCES:
-                case SPELL_AURA_TRACK_STEALTHED:
-                    return SPELL_SPECIFIC_TRACKER;
             }
         }
     }

@@ -36,3 +36,7 @@ UPDATE `gameobject_template` SET `castBarCaption` = 'Recovering', `flags` = 4, `
 DELETE FROM `gameobject_loot_template` WHERE `entry` = 209639;
 INSERT INTO `gameobject_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
 (209639, 74295, -100, 1, 0, 1, 1);
+
+-- [SQL] [Kysio's report] Npcs - Deviate Viper will no longer be mistakenly spawned by Supervisor Fizsprocket (fixes #788)
+DELETE FROM `creature` WHERE `guid` = 158447 AND `id` = 3051;
+UPDATE `smart_scripts` SET `action_param1` = 79733 WHERE `entryorguid` = 3051 AND `source_type` = 0 AND `id` = 0;

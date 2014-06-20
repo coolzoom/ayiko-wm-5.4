@@ -2106,15 +2106,15 @@ struct SpellEffectScalingEntry
 // @author Selenium: 5.4 valid
 struct SpellAuraOptionsEntry
 {
-    uint32    Id;                                           // 0       m_ID
-    uint32    StackAmount;                                  // 1       m_cumulativeAura
-    uint32    procChance;                                   // 2       m_procChance
-    uint32    procCharges;                                  // 3       m_procCharges
-    uint32    procFlags;                                    // 4       m_procTypeMask
-    //uint32    Unk_1;                                      // 5
-    //uint32    Unk_2;                                      // 6       Flag
-    //uint32    Unk_3;                                      // 7
-    //uint32    Unk_4;                                      // 8
+    uint32    Id;                                           // 0
+//  uint32    SpellId;                                      // 1
+//  uint32    Unk;                                          // 2
+    uint32    StackAmount;                                  // 3
+    uint32    procChance;                                   // 4
+    uint32    procCharges;                                  // 5
+    uint32    procFlags;                                    // 6
+    uint32    procCooldown;                                 // 7
+    uint32    spellProcsPerMinuteId;                        // 8
 };
 
 // SpellAuraRestrictions.dbc/

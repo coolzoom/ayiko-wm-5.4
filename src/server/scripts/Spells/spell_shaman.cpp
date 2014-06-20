@@ -352,25 +352,36 @@ class spell_sha_call_of_the_elements : public SpellScriptLoader
 
             void HandleOnHit()
             {
-                if (Player* _player = GetCaster()->ToPlayer())
-                {
-                    // immediately finishes the cooldown on totems with less than 3min cooldown
-                    const SpellCooldowns& cm = _player->GetSpellCooldownMap();
-                    for (SpellCooldowns::const_iterator itr = cm.begin(); itr != cm.end();)
-                    {
-                        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first);
-                        if (!spellInfo)
-                            continue;
+                auto const player = GetCaster()->ToPlayer();
+                if (!player)
+                    return;
 
-                        if ((spellInfo->Id == 51485 || spellInfo->Id == 108273 || spellInfo->Id == 108270
-                            || spellInfo->Id == 108269 || spellInfo->Id == 8143 || spellInfo->Id == 8177
-                            || spellInfo->Id == 5394 || spellInfo->Id == 2484)
-                            && spellInfo->GetRecoveryTime() > 0)
-                            _player->RemoveSpellCooldown((itr++)->first, true);
-                        else
-                            ++itr;
+                std::vector<uint32> spellsToRemoveCd;
+
+                // immediately finishes the cooldown on totems with less than 3min cooldown
+                for (auto const &kvPair : player->GetSpellCooldownMap())
+                {
+                    auto const spellInfo = sSpellMgr->GetSpellInfo(kvPair.first);
+                    if (!spellInfo || spellInfo->GetRecoveryTime() == 0)
+                        continue;
+
+                    switch (spellInfo->Id)
+                    {
+                        case 2484:
+                        case 5394:
+                        case 8143:
+                        case 8177:
+                        case 51485:
+                        case 108269:
+                        case 108270:
+                        case 108273:
+                            spellsToRemoveCd.emplace_back(spellInfo->Id);
+                            break;
                     }
                 }
+
+                for (auto const &spell : spellsToRemoveCd)
+                    player->RemoveSpellCooldown(spell, true);
             }
 
             void Register()

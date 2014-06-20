@@ -1175,25 +1175,32 @@ class spell_rog_preparation : public SpellScriptLoader
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
-                Player* caster = GetCaster()->ToPlayer();
+                Player * const caster = GetCaster()->ToPlayer();
+                if (!caster)
+                    return;
 
-                //immediately finishes the cooldown on certain Rogue abilities
-                const SpellCooldowns& cm = caster->GetSpellCooldownMap();
-                for (SpellCooldowns::const_iterator itr = cm.begin(); itr != cm.end();)
+                SpellCooldowns const &cm = caster->GetSpellCooldownMap();
+
+                SpellCooldowns::const_iterator i = cm.begin();
+                SpellCooldowns::const_iterator next = i;
+
+                for (; i != cm.end(); i = next)
                 {
-                    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first);
+                    ++next;
 
-                    if (spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE)
+                    SpellInfo const * const spellInfo = sSpellMgr->GetSpellInfo(i->first);
+                    if (!spellInfo)
+                        continue;
+
+                    switch (spellInfo->Id)
                     {
-                        if (spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_ROGUE_VAN_EVAS_SPRINT ||   // Vanish, Evasion, Sprint
-                            spellInfo->Id == 31224 ||
-                            spellInfo->SpellFamilyFlags[1] & SPELLFAMILYFLAG1_ROGUE_DISMANTLE)          // Dismantle
-                            caster->RemoveSpellCooldown((itr++)->first, true);
-                        else
-                            ++itr;
+                        case 1856:  // Vanish
+                        case 2983:  // Sprint
+                        case 5277:  // Evasion
+                        case 51722: // Dismantle
+                            caster->RemoveSpellCooldown(spellInfo->Id, true);
+                            break;
                     }
-                    else
-                        ++itr;
                 }
             }
 

@@ -44,8 +44,6 @@ enum HunterSpells
     HUNTER_SPELL_SERPENT_STING                      = 118253,
     HUNTER_SPELL_SERPENT_SPREAD                     = 87935,
     HUNTER_SPELL_CHIMERA_SHOT_HEAL                  = 53353,
-    HUNTER_SPELL_STEADY_SHOT_ENERGIZE               = 77443,
-    HUNTER_SPELL_COBRA_SHOT_ENERGIZE                = 91954,
     HUNTER_SPELL_KILL_COMMAND                       = 34026,
     HUNTER_SPELL_KILL_COMMAND_TRIGGER               = 83381,
     SPELL_MAGE_TEMPORAL_DISPLACEMENT                = 80354,
@@ -1622,8 +1620,6 @@ class spell_hun_cobra_shot : public SpellScriptLoader
                 {
                     if (Unit* target = GetHitUnit())
                     {
-                        _player->CastSpell(_player, HUNTER_SPELL_COBRA_SHOT_ENERGIZE, true);
-
                         if (AuraEffect *aurEff = target->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_HUNTER, 16384, 0, 0, GetCaster()->GetGUID()))
                         {
                             Aura *serpentSting = aurEff->GetBase();
@@ -1649,32 +1645,52 @@ class spell_hun_cobra_shot : public SpellScriptLoader
 };
 
 // Steady Shot - 56641
-class spell_hun_steady_shot : public SpellScriptLoader
+class spell_hun_steady_cobra_shot : public SpellScriptLoader
 {
-    public:
-        spell_hun_steady_shot() : SpellScriptLoader("spell_hun_steady_shot") { }
+    enum
+    {
+        SPELL_STEADY_SHOT_ENERGIZE          = 77443,
+        SPELL_COBRA_SHOT_ENERGIZE           = 91954,
+        SPELL_STEADY_SHOT                   = 56641,
+    };
 
-        class spell_hun_steady_shot_SpellScript : public SpellScript
+    class spell_hun_steady_cobra_shot_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_hun_steady_cobra_shot_SpellScript)
+
+            void Energize()
         {
-            PrepareSpellScript(spell_hun_steady_shot_SpellScript);
+            Unit * target = GetExplTargetUnit();
+            Unit * caster = GetCaster();
+            if (!caster || !target)
+                return;
 
-            void HandleOnHit()
+            uint32 spellId = (GetSpellInfo()->Id == SPELL_STEADY_SHOT) ? SPELL_STEADY_SHOT_ENERGIZE : SPELL_COBRA_SHOT_ENERGIZE;
+            if (SpellInfo const * const spell = sSpellMgr->GetSpellInfo(spellId))
             {
-                if (Player* player = GetCaster()->ToPlayer())
-                    if (GetHitUnit())
-                        player->CastSpell(player, HUNTER_SPELL_STEADY_SHOT_ENERGIZE, true);
-            }
+                int32 energizeValue = spell->Effects[EFFECT_0].BasePoints;
 
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_hun_steady_shot_SpellScript::HandleOnHit);
-            }
-        };
+                // Hunter T13 2P Bonus
+                if (caster->HasAura(105732))
+                    energizeValue *= 2;
 
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_hun_steady_shot_SpellScript();
+                caster->CastCustomSpell(caster, spellId, &energizeValue, NULL, NULL, true);
+            }
         }
+
+        void Register()
+        {
+            AfterCast += SpellCastFn(spell_hun_steady_cobra_shot_SpellScript::Energize);
+        }
+    };
+
+public:
+    spell_hun_steady_cobra_shot() : SpellScriptLoader("spell_hun_steady_cobra_shot") { }
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_hun_steady_cobra_shot_SpellScript();
+    }
 };
 
 // Chimera Shot - 53209
@@ -2278,7 +2294,7 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_ancient_hysteria();
     new spell_hun_kill_command();
     new spell_hun_cobra_shot();
-    new spell_hun_steady_shot();
+    new spell_hun_steady_cobra_shot();
     new spell_hun_chimera_shot();
     new spell_hun_last_stand_pet();
     new spell_hun_masters_call();

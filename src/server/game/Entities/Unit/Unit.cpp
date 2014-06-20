@@ -5719,15 +5719,15 @@ bool Unit::HandleAuraProcOnPowerAmount(Unit* victim, uint32 /*damage*/, AuraEffe
         CastSpell(target, trigger_spell_id, true, castItem, triggeredByAura);
 
     if (cooldown && GetTypeId() == TYPEID_PLAYER)
-        ToPlayer()->AddSpellCooldown(fakeCooldownId, 0, cooldown * IN_MILLISECONDS);
+        ToPlayer()->AddSpellCooldown(fakeCooldownId, 0, cooldown);
 
     if (cooldown && GetTypeId() == TYPEID_UNIT)
-        ToCreature()->_AddCreatureSpellCooldown(fakeCooldownId, time(NULL) + cooldown);
+        ToCreature()->_AddCreatureSpellCooldown(fakeCooldownId, time(NULL) + cooldown / IN_MILLISECONDS);
 
     return true;
 }
 
-//victim may be NULL
+// victim may be NULL
 bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggeredByAura, SpellInfo const* procSpell, uint32 procFlag, uint32 procEx, uint32 cooldown)
 {
     SpellInfo const* dummySpell = triggeredByAura->GetSpellInfo();
@@ -8104,7 +8104,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
 
                     // apply cooldown before cast to prevent processing itself
                     if (cooldown)
-                        player->AddSpellCooldown(fakeCooldownId, 0, cooldown * IN_MILLISECONDS);
+                        player->AddSpellCooldown(fakeCooldownId, 0, cooldown);
 
                     // Attack three time
                     for (uint32 i = 0; i < 3; ++i)
@@ -8757,10 +8757,10 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
         CastSpell(target, triggered_spell_id, true, castItem, triggeredByAura, originalCaster);
 
     if (cooldown && GetTypeId() == TYPEID_PLAYER)
-        ToPlayer()->AddSpellCooldown(fakeCooldownId, 0, cooldown * IN_MILLISECONDS);
+        ToPlayer()->AddSpellCooldown(fakeCooldownId, 0, cooldown);
 
     if (cooldown && GetTypeId() == TYPEID_UNIT)
-        ToCreature()->_AddCreatureSpellCooldown(fakeCooldownId, time(NULL) + cooldown);
+        ToCreature()->_AddCreatureSpellCooldown(fakeCooldownId, time(NULL) + cooldown / IN_MILLISECONDS);
 
     return true;
 }
@@ -8905,10 +8905,10 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 /*damage*/, Aura *triggeredByAura
         return false;
 
     if (cooldown && GetTypeId() == TYPEID_PLAYER)
-        ToPlayer()->AddSpellCooldown(fakeCooldownId, 0, cooldown * IN_MILLISECONDS);
+        ToPlayer()->AddSpellCooldown(fakeCooldownId, 0, cooldown);
 
     if (cooldown && GetTypeId() == TYPEID_UNIT)
-        ToCreature()->_AddCreatureSpellCooldown(fakeCooldownId, time(NULL) + cooldown);
+        ToCreature()->_AddCreatureSpellCooldown(fakeCooldownId, time(NULL) + cooldown / IN_MILLISECONDS);
 
     return true;
 }
@@ -10281,10 +10281,10 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
         CastSpell(target, trigger_spell_id, true, castItem, triggeredByAura);
 
     if (cooldown && GetTypeId() == TYPEID_PLAYER)
-        ToPlayer()->AddSpellCooldown(fakeCooldownId, 0, cooldown * IN_MILLISECONDS);
+        ToPlayer()->AddSpellCooldown(fakeCooldownId, 0, cooldown);
 
     if (cooldown && GetTypeId() == TYPEID_UNIT)
-        ToCreature()->_AddCreatureSpellCooldown(fakeCooldownId, time(NULL) + cooldown);
+        ToCreature()->_AddCreatureSpellCooldown(fakeCooldownId, time(NULL) + cooldown / IN_MILLISECONDS);
 
     return true;
 }
@@ -10342,16 +10342,13 @@ bool Unit::HandleOverrideClassScriptAuraProc(Unit* victim, uint32 /*damage*/, Au
     if (!triggerEntry)
         return false;
 
-    if (cooldown && GetTypeId() == TYPEID_PLAYER && ToPlayer()->HasSpellCooldown(triggered_spell_id))
-        return false;
-
     CastSpell(victim, triggered_spell_id, true, castItem, triggeredByAura);
 
     if (cooldown && GetTypeId() == TYPEID_PLAYER)
-        ToPlayer()->AddSpellCooldown(fakeCooldownId, 0, cooldown * IN_MILLISECONDS);
+        ToPlayer()->AddSpellCooldown(fakeCooldownId, 0, cooldown);
 
     if (cooldown && GetTypeId() == TYPEID_UNIT)
-        ToCreature()->_AddCreatureSpellCooldown(fakeCooldownId, time(NULL) + cooldown);
+        ToCreature()->_AddCreatureSpellCooldown(fakeCooldownId, time(NULL) + cooldown / IN_MILLISECONDS);
 
     return true;
 }
@@ -16519,6 +16516,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
     // Player is loaded now - do not allow passive spell casts to proc
     if (GetTypeId() == TYPEID_PLAYER && ToPlayer()->GetSession()->PlayerLoading())
         return;
+
     // For melee/ranged based attack need update skills and set some Aura states if victim present
     if (procFlag & MELEE_BASED_TRIGGER_MASK && target)
     {
@@ -16558,16 +16556,6 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
                 {
                     ModifyAuraState(AURA_STATE_DEFENSE, true);
                     StartReactiveTimer(REACTIVE_DEFENSE);
-                }
-            }
-            else // For attacker
-            {
-                // Overpower on victim dodge
-                if (procExtra & PROC_EX_DODGE && GetTypeId() == TYPEID_PLAYER && getClass() == CLASS_WARRIOR)
-                {
-                    ToPlayer()->AddComboPoints(target, 1);
-                    StartReactiveTimer(REACTIVE_OVERPOWER);
-                    CastSpell(this, 60503, true);
                 }
             }
         }
@@ -16820,8 +16808,18 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
 
         // For players set spell cooldown if need
         uint32 cooldown = 0;
-        if (prepare && GetTypeId() == TYPEID_PLAYER && i->spellProcEvent && i->spellProcEvent->cooldown)
-            cooldown = i->spellProcEvent->cooldown;
+        if (prepare && GetTypeId() == TYPEID_PLAYER)
+        {
+            if (i->spellProcEvent && i->spellProcEvent->cooldown)
+                cooldown = i->spellProcEvent->cooldown * IN_MILLISECONDS;
+
+            if (cooldown == 0)
+            {
+                auto const auraOptions = spellInfo->GetSpellAuraOptions();
+                if (auraOptions && auraOptions->procCooldown != 0)
+                    cooldown = auraOptions->procCooldown;
+            }
+        }
 
         // Hack Fix : Stealth is not removed on absorb damage
         if (spellInfo->HasAura(SPELL_AURA_MOD_STEALTH) && procExtra & PROC_EX_ABSORB && isVictim)
@@ -17384,10 +17382,6 @@ void Unit::UpdateReactives(uint32 p_time)
                 case REACTIVE_HUNTER_PARRY:
                     if (getClass() == CLASS_HUNTER && HasAuraState(AURA_STATE_HUNTER_PARRY))
                         ModifyAuraState(AURA_STATE_HUNTER_PARRY, false);
-                    break;
-                case REACTIVE_OVERPOWER:
-                    if (getClass() == CLASS_WARRIOR && GetTypeId() == TYPEID_PLAYER)
-                        ToPlayer()->ClearComboPoints();
                     break;
                 default:
                     break;

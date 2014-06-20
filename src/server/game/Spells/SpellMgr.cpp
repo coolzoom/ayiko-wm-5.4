@@ -4481,9 +4481,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[0].BasePoints = -100;
                     spellInfo->Effects[0].SpellClassMask[0] |= 0x20000;
                     break;
-                case 7384: // Overpower
-                    spellInfo->AttributesEx |= SPELL_ATTR1_ENABLE_AT_DODGE;
-                    break;
                 case 114695:// Pursuit of Justice
                     spellInfo->Effects[0].BasePoints = 0;
                     break;

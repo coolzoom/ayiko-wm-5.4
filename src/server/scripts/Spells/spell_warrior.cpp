@@ -41,7 +41,6 @@ enum WarriorSpells
     WARRIOR_SPELL_SHOCKWAVE_STUN                = 132168,
     WARRIOR_SPELL_HEROIC_LEAP_DAMAGE            = 52174,
     WARRIOR_SPELL_RALLYING_CRY                  = 122507,
-    WARRIOR_SPELL_GLYPH_OF_MORTAL_STRIKE        = 58368,
     WARRIOR_SPELL_SWORD_AND_BOARD               = 50227,
     WARRIOR_SPELL_SHIELD_SLAM                   = 23922,
     WARRIOR_SPELL_ALLOW_RAGING_BLOW             = 131116,
@@ -50,7 +49,6 @@ enum WarriorSpells
     WARRIOR_SPELL_BERZERKER_RAGE_EFFECT         = 23691,
     WARRIOR_SPELL_ENRAGE                        = 12880,
     WARRIOR_SPELL_COLOSSUS_SMASH                = 86346,
-    WARRIOR_SPELL_MORTAL_STRIKE_AURA            = 12294,
     WARRIOR_SPELL_SECOND_WIND_REGEN             = 16491,
     WARRIOR_SPELL_DRAGON_ROAR_KNOCK_BACK        = 118895,
     WARRIOR_SPELL_MEAT_CLEAVER_PROC             = 85739,
@@ -623,39 +621,39 @@ class spell_warr_sword_and_board : public SpellScriptLoader
 };
 
 // Mortal strike - 12294
-class spell_warr_mortal_strike : public SpellScriptLoader
+class spell_warr_mortal_strike final : public SpellScriptLoader
 {
-    public:
-        spell_warr_mortal_strike() : SpellScriptLoader("spell_warr_mortal_strike") { }
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
 
-        class spell_warr_mortal_strike_SpellScript : public SpellScript
+        enum
         {
-            PrepareSpellScript(spell_warr_mortal_strike_SpellScript);
-
-            void HandleOnHit()
-            {
-                // Fix Apply Mortal strike buff on player only if he has the correct glyph
-                if (Player* _player = GetCaster()->ToPlayer())
-                {
-                    if (Unit* target = GetHitUnit())
-                    {
-                        if (_player->HasAura(WARRIOR_SPELL_MORTAL_STRIKE_AURA))
-                            if (!_player->HasAura(WARRIOR_SPELL_GLYPH_OF_MORTAL_STRIKE))
-                                _player->RemoveAura(WARRIOR_SPELL_MORTAL_STRIKE_AURA);
-                    }
-                }
-            }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_warr_mortal_strike_SpellScript::HandleOnHit);
-            }
+            GLYPH_OF_MORTAL_STRIKE  = 58368
         };
 
-        SpellScript* GetSpellScript() const
+        void onInitEffects(uint32 &effectMask)
         {
-            return new spell_warr_mortal_strike_SpellScript();
+            auto const caster = GetCaster();
+            if (!caster || !caster->HasAura(GLYPH_OF_MORTAL_STRIKE))
+                effectMask &= ~(1 << EFFECT_4);
         }
+
+        void Register() final
+        {
+            OnInitEffects += AuraInitEffectsFn(script_impl::onInitEffects);
+        }
+    };
+
+public:
+    spell_warr_mortal_strike()
+        : SpellScriptLoader("spell_warr_mortal_strike")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
 };
 
 // Rallying cry - 97462

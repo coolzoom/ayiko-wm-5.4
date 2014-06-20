@@ -93,7 +93,6 @@ enum HunterSpells
     HUNTER_SPELL_STAMPEDE_DAMAGE_REDUCTION          = 130201,
     HUNTER_SPELL_GLYPH_OF_STAMPEDE                  = 57902,
     HUNTER_SPELL_GLYPH_OF_COLLAPSE                  = 126095,
-    HUNTER_SPELL_MARKED_FOR_DIE                     = 132106,
     HUNTER_SPELL_HUNTERS_MARK                       = 1130,
     HUNTER_SPELL_GLYPH_OF_MISDIRECTION              = 56829,
     HUNTER_SPELL_MISDIRECTION                       = 34477,
@@ -482,7 +481,6 @@ class spell_hun_blink_strike : public SpellScriptLoader
 
 // Called by Arcane Shot - 3044, Chimera Shot - 53209
 // Kill Command - 34026 and Explosive Shot - 53301
-// Glyph of Marked for Die - 132106
 class spell_hun_glyph_of_marked_for_die : public SpellScriptLoader
 {
     public:
@@ -494,10 +492,8 @@ class spell_hun_glyph_of_marked_for_die : public SpellScriptLoader
 
             void HandleOnHit()
             {
-                if (Player* _player = GetCaster()->ToPlayer())
-                    if (Unit* target = GetHitUnit())
-                        if (_player->HasAura(HUNTER_SPELL_MARKED_FOR_DIE))
-                            _player->CastSpell(target, HUNTER_SPELL_HUNTERS_MARK, true);
+                if (Unit* const target = GetHitUnit())
+                    GetCaster()->CastSpell(target, HUNTER_SPELL_HUNTERS_MARK, true);
             }
 
             void Register()
@@ -1577,9 +1573,6 @@ class spell_hun_kill_command : public SpellScriptLoader
                         return;
 
                     pet->CastSpell(GetExplTargetUnit(), HUNTER_SPELL_KILL_COMMAND_TRIGGER, true);
-                    // apply Hunter's Mark
-                    if (Unit * const owner = pet->GetOwner())
-                        owner->CastSpell(GetExplTargetUnit(), 1130, true);
 
                     if (pet->getVictim())
                     {

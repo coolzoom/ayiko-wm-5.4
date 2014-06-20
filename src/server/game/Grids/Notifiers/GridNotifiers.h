@@ -63,7 +63,7 @@ namespace Trinity
 
     struct PlayerRelocationNotifier : public VisibleNotifier
     {
-        PlayerRelocationNotifier(Player &player) : VisibleNotifier(player) {}
+        PlayerRelocationNotifier(Player &player) : VisibleNotifier(player) { }
 
         template<class T> void Visit(GridRefManager<T> &m) { VisibleNotifier::Visit(m); }
         void Visit(CreatureMapType &);
@@ -72,9 +72,14 @@ namespace Trinity
 
     struct CreatureRelocationNotifier
     {
-        Creature &i_creature;
-        CreatureRelocationNotifier(Creature &c) : i_creature(c) {}
-        template<class T> void Visit(GridRefManager<T> &) {}
+        typedef std::vector<Creature *> StorageType;
+        StorageType const &i_creatureList;
+
+        CreatureRelocationNotifier(StorageType const &storage)
+            : i_creatureList(storage)
+        { }
+
+        template<class T> void Visit(GridRefManager<T> &) { }
         void Visit(CreatureMapType &);
         void Visit(PlayerMapType &);
     };

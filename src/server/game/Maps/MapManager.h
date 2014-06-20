@@ -22,7 +22,6 @@
 #include "Define.h"
 #include "Common.h"
 #include "Map.h"
-#include "GridStates.h"
 #include "MapUpdater.h"
 
 #include <ace/Singleton.h>
@@ -102,11 +101,6 @@ class MapManager
             return IsValidMAP(mapid, false) && Trinity::IsValidMapCoord(x, y, z, o);
         }
 
-        static bool IsValidMapCoord(WorldLocation const& loc)
-        {
-            return IsValidMapCoord(loc.GetMapId(), loc.GetPositionX(), loc.GetPositionY(), loc.GetPositionZ(), loc.GetOrientation());
-        }
-
         // modulos a radian orientation to the range of 0..2PI
         static float NormalizeOrientation(float o)
         {
@@ -161,11 +155,6 @@ class MapManager
     private:
         typedef std::unordered_map<uint32, Map*> MapMapType;
         typedef std::vector<bool> InstanceIds;
-
-        // debugging code, should be deleted some day
-        void checkAndCorrectGridStatesArray();              // just for debugging to find some memory overwrites
-        GridState* i_GridStates[MAX_GRID_STATE];            // shadow entries to the global array in Map.cpp
-        int i_GridStateErrorCount;
 
         MapManager();
         ~MapManager();

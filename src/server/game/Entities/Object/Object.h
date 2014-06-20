@@ -903,6 +903,11 @@ class WorldObject : public Object, public WorldLocation
         float GetSightRange(const WorldObject* target = NULL) const;
         bool canSeeOrDetect(WorldObject const* obj, bool ignoreStealth = false, bool distanceCheck = false) const;
 
+        void setExplicitSeerGuid(uint64 guid)
+        {
+            m_explicitSeerGuid = guid;
+        }
+
         FlaggedValuesArray<int32, StealthType, TOTAL_STEALTH_TYPES> m_stealth;
         FlaggedValuesArray<int32, StealthType, TOTAL_STEALTH_TYPES> m_stealthDetect;
 
@@ -927,8 +932,8 @@ class WorldObject : public Object, public WorldLocation
         void SetZoneScript();
         ZoneScript* GetZoneScript() const { return m_zoneScript; }
 
-        TempSummon* SummonCreature(uint32 id, const Position &pos, TempSummonType spwtype = TEMPSUMMON_MANUAL_DESPAWN, uint32 despwtime = 0, uint32 vehId = 0, uint64 viewerGuid = 0, std::list<uint64>* viewersList = NULL) const;
-        TempSummon* SummonCreature(uint32 id, float x, float y, float z, float ang = 0, TempSummonType spwtype = TEMPSUMMON_MANUAL_DESPAWN, uint32 despwtime = 0, uint64 viewerGuid = 0, std::list<uint64>* viewersList = NULL)
+        TempSummon* SummonCreature(uint32 id, const Position &pos, TempSummonType spwtype = TEMPSUMMON_MANUAL_DESPAWN, uint32 despwtime = 0, uint32 vehId = 0) const;
+        TempSummon* SummonCreature(uint32 id, float x, float y, float z, float ang = 0, TempSummonType spwtype = TEMPSUMMON_MANUAL_DESPAWN, uint32 despwtime = 0)
         {
             if (!x && !y && !z)
             {
@@ -937,9 +942,9 @@ class WorldObject : public Object, public WorldLocation
             }
             Position pos;
             pos.Relocate(x, y, z, ang);
-            return SummonCreature(id, pos, spwtype, despwtime, 0, viewerGuid, viewersList);
+            return SummonCreature(id, pos, spwtype, despwtime, 0);
         }
-        GameObject* SummonGameObject(uint32 entry, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 respawnTime, uint64 viewerGuid = 0, std::list<uint64>* viewersList = NULL);
+        GameObject* SummonGameObject(uint32 entry, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 respawnTime);
         Creature*   SummonTrigger(float x, float y, float z, float ang, uint32 dur, CreatureAI* (*GetAI)(Creature*) = NULL);
         void SummonCreatureGroup(uint8 group, std::list<TempSummon*>& list);
 
@@ -958,6 +963,14 @@ class WorldObject : public Object, public WorldLocation
         virtual void UpdateObjectVisibility(bool forced = true);
         void BuildUpdate(UpdateDataMapType&);
 
+        // relocation and visibility system functions
+        void AddToNotify(uint16 f) { m_notifyflags |= f;}
+        bool isNeedNotify(uint16 f) const { return m_notifyflags & f;}
+        uint16 GetNotifyFlags() const { return m_notifyflags; }
+        bool NotifyExecuted(uint16 f) const { return m_executed_notifies & f;}
+        void SetNotified(uint16 f) { m_executed_notifies |= f;}
+        void ResetAllNotifies() { m_notifyflags = 0; m_executed_notifies = 0; }
+
         bool isActiveObject() const { return m_isActive; }
         void setActive(bool isActiveObject);
         void SetWorldObject(bool apply);
@@ -967,13 +980,6 @@ class WorldObject : public Object, public WorldLocation
         template<class NOTIFIER> void VisitNearbyObject(const float &radius, NOTIFIER &notifier, bool loadGrids = false) const { if (IsInWorld()) GetMap()->VisitAll(GetPositionX(), GetPositionY(), radius, notifier, loadGrids); }
         template<class NOTIFIER> void VisitNearbyGridObject(const float &radius, NOTIFIER &notifier, bool loadGrids = false) const { if (IsInWorld()) GetMap()->VisitGrid(GetPositionX(), GetPositionY(), radius, notifier, loadGrids); }
         template<class NOTIFIER> void VisitNearbyWorldObject(const float &radius, NOTIFIER &notifier, bool loadGrids = false) const { if (IsInWorld()) GetMap()->VisitWorld(GetPositionX(), GetPositionY(), radius, notifier, loadGrids); }
-#ifdef MAP_BASED_RAND_GEN
-        int32 irand(int32 min, int32 max) const     { return int32 (GetMap()->mtRand.randInt(max - min)) + min; }
-        uint32 urand(uint32 min, uint32 max) const  { return GetMap()->mtRand.randInt(max - min) + min;}
-        int32 rand32() const                        { return GetMap()->mtRand.randInt();}
-        double rand_norm() const                    { return GetMap()->mtRand.randExc();}
-        double rand_chance() const                  { return GetMap()->mtRand.randExc(100.0);}
-#endif
 
         uint32  LastUsedScriptID;
 
@@ -992,18 +998,6 @@ class WorldObject : public Object, public WorldLocation
         uint32 GetWMOAreaId() const;
 
         MovementInfo m_movementInfo;
-
-        // Personal visibility system
-        bool MustBeVisibleOnlyForSomePlayers() const { return !_visibilityPlayerList.empty(); }
-        void GetMustBeVisibleForPlayersList(std::list<uint64/* guid*/>& playerList) { playerList = _visibilityPlayerList; }
-
-        bool IsPlayerInPersonnalVisibilityList(uint64 guid) const;
-        void AddPlayerInPersonnalVisibilityList(uint64 guid) { if (IS_PLAYER_GUID(guid)) _visibilityPlayerList.push_back(guid); }
-        void AddPlayersInPersonnalVisibilityList(std::list<uint64> viewerList);
-        void RemovePlayerFromPersonnalVisibilityList(uint64 guid) { if (IS_PLAYER_GUID(guid)) _visibilityPlayerList.remove(guid); }
-
-        mutable uint32 m_lastEntrySummon;
-        mutable uint32 m_summonCounter;
 
     protected:
         std::string m_name;
@@ -1033,15 +1027,18 @@ class WorldObject : public Object, public WorldLocation
         uint32 m_InstanceId;                                // in map copy with instance id
         uint32 m_phaseMask;                                 // in area phase state
 
-        std::list<uint64/* guid*/> _visibilityPlayerList;
+        uint16 m_notifyflags;
+        uint16 m_executed_notifies;
 
         virtual bool _IsWithinDist(WorldObject const* obj, float dist2compare, bool is3D) const;
 
-        bool CanNeverSee(WorldObject const* obj) const { return GetMap() != obj->GetMap() || !InSamePhase(obj); }
+        bool CanNeverSee(WorldObject const* obj) const;
         virtual bool CanAlwaysSee(WorldObject const* /*obj*/) const { return false; }
         bool CanDetect(WorldObject const* obj, bool ignoreStealth) const;
         bool CanDetectInvisibilityOf(WorldObject const* obj) const;
         bool CanDetectStealthOf(WorldObject const* obj) const;
+
+        uint64 m_explicitSeerGuid;
 };
 
 namespace Trinity

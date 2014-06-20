@@ -290,26 +290,11 @@ template<class TMap> class MapScript : public UpdatableScript<TMap>
         // Gets the MapEntry structure associated with this script. Can return NULL.
         MapEntry const* GetEntry() { return _mapEntry; }
 
-        // Called when the map is created.
-        virtual void OnCreate(TMap* /*map*/) { }
-
-        // Called just before the map is destroyed.
-        virtual void OnDestroy(TMap* /*map*/) { }
-
-        // Called when a grid map is loaded.
-        virtual void OnLoadGridMap(TMap* /*map*/, GridMap* /*gmap*/, uint32 /*gx*/, uint32 /*gy*/) { }
-
-        // Called when a grid map is unloaded.
-        virtual void OnUnloadGridMap(TMap* /*map*/, GridMap* /*gmap*/, uint32 /*gx*/, uint32 /*gy*/)  { }
-
         // Called when a player enters the map.
         virtual void OnPlayerEnter(TMap* /*map*/, Player* /*player*/) { }
 
         // Called when a player leaves the map.
         virtual void OnPlayerLeave(TMap* /*map*/, Player* /*player*/) { }
-
-        // Called on every map update tick.
-        virtual void OnUpdate(TMap* /*map*/, uint32 /*diff*/) { }
 };
 
 class WorldMapScript : public ScriptObject, public MapScript<Map>
@@ -839,13 +824,8 @@ class ScriptMgr
 
     public: /* MapScript */
 
-        void OnCreateMap(Map* map);
-        void OnDestroyMap(Map* map);
-        void OnLoadGridMap(Map* map, GridMap* gmap, uint32 gx, uint32 gy);
-        void OnUnloadGridMap(Map* map, GridMap* gmap, uint32 gx, uint32 gy);
         void OnPlayerEnterMap(Map* map, Player* player);
         void OnPlayerLeaveMap(Map* map, Player* player);
-        void OnMapUpdate(Map* map, uint32 diff);
 
     public: /* InstanceMapScript */
 

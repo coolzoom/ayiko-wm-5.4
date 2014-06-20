@@ -1287,16 +1287,13 @@ void MovementInfo::Normalize()
         hasFallDirection = false;
 }
 
-WorldObject::WorldObject(bool isWorldObject): WorldLocation(),
-m_name(""), m_isActive(false), m_isWorldObject(isWorldObject), m_zoneScript(NULL),
-m_transport(NULL), m_currMap(NULL), m_InstanceId(0),
-m_phaseMask(PHASEMASK_NORMAL)
+WorldObject::WorldObject(bool isWorldObject)
+    : m_isActive(false), m_isWorldObject(isWorldObject), m_zoneScript(NULL)
+    , m_transport(NULL), m_currMap(NULL), m_InstanceId(0), m_phaseMask(PHASEMASK_NORMAL)
+    , m_notifyflags(0), m_executed_notifies(0), m_explicitSeerGuid()
 {
     m_serverSideVisibility.SetValue(SERVERSIDE_VISIBILITY_GHOST, GHOST_VISIBILITY_ALIVE | GHOST_VISIBILITY_GHOST);
     m_serverSideVisibilityDetect.SetValue(SERVERSIDE_VISIBILITY_GHOST, GHOST_VISIBILITY_ALIVE);
-
-    m_lastEntrySummon = 0;
-    m_summonCounter = 0;
 }
 
 void WorldObject::SetWorldObject(bool on)
@@ -1420,6 +1417,18 @@ bool WorldObject::_IsWithinDist(WorldObject const* obj, float dist2compare, bool
     }
 
     return distsq < maxdist * maxdist;
+}
+
+bool WorldObject::CanNeverSee(WorldObject const* obj) const
+{
+    if (GetMap() != obj->GetMap() || !InSamePhase(obj))
+        return true;
+
+    if (obj->m_explicitSeerGuid == GetGUID())
+        return false;
+
+    // if this and obj do not have common seer, they should not see each other
+    return m_explicitSeerGuid != obj->m_explicitSeerGuid;
 }
 
 bool WorldObject::IsWithinLOSInMap(const WorldObject* obj) const
@@ -1770,8 +1779,7 @@ float WorldObject::GetVisibilityRange() const
     if (isActiveObject() && !ToPlayer())
         return MAX_VISIBILITY_DISTANCE;
     else
-        if (GetMap())
-            return GetMap()->GetVisibilityRange();
+        return GetMap()->GetVisibilityRange();
 
     return MAX_VISIBILITY_DISTANCE;
 }
@@ -1800,17 +1808,6 @@ bool WorldObject::canSeeOrDetect(WorldObject const* obj, bool ignoreStealth, boo
 {
     if (this == obj)
         return true;
-
-    if (obj->MustBeVisibleOnlyForSomePlayers())
-    {
-        Player const* thisPlayer = ToPlayer();
-
-        if (!thisPlayer)
-            return false;
-
-        if (!obj->IsPlayerInPersonnalVisibilityList(thisPlayer->GetGUID()))
-            return false;
-    }
 
     if (obj->IsNeverVisible() || CanNeverSee(obj))
         return false;
@@ -1988,29 +1985,6 @@ bool WorldObject::CanDetectStealthOf(WorldObject const* obj) const
     }
 
     return true;
-}
-
-bool WorldObject::IsPlayerInPersonnalVisibilityList(uint64 guid) const
-{
-    if (!IS_PLAYER_GUID(guid))
-        return false;
-
-    for (auto Itr: _visibilityPlayerList)
-        if (Itr == guid)
-            return true;
-
-    return false;
-}
-
-void WorldObject::AddPlayersInPersonnalVisibilityList(std::list<uint64> viewerList)
-{
-    for (auto guid: viewerList)
-    {
-        if (!IS_PLAYER_GUID(guid))
-            continue;
-
-        _visibilityPlayerList.push_back(guid);
-    }
 }
 
 void WorldObject::SendPlaySound(uint32 Sound, bool OnlySelf)
@@ -2400,7 +2374,7 @@ void WorldObject::AddObjectToRemoveList()
     map->AddObjectToRemoveList(this);
 }
 
-TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropertiesEntry const* properties /*= NULL*/, uint32 duration /*= 0*/, Unit* summoner /*= NULL*/, uint32 spellId /*= 0*/, uint32 vehId /*= 0*/, uint64 viewerGuid /*= 0*/, std::list<uint64>* viewersList /*= NULL*/)
+TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropertiesEntry const* properties /*= NULL*/, uint32 duration /*= 0*/, Unit* summoner /*= NULL*/, uint32 spellId /*= 0*/, uint32 vehId /*= 0*/)
 {
     uint32 mask = UNIT_MASK_SUMMON;
     if (properties)
@@ -2504,13 +2478,6 @@ TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropert
     summon->SetHomePosition(pos);
 
     summon->InitStats(duration);
-
-    if (viewerGuid)
-        summon->AddPlayerInPersonnalVisibilityList(viewerGuid);
-
-    if (viewersList)
-        summon->AddPlayersInPersonnalVisibilityList(*viewersList);
-
     AddToMap(summon->ToCreature());
     summon->InitSummon();
 
@@ -2558,23 +2525,11 @@ void WorldObject::SetZoneScript()
     }
 }
 
-TempSummon* WorldObject::SummonCreature(uint32 entry, const Position &pos, TempSummonType spwtype, uint32 duration, uint32 /*vehId*/, uint64 viewerGuid, std::list<uint64>* viewersList) const
+TempSummon* WorldObject::SummonCreature(uint32 entry, const Position &pos, TempSummonType spwtype, uint32 duration, uint32 /*vehId*/) const
 {
-    if (m_lastEntrySummon != entry)
-    {
-        m_lastEntrySummon = entry;
-        m_summonCounter = 1;
-    }
-    else
-    {
-        m_summonCounter++;
-        if (m_summonCounter > 20 && isType(TYPEMASK_PLAYER))
-            TC_LOG_INFO("molten", "Player %u spam summon of creature %u [counter %u]", GetGUIDLow(), entry, m_summonCounter);
-    }
-
     if (Map* map = FindMap())
     {
-        if (TempSummon* summon = map->SummonCreature(entry, pos, NULL, duration, isType(TYPEMASK_UNIT) ? (Unit*)this : NULL, 0, 0, viewerGuid, viewersList))
+        if (TempSummon* summon = map->SummonCreature(entry, pos, NULL, duration, isType(TYPEMASK_UNIT) ? (Unit*)this : NULL, 0, 0))
         {
             summon->SetTempSummonType(spwtype);
             return summon;
@@ -2584,7 +2539,7 @@ TempSummon* WorldObject::SummonCreature(uint32 entry, const Position &pos, TempS
     return NULL;
 }
 
-GameObject* WorldObject::SummonGameObject(uint32 entry, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 respawnTime, uint64 viewerGuid, std::list<uint64>* viewersList)
+GameObject* WorldObject::SummonGameObject(uint32 entry, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 respawnTime)
 {
     if (!IsInWorld())
         return NULL;
@@ -2608,14 +2563,7 @@ GameObject* WorldObject::SummonGameObject(uint32 entry, float x, float y, float 
     else
         go->SetSpawnedByDefault(false);
 
-    if (viewerGuid)
-        go->AddPlayerInPersonnalVisibilityList(viewerGuid);
-
-    if (viewersList)
-        go->AddPlayersInPersonnalVisibilityList(*viewersList);
-
     map->AddToMap(go);
-
     return go;
 }
 

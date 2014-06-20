@@ -47,48 +47,38 @@
 
 #include <zlib.h>
 
-bool MapSessionFilter::Process(WorldPacket* packet)
+bool MapSessionFilter::Process(WorldPacket const *packet) const
 {
-    Opcodes opcode = DropHighBytes(packet->GetOpcode());
-    OpcodeHandler const* opHandle = opcodeTable[WOW_CLIENT][opcode];
+    OpcodeHandler const * const handler = opcodeTable[WOW_CLIENT][packet->GetOpcode()];
 
-    //let's check if our opcode can be really processed in Map::Update()
-    if (opHandle->packetProcessing == PROCESS_INPLACE)
+    // let's check if our opcode can be really processed in Map::Update()
+    if (handler->packetProcessing == PROCESS_INPLACE)
         return true;
 
-    //we do not process thread-unsafe packets
-    if (opHandle->packetProcessing == PROCESS_THREADUNSAFE)
+    // we do not process thread-unsafe packets
+    if (handler->packetProcessing == PROCESS_THREADUNSAFE)
         return false;
 
-    Player* player = m_pSession->GetPlayer();
-    if (!player)
-        return false;
-
-    //in Map::Update() we do not process packets where player is not in world!
-    return player->IsInWorld();
+    // in Map::Update() we do not process packets where player is not in world!
+    Player const * const player = m_session->GetPlayer();
+    return player && player->IsInWorld();
 }
 
-//we should process ALL packets when player is not in world/logged in
-//OR packet handler is not thread-safe!
-bool WorldSessionFilter::Process(WorldPacket* packet)
+bool WorldSessionFilter::Process(WorldPacket const *packet) const
 {
-    Opcodes opcode = DropHighBytes(packet->GetOpcode());
-    OpcodeHandler const* opHandle = opcodeTable[WOW_CLIENT][opcode];
-    //check if packet handler is supposed to be safe
-    if (opHandle->packetProcessing == PROCESS_INPLACE)
+    OpcodeHandler const * const handler = opcodeTable[WOW_CLIENT][packet->GetOpcode()];
+
+    // check if packet handler is supposed to be safe
+    if (handler->packetProcessing == PROCESS_INPLACE)
         return true;
 
-    //thread-unsafe packets should be processed in World::UpdateSessions()
-    if (opHandle->packetProcessing == PROCESS_THREADUNSAFE)
+    // thread-unsafe packets should be processed in World::UpdateSessions()
+    if (handler->packetProcessing == PROCESS_THREADUNSAFE)
         return true;
 
-    //no player attached? -> our client! ^^
-    Player* player = m_pSession->GetPlayer();
-    if (!player)
-        return true;
-
-    //lets process all packets for non-in-the-world player
-    return (player->IsInWorld() == false);
+    // lets process all packets for non-in-the-world player
+    Player const * const player = m_session->GetPlayer();
+    return !(player && player->IsInWorld());
 }
 
 /// WorldSession constructor
@@ -284,7 +274,7 @@ struct OpcodeInfo
 };
 
 /// Update the WorldSession (triggered by World update)
-bool WorldSession::Update(uint32 diff, PacketFilter& updater)
+bool WorldSession::Update(uint32 diff, PacketFilter const &filter)
 {
     /// Update Timeout timer.
     UpdateTimeOutTime(diff);
@@ -309,7 +299,7 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
     uint32 processedPackets = 0;
     while (m_Socket && !m_Socket->IsClosed() &&
             !_recvQueue.empty() && _recvQueue.peek(true) != firstDelayedPacket &&
-            _recvQueue.next(packet, updater))
+            _recvQueue.next(packet, filter))
     {
         const OpcodeHandler* opHandle = opcodeTable[WOW_CLIENT][packet->GetOpcode()];
 
@@ -419,7 +409,7 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
 
     //check if we are safe to proceed with logout
     //logout procedure should happen only in World::UpdateSessions() method!!!
-    if (updater.ProcessLogout())
+    if (filter.ProcessLogout())
     {
         time_t currTime = time(NULL);
         ///- If necessary, log the player out

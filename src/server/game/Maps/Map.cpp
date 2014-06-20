@@ -17,7 +17,6 @@
  */
 
 #include "Map.h"
-#include "GridStates.h"
 #include "ScriptMgr.h"
 #include "VMapFactory.h"
 #include "MapInstanced.h"
@@ -33,6 +32,8 @@
 #include "LFGMgr.h"
 #include "DynamicTree.h"
 #include "Vehicle.h"
+
+namespace {
 
 union u_map_magic
 {
@@ -50,12 +51,74 @@ u_map_magic MapLiquidMagic  = { {'M','L','I','Q'} };
 #define MAX_GRID_LOAD_TIME      50
 #define MAX_CREATURE_ATTACK_RADIUS  (45.0f * sWorld->getRate(RATE_CREATURE_AGGRO))
 
-GridState* si_GridStates[MAX_GRID_STATE];
+typedef void (*GridStateUpdate)(Map &, NGridType &, uint32);
+
+void InvalidStateUpdate(Map &, NGridType &, uint32) { }
+
+void ActiveStateUpdate(Map &map, NGridType &grid, uint32 diff)
+{
+    GridInfo * const info = grid.getGridInfoRef();
+
+    // Only check grid activity every (grid_expiry/10) ms, because it's really useless to do it every cycle
+    info->UpdateTimeTracker(diff);
+    if (!info->getTimeTracker().Passed())
+        return;
+
+    if (!grid.GetWorldObjectCountInNGrid<Player>() && !map.ActiveObjectsNearGrid(grid))
+    {
+        ObjectGridStoper worker;
+        TypeContainerVisitor<ObjectGridStoper, GridTypeMapContainer> visitor(worker);
+        grid.VisitAllGrids(visitor);
+        grid.SetGridState(GRID_STATE_IDLE);
+
+        TC_LOG_DEBUG("maps", "Grid[%u, %u] on map %u moved to IDLE state",
+                     grid.getX(), grid.getY(), map.GetId());
+    }
+    else
+    {
+        map.ResetGridExpiry(grid, 0.1f);
+    }
+}
+
+void IdleStateUpdate(Map &map, NGridType &grid, uint32)
+{
+    map.ResetGridExpiry(grid);
+    grid.SetGridState(GRID_STATE_REMOVAL);
+    TC_LOG_DEBUG("maps", "Grid[%u, %u] on map %u moved to REMOVAL state",
+                 grid.getX(), grid.getY(), map.GetId());
+}
+
+void RemovalStateUpdate(Map &map, NGridType &grid, uint32 diff)
+{
+    GridInfo * const info = grid.getGridInfoRef();
+
+    if (info->getUnloadLock())
+        return;
+
+    info->UpdateTimeTracker(diff);
+    if (!info->getTimeTracker().Passed())
+        return;
+
+    if (!map.UnloadGrid(grid, false))
+    {
+        TC_LOG_DEBUG("maps", "Grid[%u, %u] for map %u differed unloading due to players or active objects nearby",
+                     grid.getX(), grid.getY(), map.GetId());
+        map.ResetGridExpiry(grid);
+    }
+}
+
+GridStateUpdate si_GridStates[MAX_GRID_STATE] =
+{
+    &InvalidStateUpdate,
+    &ActiveStateUpdate,
+    &IdleStateUpdate,
+    &RemovalStateUpdate
+};
+
+} // namespace
 
 Map::~Map()
 {
-    sScriptMgr->OnDestroyMap(this);
-
     UnloadAll();
 
     while (!i_worldObjects.empty())
@@ -139,28 +202,28 @@ void Map::LoadMap(int gx, int gy, bool reload)
 {
     if (i_InstanceId != 0)
     {
-        if (GridMaps[gx][gy])
+        if (i_gridMaps[gx][gy])
             return;
 
         // load grid map for base map
-        if (!m_parentMap->GridMaps[gx][gy])
-            m_parentMap->EnsureGridCreated(GridCoord(63-gx, 63-gy));
+        if (!m_parentMap->i_gridMaps[gx][gy])
+            m_parentMap->EnsureGridCreated_i(GridCoord(63-gx, 63-gy));
 
         ((MapInstanced*)(m_parentMap))->AddGridMapReference(GridCoord(gx, gy));
-        GridMaps[gx][gy] = m_parentMap->GridMaps[gx][gy];
+        i_gridMaps[gx][gy] = m_parentMap->i_gridMaps[gx][gy];
         return;
     }
 
-    if (GridMaps[gx][gy] && !reload)
+    if (i_gridMaps[gx][gy] && !reload)
         return;
 
     //map already load, delete it before reloading (Is it necessary? Do we really need the ability the reload maps during runtime?)
-    if (GridMaps[gx][gy])
+    if (i_gridMaps[gx][gy])
     {
         TC_LOG_DEBUG("maps", "Unloading previously loaded map %u before reloading.", GetId());
 
-        delete (GridMaps[gx][gy]);
-        GridMaps[gx][gy]=NULL;
+        delete i_gridMaps[gx][gy];
+        i_gridMaps[gx][gy]=NULL;
     }
 
     // map file name
@@ -170,8 +233,8 @@ void Map::LoadMap(int gx, int gy, bool reload)
     snprintf(tmp, len, (char *)(sWorld->GetDataPath()+"maps/%03u%02u%02u.map").c_str(), GetId(), gx, gy);
     TC_LOG_INFO("maps", "Loading map %s", tmp);
     // loading data
-    GridMaps[gx][gy] = new GridMap();
-    if (!GridMaps[gx][gy]->loadData(tmp))
+    i_gridMaps[gx][gy] = new GridMap();
+    if (!i_gridMaps[gx][gy]->loadData(tmp))
     {
         TC_LOG_ERROR("maps", "Error loading map file: \n %s\n", tmp);
     }
@@ -183,22 +246,6 @@ void Map::LoadMapAndVMap(int gx, int gy)
     LoadMap(gx, gy);
     if (i_InstanceId == 0)
         LoadVMap(gx, gy);                                   // Only load the data for the base map
-}
-
-void Map::InitStateMachine()
-{
-    si_GridStates[GRID_STATE_INVALID] = new InvalidState;
-    si_GridStates[GRID_STATE_ACTIVE] = new ActiveState;
-    si_GridStates[GRID_STATE_IDLE] = new IdleState;
-    si_GridStates[GRID_STATE_REMOVAL] = new RemovalState;
-}
-
-void Map::DeleteStateMachine()
-{
-    delete si_GridStates[GRID_STATE_INVALID];
-    delete si_GridStates[GRID_STATE_ACTIVE];
-    delete si_GridStates[GRID_STATE_IDLE];
-    delete si_GridStates[GRID_STATE_REMOVAL];
 }
 
 Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode, Map* _parent):
@@ -214,15 +261,13 @@ i_scriptLock(false)
         for (unsigned int j=0; j < MAX_NUMBER_OF_GRIDS; ++j)
         {
             //z code
-            GridMaps[idx][j] =NULL;
+            i_gridMaps[idx][j] =NULL;
             setNGrid(NULL, idx, j);
         }
     }
 
     //lets initialize visibility distance for map
     Map::InitVisibilityDistance();
-
-    sScriptMgr->OnCreateMap(this);
 }
 
 void Map::InitVisibilityDistance()
@@ -310,27 +355,42 @@ void Map::EnsureGridCreated(const GridCoord &p)
 {
     if (!getNGrid(p.x_coord, p.y_coord))
     {
-        TRINITY_GUARD(ACE_Thread_Mutex, Lock);
-        if (!getNGrid(p.x_coord, p.y_coord))
-        {
-            TC_LOG_DEBUG("maps", "Creating grid[%u, %u] for map %u instance %u", p.x_coord, p.y_coord, GetId(), i_InstanceId);
-
-            setNGrid(new NGridType(p.x_coord*MAX_NUMBER_OF_GRIDS + p.y_coord, p.x_coord, p.y_coord, i_gridExpiry, sWorld->getBoolConfig(CONFIG_GRID_UNLOAD)),
-                p.x_coord, p.y_coord);
-
-            // build a linkage between this map and NGridType
-            buildNGridLinkage(getNGrid(p.x_coord, p.y_coord));
-
-            getNGrid(p.x_coord, p.y_coord)->SetGridState(GRID_STATE_IDLE);
-
-            //z coord
-            int gx = (MAX_NUMBER_OF_GRIDS - 1) - p.x_coord;
-            int gy = (MAX_NUMBER_OF_GRIDS - 1) - p.y_coord;
-
-            if (!GridMaps[gx][gy])
-                LoadMapAndVMap(gx, gy);
-        }
+        GridGuardType guard(i_gridLock);
+        EnsureGridCreated_i(p);
     }
+}
+
+//Create NGrid so the object can be added to it
+//But object data is not loaded here
+void Map::EnsureGridCreated_i(const GridCoord &p)
+{
+    if (getNGrid(p.x_coord, p.y_coord))
+        return;
+
+    // Such way allows to retrieve hint position for insert, so it
+    // will have amortized constant complexity instead of logarithmic
+    size_t const key = p.x_coord * MAX_NUMBER_OF_GRIDS + p.y_coord;
+    GridContainerType::iterator lb = i_loadedGrids.lower_bound(key);
+
+    if (lb != i_loadedGrids.end() && !i_loadedGrids.key_comp()(key, lb->first))
+        return;
+
+    TC_LOG_DEBUG("maps", "Creating grid[%u, %u] for map %u instance %u",
+                 p.x_coord, p.y_coord, GetId(), i_InstanceId);
+
+    NGridType *ngrid = new NGridType(p.x_coord, p.y_coord, i_gridExpiry,
+                                     sWorld->getBoolConfig(CONFIG_GRID_UNLOAD));
+    ngrid->SetGridState(GRID_STATE_IDLE);
+
+    i_loadedGrids.insert(lb, GridContainerType::value_type(key, ngrid));
+    setNGrid(ngrid, p.x_coord, p.y_coord);
+
+    //z coord
+    int gx = (MAX_NUMBER_OF_GRIDS - 1) - p.x_coord;
+    int gy = (MAX_NUMBER_OF_GRIDS - 1) - p.y_coord;
+
+    if (!i_gridMaps[gx][gy])
+        LoadMapAndVMap(gx, gy);
 }
 
 //Load NGrid and make it active
@@ -497,43 +557,33 @@ void Map::VisitNearbyCellsOf(WorldObject* obj, TypeContainerVisitor<Trinity::Obj
     }
 }
 
-void Map::Update(const uint32 t_diff)
+void Map::Update(const uint32 diff)
 {
-    _dynamicTree.update(t_diff);
-    /// update worldsessions for existing players
-    for (m_mapRefIter = m_mapRefManager.begin(); m_mapRefIter != m_mapRefManager.end(); ++m_mapRefIter)
-    {
-        Player* player = m_mapRefIter->getSource();
-        if (player && player->IsInWorld())
-        {
-            //player->Update(t_diff);
-            WorldSession* session = player->GetSession();
-            MapSessionFilter updater(session);
-            session->Update(t_diff, updater);
-        }
-    }
-    /// update active cells around players and active objects
+    _dynamicTree.update(diff);
+
+    // update active cells around players and active objects
     resetMarkedCells();
 
-    Trinity::ObjectUpdater updater(t_diff);
+    Trinity::ObjectUpdater updater(diff);
     // for creature
-    TypeContainerVisitor<Trinity::ObjectUpdater, GridTypeMapContainer  > grid_object_update(updater);
+    TypeContainerVisitor<Trinity::ObjectUpdater, GridTypeMapContainer> gridObjectUpdate(updater);
     // for pets
-    TypeContainerVisitor<Trinity::ObjectUpdater, WorldTypeMapContainer > world_object_update(updater);
+    TypeContainerVisitor<Trinity::ObjectUpdater, WorldTypeMapContainer> worldObjectUpdate(updater);
 
-    // the player iterator is stored in the map object
-    // to make sure calls to Map::Remove don't invalidate it
+    // update worldsessions for existing players
     for (m_mapRefIter = m_mapRefManager.begin(); m_mapRefIter != m_mapRefManager.end(); ++m_mapRefIter)
     {
-        Player* player = m_mapRefIter->getSource();
+        if (Player* player = m_mapRefIter->getSource())
+        {
+            player->GetSession()->Update(diff, MapSessionFilter(player->GetSession()));
 
-        if (!player || !player->IsInWorld())
-            continue;
-
-        // update players at tick
-        player->Update(t_diff);
-
-        VisitNearbyCellsOf(player, grid_object_update, world_object_update);
+            // Can be not in world after WorldSession::Update
+            if (player->IsInWorld())
+            {
+                player->Update(diff);
+                VisitNearbyCellsOf(player, gridObjectUpdate, worldObjectUpdate);
+            }
+        }
     }
 
     // non-player active objects, increasing iterator in the loop in case of object removal
@@ -545,7 +595,7 @@ void Map::Update(const uint32 t_diff)
         if (!obj || !obj->IsInWorld())
             continue;
 
-        VisitNearbyCellsOf(obj, grid_object_update, world_object_update);
+        VisitNearbyCellsOf(obj, gridObjectUpdate, worldObjectUpdate);
     }
 
     ///- Process necessary scripts
@@ -558,7 +608,71 @@ void Map::Update(const uint32 t_diff)
 
     MoveAllCreaturesInMoveList();
 
-    sScriptMgr->OnMapUpdate(this, t_diff);
+    if (!m_mapRefManager.isEmpty() || !m_activeNonPlayers.empty())
+        ProcessRelocationNotifies(diff);
+}
+
+struct ResetNotifier
+{
+    template<class T>
+    inline void resetNotify(GridRefManager<T> &m)
+    {
+        for (typename GridRefManager<T>::iterator iter=m.begin(); iter != m.end(); ++iter)
+            iter->getSource()->ResetAllNotifies();
+    }
+
+    template<class T> void Visit(GridRefManager<T> &) { }
+    void Visit(CreatureMapType &m) { resetNotify<Creature>(m);}
+    void Visit(PlayerMapType &m) { resetNotify<Player>(m);}
+};
+
+void Map::ProcessRelocationNotifies(uint32 diff)
+{
+    ResetNotifier reset;
+    TypeContainerVisitor<ResetNotifier, GridTypeMapContainer>  gridResetNotifier(reset);
+    TypeContainerVisitor<ResetNotifier, WorldTypeMapContainer> worldResetNotifier(reset);
+
+    for (GridContainerType::const_iterator i = i_loadedGrids.begin(); i != i_loadedGrids.end(); ++i)
+    {
+        NGridType * const grid = i->second;
+        if (grid->GetGridState() != GRID_STATE_ACTIVE)
+            continue;
+
+        grid->getGridInfoRef()->getRelocationTimer().TUpdate(diff);
+        if (!grid->getGridInfoRef()->getRelocationTimer().TPassed())
+            continue;
+
+        uint32 gx = grid->getX(), gy = grid->getY();
+
+        CellCoord cell_min(gx*MAX_NUMBER_OF_CELLS, gy*MAX_NUMBER_OF_CELLS);
+        CellCoord cell_max(cell_min.x_coord + MAX_NUMBER_OF_CELLS, cell_min.y_coord+MAX_NUMBER_OF_CELLS);
+
+        for (uint32 x = cell_min.x_coord; x < cell_max.x_coord; ++x)
+        {
+            for (uint32 y = cell_min.y_coord; y < cell_max.y_coord; ++y)
+            {
+                uint32 cell_id = (y * TOTAL_NUMBER_OF_CELLS_PER_MAP) + x;
+                if (!isCellMarked(cell_id))
+                    continue;
+
+                CellCoord pair(x, y);
+                Cell cell(pair);
+                cell.SetNoCreate();
+
+                Trinity::DelayedUnitRelocation cellRelocation(cell, pair, *this, MAX_VISIBILITY_DISTANCE);
+                TypeContainerVisitor<Trinity::DelayedUnitRelocation, GridTypeMapContainer> gridObjectRelocation(cellRelocation);
+                TypeContainerVisitor<Trinity::DelayedUnitRelocation, WorldTypeMapContainer> worldObjectRelocation(cellRelocation);
+
+                Visit(cell, gridObjectRelocation);
+                Visit(cell, worldObjectRelocation);
+
+                Visit(cell, gridResetNotifier);
+                Visit(cell, worldResetNotifier);
+            }
+        }
+
+        grid->getGridInfoRef()->getRelocationTimer().TReset(diff, m_VisibilityNotifyPeriod);
+    }
 }
 
 void Map::RemovePlayerFromMap(Player* player, bool remove)
@@ -631,7 +745,7 @@ void Map::PlayerRelocation(Player* player, float x, float y, float z, float orie
         AddToGrid(player, new_cell);
     }
 
-    player->OnRelocated();
+    player->UpdateObjectVisibility(false);
 }
 
 void Map::CreatureRelocation(Creature* creature, float x, float y, float z, float ang, bool respawnRelocationOnFail)
@@ -664,7 +778,7 @@ void Map::CreatureRelocation(Creature* creature, float x, float y, float z, floa
         creature->Relocate(x, y, z, ang);
         if (creature->IsVehicle())
             creature->GetVehicleKit()->RelocatePassengers();
-        creature->OnRelocated();
+        creature->UpdateObjectVisibility(false);
         RemoveCreatureFromMoveList(creature);
 
         // update movement flags
@@ -897,8 +1011,10 @@ bool Map::UnloadGrid(NGridType& ngrid, bool unloadAll)
         ASSERT(i_objectsToRemove.empty());
 
         delete &ngrid;
+        i_loadedGrids.erase(x * MAX_NUMBER_OF_GRIDS + y);
         setNGrid(NULL, x, y);
     }
+
     int gx = (MAX_NUMBER_OF_GRIDS - 1) - x;
     int gy = (MAX_NUMBER_OF_GRIDS - 1) - y;
 
@@ -907,10 +1023,10 @@ bool Map::UnloadGrid(NGridType& ngrid, bool unloadAll)
     {
         if (i_InstanceId == 0)
         {
-            if (GridMaps[gx][gy])
+            if (i_gridMaps[gx][gy])
             {
-                GridMaps[gx][gy]->unloadData();
-                delete GridMaps[gx][gy];
+                i_gridMaps[gx][gy]->unloadData();
+                delete i_gridMaps[gx][gy];
             }
             // x and y are swapped
             VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(GetId(), gx, gy);
@@ -918,7 +1034,7 @@ bool Map::UnloadGrid(NGridType& ngrid, bool unloadAll)
         else
             ((MapInstanced*)m_parentMap)->RemoveGridMapReference(GridCoord(gx, gy));
 
-        GridMaps[gx][gy] = NULL;
+        i_gridMaps[gx][gy] = NULL;
     }
     TC_LOG_DEBUG("maps", "Unloading grid[%u, %u] for map %u finished", x, y, GetId());
     return true;
@@ -947,11 +1063,11 @@ void Map::UnloadAll()
     // clear all delayed moves, useless anyway do this moves before map unload.
     _creaturesToMove.clear();
 
-    for (GridRefManager<NGridType>::iterator i = GridRefManager<NGridType>::begin(); i != GridRefManager<NGridType>::end();)
+    for (GridContainerType::const_iterator i = i_loadedGrids.begin(); i != i_loadedGrids.end();)
     {
-        NGridType &grid(*i->getSource());
-        ++i;
-        UnloadGrid(grid, true);       // deletes the grid and removes it from the GridRefManager
+        NGridType * const grid = (i++)->second;
+        // deletes the grid and removes it from the GridRefManager
+        UnloadGrid(*grid, true);
     }
 }
 
@@ -1510,7 +1626,7 @@ inline ZLiquidStatus GridMap::getLiquidStatus(float x, float y, float z, uint8 R
     return LIQUID_MAP_ABOVE_WATER;
 }
 
-inline GridMap* Map::GetGrid(float x, float y)
+GridMap* Map::GetGrid(float x, float y)
 {
     // half opt method
     int gx=(int)(32-x/SIZE_OF_GRIDS);                       //grid x
@@ -1523,7 +1639,7 @@ inline GridMap* Map::GetGrid(float x, float y)
     // ensure GridMap is loaded
     EnsureGridCreated(GridCoord(63-gx, 63-gy));
 
-    return GridMaps[gx][gy];
+    return i_gridMaps[gx][gy];
 }
 
 float Map::GetWaterOrGroundLevel(float x, float y, float z, float* ground /*= NULL*/, bool /*swim = false*/) const
@@ -2009,7 +2125,7 @@ inline void Map::setNGrid(NGridType *grid, uint32 x, uint32 y)
     i_grids[x][y] = grid;
 }
 
-void Map::DelayedUpdate(const uint32 t_diff)
+void Map::DelayedUpdate(const uint32 diff)
 {
     RemoveAllObjectsInRemoveList();
 
@@ -2017,13 +2133,10 @@ void Map::DelayedUpdate(const uint32 t_diff)
     // This isn't really bother us, since as soon as we have instanced BG-s, the whole map unloads as the BG gets ended
     if (!IsBattlegroundOrArena())
     {
-        for (GridRefManager<NGridType>::iterator i = GridRefManager<NGridType>::begin(); i != GridRefManager<NGridType>::end();)
+        for (GridContainerType::const_iterator i = i_loadedGrids.begin(); i != i_loadedGrids.end();)
         {
-            NGridType *grid = i->getSource();
-            GridInfo* info = i->getSource()->getGridInfoRef();
-            ++i;                                                // The update might delete the map and we need the next map before the iterator gets invalid
-            ASSERT(grid->GetGridState() >= 0 && grid->GetGridState() < MAX_GRID_STATE);
-            si_GridStates[grid->GetGridState()]->Update(*this, *grid, *info, t_diff);
+            NGridType * const grid = (i++)->second;
+            si_GridStates[grid->GetGridState()](*this, *grid, diff);
         }
     }
 }
@@ -2318,140 +2431,137 @@ bool InstanceMap::AddPlayerToMap(Player* player)
     // GMs still can teleport player in instance.
     // Is it needed?
 
+    // Check moved to void WorldSession::HandleMoveWorldportAckOpcode()
+    //if (!CanEnter(player))
+        //return false;
+
+    // Dungeon only code
+    if (IsDungeon())
     {
-        TRINITY_GUARD(ACE_Thread_Mutex, Lock);
-        // Check moved to void WorldSession::HandleMoveWorldportAckOpcode()
-        //if (!CanEnter(player))
-            //return false;
+        Group* group = player->GetGroup();
 
-        // Dungeon only code
-        if (IsDungeon())
+        // increase current instances (hourly limit)
+        if (!group || !group->isLFGGroup())
+            player->AddInstanceEnterTime(GetInstanceId(), time(NULL));
+
+        // get or create an instance save for the map
+        InstanceSave* mapSave = sInstanceSaveMgr->GetInstanceSave(GetInstanceId());
+        if (!mapSave)
         {
-            Group* group = player->GetGroup();
+            TC_LOG_INFO("maps", "InstanceMap::Add: creating instance save for map %d spawnmode %d with instance id %d", GetId(), GetSpawnMode(), GetInstanceId());
+            mapSave = sInstanceSaveMgr->AddInstanceSave(GetId(), GetInstanceId(), Difficulty(GetSpawnMode()), 0, true);
+        }
 
-            // increase current instances (hourly limit)
-            if (!group || !group->isLFGGroup())
-                player->AddInstanceEnterTime(GetInstanceId(), time(NULL));
-
-            // get or create an instance save for the map
-            InstanceSave* mapSave = sInstanceSaveMgr->GetInstanceSave(GetInstanceId());
-            if (!mapSave)
+        // check for existing instance binds
+        InstancePlayerBind* playerBind = player->GetBoundInstance(GetId(), Difficulty(GetSpawnMode()));
+        if (playerBind && playerBind->perm)
+        {
+            // cannot enter other instances if bound permanently
+            if (playerBind->save != mapSave)
             {
-                TC_LOG_INFO("maps", "InstanceMap::Add: creating instance save for map %d spawnmode %d with instance id %d", GetId(), GetSpawnMode(), GetInstanceId());
-                mapSave = sInstanceSaveMgr->AddInstanceSave(GetId(), GetInstanceId(), Difficulty(GetSpawnMode()), 0, true);
+                TC_LOG_ERROR("maps", "InstanceMap::Add: player %s(%d) is permanently bound to instance %d, %d, %d, %d, %d, %d"
+                             " but he is being put into instance %d, %d, %d, %d, %d, %d",
+                             player->GetName().c_str(), player->GetGUIDLow(), playerBind->save->GetMapId(),
+                             playerBind->save->GetInstanceId(), playerBind->save->GetDifficulty(),
+                             playerBind->save->GetPlayerCount(), playerBind->save->GetGroupCount(),
+                             playerBind->save->CanReset(), mapSave->GetMapId(), mapSave->GetInstanceId(),
+                             mapSave->GetDifficulty(), mapSave->GetPlayerCount(), mapSave->GetGroupCount(), mapSave->CanReset());
+                return false;
             }
-
-            // check for existing instance binds
-            InstancePlayerBind* playerBind = player->GetBoundInstance(GetId(), Difficulty(GetSpawnMode()));
-            if (playerBind && playerBind->perm)
+        }
+        else
+        {
+            if (group)
             {
-                // cannot enter other instances if bound permanently
-                if (playerBind->save != mapSave)
+                // solo saves should be reset when entering a group
+                InstanceGroupBind* groupBind = group->GetBoundInstance(this);
+                if (playerBind && playerBind->save != mapSave)
                 {
-                    TC_LOG_ERROR("maps", "InstanceMap::Add: player %s(%d) is permanently bound to instance %d, %d, %d, %d, %d, %d"
-                                 " but he is being put into instance %d, %d, %d, %d, %d, %d",
-                                 player->GetName().c_str(), player->GetGUIDLow(), playerBind->save->GetMapId(),
-                                 playerBind->save->GetInstanceId(), playerBind->save->GetDifficulty(),
-                                 playerBind->save->GetPlayerCount(), playerBind->save->GetGroupCount(),
-                                 playerBind->save->CanReset(), mapSave->GetMapId(), mapSave->GetInstanceId(),
-                                 mapSave->GetDifficulty(), mapSave->GetPlayerCount(), mapSave->GetGroupCount(), mapSave->CanReset());
+                    TC_LOG_ERROR("maps", "InstanceMap::Add: player %s(%d) is being put into instance %d, %d, %d, %d, %d, %d"
+                                 " but he is in group %d and is bound to instance %d, %d, %d, %d, %d, %d!",
+                                 player->GetName().c_str(), player->GetGUIDLow(), mapSave->GetMapId(), mapSave->GetInstanceId(),
+                                 mapSave->GetDifficulty(), mapSave->GetPlayerCount(), mapSave->GetGroupCount(), mapSave->CanReset(),
+                                 GUID_LOPART(group->GetLeaderGUID()), playerBind->save->GetMapId(), playerBind->save->GetInstanceId(),
+                                 playerBind->save->GetDifficulty(), playerBind->save->GetPlayerCount(), playerBind->save->GetGroupCount(),
+                                 playerBind->save->CanReset());
+
+                    if (groupBind)
+                    {
+                        TC_LOG_ERROR("maps", "InstanceMap::Add: the group is bound to the instance %d, %d, %d, %d, %d, %d",
+                                     groupBind->save->GetMapId(), groupBind->save->GetInstanceId(), groupBind->save->GetDifficulty(),
+                                     groupBind->save->GetPlayerCount(), groupBind->save->GetGroupCount(), groupBind->save->CanReset());
+                    }
+
+                    //ASSERT(false);
                     return false;
+                }
+                // bind to the group or keep using the group save
+                if (!groupBind)
+                    group->BindToInstance(mapSave, false);
+                else
+                {
+                    // cannot jump to a different instance without resetting it
+                    if (groupBind->save != mapSave)
+                    {
+                        TC_LOG_ERROR("maps", "InstanceMap::Add: player %s(%d) is being put into instance %d, %d, %d but he is in"
+                                     " group %d which is bound to instance %d, %d, %d!",
+                                     player->GetName().c_str(), player->GetGUIDLow(), mapSave->GetMapId(), mapSave->GetInstanceId(),
+                                     mapSave->GetDifficulty(), GUID_LOPART(group->GetLeaderGUID()), groupBind->save->GetMapId(),
+                                     groupBind->save->GetInstanceId(), groupBind->save->GetDifficulty());
+
+                        if (mapSave)
+                            TC_LOG_ERROR("maps", "MapSave players: %d, group count: %d", mapSave->GetPlayerCount(), mapSave->GetGroupCount());
+                        else
+                            TC_LOG_ERROR("maps", "MapSave NULL");
+                        if (groupBind->save)
+                            TC_LOG_ERROR("maps", "GroupBind save players: %d, group count: %d", groupBind->save->GetPlayerCount(), groupBind->save->GetGroupCount());
+                        else
+                            TC_LOG_ERROR("maps", "GroupBind save NULL");
+                        return false;
+                    }
+                    // if the group/leader is permanently bound to the instance
+                    // players also become permanently bound when they enter
+                    if (groupBind->perm)
+                    {
+                        WorldPacket data(SMSG_INSTANCE_LOCK_WARNING_QUERY, 10);
+                        data << uint32(60000);
+                        data << uint32(i_data ? i_data->GetCompletedEncounterMask() : 0);
+                        data << uint8(0);
+                        data << uint8(0); // events it throws:  1 : INSTANCE_LOCK_WARNING   0 : INSTANCE_LOCK_STOP / INSTANCE_LOCK_START
+                        player->GetSession()->SendPacket(&data);
+                        player->SetPendingBind(mapSave->GetInstanceId(), 60000);
+                    }
                 }
             }
             else
             {
-                if (group)
-                {
-                    // solo saves should be reset when entering a group
-                    InstanceGroupBind* groupBind = group->GetBoundInstance(this);
-                    if (playerBind && playerBind->save != mapSave)
-                    {
-                        TC_LOG_ERROR("maps", "InstanceMap::Add: player %s(%d) is being put into instance %d, %d, %d, %d, %d, %d"
-                                     " but he is in group %d and is bound to instance %d, %d, %d, %d, %d, %d!",
-                                     player->GetName().c_str(), player->GetGUIDLow(), mapSave->GetMapId(), mapSave->GetInstanceId(),
-                                     mapSave->GetDifficulty(), mapSave->GetPlayerCount(), mapSave->GetGroupCount(), mapSave->CanReset(),
-                                     GUID_LOPART(group->GetLeaderGUID()), playerBind->save->GetMapId(), playerBind->save->GetInstanceId(),
-                                     playerBind->save->GetDifficulty(), playerBind->save->GetPlayerCount(), playerBind->save->GetGroupCount(),
-                                     playerBind->save->CanReset());
-
-                        if (groupBind)
-                        {
-                            TC_LOG_ERROR("maps", "InstanceMap::Add: the group is bound to the instance %d, %d, %d, %d, %d, %d",
-                                         groupBind->save->GetMapId(), groupBind->save->GetInstanceId(), groupBind->save->GetDifficulty(),
-                                         groupBind->save->GetPlayerCount(), groupBind->save->GetGroupCount(), groupBind->save->CanReset());
-                        }
-
-                        //ASSERT(false);
-                        return false;
-                    }
-                    // bind to the group or keep using the group save
-                    if (!groupBind)
-                        group->BindToInstance(mapSave, false);
-                    else
-                    {
-                        // cannot jump to a different instance without resetting it
-                        if (groupBind->save != mapSave)
-                        {
-                            TC_LOG_ERROR("maps", "InstanceMap::Add: player %s(%d) is being put into instance %d, %d, %d but he is in"
-                                         " group %d which is bound to instance %d, %d, %d!",
-                                         player->GetName().c_str(), player->GetGUIDLow(), mapSave->GetMapId(), mapSave->GetInstanceId(),
-                                         mapSave->GetDifficulty(), GUID_LOPART(group->GetLeaderGUID()), groupBind->save->GetMapId(),
-                                         groupBind->save->GetInstanceId(), groupBind->save->GetDifficulty());
-
-                            if (mapSave)
-                                TC_LOG_ERROR("maps", "MapSave players: %d, group count: %d", mapSave->GetPlayerCount(), mapSave->GetGroupCount());
-                            else
-                                TC_LOG_ERROR("maps", "MapSave NULL");
-                            if (groupBind->save)
-                                TC_LOG_ERROR("maps", "GroupBind save players: %d, group count: %d", groupBind->save->GetPlayerCount(), groupBind->save->GetGroupCount());
-                            else
-                                TC_LOG_ERROR("maps", "GroupBind save NULL");
-                            return false;
-                        }
-                        // if the group/leader is permanently bound to the instance
-                        // players also become permanently bound when they enter
-                        if (groupBind->perm)
-                        {
-                            WorldPacket data(SMSG_INSTANCE_LOCK_WARNING_QUERY, 10);
-                            data << uint32(60000);
-                            data << uint32(i_data ? i_data->GetCompletedEncounterMask() : 0);
-                            data << uint8(0);
-                            data << uint8(0); // events it throws:  1 : INSTANCE_LOCK_WARNING   0 : INSTANCE_LOCK_STOP / INSTANCE_LOCK_START
-                            player->GetSession()->SendPacket(&data);
-                            player->SetPendingBind(mapSave->GetInstanceId(), 60000);
-                        }
-                    }
-                }
+                // set up a solo bind or continue using it
+                if (!playerBind)
+                    player->BindToInstance(mapSave, false);
                 else
-                {
-                    // set up a solo bind or continue using it
-                    if (!playerBind)
-                        player->BindToInstance(mapSave, false);
-                    else
-                        if (playerBind->save != mapSave)
-                            return false;
-                        //ASSERT(playerBind->save == mapSave);
-                }
+                    if (playerBind->save != mapSave)
+                        return false;
+                    //ASSERT(playerBind->save == mapSave);
             }
-
-            if (group && group->isLFGGroup())
-                if (uint32 dungeonId = sLFGMgr->GetDungeon(group->GetGUID(), true))
-                    if (LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(dungeonId))
-                        if (LFGDungeonEntry const* randomDungeon = sLFGDungeonStore.LookupEntry(*(sLFGMgr->GetSelectedDungeons(player->GetGUID()).begin())))
-                            if (uint32(dungeon->map) == GetId() && dungeon->difficulty == uint32(GetDifficulty()) && randomDungeon->type == uint32(TYPEID_RANDOM_DUNGEON))
-                                player->CastSpell(player, LFG_SPELL_LUCK_OF_THE_DRAW, true);
         }
 
-        // for normal instances cancel the reset schedule when the
-        // first player enters (no players yet)
-        SetResetSchedule(false);
-
-        TC_LOG_INFO("maps", "MAP: Player '%s' entered instance '%u' of map '%s'", player->GetName().c_str(), GetInstanceId(), GetMapName());
-        // initialize unload state
-        m_unloadTimer = 0;
-        m_resetAfterUnload = false;
-        m_unloadWhenEmpty = false;
+        if (group && group->isLFGGroup())
+            if (uint32 dungeonId = sLFGMgr->GetDungeon(group->GetGUID(), true))
+                if (LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(dungeonId))
+                    if (LFGDungeonEntry const* randomDungeon = sLFGDungeonStore.LookupEntry(*(sLFGMgr->GetSelectedDungeons(player->GetGUID()).begin())))
+                        if (uint32(dungeon->map) == GetId() && dungeon->difficulty == uint32(GetDifficulty()) && randomDungeon->type == uint32(TYPEID_RANDOM_DUNGEON))
+                            player->CastSpell(player, LFG_SPELL_LUCK_OF_THE_DRAW, true);
     }
+
+    // for normal instances cancel the reset schedule when the
+    // first player enters (no players yet)
+    SetResetSchedule(false);
+
+    TC_LOG_INFO("maps", "MAP: Player '%s' entered instance '%u' of map '%s'", player->GetName().c_str(), GetInstanceId(), GetMapName());
+    // initialize unload state
+    m_unloadTimer = 0;
+    m_resetAfterUnload = false;
+    m_unloadWhenEmpty = false;
 
     // this will acquire the same mutex so it cannot be in the previous block
     Map::AddPlayerToMap(player);
@@ -2720,14 +2830,11 @@ bool BattlegroundMap::CanEnter(Player* player)
 
 bool BattlegroundMap::AddPlayerToMap(Player* player)
 {
-    {
-        TRINITY_GUARD(ACE_Thread_Mutex, Lock);
-        //Check moved to void WorldSession::HandleMoveWorldportAckOpcode()
-        //if (!CanEnter(player))
-            //return false;
-        // reset instance validity, battleground maps do not homebind
-        player->m_InstanceValid = true;
-    }
+    //Check moved to void WorldSession::HandleMoveWorldportAckOpcode()
+    //if (!CanEnter(player))
+    //return false;
+    // reset instance validity, battleground maps do not homebind
+    player->m_InstanceValid = true;
     return Map::AddPlayerToMap(player);
 }
 

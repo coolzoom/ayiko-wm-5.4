@@ -83,7 +83,7 @@ namespace ACE_Based
             }
 
             template<class Checker>
-            bool next(T& result, Checker& check)
+            bool next(T& result, Checker const &check)
             {
                 ACE_Guard<LockType> g(this->_lock);
 

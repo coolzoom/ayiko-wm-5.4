@@ -72,7 +72,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     WorldLocation const loc = GetPlayer()->GetTeleportDest();
 
     // possible errors in the coordinate validity check
-    if (!MapManager::IsValidMapCoord(loc))
+    if (!MapManager::IsValidMapCoord(loc.GetMapId(), loc.GetPositionX(), loc.GetPositionY(), loc.GetPositionZ(), loc.GetOrientation()))
     {
         LogoutPlayer(false);
         return;

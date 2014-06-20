@@ -185,7 +185,9 @@ void ObjectGridLoader::LoadN(void)
             }
         }
     }
-    TC_LOG_DEBUG("maps", "%u GameObjects, %u Creatures, and %u Corpses/Bones loaded for grid %u on map %u", i_gameObjects, i_creatures, i_corpses, i_grid.GetGridId(), i_map->GetId());
+
+    TC_LOG_DEBUG("maps", "%u GameObjects, %u Creatures, and %u Corpses/Bones loaded for grid [%d, %d] on map %u",
+                 i_gameObjects, i_creatures, i_corpses, i_grid.getX(), i_grid.getY(), i_map->GetId());
 }
 
 template<class T>

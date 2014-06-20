@@ -2069,7 +2069,7 @@ void AddSC_icecrown_citadel()
     new spell_icc_sprit_alarm();
     new spell_frost_giant_death_plague();
     new spell_icc_harvest_blight_specimen();
-    new spell_trigger_spell_from_caster("spell_svalna_caress_of_death", SPELL_IMPALING_SPEAR_KILL);
+//     new spell_trigger_spell_from_caster("spell_svalna_caress_of_death", SPELL_IMPALING_SPEAR_KILL);
     new spell_svalna_revive_champion();
     new spell_svalna_remove_spear();
     new at_icc_saurfang_portal();

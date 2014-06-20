@@ -47,6 +47,13 @@
 #include "AccountMgr.h"
 #include "RBAC.h"
 
+namespace {
+
+Opcodes DropHighBytes(Opcodes opcode)
+{
+    return Opcodes(opcode & 0xFFFF);
+}
+
 #if defined(__GNUC__)
 #pragma pack(1)
 #else
@@ -95,6 +102,8 @@ struct ClientCryptPktHeader
 #else
 #pragma pack(pop)
 #endif
+
+} // namespace
 
 WorldSocket::WorldSocket (void): WorldHandler(),
     m_LastPingTime(ACE_Time_Value::zero), m_OverSpeedPings(0), m_Session(0),
@@ -503,7 +512,7 @@ int WorldSocket::handle_input_header (void)
     if (!m_Crypt.IsInitialized())
         size -= 2;
 
-    ACE_NEW_RETURN(m_RecvWPct, WorldPacket (PacketFilter::DropHighBytes(Opcodes(cmd)), size), -1);
+    ACE_NEW_RETURN(m_RecvWPct, WorldPacket (DropHighBytes(Opcodes(cmd)), size), -1);
 
     if (size > 0)
     {
@@ -676,7 +685,7 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
     // manage memory ;)
     ACE_Auto_Ptr<WorldPacket> aptr(new_pct);
 
-    Opcodes opcode = PacketFilter::DropHighBytes(new_pct->GetOpcode());
+    Opcodes opcode = new_pct->GetOpcode();
 
     if (closing_)
         return -1;

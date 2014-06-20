@@ -1120,8 +1120,9 @@ class spell_huo_benediction: public SpellScriptLoader
                             return;
 
                 // A partir d'ici on sait que le joueur n'a pas encore de Huo
-                if (TempSummon* tempHuo = target->SummonCreature(54958, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0.0f, TEMPSUMMON_MANUAL_DESPAWN, 0, target->GetGUID()))
+                if (TempSummon* tempHuo = target->SummonCreature(54958, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0.0f, TEMPSUMMON_MANUAL_DESPAWN, 0))
                 {
+                    tempHuo->setExplicitSeerGuid(target->GetGUID());
                     tempHuo->SetOwnerGUID(target->GetGUID());
                     tempHuo->GetMotionMaster()->MoveFollow(target, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
                 }

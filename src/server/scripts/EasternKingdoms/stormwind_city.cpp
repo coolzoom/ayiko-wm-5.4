@@ -39,8 +39,13 @@ public:
     bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
     {
         if (quest->GetQuestId() == 30988) // The Alliance Way
-            if (Creature* master = player->SummonCreature(61796, creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 300000, player->GetGUID()))
+        {
+            if (Creature* master = player->SummonCreature(61796, creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 300000))
+            {
+                master->setExplicitSeerGuid(player->GetGUID());
                 master->AI()->SetGUID(player->GetGUID());
+            }
+        }
 
         return true;
     }

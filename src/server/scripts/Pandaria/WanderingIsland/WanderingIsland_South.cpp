@@ -19,16 +19,20 @@ class AreaTrigger_at_mandori : public AreaTriggerScript
 
            uint64 playerGuid = player->GetGUID();
 
-            Creature* Aysa = player->SummonCreature(59986, 698.04f, 3601.79f, 142.82f, 3.254830f, TEMPSUMMON_MANUAL_DESPAWN, 0, playerGuid); // Aysa
-            Creature* Ji   = player->SummonCreature(59988, 698.06f, 3599.34f, 142.62f, 2.668790f, TEMPSUMMON_MANUAL_DESPAWN, 0, playerGuid); // Ji
-            Creature* Jojo = player->SummonCreature(59989, 702.78f, 3603.58f, 142.01f, 3.433610f, TEMPSUMMON_MANUAL_DESPAWN, 0, playerGuid); // Jojo
+            auto const aysa = player->SummonCreature(59986, 698.04f, 3601.79f, 142.82f, 3.254830f, TEMPSUMMON_MANUAL_DESPAWN, 0); // Aysa
+            auto const ji   = player->SummonCreature(59988, 698.06f, 3599.34f, 142.62f, 2.668790f, TEMPSUMMON_MANUAL_DESPAWN, 0); // Ji
+            auto const jojo = player->SummonCreature(59989, 702.78f, 3603.58f, 142.01f, 3.433610f, TEMPSUMMON_MANUAL_DESPAWN, 0); // Jojo
 
-            if (!Aysa || !Ji || !Jojo)
+            if (!aysa || !ji || !jojo)
                 return true;
 
-            Aysa->AI()->SetGUID(playerGuid);
-              Ji->AI()->SetGUID(playerGuid);
-            Jojo->AI()->SetGUID(playerGuid);
+            aysa->setExplicitSeerGuid(playerGuid);
+            ji->setExplicitSeerGuid(playerGuid);
+            jojo->setExplicitSeerGuid(playerGuid);
+
+            aysa->AI()->SetGUID(playerGuid);
+            ji->AI()->SetGUID(playerGuid);
+            jojo->AI()->SetGUID(playerGuid);
 
             player->RemoveAurasDueToSpell(59073);
             player->RemoveAurasDueToSpell(59074);
@@ -87,11 +91,17 @@ class mob_mandori_escort : public CreatureScript
             if (!Is(NPC_AYSA))
                 return;
 
-            if (GameObject* mandoriDoor = me->SummonGameObject(211294, 695.26f, 3600.99f, 142.38f, 3.04f, 0.0f, 0.0f, 0.0f, 0.0f, RESPAWN_IMMEDIATELY, playerGuid))
+            if (GameObject* mandoriDoor = me->SummonGameObject(211294, 695.26f, 3600.99f, 142.38f, 3.04f, 0.0f, 0.0f, 0.0f, 0.0f, RESPAWN_IMMEDIATELY))
+            {
+                mandoriDoor->setExplicitSeerGuid(playerGuid);
                 mandoriDoorGuid = mandoriDoor->GetGUID();
+            }
 
-            if (GameObject* peiwuDoor = me->SummonGameObject(211298, 566.52f, 3583.46f, 92.16f, 3.14f, 0.0f, 0.0f, 0.0f, 0.0f, RESPAWN_IMMEDIATELY, playerGuid))
+            if (GameObject* peiwuDoor = me->SummonGameObject(211298, 566.52f, 3583.46f, 92.16f, 3.14f, 0.0f, 0.0f, 0.0f, 0.0f, RESPAWN_IMMEDIATELY))
+            {
+                peiwuDoor->setExplicitSeerGuid(playerGuid);
                 peiwuDoorGuid = peiwuDoor->GetGUID();
+            }
         }
 
         bool Is(uint32 npc_entry)
@@ -244,8 +254,9 @@ class npc_korga : public CreatureScript
         bool OnQuestAccept(Player* player, Creature* /*creature*/, Quest const* quest)
         {
             if (quest->GetQuestId() == 30589) // Wrecking the Wreck
-                if (Creature* jiEscort = player->SummonCreature(60900, 424.71f, 3635.59f, 92.70f, 2.498430f, TEMPSUMMON_MANUAL_DESPAWN, 0, player->GetGUID()))
+                if (Creature* jiEscort = player->SummonCreature(60900, 424.71f, 3635.59f, 92.70f, 2.498430f, TEMPSUMMON_MANUAL_DESPAWN, 0))
                 {
+                    jiEscort->setExplicitSeerGuid(player->GetGUID());
                     jiEscort->SetReactState(REACT_PASSIVE);
                     jiEscort->AI()->SetGUID(player->GetGUID());
                 }
@@ -402,8 +413,9 @@ public:
     {
         if (quest->GetQuestId() == QUEST_AN_ANCIENT_EVIL)
         {
-            if (Creature* const vordraka = player->SummonCreature(NPC_VORDRAKA, 281.74f, 4003.40f, 72.96f, 0.05f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 600000, player->GetGUID()))
+            if (Creature* const vordraka = player->SummonCreature(NPC_VORDRAKA, 281.74f, 4003.40f, 72.96f, 0.05f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 600000))
             {
+                vordraka->setExplicitSeerGuid(player->GetGUID());
                 vordraka->AI()->SetGUID(player->GetGUID());
                 vordraka->SetPhaseMask(12, true);
             }
@@ -553,8 +565,13 @@ class mob_aysa_gunship_crash : public CreatureScript
         bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
         {
             if (quest->GetQuestId() == QUEST_RISKING_IT_ALL)
-                if (Creature* aysa = player->SummonCreature(60729, creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 0, player->GetGUID()))
+            {
+                if (Creature* aysa = player->SummonCreature(60729, creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 0))
+                {
+                    aysa->setExplicitSeerGuid(player->GetGUID());
                     aysa->AI()->SetGUID(player->GetGUID());
+                }
+            }
 
             return true;
         }
@@ -637,11 +654,17 @@ public:
         {
             playerGuid = guid;
 
-            if (Creature* ji = me->SummonCreature(NPC_JI_FIREPAW, 230.31f, 4006.67f, 87.27f, 3.38f, TEMPSUMMON_MANUAL_DESPAWN, 0, guid))
+            if (Creature* ji = me->SummonCreature(NPC_JI_FIREPAW, 230.31f, 4006.67f, 87.27f, 3.38f, TEMPSUMMON_MANUAL_DESPAWN, 0))
+            {
+                ji->setExplicitSeerGuid(playerGuid);
                 jiGuid = ji->GetGUID();
+            }
 
-            if (GameObject* gob = me->SummonGameObject(GO_EXPLOSIVES, 227.75f, 4006.38f, 87.06f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, RESPAWN_IMMEDIATELY, guid))
+            if (GameObject* gob = me->SummonGameObject(GO_EXPLOSIVES, 227.75f, 4006.38f, 87.06f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, RESPAWN_IMMEDIATELY))
+            {
+                gob->setExplicitSeerGuid(playerGuid);
                 fireGuid = gob->GetGUID();
+            }
 
             events.ScheduleEvent(EVENT_AYSA_START, 1000);
         }

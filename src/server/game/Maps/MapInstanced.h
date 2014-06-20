@@ -23,11 +23,16 @@
 #include "InstanceSaveMgr.h"
 #include "DBCEnums.h"
 
+#include <mutex>
 #include <unordered_map>
 
 class MapInstanced : public Map
 {
     friend class MapManager;
+
+    typedef std::mutex LockType;
+    typedef std::lock_guard<LockType> GuardType;
+
     public:
         typedef std::unordered_map<uint32, Map*> InstancedMaps;
 
@@ -70,6 +75,8 @@ class MapInstanced : public Map
         BattlegroundMap* CreateBattleground(uint32 InstanceId, Battleground* bg);
 
         InstancedMaps m_InstancedMaps;
+
+        LockType m_lock;
 
         uint16 GridMapReference[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
 };

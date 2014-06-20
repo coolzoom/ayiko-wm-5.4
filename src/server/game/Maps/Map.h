@@ -25,16 +25,13 @@
 #include "Cell.h"
 #include "Timer.h"
 #include "SharedDefines.h"
-#include "GridRefManager.h"
 #include "MapRefManager.h"
 #include "DynamicTree.h"
 #include "GameObjectModel.h"
 
-#include <ace/RW_Thread_Mutex.h>
-#include <ace/Thread_Mutex.h>
-
 #include <bitset>
 #include <list>
+#include <mutex>
 #include <unordered_map>
 
 class Unit;
@@ -234,7 +231,7 @@ enum LevelRequirementVsMode
 
 typedef std::map<uint32/*leaderDBGUID*/, CreatureGroup*>        CreatureGroupHolderType;
 
-class Map : public GridRefManager<NGridType>
+class Map
 {
     friend class MapReference;
     public:
@@ -301,9 +298,6 @@ class Map : public GridRefManager<NGridType>
 
         static bool ExistMap(uint32 mapid, int gx, int gy);
         static bool ExistVMap(uint32 mapid, int gx, int gy);
-
-        static void InitStateMachine();
-        static void DeleteStateMachine();
 
         Map const* GetParent() const { return m_parentMap; }
 
@@ -389,7 +383,7 @@ class Map : public GridRefManager<NGridType>
         void UpdateObjectsVisibilityFor(Player* player, Cell cell, CellCoord cellpair);
 
         void resetMarkedCells() { marked_cells.reset(); }
-        bool isCellMarked(uint32 pCellId) { return marked_cells.test(pCellId); }
+        bool isCellMarked(uint32 pCellId) const { return marked_cells.test(pCellId); }
         void markCell(uint32 pCellId) { marked_cells.set(pCellId); }
 
         bool HavePlayers() const { return !m_mapRefManager.isEmpty(); }
@@ -429,7 +423,7 @@ class Map : public GridRefManager<NGridType>
 
         void UpdateIteratorBack(Player* player);
 
-        TempSummon* SummonCreature(uint32 entry, Position const& pos, SummonPropertiesEntry const* properties = NULL, uint32 duration = 0, Unit* summoner = NULL, uint32 spellId = 0, uint32 vehId = 0, uint64 viewerGuid = 0, std::list<uint64>* viewersList = NULL);
+        TempSummon* SummonCreature(uint32 entry, Position const& pos, SummonPropertiesEntry const* properties = NULL, uint32 duration = 0, Unit* summoner = NULL, uint32 spellId = 0, uint32 vehId = 0);
         void SummonCreatureGroup(uint8 group, std::list<TempSummon*>& list);
         Creature* GetCreature(uint64 guid);
         GameObject* GetGameObject(uint64 guid);
@@ -505,21 +499,19 @@ class Map : public GridRefManager<NGridType>
 
         bool IsGridLoaded(const GridCoord &) const;
         void EnsureGridCreated(const GridCoord &);
+        void EnsureGridCreated_i(const GridCoord &);
         bool EnsureGridLoaded(Cell const&);
         void EnsureGridLoadedForActiveObject(Cell const&, WorldObject* object);
-
-        void buildNGridLinkage(NGridType* pNGridType) { pNGridType->link(this); }
 
         template<class T> void AddType(T *obj);
         template<class T> void RemoveType(T *obj, bool);
 
         NGridType* getNGrid(uint32 x, uint32 y) const
         {
-            ASSERT(x < MAX_NUMBER_OF_GRIDS && y < MAX_NUMBER_OF_GRIDS);
             return i_grids[x][y];
         }
 
-        bool isGridObjectDataLoaded(uint32 x, uint32 y) const { return getNGrid(x, y) ? getNGrid(x, y)->isGridObjectDataLoaded() : false; }
+        bool isGridObjectDataLoaded(uint32 x, uint32 y) const { return getNGrid(x, y)->isGridObjectDataLoaded(); }
         void setGridObjectDataLoaded(bool pLoaded, uint32 x, uint32 y) { getNGrid(x, y)->setGridObjectDataLoaded(pLoaded); }
 
         void setNGrid(NGridType* grid, uint32 x, uint32 y);
@@ -529,8 +521,6 @@ class Map : public GridRefManager<NGridType>
 
     protected:
         void SetUnloadReferenceLock(const GridCoord &p, bool on) { getNGrid(p.x_coord, p.y_coord)->setUnloadReferenceLock(on); }
-
-        ACE_Thread_Mutex Lock;
 
         MapEntry const* i_mapEntry;
         uint8 i_spawnMode;
@@ -564,9 +554,22 @@ class Map : public GridRefManager<NGridType>
         //InstanceMaps and BattlegroundMaps...
         Map* m_parentMap;
 
+        // we can't use unordered_map due to possible iterator invalidation at insert
+        typedef std::map<size_t, NGridType*> GridContainerType;
+        GridContainerType i_loadedGrids;
+
+        typedef std::mutex GridLockType;
+        typedef std::lock_guard<GridLockType> GridGuardType;
+        GridLockType i_gridLock;
+
         NGridType* i_grids[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
-        GridMap* GridMaps[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
+        GridMap* i_gridMaps[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
+
         std::bitset<TOTAL_NUMBER_OF_CELLS_PER_MAP*TOTAL_NUMBER_OF_CELLS_PER_MAP> marked_cells;
+
+        //these functions used to process player/mob aggro reactions and
+        //visibility calculations. Highly optimized for massive calculations
+        void ProcessRelocationNotifies(uint32 diff);
 
         bool i_scriptLock;
         std::set<WorldObject*> i_objectsToRemove;

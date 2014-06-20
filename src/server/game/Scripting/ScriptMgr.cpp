@@ -558,76 +558,6 @@ void ScriptMgr::OnGroupRateCalculation(float& rate, uint32 count, bool isRaid)
         } \
     }
 
-void ScriptMgr::OnCreateMap(Map* map)
-{
-    ASSERT(map);
-
-    SCR_MAP_BGN(WorldMapScript, map, itr, end, entry, IsWorldMap);
-        itr->second->OnCreate(map);
-    SCR_MAP_END;
-
-    SCR_MAP_BGN(InstanceMapScript, map, itr, end, entry, IsDungeon);
-        itr->second->OnCreate((InstanceMap*)map);
-    SCR_MAP_END;
-
-    SCR_MAP_BGN(BattlegroundMapScript, map, itr, end, entry, IsBattleground);
-        itr->second->OnCreate((BattlegroundMap*)map);
-    SCR_MAP_END;
-}
-
-void ScriptMgr::OnDestroyMap(Map* map)
-{
-    ASSERT(map);
-
-    SCR_MAP_BGN(WorldMapScript, map, itr, end, entry, IsWorldMap);
-        itr->second->OnDestroy(map);
-    SCR_MAP_END;
-
-    SCR_MAP_BGN(InstanceMapScript, map, itr, end, entry, IsDungeon);
-        itr->second->OnDestroy((InstanceMap*)map);
-    SCR_MAP_END;
-
-    SCR_MAP_BGN(BattlegroundMapScript, map, itr, end, entry, IsBattleground);
-        itr->second->OnDestroy((BattlegroundMap*)map);
-    SCR_MAP_END;
-}
-
-void ScriptMgr::OnLoadGridMap(Map* map, GridMap* gmap, uint32 gx, uint32 gy)
-{
-    ASSERT(map);
-    ASSERT(gmap);
-
-    SCR_MAP_BGN(WorldMapScript, map, itr, end, entry, IsWorldMap);
-        itr->second->OnLoadGridMap(map, gmap, gx, gy);
-    SCR_MAP_END;
-
-    SCR_MAP_BGN(InstanceMapScript, map, itr, end, entry, IsDungeon);
-        itr->second->OnLoadGridMap((InstanceMap*)map, gmap, gx, gy);
-    SCR_MAP_END;
-
-    SCR_MAP_BGN(BattlegroundMapScript, map, itr, end, entry, IsBattleground);
-        itr->second->OnLoadGridMap((BattlegroundMap*)map, gmap, gx, gy);
-    SCR_MAP_END;
-}
-
-void ScriptMgr::OnUnloadGridMap(Map* map, GridMap* gmap, uint32 gx, uint32 gy)
-{
-    ASSERT(map);
-    ASSERT(gmap);
-
-    SCR_MAP_BGN(WorldMapScript, map, itr, end, entry, IsWorldMap);
-        itr->second->OnUnloadGridMap(map, gmap, gx, gy);
-    SCR_MAP_END;
-
-    SCR_MAP_BGN(InstanceMapScript, map, itr, end, entry, IsDungeon);
-        itr->second->OnUnloadGridMap((InstanceMap*)map, gmap, gx, gy);
-    SCR_MAP_END;
-
-    SCR_MAP_BGN(BattlegroundMapScript, map, itr, end, entry, IsBattleground);
-        itr->second->OnUnloadGridMap((BattlegroundMap*)map, gmap, gx, gy);
-    SCR_MAP_END;
-}
-
 void ScriptMgr::OnPlayerEnterMap(Map* map, Player* player)
 {
     ASSERT(map);
@@ -661,23 +591,6 @@ void ScriptMgr::OnPlayerLeaveMap(Map* map, Player* player)
 
     SCR_MAP_BGN(BattlegroundMapScript, map, itr, end, entry, IsBattleground);
         itr->second->OnPlayerLeave((BattlegroundMap*)map, player);
-    SCR_MAP_END;
-}
-
-void ScriptMgr::OnMapUpdate(Map* map, uint32 diff)
-{
-    ASSERT(map);
-
-    SCR_MAP_BGN(WorldMapScript, map, itr, end, entry, IsWorldMap);
-        itr->second->OnUpdate(map, diff);
-    SCR_MAP_END;
-
-    SCR_MAP_BGN(InstanceMapScript, map, itr, end, entry, IsDungeon);
-        itr->second->OnUpdate((InstanceMap*)map, diff);
-    SCR_MAP_END;
-
-    SCR_MAP_BGN(BattlegroundMapScript, map, itr, end, entry, IsBattleground);
-        itr->second->OnUpdate((BattlegroundMap*)map, diff);
     SCR_MAP_END;
 }
 

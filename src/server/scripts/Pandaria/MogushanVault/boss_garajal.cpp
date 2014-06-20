@@ -303,11 +303,10 @@ class boss_garajal : public CreatureScript
                                 me->AddAura(SPELL_SOUL_CUT_SUICIDE, target);
                                 me->AddAura(SPELL_SOUL_CUT_DAMAGE,  target);
 
-                                uint64 viewerGuid = target->GetGUID();
-                                uint8  mobCount   = IsHeroic() ? 3: 1;
+                                uint8 mobCount   = IsHeroic() ? 3: 1;
 
                                 for (uint8 i = 0; i < mobCount; ++i)
-                                    if (Creature* soulCutter = me->SummonCreature(NPC_SOUL_CUTTER, target->GetPositionX() + 2.0f, target->GetPositionY() + 2.0f, target->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 30000, i == 0 ? viewerGuid: 0))
+                                    if (Creature* soulCutter = me->SummonCreature(NPC_SOUL_CUTTER, target->GetPositionX() + 2.0f, target->GetPositionY() + 2.0f, target->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 30000))
                                     {
                                         soulCutter->SetPhaseMask(2, true);
                                         soulCutter->AI()->AttackStart(target);
@@ -631,9 +630,11 @@ class mob_soul_cutter : public CreatureScript
             void JustDied(Unit* /*attacker*/)
             {
                 std::list<uint64> playerList;
+#if 0
+                // FIXME: removed during 434 ports
                 me->GetMustBeVisibleForPlayersList(playerList);
-
-                for (auto guid: playerList)
+#endif
+                for (auto guid : playerList)
                 {
                     if (Player* player = ObjectAccessor::FindPlayer(guid))
                     {

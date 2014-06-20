@@ -139,9 +139,6 @@ World::World()
     m_visibility_notify_periodInInstances  = DEFAULT_VISIBILITY_NOTIFY_PERIOD;
     m_visibility_notify_periodInBGArenas   = DEFAULT_VISIBILITY_NOTIFY_PERIOD;
 
-    Visibility_RelocationLowerLimit = 20.0f;
-    Visibility_AINotifyDelay = 1000;
-
     m_CleaningFlags = 0;
 }
 
@@ -1151,9 +1148,6 @@ void World::LoadConfigSettings(bool reload)
         TC_LOG_ERROR("server.loading", "Visibility.Distance.Continents can't be greater %f", MAX_VISIBILITY_DISTANCE);
         m_MaxVisibleDistanceOnContinents = MAX_VISIBILITY_DISTANCE;
     }
-
-    Visibility_RelocationLowerLimit = sConfigMgr->GetFloatDefault("Visibility.RelocationLowerLimit", 20.f);
-    Visibility_AINotifyDelay = sConfigMgr->GetFloatDefault("Visibility.AINotifyDelay", 1000);
 
     //visibility in instances
     m_MaxVisibleDistanceInInstances = sConfigMgr->GetFloatDefault("Visibility.Distance.Instances", DEFAULT_VISIBILITY_INSTANCE);
@@ -2831,7 +2825,7 @@ void World::UpdateSessions(uint32 diff)
     ///- Add new sessions
     WorldSession* sess = NULL;
     while (addSessQueue.next(sess))
-        AddSession_ (sess);
+        AddSession_(sess);
 
     ///- Then send an update signal to remaining ones
     for (SessionMap::iterator itr = m_sessions.begin(), next; itr != m_sessions.end(); itr = next)
@@ -2840,16 +2834,15 @@ void World::UpdateSessions(uint32 diff)
         ++next;
 
         ///- and remove not active sessions from the list
-        WorldSession* pSession = itr->second;
-        WorldSessionFilter updater(pSession);
+        WorldSession* session = itr->second;
 
-        if (!pSession->Update(diff, updater))    // As interval = 0
+        if (!session->Update(diff, WorldSessionFilter(session)))    // As interval = 0
         {
-            if (!RemoveQueuedPlayer(itr->second) && itr->second && getIntConfig(CONFIG_INTERVAL_DISCONNECT_TOLERANCE))
-                m_disconnects[itr->second->GetAccountId()] = time(NULL);
-            RemoveQueuedPlayer(pSession);
+            if (!RemoveQueuedPlayer(session) && getIntConfig(CONFIG_INTERVAL_DISCONNECT_TOLERANCE))
+                m_disconnects[session->GetAccountId()] = time(NULL);
+            RemoveQueuedPlayer(session);
             m_sessions.erase(itr);
-            delete pSession;
+            delete session;
 
         }
     }

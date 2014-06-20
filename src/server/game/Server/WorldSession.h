@@ -168,42 +168,51 @@ enum DB2Types : uint32
     DB2_REPLY_ITEM_EXTENDED_COST              = 3146089301,           // hash of ItemExtendedCost.db2
 };
 
-//class to deal with packet processing
-//allows to determine if next packet is safe to be processed
+// class to deal with packet processing
+// allows to determine if next packet is safe to be processed
 class PacketFilter
 {
 public:
-    explicit PacketFilter(WorldSession* pSession) : m_pSession(pSession) {}
-    virtual ~PacketFilter() {}
+    explicit PacketFilter(WorldSession const *session)
+        : m_session(session)
+    { }
 
-    virtual bool Process(WorldPacket* /*packet*/) { return true; }
-    virtual bool ProcessLogout() const { return true; }
-    static Opcodes DropHighBytes(Opcodes opcode) { return Opcodes(opcode & 0xFFFF); }
+    virtual bool Process(WorldPacket const *packet) const = 0;
+
+    virtual bool ProcessLogout() const = 0;
 
 protected:
-    WorldSession* const m_pSession;
-};
-//process only thread-safe packets in Map::Update()
-class MapSessionFilter : public PacketFilter
-{
-public:
-    explicit MapSessionFilter(WorldSession* pSession) : PacketFilter(pSession) {}
-    ~MapSessionFilter() {}
-
-    virtual bool Process(WorldPacket* packet);
-    //in Map::Update() we do not process player logout!
-    virtual bool ProcessLogout() const { return false; }
+    WorldSession const *m_session;
 };
 
-//class used to filer only thread-unsafe packets from queue
-//in order to update only be used in World::UpdateSessions()
-class WorldSessionFilter : public PacketFilter
+// process only thread-safe packets in Map::Update()
+class MapSessionFilter final : public PacketFilter
 {
 public:
-    explicit WorldSessionFilter(WorldSession* pSession) : PacketFilter(pSession) {}
-    ~WorldSessionFilter() {}
+    explicit MapSessionFilter(WorldSession const *session)
+        : PacketFilter(session)
+    { }
 
-    virtual bool Process(WorldPacket* packet);
+    virtual bool Process(WorldPacket const *packet) const final;
+
+    // in Map::Update() we do not process player logout!
+    virtual bool ProcessLogout() const final { return false; }
+};
+
+// class used to filer only thread-unsafe packets from queue
+// in order to update only be used in World::UpdateSessions()
+class WorldSessionFilter final : public PacketFilter
+{
+public:
+    explicit WorldSessionFilter(WorldSession const *session)
+        : PacketFilter(session)
+    { }
+
+    // we should process ALL packets when player is not in world/logged in
+    // OR packet handler is not thread-safe!
+    virtual bool Process(WorldPacket const *packet) const final;
+
+    virtual bool ProcessLogout() const final { return true; }
 };
 
 // Proxy structure to contain data passed to callback function,
@@ -310,7 +319,7 @@ class WorldSession
         void KickPlayer();
 
         void QueuePacket(WorldPacket* new_packet);
-        bool Update(uint32 diff, PacketFilter& updater);
+        bool Update(uint32 diff, PacketFilter const &filter);
 
         /// Handle the authentication waiting queue (to be completed)
         void SendAuthWaitQue(uint32 position);

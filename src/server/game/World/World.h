@@ -786,9 +786,6 @@ class World
         int32 GetVisibilityNotifyPeriodInInstances() const { return m_visibility_notify_periodInInstances; }
         int32 GetVisibilityNotifyPeriodInBGArenas() const { return m_visibility_notify_periodInBGArenas;   }
 
-        float Visibility_RelocationLowerLimit;
-        uint32 Visibility_AINotifyDelay;
-
         void ProcessCliCommands();
         void QueueCliCommand(CliCommandHolder* commandHolder) { cliCmdQueue.add(commandHolder); }
 

@@ -343,8 +343,9 @@ class spell_shu_benediction: public SpellScriptLoader
                             return;
 
                 // A partir d'ici on sait que le joueur n'a pas encore de Huo
-                if (TempSummon* tempShu = target->SummonCreature(55213, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0.0f, TEMPSUMMON_MANUAL_DESPAWN, 0, target->GetGUID()))
+                if (TempSummon* tempShu = target->SummonCreature(55213, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0.0f, TEMPSUMMON_MANUAL_DESPAWN, 0))
                 {
+                    tempShu->setExplicitSeerGuid(target->GetGUID());
                     tempShu->SetOwnerGUID(target->GetGUID());
                     tempShu->GetMotionMaster()->MoveFollow(target, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
                 }
@@ -401,22 +402,25 @@ class spell_grab_carriage: public SpellScriptLoader
 
                 if (caster->GetAreaId() == 5826) // Bassins chantants
                 {
-                    carriage = caster->SummonCreature(57208, 979.06f, 2863.87f, 87.88f, 4.7822f, TEMPSUMMON_MANUAL_DESPAWN, 0, caster->GetGUID());
-                    yak      = caster->SummonCreature(57207, 979.37f, 2860.29f, 88.22f, 4.4759f, TEMPSUMMON_MANUAL_DESPAWN, 0, caster->GetGUID());
+                    carriage = caster->SummonCreature(57208, 979.06f, 2863.87f, 87.88f, 4.7822f, TEMPSUMMON_MANUAL_DESPAWN, 0);
+                    yak      = caster->SummonCreature(57207, 979.37f, 2860.29f, 88.22f, 4.4759f, TEMPSUMMON_MANUAL_DESPAWN, 0);
                 }
                 else if (caster->GetAreaId() == 5881) // Ferme Dai-Lo
                 {
-                    carriage = caster->SummonCreature(57208, 588.70f, 3165.63f, 88.86f, 4.4156f, TEMPSUMMON_MANUAL_DESPAWN, 0, caster->GetGUID());
-                    yak      = caster->SummonCreature(59499, 587.61f, 3161.91f, 89.31f, 4.3633f, TEMPSUMMON_MANUAL_DESPAWN, 0, caster->GetGUID());
+                    carriage = caster->SummonCreature(57208, 588.70f, 3165.63f, 88.86f, 4.4156f, TEMPSUMMON_MANUAL_DESPAWN, 0);
+                    yak      = caster->SummonCreature(59499, 587.61f, 3161.91f, 89.31f, 4.3633f, TEMPSUMMON_MANUAL_DESPAWN, 0);
                 }
                 else if (caster->GetAreaId() == 5833) // Epave du Chercheciel
                 {
-                    carriage = caster->SummonCreature(57208, 264.37f, 3867.60f, 73.56f, 0.9948f, TEMPSUMMON_MANUAL_DESPAWN, 0, caster->GetGUID());
-                    yak      = caster->SummonCreature(57743, 268.38f, 3872.36f, 74.50f, 0.8245f, TEMPSUMMON_MANUAL_DESPAWN, 0, caster->GetGUID());
+                    carriage = caster->SummonCreature(57208, 264.37f, 3867.60f, 73.56f, 0.9948f, TEMPSUMMON_MANUAL_DESPAWN, 0);
+                    yak      = caster->SummonCreature(57743, 268.38f, 3872.36f, 74.50f, 0.8245f, TEMPSUMMON_MANUAL_DESPAWN, 0);
                 }
 
                 if (!carriage || !yak)
                     return;
+
+                carriage->setExplicitSeerGuid(caster->GetGUID());
+                yak->setExplicitSeerGuid(caster->GetGUID());
 
                 //carriage->CastSpell(yak, 108627, true);
                 carriage->GetMotionMaster()->MoveFollow(yak, 0.0f, M_PI);
@@ -530,8 +534,10 @@ public:
             player->KilledMonsterCredit(55548);
             player->RemoveAurasDueToSpell(59073); // Remove Phase 2, first water spirit disapear
 
-            if (Creature* shu = player->SummonCreature(55558, creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 0, player->GetGUID()))
+            if (Creature* shu = player->SummonCreature(55558, creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 0))
             {
+                shu->setExplicitSeerGuid(player->GetGUID());
+
                 if (shu->AI())
                 {
                     shu->AI()->DoAction(0);
@@ -628,8 +634,9 @@ public:
                                 owner->RemoveAurasDueToSpell(59074); // Remove phase 4, asleep wugou disappear
 
                                 if (Creature* wugou = GetClosestCreatureWithEntry(me, 60916, 20.0f))
-                                    if (Creature* newWugou = owner->SummonCreature(60916, wugou->GetPositionX(), wugou->GetPositionY(), wugou->GetPositionZ(), wugou->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 0, owner->GetGUID()))
+                                    if (Creature* newWugou = owner->SummonCreature(60916, wugou->GetPositionX(), wugou->GetPositionY(), wugou->GetPositionZ(), wugou->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 0))
                                     {
+                                        newWugou->setExplicitSeerGuid(owner->GetGUID());
                                         newWugou->RemoveAllAuras();
                                         newWugou->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
                                     }

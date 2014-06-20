@@ -364,44 +364,8 @@ bool IsIPAddress(char const* ipaddress);
 uint32 CreatePIDFile(const std::string& filename);
 
 std::string ByteArrayToHexStr(uint8 const* bytes, uint32 length, bool reverse = false);
-#endif
 
 //handler for operations on large flags
-#ifndef _FLAG96
-#define _FLAG96
-
-// simple class for not-modifiable list
-template <typename T>
-class HookList
-{
-    typedef typename std::list<T>::iterator ListIterator;
-    private:
-        typename std::list<T> m_list;
-    public:
-        HookList<T> & operator+=(T t)
-        {
-            m_list.push_back(t);
-            return *this;
-        }
-        HookList<T> & operator-=(T t)
-        {
-            m_list.remove(t);
-            return *this;
-        }
-        size_t size()
-        {
-            return m_list.size();
-        }
-        ListIterator begin()
-        {
-            return m_list.begin();
-        }
-        ListIterator end()
-        {
-            return m_list.end();
-        }
-};
-
 class flag96
 {
 private:

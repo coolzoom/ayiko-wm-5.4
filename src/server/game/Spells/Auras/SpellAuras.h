@@ -221,6 +221,7 @@ class Aura
 
         // AuraScript
         void LoadScripts();
+        void CallScriptInitEffectsHandlers(uint32 &effectMask);
         bool CallScriptCheckAreaTargetHandlers(Unit* target);
         void CallScriptDispel(DispelInfo* dispelInfo);
         void CallScriptAfterDispel(DispelInfo* dispelInfo);

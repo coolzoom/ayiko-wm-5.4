@@ -704,6 +704,15 @@ bool AuraScript::_Validate(SpellInfo const* entry)
     return _SpellScript::_Validate(entry);
 }
 
+AuraScript::InitEffectsHandler::InitEffectsHandler(AuraInitEffectsFnType _pHandlerScript)
+    : pHandlerScript(_pHandlerScript)
+{ }
+
+void AuraScript::InitEffectsHandler::Call(AuraScript* auraScript, uint32 &effectMask)
+{
+    return (auraScript->*pHandlerScript)(effectMask);
+}
+
 AuraScript::CheckAreaTargetHandler::CheckAreaTargetHandler(AuraCheckAreaTargetFnType _pHandlerScript)
 {
     pHandlerScript = _pHandlerScript;

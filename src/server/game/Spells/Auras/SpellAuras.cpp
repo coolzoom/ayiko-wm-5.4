@@ -575,6 +575,8 @@ m_isRemoved(false), m_isSingleTarget(false), m_isUsingCharges(false)
 
 void Aura::_InitEffects(uint32 effMask, Unit* caster, int32 *baseAmount)
 {
+    CallScriptInitEffectsHandlers(effMask);
+
     m_effects.resize(GetSpellInfo()->Effects.size());
     for (size_t i = 0; i < m_effects.size(); ++i)
         if (effMask & (uint8(1) << i))
@@ -2527,6 +2529,17 @@ void Aura::LoadScripts()
         TC_LOG_DEBUG("spells", "Aura::LoadScripts: Script `%s` for aura `%u` is loaded now", (*itr)->_GetScriptName()->c_str(), m_spellInfo->Id);
         (*itr)->Register();
         ++itr;
+    }
+}
+
+void Aura::CallScriptInitEffectsHandlers(uint32 &effectMask)
+{
+    for (auto &script : m_loadedScripts)
+    {
+        script->_PrepareScriptCall(AURA_SCRIPT_HOOK_INIT_EFFECTS);
+        for (auto &hook : script->OnInitEffects)
+            hook.Call(script, effectMask);
+        script->_FinishScriptCall();
     }
 }
 

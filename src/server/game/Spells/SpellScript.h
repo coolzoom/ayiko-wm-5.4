@@ -18,10 +18,11 @@
 #ifndef __SPELL_SCRIPT_H
 #define __SPELL_SCRIPT_H
 
-#include "Util.h"
 #include "SharedDefines.h"
 #include "SpellAuraDefines.h"
 #include "Spell.h"
+
+#include <list>
 #include <stack>
 
 class Unit;
@@ -38,6 +39,44 @@ class Player;
 class Item;
 class WorldLocation;
 class WorldObject;
+
+// simple class for not-modifiable list
+template <typename T>
+class HookList
+{
+    typedef typename std::list<T>::iterator ListIterator;
+
+public:
+    HookList<T> & operator+=(T t)
+    {
+        m_list.push_back(t);
+        return *this;
+    }
+
+    HookList<T> & operator-=(T t)
+    {
+        m_list.remove(t);
+        return *this;
+    }
+
+    size_t size() const
+    {
+        return m_list.size();
+    }
+
+    ListIterator begin()
+    {
+        return m_list.begin();
+    }
+
+    ListIterator end()
+    {
+        return m_list.end();
+    }
+
+private:
+    std::list<T> m_list;
+};
 
 #define SPELL_EFFECT_ANY (uint16)-1
 #define SPELL_AURA_ANY (uint16)-1
@@ -427,6 +466,7 @@ enum AuraScriptHookType
     AURA_SCRIPT_HOOK_EFFECT_AFTER_MANASHIELD,
     AURA_SCRIPT_HOOK_CHECK_AREA_TARGET,
     AURA_SCRIPT_HOOK_DISPEL,
+    AURA_SCRIPT_HOOK_INIT_EFFECTS,
     AURA_SCRIPT_HOOK_AFTER_DISPEL,
     // Spell Proc Hooks
     AURA_SCRIPT_HOOK_CHECK_PROC,
@@ -450,6 +490,7 @@ class AuraScript : public _SpellScript
     public:
 
     #define AURASCRIPT_FUNCTION_TYPE_DEFINES(CLASSNAME) \
+        typedef void(CLASSNAME::*AuraInitEffectsFnType)(uint32 &); \
         typedef bool(CLASSNAME::*AuraCheckAreaTargetFnType)(Unit* target); \
         typedef void(CLASSNAME::*AuraDispelFnType)(DispelInfo* dispelInfo); \
         typedef void(CLASSNAME::*AuraEffectApplicationModeFnType)(AuraEffect const *, AuraEffectHandleModes); \
@@ -467,6 +508,14 @@ class AuraScript : public _SpellScript
 
         AURASCRIPT_FUNCTION_TYPE_DEFINES(AuraScript)
 
+        class InitEffectsHandler
+        {
+            public:
+                InitEffectsHandler(AuraInitEffectsFnType pHandlerScript);
+                void Call(AuraScript* auraScript, uint32 &effectMask);
+            private:
+                AuraInitEffectsFnType pHandlerScript;
+        };
         class CheckAreaTargetHandler
         {
             public:
@@ -597,6 +646,7 @@ class AuraScript : public _SpellScript
         };
 
         #define AURASCRIPT_FUNCTION_CAST_DEFINES(CLASSNAME) \
+        class InitEffectsFunction : public AuraScript::InitEffectsHandler { public: InitEffectsFunction(AuraInitEffectsFnType _pHandlerScript) : AuraScript::InitEffectsHandler((AuraScript::AuraInitEffectsFnType)_pHandlerScript) { } }; \
         class CheckAreaTargetFunction : public AuraScript::CheckAreaTargetHandler { public: CheckAreaTargetFunction(AuraCheckAreaTargetFnType _pHandlerScript) : AuraScript::CheckAreaTargetHandler((AuraScript::AuraCheckAreaTargetFnType)_pHandlerScript) {} }; \
         class AuraDispelFunction : public AuraScript::AuraDispelHandler { public: AuraDispelFunction(AuraDispelFnType _pHandlerScript) : AuraScript::AuraDispelHandler((AuraScript::AuraDispelFnType)_pHandlerScript) {} }; \
         class EffectPeriodicHandlerFunction : public AuraScript::EffectPeriodicHandler { public: EffectPeriodicHandlerFunction(AuraEffectPeriodicFnType _pEffectHandlerScript, uint8 _effIndex, uint16 _effName) : AuraScript::EffectPeriodicHandler((AuraScript::AuraEffectPeriodicFnType)_pEffectHandlerScript, _effIndex, _effName) {} }; \
@@ -646,6 +696,14 @@ class AuraScript : public _SpellScript
         // AuraScript interface
         // hooks to which you can attach your functions
         //
+        // executed before initializing aura effects, can be used to completely
+        // prevent certain auras from being applied. May be useful for certain
+        // spells that enable/disable functionality if glyph is present
+        // example: OnInitEffects += AuraInitEffectsFn(class::function);
+        // where function is: void function(uint8 &effectMask);
+        HookList<InitEffectsHandler> OnInitEffects;
+        #define AuraInitEffectsFn(F) InitEffectsFunction(&F)
+
         // executed when area aura checks if it can be applied on target
         // example: OnEffectApply += AuraEffectApplyFn(class::function);
         // where function is: bool function (Unit* target);

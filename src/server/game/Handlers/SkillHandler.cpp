@@ -36,18 +36,16 @@ void WorldSession::HandleSetSpecialization(WorldPacket& recvData)
         return;
 
     uint32 specializationId = 0;
-    uint32 specializationSpell = 0;
 
     for (uint32 i = 0; i < sChrSpecializationsStore.GetNumRows(); i++)
     {
-        ChrSpecializationsEntry const* specialization = sChrSpecializationsStore.LookupEntry(i);
+        auto const specialization = sChrSpecializationsStore.LookupEntry(i);
         if (!specialization)
             continue;
 
         if (specialization->classId == classId && specialization->tabId == tab)
         {
             specializationId = specialization->entry;
-            specializationSpell = specialization->specializationSpell;
             break;
         }
     }
@@ -56,8 +54,6 @@ void WorldSession::HandleSetSpecialization(WorldPacket& recvData)
     {
         _player->SetSpecializationId(_player->GetActiveSpec(), specializationId);
         _player->SendTalentsInfoData(false);
-        if (specializationSpell)
-            _player->learnSpell(specializationSpell, false);
         _player->InitSpellForLevel();
         _player->UpdateMasteryPercentage();
     }

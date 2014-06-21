@@ -49,7 +49,8 @@ enum WarriorSpells
     WARRIOR_SPELL_BERZERKER_RAGE_EFFECT         = 23691,
     WARRIOR_SPELL_ENRAGE                        = 12880,
     WARRIOR_SPELL_COLOSSUS_SMASH                = 86346,
-    WARRIOR_SPELL_SECOND_WIND_REGEN             = 16491,
+    WARRIOR_SPELL_SECOND_WIND_REGEN             = 125667,
+    WARRIOR_SPELL_UNBRIDLED_WRATH_REGEN         = 29842,
     WARRIOR_SPELL_DRAGON_ROAR_KNOCK_BACK        = 118895,
     WARRIOR_SPELL_MEAT_CLEAVER_PROC             = 85739,
     WARRIOR_SPELL_PHYSICAL_VULNERABILITY        = 81326,
@@ -397,53 +398,81 @@ class spell_warr_frenzied_regeneration : public SpellScriptLoader
 };
 
 // Second Wind - 29838
-class spell_warr_second_wind : public SpellScriptLoader
+class spell_warr_second_wind final : public SpellScriptLoader
 {
-    public:
-        spell_warr_second_wind() : SpellScriptLoader("spell_warr_second_wind") { }
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl);
 
-        class spell_warr_second_wind_SpellScript : public SpellScript
+        bool checkProc(ProcEventInfo &eventInfo)
         {
-            PrepareSpellScript(spell_warr_second_wind_SpellScript);
-
-            void HandleOnHit()
-            {
-                if (Player* _player = GetCaster()->ToPlayer())
-                    _player->CastSpell(_player, WARRIOR_SPELL_SECOND_WIND_REGEN, true);
-            }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_warr_second_wind_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_warr_second_wind_SpellScript();
+            return GetCaster() && GetCaster()->GetHealthPct() <= 35;
         }
 
-        class spell_warr_second_wind_AuraScript : public AuraScript
+        void onProc(AuraEffect const *, ProcEventInfo &eventInfo)
         {
-            PrepareAuraScript(spell_warr_second_wind_AuraScript);
-
-            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
-            {
-                if (Unit* caster = GetCaster())
-                    if (caster->HasAura(WARRIOR_SPELL_SECOND_WIND_REGEN))
-                        caster->RemoveAura(WARRIOR_SPELL_SECOND_WIND_REGEN);
-            }
-
-            void Register()
-            {
-                OnEffectRemove += AuraEffectRemoveFn(spell_warr_second_wind_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_warr_second_wind_AuraScript();
+            GetCaster()->CastSpell(GetCaster(), WARRIOR_SPELL_SECOND_WIND_REGEN, true);
         }
+
+        void Register() final
+        {
+            DoCheckProc += AuraCheckProcFn(script_impl::checkProc);
+            OnEffectProc += AuraEffectProcFn(script_impl::onProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+public:
+    spell_warr_second_wind() : SpellScriptLoader("spell_warr_second_wind") { }
+
+    AuraScript* GetAuraScript() const final
+    {
+        return new script_impl();
+    }
+};
+
+// Unbridled Wrath - 143268
+class spell_warr_unbridled_wrath final : public SpellScriptLoader
+{
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl);
+
+        bool checkProc(ProcEventInfo &eventInfo)
+        {
+            auto const caster = eventInfo.GetActionTarget();
+            auto const target = eventInfo.GetProcTarget();
+
+            if (!caster || !target || caster == target)
+                return false;
+
+            if (!eventInfo.GetSpellInfo() || !(eventInfo.GetHitMask() & (PROC_EX_NORMAL_HIT|PROC_EX_CRITICAL_HIT)))
+                return false;
+
+            if (!(eventInfo.GetSpellInfo()->GetAllEffectsMechanicMask() & ((1<<MECHANIC_ROOT)|(1<<MECHANIC_STUN))))
+                return false;
+
+            return true;
+        }
+
+        void onProc(AuraEffect const *, ProcEventInfo &eventInfo)
+        {
+            eventInfo.GetActionTarget()->CastSpell(eventInfo.GetActionTarget(), WARRIOR_SPELL_UNBRIDLED_WRATH_REGEN, true);
+        }
+
+        void Register() final
+        {
+            DoCheckProc += AuraCheckProcFn(script_impl::checkProc);
+            OnEffectProc += AuraEffectProcFn(script_impl::onProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+public:
+    spell_warr_unbridled_wrath() : SpellScriptLoader("spell_warr_unbridled_wrath") { }
+
+    AuraScript* GetAuraScript() const final
+    {
+        return new script_impl();
+    }
 };
 
 // Sudden Death - 52437
@@ -1174,6 +1203,7 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_staggering_shout();
     new spell_warr_frenzied_regeneration();
     new spell_warr_second_wind();
+    new spell_warr_unbridled_wrath();
     new spell_warr_sudden_death();
     new spell_warr_berzerker_rage();
     new spell_warr_mocking_banner();

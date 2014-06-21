@@ -800,16 +800,16 @@ class spell_warr_shockwave : public SpellScriptLoader
         {
             PrepareSpellScript(spell_warr_shockwave_SpellScript);
 
-            void HandleOnHit()
+            void HandleDummy(SpellEffIndex /*effIndex*/)
             {
-                if (Player* _player = GetCaster()->ToPlayer())
-                    if (Unit* target = GetHitUnit())
+                if (Player* const _player = GetCaster()->ToPlayer())
+                    if (Unit* const target = GetHitUnit())
                         _player->CastSpell(target, WARRIOR_SPELL_SHOCKWAVE_STUN, true);
             }
 
             void Register()
             {
-                OnHit += SpellHitFn(spell_warr_shockwave_SpellScript::HandleOnHit);
+                OnEffectHitTarget += SpellEffectFn(spell_warr_shockwave_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 

@@ -1361,63 +1361,50 @@ class spell_pal_holy_shock : public SpellScriptLoader
         {
             PrepareSpellScript(spell_pal_holy_shock_SpellScript);
 
-            bool Validate(SpellInfo const* spell)
+            enum
             {
-                if (!sSpellMgr->GetSpellInfo(PALADIN_SPELL_HOLY_SHOCK_R1))
-                    return false;
+                HOLY_SHOCK_DAMAGE   = 25912,
+                HOLY_SHOCK_HEALING  = 25914,
+                HOLY_SHOCK_ENERGIZE = 148976,
+            };
 
-                // can't use other spell than holy shock due to spell_ranks dependency
-                if (sSpellMgr->GetFirstSpellInChain(PALADIN_SPELL_HOLY_SHOCK_R1) != sSpellMgr->GetFirstSpellInChain(spell->Id))
-                    return false;
-
-                uint8 rank = sSpellMgr->GetSpellRank(spell->Id);
-                if (!sSpellMgr->GetSpellWithRank(PALADIN_SPELL_HOLY_SHOCK_R1_DAMAGE, rank, true) || !sSpellMgr->GetSpellWithRank(PALADIN_SPELL_HOLY_SHOCK_R1_HEALING, rank, true))
-                    return false;
-
-                return true;
-            }
-
-            void HandleDummy(SpellEffIndex /*effIndex*/)
+            bool Validate(SpellInfo const *)
             {
-                if (Player* caster = GetCaster()->ToPlayer())
-                {
-                    if (Unit* unitTarget = GetHitUnit())
-                    {
-                        if (caster->IsFriendlyTo(unitTarget))
-                        {
-                            caster->CastSpell(unitTarget, PALADIN_SPELL_HOLY_SHOCK_R1_HEALING, true);
-                            caster->ToPlayer()->AddSpellCooldown(PALADIN_SPELL_HOLY_SHOCK_R1, 0, 6 * IN_MILLISECONDS);
-                        }
-                        else
-                        {
-                            caster->CastSpell(unitTarget, PALADIN_SPELL_HOLY_SHOCK_R1_DAMAGE, true);
-                            caster->ToPlayer()->AddSpellCooldown(PALADIN_SPELL_HOLY_SHOCK_R1, 0, 6 * IN_MILLISECONDS);
-                        }
-
-                        if (caster->HasAura(PALADIN_SPELL_GLYPH_OF_DENOUNCE))
-                            if (roll_chance_i(50))
-                                caster->CastSpell(caster, PALADIN_SPELL_GLYPH_OF_DENOUNCE_PROC, true);
-                    }
-                }
+                return sSpellMgr->GetSpellInfo(HOLY_SHOCK_DAMAGE)
+                    && sSpellMgr->GetSpellInfo(HOLY_SHOCK_HEALING)
+                    && sSpellMgr->GetSpellInfo(HOLY_SHOCK_ENERGIZE);
             }
 
             SpellCastResult CheckCast()
             {
-                Unit* caster = GetCaster();
-                if (Unit* target = GetExplTargetUnit())
-                {
-                    if (!caster->IsFriendlyTo(target))
-                    {
-                        if (!caster->IsValidAttackTarget(target))
-                            return SPELL_FAILED_BAD_TARGETS;
-
-                        if (!caster->isInFront(target))
-                            return SPELL_FAILED_UNIT_NOT_INFRONT;
-                    }
-                }
-                else
+                Unit const * const target = GetExplTargetUnit();
+                if (!target)
                     return SPELL_FAILED_BAD_TARGETS;
+
+                Unit const * const caster = GetCaster();
+                if (!caster->IsFriendlyTo(target))
+                {
+                    if (!caster->IsValidAttackTarget(target))
+                        return SPELL_FAILED_BAD_TARGETS;
+                    if (!caster->isInFront(target))
+                        return SPELL_FAILED_UNIT_NOT_INFRONT;
+                }
+
                 return SPELL_CAST_OK;
+            }
+
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                Unit * const caster = GetCaster();
+                Unit * const target = GetHitUnit();
+
+                uint32 const spellId = caster->IsFriendlyTo(target)
+                    ? HOLY_SHOCK_HEALING
+                    : HOLY_SHOCK_DAMAGE;
+
+                caster->CastSpell(target, spellId, true);
+                // Add Holy Power
+                caster->CastSpell(caster, HOLY_SHOCK_ENERGIZE, true);
             }
 
             void Register()
@@ -1645,7 +1632,7 @@ class spell_pal_holy_wrath : public SpellScriptLoader
     {
         PrepareSpellScript(script_impl)
 
-            void HandleEnergize(SpellEffIndex /*effIndex*/)
+        void HandleEnergize(SpellEffIndex /*effIndex*/)
         {
             if (Creature * cr = GetHitCreature())
             {

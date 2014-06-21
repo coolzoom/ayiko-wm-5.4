@@ -1307,50 +1307,6 @@ class spell_pal_holy_shock_heal : public SpellScriptLoader
         }
 };
 
-// Holy Shock (damage) - 25912
-class spell_pal_holy_shock_damage : public SpellScriptLoader
-{
-    public:
-        spell_pal_holy_shock_damage() : SpellScriptLoader("spell_pal_holy_shock_damage") { }
-
-        class spell_pal_holy_shock_damage_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_pal_holy_shock_damage_SpellScript);
-
-            void HandleOnHit()
-            {
-                if (Player* caster = GetCaster()->ToPlayer())
-                {
-                    if (GetHitUnit())
-                    {
-                        int32 damage = GetHitDamage();
-
-                        if (caster->getLevel() < 85)
-                        {
-                            damage = int32(GetHitDamage() * 0.15f);
-                            SetHitDamage(damage);
-                        }
-                        else if (caster->getLevel() < 90)
-                        {
-                            damage = int32(GetHitDamage() * 0.61f);
-                            SetHitDamage(damage);
-                        }
-                    }
-                }
-            }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_pal_holy_shock_damage_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_pal_holy_shock_damage_SpellScript();
-        }
-};
-
 // Holy Shock - 20473
 class spell_pal_holy_shock : public SpellScriptLoader
 {
@@ -1703,7 +1659,6 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_ardent_defender();
     new spell_pal_blessing_of_faith();
     new spell_pal_holy_shock_heal();
-    new spell_pal_holy_shock_damage();
     new spell_pal_holy_shock();
     new spell_pal_divine_storm();
     new spell_pal_lay_on_hands();

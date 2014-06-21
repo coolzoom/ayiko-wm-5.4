@@ -584,40 +584,38 @@ class spell_warr_raging_blow : public SpellScriptLoader
         }
 };
 
-// Called by Devastate - 20243
-// Sword and Board - 46953
 class spell_warr_sword_and_board : public SpellScriptLoader
 {
-    public:
-        spell_warr_sword_and_board() : SpellScriptLoader("spell_warr_sword_and_board") { }
+public:
+    spell_warr_sword_and_board() : SpellScriptLoader("spell_warr_sword_and_board") { }
 
-        class spell_warr_sword_and_board_SpellScript : public SpellScript
+    class spell_warr_sword_and_board_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_warr_sword_and_board_AuraScript);
+
+        void OnProc(AuraEffect const * /*aurEff*/, ProcEventInfo& eventInfo)
         {
-            PrepareSpellScript(spell_warr_sword_and_board_SpellScript);
+            Unit * const caster = GetCaster();
+            if (!caster)
+                return;
 
-            void HandleOnHit()
+            if (Player* const player = caster->ToPlayer())
             {
-                // Fix Sword and Board
-                if (Player* player = GetCaster()->ToPlayer())
-                {
-                    if (GetHitUnit() && roll_chance_i(30))
-                    {
-                        player->CastSpell(player, WARRIOR_SPELL_SWORD_AND_BOARD, true);
-                        player->RemoveSpellCooldown(WARRIOR_SPELL_SHIELD_SLAM, true);
-                    }
-                }
+                player->CastSpell(player, WARRIOR_SPELL_SWORD_AND_BOARD, true);
+                player->RemoveSpellCooldown(WARRIOR_SPELL_SHIELD_SLAM, true);
             }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_warr_sword_and_board_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_warr_sword_and_board_SpellScript();
         }
+
+        void Register()
+        {
+            OnEffectProc += AuraEffectProcFn(spell_warr_sword_and_board_AuraScript::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_warr_sword_and_board_AuraScript();
+    }
 };
 
 // Mortal strike - 12294

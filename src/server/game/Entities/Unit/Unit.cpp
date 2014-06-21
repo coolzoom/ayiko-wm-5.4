@@ -7713,19 +7713,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                     basepoints0 = triggerAmount;
                     break;
                 }
-                // Seal of Truth (damage calc on apply aura)
-                case 31801:
-                {
-                    if (effIndex != 0)                       // effect 2 used by seal unleashing code
-                        return false;
-
-                    triggered_spell_id = 31803;
-
-                    // Deals additionnal 12% weapon damage
-                    CastSpell(victim, 42463, true);
-
-                    break;
-                }
                 // Paladin Tier 6 Trinket (Ashtongue Talisman of Zeal)
                 case 40470:
                 {

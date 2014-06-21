@@ -1585,6 +1585,59 @@ public:
     }
 };
 
+// Seal of Truth - 31801
+class spell_pal_seal_of_truth : public SpellScriptLoader
+{
+    class script_impl : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        enum
+        {
+            CENSURE = 31803,
+            SEAL_OF_TRUTH_PROC = 42463
+        };
+
+        bool Validate(SpellInfo const *)
+        {
+            return sSpellMgr->GetSpellInfo(CENSURE) != NULL
+                && sSpellMgr->GetSpellInfo(SEAL_OF_TRUTH_PROC) != NULL;
+        }
+
+        bool CheckProc(ProcEventInfo &eventInfo)
+        {
+            Unit const * const caster = eventInfo.GetActor();
+            Unit const * const target = eventInfo.GetActionTarget();
+            return caster && target && caster != target;
+        }
+
+        void HandleProc(AuraEffect const *aurEff, ProcEventInfo &eventInfo)
+        {
+            Unit * const caster = eventInfo.GetActor();
+            Unit * const target = eventInfo.GetActionTarget();
+
+            caster->CastSpell(target, SEAL_OF_TRUTH_PROC, true, NULL, aurEff);
+            caster->CastSpell(target, CENSURE, true, NULL, aurEff);
+        }
+
+        void Register()
+        {
+            DoCheckProc += AuraCheckProcFn(script_impl::CheckProc);
+            OnEffectProc += AuraEffectProcFn(script_impl::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+public:
+    spell_pal_seal_of_truth()
+        : SpellScriptLoader("spell_pal_seal_of_truth")
+    { }
+
+    AuraScript * GetAuraScript() const
+    {
+        return new script_impl;
+    }
+};
+
 void AddSC_paladin_spell_scripts()
 {
     new spell_pal_glyph_of_devotian_aura();
@@ -1624,4 +1677,5 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_lay_on_hands();
     new spell_pal_righteous_defense();
     new spell_pal_crusader_strike();
+    new spell_pal_seal_of_truth();
 }

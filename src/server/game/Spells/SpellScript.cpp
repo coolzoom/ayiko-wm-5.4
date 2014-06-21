@@ -315,10 +315,8 @@ bool SpellScript::_Validate(SpellInfo const* entry)
 bool SpellScript::_Load(Spell* spell)
 {
     m_spell = spell;
-    _PrepareScriptCall((SpellScriptHookType)SPELL_SCRIPT_STATE_LOADING);
-    bool load = Load();
-    _FinishScriptCall();
-    return load;
+    auto const g = Trinity::makeScriptCallGuard(this, (SpellScriptHookType)SPELL_SCRIPT_STATE_LOADING);
+    return Load();
 }
 
 void SpellScript::_InitHit()
@@ -893,10 +891,8 @@ void AuraScript::EffectProcHandler::Call(AuraScript* auraScript, AuraEffect cons
 bool AuraScript::_Load(Aura *aura)
 {
     m_aura = aura;
-    _PrepareScriptCall((AuraScriptHookType)SPELL_SCRIPT_STATE_LOADING, NULL);
-    bool load = Load();
-    _FinishScriptCall();
-    return load;
+    auto const g = Trinity::makeScriptCallGuard(this, (AuraScriptHookType)SPELL_SCRIPT_STATE_LOADING);
+    return Load();
 }
 
 void AuraScript::_PrepareScriptCall(AuraScriptHookType hookType, AuraApplication const* aurApp)

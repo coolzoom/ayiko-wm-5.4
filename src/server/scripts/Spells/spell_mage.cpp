@@ -449,7 +449,7 @@ class spell_mage_incanters_ward : public SpellScriptLoader
                         absorbTotal += float(dmgInfo.GetDamage());
 
                         int32 pct = aurEff->GetSpellInfo()->Effects[EFFECT_1].CalcValue(GetCaster());
-                        uint32 manaGain = CalculatePct(caster->GetMaxPower(POWER_MANA), CalculatePct(((float(dmgInfo.GetDamage()) / absorbtionAmount) * 100.0f), pct));
+                        int32 manaGain = CalculatePct(caster->GetMaxPower(POWER_MANA), CalculatePct(((float(dmgInfo.GetDamage()) / absorbtionAmount) * 100.0f), pct));
 
                         if (manaGain > caster->CountPctFromMaxMana(pct))
                             manaGain = caster->CountPctFromMaxMana(pct);

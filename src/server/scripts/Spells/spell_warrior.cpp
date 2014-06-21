@@ -404,12 +404,12 @@ class spell_warr_second_wind final : public SpellScriptLoader
     {
         PrepareAuraScript(script_impl);
 
-        bool checkProc(ProcEventInfo &eventInfo)
+        bool checkProc(ProcEventInfo &)
         {
             return GetCaster() && GetCaster()->GetHealthPct() <= 35;
         }
 
-        void onProc(AuraEffect const *, ProcEventInfo &eventInfo)
+        void onProc(AuraEffect const *, ProcEventInfo &)
         {
             GetCaster()->CastSpell(GetCaster(), WARRIOR_SPELL_SECOND_WIND_REGEN, true);
         }
@@ -456,6 +456,7 @@ class spell_warr_unbridled_wrath final : public SpellScriptLoader
 
         void onProc(AuraEffect const *, ProcEventInfo &eventInfo)
         {
+            PreventDefaultAction();
             eventInfo.GetActionTarget()->CastSpell(eventInfo.GetActionTarget(), WARRIOR_SPELL_UNBRIDLED_WRATH_REGEN, true);
         }
 
@@ -622,7 +623,7 @@ public:
     {
         PrepareAuraScript(spell_warr_sword_and_board_AuraScript);
 
-        void OnProc(AuraEffect const * /*aurEff*/, ProcEventInfo& eventInfo)
+        void OnProc(AuraEffect const * /*aurEff*/, ProcEventInfo& /*eventInfo*/)
         {
             Unit * const caster = GetCaster();
             if (!caster)

@@ -8607,238 +8607,153 @@ void Spell::LoadScripts()
 
 void Spell::CallScriptBeforeCastHandlers()
 {
-    uint32 scriptExecuteTime = getMSTime();
-    for (std::list<SpellScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    for (auto &script : m_loadedScripts)
     {
-        (*scritr)->_PrepareScriptCall(SPELL_SCRIPT_HOOK_BEFORE_CAST);
-        std::list<SpellScript::CastHandler>::iterator hookItrEnd = (*scritr)->BeforeCast.end(), hookItr = (*scritr)->BeforeCast.begin();
-        for (; hookItr != hookItrEnd; ++hookItr)
-            (*hookItr).Call(*scritr);
-
-        (*scritr)->_FinishScriptCall();
+        auto const g = Trinity::makeScriptCallGuard(script, SPELL_SCRIPT_HOOK_BEFORE_CAST);
+        for (auto &hook : script->BeforeCast)
+            hook.Call(script);
     }
-
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "SpellScript [%u] take more than 10 ms to execute (%u ms)", m_spellInfo->Id, scriptExecuteTime);
 }
 
 void Spell::CallScriptOnCastHandlers()
 {
-    uint32 scriptExecuteTime = getMSTime();
-    for (std::list<SpellScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    for (auto &script : m_loadedScripts)
     {
-        (*scritr)->_PrepareScriptCall(SPELL_SCRIPT_HOOK_ON_CAST);
-        std::list<SpellScript::CastHandler>::iterator hookItrEnd = (*scritr)->OnCast.end(), hookItr = (*scritr)->OnCast.begin();
-        for (; hookItr != hookItrEnd; ++hookItr)
-            (*hookItr).Call(*scritr);
-
-        (*scritr)->_FinishScriptCall();
+        auto const g = Trinity::makeScriptCallGuard(script, SPELL_SCRIPT_HOOK_ON_CAST);
+        for (auto &hook : script->OnCast)
+            hook.Call(script);
     }
-
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "SpellScript [%u] take more than 10 ms to execute (%u ms)", m_spellInfo->Id, scriptExecuteTime);
 }
 
 void Spell::CallScriptAfterCastHandlers()
 {
-    uint32 scriptExecuteTime = getMSTime();
-    for (std::list<SpellScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    for (auto &script : m_loadedScripts)
     {
-        (*scritr)->_PrepareScriptCall(SPELL_SCRIPT_HOOK_AFTER_CAST);
-        std::list<SpellScript::CastHandler>::iterator hookItrEnd = (*scritr)->AfterCast.end(), hookItr = (*scritr)->AfterCast.begin();
-        for (; hookItr != hookItrEnd; ++hookItr)
-            (*hookItr).Call(*scritr);
-
-        (*scritr)->_FinishScriptCall();
+        auto const g = Trinity::makeScriptCallGuard(script, SPELL_SCRIPT_HOOK_AFTER_CAST);
+        for (auto &hook : script->AfterCast)
+            hook.Call(script);
     }
-
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "SpellScript [%u] take more than 10 ms to execute (%u ms)", m_spellInfo->Id, scriptExecuteTime);
 }
 
 SpellCastResult Spell::CallScriptCheckCastHandlers()
 {
-    uint32 scriptExecuteTime = getMSTime();
-    SpellCastResult retVal = SPELL_CAST_OK;
-    for (std::list<SpellScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    for (auto &script : m_loadedScripts)
     {
-        (*scritr)->_PrepareScriptCall(SPELL_SCRIPT_HOOK_CHECK_CAST);
-        std::list<SpellScript::CheckCastHandler>::iterator hookItrEnd = (*scritr)->OnCheckCast.end(), hookItr = (*scritr)->OnCheckCast.begin();
-        for (; hookItr != hookItrEnd; ++hookItr)
+        auto const g = Trinity::makeScriptCallGuard(script, SPELL_SCRIPT_HOOK_CHECK_CAST);
+        for (auto &hook : script->OnCheckCast)
         {
-            SpellCastResult tempResult = (*hookItr).Call(*scritr);
-            if (retVal == SPELL_CAST_OK)
-                retVal = tempResult;
+            auto const tempResult = hook.Call(script);
+            if (tempResult != SPELL_CAST_OK)
+                return tempResult;
         }
-
-        (*scritr)->_FinishScriptCall();
     }
 
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "SpellScript [%u] take more than 10 ms to execute (%u ms)", m_spellInfo->Id, scriptExecuteTime);
-    return retVal;
+    return SPELL_CAST_OK;
 }
 
 void Spell::PrepareScriptHitHandlers()
 {
-    uint32 scriptExecuteTime = getMSTime();
-
-    for (std::list<SpellScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
-        (*scritr)->_InitHit();
-
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "SpellScript [%u] take more than 10 ms to execute (%u ms)", m_spellInfo->Id, scriptExecuteTime);
+    for (auto &script : m_loadedScripts)
+        script->_InitHit();
 }
 
 bool Spell::CallScriptEffectHandlers(SpellEffIndex effIndex, SpellEffectHandleMode mode)
 {
-    uint32 scriptExecuteTime = getMSTime();
-
     // execute script effect handler hooks and check if effects was prevented
     bool preventDefault = false;
-    for (std::list<SpellScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+
+    for (auto &script : m_loadedScripts)
     {
-        std::list<SpellScript::EffectHandler>::iterator effItr, effEndItr;
+        HookList<SpellScript::EffectHandler> *hookList;
         SpellScriptHookType hookType;
+
         switch (mode)
         {
             case SPELL_EFFECT_HANDLE_LAUNCH:
-                effItr = (*scritr)->OnEffectLaunch.begin();
-                effEndItr = (*scritr)->OnEffectLaunch.end();
+                hookList = &script->OnEffectLaunch;
                 hookType = SPELL_SCRIPT_HOOK_EFFECT_LAUNCH;
                 break;
             case SPELL_EFFECT_HANDLE_LAUNCH_TARGET:
-                effItr = (*scritr)->OnEffectLaunchTarget.begin();
-                effEndItr = (*scritr)->OnEffectLaunchTarget.end();
+                hookList = &script->OnEffectLaunchTarget;
                 hookType = SPELL_SCRIPT_HOOK_EFFECT_LAUNCH_TARGET;
                 break;
             case SPELL_EFFECT_HANDLE_HIT:
-                effItr = (*scritr)->OnEffectHit.begin();
-                effEndItr = (*scritr)->OnEffectHit.end();
+                hookList = &script->OnEffectHit;
                 hookType = SPELL_SCRIPT_HOOK_EFFECT_HIT;
                 break;
             case SPELL_EFFECT_HANDLE_HIT_TARGET:
-                effItr = (*scritr)->OnEffectHitTarget.begin();
-                effEndItr = (*scritr)->OnEffectHitTarget.end();
+                hookList = &script->OnEffectHitTarget;
                 hookType = SPELL_SCRIPT_HOOK_EFFECT_HIT_TARGET;
                 break;
             default:
                 ASSERT(false);
                 return false;
         }
-        (*scritr)->_PrepareScriptCall(hookType);
-        for (; effItr != effEndItr; ++effItr)
+
+        auto const g = Trinity::makeScriptCallGuard(script, hookType);
+
+        for (auto &hook : *hookList)
             // effect execution can be prevented
-            if (!(*scritr)->_IsEffectPrevented(effIndex) && (*effItr).IsEffectAffected(m_spellInfo, effIndex))
-                (*effItr).Call(*scritr, effIndex);
+            if (!script->_IsEffectPrevented(effIndex) && hook.IsEffectAffected(m_spellInfo, effIndex))
+                hook.Call(script, effIndex);
 
         if (!preventDefault)
-            preventDefault = (*scritr)->_IsDefaultEffectPrevented(effIndex);
-
-        (*scritr)->_FinishScriptCall();
+            preventDefault = script->_IsDefaultEffectPrevented(effIndex);
     }
-
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "SpellScript [%u] take more than 10 ms to execute (%u ms)", m_spellInfo->Id, scriptExecuteTime);
 
     return preventDefault;
 }
 
 void Spell::CallScriptBeforeHitHandlers()
 {
-    uint32 scriptExecuteTime = getMSTime();
-    for (std::list<SpellScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    for (auto &script : m_loadedScripts)
     {
-        (*scritr)->_PrepareScriptCall(SPELL_SCRIPT_HOOK_BEFORE_HIT);
-        std::list<SpellScript::HitHandler>::iterator hookItrEnd = (*scritr)->BeforeHit.end(), hookItr = (*scritr)->BeforeHit.begin();
-        for (; hookItr != hookItrEnd; ++hookItr)
-            (*hookItr).Call(*scritr);
-
-        (*scritr)->_FinishScriptCall();
+        auto const g = Trinity::makeScriptCallGuard(script, SPELL_SCRIPT_HOOK_BEFORE_HIT);
+        for (auto &hook : script->BeforeHit)
+            hook.Call(script);
     }
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "SpellScript [%u] take more than 10 ms to execute (%u ms)", m_spellInfo->Id, scriptExecuteTime);
 }
 
 void Spell::CallScriptOnHitHandlers()
 {
-    uint32 scriptExecuteTime = getMSTime();
-    for (std::list<SpellScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    for (auto &script : m_loadedScripts)
     {
-        (*scritr)->_PrepareScriptCall(SPELL_SCRIPT_HOOK_HIT);
-        std::list<SpellScript::HitHandler>::iterator hookItrEnd = (*scritr)->OnHit.end(), hookItr = (*scritr)->OnHit.begin();
-        for (; hookItr != hookItrEnd; ++hookItr)
-            (*hookItr).Call(*scritr);
-
-        (*scritr)->_FinishScriptCall();
+        auto const g = Trinity::makeScriptCallGuard(script, SPELL_SCRIPT_HOOK_HIT);
+        for (auto &hook : script->OnHit)
+            hook.Call(script);
     }
-
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "SpellScript [%u] take more than 10 ms to execute (%u ms)", m_spellInfo->Id, scriptExecuteTime);
 }
 
 void Spell::CallScriptAfterHitHandlers()
 {
-    uint32 scriptExecuteTime = getMSTime();
-    for (std::list<SpellScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    for (auto &script : m_loadedScripts)
     {
-        (*scritr)->_PrepareScriptCall(SPELL_SCRIPT_HOOK_AFTER_HIT);
-        std::list<SpellScript::HitHandler>::iterator hookItrEnd = (*scritr)->AfterHit.end(), hookItr = (*scritr)->AfterHit.begin();
-        for (; hookItr != hookItrEnd; ++hookItr)
-            (*hookItr).Call(*scritr);
-
-        (*scritr)->_FinishScriptCall();
+        auto const g = Trinity::makeScriptCallGuard(script, SPELL_SCRIPT_HOOK_AFTER_HIT);
+        for (auto &hook : script->AfterHit)
+            hook.Call(script);
     }
-
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "SpellScript [%u] take more than 10 ms to execute (%u ms)", m_spellInfo->Id, scriptExecuteTime);
 }
 
 void Spell::CallScriptObjectAreaTargetSelectHandlers(std::list<WorldObject*>& targets, SpellEffIndex effIndex)
 {
-    uint32 scriptExecuteTime = getMSTime();
-    for (std::list<SpellScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    for (auto &script : m_loadedScripts)
     {
-        (*scritr)->_PrepareScriptCall(SPELL_SCRIPT_HOOK_OBJECT_AREA_TARGET_SELECT);
-        std::list<SpellScript::ObjectAreaTargetSelectHandler>::iterator hookItrEnd = (*scritr)->OnObjectAreaTargetSelect.end(), hookItr = (*scritr)->OnObjectAreaTargetSelect.begin();
-        for (; hookItr != hookItrEnd; ++hookItr)
-            if ((*hookItr).IsEffectAffected(m_spellInfo, effIndex))
-                (*hookItr).Call(*scritr, targets);
-
-        (*scritr)->_FinishScriptCall();
+        auto const g = Trinity::makeScriptCallGuard(script, SPELL_SCRIPT_HOOK_OBJECT_AREA_TARGET_SELECT);
+        for (auto &hook : script->OnObjectAreaTargetSelect)
+            if (hook.IsEffectAffected(m_spellInfo, effIndex))
+                hook.Call(script, targets);
     }
-
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "SpellScript [%u] take more than 10 ms to execute (%u ms)", m_spellInfo->Id, scriptExecuteTime);
 }
 
 void Spell::CallScriptObjectTargetSelectHandlers(WorldObject*& target, SpellEffIndex effIndex)
 {
-    uint32 scriptExecuteTime = getMSTime();
-    for (std::list<SpellScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    for (auto &script : m_loadedScripts)
     {
-        (*scritr)->_PrepareScriptCall(SPELL_SCRIPT_HOOK_OBJECT_TARGET_SELECT);
-        std::list<SpellScript::ObjectTargetSelectHandler>::iterator hookItrEnd = (*scritr)->OnObjectTargetSelect.end(), hookItr = (*scritr)->OnObjectTargetSelect.begin();
-        for (; hookItr != hookItrEnd; ++hookItr)
-            if ((*hookItr).IsEffectAffected(m_spellInfo, effIndex))
-                (*hookItr).Call(*scritr, target);
-
-        (*scritr)->_FinishScriptCall();
+        auto const g = Trinity::makeScriptCallGuard(script, SPELL_SCRIPT_HOOK_OBJECT_TARGET_SELECT);
+        for (auto &hook : script->OnObjectTargetSelect)
+            if (hook.IsEffectAffected(m_spellInfo, effIndex))
+                hook.Call(script, target);
     }
-
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "SpellScript [%u] take more than 10 ms to execute (%u ms)", m_spellInfo->Id, scriptExecuteTime);
 }
 
 bool Spell::CanExecuteTriggersOnHit(uint32 effMask, SpellInfo const* triggeredByAura) const

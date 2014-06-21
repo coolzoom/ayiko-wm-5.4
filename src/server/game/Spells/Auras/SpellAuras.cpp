@@ -2536,517 +2536,325 @@ void Aura::CallScriptInitEffectsHandlers(uint32 &effectMask)
 {
     for (auto &script : m_loadedScripts)
     {
-        script->_PrepareScriptCall(AURA_SCRIPT_HOOK_INIT_EFFECTS);
+        auto const g = Trinity::makeScriptCallGuard(script, AURA_SCRIPT_HOOK_INIT_EFFECTS);
         for (auto &hook : script->OnInitEffects)
             hook.Call(script, effectMask);
-        script->_FinishScriptCall();
     }
 }
 
 bool Aura::CallScriptCheckAreaTargetHandlers(Unit* target)
 {
-    uint32 scriptExecuteTime = getMSTime();
-    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    for (auto &script : m_loadedScripts)
     {
-        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_CHECK_AREA_TARGET);
-        std::list<AuraScript::CheckAreaTargetHandler>::iterator hookItrEnd = (*scritr)->DoCheckAreaTarget.end(), hookItr = (*scritr)->DoCheckAreaTarget.begin();
-        for (; hookItr != hookItrEnd; ++hookItr)
-            if (!(*hookItr).Call(*scritr, target))
+        auto const g = Trinity::makeScriptCallGuard(script, AURA_SCRIPT_HOOK_CHECK_AREA_TARGET);
+        for (auto &hook : script->DoCheckAreaTarget)
+            if (!hook.Call(script, target))
                 return false;
-        (*scritr)->_FinishScriptCall();
     }
-
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "AuraScript [%u] take more than 10 ms to execute (%u ms)", GetId(), scriptExecuteTime);
-
     return true;
 }
 
 void Aura::CallScriptDispel(DispelInfo* dispelInfo)
 {
-    uint32 scriptExecuteTime = getMSTime();
-
-    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    for (auto &script : m_loadedScripts)
     {
-        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_DISPEL);
-        std::list<AuraScript::AuraDispelHandler>::iterator hookItrEnd = (*scritr)->OnDispel.end(), hookItr = (*scritr)->OnDispel.begin();
-        for (; hookItr != hookItrEnd; ++hookItr)
-            (*hookItr).Call(*scritr, dispelInfo);
-        (*scritr)->_FinishScriptCall();
+        auto const g = Trinity::makeScriptCallGuard(script, AURA_SCRIPT_HOOK_DISPEL);
+        for (auto &hook : script->OnDispel)
+            hook.Call(script, dispelInfo);
     }
-
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "AuraScript [%u] take more than 10 ms to execute (%u ms)", GetId(), scriptExecuteTime);
 }
 
 void Aura::CallScriptAfterDispel(DispelInfo* dispelInfo)
 {
-    uint32 scriptExecuteTime = getMSTime();
-    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    for (auto &script : m_loadedScripts)
     {
-        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_AFTER_DISPEL);
-        std::list<AuraScript::AuraDispelHandler>::iterator hookItrEnd = (*scritr)->AfterDispel.end(), hookItr = (*scritr)->AfterDispel.begin();
-        for (; hookItr != hookItrEnd; ++hookItr)
-            (*hookItr).Call(*scritr, dispelInfo);
-        (*scritr)->_FinishScriptCall();
+        auto const g = Trinity::makeScriptCallGuard(script, AURA_SCRIPT_HOOK_AFTER_DISPEL);
+        for (auto &hook : script->AfterDispel)
+            hook.Call(script, dispelInfo);
     }
-
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "AuraScript [%u] take more than 10 ms to execute (%u ms)", GetId(), scriptExecuteTime);
 }
 
 bool Aura::CallScriptEffectApplyHandlers(AuraEffect const *aurEff, AuraApplication const* aurApp, AuraEffectHandleModes mode)
 {
-    uint32 scriptExecuteTime = getMSTime();
-
     bool preventDefault = false;
-    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
-    {
-        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_EFFECT_APPLY, aurApp);
-        std::list<AuraScript::EffectApplyHandler>::iterator effEndItr = (*scritr)->OnEffectApply.end(), effItr = (*scritr)->OnEffectApply.begin();
-        for (; effItr != effEndItr; ++effItr)
-        {
-            if ((*effItr).IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
-                (*effItr).Call(*scritr, aurEff, mode);
-        }
-        if (!preventDefault)
-            preventDefault = (*scritr)->_IsDefaultActionPrevented();
-        (*scritr)->_FinishScriptCall();
-    }
 
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "AuraScript [%u] take more than 10 ms to execute (%u ms)", GetId(), scriptExecuteTime);
+    for (auto &script : m_loadedScripts)
+    {
+        auto const g = Trinity::makeScriptCallGuard(script, AURA_SCRIPT_HOOK_EFFECT_APPLY, aurApp);
+
+        for (auto &hook : script->OnEffectApply)
+            if (hook.IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
+                hook.Call(script, aurEff, mode);
+
+        if (!preventDefault)
+            preventDefault = script->_IsDefaultActionPrevented();
+    }
 
     return preventDefault;
 }
 
 bool Aura::CallScriptEffectRemoveHandlers(AuraEffect const *aurEff, AuraApplication const* aurApp, AuraEffectHandleModes mode)
 {
-    uint32 scriptExecuteTime = getMSTime();
     bool preventDefault = false;
-    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
-    {
-        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_EFFECT_REMOVE, aurApp);
-        std::list<AuraScript::EffectApplyHandler>::iterator effEndItr = (*scritr)->OnEffectRemove.end(), effItr = (*scritr)->OnEffectRemove.begin();
-        for (; effItr != effEndItr; ++effItr)
-        {
-            if ((*effItr).IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
-                (*effItr).Call(*scritr, aurEff, mode);
-        }
-        if (!preventDefault)
-            preventDefault = (*scritr)->_IsDefaultActionPrevented();
-        (*scritr)->_FinishScriptCall();
-    }
 
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "AuraScript [%u] take more than 10 ms to execute (%u ms)", GetId(), scriptExecuteTime);
+    for (auto &script : m_loadedScripts)
+    {
+        auto const g = Trinity::makeScriptCallGuard(script, AURA_SCRIPT_HOOK_EFFECT_REMOVE, aurApp);
+
+        for (auto &hook : script->OnEffectRemove)
+            if (hook.IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
+                hook.Call(script, aurEff, mode);
+
+        if (!preventDefault)
+            preventDefault = script->_IsDefaultActionPrevented();
+    }
 
     return preventDefault;
 }
 
 void Aura::CallScriptAfterEffectApplyHandlers(AuraEffect const *aurEff, AuraApplication const* aurApp, AuraEffectHandleModes mode)
 {
-    uint32 scriptExecuteTime = getMSTime();
-    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    for (auto &script : m_loadedScripts)
     {
-        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_EFFECT_AFTER_APPLY, aurApp);
-        std::list<AuraScript::EffectApplyHandler>::iterator effEndItr = (*scritr)->AfterEffectApply.end(), effItr = (*scritr)->AfterEffectApply.begin();
-        for (; effItr != effEndItr; ++effItr)
-        {
-            if ((*effItr).IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
-                (*effItr).Call(*scritr, aurEff, mode);
-        }
-        (*scritr)->_FinishScriptCall();
+        auto const g = Trinity::makeScriptCallGuard(script, AURA_SCRIPT_HOOK_EFFECT_AFTER_APPLY, aurApp);
+        for (auto &hook : script->AfterEffectApply)
+            if (hook.IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
+                hook.Call(script, aurEff, mode);
     }
-
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "AuraScript [%u] take more than 10 ms to execute (%u ms)", GetId(), scriptExecuteTime);
 }
 
 void Aura::CallScriptAfterEffectRemoveHandlers(AuraEffect const *aurEff, AuraApplication const* aurApp, AuraEffectHandleModes mode)
 {
-    uint32 scriptExecuteTime = getMSTime();
-    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    for (auto &script : m_loadedScripts)
     {
-        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_EFFECT_AFTER_REMOVE, aurApp);
-        std::list<AuraScript::EffectApplyHandler>::iterator effEndItr = (*scritr)->AfterEffectRemove.end(), effItr = (*scritr)->AfterEffectRemove.begin();
-        for (; effItr != effEndItr; ++effItr)
-        {
-            if ((*effItr).IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
-                (*effItr).Call(*scritr, aurEff, mode);
-        }
-        (*scritr)->_FinishScriptCall();
+        auto const g = Trinity::makeScriptCallGuard(script, AURA_SCRIPT_HOOK_EFFECT_AFTER_REMOVE, aurApp);
+        for (auto &hook : script->AfterEffectRemove)
+            if (hook.IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
+                hook.Call(script, aurEff, mode);
     }
-
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "AuraScript [%u] take more than 10 ms to execute (%u ms)", GetId(), scriptExecuteTime);
 }
 
 bool Aura::CallScriptEffectPeriodicHandlers(AuraEffect const *aurEff, AuraApplication const* aurApp)
 {
-    uint32 scriptExecuteTime = getMSTime();
     bool preventDefault = false;
-    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
-    {
-        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_EFFECT_PERIODIC, aurApp);
-        std::list<AuraScript::EffectPeriodicHandler>::iterator effEndItr = (*scritr)->OnEffectPeriodic.end(), effItr = (*scritr)->OnEffectPeriodic.begin();
-        for (; effItr != effEndItr; ++effItr)
-        {
-            if ((*effItr).IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
-                (*effItr).Call(*scritr, aurEff);
-        }
-        if (!preventDefault)
-            preventDefault = (*scritr)->_IsDefaultActionPrevented();
-        (*scritr)->_FinishScriptCall();
-    }
 
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "AuraScript [%u] take more than 10 ms to execute (%u ms)", GetId(), scriptExecuteTime);
+    for (auto &script : m_loadedScripts)
+    {
+        auto const g = Trinity::makeScriptCallGuard(script, AURA_SCRIPT_HOOK_EFFECT_PERIODIC, aurApp);
+
+        for (auto &hook : script->OnEffectPeriodic)
+            if (hook.IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
+                hook.Call(script, aurEff);
+
+        if (!preventDefault)
+            preventDefault = script->_IsDefaultActionPrevented();
+    }
 
     return preventDefault;
 }
 
 void Aura::CallScriptAuraUpdateHandlers(uint32 diff)
 {
-    uint32 scriptExecuteTime = getMSTime();
-    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    for (auto &script : m_loadedScripts)
     {
-        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_ON_UPDATE);
-        std::list<AuraScript::AuraUpdateHandler>::iterator hookItrEnd = (*scritr)->OnAuraUpdate.end(), hookItr = (*scritr)->OnAuraUpdate.begin();
-        for (; hookItr != hookItrEnd; ++hookItr)
-            (*hookItr).Call(*scritr, diff);
-        (*scritr)->_FinishScriptCall();
+        auto const g = Trinity::makeScriptCallGuard(script, AURA_SCRIPT_HOOK_ON_UPDATE);
+        for (auto &hook : script->OnAuraUpdate)
+            hook.Call(script, diff);
     }
-
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "AuraScript [%u] take more than 10 ms to execute (%u ms)", GetId(), scriptExecuteTime);
 }
 
 void Aura::CallScriptEffectUpdateHandlers(uint32 diff, AuraEffect *aurEff)
 {
-    uint32 scriptExecuteTime = getMSTime();
-    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    for (auto &script : m_loadedScripts)
     {
-        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_EFFECT_UPDATE);
-        std::list<AuraScript::EffectUpdateHandler>::iterator effEndItr = (*scritr)->OnEffectUpdate.end(), effItr = (*scritr)->OnEffectUpdate.begin();
-        for (; effItr != effEndItr; ++effItr)
-        {
-            if ((*effItr).IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
-                (*effItr).Call(*scritr, diff, aurEff);
-        }
-        (*scritr)->_FinishScriptCall();
+        auto const g = Trinity::makeScriptCallGuard(script, AURA_SCRIPT_HOOK_EFFECT_UPDATE);
+        for (auto &hook : script->OnEffectUpdate)
+            if (hook.IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
+                hook.Call(script, diff, aurEff);
     }
-
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "AuraScript [%u] take more than 10 ms to execute (%u ms)", GetId(), scriptExecuteTime);
 }
 
 void Aura::CallScriptEffectUpdatePeriodicHandlers(AuraEffect *aurEff)
 {
-    uint32 scriptExecuteTime = getMSTime();
-    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    for (auto &script : m_loadedScripts)
     {
-        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_EFFECT_UPDATE_PERIODIC);
-        std::list<AuraScript::EffectUpdatePeriodicHandler>::iterator effEndItr = (*scritr)->OnEffectUpdatePeriodic.end(), effItr = (*scritr)->OnEffectUpdatePeriodic.begin();
-        for (; effItr != effEndItr; ++effItr)
-        {
-            if ((*effItr).IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
-                (*effItr).Call(*scritr, aurEff);
-        }
-        (*scritr)->_FinishScriptCall();
+        auto const g = Trinity::makeScriptCallGuard(script, AURA_SCRIPT_HOOK_EFFECT_UPDATE_PERIODIC);
+        for (auto &hook : script->OnEffectUpdatePeriodic)
+            if (hook.IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
+                hook.Call(script, aurEff);
     }
-
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "AuraScript [%u] take more than 10 ms to execute (%u ms)", GetId(), scriptExecuteTime);
 }
 
-void Aura::CallScriptEffectCalcAmountHandlers(AuraEffect const *aurEff, int32 & amount, bool & canBeRecalculated)
+void Aura::CallScriptEffectCalcAmountHandlers(AuraEffect const *aurEff, int32 &amount, bool &canBeRecalculated)
 {
-    uint32 scriptExecuteTime = getMSTime();
-    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    for (auto &script : m_loadedScripts)
     {
-        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_EFFECT_CALC_AMOUNT);
-        std::list<AuraScript::EffectCalcAmountHandler>::iterator effEndItr = (*scritr)->DoEffectCalcAmount.end(), effItr = (*scritr)->DoEffectCalcAmount.begin();
-        for (; effItr != effEndItr; ++effItr)
-        {
-            if ((*effItr).IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
-                (*effItr).Call(*scritr, aurEff, amount, canBeRecalculated);
-        }
-        (*scritr)->_FinishScriptCall();
+        auto const g = Trinity::makeScriptCallGuard(script, AURA_SCRIPT_HOOK_EFFECT_CALC_AMOUNT);
+        for (auto &hook : script->DoEffectCalcAmount)
+            if (hook.IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
+                hook.Call(script, aurEff, amount, canBeRecalculated);
     }
-
-
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "AuraScript [%u] take more than 10 ms to execute (%u ms)", GetId(), scriptExecuteTime);
 }
 
 void Aura::CallScriptEffectCalcPeriodicHandlers(AuraEffect const *aurEff, bool & isPeriodic, int32 & amplitude)
 {
-    uint32 scriptExecuteTime = getMSTime();
-    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    for (auto &script : m_loadedScripts)
     {
-        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_EFFECT_CALC_PERIODIC);
-        std::list<AuraScript::EffectCalcPeriodicHandler>::iterator effEndItr = (*scritr)->DoEffectCalcPeriodic.end(), effItr = (*scritr)->DoEffectCalcPeriodic.begin();
-        for (; effItr != effEndItr; ++effItr)
-        {
-            if ((*effItr).IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
-                (*effItr).Call(*scritr, aurEff, isPeriodic, amplitude);
-        }
-        (*scritr)->_FinishScriptCall();
+        auto const g = Trinity::makeScriptCallGuard(script, AURA_SCRIPT_HOOK_EFFECT_CALC_PERIODIC);
+        for (auto &hook : script->DoEffectCalcPeriodic)
+            if (hook.IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
+                hook.Call(script, aurEff, isPeriodic, amplitude);
     }
-
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "AuraScript [%u] take more than 10 ms to execute (%u ms)", GetId(), scriptExecuteTime);
 }
 
 void Aura::CallScriptEffectCalcSpellModHandlers(AuraEffect const *aurEff, SpellModifier* & spellMod)
 {
-    uint32 scriptExecuteTime = getMSTime();
-    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    for (auto &script : m_loadedScripts)
     {
-        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_EFFECT_CALC_SPELLMOD);
-        std::list<AuraScript::EffectCalcSpellModHandler>::iterator effEndItr = (*scritr)->DoEffectCalcSpellMod.end(), effItr = (*scritr)->DoEffectCalcSpellMod.begin();
-        for (; effItr != effEndItr; ++effItr)
-        {
-            if ((*effItr).IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
-                (*effItr).Call(*scritr, aurEff, spellMod);
-        }
-        (*scritr)->_FinishScriptCall();
+        auto const g = Trinity::makeScriptCallGuard(script, AURA_SCRIPT_HOOK_EFFECT_CALC_SPELLMOD);
+        for (auto &hook : script->DoEffectCalcSpellMod)
+            if (hook.IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
+                hook.Call(script, aurEff, spellMod);
     }
-
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "AuraScript [%u] take more than 10 ms to execute (%u ms)", GetId(), scriptExecuteTime);
 }
 
 void Aura::CallScriptEffectAbsorbHandlers(AuraEffect *aurEff, AuraApplication const* aurApp, DamageInfo & dmgInfo, uint32 & absorbAmount, bool& defaultPrevented)
 {
-    uint32 scriptExecuteTime = getMSTime();
-    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    for (auto &script : m_loadedScripts)
     {
-        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_EFFECT_ABSORB, aurApp);
-        std::list<AuraScript::EffectAbsorbHandler>::iterator effEndItr = (*scritr)->OnEffectAbsorb.end(), effItr = (*scritr)->OnEffectAbsorb.begin();
-        for (; effItr != effEndItr; ++effItr)
-        {
-            if ((*effItr).IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
-                (*effItr).Call(*scritr, aurEff, dmgInfo, absorbAmount);
-        }
-        defaultPrevented = (*scritr)->_IsDefaultActionPrevented();
-        (*scritr)->_FinishScriptCall();
+        auto const g = Trinity::makeScriptCallGuard(script, AURA_SCRIPT_HOOK_EFFECT_ABSORB, aurApp);
+
+        for (auto &hook : script->OnEffectAbsorb)
+            if (hook.IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
+                hook.Call(script, aurEff, dmgInfo, absorbAmount);
+
+        defaultPrevented = script->_IsDefaultActionPrevented();
     }
-
-
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "AuraScript [%u] take more than 10 ms to execute (%u ms)", GetId(), scriptExecuteTime);
 }
 
 void Aura::CallScriptEffectAfterAbsorbHandlers(AuraEffect *aurEff, AuraApplication const* aurApp, DamageInfo & dmgInfo, uint32 & absorbAmount)
 {
-    uint32 scriptExecuteTime = getMSTime();
-
-    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    for (auto &script : m_loadedScripts)
     {
-        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_EFFECT_AFTER_ABSORB, aurApp);
-        std::list<AuraScript::EffectAbsorbHandler>::iterator effEndItr = (*scritr)->AfterEffectAbsorb.end(), effItr = (*scritr)->AfterEffectAbsorb.begin();
-        for (; effItr != effEndItr; ++effItr)
-        {
-            if ((*effItr).IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
-                (*effItr).Call(*scritr, aurEff, dmgInfo, absorbAmount);
-        }
-        (*scritr)->_FinishScriptCall();
+        auto const g = Trinity::makeScriptCallGuard(script, AURA_SCRIPT_HOOK_EFFECT_AFTER_ABSORB, aurApp);
+        for (auto &hook : script->AfterEffectAbsorb)
+            if (hook.IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
+                hook.Call(script, aurEff, dmgInfo, absorbAmount);
     }
-
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "AuraScript [%u] take more than 10 ms to execute (%u ms)", GetId(), scriptExecuteTime);
 }
 
 void Aura::CallScriptEffectManaShieldHandlers(AuraEffect *aurEff, AuraApplication const* aurApp, DamageInfo & dmgInfo, uint32 & absorbAmount, bool & /*defaultPrevented*/)
 {
-    uint32 scriptExecuteTime = getMSTime();
-    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    for (auto &script : m_loadedScripts)
     {
-        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_EFFECT_MANASHIELD, aurApp);
-        std::list<AuraScript::EffectManaShieldHandler>::iterator effEndItr = (*scritr)->OnEffectManaShield.end(), effItr = (*scritr)->OnEffectManaShield.begin();
-        for (; effItr != effEndItr; ++effItr)
-        {
-            if ((*effItr).IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
-                (*effItr).Call(*scritr, aurEff, dmgInfo, absorbAmount);
-        }
-        (*scritr)->_FinishScriptCall();
+        auto const g = Trinity::makeScriptCallGuard(script, AURA_SCRIPT_HOOK_EFFECT_MANASHIELD, aurApp);
+        for (auto &hook : script->OnEffectManaShield)
+            if (hook.IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
+                hook.Call(script, aurEff, dmgInfo, absorbAmount);
     }
-
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "AuraScript [%u] take more than 10 ms to execute (%u ms)", GetId(), scriptExecuteTime);
 }
 
 void Aura::CallScriptEffectAfterManaShieldHandlers(AuraEffect *aurEff, AuraApplication const* aurApp, DamageInfo & dmgInfo, uint32 & absorbAmount)
 {
-    uint32 scriptExecuteTime = getMSTime();
-    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    for (auto &script : m_loadedScripts)
     {
-        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_EFFECT_AFTER_MANASHIELD, aurApp);
-        std::list<AuraScript::EffectManaShieldHandler>::iterator effEndItr = (*scritr)->AfterEffectManaShield.end(), effItr = (*scritr)->AfterEffectManaShield.begin();
-        for (; effItr != effEndItr; ++effItr)
-        {
-            if ((*effItr).IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
-                (*effItr).Call(*scritr, aurEff, dmgInfo, absorbAmount);
-        }
-        (*scritr)->_FinishScriptCall();
+        auto const g = Trinity::makeScriptCallGuard(script, AURA_SCRIPT_HOOK_EFFECT_AFTER_MANASHIELD, aurApp);
+        for (auto &hook : script->AfterEffectManaShield)
+            if (hook.IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
+                hook.Call(script, aurEff, dmgInfo, absorbAmount);
     }
-
-
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "AuraScript [%u] take more than 10 ms to execute (%u ms)", GetId(), scriptExecuteTime);
 }
 
 void Aura::SetScriptData(uint32 type, uint32 data)
 {
-    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
-        (*scritr)->SetData(type, data);
+    for (auto &script : m_loadedScripts)
+        script->SetData(type, data);
 }
 
 void Aura::SetScriptGuid(uint32 type, uint64 data)
 {
-    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
-        (*scritr)->SetGuid(type, data);
+    for (auto &script : m_loadedScripts)
+        script->SetGuid(type, data);
 }
 
 bool Aura::CallScriptCheckProcHandlers(AuraApplication const* aurApp, ProcEventInfo& eventInfo)
 {
-    uint32 scriptExecuteTime = getMSTime();
-    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    for (auto &script : m_loadedScripts)
     {
-        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_CHECK_PROC, aurApp);
-        std::list<AuraScript::CheckProcHandler>::iterator hookItrEnd = (*scritr)->DoCheckProc.end(), hookItr = (*scritr)->DoCheckProc.begin();
-        for (; hookItr != hookItrEnd; ++hookItr)
-            if (!(*hookItr).Call(*scritr, eventInfo))
+        auto const g = Trinity::makeScriptCallGuard(script, AURA_SCRIPT_HOOK_CHECK_PROC, aurApp);
+        for (auto &hook : script->DoCheckProc)
+            if (!hook.Call(script, eventInfo))
                 return false;
-        (*scritr)->_FinishScriptCall();
     }
-
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "AuraScript [%u] take more than 10 ms to execute (%u ms)", GetId(), scriptExecuteTime);
     return true;
 }
 
 bool Aura::CallScriptPrepareProcHandlers(AuraApplication const* aurApp, ProcEventInfo& eventInfo)
 {
-    uint32 scriptExecuteTime = getMSTime();
     bool prepare = true;
-    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+
+    for (auto &script : m_loadedScripts)
     {
-        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_PREPARE_PROC, aurApp);
-        std::list<AuraScript::AuraProcHandler>::iterator effEndItr = (*scritr)->DoPrepareProc.end(), effItr = (*scritr)->DoPrepareProc.begin();
-        for (; effItr != effEndItr; ++effItr)
-            (*effItr).Call(*scritr, eventInfo);
+        auto const g = Trinity::makeScriptCallGuard(script, AURA_SCRIPT_HOOK_PREPARE_PROC, aurApp);
 
-        if (prepare && (*scritr)->_IsDefaultActionPrevented())
+        for (auto &hook : script->DoPrepareProc)
+            hook.Call(script, eventInfo);
+
+        if (prepare && script->_IsDefaultActionPrevented())
             prepare = false;
-        (*scritr)->_FinishScriptCall();
     }
-
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "AuraScript [%u] take more than 10 ms to execute (%u ms)", GetId(), scriptExecuteTime);
 
     return prepare;
 }
 
 void Aura::CallScriptProcHandlers(AuraApplication const* aurApp, ProcEventInfo& eventInfo)
 {
-    uint32 scriptExecuteTime = getMSTime();
-    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    for (auto &script : m_loadedScripts)
     {
-        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_PROC, aurApp);
-        std::list<AuraScript::AuraProcHandler>::iterator hookItrEnd = (*scritr)->OnProc.end(), hookItr = (*scritr)->OnProc.begin();
-        for (; hookItr != hookItrEnd; ++hookItr)
-            (*hookItr).Call(*scritr, eventInfo);
-        (*scritr)->_FinishScriptCall();
+        auto const g = Trinity::makeScriptCallGuard(script, AURA_SCRIPT_HOOK_PROC, aurApp);
+        for (auto &hook : script->OnProc)
+            hook.Call(script, eventInfo);
     }
-
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "AuraScript [%u] take more than 10 ms to execute (%u ms)", GetId(), scriptExecuteTime);
 }
 
 void Aura::CallScriptAfterProcHandlers(AuraApplication const* aurApp, ProcEventInfo& eventInfo)
 {
-    uint32 scriptExecuteTime = getMSTime();
-    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    for (auto &script : m_loadedScripts)
     {
-        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_AFTER_PROC, aurApp);
-        std::list<AuraScript::AuraProcHandler>::iterator hookItrEnd = (*scritr)->AfterProc.end(), hookItr = (*scritr)->AfterProc.begin();
-        for (; hookItr != hookItrEnd; ++hookItr)
-            (*hookItr).Call(*scritr, eventInfo);
-        (*scritr)->_FinishScriptCall();
+        auto const g = Trinity::makeScriptCallGuard(script, AURA_SCRIPT_HOOK_AFTER_PROC, aurApp);
+        for (auto &hook : script->AfterProc)
+            hook.Call(script, eventInfo);
     }
-
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "AuraScript [%u] take more than 10 ms to execute (%u ms)", GetId(), scriptExecuteTime);
 }
 
 bool Aura::CallScriptEffectProcHandlers(AuraEffect const *aurEff, AuraApplication const* aurApp, ProcEventInfo& eventInfo)
 {
-    uint32 scriptExecuteTime = getMSTime();
     bool preventDefault = false;
-    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
-    {
-        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_EFFECT_PROC, aurApp);
-        std::list<AuraScript::EffectProcHandler>::iterator effEndItr  = (*scritr)->OnEffectProc.end(), effItr  = (*scritr)->OnEffectProc.begin();
-        for (; effItr  != effEndItr; ++effItr )
-        {
-            if ((*effItr).IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
-                (*effItr).Call(*scritr, aurEff, eventInfo);
-        }
-        if (!preventDefault)
-            preventDefault = (*scritr)->_IsDefaultActionPrevented();
-        (*scritr)->_FinishScriptCall();
-    }
 
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "AuraScript [%u] take more than 10 ms to execute (%u ms)", GetId(), scriptExecuteTime);
+    for (auto &script : m_loadedScripts)
+    {
+        auto const g = Trinity::makeScriptCallGuard(script, AURA_SCRIPT_HOOK_EFFECT_PROC, aurApp);
+
+        for (auto &hook : script->OnEffectProc)
+            if (hook.IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
+                hook.Call(script, aurEff, eventInfo);
+
+        if (!preventDefault)
+            preventDefault = script->_IsDefaultActionPrevented();
+    }
 
     return preventDefault;
 }
 
 void Aura::CallScriptAfterEffectProcHandlers(AuraEffect const *aurEff, AuraApplication const* aurApp, ProcEventInfo& eventInfo)
 {
-    uint32 scriptExecuteTime = getMSTime();
-    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    for (auto &script : m_loadedScripts)
     {
-        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_EFFECT_AFTER_PROC, aurApp);
-        std::list<AuraScript::EffectProcHandler>::iterator effEndItr  = (*scritr)->AfterEffectProc.end(), effItr  = (*scritr)->AfterEffectProc.begin();
-        for (; effItr  != effEndItr ; ++effItr )
-        {
-            if ((*effItr).IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
-                (*effItr).Call(*scritr, aurEff, eventInfo);
-        }
-        (*scritr)->_FinishScriptCall();
+        auto const g = Trinity::makeScriptCallGuard(script, AURA_SCRIPT_HOOK_EFFECT_AFTER_PROC, aurApp);
+        for (auto &hook : script->AfterEffectProc)
+            if (hook.IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
+                hook.Call(script, aurEff, eventInfo);
     }
-
-    scriptExecuteTime = getMSTime() - scriptExecuteTime;
-    if (scriptExecuteTime > 10)
-        TC_LOG_INFO("molten", "AuraScript [%u] take more than 10 ms to execute (%u ms)", GetId(), scriptExecuteTime);
 }
 
 UnitAura::UnitAura(SpellInfo const* spellproto, uint32 effMask, WorldObject* owner, Unit* caster, SpellPowerEntry const* spellPowerData, int32 *baseAmount, Item* castItem, uint64 casterGUID)

@@ -4315,15 +4315,6 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
                     final_bonus = 1.5f;
                     break;
                 }
-                case 19434: // Aimed Shot
-                case 82928: // Aimed Shot with Master Marksman
-                {
-                    // "A powerful aimed shot that deals % ranged weapon damage plus (RAP * 0.724)+776."
-                    shotMod = 0.724f;
-                    // Aimed Shot - (100% weapon dmg + 72.4% RAP + 776) * 160% + 100 - EJ
-                    final_bonus = 1.6f;
-                    break;
-                }
                 case 56641: // Steady Shot
                 {
                     // "A steady shot that causes % weapon damage plus RAP*0.021+280. Generates 9 Focus."

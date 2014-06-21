@@ -486,7 +486,7 @@ class Spell
         SpellCastResult CheckCasterAuras() const;
         SpellCastResult CheckArenaAndRatedBattlegroundCastRules();
 
-        int32 CalculateDamage(uint8 i, Unit const* target) const { return m_caster->CalculateSpellDamage(target, m_spellInfo, i, &m_spellValue->EffectBasePoints[i]); }
+        int32 CalculateDamage(uint8 i, Unit const* target) const { return m_caster->CalculateSpellDamage(target, m_spellInfo, i, &m_spellValue.EffectBasePoints[i]); }
 
         bool HaveTargetsForEffect(uint8 effect) const;
         void Delayed();
@@ -587,7 +587,7 @@ class Spell
 
         Unit* const m_caster;
 
-        SpellValue * const m_spellValue;
+        SpellValue m_spellValue;
 
         uint64 m_originalCasterGUID;                        // real source of cast (aura caster/etc), used for spell targets selection
                                                             // e.g. damage around area spell trigered by victim aura and damage enemies of aura caster

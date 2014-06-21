@@ -1059,6 +1059,107 @@ public:
     }
 };
 
+class spell_warr_taste_for_blood_talent final : public SpellScriptLoader
+{
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        enum
+        {
+            MORTAL_STRIKE           = 12294,
+            TASTE_FOR_BLOOD_EFFECT  = 60503
+        };
+
+        int32 stacksToAdd_;
+
+        bool checkProc(ProcEventInfo &eventInfo)
+        {
+            auto const caster = eventInfo.GetActor();
+            auto const target = eventInfo.GetActionTarget();
+
+            if (!caster || !target || caster == target)
+                return false;
+
+            if (eventInfo.GetHitMask() & PROC_EX_DODGE)
+            {
+                stacksToAdd_ = GetSpellInfo()->Effects[EFFECT_0].BasePoints;
+                return true;
+            }
+
+            auto const spellInfo = eventInfo.GetSpellInfo();
+            if (spellInfo && spellInfo->Id == MORTAL_STRIKE)
+            {
+                stacksToAdd_ = GetSpellInfo()->Effects[EFFECT_1].BasePoints;
+                return true;
+            }
+
+            return false;
+        }
+
+        void onProc(AuraEffect const *, ProcEventInfo &eventInfo)
+        {
+            PreventDefaultAction();
+
+            CustomSpellValues values;
+            values.AddSpellMod(SPELLVALUE_AURA_STACK, stacksToAdd_);
+
+            auto const caster = eventInfo.GetActor();
+            caster->CastCustomSpell(TASTE_FOR_BLOOD_EFFECT, values, caster, true);
+        }
+
+        void Register() final
+        {
+            DoCheckProc += AuraCheckProcFn(script_impl::checkProc);
+            OnEffectProc += AuraEffectProcFn(script_impl::onProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+public:
+    spell_warr_taste_for_blood_talent()
+        : SpellScriptLoader("spell_warr_taste_for_blood_talent")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
+};
+
+class spell_warr_taste_for_blood_effect final : public SpellScriptLoader
+{
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        void prepareProc(ProcEventInfo &)
+        {
+            PreventDefaultAction();
+        }
+
+        void afterProc(ProcEventInfo &)
+        {
+            GetAura()->ModStackAmount(-1);
+        }
+
+        void Register() final
+        {
+            DoPrepareProc += AuraProcFn(script_impl::prepareProc);
+            AfterProc += AuraProcFn(script_impl::afterProc);
+        }
+    };
+
+public:
+    spell_warr_taste_for_blood_effect()
+        : SpellScriptLoader("spell_warr_taste_for_blood_effect")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_victorious_state();
@@ -1089,4 +1190,6 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_thunder_clap();
     new spell_warr_deep_wounds();
     new spell_warr_charge();
+    new spell_warr_taste_for_blood_talent();
+    new spell_warr_taste_for_blood_effect();
 }

@@ -493,7 +493,7 @@ Spell::Spell(Unit* caster, SpellInfo const* info, TriggerCastFlags triggerFlags,
              uint64 originalCasterGUID, bool skipCheck, bool ignoreTriggeredAttribute) :
     m_spellInfo(sSpellMgr->GetSpellForDifficultyFromSpell(info, caster)),
     m_caster((info->AttributesEx6 & SPELL_ATTR6_CAST_BY_CHARMER && caster->GetCharmerOrOwner()) ? caster->GetCharmerOrOwner() : caster),
-    m_spellValue(new SpellValue(m_spellInfo))
+    m_spellValue(m_spellInfo)
 {
     m_spellPowerData = m_caster->GetSpellPowerEntryBySpell(m_spellInfo);
     m_customError = SPELL_CUSTOM_ERROR_NONE;
@@ -617,7 +617,6 @@ Spell::~Spell()
 
     if (m_caster && m_caster->GetTypeId() == TYPEID_PLAYER)
         ASSERT(m_caster->ToPlayer()->m_spellModTakingSpell != this);
-    delete m_spellValue;
 
     CheckEffectExecuteData();
 }
@@ -1075,7 +1074,7 @@ void Spell::SelectImplicitConeTargets(SpellEffIndex effIndex, SpellImplicitTarge
             break;
     }
 
-    float radius = m_spellInfo->Effects[effIndex].CalcRadius(m_caster) * m_spellValue->RadiusMod;
+    float radius = m_spellInfo->Effects[effIndex].CalcRadius(m_caster) * m_spellValue.RadiusMod;
 
     if (uint32 containerTypeMask = GetSearcherTypeMask(objectType, condList))
     {
@@ -1088,7 +1087,7 @@ void Spell::SelectImplicitConeTargets(SpellEffIndex effIndex, SpellImplicitTarge
         if (!targets.empty())
         {
             // Other special target selection goes here
-            if (uint32 maxTargets = m_spellValue->MaxAffectedTargets)
+            if (uint32 maxTargets = m_spellValue.MaxAffectedTargets)
                 Trinity::Containers::RandomResizeList(targets, maxTargets);
 
             // for compability with older code - add only unit and go targets
@@ -1177,7 +1176,7 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
              return;
     }
     std::list<WorldObject*> targets;
-    float radius = m_spellInfo->Effects[effIndex].CalcRadius(m_caster) * m_spellValue->RadiusMod;
+    float radius = m_spellInfo->Effects[effIndex].CalcRadius(m_caster) * m_spellValue.RadiusMod;
     SearchAreaTargets(targets, radius, center, referer, targetType.GetObjectType(), targetType.GetCheckType(), m_spellInfo->Effects[effIndex].ImplicitTargetConditions);
 
     // Custom entries
@@ -1484,7 +1483,7 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
                     m_caster->AddAura(36032, m_caster);
 
         // Other special target selection goes here
-        if (uint32 maxTargets = m_spellValue->MaxAffectedTargets)
+        if (uint32 maxTargets = m_spellValue.MaxAffectedTargets)
             Trinity::Containers::RandomResizeList(unitTargets, maxTargets);
 
         for (std::list<Unit*>::iterator itr = unitTargets.begin(); itr != unitTargets.end(); ++itr)
@@ -1493,7 +1492,7 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
 
     if (!gObjTargets.empty())
     {
-        if (uint32 maxTargets = m_spellValue->MaxAffectedTargets)
+        if (uint32 maxTargets = m_spellValue.MaxAffectedTargets)
             Trinity::Containers::RandomResizeList(gObjTargets, maxTargets);
 
         for (std::list<GameObject*>::iterator itr = gObjTargets.begin(); itr != gObjTargets.end(); ++itr)
@@ -3015,16 +3014,16 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
         {
             bool refresh = false;
             m_spellAura = Aura::TryRefreshStackOrCreate(scaledSpellInfo, effectMask, unit,
-                m_originalCaster, m_spellPowerData, (scaledSpellInfo == m_spellInfo) ? m_spellValue->EffectBasePoints : basePoints, m_CastItem, 0, &refresh);
+                m_originalCaster, m_spellPowerData, (scaledSpellInfo == m_spellInfo) ? m_spellValue.EffectBasePoints : basePoints, m_CastItem, 0, &refresh);
             if (m_spellAura)
             {
                 // Set aura stack amount to desired value
-                if (m_spellValue->AuraStackAmount > 1)
+                if (m_spellValue.AuraStackAmount > 1)
                 {
                     if (!refresh)
-                        m_spellAura->SetStackAmount(m_spellValue->AuraStackAmount);
+                        m_spellAura->SetStackAmount(m_spellValue.AuraStackAmount);
                     else
-                        m_spellAura->ModStackAmount(m_spellValue->AuraStackAmount);
+                        m_spellAura->ModStackAmount(m_spellValue.AuraStackAmount - 1);
                 }
 
                 if (float damageModifier = m_periodicDamageModifier)
@@ -3324,7 +3323,7 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const *triggered
                 if (m_spellInfo->IsPositiveEffect(i))
                 {
                     m_auraScaleMask |= (1 << i);
-                    if (m_spellValue->EffectBasePoints[i] != m_spellInfo->Effects[i].BasePoints)
+                    if (m_spellValue.EffectBasePoints[i] != m_spellInfo->Effects[i].BasePoints)
                     {
                         m_auraScaleMask = 0;
                         break;
@@ -8535,36 +8534,36 @@ void Spell::SetSpellValue(SpellValueMod mod, int32 value)
     switch (mod)
     {
         case SPELLVALUE_BASE_POINT0:
-            m_spellValue->EffectBasePoints[0] = m_spellInfo->Effects[EFFECT_0].CalcBaseValue(value);
+            m_spellValue.EffectBasePoints[0] = m_spellInfo->Effects[EFFECT_0].CalcBaseValue(value);
             break;
         case SPELLVALUE_BASE_POINT1:
             if (m_spellInfo->Effects.size() > EFFECT_1)
-                m_spellValue->EffectBasePoints[1] = m_spellInfo->Effects[EFFECT_1].CalcBaseValue(value);
+                m_spellValue.EffectBasePoints[1] = m_spellInfo->Effects[EFFECT_1].CalcBaseValue(value);
             break;
         case SPELLVALUE_BASE_POINT2:
             if (m_spellInfo->Effects.size() > EFFECT_2)
-                m_spellValue->EffectBasePoints[2] = m_spellInfo->Effects[EFFECT_2].CalcBaseValue(value);
+                m_spellValue.EffectBasePoints[2] = m_spellInfo->Effects[EFFECT_2].CalcBaseValue(value);
             break;
         case SPELLVALUE_BASE_POINT3:
             if (m_spellInfo->Effects.size() > EFFECT_3)
-                m_spellValue->EffectBasePoints[3] = m_spellInfo->Effects[EFFECT_3].CalcBaseValue(value);
+                m_spellValue.EffectBasePoints[3] = m_spellInfo->Effects[EFFECT_3].CalcBaseValue(value);
             break;
         case SPELLVALUE_BASE_POINT4:
             if (m_spellInfo->Effects.size() > EFFECT_4)
-                m_spellValue->EffectBasePoints[4] = m_spellInfo->Effects[EFFECT_4].CalcBaseValue(value);
+                m_spellValue.EffectBasePoints[4] = m_spellInfo->Effects[EFFECT_4].CalcBaseValue(value);
             break;
         case SPELLVALUE_BASE_POINT5:
             if (m_spellInfo->Effects.size() > EFFECT_5)
-                m_spellValue->EffectBasePoints[5] = m_spellInfo->Effects[EFFECT_5].CalcBaseValue(value);
+                m_spellValue.EffectBasePoints[5] = m_spellInfo->Effects[EFFECT_5].CalcBaseValue(value);
             break;
         case SPELLVALUE_RADIUS_MOD:
-            m_spellValue->RadiusMod = (float)value / 10000;
+            m_spellValue.RadiusMod = (float)value / 10000;
             break;
         case SPELLVALUE_MAX_TARGETS:
-            m_spellValue->MaxAffectedTargets = (uint32)value;
+            m_spellValue.MaxAffectedTargets = (uint32)value;
             break;
         case SPELLVALUE_AURA_STACK:
-            m_spellValue->AuraStackAmount = uint8(value);
+            m_spellValue.AuraStackAmount = uint8(value);
             break;
     }
 }

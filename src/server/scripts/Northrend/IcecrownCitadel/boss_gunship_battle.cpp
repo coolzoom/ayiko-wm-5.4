@@ -1514,7 +1514,7 @@ class spell_poix_ardente : public SpellScriptLoader
                 {
                     if (Creature* GunshipNpc = pInstance->instance->GetCreature(pInstance->GetData64(DATA_GUNSHIP_NPC_MAIN)))
                     {
-                        GetCaster()->DealDamage(GunshipNpc, GetSpellValue()->EffectBasePoints[EFFECT_0]);
+                        GetCaster()->DealDamage(GunshipNpc, GetSpellValue().EffectBasePoints[EFFECT_0]);
                     }
                 }
             }

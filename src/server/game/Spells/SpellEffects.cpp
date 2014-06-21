@@ -2603,7 +2603,7 @@ void Spell::EffectPersistentAA(SpellEffIndex effIndex)
             return;
         }
 
-        Aura *aura = Aura::TryCreate(m_spellInfo, MAX_EFFECT_MASK, dynObj, caster, m_spellPowerData, &m_spellValue->EffectBasePoints[0]);
+        Aura *aura = Aura::TryCreate(m_spellInfo, MAX_EFFECT_MASK, dynObj, caster, m_spellPowerData, &m_spellValue.EffectBasePoints[0]);
         if (aura != NULL)
         {
             m_spellAura = aura;
@@ -6328,7 +6328,7 @@ void Spell::EffectChargeDest(SpellEffIndex /*effIndex*/)
             }
         }
 
-        m_caster->GetMotionMaster()->MoveCharge(pos.m_positionX, pos.m_positionY, pos.m_positionZ, 42.0f, m_spellValue->EffectBasePoints[0] > 0 ? m_spellInfo->Id : 1003);
+        m_caster->GetMotionMaster()->MoveCharge(pos.m_positionX, pos.m_positionY, pos.m_positionZ, 42.0f, m_spellValue.EffectBasePoints[0] > 0 ? m_spellInfo->Id : 1003);
     }
 }
 

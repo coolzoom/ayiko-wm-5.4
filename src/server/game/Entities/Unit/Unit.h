@@ -37,6 +37,7 @@
 #include "Timer.h"
 
 #include <list>
+#include <type_traits>
 #include <unordered_map>
 
 #define WORLD_TRIGGER   12999
@@ -1442,17 +1443,81 @@ class Unit : public WorldObject
         uint32 GetMaxHealth() const { return GetUInt32Value(UNIT_FIELD_MAXHEALTH); }
 
         bool IsFullHealth() const { return GetHealth() == GetMaxHealth(); }
-        bool HealthBelowPct(int32 pct) const { return GetHealth() < CountPctFromMaxHealth(pct); }
-        bool HealthBelowPctDamaged(int32 pct, uint32 damage) const { return int64(GetHealth()) - int64(damage) < int64(CountPctFromMaxHealth(pct)); }
-        bool HealthAbovePct(int32 pct) const { return GetHealth() > CountPctFromMaxHealth(pct); }
-        bool HealthAbovePctHealed(int32 pct, uint32 heal) const { return uint64(GetHealth()) + uint64(heal) > CountPctFromMaxHealth(pct); }
-        float GetHealthPct() const { return GetMaxHealth() ? 100.f * GetHealth() / GetMaxHealth() : 0.0f; }
-        uint32 CountPctFromMaxHealth(int32 pct) const { return CalculatePct(GetMaxHealth(), pct); }
-        uint32 CountPctFromCurHealth(int32 pct) const { return CalculatePct(GetHealth(), pct); }
-        uint32 CountPctFromMaxMana(int32 pct) const { return CalculatePct(GetMaxPower(POWER_MANA), pct); }
-        uint32 CountPctFromCurMana(int32 pct) const { return CalculatePct(GetPower(POWER_MANA), pct); }
-        uint32 CountPctFromMaxPower(int32 pct, Powers power) const { return CalculatePct(GetMaxPower(power), pct); }
-        uint32 CountPctFromCurPower(int32 pct, Powers power) const { return CalculatePct(GetPower(power), pct); }
+
+        template <typename T>
+        typename std::enable_if<std::is_arithmetic<T>::value, bool>::type
+        HealthBelowPct(T pct) const
+        {
+            return GetHealth() < CountPctFromMaxHealth(pct);
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_arithmetic<T>::value, bool>::type
+        HealthBelowPctDamaged(T pct, uint32 damage) const
+        {
+            return int64(GetHealth()) - int64(damage) < int64(CountPctFromMaxHealth(pct));
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_arithmetic<T>::value, bool>::type
+        HealthAbovePct(T pct) const
+        {
+            return GetHealth() > CountPctFromMaxHealth(pct);
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_arithmetic<T>::value, bool>::type
+        HealthAbovePctHealed(T pct, uint32 heal) const
+        {
+            return uint64(GetHealth()) + uint64(heal) > CountPctFromMaxHealth(pct);
+        }
+
+        float GetHealthPct() const
+        {
+            return GetMaxHealth() ? 100.f * GetHealth() / GetMaxHealth() : 0.0f;
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_arithmetic<T>::value, uint32>::type
+        CountPctFromMaxHealth(T pct) const
+        {
+            return CalculatePct(GetMaxHealth(), pct);
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_arithmetic<T>::value, uint32>::type
+        CountPctFromCurHealth(T pct) const
+        {
+            return CalculatePct(GetHealth(), pct);
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_arithmetic<T>::value, int32>::type
+        CountPctFromMaxMana(T pct) const
+        {
+            return CalculatePct(GetMaxPower(POWER_MANA), pct);
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_arithmetic<T>::value, int32>::type
+        CountPctFromCurMana(T pct) const
+        {
+            return CalculatePct(GetPower(POWER_MANA), pct);
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_arithmetic<T>::value, int32>::type
+        CountPctFromMaxPower(T pct, Powers power) const
+        {
+            return CalculatePct(GetMaxPower(power), pct);
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_arithmetic<T>::value, int32>::type
+        CountPctFromCurPower(T pct, Powers power) const
+        {
+            return CalculatePct(GetPower(power), pct);
+        }
 
         void SetHealth(uint32 val);
         void SetMaxHealth(uint32 val);

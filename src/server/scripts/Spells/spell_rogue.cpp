@@ -29,7 +29,6 @@
 enum RogueSpells
 {
     ROGUE_SPELL_SHIV_TRIGGERED                   = 5940,
-    ROGUE_SPELL_RECUPERATE                       = 73651,
     ROGUE_SPELL_DEADLY_POISON                    = 2823,
     ROGUE_SPELL_WOUND_POISON                     = 8679,
     ROGUE_SPELL_MIND_NUMBLING_POISON             = 5761,
@@ -1123,39 +1122,56 @@ class spell_rog_poisons : public SpellScriptLoader
 };
 
 // Recuperate - 73651
-class spell_rog_recuperate : public SpellScriptLoader
+class spell_rog_recuperate final : public SpellScriptLoader
 {
-    public:
-        spell_rog_recuperate() : SpellScriptLoader("spell_rog_recuperate") { }
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
 
-        class spell_rog_recuperate_SpellScript : public SpellScript
+        enum
         {
-            PrepareSpellScript(spell_rog_recuperate_SpellScript);
-
-            void HandleOnHit()
-            {
-                if (Player* _player = GetCaster()->ToPlayer())
-                {
-                    if (Aura *recuperate = _player->GetAura(ROGUE_SPELL_RECUPERATE))
-                    {
-                        int32 bp = _player->CountPctFromMaxHealth(3);
-                        bp = _player->SpellHealingBonusDone(_player, GetSpellInfo(), bp, HEAL);
-                        bp = _player->SpellHealingBonusTaken(_player, GetSpellInfo(), bp, HEAL);
-                        recuperate->GetEffect(0)->ChangeAmount(bp);
-                    }
-                }
-            }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_rog_recuperate_SpellScript::HandleOnHit);
-            }
+            GLYPH_OF_RECUPERATE = 56806,
+            GLYPH_OF_RECOVERY   = 146625
         };
 
-        SpellScript* GetSpellScript() const
+        void initEffects(uint32 &effectMask)
         {
-            return new spell_rog_recuperate_SpellScript();
+            auto const caster = GetCaster();
+            if (!caster || !caster->HasAura(GLYPH_OF_RECOVERY))
+                effectMask &= ~(1 << EFFECT_1);
         }
+
+        void calculateAmount(AuraEffect const *, int32 &amount, bool &canBeRecalculated)
+        {
+            canBeRecalculated = false;
+
+            auto const caster = GetCaster();
+            if (!caster)
+                return;
+
+            amount *= 1000;
+            if (auto const eff = caster->GetAuraEffect(GLYPH_OF_RECUPERATE, EFFECT_0))
+                amount += eff->GetAmount();
+
+            amount = caster->CountPctFromMaxHealth(amount / 1000.0f);
+        }
+
+        void Register() final
+        {
+            OnInitEffects += AuraInitEffectsFn(script_impl::initEffects);
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(script_impl::calculateAmount, EFFECT_0, SPELL_AURA_PERIODIC_HEAL);
+        }
+    };
+
+public:
+    spell_rog_recuperate()
+        : SpellScriptLoader("spell_rog_recuperate")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
 };
 
 // Preparation - 14185

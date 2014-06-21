@@ -5259,6 +5259,8 @@ void Player::ResetSpec()
     if (GetSpecializationId(GetActiveSpec()) == 0)
         return;
 
+    RemovePet(PET_REMOVE_DISMISS, PET_REMOVE_FLAG_RETURN_REAGENT | PET_REMOVE_FLAG_RESET_CURRENT);
+
     RemoveAllSymbiosisAuras();
     RemoveSpecializationSpells();
     SetSpecializationId(GetActiveSpec(), 0);

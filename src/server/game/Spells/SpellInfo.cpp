@@ -3165,7 +3165,6 @@ bool SpellInfo::_IsNeedDelay() const
         case 70802: // Mayhem (Rogue)
         case 70157: // Ice Tomb (Sindragosa, ICC)
         case 79128: // Improved Expose Armor
-        case 36032: // Arcane Blast
         case 109950: // Fury of Destroyer
         case 139546: // Add combo point (for Ruthlessness)
         //case 114157: // Execution Sentence
@@ -3467,7 +3466,6 @@ bool SpellInfo::IsCustomCharged(SpellInfo const* procSpell) const
                 return true;
             break;
         case 324:   // Lightning Shield
-        case 36032: // Arcane Charge
         case 79683: // Arcane Missiles !
         case 93400: // Shooting Stars
         case 114637:// Bastion of Glory

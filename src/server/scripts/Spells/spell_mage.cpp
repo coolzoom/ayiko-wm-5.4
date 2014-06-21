@@ -701,34 +701,53 @@ class spell_mage_arcane_barrage : public SpellScriptLoader
 };
 
 // Arcane Explosion - 1449
-class spell_mage_arcane_explosion : public SpellScriptLoader
+class spell_mage_arcane_explosion final : public SpellScriptLoader
 {
-    public:
-        spell_mage_arcane_explosion() : SpellScriptLoader("spell_mage_arcane_explosion") { }
+    class script_impl final : public SpellScript
+    {
+        PrepareSpellScript(script_impl)
 
-        class spell_mage_arcane_explosion_SpellScript : public SpellScript
+        enum
         {
-            PrepareSpellScript(spell_mage_arcane_explosion_SpellScript);
-
-            void HandleOnHit()
-            {
-                if (Player* player = GetCaster()->ToPlayer())
-                    if (GetHitUnit())
-                        if (player->GetSpecializationId(player->GetActiveSpec()) == SPEC_MAGE_ARCANE)
-                            if (Aura *arcaneCharge = player->GetAura(SPELL_MAGE_ARCANE_CHARGE))
-                                arcaneCharge->RefreshDuration();
-            }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_mage_arcane_explosion_SpellScript::HandleOnHit);
-            }
+            ARCANE_CHARGE_ENABLER = 114664
         };
 
-        SpellScript* GetSpellScript() const
+        bool canGenerateCharge_;
+
+        void filterTargets(std::list<WorldObject*> &targets)
         {
-            return new spell_mage_arcane_explosion_SpellScript();
+            canGenerateCharge_ = !targets.empty();
         }
+
+        void afterCast()
+        {
+            auto const caster = GetCaster();
+            if (!caster || !caster->HasAura(ARCANE_CHARGE_ENABLER))
+                return;
+
+            if (auto const aura = caster->GetAura(SPELL_MAGE_ARCANE_CHARGE))
+                aura->RefreshDuration();
+
+            if (canGenerateCharge_ && roll_chance_i(GetSpellInfo()->Effects[EFFECT_1].BasePoints))
+                caster->CastSpell(caster, SPELL_MAGE_ARCANE_CHARGE, true);
+        }
+
+        void Register() final
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(script_impl::filterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            AfterCast += SpellCastFn(script_impl::afterCast);
+        }
+    };
+
+public:
+    spell_mage_arcane_explosion()
+        : SpellScriptLoader("spell_mage_arcane_explosion")
+    { }
+
+    SpellScript * GetSpellScript() const final
+    {
+        return new script_impl;
+    }
 };
 
 // Slow - 31589

@@ -1412,10 +1412,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 for (std::vector<int32>::const_iterator itr = spellTriggered->begin(); itr != spellTriggered->end(); ++itr)
                 {
                     if (*itr < 0)
-                    {
-                        if (!(aurApp->GetBase()->GetId() == 5143 && (-(*itr)) == 36032))
-                            target->RemoveAurasDueToSpell(-(*itr));
-                    }
+                        target->RemoveAurasDueToSpell(-(*itr));
                     else if (removeMode != AURA_REMOVE_BY_DEATH)
                         target->CastSpell(target, *itr, true, NULL, NULL, GetCasterGUID());
                 }

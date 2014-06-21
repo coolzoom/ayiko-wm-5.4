@@ -1638,6 +1638,51 @@ public:
     }
 };
 
+// 119072 - Holy Wrath
+class spell_pal_holy_wrath : public SpellScriptLoader
+{
+    class script_impl : public SpellScript
+    {
+        PrepareSpellScript(script_impl)
+
+            void HandleEnergize(SpellEffIndex /*effIndex*/)
+        {
+            if (Creature * cr = GetHitCreature())
+            {
+                uint32 mask = CREATURE_TYPEMASK_DEMON_OR_UNDEAD;
+                // Glyph of Holy Wrath
+                if(GetCaster() && GetCaster()->HasAura(54923))
+                    mask = (1 << (CREATURE_TYPE_DRAGONKIN-1)) | (1 << (CREATURE_TYPE_ELEMENTAL-1)) | (1 << (CREATURE_TYPE_DEMON-1)) | (1 << (CREATURE_TYPE_UNDEAD-1));
+
+                if ((cr->GetCreatureTypeMask() & mask))
+                    return;
+            }
+
+            // Player in Lichborn is considered undead type
+            if (Player * pl = GetHitPlayer())
+                if (pl->HasAura(50397))
+                    return;
+
+            PreventHitAura();
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(script_impl::HandleEnergize, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+        }
+    };
+
+public:
+    spell_pal_holy_wrath()
+        : SpellScriptLoader("spell_pal_holy_wrath")
+    { }
+
+    SpellScript * GetSpellScript() const
+    {
+        return new script_impl;
+    }
+};
+
 void AddSC_paladin_spell_scripts()
 {
     new spell_pal_glyph_of_devotian_aura();
@@ -1678,4 +1723,5 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_righteous_defense();
     new spell_pal_crusader_strike();
     new spell_pal_seal_of_truth();
+    new spell_pal_holy_wrath();
 }

@@ -3471,7 +3471,6 @@ bool SpellInfo::IsCustomCharged(SpellInfo const* procSpell) const
         case 79683: // Arcane Missiles !
         case 93400: // Shooting Stars
         case 114637:// Bastion of Glory
-        case 60503: // Overpower !
         case 121153:// Blindside
         case 131116:// Raging Blow !
             return true;

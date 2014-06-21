@@ -605,7 +605,7 @@ void SpellScript::SetCustomCastResultMessage(SpellCustomErrors result)
     m_spell->m_customError = result;
 }
 
-SpellValue const* SpellScript::GetSpellValue()
+SpellValue const & SpellScript::GetSpellValue() const
 {
     return m_spell->m_spellValue;
 }

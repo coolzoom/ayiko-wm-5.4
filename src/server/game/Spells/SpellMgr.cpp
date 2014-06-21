@@ -2014,7 +2014,7 @@ void SpellMgr::LoadSpellProcs()
         int32 spellId = fields[0].GetInt32();
 
         bool allRanks = false;
-        if (spellId <=0)
+        if (spellId <= 0)
         {
             allRanks = true;
             spellId = -spellId;

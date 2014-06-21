@@ -358,7 +358,7 @@ class SpellScript : public _SpellScript
         Unit* GetCaster();
         Unit* GetOriginalCaster();
         SpellInfo const* GetSpellInfo();
-        SpellValue const* GetSpellValue();
+        SpellValue const & GetSpellValue() const;
 
         // methods useable after spell is prepared
         // accessors to the explicit targets of the spell

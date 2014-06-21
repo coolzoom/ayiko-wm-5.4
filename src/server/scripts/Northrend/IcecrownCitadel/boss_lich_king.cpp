@@ -2390,7 +2390,7 @@ class spell_the_lich_king_necrotic_plague_jump : public SpellScriptLoader
 
             void AddMissingStack()
             {
-                if (GetHitAura() && !_hadAura && GetSpellValue()->EffectBasePoints[EFFECT_1] != AURA_REMOVE_BY_ENEMY_SPELL)
+                if (GetHitAura() && !_hadAura && GetSpellValue().EffectBasePoints[EFFECT_1] != AURA_REMOVE_BY_ENEMY_SPELL)
                     GetHitAura()->ModStackAmount(1);
             }
 

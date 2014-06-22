@@ -40,3 +40,9 @@ INSERT INTO `gameobject_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, 
 -- [SQL] [Kysio's report] Npcs - Deviate Viper will no longer be mistakenly spawned by Supervisor Fizsprocket (fixes #788)
 DELETE FROM `creature` WHERE `guid` = 158447 AND `id` = 3051;
 UPDATE `smart_scripts` SET `action_param1` = 79733 WHERE `entryorguid` = 3051 AND `source_type` = 0 AND `id` = 0;
+
+-- [SQL] [Blue's report] Npcs - Master Li Fei quest giver version should never be attackable (fixes #984)
+UPDATE `creature_template` SET `KillCredit2` = 0, `faction_A` = 35, `faction_H` = 35, `unit_flags` = 33536 WHERE `entry` = 54135;
+
+-- [SQL] Quests - Only The Worthy Shall Pass: Master Li Fei will now respawn faster (fixes #1399)
+UPDATE `creature` SET `spawntimesecs` = 30 WHERE `id` = 54734;

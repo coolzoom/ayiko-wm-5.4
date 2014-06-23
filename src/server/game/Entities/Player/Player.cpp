@@ -3702,7 +3702,6 @@ void Player::GiveLevel(uint8 level)
     SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY));
     if (GetPower(POWER_RAGE) > GetMaxPower(POWER_RAGE))
         SetPower(POWER_RAGE, GetMaxPower(POWER_RAGE));
-    SetPower(POWER_FOCUS, 0);
 
     // update level to hunter/summon pet
     if (Pet* pet = GetPet())

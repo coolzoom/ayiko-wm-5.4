@@ -584,7 +584,7 @@ class spell_warr_mocking_banner : public SpellScriptLoader
         }
 };
 
-// Called by the proc of Enrage - 12880
+// Called by the proc of Enrage - 12880 and Berserker Rage - 18499
 // Raging Blow (allow to use it) - 131116
 class spell_warr_raging_blow : public SpellScriptLoader
 {

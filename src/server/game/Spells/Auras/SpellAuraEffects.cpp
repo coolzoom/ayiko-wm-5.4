@@ -2655,46 +2655,43 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
     // add/remove the shapeshift aura's boosts
     HandleShapeshiftBoosts(target, apply);
 
-    if (target->GetTypeId() == TYPEID_PLAYER)
-        target->ToPlayer()->InitDataForForm();
-
-    if (target->getClass() == CLASS_DRUID)
+    if (Player * playerTarget = target->ToPlayer())
     {
-        // Dash
-        if (AuraEffect *aurEff = target->GetAuraEffect(SPELL_AURA_MOD_INCREASE_SPEED, SPELLFAMILY_DRUID, 0, 0, 0x8))
-            aurEff->RecalculateAmount();
+        playerTarget->InitDataForForm();
+        if (PowerType == POWER_MANA)
+            playerTarget->UpdateManaRegen();
 
-        // Disarm handling
-        // If druid shifts while being disarmed we need to deal with that since forms aren't affected by disarm
-        // and also HandleAuraModDisarm is not triggered
-        if (!target->CanUseAttackType(BASE_ATTACK))
+        if (target->getClass() == CLASS_DRUID)
         {
-            if (Item* pItem = target->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
-            {
-                target->ToPlayer()->_ApplyWeaponDamage(EQUIPMENT_SLOT_MAINHAND, pItem->GetTemplate(), NULL, apply);
-            }
+            // Dash
+            if (AuraEffect *aurEff = target->GetAuraEffect(SPELL_AURA_MOD_INCREASE_SPEED, SPELLFAMILY_DRUID, 0, 0, 0x8))
+                aurEff->RecalculateAmount();
+
+            // Disarm handling
+            // If druid shifts while being disarmed we need to deal with that since forms aren't affected by disarm
+            // and also HandleAuraModDisarm is not triggered
+            if (!target->CanUseAttackType(BASE_ATTACK))
+                if (Item* pItem = playerTarget->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
+                    playerTarget->_ApplyWeaponDamage(EQUIPMENT_SLOT_MAINHAND, pItem->GetTemplate(), NULL, apply);
         }
-    }
 
-    // stop handling the effect if it was removed by linked event
-    if (apply && aurApp->GetRemoveMode())
-        return;
+        // stop handling the effect if it was removed by linked event
+        if (apply && aurApp->GetRemoveMode())
+            return;
 
-    if (target->GetTypeId() == TYPEID_PLAYER)
-    {
         SpellShapeshiftFormEntry const* shapeInfo = sSpellShapeshiftFormStore.LookupEntry(form);
         // Learn spells for shapeshift form - no need to send action bars or add spells to spellbook
-        for (uint8 i = 0; i<MAX_SHAPESHIFT_SPELLS; ++i)
+        for (uint8 i = 0; i < MAX_SHAPESHIFT_SPELLS; ++i)
         {
             if (!shapeInfo->stanceSpell[i])
                 continue;
             if (apply)
-                target->ToPlayer()->AddTemporarySpell(shapeInfo->stanceSpell[i]);
+                playerTarget->AddTemporarySpell(shapeInfo->stanceSpell[i]);
             else
-                target->ToPlayer()->RemoveTemporarySpell(shapeInfo->stanceSpell[i]);
+                playerTarget->RemoveTemporarySpell(shapeInfo->stanceSpell[i]);
         }
         // Update the Mastery percentage for Shapeshift
-        target->ToPlayer()->UpdateMasteryPercentage();
+        playerTarget->UpdateMasteryPercentage();
     }
 }
 

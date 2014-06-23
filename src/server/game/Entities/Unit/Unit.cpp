@@ -15207,7 +15207,9 @@ void Unit::ModSpellCastTime(SpellInfo const* spellProto, int32 & castTime, Spell
     }
     else if (spellProto->Attributes & SPELL_ATTR0_REQ_AMMO && !(spellProto->AttributesEx2 & SPELL_ATTR2_AUTOREPEAT_FLAG))
         castTime = int32(float(castTime) * m_modAttackSpeedPct[RANGED_ATTACK]);
-    else if (spellProto->SpellVisual[0] == 3881 && HasAura(67556)) // cooking with Chef Hat.
+    else if ((spellProto->SpellVisual[0] == 3881 && HasAura(67556)) || // cooking with Chef Hat.
+            (spellProto->SpellVisual[0] == 91 && spellProto->SpellIconID == 39 && HasAura(20552)) || // Cultivation
+            (spellProto->SpellVisual[0] == 1008 && spellProto->SpellIconID == 736 && HasAura(20552)))  // Flayer
         castTime = 500;
 }
 

@@ -52,6 +52,11 @@ class WorldPacket : public ByteBuffer
             m_opcode = opcode;
         }
 
+        void Initialize(uint32 opcode, size_t newres = 200)
+        {
+            Initialize(Opcodes(opcode), newres);
+        }
+
         Opcodes GetOpcode() const { return m_opcode; }
         void SetOpcode(Opcodes opcode) { m_opcode = opcode; }
         void Compress(z_stream_s* compressionStream);

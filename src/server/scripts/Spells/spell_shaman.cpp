@@ -1798,7 +1798,7 @@ class spell_sha_lava_lash : public SpellScriptLoader
             int32 hitDamage = GetHitDamage();
 
             // Damage is increased by 40% if your off-hand weapon is enchanted with Flametongue.
-            if (player->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 0x200000, 0, 0))
+            if (player->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, Trinity::Flag128(0x200000)))
                 AddPct(hitDamage, 40);
 
             // Unleash Flame increase Lava Lash damage for 30%
@@ -1882,7 +1882,8 @@ class spell_sha_chain_heal : public SpellScriptLoader
                 if (firstHeal)
                 {
                     // Check if the target has Riptide
-                    if (AuraEffect *aurEff = GetHitUnit()->GetAuraEffect(SPELL_AURA_PERIODIC_HEAL, SPELLFAMILY_SHAMAN, 0, 0, 0x10, GetCaster()->GetGUID()))
+                    Trinity::Flag128 const flags(0, 0, 0x10);
+                    if (AuraEffect *aurEff = GetHitUnit()->GetAuraEffect(SPELL_AURA_PERIODIC_HEAL, SPELLFAMILY_SHAMAN, flags, GetCaster()->GetGUID()))
                     {
                         riptide = true;
                         // Consume it

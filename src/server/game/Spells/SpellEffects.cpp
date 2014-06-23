@@ -558,7 +558,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         // Check aura state for speed but aura state set not only for Immolate spell
                         if (unitTarget->HasAuraState(AURA_STATE_CONFLAGRATE))
                         {
-                            if (unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_WARLOCK, 0x4, 0, 0))
+                            if (unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_WARLOCK, Trinity::Flag128(0x4)))
                                 damage += damage / 6;
                         }
                         break;
@@ -4675,27 +4675,6 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                 case 86958: // Mobile Banking
                     m_caster->CastSpell(m_caster, 88304, true);
                     break;
-                case 63975: // Glyph of Backstab
-                {
-                    if (!unitTarget)
-                        break;
-
-                    // search our Rupture aura on target
-                    if (AuraEffect const *aurEff = unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_ROGUE, 0x00100000, 0, 0, m_caster->GetGUID()))
-                    {
-                        uint32 countMin = aurEff->GetBase()->GetMaxDuration();
-                        uint32 countMax = 12000; // this can be wrong, duration should be based on combo-points
-                        countMax += m_caster->HasAura(56801) ? 4000 : 0;
-
-                        if (countMin < countMax)
-                        {
-                            aurEff->GetBase()->SetDuration(uint32(aurEff->GetBase()->GetDuration() + 3000));
-                            aurEff->GetBase()->SetMaxDuration(countMin + 2000);
-                        }
-
-                    }
-                    return;
-                }
                 case 69961: // Glyph of Scourge Strike
                 {
                     if (!unitTarget)

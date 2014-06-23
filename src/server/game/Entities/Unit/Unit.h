@@ -1942,7 +1942,6 @@ class Unit : public WorldObject
         void RemoveNotOwnSingleTargetAuras(uint32 newPhase = 0x0);
         void RemoveAurasWithInterruptFlags(uint32 flag, uint32 except = 0);
         void RemoveAurasWithAttribute(uint32 flags);
-        void RemoveAurasWithFamily(SpellFamilyNames family, uint32 familyFlag1, uint32 familyFlag2, uint32 familyFlag3, uint64 casterGUID);
         void RemoveAurasWithMechanic(uint32 mechanic_mask, AuraRemoveMode removemode = AURA_REMOVE_BY_DEFAULT, uint32 except = 0, uint8 count = 0);
         void RemoveMovementImpairingAuras();
 
@@ -1968,7 +1967,7 @@ class Unit : public WorldObject
         AuraEffect *GetAuraEffect(uint32 spellId, uint8 effIndex, uint64 casterGUID = 0) const;
         AuraEffect *GetAuraEffectOfRankedSpell(uint32 spellId, uint8 effIndex, uint64 casterGUID = 0) const;
         AuraEffect *GetAuraEffect(AuraType type, SpellFamilyNames name, uint32 iconId, uint8 effIndex) const; // spell mustn't have familyflags
-        AuraEffect *GetAuraEffect(AuraType type, SpellFamilyNames family, uint32 familyFlag1, uint32 familyFlag2, uint32 familyFlag3, uint64 casterGUID =0);
+        AuraEffect *GetAuraEffect(AuraType type, SpellFamilyNames family, Trinity::Flag128 const &familyFlags, uint64 casterGUID = 0);
         inline AuraEffect *GetDummyAuraEffect(SpellFamilyNames name, uint32 iconId, uint32 effIndex) const { return GetAuraEffect(SPELL_AURA_DUMMY, name, iconId, effIndex);}
 
         AuraApplication * GetAuraApplication(uint32 spellId, uint64 casterGUID = 0, uint64 itemCasterGUID = 0, uint32 reqEffMask = 0, AuraApplication * except = NULL) const;

@@ -1611,20 +1611,20 @@ class spell_hun_cobra_shot : public SpellScriptLoader
 
             void HandleScriptEffect(SpellEffIndex /*effIndex*/)
             {
-                if (Player* _player = GetCaster()->ToPlayer())
-                {
-                    if (Unit* target = GetHitUnit())
-                    {
-                        if (AuraEffect *aurEff = target->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_HUNTER, 16384, 0, 0, GetCaster()->GetGUID()))
-                        {
-                            Aura *serpentSting = aurEff->GetBase();
-                            serpentSting->SetDuration(serpentSting->GetDuration() + (GetSpellInfo()->Effects[EFFECT_2].BasePoints * 1000));
+                auto const target = GetHitUnit();
+                if (!target)
+                    return;
 
-                            if (serpentSting->GetMaxDuration() < serpentSting->GetDuration())
-                                serpentSting->SetMaxDuration(serpentSting->GetDuration());
-                        }
-                    }
-                }
+                Trinity::Flag128 flags(16384);
+                auto const aurEff = target->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_HUNTER, flags, GetCaster()->GetGUID());
+                if (!aurEff)
+                    return;
+
+                auto const serpentSting = aurEff->GetBase();
+                serpentSting->SetDuration(serpentSting->GetDuration() + (GetSpellInfo()->Effects[EFFECT_2].BasePoints * 1000));
+
+                if (serpentSting->GetMaxDuration() < serpentSting->GetDuration())
+                    serpentSting->SetMaxDuration(serpentSting->GetDuration());
             }
 
             void Register()

@@ -2129,7 +2129,7 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
                 case FORM_CAT:
                 {
                     // Savage Roar
-                    if (target->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 0, 0x10000000, 0))
+                    if (target->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, Trinity::Flag128(0, 0x10000000)))
                         target->CastSpell(target, 62071, true);
 
                     break;
@@ -2664,7 +2664,7 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
         if (target->getClass() == CLASS_DRUID)
         {
             // Dash
-            if (AuraEffect *aurEff = target->GetAuraEffect(SPELL_AURA_MOD_INCREASE_SPEED, SPELLFAMILY_DRUID, 0, 0, 0x8))
+            if (AuraEffect *aurEff = target->GetAuraEffect(SPELL_AURA_MOD_INCREASE_SPEED, SPELLFAMILY_DRUID, Trinity::Flag128(0, 0, 0x8)))
                 aurEff->RecalculateAmount();
 
             // Disarm handling
@@ -5573,14 +5573,13 @@ void AuraEffect::HandleNoReagentUseAura(AuraApplication const* aurApp, uint8 mod
     if (target->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    flag96 mask;
+    Trinity::Flag128 mask;
     Unit::AuraEffectList const& noReagent = target->GetAuraEffectsByType(SPELL_AURA_NO_REAGENT_USE);
         for (Unit::AuraEffectList::const_iterator i = noReagent.begin(); i != noReagent.end(); ++i)
             mask |= (*i)->m_spellInfo->Effects[(*i)->m_effIndex].SpellClassMask;
 
-    target->SetUInt32Value(PLAYER_NO_REAGENT_COST_1  , mask[0]);
-    target->SetUInt32Value(PLAYER_NO_REAGENT_COST_1+1, mask[1]);
-    target->SetUInt32Value(PLAYER_NO_REAGENT_COST_1+2, mask[2]);
+    for (auto i = 0; i < 4; ++i)
+        target->SetUInt32Value(PLAYER_NO_REAGENT_COST_1 + i, mask[i]);
 }
 
 void AuraEffect::HandleAuraRetainComboPoints(AuraApplication const* aurApp, uint8 mode, bool apply) const

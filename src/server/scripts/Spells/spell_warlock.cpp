@@ -2599,7 +2599,8 @@ class spell_warl_banish : public SpellScriptLoader
 
                 if (Unit* target = GetHitUnit())
                 {
-                    if (target->GetAuraEffect(SPELL_AURA_SCHOOL_IMMUNITY, SPELLFAMILY_WARLOCK, 0, 0x08000000, 0))
+                    Trinity::Flag128 const flags(0, 0x08000000);
+                    if (target->GetAuraEffect(SPELL_AURA_SCHOOL_IMMUNITY, SPELLFAMILY_WARLOCK, flags))
                     {
                         // No need to remove old aura since its removed due to not stack by current Banish aura
                         PreventHitDefaultEffect(EFFECT_0);

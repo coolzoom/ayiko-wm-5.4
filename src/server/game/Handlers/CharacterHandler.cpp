@@ -876,8 +876,6 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
      // for send server info and strings (config)
     ChatHandler chH = ChatHandler(pCurrChar);
 
-    uint32 time = getMSTime();
-
     // "GetAccountId() == db stored account id" checked in LoadFromDB (prevent login not own character using cheating tools)
     if (!pCurrChar->LoadFromDB(GUID_LOPART(playerGuid), holder))
     {
@@ -889,14 +887,17 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         return;
     }
 
-    uint32 time1 = getMSTime() - time;
-
     pCurrChar->GetMotionMaster()->Initialize();
     pCurrChar->SendDungeonDifficulty(false);
 
-    WorldPacket data(SMSG_RESUME_TOKEN, 5);
-    data << uint32(0);
+    WorldPacket data(SMSG_SUSPEND_TOKEN_RESPONSE, 5);
     data << uint8(0x80);
+    data << uint32(0);
+    SendPacket(&data);
+
+    // FIXME: find out what is it, sent by Pandashan
+    data.Initialize(0x0286, 4);
+    data << uint32(0);
     SendPacket(&data);
 
     data.Initialize(SMSG_LOGIN_VERIFY_WORLD, 20);
@@ -911,47 +912,47 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     LoadAccountData(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADACCOUNTDATA), PER_CHARACTER_CACHE_MASK);
     SendAccountDataTimes(PER_CHARACTER_CACHE_MASK);
 
-    bool tooLongInGame = false;
-    bool inGameShop = false;
-    bool inGameShopIcon = false;
-    bool unkBit80 = true;
-    bool scrollOfRessurect = false;
-    bool voiceChat = false;
-    data.Initialize(SMSG_FEATURE_SYSTEM_STATUS, 35);         // sent in 5.0.5
-    data << uint32(0);
+    bool sessionTimeAlert = false;
+    bool travelPass = true;
+    bool webTicketFeature = false;
+    bool ingameStoreFeature = true;
+    bool itemRestorationFeature = false;
+
+    data.Initialize(SMSG_FEATURE_SYSTEM_STATUS, 35);
+
+    data << uint32(1);                  // SoR remaining ?
     data << uint32(realmID);
-    data << uint8(2);
-    data << uint32(0);
-    data << uint32(0);
-    data.WriteBit(inGameShop);
-    data.WriteBit(true);
-    data.WriteBit(inGameShopIcon);
-    data.WriteBit(tooLongInGame);
-    data.WriteBit(scrollOfRessurect);
-    data.WriteBit(unkBit80);
-    data.WriteBit(voiceChat);
-    data.WriteBit(true);
-    data.WriteBit(true);
+    data << uint8(2);                   // Complain System Status ?
+    data << uint32(43);                 // Unk
+    data << uint32(1);                  // SoR per day ?
 
+    data.WriteBit(0);                   // Unk
+    data.WriteBit(1);                   // Is Voice Chat allowed ?
+    data.WriteBit(ingameStoreFeature);
+    data.WriteBit(sessionTimeAlert);
+    data.WriteBit(1);                   // Europa Ticket System Enabled ?
+    data.WriteBit(travelPass);          // Has Travel Pass
+    data.WriteBit(1);                   // Unk
+    data.WriteBit(itemRestorationFeature);
+    data.WriteBit(webTicketFeature);
+    data.FlushBits();
 
-    if (tooLongInGame)
+    if (sessionTimeAlert)
     {
         data << uint32(0);
         data << uint32(0);
         data << uint32(0);
     }
 
-    if (unkBit80)
+    if (travelPass)
     {
         data << uint32(60000);
         data << uint32(10);
-        data << uint32(103291);
+        data << uint32(114194674);
         data << uint32(1);
     }
 
     SendPacket(&data);
-
-    uint32 time2 = getMSTime() - time1;
 
     // Send MOTD
     {
@@ -997,14 +998,14 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         TC_LOG_DEBUG("network", "WORLD: Sent server info");
     }
 
-    const static std::string timeZoneName = "Europe/Paris";
+    static const std::string timeZoneName = "Europe/Paris";
 
     data.Initialize(SMSG_TIME_ZONE_INFORMATION, 26);
     data.WriteBits(timeZoneName.size(), 7);
     data.WriteBits(timeZoneName.size(), 7);
-    data << timeZoneName;
-    data << timeZoneName;
-
+    data.FlushBits();
+    data.append(timeZoneName.c_str(), timeZoneName.size());
+    data.append(timeZoneName.c_str(), timeZoneName.size());
     SendPacket(&data);
 
     if (sWorld->getBoolConfig(CONFIG_ARENA_SEASON_IN_PROGRESS))
@@ -1035,19 +1036,18 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     data << uint64(0);
     SendPacket(&data);
 
-    data.Initialize(SMSG_HOTFIX_INFO);
-    HotfixData const& hotfix = sObjectMgr->GetHotfixData();
-    data.WriteBits(hotfix.size(), 20);
+    HotfixData const &hotfixes = sObjectMgr->GetHotfixData();
+
+    data.Initialize(SMSG_HOTFIX_INFO, 3 + hotfixes.size() * 4 * 3);
+    data.WriteBits(hotfixes.size(), 20);
     data.FlushBits();
-    for (uint32 i = 0; i < hotfix.size(); ++i)
+    for (auto const &hotfix : hotfixes)
     {
-        data << uint32(hotfix[i].Entry);
-        data << uint32(hotfix[i].Timestamp);
-        data << uint32(hotfix[i].Type);
+        data << uint32(hotfix.Entry);
+        data << uint32(hotfix.Timestamp);
+        data << uint32(hotfix.Type);
     }
     SendPacket(&data);
-
-    uint32 time3 = getMSTime() - time2;
 
     // Send item extended costs hotfix
     for (auto const &id : sObjectMgr->GetOverwriteExtendedCosts())
@@ -1076,7 +1076,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         for (auto const &req : extendedCost->RequiredCurrency)
             buff << req;
 
-        for (auto const & req : extendedCost->RequiredCurrencyCount)
+        for (auto const &req : extendedCost->RequiredCurrencyCount)
             buff << req;
 
         // Unk
@@ -1125,8 +1125,6 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         }
     }
 
-    uint32 time4 = getMSTime() - time3;
-
     if (!pCurrChar->GetMap()->AddPlayerToMap(pCurrChar) || !pCurrChar->CheckInstanceLoginValid())
     {
         AreaTriggerStruct const* at = sObjectMgr->GetGoBackTrigger(pCurrChar->GetMapId());
@@ -1152,15 +1150,11 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         }
     }
 
-    uint32 time5 = getMSTime() - time4;
-
     pCurrChar->SendInitialPacketsAfterAddToMap();
 
     CharacterDatabase.PExecute("UPDATE characters SET online = 1 WHERE guid = '%u'", pCurrChar->GetGUIDLow());
     LoginDatabase.PExecute("UPDATE account SET online = 1 WHERE id = '%u'", GetAccountId());
     pCurrChar->SetInGameTime(getMSTime());
-
-    uint32 time6 = getMSTime() - time5;
 
     // announce group about member online (must be after add to player list to receive announce to self)
     if (Group* group = pCurrChar->GetGroup())
@@ -1191,8 +1185,6 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     // Load pet if any (if player not alive and in taxi flight or another then pet will remember as temporary unsummoned)
     pCurrChar->LoadPet();
-
-    uint32 time7 = getMSTime() - time6;
 
     // Set FFA PvP for non GM in non-rest mode
     if (sWorld->IsFFAPvPRealm() && !pCurrChar->isGameMaster() && !pCurrChar->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
@@ -1230,15 +1222,13 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     pCurrChar->SendCUFProfiles();
 
-    uint32 time8 = getMSTime() - time7;
-
     // Hackfix Remove Talent spell - Remove Glyph spell
     pCurrChar->learnSpell(111621, false); // Reset Glyph
     pCurrChar->learnSpell(113873, false); // Reset Talent
 
-    std::string IP_str = GetRemoteAddress();
-    TC_LOG_INFO("entities.player.character", "Account: %d (IP: %s) Login Character:[%s] (GUID: %u) Level: %d",
-        GetAccountId(), IP_str.c_str(), pCurrChar->GetName().c_str(), pCurrChar->GetGUIDLow(), pCurrChar->getLevel());
+    std::string const &ip = GetRemoteAddress();
+    TC_LOG_INFO("entities.player.character", "Account: %u (IP: %s) Login Character:[%s] (GUID: %u) Level: %d",
+                GetAccountId(), ip.c_str(), pCurrChar->GetName().c_str(), pCurrChar->GetGUIDLow(), pCurrChar->getLevel());
 
     if (!pCurrChar->IsStandState() && !pCurrChar->HasUnitState(UNIT_STATE_STUNNED))
         pCurrChar->SetStandState(UNIT_STAND_STATE_STAND);
@@ -1246,12 +1236,6 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     m_playerLoading = false;
 
     sScriptMgr->OnPlayerLogin(pCurrChar);
-
-    uint32 time9 = getMSTime() - time8;
-
-    uint32 totalTime = getMSTime() - time;
-    if (totalTime > 50)
-        TC_LOG_INFO("molten", "HandlePlayerLogin |****---> time1 : %u | time 2 : %u | time 3 : %u | time 4 : %u | time 5: %u | time 6 : %u | time 7 : %u | time 8 : %u | time 9 : %u | totaltime : %u", time1, time2, time3, time4, time5, time6, time7, time8, time9, totalTime);
 
     delete holder;
 }

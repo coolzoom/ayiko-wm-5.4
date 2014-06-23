@@ -2084,7 +2084,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         int32 basepoints0 = aurEff->GetAmount();
                         target->CastCustomSpell(target, 31665, &basepoints0, NULL, NULL , true);
                     }
-                    else if (!target->GetAuraEffect(SPELL_AURA_MOD_SHAPESHIFT, SPELLFAMILY_ROGUE, 0x400800, 0, 0))
+                    else if (!target->GetAuraEffect(SPELL_AURA_MOD_SHAPESHIFT, SPELLFAMILY_ROGUE, Trinity::Flag128(0x400800)))
                     {
                         if (auto const aur = target->GetAura(31665))
                         {
@@ -2100,7 +2100,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     {
                         target->CastSpell(target,58427,true);
                     }
-                    else if (!target->GetAuraEffect(SPELL_AURA_MOD_SHAPESHIFT, SPELLFAMILY_ROGUE, 0x400800, 0, 0))
+                    else if (!target->GetAuraEffect(SPELL_AURA_MOD_SHAPESHIFT, SPELLFAMILY_ROGUE, Trinity::Flag128(0x400800)))
                     {
                         if (auto const aur = target->GetAura(58427))
                         {

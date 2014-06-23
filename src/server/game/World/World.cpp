@@ -1420,9 +1420,6 @@ void World::SetInitialWorldSettings()
     LoadDB2Stores(m_dataPath);
     DetectDBCLang();
 
-    TC_LOG_INFO("server.loading", "Loading spell dbc data corrections...");
-    sSpellMgr->LoadDbcDataCorrections();
-
     TC_LOG_INFO("server.loading", "Loading SpellInfo store...");
     sSpellMgr->LoadSpellInfoStore();
 

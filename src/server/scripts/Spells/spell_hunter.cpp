@@ -492,8 +492,16 @@ class spell_hun_glyph_of_marked_for_die : public SpellScriptLoader
 
             void HandleOnHit()
             {
+                // Kill Command needs diff caster check
+                Unit * caster = GetSpellInfo()->Id == 34026 ? GetCaster()->GetGuardianPet() : GetCaster();
+                if (!caster)
+                    return;
+
                 if (Unit* const target = GetHitUnit())
-                    GetCaster()->CastSpell(target, HUNTER_SPELL_HUNTERS_MARK, true);
+                {
+                    if (target != caster)
+                        GetCaster()->CastSpell(target, HUNTER_SPELL_HUNTERS_MARK, true);
+                }
             }
 
             void Register()

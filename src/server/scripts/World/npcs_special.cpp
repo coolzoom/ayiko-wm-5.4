@@ -3393,7 +3393,7 @@ class npc_demonic_gateway_green : public CreatureScript
 
 enum xuenSpells
 {
-    CRACKLING_TIGER_LIGHTNING   = 123996,
+    CRACKLING_TIGER_LIGHTNING   = 123999,
     PROVOKE                     = 130793,
     TIGER_LEAP                  = 124007,
     TIGER_LUST                  = 124009,
@@ -3401,9 +3401,8 @@ enum xuenSpells
 
 enum xuenEvents
 {
-    EVENT_LIGHTNING = 1,
-    EVENT_PROVOKE   = 2,
-    EVENT_LEAP      = 3,
+    EVENT_PROVOKE   = 1,
+    EVENT_LEAP      = 2,
 };
 
 class npc_xuen_the_white_tiger : public CreatureScript
@@ -3424,9 +3423,9 @@ class npc_xuen_the_white_tiger : public CreatureScript
             {
                 events.Reset();
 
-                events.ScheduleEvent(EVENT_LIGHTNING, 500);
                 events.ScheduleEvent(EVENT_LEAP,      200);
                 events.ScheduleEvent(EVENT_PROVOKE,   200);
+                me->CastSpell(me, CRACKLING_TIGER_LIGHTNING, true);
             }
 
             void UpdateAI(const uint32 diff)
@@ -3449,21 +3448,6 @@ class npc_xuen_the_white_tiger : public CreatureScript
                 {
                     switch (eventId)
                     {
-                        case EVENT_LIGHTNING:
-                        {
-                            if (Unit* target = me->getVictim())
-                            {
-                                me->CastSpell(target, CRACKLING_TIGER_LIGHTNING, false);
-                            }
-                            else if (me->GetOwner())
-                            {
-                                if (Unit* target = me->GetOwner()->getAttackerForHelper())
-                                    me->CastSpell(target, CRACKLING_TIGER_LIGHTNING, false);
-                            }
-
-                            events.ScheduleEvent(EVENT_LIGHTNING, 6000);
-                            break;
-                        }
                         case EVENT_LEAP:
                         {
                             if (Unit* target = me->getVictim())

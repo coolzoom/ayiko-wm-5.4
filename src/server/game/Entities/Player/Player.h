@@ -37,12 +37,12 @@
 #include "QuestDef.h"
 #include "ReputationMgr.h"
 #include "Unit.h"
-#include "Util.h"                                           // for Tokenizer typedef
 #include "WorldSession.h"
 #include "PhaseMgr.h"
 #include "CUFProfiles.h"
 #include "SpellChargesTracker.hpp"
 #include "PlayerTaxi.hpp"
+#include "Flag128.hpp"
 
 // for template
 #include "SpellMgr.h"
@@ -133,7 +133,7 @@ struct SpellModifier
     SpellModType type : 8;
     int16 charges     : 16;
     int32 value;
-    flag96 mask;
+    Trinity::Flag128 mask;
     uint32 spellId;
     Aura *ownerAura;
 };

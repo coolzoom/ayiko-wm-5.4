@@ -1252,9 +1252,12 @@ class spell_rog_deadly_poison : public SpellScriptLoader
             void HandleBeforeHit()
             {
                 if (Unit* target = GetHitUnit())
+                {
                     // Deadly Poison
-                    if (AuraEffect const *aurEff = target->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_ROGUE, 0x10000, 0x80000, 0, GetCaster()->GetGUID()))
+                    Trinity::Flag128 flags(0x10000, 0x80000);
+                    if (AuraEffect const *aurEff = target->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_ROGUE, flags, GetCaster()->GetGUID()))
                         _stackAmount = aurEff->GetBase()->GetStackAmount();
+                }
             }
 
             void HandleAfterHit()

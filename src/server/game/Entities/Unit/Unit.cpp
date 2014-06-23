@@ -329,18 +329,17 @@ Unit::~Unit()
     delete m_charmInfo;
     delete movespline;
 
-    // TODO : Find Why it crashes
-    //ASSERT(!m_duringRemoveFromWorld);
-    //ASSERT(!m_attacking);
-    //ASSERT(m_attackers.empty());
-    //ASSERT(m_sharedVision.empty());
-    //ASSERT(m_Controlled.empty());
-    //ASSERT(m_appliedAuras.empty());
-    //ASSERT(m_ownedAuras.empty());
-    //ASSERT(m_removedAuras.empty());
-    //ASSERT(m_gameObj.empty());
-    //ASSERT(m_dynObj.empty());
-    //ASSERT(m_AreaTrigger.empty());
+    ASSERT(!m_duringRemoveFromWorld);
+    ASSERT(!m_attacking);
+    ASSERT(m_attackers.empty());
+    ASSERT(m_sharedVision.empty());
+    ASSERT(m_Controlled.empty());
+    ASSERT(m_appliedAuras.empty());
+    ASSERT(m_ownedAuras.empty());
+    ASSERT(m_removedAuras.empty());
+    ASSERT(m_gameObj.empty());
+    ASSERT(m_dynObj.empty());
+    ASSERT(m_AreaTrigger.empty());
 }
 
 void Unit::Update(uint32 p_time)
@@ -4211,24 +4210,6 @@ void Unit::RemoveAurasWithInterruptFlags(uint32 flag, uint32 except)
     UpdateInterruptMask();
 }
 
-void Unit::RemoveAurasWithFamily(SpellFamilyNames family, uint32 familyFlag1, uint32 familyFlag2, uint32 familyFlag3, uint64 casterGUID)
-{
-    for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end();)
-    {
-        Aura const *aura = iter->second->GetBase();
-        if (!casterGUID || aura->GetCasterGUID() == casterGUID)
-        {
-            SpellInfo const* spell = aura->GetSpellInfo();
-            if (spell->SpellFamilyName == uint32(family) && spell->SpellFamilyFlags.HasFlag(familyFlag1, familyFlag2, familyFlag3))
-            {
-                RemoveAura(iter);
-                continue;
-            }
-        }
-        ++iter;
-    }
-}
-
 void Unit::RemoveMovementImpairingAuras()
 {
     RemoveAurasWithMechanic((1<<MECHANIC_SNARE)|(1<<MECHANIC_ROOT));
@@ -4510,13 +4491,13 @@ AuraEffect *Unit::GetAuraEffect(AuraType type, SpellFamilyNames name, uint32 ico
     return NULL;
 }
 
-AuraEffect *Unit::GetAuraEffect(AuraType type, SpellFamilyNames family, uint32 familyFlag1, uint32 familyFlag2, uint32 familyFlag3, uint64 casterGUID)
+AuraEffect *Unit::GetAuraEffect(AuraType type, SpellFamilyNames family, Trinity::Flag128 const &familyFlags, uint64 casterGUID)
 {
     AuraEffectList const& auras = GetAuraEffectsByType(type);
     for (AuraEffectList::const_iterator i = auras.begin(); i != auras.end(); ++i)
     {
         SpellInfo const* spell = (*i)->GetSpellInfo();
-        if (spell->SpellFamilyName == uint32(family) && spell->SpellFamilyFlags.HasFlag(familyFlag1, familyFlag2, familyFlag3))
+        if (spell->SpellFamilyName == uint32(family) && (spell->SpellFamilyFlags & familyFlags))
         {
             if (casterGUID && (*i)->GetCasterGUID() != casterGUID)
                 continue;
@@ -5878,7 +5859,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                         return false;
 
                     // find Mage Armor
-                    if (!GetAuraEffect(SPELL_AURA_MOD_MANA_REGEN_INTERRUPT, SPELLFAMILY_MAGE, 0x10000000, 0, 0))
+                    if (!HasAura(6117))
                         return false;
 
                     switch (GetFirstSchoolInMask(procSpell->GetSchoolMask()))
@@ -7032,36 +7013,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                     triggered_spell_id = 54846;
                     break;
                 }
-                case 54815: // Glyph of Bloodletting
-                {
-                    if (!target)
-                        return false;
-
-                    // try to find spell Rip on the target
-                    if (AuraEffect const *AurEff = target->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, 0x00800000, 0x0, 0x0, GetGUID()))
-                    {
-                        // Rip's max duration, note: spells which modifies Rip's duration also counted
-                        uint32 CountMin = AurEff->GetBase()->GetMaxDuration();
-
-                        // just Rip's max duration without other spells
-                        uint32 CountMax = AurEff->GetSpellInfo()->GetMaxDuration();
-
-                        // add possible auras' and Glyph of Shred's max duration
-                        CountMax += 3 * triggerAmount * IN_MILLISECONDS;      // Glyph of Bloodletting        -> +6 seconds
-                        CountMax += HasAura(60141) ? 4 * IN_MILLISECONDS : 0; // Rip Duration/Lacerate Damage -> +4 seconds
-
-                        // if min < max -> that means caster didn't cast 3 shred yet
-                        // so set Rip's duration and max duration
-                        if (CountMin < CountMax)
-                        {
-                            AurEff->GetBase()->SetDuration(AurEff->GetBase()->GetDuration() + triggerAmount * IN_MILLISECONDS);
-                            AurEff->GetBase()->SetMaxDuration(CountMin + triggerAmount * IN_MILLISECONDS);
-                            return true;
-                        }
-                    }
-                    // if not found Rip
-                    return false;
-                }
                 case 24932: // Leader of the Pack
                 {
                    if (triggerAmount <= 0)
@@ -8170,7 +8121,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                     if (!target)
                         return false;
                     // try to find spell Flame Shock on the target
-                    if (AuraEffect const *aurEff = target->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_SHAMAN, 0x10000000, 0x0, 0x0, GetGUID()))
+                    if (AuraEffect const *aurEff = target->GetAuraEffect(8050, EFFECT_1, GetGUID()))
                     {
                         Aura *flameShock  = aurEff->GetBase();
                         int32 maxDuration = flameShock->GetMaxDuration();
@@ -11891,7 +11842,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                 break;
             case 5481: // Starfire Bonus
             {
-                if (victim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, 0x200002, 0, 0))
+                if (victim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, Trinity::Flag128(0x200002)))
                     AddPct(DoneTotalMod, (*i)->GetAmount());
                 break;
             }
@@ -11950,7 +11901,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
             {
                 // Glyph of Smite
                 if (AuraEffect *aurEff = GetAuraEffect(55692, 0))
-                    if (victim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_PRIEST, 0x100000, 0, 0, GetGUID()))
+                    if (victim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_PRIEST, Trinity::Flag128(0x100000), GetGUID()))
                         AddPct(DoneTotalMod, aurEff->GetAmount());
             }
             break;
@@ -19071,9 +19022,16 @@ void Unit::SetPhaseMask(uint32 newPhaseMask, bool update)
     if (!IsInWorld())
         return;
 
-    for (ControlList::const_iterator itr = m_Controlled.begin(); itr != m_Controlled.end(); ++itr)
-        if ((*itr)->GetTypeId() == TYPEID_UNIT)
-            (*itr)->SetPhaseMask(newPhaseMask, true);
+    if (!m_Controlled.empty())
+    {
+        // SetPhaseMask triggers visibility update, that removes no longer visible pets
+        // in BeforeVisibilityDestroy<Creature>, so we need a copy to prevent iterator
+        // invalidation
+        ControlList copyList = m_Controlled;
+        for (ControlList::const_iterator itr = copyList.begin(); itr != copyList.end(); ++itr)
+            if ((*itr)->GetTypeId() == TYPEID_UNIT)
+                (*itr)->SetPhaseMask(newPhaseMask, true);
+    }
 
     for (uint8 i = 0; i < MAX_SUMMON_SLOT; ++i)
         if (m_SummonSlot[i])

@@ -19,10 +19,10 @@
 #define _SPELLINFO_H
 
 #include "SharedDefines.h"
-#include "Util.h"
 #include "DBCStructure.h"
 #include "DB2Structure.h"
-#include "Object.h"
+#include "ObjectDefines.h"
+#include "Flag128.hpp"
 
 #include <vector>
 
@@ -250,7 +250,7 @@ public:
     uint32    ChainTarget;
     uint32    ItemType;
     uint32    TriggerSpell;
-    flag96    SpellClassMask;
+    Trinity::Flag128 SpellClassMask;
     std::list<Condition*>* ImplicitTargetConditions;
     float     ScalingMultiplier;
     float     DeltaScalingMultiplier;
@@ -363,7 +363,7 @@ public:
     uint32 MaxTargetLevel;
     uint32 MaxAffectedTargets;
     uint32 SpellFamilyName;
-    flag96 SpellFamilyFlags;
+    Trinity::Flag128 SpellFamilyFlags;
     uint32 DmgClass;
     uint32 PreventionType;
     int32  AreaGroupId;

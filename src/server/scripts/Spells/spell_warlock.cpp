@@ -1557,15 +1557,15 @@ class spell_warl_sacrificial_pact : public SpellScriptLoader
                 {
                     if (!caster->GetGuardianPet())
                     {
-                        int32 sacrifiedHealth = caster->CountPctFromCurHealth(50);
+                        int32 sacrifiedHealth = caster->CountPctFromCurHealth(GetSpellInfo()->Effects[EFFECT_1].BasePoints);
                         caster->ModifyHealth(-sacrifiedHealth);
-                        amount = sacrifiedHealth * 2;
+                        amount = CalculatePct(sacrifiedHealth, amount);
                     }
                     else if (caster->GetGuardianPet())
                     {
-                        int32 sacrifiedHealth = caster->GetGuardianPet()->CountPctFromCurHealth(50);
+                        int32 sacrifiedHealth = caster->GetGuardianPet()->CountPctFromCurHealth(GetSpellInfo()->Effects[EFFECT_1].BasePoints);
                         caster->GetGuardianPet()->ModifyHealth(-sacrifiedHealth);
-                        amount = sacrifiedHealth * 2;
+                        amount = CalculatePct(sacrifiedHealth, amount);
                     }
                 }
             }

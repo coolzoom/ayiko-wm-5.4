@@ -1360,7 +1360,7 @@ ConjureRefreshmentData const _conjureData[MAX_CONJURE_REFRESHMENT_SPELLS] =
     { 74, 79, 74625 },
     { 80, 84, 92822 },
     { 85, 89, 92727 },
-	{ 90, 90, 116130 }
+    { 90, 90, 116130 }
 };
 
 // 42955 - Conjure Refreshment

@@ -1342,7 +1342,7 @@ class spell_mage_evocation : public SpellScriptLoader
 };
 
 // 42955 Conjure Refreshment
-/// Updated 4.3.4
+/// Updated 5.4.2
 struct ConjureRefreshmentData
 {
     uint32 minLevel;
@@ -1359,7 +1359,8 @@ ConjureRefreshmentData const _conjureData[MAX_CONJURE_REFRESHMENT_SPELLS] =
     { 64, 73, 92805 },
     { 74, 79, 74625 },
     { 80, 84, 92822 },
-    { 85, 85, 92727 }
+    { 85, 89, 92727 },
+	{ 90, 90, 116130 }
 };
 
 // 42955 - Conjure Refreshment

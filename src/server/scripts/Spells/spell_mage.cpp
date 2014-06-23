@@ -45,14 +45,6 @@ enum MageSpells
     HUNTER_SPELL_INSANITY                        = 95809,
     SPELL_SHAMAN_SATED                           = 57724,
     SPELL_SHAMAN_EXHAUSTED                       = 57723,
-    SPELL_MAGE_CONJURE_REFRESHMENT_R1            = 92739,
-    SPELL_MAGE_CONJURE_REFRESHMENT_R2            = 92799,
-    SPELL_MAGE_CONJURE_REFRESHMENT_R3            = 92802,
-    SPELL_MAGE_CONJURE_REFRESHMENT_R4            = 92805,
-    SPELL_MAGE_CONJURE_REFRESHMENT_R5            = 74625,
-    SPELL_MAGE_CONJURE_REFRESHMENT_R6            = 42956,
-    SPELL_MAGE_CONJURE_REFRESHMENT_R7            = 92727,
-    SPELL_MAGE_CONJURE_REFRESHMENT_R8            = 116130,
     SPELL_MAGE_MANA_GEM_ENERGIZE                 = 10052,
     SPELL_MAGE_ARCANE_BRILLIANCE                 = 1459,
     SPELL_MAGE_INFERNO_BLAST                     = 108853,
@@ -1349,7 +1341,28 @@ class spell_mage_evocation : public SpellScriptLoader
         }
 };
 
-// Conjure Refreshment - 42955
+// 42955 Conjure Refreshment
+/// Updated 4.3.4
+struct ConjureRefreshmentData
+{
+    uint32 minLevel;
+    uint32 maxLevel;
+    uint32 spellId;
+};
+
+uint8 const MAX_CONJURE_REFRESHMENT_SPELLS = 7;
+ConjureRefreshmentData const _conjureData[MAX_CONJURE_REFRESHMENT_SPELLS] =
+{
+    { 33, 43, 92739 },
+    { 44, 53, 92799 },
+    { 54, 63, 92802 },
+    { 64, 73, 92805 },
+    { 74, 79, 74625 },
+    { 80, 84, 92822 },
+    { 85, 85, 92727 }
+};
+
+// 42955 - Conjure Refreshment
 class spell_mage_conjure_refreshment : public SpellScriptLoader
 {
     public:
@@ -1359,40 +1372,46 @@ class spell_mage_conjure_refreshment : public SpellScriptLoader
         {
             PrepareSpellScript(spell_mage_conjure_refreshment_SpellScript);
 
-            void HandleOnHit()
+            bool Validate(SpellInfo const* /*spellInfo*/) override
             {
-                if (Player* _player = GetCaster()->ToPlayer())
+                for (uint8 i = 0; i < MAX_CONJURE_REFRESHMENT_SPELLS; ++i)
+                    if (!sSpellMgr->GetSpellInfo(_conjureData[i].spellId))
+                        return false;
+                return true;
+            }
+
+            bool Load() override
+            {
+                if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
+                    return false;
+                return true;
+            }
+
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                uint8 level = GetHitUnit()->getLevel();
+                for (uint8 i = 0; i < MAX_CONJURE_REFRESHMENT_SPELLS; ++i)
                 {
-                    if (_player->getLevel() < 44)
-                        _player->CastSpell(_player, SPELL_MAGE_CONJURE_REFRESHMENT_R1, true);
-                    else if (_player->getLevel() < 54)
-                        _player->CastSpell(_player, SPELL_MAGE_CONJURE_REFRESHMENT_R2, true);
-                    else if (_player->getLevel() < 64)
-                        _player->CastSpell(_player, SPELL_MAGE_CONJURE_REFRESHMENT_R3, true);
-                    else if (_player->getLevel() < 74)
-                        _player->CastSpell(_player, SPELL_MAGE_CONJURE_REFRESHMENT_R4, true);
-                    else if (_player->getLevel() < 80)
-                        _player->CastSpell(_player, SPELL_MAGE_CONJURE_REFRESHMENT_R5, true);
-                    else if (_player->getLevel() < 85)
-                        _player->CastSpell(_player, SPELL_MAGE_CONJURE_REFRESHMENT_R6, true);
-                    else if (_player->getLevel() < 90)
-                        _player->CastSpell(_player, SPELL_MAGE_CONJURE_REFRESHMENT_R7, true);
-                    else
-                        _player->CastSpell(_player, SPELL_MAGE_CONJURE_REFRESHMENT_R8, true);
+                    ConjureRefreshmentData const& spellData = _conjureData[i];
+                    if (level < spellData.minLevel || level > spellData.maxLevel)
+                        continue;
+                    GetHitUnit()->CastSpell(GetHitUnit(), spellData.spellId);
+                    break;
                 }
             }
 
-            void Register()
+            void Register() override
             {
-                OnHit += SpellHitFn(spell_mage_conjure_refreshment_SpellScript::HandleOnHit);
+                OnEffectHitTarget += SpellEffectFn(spell_mage_conjure_refreshment_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const override
         {
             return new spell_mage_conjure_refreshment_SpellScript();
         }
 };
+
 
 // Time Warp - 80353
 class spell_mage_time_warp : public SpellScriptLoader

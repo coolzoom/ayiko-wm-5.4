@@ -49,7 +49,8 @@ enum WarriorSpells
     WARRIOR_SPELL_BERZERKER_RAGE_EFFECT         = 23691,
     WARRIOR_SPELL_ENRAGE                        = 12880,
     WARRIOR_SPELL_COLOSSUS_SMASH                = 86346,
-    WARRIOR_SPELL_SECOND_WIND_REGEN             = 125667,
+    WARRIOR_SPELL_SECOND_WIND_REGEN             = 16491,
+    WARRIOR_SPELL_SECOND_WIND_DUMMY             = 125667,
     WARRIOR_SPELL_UNBRIDLED_WRATH_REGEN         = 29842,
     WARRIOR_SPELL_DRAGON_ROAR_KNOCK_BACK        = 118895,
     WARRIOR_SPELL_MEAT_CLEAVER_PROC             = 85739,
@@ -406,7 +407,14 @@ class spell_warr_second_wind final : public SpellScriptLoader
 
         bool checkProc(ProcEventInfo &)
         {
-            return GetCaster() && GetCaster()->GetHealthPct() <= 35;
+            Unit * const caster = GetCaster();
+            if (!caster)
+                return false;
+
+            if (!caster->HasAura(WARRIOR_SPELL_SECOND_WIND_DUMMY))
+                caster->CastSpell(caster, WARRIOR_SPELL_SECOND_WIND_DUMMY, true);
+
+            return caster->GetHealthPct() <= 35;
         }
 
         void onProc(AuraEffect const *, ProcEventInfo &)

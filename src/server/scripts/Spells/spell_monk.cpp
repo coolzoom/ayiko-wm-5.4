@@ -3078,6 +3078,45 @@ class spell_monk_tigereye_brew_stacks : public SpellScriptLoader
         }
 };
 
+// 137384 - Mastery : Combo Breaker
+class spell_monk_combo_breaker : public SpellScriptLoader
+{
+    enum
+    {
+        SPELL_COMBO_BREAKER_PALM = 118864,
+        SPELL_COMBO_BREAKER_KICK = 116768,
+    };
+
+public:
+    spell_monk_combo_breaker() : SpellScriptLoader("spell_monk_combo_breaker") { }
+
+    class aura_impl : public AuraScript
+    {
+        PrepareAuraScript(aura_impl);
+
+        void OnProc(AuraEffect const *aurEff, ProcEventInfo& eventInfo)
+        {
+            PreventDefaultAction();
+
+            if (!(eventInfo.GetDamageInfo()->GetDamage()))
+                return;
+
+            if (Unit * caster = GetCaster())
+                caster->CastSpell(caster, urand(0, 1) ? SPELL_COMBO_BREAKER_KICK : SPELL_COMBO_BREAKER_PALM);
+        }
+
+        void Register()
+        {
+            OnEffectProc += AuraEffectProcFn(aura_impl::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new aura_impl();
+    }
+};
+
 void AddSC_monk_spell_scripts()
 {
     new spell_monk_fists_of_fury_stun();
@@ -3136,4 +3175,5 @@ void AddSC_monk_spell_scripts()
     new spell_monk_provoke();
     new spell_monk_roll();
     new spell_monk_tigereye_brew_stacks();
+    new spell_monk_combo_breaker();
 }

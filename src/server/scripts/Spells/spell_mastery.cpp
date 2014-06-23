@@ -34,9 +34,6 @@ enum MasterySpells
     MASTERY_SPELL_HAND_OF_LIGHT         = 96172,
     MASTERY_SPELL_IGNITE                = 12654,
     MASTERY_SPELL_BLOOD_SHIELD          = 77535,
-    MASTERY_SPELL_COMBO_BREAKER         = 115636,
-    MASTERY_SPELL_COMBO_BREAKER_1       = 118864,
-    MASTERY_SPELL_COMBO_BREAKER_2       = 116768,
     MASTERY_SPELL_DISCIPLINE_SHIELD     = 77484,
     SPELL_DK_SCENT_OF_BLOOD             = 50421,
 };
@@ -73,50 +70,6 @@ class spell_mastery_shield_discipline : public SpellScriptLoader
         AuraScript* GetAuraScript() const
         {
             return new spell_mastery_shield_discipline_AuraScript();
-        }
-};
-
-// Called by 100780 / 108557 / 115698 / 115687 / 115693 / 115695 - Jab (and overrides)
-// 115636 - Mastery : Combo Breaker
-class spell_mastery_combo_breaker : public SpellScriptLoader
-{
-    public:
-        spell_mastery_combo_breaker() : SpellScriptLoader("spell_mastery_combo_breaker") { }
-
-        class spell_mastery_combo_breaker_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_mastery_combo_breaker_SpellScript);
-
-            void HandleOnHit()
-            {
-                if (Unit* caster = GetCaster())
-                {
-                    if (GetHitUnit())
-                    {
-                        if (caster->GetTypeId() == TYPEID_PLAYER && caster->HasAura(MASTERY_SPELL_COMBO_BREAKER))
-                        {
-                            float mastery = caster->GetFloatValue(PLAYER_MASTERY) * 1.4f;
-                            if (roll_chance_f(mastery))
-                            {
-                                if (roll_chance_i(50))
-                                    caster->CastSpell(caster, MASTERY_SPELL_COMBO_BREAKER_1, true);
-                                else
-                                    caster->CastSpell(caster, MASTERY_SPELL_COMBO_BREAKER_2, true);
-                            }
-                        }
-                    }
-                }
-            }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_mastery_combo_breaker_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_mastery_combo_breaker_SpellScript();
         }
 };
 
@@ -370,7 +323,6 @@ class spell_mastery_elemental_overload : public SpellScriptLoader
 void AddSC_mastery_spell_scripts()
 {
     new spell_mastery_shield_discipline();
-    new spell_mastery_combo_breaker();
     new spell_mastery_blood_shield();
     new spell_mastery_ignite();
     new spell_mastery_hand_of_light();

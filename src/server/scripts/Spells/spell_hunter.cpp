@@ -646,6 +646,8 @@ class spell_hun_dire_beast : public SpellScriptLoader
                                     default:
                                         if (_player->GetMap()->IsDungeon())
                                             _player->CastSpell(target, DIRE_BEAST_DUNGEONS, true);
+                                        else
+                                            _player->CastSpell(target, DIRE_BEAST_EASTERN_KINGDOMS, true);
                                         break;
                                 }
                                 break;

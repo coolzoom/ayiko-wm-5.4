@@ -1911,6 +1911,43 @@ class spell_sha_chain_heal : public SpellScriptLoader
         }
 };
 
+// Lava Burst - 51505
+class spell_sha_lava_burst : public SpellScriptLoader
+{
+    class spell_sha_lava_burst_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_sha_lava_burst_SpellScript)
+
+        enum
+        {
+            SPELL_FLAME_SHOCK = 8050,
+        };
+
+        void HandleOnHit(SpellEffIndex /*effIndex*/)
+        {
+            Unit * const target = GetHitUnit();
+            if (!target || !target->HasAura(SPELL_FLAME_SHOCK, GetCaster()->GetGUID()))
+                return;
+
+            SetHitDamage(GetHitDamage() * 1.5f);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_sha_lava_burst_SpellScript::HandleOnHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+public:
+    spell_sha_lava_burst() : SpellScriptLoader("spell_sha_lava_burst")
+    { }
+
+    SpellScript * GetSpellScript() const
+    {
+        return new spell_sha_lava_burst_SpellScript();
+    }
+};
+
 void AddSC_shaman_spell_scripts()
 {
     new spell_sha_hex();
@@ -1947,4 +1984,5 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_ancestral_awakening_proc();
     new spell_sha_lava_lash();
     new spell_sha_chain_heal();
+    new spell_sha_lava_burst();
 }

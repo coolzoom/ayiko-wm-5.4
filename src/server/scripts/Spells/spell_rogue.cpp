@@ -1362,6 +1362,35 @@ class spell_rog_shadowstep : public SpellScriptLoader
         }
 };
 
+// Marked for Death - 137619
+class spell_rog_marked_for_death : public SpellScriptLoader
+{
+public:
+    spell_rog_marked_for_death() : SpellScriptLoader("spell_rog_marked_for_death") { }
+
+    class spell_rog_marked_for_death_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_rog_marked_for_death_AuraScript );
+
+        void HandleRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes mode)
+        {
+            if (GetCaster() && GetTarget() && GetCaster()->GetTypeId() == TYPEID_PLAYER)
+                if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_DEATH)
+                    GetCaster()->ToPlayer()->RemoveSpellCooldown(GetId(), true);
+        }
+
+        void Register()
+        {
+            OnEffectRemove += AuraEffectRemoveFn(spell_rog_marked_for_death_AuraScript ::HandleRemove, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_rog_marked_for_death_AuraScript();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_glyph_of_expose_armor();
@@ -1390,4 +1419,5 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_preparation();
     new spell_rog_deadly_poison();
     new spell_rog_shadowstep();
+    new spell_rog_marked_for_death();
 }

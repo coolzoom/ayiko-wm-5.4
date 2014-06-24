@@ -160,6 +160,7 @@ Unit::Unit(bool isWorldObject): WorldObject(isWorldObject)
     , m_TempSpeed(0.0f)
     , IsAIEnabled(false)
     , NeedChangeAI(false)
+    , LastCharmerGUID(0)
     , m_ControlledByPlayer(false)
     , movespline(new Movement::MoveSpline())
     , i_AI(NULL)
@@ -15921,7 +15922,7 @@ void Unit::RemoveFromWorld()
     {
         m_duringRemoveFromWorld = true;
         if (IsVehicle())
-            GetVehicleKit()->Uninstall();
+            RemoveVehicleKit();
 
         RemoveCharmAuras();
         RemoveBindSightAuras();
@@ -18564,13 +18565,12 @@ void Unit::RemoveCharmedBy(Unit* charmer)
 
     CastStop();
     CombatStop(); // TODO: CombatStop(true) may cause crash (interrupt spells)
-    AttackStop();
     getHostileRefManager().deleteReferences();
     DeleteThreatList();
     Map* map = GetMap();
     if (!IsVehicle() || (IsVehicle() && map && !map->IsBattleground()))
         RestoreFaction();
-    GetMotionMaster()->Clear(true);
+
     GetMotionMaster()->InitDefault();
 
     if (type == CHARM_TYPE_POSSESS)
@@ -18581,16 +18581,13 @@ void Unit::RemoveCharmedBy(Unit* charmer)
 
     if (Creature* creature = ToCreature())
     {
+        // Creature will restore its old AI on next update
         if (creature->AI())
             creature->AI()->OnCharmed(false);
 
-        if (type != CHARM_TYPE_VEHICLE) // Vehicles' AI is never modified
-        {
-            creature->AIM_Initialize();
-
-            if (creature->AI() && charmer && charmer->isAlive())
-                creature->AI()->AttackStart(charmer);
-        }
+        // Vehicle should not attack its passenger after he exists the seat
+        if (type != CHARM_TYPE_VEHICLE)
+            LastCharmerGUID = charmer->GetGUID();
     }
     else
         ToPlayer()->SetClientControl(this, 1);
@@ -18616,15 +18613,12 @@ void Unit::RemoveCharmedBy(Unit* charmer)
                     ToPlayer()->SetMover(this);
                 break;
             case CHARM_TYPE_POSSESS:
-                ClearUnitState(UNIT_STATE_POSSESSED);
                 charmer->ToPlayer()->SetClientControl(charmer, 1);
                 charmer->ToPlayer()->SetViewpoint(this, false);
                 charmer->ToPlayer()->SetClientControl(this, 0);
                 charmer->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                 if (GetTypeId() == TYPEID_PLAYER)
-                {
-                    ToPlayer()->SetClientControl(this, 1);
-                }
+                    ToPlayer()->SetMover(this);
                 break;
             case CHARM_TYPE_CHARM:
                 if (GetTypeId() == TYPEID_UNIT && charmer->getClass() == CLASS_WARLOCK)
@@ -18643,6 +18637,10 @@ void Unit::RemoveCharmedBy(Unit* charmer)
                 break;
         }
     }
+
+    // We need to clear motion master as CharmedPlayerAI will make player follow Charmer on update tick
+    if (Player* player = ToPlayer())
+        player->GetMotionMaster()->Clear();
 
     // a guardian should always have charminfo
     if (charmer->GetTypeId() == TYPEID_PLAYER && this != charmer->GetFirstControlled())

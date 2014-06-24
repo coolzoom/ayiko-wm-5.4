@@ -551,6 +551,12 @@ void Creature::Update(uint32 diff)
                 UpdateCharmAI();
                 NeedChangeAI = false;
                 IsAIEnabled = true;
+
+                if (!IsInEvadeMode() && LastCharmerGUID)
+                    if (Unit* charmer = ObjectAccessor::GetUnit(*this, LastCharmerGUID))
+                        i_AI->AttackStart(charmer);
+
+                LastCharmerGUID = 0;
             }
 
             if (!IsInEvadeMode() && IsAIEnabled)

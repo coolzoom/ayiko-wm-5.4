@@ -22,9 +22,12 @@
 #include "ObjectMgr.h"
 #include "TemporarySummon.h"
 
-TempSummon::TempSummon(SummonPropertiesEntry const* properties, Unit* owner, bool isWorldObject) :
-Creature(isWorldObject), m_Properties(properties), m_type(TEMPSUMMON_MANUAL_DESPAWN),
-m_timer(0), m_lifetime(0)
+TempSummon::TempSummon(SummonPropertiesEntry const* properties, Unit* owner, bool isWorldObject)
+    : Creature(isWorldObject)
+    , m_Properties(properties)
+    , m_type(TEMPSUMMON_MANUAL_DESPAWN)
+    , m_timer(0)
+    , m_lifetime(0)
 {
     m_summonerGUID = owner ? owner->GetGUID() : 0;
     m_unitTypeMask |= UNIT_MASK_SUMMON;
@@ -215,7 +218,7 @@ void TempSummon::InitSummon()
     Unit* owner = GetSummoner();
     if (owner)
     {
-        if (owner->GetTypeId() == TYPEID_UNIT && owner->ToCreature()->IsAIEnabled)
+        if (owner->GetTypeId() == TYPEID_UNIT && owner->IsAIEnabled)
             owner->ToCreature()->AI()->JustSummoned(this);
         if (IsAIEnabled)
             AI()->IsSummonedBy(owner);
@@ -231,9 +234,8 @@ void TempSummon::UnSummon(uint32 msTime)
 {
     if (msTime)
     {
-        ForcedUnsummonDelayEvent* pEvent = new ForcedUnsummonDelayEvent(*this);
-
-        m_Events.AddEvent(pEvent, m_Events.CalculateTime(msTime));
+        ForcedUnsummonDelayEvent* event = new ForcedUnsummonDelayEvent(*this);
+        m_Events.AddEvent(event, m_Events.CalculateTime(msTime));
         return;
     }
 
@@ -275,8 +277,8 @@ void TempSummon::RemoveFromWorld()
     Creature::RemoveFromWorld();
 }
 
-Minion::Minion(SummonPropertiesEntry const* properties, Unit* owner, bool isWorldObject) : TempSummon(properties, owner, isWorldObject)
-, m_owner(owner)
+Minion::Minion(SummonPropertiesEntry const* properties, Unit* owner, bool isWorldObject)
+    : TempSummon(properties, owner, isWorldObject), m_owner(owner)
 {
     ASSERT(m_owner);
     m_unitTypeMask |= UNIT_MASK_MINION;
@@ -314,7 +316,8 @@ Guardian::Guardian(SummonPropertiesEntry const* properties, Unit* owner, bool is
 {
     memset(m_statFromOwner, 0, sizeof(float)*MAX_STATS);
     m_unitTypeMask |= UNIT_MASK_GUARDIAN;
-    if (properties && properties->Type == SUMMON_TYPE_PET)
+    if (properties
+            && (properties->Type == SUMMON_TYPE_PET || (properties->Category == SUMMON_CATEGORY_PET && (properties->Flags & 0x800))))
     {
         m_unitTypeMask |= UNIT_MASK_CONTROLABLE_GUARDIAN;
         InitCharmInfo();
@@ -325,9 +328,9 @@ void Guardian::InitStats(uint32 duration)
 {
     Minion::InitStats(duration);
 
-    InitStatsForLevel(m_owner->getLevel());
+    InitStatsForLevel(GetOwner()->getLevel());
 
-    if (m_owner->GetTypeId() == TYPEID_PLAYER && HasUnitTypeMask(UNIT_MASK_CONTROLABLE_GUARDIAN))
+    if (GetOwner()->GetTypeId() == TYPEID_PLAYER && HasUnitTypeMask(UNIT_MASK_CONTROLABLE_GUARDIAN))
         m_charmInfo->InitCharmCreateSpells();
 
     SetReactState(REACT_AGGRESSIVE);
@@ -337,21 +340,27 @@ void Guardian::InitSummon()
 {
     TempSummon::InitSummon();
 
-    if (m_owner->GetTypeId() == TYPEID_PLAYER
-        && m_owner->GetMinionGUID() == GetGUID()
-        && !m_owner->GetCharmGUID())
-        m_owner->ToPlayer()->CharmSpellInitialize();
+    if (GetOwner()->GetTypeId() == TYPEID_PLAYER
+            && GetOwner()->GetMinionGUID() == GetGUID()
+            && !GetOwner()->GetCharmGUID())
+    {
+        GetOwner()->ToPlayer()->CharmSpellInitialize();
+    }
 }
 
-Puppet::Puppet(SummonPropertiesEntry const* properties, Unit* owner) : Minion(properties, owner, false) //maybe true?
+Puppet::Puppet(SummonPropertiesEntry const* properties, Unit* owner)
+    : Minion(properties, owner, false) //maybe true?
 {
-    ASSERT(owner->GetTypeId() == TYPEID_PLAYER);
+    ASSERT(m_owner->GetTypeId() == TYPEID_PLAYER);
     m_unitTypeMask |= UNIT_MASK_PUPPET;
 }
 
 void Puppet::InitStats(uint32 duration)
 {
-    Minion::InitStats(duration);
+    TempSummon::InitStats(duration);
+
+    SetCreatorGUID(GetOwner()->GetGUID());
+    setFaction(GetOwner()->getFaction());
     SetLevel(GetOwner()->getLevel());
     SetReactState(REACT_PASSIVE);
 }

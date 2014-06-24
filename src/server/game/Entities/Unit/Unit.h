@@ -2362,6 +2362,8 @@ class Unit : public WorldObject
         Unit* GetMisdirectionTarget() { return m_misdirectionTargetGUID ? GetUnit(*this, m_misdirectionTargetGUID) : NULL; }
 
         bool IsAIEnabled, NeedChangeAI;
+        uint64 LastCharmerGUID;
+
         bool CreateVehicleKit(uint32 id, uint32 creatureEntry);
         void RemoveVehicleKit(bool dismount = false);
         Vehicle* GetVehicleKit()const { return m_vehicleKit; }

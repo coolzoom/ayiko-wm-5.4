@@ -932,6 +932,10 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
     targets.SetSpeed(speed);
     targets.Update(caster);
 
+    // Interrupt auto-cast if other spell is forced by player
+    if (caster->IsNonMeleeSpellCasted(false, true, true, false, true))
+        caster->InterruptNonMeleeSpells(false, 0, false);
+
     caster->ClearUnitState(UNIT_STATE_FOLLOW);
 
     Spell* spell = new Spell(caster, spellInfo, TRIGGERED_NONE, 0, false, true);

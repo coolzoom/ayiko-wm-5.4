@@ -1350,7 +1350,7 @@ struct ConjureRefreshmentData
     uint32 spellId;
 };
 
-uint8 const MAX_CONJURE_REFRESHMENT_SPELLS = 7;
+uint8 const MAX_CONJURE_REFRESHMENT_SPELLS = 8;
 ConjureRefreshmentData const _conjureData[MAX_CONJURE_REFRESHMENT_SPELLS] =
 {
     { 33, 43, 92739 },

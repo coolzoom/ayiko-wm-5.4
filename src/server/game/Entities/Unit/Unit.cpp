@@ -9510,14 +9510,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
 
             break;
         }
-        case 108563:// Backlash
-        {
-            if (GetTypeId() != TYPEID_PLAYER)
-                return false;
-
-            ToPlayer()->AddSpellCooldown(fakeCooldownId, 0, 8 * IN_MILLISECONDS);
-            break;
-        }
         case 144586:// Item - Paladin T16 Retribution 2P Bonus - 144586 (proc Warrior of the Light - 144587)
         {
             if (!procSpell)

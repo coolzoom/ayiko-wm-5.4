@@ -2871,6 +2871,46 @@ class spell_warl_unstable_affliction : public SpellScriptLoader
         }
 };
 
+// Backlash - 108563
+class spell_warl_backlash : public SpellScriptLoader
+{
+public:
+    spell_warl_backlash() : SpellScriptLoader("spell_warl_backlash") { }
+
+    class spell_warl_backlash_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_warl_backlash_AuraScript);
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            Player const * const player = GetCaster()->ToPlayer();
+            if (!player)
+                return false;
+
+            return !player->HasSpellCooldown(std::numeric_limits<uint32>::max() - GetId());
+        }
+
+        void OnProc(AuraEffect const *aurEff, ProcEventInfo& eventInfo)
+        {
+            PreventDefaultAction();
+            GetCaster()->CastSpell(GetCaster(), 34936, true);
+            GetCaster()->ToPlayer()->AddSpellCooldown(std::numeric_limits<uint32>::max() - GetId(), 0, 8 * IN_MILLISECONDS);
+        }
+
+        void Register()
+        {
+            DoCheckProc += AuraCheckProcFn(spell_warl_backlash_AuraScript::CheckProc);
+            OnEffectProc += AuraEffectProcFn(spell_warl_backlash_AuraScript::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_warl_backlash_AuraScript();
+    }
+};
+
+
 void AddSC_warlock_spell_scripts()
 {
     new spell_warl_soulburn_drain_life();
@@ -2937,4 +2977,5 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_demonic_circle_summon();
     new spell_warl_demonic_circle_teleport();
     new spell_warl_unstable_affliction();
+    new spell_warl_backlash();
 }

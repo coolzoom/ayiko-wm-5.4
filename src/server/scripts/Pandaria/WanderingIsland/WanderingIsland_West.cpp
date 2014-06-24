@@ -784,7 +784,7 @@ class spell_grab_air_balloon: public SpellScriptLoader
 
 class mob_shang_xi_air_balloon final : public VehicleScript
 {
-        struct mob_shang_xi_air_balloonAI final : public npc_escortAI
+    struct mob_shang_xi_air_balloonAI final : public npc_escortAI
     {
         mob_shang_xi_air_balloonAI(Creature* creature)
             : npc_escortAI(creature)
@@ -809,36 +809,38 @@ class mob_shang_xi_air_balloon final : public VehicleScript
             playerGUID = guid;
         }
 
+        void removeNpcPassengers()
+        {
+            for (auto i = 1; i != 3; ++i)
+            {
+                auto const passenger = me->GetVehicleKit()->GetPassenger(i);
+                if (!passenger)
+                    continue;
+
+                passenger->_ExitVehicle();
+                passenger->ToCreature()->DespawnOrUnsummon(1000);
+            }
+        }
+
         void WaypointReached(uint32 waypointId) final
         {
             switch (waypointId)
             {
                 case 11:
-                    if (me->GetVehicleKit())
-                    {
-                        if (Unit* passenger = me->GetVehicleKit()->GetPassenger(1))
-                            if (Creature * const creature = passenger->ToCreature())
-                                creature->ForcedDespawn(1000);
-                        if (Unit* passenger = me->GetVehicleKit()->GetPassenger(2))
-                            if (Creature * const creature = passenger->ToCreature())
-                                creature->ForcedDespawn(1000);
-                    }
+                    removeNpcPassengers();
                     break;
                 case 12:
-                    if (me->GetVehicleKit())
+                {
+                    auto const passenger = me->GetVehicleKit()->GetPassenger(0);
+                    if (passenger && passenger->GetTypeId() == TYPEID_PLAYER)
                     {
-                        if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
-                            if (Player* player = passenger->ToPlayer())
-                            {
-                                player->KilledMonsterCredit(55939);
-                                player->AddAura(50550, player);
-                            }
-
-                        me->GetVehicleKit()->RemoveAllPassengers();
+                        passenger->ToPlayer()->KilledMonsterCredit(55939);
+                        passenger->AddAura(50550, passenger);
                     }
+
+                    me->GetVehicleKit()->RemoveAllPassengers();
                     break;
-                default:
-                    break;
+                }
             }
         }
 
@@ -852,17 +854,7 @@ class mob_shang_xi_air_balloon final : public VehicleScript
         {
             if (playerGUID == 0)
             {
-                for (auto i = 1; i != 3; ++i)
-                {
-                    auto const passenger = me->GetVehicleKit()->GetPassenger(i);
-                    if (!passenger)
-                        continue;
-
-                    passenger->_ExitVehicle();
-                    if (auto const creature = passenger->ToCreature())
-                        creature->DespawnOrUnsummon();
-                }
-
+                removeNpcPassengers();
                 me->DespawnOrUnsummon();
                 return;
             }

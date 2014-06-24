@@ -1413,6 +1413,49 @@ class spell_mage_conjure_refreshment : public SpellScriptLoader
         }
 };
 
+// 43987 - Ritual of Refreshment
+class spell_mage_ritual_of_refreshment : public SpellScriptLoader
+{
+    public:
+        spell_mage_ritual_of_refreshment() : SpellScriptLoader("spell_mage_ritual_of_refreshment") { }
+
+        class spell_mage_ritual_of_refreshment_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_mage_ritual_of_refreshment_SpellScript);
+
+            bool Load()
+            {
+                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+            }
+
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                Player* caster = GetCaster()->ToPlayer();
+                caster->RemoveSpellCooldown(120056, true); // Rank 1
+                caster->RemoveSpellCooldown(120055, true); // Rank 2
+                caster->RemoveSpellCooldown(120054, true); // Rank 3
+                caster->RemoveSpellCooldown(120053, true); // Rank 4
+                if (caster->getLevel() > 70 && caster->getLevel() < 80)
+                    caster->CastSpell(caster, 120056, true);
+                if (caster->getLevel() > 80 && caster->getLevel() < 85)
+                    caster->CastSpell(caster, 120055, true);
+                if (caster->getLevel() > 85 && caster->getLevel() < 90)
+                    caster->CastSpell(caster, 120054, true);
+                if (caster->getLevel() == 90)
+                    caster->CastSpell(caster, 120053, true);
+            }
+
+            void Register()
+            {
+                OnEffectHit += SpellEffectFn(spell_mage_ritual_of_refreshment_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_mage_ritual_of_refreshment_SpellScript();
+        }
+};
 
 // Time Warp - 80353
 class spell_mage_time_warp : public SpellScriptLoader
@@ -1703,6 +1746,7 @@ void AddSC_mage_spell_scripts()
     new spell_mage_replenish_mana();
     new spell_mage_evocation();
     new spell_mage_conjure_refreshment();
+    new spell_mage_ritual_of_refreshment();
     new spell_mage_time_warp();
     new spell_mage_alter_time_overrided();
     new spell_mage_alter_time();

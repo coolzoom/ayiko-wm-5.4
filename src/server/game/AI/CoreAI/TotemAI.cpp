@@ -76,7 +76,9 @@ void TotemAI::UpdateAI(uint32 const /*diff*/)
     // Get spell range
     float max_range = spellInfo->GetMaxRange(false);
 
-    // SPELLMOD_RANGE not applied in this place just because not existence range mods for attacking totems
+    // Apply SPELLMOD_RANGE from owner (required by Elemental Reach talent at least)
+    if (Player * const modOwner = me->GetSpellModOwner())
+        modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_RANGE, max_range);
 
     // Search victim if no, not attackable, or out of range, or friendly (possible in case duel end)
     if (!victim ||

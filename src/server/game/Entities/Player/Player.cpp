@@ -27895,8 +27895,14 @@ void Player::ReduceSpellCooldown(uint32 spellId, int32 reduction)
 
     AddSpellCooldown(spellId, 0, cooldownDelay);
 
+    ObjectGuid guid = GetGUID();
+
     WorldPacket data(SMSG_MODIFY_COOLDOWN, 4 + 8 + 4);
-    data << spellId << GetGUID() << int32(-reduction);
+    data.WriteBitSeq<1, 5, 3, 0, 6, 4, 7, 2>(guid);
+    data << spellId;
+    data.WriteByteSeq<0, 5, 1, 7, 2, 4, 6, 3>(guid);
+    data << int32(-reduction);
+
     SendDirectMessage(&data);
 }
 

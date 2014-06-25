@@ -1492,12 +1492,11 @@ void AuraEffect::ChangeAmount(int32 newAmount, bool mark, bool onStackOrReapply)
     if (!handleMask)
         return;
 
-    std::list<AuraApplication*> effectApplications;
+    Unit::AuraApplicationList effectApplications;
     GetApplicationList(effectApplications);
 
-    for (std::list<AuraApplication*>::const_iterator apptItr = effectApplications.begin(); apptItr != effectApplications.end(); ++apptItr)
-        if ((*apptItr)->HasEffect(GetEffIndex()))
-            HandleEffect(*apptItr, handleMask, false);
+    for (auto &app : effectApplications)
+        HandleEffect(app, handleMask, false);
 
     if (handleMask & AURA_EFFECT_HANDLE_CHANGE_AMOUNT)
     {
@@ -1505,14 +1504,16 @@ void AuraEffect::ChangeAmount(int32 newAmount, bool mark, bool onStackOrReapply)
             m_amount = newAmount;
         else
             SetAmount(newAmount);
+
+        CalculateSpellMod();
     }
 
-    if (handleMask & AURA_EFFECT_HANDLE_REAPPLY)
-        CalculateSpellMod();
-
-    for (std::list<AuraApplication*>::const_iterator apptItr = effectApplications.begin(); apptItr != effectApplications.end(); ++apptItr)
-        if ((*apptItr)->HasEffect(GetEffIndex()))
-            HandleEffect(*apptItr, handleMask, true);
+    for (auto &app : effectApplications)
+    {
+        HandleEffect(app, handleMask, true);
+        if (app->GetRemoveMode() == AURA_REMOVE_NONE && (app->GetFlags() & AFLAG_ANY_EFFECT_AMOUNT_SENT) != 0)
+            app->SetNeedClientUpdate();
+    }
 }
 
 void AuraEffect::HandleEffect(AuraApplication * aurApp, uint8 mode, bool apply)

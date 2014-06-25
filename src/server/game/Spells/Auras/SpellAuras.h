@@ -103,7 +103,25 @@ class Aura
         virtual ~Aura();
 
         SpellInfo const* GetSpellInfo() const { return m_spellInfo; }
-        uint32 GetId() const{ return GetSpellInfo()->Id; }
+        uint32 GetId() const { return GetSpellInfo()->Id; }
+
+        bool shouldSendEffectAmount() const
+        {
+            if ((GetSpellInfo()->AttributesEx8 & SPELL_ATTR8_AURA_SEND_AMOUNT) != 0)
+                return true;
+
+            for (auto const &spellEffect : GetSpellInfo()->Effects)
+            {
+                switch (spellEffect.ApplyAuraName)
+                {
+                    case SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS:
+                    case SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2:
+                        return true;
+                }
+            }
+
+            return false;
+        }
 
         uint64 GetCastItemGUID() const { return m_castItemGuid; }
         uint64 GetCasterGUID() const { return m_casterGuid; }

@@ -151,21 +151,8 @@ void AuraApplication::_InitFlags(Unit* caster, uint32 effMask)
         _flags |= positiveFound ? AFLAG_POSITIVE : AFLAG_NEGATIVE;
     }
 
-    if (GetBase()->GetSpellInfo()->AttributesEx8 & SPELL_ATTR8_AURA_SEND_AMOUNT)
+    if (GetBase()->shouldSendEffectAmount())
         _flags |= AFLAG_ANY_EFFECT_AMOUNT_SENT;
-
-    // there are more auras that require this flag, this is just the beginning
-    for (uint8 i = 0; i < GetBase()->GetSpellInfo()->Effects.size(); ++i)
-    {
-        if (((1 << i) & effMask))
-        {
-            if (GetBase()->GetEffect(i) && GetBase()->GetEffect(i)->GetAmount())
-            {
-                _flags |= AFLAG_ANY_EFFECT_AMOUNT_SENT;
-                break;
-            }
-        }
-    }
 }
 
 void AuraApplication::_HandleEffect(uint8 effIndex, bool apply)
@@ -1244,6 +1231,9 @@ bool Aura::CanBeSentToClient() const
         return false;
 
     if (!IsPassive())
+        return true;
+
+    if ((GetSpellInfo()->AttributesEx8 & SPELL_ATTR8_AURA_SEND_AMOUNT) != 0)
         return true;
 
     for (auto const &spellEffect : m_spellInfo->Effects)

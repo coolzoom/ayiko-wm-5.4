@@ -12450,7 +12450,7 @@ float Unit::GetSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolM
                     }
                 }
             }
-            break;
+            // Both ranged and melee spells
         case SPELL_DAMAGE_CLASS_RANGED:
         {
             if (victim)

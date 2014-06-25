@@ -2231,7 +2231,7 @@ void WorldObject::BuildMonsterChat(WorldPacket* data, uint8 msgtype, std::string
     if (hasPrefix)
         data->WriteBits(0, 5);
 
-    data->WriteBit(receiverGuid ? 0 : 1);                       // !has receiver
+    data->WriteBit(receiverLength ? 0 : 1);                     // !has receiver
     data->WriteBit(!hasChatTag);                                // !has chat tag
 
     if (messageLength)

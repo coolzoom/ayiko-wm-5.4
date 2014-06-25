@@ -28,6 +28,7 @@
 #include "MapRefManager.h"
 #include "DynamicTree.h"
 #include "GameObjectModel.h"
+#include "ScriptInfo.hpp"
 
 #include <bitset>
 #include <list>
@@ -44,20 +45,20 @@ class WorldObject;
 class TempSummon;
 class Player;
 class CreatureGroup;
-struct ScriptInfo;
 struct ScriptAction;
 struct Position;
 class Battleground;
 class MapInstanced;
 class InstanceMap;
+
 namespace Trinity { struct ObjectUpdater; }
 
-struct ScriptAction
+struct ScriptAction final
 {
     uint64 sourceGUID;
     uint64 targetGUID;
     uint64 ownerGUID;                                       // owner of source if source is item
-    ScriptInfo const* script;                               // pointer to static script data
+    ScriptInfo script;
 };
 
 // ******************************************
@@ -539,13 +540,13 @@ class Map
         ActiveNonPlayers::iterator m_activeNonPlayersIter;
 
     private:
-        Player* _GetScriptPlayerSourceOrTarget(Object* source, Object* target, const ScriptInfo* scriptInfo) const;
-        Creature* _GetScriptCreatureSourceOrTarget(Object* source, Object* target, const ScriptInfo* scriptInfo, bool bReverse = false) const;
-        Unit* _GetScriptUnit(Object* obj, bool isSource, const ScriptInfo* scriptInfo) const;
-        Player* _GetScriptPlayer(Object* obj, bool isSource, const ScriptInfo* scriptInfo) const;
-        Creature* _GetScriptCreature(Object* obj, bool isSource, const ScriptInfo* scriptInfo) const;
-        WorldObject* _GetScriptWorldObject(Object* obj, bool isSource, const ScriptInfo* scriptInfo) const;
-        void _ScriptProcessDoor(Object* source, Object* target, const ScriptInfo* scriptInfo) const;
+        Player* _GetScriptPlayerSourceOrTarget(Object* source, Object* target, ScriptInfo const &scriptInfo) const;
+        Creature* _GetScriptCreatureSourceOrTarget(Object* source, Object* target, ScriptInfo const &scriptInfo, bool bReverse = false) const;
+        Unit* _GetScriptUnit(Object* obj, bool isSource, ScriptInfo const &scriptInfo) const;
+        Player* _GetScriptPlayer(Object* obj, bool isSource, ScriptInfo const &scriptInfo) const;
+        Creature* _GetScriptCreature(Object* obj, bool isSource, ScriptInfo const &scriptInfo) const;
+        WorldObject* _GetScriptWorldObject(Object* obj, bool isSource, ScriptInfo const &scriptInfo) const;
+        void _ScriptProcessDoor(Object* source, Object* target, ScriptInfo const &scriptInfo) const;
         GameObject* _FindGameObject(WorldObject* pWorldObject, uint32 guid) const;
 
         time_t i_gridExpiry;

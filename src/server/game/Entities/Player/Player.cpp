@@ -21104,7 +21104,7 @@ void Player::_SaveActions(SQLTransaction& trans)
 
 void Player::_SaveAuras(SQLTransaction& trans)
 {
-    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_AURA);
+    auto stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_AURA);
     stmt->setUInt32(0, GetGUIDLow());
     trans->Append(stmt);
 
@@ -21118,11 +21118,10 @@ void Player::_SaveAuras(SQLTransaction& trans)
             continue;
 
         Aura *aura = itr->second;
-        AuraApplication * foundAura = GetAuraApplication(aura->GetId(), aura->GetCasterGUID(), aura->GetCastItemGUID());
 
+        auto const foundAura = GetAuraApplication(aura->GetId(), aura->GetCasterGUID(), aura->GetCastItemGUID());
         if (!foundAura)
             continue;
-
 
         uint8 index = 0;
         uint32 effMask = 0;
@@ -21132,13 +21131,13 @@ void Player::_SaveAuras(SQLTransaction& trans)
             if (AuraEffect const *effect = aura->GetEffect(i))
             {
                 index = 0;
+
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_AURA_EFFECT);
                 stmt->setUInt32(index++, GetGUIDLow());
                 stmt->setUInt8(index++, foundAura->GetSlot());
                 stmt->setUInt8(index++, i);
                 stmt->setInt32(index++, effect->GetBaseAmount());
                 stmt->setInt32(index++, effect->GetAmount());
-
                 trans->Append(stmt);
 
                 effMask |= 1 << i;

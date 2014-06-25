@@ -1170,8 +1170,8 @@ bool Aura::IsDeathPersistent() const
 
 bool Aura::CanBeSaved() const
 {
-    if (GetId() == 54637 || GetId() == 98056)
-        return true;
+    if (GetSpellInfo()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_LOGOUT)
+        return false;
 
     if (IsPassive())
         return false;
@@ -1246,16 +1246,19 @@ bool Aura::CanBeSentToClient() const
     if (!IsPassive())
         return true;
 
-    if (GetSpellInfo()->HasAreaAuraEffect())
-        return true;
-
-    if (HasEffectType(SPELL_AURA_ABILITY_IGNORE_AURASTATE)      ||
-        HasEffectType(SPELL_AURA_CAST_WHILE_WALKING)            ||
-        HasEffectType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS)     ||
-        HasEffectType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2)   ||
-        HasEffectType(SPELL_AURA_MOD_IGNORE_SHAPESHIFT)         ||
-        HasEffectType(SPELL_AURA_MOD_CHARGES))
-        return true;
+    for (auto const &spellEffect : m_spellInfo->Effects)
+    {
+        if (spellEffect.IsAreaAuraEffect()
+                || spellEffect.ApplyAuraName == SPELL_AURA_ABILITY_IGNORE_AURASTATE
+                || spellEffect.ApplyAuraName == SPELL_AURA_CAST_WHILE_WALKING
+                || spellEffect.ApplyAuraName == SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS
+                || spellEffect.ApplyAuraName == SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2
+                || spellEffect.ApplyAuraName == SPELL_AURA_MOD_IGNORE_SHAPESHIFT
+                || spellEffect.ApplyAuraName == SPELL_AURA_MOD_CHARGES)
+        {
+            return true;
+        }
+    }
 
     return false;
 }

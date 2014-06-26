@@ -1248,6 +1248,88 @@ public:
     }
 };
 
+class spell_warr_bloodbath final : public SpellScriptLoader
+{
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        enum
+        {
+            BLOODBATH_BLEED = 113344
+        };
+
+        bool checkProc(ProcEventInfo &eventInfo)
+        {
+            return eventInfo.GetSpellInfo()
+                    && eventInfo.GetDamageInfo()->GetDamage() != 0;
+        }
+
+        void onProc(AuraEffect const *aurEff, ProcEventInfo &eventInfo)
+        {
+            PreventDefaultAction();
+
+            auto const caster = eventInfo.GetActor();
+            auto const target = eventInfo.GetActionTarget();
+
+            if (!caster || !target)
+                return;
+
+            auto const damage = eventInfo.GetDamageInfo()->GetDamage();
+
+            int32 const bp = CalculatePct(damage, aurEff->GetAmount())
+                + target->GetRemainingPeriodicAmount(caster->GetGUID(), BLOODBATH_BLEED, SPELL_AURA_PERIODIC_DAMAGE);
+
+            caster->CastCustomSpell(target, BLOODBATH_BLEED, &bp, nullptr, nullptr, true);
+        }
+
+        void Register() final
+        {
+            DoCheckProc += AuraCheckProcFn(script_impl::checkProc);
+            OnEffectProc += AuraEffectProcFn(script_impl::onProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+public:
+    spell_warr_bloodbath()
+        : SpellScriptLoader("spell_warr_bloodbath")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
+};
+
+class spell_warr_bloodbath_bleed final : public SpellScriptLoader
+{
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        void calculateAmount(AuraEffect const *aurEff, int32 &amount, bool &canBeRecalculated)
+        {
+            canBeRecalculated = false;
+            amount /= aurEff->GetTotalTicks();
+        }
+
+        void Register() final
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(script_impl::calculateAmount, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+        }
+    };
+
+public:
+    spell_warr_bloodbath_bleed()
+        : SpellScriptLoader("spell_warr_bloodbath_bleed")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_victorious_state();
@@ -1281,4 +1363,6 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_charge();
     new spell_warr_taste_for_blood_talent();
     new spell_warr_taste_for_blood_effect();
+    new spell_warr_bloodbath();
+    new spell_warr_bloodbath_bleed();
 }

@@ -6469,23 +6469,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                     target = victim;
                     break;
                 }
-                // Bloodbath
-                case 12292:
-                {
-                    if (!procSpell)
-                        return false;
-
-                    if (!damage)
-                        return false;
-
-                    if (!roll_chance_i(30))
-                        return false;
-
-                    int32 bp = int32(CalculatePct(damage, triggerAmount) / 6); // damage / tick_number
-                    CastCustomSpell(victim, 113344, &bp, NULL, NULL, true);
-
-                    break;
-                }
                 // Bloodsurge
                 case 46915:
                 {
@@ -20708,12 +20691,11 @@ void Unit::OutDebugInfo() const
 uint32 Unit::GetRemainingPeriodicAmount(uint64 caster, uint32 spellId, AuraType auraType, uint8 effectIndex) const
 {
     uint32 amount = 0;
-    AuraEffectList const& periodicAuras = GetAuraEffectsByType(auraType);
-    for (AuraEffectList::const_iterator i = periodicAuras.begin(); i != periodicAuras.end(); ++i)
+    for (auto const &eff : GetAuraEffectsByType(auraType))
     {
-        if ((*i)->GetCasterGUID() != caster || (*i)->GetId() != spellId || (*i)->GetEffIndex() != effectIndex || !(*i)->GetTotalTicks())
+        if (eff->GetCasterGUID() != caster || eff->GetId() != spellId || eff->GetEffIndex() != effectIndex || eff->GetTotalTicks() == 0)
             continue;
-        amount += uint32(((*i)->GetAmount() * std::max<int32>((*i)->GetTotalTicks() - int32((*i)->GetTickNumber()), 0)) / (*i)->GetTotalTicks());
+        amount += uint32((eff->GetAmount() * std::max<int32>(eff->GetTotalTicks() - int32(eff->GetTickNumber()), 0)) / eff->GetTotalTicks());
         break;
     }
 

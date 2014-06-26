@@ -956,44 +956,48 @@ class spell_rog_deadly_poison_instant_damage : public SpellScriptLoader
         }
 };
 
-// Paralytic Poison - 113952
+// Paralytic Poison - 108215
 class spell_rog_paralytic_poison : public SpellScriptLoader
 {
-    public:
-        spell_rog_paralytic_poison() : SpellScriptLoader("spell_rog_paralytic_poison") { }
+    class script_impl : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
 
-        class spell_rog_paralytic_poison_SpellScript : public SpellScript
+        bool CheckProc(ProcEventInfo& eventInfo)
         {
-            PrepareSpellScript(spell_rog_paralytic_poison_SpellScript);
+            return eventInfo.GetActionTarget();
+        }
 
-            void HandleOnHit()
+        void OnProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+        {
+            Unit * const target = eventInfo.GetActionTarget();
+            if (Aura * const paralyticPoison = target->GetAura(ROGUE_SPELL_PARALYTIC_POISON_DEBUFF))
             {
-                if (Player* _player = GetCaster()->ToPlayer())
+                if (paralyticPoison->GetStackAmount() == 3 && !target->HasAura(ROGUE_SPELL_TOTAL_PARALYSIS))
                 {
-                    if (Unit* target = GetHitUnit())
-                    {
-                        if (Aura *paralyticPoison = target->GetAura(ROGUE_SPELL_PARALYTIC_POISON_DEBUFF))
-                        {
-                            if (paralyticPoison->GetStackAmount() == 5 && !target->HasAura(ROGUE_SPELL_TOTAL_PARALYSIS))
-                            {
-                                _player->CastSpell(target, ROGUE_SPELL_TOTAL_PARALYSIS, true);
-                                target->RemoveAura(ROGUE_SPELL_PARALYTIC_POISON_DEBUFF);
-                            }
-                        }
-                    }
+                    PreventDefaultAction();
+                    target->RemoveAurasDueToSpell(ROGUE_SPELL_PARALYTIC_POISON_DEBUFF);
+                    GetUnitOwner()->CastSpell(target, ROGUE_SPELL_TOTAL_PARALYSIS, true);
                 }
             }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_rog_paralytic_poison_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_rog_paralytic_poison_SpellScript();
         }
+
+        void Register()
+        {
+            DoCheckProc += AuraCheckProcFn(script_impl::CheckProc);
+            OnEffectProc += AuraEffectProcFn(script_impl::OnProc, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
+        }
+    };
+
+public:
+    spell_rog_paralytic_poison()
+        : SpellScriptLoader("spell_rog_paralytic_poison")
+    { }
+
+    AuraScript * GetAuraScript() const
+    {
+        return new script_impl;
+    }
 };
 
 // Shiv - 5938

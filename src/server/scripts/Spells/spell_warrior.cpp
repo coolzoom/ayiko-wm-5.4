@@ -43,7 +43,6 @@ enum WarriorSpells
     WARRIOR_SPELL_RALLYING_CRY                  = 122507,
     WARRIOR_SPELL_SWORD_AND_BOARD               = 50227,
     WARRIOR_SPELL_SHIELD_SLAM                   = 23922,
-    WARRIOR_SPELL_ALLOW_RAGING_BLOW             = 131116,
     WARRIOR_SPELL_MOCKING_BANNER_TAUNT          = 114198,
     WARRIOR_NPC_MOCKING_BANNER                  = 59390,
     WARRIOR_SPELL_BERZERKER_RAGE_EFFECT         = 23691,
@@ -53,7 +52,6 @@ enum WarriorSpells
     WARRIOR_SPELL_SECOND_WIND_DUMMY             = 125667,
     WARRIOR_SPELL_UNBRIDLED_WRATH_REGEN         = 29842,
     WARRIOR_SPELL_DRAGON_ROAR_KNOCK_BACK        = 118895,
-    WARRIOR_SPELL_MEAT_CLEAVER_PROC             = 85739,
     WARRIOR_SPELL_PHYSICAL_VULNERABILITY        = 81326,
     WARRIOR_SPELL_STORM_BOLT_STUN               = 132169,
     WARRIOR_SPELL_SHIELD_BLOCKC_TRIGGERED       = 132404,
@@ -280,36 +278,6 @@ class spell_warr_colossus_smash : public SpellScriptLoader
         SpellScript* GetSpellScript() const
         {
             return new spell_warr_colossus_smash_SpellScript();
-        }
-};
-
-// Called by Raging Blow - 85288
-// Meat Cleaver - 85739
-class spell_warr_meat_cleaver : public SpellScriptLoader
-{
-    public:
-        spell_warr_meat_cleaver() : SpellScriptLoader("spell_warr_meat_cleaver") { }
-
-        class spell_warr_meat_cleaver_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_warr_meat_cleaver_SpellScript);
-
-            void HandleOnHit()
-            {
-                if (Player* _player = GetCaster()->ToPlayer())
-                    if (_player->HasAura(WARRIOR_SPELL_MEAT_CLEAVER_PROC))
-                        _player->RemoveAura(WARRIOR_SPELL_MEAT_CLEAVER_PROC);
-            }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_warr_meat_cleaver_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_warr_meat_cleaver_SpellScript();
         }
 };
 
@@ -594,32 +562,98 @@ class spell_warr_mocking_banner : public SpellScriptLoader
 
 // Called by the proc of Enrage - 12880 and Berserker Rage - 18499
 // Raging Blow (allow to use it) - 131116
-class spell_warr_raging_blow : public SpellScriptLoader
+class spell_warr_enrage_raging_blow final : public SpellScriptLoader
 {
-    public:
-        spell_warr_raging_blow() : SpellScriptLoader("spell_warr_raging_blow") { }
+    class script_impl final : public SpellScript
+    {
+        PrepareSpellScript(script_impl)
 
-        class spell_warr_raging_blow_SpellScript : public SpellScript
+        enum
         {
-            PrepareSpellScript(spell_warr_raging_blow_SpellScript);
-
-            void HandleOnHit()
-            {
-                if (Player* _player = GetCaster()->ToPlayer())
-                    if (_player->GetSpecializationId(_player->GetActiveSpec()) == SPEC_WARRIOR_FURY && _player->getLevel() >= 30)
-                        _player->CastSpell(_player, WARRIOR_SPELL_ALLOW_RAGING_BLOW, true);
-            }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_warr_raging_blow_SpellScript::HandleOnHit);
-            }
+            RAGING_BLOW_ENABLER = 131116,
         };
 
-        SpellScript* GetSpellScript() const
+        void afterHit()
         {
-            return new spell_warr_raging_blow_SpellScript();
+            auto const player = GetCaster()->ToPlayer();
+            if (player
+                    && player->getLevel() >= 30
+                    && player->GetSpecializationId(player->GetActiveSpec()) == SPEC_WARRIOR_FURY)
+            {
+                player->CastSpell(player, RAGING_BLOW_ENABLER, true);
+            }
         }
+
+        void Register() final
+        {
+            AfterHit += SpellHitFn(script_impl::afterHit);
+        }
+    };
+
+public:
+    spell_warr_enrage_raging_blow()
+        : SpellScriptLoader("spell_warr_enrage_raging_blow")
+    { }
+
+    SpellScript * GetSpellScript() const final
+    {
+        return new script_impl;
+    }
+};
+
+// Called by Raging Blow - 85288
+// Meat Cleaver - 85739
+class spell_warr_raging_blow final : public SpellScriptLoader
+{
+    class script_impl final : public SpellScript
+    {
+        PrepareSpellScript(script_impl)
+
+        enum
+        {
+            MEAT_CLEAVER_PROC   = 85739,
+            RAGING_BLOW_ENABLER = 131116,
+        };
+
+        void filterTargets(std::list<WorldObject*> &targetList)
+        {
+            // Meat Cleaver chain targets are added to main spell, this should
+            // not happen
+            targetList.clear();
+            if (auto const unitTarget = GetExplTargetUnit())
+                targetList.push_back(unitTarget);
+        }
+
+        void handleAfterHit()
+        {
+            auto const caster = GetCaster();
+            if (!caster)
+                return;
+
+            // HasAura check results in double loop to get aura application
+            caster->RemoveAura(MEAT_CLEAVER_PROC);
+
+            if (auto const aur = caster->GetAura(RAGING_BLOW_ENABLER))
+                aur->ModStackAmount(-1);
+        }
+
+        void Register() final
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(script_impl::filterTargets, EFFECT_0, TARGET_UNIT_TARGET_ENEMY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(script_impl::filterTargets, EFFECT_1, TARGET_UNIT_TARGET_ENEMY);
+            AfterHit += SpellHitFn(script_impl::handleAfterHit);
+        }
+    };
+
+public:
+    spell_warr_raging_blow()
+        : SpellScriptLoader("spell_warr_raging_blow")
+    { }
+
+    SpellScript * GetSpellScript() const final
+    {
+        return new script_impl;
+    }
 };
 
 class spell_warr_sword_and_board : public SpellScriptLoader
@@ -1207,7 +1241,6 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_shield_block();
     new spell_warr_storm_bolt();
     new spell_warr_colossus_smash();
-    new spell_warr_meat_cleaver();
     new spell_warr_dragon_roar();
     new spell_warr_staggering_shout();
     new spell_warr_frenzied_regeneration();
@@ -1216,6 +1249,7 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_sudden_death();
     new spell_warr_berzerker_rage();
     new spell_warr_mocking_banner();
+    new spell_warr_enrage_raging_blow();
     new spell_warr_raging_blow();
     new spell_warr_sword_and_board();
     new spell_warr_mortal_strike();

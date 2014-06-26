@@ -62,8 +62,6 @@ enum PaladinSpells
     PALADIN_SPELL_HOLY_PRISM_HEAL_VISUAL_2       = 121552,
     PALADIN_SPELL_ARCING_LIGHT_HEAL              = 119952,
     PALADIN_SPELL_ARCING_LIGHT_DAMAGE            = 114919,
-    PALADIN_SPELL_EXECUTION_SENTENCE             = 114916,
-    PALADIN_SPELL_STAY_OF_EXECUTION              = 114917,
     PALADIN_SPELL_INQUISITION                    = 84963,
     PALADIN_SPELL_GLYPH_OF_BLINDING_LIGHT        = 54934,
     PALADIN_SPELL_BLINDING_LIGHT_CONFUSE         = 105421,
@@ -798,41 +796,125 @@ class spell_pal_inquisition : public SpellScriptLoader
 };
 
 // Execution Sentence - 114157
-class spell_pal_execution_sentence : public SpellScriptLoader
+class spell_pal_execution_sentence final : public SpellScriptLoader
 {
-    public:
-        spell_pal_execution_sentence() : SpellScriptLoader("spell_pal_execution_sentence") { }
+    class script_impl final : public SpellScript
+    {
+        PrepareSpellScript(script_impl)
 
-        class spell_pal_execution_sentence_SpellScript : public SpellScript
+        enum
         {
-            PrepareSpellScript(spell_pal_execution_sentence_SpellScript);
-
-            void HandleOnHit()
-            {
-                if (Player* player = GetCaster()->ToPlayer())
-                {
-                    if (Unit* target = GetHitUnit())
-                    {
-                        if (player->IsValidAttackTarget(target))
-                            player->CastSpell(target, PALADIN_SPELL_EXECUTION_SENTENCE, true);
-                        else if (player->GetGUID() == target->GetGUID())
-                            player->CastSpell(player, PALADIN_SPELL_STAY_OF_EXECUTION, true);
-                        else
-                            player->CastSpell(target, PALADIN_SPELL_STAY_OF_EXECUTION, true);
-                    }
-                }
-            }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_pal_execution_sentence_SpellScript::HandleOnHit);
-            }
+            EXECUTION_SENTENCE    = 114916,
+            STAY_OF_EXECUTION     = 114917,
         };
 
-        SpellScript* GetSpellScript() const
+        void effectHitTarget(SpellEffIndex effIndex)
         {
-            return new spell_pal_execution_sentence_SpellScript();
+            PreventHitDefaultEffect(effIndex);
+
+            auto const caster = GetCaster();
+            auto const target = GetHitUnit();
+
+            if (!caster || !target)
+                return;
+
+            auto const spellId = caster->IsFriendlyTo(target)
+                    ? STAY_OF_EXECUTION
+                    : EXECUTION_SENTENCE;
+
+            caster->CastSpell(target, spellId, true);
         }
+
+        void Register() final
+        {
+            OnEffectHitTarget += SpellEffectFn(script_impl::effectHitTarget, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+public:
+    spell_pal_execution_sentence()
+        : SpellScriptLoader("spell_pal_execution_sentence")
+    { }
+
+    SpellScript * GetSpellScript() const final
+    {
+        return new script_impl;
+    }
+};
+
+class spell_pal_execution_sentence_effect final : public SpellScriptLoader
+{
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        enum
+        {
+            EXECUTION_SENTENCE_DISPEL_DAMAGE = 146585,
+            EXECUTION_SENTENCE_DISPEL_HEAL   = 146586
+        };
+
+        AuraType auraType_;
+
+    public:
+        script_impl(AuraType auraType)
+            : auraType_(auraType)
+        { }
+
+    private:
+        void effectCalcAmount(AuraEffect const *, int32 &amount, bool &canBeRecalculated)
+        {
+            canBeRecalculated = false;
+
+            auto const caster = GetCaster();
+            if (!caster)
+                return;
+
+            auto const sph = caster->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY);
+            auto const fromDummy = GetSpellInfo()->Effects[EFFECT_1].CalcValue(caster);
+
+            // Formula is taken from description in DBC
+            amount = sph * fromDummy / 1000.0f + 26.72716306f * amount;
+        }
+
+        void onRemove(AuraEffect const *aurEff, AuraEffectHandleModes)
+        {
+            if (GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_ENEMY_SPELL)
+                return;
+
+            auto const caster = GetCaster();
+            auto const target = GetTarget();
+
+            if (!caster || !target)
+                return;
+
+            auto const spellId = (auraType_ == SPELL_AURA_PERIODIC_DAMAGE)
+                    ? EXECUTION_SENTENCE_DISPEL_DAMAGE
+                    : EXECUTION_SENTENCE_DISPEL_HEAL;
+
+            int32 const bp = aurEff->GetFixedDamageInfo().GetFixedDamage() * 0.44125f;
+            caster->CastCustomSpell(target, spellId, &bp, nullptr, nullptr, true);
+        }
+
+        void Register() final
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(script_impl::effectCalcAmount, EFFECT_0, auraType_);
+            OnEffectRemove += AuraEffectRemoveFn(script_impl::onRemove, EFFECT_0, auraType_, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraType auraType_;
+
+public:
+    spell_pal_execution_sentence_effect(char const *scriptName, AuraType auraType)
+        : SpellScriptLoader(scriptName)
+        , auraType_(auraType)
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl(auraType_);
+    }
 };
 
 // Light's Hammer (periodic dummy for npc) - 114918
@@ -1648,6 +1730,8 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_divine_shield();
     new spell_pal_inquisition();
     new spell_pal_execution_sentence();
+    new spell_pal_execution_sentence_effect("spell_pal_execution_sentence_damage", SPELL_AURA_PERIODIC_DAMAGE);
+    new spell_pal_execution_sentence_effect("spell_pal_execution_sentence_heal", SPELL_AURA_PERIODIC_HEAL);
     new spell_pal_lights_hammer();
     new spell_pal_holy_prism_visual();
     new spell_pal_holy_prism_effect();

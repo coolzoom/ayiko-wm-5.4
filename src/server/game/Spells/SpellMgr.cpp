@@ -4861,6 +4861,8 @@ void SpellMgr::LoadSpellCustomAttr()
                     break;
                 // Silencing Shot
                 case 34490:
+                // Execution Sentence
+                case 114157:
                     spellInfo->Speed = 0;
                     break;
                 case 132626: // Alliance Portal - Mage

@@ -3167,7 +3167,6 @@ bool SpellInfo::_IsNeedDelay() const
         case 79128: // Improved Expose Armor
         case 109950: // Fury of Destroyer
         case 139546: // Add combo point (for Ruthlessness)
-        //case 114157: // Execution Sentence
             return true;
     }
 

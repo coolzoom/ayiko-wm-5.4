@@ -233,14 +233,14 @@ void UnitAI::FillAISpellInfo()
     }
 }
 
-//Enable PlayerAI when charmed
+// Enable PlayerAI when charmed
 void PlayerAI::OnCharmed(bool apply) { me->IsAIEnabled = apply; }
 
 void SimpleCharmedAI::UpdateAI(const uint32 /*diff*/)
 {
   Creature* charmer = me->GetCharmer()->ToCreature();
 
-    //kill self if charm aura has infinite duration
+    // kill self if charm aura has infinite duration
     if (charmer->IsInEvadeMode())
     {
         Unit::AuraEffectList const& auras = me->GetAuraEffectsByType(SPELL_AURA_MOD_CHARM);

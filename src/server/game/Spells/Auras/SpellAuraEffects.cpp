@@ -7441,31 +7441,30 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
             }
         }
         // Execution Sentence damage-per-tick calculation
-        if (GetSpellInfo()->Id == 114916)
+        if (GetId() == 114916)
         {
-            int32 spellPowerBonus = int32(5.936 * caster->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY));
-            damage = 12989 + spellPowerBonus;
             if (m_tickNumber == 1)
-                damage = int32(damage * 0.04f); // First:   4.0%
+                damage *= 0.04115f;
             else if (m_tickNumber == 2)
-                damage = int32(damage * 0.044f); // Second:  4.4%
+                damage *= 0.04525f;
             else if (m_tickNumber == 3)
-                damage = int32(damage * 0.05f); // Third:   5.0%
+                damage *= 0.04975f;
             else if (m_tickNumber == 4)
-                damage = int32(damage * 0.055f); // Fourth:  5.5%
+                damage *= 0.05475f;
             else if (m_tickNumber == 5)
-                damage = int32(damage * 0.06f); // Fifth:   6.0%
+                damage *= 0.06025f;
             else if (m_tickNumber == 6)
-                damage = int32(damage * 0.066f); // Sixth:   6.6%
+                damage *= 0.06625f;
             else if (m_tickNumber == 7)
-                damage = int32(damage * 0.073f); // Seventh: 7.3%
+                damage *= 0.07295f;
             else if (m_tickNumber == 8)
-                damage = int32(damage * 0.08f); // Eight:   8.0%
+                damage *= 0.08025f;
             else if (m_tickNumber == 9)
-                damage = int32(damage * 0.088f); // Ninth:   8.8%
+                damage *= 0.08815f;
             else
-                damage = int32(damage * 0.444f); // Final:   44.4%
+                damage *= 0.44125f;
         }
+
         if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_GENERIC)
         {
             switch (GetId())
@@ -7707,31 +7706,30 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
 
         damage = target->SpellHealingBonusTaken(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
     }
+
     // Stay of Execution heal-per-tick calculation
-    if (GetSpellInfo()->Id == 114917 && caster->GetTypeId() == TYPEID_PLAYER)
+    if (GetId() == 114917)
     {
-        int32 spellPowerBonus = int32(5.936 * caster->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY));
-        damage = 12989 + spellPowerBonus;
         if (m_tickNumber == 1)
-            damage = int32(damage * 0.04f); // First:   4.0%
+            damage *= 0.04115f;
         else if (m_tickNumber == 2)
-            damage = int32(damage * 0.044f); // Second:  4.4%
+            damage *= 0.04525f;
         else if (m_tickNumber == 3)
-            damage = int32(damage * 0.05f); // Third:   5.0%
+            damage *= 0.04975f;
         else if (m_tickNumber == 4)
-            damage = int32(damage * 0.055f); // Fourth:  5.5%
+            damage *= 0.05475f;
         else if (m_tickNumber == 5)
-            damage = int32(damage * 0.06f); // Fifth:   6.0%
+            damage *= 0.06025f;
         else if (m_tickNumber == 6)
-            damage = int32(damage * 0.066f); // Sixth:   6.6%
+            damage *= 0.06625f;
         else if (m_tickNumber == 7)
-            damage = int32(damage * 0.073f); // Seventh: 7.3%
+            damage *= 0.07295f;
         else if (m_tickNumber == 8)
-            damage = int32(damage * 0.08f); // Eight:   8.0%
+            damage *= 0.08025f;
         else if (m_tickNumber == 9)
-            damage = int32(damage * 0.088f); // Ninth:   8.8%
+            damage *= 0.08815f;
         else
-            damage = int32(damage * 0.444f); // Final:   44.4%
+            damage *= 0.44125f;
     }
 
     bool crit = false;

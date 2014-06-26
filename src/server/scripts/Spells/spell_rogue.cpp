@@ -533,16 +533,18 @@ class spell_rog_hemorrhage : public SpellScriptLoader
         }
 };
 
-// Called by Crimson Tempest - 121411, Rupture - 1943 and Eviscerate - 2098
-// -30299 Restless Blades
+// 79096 - Restless Blades
 class spell_rog_restless_blades : public SpellScriptLoader
 {
     class script_impl : public AuraScript
     {
         PrepareAuraScript(script_impl)
 
-        bool CheckProc(ProcEventInfo& /*eventInfo*/)
+        bool CheckProc(ProcEventInfo& eventInfo)
         {
+            if (eventInfo.GetSpellInfo() && !eventInfo.GetSpellInfo()->NeedsComboPoints())
+                return false;
+
             return GetUnitOwner()->GetTypeId() == TYPEID_PLAYER;
         }
 

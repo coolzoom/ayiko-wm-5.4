@@ -15122,6 +15122,11 @@ int32 Unit::ModSpellDuration(SpellInfo const* spellProto, Unit const* target, in
         else
             durationMod += durationMod_always;
 
+        // Revealing Strike - increase duration of Kidney Shot
+        if (spellProto->Id == 408)
+            if (AuraEffect const * const eff = target->GetAuraEffect(84617, EFFECT_2, GetGUID()))
+                durationMod += eff->GetAmount();
+
         if (durationMod != 0)
             AddPct(duration, durationMod);
     }

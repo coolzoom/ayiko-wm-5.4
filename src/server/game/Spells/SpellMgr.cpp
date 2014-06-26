@@ -5507,6 +5507,9 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->CasterAuraState = AURA_STATE_HEALTHLESS_35_PERCENT;
                     spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(21); // -1s
                     break;
+                case 759: // Conjure Mana Gem
+                    spellInfo->Effects[EFFECT_1].BasePoints = 54408;
+                    break;
                 default:
                     break;
             }

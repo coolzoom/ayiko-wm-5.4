@@ -753,10 +753,11 @@ void WorldSession::HandleEmoteOpcode(WorldPacket & recvData)
         return;
     }
 
-    GetPlayer()->UpdateSpeakTime();
-
     uint32 emote;
     recvData >> emote;
+
+    if (emote != EMOTE_ONESHOT_NONE)
+        GetPlayer()->UpdateSpeakTime();
 
     sScriptMgr->OnPlayerEmote(GetPlayer(), emote);
     GetPlayer()->HandleEmoteCommand(emote);
@@ -819,13 +820,16 @@ void WorldSession::HandleTextEmoteOpcode(WorldPacket & recvData)
         return;
     }
 
-    GetPlayer()->UpdateSpeakTime();
 
     uint32 text_emote, emoteNum;
     ObjectGuid guid;
 
     recvData >> emoteNum;
     recvData >> text_emote;
+
+    // these emotes have no text entries
+    if (text_emote != TEXT_EMOTE_READ && text_emote != TEXT_EMOTE_MOUNT_SPECIAL)
+        GetPlayer()->UpdateSpeakTime();
 
     recvData.ReadBitSeq<4, 2, 5, 6, 0, 3, 7, 1>(guid);
     recvData.ReadByteSeq<4, 1, 5, 2, 3, 0, 6, 7>(guid);

@@ -339,8 +339,10 @@ bool IsDisabledFor(DisableType type, uint32 entry, Unit const* unit, uint8 flags
                             return false;
                     }
                 }
-                else if (mapEntry->map_type == MAP_COMMON)
+                else if (mapEntry->IsWorldMap() || mapEntry->IsScenario())
+                {
                     return true;
+                }
             }
             return false;
         case DISABLE_TYPE_QUEST:

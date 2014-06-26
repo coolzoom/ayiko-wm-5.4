@@ -602,7 +602,7 @@ void LFGMgr::InitializeLockedDungeons(Player* player)
             lockData.lockstatus = LFG_LOCKSTATUS_ATTUNEMENT_TOO_HIGH_LEVEL;
         else if (dungeon->expansion > expansion)
             lockData.lockstatus = LFG_LOCKSTATUS_INSUFFICIENT_EXPANSION;
-        else if (DisableMgr::IsDisabledFor(DISABLE_TYPE_MAP, dungeon->map, player))
+        else if (DisableMgr::IsDisabledFor(DISABLE_TYPE_MAP, dungeon->map, player, Difficulty(dungeon->difficulty)))
             lockData.lockstatus = LFG_LOCKSTATUS_RAID_LOCKED;
         else if (dungeon->difficulty > REGULAR_DIFFICULTY && player->GetBoundInstance(dungeon->map, Difficulty(dungeon->difficulty)))
         {

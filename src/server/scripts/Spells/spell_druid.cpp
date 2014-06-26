@@ -87,8 +87,6 @@ enum DruidSpells
     SPELL_DRUID_BERSERK_BEAR                = 50334,
     SPELL_DRUID_BERSERK_CAT                 = 106951,
     SPELL_DRUID_STAMPEDING_ROAR             = 106898,
-    SPELL_DRUID_SOLAR_BEAM                  = 78675,
-    SPELL_DRUID_SOLAR_BEAM_SILENCE          = 81261,
     SPELL_DRUID_URSOLS_VORTEX_AREA_TRIGGER  = 102793,
     SPELL_DRUID_URSOLS_VORTEX_SNARE         = 127797,
     SPELL_DRUID_URSOLS_VORTEX_JUMP_DEST     = 118283,
@@ -1712,31 +1710,68 @@ class spell_dru_ursols_vortex : public SpellScriptLoader
 };
 
 // Solar beam - 78675
-class spell_dru_solar_beam : public SpellScriptLoader
+// Solar beam (Symbiosis) - 113286
+class spell_dru_solar_beam final : public SpellScriptLoader
 {
-    public:
-        spell_dru_solar_beam() : SpellScriptLoader("spell_dru_solar_beam") { }
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
 
-        class spell_dru_solar_beam_AuraScript : public AuraScript
+        enum
         {
-            PrepareAuraScript(spell_dru_solar_beam_AuraScript);
-
-            void OnTick(AuraEffect const * /*aurEff*/)
-            {
-                if (DynamicObject* dynObj = GetCaster()->GetDynObject(SPELL_DRUID_SOLAR_BEAM))
-                    GetCaster()->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), SPELL_DRUID_SOLAR_BEAM_SILENCE, true);
-            }
-
-            void Register()
-            {
-                OnEffectPeriodic += AuraEffectPeriodicFn(spell_dru_solar_beam_AuraScript::OnTick, EFFECT_2, SPELL_AURA_PERIODIC_DUMMY);
-            }
+            SOLAR_BEAM_SILENCE          = 129889,
+            SOLAR_BEAM_FOR_AMPLITUDE    = 133899,
         };
 
-        AuraScript* GetAuraScript() const
+        int32 amplitude_;
+
+        bool Load() final
         {
-            return new spell_dru_solar_beam_AuraScript();
+            auto const spellInfo = sSpellMgr->GetSpellInfo(SOLAR_BEAM_FOR_AMPLITUDE);
+            if (!spellInfo || spellInfo->Effects.size() < EFFECT_2)
+                return false;
+
+            amplitude_ = spellInfo->Effects[EFFECT_2].Amplitude;
+            return true;
         }
+
+        void onCalcPeriodic(AuraEffect const *, bool &isPeriodic, int32 &amplitude)
+        {
+            isPeriodic = true;
+            amplitude = amplitude_;
+        }
+
+        void onTick(AuraEffect const *)
+        {
+            PreventDefaultAction();
+
+            auto const caster = GetCaster();
+            if (!caster)
+                return;
+
+            auto const obj = caster->GetDynObject(GetId());
+            if (!obj)
+                return;
+
+            caster->CastSpell(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), SOLAR_BEAM_SILENCE, true);
+        }
+
+        void Register() final
+        {
+            DoEffectCalcPeriodic += AuraEffectCalcPeriodicFn(script_impl::onCalcPeriodic, EFFECT_2, SPELL_AURA_DUMMY);
+            OnEffectPeriodic += AuraEffectPeriodicFn(script_impl::onTick, EFFECT_2, SPELL_AURA_DUMMY);
+        }
+    };
+
+public:
+    spell_dru_solar_beam()
+        : SpellScriptLoader("spell_dru_solar_beam")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
 };
 
 // Dash - 1850

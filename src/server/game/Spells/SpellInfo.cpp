@@ -3772,7 +3772,6 @@ bool SpellInfo::IsInterruptSpell() const
 {
     switch (Id)
     {
-        case 78675: // Solar Beam
         case 80964:
         case 80965: // Skull Bash
         case 93985:

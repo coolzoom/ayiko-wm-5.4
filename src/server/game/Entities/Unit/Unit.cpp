@@ -5058,14 +5058,13 @@ void Unit::_UnregisterAreaTrigger(AreaTrigger* areaTrigger)
 DynamicObject* Unit::GetDynObject(uint32 spellId)
 {
     if (m_dynObj.empty())
-        return NULL;
-    for (DynObjectList::const_iterator i = m_dynObj.begin(); i != m_dynObj.end();++i)
-    {
-        DynamicObject* dynObj = *i;
+        return nullptr;
+
+    for (auto const &dynObj : m_dynObj)
         if (dynObj->GetSpellId() == spellId)
             return dynObj;
-    }
-    return NULL;
+
+    return nullptr;
 }
 
 AreaTrigger* Unit::GetAreaTrigger(uint32 spellId)

@@ -1661,12 +1661,12 @@ void AuraEffect::Update(uint32 diff, Unit* caster)
             m_periodicTimer += m_amplitude - diff;
             UpdatePeriodic(caster);
 
-            std::list<AuraApplication*> effectApplications;
+            Unit::AuraApplicationList effectApplications;
             GetApplicationList(effectApplications);
+
             // tick on targets of effects
-            for (std::list<AuraApplication*>::const_iterator apptItr = effectApplications.begin(); apptItr != effectApplications.end(); ++apptItr)
-                if ((*apptItr)->HasEffect(GetEffIndex()))
-                    PeriodicTick(*apptItr, caster);
+            for (auto &app : effectApplications)
+                PeriodicTick(app, caster);
 
             // TEMPORARY HACKS FOR PERIODIC HANDLERS OF DYNAMIC OBJECT AURAS
             if (baseAura->GetType() == DYNOBJ_AURA_TYPE)

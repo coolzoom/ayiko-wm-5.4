@@ -84,28 +84,22 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
                     return DIMINISHING_SILENCE;
                 case 107079: // Quaking Palm
                     return DIMINISHING_DISORIENT;
+                case 48400:  // Frost Tomb
+                case 64697:  // Earthquake (Trash, Ulduar)
+                case 32752:  // Summoning Disorientation
+                case 103587: // Silence, Asira Dawnslayer, Hour of Twilight
+                case 129889: // Solar Beam silence
+                    return DIMINISHING_NONE;
+                case 95199:  // Glyph of Intimidating Shout
+                    return DIMINISHING_LIMITONLY;
             }
 
             // Pet charge effects (Infernal Awakening, Demon Charge)
             if (spellproto->SpellVisual[0] == 2816 && spellproto->SpellIconID == 15)
                 return DIMINISHING_CONTROLLED_STUN;
-            // Frost Tomb
-            else if (spellproto->Id == 48400)
-                return DIMINISHING_NONE;
-            // Earthquake (Trash, Ulduar)
-            else if (spellproto->Id == 64697)
-                return DIMINISHING_NONE;
-            // Summoning Disorientation
-            else if (spellproto->Id == 32752)
-                return DIMINISHING_NONE;
             else if (spellproto->SpellVisual[0] == 14153)
                 return DIMINISHING_NONE;
-            // Silence, Asira Dawnslayer, Hour of Twilight
-            else if (spellproto->Id == 103587)
-                return DIMINISHING_NONE;
-            // Glyph of Intimidating Shout
-            else if (spellproto->Id == 95199)
-                return DIMINISHING_LIMITONLY;
+
             break;
         }
         // Event spells

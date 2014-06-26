@@ -85,8 +85,6 @@ enum ShamanSpells
     SPELL_SHA_GLYPH_OF_LAKESTRIDER          = 55448,
     SPELL_SHA_WATER_WALKING                 = 546,
     SPELL_SHA_GLYPH_OF_SHAMANISTIC_RAGE     = 63280,
-    SPELL_SHA_SOLAR_BEAM                    = 113286,
-    SPELL_SHA_SOLAR_BEAM_SILENCE            = 113288,
     SPELL_SHA_GHOST_WOLF                    = 2645,
     SPELL_SHA_ITEM_T14_4P                   = 123124,
     SPELL_SHA_GLYPH_OF_HEALING_STREAM_TOTEM = 55456
@@ -238,34 +236,6 @@ class spell_sha_prowl : public SpellScriptLoader
         SpellScript* GetSpellScript() const
         {
             return new spell_sha_prowl_SpellScript();
-        }
-};
-
-// Solar beam - 113286
-class spell_sha_solar_beam : public SpellScriptLoader
-{
-    public:
-        spell_sha_solar_beam() : SpellScriptLoader("spell_sha_solar_beam") { }
-
-        class spell_sha_solar_beam_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_sha_solar_beam_AuraScript);
-
-            void OnTick(AuraEffect const * /*aurEff*/)
-            {
-                if (DynamicObject* dynObj = GetCaster()->GetDynObject(SPELL_SHA_SOLAR_BEAM))
-                    GetCaster()->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), SPELL_SHA_SOLAR_BEAM_SILENCE, true);
-            }
-
-            void Register()
-            {
-                OnEffectPeriodic += AuraEffectPeriodicFn(spell_sha_solar_beam_AuraScript::OnTick, EFFECT_2, SPELL_AURA_PERIODIC_DUMMY);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_sha_solar_beam_AuraScript();
         }
 };
 
@@ -1953,7 +1923,6 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_hex();
     new spell_sha_water_ascendant();
     new spell_sha_prowl();
-    new spell_sha_solar_beam();
     new spell_sha_glyph_of_shamanistic_rage();
     new spell_sha_glyph_of_lakestrider();
     new spell_sha_call_of_the_elements();

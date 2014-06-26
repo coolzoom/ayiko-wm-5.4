@@ -3358,12 +3358,12 @@ void Unit::InterruptNonMeleeSpellsExcept(bool withDelayed, uint32 except, bool w
         InterruptSpell(CURRENT_CHANNELED_SPELL, true, true);
 }
 
-Spell* Unit::FindCurrentSpellBySpellId(uint32 spell_id) const
+Spell * Unit::FindCurrentSpellBySpellId(uint32 spellId) const
 {
-    for (uint32 i = 0; i < CURRENT_MAX_SPELL; i++)
-        if (m_currentSpells[i] && m_currentSpells[i]->m_spellInfo->Id == spell_id)
-            return m_currentSpells[i];
-    return NULL;
+    for (auto &spell : m_currentSpells)
+        if (spell && spell->GetSpellInfo()->Id == spellId)
+            return spell;
+    return nullptr;
 }
 
 int32 Unit::GetCurrentSpellCastTime(uint32 spell_id) const

@@ -152,40 +152,56 @@ class spell_warr_stampeding_shout : public SpellScriptLoader
 };
 
 // Shield Barrier - 112048
-class spell_warr_shield_barrier : public SpellScriptLoader
+class spell_warr_shield_barrier final : public SpellScriptLoader
 {
-    public:
-        spell_warr_shield_barrier() : SpellScriptLoader("spell_warr_shield_barrier") { }
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
 
-        class spell_warr_shield_barrier_AuraScript : public AuraScript
+        enum
         {
-            PrepareAuraScript(spell_warr_shield_barrier_AuraScript);
-
-            void CalculateAmount(AuraEffect const * /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
-            {
-                if (GetCaster())
-                {
-                    int32 rage = int32(GetCaster()->GetPower(POWER_RAGE) / 10);
-                    int32 AP = int32(GetCaster()->GetTotalAttackPowerValue(BASE_ATTACK));
-                    int32 Strength = int32(GetCaster()->GetStat(STAT_STRENGTH));
-                    int32 Stamina = int32(GetCaster()->GetStat(STAT_STAMINA));
-
-                    amount += std::max(int32(2 * (AP - 2 * (Strength - 10))), int32(Stamina * 2.5f)) * (std::min(60, rage) / 20);
-
-                    GetCaster()->SetPower(POWER_RAGE, GetCaster()->GetPower(POWER_RAGE) - std::min(60, rage) * 10);
-                }
-            }
-
-            void Register()
-            {
-                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_warr_shield_barrier_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
-            }
+            SHIELD_BARRIER = 112048
         };
 
-        AuraScript* GetAuraScript() const
+        void calculateAmount(AuraEffect const *, int32 &amount, bool &canBeRecalculated)
         {
-            return new spell_warr_shield_barrier_AuraScript();
+            canBeRecalculated = false;
+
+            auto const caster = GetCaster();
+            if (!caster)
+                return;
+
+            auto rageCost = 0;
+            if (auto const currentSpell = caster->FindCurrentSpellBySpellId(SHIELD_BARRIER))
+                rageCost = currentSpell->GetPowerCost();
+
+            auto const totalRage = caster->GetPower(POWER_RAGE) + rageCost;
+            auto const consumedRage = std::min(600, totalRage);
+
+            caster->SetPower(POWER_RAGE, totalRage - consumedRage);
+
+            auto const ap = caster->GetTotalAttackPowerValue(BASE_ATTACK);
+            auto const strength = caster->GetStat(STAT_STRENGTH) - 10;
+            auto const stamina = caster->GetStat(STAT_STAMINA);
+
+            amount = std::max(2 * (ap - 2 * strength), stamina * 2.5f) * consumedRage / 600;
         }
+
+        void Register() final
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(script_impl::calculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
+        }
+    };
+
+public:
+    spell_warr_shield_barrier()
+        : SpellScriptLoader("spell_warr_shield_barrier")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
 };
 
 // Shield Block - 2565

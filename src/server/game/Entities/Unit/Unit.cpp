@@ -19800,27 +19800,24 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form)
             break;
     }
 
-    uint32 modelid = 0;
-    SpellShapeshiftFormEntry const* formEntry = sSpellShapeshiftFormStore.LookupEntry(form);
-    if (formEntry && formEntry->modelID_A)
-    {
-        // Take the alliance modelid as default
-        if (GetTypeId() != TYPEID_PLAYER)
-            return formEntry->modelID_A;
-        else
-        {
-            if (Player::TeamForRace(getRace()) == ALLIANCE)
-                modelid = formEntry->modelID_A;
-            else
-                modelid = formEntry->modelID_H;
+    auto const formEntry = sSpellShapeshiftFormStore.LookupEntry(form);
+    if (!formEntry || formEntry->modelID_A == 0)
+        return 0;
 
-            // If the player is horde but there are no values for the horde modelid - take the alliance modelid
-            if (!modelid && Player::TeamForRace(getRace()) == HORDE)
-                modelid = formEntry->modelID_A;
-        }
+    // Take the alliance modelid as default
+    if (GetTypeId() != TYPEID_PLAYER)
+        return formEntry->modelID_A;
+
+    switch (Player::TeamForRace(getRace()))
+    {
+        case ALLIANCE:
+        case PANDAREN_NEUTRAL:
+            return formEntry->modelID_A;
+        case HORDE:
+            return (formEntry->modelID_H != 0) ? formEntry->modelID_H : formEntry->modelID_A;
     }
 
-    return modelid;
+    return 0;
 }
 
 uint32 Unit::GetModelForTotem(PlayerTotemType totemType)

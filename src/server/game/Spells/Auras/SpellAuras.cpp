@@ -276,6 +276,7 @@ void AuraApplication::ClientUpdate(bool remove)
 
     bool powerData = false;
     ObjectGuid targetGuid = GetTarget()->GetGUID();
+
     WorldPacket data(SMSG_AURA_UPDATE);
 
     data.WriteBit(false); // full update bit
@@ -283,97 +284,107 @@ void AuraApplication::ClientUpdate(bool remove)
     data.WriteBits(1, 24); // aura counter
     data.WriteBitSeq<2, 4>(targetGuid);
     data.WriteBit(powerData); // has power data, don't care about it ?
-
+#if 0
     if (powerData)
     {
-        //packet.StartBitStream(guid2, 7, 0, 6);
-        //powerCounter = packet.ReadBits(21);
-        //packet.StartBitStream(guid2, 3, 1, 2, 4, 5);
+        packet.StartBitStream(guid2, 7, 0, 6);
+        powerCounter = packet.ReadBits(21);
+        packet.StartBitStream(guid2, 3, 1, 2, 4, 5);
     }
-
+#endif
     data.WriteBitSeq<7, 3, 5>(targetGuid);
 
     BuildBitsUpdatePacket(data, remove);
     BuildBytesUpdatePacket(data, remove);
-
+#if 0
     if (powerData)
     {
-        //packet.ReadXORBytes(guid2, 7, 4, 5, 1, 6);
+        packet.ReadXORBytes(guid2, 7, 4, 5, 1, 6);
 
-        //for (var i = 0; i < powerCounter; ++i)
-        //{
-            //packet.ReadInt32("Power Value", i);
-            //packet.ReadEnum<PowerType>("Power Type", TypeCode.UInt32, i);
-        //}
+        for (var i = 0; i < powerCounter; ++i)
+        {
+            packet.ReadInt32("Power Value", i);
+            packet.ReadEnum<PowerType>("Power Type", TypeCode.UInt32, i);
+        }
 
-        //packet.ReadInt32("Attack power");
-        //packet.ReadInt32("Spell power");
-        //packet.ReadXORBytes(guid2, 3);
-        //packet.ReadInt32("Current Health");
-        //packet.ReadXORBytes(guid2, 0, 2);
-        //packet.WriteGuid("PowerUnitGUID", guid2);
+        packet.ReadInt32("Attack power");
+        packet.ReadInt32("Spell power");
+        packet.ReadXORBytes(guid2, 3);
+        packet.ReadInt32("Current Health");
+        packet.ReadXORBytes(guid2, 0, 2);
+        packet.WriteGuid("PowerUnitGUID", guid2);
     }
-
+#endif
     data.WriteByteSeq<0, 4, 3, 7, 5, 6, 2, 1>(targetGuid);
 
     _target->SendMessageToSet(&data, true);
 
-    auto const aura = GetBase();
-    if (!aura)
+    if (remove || _target->GetTypeId() != TYPEID_PLAYER)
         return;
 
+    auto const aura = GetBase();
     if (aura->GetSpellInfo()->Attributes & SPELL_ATTR0_HIDDEN_CLIENTSIDE)
         return;
 
-    Mechanics mechanic = MECHANIC_NONE;
-    SpellEffIndex effIndex = EFFECT_0;
+    uint32 mechanic = MECHANIC_NONE;
+    uint8 effectIndex;
 
     for (uint8 i = 0; i < aura->GetSpellInfo()->Effects.size(); ++i)
     {
-        if (auto const eff = aura->GetEffect(i))
-        {
-            switch (eff->GetAuraType())
-            {
-                case SPELL_AURA_MOD_CONFUSE:
-                    mechanic = MECHANIC_DISORIENTED;
-                    break;
-                case SPELL_AURA_MOD_FEAR:
-                case SPELL_AURA_MOD_FEAR_2:
-                    mechanic = MECHANIC_FEAR;
-                    break;
-                case SPELL_AURA_MOD_STUN:
-                    mechanic = MECHANIC_STUN;
-                    break;
-                case SPELL_AURA_MOD_ROOT:
-                    mechanic = MECHANIC_ROOT;
-                    break;
-                case SPELL_AURA_TRANSFORM:
-                    mechanic = MECHANIC_POLYMORPH;
-                    break;
-                case SPELL_AURA_MOD_SILENCE:
-                    mechanic = MECHANIC_SILENCE;
-                    break;
-                case SPELL_AURA_MOD_DISARM:
-                case SPELL_AURA_MOD_DISARM_OFFHAND:
-                case SPELL_AURA_MOD_DISARM_RANGED:
-                    mechanic = MECHANIC_DISARM;
-                    break;
-                default:
-                    break;
-            }
+        auto const eff = aura->GetEffect(i);
+        if (!eff)
+            continue;
 
-            if (mechanic != MECHANIC_NONE)
-            {
-                effIndex = SpellEffIndex(i);
+        switch (eff->GetAuraType())
+        {
+            case SPELL_AURA_MOD_CONFUSE:
+                mechanic = MECHANIC_DISORIENTED;
                 break;
-            }
+            case SPELL_AURA_MOD_FEAR:
+            case SPELL_AURA_MOD_FEAR_2:
+                mechanic = MECHANIC_FEAR;
+                break;
+            case SPELL_AURA_MOD_STUN:
+                mechanic = MECHANIC_STUN;
+                break;
+            case SPELL_AURA_MOD_ROOT:
+                mechanic = MECHANIC_ROOT;
+                break;
+            case SPELL_AURA_TRANSFORM:
+                mechanic = MECHANIC_POLYMORPH;
+                break;
+            case SPELL_AURA_MOD_SILENCE:
+                mechanic = MECHANIC_SILENCE;
+                break;
+            case SPELL_AURA_MOD_DISARM:
+            case SPELL_AURA_MOD_DISARM_OFFHAND:
+            case SPELL_AURA_MOD_DISARM_RANGED:
+                mechanic = MECHANIC_DISARM;
+                break;
+            default:
+                break;
+        }
+
+        if (mechanic != MECHANIC_NONE)
+        {
+            effectIndex = i;
+            break;
         }
     }
 
     if (mechanic == MECHANIC_NONE)
         return;
 
-    _target->SendLossOfControl(this, mechanic, effIndex);
+    data.Initialize(SMSG_LOSS_OF_CONTROL_AURA_UPDATE, 7);
+
+    data.WriteBits(1, 22);
+    data.WriteBits(mechanic, 8);
+    data.WriteBits(mechanic, 8);
+    data.FlushBits();
+    data << uint8(GetSlot());
+    data << uint8(effectIndex);
+
+    _target->ToPlayer()->SendDirectMessage(&data);
 }
 
 void AuraApplication::SendFakeAuraUpdate(uint32 auraId, bool remove)

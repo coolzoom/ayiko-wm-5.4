@@ -2839,7 +2839,6 @@ void SpellMgr::LoadSpellClassInfo()
             mSpellClassInfo[classId].push_back(53342);
             mSpellClassInfo[classId].push_back(53331);
             mSpellClassInfo[classId].push_back(54446);
-            mSpellClassInfo[classId].push_back(53323);
             mSpellClassInfo[classId].push_back(53344);
             mSpellClassInfo[classId].push_back(70164);
             mSpellClassInfo[classId].push_back(62158);

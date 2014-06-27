@@ -403,7 +403,12 @@ void MotionMaster::CustomJump(float x, float y, float z, float speedXY, float sp
 void MotionMaster::MoveFall(uint32 id/*=0*/)
 {
     // use larger distance for vmap height search than in most other cases
-    float tz = _owner->GetMap()->GetHeight(_owner->GetPhaseMask(), _owner->GetPositionX(), _owner->GetPositionY(), _owner->GetPositionZ(), true, MAX_FALL_DISTANCE);
+    float tz = _owner->GetMap()->GetHeight(_owner->GetPhaseMask(), _owner->GetPositionX(), _owner->GetPositionY(), _owner->GetPositionZ(), true, MAX_FALL_DISTANCE);;
+
+    // try to find ground Z
+    if (tz <= INVALID_HEIGHT)
+        tz = _owner->GetMap()->GetHeight(_owner->GetPhaseMask(), _owner->GetPositionX(), _owner->GetPositionY(), MAX_HEIGHT, true, MAX_FALL_DISTANCE);
+        
     if (tz <= INVALID_HEIGHT)
     {
         TC_LOG_DEBUG("misc", "MotionMaster::MoveFall: unable retrive a proper height at map %u (x: %f, y: %f, z: %f).",

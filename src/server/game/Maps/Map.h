@@ -235,6 +235,7 @@ typedef std::map<uint32/*leaderDBGUID*/, CreatureGroup*>        CreatureGroupHol
 class Map
 {
     friend class MapReference;
+
     public:
         Map(uint32 id, time_t, uint32 InstanceId, uint8 SpawnMode, Map* _parent = NULL);
         virtual ~Map();
@@ -403,6 +404,10 @@ class Map
         void ScriptsStart(std::map<uint32, std::multimap<uint32, ScriptInfo> > const& scripts, uint32 id, Object* source, Object* target);
         void ScriptCommandStart(ScriptInfo const& script, uint32 delay, Object* source, Object* target);
 
+        // Type specific code for add/remove to/from grid
+        template<class T>
+        void AddToGrid(T* object, Cell const& cell);
+
         // must called with AddToWorld
         template<class T>
         void AddToActive(T* obj) { AddToActiveHelper(obj); }
@@ -416,11 +421,11 @@ class Map
         void RemoveFromActive(Creature* obj);
 
         void SwitchGridContainers(Creature* creature, bool toWorldContainer);
-                template<class NOTIFIER> void VisitAll(const float &x, const float &y, float radius, NOTIFIER &notifier, bool loadGrids = false);
-                template<class NOTIFIER> void VisitFirstFound(const float &x, const float &y, float radius, NOTIFIER &notifier, bool loadGrids = false);
-                template<class NOTIFIER> void VisitWorld(const float &x, const float &y, float radius, NOTIFIER &notifier, bool loadGrids = false);
-                template<class NOTIFIER> void VisitGrid(const float &x, const float &y, float radius, NOTIFIER &notifier, bool loadGrids = false);
-                CreatureGroupHolderType CreatureGroupHolder;
+        template<class NOTIFIER> void VisitAll(const float &x, const float &y, float radius, NOTIFIER &notifier, bool loadGrids = false);
+        template<class NOTIFIER> void VisitFirstFound(const float &x, const float &y, float radius, NOTIFIER &notifier, bool loadGrids = false);
+        template<class NOTIFIER> void VisitWorld(const float &x, const float &y, float radius, NOTIFIER &notifier, bool loadGrids = false);
+        template<class NOTIFIER> void VisitGrid(const float &x, const float &y, float radius, NOTIFIER &notifier, bool loadGrids = false);
+        CreatureGroupHolderType CreatureGroupHolder;
 
         void UpdateIteratorBack(Player* player);
 
@@ -504,9 +509,6 @@ class Map
         bool EnsureGridLoaded(Cell const&);
         void EnsureGridLoadedForActiveObject(Cell const&, WorldObject* object);
 
-        template<class T> void AddType(T *obj);
-        template<class T> void RemoveType(T *obj, bool);
-
         NGridType* getNGrid(uint32 x, uint32 y) const
         {
             return i_grids[x][y];
@@ -580,12 +582,8 @@ class Map
         typedef std::multimap<time_t, ScriptAction> ScriptScheduleMap;
         ScriptScheduleMap m_scriptSchedule;
 
-        // Type specific code for add/remove to/from grid
         template<class T>
-            void AddToGrid(T* object, Cell const& cell);
-
-        template<class T>
-            void DeleteFromWorld(T*);
+        void DeleteFromWorld(T*);
 
         template<class T>
         void AddToActiveHelper(T* obj)

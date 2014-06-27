@@ -121,12 +121,12 @@ struct AreaTriggerStruct
 };
 
 typedef std::set<uint32> CellGuidSet;
-typedef std::map<uint32/*player guid*/, uint32/*instance*/> CellCorpseSet;
+typedef std::map<uint32/*player guid*/, uint32/*instance*/> CellCorpseMap;
 struct CellObjectGuids
 {
     CellGuidSet creatures;
     CellGuidSet gameobjects;
-    CellCorpseSet corpses;
+    CellCorpseMap corpses;
 };
 typedef std::unordered_map<uint32/*cell_id*/, CellObjectGuids> CellObjectGuidsMap;
 typedef std::unordered_map<uint32/*(mapid, spawnMode) pair*/, CellObjectGuidsMap> MapObjectGuids;

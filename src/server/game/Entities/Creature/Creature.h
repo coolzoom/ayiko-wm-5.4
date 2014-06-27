@@ -464,7 +464,6 @@ enum CreatureCellMoveState
 class MapCreature
 {
     friend class Map; //map for moving creatures
-    friend class ObjectGridLoader; //grid loader for loading creatures
 
 protected:
     MapCreature() : _moveState(CREATURE_CELL_MOVE_NONE) {}

@@ -51,23 +51,23 @@ u_map_magic MapLiquidMagic  = { {'M','L','I','Q'} };
 #define MAX_GRID_LOAD_TIME      50
 #define MAX_CREATURE_ATTACK_RADIUS  (45.0f * sWorld->getRate(RATE_CREATURE_AGGRO))
 
-typedef void (*GridStateUpdate)(Map &, NGridType &, uint32);
+typedef void (*GridStateUpdate)(Map &, NGrid &, uint32);
 
-void InvalidStateUpdate(Map &, NGridType &, uint32) { }
+void InvalidStateUpdate(Map &, NGrid &, uint32) { }
 
-void ActiveStateUpdate(Map &map, NGridType &grid, uint32 diff)
+void ActiveStateUpdate(Map &map, NGrid &grid, uint32 diff)
 {
-    GridInfo * const info = grid.getGridInfoRef();
+    auto &info = grid.getGridInfo();
 
     // Only check grid activity every (grid_expiry/10) ms, because it's really useless to do it every cycle
-    info->UpdateTimeTracker(diff);
-    if (!info->getTimeTracker().Passed())
+    info.UpdateTimeTracker(diff);
+    if (!info.getTimeTracker().Passed())
         return;
 
     if (!grid.GetWorldObjectCountInNGrid<Player>() && !map.ActiveObjectsNearGrid(grid))
     {
         ObjectGridStoper worker;
-        TypeContainerVisitor<ObjectGridStoper, GridTypeMapContainer> visitor(worker);
+        TypeContainerVisitor<ObjectGridStoper, Grid::GridObjectMap> visitor(worker);
         grid.VisitAllGrids(visitor);
         grid.SetGridState(GRID_STATE_IDLE);
 
@@ -80,7 +80,7 @@ void ActiveStateUpdate(Map &map, NGridType &grid, uint32 diff)
     }
 }
 
-void IdleStateUpdate(Map &map, NGridType &grid, uint32)
+void IdleStateUpdate(Map &map, NGrid &grid, uint32)
 {
     map.ResetGridExpiry(grid);
     grid.SetGridState(GRID_STATE_REMOVAL);
@@ -88,15 +88,15 @@ void IdleStateUpdate(Map &map, NGridType &grid, uint32)
                  grid.getX(), grid.getY(), map.GetId());
 }
 
-void RemovalStateUpdate(Map &map, NGridType &grid, uint32 diff)
+void RemovalStateUpdate(Map &map, NGrid &grid, uint32 diff)
 {
-    GridInfo * const info = grid.getGridInfoRef();
+    auto &info = grid.getGridInfo();
 
-    if (info->getUnloadLock())
+    if (info.getUnloadLock())
         return;
 
-    info->UpdateTimeTracker(diff);
-    if (!info->getTimeTracker().Passed())
+    info.UpdateTimeTracker(diff);
+    if (!info.getTimeTracker().Passed())
         return;
 
     if (!map.UnloadGrid(grid, false))
@@ -278,24 +278,24 @@ void Map::InitVisibilityDistance()
 }
 
 // Template specialization of utility methods
-template<class T>
+template <typename T>
 void Map::AddToGrid(T* obj, Cell const& cell)
 {
-    NGridType* grid = getNGrid(cell.GridX(), cell.GridY());
+    auto const ngrid = getNGrid(cell.GridX(), cell.GridY());
     if (obj->IsWorldObject())
-        grid->GetGridType(cell.CellX(), cell.CellY()).template AddWorldObject<T>(obj);
+        ngrid->GetGrid(cell.CellX(), cell.CellY()).template AddWorldObject<T>(obj);
     else
-        grid->GetGridType(cell.CellX(), cell.CellY()).template AddGridObject<T>(obj);
+        ngrid->GetGrid(cell.CellX(), cell.CellY()).template AddGridObject<T>(obj);
 }
 
-template<>
+template <>
 void Map::AddToGrid(Creature* obj, Cell const& cell)
 {
-    NGridType* grid = getNGrid(cell.GridX(), cell.GridY());
+    auto const ngrid = getNGrid(cell.GridX(), cell.GridY());
     if (obj->IsWorldObject())
-        grid->GetGridType(cell.CellX(), cell.CellY()).AddWorldObject(obj);
+        ngrid->GetGrid(cell.CellX(), cell.CellY()).AddWorldObject(obj);
     else
-        grid->GetGridType(cell.CellX(), cell.CellY()).AddGridObject(obj);
+        ngrid->GetGrid(cell.CellX(), cell.CellY()).AddGridObject(obj);
 
     obj->SetCurrentCell(cell);
 }
@@ -315,10 +315,11 @@ void Map::SwitchGridContainers(Creature* obj, bool on)
         return;
 
     TC_LOG_DEBUG("maps", "Switch object " UI64FMTD " from grid[%u, %u] %u", obj->GetGUID(), cell.data.Part.grid_x, cell.data.Part.grid_y, on);
-    NGridType *ngrid = getNGrid(cell.GridX(), cell.GridY());
-    ASSERT(ngrid != NULL);
 
-    GridType &grid = ngrid->GetGridType(cell.CellX(), cell.CellY());
+    auto const ngrid = getNGrid(cell.GridX(), cell.GridY());
+    ASSERT(ngrid != nullptr);
+
+    auto &grid = ngrid->GetGrid(cell.CellX(), cell.CellY());
 
     obj->RemoveFromGrid(); //This step is not really necessary but we want to do ASSERT in remove/add
     if (on)
@@ -378,8 +379,7 @@ void Map::EnsureGridCreated_i(const GridCoord &p)
     TC_LOG_DEBUG("maps", "Creating grid[%u, %u] for map %u instance %u",
                  p.x_coord, p.y_coord, GetId(), i_InstanceId);
 
-    NGridType *ngrid = new NGridType(p.x_coord, p.y_coord, i_gridExpiry,
-                                     sWorld->getBoolConfig(CONFIG_GRID_UNLOAD));
+    auto const ngrid = new NGrid(p.x_coord, p.y_coord, i_gridExpiry);
     ngrid->SetGridState(GRID_STATE_IDLE);
 
     i_loadedGrids.insert(lb, GridContainerType::value_type(key, ngrid));
@@ -397,15 +397,15 @@ void Map::EnsureGridCreated_i(const GridCoord &p)
 void Map::EnsureGridLoadedForActiveObject(const Cell &cell, WorldObject* object)
 {
     EnsureGridLoaded(cell);
-    NGridType *grid = getNGrid(cell.GridX(), cell.GridY());
-    ASSERT(grid != NULL);
+    auto const ngrid = getNGrid(cell.GridX(), cell.GridY());
+    ASSERT(ngrid != nullptr);
 
     // refresh grid state & timer
-    if (grid->GetGridState() != GRID_STATE_ACTIVE)
+    if (ngrid->GetGridState() != GRID_STATE_ACTIVE)
     {
         TC_LOG_DEBUG("maps", "Active object " UI64FMTD " triggers loading of grid [%u, %u] on map %u", object->GetGUID(), cell.GridX(), cell.GridY(), GetId());
-        ResetGridExpiry(*grid, 0.1f);
-        grid->SetGridState(GRID_STATE_ACTIVE);
+        ResetGridExpiry(*ngrid, 0.1f);
+        ngrid->SetGridState(GRID_STATE_ACTIVE);
     }
 }
 
@@ -413,24 +413,24 @@ void Map::EnsureGridLoadedForActiveObject(const Cell &cell, WorldObject* object)
 bool Map::EnsureGridLoaded(const Cell &cell)
 {
     EnsureGridCreated(GridCoord(cell.GridX(), cell.GridY()));
-    NGridType *grid = getNGrid(cell.GridX(), cell.GridY());
 
-    ASSERT(grid != NULL);
-    if (!isGridObjectDataLoaded(cell.GridX(), cell.GridY()))
-    {
-        TC_LOG_DEBUG("maps", "Loading grid[%u, %u] for map %u instance %u", cell.GridX(), cell.GridY(), GetId(), i_InstanceId);
+    auto const ngrid = getNGrid(cell.GridX(), cell.GridY());
+    ASSERT(ngrid != nullptr);
 
-        setGridObjectDataLoaded(true, cell.GridX(), cell.GridY());
+    if (isGridObjectDataLoaded(cell.GridX(), cell.GridY()))
+        return false;
 
-        ObjectGridLoader::LoadN(*grid, this, cell);
+    TC_LOG_DEBUG("maps", "Loading grid[%u, %u] for map %u instance %u", cell.GridX(), cell.GridY(), GetId(), i_InstanceId);
 
-        // Add resurrectable corpses to world object list in grid
-        sObjectAccessor->AddCorpsesToGrid(GridCoord(cell.GridX(), cell.GridY()), grid->GetGridType(cell.CellX(), cell.CellY()), this);
-        Balance();
-        return true;
-    }
+    setGridObjectDataLoaded(true, cell.GridX(), cell.GridY());
 
-    return false;
+    ObjectGridLoader::LoadN(*ngrid, this, cell);
+
+    // Add resurrectable corpses to world object list in grid
+    sObjectAccessor->AddCorpsesToGrid(GridCoord(cell.GridX(), cell.GridY()), ngrid->GetGrid(cell.CellX(), cell.CellY()), this);
+
+    Balance();
+    return true;
 }
 
 void Map::LoadGrid(float x, float y)
@@ -527,7 +527,9 @@ bool Map::IsGridLoaded(const GridCoord &p) const
     return (getNGrid(p.x_coord, p.y_coord) && isGridObjectDataLoaded(p.x_coord, p.y_coord));
 }
 
-void Map::VisitNearbyCellsOf(WorldObject* obj, TypeContainerVisitor<Trinity::ObjectUpdater, GridTypeMapContainer> &gridVisitor, TypeContainerVisitor<Trinity::ObjectUpdater, WorldTypeMapContainer> &worldVisitor)
+void Map::VisitNearbyCellsOf(WorldObject* obj,
+                             TypeContainerVisitor<Trinity::ObjectUpdater, Grid::GridObjectMap> &gridVisitor,
+                             TypeContainerVisitor<Trinity::ObjectUpdater, Grid::WorldObjectMap> &worldVisitor)
 {
     // Check for valid position
     if (!obj->IsPositionValid())
@@ -565,9 +567,9 @@ void Map::Update(const uint32 diff)
 
     Trinity::ObjectUpdater updater(diff);
     // for creature
-    TypeContainerVisitor<Trinity::ObjectUpdater, GridTypeMapContainer> gridObjectUpdate(updater);
+    TypeContainerVisitor<Trinity::ObjectUpdater, Grid::GridObjectMap> gridObjectUpdate(updater);
     // for pets
-    TypeContainerVisitor<Trinity::ObjectUpdater, WorldTypeMapContainer> worldObjectUpdate(updater);
+    TypeContainerVisitor<Trinity::ObjectUpdater, Grid::WorldObjectMap> worldObjectUpdate(updater);
 
     // update worldsessions for existing players
     for (m_mapRefIter = m_mapRefManager.begin(); m_mapRefIter != m_mapRefManager.end(); ++m_mapRefIter)
@@ -628,20 +630,20 @@ struct ResetNotifier
 void Map::ProcessRelocationNotifies(uint32 diff)
 {
     ResetNotifier reset;
-    TypeContainerVisitor<ResetNotifier, GridTypeMapContainer>  gridResetNotifier(reset);
-    TypeContainerVisitor<ResetNotifier, WorldTypeMapContainer> worldResetNotifier(reset);
+    TypeContainerVisitor<ResetNotifier, Grid::GridObjectMap>  gridResetNotifier(reset);
+    TypeContainerVisitor<ResetNotifier, Grid::WorldObjectMap> worldResetNotifier(reset);
 
     for (GridContainerType::const_iterator i = i_loadedGrids.begin(); i != i_loadedGrids.end(); ++i)
     {
-        NGridType * const grid = i->second;
-        if (grid->GetGridState() != GRID_STATE_ACTIVE)
+        auto const ngrid = i->second;
+        if (ngrid->GetGridState() != GRID_STATE_ACTIVE)
             continue;
 
-        grid->getGridInfoRef()->getRelocationTimer().TUpdate(diff);
-        if (!grid->getGridInfoRef()->getRelocationTimer().TPassed())
+        ngrid->getGridInfo().getRelocationTimer().TUpdate(diff);
+        if (!ngrid->getGridInfo().getRelocationTimer().TPassed())
             continue;
 
-        uint32 gx = grid->getX(), gy = grid->getY();
+        uint32 gx = ngrid->getX(), gy = ngrid->getY();
 
         CellCoord cell_min(gx*MAX_NUMBER_OF_CELLS, gy*MAX_NUMBER_OF_CELLS);
         CellCoord cell_max(cell_min.x_coord + MAX_NUMBER_OF_CELLS, cell_min.y_coord+MAX_NUMBER_OF_CELLS);
@@ -659,8 +661,8 @@ void Map::ProcessRelocationNotifies(uint32 diff)
                 cell.SetNoCreate();
 
                 Trinity::DelayedUnitRelocation cellRelocation(cell, pair, *this, MAX_VISIBILITY_DISTANCE);
-                TypeContainerVisitor<Trinity::DelayedUnitRelocation, GridTypeMapContainer> gridObjectRelocation(cellRelocation);
-                TypeContainerVisitor<Trinity::DelayedUnitRelocation, WorldTypeMapContainer> worldObjectRelocation(cellRelocation);
+                TypeContainerVisitor<Trinity::DelayedUnitRelocation, Grid::GridObjectMap> gridObjectRelocation(cellRelocation);
+                TypeContainerVisitor<Trinity::DelayedUnitRelocation, Grid::WorldObjectMap> worldObjectRelocation(cellRelocation);
 
                 Visit(cell, gridObjectRelocation);
                 Visit(cell, worldObjectRelocation);
@@ -670,7 +672,7 @@ void Map::ProcessRelocationNotifies(uint32 diff)
             }
         }
 
-        grid->getGridInfoRef()->getRelocationTimer().TReset(diff, m_VisibilityNotifyPeriod);
+        ngrid->getGridInfo().getRelocationTimer().TReset(diff, m_VisibilityNotifyPeriod);
     }
 }
 
@@ -960,7 +962,7 @@ bool Map::CreatureRespawnRelocation(Creature* c, bool diffGridOnly)
     return false;
 }
 
-bool Map::UnloadGrid(NGridType& ngrid, bool unloadAll)
+bool Map::UnloadGrid(NGrid &ngrid, bool unloadAll)
 {
     const uint32 x = ngrid.getX();
     const uint32 y = ngrid.getY();
@@ -986,7 +988,7 @@ bool Map::UnloadGrid(NGridType& ngrid, bool unloadAll)
 
             // move creatures to respawn grids if this is diff.grid or to remove list
             ObjectGridEvacuator worker;
-            TypeContainerVisitor<ObjectGridEvacuator, GridTypeMapContainer> visitor(worker);
+            TypeContainerVisitor<ObjectGridEvacuator, Grid::GridObjectMap> visitor(worker);
             ngrid.VisitAllGrids(visitor);
 
             // Finish creature moves, remove and delete all creatures with delayed remove before unload
@@ -995,7 +997,7 @@ bool Map::UnloadGrid(NGridType& ngrid, bool unloadAll)
 
         {
             ObjectGridCleaner worker;
-            TypeContainerVisitor<ObjectGridCleaner, GridTypeMapContainer> visitor(worker);
+            TypeContainerVisitor<ObjectGridCleaner, Grid::GridObjectMap> visitor(worker);
             ngrid.VisitAllGrids(visitor);
         }
 
@@ -1003,7 +1005,7 @@ bool Map::UnloadGrid(NGridType& ngrid, bool unloadAll)
 
         {
             ObjectGridUnloader worker;
-            TypeContainerVisitor<ObjectGridUnloader, GridTypeMapContainer> visitor(worker);
+            TypeContainerVisitor<ObjectGridUnloader, Grid::GridObjectMap> visitor(worker);
             ngrid.VisitAllGrids(visitor);
         }
 
@@ -1064,9 +1066,9 @@ void Map::UnloadAll()
 
     for (GridContainerType::const_iterator i = i_loadedGrids.begin(); i != i_loadedGrids.end();)
     {
-        NGridType * const grid = (i++)->second;
+        auto const ngrid = (i++)->second;
         // deletes the grid and removes it from the GridRefManager
-        UnloadGrid(*grid, true);
+        UnloadGrid(*ngrid, true);
     }
 }
 
@@ -2014,7 +2016,7 @@ void Map::UpdateObjectVisibility(WorldObject* obj, Cell cell, CellCoord cellpair
 {
     cell.SetNoCreate();
     Trinity::VisibleChangesNotifier notifier(*obj);
-    TypeContainerVisitor<Trinity::VisibleChangesNotifier, WorldTypeMapContainer > player_notifier(notifier);
+    TypeContainerVisitor<Trinity::VisibleChangesNotifier, Grid::WorldObjectMap> player_notifier(notifier);
     cell.Visit(cellpair, player_notifier, *this, *obj, obj->GetVisibilityRange());
 }
 
@@ -2023,8 +2025,8 @@ void Map::UpdateObjectsVisibilityFor(Player* player, Cell cell, CellCoord cellpa
     Trinity::VisibleNotifier notifier(*player);
 
     cell.SetNoCreate();
-    TypeContainerVisitor<Trinity::VisibleNotifier, WorldTypeMapContainer > world_notifier(notifier);
-    TypeContainerVisitor<Trinity::VisibleNotifier, GridTypeMapContainer  > grid_notifier(notifier);
+    TypeContainerVisitor<Trinity::VisibleNotifier, Grid::WorldObjectMap> world_notifier(notifier);
+    TypeContainerVisitor<Trinity::VisibleNotifier, Grid::GridObjectMap> grid_notifier(notifier);
     cell.Visit(cellpair, world_notifier, *this, *player, player->GetSightRange());
     cell.Visit(cellpair, grid_notifier,  *this, *player, player->GetSightRange());
 
@@ -2114,7 +2116,7 @@ void Map::SendRemoveTransports(Player* player)
         player->GetSession()->SendPacket(&packet);
 }
 
-inline void Map::setNGrid(NGridType *grid, uint32 x, uint32 y)
+void Map::setNGrid(NGrid *grid, uint32 x, uint32 y)
 {
     if (x >= MAX_NUMBER_OF_GRIDS || y >= MAX_NUMBER_OF_GRIDS)
     {
@@ -2134,8 +2136,8 @@ void Map::DelayedUpdate(const uint32 diff)
     {
         for (GridContainerType::const_iterator i = i_loadedGrids.begin(); i != i_loadedGrids.end();)
         {
-            NGridType * const grid = (i++)->second;
-            si_GridStates[grid->GetGridState()](*this, *grid, diff);
+            auto const ngrid = (i++)->second;
+            si_GridStates[ngrid->GetGridState()](*this, *ngrid, diff);
         }
     }
 }
@@ -2238,7 +2240,7 @@ void Map::SendToPlayers(WorldPacket const* data) const
         itr->getSource()->GetSession()->SendPacket(data);
 }
 
-bool Map::ActiveObjectsNearGrid(NGridType const& ngrid) const
+bool Map::ActiveObjectsNearGrid(NGrid const &ngrid) const
 {
     CellCoord cell_min(ngrid.getX() * MAX_NUMBER_OF_CELLS, ngrid.getY() * MAX_NUMBER_OF_CELLS);
     CellCoord cell_max(cell_min.x_coord + MAX_NUMBER_OF_CELLS, cell_min.y_coord+MAX_NUMBER_OF_CELLS);

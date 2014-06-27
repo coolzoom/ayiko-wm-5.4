@@ -108,9 +108,9 @@ namespace Trinity
 
     struct GridUpdater
     {
-        GridType &i_grid;
+        Grid &i_grid;
         uint32 i_timeDiff;
-        GridUpdater(GridType &grid, uint32 diff) : i_grid(grid), i_timeDiff(diff) {}
+        GridUpdater(Grid &grid, uint32 diff) : i_grid(grid), i_timeDiff(diff) {}
 
         template<class T> void updateObjects(GridRefManager<T> &m)
         {

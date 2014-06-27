@@ -21,13 +21,12 @@
 
 #include "TypeList.h"
 #include "Define.h"
-#include "GridLoader.h"
 #include "GridDefines.h"
 #include "Cell.h"
 
 struct ObjectGridLoader final
 {
-    static void LoadN(NGridType const &grid, Map *map, Cell cell);
+    static void LoadN(NGrid const &grid, Map *map, Cell cell);
 };
 
 //Stop the creatures before unloading the NGrid

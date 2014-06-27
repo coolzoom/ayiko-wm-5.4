@@ -21,6 +21,7 @@
 
 #include "Common.h"
 #include "NGrid.h"
+
 #include <cmath>
 
 // Forward class definitions
@@ -31,34 +32,6 @@ class GameObject;
 class Pet;
 class Player;
 class AreaTrigger;
-
-#define MAX_NUMBER_OF_CELLS     8
-
-#define MAX_NUMBER_OF_GRIDS      64
-
-#define SIZE_OF_GRIDS            533.33333f
-#define CENTER_GRID_ID           (MAX_NUMBER_OF_GRIDS/2)
-
-#define CENTER_GRID_OFFSET      (SIZE_OF_GRIDS/2)
-
-#define MIN_GRID_DELAY          (MINUTE*IN_MILLISECONDS)
-#define MIN_MAP_UPDATE_DELAY    50
-
-#define SIZE_OF_GRID_CELL       (SIZE_OF_GRIDS/MAX_NUMBER_OF_CELLS)
-
-#define CENTER_GRID_CELL_ID     (MAX_NUMBER_OF_CELLS*MAX_NUMBER_OF_GRIDS/2)
-#define CENTER_GRID_CELL_OFFSET (SIZE_OF_GRID_CELL/2)
-
-#define TOTAL_NUMBER_OF_CELLS_PER_MAP    (MAX_NUMBER_OF_GRIDS*MAX_NUMBER_OF_CELLS)
-
-#define MAP_RESOLUTION 128
-
-#define MAP_SIZE                (SIZE_OF_GRIDS*MAX_NUMBER_OF_GRIDS)
-#define MAP_HALFSIZE            (MAP_SIZE/2)
-
-// Creature used instead pet to simplify *::Visit templates (not required duplicate code for Creature->Pet case)
-typedef TYPELIST_5(Player, Creature/*pets*/, Corpse/*resurrectable*/, DynamicObject/*farsight target*/, AreaTrigger) AllWorldObjectTypes;
-typedef TYPELIST_5(GameObject, Creature/*except pets*/, DynamicObject, Corpse/*Bones*/, AreaTrigger) AllGridObjectTypes;
 
 typedef GridRefManager<Corpse>          CorpseMapType;
 typedef GridRefManager<Creature>        CreatureMapType;
@@ -78,13 +51,7 @@ enum GridMapTypeMask
     GRID_MAP_TYPE_MASK_ALL              = 0x3F
 };
 
-typedef Grid<Player, AllWorldObjectTypes, AllGridObjectTypes> GridType;
-typedef NGrid<MAX_NUMBER_OF_CELLS, Player, AllWorldObjectTypes, AllGridObjectTypes> NGridType;
-
-typedef TypeMapContainer<AllGridObjectTypes> GridTypeMapContainer;
-typedef TypeMapContainer<AllWorldObjectTypes> WorldTypeMapContainer;
-
-template<uint32 LIMIT>
+template <uint32 LIMIT>
 struct CoordPair
 {
     CoordPair(uint32 x=0, uint32 y=0)
@@ -236,4 +203,5 @@ namespace Trinity
         return IsValidMapCoord(x, y, z) && finite(o);
     }
 }
+
 #endif

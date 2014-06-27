@@ -2050,12 +2050,13 @@ void Spell::SearchTargets(SEARCHER& searcher, uint32 containerMask, Unit* refere
 
         if (searchInWorld)
         {
-            TypeContainerVisitor<SEARCHER, WorldTypeMapContainer> world_object_notifier(searcher);
+            TypeContainerVisitor<SEARCHER, Grid::WorldObjectMap> world_object_notifier(searcher);
             cell.Visit(p, world_object_notifier, map, radius, x, y);
         }
+
         if (searchInGrid)
         {
-            TypeContainerVisitor<SEARCHER, GridTypeMapContainer >  grid_object_notifier(searcher);
+            TypeContainerVisitor<SEARCHER, Grid::GridObjectMap> grid_object_notifier(searcher);
             cell.Visit(p, grid_object_notifier, map, radius, x , y);
         }
     }
@@ -7586,7 +7587,7 @@ SpellCastResult Spell::CheckItems()
         Trinity::GameObjectFocusCheck go_check(m_caster, m_spellInfo->RequiresSpellFocus);
         Trinity::GameObjectSearcher<Trinity::GameObjectFocusCheck> checker(m_caster, ok, go_check);
 
-        TypeContainerVisitor<Trinity::GameObjectSearcher<Trinity::GameObjectFocusCheck>, GridTypeMapContainer > object_checker(checker);
+        TypeContainerVisitor<Trinity::GameObjectSearcher<Trinity::GameObjectFocusCheck>, Grid::GridObjectMap> object_checker(checker);
         Map& map = *m_caster->GetMap();
         cell.Visit(p, object_checker, map, *m_caster, m_caster->GetVisibilityRange());
 

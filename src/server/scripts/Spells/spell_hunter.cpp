@@ -1170,8 +1170,8 @@ class spell_hun_binding_shot : public SpellScriptLoader
                     Trinity::AnyUnitInObjectRangeCheck u_check(dynObj, 15.0f);
                     Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(dynObj, bindedList, u_check);
 
-                    TypeContainerVisitor<Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
-                    TypeContainerVisitor<Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
+                    TypeContainerVisitor<Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck>, Grid::WorldObjectMap> world_unit_searcher(searcher);
+                    TypeContainerVisitor<Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck>, Grid::GridObjectMap> grid_unit_searcher(searcher);
 
                     cell.Visit(p, world_unit_searcher, *dynObj->GetMap(), *dynObj, 15.0f);
                     cell.Visit(p, grid_unit_searcher, *dynObj->GetMap(), *dynObj, 15.0f);

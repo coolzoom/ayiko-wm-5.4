@@ -98,7 +98,7 @@ uint32 LoadHelper(CellCorpseMap const &cellCorpses, Cell const &cell, Map *map)
 
 } // namespace
 
-void ObjectGridLoader::LoadN(NGridType const &grid, Map *map, Cell cell)
+void ObjectGridLoader::LoadN(NGrid const &grid, Map *map, Cell cell)
 {
     uint32 gameObjects = 0;
     uint32 creatures = 0;

@@ -354,7 +354,7 @@ Player* ScriptedAI::GetPlayerAtMinimumRange(float minimumRange)
 
     Trinity::PlayerAtMinimumRangeAway check(me, minimumRange);
     Trinity::PlayerSearcher<Trinity::PlayerAtMinimumRangeAway> searcher(me, player, check);
-    TypeContainerVisitor<Trinity::PlayerSearcher<Trinity::PlayerAtMinimumRangeAway>, GridTypeMapContainer> visitor(searcher);
+    TypeContainerVisitor<Trinity::PlayerSearcher<Trinity::PlayerAtMinimumRangeAway>, Grid::GridObjectMap> visitor(searcher);
 
     cell.Visit(pair, visitor, *me->GetMap(), *me, minimumRange);
 

@@ -273,7 +273,7 @@ void ObjectAccessor::AddCorpse(Corpse* corpse)
     }
 }
 
-void ObjectAccessor::AddCorpsesToGrid(GridCoord const& gridpair, GridType& grid, Map* map)
+void ObjectAccessor::AddCorpsesToGrid(GridCoord const& gridpair, Grid &grid, Map* map)
 {
     TRINITY_READ_GUARD(ACE_RW_Thread_Mutex, i_corpseLock);
 

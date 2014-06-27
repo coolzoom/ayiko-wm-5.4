@@ -203,8 +203,8 @@ void DelayedUnitRelocation::Visit(CreatureMapType &m)
 
     CreatureRelocationNotifier relocate(creaturesToRelocate);
 
-    TypeContainerVisitor<CreatureRelocationNotifier, WorldTypeMapContainer> c2world_relocation(relocate);
-    TypeContainerVisitor<CreatureRelocationNotifier, GridTypeMapContainer> c2grid_relocation(relocate);
+    TypeContainerVisitor<CreatureRelocationNotifier, Grid::WorldObjectMap> c2world_relocation(relocate);
+    TypeContainerVisitor<CreatureRelocationNotifier, Grid::GridObjectMap> c2grid_relocation(relocate);
 
     cell.Visit(p, c2world_relocation, i_map, i_radius, CENTER_GRID_CELL_OFFSET, CENTER_GRID_CELL_OFFSET);
     cell.Visit(p, c2grid_relocation, i_map, i_radius, CENTER_GRID_CELL_OFFSET, CENTER_GRID_CELL_OFFSET);
@@ -228,8 +228,8 @@ void DelayedUnitRelocation::Visit(PlayerMapType &m)
         //cell.SetNoCreate(); need load cells around viewPoint or player, that's why its commented
 
         PlayerRelocationNotifier relocate(*player);
-        TypeContainerVisitor<PlayerRelocationNotifier, WorldTypeMapContainer > c2world_relocation(relocate);
-        TypeContainerVisitor<PlayerRelocationNotifier, GridTypeMapContainer >  c2grid_relocation(relocate);
+        TypeContainerVisitor<PlayerRelocationNotifier, Grid::WorldObjectMap> c2world_relocation(relocate);
+        TypeContainerVisitor<PlayerRelocationNotifier, Grid::GridObjectMap>  c2grid_relocation(relocate);
 
         cell2.Visit(pair2, c2world_relocation, i_map, *viewPoint, i_radius);
         cell2.Visit(pair2, c2grid_relocation, i_map, *viewPoint, i_radius);

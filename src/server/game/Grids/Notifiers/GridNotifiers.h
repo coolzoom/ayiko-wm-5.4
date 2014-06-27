@@ -46,8 +46,11 @@ namespace Trinity
         Player::ClientGUIDs vis_guids;
 
         VisibleNotifier(Player &player) : i_player(player), i_data(player.GetMapId()), vis_guids(player.m_clientGUIDs) {}
-        template<class T> void Visit(GridRefManager<T> &m);
-        void SendToSelf(void);
+
+        void SendToSelf();
+
+        template <typename AnyMapType>
+        void Visit(AnyMapType &m);
     };
 
     struct VisibleChangesNotifier
@@ -55,19 +58,27 @@ namespace Trinity
         WorldObject &i_object;
 
         explicit VisibleChangesNotifier(WorldObject &object) : i_object(object) {}
-        template<class T> void Visit(GridRefManager<T> &) {}
+
         void Visit(PlayerMapType &);
         void Visit(CreatureMapType &);
         void Visit(DynamicObjectMapType &);
+
+        template <typename NotInterested>
+        void Visit(NotInterested &) {}
     };
 
     struct PlayerRelocationNotifier : public VisibleNotifier
     {
         PlayerRelocationNotifier(Player &player) : VisibleNotifier(player) { }
 
-        template<class T> void Visit(GridRefManager<T> &m) { VisibleNotifier::Visit(m); }
         void Visit(CreatureMapType &);
         void Visit(PlayerMapType &);
+
+        template <typename AnyMapType>
+        void Visit(AnyMapType &m)
+        {
+            VisibleNotifier::Visit(m);
+        }
     };
 
     struct CreatureRelocationNotifier
@@ -79,9 +90,11 @@ namespace Trinity
             : i_creatureList(storage)
         { }
 
-        template<class T> void Visit(GridRefManager<T> &) { }
         void Visit(CreatureMapType &);
         void Visit(PlayerMapType &);
+
+        template <typename NotInterested>
+        void Visit(NotInterested &) {}
     };
 
     struct DelayedUnitRelocation
@@ -92,9 +105,12 @@ namespace Trinity
         const float i_radius;
         DelayedUnitRelocation(Cell &c, CellCoord &pair, Map &map, float radius) :
             i_map(map), cell(c), p(pair), i_radius(radius) {}
-        template<class T> void Visit(GridRefManager<T> &) {}
+
         void Visit(CreatureMapType &);
         void Visit(PlayerMapType   &);
+
+        template <typename NotInterested>
+        void Visit(NotInterested &) {}
     };
 
     struct AIRelocationNotifier
@@ -102,8 +118,11 @@ namespace Trinity
         Unit &i_unit;
         bool isCreature;
         explicit AIRelocationNotifier(Unit &unit) : i_unit(unit), isCreature(unit.GetTypeId() == TYPEID_UNIT)  {}
-        template<class T> void Visit(GridRefManager<T> &) {}
+
         void Visit(CreatureMapType &);
+
+        template <typename NotInterested>
+        void Visit(NotInterested &) {}
     };
 
     struct GridUpdater
@@ -112,18 +131,19 @@ namespace Trinity
         uint32 i_timeDiff;
         GridUpdater(Grid &grid, uint32 diff) : i_grid(grid), i_timeDiff(diff) {}
 
-        template<class T> void updateObjects(GridRefManager<T> &m)
+        template <typename MapType>
+        void updateObjects(MapType &m)
         {
-            for (typename GridRefManager<T>::iterator iter = m.begin(); iter != m.end(); ++iter)
-                iter->getSource()->Update(i_timeDiff);
+            for (auto &ref : m)
+                ref.getSource()->Update(i_timeDiff);
         }
 
-        void Visit(PlayerMapType &m) { updateObjects<Player>(m); }
-        void Visit(CreatureMapType &m){ updateObjects<Creature>(m); }
-        void Visit(GameObjectMapType &m) { updateObjects<GameObject>(m); }
-        void Visit(DynamicObjectMapType &m) { updateObjects<DynamicObject>(m); }
-        void Visit(CorpseMapType &m) { updateObjects<Corpse>(m); }
-        void Visit(AreaTriggerMapType &m) { updateObjects<AreaTrigger>(m); }
+        void Visit(PlayerMapType &m) { updateObjects(m); }
+        void Visit(CreatureMapType &m){ updateObjects(m); }
+        void Visit(GameObjectMapType &m) { updateObjects(m); }
+        void Visit(DynamicObjectMapType &m) { updateObjects(m); }
+        void Visit(CorpseMapType &m) { updateObjects(m); }
+        void Visit(AreaTriggerMapType &m) { updateObjects(m); }
     };
 
     struct MessageDistDeliverer
@@ -138,12 +158,14 @@ namespace Trinity
             : i_source(src), i_message(msg), i_phaseMask(src->GetPhaseMask()), i_distSq(dist * dist)
             , team((own_team_only && src->GetTypeId() == TYPEID_PLAYER) ? ((Player*)src)->GetTeam() : 0)
             , skipped_receiver(skipped)
-        {
-        }
+        { }
+
         void Visit(PlayerMapType &m);
         void Visit(CreatureMapType &m);
         void Visit(DynamicObjectMapType &m);
-        template<class SKIP> void Visit(GridRefManager<SKIP> &) {}
+
+        template <typename NotInterested>
+        void Visit(NotInterested &) {}
 
         void SendPacket(Player* player)
         {
@@ -172,8 +194,8 @@ namespace Trinity
 
         void Visit(PlayerMapType &m);
 
-        template <typename SKIP>
-        void Visit(GridRefManager<SKIP> &) {}
+        template <typename NotInterested>
+        void Visit(NotInterested &) {}
 
         void SendPacket(Player* player)
         {
@@ -203,10 +225,13 @@ namespace Trinity
     {
         uint32 i_timeDiff;
         explicit ObjectUpdater(const uint32 diff) : i_timeDiff(diff) {}
-        template<class T> void Visit(GridRefManager<T> &m);
+
         void Visit(PlayerMapType &) {}
         void Visit(CorpseMapType &) {}
         void Visit(CreatureMapType &);
+
+        template <typename OtherMapType>
+        void Visit(OtherMapType &m);
     };
 
     // SEARCHERS & LIST SEARCHERS & WORKERS
@@ -231,7 +256,8 @@ namespace Trinity
         void Visit(DynamicObjectMapType &m);
         void Visit(AreaTriggerMapType &m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template <typename NotInterested>
+        void Visit(NotInterested &) {}
     };
 
     template<class Check>
@@ -252,7 +278,8 @@ namespace Trinity
         void Visit(DynamicObjectMapType &m);
         void Visit(AreaTriggerMapType &m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template <typename NotInterested>
+        void Visit(NotInterested &) {}
     };
 
     template<class Check>
@@ -273,7 +300,8 @@ namespace Trinity
         void Visit(DynamicObjectMapType &m);
         void Visit(AreaTriggerMapType &m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template <typename NotInterested>
+        void Visit(NotInterested &) {}
     };
 
     template<class Do>
@@ -339,7 +367,8 @@ namespace Trinity
                     i_do(itr->getSource());
         }
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template <typename NotInterested>
+        void Visit(NotInterested &) {}
     };
 
     // Gameobject searchers
@@ -356,7 +385,8 @@ namespace Trinity
 
         void Visit(GameObjectMapType &m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template <typename NotInterested>
+        void Visit(NotInterested &) {}
     };
 
     // Last accepted by Check GO if any (Check can change requirements at each call)
@@ -372,7 +402,8 @@ namespace Trinity
 
         void Visit(GameObjectMapType &m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template <typename NotInterested>
+        void Visit(NotInterested &) {}
     };
 
     template<class Check>
@@ -387,7 +418,8 @@ namespace Trinity
 
         void Visit(GameObjectMapType &m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template <typename NotInterested>
+        void Visit(NotInterested &) {}
     };
 
     template<class Functor>
@@ -403,7 +435,8 @@ namespace Trinity
                     _func(itr->getSource());
         }
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template <typename NotInterested>
+        void Visit(NotInterested &) {}
 
     private:
         Functor& _func;
@@ -426,7 +459,8 @@ namespace Trinity
         void Visit(CreatureMapType &m);
         void Visit(PlayerMapType &m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template <typename NotInterested>
+        void Visit(NotInterested &) {}
     };
 
     // Last accepted by Check Unit if any (Check can change requirements at each call)
@@ -443,7 +477,8 @@ namespace Trinity
         void Visit(CreatureMapType &m);
         void Visit(PlayerMapType &m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template <typename NotInterested>
+        void Visit(NotInterested &) {}
     };
 
     // All accepted by Check units if any
@@ -460,7 +495,8 @@ namespace Trinity
         void Visit(PlayerMapType &m);
         void Visit(CreatureMapType &m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template <typename NotInterested>
+        void Visit(NotInterested &) {}
     };
 
     // Creature searchers
@@ -477,7 +513,8 @@ namespace Trinity
 
         void Visit(CreatureMapType &m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template <typename NotInterested>
+        void Visit(NotInterested &) {}
     };
 
     // Last accepted by Check Creature if any (Check can change requirements at each call)
@@ -493,7 +530,8 @@ namespace Trinity
 
         void Visit(CreatureMapType &m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template <typename NotInterested>
+        void Visit(NotInterested &) {}
     };
 
     template<class Check>
@@ -508,7 +546,8 @@ namespace Trinity
 
         void Visit(CreatureMapType &m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template <typename NotInterested>
+        void Visit(NotInterested &) {}
     };
 
     template<class Do>
@@ -527,7 +566,8 @@ namespace Trinity
                     i_do(itr->getSource());
         }
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template <typename NotInterested>
+        void Visit(NotInterested &) {}
     };
 
     // Player searchers
@@ -544,7 +584,8 @@ namespace Trinity
 
         void Visit(PlayerMapType &m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template <typename NotInterested>
+        void Visit(NotInterested &) {}
     };
 
     template<class Check>
@@ -559,7 +600,8 @@ namespace Trinity
 
         void Visit(PlayerMapType &m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template <typename NotInterested>
+        void Visit(NotInterested &) {}
     };
 
     template<class Check>
@@ -569,13 +611,14 @@ namespace Trinity
         Player* &i_object;
         Check& i_check;
 
-        PlayerLastSearcher(WorldObject const* searcher, Player*& result, Check& check) : i_phaseMask(searcher->GetPhaseMask()), i_object(result), i_check(check)
-        {
-        }
+        PlayerLastSearcher(WorldObject const* searcher, Player*& result, Check& check)
+            : i_phaseMask(searcher->GetPhaseMask()), i_object(result), i_check(check)
+        { }
 
         void Visit(PlayerMapType& m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template <typename NotInterested>
+        void Visit(NotInterested &) {}
     };
 
     template<class Do>
@@ -594,7 +637,8 @@ namespace Trinity
                     i_do(itr->getSource());
         }
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template <typename NotInterested>
+        void Visit(NotInterested &) {}
     };
 
     template<class Do>
@@ -614,7 +658,8 @@ namespace Trinity
                     i_do(itr->getSource());
         }
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template <typename NotInterested>
+        void Visit(NotInterested &) {}
     };
 
     // CHECKS && DO classes

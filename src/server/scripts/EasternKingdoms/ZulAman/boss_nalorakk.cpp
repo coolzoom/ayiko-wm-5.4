@@ -173,9 +173,7 @@ class boss_nalorakk : public CreatureScript
                     Trinity::AllFriendlyCreaturesInGrid check(me);
                     Trinity::CreatureListSearcher<Trinity::AllFriendlyCreaturesInGrid> searcher(me, templist, check);
 
-                    TypeContainerVisitor<Trinity::CreatureListSearcher<Trinity::AllFriendlyCreaturesInGrid>, Grid::GridObjectMap> cSearcher(searcher);
-
-                    cell.Visit(pair, cSearcher, *(me->GetMap()), *me, me->GetGridActivationRange());
+                    cell.Visit(pair, Trinity::makeGridVisitor(searcher), *(me->GetMap()), *me, me->GetGridActivationRange());
                 }
 
                 if (templist.empty())

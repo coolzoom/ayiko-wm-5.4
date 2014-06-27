@@ -3223,9 +3223,7 @@ Unit* SmartScript::DoSelectLowestHpFriendly(float range, uint32 MinHPDiff)
     Trinity::MostHPMissingInRange u_check(me, range, MinHPDiff);
     Trinity::UnitLastSearcher<Trinity::MostHPMissingInRange> searcher(me, unit, u_check);
 
-    TypeContainerVisitor<Trinity::UnitLastSearcher<Trinity::MostHPMissingInRange>, Grid::GridObjectMap> grid_unit_searcher(searcher);
-
-    cell.Visit(p, grid_unit_searcher, *me->GetMap(), *me, range);
+    cell.Visit(p, Trinity::makeGridVisitor(searcher), *me->GetMap(), *me, range);
     return unit;
 }
 
@@ -3241,9 +3239,7 @@ void SmartScript::DoFindFriendlyCC(std::list<Creature*>& _list, float range)
     Trinity::FriendlyCCedInRange u_check(me, range);
     Trinity::CreatureListSearcher<Trinity::FriendlyCCedInRange> searcher(me, _list, u_check);
 
-    TypeContainerVisitor<Trinity::CreatureListSearcher<Trinity::FriendlyCCedInRange>, Grid::GridObjectMap> grid_creature_searcher(searcher);
-
-    cell.Visit(p, grid_creature_searcher, *me->GetMap(), *me, range);
+    cell.Visit(p, Trinity::makeGridVisitor(searcher), *me->GetMap(), *me, range);
 }
 
 void SmartScript::DoFindFriendlyMissingBuff(std::list<Creature*>& list, float range, uint32 spellid)
@@ -3258,9 +3254,7 @@ void SmartScript::DoFindFriendlyMissingBuff(std::list<Creature*>& list, float ra
     Trinity::FriendlyMissingBuffInRange u_check(me, range, spellid);
     Trinity::CreatureListSearcher<Trinity::FriendlyMissingBuffInRange> searcher(me, list, u_check);
 
-    TypeContainerVisitor<Trinity::CreatureListSearcher<Trinity::FriendlyMissingBuffInRange>, Grid::GridObjectMap> grid_creature_searcher(searcher);
-
-    cell.Visit(p, grid_creature_searcher, *me->GetMap(), *me, range);
+    cell.Visit(p, Trinity::makeGridVisitor(searcher), *me->GetMap(), *me, range);
 }
 
 void SmartScript::SetScript9(SmartScriptHolder& e, uint32 entry)
@@ -3288,4 +3282,31 @@ void SmartScript::SetScript9(SmartScriptHolder& e, uint32 entry)
 Unit* SmartScript::GetLastInvoker()
 {
     return ObjectAccessor::FindUnit(mLastInvoker);
+}
+
+GameObject* SmartScript::FindGameObjectNear(WorldObject* searchObject, uint32 guid) const
+{
+    GameObject* gameObject = NULL;
+
+    CellCoord p(Trinity::ComputeCellCoord(searchObject->GetPositionX(), searchObject->GetPositionY()));
+    Cell cell(p);
+
+    Trinity::GameObjectWithDbGUIDCheck goCheck(guid);
+    Trinity::GameObjectSearcher<Trinity::GameObjectWithDbGUIDCheck> checker(searchObject, gameObject, goCheck);
+
+    cell.Visit(p, Trinity::makeGridVisitor(checker), *searchObject->GetMap(), *searchObject, searchObject->GetGridActivationRange());
+    return gameObject;
+}
+
+Creature* SmartScript::FindCreatureNear(WorldObject* searchObject, uint32 guid) const
+{
+    Creature* creature = NULL;
+    CellCoord p(Trinity::ComputeCellCoord(searchObject->GetPositionX(), searchObject->GetPositionY()));
+    Cell cell(p);
+
+    Trinity::CreatureWithDbGUIDCheck target_check(guid);
+    Trinity::CreatureSearcher<Trinity::CreatureWithDbGUIDCheck> checker(searchObject, creature, target_check);
+
+    cell.Visit(p, Trinity::makeGridVisitor(checker), *searchObject->GetMap(), *searchObject, searchObject->GetGridActivationRange());
+    return creature;
 }

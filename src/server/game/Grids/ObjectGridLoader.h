@@ -33,26 +33,32 @@ struct ObjectGridLoader final
 struct ObjectGridStoper final
 {
     void Visit(CreatureMapType &m);
-    template<class T> void Visit(GridRefManager<T> &) {}
+
+    template <typename NotInterested>
+    void Visit(NotInterested &) {}
 };
 
 // Move the foreign creatures back to respawn positions before unloading the NGrid
 struct ObjectGridEvacuator final
 {
     void Visit(CreatureMapType &m);
-    template<class T> void Visit(GridRefManager<T> &) {}
+
+    template <typename NotInterested>
+    void Visit(NotInterested &) {}
 };
 
 // Clean up and remove from world
 struct ObjectGridCleaner final
 {
-    template<class T> void Visit(GridRefManager<T> &);
+    template <typename AnyMapType>
+    void Visit(AnyMapType &m);
 };
 
 // Delete objects before deleting NGrid
 struct ObjectGridUnloader final
 {
-    template<class T> void Visit(GridRefManager<T> &m);
+    template <typename AnyMapType>
+    void Visit(AnyMapType &m);
 };
 
 #endif

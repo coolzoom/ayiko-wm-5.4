@@ -10130,8 +10130,8 @@ void Player::SendLoot(uint64 guid, LootType loot_type, bool fetchLoot)
 
                 Trinity::AllDeadCreaturesInRange check(this, 25.0f, creature->GetGUID());
                 Trinity::CreatureListSearcher<Trinity::AllDeadCreaturesInRange> searcher(this, linkedLootCreature, check);
-                TypeContainerVisitor<Trinity::CreatureListSearcher<Trinity::AllDeadCreaturesInRange>, Grid::GridObjectMap> cSearcher(searcher);
-                cell.Visit(p, cSearcher, *(GetMap()), *this,  25.0f);
+
+                cell.Visit(p, Trinity::makeGridVisitor(searcher), *(GetMap()), *this,  25.0f);
             }
 
             uint32 maxSlot = loot->items.size() + loot->quest_items.size();

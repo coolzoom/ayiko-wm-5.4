@@ -1007,8 +1007,7 @@ GameObject* ChatHandler::GetObjectGlobalyWithGuidOrNearWithDbGuid(uint32 lowguid
         Trinity::GameObjectWithDbGUIDCheck go_check(lowguid);
         Trinity::GameObjectSearcher<Trinity::GameObjectWithDbGUIDCheck> checker(pl, obj, go_check);
 
-        TypeContainerVisitor<Trinity::GameObjectSearcher<Trinity::GameObjectWithDbGUIDCheck>, Grid::GridObjectMap> object_checker(checker);
-        cell.Visit(p, object_checker, *pl->GetMap(), *pl, pl->GetGridActivationRange());
+        cell.Visit(p, Trinity::makeGridVisitor(checker), *pl->GetMap(), *pl, pl->GetGridActivationRange());
     }
 
     return obj;

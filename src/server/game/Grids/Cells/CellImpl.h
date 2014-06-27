@@ -60,8 +60,8 @@ inline CellArea Cell::CalculateCellArea(float x, float y, float radius)
     return CellArea(centerX, centerY);
 }
 
-template<class T, class CONTAINER>
-inline void Cell::Visit(CellCoord const& standing_cell, TypeContainerVisitor<T, CONTAINER>& visitor, Map& map, float radius, float x_off, float y_off) const
+template <typename Visitor>
+inline void Cell::Visit(CellCoord const& standing_cell, Visitor &&visitor, Map& map, float radius, float x_off, float y_off) const
 {
     if (!standing_cell.IsCoordValid())
         return;
@@ -71,7 +71,7 @@ inline void Cell::Visit(CellCoord const& standing_cell, TypeContainerVisitor<T, 
     //maybe it is better to just return when radius <= 0.0f?
     if (radius <= 0.0f)
     {
-        map.Visit(*this, visitor);
+        map.Visit(*this, std::forward<Visitor>(visitor));
         return;
     }
     //lets limit the upper value for search radius
@@ -83,7 +83,7 @@ inline void Cell::Visit(CellCoord const& standing_cell, TypeContainerVisitor<T, 
     //if radius fits inside standing cell
     if (!area)
     {
-        map.Visit(*this, visitor);
+        map.Visit(*this, std::forward<Visitor>(visitor));
         return;
     }
 
@@ -99,7 +99,7 @@ inline void Cell::Visit(CellCoord const& standing_cell, TypeContainerVisitor<T, 
 
     //ALWAYS visit standing cell first!!! Since we deal with small radiuses
     //it is very essential to call visitor for standing cell firstly...
-    map.Visit(*this, visitor);
+    map.Visit(*this, std::forward<Visitor>(visitor));
 
     // loop the cell range
     for (uint32 x = area.low_bound.x_coord; x <= area.high_bound.x_coord; ++x)
@@ -112,22 +112,22 @@ inline void Cell::Visit(CellCoord const& standing_cell, TypeContainerVisitor<T, 
             {
                 Cell r_zone(cellCoord);
                 r_zone.data.Part.nocreate = this->data.Part.nocreate;
-                map.Visit(r_zone, visitor);
+                map.Visit(r_zone, std::forward<Visitor>(visitor));
             }
         }
     }
 }
 
-template<class T, class CONTAINER>
-inline void Cell::Visit(CellCoord const& standing_cell, TypeContainerVisitor<T, CONTAINER>& visitor, Map& map, WorldObject const& obj, float radius) const
+template <typename Visitor>
+inline void Cell::Visit(CellCoord const& standing_cell, Visitor &&visitor, Map& map, WorldObject const& obj, float radius) const
 {
     //we should increase search radius by object's radius, otherwise
     //we could have problems with huge creatures, which won't attack nearest players etc
-    Visit(standing_cell, visitor, map, radius + obj.GetObjectSize(), obj.GetPositionX(), obj.GetPositionY());
+    Visit(standing_cell, std::forward<Visitor>(visitor), map, radius + obj.GetObjectSize(), obj.GetPositionX(), obj.GetPositionY());
 }
 
-template<class T, class CONTAINER>
-inline void Cell::VisitCircle(TypeContainerVisitor<T, CONTAINER>& visitor, Map& map, CellCoord const& begin_cell, CellCoord const& end_cell) const
+template <typename Visitor>
+inline void Cell::VisitCircle(Visitor &visitor, Map& map, CellCoord const& begin_cell, CellCoord const& end_cell) const
 {
     //here is an algorithm for 'filling' circum-squared octagon
     uint32 x_shift = (uint32)ceilf((end_cell.x_coord - begin_cell.x_coord) * 0.3f - 0.5f);
@@ -177,5 +177,5 @@ inline void Cell::VisitCircle(TypeContainerVisitor<T, CONTAINER>& visitor, Map& 
         }
     }
 }
-#endif
 
+#endif

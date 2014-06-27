@@ -977,9 +977,26 @@ class WorldObject : public Object, public WorldLocation
         bool IsPermanentWorldObject() const { return m_isWorldObject; }
         bool IsWorldObject() const;
 
-        template<class NOTIFIER> void VisitNearbyObject(const float &radius, NOTIFIER &notifier, bool loadGrids = false) const { if (IsInWorld()) GetMap()->VisitAll(GetPositionX(), GetPositionY(), radius, notifier, loadGrids); }
-        template<class NOTIFIER> void VisitNearbyGridObject(const float &radius, NOTIFIER &notifier, bool loadGrids = false) const { if (IsInWorld()) GetMap()->VisitGrid(GetPositionX(), GetPositionY(), radius, notifier, loadGrids); }
-        template<class NOTIFIER> void VisitNearbyWorldObject(const float &radius, NOTIFIER &notifier, bool loadGrids = false) const { if (IsInWorld()) GetMap()->VisitWorld(GetPositionX(), GetPositionY(), radius, notifier, loadGrids); }
+        template <typename Notifier>
+        void VisitNearbyObject(const float &radius, Notifier &notifier, bool loadGrids = false) const
+        {
+            if (IsInWorld())
+                GetMap()->VisitAll(GetPositionX(), GetPositionY(), radius, notifier, loadGrids);
+        }
+
+        template <typename Notifier>
+        void VisitNearbyGridObject(const float &radius, Notifier &notifier, bool loadGrids = false) const
+        {
+            if (IsInWorld())
+                GetMap()->VisitGrid(GetPositionX(), GetPositionY(), radius, notifier, loadGrids);
+        }
+
+        template <typename Notifier>
+        void VisitNearbyWorldObject(const float &radius, Notifier &notifier, bool loadGrids = false) const
+        {
+            if (IsInWorld())
+                GetMap()->VisitWorld(GetPositionX(), GetPositionY(), radius, notifier, loadGrids);
+        }
 
         uint32  LastUsedScriptID;
 

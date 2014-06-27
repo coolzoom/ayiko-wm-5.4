@@ -29,7 +29,6 @@
 #include "GridRefManager.h"
 
 #include <type_traits>
-#include <vector>
 
 /*
  * @class ContainerMapList is a mulit-type container for map elements
@@ -50,26 +49,6 @@ struct ContainerMapList<TypeList<Head, Tail>> final
 {
     ContainerMapList<Head> head_;
     ContainerMapList<Tail> tail_;
-};
-
-/*
- * @class ContaierArrayList is a multi-type container for
- * array of elements.
- */
-template <typename T>
-struct ContainerArrayList final
-{
-    std::vector<T> _element;
-};
-
-template <>
-struct ContainerArrayList<TypeNull> final { };
-
-template <typename Head, typename Tail>
-struct ContainerArrayList<TypeList<Head, Tail>> final
-{
-    ContainerArrayList<Head> head_;
-    ContainerArrayList<Tail> tail_;
 };
 
 namespace Trinity {

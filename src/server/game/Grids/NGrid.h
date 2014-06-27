@@ -135,16 +135,16 @@ public:
     void UpdateTimeTracker(time_t diff) { i_GridInfo.UpdateTimeTracker(diff); }
 
     // Visit all Grids (cells) in NGrid (grid)
-    template <typename T, typename U>
-    void VisitAllGrids(TypeContainerVisitor<T, TypeMapContainer<U>> &visitor)
+    template <typename Visitor>
+    void VisitAllGrids(Visitor &&visitor)
     {
         for (auto &cell : i_cells)
             cell.Visit(visitor);
     }
 
     // Visit a single Grid (cell) in NGrid (grid)
-    template <typename T, typename U>
-    void VisitGrid(const uint32 x, const uint32 y, TypeContainerVisitor<T, TypeMapContainer<U>> &visitor)
+    template <typename Visitor>
+    void VisitGrid(const uint32 x, const uint32 y, Visitor &&visitor)
     {
         GetGrid(x, y).Visit(visitor);
     }

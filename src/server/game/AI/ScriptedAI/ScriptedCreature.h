@@ -183,9 +183,6 @@ struct ScriptedAI : public CreatureAI
     //Returns a list of all friendly units missing a specific buff within range
     std::list<Creature*> DoFindFriendlyMissingBuff(float range, uint32 spellId);
 
-    //Return a player with at least minimumRange from me
-    Player* GetPlayerAtMinimumRange(float minRange);
-
     //Spawns a creature relative to me
     Creature* DoSpawnCreature(uint32 entry, float offsetX, float offsetY, float offsetZ, float angle, uint32 type, uint32 despawntime);
 

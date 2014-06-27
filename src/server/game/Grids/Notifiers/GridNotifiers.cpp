@@ -203,11 +203,8 @@ void DelayedUnitRelocation::Visit(CreatureMapType &m)
 
     CreatureRelocationNotifier relocate(creaturesToRelocate);
 
-    TypeContainerVisitor<CreatureRelocationNotifier, Grid::WorldObjectMap> c2world_relocation(relocate);
-    TypeContainerVisitor<CreatureRelocationNotifier, Grid::GridObjectMap> c2grid_relocation(relocate);
-
-    cell.Visit(p, c2world_relocation, i_map, i_radius, CENTER_GRID_CELL_OFFSET, CENTER_GRID_CELL_OFFSET);
-    cell.Visit(p, c2grid_relocation, i_map, i_radius, CENTER_GRID_CELL_OFFSET, CENTER_GRID_CELL_OFFSET);
+    cell.Visit(p, Trinity::makeWorldVisitor(relocate), i_map, i_radius, CENTER_GRID_CELL_OFFSET, CENTER_GRID_CELL_OFFSET);
+    cell.Visit(p, Trinity::makeGridVisitor(relocate), i_map, i_radius, CENTER_GRID_CELL_OFFSET, CENTER_GRID_CELL_OFFSET);
 }
 
 void DelayedUnitRelocation::Visit(PlayerMapType &m)
@@ -228,11 +225,9 @@ void DelayedUnitRelocation::Visit(PlayerMapType &m)
         //cell.SetNoCreate(); need load cells around viewPoint or player, that's why its commented
 
         PlayerRelocationNotifier relocate(*player);
-        TypeContainerVisitor<PlayerRelocationNotifier, Grid::WorldObjectMap> c2world_relocation(relocate);
-        TypeContainerVisitor<PlayerRelocationNotifier, Grid::GridObjectMap>  c2grid_relocation(relocate);
 
-        cell2.Visit(pair2, c2world_relocation, i_map, *viewPoint, i_radius);
-        cell2.Visit(pair2, c2grid_relocation, i_map, *viewPoint, i_radius);
+        cell2.Visit(pair2, Trinity::makeWorldVisitor(relocate), i_map, *viewPoint, i_radius);
+        cell2.Visit(pair2, Trinity::makeGridVisitor(relocate), i_map, *viewPoint, i_radius);
 
         relocate.SendToSelf();
     }
@@ -353,16 +348,13 @@ void UnfriendlyMessageDistDeliverer::Visit(PlayerMapType &m)
     }
 }
 
-template<class T>
-void ObjectUpdater::Visit(GridRefManager<T> &m)
+template <typename OtherMapType>
+void ObjectUpdater::Visit(OtherMapType &m)
 {
-    for (typename GridRefManager<T>::iterator iter = m.begin(); iter != m.end(); ++iter)
+    for (auto &ref : m)
     {
-        if (!iter->getSource())
-            continue;
-
-        if (iter->getSource()->IsInWorld())
-            iter->getSource()->Update(i_timeDiff);
+        if (ref.getSource()->IsInWorld())
+            ref.getSource()->Update(i_timeDiff);
     }
 }
 
@@ -396,6 +388,6 @@ bool AnyDeadUnitSpellTargetInRangeCheck::operator()(Creature* u)
     return AnyDeadUnitObjectInRangeCheck::operator()(u) && i_check(u);
 }
 
-template void ObjectUpdater::Visit<GameObject>(GameObjectMapType &);
-template void ObjectUpdater::Visit<DynamicObject>(DynamicObjectMapType &);
-template void ObjectUpdater::Visit<AreaTrigger>(AreaTriggerMapType &);
+template void ObjectUpdater::Visit(GameObjectMapType &);
+template void ObjectUpdater::Visit(DynamicObjectMapType &);
+template void ObjectUpdater::Visit(AreaTriggerMapType &);

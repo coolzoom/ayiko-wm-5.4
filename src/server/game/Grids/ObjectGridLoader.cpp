@@ -148,12 +148,12 @@ void ObjectGridEvacuator::Visit(CreatureMapType &m)
     }
 }
 
-template<class T>
-void ObjectGridUnloader::Visit(GridRefManager<T> &m)
+template <typename AnyMapType>
+void ObjectGridUnloader::Visit(AnyMapType &m)
 {
     while (!m.isEmpty())
     {
-        T *obj = m.getFirst()->getSource();
+        auto const obj = m.getFirst()->getSource();
         // if option set then object already saved at this moment
         if (!sWorld->getBoolConfig(CONFIG_SAVE_RESPAWN_TIME_IMMEDIATELY))
             obj->SaveRespawnTime();
@@ -170,34 +170,34 @@ void ObjectGridUnloader::Visit(GridRefManager<T> &m)
 void ObjectGridStoper::Visit(CreatureMapType &m)
 {
     // stop any fights at grid de-activation and remove dynobjects created at cast by creatures
-    for (CreatureMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
+    for (auto &ref : m)
     {
-        if (!iter->getSource())
-            continue;
+        auto const source = ref.getSource();
 
-        if (iter->getSource()->isInCombat())
+        if (source->isInCombat())
         {
-            iter->getSource()->CombatStop();
-            iter->getSource()->DeleteThreatList();
+            source->CombatStop();
+            source->DeleteThreatList();
             // If creature calling RemoveCharmedBy during EnterEvadeMode, RemoveCharmedBy call AIM_Initialize so AI() pointer may be corrupt
             // Maybe we need to lock AI during the call of EnterEvadeMode ?
-            iter->getSource()->SetLockAI(true);
-            if (iter->getSource()->IsAIEnabled)
-                iter->getSource()->AI()->EnterEvadeMode();    // Calls RemoveAllAuras
-            iter->getSource()->SetLockAI(false);
+            source->SetLockAI(true);
+            if (source->IsAIEnabled)
+                source->AI()->EnterEvadeMode();    // Calls RemoveAllAuras
+            source->SetLockAI(false);
         }
-        iter->getSource()->RemoveAllDynObjects();
-        iter->getSource()->RemoveAllAreasTrigger();       // Calls RemoveFromWorld, needs to be after RemoveAllAuras or we invalidate the Owner pointer of the aura
+
+        source->RemoveAllDynObjects();
+        source->RemoveAllAreasTrigger();       // Calls RemoveFromWorld, needs to be after RemoveAllAuras or we invalidate the Owner pointer of the aura
     }
 }
 
-template<class T>
-void ObjectGridCleaner::Visit(GridRefManager<T> &m)
+template <typename AnyMapType>
+void ObjectGridCleaner::Visit(AnyMapType &m)
 {
     // look like we have a crash wile accessing to DynamicObject map here
     // I Guess it's DynamicObject delete pointer, we need to look at it anyway ...
-    for (typename GridRefManager<T>::iterator iter = m.begin(); iter != m.end(); ++iter)
-        iter->getSource()->CleanupsBeforeDelete();
+    for (auto &ref : m)
+        ref.getSource()->CleanupsBeforeDelete();
 }
 
 template void ObjectGridUnloader::Visit(CreatureMapType &);
@@ -206,7 +206,7 @@ template void ObjectGridUnloader::Visit(DynamicObjectMapType &);
 template void ObjectGridUnloader::Visit(CorpseMapType &);
 template void ObjectGridUnloader::Visit(AreaTriggerMapType &);
 template void ObjectGridCleaner::Visit(CreatureMapType &);
-template void ObjectGridCleaner::Visit<GameObject>(GameObjectMapType &);
-template void ObjectGridCleaner::Visit<DynamicObject>(DynamicObjectMapType &);
-template void ObjectGridCleaner::Visit<Corpse>(CorpseMapType &);
-template void ObjectGridCleaner::Visit<AreaTrigger>(AreaTriggerMapType &);
+template void ObjectGridCleaner::Visit(GameObjectMapType &);
+template void ObjectGridCleaner::Visit(DynamicObjectMapType &);
+template void ObjectGridCleaner::Visit(CorpseMapType &);
+template void ObjectGridCleaner::Visit(AreaTriggerMapType &);

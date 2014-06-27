@@ -206,18 +206,17 @@ class boss_akilzon : public CreatureScript
                         Trinity::AnyAoETargetUnitInObjectRangeCheck u_check(me, me, SIZE_OF_GRIDS);
                         Trinity::UnitListSearcher<Trinity::AnyAoETargetUnitInObjectRangeCheck> searcher(me, tempUnitMap, u_check);
 
-                        TypeContainerVisitor<Trinity::UnitListSearcher<Trinity::AnyAoETargetUnitInObjectRangeCheck>, Grid::WorldObjectMap> world_unit_searcher(searcher);
-                        TypeContainerVisitor<Trinity::UnitListSearcher<Trinity::AnyAoETargetUnitInObjectRangeCheck>, Grid::GridObjectMap> grid_unit_searcher(searcher);
-
-                        cell.Visit(p, world_unit_searcher, *me->GetMap(), *me, SIZE_OF_GRIDS);
-                        cell.Visit(p, grid_unit_searcher, *me->GetMap(), *me, SIZE_OF_GRIDS);
+                        cell.Visit(p, Trinity::makeWorldVisitor(searcher), *me->GetMap(), *me, SIZE_OF_GRIDS);
+                        cell.Visit(p, Trinity::makeGridVisitor(searcher), *me->GetMap(), *me, SIZE_OF_GRIDS);
                     }
+
                     //dealdamege
                     for (std::list<Unit*>::const_iterator i = tempUnitMap.begin(); i != tempUnitMap.end(); ++i)
                     {
                         if (!Cloud->IsWithinDist(*i, 6, false))
                             Cloud->CastCustomSpell(*i, 43137, &bp0, NULL, NULL, true, 0, NULL, me->GetGUID());
                     }
+
                     // visual
                     float x, y, z;
                     z = me->GetPositionZ();

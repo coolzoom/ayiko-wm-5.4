@@ -67,8 +67,7 @@ void ActiveStateUpdate(Map &map, NGrid &grid, uint32 diff)
     if (!grid.GetWorldObjectCountInNGrid<Player>() && !map.ActiveObjectsNearGrid(grid))
     {
         ObjectGridStoper worker;
-        TypeContainerVisitor<ObjectGridStoper, Grid::GridObjectMap> visitor(worker);
-        grid.VisitAllGrids(visitor);
+        grid.VisitAllGrids(Trinity::makeGridVisitor(worker));
         grid.SetGridState(GRID_STATE_IDLE);
 
         TC_LOG_DEBUG("maps", "Grid[%u, %u] on map %u moved to IDLE state",
@@ -114,6 +113,37 @@ GridStateUpdate si_GridStates[MAX_GRID_STATE] =
     &IdleStateUpdate,
     &RemovalStateUpdate
 };
+
+template <typename GridVisitor, typename WorldVisitor>
+void VisitNearbyCellsOf(Map *map, WorldObject* obj, GridVisitor &&gridVisitor, WorldVisitor &&worldVisitor)
+{
+    // Check for valid position
+    if (!obj->IsPositionValid())
+        return;
+
+    // Update mobs/objects in ALL visible cells around object!
+    CellArea area = Cell::CalculateCellArea(obj->GetPositionX(), obj->GetPositionY(), obj->GetGridActivationRange());
+
+    for (uint32 x = area.low_bound.x_coord; x <= area.high_bound.x_coord; ++x)
+    {
+        for (uint32 y = area.low_bound.y_coord; y <= area.high_bound.y_coord; ++y)
+        {
+            // marked cells are those that have been visited
+            // don't visit the same cell twice
+            uint32 cell_id = (y * TOTAL_NUMBER_OF_CELLS_PER_MAP) + x;
+            if (map->isCellMarked(cell_id))
+                continue;
+
+            map->markCell(cell_id);
+
+            Cell cell(CellCoord(x, y));
+            cell.SetNoCreate();
+
+            map->Visit(cell, std::forward<GridVisitor>(gridVisitor));
+            map->Visit(cell, std::forward<WorldVisitor>(worldVisitor));
+        }
+    }
+}
 
 } // namespace
 
@@ -541,37 +571,6 @@ bool Map::IsGridLoaded(const GridCoord &p) const
     return (getNGrid(p.x_coord, p.y_coord) && isGridObjectDataLoaded(p.x_coord, p.y_coord));
 }
 
-void Map::VisitNearbyCellsOf(WorldObject* obj,
-                             TypeContainerVisitor<Trinity::ObjectUpdater, Grid::GridObjectMap> &gridVisitor,
-                             TypeContainerVisitor<Trinity::ObjectUpdater, Grid::WorldObjectMap> &worldVisitor)
-{
-    // Check for valid position
-    if (!obj->IsPositionValid())
-        return;
-
-    // Update mobs/objects in ALL visible cells around object!
-    CellArea area = Cell::CalculateCellArea(obj->GetPositionX(), obj->GetPositionY(), obj->GetGridActivationRange());
-
-    for (uint32 x = area.low_bound.x_coord; x <= area.high_bound.x_coord; ++x)
-    {
-        for (uint32 y = area.low_bound.y_coord; y <= area.high_bound.y_coord; ++y)
-        {
-            // marked cells are those that have been visited
-            // don't visit the same cell twice
-            uint32 cell_id = (y * TOTAL_NUMBER_OF_CELLS_PER_MAP) + x;
-            if (isCellMarked(cell_id))
-                continue;
-
-            markCell(cell_id);
-            CellCoord pair(x, y);
-            Cell cell(pair);
-            cell.SetNoCreate();
-            Visit(cell, gridVisitor);
-            Visit(cell, worldVisitor);
-        }
-    }
-}
-
 void Map::Update(const uint32 diff)
 {
     _dynamicTree.update(diff);
@@ -581,9 +580,9 @@ void Map::Update(const uint32 diff)
 
     Trinity::ObjectUpdater updater(diff);
     // for creature
-    TypeContainerVisitor<Trinity::ObjectUpdater, Grid::GridObjectMap> gridObjectUpdate(updater);
+    auto gridObjectUpdate(Trinity::makeGridVisitor(updater));
     // for pets
-    TypeContainerVisitor<Trinity::ObjectUpdater, Grid::WorldObjectMap> worldObjectUpdate(updater);
+    auto worldObjectUpdate(Trinity::makeWorldVisitor(updater));
 
     // update worldsessions for existing players
     for (m_mapRefIter = m_mapRefManager.begin(); m_mapRefIter != m_mapRefManager.end(); ++m_mapRefIter)
@@ -596,7 +595,7 @@ void Map::Update(const uint32 diff)
             if (player->IsInWorld())
             {
                 player->Update(diff);
-                VisitNearbyCellsOf(player, gridObjectUpdate, worldObjectUpdate);
+                VisitNearbyCellsOf(this, player, gridObjectUpdate, worldObjectUpdate);
             }
         }
     }
@@ -610,7 +609,7 @@ void Map::Update(const uint32 diff)
         if (!obj || !obj->IsInWorld())
             continue;
 
-        VisitNearbyCellsOf(obj, gridObjectUpdate, worldObjectUpdate);
+        VisitNearbyCellsOf(this, obj, gridObjectUpdate, worldObjectUpdate);
     }
 
     ///- Process necessary scripts
@@ -629,23 +628,26 @@ void Map::Update(const uint32 diff)
 
 struct ResetNotifier
 {
-    template<class T>
-    inline void resetNotify(GridRefManager<T> &m)
+    template <typename MapType>
+    void resetNotify(MapType &m)
     {
-        for (typename GridRefManager<T>::iterator iter=m.begin(); iter != m.end(); ++iter)
-            iter->getSource()->ResetAllNotifies();
+        for (auto &ref : m)
+            ref.getSource()->ResetAllNotifies();
     }
 
-    template<class T> void Visit(GridRefManager<T> &) { }
-    void Visit(CreatureMapType &m) { resetNotify<Creature>(m);}
-    void Visit(PlayerMapType &m) { resetNotify<Player>(m);}
+    void Visit(CreatureMapType &m) { resetNotify(m);}
+    void Visit(PlayerMapType &m) { resetNotify(m);}
+
+    template <typename NotInterested>
+    void Visit(NotInterested &) { }
 };
 
 void Map::ProcessRelocationNotifies(uint32 diff)
 {
     ResetNotifier reset;
-    TypeContainerVisitor<ResetNotifier, Grid::GridObjectMap>  gridResetNotifier(reset);
-    TypeContainerVisitor<ResetNotifier, Grid::WorldObjectMap> worldResetNotifier(reset);
+
+    auto gridResetNotifier(Trinity::makeGridVisitor(reset));
+    auto worldResetNotifier(Trinity::makeWorldVisitor(reset));
 
     for (GridContainerType::const_iterator i = i_loadedGrids.begin(); i != i_loadedGrids.end(); ++i)
     {
@@ -675,11 +677,9 @@ void Map::ProcessRelocationNotifies(uint32 diff)
                 cell.SetNoCreate();
 
                 Trinity::DelayedUnitRelocation cellRelocation(cell, pair, *this, MAX_VISIBILITY_DISTANCE);
-                TypeContainerVisitor<Trinity::DelayedUnitRelocation, Grid::GridObjectMap> gridObjectRelocation(cellRelocation);
-                TypeContainerVisitor<Trinity::DelayedUnitRelocation, Grid::WorldObjectMap> worldObjectRelocation(cellRelocation);
 
-                Visit(cell, gridObjectRelocation);
-                Visit(cell, worldObjectRelocation);
+                Visit(cell, Trinity::makeGridVisitor(cellRelocation));
+                Visit(cell, Trinity::makeWorldVisitor(cellRelocation));
 
                 Visit(cell, gridResetNotifier);
                 Visit(cell, worldResetNotifier);
@@ -1002,8 +1002,7 @@ bool Map::UnloadGrid(NGrid &ngrid, bool unloadAll)
 
             // move creatures to respawn grids if this is diff.grid or to remove list
             ObjectGridEvacuator worker;
-            TypeContainerVisitor<ObjectGridEvacuator, Grid::GridObjectMap> visitor(worker);
-            ngrid.VisitAllGrids(visitor);
+            ngrid.VisitAllGrids(Trinity::makeGridVisitor(worker));
 
             // Finish creature moves, remove and delete all creatures with delayed remove before unload
             MoveAllCreaturesInMoveList();
@@ -1011,16 +1010,14 @@ bool Map::UnloadGrid(NGrid &ngrid, bool unloadAll)
 
         {
             ObjectGridCleaner worker;
-            TypeContainerVisitor<ObjectGridCleaner, Grid::GridObjectMap> visitor(worker);
-            ngrid.VisitAllGrids(visitor);
+            ngrid.VisitAllGrids(Trinity::makeGridVisitor(worker));
         }
 
         RemoveAllObjectsInRemoveList();
 
         {
             ObjectGridUnloader worker;
-            TypeContainerVisitor<ObjectGridUnloader, Grid::GridObjectMap> visitor(worker);
-            ngrid.VisitAllGrids(visitor);
+            ngrid.VisitAllGrids(Trinity::makeGridVisitor(worker));
         }
 
         ASSERT(i_objectsToRemove.empty());
@@ -2030,8 +2027,7 @@ void Map::UpdateObjectVisibility(WorldObject* obj, Cell cell, CellCoord cellpair
 {
     cell.SetNoCreate();
     Trinity::VisibleChangesNotifier notifier(*obj);
-    TypeContainerVisitor<Trinity::VisibleChangesNotifier, Grid::WorldObjectMap> player_notifier(notifier);
-    cell.Visit(cellpair, player_notifier, *this, *obj, obj->GetVisibilityRange());
+    cell.Visit(cellpair, Trinity::makeWorldVisitor(notifier), *this, *obj, obj->GetVisibilityRange());
 }
 
 void Map::UpdateObjectsVisibilityFor(Player* player, Cell cell, CellCoord cellpair)
@@ -2039,10 +2035,8 @@ void Map::UpdateObjectsVisibilityFor(Player* player, Cell cell, CellCoord cellpa
     Trinity::VisibleNotifier notifier(*player);
 
     cell.SetNoCreate();
-    TypeContainerVisitor<Trinity::VisibleNotifier, Grid::WorldObjectMap> world_notifier(notifier);
-    TypeContainerVisitor<Trinity::VisibleNotifier, Grid::GridObjectMap> grid_notifier(notifier);
-    cell.Visit(cellpair, world_notifier, *this, *player, player->GetSightRange());
-    cell.Visit(cellpair, grid_notifier,  *this, *player, player->GetSightRange());
+    cell.Visit(cellpair, Trinity::makeWorldVisitor(notifier), *this, *player, player->GetSightRange());
+    cell.Visit(cellpair, Trinity::makeGridVisitor(notifier), *this, *player, player->GetSightRange());
 
     // send data
     notifier.SendToSelf();

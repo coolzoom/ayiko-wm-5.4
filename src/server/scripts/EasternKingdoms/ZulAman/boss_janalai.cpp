@@ -243,9 +243,7 @@ class boss_janalai : public CreatureScript
                     Trinity::AllCreaturesOfEntryInRange check(me, MOB_EGG, 100);
                     Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange> searcher(me, templist, check);
 
-                    TypeContainerVisitor<Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange>, Grid::GridObjectMap> cSearcher(searcher);
-
-                    cell.Visit(pair, cSearcher, *me->GetMap(), *me, me->GetGridActivationRange());
+                    cell.Visit(pair, Trinity::makeGridVisitor(searcher), *me->GetMap(), *me, me->GetGridActivationRange());
                 }
 
                 //TC_LOG_ERROR("scripts", "Eggs %d at middle", templist.size());
@@ -276,10 +274,9 @@ class boss_janalai : public CreatureScript
                     Trinity::AllCreaturesOfEntryInRange check(me, MOB_FIRE_BOMB, 100);
                     Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange> searcher(me, templist, check);
 
-                    TypeContainerVisitor<Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange>, Grid::GridObjectMap> cSearcher(searcher);
-
-                    cell.Visit(pair, cSearcher, *me->GetMap(), *me, me->GetGridActivationRange());
+                    cell.Visit(pair, Trinity::makeGridVisitor(searcher), *me->GetMap(), *me, me->GetGridActivationRange());
                 }
+
                 for (std::list<Creature*>::const_iterator i = templist.begin(); i != templist.end(); ++i)
                 {
                    (*i)->CastSpell(*i, SPELL_FIRE_BOMB_DAMAGE, true);
@@ -529,9 +526,7 @@ class mob_janalai_hatcher : public CreatureScript
                     Trinity::AllCreaturesOfEntryInRange check(me, 23817, 50);
                     Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange> searcher(me, templist, check);
 
-                    TypeContainerVisitor<Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange>, Grid::GridObjectMap> cSearcher(searcher);
-
-                    cell.Visit(pair, cSearcher, *(me->GetMap()), *me, me->GetGridActivationRange());
+                    cell.Visit(pair, Trinity::makeGridVisitor(searcher), *(me->GetMap()), *me, me->GetGridActivationRange());
                 }
 
                 //TC_LOG_ERROR("scripts", "Eggs %d at %d", templist.size(), side);

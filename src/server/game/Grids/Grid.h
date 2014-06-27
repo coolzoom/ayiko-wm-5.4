@@ -75,14 +75,14 @@ public:
 
     // Visit grid objects
     template <typename T>
-    void Visit(TypeContainerVisitor<T, GridObjectMap> &visitor)
+    void Visit(Trinity::TypeContainerVisitor<T, GridObjectMap> &visitor)
     {
         visitor.Visit(i_gridObjects);
     }
 
     // Visit world objects
     template <typename T>
-    void Visit(TypeContainerVisitor<T, WorldObjectMap> &visitor)
+    void Visit(Trinity::TypeContainerVisitor<T, WorldObjectMap> &visitor)
     {
         visitor.Visit(i_worldObjects);
     }
@@ -114,5 +114,21 @@ private:
     GridObjectMap i_gridObjects;
     WorldObjectMap i_worldObjects;
 };
+
+namespace Trinity {
+
+template <typename T>
+inline TypeContainerVisitor<T, Grid::GridObjectMap> makeGridVisitor(T &searcher)
+{
+    return TypeContainerVisitor<T, Grid::GridObjectMap>(searcher);
+}
+
+template <typename T>
+inline TypeContainerVisitor<T, Grid::WorldObjectMap> makeWorldVisitor(T &searcher)
+{
+    return TypeContainerVisitor<T, Grid::WorldObjectMap>(searcher);
+}
+
+} // namespace Trinity
 
 #endif

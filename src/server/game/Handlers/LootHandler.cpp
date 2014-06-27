@@ -196,8 +196,8 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recvData*/)
 
                     Trinity::AllDeadCreaturesInRange check(player, 25.0f, creature->GetGUID());
                     Trinity::CreatureListSearcher<Trinity::AllDeadCreaturesInRange> searcher(player, linkedLootCreatures, check);
-                    TypeContainerVisitor<Trinity::CreatureListSearcher<Trinity::AllDeadCreaturesInRange>, Grid::GridObjectMap> cSearcher(searcher);
-                    cell.Visit(p, cSearcher, *(player->GetMap()), *player,  25.0f);
+
+                    cell.Visit(p, Trinity::makeGridVisitor(searcher), *(player->GetMap()), *player,  25.0f);
 
                     for (auto itr : linkedLootCreatures)
                     {

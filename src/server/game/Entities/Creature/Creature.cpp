@@ -717,9 +717,7 @@ void Creature::DoFleeToGetAssistance()
         Trinity::NearestAssistCreatureInCreatureRangeCheck u_check(this, getVictim(), radius);
         Trinity::CreatureLastSearcher<Trinity::NearestAssistCreatureInCreatureRangeCheck> searcher(this, creature, u_check);
 
-        TypeContainerVisitor<Trinity::CreatureLastSearcher<Trinity::NearestAssistCreatureInCreatureRangeCheck>, Grid::GridObjectMap> grid_creature_searcher(searcher);
-
-        cell.Visit(p, grid_creature_searcher, *GetMap(), *this, radius);
+        cell.Visit(p, Trinity::makeGridVisitor(searcher), *GetMap(), *this, radius);
 
         SetNoSearchAssistance(true);
         UpdateSpeed(MOVE_RUN, false);
@@ -1980,11 +1978,8 @@ Unit* Creature::SelectNearestTarget(float dist) const
         Trinity::NearestHostileUnitCheck u_check(this, dist);
         Trinity::UnitLastSearcher<Trinity::NearestHostileUnitCheck> searcher(this, target, u_check);
 
-        TypeContainerVisitor<Trinity::UnitLastSearcher<Trinity::NearestHostileUnitCheck>, Grid::WorldObjectMap> world_unit_searcher(searcher);
-        TypeContainerVisitor<Trinity::UnitLastSearcher<Trinity::NearestHostileUnitCheck>, Grid::GridObjectMap> grid_unit_searcher(searcher);
-
-        cell.Visit(p, world_unit_searcher, *GetMap(), *this, dist);
-        cell.Visit(p, grid_unit_searcher, *GetMap(), *this, dist);
+        cell.Visit(p, Trinity::makeWorldVisitor(searcher), *GetMap(), *this, dist);
+        cell.Visit(p, Trinity::makeGridVisitor(searcher), *GetMap(), *this, dist);
     }
 
     return target;
@@ -2006,11 +2001,8 @@ Unit* Creature::SelectNearestTargetNoCC(float dist) const
         Trinity::NearestHostileNoCCUnitCheck u_check(this, dist);
         Trinity::UnitLastSearcher<Trinity::NearestHostileNoCCUnitCheck> searcher(this, target, u_check);
 
-        TypeContainerVisitor<Trinity::UnitLastSearcher<Trinity::NearestHostileNoCCUnitCheck>, Grid::WorldObjectMap> world_unit_searcher(searcher);
-        TypeContainerVisitor<Trinity::UnitLastSearcher<Trinity::NearestHostileNoCCUnitCheck>, Grid::GridObjectMap> grid_unit_searcher(searcher);
-
-        cell.Visit(p, world_unit_searcher, *GetMap(), *this, dist);
-        cell.Visit(p, grid_unit_searcher, *GetMap(), *this, dist);
+        cell.Visit(p, Trinity::makeWorldVisitor(searcher), *GetMap(), *this, dist);
+        cell.Visit(p, Trinity::makeGridVisitor(searcher), *GetMap(), *this, dist);
     }
 
     return target;
@@ -2035,11 +2027,8 @@ Unit* Creature::SelectNearestTargetInAttackDistance(float dist) const
         Trinity::NearestHostileUnitInAttackDistanceCheck u_check(this, dist);
         Trinity::UnitLastSearcher<Trinity::NearestHostileUnitInAttackDistanceCheck> searcher(this, target, u_check);
 
-        TypeContainerVisitor<Trinity::UnitLastSearcher<Trinity::NearestHostileUnitInAttackDistanceCheck>, Grid::WorldObjectMap> world_unit_searcher(searcher);
-        TypeContainerVisitor<Trinity::UnitLastSearcher<Trinity::NearestHostileUnitInAttackDistanceCheck>, Grid::GridObjectMap>  grid_unit_searcher(searcher);
-
-        cell.Visit(p, world_unit_searcher, *GetMap(), *this, ATTACK_DISTANCE > dist ? ATTACK_DISTANCE : dist);
-        cell.Visit(p, grid_unit_searcher, *GetMap(), *this, ATTACK_DISTANCE > dist ? ATTACK_DISTANCE : dist);
+        cell.Visit(p, Trinity::makeWorldVisitor(searcher), *GetMap(), *this, ATTACK_DISTANCE > dist ? ATTACK_DISTANCE : dist);
+        cell.Visit(p, Trinity::makeGridVisitor(searcher), *GetMap(), *this, ATTACK_DISTANCE > dist ? ATTACK_DISTANCE : dist);
     }
 
     return target;
@@ -2103,9 +2092,7 @@ void Creature::CallAssistance()
                 Trinity::AnyAssistCreatureInRangeCheck u_check(this, getVictim(), radius);
                 Trinity::CreatureListSearcher<Trinity::AnyAssistCreatureInRangeCheck> searcher(this, assistList, u_check);
 
-                TypeContainerVisitor<Trinity::CreatureListSearcher<Trinity::AnyAssistCreatureInRangeCheck>, Grid::GridObjectMap> grid_creature_searcher(searcher);
-
-                cell.Visit(p, grid_creature_searcher, *GetMap(), *this, radius);
+                cell.Visit(p, Trinity::makeGridVisitor(searcher), *GetMap(), *this, radius);
             }
 
             if (!assistList.empty())
@@ -2135,9 +2122,7 @@ void Creature::CallForHelp(float radius)
     Trinity::CallOfHelpCreatureInRangeDo u_do(this, getVictim(), radius);
     Trinity::CreatureWorker<Trinity::CallOfHelpCreatureInRangeDo> worker(this, u_do);
 
-    TypeContainerVisitor<Trinity::CreatureWorker<Trinity::CallOfHelpCreatureInRangeDo>, Grid::GridObjectMap> grid_creature_searcher(worker);
-
-    cell.Visit(p, grid_creature_searcher, *GetMap(), *this, radius);
+    cell.Visit(p, Trinity::makeGridVisitor(worker), *GetMap(), *this, radius);
 }
 
 bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /*= true*/) const

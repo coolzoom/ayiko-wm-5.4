@@ -233,7 +233,7 @@ class spell_monk_chi_wave_bolt : public SpellScriptLoader
                 if (!GetOriginalCaster())
                     return;
 
-                if (Unit* _player = GetOriginalCaster()->ToPlayer())
+                if (Player* player = GetOriginalCaster()->ToPlayer())
                 {
                     if (Unit* target = GetHitUnit())
                     {
@@ -241,13 +241,13 @@ class spell_monk_chi_wave_bolt : public SpellScriptLoader
                         std::list<Unit*> targetList;
                         std::vector<uint64> validTargets;
 
-                        if (AuraEffect *chiWave = _player->GetAuraEffect(SPELL_MONK_CHI_WAVE_TALENT_AURA, EFFECT_1))
+                        if (AuraEffect *chiWave = player->GetAuraEffect(SPELL_MONK_CHI_WAVE_TALENT_AURA, EFFECT_1))
                         {
                             count = chiWave->GetAmount();
 
                             if (count >= 7)
                             {
-                                _player->RemoveAura(SPELL_MONK_CHI_WAVE_TALENT_AURA);
+                                player->RemoveAura(SPELL_MONK_CHI_WAVE_TALENT_AURA);
                                 return;
                             }
 
@@ -261,18 +261,15 @@ class spell_monk_chi_wave_bolt : public SpellScriptLoader
                         Cell cell(p);
                         cell.SetNoCreate();
 
-                        Trinity::AnyUnitInObjectRangeCheck u_check(_player, 20.0f);
-                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(_player, targetList, u_check);
+                        Trinity::AnyUnitInObjectRangeCheck u_check(player, 20.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(player, targetList, u_check);
 
-                        TypeContainerVisitor<Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck>, Grid::WorldObjectMap> world_unit_searcher(searcher);
-                        TypeContainerVisitor<Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck>, Grid::GridObjectMap> grid_unit_searcher(searcher);
-
-                        cell.Visit(p, world_unit_searcher, *_player->GetMap(), *_player, 20.0f);
-                        cell.Visit(p, grid_unit_searcher, *_player->GetMap(), *_player, 20.0f);
+                        cell.Visit(p, Trinity::makeWorldVisitor(searcher), *player->GetMap(), *player, 20.0f);
+                        cell.Visit(p, Trinity::makeGridVisitor(searcher), *player->GetMap(), *player, 20.0f);
 
                         for (auto itr : targetList)
                         {
-                            if (!itr->IsWithinLOSInMap(_player))
+                            if (!itr->IsWithinLOSInMap(player))
                                 continue;
 
                             if (itr == target)
@@ -283,7 +280,7 @@ class spell_monk_chi_wave_bolt : public SpellScriptLoader
 
                         if (validTargets.empty())
                         {
-                            _player->RemoveAurasDueToSpell(SPELL_MONK_CHI_WAVE_TALENT_AURA);
+                            player->RemoveAurasDueToSpell(SPELL_MONK_CHI_WAVE_TALENT_AURA);
                             return;
                         }
 
@@ -291,15 +288,15 @@ class spell_monk_chi_wave_bolt : public SpellScriptLoader
 
                         if (Unit* newTarget = sObjectAccessor->FindUnit(validTargets.front()))
                         {
-                            if (_player->IsValidAttackTarget(newTarget))
-                                target->CastSpell(newTarget, SPELL_MONK_CHI_WAVE_DAMAGE, true, NULL, NULL, _player->GetGUID());
+                            if (player->IsValidAttackTarget(newTarget))
+                                target->CastSpell(newTarget, SPELL_MONK_CHI_WAVE_DAMAGE, true, NULL, NULL, player->GetGUID());
                             else
                             {
                                 std::list<Unit*> alliesList;
 
                                 for (auto itr : validTargets)
                                 {
-                                    if (_player->IsValidAttackTarget(sObjectAccessor->FindUnit(itr)))
+                                    if (player->IsValidAttackTarget(sObjectAccessor->FindUnit(itr)))
                                         continue;
 
                                     alliesList.push_back(sObjectAccessor->FindUnit(itr));
@@ -310,7 +307,7 @@ class spell_monk_chi_wave_bolt : public SpellScriptLoader
 
                                 alliesList.sort(Trinity::HealthPctOrderPred());
 
-                                target->CastSpell(alliesList.front(), SPELL_MONK_CHI_WAVE_HEALING_BOLT, true, NULL, NULL, _player->GetGUID());
+                                target->CastSpell(alliesList.front(), SPELL_MONK_CHI_WAVE_HEALING_BOLT, true, NULL, NULL, player->GetGUID());
                             }
                         }
                     }

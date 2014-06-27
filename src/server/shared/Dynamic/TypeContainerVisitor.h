@@ -21,85 +21,61 @@
 
 /*
  * @class TypeContainerVisitor is implemented as a visitor pattern.  It is
- * a visitor to the ContainerArrayList or ContainerMapList.  The visitor has
- * to overload its types as a visit method is called.
+ * a visitor to the ContainerMapList.  The visitor has to overload its types as
+ * a visit method is called.
  */
 
 #include "Define.h"
 #include "Dynamic/TypeContainer.h"
 
-// visitor helper
-template <class VISITOR, class TYPE_CONTAINER>
-void VisitorHelper(VISITOR &v, TYPE_CONTAINER &c)
-{
-    v.Visit(c);
-}
+namespace Trinity {
+
+namespace Detail {
 
 // terminate condition container map list
-template <class VISITOR>
-void VisitorHelper(VISITOR &/*v*/, ContainerMapList<TypeNull> &/*c*/)
-{
-}
+template <typename Visitor>
+inline void VisitorHelper(Visitor &/*v*/, ContainerMapList<TypeNull> &/*c*/) { }
 
-template <class VISITOR, class T>
-void VisitorHelper(VISITOR &v, ContainerMapList<T> &c)
+template <typename Visitor, typename T>
+inline void VisitorHelper(Visitor &v, ContainerMapList<T> &c)
 {
     v.Visit(c._element);
 }
 
 // recursion container map list
-template <class VISITOR, class H, class T>
-void VisitorHelper(VISITOR &v, ContainerMapList<TypeList<H, T> > &c)
-{
-    VisitorHelper(v, c.head_);
-    VisitorHelper(v, c.tail_);
-}
-
-// array list
-template <class VISITOR, class T>
-void VisitorHelper(VISITOR &v, ContainerArrayList<T> &c)
-{
-    v.Visit(c._element);
-}
-
-template <class VISITOR>
-void VisitorHelper(VISITOR &/*v*/, ContainerArrayList<TypeNull> &/*c*/)
-{
-}
-
-// recursion
-template <class VISITOR, class H, class T>
-void VisitorHelper(VISITOR &v, ContainerArrayList<TypeList<H, T> > &c)
+template <typename Visitor, typename Head, typename Tail>
+inline void VisitorHelper(Visitor &v, ContainerMapList<TypeList<Head, Tail>> &c)
 {
     VisitorHelper(v, c.head_);
     VisitorHelper(v, c.tail_);
 }
 
 // for TypeMapContainer
-template <class VISITOR, class OBJECT_TYPES>
-void VisitorHelper(VISITOR &v, TypeMapContainer<OBJECT_TYPES> &c)
+template <typename Visitor, typename ObjectTypes>
+inline void VisitorHelper(Visitor &v, TypeMapContainer<ObjectTypes> &c)
 {
     VisitorHelper(v, c.GetElements());
 }
 
-template<class VISITOR, class TYPE_CONTAINER>
-class TypeContainerVisitor
+} // namespace Detail
+
+template <typename Visitor, typename TypeContainer>
+class TypeContainerVisitor final
 {
-    public:
-        TypeContainerVisitor(VISITOR &v) : i_visitor(v) {}
+public:
+    TypeContainerVisitor(Visitor &v)
+        : i_visitor(v)
+    { }
 
-        void Visit(TYPE_CONTAINER &c)
-        {
-            VisitorHelper(i_visitor, c);
-        }
+    void Visit(TypeContainer &c)
+    {
+        Trinity::Detail::VisitorHelper(i_visitor, c);
+    }
 
-        void Visit(const TYPE_CONTAINER &c) const
-        {
-            VisitorHelper(i_visitor, c);
-        }
-
-    private:
-        VISITOR &i_visitor;
+private:
+    Visitor &i_visitor;
 };
+
+} // namespace Trinity
 
 #endif

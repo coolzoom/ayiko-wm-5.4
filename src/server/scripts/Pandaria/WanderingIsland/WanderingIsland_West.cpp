@@ -301,12 +301,14 @@ enum Enums
     EVENT_STUNNED       = 2,
     EVENT_LIGHTNING     = 3,
 
+    POINT_STUN          = 100,
+
     SPELL_SERPENT_SWEEP = 125990,
     SPELL_STUNNED       = 125992,
     SPELL_LIGHTNING     = 126006,
 };
 
-Position const ZhaoPos[] =
+static Position const ZhaoPos[] =
 {
     {719.36f, 4164.60f, 216.06f, 0.0f}, // Center
     {745.91f, 4154.35f, 223.48f, 0.0f},
@@ -316,6 +318,8 @@ Position const ZhaoPos[] =
     {704.77f, 4190.16f, 218.24f, 0.0f},
     {736.90f, 4183.85f, 221.41f, 0.0f}
 };
+
+static const Position zhaoStunPos = {723.163025f, 4163.799805f, 202.082993f, 0.0f };
 
 class boss_zhao_ren : public CreatureScript
 {
@@ -341,6 +345,7 @@ public:
         {
             _events.Reset();
             me->SetReactState(REACT_PASSIVE);
+            me->SetDisableGravity(true);
 
             eventStarted = false;
             hitCount = 0;
@@ -359,10 +364,8 @@ public:
             {
                 if (++hitCount >= 5)
                 {
-                    me->CastSpell(me, SPELL_STUNNED, true);
                     me->GetMotionMaster()->Clear();
-                    me->GetMotionMaster()->MoveFall();
-                    _events.ScheduleEvent(EVENT_STUNNED, 12000);
+                    me->GetMotionMaster()->MovePoint(POINT_STUN, zhaoStunPos);
                     hitCount = 0;
                 }
             }
@@ -410,7 +413,14 @@ public:
             if (!id)
                 return;
 
-            _events.ScheduleEvent(EVENT_NEXT_MOVEMENT, 200);
+            if (id == POINT_STUN)
+            {
+                me->CastSpell(me, SPELL_STUNNED, true);
+                _events.RescheduleEvent(EVENT_LIGHTNING, 17000);
+                _events.ScheduleEvent(EVENT_STUNNED, 12000);
+            }
+            else
+                _events.ScheduleEvent(EVENT_NEXT_MOVEMENT, 200);
         }
 
         void JustDied(Unit* /*attacker*/)
@@ -459,7 +469,8 @@ public:
                 {
                     me->RemoveAurasDueToSpell(SPELL_STUNNED);
                     me->CastSpell(me, SPELL_SERPENT_SWEEP, false);
-                    _events.ScheduleEvent(EVENT_NEXT_MOVEMENT, 3000);
+                    me->SetDisableGravity(true);
+                    _events.ScheduleEvent(EVENT_NEXT_MOVEMENT, 4000);
                     break;
                 }
                 case EVENT_LIGHTNING:
@@ -502,11 +513,13 @@ public:
             if (cooldown)
                 return;
 
-            if (Creature* const zhao = GetClosestCreatureWithEntry(me, 55786, 50.0f))
+            Creature* const zhao = GetClosestCreatureWithEntry(me, 55786, 50.0f);
+
+            if (zhao && zhao->IsWithinDist2d(Clicker, 10.0f))
                 me->CastSpell(zhao, SPELL_ROCKET_LAUNCH, false);
             else
             {
-                Clicker->MonsterTextEmote("Wait until the Onyx Serpent is directly overhead.", Clicker->GetGUID(), true);
+                Clicker->ToPlayer()->GetSession()->SendNotification("Wait until the Onyx Serpent is directly overhead.");
                 return;
             }
 

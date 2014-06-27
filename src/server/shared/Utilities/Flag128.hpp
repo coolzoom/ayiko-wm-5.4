@@ -113,7 +113,7 @@ public:
         part[0] ^= right.part[0];
         part[1] ^= right.part[1];
         part[2] ^= right.part[2];
-        part[3] ^= right.part[4];
+        part[3] ^= right.part[3];
 
         return *this;
     };

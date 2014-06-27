@@ -289,7 +289,21 @@ void Map::AddToGrid(T* obj, Cell const& cell)
 }
 
 template <>
-void Map::AddToGrid(Creature* obj, Cell const& cell)
+void Map::AddToGrid(Player *obj, Cell const& cell)
+{
+    auto const ngrid = getNGrid(cell.GridX(), cell.GridY());
+    ngrid->GetGrid(cell.CellX(), cell.CellY()).AddWorldObject(obj);
+}
+
+template <>
+void Map::AddToGrid(GameObject *obj, Cell const& cell)
+{
+    auto const ngrid = getNGrid(cell.GridX(), cell.GridY());
+    ngrid->GetGrid(cell.CellX(), cell.CellY()).AddGridObject(obj);
+}
+
+template <>
+void Map::AddToGrid(Creature *obj, Cell const& cell)
 {
     auto const ngrid = getNGrid(cell.GridX(), cell.GridY());
     if (obj->IsWorldObject())

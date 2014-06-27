@@ -28,6 +28,7 @@
 #include "Dynamic/TypeList.h"
 #include "GridRefManager.h"
 
+#include <type_traits>
 #include <vector>
 
 /*
@@ -35,57 +36,128 @@
  * By itself its meaningless but collaborate along with TypeContainers,
  * it become the most powerfully container in the whole system.
  */
-template<class OBJECT> struct ContainerMapList
+template <typename T>
+struct ContainerMapList final
 {
-    //std::map<OBJECT_HANDLE, OBJECT *> _element;
-    GridRefManager<OBJECT> _element;
+    GridRefManager<T> _element;
 };
 
-template<> struct ContainerMapList<TypeNull>                /* nothing is in type null */
+template <>
+struct ContainerMapList<TypeNull> final { };
+
+template <typename Head, typename Tail>
+struct ContainerMapList<TypeList<Head, Tail>> final
 {
-};
-template<class H, class T> struct ContainerMapList<TypeList<H, T> >
-{
-    ContainerMapList<H> _elements;
-    ContainerMapList<T> _TailElements;
+    ContainerMapList<Head> head_;
+    ContainerMapList<Tail> tail_;
 };
 
 /*
  * @class ContaierArrayList is a multi-type container for
  * array of elements.
  */
-template<class OBJECT> struct ContainerArrayList
+template <typename T>
+struct ContainerArrayList final
 {
-    std::vector<OBJECT> _element;
+    std::vector<T> _element;
 };
 
-// termination condition
-template<> struct ContainerArrayList<TypeNull> {};
-// recursion
-template<class H, class T> struct ContainerArrayList<TypeList<H, T> >
+template <>
+struct ContainerArrayList<TypeNull> final { };
+
+template <typename Head, typename Tail>
+struct ContainerArrayList<TypeList<Head, Tail>> final
 {
-    ContainerArrayList<H> _elements;
-    ContainerArrayList<T> _TailElements;
+    ContainerArrayList<Head> head_;
+    ContainerArrayList<Tail> tail_;
 };
 
-/*
- * @class ContainerList is a simple list of different types of elements
- *
- */
-template<class OBJECT> struct ContainerList
-{
-    OBJECT _element;
-};
+namespace Trinity {
 
-/* TypeNull is underfined */
-template<> struct ContainerList<TypeNull> {};
-template<class H, class T> struct ContainerList<TypeList<H, T> >
-{
-    ContainerList<H> _elements;
-    ContainerMapList<T> _TailElements;
-};
+namespace Detail {
 
-#include "TypeContainerFunctions.h"
+template <typename SpecificType, typename Head, typename Tail>
+inline typename std::enable_if<
+    std::is_same<Head, SpecificType>::value,
+    ContainerMapList<SpecificType> const &
+>::type
+mapForType(ContainerMapList<TypeList<Head, Tail>> const &m)
+{
+    return m.head_;
+}
+
+template <typename SpecificType, typename Head, typename Tail>
+inline typename std::enable_if<
+    !std::is_same<Head, SpecificType>::value,
+    ContainerMapList<SpecificType> const &
+>::type
+mapForType(ContainerMapList<TypeList<Head, Tail>> const &m)
+{
+    return Trinity::Detail::mapForType<SpecificType>(m.tail_);
+}
+
+template <typename SpecificType, typename Head, typename Tail>
+inline typename std::enable_if<
+    std::is_same<Head, SpecificType>::value,
+    ContainerMapList<SpecificType> &
+>::type
+mapForType(ContainerMapList<TypeList<Head, Tail>> &m)
+{
+    return m.head_;
+}
+
+template <typename SpecificType, typename Head, typename Tail>
+inline typename std::enable_if<
+    !std::is_same<Head, SpecificType>::value,
+    ContainerMapList<SpecificType> &
+>::type
+mapForType(ContainerMapList<TypeList<Head, Tail>> &m)
+{
+    return Trinity::Detail::mapForType<SpecificType>(m.tail_);
+}
+
+} // namespace Detail
+
+/* ContainerMapList Helpers */
+
+template <typename SpecificType, typename Head, typename Tail>
+inline size_t Count(ContainerMapList<TypeList<Head, Tail>> const &m)
+{
+    return Trinity::Detail::mapForType<SpecificType>(m)._element.getSize();
+}
+
+template <typename SpecificType, typename Head, typename Tail>
+inline void Insert(ContainerMapList<TypeList<Head, Tail>> &m, SpecificType *obj)
+{
+    obj->AddToGrid(Trinity::Detail::mapForType<SpecificType>(m)._element);
+}
+
+//// non-const remove method
+//template<class SPECIFIC_TYPE> SPECIFIC_TYPE* Remove(ContainerMapList<SPECIFIC_TYPE> & /*elements*/, SPECIFIC_TYPE *obj)
+//{
+//    obj->GetGridRef().unlink();
+//    return obj;
+//}
+
+//template<class SPECIFIC_TYPE> SPECIFIC_TYPE* Remove(ContainerMapList<TypeNull> &/*elements*/, SPECIFIC_TYPE * /*obj*/)
+//{
+//    return NULL;
+//}
+
+//// this is a missed
+//template<class SPECIFIC_TYPE, class T> SPECIFIC_TYPE* Remove(ContainerMapList<T> &/*elements*/, SPECIFIC_TYPE * /*obj*/)
+//{
+//    return NULL;
+//}
+
+//template<class SPECIFIC_TYPE, class T, class H> SPECIFIC_TYPE* Remove(ContainerMapList<TypeList<H, T> > &elements, SPECIFIC_TYPE *obj)
+//{
+//    // The head element is bad
+//    SPECIFIC_TYPE* t = Remove(elements.head_, obj);
+//    return ( t != NULL ? t : Remove(elements.tail_, obj) );
+//}
+
+} // namespace Trinity
 
 /*
  * @class TypeMapContainer contains a fixed number of types and is
@@ -94,31 +166,38 @@ template<class H, class T> struct ContainerList<TypeList<H, T> >
  * of different types.
  */
 
-template<class OBJECT_TYPES>
-class TypeMapContainer
+template <typename ObjectTypes>
+class TypeMapContainer final
 {
-    public:
-        template<class SPECIFIC_TYPE> size_t Count() const { return Trinity::Count(i_elements, (SPECIFIC_TYPE*)NULL); }
+public:
+    typedef ContainerMapList<ObjectTypes> ObjectMap;
 
-        /// inserts a specific object into the container
-        template<class SPECIFIC_TYPE> bool insert(SPECIFIC_TYPE *obj)
-        {
-            SPECIFIC_TYPE* t = Trinity::Insert(i_elements, obj);
-            return (t != NULL);
-        }
+public:
+    template <typename SpecificType>
+    size_t Count() const
+    {
+        return Trinity::Count<SpecificType>(i_elements);
+    }
 
-        ///  Removes the object from the container, and returns the removed object
-        //template<class SPECIFIC_TYPE> bool remove(SPECIFIC_TYPE* obj)
-        //{
-        //    SPECIFIC_TYPE* t = Trinity::Remove(i_elements, obj);
-        //    return (t != NULL);
-        //}
+    /// inserts a specific object into the container
+    template <typename SpecificType>
+    void insert(SpecificType *obj)
+    {
+        Trinity::Insert(i_elements, obj);
+    }
 
-        ContainerMapList<OBJECT_TYPES> & GetElements(void) { return i_elements; }
-        const ContainerMapList<OBJECT_TYPES> & GetElements(void) const { return i_elements;}
+    ///  Removes the object from the container, and returns the removed object
+    //template<class SPECIFIC_TYPE> bool remove(SPECIFIC_TYPE* obj)
+    //{
+    //    SPECIFIC_TYPE* t = Trinity::Remove(i_elements, obj);
+    //    return (t != NULL);
+    //}
 
-    private:
-        ContainerMapList<OBJECT_TYPES> i_elements;
+    ObjectMap & GetElements() { return i_elements; }
+    ObjectMap const & GetElements() const { return i_elements;}
+
+private:
+    ObjectMap i_elements;
 };
-#endif
 
+#endif

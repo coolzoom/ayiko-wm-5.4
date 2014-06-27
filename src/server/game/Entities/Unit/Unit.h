@@ -2456,7 +2456,7 @@ class Unit : public WorldObject
         void SetIciclesTarget(uint64 guid) { iciclesTargetGUID = guid; }
 
     protected:
-        explicit Unit (bool isWorldObject);
+        explicit Unit(bool isWorldObject);
 
         void BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, Player* target) const;
 

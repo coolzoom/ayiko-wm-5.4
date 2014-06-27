@@ -3806,19 +3806,19 @@ void Player::InitSpellForLevel()
 
     for (auto const &spellId : sSpellMgr->GetSpellClassList(getClass()))
     {
-        auto const spell = sSpellMgr->GetSpellInfo(spellId);
-        if (!spell || HasSpell(spellId))
+        auto const spellInfo = sSpellMgr->GetSpellInfo(spellId);
+        if (!spellInfo || HasSpell(spellId))
             continue;
 
-        auto const &specList = spell->SpecializationIdList;
+        auto const &specList = spellInfo->SpecializationIdList;
         if (!specList.empty())
             if (!std::binary_search(specList.begin(), specList.end(), specId))
                 continue;
 
-        if (!IsSpellFitByClassAndRace(spellId))
+        if (!IsSpellFitByClassAndRace(spellInfo))
             continue;
 
-        if (spell->SpellLevel <= level)
+        if (spellInfo->SpellLevel <= level)
             learnSpell(spellId, false);
     }
 
@@ -5510,53 +5510,58 @@ bool Player::HasActiveSpell(uint32 spell) const
             && itr->second.active && !itr->second.disabled;
 }
 
-TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell) const
+TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainerSpell) const
 {
-    if (!trainer_spell)
+    if (!trainerSpell)
         return TRAINER_SPELL_RED;
 
     bool hasSpell = true;
-    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+    for (auto const &spellId : trainerSpell->learnedSpell)
     {
-        if (!trainer_spell->learnedSpell[i])
+        if (spellId == 0)
             continue;
 
-        if (!HasSpell(trainer_spell->learnedSpell[i]))
+        if (!HasSpell(spellId))
         {
             hasSpell = false;
             break;
         }
     }
+
     // known spell
     if (hasSpell)
         return TRAINER_SPELL_GRAY;
 
     // check skill requirement
-    if (trainer_spell->reqSkill && GetBaseSkillValue(trainer_spell->reqSkill) < trainer_spell->reqSkillValue)
+    if (trainerSpell->reqSkill && GetBaseSkillValue(trainerSpell->reqSkill) < trainerSpell->reqSkillValue)
         return TRAINER_SPELL_RED;
 
     // check level requirement
-    if (getLevel() < trainer_spell->reqLevel)
+    if (getLevel() < trainerSpell->reqLevel)
         return TRAINER_SPELL_RED;
 
-    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+    for (auto const &spellId : trainerSpell->learnedSpell)
     {
-        if (!trainer_spell->learnedSpell[i])
+        if (spellId == 0)
+            continue;
+
+        auto const spellInfo = sSpellMgr->GetSpellInfo(spellId);
+        if (!spellInfo)
             continue;
 
         // check race/class requirement
-        if (!IsSpellFitByClassAndRace(trainer_spell->learnedSpell[i]))
+        if (!IsSpellFitByClassAndRace(spellInfo))
             return TRAINER_SPELL_RED;
 
-        if (uint32 prevSpell = sSpellMgr->GetPrevSpellInChain(trainer_spell->learnedSpell[i]))
+        if (uint32 prevSpell = sSpellMgr->GetPrevSpellInChain(spellInfo->Id))
         {
             // check prev.rank requirement
             if (prevSpell && !HasSpell(prevSpell))
                 return TRAINER_SPELL_RED;
         }
 
-        SpellsRequiringSpellMapBounds spellsRequired = sSpellMgr->GetSpellsRequiredForSpellBounds(trainer_spell->learnedSpell[i]);
-        for (SpellsRequiringSpellMap::const_iterator itr = spellsRequired.first; itr != spellsRequired.second; ++itr)
+        auto const spellsRequired = sSpellMgr->GetSpellsRequiredForSpellBounds(spellInfo->Id);
+        for (auto itr = spellsRequired.first; itr != spellsRequired.second; ++itr)
         {
             // check additional spell requirement
             if (!HasSpell(itr->second))
@@ -5566,12 +5571,13 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
 
     // check primary prof. limit
     // first rank of primary profession spell when there are no proffesions avalible is disabled
-    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+    for (auto const &spellId : trainerSpell->learnedSpell)
     {
-        if (!trainer_spell->learnedSpell[i])
+        if (spellId == 0)
             continue;
-        SpellInfo const* learnedSpellInfo = sSpellMgr->GetSpellInfo(trainer_spell->learnedSpell[i]);
-        if (learnedSpellInfo && learnedSpellInfo->IsPrimaryProfessionFirstRank() && (GetFreePrimaryProfessionPoints() == 0))
+
+        auto const spellInfo = sSpellMgr->GetSpellInfo(spellId);
+        if (spellInfo && spellInfo->IsPrimaryProfessionFirstRank() && GetFreePrimaryProfessionPoints() == 0)
             return TRAINER_SPELL_GREEN_DISABLED;
     }
 
@@ -25122,16 +25128,12 @@ void Player::resetSpells(bool myClassOnly)
 
         for (PlayerSpellMap::const_iterator iter = smap.begin(); iter != smap.end(); ++iter)
         {
-            SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(iter->first);
+            auto const spellInfo = sSpellMgr->GetSpellInfo(iter->first);
             if (!spellInfo)
                 continue;
 
             // skip server-side/triggered spells
             if (spellInfo->SpellLevel == 0)
-                continue;
-
-            // skip wrong class/race skills
-            if (!IsSpellFitByClassAndRace(spellInfo->Id))
                 continue;
 
             // skip other spell families
@@ -25142,14 +25144,21 @@ void Player::resetSpells(bool myClassOnly)
             if (sSpellMgr->IsTalent(spellInfo->Id))
                 continue;
 
+            // skip wrong class/race skills
+            if (!IsSpellFitByClassAndRace(spellInfo))
+                continue;
+
             // skip broken spells
             if (!sSpellMgr->IsSpellValid(spellInfo, this, false))
                 continue;
         }
     }
     else
+    {
+        // only iter->first can be accessed, object by iter->second can be deleted already
         for (PlayerSpellMap::const_iterator iter = smap.begin(); iter != smap.end(); ++iter)
-            removeSpell(iter->first, false, false);           // only iter->first can be accessed, object by iter->second can be deleted already
+            removeSpell(iter->first, false, false);
+    }
 
     learnDefaultSpells();
     learnQuestRewardedSpells();
@@ -25512,23 +25521,29 @@ float Player::GetReputationPriceDiscount(Creature const* creature) const
     return 1.0f - 0.05f* (rank - REP_NEUTRAL);
 }
 
-bool Player::IsSpellFitByClassAndRace(uint32 spell_id) const
+bool Player::IsSpellFitByClassAndRace(SpellInfo const *spellInfo) const
 {
-    uint32 racemask  = getRaceMask();
-    uint32 classmask = getClassMask();
+    if ((spellInfo->AttributesEx7 & SPELL_ATTR7_ALLIANCE_ONLY) && GetTeam() != ALLIANCE)
+        return false;
 
-    SkillLineAbilityMapBounds bounds = sSpellMgr->GetSkillLineAbilityMapBounds(spell_id);
+    if ((spellInfo->AttributesEx7 & SPELL_ATTR7_HORDE_ONLY) && GetTeam() != HORDE)
+        return false;
+
+    auto const bounds = sSpellMgr->GetSkillLineAbilityMapBounds(spellInfo->Id);
     if (bounds.first == bounds.second)
         return true;
 
-    for (SkillLineAbilityMap::const_iterator _spell_idx = bounds.first; _spell_idx != bounds.second; ++_spell_idx)
+    auto const racemask  = getRaceMask();
+    auto const classmask = getClassMask();
+
+    for (auto itr = bounds.first; itr != bounds.second; ++itr)
     {
         // skip wrong race skills
-        if (_spell_idx->second->racemask && (_spell_idx->second->racemask & racemask) == 0)
+        if (itr->second->racemask && (itr->second->racemask & racemask) == 0)
             continue;
 
         // skip wrong class skills
-        if (_spell_idx->second->classmask && (_spell_idx->second->classmask & classmask) == 0)
+        if (itr->second->classmask && (itr->second->classmask & classmask) == 0)
             continue;
 
         return true;

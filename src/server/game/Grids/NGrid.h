@@ -23,36 +23,13 @@
  */
 
 #include "Grid.h"
+#include "GridDefines.h"
 #include "Timer.h"
 #include "Util.h"
 
-#define MAX_NUMBER_OF_CELLS     8
-
-#define MAX_NUMBER_OF_GRIDS      64
-
-#define SIZE_OF_GRIDS            533.33333f
-#define CENTER_GRID_ID           (MAX_NUMBER_OF_GRIDS/2)
-
-#define CENTER_GRID_OFFSET      (SIZE_OF_GRIDS/2)
-
-#define MIN_GRID_DELAY          (MINUTE*IN_MILLISECONDS)
-#define MIN_MAP_UPDATE_DELAY    50
-
-#define SIZE_OF_GRID_CELL       (SIZE_OF_GRIDS/MAX_NUMBER_OF_CELLS)
-
-#define CENTER_GRID_CELL_ID     (MAX_NUMBER_OF_CELLS*MAX_NUMBER_OF_GRIDS/2)
-#define CENTER_GRID_CELL_OFFSET (SIZE_OF_GRID_CELL/2)
-
-#define TOTAL_NUMBER_OF_CELLS_PER_MAP    (MAX_NUMBER_OF_GRIDS*MAX_NUMBER_OF_CELLS)
-
-#define MAP_RESOLUTION 128
-
-#define MAP_SIZE                (SIZE_OF_GRIDS*MAX_NUMBER_OF_GRIDS)
-#define MAP_HALFSIZE            (MAP_SIZE/2)
-
 #define DEFAULT_VISIBILITY_NOTIFY_PERIOD      1000
 
-class GridInfo
+class GridInfo final
 {
 public:
     GridInfo()
@@ -60,7 +37,7 @@ public:
         , i_unloadActiveLockCount(0), i_unloadReferenceLock(false)
     { }
 
-    GridInfo(time_t expiry)
+    explicit GridInfo(time_t expiry)
         : i_timer(expiry), vis_Update(0, irand(0, DEFAULT_VISIBILITY_NOTIFY_PERIOD))
         , i_unloadActiveLockCount(0), i_unloadReferenceLock(false)
     { }

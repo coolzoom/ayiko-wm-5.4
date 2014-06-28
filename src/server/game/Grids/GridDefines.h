@@ -19,11 +19,41 @@
 #ifndef TRINITY_GRIDDEFINES_H
 #define TRINITY_GRIDDEFINES_H
 
-#include "Common.h"
-#include "NGrid.h"
+#include "Define.h"
 
 #include <vector>
 #include <cmath>
+
+#ifdef _MSVC_VER
+#  include <float.h>
+#  define finite__ _finite
+#else
+#  define finite__ std::isfinite
+#endif
+
+#define MAX_NUMBER_OF_CELLS     8
+
+#define MAX_NUMBER_OF_GRIDS     64
+
+#define SIZE_OF_GRIDS           533.33333f
+#define CENTER_GRID_ID          (MAX_NUMBER_OF_GRIDS/2)
+
+#define CENTER_GRID_OFFSET      (SIZE_OF_GRIDS/2)
+
+#define MIN_GRID_DELAY          (MINUTE*IN_MILLISECONDS)
+#define MIN_MAP_UPDATE_DELAY    50
+
+#define SIZE_OF_GRID_CELL       (SIZE_OF_GRIDS/MAX_NUMBER_OF_CELLS)
+
+#define CENTER_GRID_CELL_ID     (MAX_NUMBER_OF_CELLS*MAX_NUMBER_OF_GRIDS/2)
+#define CENTER_GRID_CELL_OFFSET (SIZE_OF_GRID_CELL/2)
+
+#define TOTAL_NUMBER_OF_CELLS_PER_MAP    (MAX_NUMBER_OF_GRIDS*MAX_NUMBER_OF_CELLS)
+
+#define MAP_RESOLUTION 128
+
+#define MAP_SIZE                (SIZE_OF_GRIDS*MAX_NUMBER_OF_GRIDS)
+#define MAP_HALFSIZE            (MAP_SIZE/2)
 
 // Forward class definitions
 class Corpse;
@@ -34,12 +64,12 @@ class Pet;
 class Player;
 class AreaTrigger;
 
-typedef std::vector<Corpse*>          CorpseMapType;
-typedef std::vector<Creature*>        CreatureMapType;
-typedef std::vector<DynamicObject*>   DynamicObjectMapType;
-typedef std::vector<GameObject*>      GameObjectMapType;
-typedef std::vector<Player*>          PlayerMapType;
-typedef std::vector<AreaTrigger*>     AreaTriggerMapType;
+typedef std::vector<Corpse*>        CorpseMapType;
+typedef std::vector<Creature*>      CreatureMapType;
+typedef std::vector<DynamicObject*> DynamicObjectMapType;
+typedef std::vector<GameObject*>    GameObjectMapType;
+typedef std::vector<Player*>        PlayerMapType;
+typedef std::vector<AreaTrigger*>   AreaTriggerMapType;
 
 enum GridMapTypeMask
 {
@@ -53,19 +83,19 @@ enum GridMapTypeMask
 };
 
 template <uint32 LIMIT>
-struct CoordPair
+struct CoordPair final
 {
-    CoordPair(uint32 x=0, uint32 y=0)
+    explicit CoordPair(uint32 x=0, uint32 y=0)
         : x_coord(x)
         , y_coord(y)
-    {}
+    { }
 
-    CoordPair(const CoordPair<LIMIT> &obj)
+    CoordPair(CoordPair const &obj)
         : x_coord(obj.x_coord)
         , y_coord(obj.y_coord)
-    {}
+    { }
 
-    CoordPair<LIMIT> & operator=(const CoordPair<LIMIT> &obj)
+    CoordPair & operator=(CoordPair const &obj)
     {
         x_coord = obj.x_coord;
         y_coord = obj.y_coord;
@@ -109,10 +139,14 @@ struct CoordPair
         return x_coord < LIMIT && y_coord < LIMIT;
     }
 
-    CoordPair& normalize()
+    CoordPair & normalize()
     {
-        x_coord = std::min(x_coord, LIMIT - 1);
-        y_coord = std::min(y_coord, LIMIT - 1);
+        if (x_coord > LIMIT - 1)
+            x_coord = LIMIT - 1;
+
+        if (y_coord > LIMIT - 1)
+            y_coord = LIMIT - 1;
+
         return *this;
     }
 
@@ -140,69 +174,72 @@ bool operator!=(const CoordPair<LIMIT> &p1, const CoordPair<LIMIT> &p2)
 typedef CoordPair<MAX_NUMBER_OF_GRIDS> GridCoord;
 typedef CoordPair<TOTAL_NUMBER_OF_CELLS_PER_MAP> CellCoord;
 
-namespace Trinity
+namespace Trinity {
+
+template<class RET_TYPE, int CENTER_VAL>
+inline RET_TYPE Compute(float x, float y, float center_offset, float size)
 {
-    template<class RET_TYPE, int CENTER_VAL>
-    inline RET_TYPE Compute(float x, float y, float center_offset, float size)
-    {
-        // calculate and store temporary values in double format for having same result as same mySQL calculations
-        double x_offset = (double(x) - center_offset)/size;
-        double y_offset = (double(y) - center_offset)/size;
+    // calculate and store temporary values in double format for having same result as same mySQL calculations
+    double x_offset = (double(x) - center_offset)/size;
+    double y_offset = (double(y) - center_offset)/size;
 
-        int x_val = int(x_offset + CENTER_VAL + 0.5f);
-        int y_val = int(y_offset + CENTER_VAL + 0.5f);
-        return RET_TYPE(x_val, y_val);
-    }
-
-    inline GridCoord ComputeGridCoord(float x, float y)
-    {
-        return Compute<GridCoord, CENTER_GRID_ID>(x, y, CENTER_GRID_OFFSET, SIZE_OF_GRIDS);
-    }
-
-    inline CellCoord ComputeCellCoord(float x, float y)
-    {
-        return Compute<CellCoord, CENTER_GRID_CELL_ID>(x, y, CENTER_GRID_CELL_OFFSET, SIZE_OF_GRID_CELL);
-    }
-
-    inline CellCoord ComputeCellCoord(float x, float y, float &x_off, float &y_off)
-    {
-        double x_offset = (double(x) - CENTER_GRID_CELL_OFFSET)/SIZE_OF_GRID_CELL;
-        double y_offset = (double(y) - CENTER_GRID_CELL_OFFSET)/SIZE_OF_GRID_CELL;
-
-        int x_val = int(x_offset + CENTER_GRID_CELL_ID + 0.5f);
-        int y_val = int(y_offset + CENTER_GRID_CELL_ID + 0.5f);
-        x_off = (float(x_offset) - x_val + CENTER_GRID_CELL_ID) * SIZE_OF_GRID_CELL;
-        y_off = (float(y_offset) - y_val + CENTER_GRID_CELL_ID) * SIZE_OF_GRID_CELL;
-        return CellCoord(x_val, y_val);
-    }
-
-    inline void NormalizeMapCoord(float &c)
-    {
-        if (c > MAP_HALFSIZE - 0.5f)
-            c = MAP_HALFSIZE - 0.5f;
-        else if (c < -(MAP_HALFSIZE - 0.5f))
-            c = -(MAP_HALFSIZE - 0.5f);
-    }
-
-    inline bool IsValidMapCoord(float c)
-    {
-        return finite(c) && (std::fabs(c) <= MAP_HALFSIZE - 0.5f);
-    }
-
-    inline bool IsValidMapCoord(float x, float y)
-    {
-        return IsValidMapCoord(x) && IsValidMapCoord(y);
-    }
-
-    inline bool IsValidMapCoord(float x, float y, float z)
-    {
-        return IsValidMapCoord(x, y) && finite(z);
-    }
-
-    inline bool IsValidMapCoord(float x, float y, float z, float o)
-    {
-        return IsValidMapCoord(x, y, z) && finite(o);
-    }
+    int x_val = int(x_offset + CENTER_VAL + 0.5f);
+    int y_val = int(y_offset + CENTER_VAL + 0.5f);
+    return RET_TYPE(x_val, y_val);
 }
 
-#endif
+inline GridCoord ComputeGridCoord(float x, float y)
+{
+    return Compute<GridCoord, CENTER_GRID_ID>(x, y, CENTER_GRID_OFFSET, SIZE_OF_GRIDS);
+}
+
+inline CellCoord ComputeCellCoord(float x, float y)
+{
+    return Compute<CellCoord, CENTER_GRID_CELL_ID>(x, y, CENTER_GRID_CELL_OFFSET, SIZE_OF_GRID_CELL);
+}
+
+inline CellCoord ComputeCellCoord(float x, float y, float &x_off, float &y_off)
+{
+    double x_offset = (double(x) - CENTER_GRID_CELL_OFFSET)/SIZE_OF_GRID_CELL;
+    double y_offset = (double(y) - CENTER_GRID_CELL_OFFSET)/SIZE_OF_GRID_CELL;
+
+    int x_val = int(x_offset + CENTER_GRID_CELL_ID + 0.5f);
+    int y_val = int(y_offset + CENTER_GRID_CELL_ID + 0.5f);
+    x_off = (float(x_offset) - x_val + CENTER_GRID_CELL_ID) * SIZE_OF_GRID_CELL;
+    y_off = (float(y_offset) - y_val + CENTER_GRID_CELL_ID) * SIZE_OF_GRID_CELL;
+    return CellCoord(x_val, y_val);
+}
+
+inline void NormalizeMapCoord(float &c)
+{
+    if (c > MAP_HALFSIZE - 0.5f)
+        c = MAP_HALFSIZE - 0.5f;
+    else if (c < -(MAP_HALFSIZE - 0.5f))
+        c = -(MAP_HALFSIZE - 0.5f);
+}
+
+inline bool IsValidMapCoord(float c)
+{
+    return finite__(c) && (std::fabs(c) <= MAP_HALFSIZE - 0.5f);
+}
+
+inline bool IsValidMapCoord(float x, float y)
+{
+    return IsValidMapCoord(x) && IsValidMapCoord(y);
+}
+
+inline bool IsValidMapCoord(float x, float y, float z)
+{
+    return IsValidMapCoord(x, y) && finite__(z);
+}
+
+inline bool IsValidMapCoord(float x, float y, float z, float o)
+{
+    return IsValidMapCoord(x, y, z) && finite__(o);
+}
+
+} // namespace Trinity
+
+#undef finite__
+
+#endif // TRINITY_GRIDDEFINES_H

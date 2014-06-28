@@ -28,6 +28,7 @@
 #include "MapRefManager.h"
 #include "DynamicTree.h"
 #include "GameObjectModel.h"
+#include "NGrid.h"
 #include "ScriptInfo.hpp"
 
 #include <bitset>

@@ -176,7 +176,7 @@ public:
                 continue;
 
             // skip spells with first rank learned as talent (and all talents then also)
-            if (sSpellMgr->IsTalent(spellInfo->GetFirstRankSpell()->Id) > 0)
+            if (sSpellMgr->IsTalent(spellInfo->GetFirstRankSpell()->Id))
                 continue;
 
             // skip broken spells

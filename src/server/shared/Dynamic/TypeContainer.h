@@ -40,16 +40,16 @@ namespace Detail {
  * it become the most powerfully container in the whole system.
  */
 template <typename T>
-struct ContainerMapList final
+struct ContainerMapList
 {
     std::vector<T*> elements;
 };
 
 template <>
-struct ContainerMapList<TypeNull> final { };
+struct ContainerMapList<TypeNull> { };
 
 template <typename Head, typename Tail>
-struct ContainerMapList<TypeList<Head, Tail>> final
+struct ContainerMapList<TypeList<Head, Tail>>
 {
     ContainerMapList<Head> head;
     ContainerMapList<Tail> tail;

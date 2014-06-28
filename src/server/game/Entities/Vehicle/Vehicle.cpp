@@ -437,7 +437,7 @@ bool Vehicle::AddPassenger(Unit* unit, int8 seatId)
         unit->SendClearTarget();                                 // SMSG_BREAK_TARGET
         unit->SetControlled(true, UNIT_STATE_ROOT);              // SMSG_FORCE_ROOT - In some cases we send SMSG_SPLINE_MOVE_ROOT here (for creatures)
                                                                  // also adds MOVEMENTFLAG_ROOT
-        Movement::MoveSplineInit init(*unit);
+        Movement::MoveSplineInit init(unit);
         init.DisableTransportPathTransformations();
         init.MoveTo(unit->m_movementInfo.t_pos.m_positionX, unit->m_movementInfo.t_pos.m_positionY, unit->m_movementInfo.t_pos.m_positionZ);
         init.SetFacing(0.0f);
@@ -597,7 +597,7 @@ uint8 Vehicle::GetAvailableSeatCount() const
     return ret;
 }
 
-void Vehicle::CalculatePassengerPosition(float& x, float& y, float& z, float& o)
+void Vehicle::CalculatePassengerPosition(float& x, float& y, float& z, float& o) const
 {
     float inx = x, iny = y, inz = z, ino = o;
     o = GetBase()->GetOrientation() + ino;
@@ -606,7 +606,7 @@ void Vehicle::CalculatePassengerPosition(float& x, float& y, float& z, float& o)
     z = GetBase()->GetPositionZ() + inz;
 }
 
-void Vehicle::CalculatePassengerOffset(float& x, float& y, float& z, float& o)
+void Vehicle::CalculatePassengerOffset(float& x, float& y, float& z, float& o) const
 {
     o -= GetBase()->GetOrientation();
     z -= GetBase()->GetPositionZ();

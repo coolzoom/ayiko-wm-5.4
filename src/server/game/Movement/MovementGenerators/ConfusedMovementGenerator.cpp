@@ -133,7 +133,7 @@ bool ConfusedMovementGenerator<T>::DoUpdate(T *unit, uint32 diff)
             float x = i_waypoints[i_nextMove][0];
             float y = i_waypoints[i_nextMove][1];
             float z = i_waypoints[i_nextMove][2];
-            Movement::MoveSplineInit init(*unit);
+            Movement::MoveSplineInit init(unit);
             init.MoveTo(x, y, z);
             init.SetWalk(true);
             init.Launch();

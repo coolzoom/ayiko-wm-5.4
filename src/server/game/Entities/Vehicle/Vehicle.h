@@ -81,10 +81,10 @@ class Vehicle : public TransportBase
         void InitMovementInfoForBase();
 
         /// This method transforms supplied transport offsets into global coordinates
-        void CalculatePassengerPosition(float& x, float& y, float& z, float& o);
+        void CalculatePassengerPosition(float& x, float& y, float& z, float& o) const;
 
         /// This method transforms supplied global coordinates into local offsets
-        void CalculatePassengerOffset(float& x, float& y, float& z, float& o);
+        void CalculatePassengerOffset(float& x, float& y, float& z, float& o) const;
 
         Unit* _me;
         VehicleEntry const* _vehicleInfo;

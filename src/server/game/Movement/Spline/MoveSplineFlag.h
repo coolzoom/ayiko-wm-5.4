@@ -18,17 +18,15 @@
 
 #ifndef TRINITYSERVER_MOVESPLINEFLAG_H
 #define TRINITYSERVER_MOVESPLINEFLAG_H
+
 #include "MovementTypedefs.h"
 
 #include <string>
 
 namespace Movement
 {
-#if defined( __GNUC__ )
-#pragma pack(1)
-#else
-#pragma pack(push,1)
-#endif
+
+#pragma pack(push, 1)
 
     class MoveSplineFlag
     {
@@ -71,10 +69,10 @@ namespace Movement
             Mask_Final_Facing   = Final_Point | Final_Target | Final_Angle,
             // animation ids stored here, see AnimType enum, used with Animation flag
             Mask_Animations     = 0x7,
-            // flags that shouldn't be appended into SMSG_MONSTER_MOVE packet, should be more probably
+            // flags that shouldn't be appended into SMSG_MONSTER_MOVE\SMSG_MONSTER_MOVE_TRANSPORT packet, should be more probably
             Mask_No_Monster_Move = Mask_Final_Facing | Mask_Animations | Done,
             // Unused, not suported flags
-            Mask_Unused         = No_Spline|Enter_Cycle|Frozen|Unknown0|Unknown2|Unknown3|Unknown4|Unknown6|Unknown7|Unknown8|Unknown9,
+            Mask_Unused         = No_Spline|Enter_Cycle|Frozen|Unknown0|Unknown2|Unknown3|Unknown4|Unknown6|Unknown7|Unknown8|Unknown9
         };
 
         inline uint32& raw() { return (uint32&)*this; }
@@ -143,11 +141,9 @@ namespace Movement
         bool unknown8            : 1;
         bool unknown9            : 1;
     };
-#if defined( __GNUC__ )
-#pragma pack()
-#else
+
 #pragma pack(pop)
-#endif
+
 }
 
 #endif // TRINITYSERVER_MOVESPLINEFLAG_H

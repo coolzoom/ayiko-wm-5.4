@@ -30,19 +30,21 @@ namespace Movement
         ToGround    = 0, // 460 = ToGround, index of AnimationData.dbc
         FlyToFly    = 1, // 461 = FlyToFly?
         ToFly       = 2, // 458 = ToFly
-        FlyToGround = 3, // 463 = FlyToGround
+        FlyToGround = 3  // 463 = FlyToGround
     };
 
     // Transforms coordinates from global to transport offsets
     class TransportPathTransform
     {
     public:
-        TransportPathTransform(Unit& owner, bool transformForTransport)
-            : _owner(owner), _transformForTransport(transformForTransport) { }
-        Vector3 operator()(Vector3 input);
+        TransportPathTransform(Unit* owner, bool transformForTransport)
+            : _owner(owner), _transformForTransport(transformForTransport)
+        { }
+
+        G3D::Vector3 operator()(G3D::Vector3 const &input);
 
     private:
-        Unit& _owner;
+        Unit* _owner;
         bool _transformForTransport;
     };
 
@@ -52,15 +54,17 @@ namespace Movement
     {
     public:
 
-        explicit MoveSplineInit(Unit& m);
+        explicit MoveSplineInit(Unit* m);
 
         /*  Final pass of initialization that launches spline movement.
          */
         void Launch();
 
+        void LaunchTeleport();
+
         /*  Final pass of initialization that stops movement.
          */
-        void Stop(bool force = false);
+        void Stop();
 
         /* Adds movement by parabolic trajectory
          * @param amplitude  - the maximum height of parabola, value could be negative and positive
@@ -78,8 +82,8 @@ namespace Movement
          * you can have only one final facing: previous will be overriden
          */
         void SetFacing(float angle);
-        void SetFacing(Vector3 const& point);
-        void SetFacing(const Unit * target);
+        void SetFacing(G3D::Vector3 const& point);
+        void SetFacing(const Unit* target);
 
         /* Initializes movement by path
          * @param path - array of points, shouldn't be empty
@@ -87,9 +91,9 @@ namespace Movement
          */
         void MovebyPath(const PointsArray& path, int32 pointId = 0);
 
-        /* Initializes simple A to B mition, A is current unit's position, B is destination
+        /* Initializes simple A to B motion, A is current unit's position, B is destination
          */
-        void MoveTo(const Vector3& destination);
+        void MoveTo(const G3D::Vector3& destination);
         void MoveTo(float x, float y, float z);
 
         /* Sets Id of fisrt point of the path. When N-th path point will be done ILisener will notify that pointId + N done
@@ -101,31 +105,38 @@ namespace Movement
          * if not enabled linear spline mode will be choosen. Disabled by default
          */
         void SetSmooth();
-        /* Enables CatmullRom spline interpolation mode, enables flying animation. Disabled by default
-         */
+
+        // Enables CatmullRom spline interpolation mode, enables flying animation. Disabled by default
         void SetFly();
+
+        /* Waypoints in packets will be sent without compression
+         */
+        void SetUncompressed();
+
         /* Enables walk mode. Disabled by default
          */
-        void EnableTaxiFlight();
-        /* Flags used in taxi
-        */
-
         void SetWalk(bool enable);
+
         /* Makes movement cyclic. Disabled by default
          */
         void SetCyclic();
+
         /* Enables falling mode. Disabled by default
          */
         void SetFall();
+
         /* Enters transport. Disabled by default
          */
         void SetTransportEnter();
+
         /* Exits transport. Disabled by default
          */
         void SetTransportExit();
+
         /* Inverses unit model orientation. Disabled by default
          */
         void SetOrientationInversed();
+
         /* Fixes unit's model rotation. Disabled by default
          */
         void SetOrientationFixed(bool enable);
@@ -142,21 +153,18 @@ namespace Movement
         /* Disables transport coordinate transformations for cases where raw offsets are available
         */
         void DisableTransportPathTransformations();
-    protected:
 
+    private:
         MoveSplineInitArgs args;
-        Unit&  unit;
+        Unit* unit;
     };
 
     inline void MoveSplineInit::SetFly() { args.flags.flying = true; }
     inline void MoveSplineInit::SetWalk(bool enable) { args.flags.walkmode = enable; }
     inline void MoveSplineInit::SetSmooth() { args.flags.EnableCatmullRom(); }
+    inline void MoveSplineInit::SetUncompressed() { args.flags.uncompressedPath = true; }
     inline void MoveSplineInit::SetCyclic() { args.flags.cyclic = true; }
-    inline void MoveSplineInit::SetVelocity(float vel)
-    {
-        args.velocity = vel;
-        args.HasVelocity = true;
-    }
+    inline void MoveSplineInit::SetVelocity(float vel) { args.velocity = vel; args.HasVelocity = true; }
     inline void MoveSplineInit::SetOrientationInversed() { args.flags.orientationInversed = true;}
     inline void MoveSplineInit::SetTransportEnter() { args.flags.EnableTransportEnter(); }
     inline void MoveSplineInit::SetTransportExit() { args.flags.EnableTransportExit(); }
@@ -171,8 +179,7 @@ namespace Movement
 
     inline void MoveSplineInit::MoveTo(float x, float y, float z)
     {
-        Vector3 v(x, y, z);
-        MoveTo(v);
+        MoveTo(G3D::Vector3(x, y, z));
     }
 
     inline void MoveSplineInit::SetParabolic(float amplitude, float time_shift)
@@ -188,10 +195,10 @@ namespace Movement
         args.flags.EnableAnimation((uint8)anim);
     }
 
-    inline void MoveSplineInit::SetFacing(Vector3 const& spot)
+    inline void MoveSplineInit::SetFacing(G3D::Vector3 const& spot)
     {
         TransportPathTransform transform(unit, args.TransformForTransport);
-        Vector3 finalSpot = transform(spot);
+        G3D::Vector3 finalSpot = transform(spot);
         args.facing.f.x = finalSpot.x;
         args.facing.f.y = finalSpot.y;
         args.facing.f.z = finalSpot.z;
@@ -200,4 +207,5 @@ namespace Movement
 
     inline void MoveSplineInit::DisableTransportPathTransformations() { args.TransformForTransport = false; }
 }
+
 #endif // TRINITYSERVER_MOVESPLINEINIT_H

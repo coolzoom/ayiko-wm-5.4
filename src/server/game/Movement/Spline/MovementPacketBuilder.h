@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -30,6 +30,7 @@ namespace Movement
 
     struct PacketBuilder
     {
+        static void BuildLaunchPacket(WorldPacket &data, Unit const *unit);
         static void WriteCreateBits(MoveSpline const& moveSpline, ByteBuffer& data);
         static void WriteCreateData(MoveSpline const& moveSpline, ByteBuffer& data);
         static void WriteCreateGuid(MoveSpline const& moveSpline, ByteBuffer& data);

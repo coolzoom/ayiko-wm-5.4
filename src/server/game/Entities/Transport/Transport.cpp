@@ -627,7 +627,7 @@ void Transport::UpdatePlayerPositions()
     }
 }
 
-void Transport::CalculatePassengerPosition(float& x, float& y, float& z, float& o)
+void Transport::CalculatePassengerPosition(float& x, float& y, float& z, float& o) const
 {
     float inx = x, iny = y, inz = z, ino = o;
     o = GetOrientation() + ino;
@@ -636,7 +636,7 @@ void Transport::CalculatePassengerPosition(float& x, float& y, float& z, float& 
     z = GetPositionZ() + inz;
 }
 
-void Transport::CalculatePassengerOffset(float& x, float& y, float& z, float& o)
+void Transport::CalculatePassengerOffset(float& x, float& y, float& z, float& o) const
 {
     o = o - GetOrientation();
     z -= GetPositionZ();

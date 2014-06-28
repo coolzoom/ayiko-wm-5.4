@@ -1108,6 +1108,7 @@ class spell_warr_charge : public SpellScriptLoader
             DOUBLE_TIME        = 103827,
             WARBRINGER         = 103828,
             WARBRINGER_STUN    = 105771,
+            WARBRINGER_SLOW    = 137637,
             DOUBLE_TIME_MARKER = 124184,
         };
 
@@ -1134,6 +1135,9 @@ class spell_warr_charge : public SpellScriptLoader
                 return;
 
             uint32 const stunSpellId = caster->HasAura(WARBRINGER) ? WARBRINGER_STUN : CHARGE_STUN;
+            if (caster->HasAura(WARBRINGER))
+                caster->CastSpell(target, WARBRINGER_SLOW, true);
+
             caster->CastSpell(target, stunSpellId, true);
         }
 

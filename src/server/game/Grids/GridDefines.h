@@ -24,7 +24,7 @@
 #include <vector>
 #include <cmath>
 
-#ifdef _MSVC_VER
+#ifdef _MSC_VER
 #  include <float.h>
 #  define finite__ _finite
 #else

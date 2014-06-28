@@ -593,10 +593,11 @@ void Map::Update(const uint32 diff)
             {
                 player->Update(diff);
                 VisitNearbyCellsOf(this, player, gridObjectUpdate, worldObjectUpdate);
-                i_objectUpdater.updateCollected(diff);
             }
         }
     }
+
+    i_objectUpdater.updateCollected(diff);
 
     // non-player active objects, increasing iterator in the loop in case of object removal
     for (m_activeNonPlayersIter = m_activeNonPlayers.begin(); m_activeNonPlayersIter != m_activeNonPlayers.end();)

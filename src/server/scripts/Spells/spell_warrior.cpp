@@ -392,13 +392,13 @@ class spell_warr_second_wind final : public SpellScriptLoader
         bool checkProc(ProcEventInfo &)
         {
             Unit * const caster = GetCaster();
-            if (!caster || caster->HasAura(WARRIOR_SPELL_SECOND_WIND_REGEN))
+            if (!caster || caster->HasAura(WARRIOR_SPELL_SECOND_WIND_REGEN) || caster->GetHealthPct() >= 35)
                 return false;
 
             if (!caster->HasAura(WARRIOR_SPELL_SECOND_WIND_DUMMY))
                 caster->CastSpell(caster, WARRIOR_SPELL_SECOND_WIND_DUMMY, true);
 
-            return caster->GetHealthPct() <= 35;
+            return true;
         }
 
         void onProc(AuraEffect const *, ProcEventInfo &)
@@ -886,6 +886,18 @@ class spell_warr_shockwave : public SpellScriptLoader
         {
             PrepareSpellScript(spell_warr_shockwave_SpellScript);
 
+            void CountTargets(std::list<WorldObject*>& targetList)
+            {
+                _targetCount = targetList.size();
+            }
+
+            void HandleReduce()
+            {
+                if (_targetCount >= 3)
+                    if (GetCaster() && GetCaster()->GetTypeId() == TYPEID_PLAYER)
+                        GetCaster()->ToPlayer()->ReduceSpellCooldown(GetSpellInfo()->Id, GetSpellInfo()->Effects[EFFECT_3].BasePoints * IN_MILLISECONDS);
+            }
+
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
                 if (Player* const _player = GetCaster()->ToPlayer())
@@ -895,8 +907,13 @@ class spell_warr_shockwave : public SpellScriptLoader
 
             void Register()
             {
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_warr_shockwave_SpellScript::CountTargets, EFFECT_0, TARGET_UNIT_CONE_ENEMY_104);
+                AfterCast += SpellCastFn(spell_warr_shockwave_SpellScript::HandleReduce);
                 OnEffectHitTarget += SpellEffectFn(spell_warr_shockwave_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
+
+        private:
+            uint32 _targetCount;
         };
 
         SpellScript* GetSpellScript() const

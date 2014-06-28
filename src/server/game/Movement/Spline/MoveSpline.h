@@ -50,7 +50,7 @@ namespace Movement
             Result_NextSegment  = 0x08
         };
 
-        friend class PacketBuilder;
+        friend struct PacketBuilder;
 
         MoveSpline();
 

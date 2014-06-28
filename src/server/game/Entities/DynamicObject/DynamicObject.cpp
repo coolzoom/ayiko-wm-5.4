@@ -16,7 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Common.h"
+#include "DynamicObject.h"
 #include "UpdateMask.h"
 #include "Opcodes.h"
 #include "World.h"
@@ -27,8 +27,9 @@
 #include "GridNotifiersImpl.h"
 #include "ScriptMgr.h"
 
-DynamicObject::DynamicObject(bool isWorldObject) : WorldObject(isWorldObject),
-    _aura(NULL), _removedAura(NULL), _caster(NULL), _duration(0), _isViewpoint(false)
+DynamicObject::DynamicObject(bool isWorldObject)
+    : WorldObject(isWorldObject), _aura(NULL), _removedAura(NULL),
+    _isBoundToCaster(false), _duration(0), _isViewpoint(false)
 {
     m_objectType |= TYPEMASK_DYNAMICOBJECT;
     m_objectTypeId = TYPEID_DYNAMICOBJECT;
@@ -42,7 +43,7 @@ DynamicObject::~DynamicObject()
 {
     // make sure all references were properly removed
     ASSERT(!_aura);
-    ASSERT(!_caster);
+    ASSERT(!_isBoundToCaster);
     ASSERT(!_isViewpoint);
     delete _removedAura;
 }
@@ -79,19 +80,19 @@ void DynamicObject::RemoveFromWorld()
     }
 }
 
-bool DynamicObject::CreateDynamicObject(uint32 guidlow, Unit* caster, uint32 spellId, Position const& pos, float radius, DynamicObjectType /*type*/)
+bool DynamicObject::CreateDynamicObject(uint32 guidlow, Unit* caster, SpellInfo const *spell, Position const& pos, float radius, DynamicObjectType /*type*/)
 {
     SetMap(caster->GetMap());
     Relocate(pos);
     if (!IsPositionValid())
     {
-        TC_LOG_ERROR("misc", "DynamicObject (spell %u) not created. Suggested coordinates isn't valid (X: %f Y: %f)", spellId, GetPositionX(), GetPositionY());
+        TC_LOG_ERROR("misc", "DynamicObject (spell %u) not created. Suggested coordinates isn't valid (X: %f Y: %f)", spell->Id, GetPositionX(), GetPositionY());
         return false;
     }
 
     WorldObject::_Create(guidlow, HIGHGUID_DYNAMICOBJECT, caster->GetPhaseMask());
 
-    SetEntry(spellId);
+    SetEntry(spell->Id);
     SetObjectScale(1.0f);
     SetUInt64Value(DYNAMICOBJECT_CASTER, caster->GetGUID());
 
@@ -102,14 +103,12 @@ bool DynamicObject::CreateDynamicObject(uint32 guidlow, Unit* caster, uint32 spe
     // I saw sniffed...
 
     // Blizz set visual spell Id in 3 first byte of DYNAMICOBJECT_BYTES after 5.X
-    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
-    if (spellInfo)
     {
-        uint32 visual = spellInfo->SpellVisual[0] ? spellInfo->SpellVisual[0] : spellInfo->SpellVisual[1];
+        auto const visual = spell->SpellVisual[0] ? spell->SpellVisual[0] : spell->SpellVisual[1];
         SetUInt32Value(DYNAMICOBJECT_BYTES, 0x10000000 | visual);
     }
 
-    SetUInt32Value(DYNAMICOBJECT_SPELLID, spellId);
+    SetUInt32Value(DYNAMICOBJECT_SPELLID, spell->Id);
     SetFloatValue(DYNAMICOBJECT_RADIUS, radius);
     SetUInt32Value(DYNAMICOBJECT_CASTTIME, getMSTime());
 
@@ -125,8 +124,8 @@ bool DynamicObject::CreateDynamicObject(uint32 guidlow, Unit* caster, uint32 spe
 void DynamicObject::Update(uint32 p_time)
 {
     // caster has to be always available and in the same map
-    ASSERT(_caster);
-    ASSERT(_caster->GetMap() == GetMap());
+    ASSERT(_isBoundToCaster);
+    //ASSERT(_caster->GetMap() == GetMap());
 
     bool expired = false;
 
@@ -201,7 +200,7 @@ void DynamicObject::RemoveAura()
 
 void DynamicObject::SetCasterViewpoint()
 {
-    if (Player* caster = _caster->ToPlayer())
+    if (Player* caster = GetCaster()->ToPlayer())
     {
         caster->SetViewpoint(this, true);
         _isViewpoint = true;
@@ -210,26 +209,36 @@ void DynamicObject::SetCasterViewpoint()
 
 void DynamicObject::RemoveCasterViewpoint()
 {
-    if (Player* caster = _caster->ToPlayer())
+    if (Player* caster = GetCaster()->ToPlayer())
     {
         caster->SetViewpoint(this, false);
         _isViewpoint = false;
     }
 }
 
+Unit * DynamicObject::GetCaster() const
+{
+    return _isBoundToCaster ? ObjectAccessor::GetUnit(*this, GetCasterGUID()) : NULL;
+}
+
 void DynamicObject::BindToCaster()
 {
-    //ASSERT(!_caster);
-    _caster = ObjectAccessor::GetUnit(*this, GetCasterGUID());
-    //ASSERT(_caster);
-    //ASSERT(_caster->GetMap() == GetMap());
-    if (_caster)
-        _caster->_RegisterDynObject(this);
+    ASSERT(!_isBoundToCaster);
+
+    Unit * const caster = ObjectAccessor::GetUnit(*this, GetCasterGUID());
+    ASSERT(caster && caster->GetMap() == GetMap());
+
+    caster->_RegisterDynObject(this);
+    _isBoundToCaster = true;
 }
 
 void DynamicObject::UnbindFromCaster()
 {
-    //ASSERT(_caster);
-    _caster->_UnregisterDynObject(this);
-    _caster = NULL;
+    ASSERT(_isBoundToCaster);
+
+    Unit * const caster = GetCaster();
+    ASSERT(caster);
+    caster->_UnregisterDynObject(this);
+
+    _isBoundToCaster = false;
 }

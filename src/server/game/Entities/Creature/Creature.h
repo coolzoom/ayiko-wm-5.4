@@ -469,12 +469,9 @@ protected:
     MapCreature() : _moveState(CREATURE_CELL_MOVE_NONE) {}
 
 private:
-    Cell _currentCell;
-    Cell const& GetCurrentCell() const { return _currentCell; }
-    void SetCurrentCell(Cell const& cell) { _currentCell = cell; }
-
     CreatureCellMoveState _moveState;
     Position _newPosition;
+
     void SetNewCellPosition(float x, float y, float z, float o)
     {
         _moveState = CREATURE_CELL_MOVE_ACTIVE;

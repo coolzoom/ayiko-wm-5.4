@@ -658,8 +658,7 @@ class GridObject
 
 public:
     GridObject()
-        : storage_()
-        , offset_(std::numeric_limits<std::size_t>::max())
+        : offset_(std::numeric_limits<std::size_t>::max())
     { }
 
     ~GridObject()
@@ -669,39 +668,37 @@ public:
 
     bool IsInGrid() const
     {
-        return storage_ != nullptr;
+        return offset_ != std::numeric_limits<std::size_t>::max();
     }
 
     void AddToGrid(ObjectTypeStorage &storage)
     {
         ASSERT(!IsInGrid());
 
-        storage_ = &storage;
-
-        offset_ = storage_->size();
-        storage_->emplace_back(static_cast<ObjectType*>(this));
+        offset_ = storage.size();
+        storage.emplace_back(static_cast<ObjectType*>(this));
     }
 
-    void RemoveFromGrid()
+    void RemoveFromGrid(ObjectTypeStorage &storage)
     {
         ASSERT(IsInGrid());
-        ASSERT(storage_->size() > offset_);
-        ASSERT((*storage_)[offset_] == static_cast<ObjectType*>(this));
+        ASSERT(storage.size() > offset_);
 
-        // First, swap with last element in storage
-        std::swap((*storage_)[offset_], storage_->back());
+        auto &atOffset = storage[offset_];
+        ASSERT(atOffset == static_cast<ObjectType*>(this));
 
-        // Then, adjust offset for swapped element
-        static_cast<SelfType*>((*storage_)[offset_])->offset_ = offset_;
+        // swap with last element in storage
+        std::swap(atOffset, storage.back());
 
-        // Last, remove self from grid storage
-        storage_->pop_back();
-        storage_ = nullptr;
+        // adjust offset for swapped element
+        static_cast<SelfType*>(atOffset)->offset_ = offset_;
+
+        // remove self from grid storage
+        storage.pop_back();
         offset_ = std::numeric_limits<std::size_t>::max();
     }
 
 private:
-    ObjectTypeStorage *storage_;
     std::size_t offset_;
 };
 

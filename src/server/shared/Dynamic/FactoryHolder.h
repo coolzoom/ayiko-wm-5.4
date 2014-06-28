@@ -20,7 +20,6 @@
 #define TRINITY_FACTORY_HOLDER
 
 #include "Define.h"
-#include "Dynamic/TypeList.h"
 #include "ObjectRegistry.h"
 
 /** FactoryHolder holds a factory object of a specific type

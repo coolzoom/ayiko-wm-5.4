@@ -112,25 +112,32 @@ public:
 
 public:
     template <typename SpecificType>
-    size_t Count() const
+    std::size_t count() const
     {
-        auto const &m = Trinity::Detail::mapForType<SpecificType>(i_elements);
+        auto const &m = Trinity::Detail::mapForType<SpecificType>(m_objectMap);
         return m.elements.size();
     }
 
     template <typename SpecificType>
     void insert(SpecificType *obj)
     {
-        auto &m = Trinity::Detail::mapForType<SpecificType>(i_elements);
+        auto &m = Trinity::Detail::mapForType<SpecificType>(m_objectMap);
         obj->AddToGrid(m.elements);
     }
 
-    ObjectMap & GetElements() { return i_elements; }
+    template <typename SpecificType>
+    void remove(SpecificType *obj)
+    {
+        auto &m = Trinity::Detail::mapForType<SpecificType>(m_objectMap);
+        obj->RemoveFromGrid(m.elements);
+    }
 
-    ObjectMap const & GetElements() const { return i_elements; }
+    ObjectMap & objectMap() { return m_objectMap; }
+
+    ObjectMap const & objectMap() const { return m_objectMap; }
 
 private:
-    ObjectMap i_elements;
+    ObjectMap m_objectMap;
 };
 
 } // namespace Trinity

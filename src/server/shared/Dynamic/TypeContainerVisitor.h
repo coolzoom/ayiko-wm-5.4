@@ -54,7 +54,7 @@ inline void VisitorHelper(Visitor &v, ContainerMapList<TypeList<Head, Tail>> &c)
 template <typename Visitor, typename ObjectTypes>
 inline void VisitorHelper(Visitor &v, TypeMapContainer<ObjectTypes> &c)
 {
-    VisitorHelper(v, c.GetElements());
+    VisitorHelper(v, c.objectMap());
 }
 
 } // namespace Detail

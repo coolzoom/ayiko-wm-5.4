@@ -309,7 +309,7 @@ void Map::InitVisibilityDistance()
 
 // Template specialization of utility methods
 template <typename T>
-void Map::AddToGrid(T* obj, Cell const& cell)
+void Map::AddToGrid(T *obj, Cell const &cell)
 {
     auto const ngrid = getNGrid(cell.GridX(), cell.GridY());
     if (obj->IsWorldObject())
@@ -319,29 +319,41 @@ void Map::AddToGrid(T* obj, Cell const& cell)
 }
 
 template <>
-void Map::AddToGrid(Player *obj, Cell const& cell)
+void Map::AddToGrid(Player *obj, Cell const &cell)
 {
     auto const ngrid = getNGrid(cell.GridX(), cell.GridY());
     ngrid->GetGrid(cell.CellX(), cell.CellY()).AddWorldObject(obj);
 }
 
 template <>
-void Map::AddToGrid(GameObject *obj, Cell const& cell)
+void Map::AddToGrid(GameObject *obj, Cell const &cell)
 {
     auto const ngrid = getNGrid(cell.GridX(), cell.GridY());
     ngrid->GetGrid(cell.CellX(), cell.CellY()).AddGridObject(obj);
 }
 
-template <>
-void Map::AddToGrid(Creature *obj, Cell const& cell)
+template <typename T>
+void Map::RemoveFromGrid(T *obj, Cell const &cell)
 {
     auto const ngrid = getNGrid(cell.GridX(), cell.GridY());
     if (obj->IsWorldObject())
-        ngrid->GetGrid(cell.CellX(), cell.CellY()).AddWorldObject(obj);
+        ngrid->GetGrid(cell.CellX(), cell.CellY()).template RemoveWorldObject<T>(obj);
     else
-        ngrid->GetGrid(cell.CellX(), cell.CellY()).AddGridObject(obj);
+        ngrid->GetGrid(cell.CellX(), cell.CellY()).template RemoveGridObject<T>(obj);
+}
 
-    obj->SetCurrentCell(cell);
+template <>
+void Map::RemoveFromGrid(Player *obj, Cell const &cell)
+{
+    auto const ngrid = getNGrid(cell.GridX(), cell.GridY());
+    ngrid->GetGrid(cell.CellX(), cell.CellY()).RemoveWorldObject(obj);
+}
+
+template <>
+void Map::RemoveFromGrid(GameObject *obj, Cell const &cell)
+{
+    auto const ngrid = getNGrid(cell.GridX(), cell.GridY());
+    ngrid->GetGrid(cell.CellX(), cell.CellY()).RemoveGridObject(obj);
 }
 
 void Map::SwitchGridContainers(Creature* obj, bool on)
@@ -365,17 +377,19 @@ void Map::SwitchGridContainers(Creature* obj, bool on)
 
     auto &grid = ngrid->GetGrid(cell.CellX(), cell.CellY());
 
-    obj->RemoveFromGrid(); //This step is not really necessary but we want to do ASSERT in remove/add
     if (on)
     {
+        grid.RemoveGridObject(obj);
         grid.AddWorldObject(obj);
         AddWorldObject(obj);
     }
     else
     {
+        grid.RemoveWorldObject(obj);
         grid.AddGridObject(obj);
         RemoveWorldObject(obj);
     }
+
     obj->m_isTempWorldObject = on;
 }
 
@@ -697,7 +711,7 @@ void Map::RemovePlayerFromMap(Player* player, bool remove)
 
     player->UpdateObjectVisibility(true);
     if (player->IsInGrid())
-        player->RemoveFromGrid();
+        RemoveFromGrid(player, Cell(player->GetPositionX(), player->GetPositionY()));
     else
         ASSERT(remove); //maybe deleted in logoutplayer when player is not in a map
 
@@ -716,8 +730,7 @@ void Map::RemoveFromMap(T *obj, bool remove)
         RemoveFromActive(obj);
 
     obj->UpdateObjectVisibility(true);
-    obj->RemoveFromGrid();
-
+    RemoveFromGrid(obj, Cell(obj->GetPositionX(), obj->GetPositionY()));
     obj->ResetMap();
 
     if (remove)
@@ -752,7 +765,7 @@ void Map::PlayerRelocation(Player* player, float x, float y, float z, float orie
                      player->GetName().c_str(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(),
                      new_cell.GridX(), new_cell.GridY(), new_cell.CellX(), new_cell.CellY());
 
-        player->RemoveFromGrid();
+        RemoveFromGrid(player, old_cell);
 
         if (old_cell.DiffGrid(new_cell))
             EnsureGridLoadedForActiveObject(new_cell, player);
@@ -765,9 +778,7 @@ void Map::PlayerRelocation(Player* player, float x, float y, float z, float orie
 
 void Map::CreatureRelocation(Creature* creature, float x, float y, float z, float ang, bool respawnRelocationOnFail)
 {
-    ASSERT(CheckGridIntegrity(creature, false));
-
-    Cell old_cell = creature->GetCurrentCell();
+    Cell old_cell(creature->GetPositionX(), creature->GetPositionY());
     Cell new_cell(x, y);
 
     if (!respawnRelocationOnFail && !getNGrid(new_cell.GridX(), new_cell.GridY()))
@@ -808,8 +819,6 @@ void Map::CreatureRelocation(Creature* creature, float x, float y, float z, floa
                 creature->RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
         }
     }
-
-    ASSERT(CheckGridIntegrity(creature, true));
 }
 
 void Map::AddCreatureToMoveList(Creature* c, float x, float y, float z, float ang)
@@ -887,7 +896,7 @@ void Map::MoveAllCreaturesInMoveList()
 
 bool Map::CreatureCellRelocation(Creature* c, Cell new_cell)
 {
-    Cell const& old_cell = c->GetCurrentCell();
+    Cell old_cell(c->GetPositionX(), c->GetPositionY());
     if (!old_cell.DiffGrid(new_cell))                       // in same grid
     {
         // if in same cell then none do
@@ -897,7 +906,7 @@ bool Map::CreatureCellRelocation(Creature* c, Cell new_cell)
                 TC_LOG_DEBUG("maps", "Creature (GUID: %u Entry: %u) moved in grid[%u, %u] from cell[%u, %u] to cell[%u, %u].", c->GetGUIDLow(), c->GetEntry(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.CellX(), new_cell.CellY());
             #endif
 
-            c->RemoveFromGrid();
+            RemoveFromGrid(c, old_cell);
             AddToGrid(c, new_cell);
         }
         else
@@ -919,7 +928,7 @@ bool Map::CreatureCellRelocation(Creature* c, Cell new_cell)
             TC_LOG_DEBUG("maps", "Active creature (GUID: %u Entry: %u) moved from grid[%u, %u]cell[%u, %u] to grid[%u, %u]cell[%u, %u].", c->GetGUIDLow(), c->GetEntry(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.GridX(), new_cell.GridY(), new_cell.CellX(), new_cell.CellY());
         #endif
 
-        c->RemoveFromGrid();
+        RemoveFromGrid(c, old_cell);
         AddToGrid(c, new_cell);
 
         return true;
@@ -932,7 +941,7 @@ bool Map::CreatureCellRelocation(Creature* c, Cell new_cell)
             TC_LOG_DEBUG("maps", "Creature (GUID: %u Entry: %u) moved from grid[%u, %u]cell[%u, %u] to grid[%u, %u]cell[%u, %u].", c->GetGUIDLow(), c->GetEntry(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.GridX(), new_cell.GridY(), new_cell.CellX(), new_cell.CellY());
         #endif
 
-        c->RemoveFromGrid();
+        RemoveFromGrid(c, old_cell);
         EnsureGridCreated(GridCoord(new_cell.GridX(), new_cell.GridY()));
         AddToGrid(c, new_cell);
 
@@ -950,17 +959,21 @@ bool Map::CreatureRespawnRelocation(Creature* c, bool diffGridOnly)
 {
     float resp_x, resp_y, resp_z, resp_o;
     c->GetRespawnPosition(resp_x, resp_y, resp_z, &resp_o);
+
+    Cell old_cell(c->GetPositionX(), c->GetPositionY());
     Cell resp_cell(resp_x, resp_y);
 
     //creature will be unloaded with grid
-    if (diffGridOnly && !c->GetCurrentCell().DiffGrid(resp_cell))
+    if (diffGridOnly && !old_cell.DiffGrid(resp_cell))
         return true;
 
     c->CombatStop();
     c->GetMotionMaster()->Clear();
 
     #ifdef TRINITY_DEBUG
-        TC_LOG_DEBUG("maps", "Creature (GUID: %u Entry: %u) moved from grid[%u, %u]cell[%u, %u] to respawn grid[%u, %u]cell[%u, %u].", c->GetGUIDLow(), c->GetEntry(), c->GetCurrentCell().GridX(), c->GetCurrentCell().GridY(), c->GetCurrentCell().CellX(), c->GetCurrentCell().CellY(), resp_cell.GridX(), resp_cell.GridY(), resp_cell.CellX(), resp_cell.CellY());
+        TC_LOG_DEBUG("maps", "Creature (GUID: %u Entry: %u) moved from grid[%u, %u]cell[%u, %u] to respawn grid[%u, %u]cell[%u, %u].",
+                     c->GetGUIDLow(), c->GetEntry(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(),
+                     resp_cell.GridX(), resp_cell.GridY(), resp_cell.CellX(), resp_cell.CellY());
     #endif
 
     // teleport it to respawn point (like normal respawn if player see)
@@ -1998,23 +2011,6 @@ bool Map::IsUnderWater(float x, float y, float z) const
             return true;
     }
     return false;
-}
-
-bool Map::CheckGridIntegrity(Creature* c, bool moved) const
-{
-    Cell const& cur_cell = c->GetCurrentCell();
-    Cell xy_cell(c->GetPositionX(), c->GetPositionY());
-    if (xy_cell != cur_cell)
-    {
-        TC_LOG_DEBUG("maps", "Creature (GUID: %u) X: %f Y: %f (%s) is in grid[%u, %u]cell[%u, %u] instead of grid[%u, %u]cell[%u, %u]",
-            c->GetGUIDLow(),
-            c->GetPositionX(), c->GetPositionY(), (moved ? "final" : "original"),
-            cur_cell.GridX(), cur_cell.GridY(), cur_cell.CellX(), cur_cell.CellY(),
-            xy_cell.GridX(),  xy_cell.GridY(),  xy_cell.CellX(),  xy_cell.CellY());
-        return true;                                        // not crash at error, just output error in debug mode
-    }
-
-    return true;
 }
 
 char const* Map::GetMapName() const

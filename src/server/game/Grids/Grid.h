@@ -61,6 +61,30 @@ public:
         i_worldObjects.template insert<SpecificObject>(obj);
     }
 
+    template<typename SpecificObject>
+    void AddGridObject(SpecificObject *obj)
+    {
+        i_gridObjects.template insert<SpecificObject>(obj);
+    }
+
+    template <typename SpecificObject>
+    void RemoveWorldObject(SpecificObject *obj)
+    {
+        i_worldObjects.template remove<SpecificObject>(obj);
+    }
+
+    template <typename SpecificObject>
+    void RemoveGridObject(SpecificObject *obj)
+    {
+        i_gridObjects.template remove<SpecificObject>(obj);
+    }
+
+    template <typename T>
+    std::size_t GetWorldObjectCountInGrid() const
+    {
+        return i_worldObjects.template count<T>();
+    }
+
     // Visit grid objects
     template <typename T>
     void Visit(Trinity::TypeContainerVisitor<T, GridObjectMap> &visitor)
@@ -73,18 +97,6 @@ public:
     void Visit(Trinity::TypeContainerVisitor<T, WorldObjectMap> &visitor)
     {
         visitor.Visit(i_worldObjects);
-    }
-
-    template <typename T>
-    uint32 GetWorldObjectCountInGrid() const
-    {
-        return i_worldObjects.template Count<T>();
-    }
-
-    template<typename SpecificObject>
-    void AddGridObject(SpecificObject *obj)
-    {
-        i_gridObjects.template insert<SpecificObject>(obj);
     }
 
 private:

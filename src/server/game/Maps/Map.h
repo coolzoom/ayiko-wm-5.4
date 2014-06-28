@@ -343,9 +343,6 @@ class Map
         // used only in MoveAllCreaturesInMoveList and ObjectGridUnloader
         bool CreatureRespawnRelocation(Creature* c, bool diffGridOnly);
 
-        // assert print helper
-        bool CheckGridIntegrity(Creature* c, bool moved) const;
-
         uint32 GetInstanceId() const { return i_InstanceId; }
         uint8 GetSpawnMode() const { return (i_spawnMode); }
         virtual bool CanEnter(Player* /*player*/) { return true; }
@@ -403,8 +400,11 @@ class Map
         void ScriptCommandStart(ScriptInfo const& script, uint32 delay, Object* source, Object* target);
 
         // Type specific code for add/remove to/from grid
-        template<class T>
-        void AddToGrid(T* object, Cell const& cell);
+        template <typename T>
+        void AddToGrid(T *object, Cell const &cell);
+
+        template <typename T>
+        void RemoveFromGrid(T *object, Cell const &cell);
 
         // must called with AddToWorld
         template<class T>

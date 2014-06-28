@@ -149,9 +149,9 @@ public:
     }
 
     template <typename T>
-    uint32 GetWorldObjectCountInNGrid() const
+    std::size_t GetWorldObjectCountInNGrid() const
     {
-        uint32 count = 0;
+        std::size_t count = 0;
         for (auto &cell : i_cells)
             count += cell.template GetWorldObjectCountInGrid<T>();
         return count;

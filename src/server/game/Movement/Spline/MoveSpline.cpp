@@ -22,24 +22,27 @@
 
 namespace Movement{
 
-extern float computeFallTime(float path_length, bool isSafeFall);
-extern float computeFallElevation(float time_passed, bool isSafeFall, float start_velocy);
-extern float computeFallElevation(float time_passed);
+MoveSpline::MoveSpline() : onTransport(false),
+    m_Id(0), time_passed(0), effect_start_time(0), vertical_acceleration(0.f),
+    initialOrientation(0.f), point_Idx(0), point_Idx_offset(0)
+{
+    splineflags.done = true;
+}
 
 Location MoveSpline::ComputePosition() const
 {
     ASSERT(Initialized());
 
     float u = 1.f;
-    int32 seg_time = spline.length(point_Idx,point_Idx+1);
-    if (seg_time > 0)
-        u = (time_passed - spline.length(point_Idx)) / (float)seg_time;
+    if (int32 segTime = spline.length(point_Idx, point_Idx + 1))
+        u = float(time_passed - spline.length(point_Idx)) / segTime;
+
     Location c;
     c.orientation = initialOrientation;
     spline.evaluate_percent(point_Idx, u, c);
 
     if (splineflags.animation)
-        ;// MoveSplineFlag::Animation disables falling or parabolic movement
+        ; // MoveSplineFlag::Animation disables falling or parabolic movement
     else if (splineflags.parabolic)
         computeParabolicElevation(c.z);
     else if (splineflags.falling)
@@ -57,7 +60,7 @@ Location MoveSpline::ComputePosition() const
     {
         if (!splineflags.hasFlag(MoveSplineFlag::OrientationFixed | MoveSplineFlag::Falling | MoveSplineFlag::Unknown0))
         {
-            Vector3 hermite;
+            G3D::Vector3 hermite;
             spline.evaluate_derivative(point_Idx, u, hermite);
             c.orientation = atan2(hermite.y, hermite.x);
         }
@@ -83,12 +86,9 @@ void MoveSpline::computeParabolicElevation(float& el) const
 
 void MoveSpline::computeFallElevation(float& el) const
 {
-    float z_now = spline.getPoint(spline.first()).z - Movement::computeFallElevation(MSToSec(time_passed));
+    float z_now = spline.getPoint(spline.first()).z - Movement::computeFallElevation(MSToSec(time_passed), false);
     float final_z = FinalDestination().z;
-    if (z_now < final_z)
-        el = final_z;
-    else
-        el = z_now;
+    el = std::max(z_now, final_z);
 }
 
 inline uint32 computeDuration(float length, float velocity)
@@ -96,35 +96,51 @@ inline uint32 computeDuration(float length, float velocity)
     return SecToMS(length / velocity);
 }
 
-struct FallInitializer
+template <typename T>
+class FallInitializer
 {
-    FallInitializer(float _start_elevation) : start_elevation(_start_elevation) {}
-    float start_elevation;
-    inline int32 operator()(Spline<int32>& s, int32 i)
+    float startElevation;
+
+public:
+    FallInitializer(float _start_elevation)
+        : startElevation(_start_elevation)
+    { }
+
+    T operator()(Spline<T>& s, int32 i) const
     {
-        return Movement::computeFallTime(start_elevation - s.getPoint(i+1).z,false) * 1000.f;
+        using Movement::computeFallTime;
+        return static_cast<T>(computeFallTime(startElevation - s.getPoint(i+1).z, false) * 1000.f);
     }
 };
 
 enum{
-    minimal_duration = 1,
+    minimal_duration = 1
 };
 
-struct CommonInitializer
+template <typename T>
+class CommonInitializer
 {
-    CommonInitializer(float _velocity) : velocityInv(1000.f/_velocity), time(minimal_duration) {}
     float velocityInv;
-    int32 time;
-    inline int32 operator()(Spline<int32>& s, int32 i)
+    T time;
+
+public:
+    CommonInitializer(float _velocity)
+        : velocityInv(1000.f / _velocity), time(0)
+    { }
+
+    T operator()(Spline<T>& s, int32 i)
     {
-        time += (s.SegLength(i) * velocityInv);
+        float const length = s.SegLength(i);
+        if (G3D::fuzzyNe(length, 0.0))
+            time += static_cast<T>(length * velocityInv);
+
         return time;
     }
 };
 
 void MoveSpline::init_spline(const MoveSplineInitArgs& args)
 {
-    const SplineBase::EvaluationMode modes[2] = {SplineBase::ModeLinear,SplineBase::ModeCatmullrom};
+    const SplineBase::EvaluationMode modes[2] = {SplineBase::ModeLinear, SplineBase::ModeCatmullrom};
     if (args.flags.cyclic)
     {
         uint32 cyclic_point = 0;
@@ -141,25 +157,19 @@ void MoveSpline::init_spline(const MoveSplineInitArgs& args)
     // init spline timestamps
     if (splineflags.falling)
     {
-        FallInitializer init(spline.getPoint(spline.first()).z);
+        FallInitializer<MySpline::LengthType> init(spline.getPoint(spline.first()).z);
         spline.initLengths(init);
     }
     else
     {
-        CommonInitializer init(args.velocity);
+        CommonInitializer<MySpline::LengthType> init(args.velocity);
         spline.initLengths(init);
     }
 
-    // TODO: what to do in such cases? problem is in input data (all points are at same coords)
-    if (spline.length() < minimal_duration)
-    {
-        TC_LOG_ERROR("misc", "MoveSpline::init_spline: zero length spline, wrong input data?");
-        spline.set_length(spline.last(), spline.isCyclic() ? 1000 : 1);
-    }
     point_Idx = spline.first();
 }
 
-void MoveSpline::Initialize(const MoveSplineInitArgs& args)
+void MoveSpline::Initialize(MoveSplineInitArgs const& args)
 {
     splineflags = args.flags;
     facing = args.facing;
@@ -167,7 +177,6 @@ void MoveSpline::Initialize(const MoveSplineInitArgs& args)
     point_Idx_offset = args.path_Idx_offset;
     initialOrientation = args.initialOrientation;
 
-    onTransport = false;
     time_passed = 0;
     vertical_acceleration = 0.f;
     effect_start_time = 0;
@@ -194,20 +203,14 @@ void MoveSpline::Initialize(const MoveSplineInitArgs& args)
     }
 }
 
-MoveSpline::MoveSpline() : m_Id(0), time_passed(0),
-    vertical_acceleration(0.f), initialOrientation(0.f), effect_start_time(0), point_Idx(0), point_Idx_offset(0)
-{
-    splineflags.done = true;
-}
-
 /// ============================================================================================
 
-bool MoveSplineInitArgs::Validate() const
+bool MoveSplineInitArgs::Validate(Unit* unit) const
 {
 #define CHECK(exp) \
     if (!(exp))\
     {\
-        TC_LOG_ERROR("misc", "MoveSplineInitArgs::Validate: expression '%s' failed", #exp);\
+        TC_LOG_ERROR("misc", "MoveSplineInitArgs::Validate: expression '%s' failed for GUID: %u Entry: %u", #exp, unit->GetTypeId() == TYPEID_PLAYER ? unit->GetGUIDLow() : unit->ToCreature()->GetDBTableGUIDLow(), unit->GetEntry());\
         return false;\
     }
     CHECK(path.size() > 1);
@@ -225,10 +228,10 @@ bool MoveSplineInitArgs::_checkPathBounds() const
     if (!(flags & MoveSplineFlag::Catmullrom) && path.size() > 2)
     {
         enum{
-            MAX_OFFSET = (1 << 11) / 2,
+            MAX_OFFSET = (1 << 11) / 2
         };
-        Vector3 middle = (path.front()+path.back()) / 2;
-        Vector3 offset;
+        G3D::Vector3 middle = (path.front()+path.back()) / 2;
+        G3D::Vector3 offset;
         for (uint32 i = 1; i < path.size()-1; ++i)
         {
             offset = path[i] - middle;
@@ -252,38 +255,28 @@ MoveSpline::UpdateResult MoveSpline::_updateState(int32& ms_time_diff)
         return Result_Arrived;
     }
 
-    UpdateResult result = Result_None;
-
     int32 minimal_diff = std::min(ms_time_diff, segment_time_elapsed());
     ASSERT(minimal_diff >= 0);
+
     time_passed += minimal_diff;
     ms_time_diff -= minimal_diff;
 
-    if (time_passed >= next_timestamp())
+    if (time_passed < next_timestamp())
+        return Result_None;
+
+    if (++point_Idx < spline.last())
+        return Result_NextSegment;
+
+    if (!isCyclic())
     {
-        ++point_Idx;
-        if (point_Idx < spline.last())
-        {
-            result = Result_NextSegment;
-        }
-        else
-        {
-            if (spline.isCyclic())
-            {
-                point_Idx = spline.first();
-                time_passed = time_passed % Duration();
-                result = Result_NextCycle;
-            }
-            else
-            {
-                _Finalize();
-                ms_time_diff = 0;
-                result = Result_Arrived;
-            }
-        }
+        _Finalize();
+        ms_time_diff = 0;
+        return Result_Arrived;
     }
 
-    return result;
+    point_Idx = spline.first();
+    time_passed %= Duration();
+    return Result_NextCycle;
 }
 
 std::string MoveSpline::ToString() const

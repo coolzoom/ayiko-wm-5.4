@@ -116,7 +116,7 @@ bool WaypointMovementGenerator<Creature>::StartMove(Creature *creature)
 
     creature->AddUnitState(UNIT_STATE_ROAMING_MOVE);
 
-    Movement::MoveSplineInit init(*creature);
+    Movement::MoveSplineInit init(creature);
     init.MoveTo(node->x, node->y, node->z);
 
     //! Accepts angles such as 0.00001 and -0.00001, 0 must be ignored, default value in waypoint table
@@ -236,7 +236,7 @@ void FlightPathMovementGenerator::DoReset(Player *player)
     player->AddUnitState(UNIT_STATE_IN_FLIGHT);
     player->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_TAXI_FLIGHT);
 
-    Movement::MoveSplineInit init(*player);
+    Movement::MoveSplineInit init(player);
     uint32 end = GetPathAtMapEnd();
     for (uint32 i = GetCurrentNode(); i != end; ++i)
     {

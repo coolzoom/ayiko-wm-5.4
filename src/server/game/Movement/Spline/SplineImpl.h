@@ -18,7 +18,9 @@
 
 namespace Movement
 {
-template<typename length_type> void Spline<length_type>::evaluate_percent( float t, Vector3 & c ) const
+
+template<typename length_type>
+void Spline<length_type>::evaluate_percent( float t, G3D::Vector3& c) const
 {
     index_type Index;
     float u;
@@ -26,7 +28,8 @@ template<typename length_type> void Spline<length_type>::evaluate_percent( float
     evaluate_percent(Index, u, c);
 }
 
-template<typename length_type> void Spline<length_type>::evaluate_derivative(float t, Vector3& hermite) const
+template<typename length_type>
+void Spline<length_type>::evaluate_derivative(float t, G3D::Vector3& hermite) const
 {
     index_type Index;
     float u;
@@ -34,7 +37,8 @@ template<typename length_type> void Spline<length_type>::evaluate_derivative(flo
     evaluate_derivative(Index, u, hermite);
 }
 
-template<typename length_type> SplineBase::index_type Spline<length_type>::computeIndexInBounds(length_type length_) const
+template<typename length_type>
+SplineBase::index_type Spline<length_type>::computeIndexInBounds(length_type length_) const
 {
 // Temporary disabled: causes infinite loop with t = 1.f
 /*
@@ -61,7 +65,8 @@ template<typename length_type> SplineBase::index_type Spline<length_type>::compu
     return i;
 }
 
-template<typename length_type> void Spline<length_type>::computeIndex(float t, index_type& index, float& u) const
+template<typename length_type>
+void Spline<length_type>::computeIndex(float t, index_type& index, float& u) const
 {
     ASSERT(t >= 0.f && t <= 1.f);
     length_type length_ = t * length();
@@ -70,25 +75,30 @@ template<typename length_type> void Spline<length_type>::computeIndex(float t, i
     u = (length_ - length(index)) / (float)length(index, index+1);
 }
 
-template<typename length_type> SplineBase::index_type Spline<length_type>::computeIndexInBounds( float t ) const
+template<typename length_type>
+SplineBase::index_type Spline<length_type>::computeIndexInBounds(float t) const
 {
     ASSERT(t >= 0.f && t <= 1.f);
     return computeIndexInBounds(t * length());
 }
 
-template<typename length_type> void Spline<length_type>::initLengths()
+template<typename length_type>
+void Spline<length_type>::initLengths()
 {
     index_type i = index_lo;
-    length_type length = 0;
-    lengths.resize(index_hi+1);
-    while(i < index_hi )
+    length_type totalLength = 0;
+    lengths.resize(index_hi + 1);
+    while (i < index_hi)
     {
-        length += SegLength(i);
-        lengths[++i] = length;
+        float const length = SegLength(i);
+        if (G3D::fuzzyNe(length, 0.0))
+            totalLength += length;
+        lengths[++i] = totalLength;
     }
 }
 
-template<typename length_type> void Spline<length_type>::clear()
+template<typename length_type>
+void Spline<length_type>::clear()
 {
     SplineBase::clear();
     lengths.clear();

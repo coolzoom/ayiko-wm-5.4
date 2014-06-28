@@ -168,7 +168,7 @@ public:
                 continue;
 
             // skip wrong class/race skills
-            if (!handler->GetSession()->GetPlayer()->IsSpellFitByClassAndRace(spellInfo->Id))
+            if (!handler->GetSession()->GetPlayer()->IsSpellFitByClassAndRace(spellInfo))
                 continue;
 
             // skip other spell families

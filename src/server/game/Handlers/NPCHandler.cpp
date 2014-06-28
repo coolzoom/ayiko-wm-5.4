@@ -180,16 +180,22 @@ void WorldSession::SendTrainerList(uint64 guid, const std::string& strTitle)
         TrainerSpell const* tSpell = &itr->second;
 
         bool valid = true;
-        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        for (auto const &spellId : tSpell->learnedSpell)
         {
-            if (!tSpell->learnedSpell[i])
+            if (spellId == 0)
                 continue;
-            if (!_player->IsSpellFitByClassAndRace(tSpell->learnedSpell[i]))
+
+            auto const spellInfo = sSpellMgr->GetSpellInfo(spellId);
+            if (!spellInfo)
+                continue;
+
+            if (!_player->IsSpellFitByClassAndRace(spellInfo))
             {
                 valid = false;
                 break;
             }
         }
+
         if (!valid)
             continue;
 

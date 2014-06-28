@@ -308,7 +308,7 @@ void MotionMaster::MoveLand(uint32 id, Position const& pos)
 
     TC_LOG_DEBUG("misc", "Creature (Entry: %u) landing point (ID: %u X: %f Y: %f Z: %f)", _owner->GetEntry(), id, x, y, z);
 
-    Movement::MoveSplineInit init(*_owner);
+    Movement::MoveSplineInit init(_owner);
     init.MoveTo(x,y,z);
     init.SetAnimation(Movement::ToGround);
     init.Launch();
@@ -326,7 +326,7 @@ void MotionMaster::MoveTakeoff(uint32 id, float x, float y, float z)
 {
     TC_LOG_DEBUG("misc", "Creature (Entry: %u) take off point (ID: %u X: %f Y: %f Z: %f)", _owner->GetEntry(), id, x, y, z);
 
-    Movement::MoveSplineInit init(*_owner);
+    Movement::MoveSplineInit init(_owner);
     init.MoveTo(x,y,z);
     init.SetAnimation(Movement::ToFly);
     init.Launch();
@@ -346,7 +346,7 @@ void MotionMaster::MoveKnockbackFrom(float srcX, float srcY, float speedXY, floa
 
     _owner->GetNearPoint(_owner, x, y, z, _owner->GetObjectSize(), dist, _owner->GetAngle(srcX, srcY) + M_PI);
 
-    Movement::MoveSplineInit init(*_owner);
+    Movement::MoveSplineInit init(_owner);
     init.MoveTo(x,y,z);
     init.SetParabolic(max_height,0);
     init.SetOrientationFixed(true);
@@ -376,7 +376,7 @@ void MotionMaster::MoveJump(float x, float y, float z, float speedXY, float spee
     float moveTimeHalf = speedZ / Movement::gravity;
     float max_height = -Movement::computeFallElevation(moveTimeHalf,false,-speedZ);
 
-    Movement::MoveSplineInit init(*_owner);
+    Movement::MoveSplineInit init(_owner);
     init.MoveTo(x,y,z);
     init.SetParabolic(max_height,0);
     init.SetVelocity(speedXY);
@@ -392,7 +392,7 @@ void MotionMaster::CustomJump(float x, float y, float z, float speedXY, float sp
     float max_height = -Movement::computeFallElevation(moveTimeHalf,false,-speedZ);
     max_height /= 15.0f;
 
-    Movement::MoveSplineInit init(*_owner);
+    Movement::MoveSplineInit init(_owner);
     init.MoveTo(x,y,z);
     init.SetParabolic(max_height, 0);
     init.SetVelocity(speedXY);
@@ -403,7 +403,12 @@ void MotionMaster::CustomJump(float x, float y, float z, float speedXY, float sp
 void MotionMaster::MoveFall(uint32 id/*=0*/)
 {
     // use larger distance for vmap height search than in most other cases
-    float tz = _owner->GetMap()->GetHeight(_owner->GetPhaseMask(), _owner->GetPositionX(), _owner->GetPositionY(), _owner->GetPositionZ(), true, MAX_FALL_DISTANCE);
+    float tz = _owner->GetMap()->GetHeight(_owner->GetPhaseMask(), _owner->GetPositionX(), _owner->GetPositionY(), _owner->GetPositionZ(), true, MAX_FALL_DISTANCE);;
+
+    // try to find ground Z
+    if (tz <= INVALID_HEIGHT)
+        tz = _owner->GetMap()->GetHeight(_owner->GetPhaseMask(), _owner->GetPositionX(), _owner->GetPositionY(), MAX_HEIGHT, true, MAX_FALL_DISTANCE);
+
     if (tz <= INVALID_HEIGHT)
     {
         TC_LOG_DEBUG("misc", "MotionMaster::MoveFall: unable retrive a proper height at map %u (x: %f, y: %f, z: %f).",
@@ -421,7 +426,7 @@ void MotionMaster::MoveFall(uint32 id/*=0*/)
         _owner->m_movementInfo.SetFallTime(0);
     }
 
-    Movement::MoveSplineInit init(*_owner);
+    Movement::MoveSplineInit init(_owner);
     init.MoveTo(_owner->GetPositionX(), _owner->GetPositionY(), tz);
     init.SetFall();
     init.Launch();
@@ -433,7 +438,7 @@ void MotionMaster::MoveBackward(uint32 id, float x, float y, float z, float spee
     if (_owner->GetTypeId() == TYPEID_PLAYER)
         _owner->AddUnitMovementFlag(MOVEMENTFLAG_BACKWARD);
 
-    Movement::MoveSplineInit init(*_owner);
+    Movement::MoveSplineInit init(_owner);
     init.MoveTo(x, y, z);
     init.SetOrientationInversed();
     init.Launch();

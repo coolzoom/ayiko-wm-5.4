@@ -2839,7 +2839,6 @@ void SpellMgr::LoadSpellClassInfo()
             mSpellClassInfo[classId].push_back(53342);
             mSpellClassInfo[classId].push_back(53331);
             mSpellClassInfo[classId].push_back(54446);
-            mSpellClassInfo[classId].push_back(53323);
             mSpellClassInfo[classId].push_back(53344);
             mSpellClassInfo[classId].push_back(70164);
             mSpellClassInfo[classId].push_back(62158);
@@ -4858,12 +4857,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 // Execution Sentence
                 case 114157:
                     spellInfo->Speed = 0;
-                    break;
-                case 132626: // Alliance Portal - Mage
-                    spellInfo->AttributesEx7 |= SPELL_ATTR7_ALLIANCE_ONLY;
-                    break;
-                case 132620: // Horde Portal - Mage
-                    spellInfo->AttributesEx7 |= SPELL_ATTR7_HORDE_ONLY;
                     break;
                // Magic Barrier, Lady Vashj
                 case 38112:

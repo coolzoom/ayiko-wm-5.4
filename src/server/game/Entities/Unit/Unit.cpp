@@ -452,7 +452,7 @@ void Unit::Update(uint32 p_time)
     {
         if (m_SendTransportMoveTimer <= p_time)
         {
-            Movement::MoveSplineInit init(*this);
+            Movement::MoveSplineInit init(this);
             init.DisableTransportPathTransformations();
             init.MoveTo(m_movementInfo.t_pos.m_positionX, m_movementInfo.t_pos.m_positionY, m_movementInfo.t_pos.m_positionZ);
             init.SetFacing(0.0f);
@@ -479,13 +479,11 @@ bool Unit::haveOffhandWeapon() const
 
 void Unit::MonsterMoveWithSpeed(float x, float y, float z, float speed)
 {
-    Movement::MoveSplineInit init(*this);
+    Movement::MoveSplineInit init(this);
     init.MoveTo(x,y,z);
     init.SetVelocity(speed);
     init.Launch();
 }
-
-uint32 const positionUpdateDelay = 400;
 
 void Unit::UpdateSplineMovement(uint32 t_diff)
 {
@@ -505,6 +503,8 @@ void Unit::UpdateSplineMovement(uint32 t_diff)
 
 void Unit::UpdateSplinePosition()
 {
+    uint32 const positionUpdateDelay = 400;
+
     m_movesplineTimer.Reset(positionUpdateDelay);
     Movement::Location loc = movespline->ComputePosition();
     if (GetTransGUID())
@@ -528,7 +528,7 @@ void Unit::UpdateSplinePosition()
 void Unit::DisableSpline()
 {
     m_movementInfo.RemoveMovementFlag(MOVEMENTFLAG_FORWARD);
-    movespline->_Interrupt();
+    movespline->Interrupt();
 }
 
 void Unit::resetAttackTimer(WeaponAttackType type)
@@ -17117,13 +17117,15 @@ void Unit::StopMoving()
 {
     ClearUnitState(UNIT_STATE_MOVING);
 
-    // not need send any packets if not in world or not moving
-    if (!IsInWorld() || movespline->Finalized())
+    // not need send any packets if not in world
+    if (!IsInWorld())
         return;
 
     // Update position using old spline
-    UpdateSplinePosition();
-    Movement::MoveSplineInit(*this).Stop();
+    if (!movespline->Finalized())
+        UpdateSplinePosition();
+
+    Movement::MoveSplineInit(this).Stop();
 }
 
 void Unit::SendMovementFlagUpdate(bool self /* = false */)
@@ -20236,7 +20238,7 @@ void Unit::_ExitVehicle(Position const* exitPosition)
         SendMessageToSet(&data, false);
     }
 
-    Movement::MoveSplineInit init(*this);
+    Movement::MoveSplineInit init(this);
     init.MoveTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
     init.SetFacing(GetOrientation());
     init.SetTransportExit();
@@ -20360,17 +20362,22 @@ void Unit::SetCanFly(bool apply)
 
 void Unit::NearTeleportTo(float x, float y, float z, float orientation, bool casting /*= false*/)
 {
-    DisableSpline();
     if (GetTypeId() == TYPEID_PLAYER)
+    {
+        DisableSpline();
         ToPlayer()->TeleportTo(GetMapId(), x, y, z, orientation, TELE_TO_NOT_LEAVE_TRANSPORT | TELE_TO_NOT_LEAVE_COMBAT | TELE_TO_NOT_UNSUMMON_PET | (casting ? TELE_TO_SPELL : 0));
+    }
     else
     {
-        UpdatePosition(x, y, z, orientation, true);
-        SendMovementFlagUpdate();
-
-        Position pos;
-        GetPosition(&pos);
+        Position pos = {x, y, z, orientation};
         SendTeleportPacket(pos);
+        UpdatePosition(x, y, z, orientation, true);
+
+        Movement::MoveSplineInit init(this);
+        init.MoveTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
+        init.LaunchTeleport();
+
+        DisableSpline();
     }
 }
 
@@ -20853,7 +20860,7 @@ void Unit::SetInFront(Unit const* target)
 
 void Unit::SetFacingTo(float ori)
 {
-    Movement::MoveSplineInit init(*this);
+    Movement::MoveSplineInit init(this);
     init.MoveTo(GetPositionX(), GetPositionY(), GetPositionZMinusOffset());
     init.SetFacing(ori);
     init.Launch();
@@ -21019,7 +21026,7 @@ void Unit::SendMovementCanFlyChange()
 
 bool Unit::IsSplineEnabled() const
 {
-    return movespline->Initialized();
+    return movespline->Initialized() && !movespline->Finalized();
 }
 
 void Unit::SetEclipsePower(int32 power, bool send)

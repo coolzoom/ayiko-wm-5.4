@@ -420,10 +420,10 @@ class Map
         void RemoveFromActive(Creature* obj);
 
         void SwitchGridContainers(Creature* creature, bool toWorldContainer);
-        template<class NOTIFIER> void VisitAll(const float &x, const float &y, float radius, NOTIFIER &notifier, bool loadGrids = false);
-        template<class NOTIFIER> void VisitFirstFound(const float &x, const float &y, float radius, NOTIFIER &notifier, bool loadGrids = false);
-        template<class NOTIFIER> void VisitWorld(const float &x, const float &y, float radius, NOTIFIER &notifier, bool loadGrids = false);
-        template<class NOTIFIER> void VisitGrid(const float &x, const float &y, float radius, NOTIFIER &notifier, bool loadGrids = false);
+        template<class NOTIFIER> void VisitAll(const float &x, const float &y, float radius, NOTIFIER &notifier);
+        template<class NOTIFIER> void VisitFirstFound(const float &x, const float &y, float radius, NOTIFIER &notifier);
+        template<class NOTIFIER> void VisitWorld(const float &x, const float &y, float radius, NOTIFIER &notifier);
+        template<class NOTIFIER> void VisitGrid(const float &x, const float &y, float radius, NOTIFIER &notifier);
         CreatureGroupHolderType CreatureGroupHolder;
 
         void UpdateIteratorBack(Player* player);
@@ -673,25 +673,20 @@ class BattlegroundMap : public Map
 template <typename Visitor>
 inline void Map::Visit(Cell const& cell, Visitor &&visitor)
 {
-    const uint32 x = cell.GridX();
-    const uint32 y = cell.GridY();
-    const uint32 cell_x = cell.CellX();
-    const uint32 cell_y = cell.CellY();
-
-    if (!cell.NoCreate() || IsGridLoaded(GridCoord(x, y)))
-    {
+    if (!cell.NoCreate())
         EnsureGridLoaded(cell);
-        getNGrid(x, y)->VisitGrid(cell_x, cell_y, std::forward<Visitor>(visitor));
-    }
+
+    auto const grid = getNGrid(cell.GridX(), cell.GridY());
+    if (grid && grid->isGridObjectDataLoaded())
+        grid->VisitGrid(cell.CellX(), cell.CellY(), std::forward<Visitor>(visitor));
 }
 
 template <typename Notifier>
-inline void Map::VisitAll(float const& x, float const& y, float radius, Notifier& notifier, bool loadGrids)
+inline void Map::VisitAll(float const& x, float const& y, float radius, Notifier& notifier)
 {
     CellCoord p(Trinity::ComputeCellCoord(x, y));
     Cell cell(p);
-    if (!loadGrids)
-        cell.SetNoCreate();
+    cell.SetNoCreate();
 
     cell.Visit(p, Trinity::makeWorldVisitor(notifier), *this, radius, x, y);
     cell.Visit(p, Trinity::makeGridVisitor(notifier), *this, radius, x, y);
@@ -699,12 +694,11 @@ inline void Map::VisitAll(float const& x, float const& y, float radius, Notifier
 
 // should be used with Searcher notifiers, tries to search world if nothing found in grid
 template <typename Notifier>
-inline void Map::VisitFirstFound(const float &x, const float &y, float radius, Notifier &notifier, bool loadGrids)
+inline void Map::VisitFirstFound(const float &x, const float &y, float radius, Notifier &notifier)
 {
     CellCoord p(Trinity::ComputeCellCoord(x, y));
     Cell cell(p);
-    if (!loadGrids)
-        cell.SetNoCreate();
+    cell.SetNoCreate();
 
     cell.Visit(p, Trinity::makeWorldVisitor(notifier), *this, radius, x, y);
 
@@ -713,23 +707,21 @@ inline void Map::VisitFirstFound(const float &x, const float &y, float radius, N
 }
 
 template <typename Notifier>
-inline void Map::VisitWorld(const float &x, const float &y, float radius, Notifier &notifier, bool loadGrids)
+inline void Map::VisitWorld(const float &x, const float &y, float radius, Notifier &notifier)
 {
     CellCoord p(Trinity::ComputeCellCoord(x, y));
     Cell cell(p);
-    if (!loadGrids)
-        cell.SetNoCreate();
+    cell.SetNoCreate();
 
     cell.Visit(p, Trinity::makeWorldVisitor(notifier), *this, radius, x, y);
 }
 
 template <typename Notifier>
-inline void Map::VisitGrid(const float &x, const float &y, float radius, Notifier &notifier, bool loadGrids)
+inline void Map::VisitGrid(const float &x, const float &y, float radius, Notifier &notifier)
 {
     CellCoord p(Trinity::ComputeCellCoord(x, y));
     Cell cell(p);
-    if (!loadGrids)
-        cell.SetNoCreate();
+    cell.SetNoCreate();
 
     cell.Visit(p, Trinity::makeGridVisitor(notifier), *this, radius, x, y);
 }

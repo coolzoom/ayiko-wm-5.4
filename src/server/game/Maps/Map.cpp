@@ -332,6 +332,18 @@ void Map::AddToGrid(GameObject *obj, Cell const &cell)
     ngrid->GetGrid(cell.CellX(), cell.CellY()).AddGridObject(obj);
 }
 
+template <>
+void Map::AddToGrid(Creature *obj, Cell const &cell)
+{
+    auto const ngrid = getNGrid(cell.GridX(), cell.GridY());
+    if (obj->IsWorldObject())
+        ngrid->GetGrid(cell.CellX(), cell.CellY()).AddWorldObject(obj);
+    else
+        ngrid->GetGrid(cell.CellX(), cell.CellY()).AddGridObject(obj);
+
+    obj->SetCurrentCell(cell);
+}
+
 template <typename T>
 void Map::RemoveFromGrid(T *obj, Cell const &cell)
 {
@@ -778,7 +790,7 @@ void Map::PlayerRelocation(Player* player, float x, float y, float z, float orie
 
 void Map::CreatureRelocation(Creature* creature, float x, float y, float z, float ang, bool respawnRelocationOnFail)
 {
-    Cell old_cell(creature->GetPositionX(), creature->GetPositionY());
+    Cell old_cell(creature->GetCurrentCell());
     Cell new_cell(x, y);
 
     if (!respawnRelocationOnFail && !getNGrid(new_cell.GridX(), new_cell.GridY()))
@@ -896,7 +908,7 @@ void Map::MoveAllCreaturesInMoveList()
 
 bool Map::CreatureCellRelocation(Creature* c, Cell new_cell)
 {
-    Cell old_cell(c->GetPositionX(), c->GetPositionY());
+    Cell const old_cell(c->GetCurrentCell());
     if (!old_cell.DiffGrid(new_cell))                       // in same grid
     {
         // if in same cell then none do
@@ -960,7 +972,7 @@ bool Map::CreatureRespawnRelocation(Creature* c, bool diffGridOnly)
     float resp_x, resp_y, resp_z, resp_o;
     c->GetRespawnPosition(resp_x, resp_y, resp_z, &resp_o);
 
-    Cell old_cell(c->GetPositionX(), c->GetPositionY());
+    Cell const old_cell(c->GetCurrentCell());
     Cell resp_cell(resp_x, resp_y);
 
     //creature will be unloaded with grid

@@ -68,6 +68,7 @@ void TotemAI::UpdateAI(uint32 const /*diff*/)
             return;
     }
 
+
     // Search spell
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(me->ToTotem()->GetSpell());
     if (!spellInfo)
@@ -79,6 +80,35 @@ void TotemAI::UpdateAI(uint32 const /*diff*/)
     // Apply SPELLMOD_RANGE from owner (required by Elemental Reach talent at least)
     if (Player * const modOwner = me->GetSpellModOwner())
         modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_RANGE, max_range);
+
+
+    // Searing Totem prioritize Flame Shock or Stormstrike targets
+    if (spellInfo->Id == 3606)
+    {
+        if (Unit * caster = me->GetOwner())
+        {
+            std::list<Unit*> targets;
+            Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(me, me, max_range);
+            Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+            caster->VisitNearbyObject(max_range, searcher);
+            // Find Stormstrike and Flame Shock -> Stormstrike -> Flame Shock
+            const uint64 guid = caster->GetGUID();
+            auto itr = std::find_if(targets.begin(), targets.end(), [guid](Unit *u) { return u->HasAura(17364, guid) && u->HasAura(8050, guid); });
+            if (itr == targets.end())
+                itr = std::find_if(targets.begin(), targets.end(), [guid](Unit *u) { return u->HasAura(17364, guid); });
+            if (itr == targets.end())
+                itr = std::find_if(targets.begin(), targets.end(), [guid](Unit *u) { return u->HasAura(8050, guid); });
+            if (itr != targets.end())
+                victim = *itr;
+        }
+
+        if (!victim)
+        {
+            victim = me->GetOwner()->getVictim();
+            if (!victim)
+                return;
+        }
+    }
 
     // Search victim if no, not attackable, or out of range, or friendly (possible in case duel end)
     if (!victim ||

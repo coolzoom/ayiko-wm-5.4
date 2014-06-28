@@ -1351,6 +1351,46 @@ public:
     }
 };
 
+// 145674 - Riposte
+class spell_warr_riposte final : public SpellScriptLoader
+{
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        void calculateAmount(AuraEffect const *aurEff, int32 &amount, bool &canBeRecalculated)
+        {
+            canBeRecalculated = false;
+
+            Unit * const caster = GetCaster();
+            if (!caster)
+                return
+
+            if (Player * player = caster->ToPlayer())
+            {
+                uint32 rating = player->GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_PARRY);
+                rating += player->GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_DODGE);
+                amount = CalculatePct(rating, 75);
+            }
+        }
+
+        void Register() final
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(script_impl::calculateAmount, EFFECT_0, SPELL_AURA_MOD_RATING);
+        }
+    };
+
+public:
+    spell_warr_riposte()
+        : SpellScriptLoader("spell_warr_riposte")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_victorious_state();
@@ -1386,4 +1426,5 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_taste_for_blood_effect();
     new spell_warr_bloodbath();
     new spell_warr_bloodbath_bleed();
+    new spell_warr_riposte();
 }

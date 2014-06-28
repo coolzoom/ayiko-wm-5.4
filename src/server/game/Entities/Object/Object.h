@@ -689,13 +689,12 @@ public:
         auto &atOffset = (*storage_)[offset_];
         ASSERT(atOffset == static_cast<ObjectType*>(this));
 
-        // swap with last element in storage
-        std::swap(atOffset, storage_->back());
+        if (storage_->size() > 1)
+        {
+            std::swap(atOffset, storage_->back());
+            static_cast<SelfType*>(atOffset)->offset_ = offset_;
+        }
 
-        // adjust offset for swapped element
-        static_cast<SelfType*>(atOffset)->offset_ = offset_;
-
-        // remove self from grid storage
         storage_->pop_back();
         storage_ = nullptr;
         offset_ = std::numeric_limits<std::size_t>::max();

@@ -392,7 +392,7 @@ class spell_warr_second_wind final : public SpellScriptLoader
         bool checkProc(ProcEventInfo &)
         {
             Unit * const caster = GetCaster();
-            if (!caster)
+            if (!caster || caster->HasAura(WARRIOR_SPELL_SECOND_WIND_REGEN))
                 return false;
 
             if (!caster->HasAura(WARRIOR_SPELL_SECOND_WIND_DUMMY))

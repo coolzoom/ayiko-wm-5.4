@@ -1224,6 +1224,7 @@ bool Aura::CanBeSaved() const
         case 37025: // Water, Coilfang Raid
         case 36444: // Water, Lake Wintergrasp
         case 28801: // Slime, Naxxramas
+        case 125667: // Second Wind dummy
             return false;
         default:
             break;

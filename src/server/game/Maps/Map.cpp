@@ -147,6 +147,16 @@ void VisitNearbyCellsOf(Map *map, WorldObject* obj, GridVisitor &&gridVisitor, W
 
 } // namespace
 
+void Map::ObjectUpdater::updateCollected(uint32 diff)
+{
+    if (!i_objectsToUpdate.empty())
+    {
+        for (auto &object : i_objectsToUpdate)
+            object->Update(diff);
+        i_objectsToUpdate.clear();
+    }
+}
+
 Map::~Map()
 {
     UnloadAll();
@@ -566,11 +576,10 @@ void Map::Update(const uint32 diff)
     // update active cells around players and active objects
     resetMarkedCells();
 
-    Trinity::ObjectUpdater updater(diff);
     // for creature
-    auto gridObjectUpdate(Trinity::makeGridVisitor(updater));
+    auto gridObjectUpdate(Trinity::makeGridVisitor(i_objectUpdater));
     // for pets
-    auto worldObjectUpdate(Trinity::makeWorldVisitor(updater));
+    auto worldObjectUpdate(Trinity::makeWorldVisitor(i_objectUpdater));
 
     // update worldsessions for existing players
     for (m_mapRefIter = m_mapRefManager.begin(); m_mapRefIter != m_mapRefManager.end(); ++m_mapRefIter)
@@ -584,6 +593,7 @@ void Map::Update(const uint32 diff)
             {
                 player->Update(diff);
                 VisitNearbyCellsOf(this, player, gridObjectUpdate, worldObjectUpdate);
+                i_objectUpdater.updateCollected(diff);
             }
         }
     }

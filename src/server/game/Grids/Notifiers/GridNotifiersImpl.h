@@ -37,13 +37,6 @@ inline void Trinity::VisibleNotifier::Visit(AnyMapType &m)
     }
 }
 
-inline void Trinity::ObjectUpdater::Visit(CreatureMapType &m)
-{
-    for (auto &creature : m)
-        if (creature->IsInWorld())
-            creature->Update(i_timeDiff);
-}
-
 // SEARCHERS & LIST SEARCHERS & WORKERS
 
 // WorldObject searchers & workers

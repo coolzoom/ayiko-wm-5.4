@@ -339,14 +339,6 @@ void UnfriendlyMessageDistDeliverer::Visit(PlayerMapType &m)
     }
 }
 
-template <typename OtherMapType>
-void ObjectUpdater::Visit(OtherMapType &m)
-{
-    for (auto &object : m)
-        if (object->IsInWorld())
-            object->Update(i_timeDiff);
-}
-
 bool AnyDeadUnitObjectInRangeCheck::operator()(Player* u)
 {
     return !u->isAlive() && !u->HasAuraType(SPELL_AURA_GHOST) && i_searchObj->IsWithinDistInMap(u, i_range);
@@ -376,7 +368,3 @@ bool AnyDeadUnitSpellTargetInRangeCheck::operator()(Creature* u)
 {
     return AnyDeadUnitObjectInRangeCheck::operator()(u) && i_check(u);
 }
-
-template void ObjectUpdater::Visit(GameObjectMapType &);
-template void ObjectUpdater::Visit(DynamicObjectMapType &);
-template void ObjectUpdater::Visit(AreaTriggerMapType &);

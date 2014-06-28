@@ -52,8 +52,6 @@ class Battleground;
 class MapInstanced;
 class InstanceMap;
 
-namespace Trinity { struct ObjectUpdater; }
-
 struct ScriptAction final
 {
     uint64 sourceGUID;
@@ -236,6 +234,28 @@ typedef std::map<uint32/*leaderDBGUID*/, CreatureGroup*>        CreatureGroupHol
 class Map
 {
     friend class MapReference;
+
+    class ObjectUpdater final
+    {
+    public:
+        void Visit(PlayerMapType &) {}
+        void Visit(CorpseMapType &) {}
+
+        template <typename OtherMapType>
+        void Visit(OtherMapType &m)
+        {
+            for (auto &object : m)
+            {
+                if (object->IsInWorld())
+                    i_objectsToUpdate.emplace_back(object);
+            }
+        }
+
+        void updateCollected(uint32 diff);
+
+    private:
+        std::vector<WorldObject*> i_objectsToUpdate;
+    };
 
     public:
         Map(uint32 id, time_t, uint32 InstanceId, uint8 SpawnMode, Map* _parent = NULL);
@@ -619,6 +639,8 @@ class Map
 
         std::unordered_map<uint32 /*dbGUID*/, time_t> _creatureRespawnTimes;
         std::unordered_map<uint32 /*dbGUID*/, time_t> _goRespawnTimes;
+
+        ObjectUpdater i_objectUpdater;
 };
 
 enum InstanceResetMethod

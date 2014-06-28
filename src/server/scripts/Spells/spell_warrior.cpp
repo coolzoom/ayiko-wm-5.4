@@ -1364,7 +1364,7 @@ class spell_warr_riposte final : public SpellScriptLoader
 
             Unit * const caster = GetCaster();
             if (!caster)
-                return
+                return;
 
             if (Player * player = caster->ToPlayer())
             {

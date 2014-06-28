@@ -307,32 +307,18 @@ void Map::InitVisibilityDistance()
     m_VisibilityNotifyPeriod = sWorld->GetVisibilityNotifyPeriodOnContinents();
 }
 
-// Template specialization of utility methods
-template <typename T>
-void Map::AddToGrid(T *obj, Cell const &cell)
-{
-    auto const ngrid = getNGrid(cell.GridX(), cell.GridY());
-    if (obj->IsWorldObject())
-        ngrid->GetGrid(cell.CellX(), cell.CellY()).template AddWorldObject<T>(obj);
-    else
-        ngrid->GetGrid(cell.CellX(), cell.CellY()).template AddGridObject<T>(obj);
-}
-
-template <>
 void Map::AddToGrid(Player *obj, Cell const &cell)
 {
     auto const ngrid = getNGrid(cell.GridX(), cell.GridY());
     ngrid->GetGrid(cell.CellX(), cell.CellY()).AddWorldObject(obj);
 }
 
-template <>
 void Map::AddToGrid(GameObject *obj, Cell const &cell)
 {
     auto const ngrid = getNGrid(cell.GridX(), cell.GridY());
     ngrid->GetGrid(cell.CellX(), cell.CellY()).AddGridObject(obj);
 }
 
-template <>
 void Map::AddToGrid(Creature *obj, Cell const &cell)
 {
     auto const ngrid = getNGrid(cell.GridX(), cell.GridY());
@@ -344,24 +330,12 @@ void Map::AddToGrid(Creature *obj, Cell const &cell)
     obj->SetCurrentCell(cell);
 }
 
-template <typename T>
-void Map::RemoveFromGrid(T *obj, Cell const &cell)
-{
-    auto const ngrid = getNGrid(cell.GridX(), cell.GridY());
-    if (obj->IsWorldObject())
-        ngrid->GetGrid(cell.CellX(), cell.CellY()).template RemoveWorldObject<T>(obj);
-    else
-        ngrid->GetGrid(cell.CellX(), cell.CellY()).template RemoveGridObject<T>(obj);
-}
-
-template <>
 void Map::RemoveFromGrid(Player *obj, Cell const &cell)
 {
     auto const ngrid = getNGrid(cell.GridX(), cell.GridY());
     ngrid->GetGrid(cell.CellX(), cell.CellY()).RemoveWorldObject(obj);
 }
 
-template <>
 void Map::RemoveFromGrid(GameObject *obj, Cell const &cell)
 {
     auto const ngrid = getNGrid(cell.GridX(), cell.GridY());

@@ -402,10 +402,34 @@ class Map
 
         // Type specific code for add/remove to/from grid
         template <typename T>
-        void AddToGrid(T *object, Cell const &cell);
+        void AddToGrid(T *obj, Cell const &cell)
+        {
+            auto const ngrid = getNGrid(cell.GridX(), cell.GridY());
+            if (obj->IsWorldObject())
+                ngrid->GetGrid(cell.CellX(), cell.CellY()).template AddWorldObject<T>(obj);
+            else
+                ngrid->GetGrid(cell.CellX(), cell.CellY()).template AddGridObject<T>(obj);
+        }
+
+        void AddToGrid(Player *obj, Cell const &cell);
+
+        void AddToGrid(GameObject *obj, Cell const &cell);
+
+        void AddToGrid(Creature *obj, Cell const &cell);
 
         template <typename T>
-        void RemoveFromGrid(T *object, Cell const &cell);
+        void RemoveFromGrid(T *obj, Cell const &cell)
+        {
+            auto const ngrid = getNGrid(cell.GridX(), cell.GridY());
+            if (obj->IsWorldObject())
+                ngrid->GetGrid(cell.CellX(), cell.CellY()).template RemoveWorldObject<T>(obj);
+            else
+                ngrid->GetGrid(cell.CellX(), cell.CellY()).template RemoveGridObject<T>(obj);
+        }
+
+        void RemoveFromGrid(Player *obj, Cell const &cell);
+
+        void RemoveFromGrid(GameObject *obj, Cell const &cell);
 
         // must called with AddToWorld
         template<class T>

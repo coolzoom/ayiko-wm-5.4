@@ -71,7 +71,7 @@ uint32 LoadHelper(CellCorpseMap const &cellCorpses, Cell const &cell, Map *map)
         if (kvPair.second != map->GetInstanceId())
             continue;
 
-        auto const playerGuid = kvPair.first;
+        auto const playerGuid = MAKE_NEW_GUID(kvPair.first, 0, HIGHGUID_PLAYER);
 
         auto const obj = sObjectAccessor->GetCorpseForPlayerGUID(playerGuid);
         if (!obj)

@@ -499,9 +499,9 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     case 103840:// Impending Victory
                     {
                         if (m_caster->ToPlayer()->GetSpecializationId(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_WARRIOR_ARMS)
-                            damage = CalculatePct(m_caster->GetTotalAttackPowerValue(BASE_ATTACK), 70.0f);
+                            damage += CalculatePct(m_caster->GetTotalAttackPowerValue(BASE_ATTACK), 70.0f);
                         else
-                            damage = CalculatePct(m_caster->GetTotalAttackPowerValue(BASE_ATTACK), 56.0f);
+                            damage += CalculatePct(m_caster->GetTotalAttackPowerValue(BASE_ATTACK), 56.0f);
 
                         // Impending Victory heals you for 10% of your maximum health
                         m_caster->CastSpell(m_caster, 118340, true);

@@ -125,13 +125,6 @@ public:
         obj->AddToGrid(m.elements);
     }
 
-    template <typename SpecificType>
-    void remove(SpecificType *obj)
-    {
-        auto &m = Trinity::Detail::mapForType<SpecificType>(m_objectMap);
-        obj->RemoveFromGrid(m.elements);
-    }
-
     ObjectMap & objectMap() { return m_objectMap; }
 
     ObjectMap const & objectMap() const { return m_objectMap; }

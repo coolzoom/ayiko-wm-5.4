@@ -170,7 +170,7 @@ void ObjectGridUnloader::Visit(AnyMapType &m)
         // Example: Flame Leviathan Turret 33139 is summoned when a creature is deleted
         // TODO: Check if that script has the correct logic. Do we really need to summon something before deleting?
         obj->CleanupsBeforeDelete();
-        obj->RemoveFromGrid(m);
+        obj->RemoveFromGrid();
         delete obj;
     }
 }

@@ -417,20 +417,6 @@ class Map
 
         void AddToGrid(Creature *obj, Cell const &cell);
 
-        template <typename T>
-        void RemoveFromGrid(T *obj, Cell const &cell)
-        {
-            auto const ngrid = getNGrid(cell.GridX(), cell.GridY());
-            if (obj->IsWorldObject())
-                ngrid->GetGrid(cell.CellX(), cell.CellY()).template RemoveWorldObject<T>(obj);
-            else
-                ngrid->GetGrid(cell.CellX(), cell.CellY()).template RemoveGridObject<T>(obj);
-        }
-
-        void RemoveFromGrid(Player *obj, Cell const &cell);
-
-        void RemoveFromGrid(GameObject *obj, Cell const &cell);
-
         // must called with AddToWorld
         template<class T>
         void AddToActive(T* obj) { AddToActiveHelper(obj); }

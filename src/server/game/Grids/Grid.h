@@ -67,18 +67,6 @@ public:
         i_gridObjects.template insert<SpecificObject>(obj);
     }
 
-    template <typename SpecificObject>
-    void RemoveWorldObject(SpecificObject *obj)
-    {
-        i_worldObjects.template remove<SpecificObject>(obj);
-    }
-
-    template <typename SpecificObject>
-    void RemoveGridObject(SpecificObject *obj)
-    {
-        i_gridObjects.template remove<SpecificObject>(obj);
-    }
-
     template <typename T>
     std::size_t GetWorldObjectCountInGrid() const
     {

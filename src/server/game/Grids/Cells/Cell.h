@@ -113,7 +113,7 @@ struct Cell final
 
 private:
     template <typename Visitor>
-    void VisitCircle(Visitor &, Map &, CellCoord const&, CellCoord const&) const;
+    void VisitCircle(Visitor &, Map &, CellCoord const&, CellCoord const&, CellCoord const&) const;
 };
 
 #endif

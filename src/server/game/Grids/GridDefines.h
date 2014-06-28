@@ -22,6 +22,7 @@
 #include "Common.h"
 #include "NGrid.h"
 
+#include <vector>
 #include <cmath>
 
 // Forward class definitions
@@ -33,12 +34,12 @@ class Pet;
 class Player;
 class AreaTrigger;
 
-typedef GridRefManager<Corpse>          CorpseMapType;
-typedef GridRefManager<Creature>        CreatureMapType;
-typedef GridRefManager<DynamicObject>   DynamicObjectMapType;
-typedef GridRefManager<GameObject>      GameObjectMapType;
-typedef GridRefManager<Player>          PlayerMapType;
-typedef GridRefManager<AreaTrigger>     AreaTriggerMapType;
+typedef std::vector<Corpse*>          CorpseMapType;
+typedef std::vector<Creature*>        CreatureMapType;
+typedef std::vector<DynamicObject*>   DynamicObjectMapType;
+typedef std::vector<GameObject*>      GameObjectMapType;
+typedef std::vector<Player*>          PlayerMapType;
+typedef std::vector<AreaTrigger*>     AreaTriggerMapType;
 
 enum GridMapTypeMask
 {

@@ -23,7 +23,6 @@
  */
 
 #include "Grid.h"
-#include "GridReference.h"
 #include "Timer.h"
 #include "Util.h"
 

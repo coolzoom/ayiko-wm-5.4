@@ -107,7 +107,7 @@ namespace Trinity
             i_map(map), cell(c), p(pair), i_radius(radius) {}
 
         void Visit(CreatureMapType &);
-        void Visit(PlayerMapType   &);
+        void Visit(PlayerMapType &);
 
         template <typename NotInterested>
         void Visit(NotInterested &) {}
@@ -134,12 +134,12 @@ namespace Trinity
         template <typename MapType>
         void updateObjects(MapType &m)
         {
-            for (auto &ref : m)
-                ref.getSource()->Update(i_timeDiff);
+            for (auto &object : m)
+                object->Update(i_timeDiff);
         }
 
         void Visit(PlayerMapType &m) { updateObjects(m); }
-        void Visit(CreatureMapType &m){ updateObjects(m); }
+        void Visit(CreatureMapType &m) { updateObjects(m); }
         void Visit(GameObjectMapType &m) { updateObjects(m); }
         void Visit(DynamicObjectMapType &m) { updateObjects(m); }
         void Visit(CorpseMapType &m) { updateObjects(m); }
@@ -318,53 +318,60 @@ namespace Trinity
         {
             if (!(i_mapTypeMask & GRID_MAP_TYPE_MASK_GAMEOBJECT))
                 return;
-            for (GameObjectMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
-                if (itr->getSource()->InSamePhase(i_phaseMask))
-                    i_do(itr->getSource());
+
+            for (auto &obj : m)
+                if (obj->InSamePhase(i_phaseMask))
+                    i_do(obj);
         }
 
         void Visit(PlayerMapType &m)
         {
             if (!(i_mapTypeMask & GRID_MAP_TYPE_MASK_PLAYER))
                 return;
-            for (PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
-                if (itr->getSource()->InSamePhase(i_phaseMask))
-                    i_do(itr->getSource());
+
+            for (auto &player : m)
+                if (player->InSamePhase(i_phaseMask))
+                    i_do(player);
         }
+
         void Visit(CreatureMapType &m)
         {
             if (!(i_mapTypeMask & GRID_MAP_TYPE_MASK_CREATURE))
                 return;
-            for (CreatureMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
-                if (itr->getSource()->InSamePhase(i_phaseMask))
-                    i_do(itr->getSource());
+
+            for (auto &creature : m)
+                if (creature->InSamePhase(i_phaseMask))
+                    i_do(creature);
         }
 
         void Visit(CorpseMapType &m)
         {
             if (!(i_mapTypeMask & GRID_MAP_TYPE_MASK_CORPSE))
                 return;
-            for (CorpseMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
-                if (itr->getSource()->InSamePhase(i_phaseMask))
-                    i_do(itr->getSource());
+
+            for (auto &corpse : m)
+                if (corpse->InSamePhase(i_phaseMask))
+                    i_do(corpse);
         }
 
         void Visit(DynamicObjectMapType &m)
         {
             if (!(i_mapTypeMask & GRID_MAP_TYPE_MASK_DYNAMICOBJECT))
                 return;
-            for (DynamicObjectMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
-                if (itr->getSource()->InSamePhase(i_phaseMask))
-                    i_do(itr->getSource());
+
+            for (auto &obj : m)
+                if (obj->InSamePhase(i_phaseMask))
+                    i_do(obj);
         }
 
         void Visit(AreaTriggerMapType &m)
         {
             if (!(i_mapTypeMask & GRID_MAP_TYPE_MASK_AREATRIGGER))
                 return;
-            for (AreaTriggerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
-                if (itr->getSource()->InSamePhase(i_phaseMask))
-                    i_do(itr->getSource());
+
+            for (auto &trigger : m)
+                if (trigger->InSamePhase(i_phaseMask))
+                    i_do(trigger);
         }
 
         template <typename NotInterested>
@@ -430,9 +437,9 @@ namespace Trinity
 
         void Visit(GameObjectMapType& m)
         {
-            for (GameObjectMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
-                if (itr->getSource()->InSamePhase(_phaseMask))
-                    _func(itr->getSource());
+            for (auto &obj : m)
+                if (obj->InSamePhase(_phaseMask))
+                    _func(obj);
         }
 
         template <typename NotInterested>
@@ -561,9 +568,9 @@ namespace Trinity
 
         void Visit(CreatureMapType &m)
         {
-            for (CreatureMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
-                if (itr->getSource()->InSamePhase(i_phaseMask))
-                    i_do(itr->getSource());
+            for (auto &creature : m)
+                if (creature->InSamePhase(i_phaseMask))
+                    i_do(creature);
         }
 
         template <typename NotInterested>
@@ -615,7 +622,7 @@ namespace Trinity
             : i_phaseMask(searcher->GetPhaseMask()), i_object(result), i_check(check)
         { }
 
-        void Visit(PlayerMapType& m);
+        void Visit(PlayerMapType &m);
 
         template <typename NotInterested>
         void Visit(NotInterested &) {}
@@ -632,9 +639,9 @@ namespace Trinity
 
         void Visit(PlayerMapType &m)
         {
-            for (PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
-                if (itr->getSource()->InSamePhase(i_phaseMask))
-                    i_do(itr->getSource());
+            for (auto &player : m)
+                if (player->InSamePhase(i_phaseMask))
+                    i_do(player);
         }
 
         template <typename NotInterested>
@@ -653,9 +660,9 @@ namespace Trinity
 
         void Visit(PlayerMapType &m)
         {
-            for (PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
-                if (itr->getSource()->InSamePhase(i_searcher) && itr->getSource()->IsWithinDist(i_searcher, i_dist))
-                    i_do(itr->getSource());
+            for (auto &player : m)
+                if (player->InSamePhase(i_searcher) && player->IsWithinDist(i_searcher, i_dist))
+                    i_do(player);
         }
 
         template <typename NotInterested>

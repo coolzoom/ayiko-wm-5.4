@@ -50,28 +50,16 @@ public:
     // Creature used instead pet to simplify *::Visit templates (not required duplicate code for Creature->Pet case)
     typedef TYPELIST_5(Player, Creature/*pets*/, Corpse/*resurrectable*/, DynamicObject/*farsight target*/, AreaTrigger) WorldObjectTypeList;
 
-    typedef TypeMapContainer<GridObjectTypeList> GridObjectMap;
+    typedef Trinity::TypeMapContainer<GridObjectTypeList> GridObjectMap;
 
-    typedef TypeMapContainer<WorldObjectTypeList> WorldObjectMap;
+    typedef Trinity::TypeMapContainer<WorldObjectTypeList> WorldObjectMap;
 
 public:
-    /** an object of interested enters the grid
-     */
     template <typename SpecificObject>
     void AddWorldObject(SpecificObject *obj)
     {
         i_worldObjects.template insert<SpecificObject>(obj);
     }
-
-    /** an object of interested exits the grid
-     */
-    //Actually an unlink is enough, no need to go through the container
-    //template<class SPECIFIC_OBJECT> void RemoveWorldObject(SPECIFIC_OBJECT *obj)
-    //{
-    //    ASSERT(obj->GetGridRef().isValid());
-    //    i_objects.template remove<SPECIFIC_OBJECT>(obj);
-    //    ASSERT(!obj->GetGridRef().isValid());
-    //}
 
     // Visit grid objects
     template <typename T>
@@ -93,22 +81,11 @@ public:
         return i_worldObjects.template Count<T>();
     }
 
-    /** Inserts a container type object into the grid.
-     */
     template<typename SpecificObject>
     void AddGridObject(SpecificObject *obj)
     {
         i_gridObjects.template insert<SpecificObject>(obj);
     }
-
-    /** Removes a containter type object from the grid
-     */
-    //template<class SPECIFIC_OBJECT> void RemoveGridObject(SPECIFIC_OBJECT *obj)
-    //{
-    //    ASSERT(obj->GetGridRef().isValid());
-    //    i_container.template remove<SPECIFIC_OBJECT>(obj);
-    //    ASSERT(!obj->GetGridRef().isValid());
-    //}
 
 private:
     GridObjectMap i_gridObjects;

@@ -22,7 +22,6 @@
 #include "Common.h"
 #include "UpdateFields.h"
 #include "UpdateData.h"
-#include "GridReference.h"
 #include "ObjectDefines.h"
 #include "GridDefines.h"
 #include "Map.h"
@@ -650,15 +649,60 @@ class WorldLocation : public Position
         uint32 m_mapId;
 };
 
-template<class T>
+template <typename ObjectType>
 class GridObject
 {
-    public:
-        bool IsInGrid() const { return _gridRef.isValid(); }
-        void AddToGrid(GridRefManager<T>& m) { ASSERT(!IsInGrid()); _gridRef.link(&m, (T*)this); }
-        void RemoveFromGrid() { ASSERT(IsInGrid()); _gridRef.unlink(); }
-    private:
-        GridReference<T> _gridRef;
+    typedef GridObject<ObjectType> SelfType;
+
+    typedef std::vector<ObjectType*> ObjectTypeStorage;
+
+public:
+    GridObject()
+        : storage_()
+        , offset_(std::numeric_limits<std::size_t>::max())
+    { }
+
+    ~GridObject()
+    {
+        ASSERT(!IsInGrid());
+    }
+
+    bool IsInGrid() const
+    {
+        return storage_ != nullptr;
+    }
+
+    void AddToGrid(ObjectTypeStorage &storage)
+    {
+        ASSERT(!IsInGrid());
+
+        storage_ = &storage;
+
+        offset_ = storage_->size();
+        storage_->emplace_back(static_cast<ObjectType*>(this));
+    }
+
+    void RemoveFromGrid()
+    {
+        ASSERT(IsInGrid());
+        ASSERT(storage_->size() > offset_);
+        ASSERT((*storage_)[offset_] == static_cast<ObjectType*>(this));
+
+        // First, swap with last element in storage
+        std::swap((*storage_)[offset_], storage_->back());
+
+        // Then, adjust offset for swapped element
+        static_cast<SelfType*>((*storage_)[offset_])->offset_ = offset_;
+
+        // Last, remove self from grid storage
+        storage_->pop_back();
+        storage_ = nullptr;
+        offset_ = std::numeric_limits<std::size_t>::max();
+    }
+
+private:
+    ObjectTypeStorage *storage_;
+    std::size_t offset_;
 };
 
 template <class ValueType, class FlagType, uint8 MaxFlags>

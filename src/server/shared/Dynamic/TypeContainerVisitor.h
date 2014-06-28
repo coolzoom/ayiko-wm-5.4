@@ -39,15 +39,15 @@ inline void VisitorHelper(Visitor &/*v*/, ContainerMapList<TypeNull> &/*c*/) { }
 template <typename Visitor, typename T>
 inline void VisitorHelper(Visitor &v, ContainerMapList<T> &c)
 {
-    v.Visit(c._element);
+    v.Visit(c.elements);
 }
 
 // recursion container map list
 template <typename Visitor, typename Head, typename Tail>
 inline void VisitorHelper(Visitor &v, ContainerMapList<TypeList<Head, Tail>> &c)
 {
-    VisitorHelper(v, c.head_);
-    VisitorHelper(v, c.tail_);
+    VisitorHelper(v, c.head);
+    VisitorHelper(v, c.tail);
 }
 
 // for TypeMapContainer

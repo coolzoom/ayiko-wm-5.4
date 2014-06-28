@@ -26,9 +26,13 @@
 
 #include "Define.h"
 #include "Dynamic/TypeList.h"
-#include "GridRefManager.h"
 
 #include <type_traits>
+#include <vector>
+
+namespace Trinity {
+
+namespace Detail {
 
 /*
  * @class ContainerMapList is a mulit-type container for map elements
@@ -38,7 +42,7 @@
 template <typename T>
 struct ContainerMapList final
 {
-    GridRefManager<T> _element;
+    std::vector<T*> elements;
 };
 
 template <>
@@ -47,14 +51,10 @@ struct ContainerMapList<TypeNull> final { };
 template <typename Head, typename Tail>
 struct ContainerMapList<TypeList<Head, Tail>> final
 {
-    ContainerMapList<Head> head_;
-    ContainerMapList<Tail> tail_;
+    ContainerMapList<Head> head;
+    ContainerMapList<Tail> tail;
 };
 
-namespace Trinity {
-
-namespace Detail {
-
 template <typename SpecificType, typename Head, typename Tail>
 inline typename std::enable_if<
     std::is_same<Head, SpecificType>::value,
@@ -62,7 +62,7 @@ inline typename std::enable_if<
 >::type
 mapForType(ContainerMapList<TypeList<Head, Tail>> const &m)
 {
-    return m.head_;
+    return m.head;
 }
 
 template <typename SpecificType, typename Head, typename Tail>
@@ -72,7 +72,7 @@ inline typename std::enable_if<
 >::type
 mapForType(ContainerMapList<TypeList<Head, Tail>> const &m)
 {
-    return Trinity::Detail::mapForType<SpecificType>(m.tail_);
+    return Trinity::Detail::mapForType<SpecificType>(m.tail);
 }
 
 template <typename SpecificType, typename Head, typename Tail>
@@ -82,7 +82,7 @@ inline typename std::enable_if<
 >::type
 mapForType(ContainerMapList<TypeList<Head, Tail>> &m)
 {
-    return m.head_;
+    return m.head;
 }
 
 template <typename SpecificType, typename Head, typename Tail>
@@ -92,51 +92,10 @@ inline typename std::enable_if<
 >::type
 mapForType(ContainerMapList<TypeList<Head, Tail>> &m)
 {
-    return Trinity::Detail::mapForType<SpecificType>(m.tail_);
+    return Trinity::Detail::mapForType<SpecificType>(m.tail);
 }
 
 } // namespace Detail
-
-/* ContainerMapList Helpers */
-
-template <typename SpecificType, typename Head, typename Tail>
-inline size_t Count(ContainerMapList<TypeList<Head, Tail>> const &m)
-{
-    return Trinity::Detail::mapForType<SpecificType>(m)._element.getSize();
-}
-
-template <typename SpecificType, typename Head, typename Tail>
-inline void Insert(ContainerMapList<TypeList<Head, Tail>> &m, SpecificType *obj)
-{
-    obj->AddToGrid(Trinity::Detail::mapForType<SpecificType>(m)._element);
-}
-
-//// non-const remove method
-//template<class SPECIFIC_TYPE> SPECIFIC_TYPE* Remove(ContainerMapList<SPECIFIC_TYPE> & /*elements*/, SPECIFIC_TYPE *obj)
-//{
-//    obj->GetGridRef().unlink();
-//    return obj;
-//}
-
-//template<class SPECIFIC_TYPE> SPECIFIC_TYPE* Remove(ContainerMapList<TypeNull> &/*elements*/, SPECIFIC_TYPE * /*obj*/)
-//{
-//    return NULL;
-//}
-
-//// this is a missed
-//template<class SPECIFIC_TYPE, class T> SPECIFIC_TYPE* Remove(ContainerMapList<T> &/*elements*/, SPECIFIC_TYPE * /*obj*/)
-//{
-//    return NULL;
-//}
-
-//template<class SPECIFIC_TYPE, class T, class H> SPECIFIC_TYPE* Remove(ContainerMapList<TypeList<H, T> > &elements, SPECIFIC_TYPE *obj)
-//{
-//    // The head element is bad
-//    SPECIFIC_TYPE* t = Remove(elements.head_, obj);
-//    return ( t != NULL ? t : Remove(elements.tail_, obj) );
-//}
-
-} // namespace Trinity
 
 /*
  * @class TypeMapContainer contains a fixed number of types and is
@@ -149,34 +108,31 @@ template <typename ObjectTypes>
 class TypeMapContainer final
 {
 public:
-    typedef ContainerMapList<ObjectTypes> ObjectMap;
+    typedef Detail::ContainerMapList<ObjectTypes> ObjectMap;
 
 public:
     template <typename SpecificType>
     size_t Count() const
     {
-        return Trinity::Count<SpecificType>(i_elements);
+        auto const &m = Trinity::Detail::mapForType<SpecificType>(i_elements);
+        return m.elements.size();
     }
 
-    /// inserts a specific object into the container
     template <typename SpecificType>
     void insert(SpecificType *obj)
     {
-        Trinity::Insert(i_elements, obj);
+        auto &m = Trinity::Detail::mapForType<SpecificType>(i_elements);
+        obj->AddToGrid(m.elements);
     }
 
-    ///  Removes the object from the container, and returns the removed object
-    //template<class SPECIFIC_TYPE> bool remove(SPECIFIC_TYPE* obj)
-    //{
-    //    SPECIFIC_TYPE* t = Trinity::Remove(i_elements, obj);
-    //    return (t != NULL);
-    //}
-
     ObjectMap & GetElements() { return i_elements; }
-    ObjectMap const & GetElements() const { return i_elements;}
+
+    ObjectMap const & GetElements() const { return i_elements; }
 
 private:
     ObjectMap i_elements;
 };
+
+} // namespace Trinity
 
 #endif

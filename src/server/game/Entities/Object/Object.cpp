@@ -3040,55 +3040,49 @@ struct WorldObjectChangeAccumulator
     UpdateDataMapType& i_updateDatas;
     WorldObject& i_object;
     std::set<uint64> plr_list;
-    WorldObjectChangeAccumulator(WorldObject &obj, UpdateDataMapType &d) : i_updateDatas(d), i_object(obj) {}
+
+    WorldObjectChangeAccumulator(WorldObject &obj, UpdateDataMapType &d)
+        : i_updateDatas(d), i_object(obj)
+    { }
+
     void Visit(PlayerMapType &m)
     {
-        Player* source = NULL;
-        for (PlayerMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+        for (auto &source : m)
         {
-            source = iter->getSource();
-
             BuildPacket(source);
 
             if (!source->GetSharedVisionList().empty())
             {
-                SharedVisionList::const_iterator it = source->GetSharedVisionList().begin();
-                for (; it != source->GetSharedVisionList().end(); ++it)
-                    BuildPacket(*it);
+                for (auto &player : source->GetSharedVisionList())
+                    BuildPacket(player);
             }
         }
     }
 
     void Visit(CreatureMapType &m)
     {
-        Creature* source = NULL;
-        for (CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+        for (auto &source : m)
         {
-            source = iter->getSource();
             if (!source->GetSharedVisionList().empty())
             {
-                SharedVisionList::const_iterator it = source->GetSharedVisionList().begin();
-                for (; it != source->GetSharedVisionList().end(); ++it)
-                    BuildPacket(*it);
+                for (auto &player : source->GetSharedVisionList())
+                    BuildPacket(player);
             }
         }
     }
 
     void Visit(DynamicObjectMapType &m)
     {
-        DynamicObject* source = NULL;
-        for (DynamicObjectMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+        for (auto &source : m)
         {
-            source = iter->getSource();
-            uint64 guid = source->GetCasterGUID();
+            auto const guid = source->GetCasterGUID();
+            if (!IS_PLAYER_GUID(guid))
+                continue;
 
-            if (IS_PLAYER_GUID(guid))
-            {
-                //Caster may be NULL if DynObj is in removelist
-                if (Player* caster = ObjectAccessor::FindPlayer(guid))
-                    if (caster->GetUInt64Value(PLAYER_FARSIGHT) == source->GetGUID())
-                        BuildPacket(caster);
-            }
+            // Caster may be NULL if DynObj is in removelist
+            auto const caster = ObjectAccessor::FindPlayer(guid);
+            if (caster && caster->GetUInt64Value(PLAYER_FARSIGHT) == source->GetGUID())
+                BuildPacket(caster);
         }
     }
 

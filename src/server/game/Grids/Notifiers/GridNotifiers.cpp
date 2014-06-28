@@ -74,38 +74,47 @@ void VisibleNotifier::SendToSelf()
 
 void VisibleChangesNotifier::Visit(PlayerMapType &m)
 {
-    for (PlayerMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    for (auto &source : m)
     {
-        if (iter->getSource() == &i_object)
+        if (source == &i_object)
             continue;
 
-        iter->getSource()->UpdateVisibilityOf(&i_object);
+        source->UpdateVisibilityOf(&i_object);
 
-        if (!iter->getSource()->GetSharedVisionList().empty())
-            for (SharedVisionList::const_iterator i = iter->getSource()->GetSharedVisionList().begin();
-                i != iter->getSource()->GetSharedVisionList().end(); ++i)
-                if ((*i)->m_seer == iter->getSource())
-                    (*i)->UpdateVisibilityOf(&i_object);
+        if (source->GetSharedVisionList().empty())
+            continue;
+
+        for (auto &player : source->GetSharedVisionList())
+            if (player->m_seer == source)
+                player->UpdateVisibilityOf(&i_object);
     }
 }
 
 void VisibleChangesNotifier::Visit(CreatureMapType &m)
 {
-    for (CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
-        if (!iter->getSource()->GetSharedVisionList().empty())
-            for (SharedVisionList::const_iterator i = iter->getSource()->GetSharedVisionList().begin();
-                i != iter->getSource()->GetSharedVisionList().end(); ++i)
-                if ((*i)->m_seer == iter->getSource())
-                    (*i)->UpdateVisibilityOf(&i_object);
+    for (auto &source : m)
+    {
+        if (source->GetSharedVisionList().empty())
+            continue;
+
+        for (auto &player : source->GetSharedVisionList())
+            if (player->m_seer == source)
+                player->UpdateVisibilityOf(&i_object);
+    }
 }
 
 void VisibleChangesNotifier::Visit(DynamicObjectMapType &m)
 {
-    for (DynamicObjectMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
-        if (IS_PLAYER_GUID(iter->getSource()->GetCasterGUID()))
-            if (Player* caster = (Player*)iter->getSource()->GetCaster())
-                if (caster->m_seer == iter->getSource())
-                    caster->UpdateVisibilityOf(&i_object);
+    for (auto &obj : m)
+    {
+        auto const guid = obj->GetCasterGUID();
+        if (!IS_PLAYER_GUID(guid))
+            continue;
+
+        auto const caster = (Player*)obj->GetCaster();
+        if (caster && caster->m_seer == obj)
+            caster->UpdateVisibilityOf(&i_object);
+    }
 }
 
 inline void CreatureUnitRelocationWorker(Creature* c, Unit* u)
@@ -121,10 +130,8 @@ inline void CreatureUnitRelocationWorker(Creature* c, Unit* u)
 
 void PlayerRelocationNotifier::Visit(PlayerMapType &m)
 {
-    for (PlayerMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    for (auto &player : m)
     {
-        Player* player = iter->getSource();
-
         vis_guids.erase(player->GetGUID());
 
         i_player.UpdateVisibilityOf(player, i_data, i_visibleNow);
@@ -140,27 +147,23 @@ void PlayerRelocationNotifier::Visit(CreatureMapType &m)
 {
     bool relocated_for_ai = (&i_player == i_player.m_seer);
 
-    for (CreatureMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
+    for (auto &creature : m)
     {
-        Creature* c = iter->getSource();
+        vis_guids.erase(creature->GetGUID());
 
-        vis_guids.erase(c->GetGUID());
+        i_player.UpdateVisibilityOf(creature, i_data, i_visibleNow);
 
-        i_player.UpdateVisibilityOf(c, i_data, i_visibleNow);
-
-        if (relocated_for_ai && !c->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
-            CreatureUnitRelocationWorker(c, &i_player);
+        if (relocated_for_ai && !creature->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
+            CreatureUnitRelocationWorker(creature, &i_player);
     }
 }
 
 void CreatureRelocationNotifier::Visit(PlayerMapType &m)
 {
-    for (PlayerMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    for (auto &player : m)
     {
-        Player* player = iter->getSource();
-        for (StorageType::const_iterator j = i_creatureList.begin(); j != i_creatureList.end(); ++j)
+        for (auto &other : i_creatureList)
         {
-            Creature * const other = *j;
             CreatureUnitRelocationWorker(other, player);
             if (!player->m_seer->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
                 player->UpdateVisibilityOf(other);
@@ -170,17 +173,15 @@ void CreatureRelocationNotifier::Visit(PlayerMapType &m)
 
 void CreatureRelocationNotifier::Visit(CreatureMapType &m)
 {
-    for (CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    for (auto &creature : m)
     {
-        Creature* c = iter->getSource();
-        for (StorageType::const_iterator j = i_creatureList.begin(); j != i_creatureList.end(); ++j)
+        for (auto &other : i_creatureList)
         {
-            Creature * const other = *j;
             if (other->isAlive())
             {
-                CreatureUnitRelocationWorker(other, c);
-                if (!c->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
-                    CreatureUnitRelocationWorker(c, other);
+                CreatureUnitRelocationWorker(other, creature);
+                if (!creature->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
+                    CreatureUnitRelocationWorker(creature, other);
             }
         }
     }
@@ -189,13 +190,12 @@ void CreatureRelocationNotifier::Visit(CreatureMapType &m)
 void DelayedUnitRelocation::Visit(CreatureMapType &m)
 {
     CreatureRelocationNotifier::StorageType creaturesToRelocate;
-    creaturesToRelocate.reserve(m.getSize());
+    creaturesToRelocate.reserve(m.size());
 
-    for (CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    for (auto &creature : m)
     {
-        Creature* unit = iter->getSource();
-        if (unit->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
-            creaturesToRelocate.push_back(unit);
+        if (creature->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
+            creaturesToRelocate.push_back(creature);
     }
 
     if (creaturesToRelocate.empty())
@@ -209,9 +209,8 @@ void DelayedUnitRelocation::Visit(CreatureMapType &m)
 
 void DelayedUnitRelocation::Visit(PlayerMapType &m)
 {
-    for (PlayerMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    for (auto &player : m)
     {
-        Player* player = iter->getSource();
         WorldObject const* viewPoint = player->m_seer;
 
         if (!viewPoint->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
@@ -235,20 +234,18 @@ void DelayedUnitRelocation::Visit(PlayerMapType &m)
 
 void AIRelocationNotifier::Visit(CreatureMapType &m)
 {
-    for (CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    for (auto &creature : m)
     {
-        Creature* c = iter->getSource();
-        CreatureUnitRelocationWorker(c, &i_unit);
+        CreatureUnitRelocationWorker(creature, &i_unit);
         if (isCreature)
-            CreatureUnitRelocationWorker((Creature*)&i_unit, c);
+            CreatureUnitRelocationWorker((Creature*)&i_unit, creature);
     }
 }
 
 void MessageDistDeliverer::Visit(PlayerMapType &m)
 {
-    for (PlayerMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    for (auto &target : m)
     {
-        Player* target = iter->getSource();
         if (!target->InSamePhase(i_phaseMask))
             continue;
 
@@ -258,10 +255,9 @@ void MessageDistDeliverer::Visit(PlayerMapType &m)
         // Send packet to all who are sharing the player's vision
         if (!target->GetSharedVisionList().empty())
         {
-            SharedVisionList::const_iterator i = target->GetSharedVisionList().begin();
-            for (; i != target->GetSharedVisionList().end(); ++i)
-                if ((*i)->m_seer == target)
-                    SendPacket(*i);
+            for (auto &player : target->GetSharedVisionList())
+                if (player->m_seer == target)
+                    SendPacket(player);
         }
 
         if (target->m_seer == target || target->GetVehicle())
@@ -271,9 +267,8 @@ void MessageDistDeliverer::Visit(PlayerMapType &m)
 
 void MessageDistDeliverer::Visit(CreatureMapType &m)
 {
-    for (CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    for (auto &target : m)
     {
-        Creature* target = iter->getSource();
         if (!target->InSamePhase(i_phaseMask))
             continue;
 
@@ -283,19 +278,17 @@ void MessageDistDeliverer::Visit(CreatureMapType &m)
         // Send packet to all who are sharing the creature's vision
         if (!target->GetSharedVisionList().empty())
         {
-            SharedVisionList::const_iterator i = target->GetSharedVisionList().begin();
-            for (; i != target->GetSharedVisionList().end(); ++i)
-                if ((*i)->m_seer == target)
-                    SendPacket(*i);
+            for (auto &player : target->GetSharedVisionList())
+                if (player->m_seer == target)
+                    SendPacket(player);
         }
     }
 }
 
 void MessageDistDeliverer::Visit(DynamicObjectMapType &m)
 {
-    for (DynamicObjectMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    for (auto &target : m)
     {
-        DynamicObject* target = iter->getSource();
         if (!target->InSamePhase(i_phaseMask))
             continue;
 
@@ -305,7 +298,7 @@ void MessageDistDeliverer::Visit(DynamicObjectMapType &m)
         if (IS_PLAYER_GUID(target->GetCasterGUID()))
         {
             // Send packet back to the caster if the caster has vision of dynamic object
-            Player* caster = (Player*)target->GetCaster();
+            auto const caster = (Player*)target->GetCaster();
             if (caster && caster->m_seer == target)
                 SendPacket(caster);
         }
@@ -325,9 +318,8 @@ MessageDistDeliverer::VisitObject(Player* player)
 
 void UnfriendlyMessageDistDeliverer::Visit(PlayerMapType &m)
 {
-    for (PlayerMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    for (auto &target : m)
     {
-        Player* target = iter->getSource();
         if (!target->InSamePhase(i_phaseMask))
             continue;
 
@@ -337,10 +329,9 @@ void UnfriendlyMessageDistDeliverer::Visit(PlayerMapType &m)
         // Send packet to all who are sharing the player's vision
         if (!target->GetSharedVisionList().empty())
         {
-            SharedVisionList::const_iterator i = target->GetSharedVisionList().begin();
-            for (; i != target->GetSharedVisionList().end(); ++i)
-                if ((*i)->m_seer == target)
-                    SendPacket(*i);
+            for (auto &player : target->GetSharedVisionList())
+                if (player->m_seer == target)
+                    SendPacket(player);
         }
 
         if (target->m_seer == target || target->GetVehicle())
@@ -351,11 +342,9 @@ void UnfriendlyMessageDistDeliverer::Visit(PlayerMapType &m)
 template <typename OtherMapType>
 void ObjectUpdater::Visit(OtherMapType &m)
 {
-    for (auto &ref : m)
-    {
-        if (ref.getSource()->IsInWorld())
-            ref.getSource()->Update(i_timeDiff);
-    }
+    for (auto &object : m)
+        if (object->IsInWorld())
+            object->Update(i_timeDiff);
 }
 
 bool AnyDeadUnitObjectInRangeCheck::operator()(Player* u)

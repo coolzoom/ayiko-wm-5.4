@@ -138,31 +138,39 @@ void ObjectGridEvacuator::Visit(CreatureMapType &m)
     // creature in unloading grid can have respawn point in another grid
     // if it will be unloaded then it will not respawn in original grid until unload/load original grid
     // move to respawn point to prevent this case. For player view in respawn grid this will be normal respawn.
-    for (CreatureMapType::iterator iter = m.begin(); iter != m.end();)
-    {
-        Creature* c = iter->getSource();
-        ++iter;
 
-        ASSERT(!c->isPet() && "ObjectGridRespawnMover must not be called for pets");
-        c->GetMap()->CreatureRespawnRelocation(c, true);
+    std::size_t count = m.size();
+
+    for (std::size_t i = 0; i < count;)
+    {
+        auto &creature = m[i];
+        ASSERT(!creature->isPet() && "ObjectGridRespawnMover must not be called for pets");
+
+        creature->GetMap()->CreatureRespawnRelocation(creature, true);
+
+        // If creature respawned in different grid, size will change
+        if (m.size() == count)
+            ++i;
+        else
+            count = m.size();
     }
 }
 
 template <typename AnyMapType>
 void ObjectGridUnloader::Visit(AnyMapType &m)
 {
-    while (!m.isEmpty())
+    while (!m.empty())
     {
-        auto const obj = m.getFirst()->getSource();
+        auto const obj = m.front();
         // if option set then object already saved at this moment
         if (!sWorld->getBoolConfig(CONFIG_SAVE_RESPAWN_TIME_IMMEDIATELY))
             obj->SaveRespawnTime();
-        //Some creatures may summon other temp summons in CleanupsBeforeDelete()
-        //So we need this even after cleaner (maybe we can remove cleaner)
-        //Example: Flame Leviathan Turret 33139 is summoned when a creature is deleted
-        //TODO: Check if that script has the correct logic. Do we really need to summons something before deleting?
+        // Some creatures may summon other temp summons in CleanupsBeforeDelete()
+        // So we need this even after cleaner (maybe we can remove cleaner)
+        // Example: Flame Leviathan Turret 33139 is summoned when a creature is deleted
+        // TODO: Check if that script has the correct logic. Do we really need to summon something before deleting?
         obj->CleanupsBeforeDelete();
-        ///- object will get delinked from the manager when deleted
+        obj->RemoveFromGrid();
         delete obj;
     }
 }
@@ -170,10 +178,8 @@ void ObjectGridUnloader::Visit(AnyMapType &m)
 void ObjectGridStoper::Visit(CreatureMapType &m)
 {
     // stop any fights at grid de-activation and remove dynobjects created at cast by creatures
-    for (auto &ref : m)
+    for (auto &source : m)
     {
-        auto const source = ref.getSource();
-
         if (source->isInCombat())
         {
             source->CombatStop();
@@ -196,8 +202,8 @@ void ObjectGridCleaner::Visit(AnyMapType &m)
 {
     // look like we have a crash wile accessing to DynamicObject map here
     // I Guess it's DynamicObject delete pointer, we need to look at it anyway ...
-    for (auto &ref : m)
-        ref.getSource()->CleanupsBeforeDelete();
+    for (auto &object : m)
+        object->CleanupsBeforeDelete();
 }
 
 template void ObjectGridUnloader::Visit(CreatureMapType &);

@@ -631,12 +631,12 @@ struct ResetNotifier
     template <typename MapType>
     void resetNotify(MapType &m)
     {
-        for (auto &ref : m)
-            ref.getSource()->ResetAllNotifies();
+        for (auto &object : m)
+            object->ResetAllNotifies();
     }
 
-    void Visit(CreatureMapType &m) { resetNotify(m);}
-    void Visit(PlayerMapType &m) { resetNotify(m);}
+    void Visit(CreatureMapType &m) { resetNotify(m); }
+    void Visit(PlayerMapType &m) { resetNotify(m); }
 
     template <typename NotInterested>
     void Visit(NotInterested &) { }
@@ -1078,7 +1078,6 @@ void Map::UnloadAll()
     for (GridContainerType::const_iterator i = i_loadedGrids.begin(); i != i_loadedGrids.end();)
     {
         auto const ngrid = (i++)->second;
-        // deletes the grid and removes it from the GridRefManager
         UnloadGrid(*ngrid, true);
     }
 }

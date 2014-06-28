@@ -7230,8 +7230,12 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
         if (GetSpellInfo()->Id == 115767)
         {
             if (Player* _player = GetCaster()->ToPlayer())
-              if (_player->GetSpecializationId(_player->GetActiveSpec()) == SPEC_WARRIOR_ARMS)
-                  damage *= 2;
+            {
+                if (_player->GetSpecializationId(_player->GetActiveSpec()) == SPEC_WARRIOR_ARMS)
+                    damage *= 2;
+                else if (_player->GetSpecializationId(_player->GetActiveSpec()) == SPEC_WARRIOR_PROTECTION)
+                    damage /= 2;
+            }
         }
 
         // Nether Tempest and Living Bomb deal 85% of damage if used on player

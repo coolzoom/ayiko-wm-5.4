@@ -354,6 +354,12 @@ Corpse* ObjectAccessor::ConvertCorpseForPlayer(uint64 player_guid, bool insignia
         map->AddToMap(bones);
     }
 
+    if (corpse->IsInGrid())
+    {
+        // Map must exist if corpse is in grid
+        map->RemoveFromGrid(corpse, Cell(corpse->GetPositionX(), corpse->GetPositionY()));
+    }
+
     // all references to the corpse should be removed at this point
     delete corpse;
 

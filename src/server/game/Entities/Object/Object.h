@@ -1019,24 +1019,24 @@ class WorldObject : public Object, public WorldLocation
         bool IsWorldObject() const;
 
         template <typename Notifier>
-        void VisitNearbyObject(const float &radius, Notifier &notifier, bool loadGrids = false) const
+        void VisitNearbyObject(const float &radius, Notifier &notifier) const
         {
             if (IsInWorld())
-                GetMap()->VisitAll(GetPositionX(), GetPositionY(), radius, notifier, loadGrids);
+                GetMap()->VisitAll(GetPositionX(), GetPositionY(), radius, notifier);
         }
 
         template <typename Notifier>
-        void VisitNearbyGridObject(const float &radius, Notifier &notifier, bool loadGrids = false) const
+        void VisitNearbyGridObject(const float &radius, Notifier &notifier) const
         {
             if (IsInWorld())
-                GetMap()->VisitGrid(GetPositionX(), GetPositionY(), radius, notifier, loadGrids);
+                GetMap()->VisitGrid(GetPositionX(), GetPositionY(), radius, notifier);
         }
 
         template <typename Notifier>
-        void VisitNearbyWorldObject(const float &radius, Notifier &notifier, bool loadGrids = false) const
+        void VisitNearbyWorldObject(const float &radius, Notifier &notifier) const
         {
             if (IsInWorld())
-                GetMap()->VisitWorld(GetPositionX(), GetPositionY(), radius, notifier, loadGrids);
+                GetMap()->VisitWorld(GetPositionX(), GetPositionY(), radius, notifier);
         }
 
         uint32  LastUsedScriptID;

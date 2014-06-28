@@ -3052,10 +3052,8 @@ struct WorldObjectChangeAccumulator
             BuildPacket(source);
 
             if (!source->GetSharedVisionList().empty())
-            {
                 for (auto &player : source->GetSharedVisionList())
                     BuildPacket(player);
-            }
         }
     }
 
@@ -3064,10 +3062,8 @@ struct WorldObjectChangeAccumulator
         for (auto &source : m)
         {
             if (!source->GetSharedVisionList().empty())
-            {
                 for (auto &player : source->GetSharedVisionList())
                     BuildPacket(player);
-            }
         }
     }
 
@@ -3097,7 +3093,7 @@ struct WorldObjectChangeAccumulator
     }
 
     template <typename NotInterested>
-    void Visit(NotInterested &) {}
+    void Visit(NotInterested &) { }
 };
 
 void WorldObject::BuildUpdate(UpdateDataMapType& data_map)

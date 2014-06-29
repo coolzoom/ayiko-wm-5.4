@@ -438,14 +438,20 @@ class Map
         void AddToGrid(Creature *obj, Cell const &cell);
 
         // must called with AddToWorld
-        template<class T>
-        void AddToActive(T* obj) { AddToActiveHelper(obj); }
+        template <typename T>
+        void AddToActive(T* obj)
+        {
+            AddToActiveHelper(obj);
+        }
 
         void AddToActive(Creature* obj);
 
         // must called with RemoveFromWorld
-        template<class T>
-        void RemoveFromActive(T* obj) { RemoveFromActiveHelper(obj); }
+        template <typename T>
+        void RemoveFromActive(T* obj)
+        {
+            RemoveFromActiveHelper(obj);
+        }
 
         void RemoveFromActive(Creature* obj);
 
@@ -568,7 +574,6 @@ class Map
 
         typedef std::set<WorldObject*> ActiveNonPlayers;
         ActiveNonPlayers m_activeNonPlayers;
-        ActiveNonPlayers::iterator m_activeNonPlayersIter;
 
     private:
         Player* _GetScriptPlayerSourceOrTarget(Object* source, Object* target, ScriptInfo const &scriptInfo) const;
@@ -614,27 +619,16 @@ class Map
         template<class T>
         void DeleteFromWorld(T*);
 
-        template<class T>
+        template <typename T>
         void AddToActiveHelper(T* obj)
         {
             m_activeNonPlayers.insert(obj);
         }
 
-        template<class T>
+        template <typename T>
         void RemoveFromActiveHelper(T* obj)
         {
-            // Map::Update for active object in proccess
-            if (m_activeNonPlayersIter != m_activeNonPlayers.end())
-            {
-                ActiveNonPlayers::iterator itr = m_activeNonPlayers.find(obj);
-                if (itr == m_activeNonPlayers.end())
-                    return;
-                if (itr == m_activeNonPlayersIter)
-                    ++m_activeNonPlayersIter;
-                m_activeNonPlayers.erase(itr);
-            }
-            else
-                m_activeNonPlayers.erase(obj);
+            m_activeNonPlayers.erase(obj);
         }
 
         std::unordered_map<uint32 /*dbGUID*/, time_t> _creatureRespawnTimes;

@@ -293,8 +293,7 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode, Map* _par
 _creatureToMoveLock(false), i_mapEntry (sMapStore.LookupEntry(id)), i_spawnMode(SpawnMode), i_InstanceId(InstanceId),
 m_unloadTimer(0), m_VisibleDistance(DEFAULT_VISIBILITY_DISTANCE),
 m_VisibilityNotifyPeriod(DEFAULT_VISIBILITY_NOTIFY_PERIOD),
-m_activeNonPlayersIter(m_activeNonPlayers.end()), i_gridExpiry(expiry),
-i_scriptLock(false)
+i_gridExpiry(expiry), i_scriptLock(false)
 {
     m_parentMap = (_parent ? _parent : this);
     for (unsigned int idx=0; idx < MAX_NUMBER_OF_GRIDS; ++idx)
@@ -599,15 +598,10 @@ void Map::Update(const uint32 diff)
     }
 
     // non-player active objects, increasing iterator in the loop in case of object removal
-    for (m_activeNonPlayersIter = m_activeNonPlayers.begin(); m_activeNonPlayersIter != m_activeNonPlayers.end();)
+    for (auto &obj : m_activeNonPlayers)
     {
-        WorldObject* obj = *m_activeNonPlayersIter;
-        ++m_activeNonPlayersIter;
-
-        if (!obj || !obj->IsInWorld())
-            continue;
-
-        VisitNearbyCellsOf(this, obj, gridObjectUpdate, worldObjectUpdate);
+        if (obj && obj->IsInWorld())
+            VisitNearbyCellsOf(this, obj, gridObjectUpdate, worldObjectUpdate);
     }
 
     i_objectUpdater.updateCollected(diff);
@@ -2246,22 +2240,24 @@ bool Map::ActiveObjectsNearGrid(NGrid const &ngrid) const
 
     for (MapRefManager::const_iterator iter = m_mapRefManager.begin(); iter != m_mapRefManager.end(); ++iter)
     {
-        Player* player = iter->getSource();
+        Player const * const player = iter->getSource();
 
-        CellCoord p = Trinity::ComputeCellCoord(player->GetPositionX(), player->GetPositionY());
-        if ((cell_min.x_coord <= p.x_coord && p.x_coord <= cell_max.x_coord) &&
-            (cell_min.y_coord <= p.y_coord && p.y_coord <= cell_max.y_coord))
+        auto const p = Trinity::ComputeCellCoord(player->GetPositionX(), player->GetPositionY());
+        if ((cell_min.x_coord <= p.x_coord && p.x_coord <= cell_max.x_coord)
+                && (cell_min.y_coord <= p.y_coord && p.y_coord <= cell_max.y_coord))
+        {
             return true;
+        }
     }
 
-    for (ActiveNonPlayers::const_iterator iter = m_activeNonPlayers.begin(); iter != m_activeNonPlayers.end(); ++iter)
+    for (auto const &obj : m_activeNonPlayers)
     {
-        WorldObject* obj = *iter;
-
-        CellCoord p = Trinity::ComputeCellCoord(obj->GetPositionX(), obj->GetPositionY());
-        if ((cell_min.x_coord <= p.x_coord && p.x_coord <= cell_max.x_coord) &&
-            (cell_min.y_coord <= p.y_coord && p.y_coord <= cell_max.y_coord))
+        auto const p = Trinity::ComputeCellCoord(obj->GetPositionX(), obj->GetPositionY());
+        if ((cell_min.x_coord <= p.x_coord && p.x_coord <= cell_max.x_coord)
+                && (cell_min.y_coord <= p.y_coord && p.y_coord <= cell_max.y_coord))
+        {
             return true;
+        }
     }
 
     return false;

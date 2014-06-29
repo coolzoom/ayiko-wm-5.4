@@ -152,7 +152,8 @@ void Map::ObjectUpdater::updateCollected(uint32 diff)
     if (!i_objectsToUpdate.empty())
     {
         for (auto &object : i_objectsToUpdate)
-            object->Update(diff);
+            if (object->IsInWorld())
+                object->Update(diff);
         i_objectsToUpdate.clear();
     }
 }
@@ -982,8 +983,9 @@ bool Map::UnloadGrid(NGrid &ngrid, bool unloadAll)
     {
         if (!unloadAll)
         {
-            //pets, possessed creatures (must be active), transport passengers
-            if (ngrid.GetWorldObjectCountInNGrid<Creature>())
+            // pets, possessed creatures (must be active), transport passengers,
+            // resurrectable corpses
+            if (ngrid.GetWorldObjectCountInNGrid<TypeList<Creature, Corpse>>())
                 return false;
 
             if (ActiveObjectsNearGrid(ngrid))

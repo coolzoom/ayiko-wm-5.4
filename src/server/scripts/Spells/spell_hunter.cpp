@@ -1670,6 +1670,11 @@ class spell_hun_steady_cobra_shot : public SpellScriptLoader
             {
                 int32 energizeValue = spell->Effects[EFFECT_0].BasePoints;
 
+                // Steady Focus
+                if (spellId == SPELL_STEADY_SHOT_ENERGIZE)
+                    if (AuraEffect const * const steadyFocus = caster->GetAuraEffect(53220, EFFECT_1))
+                        energizeValue += steadyFocus->GetAmount();
+
                 // Hunter T13 2P Bonus
                 if (caster->HasAura(105732))
                     energizeValue *= 2;

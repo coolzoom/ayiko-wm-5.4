@@ -1790,26 +1790,25 @@ class spell_sha_lava_lash : public SpellScriptLoader
             if (player->HasAura(55444) || !target->HasAura(SPELL_SHA_FLAME_SHOCK))
                 return;
 
-            std::list<Unit*> targetList;
-            player->GetAttackableUnitListInRange(targetList, 12.0f);
-
-            int32 hitTargets = 0;
-
-            for (auto itr : targetList)
+            // Find all the enemies
+            std::list<Unit*> targets;
+            Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(player, player, 12.0f);
+            Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(player, targets, u_check);
+            player->VisitNearbyObject(12.0f, searcher);
+            // Limit to 4
+            int8 count = 0;
+            for (std::list<Unit*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
             {
-                if (!player->IsValidAttackTarget(itr))
+                // Do not check unattackable targets
+                if (!(*iter)->isTargetableForAttack())
                     continue;
 
-                if (itr->GetGUID() == target->GetGUID())
-                    continue;
-
-                if (itr->GetGUID() == player->GetGUID())
-                    continue;
-
-                player->CastSpell(itr, SPELL_SHA_FLAME_SHOCK, true);
-
-                if (++hitTargets == 4)
-                    break;
+                if (++count > 4)
+                    return;
+                // Hack to initiate attack as AddAura does not do that
+                if (Creature * const c = (*iter)->ToCreature())
+                    c->AI()->AttackStart(player);
+                player->AddAura(8050, *iter);
             }
         }
 

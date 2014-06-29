@@ -81,6 +81,7 @@
 #include "UpdateFieldFlags.h"
 #include "LexicalCast.h"
 #include "GameObjectAI.h"
+#include "ScriptMgr.h"
 
 #include <cmath>
 

@@ -290,7 +290,7 @@ public:
             playerGuid = guid;
         }
 
-        void WaypointReached(uint32 waypointId) { }
+        void WaypointReached(uint32 /*waypointId*/) { }
 
         void LastWaypointReached()
         {
@@ -390,7 +390,7 @@ public:
             me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
         }
 
-        void DoAction(int32 const action) override
+        void DoAction(int32 const /*action*/) override
         {
             Talk(0);
             me->ForcedDespawn(5000);

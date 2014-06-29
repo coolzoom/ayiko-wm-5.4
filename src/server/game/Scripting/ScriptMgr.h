@@ -242,36 +242,6 @@ class WorldScript : public ScriptObject
         virtual void OnShutdown() { }
 };
 
-class FormulaScript : public ScriptObject
-{
-    protected:
-
-        FormulaScript(const char* name);
-
-    public:
-
-        // Called after calculating honor.
-        virtual void OnHonorCalculation(float& /*honor*/, uint8 /*level*/, float /*multiplier*/) { }
-
-        // Called after gray level calculation.
-        virtual void OnGrayLevelCalculation(uint8& /*grayLevel*/, uint8 /*playerLevel*/) { }
-
-        // Called after calculating experience color.
-        virtual void OnColorCodeCalculation(XPColorChar& /*color*/, uint8 /*playerLevel*/, uint8 /*mobLevel*/) { }
-
-        // Called after calculating zero difference.
-        virtual void OnZeroDifferenceCalculation(uint8& /*diff*/, uint8 /*playerLevel*/) { }
-
-        // Called after calculating base experience gain.
-        virtual void OnBaseGainCalculation(uint32& /*gain*/, uint8 /*playerLevel*/, uint8 /*mobLevel*/, ContentLevels /*content*/) { }
-
-        // Called after calculating experience gain.
-        virtual void OnGainCalculation(uint32& /*gain*/, Player* /*player*/, Unit* /*unit*/) { }
-
-        // Called when calculating the experience rate for group experience.
-        virtual void OnGroupRateCalculation(float& /*rate*/, uint32 /*count*/, bool /*isRaid*/) { }
-};
-
 template<class TMap> class MapScript : public UpdatableScript<TMap>
 {
     MapEntry const* _mapEntry;
@@ -811,16 +781,6 @@ class ScriptMgr
         void OnWorldUpdate(uint32 diff);
         void OnStartup();
         void OnShutdown();
-
-    public: /* FormulaScript */
-
-        void OnHonorCalculation(float& honor, uint8 level, float multiplier);
-        void OnGrayLevelCalculation(uint8& grayLevel, uint8 playerLevel);
-        void OnColorCodeCalculation(XPColorChar& color, uint8 playerLevel, uint8 mobLevel);
-        void OnZeroDifferenceCalculation(uint8& diff, uint8 playerLevel);
-        void OnBaseGainCalculation(uint32& gain, uint8 playerLevel, uint8 mobLevel, ContentLevels content);
-        void OnGainCalculation(uint32& gain, Player* player, Unit* unit);
-        void OnGroupRateCalculation(float& rate, uint32 count, bool isRaid);
 
     public: /* MapScript */
 

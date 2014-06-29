@@ -2881,7 +2881,7 @@ public:
     {
         PrepareAuraScript(spell_warl_backlash_AuraScript);
 
-        bool CheckProc(ProcEventInfo& eventInfo)
+        bool CheckProc(ProcEventInfo &)
         {
             Player const * const player = GetCaster()->ToPlayer();
             if (!player)
@@ -2890,7 +2890,7 @@ public:
             return !player->HasSpellCooldown(std::numeric_limits<uint32>::max() - GetId());
         }
 
-        void OnProc(AuraEffect const *aurEff, ProcEventInfo& eventInfo)
+        void OnProc(AuraEffect const *, ProcEventInfo &)
         {
             PreventDefaultAction();
             GetCaster()->CastSpell(GetCaster(), 34936, true);

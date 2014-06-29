@@ -3091,7 +3091,7 @@ public:
     {
         PrepareAuraScript(aura_impl);
 
-        void OnProc(AuraEffect const *aurEff, ProcEventInfo& eventInfo)
+        void OnProc(AuraEffect const *, ProcEventInfo &eventInfo)
         {
             PreventDefaultAction();
 

@@ -16,7 +16,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "ScriptPCH.h"
 #include "icecrown_citadel.h"
 #include "MapManager.h"
 #include "Transport.h"
@@ -24,6 +23,9 @@
 #include "Log.h"
 #include "Vehicle.h"
 #include "Spell.h"
+#include "ScriptedCreature.h"
+#include "ScriptMgr.h"
+#include "ScriptedGossip.h"
 
 /* TODO :
 Poix Ardente

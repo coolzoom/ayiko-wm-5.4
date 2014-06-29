@@ -50,7 +50,7 @@ enum ScriptsType
     SCRIPTS_EVENT,
     SCRIPTS_WAYPOINT,
 
-    SCRIPTS_LAST
+    SCRIPTS_LAST = SCRIPTS_WAYPOINT
 };
 
 enum eScriptFlags

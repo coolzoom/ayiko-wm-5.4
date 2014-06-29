@@ -290,7 +290,6 @@ void ScriptMgr::Unload()
     // Clear scripts for every script type.
     SCR_CLEAR(SpellScriptLoader);
     SCR_CLEAR(WorldScript);
-    SCR_CLEAR(FormulaScript);
     SCR_CLEAR(WorldMapScript);
     SCR_CLEAR(InstanceMapScript);
     SCR_CLEAR(BattlegroundMapScript);
@@ -501,44 +500,6 @@ void ScriptMgr::OnShutdownCancel()
 void ScriptMgr::OnWorldUpdate(uint32 diff)
 {
     FOREACH_SCRIPT(WorldScript)->OnUpdate(diff);
-}
-
-void ScriptMgr::OnHonorCalculation(float& honor, uint8 level, float multiplier)
-{
-    FOREACH_SCRIPT(FormulaScript)->OnHonorCalculation(honor, level, multiplier);
-}
-
-void ScriptMgr::OnGrayLevelCalculation(uint8& grayLevel, uint8 playerLevel)
-{
-    FOREACH_SCRIPT(FormulaScript)->OnGrayLevelCalculation(grayLevel, playerLevel);
-}
-
-void ScriptMgr::OnColorCodeCalculation(XPColorChar& color, uint8 playerLevel, uint8 mobLevel)
-{
-    FOREACH_SCRIPT(FormulaScript)->OnColorCodeCalculation(color, playerLevel, mobLevel);
-}
-
-void ScriptMgr::OnZeroDifferenceCalculation(uint8& diff, uint8 playerLevel)
-{
-    FOREACH_SCRIPT(FormulaScript)->OnZeroDifferenceCalculation(diff, playerLevel);
-}
-
-void ScriptMgr::OnBaseGainCalculation(uint32& gain, uint8 playerLevel, uint8 mobLevel, ContentLevels content)
-{
-    FOREACH_SCRIPT(FormulaScript)->OnBaseGainCalculation(gain, playerLevel, mobLevel, content);
-}
-
-void ScriptMgr::OnGainCalculation(uint32& gain, Player* player, Unit* unit)
-{
-    ASSERT(player);
-    ASSERT(unit);
-
-    FOREACH_SCRIPT(FormulaScript)->OnGainCalculation(gain, player, unit);
-}
-
-void ScriptMgr::OnGroupRateCalculation(float& rate, uint32 count, bool isRaid)
-{
-    FOREACH_SCRIPT(FormulaScript)->OnGroupRateCalculation(rate, count, isRaid);
 }
 
 #define SCR_MAP_BGN(M, V, I, E, C, T) \
@@ -1324,12 +1285,6 @@ WorldScript::WorldScript(const char* name)
     ScriptRegistry<WorldScript>::AddScript(this);
 }
 
-FormulaScript::FormulaScript(const char* name)
-    : ScriptObject(name)
-{
-    ScriptRegistry<FormulaScript>::AddScript(this);
-}
-
 WorldMapScript::WorldMapScript(const char* name, uint32 mapId)
     : ScriptObject(name), MapScript<Map>(mapId)
 {
@@ -1466,7 +1421,6 @@ template<class TScript> uint32 ScriptRegistry<TScript>::_scriptIdCounter = 0;
 // Specialize for each script type class like so:
 template class ScriptRegistry<SpellScriptLoader>;
 template class ScriptRegistry<WorldScript>;
-template class ScriptRegistry<FormulaScript>;
 template class ScriptRegistry<WorldMapScript>;
 template class ScriptRegistry<InstanceMapScript>;
 template class ScriptRegistry<BattlegroundMapScript>;

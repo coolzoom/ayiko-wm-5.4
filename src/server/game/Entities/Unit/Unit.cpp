@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Unit.h"
 #include "Common.h"
 #include "CreatureAIImpl.h"
 #include "Log.h"
@@ -25,7 +26,6 @@
 #include "World.h"
 #include "ObjectMgr.h"
 #include "SpellMgr.h"
-#include "Unit.h"
 #include "QuestDef.h"
 #include "Player.h"
 #include "Creature.h"
@@ -59,8 +59,8 @@
 #include "UpdateFieldFlags.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
-#include <math.h>
 #include "SpellAuraEffects.h"
+#include "ScriptMgr.h"
 
 float baseMoveSpeed[MAX_MOVE_TYPE] =
 {

@@ -15,8 +15,10 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
 #include "BattlegroundIC.h"
+#include "ScriptMgr.h"
+#include "PassiveAI.h"
+#include "ScriptedCreature.h"
 
 // TO-DO: This should be done with SmartAI, but yet it does not correctly support vehicles's AIs.
 //        Even adding ReactState Passive we still have issues using SmartAI.
@@ -107,7 +109,7 @@ class boss_isle_of_conquest : public CreatureScript
                 if (!me->IsWithinLOSInMap(who))
                     EnterEvadeMode();
             }
-            
+
             void UpdateAI(const uint32 diff)
             {
                 if (!UpdateVictim())
@@ -150,7 +152,7 @@ class boss_isle_of_conquest : public CreatureScript
                                 EnterEvadeMode();
                                 return;
                             }
-                            
+
                             switch (me->GetEntry())
                             {
                                 case NPC_OVERLORD_AGMAR:
@@ -176,7 +178,7 @@ class boss_isle_of_conquest : public CreatureScript
                                     break;
                                 }
                             }
-                            
+
                             _events.ScheduleEvent(EVENT_CHECK_ROOM, 2000);
                             break;
                         }
@@ -185,7 +187,7 @@ class boss_isle_of_conquest : public CreatureScript
 
                 DoMeleeAttackIfReady();
             }
-            
+
         private:
             EventMap _events;
         };

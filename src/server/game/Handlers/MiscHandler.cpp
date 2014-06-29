@@ -2073,8 +2073,6 @@ void WorldSession::HandleReadyForAccountDataTimes(WorldPacket& /*recvData*/)
 void WorldSession::SendSetPhaseShift(PhaseShiftSet const& phaseIds, PhaseShiftSet const& terrainswaps, PhaseShiftSet const& worldMapAreaIds)
 {
     ObjectGuid guid = _player->GetGUID();
-    uint32 unkValue = 0;
-    uint32 inactiveSwapsCount = 0;
 
     PhaseShiftSet inactives;
 

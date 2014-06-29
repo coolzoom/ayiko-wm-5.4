@@ -968,7 +968,7 @@ class spell_rog_paralytic_poison : public SpellScriptLoader
             return eventInfo.GetActionTarget();
         }
 
-        void OnProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+        void OnProc(AuraEffect const *, ProcEventInfo& eventInfo)
         {
             Unit * const target = eventInfo.GetActionTarget();
             if (Aura * const paralyticPoison = target->GetAura(ROGUE_SPELL_PARALYTIC_POISON_DEBUFF))
@@ -1378,7 +1378,7 @@ public:
     {
         PrepareAuraScript(spell_rog_marked_for_death_AuraScript );
 
-        void HandleRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes mode)
+        void HandleRemove(AuraEffect const *, AuraEffectHandleModes)
         {
             if (GetCaster() && GetTarget() && GetCaster()->GetTypeId() == TYPEID_PLAYER)
                 if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_DEATH)

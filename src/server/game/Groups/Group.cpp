@@ -16,6 +16,7 @@
 * with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "Group.h"
 #include "Common.h"
 #include "Opcodes.h"
 #include "WorldPacket.h"
@@ -24,7 +25,6 @@
 #include "World.h"
 #include "ObjectMgr.h"
 #include "GroupMgr.h"
-#include "Group.h"
 #include "Formulas.h"
 #include "ObjectAccessor.h"
 #include "Battleground.h"
@@ -35,6 +35,7 @@
 #include "Util.h"
 #include "LFGMgr.h"
 #include "UpdateFieldFlags.h"
+#include "ScriptMgr.h"
 
 Roll::Roll(uint64 _guid, LootItem const& li) : itemGUID(_guid), itemid(li.itemid),
     itemRandomPropId(li.randomPropertyId), itemRandomSuffix(li.randomSuffix), itemCount(li.count),

@@ -1358,7 +1358,7 @@ class spell_warr_riposte final : public SpellScriptLoader
     {
         PrepareAuraScript(script_impl)
 
-        void calculateAmount(AuraEffect const *aurEff, int32 &amount, bool &canBeRecalculated)
+        void calculateAmount(AuraEffect const *, int32 &amount, bool &canBeRecalculated)
         {
             canBeRecalculated = false;
 

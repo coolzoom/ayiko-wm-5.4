@@ -8685,7 +8685,7 @@ void ObjectMgr::LoadDbScriptStrings()
         if (GetTrinityStringLocale(i))
             ids.insert(i);
 
-    for (int type = SCRIPTS_FIRST; type < SCRIPTS_LAST; ++type)
+    for (int type = SCRIPTS_FIRST; type <= SCRIPTS_LAST; ++type)
         CheckScripts(ScriptsType(type), ids);
 
     for (std::set<int32>::const_iterator itr = ids.begin(); itr != ids.end(); ++itr)

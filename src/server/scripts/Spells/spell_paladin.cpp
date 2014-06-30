@@ -1072,7 +1072,7 @@ class spell_pal_holy_prism : public SpellScriptLoader
         }
 };
 
-// Consecration - 26573 (periodic dummy)
+// Consecration - 26573, 116467 (periodic dummy)
 class spell_pal_consecration : public SpellScriptLoader
 {
     public:
@@ -1100,7 +1100,7 @@ class spell_pal_consecration : public SpellScriptLoader
         }
 };
 
-// Consecration - 26573
+// Consecration - 26573, 116467
 class spell_pal_consecration_area : public SpellScriptLoader
 {
     public:
@@ -1113,7 +1113,14 @@ class spell_pal_consecration_area : public SpellScriptLoader
             void HandleAfterCast()
             {
                 if (Player* _player = GetCaster()->ToPlayer())
-                    _player->CastSpell(_player, PALADIN_SPELL_CONSECRATION_AREA_DUMMY, true);
+                {
+                    Position pos;
+                    _player->GetPosition(&pos);
+                    if (GetSpellInfo()->Id == 116467) // Glyphed
+                        GetExplTargetDest()->GetPosition(&pos);
+
+                    _player->CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), PALADIN_SPELL_CONSECRATION_AREA_DUMMY, true);
+                }
             }
 
             void Register()

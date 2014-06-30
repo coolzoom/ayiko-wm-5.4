@@ -5493,6 +5493,12 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 759: // Conjure Mana Gem
                     spellInfo->Effects[EFFECT_1].BasePoints = 54408;
                     break;
+                case 116467: // Consecration (Glyphed)
+                    spellInfo->Effects[EFFECT_1].TargetA = TARGET_DEST_DEST;
+                    break;
+                case 81298: // Consecration Dummy
+                    spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DEST;
+                    break;
                 default:
                     break;
             }

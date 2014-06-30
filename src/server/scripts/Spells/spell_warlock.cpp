@@ -2910,6 +2910,75 @@ public:
     }
 };
 
+// 111397 Blood Horror
+class spell_warl_blood_horror : public SpellScriptLoader
+{
+    enum
+    {
+        SPELL_BLOOD_HORROR_EFFECT       = 137143,
+        HEALTH_COST_PCT                 = 5
+    };
+
+    class aura_impl : public AuraScript
+    {
+        PrepareAuraScript(aura_impl);
+
+        void OnProc(AuraEffect const *, ProcEventInfo & event)
+        {
+            PreventDefaultAction();
+            if (Unit * actor = event.GetActor())
+                GetCaster()->CastSpell(actor, SPELL_BLOOD_HORROR_EFFECT, true);
+        }
+
+
+        void Register()
+        {
+            OnEffectProc += AuraEffectProcFn(aura_impl::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        // HACK This spell has no entry in SpellPower.dbc (5.4.17399)
+        // spellscript for power check and consumption
+
+        SpellCastResult CheckSpec()
+        {
+            if (Unit *caster = GetCaster())
+                if (caster->GetHealthPct() < HEALTH_COST_PCT)
+                    return SPELL_FAILED_FIZZLE;
+
+            return SPELL_CAST_OK;
+        }
+
+        void HandleOnHit()
+        {
+            if (Unit * caster = GetCaster())
+                caster->ModifyHealth(-int32(caster->CountPctFromMaxHealth((int32)HEALTH_COST_PCT)));
+        }
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_impl::CheckSpec);
+            OnHit += SpellHitFn(spell_impl::HandleOnHit);
+        }
+    };
+
+public:
+    spell_warl_blood_horror() : SpellScriptLoader("spell_warl_blood_horror") {}
+
+    AuraScript* GetAuraScript() const
+    {
+        return new aura_impl();
+    }
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
 
 void AddSC_warlock_spell_scripts()
 {
@@ -2978,4 +3047,5 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_demonic_circle_teleport();
     new spell_warl_unstable_affliction();
     new spell_warl_backlash();
+    new spell_warl_blood_horror();
 }

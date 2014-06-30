@@ -215,7 +215,7 @@ struct ScriptedAI : public CreatureAI
     {
         return _difficulty == MAN25_DIFFICULTY || _difficulty == MAN25_HEROIC_DIFFICULTY;
     }
-l
+
     template<class T> inline
     const T& DUNGEON_MODE(const T& normal5, const T& heroic10) const
     {

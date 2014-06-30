@@ -402,10 +402,15 @@ void ObjectAccessor::Update(uint32 /*diff*/)
 
 void ObjectAccessor::UnloadAll()
 {
-    for (Player2CorpsesMapType::const_iterator itr = i_player2corpse.begin(); itr != i_player2corpse.end(); ++itr)
+    for (auto itr = i_player2corpse.begin(); itr != i_player2corpse.end(); ++itr)
     {
-        itr->second->RemoveFromWorld();
-        delete itr->second;
+        auto &corpse = itr->second;
+
+        corpse->RemoveFromWorld();
+        if (corpse->IsInGrid())
+            corpse->RemoveFromGrid();
+
+        delete corpse;
     }
 }
 

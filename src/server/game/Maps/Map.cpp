@@ -51,12 +51,13 @@ u_map_magic MapLiquidMagic  = { {'M','L','I','Q'} };
 #define MAX_GRID_LOAD_TIME      50
 #define MAX_CREATURE_ATTACK_RADIUS  (45.0f * sWorld->getRate(RATE_CREATURE_AGGRO))
 
-typedef void (*GridStateUpdate)(Map &, NGrid &, uint32);
+typedef void (*GridStateUpdate)(Map &, Map::GridContainerType::iterator, uint32);
 
-void InvalidStateUpdate(Map &, NGrid &, uint32) { }
+void InvalidStateUpdate(Map &, Map::GridContainerType::iterator, uint32) { }
 
-void ActiveStateUpdate(Map &map, NGrid &grid, uint32 diff)
+void ActiveStateUpdate(Map &map, Map::GridContainerType::iterator itr, uint32 diff)
 {
+    auto &grid = itr->second;
     auto &info = grid.getGridInfo();
 
     // Only check grid activity every (grid_expiry/10) ms, because it's really useless to do it every cycle
@@ -79,16 +80,19 @@ void ActiveStateUpdate(Map &map, NGrid &grid, uint32 diff)
     }
 }
 
-void IdleStateUpdate(Map &map, NGrid &grid, uint32)
+void IdleStateUpdate(Map &map, Map::GridContainerType::iterator itr, uint32)
 {
+    auto &grid = itr->second;
+
     map.ResetGridExpiry(grid);
     grid.SetGridState(GRID_STATE_REMOVAL);
     TC_LOG_DEBUG("maps", "Grid[%u, %u] on map %u moved to REMOVAL state",
                  grid.getX(), grid.getY(), map.GetId());
 }
 
-void RemovalStateUpdate(Map &map, NGrid &grid, uint32 diff)
+void RemovalStateUpdate(Map &map, Map::GridContainerType::iterator itr, uint32 diff)
 {
+    auto &grid = itr->second;
     auto &info = grid.getGridInfo();
 
     if (info.getUnloadLock())
@@ -98,7 +102,7 @@ void RemovalStateUpdate(Map &map, NGrid &grid, uint32 diff)
     if (!info.getTimeTracker().Passed())
         return;
 
-    if (!map.UnloadGrid(grid, false))
+    if (!map.UnloadGrid(itr, false))
     {
         TC_LOG_DEBUG("maps", "Grid[%u, %u] for map %u differed unloading due to players or active objects nearby",
                      grid.getX(), grid.getY(), map.GetId());
@@ -421,11 +425,15 @@ void Map::EnsureGridCreated_i(const GridCoord &p)
     TC_LOG_DEBUG("maps", "Creating grid[%u, %u] for map %u instance %u",
                  p.x_coord, p.y_coord, GetId(), i_InstanceId);
 
-    auto const ngrid = new NGrid(p.x_coord, p.y_coord, i_gridExpiry);
-    ngrid->SetGridState(GRID_STATE_IDLE);
+    auto const itr = i_loadedGrids.emplace_hint(lb,
+        std::piecewise_construct,
+        std::forward_as_tuple(key),
+        std::forward_as_tuple(p.x_coord, p.y_coord, i_gridExpiry));
 
-    i_loadedGrids.insert(lb, GridContainerType::value_type(key, ngrid));
-    setNGrid(ngrid, p.x_coord, p.y_coord);
+    auto &ngrid = itr->second;
+
+    ngrid.SetGridState(GRID_STATE_IDLE);
+    setNGrid(&ngrid, p.x_coord, p.y_coord);
 
     //z coord
     int gx = (MAX_NUMBER_OF_GRIDS - 1) - p.x_coord;
@@ -643,17 +651,17 @@ void Map::ProcessRelocationNotifies(uint32 diff)
     auto gridResetNotifier(Trinity::makeGridVisitor(reset));
     auto worldResetNotifier(Trinity::makeWorldVisitor(reset));
 
-    for (GridContainerType::const_iterator i = i_loadedGrids.begin(); i != i_loadedGrids.end(); ++i)
+    for (auto &kvPair : i_loadedGrids)
     {
-        auto const ngrid = i->second;
-        if (ngrid->GetGridState() != GRID_STATE_ACTIVE)
+        auto &ngrid = kvPair.second;
+        if (ngrid.GetGridState() != GRID_STATE_ACTIVE)
             continue;
 
-        ngrid->getGridInfo().getRelocationTimer().TUpdate(diff);
-        if (!ngrid->getGridInfo().getRelocationTimer().TPassed())
+        ngrid.getGridInfo().getRelocationTimer().TUpdate(diff);
+        if (!ngrid.getGridInfo().getRelocationTimer().TPassed())
             continue;
 
-        uint32 gx = ngrid->getX(), gy = ngrid->getY();
+        uint32 gx = ngrid.getX(), gy = ngrid.getY();
 
         CellCoord cell_min(gx*MAX_NUMBER_OF_CELLS, gy*MAX_NUMBER_OF_CELLS);
         CellCoord cell_max(cell_min.x_coord + MAX_NUMBER_OF_CELLS, cell_min.y_coord+MAX_NUMBER_OF_CELLS);
@@ -680,7 +688,7 @@ void Map::ProcessRelocationNotifies(uint32 diff)
             }
         }
 
-        ngrid->getGridInfo().getRelocationTimer().TReset(diff, m_VisibilityNotifyPeriod);
+        ngrid.getGridInfo().getRelocationTimer().TReset(diff, m_VisibilityNotifyPeriod);
     }
 }
 
@@ -969,10 +977,12 @@ bool Map::CreatureRespawnRelocation(Creature* c, bool diffGridOnly)
     return false;
 }
 
-bool Map::UnloadGrid(NGrid &ngrid, bool unloadAll)
+bool Map::UnloadGrid(GridContainerType::iterator itr, bool unloadAll)
 {
-    const uint32 x = ngrid.getX();
-    const uint32 y = ngrid.getY();
+    auto &ngrid = itr->second;
+
+    auto const x = ngrid.getX();
+    auto const y = ngrid.getY();
 
     {
         if (!unloadAll)
@@ -1016,8 +1026,7 @@ bool Map::UnloadGrid(NGrid &ngrid, bool unloadAll)
 
         ASSERT(i_objectsToRemove.empty());
 
-        delete &ngrid;
-        i_loadedGrids.erase(x * MAX_NUMBER_OF_GRIDS + y);
+        i_loadedGrids.erase(itr);
         setNGrid(NULL, x, y);
     }
 
@@ -1066,14 +1075,11 @@ void Map::RemoveAllPlayers()
 
 void Map::UnloadAll()
 {
-    // clear all delayed moves, useless anyway do this moves before map unload.
+    // clear all delayed moves, useless anyway do these moves before map unload.
     _creaturesToMove.clear();
 
-    for (GridContainerType::const_iterator i = i_loadedGrids.begin(); i != i_loadedGrids.end();)
-    {
-        auto const ngrid = (i++)->second;
-        UnloadGrid(*ngrid, true);
-    }
+    for (auto i = i_loadedGrids.begin(); i != i_loadedGrids.end();)
+        UnloadGrid(i++, true);
 }
 
 // *****************************
@@ -2117,13 +2123,8 @@ void Map::DelayedUpdate(const uint32 diff)
     // Don't unload grids if it's battleground, since we may have manually added GOs, creatures, those doesn't load from DB at grid re-load !
     // This isn't really bother us, since as soon as we have instanced BG-s, the whole map unloads as the BG gets ended
     if (!IsBattlegroundOrArena())
-    {
-        for (GridContainerType::const_iterator i = i_loadedGrids.begin(); i != i_loadedGrids.end();)
-        {
-            auto const ngrid = (i++)->second;
-            si_GridStates[ngrid->GetGridState()](*this, *ngrid, diff);
-        }
-    }
+        for (auto i = i_loadedGrids.begin(); i != i_loadedGrids.end();)
+            si_GridStates[i->second.GetGridState()](*this, i++, diff);
 }
 
 void Map::AddObjectToRemoveList(WorldObject* obj)

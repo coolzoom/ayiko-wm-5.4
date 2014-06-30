@@ -33,6 +33,7 @@
 
 #include <bitset>
 #include <list>
+#include <map>
 #include <mutex>
 #include <unordered_map>
 
@@ -258,6 +259,10 @@ class Map
     };
 
     public:
+        // we can't use unordered_map due to possible iterator invalidation at insert
+        typedef std::map<std::size_t, NGrid> GridContainerType;
+
+    public:
         Map(uint32 id, time_t, uint32 InstanceId, uint8 SpawnMode, Map* _parent = NULL);
         virtual ~Map();
 
@@ -306,12 +311,12 @@ class Map
         }
 
         void LoadGrid(float x, float y);
-        bool UnloadGrid(NGrid &ngrid, bool pForce);
+        bool UnloadGrid(GridContainerType::iterator itr, bool unloadAll);
         virtual void UnloadAll();
 
         void ResetGridExpiry(NGrid &grid, float factor = 1) const
         {
-            grid.ResetTimeTracker(time_t(float(i_gridExpiry)*factor));
+            grid.ResetTimeTracker(i_gridExpiry * factor);
         }
 
         time_t GetGridExpiry(void) const { return i_gridExpiry; }
@@ -591,8 +596,6 @@ class Map
         //InstanceMaps and BattlegroundMaps...
         Map* m_parentMap;
 
-        // we can't use unordered_map due to possible iterator invalidation at insert
-        typedef std::map<size_t, NGrid*> GridContainerType;
         GridContainerType i_loadedGrids;
 
         typedef std::mutex GridLockType;

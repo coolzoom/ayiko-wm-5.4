@@ -1708,6 +1708,76 @@ public:
     }
 };
 
+// Exorcism - 879
+class spell_pal_exorcism : public SpellScriptLoader
+{
+public:
+    spell_pal_exorcism() : SpellScriptLoader("spell_pal_exorcism") { }
+
+    class script_impl : public SpellScript
+    {
+        PrepareSpellScript(script_impl);
+
+        enum { EXORCISM_ENERGIZE = 147715 };
+
+        bool Validate(SpellInfo const *)
+        {
+            return sSpellMgr->GetSpellInfo(EXORCISM_ENERGIZE);
+        }
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            // Add Holy Power
+            GetCaster()->CastSpell(GetCaster(), EXORCISM_ENERGIZE, true);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(script_impl::HandleDummy, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new script_impl();
+    }
+};
+
+// Hammer of Wrath - 24275
+class spell_pal_hammer_of_wrath : public SpellScriptLoader
+{
+public:
+    spell_pal_hammer_of_wrath() : SpellScriptLoader("spell_pal_hammer_of_wrath") { }
+
+    class script_impl : public SpellScript
+    {
+        PrepareSpellScript(script_impl);
+
+        enum { HAMMER_OF_WRATH_ENERGIZE = 141459 };
+
+        bool Validate(SpellInfo const *)
+        {
+            return sSpellMgr->GetSpellInfo(HAMMER_OF_WRATH_ENERGIZE);
+        }
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            // Add Holy Power
+            GetCaster()->CastSpell(GetCaster(), HAMMER_OF_WRATH_ENERGIZE, true);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(script_impl::HandleDummy, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new script_impl();
+    }
+};
+
 void AddSC_paladin_spell_scripts()
 {
     new spell_pal_glyph_of_devotian_aura();
@@ -1750,4 +1820,6 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_crusader_strike();
     new spell_pal_seal_of_truth();
     new spell_pal_holy_wrath();
+    new spell_pal_exorcism();
+    new spell_pal_hammer_of_wrath();
 }

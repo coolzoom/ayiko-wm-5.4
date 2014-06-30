@@ -293,24 +293,15 @@ void Map::LoadMapAndVMap(int gx, int gy)
         LoadVMap(gx, gy);                                   // Only load the data for the base map
 }
 
-Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode, Map* _parent):
-_creatureToMoveLock(false), i_mapEntry (sMapStore.LookupEntry(id)), i_spawnMode(SpawnMode), i_InstanceId(InstanceId),
-m_unloadTimer(0), m_VisibleDistance(DEFAULT_VISIBILITY_DISTANCE),
-m_VisibilityNotifyPeriod(DEFAULT_VISIBILITY_NOTIFY_PERIOD),
-i_gridExpiry(expiry), i_scriptLock(false)
+Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode,
+         Map* _parent) :
+    _creatureToMoveLock(false), i_mapEntry (sMapStore.LookupEntry(id)),
+    i_spawnMode(SpawnMode), i_InstanceId(InstanceId), m_unloadTimer(0),
+    m_VisibleDistance(DEFAULT_VISIBILITY_DISTANCE),
+    m_VisibilityNotifyPeriod(DEFAULT_VISIBILITY_NOTIFY_PERIOD),
+    i_gridExpiry(expiry), i_grids(), i_gridMaps(), i_scriptLock(false)
 {
     m_parentMap = (_parent ? _parent : this);
-    for (unsigned int idx=0; idx < MAX_NUMBER_OF_GRIDS; ++idx)
-    {
-        for (unsigned int j=0; j < MAX_NUMBER_OF_GRIDS; ++j)
-        {
-            //z code
-            i_gridMaps[idx][j] =NULL;
-            setNGrid(NULL, idx, j);
-        }
-    }
-
-    //lets initialize visibility distance for map
     Map::InitVisibilityDistance();
 }
 
@@ -766,7 +757,7 @@ void Map::PlayerRelocation(Player* player, float x, float y, float z, float orie
 
 void Map::CreatureRelocation(Creature* creature, float x, float y, float z, float ang, bool respawnRelocationOnFail)
 {
-    Cell old_cell(creature->GetCurrentCell());
+    Cell const old_cell(creature->GetCurrentCell());
     Cell new_cell(x, y);
 
     if (!respawnRelocationOnFail && !getNGrid(new_cell.GridX(), new_cell.GridY()))
@@ -2123,8 +2114,13 @@ void Map::DelayedUpdate(const uint32 diff)
     // Don't unload grids if it's battleground, since we may have manually added GOs, creatures, those doesn't load from DB at grid re-load !
     // This isn't really bother us, since as soon as we have instanced BG-s, the whole map unloads as the BG gets ended
     if (!IsBattlegroundOrArena())
+    {
         for (auto i = i_loadedGrids.begin(); i != i_loadedGrids.end();)
-            si_GridStates[i->second.GetGridState()](*this, i++, diff);
+        {
+            auto const state = i->second.GetGridState();
+            si_GridStates[state](*this, i++, diff);
+        }
+    }
 }
 
 void Map::AddObjectToRemoveList(WorldObject* obj)

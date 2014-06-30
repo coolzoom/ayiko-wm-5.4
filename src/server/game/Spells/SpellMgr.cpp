@@ -5495,6 +5495,7 @@ void SpellMgr::LoadSpellCustomAttr()
                     break;
                 case 116467: // Consecration (Glyphed)
                     spellInfo->Effects[EFFECT_1].TargetA = TARGET_DEST_DEST;
+                    spellInfo->Effects[EFFECT_1].TargetB = 0;
                     break;
                 case 81298: // Consecration Dummy
                     spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DEST;

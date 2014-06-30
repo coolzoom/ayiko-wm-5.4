@@ -821,10 +821,21 @@ AreaTableEntry const* GetAreaEntryByAreaFlagAndMap(uint32 area_flag, uint32 map_
     return NULL;
 }
 
-char const* GetRaceName(uint8 race, uint8 /*locale*/)
+char const * GetRaceName(uint8 race, uint8 /*locale*/)
 {
-    ChrRacesEntry const* raceEntry = sChrRacesStore.LookupEntry(race);
-    return raceEntry ? raceEntry->name : NULL;
+    auto const raceEntry = sChrRacesStore.LookupEntry(race);
+    if (!raceEntry)
+        return nullptr;
+
+    switch (race)
+    {
+        case RACE_PANDAREN_ALLI:
+            return "Pandaren (A)";
+        case RACE_PANDAREN_HORDE:
+            return "Pandaren (H)";
+        default:
+            return raceEntry->name;
+    }
 }
 
 char const* GetClassName(uint8 class_, uint8 /*locale*/)

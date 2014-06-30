@@ -67,8 +67,9 @@ namespace Trinity
         void Visit(NotInterested &) {}
     };
 
-    struct PlayerRelocationNotifier : public VisibleNotifier
+    class PlayerRelocationNotifier : public VisibleNotifier
     {
+    public:
         PlayerRelocationNotifier(Player &player) : VisibleNotifier(player) { }
 
         void Visit(CreatureMapType &);
@@ -79,6 +80,11 @@ namespace Trinity
         {
             VisibleNotifier::Visit(m);
         }
+
+        void processCreatureRelocations();
+
+    private:
+        CreatureMapType creaturesToRelocate_;
     };
 
     struct CreatureRelocationNotifier

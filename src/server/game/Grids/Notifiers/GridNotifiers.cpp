@@ -145,7 +145,7 @@ void PlayerRelocationNotifier::Visit(PlayerMapType &m)
 
 void PlayerRelocationNotifier::Visit(CreatureMapType &m)
 {
-    bool relocated_for_ai = (&i_player == i_player.m_seer);
+    bool const relocatedForAI = (&i_player == i_player.m_seer);
 
     for (auto &creature : m)
     {
@@ -153,9 +153,16 @@ void PlayerRelocationNotifier::Visit(CreatureMapType &m)
 
         i_player.UpdateVisibilityOf(creature, i_data, i_visibleNow);
 
-        if (relocated_for_ai && !creature->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
-            CreatureUnitRelocationWorker(creature, &i_player);
+        if (relocatedForAI && !creature->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
+            creaturesToRelocate_.emplace_back(creature);
     }
+}
+
+void PlayerRelocationNotifier::processCreatureRelocations()
+{
+    for (auto &creature : creaturesToRelocate_)
+        if (creature->IsInWorld())
+            CreatureUnitRelocationWorker(creature, &i_player);
 }
 
 void CreatureRelocationNotifier::Visit(PlayerMapType &m)
@@ -228,6 +235,7 @@ void DelayedUnitRelocation::Visit(PlayerMapType &m)
         cell2.Visit(pair2, Trinity::makeWorldVisitor(relocate), i_map, *viewPoint, i_radius);
         cell2.Visit(pair2, Trinity::makeGridVisitor(relocate), i_map, *viewPoint, i_radius);
 
+        relocate.processCreatureRelocations();
         relocate.SendToSelf();
     }
 }

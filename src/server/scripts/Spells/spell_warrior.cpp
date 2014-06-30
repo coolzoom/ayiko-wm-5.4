@@ -41,7 +41,7 @@ enum WarriorSpells
     WARRIOR_SPELL_BLOOD_AND_THUNDER             = 84615,
     WARRIOR_SPELL_SHOCKWAVE_STUN                = 132168,
     WARRIOR_SPELL_HEROIC_LEAP_DAMAGE            = 52174,
-    WARRIOR_SPELL_RALLYING_CRY                  = 122507,
+    WARRIOR_SPELL_RALLYING_CRY                  = 97463,
     WARRIOR_SPELL_SWORD_AND_BOARD               = 50227,
     WARRIOR_SPELL_SHIELD_SLAM                   = 23922,
     WARRIOR_SPELL_MOCKING_BANNER_TAUNT          = 114198,
@@ -755,22 +755,13 @@ class spell_warr_rallying_cry : public SpellScriptLoader
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
-                if (Player* _player = GetCaster()->ToPlayer())
-                {
-                    _player->CastSpell(_player, WARRIOR_SPELL_RALLYING_CRY, true);
-
-                    std::list<Unit*> memberList;
-                    _player->GetPartyMembers(memberList);
-
-                    for (auto itr : memberList)
-                        if (itr->IsWithinDistInMap(_player, 30.0f))
-                            _player->CastSpell(itr, WARRIOR_SPELL_RALLYING_CRY, true);
-                }
+                int32 basePoints0 = int32(GetHitUnit()->CountPctFromMaxHealth(GetEffectValue()));
+                GetCaster()->CastCustomSpell(GetHitUnit(), WARRIOR_SPELL_RALLYING_CRY, &basePoints0, NULL, NULL, true);
             }
 
             void Register()
             {
-                OnEffectHit += SpellEffectFn(spell_warr_rallying_cry_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+                OnEffectHitTarget += SpellEffectFn(spell_warr_rallying_cry_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 

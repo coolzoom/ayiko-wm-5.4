@@ -4535,6 +4535,7 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 113853:// Blazing Speed aurastate
                 case 114028:// Mass Spell Reflection
                 case 122510:// Ultimatum
+                case 115317:// Raging Wind
                     spellInfo->ProcCharges = 1;
                     break;
                 case 110600:// Ice Trap (Symbiosis)

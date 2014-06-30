@@ -68,7 +68,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
     if (now - timeLastGroupInviteCommand < 5)
         return;
     else
-       timeLastGroupInviteCommand = now;
+        timeLastGroupInviteCommand = now;
 
     ObjectGuid crossRealmGuid; // unused
 

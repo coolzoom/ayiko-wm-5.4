@@ -28,6 +28,7 @@
 
 enum WarriorSpells
 {
+    WARRIOR_SPELL_DEFENSIVE_STANCE              = 71,
     WARRIOR_SPELL_LAST_STAND_TRIGGERED          = 12976,
     WARRIOR_SPELL_VICTORY_RUSH_DAMAGE           = 34428,
     WARRIOR_SPELL_VICTORY_RUSH_HEAL             = 118779,
@@ -1391,6 +1392,35 @@ public:
     }
 };
 
+// Called by Revenge and Shield Slam - preventing rage gain bonus if not in Defensive Stance
+class spell_warr_revenge_shield_slam : public SpellScriptLoader
+{
+public:
+    spell_warr_revenge_shield_slam() : SpellScriptLoader("spell_warr_revenge_shield_slam") { }
+
+    class spell_warr_revenge_shield_slam_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warr_revenge_shield_slam_SpellScript);
+
+        void HandleCast(SpellEffIndex effIndex)
+        {
+            if (!GetCaster()->HasAura(WARRIOR_SPELL_DEFENSIVE_STANCE))
+                PreventHitEffect(effIndex);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_warr_revenge_shield_slam_SpellScript::HandleCast, EFFECT_1, SPELL_EFFECT_ENERGIZE);
+            OnEffectHitTarget += SpellEffectFn(spell_warr_revenge_shield_slam_SpellScript::HandleCast, EFFECT_2, SPELL_EFFECT_ENERGIZE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_warr_revenge_shield_slam_SpellScript();
+    }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_victorious_state();
@@ -1427,4 +1457,5 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_bloodbath();
     new spell_warr_bloodbath_bleed();
     new spell_warr_riposte();
+    new spell_warr_revenge_shield_slam();
 }

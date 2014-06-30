@@ -834,19 +834,6 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
             spellId = newSpellInfo->Id;
         }
     }
-    // Frostbolt - 116 and Frostbolt - 126201 (heal for water elemental)
-    else if (spellInfo->Id == 116 && targets.GetUnitTarget())
-    {
-        if (targets.GetUnitTarget()->GetOwner() && targets.GetUnitTarget()->GetOwner()->GetTypeId() == TYPEID_PLAYER && targets.GetUnitTarget()->GetOwner()->GetGUID() == _player->GetGUID())
-        {
-            SpellInfo const* newSpellInfo = sSpellMgr->GetSpellInfo(126201);
-            if (newSpellInfo)
-            {
-                spellInfo = newSpellInfo;
-                spellId = newSpellInfo->Id;
-            }
-        }
-    }
     // Surging Mist - 116694 and Surging Mist - 116995
     // Surging Mist is instantly casted if player is channeling Soothing Mist
     else if (spellInfo->Id == 116694 && _player->GetCurrentSpell(CURRENT_CHANNELED_SPELL) && _player->GetCurrentSpell(CURRENT_CHANNELED_SPELL)->GetSpellInfo()->Id == 115175)

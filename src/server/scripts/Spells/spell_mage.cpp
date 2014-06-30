@@ -784,69 +784,85 @@ class spell_mage_slow : public SpellScriptLoader
 };
 
 // Frostbolt - 116
-class spell_mage_frostbolt : public SpellScriptLoader
+class spell_mage_frostbolt final : public SpellScriptLoader
 {
-    public:
-        spell_mage_frostbolt() : SpellScriptLoader("spell_mage_frostbolt") { }
+    class script_impl final : public SpellScript
+    {
+        PrepareSpellScript(script_impl)
 
-        class spell_mage_frostbolt_SpellScript : public SpellScript
+        enum
         {
-            PrepareSpellScript(spell_mage_frostbolt_SpellScript);
+            FROSTBOLT_HEAL = 126201
+        };
 
-            SpellCastResult CheckTarget()
+        bool shouldHeal_;
+
+        SpellCastResult checkTarget()
+        {
+            auto const target = GetExplTargetUnit();
+
+            if (!target)
+                return SPELL_FAILED_NO_VALID_TARGETS;
+
+            // attacking
+            auto const caster = GetCaster();
+            if (caster->IsValidAttackTarget(target))
             {
-                if (!GetExplTargetUnit())
-                    return SPELL_FAILED_NO_VALID_TARGETS;
-                else if (GetExplTargetUnit()->GetGUID() == GetCaster()->GetGUID())
-                    return SPELL_FAILED_BAD_TARGETS;
-                else if (GetExplTargetUnit()->GetTypeId() == TYPEID_PLAYER && !GetExplTargetUnit()->IsPvP())
-                {
-                    if (GetCaster()->ToPlayer() && GetCaster()->ToPlayer()->duel)
-                        if (GetCaster()->ToPlayer()->duel->opponent->GetGUID() == GetExplTargetUnit()->GetGUID())
-                            return SPELL_CAST_OK;
-
-                    return SPELL_FAILED_BAD_TARGETS;
-                }
-                else if (GetExplTargetUnit()->GetOwner() != GetCaster())
-                {
-                    if (GetCaster()->IsValidAttackTarget(GetExplTargetUnit()))
-                        return SPELL_CAST_OK;
-
-                    return SPELL_FAILED_BAD_TARGETS;
-                }
-
+                shouldHeal_ = false;
                 return SPELL_CAST_OK;
             }
 
-            void HandleBeforeCast()
+            // healing own Water Elemental
+            if (target->GetOwnerGUID() == caster->GetGUID() && target->GetEntry() == ENTRY_WATER_ELEMENTAL)
             {
-                SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(148022);
-                if (!spellInfo)
-                    return;
-
-                SpellCastTargets targets;
-                targets.SetUnitTarget(GetHitUnit());
-
-                CustomSpellValues values;
-                values.AddSpellMod(SPELLVALUE_BASE_POINT0, 100);
-                values.AddSpellMod(SPELLVALUE_BASE_POINT1, 100);
-                values.AddSpellMod(SPELLVALUE_BASE_POINT2, 100);
-
-                GetCaster()->ToPlayer()->RemoveSpellCooldown(spellInfo->Id);
-                GetCaster()->CastSpell(targets, spellInfo, &values, TRIGGERED_FULL_MASK, NULL, NULL, GetCaster()->GetGUID());
+                shouldHeal_ = true;
+                return SPELL_CAST_OK;
             }
 
-            void Register()
-            {
-                OnCheckCast += SpellCheckCastFn(spell_mage_frostbolt_SpellScript::CheckTarget);
-                BeforeCast += SpellCastFn(spell_mage_frostbolt_SpellScript::HandleBeforeCast);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_mage_frostbolt_SpellScript();
+            return SPELL_FAILED_BAD_TARGETS;
         }
+
+        void maybePrevent(SpellEffIndex effIndex)
+        {
+            if (!shouldHeal_)
+                return;
+
+            PreventHitDefaultEffect(effIndex);
+            if (effIndex == EFFECT_0)
+                PreventHitAura();
+        }
+
+        void maybeHeal(SpellEffIndex effIndex)
+        {
+            PreventHitDefaultEffect(effIndex);
+
+            if (!shouldHeal_)
+                return;
+
+            auto const caster = GetCaster();
+            auto const target = GetExplTargetUnit();
+
+            caster->CastSpell(target, FROSTBOLT_HEAL, true);
+        }
+
+        void Register() final
+        {
+            OnCheckCast += SpellCheckCastFn(script_impl::checkTarget);
+            OnEffectHitTarget += SpellEffectFn(script_impl::maybePrevent, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+            OnEffectLaunchTarget += SpellEffectFn(script_impl::maybePrevent, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
+            OnEffectHitTarget += SpellEffectFn(script_impl::maybeHeal, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+public:
+    spell_mage_frostbolt()
+        : SpellScriptLoader("spell_mage_frostbolt")
+    { }
+
+    SpellScript * GetSpellScript() const final
+    {
+        return new script_impl;
+    }
 };
 
 // Called by Evocation - 12051

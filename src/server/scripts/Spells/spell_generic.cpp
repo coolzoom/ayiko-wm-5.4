@@ -3490,6 +3490,58 @@ public:
     }
 };
 
+class spell_gen_synapse_springs : public SpellScriptLoader
+{
+    enum
+    {
+        SPELL_SYNAPSE_SPRINGS_AGI       = 96228,
+        SPELL_SYNAPSE_SPRINGS_STR,
+        SPELL_SYNAPSE_SPRINGS_INT
+    };
+
+    class script_impl : public SpellScript
+    {
+        PrepareSpellScript(script_impl)
+
+        void HandleScript(SpellEffIndex effIndex)
+        {
+            PreventHitDefaultEffect(effIndex);
+
+            Unit * caster = GetCaster();
+            uint32 spellId = SPELL_SYNAPSE_SPRINGS_STR;
+            uint32 amount = (uint32)caster->GetStat(STAT_STRENGTH);
+
+            if(caster->GetStat(STAT_AGILITY) > amount)
+            {
+                amount = (uint32)caster->GetStat(STAT_AGILITY);
+                spellId = SPELL_SYNAPSE_SPRINGS_AGI;
+            }
+            if(caster->GetStat(STAT_INTELLECT) > amount)
+            {
+                amount = (uint32)caster->GetStat(STAT_INTELLECT);
+                spellId = SPELL_SYNAPSE_SPRINGS_INT;
+            }
+
+            // We need custom amount as script is called by 2 spells
+            int32 buffAmount = this->GetEffectValue();
+            caster->CastCustomSpell(caster, spellId, &buffAmount, NULL, NULL, true);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(script_impl::HandleScript, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+public:
+    spell_gen_synapse_springs() : SpellScriptLoader("spell_gen_synapse_springs") { }
+
+    SpellScript * GetSpellScript() const
+    {
+        return new script_impl;
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -3568,4 +3620,5 @@ void AddSC_generic_spell_scripts()
     new spell_mage_polymorph_cast_visual();
     new spell_gen_hardened_shell();
     new spell_gen_battle_fatigue();
+    new spell_gen_synapse_springs();
 }

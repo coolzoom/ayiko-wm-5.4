@@ -112,6 +112,7 @@ set(scripts_STAT_SRCS
   Kalimdor/OnyxiasLair/instance_onyxias_lair.cpp
   Kalimdor/southern_barrens.cpp
   Kalimdor/Uldum.cpp
+  Kalimdor/mount_hyjal.cpp
 )
 
 message("  -> Prepared: Kalimdor")

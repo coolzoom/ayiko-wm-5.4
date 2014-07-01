@@ -73,6 +73,7 @@ enum HunterSpells
     HUNTER_SPELL_LYNX_RUSH_AURA                     = 120697,
     HUNTER_SPELL_LYNX_CRUSH_DAMAGE                  = 120699,
     HUNTER_SPELL_FRENZY_STACKS                      = 19615,
+    HUNTER_SPELL_FRENZY_ENERGIZE                    = 83468,
     HUNTER_SPELL_FOCUS_FIRE_READY                   = 88843,
     HUNTER_SPELL_FOCUS_FIRE_AURA                    = 82692,
     HUNTER_SPELL_A_MURDER_OF_CROWS_SUMMON           = 129179,
@@ -749,45 +750,77 @@ class spell_hun_focus_fire : public SpellScriptLoader
 
             SpellCastResult CheckFrenzy()
             {
-                if (!GetCaster()->HasAura(HUNTER_SPELL_FRENZY_STACKS))
+                Unit* const caster = GetCaster();
+                if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
+                    return SPELL_FAILED_DONT_REPORT;
+
+                Pet* const pet = caster->ToPlayer()->GetPet();
+                if (!pet)
+                    return SPELL_FAILED_NO_PET;
+
+                if (!pet->HasAura(HUNTER_SPELL_FRENZY_STACKS))
                     return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
 
                 return SPELL_CAST_OK;
             }
 
-            void HandleOnHit()
+            void Register()
             {
-                if (Player* _player = GetCaster()->ToPlayer())
-                {
-                    if (Aura *focusFire = _player->GetAura(HUNTER_SPELL_FOCUS_FIRE_AURA))
-                    {
-                        if (Aura *frenzy = _player->GetAura(HUNTER_SPELL_FRENZY_STACKS))
-                        {
-                            if (Pet* pet = _player->GetPet())
-                            {
-                                int32 stackAmount = frenzy->GetStackAmount();
+                OnCheckCast += SpellCheckCastFn(spell_hun_focus_fire_SpellScript::CheckFrenzy);
+            }
+        };
 
-                                focusFire->GetEffect(0)->ChangeAmount(focusFire->GetEffect(0)->GetAmount() * stackAmount);
+        class script_impl : public AuraScript
+        {
+            PrepareAuraScript(script_impl)
 
-                                if (pet->HasAura(HUNTER_SPELL_FRENZY_STACKS))
-                                {
-                                    pet->RemoveAura(HUNTER_SPELL_FRENZY_STACKS);
-                                    pet->EnergizeBySpell(pet, GetSpellInfo()->Id, 6, POWER_FOCUS);
-                                }
+            bool Load()
+            {
+                Unit const * const caster = GetCaster();
+                if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
+                    return false;
 
-                                _player->RemoveAura(HUNTER_SPELL_FRENZY_STACKS);
-                            }
-                        }
-                    }
-                }
+                Pet const * const pet = caster->ToPlayer()->GetPet();
+                if (!pet || !pet->HasAura(HUNTER_SPELL_FRENZY_STACKS))
+                    return false;
+
+                return true;
+            }
+
+            void CalculateAmount(AuraEffect const*, int32& amount, bool&)
+            {
+                // Pointers are checked in CheckCast() and Load()
+                Pet const * const pet = GetCaster()->ToPlayer()->GetPet();
+
+                // Pet will have this aura otherwise spell is not casted at all
+                Aura const * const aur = pet->GetAura(HUNTER_SPELL_FRENZY_STACKS);
+                amount *= aur->GetStackAmount();
+            }
+
+            void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes)
+            {
+                // Pointers are checked in CheckCast() and Load()
+                Unit * const caster = GetCaster();
+                Pet * const pet = caster->ToPlayer()->GetPet();
+
+                Aura const * const aura = pet->GetAura(HUNTER_SPELL_FRENZY_STACKS);
+
+                int32 const amount = aurEff->GetAmount() * aura->GetStackAmount();
+                caster->CastCustomSpell(pet, HUNTER_SPELL_FRENZY_ENERGIZE, &amount, NULL, NULL, true);
+                pet->RemoveAurasDueToSpell(HUNTER_SPELL_FRENZY_STACKS, pet->GetGUID());
             }
 
             void Register()
             {
-                OnCheckCast += SpellCheckCastFn(spell_hun_focus_fire_SpellScript::CheckFrenzy);
-                OnHit += SpellHitFn(spell_hun_focus_fire_SpellScript::HandleOnHit);
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(script_impl::CalculateAmount, EFFECT_0, SPELL_AURA_MOD_RANGED_HASTE);
+                AfterEffectApply += AuraEffectApplyFn(script_impl::OnApply, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
             }
         };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new script_impl;
+        }
 
         SpellScript* GetSpellScript() const
         {

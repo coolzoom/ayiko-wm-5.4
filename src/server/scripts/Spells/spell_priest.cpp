@@ -2540,6 +2540,53 @@ class spell_pri_levitate : public SpellScriptLoader
         }
 };
 
+class spell_pri_binding_heal : public SpellScriptLoader
+{
+public:
+    spell_pri_binding_heal() : SpellScriptLoader("spell_pri_binding_heal") { }
+
+    class script_impl : public SpellScript
+    {
+        PrepareSpellScript(script_impl);
+
+        enum { SPELL_GLYPH_OF_BINDING_HEAL = 63248 };
+
+        void RemoveInvalidTargets(std::list<WorldObject*>& targets)
+        {
+            auto explicitTarget = GetExplTargetUnit();
+            if (!GetCaster()->HasAura(SPELL_GLYPH_OF_BINDING_HEAL))
+            {
+                targets.clear();
+                targets.push_back(explicitTarget);
+                return;
+            }
+
+            targets.remove_if([explicitTarget](WorldObject const *obj) {
+                return !obj->isType(TYPEMASK_UNIT) || obj == explicitTarget;
+            });
+
+            targets.sort([] ( WorldObject * a, WorldObject * b)
+            {
+                return (a->ToUnit()->GetHealth() < b->ToUnit()->GetHealth());
+            });
+
+            if (targets.size() > 1)
+                targets.resize(1);
+            targets.push_back(GetExplTargetUnit());
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(script_impl::RemoveInvalidTargets, EFFECT_1, TARGET_UNIT_DEST_AREA_ALLY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new script_impl();
+    }
+};
+
 void AddSC_priest_spell_scripts()
 {
     new spell_pri_power_word_fortitude();
@@ -2595,4 +2642,5 @@ void AddSC_priest_spell_scripts()
     new spell_pri_evangelism();
     new spell_pri_archangel();
     new spell_pri_levitate();
+    new spell_pri_binding_heal();
 }

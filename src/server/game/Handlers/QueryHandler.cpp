@@ -749,8 +749,7 @@ void WorldSession::HandlePageTextQueryOpcode(WorldPacket& recvData)
 
         data << uint32(pageID);
 
-        if (pageText)
-            pageID = pageText->NextPage;
+        pageID = pageText ? pageText->NextPage : 0u;
 
         SendPacket(&data);
 

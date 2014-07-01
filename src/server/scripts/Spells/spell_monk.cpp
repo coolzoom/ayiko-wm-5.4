@@ -865,14 +865,11 @@ class spell_monk_black_ox_statue : public SpellScriptLoader
 
                                     plr->GetPartyMembers(targets);
 
-                                    for (auto itr : targets)
+                                    targets.remove_if([statue, plr](Unit const *u)
                                     {
-                                        if (itr->GetGUID() == statue->GetGUID() ||
-                                            itr->GetGUID() == plr->GetGUID())
-                                            continue;
-
-                                        targets.push_back(itr);
-                                    }
+                                        return u->GetGUID() == statue->GetGUID()
+                                                || u->GetGUID() == plr->GetGUID();
+                                    });
 
                                     Trinity::Containers::RandomResizeList(targets, 1);
 

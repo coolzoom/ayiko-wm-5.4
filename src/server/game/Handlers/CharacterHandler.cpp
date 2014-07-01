@@ -895,11 +895,6 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     data << uint32(0);
     SendPacket(&data);
 
-    // FIXME: find out what is it, sent by Pandashan
-    data.Initialize(0x0286, 4);
-    data << uint32(0);
-    SendPacket(&data);
-
     data.Initialize(SMSG_LOGIN_VERIFY_WORLD, 20);
     data << pCurrChar->GetPositionZ();
     data << pCurrChar->GetMapId();

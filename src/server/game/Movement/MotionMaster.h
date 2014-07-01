@@ -19,11 +19,12 @@
 #ifndef TRINITY_MOTIONMASTER_H
 #define TRINITY_MOTIONMASTER_H
 
-#include "Common.h"
 #include "SharedDefines.h"
 #include "Object.h"
 
 #include <vector>
+
+namespace Movement { class MoveSplineInit; }
 
 class MovementGenerator;
 class Unit;
@@ -88,7 +89,7 @@ class MotionMaster //: private std::stack<MovementGenerator *>
         void pop()
         {
             Impl[_top] = NULL;
-            while (!top())
+            while (_top >= 0 && !top())
                 --_top;
         }
         void push(_Ty _Val) { ++_top; Impl[_top] = _Val; }
@@ -97,7 +98,7 @@ class MotionMaster //: private std::stack<MovementGenerator *>
         void InitTop();
     public:
 
-        explicit MotionMaster(Unit* unit) : _expList(NULL), _top(-1), _owner(unit), _cleanFlag(MMCF_NONE)
+        explicit MotionMaster(Unit* unit) : _top(-1), _owner(unit), _cleanFlag(MMCF_NONE)
         {
             for (uint8 i = 0; i < MAX_MOTION_SLOT; ++i)
             {
@@ -193,7 +194,7 @@ class MotionMaster //: private std::stack<MovementGenerator *>
         void DelayedExpire();
 
         typedef std::vector<_Ty> ExpireList;
-        ExpireList* _expList;
+        ExpireList _expList;
         _Ty Impl[MAX_MOTION_SLOT];
         int _top;
         Unit* _owner;
@@ -201,4 +202,3 @@ class MotionMaster //: private std::stack<MovementGenerator *>
         uint8 _cleanFlag;
 };
 #endif
-

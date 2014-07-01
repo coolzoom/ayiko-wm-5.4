@@ -3207,6 +3207,7 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                     summon = m_caster->GetMap()->SummonCreature(entry, *destTarget, properties, duration, m_originalCaster, m_spellInfo->Id);
                     break;
                 case SUMMON_TYPE_TOTEM:
+                case SUMMON_TYPE_STATUE:
                 {
                     summon = m_caster->GetMap()->SummonCreature(entry, *destTarget, properties, duration, m_originalCaster, m_spellInfo->Id);
                     if (!summon || !summon->isTotem())
@@ -3215,6 +3216,9 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                     // Mana Tide Totem
                     if (m_spellInfo->Id == 16190)
                         damage = m_caster->CountPctFromMaxHealth(10);
+                    // Monk statues receive 50% from owner's health
+                    else if (properties->Type == SUMMON_TYPE_STATUE)
+                        damage = m_caster->CountPctFromMaxHealth(50);
 
                     if (damage)                                            // if not spell info, DB values used
                     {

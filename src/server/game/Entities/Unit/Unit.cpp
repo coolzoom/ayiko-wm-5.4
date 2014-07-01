@@ -676,15 +676,6 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
                     victim->GetEntry(), victim->GetName().c_str(), damage, GetGUIDLow(), GetName().c_str(), spellProto ? spellProto->Id : 0);
     }
 
-    // Custom MoP Script
-    if (ToPlayer() && getClass() == CLASS_MONK && ToPlayer()->GetSpecializationId(ToPlayer()->GetActiveSpec()) == SPEC_MONK_BREWMASTER && HasAura(115315))
-    {
-        if (damage > 0)
-        {
-            if (Aura *blackOxStatue = this->GetAura(115315))
-                blackOxStatue->SetScriptData(0, damage);
-        }
-    }
     // Leeching Poison - 112961 each attack heal the player for 10% of the damage
     if (GetTypeId() == TYPEID_PLAYER && getClass() == CLASS_ROGUE && damage != 0)
     {
@@ -19829,13 +19820,13 @@ uint32 Unit::GetModelForTotem(PlayerTotemType totemType)
         {
             switch (totemType)
             {
-                case SUMMON_TYPE_TOTEM_FIRE:    // fire
+                case SUMMON_TYPE_TOTEM_FIRE:
                     return 30758;
-                case SUMMON_TYPE_TOTEM_EARTH:   // earth
+                case SUMMON_TYPE_TOTEM_EARTH:
                     return 30757;
-                case SUMMON_TYPE_TOTEM_WATER:   // water
+                case SUMMON_TYPE_TOTEM_WATER:
                     return 30759;
-                case SUMMON_TYPE_TOTEM_AIR:     // air
+                case SUMMON_TYPE_TOTEM_AIR:
                     return 30756;
                 default:
                     break;
@@ -19846,13 +19837,13 @@ uint32 Unit::GetModelForTotem(PlayerTotemType totemType)
         {
             switch (totemType)
             {
-                case SUMMON_TYPE_TOTEM_FIRE:    // fire
+                case SUMMON_TYPE_TOTEM_FIRE:
                     return 30754;
-                case SUMMON_TYPE_TOTEM_EARTH:   // earth
+                case SUMMON_TYPE_TOTEM_EARTH:
                     return 30753;
-                case SUMMON_TYPE_TOTEM_WATER:   // water
+                case SUMMON_TYPE_TOTEM_WATER:
                     return 30755;
-                case SUMMON_TYPE_TOTEM_AIR:     // air
+                case SUMMON_TYPE_TOTEM_AIR:
                     return 30736;
                 default:
                     break;
@@ -19863,16 +19854,14 @@ uint32 Unit::GetModelForTotem(PlayerTotemType totemType)
         {
             switch (totemType)
             {
-                case SUMMON_TYPE_TOTEM_FIRE:    // fire
+                case SUMMON_TYPE_TOTEM_FIRE:
                     return 30762;
-                case SUMMON_TYPE_TOTEM_EARTH:   // earth
+                case SUMMON_TYPE_TOTEM_EARTH:
                     return 30761;
-                case SUMMON_TYPE_TOTEM_WATER:   // water
+                case SUMMON_TYPE_TOTEM_WATER:
                     return 30763;
-                case SUMMON_TYPE_TOTEM_AIR:     // air
+                case SUMMON_TYPE_TOTEM_AIR:
                     return 30760;
-                case PlayerTotemType(3211):     // Custom MoP Script - Hack Fix Searing Totem
-                    return 30762;
                 default:
                     break;
             }
@@ -19882,13 +19871,13 @@ uint32 Unit::GetModelForTotem(PlayerTotemType totemType)
         {
             switch (totemType)
             {
-                case SUMMON_TYPE_TOTEM_FIRE:    // fire
+                case SUMMON_TYPE_TOTEM_FIRE:
                     return 4589;
-                case SUMMON_TYPE_TOTEM_EARTH:   // earth
+                case SUMMON_TYPE_TOTEM_EARTH:
                     return 4588;
-                case SUMMON_TYPE_TOTEM_WATER:   // water
+                case SUMMON_TYPE_TOTEM_WATER:
                     return 4587;
-                case SUMMON_TYPE_TOTEM_AIR:     // air
+                case SUMMON_TYPE_TOTEM_AIR:
                     return 4590;
                 default:
                     break;
@@ -19899,13 +19888,13 @@ uint32 Unit::GetModelForTotem(PlayerTotemType totemType)
         {
             switch (totemType)
             {
-                case SUMMON_TYPE_TOTEM_FIRE:    // fire
+                case SUMMON_TYPE_TOTEM_FIRE:
                     return 19074;
-                case SUMMON_TYPE_TOTEM_EARTH:   // earth
+                case SUMMON_TYPE_TOTEM_EARTH:
                     return 19073;
-                case SUMMON_TYPE_TOTEM_WATER:   // water
+                case SUMMON_TYPE_TOTEM_WATER:
                     return 19075;
-                case SUMMON_TYPE_TOTEM_AIR:     // air
+                case SUMMON_TYPE_TOTEM_AIR:
                     return 19071;
                 default:
                     break;
@@ -19916,13 +19905,13 @@ uint32 Unit::GetModelForTotem(PlayerTotemType totemType)
         {
             switch (totemType)
             {
-                case SUMMON_TYPE_TOTEM_FIRE:    // fire
+                case SUMMON_TYPE_TOTEM_FIRE:
                     return 30783;
-                case SUMMON_TYPE_TOTEM_EARTH:   // earth
+                case SUMMON_TYPE_TOTEM_EARTH:
                     return 30782;
-                case SUMMON_TYPE_TOTEM_WATER:   // water
+                case SUMMON_TYPE_TOTEM_WATER:
                     return 30784;
-                case SUMMON_TYPE_TOTEM_AIR:     // air
+                case SUMMON_TYPE_TOTEM_AIR:
                     return 30781;
                 default:
                     break;
@@ -19930,50 +19919,18 @@ uint32 Unit::GetModelForTotem(PlayerTotemType totemType)
             break;
         }
         case RACE_PANDAREN_NEUTRAL:
-        {
-            switch (totemType)
-            {
-                case SUMMON_TYPE_TOTEM_FIRE:    // fire
-                    return 41670;
-                case SUMMON_TYPE_TOTEM_EARTH:   // earth
-                    return 41669;
-                case SUMMON_TYPE_TOTEM_WATER:   // water
-                    return 41671;
-                case SUMMON_TYPE_TOTEM_AIR:     // air
-                    return 41668;
-                default:
-                    break;
-            }
-            break;
-        }
         case RACE_PANDAREN_ALLI:
-        {
-            switch (totemType)
-            {
-                case SUMMON_TYPE_TOTEM_FIRE:    // fire
-                    return 41670;
-                case SUMMON_TYPE_TOTEM_EARTH:   // earth
-                    return 41669;
-                case SUMMON_TYPE_TOTEM_WATER:   // water
-                    return 41671;
-                case SUMMON_TYPE_TOTEM_AIR:     // air
-                    return 41668;
-                default:
-                    break;
-            }
-            break;
-        }
         case RACE_PANDAREN_HORDE:
         {
             switch (totemType)
             {
-                case SUMMON_TYPE_TOTEM_FIRE:    // fire
+                case SUMMON_TYPE_TOTEM_FIRE:
                     return 41670;
-                case SUMMON_TYPE_TOTEM_EARTH:   // earth
+                case SUMMON_TYPE_TOTEM_EARTH:
                     return 41669;
-                case SUMMON_TYPE_TOTEM_WATER:   // water
+                case SUMMON_TYPE_TOTEM_WATER:
                     return 41671;
-                case SUMMON_TYPE_TOTEM_AIR:     // air
+                case SUMMON_TYPE_TOTEM_AIR:
                     return 41668;
                 default:
                     break;

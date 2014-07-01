@@ -94,9 +94,6 @@ enum MonkSpells
     SPELL_MONK_GLYPH_OF_ZEN_FLIGHT              = 125893,
     SPELL_MONK_ZEN_FLIGHT                       = 125883,
     SPELL_MONK_BEAR_HUG                         = 127361,
-    ITEM_MONK_T14_TANK_4P                       = 123159,
-    MONK_NPC_BLACK_OX_STATUE                    = 61146,
-    SPELL_MONK_GUARD                            = 115295,
     SPELL_MONK_ITEM_2_S12_MISTWEAVER            = 131561,
     SPELL_MONK_ITEM_4_S12_MISTWEAVER            = 124487,
     SPELL_MONK_ZEN_FOCUS                        = 124488,
@@ -745,200 +742,47 @@ class spell_monk_diffuse_magic : public SpellScriptLoader
         }
 };
 
-// Summon Black Ox Statue - 115315
-class spell_monk_black_ox_statue : public SpellScriptLoader
-{
-    public:
-        spell_monk_black_ox_statue() : SpellScriptLoader("spell_monk_black_ox_statue") { }
-
-        class spell_monk_black_ox_statue_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_monk_black_ox_statue_SpellScript)
-
-            void HandleSummon(SpellEffIndex effIndex)
-            {
-                if (Player* player = GetCaster()->ToPlayer())
-                {
-                    PreventHitDefaultEffect(effIndex);
-
-                    const SpellInfo* spell = GetSpellInfo();
-                    std::list<Creature*> tempList;
-                    std::list<Creature*> blackOxList;
-
-                    player->GetCreatureListWithEntryInGrid(tempList, MONK_NPC_BLACK_OX_STATUE, 500.0f);
-
-                    for (auto itr : tempList)
-                        blackOxList.push_back(itr);
-
-                    // Remove other players jade statue
-                    for (std::list<Creature*>::iterator i = tempList.begin(); i != tempList.end(); ++i)
-                    {
-                        Unit* owner = (*i)->GetOwner();
-                        if (owner && owner == player && (*i)->isSummon())
-                            continue;
-
-                        blackOxList.remove((*i));
-                    }
-
-                    // 1 statue max
-                    if ((int32)blackOxList.size() >= spell->Effects[effIndex].BasePoints)
-                        blackOxList.back()->ToTempSummon()->UnSummon();
-
-                    Position pos;
-                    GetExplTargetDest()->GetPosition(&pos);
-                    TempSummon* summon = player->SummonCreature(spell->Effects[effIndex].MiscValue, pos, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, spell->GetDuration());
-                    if (!summon)
-                        return;
-
-                    summon->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, player->GetGUID());
-                    summon->setFaction(player->getFaction());
-                    summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, GetSpellInfo()->Id);
-                    summon->SetMaxHealth(player->CountPctFromMaxHealth(50));
-                    summon->SetHealth(summon->GetMaxHealth());
-                }
-            }
-
-            void Register()
-            {
-                OnEffectHit += SpellEffectFn(spell_monk_black_ox_statue_SpellScript::HandleSummon, EFFECT_0, SPELL_EFFECT_SUMMON);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_monk_black_ox_statue_SpellScript();
-        }
-
-        class spell_monk_black_ox_statue_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_monk_black_ox_statue_AuraScript);
-
-            uint32 damageDealed;
-
-            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
-            {
-                damageDealed = 0;
-            }
-
-            void SetData(uint32 /*type*/, uint32 data)
-            {
-                if (!GetCaster())
-                    return;
-
-                if (Player* plr = GetCaster()->ToPlayer())
-                {
-                    uint32 value = plr->GetTotalAttackPowerValue(BASE_ATTACK) * 16;
-
-                    damageDealed += data;
-
-                    if (damageDealed >= value)
-                    {
-                        damageDealed = 0;
-
-                        std::list<Creature*> tempList;
-                        std::list<Creature*> statueList;
-                        Creature* statue;
-
-                        plr->GetCreatureListWithEntryInGrid(tempList, MONK_NPC_BLACK_OX_STATUE, 100.0f);
-                        plr->GetCreatureListWithEntryInGrid(statueList, MONK_NPC_BLACK_OX_STATUE, 100.0f);
-
-                        // Remove other players jade statue
-                        for (std::list<Creature*>::iterator i = tempList.begin(); i != tempList.end(); ++i)
-                        {
-                            Unit* owner = (*i)->GetOwner();
-                            if (owner && owner->GetGUID() == plr->GetGUID() && (*i)->isSummon())
-                                continue;
-
-                            statueList.remove((*i));
-                        }
-
-                        if (!statueList.empty() && statueList.size() == 1)
-                        {
-                            for (auto itr : statueList)
-                                statue = itr;
-
-                            if (statue && (statue->isPet() || statue->isGuardian()))
-                            {
-                                if (statue->GetOwner() && statue->GetOwner()->GetGUID() == plr->GetGUID())
-                                {
-                                    std::list<Unit*> targets;
-
-                                    plr->GetPartyMembers(targets);
-
-                                    targets.remove_if([statue, plr](Unit const *u)
-                                    {
-                                        return u->GetGUID() == statue->GetGUID()
-                                                || u->GetGUID() == plr->GetGUID();
-                                    });
-
-                                    Trinity::Containers::RandomResizeList(targets, 1);
-
-                                    for (auto itr : targets)
-                                        statue->CastSpell(itr, SPELL_MONK_GUARD, true);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            void Register()
-            {
-                AfterEffectApply += AuraEffectApplyFn(spell_monk_black_ox_statue_AuraScript::OnApply, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_monk_black_ox_statue_AuraScript();
-        }
-};
-
 // Guard - 115295
-class spell_monk_guard : public SpellScriptLoader
+class spell_monk_guard final : public SpellScriptLoader
 {
-    public:
-        spell_monk_guard() : SpellScriptLoader("spell_monk_guard") { }
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
 
-        class spell_monk_guard_AuraScript : public AuraScript
+        enum
         {
-            PrepareAuraScript(spell_monk_guard_AuraScript);
-
-            void CalculateAmount(AuraEffect const * /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
-            {
-                if (!GetCaster())
-                    return;
-
-                if (Player* _plr = GetCaster()->ToPlayer())
-                {
-                    amount += int32(_plr->GetTotalAttackPowerValue(BASE_ATTACK) * 1.971f);
-
-                    if (_plr->HasAura(ITEM_MONK_T14_TANK_4P))
-                        amount = int32(amount * 1.2f);
-                }
-                // For Black Ox Statue
-                else if (GetCaster()->GetOwner())
-                {
-                    if (Player* _plr = GetCaster()->GetOwner()->ToPlayer())
-                    {
-                        amount += int32(_plr->GetTotalAttackPowerValue(BASE_ATTACK) * 1.971f);
-
-                        if (_plr->HasAura(ITEM_MONK_T14_TANK_4P))
-                            amount = int32(amount * 1.2f);
-                    }
-                }
-            }
-
-            void Register()
-            {
-                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_monk_guard_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
-            }
+            GLYPH_OF_GUARD = 123401,
         };
 
-        AuraScript* GetAuraScript() const
+        void calculateAmount(AuraEffect const *, int32 &amount, bool &canBeRecalculated)
         {
-            return new spell_monk_guard_AuraScript();
+            canBeRecalculated = false;
+
+            auto const caster = GetCaster();
+            if (!caster)
+                return;
+
+            amount += caster->GetTotalAttackPowerValue(BASE_ATTACK) * 1.971f;
+
+            if (auto const eff = caster->GetAuraEffect(GLYPH_OF_GUARD, EFFECT_0))
+                AddPct(amount, eff->GetAmount());
         }
+
+        void Register()
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(script_impl::calculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
+        }
+    };
+
+public:
+    spell_monk_guard()
+        : SpellScriptLoader("spell_monk_guard")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
 };
 
 // Bear Hug - 127361
@@ -3111,6 +2955,126 @@ public:
     }
 };
 
+class spell_monk_sanctuary_of_the_ox final : public SpellScriptLoader
+{
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        enum
+        {
+            BLACK_OX_GUARD_AOE_SELECTOR = 118605
+        };
+
+        uint32 totalDamageDone_;
+
+    public:
+        script_impl()
+            : totalDamageDone_()
+        { }
+
+    private:
+        void onProc(AuraEffect const *, ProcEventInfo &eventInfo)
+        {
+            PreventDefaultAction();
+
+            totalDamageDone_ += eventInfo.GetDamageInfo()->GetDamage();
+
+            auto const monk = eventInfo.GetActor();
+
+            uint32 const threshold = monk->GetTotalAttackPowerValue(BASE_ATTACK) * 16;
+            if (totalDamageDone_ < threshold)
+                return;
+
+            totalDamageDone_ -= threshold;
+
+            auto const statue = Unit::GetUnit(*monk, monk->m_SummonSlot[SUMMON_SLOT_TOTEM]);
+            if (!statue)
+                return;
+
+            statue->CastSpell(statue, BLACK_OX_GUARD_AOE_SELECTOR, true, nullptr, nullptr, monk->GetGUID());
+        }
+
+        void Register() final
+        {
+            OnEffectProc += AuraEffectProcFn(script_impl::onProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+public:
+    spell_monk_sanctuary_of_the_ox()
+        : SpellScriptLoader("spell_monk_sanctuary_of_the_ox")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
+};
+
+class spell_monk_black_ox_guard_aoe_selector final : public SpellScriptLoader
+{
+    class script_impl final : public SpellScript
+    {
+        PrepareSpellScript(script_impl)
+
+        enum
+        {
+            BLACK_OX_GUARD = 118604
+        };
+
+        void filterTargets(std::list<WorldObject*> &targets)
+        {
+            auto const monk = GetOriginalCaster();
+            Unit *mostInjured = nullptr;
+
+            for (auto &obj : targets)
+            {
+                if (obj->GetTypeId() != TYPEID_PLAYER || obj == monk)
+                    continue;
+
+                auto const unitTarget = obj->ToUnit();
+                if (!monk->IsInRaidWith(unitTarget))
+                    continue;
+
+                if (!mostInjured || mostInjured->GetHealthPct() > unitTarget->GetHealthPct())
+                    mostInjured = unitTarget;
+            };
+
+            targets.clear();
+
+            if (mostInjured)
+                targets.emplace_back(mostInjured);
+        }
+
+        void scriptEffect(SpellEffIndex effIndex)
+        {
+            PreventHitDefaultEffect(effIndex);
+
+            auto const monk = GetOriginalCaster();
+            auto const target = GetHitUnit();
+
+            monk->CastSpell(target, BLACK_OX_GUARD, true);
+        }
+
+        void Register() final
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(script_impl::filterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ALLY);
+            OnEffectHitTarget += SpellEffectFn(script_impl::scriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+public:
+    spell_monk_black_ox_guard_aoe_selector()
+        : SpellScriptLoader("spell_monk_black_ox_guard_aoe_selector")
+    { }
+
+    SpellScript * GetSpellScript() const final
+    {
+        return new script_impl;
+    }
+};
+
 void AddSC_monk_spell_scripts()
 {
     new spell_monk_fists_of_fury_stun();
@@ -3124,7 +3088,6 @@ void AddSC_monk_spell_scripts()
     new spell_monk_dampen_harm();
     new spell_monk_item_s12_4p_mistweaver();
     new spell_monk_diffuse_magic();
-    new spell_monk_black_ox_statue();
     new spell_monk_guard();
     new spell_monk_bear_hug();
     new spell_monk_zen_flight_check();
@@ -3170,4 +3133,6 @@ void AddSC_monk_spell_scripts()
     new spell_monk_roll();
     new spell_monk_tigereye_brew_stacks();
     new spell_monk_combo_breaker();
+    new spell_monk_sanctuary_of_the_ox();
+    new spell_monk_black_ox_guard_aoe_selector();
 }

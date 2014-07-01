@@ -2401,6 +2401,7 @@ TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropert
                         mask = UNIT_MASK_GUARDIAN;
                         break;
                     case SUMMON_TYPE_TOTEM:
+                    case SUMMON_TYPE_STATUE:
                         mask = UNIT_MASK_TOTEM;
                         break;
                     case SUMMON_TYPE_VEHICLE:
@@ -2441,10 +2442,6 @@ TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropert
         if (summoner->GetTypeId() == TYPEID_PLAYER)
             team = summoner->ToPlayer()->GetTeam();
     }
-
-    // Fix Serpent Jade Statue and Sturdy Ox Statue - is Guardian
-    if (entry == 60849 || entry == 61146)
-        mask = UNIT_MASK_GUARDIAN;
 
     TempSummon* summon = NULL;
     switch (mask)

@@ -62,8 +62,8 @@ void Totem::InitStats(uint32 duration)
 
     // client requires SMSG_TOTEM_CREATED to be sent before adding to world and before removing old totem
     if (m_owner->GetTypeId() == TYPEID_PLAYER
-        && m_Properties->Slot >= SUMMON_SLOT_TOTEM
-        && m_Properties->Slot < MAX_TOTEM_SLOT)
+            && m_Properties->Slot >= SUMMON_SLOT_TOTEM
+            && m_Properties->Slot < MAX_TOTEM_SLOT)
     {
         WorldPacket data(SMSG_TOTEM_CREATED, 1 + 8 + 4 + 4);
         ObjectGuid totemGuid = GetGUID();
@@ -79,8 +79,9 @@ void Totem::InitStats(uint32 duration)
 
         m_owner->ToPlayer()->SendDirectMessage(&data);
 
-        // set display id depending on caster's race
-        SetDisplayId(m_owner->GetModelForTotem(PlayerTotemType(m_Properties->Id)));
+        // set display id depending on caster's race (not for statues)
+        if (m_Properties->Type != SUMMON_TYPE_STATUE)
+            SetDisplayId(m_owner->GetModelForTotem(PlayerTotemType(m_Properties->Id)));
 
         // Light's Hammer
         if (GetUInt32Value(UNIT_CREATED_BY_SPELL) == 122773)

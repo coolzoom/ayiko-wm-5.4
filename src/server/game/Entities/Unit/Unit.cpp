@@ -10125,6 +10125,13 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
 
             break;
         }
+        // Dazed (from Hunter's Aspects)
+        case 15571:
+        {
+            if (procSpell && procSpell->IsPositive())
+                return false;
+            break;
+        }
     }
 
     // try detect target manually if not set

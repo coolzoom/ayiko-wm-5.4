@@ -603,7 +603,7 @@ void LFGMgr::InitializeLockedDungeons(Player* player)
         else if (dungeon->expansion > expansion)
             lockData.lockstatus = LFG_LOCKSTATUS_INSUFFICIENT_EXPANSION;
         else if (DisableMgr::IsDisabledFor(DISABLE_TYPE_MAP, dungeon->map, player, Difficulty(dungeon->difficulty)))
-            lockData.lockstatus = LFG_LOCKSTATUS_RAID_LOCKED;
+            lockData.lockstatus = LFG_LOCKSTATUS_TEMPORARILY_DISABLED;
         else if (dungeon->difficulty > REGULAR_DIFFICULTY && player->GetBoundInstance(dungeon->map, Difficulty(dungeon->difficulty)))
         {
             //if (!player->GetGroup() || !player->GetGroup()->isLFGGroup() || GetDungeon(player->GetGroup()->GetGUID(), true) != dungeon->ID || GetState(player->GetGroup()->GetGUID()) != LFG_STATE_DUNGEON)

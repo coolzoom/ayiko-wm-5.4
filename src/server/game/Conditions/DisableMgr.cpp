@@ -140,6 +140,8 @@ void LoadDisables()
                             flags -= RAID_STATUSFLAG_10MAN_HEROIC;
                         if (flags & RAID_STATUSFLAG_25MAN_HEROIC && !GetMapDifficultyData(entry, MAN25_HEROIC_DIFFICULTY))
                             flags -= RAID_STATUSFLAG_25MAN_HEROIC;
+                        if (flags & RAID_STATUSFLAG_RAID_TOOL && !GetMapDifficultyData(entry, RAID_TOOL_DIFFICULTY))
+                            flags -= RAID_STATUSFLAG_RAID_TOOL;
                         if (!flags)
                             isFlagInvalid = true;
                         break;
@@ -339,6 +341,8 @@ bool IsDisabledFor(DisableType type, uint32 entry, Unit const* unit, uint8 flags
                             return disabledModes & RAID_STATUSFLAG_10MAN_HEROIC;
                         case MAN25_HEROIC_DIFFICULTY:
                             return disabledModes & RAID_STATUSFLAG_25MAN_HEROIC;
+                        case RAID_TOOL_DIFFICULTY:
+                            return disabledModes & RAID_STATUSFLAG_RAID_TOOL;
                         default:
                             return false;
                     }

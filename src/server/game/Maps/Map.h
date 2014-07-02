@@ -248,7 +248,10 @@ class Map
             for (auto &object : m)
             {
                 if (object->IsInWorld())
+                {
+                    object->setLockedForMapUpdate(true);
                     i_objectsToUpdate.emplace_back(object);
+                }
             }
         }
 

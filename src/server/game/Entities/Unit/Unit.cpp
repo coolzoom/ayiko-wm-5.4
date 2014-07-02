@@ -18294,17 +18294,33 @@ void Unit::SetFeared(bool apply)
     {
         SetTarget(0);
 
-        Unit* caster = nullptr;
+        Unit *caster = nullptr;
+        bool needsDefaultDelay = true;
 
-        auto const &fearAuras = GetAuraEffectsByType(SPELL_AURA_MOD_FEAR);
-        if (!fearAuras.empty())
-            caster = ObjectAccessor::GetUnit(*this, fearAuras.front()->GetCasterGUID());
+        {
+            auto const &fearAuras = GetAuraEffectsByType(SPELL_AURA_MOD_FEAR);
+            if (!fearAuras.empty())
+            {
+                caster = ObjectAccessor::GetUnit(*this, fearAuras.front()->GetCasterGUID());
+                needsDefaultDelay = false;
+            }
+        }
+
+        if (!caster)
+        {
+            auto const &fearAuras = GetAuraEffectsByType(SPELL_AURA_MOD_FEAR_2);
+            if (!fearAuras.empty())
+            {
+                caster = ObjectAccessor::GetUnit(*this, fearAuras.front()->GetCasterGUID());
+                needsDefaultDelay = false;
+            }
+        }
 
         if (!caster)
             caster = getAttackerForHelper();
 
         // caster == NULL processed in MoveFleeing
-        GetMotionMaster()->MoveFleeing(caster, fearAuras.empty() ? sWorld->getIntConfig(CONFIG_CREATURE_FAMILY_FLEE_DELAY) : 0);
+        GetMotionMaster()->MoveFleeing(caster, needsDefaultDelay ? sWorld->getIntConfig(CONFIG_CREATURE_FAMILY_FLEE_DELAY) : 0);
     }
     else
     {

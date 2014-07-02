@@ -156,8 +156,12 @@ void Map::ObjectUpdater::updateCollected(uint32 diff)
     if (!i_objectsToUpdate.empty())
     {
         for (auto &object : i_objectsToUpdate)
+        {
             if (object->IsInWorld())
                 object->Update(diff);
+            object->setLockedForMapUpdate(false);
+        }
+
         i_objectsToUpdate.clear();
     }
 }

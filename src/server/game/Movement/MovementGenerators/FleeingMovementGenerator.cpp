@@ -403,20 +403,6 @@ template void FleeingMovementGenerator<Creature>::DoReset(Creature *);
 template bool FleeingMovementGenerator<Player>::DoUpdate(Player *, uint32);
 template bool FleeingMovementGenerator<Creature>::DoUpdate(Creature *, uint32);
 
-void TimedFleeingMovementGenerator::Finalize(Unit *owner)
-{
-    owner->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
-    owner->ClearUnitState(UNIT_STATE_FLEEING|UNIT_STATE_FLEEING_MOVE);
-    if (Unit* victim = owner->getVictim())
-    {
-        if (owner->isAlive())
-        {
-            owner->AttackStop();
-            owner->ToCreature()->AI()->AttackStart(victim);
-        }
-    }
-}
-
 bool TimedFleeingMovementGenerator::Update(Unit *owner, uint32 time_diff)
 {
     if (!owner->isAlive())

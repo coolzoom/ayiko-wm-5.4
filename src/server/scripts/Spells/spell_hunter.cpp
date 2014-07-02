@@ -441,42 +441,38 @@ class spell_hun_dash : public SpellScriptLoader
 };
 
 // Blink Strike - 130392
-class spell_hun_blink_strike : public SpellScriptLoader
+class spell_hun_basic_attack_blink_strike : public SpellScriptLoader
 {
+    enum
+    {
+        SPELL_BLINK_STRIKE_AURA             = 130392,
+        SPELL_BLINK_STRIKE_TELEPORT         = 130393
+    };
     public:
-        spell_hun_blink_strike() : SpellScriptLoader("spell_hun_blink_strike") { }
+        spell_hun_basic_attack_blink_strike() : SpellScriptLoader("spell_hun_basic_attack_blink_strike") { }
 
-        class spell_hun_blink_strike_SpellScript : public SpellScript
+        class spell_impl : public SpellScript
         {
-            PrepareSpellScript(spell_hun_blink_strike_SpellScript);
-
-            SpellCastResult CheckPet()
-            {
-                if (Player* _player = GetCaster()->ToPlayer())
-                    if (!_player->GetPet())
-                        return SPELL_FAILED_NO_PET;
-
-                return SPELL_CAST_OK;
-            }
+            PrepareSpellScript(spell_impl);
 
             void HandleOnHit()
             {
-                if (Player* _player = GetCaster()->ToPlayer())
-                    if (Unit* target = GetHitUnit())
-                        if (Pet* pet = _player->GetPet())
-                            pet->CastSpell(target, HUNTER_SPELL_BLINK_STRIKE, true);
+                if (const Pet * caster = GetCaster()->ToPet())
+                    if (Player * owner = caster->GetCharmerOrOwnerPlayerOrPlayerItself())
+                        if (owner->HasAura(SPELL_BLINK_STRIKE_AURA))
+                            if (Unit* target = GetHitUnit())
+                                GetCaster()->CastSpell(target, SPELL_BLINK_STRIKE_TELEPORT, true);
             }
 
             void Register()
             {
-                OnCheckCast += SpellCheckCastFn(spell_hun_blink_strike_SpellScript::CheckPet);
-                OnHit += SpellHitFn(spell_hun_blink_strike_SpellScript::HandleOnHit);
+                OnHit += SpellHitFn(spell_impl::HandleOnHit);
             }
         };
 
         SpellScript* GetSpellScript() const
         {
-            return new spell_hun_blink_strike_SpellScript();
+            return new spell_impl();
         }
 };
 
@@ -2300,7 +2296,7 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_glyph_of_fetch();
     new spell_hun_tracking();
     new spell_hun_dash();
-    new spell_hun_blink_strike();
+    new spell_hun_basic_attack_blink_strike();
     new spell_hun_glyph_of_marked_for_die();
     new spell_hun_stampede();
     new spell_hun_dire_beast();

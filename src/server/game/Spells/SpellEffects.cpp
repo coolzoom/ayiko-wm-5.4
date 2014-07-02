@@ -2240,7 +2240,8 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
             float Mastery = caster->GetFloatValue(PLAYER_MASTERY) * 1.25f / 100.0f;
             int32 bp = (Mastery * addhealth) / 6;
 
-            bp += unitTarget->GetRemainingPeriodicAmount(caster->GetGUID(), 77489, SPELL_AURA_PERIODIC_HEAL);
+            auto const remaining = unitTarget->GetRemainingPeriodicAmount(caster->GetGUID(), 77489, SPELL_AURA_PERIODIC_HEAL);
+            bp += remaining.perTick();
 
             m_caster->CastCustomSpell(unitTarget, 77489, &bp, NULL, NULL, true);
         }

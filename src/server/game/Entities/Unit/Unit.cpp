@@ -720,7 +720,10 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
 
         // Temporal Ripples : Add remaining amount to the basepoints
         if (victim->HasAura(115611))
-            bp += victim->GetRemainingPeriodicAmount(victim->GetGUID(), 115611, SPELL_AURA_PERIODIC_HEAL, 0);
+        {
+            auto const remaining = victim->GetRemainingPeriodicAmount(victim->GetGUID(), 115611, SPELL_AURA_PERIODIC_HEAL);
+            bp += remaining.perTick();
+        }
 
         bp /= 3;
 
@@ -6752,7 +6755,9 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
 
                     int32 tickcount = goPoH->GetMaxDuration() / goPoH->Effects[EFFECT_0].Amplitude;
                     basepoints0 = CalculatePct(int32(damage), triggerAmount) / tickcount;
-                    basepoints0 += victim->GetRemainingPeriodicAmount(GetGUID(), triggered_spell_id, SPELL_AURA_PERIODIC_HEAL);
+
+                    auto const remaining = victim->GetRemainingPeriodicAmount(GetGUID(), triggered_spell_id, SPELL_AURA_PERIODIC_HEAL);
+                    basepoints0 += remaining.perTick();
                     break;
                 }
                 // Oracle Healing Bonus ("Garments of the Oracle" set)
@@ -6867,7 +6872,9 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                     triggerAmount = 3;
                     basepoints0 = CalculatePct(damage, triggerAmount);
                     triggered_spell_id = 99173;
-                    basepoints0 += victim->GetRemainingPeriodicAmount(GetGUID(), triggered_spell_id, SPELL_AURA_PERIODIC_DAMAGE);
+
+                    auto const remaining = victim->GetRemainingPeriodicAmount(GetGUID(), triggered_spell_id, SPELL_AURA_PERIODIC_DAMAGE);;
+                    basepoints0 += remaining.perTick();
                     break;
                 }
                 // Item  Druid T12 Restoration 4P Bonus
@@ -6916,12 +6923,17 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                 }
                 // Item  Druid T12 Feral 2P Bonus
                 case 99001:
+                {
                     triggerAmount /= 2;
                     basepoints0 = int32(CalculatePct(damage, triggerAmount));
                     triggered_spell_id = 99002;
-                    basepoints0 += victim->GetRemainingPeriodicAmount(GetGUID(), triggered_spell_id, SPELL_AURA_PERIODIC_DAMAGE);
+
+                    auto const remaining = victim->GetRemainingPeriodicAmount(GetGUID(), triggered_spell_id, SPELL_AURA_PERIODIC_DAMAGE);
+                    basepoints0 += remaining.perTick();
+
                     target = victim;
                     break;
+                }
                 case 54825: // Glyph of Healing Touch
                 {
                     if (!procSpell)
@@ -7068,7 +7080,8 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                             return false;
                         basepoints0 = CalculatePct(int32(damage), triggerAmount) / (triggeredSpell->GetMaxDuration() / triggeredSpell->Effects[0].Amplitude);
                         // Add remaining ticks to damage done
-                        basepoints0 += victim->GetRemainingPeriodicAmount(GetGUID(), triggered_spell_id, SPELL_AURA_PERIODIC_DAMAGE);
+                        auto const remaining = victim->GetRemainingPeriodicAmount(GetGUID(), triggered_spell_id, SPELL_AURA_PERIODIC_DAMAGE);
+                        basepoints0 += remaining.perTick();
                     }
                     break;
                 }
@@ -8050,7 +8063,8 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                             return false;
                         basepoints0 = CalculatePct(int32(damage), triggerAmount) / (triggeredSpell->GetMaxDuration() / triggeredSpell->Effects[0].Amplitude);
                         // Add remaining ticks to healing done
-                        basepoints0 += GetRemainingPeriodicAmount(GetGUID(), triggered_spell_id, SPELL_AURA_PERIODIC_HEAL);
+                        auto const remaining = GetRemainingPeriodicAmount(GetGUID(), triggered_spell_id, SPELL_AURA_PERIODIC_HEAL);
+                        basepoints0 += remaining.perTick();
                     }
                     break;
                 }
@@ -8216,9 +8230,9 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
 
                     basepoints0 = CalculatePct(int32(damage), triggerAmount);
                     triggered_spell_id = 50536;
-                    basepoints0 += victim->GetRemainingPeriodicAmount(GetGUID(), triggered_spell_id, SPELL_AURA_PERIODIC_DAMAGE);
-                    break;
 
+                    auto const remaining = victim->GetRemainingPeriodicAmount(GetGUID(), triggered_spell_id, SPELL_AURA_PERIODIC_DAMAGE);
+                    basepoints0 += remaining.perTick();
                     break;
                 }
                 case 61257: // Runic Power Back on Snare/Root
@@ -8947,7 +8961,9 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
                         return false;
 
                     basepoints0 = CalculatePct(int32(damage), triggerAmount) / (triggerPS->GetMaxDuration() / triggerPS->Effects[0].Amplitude);
-                    basepoints0 += victim->GetRemainingPeriodicAmount(GetGUID(), trigger_spell_id, SPELL_AURA_PERIODIC_DAMAGE);
+
+                    auto const remaining = victim->GetRemainingPeriodicAmount(GetGUID(), trigger_spell_id, SPELL_AURA_PERIODIC_DAMAGE);
+                    basepoints0 += remaining.perTick();
                     break;
                 }
                 // Item - Hunter T9 4P Bonus
@@ -20642,18 +20658,25 @@ void Unit::OutDebugInfo() const
         TC_LOG_INFO("entities.unit", "On vehicle %u.", GetVehicleBase()->GetEntry());
 }
 
-uint32 Unit::GetRemainingPeriodicAmount(uint64 caster, uint32 spellId, AuraType auraType, uint8 effectIndex) const
+Unit::RemainingPeriodicAmount Unit::GetRemainingPeriodicAmount(uint64 caster, uint32 spellId, AuraType auraType, uint8 effectIndex) const
 {
-    uint32 amount = 0;
     for (auto const &eff : GetAuraEffectsByType(auraType))
     {
-        if (eff->GetCasterGUID() != caster || eff->GetId() != spellId || eff->GetEffIndex() != effectIndex || eff->GetTotalTicks() == 0)
+        if (eff->GetCasterGUID() != caster
+                || eff->GetId() != spellId
+                || eff->GetEffIndex() != effectIndex
+                || eff->GetTotalTicks() == 0)
+        {
             continue;
-        amount += uint32((eff->GetAmount() * std::max<int32>(eff->GetTotalTicks() - int32(eff->GetTickNumber()), 0)) / eff->GetTotalTicks());
-        break;
+        }
+
+        auto const totalTicks = eff->GetTotalTicks();
+        auto const remainingAmount = eff->GetAmount() * std::max(totalTicks - int32(eff->GetTickNumber()), 0);
+
+        return RemainingPeriodicAmount(remainingAmount, totalTicks);
     }
 
-    return amount;
+    return RemainingPeriodicAmount(0, 0);
 }
 
 void Unit::SendClearTarget()

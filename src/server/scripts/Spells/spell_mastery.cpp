@@ -155,7 +155,8 @@ class spell_mastery_ignite : public SpellScriptLoader
 
                                 if (target->HasAura(MASTERY_SPELL_IGNITE, caster->GetGUID()))
                                 {
-                                    bp += target->GetRemainingPeriodicAmount(caster->GetGUID(), MASTERY_SPELL_IGNITE, SPELL_AURA_PERIODIC_DAMAGE);
+                                    auto const remaining = target->GetRemainingPeriodicAmount(caster->GetGUID(), MASTERY_SPELL_IGNITE, SPELL_AURA_PERIODIC_DAMAGE);
+                                    bp += remaining.perTick();
                                     bp = int32(bp * 0.66f);
                                 }
 

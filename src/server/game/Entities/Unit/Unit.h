@@ -1312,6 +1312,23 @@ struct SpellProcEventEntry;                                 // used only private
 class Unit : public WorldObject
 {
     public:
+        class RemainingPeriodicAmount final
+        {
+        public:
+            RemainingPeriodicAmount(int32 total, int32 ticks)
+                : total_(total)
+                , ticks_(ticks)
+            { }
+
+            int32 total() const { return total_; }
+
+            int32 perTick() const { return total_ ? total_ / ticks_ : 0; }
+
+        private:
+            int32 total_;
+            int32 ticks_;
+        };
+
         typedef std::set<Unit*> AttackerSet;
         typedef std::set<Unit*> ControlList;
         typedef std::pair<uint32, uint8> spellEffectPair;
@@ -1327,6 +1344,7 @@ class Unit : public WorldObject
 
         typedef std::map<uint8, AuraApplication*> VisibleAuraMap;
 
+    public:
         virtual ~Unit();
 
         UnitAI* GetAI() { return i_AI; }
@@ -2237,7 +2255,7 @@ class Unit : public WorldObject
         uint32 GetCastingTimeForBonus(SpellInfo const* spellProto, DamageEffectType damagetype, uint32 CastingTime) const;
         float CalculateDefaultCoefficient(SpellInfo const *spellInfo, DamageEffectType damagetype) const;
 
-        uint32 GetRemainingPeriodicAmount(uint64 caster, uint32 spellId, AuraType auraType, uint8 effectIndex = 0) const;
+        RemainingPeriodicAmount GetRemainingPeriodicAmount(uint64 caster, uint32 spellId, AuraType auraType, uint8 effectIndex = 0) const;
 
         void ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply);
         void ApplySpellDispelImmunity(const SpellInfo* spellProto, DispelType type, bool apply);

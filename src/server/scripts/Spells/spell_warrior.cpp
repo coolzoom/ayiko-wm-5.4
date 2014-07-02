@@ -1289,10 +1289,9 @@ class spell_warr_bloodbath final : public SpellScriptLoader
                 return;
 
             auto const damage = eventInfo.GetDamageInfo()->GetDamage();
+            auto const remaining = target->GetRemainingPeriodicAmount(caster->GetGUID(), BLOODBATH_BLEED, SPELL_AURA_PERIODIC_DAMAGE);
 
-            int32 const bp = CalculatePct(damage, aurEff->GetAmount())
-                + target->GetRemainingPeriodicAmount(caster->GetGUID(), BLOODBATH_BLEED, SPELL_AURA_PERIODIC_DAMAGE);
-
+            int32 const bp = CalculatePct(damage, aurEff->GetAmount()) + remaining.total();
             caster->CastCustomSpell(target, BLOODBATH_BLEED, &bp, nullptr, nullptr, true);
         }
 

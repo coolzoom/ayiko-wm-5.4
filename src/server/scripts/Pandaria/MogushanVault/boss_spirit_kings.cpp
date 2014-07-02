@@ -830,8 +830,8 @@ class boss_spirit_kings : public CreatureScript
 
                     bp /= 5;
 
-                    if (attacker->GetAura(SPELL_COWARDICE_DOT))
-                        bp += attacker->GetRemainingPeriodicAmount(me->GetGUID(), SPELL_COWARDICE_DOT, SPELL_AURA_PERIODIC_DAMAGE);
+                    auto const remaining = attacker->GetRemainingPeriodicAmount(me->GetGUID(), SPELL_COWARDICE_DOT, SPELL_AURA_PERIODIC_DAMAGE);
+                    bp += remaining.perTick();
 
                     me->CastCustomSpell(attacker, SPELL_COWARDICE_DOT, &bp, NULL, NULL, true);
                 }

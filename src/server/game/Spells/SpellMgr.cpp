@@ -3295,14 +3295,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 138130:// Storm, Earth and Fire (for spirits)
                     spellInfo->Effects[0].Effect = 0;
                     break;
-                case 130392:// Blink Strikes
-                    spellInfo->Effects[0].TargetA = TARGET_UNIT_PET;
-                    spellInfo->Effects[1].TargetA = TARGET_UNIT_PET;
-                    spellInfo->Effects[2].TargetA = TARGET_UNIT_PET;
-                    break;
-                case 130393:// Blink Strike
-                    spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(10); // 30y
-                    break;
                 case 135299:// Ice Trap (snare)
                 case 140023:// Ring of Peace (dummy)
                     spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(285); // 1s
@@ -3849,6 +3841,9 @@ void SpellMgr::LoadSpellCustomAttr()
                     break;
                 case 137619:// Marked for Death
                     spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
+                    break;
+                case 132020: // Lightning Pool
+                    spellInfo->Effects[0].TargetA = TARGET_DEST_DEST;
                     break;
                 case 8680:  // Wound Poison
                 case 3409:  // Crippling Poison

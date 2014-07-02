@@ -1576,36 +1576,36 @@ class spell_dru_natures_vigil : public SpellScriptLoader
 // Cenarion Ward - 102351
 class spell_dru_cenarion_ward : public SpellScriptLoader
 {
-    public:
-        spell_dru_cenarion_ward() : SpellScriptLoader("spell_dru_cenarion_ward") { }
+    class aura_impl : public AuraScript
+    {
+        PrepareAuraScript(aura_impl);
 
-        class spell_dru_cenarion_ward_AuraScript : public AuraScript
+        void OnProc(AuraEffect const * /*aurEff*/, ProcEventInfo& eventInfo)
         {
-            PrepareAuraScript(spell_dru_cenarion_ward_AuraScript);
+            PreventDefaultAction();
 
-            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
-            {
-                if (Unit* caster = GetCaster())
-                {
-                    if (Unit* target = GetTarget())
-                    {
-                        AuraRemoveMode removeMode = GetTargetApplication()->GetRemoveMode();
-                        if (removeMode == AURA_REMOVE_BY_DEFAULT)
-                            caster->CastSpell(target, SPELL_DRUID_CENARION_WARD, true);
-                    }
-                }
-            }
+            Unit * caster = GetCaster();
 
-            void Register()
-            {
-                AfterEffectRemove += AuraEffectRemoveFn(spell_dru_cenarion_ward_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-            }
-        };
+            if (!caster)
+                return;
 
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_dru_cenarion_ward_AuraScript();
+            if (Unit * victim = GetTarget())
+                caster->CastSpell(victim, SPELL_DRUID_CENARION_WARD, true);
         }
+
+        void Register()
+        {
+            OnEffectProc += AuraEffectProcFn(aura_impl::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+public:
+    spell_dru_cenarion_ward() : SpellScriptLoader("spell_dru_cenarion_ward") {}
+
+    AuraScript* GetAuraScript() const
+    {
+        return new aura_impl();
+    }
 };
 
 // Ursol's Vortex (snare) - 127797

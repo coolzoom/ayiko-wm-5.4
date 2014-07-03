@@ -619,6 +619,97 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (6614451, @ENTRY, 0, 1, 1, 0, 0, -5285.56, 249.865, 386.112, 0.706259, 90, 0, 0, 42, 0, 0, 0, 0, 0),
 (6614450, @ENTRY, 0, 1, 1, 0, 0, -5347.89, 222.313, 386.111, 0.0111861, 90, 0, 0, 42, 0, 0, 0, 0, 0);
 
+-- Quests - Forced To Watch from Afar has been scripted (Feedback #726)
+-- Note: no gossip conditions on retail
+-- Mountaineer Dunstan
+-- Mountaineer Lewin
+-- Mountaineer Valgrum
+SET @ENTRY_DUNS := 40991;
+SET @ENTRY_LEWI := 40994;
+SET @ENTRY_VALG := 41056;
+SET @ENTRY_REMOTE_BOT := 41052;
+SET @GOSSIP_DUNS := 11455;
+SET @GOSSIP_LEWI := 11456;
+SET @GOSSIP_VALG := 11457;
+SET @TEXTID_DUNS := 15972;
+SET @TEXTID_LEWI := 15973;
+SET @TEXTID_VALG := 15974;
+SET @ENTRY_THAR := 40950;
+SET @ENTRY_GLYN := 40951;
+SET @ENTRY_COVE := 41335;
+SET @QUEST := 313;
+UPDATE `creature_template` SET `minlevel`=9, `maxlevel`=9, `faction_A`=55, `faction_H`=55, `npcflag`=1, `baseattacktime`=2000, `AIName`='SmartAI',`gossip_menu_id`=@GOSSIP_DUNS WHERE `entry`=@ENTRY_DUNS;
+UPDATE `creature_template` SET `minlevel`=9, `maxlevel`=9, `faction_A`=55, `faction_H`=55, `npcflag`=1, `baseattacktime`=2000, `AIName`='SmartAI',`gossip_menu_id`=@GOSSIP_LEWI WHERE `entry`=@ENTRY_LEWI;
+UPDATE `creature_template` SET `minlevel`=9, `maxlevel`=9, `faction_A`=55, `faction_H`=55, `npcflag`=1, `baseattacktime`=2000, `AIName`='SmartAI',`gossip_menu_id`=@GOSSIP_VALG WHERE `entry`=@ENTRY_VALG;
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE `entry`=@ENTRY_THAR;
+DELETE FROM `creature` WHERE `id` IN (@ENTRY_DUNS,@ENTRY_LEWI,@ENTRY_VALG);
+INSERT INTO `creature` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`unit_flags`,`dynamicflags`) VALUES
+(145525, @ENTRY_DUNS, 0, 1, 1, 0, 0, -5475.65, -231.772, 354.444, 3.36621, 90, 0, 0, 176, 0, 0, 0, 0, 0),
+(145521, @ENTRY_VALG, 0, 1, 1, 0, 0, -5387.79, -279.681, 363.202, 2.5761, 90, 0, 0, 176, 0, 0, 0, 0, 0),
+(145993, @ENTRY_LEWI, 0, 1, 1, 0, 0, -5485.81, -252.5, 354.782, 2.09465, 90, 0, 0, 176, 0, 0, 0, 0, 0);
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@ENTRY_DUNS,@ENTRY_LEWI,@ENTRY_VALG,@ENTRY_REMOTE_BOT,@ENTRY_THAR,@ENTRY_THAR*100);
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(@ENTRY_DUNS,0,0,1,62,0,100,0,@GOSSIP_DUNS,0,0,0,33,@ENTRY_DUNS,0,0,0,0,0,7,0,0,0,0,0,0,0,"Nepenthe-Mountaineer Dunstan - On Gossip Select - Quest Credit"),
+(@ENTRY_DUNS,0,1,2,61,0,100,0,0,0,0,0,1,0,0,0,0,0,0,7,0,0,0,0,0,0,0,"Nepenthe-Mountaineer Dunstan - On Gossip Select - Say Line 0"),
+(@ENTRY_DUNS,0,2,0,61,0,100,0,0,0,0,0,12,@ENTRY_REMOTE_BOT,8,10000,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Mountaineer Dunstan - On Gossip Select - Summon Remote Observation Bot"),
+(@ENTRY_LEWI,0,0,1,62,0,100,0,@GOSSIP_LEWI,0,0,0,33,@ENTRY_LEWI,0,0,0,0,0,7,0,0,0,0,0,0,0,"Nepenthe-Mountaineer Lewin - On Gossip Select - Quest Credit"),
+(@ENTRY_LEWI,0,1,2,61,0,100,0,0,0,0,0,1,0,0,0,0,0,0,7,0,0,0,0,0,0,0,"Nepenthe-Mountaineer Lewin - On Gossip Select - Say Line 0"),
+(@ENTRY_LEWI,0,2,0,61,0,100,0,0,0,0,0,12,@ENTRY_REMOTE_BOT,8,10000,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Mountaineer Lewin - On Gossip Select - Summon Remote Observation Bot"),
+(@ENTRY_VALG,0,0,1,62,0,100,0,@GOSSIP_VALG,0,0,0,33,@ENTRY_VALG,0,0,0,0,0,7,0,0,0,0,0,0,0,"Nepenthe-Mountaineer Valgrum - On Gossip Select - Quest Credit"),
+(@ENTRY_VALG,0,1,2,61,0,100,0,0,0,0,0,1,0,0,0,0,0,0,7,0,0,0,0,0,0,0,"Nepenthe-Mountaineer Valgrum - On Gossip Select - Say Line 0"),
+(@ENTRY_VALG,0,2,0,61,0,100,0,0,0,0,0,12,@ENTRY_REMOTE_BOT,8,10000,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Mountaineer Valgrum - On Gossip Select - Summon Remote Observation Bot"),
+(@ENTRY_REMOTE_BOT,0,0,0,54,0,100,0,0,0,0,0,89,10,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Remote Observation Bot - Just Summoned - Set Random Movement");
+-- Captain Tharran
+-- Setting phase so we won't say the on quest complete line during the event
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(@ENTRY_THAR,0,0,0,19,0,100,0,@QUEST,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Captain Tharran - On Quest Accept - Say Line 0"),
+(@ENTRY_THAR,0,1,0,1,0,100,0,15000,55000,95000,680000,80,@ENTRY_THAR*100,0,0,0,0,2,1,0,0,0,0,0,0,0,"Nepenthe-Captain Tharran - Out of Combat - Run Script"),
+(@ENTRY_THAR*100,9,0,0,0,0,100,0,0,0,0,0,22,1,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Captain Tharran - On Script - Set Phase 1"),
+(@ENTRY_THAR*100,9,1,0,0,0,100,0,1000,1000,0,0,1,1,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Captain Tharran - On Script - Say Line 1"),
+(@ENTRY_THAR*100,9,2,0,0,0,100,0,6000,6000,0,0,1,2,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Captain Tharran - On Script - Say Line 2"),
+(@ENTRY_THAR*100,9,3,0,0,0,100,0,8000,8000,0,0,1,0,0,0,0,0,0,9,@ENTRY_GLYN,0,5,0,0,0,0,"Nepenthe-Quartermaster Glynna - On Script - Say Line 0"),
+(@ENTRY_THAR*100,9,4,0,0,0,100,0,9000,9000,0,0,1,3,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Captain Tharran - On Script - Say Line 3"),
+(@ENTRY_THAR*100,9,5,0,0,0,100,0,8000,8000,0,0,1,0,0,0,0,0,0,9,@ENTRY_COVE,0,5,0,0,0,0,"Nepenthe-Quartermaster Glynna - On Script - Say Line 0"),
+(@ENTRY_THAR*100,9,6,0,0,0,100,0,9000,9000,0,0,1,1,0,0,0,0,0,9,@ENTRY_COVE,0,5,0,0,0,0,"Nepenthe-Quartermaster Glynna - On Script - Say Line 1"),
+(@ENTRY_THAR*100,9,7,0,0,0,100,0,8000,8000,0,0,1,4,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Captain Tharran - On Script - Say Line 4"),
+(@ENTRY_THAR*100,9,8,0,0,0,100,0,5000,5000,0,0,1,3,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Captain Tharran - On Script - Set Phase 0");
+-- Texts
+DELETE FROM `creature_text` WHERE `entry` IN (@ENTRY_DUNS,@ENTRY_LEWI,@ENTRY_VALG,@ENTRY_THAR,@ENTRY_GLYN,@ENTRY_COVE);
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(@ENTRY_DUNS,0,0,"Tell Captain Tharran that I'll be back in Kharanos as soon as I've verified that the bot is working correctly.",12,0,100,66,0,0,"Mountaineer Dunstan"),
+(@ENTRY_LEWI,0,0,"I can't wait to get out there and help in the fight against those trolls.",12,0,100,66,0,0,"Mountaineer Lewin"),
+(@ENTRY_VALG,0,0,"We've been fighting nonstop since the cataclysm. It'll be nice to get a rest, if a brief one.",12,0,100,66,0,0,"Mountaineer Valgrum"),
+(@ENTRY_THAR,0,0,"There's no substitute for live observers, but I need those mountaineers here. We'll have to rely on those little gnomish observer bots for now...",12,0,100,25,0,0,"Captain Tharran"),
+(@ENTRY_THAR,1,0,"We're getting bogged down in the fight against the Frostmane trolls.",12,0,100,5,0,0,"Captain Tharran"), -- ONESHOT_EXCLAMATION
+(@ENTRY_THAR,2,0,"Most of our steam tanks are out of commission and we're losing mountaineers quickly.",12,0,100,5,0,0,"Captain Tharran"), -- ONESHOT_EXCLAMATION
+(@ENTRY_GLYN,0,0,"It won't be long before we're out of supplies too, Captain. Between the trolls and the yeti raids, we'll be down to half rations within a week.",12,0,100,274,0,0,"Quartermaster Glynna"), -- ONESHOT_NO
+(@ENTRY_THAR,3,0,"We can't keep up the operation much longer. Delber and his team must launch their attack from Steelgrill's Depot as soon as possible!",12,0,100,25,0,0,"Captain Tharran"), -- ONESHOT_EXCLAMATION
+(@ENTRY_COVE,0,0,"Delber and his men are working overtime, captain. He has devised a means of delivering an assault team to the rear flank of the battle.",12,0,100,0,0,0,"Covert Operative"),
+(@ENTRY_COVE,1,0,"We've also secured air support for the operation and will be ready to deploy soon. If any of your men want to join the assault team, just send them to Delber.",12,0,100,0,0,0,"Covert Operative"),
+(@ENTRY_THAR,4,0,"Glad to hear it. I'll send Delber any forces I can spare.",12,0,100,25,0,0,"Captain Tharran"); -- ONESHOT_YES
+-- Link gossips
+DELETE FROM `gossip_menu` WHERE `entry`=@GOSSIP_DUNS AND `text_id`=@TEXTID_DUNS;
+INSERT INTO `gossip_menu` (`entry`,`text_id`) VALUES
+(@GOSSIP_DUNS,@TEXTID_DUNS);
+DELETE FROM `gossip_menu` WHERE `entry`=@GOSSIP_LEWI AND `text_id`=@TEXTID_LEWI;
+INSERT INTO `gossip_menu` (`entry`,`text_id`) VALUES
+(@GOSSIP_LEWI,@TEXTID_LEWI);
+DELETE FROM `gossip_menu` WHERE `entry`=@GOSSIP_VALG AND `text_id`=@TEXTID_VALG;
+INSERT INTO `gossip_menu` (`entry`,`text_id`) VALUES
+(@GOSSIP_VALG,@TEXTID_VALG);
+-- Static text
+DELETE FROM `npc_text` WHERE `id` IN (@TEXTID_DUNS,@TEXTID_LEWI,@TEXTID_VALG);
+INSERT INTO `npc_text` (`id`,`text0_0`) VALUES
+(@TEXTID_DUNS,"Watch yourself down here, $c. These wendigos are savage fighters."),
+(@TEXTID_LEWI,"I've seen enough of this cave for a lifetime. I ca't wait to get back to Kharanos."),
+(@TEXTID_VALG,"Those wendigos are an annoyance, sure, but the real fight is with those Frostmane refugees.");
+-- Text options
+DELETE FROM `gossip_menu_option` WHERE `menu_id` IN (@GOSSIP_DUNS,@GOSSIP_LEWI,@GOSSIP_VALG);
+INSERT INTO `gossip_menu_option` (`menu_id`,`id`,`option_icon`,`option_text`,`option_id`,`npc_option_npcflag`,`action_menu_id`,`action_poi_id`,`box_coded`,`box_money`,`box_text`) VALUES
+(@GOSSIP_DUNS,0,0,"Captain Tharran wants you to deploy your remote observation bots and withdraw to Kharanos.",1,1,0,0,0,0,NULL),
+(@GOSSIP_LEWI,0,0,"Captain Tharran wants you to deploy your remote observation bots and withdraw to Kharanos.",1,1,0,0,0,0,NULL),
+(@GOSSIP_VALG,0,0,"Captain Tharran wants you to deploy your remote observation bots and withdraw to Kharanos.",1,1,0,0,0,0,NULL);
+
 -- Quests - Down with Crushcog! has been scripted (Feedback #3172)
 -- TODO: battle music doesn't play with this targeting, the technicians don't channel the spell, don't fight and don't mount on their guardians
 SET @QUEST := 26364;

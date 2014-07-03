@@ -544,52 +544,6 @@ class spell_warl_unbound_will : public SpellScriptLoader
         }
 };
 
-// Rain of Fire (damage) - 42223
-class spell_warl_rain_of_fire_damage : public SpellScriptLoader
-{
-    public:
-        spell_warl_rain_of_fire_damage() : SpellScriptLoader("spell_warl_rain_of_fire_damage") { }
-
-        class spell_warl_rain_of_fire_damage_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_warl_rain_of_fire_damage_SpellScript);
-
-            void HandleOnHit()
-            {
-                if (Player* player = GetCaster()->ToPlayer())
-                {
-                    if (Unit* target = GetHitUnit())
-                    {
-                        if (player->GetSpecializationId(player->GetActiveSpec()) == SPEC_WARLOCK_DESTRUCTION)
-                        {
-                            if (target->HasAura(WARLOCK_IMMOLATE) || target->HasAura(WARLOCK_IMMOLATE_FIRE_AND_BRIMSTONE))
-                            {
-                                int32 damage = GetHitDamage();
-
-                                AddPct(damage, 50);
-
-                                SetHitDamage(damage);
-
-                                if (roll_chance_i(25))
-                                    player->EnergizeBySpell(player, GetSpellInfo()->Id, 1, POWER_BURNING_EMBERS);
-                            }
-                        }
-                    }
-                }
-            }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_warl_rain_of_fire_damage_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_warl_rain_of_fire_damage_SpellScript();
-        }
-};
-
 // Kil'Jaeden's Cunning (passive with cooldown) - 119048
 class spell_warl_kil_jaedens_cunning : public SpellScriptLoader
 {
@@ -855,6 +809,13 @@ class spell_warl_grimoire_of_sacrifice : public SpellScriptLoader
 // Flames of Xoroth - 120451
 class spell_warl_flames_of_xoroth : public SpellScriptLoader
 {
+    enum NPCEntries
+    {
+        NPC_DOOMGUARD = 11859,
+        NPC_INFERNAL = 89,
+        NPC_IMP = 416,
+    };
+
     public:
         spell_warl_flames_of_xoroth() : SpellScriptLoader("spell_warl_flames_of_xoroth") { }
 
@@ -904,9 +865,9 @@ class spell_warl_flames_of_xoroth : public SpellScriptLoader
 
                             switch (newPet->GetEntry())
                             {
-                                case 11859: // Doomguard
-                                case 89:    // Inferno
-                                    newPet->SetEntry(416);
+                                case NPC_DOOMGUARD:
+                                case NPC_INFERNAL:
+                                    newPet->SetEntry(NPC_IMP);
                                     break;
                                 default:
                                     break;
@@ -2218,44 +2179,6 @@ class spell_warl_shadowburn : public SpellScriptLoader
         }
 };
 
-// Called By : Incinerate - 29722 and Incinerate (Fire and Brimstone) - 114654
-// Conflagrate - 17962 and Conflagrate (Fire and Brimstone) - 108685
-// Burning Embers generate
-class spell_warl_burning_embers : public SpellScriptLoader
-{
-    public:
-        spell_warl_burning_embers() : SpellScriptLoader("spell_warl_burning_embers") { }
-
-        class spell_warl_burning_embers_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_warl_burning_embers_SpellScript);
-
-            void HandleOnHit()
-            {
-                if (Player* _player = GetCaster()->ToPlayer())
-                {
-                    if (Unit* target = GetHitUnit())
-                    {
-                        if (GetSpell()->IsCritForTarget(target))
-                            _player->SetPower(POWER_BURNING_EMBERS, _player->GetPower(POWER_BURNING_EMBERS) + 2);
-                        else
-                            _player->SetPower(POWER_BURNING_EMBERS, _player->GetPower(POWER_BURNING_EMBERS) + 1);
-                    }
-                }
-            }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_warl_burning_embers_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_warl_burning_embers_SpellScript();
-        }
-};
-
 // Fel Flame - 77799
 class spell_warl_fel_flame : public SpellScriptLoader
 {
@@ -2310,11 +2233,6 @@ class spell_warl_fel_flame : public SpellScriptLoader
                                 corruption->SetDuration(corruption->GetDuration() + 6000);
                                 corruption->SetNeedClientUpdateForTargets();
                             }
-
-                            if (GetSpell()->IsCritForTarget(target))
-                                _player->SetPower(POWER_BURNING_EMBERS, _player->GetPower(POWER_BURNING_EMBERS) + 2);
-                            else
-                                _player->SetPower(POWER_BURNING_EMBERS, _player->GetPower(POWER_BURNING_EMBERS) + 1);
                         }
                         // Increases the duration of Corruption by 6s
                         else
@@ -2979,6 +2897,107 @@ public:
     }
 };
 
+// 108647 - Burning Embers
+class spell_warl_burning_embers : public SpellScriptLoader
+{
+    enum
+    {
+        SPELL_CONFLAGRATE           = 17962,
+        SPELL_INCINERATE            = 29722,
+        SPELL_IMMOLATE              = 348,
+        SPELL_FEL_FLAME             = 77799,
+        SPELL_RAIN_OF_FIRE          = 42223,
+
+        SPELL_CONFLAGRATE_FB        = 108685,
+        SPELL_INCINERATE_FB         = 114654,
+        SPELL_IMMOLATE_FB           = 108686,
+
+        MAX_BURNING_EMBERS          = 4, // as of 5.4.0 17399
+        EMBER_CHARGE                = 10 // 10 power points = 1 ember
+    };
+
+    class aura_impl : public AuraScript
+    {
+        PrepareAuraScript(aura_impl);
+
+        void OnProc(AuraEffect const *, ProcEventInfo & event)
+        {
+            PreventDefaultAction();
+
+            const SpellInfo * spell = event.GetSpellInfo();
+            Unit * caster = GetCaster();
+
+
+            if (!spell || !caster)
+                return;
+
+            bool isCrit = event.GetHitMask() & PROC_EX_CRITICAL_HIT;
+            int8 embersCnt = -1;
+
+            switch (spell->Id)
+            {
+                case SPELL_CONFLAGRATE:
+                case SPELL_CONFLAGRATE_FB:
+                case SPELL_INCINERATE:
+                case SPELL_INCINERATE_FB:
+                case SPELL_FEL_FLAME:
+                    embersCnt = isCrit ? 2 : 1;
+                    break;
+                case SPELL_RAIN_OF_FIRE:
+                    if (!urand(0, 10))
+                        embersCnt = 1;
+                    break;
+                case SPELL_IMMOLATE:
+                case SPELL_IMMOLATE_FB:
+                    if (isCrit)
+                        embersCnt = 1;
+                    break;
+                default:
+                    return;
+            }
+
+            if (embersCnt != -1)
+            {
+                caster->EnergizeBySpell(caster, spell->Id, embersCnt, POWER_BURNING_EMBERS);
+
+                TC_LOG_DEBUG("network.opcode", "Burning Embers: generated %d embers from %u (%s)", embersCnt, spell->Id, spell->SpellName);
+            }
+
+        }
+
+        void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit * caster = GetCaster())
+            {
+                caster->SetMaxPower(POWER_BURNING_EMBERS, MAX_BURNING_EMBERS * EMBER_CHARGE);
+                caster->SetPower(POWER_BURNING_EMBERS, EMBER_CHARGE);
+            }
+        }
+
+        void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit * caster = GetCaster())
+                caster->SetMaxPower(POWER_BURNING_EMBERS, 0);
+        }
+
+
+        void Register()
+        {
+            OnEffectProc += AuraEffectProcFn(aura_impl::OnProc, EFFECT_0, SPELL_AURA_MOD_POWER_REGEN_PERCENT);
+            OnEffectApply += AuraEffectApplyFn(aura_impl::OnApply, EFFECT_0, SPELL_AURA_MOD_POWER_REGEN_PERCENT, AURA_EFFECT_HANDLE_REAL);
+            OnEffectRemove += AuraEffectRemoveFn(aura_impl::OnRemove, EFFECT_0, SPELL_AURA_MOD_POWER_REGEN_PERCENT, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+public:
+    spell_warl_burning_embers() : SpellScriptLoader("spell_warl_burning_embers") {}
+
+    AuraScript* GetAuraScript() const
+    {
+        return new aura_impl();
+    }
+};
+
 
 void AddSC_warlock_spell_scripts()
 {
@@ -2992,7 +3011,6 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_imp_swarm();
     new spell_warl_glyph_of_imp_swarm();
     new spell_warl_unbound_will();
-    new spell_warl_rain_of_fire_damage();
     new spell_warl_kil_jaedens_cunning();
     new spell_warl_shield_of_shadow();
     new spell_warl_agony();

@@ -190,7 +190,11 @@ class Aura
         void SetLoadedState(int32 maxduration, int32 duration, int32 charges, uint8 stackamount, uint32 recalculateMask, int32 * amount);
 
         // helpers for aura effects
-        bool HasEffect(uint8 effIndex) const { return GetEffect(effIndex) != NULL; }
+        bool HasEffect(uint8 i) const
+        {
+            return m_effects.size() > i && m_effects[i] != nullptr;
+        }
+
         bool HasEffectType(AuraType type) const;
 
         AuraEffect * GetEffect(uint8 effIndex) const

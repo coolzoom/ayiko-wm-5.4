@@ -1622,18 +1622,18 @@ void AuraEffect::ApplySpellMod(Unit* target, bool apply)
                     }
                     else if (GetMiscValue() == SPELLMOD_EFFECT2)
                     {
-                       if (AuraEffect *aurEff = aura->GetEffect(1))
-                            aurEff->RecalculateAmount();
+                       if (aura->HasEffect(1))
+                           aura->GetEffect(1)->RecalculateAmount();
                     }
                     else if (GetMiscValue() == SPELLMOD_EFFECT3)
                     {
-                       if (AuraEffect *aurEff = aura->GetEffect(2))
-                            aurEff->RecalculateAmount();
+                        if (aura->HasEffect(2))
+                           aura->GetEffect(2)->RecalculateAmount();
                     }
                     else if (GetMiscValue() == SPELLMOD_EFFECT5)
                     {
-                       if (AuraEffect *aurEff = aura->GetEffect(4))
-                            aurEff->RecalculateAmount();
+                        if (aura->HasEffect(4))
+                           aura->GetEffect(4)->RecalculateAmount();
                     }
                 }
             }

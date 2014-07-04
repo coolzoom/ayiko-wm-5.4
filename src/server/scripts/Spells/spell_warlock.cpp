@@ -840,6 +840,9 @@ class spell_warl_flames_of_xoroth : public SpellScriptLoader
                 if (plr->GetPet())
                     return SPELL_FAILED_ALREADY_HAVE_PET;
 
+                if (!plr->GetLastPetNumber(true))
+                    return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+
                 return SPELL_CAST_OK;
             }
 
@@ -849,11 +852,12 @@ class spell_warl_flames_of_xoroth : public SpellScriptLoader
                     return;
 
                 Player* player = GetCaster()->ToPlayer();
-                if (player->GetLastPetNumber())
+
+                if (uint32 petId = player->GetLastPetNumber(true))
                 {
                     if (Pet* newPet = new Pet(player, SUMMON_PET))
                     {
-                        if (newPet->LoadPetFromDB(PET_LOAD_BY_ID, player->GetLastPetNumber()))
+                        if (newPet->LoadPetFromDB(PET_LOAD_BY_ID, petId))
                         {
                             // revive the pet if it is dead
                             if (newPet->getDeathState() == DEAD || newPet->getDeathState() == CORPSE)

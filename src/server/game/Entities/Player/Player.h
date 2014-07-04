@@ -2596,7 +2596,7 @@ class Player final : public Unit, public GridObject<Player>
         void RemovePetAura(PetAura const* petSpell);
 
         // last used pet number (for BG's)
-        uint32 GetLastPetNumber() const { return m_lastpetnumber; }
+        uint32 GetLastPetNumber(bool withDismissed = false);
         void SetLastPetNumber(uint32 petnumber) { m_lastpetnumber = petnumber; }
 
         /*********************************************************/

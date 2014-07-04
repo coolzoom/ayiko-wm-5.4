@@ -22129,7 +22129,7 @@ void Player::RemovePet(PetRemoveMode mode, uint8 removeFlags /*= PET_REMOVE_FLAG
                 SetCurrentPetId(0);
                 // If pet was removed we need to clear last pet number
                 if ((removeFlags & PET_REMOVE_FLAG_RETURN_REAGENT) == 0)
-                    SetLastPetNumber(0);
+                    SetLastPetNumber((1 << 31) | GetLastPetNumber());
             }
         }
         else
@@ -29121,6 +29121,15 @@ void Player::RemovePetAura(PetAura const* petSpell)
     m_petAuras.erase(petSpell);
     if (Pet* pet = GetPet())
         pet->RemoveAurasDueToSpell(petSpell->GetAura(pet->GetEntry()));
+}
+
+uint32 Player::GetLastPetNumber(bool withDismissed)
+{
+    uint32 dismissedMask = (1 << 31);
+    if (m_lastpetnumber & dismissedMask)
+        return withDismissed ? m_lastpetnumber & ~dismissedMask : 0;
+
+    return m_lastpetnumber;
 }
 
 Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, uint32 duration, bool stampeded)

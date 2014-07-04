@@ -246,13 +246,8 @@ class Map
         void Visit(OtherMapType &m)
         {
             for (auto &object : m)
-            {
                 if (object->IsInWorld())
-                {
-                    object->setLockedForMapUpdate(true);
                     i_objectsToUpdate.emplace_back(object);
-                }
-            }
         }
 
         void updateCollected(uint32 diff);

@@ -154,8 +154,8 @@ struct CorpseGridReset final
 {
     void Visit(CorpseMapType &m)
     {
-        for (auto &corpse : m)
-            corpse->RemoveFromGrid();
+        while (!m.empty())
+            m.back()->RemoveFromGrid();
     }
 
     template <typename NotInterested>

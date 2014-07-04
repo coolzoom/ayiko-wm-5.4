@@ -659,7 +659,6 @@ class GridObject
 public:
     GridObject()
         : storage_()
-        , offset_(std::numeric_limits<std::size_t>::max())
     { }
 
     ~GridObject()
@@ -689,7 +688,7 @@ public:
         auto &atOffset = (*storage_)[offset_];
         ASSERT(atOffset == static_cast<ObjectType*>(this));
 
-        if (storage_->size() > 1)
+        if (atOffset != storage_->back())
         {
             std::swap(atOffset, storage_->back());
             static_cast<SelfType*>(atOffset)->offset_ = offset_;
@@ -697,7 +696,6 @@ public:
 
         storage_->pop_back();
         storage_ = nullptr;
-        offset_ = std::numeric_limits<std::size_t>::max();
     }
 
 private:

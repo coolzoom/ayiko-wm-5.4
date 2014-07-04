@@ -98,6 +98,8 @@ uint32 LoadHelper(CellCorpseMap const &cellCorpses, Cell const &cell, Map *map)
 
 } // namespace
 
+namespace Trinity {
+
 void ObjectGridLoader::LoadN(NGrid const &grid, Map *map, Cell cell)
 {
     uint32 gameObjects = 0;
@@ -206,13 +208,16 @@ void ObjectGridCleaner::Visit(AnyMapType &m)
         object->CleanupsBeforeDelete();
 }
 
-template void ObjectGridUnloader::Visit(CreatureMapType &);
-template void ObjectGridUnloader::Visit(GameObjectMapType &);
-template void ObjectGridUnloader::Visit(DynamicObjectMapType &);
-template void ObjectGridUnloader::Visit(CorpseMapType &);
-template void ObjectGridUnloader::Visit(AreaTriggerMapType &);
-template void ObjectGridCleaner::Visit(CreatureMapType &);
-template void ObjectGridCleaner::Visit(GameObjectMapType &);
-template void ObjectGridCleaner::Visit(DynamicObjectMapType &);
-template void ObjectGridCleaner::Visit(CorpseMapType &);
-template void ObjectGridCleaner::Visit(AreaTriggerMapType &);
+} // namespace Trinity
+
+template void Trinity::ObjectGridUnloader::Visit(CreatureMapType &);
+template void Trinity::ObjectGridUnloader::Visit(GameObjectMapType &);
+template void Trinity::ObjectGridUnloader::Visit(DynamicObjectMapType &);
+template void Trinity::ObjectGridUnloader::Visit(CorpseMapType &);
+template void Trinity::ObjectGridUnloader::Visit(AreaTriggerMapType &);
+
+template void Trinity::ObjectGridCleaner::Visit(CreatureMapType &);
+template void Trinity::ObjectGridCleaner::Visit(GameObjectMapType &);
+template void Trinity::ObjectGridCleaner::Visit(DynamicObjectMapType &);
+template void Trinity::ObjectGridCleaner::Visit(CorpseMapType &);
+template void Trinity::ObjectGridCleaner::Visit(AreaTriggerMapType &);

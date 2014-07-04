@@ -32,6 +32,7 @@
 #include "LFGMgr.h"
 #include "DynamicTree.h"
 #include "Vehicle.h"
+#include "ObjectGridLoader.h"
 
 namespace {
 
@@ -67,7 +68,7 @@ void ActiveStateUpdate(Map &map, Map::GridContainerType::iterator itr, uint32 di
 
     if (!grid.GetWorldObjectCountInNGrid<Player>() && !map.ActiveObjectsNearGrid(grid))
     {
-        ObjectGridStoper worker;
+        Trinity::ObjectGridStoper worker;
         grid.VisitAllGrids(Trinity::makeGridVisitor(worker));
         grid.SetGridState(GRID_STATE_IDLE);
 
@@ -148,6 +149,18 @@ void VisitNearbyCellsOf(Map *map, WorldObject* obj, GridVisitor &&gridVisitor, W
         }
     }
 }
+
+struct CorpseGridReset final
+{
+    void Visit(CorpseMapType &m)
+    {
+        for (auto &corpse : m)
+            corpse->RemoveFromGrid();
+    }
+
+    template <typename NotInterested>
+    void Visit(NotInterested &) { }
+};
 
 } // namespace
 
@@ -469,7 +482,7 @@ bool Map::EnsureGridLoaded(const Cell &cell)
 
     setGridObjectDataLoaded(true, cell.GridX(), cell.GridY());
 
-    ObjectGridLoader::LoadN(*ngrid, this, cell);
+    Trinity::ObjectGridLoader::LoadN(*ngrid, this, cell);
 
     // Add resurrectable corpses to world object list in grid
     sObjectAccessor->AddCorpsesToGrid(GridCoord(cell.GridX(), cell.GridY()), ngrid->GetGrid(cell.CellX(), cell.CellY()), this);
@@ -982,9 +995,8 @@ bool Map::UnloadGrid(GridContainerType::iterator itr, bool unloadAll)
     {
         if (!unloadAll)
         {
-            // pets, possessed creatures (must be active), transport passengers,
-            // resurrectable corpses
-            if (ngrid.GetWorldObjectCountInNGrid<TypeList<Creature, Corpse>>())
+            // pets, possessed creatures (must be active), transport passengers
+            if (ngrid.GetWorldObjectCountInNGrid<Creature>())
                 return false;
 
             if (ActiveObjectsNearGrid(ngrid))
@@ -1000,7 +1012,7 @@ bool Map::UnloadGrid(GridContainerType::iterator itr, bool unloadAll)
             MoveAllCreaturesInMoveList();
 
             // move creatures to respawn grids if this is diff.grid or to remove list
-            ObjectGridEvacuator worker;
+            Trinity::ObjectGridEvacuator worker;
             ngrid.VisitAllGrids(Trinity::makeGridVisitor(worker));
 
             // Finish creature moves, remove and delete all creatures with delayed remove before unload
@@ -1008,18 +1020,26 @@ bool Map::UnloadGrid(GridContainerType::iterator itr, bool unloadAll)
         }
 
         {
-            ObjectGridCleaner worker;
+            Trinity::ObjectGridCleaner worker;
             ngrid.VisitAllGrids(Trinity::makeGridVisitor(worker));
         }
 
         RemoveAllObjectsInRemoveList();
 
         {
-            ObjectGridUnloader worker;
+            Trinity::ObjectGridUnloader worker;
             ngrid.VisitAllGrids(Trinity::makeGridVisitor(worker));
         }
 
         ASSERT(i_objectsToRemove.empty());
+
+        {
+            // Resurrectable corpses are cached in ObjectAccessor and must be
+            // removed from grid whenever grid is unloaded to avoid dangling
+            // pointers
+            CorpseGridReset worker;
+            ngrid.VisitAllGrids(Trinity::makeWorldVisitor(worker));
+        }
 
         i_loadedGrids.erase(itr);
         setNGrid(NULL, x, y);

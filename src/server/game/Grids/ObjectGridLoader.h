@@ -23,6 +23,8 @@
 #include "GridDefines.h"
 #include "Cell.h"
 
+namespace Trinity {
+
 struct ObjectGridLoader final
 {
     static void LoadN(NGrid const &grid, Map *map, Cell cell);
@@ -34,7 +36,7 @@ struct ObjectGridStoper final
     void Visit(CreatureMapType &m);
 
     template <typename NotInterested>
-    void Visit(NotInterested &) {}
+    void Visit(NotInterested &) { }
 };
 
 // Move the foreign creatures back to respawn positions before unloading the NGrid
@@ -43,7 +45,7 @@ struct ObjectGridEvacuator final
     void Visit(CreatureMapType &m);
 
     template <typename NotInterested>
-    void Visit(NotInterested &) {}
+    void Visit(NotInterested &) { }
 };
 
 // Clean up and remove from world
@@ -59,5 +61,7 @@ struct ObjectGridUnloader final
     template <typename AnyMapType>
     void Visit(AnyMapType &m);
 };
+
+} // namespace Trinity
 
 #endif

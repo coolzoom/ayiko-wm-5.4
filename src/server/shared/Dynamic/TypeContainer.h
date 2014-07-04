@@ -95,39 +95,6 @@ mapForType(ContainerMapList<TypeList<Head, Tail>> &m)
     return Trinity::Detail::mapForType<SpecificType>(m.tail);
 }
 
-template <typename SpecificType>
-struct TypeListCounter
-{
-    template <typename U>
-    static std::size_t count(U const &m)
-    {
-        return mapForType<SpecificType>(m).elements.size();
-    }
-};
-
-template <>
-struct TypeListCounter<TypeNull>
-{
-    template <typename U>
-    static std::size_t count(U const &)
-    {
-        return 0;
-    }
-};
-
-template <typename Head, typename Tail>
-struct TypeListCounter<TypeList<Head, Tail>>
-{
-    template <typename U>
-    static std::size_t count(U const &m)
-    {
-        typedef TypeListCounter<Head> HeadCounter;
-        typedef TypeListCounter<Tail> TailCounter;
-
-        return HeadCounter::count(m) + TailCounter::count(m);
-    }
-};
-
 } // namespace Detail
 
 /*
@@ -144,10 +111,11 @@ public:
     typedef Detail::ContainerMapList<ObjectTypes> ObjectMap;
 
 public:
-    template <typename T>
+    template <typename SpecificType>
     std::size_t count() const
     {
-        return Detail::TypeListCounter<T>::count(m_objectMap);
+        auto const &m = Detail::mapForType<SpecificType>(m_objectMap);
+        return m.elements.size();
     }
 
     template <typename SpecificType>

@@ -19,22 +19,15 @@
 #ifndef TRINITY_GRIDNOTIFIERS_H
 #define TRINITY_GRIDNOTIFIERS_H
 
-#include "ObjectGridLoader.h"
 #include "UpdateData.h"
-#include <iostream>
 
 #include "Corpse.h"
-#include "Object.h"
 #include "AreaTrigger.h"
 #include "DynamicObject.h"
 #include "GameObject.h"
 #include "Player.h"
-#include "Unit.h"
 #include "CreatureAI.h"
 #include "Spell.h"
-
-class Player;
-//class Map;
 
 namespace Trinity
 {

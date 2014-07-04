@@ -3377,6 +3377,12 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const *triggered
 
         SendCastResult(result);
 
+        if (auto const player = m_caster->ToPlayer())
+        {
+            player->RestoreSpellMods(this);
+            player->SetSpellModTakingSpell(this, false);
+        }
+
         finish(false);
         return;
     }

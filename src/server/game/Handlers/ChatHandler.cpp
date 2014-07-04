@@ -233,6 +233,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
                 recvData.rfinish(); // Prevent warnings
                 return;
             }
+
+            if (type == CHAT_MSG_CHANNEL || type == CHAT_MSG_YELL)
+                sender->UpdateSpeakTime();
         }
     }
     else

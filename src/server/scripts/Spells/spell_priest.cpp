@@ -1640,7 +1640,7 @@ class spell_pri_cascade_second : public SpellScriptLoader
                             return;
 
                         if (Aura *boundNumber = _player->GetAura(PRIEST_CASCADE_INVISIBLE_AURA_2))
-                            if (boundNumber->GetCharges() >= 3)
+                            if (boundNumber->GetCharges() >= 4)
                                 return;
 
                         for (auto itr : targetList)

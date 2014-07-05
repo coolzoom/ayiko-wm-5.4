@@ -1252,17 +1252,31 @@ class spell_pri_spirit_shell : public SpellScriptLoader
 
             void HandleOnHit()
             {
-                if (Player* _player = GetCaster()->ToPlayer())
+                if (Player* const _player = GetCaster()->ToPlayer())
                 {
-                    if (Unit* target = GetHitUnit())
+                    if (Unit* const target = GetHitUnit())
                     {
                         if (_player->HasAura(PRIEST_SPIRIT_SHELL_AURA))
                         {
-                            int32 bp = GetHitHeal();
+                            int32 absorb = GetHitHeal();
 
                             SetHitHeal(0);
 
-                            _player->CastCustomSpell(target, PRIEST_SPIRIT_SHELL_ABSORPTION, &bp, NULL, NULL, true);
+                            // Mastery must be handled here to prevent double absorb bonus
+                            // TODO: Rewrite Mastery to have proper amount stored in aura instead of hardcoding calculated formulas
+                            if (_player->HasAura(SPELL_PRIEST_SHIELD_DISCIPLINE) && _player->getLevel() >= 80)
+                            {
+                                float Mastery = 1 + (_player->GetFloatValue(PLAYER_MASTERY) * 2.5f / 100.0f);
+                                absorb = int32(absorb * Mastery);
+                            }
+
+                            // Multiple effects stack, so let's try to find this aura.
+                            if (AuraEffect const* const shell = target->GetAuraEffect(PRIEST_SPIRIT_SHELL_ABSORPTION, EFFECT_0, _player->GetGUID()))
+                                absorb += shell->GetAmount();
+
+                            absorb = std::min<int32>(absorb, target->CountPctFromMaxHealth(60));
+
+                            _player->CastCustomSpell(target, PRIEST_SPIRIT_SHELL_ABSORPTION, &absorb, NULL, NULL, true);
                         }
                     }
                 }

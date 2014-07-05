@@ -770,7 +770,7 @@ class spell_pri_from_darkness_comes_light : public SpellScriptLoader
             void HandleOnHit()
             {
                 if (Player* _player = GetCaster()->ToPlayer())
-                    if (_player->HasAura(PRIEST_FROM_DARKNESS_COMES_LIGHT_AURA))
+                    if (_player->HasAura(PRIEST_FROM_DARKNESS_COMES_LIGHT_AURA) && _player->GetSpecializationId(_player->GetActiveSpec()) != SPEC_PRIEST_SHADOW)
                         if (roll_chance_i(15))
                             _player->CastSpell(_player, PRIEST_SURGE_OF_LIGHT, true);
             }
@@ -1252,17 +1252,31 @@ class spell_pri_spirit_shell : public SpellScriptLoader
 
             void HandleOnHit()
             {
-                if (Player* _player = GetCaster()->ToPlayer())
+                if (Player* const _player = GetCaster()->ToPlayer())
                 {
-                    if (Unit* target = GetHitUnit())
+                    if (Unit* const target = GetHitUnit())
                     {
                         if (_player->HasAura(PRIEST_SPIRIT_SHELL_AURA))
                         {
-                            int32 bp = GetHitHeal();
+                            int32 absorb = GetHitHeal();
 
                             SetHitHeal(0);
 
-                            _player->CastCustomSpell(target, PRIEST_SPIRIT_SHELL_ABSORPTION, &bp, NULL, NULL, true);
+                            // Mastery must be handled here to prevent double absorb bonus
+                            // TODO: Rewrite Mastery to have proper amount stored in aura instead of hardcoding calculated formulas
+                            if (_player->HasAura(SPELL_PRIEST_SHIELD_DISCIPLINE) && _player->getLevel() >= 80)
+                            {
+                                float Mastery = 1 + (_player->GetFloatValue(PLAYER_MASTERY) * 2.5f / 100.0f);
+                                absorb = int32(absorb * Mastery);
+                            }
+
+                            // Multiple effects stack, so let's try to find this aura.
+                            if (AuraEffect const* const shell = target->GetAuraEffect(PRIEST_SPIRIT_SHELL_ABSORPTION, EFFECT_0, _player->GetGUID()))
+                                absorb += shell->GetAmount();
+
+                            absorb = std::min<int32>(absorb, target->CountPctFromMaxHealth(60));
+
+                            _player->CastCustomSpell(target, PRIEST_SPIRIT_SHELL_ABSORPTION, &absorb, NULL, NULL, true);
                         }
                     }
                 }
@@ -1626,7 +1640,7 @@ class spell_pri_cascade_second : public SpellScriptLoader
                             return;
 
                         if (Aura *boundNumber = _player->GetAura(PRIEST_CASCADE_INVISIBLE_AURA_2))
-                            if (boundNumber->GetCharges() >= 3)
+                            if (boundNumber->GetCharges() >= 4)
                                 return;
 
                         for (auto itr : targetList)

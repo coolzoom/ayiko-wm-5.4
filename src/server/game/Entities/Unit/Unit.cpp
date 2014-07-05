@@ -6673,23 +6673,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                 victim->CastSpell(victim, 57669, true, castItem, triggeredByAura);
                 return true;                                // no hidden cooldown
             }
-            // Divine Aegis
-            if (dummySpell->Id == 47515)
-            {
-                if (!target)
-                    return false;
-
-                if (!procSpell)
-                    return false;
-
-                if (procSpell->Id != 596 && !(procEx & PROC_EX_CRITICAL_HIT))
-                    return false;
-
-                basepoints0 = CalculatePct(int32(damage), triggerAmount);
-
-                triggered_spell_id = 47753;
-                break;
-            }
             switch (dummySpell->Id)
             {
                 // Shadowflame, Item - Priest T12 Shadow 2P Bonus

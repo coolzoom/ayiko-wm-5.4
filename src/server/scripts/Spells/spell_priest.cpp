@@ -124,7 +124,9 @@ enum PriestSpells
     PRIEST_NPC_PSYFIEND                             = 59190,
     PRIEST_SPELL_SPECTRAL_GUISE_CHARGES             = 119030,
     PRIEST_SPELL_POWER_WORD_SHIELD                  = 17,
-    PRIEST_SPELL_POWER_WORD_FORTITUDE               = 21562
+    PRIEST_SPELL_POWER_WORD_FORTITUDE               = 21562,
+    SPELL_PRIEST_DIVINE_AEGIS                       = 47753,
+    SPELL_PRIEST_SHIELD_DISCIPLINE                  = 77484,
 };
 
 // Power Word : Fortitude - 21562
@@ -2587,6 +2589,69 @@ public:
     }
 };
 
+// 47515 - Divine Aegis
+class spell_pri_divine_aegis : public SpellScriptLoader
+{
+public:
+    spell_pri_divine_aegis() : SpellScriptLoader("spell_pri_divine_aegis") { }
+
+    class spell_pri_divine_aegis_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_pri_divine_aegis_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_DIVINE_AEGIS))
+                return false;
+            return true;
+        }
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            return eventInfo.GetProcTarget();
+        }
+
+        void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+        {
+            PreventDefaultAction();
+
+            if (!eventInfo.GetActor() || !eventInfo.GetSpellInfo() || (eventInfo.GetSpellInfo()->Id != 596 && eventInfo.GetHitMask() & PROC_EX_NORMAL_HIT))
+                return;
+
+            Unit * caster = GetTarget();
+
+            int32 absorb = CalculatePct(int32(eventInfo.GetHealInfo()->GetHeal()), aurEff->GetAmount());
+
+            // Mastery must be handled here to prevent double absorb bonus
+            // TODO: Rewrite Mastery to have proper amount stored in aura instead of hardcoding calculated formulas
+            if (caster->HasAura(SPELL_PRIEST_SHIELD_DISCIPLINE) && caster->getLevel() >= 80)
+            {
+                float Mastery = 1 + (caster->GetFloatValue(PLAYER_MASTERY) * 2.5f / 100.0f);
+                absorb = int32(absorb * Mastery);
+            }
+
+            // Multiple effects stack, so let's try to find this aura.
+            if (AuraEffect const* aegis = eventInfo.GetProcTarget()->GetAuraEffect(SPELL_PRIEST_DIVINE_AEGIS, EFFECT_0, eventInfo.GetActor()->GetGUID()))
+                absorb += aegis->GetAmount();
+
+            absorb = std::min<int32>(absorb, eventInfo.GetActor()->CountPctFromMaxHealth(60));
+
+            GetTarget()->CastCustomSpell(SPELL_PRIEST_DIVINE_AEGIS, SPELLVALUE_BASE_POINT0, absorb, eventInfo.GetProcTarget(), true, NULL, aurEff, eventInfo.GetActor()->GetGUID());
+        }
+
+        void Register()
+        {
+            DoCheckProc += AuraCheckProcFn(spell_pri_divine_aegis_AuraScript::CheckProc);
+            OnEffectProc += AuraEffectProcFn(spell_pri_divine_aegis_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_pri_divine_aegis_AuraScript();
+    }
+};
+
 void AddSC_priest_spell_scripts()
 {
     new spell_pri_power_word_fortitude();
@@ -2643,4 +2708,5 @@ void AddSC_priest_spell_scripts()
     new spell_pri_archangel();
     new spell_pri_levitate();
     new spell_pri_binding_heal();
+    new spell_pri_divine_aegis();
 }

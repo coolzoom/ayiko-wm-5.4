@@ -1225,6 +1225,7 @@ bool Aura::CanBeSaved() const
         case 36444: // Water, Lake Wintergrasp
         case 28801: // Slime, Naxxramas
         case 125667: // Second Wind dummy
+        case 111757: // Glyph of Levitate Speed Bonus
             return false;
         default:
             break;
@@ -2206,6 +2207,20 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             caster->CastSpell(caster, 99158, true);
                         else
                             caster->RemoveAurasDueToSpell(99158);
+                    }
+                    break;
+                }
+                // Levitate effect
+                case 111758:
+                {
+                    if (apply && caster->HasAura(108939)) // Glyph of Levitate
+                    {
+                        caster->CastSpell(target, 111757, true);
+                    }
+                    else if (!apply)
+                    {
+                        if (Aura * const speedBonus = target->GetAura(111757))
+                            speedBonus->SetDuration(10 * IN_MILLISECONDS);
                     }
                     break;
                 }

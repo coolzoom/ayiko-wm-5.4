@@ -3704,24 +3704,24 @@ void ObjectMgr::LoadQuests()
             }
         }
 
-        if (qinfo->Flags & QUEST_SPECIAL_FLAGS_MONTHLY)
+        if (qinfo->SpecialFlags & QUEST_SPECIAL_FLAGS_MONTHLY)
         {
-            if (!(qinfo->Flags & QUEST_SPECIAL_FLAGS_REPEATABLE))
+            if (!(qinfo->SpecialFlags & QUEST_SPECIAL_FLAGS_REPEATABLE))
             {
                 TC_LOG_ERROR("sql.sql", "Monthly quest %u not marked as repeatable in `SpecialFlags`, added.", qinfo->GetQuestId());
-                qinfo->Flags |= QUEST_SPECIAL_FLAGS_REPEATABLE;
+                qinfo->SpecialFlags |= QUEST_SPECIAL_FLAGS_REPEATABLE;
             }
         }
 
         if (qinfo->Flags & QUEST_FLAGS_TRACKING)
         {
             // At auto-reward can be rewarded only RewardChoiceItemId[0]
-            for (int j = 1; j < QUEST_REWARD_CHOICES_COUNT; ++j)
+            for (int j = 1; j < QUEST_REWARD_CHOICES_COUNT; ++j )
             {
                 if (uint32 id = qinfo->RewardChoiceItemId[j])
                 {
                     TC_LOG_ERROR("sql.sql", "Quest %u has `RewardChoiceItemId%d` = %u but item from `RewardChoiceItemId%d` can't be rewarded with quest flag QUEST_FLAGS_TRACKING.",
-                        qinfo->GetQuestId(), j + 1, id, j + 1);
+                        qinfo->GetQuestId(), j+1, id, j+1);
                     // No changes, quest ignore this data
                 }
             }

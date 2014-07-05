@@ -1,0 +1,4 @@
+-- [SQL] Quests - Membership Benefits (all versions) will now be considered Monthly
+UPDATE `quest_template` SET `SpecialFlags` = `SpecialFlags`|'1'|'16' WHERE `Id` IN ('9884','9885','9886','9887');
+-- [SQL] Quests - Darkmoon: Test Your Strength, The Master Strategist, Tools of Divination, A Curious Crystal, An Exotic Egg, An Intriguing Grimoire, A Wondrous Weapon, A Captured Banner, The Enemy's Insignia, The Captured Journal will now be considered Monthly
+UPDATE `quest_template` SET `SpecialFlags` = `SpecialFlags`|'1'|'16' WHERE `Id` IN ('29506', '29451', '29464', '29443', '29444', '29445', '29446', '29456', '29457', '29458');

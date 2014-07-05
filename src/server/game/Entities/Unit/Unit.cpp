@@ -9188,7 +9188,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
             break;
         case 109175:// Divine Insight (Shadow)
         {
-            if (GetTypeId() != TYPEID_PLAYER)
+            if (GetTypeId() != TYPEID_PLAYER || ToPlayer()->GetSpecializationId(ToPlayer()->GetActiveSpec()) != SPEC_PRIEST_SHADOW)
                 return false;
 
             if (!procSpell)

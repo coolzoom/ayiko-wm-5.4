@@ -175,6 +175,9 @@ Unit::Unit(bool isWorldObject): WorldObject(isWorldObject)
     , m_unitTypeMask(UNIT_MASK_NONE)
     , m_HostileRefManager(this)
     , _lastDamagedTime(0)
+    , damageTrackingTimer_()
+    , playerDamageTaken_()
+    , npcDamageTaken_()
 
 {
 #ifdef _MSC_VER
@@ -313,20 +316,6 @@ Unit::~Unit()
 
     _DeleteRemovedAuras();
 
-    for (HealDoneList::iterator itr = m_healDone.begin(); itr != m_healDone.end(); itr++)
-        delete (*itr);
-    for (HealTakenList::iterator itr = m_healTaken.begin(); itr != m_healTaken.end(); itr++)
-        delete (*itr);
-    for (DmgDoneList::iterator itr = m_dmgDone.begin(); itr != m_dmgDone.end(); itr++)
-        delete (*itr);
-    for (DmgTakenList::iterator itr = m_dmgTaken.begin(); itr != m_dmgTaken.end(); itr++)
-        delete (*itr);
-
-    m_healDone.clear();
-    m_healTaken.clear();
-    m_dmgDone.clear();
-    m_dmgTaken.clear();
-
     delete m_charmInfo;
     delete movespline;
 
@@ -353,59 +342,21 @@ void Unit::Update(uint32 p_time)
     if (!IsInWorld())
         return;
 
+    // This is required for GetDamageTakenInPastSecs()
+    damageTrackingTimer_ -= p_time;
+
+    while (damageTrackingTimer_ <= 0)
+    {
+        std::copy(npcDamageTaken_.begin(), npcDamageTaken_.end() - 1, npcDamageTaken_.begin() + 1);
+        std::copy(playerDamageTaken_.begin(), playerDamageTaken_.end() - 1, playerDamageTaken_.begin() + 1);
+
+        npcDamageTaken_[0] = 0;
+        playerDamageTaken_[0] = 0;
+
+        damageTrackingTimer_ += DAMAGE_TRACKING_UPDATE_INTERVAL;
+    }
+
     _UpdateSpells(p_time);
-
-    HealDoneList::iterator healDoneNext;
-    for (HealDoneList::iterator itr = m_healDone.begin(); itr != m_healDone.end(); itr = healDoneNext)
-    {
-        healDoneNext = itr;
-        ++healDoneNext;
-
-        if ((getMSTime() - (*itr)->s_timestamp) > 60 * IN_MILLISECONDS)
-        {
-            delete (*itr);
-            m_healDone.erase(itr);
-        }
-    }
-
-    HealTakenList::iterator healTakenNext;
-    for (HealTakenList::iterator itr = m_healTaken.begin(); itr != m_healTaken.end(); itr = healTakenNext)
-    {
-        healTakenNext = itr;
-        ++healTakenNext;
-
-        if ((getMSTime() - (*itr)->s_timestamp) > 60 * IN_MILLISECONDS)
-        {
-            delete (*itr);
-            m_healTaken.erase(itr);
-        }
-    }
-
-    DmgDoneList::iterator dmgDoneNext;
-    for (DmgDoneList::iterator itr = m_dmgDone.begin(); itr != m_dmgDone.end(); itr = dmgDoneNext)
-    {
-        dmgDoneNext = itr;
-        ++dmgDoneNext;
-
-        if ((getMSTime() - (*itr)->s_timestamp) > 60 * IN_MILLISECONDS)
-        {
-            delete (*itr);
-            m_dmgDone.erase(itr);
-        }
-    }
-
-    DmgTakenList::iterator dmgTakenNext;
-    for (DmgTakenList::iterator itr = m_dmgTaken.begin(); itr != m_dmgTaken.end(); itr = dmgTakenNext)
-    {
-        dmgTakenNext = itr;
-        ++dmgTakenNext;
-
-        if ((getMSTime() - (*itr)->s_timestamp) > 60 * IN_MILLISECONDS)
-        {
-            delete (*itr);
-            m_dmgTaken.erase(itr);
-        }
-    }
 
     // If this is set during update SetCantProc(false) call is missing somewhere in the code
     // Having this would prevent spells from being proced, so let's crash
@@ -663,12 +614,6 @@ void Unit::DealDamageMods(Unit* victim, uint32 &damage, uint32* absorb)
 
 uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellInfo const* spellProto, bool durabilityLoss)
 {
-    DamageTaken* dmgTaken = new DamageTaken(damage, getMSTime());
-    victim->SetDamageTaken(dmgTaken);
-
-    DamageDone* dmgDone = new DamageDone(damage, getMSTime());
-    SetDamageDone(dmgDone);
-
     // Log damage > 1 000 000 on worldboss
     if (damage > 1000000 && GetTypeId() == TYPEID_PLAYER && victim->GetTypeId() == TYPEID_UNIT && victim->ToCreature()->GetCreatureTemplate()->rank)
     {
@@ -785,6 +730,11 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
 
     if (IsAIEnabled)
         GetAI()->DamageDealt(victim, damage, damagetype);
+
+    if (GetTypeId() != TYPEID_PLAYER)
+        victim->npcDamageTaken_[0] += damage;
+    else
+        victim->playerDamageTaken_[0] += damage;
 
     if (victim->GetTypeId() == TYPEID_PLAYER)
     {
@@ -11047,12 +10997,6 @@ int32 Unit::DealHeal(Unit* victim, uint32 addhealth, SpellInfo const* spellProto
 {
     int32 gain = 0;
 
-    HealTaken* healTaken = new HealTaken(addhealth, getMSTime());
-    SetHealTaken(healTaken);
-
-    HealDone* healDone = new HealDone(addhealth, getMSTime());
-    SetHealDone(healDone);
-
     if (victim->IsAIEnabled)
         victim->GetAI()->HealReceived(this, addhealth);
 
@@ -21004,55 +20948,28 @@ void Unit::SetEclipsePower(int32 power, bool send)
     SetPower(POWER_ECLIPSE, power, send);
 }
 
-/* In the next functions, we keep 1 minute of last damage */
-uint32 Unit::GetHealingDoneInPastSecs(uint32 secs)
+uint32 Unit::GetNpcDamageTakenInPastSecs(uint32 secs) const
 {
-    uint32 heal = 0;
+    auto const offset = std::min<size_t>(secs, npcDamageTaken_.size());
+    return std::accumulate(npcDamageTaken_.begin(), npcDamageTaken_.begin() + offset, 0u);
+}
 
-    for (HealDoneList::iterator itr = m_healDone.begin(); itr != m_healDone.end(); itr++)
-    {
-        if ((getMSTime() - (*itr)->s_timestamp) <= (secs * IN_MILLISECONDS))
-            heal += (*itr)->s_heal;
-    }
-
-    return heal;
-};
-
-uint32 Unit::GetHealingTakenInPastSecs(uint32 secs)
+uint32 Unit::GetPlayerDamageTakenInPastSecs(uint32 secs) const
 {
-    uint32 heal = 0;
+    auto const offset = std::min<size_t>(secs, playerDamageTaken_.size());
+    return std::accumulate(playerDamageTaken_.begin(), playerDamageTaken_.begin() + offset, 0u);
+}
 
-    for (HealTakenList::iterator itr = m_healTaken.begin(); itr != m_healTaken.end(); itr++)
-    {
-        if ((getMSTime() - (*itr)->s_timestamp) <= (secs * IN_MILLISECONDS))
-            heal += (*itr)->s_heal;
-    }
-
-    return heal;
-};
-
-uint32 Unit::GetDamageDoneInPastSecs(uint32 secs)
+uint32 Unit::GetDamageTakenInPastSecs(uint32 secs) const
 {
+    static_assert(std::is_same<decltype(npcDamageTaken_), decltype(playerDamageTaken_)>::value,
+                  "npcDamageTaken_ and playerDamageTaken_ must have same type");
+
+    auto const offset = std::min<size_t>(secs, npcDamageTaken_.size());
+
     uint32 damage = 0;
-
-    for (DmgDoneList::iterator itr = m_dmgDone.begin(); itr != m_dmgDone.end(); itr++)
-    {
-        if ((getMSTime() - (*itr)->s_timestamp) <= (secs * IN_MILLISECONDS))
-            damage += (*itr)->s_damage;
-    }
-
-    return damage;
-};
-
-uint32 Unit::GetDamageTakenInPastSecs(uint32 secs)
-{
-    uint32 damage = 0;
-
-    for (DmgTakenList::iterator itr = m_dmgTaken.begin(); itr != m_dmgTaken.end(); itr++)
-    {
-        if ((getMSTime() - (*itr)->s_timestamp) <= (secs * IN_MILLISECONDS))
-            damage += (*itr)->s_damage;
-    }
+    for (size_t i = 0; i < offset; ++i)
+        damage += npcDamageTaken_[i] + playerDamageTaken_[i];
 
     return damage;
 }

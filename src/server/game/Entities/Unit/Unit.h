@@ -36,6 +36,7 @@
 #include "Path.h"
 #include "Timer.h"
 
+#include <array>
 #include <list>
 #include <type_traits>
 #include <unordered_map>
@@ -841,42 +842,6 @@ enum MeleeHitOutcome
     MELEE_HIT_GLANCING, MELEE_HIT_CRIT, MELEE_HIT_CRUSHING, MELEE_HIT_NORMAL
 };
 
-struct HealDone
-{
-    HealDone(uint32 heal, uint32 time)
-    : s_heal(heal), s_timestamp(time) {}
-
-    uint32 s_heal;
-    uint32 s_timestamp;
-};
-
-struct HealTaken
-{
-    HealTaken(uint32 heal, uint32 time)
-    : s_heal(heal), s_timestamp(time) {}
-
-    uint32 s_heal;
-    uint32 s_timestamp;
-};
-
-struct DamageDone
-{
-    DamageDone(uint32 dmg, uint32 time)
-    : s_damage(dmg), s_timestamp(time) {}
-
-    uint32 s_damage;
-    uint32 s_timestamp;
-};
-
-struct DamageTaken
-{
-    DamageTaken(uint32 dmg, uint32 time)
-    : s_damage(dmg), s_timestamp(time) {}
-
-    uint32 s_damage;
-    uint32 s_timestamp;
-};
-
 class DispelInfo
 {
 public:
@@ -1311,6 +1276,12 @@ struct SpellProcEventEntry;                                 // used only private
 
 class Unit : public WorldObject
 {
+    enum DamageTrackingInfo
+    {
+        DAMAGE_TRACKING_PERIOD = 120,
+        DAMAGE_TRACKING_UPDATE_INTERVAL = 1 * IN_MILLISECONDS
+    };
+
     public:
         class RemainingPeriodicAmount final
         {
@@ -2452,17 +2423,12 @@ class Unit : public WorldObject
 
         void SetEclipsePower(int32 power, bool send = true);
 
-        uint32 GetHealingDoneInPastSecs(uint32 secs);
-        uint32 GetHealingTakenInPastSecs(uint32 secs);
-        uint32 GetDamageDoneInPastSecs(uint32 secs);
-        uint32 GetDamageTakenInPastSecs(uint32 secs);
-        void SetHealDone(HealDone* healDone) { m_healDone.push_back(healDone); }
-        void SetHealTaken(HealTaken* healTaken) { m_healTaken.push_back(healTaken); }
-        void SetDamageDone(DamageDone* dmgDone) { m_dmgDone.push_back(dmgDone); }
-        void SetDamageTaken(DamageTaken* dmgTaken) { m_dmgTaken.push_back(dmgTaken); }
+        uint32 GetNpcDamageTakenInPastSecs(uint32 secs) const;
+        uint32 GetPlayerDamageTakenInPastSecs(uint32 secs) const;
+        uint32 GetDamageTakenInPastSecs(uint32 secs) const;
 
         // Movement info
-        Movement::MoveSpline * movespline;
+        Movement::MoveSpline *movespline;
 
         // helper for dark simulacrum spell
         Unit* GetSimulacrumTarget();
@@ -2523,15 +2489,6 @@ class Unit : public WorldObject
         AuraStateAurasMap m_auraStateAuras;        // Used for improve performance of aura state checks on aura apply/remove
         uint32 m_interruptMask;
         AuraIdList _SoulSwapDOTList;
-
-        typedef std::list<HealDone*> HealDoneList;
-        typedef std::list<HealTaken*> HealTakenList;
-        typedef std::list<DamageDone*> DmgDoneList;
-        typedef std::list<DamageTaken*> DmgTakenList;
-        HealDoneList m_healDone;
-        HealTakenList m_healTaken;
-        DmgDoneList m_dmgDone;
-        DmgTakenList m_dmgTaken;
 
         float m_auraModifiersGroup[UNIT_MOD_END][MODIFIER_TYPE_END];
         float m_weaponDamage[MAX_ATTACK][2];
@@ -2619,6 +2576,11 @@ class Unit : public WorldObject
         bool _isWalkingBeforeCharm; // Are we walking before we were charmed?
 
         time_t _lastDamagedTime;
+
+        int32 damageTrackingTimer_;
+
+        std::array<uint32, DAMAGE_TRACKING_PERIOD> playerDamageTaken_;
+        std::array<uint32, DAMAGE_TRACKING_PERIOD> npcDamageTaken_;
 };
 
 namespace Trinity

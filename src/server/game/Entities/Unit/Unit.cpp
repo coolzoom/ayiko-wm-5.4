@@ -11848,6 +11848,18 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                 if (AuraEffect *aurEff = GetAuraEffect(64962, EFFECT_1))
                     DoneTotal += aurEff->GetAmount();
             break;
+        case SPELLFAMILY_PALADIN:
+            {
+                if (spellProto->Id == 119072) // Glyph of Final Wrath
+                {
+                    if (AuraEffect const * const glyph = GetAuraEffect(54935, EFFECT_0))
+                        if (victim->HealthBelowPct(20))
+                            AddPct(DoneTotalMod, glyph->GetAmount());
+                }
+                break;
+            }
+
+
     }
 
     // Done fixed damage bonus auras

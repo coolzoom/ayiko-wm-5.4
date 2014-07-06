@@ -6552,7 +6552,11 @@ SpellCastResult Spell::CheckCast(bool strict)
                 {
                     Unit* target = m_targets.GetUnitTarget();
                     if (!target || (target->IsFriendlyTo(m_caster) && target->GetCreatureType() != CREATURE_TYPE_UNDEAD))
-                        return SPELL_FAILED_BAD_TARGETS;
+                    {
+                        // Glyph of Death Coils
+                        if (!m_caster->HasAura(63333) || m_caster == target)
+                            return SPELL_FAILED_BAD_TARGETS;
+                    }
                     if (!target->IsFriendlyTo(m_caster) && !m_caster->HasInArc(static_cast<float>(M_PI), target))
                         return SPELL_FAILED_UNIT_NOT_INFRONT;
                 }

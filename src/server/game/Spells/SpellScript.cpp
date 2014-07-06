@@ -702,6 +702,15 @@ bool AuraScript::_Validate(SpellInfo const* entry)
     return _SpellScript::_Validate(entry);
 }
 
+AuraScript::RefreshChargesHandler::RefreshChargesHandler(AuraRefreshChargesFnType _pHandlerScript)
+    : pHandlerScript(_pHandlerScript)
+{ }
+
+void AuraScript::RefreshChargesHandler::Call(AuraScript* auraScript, uint8 &charges)
+{
+    return (auraScript->*pHandlerScript)(charges);
+}
+
 AuraScript::InitEffectsHandler::InitEffectsHandler(AuraInitEffectsFnType _pHandlerScript)
     : pHandlerScript(_pHandlerScript)
 { }
@@ -820,6 +829,17 @@ AuraScript::EffectCalcSpellModHandler::EffectCalcSpellModHandler(AuraEffectCalcS
 void AuraScript::EffectCalcSpellModHandler::Call(AuraScript* auraScript, AuraEffect const *aurEff, SpellModifier*& spellMod)
 {
     (auraScript->*pEffectHandlerScript)(aurEff, spellMod);
+}
+
+AuraScript::EffectDropModChargeHandler::EffectDropModChargeHandler(AuraEffectDropModChargeFnType _pEffectHandlerScript, uint8 _effIndex, uint16 _effName)
+    : AuraScript::EffectBase(_effIndex, _effName)
+{
+    pEffectHandlerScript = _pEffectHandlerScript;
+}
+
+void AuraScript::EffectDropModChargeHandler::Call(AuraScript* auraScript, AuraEffect *aurEff)
+{
+    (auraScript->*pEffectHandlerScript)(aurEff);
 }
 
 AuraScript::EffectApplyHandler::EffectApplyHandler(AuraEffectApplicationModeFnType _pEffectHandlerScript, uint8 _effIndex, uint16 _effName, AuraEffectHandleModes _mode)
@@ -1126,6 +1146,7 @@ Unit* AuraScript::GetTarget() const
         case AURA_SCRIPT_HOOK_AFTER_PROC:
         case AURA_SCRIPT_HOOK_EFFECT_PROC:
         case AURA_SCRIPT_HOOK_EFFECT_AFTER_PROC:
+        case AURA_SCRIPT_HOOK_EFFECT_DROP_MOD_CHARGE:
             return m_auraApplication->GetTarget();
         default:
             TC_LOG_ERROR("scripts", "Script: `%s` Spell: `%u` AuraScript::GetTarget called in a hook in which the call won't have effect!", m_scriptName->c_str(), m_scriptSpellId);

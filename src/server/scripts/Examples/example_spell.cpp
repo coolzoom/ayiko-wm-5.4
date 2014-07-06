@@ -309,7 +309,6 @@ class spell_ex_66244 : public SpellScriptLoader
                     spellMod = new SpellModifier(GetAura());
                     spellMod->op = SPELLMOD_DOT;
                     spellMod->type = SPELLMOD_PCT;
-                    spellMod->spellId = GetId();
                     spellMod->mask[1] = 0x00002000;
                 }
             }

@@ -24,6 +24,7 @@
 #include "ConditionMgr.h"
 #include "Vehicle.h"
 #include "SpellAuras.h"
+#include "SpellAuraEffects.h"
 
 namespace {
 
@@ -909,7 +910,6 @@ SpellInfo::SpellInfo(SpellEntry const* spellEntry, uint32 difficulty)
     SpellEquippedItemsId = spellEntry->SpellEquippedItemsId;
     SpellInterruptsId = spellEntry->SpellInterruptsId;
     SpellLevelsId = spellEntry->SpellLevelsId;
-   // SpellPowerId = spellEntry->SpellPowerId;
     SpellReagentsId = spellEntry->SpellReagentsId;
     SpellShapeshiftId = spellEntry->SpellShapeshiftId;
     SpellTargetRestrictionsId = spellEntry->SpellTargetRestrictionsId;
@@ -1011,17 +1011,11 @@ SpellInfo::SpellInfo(SpellEntry const* spellEntry, uint32 difficulty)
     SpellLevel = _levels ? _levels->spellLevel : 0;
 
     // SpellPowerEntry
-    ManaCost =  0;
-    ManaCostPercentage = 0;
-    ManaPerSecond = 0;
-    PowerType = POWER_MANA;
-
-    spellPower = new SpellPowerEntry();
-    spellPower->manaCost = 0;
-    spellPower->ManaCostPercentage = 0;
-    spellPower->manaPerSecond = 0;
-    spellPower->SpellId = Id;
-    spellPower->powerType = POWER_MANA;
+    spellPower.manaCost = 0;
+    spellPower.manaCostPercentage = 0;
+    spellPower.manaPerSecond = 0;
+    spellPower.SpellId = Id;
+    spellPower.powerType = POWER_MANA;
 
     // SpellMiscEntry
     SpellMiscEntry const* _misc = GetSpellMisc();
@@ -1303,7 +1297,7 @@ bool SpellInfo::IsStackableWithRanks() const
 {
     if (IsPassive())
         return false;
-    if (PowerType != POWER_MANA && PowerType != POWER_HEALTH)
+    if (spellPower.powerType != POWER_MANA && spellPower.powerType != POWER_HEALTH)
         return false;
     if (IsProfessionOrRiding())
         return false;
@@ -1412,7 +1406,7 @@ bool SpellInfo::IsAffectedBySpellMod(SpellModifier* mod) const
     if (!IsAffectedBySpellMods())
         return false;
 
-    SpellInfo const* affectSpell = sSpellMgr->GetSpellInfo(mod->spellId);
+    auto const affectSpell = sSpellMgr->GetSpellInfo(mod->ownerEffect->GetId());
     // False if affect_spell == NULL or spellFamily not equal
     if (!affectSpell || affectSpell->SpellFamilyName != SpellFamilyName)
         return false;
@@ -2501,7 +2495,7 @@ uint32 SpellInfo::GetRecoveryTime() const
     return RecoveryTime > CategoryRecoveryTime ? RecoveryTime : CategoryRecoveryTime;
 }
 
-uint32 SpellInfo::CalcPowerCost(Unit const* caster, SpellSchoolMask schoolMask, SpellPowerEntry const* spellPower) const
+uint32 SpellInfo::CalcPowerCost(Unit const* caster, SpellSchoolMask schoolMask, SpellPowerEntry const* spellPower, bool takeMods) const
 {
     // Spell drain all exist power on cast (Only paladin lay of Hands)
     if (AttributesEx & SPELL_ATTR1_DRAIN_ALL_POWER)
@@ -2519,21 +2513,21 @@ uint32 SpellInfo::CalcPowerCost(Unit const* caster, SpellSchoolMask schoolMask, 
     // Base powerCost
     int32 powerCost = spellPower->manaCost;
     // PCT cost from total amount
-    if (spellPower->ManaCostPercentage)
+    if (spellPower->manaCostPercentage)
     {
         switch (spellPower->powerType)
         {
             // health as power used
             case POWER_HEALTH:
-                powerCost += int32(CalculatePct(caster->GetCreateHealth(), spellPower->ManaCostPercentage));
+                powerCost += int32(CalculatePct(caster->GetCreateHealth(), spellPower->manaCostPercentage));
                 break;
             case POWER_MANA:
-                powerCost += int32(CalculatePct(caster->GetCreateMana(), spellPower->ManaCostPercentage));
+                powerCost += int32(CalculatePct(caster->GetCreateMana(), spellPower->manaCostPercentage));
                 break;
             case POWER_RAGE:
             case POWER_FOCUS:
             case POWER_ENERGY:
-                powerCost += int32(CalculatePct(caster->GetMaxPower(Powers(spellPower->powerType)), spellPower->ManaCostPercentage));
+                powerCost += int32(CalculatePct(caster->GetMaxPower(Powers(spellPower->powerType)), spellPower->manaCostPercentage));
                 break;
             case POWER_RUNES:
             case POWER_RUNIC_POWER:
@@ -2549,7 +2543,7 @@ uint32 SpellInfo::CalcPowerCost(Unit const* caster, SpellSchoolMask schoolMask, 
     powerCost += caster->GetInt32Value(UNIT_FIELD_POWER_COST_MODIFIER + school);
     // Apply cost mod by spell
     if (Player* modOwner = caster->GetSpellModOwner())
-        modOwner->ApplySpellMod(Id, SPELLMOD_COST, powerCost);
+        modOwner->ApplySpellMod(Id, SPELLMOD_COST, powerCost, nullptr, takeMods);
 
     if (Attributes & SPELL_ATTR0_LEVEL_DAMAGE_CALCULATION)
         powerCost = int32(powerCost / (1.117f * SpellLevel / caster->getLevel() -0.1327f));
@@ -2997,11 +2991,6 @@ SpellInterruptsEntry const* SpellInfo::GetSpellInterrupts() const
 SpellLevelsEntry const* SpellInfo::GetSpellLevels() const
 {
     return SpellLevelsId ? sSpellLevelsStore.LookupEntry(SpellLevelsId) : NULL;
-}
-
-SpellPowerEntry const* SpellInfo::GetSpellPower() const
-{
-    return sSpellPowerStore.LookupEntry(Id);
 }
 
 SpellMiscEntry const* SpellInfo::GetSpellMisc() const
@@ -3566,11 +3555,11 @@ bool SpellInfo::IsCanBeStolen() const
 {
     // some of the rules for those spells that can be stolen by Dark Simulacrum
     // spells should use mana
-    if (PowerType != POWER_MANA)
+    if (spellPower.powerType != POWER_MANA)
         return false;
 
     // and should have mana cost
-    if (!ManaCost && !ManaCostPercentage)
+    if (!spellPower.manaCost && !spellPower.manaCostPercentage)
         return false;
 
     // special rules

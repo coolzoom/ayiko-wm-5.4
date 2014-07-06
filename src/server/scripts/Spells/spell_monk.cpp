@@ -1356,88 +1356,53 @@ class spell_monk_teachings_of_the_monastery : public SpellScriptLoader
 };
 
 // Mana Tea - 115294
-class spell_monk_mana_tea : public SpellScriptLoader
+class spell_monk_mana_tea final : public SpellScriptLoader
 {
-    public:
-        spell_monk_mana_tea() : SpellScriptLoader("spell_monk_mana_tea") { }
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
 
-        class spell_monk_mana_tea_SpellScript : public SpellScript
+        void onApply(AuraEffect const *eff, AuraEffectHandleModes)
         {
-            PrepareSpellScript(spell_monk_mana_tea_SpellScript);
+            auto const caster = GetCaster();
+            if (!caster)
+                return;
 
-            SpellModifier* spellMod;
+            auto const manaTea = caster->GetAura(SPELL_MONK_MANA_TEA_STACKS);
+            if (!manaTea)
+                return;
 
-            void HandleBeforeCast()
-            {
-                if (Player* _player = GetCaster()->ToPlayer())
-                {
-                    int32 stacks = 0;
-
-                    if (Aura *manaTeaStacks = _player->GetAura(SPELL_MONK_MANA_TEA_STACKS))
-                        stacks = manaTeaStacks->GetStackAmount();
-
-                    int32 newDuration = stacks * IN_MILLISECONDS;
-
-                    spellMod = new SpellModifier();
-                    spellMod->op = SPELLMOD_DURATION;
-                    spellMod->type = SPELLMOD_FLAT;
-                    spellMod->spellId = SPELL_MONK_MANA_TEA_REGEN;
-                    spellMod->value = newDuration;
-                    spellMod->mask[1] = 0x200000;
-                    spellMod->mask[2] = 0x1;
-
-                    _player->AddSpellMod(spellMod, true);
-                }
-            }
-
-            void HandleAfterCast()
-            {
-                if (Player* _player = GetCaster()->ToPlayer())
-                    _player->AddSpellMod(spellMod, false);
-            }
-
-            void Register()
-            {
-                BeforeCast += SpellCastFn(spell_monk_mana_tea_SpellScript::HandleBeforeCast);
-                AfterCast += SpellCastFn(spell_monk_mana_tea_SpellScript::HandleAfterCast);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_monk_mana_tea_SpellScript();
+            GetAura()->SetMaxDuration(eff->GetAmplitude() * manaTea->GetStackAmount());
+            GetAura()->RefreshDuration(false);
         }
 
-        class spell_monk_mana_tea_AuraScript : public AuraScript
+        void onTick(AuraEffect const *)
         {
-            PrepareAuraScript(spell_monk_mana_tea_AuraScript);
-
-            void OnTick(AuraEffect const * /*aurEff*/)
+            if (auto const caster = GetCaster())
             {
-                if (GetCaster())
-                {
-                    // remove one charge per tick instead of remove aura on cast
-                    // "Cancelling the channel will not waste stacks"
-                    if (Aura *manaTea = GetCaster()->GetAura(SPELL_MONK_MANA_TEA_STACKS))
-                    {
-                        if (manaTea->GetStackAmount() > 1)
-                            manaTea->SetStackAmount(manaTea->GetStackAmount() - 1);
-                        else
-                            GetCaster()->RemoveAura(SPELL_MONK_MANA_TEA_STACKS);
-                    }
-                }
+                // remove one charge per tick instead of remove aura on cast
+                // "Cancelling the channel will not waste stacks"
+                if (auto const manaTea = caster->GetAura(SPELL_MONK_MANA_TEA_STACKS))
+                    manaTea->ModStackAmount(-1);
             }
-
-            void Register()
-            {
-                OnEffectPeriodic += AuraEffectPeriodicFn(spell_monk_mana_tea_AuraScript::OnTick, EFFECT_0, SPELL_AURA_OBS_MOD_POWER);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_monk_mana_tea_AuraScript();
         }
+
+        void Register() final
+        {
+            OnEffectApply += AuraEffectApplyFn(script_impl::onApply, EFFECT_0, SPELL_AURA_OBS_MOD_POWER, AURA_EFFECT_HANDLE_REAL);
+            OnEffectPeriodic += AuraEffectPeriodicFn(script_impl::onTick, EFFECT_0, SPELL_AURA_OBS_MOD_POWER);
+        }
+    };
+
+public:
+    spell_monk_mana_tea()
+        : SpellScriptLoader("spell_monk_mana_tea")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
 };
 
 // Brewing : Mana Tea - 123766

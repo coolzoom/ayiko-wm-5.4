@@ -1538,7 +1538,7 @@ void Pet::_LoadAuras(uint32 timediff)
                 }
             }
 
-            Aura *aura = Aura::TryCreate(spellInfo, effmask, this, NULL, spellInfo->spellPower, &baseDamage[0], NULL, caster_guid);
+            Aura *aura = Aura::TryCreate(spellInfo, effmask, this, NULL, &spellInfo->spellPower, &baseDamage[0], NULL, caster_guid);
             if (aura != NULL)
             {
                 if (!aura->CanBeSaved())

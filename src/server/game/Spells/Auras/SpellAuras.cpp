@@ -1014,8 +1014,10 @@ void Aura::SetCharges(uint8 charges)
 {
     if (m_procCharges == charges)
         return;
+
     m_procCharges = charges;
     m_isUsingCharges = m_procCharges != 0;
+
     SetNeedClientUpdateForTargets();
 }
 
@@ -1042,21 +1044,19 @@ bool Aura::ModCharges(int32 num, AuraRemoveMode removeMode)
         if (GetId() == 79683)
             maxCharges = 2;
 
-        // limit charges (only on charges increase, charges may be changed manually)
-        if ((num > 0) && (charges > int32(maxCharges)))
+        if (num > 0 && charges > maxCharges)
+        {
+            // limit charges (only on charges increase, charges may be changed manually)
             charges = maxCharges;
-        // we're out of charges, remove
+        }
         else if (charges <= 0)
         {
+            // we're out of charges, remove
             Remove(removeMode);
             return true;
         }
 
         SetCharges(charges);
-
-        // Molten Core and Arcane Missiles ! : charges = stackAmount
-        if (GetId() == 122355 || GetId() == 79683)
-            SetStackAmount(charges);
     }
     return false;
 }
@@ -1066,20 +1066,19 @@ void Aura::SetStackAmount(uint8 stackAmount)
     m_stackAmount = stackAmount;
     Unit* caster = GetCaster();
 
-    std::list<AuraApplication*> applications;
-    GetApplicationList(applications);
+    auto const applications = GetApplicationList();
 
-    for (auto apptItr = applications.begin(); apptItr != applications.end(); ++apptItr)
-        if (!(*apptItr)->GetRemoveMode())
-            HandleAuraSpecificMods(*apptItr, caster, false, true);
+    for (auto const &app : applications)
+        if (!app->GetRemoveMode())
+            HandleAuraSpecificMods(app, caster, false, true);
 
     for (auto &effect : m_effects)
         if (effect)
             effect->ChangeAmount(effect->CalculateAmount(caster), false, true);
 
-    for (auto apptItr = applications.begin(); apptItr != applications.end(); ++apptItr)
-        if (!(*apptItr)->GetRemoveMode())
-            HandleAuraSpecificMods(*apptItr, caster, true, true);
+    for (auto const &app : applications)
+        if (!app->GetRemoveMode())
+            HandleAuraSpecificMods(app, caster, true, true);
 
     SetNeedClientUpdateForTargets();
 }
@@ -1118,22 +1117,15 @@ bool Aura::ModStackAmount(int32 num, AuraRemoveMode removeMode)
         RefreshSpellMods();
         RefreshTimers();
 
-        // Fix Backdraft can stack up to 6 charges max
-        if (m_spellInfo->Id == 117828)
-            SetCharges((GetCharges() + 3) > 6 ? 6 : GetCharges() + 3);
-        // Molten Core - Just apply one charge by one charge
-        else if (m_spellInfo->Id == 122355)
-           SetCharges(GetCharges() + 1);
-        // reset charges
-        else
-            SetCharges(CalcMaxCharges());
+        auto charges = CalcMaxCharges();
+        CallScriptRefreshChargesHandlers(charges);
+        SetCharges(charges);
 
         // FIXME: not a best way to synchronize charges, but works
-        for (uint8 i = 0; i < GetSpellInfo()->Effects.size(); ++i)
-            if (AuraEffect *aurEff = GetEffect(i))
-                if (aurEff->GetAuraType() == SPELL_AURA_ADD_FLAT_MODIFIER || aurEff->GetAuraType() == SPELL_AURA_ADD_PCT_MODIFIER)
-                    if (SpellModifier* mod = aurEff->GetSpellModifier())
-                        mod->charges = GetCharges();
+        for (auto &eff : m_effects)
+            if (eff && (eff->GetAuraType() == SPELL_AURA_ADD_FLAT_MODIFIER || eff->GetAuraType() == SPELL_AURA_ADD_PCT_MODIFIER))
+                if (auto const mod = eff->GetSpellModifier())
+                    mod->charges = GetCharges();
     }
     SetNeedClientUpdateForTargets();
     return false;
@@ -1352,13 +1344,15 @@ void Aura::HandleAllEffects(AuraApplication * aurApp, uint8 mode, bool apply)
     }
 }
 
-void Aura::GetApplicationList(std::list<AuraApplication*> & applicationList) const
+Unit::AuraApplicationList Aura::GetApplicationList() const
 {
-    for (Aura::ApplicationMap::const_iterator appIter = m_applications.begin(); appIter != m_applications.end(); ++appIter)
-    {
-        if (appIter->second->GetEffectMask())
-            applicationList.push_back(appIter->second);
-    }
+    Unit::AuraApplicationList applicationList;
+
+    for (auto &kvPair : m_applications)
+        if (kvPair.second->GetEffectMask())
+            applicationList.push_back(kvPair.second);
+
+    return applicationList;
 }
 
 void Aura::SetNeedClientUpdateForTargets() const
@@ -2549,6 +2543,16 @@ void Aura::LoadScripts()
     }
 }
 
+void Aura::CallScriptRefreshChargesHandlers(uint8 &charges)
+{
+    for (auto &script : m_loadedScripts)
+    {
+        auto const g = Trinity::makeScriptCallGuard(script, AURA_SCRIPT_HOOK_REFRESH_CHARGES);
+        for (auto &hook : script->OnRefreshCharges)
+            hook.Call(script, charges);
+    }
+}
+
 void Aura::CallScriptInitEffectsHandlers(uint32 &effectMask)
 {
     for (auto &script : m_loadedScripts)
@@ -2724,7 +2728,7 @@ void Aura::CallScriptEffectCalcPeriodicHandlers(AuraEffect const *aurEff, bool &
     }
 }
 
-void Aura::CallScriptEffectCalcSpellModHandlers(AuraEffect const *aurEff, SpellModifier* & spellMod)
+void Aura::CallScriptEffectCalcSpellModHandlers(AuraEffect const *aurEff, SpellModifier *&spellMod)
 {
     for (auto &script : m_loadedScripts)
     {
@@ -2732,6 +2736,17 @@ void Aura::CallScriptEffectCalcSpellModHandlers(AuraEffect const *aurEff, SpellM
         for (auto &hook : script->DoEffectCalcSpellMod)
             if (hook.IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
                 hook.Call(script, aurEff, spellMod);
+    }
+}
+
+void Aura::CallScriptEffectDropModChargeHandlers(AuraEffect *aurEff, AuraApplication const *aurApp)
+{
+    for (auto &script : m_loadedScripts)
+    {
+        auto const g = Trinity::makeScriptCallGuard(script, AURA_SCRIPT_HOOK_EFFECT_DROP_MOD_CHARGE, aurApp);
+        for (auto &hook : script->OnEffectDropModCharge)
+            if (hook.IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
+                hook.Call(script, aurEff);
     }
 }
 

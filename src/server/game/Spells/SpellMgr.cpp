@@ -3024,15 +3024,10 @@ void SpellMgr::LoadSpellInfoStore()
             if (!spell)
                 continue;
 
-            spell->ManaCost = spellPower->manaCost;
-            spell->ManaCostPercentage = spellPower->ManaCostPercentage;
-            spell->ManaPerSecond = spellPower->manaPerSecond;
-            spell->PowerType = spellPower->powerType;
-
-            spell->spellPower->manaCost = spellPower->manaCost;
-            spell->spellPower->ManaCostPercentage = spellPower->ManaCostPercentage;
-            spell->spellPower->manaPerSecond = spellPower->manaPerSecond;
-            spell->spellPower->powerType = spellPower->powerType;
+            spell->spellPower.manaCost = spellPower->manaCost;
+            spell->spellPower.manaCostPercentage = spellPower->manaCostPercentage;
+            spell->spellPower.manaPerSecond = spellPower->manaPerSecond;
+            spell->spellPower.powerType = spellPower->powerType;
         }
 
         alreadySet.insert(spellPower->SpellId);
@@ -3044,7 +3039,7 @@ void SpellMgr::LoadSpellInfoStore()
         if (!talentInfo)
             continue;
 
-        SpellInfo * spellEntry = mSpellInfoMap[NONE_DIFFICULTY][talentInfo->spellId];
+        SpellInfo *spellEntry = mSpellInfoMap[NONE_DIFFICULTY][talentInfo->spellId];
         if (spellEntry)
             spellEntry->talentId = talentInfo->Id;
     }
@@ -4063,9 +4058,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[0].TargetA = TARGET_UNIT_TARGET_ALLY;
                     spellInfo->Effects[0].TargetB = 0;
                     break;
-                case 122355:// Molten Core
-                    spellInfo->StackAmount = 255;
-                    break;
                 case 6203:  // Soulstone
                     spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_DEAD;
                     break;
@@ -4442,22 +4434,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 111771:// Demonic Gateway
                     spellInfo->Effects[2].Effect = 0;
                     spellInfo->Effects[2].TriggerSpell = 0;
-                    break;
-                case 117828:// Backdraft
-                    spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_ADD_PCT_MODIFIER;
-                    spellInfo->Effects[0].MiscValue = SPELLMOD_CASTING_TIME;
-                    spellInfo->Effects[0].BasePoints = -30;
-                    spellInfo->Effects[0].SpellClassMask[1] |= 0x2000;
-                    spellInfo->Effects[1].ApplyAuraName = SPELL_AURA_ADD_PCT_MODIFIER;
-                    spellInfo->Effects[1].MiscValue = SPELLMOD_COST;
-                    spellInfo->Effects[1].BasePoints = -30;
-                    spellInfo->Effects[1].SpellClassMask[1] |= 0x80;
-                    spellInfo->Effects[1].SpellClassMask[0] |= 0x1000;
-                    spellInfo->Effects[2].ApplyAuraName = SPELL_AURA_ADD_PCT_MODIFIER;
-                    spellInfo->Effects[2].MiscValue = SPELLMOD_CASTING_TIME;
-                    spellInfo->Effects[2].BasePoints = -30;
-                    spellInfo->Effects[2].SpellClassMask[1] |= 0x80;
-                    spellInfo->Effects[2].SpellClassMask[0] |= 0x1000;
                     break;
                 case 109259:// Powershot
                     spellInfo->Effects[1].BasePoints = 70;
@@ -5618,7 +5594,7 @@ SpellPowerEntry const* SpellMgr::GetSpellPowerEntryByIdAndPower(uint32 spellId, 
     }
 
     auto const spell = GetSpellInfo(spellId);
-    return spell->spellPower;
+    return &spell->spellPower;
 }
 
 void SpellMgr::LoadSpellsByCategory()

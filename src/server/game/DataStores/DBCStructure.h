@@ -2379,7 +2379,7 @@ struct SpellPowerEntry
     //uint32    unk_3;                                      // 6
     //uint32    unk_4;                                      // 7
     //uint32    unk_5;                                      // 8
-    float ManaCostPercentage;                               // 9
+    float manaCostPercentage;                               // 9
     float manaPerSecond;                                    // 10
     //uint32    requireShapeshift;                          // 11 Shapeshift required (spellID)
     //float     unk_7;                                      // 12

@@ -3351,12 +3351,14 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const *triggered
     if (IsDarkSimulacrum() || (m_triggeredByAuraSpell && m_triggeredByAuraSpell->Id == 101056))
         isStolen = true;
 
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-        m_caster->ToPlayer()->SetSpellModTakingSpell(this, true);
-    // Fill cost data (not use power for item casts
-    m_powerCost = m_CastItem ? 0 : m_spellInfo->CalcPowerCost(m_caster, m_spellSchoolMask, m_spellPowerData);
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-        m_caster->ToPlayer()->SetSpellModTakingSpell(this, false);
+    // Fill cost data (not use power for item casts) but don't take mods for power calculation
+    if (auto const player = m_caster->ToPlayer())
+        player->SetSpellModTakingSpell(this, true);
+
+    m_powerCost = m_CastItem ? 0 : m_spellInfo->CalcPowerCost(m_caster, m_spellSchoolMask, m_spellPowerData, false);
+
+    if (auto const player = m_caster->ToPlayer())
+        player->SetSpellModTakingSpell(this, false);
 
     // Set combo point requirement
     if ((_triggeredCastFlags & TRIGGERED_IGNORE_COMBO_POINTS) || m_CastItem || !m_caster->m_movedPlayer)
@@ -3390,23 +3392,33 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const *triggered
     // Prepare data for triggers
     prepareDataForTriggerSystem(triggeredByAura);
 
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-        m_caster->ToPlayer()->SetSpellModTakingSpell(this, true);
-    // calculate cast time (calculated after first CheckCast check to prevent charge counting for first CheckCast fail)
-    m_casttime = m_spellInfo->CalcCastTime(m_caster, this);
+    if (auto const player = m_caster->ToPlayer())
+    {
+        if (!player->GetCommandStatus(CHEAT_CASTTIME))
+        {
+            player->SetSpellModTakingSpell(this, true);
 
-    // If spell not channeled and was stolen he have no cast time
+            // Re-calculate spell power and take mod
+            m_powerCost = m_CastItem ? 0 : m_spellInfo->CalcPowerCost(m_caster, m_spellSchoolMask, m_spellPowerData);
+
+            // calculate cast time (calculated after first CheckCast check to prevent charge counting for first CheckCast fail)
+            m_casttime = m_spellInfo->CalcCastTime(player, this);
+
+            player->SetSpellModTakingSpell(this, false);
+        }
+        else
+        {
+            m_casttime = 0; // Set cast time to 0 if .cheat casttime is enabled.
+        }
+    }
+    else
+    {
+        m_casttime = m_spellInfo->CalcCastTime(m_caster, this);
+    }
+
+    // If spell not channeled and was stolen it has no cast time
     if (isStolen && !m_spellInfo->IsChanneled() && m_spellInfo->Id != 605)
         m_casttime = 0;
-
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-    {
-        m_caster->ToPlayer()->SetSpellModTakingSpell(this, false);
-
-        // Set cast time to 0 if .cheat cast time is enabled.
-        if (m_caster->ToPlayer()->GetCommandStatus(CHEAT_CASTTIME))
-             m_casttime = 0;
-    }
 
     // don't allow channeled spells / spells with cast time to be casted while moving
     // (even if they are interrupted on moving, spells with almost immediate effect get to have their effect processed before movement interrupter kicks in)
@@ -3933,7 +3945,7 @@ void Spell::_handle_finish_phase()
         if (m_comboPointGain)
             m_caster->m_movedPlayer->GainSpellComboPoints(m_comboPointGain);
 
-        if (m_spellInfo->PowerType == POWER_HOLY_POWER && m_caster->m_movedPlayer->getClass() == CLASS_PALADIN)
+        if (m_spellInfo->spellPower.powerType == POWER_HOLY_POWER && m_caster->m_movedPlayer->getClass() == CLASS_PALADIN)
             HandleHolyPower(m_caster->m_movedPlayer);
     }
 
@@ -5823,7 +5835,7 @@ void Spell::TakePower()
     }
 
     // In Spell::HandleHolyPower
-    if (m_spellInfo->PowerType == POWER_HOLY_POWER)
+    if (m_spellInfo->spellPower.powerType == POWER_HOLY_POWER)
     {
         if (m_spellInfo->Id == 85222)
         {

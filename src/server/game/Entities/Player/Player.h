@@ -128,14 +128,21 @@ struct PlayerTalent
 // Spell modifier (used for modify other spells)
 struct SpellModifier
 {
-    SpellModifier(Aura *_ownerAura = NULL) : op(SPELLMOD_DAMAGE), type(SPELLMOD_FLAT), charges(0), value(0), mask(), spellId(0), ownerAura(_ownerAura) {}
-    SpellModOp   op   : 8;
-    SpellModType type : 8;
-    int16 charges     : 16;
-    int32 value;
+    SpellModifier(AuraEffect *effect)
+        : ownerEffect(effect)
+        , op(SPELLMOD_DAMAGE)
+        , type(SPELLMOD_FLAT)
+        , mask()
+        , value(0)
+        , charges(0)
+    { }
+
+    AuraEffect *ownerEffect;
+    SpellModOp op;
+    SpellModType type;
     Trinity::Flag128 mask;
-    uint32 spellId;
-    Aura *ownerAura;
+    int32 value;
+    int16 charges;
 };
 
 enum PlayerCurrencyState
@@ -159,7 +166,6 @@ struct PlayerCurrency
 
 typedef std::unordered_map<uint32, PlayerTalent> PlayerTalentMap;
 typedef std::unordered_map<uint32, PlayerSpell> PlayerSpellMap;
-typedef std::list<SpellModifier*> SpellModList;
 typedef std::unordered_map<uint32, PlayerCurrency> PlayerCurrenciesMap;
 
 struct SpellCooldown
@@ -1822,9 +1828,12 @@ class Player final : public Unit, public GridObject<Player>
 
         SpellCooldowns const& GetSpellCooldownMap() const { return m_spellCooldowns; }
 
-        void AddSpellMod(SpellModifier* mod, bool apply);
+        bool AddSpellMod(SpellModifier* mod, bool apply);
         bool IsAffectedBySpellmod(SpellInfo const* spellInfo, SpellModifier* mod, Spell* spell = NULL);
-        template <class T> T ApplySpellMod(uint32 spellId, SpellModOp op, T &basevalue, Spell* spell = NULL, bool removestacks = true);
+
+        template <typename T>
+        T ApplySpellMod(uint32 spellId, SpellModOp op, T &basevalue, Spell* spell = NULL, bool takeMods = true);
+
         void RemoveSpellMods(Spell* spell);
         void RestoreSpellMods(Spell* spell, uint32 ownerAuraId = 0, Aura *aura = NULL);
         void RestoreAllSpellMods(uint32 ownerAuraId = 0, Aura *aura = NULL);
@@ -2962,7 +2971,7 @@ class Player final : public Unit, public GridObject<Player>
         uint32 m_baseHealthRegen;
         int32 m_spellPenetrationItemMod;
 
-        SpellModList m_spellMods[MAX_SPELLMOD];
+        std::unordered_set<SpellModifier*> m_spellMods[MAX_SPELLMOD];
 
         EnchantDurationList m_enchantDuration;
         ItemDurationList m_itemDuration;
@@ -3107,7 +3116,6 @@ class Player final : public Unit, public GridObject<Player>
         uint32 m_DelayedOperations;
         bool m_bCanDelayTeleport;
         bool m_bHasDelayedTeleport;
-        bool m_isMoltenCored;
 
         uint32 m_currentPetId;
 
@@ -3174,7 +3182,8 @@ void AddItemsSetItem(Player*player, Item* item);
 void RemoveItemsSetItem(Player*player, ItemTemplate const* proto);
 
 // "the bodies of template functions must be made available in a header file"
-template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T &basevalue, Spell* spell, bool removestacks)
+template <typename T>
+T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T &basevalue, Spell* spell, bool takeMods)
 {
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
     if (!spellInfo)
@@ -3182,27 +3191,20 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T &bas
 
     float totalmul = 1.0f;
     int32 totalflat = 0;
-    bool chaosBolt = false;
-    bool soulFire = false;
-    int32 value = 0;
 
     // Drop charges for triggering spells instead of triggered ones
     if (m_spellModTakingSpell)
         spell = m_spellModTakingSpell;
 
-    for (SpellModList::iterator itr = m_spellMods[op].begin(); itr != m_spellMods[op].end(); ++itr)
+    for (auto const &mod : m_spellMods[op])
     {
-        SpellModifier* mod = *itr;
-
-        // Charges can be set only for mods with auras
-        if (!mod->ownerAura)
-            ASSERT(mod->charges == 0);
-
         if (!IsAffectedBySpellmod(spellInfo, mod, spell))
             continue;
 
         if (mod->type == SPELLMOD_FLAT)
+        {
             totalflat += mod->value;
+        }
         else if (mod->type == SPELLMOD_PCT)
         {
             // skip percent mods for null basevalue (most important for spell mods with charges)
@@ -3213,36 +3215,10 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T &bas
             if (mod->op == SPELLMOD_CASTING_TIME && basevalue >= T(10000) && mod->value <= -100)
                 continue;
 
-            value = mod->value;
-
-            // Fix don't apply Backdraft twice for Chaos Bolt
-            if (mod->spellId == 117828 && mod->op == SPELLMOD_CASTING_TIME && spellInfo->Id == 116858)
-            {
-                if (chaosBolt)
-                    continue;
-                else
-                    chaosBolt = true;
-            }
-            // Fix don't apply Molten Core multiple times for Soul Fire
-            else if (mod->spellId == 122355 && (spellInfo->Id == 6353 || spellInfo->Id == 104027))
-            {
-                if (soulFire)
-                    continue;
-                else
-                    soulFire = true;
-
-                if (m_isMoltenCored)
-                    m_isMoltenCored = false;
-                else if (mod->op == SPELLMOD_CASTING_TIME || mod->op == SPELLMOD_COST)
-                    m_isMoltenCored = true;
-
-                value = mod->value / mod->charges;
-            }
-
-            totalmul += CalculatePct(1.0f, value);
+            totalmul += CalculatePct(1.0f, mod->value);
         }
 
-        if (removestacks && !m_isMoltenCored)
+        if (takeMods)
             DropModCharge(mod, spell);
     }
 

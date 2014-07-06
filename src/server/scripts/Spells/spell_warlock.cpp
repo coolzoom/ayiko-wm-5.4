@@ -53,8 +53,6 @@ enum WarlockSpells
     WARLOCK_CONFLAGRATE_FIRE_AND_BRIMSTONE  = 108685,
     WARLOCK_IMMOLATE_FIRE_AND_BRIMSTONE     = 108686,
     WARLOCK_FIRE_AND_BRIMSTONE              = 108683,
-    WARLOCK_BACKDRAFT                       = 117828,
-    WARLOCK_PYROCLASM                       = 123686,
     WARLOCK_RAIN_OF_FIRE                    = 104232,
     WARLOCK_RAIN_OF_FIRE_TRIGGERED          = 42223,
     WARLOCK_SPAWN_PURPLE_DEMONIC_GATEWAY    = 113890,
@@ -2005,36 +2003,6 @@ class spell_warl_rain_of_fire : public SpellScriptLoader
         }
 };
 
-// Chaos Bolt - 116858
-class spell_warl_chaos_bolt : public SpellScriptLoader
-{
-    public:
-        spell_warl_chaos_bolt() : SpellScriptLoader("spell_warl_chaos_bolt") { }
-
-        class spell_warl_chaos_bolt_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_warl_chaos_bolt_SpellScript);
-
-            void HandleAfterCast()
-            {
-                if (Player* _player = GetCaster()->ToPlayer())
-                    if (_player->HasAura(WARLOCK_PYROCLASM))
-                        if(Aura *backdraft = _player->GetAura(WARLOCK_BACKDRAFT))
-                            backdraft->ModCharges(-3);
-            }
-
-            void Register()
-            {
-                AfterCast += SpellCastFn(spell_warl_chaos_bolt_SpellScript::HandleAfterCast);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_warl_chaos_bolt_SpellScript();
-        }
-};
-
 // Ember Tap - 114635
 class spell_warl_ember_tap : public SpellScriptLoader
 {
@@ -3002,6 +2970,104 @@ public:
     }
 };
 
+class spell_warl_backdraft final : public SpellScriptLoader
+{
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        enum
+        {
+            PYROCLASM  = 123686,
+        };
+
+        void onInitEffects(uint32 &effectMask)
+        {
+            auto const caster = GetCaster();
+            if (!caster || !caster->HasAura(PYROCLASM))
+                effectMask &= ~(1 << EFFECT_2);
+        }
+
+        void onRefreshCharges(uint8 &newCharges)
+        {
+            // Retail applies 3 charges first, and 3 more at refresh
+            uint8 const maxCharges = GetSpellInfo()->ProcCharges * 2;
+            newCharges = std::min<uint8>(maxCharges, GetCharges() + newCharges);
+
+            // We should enable Chaos Bolt modifier again at refresh
+            if (HasEffect(EFFECT_2) && GetCharges() < maxCharges / 2)
+                GetEffect(EFFECT_2)->ApplySpellMod(GetCaster(), true);
+        }
+
+        void onIncinerate(AuraEffect *)
+        {
+            // If Pyroclasm is active and aura charges will drop below threshold,
+            // Chaos Bolt can no longer benefit from Backdraft
+            int32 const threshold = GetSpellInfo()->ProcCharges;
+            if (HasEffect(EFFECT_2) && GetCharges() - 1 < threshold)
+                GetEffect(EFFECT_2)->ApplySpellMod(GetCaster(), false);
+        }
+
+        void onChaosBolt(AuraEffect *)
+        {
+            // Drop 2 charges only, one more will be consumed after this hook
+            int32 const threshold = GetSpellInfo()->ProcCharges;
+            ModCharges(-(threshold - 1), AURA_REMOVE_BY_EXPIRE);
+        }
+
+        void Register() final
+        {
+            OnInitEffects += AuraInitEffectsFn(script_impl::onInitEffects);
+            OnRefreshCharges += AuraRefreshChargesFn(script_impl::onRefreshCharges);
+            OnEffectDropModCharge += AuraEffectDropModChargeFn(script_impl::onIncinerate, EFFECT_0, SPELL_AURA_ADD_PCT_MODIFIER);
+            OnEffectDropModCharge += AuraEffectDropModChargeFn(script_impl::onChaosBolt, EFFECT_2, SPELL_AURA_ADD_PCT_MODIFIER);
+        }
+    };
+
+public:
+    spell_warl_backdraft()
+        : SpellScriptLoader("spell_warl_backdraft")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
+};
+
+class spell_warl_molten_core final : public SpellScriptLoader
+{
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        enum
+        {
+            CHARGES_CAP = 10
+        };
+
+        void onRefreshCharges(uint8 &newCharges)
+        {
+            // Caps at 10 charges, +1 at refresh
+            newCharges = std::min<uint8>(CHARGES_CAP, GetCharges() + 1);
+        }
+
+        void Register() final
+        {
+            OnRefreshCharges += AuraRefreshChargesFn(script_impl::onRefreshCharges);
+        }
+    };
+
+public:
+    spell_warl_molten_core()
+        : SpellScriptLoader("spell_warl_molten_core")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
+};
 
 void AddSC_warlock_spell_scripts()
 {
@@ -3049,7 +3115,6 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_demonic_gateway_charges();
     new spell_warl_demonic_gateway();
     new spell_warl_rain_of_fire();
-    new spell_warl_chaos_bolt();
     new spell_warl_ember_tap();
     new spell_warl_fire_and_brimstone();
     new spell_warl_conflagrate_aura();
@@ -3070,4 +3135,6 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_unstable_affliction();
     new spell_warl_backlash();
     new spell_warl_blood_horror();
+    new spell_warl_backdraft();
+    new spell_warl_molten_core();
 }

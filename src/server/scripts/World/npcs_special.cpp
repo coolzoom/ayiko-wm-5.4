@@ -4503,7 +4503,9 @@ class npc_spectral_guise : public CreatureScript
                     owner->AddAura(SPELL_SPECTRAL_GUISE_CLONE, me);
 
                     me->CastSpell(me, SPELL_SPECTRAL_GUISE_CHARGES, true);
-                    Aura::TryRefreshStackOrCreate(sSpellMgr->GetSpellInfo(SPELL_SPECTRAL_GUISE_STEALTH), MAX_EFFECT_MASK, owner, owner, sSpellMgr->GetSpellInfo(SPELL_SPECTRAL_GUISE_STEALTH)->spellPower);
+
+                    auto const spellInfo = sSpellMgr->GetSpellInfo(SPELL_SPECTRAL_GUISE_STEALTH);
+                    Aura::TryRefreshStackOrCreate(spellInfo, MAX_EFFECT_MASK, owner, owner, &spellInfo->spellPower);
 
                     std::list<HostileReference*> threatList = owner->getThreatManager().getThreatList();
                     for (std::list<HostileReference*>::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)

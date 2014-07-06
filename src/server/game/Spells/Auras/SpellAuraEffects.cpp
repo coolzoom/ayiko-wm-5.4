@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "SpellAuraEffects.h"
 #include "Common.h"
 #include "WorldPacket.h"
 #include "Opcodes.h"
@@ -27,7 +28,6 @@
 #include "ObjectAccessor.h"
 #include "Util.h"
 #include "Spell.h"
-#include "SpellAuraEffects.h"
 #include "Battleground.h"
 #include "OutdoorPvPMgr.h"
 #include "Formulas.h"
@@ -587,14 +587,15 @@ void AuraEffect::GetTargetList(std::list<Unit*> & targetList) const
     }
 }
 
-void AuraEffect::GetApplicationList(std::list<AuraApplication*> & applicationList) const
+Unit::AuraApplicationList AuraEffect::GetApplicationList() const
 {
-    Aura::ApplicationMap const & targetMap = GetBase()->GetApplicationMap();
-    for (Aura::ApplicationMap::const_iterator appIter = targetMap.begin(); appIter != targetMap.end(); ++appIter)
-    {
-        if (appIter->second->HasEffect(GetEffIndex()))
-            applicationList.push_back(appIter->second);
-    }
+    Unit::AuraApplicationList applicationList;
+
+    for (auto &kvPair : GetBase()->GetApplicationMap())
+        if (kvPair.second->HasEffect(GetEffIndex()))
+            applicationList.push_back(kvPair.second);
+
+    return applicationList;
 }
 
 int32 AuraEffect::CalculateAmount(Unit* caster)
@@ -1369,10 +1370,9 @@ void AuraEffect::CalculateSpellMod()
                         {
                             if (!m_spellmod)
                             {
-                                m_spellmod = new SpellModifier(GetBase());
+                                m_spellmod = new SpellModifier(this);
                                 m_spellmod->op = SPELLMOD_DOT;
                                 m_spellmod->type = SPELLMOD_FLAT;
-                                m_spellmod->spellId = GetId();
                                 m_spellmod->mask[1] = 0x0010;
                             }
                             m_spellmod->value = GetAmount()/7;
@@ -1388,12 +1388,11 @@ void AuraEffect::CalculateSpellMod()
         case SPELL_AURA_ADD_PCT_MODIFIER:
             if (!m_spellmod)
             {
-                m_spellmod = new SpellModifier(GetBase());
+                m_spellmod = new SpellModifier(this);
                 m_spellmod->op = SpellModOp(GetMiscValue());
                 ASSERT(m_spellmod->op < MAX_SPELLMOD);
 
                 m_spellmod->type = SpellModType(uint32(GetAuraType()));    // SpellModType value == spell aura types
-                m_spellmod->spellId = GetId();
                 m_spellmod->mask = GetSpellInfo()->Effects[GetEffIndex()].SpellClassMask;
                 m_spellmod->charges = GetBase()->GetCharges();
             }
@@ -1457,10 +1456,9 @@ void AuraEffect::CalculateSpellMod()
 
             if (!m_spellmod)
             {
-                m_spellmod = new SpellModifier(GetBase());
+                m_spellmod = new SpellModifier(this);
                 m_spellmod->op = SPELLMOD_COOLDOWN;
                 m_spellmod->type = SPELLMOD_PCT;
-                m_spellmod->spellId = GetId();
                 m_spellmod->mask[1] = 0x04248082;
                 m_spellmod->mask[0] = 0x00804020;
             }
@@ -1492,8 +1490,7 @@ void AuraEffect::ChangeAmount(int32 newAmount, bool mark, bool onStackOrReapply)
     if (!handleMask)
         return;
 
-    Unit::AuraApplicationList effectApplications;
-    GetApplicationList(effectApplications);
+    auto const effectApplications = GetApplicationList();
 
     for (auto &app : effectApplications)
         HandleEffect(app, handleMask, false);
@@ -1583,11 +1580,13 @@ void AuraEffect::ApplySpellMod(Unit* target, bool apply)
     if (!m_spellmod || target->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    target->ToPlayer()->AddSpellMod(m_spellmod, apply);
+    if (!target->ToPlayer()->AddSpellMod(m_spellmod, apply))
+        return;
 
     // Auras with charges do not mod amount of passive auras
     if (GetBase()->IsUsingCharges())
         return;
+
     // reapply some passive spells after add/remove related spellmods
     // Warning: it is a dead loop if 2 auras each other amount-shouldn't happen
     switch (GetMiscValue())
@@ -1638,8 +1637,6 @@ void AuraEffect::ApplySpellMod(Unit* target, bool apply)
                 }
             }
         }
-        default:
-            break;
     }
 }
 
@@ -1661,11 +1658,8 @@ void AuraEffect::Update(uint32 diff, Unit* caster)
             m_periodicTimer += m_amplitude - diff;
             UpdatePeriodic(caster);
 
-            Unit::AuraApplicationList effectApplications;
-            GetApplicationList(effectApplications);
-
             // tick on targets of effects
-            for (auto &app : effectApplications)
+            for (auto &app : GetApplicationList())
                 PeriodicTick(app, caster);
 
             // TEMPORARY HACKS FOR PERIODIC HANDLERS OF DYNAMIC OBJECT AURAS
@@ -7792,7 +7786,7 @@ void AuraEffect::HandlePeriodicManaLeechAuraTick(Unit* target, Unit* caster) con
 
     // Special case: draining x% of mana (up to a maximum of 2*x% of the caster's maximum mana)
     // It's mana percent cost spells, m_amount is percent drain from target
-    if (m_base->GetSpellPowerData()->ManaCostPercentage)
+    if (m_base->GetSpellPowerData()->manaCostPercentage)
     {
         // max value
         int32 maxmana = CalculatePct(caster->GetMaxPower(powerType), drainAmount * 2.0f);

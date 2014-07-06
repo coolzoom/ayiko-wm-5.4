@@ -520,14 +520,16 @@ enum AuraScriptHookType
     AURA_SCRIPT_HOOK_EFFECT_CALC_AMOUNT,
     AURA_SCRIPT_HOOK_EFFECT_CALC_PERIODIC,
     AURA_SCRIPT_HOOK_EFFECT_CALC_SPELLMOD,
+    AURA_SCRIPT_HOOK_EFFECT_DROP_MOD_CHARGE,
     AURA_SCRIPT_HOOK_EFFECT_ABSORB,
     AURA_SCRIPT_HOOK_EFFECT_AFTER_ABSORB,
     AURA_SCRIPT_HOOK_EFFECT_MANASHIELD,
     AURA_SCRIPT_HOOK_EFFECT_AFTER_MANASHIELD,
     AURA_SCRIPT_HOOK_CHECK_AREA_TARGET,
     AURA_SCRIPT_HOOK_DISPEL,
-    AURA_SCRIPT_HOOK_INIT_EFFECTS,
     AURA_SCRIPT_HOOK_AFTER_DISPEL,
+    AURA_SCRIPT_HOOK_INIT_EFFECTS,
+    AURA_SCRIPT_HOOK_REFRESH_CHARGES,
     // Spell Proc Hooks
     AURA_SCRIPT_HOOK_CHECK_PROC,
     AURA_SCRIPT_HOOK_PREPARE_PROC,
@@ -550,6 +552,7 @@ class AuraScript : public _SpellScript
 public:
 
 #define AURASCRIPT_FUNCTION_TYPE_DEFINES(CLASSNAME) \
+    typedef void(CLASSNAME::*AuraRefreshChargesFnType)(uint8 &); \
     typedef void(CLASSNAME::*AuraInitEffectsFnType)(uint32 &); \
     typedef bool(CLASSNAME::*AuraCheckAreaTargetFnType)(Unit* target); \
     typedef void(CLASSNAME::*AuraDispelFnType)(DispelInfo* dispelInfo); \
@@ -561,6 +564,7 @@ public:
     typedef void(CLASSNAME::*AuraEffectCalcAmountFnType)(AuraEffect const *, int32 &, bool &); \
     typedef void(CLASSNAME::*AuraEffectCalcPeriodicFnType)(AuraEffect const *, bool &, int32 &); \
     typedef void(CLASSNAME::*AuraEffectCalcSpellModFnType)(AuraEffect const *, SpellModifier* &); \
+    typedef void(CLASSNAME::*AuraEffectDropModChargeFnType)(AuraEffect *); \
     typedef void(CLASSNAME::*AuraEffectAbsorbFnType)(AuraEffect *, DamageInfo &, uint32 &); \
     typedef bool(CLASSNAME::*AuraCheckProcFnType)(ProcEventInfo&); \
     typedef void(CLASSNAME::*AuraProcFnType)(ProcEventInfo&); \
@@ -568,6 +572,14 @@ public:
 
     AURASCRIPT_FUNCTION_TYPE_DEFINES(AuraScript)
 
+    class RefreshChargesHandler
+    {
+        public:
+            RefreshChargesHandler(AuraRefreshChargesFnType pHandlerScript);
+            void Call(AuraScript* auraScript, uint8 &charges);
+        private:
+            AuraRefreshChargesFnType pHandlerScript;
+    };
     class InitEffectsHandler
     {
         public:
@@ -655,6 +667,14 @@ public:
         private:
             AuraEffectCalcSpellModFnType pEffectHandlerScript;
     };
+    class EffectDropModChargeHandler : public EffectBase
+    {
+        public:
+            EffectDropModChargeHandler(AuraEffectDropModChargeFnType _pEffectHandlerScript, uint8 _effIndex, uint16 _effName);
+            void Call(AuraScript* auraScript, AuraEffect *aurEff);
+        private:
+            AuraEffectDropModChargeFnType pEffectHandlerScript;
+    };
     class EffectApplyHandler : public EffectBase
     {
         public:
@@ -706,7 +726,8 @@ public:
     };
 
     #define AURASCRIPT_FUNCTION_CAST_DEFINES(CLASSNAME) \
-    class InitEffectsFunction : public AuraScript::InitEffectsHandler { public: InitEffectsFunction(AuraInitEffectsFnType _pHandlerScript) : AuraScript::InitEffectsHandler((AuraScript::AuraInitEffectsFnType)_pHandlerScript) { } }; \
+    class RefreshChargesFunction : public AuraScript::RefreshChargesHandler { public: RefreshChargesFunction(AuraRefreshChargesFnType _pHandlerScript) : AuraScript::RefreshChargesHandler((AuraScript::AuraRefreshChargesFnType)_pHandlerScript) {} }; \
+    class InitEffectsFunction : public AuraScript::InitEffectsHandler { public: InitEffectsFunction(AuraInitEffectsFnType _pHandlerScript) : AuraScript::InitEffectsHandler((AuraScript::AuraInitEffectsFnType)_pHandlerScript) {} }; \
     class CheckAreaTargetFunction : public AuraScript::CheckAreaTargetHandler { public: CheckAreaTargetFunction(AuraCheckAreaTargetFnType _pHandlerScript) : AuraScript::CheckAreaTargetHandler((AuraScript::AuraCheckAreaTargetFnType)_pHandlerScript) {} }; \
     class AuraDispelFunction : public AuraScript::AuraDispelHandler { public: AuraDispelFunction(AuraDispelFnType _pHandlerScript) : AuraScript::AuraDispelHandler((AuraScript::AuraDispelFnType)_pHandlerScript) {} }; \
     class EffectPeriodicHandlerFunction : public AuraScript::EffectPeriodicHandler { public: EffectPeriodicHandlerFunction(AuraEffectPeriodicFnType _pEffectHandlerScript, uint8 _effIndex, uint16 _effName) : AuraScript::EffectPeriodicHandler((AuraScript::AuraEffectPeriodicFnType)_pEffectHandlerScript, _effIndex, _effName) {} }; \
@@ -716,6 +737,7 @@ public:
     class EffectCalcAmountHandlerFunction : public AuraScript::EffectCalcAmountHandler { public: EffectCalcAmountHandlerFunction(AuraEffectCalcAmountFnType _pEffectHandlerScript, uint8 _effIndex, uint16 _effName) : AuraScript::EffectCalcAmountHandler((AuraScript::AuraEffectCalcAmountFnType)_pEffectHandlerScript, _effIndex, _effName) {} }; \
     class EffectCalcPeriodicHandlerFunction : public AuraScript::EffectCalcPeriodicHandler { public: EffectCalcPeriodicHandlerFunction(AuraEffectCalcPeriodicFnType _pEffectHandlerScript, uint8 _effIndex, uint16 _effName) : AuraScript::EffectCalcPeriodicHandler((AuraScript::AuraEffectCalcPeriodicFnType)_pEffectHandlerScript, _effIndex, _effName) {} }; \
     class EffectCalcSpellModHandlerFunction : public AuraScript::EffectCalcSpellModHandler { public: EffectCalcSpellModHandlerFunction(AuraEffectCalcSpellModFnType _pEffectHandlerScript, uint8 _effIndex, uint16 _effName) : AuraScript::EffectCalcSpellModHandler((AuraScript::AuraEffectCalcSpellModFnType)_pEffectHandlerScript, _effIndex, _effName) {} }; \
+    class EffectDropModChargeFunction : public AuraScript::EffectDropModChargeHandler { public: EffectDropModChargeFunction(AuraEffectDropModChargeFnType _pEffectHandlerScript, uint8 _effIndex, uint16 _effName) : AuraScript::EffectDropModChargeHandler((AuraScript::AuraEffectDropModChargeFnType)_pEffectHandlerScript, _effIndex, _effName) {} }; \
     class EffectApplyHandlerFunction : public AuraScript::EffectApplyHandler { public: EffectApplyHandlerFunction(AuraEffectApplicationModeFnType _pEffectHandlerScript, uint8 _effIndex, uint16 _effName, AuraEffectHandleModes _mode) : AuraScript::EffectApplyHandler((AuraScript::AuraEffectApplicationModeFnType)_pEffectHandlerScript, _effIndex, _effName, _mode) {} }; \
     class EffectAbsorbFunction : public AuraScript::EffectAbsorbHandler { public: EffectAbsorbFunction(AuraEffectAbsorbFnType _pEffectHandlerScript, uint8 _effIndex) : AuraScript::EffectAbsorbHandler((AuraScript::AuraEffectAbsorbFnType)_pEffectHandlerScript, _effIndex) {} }; \
     class EffectManaShieldFunction : public AuraScript::EffectManaShieldHandler { public: EffectManaShieldFunction(AuraEffectAbsorbFnType _pEffectHandlerScript, uint8 _effIndex) : AuraScript::EffectManaShieldHandler((AuraScript::AuraEffectAbsorbFnType)_pEffectHandlerScript, _effIndex) {} }; \
@@ -752,15 +774,20 @@ private:
     ScriptStateStack m_scriptStates;
 
 public:
-    //
     // AuraScript interface
     // hooks to which you can attach your functions
-    //
+
+    // executed when aura charges are refreshed
+    // example: OnRefreshCharges += AuraRefreshChargesFn(class::function);
+    // where function is: void function(uint8 &charges);
+    HookList<RefreshChargesHandler> OnRefreshCharges;
+    #define AuraRefreshChargesFn(F) RefreshChargesFunction(&F)
+
     // executed before initializing aura effects, can be used to completely
     // prevent certain auras from being applied. May be useful for certain
     // spells that enable/disable functionality if glyph is present
     // example: OnInitEffects += AuraInitEffectsFn(class::function);
-    // where function is: void function(uint8 &effectMask);
+    // where function is: void function(uint32 &effectMask);
     HookList<InitEffectsHandler> OnInitEffects;
     #define AuraInitEffectsFn(F) InitEffectsFunction(&F)
 
@@ -843,6 +870,12 @@ public:
     // where function is: void function (AuraEffect const *aurEff, SpellModifier*& spellMod);
     HookList<EffectCalcSpellModHandler> DoEffectCalcSpellMod;
     #define AuraEffectCalcSpellModFn(F, I, N) EffectCalcSpellModHandlerFunction(&F, I, N)
+
+    // executed when aura effect spellmod charge is dropped
+    // example: OnEffectDropModCharge += AuraEffectDropModChargeFn(class::function, EffectIndexSpecifier, EffectAuraNameSpecifier);
+    // where function is: void function(AuraEffect *aurEff);
+    HookList<EffectDropModChargeHandler> OnEffectDropModCharge;
+    #define AuraEffectDropModChargeFn(F, I, N) EffectDropModChargeFunction(&F, I, N)
 
     // executed when absorb aura effect is going to reduce damage
     // example: OnEffectAbsorb += AuraEffectAbsorbFn(class::function, EffectIndexSpecifier);

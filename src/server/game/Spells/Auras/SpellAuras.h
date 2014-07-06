@@ -216,7 +216,7 @@ class Aura
 
         // Helpers for targets
         ApplicationMap const & GetApplicationMap() {return m_applications;}
-        void GetApplicationList(std::list<AuraApplication*> & applicationList) const;
+        Unit::AuraApplicationList GetApplicationList() const;
         const AuraApplication * GetApplicationOfTarget (uint64 guid) const { ApplicationMap::const_iterator itr = m_applications.find(guid); if (itr != m_applications.end()) return itr->second; return NULL; }
         AuraApplication * GetApplicationOfTarget (uint64 guid) { ApplicationMap::iterator itr = m_applications.find(guid); if (itr != m_applications.end()) return itr->second; return NULL; }
         bool IsAppliedOnTarget(uint64 guid) const { return m_applications.find(guid) != m_applications.end(); }
@@ -243,6 +243,7 @@ class Aura
 
         // AuraScript
         void LoadScripts();
+        void CallScriptRefreshChargesHandlers(uint8 &charges);
         void CallScriptInitEffectsHandlers(uint32 &effectMask);
         bool CallScriptCheckAreaTargetHandlers(Unit* target);
         void CallScriptDispel(DispelInfo* dispelInfo);
@@ -257,7 +258,8 @@ class Aura
         void CallScriptEffectUpdatePeriodicHandlers(AuraEffect *aurEff);
         void CallScriptEffectCalcAmountHandlers(AuraEffect const *aurEff, int32 & amount, bool & canBeRecalculated);
         void CallScriptEffectCalcPeriodicHandlers(AuraEffect const *aurEff, bool & isPeriodic, int32 & amplitude);
-        void CallScriptEffectCalcSpellModHandlers(AuraEffect const *aurEff, SpellModifier* & spellMod);
+        void CallScriptEffectCalcSpellModHandlers(AuraEffect const *aurEff, SpellModifier *&spellMod);
+        void CallScriptEffectDropModChargeHandlers(AuraEffect *aurEff, AuraApplication const *aurApp);
         void CallScriptEffectAbsorbHandlers(AuraEffect *aurEff, AuraApplication const* aurApp, DamageInfo & dmgInfo, uint32 & absorbAmount, bool & defaultPrevented);
         void CallScriptEffectAfterAbsorbHandlers(AuraEffect *aurEff, AuraApplication const* aurApp, DamageInfo & dmgInfo, uint32 & absorbAmount);
         void CallScriptEffectManaShieldHandlers(AuraEffect *aurEff, AuraApplication const* aurApp, DamageInfo & dmgInfo, uint32 & absorbAmount, bool & defaultPrevented);

@@ -89,8 +89,6 @@ enum PriestSpells
     PRIEST_HOLY_WORD_CHASTISE                       = 88625,
     PRIEST_HOLY_WORD_SANCTUARY_AREA                 = 88685,
     PRIEST_HOLY_WORD_SANCTUARY_HEAL                 = 88686,
-    PRIEST_RAPID_RENEWAL_AURA                       = 95649,
-    PRIEST_SPELL_EMPOWERED_RENEW                    = 63544,
     PRIEST_SPELL_DIVINE_INSIGHT_TALENT              = 109175,
     PRIEST_SPELL_DIVINE_INSIGHT_DISCIPLINE          = 123266,
     PRIEST_SPELL_DIVINE_INSIGHT_HOLY                = 123267,
@@ -127,6 +125,8 @@ enum PriestSpells
     PRIEST_SPELL_POWER_WORD_FORTITUDE               = 21562,
     SPELL_PRIEST_DIVINE_AEGIS                       = 47753,
     SPELL_PRIEST_SHIELD_DISCIPLINE                  = 77484,
+    SPELL_PRIEST_RAPID_RENEWAL                      = 95649,
+    SPELL_PRIEST_RAPID_RENEWAL_HEAL                 = 63544,
 };
 
 // Power Word : Fortitude - 21562
@@ -2446,45 +2446,6 @@ class spell_pri_vampiric_touch : public SpellScriptLoader
         }
 };
 
-// Called by Renew - 139
-// Rapid Renew - 95649
-class spell_pri_renew : public SpellScriptLoader
-{
-    public:
-        spell_pri_renew() : SpellScriptLoader("spell_pri_renew") { }
-
-        class spell_pri_renew_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_pri_renew_AuraScript);
-
-            void HandleApplyEffect(AuraEffect const *aurEff, AuraEffectHandleModes /*mode*/)
-            {
-                if (Unit* caster = GetCaster())
-                {
-                    // Empowered Renew
-                    if (Aura *empoweredRenew = caster->GetAura(PRIEST_RAPID_RENEWAL_AURA))
-                    {
-                        uint32 heal = caster->SpellHealingBonusDone(GetTarget(), GetSpellInfo(), GetEffect(EFFECT_0)->GetAmount(), DOT);
-                        heal = GetTarget()->SpellHealingBonusTaken(caster, GetSpellInfo(), heal, DOT);
-
-                        int32 basepoints0 = empoweredRenew->GetEffect(EFFECT_2)->GetAmount() * GetEffect(EFFECT_0)->GetTotalTicks() * int32(heal) / 100;
-                        caster->CastCustomSpell(GetTarget(), PRIEST_SPELL_EMPOWERED_RENEW, &basepoints0, NULL, NULL, true, NULL, aurEff);
-                    }
-                }
-            }
-
-            void Register()
-            {
-                OnEffectApply += AuraEffectApplyFn(spell_pri_renew_AuraScript::HandleApplyEffect, EFFECT_0, SPELL_AURA_PERIODIC_HEAL, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_pri_renew_AuraScript();
-        }
-};
-
 // Called by Shadow Form - 15473
 // Glyph of Shadow - 107906
 class spell_pri_shadowform : public SpellScriptLoader
@@ -2663,6 +2624,55 @@ public:
     AuraScript* GetAuraScript() const
     {
         return new spell_pri_divine_aegis_AuraScript();
+    }
+};
+
+// 139 - Renew
+class spell_pri_renew : public SpellScriptLoader
+{
+public:
+    spell_pri_renew() : SpellScriptLoader("spell_priest_renew") { }
+
+    class spell_pri_renew_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_pri_renew_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_RAPID_RENEWAL_HEAL))
+                return false;
+            return true;
+        }
+
+        bool Load() override
+        {
+            return GetCaster() && GetCaster()->GetTypeId() == TYPEID_PLAYER;
+        }
+
+        void HandleApplyEffect(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                // Rapid Renewal
+                if (AuraEffect const* empoweredRenewAurEff = caster->GetAuraEffect(SPELL_PRIEST_RAPID_RENEWAL, EFFECT_2))
+                {
+                    uint32 heal = caster->SpellHealingBonusDone(GetTarget(), GetSpellInfo(), aurEff->GetAmount(), DOT);
+                    heal = GetTarget()->SpellHealingBonusTaken(caster, GetSpellInfo(), heal, DOT);
+                    int32 basepoints0 = CalculatePct(int32(heal) * aurEff->GetTotalTicks(), empoweredRenewAurEff->GetAmount());
+                    caster->CastCustomSpell(GetTarget(), SPELL_PRIEST_RAPID_RENEWAL_HEAL, &basepoints0, NULL, NULL, true, NULL, aurEff);
+                }
+            }
+        }
+
+        void Register() override
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_pri_renew_AuraScript::HandleApplyEffect, EFFECT_0, SPELL_AURA_PERIODIC_HEAL, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_pri_renew_AuraScript();
     }
 };
 

@@ -6710,7 +6710,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                 // Train of Thought
                 case 92297:
                 {
-                    if (GetTypeId() != TYPEID_PLAYER)
+                    if (GetTypeId() != TYPEID_PLAYER || effIndex != EFFECT_0)
                         return false;
 
                     if (procSpell->Id == 585)

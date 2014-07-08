@@ -6,6 +6,8 @@ DELETE FROM `creature_template_addon` WHERE `entry` = 28311;
 INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES
 (28311, 33719);
 UPDATE `creature_template` SET `npcflag` = 80 WHERE `entry` = 28245;
+UPDATE `creature_template` SET `exp` = 0, `faction_A` = 7, `faction_H` = 7, `ScriptName` = 'npc_training_dummy' WHERE `entry` = 70057;
+UPDATE `creature` SET `id` = 70057 WHERE `id` = 67232;
 UPDATE `creature_template` SET `minlevel` = 20, `maxlevel` = 20, `faction_A` = 7, `faction_H` = 7 WHERE `entry` IN (9659, 10156);
 UPDATE `creature_template` SET `minlevel` = 60, `maxlevel` = 60, `faction_A` = 7, `faction_H` = 7, `mindmg` = 200, `maxdmg` = 200, `attackpower` = 0, `dmg_multiplier` = 1 WHERE `entry` = 16078;
 UPDATE `creature_template` SET `minlevel` = 80, `maxlevel` = 80, `exp` = 2, `faction_A` = 14, `faction_H` = 14, `mindmg` = 245, `maxdmg` = 473, `attackpower` = 754, `dmg_multiplier` = 2, `ScriptName` = 'npc_training_dummy' WHERE `entry` = 30888;

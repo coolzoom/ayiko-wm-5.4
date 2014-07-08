@@ -294,23 +294,9 @@ class spell_ex_66244 : public SpellScriptLoader
                 amplitude = 2 * IN_MILLISECONDS;
             }
 
-            void HandleEffectCalcSpellMod(AuraEffect const * /*aurEff*/, SpellModifier*& spellMod)
+            void HandleEffectCalcSpellMod(AuraEffect const * /*aurEff*/)
             {
                 TC_LOG_INFO("misc", "SpellMod data of Aura Effect is being calculated now!");
-                // we don't want spellmod for example
-                if (spellMod)
-                {
-                    delete spellMod;
-                    spellMod = NULL;
-                }
-                // alternative: we want spellmod for spell which doesn't have it
-                if (!spellMod)
-                {
-                    spellMod = new SpellModifier(GetAura());
-                    spellMod->op = SPELLMOD_DOT;
-                    spellMod->type = SPELLMOD_PCT;
-                    spellMod->mask[1] = 0x00002000;
-                }
             }
 
             // function registering
@@ -475,7 +461,7 @@ class spell_ex : public SpellScriptLoader
             //void spell_ex_SpellScript::Function(AuraEffect* aurEff) //OnEffectUpdatePeriodic += AuraEffectUpdatePeriodicFn(spell_ex_SpellScript::Function, EFFECT_ANY, SPELL_AURA_ANY);
             //void spell_ex_SpellScript::Function(AuraEffect const* aurEff, int32& amount, bool& canBeRecalculated) //DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_ex_SpellScript::Function, EFFECT_ANY, SPELL_AURA_ANY);
             //void spell_ex_SpellScript::Function(AuraEffect const* aurEff, bool& isPeriodic, int32& amplitude) //OnEffectCalcPeriodic += AuraEffectCalcPeriodicFn(spell_ex_SpellScript::Function, EFFECT_ANY, SPELL_AURA_ANY);
-            //void spell_ex_SpellScript::Function(AuraEffect const* aurEff, SpellModifier*& spellMod) //OnEffectCalcSpellMod += AuraEffectCalcSpellModFn(spell_ex_SpellScript::Function, EFFECT_ANY, SPELL_AURA_ANY);
+            //void spell_ex_SpellScript::Function(AuraEffect const* aurEff) //OnEffectCalcSpellMod += AuraEffectCalcSpellModFn(spell_ex_SpellScript::Function, EFFECT_ANY, SPELL_AURA_ANY);
             void Register()
             {
             }

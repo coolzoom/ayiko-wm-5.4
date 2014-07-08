@@ -616,14 +616,6 @@ Spell::~Spell()
     if (m_caster && m_caster->GetTypeId() == TYPEID_PLAYER)
         ASSERT(m_caster->ToPlayer()->m_spellModTakingSpell != this);
 
-    for (auto &mod : m_appliedMods)
-    {
-        if (!mod->ownerEffect)
-            delete mod;
-        else
-            mod->applied = false;
-    }
-
     CheckEffectExecuteData();
 }
 
@@ -2109,6 +2101,9 @@ void Spell::SearchChainTargets(std::list<WorldObject*>& targets, uint32 chainTar
             break;
     }
 
+    if (auto const modOwner = m_caster->GetSpellModOwner())
+        modOwner->ApplySpellMod(GetSpellInfo()->Id, SPELLMOD_JUMP_DISTANCE, jumpRadius, this);
+
     // chain lightning/heal spells and similar - allow to jump at larger distance and go out of los
     bool isBouncingFar = (m_spellInfo->AttributesEx4 & SPELL_ATTR4_AREA_TARGET_CHAIN
         || m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE
@@ -3513,11 +3508,6 @@ void Spell::cancel()
             if (m_caster->GetTypeId() == TYPEID_PLAYER)
             {
                 m_caster->ToPlayer()->RemoveSpellMods(*this);
-
-                // prevents possible memory leak in AuraEffect destructor
-                for (auto &mod : m_appliedMods)
-                    mod->applied = false;
-
                 m_appliedMods.clear();
             }
             break;

@@ -31,7 +31,6 @@ class SpellScript;
 class Spell;
 class Aura;
 class AuraEffect;
-struct SpellModifier;
 class Creature;
 class GameObject;
 class DynamicObject;
@@ -563,7 +562,7 @@ public:
     typedef void(CLASSNAME::*AuraEffectUpdatePeriodicFnType)(AuraEffect *); \
     typedef void(CLASSNAME::*AuraEffectCalcAmountFnType)(AuraEffect const *, int32 &, bool &); \
     typedef void(CLASSNAME::*AuraEffectCalcPeriodicFnType)(AuraEffect const *, bool &, int32 &); \
-    typedef void(CLASSNAME::*AuraEffectCalcSpellModFnType)(AuraEffect const *, SpellModifier* &); \
+    typedef void(CLASSNAME::*AuraEffectCalcSpellModFnType)(AuraEffect const *); \
     typedef void(CLASSNAME::*AuraEffectDropModChargeFnType)(AuraEffect *); \
     typedef void(CLASSNAME::*AuraEffectAbsorbFnType)(AuraEffect *, DamageInfo &, uint32 &); \
     typedef bool(CLASSNAME::*AuraCheckProcFnType)(ProcEventInfo&); \
@@ -663,7 +662,7 @@ public:
     {
         public:
             EffectCalcSpellModHandler(AuraEffectCalcSpellModFnType _pEffectHandlerScript, uint8 _effIndex, uint16 _effName);
-            void Call(AuraScript* auraScript, AuraEffect const *aurEff, SpellModifier* & spellMod);
+            void Call(AuraScript* auraScript, AuraEffect const *aurEff);
         private:
             AuraEffectCalcSpellModFnType pEffectHandlerScript;
     };
@@ -867,7 +866,7 @@ public:
 
     // executed when aura effect calculates spellmod
     // example: DoEffectCalcSpellMod += AuraEffectCalcSpellModFn(class::function, EffectIndexSpecifier, EffectAuraNameSpecifier);
-    // where function is: void function (AuraEffect const *aurEff, SpellModifier*& spellMod);
+    // where function is: void function (AuraEffect const *aurEff);
     HookList<EffectCalcSpellModHandler> DoEffectCalcSpellMod;
     #define AuraEffectCalcSpellModFn(F, I, N) EffectCalcSpellModHandlerFunction(&F, I, N)
 

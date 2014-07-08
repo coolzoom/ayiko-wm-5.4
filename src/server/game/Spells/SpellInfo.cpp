@@ -1401,27 +1401,6 @@ bool SpellInfo::IsAffectedBySpellMods() const
     return !(AttributesEx3 & SPELL_ATTR3_NO_DONE_BONUS);
 }
 
-bool SpellInfo::IsAffectedBySpellMod(SpellModifier* mod) const
-{
-    if (!IsAffectedBySpellMods())
-        return false;
-
-    auto const affectSpell = sSpellMgr->GetSpellInfo(mod->ownerEffect->GetId());
-    // False if affect_spell == NULL or spellFamily not equal
-    if (!affectSpell || affectSpell->SpellFamilyName != SpellFamilyName)
-        return false;
-
-    // true
-    if (mod->mask & SpellFamilyFlags)
-        return true;
-
-    // Elemental Blast is affected by Ancestral Swiftness and Maelstrom Weapon
-    if (Id == 117014 && (affectSpell->Id == 16188 || affectSpell->Id == 53817))
-        return true;
-
-    return false;
-}
-
 bool SpellInfo::CanPierceImmuneAura(SpellInfo const* aura) const
 {
     // these spells pierce all avalible spells (Resurrection Sickness for example)

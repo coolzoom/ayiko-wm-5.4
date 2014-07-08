@@ -1124,7 +1124,7 @@ bool Aura::ModStackAmount(int32 num, AuraRemoveMode removeMode)
         // FIXME: not a best way to synchronize charges, but works
         for (auto &eff : m_effects)
             if (eff && (eff->GetAuraType() == SPELL_AURA_ADD_FLAT_MODIFIER || eff->GetAuraType() == SPELL_AURA_ADD_PCT_MODIFIER))
-                if (auto const mod = eff->GetSpellModifier())
+                if (auto &mod = eff->GetSpellModifier())
                     mod->charges = GetCharges();
     }
     SetNeedClientUpdateForTargets();
@@ -2728,14 +2728,14 @@ void Aura::CallScriptEffectCalcPeriodicHandlers(AuraEffect const *aurEff, bool &
     }
 }
 
-void Aura::CallScriptEffectCalcSpellModHandlers(AuraEffect const *aurEff, SpellModifier *&spellMod)
+void Aura::CallScriptEffectCalcSpellModHandlers(AuraEffect const *aurEff)
 {
     for (auto &script : m_loadedScripts)
     {
         auto const g = Trinity::makeScriptCallGuard(script, AURA_SCRIPT_HOOK_EFFECT_CALC_SPELLMOD);
         for (auto &hook : script->DoEffectCalcSpellMod)
             if (hook.IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
-                hook.Call(script, aurEff, spellMod);
+                hook.Call(script, aurEff);
     }
 }
 

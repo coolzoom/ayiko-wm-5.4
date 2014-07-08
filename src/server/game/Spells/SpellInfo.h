@@ -34,7 +34,6 @@ class SpellInfo;
 struct SpellChainNode;
 struct SpellTargetPosition;
 struct SpellDurationEntry;
-struct SpellModifier;
 struct SpellRangeEntry;
 struct SpellRadiusEntry;
 struct SpellEntry;
@@ -462,7 +461,6 @@ public:
     bool IsNeedAdditionalLosChecks() const;
 
     bool IsAffectedBySpellMods() const;
-    bool IsAffectedBySpellMod(SpellModifier* mod) const;
 
     bool CanPierceImmuneAura(SpellInfo const* aura) const;
     bool CanDispelAura(SpellInfo const* aura) const;

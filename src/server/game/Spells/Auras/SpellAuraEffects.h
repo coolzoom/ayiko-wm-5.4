@@ -20,6 +20,7 @@
 #define TRINITY_SPELLAURAEFFECTS_H
 
 #include "SpellAuras.h"
+#include "SpellModifier.hpp"
 
 class AuraEffect;
 
@@ -43,7 +44,7 @@ class AuraEffect
 
         Unit::AuraApplicationList GetApplicationList() const;
 
-        SpellModifier* GetSpellModifier() const { return m_spellmod; }
+        SpellModifier::Ptr const & GetSpellModifier() const { return m_spellmod; }
 
         SpellInfo const* GetSpellInfo() const { return m_spellInfo; }
         uint32 GetId() const { return m_spellInfo->Id; }
@@ -148,7 +149,7 @@ class AuraEffect
 
         int32 m_amount;
 
-        SpellModifier* m_spellmod;
+        SpellModifier::Ptr m_spellmod;
 
         int32 m_periodicTimer;
         int32 m_amplitude;

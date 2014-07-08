@@ -43,6 +43,7 @@
 #include "SpellChargesTracker.hpp"
 #include "PlayerTaxi.hpp"
 #include "Flag128.hpp"
+#include "SpellModifier.hpp"
 
 // for template
 #include "SpellMgr.h"
@@ -74,13 +75,6 @@ typedef std::deque<Mail*> PlayerMails;
 #define PLAYER_MAX_SKILLS           128
 #define DEFAULT_MAX_PRIMARY_TRADE_SKILL 2
 #define PLAYER_EXPLORED_ZONES_SIZE  200
-
-// Note: SPELLMOD_* values is aura types in fact
-enum SpellModType
-{
-    SPELLMOD_FLAT         = 107,                            // SPELL_AURA_ADD_FLAT_MODIFIER
-    SPELLMOD_PCT          = 108                             // SPELL_AURA_ADD_PCT_MODIFIER
-};
 
 // 2^n values, Player::m_isunderwater is a bitmask. These are Trinity internal values, they are never send to any client
 enum PlayerUnderwaterState
@@ -123,28 +117,6 @@ struct PlayerTalent
 {
     PlayerSpellState state;
     uint8 spec;
-};
-
-// Spell modifier (used for modify other spells)
-struct SpellModifier
-{
-    SpellModifier(AuraEffect *effect)
-        : ownerEffect(effect)
-        , op(SPELLMOD_DAMAGE)
-        , type(SPELLMOD_FLAT)
-        , mask()
-        , applied()
-        , value(0)
-        , charges(0)
-    { }
-
-    AuraEffect *ownerEffect;
-    SpellModOp op;
-    SpellModType type;
-    Trinity::Flag128 mask;
-    bool applied;
-    int32 value;
-    int16 charges;
 };
 
 enum PlayerCurrencyState
@@ -1830,8 +1802,8 @@ class Player final : public Unit, public GridObject<Player>
 
         SpellCooldowns const& GetSpellCooldownMap() const { return m_spellCooldowns; }
 
-        bool AddSpellMod(SpellModifier* mod, bool apply);
-        bool IsAffectedBySpellmod(SpellInfo const* spellInfo, SpellModifier* mod, Spell* spell = NULL);
+        bool AddSpellMod(SpellModifier::Ptr const &mod, bool apply);
+        bool IsAffectedBySpellmod(SpellInfo const* spellInfo, SpellModifier::Ptr const &mod, Spell* spell = NULL);
 
         template <typename T>
         T ApplySpellMod(uint32 spellId, SpellModOp op, T &basevalue, Spell* spell = NULL, bool takeMods = true);
@@ -1839,7 +1811,7 @@ class Player final : public Unit, public GridObject<Player>
         void RemoveSpellMods(Spell &spell);
         void RestoreSpellMods(Spell &spell, uint32 ownerAuraId = 0, Aura *aura = NULL);
         void RestoreAllSpellMods(uint32 ownerAuraId = 0, Aura *aura = NULL);
-        void DropModCharge(SpellModifier* mod, Spell* spell);
+        void DropModCharge(SpellModifier::Ptr const &mod, Spell* spell);
         void SetSpellModTakingSpell(Spell* spell, bool apply);
 
         bool HasSpellCooldown(uint32 spellId) const;
@@ -2973,7 +2945,7 @@ class Player final : public Unit, public GridObject<Player>
         uint32 m_baseHealthRegen;
         int32 m_spellPenetrationItemMod;
 
-        std::unordered_set<SpellModifier*> m_spellMods[MAX_SPELLMOD];
+        std::unordered_set<SpellModifier::Ptr> m_spellMods[MAX_SPELLMOD];
 
         EnchantDurationList m_enchantDuration;
         ItemDurationList m_itemDuration;

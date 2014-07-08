@@ -23,6 +23,7 @@
 #include "SharedDefines.h"
 #include "ObjectMgr.h"
 #include "SpellInfo.h"
+#include "SpellModifier.hpp"
 
 class Unit;
 class Player;
@@ -426,7 +427,7 @@ class Spell
         int32 CalculateMonkMeleeAttacks(Unit* caster, float coeff, int32 APmultiplier);
         void EffectResurrectWithAura(SpellEffIndex effIndex);
 
-        typedef std::set<SpellModifier*> UsedSpellMods;
+        typedef std::set<SpellModifier::Ptr> UsedSpellMods;
 
         Spell(Unit* caster, SpellInfo const* info, TriggerCastFlags triggerFlags, uint64 originalCasterGUID = 0, bool skipCheck = false, bool ignoreTriggeredAttribute = false);
         ~Spell();

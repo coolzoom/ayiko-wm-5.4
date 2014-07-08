@@ -22750,7 +22750,7 @@ void Player::SendRemoveControlBar()
     GetSession()->SendPacket(&data);
 }
 
-bool Player::IsAffectedBySpellmod(SpellInfo const* spellInfo, SpellModifier* mod, Spell* spell)
+bool Player::IsAffectedBySpellmod(SpellInfo const* spellInfo, SpellModifier::Ptr const &mod, Spell* spell)
 {
     if (!mod || !spellInfo)
         return false;
@@ -22763,10 +22763,10 @@ bool Player::IsAffectedBySpellmod(SpellInfo const* spellInfo, SpellModifier* mod
     if (mod->op == SPELLMOD_DURATION && spellInfo->GetDuration() == -1)
         return false;
 
-    return spellInfo->IsAffectedBySpellMod(mod);
+    return mod->isAffectingSpell(spellInfo);
 }
 
-bool Player::AddSpellMod(SpellModifier* mod, bool apply)
+bool Player::AddSpellMod(SpellModifier::Ptr const &mod, bool apply)
 {
     auto &spellModSet = m_spellMods[mod->op];
 
@@ -22840,11 +22840,10 @@ void Player::RestoreSpellMods(Spell &spell, uint32 ownerAuraId, Aura *aura)
 {
     for (auto i = spell.m_appliedMods.begin(); i != spell.m_appliedMods.end();)
     {
-        auto const mod = *i;
+        auto const &mod = *i;
 
         if (!mod->ownerEffect)
         {
-            delete mod;
             i = spell.m_appliedMods.erase(i);
             continue;
         }
@@ -22859,10 +22858,6 @@ void Player::RestoreSpellMods(Spell &spell, uint32 ownerAuraId, Aura *aura)
             continue;
         }
 
-        // remove from list
-        i = spell.m_appliedMods.erase(i);
-        mod->applied = false;
-
         // add mod charges back to mod
         if (mod->charges == -1)
             mod->charges = 1;
@@ -22872,6 +22867,9 @@ void Player::RestoreSpellMods(Spell &spell, uint32 ownerAuraId, Aura *aura)
         // Do not set more spellmods than avalible
         if (base->GetCharges() < mod->charges)
             mod->charges = base->GetCharges();
+
+        // remove from list
+        i = spell.m_appliedMods.erase(i);
     }
 }
 
@@ -22888,11 +22886,10 @@ void Player::RemoveSpellMods(Spell &spell)
 
     for (auto i = spell.m_appliedMods.begin(); i != spell.m_appliedMods.end();)
     {
-        auto const mod = *i;
+        auto const &mod = *i;
 
         if (!mod->ownerEffect)
         {
-            delete mod;
             i = spell.m_appliedMods.erase(i);
             continue;
         }
@@ -22906,21 +22903,20 @@ void Player::RemoveSpellMods(Spell &spell)
             continue;
         }
 
-        // remove from list
-        i = spell.m_appliedMods.erase(i);
-        mod->applied = false;
-
         auto const app = base->GetApplicationOfTarget(GetGUID());
         base->CallScriptEffectDropModChargeHandlers(mod->ownerEffect, app);
 
         aurasToDropCharge.insert(base);
+
+        // remove from list
+        i = spell.m_appliedMods.erase(i);
     }
 
     for (auto &aura : aurasToDropCharge)
         aura->DropCharge(AURA_REMOVE_BY_EXPIRE);
 }
 
-void Player::DropModCharge(SpellModifier* mod, Spell* spell)
+void Player::DropModCharge(SpellModifier::Ptr const &mod, Spell* spell)
 {
 #if 0
     // don't handle spells with proc_event entry defined
@@ -22934,7 +22930,6 @@ void Player::DropModCharge(SpellModifier* mod, Spell* spell)
             mod->charges = -1;
 
         spell->m_appliedMods.insert(mod);
-        mod->applied = true;
     }
 }
 

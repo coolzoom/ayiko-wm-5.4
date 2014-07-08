@@ -18715,12 +18715,12 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
          sObjectMgr->IsReservedName(m_name)))
     {
         PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_ADD_AT_LOGIN_FLAG);
-        
+
         stmt->setUInt16(0, uint16(AT_LOGIN_RENAME));
         stmt->setUInt32(1, guid);
-        
+
         CharacterDatabase.Execute(stmt);
-        
+
         return false;
     }
 
@@ -22756,7 +22756,7 @@ bool Player::IsAffectedBySpellmod(SpellInfo const* spellInfo, SpellModifier* mod
         return false;
 
     // Mod out of charges
-    if (spell && mod->charges == -1 && spell->m_appliedMods.find(mod->ownerEffect) == spell->m_appliedMods.end())
+    if (spell && mod->charges == -1 && spell->m_appliedMods.find(mod) == spell->m_appliedMods.end())
         return false;
 
     // +duration to infinite duration spells making them limited
@@ -22836,50 +22836,42 @@ bool Player::AddSpellMod(SpellModifier* mod, bool apply)
 }
 
 // Restore spellmods in case of failed cast
-void Player::RestoreSpellMods(Spell* spell, uint32 ownerAuraId, Aura *aura)
+void Player::RestoreSpellMods(Spell &spell, uint32 ownerAuraId, Aura *aura)
 {
-    if (!spell || spell->m_appliedMods.empty())
-        return;
-
-    for (auto &spellModSet : m_spellMods)
+    for (auto i = spell.m_appliedMods.begin(); i != spell.m_appliedMods.end();)
     {
-        for (auto &mod : spellModSet)
+        auto const mod = *i;
+
+        if (!mod->ownerEffect)
         {
-            auto const base = mod->ownerEffect->GetBase();
-
-            // spellmods without aura set cannot be charged
-            if (!base->IsUsingCharges())
-                continue;
-
-            // Restore only specific owner aura mods
-            if (ownerAuraId && (ownerAuraId != base->GetId()))
-                continue;
-
-            if (aura && base != aura)
-                continue;
-
-            // check if the current mod is one of the spellmods applied by the mod aura
-            auto itr = spell->m_appliedMods.find(mod->ownerEffect);
-            if (itr == spell->m_appliedMods.end())
-                continue;
-
-            // remove from list
-            spell->m_appliedMods.erase(itr);
-
-            // add mod charges back to mod
-            if (mod->charges == -1)
-                mod->charges = 1;
-            else
-                ++mod->charges;
-
-            // Do not set more spellmods than avalible
-            if (base->GetCharges() < mod->charges)
-                mod->charges = base->GetCharges();
-
-            // Skip this check for now - aura charges may change due to various reason
-            // TODO: track these changes correctly
-            //ASSERT(base->GetCharges() <= mod->charges);
+            delete mod;
+            i = spell.m_appliedMods.erase(i);
+            continue;
         }
+
+        auto const base = mod->ownerEffect->GetBase();
+
+        if (!base->IsUsingCharges()
+                || (ownerAuraId && (ownerAuraId != base->GetId()))
+                || (aura && base != aura))
+        {
+            ++i;
+            continue;
+        }
+
+        // remove from list
+        i = spell.m_appliedMods.erase(i);
+        mod->applied = false;
+
+        // add mod charges back to mod
+        if (mod->charges == -1)
+            mod->charges = 1;
+        else
+            ++mod->charges;
+
+        // Do not set more spellmods than avalible
+        if (base->GetCharges() < mod->charges)
+            mod->charges = base->GetCharges();
     }
 }
 
@@ -22887,39 +22879,41 @@ void Player::RestoreAllSpellMods(uint32 ownerAuraId, Aura *aura)
 {
     for (uint32 i = 0; i < CURRENT_MAX_SPELL; ++i)
         if (m_currentSpells[i])
-            RestoreSpellMods(m_currentSpells[i], ownerAuraId, aura);
+            RestoreSpellMods(*m_currentSpells[i], ownerAuraId, aura);
 }
 
-void Player::RemoveSpellMods(Spell* spell)
+void Player::RemoveSpellMods(Spell &spell)
 {
-    if (!spell || spell->m_appliedMods.empty())
-        return;
-
     std::set<Aura*> aurasToDropCharge;
 
-    for (auto &spellModSet : m_spellMods)
+    for (auto i = spell.m_appliedMods.begin(); i != spell.m_appliedMods.end();)
     {
-        for (auto &mod : spellModSet)
+        auto const mod = *i;
+
+        if (!mod->ownerEffect)
         {
-            auto const base = mod->ownerEffect->GetBase();
-
-            // spellmods without aura set cannot be charged
-            if (!base->IsUsingCharges())
-                continue;
-
-            // check if mod affected this spell
-            auto itr = spell->m_appliedMods.find(mod->ownerEffect);
-            if (itr == spell->m_appliedMods.end())
-                continue;
-
-            // remove from list
-            spell->m_appliedMods.erase(itr);
-
-            auto const app = base->GetApplicationOfTarget(GetGUID());
-            base->CallScriptEffectDropModChargeHandlers(mod->ownerEffect, app);
-
-            aurasToDropCharge.insert(base);
+            delete mod;
+            i = spell.m_appliedMods.erase(i);
+            continue;
         }
+
+        auto const base = mod->ownerEffect->GetBase();
+
+        // spellmods without aura set cannot be charged
+        if (!base->IsUsingCharges())
+        {
+            ++i;
+            continue;
+        }
+
+        // remove from list
+        i = spell.m_appliedMods.erase(i);
+        mod->applied = false;
+
+        auto const app = base->GetApplicationOfTarget(GetGUID());
+        base->CallScriptEffectDropModChargeHandlers(mod->ownerEffect, app);
+
+        aurasToDropCharge.insert(base);
     }
 
     for (auto &aura : aurasToDropCharge)
@@ -22939,7 +22933,8 @@ void Player::DropModCharge(SpellModifier* mod, Spell* spell)
         if (--mod->charges == 0)
             mod->charges = -1;
 
-        spell->m_appliedMods.insert(mod->ownerEffect);
+        spell->m_appliedMods.insert(mod);
+        mod->applied = true;
     }
 }
 

@@ -133,6 +133,7 @@ struct SpellModifier
         , op(SPELLMOD_DAMAGE)
         , type(SPELLMOD_FLAT)
         , mask()
+        , applied()
         , value(0)
         , charges(0)
     { }
@@ -141,6 +142,7 @@ struct SpellModifier
     SpellModOp op;
     SpellModType type;
     Trinity::Flag128 mask;
+    bool applied;
     int32 value;
     int16 charges;
 };
@@ -1834,8 +1836,8 @@ class Player final : public Unit, public GridObject<Player>
         template <typename T>
         T ApplySpellMod(uint32 spellId, SpellModOp op, T &basevalue, Spell* spell = NULL, bool takeMods = true);
 
-        void RemoveSpellMods(Spell* spell);
-        void RestoreSpellMods(Spell* spell, uint32 ownerAuraId = 0, Aura *aura = NULL);
+        void RemoveSpellMods(Spell &spell);
+        void RestoreSpellMods(Spell &spell, uint32 ownerAuraId = 0, Aura *aura = NULL);
         void RestoreAllSpellMods(uint32 ownerAuraId = 0, Aura *aura = NULL);
         void DropModCharge(SpellModifier* mod, Spell* spell);
         void SetSpellModTakingSpell(Spell* spell, bool apply);

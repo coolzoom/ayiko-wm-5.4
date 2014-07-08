@@ -600,12 +600,10 @@ Spell::Spell(Unit* caster, SpellInfo const* info, TriggerCastFlags triggerFlags,
 Spell::~Spell()
 {
     // unload scripts
-    while (!m_loadedScripts.empty())
+    for (auto &script : m_loadedScripts)
     {
-        std::list<SpellScript*>::iterator itr = m_loadedScripts.begin();
-        (*itr)->_Unload();
-        delete (*itr);
-        m_loadedScripts.erase(itr);
+        script->_Unload();
+        delete script;
     }
 
     if (m_referencedFromCurrentSpell && m_selfContainer && *m_selfContainer == this)
@@ -617,6 +615,14 @@ Spell::~Spell()
 
     if (m_caster && m_caster->GetTypeId() == TYPEID_PLAYER)
         ASSERT(m_caster->ToPlayer()->m_spellModTakingSpell != this);
+
+    for (auto &mod : m_appliedMods)
+    {
+        if (!mod->ownerEffect)
+            delete mod;
+        else
+            mod->applied = false;
+    }
 
     CheckEffectExecuteData();
 }
@@ -2690,7 +2696,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         // TODO: check how broad this rule should be
         if (m_caster->GetTypeId() == TYPEID_PLAYER && (missInfo == SPELL_MISS_MISS ||
                 missInfo == SPELL_MISS_DODGE || missInfo == SPELL_MISS_PARRY))
-            m_caster->ToPlayer()->RestoreSpellMods(this, 14177);
+            m_caster->ToPlayer()->RestoreSpellMods(*this, 14177);
     }
 
     // Trigger info was not filled in spell::preparedatafortriggersystem - we do it now
@@ -3381,7 +3387,7 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const *triggered
 
         if (auto const player = m_caster->ToPlayer())
         {
-            player->RestoreSpellMods(this);
+            player->RestoreSpellMods(*this);
             player->SetSpellModTakingSpell(this, false);
         }
 
@@ -3487,7 +3493,7 @@ void Spell::cancel()
         case SPELL_STATE_PREPARING:
             CancelGlobalCooldown();
             if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                m_caster->ToPlayer()->RestoreSpellMods(this);
+                m_caster->ToPlayer()->RestoreSpellMods(*this);
         case SPELL_STATE_DELAYED:
             SendInterrupted(0);
             SendCastResult(SPELL_FAILED_INTERRUPTED);
@@ -3505,9 +3511,15 @@ void Spell::cancel()
 
             // spell is canceled-take mods and clear list
             if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                m_caster->ToPlayer()->RemoveSpellMods(this);
+            {
+                m_caster->ToPlayer()->RemoveSpellMods(*this);
 
-            m_appliedMods.clear();
+                // prevents possible memory leak in AuraEffect destructor
+                for (auto &mod : m_appliedMods)
+                    mod->applied = false;
+
+                m_appliedMods.clear();
+            }
             break;
 
         default:
@@ -3605,7 +3617,7 @@ void Spell::cast(bool skipCheck)
             //restore spell mods
             if (m_caster->GetTypeId() == TYPEID_PLAYER)
             {
-                m_caster->ToPlayer()->RestoreSpellMods(this);
+                m_caster->ToPlayer()->RestoreSpellMods(*this);
                 // cleanup after mod system
                 // triggered spell pointer can be not removed in some cases
                 m_caster->ToPlayer()->SetSpellModTakingSpell(this, false);
@@ -3629,7 +3641,7 @@ void Spell::cast(bool skipCheck)
                         my_trade->SetSpell(m_spellInfo->Id, m_CastItem);
                         SendCastResult(SPELL_FAILED_DONT_REPORT);
                         SendInterrupted(0);
-                        m_caster->ToPlayer()->RestoreSpellMods(this);
+                        m_caster->ToPlayer()->RestoreSpellMods(*this);
                         // cleanup after mod system
                         // triggered spell pointer can be not removed in some cases
                         m_caster->ToPlayer()->SetSpellModTakingSpell(this, false);
@@ -3651,7 +3663,7 @@ void Spell::cast(bool skipCheck)
         //restore spell mods
         if (m_caster->GetTypeId() == TYPEID_PLAYER)
         {
-            m_caster->ToPlayer()->RestoreSpellMods(this);
+            m_caster->ToPlayer()->RestoreSpellMods(*this);
             // cleanup after mod system
             // triggered spell pointer can be not removed in some cases
             m_caster->ToPlayer()->SetSpellModTakingSpell(this, false);
@@ -4164,19 +4176,19 @@ void Spell::finish(bool ok)
     }
 
     // potions disabled by client, send event "not in combat" if need
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    if (auto const player = m_caster->ToPlayer())
     {
         if (!m_triggeredByAuraSpell)
-            m_caster->ToPlayer()->UpdatePotionCooldown(this);
+            player->UpdatePotionCooldown(this);
 
         // triggered spell pointer can be not set in some cases
         // this is needed for proper apply of triggered spell mods
-        m_caster->ToPlayer()->SetSpellModTakingSpell(this, true);
+        player->SetSpellModTakingSpell(this, true);
 
         // Take mods after trigger spell (needed for 14177 to affect 48664)
         // mods are taken only on succesfull cast and independantly from targets of the spell
-        m_caster->ToPlayer()->RemoveSpellMods(this);
-        m_caster->ToPlayer()->SetSpellModTakingSpell(this, false);
+        player->RemoveSpellMods(*this);
+        player->SetSpellModTakingSpell(this, false);
     }
 
     // Stop Attack for some spells

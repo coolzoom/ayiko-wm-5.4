@@ -573,7 +573,10 @@ AuraEffect::AuraEffect(Aura *base, uint8 effIndex, int32 *baseAmount, Unit* cast
 
 AuraEffect::~AuraEffect()
 {
-    delete m_spellmod;
+    if (m_spellmod && m_spellmod->applied)
+        m_spellmod->ownerEffect = nullptr;
+    else
+        delete m_spellmod;
 }
 
 void AuraEffect::GetTargetList(std::list<Unit*> & targetList) const

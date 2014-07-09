@@ -1761,6 +1761,7 @@ class Player final : public Unit, public GridObject<Player>
 
         bool ResetTalents(bool no_cost = false);
         uint32 GetNextResetTalentsCost() const;
+        void ResetSpec(bool no_cost = false);
         uint32 GetNextResetSpecializationCost() const;
         void InitTalentForLevel();
         void InitSpellForLevel();
@@ -1774,7 +1775,6 @@ class Player final : public Unit, public GridObject<Player>
         void CastPassiveTalentSpell(uint32 spellId);
         void RemovePassiveTalentSpell(uint32 spellId);
 
-        void ResetSpec();
 
         // Dual Spec
         void UpdateSpecCount(uint8 count);

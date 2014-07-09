@@ -61,6 +61,7 @@
 #include "BattlefieldMgr.h"
 #include "SpellAuraEffects.h"
 #include "ScriptMgr.h"
+#include <numeric>
 
 float baseMoveSpeed[MAX_MOVE_TYPE] =
 {
@@ -6464,6 +6465,10 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
         {
             switch (dummySpell->Id)
             {
+                case 56218: // Glyph of Siphon Life
+                    triggered_spell_id = 63106;
+                    target = this;
+                    break;
                 case 27243: // Seed of Corruption
                 {
                     if (procSpell && procSpell->Id == 27285)

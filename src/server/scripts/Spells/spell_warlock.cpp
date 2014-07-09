@@ -3069,6 +3069,40 @@ public:
     }
 };
 
+class spell_warl_glyph_of_siphon_life : public SpellScriptLoader
+{
+public:
+    spell_warl_glyph_of_siphon_life() : SpellScriptLoader("spell_warl_glyph_of_siphon_life") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void HandleEffect(SpellEffIndex effIndex)
+        {
+            PreventHitDefaultEffect(effIndex);
+
+            if (Unit * caster = GetCaster())
+            {
+                // 0.5% (5.4.0 17399)
+                int32 healing = caster->CountPctFromMaxHealth(1) * 0.5f;
+                SetHitHeal(healing);
+                SetHitDamage(0);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_impl::HandleEffect, EFFECT_0, SPELL_EFFECT_HEAL_PCT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
 void AddSC_warlock_spell_scripts()
 {
     new spell_warl_soulburn_drain_life();
@@ -3137,4 +3171,5 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_blood_horror();
     new spell_warl_backdraft();
     new spell_warl_molten_core();
+    new spell_warl_glyph_of_siphon_life();
 }

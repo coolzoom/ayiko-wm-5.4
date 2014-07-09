@@ -2051,9 +2051,6 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
         {
             case 19750: // Selfless Healer
             {
-                if (!caster)
-                    break
-
                 if (!caster->HasAura(114250))
                     break;
 
@@ -2069,9 +2066,6 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
             }
             case 45064: // Vessel of the Naaru (Vial of the Sunwell trinket)
             {
-                if (!caster)
-                    break;
-
                 // Amount of heal - depends from stacked Holy Energy
                 int damageAmount = 0;
                 if (AuraEffect const *aurEff = caster->GetAuraEffect(45062, 0))
@@ -2083,9 +2077,6 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
             }
             case 67489: // Runic Healing Injector (heal increased by 25% for engineers - 3.2.0 patch change)
             {
-                if (!caster)
-                    break;
-
                 if (Player const * const player = caster->ToPlayer())
                     if (player->HasSkill(SKILL_ENGINEERING))
                         AddPct(addhealth, 25);
@@ -2094,9 +2085,6 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
             case 85222: // Light of Dawn
             {
                 addhealth *= GetPowerCost();
-
-                if (!caster)
-                    break;
 
                 if (caster->HasAura(54940))
                     AddPct(addhealth, 25);
@@ -2110,9 +2098,6 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
             }
             case 90361: // Spirit Mend
             {
-                if (!unitTarget || !caster)
-                    return;
-
                 if (!caster->GetOwner())
                     return;
 
@@ -2127,9 +2112,6 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
             case 114163:// Eternal Flame
             case 130551:// Word of Glory
             {
-                if (!caster || !unitTarget)
-                    return;
-
                 if (caster->GetTypeId() != TYPEID_PLAYER)
                     return;
 
@@ -2165,7 +2147,7 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
             case 115072:// Expel Harm
             case 147489:// Expel Harm with glyph of Targeted Expulsion
             {
-                if (caster && caster->getClass() == CLASS_MONK && addhealth && (m_spellInfo->Id == 115072 || m_spellInfo->Id == 147489))
+                if (caster->getClass() == CLASS_MONK && addhealth && (m_spellInfo->Id == 115072 || m_spellInfo->Id == 147489))
                 {
                     addhealth = Spell::CalculateMonkMeleeAttacks(m_caster, 7, 14);
                     addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
@@ -2191,16 +2173,16 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
             }
             // Glyph of Prayer of Mending
             case 33110:
-                {
-                    if (GetOriginalCaster())
-                        if (AuraEffect* const auraEff = caster->GetAuraEffect(55685, EFFECT_0))
-                            if (auraEff->GetUserData())
-                            {
-                                auraEff->SetUserData(0);
-                                AddPct(addhealth, auraEff->GetAmount());
-                            }
-                            break;
-                }
+            {
+                if (GetOriginalCaster())
+                    if (AuraEffect* const auraEff = caster->GetAuraEffect(55685, EFFECT_0))
+                        if (auraEff->GetUserData())
+                        {
+                            auraEff->SetUserData(0);
+                            AddPct(addhealth, auraEff->GetAmount());
+                        }
+                break;
+            }
             default:
                 break;
         }

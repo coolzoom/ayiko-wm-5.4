@@ -3654,6 +3654,7 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 110730:// Redirect
                 case 51699: // Honor Among Thieves (triggered)
                 case 57934: // Tricks of the Trade
+                case 50259: // Daze (Wild Charge (Cat Form))
                     spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
                     break;
                 case 57723: // Exhaustion
@@ -5468,6 +5469,10 @@ void SpellMgr::LoadSpellCustomAttr()
                     break;
                 case 81298: // Consecration Dummy
                     spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DEST;
+                    break;
+                case 49376:
+                    // Wild Charge (Cat Form) - Remove SPELL_ATTR3_CANT_TRIGGER_PROC and set SPELL_ATTR3_NO_INITIAL_AGGRO
+                    spellInfo->AttributesEx3 = SPELL_ATTR3_NO_INITIAL_AGGRO;
                     break;
                 default:
                     break;

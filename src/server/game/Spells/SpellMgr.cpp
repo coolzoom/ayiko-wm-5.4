@@ -5474,6 +5474,9 @@ void SpellMgr::LoadSpellCustomAttr()
                     // Wild Charge (Cat Form) - Remove SPELL_ATTR3_CANT_TRIGGER_PROC and set SPELL_ATTR3_NO_INITIAL_AGGRO
                     spellInfo->AttributesEx3 = SPELL_ATTR3_NO_INITIAL_AGGRO;
                     break;
+                case 52610: // Savage Roar tooltip amount
+                    spellInfo->Effects[EFFECT_2].BasePoints = 40;
+                    break;
                 default:
                     break;
             }

@@ -7083,6 +7083,14 @@ SpellCastResult Spell::CheckCast(bool strict)
             if (m_caster->GetTypeId() != TYPEID_PLAYER || !m_caster->ToPlayer()->IsInFeralForm())
                 return SPELL_FAILED_ONLY_SHAPESHIFT;
         }
+        case 5217: // Tiger's Fury
+        {
+            if (m_caster->GetShapeshiftForm() != FORM_CAT)
+            {
+                m_customError = SPELL_CUSTOM_ERROR_MUST_BE_IN_CAT_FORM;
+                return SPELL_FAILED_CUSTOM_ERROR;
+            }
+        }
         default: break;
     }
 

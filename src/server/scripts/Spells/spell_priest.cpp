@@ -72,7 +72,6 @@ enum PriestSpells
     PRIEST_SPIRIT_SHELL_ABSORPTION                  = 114908,
     PRIEST_ATONEMENT_AURA                           = 81749,
     PRIEST_ATONEMENT_HEAL                           = 81751,
-    PRIEST_RAPTURE_ENERGIZE                         = 47755,
     PRIEST_INNER_FOCUS                              = 89485,
     PRIEST_GRACE_AURA                               = 47517,
     PRIEST_GRACE_PROC                               = 77613,
@@ -1141,47 +1140,6 @@ class spell_pri_grace : public SpellScriptLoader
         SpellScript* GetSpellScript() const
         {
             return new spell_pri_grace_SpellScript();
-        }
-};
-
-// Called by Power Word : Shield - 17
-// Rapture - 47536
-class spell_pri_rapture : public SpellScriptLoader
-{
-    public:
-        spell_pri_rapture() : SpellScriptLoader("spell_pri_rapture") { }
-
-        class spell_pri_rapture_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_pri_rapture_AuraScript);
-
-            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
-            {
-                if (Unit* caster = GetCaster())
-                {
-                    AuraRemoveMode removeMode = GetTargetApplication()->GetRemoveMode();
-                    if (removeMode == AURA_REMOVE_BY_ENEMY_SPELL)
-                    {
-                        int32 bp = int32(caster->GetStat(STAT_SPIRIT) * 1.5f);
-
-                        if (caster->ToPlayer() && !caster->ToPlayer()->HasSpellCooldown(PRIEST_RAPTURE_ENERGIZE))
-                        {
-                            caster->EnergizeBySpell(caster, PRIEST_RAPTURE_ENERGIZE, bp, POWER_MANA);
-                            caster->ToPlayer()->AddSpellCooldown(PRIEST_RAPTURE_ENERGIZE, 0, 12 * IN_MILLISECONDS);
-                        }
-                    }
-                }
-            }
-
-            void Register()
-            {
-                OnEffectRemove += AuraEffectRemoveFn(spell_pri_rapture_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB, AURA_EFFECT_HANDLE_REAL);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_pri_rapture_AuraScript();
         }
 };
 
@@ -2318,49 +2276,6 @@ class spell_pri_penance : public SpellScriptLoader
         }
 };
 
-// Reflective Shield
-class spell_pri_reflective_shield_trigger : public SpellScriptLoader
-{
-    public:
-        spell_pri_reflective_shield_trigger() : SpellScriptLoader("spell_pri_reflective_shield_trigger") { }
-
-        class spell_pri_reflective_shield_trigger_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_pri_reflective_shield_trigger_AuraScript);
-
-            bool Validate(SpellInfo const* /*spellEntry*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(PRIEST_SPELL_REFLECTIVE_SHIELD_TRIGGERED) || !sSpellMgr->GetSpellInfo(PRIEST_SPELL_REFLECTIVE_SHIELD_R1))
-                    return false;
-                return true;
-            }
-
-            void Trigger(AuraEffect *aurEff, DamageInfo & dmgInfo, uint32 & absorbAmount)
-            {
-                Unit* target = GetTarget();
-                if (dmgInfo.GetAttacker() == target)
-                    return;
-
-                if (GetCaster())
-                    if (AuraEffect *talentAurEff = target->GetAuraEffectOfRankedSpell(PRIEST_SPELL_REFLECTIVE_SHIELD_R1, EFFECT_0))
-                    {
-                        int32 bp = CalculatePct(absorbAmount, talentAurEff->GetAmount());
-                        target->CastCustomSpell(dmgInfo.GetAttacker(), PRIEST_SPELL_REFLECTIVE_SHIELD_TRIGGERED, &bp, NULL, NULL, true, NULL, aurEff);
-                    }
-            }
-
-            void Register()
-            {
-                 AfterEffectAbsorb += AuraEffectAbsorbFn(spell_pri_reflective_shield_trigger_AuraScript::Trigger, EFFECT_0);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_pri_reflective_shield_trigger_AuraScript();
-        }
-};
-
 enum PrayerOfMending
 {
     SPELL_T9_HEALING_2_PIECE = 67201,
@@ -2676,6 +2591,86 @@ public:
     }
 };
 
+// 17 - Power Word: Shield
+class spell_pri_power_word_shield : public SpellScriptLoader
+{
+    class script_impl : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        enum
+        {
+            GLYPH_OF_REFLECTIVE_SHIELD  = 33202,
+            REFLECTIVE_SHIELD_TRIGGERED = 33619,
+
+            RAPTURE_TALENT              = 47536,
+            RAPTURE_ENERGIZE            = 47755,
+            RAPTURE_MARKER              = 63853,
+        };
+
+        bool Validate(SpellInfo const* /*spellInfo*/)
+        {
+            return sSpellMgr->GetSpellInfo(REFLECTIVE_SHIELD_TRIGGERED)
+                && sSpellMgr->GetSpellInfo(GLYPH_OF_REFLECTIVE_SHIELD);
+        }
+
+        void AfterRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            Unit * const caster = GetCaster();
+            if (caster && GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_ENEMY_SPELL)
+            {
+                // Rapture
+                if (AuraEffect const * const raptureEff = caster->GetAuraEffectOfRankedSpell(RAPTURE_TALENT, EFFECT_0))
+                {
+                    if (!caster->HasAura(RAPTURE_MARKER))
+                    {
+                        int32 basepoints0 = this->GetSpellInfo()->CalcPowerCost(caster, GetSpellInfo()->GetSchoolMask(), &GetSpellInfo()->spellPower, false);
+                        // Priest T13 Healer 4P Bonus - Increase mana granted from Rapture by 100%
+                        if (AuraEffect const * const eff = caster->GetAuraEffect(105832, EFFECT_1))
+                            AddPct(basepoints0, eff->GetAmount());
+
+                        caster->CastCustomSpell(caster, RAPTURE_ENERGIZE, &basepoints0, NULL, NULL, true);
+                        caster->CastSpell(caster, RAPTURE_MARKER, true);
+                    }
+                }
+            }
+        }
+
+        void ReflectDamage(AuraEffect *aurEff, DamageInfo &dmgInfo, uint32 &absorbAmount)
+        {
+            Unit * const target = GetTarget();
+            if (dmgInfo.GetAttacker() == target)
+                return;
+
+            Unit * const caster = GetCaster();
+            if (!caster)
+                return;
+
+            if (AuraEffect const * const talentAurEff = caster->GetAuraEffect(GLYPH_OF_REFLECTIVE_SHIELD, EFFECT_0))
+            {
+                int32 bp = CalculatePct(absorbAmount, talentAurEff->GetAmount());
+                target->CastCustomSpell(dmgInfo.GetAttacker(), REFLECTIVE_SHIELD_TRIGGERED, &bp, NULL, NULL, true, NULL, aurEff);
+            }
+        }
+
+        void Register()
+        {
+            AfterEffectAbsorb += AuraEffectAbsorbFn(script_impl::ReflectDamage, EFFECT_0);
+            AfterEffectRemove += AuraEffectRemoveFn(script_impl::AfterRemove, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+public:
+    spell_pri_power_word_shield()
+        : SpellScriptLoader("spell_pri_power_word_shield")
+    { }
+
+    AuraScript* GetAuraScript() const
+    {
+        return new script_impl();
+    }
+};
+
 void AddSC_priest_spell_scripts()
 {
     new spell_pri_power_word_fortitude();
@@ -2704,7 +2699,6 @@ void AddSC_priest_spell_scripts()
     new spell_pri_lightwell_renew();
     new spell_pri_strength_of_soul();
     new spell_pri_grace();
-    new spell_pri_rapture();
     new spell_pri_atonement();
     new spell_pri_spirit_shell();
     new spell_pri_purify();
@@ -2723,7 +2717,6 @@ void AddSC_priest_spell_scripts()
     new spell_pri_psychic_horror();
     new spell_pri_guardian_spirit();
     new spell_pri_penance();
-    new spell_pri_reflective_shield_trigger();
     new spell_pri_prayer_of_mending_heal();
     new spell_pri_vampiric_touch();
     new spell_pri_renew();
@@ -2733,4 +2726,5 @@ void AddSC_priest_spell_scripts()
     new spell_pri_levitate();
     new spell_pri_binding_heal();
     new spell_pri_divine_aegis();
+    new spell_pri_power_word_shield();
 }

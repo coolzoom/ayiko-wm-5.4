@@ -67,6 +67,9 @@ class AuraEffect
             m_canBeRecalculated = false;
         }
 
+        int32 GetUserData() const { return m_userData; }
+        void SetUserData(int32 data) { m_userData = data; }
+
         int32 GetPeriodicTimer() const { return m_periodicTimer; }
         void SetPeriodicTimer(int32 periodicTimer) { m_periodicTimer = periodicTimer; }
 
@@ -154,6 +157,8 @@ class AuraEffect
         int32 m_periodicTimer;
         int32 m_amplitude;
         uint32 m_tickNumber;
+
+        int32 m_userData;
 
         uint8 const m_effIndex;
         bool m_canBeRecalculated;

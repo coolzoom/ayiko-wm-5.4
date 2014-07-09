@@ -2039,14 +2039,20 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
 
         int32 addhealth = damage;
 
+        // Death Pact - return pct of max health to caster
+        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && m_spellInfo->SpellFamilyFlags[0] & 0x00080000)
+            addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, int32(caster->CountPctFromMaxHealth(damage)), HEAL);
+        else
+            addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
+
+        addhealth = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, addhealth, HEAL);
+
         switch (m_spellInfo->Id)
         {
             case 19750: // Selfless Healer
             {
                 if (!caster)
-                    break;
-
-                addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
+                    break
 
                 if (!caster->HasAura(114250))
                     break;
@@ -2070,30 +2076,23 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
                 int damageAmount = 0;
                 if (AuraEffect const *aurEff = caster->GetAuraEffect(45062, 0))
                 {
-                    damageAmount+= aurEff->GetAmount();
+                    addhealth += aurEff->GetAmount();
                     caster->RemoveAurasDueToSpell(45062);
                 }
-
-                addhealth += damageAmount;
-                addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
-
                 break;
             }
-            case 48743: // Death Pact - return pct of max health to caster
-                if (!caster)
-                    break;
-
-                addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, int32(caster->CountPctFromMaxHealth(damage)), HEAL);
-                break;
             case 67489: // Runic Healing Injector (heal increased by 25% for engineers - 3.2.0 patch change)
+            {
                 if (!caster)
                     break;
 
-                if (Player* player = caster->ToPlayer())
+                if (Player const * const player = caster->ToPlayer())
                     if (player->HasSkill(SKILL_ENGINEERING))
                         AddPct(addhealth, 25);
                 break;
+            }
             case 85222: // Light of Dawn
+            {
                 addhealth *= GetPowerCost();
 
                 if (!caster)
@@ -2102,9 +2101,8 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
                 if (caster->HasAura(54940))
                     AddPct(addhealth, 25);
 
-                addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
-
                 break;
+            }
             case 86961: // Cleansing Waters
             {
                 addhealth = m_caster->CountPctFromMaxHealth(4);
@@ -2191,15 +2189,22 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
 
                 break;
             }
+            // Glyph of Prayer of Mending
+            case 33110:
+                {
+                    if (GetOriginalCaster())
+                        if (AuraEffect* const auraEff = caster->GetAuraEffect(55685, EFFECT_0))
+                            if (auraEff->GetUserData())
+                            {
+                                auraEff->SetUserData(0);
+                                AddPct(addhealth, auraEff->GetAmount());
+                            }
+                            break;
+                }
             default:
-                if (!caster)
-                    break;
-
-                addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
                 break;
         }
 
-        addhealth = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, addhealth, HEAL);
 
         // Remove Grievous bite if fully healed
         if (unitTarget->HasAura(48920) && (unitTarget->GetHealth() + addhealth >= unitTarget->GetMaxHealth()))

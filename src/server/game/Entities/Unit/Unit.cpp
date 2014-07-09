@@ -17649,6 +17649,12 @@ bool Unit::HandleAuraRaidProcFromChargeWithValue(AuraEffect *triggeredByAura)
         }
     }
 
+    // Glyph of Prayer of Mending - Add data about first charge
+    if (Unit* caster = triggeredByAura->GetCaster())
+        if (AuraEffect * const auraEff = caster->GetAuraEffect(55685, EFFECT_0))
+            if (static_cast<int32>(spellProto->ProcCharges) - 1 == jumps)
+                auraEff->SetUserData(1);
+
     // heal
     CastCustomSpell(this, 33110, &heal, NULL, NULL, true, NULL, NULL, caster_guid);
     return true;

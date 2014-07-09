@@ -553,6 +553,7 @@ struct SpellLearnSpellNode
     uint32 spell;
     bool active;                                            // show in spellbook or not
     bool autoLearned;
+    uint16 spec;
 };
 
 typedef std::multimap<uint32, SpellLearnSpellNode> SpellLearnSpellMap;

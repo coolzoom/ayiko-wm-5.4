@@ -1612,8 +1612,8 @@ void SpellMgr::LoadSpellLearnSpells()
 
     mSpellLearnSpells.clear();                              // need for reload case
 
-    //                                                  0      1        2
-    QueryResult result = WorldDatabase.Query("SELECT entry, SpellID, Active FROM spell_learn_spell");
+    //                                                  0      1        2      3
+    QueryResult result = WorldDatabase.Query("SELECT entry, SpellID, Active, specId FROM spell_learn_spell");
     if (!result)
     {
         TC_LOG_INFO("server.loading", ">> Loaded 0 spell learn spells. DB table `spell_learn_spell` is empty.");
@@ -1631,6 +1631,7 @@ void SpellMgr::LoadSpellLearnSpells()
         node.spell       = fields[1].GetUInt32();
         node.active      = fields[2].GetBool();
         node.autoLearned = false;
+        node.spec        = fields[3].GetUInt16();
 
         if (!GetSpellInfo(spell_id))
         {
@@ -2850,7 +2851,9 @@ void SpellMgr::LoadSpellClassInfo()
 
         // Dark Soul
         if (classId == CLASS_WARLOCK)
+        {
             mSpellClassInfo[classId].push_back(77801);
+        }
 
         // All portals and teleports for mages and Mana Attunement
         if (classId == CLASS_MAGE)

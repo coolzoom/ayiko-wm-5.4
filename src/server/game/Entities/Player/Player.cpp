@@ -3822,6 +3822,25 @@ void Player::InitSpellForLevel()
             learnSpell(spellId, false);
     }
 
+    for (auto const &spellMap : GetSpellMap())
+    {
+        if (!HasSpell(spellMap.first))
+            continue;
+
+        auto spellBounds = sSpellMgr->GetSpellLearnSpellMapBounds(spellMap.first);
+
+        for (auto itr = spellBounds.first; itr != spellBounds.second; ++itr)
+        {
+            if (!itr->second.spec)
+                continue;
+
+            if (itr->second.spec == GetSpecializationId(GetActiveSpec()))
+                learnSpell(itr->second.spell, true);
+            else
+                removeSpell(itr->second.spell);
+        }
+    }
+
     // Aberration
     if (getRace() == RACE_WORGEN)
         learnSpell(68976, false);
@@ -4695,7 +4714,7 @@ bool Player::addSpell(uint32 spellId, bool active, bool learning, bool dependent
 
     for (SpellLearnSpellMap::const_iterator itr2 = spell_bounds.first; itr2 != spell_bounds.second; ++itr2)
     {
-        if (!itr2->second.autoLearned)
+        if (!itr2->second.autoLearned && (!itr2->second.spec || GetSpecializationId(GetActiveSpec()) == itr2->second.spec))
         {
             if (!IsInWorld() || !itr2->second.active)       // at spells loading, no output, but allow save
                 addSpell(itr2->second.spell, itr2->second.active, true, true, false);

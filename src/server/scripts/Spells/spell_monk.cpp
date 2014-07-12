@@ -2521,7 +2521,7 @@ class spell_monk_blackout_kick : public SpellScriptLoader
         {
             PrepareSpellScript(spell_monk_blackout_kick_SpellScript);
 
-            void HandleOnHit()
+            void HandleOnHit(SpellEffIndex /*effIndex*/)
             {
                 if (Unit* caster = GetCaster())
                 {
@@ -2555,14 +2555,19 @@ class spell_monk_blackout_kick : public SpellScriptLoader
                         }
                         // Brewmaster : Training - you gain Shuffle, increasing parry chance and stagger amount by 20%
                         else if (caster->GetTypeId() == TYPEID_PLAYER && caster->ToPlayer()->GetSpecializationId(caster->ToPlayer()->GetActiveSpec()) == SPEC_MONK_BREWMASTER)
-                            caster->CastSpell(caster, SPELL_MONK_SHUFFLE, true);
+                        {
+                            if (Aura * const shuffle = caster->GetAura(SPELL_MONK_SHUFFLE))
+                                shuffle->SetDuration(shuffle->GetDuration() + shuffle->GetMaxDuration());
+                            else
+                                caster->CastSpell(caster, SPELL_MONK_SHUFFLE, true);
+                        }
                     }
                 }
             }
 
             void Register()
             {
-                OnHit += SpellHitFn(spell_monk_blackout_kick_SpellScript::HandleOnHit);
+                OnEffectHitTarget += SpellEffectFn(spell_monk_blackout_kick_SpellScript::HandleOnHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
             }
         };
 

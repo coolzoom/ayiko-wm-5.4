@@ -4320,7 +4320,6 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
                     if (AuraEffect const *aurEff = m_caster->GetAuraEffect(64736, EFFECT_0))
                         AddPct(bonusPct, aurEff->GetAmount());
                     AddPct(totalDamagePercentMod, bonusPct);
-
                     break;
                 }
                 case 49020: // Obliterate
@@ -4340,7 +4339,6 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
                     // Death Knight T8 Melee 4P Bonus
                     if (AuraEffect const *aurEff = m_caster->GetAuraEffect(64736, EFFECT_0))
                         AddPct(bonusPct, aurEff->GetAmount());
-
                     AddPct(totalDamagePercentMod, bonusPct);
                     break;
                 }

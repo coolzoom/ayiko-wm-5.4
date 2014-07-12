@@ -23,6 +23,8 @@
 #include "PreparedStatement.h"
 #include "Log.h"
 #include "Util.h"
+#include "Config.h"
+#include "Common.h"
 
 #include <ace/OS_NS_unistd.h>
 #include <ace/Assert.h>
@@ -64,50 +66,61 @@ bool MySQLConnection::DoOpen()
 
     int port;
     char const* unix_socket;
-    //unsigned int timeout = 10;
 
     mysql_options(mysqlInit, MYSQL_SET_CHARSET_NAME, "utf8");
-    //mysql_options(mysqlInit, MYSQL_OPT_READ_TIMEOUT, (char const*)&timeout);
-    #ifdef _WIN32
-    if (m_connectionInfo->host == ".")                                           // named pipe use option (Windows)
+
+    if (m_connectionInfo->host == ".")
     {
+#ifdef _WIN32
+        // named pipe use option (Windows)
         unsigned int opt = MYSQL_PROTOCOL_PIPE;
         mysql_options(mysqlInit, MYSQL_OPT_PROTOCOL, (char const*)&opt);
-        port = 0;
         unix_socket = 0;
-    }
-    else                                                    // generic case
-    {
-        port = atoi(m_connectionInfo->port_or_socket.c_str());
-        unix_socket = 0;
-    }
-    #else
-    if (m_connectionInfo->host == ".")                                           // socket use option (Unix/Linux)
-    {
+#else
+        // socket use option (Unix/Linux)
         unsigned int opt = MYSQL_PROTOCOL_SOCKET;
         mysql_options(mysqlInit, MYSQL_OPT_PROTOCOL, (char const*)&opt);
         m_connectionInfo->host = "localhost";
-        port = 0;
         unix_socket = m_connectionInfo->port_or_socket.c_str();
+#endif
+        port = 0;
     }
-    else                                                    // generic case
+    else
     {
+        // generic case
         port = atoi(m_connectionInfo->port_or_socket.c_str());
         unix_socket = 0;
     }
-    #endif
 
     m_handle = mysql_real_connect(mysqlInit, m_connectionInfo->host.c_str(), m_connectionInfo->user.c_str(),
                                   m_connectionInfo->password.c_str(), m_connectionInfo->database.c_str(), port, unix_socket, 0);
 
     if (m_handle)
     {
+        auto const version = mysql_get_server_version(m_handle);
+
         if (!m_reconnecting)
         {
-            TC_LOG_INFO("sql.sql", "MySQL client library: %s", mysql_get_client_info());
-            TC_LOG_INFO("sql.sql", "MySQL server ver: %s ", mysql_get_server_info(m_handle));
+            TC_LOG_INFO("sql.sql", "MySQL client version: %s", mysql_get_client_info());
+            TC_LOG_INFO("sql.sql", "MySQL server version: %s", mysql_get_server_info(m_handle));
+
             if (mysql_get_server_version(m_handle) != mysql_get_client_version())
-                TC_LOG_INFO("sql.sql", "[WARNING] MySQL client/server version mismatch; may conflict with behaviour of prepared statements.");
+            {
+                TC_LOG_INFO("sql.sql", "[WARNING] MySQL client/server version mismatch, "
+                            "may conflict with behaviour of prepared statements.");
+            }
+        }
+
+        // MariaDB >= 10.0.10 supports Global Transaction ID feature, that, among
+        // other benefits, allows to set up parallel replication streams
+        if (version >= 100010)
+        {
+            auto const realm = sConfigMgr->GetIntDefault("RealmID", 0);
+
+            char buf[64];
+            snprintf(buf, sizeof(buf), "SET SESSION gtid_domain_id = %u", realm);
+
+            Execute(buf);
         }
 
         TC_LOG_INFO("sql.sql", "Connected to MySQL database at %s", m_connectionInfo->host.c_str());

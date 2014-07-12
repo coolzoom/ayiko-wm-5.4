@@ -3054,6 +3054,55 @@ public:
     }
 };
 
+// 145640 - Chi Brew
+class spell_monk_chi_brew : public SpellScriptLoader
+{
+public:
+    spell_monk_chi_brew() : SpellScriptLoader("spell_monk_chi_brew") { }
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            Player * const player = GetCaster()->ToPlayer();
+            if (!player)
+                return;
+
+            uint32 brewId = 0;
+            switch (player->GetSpecializationId(player->GetActiveSpec()))
+            {
+                case SPEC_MONK_BREWMASTER:
+                    brewId = SPELL_MONK_ELUSIVE_BREW_STACKS;
+                    break;
+                case SPEC_MONK_MISTWEAVER:
+                    brewId = SPELL_MONK_MANA_TEA_STACKS;
+                    break;
+                case SPEC_MONK_WINDWALKER:
+                    brewId = SPELL_MONK_TIGEREYE_BREW_STACKS;
+                    break;
+                default:
+                    break;
+            }
+
+            if (brewId)
+                for (uint32 i = 0; i < 2; ++i)
+                    player->CastSpell(player, brewId, true);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_impl::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
 void AddSC_monk_spell_scripts()
 {
     new spell_monk_fists_of_fury_stun();
@@ -3114,4 +3163,5 @@ void AddSC_monk_spell_scripts()
     new spell_monk_combo_breaker();
     new spell_monk_sanctuary_of_the_ox();
     new spell_monk_black_ox_guard_aoe_selector();
+    new spell_monk_chi_brew();
 }

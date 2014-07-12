@@ -777,7 +777,7 @@ void WorldSession::HandleQuestPOIQuery(WorldPacket& recvData)
     uint32 count;
     count = recvData.ReadBits(22);
 
-    if (count >= MAX_QUEST_LOG_SIZE)
+    if (count > MAX_QUEST_LOG_SIZE)
     {
         recvData.rfinish();
         return;

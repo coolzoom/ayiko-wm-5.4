@@ -1853,13 +1853,13 @@ class spell_dk_glyph_of_corpse_explosion : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dk_glyph_of_corpse_explosion_AuraScript);
 
-            void OnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Player* _player = GetTarget()->ToPlayer())
                     _player->learnSpell(DK_SPELL_GLYPH_OF_CORPSE_EXPLOSION, false);
             }
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Player* _player = GetTarget()->ToPlayer())
                     if (_player->HasSpell(DK_SPELL_GLYPH_OF_CORPSE_EXPLOSION))
@@ -1909,6 +1909,46 @@ class spell_dk_glyph_of_horn_of_winter : public SpellScriptLoader
         }
 };
 
+// 145677 - Riposte
+class spell_dk_riposte final : public SpellScriptLoader
+{
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+            void calculateAmount(AuraEffect const *, int32 &amount, bool &canBeRecalculated)
+        {
+            canBeRecalculated = false;
+
+            Unit * const caster = GetCaster();
+            if (!caster)
+                return;
+
+            if (Player const * const player = caster->ToPlayer())
+            {
+                uint32 rating = player->GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_PARRY);
+                rating += player->GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_DODGE);
+                amount = CalculatePct(rating, 75);
+            }
+        }
+
+        void Register() final
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(script_impl::calculateAmount, EFFECT_0, SPELL_AURA_MOD_RATING);
+        }
+    };
+
+public:
+    spell_dk_riposte()
+        : SpellScriptLoader("spell_dk_riposte")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
+};
+
 void AddSC_deathknight_spell_scripts()
 {
     new spell_dk_gorefiends_grasp();
@@ -1949,4 +1989,5 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_scourge_strike();
     new spell_dk_blood_boil();
     new spell_dk_death_grip();
+    new spell_dk_riposte();
 }

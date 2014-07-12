@@ -1934,50 +1934,52 @@ class spell_monk_spear_hand_strike : public SpellScriptLoader
 // Tigereye Brew - 116740
 class spell_monk_tigereye_brew : public SpellScriptLoader
 {
-    public:
-        spell_monk_tigereye_brew() : SpellScriptLoader("spell_monk_tigereye_brew") { }
+public:
+    spell_monk_tigereye_brew() : SpellScriptLoader("spell_monk_tigereye_brew") { }
 
-        class spell_monk_tigereye_brew_SpellScript : public SpellScript
+    class spell_impl : public AuraScript
+    {
+        PrepareAuraScript(spell_impl);
+
+        bool Load()
         {
-            PrepareSpellScript(spell_monk_tigereye_brew_SpellScript);
+            return GetCaster() && GetCaster()->GetTypeId() == TYPEID_PLAYER;
+        }
 
-            bool Validate(SpellInfo const *)
+        void CalculateAmount(AuraEffect const * auraEffect, int32& amount, bool& /*canBeRecalculated*/)
+        {
+            Unit * const caster = GetCaster();
+            if (auraEffect->GetEffIndex() == EFFECT_0)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_MONK_TIGEREYE_BREW))
-                    return false;
-                return true;
-            }
-
-            void HandleOnHit()
-            {
-                if (Player* player = GetCaster()->ToPlayer())
+                if (Aura * const brewStacks = caster->GetAura(SPELL_MONK_TIGEREYE_BREW_STACKS))
                 {
-                    if (GetHitUnit())
-                    {
-                        if (AuraApplication* aura = player->GetAuraApplication(SPELL_MONK_TIGEREYE_BREW_STACKS, player->GetGUID()))
-                        {
-                            int32 stackAmount = aura->GetBase()->GetStackAmount() * 2;
+                    uint8 stackAmount = brewStacks->GetStackAmount();
+                    uint8 consumeAmount = std::min((uint8)10, stackAmount);
+                    if (consumeAmount >= stackAmount)
+                        caster->RemoveAurasDueToSpell(SPELL_MONK_TIGEREYE_BREW_STACKS);
+                    else
+                        brewStacks->SetStackAmount(stackAmount - consumeAmount);
 
-                            AuraApplication* tigereyeBrew = player->GetAuraApplication(SPELL_MONK_TIGEREYE_BREW, player->GetGUID());
-                            if (tigereyeBrew)
-                                tigereyeBrew->GetBase()->GetEffect(0)->ChangeAmount(stackAmount);
-
-                            player->RemoveAura(SPELL_MONK_TIGEREYE_BREW_STACKS);
-                        }
-                    }
+                    amount *= consumeAmount;
                 }
             }
-
-            void Register()
+            else
             {
-                OnHit += SpellHitFn(spell_monk_tigereye_brew_SpellScript::HandleOnHit);
+                amount = auraEffect->GetBase()->GetEffect(EFFECT_0)->GetAmount();
             }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_monk_tigereye_brew_SpellScript();
         }
+
+        void Register()
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_impl::CalculateAmount, EFFECT_0, SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_impl::CalculateAmount, EFFECT_1, SPELL_AURA_MOD_HEALING_DONE_PERCENT);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_impl();
+    }
 };
 
 // Tiger's Lust - 116841

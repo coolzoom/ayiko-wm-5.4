@@ -5477,6 +5477,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 52610: // Savage Roar tooltip amount
                     spellInfo->Effects[EFFECT_2].BasePoints = 40;
                     break;
+                case 125195: // Tigereye Brew (Windwalker - stacking)
+                    spellInfo->Effects[EFFECT_2].BasePoints = 6;
+                    break;
                 default:
                     break;
             }

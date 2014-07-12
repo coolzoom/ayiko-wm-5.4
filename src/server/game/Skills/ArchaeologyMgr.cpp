@@ -402,16 +402,13 @@ void ArchaeologyMgr::GenerateResearchProjects()
     }
 
     uint8 const races[9] = { 1, 2, 3, 4, 5, 6, 7, 8, 27 };
-    uint8 const *race = races;
 
-    ProjectSet::const_iterator itr;
-    do
+    for (auto const &race : races)
     {
-        itr = tempProjects[*race].begin();
-        std::advance(itr, urand(0, tempProjects[*race].size() - 1));
-        _researchProjects.insert((*itr));
+        auto itr = tempProjects[race].begin();
+        std::advance(itr, urand(0, tempProjects[race].size() - 1));
+        _researchProjects.insert(*itr);
     }
-    while(*++race);
 
     _archaeologyChanged = true;
 

@@ -10050,6 +10050,14 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
                 return false;
             break;
         }
+        // Momentum (Monk)
+        case 119085:
+        {
+            // Dizzying Haze - same FamilyFlag
+            if (procSpell && procSpell->Id == 115180)
+                return false;
+            break;
+        }
     }
 
     // try detect target manually if not set

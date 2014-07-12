@@ -2586,8 +2586,9 @@ class Player final : public Unit, public GridObject<Player>
         /***                   GROUP SYSTEM                    ***/
         /*********************************************************/
 
-        Group* GetGroupInvite() { return m_groupInvite; }
-        void SetGroupInvite(Group* group) { m_groupInvite = group; }
+        uint32 GetInvitingGroupId() const { return m_invitingGroupId; }
+        void SetInvitingGroupId(uint32 groupId) { m_invitingGroupId = groupId; }
+
         Group* GetGroup() { return m_group.getTarget(); }
         const Group* GetGroup() const { return (const Group*)m_group.getTarget(); }
         GroupReference& GetGroupRef() { return m_group; }
@@ -3006,7 +3007,7 @@ class Player final : public Unit, public GridObject<Player>
         // Groups
         GroupReference m_group;
         GroupReference m_originalGroup;
-        Group* m_groupInvite;
+        uint32 m_invitingGroupId;
         uint32 m_groupUpdateMask;
         uint64 m_auraRaidUpdateMask;
         bool m_bPassOnGroupLoot;

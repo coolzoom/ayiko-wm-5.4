@@ -740,7 +740,7 @@ Player::Player(WorldSession* session)
     m_social = NULL;
 
     // group is initialized in the reference constructor
-    SetGroupInvite(NULL);
+    SetInvitingGroupId(0);
     m_groupUpdateMask = 0;
     m_auraRaidUpdateMask = 0;
     m_bPassOnGroupLoot = false;
@@ -3485,9 +3485,12 @@ bool Player::IsInSameGroupWith(Player const* p) const
 /// \todo Shouldn't we also check if there is no other invitees before disbanding the group?
 void Player::UninviteFromGroup()
 {
-    Group* group = GetGroupInvite();
+    Group* group = sGroupMgr->GetGroupByGUID(GetInvitingGroupId());
     if (!group)
+    {
+        SetInvitingGroupId(0);
         return;
+    }
 
     group->RemoveInvite(this);
 
@@ -5649,7 +5652,7 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
     PreparedQueryResult resultGroup = CharacterDatabase.Query(stmt);
 
     if (resultGroup)
-        if (Group* group = sGroupMgr->GetGroupByDbStoreId((*resultGroup)[0].GetUInt32()))
+        if (Group* group = sGroupMgr->GetGroupByGUID((*resultGroup)[0].GetUInt32()))
             RemoveFromGroup(group, playerguid);
 
     // Remove signs from petitions (also remove petitions if owner);
@@ -20260,7 +20263,7 @@ void Player::_LoadGroup(PreparedQueryResult result)
     //QueryResult* result = CharacterDatabase.PQuery("SELECT guid FROM group_member WHERE memberGuid=%u", GetGUIDLow());
     if (result)
     {
-        if (Group* group = sGroupMgr->GetGroupByDbStoreId((*result)[0].GetUInt32()))
+        if (Group* group = sGroupMgr->GetGroupByGUID((*result)[0].GetUInt32()))
         {
             uint8 subgroup = group->GetMemberGroup(GetGUID());
             SetGroup(group, subgroup);

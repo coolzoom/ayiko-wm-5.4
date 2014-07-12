@@ -18,41 +18,41 @@
 #ifndef _GROUPMGR_H
 #define _GROUPMGR_H
 
+#include "Define.h"
 #include "Group.h"
+
+#include <unordered_map>
 
 class GroupMgr
 {
-    friend class ACE_Singleton<GroupMgr, ACE_Null_Mutex>;
-private:
     GroupMgr();
     ~GroupMgr();
 
 public:
-    typedef std::unordered_map<uint32, Group*> GroupContainer;
-    typedef std::vector<Group*>      GroupDbContainer;
+    typedef std::unordered_map<uint32, Group*> StorageType;
+
+    static GroupMgr * instance();
 
     Group* GetGroupByGUID(uint32 guid) const;
 
-    uint32 GenerateNewGroupDbStoreId();
-    void   RegisterGroupDbStoreId(uint32 storageId, Group* group);
-    void   FreeGroupDbStoreId(Group* group);
-    void   SetNextGroupDbStoreId(uint32 storageId) { NextGroupDbStoreId = storageId; };
-    Group* GetGroupByDbStoreId(uint32 storageId) const;
-    void   SetGroupDbStoreSize(uint32 newSize) { GroupDbStore.resize(newSize); }
+    void SetNextGroupId(uint32 id) { nextGroupId_ = id; }
 
-    void   LoadGroups();
+    void LoadGroups();
     uint32 GenerateGroupId();
-    void   AddGroup(Group* group);
-    void   RemoveGroup(Group* group);
+    void AddGroup(Group* group);
+    void RemoveGroup(Group* group);
 
-
-protected:
-    uint32           NextGroupId;
-    uint32           NextGroupDbStoreId;
-    GroupContainer   GroupStore;
-    GroupDbContainer GroupDbStore;
+private:
+    uint32 nextGroupId_;
+    StorageType groupStore_;
 };
 
-#define sGroupMgr ACE_Singleton<GroupMgr, ACE_Null_Mutex>::instance()
+inline GroupMgr * GroupMgr::instance()
+{
+    static GroupMgr mgr;
+    return &mgr;
+}
+
+#define sGroupMgr GroupMgr::instance()
 
 #endif

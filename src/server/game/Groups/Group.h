@@ -19,18 +19,16 @@
 #ifndef GROUP_H
 #define GROUP_H
 
-#include "Battleground.h"
 #include "DBCEnums.h"
 #include "GroupRefManager.h"
 #include "LootMgr.h"
 #include "SharedDefines.h"
-#include "Player.h"
-#include "Battlefield.h"
-#include "BattlefieldMgr.h"
 #include "MySQLPtrTypesFwd.h"
 
 #include <unordered_map>
 
+class Battlefield;
+class Battleground;
 class Creature;
 class GroupReference;
 class InstanceSave;
@@ -147,7 +145,6 @@ class Roll : public LootValidatorRef
 {
     public:
         Roll(uint64 _guid, LootItem const& li);
-        ~Roll();
         void setLoot(Loot* pLoot);
         Loot* getLoot();
         void targetObjectBuildLink();
@@ -207,12 +204,13 @@ class Group
         typedef std::unordered_map<uint32 /*mapId*/, InstanceGroupBind> BoundInstancesMap;
     protected:
         typedef MemberSlotList::iterator member_witerator;
-        typedef std::set<Player*> InvitesList;
+        typedef std::set<uint64> InvitesList;
 
         typedef std::vector<Roll*> Rolls;
 
     public:
         Group();
+        explicit Group(uint32 lowGuid);
         ~Group();
 
         // group manipulation methods
@@ -247,8 +245,6 @@ class Group
         LootMethod GetLootMethod() const;
         uint64 GetLooterGuid() const;
         ItemQualities GetLootThreshold() const;
-
-        uint32 GetDbStoreId() const { return m_dbStoreId; };
 
         // member manipulation methods
         bool IsMember(uint64 guid) const;
@@ -379,7 +375,6 @@ class Group
         MemberSlotList      m_memberSlots;
         RaidMarkerList      m_raidMarkers;
         GroupRefManager     m_memberMgr;
-        mutable ACE_Thread_Mutex    m_inviteesLock;
         InvitesList         m_invitees;
         uint64              m_leaderGuid;
         std::string         m_leaderName;
@@ -398,7 +393,6 @@ class Group
         uint64              m_guid;
         uint32              m_counter;                      // used only in SMSG_PARTY_UPDATE
         uint32              m_maxEnchantingLevel;
-        uint32              m_dbStoreId;                    // Represents the ID used in database (Can be reused by other groups if group was disbanded)
         uint8               m_readyCheckCount;
         bool                m_readyCheck;
 };

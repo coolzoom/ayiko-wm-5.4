@@ -1782,7 +1782,6 @@ void LFGMgr::UpdateProposal(uint32 proposalId, uint64 guid, bool accept)
                 grp->ConvertToLFG();
                 uint64 gguid = grp->GetGUID();
                 SetState(gguid, LFG_STATE_PROPOSAL);
-                sGroupMgr->AddGroup(grp);
             }
             else if (group != grp)
                 grp->AddMember(player);
@@ -1834,7 +1833,7 @@ void LFGMgr::UpdateProposal(uint32 proposalId, uint64 guid, bool accept)
         uint64 gguid = grp->GetGUID();
         SetDungeon(gguid, dungeon->Entry());
         SetState(gguid, LFG_STATE_DUNGEON);
-        _SaveToDB(gguid, grp->GetDbStoreId());
+        _SaveToDB(gguid, grp->GetLowGUID());
 
         // Remove players/groups from Queue
         for (LfgGuidList::const_iterator it = pProposal->queues.begin(); it != pProposal->queues.end(); ++it)

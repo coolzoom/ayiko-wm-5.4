@@ -585,7 +585,6 @@ bool Battlefield::AddOrSetPlayerToCorrectBfGroup(Player* player)
         group = new Group;
         group->SetBattlefieldGroup(this);
         group->Create(player);
-        sGroupMgr->AddGroup(group);
 
         if (player->GetTeamId() < 2)
             m_Groups[player->GetTeamId()].insert(group->GetGUID());

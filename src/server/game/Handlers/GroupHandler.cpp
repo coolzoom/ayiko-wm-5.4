@@ -35,7 +35,7 @@
 #include "DB2Stores.h"
 #include "SpellAuraEffects.h"
 
-class Aura;
+#include <memory>
 
 /* differeces from off:
 -you can uninvite yourself - is is useful
@@ -161,7 +161,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
     if (group2 && group2->isBGGroup())
         group2 = player->GetOriginalGroup();
     // player already in another group or invited
-    if (group2 || player->GetGroupInvite())
+    if (group2 || player->GetInvitingGroupId())
     {
         SendPartyResult(PARTY_OP_INVITE, memberName, ERR_ALREADY_IN_GROUP_S);
 
@@ -234,8 +234,6 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
             delete group;
             return;
         }
-
-        group->Create(GetPlayer());
     }
     else
     {
@@ -287,26 +285,31 @@ void WorldSession::HandleGroupInviteResponseOpcode(WorldPacket& recvData)
     bool accept = recvData.ReadBit();
     recvData.ReadBit();
 
-    Group* group = GetPlayer()->GetGroupInvite();
+    auto group(sGroupMgr->GetGroupByGUID(GetPlayer()->GetInvitingGroupId()));
     if (!group)
+    {
+        GetPlayer()->SetInvitingGroupId(0);
         return;
+    }
 
     if (accept)
     {
         // Remove player from invitees in any case
         group->RemoveInvite(GetPlayer());
 
-        if (group->GetLeaderGUID() == GetPlayer()->GetGUID())
-        {
-            TC_LOG_ERROR("network", "HandleGroupAcceptOpcode: player %s(%d) tried to accept an invite to his own group",
-                         GetPlayer()->GetName().c_str(), GetPlayer()->GetGUIDLow());
-            return;
-        }
-
         // Group is full
         if (group->IsFull())
         {
             SendPartyResult(PARTY_OP_INVITE, "", ERR_GROUP_FULL);
+            return;
+        }
+
+        auto raii = std::unique_ptr<Group>(group);
+
+        if (group->GetLeaderGUID() == GetPlayer()->GetGUID())
+        {
+            TC_LOG_ERROR("network", "HandleGroupAcceptOpcode: player %s(%u) tried to accept an invite to his own group",
+                         GetPlayer()->GetName().c_str(), GetPlayer()->GetGUIDLow());
             return;
         }
 
@@ -322,16 +325,18 @@ void WorldSession::HandleGroupInviteResponseOpcode(WorldPacket& recvData)
                 return;
             }
 
-            // If we're about to create a group there really should be a leader present
-            ASSERT(leader);
             group->RemoveInvite(leader);
             group->Create(leader);
-            sGroupMgr->AddGroup(group);
         }
+
+        raii.release();
 
         // Everything is fine, do it, PLAYER'S GROUP IS SET IN ADDMEMBER!!!
         if (!group->AddMember(GetPlayer()))
+        {
+            group->Disband(true);
             return;
+        }
 
         group->BroadcastGroupUpdate();
     }
@@ -343,14 +348,15 @@ void WorldSession::HandleGroupInviteResponseOpcode(WorldPacket& recvData)
         // uninvite, group can be deleted
         GetPlayer()->UninviteFromGroup();
 
-        if (!leader || !leader->GetSession())
+        if (!leader)
             return;
 
         // report
         std::string const &name = GetPlayer()->GetName();
         WorldPacket data(SMSG_GROUP_DECLINE, name.length());
         data << name;
-        leader->GetSession()->SendPacket(&data);
+
+        leader->SendDirectMessage(&data);
     }
 }
 

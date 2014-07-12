@@ -2859,13 +2859,20 @@ class spell_monk_tigereye_brew_stacks : public SpellScriptLoader
 
             void SetData(uint32 /*type*/, uint32 data)
             {
+                Unit * const caster = GetCaster();
+                if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
                 while ((chiConsumed += data) >= 4)
                 {
                     chiConsumed = 0;
                     data = data > 4 ? data - 4: 0;
 
-                    if (GetCaster())
-                        GetCaster()->CastSpell(GetCaster(), SPELL_MONK_TIGEREYE_BREW_STACKS, true);
+                    caster->CastSpell(caster, SPELL_MONK_TIGEREYE_BREW_STACKS, true);
+                    // Mastery: Bottled Fury
+                    if (AuraEffect * const mastery = caster->GetAuraEffect(115636, EFFECT_0))
+                        if (roll_chance_f(caster->GetFloatValue(PLAYER_MASTERY) * 2.5f))
+                            caster->CastSpell(GetCaster(), SPELL_MONK_TIGEREYE_BREW_STACKS, true);
                 }
             }
 

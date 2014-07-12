@@ -405,9 +405,14 @@ void ArchaeologyMgr::GenerateResearchProjects()
 
     for (auto const &race : races)
     {
-        auto itr = tempProjects[race].begin();
-        std::advance(itr, urand(0, tempProjects[race].size() - 1));
-        _researchProjects.insert(*itr);
+        auto const i = tempProjects.find(race);
+        if (i == tempProjects.end())
+            continue;
+
+        auto j = i->second.begin();
+        std::advance(j, urand(0, i->second.size() - 1));
+
+        _researchProjects.insert(*j);
     }
 
     _archaeologyChanged = true;

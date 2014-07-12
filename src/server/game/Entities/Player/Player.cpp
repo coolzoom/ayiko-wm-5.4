@@ -25262,7 +25262,7 @@ void Player::learnQuestRewardedSpells(Quest const* quest)
     if (!HasSpell(learned_0))
     {
         SpellInfo const* learnedInfo = sSpellMgr->GetSpellInfo(learned_0);
-        if (!learnedInfo)
+        if (!learnedInfo || learnedInfo->Effects.size() == 1)
             return;
 
         // profession specialization can be re-learned from npc

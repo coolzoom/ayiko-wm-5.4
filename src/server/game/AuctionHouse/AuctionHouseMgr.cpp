@@ -803,12 +803,10 @@ void AuctionHouseMgr::DeleteExpiredAuctionsAtStartup()
 bool AuctionEntry::LoadFromFieldList(Field* fields)
 {
     // Loads an AuctionEntry item from a field list. Unlike "LoadFromDB()", this one
-    //  does not require the AuctionEntryMap to have been loaded with items. It simply
-    //  acts as a wrapper to fill out an AuctionEntry struct from a field list
+    // does not require the AuctionEntryMap to have been loaded with items. It simply
+    // acts as a wrapper to fill out an AuctionEntry struct from a field list
 
-    uint8 index = 0;
-
-    Id          = fields[index++].GetUInt32();
+    Id = fields[0].GetUInt32();
 
     auctionHouseEntry = sAuctionHouseStore.LookupEntry(fields[1].GetUInt8());
     if (!auctionHouseEntry)
@@ -817,16 +815,16 @@ bool AuctionEntry::LoadFromFieldList(Field* fields)
         return false;
     }
 
-    itemGUIDLow = fields[index++].GetUInt32();
-    itemEntry   = fields[index++].GetUInt32();
-    itemCount   = fields[index++].GetUInt32();
-    owner       = fields[index++].GetUInt64();
-    buyout      = fields[index++].GetUInt64();
-    expire_time = fields[index++].GetUInt32();
-    bidder      = fields[index++].GetUInt64();
-    bid         = fields[index++].GetUInt64();
-    startbid    = fields[index++].GetUInt64();
-    deposit     = fields[index++].GetUInt32();
+    itemGUIDLow = fields[2].GetUInt32();
+    itemEntry   = fields[3].GetUInt32();
+    itemCount   = fields[4].GetUInt32();
+    owner       = fields[5].GetUInt64();
+    buyout      = fields[6].GetUInt64();
+    expire_time = fields[7].GetUInt32();
+    bidder      = fields[8].GetUInt64();
+    bid         = fields[9].GetUInt64();
+    startbid    = fields[10].GetUInt64();
+    deposit     = fields[11].GetUInt32();
 
     return true;
 }

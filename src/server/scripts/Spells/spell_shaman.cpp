@@ -873,8 +873,8 @@ class spell_sha_tidal_waves : public SpellScriptLoader
                     {
                         if (GetHitUnit())
                         {
-                            int32 bp0 = -(sSpellMgr->GetSpellInfo(SPELL_SHA_TIDAL_WAVES)->Effects[0].BasePoints);
-                            int32 bp1 = sSpellMgr->GetSpellInfo(SPELL_SHA_TIDAL_WAVES)->Effects[1].BasePoints;
+                            int32 bp0 = -(sSpellMgr->GetSpellInfo(SPELL_SHA_TIDAL_WAVES)->Effects[EFFECT_0].BasePoints);
+                            int32 bp1 = sSpellMgr->GetSpellInfo(SPELL_SHA_TIDAL_WAVES)->Effects[EFFECT_0].BasePoints;
                             _player->CastCustomSpell(_player, SPELL_SHA_TIDAL_WAVES_PROC, &bp0, &bp1, NULL, true);
                         }
                     }

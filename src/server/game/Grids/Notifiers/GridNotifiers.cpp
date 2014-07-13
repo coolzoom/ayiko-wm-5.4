@@ -28,6 +28,22 @@
 #include "CellImpl.h"
 #include "SpellInfo.h"
 
+namespace {
+
+bool shouldCallMoveInLineOfSight(Creature const *c, Unit const *u)
+{
+    return c != u
+            && c->IsAIEnabled
+            && c->isAlive()
+            && u->isAlive()
+            && !u->isInFlight()
+            && !c->HasUnitState(UNIT_STATE_SIGHTLESS)
+            && (c->HasReactState(REACT_AGGRESSIVE) || c->AI()->CanSeeEvenInPassiveMode())
+            && c->canSeeOrDetect(u, false, true);
+}
+
+} // namespace
+
 using namespace Trinity;
 
 void VisibleNotifier::SendToSelf()
@@ -117,17 +133,6 @@ void VisibleChangesNotifier::Visit(DynamicObjectMapType &m)
     }
 }
 
-inline void CreatureUnitRelocationWorker(Creature* c, Unit* u)
-{
-    if (!u->isAlive() || !c->isAlive() || c == u || u->isInFlight())
-        return;
-
-    if (!c->HasUnitState(UNIT_STATE_SIGHTLESS))
-        if (c->IsAIEnabled && c->canSeeOrDetect(u, false, true))
-            if (c->HasReactState(REACT_AGGRESSIVE) || c->AI()->CanSeeEvenInPassiveMode())
-                c->AI()->MoveInLineOfSight_Safe(u);
-}
-
 void PlayerRelocationNotifier::Visit(PlayerMapType &m)
 {
     for (auto &player : m)
@@ -154,64 +159,77 @@ void PlayerRelocationNotifier::Visit(CreatureMapType &m)
         i_player.UpdateVisibilityOf(creature, i_data, i_visibleNow);
 
         if (relocatedForAI && !creature->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
-            creaturesToRelocate_.emplace_back(creature);
+            if (shouldCallMoveInLineOfSight(creature, &i_player))
+                movedInLos_.emplace_back(creature);
     }
-}
 
-void PlayerRelocationNotifier::processCreatureRelocations()
-{
-    for (auto &creature : creaturesToRelocate_)
-        if (creature->IsInWorld())
-            CreatureUnitRelocationWorker(creature, &i_player);
+    if (movedInLos_.empty())
+        return;
+
+    for (auto &creature : movedInLos_)
+        creature->AI()->MoveInLineOfSight_Safe(&i_player);
+
+    movedInLos_.clear();
 }
 
 void CreatureRelocationNotifier::Visit(PlayerMapType &m)
 {
     for (auto &player : m)
     {
-        for (auto &other : i_creatureList)
-        {
-            CreatureUnitRelocationWorker(other, player);
-            if (!player->m_seer->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
-                player->UpdateVisibilityOf(other);
-        }
+        if (!player->m_seer->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
+            player->UpdateVisibilityOf(me_);
+
+        if (shouldCallMoveInLineOfSight(me_, player))
+            movedInLos_.emplace_back(player, false);
     }
+
+    if (movedInLos_.empty())
+        return;
+
+    for (auto &pair : movedInLos_)
+        me_->AI()->MoveInLineOfSight_Safe(pair.first);
+
+    movedInLos_.clear();
 }
 
 void CreatureRelocationNotifier::Visit(CreatureMapType &m)
 {
     for (auto &creature : m)
     {
-        for (auto &other : i_creatureList)
+        if (shouldCallMoveInLineOfSight(me_, creature))
         {
-            if (other->isAlive())
-            {
-                CreatureUnitRelocationWorker(other, creature);
-                if (!creature->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
-                    CreatureUnitRelocationWorker(creature, other);
-            }
+            auto const both = !creature->isNeedNotify(NOTIFY_VISIBILITY_CHANGED)
+                    && shouldCallMoveInLineOfSight(creature, me_);
+
+            movedInLos_.emplace_back(creature, both);
         }
     }
+
+    if (movedInLos_.empty())
+        return;
+
+    for (auto &pair : movedInLos_)
+    {
+        me_->AI()->MoveInLineOfSight_Safe(pair.first);
+        if (pair.second)
+            static_cast<Creature *>(pair.first)->AI()->MoveInLineOfSight_Safe(me_);
+    }
+
+    movedInLos_.clear();
 }
 
 void DelayedUnitRelocation::Visit(CreatureMapType &m)
 {
-    CreatureRelocationNotifier::StorageType creaturesToRelocate;
-    creaturesToRelocate.reserve(m.size());
-
     for (auto &creature : m)
     {
-        if (creature->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
-            creaturesToRelocate.push_back(creature);
+        if (!creature->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
+            continue;
+
+        CreatureRelocationNotifier relocate(*creature);
+
+        cell.Visit(p, Trinity::makeWorldVisitor(relocate), i_map, *creature, i_radius);
+        cell.Visit(p, Trinity::makeGridVisitor(relocate), i_map, *creature, i_radius);
     }
-
-    if (creaturesToRelocate.empty())
-        return;
-
-    CreatureRelocationNotifier relocate(creaturesToRelocate);
-
-    cell.Visit(p, Trinity::makeWorldVisitor(relocate), i_map, i_radius, CENTER_GRID_CELL_OFFSET, CENTER_GRID_CELL_OFFSET);
-    cell.Visit(p, Trinity::makeGridVisitor(relocate), i_map, i_radius, CENTER_GRID_CELL_OFFSET, CENTER_GRID_CELL_OFFSET);
 }
 
 void DelayedUnitRelocation::Visit(PlayerMapType &m)
@@ -235,30 +253,40 @@ void DelayedUnitRelocation::Visit(PlayerMapType &m)
         cell2.Visit(pair2, Trinity::makeWorldVisitor(relocate), i_map, *viewPoint, i_radius);
         cell2.Visit(pair2, Trinity::makeGridVisitor(relocate), i_map, *viewPoint, i_radius);
 
-        relocate.processCreatureRelocations();
         relocate.SendToSelf();
     }
 }
 
 void AIRelocationNotifier::Visit(CreatureMapType &m)
 {
-    // We must have a copy here, MoveInLineOfSight can do anything, including
-    // spawning/despawning NPCs, that invalidates grid storage
-    creaturesInGrid_ = m;
-
     if (unit_->GetTypeId() == TYPEID_UNIT)
     {
-        for (auto &creature : creaturesInGrid_)
+        for (auto &creature : m)
         {
-            CreatureUnitRelocationWorker(creature, unit_);
-            CreatureUnitRelocationWorker(static_cast<Creature*>(unit_), creature);
+            if (shouldCallMoveInLineOfSight(creature, unit_))
+            {
+                auto const both = shouldCallMoveInLineOfSight(static_cast<Creature*>(unit_), creature);
+                movedInLos_.emplace_back(creature, both);
+            }
         }
     }
     else
     {
-        for (auto &creature : creaturesInGrid_)
-            CreatureUnitRelocationWorker(creature, unit_);
+        for (auto &creature : m)
+            movedInLos_.emplace_back(creature, false);
     }
+
+    if (movedInLos_.empty())
+        return;
+
+    for (auto &pair : movedInLos_)
+    {
+        pair.first->AI()->MoveInLineOfSight_Safe(unit_);
+        if (pair.second)
+            static_cast<Creature*>(unit_)->AI()->MoveInLineOfSight_Safe(pair.first);
+    }
+
+    movedInLos_.clear();
 }
 
 void MessageDistDeliverer::Visit(PlayerMapType &m)

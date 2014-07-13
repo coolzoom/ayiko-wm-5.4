@@ -971,23 +971,22 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (Unit* victim = me->getVictim())
+            auto victim = me->getVictim();
+            if (victim && victim->GetPositionZ() >= 286.276f)
             {
-                if (victim->GetPositionZ() >= 286.276f)
+                for (auto &ref : me->getThreatManager().getThreatList())
                 {
-                    std::list<HostileReference*> t_list = me->getThreatManager().getThreatList();
-                    for (std::list<HostileReference*>::const_iterator itr = t_list.begin(); itr!= t_list.end(); ++itr)
+                    if (auto unit = Unit::GetUnit(*me, ref->getUnitGuid()))
                     {
-                        if (Unit* unit = Unit::GetUnit(*me, (*itr)->getUnitGuid()))
+                        if (unit->GetPositionZ() <= 286.276f)
                         {
-                            if (unit->GetPositionZ() <= 286.276f)
-                            {
-                                me->getThreatManager().resetAllAggro();
-                                me->AddThreat(unit, 5.0f);
-                                break;
-                            }
-                            EnterEvadeMode();
+                            me->getThreatManager().resetAllAggro();
+                            me->AddThreat(unit, 5.0f);
+                            break;
                         }
+
+                        EnterEvadeMode();
+                        break;
                     }
                 }
             }

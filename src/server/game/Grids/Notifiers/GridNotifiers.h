@@ -74,26 +74,26 @@ namespace Trinity
             VisibleNotifier::Visit(m);
         }
 
-        void processCreatureRelocations();
-
     private:
-        CreatureMapType creaturesToRelocate_;
+        CreatureMapType movedInLos_;
     };
 
-    struct CreatureRelocationNotifier
+    class CreatureRelocationNotifier
     {
-        typedef std::vector<Creature *> StorageType;
-        StorageType const &i_creatureList;
-
-        CreatureRelocationNotifier(StorageType const &storage)
-            : i_creatureList(storage)
+    public:
+        CreatureRelocationNotifier(Creature &creature)
+            : me_(&creature)
         { }
 
         void Visit(CreatureMapType &);
         void Visit(PlayerMapType &);
 
         template <typename NotInterested>
-        void Visit(NotInterested &) {}
+        void Visit(NotInterested &) { }
+
+    private:
+        Creature *me_;
+        std::vector<std::pair<Unit *, bool>> movedInLos_;
     };
 
     struct DelayedUnitRelocation
@@ -126,7 +126,7 @@ namespace Trinity
 
     private:
         Unit *unit_;
-        CreatureMapType creaturesInGrid_;
+        std::vector<std::pair<Creature *, bool>> movedInLos_;
     };
 
     struct GridUpdater

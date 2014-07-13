@@ -19,13 +19,8 @@
 #define DB2STORE_H
 
 #include "DB2FileLoader.h"
-#include "DB2fmt.h"
-#include "Log.h"
-#include "Field.h"
-#include "DatabaseWorkerPool.h"
-#include "Implementation/WorldDatabase.h"
-#include "DatabaseEnv.h"
 
+#include <list>
 #include <vector>
 
 template<class T>
@@ -33,6 +28,7 @@ class DB2Storage
 {
     typedef std::list<char*> StringPoolList;
     typedef std::vector<T*> DataTableEx;
+
 public:
     explicit DB2Storage(const char *f) : nCount(0), fieldCount(0), fmt(f), indexTable(NULL), m_dataTable(NULL) { }
     ~DB2Storage() { Clear(); }
@@ -42,28 +38,28 @@ public:
     char const* GetFormat() const { return fmt; }
     uint32 GetFieldCount() const { return fieldCount; }
 
-        /// Copies the provided entry and stores it.
-        void AddEntry(uint32 id, const T* entry)
+    /// Copies the provided entry and stores it.
+    void AddEntry(uint32 id, const T* entry)
+    {
+        if (LookupEntry(id))
+            return;
+
+        if (id >= nCount)
         {
-            if (LookupEntry(id))
-                return;
-
-            if (id >= nCount)
-            {
-                // reallocate index table
-                char** tmpIdxTable = new char*[id+1];
-                memset(tmpIdxTable, 0, (id+1) * sizeof(char*));
-                memcpy(tmpIdxTable, (char*)indexTable, nCount * sizeof(char*));
-                delete[] ((char*)indexTable);
-                nCount = id + 1;
-                indexTable = (T**)tmpIdxTable;
-            }
-
-            T* entryDst = new T;
-            memcpy((char*)entryDst, (char*)entry, sizeof(T));
-            m_dataTableEx.push_back(entryDst);
-            indexTable[id] = entryDst;
+            // reallocate index table
+            char** tmpIdxTable = new char*[id+1];
+            memset(tmpIdxTable, 0, (id+1) * sizeof(char*));
+            memcpy(tmpIdxTable, (char*)indexTable, nCount * sizeof(char*));
+            delete[] ((char*)indexTable);
+            nCount = id + 1;
+            indexTable = (T**)tmpIdxTable;
         }
+
+        T* entryDst = new T;
+        memcpy((char*)entryDst, (char*)entry, sizeof(T));
+        m_dataTableEx.push_back(entryDst);
+        indexTable[id] = entryDst;
+    }
 
     bool Load(char const* fn)
     {

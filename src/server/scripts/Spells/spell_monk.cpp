@@ -2691,24 +2691,28 @@ class spell_monk_touch_of_death : public SpellScriptLoader
 
             SpellCastResult CheckCast()
             {
-                if (GetCaster() && GetExplTargetUnit())
+                Unit * const caster = GetCaster();
+                Unit * const target = GetExplTargetUnit();
+                if (caster && target)
                 {
-                    if (GetCaster()->HasAura(124490))
+                    if (target->GetTypeId() == TYPEID_UNIT)
                     {
-                        if (GetExplTargetUnit()->GetTypeId() == TYPEID_UNIT && GetExplTargetUnit()->ToCreature()->IsDungeonBoss())
+                        // Is boss, or target has more health
+                        if (target->ToCreature()->IsDungeonBoss()
+                            || target->GetHealth() > caster->GetHealth())
+                        {
                             return SPELL_FAILED_BAD_TARGETS;
-                        else if (GetExplTargetUnit()->GetTypeId() == TYPEID_UNIT && (GetExplTargetUnit()->GetHealth() > GetCaster()->GetHealth()))
-                            return SPELL_FAILED_BAD_TARGETS;
-                        else if (GetExplTargetUnit()->GetTypeId() == TYPEID_PLAYER && (GetExplTargetUnit()->GetHealthPct() > 10.0f))
+                        }
+                    }
+
+                    if (caster->HasAura(124490)) // Arena S14 4P bonus
+                    {
+                        if (target->GetTypeId() == TYPEID_PLAYER && (target->GetHealthPct() > 10.0f))
                             return SPELL_FAILED_BAD_TARGETS;
                     }
                     else
                     {
-                        if (GetExplTargetUnit()->GetTypeId() == TYPEID_UNIT && GetExplTargetUnit()->ToCreature()->IsDungeonBoss())
-                            return SPELL_FAILED_BAD_TARGETS;
-                        else if (GetExplTargetUnit()->GetTypeId() == TYPEID_PLAYER)
-                            return SPELL_FAILED_BAD_TARGETS;
-                        else if (GetExplTargetUnit()->GetTypeId() == TYPEID_UNIT && (GetExplTargetUnit()->GetHealth() > GetCaster()->GetHealth()))
+                        if (target->GetTypeId() == TYPEID_PLAYER || target->isPet())
                             return SPELL_FAILED_BAD_TARGETS;
                     }
                     return SPELL_CAST_OK;

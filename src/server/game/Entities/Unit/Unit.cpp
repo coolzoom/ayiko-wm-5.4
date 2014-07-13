@@ -18591,10 +18591,13 @@ void Unit::RemoveVehicleKit(bool dismount/* = false*/)
     if (!m_vehicleKit)
         return;
 
-    m_vehicleKit->Uninstall(dismount);
-    delete m_vehicleKit;
+    // We must reset vehicle kit before Uninstall call, as it can lead to
+    // RemoveVehicleKit again. TODO: may be port vehicle system from 4.3.4?
+    auto vehicleKit = m_vehicleKit;
+    m_vehicleKit = nullptr;
 
-    m_vehicleKit = NULL;
+    vehicleKit->Uninstall(dismount);
+    delete vehicleKit;
 
     m_updateFlag &= ~UPDATEFLAG_VEHICLE;
     m_unitTypeMask &= ~UNIT_MASK_VEHICLE;

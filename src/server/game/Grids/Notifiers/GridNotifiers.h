@@ -112,16 +112,21 @@ namespace Trinity
         void Visit(NotInterested &) {}
     };
 
-    struct AIRelocationNotifier
+    class AIRelocationNotifier
     {
-        Unit &i_unit;
-        bool isCreature;
-        explicit AIRelocationNotifier(Unit &unit) : i_unit(unit), isCreature(unit.GetTypeId() == TYPEID_UNIT)  {}
+    public:
+        explicit AIRelocationNotifier(Unit &unit)
+            : unit_(&unit)
+        { }
 
         void Visit(CreatureMapType &);
 
         template <typename NotInterested>
-        void Visit(NotInterested &) {}
+        void Visit(NotInterested &) { }
+
+    private:
+        Unit *unit_;
+        CreatureMapType creaturesInGrid_;
     };
 
     struct GridUpdater

@@ -242,11 +242,22 @@ void DelayedUnitRelocation::Visit(PlayerMapType &m)
 
 void AIRelocationNotifier::Visit(CreatureMapType &m)
 {
-    for (auto &creature : m)
+    // We must have a copy here, MoveInLineOfSight can do anything, including
+    // spawning/despawning NPCs, that invalidates grid storage
+    creaturesInGrid_ = m;
+
+    if (unit_->GetTypeId() == TYPEID_UNIT)
     {
-        CreatureUnitRelocationWorker(creature, &i_unit);
-        if (isCreature)
-            CreatureUnitRelocationWorker((Creature*)&i_unit, creature);
+        for (auto &creature : creaturesInGrid_)
+        {
+            CreatureUnitRelocationWorker(creature, unit_);
+            CreatureUnitRelocationWorker(static_cast<Creature*>(unit_), creature);
+        }
+    }
+    else
+    {
+        for (auto &creature : creaturesInGrid_)
+            CreatureUnitRelocationWorker(creature, unit_);
     }
 }
 

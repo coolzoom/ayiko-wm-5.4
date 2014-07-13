@@ -115,12 +115,24 @@ bool MySQLConnection::DoOpen()
         // other benefits, allows to set up parallel replication streams
         if (version >= 100010)
         {
-            auto const realm = sConfigMgr->GetIntDefault("RealmID", 0);
+            auto const roleName = sConfigMgr->GetStringDefault("GtidDomain.Role", "");
+            if (!roleName.empty())
+            {
+                char str[128];
 
-            char buf[64];
-            snprintf(buf, sizeof(buf), "SET SESSION gtid_domain_id = %u", realm);
+                BeginTransaction();
 
-            Execute(buf);
+                snprintf(str, sizeof(str), "SET ROLE %s", roleName.c_str());
+                Execute(str);
+
+                auto const realm = sConfigMgr->GetIntDefault("RealmID", 0);
+                snprintf(str, sizeof(str), "SET SESSION gtid_domain_id = %u", realm);
+                Execute(str);
+
+                Execute("SET ROLE NONE");
+
+                CommitTransaction();
+            }
         }
 
         TC_LOG_INFO("sql.sql", "Connected to MySQL database at %s", m_connectionInfo->host.c_str());

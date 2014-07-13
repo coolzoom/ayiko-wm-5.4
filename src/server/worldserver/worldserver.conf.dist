@@ -74,6 +74,14 @@ DataDir = "."
 
 LogsDir = ""
 
+#    GtidDomain.Role
+#        Description: MariaDB 10 specific variable that can be set to name of role with SUPER
+#                     privilege, that is then used to set GTID domain id to realm id, allowing
+#                     MariaDB to parallelize replication stream.
+#        Default:     ""
+
+GtidDomain.Role = ""
+
 #
 #    LoginDatabaseInfo
 #    WorldDatabaseInfo

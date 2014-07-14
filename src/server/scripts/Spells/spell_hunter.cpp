@@ -1229,45 +1229,6 @@ class spell_hun_improved_serpent_sting : public SpellScriptLoader
     public:
         spell_hun_improved_serpent_sting() : SpellScriptLoader("spell_hun_improved_serpent_sting") { }
 
-        class spell_hun_improved_serpent_sting_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_hun_improved_serpent_sting_SpellScript);
-
-            void HandleOnHit()
-            {
-                if (Player* _player = GetCaster()->ToPlayer())
-                {
-                    if (Unit* target = GetHitUnit())
-                    {
-                        if (_player->HasAura(HUNTER_SPELL_IMPROVED_SERPENT_STING_AURA))
-                        {
-                            if (Aura *serpentSting = target->GetAura(HUNTER_SPELL_SERPENT_STING, _player->GetGUID()))
-                            {
-                                if (serpentSting->GetEffect(0))
-                                {
-                                    int32 bp = _player->SpellDamageBonusDone(target, GetSpellInfo(), serpentSting->GetEffect(0)->GetAmount(), DOT);
-                                    bp *= serpentSting->GetMaxDuration() / serpentSting->GetEffect(0)->GetAmplitude();
-                                    bp = CalculatePct(bp, 30);
-
-                                    _player->CastCustomSpell(target, HUNTER_SPELL_IMPROVED_SERPENT_STING, &bp, NULL, NULL, true);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_hun_improved_serpent_sting_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_hun_improved_serpent_sting_SpellScript();
-        }
-
         class spell_hun_improved_serpent_sting_AuraScript : public AuraScript
         {
             PrepareAuraScript(spell_hun_improved_serpent_sting_AuraScript);
@@ -1281,9 +1242,25 @@ class spell_hun_improved_serpent_sting : public SpellScriptLoader
                     GetCaster()->EnergizeBySpell(GetCaster(), HUNTER_SPELL_VIPER_VENOM, 3, POWER_FOCUS);
             }
 
+            void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes)
+            {
+                Unit* const caster = GetCaster();
+                if (!caster)
+                    return;
+
+                if (AuraEffect const* const improvedSting = caster->GetAuraEffect(HUNTER_SPELL_IMPROVED_SERPENT_STING_AURA, EFFECT_0))
+                {
+                    int32 bp = caster->SpellDamageBonusDone(GetTarget(), GetSpellInfo(), aurEff->GetAmount(), DOT);
+                    bp *= aurEff->GetBase()->GetMaxDuration() / aurEff->GetAmplitude();
+                    bp = CalculatePct(bp, improvedSting->GetAmount());
+                    caster->CastCustomSpell(GetTarget(), HUNTER_SPELL_IMPROVED_SERPENT_STING, &bp, NULL, NULL, true);
+                }
+            }
+
             void Register()
             {
                 OnEffectPeriodic += AuraEffectPeriodicFn(spell_hun_improved_serpent_sting_AuraScript::OnTick, EFFECT_0, SPELL_AURA_PERIODIC_HEAL);
+                AfterEffectApply += AuraEffectApplyFn(spell_hun_improved_serpent_sting_AuraScript::OnApply, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
             }
         };
 

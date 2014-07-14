@@ -1754,6 +1754,12 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         target->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
                         break;
                     }
+                    case 53257: // Cobra Strikes
+                    {
+                        if (!onReapply)
+                            ModStackAmount(1);
+                        break;
+                    }
                 }
                 break;
             case SPELLFAMILY_DEATHKNIGHT:

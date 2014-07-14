@@ -16366,6 +16366,25 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
                     StartReactiveTimer(REACTIVE_DEFENSE);
                 }
             }
+            else // For attacker
+            {
+                if ((procExtra & PROC_EX_CRITICAL_HIT) != 0 && isHunterPet())
+                {
+                    // Cobra Strikes
+                    if (procSpell)
+                    {
+                        switch (procSpell->Id)
+                        {
+                        case 16827: // Claw
+                        case 17253: // Bite
+                        case 49966: // Smack
+                            if (Player * const petOwner = ToPet()->GetCharmerOrOwnerPlayerOrPlayerItself())
+                                petOwner->RemoveAuraFromStack(53257);
+                            break;
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -16448,18 +16467,6 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
         || (procSpell->DurationEntry && procSpell->DurationEntry->Duration[0] > 0 && procSpell->DurationEntry->Duration[0] < 4000 && procSpell->AttributesEx & SPELL_ATTR1_CHANNELED_2)))
         if (AuraApplication* aura = GetAuraApplication(108839, GetGUID()))
             aura->GetBase()->DropCharge();
-
-    // Hack Fix Cobra Strikes - Drop charge
-    if (GetTypeId() == TYPEID_UNIT && HasAura(53257) && damage > 0)
-    {
-        if (Aura *aura = GetAura(53257))
-        {
-            aura->DropCharge();
-            if (GetOwner())
-                if (Aura *cobra = GetOwner()->GetAura(53257))
-                    cobra->DropCharge();
-        }
-    }
 
     // Hack Fix Frenzy
     if (GetTypeId() == TYPEID_UNIT && isHunterPet() && GetOwner() && GetOwner()->ToPlayer() && GetOwner()->HasAura(19623) && ToPet()->IsPermanentPetFor(GetOwner()->ToPlayer()) && !procSpell)

@@ -4816,10 +4816,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 45297:
                     spellInfo->MaxLevel = spellInfo->SpellLevel;
                     break;
-                // Silencing Shot
-                case 34490:
-                // Execution Sentence
-                case 114157:
+                case 34490: // Silencing Shot
+                case 114157: // Execution Sentence
+                case 128405: // Narrow Escape
                     spellInfo->Speed = 0;
                     break;
                // Magic Barrier, Lady Vashj

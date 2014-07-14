@@ -804,6 +804,7 @@ class spell_hun_focus_fire : public SpellScriptLoader
                 int32 const amount = aurEff->GetAmount() * aura->GetStackAmount();
                 caster->CastCustomSpell(pet, HUNTER_SPELL_FRENZY_ENERGIZE, &amount, NULL, NULL, true);
                 pet->RemoveAurasDueToSpell(HUNTER_SPELL_FRENZY_STACKS, pet->GetGUID());
+                caster->RemoveAurasDueToSpell(HUNTER_SPELL_FRENZY_STACKS);
             }
 
             void Register()

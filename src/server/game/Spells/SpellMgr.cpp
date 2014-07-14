@@ -5479,6 +5479,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 125195: // Tigereye Brew (Windwalker - stacking)
                     spellInfo->Effects[EFFECT_2].BasePoints = 6;
                     break;
+                case 56315: // Kindred Spirits
+                    spellInfo->Effects[EFFECT_0].TargetB = TARGET_UNIT_PET;
+                    break;
                 default:
                     break;
             }

@@ -107,7 +107,6 @@ enum HunterSpells
     HUNTER_SPELL_TRACK_HUMANOIDS                    = 19883,
     HUNTER_SPELL_TRACK_UNDEAD                       = 19884,
     HUNTER_SPELL_TRACK_HIDDEN                       = 19885,
-    HUNTER_SPELL_VIPER_VENOM                        = 118976,
     HUNTER_SPELL_FETCH                              = 125050,
     HUNTER_SPELL_GLAIVE_TOSS_AURA                   = 117050,
     HUNTER_SPELL_GLAIVE_TOSS_RIGHT                  = 120755,
@@ -1233,15 +1232,6 @@ class spell_hun_improved_serpent_sting : public SpellScriptLoader
         {
             PrepareAuraScript(spell_hun_improved_serpent_sting_AuraScript);
 
-            void OnTick(AuraEffect const * /*aurEff*/)
-            {
-                if (!GetCaster())
-                    return;
-
-                if (GetCaster()->HasAura(HUNTER_SPELL_VIPER_VENOM))
-                    GetCaster()->EnergizeBySpell(GetCaster(), HUNTER_SPELL_VIPER_VENOM, 3, POWER_FOCUS);
-            }
-
             void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes)
             {
                 Unit* const caster = GetCaster();
@@ -1259,7 +1249,6 @@ class spell_hun_improved_serpent_sting : public SpellScriptLoader
 
             void Register()
             {
-                OnEffectPeriodic += AuraEffectPeriodicFn(spell_hun_improved_serpent_sting_AuraScript::OnTick, EFFECT_0, SPELL_AURA_PERIODIC_HEAL);
                 AfterEffectApply += AuraEffectApplyFn(spell_hun_improved_serpent_sting_AuraScript::OnApply, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
             }
         };

@@ -849,10 +849,9 @@ public:
 
             if (me->getVictim() && me->getVictim()->GetPositionZ() >= 286.276f)
             {
-                std::list<HostileReference*> t_list = me->getThreatManager().getThreatList();
-                for (std::list<HostileReference*>::const_iterator itr = t_list.begin(); itr!= t_list.end(); ++itr)
+                for (auto &ref : me->getThreatManager().getThreatList())
                 {
-                    if (Unit* unit = Unit::GetUnit(*me, (*itr)->getUnitGuid()))
+                    if (auto unit = Unit::GetUnit(*me, ref->getUnitGuid()))
                     {
                         if (unit->GetPositionZ() <= 286.276f)
                         {
@@ -860,7 +859,9 @@ public:
                             me->AddThreat(unit, 5.0f);
                             break;
                         }
+
                         EnterEvadeMode();
+                        break;
                     }
                 }
             }
@@ -1123,10 +1124,9 @@ public:
 
             if (me->getVictim() && me->getVictim()->GetPositionZ() >= 286.276f)
             {
-                std::list<HostileReference*> t_list = me->getThreatManager().getThreatList();
-                for (std::list<HostileReference*>::const_iterator itr = t_list.begin(); itr!= t_list.end(); ++itr)
+                for (auto &ref : me->getThreatManager().getThreatList())
                 {
-                    if (Unit* unit = Unit::GetUnit(*me, (*itr)->getUnitGuid()))
+                    if (auto unit = Unit::GetUnit(*me, ref->getUnitGuid()))
                     {
                         if (unit->GetPositionZ() <= 286.276f)
                         {
@@ -1134,7 +1134,9 @@ public:
                             me->AddThreat(unit, 5.0f);
                             break;
                         }
+
                         EnterEvadeMode();
+                        break;
                     }
                 }
             }

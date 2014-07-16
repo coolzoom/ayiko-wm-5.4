@@ -3454,7 +3454,7 @@ Aura *Unit::_TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint3
             if (foundAura->GetId() == 980)
             {
                 foundAura->RefreshSpellMods();
-                foundAura->RefreshTimers();
+                foundAura->RefreshTimers(true);
             }
 
             return foundAura;

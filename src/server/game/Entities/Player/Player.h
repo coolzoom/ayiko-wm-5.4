@@ -48,8 +48,6 @@
 // for template
 #include "SpellMgr.h"
 
-#include <ace/Stack_Trace.h>
-
 #include <string>
 #include <vector>
 #include <unordered_map>

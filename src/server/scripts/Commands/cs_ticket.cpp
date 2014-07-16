@@ -30,6 +30,7 @@ EndScriptData */
 #include "Player.h"
 #include "TicketMgr.h"
 #include "ScriptMgr.h"
+#include "ObjectAccessor.h"
 
 class ticket_commandscript : public CommandScript
 {

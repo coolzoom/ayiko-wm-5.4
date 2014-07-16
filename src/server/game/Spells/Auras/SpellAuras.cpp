@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "SpellAuras.h"
 #include "Common.h"
 #include "WorldPacket.h"
 #include "Opcodes.h"
@@ -671,6 +672,7 @@ void Aura::_Remove(AuraRemoveMode removeMode)
 {
     ASSERT (!m_isRemoved);
     m_isRemoved = true;
+
     ApplicationMap::iterator appItr = m_applications.begin();
     for (appItr = m_applications.begin(); appItr != m_applications.end();)
     {
@@ -980,7 +982,7 @@ void Aura::RefreshDuration(bool recalculate)
         RecalculateAmountOfEffects();
 }
 
-void Aura::RefreshTimers()
+void Aura::RefreshTimers(bool recalculate)
 {
     m_maxDuration = CalcMaxDuration();
     bool resetPeriodic = true;
@@ -1003,7 +1005,8 @@ void Aura::RefreshTimers()
     if (m_spellInfo->AttributesCu & SPELL_ATTR0_CU_DONT_RESET_PERIODIC_TIMER)
         resetPeriodic = false;
 
-    RefreshDuration();
+    RefreshDuration(recalculate);
+
     Unit* caster = GetCaster();
     for (uint8 i = 0; i < GetSpellInfo()->Effects.size(); ++i)
         if (HasEffect(i))
@@ -1115,7 +1118,7 @@ bool Aura::ModStackAmount(int32 num, AuraRemoveMode removeMode)
     if (refresh)
     {
         RefreshSpellMods();
-        RefreshTimers();
+        RefreshTimers(false);
 
         auto charges = CalcMaxCharges();
         CallScriptRefreshChargesHandlers(charges);

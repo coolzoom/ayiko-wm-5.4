@@ -4135,6 +4135,13 @@ void AuraEffect::HandleModStateImmunityMask(AuraApplication const* aurApp, uint8
                     | (1 << MECHANIC_POLYMORPH) | (1 << MECHANIC_DISORIENTED)
                     | (1 << MECHANIC_FREEZE) | (1 << MECHANIC_TURN);
 
+                // Bladestorm gives Disarm immunity too
+                if (GetId() == 46924)
+                {
+                    mechanic_immunity_list |= (1 << MECHANIC_DISARM);
+                    target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_DISARM, apply);
+                }
+
                 target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_SNARE, apply);
                 target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_ROOT, apply);
                 target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_FEAR, apply);

@@ -28,6 +28,7 @@
 #include "Player.h"
 #include "CreatureAI.h"
 #include "Spell.h"
+#include "RelocationNotifiers.hpp"
 
 namespace Trinity
 {
@@ -76,40 +77,6 @@ namespace Trinity
 
     private:
         CreatureMapType movedInLos_;
-    };
-
-    class CreatureRelocationNotifier
-    {
-    public:
-        CreatureRelocationNotifier(Creature &creature)
-            : me_(&creature)
-        { }
-
-        void Visit(CreatureMapType &);
-        void Visit(PlayerMapType &);
-
-        template <typename NotInterested>
-        void Visit(NotInterested &) { }
-
-    private:
-        Creature *me_;
-        std::vector<std::pair<Unit *, bool>> movedInLos_;
-    };
-
-    struct DelayedUnitRelocation
-    {
-        Map &i_map;
-        Cell &cell;
-        CellCoord &p;
-        const float i_radius;
-        DelayedUnitRelocation(Cell &c, CellCoord &pair, Map &map, float radius) :
-            i_map(map), cell(c), p(pair), i_radius(radius) {}
-
-        void Visit(CreatureMapType &);
-        void Visit(PlayerMapType &);
-
-        template <typename NotInterested>
-        void Visit(NotInterested &) {}
     };
 
     class AIRelocationNotifier

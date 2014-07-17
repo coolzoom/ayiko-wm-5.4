@@ -683,10 +683,7 @@ void Map::ProcessRelocationNotifies(uint32 diff)
                 Cell cell(pair);
                 cell.SetNoCreate();
 
-                Trinity::DelayedUnitRelocation cellRelocation(cell, pair, *this, MAX_VISIBILITY_DISTANCE);
-
-                Visit(cell, Trinity::makeGridVisitor(cellRelocation));
-                Visit(cell, Trinity::makeWorldVisitor(cellRelocation));
+                delayedUnitRelocation_(*this, cell, pair, MAX_VISIBILITY_DISTANCE);
 
                 Visit(cell, gridResetNotifier);
                 Visit(cell, worldResetNotifier);

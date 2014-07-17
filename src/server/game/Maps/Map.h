@@ -30,6 +30,7 @@
 #include "GameObjectModel.h"
 #include "NGrid.h"
 #include "ScriptInfo.hpp"
+#include "RelocationNotifiers.hpp"
 
 #include <bitset>
 #include <list>
@@ -636,6 +637,8 @@ class Map
         std::unordered_map<uint32 /*dbGUID*/, time_t> _goRespawnTimes;
 
         ObjectUpdater i_objectUpdater;
+
+        Trinity::DelayedUnitRelocation delayedUnitRelocation_;
 };
 
 enum InstanceResetMethod

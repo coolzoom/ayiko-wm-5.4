@@ -12329,10 +12329,6 @@ float Unit::GetSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolM
                                 // ... has a 60% increased chance to be a critical strike.
                                 crit_chance += 60.0f;
                                 break;
-                            case 23881: // Bloodthirst ...
-                                // ... has double critical chance
-                                crit_chance *= 2;
-                                break;
                             case 118000:// Dragon Roar ...
                                 // ... is always a critical hit
                                 return 100.0f;
@@ -12382,6 +12378,9 @@ float Unit::GetSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolM
         // Mind Blast & Mind Spike debuff
         if (spellProto->Id == 8092)
             victim->RemoveAurasDueToSpell(87178, GetGUID());
+        // Bloodthirst
+        else if (spellProto->Id == 23881)
+            crit_chance *= 2;
     }
 
     // percent done

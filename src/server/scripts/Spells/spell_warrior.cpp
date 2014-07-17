@@ -1411,6 +1411,44 @@ public:
     }
 };
 
+class spell_warr_glyph_of_die_by_the_sword : public SpellScriptLoader
+{
+public:
+    spell_warr_glyph_of_die_by_the_sword() : SpellScriptLoader("spell_warr_glyph_of_die_by_the_sword") { }
+
+    class script_impl : public AuraScript
+    {
+        PrepareAuraScript(script_impl);
+
+        void OnProc(AuraEffect const * /*aurEff*/, ProcEventInfo& eventInfo)
+        {
+            Unit * const caster = GetCaster();
+            if (!caster || !eventInfo.GetSpellInfo())
+                return;
+
+            Aura * const aura = caster->GetAura(118038);
+            if (!aura)
+                return;
+
+            // Overpower
+            if (eventInfo.GetSpellInfo()->Id == 7384)
+                aura->SetDuration(aura->GetDuration() + 1000);
+            else // Wild Strike
+                aura->SetDuration(aura->GetDuration() + 500);
+        }
+
+        void Register()
+        {
+            OnEffectProc += AuraEffectProcFn(script_impl::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new script_impl();
+    }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_victorious_state();
@@ -1448,4 +1486,5 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_bloodbath_bleed();
     new spell_warr_riposte();
     new spell_warr_revenge_shield_slam();
+    new spell_warr_glyph_of_die_by_the_sword();
 }

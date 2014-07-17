@@ -6431,7 +6431,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                 // Glyph of Colossus Smash
                 case 89003:
                 {
-                    triggered_spell_id = 58567;
+                    triggered_spell_id = 113746;
                     break;
                 }
             }

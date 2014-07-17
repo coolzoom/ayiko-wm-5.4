@@ -1420,6 +1420,44 @@ public:
     }
 };
 
+// 7384 - Overpower
+class spell_warr_overpower : public SpellScriptLoader
+{
+public:
+    spell_warr_overpower() : SpellScriptLoader("spell_warr_overpower") { }
+
+    class script_impl : public SpellScript
+    {
+        PrepareSpellScript(script_impl);
+
+        enum
+        {
+            MORTAL_STRIKE           = 12294
+        };
+
+        void HandleCast(SpellEffIndex effIndex)
+        {
+            Player * player = GetCaster()->ToPlayer();
+            if (!player)
+                return;
+
+            // Reduce Mortal Strike cooldown by 0.5 sec
+            if (player->HasSpellCooldown(MORTAL_STRIKE))
+                player->ReduceSpellCooldown(MORTAL_STRIKE, 500);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(script_impl::HandleCast, EFFECT_0, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new script_impl();
+    }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_victorious_state();
@@ -1457,4 +1495,5 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_riposte();
     new spell_warr_revenge_shield_slam();
     new spell_warr_glyph_of_die_by_the_sword();
+    new spell_warr_overpower();
 }

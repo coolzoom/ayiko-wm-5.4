@@ -4912,12 +4912,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 53184:
                     spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_ADD_PCT_MODIFIER;
                     break;
-                // Glyph of Fear
-                case 56244:
-                    spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_ADD_FLAT_MODIFIER;
-                    spellInfo->Effects[EFFECT_0].BasePoints = 5000;
-                    spellInfo->Effects[EFFECT_0].MiscValue = SPELLMOD_COOLDOWN;
-                    break;
                 // Eclipse markers
                 case 67484:
                 case 67483:

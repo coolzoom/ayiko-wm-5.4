@@ -1,0 +1,3 @@
+-- [SQL] [Kysio's report] Exploits - Alterac Valley: Tower Point Warmaster/Marshall will now be immune to mind control (Fixes #4274)
+UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'mob_av_marshal_or_warmaster', `mechanic_immune_mask` = `mechanic_immune_mask`|1 WHERE `entry` IN (14776, 14767);
+UPDATE `creature_template` SET `AIName` = '', `ScriptName` = '', `mechanic_immune_mask` = `mechanic_immune_mask`|1 WHERE `entry` IN (22580, 31909, 37435, 22579, 31908, 37434);

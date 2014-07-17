@@ -1487,10 +1487,18 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
         values.AddSpellMod(SPELLVALUE_BASE_POINT2, damage);
     }
 
-    // Remove spell cooldown (not category) if spell triggering spell with cooldown and same category
-    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->CategoryRecoveryTime && spellInfo->CategoryRecoveryTime
-        && m_spellInfo->Category == spellInfo->Category)
-        m_caster->ToPlayer()->RemoveSpellCooldown(spellInfo->Id);
+    // Remove spell cooldown (not category) if spell triggers spell with cooldown
+    // and same category or spell cast is due to item usage. Item spells do not
+    // have categories in DBC files.
+    if (Player * const playerCaster = m_caster->ToPlayer())
+    {
+        bool const shouldRemoveCooldown = m_spellInfo->CategoryRecoveryTime
+                && spellInfo->CategoryRecoveryTime
+                && m_spellInfo->Category == spellInfo->Category;
+
+        if (shouldRemoveCooldown || m_CastItem)
+            playerCaster->RemoveSpellCooldown(spellInfo->Id);
+    }
 
     // original caster guid only for GO cast
     m_caster->CastSpell(targets, spellInfo, &values, TRIGGERED_FULL_MASK, NULL, NULL, m_originalCasterGUID);

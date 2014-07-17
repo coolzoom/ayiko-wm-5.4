@@ -1,5 +1,6 @@
 #include "RelocationNotifiers.hpp"
 #include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
 #include "Creature.h"
 #include "CreatureAI.h"
 #include "Player.h"

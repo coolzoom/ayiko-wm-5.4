@@ -2729,6 +2729,15 @@ bool SpellInfo::_IsPositiveEffect(uint8 effIndex, bool deep) const
                     break;
             }
             break;
+        case SPELLFAMILY_WARRIOR:
+            switch (Id)
+            {
+                // Glyph of Mortal Strike
+                case 58368:
+                    return true;
+                default:
+                    break;
+            }
         default:
             break;
     }

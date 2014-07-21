@@ -1786,6 +1786,15 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         break;
                 }
 
+                // Switching presence resets power to 0 or 70% with Glyph of Shifting Presences
+                if (GetSpellInfo()->GetSpellSpecific() == SPELL_SPECIFIC_PRESENCE)
+                {
+                    if (AuraEffect const * const glyph = target->GetAuraEffect(58647, EFFECT_0))
+                        target->SetPower(POWER_RUNIC_POWER, CalculatePct(target->GetPower(POWER_RUNIC_POWER), glyph->GetAmount()));
+                    else
+                        target->SetPower(POWER_RUNIC_POWER, 0);
+                }
+
                 break;
             }
             default:

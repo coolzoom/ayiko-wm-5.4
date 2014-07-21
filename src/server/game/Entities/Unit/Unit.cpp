@@ -6434,6 +6434,12 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                     triggered_spell_id = 113746;
                     break;
                 }
+                // Glyph of the Raging Whirlwind
+                case 146968:
+                {
+                    triggered_spell_id = 147297;
+                    break;
+                }
             }
 
             // Retaliation

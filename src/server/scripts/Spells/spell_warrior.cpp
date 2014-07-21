@@ -1232,6 +1232,7 @@ public:
     }
 };
 
+// 12292 - Bloodbath
 class spell_warr_bloodbath final : public SpellScriptLoader
 {
     class script_impl final : public AuraScript
@@ -1256,7 +1257,7 @@ class spell_warr_bloodbath final : public SpellScriptLoader
             auto const caster = eventInfo.GetActor();
             auto const target = eventInfo.GetActionTarget();
 
-            if (!caster || !target)
+            if (!caster || !target || caster == target)
                 return;
 
             auto const damage = eventInfo.GetDamageInfo()->GetDamage();

@@ -1467,6 +1467,7 @@ bool SpellInfo::CanCritDamageClassNone() const
         case 108000: // Item - Windward Heart lfr
         case 109822: // Item - Windward Heart normal
         case 119611: // Renewing Mist
+        case 102352: // Cenarion Ward
             return true;
     }
     return false;

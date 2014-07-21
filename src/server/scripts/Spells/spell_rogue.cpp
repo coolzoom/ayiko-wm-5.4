@@ -593,8 +593,8 @@ class spell_rog_cut_to_the_chase : public SpellScriptLoader
                 if (Player* player = GetCaster()->ToPlayer())
                     if (GetHitUnit())
                         if (player->HasAura(ROGUE_SPELL_CUT_TO_THE_CHASE_AURA))
-                            if (Aura *sliceAndDice = player->GetAura(ROGUE_SPELL_SLICE_AND_DICE, player->GetGUID()))
-                                sliceAndDice->SetDuration(sliceAndDice->GetMaxDuration());
+                            if (Aura * const sliceAndDice = player->GetAura(ROGUE_SPELL_SLICE_AND_DICE, player->GetGUID()))
+                                sliceAndDice->SetDuration(sliceAndDice->GetSpellInfo()->GetMaxDuration(), true);
             }
 
             void Register()

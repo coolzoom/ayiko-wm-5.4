@@ -38,7 +38,7 @@ enum MasterySpells
     SPELL_DK_SCENT_OF_BLOOD             = 50421,
 };
 
-// Called by Power Word : Shield - 17, Power Word : Shield (Divine Insight) - 123258, Angelic Bulwark - 114214
+// Called by Power Word : Shield (Divine Insight) - 123258, Angelic Bulwark - 114214
 // Mastery : Shield Discipline - 77484
 class spell_mastery_shield_discipline : public SpellScriptLoader
 {

@@ -2606,6 +2606,8 @@ class spell_pri_power_word_shield : public SpellScriptLoader
             RAPTURE_TALENT              = 47536,
             RAPTURE_ENERGIZE            = 47755,
             RAPTURE_MARKER              = 63853,
+
+            MASTERY_SPELL_DISCIPLINE_SHIELD     = 77484,
         };
 
         bool Validate(SpellInfo const* /*spellInfo*/)
@@ -2653,10 +2655,31 @@ class spell_pri_power_word_shield : public SpellScriptLoader
             }
         }
 
+        void CalculateAmount(AuraEffect const *, int32 & amount, bool & )
+        {
+            Unit * const caster = GetCaster();
+            if (!caster)
+                return;
+
+            if (Player const * const player = caster->ToPlayer())
+            {
+                if (player->HasAura(MASTERY_SPELL_DISCIPLINE_SHIELD) && player->getLevel() >= 80)
+                {
+                    float Mastery = 1 + (player->GetFloatValue(PLAYER_MASTERY) * 2.5f / 100.0f);
+                    amount = int32(amount * Mastery);
+                }
+                // Divine Aegis
+                if (AuraEffect const * const aegis = player->GetAuraEffect(47515, EFFECT_0))
+                    if (roll_chance_f(player->GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + GetFirstSchoolInMask(GetSpellInfo()->GetSchoolMask()))))
+                        amount *= 2;
+            }
+        }
+
         void Register()
         {
             AfterEffectAbsorb += AuraEffectAbsorbFn(script_impl::ReflectDamage, EFFECT_0);
             AfterEffectRemove += AuraEffectRemoveFn(script_impl::AfterRemove, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB, AURA_EFFECT_HANDLE_REAL);
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(script_impl::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
         }
     };
 

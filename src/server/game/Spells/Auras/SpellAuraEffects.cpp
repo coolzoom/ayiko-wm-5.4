@@ -956,9 +956,13 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                 }
                 case 114163:// Eternal Flame
                 {
-                    amount += int32(0.0585f * caster->SpellBaseDamageBonusDone(SpellSchoolMask(m_spellInfo->SchoolMask)));
+                    amount += int32(0.0819f * caster->SpellBaseDamageBonusDone(SpellSchoolMask(m_spellInfo->SchoolMask)));
 
                     int32 holyPower = caster->GetPower(POWER_HOLY_POWER) + 1;
+
+                    // Bonus from self-cast
+                    if (caster == GetBase()->GetUnitOwner())
+                        AddPct(amount, GetSpellInfo()->Effects[EFFECT_2].BasePoints);
 
                     if (holyPower > 3)
                         holyPower = 3;

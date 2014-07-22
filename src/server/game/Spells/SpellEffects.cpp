@@ -2057,8 +2057,17 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
 
         switch (m_spellInfo->Id)
         {
-            case 19750: // Selfless Healer
+            // Selfless Healer
+            case 19750: // Flash of Light
+            case 82326: // Divine Light (Holy Spec)
+            case 82327: // Holy Radiance (Holy Spec)
             {
+                // Other spells require active Holy Spec
+                if (m_spellInfo->Id != 19750)
+                    if (Player const * const player = caster->ToPlayer())
+                        if (player->GetSpecializationId(player->GetActiveSpec()) != SPEC_PALADIN_HOLY)
+                            break;
+
                 if (AuraEffect const * const selflessHealer = caster->GetAuraEffect(114250, EFFECT_1))
                     if (unitTarget->GetGUID() != caster->GetGUID())
                         AddPct(addhealth, selflessHealer->GetAmount());

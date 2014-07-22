@@ -1408,43 +1408,6 @@ void AuraEffect::CalculateSpellMod()
                     // Increases Parry chance by 100% while channeling Fists of Fury
                     m_spellmod->mask = sSpellMgr->GetSpellInfo(113686)->SpellFamilyFlags;
                     break;
-                case 114232:// Sanctified Wrath
-                {
-                    if (!GetCaster())
-                        break;
-
-                    Player* _player = GetCaster()->ToPlayer();
-                    if (!_player)
-                        break;
-
-                    switch (_player->GetSpecializationId(_player->GetActiveSpec()))
-                    {
-                        case SPEC_PALADIN_HOLY: // Holy Shock - Effect 0 : Cooldown
-                        {
-                            if (m_effIndex != 0)
-                                m_spellmod->value = 0;
-
-                            break;
-                        }
-                        case SPEC_PALADIN_PROTECTION: // Judgement - Effect 1 : Cooldown ...
-                        {
-                            if (m_effIndex != 1)
-                                m_spellmod->value = 0;
-
-                            break;
-                        }
-                        case SPEC_PALADIN_RETRIBUTION: // Hammer of Wrath - Effect 2 : Cooldown
-                        {
-                            if (m_effIndex != 2)
-                                m_spellmod->value = 0;
-
-                            break;
-                        }
-                        default:
-                            break;
-                    }
-                    break;
-                }
                 default:
                     break;
             }

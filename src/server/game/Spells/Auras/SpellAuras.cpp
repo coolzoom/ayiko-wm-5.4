@@ -1221,6 +1221,7 @@ bool Aura::CanBeSaved() const
         case 28801: // Slime, Naxxramas
         case 125667: // Second Wind dummy
         case 111757: // Glyph of Levitate Speed Bonus
+        case 114232: // Sanctified Wrath bonus
             return false;
         default:
             break;
@@ -2182,6 +2183,12 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         else
                             target->RemoveAurasDueToSpell(71166);
                     }
+                    break;
+                case 53376: //Sanctified Wrath
+                    if (apply)
+                        target->CastSpell(target, 114232, true);
+                    else
+                        target->RemoveAurasDueToSpell(114232);
                     break;
             }
             break;

@@ -1227,6 +1227,11 @@ class spell_pal_judgment : public SpellScriptLoader
                         if (_player->HasAura(PALADIN_SPELL_JUDGMENTS_OF_THE_BOLD) || _player->HasAura(PALADIN_SPELL_JUDGMENTS_OF_THE_WISE))
                         {
                             int32 power = 1;
+
+                            // Sanctified Wrath with Protection Spec
+                            if (_player->HasAura(114232) && _player->GetSpecializationId(_player->GetActiveSpec()) == SPEC_PALADIN_PROTECTION)
+                                power = 2;
+
                             if (_player->HasAura(PALADIN_SPELL_HOLY_AVENGER))
                                 power = 3;
 
@@ -1785,6 +1790,52 @@ public:
     }
 };
 
+// Sanctified Wrath - 114232
+class spell_pal_sanctified_wrath final : public SpellScriptLoader
+{
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        void initEffects(uint32 &effectMask)
+        {
+            auto const caster = GetCaster();
+            if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            auto const player = caster->ToPlayer();
+
+            switch(player->GetSpecializationId(player->GetActiveSpec()))
+            {
+                case SPEC_PALADIN_HOLY:
+                    effectMask &= ~((1 << EFFECT_1) | (1 << EFFECT_2) | (1 << EFFECT_3));
+                    break;
+                case SPEC_PALADIN_PROTECTION:
+                    effectMask &= ~((1 << EFFECT_0) | (1 << EFFECT_2) | (1 << EFFECT_4));
+                    break;
+                case SPEC_PALADIN_RETRIBUTION:
+                    effectMask &= ~((1 << EFFECT_0) | (1 << EFFECT_1) | (1 << EFFECT_3) | (1 << EFFECT_4));
+                    break;
+            }
+        }
+
+        void Register() final
+        {
+            OnInitEffects += AuraInitEffectsFn(script_impl::initEffects);
+        }
+    };
+
+public:
+    spell_pal_sanctified_wrath()
+        : SpellScriptLoader("spell_pal_sanctified_wrath")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
+};
+
 void AddSC_paladin_spell_scripts()
 {
     new spell_pal_glyph_of_devotian_aura();
@@ -1829,4 +1880,5 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_holy_wrath();
     new spell_pal_exorcism();
     new spell_pal_hammer_of_wrath();
+    new spell_pal_sanctified_wrath();
 }

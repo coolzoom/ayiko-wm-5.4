@@ -17312,14 +17312,6 @@ void Unit::ApplyAttackTimePercentMod(WeaponAttackType att, float val, bool apply
         }
     }
 
-    if (GetTypeId() == TYPEID_PLAYER)
-    {
-        // Sanctity of Battle - update hacked spellmods
-        AuraEffectList const& hasteCooldownAura = GetAuraEffectsByType(SPELL_AURA_SANCTITY_OF_BATTLE);
-        for (AuraEffectList::const_iterator i = hasteCooldownAura.begin(); i != hasteCooldownAura.end(); ++i)
-            (*i)->ChangeAmount((*i)->CalculateAmount((*i)->GetCaster()), false, true);
-    }
-
     m_attackTimer[att] = uint32(GetAttackTime(att) * m_modAttackSpeedPct[att] * remainingTimePct);
 }
 
@@ -17329,6 +17321,18 @@ void Unit::ApplyCastTimePercentMod(float val, bool apply)
         ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED, val, !apply);
     else
         ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED, -val, apply);
+
+    const AuraEffectList &aList = GetAuraEffectsByType(SPELL_AURA_SANCTITY_OF_BATTLE);
+    if(!aList.empty())
+    {
+        for(AuraEffectList::const_iterator itr = aList.begin(); itr != aList.end(); ++itr)
+        {
+            (*itr)->ApplySpellMod((*itr)->GetBase()->GetUnitOwner(), false);
+            (*itr)->CalculateSpellMod();
+            (*itr)->ApplySpellMod((*itr)->GetBase()->GetUnitOwner(), true);
+            printf("\n ! val is %i ! \n ", (*itr)->GetSpellModifier()->value);
+        }
+    }
 }
 
 uint32 Unit::GetCastingTimeForBonus(SpellInfo const* spellProto, DamageEffectType damagetype, uint32 CastingTime) const

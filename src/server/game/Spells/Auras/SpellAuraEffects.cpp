@@ -1387,6 +1387,7 @@ void AuraEffect::CalculateSpellMod()
             break;
         case SPELL_AURA_ADD_FLAT_MODIFIER:
         case SPELL_AURA_ADD_PCT_MODIFIER:
+        {
             if (!m_spellmod)
             {
                 m_spellmod = SpellModifier::create(this);
@@ -1413,28 +1414,18 @@ void AuraEffect::CalculateSpellMod()
             }
 
             break;
+        }
         case SPELL_AURA_SANCTITY_OF_BATTLE:
         {
-            if (!GetCaster()->ToPlayer())
-                break;
-
-            if (!m_spellmod)
+            if(!m_spellmod)
             {
                 m_spellmod = SpellModifier::create(this);
                 m_spellmod->op = SPELLMOD_COOLDOWN;
                 m_spellmod->type = SPELLMOD_PCT;
-                m_spellmod->mask[1] = 0x04248082;
-                m_spellmod->mask[0] = 0x00804020;
+                m_spellmod->mask = m_spellInfo->Effects[m_effIndex].SpellClassMask;
             }
-            float haste = GetCaster()->ToPlayer()->GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_HASTE_MELEE) * GetCaster()->ToPlayer()->GetRatingMultiplier(CR_HASTE_MELEE);
-            if (int32(haste) > 100)
-                haste = 100.0f;
 
-            float newValue = -int32(haste);
-            if (newValue > 0)
-                newValue = 0;
-            m_spellmod->value = newValue;
-            break;
+            m_spellmod->value = GetBase()->GetUnitOwner()->GetFloatValue(UNIT_MOD_CAST_SPEED) * GetAmount() - 100;
         }
         default:
             break;

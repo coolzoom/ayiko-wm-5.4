@@ -279,34 +279,36 @@ class spell_pal_hand_of_purity : public SpellScriptLoader
         }
 };
 
-// Called by Avenging Wrath - 31884
+// Avenging Wrath - 31884
 // Glyph of Avenging Wrath - 54927
-class spell_pal_glyph_of_avenging_wrath : public SpellScriptLoader
+class spell_pal_glyph_of_avenging_wrath final : public SpellScriptLoader
 {
-    public:
-        spell_pal_glyph_of_avenging_wrath() : SpellScriptLoader("spell_pal_glyph_of_avenging_wrath") { }
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
 
-        class spell_pal_glyph_of_avenging_wrath_SpellScript : public SpellScript
+        void initEffects(uint32 &effectMask)
         {
-            PrepareSpellScript(spell_pal_glyph_of_avenging_wrath_SpellScript);
-
-            void HandleOnHit()
-            {
-                if (Player* _player = GetCaster()->ToPlayer())
-                    if (_player->HasAura(PALADIN_SPELL_GLYPH_OF_AVENGING_WRATH))
-                        _player->CastSpell(_player, PALADIN_SPELL_AVENGING_WRATH_REGEN_BY_GLYPH, true);
-            }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_pal_glyph_of_avenging_wrath_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_pal_glyph_of_avenging_wrath_SpellScript();
+            auto const caster = GetCaster();
+            if (!caster || !caster->HasAura(PALADIN_SPELL_GLYPH_OF_AVENGING_WRATH))
+                effectMask &= ~(1 << EFFECT_2);
         }
+
+        void Register() final
+        {
+            OnInitEffects += AuraInitEffectsFn(script_impl::initEffects);
+        }
+    };
+
+public:
+    spell_pal_glyph_of_avenging_wrath()
+        : SpellScriptLoader("spell_pal_glyph_of_avenging_wrath")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
 };
 
 // Shield of the Righteous - 53600

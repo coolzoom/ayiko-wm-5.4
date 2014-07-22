@@ -9687,7 +9687,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
         case 115946:// Glyph of Burning Anger
         case 88821: // Daybreak
         case 131542:// Relentless Grip
-        case 56420: // Glyph of Denounce
         case 126046:// Adaptation
             return false;
         case 35551: // Combat Potency

@@ -1796,8 +1796,13 @@ class spell_sha_lava_lash : public SpellScriptLoader
 
             // Spreading your Flame shock from the target to up to four enemies
             // within 12 yards. Effect deactivated if has Glyph of Lava Lash
-            if (player->HasAura(55444) || !target->HasAura(SPELL_SHA_FLAME_SHOCK))
+
+            if (player->HasAura(55444))
                 return;
+
+             Aura const * const flameShock = target->GetAura(SPELL_SHA_FLAME_SHOCK, player->GetGUID());
+             if (!flameShock)
+                 return;
 
             // Find all the enemies
             std::list<Unit*> targets;
@@ -1809,7 +1814,7 @@ class spell_sha_lava_lash : public SpellScriptLoader
             for (std::list<Unit*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
             {
                 // Do not check unattackable targets
-                if (!(*iter)->isTargetableForAttack())
+                if (!(*iter)->isTargetableForAttack() || target->GetGUID() == (*iter)->GetGUID())
                     continue;
 
                 if (++count > 4)
@@ -1817,7 +1822,9 @@ class spell_sha_lava_lash : public SpellScriptLoader
                 // Hack to initiate attack as AddAura does not do that
                 if (Creature * const c = (*iter)->ToCreature())
                     c->AI()->AttackStart(player);
-                player->AddAura(8050, *iter);
+
+                if (Aura * const newAura = player->AddAura(SPELL_SHA_FLAME_SHOCK, *iter))
+                    newAura->SetDuration(flameShock->GetDuration());
             }
         }
 

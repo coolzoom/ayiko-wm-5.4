@@ -1477,35 +1477,55 @@ class spell_sha_earthquake : public SpellScriptLoader
         }
 };
 
-// Healing Rain - 73920
+// 73920 - Healing Rain
 class spell_sha_healing_rain : public SpellScriptLoader
 {
-    public:
-        spell_sha_healing_rain() : SpellScriptLoader("spell_sha_healing_rain") { }
+    class script_impl : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
 
-        class spell_sha_healing_rain_AuraScript : public AuraScript
+            enum
         {
-            PrepareAuraScript(spell_sha_healing_rain_AuraScript);
-
-            void OnTick(AuraEffect const * /*aurEff*/)
-            {
-                if (!GetCaster())
-                    return;
-
-                if (DynamicObject* dynObj = GetCaster()->GetDynObject(SPELL_SHA_HEALING_RAIN))
-                    GetCaster()->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), SPELL_SHA_HEALING_RAIN_TICK, true);
-            }
-
-            void Register()
-            {
-                OnEffectPeriodic += AuraEffectPeriodicFn(spell_sha_healing_rain_AuraScript::OnTick, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
-            }
+            SPELL_HEALING_RAIN      = 73920,
+            SPELL_HEALING_RAIN_HEAL = 73921
         };
 
-        AuraScript* GetAuraScript() const
+        Position healCastPos;
+
+        bool Load()
         {
-            return new spell_sha_healing_rain_AuraScript();
+            Unit * const caster = GetCaster();
+            if (!caster)
+                return false;
+
+            DynamicObject const* const obj = caster->GetDynObject(SPELL_HEALING_RAIN);
+            if (!obj)
+                return false;
+
+            obj->GetPosition(&healCastPos);
+            return true;
         }
+
+        void HandlePeriodic(AuraEffect const *)
+        {
+            GetCaster()->CastSpell(healCastPos.GetPositionX(), healCastPos.GetPositionY(), healCastPos.GetPositionZ(), SPELL_HEALING_RAIN_HEAL, true);
+        }
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(script_impl::HandlePeriodic, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
+        }
+    };
+
+public:
+    spell_sha_healing_rain()
+        : SpellScriptLoader("spell_sha_healing_rain")
+    { }
+
+    AuraScript * GetAuraScript() const
+    {
+        return new script_impl;
+    }
 };
 
 // Ascendance - 114049

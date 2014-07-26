@@ -3611,21 +3611,6 @@ bool SpellInfo::IsNeedAdditionalLosChecks() const
     return false;
 }
 
-bool SpellInfo::IsRequireAdditionalTargetCheck() const
-{
-    switch (Id)
-    {
-        case 2812: // Holy Wrath
-            return false;
-        case 103327: // Hour of Twilight dmg, Ultraxion, Dragon Soul
-            return false;
-        default:
-            break;
-    }
-
-    return true;
-}
-
 bool SpellInfo::IsBreakingStealth(Unit* m_caster) const
 {
     if (m_caster && m_caster->HasAura(115192))

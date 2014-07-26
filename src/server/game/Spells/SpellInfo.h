@@ -532,7 +532,6 @@ public:
     float GetGiftOfTheSerpentScaling(Unit* caster) const;
 
     bool IsIgnoringCombat() const;
-    bool IsRequireAdditionalTargetCheck() const;
     bool IsNeedToCheckSchoolImmune() const;
     bool IsRemoveLossControlEffects() const;
     bool DoesIgnoreGlobalCooldown(Unit* caster) const;

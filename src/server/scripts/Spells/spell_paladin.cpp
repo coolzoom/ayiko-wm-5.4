@@ -1184,6 +1184,10 @@ class spell_pal_judgment : public SpellScriptLoader
                 {
                     if (Unit* unitTarget = GetHitUnit())
                     {
+                        // Selfless Healer in Holy Spec
+                        if (_player->HasAura(85804) && _player->GetSpecializationId(_player->GetActiveSpec()) == SPEC_PALADIN_HOLY)
+                            _player->CastSpell(_player, 148502, true);
+
                         if (_player->HasAura(PALADIN_SPELL_JUDGMENTS_OF_THE_BOLD) || _player->HasAura(PALADIN_SPELL_JUDGMENTS_OF_THE_WISE))
                         {
                             int32 power = 1;

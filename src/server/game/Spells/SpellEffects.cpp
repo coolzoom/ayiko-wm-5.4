@@ -886,10 +886,21 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
             }
         }
 
+
         if (m_originalCaster && damage > 0 && apply_direct_bonus)
         {
             damage = m_originalCaster->SpellDamageBonusDone(unitTarget, m_spellInfo, (uint32)damage, SPELL_DIRECT_DAMAGE);
             damage = unitTarget->SpellDamageBonusTaken(m_originalCaster, m_spellInfo, (uint32)damage, SPELL_DIRECT_DAMAGE);
+        }
+
+        // Holy Wrath - Need to be in this place as before SP scaling spell gets lowered to 0 and spell is not scaled
+        if (m_spellInfo->Id == 119072)
+        {
+            uint32 count = 0;
+            for (std::list<TargetInfo>::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
+                    ++count;
+
+            damage /= count;
         }
 
         m_damage += damage;

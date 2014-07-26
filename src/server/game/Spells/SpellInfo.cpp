@@ -3874,6 +3874,7 @@ bool SpellInfo::IsCustomCalculated() const
 {
     switch (Id)
     {
+        case 119072:// Holy Wrath
         case 113344:// Bloodbath
         case 124464:// Mastery: Shadowy Recall - Shadow Word: Pain
         case 124465:// Mastery: Shadowy Recall - Vampiric Touch

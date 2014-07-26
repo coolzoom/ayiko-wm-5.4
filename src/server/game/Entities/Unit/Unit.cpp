@@ -17329,7 +17329,6 @@ void Unit::ApplyCastTimePercentMod(float val, bool apply)
             (*itr)->ApplySpellMod((*itr)->GetBase()->GetUnitOwner(), false);
             (*itr)->CalculateSpellMod();
             (*itr)->ApplySpellMod((*itr)->GetBase()->GetUnitOwner(), true);
-            printf("\n ! val is %i ! \n ", (*itr)->GetSpellModifier()->value);
         }
     }
 }

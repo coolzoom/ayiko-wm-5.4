@@ -12877,7 +12877,12 @@ bool Unit::IsImmunedToSpell(SpellInfo const* spellInfo)
             if ((itr->type & spellInfo->GetSchoolMask())
                 && !(immuneSpellInfo && immuneSpellInfo->IsPositive() && spellInfo->IsPositive())
                 && !spellInfo->CanPierceImmuneAura(immuneSpellInfo))
+            {
+                // Divine Shield should allow generating Holy Power generation from Hammer of the Righteous
+                if(immuneSpellInfo->Id == 642 && spellInfo->Id == 53595 && !IsImmunedToSpellEffect(spellInfo, EFFECT_2))
+                    continue;
                 return true;
+            }
         }
     }
 

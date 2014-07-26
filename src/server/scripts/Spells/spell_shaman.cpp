@@ -1548,6 +1548,8 @@ class spell_sha_ascendance : public SpellScriptLoader
                     switch(_player->GetSpecializationId(_player->GetActiveSpec()))
                     {
                         case SPEC_SHAMAN_ELEMENTAL:
+                            // Remove current spell cooldown
+                            _player->RemoveSpellCooldown(51505, true);
                             _player->CastSpell(_player, SPELL_SHA_ASCENDANCE_ELEMENTAL, true);
                             break;
                         case SPEC_SHAMAN_ENHANCEMENT:

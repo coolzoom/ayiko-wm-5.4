@@ -1371,38 +1371,25 @@ class spell_sha_elemental_blast : public SpellScriptLoader
 
             void HandleOnHit()
             {
-                if (Player* _player = GetCaster()->ToPlayer())
+                if (Player* const _player = GetCaster()->ToPlayer())
                 {
-                    int32 randomEffect = irand(0, 2);
-
                     _player->CastSpell(_player, SPELL_SHA_ELEMENTAL_BLAST_RATING_BONUS, true);
 
-                    AuraApplication* aura = _player->GetAuraApplication(SPELL_SHA_ELEMENTAL_BLAST_RATING_BONUS, _player->GetGUID());
-
-                    if (aura)
+                    if (Aura* const aura = _player->GetAura(SPELL_SHA_ELEMENTAL_BLAST_RATING_BONUS, _player->GetGUID()))
                     {
-                        switch (randomEffect)
+                        uint32 randomEffect = urand(0, 2);
+
+                        if (_player->GetSpecializationId(_player->GetActiveSpec()) == SPEC_SHAMAN_ENHANCEMENT)
+                            randomEffect = 3;
+                        // Iterate over all aura effects
+                        for (int i = 0; i < 4; ++i)
                         {
-                            case 0:
+                            if (i == randomEffect)
+                                aura->GetEffect(i)->ChangeAmount(3500);
+                            else
                             {
-                                aura->GetBase()->GetEffect(1)->ChangeAmount(0);
-                                aura->GetBase()->GetEffect(2)->ChangeAmount(0);
-                                break;
+                                aura->GetEffect(i)->ChangeAmount(0);
                             }
-                            case 1:
-                            {
-                                aura->GetBase()->GetEffect(0)->ChangeAmount(0);
-                                aura->GetBase()->GetEffect(2)->ChangeAmount(0);
-                                break;
-                            }
-                            case 2:
-                            {
-                                aura->GetBase()->GetEffect(0)->ChangeAmount(0);
-                                aura->GetBase()->GetEffect(1)->ChangeAmount(0);
-                                break;
-                            }
-                            default:
-                                break;
                         }
                     }
                 }

@@ -7391,7 +7391,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                             if (AuraEffect *aurShield = victim->GetAuraEffect(triggered_spell_id, EFFECT_0, GetGUID()))
                                 basepoints0 += aurShield->GetAmount();
 
-                            int32 maxHealth = CountPctFromMaxHealth(10);
+                            int32 maxHealth = CountPctFromMaxHealth(33);
                             basepoints0 = std::min(basepoints0, maxHealth);
 
                             break;

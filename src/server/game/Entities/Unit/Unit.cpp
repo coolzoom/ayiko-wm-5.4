@@ -10063,6 +10063,13 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
                 return false;
             break;
         }
+        // Infected Wounds
+        case 58180:
+        {
+            if (victim == this)
+                return false;
+            break;
+        }
     }
 
     // try detect target manually if not set

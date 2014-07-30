@@ -80,8 +80,7 @@ enum PaladinSpells
     PALADIN_SPELL_DIVINE_SHIELD                  = 642,
     PALADIN_SPELL_LAY_ON_HANDS                   = 633,
     PALADIN_SPELL_DIVINE_PROTECTION              = 498,
-    PALADIN_SPELL_GLYPH_OF_AVENGING_WRATH        = 54927,
-    PALADIN_SPELL_AVENGING_WRATH_REGEN_BY_GLYPH  = 115547,
+    PALADIN_SPELL_GLYPH_OF_FALLING_AVENGER       = 115931,
     PALADIN_SPELL_SACRED_CLEANSING               = 53551,
     PALADIN_SPELL_DAYBREAK_AURA                  = 88821,
     PALADIN_SPELL_DAYBREAK_PROC                  = 88819,
@@ -288,8 +287,8 @@ class spell_pal_glyph_of_avenging_wrath final : public SpellScriptLoader
         void initEffects(uint32 &effectMask)
         {
             auto const caster = GetCaster();
-            if (!caster || !caster->HasAura(PALADIN_SPELL_GLYPH_OF_AVENGING_WRATH))
-                effectMask &= ~(1 << EFFECT_2);
+            if (!caster || !caster->HasAura(PALADIN_SPELL_GLYPH_OF_FALLING_AVENGER))
+                effectMask &= ~(1 << EFFECT_3);
         }
 
         void Register() final

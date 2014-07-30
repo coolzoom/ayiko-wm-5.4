@@ -2444,10 +2444,7 @@ class spell_warl_fear : public SpellScriptLoader
                     if (Unit* target = GetHitUnit())
                     {
                         if (player->HasAura(WARLOCK_GLYPH_OF_FEAR))
-                        {
                             player->CastSpell(target, WARLOCK_GLYPH_OF_FEAR_EFFECT, true);
-                            player->AddSpellCooldown(5782, 0, 5 * IN_MILLISECONDS);
-                        }
                         else
                             player->CastSpell(target, WARLOCK_FEAR_EFFECT, true);
                     }

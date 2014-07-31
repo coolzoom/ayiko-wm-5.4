@@ -1717,14 +1717,14 @@ class spell_mage_living_bomb : public SpellScriptLoader
                 {
                     caster->CastSpell(GetTarget(), SPELL_MAGE_LIVING_BOMB_TRIGGERED, true);
 
-                    if (caster->HasAura(SPELL_MAGE_BRAIN_FREEZE))
-                        caster->CastSpell(caster, SPELL_MAGE_BRAIN_FREEZE_TRIGGERED, true);
+                    /*if (caster->HasAura(SPELL_MAGE_BRAIN_FREEZE))
+                        caster->CastSpell(caster, SPELL_MAGE_BRAIN_FREEZE_TRIGGERED, true);*/
                 }
             }
 
             void Register()
             {
-                AfterEffectRemove += AuraEffectRemoveFn(spell_mage_living_bomb_AuraScript::AfterRemove, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+                AfterEffectRemove += AuraEffectRemoveFn(spell_mage_living_bomb_AuraScript::AfterRemove, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
             }
         };
 

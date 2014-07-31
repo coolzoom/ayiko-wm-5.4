@@ -71,6 +71,7 @@ enum MageSpells
     SPELL_MAGE_PYROMANIAC_DAMAGE_DONE            = 132210,
     SPELL_MAGE_MIRROR_IMAGE_SUMMON               = 58832,
     SPELL_MAGE_CAUTERIZE                         = 87023,
+    SPELL_MAGE_CAUTERIZE_MARKER                  = 87024,
     SPELL_MAGE_ARCANE_MISSILES                   = 79683,
     SPELL_MAGE_INCANTERS_WARD_ENERGIZE           = 113842,
     SPELL_MAGE_INCANTERS_ABSORBTION              = 116267,
@@ -555,7 +556,8 @@ class spell_mage_cauterize : public SpellScriptLoader
 
                 int bp1 = target->CountPctFromMaxHealth(healtPct);
                 target->CastCustomSpell(target, SPELL_MAGE_CAUTERIZE, NULL, &bp1, NULL, true);
-                target->ToPlayer()->AddSpellCooldown(SPELL_MAGE_CAUTERIZE, 0, 60 * IN_MILLISECONDS);
+                target->CastSpell(target, SPELL_MAGE_CAUTERIZE_MARKER, true);
+                target->ToPlayer()->AddSpellCooldown(SPELL_MAGE_CAUTERIZE, 0, 120 * IN_MILLISECONDS);
 
                 absorbAmount = dmgInfo.GetDamage();
             }

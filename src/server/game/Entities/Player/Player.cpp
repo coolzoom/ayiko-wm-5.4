@@ -9880,18 +9880,32 @@ void Player::_ApplyAllItemMods()
 
 void Player::_ApplyAllLevelScaleItemMods(bool apply)
 {
-    for (uint8 i = 0; i < INVENTORY_SLOT_BAG_END; ++i)
+    for (uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i)
     {
-        if (m_items[i])
+        auto item = m_items[i];
+
+        if (!item || item->IsBroken() || !CanUseAttackType(GetAttackBySlot(i)))
+            continue;
+
+        auto const proto = item->GetTemplate();
+        if (!proto)
+            continue;
+
+        _ApplyItemBonuses(proto, i, apply, true);
+
+        for (uint32 j = 0; j < MAX_ENCHANTMENT_SLOT; ++j)
         {
-            if (m_items[i]->IsBroken() || !CanUseAttackType(GetAttackBySlot(i)))
+            auto const slot = EnchantmentSlot(j);
+
+            auto const enchantId = item->GetEnchantmentId(slot);
+            if (enchantId == 0)
                 continue;
 
-            ItemTemplate const* proto = m_items[i]->GetTemplate();
-            if (!proto)
+            auto const entry = sSpellItemEnchantmentStore.LookupEntry(enchantId);
+            if (!entry || entry->scalingClass == 0)
                 continue;
 
-            _ApplyItemBonuses(proto, i, apply, true);
+            ApplyEnchantment(item, slot, apply);
         }
     }
 }
@@ -15374,6 +15388,18 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
             uint32 enchant_display_type = pEnchant->type[s];
             uint32 enchant_amount = pEnchant->amount[s];
             uint32 enchant_spell_id = pEnchant->spellid[s];
+
+            if (pEnchant->scalingClass != 0 && getLevel() <= pEnchant->scalingMaxLevel)
+            {
+                // Only negative values are present as of 5.4.0, but generic
+                // check will not harm.
+                auto const gtKeyBase = (pEnchant->scalingClass <= -1)
+                        ? MAX_CLASSES - 2 - pEnchant->scalingClass
+                        : pEnchant->scalingClass - 1;
+
+                if (auto const gtScaling = sGtSpellScalingStore.LookupEntry(gtKeyBase * 100 + getLevel() - 1))
+                    enchant_amount = pEnchant->scalingMult[s] * gtScaling->value + 0.5f;
+            }
 
             switch (enchant_display_type)
             {

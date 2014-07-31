@@ -2468,29 +2468,26 @@ struct SpellDurationEntry
 };
 
 // @author Selenium:  5.4 valid
-// 3 new float on 5.4
-struct SpellItemEnchantmentEntry
+struct SpellItemEnchantmentEntry final
 {
     uint32      ID;                                         // 0        m_ID
-    //uint32      charges;                                  // 1        m_charges
+    // uint32   charges;                                    // 1        m_charges
     uint32      type[MAX_ITEM_ENCHANTMENT_EFFECTS];         // 2-4      m_effect[MAX_ITEM_ENCHANTMENT_EFFECTS]
     uint32      amount[MAX_ITEM_ENCHANTMENT_EFFECTS];       // 5-7      m_effectPointsMin[MAX_ITEM_ENCHANTMENT_EFFECTS]
-    uint32      spellid[MAX_ITEM_ENCHANTMENT_EFFECTS];      // 11-13    m_effectArg[MAX_ITEM_ENCHANTMENT_EFFECTS]
-    char*       description;                                // 14       m_name_lang
-    uint32      aura_id;                                    // 15       m_itemVisual
-    uint32      slot;                                       // 16       m_flags
-    uint32      GemID;                                      // 17       m_src_itemID
-    uint32      EnchantmentCondition;                       // 18       m_condition_id
-    uint32      requiredSkill;                              // 19       m_requiredSkillID
-    uint32      requiredSkillValue;                         // 20       m_requiredSkillRank
-    uint32      requiredLevel;                              // 21       new in 3.1
-    //uint32    unk_level                                   // 22       new in 3.1, look like level (max)?
-    // uint32   unk_1
-    // int32    unk_2
-    // int32    unk_3
-    // float    unk_4
-    // float    unk_5
-    // float    unk_6
+    uint32      spellid[MAX_ITEM_ENCHANTMENT_EFFECTS];      // 8-10     m_effectArg[MAX_ITEM_ENCHANTMENT_EFFECTS]
+    char const *description;                                // 11       m_name_lang
+    uint32      aura_id;                                    // 12       m_itemVisual
+    uint32      slot;                                       // 13       m_flags
+    uint32      GemID;                                      // 14       m_src_itemID
+    uint32      EnchantmentCondition;                       // 15       m_condition_id
+    uint32      requiredSkill;                              // 16       m_requiredSkillID
+    uint32      requiredSkillValue;                         // 17       m_requiredSkillRank
+    uint32      requiredLevel;                              // 18       new in 3.1
+    uint32      scalingMaxLevel;                            // 19
+    // uint32   unk_1                                       // 20
+    int32       scalingClass;                               // 21
+    // int32    unk_2                                       // 22
+    float       scalingMult[MAX_ITEM_ENCHANTMENT_EFFECTS];  // 23-25
 };
 
 //@todo

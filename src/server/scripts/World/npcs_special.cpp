@@ -3823,6 +3823,8 @@ class npc_ring_of_frost : public CreatureScript
 
         struct npc_ring_of_frostAI : public Scripted_NoMovementAI
         {
+            uint8 targetsFrozen;
+
             npc_ring_of_frostAI(Creature *c) : Scripted_NoMovementAI(c)
             {
                 me->SetReactState(REACT_PASSIVE);
@@ -3832,6 +3834,7 @@ class npc_ring_of_frost : public CreatureScript
 
             void Reset()
             {
+                targetsFrozen = 0;
                 me->SetReactState(REACT_PASSIVE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -3858,12 +3861,17 @@ class npc_ring_of_frost : public CreatureScript
 
             void CheckIfMoveInRing(Unit *who)
             {
-                if (who->isAlive() && me->IsInRange(who, 2.0f, 4.7f) && me->IsWithinLOSInMap(who))
+                if (who->isAlive() && me->IsWithinLOSInMap(who) && targetsFrozen < 10)
                 {
+                    float distance = who->GetDistance2d(me->GetPositionX(), me->GetPositionY());
+                    if (distance > 3.1f || distance < 2.0f)
+                        return;
+
                     if (!who->HasAura(82691))
                     {
                         if (!who->HasAura(91264))
                         {
+                            ++targetsFrozen;
                             me->CastSpell(who, 82691, true);
                             me->CastSpell(who, 91264, true);
                         }
@@ -3876,9 +3884,9 @@ class npc_ring_of_frost : public CreatureScript
             {
                 // Find all the enemies
                 std::list<Unit*> targets;
-                Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(me, me, 5.0f);
+                Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(me, me, 10.0f);
                 Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(me, targets, u_check);
-                me->VisitNearbyObject(5.0f, searcher);
+                me->VisitNearbyObject(10.0f, searcher);
                 for (std::list<Unit*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
                     if (!(*iter)->isTotem())
                         CheckIfMoveInRing(*iter);

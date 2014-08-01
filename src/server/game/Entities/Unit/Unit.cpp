@@ -12881,16 +12881,16 @@ bool Unit::IsImmunedToSpell(SpellInfo const* spellInfo)
 
     if (spellInfo->IsNeedToCheckSchoolImmune())
     {
-        SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
-        for (SpellImmuneList::const_iterator itr = schoolList.begin(); itr != schoolList.end(); ++itr)
+        for (auto const &i : m_spellImmune[IMMUNITY_SCHOOL])
         {
-            SpellInfo const* immuneSpellInfo = sSpellMgr->GetSpellInfo(itr->spellId);
-            if ((itr->type & spellInfo->GetSchoolMask())
-                && !(immuneSpellInfo && immuneSpellInfo->IsPositive() && spellInfo->IsPositive())
-                && !spellInfo->CanPierceImmuneAura(immuneSpellInfo))
+            auto const immuneSpellInfo = sSpellMgr->GetSpellInfo(i.spellId);
+
+            if ((i.type & spellInfo->GetSchoolMask())
+                    && !(immuneSpellInfo && immuneSpellInfo->IsPositive() && spellInfo->IsPositive())
+                    && !spellInfo->CanPierceImmuneAura(immuneSpellInfo))
             {
-                // Divine Shield should allow generating Holy Power generation from Hammer of the Righteous
-                if(immuneSpellInfo->Id == 642 && spellInfo->Id == 53595 && !IsImmunedToSpellEffect(spellInfo, EFFECT_2))
+                // Divine Shield should allow Holy Power generation from Hammer of the Righteous
+                if (immuneSpellInfo && immuneSpellInfo->Id == 642 && spellInfo->Id == 53595 && !IsImmunedToSpellEffect(spellInfo, EFFECT_2))
                     continue;
                 return true;
             }

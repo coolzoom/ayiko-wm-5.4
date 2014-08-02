@@ -1241,6 +1241,19 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
                         maxSize = m_spellInfo->MaxAffectedTargets;
                         power = POWER_HEALTH;
                         break;
+                    case 114911: // Ancestral Guidance
+                        maxSize = 3;
+                        power = POWER_HEALTH;
+
+                        // Remove targets outside caster's raid
+                        for (std::list<Unit*>::iterator itr = unitTargets.begin(); itr != unitTargets.end();)
+                        {
+                            if (!(*itr)->IsInRaidWith(m_caster))
+                                itr = unitTargets.erase(itr);
+                            else
+                                ++itr;
+                        }
+                        break;
                     case 57669: // Replenishment
                         // In arenas Replenishment may only affect the caster
                         if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->ToPlayer()->InArena())

@@ -2824,13 +2824,8 @@ void SpellMgr::LoadSpellClassInfo()
         if (!classEntry)
             continue;
 
-        // Player damage reduction (72% base resilience)
-        mSpellClassInfo[classId].push_back(115043);
+        // Player Damage Reduction Level 90 (32% additional base resilience for a total of 72%)
         mSpellClassInfo[classId].push_back(142689);
-        // Player mastery activation
-        mSpellClassInfo[classId].push_back(114585);
-        // Battle Fatigue
-        mSpellClassInfo[classId].push_back(134732);
 
         // All Rune for DK
         if (classId == CLASS_DEATH_KNIGHT)
@@ -2851,65 +2846,15 @@ void SpellMgr::LoadSpellClassInfo()
 
         // Dark Soul
         if (classId == CLASS_WARLOCK)
-        {
             mSpellClassInfo[classId].push_back(77801);
-        }
-
-        // All portals and teleports for mages and Mana Attunement
-        if (classId == CLASS_MAGE)
-        {
-            mSpellClassInfo[classId].push_back(3561);
-            mSpellClassInfo[classId].push_back(3562);
-            mSpellClassInfo[classId].push_back(3563);
-            mSpellClassInfo[classId].push_back(3565);
-            mSpellClassInfo[classId].push_back(3566);
-            mSpellClassInfo[classId].push_back(3567);
-            mSpellClassInfo[classId].push_back(32271);
-            mSpellClassInfo[classId].push_back(32272);
-            mSpellClassInfo[classId].push_back(49359);
-            mSpellClassInfo[classId].push_back(49360);
-            mSpellClassInfo[classId].push_back(32266);
-            mSpellClassInfo[classId].push_back(32267);
-            mSpellClassInfo[classId].push_back(10059);
-            mSpellClassInfo[classId].push_back(11416);
-            mSpellClassInfo[classId].push_back(11417);
-            mSpellClassInfo[classId].push_back(11418);
-            mSpellClassInfo[classId].push_back(11419);
-            mSpellClassInfo[classId].push_back(11420);
-            mSpellClassInfo[classId].push_back(49358);
-            mSpellClassInfo[classId].push_back(49361);
-            mSpellClassInfo[classId].push_back(35715);
-            mSpellClassInfo[classId].push_back(33690);
-            mSpellClassInfo[classId].push_back(33691);
-            mSpellClassInfo[classId].push_back(35717);
-            mSpellClassInfo[classId].push_back(53140);
-            mSpellClassInfo[classId].push_back(53142);
-            mSpellClassInfo[classId].push_back(88342);
-            mSpellClassInfo[classId].push_back(88344);
-            mSpellClassInfo[classId].push_back(88345);
-            mSpellClassInfo[classId].push_back(88346);
-            mSpellClassInfo[classId].push_back(121039);
-            mSpellClassInfo[classId].push_back(132626);
-            mSpellClassInfo[classId].push_back(132627);
-            mSpellClassInfo[classId].push_back(132621);
-            mSpellClassInfo[classId].push_back(132620);
-        }
 
         // Ancestral Focus
         if (classId == CLASS_SHAMAN)
             mSpellClassInfo[classId].push_back(89920);
 
-        // Plate Mail skill
-        if (classId == CLASS_PALADIN || classId == CLASS_WARRIOR)
-            mSpellClassInfo[classId].push_back(750);
-
         // Mail skill
         if (classId == CLASS_SHAMAN || classId == CLASS_HUNTER)
             mSpellClassInfo[classId].push_back(8737);
-
-        // Dual Wield
-        if (classId == CLASS_WARRIOR || classId == CLASS_HUNTER || classId == CLASS_ROGUE || classId == CLASS_DEATH_KNIGHT || classId == CLASS_MONK)
-            mSpellClassInfo[classId].push_back(674);
 
         // Natural Insight druid
         if (classId == CLASS_DRUID)
@@ -2918,20 +2863,6 @@ void SpellMgr::LoadSpellClassInfo()
         // Sinister Strike Enabler
         if (classId == CLASS_ROGUE)
             mSpellClassInfo[classId].push_back(79327);
-
-        // Opening gameobject
-        if (classId == CLASS_MONK)
-        {
-            mSpellClassInfo[classId].push_back(3365);
-            mSpellClassInfo[classId].push_back(6247);
-            mSpellClassInfo[classId].push_back(6477);
-            mSpellClassInfo[classId].push_back(6478);
-            mSpellClassInfo[classId].push_back(21651);
-            mSpellClassInfo[classId].push_back(22810);
-            mSpellClassInfo[classId].push_back(61437);
-            mSpellClassInfo[classId].push_back(68398);
-            mSpellClassInfo[classId].push_back(96220);
-        }
 
         for (uint32 i = 0; i < sSkillLineAbilityStore.GetNumRows(); ++i)
         {

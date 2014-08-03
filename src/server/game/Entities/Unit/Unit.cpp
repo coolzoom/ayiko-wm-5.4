@@ -11861,8 +11861,8 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
             if (bonus->ap_bonus > 0)
             {
                 WeaponAttackType attType = (spellProto->IsRangedWeaponSpell() && spellProto->DmgClass != SPELL_DAMAGE_CLASS_MELEE) ? RANGED_ATTACK : BASE_ATTACK;
-                // Hack for Exorcism and Howling Blast to take Melee AP
-                if (spellProto->Id == 879 || spellProto->Id == 49184)
+                // Hack for Exorcism, Icy Touch and Howling Blast to take Melee AP
+                if (spellProto->Id == 879 || spellProto->Id == 45477 || spellProto->Id == 49184)
                     attType = BASE_ATTACK;
 
                 float APbonus = float(victim->GetTotalAuraModifier(attType == BASE_ATTACK ? SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS : SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS));

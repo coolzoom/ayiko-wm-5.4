@@ -8242,15 +8242,7 @@ void AuraEffect::HandleAuraStrangulate(AuraApplication const* aurApp, uint8 mode
 
     // Asphyxiate
     if (m_spellInfo->Id == 108194)
-    {
-        int32 newZ = 10;
         target->SetControlled(apply, UNIT_STATE_STUNNED);
-
-        if (apply)
-            target->UpdateHeight(target->GetPositionZ() + newZ);
-        else
-            target->UpdateHeight(target->GetPositionZ() - newZ);
-    }
 }
 
 void AuraEffect::HandleChangeSpellVisualEffect(AuraApplication const* aurApp, uint8 mode, bool apply) const

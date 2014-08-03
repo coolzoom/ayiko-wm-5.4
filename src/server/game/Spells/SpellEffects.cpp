@@ -5318,7 +5318,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
         case SPELLFAMILY_DEATHKNIGHT:
         {
             // Pestilence
-            if (m_spellInfo->SpellFamilyFlags[1]&0x10000)
+            if (m_spellInfo->Id == 50842)
             {
                 // Get diseases on target of spell
                 if (m_targets.GetUnitTarget() && m_targets.GetUnitTarget() != unitTarget)
@@ -5329,14 +5329,12 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     if (m_targets.GetUnitTarget()->GetAura(55078))
                     {
                         m_caster->CastSpell(unitTarget, 55078, true, NULL, NULL, 0, float(pestilcenceModifier / 100.0f));
-                        m_caster->AddAura(63687, unitTarget);                           // Cosmetic - Pestilence State
                         m_targets.GetUnitTarget()->CastSpell(unitTarget, 91939, true);  // Cosmetic - Send Diseases on target
                     }
                     // Frost Fever
                     if (m_targets.GetUnitTarget()->GetAura(55095))
                     {
                         m_caster->CastSpell(unitTarget, 55095, true, NULL, NULL, 0, float(pestilcenceModifier / 100.0f));
-                        m_caster->AddAura(63687, unitTarget);                           // Cosmetic - Pestilence State
                         m_targets.GetUnitTarget()->CastSpell(unitTarget, 91939, true);  // Cosmetic - Send Diseases on target
                     }
                 }

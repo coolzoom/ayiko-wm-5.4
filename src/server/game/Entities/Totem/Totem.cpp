@@ -190,7 +190,9 @@ void Totem::UnSummon(uint32 msTime)
         }
     }
 
-    m_owner->RemoveAurasDueToSpell(GetSpell(), GetGUID());
+    // Stone Bulwark totem does not remove aura from owner
+    if (GetEntry() != 59712)
+        m_owner->RemoveAurasDueToSpell(GetSpell(), GetGUID());
 
     // Remove Sentry Totem Aura
     if (GetEntry() == SENTRY_TOTEM_ENTRY)

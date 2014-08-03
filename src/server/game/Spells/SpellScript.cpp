@@ -581,6 +581,11 @@ void SpellScript::CreateItem(uint32 effIndex, uint32 itemId)
     m_spell->DoCreateItem(effIndex, itemId);
 }
 
+Spell::UsedSpellMods const & SpellScript::appliedSpellMods() const
+{
+    return m_spell->m_appliedMods;
+}
+
 SpellInfo const* SpellScript::GetTriggeringSpell()
 {
     return m_spell->m_triggeredByAuraSpell;

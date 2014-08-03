@@ -1905,8 +1905,25 @@ class spell_sha_lava_burst : public SpellScriptLoader
 
         enum
         {
-            SPELL_FLAME_SHOCK = 8050,
+            SPELL_FLAME_SHOCK       = 8050,
+            SPELL_LAVA_SURGE_PROC   = 77762,
         };
+
+        void HandleAfterHit()
+        {
+            Unit * const caster = GetCaster();
+            if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            Spell::UsedSpellMods const &mods = appliedSpellMods();
+            AuraEffect * const aurEff = caster->GetAuraEffect(SPELL_LAVA_SURGE_PROC, EFFECT_0);
+
+
+            if (!aurEff || mods.find(aurEff->GetSpellModifier()) != mods.end())
+                return;
+
+            caster->ToPlayer()->RemoveSpellCooldown(GetSpellInfo()->Id, true);
+        }
 
         void HandleOnHit(SpellEffIndex /*effIndex*/)
         {
@@ -1920,6 +1937,7 @@ class spell_sha_lava_burst : public SpellScriptLoader
         void Register()
         {
             OnEffectHitTarget += SpellEffectFn(spell_sha_lava_burst_SpellScript::HandleOnHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            AfterHit += SpellHitFn(spell_sha_lava_burst_SpellScript::HandleAfterHit);
         }
     };
 

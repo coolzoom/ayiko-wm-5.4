@@ -6721,11 +6721,15 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
 
             switch (GetId())
             {
-                // Hysteria
+                // Unholy Frenzy
                 case 49016:
                 {
-                    uint32 damage = uint32(target->CountPctFromMaxHealth(1));
-                    target->DealDamage(target, damage, NULL, NODAMAGE, SPELL_SCHOOL_MASK_NORMAL, GetSpellInfo(), false);
+                    // Glyph of Unholy Frenzy makes it deal no periodic damage
+                    if (!caster->HasAura(58616))
+                    {
+                        uint32 damage = uint32(target->CountPctFromMaxHealth(2));
+                        target->DealDamage(target, damage, NULL, NODAMAGE, SPELL_SCHOOL_MASK_NORMAL, GetSpellInfo(), false);
+                    }
                     break;
                 }
                 // Death's Advance

@@ -1949,6 +1949,38 @@ public:
     }
 };
 
+// Plague Strike - 45462
+class spell_dk_plague_strike : public SpellScriptLoader
+{
+public:
+    spell_dk_plague_strike() : SpellScriptLoader("spell_dk_plague_strike") { }
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            Unit * const caster = GetCaster();
+            if (!caster || !caster->HasAura(51160))
+                return;
+
+            caster->CastSpell(GetHitUnit(), DK_SPELL_FROST_FEVER, true);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_impl::HandleDummy, EFFECT_2, SPELL_EFFECT_TRIGGER_SPELL);
+        }
+
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
 void AddSC_deathknight_spell_scripts()
 {
     new spell_dk_gorefiends_grasp();
@@ -1990,4 +2022,5 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_blood_boil();
     new spell_dk_death_grip();
     new spell_dk_riposte();
+    new spell_dk_plague_strike();
 }

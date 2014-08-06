@@ -1383,6 +1383,12 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (@ENTRY,0,2,"My weapon be thirsty!",12,0,0,0,0,0,"Frostmane Troll Whelp"),
 (@ENTRY,0,3,"You be dead soon!",12,0,0,0,0,0,"Frostmane Troll Whelp");
 
+-- [SQL] Generic - Constriction Totem Aura will no longer be stuck on players (Refs #5370)
+DELETE FROM `spell_area` WHERE `spell` = 77311;
+INSERT INTO `spell_area` (`spell`, `area`, `gender`) VALUES
+(77311, 5097, 2);
+
+UPDATE `quest_template` SET `EndText` = "" WHERE `Id` = 27671;
 
 /*
 -- Quests - A Job for the Multi-Bot has been scripted (Feedback #284)

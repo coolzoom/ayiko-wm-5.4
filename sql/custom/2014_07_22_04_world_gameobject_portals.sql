@@ -104,6 +104,7 @@ INSERT INTO `gameobject` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`position_x`
 UPDATE `gameobject_template` SET `data0` = 84506, `ScriptName` = '' WHERE `entry` = 205273;
 UPDATE `gameobject_template` SET `data0` = 17609, `ScriptName` = '' WHERE `entry` = 209081;
 UPDATE `gameobject_template` SET `data0` = 17609 WHERE `entry` = 193206; -- hack
+UPDATE `gameobject_template` SET `data0` = 94724 WHERE `entry` = 205273; -- hack
 DELETE FROM `gameobject` WHERE `id`=205273;
 INSERT INTO `gameobject` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`spawntimesecs`,`animprogress`,`state`) VALUES
 (171069, 205273, 648, 1, 65535, -8423.91, 1366.12, 104.676, 1.53938, 0, 0, 0.695912, 0.718127, 60, 100, 1),
@@ -118,12 +119,17 @@ INSERT INTO `gameobject` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`position_x`
 (164, 195140, 530, 1, 1, -161.318, 965.41, 54.29, 0, 0, 0, 0, 0, 60, 100, 1),
 (189108, 195140, 732, 1, 1, -601.014, 1386.42, 21.709, 3.912, 0, 0, 0.926713, -0.375771, 60, 100, 1),
 (173286, 195140, 870, 1, 1, 2953.11, -519.714, 269.162, 1.85849, 0, 0, 0.801169, 0.598439, 60, 100, 1);
-DELETE FROM `spell_target_position` WHERE `id` IN (17334, 17609, 121852, 84506);
+DELETE FROM `spell_target_position` WHERE `id` IN (17334, 121857, 17609, 121852, 84506);
 INSERT INTO `spell_target_position` (`id`, `effIndex`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
-(17334, 0, 0, -9003.46, 870.031, 29.6206, 2.28),
+(121857, 0, 0, -9003.46, 870.031, 29.6206, 2.28),
 (121852, 0, 1, 2032.8, -4336.7, 95.8, 1.5),
 (84506, 0, 1, 2049.2, -4376.8, 98.8446, 0.785398);
 DELETE FROM `spell_script_names` WHERE `ScriptName` = 'spell_gen_tp_storm_orgri';
+-- [SQL] General - Tol Barad portal will now require level 85
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 17 AND `SourceEntry` IN (88339, 88341);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(17, 0, 88339, 0, 0, 27, 0, 85, 3, 0, 0, 0, "", "Spell Portal Effect: Tol Barad requires level 85"),
+(17, 0, 88341, 0, 0, 27, 0, 85, 3, 0, 0, 0, "", "Spell Portal Effect: Tol Barad requires level 85");
 
 -- Cleanup
 DELETE FROM `gameobject_scripts` WHERE `id` NOT IN (SELECT `guid` FROM `gameobject`);

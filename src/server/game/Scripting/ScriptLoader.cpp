@@ -699,6 +699,8 @@ void AddSC_outdoorpvp_si();
 void AddSC_outdoorpvp_tf();
 void AddSC_outdoorpvp_zm();
 
+void AddSC_darkmoon_faire();
+
 // player
 void AddSC_chat_log();
 #endif
@@ -1449,5 +1451,6 @@ void AddBattlegroundScripts()
 void AddCustomScripts()
 {
 #ifdef SCRIPTS
+    AddSC_darkmoon_faire();
 #endif
 }

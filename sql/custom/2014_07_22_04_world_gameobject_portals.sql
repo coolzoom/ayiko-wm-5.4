@@ -121,7 +121,7 @@ INSERT INTO `gameobject` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`position_x`
 DELETE FROM `spell_target_position` WHERE `id` IN (17334, 17609, 84506);
 INSERT INTO `spell_target_position` (`id`, `effIndex`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
 (17334, 0, 0, -9003.46, 870.031, 29.6206, 2.28),
-(17609, 0, 1, 1776.5, -4338.8, -7.50874, 3.54718),
+(17609, 0, 1, 2032.8, -4336.7, 95.8, 1.5),
 (84506, 0, 1, 2049.2, -4376.8, 98.8446, 0.785398);
 DELETE FROM `spell_script_names` WHERE `ScriptName` = 'spell_gen_tp_storm_orgri';
 

@@ -2694,6 +2694,175 @@ public:
     }
 };
 
+class npc_pri_divine_star : public CreatureScript
+{
+public:
+    npc_pri_divine_star() : CreatureScript("npc_pri_divine_star") { }
+
+    struct npc_pri_divine_starAI : public PassiveAI
+    {
+        npc_pri_divine_starAI(Creature* c) : PassiveAI(c) { }
+
+        void Reset()
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+        }
+
+        std::set<uint64> alreadyHit;
+
+        void IsSummonedBy(Unit* owner)
+        {
+            if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+            {
+                me->SetLevel(owner->getLevel());
+                me->setFaction(owner->getFaction());
+                me->SetOwnerGUID(owner->GetGUID());
+            }
+            else
+                me->DespawnOrUnsummon();
+        }
+
+        void MovementInform(uint32 type, uint32 id)
+        {
+            if (type != POINT_MOTION_TYPE)
+                return;
+
+            if (id == 1)
+            {
+                if (Player * const owner = me->GetCharmerOrOwnerPlayerOrPlayerItself())
+                {
+                    // Move back to owner
+                    alreadyHit.clear();
+                    me->CastSpell(owner->GetPositionX(), owner->GetPositionY(), owner->GetPositionZ(), me->HasAura(58880) ? 58880 : 122127, true);
+                    me->GetMotionMaster()->MoveFollow(owner, 0, M_PI);
+                }
+            }
+        }
+
+    public:
+        std::set<uint64> & getHitTargets() { return alreadyHit; }
+
+    };
+
+    CreatureAI* GetAI(Creature *creature) const
+    {
+        return new npc_pri_divine_starAI(creature);
+    }
+};
+
+// 58880, 122127 - Divine Star dummy
+class spell_pri_divine_star_dummy : public SpellScriptLoader
+{
+public:
+    spell_pri_divine_star_dummy() : SpellScriptLoader("spell_pri_divine_star_dummy") { }
+
+    class script_impl : public SpellScript
+    {
+        PrepareSpellScript(script_impl);
+
+        enum divineStar
+        {
+            NPC_DIVINE_STAR         = 73692,
+        };
+
+        void HandleDummy(SpellEffIndex f)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                Position casterPos;
+                Position destPos;
+                caster->GetPosition(&destPos);
+                caster->GetPosition(&casterPos);
+
+                caster->MovePosition(destPos, 25.f, caster->GetTypeId() == TYPEID_PLAYER ? 0 : M_PI);
+
+                // needed for NPC height increase
+                destPos.m_positionZ += 1.5;
+
+                const_cast<WorldLocation*>(GetExplTargetDest())->Relocate(destPos);
+                GetHitDest()->Relocate(destPos);
+
+                // Triggered dummy is casted back by creature - don't spawn another star
+                if (caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+               if (Creature * const divineStar = caster->SummonCreature(NPC_DIVINE_STAR, casterPos, TEMPSUMMON_TIMED_DESPAWN, 5000))
+               {
+                   caster->AddAura(GetSpellInfo()->Id == 58880 ? 110744 : 122121, divineStar);
+                   // Move ~24 yards forward call point-reach and move back to caster
+                   divineStar->SetSpeed(MOVE_RUN, 2.7f, true);
+                   divineStar->SetSpeed(MOVE_FLIGHT, 2.7f, true);
+                   divineStar->GetMotionMaster()->MovePoint(1, destPos);
+               }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectLaunch += SpellEffectFn(script_impl::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new script_impl();
+    }
+};
+
+// 110745, 122128 - Divine Star damage and heal
+class spell_pri_divine_star_damage_heal : public SpellScriptLoader
+{
+public:
+    spell_pri_divine_star_damage_heal() : SpellScriptLoader("spell_pri_divine_star_damage_heal") { }
+
+    class script_impl : public SpellScript
+    {
+        PrepareSpellScript(script_impl);
+
+        enum divineStar
+        {
+            NPC_DIVINE_STAR         = 73692,
+        };
+
+        void RemoveInvalidTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            Creature * divineStar = GetCaster()->ToCreature();
+            if (!divineStar)
+            {
+                targets.clear();
+                return;
+            }
+
+            // Remove self
+            targets.remove(divineStar);
+
+            if (npc_pri_divine_star::npc_pri_divine_starAI * divineAI = CAST_AI(npc_pri_divine_star::npc_pri_divine_starAI, divineStar->GetAI()))
+            {
+                auto & proceeded = divineAI->getHitTargets();
+                if (!proceeded.empty())
+                    targets.remove_if([&proceeded](WorldObject *u) { return proceeded.find(u->GetGUID()) != proceeded.end(); });
+
+                for (auto const obj : targets)
+                    proceeded.insert(obj->GetGUID());
+            }
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(script_impl::RemoveInvalidTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(script_impl::RemoveInvalidTargets, EFFECT_1, TARGET_UNIT_DEST_AREA_ALLY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new script_impl();
+    }
+};
+
 void AddSC_priest_spell_scripts()
 {
     new spell_pri_power_word_fortitude();
@@ -2750,4 +2919,7 @@ void AddSC_priest_spell_scripts()
     new spell_pri_binding_heal();
     new spell_pri_divine_aegis();
     new spell_pri_power_word_shield();
+    new spell_pri_divine_star_dummy();
+    new npc_pri_divine_star();
+    new spell_pri_divine_star_damage_heal();
 }

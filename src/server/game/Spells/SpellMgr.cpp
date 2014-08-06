@@ -4356,8 +4356,8 @@ void SpellMgr::LoadSpellCustomAttr()
                     break;
                 case 122128:// Divine Star (shadow)
                 case 110745:// Divine Star (other)
-                    spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(29);
-                    spellInfo->Effects[1].RadiusEntry = sSpellRadiusStore.LookupEntry(29);
+                    spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_4_YARDS);
+                    spellInfo->Effects[1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_4_YARDS);
                     break;
                 case 12975:// Last Stand
                     spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT;

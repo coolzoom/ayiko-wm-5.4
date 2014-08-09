@@ -9189,9 +9189,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
             if ((GetHealth() - damage) >= CountPctFromMaxHealth(30))
                 return false;
 
-            ToPlayer()->AddSpellCooldown(fakeCooldownId, 0, 90 * IN_MILLISECONDS);
             basepoints0 = int32(CountPctFromMaxHealth(20));
-
             break;
         }
         case 125732:// Glyph of Honor

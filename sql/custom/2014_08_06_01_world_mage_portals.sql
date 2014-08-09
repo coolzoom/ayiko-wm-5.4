@@ -44,6 +44,6 @@ UPDATE `gameobject_template` SET `faction` = 1801, `data0` = 132624, `data1` = 0
 DELETE FROM `spell_target_position` WHERE `id` IN (132621, 132622, 132627, 132624, 130703, 130698);
 INSERT INTO `spell_target_position` (`id`, `effIndex`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
 (132621, 0, 870, 821.5, 253.2, 503.919, 0.719747),  --  Teleport: Vale of Eternal Blossoms Alliance
-(132622, 0, 870, 821.5, 253.2, 503.919, 0.719747),  --  Portal: Vale of Eternal Blossoms Alliance
+(132624, 0, 870, 821.5, 253.2, 503.919, 0.719747),  --  Portal: Vale of Eternal Blossoms Alliance
 (132627, 0, 870, 1623.2, 920.8, 471.183, 3.534191),  --  Teleport: Vale of Eternal Blossoms Horde
-(132624, 0, 870, 1623.2, 920.8, 471.183, 3.534191);  --  Portal: Vale of Eternal Blossoms Horde
+(132622, 0, 870, 1623.2, 920.8, 471.183, 3.534191);  --  Portal: Vale of Eternal Blossoms Horde

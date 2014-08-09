@@ -28208,6 +28208,10 @@ void Player::ActivateSpec(uint8 spec)
 
     SendActionButtons(1);
 
+    // Shadow spec must reset Shadow Orb count
+    if (GetSpecializationId(GetActiveSpec()) == SPEC_PRIEST_SHADOW)
+        UpdateMaxPower(POWER_SHADOW_ORB);
+
     Powers pw = getPowerType();
     if (pw != POWER_MANA)
         SetPower(POWER_MANA, 0); // Mana must be 0 even if it isn't the active power type.

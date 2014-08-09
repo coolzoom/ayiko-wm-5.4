@@ -32,8 +32,6 @@ enum PriestSpells
     PRIEST_SPELL_PENANCE                            = 47540,
     PRIEST_SPELL_PENANCE_DAMAGE                     = 47758,
     PRIEST_SPELL_PENANCE_HEAL                       = 47757,
-    PRIEST_SPELL_REFLECTIVE_SHIELD_TRIGGERED        = 33619,
-    PRIEST_SPELL_REFLECTIVE_SHIELD_R1               = 33201,
     PRIEST_SHADOW_WORD_DEATH                        = 32409,
     PRIEST_SHADOWFORM_VISUAL_WITHOUT_GLYPH          = 107903,
     PRIEST_SHADOWFORM_VISUAL_WITH_GLYPH             = 107904,

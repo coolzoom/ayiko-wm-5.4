@@ -1321,7 +1321,6 @@ class spell_pri_devouring_plague : public SpellScriptLoader
                         if (player->GetSpecializationId(player->GetActiveSpec()) == SPEC_PRIEST_SHADOW)
                         {
                             uint8 powerUsed = player->GetPower(POWER_SHADOW_ORB) + 1; // Don't forget PowerCost
-
                             // Shadow Orb visual
                             if (player->HasAura(77487))
                                 player->RemoveAura(77487);
@@ -1330,7 +1329,9 @@ class spell_pri_devouring_plague : public SpellScriptLoader
                                 player->RemoveAura(127850);
 
                             // Instant damage equal to amount of shadow orb
-                            SetHitDamage(int32(GetHitDamage() * powerUsed / 3));
+                            int32 damage = GetHitDamage();
+                            damage = AddPct(damage, powerUsed * 20);
+                            SetHitDamage(damage);
                         }
                     }
                 }

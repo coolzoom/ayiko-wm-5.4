@@ -797,11 +797,11 @@ class spell_rog_crimson_tempest : public SpellScriptLoader
 
             void HandleOnHit()
             {
-                if (Player* _player = GetCaster()->ToPlayer())
+                if (Player* const _player = GetCaster()->ToPlayer())
                 {
-                    if (Unit* target = GetHitUnit())
+                    if (Unit* const target = GetHitUnit())
                     {
-                        int32 damage = int32(GetHitDamage() * 0.30f / 6); // 30% / number_of_ticks
+                        int32 const damage = CalculatePct(GetHitDamage(), 40); // 240% / 6 (tick count)
                         _player->CastCustomSpell(target, ROGUE_SPELL_CRIMSON_TEMPEST_DOT, &damage, NULL, NULL, true);
                     }
                 }

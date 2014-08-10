@@ -187,3 +187,4 @@ UPDATE `quest_template` SET `RequiredClasses` = 1 WHERE `Id` = 25148;
 UPDATE `quest_template` SET `RequiredClasses` = 128 WHERE `Id` = 25150;
 UPDATE `quest_template` SET `RequiredClasses` = 256 WHERE `Id` = 26151;
 UPDATE `quest_template` SET `RequiredClasses` = 8 WHERE `Id` = 30118;
+-- SELECT RequiredClasses, Id FROM 434_world.quest_template WHERE RequiredClasses > 0 AND Id NOT IN (SELECT Id FROM 540_world.quest_template WHERE RequiredClasses > 0);

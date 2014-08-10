@@ -1069,6 +1069,11 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                         unitTarget->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID, m_caster->GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID));
                     break;
                 }
+                case 139569: // Ruthlessness
+                {
+                    m_caster->CastSpell(unitTarget, 139546, true);
+                    break;
+                }
                 default:
                     break;
             }

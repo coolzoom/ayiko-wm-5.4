@@ -6726,7 +6726,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
 
                     if (procSpell->Id == 585)
                         ToPlayer()->ReduceSpellCooldown(47540, 500);
-                    else
+                    else if (procSpell->Id == 2060)
                         ToPlayer()->ReduceSpellCooldown(89485, 5 * IN_MILLISECONDS);
                     break;
                 }

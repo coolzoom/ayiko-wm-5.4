@@ -2133,6 +2133,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     else
                         target->RemoveAurasDueToSpell(61922);
                 }
+                break;
             }
             break;
         case SPELLFAMILY_HUNTER:

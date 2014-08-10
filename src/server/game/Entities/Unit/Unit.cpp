@@ -9032,6 +9032,13 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
                             return false;
                         break;
                     }
+                    case 55447: // Glyph of Flame Shock
+                    {
+                        basepoints0 = CalculatePct(damage, triggerAmount);
+                        trigger_spell_id = 137808;
+                        target = this;
+                        break;
+                    }
                 }
                 break;
             }

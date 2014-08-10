@@ -38,9 +38,6 @@ enum DeathKnightSpells
     DK_SPELL_BLACK_ICE_R1                       = 49140,
     DK_SPELL_BLOOD_PLAGUE                       = 55078,
     DK_SPELL_FROST_FEVER                        = 55095,
-    DK_SPELL_MASTER_OF_GHOULS                   = 52143,
-    DK_SPELL_GHOUL_AS_GUARDIAN                  = 46585,
-    DK_SPELL_GHOUL_AS_PET                       = 52150,
     DK_SPELL_ROILING_BLOOD                      = 108170,
     DK_SPELL_PESTILENCE                         = 50842,
     DK_SPELL_CHILBLAINS                         = 50041,
@@ -1334,37 +1331,52 @@ class spell_dk_outbreak : public SpellScriptLoader
         }
 };
 
-// Raise Dead - 46584
+// 46584 - Raise Dead
 class spell_dk_raise_dead : public SpellScriptLoader
 {
-    public:
-        spell_dk_raise_dead() : SpellScriptLoader("spell_dk_raise_dead") { }
+    class script_impl : public SpellScript
+    {
+        PrepareSpellScript(script_impl)
 
-        class spell_dk_raise_dead_SpellScript : public SpellScript
+            enum
         {
-            PrepareSpellScript(spell_dk_raise_dead_SpellScript);
-
-            void HandleDummy(SpellEffIndex /*effIndex*/)
-            {
-                if (Player* _player = GetCaster()->ToPlayer())
-                {
-                    if (_player->HasAura(DK_SPELL_MASTER_OF_GHOULS))
-                        _player->CastSpell(_player, DK_SPELL_GHOUL_AS_PET, true);
-                    else
-                        _player->CastSpell(_player, DK_SPELL_GHOUL_AS_GUARDIAN, true);
-                }
-            }
-
-            void Register()
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_dk_raise_dead_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-            }
+            MASTER_OF_GHOULS = 52143
         };
 
-        SpellScript* GetSpellScript() const
+        bool Load()
         {
-            return new spell_dk_raise_dead_SpellScript();
+            Unit * const caster = GetCaster();
+            return caster && caster->GetTypeId() == TYPEID_PLAYER;
         }
+
+        void HandleScript(SpellEffIndex effIndex)
+        {
+            PreventHitEffect(effIndex);
+
+            Unit * const caster = GetCaster();
+
+            effIndex = caster->HasAura(MASTER_OF_GHOULS) ? EFFECT_1 : EFFECT_0;
+            uint32 const spellId = GetSpellInfo()->Effects[effIndex].BasePoints;
+
+            caster->ToPlayer()->RemoveSpellCooldown(spellId);
+            caster->CastSpell(caster, spellId, true);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(script_impl::HandleScript, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+public:
+    spell_dk_raise_dead()
+        : SpellScriptLoader("spell_dk_raise_dead")
+    { }
+
+    SpellScript * GetSpellScript() const
+    {
+        return new script_impl;
+    }
 };
 
 // 50462 - Anti-Magic Shell (on raid member)

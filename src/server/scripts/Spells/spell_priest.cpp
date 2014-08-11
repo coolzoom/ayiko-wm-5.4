@@ -2856,6 +2856,75 @@ public:
     }
 };
 
+// Mind Flay - 15407
+class spell_pri_mind_flay final : public SpellScriptLoader
+{
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        enum
+        {
+            TALENT_SOLACE_AND_INSANITY  = 139139,
+            SPELL_DEVOURING_PLAGUE      = 2944,
+            GLYPH_OF_MIND_FLAY          = 120585,
+        };
+
+        void initEffects(uint32 &effectMask)
+        {
+            // Glyph of Mind Flay - Remove slow effect
+            auto const caster = GetCaster();
+            if (caster && caster->HasAura(GLYPH_OF_MIND_FLAY))
+                effectMask &= ~(1 << EFFECT_1);
+        }
+
+        void calculateAmount(AuraEffect const *, int32 &amount, bool &canBeRecalculated)
+        {
+            canBeRecalculated = false;
+
+            if (!GetCaster())
+                return;
+
+            auto const caster = GetCaster()->ToPlayer();
+            auto const target = GetUnitOwner();
+            if (!caster || !target)
+                return;
+
+            // Mind flay with Solace and Insanity
+            if (caster->GetSpecializationId(caster->GetActiveSpec()) == SPEC_PRIEST_SHADOW && caster->HasAura(TALENT_SOLACE_AND_INSANITY))
+            {
+                // Get dummy aura where consumed Shadow Orbs are stored
+                if (auto const devouringPlague = target->GetAuraEffect(SPELL_DEVOURING_PLAGUE, EFFECT_2))
+                    AddPct(amount, 33.3f * (devouringPlague->GetAmount() + 1));
+            }
+        }
+
+        void onTick(AuraEffect const * /*aurEff*/)
+        {
+            if (auto caster = GetCaster())
+                if (caster->HasAura(GLYPH_OF_MIND_FLAY))
+                    caster->CastSpell(caster, 120587, true);
+        }
+
+        void Register() final
+        {
+            OnInitEffects += AuraInitEffectsFn(script_impl::initEffects);
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(script_impl::calculateAmount, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+            OnEffectPeriodic += AuraEffectPeriodicFn(script_impl::onTick, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+        }
+    };
+
+public:
+    spell_pri_mind_flay()
+        : SpellScriptLoader("spell_pri_mind_flay")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
+};
+
 void AddSC_priest_spell_scripts()
 {
     new spell_pri_power_word_fortitude();
@@ -2915,4 +2984,5 @@ void AddSC_priest_spell_scripts()
     new spell_pri_divine_star_dummy();
     new npc_pri_divine_star();
     new spell_pri_divine_star_damage_heal();
+    new spell_pri_mind_flay();
 }

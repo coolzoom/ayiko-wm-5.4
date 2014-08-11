@@ -7215,20 +7215,6 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 damage *= 0.85f;
         }
 
-        // Mind flay with Solace and Insanity
-        if (GetSpellInfo()->Id == 15407)
-        {
-            if (Player* const _player = GetCaster()->ToPlayer())
-            {
-                if (_player->GetSpecializationId(_player->GetActiveSpec()) == SPEC_PRIEST_SHADOW &&_player->HasAura(139139) && target->HasAura(2944))
-                {
-                    // Get dummy aura where consumed Shadow Orbs are stored
-                    if (auto const devouringPlague = target->GetAuraEffect(2944, EFFECT_2))
-                        AddPct(damage, 33.3f * (devouringPlague->GetAmount() + 1));
-                }
-            }
-        }
-
         // Chaos Bolt with Grimoire
         if (GetSpellInfo()->Id == 116858)
         {

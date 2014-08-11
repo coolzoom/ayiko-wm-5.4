@@ -7218,15 +7218,13 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
         // Mind flay with Solace and Insanity
         if (GetSpellInfo()->Id == 15407)
         {
-            if (Player* _player = GetCaster()->ToPlayer())
+            if (Player* const _player = GetCaster()->ToPlayer())
             {
-                if (_player->GetSpecializationId(_player->GetActiveSpec()) == SPEC_PRIEST_SHADOW &&_player->HasAura(120585) && target->HasAura(2944))
+                if (_player->GetSpecializationId(_player->GetActiveSpec()) == SPEC_PRIEST_SHADOW &&_player->HasAura(139139) && target->HasAura(2944))
                 {
-                    if (auto const devouringPlague = target->GetAura(2944))
-                    {
-                        uint8 powerUsed = devouringPlague->GetEffect(2)->GetAmount();
-                        damage *= (powerUsed * 0.33f + 1);
-                    }
+                    // Get dummy aura where consumed Shadow Orbs are stored
+                    if (auto const devouringPlague = target->GetAuraEffect(2944, EFFECT_2))
+                        AddPct(damage, 33.3f * (devouringPlague->GetAmount() + 1));
                 }
             }
         }

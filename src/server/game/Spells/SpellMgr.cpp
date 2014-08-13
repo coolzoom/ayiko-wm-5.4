@@ -4726,6 +4726,7 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->ProcChance = 100;
                     spellInfo->ProcCharges = 1;
                     spellInfo->ProcFlags = PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS;
+                    spellInfo->Effects[EFFECT_1].SpellClassMask[0] = spellInfo->Effects[EFFECT_0].SpellClassMask[0];
                     break;
                 case 54785: // Demonic Leap
                     spellInfo->DmgClass = SPELL_DAMAGE_CLASS_NONE;

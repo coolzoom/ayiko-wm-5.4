@@ -305,17 +305,22 @@ class npc_injured_draenei : public CreatureScript
 public:
     npc_injured_draenei() : CreatureScript("npc_injured_draenei") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
     {
-        return new npc_injured_draeneiAI (creature);
+        return new npc_injured_draeneiAI(creature);
     }
 
     struct npc_injured_draeneiAI : public ScriptedAI
     {
-        npc_injured_draeneiAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_injured_draeneiAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void Reset()
+        bool healedRecently;
+        uint32 resetTimer;
+
+        void Reset() override
         {
+            healedRecently = false;
+            resetTimer = 10000;
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
             me->SetHealth(me->CountPctFromMaxHealth(15));
             switch (urand(0, 1))
@@ -330,11 +335,31 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/) {}
+        void EnterCombat(Unit* /*who*/) override { }
 
-        void MoveInLineOfSight(Unit* /*who*/) {}
+        void MoveInLineOfSight(Unit* /*who*/) override { }
 
-        void UpdateAI(const uint32 /*diff*/) {}
+        void UpdateAI(uint32 diff) override
+        {
+            if (healedRecently)
+            {
+                if (resetTimer <= diff)
+                    Reset();
+                else
+                    resetTimer -= diff;
+            }
+        }
+
+        void SpellHit(Unit * caster, const SpellInfo * spell)
+        {
+            if (spell->Id == 2061 && !healedRecently && caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                caster->ToPlayer()->KilledMonsterCredit(44175);
+                me->SetHealth(me->GetMaxHealth());
+                me->SetStandState(UNIT_STAND_STATE_STAND);
+                healedRecently = true;
+            }
+        }
     };
 
 };

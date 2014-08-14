@@ -110,6 +110,7 @@ set(scripts_STAT_SRCS
   Kalimdor/OnyxiasLair/boss_onyxia.cpp
   Kalimdor/OnyxiasLair/onyxias_lair.h
   Kalimdor/OnyxiasLair/instance_onyxias_lair.cpp
+  Kalimdor/EchoIsles/echo_isles.cpp
   Kalimdor/southern_barrens.cpp
   Kalimdor/Uldum.cpp
   Kalimdor/mount_hyjal.cpp

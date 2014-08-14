@@ -2019,7 +2019,7 @@ class npc_lightwell : public CreatureScript
         }
 };
 
-enum eTrainingDummy
+enum TrainingDummy
 {
     NPC_ADVANCED_TARGET_DUMMY                  = 2674,
     NPC_TARGET_DUMMY                           = 2673
@@ -2027,84 +2027,88 @@ enum eTrainingDummy
 
 class npc_training_dummy : public CreatureScript
 {
-    public:
-        npc_training_dummy() : CreatureScript("npc_training_dummy") { }
+public:
+    npc_training_dummy() : CreatureScript("npc_training_dummy") { }
 
-        struct npc_training_dummyAI : Scripted_NoMovementAI
+    struct npc_training_dummyAI : ScriptedAI
+    {
+        npc_training_dummyAI(Creature* creature) : ScriptedAI(creature)
         {
-            npc_training_dummyAI(Creature* creature) : Scripted_NoMovementAI(creature)
-            {
-                entry = creature->GetEntry();
-            }
+            SetCombatMovement(false);
+            entry = creature->GetEntry();
+            const CreatureTemplate * cinfo = creature->GetCreatureTemplate();
+            const_cast<CreatureTemplate *>(cinfo)->flags_extra |= CREATURE_FLAG_EXTRA_TRAINING_DUMMY;
+        }
 
-            uint32 entry;
-            uint32 resetTimer;
-            uint32 despawnTimer;
+        uint32 entry;
+        uint32 resetTimer;
+        uint32 despawnTimer;
 
-            void Reset()
-            {
+        void Reset() override
+        {
+            me->SetControlled(true, UNIT_STATE_STUNNED);//disable rotate
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);//imune to knock aways like blast wave
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
+            resetTimer = 5000;
+            despawnTimer = 15000;
+        }
+
+        void EnterEvadeMode() override
+        {
+            if (!_EnterEvadeMode())
+                return;
+
+            Reset();
+        }
+
+        void DamageTaken(Unit* /*doneBy*/, uint32& damage) override
+        {
+            resetTimer = 5000;
+        }
+
+        void SpellHit(Unit * caster, const SpellInfo * spell)
+        {
+            if (spell->Id == 100 || spell->Id == 122 || spell->Id == 172 || spell->Id == 348 || spell->Id == 589 || spell->Id == 2098 ||
+                spell->Id == 5143 || spell->Id == 20271 || spell->Id == 56641 || spell->Id == 73899 || spell->Id == 100787)
+                if (Player * pCaster = caster->ToPlayer())
+                    pCaster->KilledMonsterCredit(44175);
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (!me->HasUnitState(UNIT_STATE_STUNNED))
                 me->SetControlled(true, UNIT_STATE_STUNNED);//disable rotate
-                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);//imune to knock aways like blast wave
-                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
 
-                resetTimer = 5000;
-                despawnTimer = 15000;
-            }
-
-            void EnterEvadeMode()
+            if (entry != NPC_ADVANCED_TARGET_DUMMY && entry != NPC_TARGET_DUMMY)
             {
-                if (!_EnterEvadeMode())
-                    return;
-
-                Reset();
-            }
-
-            void DamageTaken(Unit* /*doneBy*/, uint32& damage)
-            {
-                resetTimer = 5000;
-                damage = 0;
-            }
-
-            void EnterCombat(Unit* /*who*/)
-            {
-                if (entry != NPC_ADVANCED_TARGET_DUMMY && entry != NPC_TARGET_DUMMY)
-                    return;
-            }
-
-            void UpdateAI(uint32 const diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                if (!me->HasUnitState(UNIT_STATE_STUNNED))
-                    me->SetControlled(true, UNIT_STATE_STUNNED);//disable rotate
-
-                if (entry != NPC_ADVANCED_TARGET_DUMMY && entry != NPC_TARGET_DUMMY)
+                if (resetTimer <= diff)
                 {
-                    if (resetTimer <= diff)
-                    {
-                        EnterEvadeMode();
-                        resetTimer = 5000;
-                    }
-                    else
-                        resetTimer -= diff;
-                    return;
+                    EnterEvadeMode();
+                    resetTimer = 5000;
                 }
                 else
-                {
-                    if (despawnTimer <= diff)
-                        me->DespawnOrUnsummon();
-                    else
-                        despawnTimer -= diff;
-                }
+                    resetTimer -= diff;
+                return;
             }
-            void MoveInLineOfSight(Unit* /*who*/){return;}
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new npc_training_dummyAI(creature);
+            else
+            {
+                if (despawnTimer <= diff)
+                    me->DespawnOrUnsummon();
+                else
+                    despawnTimer -= diff;
+            }
         }
+
+        void MoveInLineOfSight(Unit* /*who*/) override { }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_training_dummyAI(creature);
+    }
 };
 
 /*######

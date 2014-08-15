@@ -813,20 +813,31 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
     if (cleanDamage && damagetype == DIRECT_DAMAGE && this != victim && getPowerType() == POWER_RAGE
         && (!spellProto || !spellProto->HasAura(SPELL_AURA_SPLIT_DAMAGE_PCT)))
     {
-        uint32 weaponSpeedHitFactor;
+        float rageRate = 1.75f * GetAttackTime(cleanDamage->attackType) / 1000.0f;
+        float bonusMultiplier = 1.0f;
+
+        // Bonus multiplier for low level TODO: 10-80 seems to have some bonus multiplier too
+        if (getLevel() < 10)
+        {
+            if (getClass() == CLASS_DRUID)
+                bonusMultiplier = 2.25f;
+            else
+                bonusMultiplier = 4.0f;
+        }
+
+        rageRate *= bonusMultiplier;
 
         switch (cleanDamage->attackType)
         {
             case BASE_ATTACK:
             {
-                weaponSpeedHitFactor = uint32(GetAttackTime(cleanDamage->attackType) / 1000.0f * 6.5f);
-                RewardRage(weaponSpeedHitFactor, true);
+                RewardRage(rageRate, true);
                 break;
             }
             case OFF_ATTACK:
             {
-                weaponSpeedHitFactor = uint32(GetAttackTime(cleanDamage->attackType) / 1000.0f * 3.25f);
-                RewardRage(weaponSpeedHitFactor, true);
+                rageRate /= 2.0f;
+                RewardRage(rageRate, true);
                 break;
             }
             case RANGED_ATTACK:
@@ -20505,14 +20516,14 @@ void Unit::SendRemoveFromThreatListOpcode(HostileReference* pHostileReference)
 }
 
 // baseRage means damage taken when attacker = false
-void Unit::RewardRage(uint32 baseRage, bool attacker)
+void Unit::RewardRage(float baseRage, bool attacker)
 {
     float addRage = baseRage;
 
     if (attacker)
     {
         // talent who gave more rage on attack
-        addRage *= 1.0f + GetTotalAuraModifier(SPELL_AURA_MOD_RAGE_FROM_DAMAGE_DEALT) / 100.0f;
+        AddPct(addRage, GetTotalAuraModifier(SPELL_AURA_MOD_RAGE_FROM_DAMAGE_DEALT));
 
         // Sentinel - Protection Warrior Mastery
         if (AuraEffect *aurEff = GetAuraEffect(29144, 1))
@@ -20521,10 +20532,11 @@ void Unit::RewardRage(uint32 baseRage, bool attacker)
     }
     else
     {
-        addRage /= (GetCreateHealth()/35);
+        // baseRage is damage taken here
+        addRage = baseRage / GetMaxHealth() * 100.f;
 
-        // Generate rage from damage taken only in Berserker Stance
-        if (!HasAura(2458))
+        // Warrior: Generate rage from damage taken only in Berserker Stance
+        if (getClass() == CLASS_WARRIOR && !HasAura(2458))
             return;
 
         // Berserker Rage effect
@@ -20535,7 +20547,9 @@ void Unit::RewardRage(uint32 baseRage, bool attacker)
         }
     }
 
-    ModifyPower(POWER_RAGE, uint32(addRage * 3));
+    addRage *= 10;
+
+    ModifyPower(POWER_RAGE, addRage);
 }
 
 void Unit::StopAttackFaction(uint32 faction_id)

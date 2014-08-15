@@ -2069,7 +2069,7 @@ public:
         void SpellHit(Unit * caster, const SpellInfo * spell)
         {
             if (spell->Id == 100 || spell->Id == 122 || spell->Id == 172 || spell->Id == 348 || spell->Id == 589 || spell->Id == 2098 ||
-                spell->Id == 5143 || spell->Id == 20271 || spell->Id == 56641 || spell->Id == 73899 || spell->Id == 100787)
+                spell->Id == 5143 || spell->Id == 20271 || spell->Id == 56641 || spell->Id == 73899 || spell->Id == 100787 || spell->Id == 118215)
                 if (Player * pCaster = caster->ToPlayer())
                     pCaster->KilledMonsterCredit(44175);
         }

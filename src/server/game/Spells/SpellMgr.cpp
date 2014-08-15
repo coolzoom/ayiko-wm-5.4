@@ -5417,6 +5417,9 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[EFFECT_0].TargetB = TARGET_DEST_DYNOBJ_NONE;
                     spellInfo->Effects[EFFECT_1].BasePoints = 0;
                     break;
+                case 86346: // Colossus Smash - swap effects
+                    std::swap(spellInfo->Effects[EFFECT_1], spellInfo->Effects[EFFECT_4]);
+                    break;
                 default:
                     break;
             }

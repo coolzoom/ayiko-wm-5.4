@@ -1062,13 +1062,12 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
             switch (GetId())
             {
                 case 86346: // Colossus Smash
-                    if (GetBase()->GetUnitOwner()->GetTypeId() == TYPEID_PLAYER)
-                        amount /= 2;
-                    break;
                 case 91021: // Find Weakness
+                {
                     if (GetBase()->GetUnitOwner()->GetTypeId() == TYPEID_PLAYER)
                         amount /= 2;
                     break;
+                }
                 default:
                     break;
             }

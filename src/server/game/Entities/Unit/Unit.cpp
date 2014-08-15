@@ -20535,8 +20535,8 @@ void Unit::RewardRage(float baseRage, bool attacker)
         // baseRage is damage taken here
         addRage = baseRage / GetMaxHealth() * 100.f;
 
-        // Warrior: Generate rage from damage taken only in Berserker Stance
-        if (getClass() == CLASS_WARRIOR && !HasAura(2458))
+        // Generate rage from damage taken only in Berserker Stance
+        if (!HasAura(2458))
             return;
 
         // Berserker Rage effect

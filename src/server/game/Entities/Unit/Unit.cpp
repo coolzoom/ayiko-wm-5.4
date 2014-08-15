@@ -5766,12 +5766,17 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                     break;
                 }
                 // Sweeping Strikes
+                case 12328:
                 case 18765:
                 case 35429:
                 {
                     target = SelectNearbyTarget(victim);
                     if (!target)
                         return false;
+
+                    // Glyph of Sweeping Strikes
+                    if (HasAura(58384))
+                        CastSpell(this, 124333, true);
 
                     triggered_spell_id = 26654;
                     break;
@@ -6407,16 +6412,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                     basepoints0 = int32(CalculatePct(damage, triggerAmount / 2)); // 2 ticks
                     triggered_spell_id = 99240;
                     target = victim;
-                    break;
-                }
-                // Sweeping Strikes
-                case 12328:
-                {
-                    target = SelectNearbyTarget(victim);
-                    if (!target)
-                        return false;
-
-                    triggered_spell_id = 26654;
                     break;
                 }
                 // Victorious

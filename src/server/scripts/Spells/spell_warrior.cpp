@@ -1455,6 +1455,55 @@ public:
     }
 };
 
+// 76838 - Mastery: Strikes of Opportunity
+class spell_warr_strikes_of_opportunity : public SpellScriptLoader
+{
+    class script_impl : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        enum
+        {
+            OPPORTUNITY_STRIKE              = 76858,
+            SWEEPING_STRIKES_EXTRA_ATTACK   = 26654,
+        };
+
+        bool CheckProc(ProcEventInfo &eventInfo)
+        {
+            SpellInfo const * const procSpell = eventInfo.GetSpellInfo();
+            return !procSpell || (procSpell->Id != OPPORTUNITY_STRIKE && procSpell->Id != SWEEPING_STRIKES_EXTRA_ATTACK);
+        }
+
+        void OnProc(AuraEffect const *aurEff, ProcEventInfo &eventInfo)
+        {
+            PreventDefaultAction();
+
+            Unit * const caster = eventInfo.GetActor();
+            Unit * const target = eventInfo.GetActionTarget();
+
+            if (caster && caster->GetTypeId() == TYPEID_PLAYER && target)
+                if (roll_chance_i(caster->ToPlayer()->GetFloatValue(PLAYER_MASTERY) * 2.2f))
+                    caster->CastSpell(target, OPPORTUNITY_STRIKE, true);
+        }
+
+        void Register() override
+        {
+            DoCheckProc += AuraCheckProcFn(script_impl::CheckProc);
+            OnEffectProc += AuraEffectProcFn(script_impl::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+public:
+    spell_warr_strikes_of_opportunity()
+        : SpellScriptLoader("spell_warr_strikes_of_opportunity")
+    { }
+
+    AuraScript * GetAuraScript() const
+    {
+        return new script_impl;
+    }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_victorious_state();
@@ -1493,4 +1542,5 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_revenge_shield_slam();
     new spell_warr_glyph_of_die_by_the_sword();
     new spell_warr_overpower();
+    new spell_warr_strikes_of_opportunity();
 }

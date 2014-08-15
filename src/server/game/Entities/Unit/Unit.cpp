@@ -1728,6 +1728,7 @@ uint32 Unit::CalcArmorReducedDamage(Unit* victim, const uint32 damage, SpellInfo
     for (AuraEffectList::const_iterator i = reductionAuras.begin(); i != reductionAuras.end(); ++i)
         if ((*i)->GetCasterGUID() == GetGUID())
             armorBypassPct += (*i)->GetAmount();
+
     armor = CalculatePct(armor, 100 - std::min(armorBypassPct, 100));
 
     // Ignore enemy armor by SPELL_AURA_MOD_TARGET_RESISTANCE aura
@@ -13152,19 +13153,6 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
 
             if (roll_chance_f(Mastery))
                 this->CastSpell(victim, 86392, true);
-        }
-    }
-
-    // Custom MoP Script
-    // 76838 - Mastery : Strikes of Opportunity
-    if (GetTypeId() == TYPEID_PLAYER && victim && pdamage != 0 && (attType == BASE_ATTACK || attType == OFF_ATTACK) && !spellProto)
-    {
-        if (HasAura(76838))
-        {
-            float Mastery = GetFloatValue(PLAYER_MASTERY) * 2.2f;
-
-            if (roll_chance_f(Mastery))
-                this->CastSpell(victim, 76858, true);
         }
     }
 

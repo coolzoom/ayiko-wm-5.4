@@ -13,6 +13,7 @@ set(scripts_STAT_SRCS
   World/achievement_scripts.cpp
   World/areatrigger_scripts.cpp
   World/chat_log.cpp
+  World/darkmoon_faire.cpp
   World/go_scripts.cpp
   World/guards.cpp
   World/item_scripts.cpp

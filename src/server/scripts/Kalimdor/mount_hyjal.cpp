@@ -183,7 +183,7 @@ class npc_child_of_tortolla : public CreatureScript
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (checkTimer <= diff)
             {

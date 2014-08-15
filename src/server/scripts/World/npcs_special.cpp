@@ -2036,8 +2036,8 @@ public:
         {
             SetCombatMovement(false);
             entry = creature->GetEntry();
-            const CreatureTemplate * cinfo = creature->GetCreatureTemplate();
-            const_cast<CreatureTemplate *>(cinfo)->flags_extra |= CREATURE_FLAG_EXTRA_TRAINING_DUMMY;
+            /*const CreatureTemplate * cinfo = creature->GetCreatureTemplate();
+            const_cast<CreatureTemplate *>(cinfo)->flags_extra |= CREATURE_FLAG_EXTRA_TRAINING_DUMMY;*/
         }
 
         uint32 entry;
@@ -2074,7 +2074,7 @@ public:
                     pCaster->KilledMonsterCredit(44175);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if (!UpdateVictim())
                 return;

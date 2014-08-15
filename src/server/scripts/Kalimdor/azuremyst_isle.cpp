@@ -339,7 +339,7 @@ public:
 
         void MoveInLineOfSight(Unit* /*who*/) override { }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if (healedRecently)
             {

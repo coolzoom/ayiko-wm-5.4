@@ -62,9 +62,9 @@ class npc_generic_darkspear_novice : public CreatureScript
                 ScriptedAI::AttackStartNoMove(who);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
-            if (!me->GetVictim())
+            if (!me->getVictim())
             {
                 if (targetTimer <= diff)
                 {
@@ -137,13 +137,13 @@ class npc_tiki_target_troll : public CreatureScript
         {
             resetTimer = 5000;
 
-            if (me->HealthBelowPctDamaged(75, damage) && done_by->GetTypeId() == TYPEID_UNIT && !done_by->IsPet())
+            if (me->HealthBelowPctDamaged(75, damage) && done_by->GetTypeId() == TYPEID_UNIT && !done_by->isPet())
                 damage = 0;
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
-            if (me->GetVictim())
+            if (me->getVictim())
             {
                 if (resetTimer <= diff)
                 {
@@ -206,7 +206,7 @@ class npc_darkspear_jailor : public CreatureScript
             there = true;
         }
 
-        void DoAction(int32 action)
+        void DoAction(int32 const action)
         {
             if (action == 1)
             {
@@ -234,7 +234,7 @@ class npc_darkspear_jailor : public CreatureScript
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!done)
             {
@@ -319,7 +319,7 @@ class npc_captive_spitescale_scout : public CreatureScript
                 jailor->AI()->DoAction(2);
         }
 
-        void DoAction(int32 /*action*/)
+        void DoAction(int32 const /*action*/)
         {
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
             Talk(1);
@@ -327,7 +327,7 @@ class npc_captive_spitescale_scout : public CreatureScript
             me->GetMotionMaster()->MovePoint(0,  -1151.08f, -5526.25f, 8.11f);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
                 return;
@@ -386,7 +386,7 @@ class npc_lost_bloodtalon_hatchling : public CreatureScript
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (following)
             {
@@ -432,7 +432,7 @@ class spell_bloodtalon_whistle : public SpellScriptLoader
     {
         PrepareSpellScript(spell_bloodtalon_whistle_SpellScript)
 
-        void SelectTarget(WorldObjectList& targets)
+        void SelectTarget(std::list<WorldObject*> & targets)
         {
             targets.remove_if (MovementCheck());
         }
@@ -488,7 +488,7 @@ class npc_bloodtalon_thrasher : public CreatureScript
                 {
                     nextPathTimer = 2500;
                     jumping = true;
-                    me->GetMotionMaster()->MoveJump(jumpPos[jump], 10.0f, 20.0f);
+                    me->GetMotionMaster()->MoveJump(jumpPos[jump].GetPositionX(), jumpPos[jump].GetPositionY(), jumpPos[jump].GetPositionZ(), 10.0f, 20.0f);
                     ++jump;
                 }
                 else if (jump == 2 && id == 8)
@@ -496,7 +496,7 @@ class npc_bloodtalon_thrasher : public CreatureScript
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (jumping)
             {
@@ -617,7 +617,7 @@ class npc_voljin_ancient_enemy : public CreatureScript
             ScriptedAI::AttackStartNoMove(who);
         }
 
-        void DoAction(int32 /*action*/)
+        void DoAction(int32 const /*action*/)
         {
             if (EventInProgress)
                 return;
@@ -642,7 +642,7 @@ class npc_voljin_ancient_enemy : public CreatureScript
             events.ScheduleEvent(EVENT_SHADOW_SHOCK, 5000);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!EventInProgress)
                 return;
@@ -738,7 +738,7 @@ class npc_zarjira : public CreatureScript
             ScriptedAI::AttackStartNoMove(who);
         }
 
-        void DoAction(int32 action)
+        void DoAction(int32 const action)
         {
             if (action == 1)
                 events.ScheduleEvent(EVENT_INTRO, 12000);
@@ -764,7 +764,7 @@ class npc_zarjira : public CreatureScript
             events.ScheduleEvent(EVENT_FIRES, 60000);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             events.Update(diff);
             if (uint32 eventId = events.ExecuteEvent())

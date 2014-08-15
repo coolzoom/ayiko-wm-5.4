@@ -469,34 +469,30 @@ class spell_warr_sudden_death : public SpellScriptLoader
         }
 };
 
-// Berzerker Rage - 18499
-class spell_warr_berzerker_rage : public SpellScriptLoader
+// Berserker Rage - 18499
+class spell_warr_berserker_rage : public SpellScriptLoader
 {
     public:
-        spell_warr_berzerker_rage() : SpellScriptLoader("spell_warr_berzerker_rage") { }
+        spell_warr_berserker_rage() : SpellScriptLoader("spell_warr_berserker_rage") { }
 
-        class spell_warr_berzerker_rage_SpellScript : public SpellScript
+        class spell_warr_berserker_rage_SpellScript : public SpellScript
         {
-            PrepareSpellScript(spell_warr_berzerker_rage_SpellScript);
+            PrepareSpellScript(spell_warr_berserker_rage_SpellScript);
 
             void HandleOnHit()
             {
-                if (Player* _player = GetCaster()->ToPlayer())
-                {
-                    _player->CastSpell(_player, WARRIOR_SPELL_ENRAGE, true);
-                    _player->CastSpell(_player, WARRIOR_SPELL_BERZERKER_RAGE_EFFECT, true);
-                }
+                GetCaster()->CastSpell(GetCaster(), WARRIOR_SPELL_ENRAGE, true);
             }
 
             void Register()
             {
-                OnHit += SpellHitFn(spell_warr_berzerker_rage_SpellScript::HandleOnHit);
+                OnHit += SpellHitFn(spell_warr_berserker_rage_SpellScript::HandleOnHit);
             }
         };
 
         SpellScript* GetSpellScript() const
         {
-            return new spell_warr_berzerker_rage_SpellScript();
+            return new spell_warr_berserker_rage_SpellScript();
         }
 };
 
@@ -1473,7 +1469,7 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_second_wind();
     new spell_warr_unbridled_wrath();
     new spell_warr_sudden_death();
-    new spell_warr_berzerker_rage();
+    new spell_warr_berserker_rage();
     new spell_warr_mocking_banner();
     new spell_warr_enrage_raging_blow();
     new spell_warr_raging_blow();

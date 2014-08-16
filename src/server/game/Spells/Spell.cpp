@@ -3746,6 +3746,18 @@ void Spell::cast(bool skipCheck)
 
     CallScriptAfterCastHandlers();
 
+    // Hack for Whiplash, TODO: Move to spell-script
+    if (m_spellInfo->Id == 119909 && m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        if (WorldLocation const * loc = m_targets.GetDstPos())
+            if (Pet* pet = m_caster->ToPlayer()->GetPet())
+            {
+                pet->CastSpell(loc->GetPositionX(), loc->GetPositionY(), loc->GetPositionZ(), 6360, true);
+                pet->AddCreatureSpellCooldown(6360);
+                m_caster->ToPlayer()->AddSpellCooldown(m_spellInfo->Id, 0, pet->GetCreatureSpellCooldownDelay(6360) * 1000);
+            }
+    }
+
     // Kil'Jaeden's Cunning - 10% speed less for each cast while moving (up to 2 charges)
     if (m_caster->HasAuraType(SPELL_AURA_KIL_JAEDENS_CUNNING) && m_caster->isMoving() && !m_caster->HasAura(119048) && m_spellInfo->CalcCastTime(m_caster) > 0)
         m_caster->CastSpell(m_caster, 119050, true);

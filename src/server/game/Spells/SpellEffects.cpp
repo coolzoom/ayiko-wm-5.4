@@ -1243,7 +1243,11 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 {
                     if (m_caster->GetTypeId() == TYPEID_PLAYER)
                         if (Pet* pet = m_caster->ToPlayer()->GetPet())
+                        {
                             pet->CastSpell(unitTarget, 119899, true);
+                            pet->AddCreatureSpellCooldown(119899);
+                            m_caster->ToPlayer()->AddSpellCooldown(m_spellInfo->Id, 0, pet->GetCreatureSpellCooldownDelay(119899) * 1000);
+                        }
 
                     break;
                 }
@@ -1254,7 +1258,11 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     if (!m_caster->IsFriendlyTo(unitTarget))
                         if (m_caster->GetTypeId() == TYPEID_PLAYER)
                             if (Pet* pet = m_caster->ToPlayer()->GetPet())
+                            {
                                 pet->CastSpell(unitTarget, damage, true);
+                                pet->AddCreatureSpellCooldown(damage);
+                                m_caster->ToPlayer()->AddSpellCooldown(m_spellInfo->Id, 0, pet->GetCreatureSpellCooldownDelay(damage) * 1000);
+                            }
                     break;
                 }
                 case 119909:// Whiplash (Command Demon)
@@ -1263,7 +1271,11 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     if (m_caster->GetTypeId() == TYPEID_PLAYER)
                         if (targets.GetDstPos())
                             if (Pet* pet = m_caster->ToPlayer()->GetPet())
+                            {
                                 pet->CastSpell(targets.GetDstPos()->GetPositionX(), targets.GetDstPos()->GetPositionY(), targets.GetDstPos()->GetPositionZ(), damage, true);
+                                pet->AddCreatureSpellCooldown(damage);
+                                m_caster->ToPlayer()->AddSpellCooldown(m_spellInfo->Id, 0, pet->GetCreatureSpellCooldownDelay(damage) * 1000);
+                            }
 
                     break;
                 }

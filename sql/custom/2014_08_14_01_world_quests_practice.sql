@@ -5,7 +5,10 @@ UPDATE `quest_template` SET `Title` = 'Corruption', `Objectives` = 'Reach level 
 UPDATE `quest_template` SET `SpecialFlags` = `SpecialFlags`|4 WHERE `Id` = 26198;
 UPDATE `creature_template` SET `AIName` = "SmartAI", `ScriptName` = "" WHERE `entry` IN (35118, 42501, 44564, 44617, 44857, 45199, 47091);
 UPDATE `creature_template` SET `AIName` = "", `ScriptName` = "npc_injured_draenei" WHERE `entry` = 16971;
-UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'npc_tiki_target_troll' WHERE `entry` = 38038;
+UPDATE `creature_template` SET `npcflag` = 0, `AIName` = '', `ScriptName` = 'npc_tiki_target_troll' WHERE `entry` = 38038;
+DELETE FROM `creature_template_addon` WHERE `entry` = 38038;
+INSERT INTO `creature_template_addon` (`entry`, `emote`, `auras`) VALUES 
+(38038, 0, '71066 7056 83470'); -- Tiki Target
 UPDATE `creature_template` SET `faction_A` = 1604, `faction_H` = 1604 WHERE `entry` = 44857;
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN (16971, 35118, 42501, 44564, 44617, 44857, 45199, 47091) AND `source_type` = 0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES

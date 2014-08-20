@@ -1377,10 +1377,13 @@ class spell_sha_elemental_blast : public SpellScriptLoader
 
                     if (Aura* const aura = _player->GetAura(SPELL_SHA_ELEMENTAL_BLAST_RATING_BONUS, _player->GetGUID()))
                     {
-                        uint32 randomEffect = urand(0, 2);
+                        uint32 randomEffect = 0;
 
                         if (_player->GetSpecializationId(_player->GetActiveSpec()) == SPEC_SHAMAN_ENHANCEMENT)
-                            randomEffect = 3;
+                            randomEffect = urand(0, 3);
+                        else
+                            randomEffect = urand(0, 2);
+
                         // Iterate over all aura effects
                         for (int i = 0; i < 4; ++i)
                         {

@@ -7378,14 +7378,14 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
 
                     switch (procSpell->Id)
                     {
-                        case 635:
-                        case 85673:
-                        case 19750:
-                        case 82326:
-                        case 20473:
-                        case 25914:
-                        case 82327:
-                        case 86452:
+                        case 635: // Holy Light
+                        case 19750: // Flash of Light
+                        case 82326: // Divine Light
+                        case 20473: // Holy Shock
+                        case 25914: // Holy Shock
+                        case 82327: // Holy Radiance
+                        case 85222: // Light of Dawn
+                        case 130551: // Word of Glory
                         {
                             float mastery = ToPlayer()->GetFloatValue(PLAYER_MASTERY) * 1.25f;
                             basepoints0 = int32(damage * float(mastery / 100.0f));
@@ -7394,7 +7394,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                             if (AuraEffect *aurShield = victim->GetAuraEffect(triggered_spell_id, EFFECT_0, GetGUID()))
                                 basepoints0 += aurShield->GetAmount();
 
-                            int32 maxHealth = CountPctFromMaxHealth(33);
+                            int32 maxHealth = CountPctFromMaxHealth(33.333f);
                             basepoints0 = std::min(basepoints0, maxHealth);
 
                             break;

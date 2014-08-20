@@ -5420,6 +5420,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 86346: // Colossus Smash - swap effects
                     std::swap(spellInfo->Effects[EFFECT_1], spellInfo->Effects[EFFECT_4]);
                     break;
+                case 114163: // Eternal Flame: Bonus for self-cast is 50% not 100%
+                    spellInfo->Effects[EFFECT_2].BasePoints = 50;
+                    break;
                 default:
                     break;
             }

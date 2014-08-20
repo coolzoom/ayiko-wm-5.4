@@ -484,11 +484,14 @@ class spell_sha_ancestral_guidance : public SpellScriptLoader
 
                 if (Unit* target = eventInfo.GetActionTarget())
                 {
-                    int32 bp = eventInfo.GetDamageInfo()->GetDamage() > eventInfo.GetHealInfo()->GetHeal() ? eventInfo.GetDamageInfo()->GetDamage() : eventInfo.GetHealInfo()->GetHeal();
+                    uint32 spellDamage = eventInfo.GetDamageInfo()->GetDamage();
+                    uint32 spellHeal = eventInfo.GetHealInfo()->GetHeal();
+                    bool isDamage = spellDamage > spellHeal;
+                    int32 bp = std::max(spellDamage, spellHeal);
                     if (!bp)
                         return;
 
-                    bp = int32(bp * 0.40f);
+                    bp = isDamage ? int32(bp * 0.40f) : int32(bp * 0.60f);
 
                     _player->CastCustomSpell(target, SPELL_SHA_ANCESTRAL_GUIDANCE, &bp, NULL, NULL, true);
                 }

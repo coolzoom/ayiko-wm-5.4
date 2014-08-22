@@ -320,6 +320,11 @@ Unit::~Unit()
     delete m_charmInfo;
     delete movespline;
 
+    if (GetTypeId() == TYPEID_PLAYER)
+        ASSERT(m_movedPlayer == this);
+    else
+        ASSERT(m_movedPlayer == nullptr);
+
     ASSERT(!m_duringRemoveFromWorld);
     ASSERT(!m_attacking);
     ASSERT(m_attackers.empty());

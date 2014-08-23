@@ -12486,29 +12486,26 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
     if (spellProto->SpellFamilyName == SPELLFAMILY_POTION)
         return healamount;
 
-    // No bonus for Temporal Ripples or Desperate Prayer or Conductivity
-    if (spellProto->Id == 115611 || spellProto->Id == 19236 || spellProto->Id == 118800)
-        return healamount;
-
-    // No bonus for Devouring Plague heal or Atonement or Eminence
-    if (spellProto->Id == 127626 || spellProto->Id == 81751 || spellProto->Id == 117895)
-        return healamount;
-
-    // No bonus for Leader of the Pack or Soul Leech or Soul Link heal
-    if (spellProto->Id == 34299 || spellProto->Id == 108366 || spellProto->Id == 108447)
-        return healamount;
-
-    // No bonus for Living Seed or Ancestral Guidance
-    if (spellProto->Id == 48503 || spellProto->Id == 114911)
-        return healamount;
-
-    // No bonus for Lifebloom : Final heal
-    if (spellProto->Id == 33778)
-        return healamount;
-
-    // No bonus for Eminence (statue) and Eminence
-    if (spellProto->Id == 117895 || spellProto->Id == 126890)
-        return healamount;
+    switch (spellProto->Id)
+    {
+        case 19236: // Desperate Prayer
+        case 33778: // Lifebloom: Final Heal
+        case 34299: // Leader of the Pack
+        case 48503: // Living Seed
+        case 81751: // Atonement
+        case 108366: // Soul Leech
+        case 108447: // Soul Link Heal
+        case 114911: // Ancestral Guidance
+        case 115611: // Temporal Ripples
+        case 126890: // Eminence
+        case 117895: // Eminence (statue)
+        case 118800: // Conductivity
+        case 127626: // Devouring Plague Heal
+        case 137808: // Glyph of Flame Shock Heal
+            return healamount;
+        default:
+            break;
+    }
 
     float DoneTotalMod = 1.0f;
     int32 DoneTotal = 0;

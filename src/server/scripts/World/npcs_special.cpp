@@ -4113,9 +4113,10 @@ enum PastSelfSpells
 
 struct auraData
 {
-    auraData(uint32 id, int32 duration) : m_id(id), m_duration(duration) {}
+    auraData(uint32 id, int32 duration, uint8 stacks) : m_id(id), m_duration(duration), m_stacks(stacks) {}
     uint32 m_id;
     int32 m_duration;
+    uint8 m_stacks;
 };
 
 #define ACTION_ALTER_TIME   1
@@ -4167,7 +4168,7 @@ class npc_past_self : public CreatureScript
                             if (auraInfo->IsPassive())
                                 continue;
 
-                            auras.insert(new auraData(auraInfo->Id, aura->GetDuration()));
+                            auras.insert(new auraData(auraInfo->Id, aura->GetDuration(), aura->GetStackAmount()));
                         }
                     }
 
@@ -4201,6 +4202,7 @@ class npc_past_self : public CreatureScript
                                     Aura *aura = !m_owner->HasAura((*itr)->m_id) ? m_owner->AddAura((*itr)->m_id, m_owner) : m_owner->GetAura((*itr)->m_id);
                                     if (aura)
                                     {
+                                        aura->SetStackAmount((*itr)->m_stacks);
                                         aura->SetDuration((*itr)->m_duration);
                                         aura->SetNeedClientUpdateForTargets();
                                     }

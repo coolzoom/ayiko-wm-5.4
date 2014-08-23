@@ -6604,6 +6604,12 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
 
                     break;
                 }
+                case 118694:// Spirit Bond
+                {
+                    if (caster && target && caster == target)
+                        caster->CastSpell(caster, 149254, true);
+                    break;
+                }
                 default:
                     break;
             }

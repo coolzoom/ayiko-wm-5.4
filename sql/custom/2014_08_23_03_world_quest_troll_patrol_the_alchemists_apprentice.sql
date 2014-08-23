@@ -1,4 +1,5 @@
 -- [SQL] Quests - Troll Patrol: The Alchemist's Apprentice scripted (Feedback #4290)
+-- [SQL] Quests - Lab Work scripted (Feedback #4285)
 -- Add option conditions for Alchemist Finklestein
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` IN (15) AND `SourceGroup` IN (9668) AND `SourceEntry` IN (0) AND `ConditionValue1` IN (51216);
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`,`SourceGroup`,`SourceEntry`,`ElseGroup`,`ConditionTypeOrReference`,`ConditionValue1`,`ConditionValue2`,`ConditionValue3`,`NegativeCondition`,`ErrorTextId`,`ScriptName`,`Comment`) VALUES

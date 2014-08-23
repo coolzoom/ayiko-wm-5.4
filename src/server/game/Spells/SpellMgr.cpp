@@ -5408,7 +5408,7 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 56315: // Kindred Spirits
                     spellInfo->Effects[EFFECT_0].TargetB = TARGET_UNIT_PET;
                     break;
-                case 85448: // Assassin's Resolve
+                case 84601: // Assassin's Resolve
                     spellInfo->Effects[EFFECT_1].BasePoints = 20;
                     break;
                 case 73920: // Healing Rain

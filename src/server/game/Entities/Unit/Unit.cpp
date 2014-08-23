@@ -10083,6 +10083,15 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
                 return false;
             break;
         }
+        // Lock and Load
+        case 56453:
+        {
+            // Black Arrow proc-chance
+            if (procFlags & PROC_FLAG_DONE_PERIODIC)
+                if (!roll_chance_i(triggerAmount))
+                    return false;
+            break;
+        }
     }
 
     // try detect target manually if not set

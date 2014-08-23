@@ -3974,9 +3974,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REFLECTED;
                     spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(13);
                     break;
-                case 91021: // Find Weakness
-                    spellInfo->Effects[0].BasePoints = 100;
-                    break;
                 case 76577: // Smoke Bomb
                     spellInfo->SpellVisual[1] = 20733;
                     break;

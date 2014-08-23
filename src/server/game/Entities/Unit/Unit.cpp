@@ -16445,7 +16445,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
     }
 
     // Find Weakness - 91023
-    if (GetTypeId() == TYPEID_PLAYER && HasAura(91023) && procSpell && (procSpell->Id == 8676 || procSpell->Id == 703 || procSpell->Id == 1833))
+    if (GetTypeId() == TYPEID_PLAYER && HasAura(91023) && !(procFlag & PROC_FLAG_DONE_PERIODIC) && procSpell && (procSpell->Id == 8676 || procSpell->Id == 703 || procSpell->Id == 1833))
         CastSpell(target, 91021, true);
 
     // Revealing Strike - 84617

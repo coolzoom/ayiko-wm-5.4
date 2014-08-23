@@ -262,29 +262,27 @@ class spell_mage_pet_frost_nova : public SpellScriptLoader
 
                 result &= GetCaster()->GetTypeId() == TYPEID_UNIT;
 
-                if (!GetCaster()->GetOwner())
+                if (Unit * const owner = GetCaster()->GetOwner())
+                {
+                    result &= owner->GetTypeId() == TYPEID_PLAYER;
+                    result &= owner->getLevel() >= 24;
+                    return result;
+                }
+                else
                     return false;
-
-                result &= GetCaster()->GetOwner()->GetTypeId() == TYPEID_PLAYER;
-                result &= GetCaster()->GetOwner()->getLevel() >= 24;
-
-                return result;
             }
 
             void HandleOnHit()
             {
-                if (Unit* caster = GetCaster())
+                if (Unit * const owner = GetCaster()->GetOwner())
                 {
-                    if (caster->GetOwner())
+                    if (Player * const _player = owner->ToPlayer())
                     {
-                        if (Player* _player = caster->GetOwner()->ToPlayer())
-                        {
-                            if (!_player->HasAura(SPELL_MAGE_FINGERS_OF_FROST_AURA))
-                                return;
+                        if (!_player->HasSpell(SPELL_MAGE_FINGERS_OF_FROST_AURA))
+                            return;
 
-                            _player->CastSpell(_player, SPELL_MAGE_FINGER_OF_FROST_VISUAL, true);
-                            _player->CastSpell(_player, SPELL_MAGE_FINGER_OF_FROST_EFFECT, true);
-                        }
+                        _player->CastSpell(_player, SPELL_MAGE_FINGER_OF_FROST_VISUAL, true);
+                        _player->CastSpell(_player, SPELL_MAGE_FINGER_OF_FROST_EFFECT, true);
                     }
                 }
             }

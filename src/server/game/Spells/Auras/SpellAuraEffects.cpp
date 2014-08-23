@@ -818,6 +818,10 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                     default:
                         break;
                 }
+
+                // Revealing Strike
+                if (AuraEffect const * const strike = GetBase()->GetUnitOwner()->GetAuraEffect(84617, EFFECT_2, caster->GetGUID()))
+                    AddPct(amount, strike->GetAmount());
             }
             // Rip
             if (m_spellInfo->Id == 1079)

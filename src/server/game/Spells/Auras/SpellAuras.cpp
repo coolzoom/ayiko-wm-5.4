@@ -1977,7 +1977,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     case 53817: // Maelstrom Weapon
                     {
                         // Maelstrom Weapon visual buff
-                        if (caster)
+                        if (caster && !onReapply)
                             caster->RemoveAurasDueToSpell(60349);
 
                         break;

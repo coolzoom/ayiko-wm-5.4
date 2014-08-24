@@ -6318,13 +6318,10 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                 }
                 case 44448: // Improved Hot Streak
                 {
-                    if (effIndex != 0)
+                    if (effIndex != 0 || !procSpell)
                         return false;
 
-                    if (!damage)
-                        return false;
-
-                    if (!procSpell)
+                    if (!damage && !(procEx & PROC_EX_ABSORB))
                         return false;
 
                     if (procEx & PROC_EX_INTERNAL_DOT)

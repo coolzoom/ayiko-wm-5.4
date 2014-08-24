@@ -2538,11 +2538,7 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
                     target->RemoveAurasDueToSpell(76691);
 
                 // remove movement affects
-                uint32 mechanicMask = (1 << MECHANIC_SNARE);
-                if (target->HasAura(96429) || form == FORM_MOONKIN)
-                    mechanicMask |= (1 << MECHANIC_ROOT);
-
-                target->RemoveAurasWithMechanic(mechanicMask);
+                target->RemoveMovementImpairingAuras();
 
                 // and polymorphic affects
                 if (target->IsPolymorphed())

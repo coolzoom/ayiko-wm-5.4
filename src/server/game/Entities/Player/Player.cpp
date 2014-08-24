@@ -22843,6 +22843,69 @@ void Player::RemoveSpellMods(Spell &spell)
 {
     std::set<Aura*> aurasToDropCharge;
 
+    // First id will be prioritized for removal
+    uint32 unusedAura = 0;
+    uint32 firstId = 0;
+    uint32 secondId = 0; // Aura that will not be used if first exists
+
+    switch (spell.GetSpellInfo()->Id)
+    {
+        // Pyroblast: prioritize Pyroblast! over Presence of Mind
+        case 11366:
+            firstId = 48108;
+            secondId = 12043;
+            break;
+            // Soulfire - prioritize Empowered Imp (47283) over Soulburn (74434)
+        /*case 6353:
+            firstId = 47283;
+            secondId = 74434;
+            break;
+            // Ravage - prioritize Stampede bonus (81022) over Clearcasting (16870)
+        case 81170:
+            firstId = 81022;
+            secondId = 16870;
+            break;
+            // Explosive Shot - prioritize Lock and Load (56453) over Burning Adrenaline (99060)
+        case 53301:
+            firstId = 56453;
+            secondId = 99060;
+            break;
+            // Slam - prioritize Bloodsurge (46916) over Battle Trance (12964)
+        case 1464:
+            firstId = 46916;
+            secondId = 12964;
+            break;*/
+        default:
+            break;
+    }
+
+    // Loop over two most-common spellMods (Cost and Cast Time)
+    for (uint8 i = 0; i < 2; ++i)
+    {
+        bool foundFirst = false;
+        bool foundSecond = false;
+        unusedAura = 0;
+        SpellModOp modType = (i == 1) ? SPELLMOD_COST : SPELLMOD_CASTING_TIME;
+
+        for (auto const &mod : m_spellMods[modType])
+        {
+            if (!mod->ownerEffect)
+                continue;
+
+            if (mod->ownerEffect->GetId() == firstId)
+                foundFirst = true;
+
+            if (mod->ownerEffect->GetId() == secondId)
+                foundSecond = true;
+        }
+
+        if (foundFirst && foundSecond)
+        {
+            unusedAura = secondId;
+            break;
+        }
+    }
+
     for (auto i = spell.m_appliedMods.begin(); i != spell.m_appliedMods.end();)
     {
         auto const &mod = *i;
@@ -22859,6 +22922,22 @@ void Player::RemoveSpellMods(Spell &spell)
         if (!base->IsUsingCharges())
         {
             ++i;
+            continue;
+        }
+
+        // Unused aura must be restored
+        if (base->GetId() == unusedAura)
+        {
+            // Restore spell modifier (Do not call RestoreSpellMods as it invalidates current mods removal iterator
+            if (mod->charges == -1)
+                mod->charges = 1;
+            else
+                ++mod->charges;
+
+            if (base->GetCharges() < mod->charges)
+                mod->charges = base->GetCharges();
+            ++i;
+
             continue;
         }
 

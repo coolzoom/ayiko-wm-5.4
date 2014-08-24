@@ -22855,26 +22855,6 @@ void Player::RemoveSpellMods(Spell &spell)
             firstId = 48108;
             secondId = 12043;
             break;
-            // Soulfire - prioritize Empowered Imp (47283) over Soulburn (74434)
-        /*case 6353:
-            firstId = 47283;
-            secondId = 74434;
-            break;
-            // Ravage - prioritize Stampede bonus (81022) over Clearcasting (16870)
-        case 81170:
-            firstId = 81022;
-            secondId = 16870;
-            break;
-            // Explosive Shot - prioritize Lock and Load (56453) over Burning Adrenaline (99060)
-        case 53301:
-            firstId = 56453;
-            secondId = 99060;
-            break;
-            // Slam - prioritize Bloodsurge (46916) over Battle Trance (12964)
-        case 1464:
-            firstId = 46916;
-            secondId = 12964;
-            break;*/
         default:
             break;
     }

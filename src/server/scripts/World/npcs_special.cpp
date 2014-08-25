@@ -2025,26 +2025,24 @@ enum TrainingDummy
     NPC_TARGET_DUMMY                           = 2673
 };
 
-class npc_training_dummy : public CreatureScript
+class npc_training_dummy final : public CreatureScript
 {
-public:
-    npc_training_dummy() : CreatureScript("npc_training_dummy") { }
-
-    struct npc_training_dummyAI : ScriptedAI
+    struct npc_training_dummyAI final : ScriptedAI
     {
-        npc_training_dummyAI(Creature* creature) : ScriptedAI(creature)
+        npc_training_dummyAI(Creature* creature)
+            : ScriptedAI(creature)
         {
             SetCombatMovement(false);
             entry = creature->GetEntry();
-            /*const CreatureTemplate * cinfo = creature->GetCreatureTemplate();
-            const_cast<CreatureTemplate *>(cinfo)->flags_extra |= CREATURE_FLAG_EXTRA_TRAINING_DUMMY;*/
+            const CreatureTemplate * cinfo = creature->GetCreatureTemplate();
+            const_cast<CreatureTemplate *>(cinfo)->flags_extra |= CREATURE_FLAG_EXTRA_TRAINING_DUMMY;
         }
 
         uint32 entry;
         uint32 resetTimer;
         uint32 despawnTimer;
 
-        void Reset() override
+        void Reset() final
         {
             me->SetControlled(true, UNIT_STATE_STUNNED);//disable rotate
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);//imune to knock aways like blast wave
@@ -2053,7 +2051,7 @@ public:
             despawnTimer = 15000;
         }
 
-        void EnterEvadeMode() override
+        void EnterEvadeMode() final
         {
             if (!_EnterEvadeMode())
                 return;
@@ -2061,12 +2059,12 @@ public:
             Reset();
         }
 
-        void DamageTaken(Unit* /*doneBy*/, uint32& damage) override
+        void DamageTaken(Unit* /*doneBy*/, uint32& /*damage*/) final
         {
             resetTimer = 5000;
         }
 
-        void SpellHit(Unit * caster, const SpellInfo * spell)
+        void SpellHit(Unit * caster, const SpellInfo * spell) final
         {
             if (spell->Id == 100 || spell->Id == 122 || spell->Id == 172 || spell->Id == 348 || spell->Id == 589 || spell->Id == 2098 ||
                 spell->Id == 5143 || spell->Id == 20271 || spell->Id == 56641 || spell->Id == 73899 || spell->Id == 100787 || spell->Id == 118215)
@@ -2074,7 +2072,7 @@ public:
                     pCaster->KilledMonsterCredit(44175);
         }
 
-        void UpdateAI(uint32 const diff) override
+        void UpdateAI(uint32 const diff) final
         {
             if (!UpdateVictim())
                 return;
@@ -2082,30 +2080,35 @@ public:
             if (!me->HasUnitState(UNIT_STATE_STUNNED))
                 me->SetControlled(true, UNIT_STATE_STUNNED);//disable rotate
 
-            if (entry != NPC_ADVANCED_TARGET_DUMMY && entry != NPC_TARGET_DUMMY)
-            {
-                if (resetTimer <= diff)
+                if (entry != NPC_ADVANCED_TARGET_DUMMY && entry != NPC_TARGET_DUMMY)
                 {
-                    EnterEvadeMode();
-                    resetTimer = 5000;
+                    if (resetTimer <= diff)
+                    {
+                        EnterEvadeMode();
+                        resetTimer = 5000;
+                    }
+                    else
+                        resetTimer -= diff;
+                    return;
                 }
                 else
-                    resetTimer -= diff;
-                return;
-            }
-            else
-            {
-                if (despawnTimer <= diff)
-                    me->DespawnOrUnsummon();
-                else
-                    despawnTimer -= diff;
-            }
+                {
+                    if (despawnTimer <= diff)
+                        me->DespawnOrUnsummon();
+                    else
+                        despawnTimer -= diff;
+                }
         }
 
-        void MoveInLineOfSight(Unit* /*who*/) override { }
+        void MoveInLineOfSight(Unit* /*who*/) final { }
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+public:
+    npc_training_dummy()
+        : CreatureScript("npc_training_dummy")
+    { }
+
+    CreatureAI * GetAI(Creature* creature) const final
     {
         return new npc_training_dummyAI(creature);
     }

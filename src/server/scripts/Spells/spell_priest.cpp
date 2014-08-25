@@ -1266,6 +1266,7 @@ class spell_pri_purify : public SpellScriptLoader
                 {
                     if (Unit* target = GetExplTargetUnit())
                     {
+                        bool found = false;
                         // Create dispel mask by dispel type
                         for (auto const &spellEffect : GetSpellInfo()->Effects)
                         {
@@ -1273,12 +1274,14 @@ class spell_pri_purify : public SpellScriptLoader
 
                             DispelChargesList dispelList;
                             target->GetDispellableAuraList(caster, dispelMask, dispelList);
-
-                            if (dispelList.empty())
-                                return SPELL_FAILED_NOTHING_TO_DISPEL;
-
-                            return SPELL_CAST_OK;
+                            if (!dispelList.empty())
+                                found = true;
                         }
+
+                        if (!found)
+                            return SPELL_FAILED_NOTHING_TO_DISPEL;
+
+                        return SPELL_CAST_OK;
                     }
                 }
 

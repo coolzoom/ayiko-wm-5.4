@@ -3827,6 +3827,7 @@ bool SpellInfo::IsAffectedByResilience() const
 {
     switch (Id)
     {
+        case 32409: // Glyph of Shadow Word: Death (backfire)
         case 33619: // Glyph of Reflective Shield
         case 49016: // Unholy Frenzy
         case 87023: // Cauterize

@@ -5420,6 +5420,12 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 114163: // Eternal Flame: Bonus for self-cast is 50% not 100%
                     spellInfo->Effects[EFFECT_2].BasePoints = 50;
                     break;
+                case 120583: // Glyph of Shadow Word: Death
+                    spellInfo->AttributesEx9 = 0;
+                    break;
+                case 32409: // Glyph of Shadow Word: Death (backfire)
+                    spellInfo->Effects[EFFECT_0].ScalingMultiplier = 0.0f;
+                    break;
                 default:
                     break;
             }

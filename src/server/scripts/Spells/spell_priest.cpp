@@ -2928,6 +2928,83 @@ public:
     }
 };
 
+// 129176 - Shadow Word Death (Glyphed)
+class spell_pri_shadow_word_death_glyphed : public SpellScriptLoader
+{
+    class script_impl : public SpellScript
+    {
+        PrepareSpellScript(script_impl)
+
+        enum
+        {
+            SPELL_SHADOW_WORD_DEATH                 = 32379,
+            SPELL_GLYPH_OF_SHADOW_WORD_DEATH        = 55682,
+            SPELL_GLYPH_OF_SHADOW_WORD_DEATH_MARKER = 95652,
+            SPELL_BACKFIRE_DAMAGE                   = 32409,
+        };
+
+        bool m_damageIncreased;
+
+    public:
+        script_impl()
+            : m_damageIncreased(false)
+        { }
+
+    private:
+        void HandleBeforeHit()
+        {
+            Unit const * const caster = GetCaster();
+            Unit const * const target = GetHitUnit();
+            if (!caster || !target)
+                return;
+
+            if (target->HealthBelowPct(20))
+            {
+                m_damageIncreased = true;
+                SetHitDamage(GetHitDamage() * 4.0f);
+            }
+        }
+
+        void HandleAfterHit()
+        {
+            Unit * const caster = GetCaster();
+            Unit * const target = GetHitUnit();
+            if (!caster || !target || !target->isAlive() || caster->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            int32 backfireDamage = GetHitDamage();
+
+            // Priest T13 Shadow 2P Bonus
+            if (AuraEffect const * const eff = caster->GetAuraEffect(105843, EFFECT_1))
+                backfireDamage -= CalculatePct(backfireDamage, eff->GetAmount());
+
+            caster->CastCustomSpell(SPELL_BACKFIRE_DAMAGE, SPELLVALUE_BASE_POINT0, backfireDamage, caster, true);
+
+            if (m_damageIncreased && !caster->HasAura(SPELL_GLYPH_OF_SHADOW_WORD_DEATH_MARKER))
+            {
+                caster->ToPlayer()->RemoveSpellCooldown(SPELL_SHADOW_WORD_DEATH, true);
+                caster->CastSpell(caster, SPELL_GLYPH_OF_SHADOW_WORD_DEATH_MARKER, true);
+            }
+        }
+
+        void Register()
+        {
+            BeforeHit += SpellHitFn(script_impl::HandleBeforeHit);
+            AfterHit += SpellHitFn(script_impl::HandleAfterHit);
+        }
+    };
+
+public:
+    spell_pri_shadow_word_death_glyphed()
+        : SpellScriptLoader("spell_pri_shadow_word_death_glyphed")
+    { }
+
+    SpellScript * GetSpellScript() const
+    {
+        return new script_impl;
+    }
+};
+
 void AddSC_priest_spell_scripts()
 {
     new spell_pri_power_word_fortitude();
@@ -2988,4 +3065,5 @@ void AddSC_priest_spell_scripts()
     new npc_pri_divine_star();
     new spell_pri_divine_star_damage_heal();
     new spell_pri_mind_flay();
+    new spell_pri_shadow_word_death_glyphed();
 }

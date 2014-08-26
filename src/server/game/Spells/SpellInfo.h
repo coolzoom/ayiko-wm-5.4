@@ -379,13 +379,6 @@ public:
     uint32 SpellTargetRestrictionsId;
     uint32 SpellTotemsId;
     uint32 SpellMiscId;
-    // SpellScalingEntry
-    int32  CastTimeMin;
-    int32  CastTimeMax;
-    int32  CastTimeMaxLevel;
-    int32  ScalingClass;
-    float  CoefBase;
-    int32  CoefLevelBase;
     std::vector<SpellEffectInfo> Effects;
     uint32 ExplicitTargetMask;
     SpellChainNode const* ChainEntry;

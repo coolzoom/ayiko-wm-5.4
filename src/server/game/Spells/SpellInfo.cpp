@@ -664,21 +664,29 @@ int32 SpellEffectInfo::CalcValue(Unit const* caster, int32 const* bp, Unit const
     {
         if (caster && !_spellInfo->IsCustomCalculated())
         {
-            int32 level = caster->getLevel();
+            auto scalingEntry = SpellScalingEntry();
+            if (auto const existing = _spellInfo->GetSpellScaling())
+                scalingEntry = *existing;
+
+            uint32 level = caster->getLevel();
             if (target && _spellInfo->IsPositiveEffect(_effIndex) && (Effect == SPELL_EFFECT_APPLY_AURA) && _spellInfo->Id != 774) // Hack Fix Rejuvenation, doesn't use the target level for basepoints
                 level = target->getLevel();
 
-            auto const gtKeyBase = (_spellInfo->ScalingClass <= -1)
-                    ? MAX_CLASSES - 2 - _spellInfo->ScalingClass
-                    : _spellInfo->ScalingClass - 1;
+            auto const gtKeyBase = (scalingEntry.ScalingClass <= -1)
+                    ? MAX_CLASSES - 2 - scalingEntry.ScalingClass
+                    : scalingEntry.ScalingClass - 1;
 
-            if (GtSpellScalingEntry const* gtScaling = sGtSpellScalingStore.LookupEntry(gtKeyBase * 100 + level - 1))
+            auto const levelForKey = scalingEntry.MaxLevel != 0
+                    ? std::min(scalingEntry.MaxLevel, level)
+                    : level;
+
+            if (auto const gtScaling = sGtSpellScalingStore.LookupEntry(gtKeyBase * 100 + levelForKey - 1))
             {
                 float multiplier = gtScaling->value;
-                if (_spellInfo->CastTimeMax > 0 && _spellInfo->CastTimeMaxLevel > level)
-                    multiplier *= float(_spellInfo->CastTimeMin + (level - 1) * (_spellInfo->CastTimeMax - _spellInfo->CastTimeMin) / (_spellInfo->CastTimeMaxLevel - 1)) / float(_spellInfo->CastTimeMax);
-                if (_spellInfo->CoefLevelBase > level)
-                    multiplier *= (1.0f - _spellInfo->CoefBase) * (float)(level - 1) / (float)(_spellInfo->CoefLevelBase - 1) + _spellInfo->CoefBase;
+                if (scalingEntry.CastTimeMax > 0 && scalingEntry.CastTimeMaxLevel > level)
+                    multiplier *= float(scalingEntry.CastTimeMin + (level - 1) * (scalingEntry.CastTimeMax - scalingEntry.CastTimeMin) / (scalingEntry.CastTimeMaxLevel - 1)) / float(scalingEntry.CastTimeMax);
+                if (scalingEntry.CoefLevelBase > level)
+                    multiplier *= (1.0f - scalingEntry.CoefBase) * (float)(level - 1) / (float)(scalingEntry.CoefLevelBase - 1) + scalingEntry.CoefBase;
 
                 float preciseBasePoints = ScalingMultiplier * multiplier;
                 if (DeltaScalingMultiplier)
@@ -937,15 +945,6 @@ SpellInfo::SpellInfo(SpellEntry const* spellEntry, uint32 difficulty)
             Effects.at(i) = SpellEffectInfo(this, effectEntry, i);
         }
     }
-
-    // SpellScalingEntry
-    SpellScalingEntry const* _scaling = GetSpellScaling();
-    CastTimeMin = _scaling ? _scaling->CastTimeMin : 0;
-    CastTimeMax = _scaling ?_scaling->CastTimeMax : 0;
-    CastTimeMaxLevel = _scaling ? _scaling->CastTimeMaxLevel : 0;
-    ScalingClass = _scaling ? _scaling->ScalingClass : 0;
-    CoefBase = _scaling ? _scaling->CoefBase : 0;
-    CoefLevelBase = _scaling ? _scaling->CoefLevelBase : 0;
 
     // SpellAuraOptionsEntry
     SpellAuraOptionsEntry const* _options = GetSpellAuraOptions();
@@ -2398,12 +2397,16 @@ uint32 SpellInfo::CalcCastTime(Unit* caster, Spell* spell) const
 {
     int32 castTime = 0;
 
+    auto scalingEntry = SpellScalingEntry();
+    if (auto const existing = GetSpellScaling())
+        scalingEntry = *existing;
+
     // not all spells have cast time index and this is all is pasiive abilities
-    if (caster && CastTimeMax > 0)
+    if (caster && scalingEntry.CastTimeMax > 0)
     {
-        castTime = CastTimeMax;
-        if (CastTimeMaxLevel > int32(caster->getLevel()))
-            castTime = CastTimeMin + int32(caster->getLevel() - 1) * (CastTimeMax - CastTimeMin) / (CastTimeMaxLevel - 1);
+        castTime = scalingEntry.CastTimeMax;
+        if (scalingEntry.CastTimeMaxLevel > int32(caster->getLevel()))
+            castTime = scalingEntry.CastTimeMin + int32(caster->getLevel() - 1) * (scalingEntry.CastTimeMax - scalingEntry.CastTimeMin) / (scalingEntry.CastTimeMaxLevel - 1);
     }
     else if (CastTimeEntry)
         castTime = CastTimeEntry->CastTime;

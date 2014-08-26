@@ -938,6 +938,8 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
             victim->ToCreature()->LowerPlayerDamageReq(health < damage ?  health : damage);
     }
 
+    bool isTrainingDummy = victim->GetTypeId() == TYPEID_UNIT && victim->ToCreature()->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_TRAINING_DUMMY;
+
     if (health <= damage)
     {
         if (victim->GetTypeId() == TYPEID_PLAYER && victim != this)
@@ -949,14 +951,16 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
                 killer->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_SPECIAL_PVP_KILL, 1, 0, 0, victim);
         }
 
-        Kill(victim, durabilityLoss, spellProto ? spellProto : NULL);
+        if (!isTrainingDummy)
+            Kill(victim, durabilityLoss, spellProto);
     }
     else
     {
         if (victim->GetTypeId() == TYPEID_PLAYER)
             victim->ToPlayer()->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_TOTAL_DAMAGE_RECEIVED, damage);
 
-        victim->ModifyHealth(- (int32)damage);
+        if (!isTrainingDummy)
+            victim->ModifyHealth(-(int32)damage);
 
         if (damagetype == DIRECT_DAMAGE || damagetype == SPELL_DIRECT_DAMAGE)
             victim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DIRECT_DAMAGE, spellProto ? spellProto->Id : 0);

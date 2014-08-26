@@ -1277,7 +1277,7 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
                 }
                 else if (m_spellInfo->Id == 64844) // Divine Hymn
                 {
-                    maxSize = 5;
+                    maxSize = m_caster->GetMap()->Is25ManRaid() ? 12 : 5;
                     power = POWER_HEALTH;
                 }
                 else if (m_spellInfo->Id == 64904) // Hymn of Hope

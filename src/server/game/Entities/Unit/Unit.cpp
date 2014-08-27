@@ -627,8 +627,8 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
                     victim->GetEntry(), victim->GetName().c_str(), damage, GetGUIDLow(), GetName().c_str(), spellProto ? spellProto->Id : 0);
     }
 
-    // Leeching Poison - 112961 each attack heal the player for 10% of the damage
-    if (GetTypeId() == TYPEID_PLAYER && getClass() == CLASS_ROGUE && damage != 0 && damagetype != DOT && !(damageSchoolMask & SPELL_SCHOOL_NATURE))
+    // Leeching Poison - 112961 each attack heal the player for 10% of the damage (TODO: Make proper filter)
+    if (GetTypeId() == TYPEID_PLAYER && getClass() == CLASS_ROGUE && damage != 0 && damagetype != DOT && (!spellProto || spellProto->SpellFamilyName == SPELLFAMILY_ROGUE && spellProto->Id != 113780))
     {
         if (Aura * const leechingPoison = victim->GetAura(112961, GetGUID()))
         {

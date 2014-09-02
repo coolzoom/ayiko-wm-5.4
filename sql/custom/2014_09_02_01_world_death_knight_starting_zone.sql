@@ -1,8 +1,10 @@
 -- [SQL] Death Knight - Quests - The Plaguebringer's Request, The Gift That Keeps On Giving, Tonight We Dine In Havenshire, Nowhere To Run And Nowhere To Hide, How To Win Friends And Influence Enemies, Ambush At The Overlook fixed (Feedback #113, #108, #107, #114, #115, #120)
 UPDATE `quest_template` SET `PrevQuestId` = 12714, `NextQuestId` = 12723, `ExclusiveGroup` = -12716, `NextQuestIdChain` = 12723, `Method` = 2 WHERE `Id` = 12716;
+UPDATE `quest_template` SET `ExclusiveGroup` = -12716 WHERE `Id` = 12722;
+UPDATE `quest_template` SET `ExclusiveGroup` = -12716, `Method` = 2, `EndText` = '"Crimson Dawn" Revealed', `RequiredSourceItemId4` = 39371, `RequiredSourceItemCount4` = 2 WHERE `Id` = 12720;
 UPDATE `quest_template` SET `NextQuestId` = 12778 WHERE `Id` = 12757;
 UPDATE `quest_template` SET `Method` = 2 WHERE `Id` IN (12698, 12679, 12719, 12754);
-UPDATE `quest_template` SET `Method` = 2, `EndText` = '"Crimson Dawn" Revealed', `RequiredSourceItemId4` = 39371, `RequiredSourceItemCount4` = 2 WHERE `Id` = 12720;
+
 
 -- [SQL] Death Knight - Quests - A Special Surprise races requirements corrected (Fixes #119)
 UPDATE `quest_template` SET `RequiredRaces` = 32 WHERE `Id` = 12739;
@@ -13,8 +15,9 @@ UPDATE `quest_template` SET `RequiredRaces` = 128 WHERE `Id` = 12749;
 -- [SQL] Death Knight - Quests - Death Comes From On High fixed (Feedback #106)
 UPDATE `quest_template` SET `Method` = 2, `SpecialFlags` = 32, `RequiredSpellCast1` = 51858, `RequiredSpellCast2` = 51858, `RequiredSpellCast3` = 51858 WHERE `Id` = 12641;
 
--- [SQL] Death Knight - Quests - The Path Of The Righteous Crusader fixed (Feedback #12724)
+-- [SQL] Death Knight - Quests - The Path Of The Righteous Crusader fixed (Feedback #116)
 UPDATE `quest_template` SET `Method` = 2, `NextQuestId` = 12754, `ExclusiveGroup` = -12751 WHERE `Id` = 12724;
+UPDATE `quest_template` SET `NextQuestId` = 12754, `ExclusiveGroup` = -12751 WHERE `Id` = 12751;
 
 -- [SQL] Death Knight - Quests - Massacre At Light's Point fixed (Feedback #109)
 UPDATE `quest_template` SET `Method` = 2, `RewardTalents` = 0, `RequiredNpcOrGoCount1` = 100 WHERE `Id` = 12701;

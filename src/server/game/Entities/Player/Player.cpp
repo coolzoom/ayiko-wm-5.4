@@ -3763,9 +3763,9 @@ void Player::GiveLevel(uint8 level)
 
 void Player::InitTalentForLevel()
 {
-    uint8 level = getLevel();
-    // talents base at level diff (talents = level - 9 but some can be used already)
-    if (level < 15)
+    auto const level = getLevel();
+
+    if (level < (getClass() != CLASS_DEATH_KNIGHT ? 15 : 56))
     {
         // Remove all talent points
         if (GetUsedTalentCount() > 0)                           // Free any used talents
@@ -3782,7 +3782,7 @@ void Player::InitTalentForLevel()
             SetActiveSpec(0);
         }
 
-        uint32 talentPointsForLevel = CalculateTalentsPoints();
+        auto const talentPointsForLevel = CalculateTalentsPoints();
 
         // if used more that have then reset
         if (GetUsedTalentCount() > talentPointsForLevel)
@@ -27044,8 +27044,22 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot, uint8 linkedLootSlot)
 
 uint32 Player::CalculateTalentsPoints() const
 {
-    // Un talent par tranche de 15 levels
-    return getLevel() / 15;
+    auto const level = std::min<uint32>(getLevel(), DEFAULT_MAX_LEVEL);
+
+    if (getClass() != CLASS_DEATH_KNIGHT)
+        return level / 15;
+    else if (level == DEFAULT_MAX_LEVEL)
+        return 6;
+    else if (level >= 75)
+        return 5;
+    else if (level >= 60)
+        return 4;
+    else if (level >= 58)
+        return 3;
+    else if (level >= 56)
+        return 1 + (level - 56);
+    else
+        return 0;
 }
 
 bool Player::IsKnowHowFlyIn(uint32 mapid, uint32 zone, uint32 spellId) const

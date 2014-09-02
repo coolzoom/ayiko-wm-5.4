@@ -51,3 +51,4 @@ UPDATE `quest_template` SET `ObjectiveText2` = '' WHERE `ObjectiveText2` = '0';
 UPDATE `quest_template` SET `ObjectiveText3` = '' WHERE `ObjectiveText3` = '0';
 UPDATE `quest_template` SET `ObjectiveText4` = '' WHERE `ObjectiveText4` = '0';
 UPDATE `quest_template` SET `EndText` = '' WHERE `EndText` = `ObjectiveText1`;
+UPDATE `quest_template` SET `EndText` = '' WHERE `EndText` = `CompletedText`;

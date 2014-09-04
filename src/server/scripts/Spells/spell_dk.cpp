@@ -2072,4 +2072,5 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_riposte();
     new spell_dk_plague_strike();
     new spell_dk_unholy_frenzy();
+    new spell_dk_glyph_of_horn_of_winter();
 }

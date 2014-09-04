@@ -4093,7 +4093,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[1].TargetA = TARGET_UNIT_TARGET_ALLY;
                     break;
                 case 49016: // Unholy Frenzy
-                    spellInfo->Effects[0].BasePoints = 30;
                     spellInfo->AttributesEx4 |= SPELL_ATTR4_STACK_DOT_MODIFIER;
                     break;
                 case 31935: // Avenger's Shield

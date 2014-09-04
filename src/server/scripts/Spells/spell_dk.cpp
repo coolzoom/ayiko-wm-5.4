@@ -1993,6 +1993,42 @@ public:
     }
 };
 
+// Unholy Frenzy - 49016
+class spell_dk_unholy_frenzy final : public SpellScriptLoader
+{
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        enum
+        {
+            GLYPH_OF_UNHOLY_FRENZY  = 58616
+        };
+
+        void onInitEffects(uint32 &effectMask)
+        {
+            auto const caster = GetCaster();
+            if (caster && caster->HasAura(GLYPH_OF_UNHOLY_FRENZY))
+                effectMask &= ~(1 << EFFECT_1);
+        }
+
+        void Register() final
+        {
+            OnInitEffects += AuraInitEffectsFn(script_impl::onInitEffects);
+        }
+    };
+
+public:
+    spell_dk_unholy_frenzy()
+        : SpellScriptLoader("spell_dk_unholy_frenzy")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
+};
+
 void AddSC_deathknight_spell_scripts()
 {
     new spell_dk_gorefiends_grasp();
@@ -2035,4 +2071,5 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_death_grip();
     new spell_dk_riposte();
     new spell_dk_plague_strike();
+    new spell_dk_unholy_frenzy();
 }

@@ -199,8 +199,10 @@ enum SpellCustomAttributes
     // @todo: 4.3.4 core
     //SPELL_ATTR0_CU_CAN_STACK_FROM_DIFF_CASTERS   = 0x00100000,  // Collect auras with diff casters in one stackable aura
     SPELL_ATTR0_CU_BINARY                        = 0x00400000, // Binary spells can be fully resisted
+    SPELL_ATTR0_CU_NEGATIVE_EFF3                 = 0x00800000,
+    SPELL_ATTR0_CU_NEGATIVE_EFF4                 = 0x01000000,
 
-    SPELL_ATTR0_CU_NEGATIVE                      = SPELL_ATTR0_CU_NEGATIVE_EFF0 | SPELL_ATTR0_CU_NEGATIVE_EFF1 | SPELL_ATTR0_CU_NEGATIVE_EFF2,
+    SPELL_ATTR0_CU_NEGATIVE                      = SPELL_ATTR0_CU_NEGATIVE_EFF0 | SPELL_ATTR0_CU_NEGATIVE_EFF1 | SPELL_ATTR0_CU_NEGATIVE_EFF2 | SPELL_ATTR0_CU_NEGATIVE_EFF3 | SPELL_ATTR0_CU_NEGATIVE_EFF4,
 };
 
 uint32 GetTargetFlagMask(SpellTargetObjectTypes objType);

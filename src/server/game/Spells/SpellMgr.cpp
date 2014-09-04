@@ -3142,6 +3142,12 @@ void SpellMgr::LoadSpellCustomAttr()
             if (spellInfo->Effects.size() > EFFECT_2 && !spellInfo->_IsPositiveEffect(EFFECT_2, false))
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_NEGATIVE_EFF2;
 
+            if (spellInfo->Effects.size() > EFFECT_3 && !spellInfo->_IsPositiveEffect(EFFECT_3, false))
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_NEGATIVE_EFF3;
+
+            if (spellInfo->Effects.size() > EFFECT_4 && !spellInfo->_IsPositiveEffect(EFFECT_4, false))
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_NEGATIVE_EFF4;
+
             if (spellInfo->SpellVisual[0] == 3879 || spellInfo->Id == 74117)
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_BACK;
 

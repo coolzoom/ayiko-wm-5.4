@@ -1375,6 +1375,10 @@ bool SpellInfo::IsPositiveEffect(uint8 effIndex) const
             return !(AttributesCu & SPELL_ATTR0_CU_NEGATIVE_EFF1);
         case 2:
             return !(AttributesCu & SPELL_ATTR0_CU_NEGATIVE_EFF2);
+        case 3:
+            return !(AttributesCu & SPELL_ATTR0_CU_NEGATIVE_EFF3);
+        case 4:
+            return !(AttributesCu & SPELL_ATTR0_CU_NEGATIVE_EFF4);
     }
 }
 
@@ -2737,8 +2741,10 @@ bool SpellInfo::_IsPositiveEffect(uint8 effIndex, bool deep) const
             switch (Id)
             {
                 // Glyph of Mortal Strike
-                case 58368:
-                    return true;
+                case 12294:
+                    if (effIndex == EFFECT_4)
+                        return true;
+                    break;
                 default:
                     break;
             }

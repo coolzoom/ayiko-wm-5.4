@@ -425,13 +425,13 @@ class spell_rog_nightstalker : public SpellScriptLoader
 
             void HandleRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
-                if (GetCaster())
+                if (Unit * const caster = GetCaster())
                 {
-                    if (GetCaster()->HasAura(ROGUE_SPELL_NIGHTSTALKER_DAMAGE_DONE))
-                        GetCaster()->RemoveAura(ROGUE_SPELL_NIGHTSTALKER_DAMAGE_DONE);
+                    if (Aura * const nightstalker = caster->GetAura(ROGUE_SPELL_NIGHTSTALKER_DAMAGE_DONE))
+                        nightstalker->SetDuration(100); // Set duration instead of remove as stealth removal is done before spell-cast damage calculation
 
-                    if (GetCaster()->HasAura(ROGUE_SPELL_SHADOW_FOCUS_COST_PCT))
-                        GetCaster()->RemoveAura(ROGUE_SPELL_SHADOW_FOCUS_COST_PCT);
+                    if (caster->HasAura(ROGUE_SPELL_SHADOW_FOCUS_COST_PCT))
+                        caster->RemoveAura(ROGUE_SPELL_SHADOW_FOCUS_COST_PCT);
                 }
             }
 

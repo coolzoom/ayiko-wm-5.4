@@ -1914,9 +1914,20 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     break;
                 break;
             case SPELLFAMILY_ROGUE:
-                // Remove Vanish on stealth remove
-                if (GetId() == 1784 || GetId() == 115191)
-                    target->RemoveAurasDueToSpell(131369, target->GetGUID());
+                switch (GetId())
+                {
+                    // Remove Vanish on stealth remove
+                    case 1784:
+                    case 115191:
+                        target->RemoveAurasDueToSpell(131369, target->GetGUID());
+                        break;
+                    // Nerve Strike - Apply debuff on Kidney Shot and Cheap Shot
+                    case 408:
+                    case 1833:
+                        if (caster && caster->HasAura(108210))
+                            caster->CastSpell(target, 112947, true);
+                        break;
+                }
                 break;
             case SPELLFAMILY_PALADIN:
                 if (!caster)

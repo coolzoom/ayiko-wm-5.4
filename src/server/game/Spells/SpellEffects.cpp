@@ -2354,6 +2354,10 @@ void Spell::EffectHealPct(SpellEffIndex /*effIndex*/)
                 m_caster->RemoveAurasDueToSpell(32216);
             }
             break;
+        case 118779: // Glyph of Victory Rush
+            if (AuraEffect * glyph = m_caster->GetAuraEffect(58382, EFFECT_0))
+                AddPct(damage, glyph->GetAmount());
+            break;
         case 137562:// Nimble Brew
             if (!m_caster->HasAura(146952)) // Glyph of Nimble Brew
                 return;

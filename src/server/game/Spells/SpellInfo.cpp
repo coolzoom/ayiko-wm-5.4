@@ -2742,6 +2742,15 @@ bool SpellInfo::_IsPositiveEffect(uint8 effIndex, bool deep) const
                 default:
                     break;
             }
+        case SPELLFAMILY_DEATHKNIGHT:
+            switch (Id)
+            {
+                // Unholy Frenzy
+                case 49016:
+                    return true;
+                default:
+                    break;
+            }
         default:
             break;
     }

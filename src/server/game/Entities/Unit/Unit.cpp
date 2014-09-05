@@ -21259,3 +21259,8 @@ void Unit::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* target)
     updateMask.AppendToPacket(data);
     data->append(fieldBuffer);
 }
+
+int32 Unit::GetSplineDuration() const
+{
+    return IsSplineEnabled() ? movespline->Duration() : 0;
+}

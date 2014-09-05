@@ -31,6 +31,7 @@ EndContentData */
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
 #include "ScriptedEscortAI.h"
+#include "MoveSplineInit.h"
 
 /*#####
 ## npc_wizzlecrank_shredder
@@ -195,7 +196,86 @@ public:
 
 };
 
+const float BrutuskWPPath[12][3] =
+{
+    { 1216.619f, -2253.758f, 91.847f },
+    { 1235.647f, -2243.865f, 91.763f },
+    { 1249.403f, -2229.486f, 92.269f },
+    { 1284.208f, -2221.406f, 91.758f },
+    { 1312.357f, -2237.044f, 91.735f },
+    { 1344.717f, -2256.614f, 90.167f },
+    { 1390.280f, -2258.193f, 89.898f },
+    { 1436.188f, -2287.756f, 89.986f },
+    { 1477.342f, -2347.694f, 91.630f },
+    { 1518.445f, -2394.406f, 95.107f },
+    { 1558.744f, -2431.286f, 97.992f },
+    { 1582.841f, -2484.444f, 97.991f }
+};
+
+class npc_brutusk_qgw : public CreatureScript
+{
+public:
+    npc_brutusk_qgw() : CreatureScript("npc_brutusk_qgw") {}
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_brutusk_qgwAI(creature);
+    }
+
+    enum eEvents
+    {
+        EVENT_DONE = 1
+    };
+
+    enum eSpells
+    {
+        SPELL_EJECT_PASSENGERS = 68576,
+        SPELL_KILL_CREDIT      = 62890
+    };
+
+    struct npc_brutusk_qgwAI : public VehicleAI
+    {
+        npc_brutusk_qgwAI(Creature* creature) : VehicleAI(creature) {}
+
+        EventMap events;
+
+        void IsSummonedBy(Unit* summoner) override
+        {
+            Movement::MoveSplineInit init(*me);
+            for (uint8 i = 0; i < 12; ++i)
+            {
+                G3D::Vector3 path(BrutuskWPPath[i][0], BrutuskWPPath[i][1], BrutuskWPPath[i][2]);
+                init.Path().push_back(path);
+            }
+            init.SetSmooth();
+            init.SetVelocity(15.0f);
+            init.Launch();
+            
+            events.ScheduleEvent(EVENT_DONE, me->GetSplineDuration());
+        }
+
+        void PassengerBoarded(Unit* who, int8 seatId, bool apply)
+        {
+            if (apply)
+               if (who->GetTypeId() == TYPEID_PLAYER)
+                   me->CastSpell(who, SPELL_KILL_CREDIT, false);
+        }
+
+        void UpdateAI(const uint32 diff) override
+        {
+            events.Update(diff);
+
+            if (events.ExecuteEvent() == EVENT_DONE)
+            {
+                me->CastSpell(me, SPELL_EJECT_PASSENGERS, TRIGGERED_FULL_MASK);
+                me->DespawnOrUnsummon(1 * IN_MILLISECONDS);
+            }
+        }
+    };
+};
+
 void AddSC_the_barrens()
 {
     new npc_wizzlecrank_shredder();
+    new npc_brutusk_qgw();
 }

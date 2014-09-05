@@ -103,3 +103,6 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 (212736, 191542, 571, 1, 1, 2418.44, 6456.02, 50.214, 1.60866, 0, 0, 0, 0, 25, 100, 1),
 (65973, 191364, 609, 1, 1|4|64, 2430.61, -5730.01, 157.302, 2.55552, 0, 0, 0.938191, 0.346117, 25, 100, 0),
 (79618, 191364, 0, 1, 1|257, 2430.61, -5730.01, 157.301, 2.55552, 0, 0, 0.938191, 0.346117, 25, 100, 0);
+
+-- [SQL] Death Knight - Quests - The Light of Dawn has been enabled (Feedback #121)
+UPDATE `quest_template` SET `Method` = 2 WHERE `Id` = 12801;

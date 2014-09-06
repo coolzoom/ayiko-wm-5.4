@@ -1595,6 +1595,107 @@ class spell_q13291_q13292_q13239_q13261_armored_decoy_summon_skytalon : public S
         }
 };
 
+enum DeathComesFromOnHigh
+{
+    SPELL_FORGE_CREDIT                  = 51974,
+    SPELL_TOWN_HALL_CREDIT              = 51977,
+    SPELL_SCARLET_HOLD_CREDIT           = 51980,
+    SPELL_CHAPEL_CREDIT                 = 51982,
+
+    NPC_NEW_AVALON_FORGE                = 28525,
+    NPC_NEW_AVALON_TOWN_HALL            = 28543,
+    NPC_SCARLET_HOLD                    = 28542,
+    NPC_CHAPEL_OF_THE_CRIMSON_FLAME     = 28544
+};
+
+// 51858 - Siphon of Acherus
+class spell_q12641_death_comes_from_on_high : public SpellScriptLoader
+{
+    public:
+        spell_q12641_death_comes_from_on_high() : SpellScriptLoader("spell_q12641_death_comes_from_on_high") { }
+
+        class spell_q12641_death_comes_from_on_high_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_q12641_death_comes_from_on_high_SpellScript);
+
+            bool Validate(SpellInfo const* /*spellInfo*/) override
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_FORGE_CREDIT) ||
+                    !sSpellMgr->GetSpellInfo(SPELL_TOWN_HALL_CREDIT) ||
+                    !sSpellMgr->GetSpellInfo(SPELL_SCARLET_HOLD_CREDIT) ||
+                    !sSpellMgr->GetSpellInfo(SPELL_CHAPEL_CREDIT))
+                    return false;
+                return true;
+            }
+
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                uint32 spellId = 0;
+
+                switch (GetHitCreature()->GetEntry())
+                {
+                    case NPC_NEW_AVALON_FORGE:
+                        spellId = SPELL_FORGE_CREDIT;
+                        break;
+                    case NPC_NEW_AVALON_TOWN_HALL:
+                        spellId = SPELL_TOWN_HALL_CREDIT;
+                        break;
+                    case NPC_SCARLET_HOLD:
+                        spellId = SPELL_SCARLET_HOLD_CREDIT;
+                        break;
+                    case NPC_CHAPEL_OF_THE_CRIMSON_FLAME:
+                        spellId = SPELL_CHAPEL_CREDIT;
+                        break;
+                    default:
+                        return;
+                }
+
+                GetCaster()->CastSpell((Unit*)NULL, spellId, true);
+            }
+
+            void Register() override
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_q12641_death_comes_from_on_high_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const override
+        {
+            return new spell_q12641_death_comes_from_on_high_SpellScript();
+        }
+};
+
+// 52694 - Recall Eye of Acherus
+class spell_q12641_recall_eye_of_acherus : public SpellScriptLoader
+{
+    public:
+        spell_q12641_recall_eye_of_acherus() : SpellScriptLoader("spell_q12641_recall_eye_of_acherus") { }
+
+        class spell_q12641_recall_eye_of_acherus_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_q12641_recall_eye_of_acherus_SpellScript);
+
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                if (Player* player = GetCaster()->GetCharmerOrOwner()->ToPlayer())
+                {
+                    player->StopCastingCharm();
+                    player->StopCastingBindSight();
+                }
+            }
+
+            void Register() override
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_q12641_recall_eye_of_acherus_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+            }
+        };
+
+        SpellScript* GetSpellScript() const override
+        {
+            return new spell_q12641_recall_eye_of_acherus_SpellScript();
+        }
+};
+
 // 27421 Rayne's Seed
 class spell_q27421_rayne_seed : public SpellScriptLoader
 {
@@ -1943,6 +2044,47 @@ class spell_q12919_gymers_throw : public SpellScriptLoader
         }
 };
 
+enum Quest_The_Hunter_And_The_Prince
+{
+    SPELL_ILLIDAN_KILL_CREDIT      = 61748
+};
+
+class spell_q13400_illidan_kill_master : public SpellScriptLoader
+{
+    public:
+        spell_q13400_illidan_kill_master() : SpellScriptLoader("spell_q13400_illidan_kill_master") { }
+
+        class spell_q13400_illidan_kill_master_SpellScript : public SpellScript
+        {
+           PrepareSpellScript(spell_q13400_illidan_kill_master_SpellScript);
+
+            bool Validate(SpellInfo const* /*spellInfo*/) override
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_ILLIDAN_KILL_CREDIT))
+                    return false;
+                return true;
+            }
+
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                Unit* caster = GetCaster();
+                if (caster->IsVehicle())
+                    if (Unit* passenger = caster->GetVehicleKit()->GetPassenger(0))
+                         passenger->CastSpell(passenger, SPELL_ILLIDAN_KILL_CREDIT, true);
+            }
+
+            void Register() override
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_q13400_illidan_kill_master_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const override
+        {
+            return new spell_q13400_illidan_kill_master_SpellScript();
+        }
+};
+
 void AddSC_quest_spell_scripts()
 {
     new spell_q55_sacred_cleansing();
@@ -1982,6 +2124,8 @@ void AddSC_quest_spell_scripts()
     new spell_q11008_blasting_charge();
     new spell_q13291_q13292_q13239_q13261_frostbrood_skytalon_grab_decoy();
     new spell_q13291_q13292_q13239_q13261_armored_decoy_summon_skytalon();
+    new spell_q12641_death_comes_from_on_high();
+    new spell_q12641_recall_eye_of_acherus();
     new spell_q27421_rayne_seed();
     new spell_q12512_resuscitate();
     new spell_q25792_burn_constriction_totem();
@@ -1991,4 +2135,5 @@ void AddSC_quest_spell_scripts()
     new spell_q24861_funeral_offering();
     new spell_q12919_gymers_grab();
     new spell_q12919_gymers_throw();
+    new spell_q13400_illidan_kill_master();
 }

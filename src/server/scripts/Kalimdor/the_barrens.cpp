@@ -27,11 +27,12 @@ EndScriptData */
 npc_wizzlecrank_shredder
 EndContentData */
 
-#include "ScriptMgr.h"
-#include "ScriptedCreature.h"
-#include "ScriptedGossip.h"
-#include "ScriptedEscortAI.h"
+#include "CombatAI.h"
 #include "MoveSplineInit.h"
+#include "ScriptedCreature.h"
+#include "ScriptedEscortAI.h"
+#include "ScriptedGossip.h"
+#include "ScriptMgr.h"
 
 /*#####
 ## npc_wizzlecrank_shredder
@@ -241,7 +242,7 @@ public:
 
         void IsSummonedBy(Unit* summoner) override
         {
-            Movement::MoveSplineInit init(*me);
+            Movement::MoveSplineInit init(me);
             for (uint8 i = 0; i < 12; ++i)
             {
                 G3D::Vector3 path(BrutuskWPPath[i][0], BrutuskWPPath[i][1], BrutuskWPPath[i][2]);
@@ -250,7 +251,7 @@ public:
             init.SetSmooth();
             init.SetVelocity(15.0f);
             init.Launch();
-            
+
             events.ScheduleEvent(EVENT_DONE, me->GetSplineDuration());
         }
 

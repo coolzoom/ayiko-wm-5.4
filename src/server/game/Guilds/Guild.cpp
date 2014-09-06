@@ -1172,9 +1172,11 @@ bool Guild::Create(Player* pLeader, const std::string& name)
     stmt->setUInt64(++index, m_bankMoney);
     trans->Append(stmt);
 
-    CharacterDatabase.CommitTransaction(trans);
     // Create default ranks
-    _CreateDefaultGuildRanks(pLeaderSession->GetSessionDbLocaleIndex());
+    _CreateDefaultGuildRanks(trans, pLeaderSession->GetSessionDbLocaleIndex());
+
+    CharacterDatabase.DirectCommitTransaction(trans);
+
     // Add guildmaster
     bool ret = AddMember(m_leaderGuid, GR_GUILDMASTER);
     // Call scripts on successful create
@@ -2948,48 +2950,64 @@ bool Guild::_CreateNewBankTab()
     return true;
 }
 
-void Guild::_CreateDefaultGuildRanks(LocaleConstant loc)
+void Guild::_CreateDefaultGuildRanks(SQLTransaction &trans, LocaleConstant loc)
 {
-    PreparedStatement* stmt = NULL;
-
-    stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GUILD_RANKS);
+    auto stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GUILD_RANKS);
     stmt->setUInt32(0, m_id);
-    CharacterDatabase.Execute(stmt);
+    trans->Append(stmt);
 
     stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GUILD_BANK_RIGHTS);
     stmt->setUInt32(0, m_id);
-    CharacterDatabase.Execute(stmt);
+    trans->Append(stmt);
 
-    _CreateRank(sObjectMgr->GetTrinityString(LANG_GUILD_MASTER,   loc), GR_RIGHT_ALL);
-    _CreateRank(sObjectMgr->GetTrinityString(LANG_GUILD_OFFICER,  loc), GR_RIGHT_ALL);
-    _CreateRank(sObjectMgr->GetTrinityString(LANG_GUILD_VETERAN,  loc), GR_RIGHT_GCHATLISTEN | GR_RIGHT_GCHATSPEAK);
-    _CreateRank(sObjectMgr->GetTrinityString(LANG_GUILD_MEMBER,   loc), GR_RIGHT_GCHATLISTEN | GR_RIGHT_GCHATSPEAK);
-    _CreateRank(sObjectMgr->GetTrinityString(LANG_GUILD_INITIATE, loc), GR_RIGHT_GCHATLISTEN | GR_RIGHT_GCHATSPEAK);
+    _CreateRank(trans, sObjectMgr->GetTrinityString(LANG_GUILD_MASTER, loc), GR_RIGHT_ALL);
+    _CreateRank(trans, sObjectMgr->GetTrinityString(LANG_GUILD_OFFICER, loc), GR_RIGHT_ALL);
+    _CreateRank(trans, sObjectMgr->GetTrinityString(LANG_GUILD_VETERAN, loc), GR_RIGHT_GCHATLISTEN | GR_RIGHT_GCHATSPEAK);
+    _CreateRank(trans, sObjectMgr->GetTrinityString(LANG_GUILD_MEMBER, loc), GR_RIGHT_GCHATLISTEN | GR_RIGHT_GCHATSPEAK);
+    _CreateRank(trans, sObjectMgr->GetTrinityString(LANG_GUILD_INITIATE, loc), GR_RIGHT_GCHATLISTEN | GR_RIGHT_GCHATSPEAK);
 }
 
-void Guild::_CreateRank(const std::string& name, uint32 rights)
+void Guild::_CreateDefaultGuildRanks(LocaleConstant loc)
 {
-    if (_GetRanksSize() >= GUILD_RANKS_MAX_COUNT)
-        return;
+    auto trans = CharacterDatabase.BeginTransaction();
+    _CreateDefaultGuildRanks(trans, loc);
+    CharacterDatabase.CommitTransaction(trans);
+}
 
+bool Guild::_CreateRank(SQLTransaction &trans, std::string const &name, uint32 rights)
+{
     // Ranks represent sequence 0, 1, 2, ... where 0 means guildmaster
     uint32 newRankId = _GetRanksSize();
+    if (newRankId >= GUILD_RANKS_MAX_COUNT)
+        return false;
 
     RankInfo info(m_id, newRankId, name, rights, 0);
     m_ranks.push_back(info);
 
-    SQLTransaction trans = CharacterDatabase.BeginTransaction();
     for (uint8 i = 0; i < GetPurchasedTabsSize(); ++i)
     {
         // Create bank rights with default values
-        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_GUILD_BANK_RIGHT_DEFAULT);
+        auto stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_GUILD_BANK_RIGHT_DEFAULT);
         stmt->setUInt32(0, m_id);
-        stmt->setUInt8 (1, i);
-        stmt->setUInt8 (2, newRankId);
+        stmt->setUInt8(1, i);
+        stmt->setUInt8(2, newRankId);
         trans->Append(stmt);
     }
     info.SaveToDB(trans);
-    CharacterDatabase.CommitTransaction(trans);
+
+    return true;
+}
+
+bool Guild::_CreateRank(std::string const &name, uint32 rights)
+{
+    SQLTransaction trans = CharacterDatabase.BeginTransaction();
+
+    if (_CreateRank(trans, name, rights)) {
+        CharacterDatabase.CommitTransaction(trans);
+        return true;
+    }
+
+    return false;
 }
 
 // Updates the number of accounts that are in the guild

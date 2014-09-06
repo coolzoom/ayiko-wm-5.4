@@ -896,9 +896,11 @@ class Guild
         // Tries to create new bank tab
         bool _CreateNewBankTab();
         // Creates default guild ranks with names in given locale
+        void _CreateDefaultGuildRanks(SQLTransaction &trans, LocaleConstant loc);
         void _CreateDefaultGuildRanks(LocaleConstant loc);
         // Creates new rank
-        void _CreateRank(const std::string& name, uint32 rights);
+        bool _CreateRank(SQLTransaction &trans, std::string const &name, uint32 rights);
+        bool _CreateRank(std::string const &name, uint32 rights);
         // Update account number when member added/removed from guild
         void _UpdateAccountsNumber();
         bool _IsLeader(Player* player) const;

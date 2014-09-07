@@ -1404,6 +1404,44 @@ public:
     }
 };
 
+// Cloak and Dagger
+class spell_rog_cloak_and_dagger : public SpellScriptLoader
+{
+public:
+    spell_rog_cloak_and_dagger() : SpellScriptLoader("spell_rog_cloak_and_dagger") { }
+
+    class script_impl : public SpellScript
+    {
+        PrepareSpellScript(script_impl);
+
+        enum
+        {
+            TALENT_CLOAK_AND_SHADOW     = 138106,
+            CLOAK_AND_SHADOW_TELEPORT   = 132987
+        };
+
+        void HandleOnHit()
+        {
+            auto caster = GetCaster();
+            auto target = GetHitUnit();
+            if (caster && target && caster->HasAura(TALENT_CLOAK_AND_SHADOW))
+            {
+                caster->CastSpell(target, CLOAK_AND_SHADOW_TELEPORT, true);
+            }
+        }
+
+        void Register()
+        {
+            OnHit += SpellHitFn(script_impl::HandleOnHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new script_impl();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_glyph_of_expose_armor();

@@ -463,26 +463,30 @@ class spell_rog_sanguinary_vein : public SpellScriptLoader
                 if (!GetCaster())
                     return;
 
-                if (Player* _player = GetCaster()->ToPlayer())
-                    if (Unit* target = GetTarget())
+                if (auto _player = GetCaster()->ToPlayer())
+                    if (auto target = GetTarget())
                         _player->CastSpell(target, ROGUE_SPELL_SANGUINARY_VEIN_DEBUFF, true);
             }
 
             void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
-                if (!GetCaster())
-                    return;
+                if (auto target = GetTarget())
+                {
+                    bool hasFound = false;
+                    uint32 spellsAffected[3] = {1943, 703, 121411};
+                    for (uint32 i = 0; i < 3; ++i)
+                        if (target->HasAura(spellsAffected[i], GetCasterGUID()))
+                            hasFound = true;
 
-                if (Player* _player = GetCaster()->ToPlayer())
-                    if (Unit* target = GetTarget())
-                        if (target->HasAura(ROGUE_SPELL_SANGUINARY_VEIN_DEBUFF, _player->GetGUID()))
-                            _player->CastSpell(target, ROGUE_SPELL_SANGUINARY_VEIN_DEBUFF, true);
+                    if (!hasFound)
+                        target->RemoveAurasDueToSpell(ROGUE_SPELL_SANGUINARY_VEIN_DEBUFF, GetCasterGUID());
+                }
             }
 
             void Register()
             {
                 OnEffectApply += AuraEffectApplyFn(spell_rog_sanguinary_vein_AuraScript::OnApply, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
-                OnEffectRemove += AuraEffectRemoveFn(spell_rog_sanguinary_vein_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
+                AfterEffectRemove += AuraEffectRemoveFn(spell_rog_sanguinary_vein_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
             }
         };
 

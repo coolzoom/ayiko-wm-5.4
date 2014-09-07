@@ -13181,11 +13181,6 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
             if (AuraEffect *shadowInfusion = stacks->GetEffect(0))
                 AddPct(DoneTotalMod, shadowInfusion->GetAmount());
 
-    // Seasoned Soldier
-    if (GetTypeId() == TYPEID_PLAYER && HasAura(12712) && ToPlayer()->GetSpecializationId(ToPlayer()->GetActiveSpec()) != SPEC_WARRIOR_ARMS)
-        if (ToPlayer() && ToPlayer()->IsTwoHandUsed())
-            AddPct(DoneTotalMod, 25);
-
     // Some spells don't benefit from pct done mods
     if (spellProto)
     {

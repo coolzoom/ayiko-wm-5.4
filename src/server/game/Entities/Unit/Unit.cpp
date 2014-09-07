@@ -11663,6 +11663,13 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
      if (GetTypeId() == TYPEID_PLAYER && spellProto && HasAura(53503) && ToPlayer()->IsTwoHandUsed() && (spellProto->Id == 20271 || spellProto->Id == 24275))
          AddPct(DoneTotalMod, 30);
 
+     // Thunder Clap and Heroic Leap - Seasoned Soldier
+     if (spellProto && (spellProto->Id == 6343 || spellProto->Id == 52174))
+     {
+         if (GetTypeId() == TYPEID_PLAYER && HasAura(12712) && ToPlayer()->IsTwoHandUsed())
+             AddPct(DoneTotalMod, 25);
+     }
+
     // Pet damage?
     if (GetTypeId() == TYPEID_UNIT && !ToCreature()->isPet())
         DoneTotalMod *= ToCreature()->GetSpellDamageMod(ToCreature()->GetCreatureTemplate()->rank);

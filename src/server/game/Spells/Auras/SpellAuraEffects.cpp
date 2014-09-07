@@ -6109,20 +6109,43 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                 else
                     target->RemoveAurasDueToSpell(63611);
             break;
+            }
         }
         case SPELLFAMILY_WARLOCK:
+        {
+            switch(GetId())
             {
-                switch(GetId())
-                {
-                    // Demonic Pact
+                // Demonic Pact
                 case 47236:
                     if (caster)
                         caster->CastSpell(caster, 53646, true);
-                    break;
-                }
                 break;
             }
+            break;
         }
+        case SPELLFAMILY_ROGUE:
+        {
+            switch(GetId())
+            {
+                // Glyph of Detection
+                case 125044:
+                {
+                    if (auto player = GetCaster()->ToPlayer())
+                    {
+                        printf("\n ! glyph of detection ! \n ");
+                        if (apply)
+                            player->learnSpell(56814, true);
+                        else
+                            player->removeSpell(56814);
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+            break;
+        }
+
     }
 }
 

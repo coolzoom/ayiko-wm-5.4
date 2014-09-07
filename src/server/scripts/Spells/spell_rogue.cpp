@@ -283,7 +283,7 @@ class spell_rog_cloak_of_shadows : public SpellScriptLoader
                         if ((spell->DmgClass == SPELL_DAMAGE_CLASS_MAGIC // only affect magic spells
                             || (spell->GetDispelMask() & dispelMask) || (spell->GetSchoolMask() & SPELL_SCHOOL_MASK_MAGIC))
                             // ignore positive and passive auras
-                            && !iter->second->IsPositive() && !iter->second->GetBase()->IsPassive() && m_spellInfo->CanDispelAura(spell))
+                            && !iter->second->IsPositive() && !iter->second->GetBase()->IsPassive())
                         {
                             _player->RemoveAura(iter);
                         }

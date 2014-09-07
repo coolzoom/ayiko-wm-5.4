@@ -5422,6 +5422,17 @@ void Spell::EffectAddComboPoints(SpellEffIndex /*effIndex*/)
         if (m_caster->m_movedPlayer->GetComboTarget() != unitTarget->GetGUID())
             return;
 
+    // Anticipation
+    if (m_caster->m_movedPlayer->GetComboPoints() >= 5 && m_caster->HasAura(114015))
+    {
+        // Cheap Shot and Expose Armor hack (they do not trigger aura-proc)
+        if (m_spellInfo->Id == 1833 || m_spellInfo->Id == 8647)
+        {
+            int32 basePoints = damage;
+            m_caster->CastCustomSpell(m_caster, 115189, &basePoints, NULL, NULL, true);
+        }
+    }
+
     m_caster->m_movedPlayer->AddComboPoints(unitTarget, damage, this);
 }
 

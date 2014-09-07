@@ -7125,10 +7125,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                     if (GetTypeId() != TYPEID_PLAYER)
                         return false;
 
-                    if (!procSpell)
-                        return false;
-
-                    if (procSpell->Id == 115190)
+                    if (!procSpell || procSpell->Id == 115190)
                         return false;
 
                     if (!procSpell->HasEffect(SPELL_EFFECT_ADD_COMBO_POINTS) && procSpell->Id != 5374 && procSpell->Id != 27576)
@@ -7140,7 +7137,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                     {
                         if (spellEffect.IsEffect(SPELL_EFFECT_ADD_COMBO_POINTS))
                         {
-                            newCombo += spellEffect.BasePoints;
+                            newCombo += (spellEffect.BasePoints ? spellEffect.BasePoints : 1);
                             break;
                         }
                     }

@@ -13182,6 +13182,11 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
         }
     }
 
+    // Cleave and Heroic strike has 1.4 modifier for one-handed weapons used
+    if (spellProto && (spellProto->Id == 845 || spellProto->Id == 78))
+        if (GetTypeId() == TYPEID_PLAYER && !ToPlayer()->IsTwoHandUsed())
+            AddPct(DoneTotalMod, 40);
+
     // Ghoul benefit from dmg pct mod from Shadow Infusion
     if (GetTypeId() == TYPEID_UNIT && HasAura(91342))
         if (Aura *stacks = GetAura(91342))

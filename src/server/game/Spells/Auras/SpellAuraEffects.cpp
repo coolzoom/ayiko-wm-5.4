@@ -5990,6 +5990,22 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
         {
             //if (!(mode & AURA_EFFECT_HANDLE_REAL))
                 //break;
+            switch (GetId())
+            {
+                case 125045:
+                {
+                    if (auto player = GetCaster()->ToPlayer())
+                    {
+                        if (apply)
+                            player->learnSpell(132157, true);
+                        else
+                            player->removeSpell(132157);
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
             break;
         }
         case SPELLFAMILY_DRUID:
@@ -6132,7 +6148,6 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                 {
                     if (auto player = GetCaster()->ToPlayer())
                     {
-                        printf("\n ! glyph of detection ! \n ");
                         if (apply)
                             player->learnSpell(56814, true);
                         else

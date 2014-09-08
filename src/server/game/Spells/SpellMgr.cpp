@@ -5425,6 +5425,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 32409: // Glyph of Shadow Word: Death (backfire)
                     spellInfo->Effects[EFFECT_0].ScalingMultiplier = 0.0f;
                     break;
+                case 116: // Frostbolt - It has unknown type 5 in DBC
+                    spellInfo->PreventionType = SPELL_PREVENTION_TYPE_SILENCE;
+                    break;
                 default:
                     break;
             }

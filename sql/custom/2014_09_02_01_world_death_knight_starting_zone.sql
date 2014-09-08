@@ -127,8 +127,8 @@ INSERT INTO script_waypoint VALUES
    (28912, 7, 1626.845, -6015.085, 134.740, 0, ''),
    (28912, 8, 1649.150, -6016.975, 133.240, 0, ''),
    (28912, 9, 1653.063, -5974.844, 132.652, 5000, 'Mount'),
-   (28912, 10, 1654.747, -5926.424, 121.191, 0, 'Disappear');   
-   
+   (28912, 10, 1654.747, -5926.424, 121.191, 0, 'Disappear');
+
 DELETE FROM `script_texts` WHERE `npc_entry` IN (28939, 28940, 28610, 29076, 28912, 29001, 29032, 29061, 29065, 29067, 29068, 29070, 29074, 29072, 29073, 29071, 29032, 29053);
 DELETE FROM `creature_text` WHERE `entry` IN (28939, 28940, 28610, 29076, 28912, 29001, 29032, 29061, 29065, 29067, 29068, 29070, 29074, 29072, 29073, 29071, 29032, 29053);
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES

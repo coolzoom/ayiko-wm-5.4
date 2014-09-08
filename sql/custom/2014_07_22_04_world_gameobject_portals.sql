@@ -131,5 +131,11 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 (17, 0, 88339, 0, 0, 27, 0, 85, 3, 0, 0, 0, "", "Spell Portal Effect: Tol Barad requires level 85"),
 (17, 0, 88341, 0, 0, 27, 0, 85, 3, 0, 0, 0, "", "Spell Portal Effect: Tol Barad requires level 85");
 
+-- [SQL] General - Portal to Honeydew Village fixed (Feedback #5921)
+DELETE FROM `spell_target_position` WHERE `id` IN (130696);
+INSERT INTO `spell_target_position` (`id`, `effIndex`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
+(130696, 0, 870, 2952.85, -514.627, 268.9057, 4.613788);
+
+
 -- Cleanup
 DELETE FROM `gameobject_scripts` WHERE `id` NOT IN (SELECT `guid` FROM `gameobject`);

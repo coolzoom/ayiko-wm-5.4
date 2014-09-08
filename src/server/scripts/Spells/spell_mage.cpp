@@ -1734,6 +1734,50 @@ class spell_mage_living_bomb : public SpellScriptLoader
         }
 };
 
+class spell_mage_temporal_shield : public SpellScriptLoader
+{
+public:
+    spell_mage_temporal_shield() : SpellScriptLoader("spell_mage_temporal_shield") { }
+
+    class script_impl : public AuraScript
+    {
+        PrepareAuraScript(script_impl);
+
+        uint32 damageTaken;
+
+        bool Load()
+        {
+            damageTaken = 0;
+            return true;
+        }
+
+        void OnProc(AuraEffect const * /*aurEff*/, ProcEventInfo& eventInfo)
+        {
+            damageTaken += eventInfo.GetDamageInfo()->GetDamage();
+        }
+
+        void AfterRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (damageTaken)
+            {
+                int32 bp = damageTaken / 3;
+                GetTarget()->CastCustomSpell(GetTarget(), 115611, &bp, NULL, NULL, true);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectProc += AuraEffectProcFn(script_impl::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
+            AfterEffectRemove += AuraEffectRemoveFn(script_impl::AfterRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new script_impl();
+    }
+};
+
 void AddSC_mage_spell_scripts()
 {
     new spell_mage_flamestrike();
@@ -1771,4 +1815,5 @@ void AddSC_mage_spell_scripts()
     new spell_mage_incanters_absorbtion_absorb();
     new spell_mage_incanters_absorbtion_manashield();
     new spell_mage_living_bomb();
+    new spell_mage_temporal_shield();
 }

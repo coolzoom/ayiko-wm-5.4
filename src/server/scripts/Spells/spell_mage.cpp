@@ -1734,6 +1734,7 @@ class spell_mage_living_bomb : public SpellScriptLoader
         }
 };
 
+// Temporal Shield - 115610
 class spell_mage_temporal_shield : public SpellScriptLoader
 {
 public:
@@ -1769,6 +1770,49 @@ public:
         {
             OnEffectProc += AuraEffectProcFn(script_impl::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
             AfterEffectRemove += AuraEffectRemoveFn(script_impl::AfterRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new script_impl();
+    }
+};
+
+// Flameglow - 140468
+class spell_mage_flameglow : public SpellScriptLoader
+{
+public:
+    spell_mage_flameglow() : SpellScriptLoader("spell_mage_flameglow") { }
+
+    class script_impl : public AuraScript
+    {
+        PrepareAuraScript(script_impl);
+
+        void CalculateAmount(AuraEffect const * /*auraEffect*/, int32& amount, bool& /*canBeRecalculated*/)
+        {
+            amount = -1;
+        }
+
+        void Absorb(AuraEffect * /*auraEffect*/, DamageInfo& dmgInfo, uint32& absorbAmount)
+        {
+            Unit* target = GetTarget();
+            if (target->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            int32 bonusPct = GetAura()->GetSpellInfo()->Effects[EFFECT_1].BasePoints;
+            int32 damagePct = GetAura()->GetSpellInfo()->Effects[EFFECT_2].BasePoints;
+            // Calculate %s
+            uint32 spellAbsorb = CalculatePct(target->ToPlayer()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE), bonusPct);
+            uint32 absorbLimit  = CalculatePct(dmgInfo.GetDamage(), damagePct);
+
+            absorbAmount = std::min(spellAbsorb, absorbLimit);
+        }
+
+        void Register()
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(script_impl::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
+            OnEffectAbsorb += AuraEffectAbsorbFn(script_impl::Absorb, EFFECT_0);
         }
     };
 
@@ -1816,4 +1860,5 @@ void AddSC_mage_spell_scripts()
     new spell_mage_incanters_absorbtion_manashield();
     new spell_mage_living_bomb();
     new spell_mage_temporal_shield();
+    new spell_mage_flameglow();
 }

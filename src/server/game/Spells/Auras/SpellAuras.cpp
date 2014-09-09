@@ -1690,7 +1690,17 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         // Glyph of Blind
                         if (caster && caster->HasAura(91299))
                         {
-                            target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE, 0, target->GetAura(32409));
+                            // Manual iteration to prevent removing poisons with Dirty Tricks talent
+                            auto periodicAuras = target->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
+                            for (auto iter = periodicAuras.begin(); iter != periodicAuras.end();)
+                            {
+                                Aura *aura = (*iter)->GetBase();
+                                ++iter;
+                                if (aura->GetSpellInfo()->IsPoisonOrBleedSpell() && caster->HasAura(108216) && aura->GetCasterGUID() == caster->GetGUID() || aura->GetId() == 32409)
+                                    continue;
+                                else
+                                    target->RemoveAura(aura);
+                            }
                             target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
                             target->RemoveAurasByType(SPELL_AURA_PERIODIC_LEECH);
                         }

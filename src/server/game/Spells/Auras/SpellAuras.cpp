@@ -1525,6 +1525,21 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             if (!target->IsFriendlyTo(caster))
                                 target->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
                         break;
+                    // Vanish (triggered)
+                    case 131369:
+                    {
+                        // Glyph of Decoy
+                        if (target->HasAura(56800))
+                        {
+                            Position pos;
+                            target->GetPosition(&pos);
+                            if (Creature * decoy = target->SummonCreature(62261, pos, TEMPSUMMON_TIMED_DESPAWN, 4000))
+                            {
+                                target->CastSpell(decoy, 45204, true);
+                                decoy->CastSpell(decoy, 52188, true);
+                            }
+                        }
+                    }
                 }
                 break;
             case SPELLFAMILY_DRUID:

@@ -931,6 +931,10 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     uint32 val  = (fire > shadow) ? fire : shadow;
                     SetBonusDamage(int32 (val));
 
+                    // Glyph of the Geist
+                    if (GetOwner()->HasAura(58640))
+                        SetDisplayId(25664);
+
                     // Hardcode : Ghoul Base HP
                     if (IsPetGhoul() && getLevel() > 86)
                     {

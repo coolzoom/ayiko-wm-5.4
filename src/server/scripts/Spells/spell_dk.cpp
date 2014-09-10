@@ -2029,6 +2029,42 @@ public:
     }
 };
 
+// Soul Reaper - 114868
+class spell_dk_soul_reaper_effect final : public SpellScriptLoader
+{
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        enum
+        {
+            GLYPH_OF_SWIFT_DEATH  = 146645
+        };
+
+        void onInitEffects(uint32 &effectMask)
+        {
+            auto const caster = GetCaster();
+            if (caster && !caster->HasAura(GLYPH_OF_SWIFT_DEATH))
+                effectMask &= ~(1 << EFFECT_1);
+        }
+
+        void Register() final
+        {
+            OnInitEffects += AuraInitEffectsFn(script_impl::onInitEffects);
+        }
+    };
+
+public:
+    spell_dk_soul_reaper_effect()
+        : SpellScriptLoader("spell_dk_soul_reaper_effect")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
+};
+
 void AddSC_deathknight_spell_scripts()
 {
     new spell_dk_gorefiends_grasp();
@@ -2073,4 +2109,5 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_plague_strike();
     new spell_dk_unholy_frenzy();
     new spell_dk_glyph_of_horn_of_winter();
+    new spell_dk_soul_reaper_effect();
 }

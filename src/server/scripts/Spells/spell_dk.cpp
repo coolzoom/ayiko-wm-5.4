@@ -898,7 +898,7 @@ class spell_dk_death_siphon : public SpellScriptLoader
                 {
                     if (GetHitUnit())
                     {
-                        int32 bp = GetHitDamage();
+                        int32 bp = CalculatePct(GetHitDamage(), GetSpellInfo()->Effects[EFFECT_1].BasePoints);
 
                         player->CastCustomSpell(player, DK_SPELL_DEATH_SIPHON_HEAL, &bp, NULL, NULL, true);
 

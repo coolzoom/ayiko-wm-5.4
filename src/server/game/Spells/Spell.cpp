@@ -6056,13 +6056,15 @@ void Spell::TakeRunePower(bool didHit)
                     case 85948: // Festering Strike
                     {
                         // Reaping
-                        player->AddRuneBySpell(i, RUNE_DEATH, 56835);
+                        if (player->HasAura(56835))
+                            player->AddRuneBySpell(i, RUNE_DEATH, 56835);
                         break;
                     }
                     case 49998: // Death Strike
                     {
                         // Blood Rites
-                        player->AddRuneBySpell(i, RUNE_DEATH, 50034);
+                        if (player->HasAura(50034))
+                            player->AddRuneBySpell(i, RUNE_DEATH, 50034);
                         break;
                     }
                     default:

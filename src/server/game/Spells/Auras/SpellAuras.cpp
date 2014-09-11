@@ -454,9 +454,7 @@ uint32 Aura::BuildEffectMaskForOwner(SpellInfo const* spellProto, uint32 avalibl
         case TYPEID_DYNAMICOBJECT:
             for (uint8 i = 0; i < spellProto->Effects.size(); ++i)
             {
-                if (spellProto->Effects[i].Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA || spellProto->Effects[i].IsPeriodicEffect())
-                    effMask |= 1 << i;
-                else if (spellProto->Effects[i].Effect == SPELL_EFFECT_CREATE_AREATRIGGER)
+                if (spellProto->Effects[i].Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA || spellProto->Effects[i].Effect == SPELL_EFFECT_CREATE_AREATRIGGER)
                     effMask |= 1 << i;
             }
             break;

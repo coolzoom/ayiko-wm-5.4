@@ -1047,23 +1047,9 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                 else if (resist > 80)
                     resist += ((resist-70) * 5 + (resist - 80) * 7);
 
-                switch (GetId())
-                {
-                    case 20043: // Aspect of the Wild
-                    case 8185:  // Elemental Resistance
-                    case 19891: // Resistance Aura
-                    case 79106: // Shadow Protection
-                    case 79107: // Shadow Protection
-                        amount = resist;
-                        break;
-                    case 79060: // Mark of the Wild
-                    case 79061: // Mark of the Wild
-                    case 79062: // Blessing of Kings
-                    case 79063: // Blessing of Kings
-                    case 90363: // Embrace of the Shale Spider
-                        amount = resist / 2;
-                        break;
-                    }
+                if (GetId() == 90363) // Embrace of the Shale Spider
+                    amount = resist / 2;
+
                 break;
             }
         }

@@ -4152,6 +4152,10 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[1].ApplyAuraName = SPELL_AURA_MOD_CRIT_PCT;
                     break;
                 case 21562: // Power Word : Fortitude
+                case 19740: // Blessing of Might
+                case 20217: // Blessing of Kings
+                case 1126:  // Mark of the Wild
+                case 109773:// Dark Intent
                     spellInfo->Effects[0].TargetA = TARGET_UNIT_TARGET_ANY;
                     break;
                 case 128997:// Spirit Beast Blessing
@@ -4160,11 +4164,7 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 127830:// Spirit Beast Blessing (Mastery Rating)
                     spellInfo->Effects[0].Effect = SPELL_EFFECT_APPLY_AREA_AURA_RAID;
                     break;
-                case 1126:  // Mark of the Wild
-                case 19740: // Blessing of Might
-                case 20217: // Blessing of Kings
                 case 24907: // Moonkin Aura
-                case 109773:// Dark Intent
                 case 116781:// Legacy of the White Tiger
                     spellInfo->Effects[0].TargetA = TARGET_UNIT_CASTER;
                     spellInfo->Effects[0].TargetB = TARGET_UNIT_CASTER_AREA_RAID;

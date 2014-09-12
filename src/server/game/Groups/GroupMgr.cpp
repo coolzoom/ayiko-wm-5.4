@@ -27,8 +27,15 @@ GroupMgr::GroupMgr()
 
 GroupMgr::~GroupMgr()
 {
-    for (auto itr = groupStore_.begin(); itr != groupStore_.end(); ++itr)
-        delete itr->second;
+    for (auto itr = groupStore_.begin(); itr != groupStore_.end();)
+    {
+        Group *group = itr->second;
+        itr = groupStore_.erase(itr);
+
+        // It still calls back to GroupMgr::RemoveGroup, but doesn't do anything
+        // as key-value pair is already removed from map
+        delete group;
+    }
 }
 
 uint32 GroupMgr::GenerateGroupId()

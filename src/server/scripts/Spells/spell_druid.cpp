@@ -2861,6 +2861,12 @@ class spell_dru_astral_communion : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_astral_communion_AuraScript);
 
+            enum eclipseMarkers
+            {
+                SPELL_ECLIPSE_MARKER_LUNAR = 67484,
+                SPELL_ECLIPSE_MARKER_SOLAR = 67483
+            };
+
             int32 beginningEclipse;
 
             bool Load()
@@ -3366,6 +3372,12 @@ class spell_dru_eclipse : public SpellScriptLoader
         {
             PrepareSpellScript(spell_dru_eclipse_SpellScript);
 
+            enum eclipseMarkers
+            {
+                SPELL_ECLIPSE_MARKER_LUNAR = 67484,
+                SPELL_ECLIPSE_MARKER_SOLAR = 67483
+            };
+
             void HandleAfterCast()
             {
                 if (Player* _plr = GetCaster()->ToPlayer())
@@ -3396,6 +3408,8 @@ class spell_dru_eclipse : public SpellScriptLoader
                         if ((player->GetPower(POWER_ECLIPSE) < 0 && !player->HasAura(SPELL_DRUID_LUNAR_ECLIPSE)) ||
                             (player->GetPower(POWER_ECLIPSE) > 0 && player->HasAura(SPELL_DRUID_SOLAR_ECLIPSE)))
                             return;
+
+                        player->CastSpell(player, SPELL_ECLIPSE_MARKER_SOLAR, true);
                     }
                     // Lunar energy
                     if (eclipse < 0)
@@ -3403,6 +3417,8 @@ class spell_dru_eclipse : public SpellScriptLoader
                         if ((player->GetPower(POWER_ECLIPSE) > 0 && !player->HasAura(SPELL_DRUID_SOLAR_ECLIPSE)) ||
                             (player->GetPower(POWER_ECLIPSE) < 0 && player->HasAura(SPELL_DRUID_LUNAR_ECLIPSE)))
                             return;
+
+                        player->CastSpell(player, SPELL_ECLIPSE_MARKER_LUNAR, true);
                     }
 
                     if (player->HasAura(SPELL_DRUID_EUPHORIA) && !player->HasAura(SPELL_DRUID_SOLAR_ECLIPSE) && !player->HasAura(SPELL_DRUID_LUNAR_ECLIPSE))
@@ -3412,12 +3428,20 @@ class spell_dru_eclipse : public SpellScriptLoader
 
                     if (player->GetPower(POWER_ECLIPSE) == 100 && !player->HasAura(SPELL_DRUID_SOLAR_ECLIPSE))
                     {
+                        // Init Eclipse direction markers
+                        player->CastSpell(player, SPELL_ECLIPSE_MARKER_LUNAR, true);
+                        player->RemoveAurasDueToSpell(SPELL_ECLIPSE_MARKER_SOLAR);
+                        // Handle Eclipse
                         player->CastSpell(player, SPELL_DRUID_SOLAR_ECLIPSE, true, 0); // Cast Lunar Eclipse
                         player->CastSpell(player, SPELL_DRUID_NATURES_GRACE, true); // Cast Nature's Grace
                         player->CastSpell(player, SPELL_DRUID_ECLIPSE_GENERAL_ENERGIZE, true); // Cast Eclipse - Give 35% of POWER_MANA
                     }
                     else if (player->GetPower(POWER_ECLIPSE) == -100 && !player->HasAura(SPELL_DRUID_LUNAR_ECLIPSE))
                     {
+                        // Init Eclipse direction markers
+                        player->CastSpell(player, SPELL_ECLIPSE_MARKER_SOLAR, true);
+                        player->RemoveAurasDueToSpell(SPELL_ECLIPSE_MARKER_LUNAR);
+                        // Handle Eclipse
                         player->CastSpell(player, SPELL_DRUID_LUNAR_ECLIPSE, true, 0); // Cast Lunar Eclipse
                         player->CastSpell(player, SPELL_DRUID_NATURES_GRACE, true); // Cast Nature's Grace
                         player->CastSpell(player, SPELL_DRUID_ECLIPSE_GENERAL_ENERGIZE, true); // Cast Eclipse - Give 35% of POWER_MANA

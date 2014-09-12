@@ -404,108 +404,102 @@ public:
             stmt->setUInt32(0, entry);
             PreparedQueryResult result = WorldDatabase.Query(stmt);
 
-            if (!result)
+            if (!result || !sObjectMgr->GetCreatureTemplate(entry))
             {
                 handler->PSendSysMessage(LANG_COMMAND_CREATURETEMPLATE_NOTFOUND, entry);
                 continue;
             }
 
-            if (!sObjectMgr->GetCreatureTemplate(entry))
-            {
-                handler->PSendSysMessage(LANG_COMMAND_CREATURESTORAGE_NOTFOUND, entry);
-                continue;
-            }
+            TC_LOG_INFO("misc", "Reloading creature template entry %u", entry);
+
+            uint8 index = 0;
+            Field* fields = result->Fetch();
 
             CreatureTemplate newTemplate;
             newTemplate.Entry = entry;
 
-            TC_LOG_INFO("misc", "Reloading creature template entry %u", entry);
+            for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
+                newTemplate.DifficultyEntry[i] = fields[index++].GetUInt32();
 
-            Field* fields = result->Fetch();
+            for (uint8 i = 0; i < MAX_KILL_CREDIT; ++i)
+                newTemplate.KillCredit[i] = fields[index++].GetUInt32();
 
-            newTemplate.DifficultyEntry[0] = fields[0].GetUInt32();
-            newTemplate.DifficultyEntry[1] = fields[1].GetUInt32();
-            newTemplate.DifficultyEntry[2] = fields[2].GetUInt32();
-            newTemplate.KillCredit[0]      = fields[3].GetUInt32();
-            newTemplate.KillCredit[1]      = fields[4].GetUInt32();
-            newTemplate.Modelid1           = fields[5].GetUInt32();
-            newTemplate.Modelid2           = fields[6].GetUInt32();
-            newTemplate.Modelid3           = fields[7].GetUInt32();
-            newTemplate.Modelid4           = fields[8].GetUInt32();
-            newTemplate.Name               = fields[9].GetString();
-            newTemplate.SubName            = fields[10].GetString();
-            newTemplate.IconName           = fields[11].GetString();
-            newTemplate.GossipMenuId       = fields[12].GetUInt32();
-            newTemplate.minlevel           = fields[13].GetUInt8();
-            newTemplate.maxlevel           = fields[14].GetUInt8();
-            newTemplate.expansion          = fields[15].GetUInt16();
-            newTemplate.faction_A          = fields[16].GetUInt16();
-            newTemplate.faction_H          = fields[17].GetUInt16();
-            newTemplate.npcflag            = fields[18].GetUInt32();
-            newTemplate.speed_walk         = fields[19].GetFloat();
-            newTemplate.speed_run          = fields[20].GetFloat();
-            newTemplate.scale              = fields[21].GetFloat();
-            newTemplate.rank               = fields[22].GetUInt8();
-            newTemplate.mindmg             = fields[23].GetFloat();
-            newTemplate.maxdmg             = fields[24].GetFloat();
-            newTemplate.dmgschool          = fields[25].GetUInt8();
-            newTemplate.attackpower        = fields[26].GetUInt32();
-            newTemplate.dmg_multiplier     = fields[27].GetFloat();
-            newTemplate.baseattacktime     = fields[28].GetUInt32();
-            newTemplate.rangeattacktime    = fields[29].GetUInt32();
-            newTemplate.unit_class         = fields[30].GetUInt8();
-            newTemplate.unit_flags         = fields[31].GetUInt32();
-            newTemplate.dynamicflags       = fields[32].GetUInt32();
-            newTemplate.family             = fields[33].GetUInt8();
-            newTemplate.trainer_type       = fields[34].GetUInt8();
-            newTemplate.trainer_spell      = fields[35].GetUInt32();
-            newTemplate.trainer_class      = fields[36].GetUInt8();
-            newTemplate.trainer_race       = fields[37].GetUInt8();
-            newTemplate.minrangedmg        = fields[38].GetFloat();
-            newTemplate.maxrangedmg        = fields[39].GetFloat();
-            newTemplate.rangedattackpower  = fields[40].GetUInt16();
-            newTemplate.type               = fields[41].GetUInt8();
-            newTemplate.type_flags         = fields[42].GetUInt32();
-            newTemplate.lootid             = fields[43].GetUInt32();
-            newTemplate.pickpocketLootId   = fields[44].GetUInt32();
-            newTemplate.SkinLootId         = fields[45].GetUInt32();
+            newTemplate.Modelid1          = fields[index++].GetUInt32();
+            newTemplate.Modelid2          = fields[index++].GetUInt32();
+            newTemplate.Modelid3          = fields[index++].GetUInt32();
+            newTemplate.Modelid4          = fields[index++].GetUInt32();
+            newTemplate.Name              = fields[index++].GetString();
+            newTemplate.SubName           = fields[index++].GetString();
+            newTemplate.IconName          = fields[index++].GetString();
+            newTemplate.GossipMenuId      = fields[index++].GetUInt32();
+            newTemplate.minlevel          = fields[index++].GetUInt8();
+            newTemplate.maxlevel          = fields[index++].GetUInt8();
+            newTemplate.expansion         = fields[index++].GetUInt16();
+            newTemplate.expansionUnknown  = fields[index++].GetUInt16();
+            newTemplate.faction_A         = fields[index++].GetUInt16();
+            newTemplate.faction_H         = fields[index++].GetUInt16();
+            newTemplate.npcflag           = fields[index++].GetUInt32();
+            newTemplate.npcflag2          = fields[index++].GetUInt32();
+            newTemplate.speed_walk        = fields[index++].GetFloat();
+            newTemplate.speed_run         = fields[index++].GetFloat();
+            newTemplate.speed_fly         = fields[index++].GetFloat();
+            newTemplate.scale             = fields[index++].GetFloat();
+            newTemplate.rank              = fields[index++].GetUInt8();
+            newTemplate.mindmg            = fields[index++].GetFloat();
+            newTemplate.maxdmg            = fields[index++].GetFloat();
+            newTemplate.dmgschool         = fields[index++].GetInt8();
+            newTemplate.attackpower       = fields[index++].GetUInt32();
+            newTemplate.dmg_multiplier    = fields[index++].GetFloat();
+            newTemplate.baseattacktime    = fields[index++].GetUInt32();
+            newTemplate.rangeattacktime   = fields[index++].GetUInt32();
+            newTemplate.unit_class        = fields[index++].GetUInt8();
+            newTemplate.unit_flags        = fields[index++].GetUInt32();
+            newTemplate.unit_flags2       = fields[index++].GetUInt32();
+            newTemplate.dynamicflags      = fields[index++].GetUInt32();
+            newTemplate.family            = fields[index++].GetUInt32();
+            newTemplate.trainer_type      = fields[index++].GetUInt8();
+            newTemplate.trainer_spell     = fields[index++].GetUInt32();
+            newTemplate.trainer_class     = fields[index++].GetUInt8();
+            newTemplate.trainer_race      = fields[index++].GetUInt8();
+            newTemplate.minrangedmg       = fields[index++].GetFloat();
+            newTemplate.maxrangedmg       = fields[index++].GetFloat();
+            newTemplate.rangedattackpower = fields[index++].GetUInt16();
+            newTemplate.type              = fields[index++].GetUInt8();
+            newTemplate.type_flags        = fields[index++].GetUInt32();
+            newTemplate.type_flags2       = fields[index++].GetUInt32();
+            newTemplate.lootid            = fields[index++].GetUInt32();
+            newTemplate.pickpocketLootId  = fields[index++].GetUInt32();
+            newTemplate.SkinLootId        = fields[index++].GetUInt32();
 
             for (uint8 i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
-                newTemplate.resistance[i] = fields[46 + i -1].GetUInt16();
+                newTemplate.resistance[i] = fields[index++].GetInt16();
 
-            newTemplate.spells[0]          = fields[52].GetUInt32();
-            newTemplate.spells[1]          = fields[53].GetUInt32();
-            newTemplate.spells[2]          = fields[54].GetUInt32();
-            newTemplate.spells[3]          = fields[55].GetUInt32();
-            newTemplate.spells[4]          = fields[56].GetUInt32();
-            newTemplate.spells[5]          = fields[57].GetUInt32();
-            newTemplate.spells[6]          = fields[58].GetUInt32();
-            newTemplate.spells[7]          = fields[59].GetUInt32();
-            newTemplate.PetSpellDataId     = fields[60].GetUInt32();
-            newTemplate.VehicleId          = fields[61].GetUInt32();
-            newTemplate.mingold            = fields[62].GetUInt32();
-            newTemplate.maxgold            = fields[63].GetUInt32();
-            newTemplate.AIName             = fields[64].GetString();
-            newTemplate.MovementType       = fields[65].GetUInt8();
-            newTemplate.InhabitType        = fields[66].GetUInt8();
-            newTemplate.HoverHeight        = fields[67].GetFloat();
-            newTemplate.ModHealth          = fields[68].GetFloat();
-            newTemplate.ModMana            = fields[69].GetFloat();
-            newTemplate.ModManaExtra       = fields[70].GetFloat();
-            newTemplate.ModArmor           = fields[71].GetFloat();
-            newTemplate.RacialLeader       = fields[72].GetBool();
-            newTemplate.questItems[0]      = fields[73].GetUInt32();
-            newTemplate.questItems[1]      = fields[74].GetUInt32();
-            newTemplate.questItems[2]      = fields[75].GetUInt32();
-            newTemplate.questItems[3]      = fields[76].GetUInt32();
-            newTemplate.questItems[4]      = fields[77].GetUInt32();
-            newTemplate.questItems[5]      = fields[78].GetUInt32();
-            newTemplate.movementId         = fields[79].GetUInt32();
-            newTemplate.RegenHealth        = fields[80].GetBool();
-            newTemplate.equipmentId        = fields[81].GetUInt32();
-            newTemplate.MechanicImmuneMask = fields[82].GetUInt32();
-            newTemplate.flags_extra        = fields[83].GetUInt32();
-            newTemplate.ScriptID           = sObjectMgr->GetScriptId(fields[84].GetCString());
+            for (uint8 i = 0; i < CREATURE_MAX_SPELLS; ++i)
+                newTemplate.spells[i] = fields[index++].GetUInt32();
+
+            newTemplate.PetSpellDataId = fields[index++].GetUInt32();
+            newTemplate.VehicleId      = fields[index++].GetUInt32();
+            newTemplate.mingold        = fields[index++].GetUInt32();
+            newTemplate.maxgold        = fields[index++].GetUInt32();
+            newTemplate.AIName         = fields[index++].GetString();
+            newTemplate.MovementType   = fields[index++].GetUInt8();
+            newTemplate.InhabitType    = fields[index++].GetUInt8();
+            newTemplate.HoverHeight    = fields[index++].GetFloat();
+            newTemplate.ModHealth      = fields[index++].GetFloat();
+            newTemplate.ModMana        = fields[index++].GetFloat();
+            newTemplate.ModManaExtra   = fields[index++].GetFloat();
+            newTemplate.ModArmor       = fields[index++].GetFloat();
+            newTemplate.RacialLeader   = fields[index++].GetBool();
+
+            for (uint8 i = 0; i < MAX_CREATURE_QUEST_ITEMS; ++i)
+                newTemplate.questItems[i] = fields[index++].GetUInt32();
+
+            newTemplate.movementId         = fields[index++].GetUInt32();
+            newTemplate.RegenHealth        = fields[index++].GetBool();
+            newTemplate.equipmentId        = fields[index++].GetUInt32();
+            newTemplate.MechanicImmuneMask = fields[index++].GetUInt32();
+            newTemplate.flags_extra        = fields[index++].GetUInt32();
+            newTemplate.ScriptID           = sObjectMgr->GetScriptId(fields[index++].GetCString());
 
             sObjectMgr->ReplaceCreatureTemplate(entry, newTemplate);
         }

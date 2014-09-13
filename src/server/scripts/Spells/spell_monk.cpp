@@ -467,11 +467,14 @@ class spell_monk_transcendence_transfer : public SpellScriptLoader
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
-                if (GetCaster()->ToPlayer())
-                    if (Unit* target = GetHitUnit())
-                        if (Pet* pet = target->ToPet())
-                            if (pet->AI())
-                                pet->AI()->DoAction(1);
+                if (auto player = GetCaster()->ToPlayer())
+                    if (auto pet = player->GetPet())
+                    {
+                        if (player->GetDistance(pet) > 40.f)
+                            return;
+                        if (pet->AI())
+                            pet->AI()->DoAction(1);
+                    }
             }
 
             void Register()

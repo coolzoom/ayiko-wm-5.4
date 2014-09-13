@@ -4263,21 +4263,13 @@ class npc_transcendence_spirit : public CreatureScript
                 me->SetReactState(REACT_PASSIVE);
             }
 
-            void Reset()
+            void InitializeAI()
             {
-                if (!me->HasAura(SPELL_MEDITATE))
-                    me->AddAura(SPELL_MEDITATE, me);
-            }
-
-            void IsSummonedBy(Unit* owner)
-            {
+                auto owner = me->GetOwner();
                 if (owner && owner->GetTypeId() == TYPEID_PLAYER)
                 {
-                    me->SetMaxHealth(owner->GetMaxHealth() / 2);
-                    me->SetHealth(me->GetMaxHealth());
-
                     me->CastSpell(me, SPELL_VISUAL_SPIRIT, true);
-                    owner->CastSpell(me, SPELL_INITIALIZE_IMAGES, true);
+                    owner->CastSpell(me, 45204, true);
                     owner->CastSpell(me, SPELL_CLONE_CASTER, true);
                     owner->AddAura(SPELL_MEDITATE, me);
                     me->AddAura(SPELL_ROOT_FOR_EVER, me);
@@ -4286,13 +4278,10 @@ class npc_transcendence_spirit : public CreatureScript
                     me->DespawnOrUnsummon();
             }
 
-            void MovementInform(uint32 type, uint32 id)
+            void Reset()
             {
-                if (type != POINT_MOTION_TYPE)
-                    return;
-
-                if (id == 0)
-                    me->SetSpeed(MOVE_RUN, 0.0f);
+                if (!me->HasAura(SPELL_MEDITATE))
+                    me->AddAura(SPELL_MEDITATE, me);
             }
 
             void DoAction(int32 const action)
@@ -4300,16 +4289,27 @@ class npc_transcendence_spirit : public CreatureScript
                 switch (action)
                 {
                     case ACTION_TELEPORT:
-                        if (!me->GetOwner())
+                    {
+                        auto owner = me->GetOwner();
+                        if (!owner)
                         {
                             me->DespawnOrUnsummon(500);
                             break;
                         }
 
-                        me->SetSpeed(MOVE_RUN, 10.0f);
-                        me->GetMotionMaster()->MovePoint(0, me->GetOwner()->GetPositionX(), me->GetOwner()->GetPositionY(), me->GetOwner()->GetPositionZ());
+                        // Switch positions
+                        Position ownerPos;
+                        owner->GetPosition(&ownerPos);
+
+                        owner->NearTeleportTo(me->GetPositionX(), me->GetPositionY(),
+                            me->GetPositionZ(), me->GetOrientation());
+
+                        me->NearTeleportTo(ownerPos.GetPositionX(), ownerPos.GetPositionY(),
+                            ownerPos.GetPositionZ(), ownerPos.GetOrientation());
+
                         me->SetOrientation(me->GetOwner()->GetOrientation());
                         break;
+                    }
                     default:
                         break;
                 }

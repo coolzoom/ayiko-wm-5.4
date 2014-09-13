@@ -767,7 +767,8 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                 || GetOwner()->getClass() == CLASS_SHAMAN        // Fire Elemental
                 || GetOwner()->getClass() == CLASS_PRIEST        // Shadowfiend and Mindbender
                 || GetOwner()->getClass() == CLASS_DEATH_KNIGHT  // Risen Ghoul
-                || GetOwner()->getClass() == CLASS_MAGE)         // Water Elemental
+                || GetOwner()->getClass() == CLASS_MAGE          // Water Elemental
+                || GetOwner()->getClass() == CLASS_MONK)         // Transcendence
         {
             petType = SUMMON_PET;
         }

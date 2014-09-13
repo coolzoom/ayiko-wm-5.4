@@ -1544,32 +1544,39 @@ class spell_warl_sacrificial_pact : public SpellScriptLoader
         }
 };
 
-// Hand of Gul'Dan - 86040
+// Hand of Gul'Dan - 105174, 86040
 class spell_warl_hand_of_guldan : public SpellScriptLoader
 {
     public:
         spell_warl_hand_of_guldan() : SpellScriptLoader("spell_warl_hand_of_guldan") { }
 
-        class spell_warl_hand_of_guldan_SpellScript : public SpellScript
+        class script_impl : public SpellScript
         {
-            PrepareSpellScript(spell_warl_hand_of_guldan_SpellScript);
+            PrepareSpellScript(script_impl);
 
-            void HandleOnHit()
+            void HandleDummy(SpellEffIndex /*effIndex*/)
             {
-                if (Player* _player = GetCaster()->ToPlayer())
-                    if (Unit* target = GetHitUnit())
-                        _player->CastSpell(target, WARLOCK_SHADOWFLAME, true);
+                auto _player = GetCaster()->ToPlayer();
+                auto target = GetHitUnit();
+                if (!target || !_player)
+                    return;
+
+                if (GetSpellInfo()->Id == 86040)
+                    _player->CastSpell(target, WARLOCK_SHADOWFLAME, true);
+                else
+                    _player->CastSpell(GetExplTargetDest()->GetPositionX(), GetExplTargetDest()->GetPositionY(), GetExplTargetDest()->GetPositionZ(), 86040, true);
             }
 
             void Register()
             {
-                OnHit += SpellHitFn(spell_warl_hand_of_guldan_SpellScript::HandleOnHit);
+                OnEffectHitTarget += SpellEffectFn(script_impl::HandleDummy, EFFECT_0, SPELL_EFFECT_TRIGGER_MISSILE);
+                OnEffectHitTarget += SpellEffectFn(script_impl::HandleDummy, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
             }
         };
 
         SpellScript* GetSpellScript() const
         {
-            return new spell_warl_hand_of_guldan_SpellScript();
+            return new script_impl();
         }
 };
 

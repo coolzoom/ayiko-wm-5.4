@@ -11813,6 +11813,12 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
             if (spellProto->SpellFamilyFlags[1] & 0x00400000 && isPet())
                 if (uint8 count = victim->GetDoTsByCaster(GetOwnerGUID()))
                     AddPct(DoneTotalMod, 30 * count);
+            // Doom Bolt (Doomguard)
+            else if (spellProto->Id == 85692)
+            {
+                if (Player * player = GetCharmerOrOwnerPlayerOrPlayerItself())
+                    DoneTotal += (player->SpellBaseDamageBonusDone(spellProto->GetSchoolMask()) * 0.9f);
+            }
             break;
         case SPELLFAMILY_DEATHKNIGHT:
             // Sigil of the Vengeful Heart

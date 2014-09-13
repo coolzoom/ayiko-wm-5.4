@@ -2920,27 +2920,6 @@ class spell_dru_astral_communion : public SpellScriptLoader
                     }
 
                     player->SetEclipsePower(playersEclipse + eclipse);
-
-                    if (player->GetPower(POWER_ECLIPSE) == 100 && !player->HasAura(SPELL_DRUID_SOLAR_ECLIPSE))
-                    {
-                        player->RemoveAurasDueToSpell(SPELL_ECLIPSE_MARKER_SOLAR);
-                        player->CastSpell(player, SPELL_ECLIPSE_MARKER_LUNAR, true);
-                        player->CastSpell(player, SPELL_DRUID_SOLAR_ECLIPSE, true, 0); // Cast Solar Eclipse
-                        player->CastSpell(player, SPELL_DRUID_NATURES_GRACE, true); // Cast Nature's Grace
-                        player->CastSpell(player, SPELL_DRUID_ECLIPSE_GENERAL_ENERGIZE, true); // Cast Eclipse - Give 35% of POWER_MANA
-                    }
-                    else if (player->GetPower(POWER_ECLIPSE) == -100 && !player->HasAura(SPELL_DRUID_LUNAR_ECLIPSE))
-                    {
-                        player->RemoveAurasDueToSpell(SPELL_ECLIPSE_MARKER_LUNAR);
-                        player->CastSpell(player, SPELL_ECLIPSE_MARKER_SOLAR, true);
-                        player->CastSpell(player, SPELL_DRUID_LUNAR_ECLIPSE, true, 0); // Cast Lunar Eclipse
-                        player->CastSpell(player, SPELL_DRUID_NATURES_GRACE, true); // Cast Nature's Grace
-                        player->CastSpell(player, SPELL_DRUID_ECLIPSE_GENERAL_ENERGIZE, true); // Cast Eclipse - Give 35% of POWER_MANA
-                        player->CastSpell(player, SPELL_DRUID_LUNAR_ECLIPSE_OVERRIDE, true);
-
-                        if (player->HasSpellCooldown(SPELL_DRUID_STARFALL))
-                            player->RemoveSpellCooldown(SPELL_DRUID_STARFALL, true);
-                    }
                 }
             }
 
@@ -3447,31 +3426,6 @@ class spell_dru_eclipse : public SpellScriptLoader
                         eclipse *= 2;
 
                     player->SetEclipsePower(int32(player->GetPower(POWER_ECLIPSE) + eclipse));
-
-                    if (player->GetPower(POWER_ECLIPSE) == 100 && !player->HasAura(SPELL_DRUID_SOLAR_ECLIPSE))
-                    {
-                        // Init Eclipse direction markers
-                        player->CastSpell(player, SPELL_ECLIPSE_MARKER_LUNAR, true);
-                        player->RemoveAurasDueToSpell(SPELL_ECLIPSE_MARKER_SOLAR);
-                        // Handle Eclipse
-                        player->CastSpell(player, SPELL_DRUID_SOLAR_ECLIPSE, true, 0); // Cast Lunar Eclipse
-                        player->CastSpell(player, SPELL_DRUID_NATURES_GRACE, true); // Cast Nature's Grace
-                        player->CastSpell(player, SPELL_DRUID_ECLIPSE_GENERAL_ENERGIZE, true); // Cast Eclipse - Give 35% of POWER_MANA
-                    }
-                    else if (player->GetPower(POWER_ECLIPSE) == -100 && !player->HasAura(SPELL_DRUID_LUNAR_ECLIPSE))
-                    {
-                        // Init Eclipse direction markers
-                        player->CastSpell(player, SPELL_ECLIPSE_MARKER_SOLAR, true);
-                        player->RemoveAurasDueToSpell(SPELL_ECLIPSE_MARKER_LUNAR);
-                        // Handle Eclipse
-                        player->CastSpell(player, SPELL_DRUID_LUNAR_ECLIPSE, true, 0); // Cast Lunar Eclipse
-                        player->CastSpell(player, SPELL_DRUID_NATURES_GRACE, true); // Cast Nature's Grace
-                        player->CastSpell(player, SPELL_DRUID_ECLIPSE_GENERAL_ENERGIZE, true); // Cast Eclipse - Give 35% of POWER_MANA
-                        player->CastSpell(player, SPELL_DRUID_LUNAR_ECLIPSE_OVERRIDE, true);
-
-                        if (player->HasSpellCooldown(SPELL_DRUID_STARFALL))
-                            player->RemoveSpellCooldown(SPELL_DRUID_STARFALL, true);
-                    }
 
                     // Your crits also increase moonfire/sunfire duration by 2s depending on spell
                     if (GetSpell()->IsCritForTarget(target))

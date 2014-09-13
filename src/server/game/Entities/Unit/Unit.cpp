@@ -20966,6 +20966,20 @@ bool Unit::IsSplineEnabled() const
 
 void Unit::SetEclipsePower(int32 power, bool send)
 {
+    // Predefined spells
+    enum
+    {
+        SPELL_DRUID_STARFALL                    = 48505,
+        SPELL_DRUID_NATURES_GRACE               = 16886,
+        SPELL_DRUID_ECLIPSE_GENERAL_ENERGIZE    = 81070,
+        SPELL_DRUID_STARSURGE_ENERGIZE          = 86605,
+        SPELL_ECLIPSE_MARKER_LUNAR              = 67484,
+        SPELL_ECLIPSE_MARKER_SOLAR              = 67483,
+        SPELL_DRUID_SOLAR_ECLIPSE               = 48517,
+        SPELL_DRUID_LUNAR_ECLIPSE               = 48518,
+        SPELL_DRUID_LUNAR_ECLIPSE_OVERRIDE      = 107095,
+    };
+
     if (power > 100)
         power = 100;
 
@@ -20974,29 +20988,56 @@ void Unit::SetEclipsePower(int32 power, bool send)
 
     if (power > 0)
     {
-        if (HasAura(48518))
-            RemoveAurasDueToSpell(48518); // Eclipse (Lunar)
-        if (HasAura(107095))
-            RemoveAurasDueToSpell(107095);// Eclipse (Lunar) - SPELL_AURA_OVERRIDE_SPELLS
+        if (HasAura(SPELL_DRUID_LUNAR_ECLIPSE))
+            RemoveAurasDueToSpell(SPELL_DRUID_LUNAR_ECLIPSE);
+        if (HasAura(SPELL_DRUID_LUNAR_ECLIPSE_OVERRIDE))
+            RemoveAurasDueToSpell(SPELL_DRUID_LUNAR_ECLIPSE_OVERRIDE);
     }
 
     if (power == 0)
     {
-        if (HasAura(48517))
-            RemoveAurasDueToSpell(48517); // Eclipse (Solar)
-        if (HasAura(48518))
-            RemoveAurasDueToSpell(48518); // Eclipse (Lunar)
-        if (HasAura(107095))
-            RemoveAurasDueToSpell(107095);// Eclipse (Lunar) - SPELL_AURA_OVERRIDE_SPELLS
+        if (HasAura(SPELL_DRUID_SOLAR_ECLIPSE))
+            RemoveAurasDueToSpell(SPELL_DRUID_SOLAR_ECLIPSE); // Eclipse (Solar)
+        if (HasAura(SPELL_DRUID_LUNAR_ECLIPSE))
+            RemoveAurasDueToSpell(SPELL_DRUID_LUNAR_ECLIPSE); // Eclipse (Lunar)
+        if (HasAura(SPELL_DRUID_LUNAR_ECLIPSE_OVERRIDE))
+            RemoveAurasDueToSpell(SPELL_DRUID_LUNAR_ECLIPSE_OVERRIDE);// Eclipse (Lunar) - SPELL_AURA_OVERRIDE_SPELLS
     }
 
     if (power < 0)
     {
-        if (HasAura(48517))
-            RemoveAurasDueToSpell(48517); // Eclipse (Solar)
+        if (HasAura(SPELL_DRUID_SOLAR_ECLIPSE))
+            RemoveAurasDueToSpell(SPELL_DRUID_SOLAR_ECLIPSE); // Eclipse (Solar)
     }
 
     SetPower(POWER_ECLIPSE, power, send);
+
+    auto player = ToPlayer();
+    if (!player)
+        return;
+
+    if (player->GetPower(POWER_ECLIPSE) == 100 && !player->HasAura(SPELL_DRUID_SOLAR_ECLIPSE))
+    {
+        player->RemoveAurasDueToSpell(SPELL_ECLIPSE_MARKER_SOLAR);
+        player->CastSpell(player, SPELL_ECLIPSE_MARKER_LUNAR, true);
+        player->CastSpell(player, SPELL_DRUID_SOLAR_ECLIPSE, true, 0); // Cast Solar Eclipse
+        player->CastSpell(player, SPELL_DRUID_NATURES_GRACE, true); // Cast Nature's Grace
+        player->CastSpell(player, SPELL_DRUID_ECLIPSE_GENERAL_ENERGIZE, true); // Cast Eclipse - Give 35% of POWER_MANA
+    }
+    else if (player->GetPower(POWER_ECLIPSE) == -100 && !player->HasAura(SPELL_DRUID_LUNAR_ECLIPSE))
+    {
+        player->RemoveAurasDueToSpell(SPELL_ECLIPSE_MARKER_LUNAR);
+        player->CastSpell(player, SPELL_ECLIPSE_MARKER_SOLAR, true);
+        player->CastSpell(player, SPELL_DRUID_LUNAR_ECLIPSE, true, 0); // Cast Lunar Eclipse
+        player->CastSpell(player, SPELL_DRUID_NATURES_GRACE, true); // Cast Nature's Grace
+        player->CastSpell(player, SPELL_DRUID_ECLIPSE_GENERAL_ENERGIZE, true); // Cast Eclipse - Give 35% of POWER_MANA
+        player->CastSpell(player, SPELL_DRUID_LUNAR_ECLIPSE_OVERRIDE, true);
+
+        // Entering Lunar Eclipse restarts Starfall cooldown
+        if (player->HasSpellCooldown(SPELL_DRUID_STARFALL))
+            player->RemoveSpellCooldown(SPELL_DRUID_STARFALL, true);
+    }
+
 }
 
 uint32 Unit::GetNpcDamageTakenInPastSecs(uint32 secs) const

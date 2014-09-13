@@ -3397,16 +3397,24 @@ class spell_dru_eclipse : public SpellScriptLoader
                 {
                     // Power stored in EFFECT_1
                     int32 eclipse = GetSpellInfo()->Effects[EFFECT_1].BasePoints;
+                    int32 const playersEclipse = player->GetPower(POWER_ECLIPSE);
+
+                    bool const hasLunarEclipse = player->HasAura(SPELL_DRUID_LUNAR_ECLIPSE);
+                    bool const hasSolarEclipse = player->HasAura(SPELL_DRUID_SOLAR_ECLIPSE);
+
                     // Wrath must have negative, Starsurge depends on actual direction of Eclipse
-                    if (GetSpellInfo()->Id == SPELL_DRUID_WRATH || (GetSpellInfo()->Id == SPELL_DRUID_STARSURGE && player->GetPower(POWER_ECLIPSE) > 0))
+                    if ((GetSpellInfo()->Id == SPELL_DRUID_STARSURGE && (playersEclipse < 0 && !hasLunarEclipse || playersEclipse > 0 && hasSolarEclipse)) ||
+                        GetSpellInfo()->Id == SPELL_DRUID_WRATH)
+                    {
                         eclipse = -eclipse;
+                    }
 
                     // - Is Lunar + is Solar
                     // Solar Energy
                     if (eclipse > 0)
                     {
-                        if ((player->GetPower(POWER_ECLIPSE) < 0 && !player->HasAura(SPELL_DRUID_LUNAR_ECLIPSE)) ||
-                            (player->GetPower(POWER_ECLIPSE) > 0 && player->HasAura(SPELL_DRUID_SOLAR_ECLIPSE)))
+                        if ((playersEclipse < 0 && !hasLunarEclipse) ||
+                            (playersEclipse > 0 && hasSolarEclipse))
                             return;
 
                         player->CastSpell(player, SPELL_ECLIPSE_MARKER_SOLAR, true);
@@ -3414,14 +3422,14 @@ class spell_dru_eclipse : public SpellScriptLoader
                     // Lunar energy
                     if (eclipse < 0)
                     {
-                        if ((player->GetPower(POWER_ECLIPSE) > 0 && !player->HasAura(SPELL_DRUID_SOLAR_ECLIPSE)) ||
-                            (player->GetPower(POWER_ECLIPSE) < 0 && player->HasAura(SPELL_DRUID_LUNAR_ECLIPSE)))
+                        if ((playersEclipse > 0 && !hasSolarEclipse) ||
+                            (playersEclipse < 0 && hasLunarEclipse))
                             return;
 
                         player->CastSpell(player, SPELL_ECLIPSE_MARKER_LUNAR, true);
                     }
 
-                    if (player->HasAura(SPELL_DRUID_EUPHORIA) && !player->HasAura(SPELL_DRUID_SOLAR_ECLIPSE) && !player->HasAura(SPELL_DRUID_LUNAR_ECLIPSE))
+                    if (player->HasAura(SPELL_DRUID_EUPHORIA) && !hasLunarEclipse && !hasSolarEclipse)
                         eclipse *= 2;
 
                     player->SetEclipsePower(int32(player->GetPower(POWER_ECLIPSE) + eclipse));

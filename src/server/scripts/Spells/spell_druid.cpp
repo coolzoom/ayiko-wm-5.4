@@ -42,6 +42,9 @@ enum DruidSpells
     SPELL_DRUID_SOLAR_ECLIPSE               = 48517,
     SPELL_DRUID_LUNAR_ECLIPSE               = 48518,
     SPELL_DRUID_LUNAR_ECLIPSE_OVERRIDE      = 107095,
+    SPELL_ECLIPSE_MARKER_LUNAR              = 67484,
+    SPELL_ECLIPSE_MARKER_SOLAR              = 67483,
+    SPELL_DRUID_ASTRAL_INSIGHT              = 145138,
     SPELL_DRUID_STARFALL                    = 48505,
     SPELL_DRUID_NATURES_GRACE               = 16886,
     SPELL_DRUID_EUPHORIA                    = 81062,
@@ -125,7 +128,7 @@ enum DruidSpells
     SPELL_DRUID_REJUVENATION                = 774,
     SPELL_DRUID_TOOTH_AND_CLAW_AURA         = 135286,
     SPELL_DRUID_TOOTH_AND_CLAW_ABSORB       = 135597,
-    SPELL_DRUID_TOOTH_AND_CLAW_VISUAL_AURA  = 135601
+    SPELL_DRUID_TOOTH_AND_CLAW_VISUAL_AURA  = 135601,
 };
 
 // Tooth and Claw - 135597
@@ -555,46 +558,6 @@ class spell_dru_swipe_and_maul : public SpellScriptLoader
         SpellScript* GetSpellScript() const
         {
             return new spell_dru_swipe_and_maul_SpellScript();
-        }
-};
-
-// Called by Lunar Eclipse - 48518 and Solar Eclipse - 48517
-// Soul of the Forest - 114107
-class spell_dru_soul_of_the_forest_eclipse : public SpellScriptLoader
-{
-    public:
-        spell_dru_soul_of_the_forest_eclipse() : SpellScriptLoader("spell_dru_soul_of_the_forest_eclipse") { }
-
-        class spell_dru_soul_of_the_forest_eclipse_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_dru_soul_of_the_forest_eclipse_AuraScript);
-
-            void HandleEffectRemove(AuraEffect const *aurEff, AuraEffectHandleModes /*mode*/)
-            {
-                if (!GetTarget())
-                    return;
-
-                if (Player* player = GetTarget()->ToPlayer())
-                {
-                    if (player->HasAura(SPELL_DRUID_SOUL_OF_THE_FOREST_HASTE))
-                    {
-                        if (aurEff->GetSpellInfo()->Id == SPELL_DRUID_SOLAR_ECLIPSE)
-                            player->SetEclipsePower(int32(player->GetPower(POWER_ECLIPSE) - 20));
-                        else if (aurEff->GetSpellInfo()->Id == SPELL_DRUID_LUNAR_ECLIPSE)
-                            player->SetEclipsePower(int32(player->GetPower(POWER_ECLIPSE) + 20));
-                    }
-                }
-            }
-
-            void Register()
-            {
-                AfterEffectRemove += AuraEffectRemoveFn(spell_dru_soul_of_the_forest_eclipse_AuraScript::HandleEffectRemove, EFFECT_0, SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, AURA_EFFECT_HANDLE_REAL);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_dru_soul_of_the_forest_eclipse_AuraScript();
         }
 };
 
@@ -2861,27 +2824,25 @@ class spell_dru_astral_communion : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_astral_communion_AuraScript);
 
-            enum eclipseMarkers
-            {
-                SPELL_ECLIPSE_MARKER_LUNAR = 67484,
-                SPELL_ECLIPSE_MARKER_SOLAR = 67483
-            };
-
-            int32 beginningEclipse;
+            bool hasAstralInsight;
 
             bool Load()
             {
-                beginningEclipse = 0;
+                hasAstralInsight = false;
                 return true;
             }
 
             void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
-                if (!GetCaster())
+                auto caster = GetCaster();
+                if (!caster)
                     return;
 
-                if (Player* player = GetTarget()->ToPlayer())
-                    beginningEclipse = player->GetPower(POWER_ECLIPSE);
+                if (caster->HasAura(SPELL_DRUID_ASTRAL_INSIGHT))
+                {
+                    hasAstralInsight = true;
+                    OnTick(nullptr);
+                }
             }
 
             void OnTick(AuraEffect const * /*aurEff*/)
@@ -2891,7 +2852,7 @@ class spell_dru_astral_communion : public SpellScriptLoader
 
                 if (Player* player = GetTarget()->ToPlayer())
                 {
-                    int32 eclipse = 25; // 25 Solar or Lunar energy
+                    int32 eclipse = hasAstralInsight ? 100 : 25;
 
                     bool const hasLunarEclipse = player->HasAura(SPELL_DRUID_LUNAR_ECLIPSE);
                     bool const hasSolarEclipse = player->HasAura(SPELL_DRUID_SOLAR_ECLIPSE);
@@ -2920,6 +2881,12 @@ class spell_dru_astral_communion : public SpellScriptLoader
                     }
 
                     player->SetEclipsePower(playersEclipse + eclipse);
+
+                    if (hasAstralInsight)
+                    {
+                        player->RemoveAurasDueToSpell(SPELL_DRUID_ASTRAL_INSIGHT);
+                        this->SetDuration(100);
+                    }
                 }
             }
 
@@ -3365,12 +3332,6 @@ class spell_dru_eclipse : public SpellScriptLoader
         {
             PrepareSpellScript(spell_dru_eclipse_SpellScript);
 
-            enum eclipseMarkers
-            {
-                SPELL_ECLIPSE_MARKER_LUNAR = 67484,
-                SPELL_ECLIPSE_MARKER_SOLAR = 67483
-            };
-
             void HandleAfterCast()
             {
                 if (Player* _plr = GetCaster()->ToPlayer())
@@ -3426,6 +3387,10 @@ class spell_dru_eclipse : public SpellScriptLoader
                         eclipse *= 2;
 
                     player->SetEclipsePower(int32(player->GetPower(POWER_ECLIPSE) + eclipse));
+
+                    // Soul of the Forest
+                    if (player->HasAura(SPELL_DRUID_SOUL_OF_THE_FOREST) && roll_chance_i(8))
+                        player->CastSpell(player, SPELL_DRUID_ASTRAL_INSIGHT, true);
 
                     // Your crits also increase moonfire/sunfire duration by 2s depending on spell
                     if (GetSpell()->IsCritForTarget(target))
@@ -3984,7 +3949,6 @@ void AddSC_druid_spell_scripts()
     new spell_dru_wild_charge_moonkin();
     new spell_dru_thrash_bear();
     new spell_dru_swipe_and_maul();
-    new spell_dru_soul_of_the_forest_eclipse();
     new spell_dru_soul_of_the_forest();
     new spell_dru_tigers_fury();
     new spell_dru_play_death();

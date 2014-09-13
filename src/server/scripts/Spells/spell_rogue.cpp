@@ -186,13 +186,14 @@ class spell_rog_blade_flurry : public SpellScriptLoader
             {
                 PreventDefaultAction();
 
-                if (!GetCaster())
+                Unit * const caster = GetCaster();
+                if (!caster)
                     return;
 
                 if (eventInfo.GetActor()->GetGUID() != GetTarget()->GetGUID())
                     return;
 
-                if (Player* _player = GetCaster()->ToPlayer())
+                if (Player* const _player = caster->ToPlayer())
                 {
                     int32 damage = eventInfo.GetDamageInfo()->GetDamage();
                     SpellInfo const* spellInfo = eventInfo.GetDamageInfo()->GetSpellInfo();

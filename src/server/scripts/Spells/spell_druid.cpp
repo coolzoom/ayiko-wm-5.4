@@ -3344,10 +3344,37 @@ class spell_dru_eclipse : public SpellScriptLoader
                 auto player = GetCaster()->ToPlayer();
                 auto target = GetHitUnit();
 
-                if (!player || !target)
+                if (!player || !target || player->GetSpecializationId(player->GetActiveSpec()) != SPEC_DRUID_BALANCE)
                     return;
 
-                if (!player->HasAura(SPELL_DRUID_CELESTIAL_ALIGNMENT) && player->GetSpecializationId(player->GetActiveSpec()) == SPEC_DRUID_BALANCE)
+                // Soul of the Forest
+                if (player->HasAura(SPELL_DRUID_SOUL_OF_THE_FOREST) && roll_chance_i(8))
+                    player->CastSpell(player, SPELL_DRUID_ASTRAL_INSIGHT, true);
+
+                // Your crits also increase moonfire/sunfire duration by 2s depending on spell
+                if (GetSpell()->IsCritForTarget(target))
+                {
+                    if (GetSpellInfo()->Id != SPELL_DRUID_WRATH)
+                    {
+                        if (Aura *const aura = target->GetAura(SPELL_DRUID_MOONFIRE))
+                        {
+                            aura->SetDuration(aura->GetDuration() + 2000);
+                            if (aura->GetMaxDuration() < aura->GetDuration())
+                                aura->SetMaxDuration(aura->GetDuration());
+                        }
+                    }
+                    if (GetSpellInfo()->Id != SPELL_DRUID_STARFALL)
+                    {
+                        if (Aura * const aura = target->GetAura(SPELL_DRUID_SUNFIRE))
+                        {
+                            aura->SetDuration(aura->GetDuration() + 2000);
+                            if (aura->GetMaxDuration() < aura->GetDuration())
+                                aura->SetMaxDuration(aura->GetDuration());
+                        }
+                    }
+                }
+
+                if (!player->HasAura(SPELL_DRUID_CELESTIAL_ALIGNMENT))
                 {
                     // Power stored in EFFECT_1
                     int32 eclipse = GetSpellInfo()->Effects[EFFECT_1].BasePoints;
@@ -3387,33 +3414,6 @@ class spell_dru_eclipse : public SpellScriptLoader
                         eclipse *= 2;
 
                     player->SetEclipsePower(int32(player->GetPower(POWER_ECLIPSE) + eclipse));
-
-                    // Soul of the Forest
-                    if (player->HasAura(SPELL_DRUID_SOUL_OF_THE_FOREST) && roll_chance_i(8))
-                        player->CastSpell(player, SPELL_DRUID_ASTRAL_INSIGHT, true);
-
-                    // Your crits also increase moonfire/sunfire duration by 2s depending on spell
-                    if (GetSpell()->IsCritForTarget(target))
-                    {
-                        if (GetSpellInfo()->Id != SPELL_DRUID_WRATH)
-                        {
-                            if (Aura *const aura = target->GetAura(SPELL_DRUID_MOONFIRE))
-                            {
-                                aura->SetDuration(aura->GetDuration() + 2000);
-                                if (aura->GetMaxDuration() < aura->GetDuration())
-                                    aura->SetMaxDuration(aura->GetDuration());
-                            }
-                        }
-                        if (GetSpellInfo()->Id != SPELL_DRUID_STARFALL)
-                        {
-                            if (Aura * const aura = target->GetAura(SPELL_DRUID_SUNFIRE))
-                            {
-                                aura->SetDuration(aura->GetDuration() + 2000);
-                                if (aura->GetMaxDuration() < aura->GetDuration())
-                                    aura->SetMaxDuration(aura->GetDuration());
-                            }
-                        }
-                    }
                 }
             }
 

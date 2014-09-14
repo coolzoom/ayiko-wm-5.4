@@ -2695,6 +2695,9 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         }
     }
 
+    // Refresh procEx after effect-handlers
+    procEx |= m_procEx;
+
     // Do not take combo points on dodge and miss
     if (missInfo != SPELL_MISS_NONE && m_needComboPoints &&
             m_targets.GetUnitTargetGUID() == target->targetGUID)

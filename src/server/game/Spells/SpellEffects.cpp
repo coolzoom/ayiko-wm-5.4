@@ -4512,6 +4512,7 @@ void Spell::EffectInterruptCast(SpellEffIndex effIndex)
             if (m_originalCaster->ToPlayer()->GetComboPoints() != 3)
                 return;
 
+    bool interruptDone = false;
     // TODO: not all spells that used this effect apply cooldown at school spells
     // also exist case: apply cooldown to interrupted cast only and to all spells
     // there is no CURRENT_AUTOREPEAT_SPELL spells that can be interrupted
@@ -4534,9 +4535,13 @@ void Spell::EffectInterruptCast(SpellEffIndex effIndex)
                 }
                 ExecuteLogEffectInterruptCast(effIndex, unitTarget, curSpellInfo->Id);
                 unitTarget->InterruptSpell(CurrentSpellTypes(i), false);
+                interruptDone = true;
             }
         }
     }
+
+    if (interruptDone)
+        m_procEx |= PROC_EX_INTERRUPT;
 }
 
 void Spell::EffectSummonObjectWild(SpellEffIndex effIndex)

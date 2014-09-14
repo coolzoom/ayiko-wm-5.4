@@ -3117,14 +3117,31 @@ void AuraEffect::HandleAuraModSilence(AuraApplication const* aurApp, uint8 mode,
     if (apply)
     {
         target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED);
-
+        bool interrupted = false;
         // call functions which may have additional effects after chainging state of unit
         // Stop cast only spells vs PreventionType == SPELL_PREVENTION_TYPE_SILENCE
         for (uint32 i = CURRENT_MELEE_SPELL; i < CURRENT_MAX_SPELL; ++i)
             if (Spell* spell = target->GetCurrentSpell(CurrentSpellTypes(i)))
                 if (spell->m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE)
+                {
                     // Stop spells on prepare or casting state
                     target->InterruptSpell(CurrentSpellTypes(i), false);
+                    interrupted = true;
+                    // Glyph of Strangulate - increase duration by 2 seconds if succesful silence
+                    if (GetId() == 47476 && GetCaster())
+                    {
+                        if (AuraEffect * const aura = GetCaster()->GetAuraEffect(58618, EFFECT_0))
+                        {
+                            GetBase()->SetMaxDuration(GetBase()->GetMaxDuration() + aura->GetAmount());
+                            GetBase()->SetDuration(GetBase()->GetMaxDuration());
+                        }
+                    }
+                }
+
+        if (interrupted)
+            if (Unit * caster = GetCaster())
+                if(Spell * spell = caster->FindCurrentSpellBySpellId(GetId()))
+                    spell->addProcExFlag(PROC_EX_INTERRUPT);
     }
     else
     {

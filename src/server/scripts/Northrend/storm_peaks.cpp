@@ -302,71 +302,8 @@ public:
 };
 
 /*######
-## npc_loklira_crone
+## npc_injured_goblin
 ######*/
-
-#define GOSSIP_LOKLIRACRONE     "Tell me about this proposal"
-#define GOSSIP_LOKLIRACRONE1    "What happened then?"
-#define GOSSIP_LOKLIRACRONE2    "You want me to take part in the Hyldsmeet to end the war?"
-#define GOSSIP_LOKLIRACRONE3    "Very well. I'll take part in this competition."
-
-enum eLokliraCrone
-{
-    QUEST_HYLDSMEET     = 12970,
-
-    GOSSIP_TEXTID_LOK1  = 13778,
-    GOSSIP_TEXTID_LOK2  = 13779,
-    GOSSIP_TEXTID_LOK3  = 13780
-};
-
-class npc_loklira_crone : public CreatureScript
-{
-public:
-    npc_loklira_crone() : CreatureScript("npc_loklira_crone") { }
-
-    bool OnGossipHello(Player* player, Creature* creature)
-    {
-        if (creature->isQuestGiver())
-            player->PrepareQuestMenu(creature->GetGUID());
-
-        if (player->GetQuestStatus(QUEST_HYLDSMEET) == QUEST_STATUS_INCOMPLETE)
-        {
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LOKLIRACRONE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
-            player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
-            return true;
-        }
-        return false;
-    }
-
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
-    {
-        player->PlayerTalkClass->ClearMenus();
-        switch (action)
-        {
-            case GOSSIP_ACTION_INFO_DEF+1:
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LOKLIRACRONE1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
-                player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_LOK1, creature->GetGUID());
-                break;
-            case GOSSIP_ACTION_INFO_DEF+2:
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LOKLIRACRONE2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
-                player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_LOK2, creature->GetGUID());
-                break;
-            case GOSSIP_ACTION_INFO_DEF+3:
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LOKLIRACRONE3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+4);
-                player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_LOK3, creature->GetGUID());
-                break;
-            case GOSSIP_ACTION_INFO_DEF+4:
-                player->CLOSE_GOSSIP_MENU();
-                player->CompleteQuest(QUEST_HYLDSMEET);
-                break;
-        }
-        return true;
-    }
-};
-
-/////////////////////
-///npc_injured_goblin
-/////////////////////
 
 enum eInjuredGoblin
 {
@@ -710,54 +647,6 @@ public:
     }
 };
 
-class npc_hyldsmeet_protodrake : public CreatureScript
-{
-    enum NPCs
-    {
-        NPC_HYLDSMEET_DRAKERIDER = 29694
-    };
-
-    public:
-        npc_hyldsmeet_protodrake() : CreatureScript("npc_hyldsmeet_protodrake") { }
-
-        class npc_hyldsmeet_protodrakeAI : public CreatureAI
-        {
-            public:
-                npc_hyldsmeet_protodrakeAI(Creature* creature) : CreatureAI(creature), _accessoryRespawnTimer(0), _vehicleKit(creature->GetVehicleKit()) {}
-
-                void PassengerBoarded(Unit* who, int8 /*seat*/, bool apply)
-                {
-                    if (apply)
-                        return;
-
-                    if (who->GetEntry() == NPC_HYLDSMEET_DRAKERIDER)
-                        _accessoryRespawnTimer = 5 * MINUTE * IN_MILLISECONDS;
-                }
-
-                void UpdateAI(uint32 const diff)
-                {
-                    //! We need to manually reinstall accessories because the vehicle itself is friendly to players,
-                    //! so EnterEvadeMode is never triggered. The accessory on the other hand is hostile and killable.
-                    if (_accessoryRespawnTimer && _accessoryRespawnTimer <= diff && _vehicleKit)
-                    {
-                        _vehicleKit->InstallAllAccessories(true);
-                        _accessoryRespawnTimer = 0;
-                    }
-                    else
-                        _accessoryRespawnTimer -= diff;
-                }
-
-            private:
-                uint32 _accessoryRespawnTimer;
-                Vehicle* _vehicleKit;
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new npc_hyldsmeet_protodrakeAI (creature);
-        }
-};
-
 enum CloseRift
 {
     SPELL_DESPAWN_RIFT          = 61665
@@ -805,17 +694,438 @@ class spell_close_rift : public SpellScriptLoader
         }
 };
 
+/*######
+## go_rusty_cage
+######*/
+
+enum eRustyCage
+{
+    NPC_GOBLIN_PRISIONER    = 29466
+};
+
+class go_rusty_cage : public GameObjectScript
+{
+public:
+    go_rusty_cage() : GameObjectScript("go_rusty_cage") { }
+
+    bool OnGossipHello(Player* player, GameObject* pGO)
+    {
+        if (Creature* goblinPrisoner = pGO->FindNearestCreature(NPC_GOBLIN_PRISIONER, 5.0f, true))
+        {
+            pGO->SetGoState(GO_STATE_ACTIVE);
+            player->KilledMonsterCredit(NPC_GOBLIN_PRISIONER, goblinPrisoner->GetGUID());
+            goblinPrisoner->ForcedDespawn(2000);
+            goblinPrisoner->MonsterSay(RAND<const char*>("Time to hightail it! Thanks, friend!",
+                                                        "I can't believe it! I'm free to go!",
+                                                        "I'm free? I'm free!"), LANG_UNIVERSAL, 0);
+        }
+
+        return true;
+    }
+};
+
+/*######
+## npc_goblin_prisoner
+######*/
+
+enum eGoblinPrisoner
+{
+    GO_RUSTY_CAGE = 191544
+};
+
+class npc_goblin_prisoner : public CreatureScript
+{
+public:
+    npc_goblin_prisoner() : CreatureScript("npc_goblin_prisoner") { }
+
+    struct npc_goblin_prisonerAI : public ScriptedAI
+    {
+        npc_goblin_prisonerAI(Creature* creature) : ScriptedAI (creature){ }
+
+        void Reset()
+        {
+            me->SetReactState(REACT_PASSIVE);
+
+            if (GameObject* pGO = me->FindNearestGameObject(GO_RUSTY_CAGE, 5.0f))
+                if (pGO->GetGoState() == GO_STATE_ACTIVE)
+                    pGO->SetGoState(GO_STATE_READY);
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_goblin_prisonerAI(creature);
+    }
+};
+
+class spell_q12906_discipline : public SpellScriptLoader
+{
+public:
+    spell_q12906_discipline() : SpellScriptLoader("spell_q12906_discipline") { }
+
+    class spell_q12906_discipline_SpellScript : public SpellScript
+    {
+    public:
+        PrepareSpellScript(spell_q12906_discipline_SpellScript)
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            Unit* pCaster = GetCaster();
+            if (Player* player = pCaster->ToPlayer())
+            {
+                if (Creature* target = GetHitCreature())
+                {
+                    if (target->getStandState() == UNIT_STAND_STATE_STAND)
+                        return;
+
+                    switch(urand(1,2))
+                    {
+                        case 1:
+                        {
+                            target->MonsterSay(RAND<const char*>("Curse you! You will not treat me like a beast!",
+                                                    "Enough! I will teach you some manners, wench!",
+                                                    "I'd rather die fighting than live like a slave!"), LANG_UNIVERSAL, 0);
+                            target->SetStandState(UNIT_STAND_STATE_STAND);
+                            target->AI()->AttackStart(player);
+                            break;
+                        }
+                        case 2:
+                        {
+                            target->MonsterSay(RAND<const char*>("We will have revenge... some day.",
+                                                                 "You treat us worse than animals!",
+                                                                 "Back... to work..."), LANG_UNIVERSAL, 0);
+                            target->SetStandState(UNIT_STAND_STATE_STAND);
+                            target->HandleEmoteCommand(EMOTE_STATE_WORK);
+                            break;
+                        }
+                    }
+                    player->KilledMonsterCredit(29886);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_q12906_discipline_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_q12906_discipline_SpellScript();
+    }
+};
+
+/*######
+## npc_loklira_crone
+######*/
+
+#define GOSSIP_LOKLIRACRONE     "Tell me about this proposal"
+#define GOSSIP_LOKLIRACRONE1    "What happened then?"
+#define GOSSIP_LOKLIRACRONE2    "You want me to take part in the Hyldsmeet to end the war?"
+#define GOSSIP_LOKLIRACRONE3    "Very well. I'll take part in this competition."
+
+enum eLokliraCrone
+{
+    QUEST_HYLDSMEET     = 12970,
+
+    GOSSIP_TEXTID_LOK1  = 13778,
+    GOSSIP_TEXTID_LOK2  = 13779,
+    GOSSIP_TEXTID_LOK3  = 13780
+};
+
+class npc_loklira_crone : public CreatureScript
+{
+public:
+    npc_loklira_crone() : CreatureScript("npc_loklira_crone") { }
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (creature->IsQuestGiver())
+            player->PrepareQuestMenu(creature->GetGUID());
+
+        if (player->GetQuestStatus(QUEST_HYLDSMEET) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LOKLIRACRONE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+            player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+            return true;
+        }
+        return false;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
+    {
+        player->PlayerTalkClass->ClearMenus();
+        switch (action)
+        {
+            case GOSSIP_ACTION_INFO_DEF+1:
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LOKLIRACRONE1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
+                player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_LOK1, creature->GetGUID());
+                break;
+            case GOSSIP_ACTION_INFO_DEF+2:
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LOKLIRACRONE2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
+                player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_LOK2, creature->GetGUID());
+                break;
+            case GOSSIP_ACTION_INFO_DEF+3:
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LOKLIRACRONE3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+4);
+                player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_LOK3, creature->GetGUID());
+                break;
+            case GOSSIP_ACTION_INFO_DEF+4:
+                player->CLOSE_GOSSIP_MENU();
+                player->CompleteQuest(QUEST_HYLDSMEET);
+                break;
+        }
+        return true;
+    }
+};
+
+/*######
+## Quest: The Drakkensryd (12886)
+######*/
+
+enum eHyldsmeetProtodrake
+{
+    //QUEST_DRAKKENSRYD              = 12886,
+    ENTRY_DRAKE_RIDER              = 29800
+};
+
+static const Position centerPos = {7432.099609f, -533.930176f, 1896.850098f, 0.0f};
+
+class npc_hyldsmeet_protodrake_static : public CreatureScript
+{
+    struct npc_hyldsmeet_protodrake_staticAI : public ScriptedAI
+    {
+        npc_hyldsmeet_protodrake_staticAI(Creature * creature) : ScriptedAI(creature)
+        {
+            creature->setActive(true);
+            init = false;
+            initTimer = urand(1000, 30000);
+            respawnTimer = 0;
+        }
+
+        void Reset()
+        {
+            if (vPos.empty())
+                MakePath();
+        }
+
+        void JustReachedHome()
+        {
+            if (init)
+                StartMovement();
+        }
+
+        void StartMovement()
+        {
+            me->SetWalk(false);
+            Movement::MoveSplineInit init(me);
+            init.Path() = vPos;
+            init.SetSmooth();
+            init.SetCyclic();
+            init.SetFly();
+            init.SetUncompressed();
+            init.Launch();
+        }
+
+        void MakePath()
+        {
+            float angle = centerPos.GetAngle(me);
+            float dist = me->GetExactDist2d(&centerPos);
+            float x, y, z;
+            float Z = me->GetPositionZ();
+            for (int i=0; i < 23; ++i )
+            {
+                centerPos.GetPosition(x, y, z);
+                angle += 15.0f * M_PI / 180.0f;
+                angle = centerPos.NormalizeOrientation(angle);
+
+                x += dist * cos(angle);
+                y += dist * sin(angle);
+                z = Z + frand(0.0f, 40.0f);
+                vPos.push_back(G3D::Vector3(x, y, z));
+            }
+        }
+
+        void SummonedCreatureDies(Creature* /*summon*/, Unit* /*killer*/)
+        {
+            respawnTimer = 45000;
+        }
+
+        void PassengerBoarded(Unit* /*who*/, int8 /*seatId*/, bool /*apply*/)
+        {
+            me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+        }
+
+        void JustSummoned(Creature* summon)
+        {
+            summon->setActive(true);
+            summon->SetReactState(REACT_AGGRESSIVE);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!init)
+            {
+                if (initTimer <= diff)
+                {
+                    init = true;
+                    StartMovement();
+                }else initTimer -= diff;
+            }
+
+            if (respawnTimer)
+            {
+                if (respawnTimer <= diff)
+                {
+                    me->GetVehicleKit()->InstallAllAccessories(false);
+                    respawnTimer = 0;
+                }else respawnTimer -= diff;
+            }
+        }
+
+    private:
+        std::vector<G3D::Vector3> vPos;
+        bool init;
+        uint32 initTimer;
+        uint32 respawnTimer;
+    };
+public:
+    npc_hyldsmeet_protodrake_static() : CreatureScript("npc_hyldsmeet_protodrake_static") { }
+
+    CreatureAI * GetAI(Creature * creature) const
+    {
+        return new npc_hyldsmeet_protodrake_staticAI(creature);
+    }
+};
+
+class npc_hyldsmeet_protodrake : public CreatureScript
+{
+    enum NPCs
+    {
+        NPC_HYLDSMEET_DRAKERIDER = 29694
+    };
+
+    struct npc_hyldsmeet_protodrakeAI : public ScriptedAI
+    {
+        npc_hyldsmeet_protodrakeAI(Creature* pCreature) : ScriptedAI(pCreature) { }
+
+        void Reset()
+        {
+            cycleTimer = 0;
+            moveTimer = 0;
+        }
+
+        void PassengerBoarded(Unit* pWho, int8 /*seatId*/, bool apply)
+        {
+            if (pWho && apply)
+            {
+                moveTimer = 2000;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (cycleTimer)
+            {
+                if (cycleTimer <= diff)
+                {
+                    me->GetMotionMaster()->MoveSplinePath(2, true, true, 32.0f, true);
+                    cycleTimer = 0;
+                }else cycleTimer -= diff;
+            }
+
+            if (moveTimer)
+            {
+                if (moveTimer <= diff)
+                {
+                    moveTimer = 0;
+                    me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
+                    me->GetMotionMaster()->MoveSplinePath(1, true, false, 32.0f);
+                    cycleTimer = me->GetSplineDuration();
+                }else moveTimer -= diff;
+            }
+        }
+    private:
+        uint32 cycleTimer;
+        uint32 moveTimer;
+    };
+
+public:
+    npc_hyldsmeet_protodrake() : CreatureScript("npc_hyldsmeet_protodrake") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_hyldsmeet_protodrakeAI(pCreature);
+    }
+};
+
+class npc_column_ornament : public CreatureScript
+{
+    enum
+    {
+        SPELL_HYLDNIR_HARPOON           = 54933
+    };
+
+    class VehicleExitEvent : public BasicEvent
+    {
+        public:
+            VehicleExitEvent(Unit * owner) : _owner(owner) { }
+
+            bool Execute(uint64 /*execTime*/, uint32 /*diff*/)
+            {
+                _owner->ExitVehicle();
+                return false;
+            }
+
+        private:
+            Unit * _owner;
+    };
+
+    struct npc_column_ornamentAI : public ScriptedAI
+    {
+        npc_column_ornamentAI(Creature* creature) : ScriptedAI(creature)
+        {
+            creature->setActive(true);
+        }
+
+        void SpellHit(Unit* hitter, const SpellInfo* spell)
+        {
+            if (!hitter || !spell)
+                return;
+
+            if (spell->Id == SPELL_HYLDNIR_HARPOON)
+            {
+                me->m_Events.AddEvent(new VehicleExitEvent(hitter), me->m_Events.CalculateTime(hitter->GetSplineDuration() + 500));
+            }
+        }
+
+    };
+
+public:
+    npc_column_ornament() : CreatureScript("npc_column_ornament") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_column_ornamentAI(creature);
+    }
+};
+
 void AddSC_storm_peaks()
 {
     new npc_agnetta_tyrsdottar();
     new npc_frostborn_scout();
     new npc_thorim();
     new npc_victorious_challenger();
-    new npc_loklira_crone();
     new npc_injured_goblin();
     new npc_roxi_ramrocket();
     new npc_brunnhildar_prisoner();
     new npc_icefang();
-    new npc_hyldsmeet_protodrake();
     new spell_close_rift();
+    new npc_goblin_prisoner();
+    new go_rusty_cage();
+    new spell_q12906_discipline();
+    new npc_loklira_crone();
+    new npc_hyldsmeet_protodrake();
+    new npc_column_ornament();
+    new npc_hyldsmeet_protodrake_static();
 }

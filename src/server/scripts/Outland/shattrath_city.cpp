@@ -284,28 +284,32 @@ public:
 # npc_kservant
 ######*/
 
-#define SAY1       -1000234
-#define WHISP1     -1000235
-#define WHISP2     -1000236
-#define WHISP3     -1000237
-#define WHISP4     -1000238
-#define WHISP5     -1000239
-#define WHISP6     -1000240
-#define WHISP7     -1000241
-#define WHISP8     -1000242
-#define WHISP9     -1000243
-#define WHISP10    -1000244
-#define WHISP11    -1000245
-#define WHISP12    -1000246
-#define WHISP13    -1000247
-#define WHISP14    -1000248
-#define WHISP15    -1000249
-#define WHISP16    -1000250
-#define WHISP17    -1000251
-#define WHISP18    -1000252
-#define WHISP19    -1000253
-#define WHISP20    -1000254
-#define WHISP21    -1000255
+enum KServant
+{
+    SAY1       = 0,
+    WHISP1     = 1,
+    WHISP2     = 2,
+    WHISP3     = 3,
+    WHISP4     = 4,
+    WHISP5     = 5,
+    WHISP6     = 6,
+    WHISP7     = 7,
+    WHISP8     = 8,
+    WHISP9     = 9,
+    WHISP10    = 10,
+    WHISP11    = 11,
+    WHISP12    = 12,
+    WHISP13    = 13,
+    WHISP14    = 14,
+    WHISP15    = 15,
+    WHISP16    = 16,
+    WHISP17    = 17,
+    WHISP18    = 18,
+    WHISP19    = 19,
+    WHISP20    = 20,
+    WHISP21    = 21
+};
+
 class npc_kservant : public CreatureScript
 {
 public:
@@ -330,70 +334,70 @@ public:
             switch (waypointId)
             {
                 case 0:
-                    DoScriptText(SAY1, me, player);
+                    Talk(SAY1, player->GetGUID());
                     break;
                 case 4:
-                    DoScriptText(WHISP1, me, player);
+                    Talk(WHISP1, player->GetGUID());
                     break;
                 case 6:
-                    DoScriptText(WHISP2, me, player);
+                    Talk(WHISP2, player->GetGUID());
                     break;
                 case 7:
-                    DoScriptText(WHISP3, me, player);
+                    Talk(WHISP3, player->GetGUID());
                     break;
                 case 8:
-                    DoScriptText(WHISP4, me, player);
+                    Talk(WHISP4, player->GetGUID());
                     break;
                 case 17:
-                    DoScriptText(WHISP5, me, player);
+                    Talk(WHISP5, player->GetGUID());
                     break;
                 case 18:
-                    DoScriptText(WHISP6, me, player);
+                    Talk(WHISP6, player->GetGUID());
                     break;
                 case 19:
-                    DoScriptText(WHISP7, me, player);
+                    Talk(WHISP7, player->GetGUID());
                     break;
                 case 33:
-                    DoScriptText(WHISP8, me, player);
+                    Talk(WHISP8, player->GetGUID());
                     break;
                 case 34:
-                    DoScriptText(WHISP9, me, player);
+                    Talk(WHISP9, player->GetGUID());
                     break;
                 case 35:
-                    DoScriptText(WHISP10, me, player);
+                    Talk(WHISP10, player->GetGUID());
                     break;
                 case 36:
-                    DoScriptText(WHISP11, me, player);
+                    Talk(WHISP11, player->GetGUID());
                     break;
                 case 43:
-                    DoScriptText(WHISP12, me, player);
+                    Talk(WHISP12, player->GetGUID());
                     break;
                 case 44:
-                    DoScriptText(WHISP13, me, player);
+                    Talk(WHISP13, player->GetGUID());
                     break;
                 case 49:
-                    DoScriptText(WHISP14, me, player);
+                    Talk(WHISP14, player->GetGUID());
                     break;
                 case 50:
-                    DoScriptText(WHISP15, me, player);
+                    Talk(WHISP15, player->GetGUID());
                     break;
                 case 51:
-                    DoScriptText(WHISP16, me, player);
+                    Talk(WHISP16, player->GetGUID());
                     break;
                 case 52:
-                    DoScriptText(WHISP17, me, player);
+                    Talk(WHISP17, player->GetGUID());
                     break;
                 case 53:
-                    DoScriptText(WHISP18, me, player);
+                    Talk(WHISP18, player->GetGUID());
                     break;
                 case 54:
-                    DoScriptText(WHISP19, me, player);
+                    Talk(WHISP19, player->GetGUID());
                     break;
                 case 55:
-                    DoScriptText(WHISP20, me, player);
+                    Talk(WHISP20, player->GetGUID());
                     break;
                 case 56:
-                    DoScriptText(WHISP21, me, player);
+                    Talk(WHISP21, player->GetGUID());
                     player->GroupEventHappens(10211, me);
                     break;
             }

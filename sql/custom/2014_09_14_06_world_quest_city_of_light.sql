@@ -1,0 +1,28 @@
+-- [SQL] Quests - City of Light fixed (Feedback #1904)
+UPDATE `quest_template` SET `SourceSpellId` = 34444 WHERE `Id` = 10211;
+UPDATE `creature_template` SET `maxlevel` = 60, `faction_A` = 1773, `faction_H` = 1773, `speed_walk` = 2, `dynamicflags` = 0 WHERE `entry` = 19685;
+DELETE FROM `script_texts` WHERE `npc_entry` = 19685;
+DELETE FROM `creature_text` WHERE `entry` = 19685;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(19685, 0, 0, 'Follow me, stranger. This won\'t take long.', 12, 0, 100, 0, 0, 0, 'kservant SAY_KHAD_SERV_0'),
+(19685, 1, 0, 'Shattrath was once the draenei capital of this world. Its name means \"dwelling of light.\"', 15, 0, 100, 0, 0, 0, 'kservant SAY_KHAD_SERV_1'),
+(19685, 2, 0, 'When the Burning Legion turned the orcs against the draenei, the fiercest battle was fought here. The draenei fought tooth and nail, but in the end the city fell.', 15, 0, 100, 0, 0, 0, 'kservant SAY_KHAD_SERV_2'),
+(19685, 3, 0, 'The city was left in ruins and darkness... until the Sha\'tar arrived.', 15, 0, 100, 0, 0, 0, 'kservant SAY_KHAD_SERV_3'),
+(19685, 4, 0, 'Let us go into the Lower City. I will warn you that as one of the only safe havens in Outland, Shattrath has attracted droves of refugees from all wars, current and past.', 15, 0, 100, 0, 0, 0, 'kservant SAY_KHAD_SERV_4'),
+(19685, 5, 0, 'The Sha\'tar, or \"born from light\" are the naaru that came to Outland to fight the demons of the Burning Legion.', 15, 0, 100, 0, 0, 0, 'kservant SAY_KHAD_SERV_5'),
+(19685, 6, 0, 'They were drawn to the ruins of Shattrath City where a small remnant of the draenei priesthood conducted its rites inside a ruined temple on this very spot.', 15, 0, 100, 0, 0, 0, 'kservant SAY_KHAD_SERV_6'),
+(19685, 7, 0, 'The priesthood, known as the Aldor, quickly regained its strength as word spread that the naaru had returned and reconstruction soon began. The ruined temple is now used as an infirmary for injured refugees.', 15, 0, 100, 0, 0, 0, 'kservant SAY_KHAD_SERV_7'),
+(19685, 8, 0, 'It wouldn\'t be long, however, before the city came under attack once again. This time, the attack came from Illidan\'s armies. A large regiment of blood elves had been sent by Illidan\'s ally, Kael\'thas Sunstrider, to lay waste to the city.', 15, 0, 100, 0, 0, 0, 'kservant SAY_KHAD_SERV_8'),
+(19685, 9, 0, 'As the regiment of blood elves crossed this very bridge, the Aldor\'s exarchs and vindicators lined up to defend the Terrace of Light. But then the unexpected happened.', 15, 0, 100, 0, 0, 0, 'kservant SAY_KHAD_SERV_9'),
+(19685, 10, 0, 'The blood elves laid down their weapons in front of the city\'s defenders; their leader, a blood elf elder known as Voren\'thal, stormed into the Terrace of Light and demanded to speak to A\'dal.', 15, 0, 100, 0, 0, 0, 'kservant SAY_KHAD_SERV_10'),
+(19685, 11, 0, 'As the naaru approached him, Voren\'thal kneeled before him and uttered the following words: \"I\'ve seen you in a vision, naaru. My race\'s only hope for survival lies with you. My followers and I are here to serve you.\"', 15, 0, 100, 0, 0, 0, 'kservant SAY_KHAD_SERV_11'),
+(19685, 12, 0, 'The defection of Voren\'thal and his followers was the largest loss ever incurred by Kael\'s forces. And these weren\'t just any blood elves. Many of the best and brightest amongst Kael\'s scholars and magisters had been swayed by Voren\'thal\'s influence.', 15, 0, 100, 0, 0, 0, 'kservant SAY_KHAD_SERV_12'),
+(19685, 13, 0, 'The naaru accepted the defectors, who would become known as the Scryers; their dwelling lies in the platform above. Only those initiated with the Scryers are allowed there.', 15, 0, 100, 0, 0, 0, 'kservant SAY_KHAD_SERV_13'),
+(19685, 14, 0, 'The Aldor are followers of the Light and forgiveness and redemption are values they understand. However, they found hard to forget the deeds of the blood elves while under Kael\'s command.', 15, 0, 100, 0, 0, 0, 'kservant SAY_KHAD_SERV_14'),
+(19685, 15, 0, 'Many of the priesthood had been slain by the same magisters who now vowed to serve the naaru. They were not happy to share the city with their former enemies.', 15, 0, 100, 0, 0, 0, 'kservant SAY_KHAD_SERV_15'),
+(19685, 16, 0, 'The Aldor\'s most holy temple and its surrounding dwellings lie on the terrace above. As a holy site, only the initiated are welcome inside.', 15, 0, 100, 0, 0, 0, 'kservant SAY_KHAD_SERV_16'),
+(19685, 17, 0, 'The attacks against Shattrath continued, but the city did not fall, as you can see. On the contrary, the naaru known as Xi\'ri led a successful incursion into Shadowmoon Valley - Illidan\'s doorstep.', 15, 0, 100, 0, 0, 0, 'kservant SAY_KHAD_SERV_17'),
+(19685, 18, 0, 'There he continues to wage war on Illidan with the assistance of the Aldor and the Scryers. The two factions have not given up on their old feuds, though.', 15, 0, 100, 0, 0, 0, 'kservant SAY_KHAD_SERV_18'),
+(19685, 19, 0, 'Such is their animosity that they vie for the honor of being sent to assist the naaru there. Each day, that decision is made here by A\'dal. The armies gather here to receive A\'dal\'s blessing before heading to Shadowmoon.', 15, 0, 100, 0, 0, 0, 'kservant SAY_KHAD_SERV_19'),
+(19685, 20, 0, 'Khadgar should be ready to see you again. Just remember that to serve the Sha\'tar you will most likely have to ally with the Aldor or the Scryers. And seeking the favor of one group will cause the others\' dislike.', 15, 0, 100, 0, 0, 0, 'kservant SAY_KHAD_SERV_20'),
+(19685, 21, 0, 'Good luck stranger, and welcome to Shattrath City.', 15, 0, 100, 0, 0, 0, 'kservant SAY_KHAD_SERV_21');

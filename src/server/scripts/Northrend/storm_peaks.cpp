@@ -1030,7 +1030,7 @@ class npc_hyldsmeet_protodrake : public CreatureScript
             {
                 if (cycleTimer <= diff)
                 {
-                    me->GetMotionMaster()->MoveSplinePath(2, true, true, 32.0f, true);
+                    // me->GetMotionMaster()->MoveSplinePath(2, true, true, 32.0f, true);
                     cycleTimer = 0;
                 }else cycleTimer -= diff;
             }
@@ -1041,7 +1041,7 @@ class npc_hyldsmeet_protodrake : public CreatureScript
                 {
                     moveTimer = 0;
                     me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
-                    me->GetMotionMaster()->MoveSplinePath(1, true, false, 32.0f);
+                    // me->GetMotionMaster()->MoveSplinePath(1, true, false, 32.0f);
                     cycleTimer = me->GetSplineDuration();
                 }else moveTimer -= diff;
             }

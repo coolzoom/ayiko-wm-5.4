@@ -188,7 +188,8 @@ void AIRelocationNotifier::Visit(CreatureMapType &m)
     else
     {
         for (auto &creature : m)
-            movedInLos_.emplace_back(creature, false);
+            if (shouldCallMoveInLineOfSight(creature, unit_))
+                movedInLos_.emplace_back(creature, false);
     }
 
     if (movedInLos_.empty())

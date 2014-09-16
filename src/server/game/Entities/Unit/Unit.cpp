@@ -16391,18 +16391,22 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
             }
             else // For attacker
             {
-                if ((procExtra & PROC_EX_CRITICAL_HIT) != 0 && isHunterPet())
+                if (procSpell && isHunterPet())
                 {
-                    // Cobra Strikes
-                    if (procSpell)
+                    switch (procSpell->Id)
                     {
-                        switch (procSpell->Id)
-                        {
                         case 16827: // Claw
                         case 17253: // Bite
                         case 49966: // Smack
-                            if (Player * const petOwner = ToPet()->GetCharmerOrOwnerPlayerOrPlayerItself())
-                                petOwner->RemoveAuraFromStack(53257);
+                        {
+                            if ((procExtra & PROC_EX_CRITICAL_HIT) != 0)
+                                if (Player * const petOwner = ToPet()->GetCharmerOrOwnerPlayerOrPlayerItself())
+                                    petOwner->RemoveAuraFromStack(53257);
+
+                            // Hack Fix Frenzy
+                            if (GetOwner() && GetOwner()->GetTypeId() == TYPEID_PLAYER && GetOwner()->HasAura(19623) && ToPet()->IsPermanentPetFor(GetOwner()->ToPlayer()))
+                                if (roll_chance_i(40))
+                                    CastSpell(this, 19615, true);
                             break;
                         }
                     }
@@ -16490,11 +16494,6 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
         || (procSpell->DurationEntry && procSpell->DurationEntry->Duration[0] > 0 && procSpell->DurationEntry->Duration[0] < 4000 && procSpell->AttributesEx & SPELL_ATTR1_CHANNELED_2)))
         if (AuraApplication* aura = GetAuraApplication(108839, GetGUID()))
             aura->GetBase()->DropCharge();
-
-    // Hack Fix Frenzy
-    if (GetTypeId() == TYPEID_UNIT && isHunterPet() && GetOwner() && GetOwner()->ToPlayer() && GetOwner()->HasAura(19623) && ToPet()->IsPermanentPetFor(GetOwner()->ToPlayer()) && !procSpell)
-        if (roll_chance_i(40))
-            CastSpell(this, 19615, true);
 
     // Hack Fix for Invigoration
     if (GetTypeId() == TYPEID_UNIT && GetOwner() && GetOwner()->ToPlayer() && GetOwner()->HasAura(53253) &&

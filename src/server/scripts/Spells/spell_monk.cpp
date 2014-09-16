@@ -90,6 +90,7 @@ enum MonkSpells
     SPELL_MONK_JADE_LIGHTNING_ENERGIZE          = 123333,
     SPELL_MONK_CRACKLING_JADE_SHOCK_BUMP        = 117962,
     SPELL_MONK_POWER_STRIKES_TALENT             = 121817,
+    SPELL_MONK_POWER_STRIKES_BUFF               = 129914,
     SPELL_MONK_CREATE_CHI_SPHERE                = 121286,
     SPELL_MONK_GLYPH_OF_ZEN_FLIGHT              = 125893,
     SPELL_MONK_ZEN_FLIGHT                       = 125883,
@@ -926,53 +927,67 @@ class spell_monk_glyph_of_zen_flight : public SpellScriptLoader
         }
 };
 
-// Called by Jab - 100780
 // Power Strikes - 121817
 class spell_monk_power_strikes : public SpellScriptLoader
 {
-    public:
-        spell_monk_power_strikes() : SpellScriptLoader("spell_monk_power_strikes") { }
+public:
+    spell_monk_power_strikes() : SpellScriptLoader("spell_monk_power_strikes") { }
 
-        class spell_monk_power_strikes_SpellScript : public SpellScript
+    class script_impl : public AuraScript
+    {
+        PrepareAuraScript(script_impl);
+
+        void OnProc(AuraEffect const *aurEff, ProcEventInfo& eventInfo)
         {
-            PrepareSpellScript(spell_monk_power_strikes_SpellScript)
+            PreventDefaultAction();
 
-            void HandleOnHit()
+            auto caster = GetCaster();
+            auto target = eventInfo.GetProcTarget();
+            if (!caster || !target)
+                return;
+
+            auto player = caster->ToPlayer();
+            if (!player)
+                return;
+
+            if (!player->HasAura(SPELL_MONK_POWER_STRIKES_BUFF))
+                return;
+
+            if (!player->HasSpellCooldown(SPELL_MONK_POWER_STRIKES_TALENT))
             {
-                if (Player* player = GetCaster()->ToPlayer())
+                if (player->GetPower(POWER_CHI) < player->GetMaxPower(POWER_CHI))
                 {
-                    if (Unit* target = GetHitUnit())
-                    {
-                        if (target->GetGUID() != player->GetGUID())
-                        {
-                            if (player->HasAura(SPELL_MONK_POWER_STRIKES_TALENT))
-                            {
-                                if (!player->HasSpellCooldown(SPELL_MONK_POWER_STRIKES_TALENT))
-                                {
-                                    if (player->GetPower(POWER_CHI) < player->GetMaxPower(POWER_CHI))
-                                    {
-                                        player->EnergizeBySpell(player, GetSpellInfo()->Id, 1, POWER_CHI);
-                                        player->AddSpellCooldown(SPELL_MONK_POWER_STRIKES_TALENT, 0, 20 * IN_MILLISECONDS);
-                                    }
-                                    else
-                                        player->CastSpell(player, SPELL_MONK_CREATE_CHI_SPHERE, true);
-                                }
-                            }
-                        }
-                    }
+                    player->EnergizeBySpell(player, GetSpellInfo()->Id, 1, POWER_CHI);
+                    player->AddSpellCooldown(SPELL_MONK_POWER_STRIKES_TALENT, 0, 20 * IN_MILLISECONDS);
+                    player->RemoveAurasDueToSpell(SPELL_MONK_POWER_STRIKES_BUFF);
                 }
+                else
+                    player->CastSpell(player, SPELL_MONK_CREATE_CHI_SPHERE, true);
             }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_monk_power_strikes_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_monk_power_strikes_SpellScript();
         }
+
+        void OnTick(AuraEffect const * aurEff)
+        {
+            auto caster = GetCaster();
+            if (caster && caster->GetTypeId() == TYPEID_PLAYER)
+                if (caster->ToPlayer()->HasSpellCooldown(SPELL_MONK_POWER_STRIKES_TALENT))
+                {
+                    PreventDefaultAction();
+                    const_cast<AuraEffect*>(aurEff)->ResetPeriodic(true);
+                }
+        }
+
+        void Register()
+        {
+            OnEffectProc += AuraEffectProcFn(script_impl::OnProc, EFFECT_1, SPELL_AURA_DUMMY);
+            OnEffectPeriodic += AuraEffectPeriodicFn(script_impl::OnTick, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new script_impl();
+    }
 };
 
 // Crackling Jade Lightning - 117952

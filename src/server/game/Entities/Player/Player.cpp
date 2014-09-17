@@ -22855,34 +22855,42 @@ void Player::RemoveSpellMods(Spell &spell)
             firstId = 48108;
             secondId = 12043;
             break;
+        // Arcane Blast: do not consume Arcane Charges
+        case 30451:
+            unusedAura = 36032;
+            break;
         default:
             break;
     }
 
-    // Loop over two most-common spellMods (Cost and Cast Time)
-    for (uint8 i = 0; i < 2; ++i)
+    // unusedAura might be already set for spells that benefit from mod but shouldn't consume it
+    if (!unusedAura)
     {
-        bool foundFirst = false;
-        bool foundSecond = false;
-        unusedAura = 0;
-        SpellModOp modType = (i == 1) ? SPELLMOD_COST : SPELLMOD_CASTING_TIME;
-
-        for (auto const &mod : m_spellMods[modType])
+        // Loop over two most-common spellMods (Cost and Cast Time)
+        for (uint8 i = 0; i < 2; ++i)
         {
-            if (!mod->ownerEffect)
-                continue;
+            bool foundFirst = false;
+            bool foundSecond = false;
+            unusedAura = 0;
+            SpellModOp modType = (i == 1) ? SPELLMOD_COST : SPELLMOD_CASTING_TIME;
 
-            if (mod->ownerEffect->GetId() == firstId)
-                foundFirst = true;
+            for (auto const &mod : m_spellMods[modType])
+            {
+                if (!mod->ownerEffect)
+                    continue;
 
-            if (mod->ownerEffect->GetId() == secondId)
-                foundSecond = true;
-        }
+                if (mod->ownerEffect->GetId() == firstId)
+                    foundFirst = true;
 
-        if (foundFirst && foundSecond)
-        {
-            unusedAura = secondId;
-            break;
+                if (mod->ownerEffect->GetId() == secondId)
+                    foundSecond = true;
+            }
+
+            if (foundFirst && foundSecond)
+            {
+                unusedAura = secondId;
+                break;
+            }
         }
     }
 

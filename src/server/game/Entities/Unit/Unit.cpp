@@ -8795,7 +8795,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
                     case 40336:
                     {
                         // On successful melee or ranged attack gain $29471s1 mana and if possible drain $27526s1 mana from the target.
-                        if (this && isAlive())
+                        if (isAlive())
                             CastSpell(this, 29471, true, castItem, triggeredByAura);
                         if (victim && victim->isAlive())
                             CastSpell(victim, 27526, true, castItem, triggeredByAura);
@@ -11815,8 +11815,10 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                 }
             // Shadow Bite (30% increase from each dot)
             if (spellProto->SpellFamilyFlags[1] & 0x00400000 && isPet())
+            {
                 if (uint8 count = victim->GetDoTsByCaster(GetOwnerGUID()))
                     AddPct(DoneTotalMod, 30 * count);
+            }
             // Doom Bolt (Doomguard)
             else if (spellProto->Id == 85692)
             {
@@ -15964,7 +15966,7 @@ void Unit::DeleteCharmInfo()
 }
 
 CharmInfo::CharmInfo(Unit* unit)
-: m_unit(unit), m_CommandState(COMMAND_FOLLOW), m_petnumber(0), m_barInit(false),
+: m_unit(unit), m_CommandState(COMMAND_FOLLOW), m_petnumber(0),
   m_isCommandAttack(false), m_isAtStay(false), m_isFollowing(false), m_isReturning(false),
   m_stayX(0.0f), m_stayY(0.0f), m_stayZ(0.0f)
 {
@@ -21296,4 +21298,9 @@ void Unit::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* target)
 int32 Unit::GetSplineDuration() const
 {
     return IsSplineEnabled() ? movespline->Duration() : 0;
+}
+
+bool Unit::IsOnVehicle(Unit const *vehicle) const
+{
+    return m_vehicle && m_vehicle->GetBase() == vehicle;
 }

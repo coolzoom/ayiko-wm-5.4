@@ -2409,7 +2409,7 @@ uint32 SpellInfo::CalcCastTime(Unit* caster, Spell* spell) const
     if (caster && scalingEntry.CastTimeMax > 0)
     {
         castTime = scalingEntry.CastTimeMax;
-        if (scalingEntry.CastTimeMaxLevel > int32(caster->getLevel()))
+        if (scalingEntry.CastTimeMaxLevel > caster->getLevel())
             castTime = scalingEntry.CastTimeMin + int32(caster->getLevel() - 1) * (scalingEntry.CastTimeMax - scalingEntry.CastTimeMin) / (scalingEntry.CastTimeMaxLevel - 1);
     }
     else if (CastTimeEntry)

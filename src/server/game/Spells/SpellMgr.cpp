@@ -5432,6 +5432,11 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 132169: // Storm Bolt stun
                     spellInfo->Speed = 0;
                     break;
+                case 96103: // Raging Blow
+                case 85384: // Raging Blow: Off-Hand
+                    // 5.4 Hot-Fix: Raging Blow damage increased by 20%
+                    spellInfo->Effects[EFFECT_1].BasePoints = 228;
+                    break;
                 default:
                     break;
             }

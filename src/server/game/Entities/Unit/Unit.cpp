@@ -7845,8 +7845,8 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                 // Windfury Weapon (Passive) 1-8 Ranks
                 case 33757:
                 {
-                    Player* player = ToPlayer();
-                    if (!player || !castItem || !castItem->IsEquipped() || !victim || !victim->isAlive())
+                    auto const player = ToPlayer();
+                    if (!player || !castItem || !castItem->IsEquipped() || !victim || !victim->isAlive() || victim == player)
                         return false;
 
                     // custom cooldown processing case

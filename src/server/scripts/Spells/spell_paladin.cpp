@@ -1180,11 +1180,11 @@ class spell_pal_judgment : public SpellScriptLoader
                 return true;
             }
 
-            void HandleOnHit()
+            void HandleHit(SpellEffIndex /*effIndex*/)
             {
-                if (Player* _player = GetCaster()->ToPlayer())
+                if (auto _player = GetCaster()->ToPlayer())
                 {
-                    if (Unit* unitTarget = GetHitUnit())
+                    if (auto unitTarget = GetHitUnit())
                     {
                         // Selfless Healer in Holy Spec
                         if (_player->HasAura(85804) && _player->GetSpecializationId(_player->GetActiveSpec()) == SPEC_PALADIN_HOLY)
@@ -1218,7 +1218,7 @@ class spell_pal_judgment : public SpellScriptLoader
 
             void Register()
             {
-                OnHit += SpellHitFn(spell_pal_judgment_SpellScript::HandleOnHit);
+                OnEffectHitTarget += SpellEffectFn(spell_pal_judgment_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
             }
         };
 

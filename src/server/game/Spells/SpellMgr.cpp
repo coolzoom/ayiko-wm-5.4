@@ -178,7 +178,6 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
                 case 6358:   // Seduction
                 case 115268: // Mesmerize
                 case 132412: // Seduction
-                    return DIMINISHING_DISORIENT;
                 case 118699: // Fear
                 case 5484:   // Howl of Terror
                 case 104045: // Sleep

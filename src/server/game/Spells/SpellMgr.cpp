@@ -5430,6 +5430,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 116: // Frostbolt - It has unknown type 5 in DBC
                     spellInfo->PreventionType = SPELL_PREVENTION_TYPE_SILENCE;
                     break;
+                case 132169: // Storm Bolt stun
+                    spellInfo->Speed = 0;
+                    break;
                 default:
                     break;
             }

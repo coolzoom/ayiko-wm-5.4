@@ -5437,6 +5437,10 @@ void SpellMgr::LoadSpellCustomAttr()
                     // 5.4 Hot-Fix: Raging Blow damage increased by 20%
                     spellInfo->Effects[EFFECT_1].BasePoints = 228;
                     break;
+                case 23881: // Bloodthirst
+                    // 5.4 Hot-Fix: Bloodthirst damage increased by 20%
+                    spellInfo->Effects[EFFECT_1].BasePoints = 108;
+                    break;
                 default:
                     break;
             }

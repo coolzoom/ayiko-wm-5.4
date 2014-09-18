@@ -3047,10 +3047,11 @@ void World::ResetDailyQuests()
 
 void World::ResetCurrencyWeekCap()
 {
+#if 0
     CharacterDatabase.Execute("UPDATE `character_currency` SET `week_count` = 0, `needResetCap` = 1");
     CharacterDatabase.Execute("UPDATE `character_arena_data` SET `prevWeekWins0` = `weekWins0`, `prevWeekWins1` = `weekWins1`, `prevWeekWins2` = `weekWins2`");
     CharacterDatabase.Execute("UPDATE `character_arena_data` SET `bestRatingOfWeek0` = 0, `weekGames0` = 0, `weekWins0` = 0, `bestRatingOfWeek1` = 0, `weekGames1` = 0, `weekWins1` = 0, `bestRatingOfWeek2` = 0, `weekGames2` = 0, `weekWins2` = 0");
-
+#endif
     for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
         if (itr->second->GetPlayer())
             itr->second->GetPlayer()->ResetCurrencyWeekCap();

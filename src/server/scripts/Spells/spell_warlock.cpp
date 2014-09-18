@@ -3107,6 +3107,39 @@ public:
     }
 };
 
+class spell_warl_demonic_fury : public SpellScriptLoader
+{
+public:
+    spell_warl_demonic_fury() : SpellScriptLoader("spell_warl_demonic_fury") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void HandleEffect(SpellEffIndex effIndex)
+        {
+            PreventHitDefaultEffect(effIndex);
+            auto owner = GetCaster()->GetOwner();
+            if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            auto player = owner->ToPlayer();
+            if (player->GetSpecializationId(player->GetActiveSpec()) == SPEC_WARLOCK_DEMONOLOGY)
+                player->EnergizeBySpell(player, GetSpellInfo()->Id, GetSpellInfo()->Effects[EFFECT_2].BasePoints, POWER_DEMONIC_FURY);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_impl::HandleEffect, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
 void AddSC_warlock_spell_scripts()
 {
     new spell_warl_soulburn_drain_life();
@@ -3176,4 +3209,5 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_backdraft();
     new spell_warl_molten_core();
     new spell_warl_glyph_of_siphon_life();
+    new spell_warl_demonic_fury();
 }

@@ -12144,6 +12144,10 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
     if ((spellProto->AttributesEx2 & SPELL_ATTR2_CANT_CRIT))
         return false;
 
+    // Roar of Sacrifice should make player immune to crits, chances from aura are calculated before therefore it must return false directly from here.
+    if (victim->HasAura(53480))
+        return false;
+
     switch (spellProto->Id)
     {
         case 53353: // Chimera Shot - Healing can crit, other spells - not

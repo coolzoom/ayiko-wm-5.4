@@ -5441,6 +5441,10 @@ void SpellMgr::LoadSpellCustomAttr()
                     // 5.4 Hot-Fix: Bloodthirst damage increased by 20%
                     spellInfo->Effects[EFFECT_1].BasePoints = 108;
                     break;
+                case 53480: // Roar of Sacrifice Split damage
+                    spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_SHARE_DAMAGE_PCT;
+                    spellInfo->Effects[EFFECT_1].MiscValue = 127;
+                    break;
                 default:
                     break;
             }

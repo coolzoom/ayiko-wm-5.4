@@ -317,6 +317,24 @@ class instance_mogu_shan_vault : public InstanceMapScript
                 }
             }
 
+            void OnGameObjectRemove(GameObject *go) final
+            {
+                switch(go->GetEntry())
+                {
+                    case GOB_STONE_GUARD_DOOR_ENTRANCE:
+                    case GOB_FENG_DOOR_FENCE:
+                    case GOB_FENG_DOOR_EXIT:
+                    case GOB_GARAJAL_FENCE:
+                    case GOB_GARAJAL_EXIT:
+                    case GOB_SPIRIT_KINGS_WIND_WALL:
+                    case GOB_SPIRIT_KINGS_EXIT:
+                    case GOB_CELESTIAL_DOOR:
+                    case GOB_STONE_GUARD_DOOR_EXIT:
+                        AddDoor(go, false);
+                        break;
+                }
+            }
+
             bool SetBossState(uint32 id, EncounterState state)
             {
                 if (!InstanceScript::SetBossState(id, state))

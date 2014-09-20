@@ -1041,10 +1041,6 @@ bool Aura::ModCharges(int32 num, AuraRemoveMode removeMode)
         int32 charges = m_procCharges + num;
         int32 maxCharges = CalcMaxCharges();
 
-        // Hack Fix - Arcane Missiles !
-        if (GetId() == 79683)
-            maxCharges = 2;
-
         if (num > 0 && charges > maxCharges)
         {
             // limit charges (only on charges increase, charges may be changed manually)
@@ -1903,6 +1899,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                                 if (pet->HasAura(32612))
                                     pet->RemoveAurasDueToSpell(32612);
 
+                        break;
+                    }
+                    case 79683: // Arcane Missiles aura
+                    {
+                        // Arcane Missiles double-aura state
+                        if (caster && !onReapply)
+                            caster->RemoveAurasDueToSpell(79808);
                         break;
                     }
                     default:

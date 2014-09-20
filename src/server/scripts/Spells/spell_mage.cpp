@@ -73,6 +73,7 @@ enum MageSpells
     SPELL_MAGE_CAUTERIZE                         = 87023,
     SPELL_MAGE_CAUTERIZE_MARKER                  = 87024,
     SPELL_MAGE_ARCANE_MISSILES                   = 79683,
+    SPELL_MAGE_ARCANE_MISSILES_DOUBLE_AURASTATE  = 79808,
     SPELL_MAGE_INCANTERS_WARD_ENERGIZE           = 113842,
     SPELL_MAGE_INCANTERS_ABSORBTION              = 116267,
     SPELL_MAGE_INCANTERS_ABSORBTION_PASSIVE      = 118858,
@@ -491,14 +492,17 @@ class spell_mage_arcane_missile : public SpellScriptLoader
 
             void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
-                if (!GetCaster())
+                auto caster = GetCaster();
+                if (!caster)
                     return;
 
-                GetCaster()->CastSpell(GetCaster(), SPELL_MAGE_ARCANE_CHARGE, true);
+                caster->CastSpell(caster, SPELL_MAGE_ARCANE_CHARGE, true);
 
-                if (Player* _player = GetCaster()->ToPlayer())
-                    if (Aura *arcaneMissiles = _player->GetAura(SPELL_MAGE_ARCANE_MISSILES))
-                        arcaneMissiles->DropCharge();
+                if (Aura *arcaneMissiles = caster->GetAura(SPELL_MAGE_ARCANE_MISSILES))
+                {
+                    arcaneMissiles->ModStackAmount(-1);
+                    caster->RemoveAurasDueToSpell(SPELL_MAGE_ARCANE_MISSILES_DOUBLE_AURASTATE);
+                }
             }
 
             void Register()

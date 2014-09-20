@@ -9359,12 +9359,9 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
             if (ToPlayer()->GetSpecializationId(ToPlayer()->GetActiveSpec()) != SPEC_MAGE_ARCANE)
                 return false;
 
-            if (Aura *arcaneMissiles = GetAura(79683))
-            {
-                arcaneMissiles->ModCharges(1);
-                arcaneMissiles->RefreshDuration();
-                return false;
-            }
+            // Cast double-arcane missiles marker
+            if (HasAura(79683) && !HasAura(79808))
+                CastSpell(this, 79808, true);
 
             break;
         }

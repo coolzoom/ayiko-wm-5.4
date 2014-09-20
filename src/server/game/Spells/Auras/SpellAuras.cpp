@@ -2319,7 +2319,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     {
                         uint32 spellVisual = player->GetTeam() == ALLIANCE ? 147923 : 146122;
                         // If shield equipped - switch visual
-                        auto shieldItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+                        auto shieldItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
                         if (shieldItem && shieldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_SHIELD)
                             spellVisual = 146120;
 
@@ -2345,7 +2345,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     {
                         uint32 spellVisual = player->GetTeam() == ALLIANCE ? 147925 : 146127;
                         // If shield equipped - switch visual
-                        auto shieldItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+                        auto shieldItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
                         if (shieldItem && shieldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_SHIELD)
                             spellVisual = 146128;
 

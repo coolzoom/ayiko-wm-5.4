@@ -1481,7 +1481,14 @@ class spell_warl_soul_leech : public SpellScriptLoader
                     {
                         if (player->HasAura(WARLOCK_SOUL_LEECH_AURA))
                         {
-                            int32 bp = int32(GetHitDamage() / 10);
+                            uint32 absorbPct = 20;
+                            if (player->GetSpecializationId(player->GetActiveSpec()) != SPEC_WARLOCK_AFFLICTION)
+                                absorbPct = 10;
+
+                            int32 bp = CalculatePct(GetHitDamage(), absorbPct);
+
+                            if (!bp)
+                                return;
 
                             player->CastCustomSpell(player, WARLOCK_SOUL_LEECH_HEAL, &bp, NULL, NULL, true);
 

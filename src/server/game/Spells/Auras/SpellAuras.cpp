@@ -2327,6 +2327,32 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     }
                     break;
                 }
+                // Shield Wall - Apply Visuals
+                case 871:
+                {
+                    auto player = caster->ToPlayer();
+                    if (!player)
+                        break;
+
+                    // Remove all possible visuals
+                    if (!apply)
+                    {
+                        player->RemoveAurasDueToSpell(147923);
+                        player->RemoveAurasDueToSpell(146122);
+                        player->RemoveAurasDueToSpell(146120);
+                    }
+                    else
+                    {
+                        uint32 spellVisual = player->GetTeam() == ALLIANCE ? 147925 : 146127;
+                        // If shield equipped - switch visual
+                        auto shieldItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+                        if (shieldItem && shieldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_SHIELD)
+                            spellVisual = 146128;
+
+                        player->CastSpell(player, spellVisual, true);
+                    }
+                    break;
+                }
             }
         }
         default:

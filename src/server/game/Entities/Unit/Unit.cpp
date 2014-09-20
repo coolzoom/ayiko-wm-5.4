@@ -9893,6 +9893,13 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
                 return false;
             break;
         }
+        // Glyph of Hamstring
+        case 58385:
+        {
+            if (HasAura(115945))
+                return false;
+            break;
+        }
         default:
             break;
     }

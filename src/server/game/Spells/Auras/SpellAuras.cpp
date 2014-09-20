@@ -2258,6 +2258,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             break;
         }
         case SPELLFAMILY_PRIEST:
+        {
             if (!caster)
                 break;
 
@@ -2291,6 +2292,43 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     break;
                 }
             }
+            break;
+        }
+        case SPELLFAMILY_WARRIOR:
+        {
+            if (!caster)
+                break;
+
+            switch(GetSpellInfo()->Id)
+            {
+                // Spell Reflection - Apply Visuals
+                case 23920:
+                {
+                    auto player = caster->ToPlayer();
+                    if (!player)
+                        break;
+
+                    // Remove all possible visuals
+                    if (!apply)
+                    {
+                        player->RemoveAurasDueToSpell(147923);
+                        player->RemoveAurasDueToSpell(146122);
+                        player->RemoveAurasDueToSpell(146120);
+                    }
+                    else
+                    {
+                        uint32 spellVisual = player->GetTeam() == ALLIANCE ? 147923 : 146122;
+                        // If shield equipped - switch visual
+                        auto shieldItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+                        if (shieldItem && shieldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_SHIELD)
+                            spellVisual = 146120;
+
+                        player->CastSpell(player, spellVisual, true);
+                    }
+                    break;
+                }
+            }
+        }
         default:
             break;
     }

@@ -658,9 +658,14 @@ void Aura::_UnapplyForTarget(Unit* target, Unit* caster, AuraApplication * auraA
     // reset cooldown state for spells
     if (caster && caster->GetTypeId() == TYPEID_PLAYER)
     {
-        if (GetSpellInfo()->Attributes & SPELL_ATTR0_DISABLED_WHILE_ACTIVE && !(GetSpellInfo()->Id == 34477 && caster->HasAura(56829) && (caster->GetPetGUID() == target->GetGUID())))
+        if (GetSpellInfo()->Attributes & SPELL_ATTR0_DISABLED_WHILE_ACTIVE)
             // note: item based cooldowns and cooldown spell mods with charges ignored (unknown existed cases)
+        {
             caster->ToPlayer()->SendCooldownEvent(GetSpellInfo());
+            // Glyph of Misdirection must remove cooldown after
+            if (GetSpellInfo()->Id == 34477 && caster->HasAura(56829) && caster->GetMisdirectionTarget() && caster->GetPetGUID() == caster->GetMisdirectionTarget()->GetGUID())
+                caster->ToPlayer()->RemoveSpellCooldown(34477, true);
+        }
     }
 }
 

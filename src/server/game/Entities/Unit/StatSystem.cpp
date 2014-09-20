@@ -691,7 +691,9 @@ void Player::UpdateDodgePercentage()
     };
 
     float diminishing = 0.0f, nondiminishing = 0.0f;
-    GetDodgeFromAgility(diminishing, nondiminishing);
+    // Warriors, Death Knights and Paladins no longer gain dodge from agility
+    if (getClass() != CLASS_WARRIOR && getClass() != CLASS_DEATH_KNIGHT && getClass() != CLASS_PALADIN)
+        GetDodgeFromAgility(diminishing, nondiminishing);
     // Dodge from SPELL_AURA_MOD_DODGE_PERCENT aura
     nondiminishing += GetTotalAuraModifier(SPELL_AURA_MOD_DODGE_PERCENT);
     // Dodge from rating

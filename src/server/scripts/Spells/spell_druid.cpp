@@ -1844,8 +1844,13 @@ class spell_dru_savage_defense : public SpellScriptLoader
 
             void HandleOnHit()
             {
-                if (Player* _player = GetCaster()->ToPlayer())
-                    _player->CastSpell(_player, SPELL_DRUID_SAVAGE_DEFENSE_DODGE_PCT, true);
+                if (Player* const _player = GetCaster()->ToPlayer())
+                {
+                    if (auto aura = _player->GetAura(SPELL_DRUID_SAVAGE_DEFENSE_DODGE_PCT))
+                        aura->SetDuration(aura->GetDuration() + 6 * IN_MILLISECONDS);
+                    else
+                        _player->CastSpell(_player, SPELL_DRUID_SAVAGE_DEFENSE_DODGE_PCT, true);
+                }
             }
 
             void Register()

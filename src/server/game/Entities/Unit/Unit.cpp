@@ -9965,12 +9965,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
                 return false;
             break;
         }
-        // Savage Defense
-        case 62606:
-        {
-            basepoints0 = CalculatePct(triggerAmount, GetTotalAttackPowerValue(BASE_ATTACK));
-            break;
-        }
         // Culling the Herd
         case 70893:
         {

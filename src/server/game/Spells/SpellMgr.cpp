@@ -5446,6 +5446,7 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[EFFECT_1].MiscValue = 127;
                     break;
                 case 79808: // Arcane Missiles Double Aurastate - Override procflag
+                case 116768: // Combo Breaker: Blackout Kick
                     spellInfo->ProcFlags = 0;
                     break;
                 default:

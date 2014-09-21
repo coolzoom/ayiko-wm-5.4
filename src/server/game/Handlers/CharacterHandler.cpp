@@ -836,36 +836,6 @@ void WorldSession::HandleLoadScreenOpcode(WorldPacket& recvPacket)
 
     recvPacket >> mapID;
     recvPacket.ReadBit();
-
-    // Refresh spellmods for client
-    // This is Hackypig fix : find a better way
-    if (Player* _plr = GetPlayer())
-    {
-        std::list<uint32> spellToCast;
-
-        Unit::AuraApplicationMap& auraList = _plr->GetAppliedAuras();
-        for (Unit::AuraApplicationMap::iterator iter = auraList.begin(); iter != auraList.end();)
-        {
-            AuraApplication* aurApp = iter->second;
-            if (!aurApp)
-                continue;
-
-            Aura *aura = aurApp->GetBase();
-            if (aura && (aura->HasEffectType(SPELL_AURA_ADD_FLAT_MODIFIER) || aura->HasEffectType(SPELL_AURA_ADD_PCT_MODIFIER)) && aura->GetSpellInfo())
-            {
-                spellToCast.push_back(aura->GetSpellInfo()->Id);
-                _player->RemoveAura(iter);
-            }
-            else
-                ++iter;
-        }
-
-        for (auto id : spellToCast)
-        {
-            if (id > 0 && _plr)
-                _plr->CastSpell(_plr, id, true);
-        }
-    }
 }
 
 void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)

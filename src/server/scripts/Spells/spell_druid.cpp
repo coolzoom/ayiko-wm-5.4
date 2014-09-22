@@ -348,15 +348,18 @@ class spell_dru_glyph_of_shred : public SpellScriptLoader
 
             void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
-                GetTarget()->CastSpell(GetTarget(), SPELL_DRUID_GLYPH_OF_SHRED_OVERRIDE, true);
+                auto target = GetTarget();
+                if (target->HasAura(SPELL_DRUID_GLYPH_OF_SHRED))
+                    target->CastSpell(target, SPELL_DRUID_GLYPH_OF_SHRED_OVERRIDE, true);
             }
 
             void OnRemove(AuraEffect const *aurEff, AuraEffectHandleModes /*mode*/)
             {
-                if (aurEff->GetSpellInfo()->Id == SPELL_DRUID_BERSERK_CAT && !GetTarget()->HasAura(SPELL_DRUID_TIGERS_FURY))
-                    GetTarget()->RemoveAurasDueToSpell(SPELL_DRUID_GLYPH_OF_SHRED_OVERRIDE);
-                else if (aurEff->GetSpellInfo()->Id == SPELL_DRUID_TIGERS_FURY && !GetTarget()->HasAura(SPELL_DRUID_BERSERK_CAT))
-                    GetTarget()->RemoveAurasDueToSpell(SPELL_DRUID_GLYPH_OF_SHRED_OVERRIDE);
+                auto target = GetTarget();
+                if (aurEff->GetSpellInfo()->Id == SPELL_DRUID_BERSERK_CAT && !target->HasAura(SPELL_DRUID_TIGERS_FURY))
+                    target->RemoveAurasDueToSpell(SPELL_DRUID_GLYPH_OF_SHRED_OVERRIDE);
+                else if (aurEff->GetSpellInfo()->Id == SPELL_DRUID_TIGERS_FURY && !target->HasAura(SPELL_DRUID_BERSERK_CAT))
+                    target->RemoveAurasDueToSpell(SPELL_DRUID_GLYPH_OF_SHRED_OVERRIDE);
             }
 
             void Register()

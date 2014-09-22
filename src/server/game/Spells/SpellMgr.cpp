@@ -3913,6 +3913,7 @@ void SpellMgr::LoadSpellCustomAttr()
                     break;
                 case 125972:// Felin Grace
                     spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_SAFE_FALL;
+                    spellInfo->Stances = 1 << (FORM_CAT - 1);
                     break;
                 case 83968: // Mass Resurrect
                     spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_DEAD;

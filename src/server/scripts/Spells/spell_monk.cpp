@@ -1003,7 +1003,7 @@ class spell_monk_crackling_jade_lightning : public SpellScriptLoader
             void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (Unit* caster = GetCaster())
-                    if (roll_chance_i(25))
+                    if (roll_chance_i(30))
                         caster->CastSpell(caster, SPELL_MONK_JADE_LIGHTNING_ENERGIZE, true);
             }
 

@@ -4470,13 +4470,24 @@ void Spell::EffectThreat(SpellEffIndex /*effIndex*/)
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
 
+    auto threatTarget = m_caster;
+
     if (!unitTarget || !unitTarget->isAlive() || !m_caster->isAlive())
         return;
 
     if (!unitTarget->CanHaveThreatList())
         return;
 
-    unitTarget->AddThreat(m_caster, float(damage));
+    // Glyph of Distracting Shot - redirect effect to pet
+    if (m_spellInfo->Id == 20736 && m_caster->HasAura(123632))
+    {
+        if (auto const player = m_caster->ToPlayer())
+            if (auto const pet = player->GetPet())
+                if (pet->isAlive())
+                    threatTarget = pet;
+    }
+
+    unitTarget->AddThreat(threatTarget, float(damage));
 }
 
 void Spell::EffectHealMaxHealth(SpellEffIndex /*effIndex*/)

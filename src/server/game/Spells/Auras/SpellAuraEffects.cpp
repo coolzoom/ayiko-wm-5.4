@@ -3609,6 +3609,15 @@ void AuraEffect::HandleModTaunt(AuraApplication const* aurApp, uint8 mode, bool 
     if (!caster || !caster->isAlive())
         return;
 
+    // Glyph of Distracting Shot - redirect effect to pet
+    if (GetId() == 20736 && caster->HasAura(123632))
+    {
+        if (auto const player = caster->ToPlayer())
+            if (auto const pet = player->GetPet())
+                if (pet->isAlive())
+                    caster = pet;
+    }
+
     if (apply)
         target->TauntApply(caster);
     else

@@ -114,6 +114,7 @@ enum HunterSpells
     HUNTER_SPELL_GLAIVE_TOSS_DAMAGE_AND_SNARE_LEFT  = 120761,
     HUNTER_SPELL_GLAIVE_TOSS_DAMAGE_AND_SNARE_RIGHT = 121414,
     HUNTER_SPELL_ASPECT_OF_THE_BEAST                = 61648,
+    HUNTER_SPELL_WEAKENED_ARMOR                     = 113746,
 };
 
 // Glyph of Aspect of the Beast - 125042
@@ -2214,6 +2215,36 @@ public:
     }
 };
 
+// Dust Cloud - 50285
+class spell_hun_pet_dust_cloud : public SpellScriptLoader
+{
+    public:
+        spell_hun_pet_dust_cloud() : SpellScriptLoader("spell_hun_pet_dust_cloud") { }
+
+        class script_impl : public SpellScript
+        {
+            PrepareSpellScript(script_impl);
+
+            void HandleEffect(SpellEffIndex /*effIndex*/)
+            {
+                auto caster = GetCaster();
+                if (Unit* target = GetHitUnit())
+                    for (uint32 i = 0; i < 3; ++i)
+                        caster->CastSpell(target, HUNTER_SPELL_WEAKENED_ARMOR, true);
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(script_impl::HandleEffect, EFFECT_0, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new script_impl();
+        }
+};
+
 void AddSC_hunter_spell_scripts()
 {
     new spell_hun_glyph_of_aspect_of_the_beast();
@@ -2255,4 +2286,5 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_misdirection_proc();
     new spell_hun_disengage();
     new spell_hun_tame_beast();
+    new spell_hun_pet_dust_cloud();
 }

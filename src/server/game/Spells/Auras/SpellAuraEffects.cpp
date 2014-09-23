@@ -1985,8 +1985,7 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
             break;
         case FORM_METAMORPHOSIS:
             spellId  = 103965;
-            spellId2 = 54817;
-            spellId3 = 54879;
+            spellId2 = 54879;
             break;
         case FORM_SPIRITOFREDEMPTION:
             spellId  = 27792;

@@ -10049,8 +10049,8 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
                 return false;
             break;
         }
-        // Infected Wounds
-        case 58180:
+        case 58180: // Infected Wounds
+        case 127802: // Touch of the Grave
         {
             if (victim == this)
                 return false;

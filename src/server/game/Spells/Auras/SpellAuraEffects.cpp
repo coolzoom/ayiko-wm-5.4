@@ -4833,10 +4833,13 @@ void AuraEffect::HandleAuraModIncreaseHealth(AuraApplication const* aurApp, uint
     }
     else
     {
-        if (int32(target->GetHealth()) > GetAmount())
-            target->ModifyHealth(-GetAmount());
-        else
-            target->SetHealth(1);
+        if (GetSpellInfo()->Effects[GetEffIndex()].ApplyAuraName != SPELL_AURA_MOD_INCREASE_HEALTH_2)
+        {
+            if (int32(target->GetHealth()) > GetAmount())
+                target->ModifyHealth(-GetAmount());
+            else
+                target->SetHealth(1);
+        }
         target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(GetAmount()), apply);
     }
 }

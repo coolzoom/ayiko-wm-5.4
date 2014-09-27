@@ -16393,27 +16393,25 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
                     StartReactiveTimer(REACTIVE_DEFENSE);
                 }
             }
-            else // For attacker
-            {
-                if (procSpell && isHunterPet())
-                {
-                    switch (procSpell->Id)
-                    {
-                        case 16827: // Claw
-                        case 17253: // Bite
-                        case 49966: // Smack
-                        {
-                            if ((procExtra & PROC_EX_CRITICAL_HIT) != 0)
-                                if (Player * const petOwner = ToPet()->GetCharmerOrOwnerPlayerOrPlayerItself())
-                                    petOwner->RemoveAuraFromStack(53257);
+        }
 
-                            // Hack Fix Frenzy
-                            if (GetOwner() && GetOwner()->GetTypeId() == TYPEID_PLAYER && GetOwner()->HasAura(19623) && ToPet()->IsPermanentPetFor(GetOwner()->ToPlayer()))
-                                if (roll_chance_i(40))
-                                    CastSpell(this, 19615, true);
-                            break;
-                        }
-                    }
+        if (!isVictim && procSpell && isHunterPet())
+        {
+            switch (procSpell->Id)
+            {
+                case 16827: // Claw
+                case 17253: // Bite
+                case 49966: // Smack
+                {
+                    if ((procExtra & PROC_EX_CRITICAL_HIT) != 0)
+                        if (Player * const petOwner = ToPet()->GetCharmerOrOwnerPlayerOrPlayerItself())
+                            petOwner->RemoveAuraFromStack(53257);
+
+                    // Hack Fix Frenzy
+                    if (GetOwner() && GetOwner()->GetTypeId() == TYPEID_PLAYER && GetOwner()->HasAura(19623) && ToPet()->IsPermanentPetFor(GetOwner()->ToPlayer()))
+                        if (roll_chance_i(40))
+                            CastSpell(this, 19615, true);
+                    break;
                 }
             }
         }

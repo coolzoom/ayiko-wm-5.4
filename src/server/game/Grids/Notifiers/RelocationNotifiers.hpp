@@ -29,7 +29,8 @@ public:
 
 private:
     Creature *me_;
-    std::vector<std::pair<Unit *, bool>> movedInLos_;
+    std::vector<Unit *> unitToMe_;
+    std::vector<Creature *> meToCreature_;
 };
 
 class DelayedUnitRelocation final

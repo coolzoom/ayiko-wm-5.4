@@ -10060,7 +10060,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
         case 56453:
         {
             // Proc only from proper traps (proc-flags contains additional for T.N.T talent: Explosive Trap, Immolation Trap
-            if ((procFlags & PROC_FLAG_DONE_TRAP_ACTIVATION) && procSpell && (procSpell->Id == 13812 || procSpell->Id == 13797))
+            if (procSpell && (((procFlags & PROC_FLAG_DONE_TRAP_ACTIVATION) && procSpell->Id == 13797) || procSpell->Id == 13812))
                 return false;
 
             // Black Arrow proc-chance

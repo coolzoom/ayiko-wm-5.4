@@ -1533,10 +1533,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             Position pos;
                             target->GetPosition(&pos);
                             if (Creature * decoy = target->SummonCreature(62261, pos, TEMPSUMMON_TIMED_DESPAWN, 4000))
-                            {
                                 target->CastSpell(decoy, 45204, true);
-                                decoy->CastSpell(decoy, 52188, true);
-                            }
                         }
                     }
                 }

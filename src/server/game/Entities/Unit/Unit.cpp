@@ -663,7 +663,7 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         && spellProto->Id != 124098 && spellProto->Id != 107270 && spellProto->Id != 132467
         && spellProto->Id != 130651 && spellProto->Id != 117993) // Don't triggered by Zen Sphere, Spinning Crane Kick, Chi Wave, Chi Burst and Chi Torpedo
     {
-        int32 bp = damage / 2;
+        int32 bp = damage / 4;
         std::list<Unit*> targetList;
         std::list<Creature*> tempList;
         std::list<Creature*> statueList;

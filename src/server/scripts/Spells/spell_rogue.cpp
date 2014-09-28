@@ -1472,4 +1472,5 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_deadly_poison();
     new spell_rog_shadowstep();
     new spell_rog_marked_for_death();
+    new spell_rog_cloak_and_dagger();
 }

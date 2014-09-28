@@ -115,6 +115,8 @@ enum HunterSpells
     HUNTER_SPELL_GLAIVE_TOSS_DAMAGE_AND_SNARE_RIGHT = 121414,
     HUNTER_SPELL_ASPECT_OF_THE_BEAST                = 61648,
     HUNTER_SPELL_WEAKENED_ARMOR                     = 113746,
+    HUNTER_SPELL_GLYPH_OF_LIBERATION                = 132106,
+    HUNTER_SPELL_GLYPH_OF_LIBERATION_HEAL           = 115927,
 };
 
 // Glyph of Aspect of the Beast - 125042
@@ -2120,6 +2122,9 @@ class spell_hun_disengage : public SpellScriptLoader
                         for (auto itr : retsList)
                             _player->CastSpell(itr, HUNTER_SPELL_NARROW_ESCAPE_RETS, true);
                     }
+
+                    if (_player->HasAura(HUNTER_SPELL_GLYPH_OF_LIBERATION))
+                        _player->CastSpell(_player, HUNTER_SPELL_GLYPH_OF_LIBERATION_HEAL, true);
                 }
             }
 

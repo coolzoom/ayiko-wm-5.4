@@ -5443,10 +5443,8 @@ void Spell::EffectAddComboPoints(SpellEffIndex /*effIndex*/)
     {
         // Cheap Shot and Expose Armor hack (they do not trigger aura-proc)
         if (m_spellInfo->Id == 1833 || m_spellInfo->Id == 8647)
-        {
-            int32 basePoints = damage;
-            m_caster->CastCustomSpell(m_caster, 115189, &basePoints, NULL, NULL, true);
-        }
+            for (int32 i = 0; i < damage; ++i)
+                m_caster->CastSpell(m_caster, 115189, true);
     }
 
     m_caster->m_movedPlayer->AddComboPoints(unitTarget, damage, this);

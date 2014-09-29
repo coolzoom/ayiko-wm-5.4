@@ -11880,6 +11880,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                 {
                     case 879: // Exorcism
                     case 45477: // Icy Touch
+                    case 45524: // Chains of Ice (Glyphed)
                     case 49184: // Howling Blast
                     case 52212: // Death and Decay
                     case 108196: // Death Siphon

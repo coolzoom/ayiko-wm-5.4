@@ -28,7 +28,7 @@ WaypointMgr::WaypointMgr()
 
 WaypointMgr::~WaypointMgr()
 {
-    for (WaypointPathContainer::iterator itr = _waypointStore.begin(); itr != _waypointStore.end(); ++itr)
+    for (WaypointPathContainer::iterator itr = m_waypointStore.begin(); itr != m_waypointStore.end(); ++itr)
     {
         for (WaypointPath::const_iterator it = itr->second.begin(); it != itr->second.end(); ++it)
             delete *it;
@@ -36,7 +36,7 @@ WaypointMgr::~WaypointMgr()
         itr->second.clear();
     }
 
-    _waypointStore.clear();
+    m_waypointStore.clear();
 }
 
 void WaypointMgr::Load()
@@ -61,7 +61,7 @@ void WaypointMgr::Load()
         WaypointData* wp = new WaypointData();
 
         uint32 pathId = fields[0].GetUInt32();
-        WaypointPath& path = _waypointStore[pathId];
+        WaypointPath& path = m_waypointStore[pathId];
 
         float x = fields[2].GetFloat();
         float y = fields[3].GetFloat();
@@ -86,19 +86,70 @@ void WaypointMgr::Load()
     }
     while (result->NextRow());
 
+    result = WorldDatabase.Query("SELECT c_entry, path_id, wp_id, position_x, position_y, position_z FROM waypoint_spline_data ORDER BY c_entry, path_id, wp_id");
+
+    if (result)
+    {
+        do
+        {
+            Field* fields = result->Fetch();
+
+            uint32 c_entry = fields[0].GetUInt32();
+            uint8 path_id = fields[1].GetUInt8();
+
+            SplineWaypointPathContainer& c_paths = m_splineWaypointStore[c_entry];
+            SplineWaypointPath& path = c_paths[path_id];
+
+            SplineWaypointData wp;
+
+            wp.wp_id = fields[2].GetUInt8();
+            wp.x = fields[3].GetFloat();
+            wp.y = fields[4].GetFloat();
+            wp.z = fields[5].GetFloat();
+
+            Trinity::NormalizeMapCoord(wp.x);
+            Trinity::NormalizeMapCoord(wp.y);
+
+            path.push_back(wp);
+        }
+        while (result->NextRow());
+    }
+    else
+        TC_LOG_ERROR("server.loading", ">> Loaded 0 spline waypoints. DB table `waypoint_spline_data` is empty!");
+
+    result = WorldDatabase.Query("SELECT path_id, fly, walk, catmullRom, speed FROM waypoint_data_addon ORDER BY path_id");
+
+    if (result)
+    {
+        do
+        {
+            Field* fields = result->Fetch();
+            uint32 path_id = fields[0].GetUInt32();
+            WaypointAddon& addon = m_waypointAddonStore[path_id];
+
+            addon.fly = fields[1].GetBool();
+            addon.walk = fields[2].GetBool();
+            addon.catmullRom = fields[3].GetBool();
+            addon.speed = fields[4].GetFloat();
+        }
+        while (result->NextRow());
+    }
+    else
+        TC_LOG_ERROR("server.loading", ">> Loaded 0 waypoint's addons. DB table `waypoint_data_addon` is empty!");
+
     TC_LOG_INFO("server.loading", ">> Loaded %u waypoints in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 
 }
 
 void WaypointMgr::ReloadPath(uint32 id)
 {
-    WaypointPathContainer::iterator itr = _waypointStore.find(id);
-    if (itr != _waypointStore.end())
+    WaypointPathContainer::iterator itr = m_waypointStore.find(id);
+    if (itr != m_waypointStore.end())
     {
         for (WaypointPath::const_iterator it = itr->second.begin(); it != itr->second.end(); ++it)
             delete *it;
 
-        _waypointStore.erase(itr);
+        m_waypointStore.erase(itr);
     }
 
     PreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_SEL_WAYPOINT_DATA_BY_ID);
@@ -110,7 +161,7 @@ void WaypointMgr::ReloadPath(uint32 id)
     if (!result)
         return;
 
-    WaypointPath& path = _waypointStore[id];
+    WaypointPath& path = m_waypointStore[id];
 
     do
     {

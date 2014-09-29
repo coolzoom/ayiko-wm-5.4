@@ -2100,6 +2100,9 @@ class Player final : public Unit, public GridObject<Player>
         void RepopAtGraveyard();
         void SendCemeteryList(bool onMap);
 
+        uint32 GetCurrentMovieId() { return m_currentMovie; }
+        void SetCurrentMovieId(uint32 movieID) { m_currentMovie = movieID; }
+
         void DurabilityLossAll(double percent, bool inventory);
         void DurabilityLoss(Item* item, double percent);
         void DurabilityPointsLossAll(int32 points, bool inventory);
@@ -2776,6 +2779,7 @@ class Player final : public Unit, public GridObject<Player>
         uint32 m_alternateRegenTimerCount;
         float m_powerFraction[MAX_POWERS_PER_CLASS];
         uint32 m_contestedPvPTimer;
+        uint32 m_currentMovie;
 
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/

@@ -2357,6 +2357,7 @@ class Unit : public WorldObject
         virtual bool CanFly() const = 0;
         bool IsFlying() const   { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_FLYING | MOVEMENTFLAG_DISABLE_GRAVITY); }
         void SetCanFly(bool apply);
+        bool SetSwim(bool enable);
 
         void RewardRage(float baseRage, bool attacker);
 

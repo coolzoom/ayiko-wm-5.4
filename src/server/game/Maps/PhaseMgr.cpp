@@ -158,6 +158,57 @@ void PhaseMgr::RegisterPhasingAuraEffect(AuraEffect const* auraEffect)
 
     phaseInfo.phaseId = auraEffect->GetMiscValueB();
 
+    if (player)
+    {
+        uint32 mapId = player->GetMapId();
+        uint32 zoneId = player->GetZoneId();
+
+        if (zoneId == 4720) // Kezan, Lost Isles only
+        {
+            switch (phaseInfo.phaseId)
+            {
+                case 180:
+                case 181:
+                case 182:
+                    phaseInfo.terrainswapmap = 661;
+                    break;
+                case 183:
+                case 184:
+                case 185:
+                    phaseInfo.terrainswapmap = 659;
+                    break;
+            }
+        }
+
+        if (mapId == 654) // Gilneas
+        {
+            switch (phaseInfo.phaseId)
+            {
+                case 170:
+                case 171:
+                case 172:
+                case 179:
+                case 181:
+                case 182:
+                    phaseInfo.terrainswapmap = 638;
+                    break;
+                case 183:
+                case 184:
+                    phaseInfo.terrainswapmap = 655;
+                    break;
+                case 186:
+                case 187:
+                case 188:
+                case 191:
+                case 189:
+                case 190:
+                case 194:
+                    phaseInfo.terrainswapmap = 656;
+                    break;
+            }
+        }
+    }
+
     if (phaseInfo.NeedsClientSideUpdate())
         _UpdateFlags |= PHASE_UPDATE_FLAG_CLIENTSIDE_CHANGED;
 

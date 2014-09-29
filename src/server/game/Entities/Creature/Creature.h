@@ -284,7 +284,7 @@ struct CreatureData
     explicit CreatureData() : dbData(true) {}
     uint32 id;                                              // entry in creature_template
     uint16 mapid;
-    uint16 phaseMask;
+    uint32 phaseMask;
     uint32 displayid;
     int32 equipmentId;
     float posX;
@@ -311,10 +311,13 @@ struct CreatureAddon
 {
     uint32 path_id;
     uint32 mount;
-    uint32 bytes1;
-    uint32 bytes2;
+    uint32 bytes[2];
     uint32 emote;
     std::vector<uint32> auras;
+
+    CreatureAddon()
+        : path_id(), mount(), bytes(), emote()
+    { }
 };
 
 typedef std::unordered_map<uint32, CreatureAddon> CreatureAddonContainer;
@@ -498,7 +501,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
         void DisappearAndDie();
 
         bool Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, uint32 vehId, uint32 team, float x, float y, float z, float ang, const CreatureData* data = NULL);
-        bool LoadCreaturesAddon(bool reload = false);
+        bool LoadCreaturesAddon();
         void SelectLevel(const CreatureTemplate* cinfo);
         void LoadEquipment(uint32 equip_entry, bool force=false);
 
@@ -781,11 +784,15 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
 
         static float _GetDamageMod(int32 Rank);
 
-        float m_SightDistance, m_CombatDistance;
+        float m_SightDistance, m_CombatDistance, m_ReactDistance;
 
         void FarTeleportTo(Map* map, float X, float Y, float Z, float O);
 
         bool m_isTempWorldObject; //true when possessed
+
+        void SetSeerGUID(uint64 guid) { m_seerGUID = guid; }
+
+        uint64 GetSeerGUID() const { return m_seerGUID; }
 
         void ForcedDespawn(uint32 timeMSToDespawn = 0);
 
@@ -835,6 +842,9 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
         CreatureData const* m_creatureData;
 
         uint16 m_LootMode;                                  // bitmask, default LOOT_MODE_DEFAULT, determines what loot will be lootable
+
+        uint64 m_seerGUID;
+        bool IsAlwaysVisibleFor(WorldObject const* seer) const;
 
         bool IsInvisibleDueToDespawn() const;
         bool CanAlwaysSee(WorldObject const* obj) const;

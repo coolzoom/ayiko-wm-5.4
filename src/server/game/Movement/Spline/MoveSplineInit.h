@@ -154,6 +154,8 @@ namespace Movement
         */
         void DisableTransportPathTransformations();
 
+        Unit const * GetMasterUnit() const { return unit; }
+
     private:
         MoveSplineInitArgs args;
         Unit* unit;

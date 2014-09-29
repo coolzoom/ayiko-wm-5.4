@@ -145,7 +145,7 @@ m_PlayerDamageReq(0), m_lootRecipient(0), m_lootRecipientGroup(0), m_corpseRemov
 m_respawnDelay(300), m_corpseDelay(60), m_respawnradius(0.0f), m_reactState(REACT_AGGRESSIVE),
 m_defaultMovementType(IDLE_MOTION_TYPE), m_DBTableGuid(0), m_equipmentId(0), m_AlreadyCallAssistance(false),
 m_AlreadySearchedAssistance(false), m_regenHealth(true), m_AI_locked(false), m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL),
-m_creatureInfo(NULL), m_creatureData(NULL), m_path_id(0), m_formation(NULL)
+m_creatureInfo(NULL), m_creatureData(NULL), m_path_id(0), m_formation(NULL), m_ReactDistance(0), m_seerGUID(0)
 {
     m_regenTimer = 0;
     m_powerFraction = 0;
@@ -1549,10 +1549,6 @@ void Creature::DeleteFromDB()
     stmt->setUInt32(0, m_DBTableGuid);
     trans->Append(stmt);
 
-    stmt = WorldDatabase.GetPreparedStatement(WORLD_DEL_CREATURE_ADDON);
-    stmt->setUInt32(0, m_DBTableGuid);
-    trans->Append(stmt);
-
     stmt = WorldDatabase.GetPreparedStatement(WORLD_DEL_GAME_EVENT_CREATURE);
     stmt->setUInt32(0, m_DBTableGuid);
     trans->Append(stmt);
@@ -1579,6 +1575,25 @@ bool Creature::CanAlwaysSee(WorldObject const* obj) const
 {
     if (IsAIEnabled && AI()->CanSeeAlways(obj))
         return true;
+
+    return false;
+}
+
+bool Creature::IsAlwaysVisibleFor(WorldObject const* seer) const
+{
+    if (Unit::IsAlwaysVisibleFor(seer))
+        return true;
+
+    // Always seen by seer player and by creatures who has same seer player
+    if (m_seerGUID)
+    {
+        if (seer->GetGUID() == m_seerGUID)
+            return true;
+
+        if (const Creature* _seer = seer->ToCreature())
+            if (_seer->GetSeerGUID() == m_seerGUID)
+                return true;
+    }
 
     return false;
 }
@@ -1623,6 +1638,9 @@ bool Creature::canStartAttack(Unit const* who, bool force) const
 
 float Creature::GetAttackDistance(Unit const* player) const
 {
+    if (m_ReactDistance)
+        return m_ReactDistance;
+
     float aggroRate = sWorld->getRate(RATE_CREATURE_AGGRO);
     if (aggroRate == 0)
         return 0.0f;
@@ -1733,7 +1751,7 @@ void Creature::setDeathState(DeathState s)
         SetUInt32Value(UNIT_NPC_FLAGS + 1, cinfo->npcflag2);
         ClearUnitState(uint32(UNIT_STATE_ALL_STATE));
         SetMeleeDamageSchool(SpellSchools(cinfo->dmgschool));
-        LoadCreaturesAddon(true);
+        LoadCreaturesAddon();
         Motion_Initialize();
         if (GetCreatureData() && GetPhaseMask() != GetCreatureData()->phaseMask)
             SetPhaseMask(GetCreatureData()->phaseMask, false);
@@ -2250,7 +2268,7 @@ CreatureAddon const* Creature::GetCreatureAddon() const
 }
 
 //creature_addon table
-bool Creature::LoadCreaturesAddon(bool reload)
+bool Creature::LoadCreaturesAddon()
 {
     CreatureAddon const* cainfo = GetCreatureAddon();
     if (!cainfo)
@@ -2259,34 +2277,36 @@ bool Creature::LoadCreaturesAddon(bool reload)
     if (cainfo->mount != 0)
         Mount(cainfo->mount);
 
-    if (cainfo->bytes1 != 0)
+    if (cainfo->bytes[0] != 0)
     {
         // 0 StandState
         // 1 FreeTalentPoints   Pet only, so always 0 for default creature
         // 2 StandFlags
         // 3 StandMiscFlags
 
-        SetByteValue(UNIT_FIELD_BYTES_1, 0, uint8(cainfo->bytes1 & 0xFF));
+        SetByteValue(UNIT_FIELD_BYTES_1, 0, uint8(cainfo->bytes[0] & 0xFF));
         //SetByteValue(UNIT_FIELD_BYTES_1, 1, uint8((cainfo->bytes1 >> 8) & 0xFF));
         SetByteValue(UNIT_FIELD_BYTES_1, 1, 0);
-        SetByteValue(UNIT_FIELD_BYTES_1, 2, uint8((cainfo->bytes1 >> 16) & 0xFF));
-        SetByteValue(UNIT_FIELD_BYTES_1, 3, uint8((cainfo->bytes1 >> 24) & 0xFF));
+        SetByteValue(UNIT_FIELD_BYTES_1, 2, uint8((cainfo->bytes[0] >> 16) & 0xFF));
+        SetByteValue(UNIT_FIELD_BYTES_1, 3, uint8((cainfo->bytes[0] >> 24) & 0xFF));
 
         //! Suspected correlation between UNIT_FIELD_BYTES_1, offset 3, value 0x2:
-        //! If no inhabittype_fly (if no MovementFlag_DisableGravity flag found in sniffs)
+        //! If no inhabittype_fly (if no MovementFlag_DisableGravity or MovementFlag_CanFly flag found in sniffs)
+        //! Check using InhabitType as movement flags are assigned dynamically
+        //! basing on whether the creature is in air or not
         //! Set MovementFlag_Hover. Otherwise do nothing.
-        if (GetByteValue(UNIT_FIELD_BYTES_1, 3) & UNIT_BYTE1_FLAG_HOVER && !IsLevitating())
+        if (GetByteValue(UNIT_FIELD_BYTES_1, 3) & UNIT_BYTE1_FLAG_HOVER && !(GetCreatureTemplate()->InhabitType & INHABIT_AIR))
             AddUnitMovementFlag(MOVEMENTFLAG_HOVER);
     }
 
-    if (cainfo->bytes2 != 0)
+    if (cainfo->bytes[1] != 0)
     {
         // 0 SheathState
         // 1 Bytes2Flags
         // 2 UnitRename         Pet only, so always 0 for default creature
         // 3 ShapeshiftForm     Must be determined/set by shapeshift spell/aura
 
-        SetByteValue(UNIT_FIELD_BYTES_2, 0, uint8(cainfo->bytes2 & 0xFF));
+        SetByteValue(UNIT_FIELD_BYTES_2, 0, uint8(cainfo->bytes[1] & 0xFF));
         //SetByteValue(UNIT_FIELD_BYTES_2, 1, uint8((cainfo->bytes2 >> 8) & 0xFF));
         //SetByteValue(UNIT_FIELD_BYTES_2, 2, uint8((cainfo->bytes2 >> 16) & 0xFF));
         SetByteValue(UNIT_FIELD_BYTES_2, 2, 0);
@@ -2305,24 +2325,18 @@ bool Creature::LoadCreaturesAddon(bool reload)
     {
         for (std::vector<uint32>::const_iterator itr = cainfo->auras.begin(); itr != cainfo->auras.end(); ++itr)
         {
-            SpellInfo const* AdditionalSpellInfo = sSpellMgr->GetSpellInfo(*itr);
-            if (!AdditionalSpellInfo)
-            {
-                TC_LOG_ERROR("sql.sql", "Creature (GUID: %u Entry: %u) has wrong spell %u defined in `auras` field.", GetGUIDLow(), GetEntry(), *itr);
-                continue;
-            }
-
             // skip already applied aura
             if (HasAura(*itr))
-            {
-                if (!reload)
-                    TC_LOG_ERROR("sql.sql", "Creature (GUID: %u Entry: %u) has duplicate aura (spell %u) in `auras` field.", GetGUIDLow(), GetEntry(), *itr);
-
                 continue;
-            }
 
-            AddAura(*itr, this);
-            TC_LOG_DEBUG("entities.unit", "Spell: %u added to creature (GUID: %u Entry: %u)", *itr, GetGUIDLow(), GetEntry());
+            if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(*itr))
+            {
+                if (spellInfo->IsChanneled())
+                    CastSpell(this, *itr, true);
+                else
+                    AddAura(*itr, this);
+                TC_LOG_DEBUG("entities.unit", "Spell: %u added to creature (GUID: %u Entry: %u)", *itr, GetGUIDLow(), GetEntry());
+            }
         }
     }
 

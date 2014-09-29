@@ -20291,6 +20291,19 @@ void Unit::SetCanFly(bool apply)
         RemoveUnitMovementFlag(MOVEMENTFLAG_CAN_FLY);
 }
 
+bool Unit::SetSwim(bool enable)
+{
+    if (enable == HasUnitMovementFlag(MOVEMENTFLAG_SWIMMING))
+        return false;
+
+    if (enable)
+        AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
+    else
+        RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
+
+    return true;
+}
+
 void Unit::NearTeleportTo(float x, float y, float z, float orientation, bool casting /*= false*/)
 {
     if (GetTypeId() == TYPEID_PLAYER)

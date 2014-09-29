@@ -492,70 +492,13 @@ void ObjectMgr::LoadCreatureTemplateAddons()
 {
     uint32 oldMSTime = getMSTime();
 
-    //                                                0       1       2      3       4       5      6
-    QueryResult result = WorldDatabase.Query("SELECT entry, path_id, mount, bytes1, bytes2, emote, auras FROM creature_template_addon");
+    LoadCreatureAddonPaths("entry", "creature_template_path", _creatureTemplateAddonStore);
+    LoadCreatureAddonMounts("entry", "creature_template_mount", _creatureTemplateAddonStore);
+    LoadCreatureAddonBytes("entry", "creature_template_bytes", _creatureTemplateAddonStore);
+    LoadCreatureAddonEmotes("entry", "creature_template_emote", _creatureTemplateAddonStore);
+    LoadCreatureAddonAuras("entry", "creature_template_aura", _creatureTemplateAddonStore);
 
-    if (!result)
-    {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 creature template addon definitions. DB table `creature_template_addon` is empty.");
-        return;
-    }
-
-    uint32 count = 0;
-    do
-    {
-        Field* fields = result->Fetch();
-
-        uint32 entry = fields[0].GetUInt32();
-
-        if (!sObjectMgr->GetCreatureTemplate(entry))
-        {
-            TC_LOG_ERROR("sql.sql", "Creature template (Entry: %u) does not exist but has a record in `creature_template_addon`", entry);
-            continue;
-        }
-
-        CreatureAddon& creatureAddon = _creatureTemplateAddonStore[entry];
-
-        creatureAddon.path_id = fields[1].GetUInt32();
-        creatureAddon.mount   = fields[2].GetUInt32();
-        creatureAddon.bytes1  = fields[3].GetUInt32();
-        creatureAddon.bytes2  = fields[4].GetUInt32();
-        creatureAddon.emote   = fields[5].GetUInt32();
-
-        Tokenizer tokens(fields[6].GetString(), ' ');
-        uint8 i = 0;
-        creatureAddon.auras.resize(tokens.size());
-        for (Tokenizer::const_iterator itr = tokens.begin(); itr != tokens.end(); ++itr)
-        {
-            SpellInfo const* AdditionalSpellInfo = sSpellMgr->GetSpellInfo(uint32(atol(*itr)));
-            if (!AdditionalSpellInfo)
-            {
-                TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has wrong spell %u defined in `auras` field in `creature_template_addon`.", entry, uint32(atol(*itr)));
-                continue;
-            }
-            creatureAddon.auras[i++] = uint32(atol(*itr));
-        }
-
-        if (creatureAddon.mount)
-        {
-            if (!sCreatureDisplayInfoStore.LookupEntry(creatureAddon.mount))
-            {
-                TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has invalid displayInfoId (%u) for mount defined in `creature_template_addon`", entry, creatureAddon.mount);
-                creatureAddon.mount = 0;
-            }
-        }
-
-        if (!sEmotesStore.LookupEntry(creatureAddon.emote))
-        {
-            TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has invalid emote (%u) defined in `creature_addon`.", entry, creatureAddon.emote);
-            creatureAddon.emote = 0;
-        }
-
-        ++count;
-    }
-    while (result->NextRow());
-
-    TC_LOG_INFO("server.loading", ">> Loaded %u creature template addons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    //TC_LOG_INFO("server.loading", ">> Loaded creature template addons in %u ms", _creatureTemplateAddonStore.size(), GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::FixCreatureTemplate(CreatureTemplate &cInfo)
@@ -871,77 +814,13 @@ void ObjectMgr::LoadCreatureAddons()
 {
     uint32 oldMSTime = getMSTime();
 
-    //                                                0       1       2      3       4       5      6
-    QueryResult result = WorldDatabase.Query("SELECT guid, path_id, mount, bytes1, bytes2, emote, auras FROM creature_addon");
+    LoadCreatureAddonPaths("guid", "creature_path", _creatureAddonStore);
+    LoadCreatureAddonMounts("guid", "creature_mount", _creatureAddonStore);
+    LoadCreatureAddonBytes("guid", "creature_bytes", _creatureAddonStore);
+    LoadCreatureAddonEmotes("guid", "creature_emote", _creatureAddonStore);
+    LoadCreatureAddonAuras("guid", "creature_aura", _creatureAddonStore);
 
-    if (!result)
-    {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 creature addon definitions. DB table `creature_addon` is empty.");
-        return;
-    }
-
-    uint32 count = 0;
-    do
-    {
-        Field* fields = result->Fetch();
-
-        uint32 guid = fields[0].GetUInt32();
-
-        CreatureData const* creData = GetCreatureData(guid);
-        if (!creData)
-        {
-            TC_LOG_ERROR("sql.sql", "Creature (GUID: %u) does not exist but has a record in `creature_addon`", guid);
-            continue;
-        }
-
-        CreatureAddon& creatureAddon = _creatureAddonStore[guid];
-
-        creatureAddon.path_id = fields[1].GetUInt32();
-        if (creData->movementType == WAYPOINT_MOTION_TYPE && !creatureAddon.path_id)
-        {
-            const_cast<CreatureData*>(creData)->movementType = IDLE_MOTION_TYPE;
-            TC_LOG_ERROR("sql.sql", "Creature (GUID %u) has movement type set to WAYPOINT_MOTION_TYPE but no path assigned", guid);
-        }
-
-        creatureAddon.mount   = fields[2].GetUInt32();
-        creatureAddon.bytes1  = fields[3].GetUInt32();
-        creatureAddon.bytes2  = fields[4].GetUInt32();
-        creatureAddon.emote   = fields[5].GetUInt32();
-
-        Tokenizer tokens(fields[6].GetString(), ' ');
-        uint8 i = 0;
-        creatureAddon.auras.resize(tokens.size());
-        for (Tokenizer::const_iterator itr = tokens.begin(); itr != tokens.end(); ++itr)
-        {
-            SpellInfo const* AdditionalSpellInfo = sSpellMgr->GetSpellInfo(uint32(atol(*itr)));
-            if (!AdditionalSpellInfo)
-            {
-                TC_LOG_ERROR("sql.sql", "Creature (GUID: %u) has wrong spell %u defined in `auras` field in `creature_addon`.", guid, uint32(atol(*itr)));
-                continue;
-            }
-            creatureAddon.auras[i++] = uint32(atol(*itr));
-        }
-
-        if (creatureAddon.mount)
-        {
-            if (!sCreatureDisplayInfoStore.LookupEntry(creatureAddon.mount))
-            {
-                TC_LOG_ERROR("sql.sql", "Creature (GUID: %u) has invalid displayInfoId (%u) for mount defined in `creature_addon`", guid, creatureAddon.mount);
-                creatureAddon.mount = 0;
-            }
-        }
-
-        if (!sEmotesStore.LookupEntry(creatureAddon.emote))
-        {
-            TC_LOG_ERROR("sql.sql", "Creature (GUID: %u) has invalid emote (%u) defined in `creature_addon`.", guid, creatureAddon.emote);
-            creatureAddon.emote = 0;
-        }
-
-        ++count;
-    }
-    while (result->NextRow());
-
-    TC_LOG_INFO("server.loading", ">> Loaded %u creature addons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    //TC_LOG_INFO("server.loading", ">> Loaded creature addons in %u ms", _creatureAddonStore.size(), GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::loadCreatureTemplateInvisibility()
@@ -9315,4 +9194,81 @@ void ObjectMgr::ReplaceCreatureTemplate(uint32 entry, CreatureTemplate const &ne
 
     currTemplate = newTemplate;
     FixCreatureTemplate(currTemplate);
+}
+
+void ObjectMgr::LoadCreatureAddonPaths(char const *keyName, char const *tableName, CreatureAddonContainer &addonStorage)
+{
+    QueryResult result = WorldDatabase.PQuery("SELECT `%s`, `path` FROM `%s`", keyName, tableName);
+    if (!result)
+        return;
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        uint32 entry = fields[0].GetUInt32();
+        addonStorage[entry].path_id = fields[1].GetUInt32();
+    } while (result->NextRow());
+}
+
+void ObjectMgr::LoadCreatureAddonMounts(char const *keyName, char const *tableName, CreatureAddonContainer &addonStorage)
+{
+    QueryResult result = WorldDatabase.PQuery("SELECT `%s`, `mount` FROM `%s`", keyName, tableName);
+    if (!result)
+        return;
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        uint32 entry = fields[0].GetUInt32();
+        addonStorage[entry].mount = fields[1].GetUInt32();
+    } while (result->NextRow());
+}
+
+void ObjectMgr::LoadCreatureAddonBytes(char const *keyName, char const *tableName, CreatureAddonContainer &addonStorage)
+{
+    QueryResult result = WorldDatabase.PQuery("SELECT `%s`, `index`, `bytes` FROM `%s`", keyName, tableName);
+    if (!result)
+        return;
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        uint32 entry = fields[0].GetUInt32();
+        uint8 index = fields[1].GetUInt8();
+
+        addonStorage[entry].bytes[index] = fields[2].GetUInt32();
+    } while (result->NextRow());
+}
+
+void ObjectMgr::LoadCreatureAddonEmotes(char const *keyName, char const *tableName, CreatureAddonContainer &addonStorage)
+{
+    QueryResult result = WorldDatabase.PQuery("SELECT `%s`, `emote` FROM `%s`", keyName, tableName);
+    if (!result)
+        return;
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        uint32 entry = fields[0].GetUInt32();
+        addonStorage[entry].emote = fields[1].GetUInt32();
+    } while (result->NextRow());
+}
+
+void ObjectMgr::LoadCreatureAddonAuras(char const *keyName, char const *tableName, CreatureAddonContainer &addonStorage)
+{
+    QueryResult result = WorldDatabase.PQuery("SELECT `%s`, `aura` FROM `%s`", keyName, tableName);
+    if (!result)
+        return;
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        uint32 entry = fields[0].GetUInt32();
+        addonStorage[entry].auras.push_back(fields[1].GetUInt32());
+    } while (result->NextRow());
 }

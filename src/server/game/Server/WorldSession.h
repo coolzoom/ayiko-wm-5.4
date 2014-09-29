@@ -1049,6 +1049,7 @@ class WorldSession
         void HandleBlackMarketBid(WorldPacket& recvData);
         void SendBlackMarketBidResult(uint32 itemEntry, uint32 auctionId);
 
+        void HandleMovieComplete(WorldPacket& recv_data);
     private:
         void InitializeQueryCallbackParameters();
         void ProcessQueryCallbacks();

@@ -314,6 +314,14 @@ struct SpellEnchantProcEntry
 
 typedef std::unordered_map<uint32, SpellEnchantProcEntry> SpellEnchantProcEventMap;
 
+struct SpellAmmoEntry
+{
+    uint32 ammoDisplayID;
+    uint32 inventoryType;
+};
+
+typedef std::unordered_map<uint32, SpellAmmoEntry>      SpellAmmoMap;
+
 struct SpellBonusEntry
 {
     float  direct_damage;
@@ -721,6 +729,8 @@ class SpellMgr
             return mSpellsByCategoryStore.equal_range(categoryId);
         }
 
+        SpellAmmoMap const&  GetSpellAmmoMap() const { return mSpellAmmoMap; }
+
     // Modifiers
     public:
 
@@ -753,6 +763,7 @@ class SpellMgr
         void LoadSpellPowerInfo();
         void InitializeItemUpgradeDatas();
         void LoadSpellsByCategory();
+        void LoadSpellAmmo();
 
         std::vector<uint32>        mSpellCreateItemList;
 
@@ -769,6 +780,7 @@ class SpellMgr
         SpellProcEventMap          mSpellProcEventMap;
         SpellProcMap               mSpellProcMap;
         SpellBonusMap              mSpellBonusMap;
+        SpellAmmoMap               mSpellAmmoMap;
         SpellThreatMap             mSpellThreatMap;
         SpellPetAuraMap            mSpellPetAuraMap;
         SpellLinkedMap             mSpellLinkedMap;

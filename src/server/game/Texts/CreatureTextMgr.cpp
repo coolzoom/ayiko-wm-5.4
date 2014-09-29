@@ -160,7 +160,7 @@ void CreatureTextMgr::LoadCreatureTextLocales()
 
 }
 
-uint32 CreatureTextMgr::SendChat(Creature* source, uint8 textGroup, uint64 whisperGuid /*= 0*/, ChatMsg msgType /*= CHAT_MSG_ADDON*/, Language language /*= LANG_ADDON*/, TextRange range /*= TEXT_RANGE_NORMAL*/, uint32 sound /*= 0*/, Team team /*= TEAM_OTHER*/, bool gmOnly /*= false*/, Player* srcPlr /*= NULL*/)
+uint32 CreatureTextMgr::SendChat(Creature* source, uint8 textGroup, uint64 whisperGuid /*= 0*/, ChatMsg msgType /*= CHAT_MSG_ADDON*/, Language language /*= LANG_ADDON*/, TextRange range /*= TEXT_RANGE_NORMAL*/, uint32 sound /*= 0*/, Team team /*= TEAM_OTHER*/, bool gmOnly /*= false*/, Player* srcPlr /*= NULL*/, bool personal /*= false*/, float customRange)
 {
     if (!source)
         return 0;
@@ -254,7 +254,7 @@ uint32 CreatureTextMgr::SendChat(Creature* source, uint8 textGroup, uint64 whisp
         SendEmote(finalSource, iter->emote);
 
     CreatureTextBuilder builder(finalSource, finalType, iter->group, iter->id, finalLang, whisperGuid);
-    SendChatPacket(finalSource, builder, finalType, whisperGuid, range, team, gmOnly);
+    SendChatPacket(finalSource, builder, finalType, whisperGuid, range, team, gmOnly, personal, customRange);
     if (isEqualChanced || (!isEqualChanced && totalChance == 100.0f))
         SetRepeatId(source, textGroup, iter->id);
 
@@ -280,7 +280,7 @@ float CreatureTextMgr::GetRangeForChatType(ChatMsg msgType) const
     return dist;
 }
 
-void CreatureTextMgr::SendSound(Creature* source, uint32 sound, ChatMsg msgType, uint64 whisperGuid, TextRange range, Team team, bool gmOnly)
+void CreatureTextMgr::SendSound(Creature* source, uint32 sound, ChatMsg msgType, uint64 whisperGuid, TextRange range, Team team, bool gmOnly, bool personal, float customRange)
 {
     if (!sound || !source)
         return;
@@ -292,10 +292,21 @@ void CreatureTextMgr::SendSound(Creature* source, uint32 sound, ChatMsg msgType,
     data.WriteByteSeq<7, 0, 5, 4, 3, 1, 2, 6>(guid);
     data << uint32(sound);
 
-    SendNonChatPacket(source, &data, msgType, whisperGuid, range, team, gmOnly);
+    if (personal)
+    {
+        Player* player = ObjectAccessor::FindPlayer(whisperGuid);
+
+        if (!player || !player->GetSession())
+            return;
+
+        player->SendDirectMessage(&data);
+        return;
+    }
+
+    SendNonChatPacket(source, &data, msgType, whisperGuid, range, team, gmOnly, customRange);
 }
 
-void CreatureTextMgr::SendNonChatPacket(WorldObject* source, WorldPacket* data, ChatMsg msgType, uint64 whisperGuid, TextRange range, Team team, bool gmOnly) const
+void CreatureTextMgr::SendNonChatPacket(WorldObject* source, WorldPacket* data, ChatMsg msgType, uint64 whisperGuid, TextRange range, Team team, bool gmOnly, float customRange) const
 {
     float dist = GetRangeForChatType(msgType);
 
@@ -355,6 +366,9 @@ void CreatureTextMgr::SendNonChatPacket(WorldObject* source, WorldPacket* data, 
                         player->GetSession()->SendPacket(data);
             return;
         }
+        case TEXT_RANGE_CUSTOM:
+            dist = customRange;
+            break;
         case TEXT_RANGE_NORMAL:
         default:
             break;

@@ -66,10 +66,10 @@ void DoPrepareStatements(MySQLConnection &conn)
     conn.prepareStatement(WORLD_SEL_WAYPOINT_DATA_WPGUID_BY_ID, "SELECT wpguid FROM waypoint_data WHERE id = ? and wpguid <> 0");
     conn.prepareStatement(WORLD_SEL_WAYPOINT_DATA_ACTION, "SELECT DISTINCT action FROM waypoint_data");
     conn.prepareStatement(WORLD_SEL_WAYPOINT_SCRIPTS_MAX_ID, "SELECT MAX(guid) FROM waypoint_scripts");
-    conn.prepareStatement(WORLD_INS_CREATURE_ADDON, "INSERT INTO creature_addon(guid, path_id) VALUES (?, ?)");
-    conn.prepareStatement(WORLD_UPD_CREATURE_ADDON_PATH, "UPDATE creature_addon SET path_id = ? WHERE guid = ?");
-    conn.prepareStatement(WORLD_DEL_CREATURE_ADDON, "DELETE FROM creature_addon WHERE guid = ?");
-    conn.prepareStatement(WORLD_SEL_CREATURE_ADDON_BY_GUID, "SELECT guid FROM creature_addon WHERE guid = ?");
+    conn.prepareStatement(WORLD_INS_CREATURE_PATH, "INSERT INTO creature_path(guid, path) VALUES (?, ?)");
+    conn.prepareStatement(WORLD_UPD_CREATURE_PATH, "UPDATE creature_path SET path = ? WHERE guid = ?");
+    conn.prepareStatement(WORLD_DEL_CREATURE_PATH, "DELETE FROM creature_path WHERE guid = ?");
+    conn.prepareStatement(WORLD_SEL_CREATURE_PATH, "SELECT 1 FROM creature_path WHERE guid = ?");
     conn.prepareStatement(WORLD_INS_WAYPOINT_SCRIPT, "INSERT INTO waypoint_scripts (guid) VALUES (?)");
     conn.prepareStatement(WORLD_DEL_WAYPOINT_SCRIPT, "DELETE FROM waypoint_scripts WHERE guid = ?");
     conn.prepareStatement(WORLD_UPD_WAYPOINT_SCRIPT_ID, "UPDATE waypoint_scripts SET id = ? WHERE guid = ?");

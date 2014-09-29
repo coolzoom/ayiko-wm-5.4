@@ -157,6 +157,7 @@ class MotionMaster //: private std::stack<MovementGenerator *>
         void MovePoint(uint32 id, const Position &pos)
             { MovePoint(id, pos.m_positionX, pos.m_positionY, pos.m_positionZ); }
         void MovePoint(uint32 id, float x, float y, float z);
+        void MovePointSmooth(float x, float y, float diffDist = 5.f, bool vmapsOnly = false, Movement::MoveSplineInit * init = NULL);
 
         // These two movement types should only be used with creatures having landing/takeoff animations
         void MoveLand(uint32 id, Position const& pos);
@@ -167,6 +168,8 @@ class MotionMaster //: private std::stack<MovementGenerator *>
         void MoveKnockbackFrom(float srcX, float srcY, float speedXY, float speedZ);
         void MoveJumpTo(float angle, float speedXY, float speedZ);
         void MoveJump(float x, float y, float z, float speedXY, float speedZ, uint32 id = 0);
+        void MoveJump(Position const& pos, float speedXY, float speedZ, uint32 id = EVENT_JUMP)
+            { MoveJump(pos.m_positionX, pos.m_positionY, pos.m_positionZ, speedXY, speedZ, id); };
         void CustomJump(float x, float y, float z, float speedXY, float speedZ, uint32 id = 0);
         void MoveFall(uint32 id = 0);
         void MoveBackward(uint32 id, float x, float y, float z, float speed = 0.0f);
@@ -175,6 +178,7 @@ class MotionMaster //: private std::stack<MovementGenerator *>
         void MoveSeekAssistanceDistract(uint32 timer);
         void MoveTaxiFlight(uint32 path, uint32 pathnode);
         void MoveDistract(uint32 time);
+        void MoveSplinePath(uint8 path_id, bool fly = false, bool walk = false, float speed = 0.0f, bool cyclic = false, bool catmullrom = true, bool uncompressed = true);
         void MovePath(uint32 path_id, bool repeatable);
         void MoveRotate(uint32 time, RotateDirection direction);
 

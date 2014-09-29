@@ -7501,6 +7501,7 @@ void Player::SendCinematicStart(uint32 CinematicSequenceId)
 
 void Player::SendMovieStart(uint32 MovieId)
 {
+    SetCurrentMovieId(MovieId);
     WorldPacket data(SMSG_TRIGGER_MOVIE, 4);
     data << uint32(MovieId);
     SendDirectMessage(&data);

@@ -438,6 +438,8 @@ public:
     // returns: WorldObject which was selected as an explicit spell target or NULL if there's no target
     WorldObject* GetExplTargetWorldObject();
 
+    void GetTargetSpeedXYZ(float &speedXY, float &speedZ);
+
     // returns: Unit which was selected as an explicit spell target or NULL if there's no target
     Unit* GetExplTargetUnit();
 

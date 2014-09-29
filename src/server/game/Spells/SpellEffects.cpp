@@ -7327,9 +7327,8 @@ void Spell::EffectPlayMusic(SpellEffIndex effIndex)
     if (!sSoundEntriesStore.LookupEntry(soundId))
         return;
 
-    WorldPacket data(SMSG_PLAY_MUSIC, 4);
-    data << uint32(soundId);
-    unitTarget->ToPlayer()->GetSession()->SendPacket(&data);
+
+    unitTarget->PlayMusic(soundId, unitTarget->ToPlayer());
 }
 
 void Spell::EffectSpecCount(SpellEffIndex /*effIndex*/)

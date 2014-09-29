@@ -2197,6 +2197,11 @@ void WorldSession::HandleInstanceLockResponse(WorldPacket& recvPacket)
     _player->SetPendingBind(0, 0);
 }
 
+void WorldSession::HandleMovieComplete(WorldPacket& /*recvData*/)
+{
+    _player->SetCurrentMovieId(0);
+}
+
 void WorldSession::HandleRequestHotfix(WorldPacket& recvPacket)
 {
     uint32 type, count;

@@ -5593,3 +5593,46 @@ void SpellMgr::LoadSpellsByCategory()
     TC_LOG_INFO("server.loading", ">> Loaded " SIZEFMTD "spell <-> category relations in %u ms",
                   mSpellsByCategoryStore.size(), GetMSTimeDiffToNow(oldMSTime));
 }
+
+void SpellMgr::LoadSpellAmmo()
+{
+    mSpellAmmoMap.clear();
+
+    uint32 oldMSTime = getMSTime();
+
+    //                                               0       1            2
+    QueryResult result = WorldDatabase.Query("SELECT spellEntry, ammoDisplayID, inventoryType FROM `spell_ammo`");
+
+    if (!result)
+    {
+        TC_LOG_INFO("server.loading", ">> Loaded 0 spell ammo infos. DB table `spell_ammo` is empty.");
+        return;
+    }
+
+    uint32 count = 0;
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        uint32 spellId = fields[0].GetUInt32();
+        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
+
+        if (!spellInfo)
+        {
+            TC_LOG_ERROR("sql.sql", "Spell %u defined in `spell_ammo` is not valid spell entry!", spellId);
+            continue;
+        }
+
+        const_cast<SpellInfo*>(spellInfo)->AttributesCu |= SPELL_ATTR0_CU_USE_AMMO;
+
+        SpellAmmoEntry &spellAmmo = mSpellAmmoMap[spellInfo->Id];
+        spellAmmo.ammoDisplayID = fields[1].GetUInt32();
+        spellAmmo.inventoryType = fields[2].GetUInt32();
+
+        ++count;
+    }
+    while (result->NextRow());
+
+    TC_LOG_INFO("server.loading", ">> Loaded %u SpellAmmo in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+}

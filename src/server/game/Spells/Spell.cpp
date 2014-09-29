@@ -4916,6 +4916,8 @@ void Spell::SendSpellGo()
     if (m_targets.HasTraj())
         castFlags |= CAST_FLAG_ADJUST_MISSILE;
 
+    if (m_spellInfo->AttributesCu & SPELL_ATTR0_CU_USE_AMMO)
+        castFlags |= CAST_FLAG_PROJECTILE;
 
     WorldPacket data(SMSG_SPELL_GO);
 
@@ -5384,8 +5386,24 @@ void Spell::SendSpellGo()
 
     if (castFlags & CAST_FLAG_PROJECTILE)
     {
-        data << uint32(0); // Ammo display ID
-        data << uint32(0); // Inventory Type
+        uint32 ammoDisplayId = 0;
+        uint32 inventoryType = 0;
+
+        SpellAmmoMap const& spellAmmoMap = sSpellMgr->GetSpellAmmoMap();
+
+        if (!spellAmmoMap.empty())
+        {
+            SpellAmmoMap::const_iterator itr = spellAmmoMap.find(m_spellInfo->Id);
+
+            if (itr != spellAmmoMap.end())
+            {
+                ammoDisplayId = itr->second.ammoDisplayID;
+                inventoryType = itr->second.inventoryType;
+            }
+        }
+
+        data << uint32(ammoDisplayId); // Ammo display ID
+        data << uint32(inventoryType); // Inventory Type
     }
 
     if (castFlags & CAST_FLAG_VISUAL_CHAIN)

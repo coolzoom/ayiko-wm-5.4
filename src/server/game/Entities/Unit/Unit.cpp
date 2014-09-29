@@ -9330,17 +9330,18 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
             break;
         }
         case 49509: // Scent of Blood
+        case 148211:
         {
-            if (GetTypeId() != TYPEID_PLAYER)
+            auto const player = ToPlayer();
+
+            if (!player || player->GetSpecializationId(player->GetActiveSpec()) != SPEC_DK_BLOOD)
                 return false;
 
-            if (getClass() != CLASS_DEATH_KNIGHT)
-                return false;
+            bool procPass = false;
+            if ((procFlags & PROC_FLAG_DONE_MAINHAND_ATTACK) || (procEx & PROC_EX_DODGE) || (procEx & PROC_EX_PARRY))
+                procPass = true;
 
-            if (ToPlayer()->GetSpecializationId(ToPlayer()->GetActiveSpec()) != SPEC_DK_BLOOD)
-                return false;
-
-            if (!roll_chance_i(15))
+            if (!procPass || !roll_chance_i(15))
                 return false;
 
             break;

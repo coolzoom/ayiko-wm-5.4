@@ -1,5 +1,6 @@
 -- [SQL] Quests - Sniffing Out the Perpetrator (A, H) scripted (Feedback #3670)
 -- [SQL] Quests - Catching up with Brann scripted (Feedback #3659)
+-- [SQL] Item - Brann's Communicator will now drop from Tracker Thulin (Feedback #7539)
 SET @NPC_FROSTHOUND := 29677;
 SET @NPC_THULIN := 29695;
 SET @NPC_PURSUER := 29696;

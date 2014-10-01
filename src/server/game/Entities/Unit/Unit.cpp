@@ -16071,6 +16071,12 @@ void CharmInfo::InitCharmCreateSpells()
             continue;
         }
 
+        // Xuen's Provoke should be added to spell-bar only for Brewmaster Spec
+        if (spellId == 130793)
+            if (auto player = m_unit->GetCharmerOrOwnerPlayerOrPlayerItself())
+                if (player->GetSpecializationId(player->GetActiveSpec()) != SPEC_MONK_BREWMASTER)
+                    continue;
+
         if (spellInfo->IsPassive())
         {
             m_unit->CastSpell(m_unit, spellInfo, true);

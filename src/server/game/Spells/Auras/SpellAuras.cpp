@@ -1780,7 +1780,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     // Load and Load proc removes current Explosive Shot cooldown
                     case 56453:
                     {
-                        if(target->ToPlayer())
+                        if(target->GetTypeId() == TYPEID_PLAYER)
                             target->ToPlayer()->RemoveSpellCooldown(53301, true);
                          break;
                     }

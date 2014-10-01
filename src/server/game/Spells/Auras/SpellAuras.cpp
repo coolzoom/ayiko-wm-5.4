@@ -1777,6 +1777,15 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             ModStackAmount(1);
                         break;
                     }
+                    // Load and Load proc removes current Explosive Shot cooldown
+                    case 56453:
+                    {
+                        if(target->ToPlayer())
+                            target->ToPlayer()->RemoveSpellCooldown(53301, true);
+                         break;
+                    }
+                    default:
+                        break;
                 }
                 break;
             case SPELLFAMILY_DEATHKNIGHT:

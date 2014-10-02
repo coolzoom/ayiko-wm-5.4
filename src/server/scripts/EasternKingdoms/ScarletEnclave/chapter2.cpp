@@ -560,12 +560,13 @@ public:
 /*######
 ## npc_a_special_surprise
 ######*/
-//used by 29032, 29061, 29065, 29067, 29068, 29070, 29074, 29072, 29073, 29071 but signed for 29032
+//used by 29032, 29061, 29065, 29067, 29068, 29070, 29074, 29072, 29073, 29071, 49355, 49356 but signed for 29032
 enum SpecialSurprise
 {
     SAY_EXEC_START_1            = 0,                 // speech for all
     SAY_EXEC_START_2            = 1,
     SAY_EXEC_START_3            = 2,
+    SAY_EXEC_START_4            = 54,                     // Cataclysm: Goblin
     SAY_EXEC_PROG_1             = 3,
     SAY_EXEC_PROG_2             = 4,
     SAY_EXEC_PROG_3             = 5,
@@ -573,6 +574,7 @@ enum SpecialSurprise
     SAY_EXEC_PROG_5             = 7,
     SAY_EXEC_PROG_6             = 8,
     SAY_EXEC_PROG_7             = 9,
+    SAY_EXEC_PROG_8             = 55,                     // Cataclysm: Goblin
     SAY_EXEC_NAME_1             = 10,
     SAY_EXEC_NAME_2             = 11,
     SAY_EXEC_RECOG_1            = 12,
@@ -590,6 +592,8 @@ enum SpecialSurprise
     SAY_EXEC_NOREM_7            = 24,
     SAY_EXEC_NOREM_8            = 25,
     SAY_EXEC_NOREM_9            = 26,
+    SAY_EXEC_NOREM_10           = 56,                     // Cataclysm: Goblin
+    SAY_EXEC_NOREM_11           = 57,                     // Cataclysm: Worgen
     SAY_EXEC_THINK_1            = 27,
     SAY_EXEC_THINK_2            = 28,
     SAY_EXEC_THINK_3            = 29,
@@ -600,10 +604,13 @@ enum SpecialSurprise
     SAY_EXEC_THINK_8            = 34,
     SAY_EXEC_THINK_9            = 35,
     SAY_EXEC_THINK_10           = 36,
+    SAY_EXEC_THINK_11           = 58,                     // Cataclysm: Goblin
+    SAY_EXEC_THINK_12           = 59,                     // Cataclysm: Worgen
     SAY_EXEC_LISTEN_1           = 37,
     SAY_EXEC_LISTEN_2           = 38,
     SAY_EXEC_LISTEN_3           = 39,
     SAY_EXEC_LISTEN_4           = 40,
+    SAY_EXEC_LISTEN_5           = 60,                     // Cataclysm: Goblin
     SAY_PLAGUEFIST              = 41,
     SAY_EXEC_TIME_1             = 42,
     SAY_EXEC_TIME_2             = 43,
@@ -615,6 +622,8 @@ enum SpecialSurprise
     SAY_EXEC_TIME_8             = 49,
     SAY_EXEC_TIME_9             = 50,
     SAY_EXEC_TIME_10            = 51,
+    SAY_EXEC_TIME_11            = 61,                     // Cataclysm: Goblin
+    SAY_EXEC_TIME_12            = 62,                     // Cataclysm: Worgen
     SAY_EXEC_WAITING            = 52,
     EMOTE_DIES                  = 53,
 
@@ -633,17 +642,7 @@ public:
 
     struct npc_a_special_surpriseAI : public ScriptedAI
     {
-        npc_a_special_surpriseAI(Creature* creature) : ScriptedAI(creature)
-        {
-            Initialize();
-        }
-
-        void Initialize()
-        {
-            ExecuteSpeech_Timer = 0;
-            ExecuteSpeech_Counter = 0;
-            PlayerGUID = 0;
-        }
+        npc_a_special_surpriseAI(Creature* creature) : ScriptedAI(creature) { }
 
         uint32 ExecuteSpeech_Timer;
         uint32 ExecuteSpeech_Counter;
@@ -651,7 +650,9 @@ public:
 
         void Reset() override
         {
-            Initialize();
+            ExecuteSpeech_Timer = 0;
+            ExecuteSpeech_Counter = 0;
+            PlayerGUID = 0;
 
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
         }
@@ -698,6 +699,14 @@ public:
                     break;
                 case 29070:                                     // Valok the Righteous
                     if (player->GetQuestStatus(12746) == QUEST_STATUS_INCOMPLETE)
+                        return true;
+                    break;
+                case 49355:                                     // Lord Harford
+                    if (player->GetQuestStatus(28649) == QUEST_STATUS_INCOMPLETE)
+                        return true;
+                    break;
+                case 49356:                                     // Gally Lumpstain
+                    if (player->GetQuestStatus(28650) == QUEST_STATUS_INCOMPLETE)
                         return true;
                     break;
             }
@@ -1026,6 +1035,62 @@ public:
                                 case 10:
                                     Talk(SAY_EXEC_WAITING, player->GetGUID());
                                     break;
+                                case 11:
+                                    Talk(EMOTE_DIES);
+                                    me->setDeathState(JUST_DIED);
+                                    me->SetHealth(0);
+                                    return;
+                            }
+                            break;
+                            case RACE_WORGEN:
+                            switch (ExecuteSpeech_Counter)
+                            {
+                                case 0: Talk(SAY_EXEC_START_1, player->GetGUID()); break;
+                                case 1: me->SetStandState(UNIT_STAND_STATE_STAND); break;
+                                case 2: Talk(SAY_EXEC_PROG_1, player->GetGUID()); break;
+                                case 3: Talk(SAY_EXEC_NAME_1, player->GetGUID()); break;
+                                case 4: Talk(SAY_EXEC_RECOG_1, player->GetGUID()); break;
+                                case 5: Talk(SAY_EXEC_NOREM_11, player->GetGUID()); break;        // SQL Part Implemented in Cataclysm
+                                case 6: Talk(SAY_EXEC_THINK_12, player->GetGUID()); break;        // SQL Part Implemented in Cataclysm
+                                case 7: Talk(SAY_EXEC_LISTEN_1, player->GetGUID()); break;
+                                case 8:
+                                    if (Creature* Plaguefist = GetClosestCreatureWithEntry(me, NPC_PLAGUEFIST, 85.0f))
+                                        Plaguefist->AI()->Talk(SAY_PLAGUEFIST, player->GetGUID());
+                                    break;
+                                case 9:
+                                    Talk(SAY_EXEC_TIME_12, player->GetGUID());
+                                    me->SetStandState(UNIT_STAND_STATE_KNEEL);
+                                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                                    break;
+                                case 10: Talk(SAY_EXEC_WAITING, player->GetGUID()); break;
+                                case 11:
+                                    Talk(EMOTE_DIES);
+                                    me->setDeathState(JUST_DIED);
+                                    me->SetHealth(0);
+                                    return;
+                            }
+                            break;
+                        case RACE_GOBLIN:
+                            switch (ExecuteSpeech_Counter)
+                            {
+                                case 0: Talk(SAY_EXEC_START_4, player->GetGUID()); break;            // SQL Part Implemented in Cataclysm
+                                case 1: me->SetStandState(UNIT_STAND_STATE_STAND); break;
+                                case 2: Talk(SAY_EXEC_PROG_8, player->GetGUID()); break;            // SQL Part Implemented in Cataclysm
+                                case 3: Talk(SAY_EXEC_NAME_1, player->GetGUID()); break;            // SQL Part Implemented in Cataclysm
+                                case 4: Talk(SAY_EXEC_RECOG_1, player->GetGUID()); break;
+                                case 5: Talk(SAY_EXEC_NOREM_11, player->GetGUID()); break;        // SQL Part Implemented in Cataclysm
+                                case 6: Talk(SAY_EXEC_THINK_11, player->GetGUID()); break;        // SQL Part Implemented in Cataclysm
+                                case 7: Talk(SAY_EXEC_LISTEN_5, player->GetGUID()); break;        // SQL Part Implemented in Cataclysm
+                                case 8:
+                                    if (Creature* Plaguefist = GetClosestCreatureWithEntry(me, NPC_PLAGUEFIST, 85.0f))
+                                        Plaguefist->AI()->Talk(SAY_PLAGUEFIST, player->GetGUID());
+                                    break;
+                                case 9:
+                                    Talk(SAY_EXEC_TIME_11, player->GetGUID());
+                                    me->SetStandState(UNIT_STAND_STATE_KNEEL);
+                                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                                    break;
+                                case 10: Talk(SAY_EXEC_WAITING, player->GetGUID()); break;
                                 case 11:
                                     Talk(EMOTE_DIES);
                                     me->setDeathState(JUST_DIED);

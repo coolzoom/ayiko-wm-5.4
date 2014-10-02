@@ -105,7 +105,11 @@ UPDATE `quest_template` SET `RequiredRaces` = 128 WHERE `Id` = 12749;
 
 -- [SQL] Death Knight - Quests - An End To All Things... fixed (Feedback #98)
 UPDATE `quest_template` SET `Method` = 2 WHERE `Id` = 12779;
-
+UPDATE `creature_template` SET `KillCredit1` = 29150 WHERE `entry` IN (29102, 29103);
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (29102, 29103) AND `source_type` = 0;
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(29102, 0, 0, 0, 4, 0, 100, 1, 0, 0, 0, 0, 11, 53345, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Hearthglen Crusader - Cast Arrow Assault on Aggro"),
+(29103, 0, 0, 0, 4, 0, 100, 1, 0, 0, 0, 0, 11, 53345, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Tirisfal Crusader - Cast Arrow Assault on Aggro");
 REPLACE INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
 (29032, 0, 0, 'Come to finish the job, have you?', 12, 0, 100, 0, 0, 0, 'special_surprise SAY_EXEC_START_1'),
 (29032, 1, 0, 'Come to finish the job, have ye?', 12, 0, 100, 0, 0, 0, 'special_surprise SAY_EXEC_START_2'),
@@ -640,11 +644,16 @@ REPLACE INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `languag
 (29074, 53, 0, '%s dies from his wounds.', 16, 0, 100, 0, 0, 0, 'special_surprise EMOTE_DIES');
 
 -- [SQL] Death Knight - Quests - How To Win Friends And Influence Enemies, A Special Surprise, Bloody Breakout scripted (Feedback #115, #6708, #119)
+DELETE FROM `creature_model_info` WHERE `modelid`=24193;
+INSERT INTO `creature_model_info` (`modelid`, `bounding_radius`, `combat_reach`, `gender`, `modelid_other_gender`) VALUES
+(24193, 0, 0, 2, 0);
+UPDATE `item_template` SET `spellppmRate_1` = 1 WHERE `entry` = 39371; -- persuader
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` IN ('17', '13') AND `SourceEntry` = '52781';
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 ('17','0','52781','0','0','31','0','3','28610','0','0','0','','Persuasive Strike - Scarlet Marksman'),
 ('17','0','52781','0','1','31','0','3','28939','0','0','0','','Persuasive Strike - Scarlet Preacher'),
 ('17','0','52781','0','2','31','0','3','28940','0','0','0','','Persuasive Strike - Scarlet Crusader');
+UPDATE `creature_template` SET `ScriptName`='npc_crusade_persuaded' WHERE `entry` IN (28939, 28940, 28610);
 UPDATE `creature_template` SET `ScriptName`='npc_scarlet_courier' WHERE `entry`='29076';
 UPDATE `creature_template` SET `ScriptName`='npc_koltira_deathweaver' WHERE `entry`='28912';
 UPDATE `creature_template` SET `ScriptName`='npc_high_inquisitor_valroth' WHERE `entry`='29001';
@@ -662,6 +671,7 @@ INSERT INTO script_waypoint VALUES
    (28912, 9, 1653.063, -5974.844, 132.652, 5000, 'Mount'),
    (28912, 10, 1654.747, -5926.424, 121.191, 0, 'Disappear');
 
+DELETE FROM `script_texts` WHERE `entry` BETWEEN -1609600 AND -1609501;
 DELETE FROM `script_texts` WHERE `npc_entry` IN (28939, 28940, 28610, 29076, 28912, 29001, 29032, 29061, 29065, 29067, 29068, 29070, 29074, 29072, 29073, 29071, 29032, 29053);
 DELETE FROM `creature_text` WHERE `entry` IN (28939, 28940, 28610, 29076, 28912, 29001, 29032, 29061, 29065, 29067, 29068, 29070, 29074, 29072, 29073, 29071, 29032, 29053);
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES

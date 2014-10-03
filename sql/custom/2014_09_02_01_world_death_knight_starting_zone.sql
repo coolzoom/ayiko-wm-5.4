@@ -647,8 +647,7 @@ REPLACE INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `languag
 DELETE FROM `creature_model_info` WHERE `modelid`=24193;
 INSERT INTO `creature_model_info` (`modelid`, `bounding_radius`, `combat_reach`, `gender`, `modelid_other_gender`) VALUES
 (24193, 0, 0, 2, 0);
-UPDATE `item_template` SET `spellppmRate_1` = 1 WHERE `entry` = 39371; -- persuader
-DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` IN ('17', '13') AND `SourceEntry` = '52781';
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` IN (17, 13) AND `SourceEntry` = 52781;
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 ('17','0','52781','0','0','31','0','3','28610','0','0','0','','Persuasive Strike - Scarlet Marksman'),
 ('17','0','52781','0','1','31','0','3','28939','0','0','0','','Persuasive Strike - Scarlet Preacher'),
@@ -1284,11 +1283,14 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 
 -- [SQL] Death Knight - Quests - Death Comes From On High fixed (Feedback #106)
 UPDATE `quest_template` SET `Method` = 2, `Flags` = 136, `SpecialFlags` = 0, `RequiredSpellCast1` = 0, `RequiredSpellCast2` = 0, `RequiredSpellCast3` = 0, `RequiredSpellCast4` = 0 WHERE `Id` = 12641;
+UPDATE `creature_template` SET `spell1` = 26062, `ScriptName` = 'generic_creature' WHERE `entry` = 28528;
 DELETE FROM `spell_script_names` WHERE `spell_id` IN (51858, 52694);
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (51858, 'spell_q12641_death_comes_from_on_high'),
 (52694, 'spell_q12641_recall_eye_of_acherus');
-UPDATE `creature` SET `position_x`=1814.592, `position_y`=-5988.646, `position_z`=125.4968, `orientation`=3.228859 WHERE `id`=28525;
-UPDATE `creature` SET `position_x`=1590.806, `position_y`=-5731.661, `position_z`=143.8694, `orientation`=0.9075712 WHERE `id`=28543;
-UPDATE `creature` SET `position_x`= 1651.211, `position_y`=-5994.667, `position_z`=133.5836 WHERE `id`=28542;
-UPDATE `creature` SET `position_x`= 1385.928, `position_x`=1385.928, `position_y`= -5702.061, `position_z`= 146.3048, `orientation`=4.153883 WHERE `id`=28544;
+DELETE FROM `creature` WHERE `id` IN (28525, 28542, 28543, 28544);
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(128615, 28525, 609, 1, 2, 11686, 1, 1807.430, -5991.200, 117.610, 1.610, 120, 0, 0, 8982, 0, 0, 0, 0, 0),
+(128741, 28542, 609, 1, 2, 11686, 1, 1651.270, -5996.730, 133.500, 1.550, 120, 0, 0, 8982, 0, 0, 0, 0, 0),
+(128746, 28543, 609, 1, 2, 11686, 1, 1591.280, -5732.610, 121.680, 5.120, 120, 0, 0, 8982, 0, 0, 0, 0, 0),
+(128751, 28544, 609, 1, 2, 11686, 1, 1384.860, -5701.300, 137.980, 5.730, 120, 0, 0, 8982, 0, 0, 0, 0, 0);

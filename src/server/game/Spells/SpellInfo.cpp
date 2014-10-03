@@ -1260,20 +1260,27 @@ bool SpellInfo::NeedsExplicitUnitTarget() const
     return GetExplicitTargetMask() & TARGET_FLAG_UNIT_MASK;
 }
 
-bool SpellInfo::NeedsToBeTriggeredByCaster() const
+bool SpellInfo::NeedsToBeTriggeredByCaster(SpellInfo const *triggeringSpell) const
 {
     if (NeedsExplicitUnitTarget())
         return true;
 
-    for (auto const &spellEffect : Effects)
+    if (triggeringSpell->IsChanneled())
     {
-        if (spellEffect.IsEffect())
+        uint32 mask = 0;
+        for (auto const &spellEffect : Effects)
         {
-            if (spellEffect.TargetA.GetSelectionCategory() == TARGET_SELECT_CATEGORY_CHANNEL
-                    || spellEffect.TargetB.GetSelectionCategory() == TARGET_SELECT_CATEGORY_CHANNEL)
-                return true;
+            if (spellEffect.TargetA.GetTarget() != TARGET_UNIT_CASTER && spellEffect.TargetA.GetTarget() != TARGET_DEST_CASTER
+                && spellEffect.TargetB.GetTarget() != TARGET_UNIT_CASTER && spellEffect.TargetB.GetTarget() != TARGET_DEST_CASTER)
+            {
+                mask |= spellEffect.GetProvidedTargetMask();
+            }
         }
+
+        if (mask & TARGET_FLAG_UNIT_MASK)
+            return true;
     }
+
     return false;
 }
 

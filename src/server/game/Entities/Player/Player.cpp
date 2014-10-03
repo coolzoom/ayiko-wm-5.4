@@ -24580,7 +24580,7 @@ void Player::UpdateVisibilityOf(WorldObject* target)
 {
     if (HaveAtClient(target))
     {
-        if (!canSeeOrDetect(target, false, true))
+        if (!m_seer->canSeeOrDetect(target, false, true))
         {
             if (target->GetTypeId() == TYPEID_UNIT)
                 BeforeVisibilityDestroy<Creature>(target->ToCreature(), this);
@@ -24595,7 +24595,7 @@ void Player::UpdateVisibilityOf(WorldObject* target)
     }
     else
     {
-        if (canSeeOrDetect(target, false, true))
+        if (m_seer->canSeeOrDetect(target, false, true))
         {
             //if (target->isType(TYPEMASK_UNIT) && ((Unit*)target)->m_Vehicle)
             //    UpdateVisibilityOf(((Unit*)target)->m_Vehicle);

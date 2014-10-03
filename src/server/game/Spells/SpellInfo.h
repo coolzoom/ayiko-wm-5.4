@@ -433,7 +433,7 @@ public:
     bool IsAffectingArea() const;
     bool IsTargetingArea() const;
     bool NeedsExplicitUnitTarget() const;
-    bool NeedsToBeTriggeredByCaster() const;
+    bool NeedsToBeTriggeredByCaster(SpellInfo const *triggeringSpell) const;
 
     bool IsPassive() const;
     bool IsRaidMarker() const;

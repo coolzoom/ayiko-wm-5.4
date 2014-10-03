@@ -1469,13 +1469,13 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
     SpellCastTargets targets;
     if (effectHandleMode == SPELL_EFFECT_HANDLE_LAUNCH_TARGET)
     {
-        if (!spellInfo->NeedsToBeTriggeredByCaster())
+        if (!spellInfo->NeedsToBeTriggeredByCaster(GetSpellInfo()))
             return;
         targets.SetUnitTarget(unitTarget);
     }
     else //if (effectHandleMode == SPELL_EFFECT_HANDLE_LAUNCH)
     {
-        if (spellInfo->NeedsToBeTriggeredByCaster() && (m_spellInfo->Effects[effIndex].GetProvidedTargetMask() & TARGET_FLAG_UNIT_MASK))
+        if (spellInfo->NeedsToBeTriggeredByCaster(GetSpellInfo()) && (m_spellInfo->Effects[effIndex].GetProvidedTargetMask() & TARGET_FLAG_UNIT_MASK))
             return;
 
         if (spellInfo->GetExplicitTargetMask() & TARGET_FLAG_DEST_LOCATION)
@@ -1527,13 +1527,13 @@ void Spell::EffectTriggerMissileSpell(SpellEffIndex effIndex)
     SpellCastTargets targets;
     if (effectHandleMode == SPELL_EFFECT_HANDLE_HIT_TARGET)
     {
-        if (!spellInfo->NeedsToBeTriggeredByCaster())
+        if (!spellInfo->NeedsToBeTriggeredByCaster(GetSpellInfo()))
             return;
         targets.SetUnitTarget(unitTarget);
     }
     else //if (effectHandleMode == SPELL_EFFECT_HANDLE_HIT)
     {
-        if (spellInfo->NeedsToBeTriggeredByCaster() && (m_spellInfo->Effects[effIndex].GetProvidedTargetMask() & TARGET_FLAG_UNIT_MASK))
+        if (spellInfo->NeedsToBeTriggeredByCaster(GetSpellInfo()) && (m_spellInfo->Effects[effIndex].GetProvidedTargetMask() & TARGET_FLAG_UNIT_MASK))
             return;
 
         if (spellInfo->GetExplicitTargetMask() & TARGET_FLAG_DEST_LOCATION)

@@ -2554,7 +2554,6 @@ void SpellMgr::LoadPetDefaultSpells()
     CreatureTemplateContainer const* ctc = sObjectMgr->GetCreatureTemplates();
     for (CreatureTemplateContainer::const_iterator itr = ctc->begin(); itr != ctc->end(); ++itr)
     {
-
         if (!itr->second.PetSpellDataId)
             continue;
 
@@ -2598,6 +2597,10 @@ void SpellMgr::LoadPetDefaultSpells()
 
                 // already loaded
                 if (cInfo->PetSpellDataId)
+                    continue;
+
+                // tameable pets can't have additional spells
+                if (cInfo->isTameable(true))
                     continue;
 
                 // for creature without PetSpellDataId get default pet spells from creature_template
@@ -3206,6 +3209,9 @@ void SpellMgr::LoadSpellCustomAttr()
             ///////////////////////////
             //////   END BINARY  //////
             ///////////////////////////
+
+            if (spellInfo->ActiveIconID == 2158)  // flight
+                spellInfo->Attributes |= SPELL_ATTR0_PASSIVE;
 
             switch (spellInfo->Id)
             {

@@ -1796,16 +1796,16 @@ void WorldSession::HandleFarSightOpcode(WorldPacket& recvData)
 
     if (apply)
     {
-        TC_LOG_DEBUG("network", "Player %u set vision to self", _player->GetGUIDLow());
-        _player->SetSeer(_player);
-    }
-    else
-    {
         TC_LOG_DEBUG("network", "Added FarSight " UI64FMTD " to player %u", _player->GetUInt64Value(PLAYER_FARSIGHT), _player->GetGUIDLow());
         if (WorldObject* target = _player->GetViewpoint())
             _player->SetSeer(target);
         else
             TC_LOG_ERROR("network", "Player %s requests non-existing seer " UI64FMTD, _player->GetName().c_str(), _player->GetUInt64Value(PLAYER_FARSIGHT));
+    }
+    else
+    {
+        TC_LOG_DEBUG("network", "Player %u set vision to self", _player->GetGUIDLow());
+        _player->SetSeer(_player);
     }
 
     GetPlayer()->UpdateVisibilityForPlayer();

@@ -3147,11 +3147,9 @@ void Player::RegenerateHealth()
     // normal regen case (maybe partly in combat case)
     else if (!inFight || HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT))
     {
-        addvalue = HealthIncreaseRate;
-        if (getLevel() < 15)
-            addvalue = (0.20f*((float)GetMaxHealth())/getLevel()*HealthIncreaseRate);
-        else
-            addvalue = 0.015f*((float)GetMaxHealth())*HealthIncreaseRate;
+        addvalue = 0.03f*((float)GetMaxHealth())*HealthIncreaseRate;
+        if (getLevel() < 20)
+            addvalue *= 2;
 
         AuraEffectList const& mModHealthRegenPct = GetAuraEffectsByType(SPELL_AURA_MOD_HEALTH_REGEN_PERCENT);
         for (AuraEffectList::const_iterator i = mModHealthRegenPct.begin(); i != mModHealthRegenPct.end(); ++i)

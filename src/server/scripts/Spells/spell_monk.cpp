@@ -2940,15 +2940,18 @@ public:
     {
         PrepareAuraScript(aura_impl);
 
-        void OnProc(AuraEffect const *, ProcEventInfo &eventInfo)
+        void OnProc(AuraEffect const * eff, ProcEventInfo &eventInfo)
         {
             PreventDefaultAction();
-
-            if (!(eventInfo.GetDamageInfo()->GetDamage()))
+            auto caster = GetCaster();
+            if (!caster || !(eventInfo.GetDamageInfo()->GetDamage()))
                 return;
 
-            if (Unit * caster = GetCaster())
-                caster->CastSpell(caster, urand(0, 1) ? SPELL_COMBO_BREAKER_KICK : SPELL_COMBO_BREAKER_PALM);
+            if (roll_chance_i(eff->GetAmount()))
+                caster->CastSpell(caster, SPELL_COMBO_BREAKER_KICK, true);
+
+            if (roll_chance_i(eff->GetAmount()))
+                caster->CastSpell(caster, SPELL_COMBO_BREAKER_PALM, true);
         }
 
         void Register()

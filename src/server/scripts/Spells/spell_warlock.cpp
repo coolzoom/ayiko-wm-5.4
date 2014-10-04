@@ -2302,9 +2302,9 @@ class spell_warl_life_tap : public SpellScriptLoader
     public:
         spell_warl_life_tap() : SpellScriptLoader("spell_warl_life_tap") { }
 
-        class spell_warl_life_tap_SpellScript : public SpellScript
+        class script_impl : public SpellScript
         {
-            PrepareSpellScript(spell_warl_life_tap_SpellScript);
+            PrepareSpellScript(script_impl);
 
             SpellCastResult CheckLife()
             {
@@ -2313,10 +2313,11 @@ class spell_warl_life_tap : public SpellScriptLoader
                 return SPELL_FAILED_FIZZLE;
             }
 
-            void HandleOnHit()
+            void HandleOnHit(SpellEffIndex effIndex)
             {
                 if (Player* _player = GetCaster()->ToPlayer())
                 {
+                    PreventHitEffect(effIndex);
                     int32 healthCost = int32(_player->GetMaxHealth() * 0.15f);
 
                     _player->SetHealth(_player->GetHealth() - healthCost);
@@ -2326,14 +2327,14 @@ class spell_warl_life_tap : public SpellScriptLoader
 
             void Register()
             {
-                OnCheckCast += SpellCheckCastFn(spell_warl_life_tap_SpellScript::CheckLife);
-                OnHit += SpellHitFn(spell_warl_life_tap_SpellScript::HandleOnHit);
+                OnCheckCast += SpellCheckCastFn(script_impl::CheckLife);
+                OnEffectHitTarget += SpellEffectFn(script_impl::HandleOnHit, EFFECT_0, SPELL_EFFECT_ENERGIZE);
             }
         };
 
         SpellScript* GetSpellScript() const
         {
-            return new spell_warl_life_tap_SpellScript();
+            return new script_impl();
         }
 };
 

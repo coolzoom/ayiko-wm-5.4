@@ -1495,10 +1495,21 @@ public:
         {
             PreventDefaultAction();
             auto caster = GetCaster();
-            if (!caster || !eventInfo.GetSpellInfo())
+
+
+            if (!caster)
                 return;
 
-            if (eventInfo.GetSpellInfo()->Id == SPELL_EXECUTE)
+            auto procSpellInfo = eventInfo.GetSpellInfo();
+
+            if (roll_chance_i(10) && (!procSpellInfo || procSpellInfo->Id == 76858))
+            {
+                caster->CastSpell(caster, 52437, true); // Reset Cooldown of Colossus Smash
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                    caster->ToPlayer()->RemoveSpellCooldown(WARRIOR_SPELL_COLOSSUS_SMASH, true);
+            }
+
+            if (procSpellInfo->Id == SPELL_EXECUTE)
                 caster->CastSpell(caster, SPELL_SUDDEN_DEATH_PROC, true);
         }
 

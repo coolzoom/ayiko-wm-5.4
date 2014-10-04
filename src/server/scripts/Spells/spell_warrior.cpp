@@ -440,35 +440,6 @@ public:
     }
 };
 
-// Sudden Death - 52437
-class spell_warr_sudden_death : public SpellScriptLoader
-{
-    public:
-        spell_warr_sudden_death() : SpellScriptLoader("spell_warr_sudden_death") { }
-
-        class spell_warr_sudden_death_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_warr_sudden_death_SpellScript);
-
-            void HandleOnHit()
-            {
-                if (Player* _player = GetCaster()->ToPlayer())
-                    if (_player->HasSpellCooldown(WARRIOR_SPELL_COLOSSUS_SMASH))
-                        _player->RemoveSpellCooldown(WARRIOR_SPELL_COLOSSUS_SMASH, true);
-            }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_warr_sudden_death_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_warr_sudden_death_SpellScript();
-        }
-};
-
 // Berserker Rage - 18499
 class spell_warr_berserker_rage : public SpellScriptLoader
 {
@@ -1504,6 +1475,45 @@ public:
     }
 };
 
+// 29725 - Sudden Death
+class spell_warr_sudden_death : public SpellScriptLoader
+{
+    enum
+    {
+        SPELL_EXECUTE            = 5308,
+        SPELL_SUDDEN_DEATH_PROC  = 139958,
+    };
+
+public:
+    spell_warr_sudden_death() : SpellScriptLoader("spell_warr_sudden_death") { }
+
+    class aura_impl : public AuraScript
+    {
+        PrepareAuraScript(aura_impl);
+
+        void OnProc(AuraEffect const * eff, ProcEventInfo &eventInfo)
+        {
+            PreventDefaultAction();
+            auto caster = GetCaster();
+            if (!caster || !eventInfo.GetSpellInfo())
+                return;
+
+            if (eventInfo.GetSpellInfo()->Id == SPELL_EXECUTE)
+                caster->CastSpell(caster, SPELL_SUDDEN_DEATH_PROC, true);
+        }
+
+        void Register()
+        {
+            OnEffectProc += AuraEffectProcFn(aura_impl::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new aura_impl();
+    }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_victorious_state();
@@ -1517,7 +1527,6 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_staggering_shout();
     new spell_warr_second_wind();
     new spell_warr_unbridled_wrath();
-    new spell_warr_sudden_death();
     new spell_warr_berserker_rage();
     new spell_warr_mocking_banner();
     new spell_warr_enrage_raging_blow();
@@ -1543,4 +1552,5 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_glyph_of_die_by_the_sword();
     new spell_warr_overpower();
     new spell_warr_strikes_of_opportunity();
+    new spell_warr_sudden_death();
 }

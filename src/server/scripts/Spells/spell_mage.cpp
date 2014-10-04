@@ -1346,8 +1346,9 @@ class spell_mage_evocation : public SpellScriptLoader
 
             void HandleOnHit()
             {
-                if (Player* _player = GetCaster()->ToPlayer())
-                    _player->EnergizeBySpell(_player, GetSpellInfo()->Id, int32(_player->GetMaxPower(POWER_MANA) * 0.15), POWER_MANA);
+                auto caster = GetCaster();
+                caster->EnergizeBySpell(caster, GetSpellInfo()->Id, int32(caster->GetMaxPower(POWER_MANA) * 0.15), POWER_MANA);
+                caster->RemoveAurasDueToSpell(SPELL_MAGE_ARCANE_CHARGE);
             }
 
             void Register()

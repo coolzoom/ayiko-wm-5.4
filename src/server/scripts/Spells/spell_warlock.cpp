@@ -104,54 +104,6 @@ enum WarlockSpells
     WARLOCK_SOULBURN_DEMONIC_CIRCLE_TELE    = 114794,
 };
 
-// Soulburn : Drain Life - 89420
-class spell_warl_soulburn_drain_life : public SpellScriptLoader
-{
-    public:
-        spell_warl_soulburn_drain_life() : SpellScriptLoader("spell_warl_soulburn_drain_life") { }
-
-        class spell_warl_soulburn_drain_life_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_warl_soulburn_drain_life_AuraScript);
-
-            void HandleApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
-            {
-                if (GetCaster())
-                    GetCaster()->RemoveAura(WARLOCK_SOULBURN_AURA);
-            }
-
-            void OnTick(AuraEffect const * /*aurEff*/)
-            {
-                if (GetCaster())
-                {
-                    Player* player = GetCaster()->ToPlayer();
-                    if (!player)
-                        return;
-
-                    // Restoring 2% of the caster's total health every 1s
-                    int32 basepoints = player->CountPctFromMaxHealth(3);
-
-                    // In Demonology spec : Generates 10 Demonic Fury per second
-                    if (player->GetSpecializationId(player->GetActiveSpec()) == SPEC_WARLOCK_DEMONOLOGY)
-                        player->EnergizeBySpell(player, 689, 10, POWER_DEMONIC_FURY);
-
-                    player->CastCustomSpell(player, WARLOCK_DRAIN_LIFE_HEAL, &basepoints, NULL, NULL, true);
-                }
-            }
-
-            void Register()
-            {
-                OnEffectApply += AuraEffectApplyFn(spell_warl_soulburn_drain_life_AuraScript::HandleApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-                OnEffectPeriodic += AuraEffectPeriodicFn(spell_warl_soulburn_drain_life_AuraScript::OnTick, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_warl_soulburn_drain_life_AuraScript();
-        }
-};
-
 // Soulburn : Health Funnel - 104220
 class spell_warl_soulburn_health_funnel : public SpellScriptLoader
 {
@@ -2263,8 +2215,8 @@ class spell_warl_drain_life : public SpellScriptLoader
                     if (!player)
                         return;
 
-                    // Restoring 2% of the caster's total health every 1s
-                    int32 basepoints = player->GetMaxHealth() / 50;
+                    // Restoring 2 (3 if Soulburn's) % of the caster's total health every 1s
+                    int32 basepoints = player->CountPctFromMaxHealth(GetId() == 89420 ? 3 : 2);
 
                     // Harvest Life
                     if (Aura const * const harvest = player->GetAura(108371))
@@ -3149,7 +3101,6 @@ public:
 
 void AddSC_warlock_spell_scripts()
 {
-    new spell_warl_soulburn_drain_life();
     new spell_warl_soulburn_health_funnel();
     new spell_warl_soulburn_seed_of_corruption_damage();
     new spell_warl_soulburn_seed_of_corruption();

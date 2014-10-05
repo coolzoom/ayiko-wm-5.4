@@ -1754,10 +1754,16 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 // Battle Shout && Commander Shout
                 else if (m_spellInfo->Id == 469 || m_spellInfo->Id == 6673)
                 {
-                    // Item - Warrior T12 DPS 2P Bonus
-                    if (caster)
-                        if (caster == target && caster->HasAura(99234))
+                    if (caster && caster == target)
+                    {
+                        // Item - Warrior T12 DPS 2P Bonus
+                        if (caster->HasAura(99234))
                             caster->CastSpell(caster, 99233, true);
+
+                        // Glyph of Mystic Shout
+                        if (caster->HasAura(58095))
+                            caster->CastSpell(caster, 121186, true);
+                    }
                 }
                 // Demoralizing Shout
                 else if (m_spellInfo->Id == 125565)

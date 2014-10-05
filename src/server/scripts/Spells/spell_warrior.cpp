@@ -1525,6 +1525,80 @@ public:
     }
 };
 
+// 12328, 18765, 35429 - Sweeping Strikes
+class spell_warr_sweeping_strikes : public SpellScriptLoader
+{
+    enum
+    {
+        SPELL_SWEEPING_STRIKES_EXTRA_ATTACK     = 12723,
+        SPELL_GLYPH_OF_SWEEPING_STRIKES         = 58384,
+        SPELL_GLYPH_OF_SWEEPING_STRIKES_PROC    = 124333,
+        SPELL_SLAM                              = 1464,
+        SPELL_SLAM_PROC                         = 146361,
+    };
+
+public:
+    spell_warr_sweeping_strikes() : SpellScriptLoader("spell_warr_sweeping_strikes") { }
+
+    class spell_warr_sweeping_strikes_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_warr_sweeping_strikes_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_SWEEPING_STRIKES_EXTRA_ATTACK) || !sSpellMgr->GetSpellInfo(SPELL_GLYPH_OF_SWEEPING_STRIKES_PROC))
+                return false;
+            return true;
+        }
+
+        bool Load()
+        {
+            _procTarget = NULL;
+            return true;
+        }
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            _procTarget = eventInfo.GetActor()->SelectNearbyTarget(eventInfo.GetProcTarget());
+            return _procTarget;
+        }
+
+        void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+        {
+            auto caster = GetTarget();
+            PreventDefaultAction();
+
+            // Glyph of Sweeping Strikes
+            if (caster->HasAura(SPELL_GLYPH_OF_SWEEPING_STRIKES))
+                caster->CastSpell(caster, SPELL_GLYPH_OF_SWEEPING_STRIKES_PROC, true);
+
+            int32 bp = CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), aurEff->GetAmount());
+            caster->CastCustomSpell(_procTarget, SPELL_SWEEPING_STRIKES_EXTRA_ATTACK, &bp, NULL, NULL, true, NULL, aurEff);
+
+            // Slam bonus
+            if (eventInfo.GetSpellInfo() && eventInfo.GetSpellInfo()->Id == SPELL_SLAM)
+            {
+                int32 slamBp = CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), 35);
+                caster->CastCustomSpell(_procTarget, SPELL_SLAM_PROC, &slamBp, NULL, NULL, true);
+            }
+        }
+
+        void Register()
+        {
+            DoCheckProc += AuraCheckProcFn(spell_warr_sweeping_strikes_AuraScript::CheckProc);
+            OnEffectProc += AuraEffectProcFn(spell_warr_sweeping_strikes_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+
+    private:
+        Unit* _procTarget;
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_warr_sweeping_strikes_AuraScript();
+    }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_victorious_state();
@@ -1564,4 +1638,5 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_overpower();
     new spell_warr_strikes_of_opportunity();
     new spell_warr_sudden_death();
+    new spell_warr_sweeping_strikes();
 }

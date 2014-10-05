@@ -3444,6 +3444,7 @@ class spell_gen_hardened_shell : public SpellScriptLoader
         }
 };
 
+// Battle Fatigue - 134732
 class spell_gen_battle_fatigue final : public SpellScriptLoader
 {
     class script_impl final : public AuraScript

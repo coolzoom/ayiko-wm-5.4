@@ -5762,22 +5762,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                     triggered_spell_id = 25997;
                     break;
                 }
-                // Sweeping Strikes
-                case 12328:
-                case 18765:
-                case 35429:
-                {
-                    target = SelectNearbyTarget(victim);
-                    if (!target)
-                        return false;
-
-                    // Glyph of Sweeping Strikes
-                    if (HasAura(58384))
-                        CastSpell(this, 124333, true);
-
-                    triggered_spell_id = 26654;
-                    break;
-                }
                 // Unstable Power
                 case 24658:
                 {

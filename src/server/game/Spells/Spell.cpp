@@ -3350,7 +3350,7 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const *triggered
     m_caster->m_Events.AddEvent(Event, m_caster->m_Events.CalculateTime(1));
 
     //Prevent casting at cast another spell (ServerSide check)
-    if (!(_triggeredCastFlags & TRIGGERED_IGNORE_CAST_IN_PROGRESS) && m_caster->IsNonMeleeSpellCasted(false, true, true) && m_cast_count)
+    if (!(_triggeredCastFlags & TRIGGERED_IGNORE_CAST_IN_PROGRESS) && m_caster->IsNonMeleeSpellCasted(false, true, true) && m_cast_count && m_spellInfo->Id != 108839)
     {
         SendCastResult(SPELL_FAILED_SPELL_IN_PROGRESS);
         finish(false);
@@ -6276,7 +6276,10 @@ SpellCastResult Spell::CheckCast(bool strict)
         if (!(_triggeredCastFlags & TRIGGERED_IGNORE_CASTER_AURASTATE) && player->HasFlag(PLAYER_FLAGS, PLAYER_ALLOW_ONLY_ABILITY)
             && !(m_caster->HasAura(46924) && (m_spellInfo->Id == 469 || m_spellInfo->Id == 6673 || m_spellInfo->Id == 97462 || m_spellInfo->Id == 5246 || m_spellInfo->Id == 12323
             || m_spellInfo->Id == 107566 || m_spellInfo->Id == 102060 || m_spellInfo->Id == 1160))) // Hack fix Bladestorm - caster should be able to cast only shout spells during bladestorm
-            return SPELL_FAILED_SPELL_IN_PROGRESS;
+        {
+            if (m_spellInfo->Id != 108839)
+                return SPELL_FAILED_SPELL_IN_PROGRESS;
+        }
 
         if (player->HasSpellCooldown(m_spellInfo->Id) && !player->HasAuraTypeWithAffectMask(SPELL_AURA_ALLOW_CAST_WHILE_IN_COOLDOWN, m_spellInfo) && !(_triggeredCastFlags & TRIGGERED_IGNORE_CURRENT_COOLDOWN))
         {

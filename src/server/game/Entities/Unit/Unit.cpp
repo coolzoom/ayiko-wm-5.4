@@ -3132,7 +3132,8 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
 
     CurrentSpellTypes CSpellType = pSpell->GetCurrentContainer();
 
-    if (pSpell == m_currentSpells[CSpellType])             // avoid breaking self
+    // avoid breaking self or interrupting other cast by Ice Floes
+    if (pSpell == m_currentSpells[CSpellType] || pSpell->GetSpellInfo()->Id == 108839)
         return;
 
     // break same type spell if it is not delayed
@@ -16456,7 +16457,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
         ((procSpell->CastTimeEntry && procSpell->CastTimeEntry->CastTime > 0 && procSpell->CastTimeEntry->CastTime < 4000)
         || (procSpell->DurationEntry && procSpell->DurationEntry->Duration[0] > 0 && procSpell->DurationEntry->Duration[0] < 4000 && procSpell->AttributesEx & SPELL_ATTR1_CHANNELED_2)))
         if (AuraApplication* aura = GetAuraApplication(108839, GetGUID()))
-            aura->GetBase()->DropCharge();
+            aura->GetBase()->ModStackAmount(-1);
 
     // Hack Fix for Invigoration
     if (GetTypeId() == TYPEID_UNIT && GetOwner() && GetOwner()->ToPlayer() && GetOwner()->HasAura(53253) &&

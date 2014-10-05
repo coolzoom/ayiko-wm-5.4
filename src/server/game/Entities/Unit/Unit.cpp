@@ -9134,24 +9134,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
 
             break;
         }
-        case 122013:// Glyph of Incite
-        {
-            if (GetTypeId() != TYPEID_PLAYER)
-                return false;
-
-            if (!procSpell)
-                return false;
-
-            // Only triggered by Devastate
-            if (procSpell->Id != 20243)
-                return false;
-
-            // Mortal Peace
-            if (!HasAura(85730))
-                return false;
-
-            break;
-        }
         case 108945:// Angelic Bulwark
         {
             if (GetTypeId() != TYPEID_PLAYER)
@@ -9658,6 +9640,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
         case 88821: // Daybreak
         case 131542:// Relentless Grip
         case 126046:// Adaptation
+        case 122013: // Glyph of Incite
             return false;
         case 35551: // Combat Potency
         {

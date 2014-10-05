@@ -1759,6 +1759,17 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         if (caster == target && caster->HasAura(99234))
                             caster->CastSpell(caster, 99233, true);
                 }
+                // Demoralizing Shout
+                else if (m_spellInfo->Id == 125565)
+                {
+                    // Glyph of Incite
+                    if (target->HasAura(122013))
+                    {
+                        target->CastSpell(target, 122016, true);
+                        if (auto incite = target->GetAura(122016))
+                            incite->ModStackAmount(3);
+                    }
+                }
                 break;
             case SPELLFAMILY_HUNTER:
                 if (!caster)

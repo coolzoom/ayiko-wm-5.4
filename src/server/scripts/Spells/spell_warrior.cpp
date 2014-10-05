@@ -790,8 +790,15 @@ class spell_warr_heroic_leap_damage : public SpellScriptLoader
 
             void HandleOnHit()
             {
-                if (Unit* caster = GetCaster())
-                    SetHitDamage(int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.5f));
+                if (auto caster = GetCaster())
+                {
+                    int32 damage = int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.5f);
+                    // Seasoned Soldier
+                    if (caster->GetTypeId() == TYPEID_PLAYER && caster->HasAura(12712) && caster->ToPlayer()->IsTwoHandUsed())
+                        AddPct(damage, 25);
+
+                    SetHitDamage(damage);
+                }
             }
 
             void Register()

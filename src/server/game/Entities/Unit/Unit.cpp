@@ -11560,85 +11560,76 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
         }
     }
 
-    // Custom MoP Script
-    // 77223 - Mastery : Enhanced Elements
-    if (GetTypeId() == TYPEID_PLAYER && spellProto && (spellProto->SchoolMask == SPELL_SCHOOL_MASK_FIRE || spellProto->SchoolMask == SPELL_SCHOOL_MASK_FROST || spellProto->SchoolMask == SPELL_SCHOOL_MASK_NATURE))
+    if (spellProto && GetTypeId() == TYPEID_PLAYER)
     {
-        if (HasAura(77223))
-        {
-            float Mastery = GetFloatValue(PLAYER_MASTERY) * 2.0f;
+        auto player = ToPlayer();
 
+        // 77223 - Mastery : Enhanced Elements
+        if (spellProto->SchoolMask == SPELL_SCHOOL_MASK_FIRE || spellProto->SchoolMask == SPELL_SCHOOL_MASK_FROST || spellProto->SchoolMask == SPELL_SCHOOL_MASK_NATURE)
+        {
+            if (HasAura(77223))
+            {
+                float Mastery = GetFloatValue(PLAYER_MASTERY) * 2.0f;
+                AddPct(DoneTotalMod, Mastery);
+            }
+        }
+
+        // 77492 - Mastery : Total Eclipse
+        if (spellProto->SchoolMask == SPELL_SCHOOL_MASK_NATURE && HasAura(77492) && HasAura(48517)) // Solar Eclipse
+        {
+            float Mastery = GetFloatValue(PLAYER_MASTERY) * 1.87f;
             AddPct(DoneTotalMod, Mastery);
         }
-    }
-
-    // Custom MoP Script
-    // 77492 - Mastery : Total Eclipse
-    if (GetTypeId() == TYPEID_PLAYER && spellProto && spellProto->SchoolMask == SPELL_SCHOOL_MASK_NATURE && HasAura(77492) && HasAura(48517)) // Solar Eclipse
-    {
-        float Mastery = GetFloatValue(PLAYER_MASTERY) * 1.87f;
-        AddPct(DoneTotalMod, Mastery);
-    }
-    else if (GetTypeId() == TYPEID_PLAYER && spellProto && spellProto->SchoolMask == SPELL_SCHOOL_MASK_ARCANE && HasAura(77492) && HasAura(48518)) // Lunar Eclipse
-    {
-        float Mastery = GetFloatValue(PLAYER_MASTERY) * 1.87f;
-        AddPct(DoneTotalMod, Mastery);
-    }
-
-    // Chaos Bolt - 116858 and Soul Fire - 6353
-    // damage is increased by your critical strike chance
-    if (GetTypeId() == TYPEID_PLAYER && spellProto && (spellProto->Id == 116858 || spellProto->Id == 6353 || spellProto->Id == 104027))
-    {
-        float crit_chance;
-        crit_chance = GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + GetFirstSchoolInMask(spellProto->GetSchoolMask()));
-        AddPct(DoneTotalMod, crit_chance);
-    }
-
-    // Pyroblast - 11366
-    // Pyroblast ! - 48108 : Next Pyroblast damage increased by 25%
-    if (GetTypeId() == TYPEID_PLAYER && spellProto && spellProto->Id == 11366 && damagetype == SPELL_DIRECT_DAMAGE && HasAura(48108))
-        AddPct(DoneTotalMod, 25);
-
-    // Fingers of Frost - 112965
-    if (GetTypeId() == TYPEID_PLAYER && pdamage != 0 && ToPlayer()->GetSpecializationId(ToPlayer()->GetActiveSpec()) == SPEC_MAGE_FROST && spellProto && getLevel() >= 24)
-    {
-        if (spellProto->Id == 116 || spellProto->Id == 44614 || spellProto->Id == 84721)
+        else if (spellProto->SchoolMask == SPELL_SCHOOL_MASK_ARCANE && HasAura(77492) && HasAura(48518)) // Lunar Eclipse
         {
-            if (roll_chance_i(12))
+            float Mastery = GetFloatValue(PLAYER_MASTERY) * 1.87f;
+            AddPct(DoneTotalMod, Mastery);
+        }
+
+        // Chaos Bolt - 116858 and Soul Fire - 6353
+        // damage is increased by your critical strike chance
+        if (spellProto->Id == 116858 || spellProto->Id == 6353 || spellProto->Id == 104027)
+        {
+            float crit_chance;
+            crit_chance = GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + GetFirstSchoolInMask(spellProto->GetSchoolMask()));
+            AddPct(DoneTotalMod, crit_chance);
+        }
+
+        // Pyroblast - 11366
+        // Pyroblast ! - 48108 : Next Pyroblast damage increased by 25%
+        if (spellProto->Id == 11366 && damagetype == SPELL_DIRECT_DAMAGE && HasAura(48108))
+            AddPct(DoneTotalMod, 25);
+
+        // Fingers of Frost - 112965
+        if (pdamage != 0 && player->GetSpecializationId(player->GetActiveSpec()) == SPEC_MAGE_FROST  && getLevel() >= 24)
+        {
+            uint32 chance = 0;
+            if (spellProto->Id == 116 || spellProto->Id == 44614 || spellProto->Id == 84721)
+                chance = 12;
+            else if (spellProto->Id == 42208)
+                chance = 4;
+            else if (spellProto->Id == 2948)
+                chance = 9;
+
+            if (chance && roll_chance_i(chance))
             {
                 CastSpell(this, 44544, true);  // Fingers of frost proc
                 CastSpell(this, 126084, true); // Fingers of frost visual
             }
         }
-        else if (spellProto->Id == 42208)
+
+        // Sword of Light - 53503
+        // Increases damage of Hammer of Wrath and Judgement too
+        if (HasAura(53503) && player->IsTwoHandUsed() && (spellProto->Id == 20271 || spellProto->Id == 24275))
+            AddPct(DoneTotalMod, 30);
+
+        // Thunder Clap and - Seasoned Soldier
+        if (spellProto->Id == 6343)
         {
-            if (roll_chance_i(4))
-            {
-                CastSpell(this, 44544, true);  // Fingers of frost proc
-                CastSpell(this, 126084, true); // Fingers of frost visual
-            }
-        }
-        else if (spellProto->Id == 2948)
-        {
-            if (roll_chance_i(9))
-            {
-                CastSpell(this, 44544, true);  // Fingers of frost proc
-                CastSpell(this, 126084, true); // Fingers of frost visual
-            }
+            if (HasAura(12712) && player->IsTwoHandUsed())
+                AddPct(DoneTotalMod, 25);
         }
     }
-
-    // Sword of Light - 53503
-    // Increases damage of Hammer of Wrath and Judgement too
-     if (GetTypeId() == TYPEID_PLAYER && spellProto && HasAura(53503) && ToPlayer()->IsTwoHandUsed() && (spellProto->Id == 20271 || spellProto->Id == 24275))
-         AddPct(DoneTotalMod, 30);
-
-     // Thunder Clap and Heroic Leap - Seasoned Soldier
-     if (spellProto && (spellProto->Id == 6343 || spellProto->Id == 52174))
-     {
-         if (GetTypeId() == TYPEID_PLAYER && HasAura(12712) && ToPlayer()->IsTwoHandUsed())
-             AddPct(DoneTotalMod, 25);
-     }
 
     // Pet damage?
     if (GetTypeId() == TYPEID_UNIT && !ToCreature()->isPet())

@@ -2343,9 +2343,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     // Remove all possible visuals
                     if (!apply)
                     {
-                        player->RemoveAurasDueToSpell(147923);
-                        player->RemoveAurasDueToSpell(146122);
-                        player->RemoveAurasDueToSpell(146120);
+                        player->RemoveAurasDueToSpell(147925);
+                        player->RemoveAurasDueToSpell(146127);
+                        player->RemoveAurasDueToSpell(146128);
                     }
                     else
                     {

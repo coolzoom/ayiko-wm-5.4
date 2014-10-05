@@ -3205,7 +3205,7 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
         case SUMMON_CATEGORY_WILD:
         case SUMMON_CATEGORY_ALLY:
         case SUMMON_CATEGORY_UNK:
-            if ((properties->Flags & 512) || m_spellInfo->Id == 114192 || m_spellInfo->Id == 114203 || m_spellInfo->Id == 114207)
+            if (properties->Flags & 512)
             {
                 SummonGuardian(effIndex, entry, properties, numSummons);
                 break;
@@ -3225,6 +3225,7 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                     break;
                 case SUMMON_TYPE_TOTEM:
                 case SUMMON_TYPE_STATUE:
+                case SUMMON_TYPE_WAR_BANNER:
                 {
                     summon = m_caster->GetMap()->SummonCreature(entry, *destTarget, properties, duration, m_originalCaster, m_spellInfo->Id);
                     if (!summon || !summon->isTotem())
@@ -3236,6 +3237,8 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                     // Monk statues receive 50% from owner's health
                     else if (properties->Type == SUMMON_TYPE_STATUE)
                         damage = m_caster->CountPctFromMaxHealth(50);
+                    else if (properties->Type == SUMMON_TYPE_WAR_BANNER)
+                        damage = m_caster->CountPctFromMaxHealth(30);
 
                     if (damage)                                            // if not spell info, DB values used
                     {

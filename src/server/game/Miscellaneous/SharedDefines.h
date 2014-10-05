@@ -4149,6 +4149,8 @@ enum SummonType
     SUMMON_TYPE_GATEWAY     = 14,
     SUMMON_TYPE_UNK15       = 15,
     SUMMON_TYPE_STATUE      = 16,
+    SUMMON_TYPE_UNK17       = 17,
+    SUMMON_TYPE_WAR_BANNER  = 18,                           // Warrior War Banners - behave same as totem
 };
 
 enum EventId

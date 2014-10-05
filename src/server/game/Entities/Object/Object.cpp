@@ -2403,6 +2403,7 @@ TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropert
                         break;
                     case SUMMON_TYPE_TOTEM:
                     case SUMMON_TYPE_STATUE:
+                    case SUMMON_TYPE_WAR_BANNER:
                         mask = UNIT_MASK_TOTEM;
                         break;
                     case SUMMON_TYPE_VEHICLE:
@@ -2422,17 +2423,6 @@ TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropert
             default:
                 return NULL;
         }
-    }
-
-    switch (spellId)
-    {
-        case 114192:// Mocking Banner
-        case 114203:// Demoralizing Banner
-        case 114207:// Skull Banner
-            mask = UNIT_MASK_GUARDIAN;
-            break;
-        default:
-            break;
     }
 
     uint32 phase = PHASEMASK_NORMAL;

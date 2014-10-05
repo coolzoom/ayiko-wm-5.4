@@ -3112,52 +3112,6 @@ class npc_spirit_link_totem : public CreatureScript
 };
 
 /*######
-# npc_demoralizing_banner
-######*/
-
-class npc_demoralizing_banner : public CreatureScript
-{
-    public:
-        npc_demoralizing_banner() : CreatureScript("npc_demoralizing_banner") { }
-
-        struct npc_demoralizing_bannerAI : public ScriptedAI
-        {
-            uint32 demoralizingTimer;
-
-            npc_demoralizing_bannerAI(Creature* creature) : ScriptedAI(creature)
-            {
-                demoralizingTimer = 1000;
-
-                Unit* owner = creature->GetOwner();
-
-                if (owner)
-                    owner->CastSpell(creature, 114205, true);
-            }
-
-            void UpdateAI(const uint32 diff)
-            {
-                Unit* owner = me->GetOwner();
-
-                if (!owner)
-                    return;
-
-                if (demoralizingTimer <= diff)
-                {
-                    owner->CastSpell(me, 114205, true);
-                    demoralizingTimer = 0;
-                }
-                else
-                    demoralizingTimer -= diff;
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new npc_demoralizing_bannerAI(creature);
-        }
-};
-
-/*######
 # npc_frozen_orb
 ######*/
 
@@ -4644,7 +4598,6 @@ void AddSC_npcs_special()
     new npc_capacitor_totem();
     new npc_feral_spirit();
     new npc_spirit_link_totem();
-    new npc_demoralizing_banner();
     new npc_frozen_orb();
     new npc_guardian_of_ancient_kings();
     new npc_power_word_barrier();

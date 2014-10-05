@@ -1509,7 +1509,7 @@ public:
                     caster->ToPlayer()->RemoveSpellCooldown(WARRIOR_SPELL_COLOSSUS_SMASH, true);
             }
 
-            if (procSpellInfo->Id == SPELL_EXECUTE)
+            if (procSpellInfo && procSpellInfo->Id == SPELL_EXECUTE)
                 caster->CastSpell(caster, SPELL_SUDDEN_DEATH_PROC, true);
         }
 

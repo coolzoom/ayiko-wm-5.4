@@ -3835,6 +3835,10 @@ bool SpellInfo::DoesIgnoreGlobalCooldown(Unit* caster) const
 {
     switch (Id)
     {
+        case 44572: // Deep Freeze
+            if (caster->HasAura(115710)) // Glyph of Deep Freeze
+                return true;
+            break;
         case 85673: // Word of Glory
         case 114163:// Eternal Flame
         case 136494:// Word of Glory (other)

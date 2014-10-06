@@ -16453,11 +16453,12 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
     }
 
     // Hack Fix Ice Floes - Drop charges
-    if (GetTypeId() == TYPEID_PLAYER && HasAura(108839) && procSpell && procSpell->Id != 108839 &&
-        ((procSpell->CastTimeEntry && procSpell->CastTimeEntry->CastTime > 0 && procSpell->CastTimeEntry->CastTime < 4000)
-        || (procSpell->DurationEntry && procSpell->DurationEntry->Duration[0] > 0 && procSpell->DurationEntry->Duration[0] < 4000 && procSpell->AttributesEx & SPELL_ATTR1_CHANNELED_2)))
-        if (AuraApplication* aura = GetAuraApplication(108839, GetGUID()))
-            aura->GetBase()->ModStackAmount(-1);
+    if (GetTypeId() == TYPEID_PLAYER && procSpell && procSpell->Id != 108839 && !(procFlag & PROC_FLAG_DONE_PERIODIC))
+    {
+        if (auto auraEff = GetAuraEffect(108839, EFFECT_0))
+            if (auraEff->IsAffectingSpell(procSpell))
+                auraEff->GetBase()->ModStackAmount(-1);
+    }
 
     // Hack Fix for Invigoration
     if (GetTypeId() == TYPEID_UNIT && GetOwner() && GetOwner()->ToPlayer() && GetOwner()->HasAura(53253) &&

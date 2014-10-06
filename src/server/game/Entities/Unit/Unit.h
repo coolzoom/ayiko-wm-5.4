@@ -2398,10 +2398,6 @@ class Unit : public WorldObject
         void setSimulacrumTarget(uint64 guid) { simulacrumTargetGUID = guid; }
         void removeSimulacrumTarget() { simulacrumTargetGUID = 0; }
 
-        // helpers for Icicles spells
-        uint64 GetIciclesTarget() const { return iciclesTargetGUID; }
-        void SetIciclesTarget(uint64 guid) { iciclesTargetGUID = guid; }
-
     protected:
         explicit Unit(bool isWorldObject);
 
@@ -2519,7 +2515,6 @@ class Unit : public WorldObject
         TimeTrackerSmall m_movesplineTimer;
 
         uint64 simulacrumTargetGUID;
-        uint64 iciclesTargetGUID;
 
         Diminishing m_Diminishing;
         // Manage all Units that are threatened by us

@@ -4565,7 +4565,8 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 107270:// Spinning Crane Kick - Radius
                     spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(14);
                     break;
-                case 107223:
+                case 107223: // Sunfire Rays
+                case 148023: // Icicle (periodic trigger)
                     spellInfo->Effects[0].TargetA = TARGET_UNIT_TARGET_ENEMY;
                     break;
                 case 106909:

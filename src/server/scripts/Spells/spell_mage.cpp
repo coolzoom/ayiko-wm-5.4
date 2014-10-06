@@ -796,7 +796,10 @@ class spell_mage_frostbolt final : public SpellScriptLoader
 
         enum
         {
-            FROSTBOLT_HEAL = 126201
+            FROSTBOLT_HEAL = 126201,
+            ICICLE_STORE   = 148012,
+            ICICLE_DAMAGE  = 148022,
+            ICICILE_VISUAL = 148017,
         };
 
         bool shouldHeal_;
@@ -849,12 +852,37 @@ class spell_mage_frostbolt final : public SpellScriptLoader
             caster->CastSpell(target, FROSTBOLT_HEAL, true);
         }
 
+        void handleMastery(SpellEffIndex effIndex)
+        {
+            auto caster = GetCaster()->ToPlayer();
+            if (!caster)
+                return;
+
+            if (caster->getLevel() >= 80 && caster->HasAura(76613))
+            {
+                int32 damage = GetHitDamage();
+                float Mastery = caster->GetFloatValue(PLAYER_MASTERY) * 2.0f;
+                damage = CalculatePct(damage, Mastery);
+                for (int32 i = 0; i < 5; ++i)
+                {
+                    if (caster->HasAura(ICICLE_STORE+i))
+                        continue;
+                    else
+                    {
+                        caster->CastCustomSpell(caster, ICICLE_STORE+i, &damage, NULL, NULL, true);
+                        break;
+                    }
+                }
+            }
+        }
+
         void Register() final
         {
             OnCheckCast += SpellCheckCastFn(script_impl::checkTarget);
             OnEffectHitTarget += SpellEffectFn(script_impl::maybePrevent, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
             OnEffectLaunchTarget += SpellEffectFn(script_impl::maybePrevent, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
             OnEffectHitTarget += SpellEffectFn(script_impl::maybeHeal, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
+            OnEffectHitTarget += SpellEffectFn(script_impl::handleMastery, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
         }
     };
 
@@ -866,6 +894,97 @@ public:
     SpellScript * GetSpellScript() const final
     {
         return new script_impl;
+    }
+};
+
+// Ice Lance - 30455
+class spell_mastery_icicles_trigger final : public SpellScriptLoader
+{
+    class script_impl final : public SpellScript
+    {
+        PrepareSpellScript(script_impl)
+
+        enum
+        {
+            ICICILE_TRIGGER_AURA = 148023
+        };
+
+        void handleMastery(SpellEffIndex effIndex)
+        {
+            auto caster = GetCaster()->ToPlayer();
+            if (!caster)
+                return;
+
+            if (caster->getLevel() >= 80 && caster->HasAura(76613))
+                caster->CastSpell(GetHitUnit(), ICICILE_TRIGGER_AURA, true);
+        }
+
+        void Register() final
+        {
+            OnEffectHitTarget += SpellEffectFn(script_impl::handleMastery, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+public:
+    spell_mastery_icicles_trigger()
+        : SpellScriptLoader("spell_mastery_icicles_trigger")
+    { }
+
+    SpellScript * GetSpellScript() const final
+    {
+        return new script_impl;
+    }
+};
+
+// 148023 - Icicles (periodic aura to trigger all stored icicles)
+class spell_mastery_icicles_periodic : public SpellScriptLoader
+{
+public:
+    spell_mastery_icicles_periodic() : SpellScriptLoader("spell_mastery_icicles_periodic") { }
+
+    enum
+    {
+        ICICLE_STORE   = 148012,
+        ICICLE_DAMAGE  = 148022,
+        ICICILE_VISUAL = 148017,
+    };
+
+    class script_impl : public AuraScript
+    {
+        PrepareAuraScript(script_impl);
+
+        void OnTick(AuraEffect const * /*aurEff*/)
+        {
+            if (!GetCaster())
+                return;
+            auto player = GetCaster()->ToPlayer();
+            if (player)
+            {
+                for (int32 i = 0; i < 5; ++i)
+                {
+                    if (auto icicle = player->GetAuraEffect(ICICLE_STORE + i, EFFECT_0))
+                    {
+                        int32 amount = icicle->GetAmount();
+                        player->CastCustomSpell(GetTarget(), ICICILE_VISUAL+i, &amount, NULL, NULL, true);
+                        player->CastCustomSpell(GetTarget(), ICICLE_DAMAGE, &amount, NULL, NULL, true);
+                        player->RemoveAurasDueToSpell(ICICLE_STORE + i);
+                        break;
+                    }
+                    if (i == 4)
+                        SetDuration(0);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(script_impl::OnTick, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new script_impl();
     }
 };
 
@@ -1866,4 +1985,6 @@ void AddSC_mage_spell_scripts()
     new spell_mage_living_bomb();
     new spell_mage_temporal_shield();
     new spell_mage_flameglow();
+    new spell_mastery_icicles_trigger();
+    new spell_mastery_icicles_periodic();
 }

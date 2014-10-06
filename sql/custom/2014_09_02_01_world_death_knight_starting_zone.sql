@@ -96,6 +96,8 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 
 -- [SQL] Death Knight - Quests - The Light of Dawn has been enabled (Feedback #121)
 UPDATE `quest_template` SET `Method` = 2, `SourceSpellId` = 0 WHERE `Id` = 12801;
+UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'npc_highlord_darion_mograine' WHERE `entry` = 29173;
+UPDATE `creature` SET `spawntimesecs` = 60 WHERE `id` IN (29173, 29183, 29175, 29176, 29178, 29227, 29228);
 DELETE FROM `script_texts` WHERE `entry` BETWEEN -1609286 AND -1609201;
 DELETE FROM `creature_text` WHERE `entry` IN (29173, 29199, 29183, 29186, 29190, 29219, 29175, 29176, 29178, 29179, 29180, 29177, 29181, 29174, 29182, 29204, 29227, 29228);
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES

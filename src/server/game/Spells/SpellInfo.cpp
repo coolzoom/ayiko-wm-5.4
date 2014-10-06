@@ -3864,6 +3864,7 @@ bool SpellInfo::IsAffectedByResilience() const
         case 110914:// Dark Bargain (DoT)
         case 124280:// Touch of Karma (DoT)
         case 113344: // Bloodbath (DoT)
+        case 148022: // Icicles (damage)
             return false;
         default:
             break;

@@ -852,7 +852,41 @@ class spell_mage_frostbolt final : public SpellScriptLoader
             caster->CastSpell(target, FROSTBOLT_HEAL, true);
         }
 
-        void handleMastery(SpellEffIndex effIndex)
+        void Register() final
+        {
+            OnCheckCast += SpellCheckCastFn(script_impl::checkTarget);
+            OnEffectHitTarget += SpellEffectFn(script_impl::maybePrevent, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+            OnEffectLaunchTarget += SpellEffectFn(script_impl::maybePrevent, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
+            OnEffectHitTarget += SpellEffectFn(script_impl::maybeHeal, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+public:
+    spell_mage_frostbolt()
+        : SpellScriptLoader("spell_mage_frostbolt")
+    { }
+
+    SpellScript * GetSpellScript() const final
+    {
+        return new script_impl;
+    }
+};
+
+// Mastery: Icicles Called by Frostbolt and Frostfire Bolt - 116, 44614
+class spell_mastery_icicles final : public SpellScriptLoader
+{
+    class script_impl final : public SpellScript
+    {
+        PrepareSpellScript(script_impl)
+
+        enum
+        {
+            ICICLE_STORE   = 148012,
+            ICICLE_DAMAGE  = 148022,
+            ICICILE_VISUAL = 148017,
+        };
+
+        void handleMastery()
         {
             auto caster = GetCaster()->ToPlayer();
             if (!caster)
@@ -861,6 +895,9 @@ class spell_mage_frostbolt final : public SpellScriptLoader
             if (caster->getLevel() >= 80 && caster->HasAura(76613))
             {
                 int32 damage = GetHitDamage();
+                if (!damage)
+                    return;
+
                 float Mastery = caster->GetFloatValue(PLAYER_MASTERY) * 2.0f;
                 damage = CalculatePct(damage, Mastery);
                 for (int32 i = 0; i < 5; ++i)
@@ -878,17 +915,13 @@ class spell_mage_frostbolt final : public SpellScriptLoader
 
         void Register() final
         {
-            OnCheckCast += SpellCheckCastFn(script_impl::checkTarget);
-            OnEffectHitTarget += SpellEffectFn(script_impl::maybePrevent, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
-            OnEffectLaunchTarget += SpellEffectFn(script_impl::maybePrevent, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
-            OnEffectHitTarget += SpellEffectFn(script_impl::maybeHeal, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
-            OnEffectHitTarget += SpellEffectFn(script_impl::handleMastery, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
+            AfterHit += SpellHitFn(script_impl::handleMastery);
         }
     };
 
 public:
-    spell_mage_frostbolt()
-        : SpellScriptLoader("spell_mage_frostbolt")
+    spell_mastery_icicles()
+        : SpellScriptLoader("spell_mastery_icicles")
     { }
 
     SpellScript * GetSpellScript() const final
@@ -1985,6 +2018,7 @@ void AddSC_mage_spell_scripts()
     new spell_mage_living_bomb();
     new spell_mage_temporal_shield();
     new spell_mage_flameglow();
+    new spell_mastery_icicles();
     new spell_mastery_icicles_trigger();
     new spell_mastery_icicles_periodic();
 }

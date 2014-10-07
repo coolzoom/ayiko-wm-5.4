@@ -1581,6 +1581,14 @@ void Spell::EffectForceCast(SpellEffIndex effIndex)
             }
             break;
         }
+        case 119914: // Felguard's Felstorm hack
+        {
+            if (Pet* pet = m_caster->ToPlayer()->GetPet())
+            {
+                pet->AddCreatureSpellCooldown(119914);
+                m_caster->ToPlayer()->AddSpellCooldown(m_spellInfo->Id, 0, 45 * 1000);
+            }
+        }
     }
 
     if (!unitTarget)

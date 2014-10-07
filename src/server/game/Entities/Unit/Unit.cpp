@@ -3480,18 +3480,24 @@ void Unit::_AddAura(UnitAura *aura, Unit* caster)
         // register single target aura
         caster->GetSingleCastAuras().push_back(aura);
         // remove other single target auras
+        int32 foundLifebloom = 0;
         Unit::AuraList& scAuras = caster->GetSingleCastAuras();
         for (Unit::AuraList::iterator itr = scAuras.begin(); itr != scAuras.end();)
         {
             if ((*itr) != aura &&
                 (*itr)->GetSpellInfo()->IsSingleTargetWith(aura->GetSpellInfo()))
             {
+                if (aura->GetId() == 33763 && (*itr)->GetId() == 33763 && (*itr)->GetDuration() > 2000 && (*itr)->GetStackAmount() > 1)
+                    foundLifebloom = (*itr)->GetStackAmount();
+
                 (*itr)->Remove();
                 itr = scAuras.begin();
             }
             else
                 ++itr;
         }
+        if (foundLifebloom)
+            aura->SetStackAmount(foundLifebloom);
     }
 }
 

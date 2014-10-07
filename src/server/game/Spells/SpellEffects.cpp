@@ -848,6 +848,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         damage = CalculateMonkMeleeAttacks(m_caster, 3.0f, 14);
                         break;
                     case 107270:// Spinning Crane Kick
+                    case 148187:// Rushing Jade Wind
                         damage = CalculateMonkMeleeAttacks(m_caster, 1.59f, 14);
                         break;
                     case 107428:// Rising Sun Kick

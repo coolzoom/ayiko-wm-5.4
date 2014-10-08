@@ -3349,13 +3349,14 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const *triggered
     SpellEvent* Event = new SpellEvent(this);
     m_caster->m_Events.AddEvent(Event, m_caster->m_Events.CalculateTime(1));
 
-    //Prevent casting at cast another spell (ServerSide check)
-    if (!(_triggeredCastFlags & TRIGGERED_IGNORE_CAST_IN_PROGRESS) && m_caster->IsNonMeleeSpellCasted(false, true, true) && m_cast_count && m_spellInfo->Id != 108839)
-    {
-        SendCastResult(SPELL_FAILED_SPELL_IN_PROGRESS);
-        finish(false);
-        return;
-    }
+    //Prevent casting at cast another spell (ServerSide check) - Do not check for Autoshot as Steady Shot should be available to init cast of it
+    if (m_spellInfo->Id != 108839 && m_spellInfo->Id != 75)
+        if (!(_triggeredCastFlags & TRIGGERED_IGNORE_CAST_IN_PROGRESS) && m_caster->IsNonMeleeSpellCasted(false, true, true) && m_cast_count)
+        {
+            SendCastResult(SPELL_FAILED_SPELL_IN_PROGRESS);
+            finish(false);
+            return;
+        }
 
     if (DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->Id, m_caster))
     {

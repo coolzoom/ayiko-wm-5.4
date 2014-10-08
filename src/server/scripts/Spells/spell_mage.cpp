@@ -1979,6 +1979,49 @@ public:
     }
 };
 
+// 42208 - Blizzard
+/// Updated 4.3.4
+class spell_mage_blizzard : public SpellScriptLoader
+{
+public:
+    spell_mage_blizzard() : SpellScriptLoader("spell_mage_blizzard") { }
+
+    class spell_mage_blizzard_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_mage_blizzard_SpellScript);
+
+        enum
+        {
+            SPELL_MAGE_BLIZZARD_SLOW = 12486
+        };
+
+        bool Validate(SpellInfo const* /*spellInfo*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_BLIZZARD_SLOW))
+                return false;
+            return true;
+        }
+
+        void AddChillEffect(SpellEffIndex /*effIndex*/)
+        {
+            Unit* caster = GetCaster();
+            if (Unit* unitTarget = GetHitUnit())
+                caster->CastSpell(unitTarget, SPELL_MAGE_BLIZZARD_SLOW, true);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_mage_blizzard_SpellScript::AddChillEffect, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_mage_blizzard_SpellScript();
+    }
+};
+
+
 void AddSC_mage_spell_scripts()
 {
     new spell_mage_flamestrike();
@@ -2021,4 +2064,5 @@ void AddSC_mage_spell_scripts()
     new spell_mastery_icicles();
     new spell_mastery_icicles_trigger();
     new spell_mastery_icicles_periodic();
+    new spell_mage_blizzard();
 }

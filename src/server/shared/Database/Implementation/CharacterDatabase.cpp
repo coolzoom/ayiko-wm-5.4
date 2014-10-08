@@ -659,6 +659,15 @@ void DoPrepareStatements(MySQLConnection &conn)
     conn.prepareStatement(CHAR_DEL_BLACKMARKET_AUCTION, "DELETE FROM blackmarket WHERE id = ?");
     conn.prepareStatement(CHAR_UPD_BLACKMARKET_AUCTION, "UPDATE blackmarket SET bid = ?, bidder = ?, bidderCount = ? WHERE id = ?");
     conn.prepareStatement(CHAR_SEL_BLACKMARKET_AUCTIONS, "SELECT id, templateId, startTime, bid, bidder, bidderCount FROM blackmarket");
+
+    // Items that hold loot or money
+    conn.prepareStatement(CHAR_SEL_ITEMCONTAINER_ITEMS, "SELECT item_id, item_count, follow_rules, ffa, blocked, counted, under_threshold, needs_quest, rnd_prop, rnd_suffix FROM item_loot_items WHERE container_id = ?");
+    conn.prepareStatement(CHAR_DEL_ITEMCONTAINER_ITEMS, "DELETE FROM item_loot_items WHERE container_id = ?");
+    conn.prepareStatement(CHAR_DEL_ITEMCONTAINER_ITEM, "DELETE FROM item_loot_items WHERE container_id = ? AND item_id = ?");
+    conn.prepareStatement(CHAR_INS_ITEMCONTAINER_ITEMS, "INSERT INTO item_loot_items (container_id, item_id, item_count, follow_rules, ffa, blocked, counted, under_threshold, needs_quest, rnd_prop, rnd_suffix) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    conn.prepareStatement(CHAR_SEL_ITEMCONTAINER_MONEY, "SELECT money FROM item_loot_money WHERE container_id = ?");
+    conn.prepareStatement(CHAR_DEL_ITEMCONTAINER_MONEY, "DELETE FROM item_loot_money WHERE container_id = ?");
+    conn.prepareStatement(CHAR_INS_ITEMCONTAINER_MONEY, "INSERT INTO item_loot_money (container_id, money) VALUES (?, ?)");
 }
 
 } // namespace CharacterDatabaseConnection

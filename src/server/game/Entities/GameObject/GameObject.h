@@ -550,6 +550,11 @@ class OPvPCapturePoint;
 
 union GameObjectValue
 {
+    //25 GAMEOBJECT_TYPE_FISHINGHOLE
+    struct
+    {
+        uint32 MaxOpens;
+    } FishingHole;
     //29 GAMEOBJECT_TYPE_CAPTURE_POINT
     struct
     {
@@ -645,7 +650,8 @@ class GameObject : public WorldObject, public GridObject<GameObject>
         static GameObject* GetGameObject(WorldObject& object, uint64 guid);
         GameObjectTemplate const* GetGOInfo() const { return m_goInfo; }
         GameObjectData const* GetGOData() const { return m_goData; }
-        GameObjectValue * GetGOValue() const { return m_goValue; }
+        GameObjectValue const & GetGOValue() const { return m_goValue; }
+        GameObjectValue & GetGOValue() { return m_goValue; }
 
         bool IsTransport() const;
         bool IsDynTransport() const;
@@ -837,7 +843,7 @@ class GameObject : public WorldObject, public GridObject<GameObject>
         uint32 m_DBTableGuid;                               ///< For new or temporary gameobjects is 0 for saved it is lowguid
         GameObjectTemplate const* m_goInfo;
         GameObjectData const* m_goData;
-        GameObjectValue * const m_goValue;
+        GameObjectValue m_goValue;
 
         uint64 m_rotation;
 

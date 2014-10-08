@@ -3515,6 +3515,55 @@ void Player::RemoveFromGroup(Group* group, uint64 guid, RemoveMethod method /* =
     }
 }
 
+void Player::LootMoneyInGroup(uint32 money, MoneyLootFlags lootFlags)
+{
+    Group* group = GetGroup();
+
+    std::vector<Player*> playersNear;
+    for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
+    {
+        Player* member = itr->getSource();
+        if (!member)
+            continue;
+
+        if (IsWithinDistInMap(member, sWorld->getFloatConfig(CONFIG_GROUP_XP_DISTANCE), false))
+            playersNear.push_back(member);
+    }
+
+    uint32 goldPerPlayer = uint32(money / playersNear.size());
+    if (goldPerPlayer == money)
+        lootFlags |= MONEY_LOOT_FLAG_SOLO;
+
+    for (auto i = playersNear.begin(); i != playersNear.end(); ++i)
+        (*i)->LootMoney(goldPerPlayer, lootFlags);
+}
+
+void Player::LootMoney(uint32 money, MoneyLootFlags flags)
+{
+    bool const soloLoot = (flags & MONEY_LOOT_FLAG_SOLO) != 0;
+    bool const fromEnemy = (flags & MONEY_LOOT_FLAG_FROM_ENEMY) != 0;
+
+    uint32 guildMoney = fromEnemy
+            ? CalculatePct(money, GetMaxPositiveAuraModifier(SPELL_AURA_DEPOSIT_BONUS_MONEY_IN_GUILD_BANK_ON_LOOT))
+            : 0;
+
+    ModifyMoney((int64)money);
+    UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_MONEY, money);
+
+    if (guildMoney != 0)
+        if (Guild *guild = GetGuild())
+            guild->HandleMemberDepositMoney(GetSession(), guildMoney, true);
+
+    TC_LOG_DEBUG("entities.player", "SMSG_LOOT_MONEY_NOTIFY Player: %s Money: %d Alone: %u, Guild Money: %d",
+                 GetName().c_str(), soloLoot, money, guildMoney);
+
+    WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4 + 1);
+    data << uint32(money);
+    data << uint8(soloLoot);
+
+    GetSession()->SendPacket(&data);
+}
+
 void Player::SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 BonusXP, bool /*recruitAFriend*/, float /*group_rate*/)
 {
     WorldPacket data(SMSG_LOG_XP_GAIN);
@@ -9857,7 +9906,7 @@ void Player::SendLootRelease(uint64 guid)
     SendDirectMessage(&data);
 }
 
-void Player::SendLoot(uint64 guid, LootType loot_type, bool fetchLoot)
+void Player::SendLoot(uint64 guid, LootType loot_type)
 {
     if (uint64 lguid = GetLootGUID())
         m_session->DoLootRelease(lguid);
@@ -9865,13 +9914,17 @@ void Player::SendLoot(uint64 guid, LootType loot_type, bool fetchLoot)
     Loot* loot = 0;
     PermissionTypes permission = ALL_PERMISSION;
 
+    TC_LOG_DEBUG("loot", "Player::SendLoot");
     if (IS_GAMEOBJECT_GUID(guid))
     {
+        TC_LOG_DEBUG("loot", "IS_GAMEOBJECT_GUID(guid)");
         GameObject* go = GetMap()->GetGameObject(guid);
 
         // not check distance for GO in case owned GO (fishing bobber case, for example)
         // And permit out of range GO with no owner in case fishing hole
-        if (!go || (loot_type != LOOT_FISHINGHOLE && (loot_type != LOOT_FISHING || go->GetOwnerGUID() != GetGUID()) && !go->IsWithinDistInMap(this, INTERACTION_DISTANCE)) || (loot_type == LOOT_CORPSE && go->GetRespawnTime() && go->isSpawnedByDefault()))
+        if (!go
+                || (loot_type != LOOT_FISHINGHOLE && (loot_type != LOOT_FISHING || go->GetOwnerGUID() != GetGUID()) && !go->IsWithinDistInMap(this, INTERACTION_DISTANCE))
+                || (loot_type == LOOT_CORPSE && go->GetRespawnTime() && go->isSpawnedByDefault()))
         {
             SendLootRelease(guid);
             return;
@@ -9882,23 +9935,20 @@ void Player::SendLoot(uint64 guid, LootType loot_type, bool fetchLoot)
         if (go->getLootState() == GO_READY)
         {
             uint32 lootid = go->GetGOInfo()->GetLootId();
-
-            //TODO: fix this big hack
-            if ((go->GetEntry() == BG_AV_OBJECTID_MINE_N || go->GetEntry() == BG_AV_OBJECTID_MINE_S))
-                if (Battleground* bg = GetBattleground())
-                    if (bg->GetTypeID(true) == BATTLEGROUND_AV)
-                        if (!(((BattlegroundAV*)bg)->PlayerCanDoMineQuest(go->GetEntry(), GetTeam())))
-                        {
-                            SendLootRelease(guid);
-                            return;
-                        }
+            if (Battleground* bg = GetBattleground())
+                if (!bg->CanActivateGO(go->GetEntry(), GetTeam()))
+                {
+                    SendLootRelease(guid);
+                    return;
+                }
 
             if (lootid)
             {
+                GameObjectTemplate const* goTemp = go->GetGOInfo();
                 loot->clear();
 
                 Group* group = GetGroup();
-                bool groupRules = (group && go->GetGOInfo()->type == GAMEOBJECT_TYPE_CHEST && go->GetGOInfo()->chest.groupLootRules);
+                bool groupRules = (group && goTemp->type == GAMEOBJECT_TYPE_CHEST && goTemp->chest.groupLootRules);
 
                 // check current RR player and get next if necessary
                 if (groupRules)
@@ -9977,7 +10027,9 @@ void Player::SendLoot(uint64 guid, LootType loot_type, bool fetchLoot)
 
         loot = &item->loot;
 
-        if (!item->m_lootGenerated)
+        // If item doesn't already have loot, attempt to load it. If that
+        //  fails then this is first time opening, generate loot
+        if (!item->m_lootGenerated && !item->ItemContainerLoadLootFromDB())
         {
             item->m_lootGenerated = true;
             loot->clear();
@@ -9996,6 +10048,17 @@ void Player::SendLoot(uint64 guid, LootType loot_type, bool fetchLoot)
                 default:
                     loot->generateMoneyLoot(item->GetTemplate()->MinMoneyLoot, item->GetTemplate()->MaxMoneyLoot);
                     loot->FillLoot(item->GetEntry(), LootTemplates_Item, this, true, loot->gold != 0);
+
+                    // Force save the loot and money items that were just rolled
+                    //  Also saves the container item ID in Loot struct (not to DB)
+                    if (loot->gold > 0 || loot->unlootedCount > 0)
+                    {
+                        SQLTransaction trans = CharacterDatabase.BeginTransaction();
+                        _SaveInventory(trans);
+                        item->ItemContainerSaveLootToDB(trans);
+                        CharacterDatabase.CommitTransaction(trans);
+                    }
+
                     break;
             }
         }
@@ -10035,7 +10098,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type, bool fetchLoot)
         Creature* creature = GetMap()->GetCreature(guid);
 
         // must be in range and creature must be alive for pickpocket and must be dead for another loot
-        if (!creature || creature->isAlive() != (loot_type == LOOT_PICKPOCKETING) || (!creature->IsWithinDistInMap(this, INTERACTION_DISTANCE) && !fetchLoot))
+        if (!creature || creature->isAlive() != (loot_type == LOOT_PICKPOCKETING) || !creature->IsWithinDistInMap(this, INTERACTION_DISTANCE))
         {
             SendLootRelease(guid);
             return;
@@ -10048,7 +10111,6 @@ void Player::SendLoot(uint64 guid, LootType loot_type, bool fetchLoot)
         }
 
         loot = &creature->loot;
-        loot->linkedLoot.clear();
 
         if (loot_type == LOOT_PICKPOCKETING)
         {
@@ -10069,119 +10131,74 @@ void Player::SendLoot(uint64 guid, LootType loot_type, bool fetchLoot)
         }
         else
         {
-            // Check all creature around, to see if we can loot it too
-            std::list<Creature*> linkedLootCreature;
-            linkedLootCreature.push_back(creature);
+            // the player whose group may loot the corpse
+            Player* recipient = creature->GetLootRecipient();
+            if (!recipient)
+                return;
 
-            if (loot_type == LOOT_CORPSE)
+            if (!creature->lootForBody)
             {
-                CellCoord p(Trinity::ComputeCellCoord(GetPositionX(), GetPositionY()));
-                Cell cell(p);
-                cell.SetNoCreate();
+                creature->lootForBody = true;
 
-                Trinity::AllDeadCreaturesInRange check(this, 25.0f, creature->GetGUID());
-                Trinity::CreatureListSearcher<Trinity::AllDeadCreaturesInRange> searcher(this, linkedLootCreature, check);
+                // for creature, loot is filled when creature is killed.
 
-                cell.Visit(p, Trinity::makeGridVisitor(searcher), *(GetMap()), *this,  25.0f);
+                if (Group* group = recipient->GetGroup())
+                {
+                    switch (group->GetLootMethod())
+                    {
+                        case GROUP_LOOT:
+                            // GroupLoot: rolls items over threshold. Items with quality < threshold, round robin
+                            group->GroupLoot(loot, creature);
+                            break;
+                        case NEED_BEFORE_GREED:
+                            group->NeedBeforeGreed(loot, creature);
+                            break;
+                        case MASTER_LOOT:
+                            group->MasterLoot(loot, creature);
+                            break;
+                        default:
+                            break;
+                    }
+                }
             }
 
-            uint32 maxSlot = loot->items.size() + loot->quest_items.size();
-            loot->additionalLinkedGold = 0;
-            for (auto itr : linkedLootCreature)
+            // possible only if creature->lootForBody && loot->empty() at spell cast check
+            if (loot_type == LOOT_SKINNING)
             {
-                // the player whose group may loot the corpse
-                Player* recipient = itr->GetLootRecipient();
-                if (!recipient)
+                loot->clear();
+                loot->FillLoot(creature->GetCreatureTemplate()->SkinLootId, LootTemplates_Skinning, this, true);
+                permission = OWNER_PERMISSION;
+            }
+            // set group rights only for loot_type != LOOT_SKINNING
+            else
+            {
+                if (Group* group = GetGroup())
                 {
-                    if (creature != itr)
-                        continue;
-
-                    return;
-                }
-
-                Loot* linkedLoot = &itr->loot;
-
-                if (!itr->lootForBody)
-                {
-                    itr->lootForBody = true;
-
-                    // for creature, loot is filled when creature is killed.
-
-                    if (Group* group = recipient->GetGroup())
+                    if (group == recipient->GetGroup())
                     {
                         switch (group->GetLootMethod())
                         {
-                            case GROUP_LOOT:
-                                // GroupLoot: rolls items over threshold. Items with quality < threshold, round robin
-                                group->GroupLoot(linkedLoot, itr);
-                                break;
-                            case NEED_BEFORE_GREED:
-                                group->NeedBeforeGreed(linkedLoot, itr);
-                                break;
                             case MASTER_LOOT:
-                                group->MasterLoot(linkedLoot, itr);
+                                permission = MASTER_PERMISSION;
+                                break;
+                            case FREE_FOR_ALL:
+                                permission = ALL_PERMISSION;
+                                break;
+                            case ROUND_ROBIN:
+                                permission = ROUND_ROBIN_PERMISSION;
                                 break;
                             default:
+                                permission = GROUP_PERMISSION;
                                 break;
                         }
                     }
-                }
-
-                PermissionTypes perm = NONE_PERMISSION;
-
-                // TODO: handle this case with new radius loot system
-                // possible only if creature->lootForBody && loot->empty() at spell cast check
-                if (loot_type == LOOT_SKINNING)
-                {
-                    linkedLoot->clear();
-                    linkedLoot->FillLoot(itr->GetCreatureTemplate()->SkinLootId, LootTemplates_Skinning, this, true);
-                    perm = OWNER_PERMISSION;
-                }
-                // set group rights only for loot_type != LOOT_SKINNING
-                else
-                {
-                    if (Group* group = GetGroup())
-                    {
-                        if (group == recipient->GetGroup())
-                        {
-                            switch (group->GetLootMethod())
-                            {
-                                case MASTER_LOOT:
-                                    perm = MASTER_PERMISSION;
-                                    break;
-                                case FREE_FOR_ALL:
-                                    perm = ALL_PERMISSION;
-                                    break;
-                                case ROUND_ROBIN:
-                                    perm = ROUND_ROBIN_PERMISSION;
-                                    break;
-                                default:
-                                    perm = GROUP_PERMISSION;
-                                    break;
-                            }
-                        }
-                        else
-                            perm = NONE_PERMISSION;
-                    }
-                    else if (recipient == this)
-                        perm = OWNER_PERMISSION;
                     else
-                        perm = NONE_PERMISSION;
+                        permission = NONE_PERMISSION;
                 }
-
-                if (itr == creature)
-                    permission = perm;
+                else if (recipient == this)
+                    permission = OWNER_PERMISSION;
                 else
-                {
-                    if (perm != NONE_PERMISSION)
-                    {
-                        linkedLoot->AddLooter(GetGUID());
-                        loot->additionalLinkedGold += linkedLoot->gold;
-                    }
-
-                    for (uint32 i = 0; i < linkedLoot->items.size(); i++)
-                        loot->addLinkedLoot(maxSlot++, itr->GetGUID(), i, perm);
-                }
+                    permission = NONE_PERMISSION;
             }
         }
     }
@@ -10191,9 +10208,14 @@ void Player::SendLoot(uint64 guid, LootType loot_type, bool fetchLoot)
     // LOOT_INSIGNIA and LOOT_FISHINGHOLE unsupported by client
     switch (loot_type)
     {
-        case LOOT_INSIGNIA:    loot_type = LOOT_SKINNING; break;
-        case LOOT_FISHINGHOLE: loot_type = LOOT_FISHING; break;
-        default: break;
+        case LOOT_INSIGNIA:
+            loot_type = LOOT_SKINNING;
+            break;
+        case LOOT_FISHINGHOLE:
+            loot_type = LOOT_FISHING;
+            break;
+        default:
+            break;
     }
 
     // need know merged fishing/corpse loot type for achievements
@@ -10215,7 +10237,6 @@ void Player::SendNotifyLootMoneyRemoved()
 {
     WorldPacket data(SMSG_COIN_REMOVED);
     ObjectGuid guid = MAKE_NEW_GUID(GUID_LOPART(GetLootGUID()), 0, HIGHGUID_LOOT);
-    sObjectMgr->setLootViewGUID(guid, GetLootGUID());
 
     data.WriteBitSeq<1, 3, 4, 0, 5, 6, 2, 7>(guid);
     data.WriteByteSeq<1, 4, 0, 6, 3, 7, 5, 2>(guid);
@@ -10229,7 +10250,6 @@ void Player::SendNotifyLootItemRemoved(uint8 lootSlot)
 
     ObjectGuid guid = GetLootGUID();
     ObjectGuid lootGuid = MAKE_NEW_GUID(GUID_LOPART(guid), 0, HIGHGUID_LOOT);
-    sObjectMgr->setLootViewGUID(lootGuid, guid);
 
     data.WriteBitSeq<7, 0, 5>(guid);
     data.WriteBitSeq<5>(lootGuid);
@@ -26974,7 +26994,7 @@ void Player::AutoStoreLoot(uint8 bag, uint8 slot, uint32 loot_id, LootStore cons
     }
 }
 
-void Player::StoreLootItem(uint8 lootSlot, Loot* loot, uint8 linkedLootSlot)
+void Player::StoreLootItem(uint8 lootSlot, Loot* loot)
 {
     QuestItem* qitem = NULL;
     QuestItem* ffaitem = NULL;
@@ -27007,7 +27027,7 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot, uint8 linkedLootSlot)
             qitem->is_looted = true;
             //freeforall is 1 if everyone's supposed to get the quest item.
             if (item->freeforall || loot->GetPlayerQuestItems().size() == 1)
-                SendNotifyLootItemRemoved(linkedLootSlot == 0xFF ? lootSlot : linkedLootSlot);
+                SendNotifyLootItemRemoved(lootSlot);
             else
                 loot->NotifyQuestItemRemoved(qitem->index);
         }
@@ -27017,14 +27037,14 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot, uint8 linkedLootSlot)
             {
                 //freeforall case, notify only one player of the removal
                 ffaitem->is_looted = true;
-                SendNotifyLootItemRemoved(linkedLootSlot == 0xFF ? lootSlot : linkedLootSlot);
+                SendNotifyLootItemRemoved(lootSlot);
             }
             else
             {
                 //not freeforall, notify everyone
                 if (conditem)
                     conditem->is_looted = true;
-                loot->NotifyItemRemoved(linkedLootSlot == 0xFF ? lootSlot : linkedLootSlot);
+                loot->NotifyItemRemoved(lootSlot);
             }
         }
 
@@ -27043,6 +27063,10 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot, uint8 linkedLootSlot)
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_ITEM, item->itemid, item->count);
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_TYPE, loot->loot_type, item->count);
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_EPIC_ITEM, item->itemid, item->count);
+
+        // LootItem is being removed (looted) from the container, delete it from the DB.
+        if (loot->containerID > 0)
+            loot->DeleteLootItemFromContainerItemDB(item->itemid);
     }
     else
         SendEquipError(msg, NULL, NULL, item->itemid);

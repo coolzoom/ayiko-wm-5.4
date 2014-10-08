@@ -5334,7 +5334,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                         return;
 
                     pet->GetMotionMaster()->MoveCharge(unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ());
-                    player->SendLoot(unitTarget->GetGUID(), LOOT_CORPSE, true);
+                    player->SendLoot(unitTarget->GetGUID(), LOOT_CORPSE);
 
                     break;
                 }

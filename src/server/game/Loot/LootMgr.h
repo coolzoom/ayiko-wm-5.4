@@ -143,10 +143,14 @@ struct LootItem
     bool    is_counted        : 1;
     bool    needs_quest       : 1;                          // quest drop
     bool    follow_loot_rules : 1;
+    bool    canSave;
 
     // Constructor, copies most fields from LootStoreItem, generates random count and random suffixes/properties
     // Should be called for non-reference LootStoreItem entries only (mincountOrRef > 0)
     explicit LootItem(LootStoreItem const& li);
+
+    // Empty constructor for creating an empty LootItem to be filled in with DB data
+    LootItem() : canSave(true) { }
 
     // Basic checks for player/item compatibility - if false no chance to see the item in the loot
     bool AllowedForPlayer(Player const* player) const;
@@ -221,10 +225,11 @@ class LootTemplate
 
     public:
         // Adds an entry to the group (at loading stage)
-        void AddEntry(LootStoreItem& item);
+        void AddEntry(LootStoreItem const &item);
         // Rolls for every item in the template and adds the rolled items the the loot
         void Process(Loot& loot, bool rate, uint16 lootMode, uint8 groupId = 0) const;
-        void CopyConditions(std::list<Condition*>  conditions);
+        void CopyConditions(ConditionList const &conditions);
+        void CopyConditions(LootItem *li) const;
 
         // True if template includes at least 1 quest drop entry
         bool HasQuestDrop(LootTemplateMap const& store, uint8 groupId = 0) const;
@@ -271,15 +276,7 @@ class LootValidatorRefManager : public RefManager<Loot, LootValidatorRef>
 //=====================================================
 struct LootView;
 
-ByteBuffer& operator<<(ByteBuffer& b, LootItem const& li);
 ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv);
-
-struct LinkedLootInfo
-{
-    uint64 creatureGUID;
-    uint32 slot;
-    PermissionTypes permission;
-};
 
 struct Loot
 {
@@ -289,7 +286,6 @@ struct Loot
     QuestItemMap const& GetPlayerFFAItems() const { return PlayerFFAItems; }
     QuestItemMap const& GetPlayerNonQuestNonFFAConditionalItems() const { return PlayerNonQuestNonFFAConditionalItems; }
 
-    std::map<uint32, LinkedLootInfo> linkedLoot;
     std::vector<LootItem> items;
     std::vector<LootItem> quest_items;
     uint32 gold;
@@ -297,20 +293,25 @@ struct Loot
     uint64 roundRobinPlayer;                                // GUID of the player having the Round-Robin ownership for the loot. If 0, round robin owner has released.
     LootType loot_type;                                     // required for achievement system
     bool alreadyAskedForRoll;
-    uint32 maxLinkedSlot;
-    uint32 additionalLinkedGold;
 
-    Loot(uint32 _gold = 0)
+    // GUIDLow of container that holds this loot (item_instance.entry)
+    //  Only set for inventory items that can be right-click looted
+    uint32 containerID;
+
+    explicit Loot(uint32 _gold = 0)
         : gold(_gold)
         , unlootedCount(0)
         , roundRobinPlayer(0)
         , loot_type(LOOT_CORPSE)
         , alreadyAskedForRoll(false)
-        , maxLinkedSlot(0)
-        , additionalLinkedGold(0)
+        , containerID(0)
     { }
 
     ~Loot() { clear(); }
+
+    // For deleting items at loot removal since there is no backward interface to the Item()
+    void DeleteLootItemFromContainerItemDB(uint32 itemID);
+    void DeleteLootMoneyFromContainerItemDB();
 
     // if loot becomes invalid this reference is used to inform the listener
     void addLootValidatorRef(LootValidatorRef* pLootValidatorRef)
@@ -339,32 +340,7 @@ struct Loot
         gold = 0;
         unlootedCount = 0;
         roundRobinPlayer = 0;
-        additionalLinkedGold = 0;
         i_LootValidatorRefManager.clearReferences();
-    }
-
-    void addLinkedLoot(uint32 slot, uint64 linkedCreature, uint32 linkedSlot, PermissionTypes perm)
-    {
-        linkedLoot[slot].creatureGUID = linkedCreature;
-        linkedLoot[slot].slot = linkedSlot;
-        linkedLoot[slot].permission = perm;
-
-        if (maxLinkedSlot < slot)
-            maxLinkedSlot = slot;
-    }
-
-    bool isLinkedLoot(uint32 slot)
-    {
-        if (linkedLoot.find(slot) != linkedLoot.end())
-            return true;
-
-        return false;
-    }
-
-    // Must used only AFTER isLinkedLoot check
-    LinkedLootInfo& getLinkedLoot(uint32 slot)
-    {
-        return linkedLoot[slot];
     }
 
     bool empty() const { return items.empty() && gold == 0; }
@@ -388,19 +364,19 @@ struct Loot
     bool hasItemFor(Player* player) const;
     bool hasOverThresholdItem() const;
 
-    private:
-        void FillNotNormalLootFor(Player* player, bool presentAtLooting);
-        QuestItemList* FillFFALoot(Player* player);
-        QuestItemList* FillQuestLoot(Player* player);
-        QuestItemList* FillNonQuestNonFFAConditionalLoot(Player* player, bool presentAtLooting);
+private:
+    void FillNotNormalLootFor(Player* player, bool presentAtLooting);
+    QuestItemList* FillFFALoot(Player* player);
+    QuestItemList* FillQuestLoot(Player* player);
+    QuestItemList* FillNonQuestNonFFAConditionalLoot(Player* player, bool presentAtLooting);
 
-        std::set<uint64> PlayersLooting;
-        QuestItemMap PlayerQuestItems;
-        QuestItemMap PlayerFFAItems;
-        QuestItemMap PlayerNonQuestNonFFAConditionalItems;
+    std::set<uint64> PlayersLooting;
+    QuestItemMap PlayerQuestItems;
+    QuestItemMap PlayerFFAItems;
+    QuestItemMap PlayerNonQuestNonFFAConditionalItems;
 
-        // All rolls are registered here. They need to know, when the loot is not valid anymore
-        LootValidatorRefManager i_LootValidatorRefManager;
+    // All rolls are registered here. They need to know, when the loot is not valid anymore
+    LootValidatorRefManager i_LootValidatorRefManager;
 };
 
 struct LootView

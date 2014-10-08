@@ -1577,64 +1577,39 @@ void Group::NeedBeforeGreed(Loot* loot, WorldObject* lootedObject)
     }
 }
 
-void Group::MasterLoot(Loot* /*loot*/, WorldObject* pLootedObject)
+void Group::MasterLoot(Loot* /*loot*/, WorldObject* lootedObject)
 {
     TC_LOG_DEBUG("network", "Group::MasterLoot (SMSG_MASTER_LOOT_CANDIDATE_LIST)");
-    uint32 real_count = 0;
+
+    std::vector<Player *> membersInDist;
+    membersInDist.reserve(GetMembersCount());
 
     for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
     {
-        Player* looter = itr->getSource();
-        if (!looter->IsInWorld())
-            continue;
-
-        if (looter->IsWithinDistInMap(pLootedObject, sWorld->getFloatConfig(CONFIG_GROUP_XP_DISTANCE), false))
-            ++real_count;
+        auto const looter = itr->getSource();
+        if (looter->IsInWorld() && looter->IsWithinDistInMap(lootedObject, sWorld->getFloatConfig(CONFIG_GROUP_XP_DISTANCE), false))
+            membersInDist.push_back(looter);
     }
 
-    ObjectGuid guid_looted = MAKE_NEW_GUID(pLootedObject->GetGUIDLow(), 0, HIGHGUID_LOOT);
-    sObjectMgr->setLootViewGUID(guid_looted, pLootedObject->GetGUID());
+    ObjectGuid lootedGuid = MAKE_NEW_GUID(lootedObject->GetGUIDLow(), 0, HIGHGUID_LOOT);
 
     WorldPacket data(SMSG_MASTER_LOOT_CANDIDATE_LIST);
-    data.WriteBitSeq<2, 4, 1, 3, 5, 6, 7>(guid_looted);
-    data.WriteBits(real_count, 24);
+    data.WriteBitSeq<2, 4, 1, 3, 5, 6, 7>(lootedGuid);
+    data.WriteBits(membersInDist.size(), 24);
 
-    for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
-    {
-        Player* looter = itr->getSource();
-        if (!looter->IsInWorld())
-            continue;
+    for (auto &looter : membersInDist)
+        data.WriteBitSeq<5, 1, 4, 6, 3, 2, 7, 0>(looter->GetGUID());
 
-        if (looter->IsWithinDistInMap(pLootedObject, sWorld->getFloatConfig(CONFIG_GROUP_XP_DISTANCE), false))
-        {
-            ObjectGuid guid = looter->GetGUID();
-            data.WriteBitSeq<5, 1, 4, 6, 3, 2, 7, 0>(guid);
-        }
-    }
+    data.WriteBitSeq<0>(lootedGuid);
+    data.WriteByteSeq<7>(lootedGuid);
 
-    data.WriteBitSeq<0>(guid_looted);
-    data.WriteByteSeq<7>(guid_looted);
-    for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
-    {
-        Player* looter = itr->getSource();
-        if (!looter->IsInWorld())
-            continue;
+    for (auto &looter : membersInDist)
+        data.WriteByteSeq<0, 4, 1, 3, 6, 5, 7, 2>(looter->GetGUID());
 
-        if (looter->IsWithinDistInMap(pLootedObject, sWorld->getFloatConfig(CONFIG_GROUP_XP_DISTANCE), false))
-        {
-            ObjectGuid guid = looter->GetGUID();
-            data.WriteByteSeq<0, 4, 1, 3, 6, 5, 7, 2>(guid);
-        }
-    }
+    data.WriteByteSeq<0, 2, 4, 1, 6, 5, 3>(lootedGuid);
 
-    data.WriteByteSeq<0, 2, 4, 1, 6, 5, 3>(guid_looted);
-
-    for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
-    {
-        Player* looter = itr->getSource();
-        if (looter->IsWithinDistInMap(pLootedObject, sWorld->getFloatConfig(CONFIG_GROUP_XP_DISTANCE), false))
-            looter->GetSession()->SendPacket(&data);
-    }
+    for (auto &looter : membersInDist)
+        looter->GetSession()->SendPacket(&data);
 }
 
 void Group::DoRollForAllMembers(ObjectGuid guid, uint8 slot, uint32 mapid, Loot* loot, LootItem& item, Player* player)

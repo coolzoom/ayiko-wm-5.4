@@ -82,8 +82,7 @@ enum MageSpells
     SPELL_MAGE_GLYPH_OF_ICE_BLOCK_FROST_NOVA     = 115757,
     SPELL_MAGE_IMPROVED_COUNTERSPELL             = 12598,
     SPELL_MAGE_COUNTERSPELL_SILENCE              = 55021,
-    SPELL_MAGE_FINGER_OF_FROST_VISUAL            = 44544,
-    SPELL_MAGE_FINGER_OF_FROST_EFFECT            = 126084,
+    SPELL_MAGE_FINGER_OF_FROST_EFFECT            = 44544,
     SPELL_MAGE_GLYPH_OF_SLOW                     = 86209,
     SPELL_MAGE_GREATER_INVISIBILITY_LESS_DAMAGE  = 113862,
     SPELL_MAGE_REMOVE_INVISIBILITY_REMOVED_TIMER = 122293,
@@ -282,7 +281,6 @@ class spell_mage_pet_frost_nova : public SpellScriptLoader
                         if (!_player->HasSpell(SPELL_MAGE_FINGERS_OF_FROST_AURA))
                             return;
 
-                        _player->CastSpell(_player, SPELL_MAGE_FINGER_OF_FROST_VISUAL, true);
                         _player->CastSpell(_player, SPELL_MAGE_FINGER_OF_FROST_EFFECT, true);
                     }
                 }

@@ -11588,10 +11588,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                 chance = 9;
 
             if (chance && roll_chance_i(chance))
-            {
                 CastSpell(this, 44544, true);  // Fingers of frost proc
-                CastSpell(this, 126084, true); // Fingers of frost visual
-            }
         }
 
         // Sword of Light - 53503
@@ -16471,8 +16468,6 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
     {
         if (Aura *fingersOfFrost = GetAura(44544, GetGUID()))
             fingersOfFrost->ModStackAmount(-1);
-        if (Aura *fingersVisual = GetAura(126084, GetGUID()))
-            fingersVisual->ModStackAmount(-1);
     }
 
     // Cast Shadowy Apparitions when Shadow Word : Pain is crit

@@ -4479,7 +4479,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->ProcCharges = 2;
                     break;
                 case 44544: // Fingers of Frost
-                case 126084:// Fingers of Frost - visual
                     spellInfo->StackAmount = 2;
                     break;
                 case 85222: // Light of Dawn

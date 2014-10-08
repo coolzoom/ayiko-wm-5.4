@@ -2255,6 +2255,17 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     if (!apply && caster)
                         caster->RemoveAurasDueToSpell(87833);
                     break;
+                case 44544: // Fingers of Frost - Apply second-stack visual
+                {
+                    if (apply)
+                    {
+                        if (GetStackAmount() > 1 && !target->HasAura(126084))
+                            target->CastSpell(target, 126084, true);
+                    }
+                    else
+                        target->RemoveAurasDueToSpell(126084);
+                    break;
+                }
                 default:
                     break;
             }

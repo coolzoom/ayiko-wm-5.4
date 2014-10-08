@@ -3117,10 +3117,9 @@ class npc_spirit_link_totem : public CreatureScript
 
 enum frozenOrbSpells
 {
-    SPELL_FINGERS_OF_FROST_VISUAL   = 44544,
+    SPELL_FINGERS_OF_FROST          = 44544,
     SPELL_SELF_SNARE_90             = 82736,
     SPELL_SNARE_DAMAGE              = 84721,
-    SPELL_FINGERS_OF_FROST          = 126084,
 };
 
 class npc_frozen_orb : public CreatureScript
@@ -3142,7 +3141,6 @@ class npc_frozen_orb : public CreatureScript
                 if (owner && owner->GetTypeId() == TYPEID_PLAYER)
                 {
                     owner->CastSpell(me, SPELL_SNARE_DAMAGE, true);
-                    owner->CastSpell(owner, SPELL_FINGERS_OF_FROST_VISUAL, true);
                     owner->CastSpell(owner, SPELL_FINGERS_OF_FROST, true);
                     me->AddAura(SPELL_SELF_SNARE_90, me);
 

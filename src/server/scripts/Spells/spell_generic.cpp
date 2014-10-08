@@ -3474,6 +3474,7 @@ class spell_gen_battle_fatigue final : public SpellScriptLoader
 
         void OnProc(AuraEffect const *, ProcEventInfo &eventInfo)
         {
+            PreventDefaultAction();
             if (auto const target = eventInfo.GetActionTarget())
                 target->CastSpell(target, BATTLE_FATIGUE_HEAL_REDUCTION, true);
         }

@@ -82,6 +82,8 @@
 #include "PlayerDump.h"
 #include "Compress.hpp"
 
+#include <zmq.h>
+
 #include <memory>
 
 namespace {
@@ -195,6 +197,7 @@ void ProcessTransferQueue()
 
 /// World constructor
 World::World()
+    : m_zmqContext(zmq_ctx_new()), m_auctionBroker(m_zmqContext)
 {
     m_playerLimit = 0;
     m_allowedSecurityLevel = SEC_PLAYER;
@@ -253,6 +256,9 @@ World::~World()
         delete command;
 
     VMAP::VMapFactory::clear();
+
+    m_auctionBroker.stop();
+    zmq_ctx_destroy(m_zmqContext);
 
     //TODO free addSessQueue
 }
@@ -2087,6 +2093,14 @@ void World::SetInitialWorldSettings()
     TC_LOG_INFO("server.loading", "Caching taxi nodes for levelup...");
     Trinity::PlayerTaxi::CacheLevelupNodes();
 
+    {
+        TC_LOG_INFO("server.loading", "Starting web auction broker agent...");
+
+        std::string endpoint = sConfigMgr->GetStringDefault("AuctionBrokerEndpoint", "tcp://*:8100");
+        if (m_auctionBroker.bind(endpoint.c_str()) != 0)
+            exit(1);
+    }
+
     uint32 startupDuration = GetMSTimeDiffToNow(startupBegin);
 
     TC_LOG_INFO("server.worldserver", "World initialized in %u minutes %u seconds", (startupDuration / 60000), ((startupDuration % 60000) / 1000));
@@ -2262,6 +2276,8 @@ void World::Update(uint32 diff)
     }
 
     UpdateSessions(diff);
+
+    m_auctionBroker.update();
 
     /// <li> Handle weather updates when the timer has passed
     if (m_timers[WUPDATE_WEATHERS].Passed())

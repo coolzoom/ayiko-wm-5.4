@@ -138,6 +138,7 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders
   ${ACE_INCLUDE_DIRS}
   ${MYSQL_INCLUDE_DIR}
+  ${ZLIB_INCLUDE_DIRS}
 )
 
 add_library(scripts STATIC

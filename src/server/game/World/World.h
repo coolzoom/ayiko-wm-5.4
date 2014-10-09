@@ -28,6 +28,7 @@
 #include "SharedDefines.h"
 #include "MySQLPtrTypesFwd.h"
 #include "Callback.h"
+#include "AuctionBroker.hpp"
 
 #include <ace/Singleton.h>
 
@@ -892,6 +893,9 @@ class World
 
         void ProcessQueryCallbacks();
         ACE_Future_Set<PreparedQueryResult> m_realmCharCallbacks;
+
+        void *m_zmqContext;
+        Trinity::AuctionBroker m_auctionBroker;
 
         uint32 m_worldLoopCounter;
 };

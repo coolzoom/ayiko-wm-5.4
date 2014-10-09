@@ -202,12 +202,16 @@ include_directories(
   ${ACE_INCLUDE_DIRS}
   ${MYSQL_INCLUDE_DIR}
   ${OPENSSL_INCLUDE_DIR}
+  ${ZEROMQ_INCLUDE_DIRS}
+  ${ZLIB_INCLUDE_DIRS}
 )
 
 add_library(game STATIC
   ${game_STAT_SRCS}
   ${game_STAT_PCH_SRC}
 )
+
+target_link_libraries(game ${ZEROMQ_LIBRARIES})
 
 add_dependencies(game revision.h)
 

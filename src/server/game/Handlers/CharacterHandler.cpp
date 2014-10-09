@@ -1329,8 +1329,9 @@ void WorldSession::HandleCharRenameOpcode(WorldPacket& recvData)
     nameLen = recvData.ReadBits(6);
     recvData.ReadBitSeq<4, 2, 0, 7, 1>(guid);
 
-    recvData.ReadByteSeq<6, 7, 5, 1, 4, 0, 2, 3>(guid);
+    recvData.ReadByteSeq<6, 7, 5, 1, 4, 0, 2>(guid);
     newName = recvData.ReadString(nameLen);
+    recvData.ReadByteSeq<3>(guid);
 
     // prevent character rename to invalid name
     if (!normalizePlayerName(newName))

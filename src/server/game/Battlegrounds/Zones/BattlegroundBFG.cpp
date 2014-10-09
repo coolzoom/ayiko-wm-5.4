@@ -20,12 +20,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#include "gamePCH.h"
 #include "Player.h"
 #include "Battleground.h"
 #include "BattlegroundBFG.h"
 #include "Language.h"
-#include "gamePCH.h"
 #include "World.h"
 #include "WorldPacket.h"
 #include "ObjectMgr.h"

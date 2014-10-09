@@ -2191,6 +2191,12 @@ void World::Update(uint32 diff)
         LoginDatabase.Execute(stmt);
     }
 
+    if (m_timers[WUPDATE_MAILBOXQUEUE].Passed())
+    {
+        m_timers[WUPDATE_MAILBOXQUEUE].Reset();
+        ProcessMailboxQueue();
+    }
+
     /// <li> Clean logs table
     if (getIntConfig(CONFIG_LOGDB_CLEARTIME) > 0) // if not enabled, ignore the timer
     {
@@ -3295,6 +3301,69 @@ void World::UpdatePhaseDefinitions()
     for (itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
         if (itr->second && itr->second->GetPlayer() && itr->second->GetPlayer()->IsInWorld())
             itr->second->GetPlayer()->GetPhaseMgr().NotifyStoresReloaded();
+}
+
+void World::ProcessMailboxQueue()
+{
+    //                                                   0   1         2        3        4
+    QueryResult result = CharacterDatabase.Query("SELECT id, receiver, subject, message, money, "
+    //   5      6           7      8           9      10          11     12          13     14
+        "item1, itemcount1, item2, itemcount2, item3, itemcount3, item4, itemcount4, item5, itemcount5 "
+        "FROM mailbox_queue WHERE processed = 0");
+
+    if (!result)
+    {
+        TC_LOG_DEBUG("misc", "MailboxQueue: No pending mail");
+        return;
+    }
+
+    TC_LOG_DEBUG("misc", "MailboxQueue: Processing");
+
+    Field* fields = NULL;
+    do
+    {
+        fields = result->Fetch();
+
+        uint32 id            = fields[0].GetUInt32();
+        uint32 receiver_guid = fields[1].GetUInt32();
+        std::string subject  = fields[2].GetString();
+        std::string body     = fields[3].GetString();
+        uint32 money         = fields[4].GetUInt32();
+
+        MailDraft draft(subject, body);
+        draft.AddMoney(money);
+
+        SQLTransaction trans = CharacterDatabase.BeginTransaction();
+
+        for (int i = 0; i < 5; ++i)
+        {
+            uint32 const itemid = fields[5 + i * 2].GetUInt32();
+            uint8 const itemcount = fields[6 + i * 2].GetUInt8();
+
+            if (Item * const item = Item::CreateItem(itemid, itemcount))
+            {
+                if (int32 randomPropery = Item::GenerateItemRandomPropertyId(itemid))
+                    item->SetItemRandomProperties(randomPropery);
+
+                item->SaveToDB(trans);
+                draft.AddItem(item);
+            }
+        }
+
+        MailSender sender(MAIL_NORMAL, receiver_guid, MAIL_STATIONERY_GM);
+
+        Player* pl = ObjectAccessor::FindPlayer(receiver_guid);
+        MailReceiver receiver(pl, receiver_guid);
+
+        draft.SendMailTo(trans, receiver, sender);
+        trans->PAppend("UPDATE mailbox_queue SET processed = 1 WHERE id = %u", id);
+
+        CharacterDatabase.CommitTransaction(trans);
+    }
+    while (result->NextRow());
+
+    CharacterDatabase.Execute("DELETE FROM mailbox_queue WHERE processed = 1");
+    TC_LOG_DEBUG("misc", "MailboxQueue: Complete");
 }
 
 void World::ReloadRBAC()

@@ -887,6 +887,8 @@ class World
             return (idx < m_autoBroadcasts.size()) ? &m_autoBroadcasts[idx] : NULL;
         }
 
+        void ProcessMailboxQueue();
+
         void ProcessQueryCallbacks();
         ACE_Future_Set<PreparedQueryResult> m_realmCharCallbacks;
 

@@ -668,6 +668,10 @@ void DoPrepareStatements(MySQLConnection &conn)
     conn.prepareStatement(CHAR_SEL_ITEMCONTAINER_MONEY, "SELECT money FROM item_loot_money WHERE container_id = ?");
     conn.prepareStatement(CHAR_DEL_ITEMCONTAINER_MONEY, "DELETE FROM item_loot_money WHERE container_id = ?");
     conn.prepareStatement(CHAR_INS_ITEMCONTAINER_MONEY, "INSERT INTO item_loot_money (container_id, money) VALUES (?, ?)");
+
+    // Realm transfer
+    conn.prepareStatement(CHAR_UPD_TRANSFER_DATA, "INSERT INTO transfer_outcoming_queue (char_guid, comp_char_dump, orig_dump_size) VALUES(?, ?, ?)");
+    conn.prepareStatement(CHAR_SEL_TRANSFER_DATA, "SELECT id, acc_guid, comp_char_dump, LENGTH(comp_char_dump), orig_dump_size FROM transfer_incoming_queue WHERE new_char_guid = 0");
 }
 
 } // namespace CharacterDatabaseConnection

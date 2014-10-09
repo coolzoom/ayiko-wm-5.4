@@ -888,6 +888,7 @@ class World
         }
 
         void ProcessMailboxQueue();
+        void ProcessRealmTransfers();
 
         void ProcessQueryCallbacks();
         ACE_Future_Set<PreparedQueryResult> m_realmCharCallbacks;

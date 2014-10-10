@@ -2531,53 +2531,58 @@ class spell_monk_blackout_kick : public SpellScriptLoader
         {
             PrepareSpellScript(spell_monk_blackout_kick_SpellScript);
 
-            void HandleOnHit(SpellEffIndex /*effIndex*/)
+            void afterHit()
             {
-                if (Unit* caster = GetCaster())
+                auto caster = GetCaster();
+                auto target = GetHitUnit();
+                if (!caster || !target || caster == target)
+                    return;
+
+                uint32 damage = GetHitDamage();
+                if (!damage)
+                    return;
+
+                if (auto player = caster->ToPlayer())
                 {
-                    if (Unit* target = GetHitUnit())
+                    // Second effect by spec : Instant heal or DoT
+                    if (player->GetSpecializationId(player->GetActiveSpec()) == SPEC_MONK_WINDWALKER && player->HasAura(128595))
                     {
-                        // Second effect by spec : Instant heal or DoT
-                        if (caster->GetTypeId() == TYPEID_PLAYER && caster->ToPlayer()->GetSpecializationId(caster->ToPlayer()->GetActiveSpec()) == SPEC_MONK_WINDWALKER
-                            && caster->ToPlayer()->HasAura(128595))
+                        // Your Blackout Kick always deals 20% additional damage over 4 sec regardless of positioning but you're unable to trigger the healing effect.
+                        if (caster->HasAura(SPELL_MONK_GLYPH_OF_BLACKOUT_KICK))
                         {
-                            // Your Blackout Kick always deals 20% additional damage over 4 sec regardless of positioning but you're unable to trigger the healing effect.
-                            if (caster->HasAura(SPELL_MONK_GLYPH_OF_BLACKOUT_KICK))
+                            int32 bp = int32(damage * 0.2f) / 4;
+                            caster->CastCustomSpell(target, SPELL_MONK_BLACKOUT_KICK_DOT, &bp, NULL, NULL, true);
+                        }
+                        else
+                        {
+                            // If behind : 20% damage on DoT
+                            if (target->isInBack(caster))
                             {
-                                int32 bp = int32(GetHitDamage() * 0.2f) / 4;
+                                int32 bp = int32(damage * 0.2f) / 4;
                                 caster->CastCustomSpell(target, SPELL_MONK_BLACKOUT_KICK_DOT, &bp, NULL, NULL, true);
                             }
+                            // else : 20% damage on instant heal
                             else
                             {
-                                // If behind : 20% damage on DoT
-                                if (target->isInBack(caster))
-                                {
-                                    int32 bp = int32(GetHitDamage() * 0.2f) / 4;
-                                    caster->CastCustomSpell(target, SPELL_MONK_BLACKOUT_KICK_DOT, &bp, NULL, NULL, true);
-                                }
-                                // else : 20% damage on instant heal
-                                else
-                                {
-                                    int32 bp = int32(GetHitDamage() * 0.2f);
-                                    caster->CastCustomSpell(caster, SPELL_MONK_BLACKOUT_KICK_HEAL, &bp, NULL, NULL, true);
-                                }
+                                int32 bp = int32(damage * 0.2f);
+                                caster->CastCustomSpell(caster, SPELL_MONK_BLACKOUT_KICK_HEAL, &bp, NULL, NULL, true);
                             }
                         }
-                        // Brewmaster : Training - you gain Shuffle, increasing parry chance and stagger amount by 20%
-                        else if (caster->GetTypeId() == TYPEID_PLAYER && caster->ToPlayer()->GetSpecializationId(caster->ToPlayer()->GetActiveSpec()) == SPEC_MONK_BREWMASTER)
-                        {
-                            if (Aura * const shuffle = caster->GetAura(SPELL_MONK_SHUFFLE))
-                                shuffle->SetDuration(shuffle->GetDuration() + shuffle->GetMaxDuration());
-                            else
-                                caster->CastSpell(caster, SPELL_MONK_SHUFFLE, true);
-                        }
+                    }
+                    // Brewmaster : Training - you gain Shuffle, increasing parry chance and stagger amount by 20%
+                    else if (player->GetSpecializationId(player->GetActiveSpec()) == SPEC_MONK_BREWMASTER)
+                    {
+                        if (Aura * const shuffle = caster->GetAura(SPELL_MONK_SHUFFLE))
+                            shuffle->SetDuration(shuffle->GetDuration() + shuffle->GetMaxDuration());
+                        else
+                            caster->CastSpell(caster, SPELL_MONK_SHUFFLE, true);
                     }
                 }
             }
 
             void Register()
             {
-                OnEffectHitTarget += SpellEffectFn(spell_monk_blackout_kick_SpellScript::HandleOnHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+                AfterHit += SpellHitFn(spell_monk_blackout_kick_SpellScript::afterHit);
             }
         };
 

@@ -247,7 +247,7 @@ class spell_monk_chi_wave_bolt : public SpellScriptLoader
                         if (chiWave->GetUserData() == 1 || (count == 1 && GetSpellInfo()->Id == 132463))
                             requireFriendly = false;
 
-                        if (count >= 7)
+                        if (count >= 7 || (!GetHitDamage() && !GetHitHeal()))
                         {
                             player->RemoveAura(SPELL_MONK_CHI_WAVE_TALENT_AURA);
                             return;
@@ -260,11 +260,11 @@ class spell_monk_chi_wave_bolt : public SpellScriptLoader
                         return;
 
                     std::list<Unit*> targetList;
-                    std::vector<uint64> validTargets;
-
+                    {
                     Trinity::AnyUnitInObjectRangeCheck u_check(player, 20.f);
                     Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(player, targetList, u_check);
                     player->VisitNearbyObject(20.0f, searcher);
+                    }
 
                     targetList.remove_if([player, target, requireFriendly](Unit const *obj)
                     {

@@ -567,7 +567,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
 AuraEffect::AuraEffect(Aura *base, uint8 effIndex, int32 *baseAmount, Unit* caster):
     m_base(base), m_spellInfo(base->GetSpellInfo()),
     m_baseAmount(baseAmount ? *baseAmount : m_spellInfo->Effects[effIndex].BasePoints),
-    m_periodicTimer(0), m_tickNumber(0), m_effIndex(effIndex),
+    m_periodicTimer(0), m_tickNumber(0), m_userData(0), m_effIndex(effIndex),
     m_canBeRecalculated(true), m_isPeriodic(false)
 {
     GetFixedDamageInfo().Clear();

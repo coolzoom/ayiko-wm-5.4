@@ -228,86 +228,70 @@ class spell_monk_chi_wave_bolt : public SpellScriptLoader
 
             void HandleOnHit()
             {
-                if (!GetOriginalCaster())
+                auto caster = GetOriginalCaster();
+                auto target = GetHitUnit();
+                if (!caster || !target)
                     return;
 
-                if (Player* player = GetOriginalCaster()->ToPlayer())
+                if (auto player = caster->ToPlayer())
                 {
-                    if (Unit* target = GetHitUnit())
+                    uint8 count = 0;
+                    bool requireFriendly = true;
+
+                    auto chiWave = player->GetAuraEffect(SPELL_MONK_CHI_WAVE_TALENT_AURA, EFFECT_1);
+                    if (chiWave)
                     {
-                        uint8 count = 0;
-                        std::list<Unit*> targetList;
-                        std::vector<uint64> validTargets;
+                        count = chiWave->GetAmount();
 
-                        if (AuraEffect *chiWave = player->GetAuraEffect(SPELL_MONK_CHI_WAVE_TALENT_AURA, EFFECT_1))
+                        // If we start with healing - make sure to trigger unfriendly requirement
+                        if (chiWave->GetUserData() == 1 || (count == 1 && GetSpellInfo()->Id == 132463))
+                            requireFriendly = false;
+
+                        if (count >= 7)
                         {
-                            count = chiWave->GetAmount();
-
-                            if (count >= 7)
-                            {
-                                player->RemoveAura(SPELL_MONK_CHI_WAVE_TALENT_AURA);
-                                return;
-                            }
-
-                            count++;
-                            chiWave->SetAmount(count);
-                        }
-                        else
-                            return;
-
-                        CellCoord p(Trinity::ComputeCellCoord(target->GetPositionX(), target->GetPositionY()));
-                        Cell cell(p);
-                        cell.SetNoCreate();
-
-                        Trinity::AnyUnitInObjectRangeCheck u_check(player, 20.0f);
-                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(player, targetList, u_check);
-
-                        cell.Visit(p, Trinity::makeWorldVisitor(searcher), *player->GetMap(), *player, 20.0f);
-                        cell.Visit(p, Trinity::makeGridVisitor(searcher), *player->GetMap(), *player, 20.0f);
-
-                        for (auto itr : targetList)
-                        {
-                            if (!itr->IsWithinLOSInMap(player))
-                                continue;
-
-                            if (itr == target)
-                                continue;
-
-                            validTargets.push_back(itr->GetGUID());
-                        }
-
-                        if (validTargets.empty())
-                        {
-                            player->RemoveAurasDueToSpell(SPELL_MONK_CHI_WAVE_TALENT_AURA);
+                            player->RemoveAura(SPELL_MONK_CHI_WAVE_TALENT_AURA);
                             return;
                         }
 
-                        std::random_shuffle(validTargets.begin(), validTargets.end());
+                        count++;
+                        chiWave->SetAmount(count);
+                    }
+                    else
+                        return;
 
-                        if (Unit* newTarget = sObjectAccessor->FindUnit(validTargets.front()))
-                        {
-                            if (player->IsValidAttackTarget(newTarget))
-                                target->CastSpell(newTarget, SPELL_MONK_CHI_WAVE_DAMAGE, true, NULL, NULL, player->GetGUID());
-                            else
-                            {
-                                std::list<Unit*> alliesList;
+                    std::list<Unit*> targetList;
+                    std::vector<uint64> validTargets;
 
-                                for (auto itr : validTargets)
-                                {
-                                    if (player->IsValidAttackTarget(sObjectAccessor->FindUnit(itr)))
-                                        continue;
+                    Trinity::AnyUnitInObjectRangeCheck u_check(player, 20.f);
+                    Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(player, targetList, u_check);
+                    player->VisitNearbyObject(20.0f, searcher);
 
-                                    alliesList.push_back(sObjectAccessor->FindUnit(itr));
-                                }
+                    targetList.remove_if([player, target, requireFriendly](Unit const *obj)
+                    {
+                        return (!obj->IsWithinLOSInMap(player) || obj == target ||
+                            (requireFriendly ? false : (obj->IsFriendlyTo(player) || !player->IsValidAttackTarget(obj))));
+                    });
 
-                                if (alliesList.empty())
-                                    return;
+                    if (targetList.empty())
+                    {
+                        player->RemoveAurasDueToSpell(SPELL_MONK_CHI_WAVE_TALENT_AURA);
+                        return;
+                    }
 
-                                alliesList.sort(Trinity::HealthPctOrderPred());
+                    if (requireFriendly)
+                    {
+                        targetList.sort(Trinity::HealthPctOrderPred());
+                        chiWave->SetUserData(1);
+                        target->CastSpell(targetList.front(), SPELL_MONK_CHI_WAVE_HEALING_BOLT, true, NULL, NULL, player->GetGUID());
+                    }
+                    else
+                    {
+                        // Select random target
+                        auto randomTarget = targetList.begin();
+                        std::advance(randomTarget, std::rand() % targetList.size());
 
-                                target->CastSpell(alliesList.front(), SPELL_MONK_CHI_WAVE_HEALING_BOLT, true, NULL, NULL, player->GetGUID());
-                            }
-                        }
+                        target->CastSpell(*randomTarget, SPELL_MONK_CHI_WAVE_DAMAGE, true, NULL, NULL, player->GetGUID());
+                        chiWave->SetUserData(0);
                     }
                 }
             }

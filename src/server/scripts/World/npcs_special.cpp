@@ -4213,6 +4213,7 @@ class npc_transcendence_spirit : public CreatureScript
             npc_transcendence_spiritAI(Creature* c) : Scripted_NoMovementAI(c)
             {
                 me->SetReactState(REACT_PASSIVE);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
             }
 
             void InitializeAI()

@@ -269,7 +269,7 @@ class spell_monk_chi_wave_bolt : public SpellScriptLoader
                     targetList.remove_if([player, target, requireFriendly](Unit const *obj)
                     {
                         return (!obj->IsWithinLOSInMap(player) || obj == target ||
-                            (requireFriendly ? false : (obj->IsFriendlyTo(player) || !player->IsValidAttackTarget(obj))));
+                            (requireFriendly ? false : (obj->IsFriendlyTo(player) || !player->IsValidAttackTarget(obj)) || !obj->isInCombat()) );
                     });
 
                     if (targetList.empty())

@@ -653,7 +653,7 @@ std::pair<DumpReturn, uint32> PlayerDumpReader::LoadDump(char const *dump, uint3
             case DTT_ITEM_VOID:
             {
                 char voidStorageId[21];
-                snprintf(voidStorageId, 21, "%" PRIu64, sObjectMgr->GenerateVoidStorageItemId());
+                snprintf(voidStorageId, 21, UI64FMTD, sObjectMgr->GenerateVoidStorageItemId());
 
                 if (!changenth(line, 1, voidStorageId))     // character_void_storage.id update
                     return std::make_pair(DUMP_FILE_BROKEN, 0u);

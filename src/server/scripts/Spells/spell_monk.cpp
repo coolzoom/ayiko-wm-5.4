@@ -675,13 +675,23 @@ class spell_monk_diffuse_magic : public SpellScriptLoader
                         if (!caster->IsWithinDist(_player, 40.0f))
                             continue;
 
-                        if (aura->GetSpellInfo()->IsPositive())
+                        if (aura->GetSpellInfo()->IsPositive() || aura->IsPassive())
                             continue;
 
                         if (!(aura->GetSpellInfo()->GetSchoolMask() & SPELL_SCHOOL_MASK_MAGIC))
                             continue;
 
-                        _player->AddAura(aura->GetSpellInfo()->Id, caster);
+                        // We need to manually apply Diminishing Return duration
+                        if (auto addedAura = _player->AddAura(aura->GetSpellInfo()->Id, caster))
+                        {
+                            DiminishingGroup m_diminishGroup = GetDiminishingReturnsGroupForSpell(aura->GetSpellInfo(), false);
+                            int32 duration = addedAura->GetMaxDuration();
+                            int32 limitduration = GetDiminishingReturnsLimitDuration(m_diminishGroup, addedAura->GetSpellInfo());
+                            DiminishingLevels m_diminishLevel = caster->GetDiminishing(m_diminishGroup);
+                            float diminishMod = caster->ApplyDiminishingToDuration(m_diminishGroup, duration, _player, m_diminishLevel, limitduration);
+                            addedAura->SetDuration(duration, true);
+                            addedAura->SetMaxDuration(duration);
+                        }
 
                         if (Aura *targetAura = caster->GetAura(aura->GetSpellInfo()->Id, _player->GetGUID()))
                         {

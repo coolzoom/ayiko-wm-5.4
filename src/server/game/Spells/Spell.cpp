@@ -1479,12 +1479,15 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
 
         // Custom MoP Script
         // 107270 / 117640 - Spinning Crane Kick : Give 1 Chi if the spell hits at least 3 targets
-        if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        if (auto player = m_caster->ToPlayer())
         {
-            if ((m_spellInfo->Id == 107270 || m_spellInfo->Id == 117640 || m_spellInfo->Id == 148187) && unitTargets.size() >= 3 && !m_caster->ToPlayer()->HasSpellCooldown(129881))
+            if ((m_spellInfo->Id == 107270 || m_spellInfo->Id == 117640 || m_spellInfo->Id == 148187) && unitTargets.size() >= 3 && !player->HasSpellCooldown(129881))
             {
                 m_caster->CastSpell(m_caster, 129881, true);
-                m_caster->ToPlayer()->AddSpellCooldown(129881, 0, 3 * IN_MILLISECONDS);
+                player->AddSpellCooldown(129881, 0, 3 * IN_MILLISECONDS);
+                // Muscle Memory
+                if (player->HasSpell(139598))
+                    player->CastSpell(player, 139597, true);
             }
         }
 

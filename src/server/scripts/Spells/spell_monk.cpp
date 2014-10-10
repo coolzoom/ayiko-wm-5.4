@@ -3117,6 +3117,38 @@ public:
     }
 };
 
+// Muscle Memory (139598) - Called by Jab (all versions)
+class spell_monk_muscle_memory : public SpellScriptLoader
+{
+public:
+    spell_monk_muscle_memory() : SpellScriptLoader("spell_monk_muscle_memory") { }
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void HandleEffect(SpellEffIndex /*effIndex*/)
+        {
+            Player * const player = GetCaster()->ToPlayer();
+            if (!player)
+                return;
+
+            if (player->HasSpell(139598))
+                player->CastSpell(player, 139597, true);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_impl::HandleEffect, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
 void AddSC_monk_spell_scripts()
 {
     new spell_monk_fists_of_fury_stun();
@@ -3178,4 +3210,5 @@ void AddSC_monk_spell_scripts()
     new spell_monk_sanctuary_of_the_ox();
     new spell_monk_black_ox_guard_aoe_selector();
     new spell_monk_chi_brew();
+    new spell_monk_muscle_memory();
 }

@@ -44,22 +44,23 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket & recvData)
 
     uint32 count = recvData.ReadBits(23);
 
-    std::vector<ObjectGuid> guids;
-    guids.resize(count);
-
-    for (uint32 i = 0; i < count; i++)
-        recvData.ReadBitSeq<3, 7, 2, 4, 0, 5, 6, 1>(guids[i]);
-
     // As long as AoE loot is not implemented, count must be equal to 1.
-    ASSERT(count == 1);
+    if (count != 1)
+        return;
 
-    for (uint32 i = 0; i < count; i++)
+    std::vector<ObjectGuid> guids(count);
+
+    for (auto &objGuid : guids)
+        recvData.ReadBitSeq<3, 7, 2, 4, 0, 5, 6, 1>(objGuid);
+
+    for (auto &objGuid : guids)
     {
-        recvData.ReadByteSeq<4, 7, 6, 5>(guids[i]);
+        recvData.ReadByteSeq<4, 7, 6, 5>(objGuid);
         recvData >> lootSlot;
-        recvData.ReadByteSeq<3, 1, 0, 2>(guids[i]);
+        recvData.ReadByteSeq<3, 1, 0, 2>(objGuid);
 
-        ASSERT(GUID_LOPART(guids[i]) == GUID_LOPART(lguid));
+        if (GUID_LOPART(objGuid) != GUID_LOPART(lguid))
+            return;
 
         if (IS_GAMEOBJECT_GUID(lguid))
         {

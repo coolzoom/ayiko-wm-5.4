@@ -795,9 +795,6 @@ class spell_mage_frostbolt final : public SpellScriptLoader
         enum
         {
             FROSTBOLT_HEAL = 126201,
-            ICICLE_STORE   = 148012,
-            ICICLE_DAMAGE  = 148022,
-            ICICILE_VISUAL = 148017,
         };
 
         bool shouldHeal_;
@@ -887,7 +884,7 @@ class spell_mastery_icicles final : public SpellScriptLoader
         void handleMastery()
         {
             auto caster = GetCaster()->ToPlayer();
-            if (!caster)
+            if (!caster || caster == GetHitUnit())
                 return;
 
             if (caster->getLevel() >= 80 && caster->HasAura(76613))
@@ -988,8 +985,7 @@ public:
         {
             if (!GetCaster())
                 return;
-            auto player = GetCaster()->ToPlayer();
-            if (player)
+            if (auto player = GetCaster()->ToPlayer())
             {
                 for (int32 i = 0; i < 5; ++i)
                 {

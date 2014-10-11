@@ -4565,8 +4565,17 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(14);
                     break;
                 case 107223: // Sunfire Rays
-                case 148023: // Icicle (periodic trigger)
                     spellInfo->Effects[0].TargetA = TARGET_UNIT_TARGET_ENEMY;
+                    break;
+                case 148023: // Icicle (periodic trigger)
+                case 148022: // Icicle (damage)
+                case 148017: // Icicle (visual)
+                case 148018:
+                case 148019:
+                case 148020:
+                case 148021:
+                    spellInfo->Effects[0].TargetA = TARGET_UNIT_TARGET_ANY;
+                    spellInfo->AttributesEx6 &= ~SPELL_ATTR6_CANT_TARGET_CROWD_CONTROLLED;
                     break;
                 case 106909:
                 {

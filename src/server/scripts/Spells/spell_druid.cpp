@@ -535,7 +535,7 @@ class spell_dru_swipe_and_maul : public SpellScriptLoader
                             SetHitDamage(damage);
                         }
 
-                        if (caster->HasAura(SPELL_DRUID_TOOTH_AND_CLAW_AURA))
+                        if (caster->HasAura(SPELL_DRUID_TOOTH_AND_CLAW_AURA) && GetSpellInfo()->Id == 6807)
                         {
                             int32 bp = CalculatePct(caster->GetTotalAttackPowerValue(BASE_ATTACK), 88);
                             int32 agi = CalculatePct(caster->GetStat(STAT_AGILITY), 176);

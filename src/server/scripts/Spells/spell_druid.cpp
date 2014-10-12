@@ -3673,6 +3673,7 @@ class spell_dru_survival_instincts : public SpellScriptLoader
         }
 };
 
+// 145108 - Ysera's Gift
 class spell_dru_yseras_gift final : public SpellScriptLoader
 {
     class script_impl final : public AuraScript
@@ -3690,7 +3691,7 @@ class spell_dru_yseras_gift final : public SpellScriptLoader
             PreventDefaultAction();
 
             auto const caster = GetCaster();
-            if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
+            if (!caster || caster->isDead() || caster->GetTypeId() != TYPEID_PLAYER)
                 return;
 
             uint32 spellId = YSERAS_GIFT_HEAL_SELF;
@@ -3724,6 +3725,7 @@ public:
     }
 };
 
+// Ysera's Gift (ally heal) - 145110
 class spell_dru_yseras_gift_heal_ally final : public SpellScriptLoader
 {
     class script_impl final : public SpellScript

@@ -5465,6 +5465,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 116768: // Combo Breaker: Blackout Kick
                     spellInfo->ProcFlags = 0;
                     break;
+                case 145110: // Ysera's Gift (Party Heal)
+                    spellInfo->Effects[EFFECT_0].SetRadiusIndex(EFFECT_RADIUS_100_YARDS);
+                    break;
                 default:
                     break;
             }

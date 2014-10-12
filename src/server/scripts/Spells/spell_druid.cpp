@@ -1470,25 +1470,20 @@ class spell_dru_natures_vigil : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_natures_vigil_AuraScript);
 
-            void OnProc(AuraEffect const * /*aurEff*/, ProcEventInfo& eventInfo)
+            void OnProc(AuraEffect const * aurEff, ProcEventInfo& eventInfo)
             {
                 PreventDefaultAction();
 
-                if (!GetCaster())
+                auto _player = GetTarget()->ToPlayer();
+                if (!_player || eventInfo.GetActor()->GetGUID() != _player->GetGUID())
                     return;
 
-                Player* _player = GetCaster()->ToPlayer();
-                if (!_player)
-                    return;
-
-                if (eventInfo.GetActor()->GetGUID() != _player->GetGUID())
-                    return;
-
-                if (!eventInfo.GetDamageInfo()->GetSpellInfo())
+                auto damageInfo = eventInfo.GetDamageInfo();
+                if (!damageInfo->GetSpellInfo())
                     return;
 
                 bool singleTarget = false;
-                for (auto const &spellEffect : eventInfo.GetDamageInfo()->GetSpellInfo()->Effects)
+                for (auto const &spellEffect : damageInfo->GetSpellInfo()->Effects)
                 {
                     if ((spellEffect.TargetA.GetTarget() == TARGET_UNIT_TARGET_ALLY || spellEffect.TargetA.GetTarget() == TARGET_UNIT_TARGET_ENEMY)
                             && spellEffect.TargetB.GetTarget() == 0)
@@ -1498,37 +1493,50 @@ class spell_dru_natures_vigil : public SpellScriptLoader
                 if (!singleTarget)
                     return;
 
-                if (eventInfo.GetDamageInfo()->GetSpellInfo()->Id == SPELL_DRUID_NATURES_VIGIL_HEAL ||
-                    eventInfo.GetDamageInfo()->GetSpellInfo()->Id == SPELL_DRUID_NATURES_VIGIL_DAMAGE)
+                if (damageInfo->GetSpellInfo()->Id == SPELL_DRUID_NATURES_VIGIL_HEAL ||
+                    damageInfo->GetSpellInfo()->Id == SPELL_DRUID_NATURES_VIGIL_DAMAGE)
                     return;
 
-                if (!(eventInfo.GetDamageInfo()->GetDamage()) && !(eventInfo.GetHealInfo()->GetHeal()))
+                if (!(damageInfo->GetDamage()) && !(eventInfo.GetHealInfo()->GetHeal()))
                     return;
 
-                if (!(eventInfo.GetDamageInfo()->GetDamageType() == SPELL_DIRECT_DAMAGE) && !(eventInfo.GetDamageInfo()->GetDamageType() == HEAL))
+                if (!(damageInfo->GetDamageType() == SPELL_DIRECT_DAMAGE) && !(damageInfo->GetDamageType() == HEAL))
                     return;
 
                 int32 bp = 0;
-                Unit* target = NULL;
-                uint32 spellId = 0;
-
-                if (!eventInfo.GetDamageInfo()->GetSpellInfo()->IsPositive())
-                {
-                    bp = eventInfo.GetDamageInfo()->GetDamage() / 4;
-                    spellId = SPELL_DRUID_NATURES_VIGIL_HEAL;
-                    target = _player->SelectNearbyAlly(_player, 25.0f);
-                }
+                bool isPositive = damageInfo->GetSpellInfo()->IsPositive();
+                if (isPositive)
+                    bp = CalculatePct(eventInfo.GetHealInfo()->GetHeal(), aurEff->GetAmount());
                 else
+                    bp = CalculatePct(damageInfo->GetDamage(), aurEff->GetAmount());
+
+
+                // Healing from both damage and heal spells
+                if (auto target = _player->SelectNearbyAlly(_player, 40.0f))
+                    _player->CastCustomSpell(target, SPELL_DRUID_NATURES_VIGIL_HEAL, &bp, NULL, NULL, true);
+
+                if (isPositive)
                 {
-                    bp = eventInfo.GetHealInfo()->GetHeal() / 4;
-                    spellId = SPELL_DRUID_NATURES_VIGIL_DAMAGE;
-                    target = _player->SelectNearbyTarget(_player, 25.0f);
+                    std::list<Unit*> targets;
+                    Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(_player, _player, 40.f);
+                    Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(_player, targets, u_check);
+                    _player->VisitNearbyObject(40.f, searcher);
+                    // remove invalid targets
+                    for (std::list<Unit*>::iterator tIter = targets.begin(); tIter != targets.end();)
+                    {
+                        if (!_player->IsWithinLOSInMap(*tIter) || (*tIter)->isTotem() || (*tIter)->isSpiritService() || (*tIter)->GetCreatureType() == CREATURE_TYPE_CRITTER || !_player->IsValidAttackTarget(*tIter))
+                            targets.erase(tIter++);
+                        else
+                            ++tIter;
+                    }
+                    // no appropriate targets
+                    if (targets.empty())
+                        return;
+
+                    // select random
+                    if (auto target = Trinity::Containers::SelectRandomContainerElement(targets))
+                        _player->CastCustomSpell(target, SPELL_DRUID_NATURES_VIGIL_DAMAGE, &bp, NULL, NULL, true);
                 }
-
-                if (!target || !spellId || !bp)
-                    return;
-
-                _player->CastCustomSpell(target, spellId, &bp, NULL, NULL, true);
             }
 
             void Register()

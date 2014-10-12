@@ -1749,7 +1749,7 @@ class spell_monk_healing_elixirs : public SpellScriptLoader
         }
 };
 
-// Living Bomb - 44457
+// Zen Sphere - 124081
 class spell_monk_zen_sphere : public SpellScriptLoader
 {
     public:

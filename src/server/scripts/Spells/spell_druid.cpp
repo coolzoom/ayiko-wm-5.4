@@ -3950,6 +3950,71 @@ public:
     }
 };
 
+// Heart of the Wild - 108288
+class spell_dru_heart_of_the_wild : public SpellScriptLoader
+{
+public:
+    spell_dru_heart_of_the_wild() : SpellScriptLoader("spell_dru_heart_of_the_wild") { }
+
+    class script_impl : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            auto player = GetTarget()->ToPlayer();
+            if (!player)
+                return;
+
+            uint32 specAuras[4] = {108294, 123738, 108293, 123737};
+            uint32 excludeSpell = 0;
+
+            switch (player->GetSpecializationId(player->GetActiveSpec()))
+            {
+                case SPEC_DRUID_BALANCE:
+                    excludeSpell = 108294;
+                    break;
+                case SPEC_DRUID_FERAL:
+                    excludeSpell = 123737;
+                    break;
+                case SPEC_DRUID_GUARDIAN:
+                    excludeSpell = 123738;
+                    break;
+                case SPEC_DRUID_RESTORATION:
+                    excludeSpell = 108293;
+                    break;
+                default:
+                    break;
+            }
+
+            for (int32 i = 0; i < 4; ++i)
+            {
+                if (specAuras[i] == excludeSpell)
+                    continue;
+                player->CastSpell(player, specAuras[i], true);
+            }
+        }
+
+        void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            uint32 specAuras[4] = {108294, 123738, 108293, 123737};
+            for (int32 i = 0; i < 4; ++i)
+                GetTarget()->RemoveAurasDueToSpell(specAuras[i]);
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(script_impl::OnApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            OnEffectRemove += AuraEffectRemoveFn(script_impl::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new script_impl();
+    }
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_tooth_and_claw_absorb();
@@ -4024,4 +4089,5 @@ void AddSC_druid_spell_scripts()
     new spell_dru_healing_touch_dream_of_cenarius();
     new spell_dru_wrath_dream_of_cenarius();
     new spell_dru_dream_of_cenarius_restoration();
+    new spell_dru_heart_of_the_wild();
 }

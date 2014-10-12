@@ -588,7 +588,6 @@ class spell_dru_soul_of_the_forest : public SpellScriptLoader
                             caster->CastSpell(caster, SPELL_DRUID_SOUL_OF_THE_FOREST_HASTE, true);
                         else
                         {
-                            caster->EnergizeBySpell(caster, SPELL_DRUID_SOUL_OF_THE_FOREST, 40, POWER_RAGE);
                             int32 damage = GetHitDamage();
                             AddPct(damage, 15);
                             SetHitDamage(damage);

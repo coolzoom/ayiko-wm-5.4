@@ -2680,6 +2680,10 @@ void Spell::EffectEnergize(SpellEffIndex effIndex)
                     }
                 }
             break;
+        case 33878: // Mangle - Soul of the Forest
+            if (auto soulOfForest = m_caster->GetAuraEffect(114107, EFFECT_4))
+                AddPct(damage, soulOfForest->GetAmount());
+            break;
         default:
             break;
     }

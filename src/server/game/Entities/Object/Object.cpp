@@ -2805,6 +2805,17 @@ void WorldObject::MovePosition(Position &pos, float dist, float angle)
     pos.SetOrientation(GetOrientation());
 }
 
+void WorldObject::MovePositionFixedXY(Position &pos, float dist, float angle)
+{
+    angle += m_orientation;
+    pos.m_positionX += dist * std::cos(angle);
+    pos.m_positionY += dist * std::sin(angle);
+    Trinity::NormalizeMapCoord(pos.m_positionX);
+    Trinity::NormalizeMapCoord(pos.m_positionY);
+    UpdateGroundPositionZ(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
+    pos.SetOrientation(GetOrientation());
+}
+
 void WorldObject::MovePositionToFirstCollision(Position &pos, float dist, float angle)
 {
     angle += GetOrientation();

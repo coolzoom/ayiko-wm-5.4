@@ -460,20 +460,20 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
     ObjectGuid itemTarget, Guid2, Guid3, targetGuid;
 
-    bool hasTargetFlags = !(recvPacket.ReadBit());
-    bool hasCountCast = !(recvPacket.ReadBit());
-    bool hasUnk1 = !(recvPacket.ReadBit());
-    bool hasSpellId = !(recvPacket.ReadBit());
+    bool hasTargetFlags = !recvPacket.ReadBit();
+    bool hasCountCast = !recvPacket.ReadBit();
+    bool hasUnk1 = !recvPacket.ReadBit();
+    bool hasSpellId = !recvPacket.ReadBit();
     uint8 archeologyCounter = recvPacket.ReadBits(2);
     recvPacket.ReadBit(); // hasGuid0 (inversed)
-    bool hasElevation = !(recvPacket.ReadBit());
+    bool hasElevation = !recvPacket.ReadBit();
     recvPacket.ReadBit(); // hasTargetGuid (inversed)
     bool hasGuid3 = recvPacket.ReadBit();
-    bool hasSpeed = !(recvPacket.ReadBit());
-    bool hasUnkString = !(recvPacket.ReadBit());
+    bool hasSpeed = !recvPacket.ReadBit();
+    bool hasUnkString = !recvPacket.ReadBit();
     bool hasGuid2 = recvPacket.ReadBit();
     bool hasMovement = recvPacket.ReadBit();
-    bool hasUnk4 = !(recvPacket.ReadBit());
+    bool hasUnk4 = !recvPacket.ReadBit();
 
     uint32 targetFlags = 0;
 
@@ -562,8 +562,8 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     if (hasCountCast)
         recvPacket >> castCount;
 
-    if (hasSpeed)
-        recvPacket >> speed;
+    if (hasElevation)
+        recvPacket >> elevation;
 
     if (hasUnkString)
         unkString = recvPacket.ReadString(unkStringLength);
@@ -571,8 +571,8 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     if (hasUnk1)
         recvPacket >> glyphIndex; // not sure about this ...
 
-    if (hasElevation)
-        recvPacket >> elevation;
+    if (hasSpeed)
+        recvPacket >> speed;
 
     TC_LOG_DEBUG("network", "WORLD: got cast spell packet, castCount: %u, spellId: %u, targetFlags: %u, data length = %u",
                    castCount, spellId, targetFlags, (uint32)recvPacket.size());

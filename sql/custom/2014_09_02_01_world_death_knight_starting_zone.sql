@@ -13,7 +13,7 @@ UPDATE `quest_template` SET `NextQuestId` = 12754, `ExclusiveGroup` = -12751 WHE
 UPDATE `quest_template` SET `Method` = 2, `RewardTalents` = 0, `RequiredNpcOrGoCount1` = 100 WHERE `Id` = 12701;
 
 -- [SQL] Death Knight - Quests - If Chaos Drives, Let Suffering Hold The Reins will no longer award double kill credits (Fixes #110)
-DELETE FROM `smart_scripts` WHERE `entryorguid` IN (28611, 28608, 28557, 28609, 28576, 28577) AND `source_type`=0;
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (28611, 28608, 28557, 28609, 28576, 28577) AND `source_type` = 0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
 (28611, 0, 0, 0, 4, 0, 100, 1, 0, 0, 0, 0, 11, 6660, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Captain - On Aggro - Cast Shoot"),
 (28611, 0, 1, 0, 0, 0, 100, 0, 4000, 5000, 12000, 14000, 11, 52221, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Captain - IC - Cast Heroic Strike"),
@@ -29,19 +29,19 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (28608, 0, 9, 0, 3, 2, 100, 0, 30, 100, 100, 100, 22, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Medic - On High Mana - Set Phase 1"),
 (28608, 0, 10, 0, 0, 1, 100, 0, 6000, 7000, 39000, 45000, 11, 19725, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Medic - IC - Cast Turn Undead"),
 (28608, 0, 11, 0, 1, 0, 100, 0, 500, 1000, 600000, 600000, 11, 13864, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Medic - On Spawn - Cast Power Word: Fortitude"),
-(28557, 0, 0, 0, 4, 0, 100, 1, 0, 0, 0, 0, 31, 1, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Peasant - On Aggro - Set Random Phase"),
-(28557, 0, 1, 2, 4, 1, 100, 1, 0, 0, 0, 0, 17, 431, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Peasant - On Aggro - Play Emote Fear"),
-(28557, 0, 2, 3, 61, 1, 100, 1, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Peasant - On Aggro - Stop Attack"),
-(28557, 0, 3, 4, 61, 1, 100, 1, 0, 0, 0, 0, 4, 14992, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Peasant - On Aggro - Play Sound Male"),
-(28557, 0, 4, 5, 61, 1, 100, 1, 0, 0, 0, 0, 21, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Peasant - On Aggro - Stop Move"),
-(28557, 0, 5, 0, 61, 1, 100, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Peasant - On Aggro - Say Line 0"),
-(28557, 0, 6, 0, 0, 1, 100, 0, 20000, 20000, 40000, 40000, 4, 14992, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Peasant - IC - Play Sound Male Scream"),
-(28557, 0, 7, 8, 7, 1, 100, 1, 0, 0, 0, 0, 17, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Peasant - On Evade - Reset Emote"),
-(28557, 0, 8, 0, 61, 1, 100, 1, 0, 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Peasant - On Evade - Reset Phase"),
-(28557, 0, 9, 0, 6, 1, 100, 1, 0, 0, 0, 0, 17, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Peasant - On Death - Reset Emote"),
-(28557, 0, 10, 11, 61, 2, 100, 1, 0, 0, 0, 0, 20, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Peasant - On Aggro - Start Attack"),
-(28557, 0, 11, 0, 61, 2, 100, 1, 0, 0, 0, 0, 21, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Peasant - On Aggro - Start Move"),
-(28557, 0, 12, 0, 7, 2, 100, 1, 0, 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Peasant - On Evade - Reset Phase"),
+(28557, 0, 0, 0, 4, 0, 100, 1, 0, 0, 0, 0, 31, 1, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Peasant - On Aggro phase 0 - Set Random Phase"),
+(28557, 0, 1, 2, 4, 1, 100, 1, 0, 0, 0, 0, 17, 431, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Peasant - On Aggro phase 1 - Play Emote Fear"),
+(28557, 0, 2, 3, 61, 1, 100, 1, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Peasant - On Aggro phase 1 - Stop Attack"),
+(28557, 0, 3, 4, 61, 1, 100, 1, 0, 0, 0, 0, 4, 14992, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Peasant - On Aggro phase 1 - Play Sound Male"),
+(28557, 0, 4, 5, 61, 1, 100, 1, 0, 0, 0, 0, 21, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Peasant - On Aggro phase 1 - Stop Move"),
+(28557, 0, 5, 0, 61, 1, 100, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Peasant - On Aggro phase 1 - Say Line 0"),
+(28557, 0, 6, 0, 0, 1, 100, 0, 20000, 20000, 40000, 40000, 4, 14992, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Peasant - IC phase 1 - Play Sound Male Scream"),
+(28557, 0, 7, 8, 7, 1, 100, 1, 0, 0, 0, 0, 17, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Peasant - On Evade phase 1 - Reset Emote"),
+(28557, 0, 8, 0, 61, 1, 100, 1, 0, 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Peasant - On Evade phase 1 - Reset Phase"),
+(28557, 0, 9, 0, 6, 1, 100, 1, 0, 0, 0, 0, 17, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Peasant - On Death phase 1 - Reset Emote"),
+(28557, 0, 10, 11, 61, 2, 100, 1, 0, 0, 0, 0, 20, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Peasant - On Aggro phase 2 - Start Attack"),
+(28557, 0, 11, 0, 61, 2, 100, 1, 0, 0, 0, 0, 21, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Peasant - On Aggro phase 2 - Start Move"),
+(28557, 0, 12, 0, 7, 2, 100, 1, 0, 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Peasant - On Evade phase 2 - Reset Phase"),
 (28609, 0, 0, 0, 0, 0, 100, 0, 3000, 3500, 13400, 14600, 11, 25710, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Infantryman - IC - Cast Heroic Strike"),
 (28609, 0, 1, 0, 0, 0, 100, 0, 8000, 8900, 17000, 22400, 11, 53399, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Scarlet Infantryman - IC - Cast Sweeping Slam"),
 (28576, 0, 0, 0, 4, 0, 100, 1, 0, 0, 0, 0, 31, 1, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Citizen of Havenshire - On Aggro - Set Random Phase"),
@@ -76,6 +76,64 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (28577, 0, 13, 14, 61, 2, 100, 1, 0, 0, 0, 0, 20, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Citizen of Havenshire - On Aggro - Start Attack"),
 (28577, 0, 14, 0, 61, 2, 100, 1, 0, 0, 0, 0, 21, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Citizen of Havenshire - On Aggro - Start Move"),
 (28577, 0, 15, 0, 7, 2, 100, 1, 0, 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Citizen of Havenshire - On Evade - Reset Phase");
+DELETE FROM `creature_text` WHERE `entry` IN ('28611', '28608', '28557', '28609', '28576', '28577');
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+('28557','0','0','Ungh... I... I think I pooped...','12','0','50','0','0','0','Scarlet Peasant'),
+('28557','0','1','Don\'t kill me! I only took this job for the benefits!','12','0','50','0','0','0','Scarlet Peasant'),
+('28557','0','2','I... I got a sick grandma at home... I... I\'m all she\'s got, $g:mister;miss .','12','0','50','0','0','0','Scarlet Peasant'),
+('28557','0','3','I picked the wrong week to quit drinkin\'!','12','0','50','0','0','0','Scarlet Peasant'),
+('28557','0','4','You don\'t have to do this! Nobody has to die!','12','0','50','0','0','0','Scarlet Peasant'),
+('28557','0','5','The... They promised that we\'d be safe...','12','0','50','0','0','0','Scarlet Peasant'),
+('28557','0','6','Not again! Don\'t kill me, I have a family... HELP!!! HELP ME SOMEBODY!!!','12','0','50','0','0','0','Scarlet Peasant'),
+('28576','0','0','Why?','12','0','50','0','0','0','Citizen of Havenshire'),
+('28576','0','1','P... Please don\'t...','12','0','50','0','0','0','Citizen of Havenshire'),
+('28576','0','2','Spare my life! I will leave this place forever! Please!','12','0','50','0','0','0','Citizen of Havenshire'),
+('28576','0','3','I\'ve got five kids, $g:man;lady ! They\'ll die without me!','12','0','50','0','0','0','Citizen of Havenshire'),
+('28576','0','4','The... They promised that we\'d be safe...','12','0','50','0','0','0','Citizen of Havenshire'),
+('28576','0','5','I\'m too young to die!','12','0','50','0','0','0','Citizen of Havenshire'),
+('28576','0','6','Ask for anything and you shall have it! Just spare my life!','12','0','50','0','0','0','Citizen of Havenshire'),
+('28576','1','0','The Lich King whispers: Kill them all!','16','0','50','0','0','14772','Citizen of Havenshire'),
+('28576','1','1','The Lich King whispers: Finish it!','16','0','50','0','0','14774','Citizen of Havenshire'),
+('28576','1','2','The Lich King whispers: Mercy is for the weak!','16','0','50','0','0','14773','Citizen of Havenshire'),
+('28576','1','3','The Lich King whispers: No survivors!','16','0','50','0','0','14776','Citizen of Havenshire'),
+('28576','1','4','The Lich King whispers: Show it the meaning of terror!','16','0','50','0','0','14782','Citizen of Havenshire'),
+('28576','1','5','The Lich King whispers: No mercy!','16','0','50','0','0','14771','Citizen of Havenshire'),
+('28576','1','6','The Lich King whispers: Kill or die!','16','0','50','0','0','14777','Citizen of Havenshire'),
+('28576','1','7','The Lich King whispers: Suffering to the conquered!','16','0','50','0','0','14781','Citizen of Havenshire'),
+('28576','2','0','I won\'t go down that easy!','12','0','50','0','0','0','Citizen of Havenshire'),
+('28576','2','1','Die Scourge dog! DIE!','12','0','50','0','0','0','Citizen of Havenshire'),
+('28576','2','2','Is this the best the Scourge can do?','12','0','50','0','0','0','Citizen of Havenshire'),
+('28576','2','3','You may take my life, but you won\'t take my freedom!','12','0','50','0','0','0','Citizen of Havenshire'),
+('28577','0','0','Why?','12','0','50','0','0','0','Citizen of Havenshire'),
+('28577','0','1','P... Please don\'t...','12','0','50','0','0','0','Citizen of Havenshire'),
+('28577','0','2','Spare my life! I will leave this place forever! Please!','12','0','50','0','0','0','Citizen of Havenshire'),
+('28577','0','3','I\'ve got five kids, $g:man;lady ! They\'ll die without me!','12','0','50','0','0','0','Citizen of Havenshire'),
+('28577','0','4','The... They promised that we\'d be safe... ','12','0','50','0','0','0','Citizen of Havenshire'),
+('28577','0','5','I\'m too young to die!','12','0','50','0','0','0','Citizen of Havenshire'),
+('28577','0','6','Ask for anything and you shall have it! Just spare my life! ','12','0','50','0','0','0','Citizen of Havenshire'),
+('28577','1','0','The Lich King whispers: Kill them all!','16','0','50','0','0','14772','Citizen of Havenshire'),
+('28577','1','1','The Lich King whispers: Finish it!','16','0','50','0','0','14774','Citizen of Havenshire'),
+('28577','1','2','The Lich King whispers: Mercy is for the weak!','16','0','50','0','0','14773','Citizen of Havenshire'),
+('28577','1','3','The Lich King whispers: No survivors!','16','0','50','0','0','14776','Citizen of Havenshire'),
+('28577','1','4','The Lich King whispers: Show it the meaning of terror!','16','0','50','0','0','14782','Citizen of Havenshire'),
+('28577','1','5','The Lich King whispers: No mercy!','16','0','50','0','0','14771','Citizen of Havenshire'),
+('28577','1','6','The Lich King whispers: Kill or die!','16','0','50','0','0','14777','Citizen of Havenshire'),
+('28577','1','7','The Lich King whispers: Suffering to the conquered!','16','0','50','0','0','14781','Citizen of Havenshire'),
+('28577','2','0','I won\'t go down that easy!','12','0','50','0','0','0','Citizen of Havenshire'),
+('28577','2','1','Die Scourge dog! DIE!','12','0','50','0','0','0','Citizen of Havenshire'),
+('28577','2','2','Is this the best the Scourge can do?','12','0','50','0','0','0','Citizen of Havenshire'),
+('28577','2','3','You may take my life, but you won\'t take my freedom!','12','0','50','0','0','0','Citizen of Havenshire'),
+('28609','0','0','The Crusade will be victorious!','12','0','100','0','0','0','Scarlet Infantryman'),
+('28609','0','1','Let the purging begin!','12','0','100','0','0','0','Scarlet Infantryman'),
+('28609','0','2','You\'re not welcome in these lands, monster!','12','0','100','0','0','0','Scarlet Infantryman'),
+('28611','0','0','The Crusade will be victorious!','12','0','100','0','0','0','Scarlet Captain'),
+('28611','0','1','Let the purging begin!','12','0','100','0','0','0','Scarlet Captain'),
+('28611','0','2','You\'re not welcome in these lands, monster!','12','0','100','0','0','0','Scarlet Captain');
+-- [SQL] Npcs - a version of Scarlet Paesant will now look dead as intented (Refs #7859)
+DELETE FROM `creature_addon` WHERE `guid` IN (SELECT `guid` FROM `creature` WHERE `id` = 28892);
+DELETE FROM `creature_template_addon` WHERE `entry` = 28892;
+INSERT INTO `creature_template_addon` (`entry`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES
+(28892, 1, 0, 30, 29266);
 
 -- [SQL] Death Knight - Quests - Into the Realm of Shadows corrected (Feedback #112)
 DELETE FROM `quest_start_scripts` WHERE `id` = 12687;

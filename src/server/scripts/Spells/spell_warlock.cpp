@@ -887,55 +887,6 @@ class spell_warl_soul_link_dummy : public SpellScriptLoader
         }
 };
 
-// Soul Link - 108415
-class spell_warl_soul_link : public SpellScriptLoader
-{
-    public:
-        spell_warl_soul_link() : SpellScriptLoader("spell_warl_soul_link") { }
-
-        class spell_warl_soul_link_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_warl_soul_link_SpellScript);
-
-            void HandleOnHit()
-            {
-                if (Player* _player = GetCaster()->ToPlayer())
-                {
-                    if (Unit* target = GetHitUnit())
-                    {
-                        if (!target->HasAura(WARLOCK_SOUL_LINK_DUMMY_AURA))
-                        {
-                            uint32 health = target->CountPctFromMaxHealth(50);
-
-                            if (target->GetHealth() > health)
-                                target->SetHealth(health);
-                            target->SetMaxHealth(health);
-
-                            _player->CastSpell(_player, WARLOCK_SOUL_LINK_DUMMY_AURA, true);
-                        }
-                        else
-                        {
-                            target->SetMaxHealth(target->GetMaxHealth() * 2);
-                            target->SetHealth(target->GetHealth() * 2);
-                            _player->RemoveAura(WARLOCK_SOUL_LINK_DUMMY_AURA);
-                            target->RemoveAura(WARLOCK_SOUL_LINK_DUMMY_AURA);
-                        }
-                    }
-                }
-            }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_warl_soul_link_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_warl_soul_link_SpellScript();
-        }
-};
-
 // Archimonde's Vengeance (Cooldown marker) - 108505
 class spell_warl_archimondes_vengeance_cooldown : public SpellScriptLoader
 {
@@ -3117,7 +3068,6 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_grimoire_of_sacrifice();
     new spell_warl_flames_of_xoroth();
     new spell_warl_soul_link_dummy();
-    new spell_warl_soul_link();
     new spell_warl_archimondes_vengeance_cooldown();
     new spell_warl_archimondes_vengance();
     new spell_warl_archimondes_vengance_passive();

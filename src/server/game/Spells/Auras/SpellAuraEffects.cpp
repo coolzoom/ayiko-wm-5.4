@@ -7853,7 +7853,13 @@ void AuraEffect::HandleObsModPowerAuraTick(Unit* target, Unit* caster) const
     // Hack Fix Glyph of Evocation - 56380
     if (GetBase()->GetId() == 12051 && GetTickNumber() > 1)
         if (target->HasAura(56380) && !target->HasAura(114003))
-            target->HealBySpell(target, sSpellMgr->GetSpellInfo(12051), target->CountPctFromMaxHealth(20), false);
+        {
+            int32 healthGain = caster->CountPctFromMaxHealth(20);
+            auto spellInfo = sSpellMgr->GetSpellInfo(12051);
+            healthGain = target->SpellHealingBonusDone(target, spellInfo, healthGain, HEAL);
+            healthGain = target->SpellHealingBonusTaken(target, spellInfo, healthGain, HEAL);
+            target->HealBySpell(target, spellInfo, healthGain, false);
+        }
 
     int32 gain = target->ModifyPower(powerType, amount);
 

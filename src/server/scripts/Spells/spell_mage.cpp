@@ -1039,7 +1039,13 @@ class spell_mage_invocation : public SpellScriptLoader
                         caster->CastSpell(caster, SPELL_MAGE_INVOKERS_ENERGY, true);
 
                         if (caster->HasAura(SPELL_MAGE_GLYPH_OF_EVOCATION))
-                            caster->HealBySpell(caster, sSpellMgr->GetSpellInfo(12051), caster->CountPctFromMaxHealth(10), false);
+                        {
+                            int32 healthGain = caster->CountPctFromMaxHealth(10);
+                            auto spellInfo = sSpellMgr->GetSpellInfo(12051);
+                            healthGain = caster->SpellHealingBonusDone(caster, spellInfo, healthGain, HEAL);
+                            healthGain = caster->SpellHealingBonusTaken(caster, spellInfo, healthGain, HEAL);
+                            caster->HealBySpell(caster, spellInfo, healthGain, false);
+                        }
                     }
                 }
             }

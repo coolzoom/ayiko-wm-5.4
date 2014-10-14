@@ -1777,7 +1777,7 @@ class Player final : public Unit, public GridObject<Player>
         bool LearnTalent(uint32 talentId);
         bool AddTalent(uint32 spellId, uint8 spec, bool learning);
         bool HasTalent(uint32 spell_id, uint8 spec) const;
-        uint32 CalculateTalentsPoints() const;
+        uint32 CalculateTalentPoints() const;
         void CastPassiveTalentSpell(uint32 spellId);
         void RemovePassiveTalentSpell(uint32 spellId);
 

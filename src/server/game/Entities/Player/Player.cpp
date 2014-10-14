@@ -3829,7 +3829,7 @@ void Player::InitTalentForLevel()
             SetActiveSpec(0);
         }
 
-        auto const talentPointsForLevel = CalculateTalentsPoints();
+        auto const talentPointsForLevel = CalculateTalentPoints();
 
         // if used more that have then reset
         if (GetUsedTalentCount() > talentPointsForLevel)
@@ -4840,7 +4840,7 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
         else
         {
             SetUsedTalentCount(0);
-            SetFreeTalentPoints(CalculateTalentsPoints());
+            SetFreeTalentPoints(CalculateTalentPoints());
         }
     }
 
@@ -5252,7 +5252,7 @@ bool Player::ResetTalents(bool no_cost)
     if (HasAtLoginFlag(AT_LOGIN_RESET_TALENTS))
         RemoveAtLoginFlag(AT_LOGIN_RESET_TALENTS, true);
 
-    uint32 talentPointsForLevel = CalculateTalentsPoints();
+    uint32 talentPointsForLevel = CalculateTalentPoints();
 
     if (!GetUsedTalentCount())
     {
@@ -19123,7 +19123,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     SetSpecializationId(0, fields[51].GetUInt32());
     SetSpecializationId(1, fields[52].GetUInt32());
 
-    SetFreeTalentPoints(CalculateTalentsPoints());
+    SetFreeTalentPoints(CalculateTalentPoints());
 
     // sanity check
     if (GetSpecsCount() > MAX_TALENT_SPECS || GetActiveSpec() > MAX_TALENT_SPEC || GetSpecsCount() < MIN_TALENT_SPECS)
@@ -27072,7 +27072,7 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot)
         SendEquipError(msg, NULL, NULL, item->itemid);
 }
 
-uint32 Player::CalculateTalentsPoints() const
+uint32 Player::CalculateTalentPoints() const
 {
     auto const level = std::min<uint32>(getLevel(), DEFAULT_MAX_LEVEL);
 
@@ -27451,8 +27451,7 @@ void Player::CompletedAchievement(AchievementEntry const* entry)
 // TODO : Check cheat-hack issue with packet-editing
 bool Player::LearnTalent(uint32 talentId)
 {
-    uint32 CurTalentPoints = GetFreeTalentPoints();
-    if (CurTalentPoints == 0)
+    if (GetFreeTalentPoints() == 0)
         return false;
 
     TalentEntry const* talentInfo = sTalentStore.LookupEntry(talentId);
@@ -27462,10 +27461,13 @@ bool Player::LearnTalent(uint32 talentId)
     if (talentInfo->classId != getClass())
         return false;
 
+    if (talentInfo->rank >= CalculateTalentPoints())
+        return false;
+
     uint32 spellid = talentInfo->spellId;
     if (spellid == 0)
     {
-        TC_LOG_ERROR("entities.player", "Talent.dbc have for talent: %uspell id = 0", talentId);
+        TC_LOG_ERROR("entities.player", "Talent.dbc have for talent: %u spell id = 0", talentId);
         return false;
     }
 
@@ -27473,7 +27475,7 @@ bool Player::LearnTalent(uint32 talentId)
     if (HasSpell(spellid))
         return false;
 
-    // Check if players has already learn a talent for this rank
+    // Check if players has already learnt a talent for this rank
     for (uint32 i = 0; i < sTalentStore.GetNumRows(); i++)
     {
         TalentEntry const* tInfo = sTalentStore.LookupEntry(i);
@@ -27485,7 +27487,7 @@ bool Player::LearnTalent(uint32 talentId)
 
         if (tInfo->rank == talentInfo->rank && HasSpell(tInfo->spellId))
         {
-            TC_LOG_INFO("molten", "[Cheat] Player GUID %u try to learn talent %u, but he has already spell %u", GetGUIDLow(), talentInfo->spellId, tInfo->spellId);
+            TC_LOG_ERROR("molten", "[Cheat] Player GUID %u try to learn talent %u, but he has already spell %u", GetGUIDLow(), talentInfo->spellId, tInfo->spellId);
             return false;
         }
     }
@@ -27495,7 +27497,7 @@ bool Player::LearnTalent(uint32 talentId)
     AddTalent(spellid, GetActiveSpec(), true);
     CastPassiveTalentSpell(spellid);
 
-    TC_LOG_INFO("misc", "TalentID: %u Spell: %u Spec: %u\n", talentId, spellid, GetActiveSpec());
+    TC_LOG_DEBUG("misc", "TalentID: %u Spell: %u Spec: %u", talentId, spellid, GetActiveSpec());
     return true;
 }
 
@@ -27629,7 +27631,7 @@ void Player::SendTalentsInfoData(bool pet)
     }
 
     // Update free talents points client-side
-    SetUInt32Value(PLAYER_MAX_TALENT_TIERS, CalculateTalentsPoints());
+    SetUInt32Value(PLAYER_MAX_TALENT_TIERS, CalculateTalentPoints());
 
     WorldPacket data(SMSG_UPDATE_TALENT_DATA);
     BuildPlayerTalentsInfoData(&data);

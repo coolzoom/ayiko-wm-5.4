@@ -106,7 +106,7 @@ class mob_darkfang : public CreatureScript
             InstanceScript* pInstance;
             EventMap events;
 
-		    void Reset()
+            void Reset()
             {
                 events.Reset();
             }

@@ -273,7 +273,7 @@ class WorldSession
         void SendPetNameInvalid(uint32 error, const std::string& name, DeclinedName *declinedName);
         void SendPartyResult(PartyOperation operation, const std::string& member, PartyResult res, uint32 val = 0);
         void SendAreaTriggerMessage(const char* Text, ...) ATTR_PRINTF(2, 3);
-		void SendSetPhaseShift(PhaseShiftSet const &phaseIds, PhaseShiftSet const &terrainswaps, PhaseShiftSet const& worldMapAreaIds);
+        void SendSetPhaseShift(PhaseShiftSet const &phaseIds, PhaseShiftSet const &terrainswaps, PhaseShiftSet const& worldMapAreaIds);
         void SendQueryTimeResponse();
         void HandleLearnPetSpecialization(WorldPacket& data);
 

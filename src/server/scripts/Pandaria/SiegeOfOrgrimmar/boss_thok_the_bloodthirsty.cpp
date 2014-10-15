@@ -4,11 +4,11 @@
 
 enum eSpells
 {
-    SPELL_ACCELERATION	           =143411,
-    SPELL_ACID_BREATH	           =143780,
-    SPELL_BERSERK	               =26662,
+    SPELL_ACCELERATION               =143411,
+    SPELL_ACID_BREATH               =143780,
+    SPELL_BERSERK                   =26662,
     SPELL_BLOOD_FRENZY             =143442,
-    SPELL_DEAFENING_SCREECH	       =143343,
+    SPELL_DEAFENING_SCREECH           =143343,
     SPELL_FEARSOME_ROAR            =143426,
     SPELL_FIXATE                   =146540,
     SPELL_FREEZING_BREATH          =143773,

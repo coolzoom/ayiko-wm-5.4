@@ -279,13 +279,13 @@ class mob_blackhoof : public CreatureScript
 enum eIkThikWarriorSpells
 {
     SPELL_PIERCE_ARMOR      = 6016,
-    SPELL_SHOCK_AND_AWE		= 118538,
+    SPELL_SHOCK_AND_AWE        = 118538,
 };
 
 enum eIkThikWarriorEvents
 {
     EVENT_PIERCE_ARMOR          = 1,
-    EVENT_SHOCK_AND_AWE			= 2,
+    EVENT_SHOCK_AND_AWE            = 2,
 };
 
 class mob_ik_thik_warrior : public CreatureScript
@@ -308,8 +308,8 @@ class mob_ik_thik_warrior : public CreatureScript
             {
                 events.Reset();
 
-                events.ScheduleEvent(EVENT_PIERCE_ARMOR,		 5000);
-                events.ScheduleEvent(EVENT_SHOCK_AND_AWE,		15000);
+                events.ScheduleEvent(EVENT_PIERCE_ARMOR,         5000);
+                events.ScheduleEvent(EVENT_SHOCK_AND_AWE,        15000);
             }
 
             void JustDied(Unit* /*killer*/) { }

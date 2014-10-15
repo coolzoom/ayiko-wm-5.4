@@ -814,7 +814,7 @@ class npc_lorewalker_cho : public CreatureScript
                                 sorcererMogu->AI()->DoAction(ACTION_SET_NATIVE_DISPLAYID);
                                 sorcererMogu->AI()->DoAction(ACTION_SET_GHOST_VISUAL);
                                 sorcererMogu->AI()->DoAction(ACTION_BEFORE_COMBAT);
-                                events.ScheduleEvent(EVENT_START_FIRST_COMBAT,	4000);
+                                events.ScheduleEvent(EVENT_START_FIRST_COMBAT,    4000);
                             }
                         }
 
@@ -852,7 +852,7 @@ class npc_lorewalker_cho : public CreatureScript
                                 zian->AI()->DoAction(ACTION_SET_GHOST_VISUAL);
                                 zian->AI()->DoAction(ACTION_SET_NATIVE_DISPLAYID);
                                 zian->AI()->DoAction(ACTION_BEFORE_COMBAT);
-                                events.ScheduleEvent(EVENT_START_FIRST_COMBAT,	5000);
+                                events.ScheduleEvent(EVENT_START_FIRST_COMBAT,    5000);
                             }
                         }
 

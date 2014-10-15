@@ -104,54 +104,6 @@ enum WarlockSpells
     WARLOCK_SOULBURN_DEMONIC_CIRCLE_TELE    = 114794,
 };
 
-// Soulburn : Drain Life - 89420
-class spell_warl_soulburn_drain_life : public SpellScriptLoader
-{
-    public:
-        spell_warl_soulburn_drain_life() : SpellScriptLoader("spell_warl_soulburn_drain_life") { }
-
-        class spell_warl_soulburn_drain_life_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_warl_soulburn_drain_life_AuraScript);
-
-            void HandleApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
-            {
-                if (GetCaster())
-                    GetCaster()->RemoveAura(WARLOCK_SOULBURN_AURA);
-            }
-
-            void OnTick(AuraEffect const * /*aurEff*/)
-            {
-                if (GetCaster())
-                {
-                    Player* player = GetCaster()->ToPlayer();
-                    if (!player)
-                        return;
-
-                    // Restoring 2% of the caster's total health every 1s
-                    int32 basepoints = player->CountPctFromMaxHealth(3);
-
-                    // In Demonology spec : Generates 10 Demonic Fury per second
-                    if (player->GetSpecializationId(player->GetActiveSpec()) == SPEC_WARLOCK_DEMONOLOGY)
-                        player->EnergizeBySpell(player, 689, 10, POWER_DEMONIC_FURY);
-
-                    player->CastCustomSpell(player, WARLOCK_DRAIN_LIFE_HEAL, &basepoints, NULL, NULL, true);
-                }
-            }
-
-            void Register()
-            {
-                OnEffectApply += AuraEffectApplyFn(spell_warl_soulburn_drain_life_AuraScript::HandleApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-                OnEffectPeriodic += AuraEffectPeriodicFn(spell_warl_soulburn_drain_life_AuraScript::OnTick, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_warl_soulburn_drain_life_AuraScript();
-        }
-};
-
 // Soulburn : Health Funnel - 104220
 class spell_warl_soulburn_health_funnel : public SpellScriptLoader
 {
@@ -935,55 +887,6 @@ class spell_warl_soul_link_dummy : public SpellScriptLoader
         }
 };
 
-// Soul Link - 108415
-class spell_warl_soul_link : public SpellScriptLoader
-{
-    public:
-        spell_warl_soul_link() : SpellScriptLoader("spell_warl_soul_link") { }
-
-        class spell_warl_soul_link_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_warl_soul_link_SpellScript);
-
-            void HandleOnHit()
-            {
-                if (Player* _player = GetCaster()->ToPlayer())
-                {
-                    if (Unit* target = GetHitUnit())
-                    {
-                        if (!target->HasAura(WARLOCK_SOUL_LINK_DUMMY_AURA))
-                        {
-                            uint32 health = target->CountPctFromMaxHealth(50);
-
-                            if (target->GetHealth() > health)
-                                target->SetHealth(health);
-                            target->SetMaxHealth(health);
-
-                            _player->CastSpell(_player, WARLOCK_SOUL_LINK_DUMMY_AURA, true);
-                        }
-                        else
-                        {
-                            target->SetMaxHealth(target->GetMaxHealth() * 2);
-                            target->SetHealth(target->GetHealth() * 2);
-                            _player->RemoveAura(WARLOCK_SOUL_LINK_DUMMY_AURA);
-                            target->RemoveAura(WARLOCK_SOUL_LINK_DUMMY_AURA);
-                        }
-                    }
-                }
-            }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_warl_soul_link_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_warl_soul_link_SpellScript();
-        }
-};
-
 // Archimonde's Vengeance (Cooldown marker) - 108505
 class spell_warl_archimondes_vengeance_cooldown : public SpellScriptLoader
 {
@@ -1481,7 +1384,14 @@ class spell_warl_soul_leech : public SpellScriptLoader
                     {
                         if (player->HasAura(WARLOCK_SOUL_LEECH_AURA))
                         {
-                            int32 bp = int32(GetHitDamage() / 10);
+                            uint32 absorbPct = 20;
+                            if (player->GetSpecializationId(player->GetActiveSpec()) != SPEC_WARLOCK_AFFLICTION)
+                                absorbPct = 10;
+
+                            int32 bp = CalculatePct(GetHitDamage(), absorbPct);
+
+                            if (!bp)
+                                return;
 
                             player->CastCustomSpell(player, WARLOCK_SOUL_LEECH_HEAL, &bp, NULL, NULL, true);
 
@@ -2256,8 +2166,8 @@ class spell_warl_drain_life : public SpellScriptLoader
                     if (!player)
                         return;
 
-                    // Restoring 2% of the caster's total health every 1s
-                    int32 basepoints = player->GetMaxHealth() / 50;
+                    // Restoring 2 (3 if Soulburn's) % of the caster's total health every 1s
+                    int32 basepoints = player->CountPctFromMaxHealth(GetId() == 89420 ? 3 : 2);
 
                     // Harvest Life
                     if (Aura const * const harvest = player->GetAura(108371))
@@ -2343,9 +2253,9 @@ class spell_warl_life_tap : public SpellScriptLoader
     public:
         spell_warl_life_tap() : SpellScriptLoader("spell_warl_life_tap") { }
 
-        class spell_warl_life_tap_SpellScript : public SpellScript
+        class script_impl : public SpellScript
         {
-            PrepareSpellScript(spell_warl_life_tap_SpellScript);
+            PrepareSpellScript(script_impl);
 
             SpellCastResult CheckLife()
             {
@@ -2354,10 +2264,11 @@ class spell_warl_life_tap : public SpellScriptLoader
                 return SPELL_FAILED_FIZZLE;
             }
 
-            void HandleOnHit()
+            void HandleOnHit(SpellEffIndex effIndex)
             {
                 if (Player* _player = GetCaster()->ToPlayer())
                 {
+                    PreventHitEffect(effIndex);
                     int32 healthCost = int32(_player->GetMaxHealth() * 0.15f);
 
                     _player->SetHealth(_player->GetHealth() - healthCost);
@@ -2367,14 +2278,14 @@ class spell_warl_life_tap : public SpellScriptLoader
 
             void Register()
             {
-                OnCheckCast += SpellCheckCastFn(spell_warl_life_tap_SpellScript::CheckLife);
-                OnHit += SpellHitFn(spell_warl_life_tap_SpellScript::HandleOnHit);
+                OnCheckCast += SpellCheckCastFn(script_impl::CheckLife);
+                OnEffectHitTarget += SpellEffectFn(script_impl::HandleOnHit, EFFECT_0, SPELL_EFFECT_ENERGIZE);
             }
         };
 
         SpellScript* GetSpellScript() const
         {
-            return new spell_warl_life_tap_SpellScript();
+            return new script_impl();
         }
 };
 
@@ -3107,9 +3018,41 @@ public:
     }
 };
 
+class spell_warl_demonic_fury : public SpellScriptLoader
+{
+public:
+    spell_warl_demonic_fury() : SpellScriptLoader("spell_warl_demonic_fury") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void HandleEffect(SpellEffIndex effIndex)
+        {
+            PreventHitDefaultEffect(effIndex);
+            auto owner = GetCaster()->GetOwner();
+            if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            auto player = owner->ToPlayer();
+            if (player->GetSpecializationId(player->GetActiveSpec()) == SPEC_WARLOCK_DEMONOLOGY)
+                player->EnergizeBySpell(player, GetSpellInfo()->Id, GetSpellInfo()->Effects[EFFECT_2].BasePoints, POWER_DEMONIC_FURY);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_impl::HandleEffect, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
 void AddSC_warlock_spell_scripts()
 {
-    new spell_warl_soulburn_drain_life();
     new spell_warl_soulburn_health_funnel();
     new spell_warl_soulburn_seed_of_corruption_damage();
     new spell_warl_soulburn_seed_of_corruption();
@@ -3125,7 +3068,6 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_grimoire_of_sacrifice();
     new spell_warl_flames_of_xoroth();
     new spell_warl_soul_link_dummy();
-    new spell_warl_soul_link();
     new spell_warl_archimondes_vengeance_cooldown();
     new spell_warl_archimondes_vengance();
     new spell_warl_archimondes_vengance_passive();
@@ -3176,4 +3118,5 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_backdraft();
     new spell_warl_molten_core();
     new spell_warl_glyph_of_siphon_life();
+    new spell_warl_demonic_fury();
 }

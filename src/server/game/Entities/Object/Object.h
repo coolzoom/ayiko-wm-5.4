@@ -782,7 +782,10 @@ class WorldObject : public Object, public WorldLocation
             // angle calculated from current orientation
             GetNearPoint(NULL, x, y, z, size, distance2d, GetOrientation() + angle);
         }
+
         void MovePosition(Position &pos, float dist, float angle);
+        void MovePositionFixedXY(Position &pos, float dist, float angle);
+
         void GetNearPosition(Position &pos, float dist, float angle)
         {
             GetPosition(&pos);

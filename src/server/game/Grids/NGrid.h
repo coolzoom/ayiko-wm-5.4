@@ -33,36 +33,64 @@ class GridInfo final
 {
 public:
     GridInfo()
-        : i_timer(0), vis_Update(0, irand(0, DEFAULT_VISIBILITY_NOTIFY_PERIOD))
-        , i_unloadActiveLockCount(0), i_unloadReferenceLock(false)
+        : i_timer(0), i_visUpdate(0, irand(0, DEFAULT_VISIBILITY_NOTIFY_PERIOD))
+        , i_unloadActiveLockCount(0), i_unloadReferenceLock(0)
+        , i_unloadExplicitLock(0)
     { }
 
-    explicit GridInfo(time_t expiry)
-        : i_timer(expiry), vis_Update(0, irand(0, DEFAULT_VISIBILITY_NOTIFY_PERIOD))
-        , i_unloadActiveLockCount(0), i_unloadReferenceLock(false)
+    explicit GridInfo(time_t expiry, bool unload = true)
+        : i_timer(expiry), i_visUpdate(0, irand(0, DEFAULT_VISIBILITY_NOTIFY_PERIOD))
+        , i_unloadActiveLockCount(0), i_unloadReferenceLock(0)
+        , i_unloadExplicitLock(unload ? 0 : 1)
     { }
 
     const TimeTracker& getTimeTracker() const { return i_timer; }
 
-    bool getUnloadLock() const { return i_unloadActiveLockCount || i_unloadReferenceLock; }
+    bool getUnloadLock() const
+    {
+        return i_unloadActiveLockCount || i_unloadReferenceLock || i_unloadExplicitLock;
+    }
 
-    void setUnloadReferenceLock(bool on) { i_unloadReferenceLock = on; }
+    void setUnloadReferenceLock(bool on)
+    {
+        i_unloadReferenceLock = on ? 1 : 0;
+    }
 
-    void incUnloadActiveLock() { ++i_unloadActiveLockCount; }
-    void decUnloadActiveLock() { if (i_unloadActiveLockCount) --i_unloadActiveLockCount; }
+    void incUnloadActiveLock()
+    {
+        ++i_unloadActiveLockCount;
+    }
 
-    void setTimer(const TimeTracker& pTimer) { i_timer = pTimer; }
-    void ResetTimeTracker(time_t interval) { i_timer.Reset(interval); }
-    void UpdateTimeTracker(time_t diff) { i_timer.Update(diff); }
+    void decUnloadActiveLock()
+    {
+        if (i_unloadActiveLockCount)
+            --i_unloadActiveLockCount;
+    }
 
-    PeriodicTimer & getRelocationTimer() { return vis_Update; }
+    void setTimer(const TimeTracker& pTimer)
+    {
+        i_timer = pTimer;
+    }
+
+    void ResetTimeTracker(time_t interval)
+    {
+        i_timer.Reset(interval);
+    }
+
+    void UpdateTimeTracker(time_t diff)
+    {
+        i_timer.Update(diff);
+    }
+
+    PeriodicTimer & getRelocationTimer() { return i_visUpdate; }
 
 private:
     TimeTracker i_timer;
-    PeriodicTimer vis_Update;
+    PeriodicTimer i_visUpdate;
 
     uint16 i_unloadActiveLockCount;                     // lock from active object spawn points (prevent clone loading)
-    bool   i_unloadReferenceLock;                       // lock from instance map copy
+    uint8 i_unloadReferenceLock;                        // lock from instance map copy
+    uint8 i_unloadExplicitLock;                         // explicit config setting
 };
 
 enum GridState
@@ -77,8 +105,8 @@ enum GridState
 class NGrid final
 {
 public:
-    NGrid(int32 x, int32 y, time_t expiry)
-        : i_GridInfo(expiry), i_x(x), i_y(y)
+    NGrid(int32 x, int32 y, time_t expiry, bool unload = true)
+        : i_GridInfo(expiry, unload), i_x(x), i_y(y)
         , i_cellstate(GRID_STATE_INVALID), i_GridObjectDataLoaded(false)
     { }
 

@@ -80,7 +80,7 @@ void Totem::InitStats(uint32 duration)
         m_owner->ToPlayer()->SendDirectMessage(&data);
 
         // set display id depending on caster's race (not for statues)
-        if (m_Properties->Type != SUMMON_TYPE_STATUE)
+        if (m_Properties->Type != SUMMON_TYPE_STATUE && m_Properties->Type != SUMMON_TYPE_WAR_BANNER)
             SetDisplayId(m_owner->GetModelForTotem(PlayerTotemType(m_Properties->Id)));
 
         // Light's Hammer

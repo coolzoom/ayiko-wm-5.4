@@ -461,12 +461,13 @@ class spell_rog_sanguinary_vein : public SpellScriptLoader
 
             void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
-                if (!GetCaster())
+                auto caster = GetCaster();
+                auto target = GetTarget();
+                if (!caster || !target)
                     return;
 
-                if (auto _player = GetCaster()->ToPlayer())
-                    if (auto target = GetTarget())
-                        _player->CastSpell(target, ROGUE_SPELL_SANGUINARY_VEIN_DEBUFF, true);
+                if (caster->HasAura(79147))
+                    caster->CastSpell(target, ROGUE_SPELL_SANGUINARY_VEIN_DEBUFF, true);
             }
 
             void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
@@ -1472,4 +1473,5 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_deadly_poison();
     new spell_rog_shadowstep();
     new spell_rog_marked_for_death();
+    new spell_rog_cloak_and_dagger();
 }

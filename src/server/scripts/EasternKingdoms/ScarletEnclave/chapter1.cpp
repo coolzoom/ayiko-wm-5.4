@@ -23,6 +23,10 @@
 #include "ScriptedEscortAI.h"
 #include "CombatAI.h"
 #include "PassiveAI.h"
+#include "Player.h"
+#include "SpellInfo.h"
+#include "CreatureTextMgr.h"
+#include "MoveSplineInit.h"
 
 /*######
 ##Quest 12848

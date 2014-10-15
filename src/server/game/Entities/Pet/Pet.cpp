@@ -876,6 +876,9 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                 case ENTRY_GHOUL:
                     SetCreateHealth(GetCreateHealth() / 7);
                     CastSpell(this, 47466, true);
+                    // Glyph of the Geist
+                    if (GetOwner()->HasAura(58640))
+                        SetDisplayId(25664);
                     break;
                 case ENTRY_FEL_IMP:
                     CastSpell(this, 115578, true); // Grimoire of Supremacy - +20% damage done

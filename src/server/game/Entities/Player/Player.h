@@ -851,6 +851,14 @@ enum CharDeleteMethod
                                                  // the name gets freed up and appears as deleted ingame
 };
 
+enum MoneyLootFlag
+{
+    MONEY_LOOT_FLAG_SOLO       = (1 << 0),
+    MONEY_LOOT_FLAG_FROM_ENEMY = (1 << 1)
+};
+
+typedef uint32 MoneyLootFlags;
+
 enum ReferAFriendError
 {
     ERR_REFER_A_FRIEND_NONE                          = 0x00,
@@ -1316,7 +1324,7 @@ class Player final : public Unit, public GridObject<Player>
         bool StoreNewItemInBestSlots(uint32 item_id, uint32 item_count);
         void AutoStoreLoot(uint8 bag, uint8 slot, uint32 loot_id, LootStore const& store, bool broadcast = false);
         void AutoStoreLoot(uint32 loot_id, LootStore const& store, bool broadcast = false) { AutoStoreLoot(NULL_BAG, NULL_SLOT, loot_id, store, broadcast); }
-        void StoreLootItem(uint8 lootSlot, Loot* loot, uint8 linkedLootSlot = 255);
+        void StoreLootItem(uint8 lootSlot, Loot* loot);
 
         InventoryResult CanTakeMoreSimilarItems(uint32 entry, uint32 count, Item* pItem, uint32* no_space_count = NULL) const;
         InventoryResult CanStoreItem(uint8 bag, uint8 slot, ItemPosCountVec& dest, uint32 entry, uint32 count, Item* pItem = NULL, bool swap = false, uint32* no_space_count = NULL) const;
@@ -1769,7 +1777,7 @@ class Player final : public Unit, public GridObject<Player>
         bool LearnTalent(uint32 talentId);
         bool AddTalent(uint32 spellId, uint8 spec, bool learning);
         bool HasTalent(uint32 spell_id, uint8 spec) const;
-        uint32 CalculateTalentsPoints() const;
+        uint32 CalculateTalentPoints() const;
         void CastPassiveTalentSpell(uint32 spellId);
         void RemovePassiveTalentSpell(uint32 spellId);
 
@@ -2059,6 +2067,9 @@ class Player final : public Unit, public GridObject<Player>
 
         WorldSession* GetSession() const { return m_session; }
 
+        void LootMoneyInGroup(uint32 money, MoneyLootFlags lootFlags);
+        void LootMoney(uint32 money, MoneyLootFlags flags);
+
         void BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) const;
         void DestroyForPlayer(Player* target, bool onDeath = false) const;
         void SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 BonusXP, bool recruitAFriend = false, float group_rate=1.0f);
@@ -2256,7 +2267,7 @@ class Player final : public Unit, public GridObject<Player>
         PlayerMenu* PlayerTalkClass;
         std::vector<ItemSetEffect*> ItemSetEff;
 
-        void SendLoot(uint64 guid, LootType loot_type, bool fetchLoot = false);
+        void SendLoot(uint64 guid, LootType loot_type);
         void SendLootRelease(uint64 guid);
         void SendNotifyLootItemRemoved(uint8 lootSlot);
         void SendNotifyLootMoneyRemoved();

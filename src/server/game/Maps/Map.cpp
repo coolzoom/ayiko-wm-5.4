@@ -433,7 +433,7 @@ void Map::EnsureGridCreated_i(const GridCoord &p)
     auto const itr = i_loadedGrids.emplace_hint(lb,
         std::piecewise_construct,
         std::forward_as_tuple(key),
-        std::forward_as_tuple(p.x_coord, p.y_coord, i_gridExpiry));
+        std::forward_as_tuple(p.x_coord, p.y_coord, i_gridExpiry, sWorld->getBoolConfig(CONFIG_GRID_UNLOAD)));
 
     auto &ngrid = itr->second;
 

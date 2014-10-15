@@ -197,6 +197,10 @@ public:
 
 };
 
+/*#####
+## npc_brutusk_qgw
+#####*/
+
 const float BrutuskWPPath[12][3] =
 {
     { 1216.619f, -2253.758f, 91.847f },

@@ -879,8 +879,8 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
     if (hasGlyphIndex)
         recvPacket.read_skip<uint32>();     // glyph index
 
-    if (hasSpeed)
-        speed = recvPacket.read<float>();
+    if (hasElevation)
+        elevation = recvPacket.read<float>();
 
     if (hasSpell)
         spellID = recvPacket.read<uint32>();
@@ -891,8 +891,8 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
     if (hasString)
         recvPacket.ReadString(stringLenght);
 
-    if (hasElevation)
-        elevation = recvPacket.read<float>();
+    if (hasSpeed)
+        speed = recvPacket.read<float>();
 
     TC_LOG_DEBUG("network", "WORLD: CMSG_PET_CAST_SPELL, castCount: %u, spellId %u, targetFlags %u", castCount, spellID, targetFlags);
 

@@ -1662,7 +1662,7 @@ class npc_darkmoon_faire_target_controller : public CreatureScript
                     {
                         spawnNewTargetTimer = 3500;
 
-                        if (lastBunny = Trinity::Containers::SelectRandomContainerElement(bunnyList))
+                        if ((lastBunny = Trinity::Containers::SelectRandomContainerElement(bunnyList)))
                         {
                             lastBunny->AddAura(SPELL_TARGET_INDICATOR_ARROW, lastBunny);
                             lastBunny->AddAura(SPELL_QUICK_SHOT_INDICATOR, lastBunny);

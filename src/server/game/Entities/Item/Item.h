@@ -240,6 +240,14 @@ class Item : public Object
         virtual void DeleteFromDB(SQLTransaction& trans);
         static void DeleteFromInventoryDB(SQLTransaction& trans, uint32 itemGuid);
 
+        // Lootable items and their contents
+        void ItemContainerSaveLootToDB(SQLTransaction &trans);
+        bool ItemContainerLoadLootFromDB();
+        void ItemContainerDeleteLootItemsFromDB();
+        void ItemContainerDeleteLootItemFromDB(uint32 itemID);
+        void ItemContainerDeleteLootMoneyFromDB();
+        void ItemContainerDeleteLootMoneyAndLootItemsFromDB();
+
         void DeleteFromInventoryDB(SQLTransaction& trans);
         void SaveRefundDataToDB(SQLTransaction& trans);
         void DeleteRefundDataFromDB(SQLTransaction* trans);

@@ -19,7 +19,7 @@ INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entr
 -- Brutusk
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `npcflag2`, `unit_flags`, `dynamicflags`, `isActive`) VALUES 
-(@GUID + 1, 33374, 1, 17, 1703, 1, 0, 28595, 0, 1195.28, -2258.38, 91.7586, 0.314159, 120, 3, 0, 699, 0, 0, 0, 0, 0, 0, 0);
+(@GUID + 1, 33374, 1, 17, 1703, 1, 1, 28595, 0, 1195.28, -2258.38, 91.7586, 0.314159, 120, 3, 0, 699, 0, 0, 0, 0, 0, 0, 0);
 
 DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = 33374;
 INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`, `user_type`) VALUES 
@@ -34,7 +34,6 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Kadrak
 UPDATE `creature_template` SET `gossip_menu_id` = @GOSSIP_KENDRAK, `AIName` = "SmartAI", `ScriptName` = "" WHERE `entry` = @NPC_KENDRAK;
-
 DELETE FROM `smart_scripts` WHERE `source_type` = 0 AND `entryorguid` = @NPC_KENDRAK;
 INSERT INTO `smart_scripts` (`entryorguid`, `id`, `event_type`, `event_param1`, `action_type`, `action_param1`, `action_param2`, `target_type`, `comment`) VALUES
 (@NPC_KENDRAK, 0, 62, @GOSSIP_KENDRAK, 56, @ITEM_REINS, 1, 7, "Nepenthe-Kadrak - On Gossip Select - Add Item"),
@@ -52,14 +51,14 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `npcflag2`, `unit_flags`, `dynamicflags`, `isActive`) VALUES 
-(@GUID + 1, @NPC_KENDRAK, 1, 17, 1703, 1, 0, 0, 466, 1236.59, -2250.96, 91.8537, 3.57813, 120, 0, 0, 2213, 0, 0, 0, 0, 0, 0, 0);
+(@GUID + 1, @NPC_KENDRAK, 1, 17, 1703, 1, 1, 0, 466, 1236.59, -2250.96, 91.8537, 3.57813, 120, 0, 0, 2213, 0, 0, 0, 0, 0, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Gorka
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `npcflag2`, `unit_flags`, `dynamicflags`, `isActive`) VALUES 
-(@GUID + 1, 33421, 1, 331, 3177, 1, 0, 0, 0, 1580.95, -2505.7, 98.1324, 1.95477, 120, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0);
+(@GUID + 1, 33421, 1, 331, 3177, 1, 1, 0, 0, 1580.95, -2505.7, 98.1324, 1.95477, 120, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 -- move gossip and condition to db

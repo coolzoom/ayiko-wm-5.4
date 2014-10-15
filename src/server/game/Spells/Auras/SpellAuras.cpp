@@ -658,9 +658,14 @@ void Aura::_UnapplyForTarget(Unit* target, Unit* caster, AuraApplication * auraA
     // reset cooldown state for spells
     if (caster && caster->GetTypeId() == TYPEID_PLAYER)
     {
-        if (GetSpellInfo()->Attributes & SPELL_ATTR0_DISABLED_WHILE_ACTIVE && !(GetSpellInfo()->Id == 34477 && caster->HasAura(56829) && (caster->GetPetGUID() == target->GetGUID())))
+        if (GetSpellInfo()->Attributes & SPELL_ATTR0_DISABLED_WHILE_ACTIVE)
             // note: item based cooldowns and cooldown spell mods with charges ignored (unknown existed cases)
+        {
             caster->ToPlayer()->SendCooldownEvent(GetSpellInfo());
+            // Glyph of Misdirection must remove cooldown after
+            if (GetSpellInfo()->Id == 34477 && caster->HasAura(56829) && caster->GetMisdirectionTarget() && caster->GetPetGUID() == caster->GetMisdirectionTarget()->GetGUID())
+                caster->ToPlayer()->RemoveSpellCooldown(34477, true);
+        }
     }
 }
 
@@ -1040,10 +1045,6 @@ bool Aura::ModCharges(int32 num, AuraRemoveMode removeMode)
     {
         int32 charges = m_procCharges + num;
         int32 maxCharges = CalcMaxCharges();
-
-        // Hack Fix - Arcane Missiles !
-        if (GetId() == 79683)
-            maxCharges = 2;
 
         if (num > 0 && charges > maxCharges)
         {
@@ -1532,10 +1533,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             Position pos;
                             target->GetPosition(&pos);
                             if (Creature * decoy = target->SummonCreature(62261, pos, TEMPSUMMON_TIMED_DESPAWN, 4000))
-                            {
                                 target->CastSpell(decoy, 45204, true);
-                                decoy->CastSpell(decoy, 52188, true);
-                            }
                         }
                     }
                 }
@@ -1585,26 +1583,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             target->RemoveAurasByType(SPELL_AURA_PERIODIC_LEECH);
                         }
 
-                        break;
-                    }
-                    case 12536: // Clearcasting
-                    case 12043: // Presence of Mind
-                    {
-                        // Arcane Potency
-                        if (AuraEffect const *aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_MAGE, 2120, 0))
-                        {
-                            uint32 spellId = 0;
-
-                            switch (aurEff->GetId())
-                            {
-                                case 31571: spellId = 57529; break;
-                                case 31572: spellId = 57531; break;
-                                default:
-                                    TC_LOG_ERROR("spells", "Aura::HandleAuraSpecificMods: Unknown rank of Arcane Potency (%d) found", aurEff->GetId());
-                            }
-                            if (spellId)
-                                caster->CastSpell(caster, spellId, true);
-                        }
                         break;
                     }
                     case 44457: // Living Bomb
@@ -1756,10 +1734,27 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 // Battle Shout && Commander Shout
                 else if (m_spellInfo->Id == 469 || m_spellInfo->Id == 6673)
                 {
-                    // Item - Warrior T12 DPS 2P Bonus
-                    if (caster)
-                        if (caster == target && caster->HasAura(99234))
+                    if (caster && caster == target)
+                    {
+                        // Item - Warrior T12 DPS 2P Bonus
+                        if (caster->HasAura(99234))
                             caster->CastSpell(caster, 99233, true);
+
+                        // Glyph of Mystic Shout
+                        if (caster->HasAura(58095))
+                            caster->CastSpell(caster, 121186, true);
+                    }
+                }
+                // Demoralizing Shout
+                else if (m_spellInfo->Id == 125565)
+                {
+                    // Glyph of Incite
+                    if (target->HasAura(122013))
+                    {
+                        target->CastSpell(target, 122016, true);
+                        if (auto incite = target->GetAura(122016))
+                            incite->ModStackAmount(3);
+                    }
                 }
                 break;
             case SPELLFAMILY_HUNTER:
@@ -1779,6 +1774,15 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             ModStackAmount(1);
                         break;
                     }
+                    // Load and Load proc removes current Explosive Shot cooldown
+                    case 56453:
+                    {
+                        if(target->GetTypeId() == TYPEID_PLAYER)
+                            target->ToPlayer()->RemoveSpellCooldown(53301, true);
+                         break;
+                    }
+                    default:
+                        break;
                 }
                 break;
             case SPELLFAMILY_DEATHKNIGHT:
@@ -1903,6 +1907,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                                 if (pet->HasAura(32612))
                                     pet->RemoveAurasDueToSpell(32612);
 
+                        break;
+                    }
+                    case 79683: // Arcane Missiles aura
+                    {
+                        // Arcane Missiles double-aura state
+                        if (caster && !onReapply)
+                            caster->RemoveAurasDueToSpell(79808);
                         break;
                     }
                     default:
@@ -2244,12 +2255,24 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     if (!apply && caster)
                         caster->RemoveAurasDueToSpell(87833);
                     break;
+                case 44544: // Fingers of Frost - Apply second-stack visual
+                {
+                    if (apply)
+                    {
+                        if (GetStackAmount() > 1 && !target->HasAura(126084))
+                            target->CastSpell(target, 126084, true);
+                    }
+                    else
+                        target->RemoveAurasDueToSpell(126084);
+                    break;
+                }
                 default:
                     break;
             }
             break;
         }
         case SPELLFAMILY_PRIEST:
+        {
             if (!caster)
                 break;
 
@@ -2283,6 +2306,69 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     break;
                 }
             }
+            break;
+        }
+        case SPELLFAMILY_WARRIOR:
+        {
+            if (!caster)
+                break;
+
+            switch(GetSpellInfo()->Id)
+            {
+                // Spell Reflection - Apply Visuals
+                case 23920:
+                {
+                    auto player = caster->ToPlayer();
+                    if (!player)
+                        break;
+
+                    // Remove all possible visuals
+                    if (!apply)
+                    {
+                        player->RemoveAurasDueToSpell(147923);
+                        player->RemoveAurasDueToSpell(146122);
+                        player->RemoveAurasDueToSpell(146120);
+                    }
+                    else
+                    {
+                        uint32 spellVisual = player->GetTeam() == ALLIANCE ? 147923 : 146122;
+                        // If shield equipped - switch visual
+                        auto shieldItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+                        if (shieldItem && shieldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_SHIELD)
+                            spellVisual = 146120;
+
+                        player->CastSpell(player, spellVisual, true);
+                    }
+                    break;
+                }
+                // Shield Wall - Apply Visuals
+                case 871:
+                {
+                    auto player = caster->ToPlayer();
+                    if (!player)
+                        break;
+
+                    // Remove all possible visuals
+                    if (!apply)
+                    {
+                        player->RemoveAurasDueToSpell(147925);
+                        player->RemoveAurasDueToSpell(146127);
+                        player->RemoveAurasDueToSpell(146128);
+                    }
+                    else
+                    {
+                        uint32 spellVisual = player->GetTeam() == ALLIANCE ? 147925 : 146127;
+                        // If shield equipped - switch visual
+                        auto shieldItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+                        if (shieldItem && shieldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_SHIELD)
+                            spellVisual = 146128;
+
+                        player->CastSpell(player, spellVisual, true);
+                    }
+                    break;
+                }
+            }
+        }
         default:
             break;
     }

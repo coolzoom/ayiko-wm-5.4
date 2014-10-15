@@ -663,7 +663,7 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         && spellProto->Id != 124098 && spellProto->Id != 107270 && spellProto->Id != 132467
         && spellProto->Id != 130651 && spellProto->Id != 117993) // Don't triggered by Zen Sphere, Spinning Crane Kick, Chi Wave, Chi Burst and Chi Torpedo
     {
-        int32 bp = damage / 2;
+        int32 bp = damage / 4;
         std::list<Unit*> targetList;
         std::list<Creature*> tempList;
         std::list<Creature*> statueList;
@@ -3132,7 +3132,8 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
 
     CurrentSpellTypes CSpellType = pSpell->GetCurrentContainer();
 
-    if (pSpell == m_currentSpells[CSpellType])             // avoid breaking self
+    // avoid breaking self or interrupting other cast by Ice Floes
+    if (pSpell == m_currentSpells[CSpellType] || pSpell->GetSpellInfo()->Id == 108839)
         return;
 
     // break same type spell if it is not delayed
@@ -3479,18 +3480,24 @@ void Unit::_AddAura(UnitAura *aura, Unit* caster)
         // register single target aura
         caster->GetSingleCastAuras().push_back(aura);
         // remove other single target auras
+        int32 foundLifebloom = 0;
         Unit::AuraList& scAuras = caster->GetSingleCastAuras();
         for (Unit::AuraList::iterator itr = scAuras.begin(); itr != scAuras.end();)
         {
             if ((*itr) != aura &&
                 (*itr)->GetSpellInfo()->IsSingleTargetWith(aura->GetSpellInfo()))
             {
+                if (aura->GetId() == 33763 && (*itr)->GetId() == 33763 && (*itr)->GetDuration() > 2000 && (*itr)->GetStackAmount() > 1)
+                    foundLifebloom = (*itr)->GetStackAmount();
+
                 (*itr)->Remove();
                 itr = scAuras.begin();
             }
             else
                 ++itr;
         }
+        if (foundLifebloom)
+            aura->SetStackAmount(foundLifebloom);
     }
 }
 
@@ -5762,22 +5769,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                     triggered_spell_id = 25997;
                     break;
                 }
-                // Sweeping Strikes
-                case 12328:
-                case 18765:
-                case 35429:
-                {
-                    target = SelectNearbyTarget(victim);
-                    if (!target)
-                        return false;
-
-                    // Glyph of Sweeping Strikes
-                    if (HasAura(58384))
-                        CastSpell(this, 124333, true);
-
-                    triggered_spell_id = 26654;
-                    break;
-                }
                 // Unstable Power
                 case 24658:
                 {
@@ -7845,8 +7836,8 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                 // Windfury Weapon (Passive) 1-8 Ranks
                 case 33757:
                 {
-                    Player* player = ToPlayer();
-                    if (!player || !castItem || !castItem->IsEquipped() || !victim || !victim->isAlive())
+                    auto const player = ToPlayer();
+                    if (!player || !castItem || !castItem->IsEquipped() || !victim || !victim->isAlive() || victim == player)
                         return false;
 
                     // custom cooldown processing case
@@ -8795,7 +8786,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
                     case 40336:
                     {
                         // On successful melee or ranged attack gain $29471s1 mana and if possible drain $27526s1 mana from the target.
-                        if (this && isAlive())
+                        if (isAlive())
                             CastSpell(this, 29471, true, castItem, triggeredByAura);
                         if (victim && victim->isAlive())
                             CastSpell(victim, 27526, true, castItem, triggeredByAura);
@@ -9150,24 +9141,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
 
             break;
         }
-        case 122013:// Glyph of Incite
-        {
-            if (GetTypeId() != TYPEID_PLAYER)
-                return false;
-
-            if (!procSpell)
-                return false;
-
-            // Only triggered by Devastate
-            if (procSpell->Id != 20243)
-                return false;
-
-            // Mortal Peace
-            if (!HasAura(85730))
-                return false;
-
-            break;
-        }
         case 108945:// Angelic Bulwark
         {
             if (GetTypeId() != TYPEID_PLAYER)
@@ -9330,17 +9303,18 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
             break;
         }
         case 49509: // Scent of Blood
+        case 148211:
         {
-            if (GetTypeId() != TYPEID_PLAYER)
+            auto const player = ToPlayer();
+
+            if (!player || player->GetSpecializationId(player->GetActiveSpec()) != SPEC_DK_BLOOD)
                 return false;
 
-            if (getClass() != CLASS_DEATH_KNIGHT)
-                return false;
+            bool procPass = false;
+            if ((procFlags & PROC_FLAG_DONE_MAINHAND_ATTACK) || (procEx & PROC_EX_DODGE) || (procEx & PROC_EX_PARRY))
+                procPass = true;
 
-            if (ToPlayer()->GetSpecializationId(ToPlayer()->GetActiveSpec()) != SPEC_DK_BLOOD)
-                return false;
-
-            if (!roll_chance_i(15))
+            if (!procPass || !roll_chance_i(15))
                 return false;
 
             break;
@@ -9359,12 +9333,9 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
             if (ToPlayer()->GetSpecializationId(ToPlayer()->GetActiveSpec()) != SPEC_MAGE_ARCANE)
                 return false;
 
-            if (Aura *arcaneMissiles = GetAura(79683))
-            {
-                arcaneMissiles->ModCharges(1);
-                arcaneMissiles->RefreshDuration();
-                return false;
-            }
+            // Cast double-arcane missiles marker
+            if (HasAura(79683) && !HasAura(79808))
+                CastSpell(this, 79808, true);
 
             break;
         }
@@ -9676,6 +9647,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
         case 88821: // Daybreak
         case 131542:// Relentless Grip
         case 126046:// Adaptation
+        case 122013: // Glyph of Incite
             return false;
         case 35551: // Combat Potency
         {
@@ -9896,6 +9868,13 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
                 return false;
             break;
         }
+        // Glyph of Hamstring
+        case 58385:
+        {
+            if (HasAura(115945))
+                return false;
+            break;
+        }
         default:
             break;
     }
@@ -9959,12 +9938,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
             // Proc only from healing part of Death Coil. Check is essential as all Death Coil spells have 0x2000 mask in SpellFamilyFlags
             if (!procSpell || !(procSpell->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && procSpell->SpellFamilyFlags[0] == 0x80002000))
                 return false;
-            break;
-        }
-        // Savage Defense
-        case 62606:
-        {
-            basepoints0 = CalculatePct(triggerAmount, GetTotalAttackPowerValue(BASE_ATTACK));
             break;
         }
         // Culling the Herd
@@ -10051,8 +10024,8 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
                 return false;
             break;
         }
-        // Infected Wounds
-        case 58180:
+        case 58180: // Infected Wounds
+        case 127802: // Touch of the Grave
         {
             if (victim == this)
                 return false;
@@ -10061,6 +10034,10 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
         // Lock and Load
         case 56453:
         {
+            // Proc only from proper traps (proc-flags contains additional for T.N.T talent: Explosive Trap, Immolation Trap
+            if (procSpell && (((procFlags & PROC_FLAG_DONE_TRAP_ACTIVATION) && procSpell->Id == 13797) || procSpell->Id == 13812))
+                return false;
+
             // Black Arrow proc-chance
             if (procFlags & PROC_FLAG_DONE_PERIODIC)
                 if (!roll_chance_i(triggerAmount))
@@ -11557,101 +11534,75 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                 AddPct(DoneTotalMod, Mastery);
             }
         }
-        else
-        {
-            if (GetTypeId() == TYPEID_PLAYER && HasAura(76613))
-            {
-                // Frostfire bolt acts like if target is frozen with Brain Freeze
-                // Ice Lance acts like if target is frozen with Fingers of Frost
-                if (victim->HasAuraState(AURA_STATE_FROZEN) || (HasAura(57761) && spellProto && spellProto->Id == 44614)
-                    || (HasAura(44544) && spellProto && spellProto->Id == 30455))
-                {
-                    float Mastery = GetFloatValue(PLAYER_MASTERY) * 2.0f;
-                    AddPct(DoneTotalMod, Mastery);
-                }
-            }
-        }
     }
 
-    // Custom MoP Script
-    // 77223 - Mastery : Enhanced Elements
-    if (GetTypeId() == TYPEID_PLAYER && spellProto && (spellProto->SchoolMask == SPELL_SCHOOL_MASK_FIRE || spellProto->SchoolMask == SPELL_SCHOOL_MASK_FROST || spellProto->SchoolMask == SPELL_SCHOOL_MASK_NATURE))
+    if (spellProto && GetTypeId() == TYPEID_PLAYER)
     {
-        if (HasAura(77223))
-        {
-            float Mastery = GetFloatValue(PLAYER_MASTERY) * 2.0f;
+        auto player = ToPlayer();
 
+        // 77223 - Mastery : Enhanced Elements
+        if (spellProto->SchoolMask == SPELL_SCHOOL_MASK_FIRE || spellProto->SchoolMask == SPELL_SCHOOL_MASK_FROST || spellProto->SchoolMask == SPELL_SCHOOL_MASK_NATURE)
+        {
+            if (HasAura(77223))
+            {
+                float Mastery = GetFloatValue(PLAYER_MASTERY) * 2.0f;
+                AddPct(DoneTotalMod, Mastery);
+            }
+        }
+
+        // 77492 - Mastery : Total Eclipse
+        if (spellProto->SchoolMask == SPELL_SCHOOL_MASK_NATURE && HasAura(77492) && HasAura(48517)) // Solar Eclipse
+        {
+            float Mastery = GetFloatValue(PLAYER_MASTERY) * 1.87f;
             AddPct(DoneTotalMod, Mastery);
         }
-    }
-
-    // Custom MoP Script
-    // 77492 - Mastery : Total Eclipse
-    if (GetTypeId() == TYPEID_PLAYER && spellProto && spellProto->SchoolMask == SPELL_SCHOOL_MASK_NATURE && HasAura(77492) && HasAura(48517)) // Solar Eclipse
-    {
-        float Mastery = GetFloatValue(PLAYER_MASTERY) * 1.87f;
-        AddPct(DoneTotalMod, Mastery);
-    }
-    else if (GetTypeId() == TYPEID_PLAYER && spellProto && spellProto->SchoolMask == SPELL_SCHOOL_MASK_ARCANE && HasAura(77492) && HasAura(48518)) // Lunar Eclipse
-    {
-        float Mastery = GetFloatValue(PLAYER_MASTERY) * 1.87f;
-        AddPct(DoneTotalMod, Mastery);
-    }
-
-    // Chaos Bolt - 116858 and Soul Fire - 6353
-    // damage is increased by your critical strike chance
-    if (GetTypeId() == TYPEID_PLAYER && spellProto && (spellProto->Id == 116858 || spellProto->Id == 6353 || spellProto->Id == 104027))
-    {
-        float crit_chance;
-        crit_chance = GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + GetFirstSchoolInMask(spellProto->GetSchoolMask()));
-        AddPct(DoneTotalMod, crit_chance);
-    }
-
-    // Pyroblast - 11366
-    // Pyroblast ! - 48108 : Next Pyroblast damage increased by 25%
-    if (GetTypeId() == TYPEID_PLAYER && spellProto && spellProto->Id == 11366 && damagetype == SPELL_DIRECT_DAMAGE && HasAura(48108))
-        AddPct(DoneTotalMod, 25);
-
-    // Fingers of Frost - 112965
-    if (GetTypeId() == TYPEID_PLAYER && pdamage != 0 && ToPlayer()->GetSpecializationId(ToPlayer()->GetActiveSpec()) == SPEC_MAGE_FROST && spellProto && getLevel() >= 24)
-    {
-        if (spellProto->Id == 116 || spellProto->Id == 44614 || spellProto->Id == 84721)
+        else if (spellProto->SchoolMask == SPELL_SCHOOL_MASK_ARCANE && HasAura(77492) && HasAura(48518)) // Lunar Eclipse
         {
-            if (roll_chance_i(12))
-            {
-                CastSpell(this, 44544, true);  // Fingers of frost proc
-                CastSpell(this, 126084, true); // Fingers of frost visual
-            }
+            float Mastery = GetFloatValue(PLAYER_MASTERY) * 1.87f;
+            AddPct(DoneTotalMod, Mastery);
         }
-        else if (spellProto->Id == 42208)
+
+        // Chaos Bolt - 116858 and Soul Fire - 6353
+        // damage is increased by your critical strike chance
+        if (spellProto->Id == 116858 || spellProto->Id == 6353 || spellProto->Id == 104027)
         {
-            if (roll_chance_i(4))
-            {
-                CastSpell(this, 44544, true);  // Fingers of frost proc
-                CastSpell(this, 126084, true); // Fingers of frost visual
-            }
+            float crit_chance;
+            crit_chance = GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + GetFirstSchoolInMask(spellProto->GetSchoolMask()));
+            AddPct(DoneTotalMod, crit_chance);
         }
-        else if (spellProto->Id == 2948)
+
+        // Pyroblast - 11366
+        // Pyroblast ! - 48108 : Next Pyroblast damage increased by 25%
+        if (spellProto->Id == 11366 && damagetype == SPELL_DIRECT_DAMAGE && HasAura(48108))
+            AddPct(DoneTotalMod, 25);
+
+        // Fingers of Frost - 112965
+        if (pdamage != 0 && player->GetSpecializationId(player->GetActiveSpec()) == SPEC_MAGE_FROST  && getLevel() >= 24)
         {
-            if (roll_chance_i(9))
-            {
+            uint32 chance = 0;
+            if (spellProto->Id == 116 || spellProto->Id == 44614 || spellProto->Id == 84721)
+                chance = 12;
+            else if (spellProto->Id == 42208)
+                chance = 4;
+            else if (spellProto->Id == 2948)
+                chance = 9;
+
+            if (chance && roll_chance_i(chance))
                 CastSpell(this, 44544, true);  // Fingers of frost proc
-                CastSpell(this, 126084, true); // Fingers of frost visual
-            }
+        }
+
+        // Sword of Light - 53503
+        // Increases damage of Hammer of Wrath and Judgement too
+        if (HasAura(53503) && player->IsTwoHandUsed() && (spellProto->Id == 20271 || spellProto->Id == 24275))
+            AddPct(DoneTotalMod, 30);
+
+        // Thunder Clap and - Seasoned Soldier
+        if (spellProto->Id == 6343)
+        {
+            if (HasAura(12712) && player->IsTwoHandUsed())
+                AddPct(DoneTotalMod, 25);
         }
     }
-
-    // Sword of Light - 53503
-    // Increases damage of Hammer of Wrath and Judgement too
-     if (GetTypeId() == TYPEID_PLAYER && spellProto && HasAura(53503) && ToPlayer()->IsTwoHandUsed() && (spellProto->Id == 20271 || spellProto->Id == 24275))
-         AddPct(DoneTotalMod, 30);
-
-     // Thunder Clap and Heroic Leap - Seasoned Soldier
-     if (spellProto && (spellProto->Id == 6343 || spellProto->Id == 52174))
-     {
-         if (GetTypeId() == TYPEID_PLAYER && HasAura(12712) && ToPlayer()->IsTwoHandUsed())
-             AddPct(DoneTotalMod, 25);
-     }
 
     // Pet damage?
     if (GetTypeId() == TYPEID_UNIT && !ToCreature()->isPet())
@@ -11811,8 +11762,10 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                 }
             // Shadow Bite (30% increase from each dot)
             if (spellProto->SpellFamilyFlags[1] & 0x00400000 && isPet())
+            {
                 if (uint8 count = victim->GetDoTsByCaster(GetOwnerGUID()))
                     AddPct(DoneTotalMod, 30 * count);
+            }
             // Doom Bolt (Doomguard)
             else if (spellProto->Id == 85692)
             {
@@ -11876,6 +11829,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                 {
                     case 879: // Exorcism
                     case 45477: // Icy Touch
+                    case 45524: // Chains of Ice (Glyphed)
                     case 49184: // Howling Blast
                     case 52212: // Death and Decay
                     case 108196: // Death Siphon
@@ -12136,6 +12090,10 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
 
     // not critting spell
     if ((spellProto->AttributesEx2 & SPELL_ATTR2_CANT_CRIT))
+        return false;
+
+    // Roar of Sacrifice should make player immune to crits, chances from aura are calculated before therefore it must return false directly from here.
+    if (victim->HasAura(53480))
         return false;
 
     switch (spellProto->Id)
@@ -13058,11 +13016,6 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
         float Mastery = GetFloatValue(PLAYER_MASTERY);
         AddPct(DoneTotalMod, Mastery);
     }
-
-    // Sudden Death - 29725
-    if (GetTypeId() == TYPEID_PLAYER && ToPlayer()->GetSpecializationId(ToPlayer()->GetActiveSpec()) == SPEC_WARRIOR_ARMS && HasAura(29725) && (attType == BASE_ATTACK || attType == OFF_ATTACK || spellProto))
-        if (roll_chance_i(10))
-            CastSpell(this, 52437, true); // Reset Cooldown of Colossus Smash
 
     // Custom MoP Script
     // 76659 - Mastery : Wild Quiver
@@ -15960,7 +15913,7 @@ void Unit::DeleteCharmInfo()
 }
 
 CharmInfo::CharmInfo(Unit* unit)
-: m_unit(unit), m_CommandState(COMMAND_FOLLOW), m_petnumber(0), m_barInit(false),
+: m_unit(unit), m_CommandState(COMMAND_FOLLOW), m_petnumber(0),
   m_isCommandAttack(false), m_isAtStay(false), m_isFollowing(false), m_isReturning(false),
   m_stayX(0.0f), m_stayY(0.0f), m_stayZ(0.0f)
 {
@@ -16060,6 +16013,12 @@ void CharmInfo::InitCharmCreateSpells()
             m_charmspells[x].SetActionAndType(spellId, ACT_DISABLED);
             continue;
         }
+
+        // Xuen's Provoke should be added to spell-bar only for Brewmaster Spec
+        if (spellId == 130793)
+            if (auto player = m_unit->GetCharmerOrOwnerPlayerOrPlayerItself())
+                if (player->GetSpecializationId(player->GetActiveSpec()) != SPEC_MONK_BREWMASTER)
+                    continue;
 
         if (spellInfo->IsPassive())
         {
@@ -16385,23 +16344,25 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
                     StartReactiveTimer(REACTIVE_DEFENSE);
                 }
             }
-            else // For attacker
+        }
+
+        if (!isVictim && procSpell && isHunterPet())
+        {
+            switch (procSpell->Id)
             {
-                if ((procExtra & PROC_EX_CRITICAL_HIT) != 0 && isHunterPet())
+                case 16827: // Claw
+                case 17253: // Bite
+                case 49966: // Smack
                 {
-                    // Cobra Strikes
-                    if (procSpell)
-                    {
-                        switch (procSpell->Id)
-                        {
-                        case 16827: // Claw
-                        case 17253: // Bite
-                        case 49966: // Smack
-                            if (Player * const petOwner = ToPet()->GetCharmerOrOwnerPlayerOrPlayerItself())
-                                petOwner->RemoveAuraFromStack(53257);
-                            break;
-                        }
-                    }
+                    if ((procExtra & PROC_EX_CRITICAL_HIT) != 0)
+                        if (Player * const petOwner = ToPet()->GetCharmerOrOwnerPlayerOrPlayerItself())
+                            petOwner->RemoveAuraFromStack(53257);
+
+                    // Hack Fix Frenzy
+                    if (GetOwner() && GetOwner()->GetTypeId() == TYPEID_PLAYER && GetOwner()->HasAura(19623) && ToPet()->IsPermanentPetFor(GetOwner()->ToPlayer()))
+                        if (roll_chance_i(40))
+                            CastSpell(this, 19615, true);
+                    break;
                 }
             }
         }
@@ -16481,16 +16442,12 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
     }
 
     // Hack Fix Ice Floes - Drop charges
-    if (GetTypeId() == TYPEID_PLAYER && HasAura(108839) && procSpell && procSpell->Id != 108839 &&
-        ((procSpell->CastTimeEntry && procSpell->CastTimeEntry->CastTime > 0 && procSpell->CastTimeEntry->CastTime < 4000)
-        || (procSpell->DurationEntry && procSpell->DurationEntry->Duration[0] > 0 && procSpell->DurationEntry->Duration[0] < 4000 && procSpell->AttributesEx & SPELL_ATTR1_CHANNELED_2)))
-        if (AuraApplication* aura = GetAuraApplication(108839, GetGUID()))
-            aura->GetBase()->DropCharge();
-
-    // Hack Fix Frenzy
-    if (GetTypeId() == TYPEID_UNIT && isHunterPet() && GetOwner() && GetOwner()->ToPlayer() && GetOwner()->HasAura(19623) && ToPet()->IsPermanentPetFor(GetOwner()->ToPlayer()) && !procSpell)
-        if (roll_chance_i(40))
-            CastSpell(this, 19615, true);
+    if (GetTypeId() == TYPEID_PLAYER && procSpell && procSpell->Id != 108839 && !(procFlag & PROC_FLAG_DONE_PERIODIC))
+    {
+        if (auto auraEff = GetAuraEffect(108839, EFFECT_0))
+            if (auraEff->IsAffectingSpell(procSpell))
+                auraEff->GetBase()->ModStackAmount(-1);
+    }
 
     // Hack Fix for Invigoration
     if (GetTypeId() == TYPEID_UNIT && GetOwner() && GetOwner()->ToPlayer() && GetOwner()->HasAura(53253) &&
@@ -16511,8 +16468,6 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
     {
         if (Aura *fingersOfFrost = GetAura(44544, GetGUID()))
             fingersOfFrost->ModStackAmount(-1);
-        if (Aura *fingersVisual = GetAura(126084, GetGUID()))
-            fingersVisual->ModStackAmount(-1);
     }
 
     // Cast Shadowy Apparitions when Shadow Word : Pain is crit
@@ -21306,4 +21261,9 @@ void Unit::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* target)
 int32 Unit::GetSplineDuration() const
 {
     return IsSplineEnabled() ? movespline->Duration() : 0;
+}
+
+bool Unit::IsOnVehicle(Unit const *vehicle) const
+{
+    return m_vehicle && m_vehicle->GetBase() == vehicle;
 }

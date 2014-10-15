@@ -622,7 +622,7 @@ void BattlegroundSA::DestroyGate(Player* player, GameObject* go)
 
     if (GameObject* g = GetBGObject(i))
     {
-        if (g->GetGOValue()->Building.Health == 0)
+        if (g->GetGOValue().Building.Health == 0)
         {
             GateStatus[i] = BG_SA_GATE_DESTROYED;
             uint32 uws = getWorldStateFromGateId(i);

@@ -837,33 +837,20 @@ void WorldSession::HandleLoadScreenOpcode(WorldPacket& recvPacket)
     recvPacket >> mapID;
     recvPacket.ReadBit();
 
+
     // Refresh spellmods for client
     // This is Hackypig fix : find a better way
-    if (Player* _plr = GetPlayer())
+    if (auto const player = GetPlayer())
     {
-        std::list<uint32> spellToCast;
-
-        Unit::AuraApplicationMap& auraList = _plr->GetAppliedAuras();
-        for (Unit::AuraApplicationMap::iterator iter = auraList.begin(); iter != auraList.end();)
+        for (auto const &eff : player->GetAuraEffectsByType(SPELL_AURA_ADD_PCT_MODIFIER))
         {
-            AuraApplication* aurApp = iter->second;
-            if (!aurApp)
-                continue;
-
-            Aura *aura = aurApp->GetBase();
-            if (aura && (aura->HasEffectType(SPELL_AURA_ADD_FLAT_MODIFIER) || aura->HasEffectType(SPELL_AURA_ADD_PCT_MODIFIER)) && aura->GetSpellInfo())
-            {
-                spellToCast.push_back(aura->GetSpellInfo()->Id);
-                _player->RemoveAura(iter);
-            }
-            else
-                ++iter;
+            player->AddSpellMod(eff->GetSpellModifier(), false);
+            player->AddSpellMod(eff->GetSpellModifier(), true);
         }
-
-        for (auto id : spellToCast)
+        for (auto const &eff : player->GetAuraEffectsByType(SPELL_AURA_ADD_FLAT_MODIFIER))
         {
-            if (id > 0 && _plr)
-                _plr->CastSpell(_plr, id, true);
+            player->AddSpellMod(eff->GetSpellModifier(), false);
+            player->AddSpellMod(eff->GetSpellModifier(), true);
         }
     }
 }
@@ -1344,7 +1331,7 @@ void WorldSession::HandleCharRenameOpcode(WorldPacket& recvData)
 
     recvData.ReadByteSeq<6, 7, 5, 1, 4, 0, 2>(guid);
     newName = recvData.ReadString(nameLen);
-    recvData.ReadByteSeq<6>(guid);
+    recvData.ReadByteSeq<3>(guid);
 
     // prevent character rename to invalid name
     if (!normalizePlayerName(newName))

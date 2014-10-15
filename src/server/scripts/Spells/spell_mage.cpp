@@ -73,6 +73,7 @@ enum MageSpells
     SPELL_MAGE_CAUTERIZE                         = 87023,
     SPELL_MAGE_CAUTERIZE_MARKER                  = 87024,
     SPELL_MAGE_ARCANE_MISSILES                   = 79683,
+    SPELL_MAGE_ARCANE_MISSILES_DOUBLE_AURASTATE  = 79808,
     SPELL_MAGE_INCANTERS_WARD_ENERGIZE           = 113842,
     SPELL_MAGE_INCANTERS_ABSORBTION              = 116267,
     SPELL_MAGE_INCANTERS_ABSORBTION_PASSIVE      = 118858,
@@ -81,8 +82,7 @@ enum MageSpells
     SPELL_MAGE_GLYPH_OF_ICE_BLOCK_FROST_NOVA     = 115757,
     SPELL_MAGE_IMPROVED_COUNTERSPELL             = 12598,
     SPELL_MAGE_COUNTERSPELL_SILENCE              = 55021,
-    SPELL_MAGE_FINGER_OF_FROST_VISUAL            = 44544,
-    SPELL_MAGE_FINGER_OF_FROST_EFFECT            = 126084,
+    SPELL_MAGE_FINGER_OF_FROST_EFFECT            = 44544,
     SPELL_MAGE_GLYPH_OF_SLOW                     = 86209,
     SPELL_MAGE_GREATER_INVISIBILITY_LESS_DAMAGE  = 113862,
     SPELL_MAGE_REMOVE_INVISIBILITY_REMOVED_TIMER = 122293,
@@ -281,7 +281,6 @@ class spell_mage_pet_frost_nova : public SpellScriptLoader
                         if (!_player->HasSpell(SPELL_MAGE_FINGERS_OF_FROST_AURA))
                             return;
 
-                        _player->CastSpell(_player, SPELL_MAGE_FINGER_OF_FROST_VISUAL, true);
                         _player->CastSpell(_player, SPELL_MAGE_FINGER_OF_FROST_EFFECT, true);
                     }
                 }
@@ -491,14 +490,17 @@ class spell_mage_arcane_missile : public SpellScriptLoader
 
             void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
-                if (!GetCaster())
+                auto caster = GetCaster();
+                if (!caster)
                     return;
 
-                GetCaster()->CastSpell(GetCaster(), SPELL_MAGE_ARCANE_CHARGE, true);
+                caster->CastSpell(caster, SPELL_MAGE_ARCANE_CHARGE, true);
 
-                if (Player* _player = GetCaster()->ToPlayer())
-                    if (Aura *arcaneMissiles = _player->GetAura(SPELL_MAGE_ARCANE_MISSILES))
-                        arcaneMissiles->DropCharge();
+                if (Aura *arcaneMissiles = caster->GetAura(SPELL_MAGE_ARCANE_MISSILES))
+                {
+                    arcaneMissiles->ModStackAmount(-1);
+                    caster->RemoveAurasDueToSpell(SPELL_MAGE_ARCANE_MISSILES_DOUBLE_AURASTATE);
+                }
             }
 
             void Register()
@@ -792,7 +794,7 @@ class spell_mage_frostbolt final : public SpellScriptLoader
 
         enum
         {
-            FROSTBOLT_HEAL = 126201
+            FROSTBOLT_HEAL = 126201,
         };
 
         bool shouldHeal_;
@@ -865,6 +867,154 @@ public:
     }
 };
 
+// Mastery: Icicles Called by Frostbolt and Frostfire Bolt - 116, 44614
+class spell_mastery_icicles final : public SpellScriptLoader
+{
+    class script_impl final : public SpellScript
+    {
+        PrepareSpellScript(script_impl)
+
+        enum
+        {
+            ICICLE_STORE   = 148012,
+            ICICLE_DAMAGE  = 148022,
+            ICICILE_VISUAL = 148017,
+        };
+
+        void handleMastery()
+        {
+            auto caster = GetCaster()->ToPlayer();
+            if (!caster || caster == GetHitUnit())
+                return;
+
+            if (caster->getLevel() >= 80 && caster->HasAura(76613))
+            {
+                int32 damage = GetHitDamage();
+                if (!damage)
+                    return;
+
+                float Mastery = caster->GetFloatValue(PLAYER_MASTERY) * 2.0f;
+                damage = CalculatePct(damage, Mastery);
+                for (int32 i = 0; i < 5; ++i)
+                {
+                    if (caster->HasAura(ICICLE_STORE+i))
+                        continue;
+                    else
+                    {
+                        caster->CastCustomSpell(caster, ICICLE_STORE+i, &damage, NULL, NULL, true);
+                        break;
+                    }
+                }
+            }
+        }
+
+        void Register() final
+        {
+            AfterHit += SpellHitFn(script_impl::handleMastery);
+        }
+    };
+
+public:
+    spell_mastery_icicles()
+        : SpellScriptLoader("spell_mastery_icicles")
+    { }
+
+    SpellScript * GetSpellScript() const final
+    {
+        return new script_impl;
+    }
+};
+
+// Ice Lance - 30455
+class spell_mastery_icicles_trigger final : public SpellScriptLoader
+{
+    class script_impl final : public SpellScript
+    {
+        PrepareSpellScript(script_impl)
+
+        enum
+        {
+            ICICILE_TRIGGER_AURA = 148023
+        };
+
+        void handleMastery(SpellEffIndex effIndex)
+        {
+            auto caster = GetCaster()->ToPlayer();
+            if (!caster)
+                return;
+
+            if (caster->getLevel() >= 80 && caster->HasAura(76613))
+                caster->CastSpell(GetHitUnit(), ICICILE_TRIGGER_AURA, true);
+        }
+
+        void Register() final
+        {
+            OnEffectHitTarget += SpellEffectFn(script_impl::handleMastery, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+public:
+    spell_mastery_icicles_trigger()
+        : SpellScriptLoader("spell_mastery_icicles_trigger")
+    { }
+
+    SpellScript * GetSpellScript() const final
+    {
+        return new script_impl;
+    }
+};
+
+// 148023 - Icicles (periodic aura to trigger all stored icicles)
+class spell_mastery_icicles_periodic : public SpellScriptLoader
+{
+public:
+    spell_mastery_icicles_periodic() : SpellScriptLoader("spell_mastery_icicles_periodic") { }
+
+    enum
+    {
+        ICICLE_STORE   = 148012,
+        ICICLE_DAMAGE  = 148022,
+        ICICILE_VISUAL = 148017,
+    };
+
+    class script_impl : public AuraScript
+    {
+        PrepareAuraScript(script_impl);
+
+        void OnTick(AuraEffect const * /*aurEff*/)
+        {
+            if (!GetCaster())
+                return;
+            if (auto player = GetCaster()->ToPlayer())
+            {
+                for (int32 i = 0; i < 5; ++i)
+                {
+                    if (auto icicle = player->GetAuraEffect(ICICLE_STORE + i, EFFECT_0))
+                    {
+                        int32 amount = icicle->GetAmount();
+                        player->CastCustomSpell(GetTarget(), ICICILE_VISUAL+i, &amount, NULL, NULL, true);
+                        player->CastCustomSpell(GetTarget(), ICICLE_DAMAGE, &amount, NULL, NULL, true);
+                        player->RemoveAurasDueToSpell(ICICLE_STORE + i);
+                        break;
+                    }
+                    if (i == 4)
+                        SetDuration(0);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(script_impl::OnTick, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new script_impl();
+    }
+};
+
 // Called by Evocation - 12051
 // Invocation - 114003
 class spell_mage_invocation : public SpellScriptLoader
@@ -889,7 +1039,13 @@ class spell_mage_invocation : public SpellScriptLoader
                         caster->CastSpell(caster, SPELL_MAGE_INVOKERS_ENERGY, true);
 
                         if (caster->HasAura(SPELL_MAGE_GLYPH_OF_EVOCATION))
-                            caster->HealBySpell(caster, sSpellMgr->GetSpellInfo(12051), caster->CountPctFromMaxHealth(40), false);
+                        {
+                            int32 healthGain = caster->CountPctFromMaxHealth(10);
+                            auto spellInfo = sSpellMgr->GetSpellInfo(12051);
+                            healthGain = caster->SpellHealingBonusDone(caster, spellInfo, healthGain, HEAL);
+                            healthGain = caster->SpellHealingBonusTaken(caster, spellInfo, healthGain, HEAL);
+                            caster->HealBySpell(caster, spellInfo, healthGain, false);
+                        }
                     }
                 }
             }
@@ -1342,8 +1498,9 @@ class spell_mage_evocation : public SpellScriptLoader
 
             void HandleOnHit()
             {
-                if (Player* _player = GetCaster()->ToPlayer())
-                    _player->EnergizeBySpell(_player, GetSpellInfo()->Id, int32(_player->GetMaxPower(POWER_MANA) * 0.15), POWER_MANA);
+                auto caster = GetCaster();
+                caster->EnergizeBySpell(caster, GetSpellInfo()->Id, int32(caster->GetMaxPower(POWER_MANA) * 0.15), POWER_MANA);
+                caster->RemoveAurasDueToSpell(SPELL_MAGE_ARCANE_CHARGE);
             }
 
             void Register()
@@ -1822,6 +1979,49 @@ public:
     }
 };
 
+// 42208 - Blizzard
+/// Updated 4.3.4
+class spell_mage_blizzard : public SpellScriptLoader
+{
+public:
+    spell_mage_blizzard() : SpellScriptLoader("spell_mage_blizzard") { }
+
+    class spell_mage_blizzard_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_mage_blizzard_SpellScript);
+
+        enum
+        {
+            SPELL_MAGE_BLIZZARD_SLOW = 12486
+        };
+
+        bool Validate(SpellInfo const* /*spellInfo*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_BLIZZARD_SLOW))
+                return false;
+            return true;
+        }
+
+        void AddChillEffect(SpellEffIndex /*effIndex*/)
+        {
+            Unit* caster = GetCaster();
+            if (Unit* unitTarget = GetHitUnit())
+                caster->CastSpell(unitTarget, SPELL_MAGE_BLIZZARD_SLOW, true);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_mage_blizzard_SpellScript::AddChillEffect, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_mage_blizzard_SpellScript();
+    }
+};
+
+
 void AddSC_mage_spell_scripts()
 {
     new spell_mage_flamestrike();
@@ -1861,4 +2061,8 @@ void AddSC_mage_spell_scripts()
     new spell_mage_living_bomb();
     new spell_mage_temporal_shield();
     new spell_mage_flameglow();
+    new spell_mastery_icicles();
+    new spell_mastery_icicles_trigger();
+    new spell_mastery_icicles_periodic();
+    new spell_mage_blizzard();
 }

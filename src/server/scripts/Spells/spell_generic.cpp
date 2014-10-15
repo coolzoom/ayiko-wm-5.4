@@ -3444,6 +3444,7 @@ class spell_gen_hardened_shell : public SpellScriptLoader
         }
 };
 
+// Battle Fatigue - 134732
 class spell_gen_battle_fatigue final : public SpellScriptLoader
 {
     class script_impl final : public AuraScript
@@ -3473,6 +3474,7 @@ class spell_gen_battle_fatigue final : public SpellScriptLoader
 
         void OnProc(AuraEffect const *, ProcEventInfo &eventInfo)
         {
+            PreventDefaultAction();
             if (auto const target = eventInfo.GetActionTarget())
                 target->CastSpell(target, BATTLE_FATIGUE_HEAL_REDUCTION, true);
         }
@@ -3544,6 +3546,295 @@ public:
     SpellScript * GetSpellScript() const
     {
         return new script_impl;
+    }
+};
+
+class spell_gen_brewfest_ram_speed_tracker final : public SpellScriptLoader
+{
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        enum
+        {
+            SPELL_SPEED_WALK   = 43310,
+            SPELL_SPEED_TROT   = 42992,
+            SPELL_SPEED_CANTER = 42993,
+            SPELL_SPEED_GALLOP = 42994,
+
+            SPELL_EXHAUSTED_RAM = 43332
+        };
+
+        void HandleEffectPeriodic(AuraEffect const* eff)
+        {
+            static uint32 const spellsByStack[] =
+            {
+                SPELL_SPEED_WALK,   SPELL_SPEED_WALK,   SPELL_SPEED_WALK,
+                SPELL_SPEED_TROT,   SPELL_SPEED_TROT,   SPELL_SPEED_TROT,
+                SPELL_SPEED_CANTER, SPELL_SPEED_CANTER, SPELL_SPEED_CANTER,
+                SPELL_SPEED_GALLOP, SPELL_SPEED_GALLOP, SPELL_SPEED_GALLOP
+            };
+
+            Unit* const target = GetTarget();
+            if (!target || target->HasAura(SPELL_EXHAUSTED_RAM))
+                return;
+
+            uint8 stackAmount = GetStackAmount();
+
+            if (stackAmount > 1)
+            {
+                ModStackAmount(-1);
+                --stackAmount;
+            }
+
+            if (!target->HasAura(spellsByStack[stackAmount]))
+                target->CastSpell(target, spellsByStack[stackAmount], true, NULL, eff);
+        }
+
+        void Register() final
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(script_impl::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+        }
+    };
+
+public:
+    spell_gen_brewfest_ram_speed_tracker()
+        : SpellScriptLoader("spell_gen_brewfest_ram_speed_tracker")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
+};
+
+class spell_gen_brewfest_ram_fatigue_tracker final : public SpellScriptLoader
+{
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        enum
+        {
+            SPELL_FATIGUE_TRACKER = 43052,
+            SPELL_EXHAUSTED_RAM   = 43332,
+
+            MAX_ALLOWED_FATIGUE = 100,
+
+            QUEST_RIDE_ENTRY_A  = 11318,
+            QUEST_RIDE_ENTRY_H  = 11409,
+            QUEST_RIDE_DURATION = 8 * IN_MILLISECONDS
+        };
+
+        struct
+        {
+            int32 fatigue;
+            uint32 creditSpell;
+
+            void init (int32 a, uint32 b) { fatigue = a; creditSpell = b; }
+        } m_data;
+
+        bool Load()
+        {
+            if (!IsHolidayActive(HOLIDAY_BREWFEST))
+                return false;
+
+            Player* caster = NULL;
+            if (Unit* unit = GetCaster())
+                caster = unit->ToPlayer();
+            if (!caster)
+                return false;
+
+            uint32 questId = (caster->GetTeam() == ALLIANCE)
+                    ? QUEST_RIDE_ENTRY_A : QUEST_RIDE_ENTRY_H;
+
+            bool doQuestCheck = (caster->GetQuestStatus(questId) == QUEST_STATUS_INCOMPLETE);
+
+            switch (GetSpellInfo()->Id)
+            {
+            case 43310:
+                m_data.init(-4, 0);
+                break;
+            case 42992:
+                m_data.init(-2, doQuestCheck ? 43345 : 0);
+                break;
+            case 42993:
+                m_data.init(1, doQuestCheck ? 43346 : 0);
+                break;
+            case 42994:
+                m_data.init(5, doQuestCheck ? 43347 : 0);
+                break;
+            default:
+                return false;
+            }
+
+            return true;
+        }
+
+        void HandleEffectPeriodic(AuraEffect const* eff)
+        {
+            Player* const caster = GetCaster()->ToPlayer();
+            if (!caster)
+                return;
+
+            if (m_data.creditSpell
+                    && eff->GetTickNumber() * eff->GetAmplitude() == QUEST_RIDE_DURATION)
+            {
+                caster->CastSpell(caster, m_data.creditSpell, true);
+            }
+
+            Aura* const fatigueAura = caster->GetAura(SPELL_FATIGUE_TRACKER);
+            if (!fatigueAura)
+            {
+                if (m_data.fatigue > 0)
+                    caster->CastSpell(caster, SPELL_FATIGUE_TRACKER, true);
+                return;
+            }
+
+            fatigueAura->ModStackAmount(m_data.fatigue);
+            uint8 fatigueStacks = fatigueAura->GetStackAmount();
+
+            if (fatigueStacks == 0)
+                caster->RemoveAura(fatigueAura);
+            else if (fatigueStacks >= MAX_ALLOWED_FATIGUE)
+                caster->CastSpell(caster, SPELL_EXHAUSTED_RAM, true, NULL, eff);
+        }
+
+        void Register() final
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(script_impl::HandleEffectPeriodic, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
+        }
+    };
+
+public:
+    spell_gen_brewfest_ram_fatigue_tracker()
+        : SpellScriptLoader("spell_gen_brewfest_ram_fatigue_tracker")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
+};
+
+class spell_gen_brewfest_ram_exhausted final : public SpellScriptLoader
+{
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        enum
+        {
+            SPELL_SPEED_TRACKER = 42924,
+            SPELL_FATIGUE_TRACKER = 43052
+        };
+
+        void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            Unit* const target = GetTarget();
+            if (!target)
+                return;
+
+            if (Aura* const aura = target->GetAura(SPELL_SPEED_TRACKER))
+                aura->SetStackAmount(1);
+            if (Aura* const aura = target->GetAura(SPELL_FATIGUE_TRACKER))
+                aura->ModStackAmount(-15);
+        }
+
+        void Register() final
+        {
+            OnEffectRemove += AuraEffectRemoveFn(script_impl::HandleEffectRemove, EFFECT_0, SPELL_AURA_MOD_DECREASE_SPEED, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+public:
+    spell_gen_brewfest_ram_exhausted()
+        : SpellScriptLoader("spell_gen_brewfest_ram_exhausted")
+    { }
+
+    virtual AuraScript* GetAuraScript() const
+    {
+        return new script_impl;
+    }
+};
+
+class spell_gen_brewfest_dismount_ram final : public SpellScriptLoader
+{
+    class script_impl final : public SpellScript
+    {
+        PrepareSpellScript(script_impl)
+
+        enum
+        {
+            SPELL_RAM_MOUNT = 43883
+        };
+
+        void HandleEffect(SpellEffIndex /*index*/)
+        {
+            if (auto const target = GetHitUnit())
+                target->RemoveAura(SPELL_RAM_MOUNT);
+        }
+
+        void Register() final
+        {
+            OnEffectHitTarget += SpellEffectFn(script_impl::HandleEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+public:
+    spell_gen_brewfest_dismount_ram()
+        : SpellScriptLoader("spell_gen_brewfest_dismount_ram")
+    { }
+
+    SpellScript * GetSpellScript() const final
+    {
+        return new script_impl;
+    }
+};
+
+class spell_brewfest_ram_race_increase_duration final : public SpellScriptLoader
+{
+    class script_impl final : public SpellScript
+    {
+        PrepareSpellScript(script_impl)
+
+        enum
+        {
+            SPELL_RAM_AURA              = 43880,
+            MAX_DURATION_EXTENDED       = 15 * MINUTE,
+            DURATION_BONUS              = 30 * IN_MILLISECONDS,
+        };
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            Unit* target = GetHitUnit();
+            if (!target)
+                return;
+
+            if (Aura* aur = target->GetAura(SPELL_RAM_AURA))
+            {
+                if (time(NULL) - aur->GetApplyTime() < MAX_DURATION_EXTENDED)
+                {
+                    int32 dur = aur->GetDuration() + DURATION_BONUS;
+                    aur->SetDuration(std::min(dur, aur->GetMaxDuration()));
+                }
+            }
+        }
+
+        void Register() final
+        {
+            OnEffectHitTarget += SpellEffectFn(script_impl::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+public:
+    spell_brewfest_ram_race_increase_duration()
+        : SpellScriptLoader("spell_brewfest_ram_race_increase_duration")
+    { }
+
+    SpellScript * GetSpellScript() const final
+    {
+        return new script_impl();
     }
 };
 
@@ -3626,4 +3917,9 @@ void AddSC_generic_spell_scripts()
     new spell_gen_hardened_shell();
     new spell_gen_battle_fatigue();
     new spell_gen_synapse_springs();
+    new spell_gen_brewfest_ram_speed_tracker();
+    new spell_gen_brewfest_ram_fatigue_tracker();
+    new spell_gen_brewfest_ram_exhausted();
+    new spell_gen_brewfest_dismount_ram();
+    new spell_brewfest_ram_race_increase_duration();
 }

@@ -178,7 +178,6 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
                 case 6358:   // Seduction
                 case 115268: // Mesmerize
                 case 132412: // Seduction
-                    return DIMINISHING_DISORIENT;
                 case 118699: // Fear
                 case 5484:   // Howl of Terror
                 case 104045: // Sleep
@@ -2555,7 +2554,6 @@ void SpellMgr::LoadPetDefaultSpells()
     CreatureTemplateContainer const* ctc = sObjectMgr->GetCreatureTemplates();
     for (CreatureTemplateContainer::const_iterator itr = ctc->begin(); itr != ctc->end(); ++itr)
     {
-
         if (!itr->second.PetSpellDataId)
             continue;
 
@@ -2599,6 +2597,10 @@ void SpellMgr::LoadPetDefaultSpells()
 
                 // already loaded
                 if (cInfo->PetSpellDataId)
+                    continue;
+
+                // tameable pets can't have additional spells
+                if (cInfo->isTameable(true))
                     continue;
 
                 // for creature without PetSpellDataId get default pet spells from creature_template
@@ -3207,6 +3209,9 @@ void SpellMgr::LoadSpellCustomAttr()
             ///////////////////////////
             //////   END BINARY  //////
             ///////////////////////////
+
+            if (spellInfo->ActiveIconID == 2158)  // flight
+                spellInfo->Attributes |= SPELL_ATTR0_PASSIVE;
 
             switch (spellInfo->Id)
             {
@@ -3914,6 +3919,7 @@ void SpellMgr::LoadSpellCustomAttr()
                     break;
                 case 125972:// Felin Grace
                     spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_SAFE_FALL;
+                    spellInfo->Stances = 1 << (FORM_CAT - 1);
                     break;
                 case 83968: // Mass Resurrect
                     spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_DEAD;
@@ -4473,7 +4479,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->ProcCharges = 2;
                     break;
                 case 44544: // Fingers of Frost
-                case 126084:// Fingers of Frost - visual
                     spellInfo->StackAmount = 2;
                     break;
                 case 85222: // Light of Dawn
@@ -4559,8 +4564,18 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 107270:// Spinning Crane Kick - Radius
                     spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(14);
                     break;
-                case 107223:
+                case 107223: // Sunfire Rays
                     spellInfo->Effects[0].TargetA = TARGET_UNIT_TARGET_ENEMY;
+                    break;
+                case 148023: // Icicle (periodic trigger)
+                case 148022: // Icicle (damage)
+                case 148017: // Icicle (visual)
+                case 148018:
+                case 148019:
+                case 148020:
+                case 148021:
+                    spellInfo->Effects[0].TargetA = TARGET_UNIT_TARGET_ANY;
+                    spellInfo->AttributesEx6 &= ~SPELL_ATTR6_CANT_TARGET_CROWD_CONTROLLED;
                     break;
                 case 106909:
                 {
@@ -5429,6 +5444,29 @@ void SpellMgr::LoadSpellCustomAttr()
                     break;
                 case 116: // Frostbolt - It has unknown type 5 in DBC
                     spellInfo->PreventionType = SPELL_PREVENTION_TYPE_SILENCE;
+                    break;
+                case 132169: // Storm Bolt stun
+                    spellInfo->Speed = 0;
+                    break;
+                case 96103: // Raging Blow
+                case 85384: // Raging Blow: Off-Hand
+                    // 5.4 Hot-Fix: Raging Blow damage increased by 20%
+                    spellInfo->Effects[EFFECT_1].BasePoints = 228;
+                    break;
+                case 23881: // Bloodthirst
+                    // 5.4 Hot-Fix: Bloodthirst damage increased by 20%
+                    spellInfo->Effects[EFFECT_1].BasePoints = 108;
+                    break;
+                case 53480: // Roar of Sacrifice Split damage
+                    spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_SHARE_DAMAGE_PCT;
+                    spellInfo->Effects[EFFECT_1].MiscValue = 127;
+                    break;
+                case 79808: // Arcane Missiles Double Aurastate - Override procflag
+                case 116768: // Combo Breaker: Blackout Kick
+                    spellInfo->ProcFlags = 0;
+                    break;
+                case 145110: // Ysera's Gift (Party Heal)
+                    spellInfo->Effects[EFFECT_0].SetRadiusIndex(EFFECT_RADIUS_100_YARDS);
                     break;
                 default:
                     break;

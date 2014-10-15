@@ -320,13 +320,26 @@ class spell_pal_shield_of_the_righteous : public SpellScriptLoader
 
             void HandleOnHit()
             {
-                if (Player* player = GetCaster()->ToPlayer())
+                if (Player* const player = GetCaster()->ToPlayer())
                 {
                     if (GetHitUnit())
                     {
-                        // -30% damage taken for 3s
-                        player->CastSpell(player, PALADIN_SPELL_SHIELD_OF_THE_RIGHTEOUS_PROC, true);
-                        player->CastSpell(player, PALADIN_SPELL_BASTION_OF_GLORY, true);
+                        if (auto spell = sSpellStore.LookupEntry(PALADIN_SPELL_SHIELD_OF_THE_RIGHTEOUS_PROC))
+                        {
+                            int32 bp0 = spell->GetSpellEffect(EFFECT_0, 0)->EffectBasePoints;
+                            bp0 = AddPct(bp0, player->GetFloatValue(PLAYER_MASTERY));
+                            player->CastCustomSpell(player, PALADIN_SPELL_SHIELD_OF_THE_RIGHTEOUS_PROC, &bp0, NULL, NULL, true);
+                        }
+
+                        if (auto spell = sSpellStore.LookupEntry(PALADIN_SPELL_BASTION_OF_GLORY))
+                        {
+                            int32 bp0 = spell->GetSpellEffect(EFFECT_0, 0)->EffectBasePoints;
+                            int32 bp1 = spell->GetSpellEffect(EFFECT_2, 0)->EffectBasePoints;
+                            bp0 = AddPct(bp0, player->GetFloatValue(PLAYER_MASTERY));
+                            bp1 = AddPct(bp1, player->GetFloatValue(PLAYER_MASTERY));
+
+                            player->CastCustomSpell(player, PALADIN_SPELL_BASTION_OF_GLORY, &bp0, NULL, &bp1, true);
+                        }
                     }
                 }
             }
@@ -1180,11 +1193,11 @@ class spell_pal_judgment : public SpellScriptLoader
                 return true;
             }
 
-            void HandleOnHit()
+            void HandleHit(SpellEffIndex /*effIndex*/)
             {
-                if (Player* _player = GetCaster()->ToPlayer())
+                if (auto _player = GetCaster()->ToPlayer())
                 {
-                    if (Unit* unitTarget = GetHitUnit())
+                    if (auto unitTarget = GetHitUnit())
                     {
                         // Selfless Healer in Holy Spec
                         if (_player->HasAura(85804) && _player->GetSpecializationId(_player->GetActiveSpec()) == SPEC_PALADIN_HOLY)
@@ -1218,7 +1231,7 @@ class spell_pal_judgment : public SpellScriptLoader
 
             void Register()
             {
-                OnHit += SpellHitFn(spell_pal_judgment_SpellScript::HandleOnHit);
+                OnEffectHitTarget += SpellEffectFn(spell_pal_judgment_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
             }
         };
 

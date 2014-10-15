@@ -1568,7 +1568,7 @@ class BattlegroundAV : public Battleground
         void HandleKillPlayer(Player* player, Player* killer);
         void HandleKillUnit(Creature* unit, Player* killer);
         void HandleQuestComplete(uint32 questid, Player* player);
-        bool PlayerCanDoMineQuest(int32 GOId, uint32 team);
+        bool CanActivateGO(int32 GOId, uint32 team) const;
 
         void EndBattleground(uint32 winner);
 

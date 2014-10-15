@@ -791,7 +791,11 @@ void Spell::SelectSpellTargets()
         }
     }
 
-    if (m_targets.HasDst())
+    if (m_spellInfo->AttributesEx9 & SPELL_ATTR9_SPECIAL_DELAY_CALCULATION)
+    {
+        m_delayMoment = uint64(m_spellInfo->Speed * 1000.0f);
+    }
+    else if (m_targets.HasDst())
     {
         if (m_targets.HasTraj())
         {
@@ -801,12 +805,8 @@ void Spell::SelectSpellTargets()
         }
         else if (m_spellInfo->Speed > 0.0f)
         {
-            float dist = m_caster->GetDistance(*m_targets.GetDstPos());
-
-            if (!(m_spellInfo->AttributesEx9 & SPELL_ATTR9_SPECIAL_DELAY_CALCULATION))
-                m_delayMoment = uint64(floor(dist / m_spellInfo->Speed * 1000.0f));
-            else
-                m_delayMoment = uint64(m_spellInfo->Speed * 1000.0f);
+            float dist = m_caster->GetExactDist(m_targets.GetDstPos());
+            m_delayMoment = uint64(floor(dist / m_spellInfo->Speed * 1000.0f));
         }
     }
 }
@@ -1479,12 +1479,15 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
 
         // Custom MoP Script
         // 107270 / 117640 - Spinning Crane Kick : Give 1 Chi if the spell hits at least 3 targets
-        if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        if (auto player = m_caster->ToPlayer())
         {
-            if ((m_spellInfo->Id == 107270 || m_spellInfo->Id == 117640) && unitTargets.size() >= 3 && !m_caster->ToPlayer()->HasSpellCooldown(129881))
+            if ((m_spellInfo->Id == 107270 || m_spellInfo->Id == 117640 || m_spellInfo->Id == 148187) && unitTargets.size() >= 3 && !player->HasSpellCooldown(129881))
             {
                 m_caster->CastSpell(m_caster, 129881, true);
-                m_caster->ToPlayer()->AddSpellCooldown(129881, 0, 3 * IN_MILLISECONDS);
+                player->AddSpellCooldown(129881, 0, 3 * IN_MILLISECONDS);
+                // Muscle Memory
+                if (player->HasSpell(139598))
+                    player->CastSpell(player, 139597, true);
             }
         }
 
@@ -1521,27 +1524,47 @@ void Spell::SelectImplicitCasterDestTargets(SpellEffIndex effIndex, SpellImplici
             if (SpellTargetPosition const* st = sSpellMgr->GetSpellTargetPosition(m_spellInfo->Id, effIndex))
             {
                 // @TODO: fix this check
-                if (m_spellInfo->HasEffect(SPELL_EFFECT_TELEPORT_UNITS))
+                if (m_spellInfo->HasEffect(SPELL_EFFECT_TELEPORT_UNITS) || m_spellInfo->HasEffect(SPELL_EFFECT_BIND))
                     m_targets.SetDst(st->target_X, st->target_Y, st->target_Z, st->target_Orientation, (int32)st->target_mapId);
                 else if (st->target_mapId == m_caster->GetMapId())
                     m_targets.SetDst(st->target_X, st->target_Y, st->target_Z, st->target_Orientation);
             }
             else
             {
+                TC_LOG_DEBUG("spells", "SPELL: unknown target coordinates for spell ID %u", m_spellInfo->Id);
                 WorldObject* target = m_targets.GetObjectTarget();
                 m_targets.SetDst(target ? *target : *m_caster);
             }
             return;
         case TARGET_DEST_CASTER_FISHING:
         {
-             float min_dis = m_spellInfo->GetMinRange(true);
-             float max_dis = m_spellInfo->GetMaxRange(true);
-             float dis = (float)rand_norm() * (max_dis - min_dis) + min_dis;
-             float x, y, z, angle;
-             angle = (float)rand_norm() * static_cast<float>(M_PI * 35.0f / 180.0f) - static_cast<float>(M_PI * 17.5f / 180.0f);
-             m_caster->GetClosePoint(x, y, z, DEFAULT_WORLD_OBJECT_SIZE, dis, angle);
-             m_targets.SetDst(x, y, z, m_caster->GetOrientation());
-             return;
+            float min_dis = m_spellInfo->GetMinRange(true);
+            float max_dis = m_spellInfo->GetMaxRange(true);
+            float dis = (float)rand_norm() * (max_dis - min_dis) + min_dis;
+            float x, y, z, angle;
+            angle = (float)rand_norm() * static_cast<float>(M_PI * 35.0f / 180.0f) - static_cast<float>(M_PI * 17.5f / 180.0f);
+            m_caster->GetClosePoint(x, y, z, DEFAULT_WORLD_OBJECT_SIZE, dis, angle);
+
+            float ground = z;
+            float liquidLevel = m_caster->GetMap()->GetWaterOrGroundLevel(x, y, z, &ground);
+            if (liquidLevel <= ground) // When there is no liquid Map::GetWaterOrGroundLevel returns ground level
+            {
+                SendCastResult(SPELL_FAILED_NOT_HERE);
+                SendChannelUpdate(0);
+                finish(false);
+                return;
+            }
+
+            if (ground + 0.75 > liquidLevel)
+            {
+                SendCastResult(SPELL_FAILED_TOO_SHALLOW);
+                SendChannelUpdate(0);
+                finish(false);
+                return;
+            }
+
+            m_targets.SetDst(x, y, liquidLevel, m_caster->GetOrientation());
+            return;
         }
         default:
             break;
@@ -1561,10 +1584,28 @@ void Spell::SelectImplicitCasterDestTargets(SpellEffIndex effIndex, SpellImplici
         dist = objSize + (dist - objSize) * (float)rand_norm();
 
     Position pos;
-    if (targetType.GetTarget() == TARGET_DEST_CASTER_FRONT_LEAP)
-        m_caster->GetFirstCollisionPosition(pos, dist, angle);
-    else
-        m_caster->GetNearPosition(pos, dist, angle);
+
+    switch (targetType.GetTarget())
+    {
+        case TARGET_DEST_CASTER_FRONT_LEAP:
+        case TARGET_DEST_CASTER_FRONT_LEFT:
+        case TARGET_DEST_CASTER_BACK_LEFT:
+        case TARGET_DEST_CASTER_BACK_RIGHT:
+        case TARGET_DEST_CASTER_FRONT_RIGHT:
+        case TARGET_DEST_CASTER_FRONT:
+            m_caster->GetFirstCollisionPosition(pos, dist, angle);
+            break;
+        case TARGET_DEST_CASTER_SUMMON:
+            m_caster->GetPosition(&pos);
+            m_caster->MovePositionFixedXY(pos, dist, angle);
+            break;
+        default:
+            m_caster->GetPosition(&pos);
+            m_caster->MovePositionFixedXY(pos, dist, angle);
+            pos.SetOrientation(m_caster->GetOrientation() + angle);
+            break;
+    }
+
     m_targets.SetDst(*m_caster);
     m_targets.ModDst(pos);
 }
@@ -1591,7 +1632,9 @@ void Spell::SelectImplicitTargetDestTargets(SpellEffIndex effIndex, SpellImplici
         dist = objSize + (dist - objSize) * (float)rand_norm();
 
     Position pos;
-    target->GetNearPosition(pos, dist, angle);
+    target->GetPosition(&pos);
+    target->MovePositionFixedXY(pos, dist, angle);
+
     m_targets.SetDst(*target);
     m_targets.ModDst(pos);
 }
@@ -1625,7 +1668,8 @@ void Spell::SelectImplicitDestDestTargets(SpellEffIndex effIndex, SpellImplicitT
         dist *= (float)rand_norm();
 
     Position pos = *m_targets.GetDstPos();
-    m_caster->MovePosition(pos, dist, angle);
+    m_caster->MovePositionFixedXY(pos, dist, angle);
+    pos.SetOrientation(m_caster->GetOrientation() + angle);
     m_targets.ModDst(pos);
 }
 
@@ -1792,8 +1836,6 @@ float tangent(float x)
     return 0.0f;
 }
 
-#define DEBUG_TRAJ(a) //a
-
 void Spell::SelectImplicitTrajTargets()
 {
     if (!m_targets.HasTraj())
@@ -1808,7 +1850,7 @@ void Spell::SelectImplicitTrajTargets()
     std::list<WorldObject*> targets;
     Trinity::WorldObjectSpellTrajTargetCheck check(dist2d, m_targets.GetSrcPos(), m_caster, m_spellInfo);
     Trinity::WorldObjectListSearcher<Trinity::WorldObjectSpellTrajTargetCheck> searcher(m_caster, targets, check, GRID_MAP_TYPE_MASK_ALL);
-    SearchTargets<Trinity::WorldObjectListSearcher<Trinity::WorldObjectSpellTrajTargetCheck> > (searcher, GRID_MAP_TYPE_MASK_ALL, m_caster, m_targets.GetSrcPos(), dist2d);
+    SearchTargets(searcher, GRID_MAP_TYPE_MASK_ALL, m_caster, m_targets.GetSrcPos(), dist2d);
     if (targets.empty())
         return;
 
@@ -1818,9 +1860,10 @@ void Spell::SelectImplicitTrajTargets()
     float a = (srcToDestDelta - dist2d * b) / (dist2d * dist2d);
     if (a > -0.0001f)
         a = 0;
+
     float bestDist = m_spellInfo->GetMaxRange(false);
 
-    std::list<WorldObject*>::const_iterator itr = targets.begin();
+    auto itr = targets.begin();
     for (; itr != targets.end(); ++itr)
     {
         if (Unit* unitTarget = (*itr)->ToUnit())
@@ -1828,7 +1871,7 @@ void Spell::SelectImplicitTrajTargets()
                 continue;
 
         const float size = std::max((*itr)->GetObjectSize() * 0.7f, 1.0f); // 1/sqrt(3)
-        // TODO: all calculation should be based on src instead of m_caster
+        /// @todo all calculation should be based on src instead of m_caster
         const float objDist2d = m_targets.GetSrcPos()->GetExactDist2d(*itr) * std::cos(m_targets.GetSrcPos()->GetRelativeAngle(*itr));
         const float dz = (*itr)->GetPositionZ() - m_targets.GetSrcPos()->m_positionZ;
 
@@ -1842,7 +1885,6 @@ void Spell::SelectImplicitTrajTargets()
         }
 
 #define CHECK_DIST {\
-            DEBUG_TRAJ(TC_LOG_ERROR("spells", "Spell::SelectTrajTargets: dist %f, height %f.", dist, height);)\
             if (dist > bestDist)\
                 continue;\
             if (dist < objDist2d + size && dist > objDist2d - size)\
@@ -1904,6 +1946,7 @@ void Spell::SelectImplicitTrajTargets()
             float distSq = (*itr)->GetExactDistSq(x, y, z);
             float sizeSq = (*itr)->GetObjectSize();
             sizeSq *= sizeSq;
+
             if (distSq > sizeSq)
             {
                 float factor = 1 - sqrt(sizeSq / distSq);
@@ -2511,6 +2554,7 @@ void Spell::AddGOTarget(GameObject* go, uint32 effectMask)
         float dist = m_caster->GetDistance(go->GetPositionX(), go->GetPositionY(), go->GetPositionZ());
         if (dist < 5.0f)
             dist = 5.0f;
+
        if (!(m_spellInfo->AttributesEx9 & SPELL_ATTR9_SPECIAL_DELAY_CALCULATION))
            target.timeDelay = uint64(floor(dist / m_spellInfo->Speed * 1000.0f));
        else
@@ -2694,6 +2738,9 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
             }
         }
     }
+
+    // Refresh procEx after effect-handlers
+    procEx |= m_procEx;
 
     // Do not take combo points on dodge and miss
     if (missInfo != SPELL_MISS_NONE && m_needComboPoints &&
@@ -3346,13 +3393,14 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const *triggered
     SpellEvent* Event = new SpellEvent(this);
     m_caster->m_Events.AddEvent(Event, m_caster->m_Events.CalculateTime(1));
 
-    //Prevent casting at cast another spell (ServerSide check)
-    if (!(_triggeredCastFlags & TRIGGERED_IGNORE_CAST_IN_PROGRESS) && m_caster->IsNonMeleeSpellCasted(false, true, true) && m_cast_count)
-    {
-        SendCastResult(SPELL_FAILED_SPELL_IN_PROGRESS);
-        finish(false);
-        return;
-    }
+    //Prevent casting at cast another spell (ServerSide check) - Do not check for Autoshot as Steady Shot should be available to init cast of it
+    if (m_spellInfo->Id != 108839 && m_spellInfo->Id != 75)
+        if (!(_triggeredCastFlags & TRIGGERED_IGNORE_CAST_IN_PROGRESS) && m_caster->IsNonMeleeSpellCasted(false, true, true) && m_cast_count)
+        {
+            SendCastResult(SPELL_FAILED_SPELL_IN_PROGRESS);
+            finish(false);
+            return;
+        }
 
     if (DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->Id, m_caster))
     {
@@ -6032,6 +6080,21 @@ void Spell::TakeRunePower(bool didHit)
         player->SetRuneCooldown(i, cooldown);
         player->SetDeathRuneUsed(i, false);
 
+        switch (m_spellInfo->Id)
+        {
+            case 45477: // Icy Touch
+            case 45902: // Blood Strike
+            case 48721: // Blood Boil
+            case 50842: // Pestilence
+            case 85948: // Festering Strike
+            {
+                // Reaping
+                if (player->HasAura(56835))
+                    player->AddRuneBySpell(i, RUNE_DEATH, 56835);
+                break;
+            }
+        }
+
         runeCost[rune]--;
         gain_runic = true;
     }
@@ -6067,17 +6130,6 @@ void Spell::TakeRunePower(bool didHit)
 
                 switch (m_spellInfo->Id)
                 {
-                    case 45477: // Icy Touch
-                    case 45902: // Blood Strike
-                    case 48721: // Blood Boil
-                    case 50842: // Pestilence
-                    case 85948: // Festering Strike
-                    {
-                        // Reaping
-                        if (player->HasAura(56835))
-                            player->AddRuneBySpell(i, RUNE_DEATH, 56835);
-                        break;
-                    }
                     case 49998: // Death Strike
                     {
                         // Blood Rites
@@ -6287,7 +6339,10 @@ SpellCastResult Spell::CheckCast(bool strict)
         if (!(_triggeredCastFlags & TRIGGERED_IGNORE_CASTER_AURASTATE) && player->HasFlag(PLAYER_FLAGS, PLAYER_ALLOW_ONLY_ABILITY)
             && !(m_caster->HasAura(46924) && (m_spellInfo->Id == 469 || m_spellInfo->Id == 6673 || m_spellInfo->Id == 97462 || m_spellInfo->Id == 5246 || m_spellInfo->Id == 12323
             || m_spellInfo->Id == 107566 || m_spellInfo->Id == 102060 || m_spellInfo->Id == 1160))) // Hack fix Bladestorm - caster should be able to cast only shout spells during bladestorm
-            return SPELL_FAILED_SPELL_IN_PROGRESS;
+        {
+            if (m_spellInfo->Id != 108839)
+                return SPELL_FAILED_SPELL_IN_PROGRESS;
+        }
 
         if (player->HasSpellCooldown(m_spellInfo->Id) && !player->HasAuraTypeWithAffectMask(SPELL_AURA_ALLOW_CAST_WHILE_IN_COOLDOWN, m_spellInfo) && !(_triggeredCastFlags & TRIGGERED_IGNORE_CURRENT_COOLDOWN))
         {
@@ -7268,6 +7323,10 @@ SpellCastResult Spell::CheckCasterAuras() const
     }
 
     bool usableInStun = m_spellInfo->AttributesEx5 & SPELL_ATTR5_USABLE_WHILE_STUNNED;
+
+    // Glyph of Life Cocoon
+    if (m_spellInfo->Id == 116849 && m_caster->HasAura(124989))
+        usableInStun = true;
 
     // Check whether the cast should be prevented by any state you might have.
     SpellCastResult prevented_reason = SPELL_CAST_OK;

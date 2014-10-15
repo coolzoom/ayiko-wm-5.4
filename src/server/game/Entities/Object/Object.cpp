@@ -2403,6 +2403,7 @@ TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropert
                         break;
                     case SUMMON_TYPE_TOTEM:
                     case SUMMON_TYPE_STATUE:
+                    case SUMMON_TYPE_WAR_BANNER:
                         mask = UNIT_MASK_TOTEM;
                         break;
                     case SUMMON_TYPE_VEHICLE:
@@ -2422,17 +2423,6 @@ TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropert
             default:
                 return NULL;
         }
-    }
-
-    switch (spellId)
-    {
-        case 114192:// Mocking Banner
-        case 114203:// Demoralizing Banner
-        case 114207:// Skull Banner
-            mask = UNIT_MASK_GUARDIAN;
-            break;
-        default:
-            break;
     }
 
     uint32 phase = PHASEMASK_NORMAL;
@@ -2812,6 +2802,17 @@ void WorldObject::MovePosition(Position &pos, float dist, float angle)
         }
     }
 
+    Trinity::NormalizeMapCoord(pos.m_positionX);
+    Trinity::NormalizeMapCoord(pos.m_positionY);
+    UpdateGroundPositionZ(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
+    pos.SetOrientation(GetOrientation());
+}
+
+void WorldObject::MovePositionFixedXY(Position &pos, float dist, float angle)
+{
+    angle += m_orientation;
+    pos.m_positionX += dist * std::cos(angle);
+    pos.m_positionY += dist * std::sin(angle);
     Trinity::NormalizeMapCoord(pos.m_positionX);
     Trinity::NormalizeMapCoord(pos.m_positionY);
     UpdateGroundPositionZ(pos.m_positionX, pos.m_positionY, pos.m_positionZ);

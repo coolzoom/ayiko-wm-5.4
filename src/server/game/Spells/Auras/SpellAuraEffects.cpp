@@ -567,7 +567,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
 AuraEffect::AuraEffect(Aura *base, uint8 effIndex, int32 *baseAmount, Unit* caster):
     m_base(base), m_spellInfo(base->GetSpellInfo()),
     m_baseAmount(baseAmount ? *baseAmount : m_spellInfo->Effects[effIndex].BasePoints),
-    m_periodicTimer(0), m_tickNumber(0), m_effIndex(effIndex),
+    m_periodicTimer(0), m_tickNumber(0), m_userData(0), m_effIndex(effIndex),
     m_canBeRecalculated(true), m_isPeriodic(false)
 {
     GetFixedDamageInfo().Clear();
@@ -1021,6 +1021,11 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
         case SPELL_AURA_MOD_INCREASE_HEALTH:
             // Vampiric Blood
             if (GetId() == 55233)
+                amount = GetBase()->GetUnitOwner()->CountPctFromMaxHealth(amount);
+            break;
+        case SPELL_AURA_MOD_INCREASE_HEALTH_2:
+            // Shadow Bulwark
+            if (GetId() == 132413)
                 amount = GetBase()->GetUnitOwner()->CountPctFromMaxHealth(amount);
             break;
         case SPELL_AURA_MOD_INCREASE_SPEED:
@@ -1980,8 +1985,7 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
             break;
         case FORM_METAMORPHOSIS:
             spellId  = 103965;
-            spellId2 = 54817;
-            spellId3 = 54879;
+            spellId2 = 54879;
             break;
         case FORM_SPIRITOFREDEMPTION:
             spellId  = 27792;
@@ -3117,14 +3121,31 @@ void AuraEffect::HandleAuraModSilence(AuraApplication const* aurApp, uint8 mode,
     if (apply)
     {
         target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED);
-
+        bool interrupted = false;
         // call functions which may have additional effects after chainging state of unit
         // Stop cast only spells vs PreventionType == SPELL_PREVENTION_TYPE_SILENCE
         for (uint32 i = CURRENT_MELEE_SPELL; i < CURRENT_MAX_SPELL; ++i)
             if (Spell* spell = target->GetCurrentSpell(CurrentSpellTypes(i)))
                 if (spell->m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE)
+                {
                     // Stop spells on prepare or casting state
                     target->InterruptSpell(CurrentSpellTypes(i), false);
+                    interrupted = true;
+                    // Glyph of Strangulate - increase duration by 2 seconds if succesful silence
+                    if (GetId() == 47476 && GetCaster())
+                    {
+                        if (AuraEffect * const aura = GetCaster()->GetAuraEffect(58618, EFFECT_0))
+                        {
+                            GetBase()->SetMaxDuration(GetBase()->GetMaxDuration() + aura->GetAmount());
+                            GetBase()->SetDuration(GetBase()->GetMaxDuration());
+                        }
+                    }
+                }
+
+        if (interrupted)
+            if (Unit * caster = GetCaster())
+                if(Spell * spell = caster->FindCurrentSpellBySpellId(GetId()))
+                    spell->addProcExFlag(PROC_EX_INTERRUPT);
     }
     else
     {
@@ -3586,6 +3607,15 @@ void AuraEffect::HandleModTaunt(AuraApplication const* aurApp, uint8 mode, bool 
     Unit* caster = GetCaster();
     if (!caster || !caster->isAlive())
         return;
+
+    // Glyph of Distracting Shot - redirect effect to pet
+    if (GetId() == 20736 && caster->HasAura(123632))
+    {
+        if (auto const player = caster->ToPlayer())
+            if (auto const pet = player->GetPet())
+                if (pet->isAlive())
+                    caster = pet;
+    }
 
     if (apply)
         target->TauntApply(caster);
@@ -4802,10 +4832,13 @@ void AuraEffect::HandleAuraModIncreaseHealth(AuraApplication const* aurApp, uint
     }
     else
     {
-        if (int32(target->GetHealth()) > GetAmount())
-            target->ModifyHealth(-GetAmount());
-        else
-            target->SetHealth(1);
+        if (GetSpellInfo()->Effects[GetEffIndex()].ApplyAuraName != SPELL_AURA_MOD_INCREASE_HEALTH_2)
+        {
+            if (int32(target->GetHealth()) > GetAmount())
+                target->ModifyHealth(-GetAmount());
+            else
+                target->SetHealth(1);
+        }
         target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(GetAmount()), apply);
     }
 }
@@ -6354,7 +6387,7 @@ void AuraEffect::HandleAuraLinked(AuraApplication const* aurApp, uint8 mode, boo
     {
         if (apply)
         {
-            Unit* caster = triggeredSpellInfo->NeedsToBeTriggeredByCaster() ? GetCaster() : target;
+            Unit* caster = triggeredSpellInfo->NeedsToBeTriggeredByCaster(GetSpellInfo()) ? GetCaster() : target;
 
             if (!caster)
                 return;
@@ -6366,13 +6399,13 @@ void AuraEffect::HandleAuraLinked(AuraApplication const* aurApp, uint8 mode, boo
         }
         else
         {
-            uint64 casterGUID = triggeredSpellInfo->NeedsToBeTriggeredByCaster() ? GetCasterGUID() : target->GetGUID();
+            uint64 casterGUID = triggeredSpellInfo->NeedsToBeTriggeredByCaster(GetSpellInfo()) ? GetCasterGUID() : target->GetGUID();
             target->RemoveAura(triggeredSpellId, casterGUID, 0, aurApp->GetRemoveMode());
         }
     }
     else if (mode & AURA_EFFECT_HANDLE_REAPPLY && apply)
     {
-        uint64 casterGUID = triggeredSpellInfo->NeedsToBeTriggeredByCaster() ? GetCasterGUID() : target->GetGUID();
+        uint64 casterGUID = triggeredSpellInfo->NeedsToBeTriggeredByCaster(GetSpellInfo()) ? GetCasterGUID() : target->GetGUID();
         // change the stack amount to be equal to stack amount of our aura
         Aura *triggeredAura = target->GetAura(triggeredSpellId, casterGUID);
         if (triggeredAura != NULL)
@@ -7094,7 +7127,7 @@ void AuraEffect::HandlePeriodicTriggerSpellAuraTick(Unit* target, Unit* caster) 
 
     if (triggeredSpellInfo)
     {
-        if (Unit* triggerCaster = triggeredSpellInfo->NeedsToBeTriggeredByCaster() ? caster : target)
+        if (Unit* triggerCaster = triggeredSpellInfo->NeedsToBeTriggeredByCaster(GetSpellInfo()) ? caster : target)
         {
             triggerCaster->CastSpell(target, triggeredSpellInfo, true, NULL, this);
         }
@@ -7113,7 +7146,7 @@ void AuraEffect::HandlePeriodicTriggerSpellWithValueAuraTick(Unit* target, Unit*
     uint32 triggerSpellId = GetSpellInfo()->Effects[m_effIndex].TriggerSpell;
     if (SpellInfo const* triggeredSpellInfo = sSpellMgr->GetSpellInfo(triggerSpellId))
     {
-        if (Unit* triggerCaster = triggeredSpellInfo->NeedsToBeTriggeredByCaster() ? caster : target)
+        if (Unit* triggerCaster = triggeredSpellInfo->NeedsToBeTriggeredByCaster(GetSpellInfo()) ? caster : target)
         {
             int32 basepoints0 = GetAmount();
             triggerCaster->CastCustomSpell(target, triggerSpellId, &basepoints0, 0, 0, true, 0, this);
@@ -7633,24 +7666,6 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
 
     if (GetAuraType() == SPELL_AURA_OBS_MOD_HEALTH)
     {
-        // Taken mods
-        float TakenTotalMod = 1.0f;
-
-        // Tenacity increase healing % taken
-        if (AuraEffect const *Tenacity = target->GetAuraEffect(58549, 0))
-            AddPct(TakenTotalMod, Tenacity->GetAmount());
-
-        // Healing taken percent
-        float minval = (float)target->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
-        if (minval)
-            AddPct(TakenTotalMod, minval);
-
-        float maxval = (float)target->GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
-        if (maxval)
-            AddPct(TakenTotalMod, maxval);
-
-        TakenTotalMod = std::max(TakenTotalMod, 0.0f);
-
         // Mend Pet
         if (m_spellInfo->Id == 136)
             if (caster->HasAura(19573)) // Glyph of Mend Pet
@@ -7658,7 +7673,6 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
                     caster->CastSpell(target, 24406, true); // Dispel
 
         damage = uint32(target->CountPctFromMaxHealth(damage));
-        damage = uint32(damage * TakenTotalMod);
 
         damage = caster->SpellHealingBonusDone(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
         damage = target->SpellHealingBonusTaken(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
@@ -7839,7 +7853,13 @@ void AuraEffect::HandleObsModPowerAuraTick(Unit* target, Unit* caster) const
     // Hack Fix Glyph of Evocation - 56380
     if (GetBase()->GetId() == 12051 && GetTickNumber() > 1)
         if (target->HasAura(56380) && !target->HasAura(114003))
-            target->HealBySpell(target, sSpellMgr->GetSpellInfo(12051), target->CountPctFromMaxHealth(20), false);
+        {
+            int32 healthGain = caster->CountPctFromMaxHealth(20);
+            auto spellInfo = sSpellMgr->GetSpellInfo(12051);
+            healthGain = target->SpellHealingBonusDone(target, spellInfo, healthGain, HEAL);
+            healthGain = target->SpellHealingBonusTaken(target, spellInfo, healthGain, HEAL);
+            target->HealBySpell(target, spellInfo, healthGain, false);
+        }
 
     int32 gain = target->ModifyPower(powerType, amount);
 

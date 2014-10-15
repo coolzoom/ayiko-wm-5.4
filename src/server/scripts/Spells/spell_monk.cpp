@@ -90,6 +90,7 @@ enum MonkSpells
     SPELL_MONK_JADE_LIGHTNING_ENERGIZE          = 123333,
     SPELL_MONK_CRACKLING_JADE_SHOCK_BUMP        = 117962,
     SPELL_MONK_POWER_STRIKES_TALENT             = 121817,
+    SPELL_MONK_POWER_STRIKES_BUFF               = 129914,
     SPELL_MONK_CREATE_CHI_SPHERE                = 121286,
     SPELL_MONK_GLYPH_OF_ZEN_FLIGHT              = 125893,
     SPELL_MONK_ZEN_FLIGHT                       = 125883,
@@ -227,86 +228,70 @@ class spell_monk_chi_wave_bolt : public SpellScriptLoader
 
             void HandleOnHit()
             {
-                if (!GetOriginalCaster())
+                auto caster = GetOriginalCaster();
+                auto target = GetHitUnit();
+                if (!caster || !target)
                     return;
 
-                if (Player* player = GetOriginalCaster()->ToPlayer())
+                if (auto player = caster->ToPlayer())
                 {
-                    if (Unit* target = GetHitUnit())
+                    uint8 count = 0;
+                    bool requireFriendly = true;
+
+                    auto chiWave = player->GetAuraEffect(SPELL_MONK_CHI_WAVE_TALENT_AURA, EFFECT_1);
+                    if (chiWave)
                     {
-                        uint8 count = 0;
-                        std::list<Unit*> targetList;
-                        std::vector<uint64> validTargets;
+                        count = chiWave->GetAmount();
 
-                        if (AuraEffect *chiWave = player->GetAuraEffect(SPELL_MONK_CHI_WAVE_TALENT_AURA, EFFECT_1))
+                        // If we start with healing - make sure to trigger unfriendly requirement
+                        if (chiWave->GetUserData() == 1 || (count == 1 && GetSpellInfo()->Id == 132463))
+                            requireFriendly = false;
+
+                        if (count >= 7 || (!GetHitDamage() && !GetHitHeal()))
                         {
-                            count = chiWave->GetAmount();
-
-                            if (count >= 7)
-                            {
-                                player->RemoveAura(SPELL_MONK_CHI_WAVE_TALENT_AURA);
-                                return;
-                            }
-
-                            count++;
-                            chiWave->SetAmount(count);
-                        }
-                        else
-                            return;
-
-                        CellCoord p(Trinity::ComputeCellCoord(target->GetPositionX(), target->GetPositionY()));
-                        Cell cell(p);
-                        cell.SetNoCreate();
-
-                        Trinity::AnyUnitInObjectRangeCheck u_check(player, 20.0f);
-                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(player, targetList, u_check);
-
-                        cell.Visit(p, Trinity::makeWorldVisitor(searcher), *player->GetMap(), *player, 20.0f);
-                        cell.Visit(p, Trinity::makeGridVisitor(searcher), *player->GetMap(), *player, 20.0f);
-
-                        for (auto itr : targetList)
-                        {
-                            if (!itr->IsWithinLOSInMap(player))
-                                continue;
-
-                            if (itr == target)
-                                continue;
-
-                            validTargets.push_back(itr->GetGUID());
-                        }
-
-                        if (validTargets.empty())
-                        {
-                            player->RemoveAurasDueToSpell(SPELL_MONK_CHI_WAVE_TALENT_AURA);
+                            player->RemoveAura(SPELL_MONK_CHI_WAVE_TALENT_AURA);
                             return;
                         }
 
-                        std::random_shuffle(validTargets.begin(), validTargets.end());
+                        count++;
+                        chiWave->SetAmount(count);
+                    }
+                    else
+                        return;
 
-                        if (Unit* newTarget = sObjectAccessor->FindUnit(validTargets.front()))
-                        {
-                            if (player->IsValidAttackTarget(newTarget))
-                                target->CastSpell(newTarget, SPELL_MONK_CHI_WAVE_DAMAGE, true, NULL, NULL, player->GetGUID());
-                            else
-                            {
-                                std::list<Unit*> alliesList;
+                    std::list<Unit*> targetList;
+                    {
+                    Trinity::AnyUnitInObjectRangeCheck u_check(player, 20.f);
+                    Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(player, targetList, u_check);
+                    player->VisitNearbyObject(20.0f, searcher);
+                    }
 
-                                for (auto itr : validTargets)
-                                {
-                                    if (player->IsValidAttackTarget(sObjectAccessor->FindUnit(itr)))
-                                        continue;
+                    targetList.remove_if([player, target, requireFriendly](Unit const *obj)
+                    {
+                        return (!obj->IsWithinLOSInMap(player) || obj == target ||
+                            (requireFriendly ? false : (obj->IsFriendlyTo(player) || !player->IsValidAttackTarget(obj)) || !obj->isInCombat()) );
+                    });
 
-                                    alliesList.push_back(sObjectAccessor->FindUnit(itr));
-                                }
+                    if (targetList.empty())
+                    {
+                        player->RemoveAurasDueToSpell(SPELL_MONK_CHI_WAVE_TALENT_AURA);
+                        return;
+                    }
 
-                                if (alliesList.empty())
-                                    return;
+                    if (requireFriendly)
+                    {
+                        targetList.sort(Trinity::HealthPctOrderPred());
+                        chiWave->SetUserData(1);
+                        target->CastSpell(targetList.front(), SPELL_MONK_CHI_WAVE_HEALING_BOLT, true, NULL, NULL, player->GetGUID());
+                    }
+                    else
+                    {
+                        // Select random target
+                        auto randomTarget = targetList.begin();
+                        std::advance(randomTarget, std::rand() % targetList.size());
 
-                                alliesList.sort(Trinity::HealthPctOrderPred());
-
-                                target->CastSpell(alliesList.front(), SPELL_MONK_CHI_WAVE_HEALING_BOLT, true, NULL, NULL, player->GetGUID());
-                            }
-                        }
+                        target->CastSpell(*randomTarget, SPELL_MONK_CHI_WAVE_DAMAGE, true, NULL, NULL, player->GetGUID());
+                        chiWave->SetUserData(0);
                     }
                 }
             }
@@ -690,13 +675,23 @@ class spell_monk_diffuse_magic : public SpellScriptLoader
                         if (!caster->IsWithinDist(_player, 40.0f))
                             continue;
 
-                        if (aura->GetSpellInfo()->IsPositive())
+                        if (aura->GetSpellInfo()->IsPositive() || aura->IsPassive())
                             continue;
 
                         if (!(aura->GetSpellInfo()->GetSchoolMask() & SPELL_SCHOOL_MASK_MAGIC))
                             continue;
 
-                        _player->AddAura(aura->GetSpellInfo()->Id, caster);
+                        // We need to manually apply Diminishing Return duration
+                        if (auto addedAura = _player->AddAura(aura->GetSpellInfo()->Id, caster))
+                        {
+                            DiminishingGroup m_diminishGroup = GetDiminishingReturnsGroupForSpell(aura->GetSpellInfo(), false);
+                            int32 duration = addedAura->GetMaxDuration();
+                            int32 limitduration = GetDiminishingReturnsLimitDuration(m_diminishGroup, addedAura->GetSpellInfo());
+                            DiminishingLevels m_diminishLevel = caster->GetDiminishing(m_diminishGroup);
+                            float diminishMod = caster->ApplyDiminishingToDuration(m_diminishGroup, duration, _player, m_diminishLevel, limitduration);
+                            addedAura->SetDuration(duration, true);
+                            addedAura->SetMaxDuration(duration);
+                        }
 
                         if (Aura *targetAura = caster->GetAura(aura->GetSpellInfo()->Id, _player->GetGUID()))
                         {
@@ -926,53 +921,67 @@ class spell_monk_glyph_of_zen_flight : public SpellScriptLoader
         }
 };
 
-// Called by Jab - 100780
 // Power Strikes - 121817
 class spell_monk_power_strikes : public SpellScriptLoader
 {
-    public:
-        spell_monk_power_strikes() : SpellScriptLoader("spell_monk_power_strikes") { }
+public:
+    spell_monk_power_strikes() : SpellScriptLoader("spell_monk_power_strikes") { }
 
-        class spell_monk_power_strikes_SpellScript : public SpellScript
+    class script_impl : public AuraScript
+    {
+        PrepareAuraScript(script_impl);
+
+        void OnProc(AuraEffect const *aurEff, ProcEventInfo& eventInfo)
         {
-            PrepareSpellScript(spell_monk_power_strikes_SpellScript)
+            PreventDefaultAction();
 
-            void HandleOnHit()
+            auto caster = GetCaster();
+            auto target = eventInfo.GetProcTarget();
+            if (!caster || !target)
+                return;
+
+            auto player = caster->ToPlayer();
+            if (!player)
+                return;
+
+            if (!player->HasAura(SPELL_MONK_POWER_STRIKES_BUFF))
+                return;
+
+            if (!player->HasSpellCooldown(SPELL_MONK_POWER_STRIKES_TALENT))
             {
-                if (Player* player = GetCaster()->ToPlayer())
+                if (player->GetPower(POWER_CHI) < player->GetMaxPower(POWER_CHI))
                 {
-                    if (Unit* target = GetHitUnit())
-                    {
-                        if (target->GetGUID() != player->GetGUID())
-                        {
-                            if (player->HasAura(SPELL_MONK_POWER_STRIKES_TALENT))
-                            {
-                                if (!player->HasSpellCooldown(SPELL_MONK_POWER_STRIKES_TALENT))
-                                {
-                                    if (player->GetPower(POWER_CHI) < player->GetMaxPower(POWER_CHI))
-                                    {
-                                        player->EnergizeBySpell(player, GetSpellInfo()->Id, 1, POWER_CHI);
-                                        player->AddSpellCooldown(SPELL_MONK_POWER_STRIKES_TALENT, 0, 20 * IN_MILLISECONDS);
-                                    }
-                                    else
-                                        player->CastSpell(player, SPELL_MONK_CREATE_CHI_SPHERE, true);
-                                }
-                            }
-                        }
-                    }
+                    player->EnergizeBySpell(player, GetSpellInfo()->Id, 1, POWER_CHI);
+                    player->AddSpellCooldown(SPELL_MONK_POWER_STRIKES_TALENT, 0, 20 * IN_MILLISECONDS);
+                    player->RemoveAurasDueToSpell(SPELL_MONK_POWER_STRIKES_BUFF);
                 }
+                else
+                    player->CastSpell(player, SPELL_MONK_CREATE_CHI_SPHERE, true);
             }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_monk_power_strikes_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_monk_power_strikes_SpellScript();
         }
+
+        void OnTick(AuraEffect const * aurEff)
+        {
+            auto caster = GetCaster();
+            if (caster && caster->GetTypeId() == TYPEID_PLAYER)
+                if (caster->ToPlayer()->HasSpellCooldown(SPELL_MONK_POWER_STRIKES_TALENT))
+                {
+                    PreventDefaultAction();
+                    const_cast<AuraEffect*>(aurEff)->ResetPeriodic(true);
+                }
+        }
+
+        void Register()
+        {
+            OnEffectProc += AuraEffectProcFn(script_impl::OnProc, EFFECT_1, SPELL_AURA_DUMMY);
+            OnEffectPeriodic += AuraEffectPeriodicFn(script_impl::OnTick, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new script_impl();
+    }
 };
 
 // Crackling Jade Lightning - 117952
@@ -988,8 +997,15 @@ class spell_monk_crackling_jade_lightning : public SpellScriptLoader
             void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (Unit* caster = GetCaster())
-                    if (roll_chance_i(25))
+                {
+                    if (roll_chance_i(30))
                         caster->CastSpell(caster, SPELL_MONK_JADE_LIGHTNING_ENERGIZE, true);
+                    // Hack fix to consume energy per tick
+                    if (caster->GetPower(POWER_ENERGY) >= 20)
+                        caster->EnergizeBySpell(caster, GetId(), -20, POWER_ENERGY);
+                    else
+                        SetDuration(0);
+                }
             }
 
             void OnProc(AuraEffect const *aurEff, ProcEventInfo& eventInfo)
@@ -1254,7 +1270,7 @@ class spell_monk_thunder_focus_tea : public SpellScriptLoader
 
             void Register()
             {
-                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_monk_thunder_focus_tea_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_CASTER_AREA_RAID);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_monk_thunder_focus_tea_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ALLY);
                 OnHit += SpellHitFn(spell_monk_thunder_focus_tea_SpellScript::HandleOnHit);
             }
         };
@@ -1739,49 +1755,32 @@ class spell_monk_zen_sphere : public SpellScriptLoader
     public:
         spell_monk_zen_sphere() : SpellScriptLoader("spell_monk_zen_sphere") { }
 
-        class spell_monk_zen_sphere_SpellScript : public SpellScript
+        class script_impl : public AuraScript
         {
-            PrepareSpellScript(spell_monk_zen_sphere_SpellScript);
+            PrepareAuraScript(script_impl);
 
-            bool active;
-
-            void HandleBeforeHit()
+            void AfterRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
-                active = false;
+                AuraRemoveMode removeMode = GetTargetApplication()->GetRemoveMode();
+                if (removeMode != AURA_REMOVE_BY_ENEMY_SPELL && removeMode != AURA_REMOVE_BY_EXPIRE)
+                    return;
 
-                if (GetCaster()->ToPlayer())
-                    if (Unit* target = GetHitUnit())
-                        if (target->HasAura(SPELL_MONK_ZEN_SPHERE_HEAL))
-                            active = true;
-            }
-
-            void HandleAfterHit()
-            {
-                if (Player* player = GetCaster()->ToPlayer())
+                if (auto caster = GetCaster())
                 {
-                    if (GetHitUnit())
-                    {
-                        if (active)
-                        {
-                            player->CastSpell(player, SPELL_MONK_ZEN_SPHERE_DETONATE_HEAL, true);
-                            player->CastSpell(player, SPELL_MONK_ZEN_SPHERE_DETONATE_DAMAGE, true);
-                            player->RemoveAura(SPELL_MONK_ZEN_SPHERE_HEAL);
-                            active = false;
-                        }
-                    }
+                    caster->CastSpell(GetTarget(), SPELL_MONK_ZEN_SPHERE_DETONATE_HEAL, true);
+                    caster->CastSpell(GetTarget(), SPELL_MONK_ZEN_SPHERE_DETONATE_DAMAGE, true);
                 }
             }
 
             void Register()
             {
-                BeforeHit += SpellHitFn(spell_monk_zen_sphere_SpellScript::HandleBeforeHit);
-                AfterHit += SpellHitFn(spell_monk_zen_sphere_SpellScript::HandleAfterHit);
+                AfterEffectRemove += AuraEffectRemoveFn(script_impl::AfterRemove, EFFECT_0, SPELL_AURA_PERIODIC_HEAL, AURA_EFFECT_HANDLE_REAL);
             }
         };
 
-        SpellScript* GetSpellScript() const
+        AuraScript* GetAuraScript() const
         {
-            return new spell_monk_zen_sphere_SpellScript();
+            return new script_impl();
         }
 };
 
@@ -2526,53 +2525,58 @@ class spell_monk_blackout_kick : public SpellScriptLoader
         {
             PrepareSpellScript(spell_monk_blackout_kick_SpellScript);
 
-            void HandleOnHit(SpellEffIndex /*effIndex*/)
+            void afterHit()
             {
-                if (Unit* caster = GetCaster())
+                auto caster = GetCaster();
+                auto target = GetHitUnit();
+                if (!caster || !target || caster == target)
+                    return;
+
+                uint32 damage = GetHitDamage();
+                if (!damage)
+                    return;
+
+                if (auto player = caster->ToPlayer())
                 {
-                    if (Unit* target = GetHitUnit())
+                    // Second effect by spec : Instant heal or DoT
+                    if (player->GetSpecializationId(player->GetActiveSpec()) == SPEC_MONK_WINDWALKER && player->HasAura(128595))
                     {
-                        // Second effect by spec : Instant heal or DoT
-                        if (caster->GetTypeId() == TYPEID_PLAYER && caster->ToPlayer()->GetSpecializationId(caster->ToPlayer()->GetActiveSpec()) == SPEC_MONK_WINDWALKER
-                            && caster->ToPlayer()->HasAura(128595))
+                        // Your Blackout Kick always deals 20% additional damage over 4 sec regardless of positioning but you're unable to trigger the healing effect.
+                        if (caster->HasAura(SPELL_MONK_GLYPH_OF_BLACKOUT_KICK))
                         {
-                            // Your Blackout Kick always deals 20% additional damage over 4 sec regardless of positioning but you're unable to trigger the healing effect.
-                            if (caster->HasAura(SPELL_MONK_GLYPH_OF_BLACKOUT_KICK))
+                            int32 bp = int32(damage * 0.2f) / 4;
+                            caster->CastCustomSpell(target, SPELL_MONK_BLACKOUT_KICK_DOT, &bp, NULL, NULL, true);
+                        }
+                        else
+                        {
+                            // If behind : 20% damage on DoT
+                            if (target->isInBack(caster))
                             {
-                                int32 bp = int32(GetHitDamage() * 0.2f) / 4;
+                                int32 bp = int32(damage * 0.2f) / 4;
                                 caster->CastCustomSpell(target, SPELL_MONK_BLACKOUT_KICK_DOT, &bp, NULL, NULL, true);
                             }
+                            // else : 20% damage on instant heal
                             else
                             {
-                                // If behind : 20% damage on DoT
-                                if (target->isInBack(caster))
-                                {
-                                    int32 bp = int32(GetHitDamage() * 0.2f) / 4;
-                                    caster->CastCustomSpell(target, SPELL_MONK_BLACKOUT_KICK_DOT, &bp, NULL, NULL, true);
-                                }
-                                // else : 20% damage on instant heal
-                                else
-                                {
-                                    int32 bp = int32(GetHitDamage() * 0.2f);
-                                    caster->CastCustomSpell(caster, SPELL_MONK_BLACKOUT_KICK_HEAL, &bp, NULL, NULL, true);
-                                }
+                                int32 bp = int32(damage * 0.2f);
+                                caster->CastCustomSpell(caster, SPELL_MONK_BLACKOUT_KICK_HEAL, &bp, NULL, NULL, true);
                             }
                         }
-                        // Brewmaster : Training - you gain Shuffle, increasing parry chance and stagger amount by 20%
-                        else if (caster->GetTypeId() == TYPEID_PLAYER && caster->ToPlayer()->GetSpecializationId(caster->ToPlayer()->GetActiveSpec()) == SPEC_MONK_BREWMASTER)
-                        {
-                            if (Aura * const shuffle = caster->GetAura(SPELL_MONK_SHUFFLE))
-                                shuffle->SetDuration(shuffle->GetDuration() + shuffle->GetMaxDuration());
-                            else
-                                caster->CastSpell(caster, SPELL_MONK_SHUFFLE, true);
-                        }
+                    }
+                    // Brewmaster : Training - you gain Shuffle, increasing parry chance and stagger amount by 20%
+                    else if (player->GetSpecializationId(player->GetActiveSpec()) == SPEC_MONK_BREWMASTER)
+                    {
+                        if (Aura * const shuffle = caster->GetAura(SPELL_MONK_SHUFFLE))
+                            shuffle->SetDuration(shuffle->GetDuration() + shuffle->GetMaxDuration());
+                        else
+                            caster->CastSpell(caster, SPELL_MONK_SHUFFLE, true);
                     }
                 }
             }
 
             void Register()
             {
-                OnEffectHitTarget += SpellEffectFn(spell_monk_blackout_kick_SpellScript::HandleOnHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+                AfterHit += SpellHitFn(spell_monk_blackout_kick_SpellScript::afterHit);
             }
         };
 
@@ -2918,15 +2922,18 @@ public:
     {
         PrepareAuraScript(aura_impl);
 
-        void OnProc(AuraEffect const *, ProcEventInfo &eventInfo)
+        void OnProc(AuraEffect const * eff, ProcEventInfo &eventInfo)
         {
             PreventDefaultAction();
-
-            if (!(eventInfo.GetDamageInfo()->GetDamage()))
+            auto caster = GetCaster();
+            if (!caster || !(eventInfo.GetDamageInfo()->GetDamage()))
                 return;
 
-            if (Unit * caster = GetCaster())
-                caster->CastSpell(caster, urand(0, 1) ? SPELL_COMBO_BREAKER_KICK : SPELL_COMBO_BREAKER_PALM);
+            if (roll_chance_i(eff->GetAmount()))
+                caster->CastSpell(caster, SPELL_COMBO_BREAKER_KICK, true);
+
+            if (roll_chance_i(eff->GetAmount()))
+                caster->CastSpell(caster, SPELL_COMBO_BREAKER_PALM, true);
         }
 
         void Register()
@@ -3110,6 +3117,38 @@ public:
     }
 };
 
+// Muscle Memory (139598) - Called by Jab (all versions)
+class spell_monk_muscle_memory : public SpellScriptLoader
+{
+public:
+    spell_monk_muscle_memory() : SpellScriptLoader("spell_monk_muscle_memory") { }
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void HandleEffect(SpellEffIndex /*effIndex*/)
+        {
+            Player * const player = GetCaster()->ToPlayer();
+            if (!player)
+                return;
+
+            if (player->HasSpell(139598))
+                player->CastSpell(player, 139597, true);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_impl::HandleEffect, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
 void AddSC_monk_spell_scripts()
 {
     new spell_monk_fists_of_fury_stun();
@@ -3171,4 +3210,5 @@ void AddSC_monk_spell_scripts()
     new spell_monk_sanctuary_of_the_ox();
     new spell_monk_black_ox_guard_aoe_selector();
     new spell_monk_chi_brew();
+    new spell_monk_muscle_memory();
 }

@@ -440,35 +440,6 @@ public:
     }
 };
 
-// Sudden Death - 52437
-class spell_warr_sudden_death : public SpellScriptLoader
-{
-    public:
-        spell_warr_sudden_death() : SpellScriptLoader("spell_warr_sudden_death") { }
-
-        class spell_warr_sudden_death_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_warr_sudden_death_SpellScript);
-
-            void HandleOnHit()
-            {
-                if (Player* _player = GetCaster()->ToPlayer())
-                    if (_player->HasSpellCooldown(WARRIOR_SPELL_COLOSSUS_SMASH))
-                        _player->RemoveSpellCooldown(WARRIOR_SPELL_COLOSSUS_SMASH, true);
-            }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_warr_sudden_death_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_warr_sudden_death_SpellScript();
-        }
-};
-
 // Berserker Rage - 18499
 class spell_warr_berserker_rage : public SpellScriptLoader
 {
@@ -819,8 +790,15 @@ class spell_warr_heroic_leap_damage : public SpellScriptLoader
 
             void HandleOnHit()
             {
-                if (Unit* caster = GetCaster())
-                    SetHitDamage(int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.5f));
+                if (auto caster = GetCaster())
+                {
+                    int32 damage = int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.5f);
+                    // Seasoned Soldier
+                    if (caster->GetTypeId() == TYPEID_PLAYER && caster->HasAura(12712) && caster->ToPlayer()->IsTwoHandUsed())
+                        AddPct(damage, 25);
+
+                    SetHitDamage(damage);
+                }
             }
 
             void Register()
@@ -1504,6 +1482,130 @@ public:
     }
 };
 
+// 29725 - Sudden Death
+class spell_warr_sudden_death : public SpellScriptLoader
+{
+    enum
+    {
+        SPELL_EXECUTE            = 5308,
+        SPELL_SUDDEN_DEATH_PROC  = 139958,
+    };
+
+public:
+    spell_warr_sudden_death() : SpellScriptLoader("spell_warr_sudden_death") { }
+
+    class aura_impl : public AuraScript
+    {
+        PrepareAuraScript(aura_impl);
+
+        void OnProc(AuraEffect const * eff, ProcEventInfo &eventInfo)
+        {
+            PreventDefaultAction();
+            auto caster = GetCaster();
+
+
+            if (!caster)
+                return;
+
+            auto procSpellInfo = eventInfo.GetSpellInfo();
+
+            if (roll_chance_i(10) && (!procSpellInfo || procSpellInfo->Id == 76858))
+            {
+                caster->CastSpell(caster, 52437, true); // Reset Cooldown of Colossus Smash
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                    caster->ToPlayer()->RemoveSpellCooldown(WARRIOR_SPELL_COLOSSUS_SMASH, true);
+            }
+
+            if (procSpellInfo && procSpellInfo->Id == SPELL_EXECUTE)
+                caster->CastSpell(caster, SPELL_SUDDEN_DEATH_PROC, true);
+        }
+
+        void Register()
+        {
+            OnEffectProc += AuraEffectProcFn(aura_impl::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new aura_impl();
+    }
+};
+
+// 12328, 18765, 35429 - Sweeping Strikes
+class spell_warr_sweeping_strikes : public SpellScriptLoader
+{
+    enum
+    {
+        SPELL_SWEEPING_STRIKES_EXTRA_ATTACK     = 12723,
+        SPELL_GLYPH_OF_SWEEPING_STRIKES         = 58384,
+        SPELL_GLYPH_OF_SWEEPING_STRIKES_PROC    = 124333,
+        SPELL_SLAM                              = 1464,
+        SPELL_SLAM_PROC                         = 146361,
+    };
+
+public:
+    spell_warr_sweeping_strikes() : SpellScriptLoader("spell_warr_sweeping_strikes") { }
+
+    class spell_warr_sweeping_strikes_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_warr_sweeping_strikes_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_SWEEPING_STRIKES_EXTRA_ATTACK) || !sSpellMgr->GetSpellInfo(SPELL_GLYPH_OF_SWEEPING_STRIKES_PROC))
+                return false;
+            return true;
+        }
+
+        bool Load()
+        {
+            _procTarget = NULL;
+            return true;
+        }
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            _procTarget = eventInfo.GetActor()->SelectNearbyTarget(eventInfo.GetProcTarget());
+            return _procTarget;
+        }
+
+        void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+        {
+            auto caster = GetTarget();
+            PreventDefaultAction();
+
+            // Glyph of Sweeping Strikes
+            if (caster->HasAura(SPELL_GLYPH_OF_SWEEPING_STRIKES))
+                caster->CastSpell(caster, SPELL_GLYPH_OF_SWEEPING_STRIKES_PROC, true);
+
+            int32 bp = CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), aurEff->GetAmount());
+            caster->CastCustomSpell(_procTarget, SPELL_SWEEPING_STRIKES_EXTRA_ATTACK, &bp, NULL, NULL, true, NULL, aurEff);
+
+            // Slam bonus
+            if (eventInfo.GetSpellInfo() && eventInfo.GetSpellInfo()->Id == SPELL_SLAM)
+            {
+                int32 slamBp = CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), 35);
+                caster->CastCustomSpell(_procTarget, SPELL_SLAM_PROC, &slamBp, NULL, NULL, true);
+            }
+        }
+
+        void Register()
+        {
+            DoCheckProc += AuraCheckProcFn(spell_warr_sweeping_strikes_AuraScript::CheckProc);
+            OnEffectProc += AuraEffectProcFn(spell_warr_sweeping_strikes_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+
+    private:
+        Unit* _procTarget;
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_warr_sweeping_strikes_AuraScript();
+    }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_victorious_state();
@@ -1517,7 +1619,6 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_staggering_shout();
     new spell_warr_second_wind();
     new spell_warr_unbridled_wrath();
-    new spell_warr_sudden_death();
     new spell_warr_berserker_rage();
     new spell_warr_mocking_banner();
     new spell_warr_enrage_raging_blow();
@@ -1543,4 +1644,6 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_glyph_of_die_by_the_sword();
     new spell_warr_overpower();
     new spell_warr_strikes_of_opportunity();
+    new spell_warr_sudden_death();
+    new spell_warr_sweeping_strikes();
 }

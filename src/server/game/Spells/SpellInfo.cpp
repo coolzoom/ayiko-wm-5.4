@@ -1260,20 +1260,27 @@ bool SpellInfo::NeedsExplicitUnitTarget() const
     return GetExplicitTargetMask() & TARGET_FLAG_UNIT_MASK;
 }
 
-bool SpellInfo::NeedsToBeTriggeredByCaster() const
+bool SpellInfo::NeedsToBeTriggeredByCaster(SpellInfo const *triggeringSpell) const
 {
     if (NeedsExplicitUnitTarget())
         return true;
 
-    for (auto const &spellEffect : Effects)
+    if (triggeringSpell->IsChanneled())
     {
-        if (spellEffect.IsEffect())
+        uint32 mask = 0;
+        for (auto const &spellEffect : Effects)
         {
-            if (spellEffect.TargetA.GetSelectionCategory() == TARGET_SELECT_CATEGORY_CHANNEL
-                    || spellEffect.TargetB.GetSelectionCategory() == TARGET_SELECT_CATEGORY_CHANNEL)
-                return true;
+            if (spellEffect.TargetA.GetTarget() != TARGET_UNIT_CASTER && spellEffect.TargetA.GetTarget() != TARGET_DEST_CASTER
+                && spellEffect.TargetB.GetTarget() != TARGET_UNIT_CASTER && spellEffect.TargetB.GetTarget() != TARGET_DEST_CASTER)
+            {
+                mask |= spellEffect.GetProvidedTargetMask();
+            }
         }
+
+        if (mask & TARGET_FLAG_UNIT_MASK)
+            return true;
     }
+
     return false;
 }
 
@@ -2409,7 +2416,7 @@ uint32 SpellInfo::CalcCastTime(Unit* caster, Spell* spell) const
     if (caster && scalingEntry.CastTimeMax > 0)
     {
         castTime = scalingEntry.CastTimeMax;
-        if (scalingEntry.CastTimeMaxLevel > int32(caster->getLevel()))
+        if (scalingEntry.CastTimeMaxLevel > caster->getLevel())
             castTime = scalingEntry.CastTimeMin + int32(caster->getLevel() - 1) * (scalingEntry.CastTimeMax - scalingEntry.CastTimeMin) / (scalingEntry.CastTimeMaxLevel - 1);
     }
     else if (CastTimeEntry)
@@ -3828,6 +3835,10 @@ bool SpellInfo::DoesIgnoreGlobalCooldown(Unit* caster) const
 {
     switch (Id)
     {
+        case 44572: // Deep Freeze
+            if (caster->HasAura(115710)) // Glyph of Deep Freeze
+                return true;
+            break;
         case 85673: // Word of Glory
         case 114163:// Eternal Flame
         case 136494:// Word of Glory (other)
@@ -3845,6 +3856,7 @@ bool SpellInfo::IsAffectedByResilience() const
 {
     switch (Id)
     {
+        case 12723: // Sweeping Strikes proc
         case 32409: // Glyph of Shadow Word: Death (backfire)
         case 33619: // Glyph of Reflective Shield
         case 49016: // Unholy Frenzy
@@ -3852,6 +3864,7 @@ bool SpellInfo::IsAffectedByResilience() const
         case 110914:// Dark Bargain (DoT)
         case 124280:// Touch of Karma (DoT)
         case 113344: // Bloodbath (DoT)
+        case 148022: // Icicles (damage)
             return false;
         default:
             break;

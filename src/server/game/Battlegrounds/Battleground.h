@@ -606,6 +606,7 @@ class Battleground
         bool CanAwardArenaPoints() const { return m_LevelMin >= BG_AWARD_ARENA_POINTS_MIN_LEVEL; }
 
         virtual uint64 GetFlagPickerGUID(int32 /*team*/ = -1) const { return 0; }
+        virtual bool CanActivateGO(int32 /*entry*/, uint32 /*team*/) const { return true; }
 
     protected:
         void BuildArenaOpponentSpecializations(WorldPacket* data, uint32 team);

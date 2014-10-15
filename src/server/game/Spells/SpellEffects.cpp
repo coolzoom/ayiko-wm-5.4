@@ -635,7 +635,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         // Glyph of Ferocious Bite
                         if (m_caster->HasAura(67598))
                         {
-                            int32 heal_pct = int32((25 + energy) / 10);
+                            int32 heal_pct = int32((25 + energy) / 10 * 2);
                             m_caster->CastCustomSpell(m_caster, 101024, &heal_pct, 0, 0, true);
                         }
 
@@ -848,6 +848,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         damage = CalculateMonkMeleeAttacks(m_caster, 3.0f, 14);
                         break;
                     case 107270:// Spinning Crane Kick
+                    case 148187:// Rushing Jade Wind
                         damage = CalculateMonkMeleeAttacks(m_caster, 1.59f, 14);
                         break;
                     case 107428:// Rising Sun Kick
@@ -1469,13 +1470,13 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
     SpellCastTargets targets;
     if (effectHandleMode == SPELL_EFFECT_HANDLE_LAUNCH_TARGET)
     {
-        if (!spellInfo->NeedsToBeTriggeredByCaster())
+        if (!spellInfo->NeedsToBeTriggeredByCaster(GetSpellInfo()))
             return;
         targets.SetUnitTarget(unitTarget);
     }
     else //if (effectHandleMode == SPELL_EFFECT_HANDLE_LAUNCH)
     {
-        if (spellInfo->NeedsToBeTriggeredByCaster() && (m_spellInfo->Effects[effIndex].GetProvidedTargetMask() & TARGET_FLAG_UNIT_MASK))
+        if (spellInfo->NeedsToBeTriggeredByCaster(GetSpellInfo()) && (m_spellInfo->Effects[effIndex].GetProvidedTargetMask() & TARGET_FLAG_UNIT_MASK))
             return;
 
         if (spellInfo->GetExplicitTargetMask() & TARGET_FLAG_DEST_LOCATION)
@@ -1527,13 +1528,13 @@ void Spell::EffectTriggerMissileSpell(SpellEffIndex effIndex)
     SpellCastTargets targets;
     if (effectHandleMode == SPELL_EFFECT_HANDLE_HIT_TARGET)
     {
-        if (!spellInfo->NeedsToBeTriggeredByCaster())
+        if (!spellInfo->NeedsToBeTriggeredByCaster(GetSpellInfo()))
             return;
         targets.SetUnitTarget(unitTarget);
     }
     else //if (effectHandleMode == SPELL_EFFECT_HANDLE_HIT)
     {
-        if (spellInfo->NeedsToBeTriggeredByCaster() && (m_spellInfo->Effects[effIndex].GetProvidedTargetMask() & TARGET_FLAG_UNIT_MASK))
+        if (spellInfo->NeedsToBeTriggeredByCaster(GetSpellInfo()) && (m_spellInfo->Effects[effIndex].GetProvidedTargetMask() & TARGET_FLAG_UNIT_MASK))
             return;
 
         if (spellInfo->GetExplicitTargetMask() & TARGET_FLAG_DEST_LOCATION)
@@ -1581,6 +1582,14 @@ void Spell::EffectForceCast(SpellEffIndex effIndex)
             }
             break;
         }
+        case 119914: // Felguard's Felstorm hack
+        {
+            if (Pet* pet = m_caster->ToPlayer()->GetPet())
+            {
+                pet->AddCreatureSpellCooldown(119914);
+                m_caster->ToPlayer()->AddSpellCooldown(m_spellInfo->Id, 0, 45 * 1000);
+            }
+        }
     }
 
     if (!unitTarget)
@@ -1598,10 +1607,13 @@ void Spell::EffectForceCast(SpellEffIndex effIndex)
     {
         switch (m_spellInfo->Id)
         {
-            case 52588: // Skeletal Gryphon Escape
             case 48598: // Ride Flamebringer Cue
                 unitTarget->RemoveAura(damage);
                 break;
+            case 52588: // Skeletal Gryphon Escape
+                unitTarget->RemoveAura(damage);
+                unitTarget->CastSpell(unitTarget, spellInfo, true);
+                return;
             case 52463: // Hide In Mine Car
             case 52349: // Overtake
                 unitTarget->CastCustomSpell(unitTarget, spellInfo->Id, &damage, NULL, NULL, true, NULL, NULL, m_originalCasterGUID);
@@ -1681,7 +1693,7 @@ void Spell::EffectJumpDest(SpellEffIndex effIndex)
     switch (m_spellInfo->Id)
     {
         case 49575: // Death Grip
-        case 92832: // Leap of Faith
+        case 110726: // Leap of Faith
             m_caster->GetMotionMaster()->CustomJump(x, y, z, speedXY, speedZ);
             break;
         case 49376:
@@ -2671,6 +2683,10 @@ void Spell::EffectEnergize(SpellEffIndex effIndex)
                     }
                 }
             break;
+        case 33878: // Mangle - Soul of the Forest
+            if (auto soulOfForest = m_caster->GetAuraEffect(114107, EFFECT_4))
+                AddPct(damage, soulOfForest->GetAmount());
+            break;
         default:
             break;
     }
@@ -3205,7 +3221,7 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
         case SUMMON_CATEGORY_WILD:
         case SUMMON_CATEGORY_ALLY:
         case SUMMON_CATEGORY_UNK:
-            if ((properties->Flags & 512) || m_spellInfo->Id == 114192 || m_spellInfo->Id == 114203 || m_spellInfo->Id == 114207)
+            if (properties->Flags & 512)
             {
                 SummonGuardian(effIndex, entry, properties, numSummons);
                 break;
@@ -3225,6 +3241,7 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                     break;
                 case SUMMON_TYPE_TOTEM:
                 case SUMMON_TYPE_STATUE:
+                case SUMMON_TYPE_WAR_BANNER:
                 {
                     summon = m_caster->GetMap()->SummonCreature(entry, *destTarget, properties, duration, m_originalCaster, m_spellInfo->Id);
                     if (!summon || !summon->isTotem())
@@ -3236,6 +3253,8 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                     // Monk statues receive 50% from owner's health
                     else if (properties->Type == SUMMON_TYPE_STATUE)
                         damage = m_caster->CountPctFromMaxHealth(50);
+                    else if (properties->Type == SUMMON_TYPE_WAR_BANNER)
+                        damage = m_caster->CountPctFromMaxHealth(30);
 
                     if (damage)                                            // if not spell info, DB values used
                     {
@@ -4470,13 +4489,24 @@ void Spell::EffectThreat(SpellEffIndex /*effIndex*/)
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
 
+    auto threatTarget = m_caster;
+
     if (!unitTarget || !unitTarget->isAlive() || !m_caster->isAlive())
         return;
 
     if (!unitTarget->CanHaveThreatList())
         return;
 
-    unitTarget->AddThreat(m_caster, float(damage));
+    // Glyph of Distracting Shot - redirect effect to pet
+    if (m_spellInfo->Id == 20736 && m_caster->HasAura(123632))
+    {
+        if (auto const player = m_caster->ToPlayer())
+            if (auto const pet = player->GetPet())
+                if (pet->isAlive())
+                    threatTarget = pet;
+    }
+
+    unitTarget->AddThreat(threatTarget, float(damage));
 }
 
 void Spell::EffectHealMaxHealth(SpellEffIndex /*effIndex*/)
@@ -4512,6 +4542,7 @@ void Spell::EffectInterruptCast(SpellEffIndex effIndex)
             if (m_originalCaster->ToPlayer()->GetComboPoints() != 3)
                 return;
 
+    bool interruptDone = false;
     // TODO: not all spells that used this effect apply cooldown at school spells
     // also exist case: apply cooldown to interrupted cast only and to all spells
     // there is no CURRENT_AUTOREPEAT_SPELL spells that can be interrupted
@@ -4534,9 +4565,13 @@ void Spell::EffectInterruptCast(SpellEffIndex effIndex)
                 }
                 ExecuteLogEffectInterruptCast(effIndex, unitTarget, curSpellInfo->Id);
                 unitTarget->InterruptSpell(CurrentSpellTypes(i), false);
+                interruptDone = true;
             }
         }
     }
+
+    if (interruptDone)
+        m_procEx |= PROC_EX_INTERRUPT;
 }
 
 void Spell::EffectSummonObjectWild(SpellEffIndex effIndex)
@@ -5306,7 +5341,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                         return;
 
                     pet->GetMotionMaster()->MoveCharge(unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ());
-                    player->SendLoot(unitTarget->GetGUID(), LOOT_CORPSE, true);
+                    player->SendLoot(unitTarget->GetGUID(), LOOT_CORPSE);
 
                     break;
                 }
@@ -5427,10 +5462,8 @@ void Spell::EffectAddComboPoints(SpellEffIndex /*effIndex*/)
     {
         // Cheap Shot and Expose Armor hack (they do not trigger aura-proc)
         if (m_spellInfo->Id == 1833 || m_spellInfo->Id == 8647)
-        {
-            int32 basePoints = damage;
-            m_caster->CastCustomSpell(m_caster, 115189, &basePoints, NULL, NULL, true);
-        }
+            for (int32 i = 0; i < damage; ++i)
+                m_caster->CastSpell(m_caster, 115189, true);
     }
 
     m_caster->m_movedPlayer->AddComboPoints(unitTarget, damage, this);

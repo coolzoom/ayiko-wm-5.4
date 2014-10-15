@@ -1169,7 +1169,6 @@ struct CharmInfo
         CharmSpellInfo m_charmspells[4];
         CommandStates   m_CommandState;
         uint32          m_petnumber;
-        bool            m_barInit;
 
         //for restoration after charmed
         ReactStates     m_oldReactState;
@@ -2191,7 +2190,7 @@ class Unit : public WorldObject
 
         RemainingPeriodicAmount GetRemainingPeriodicAmount(uint64 caster, uint32 spellId, AuraType auraType, uint8 effectIndex = 0) const;
         int32 GetSplineDuration() const;
-        
+
         void ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply);
         void ApplySpellDispelImmunity(const SpellInfo* spellProto, DispelType type, bool apply);
         virtual bool IsImmunedToSpell(SpellInfo const* spellInfo);
@@ -2326,7 +2325,7 @@ class Unit : public WorldObject
         Vehicle* GetVehicleKit() const { return m_vehicleKit; }
         Vehicle* GetVehicle() const { return m_vehicle; }
         bool IsOnVehicle() const { return m_vehicle != NULL; }
-        bool IsOnVehicle(const Unit* vehicle) const { return m_vehicle && m_vehicle == vehicle->GetVehicleKit(); }
+        bool IsOnVehicle(Unit const *vehicle) const;
         Unit* GetVehicleBase() const;
         Creature* GetVehicleCreatureBase() const;
         float GetTransOffsetX() const { return m_movementInfo.t_pos.GetPositionX(); }
@@ -2399,10 +2398,6 @@ class Unit : public WorldObject
         Unit* GetSimulacrumTarget();
         void setSimulacrumTarget(uint64 guid) { simulacrumTargetGUID = guid; }
         void removeSimulacrumTarget() { simulacrumTargetGUID = 0; }
-
-        // helpers for Icicles spells
-        uint64 GetIciclesTarget() const { return iciclesTargetGUID; }
-        void SetIciclesTarget(uint64 guid) { iciclesTargetGUID = guid; }
 
     protected:
         explicit Unit(bool isWorldObject);
@@ -2521,7 +2516,6 @@ class Unit : public WorldObject
         TimeTrackerSmall m_movesplineTimer;
 
         uint64 simulacrumTargetGUID;
-        uint64 iciclesTargetGUID;
 
         Diminishing m_Diminishing;
         // Manage all Units that are threatened by us

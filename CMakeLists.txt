@@ -49,6 +49,7 @@ include(CheckPlatform)
 find_package(PCHSupport)
 find_package(ACE REQUIRED)
 find_package(OpenSSL REQUIRED)
+find_package(ZeroMQ REQUIRED)
 find_package(Threads REQUIRED)
 find_package(MySQL REQUIRED)
 

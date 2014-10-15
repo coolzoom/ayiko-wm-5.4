@@ -1010,17 +1010,6 @@ class ObjectMgr
             return _overwriteExtendedCosts;
         }
 
-        uint64 GetCreatureGUIDByLootViewGUID(uint64 lootview) const
-        {
-            auto itr = _lootViewGUID.find(lootview);
-            return itr != _lootViewGUID.end() ? itr->second : 0;
-        }
-
-        void setLootViewGUID(uint64 lootview, uint64 creature)
-        {
-            _lootViewGUID[lootview] = creature;
-        }
-
     private:
         // first free id for selected id type
         uint32 _auctionId;
@@ -1096,8 +1085,6 @@ class ObjectMgr
 
         PhaseDefinitionMap _PhaseDefinitionStore;
         SpellPhaseStore _SpellPhaseStore;
-
-        std::map<uint64, uint64> _lootViewGUID;
 
         ResearchZoneMap _researchZoneMap;
         ResearchLootVector _researchLoot;

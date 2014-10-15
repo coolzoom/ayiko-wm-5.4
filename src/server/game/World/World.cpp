@@ -79,27 +79,125 @@
 #include "CalendarMgr.h"
 #include "BattlefieldMgr.h"
 #include "BlackMarketMgr.h"
+#include "PlayerDump.h"
+#include "Compress.hpp"
+
+#include <zmq.h>
+
+#include <memory>
 
 namespace {
 
 void createXML(uint32 activeClientsNum, uint32 queuedClientsNum, std::string const &upTime)
 {
-    FILE* pxmlFile;
-    pxmlFile = fopen("stats.xml", "w");
-    if (pxmlFile != NULL)
+    if (auto const pxmlFile = fopen("stats.xml", "w"))
     {
         fprintf(pxmlFile, "<?xml version='1.0' encoding='utf-8' ?>"
-                "<root><activeClientsNum>%d</activeClientsNum><queuedClientsNum>%d</queuedClientsNum><upTime>%s</upTime></root>",
+                "<root><activeClientsNum>%u</activeClientsNum><queuedClientsNum>%u</queuedClientsNum><upTime>%s</upTime></root>",
                 activeClientsNum, queuedClientsNum, upTime.c_str());
-        fflush(pxmlFile);
         fclose(pxmlFile);
     }
+}
+
+void ProcessTransferRequests()
+{
+    // Process transfer requests
+    QueryResult result = CharacterDatabase.Query("SELECT id, char_guid FROM "
+                                                 "transfer_requests WHERE processed = 0");
+    if (!result)
+        return;
+
+    Field* fields = NULL;
+    PlayerDumpWriter dump_writer;
+
+    do
+    {
+        fields = result->Fetch();
+
+        uint32 transfer_id = fields[0].GetUInt32();
+
+        uint32 char_guid = fields[1].GetUInt32();
+        uint64 full_guid = MAKE_NEW_GUID(char_guid, 0, HIGHGUID_PLAYER);
+
+        if (Player* plr = ObjectAccessor::FindPlayer(full_guid))
+        {
+            plr->RemoveFromGroup();
+            plr->GetSession()->KickPlayer();
+            plr->GetSession()->LogoutPlayer(false);
+        }
+
+        do
+        {
+            std::string dump;
+            if (!dump_writer.GetDump(char_guid, dump))
+                break;
+
+            size_t orig_size = dump.size() + 1;
+            size_t comp_size = zlib::max_compressed_size(orig_size);
+            std::unique_ptr<uint8[]> comp_data(new uint8[comp_size]);
+
+            if (zlib::compress(comp_data.get(), comp_size, (const uint8*)dump.c_str(),
+                               orig_size, zlib::level::good))
+            {
+                PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_TRANSFER_DATA);
+                stmt->setUInt32(0, char_guid);
+                stmt->setBinary(1, comp_data.get(), comp_size);
+                stmt->setUInt32(2, orig_size);
+                CharacterDatabase.Execute(stmt);
+
+                CharacterDatabase.PExecute("UPDATE characters SET account = 0 WHERE guid = %u", char_guid);
+            }
+        }
+        while (0);
+
+        CharacterDatabase.PExecute("UPDATE transfer_requests SET processed = 1 WHERE id = %u", transfer_id);
+    }
+    while (result->NextRow());
+
+    CharacterDatabase.Execute("DELETE FROM transfer_requests WHERE processed = 1");
+}
+
+void ProcessTransferQueue()
+{
+    // Process transfer queue
+    PreparedQueryResult result = CharacterDatabase.Query(CharacterDatabase.GetPreparedStatement(CHAR_SEL_TRANSFER_DATA));
+    if (!result)
+        return;
+
+    do
+    {
+        Field const * const fields = result->Fetch();
+
+        uint32 id = fields[0].GetUInt32();
+        uint32 acc_id = fields[1].GetUInt32();
+        const uint8 *comp_dump = (const uint8 *)fields[2].GetCString();
+        size_t comp_size = fields[3].GetUInt32();
+        size_t orig_size = fields[4].GetUInt32();
+
+        std::unique_ptr<uint8[]> dump(new uint8[orig_size]);
+        if (zlib::decompress(dump.get(), orig_size, comp_dump, comp_size))
+        {
+            auto const result = PlayerDumpReader::LoadDump((char const *)dump.get(), acc_id, "");
+            if (result.first == DUMP_SUCCESS)
+            {
+                CharacterDatabase.PExecute("UPDATE transfer_incoming_queue "
+                                           "SET new_char_guid = %u WHERE id = %u",
+                                           result.second, id);
+            }
+            else
+            {
+                TC_LOG_ERROR("misc", "Error during pdump loading: %d.", result.first);
+            }
+        }
+    }
+    while (result->NextRow());
 }
 
 } // namespace
 
 /// World constructor
 World::World()
+    : m_zmqContext(zmq_ctx_new()), m_auctionBroker(m_zmqContext)
 {
     m_playerLimit = 0;
     m_allowedSecurityLevel = SEC_PLAYER;
@@ -158,6 +256,9 @@ World::~World()
         delete command;
 
     VMAP::VMapFactory::clear();
+
+    m_auctionBroker.stop();
+    zmq_ctx_destroy(m_zmqContext);
 
     //TODO free addSessQueue
 }
@@ -1874,6 +1975,8 @@ void World::SetInitialWorldSettings()
     m_timers[WUPDATE_MAILBOXQUEUE].SetInterval(2 * MINUTE * IN_MILLISECONDS);
     m_timers[WUPDATE_DELETECHARS].SetInterval(DAY*IN_MILLISECONDS); // check for chars to delete every day
 
+    m_timers[WUPDATE_TRANSFERCHARS].SetInterval(5 * MINUTE * IN_MILLISECONDS);
+
     m_timers[WUPDATE_GUILDSAVE].SetInterval(getIntConfig(CONFIG_GUILD_SAVE_INTERVAL) * MINUTE * IN_MILLISECONDS);
 
     m_timers[WUPDATE_BLACKMARKET].SetInterval(MINUTE * IN_MILLISECONDS);
@@ -1992,6 +2095,14 @@ void World::SetInitialWorldSettings()
 
     TC_LOG_INFO("server.loading", "Caching taxi nodes for levelup...");
     Trinity::PlayerTaxi::CacheLevelupNodes();
+
+    {
+        TC_LOG_INFO("server.loading", "Starting web auction broker agent...");
+
+        std::string endpoint = sConfigMgr->GetStringDefault("AuctionBrokerEndpoint", "tcp://*:8100");
+        if (m_auctionBroker.bind(endpoint.c_str()) != 0)
+            exit(1);
+    }
 
     uint32 startupDuration = GetMSTimeDiffToNow(startupBegin);
 
@@ -2169,6 +2280,8 @@ void World::Update(uint32 diff)
 
     UpdateSessions(diff);
 
+    m_auctionBroker.update();
+
     /// <li> Handle weather updates when the timer has passed
     if (m_timers[WUPDATE_WEATHERS].Passed())
     {
@@ -2192,6 +2305,12 @@ void World::Update(uint32 diff)
         stmt->setUInt32(3, uint32(m_startTime));
 
         LoginDatabase.Execute(stmt);
+    }
+
+    if (m_timers[WUPDATE_MAILBOXQUEUE].Passed())
+    {
+        m_timers[WUPDATE_MAILBOXQUEUE].Reset();
+        ProcessMailboxQueue();
     }
 
     /// <li> Clean logs table
@@ -2255,6 +2374,12 @@ void World::Update(uint32 diff)
         uint32 nextGameEvent = sGameEventMgr->Update();
         m_timers[WUPDATE_EVENTS].SetInterval(nextGameEvent);
         m_timers[WUPDATE_EVENTS].Reset();
+    }
+
+    if (m_timers[WUPDATE_TRANSFERCHARS].Passed())
+    {
+        m_timers[WUPDATE_TRANSFERCHARS].Reset();
+        ProcessRealmTransfers();
     }
 
     if (m_timers[WUPDATE_GUILDSAVE].Passed())
@@ -3050,10 +3175,11 @@ void World::ResetDailyQuests()
 
 void World::ResetCurrencyWeekCap()
 {
+#if 0
     CharacterDatabase.Execute("UPDATE `character_currency` SET `week_count` = 0, `needResetCap` = 1");
     CharacterDatabase.Execute("UPDATE `character_arena_data` SET `prevWeekWins0` = `weekWins0`, `prevWeekWins1` = `weekWins1`, `prevWeekWins2` = `weekWins2`");
     CharacterDatabase.Execute("UPDATE `character_arena_data` SET `bestRatingOfWeek0` = 0, `weekGames0` = 0, `weekWins0` = 0, `bestRatingOfWeek1` = 0, `weekGames1` = 0, `weekWins1` = 0, `bestRatingOfWeek2` = 0, `weekGames2` = 0, `weekWins2` = 0");
-
+#endif
     for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
         if (itr->second->GetPlayer())
             itr->second->GetPlayer()->ResetCurrencyWeekCap();
@@ -3299,10 +3425,79 @@ void World::UpdatePhaseDefinitions()
             itr->second->GetPlayer()->GetPhaseMgr().NotifyStoresReloaded();
 }
 
+void World::ProcessMailboxQueue()
+{
+    //                                                   0   1         2        3        4
+    QueryResult result = CharacterDatabase.Query("SELECT id, receiver, subject, message, money, "
+    //   5      6           7      8           9      10          11     12          13     14
+        "item1, itemcount1, item2, itemcount2, item3, itemcount3, item4, itemcount4, item5, itemcount5 "
+        "FROM mailbox_queue WHERE processed = 0");
+
+    if (!result)
+    {
+        TC_LOG_DEBUG("misc", "MailboxQueue: No pending mail");
+        return;
+    }
+
+    TC_LOG_DEBUG("misc", "MailboxQueue: Processing");
+
+    Field* fields = NULL;
+    do
+    {
+        fields = result->Fetch();
+
+        uint32 id            = fields[0].GetUInt32();
+        uint32 receiver_guid = fields[1].GetUInt32();
+        std::string subject  = fields[2].GetString();
+        std::string body     = fields[3].GetString();
+        uint32 money         = fields[4].GetUInt32();
+
+        MailDraft draft(subject, body);
+        draft.AddMoney(money);
+
+        SQLTransaction trans = CharacterDatabase.BeginTransaction();
+
+        for (int i = 0; i < 5; ++i)
+        {
+            uint32 const itemid = fields[5 + i * 2].GetUInt32();
+            uint8 const itemcount = fields[6 + i * 2].GetUInt8();
+
+            if (Item * const item = Item::CreateItem(itemid, itemcount))
+            {
+                if (int32 randomPropery = Item::GenerateItemRandomPropertyId(itemid))
+                    item->SetItemRandomProperties(randomPropery);
+
+                item->SaveToDB(trans);
+                draft.AddItem(item);
+            }
+        }
+
+        MailSender sender(MAIL_NORMAL, receiver_guid, MAIL_STATIONERY_GM);
+
+        Player* pl = ObjectAccessor::FindPlayer(receiver_guid);
+        MailReceiver receiver(pl, receiver_guid);
+
+        draft.SendMailTo(trans, receiver, sender);
+        trans->PAppend("UPDATE mailbox_queue SET processed = 1 WHERE id = %u", id);
+
+        CharacterDatabase.CommitTransaction(trans);
+    }
+    while (result->NextRow());
+
+    CharacterDatabase.Execute("DELETE FROM mailbox_queue WHERE processed = 1");
+    TC_LOG_DEBUG("misc", "MailboxQueue: Complete");
+}
+
 void World::ReloadRBAC()
 {
     // Pasive reload, we mark the data as invalidated and next time a permission is checked it will be reloaded
     TC_LOG_INFO("rbac", "World::ReloadRBAC()");
     for (SessionMap::iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
         itr->second->ReloadRBACData();
+}
+
+void World::ProcessRealmTransfers()
+{
+    ProcessTransferRequests();
+    ProcessTransferQueue();
 }

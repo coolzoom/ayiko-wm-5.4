@@ -675,9 +675,10 @@ INSERT INTO `creature_model_info` (`modelid`, `bounding_radius`, `combat_reach`,
 (24193, 0, 0, 2, 0);
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` IN (17, 13) AND `SourceEntry` = 52781;
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
-('17','0','52781','0','0','31','0','3','28610','0','0','0','','Persuasive Strike - Scarlet Marksman'),
-('17','0','52781','0','1','31','0','3','28939','0','0','0','','Persuasive Strike - Scarlet Preacher'),
-('17','0','52781','0','2','31','0','3','28940','0','0','0','','Persuasive Strike - Scarlet Crusader');
+('17','0','52781','0','0','31','1','3','28610','0','0','0','','Persuasive Strike - Scarlet Marksman'),
+('17','0','52781','0','1','31','1','3','28939','0','0','0','','Persuasive Strike - Scarlet Preacher'),
+('17','0','52781','0','2','31','1','3','28940','0','0','0','','Persuasive Strike - Scarlet Crusader');
+DELETE FROM `creature` WHERE `id` = 31098 AND `phaseMask` = 384;
 UPDATE `creature_template` SET `ScriptName`='npc_crusade_persuaded' WHERE `entry` IN (28939, 28940, 28610);
 UPDATE `creature_template` SET `ScriptName`='npc_scarlet_courier' WHERE `entry`='29076';
 UPDATE `creature_template` SET `ScriptName`='npc_koltira_deathweaver' WHERE `entry`='28912';
@@ -1446,3 +1447,13 @@ DELETE FROM `creature_addon` WHERE `guid` IN (SELECT `guid` FROM `creature` WHER
 DELETE FROM `creature_template_addon` WHERE `entry` = 28892;
 INSERT INTO `creature_template_addon` (`entry`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES
 (28892, 1, 0, 30, 29266);
+
+-- [SQL] Npcs - Salanar the Horseman gossip requirements corrected (Fixes #7856)
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 15 AND `SourceGroup` = 9739;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ScriptName`, `Comment`) VALUES
+(15, 9739, 0, 0, 0, 9, 0, 12687, 0, 0, 0, "", "Show gossip if on quest");
+
+-- [SQL] Npcs - Fury will no longer be possible to mount by players (Feedback #7855)
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 16 AND `SourceEntry` = 28446;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `ScriptName`, `Comment`) VALUES
+(16, 0, 28446, 2, 23, 4495, 0, 0, "", "Nepenthe-Dismount player from Fury vehicle, hacky solution to disable it");

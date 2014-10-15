@@ -628,14 +628,18 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         caster = _player;
     }
 
-    if (caster->GetTypeId() == TYPEID_PLAYER &&
-        !caster->ToPlayer()->HasActiveSpell(spellId) &&
-         spellId != 101603 && // Hack for Throw Totem, Echo of Baine
-         spellId != 1843) // Hack for disarm. Client sends the spell instead of gameobjectuse.
+    if (caster->GetTypeId() == TYPEID_PLAYER
+            // Hack for Throw Totem, Echo of Baine
+            && spellId != 101603
+            // Hack for disarm. Client sends the spell instead of gameobjectuse.
+            && spellId != 1843
+            // TODO may be add this attribute to spells above?
+            && (spellInfo->AttributesCu & SPELL_ATTR0_CU_SKIP_SPELLBOOCK_CHECK) == 0
+            && !spellInfo->IsAbilityOfSkillType(SKILL_ARCHAEOLOGY))
     {
         // not have spell in spellbook
-        //cheater? kick? ban?
-        if (!spellInfo->IsAbilityOfSkillType(SKILL_ARCHAEOLOGY))
+        // cheater? kick? ban?
+        if (!caster->ToPlayer()->HasActiveSpell(spellId))
         {
             recvPacket.rfinish(); // prevent spam at ignore packet
             return;

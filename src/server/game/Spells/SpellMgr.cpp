@@ -3153,6 +3153,9 @@ void SpellMgr::LoadSpellCustomAttr()
             if (spellInfo->SpellVisual[0] == 3879 || spellInfo->Id == 74117)
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_BACK;
 
+            if (spellInfo->AttributesEx8 & SPELL_ATTR8_RAID_MARKER)
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_SKIP_SPELLBOOCK_CHECK;
+
             ////////////////////////////////////
             ///      DEFINE BINARY SPELLS   ////
             ////////////////////////////////////
@@ -3215,6 +3218,10 @@ void SpellMgr::LoadSpellCustomAttr()
 
             switch (spellInfo->Id)
             {
+                case 67869:
+                case 98322: // Battle for Gilneas capturing spell
+                    spellInfo->AttributesCu |= SPELL_ATTR0_CU_SKIP_SPELLBOOCK_CHECK;
+                    break;
                 case 145518:// Genesis
                     spellInfo->Effects[0].TargetA = TARGET_UNIT_CASTER;
                     spellInfo->Effects[0].TargetB = 0;

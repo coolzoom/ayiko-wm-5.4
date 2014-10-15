@@ -729,7 +729,7 @@ class SpellMgr
             return mSpellsByCategoryStore.equal_range(categoryId);
         }
 
-        SpellAmmoMap const&  GetSpellAmmoMap() const { return mSpellAmmoMap; }
+        SpellAmmoMap const & GetSpellAmmoMap() const { return mSpellAmmoMap; }
 
     // Modifiers
     public:

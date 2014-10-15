@@ -381,7 +381,7 @@ void ObjectMgr::LoadCreatureTemplates()
         return;
     }
 
-    //_creatureTemplateStore.rehash(result->GetRowCount());
+    _creatureTemplateStore.rehash(result->GetRowCount());
     uint32 count = 0;
     do
     {
@@ -498,7 +498,7 @@ void ObjectMgr::LoadCreatureTemplateAddons()
     LoadCreatureAddonEmotes("entry", "creature_template_emote", _creatureTemplateAddonStore);
     LoadCreatureAddonAuras("entry", "creature_template_aura", _creatureTemplateAddonStore);
 
-    //TC_LOG_INFO("server.loading", ">> Loaded creature template addons in %u ms", _creatureTemplateAddonStore.size(), GetMSTimeDiffToNow(oldMSTime));
+    TC_LOG_INFO("server.loading", ">> Loaded " UI64FMTD " creature template addons in %u ms", _creatureTemplateAddonStore.size(), GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::FixCreatureTemplate(CreatureTemplate &cInfo)
@@ -820,7 +820,7 @@ void ObjectMgr::LoadCreatureAddons()
     LoadCreatureAddonEmotes("guid", "creature_emote", _creatureAddonStore);
     LoadCreatureAddonAuras("guid", "creature_aura", _creatureAddonStore);
 
-    //TC_LOG_INFO("server.loading", ">> Loaded creature addons in %u ms", _creatureAddonStore.size(), GetMSTimeDiffToNow(oldMSTime));
+    TC_LOG_INFO("server.loading", ">> Loaded " UI64FMTD " creature addons in %u ms", _creatureAddonStore.size(), GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::loadCreatureTemplateInvisibility()

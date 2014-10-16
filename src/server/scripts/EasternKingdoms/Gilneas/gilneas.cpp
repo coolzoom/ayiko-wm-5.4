@@ -5215,31 +5215,29 @@ class npc_lucius_the_cruel final : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_CATCH_CHANCE_1:
+                            if (Creature* chance = me->FindNearestCreature(NPC_CHANCE_THE_CAT, 20.f))
                             {
-                                if (Creature* chance = me->FindNearestCreature(NPC_CHANCE_THE_CAT, 20.f))
-                                {
-                                    me->SetFacingToObject(chance);
-                                    me->HandleEmoteCommand(EMOTE_ONESHOT_KNEEL);
-                                    chance->DespawnOrUnsummon(1000);
-                                }
-
-                                me->SetHomePosition(*me);
-                                events.ScheduleEvent(EVENT_CATCH_CHANCE_2, 2500);
+                                me->SetFacingToObject(chance);
+                                me->HandleEmoteCommand(EMOTE_ONESHOT_KNEEL);
+                                chance->DespawnOrUnsummon(1000);
                             }
+
+                            me->SetHomePosition(*me);
+                            events.ScheduleEvent(EVENT_CATCH_CHANCE_2, 2500);
                             break;
                         case EVENT_CATCH_CHANCE_2:
                             me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
                             me->SetReactState(REACT_AGGRESSIVE);
                             AttackStart(me->ToTempSummon()->GetSummoner());
                             break;
-                    case EVENT_SUMMON_WHAL:
-                        {
-                            static Position wahlSP = {-2100.673f, 2351.875f, 6.855009f, 3.227739f};
-
-                            if (Creature* wahl = me->SummonCreature(NPC_WAHL, wahlSP))
-                                wahlGUID = wahl->GetGUID();
-                        }
-                        break;
+                        case EVENT_SUMMON_WHAL:
+                            if (wahlGUID == 0)
+                            {
+                                Position const wahlSP = {-2100.673f, 2351.875f, 6.855009f, 3.227739f};
+                                if (Creature* wahl = me->SummonCreature(NPC_WAHL, wahlSP))
+                                    wahlGUID = wahl->GetGUID();
+                            }
+                            break;
                     }
                 }
 

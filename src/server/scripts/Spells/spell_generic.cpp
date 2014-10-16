@@ -33,6 +33,7 @@
 #include "InstanceScript.h"
 #include "Group.h"
 #include "LFGMgr.h"
+#include "Vehicle.h"
 
 class spell_gen_absorb0_hitlimit1 : public SpellScriptLoader
 {
@@ -3838,6 +3839,40 @@ public:
     }
 };
 
+class spell_eject_all_passengers_script_effect final : public SpellScriptLoader
+{
+    class script_impl final : public SpellScript
+    {
+        PrepareSpellScript(script_impl)
+
+        bool Load() final
+        {
+            return GetCaster()->IsVehicle();
+        }
+
+        void HandleScript(SpellEffIndex effIndex)
+        {
+            PreventHitDefaultEffect(effIndex);
+            GetCaster()->GetVehicleKit()->RemoveAllPassengers();
+        }
+
+        void Register() final
+        {
+            OnEffectHitTarget += SpellEffectFn(script_impl::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+public:
+    spell_eject_all_passengers_script_effect()
+        : SpellScriptLoader("spell_eject_all_passengers_script_effect")
+    { }
+
+    SpellScript * GetSpellScript() const final
+    {
+        return new script_impl;
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -3922,4 +3957,5 @@ void AddSC_generic_spell_scripts()
     new spell_gen_brewfest_ram_exhausted();
     new spell_gen_brewfest_dismount_ram();
     new spell_brewfest_ram_race_increase_duration();
+    new spell_eject_all_passengers_script_effect();
 }

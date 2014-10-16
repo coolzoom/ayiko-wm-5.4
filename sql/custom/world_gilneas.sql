@@ -16857,3 +16857,5 @@ VALUES
   (12032, 14078),
   (36332, 14375),
   (43776, 24674);
+
+UPDATE `creature_template` SET `Health_mod` = 1 WHERE `entry` = 50471;

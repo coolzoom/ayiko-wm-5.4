@@ -4613,6 +4613,9 @@ class npc_dark_ranger_thyala final : public CreatureScript
             void Reset() final
             {
                 shooterAI.Reset();
+                events.Reset();
+
+                events.ScheduleEvent(EVENT_KNOCKBACK, urand(2500, 5000));
             }
 
             void DamageTaken(Unit* attacker, uint32 &damage) final
@@ -4630,7 +4633,6 @@ class npc_dark_ranger_thyala final : public CreatureScript
             void EnterCombat(Unit* who) final
             {
                 shooterAI.EnterCombat(who);
-                events.ScheduleEvent(EVENT_KNOCKBACK, urand(2500, 5000));
             }
 
             void JustSummoned(Creature* summoned) final
@@ -4775,10 +4777,7 @@ class spell_call_attack_mastiffs final : public SpellScriptLoader
                     {
                         mastiff->Attack(target, true);
                         mastiff->AddThreat(target, std::numeric_limits<float>::max());
-                        target->GetNearPoint2D(x, y, 2.f, target->GetAngle(mastiff));
-                        Movement::MoveSplineInit init(mastiff);
-                        init.SetVelocity(10.f);
-                        mastiff->GetMotionMaster()->MovePointSmooth(x, y, 5.f, true, &init);
+                        mastiff->GetMotionMaster()->MoveChase(target);
                     }
                 }
             }

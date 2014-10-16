@@ -400,8 +400,8 @@ bool Vehicle::AddPassenger(Unit* unit, int8 seatId)
         }
     }
 
-    if (seat->second.SeatInfo->m_flags && !(seat->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_ALLOW_TURNING))
-        unit->AddUnitState(UNIT_STATE_ONVEHICLE);
+    if (seat->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_PASSENGER_NOT_SELECTABLE)
+        unit->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
     VehicleSeatEntry const* veSeat = seat->second.SeatInfo;
 
@@ -485,9 +485,11 @@ void Vehicle::RemovePassenger(Unit* unit)
         ++_usableSeatNum;
     }
 
-    unit->ClearUnitState(UNIT_STATE_ONVEHICLE);
+    // Remove UNIT_FLAG_NOT_SELECTABLE if passenger did not have it before entering vehicle
+    if (seat->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_PASSENGER_NOT_SELECTABLE /*&& !seat->second.Passenger.IsUnselectable*/)
+        unit->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
-    if (_me->GetTypeId() == TYPEID_UNIT && unit->GetTypeId() == TYPEID_PLAYER && seat->first == 0 && seat->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_CAN_CONTROL)
+    if (_me->GetTypeId() == TYPEID_UNIT && unit->GetTypeId() == TYPEID_PLAYER && seat->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_CAN_CONTROL)
         _me->RemoveCharmedBy(unit);
 
     if (_me->IsInWorld())

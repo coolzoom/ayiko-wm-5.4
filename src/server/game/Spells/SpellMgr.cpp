@@ -3218,7 +3218,179 @@ void SpellMgr::LoadSpellCustomAttr()
 
             switch (spellInfo->Id)
             {
+                // Gilneas
+                case 68087:
+                case 80281:
+                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+                    spellInfo->ExplicitTargetMask = TARGET_FLAG_DEST_LOCATION;
+                    break;
+                case 68070:
+                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+                    spellInfo->Effects[EFFECT_1].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+                    spellInfo->ExplicitTargetMask = TARGET_FLAG_DEST_LOCATION;
+                    break;
+                case 67357:
+                    spellInfo->Effects[EFFECT_0].MiscValue = 250;
+                    break;
+                case 67593:
+                    spellInfo->AttributesCu |= SPELL_ATTR0_CU_DIRECT_DAMAGE;
+                    spellInfo->DmgClass = 3;
+                    break;
+                case 5916:
+                    spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_HITBYSPELL | AURA_INTERRUPT_FLAG_TAKE_DAMAGE;
+                    break;
+                case 68635:
+                case 68636:
+                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_SUMMONER);
+                    break;
+                case 68917:
+                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_SUMMONER);
+                    break;
+                case 68491:
+                    spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_1_YARD);
+                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_CASTER_BACK);
+                    break;
+                case 68682:
+                    spellInfo->Effects[EFFECT_2].Effect = 0;
+                    break;
                 case 67869:
+                    spellInfo->AttributesCu |= SPELL_ATTR0_CU_SKIP_SPELLBOOCK_CHECK;
+                    break;
+                case 70794: // Freezing Trap Effect
+                    spellInfo->Mechanic = MECHANIC_STUN;
+                    break;
+                case 69123: // Curse of the Worgen
+                case 68632:
+                case 68634:
+                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
+                    break;
+                case 72349: // BFGC Complete
+                    spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_60_YARDS);
+                    break;
+                case 70631: // Swing Torch
+                    spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENEMY);
+                    break;
+                case 72247: // Iron Bomb
+                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_DEST_AREA_ENEMY);
+                    break;
+                case 71526: // Plague Barrel Launch
+                case 71804: // Plague Barrel Launch
+                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+                    spellInfo->ExplicitTargetMask = TARGET_FLAG_DEST_LOCATION;
+                    break;
+                case 68591: // Fiery Boulder
+                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+                    spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo();
+                    spellInfo->ExplicitTargetMask = TARGET_FLAG_DEST_LOCATION;
+                    break;
+                case 67063: // Throw Torch
+                    spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_DEST_AREA_ENEMY);
+                    spellInfo->Effects[EFFECT_1].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_DEST_AREA_ENEMY);
+                    spellInfo->Effects[EFFECT_2].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_DEST_AREA_ENEMY);
+                    spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(18);
+                    break;
+                case 20463: // Shoot
+                    spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(74);
+                    spellInfo->RangeEntry = sSpellRangeStore.LookupEntry (74);
+                    break;
+                case 68659: // Launch
+                    spellInfo->Effects[EFFECT_1].Effect = 0;
+                    break;
+                case 72768: // Throw Boulder
+                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+                    spellInfo->ExplicitTargetMask = TARGET_FLAG_DEST_LOCATION;
+                    break;
+                case 70511: // Place Banner
+                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
+                    break;
+                case 81768: // Worgen Combat Transform FX
+                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+                    break;
+                case 68235: // Cannon Fire
+                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
+                    break;
+                case 69255:
+                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
+                    break;
+                case 72767:
+                    spellInfo->Effects[EFFECT_0].BasePoints = 1;
+                    spellInfo->Effects[EFFECT_0].MiscValueB = 64;
+                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
+                    break;
+                case 71036:
+                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
+                    spellInfo->Effects[EFFECT_0].TargetB = 0;
+                    break;
+                case 72774:
+                case 72775:
+                case 72776:
+                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
+                    break;
+                case 72772:
+                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
+                    break;
+                case 70354:
+                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+                    spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_NEARBY_ENTRY);
+                    break;
+                case 85965:
+                    spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
+                    spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
+                    break;
+                case 72116:
+                case 72113:
+                    spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
+                    spellInfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REDIRECTED | SPELL_ATTR1_CANT_BE_REFLECTED;
+                    spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_DEAD | SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+                    spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
+                    spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_UNTARGETABLE | SPELL_ATTR6_CAN_TARGET_INVISIBLE | SPELL_ATTR6_IGNORE_CASTER_AURAS;
+                    break;
+                case 72470:
+                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
+                    spellInfo->Effects[EFFECT_0].TargetB = 0;
+                    break;
+                case 94244:
+                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
+                    spellInfo->Effects[EFFECT_0].TargetB = 0;
+                    break;
+                case 93995:
+                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
+                    break;
+                case 94245:
+                    spellInfo->Effects[EFFECT_1].Effect = 0;
+                    break;
+                case 94252:
+                case 94254:
+                case 94256:
+                case 94246:
+                case 72853:
+                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
+                    spellInfo->Effects[EFFECT_0].TargetB = 0;
+                    break;
+                case 68630:
+                    spellInfo->Effects[EFFECT_2].Effect = 0;
+                    break;
+                case 67805:
+                    spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_UNTARGETABLE | SPELL_ATTR6_CAN_TARGET_INVISIBLE | SPELL_ATTR6_IGNORE_CASTER_AURAS;
+                    break;
+                case 72051:
+                    spellInfo->SchoolMask = SPELL_SCHOOL_MASK_FIRE;
+                    spellInfo->DmgClass = SPELL_DAMAGE_CLASS_MAGIC;
+                    break;
+                case 84874:
+                case 70738:
+                    spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_5_YARDS);
+                    break;
+                case 72009:
+                    spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_5_YARDS);
+                    spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_5_YARDS);
+                    spellInfo->Effects[EFFECT_2].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_5_YARDS);
+                    break;
+                case 84167:
+                case 84171:
+                    spellInfo->AttributesEx6 |= SPELL_ATTR6_CASTABLE_WHILE_ON_VEHICLE | SPELL_ATTR6_CAN_TARGET_UNTARGETABLE | SPELL_ATTR6_CAN_TARGET_INVISIBLE | SPELL_ATTR6_IGNORE_CASTER_AURAS;
+                    break;
+                // Gilneas end
                 case 98322: // Battle for Gilneas capturing spell
                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_SKIP_SPELLBOOCK_CHECK;
                     break;

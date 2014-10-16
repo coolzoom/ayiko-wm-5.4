@@ -16860,3 +16860,8 @@ VALUES
 
 UPDATE `creature_template` SET `Health_mod` = 1 WHERE `entry` = 50471;
 UPDATE `creature_template` SET `ScriptName` = 'npc_swamp_crocolisk' WHERE `entry` = 37078;
+
+DELETE FROM `creature_model_info` WHERE `modelid` = 33949;
+INSERT INTO `creature_model_info` (`modelid`, `bounding_radius`, `combat_reach`, `gender`, `modelid_other_gender`)
+VALUES
+  (33949, 0, 0, 2, 0);

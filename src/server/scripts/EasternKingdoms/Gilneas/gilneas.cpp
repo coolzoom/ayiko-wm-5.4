@@ -118,7 +118,7 @@ enum
 #define    TRAIN_ME_TAILORING                                "Train me in Tailoring."
 #define    TRAIN_ME_ENCHANTING                               "Train me in Enchanting."
 
-class npc_jack_derrington : public CreatureScript
+class npc_jack_derrington final : public CreatureScript
 {
     public:
         npc_jack_derrington() : CreatureScript("npc_jack_derrington") { }
@@ -179,7 +179,7 @@ class npc_jack_derrington : public CreatureScript
             return;
         }
 
-        bool OnGossipHello(Player* player, Creature* creature)
+        bool OnGossipHello(Player* player, Creature* creature) final
         {
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, TELL_ME_ABOUT_GATHERING_AND_MINING_PROFESSIONS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, TELL_ME_ABOUT_CRAFTING_PROFESSIONS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
@@ -187,7 +187,7 @@ class npc_jack_derrington : public CreatureScript
             return true;
         }
 
-        bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
+        bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) final
         {
             player->PlayerTalkClass->ClearMenus();
 
@@ -332,18 +332,18 @@ class npc_jack_derrington : public CreatureScript
         }
 };
 
-class npc_gilneas_tremors_credit : public CreatureScript
+class npc_gilneas_tremors_credit final : public CreatureScript
 {
     public:
         npc_gilneas_tremors_credit() : CreatureScript("npc_gilneas_tremors_credit") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -360,13 +360,13 @@ class npc_gilneas_tremors_credit : public CreatureScript
 
             EventMap events;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 Reset();
                 me->setActive(true);
             }
 
-            void Reset()
+            void Reset() final
             {
                 events.Reset();
                 events.ScheduleEvent(EVENT_TREMOR_1, urand(30000, 150000));
@@ -384,7 +384,7 @@ class npc_gilneas_tremors_credit : public CreatureScript
                             player->CastSpell(player, uiSpellId, false);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 events.Update(diff);
 
@@ -410,14 +410,14 @@ class npc_gilneas_tremors_credit : public CreatureScript
         };
 };
 
-struct Coord
+struct Coord final
 {
     float x;
     float y;
     float z;
 };
 
-struct CrowFlyPosition
+struct CrowFlyPosition final
 {
     Coord FirstCoord;
     Coord SecondCoord;
@@ -439,18 +439,18 @@ const CrowFlyPosition CrowFlyPos[12]=
     {{-1650.79f, 2507.28f, 109.893f},{-1645.28f, 2506.02f, 115.819f}},
 };
 
-class npc_gilnean_crow : public CreatureScript
+class npc_gilnean_crow final : public CreatureScript
 {
     public:
         npc_gilnean_crow() : CreatureScript("npc_gilnean_crow") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature)
                 : ScriptedAI(creature)
@@ -460,7 +460,7 @@ class npc_gilnean_crow : public CreatureScript
             uint8 pointId;
             bool flying;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 FindFlyId();
             }
@@ -510,33 +510,31 @@ class npc_gilnean_crow : public CreatureScript
                 me->DespawnOrUnsummon(me->GetSplineDuration());
             }
 
-            void JustRespawned()
+            void JustRespawned() final
             {
                 flying = false;
             }
 
-            void MoveInLineOfSight(Unit* who)
+            void MoveInLineOfSight(Unit* who) final
             {
-                if (who->GetTypeId() == TYPEID_PLAYER)
-                    if (me->IsWithinDistInMap(who, 15.0f))
-                        if (!flying)
-                            FlyAway();
+                if (!flying && who->GetTypeId() == TYPEID_PLAYER && me->IsWithinDistInMap(who, 15.0f))
+                    FlyAway();
             }
         };
 };
 
-class npc_prince_liam_greymane_phase_1 : public CreatureScript
+class npc_prince_liam_greymane_phase_1 final : public CreatureScript
 {
     public:
         npc_prince_liam_greymane_phase_1() : CreatureScript("npc_prince_liam_greymane_phase_1") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) final
         {
             enum
             {
@@ -552,7 +550,7 @@ class npc_prince_liam_greymane_phase_1 : public CreatureScript
             return false;
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -569,13 +567,13 @@ class npc_prince_liam_greymane_phase_1 : public CreatureScript
 
             EventMap events;
 
-            void Reset()
+            void Reset() final
             {
                 events.Reset();
                 events.ScheduleEvent(EVENT_SAY_INTRO_1, 1000);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 if (!UpdateVictim())
                 {
@@ -608,18 +606,18 @@ class npc_prince_liam_greymane_phase_1 : public CreatureScript
         };
 };
 
-class npc_gilneas_city_guard_gate : public CreatureScript
+class npc_gilneas_city_guard_gate final : public CreatureScript
 {
     public:
         npc_gilneas_city_guard_gate() : CreatureScript("npc_gilneas_city_guard_gate") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -634,7 +632,7 @@ class npc_gilneas_city_guard_gate : public CreatureScript
 
             EventMap events;
 
-            void Reset()
+            void Reset() final
             {
                 events.Reset();
 
@@ -642,7 +640,7 @@ class npc_gilneas_city_guard_gate : public CreatureScript
                     events.ScheduleEvent(EVENT_GUARD_TALK, urand(10000, 20000));
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 if (!UpdateVictim())
                 {
@@ -680,18 +678,18 @@ class npc_gilneas_city_guard_gate : public CreatureScript
         };
 };
 
-class npc_panicked_citizen_gate : public CreatureScript
+class npc_panicked_citizen_gate final : public CreatureScript
 {
     public:
         npc_panicked_citizen_gate() : CreatureScript("npc_panicked_citizen_gate") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -702,12 +700,12 @@ class npc_panicked_citizen_gate : public CreatureScript
 
             EventMap events;
 
-            void Reset()
+            void Reset() final
             {
                 events.ScheduleEvent(EVENT_RANDOM_EMOTE, urand(4000, 8000));
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 if (!UpdateVictim())
                 {
@@ -737,13 +735,13 @@ class npc_panicked_citizen_gate : public CreatureScript
         };
 };
 
-class npc_lieutenant_walden : public CreatureScript
+class npc_lieutenant_walden final : public CreatureScript
 {
     public:
         npc_lieutenant_walden() : CreatureScript("npc_lieutenant_walden") { }
 
     private:
-        bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/)
+        bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/) final
         {
             if (quest->GetQuestId() == QUEST_LOCKDOWN)
             {
@@ -756,7 +754,7 @@ class npc_lieutenant_walden : public CreatureScript
         }
 };
 
-class AggroEvent : public BasicEvent
+class AggroEvent final : public BasicEvent
 {
     public:
         AggroEvent(Creature* creature)
@@ -764,7 +762,7 @@ class AggroEvent : public BasicEvent
         { }
 
     private:
-        bool Execute(uint64 /*time*/, uint32 /*diff*/)
+        bool Execute(uint64 /*time*/, uint32 /*diff*/) final
         {
             if (!_creature->isInCombat())
                 _creature->CastCustomSpell(43263, SPELLVALUE_MAX_TARGETS, 1);
@@ -775,18 +773,18 @@ class AggroEvent : public BasicEvent
         Creature* _creature;
 };
 
-class npc_gilneas_worgen : public CreatureScript
+class npc_gilneas_worgen final : public CreatureScript
 {
     public:
         npc_gilneas_worgen() : CreatureScript("npc_gilneas_worgen") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -797,13 +795,13 @@ class npc_gilneas_worgen : public CreatureScript
 
             bool enrage;
 
-            void Reset()
+            void Reset() final
             {
                 enrage = false;
                 me->m_Events.AddEvent(new AggroEvent(me), me->m_Events.CalculateTime(500));
             }
 
-            void DamageTaken(Unit* attacker, uint32 &damage)
+            void DamageTaken(Unit* attacker, uint32 &damage) final
             {
                 if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->isPet())
                 {
@@ -835,7 +833,7 @@ class npc_gilneas_worgen : public CreatureScript
         };
 };
 
-struct ShooterGuardAI : public ScriptedAI
+struct ShooterGuardAI final : public ScriptedAI
 {
     ShooterGuardAI(Creature* creature, uint32 _shootSpellEntry, float _rangeDist = 30.f)
         : ScriptedAI(creature)
@@ -854,7 +852,7 @@ struct ShooterGuardAI : public ScriptedAI
     float rangeDist;
     bool isActive;
 
-    void Reset()
+    void Reset() final
     {
         events.Reset();
     }
@@ -864,12 +862,12 @@ struct ShooterGuardAI : public ScriptedAI
         isActive = enable;
     }
 
-    void EnterCombat(Unit* /*who*/)
+    void EnterCombat(Unit* /*who*/) final
     {
         events.ScheduleEvent(EVENT_SHOOT, urand(500, 2000));
     }
 
-    void DamageTaken(Unit* attacker, uint32 &damage)
+    void DamageTaken(Unit* attacker, uint32 &damage) final
     {
         if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->isPet())
         {
@@ -881,7 +879,7 @@ struct ShooterGuardAI : public ScriptedAI
         }
     }
 
-    void AttackStart(Unit* who)
+    void AttackStart(Unit* who) final
     {
         bool melee = me->IsWithinMeleeRange(who);
         me->Attack(who, melee);
@@ -966,7 +964,7 @@ enum
     SPELL_GUARD_SHOOT_DEADLY    = 67595,
 };
 
-class npc_gilneas_city_guard : public CreatureScript
+class npc_gilneas_city_guard final : public CreatureScript
 {
     public:
         npc_gilneas_city_guard(const char* scriptName, uint32 shootSpellEntry)
@@ -977,12 +975,12 @@ class npc_gilneas_city_guard : public CreatureScript
     private:
         uint32 _shootSpellEntry;
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature, _shootSpellEntry);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature, uint32 shootSpellEntry)
                 : ScriptedAI(creature)
@@ -991,45 +989,45 @@ class npc_gilneas_city_guard : public CreatureScript
 
             ShooterGuardAI shooterAI;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 Reset();
                 SetCombatMovement(false);
                 me->m_ReactDistance = 30.0f;
             }
 
-            void Reset()
+            void Reset() final
             {
                 shooterAI.Reset();
                 me->m_Events.AddEvent(new AggroEvent(me), me->m_Events.CalculateTime(500));
             }
 
-            void DamageTaken(Unit* attacker, uint32 &damage)
+            void DamageTaken(Unit* attacker, uint32 &damage) final
             {
                 shooterAI.DamageTaken(attacker, damage);
             }
 
-            void EnterCombat(Unit* who)
+            void EnterCombat(Unit* who) final
             {
                 shooterAI.EnterCombat(who);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 shooterAI.UpdateShooterAI(diff);
             }
         };
 };
 
-class npc_prince_liam_greymane_phase_2 : public CreatureScript
+class npc_prince_liam_greymane_phase_2 final : public CreatureScript
 {
     public:
         npc_prince_liam_greymane_phase_2() : CreatureScript("npc_prince_liam_greymane_phase_2") { }
 
     private:
-        bool OnQuestAccept(Player* player, Creature* /*creature*/, const Quest* quest)
+        bool OnQuestAccept(Player* player, Creature* /*creature*/, const Quest* quest) final
         {
-            if (quest->GetQuestId() ==  QUEST_ROYAL_ORDERS)
+            if (quest->GetQuestId() == QUEST_ROYAL_ORDERS)
             {
                 player->RemoveAura(SPELL_INVISIBILITY_DETECTION_1);
                 player->CastSpell(player, SPELL_INVISIBILITY_DETECTION_2, false);
@@ -1039,12 +1037,12 @@ class npc_prince_liam_greymane_phase_2 : public CreatureScript
             return false;
         }
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature)
                 : ScriptedAI(creature)
@@ -1062,31 +1060,31 @@ class npc_prince_liam_greymane_phase_2 : public CreatureScript
             EventMap events;
             ShooterGuardAI shooterAI;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 Reset();
                 SetCombatMovement(false);
                 me->m_ReactDistance = 30.0f;
             }
 
-            void Reset()
+            void Reset() final
             {
                 shooterAI.Reset();
                 events.Reset();
             }
 
-            void DamageTaken(Unit* attacker, uint32 &damage)
+            void DamageTaken(Unit* attacker, uint32 &damage) final
             {
                 shooterAI.DamageTaken(attacker, damage);
             }
 
-            void EnterCombat(Unit* who)
+            void EnterCombat(Unit* who) final
             {
                 shooterAI.EnterCombat(who);
                 events.ScheduleEvent(EVENT_TALK, 1000);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 if (!shooterAI.UpdateShooterAI(diff))
                     return;
@@ -1103,18 +1101,18 @@ class npc_prince_liam_greymane_phase_2 : public CreatureScript
 };
 
 // Quest Evacuate the Merchant Square 14098
-class npc_qems_citizen : public CreatureScript
+class npc_qems_citizen final : public CreatureScript
 {
     public:
         npc_qems_citizen() : CreatureScript("npc_qems_citizen") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl(creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -1128,12 +1126,12 @@ class npc_qems_citizen : public CreatureScript
 
             EventMap events;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 me->SetReactState(REACT_PASSIVE);
             }
 
-            void isSummonedBy(Unit* /*summoner*/)
+            void IsSummonedBy(Unit* /*summoner*/) final
             {
                 if (GameObject* go = me->FindNearestGameObject(195327, 10.f))
                 {
@@ -1159,7 +1157,7 @@ class npc_qems_citizen : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 events.Update(diff);
 
@@ -1192,18 +1190,18 @@ class npc_qems_citizen : public CreatureScript
         };
 };
 
-class npc_qems_worgen : public CreatureScript
+class npc_qems_worgen final : public CreatureScript
 {
     public:
         npc_qems_worgen() : CreatureScript("npc_qems_worgen") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl(creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -1215,18 +1213,18 @@ class npc_qems_worgen : public CreatureScript
 
             EventMap events;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 me->SetReactState(REACT_PASSIVE);
             }
 
-            void isSummonedBy(Unit* /*summoner*/)
+            void IsSummonedBy(Unit* /*summoner*/) final
             {
                 events.ScheduleEvent(EVENT_START_RUN, 1500);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 events.Update(diff);
 
@@ -1285,13 +1283,13 @@ class npc_qems_worgen : public CreatureScript
         };
 };
 
-class spell_gilneas_knocking : public SpellScriptLoader
+class spell_gilneas_knocking final : public SpellScriptLoader
 {
     public:
         spell_gilneas_knocking() : SpellScriptLoader("spell_gilneas_knocking") { }
 
     private:
-        class spell_script_impl : public SpellScript
+        class spell_script_impl final : public SpellScript
         {
             PrepareSpellScript(spell_script_impl)
 
@@ -1319,14 +1317,14 @@ class spell_gilneas_knocking : public SpellScriptLoader
                 }
             }
 
-            void Register()
+            void Register() final
             {
                 OnObjectTargetSelect += SpellObjectTargetSelectFn(spell_script_impl::FilterSingleTarget, EFFECT_0, TARGET_GAMEOBJECT_TARGET);
                 OnEffectHitTarget += SpellEffectFn(spell_script_impl::ExtraEffect, EFFECT_1, SPELL_EFFECT_DUMMY);
             }
         };
 
-        SpellScript * GetSpellScript() const
+        SpellScript * GetSpellScript() const final
         {
             return new spell_script_impl;
         }
@@ -1339,7 +1337,7 @@ enum
     TRAINER_SAY_QUEST_DONE      = 2,
 };
 
-class npc_gilneas_class_trainer : public CreatureScript
+class npc_gilneas_class_trainer final : public CreatureScript
 {
     public:
         npc_gilneas_class_trainer(const char* scriptName, uint32 questEntry)
@@ -1350,7 +1348,7 @@ class npc_gilneas_class_trainer : public CreatureScript
     private:
         uint32 _questEntry;
 
-        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) final
         {
             if (quest->GetQuestId() == _questEntry)
                 if (creature->IsAIEnabled)
@@ -1359,7 +1357,7 @@ class npc_gilneas_class_trainer : public CreatureScript
             return false;
         }
 
-        bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/)
+        bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/) final
         {
             if (quest->GetQuestId() == _questEntry)
                 if (creature->IsAIEnabled)
@@ -1369,13 +1367,13 @@ class npc_gilneas_class_trainer : public CreatureScript
         }
 };
 
-class npc_myriam_spellwaker : public CreatureScript
+class npc_myriam_spellwaker final : public CreatureScript
 {
     public:
         npc_myriam_spellwaker() : CreatureScript("npc_myriam_spellwaker") { }
 
     private:
-        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) final
         {
             if (quest->GetQuestId() == QUEST_ARCANE_MISSILES)
                 if (creature->IsAIEnabled)
@@ -1384,7 +1382,7 @@ class npc_myriam_spellwaker : public CreatureScript
             return false;
         }
 
-        bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/)
+        bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/) final
         {
             if (quest->GetQuestId() == QUEST_ARCANE_MISSILES)
                 if (creature->IsAIEnabled)
@@ -1393,12 +1391,12 @@ class npc_myriam_spellwaker : public CreatureScript
             return false;
         }
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -1411,18 +1409,18 @@ class npc_myriam_spellwaker : public CreatureScript
 
             EventMap events;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 Reset();
                 SetCombatMovement(false);
             }
 
-            void Reset()
+            void Reset() final
             {
                 events.Reset();
             }
 
-            void DamageTaken(Unit* attacker, uint32 &damage)
+            void DamageTaken(Unit* attacker, uint32 &damage) final
             {
                 if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->isPet())
                 {
@@ -1434,12 +1432,12 @@ class npc_myriam_spellwaker : public CreatureScript
                 }
             }
 
-            void EnterCombat(Unit* /*who*/)
+            void EnterCombat(Unit* /*who*/) final
             {
                 events.ScheduleEvent(EVENT_CAST_FROSTBOLT, 250);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 if (!UpdateVictim())
                     return;
@@ -1455,13 +1453,13 @@ class npc_myriam_spellwaker : public CreatureScript
         };
 };
 
-class npc_sergeant_cleese : public CreatureScript
+class npc_sergeant_cleese final : public CreatureScript
 {
     public:
         npc_sergeant_cleese() : CreatureScript("npc_sergeant_cleese") { }
 
     private:
-        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) final
         {
             if (quest->GetQuestId() == QUEST_CHARGE)
                 if (creature->IsAIEnabled)
@@ -1470,7 +1468,7 @@ class npc_sergeant_cleese : public CreatureScript
             return false;
         }
 
-        bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/)
+        bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/) final
         {
             if (quest->GetQuestId() == QUEST_CHARGE)
                 if (creature->IsAIEnabled)
@@ -1479,22 +1477,22 @@ class npc_sergeant_cleese : public CreatureScript
             return false;
         }
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 me->m_ReactDistance = 20.0f;
                 SetCombatMovement(false);
             }
 
-            void DamageTaken(Unit* attacker, uint32 &damage)
+            void DamageTaken(Unit* attacker, uint32 &damage) final
             {
                 if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->isPet())
                 {
@@ -1508,18 +1506,18 @@ class npc_sergeant_cleese : public CreatureScript
         };
 };
 
-class npc_gilneas_worgen_class_quest : public CreatureScript
+class npc_gilneas_worgen_class_quest final : public CreatureScript
 {
     public:
         npc_gilneas_worgen_class_quest() : CreatureScript("npc_gilneas_worgen_class_quest") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -1538,13 +1536,13 @@ class npc_gilneas_worgen_class_quest : public CreatureScript
 
             bool enrage;
 
-            void Reset()
+            void Reset() final
             {
                 enrage = false;
                 me->m_Events.AddEvent(new AggroEvent(me), me->m_Events.CalculateTime(500));
             }
 
-            void SpellHit(Unit* caster, const SpellInfo* spell)
+            void SpellHit(Unit* caster, const SpellInfo* spell) final
             {
                 switch (spell->Id)
                 {
@@ -1561,7 +1559,7 @@ class npc_gilneas_worgen_class_quest : public CreatureScript
                 }
             }
 
-            void DamageTaken(Unit* attacker, uint32 &damage)
+            void DamageTaken(Unit* attacker, uint32 &damage) final
             {
                 if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->isPet())
                 {
@@ -1593,18 +1591,18 @@ class npc_gilneas_worgen_class_quest : public CreatureScript
         };
 };
 
-class npc_wounded_guard_class_quest : public CreatureScript
+class npc_wounded_guard_class_quest final : public CreatureScript
 {
     public:
         npc_wounded_guard_class_quest() : CreatureScript("npc_wounded_guard_class_quest") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -1618,13 +1616,13 @@ class npc_wounded_guard_class_quest : public CreatureScript
 
             bool enrage;
 
-            void Reset()
+            void Reset() final
             {
                 enrage = false;
                 me->m_Events.AddEvent(new AggroEvent(me), me->m_Events.CalculateTime(500));
             }
 
-            void SpellHit(Unit* caster, const SpellInfo* spell)
+            void SpellHit(Unit* caster, const SpellInfo* spell) final
             {
                 switch (spell->Id)
                 {
@@ -1638,7 +1636,7 @@ class npc_wounded_guard_class_quest : public CreatureScript
                 }
             }
 
-            void HealReceived(Unit* /*healer*/, uint32& heal)
+            void HealReceived(Unit* /*healer*/, uint32& heal) final
             {
                 if (me->GetHealthPct() > 50.f)
                     me->SetHealth(1);
@@ -1647,7 +1645,7 @@ class npc_wounded_guard_class_quest : public CreatureScript
 };
 
 // Quest Old Divisions 14157
-class npc_king_genn_greymane_phase_2 : public CreatureScript
+class npc_king_genn_greymane_phase_2 final : public CreatureScript
 {
     public:
         npc_king_genn_greymane_phase_2() : CreatureScript("npc_king_genn_greymane_phase_2") { }
@@ -1666,7 +1664,7 @@ class npc_king_genn_greymane_phase_2 : public CreatureScript
             TYPE_PSC_PLAYER_GUID    = 1,
         };
 
-        class PersonalTalkEvent : public BasicEvent
+        class PersonalTalkEvent final : public BasicEvent
         {
             public:
                 PersonalTalkEvent(Creature* source, uint64 playerGUID, uint8 textId)
@@ -1676,7 +1674,7 @@ class npc_king_genn_greymane_phase_2 : public CreatureScript
                 { }
 
             private:
-                bool Execute(uint64 /*time*/, uint32 /*diff*/)
+                bool Execute(uint64 /*time*/, uint32 /*diff*/) final
                 {
                     if (_source->IsAIEnabled)
                         _source->AI()->Talk(_textId, _playerGUID, true);
@@ -1689,7 +1687,7 @@ class npc_king_genn_greymane_phase_2 : public CreatureScript
                 uint8 _textId;
         };
 
-        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) final
         {
             if (quest->GetQuestId() == QUEST_OLD_DIVISIONS)
             {
@@ -1722,7 +1720,7 @@ enum
     TYPE_QBSHT_WORGEN_ID                    = 1,
 };
 
-struct WorgenPosQBSHTR
+struct WorgenPosQBSHTR final
 {
     uint32 entry;
     Position summonPos;
@@ -1739,7 +1737,7 @@ const WorgenPosQBSHTR WorgenPosRight[5] =
     {NPC_WORGEN_RUNT_R,  {-1624.351f,1499.161f,70.931f,3.94f},{-1636.495f,1488.273f,70.838f,0.f},{-1676.181f,1450.732f,52.288f,0.f}},
 };
 
-struct WorgenPosQBSHTL
+struct WorgenPosQBSHTL final
 {
     uint32 entry;
     Position summonPos;
@@ -1753,18 +1751,18 @@ const WorgenPosQBSHTL WorgenPosLeft[4] =
     {NPC_WORGEN_RUNT_L,  {-1728.381f, 1526.393f, 55.445f, 3.94f}},
 };
 
-class npc_worgen_attacker_right : public CreatureScript
+class npc_worgen_attacker_right final : public CreatureScript
 {
     public:
         npc_worgen_attacker_right() : CreatureScript("npc_worgen_attacker_right") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl(creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -1782,7 +1780,7 @@ class npc_worgen_attacker_right : public CreatureScript
             uint8 worgenId;
             bool enrage;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 Reset();
                 me->SetReactState(REACT_PASSIVE);
@@ -1790,12 +1788,12 @@ class npc_worgen_attacker_right : public CreatureScript
                 me->setActive(true);
             }
 
-            void Reset()
+            void Reset() final
             {
                 enrage = false;
             }
 
-            void SetData(uint32 type, uint32 data)
+            void SetData(uint32 type, uint32 data) final
             {
                 if (type == TYPE_QBSHT_WORGEN_ID)
                 {
@@ -1805,7 +1803,7 @@ class npc_worgen_attacker_right : public CreatureScript
                 }
             }
 
-            void DamageTaken(Unit* attacker, uint32 &damage)
+            void DamageTaken(Unit* attacker, uint32 &damage) final
             {
                 if (!enrage && me->HealthBelowPctDamaged(30, damage))
                 {
@@ -1814,7 +1812,7 @@ class npc_worgen_attacker_right : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 if (!UpdateVictim())
                     return;
@@ -1848,18 +1846,18 @@ class npc_worgen_attacker_right : public CreatureScript
 
 const Position JumpPosLeft = {-1701.914f, 1470.969f, 52.287f, 5.4f};
 
-class npc_worgen_attacker_left : public CreatureScript
+class npc_worgen_attacker_left final : public CreatureScript
 {
     public:
         npc_worgen_attacker_left() : CreatureScript("npc_worgen_attacker_left") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl(creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -1877,7 +1875,7 @@ class npc_worgen_attacker_left : public CreatureScript
             uint8 worgenId;
             bool enrage;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 Reset();
                 me->SetReactState(REACT_PASSIVE);
@@ -1885,18 +1883,18 @@ class npc_worgen_attacker_left : public CreatureScript
                 me->setActive(true);
             }
 
-            void Reset()
+            void Reset() final
             {
                 enrage = false;
             }
 
-            void isSummonedBy(Unit* /*summoner*/)
+            void IsSummonedBy(Unit* /*summoner*/) final
             {
                 me->GetMotionMaster()->MoveSplinePath(1, false, false, 0.f, false, false);
                 events.ScheduleEvent(EVENT_JUMP, me->GetSplineDuration());
             }
 
-            void DamageTaken(Unit* attacker, uint32 &damage)
+            void DamageTaken(Unit* attacker, uint32 &damage) final
             {
                 if (!enrage && me->HealthBelowPctDamaged(30, damage))
                 {
@@ -1905,7 +1903,7 @@ class npc_worgen_attacker_left : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 if (!UpdateVictim())
                     return;
@@ -1937,13 +1935,13 @@ class npc_worgen_attacker_left : public CreatureScript
         };
 };
 
-class npc_lord_darius_crowley : public CreatureScript
+class npc_lord_darius_crowley final : public CreatureScript
 {
     public:
         npc_lord_darius_crowley() : CreatureScript("npc_lord_darius_crowley") { }
 
     private:
-        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) final
         {
             if (quest->GetQuestId() == QUEST_BY_THE_SKIN_OF_HIS_TEETH)
                 creature->CastSpell(player, SPELL_GILNEAS_PRISON_PERIODIC_FORCECAST, true);
@@ -1951,12 +1949,12 @@ class npc_lord_darius_crowley : public CreatureScript
             return false;
         }
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* c)
                 : ScriptedAI(c)
@@ -1979,18 +1977,18 @@ class npc_lord_darius_crowley : public CreatureScript
             EventMap commonEvents;
             bool canSummon;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 SetCombatMovement(false);
                 Reset();
             }
 
-            void Reset()
+            void Reset() final
             {
                 events.Reset();
             }
 
-            void DoAction(int32 const action)
+            void DoAction(int32 const action) final
             {
                 if (action == ACTION_QBSHT_SUMMON_WORGEN && canSummon)
                 {
@@ -2012,18 +2010,18 @@ class npc_lord_darius_crowley : public CreatureScript
                 }
             }
 
-            void JustSummoned(Creature* summoned)
+            void JustSummoned(Creature* summoned) final
             {
                 summoned->Attack(me, false);
             }
 
-            void EnterCombat(Unit* /*who*/)
+            void EnterCombat(Unit* /*who*/) final
             {
                 events.ScheduleEvent(EVENT_LEFT_HOOK, urand(3500, 7000));
                 events.ScheduleEvent(EVENT_DEMORALIZING_SHOUT, 3000);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 commonEvents.Update(diff);
 
@@ -2059,13 +2057,13 @@ class npc_lord_darius_crowley : public CreatureScript
         };
 };
 
-class spell_gilneas_prison_periodic_dummy : public SpellScriptLoader
+class spell_gilneas_prison_periodic_dummy final : public SpellScriptLoader
 {
     public:
         spell_gilneas_prison_periodic_dummy() : SpellScriptLoader("spell_gilneas_prison_periodic_dummy") { }
 
     private:
-        class spell_script_impl : public SpellScript
+        class spell_script_impl final : public SpellScript
         {
             PrepareSpellScript(spell_script_impl)
 
@@ -2093,13 +2091,13 @@ class spell_gilneas_prison_periodic_dummy : public SpellScriptLoader
                 }
             }
 
-            void Register()
+            void Register() final
             {
                 OnEffectHitTarget += SpellEffectFn(spell_script_impl::ExtraEffect, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 
-        SpellScript *GetSpellScript() const
+        SpellScript *GetSpellScript() const final
         {
             return new spell_script_impl();
         }
@@ -2108,18 +2106,18 @@ class spell_gilneas_prison_periodic_dummy : public SpellScriptLoader
 // Quest The Rebel Lord's Arsenal 14159
 const Position JosiahJumpPos = {-1796.63f, 1427.73f, 12.4624f, 0.f};
 
-class npc_josiah_avery_worgen : public CreatureScript
+class npc_josiah_avery_worgen final : public CreatureScript
 {
     public:
         npc_josiah_avery_worgen() : CreatureScript("npc_josiah_avery_worgen") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -2139,19 +2137,19 @@ class npc_josiah_avery_worgen : public CreatureScript
 
             EventMap events;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 ASSERT(me->isSummon());
                 me->SetReactState(REACT_PASSIVE);
                 me->SetPhaseMask(6, true);
             }
 
-            void isSummonedBy(Unit* /*summoner*/)
+            void IsSummonedBy(Unit* /*summoner*/) final
             {
                 events.ScheduleEvent(EVENT_ATTACK_PLAYER, 500);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 events.Update(diff);
 
@@ -2193,18 +2191,18 @@ class npc_josiah_avery_worgen : public CreatureScript
         };
 };
 
-class npc_josiah_event_trigger : public CreatureScript
+class npc_josiah_event_trigger final : public CreatureScript
 {
     public:
         npc_josiah_event_trigger() : CreatureScript("npc_josiah_event_trigger") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -2213,26 +2211,26 @@ class npc_josiah_event_trigger : public CreatureScript
                 TALK_WORGEN_BITE    = 1,
             };
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 ASSERT(me->isSummon());
                 me->SetPhaseMask(6, true);
             }
 
-            void isSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* summoner) final
             {
                 Talk(TALK_WORGEN_BITE, summoner->GetGUID(), true);
             }
         };
 };
 
-class npc_josiah_avery_human : public CreatureScript
+class npc_josiah_avery_human final : public CreatureScript
 {
     public:
         npc_josiah_avery_human() : CreatureScript("npc_josiah_avery_human") { }
 
     private:
-        bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/)
+        bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/) final
         {
             enum
             {
@@ -2248,12 +2246,12 @@ class npc_josiah_avery_human : public CreatureScript
             return false;
         }
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -2266,13 +2264,13 @@ class npc_josiah_avery_human : public CreatureScript
 
             EventMap events;
 
-            void Reset()
+            void Reset() final
             {
                 events.Reset();
                 events.ScheduleEvent(EVENT_YELL_HELP, 1000);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 events.Update(diff);
 
@@ -2290,13 +2288,13 @@ class npc_josiah_avery_human : public CreatureScript
         };
 };
 
-class spell_force_cast_summon_josiah : public SpellScriptLoader
+class spell_force_cast_summon_josiah final : public SpellScriptLoader
 {
     public:
         spell_force_cast_summon_josiah() : SpellScriptLoader("spell_force_cast_summon_josiah") { }
 
     private:
-        class spell_script_impl : public SpellScript
+        class spell_script_impl final : public SpellScript
         {
             PrepareSpellScript(spell_script_impl)
 
@@ -2314,20 +2312,20 @@ class spell_force_cast_summon_josiah : public SpellScriptLoader
                 }
             }
 
-            void Register()
+            void Register() final
             {
                 OnEffectHitTarget += SpellEffectFn(spell_script_impl::Function, EFFECT_0, SPELL_EFFECT_FORCE_CAST);
             }
         };
 
-        SpellScript *GetSpellScript() const
+        SpellScript * GetSpellScript() const final
         {
             return new spell_script_impl();
         }
 };
 
 // Quest From the Shadows 14204
-class npc_lorna_crowley_phase_3 : public CreatureScript
+class npc_lorna_crowley_phase_3 final : public CreatureScript
 {
     public:
         npc_lorna_crowley_phase_3() : CreatureScript("npc_lorna_crowley_phase_3") { }
@@ -2340,7 +2338,7 @@ class npc_lorna_crowley_phase_3 : public CreatureScript
             SPELL_FORCE_DISMISS_PET = 43511,
         };
 
-        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) final
         {
             if (quest->GetQuestId() == QUEST_FROM_THE_SHADOWS)
             {
@@ -2353,7 +2351,7 @@ class npc_lorna_crowley_phase_3 : public CreatureScript
             return false;
         }
 
-        bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/)
+        bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/) final
         {
             if (quest->GetQuestId() == QUEST_FROM_THE_SHADOWS)
                 creature->CastSpell(player, SPELL_FORCE_DISMISS_PET, false, NULL, NULL, player->GetGUID());
@@ -2362,13 +2360,13 @@ class npc_lorna_crowley_phase_3 : public CreatureScript
         }
 };
 
-class spell_quest_dismiss_plaguehound : public SpellScriptLoader
+class spell_quest_dismiss_plaguehound final : public SpellScriptLoader
 {
     public:
         spell_quest_dismiss_plaguehound() : SpellScriptLoader("spell_quest_dismiss_plaguehound") { }
 
     private:
-        class spell_script_impl : public SpellScript
+        class spell_script_impl final : public SpellScript
         {
             PrepareSpellScript(spell_script_impl)
 
@@ -2381,30 +2379,30 @@ class spell_quest_dismiss_plaguehound : public SpellScriptLoader
                         creature->DespawnOrUnsummon();
             }
 
-            void Register()
+            void Register() final
             {
                 OnEffectHitTarget += SpellEffectFn(spell_script_impl::ExtraEffect, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 
-        SpellScript *GetSpellScript() const
+        SpellScript * GetSpellScript() const final
         {
             return new spell_script_impl();
         }
 };
 
-class npc_bloodfang_lurker : public CreatureScript
+class npc_bloodfang_lurker final : public CreatureScript
 {
     public:
         npc_bloodfang_lurker() : CreatureScript("npc_bloodfang_lurker") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -2418,7 +2416,7 @@ class npc_bloodfang_lurker : public CreatureScript
             bool enrage;
             bool frenzy;
 
-            void Reset()
+            void Reset() final
             {
                 enrage = false;
                 frenzy = false;
@@ -2426,7 +2424,7 @@ class npc_bloodfang_lurker : public CreatureScript
                 me->CastSpell(me, SPELL_SHADOWSTALKER_STEALTH, false);
             }
 
-            void SpellHit(Unit* caster, const SpellInfo* spell)
+            void SpellHit(Unit* caster, const SpellInfo* spell) final
             {
                 if (me->HasReactState(REACT_PASSIVE) && me->IsHostileTo(caster))
                 {
@@ -2435,7 +2433,7 @@ class npc_bloodfang_lurker : public CreatureScript
                 }
             }
 
-            void DamageTaken(Unit* attacker, uint32 &damage)
+            void DamageTaken(Unit* attacker, uint32 &damage) final
             {
                 if (me->HasReactState(REACT_PASSIVE))
                     me->SetReactState(REACT_AGGRESSIVE);
@@ -2461,13 +2459,13 @@ class npc_bloodfang_lurker : public CreatureScript
 };
 
 // Quest Save Krennan Aranas 14293
-class npc_king_genn_greymane_phase_3 : public CreatureScript
+class npc_king_genn_greymane_phase_3 final : public CreatureScript
 {
     public:
         npc_king_genn_greymane_phase_3() : CreatureScript("npc_king_genn_greymane_phase_3") { }
 
     private:
-        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) final
         {
             enum
             {
@@ -2480,12 +2478,12 @@ class npc_king_genn_greymane_phase_3 : public CreatureScript
             return false;
         }
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -2498,13 +2496,13 @@ class npc_king_genn_greymane_phase_3 : public CreatureScript
 
             EventMap events;
 
-            void Reset()
+            void Reset() final
             {
                 events.Reset();
                 events.ScheduleEvent(EVENT_RANDOM_SAY, 1000);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 events.Update(diff);
 
@@ -2524,18 +2522,18 @@ class npc_king_genn_greymane_phase_3 : public CreatureScript
 
 const Position GreymaneHorseJumpPos = {-1676.16f, 1346.19f, 15.1349f, 0.f};
 
-class npc_vehicle_genn_horse : public CreatureScript
+class npc_vehicle_genn_horse final : public CreatureScript
 {
     public:
         npc_vehicle_genn_horse() : CreatureScript("npc_vehicle_genn_horse") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl(creature);
         }
 
-        struct creature_script_impl : public VehicleAI
+        struct creature_script_impl final : public VehicleAI
         {
             creature_script_impl(Creature* creature) : VehicleAI(creature) { }
 
@@ -2558,18 +2556,18 @@ class npc_vehicle_genn_horse : public CreatureScript
 
             EventMap events;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 ASSERT(me->isSummon());
                 me->SetControlled(true, UNIT_STATE_ROOT);
             }
 
-            void isSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* summoner) final
             {
                 events.ScheduleEvent(EVENT_START_RIDE, 2000);
             }
 
-            void PassengerBoarded(Unit* who, int8 /*seatId*/, bool apply)
+            void PassengerBoarded(Unit* who, int8 /*seatId*/, bool apply) final
             {
                 if (apply)
                 {
@@ -2583,7 +2581,7 @@ class npc_vehicle_genn_horse : public CreatureScript
                     me->CastSpell(who, SPELL_UPDATE_CATHEDRAL_AURAS_AND_SANCTUARY, false);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 events.Update(diff);
 
@@ -2621,18 +2619,18 @@ class npc_vehicle_genn_horse : public CreatureScript
         };
 };
 
-class npc_saved_aranas : public CreatureScript
+class npc_saved_aranas final : public CreatureScript
 {
     public:
         npc_saved_aranas() : CreatureScript("npc_saved_aranas") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -2644,14 +2642,14 @@ class npc_saved_aranas : public CreatureScript
                 TEXT_THANKS             = 1,
             };
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 ASSERT(me->isSummon());
                 me->SetReactState(REACT_PASSIVE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             }
 
-            void isSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* summoner) final
             {
                 me->SetSeerGUID(summoner->GetGUID());
                 me->SetVisible(false);
@@ -2671,13 +2669,13 @@ class npc_saved_aranas : public CreatureScript
         };
 };
 
-class npc_lord_godfrey_phase_3 : public CreatureScript
+class npc_lord_godfrey_phase_3 final : public CreatureScript
 {
     public:
         npc_lord_godfrey_phase_3() : CreatureScript("npc_lord_godfrey_phase_3") { }
 
     private:
-        bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/)
+        bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/) final
         {
             enum
             {
@@ -2717,18 +2715,18 @@ const Position WorgenSummonPosPhase4[13] =
 
 const float WorgenAttackCoord[3] = {-1751.874f, 1377.457f, 19.930f};
 
-class npc_cannon_camera : public CreatureScript
+class npc_cannon_camera final : public CreatureScript
 {
     public:
         npc_cannon_camera() : CreatureScript("npc_cannon_camera") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature)
                 : ScriptedAI(creature)
@@ -2756,7 +2754,7 @@ class npc_cannon_camera : public CreatureScript
                     cannon->CastSpell((Unit*)NULL, SPELL_CANNON_FIRE, false);
             }
 
-            void PassengerBoarded(Unit* /*who*/, int8 /*seatId*/, bool apply)
+            void PassengerBoarded(Unit* /*who*/, int8 /*seatId*/, bool apply) final
             {
                 if (apply)
                     events.ScheduleEvent(EVENT_SUMMON_WORGENS, 1000);
@@ -2773,7 +2771,7 @@ class npc_cannon_camera : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 events.Update(diff);
 
@@ -2808,13 +2806,13 @@ class npc_cannon_camera : public CreatureScript
         };
 };
 
-class spell_forcecast_cannon_camera : public SpellScriptLoader
+class spell_forcecast_cannon_camera final : public SpellScriptLoader
 {
     public:
         spell_forcecast_cannon_camera() : SpellScriptLoader("spell_forcecast_cannon_camera") { }
 
     private:
-        class spell_script_impl : public SpellScript
+        class spell_script_impl final : public SpellScript
         {
             PrepareSpellScript(spell_script_impl)
 
@@ -2831,30 +2829,30 @@ class spell_forcecast_cannon_camera : public SpellScriptLoader
                 }
             }
 
-            void Register()
+            void Register() final
             {
                 OnEffectHitTarget += SpellEffectFn(spell_script_impl::Function, EFFECT_0, SPELL_EFFECT_FORCE_CAST);
             }
         };
 
-        SpellScript *GetSpellScript() const
+        SpellScript *GetSpellScript() const final
         {
             return new spell_script_impl();
         }
 };
 
-class npc_gilneas_city_guard_phase_4 : public CreatureScript
+class npc_gilneas_city_guard_phase_4 final : public CreatureScript
 {
     public:
         npc_gilneas_city_guard_phase_4() : CreatureScript("npc_gilneas_city_guard_phase_4") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature)
                 : ScriptedAI(creature)
@@ -2872,30 +2870,30 @@ class npc_gilneas_city_guard_phase_4 : public CreatureScript
             EventMap events;
             ShooterGuardAI shooterAI;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 SetCombatMovement(false);
                 me->m_ReactDistance = 30.0f;
             }
 
-            void Reset()
+            void Reset() final
             {
                 shooterAI.Reset();
                 events.Reset();
             }
 
-            void DamageTaken(Unit* attacker, uint32 &damage)
+            void DamageTaken(Unit* attacker, uint32 &damage) final
             {
                 shooterAI.DamageTaken(attacker, damage);
             }
 
-            void EnterCombat(Unit* who)
+            void EnterCombat(Unit* who) final
             {
                 shooterAI.EnterCombat(who);
                 events.ScheduleEvent(EVENT_TALK, urand(5000, 50000));
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 if (!shooterAI.UpdateShooterAI(diff))
                     return;
@@ -2917,7 +2915,7 @@ enum
     QUEST_TIME_TO_REGROUP_EVENT_ID  = 10014294,
 };
 
-class npc_king_genn_greymane_phase_4 : public CreatureScript
+class npc_king_genn_greymane_phase_4 final : public CreatureScript
 {
     public:
         npc_king_genn_greymane_phase_4() : CreatureScript("npc_king_genn_greymane_phase_4") { }
@@ -2944,7 +2942,7 @@ class npc_king_genn_greymane_phase_4 : public CreatureScript
             NPC_KING_GENN_GREYMANE      = 35911,
         };
 
-        class PersonalTalkEvent : public BasicEvent
+        class PersonalTalkEvent final : public BasicEvent
         {
             public:
                 PersonalTalkEvent(Player* player, uint8 eventId)
@@ -2953,7 +2951,7 @@ class npc_king_genn_greymane_phase_4 : public CreatureScript
                 { }
 
             private:
-                bool Execute(uint64 /*time*/, uint32 /*diff*/)
+                bool Execute(uint64 /*time*/, uint32 /*diff*/) final
                 {
                     switch (_eventId)
                     {
@@ -3018,7 +3016,7 @@ class npc_king_genn_greymane_phase_4 : public CreatureScript
                 uint8 _eventId;
         };
 
-        bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/)
+        bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/) final
         {
             if (quest->GetQuestId() == QUEST_TIME_TO_REGROUP)
                 player->m_Events.AddEvent(new PersonalTalkEvent(player, EVENT_GENN_SAY_IF), player->m_Events.CalculateTime(500), true, QUEST_TIME_TO_REGROUP_EVENT_ID);
@@ -3028,13 +3026,13 @@ class npc_king_genn_greymane_phase_4 : public CreatureScript
 };
 
 // Quest Sacrifices 14212
-class spell_forcecast_summon_crowleys_horse : public SpellScriptLoader
+class spell_forcecast_summon_crowleys_horse final : public SpellScriptLoader
 {
     public:
         spell_forcecast_summon_crowleys_horse() : SpellScriptLoader("spell_forcecast_summon_crowleys_horse") { }
 
     private:
-        class spell_script_impl : public SpellScript
+        class spell_script_impl final : public SpellScript
         {
             PrepareSpellScript(spell_script_impl)
 
@@ -3050,13 +3048,13 @@ class spell_forcecast_summon_crowleys_horse : public SpellScriptLoader
                 }
             }
 
-            void Register()
+            void Register() final
             {
                 OnEffectHitTarget += SpellEffectFn(spell_script_impl::Function, EFFECT_0, SPELL_EFFECT_FORCE_CAST);
             }
         };
 
-        SpellScript *GetSpellScript() const
+        SpellScript *GetSpellScript() const final
         {
             return new spell_script_impl();
         }
@@ -3069,18 +3067,18 @@ const Position JumpPoints[3]=
     {-1566.710f, 1708.040f, 20.48490f, 0.f},
 };
 
-class npc_crowley_horse_first_round : public CreatureScript
+class npc_crowley_horse_first_round final : public CreatureScript
 {
     public:
         npc_crowley_horse_first_round() : CreatureScript("npc_crowley_horse_first_round") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl(creature);
         }
 
-        struct creature_script_impl : public VehicleAI
+        struct creature_script_impl final : public VehicleAI
         {
             creature_script_impl(Creature* creature) : VehicleAI(creature) { }
 
@@ -3104,14 +3102,14 @@ class npc_crowley_horse_first_round : public CreatureScript
 
             EventMap events;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 ASSERT(me->isSummon());
                 me->SetReactState(REACT_PASSIVE);
                 me->SetControlled(true, UNIT_STATE_ROOT);
             }
 
-            void isSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* summoner) final
             {
                 if (Creature* crowley = summoner->SummonCreature(NPC_CROWLEY, *me))
                 {
@@ -3123,7 +3121,7 @@ class npc_crowley_horse_first_round : public CreatureScript
                 events.ScheduleEvent(EVENT_BEGIN, 1000);
             }
 
-            void PassengerBoarded(Unit* who, int8 /*seatId*/, bool apply)
+            void PassengerBoarded(Unit* who, int8 /*seatId*/, bool apply) final
             {
                 if (!apply)
                     if (Creature* crowley = who->ToCreature())
@@ -3139,7 +3137,7 @@ class npc_crowley_horse_first_round : public CreatureScript
                                 crowley->AI()->Talk(textId, me->ToTempSummon()->GetSummonerGUID(), true);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 events.Update(diff);
 
@@ -3183,18 +3181,18 @@ class npc_crowley_horse_first_round : public CreatureScript
         };
 };
 
-class npc_crowley_horse_second_round : public CreatureScript
+class npc_crowley_horse_second_round final : public CreatureScript
 {
     public:
         npc_crowley_horse_second_round() : CreatureScript("npc_crowley_horse_second_round") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public VehicleAI
+        struct creature_script_impl final : public VehicleAI
         {
             creature_script_impl(Creature* creature) : VehicleAI(creature) { }
 
@@ -3208,19 +3206,19 @@ class npc_crowley_horse_second_round : public CreatureScript
 
             EventMap events;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 ASSERT(me->isSummon());
                 me->SetReactState(REACT_PASSIVE);
                 me->SetControlled(true, UNIT_STATE_ROOT);
             }
 
-            void isSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* summoner) final
             {
                 events.ScheduleEvent(EVENT_START_RUN, 1000);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 events.Update(diff);
 
@@ -3242,18 +3240,18 @@ class npc_crowley_horse_second_round : public CreatureScript
         };
 };
 
-class npc_bloodfang_stalker : public CreatureScript
+class npc_bloodfang_stalker final : public CreatureScript
 {
     public:
         npc_bloodfang_stalker() : CreatureScript("npc_bloodfang_stalker") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -3272,7 +3270,7 @@ class npc_bloodfang_stalker : public CreatureScript
             bool enrage;
             bool inFire;
 
-            void DamageTaken(Unit* attacker, uint32 &damage)
+            void DamageTaken(Unit* attacker, uint32 &damage) final
             {
                 if (!enrage && me->HealthBelowPctDamaged(30, damage))
                 {
@@ -3281,20 +3279,20 @@ class npc_bloodfang_stalker : public CreatureScript
                 }
             }
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 Reset();
                 me->m_ReactDistance = 10.0f;
             }
 
-            void Reset()
+            void Reset() final
             {
                 enrage = false;
                 inFire = false;
                 events.Reset();
             }
 
-            void SpellHit(Unit* caster, const SpellInfo* spell)
+            void SpellHit(Unit* caster, const SpellInfo* spell) final
             {
                 if (!inFire && spell->Id == SPELL_THROW_TORCH)
                 {
@@ -3312,7 +3310,7 @@ class npc_bloodfang_stalker : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 events.Update(diff);
 
@@ -3334,22 +3332,22 @@ class npc_bloodfang_stalker : public CreatureScript
         };
 };
 
-class npc_rebel_cannon_phase_4 : public CreatureScript
+class npc_rebel_cannon_phase_4 final : public CreatureScript
 {
     public:
         npc_rebel_cannon_phase_4() : CreatureScript("npc_rebel_cannon_phase_4") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public VehicleAI
+        struct creature_script_impl final : public VehicleAI
         {
             creature_script_impl(Creature* creature) : VehicleAI(creature) { }
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 me->SetControlled(true, UNIT_STATE_ROOT);
                 me->AddExtraUnitMovementFlag(MOVEMENTFLAG2_FULL_SPEED_PITCHING);
@@ -3359,7 +3357,7 @@ class npc_rebel_cannon_phase_4 : public CreatureScript
 };
 
 // Quest Last Stand 14222 && Last Chance at Humanity 14375
-class npc_lord_darius_crowley_phase_5 : public CreatureScript
+class npc_lord_darius_crowley_phase_5 final : public CreatureScript
 {
     public:
         npc_lord_darius_crowley_phase_5() : CreatureScript("npc_lord_darius_crowley_phase_5") { }
@@ -3374,7 +3372,7 @@ class npc_lord_darius_crowley_phase_5 : public CreatureScript
             SPELL_LAST_STAND_COMPLETE   = 72799,
         };
 
-        bool OnQuestReward(Player* player, Creature* /*creature*/, Quest const* quest, uint32 /*opt*/)
+        bool OnQuestReward(Player* player, Creature* /*creature*/, Quest const* quest, uint32 /*opt*/) final
         {
             if (quest->GetQuestId() == QUEST_LAST_STAND)
             {
@@ -3395,13 +3393,13 @@ class npc_lord_darius_crowley_phase_5 : public CreatureScript
         }
 };
 
-class npc_king_genn_greymane_last_stand : public CreatureScript
+class npc_king_genn_greymane_last_stand final : public CreatureScript
 {
     public:
         npc_king_genn_greymane_last_stand() : CreatureScript("npc_king_genn_greymane_last_stand") { }
 
     private:
-        bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/)
+        bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/) final
         {
             enum
             {
@@ -3425,9 +3423,9 @@ class npc_king_genn_greymane_last_stand : public CreatureScript
         }
 };
 
-class spell_worgen_intro_completion : public SpellScriptLoader
+class spell_worgen_intro_completion final : public SpellScriptLoader
 {
-    struct SeerCheck : public std::unary_function<WorldObject const *, bool>
+    struct SeerCheck final : public std::unary_function<WorldObject const *, bool>
     {
         explicit SeerCheck(uint64 guid)
             : casterGUID(guid)
@@ -3449,7 +3447,7 @@ class spell_worgen_intro_completion : public SpellScriptLoader
         spell_worgen_intro_completion() : SpellScriptLoader("spell_worgen_intro_completion") { }
 
     private:
-        class spell_script_impl : public SpellScript
+        class spell_script_impl final : public SpellScript
         {
             PrepareSpellScript(spell_script_impl)
 
@@ -3467,26 +3465,26 @@ class spell_worgen_intro_completion : public SpellScriptLoader
                     target->DespawnOrUnsummon();
             }
 
-            void Register()
+            void Register() final
             {
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_script_impl::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENTRY);
                 OnEffectHitTarget += SpellEffectFn(spell_script_impl::ExtraEffect, EFFECT_1, SPELL_EFFECT_DUMMY);
             }
         };
 
-        SpellScript *GetSpellScript() const
+        SpellScript *GetSpellScript() const final
         {
             return new spell_script_impl();
         }
 };
 
-class spell_curse_of_the_worgen_invis : public SpellScriptLoader
+class spell_curse_of_the_worgen_invis final : public SpellScriptLoader
 {
     public:
         spell_curse_of_the_worgen_invis() : SpellScriptLoader("spell_curse_of_the_worgen_invis") { }
 
     private:
-        class SummonAranasEvent : public BasicEvent
+        class SummonAranasEvent final : public BasicEvent
         {
             public:
                 SummonAranasEvent(Unit* unit)
@@ -3494,7 +3492,7 @@ class spell_curse_of_the_worgen_invis : public SpellScriptLoader
                 { }
 
             private:
-                bool Execute(uint64 /*time*/, uint32 /*diff*/)
+                bool Execute(uint64 /*time*/, uint32 /*diff*/) final
                 {
                     enum
                     {
@@ -3508,7 +3506,7 @@ class spell_curse_of_the_worgen_invis : public SpellScriptLoader
                 Unit* _unit;
         };
 
-        class aura_script_impl : public AuraScript
+        class aura_script_impl final : public AuraScript
         {
             PrepareAuraScript(aura_script_impl);
 
@@ -3518,30 +3516,30 @@ class spell_curse_of_the_worgen_invis : public SpellScriptLoader
                     target->m_Events.AddEvent(new SummonAranasEvent(target), target->m_Events.CalculateTime(500));
             }
 
-            void Register()
+            void Register() final
             {
                 AfterEffectApply += AuraEffectApplyFn(aura_script_impl::ExtraEffect, EFFECT_1, SPELL_AURA_LINKED, AURA_EFFECT_HANDLE_REAL);
             }
         };
 
-        AuraScript* GetAuraScript() const
+        AuraScript* GetAuraScript() const final
         {
             return new aura_script_impl();
         }
 };
 
-class npc_krennan_aranas_last_stand : public CreatureScript
+class npc_krennan_aranas_last_stand final : public CreatureScript
 {
     public:
         npc_krennan_aranas_last_stand() : CreatureScript("npc_krennan_aranas_last_stand") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature)
                 : ScriptedAI(creature)
@@ -3581,13 +3579,13 @@ class npc_krennan_aranas_last_stand : public CreatureScript
             uint64 godfreyGUID;
             uint64 greymaneGUID;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 ASSERT(me->isSummon());
                 me->setActive(true);
             }
 
-            void isSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* summoner) final
             {
                 me->SetSeerGUID(summoner->GetGUID());
                 me->SetVisible(false);
@@ -3595,7 +3593,7 @@ class npc_krennan_aranas_last_stand : public CreatureScript
                 events.ScheduleEvent(EVENT_CHECK_PLAYER_MOVIE, 500);
             }
 
-            void JustSummoned(Creature* summoned)
+            void JustSummoned(Creature* summoned) final
             {
                 switch (summoned->GetEntry())
                 {
@@ -3612,7 +3610,7 @@ class npc_krennan_aranas_last_stand : public CreatureScript
                 summoned->SetVisible(false);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 events.Update(diff);
 
@@ -3737,13 +3735,13 @@ class npc_krennan_aranas_last_stand : public CreatureScript
 };
 
 // Quest In Need of Ingredients 14320
-class go_crate_of_mandrake_essence : public GameObjectScript
+class go_crate_of_mandrake_essence final : public GameObjectScript
 {
     public:
         go_crate_of_mandrake_essence() : GameObjectScript("go_crate_of_mandrake_essence") { }
 
     private:
-        bool OnQuestReward(Player* player, GameObject* /*go*/, Quest const* quest, uint32 /*opt*/)
+        bool OnQuestReward(Player* player, GameObject* /*go*/, Quest const* quest, uint32 /*opt*/) final
         {
             enum
             {
@@ -3758,13 +3756,13 @@ class go_crate_of_mandrake_essence : public GameObjectScript
 };
 
 // Quest Invasion 14321
-class npc_slain_watchman : public CreatureScript
+class npc_slain_watchman final : public CreatureScript
 {
     public:
         npc_slain_watchman() : CreatureScript("npc_slain_watchman") { }
 
     private:
-        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) final
         {
             enum
             {
@@ -3778,13 +3776,13 @@ class npc_slain_watchman : public CreatureScript
         }
 };
 
-class npc_gwen_armstead_phase_6 : public CreatureScript
+class npc_gwen_armstead_phase_6 final : public CreatureScript
 {
     public:
         npc_gwen_armstead_phase_6() : CreatureScript("npc_gwen_armstead_phase_6") { }
 
     private:
-        bool OnQuestReward(Player* player, Creature* /*creature*/, Quest const* quest, uint32 /*opt*/)
+        bool OnQuestReward(Player* player, Creature* /*creature*/, Quest const* quest, uint32 /*opt*/) final
         {
             if (quest->GetQuestId() == QUEST_INVASION)
             {
@@ -3797,18 +3795,18 @@ class npc_gwen_armstead_phase_6 : public CreatureScript
         }
 };
 
-class npc_forsaken_assassin : public CreatureScript
+class npc_forsaken_assassin final : public CreatureScript
 {
     public:
         npc_forsaken_assassin() : CreatureScript("npc_forsaken_assassin") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -3818,14 +3816,14 @@ class npc_forsaken_assassin : public CreatureScript
                 SPELL_BACKSTAB          = 75360,
             };
 
-            void isSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* summoner) final
             {
                 Talk(FORSAKEN_ASSASSIN_SAY, summoner->GetGUID(), true);
                 AttackStart(summoner);
                 me->CastSpell(summoner, SPELL_BACKSTAB, false);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 if (!UpdateVictim())
                     return;
@@ -3838,35 +3836,32 @@ class npc_forsaken_assassin : public CreatureScript
 // Quest You Can't Take 'Em Alone 14348
 const float LiamPosition[2] = {-1920.43f, 2308.94f};
 
-class npc_horrid_abomination : public CreatureScript
+class npc_horrid_abomination final : public CreatureScript
 {
     public:
         npc_horrid_abomination() : CreatureScript("npc_horrid_abomination") { }
 
     private:
-        class CreatureEntryCheck
+        class CreatureEntryCheck final
         {
             public:
                 CreatureEntryCheck(uint32 entry) : _entry(entry) { }
 
-                bool operator() (Unit* unit)
+                bool operator() (Unit const *unit) const
                 {
-                    if (unit->GetEntry() == _entry)
-                        return true;
-
-                    return false;
+                    return unit->GetEntry() == _entry;
                 }
 
             private:
                 uint32 _entry;
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new npc_horrid_abominationAI (creature);
         }
 
-        struct npc_horrid_abominationAI : public ScriptedAI
+        struct npc_horrid_abominationAI final : public ScriptedAI
         {
             npc_horrid_abominationAI(Creature* creature) : ScriptedAI(creature) { }
 
@@ -3888,13 +3883,13 @@ class npc_horrid_abomination : public CreatureScript
             EventMap events;
             uint64 playerGUID;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 me->m_ReactDistance = 10.0f;
                 Reset();
             }
 
-            void Reset()
+            void Reset() final
             {
                 events.Reset();
                 playerGUID = 0;
@@ -3902,7 +3897,7 @@ class npc_horrid_abomination : public CreatureScript
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             }
 
-            void SpellHit(Unit* caster, const SpellInfo* spell)
+            void SpellHit(Unit* caster, const SpellInfo* spell) final
             {
                 switch (spell->Id)
                 {
@@ -3947,12 +3942,12 @@ class npc_horrid_abomination : public CreatureScript
                 me->DespawnOrUnsummon(2000);
             }
 
-            void EnterCombat(Unit* /*who*/)
+            void EnterCombat(Unit* /*who*/) final
             {
                 events.ScheduleEvent(EVENT_RESTITCHING, 3000);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 if (!UpdateVictim())
                     return;
@@ -3970,13 +3965,13 @@ class npc_horrid_abomination : public CreatureScript
         };
 };
 
-class spell_gilneas_horrid_abomination_explosion : public SpellScriptLoader
+class spell_gilneas_horrid_abomination_explosion final : public SpellScriptLoader
 {
     public:
         spell_gilneas_horrid_abomination_explosion() : SpellScriptLoader("spell_gilneas_horrid_abomination_explosion") { }
 
     private:
-        class spell_script_impl : public SpellScript
+        class spell_script_impl final : public SpellScript
         {
             PrepareSpellScript(spell_script_impl)
 
@@ -4004,13 +3999,13 @@ class spell_gilneas_horrid_abomination_explosion : public SpellScriptLoader
                 }
             }
 
-            void Register()
+            void Register() final
             {
                 OnEffectHitTarget += SpellEffectFn(spell_script_impl::ScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
             }
         };
 
-        SpellScript *GetSpellScript() const
+        SpellScript *GetSpellScript() const final
         {
             return new spell_script_impl();
         }
@@ -4039,18 +4034,18 @@ const Position InvaderSP[19]=
     {-1953.898f, 2349.607f, 31.305f, 5.483f},
 };
 
-class npc_prince_liam_greymane_phase_7 : public CreatureScript
+class npc_prince_liam_greymane_phase_7 final : public CreatureScript
 {
     public:
         npc_prince_liam_greymane_phase_7() : CreatureScript("npc_prince_liam_greymane_phase_7") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature)
                 : ScriptedAI(creature)
@@ -4066,7 +4061,7 @@ class npc_prince_liam_greymane_phase_7 : public CreatureScript
 
             ShooterGuardAI shooterAI;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 Reset();
                 SetCombatMovement(false);
@@ -4077,7 +4072,7 @@ class npc_prince_liam_greymane_phase_7 : public CreatureScript
                     SummonInvader();
             }
 
-            void Reset()
+            void Reset() final
             {
                 shooterAI.Reset();
             }
@@ -4096,22 +4091,22 @@ class npc_prince_liam_greymane_phase_7 : public CreatureScript
                 }
             }
 
-            void SummonedCreatureDies(Creature* summoned, Unit* /*killer*/)
+            void SummonedCreatureDies(Creature* summoned, Unit* /*killer*/) final
             {
                 SummonInvader();
             }
 
-            void DamageTaken(Unit* attacker, uint32 &damage)
+            void DamageTaken(Unit* attacker, uint32 &damage) final
             {
                 shooterAI.DamageTaken(attacker, damage);
             }
 
-            void EnterCombat(Unit* who)
+            void EnterCombat(Unit* who) final
             {
                 shooterAI.EnterCombat(who);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 shooterAI.UpdateShooterAI(diff);
             }
@@ -4137,7 +4132,7 @@ const std::string PlayerSay[3]=
     "Your mother's in the basement next door.  Get to her now!",
 };
 
-class npc_gilneas_children_phase_7 : public CreatureScript
+class npc_gilneas_children_phase_7 final : public CreatureScript
 {
     public:
         npc_gilneas_children_phase_7(const char* scriptName, uint32 spellId, uint8 playerSayId)
@@ -4150,12 +4145,12 @@ class npc_gilneas_children_phase_7 : public CreatureScript
         uint32 _spellId;
         uint8 _playerSayId;
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature, _spellId, _playerSayId);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature, uint32 spellId, uint8 playerSayId)
                 : ScriptedAI(creature)
@@ -4181,7 +4176,7 @@ class npc_gilneas_children_phase_7 : public CreatureScript
             uint8 _playerSayId;
             bool activated;
 
-            void Reset()
+            void Reset() final
             {
                 events.Reset();
                 playerGUID = 0;
@@ -4189,7 +4184,7 @@ class npc_gilneas_children_phase_7 : public CreatureScript
                 me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
             }
 
-            void SpellHit(Unit* caster, const SpellInfo* spell)
+            void SpellHit(Unit* caster, const SpellInfo* spell) final
             {
                 if (!activated && spell->Id == _spellId)
                 {
@@ -4205,7 +4200,7 @@ class npc_gilneas_children_phase_7 : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 events.Update(diff);
 
@@ -4249,27 +4244,27 @@ class npc_gilneas_children_phase_7 : public CreatureScript
         };
 };
 
-class npc_forsaken_invader : public CreatureScript
+class npc_forsaken_invader final : public CreatureScript
 {
     public:
         npc_forsaken_invader() : CreatureScript("npc_forsaken_invader") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
-            void Reset()
+            void Reset() final
             {
                 me->m_Events.AddEvent(new AggroEvent(me), me->m_Events.CalculateTime(500));
             }
 
-            void DamageTaken(Unit* attacker, uint32 &damage)
+            void DamageTaken(Unit* attacker, uint32 &damage) final
             {
                 if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->isPet())
                 {
@@ -4296,17 +4291,17 @@ class npc_forsaken_invader : public CreatureScript
 };
 
 // Quest Two By Sea 14382
-class npc_forsaken_catapult_phase_7 : public CreatureScript
+class npc_forsaken_catapult_phase_7 final : public CreatureScript
 {
     public:
         npc_forsaken_catapult_phase_7() : CreatureScript("npc_forsaken_catapult_phase_7") { }
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public VehicleAI
+        struct creature_script_impl final : public VehicleAI
         {
             creature_script_impl(Creature* creature) : VehicleAI(creature) { }
 
@@ -4335,20 +4330,20 @@ class npc_forsaken_catapult_phase_7 : public CreatureScript
             float _speedXY, _speedZ;
             Position _pos;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 Reset();
                 me->setActive(true);
             }
 
-            void Reset()
+            void Reset() final
             {
                 events.Reset();
                 events.ScheduleEvent(EVENT_BOULDER, urand(5000, 20000));
                 me->m_Events.AddEvent(new DelayEventDoAction(me, ACTION_DRIVER), me->m_Events.CalculateTime(500));
             }
 
-            void DoAction(int32 const action)
+            void DoAction(int32 const action) final
             {
                 if (action == ACTION_DRIVER)
                 {
@@ -4363,7 +4358,7 @@ class npc_forsaken_catapult_phase_7 : public CreatureScript
                 }
             }
 
-            void PassengerBoarded(Unit* who, int8 seatId, bool apply)
+            void PassengerBoarded(Unit* who, int8 seatId, bool apply) final
             {
                 if (!apply)
                 {
@@ -4374,7 +4369,7 @@ class npc_forsaken_catapult_phase_7 : public CreatureScript
                     events.CancelEvent(EVENT_RESPAWN);
             }
 
-            void PassengerWillBoard(Unit* passenger, Position& enterPos, int8 seatId)
+            void PassengerWillBoard(Unit* passenger, Position& enterPos, int8 seatId) final
             {
                 if (seatId == 1)
                 {
@@ -4383,12 +4378,12 @@ class npc_forsaken_catapult_phase_7 : public CreatureScript
                 }
             }
 
-            void SummonedCreatureDies(Creature * summon, Unit * /*killer*/)
+            void SummonedCreatureDies(Creature * summon, Unit * /*killer*/) final
             {
                 me->setFaction(35);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 events.Update(diff);
 
@@ -4452,13 +4447,13 @@ const float CheckSpellPos[16][3]=
 
 typedef npc_forsaken_catapult_phase_7::creature_script_impl CatapultAI;
 
-class spell_gilneas_forsaken_catapult_launch : public SpellScriptLoader
+class spell_gilneas_forsaken_catapult_launch final : public SpellScriptLoader
 {
     public:
         spell_gilneas_forsaken_catapult_launch() : SpellScriptLoader("spell_gilneas_forsaken_catapult_launch") { }
 
     private:
-        class spell_script_impl : public SpellScript
+        class spell_script_impl final : public SpellScript
         {
             PrepareSpellScript(spell_script_impl)
 
@@ -4498,31 +4493,31 @@ class spell_gilneas_forsaken_catapult_launch : public SpellScriptLoader
                 }
             }
 
-            void Register()
+            void Register() final
             {
                 OnCheckCast += SpellCheckCastFn(spell_script_impl::CheckCast);
                 OnEffectHit += SpellEffectFn(spell_script_impl::Function, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 
-        SpellScript *GetSpellScript() const
+        SpellScript *GetSpellScript() const final
         {
             return new spell_script_impl();
         }
 };
 
-class npc_gilneas_forsaken_captain : public CreatureScript
+class npc_gilneas_forsaken_captain final : public CreatureScript
 {
     public:
         npc_gilneas_forsaken_captain() : CreatureScript("npc_gilneas_forsaken_captain") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature)
                 : ScriptedAI(creature)
@@ -4540,25 +4535,25 @@ class npc_gilneas_forsaken_captain : public CreatureScript
             EventMap events;
             ShooterGuardAI shooterAI;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 Reset();
                 SetCombatMovement(false);
                 me->m_ReactDistance = 45.0f;
             }
 
-            void Reset()
+            void Reset() final
             {
                 shooterAI.Reset();
             }
 
-            void EnterCombat(Unit* who)
+            void EnterCombat(Unit* who) final
             {
                 shooterAI.EnterCombat(who);
                 events.ScheduleEvent(EVENT_RUSTY_RAPIER, urand(5000, 10000));
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 if (!shooterAI.UpdateShooterAI(diff))
                     return;
@@ -4575,18 +4570,18 @@ class npc_gilneas_forsaken_captain : public CreatureScript
 };
 
 // Quest Leader of the Pack 14386
-class npc_dark_ranger_thyala : public CreatureScript
+class npc_dark_ranger_thyala final : public CreatureScript
 {
     public:
         npc_dark_ranger_thyala() : CreatureScript("npc_dark_ranger_thyala") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature)
                 : ScriptedAI(creature)
@@ -4608,19 +4603,19 @@ class npc_dark_ranger_thyala : public CreatureScript
             SummonList summons;
             ShooterGuardAI shooterAI;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 Reset();
                 SetCombatMovement(false);
                 me->m_ReactDistance = 45.0f;
             }
 
-            void Reset()
+            void Reset() final
             {
                 shooterAI.Reset();
             }
 
-            void DamageTaken(Unit* attacker, uint32 &damage)
+            void DamageTaken(Unit* attacker, uint32 &damage) final
             {
                 if (me->GetHealth() < damage)
                 {
@@ -4632,23 +4627,23 @@ class npc_dark_ranger_thyala : public CreatureScript
                 }
             }
 
-            void EnterCombat(Unit* who)
+            void EnterCombat(Unit* who) final
             {
                 shooterAI.EnterCombat(who);
                 events.ScheduleEvent(EVENT_KNOCKBACK, urand(2500, 5000));
             }
 
-            void JustSummoned(Creature* summoned)
+            void JustSummoned(Creature* summoned) final
             {
                 summons.Summon(summoned);
             }
 
-            void JustDied(Unit* /*who*/)
+            void JustDied(Unit* /*who*/) final
             {
                 summons.DespawnAll();
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 if (!shooterAI.UpdateShooterAI(diff))
                     return;
@@ -4664,18 +4659,18 @@ class npc_dark_ranger_thyala : public CreatureScript
         };
 };
 
-class npc_attack_mastiff : public CreatureScript
+class npc_attack_mastiff final : public CreatureScript
 {
     public:
         npc_attack_mastiff() : CreatureScript("npc_attack_mastiff") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -4692,24 +4687,24 @@ class npc_attack_mastiff : public CreatureScript
 
             EventMap events;
 
-            void Reset()
+            void Reset() final
             {
                 events.Reset();
             }
 
-            void EnterCombat(Unit* who)
+            void EnterCombat(Unit* who) final
             {
                 events.ScheduleEvent(EVENT_DEMORALIZING_ROAR, urand(2500, 5000));
                 events.ScheduleEvent(SPELL_TAUNT, urand(2500, 5000));
                 events.ScheduleEvent(SPELL_LEAP, urand(5000, 10000));
             }
 
-            void JustDied(Unit* /*killer*/)
+            void JustDied(Unit* /*killer*/) final
             {
                 events.Reset();
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 if (!UpdateVictim())
                     return;
@@ -4740,13 +4735,13 @@ class npc_attack_mastiff : public CreatureScript
         };
 };
 
-class spell_call_attack_mastiffs : public SpellScriptLoader
+class spell_call_attack_mastiffs final : public SpellScriptLoader
 {
     public:
         spell_call_attack_mastiffs() : SpellScriptLoader("spell_call_attack_mastiffs") { }
 
     private:
-        class spell_script_impl : public SpellScript
+        class spell_script_impl final : public SpellScript
         {
             PrepareSpellScript(spell_script_impl)
 
@@ -4788,25 +4783,25 @@ class spell_call_attack_mastiffs : public SpellScriptLoader
                 }
             }
 
-            void Register()
+            void Register() final
             {
                 OnEffectHitTarget += SpellEffectFn(spell_script_impl::SummonMastiffs, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 
-        SpellScript *GetSpellScript() const
+        SpellScript *GetSpellScript() const final
         {
             return new spell_script_impl();
         }
 };
 
-class npc_lord_godfrey_phase_7 : public CreatureScript
+class npc_lord_godfrey_phase_7 final : public CreatureScript
 {
     public:
         npc_lord_godfrey_phase_7() : CreatureScript("npc_lord_godfrey_phase_7") { }
 
     private:
-        bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/)
+        bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/) final
         {
             enum
             {
@@ -4823,13 +4818,13 @@ class npc_lord_godfrey_phase_7 : public CreatureScript
         }
 };
 
-class spell_gilneas_cataclysm_phase_7 : public SpellScriptLoader
+class spell_gilneas_cataclysm_phase_7 final : public SpellScriptLoader
 {
     public:
         spell_gilneas_cataclysm_phase_7() : SpellScriptLoader("spell_gilneas_cataclysm_phase_7") { }
 
     private:
-        class spell_script_impl : public SpellScript
+        class spell_script_impl final : public SpellScript
         {
             PrepareSpellScript(spell_script_impl)
 
@@ -4842,31 +4837,31 @@ class spell_gilneas_cataclysm_phase_7 : public SpellScriptLoader
                 }
             }
 
-            void Register()
+            void Register() final
             {
                 OnEffectHitTarget += SpellEffectFn(spell_script_impl::ExtraEffect, EFFECT_0, SPELL_EFFECT_FORCE_CAST);
             }
         };
 
-        SpellScript *GetSpellScript() const
+        SpellScript *GetSpellScript() const final
         {
             return new spell_script_impl();
         }
 };
 
 // Quest Gasping for Breath 14395
-class npc_drowning_watchman : public CreatureScript
+class npc_drowning_watchman final : public CreatureScript
 {
     public:
         npc_drowning_watchman() : CreatureScript("npc_drowning_watchman") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new npc_drowning_watchmanAI (creature);
         }
 
-        struct npc_drowning_watchmanAI : public ScriptedAI
+        struct npc_drowning_watchmanAI final : public ScriptedAI
         {
             npc_drowning_watchmanAI(Creature* creature) : ScriptedAI(creature) { }
 
@@ -4881,14 +4876,14 @@ class npc_drowning_watchman : public CreatureScript
                 DROWNING_WATCHMAN_SAY           = 1,
             };
 
-            void Reset()
+            void Reset() final
             {
                 me->CastSpell(me, SPELL_DROWNING, false);
                 me->CastSpell((Unit*)NULL, SPELL_SUMMON_SPARKLES, false);
                 me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
             }
 
-            void SpellHit(Unit* caster, const SpellInfo* spell)
+            void SpellHit(Unit* caster, const SpellInfo* spell) final
             {
                 if (spell->Id == SPELL_RESCUE_DROWNING_WATCHMAN)
                 {
@@ -4901,7 +4896,7 @@ class npc_drowning_watchman : public CreatureScript
                 }
             }
 
-            void OnControlVehicle(Unit* base, int8 /*seatId*/, bool apply)
+            void OnControlVehicle(Unit* base, int8 /*seatId*/, bool apply) final
             {
                 if (!apply)
                 {
@@ -4917,18 +4912,18 @@ class npc_drowning_watchman : public CreatureScript
         };
 };
 
-class npc_duskhaven_watchman_rescuer_phase_8 : public CreatureScript
+class npc_duskhaven_watchman_rescuer_phase_8 final : public CreatureScript
 {
     public:
         npc_duskhaven_watchman_rescuer_phase_8() : CreatureScript("npc_duskhaven_watchman_rescuer_phase_8") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature){ }
 
@@ -4939,7 +4934,7 @@ class npc_duskhaven_watchman_rescuer_phase_8 : public CreatureScript
                 SPELL_RESCUE_DROWNING_WATCHMAN  = 68735,
             };
 
-            void MoveInLineOfSight(Unit* who)
+            void MoveInLineOfSight(Unit* who) final
             {
                 if (who->GetTypeId() == TYPEID_PLAYER && who->IsVehicle() && !who->IsInWater() && me->GetExactDistSq(who) < 25.0f)
                 {
@@ -4951,18 +4946,18 @@ class npc_duskhaven_watchman_rescuer_phase_8 : public CreatureScript
 };
 
 // Quest The Hungry Ettin 14416
-class npc_mountain_horse_vehicle : public CreatureScript
+class npc_mountain_horse_vehicle final : public CreatureScript
 {
     public:
         npc_mountain_horse_vehicle() : CreatureScript("npc_mountain_horse_vehicle") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public VehicleAI
+        struct creature_script_impl final : public VehicleAI
         {
             creature_script_impl(Creature* creature)
                 : VehicleAI(creature)
@@ -4977,13 +4972,13 @@ class npc_mountain_horse_vehicle : public CreatureScript
 
             SummonList summons;
 
-            void SpellHit(Unit* /*caster*/, const SpellInfo* spell)
+            void SpellHit(Unit* /*caster*/, const SpellInfo* spell) final
             {
                 if (spell->Id == SPELL_ROPE_IN_HORSE)
                     me->DespawnOrUnsummon();
             }
 
-            void PassengerBoarded(Unit* who, int8 /*seatId*/, bool apply)
+            void PassengerBoarded(Unit* who, int8 /*seatId*/, bool apply) final
             {
                 if (!apply)
                 {
@@ -5003,25 +4998,25 @@ class npc_mountain_horse_vehicle : public CreatureScript
                 }
             }
 
-            void JustSummoned(Creature* summoned)
+            void JustSummoned(Creature* summoned) final
             {
                 summons.Summon(summoned);
             }
         };
 };
 
-class npc_mountain_horse_follower : public CreatureScript
+class npc_mountain_horse_follower final : public CreatureScript
 {
     public:
         npc_mountain_horse_follower() : CreatureScript("npc_mountain_horse_follower") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl(creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -5030,7 +5025,7 @@ class npc_mountain_horse_follower : public CreatureScript
                 SPELL_ROPE_CHANNEL  = 68940,
             };
 
-            void isSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* summoner) final
             {
                 me->CastSpell(summoner, SPELL_ROPE_CHANNEL, false);
                 me->GetMotionMaster()->MoveFollow(summoner, frand(2.5, 5.f), frand(-M_PI / 4, M_PI / 4));
@@ -5042,13 +5037,13 @@ class npc_mountain_horse_follower : public CreatureScript
         };
 };
 
-class spell_round_up_horse : public SpellScriptLoader
+class spell_round_up_horse final : public SpellScriptLoader
 {
     public:
         spell_round_up_horse() : SpellScriptLoader("spell_round_up_horse") { }
 
     private:
-        class spell_script_impl : public SpellScript
+        class spell_script_impl final : public SpellScript
         {
             PrepareSpellScript(spell_script_impl)
 
@@ -5067,20 +5062,20 @@ class spell_round_up_horse : public SpellScriptLoader
                 return SPELL_CAST_OK;
             }
 
-            void Register()
+            void Register() final
             {
                 OnCheckCast += SpellCheckCastFn(spell_script_impl::CheckCast);
             }
         };
 
-        SpellScript *GetSpellScript() const
+        SpellScript *GetSpellScript() const final
         {
             return new spell_script_impl();
         }
 };
 
 // Quest Grandma's Cat 14401
-class npc_wahl : public CreatureScript
+class npc_wahl final : public CreatureScript
 {
     public:
         npc_wahl() : CreatureScript("npc_wahl") { }
@@ -5091,7 +5086,7 @@ class npc_wahl : public CreatureScript
             return new creature_script_impl(creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -5105,7 +5100,7 @@ class npc_wahl : public CreatureScript
 
             EventMap events;
 
-            void isSummonedBy(Unit* /*summoner*/)
+            void IsSummonedBy(Unit* /*summoner*/) final
             {
                 Talk(YELL_DONT_MESS);
                 me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
@@ -5113,7 +5108,7 @@ class npc_wahl : public CreatureScript
                 events.ScheduleEvent(EVENT_TRANSFORM, me->GetSplineDuration());
             }
 
-            void JustReachedHome()
+            void JustReachedHome() final
             {
                 if (me->isSummon())
                 {
@@ -5122,7 +5117,7 @@ class npc_wahl : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 events.Update(diff);
 
@@ -5150,18 +5145,18 @@ class npc_wahl : public CreatureScript
         };
 };
 
-class npc_lucius_the_cruel : public CreatureScript
+class npc_lucius_the_cruel final : public CreatureScript
 {
     public:
         npc_lucius_the_cruel() : CreatureScript("npc_lucius_the_cruel") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature)
                 : ScriptedAI(creature)
@@ -5186,7 +5181,7 @@ class npc_lucius_the_cruel : public CreatureScript
             EventMap events;
             uint64 wahlGUID;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 ASSERT(me->isSummon());
                 SetCombatMovement(false);
@@ -5194,25 +5189,25 @@ class npc_lucius_the_cruel : public CreatureScript
                 me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
             }
 
-            void isSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* summoner) final
             {
                 Talk(SAY_THIS_CAT_IS_MINE);
                 me->GetMotionMaster()->MoveSplinePath(1, false, true, 0.f, false, false);
                 events.ScheduleEvent(EVENT_CATCH_CHANCE_1, me->GetSplineDuration() + 500);
             }
 
-            void Reset()
+            void Reset() final
             {
                 shooterAI.Reset();
             }
 
-            void EnterCombat(Unit* who)
+            void EnterCombat(Unit* who) final
             {
                 shooterAI.EnterCombat(who);
                 events.ScheduleEvent(EVENT_SUMMON_WHAL, 2000);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 events.Update(diff);
 
@@ -5254,18 +5249,18 @@ class npc_lucius_the_cruel : public CreatureScript
         };
 };
 
-class npc_chance_the_cat : public CreatureScript
+class npc_chance_the_cat final : public CreatureScript
 {
     public:
         npc_chance_the_cat() : CreatureScript("npc_chance_the_cat") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -5277,12 +5272,12 @@ class npc_chance_the_cat : public CreatureScript
 
             bool isEvent;
 
-            void Reset()
+            void Reset() final
             {
                 isEvent = false;
             }
 
-            void SpellHit(Unit* caster, const SpellInfo* spell)
+            void SpellHit(Unit* caster, const SpellInfo* spell) final
             {
                 if (!isEvent && spell->Id == SPELL_CATCH_CAT)
                 {
@@ -5317,18 +5312,18 @@ static const Position HaywardInvaderSP[17]=
     {-2317.483f, 2316.027f, 0.329f, 4.943f},
 };
 
-class npc_hayward_brother : public CreatureScript
+class npc_hayward_brother final : public CreatureScript
 {
     public:
         npc_hayward_brother() : CreatureScript("npc_hayward_brother") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -5337,7 +5332,7 @@ class npc_hayward_brother : public CreatureScript
                 NPC_FORSAKEN_INVADER = 36488,
             };
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 SetCombatMovement(false);
                 me->m_ReactDistance = 10.0f;
@@ -5363,12 +5358,12 @@ class npc_hayward_brother : public CreatureScript
                 }
             }
 
-            void SummonedCreatureDies(Creature* summoned, Unit* /*killer*/)
+            void SummonedCreatureDies(Creature* summoned, Unit* /*killer*/) final
             {
                 SummonInvader();
             }
 
-            void DamageTaken(Unit* attacker, uint32 &damage)
+            void DamageTaken(Unit* attacker, uint32 &damage) final
             {
                 if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->isPet())
                 {
@@ -5380,7 +5375,7 @@ class npc_hayward_brother : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 if (!UpdateVictim())
                     return;
@@ -5391,18 +5386,18 @@ class npc_hayward_brother : public CreatureScript
 };
 
 // Quest To Greymane Manor 14465
-class npc_swift_mountain_horse : public CreatureScript
+class npc_swift_mountain_horse final : public CreatureScript
 {
     public:
         npc_swift_mountain_horse() : CreatureScript("npc_swift_mountain_horse") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl(creature);
         }
 
-        struct creature_script_impl : public VehicleAI
+        struct creature_script_impl final : public VehicleAI
         {
             creature_script_impl(Creature* creature) : VehicleAI(creature) { }
 
@@ -5421,17 +5416,17 @@ class npc_swift_mountain_horse : public CreatureScript
 
             EventMap events;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 ASSERT(me->isSummon());
             }
 
-            void isSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* summoner) final
             {
                 events.ScheduleEvent(EVENT_START_RIDE, 1500);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 events.Update(diff);
 
@@ -5472,13 +5467,13 @@ class npc_swift_mountain_horse : public CreatureScript
         };
 };
 
-class npc_gwen_armstead_phase_8 : public CreatureScript
+class npc_gwen_armstead_phase_8 final : public CreatureScript
 {
     public:
         npc_gwen_armstead_phase_8() : CreatureScript("npc_gwen_armstead_phase_8") { }
 
     private:
-        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) final
         {
             enum
             {
@@ -5493,7 +5488,7 @@ class npc_gwen_armstead_phase_8 : public CreatureScript
 };
 
 // Quest The King's Observatory 14466, Alas, Gilneas! 14467
-class npc_king_genn_greymane_c3 : public CreatureScript
+class npc_king_genn_greymane_c3 final : public CreatureScript
 {
     public:
         npc_king_genn_greymane_c3() : CreatureScript("npc_king_genn_greymane_c3") { }
@@ -5505,7 +5500,7 @@ class npc_king_genn_greymane_c3 : public CreatureScript
             CINEMATIC_TELESCOPE             = 167,
         };
 
-        bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/)
+        bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/) final
         {
             if (quest->GetQuestId() == QUEST_THE_KINGS_OBSERVATORY)
             {
@@ -5524,7 +5519,7 @@ class npc_king_genn_greymane_c3 : public CreatureScript
             return false;
         }
 
-        bool OnQuestAccept(Player* player, Creature* /*creature*/, Quest const* quest)
+        bool OnQuestAccept(Player* player, Creature* /*creature*/, Quest const* quest) final
         {
             if (quest->GetQuestId() == QUEST_EXODUS)
             {
@@ -5550,7 +5545,7 @@ enum
     NPC_QE_LORNA_CROWLEY            = 51409,
 };
 
-struct CarriageAccessory
+struct CarriageAccessory final
 {
     uint8 seatId;
     uint32 entry;
@@ -5566,32 +5561,32 @@ const CarriageAccessory carriageAccessories[6]=
     {6, NPC_QE_LORNA_CROWLEY},
 };
 
-class npc_stagecoach_harness_summoner : public CreatureScript
+class npc_stagecoach_harness_summoner final : public CreatureScript
 {
     public:
         npc_stagecoach_harness_summoner() : CreatureScript("npc_stagecoach_harness_summoner") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public VehicleAI
+        struct creature_script_impl final : public VehicleAI
         {
             creature_script_impl(Creature* creature) : VehicleAI(creature) { }
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 me->CastSpell(me, SPELL_GENERIC_QUEST_INVISIBILITY_2, false);
             }
 
-            void JustSummoned(Creature* summoned)
+            void JustSummoned(Creature* summoned) final
             {
                 summoned->CastSpell(summoned, SPELL_GENERIC_QUEST_INVISIBILITY_2, false);
             }
 
-            void PassengerWillBoard(Unit* passenger, Position& enterPos, int8 seatId)
+            void PassengerWillBoard(Unit* passenger, Position& enterPos, int8 seatId) final
             {
                 switch (seatId)
                 {
@@ -5612,18 +5607,18 @@ class npc_stagecoach_harness_summoner : public CreatureScript
         };
 };
 
-class npc_stagecoach_carriage_summoner : public CreatureScript
+class npc_stagecoach_carriage_summoner final : public CreatureScript
 {
     public:
         npc_stagecoach_carriage_summoner() : CreatureScript("npc_stagecoach_carriage_summoner") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public VehicleAI
+        struct creature_script_impl final : public VehicleAI
         {
             creature_script_impl(Creature* creature) : VehicleAI(creature) { }
 
@@ -5632,13 +5627,13 @@ class npc_stagecoach_carriage_summoner : public CreatureScript
                 ACTION_INSTALL_ACCESSORIES      = 1,
             };
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 ASSERT(me->isSummon());
                 me->m_Events.AddEvent(new DelayEventDoAction(me, ACTION_INSTALL_ACCESSORIES), me->m_Events.CalculateTime(250), true);
             }
 
-            void OnSpellClick(Unit* player, bool& /*result*/)
+            void OnSpellClick(Unit* player) final
             {
                 player->RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT);
                 player->RemoveAurasByType(SPELL_AURA_MOD_INVISIBILITY_DETECT);
@@ -5646,7 +5641,7 @@ class npc_stagecoach_carriage_summoner : public CreatureScript
                 player->CastSpell(player, SPELL_ZONE_SPECIFIC_19, false);
             }
 
-            void DoAction(int32 const action)
+            void DoAction(int32 const action) final
             {
                 if (action == ACTION_INSTALL_ACCESSORIES)
                 {
@@ -5659,7 +5654,7 @@ class npc_stagecoach_carriage_summoner : public CreatureScript
                 }
             }
 
-            void PassengerWillBoard(Unit* passenger, Position& enterPos, int8 seatId)
+            void PassengerWillBoard(Unit* passenger, Position& enterPos, int8 seatId) final
             {
                 switch (seatId)
                 {
@@ -5698,18 +5693,18 @@ static const uint32 ropeSpellEntry[2]=
     84167,
 };
 
-class npc_stagecoach_harness_escort : public CreatureScript
+class npc_stagecoach_harness_escort final : public CreatureScript
 {
     public:
         npc_stagecoach_harness_escort() : CreatureScript("npc_stagecoach_harness_escort") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl(creature);
         }
 
-        struct creature_script_impl : public VehicleAI
+        struct creature_script_impl final : public VehicleAI
         {
             creature_script_impl(Creature* creature)
                 : VehicleAI(creature)
@@ -5749,14 +5744,14 @@ class npc_stagecoach_harness_escort : public CreatureScript
             SummonList summons;
             uint64 lornaGUID;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 ASSERT(me->isSummon());
                 me->SetPhaseMask(EXODUS_PHASE_MASK, true);
                 me->setActive(true);
             }
 
-            void DoAction(int32 const action)
+            void DoAction(int32 const action) final
             {
                 switch (action)
                 {
@@ -5781,7 +5776,7 @@ class npc_stagecoach_harness_escort : public CreatureScript
                 }
             }
 
-            void isSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* summoner) final
             {
                 me->SetSeerGUID(summoner->GetGUID());
                 me->SetVisible(false);
@@ -5795,7 +5790,7 @@ class npc_stagecoach_harness_escort : public CreatureScript
                 me->m_Events.AddEvent(new DelayEventDoAction(me, ACTION_INSTALL_ACCESSORIES), me->m_Events.CalculateTime(250), true);
             }
 
-            void JustSummoned(Creature* summoned)
+            void JustSummoned(Creature* summoned) final
             {
                 summons.Summon(summoned);
                 summoned->SetSeerGUID(me->ToTempSummon()->GetSummonerGUID());
@@ -5807,7 +5802,7 @@ class npc_stagecoach_harness_escort : public CreatureScript
                     lornaGUID = summoned->GetGUID();
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 events.Update(diff);
 
@@ -5924,18 +5919,18 @@ class npc_stagecoach_harness_escort : public CreatureScript
         };
 };
 
-class npc_stagecoach_carriage_escort : public CreatureScript
+class npc_stagecoach_carriage_escort final : public CreatureScript
 {
     public:
         npc_stagecoach_carriage_escort() : CreatureScript("npc_stagecoach_carriage_escort") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public VehicleAI
+        struct creature_script_impl final : public VehicleAI
         {
             creature_script_impl(Creature* creature) : VehicleAI(creature) { }
 
@@ -5944,13 +5939,13 @@ class npc_stagecoach_carriage_escort : public CreatureScript
                 ACTION_INSTALL_ACCESSORIES      = 1,
             };
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 ASSERT(me->isSummon());
                 me->m_Events.AddEvent(new DelayEventDoAction(me, ACTION_INSTALL_ACCESSORIES), me->m_Events.CalculateTime(250), true);
             }
 
-            void DoAction(int32 const action)
+            void DoAction(int32 const action) final
             {
                 if (action == ACTION_INSTALL_ACCESSORIES)
                 {
@@ -5970,7 +5965,7 @@ class npc_stagecoach_carriage_escort : public CreatureScript
                 }
             }
 
-            void PassengerWillBoard(Unit* passenger, Position& enterPos, int8 seatId)
+            void PassengerWillBoard(Unit* passenger, Position& enterPos, int8 seatId) final
             {
                 switch (seatId)
                 {
@@ -6004,18 +5999,18 @@ class npc_stagecoach_carriage_escort : public CreatureScript
 };
 
 // Quest Stranded at the Marsh 24468
-class npc_crash_survivor : public CreatureScript
+class npc_crash_survivor final : public CreatureScript
 {
     public:
         npc_crash_survivor() : CreatureScript("npc_crash_survivor") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature)
                 : ScriptedAI(creature)
@@ -6030,13 +6025,13 @@ class npc_crash_survivor : public CreatureScript
 
             bool canSummon;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 SetCombatMovement(false);
                 Reset();
             }
 
-            void Reset()
+            void Reset() final
             {
                 if (canSummon)
                 {
@@ -6057,7 +6052,7 @@ class npc_crash_survivor : public CreatureScript
                 }
             }
 
-            void DamageTaken(Unit* attacker, uint32 &damage)
+            void DamageTaken(Unit* attacker, uint32 &damage) final
             {
                 if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->isPet())
                 {
@@ -6069,7 +6064,7 @@ class npc_crash_survivor : public CreatureScript
                 }
             }
 
-            void SummonedCreatureDies(Creature* summoned, Unit* /*killer*/)
+            void SummonedCreatureDies(Creature* summoned, Unit* /*killer*/) final
             {
                 Talk(SURVIVOR_RANDOM_SAY);
                 me->SetReactState(REACT_PASSIVE);
@@ -6079,7 +6074,7 @@ class npc_crash_survivor : public CreatureScript
                 me->DespawnOrUnsummon(3500);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 if (!UpdateVictim())
                     return;
@@ -6089,22 +6084,22 @@ class npc_crash_survivor : public CreatureScript
         };
 };
 
-class npc_swamp_crocolisk : public CreatureScript
+class npc_swamp_crocolisk final : public CreatureScript
 {
     public:
         npc_swamp_crocolisk() : CreatureScript("npc_swamp_crocolisk") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
-            void DamageTaken(Unit* attacker, uint32 &damage)
+            void DamageTaken(Unit* attacker, uint32 &damage) final
             {
                 if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->isPet())
                 {
@@ -6146,18 +6141,18 @@ const float AstherWP[18][3]=
     {-2177.11f, 1807.75f, 12.717f},{-2179.79f, 1807.67f, 12.573f},{-2183.06f, 1807.59f, 12.504f},
 };
 
-class npc_koroth_the_hillbreaker_friend : public CreatureScript
+class npc_koroth_the_hillbreaker_friend final : public CreatureScript
 {
     public:
         npc_koroth_the_hillbreaker_friend() : CreatureScript("npc_koroth_the_hillbreaker_friend") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -6174,19 +6169,19 @@ class npc_koroth_the_hillbreaker_friend : public CreatureScript
 
             EventMap events;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 ASSERT(me->isSummon());
                 SetCombatMovement(false);
             }
 
-            void isSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* summoner) final
             {
                 me->GetMotionMaster()->MoveSplinePath(1);
                 me->m_Events.AddEvent(new DelayEventDoAction(me, ACTION_KOROTH_ATTACK), me->m_Events.CalculateTime(me->GetSplineDuration() - 500));
             }
 
-            void DoAction(int32 const action)
+            void DoAction(int32 const action) final
             {
                 if (action == ACTION_KOROTH_ATTACK)
                 {
@@ -6208,13 +6203,13 @@ class npc_koroth_the_hillbreaker_friend : public CreatureScript
                 }
             }
 
-            void EnterCombat(Unit* /*who*/)
+            void EnterCombat(Unit* /*who*/) final
             {
                 events.ScheduleEvent(EVENT_DEMORALIZING_SHOUT, 1000);
                 events.ScheduleEvent(EVENT_CLEAVE, urand(2500, 5000));
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 if (!UpdateVictim())
                     return;
@@ -6241,18 +6236,18 @@ class npc_koroth_the_hillbreaker_friend : public CreatureScript
         };
 };
 
-class npc_captain_asther_qiao : public CreatureScript
+class npc_captain_asther_qiao final : public CreatureScript
 {
     public:
         npc_captain_asther_qiao() : CreatureScript("npc_captain_asther_qiao") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public SmoothEscortAI
+        struct creature_script_impl final : public SmoothEscortAI
         {
             creature_script_impl(Creature* creature)
                 : SmoothEscortAI(creature)
@@ -6279,7 +6274,7 @@ class npc_captain_asther_qiao : public CreatureScript
             std::list<Minion> minions;
             uint64 korothGUID;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 ASSERT(me->isSummon());
                 me->SetReactState(REACT_PASSIVE);
@@ -6287,14 +6282,14 @@ class npc_captain_asther_qiao : public CreatureScript
                 me->setActive(true);
             }
 
-            void isSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* summoner) final
             {
                 me->SetSeerGUID(summoner->GetGUID());
                 me->SetVisible(false);
                 StartEvent();
             }
 
-            void JustSummoned(Creature* summoned)
+            void JustSummoned(Creature* summoned) final
             {
                 summoned->SetReactState(REACT_PASSIVE);
                 summoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -6303,7 +6298,7 @@ class npc_captain_asther_qiao : public CreatureScript
                 summoned->setActive(true);
             }
 
-            void StartMoveTo(float x, float y, float z)
+            void StartMoveTo(float x, float y, float z) final
             {
                 if (minions.empty())
                     return;
@@ -6334,7 +6329,7 @@ class npc_captain_asther_qiao : public CreatureScript
                 }
             }
 
-            void DoAction(int32 const action)
+            void DoAction(int32 const action) final
             {
                 if (action == ACTION_KOROTH_ATTACK)
                 {
@@ -6405,7 +6400,7 @@ class npc_captain_asther_qiao : public CreatureScript
                 Start();
             }
 
-            void WaypointReached(uint32 point)
+            void WaypointReached(uint32 point) final
             {
                 if (point == 15)
                 {
@@ -6416,7 +6411,7 @@ class npc_captain_asther_qiao : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 SmoothEscortAI::UpdateAI(diff);
 
@@ -6428,7 +6423,7 @@ class npc_captain_asther_qiao : public CreatureScript
         };
 };
 
-class npc_prince_liam_greymane_qiao : public CreatureScript
+class npc_prince_liam_greymane_qiao final : public CreatureScript
 {
     public:
         npc_prince_liam_greymane_qiao() : CreatureScript("npc_prince_liam_greymane_qiao") { }
@@ -6449,7 +6444,7 @@ class npc_prince_liam_greymane_qiao : public CreatureScript
             LIAM_YELL_YOU_CANT              = 2,
         };
 
-        class PersonalTalkEvent : public BasicEvent
+        class PersonalTalkEvent final : public BasicEvent
         {
             public:
                 PersonalTalkEvent(Creature* source, uint64 playerGUID, uint8 eventId)
@@ -6459,7 +6454,7 @@ class npc_prince_liam_greymane_qiao : public CreatureScript
                 { }
 
             private:
-                bool Execute(uint64 /*time*/, uint32 /*diff*/)
+                bool Execute(uint64 /*time*/, uint32 /*diff*/) final
                 {
                     switch (_eventId)
                     {
@@ -6492,7 +6487,7 @@ class npc_prince_liam_greymane_qiao : public CreatureScript
                 uint8 _eventId;
         };
 
-        bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/)
+        bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/) final
         {
             switch (quest->GetQuestId())
             {
@@ -6514,18 +6509,18 @@ enum
     ACTION_START_EVENT  = 100,
 };
 
-class npc_koroth_the_hillbreaker : public CreatureScript
+class npc_koroth_the_hillbreaker final : public CreatureScript
 {
     public:
         npc_koroth_the_hillbreaker() : CreatureScript("npc_koroth_the_hillbreaker") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl(creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -6538,7 +6533,7 @@ class npc_koroth_the_hillbreaker : public CreatureScript
                 YELL_FIND_YOU           = 2,
             };
 
-            void DoAction(int32 const action)
+            void DoAction(int32 const action) final
             {
                 switch (action)
                 {
@@ -6557,7 +6552,7 @@ class npc_koroth_the_hillbreaker : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 if (!UpdateVictim())
                     return;
@@ -6567,13 +6562,13 @@ class npc_koroth_the_hillbreaker : public CreatureScript
         };
 };
 
-class go_koroth_banner : public GameObjectScript
+class go_koroth_banner final : public GameObjectScript
 {
     public:
         go_koroth_banner() : GameObjectScript("go_koroth_banner") { }
 
     private:
-        bool OnGossipHello(Player* player, GameObject* go)
+        bool OnGossipHello(Player* player, GameObject* go) final
         {
             enum
             {
@@ -6594,13 +6589,13 @@ enum
     ACTION_PLAYER_IS_FREE       = 1,
 };
 
-class at_losing_your_tail : public AreaTriggerScript
+class at_losing_your_tail final : public AreaTriggerScript
 {
     public:
         at_losing_your_tail() : AreaTriggerScript("at_losing_your_tail") { }
 
     private:
-        bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/)
+        bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/) final
         {
             enum
             {
@@ -6618,18 +6613,18 @@ class at_losing_your_tail : public AreaTriggerScript
         }
 };
 
-class npc_dark_scout : public CreatureScript
+class npc_dark_scout final : public CreatureScript
 {
     public:
         npc_dark_scout() : CreatureScript("npc_dark_scout") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new spell_script_impl (creature);
         }
 
-        struct spell_script_impl : public ScriptedAI
+        struct spell_script_impl final : public ScriptedAI
         {
             spell_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -6642,7 +6637,7 @@ class npc_dark_scout : public CreatureScript
                 SPELL_AIMED_SHOT            = 70796,
             };
 
-            void isSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* summoner) final
             {
                 Talk(NPC_DARK_SCOUT_SAY_CATCH);
                 Talk(NPC_DARK_SCOUT_SAY_FREE, summoner->GetGUID(), true);
@@ -6650,12 +6645,12 @@ class npc_dark_scout : public CreatureScript
                 me->CastSpell(summoner, SPELL_AIMED_SHOT, false);
             }
 
-            void EnterEvadeMode()
+            void EnterEvadeMode() final
             {
                 me->DespawnOrUnsummon();
             }
 
-            void DoAction(int32 const action)
+            void DoAction(int32 const action) final
             {
                 if (action == ACTION_PLAYER_IS_FREE)
                 {
@@ -6664,7 +6659,7 @@ class npc_dark_scout : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 if (!UpdateVictim())
                     return;
@@ -6674,13 +6669,13 @@ class npc_dark_scout : public CreatureScript
         };
 };
 
-class spell_belysras_talisman : public SpellScriptLoader
+class spell_belysras_talisman final : public SpellScriptLoader
 {
     public:
         spell_belysras_talisman() : SpellScriptLoader("spell_belysras_talisman") { }
 
     private:
-        class spell_script_impl : public SpellScript
+        class spell_script_impl final : public SpellScript
         {
             PrepareSpellScript(spell_script_impl)
 
@@ -6693,13 +6688,13 @@ class spell_belysras_talisman : public SpellScriptLoader
                         target->GetAI()->DoAction(ACTION_PLAYER_IS_FREE);
             }
 
-            void Register()
+            void Register() final
             {
                 OnEffectHitTarget += SpellEffectFn(spell_script_impl::ExtraEffect, EFFECT_1, SPELL_EFFECT_DUMMY);
             }
         };
 
-        SpellScript *GetSpellScript() const
+        SpellScript *GetSpellScript() const final
         {
             return new spell_script_impl();
         }
@@ -6717,13 +6712,13 @@ enum
     CROWLEY_SAY_YES_GENN    = 4,
 };
 
-class npc_lord_darius_crowley_qaod : public CreatureScript
+class npc_lord_darius_crowley_qaod final : public CreatureScript
 {
     public:
         npc_lord_darius_crowley_qaod() : CreatureScript("npc_lord_darius_crowley_qaod") { }
 
     private:
-        bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/)
+        bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/) final
         {
             enum
             {
@@ -6745,18 +6740,18 @@ class npc_lord_darius_crowley_qaod : public CreatureScript
         }
 };
 
-class npc_tobias_mistmantle_qaod : public CreatureScript
+class npc_tobias_mistmantle_qaod final : public CreatureScript
 {
     public:
         npc_tobias_mistmantle_qaod() : CreatureScript("npc_tobias_mistmantle_qaod") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -6776,12 +6771,12 @@ class npc_tobias_mistmantle_qaod : public CreatureScript
 
             EventMap events;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 ASSERT(me->isSummon());
             }
 
-            void isSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* summoner) final
             {
                 me->SetSeerGUID(summoner->GetGUID());
                 me->SetVisible(false);
@@ -6789,7 +6784,7 @@ class npc_tobias_mistmantle_qaod : public CreatureScript
                 events.ScheduleEvent(EVENT_SAY_FORSAKEN, me->GetSplineDuration());
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 events.Update(diff);
 
@@ -6830,7 +6825,7 @@ enum
     ACTION_BACK                     = 100,
 };
 
-struct TrackerRetreatPOS
+struct TrackerRetreatPOS final
 {
     Position startPos;
     Position jumpPos;
@@ -6843,18 +6838,18 @@ static TrackerRetreatPOS const TrackerPOS[3]=
     { { -2147.640f, 1624.307f, -43.179f, 0.0f }, { -2178.477f, 1620.596f, -22.339f, 0.0f } },
 };
 
-class npc_taldoren_tracker : public CreatureScript
+class npc_taldoren_tracker final : public CreatureScript
 {
     public:
         npc_taldoren_tracker() : CreatureScript("npc_taldoren_tracker") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl(creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature)
                 : ScriptedAI(creature)
@@ -6870,12 +6865,12 @@ class npc_taldoren_tracker : public CreatureScript
 
             uint8 retreatId;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 ASSERT(me->isSummon());
             }
 
-            void DoAction(int32 const action)
+            void DoAction(int32 const action) final
             {
                 switch (action)
                 {
@@ -6910,7 +6905,7 @@ class npc_taldoren_tracker : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 if (!UpdateVictim())
                     return;
@@ -6920,18 +6915,18 @@ class npc_taldoren_tracker : public CreatureScript
         };
 };
 
-class npc_tobias_mistmantle_qtbwo : public CreatureScript
+class npc_tobias_mistmantle_qtbwo final : public CreatureScript
 {
     public:
         npc_tobias_mistmantle_qtbwo() : CreatureScript("npc_tobias_mistmantle_qtbwo") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature)
                 : ScriptedAI(creature)
@@ -6948,19 +6943,19 @@ class npc_tobias_mistmantle_qtbwo : public CreatureScript
 
             SummonList summons;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 ASSERT(me->isSummon());
             }
 
-            void isSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* summoner) final
             {
                 Talk(TOBIAS_SAY_DISTRACT_RANGERS, me->ToTempSummon()->GetSummonerGUID(), true);
                 me->CastSpell((Unit*)NULL, 71011, false);
                 me->m_Events.AddEvent(new DelayEventDoAction(me, ACTION_EVENT_DONE), me->m_Events.CalculateTime(25000));
             }
 
-            void DoAction(int32 const action)
+            void DoAction(int32 const action) final
             {
                 if (action == ACTION_EVENT_DONE)
                 {
@@ -6970,7 +6965,7 @@ class npc_tobias_mistmantle_qtbwo : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 if (!UpdateVictim())
                     return;
@@ -6980,13 +6975,13 @@ class npc_tobias_mistmantle_qtbwo : public CreatureScript
         };
 };
 
-class spell_horn_of_taldoren : public SpellScriptLoader
+class spell_horn_of_taldoren final : public SpellScriptLoader
 {
     public:
         spell_horn_of_taldoren() : SpellScriptLoader("spell_horn_of_taldoren") { }
 
     private:
-        class spell_script_impl : public SpellScript
+        class spell_script_impl final : public SpellScript
         {
             PrepareSpellScript(spell_script_impl)
 
@@ -7006,25 +7001,26 @@ class spell_horn_of_taldoren : public SpellScriptLoader
 
                 return SPELL_FAILED_BAD_TARGETS;
             }
-            void Register()
+
+            void Register() final
             {
                 OnCheckCast += SpellCheckCastFn(spell_script_impl::CanCast);
             }
         };
 
-        SpellScript *GetSpellScript() const
+        SpellScript *GetSpellScript() const final
         {
             return new spell_script_impl();
         }
 };
 
-class spell_retreat_trackers : public SpellScriptLoader
+class spell_retreat_trackers final : public SpellScriptLoader
 {
     public:
         spell_retreat_trackers() : SpellScriptLoader("spell_retreat_trackers") { }
 
     private:
-        class spell_script_impl : public SpellScript
+        class spell_script_impl final : public SpellScript
         {
             PrepareSpellScript(spell_script_impl)
 
@@ -7037,20 +7033,20 @@ class spell_retreat_trackers : public SpellScriptLoader
                         target->GetAI()->DoAction(ACTION_BACK);
             }
 
-            void Register()
+            void Register() final
             {
                 OnEffectHitTarget += SpellEffectFn(spell_script_impl::ExtraEffect, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 
-        SpellScript *GetSpellScript() const
+        SpellScript *GetSpellScript() const final
         {
             return new spell_script_impl();
         }
 };
 
 // Quest Neither Human Nor Beast 24593
-class go_qnhnb_well : public GameObjectScript
+class go_qnhnb_well final : public GameObjectScript
 {
     public:
         go_qnhnb_well(const char* scriptName, uint32 druidEntry, uint8 goId)
@@ -7064,7 +7060,7 @@ class go_qnhnb_well : public GameObjectScript
         uint8 _goId;
 
     private:
-        bool OnGossipHello(Player* player, GameObject* go)
+        bool OnGossipHello(Player* player, GameObject* go) final
         {
             enum
             {
@@ -7099,18 +7095,18 @@ class go_qnhnb_well : public GameObjectScript
         }
 };
 
-class npc_lord_godfrey_qnhnb : public CreatureScript
+class npc_lord_godfrey_qnhnb final : public CreatureScript
 {
     public:
         npc_lord_godfrey_qnhnb() : CreatureScript("npc_lord_godfrey_qnhnb") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl(creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -7127,12 +7123,12 @@ class npc_lord_godfrey_qnhnb : public CreatureScript
                 NPC_LORD_DARIUS_CROWLEY = 37195,
             };
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 ASSERT(me->isSummon());
             }
 
-            void isSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* summoner) final
             {
                 me->SetSeerGUID(summoner->GetGUID());
                 me->SetVisible(false);
@@ -7142,7 +7138,7 @@ class npc_lord_godfrey_qnhnb : public CreatureScript
                 me->m_Events.AddEvent(new DelayEventDoAction(me, ACTION_TALK_1), me->m_Events.CalculateTime(15000));
             }
 
-            void DoAction(int32 const action)
+            void DoAction(int32 const action) final
             {
                 switch (action)
                 {
@@ -7168,18 +7164,18 @@ class npc_lord_godfrey_qnhnb : public CreatureScript
         };
 };
 
-class npc_lorna_crowley_qnhnb : public CreatureScript
+class npc_lorna_crowley_qnhnb final : public CreatureScript
 {
     public:
         npc_lorna_crowley_qnhnb() : CreatureScript("npc_lorna_crowley_qnhnb") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl(creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -7192,12 +7188,12 @@ class npc_lorna_crowley_qnhnb : public CreatureScript
                 LORNA_YELL_FATHER   = 1,
             };
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 ASSERT(me->isSummon());
             }
 
-            void isSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* summoner) final
             {
                 me->SetSeerGUID(summoner->GetGUID());
                 me->SetVisible(false);
@@ -7206,7 +7202,7 @@ class npc_lorna_crowley_qnhnb : public CreatureScript
                 me->m_Events.AddEvent(new DelayEventDoAction(me, ACTION_TALK), me->m_Events.CalculateTime(me->GetSplineDuration()));
             }
 
-            void DoAction(int32 const action)
+            void DoAction(int32 const action) final
             {
                 switch (action)
                 {
@@ -7226,18 +7222,18 @@ class npc_lorna_crowley_qnhnb : public CreatureScript
         };
 };
 
-class npc_king_genn_greymane_qnhnb : public CreatureScript
+class npc_king_genn_greymane_qnhnb final : public CreatureScript
 {
     public:
         npc_king_genn_greymane_qnhnb() : CreatureScript("npc_king_genn_greymane_qnhnb") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl(creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -7257,12 +7253,12 @@ class npc_king_genn_greymane_qnhnb : public CreatureScript
                 SPELL_WORGEN_TRANSFORM              = 81908,
             };
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 ASSERT(me->isSummon());
             }
 
-            void isSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* summoner) final
             {
                 me->SetSeerGUID(summoner->GetGUID());
                 me->SetVisible(false);
@@ -7272,7 +7268,7 @@ class npc_king_genn_greymane_qnhnb : public CreatureScript
                 me->m_Events.AddEvent(new DelayEventDoAction(me, ACTION_TRANSFORM), me->m_Events.CalculateTime(35000));
             }
 
-            void DoAction(int32 const action)
+            void DoAction(int32 const action) final
             {
                 switch (action)
                 {
@@ -7301,7 +7297,7 @@ class npc_king_genn_greymane_qnhnb : public CreatureScript
         };
 };
 
-class spell_gilneas_pings_crowley : public SpellScriptLoader
+class spell_gilneas_pings_crowley final : public SpellScriptLoader
 {
     public:
         spell_gilneas_pings_crowley(const char* scriptName, uint8 textid)
@@ -7312,7 +7308,7 @@ class spell_gilneas_pings_crowley : public SpellScriptLoader
         uint8 _textid;
 
     private:
-        class spell_script_impl : public SpellScript
+        class spell_script_impl final : public SpellScript
         {
             PrepareSpellScript(spell_script_impl);
 
@@ -7336,25 +7332,25 @@ class spell_gilneas_pings_crowley : public SpellScriptLoader
                     target->AI()->Talk(_textid, caster->GetGUID(), true);
             }
 
-            void Register()
+            void Register() final
             {
                 OnEffectHitTarget += SpellEffectFn(spell_script_impl::ExtraEffect, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 
-        SpellScript *GetSpellScript() const
+        SpellScript *GetSpellScript() const final
         {
             return new spell_script_impl(_textid);
         }
 };
 
 // Quest Betrayal at Tempest's Reach 24592
-class npc_krennan_aranas_qbatr : public CreatureScript
+class npc_krennan_aranas_qbatr final : public CreatureScript
 {
     public:
         npc_krennan_aranas_qbatr() : CreatureScript("npc_krennan_aranas_qbatr") { }
 
-        bool OnQuestAccept(Player* player, Creature* /*creature*/, Quest const* quest)
+        bool OnQuestAccept(Player* player, Creature* /*creature*/, Quest const* quest) final
         {
             if (quest->GetQuestId() == QUEST_BETRAYAL_AT_TEMPESTS_REACH)
             {
@@ -7366,12 +7362,12 @@ class npc_krennan_aranas_qbatr : public CreatureScript
         }
 };
 
-class npc_king_genn_greymane_qbatr : public CreatureScript
+class npc_king_genn_greymane_qbatr final : public CreatureScript
 {
     public:
         npc_king_genn_greymane_qbatr() : CreatureScript("npc_king_genn_greymane_qbatr") { }
 
-        bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/)
+        bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/) final
         {
             enum
             {
@@ -7395,17 +7391,17 @@ class npc_king_genn_greymane_qbatr : public CreatureScript
         }
 };
 
-class npc_lord_godfrey_qbatr : public CreatureScript
+class npc_lord_godfrey_qbatr final : public CreatureScript
 {
     public:
         npc_lord_godfrey_qbatr() : CreatureScript("npc_lord_godfrey_qbatr") { }
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new npc_lord_godfrey_qbatrAI(creature);
         }
 
-        struct npc_lord_godfrey_qbatrAI : public ScriptedAI
+        struct npc_lord_godfrey_qbatrAI final : public ScriptedAI
         {
             npc_lord_godfrey_qbatrAI(Creature* creature) : ScriptedAI(creature) { }
 
@@ -7423,12 +7419,12 @@ class npc_lord_godfrey_qbatr : public CreatureScript
 
             bool isEvent;
 
-            void Reset()
+            void Reset() final
             {
                 isEvent = false;
             }
 
-            void DoAction(int32 const action)
+            void DoAction(int32 const action) final
             {
                 switch (action)
                 {
@@ -7466,7 +7462,7 @@ class npc_lord_godfrey_qbatr : public CreatureScript
         };
 };
 
-class npc_gilneas_betrayer_lord : public CreatureScript
+class npc_gilneas_betrayer_lord final : public CreatureScript
 {
     public:
         npc_gilneas_betrayer_lord(const char* scriptName, uint32 auraEntry)
@@ -7477,7 +7473,7 @@ class npc_gilneas_betrayer_lord : public CreatureScript
     private:
         uint32 _auraEntry;
 
-        class RemoveAuraEvent : public BasicEvent
+        class RemoveAuraEvent final : public BasicEvent
         {
             public:
                 RemoveAuraEvent(Player* owner, uint32 auraEntry)
@@ -7486,7 +7482,7 @@ class npc_gilneas_betrayer_lord : public CreatureScript
                 { }
 
             private:
-                bool Execute(uint64 /*time*/, uint32 /*diff*/)
+                bool Execute(uint64 /*time*/, uint32 /*diff*/) final
                 {
                     _owner->RemoveAura(_auraEntry);
                     _owner->SaveToDB();
@@ -7497,12 +7493,12 @@ class npc_gilneas_betrayer_lord : public CreatureScript
                 uint32 _auraEntry;
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature, _auraEntry);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature, uint32 auraEntry)
                 : ScriptedAI(creature)
@@ -7511,13 +7507,13 @@ class npc_gilneas_betrayer_lord : public CreatureScript
 
             uint32 _auraEntry;
 
-            void JustDied(Unit* killer)
+            void JustDied(Unit* killer) final
             {
                 if (Player* player = killer->ToPlayer())
                     player->m_Events.AddEvent(new RemoveAuraEvent(player, _auraEntry), player->m_Events.CalculateTime(10000));
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 if (!UpdateVictim())
                     return;
@@ -7527,13 +7523,13 @@ class npc_gilneas_betrayer_lord : public CreatureScript
         };
 };
 
-class npc_lord_hewell : public CreatureScript
+class npc_lord_hewell final : public CreatureScript
 {
     public:
         npc_lord_hewell() : CreatureScript("npc_lord_hewell") { }
 
     private:
-        bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
+        bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) final
         {
             enum
             {
@@ -7548,18 +7544,18 @@ class npc_lord_hewell : public CreatureScript
         }
 };
 
-class npc_stout_mountain_horse : public CreatureScript
+class npc_stout_mountain_horse final : public CreatureScript
 {
     public:
         npc_stout_mountain_horse() : CreatureScript("npc_stout_mountain_horse") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl(creature);
         }
 
-        struct creature_script_impl : public VehicleAI
+        struct creature_script_impl final : public VehicleAI
         {
             creature_script_impl(Creature* creature) : VehicleAI(creature) { }
 
@@ -7573,17 +7569,17 @@ class npc_stout_mountain_horse : public CreatureScript
 
             EventMap events;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 ASSERT(me->isSummon());
             }
 
-            void isSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* summoner) final
             {
                 events.ScheduleEvent(EVENT_START_RIDE, 1500);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 events.Update(diff);
 
@@ -7605,13 +7601,13 @@ class npc_stout_mountain_horse : public CreatureScript
 };
 
 // Quest Liberation Day 24575
-class spell_gilneas_rescue_enslaved_villager : public SpellScriptLoader
+class spell_gilneas_rescue_enslaved_villager final : public SpellScriptLoader
 {
     public:
         spell_gilneas_rescue_enslaved_villager() : SpellScriptLoader("spell_gilneas_rescue_enslaved_villager") { }
 
     private:
-        class spell_script_impl : public SpellScript
+        class spell_script_impl final : public SpellScript
         {
             PrepareSpellScript(spell_script_impl)
 
@@ -7634,25 +7630,25 @@ class spell_gilneas_rescue_enslaved_villager : public SpellScriptLoader
                 }
             }
 
-            void Register()
+            void Register() final
             {
                 OnEffectHitTarget += SpellEffectFn(spell_script_impl::ExtraEffect, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 
-        SpellScript *GetSpellScript() const
+        SpellScript *GetSpellScript() const final
         {
             return new spell_script_impl();
         }
 };
 
-class npc_lorna_crowley_livery_outpost : public CreatureScript
+class npc_lorna_crowley_livery_outpost final : public CreatureScript
 {
     public:
         npc_lorna_crowley_livery_outpost() : CreatureScript("npc_lorna_crowley_livery_outpost") { }
 
     private:
-        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) final
         {
             enum
             {
@@ -7676,7 +7672,7 @@ class npc_lorna_crowley_livery_outpost : public CreatureScript
 };
 
 // Quest The Battle for Gilneas City
-static float FWaveWP[168][3] =
+static float const FWaveWP[168][3] =
 {
     {-1414.161f, 1281.892f, 36.428f},{-1416.068f, 1289.827f, 36.428f},{-1419.030f, 1301.834f, 36.428f},
     {-1421.962f, 1313.006f, 36.428f},{-1423.899f, 1321.179f, 34.881f},{-1426.428f, 1331.009f, 34.782f},
@@ -7736,7 +7732,7 @@ static float FWaveWP[168][3] =
     {-1697.858f, 1613.420f, 20.488f},{-1692.809f, 1611.844f, 20.488f},{-1688.960f, 1611.874f, 20.488f},
 };
 
-static float SWaveWP[173][3] =
+static float const SWaveWP[173][3] =
 {
     {-1414.161f, 1281.892f, 36.428f},{-1416.068f, 1289.827f, 36.428f},{-1419.030f, 1301.834f, 36.428f},
     {-1421.962f, 1313.006f, 36.428f},{-1423.899f, 1321.179f, 34.881f},{-1426.428f, 1331.009f, 34.782f},
@@ -7798,7 +7794,7 @@ static float SWaveWP[173][3] =
     {-1688.187f, 1634.420f, 20.490f},{-1682.491f, 1634.150f, 20.493f}
 };
 
-static float TWaveWP[160][3] =
+static float const TWaveWP[160][3] =
 {
     {-1414.161f, 1281.892f, 36.428f},{-1416.068f, 1289.827f, 36.428f},{-1419.030f, 1301.834f, 36.428f},
     {-1421.962f, 1313.006f, 36.428f},{-1423.899f, 1321.179f, 34.881f},{-1426.428f, 1331.009f, 34.782f},
@@ -7856,7 +7852,7 @@ static float TWaveWP[160][3] =
     {-1699.046f, 1610.021f, 20.487f},
 };
 
-static float LornaWP[78][3] =
+static float const LornaWP[78][3] =
 {
     {-1551.90f,1284.75f,13.992f}, {-1561.35f,1282.32f,21.372f}, {-1581.19f,1277.05f,35.878f},
     {-1587.59f,1275.81f,35.880f}, {-1591.07f,1284.64f,35.878f}, {-1591.32f,1291.64f,35.981f},
@@ -7886,7 +7882,7 @@ static float LornaWP[78][3] =
     {-1718.56f,1643.08f,20.485f}, {-1709.44f,1635.46f,20.486f}, {-1703.89f,1621.66f,20.488f},
 };
 
-static float FWorgenWP[90][3] =
+static float const FWorgenWP[90][3] =
 {
     {-1782.323f, 1330.417f, 19.986f},{-1777.212f, 1335.359f, 19.928f},{-1772.587f, 1340.136f, 19.866f},
     {-1768.117f, 1344.888f, 19.770f},{-1763.055f, 1349.358f, 19.410f},{-1756.953f, 1354.040f, 19.658f},
@@ -7920,7 +7916,7 @@ static float FWorgenWP[90][3] =
     {-1690.876f, 1625.229f, 20.488f},{-1687.808f, 1622.724f, 20.488f},{-1683.897f, 1618.888f, 20.488f},
 };
 
-static float GreymaneWP[16][3] =
+static float const GreymaneWP[16][3] =
 {
     {-1763.038f, 1680.547f, 22.158f},{-1756.171f, 1674.759f, 22.158f},{-1750.765f, 1670.313f, 22.158f},
     {-1743.187f, 1664.099f, 20.481f},{-1734.999f, 1657.525f, 20.479f},{-1728.514f, 1652.187f, 20.500f},
@@ -7943,7 +7939,7 @@ const Position CannonSP[3]=
     {-1534.256f, 1285.484f, 1.539f, 3.12f},
 };
 
-struct Militia
+struct Militia final
 {
     uint64 guid;
     float dist;
@@ -7962,13 +7958,13 @@ enum
     TYPE_DESPAWN_EVENT          = 1,
 };
 
-class npc_krennan_aranas_tbfgc : public CreatureScript
+class npc_krennan_aranas_tbfgc final : public CreatureScript
 {
     public:
         npc_krennan_aranas_tbfgc() : CreatureScript("npc_krennan_aranas_tbfgc") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl(creature);
         }
@@ -7982,7 +7978,7 @@ class npc_krennan_aranas_tbfgc : public CreatureScript
             TYPE_PLAYER_GUID            = 1,
         };
 
-        bool OnGossipHello(Player* player, Creature* creature)
+        bool OnGossipHello(Player* player, Creature* creature) final
         {
             if (player->GetQuestStatus(QUEST_THE_BATTLE_FOR_GILNEAS_CITY) == QUEST_STATUS_INCOMPLETE)
             {
@@ -8001,7 +7997,7 @@ class npc_krennan_aranas_tbfgc : public CreatureScript
             return true;
         }
 
-        bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
+        bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) final
         {
             player->PlayerTalkClass->ClearMenus();
             player->CLOSE_GOSSIP_MENU();
@@ -8030,20 +8026,20 @@ class npc_krennan_aranas_tbfgc : public CreatureScript
             return true;
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
             uint64 liamGUID;
             bool battle;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 InitBattle();
                 me->setActive(true);
             }
 
-            void DoAction(int32 const action)
+            void DoAction(int32 const action) final
             {
                 switch (action)
                 {
@@ -8056,7 +8052,7 @@ class npc_krennan_aranas_tbfgc : public CreatureScript
                 }
             }
 
-            bool IsBattle()
+            bool IsBattle() const
             {
                 return battle;
             }
@@ -8079,7 +8075,7 @@ class npc_krennan_aranas_tbfgc : public CreatureScript
                         liam->GetAI()->DoAction(ACTION_START_EVENT);
             }
 
-            void SetGUID(uint64 guid, int32 type)
+            void SetGUID(uint64 guid, int32 type) final
             {
                 if (type == TYPE_PLAYER_GUID)
                 {
@@ -8128,7 +8124,7 @@ struct BattleForGilneasLeaderAI : public SmoothEscortAI
         militias.push_back(militia);
     }
 
-    void SetData(uint32 type, uint32 data)
+    void SetData(uint32 type, uint32 data) override
     {
         if (type == TYPE_DESPAWN_EVENT)
         {
@@ -8140,7 +8136,7 @@ struct BattleForGilneasLeaderAI : public SmoothEscortAI
         }
     }
 
-    void StartMoveTo(float x, float y, float z)
+    void StartMoveTo(float x, float y, float z) override
     {
         float pathangle = atan2(me->GetPositionY() - y, me->GetPositionX() - x);
         bool smooth = std::abs(me->GetPositionZ() - z) > 5.f;
@@ -8231,7 +8227,7 @@ struct BattleForGilneasLeaderAI : public SmoothEscortAI
         }
     }
 
-    void AttackStart(Unit* who)
+    void AttackStart(Unit* who) override
     {
         SmoothEscortAI::AttackStart(who);
 
@@ -8256,7 +8252,7 @@ struct BattleForGilneasLeaderAI : public SmoothEscortAI
         }
     }
 
-    void EnterEvadeMode()
+    void EnterEvadeMode() override
     {
         if (!isFinish)
         {
@@ -8280,18 +8276,18 @@ struct BattleForGilneasLeaderAI : public SmoothEscortAI
     }
 };
 
-class npc_prince_liam_greymane_tbfgc : public CreatureScript
+class npc_prince_liam_greymane_tbfgc final : public CreatureScript
 {
     public:
         npc_prince_liam_greymane_tbfgc() : CreatureScript("npc_prince_liam_greymane_tbfgc") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl(creature);
         }
 
-        struct creature_script_impl : public BattleForGilneasLeaderAI
+        struct creature_script_impl final : public BattleForGilneasLeaderAI
         {
             creature_script_impl(Creature* creature)
                 : BattleForGilneasLeaderAI(creature)
@@ -8378,7 +8374,7 @@ class npc_prince_liam_greymane_tbfgc : public CreatureScript
             uint8 battlePhase;
             bool isBattle;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 Reset();
                 SummonEventCreatures();
@@ -8388,18 +8384,18 @@ class npc_prince_liam_greymane_tbfgc : public CreatureScript
                 me->setActive(true);
             }
 
-            void Reset()
+            void Reset() final
             {
                 shooterAI.Reset();
                 events.Reset();
             }
 
-            void DamageTaken(Unit* attacker, uint32 &damage)
+            void DamageTaken(Unit* attacker, uint32 &damage) final
             {
                 shooterAI.DamageTaken(attacker, damage);
             }
 
-            void SpellHit(Unit* caster, SpellInfo const* spell) override
+            void SpellHit(Unit* caster, SpellInfo const* spell) final
             {
                 BattleForGilneasLeaderAI::SpellHit(caster, spell);
 
@@ -8410,7 +8406,7 @@ class npc_prince_liam_greymane_tbfgc : public CreatureScript
                 }
             }
 
-            void DoAction(int32 const action)
+            void DoAction(int32 const action) final
             {
                 switch (action)
                 {
@@ -8501,7 +8497,7 @@ class npc_prince_liam_greymane_tbfgc : public CreatureScript
                 battlePhase = PHASE_MERCHANT_SQUARE;
             }
 
-            void JustSummoned(Creature* summoned)
+            void JustSummoned(Creature* summoned) final
             {
                 switch (summoned->GetEntry())
                 {
@@ -8557,7 +8553,7 @@ class npc_prince_liam_greymane_tbfgc : public CreatureScript
                                 escort->SetEscortPaused(false);
             }
 
-            void WaypointReached(uint32 point)
+            void WaypointReached(uint32 point) final
             {
                 switch (point)
                 {
@@ -8592,7 +8588,7 @@ class npc_prince_liam_greymane_tbfgc : public CreatureScript
                 }
             }
 
-            void EnterCombat(Unit* who)
+            void EnterCombat(Unit* who) final
             {
                 shooterAI.EnterCombat(who);
                 CustomSpellValues values;
@@ -8603,7 +8599,7 @@ class npc_prince_liam_greymane_tbfgc : public CreatureScript
                 events.ScheduleEvent(EVENT_LIAM_BATTLE_YELL, urand(3000, 7000));
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 SmoothEscortAI::UpdateAI(diff);
 
@@ -8768,18 +8764,18 @@ class npc_prince_liam_greymane_tbfgc : public CreatureScript
         };
 };
 
-class npc_myriam_spellwaker_tbfgc : public CreatureScript
+class npc_myriam_spellwaker_tbfgc final : public CreatureScript
 {
     public:
         npc_myriam_spellwaker_tbfgc() : CreatureScript("npc_myriam_spellwaker_tbfgc"){ }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl(creature);
         }
 
-        struct creature_script_impl : public BattleForGilneasLeaderAI
+        struct creature_script_impl final : public BattleForGilneasLeaderAI
         {
             creature_script_impl(Creature* creature) : BattleForGilneasLeaderAI(creature) { }
 
@@ -8798,23 +8794,23 @@ class npc_myriam_spellwaker_tbfgc : public CreatureScript
 
             EventMap events;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 SetCombatMovement(false);
                 me->setActive(true);
             }
 
-            void Reset()
+            void Reset() final
             {
                 events.Reset();
             }
 
-            void isSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* summoner) final
             {
                 SummonMilitia(summoner, NPC_GILNEAN_MILITIA, 5, 7);
             }
 
-            void DoAction(int32 const action)
+            void DoAction(int32 const action) final
             {
                 switch (action)
                 {
@@ -8829,7 +8825,7 @@ class npc_myriam_spellwaker_tbfgc : public CreatureScript
                 }
             }
 
-            void WaypointReached(uint32 point)
+            void WaypointReached(uint32 point) final
             {
                 switch (point)
                 {
@@ -8847,7 +8843,7 @@ class npc_myriam_spellwaker_tbfgc : public CreatureScript
                 }
             }
 
-            void DamageTaken(Unit* attacker, uint32 &damage)
+            void DamageTaken(Unit* attacker, uint32 &damage) final
             {
                 if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->isPet())
                 {
@@ -8859,7 +8855,7 @@ class npc_myriam_spellwaker_tbfgc : public CreatureScript
                 }
             }
 
-            void EnterCombat(Unit* who)
+            void EnterCombat(Unit* who) final
             {
                 CustomSpellValues values;
                 values.AddSpellMod(SPELLVALUE_RADIUS_MOD, 40.f);
@@ -8869,7 +8865,7 @@ class npc_myriam_spellwaker_tbfgc : public CreatureScript
                 events.ScheduleEvent(EVENT_BLIZZARD, urand(5000, 15000));
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 SmoothEscortAI::UpdateAI(diff);
 
@@ -8903,18 +8899,18 @@ class npc_myriam_spellwaker_tbfgc : public CreatureScript
         };
 };
 
-class npc_sister_almyra_tbfgc : public CreatureScript
+class npc_sister_almyra_tbfgc final : public CreatureScript
 {
     public:
         npc_sister_almyra_tbfgc() : CreatureScript("npc_sister_almyra_tbfgc") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl(creature);
         }
 
-        struct creature_script_impl : public BattleForGilneasLeaderAI
+        struct creature_script_impl final : public BattleForGilneasLeaderAI
         {
             creature_script_impl(Creature* creature) : BattleForGilneasLeaderAI(creature) { }
 
@@ -8932,23 +8928,23 @@ class npc_sister_almyra_tbfgc : public CreatureScript
 
             EventMap events;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 SetCombatMovement(false);
                 me->setActive(true);
             }
 
-            void Reset()
+            void Reset() final
             {
                 events.Reset();
             }
 
-            void isSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* summoner) final
             {
                 SummonMilitia(summoner, NPC_GILNEAN_MILITIA, 8, 10);
             }
 
-            void DoAction(int32 const action)
+            void DoAction(int32 const action) final
             {
                 switch (action)
                 {
@@ -8963,7 +8959,7 @@ class npc_sister_almyra_tbfgc : public CreatureScript
                 }
             }
 
-            void WaypointReached(uint32 point)
+            void WaypointReached(uint32 point) final
             {
                 switch (point)
                 {
@@ -8988,7 +8984,7 @@ class npc_sister_almyra_tbfgc : public CreatureScript
                 }
             }
 
-            void DamageTaken(Unit* attacker, uint32 &damage)
+            void DamageTaken(Unit* attacker, uint32 &damage) final
             {
                 if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->isPet())
                 {
@@ -9000,7 +8996,7 @@ class npc_sister_almyra_tbfgc : public CreatureScript
                 }
             }
 
-            void EnterCombat(Unit* who)
+            void EnterCombat(Unit* who) final
             {
                 CustomSpellValues values;
                 values.AddSpellMod(SPELLVALUE_RADIUS_MOD, 40.f);
@@ -9009,7 +9005,7 @@ class npc_sister_almyra_tbfgc : public CreatureScript
                 events.ScheduleEvent(EVENT_HOLY_NOVA, urand(3000, 5000));
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 SmoothEscortAI::UpdateAI(diff);
 
@@ -9043,18 +9039,18 @@ class npc_sister_almyra_tbfgc : public CreatureScript
         };
 };
 
-class npc_gilnean_militia_tbfgc : public CreatureScript
+class npc_gilnean_militia_tbfgc final : public CreatureScript
 {
     public:
         npc_gilnean_militia_tbfgc() : CreatureScript("npc_gilnean_militia_tbfgc") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl(creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature)
                 : ScriptedAI(creature)
@@ -9074,26 +9070,26 @@ class npc_gilnean_militia_tbfgc : public CreatureScript
             ShooterGuardAI shooterAI;
             EventMap events;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 Reset();
                 SetCombatMovement(false);
                 me->setActive(true);
             }
 
-            void Reset()
+            void Reset() final
             {
                 shooterAI.Reset();
                 events.Reset();
                 me->SetWalk(false);
             }
 
-            void DamageTaken(Unit* attacker, uint32 &damage)
+            void DamageTaken(Unit* attacker, uint32 &damage) final
             {
                 shooterAI.DamageTaken(attacker, damage);
             }
 
-            void EnterEvadeMode()
+            void EnterEvadeMode() final
             {
                 if (me->isSummon())
                 {
@@ -9110,7 +9106,7 @@ class npc_gilnean_militia_tbfgc : public CreatureScript
                 ScriptedAI::EnterEvadeMode();
             }
 
-            void SpellHit(Unit* /*caster*/, SpellInfo const* spell) override
+            void SpellHit(Unit* /*caster*/, SpellInfo const* spell) final
             {
                 if (spell->Id == SPELL_BANSHEE_QUEENS_WAIL)
                 {
@@ -9122,7 +9118,7 @@ class npc_gilnean_militia_tbfgc : public CreatureScript
                 }
             }
 
-            void AttackStart(Unit* who)
+            void AttackStart(Unit* who) final
             {
                 shooterAI.AttackStart(who);
 
@@ -9144,7 +9140,7 @@ class npc_gilnean_militia_tbfgc : public CreatureScript
                 }
             }
 
-            void EnterCombat(Unit* who)
+            void EnterCombat(Unit* who) final
             {
                 if (me->isMoving())
                     me->StopMoving();
@@ -9157,7 +9153,7 @@ class npc_gilnean_militia_tbfgc : public CreatureScript
                 events.ScheduleEvent(EVENT_SUNDER_ARMOR, urand(3000, 5000));
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 if (!shooterAI.UpdateShooterAI(diff))
                     return;
@@ -9190,18 +9186,18 @@ class npc_gilnean_militia_tbfgc : public CreatureScript
         };
 };
 
-class npc_dark_ranger_elite_tbfgc : public CreatureScript
+class npc_dark_ranger_elite_tbfgc final : public CreatureScript
 {
     public:
         npc_dark_ranger_elite_tbfgc() : CreatureScript("npc_dark_ranger_elite_tbfgc") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl(creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature)
                 : ScriptedAI(creature)
@@ -9219,26 +9215,26 @@ class npc_dark_ranger_elite_tbfgc : public CreatureScript
             ShooterGuardAI shooterAI;
             EventMap events;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 Reset();
                 SetCombatMovement(false);
                 me->m_ReactDistance = 30.0f;
             }
 
-            void Reset()
+            void Reset() final
             {
                 shooterAI.Reset();
                 events.Reset();
                 me->m_Events.AddEvent(new AggroEvent(me), me->m_Events.CalculateTime(500));
             }
 
-            void AttackStart(Unit* who)
+            void AttackStart(Unit* who) final
             {
                 shooterAI.AttackStart(who);
             }
 
-            void EnterCombat(Unit* who)
+            void EnterCombat(Unit* who) final
             {
                 me->StopMoving();
                 me->SetHomePosition(*me);
@@ -9246,7 +9242,7 @@ class npc_dark_ranger_elite_tbfgc : public CreatureScript
                 events.ScheduleEvent(EVENT_KNOCKBACK, urand(5000, 10000));
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 if (!shooterAI.UpdateShooterAI(diff))
                     return;
@@ -9264,18 +9260,18 @@ class npc_dark_ranger_elite_tbfgc : public CreatureScript
         };
 };
 
-class npc_lorna_crowley_tbfgc : public CreatureScript
+class npc_lorna_crowley_tbfgc final : public CreatureScript
 {
     public:
         npc_lorna_crowley_tbfgc() : CreatureScript("npc_lorna_crowley_tbfgc") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl(creature);
         }
 
-        struct creature_script_impl : public SmoothEscortAI
+        struct creature_script_impl final : public SmoothEscortAI
         {
             creature_script_impl(Creature* creature)
                 : SmoothEscortAI(creature)
@@ -9291,7 +9287,7 @@ class npc_lorna_crowley_tbfgc : public CreatureScript
 
             ShooterGuardAI shooterAI;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 SetCombatMovement(false);
                 me->m_ReactDistance = 30.0f;
@@ -9299,12 +9295,12 @@ class npc_lorna_crowley_tbfgc : public CreatureScript
                 Reset();
             }
 
-            void Reset()
+            void Reset() final
             {
                 shooterAI.Reset();
             }
 
-            void isSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* summoner) final
             {
                 for (int i = 0; i < 78; ++i)
                     AddWaypoint(i, LornaWP[i][0], LornaWP[i][1], LornaWP[i][2]);
@@ -9312,13 +9308,13 @@ class npc_lorna_crowley_tbfgc : public CreatureScript
                 Start(true);
             }
 
-            void SetData(uint32 type, uint32 data)
+            void SetData(uint32 type, uint32 data) final
             {
                 if (type == TYPE_DESPAWN_EVENT)
                     me->DespawnOrUnsummon(data);
             }
 
-            void SpellHit(Unit* /*caster*/, SpellInfo const* spell) override
+            void SpellHit(Unit* /*caster*/, SpellInfo const* spell) final
             {
                 if (spell->Id == SPELL_BANSHEE_QUEENS_WAIL)
                 {
@@ -9330,17 +9326,17 @@ class npc_lorna_crowley_tbfgc : public CreatureScript
                 }
             }
 
-            void DamageTaken(Unit* attacker, uint32 &damage)
+            void DamageTaken(Unit* attacker, uint32 &damage) final
             {
                 shooterAI.DamageTaken(attacker, damage);
             }
 
-            void EnterCombat(Unit* who)
+            void EnterCombat(Unit* who) final
             {
                 shooterAI.EnterCombat(who);
             }
 
-            void WaypointReached(uint32 point)
+            void WaypointReached(uint32 point) final
             {
                 switch (point)
                 {
@@ -9360,7 +9356,7 @@ class npc_lorna_crowley_tbfgc : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 SmoothEscortAI::UpdateAI(diff);
 
@@ -9369,18 +9365,18 @@ class npc_lorna_crowley_tbfgc : public CreatureScript
         };
 };
 
-class npc_emberstone_cannon_tbfgc : public CreatureScript
+class npc_emberstone_cannon_tbfgc final : public CreatureScript
 {
     public:
         npc_emberstone_cannon_tbfgc() : CreatureScript("npc_emberstone_cannon_tbfgc") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl(creature);
         }
 
-        struct creature_script_impl : public VehicleAI
+        struct creature_script_impl final : public VehicleAI
         {
             creature_script_impl(Creature* creature) : VehicleAI(creature) { }
 
@@ -9395,19 +9391,19 @@ class npc_emberstone_cannon_tbfgc : public CreatureScript
                 NPC_FREED_EMBERSTONE_VILLAGER   = 38425,
             };
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 me->AddExtraUnitMovementFlag(MOVEMENTFLAG2_FULL_SPEED_PITCHING);
                 me->AddExtraUnitMovementFlag(MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING);
                 me->setActive(true);
             }
 
-            void isSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* summoner) final
             {
                 me->m_Events.AddEvent(new DelayEventDoAction(me, ACTION_INITIALIZE), me->m_Events.CalculateTime(250));
             }
 
-            void DoAction(int32 const action)
+            void DoAction(int32 const action) final
             {
                 switch (action)
                 {
@@ -9432,18 +9428,18 @@ class npc_emberstone_cannon_tbfgc : public CreatureScript
         };
 };
 
-class npc_gilneas_forsaken_crossbowman_tbfgc : public CreatureScript
+class npc_gilneas_forsaken_crossbowman_tbfgc final : public CreatureScript
 {
     public:
         npc_gilneas_forsaken_crossbowman_tbfgc() : CreatureScript("npc_gilneas_forsaken_crossbowman_tbfgc") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature)
                 : ScriptedAI(creature)
@@ -9457,41 +9453,41 @@ class npc_gilneas_forsaken_crossbowman_tbfgc : public CreatureScript
 
             ShooterGuardAI shooterAI;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 SetCombatMovement(false);
                 me->m_ReactDistance = 30.0f;
             }
 
-            void Reset()
+            void Reset() final
             {
                 shooterAI.Reset();
             }
 
-            void EnterCombat(Unit* who)
+            void EnterCombat(Unit* who) final
             {
                 shooterAI.EnterCombat(who);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 shooterAI.UpdateShooterAI(diff);
             }
         };
 };
 
-class npc_lord_darius_crowley_tbfgc : public CreatureScript
+class npc_lord_darius_crowley_tbfgc final : public CreatureScript
 {
     public:
         npc_lord_darius_crowley_tbfgc() : CreatureScript("npc_lord_darius_crowley_tbfgc") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl(creature);
         }
 
-        struct creature_script_impl : public BattleForGilneasLeaderAI
+        struct creature_script_impl final : public BattleForGilneasLeaderAI
         {
             creature_script_impl(Creature* creature) : BattleForGilneasLeaderAI(creature) { }
 
@@ -9514,20 +9510,20 @@ class npc_lord_darius_crowley_tbfgc : public CreatureScript
             EventMap events;
             bool gorerot;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 SummonMilitia(me, NPC_WORGEN_WARRIOR, 1, 4);
                 Reset();
                 me->setActive(true);
             }
 
-            void Reset()
+            void Reset() final
             {
                 gorerot = false;
                 events.Reset();
             }
 
-            void isSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* summoner) final
             {
                 for (int j = 0; j < 90; ++j)
                     AddWaypoint(j, FWorgenWP[j][0], FWorgenWP[j][1], FWorgenWP[j][2]);
@@ -9535,7 +9531,7 @@ class npc_lord_darius_crowley_tbfgc : public CreatureScript
                 Start(true, true);
             }
 
-            void DoAction(int32 const action)
+            void DoAction(int32 const action) final
             {
                 switch (action)
                 {
@@ -9549,7 +9545,7 @@ class npc_lord_darius_crowley_tbfgc : public CreatureScript
                 }
             }
 
-            void WaypointReached(uint32 point)
+            void WaypointReached(uint32 point) final
             {
                 if (point == 18)
                 {
@@ -9562,7 +9558,7 @@ class npc_lord_darius_crowley_tbfgc : public CreatureScript
                 }
             }
 
-            void DamageTaken(Unit* attacker, uint32 &damage)
+            void DamageTaken(Unit* attacker, uint32 &damage) final
             {
                 if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->isPet())
                 {
@@ -9574,7 +9570,7 @@ class npc_lord_darius_crowley_tbfgc : public CreatureScript
                 }
             }
 
-            void EnterCombat(Unit* who)
+            void EnterCombat(Unit* who) final
             {
                 me->CastSpell(who, SPELL_INTERCEPT, false);
                 events.ScheduleEvent(EVENT_TAUNT, 1000);
@@ -9584,7 +9580,7 @@ class npc_lord_darius_crowley_tbfgc : public CreatureScript
                     events.ScheduleEvent(EVENT_JUMP, 12000);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 SmoothEscortAI::UpdateAI(diff);
 
@@ -9633,22 +9629,22 @@ class npc_lord_darius_crowley_tbfgc : public CreatureScript
         };
 };
 
-class npc_worgen_warrior_tbfgc : public CreatureScript
+class npc_worgen_warrior_tbfgc final : public CreatureScript
 {
     public:
         npc_worgen_warrior_tbfgc() : CreatureScript("npc_worgen_warrior_tbfgc") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
-            void SpellHit(Unit* /*caster*/, SpellInfo const* spell) override
+            void SpellHit(Unit* /*caster*/, SpellInfo const* spell) final
             {
                 if (spell->Id == SPELL_BANSHEE_QUEENS_WAIL)
                 {
@@ -9659,7 +9655,7 @@ class npc_worgen_warrior_tbfgc : public CreatureScript
                 }
             }
 
-            void DamageTaken(Unit* attacker, uint32 &damage)
+            void DamageTaken(Unit* attacker, uint32 &damage) final
             {
                 if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->isPet())
                 {
@@ -9671,7 +9667,7 @@ class npc_worgen_warrior_tbfgc : public CreatureScript
                 }
             }
 
-            void EnterEvadeMode()
+            void EnterEvadeMode() final
             {
                 if (me->isSummon())
                 {
@@ -9688,7 +9684,7 @@ class npc_worgen_warrior_tbfgc : public CreatureScript
                 ScriptedAI::EnterEvadeMode();
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 if (!UpdateVictim())
                     return;
@@ -9698,18 +9694,18 @@ class npc_worgen_warrior_tbfgc : public CreatureScript
         };
 };
 
-class npc_gorerot_tbfgc : public CreatureScript
+class npc_gorerot_tbfgc final : public CreatureScript
 {
     public:
         npc_gorerot_tbfgc() : CreatureScript("npc_gorerot_tbfgc") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -9731,19 +9727,19 @@ class npc_gorerot_tbfgc : public CreatureScript
 
             EventMap events;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 SetCombatMovement(false);
                 me->setActive(true);
                 Reset();
             }
 
-            void Reset()
+            void Reset() final
             {
                 events.Reset();
             }
 
-            void isSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* summoner) final
             {
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 me->SetReactState(REACT_PASSIVE);
@@ -9753,7 +9749,7 @@ class npc_gorerot_tbfgc : public CreatureScript
                 me->m_Events.AddEvent(new DelayEventDoAction(me, ACTION_START_COMBAT), me->m_Events.CalculateTime(me->GetSplineDuration() + 250));
             }
 
-            void DoAction(int32 const action)
+            void DoAction(int32 const action) final
             {
                 if (action == ACTION_START_COMBAT)
                 {
@@ -9764,7 +9760,7 @@ class npc_gorerot_tbfgc : public CreatureScript
                 }
             }
 
-            void JustDied(Unit* /*killer*/)
+            void JustDied(Unit* /*killer*/) final
             {
                 if (me->isSummon())
                     if (Unit* summoner = me->ToTempSummon()->GetSummoner())
@@ -9772,7 +9768,7 @@ class npc_gorerot_tbfgc : public CreatureScript
                             liam->AI()->DoAction(ACTION_GOREROT_DIED);
             }
 
-            void PassengerWillBoard(Unit* passenger, Position& enterPos, int8 seatId)
+            void PassengerWillBoard(Unit* passenger, Position& enterPos, int8 seatId) final
             {
                 switch (seatId)
                 {
@@ -9784,7 +9780,7 @@ class npc_gorerot_tbfgc : public CreatureScript
                 }
             }
 
-            void EnterCombat(Unit* who)
+            void EnterCombat(Unit* who) final
             {
                 events.ScheduleEvent(EVENT_APPLY_WORGENS, 1000);
                 events.ScheduleEvent(EVENT_SMASH, urand(5000, 10000));
@@ -9799,7 +9795,7 @@ class npc_gorerot_tbfgc : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 if (!UpdateVictim())
                     return;
@@ -9882,18 +9878,18 @@ class npc_gorerot_tbfgc : public CreatureScript
         };
 };
 
-class npc_damaged_catapult_tbfgc : public CreatureScript
+class npc_damaged_catapult_tbfgc final : public CreatureScript
 {
     public:
         npc_damaged_catapult_tbfgc() : CreatureScript("npc_damaged_catapult_tbfgc") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public VehicleAI
+        struct creature_script_impl final : public VehicleAI
         {
             creature_script_impl(Creature* creature) : VehicleAI(creature) { }
 
@@ -9903,12 +9899,12 @@ class npc_damaged_catapult_tbfgc : public CreatureScript
                 SPELL_BURNING           = 72839,
             };
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_SOLDIER_OF_TBFGC, true);
             }
 
-            void PassengerBoarded(Unit* /*who*/, int8 /*seatId*/, bool apply)
+            void PassengerBoarded(Unit* /*who*/, int8 /*seatId*/, bool apply) final
             {
                 if (apply)
                     me->AddAura(SPELL_BURNING, me);
@@ -9918,18 +9914,18 @@ class npc_damaged_catapult_tbfgc : public CreatureScript
         };
 };
 
-class npc_king_genn_greymane_tbfgc : public CreatureScript
+class npc_king_genn_greymane_tbfgc final : public CreatureScript
 {
     public:
         npc_king_genn_greymane_tbfgc() : CreatureScript("npc_king_genn_greymane_tbfgc") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl(creature);
         }
 
-        struct creature_script_impl : public BattleForGilneasLeaderAI
+        struct creature_script_impl final : public BattleForGilneasLeaderAI
         {
             creature_script_impl(Creature* creature) : BattleForGilneasLeaderAI(creature) { }
 
@@ -9943,13 +9939,13 @@ class npc_king_genn_greymane_tbfgc : public CreatureScript
 
             };
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 me->setActive(true);
                 SummonMilitia(me, NPC_GILNEAN_MILITIA, 1, 4);
             }
 
-            void isSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* summoner) final
             {
                 for (int i = 0; i < 16; ++i)
                     AddWaypoint(i, GreymaneWP[i][0], GreymaneWP[i][1], GreymaneWP[i][2]);
@@ -9957,7 +9953,7 @@ class npc_king_genn_greymane_tbfgc : public CreatureScript
                 Start(true);
             }
 
-            void DamageTaken(Unit* attacker, uint32 &damage)
+            void DamageTaken(Unit* attacker, uint32 &damage) final
             {
                 if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->isPet())
                 {
@@ -9969,7 +9965,7 @@ class npc_king_genn_greymane_tbfgc : public CreatureScript
                 }
             }
 
-            void WaypointReached(uint32 point)
+            void WaypointReached(uint32 point) final
             {
                 switch (point)
                 {
@@ -9983,7 +9979,7 @@ class npc_king_genn_greymane_tbfgc : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 SmoothEscortAI::UpdateAI(diff);
 
@@ -9995,18 +9991,18 @@ class npc_king_genn_greymane_tbfgc : public CreatureScript
         };
 };
 
-class npc_lady_sylvanas_windrunner_tbfgc : public CreatureScript
+class npc_lady_sylvanas_windrunner_tbfgc final : public CreatureScript
 {
     public:
         npc_lady_sylvanas_windrunner_tbfgc() : CreatureScript("npc_lady_sylvanas_windrunner_tbfgc") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature)
                 : ScriptedAI(creature)
@@ -10023,7 +10019,7 @@ class npc_lady_sylvanas_windrunner_tbfgc : public CreatureScript
             ShooterGuardAI shooterAI;
             bool enrage;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 SetCombatMovement(false);
                 me->SetReactState(REACT_PASSIVE);
@@ -10031,13 +10027,13 @@ class npc_lady_sylvanas_windrunner_tbfgc : public CreatureScript
                 me->setActive(true);
             }
 
-            void Reset()
+            void Reset() final
             {
                 enrage = false;
                 shooterAI.Reset();
             }
 
-            void DamageTaken(Unit* attacker, uint32 &damage)
+            void DamageTaken(Unit* attacker, uint32 &damage) final
             {
                 if (!enrage && me->HealthBelowPctDamaged(20, damage))
                 {
@@ -10057,7 +10053,7 @@ class npc_lady_sylvanas_windrunner_tbfgc : public CreatureScript
                 }
             }
 
-            void EnterCombat(Unit* who)
+            void EnterCombat(Unit* who) final
             {
                 shooterAI.EnterCombat(who);
 
@@ -10070,7 +10066,7 @@ class npc_lady_sylvanas_windrunner_tbfgc : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 shooterAI.UpdateShooterAI(diff);
             }
@@ -10078,7 +10074,7 @@ class npc_lady_sylvanas_windrunner_tbfgc : public CreatureScript
 };
 
 // Quest The Hunt For Sylvanas 24902
-class npc_lorna_crowley_qthfs : public CreatureScript
+class npc_lorna_crowley_qthfs final : public CreatureScript
 {
     public:
         npc_lorna_crowley_qthfs() : CreatureScript("npc_lorna_crowley_qthfs") { }
@@ -10089,7 +10085,7 @@ class npc_lorna_crowley_qthfs : public CreatureScript
             SPELL_SUMMON_TOBIAS = 72471,
         };
 
-        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) final
         {
             if (quest->GetQuestId() == QUEST_THE_HUNT_FOR_SYLVANAS)
                 creature->CastSpell(player, SPELL_SUMMON_TOBIAS, false, NULL, NULL, player->GetGUID());
@@ -10097,7 +10093,7 @@ class npc_lorna_crowley_qthfs : public CreatureScript
             return false;
         }
 
-        bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/)
+        bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/) final
         {
             if (quest->GetQuestId() == QUEST_THE_BATTLE_FOR_GILNEAS_CITY)
             {
@@ -10110,18 +10106,18 @@ class npc_lorna_crowley_qthfs : public CreatureScript
         }
 };
 
-class npc_tobias_mistmantle_qthfs : public CreatureScript
+class npc_tobias_mistmantle_qthfs final : public CreatureScript
 {
     public:
         npc_tobias_mistmantle_qthfs() : CreatureScript("npc_tobias_mistmantle_qthfs") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl(creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -10181,13 +10177,13 @@ class npc_tobias_mistmantle_qthfs : public CreatureScript
             uint64 warhowlGUID;
             uint64 crenshawGUID;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 ASSERT(me->isSummon());
                 me->setActive(true);
             }
 
-            void isSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* summoner) final
             {
                 me->SetSeerGUID(summoner->GetGUID());
                 me->SetVisible(false);
@@ -10195,13 +10191,13 @@ class npc_tobias_mistmantle_qthfs : public CreatureScript
                 events.ScheduleEvent(EVENT_START_HUNT, 5000);
             }
 
-            void JustSummoned(Creature* summoned)
+            void JustSummoned(Creature* summoned) final
             {
                 summoned->SetSeerGUID(me->ToTempSummon()->GetSummonerGUID());
                 summoned->SetVisible(false);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 events.Update(diff);
 
@@ -10465,18 +10461,18 @@ enum
     ACTION_FLY_BACK = 1,
 };
 
-class npc_captured_riding_bat : public CreatureScript
+class npc_captured_riding_bat final : public CreatureScript
 {
     public:
         npc_captured_riding_bat() : CreatureScript("npc_captured_riding_bat") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl(creature);
         }
 
-        struct creature_script_impl : public VehicleAI
+        struct creature_script_impl final : public VehicleAI
         {
             creature_script_impl(Creature* creature) : VehicleAI(creature) { }
 
@@ -10489,7 +10485,7 @@ class npc_captured_riding_bat : public CreatureScript
 
             EventMap events;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 ASSERT(me->isSummon());
                 me->SetCanFly(true);
@@ -10497,12 +10493,12 @@ class npc_captured_riding_bat : public CreatureScript
                 me->setActive(true);
             }
 
-            void isSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* summoner) final
             {
                 events.ScheduleEvent(EVENT_START_RIDE, 1000);
             }
 
-            void DoAction(int32 const action)
+            void DoAction(int32 const action) final
             {
                 if (action == ACTION_FLY_BACK)
                 {
@@ -10515,7 +10511,7 @@ class npc_captured_riding_bat : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 events.Update(diff);
 
@@ -10541,13 +10537,13 @@ class npc_captured_riding_bat : public CreatureScript
         };
 };
 
-class spell_gilneas_bat_fly_back : public SpellScriptLoader
+class spell_gilneas_bat_fly_back final : public SpellScriptLoader
 {
     public:
         spell_gilneas_bat_fly_back() : SpellScriptLoader("spell_gilneas_bat_fly_back") { }
 
     private:
-        class spell_script_impl : public SpellScript
+        class spell_script_impl final : public SpellScript
         {
             PrepareSpellScript(spell_script_impl)
 
@@ -10560,13 +10556,13 @@ class spell_gilneas_bat_fly_back : public SpellScriptLoader
                         creature->GetAI()->DoAction(ACTION_FLY_BACK);
             }
 
-            void Register()
+            void Register() final
             {
                 OnEffectHitTarget += SpellEffectFn(spell_script_impl::ExtraEffect, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 
-        SpellScript *GetSpellScript() const
+        SpellScript *GetSpellScript() const final
         {
             return new spell_script_impl();
         }
@@ -10581,18 +10577,18 @@ const float CatapultCheckPos[5][2]=
     {-1291.34f, 1721.51f},
 };
 
-class npc_forsaken_catapult_sti : public CreatureScript
+class npc_forsaken_catapult_sti final : public CreatureScript
 {
     public:
         npc_forsaken_catapult_sti() : CreatureScript("npc_forsaken_catapult_sti") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public VehicleAI
+        struct creature_script_impl final : public VehicleAI
         {
             creature_script_impl(Creature* creature) : VehicleAI(creature) { }
 
@@ -10605,7 +10601,7 @@ class npc_forsaken_catapult_sti : public CreatureScript
 
             EventMap events;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 for (int i = 0; i < 5; ++i)
                 {
@@ -10618,7 +10614,7 @@ class npc_forsaken_catapult_sti : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 events.Update(diff);
 
@@ -10635,18 +10631,18 @@ class npc_forsaken_catapult_sti : public CreatureScript
 };
 
 // Quest Knee-Deep 24678
-class npc_knee_deep_attacker : public CreatureScript
+class npc_knee_deep_attacker final : public CreatureScript
 {
     public:
         npc_knee_deep_attacker() : CreatureScript("npc_knee_deep_attacker") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
@@ -10659,7 +10655,7 @@ class npc_knee_deep_attacker : public CreatureScript
 
             EventMap events;
 
-            void SpellHit(Unit* caster, const SpellInfo* spell)
+            void SpellHit(Unit* caster, const SpellInfo* spell) final
             {
                 if (spell->Id == SPELL_SWING_TORCH)
                 {
@@ -10669,12 +10665,12 @@ class npc_knee_deep_attacker : public CreatureScript
                 }
             }
 
-            void EnterCombat(Unit* /*who*/)
+            void EnterCombat(Unit* /*who*/) final
             {
                 me->setAttackTimer(BASE_ATTACK, 5000);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 events.Update(diff);
 
@@ -10704,13 +10700,13 @@ enum qPB
     GO_OFFERINGS                   = 202319,
 };
 
-class npc_gilneas_funeral_camera : public CreatureScript
+class npc_gilneas_funeral_camera final : public CreatureScript
 {
     public:
         npc_gilneas_funeral_camera() : CreatureScript("npc_gilneas_funeral_camera") { }
 
     private:
-        class TeleportEvent : public BasicEvent
+        class TeleportEvent final : public BasicEvent
         {
             public:
                 TeleportEvent(Unit* unit)
@@ -10718,7 +10714,7 @@ class npc_gilneas_funeral_camera : public CreatureScript
                 { }
 
             private:
-                bool Execute(uint64 /*time*/, uint32 /*diff*/)
+                bool Execute(uint64 /*time*/, uint32 /*diff*/) final
                 {
                     _unit->NearTeleportTo(-1724.116f, 1871.721f, 17.787f, 3.125f);
                     return true;
@@ -10727,12 +10723,12 @@ class npc_gilneas_funeral_camera : public CreatureScript
                 Unit* _unit;
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl(creature);
         }
 
-        struct creature_script_impl : public VehicleAI
+        struct creature_script_impl final : public VehicleAI
         {
             creature_script_impl(Creature* creature) : VehicleAI(creature) { }
 
@@ -10765,12 +10761,12 @@ class npc_gilneas_funeral_camera : public CreatureScript
             uint64 crowleyGUID;
             uint64 cloneGUID;
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 ASSERT(me->isSummon());
             }
 
-            void isSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* summoner) final
             {
                 me->SetSeerGUID(summoner->GetGUID());
                 me->SetVisible(false);
@@ -10778,7 +10774,7 @@ class npc_gilneas_funeral_camera : public CreatureScript
                 events.ScheduleEvent(EVENT_START_CAMERA, 2000);
             }
 
-            void JustSummoned(Creature* summoned)
+            void JustSummoned(Creature* summoned) final
             {
                 summoned->SetSeerGUID(me->ToTempSummon()->GetSummonerGUID());
                 summoned->SetVisible(false);
@@ -10805,13 +10801,13 @@ class npc_gilneas_funeral_camera : public CreatureScript
                 }
             }
 
-            void PassengerWillBoard(Unit* passenger, Position& enterPos, int8 seatId)
+            void PassengerWillBoard(Unit* passenger, Position& enterPos, int8 seatId) final
             {
                 passenger->m_movementInfo.t_pos.Relocate(2.009521f, 1.367432f, -0.03686714f);
                 enterPos.Relocate(2.009521f, 1.367432f, -0.03686714f);
             }
 
-            void PassengerBoarded(Unit* who, int8 /*seatId*/, bool apply)
+            void PassengerBoarded(Unit* who, int8 /*seatId*/, bool apply) final
             {
                 if (!apply)
                 {
@@ -10840,7 +10836,7 @@ class npc_gilneas_funeral_camera : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 events.Update(diff);
 
@@ -10916,13 +10912,13 @@ class npc_gilneas_funeral_camera : public CreatureScript
         };
 };
 
-class spell_place_blessed_offerings : public SpellScriptLoader
+class spell_place_blessed_offerings final : public SpellScriptLoader
 {
     public:
         spell_place_blessed_offerings() : SpellScriptLoader("spell_place_blessed_offerings") { }
 
     private:
-        class spell_place_blessed_offerings_SpellScript : public SpellScript
+        class spell_place_blessed_offerings_SpellScript final : public SpellScript
         {
             PrepareSpellScript(spell_place_blessed_offerings_SpellScript)
 
@@ -10937,25 +10933,25 @@ class spell_place_blessed_offerings : public SpellScriptLoader
                     caster->CastSpell(caster, SPELL_SUMMON_FUNERAL_EVENT_CAMERA, true);
             }
 
-            void Register()
+            void Register() final
             {
                 OnEffectLaunch += SpellEffectFn(spell_place_blessed_offerings_SpellScript::SummonOfferings, EFFECT_0, SPELL_EFFECT_TRANS_DOOR);
             }
         };
 
-        SpellScript *GetSpellScript() const
+        SpellScript *GetSpellScript() const final
         {
             return new spell_place_blessed_offerings_SpellScript();
         }
 };
 
-class spell_reverse_cast_mirror_image : public SpellScriptLoader
+class spell_reverse_cast_mirror_image final : public SpellScriptLoader
 {
     public:
         spell_reverse_cast_mirror_image() : SpellScriptLoader("spell_reverse_cast_mirror_image") { }
 
     private:
-        class spell_script_impl : public SpellScript
+        class spell_script_impl final : public SpellScript
         {
             PrepareSpellScript(spell_script_impl)
 
@@ -10971,25 +10967,25 @@ class spell_reverse_cast_mirror_image : public SpellScriptLoader
                 target->CastSpell(caster, GetSpellInfo()->Effects[effIndex].BasePoints, false);
             }
 
-            void Register()
+            void Register() final
             {
                 OnEffectHitTarget += SpellEffectFn(spell_script_impl::ScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
             }
         };
 
-        SpellScript *GetSpellScript() const
+        SpellScript *GetSpellScript() const final
         {
             return new spell_script_impl();
         }
 };
 
-class spell_gilneas_mirror_image : public SpellScriptLoader
+class spell_gilneas_mirror_image final : public SpellScriptLoader
 {
     public:
         spell_gilneas_mirror_image() : SpellScriptLoader("spell_gilneas_mirror_image") { }
 
     private:
-        class spell_script_impl : public SpellScript
+        class spell_script_impl final : public SpellScript
         {
             PrepareSpellScript(spell_script_impl)
 
@@ -11005,40 +11001,40 @@ class spell_gilneas_mirror_image : public SpellScriptLoader
                 target->CastSpell(caster, GetSpellInfo()->Effects[effIndex].BasePoints, false);
             }
 
-            void Register()
+            void Register() final
             {
                 OnEffectHitTarget += SpellEffectFn(spell_script_impl::ScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
                 OnEffectHitTarget += SpellEffectFn(spell_script_impl::ScriptEffect, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
             }
         };
 
-        SpellScript *GetSpellScript() const
+        SpellScript *GetSpellScript() const final
         {
             return new spell_script_impl();
         }
 };
 
-class npc_gilneas_towering_ancient : public CreatureScript
+class npc_gilneas_towering_ancient final : public CreatureScript
 {
     public:
         npc_gilneas_towering_ancient() : CreatureScript("npc_gilneas_towering_ancient") { }
 
     private:
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const final
         {
             return new creature_script_impl (creature);
         }
 
-        struct creature_script_impl : public ScriptedAI
+        struct creature_script_impl final : public ScriptedAI
         {
             creature_script_impl(Creature* creature) : ScriptedAI(creature) { }
 
-            void InitializeAI()
+            void InitializeAI() final
             {
                 SetCombatMovement(false);
             }
 
-            void DamageTaken(Unit* attacker, uint32 &damage)
+            void DamageTaken(Unit* attacker, uint32 &damage) final
             {
                 if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->isPet())
                 {
@@ -11050,7 +11046,7 @@ class npc_gilneas_towering_ancient : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff) final
             {
                 if (!UpdateVictim())
                     return;
@@ -11060,13 +11056,13 @@ class npc_gilneas_towering_ancient : public CreatureScript
         };
 };
 
-class npc_admiral_nightwind : public CreatureScript
+class npc_admiral_nightwind final : public CreatureScript
 {
     public:
         npc_admiral_nightwind() : CreatureScript("npc_admiral_nightwind") { }
 
     private:
-        bool OnQuestReward(Player* player, Creature* /*creature*/, Quest const* quest, uint32 /*opt*/)
+        bool OnQuestReward(Player* player, Creature* /*creature*/, Quest const* quest, uint32 /*opt*/) final
         {
             if (quest->GetQuestId() == 14434)
             {

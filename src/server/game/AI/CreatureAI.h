@@ -181,7 +181,11 @@ class CreatureAI : public UnitAI
         // Pointer to controlled by AI creature
         //Creature* const me;
 
+        virtual void PassengerWillBoard(Unit* /*passenger*/, Position& /*enterPos*/, int8 /*seatId*/) { }
+
         virtual void PassengerBoarded(Unit* /*passenger*/, int8 /*seatId*/, bool /*apply*/) {}
+
+        virtual void OnControlVehicle(Unit* /*base*/, int8 /*seatId*/, bool /*apply*/) { }
 
         virtual void OnSpellClick(Unit* /*clicker*/) { }
 

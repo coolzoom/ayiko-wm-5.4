@@ -1813,7 +1813,7 @@ void ObjectMgr::LoadGameobjects()
         if (data.spawnMask & ~spawnMasks[data.mapid])
             TC_LOG_ERROR("sql.sql", "Table `gameobject` has gameobject (GUID: %u Entry: %u) that has wrong spawn mask %u including not supported difficulty modes for map (Id: %u), skip", guid, data.id, data.spawnMask, data.mapid);
 
-        data.phaseMask      = fields[index++].GetUInt16();
+        data.phaseMask      = fields[index++].GetUInt32();
         int16 gameEvent     = fields[index++].GetInt8();
         uint32 poolId       = fields[index++].GetUInt32();
 

@@ -16859,3 +16859,4 @@ VALUES
   (43776, 24674);
 
 UPDATE `creature_template` SET `Health_mod` = 1 WHERE `entry` = 50471;
+UPDATE `creature_template` SET `ScriptName` = 'npc_swamp_crocolisk' WHERE `entry` = 37078;

@@ -99,7 +99,7 @@ void PhaseMgr::Recalculate()
                 if (phase->phasemask)
                     _UpdateFlags |= PHASE_UPDATE_FLAG_SERVERSIDE_CHANGED;
 
-                if (phase->phaseId || phase->terrainswapmap)
+                if (phase->phaseId || phase->terrainswapmap || phase->worldMapAreaId)
                     _UpdateFlags |= PHASE_UPDATE_FLAG_CLIENTSIDE_CHANGED;
 
                 if (phase->IsLastDefinition())
@@ -199,9 +199,9 @@ void PhaseMgr::RegisterPhasingAuraEffect(AuraEffect const* auraEffect)
                 case 186:
                 case 187:
                 case 188:
-                case 191:
                 case 189:
                 case 190:
+                case 191:
                 case 194:
                     phaseInfo.terrainswapmap = 656;
                     break;
@@ -304,14 +304,16 @@ void PhaseData::SendPhaseshiftToPlayer()
     // Client side update
     PhaseShiftSet phaseIds;
     PhaseShiftSet terrainswaps;
-    PhaseShiftSet wmoAreaIds;
+    PhaseShiftSet worldMapAreaIds;
 
     for (auto const &kvPair : spellPhaseInfo)
     {
-        if (kvPair.second.terrainswapmap)
-            terrainswaps.insert(kvPair.second.terrainswapmap);
         if (kvPair.second.phaseId)
             phaseIds.insert(kvPair.second.phaseId);
+        if (kvPair.second.terrainswapmap)
+            terrainswaps.insert(kvPair.second.terrainswapmap);
+        if (kvPair.second.worldMapAreaId)
+            worldMapAreaIds.insert(kvPair.second.worldMapAreaId);
     }
 
     // Phase Definitions
@@ -321,9 +323,11 @@ void PhaseData::SendPhaseshiftToPlayer()
             phaseIds.insert(def->phaseId);
         if (def->terrainswapmap)
             terrainswaps.insert(def->terrainswapmap);
+        if (def->worldMapAreaId)
+            worldMapAreaIds.insert(def->worldMapAreaId);
     }
 
-    player->GetSession()->SendSetPhaseShift(phaseIds, terrainswaps, wmoAreaIds);
+    player->GetSession()->SendSetPhaseShift(phaseIds, terrainswaps, worldMapAreaIds);
 }
 
 void PhaseData::GetActivePhases(std::set<uint32>& phases) const

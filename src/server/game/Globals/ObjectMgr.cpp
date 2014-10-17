@@ -8880,8 +8880,8 @@ void ObjectMgr::LoadPhaseDefinitions()
 
     uint32 oldMSTime = getMSTime();
 
-    //                                                 0       1       2         3            4           5
-    QueryResult result = WorldDatabase.Query("SELECT zoneId, entry, phasemask, phaseId, terrainswapmap, flags FROM `phase_definitions` ORDER BY `entry` ASC");
+    //                                                 0       1       2         3            4         5               6
+    QueryResult result = WorldDatabase.Query("SELECT zoneId, entry, phasemask, phaseId, terrainswapmap, worldMapAreaId, flags FROM `phase_definitions` ORDER BY `entry` ASC");
 
     if (!result)
     {
@@ -8899,10 +8899,11 @@ void ObjectMgr::LoadPhaseDefinitions()
 
         pd.zoneId                = fields[0].GetUInt32();
         pd.entry                 = fields[1].GetUInt16();
-        pd.phasemask             = fields[2].GetUInt64();
-        pd.phaseId               = fields[3].GetUInt8();
+        pd.phasemask             = fields[2].GetUInt32();
+        pd.phaseId               = fields[3].GetUInt16();
         pd.terrainswapmap        = fields[4].GetUInt16();
-        pd.flags                 = fields[5].GetUInt8();
+        pd.worldMapAreaId        = fields[5].GetUInt16();
+        pd.flags                 = fields[6].GetUInt8();
 
         // Checks
         if ((pd.flags & PHASE_FLAG_OVERWRITE_EXISTING) && (pd.flags & PHASE_FLAG_NEGATE_PHASE))

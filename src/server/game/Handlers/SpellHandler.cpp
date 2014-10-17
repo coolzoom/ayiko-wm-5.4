@@ -581,6 +581,23 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
     ObjectGuid itemTarget, Guid2, Guid3, targetGuid;
 
+    MovementInfo movementInfo;
+    ObjectGuid movementTransportGuid;
+    ObjectGuid movementGuid;
+    uint32 unkMovementLoopCounter = 0;
+    bool hasMovementFlags = false;
+    bool hasMovementFlags2 = false;
+    bool hasSplineElevation = false;
+    bool hasAliveTime = false;
+    bool hasFallData = false;
+    bool hasFallDirection = false;
+    bool hasTimeStamp = false;
+    bool hasOrientation = false;
+    bool hasTransportData = false;
+    bool hasTransTime2 = false;
+    bool hasTransTime3 = false;
+    bool hasPitch = false;
+
     bool hasTargetFlags = !recvPacket.ReadBit();
     bool hasCountCast = !recvPacket.ReadBit();
     bool hasUnk1 = !recvPacket.ReadBit();
@@ -607,7 +624,45 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
     if (hasMovement)
     {
-        // Kebab client side
+        hasAliveTime = !recvPacket.ReadBit();
+        recvPacket.ReadBitSeq<3>(movementGuid);
+        hasSplineElevation = !recvPacket.ReadBit();
+        unkMovementLoopCounter = recvPacket.ReadBits(22);
+        hasFallData = recvPacket.ReadBit();
+        hasMovementFlags = !recvPacket.ReadBit();
+        recvPacket.ReadBitSeq<6, 0>(movementGuid);
+
+        if (hasMovementFlags)
+            movementInfo.flags = recvPacket.ReadBits(30);
+
+        hasPitch = !recvPacket.ReadBit();
+
+        recvPacket.ReadBit();
+        recvPacket.ReadBitSeq<2, 7, 1, 5>(movementGuid);
+
+        hasOrientation = !recvPacket.ReadBit();
+        if (hasFallData)
+            hasFallDirection = recvPacket.ReadBit();
+
+        recvPacket.ReadBit();
+        recvPacket.ReadBitSeq<4>(movementGuid);
+
+        hasTransportData = recvPacket.ReadBit();
+        if (hasTransportData)
+        {
+            hasTransTime2 = recvPacket.ReadBit();
+            recvPacket.ReadBitSeq<6, 3, 1, 0, 4>(movementTransportGuid);
+            hasTransTime3 = recvPacket.ReadBit();
+            recvPacket.ReadBitSeq<7, 2, 5>(movementTransportGuid);
+        }
+
+        recvPacket.ReadBit();
+
+        hasMovementFlags2 = !recvPacket.ReadBit();
+        if (hasMovementFlags2)
+            movementInfo.flags2 = recvPacket.ReadBits(13);
+
+        hasTimeStamp = !recvPacket.ReadBit();
     }
 
     if (hasTargetFlags)
@@ -648,7 +703,71 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
     if (hasMovement)
     {
-        // Kebab client side
+        if (hasTransportData)
+        {
+            recvPacket.ReadByteSeq<5>(movementTransportGuid);
+
+            if (hasTransTime3)
+                recvPacket.read_skip<uint32>();
+
+            recvPacket.read_skip<float>();
+            recvPacket.read_skip<float>();
+
+            if (hasTransTime2)
+                recvPacket.read_skip<uint32>();
+
+            recvPacket.ReadByteSeq<7, 2, 0>(movementTransportGuid);
+            recvPacket.read_skip<uint32>();
+            recvPacket.ReadByteSeq<1, 6, 3>(movementTransportGuid);
+            recvPacket.read_skip<float>();
+            recvPacket.ReadByteSeq<4>(movementTransportGuid);
+            recvPacket.read_skip<uint8>();
+            recvPacket.read_skip<float>();
+        }
+
+        if (hasOrientation)
+            recvPacket.read_skip<float>();
+
+        recvPacket.ReadByteSeq<6, 4>(movementGuid);
+
+        if (hasFallData)
+        {
+            recvPacket.read_skip<uint32>();
+
+            if (hasFallDirection)
+            {
+                recvPacket.read_skip<float>();
+                recvPacket.read_skip<float>();
+                recvPacket.read_skip<float>();
+            }
+
+            recvPacket.read_skip<float>();
+        }
+
+        recvPacket.ReadByteSeq<3, 2>(movementGuid);
+
+        if (hasPitch)
+            recvPacket.read_skip<float>();
+        if (hasAliveTime)
+            recvPacket.read_skip<uint32>();
+
+        recvPacket.read_skip<float>();
+
+        if (hasTimeStamp)
+            recvPacket.read_skip<uint32>();
+
+        recvPacket.ReadByteSeq<5, 0>(movementGuid);
+
+        recvPacket.read_skip<float>();
+        recvPacket.read_skip<float>();
+
+        for (uint32 i = 0 ; i < unkMovementLoopCounter ; ++i)
+            recvPacket.read_skip<uint32>();
+
+        if (hasSplineElevation)
+            recvPacket.read_skip<float>();
+
+        recvPacket.ReadByteSeq<7, 1>(movementGuid);
     }
 
     if (hasSpellId)

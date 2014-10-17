@@ -16865,3 +16865,8 @@ DELETE FROM `creature_model_info` WHERE `modelid` = 33949;
 INSERT INTO `creature_model_info` (`modelid`, `bounding_radius`, `combat_reach`, `gender`, `modelid_other_gender`)
 VALUES
   (33949, 0, 0, 2, 0);
+
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger` = 70797;
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`)
+VALUES
+  (70797, -70794, 0, 'Belrysa''s Talisman - remove Freezing Trap Effect');

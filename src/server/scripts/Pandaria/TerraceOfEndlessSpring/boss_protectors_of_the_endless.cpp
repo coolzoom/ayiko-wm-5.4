@@ -249,16 +249,16 @@ class boss_ancient_regail : public CreatureScript
             bool firstSpecialEnabled;
             bool secondSpecialEnabled;
 
-			void Reset()
-			{
+            void Reset()
+            {
                 SetEquipmentSlots(false, REGAIL_ITEMS, REGAIL_ITEMS, EQUIP_NO_CHANGE);
                 me->CastSpell(me, SPELL_SHA_MASK, true);
 
-				_Reset();
+                _Reset();
 
-				events.Reset();
+                events.Reset();
 
-				summons.DespawnAll();
+                summons.DespawnAll();
 
                 firstSpecialEnabled = false;
                 secondSpecialEnabled = false;
@@ -269,7 +269,7 @@ class boss_ancient_regail : public CreatureScript
                 events.ScheduleEvent(EVENT_LIGHTNING_BOLT, 5000);
                 events.ScheduleEvent(EVENT_LIGHTNING_PRISON, 25000);
 
-				if (pInstance)
+                if (pInstance)
                 {
                     pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                     pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_TOUCH_OF_SHA);
@@ -286,9 +286,9 @@ class boss_ancient_regail : public CreatureScript
 
                     RespawnProtectors(pInstance, me);
                 }
-			}
+            }
 
-			void JustReachedHome()
+            void JustReachedHome()
             {
                 _JustReachedHome();
 
@@ -296,7 +296,7 @@ class boss_ancient_regail : public CreatureScript
                     pInstance->SetBossState(DATA_PROTECTORS, FAIL);
             }
 
-			void EnterCombat(Unit* attacker)
+            void EnterCombat(Unit* attacker)
             {
                 if (pInstance)
                 {
@@ -311,7 +311,7 @@ class boss_ancient_regail : public CreatureScript
                 }
             }
 
-			void JustSummoned(Creature* summon)
+            void JustSummoned(Creature* summon)
             {
                 summons.Summon(summon);
             }
@@ -321,13 +321,13 @@ class boss_ancient_regail : public CreatureScript
                 summons.Despawn(summon);
             }
 
-			void KilledUnit(Unit* who)
+            void KilledUnit(Unit* who)
             {
                 if (who->GetTypeId() == TYPEID_PLAYER)
                     Talk(TALK_REGAIL_SLAY);
             }
 
-			void JustDied(Unit* killer)
+            void JustDied(Unit* killer)
             {
                 Talk(TALK_REGAIL_DEATH);
 
@@ -451,7 +451,7 @@ class boss_ancient_regail : public CreatureScript
                 }
             }
 
-			void UpdateAI(const uint32 diff)
+            void UpdateAI(const uint32 diff)
             {
                 if (!IntroDone(pInstance, me))
                 {
@@ -510,10 +510,10 @@ class boss_ancient_regail : public CreatureScript
                         break;
                     default:
                         break;
-				}
+                }
 
                 DoMeleeAttackIfReady();
-			}
+            }
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -540,16 +540,16 @@ class boss_ancient_asani : public CreatureScript
             bool firstSpecialEnabled;
             bool secondSpecialEnabled;
 
-			void Reset()
-			{
+            void Reset()
+            {
                 SetEquipmentSlots(false, ASANI_MH_ITEM, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
                 me->CastSpell(me, SPELL_SHA_MASK, true);
 
-				_Reset();
+                _Reset();
 
-				events.Reset();
+                events.Reset();
 
-				summons.DespawnAll();
+                summons.DespawnAll();
 
                 firstSpecialEnabled = false;
                 secondSpecialEnabled = false;
@@ -560,7 +560,7 @@ class boss_ancient_asani : public CreatureScript
                 events.ScheduleEvent(EVENT_WATER_BOLT, 5000);
                 events.ScheduleEvent(EVENT_CLEANSING_WATERS, 32500);
 
-				if (pInstance)
+                if (pInstance)
                 {
                     pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                     pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_TOUCH_OF_SHA);
@@ -574,9 +574,9 @@ class boss_ancient_asani : public CreatureScript
 
                     RespawnProtectors(pInstance, me);
                 }
-			}
+            }
 
-			void JustReachedHome()
+            void JustReachedHome()
             {
                 _JustReachedHome();
 
@@ -584,7 +584,7 @@ class boss_ancient_asani : public CreatureScript
                     pInstance->SetBossState(DATA_PROTECTORS, FAIL);
             }
 
-			void EnterCombat(Unit* attacker)
+            void EnterCombat(Unit* attacker)
             {
                 if (pInstance)
                 {
@@ -595,7 +595,7 @@ class boss_ancient_asani : public CreatureScript
                 }
             }
 
-			void JustSummoned(Creature* summon)
+            void JustSummoned(Creature* summon)
             {
                 summons.Summon(summon);
             }
@@ -605,13 +605,13 @@ class boss_ancient_asani : public CreatureScript
                 summons.Despawn(summon);
             }
 
-			void KilledUnit(Unit* who)
+            void KilledUnit(Unit* who)
             {
                 if (who->GetTypeId() == TYPEID_PLAYER)
                     Talk(TALK_ASANI_SLAY);
             }
 
-			void JustDied(Unit* killer)
+            void JustDied(Unit* killer)
             {
                 Talk(TALK_ASANI_DEATH);
 
@@ -737,7 +737,7 @@ class boss_ancient_asani : public CreatureScript
                 }
             }
 
-			void UpdateAI(const uint32 diff)
+            void UpdateAI(const uint32 diff)
             {
                 if (!IntroDone(pInstance, me))
                 {
@@ -788,10 +788,10 @@ class boss_ancient_asani : public CreatureScript
                         break;
                     default:
                         break;
-				}
+                }
 
                 DoMeleeAttackIfReady();
-			}
+            }
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -819,16 +819,16 @@ class boss_protector_kaolan : public CreatureScript
             bool secondSpecialEnabled;
             bool introDone;
 
-			void Reset()
-			{
+            void Reset()
+            {
                 SetEquipmentSlots(false, KAOLAN_MH_ITEM, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
                 me->CastSpell(me, SPELL_SHA_MASK, true);
 
-				_Reset();
+                _Reset();
 
-				events.Reset();
+                events.Reset();
 
-				summons.DespawnAll();
+                summons.DespawnAll();
 
                 firstSpecialEnabled = false;
                 secondSpecialEnabled = false;
@@ -839,7 +839,7 @@ class boss_protector_kaolan : public CreatureScript
 
                 events.ScheduleEvent(EVENT_TOUCH_OF_SHA, 12000);
 
-				if (pInstance)
+                if (pInstance)
                 {
                     pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                     pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_TOUCH_OF_SHA);
@@ -853,9 +853,9 @@ class boss_protector_kaolan : public CreatureScript
 
                     RespawnProtectors(pInstance, me);
                 }
-			}
+            }
 
-			void JustReachedHome()
+            void JustReachedHome()
             {
                 _JustReachedHome();
 
@@ -863,7 +863,7 @@ class boss_protector_kaolan : public CreatureScript
                     pInstance->SetBossState(DATA_PROTECTORS, FAIL);
             }
 
-			void EnterCombat(Unit* attacker)
+            void EnterCombat(Unit* attacker)
             {
                 if (pInstance)
                 {
@@ -873,7 +873,7 @@ class boss_protector_kaolan : public CreatureScript
                 }
             }
 
-			void JustSummoned(Creature* summon)
+            void JustSummoned(Creature* summon)
             {
                 summons.Summon(summon);
             }
@@ -892,13 +892,13 @@ class boss_protector_kaolan : public CreatureScript
                 }
             }
 
-			void KilledUnit(Unit* who)
+            void KilledUnit(Unit* who)
             {
                 if (who->GetTypeId() == TYPEID_PLAYER)
                     Talk(TALK_KAOLAN_SLAY);
             }
 
-			void JustDied(Unit* killer)
+            void JustDied(Unit* killer)
             {
                 Talk(TALK_KAOLAN_DEATH);
 
@@ -1022,7 +1022,7 @@ class boss_protector_kaolan : public CreatureScript
                 }
             }
 
-			void UpdateAI(const uint32 diff)
+            void UpdateAI(const uint32 diff)
             {
                 if (!IntroDone(pInstance, me))
                 {
@@ -1077,10 +1077,10 @@ class boss_protector_kaolan : public CreatureScript
                         break;
                     default:
                         break;
-				}
+                }
 
                 DoMeleeAttackIfReady();
-			}
+            }
         };
 
         CreatureAI* GetAI(Creature* creature) const

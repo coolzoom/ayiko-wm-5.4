@@ -113,7 +113,7 @@ class npc_apparition_of_fear : public CreatureScript
                 events.ScheduleEvent(EVENT_NIGHT_TERRORS_MISSILE, 13000);
             }
 
-			void JustSummoned(Creature* summon)
+            void JustSummoned(Creature* summon)
             {
                 summons.Summon(summon);
             }
@@ -263,7 +263,7 @@ class npc_apparition_of_terror : public CreatureScript
                 events.ScheduleEvent(EVENT_UNLEASHED_TERROR, 9000);
             }
 
-			void JustSummoned(Creature* summon)
+            void JustSummoned(Creature* summon)
             {
                 summons.Summon(summon);
             }

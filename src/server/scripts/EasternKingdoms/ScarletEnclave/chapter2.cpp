@@ -1042,7 +1042,7 @@ public:
                                     return;
                             }
                             break;
-                            case RACE_WORGEN:
+                        case RACE_WORGEN:
                             switch (ExecuteSpeech_Counter)
                             {
                                 case 0: Talk(SAY_EXEC_START_1, player->GetGUID()); break;

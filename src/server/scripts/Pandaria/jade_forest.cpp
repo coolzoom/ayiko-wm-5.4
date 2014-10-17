@@ -497,8 +497,8 @@ class mob_grookin_outrunner : public CreatureScript
             {
                 events.Reset();
 
-                events.ScheduleEvent(EVENT_SHOOT,		7000);
-                events.ScheduleEvent(EVENT_CLEAVE,	    12000);
+                events.ScheduleEvent(EVENT_SHOOT,        7000);
+                events.ScheduleEvent(EVENT_CLEAVE,        12000);
             }
 
             void JustDied(Unit* /*killer*/)
@@ -573,7 +573,7 @@ class mob_bamboo_python : public CreatureScript
             {
                 events.Reset();
 
-                events.ScheduleEvent(EVENT_SWAMP_FEVER,		7000);
+                events.ScheduleEvent(EVENT_SWAMP_FEVER,        7000);
             }
 
             void EnterCombat(Unit* /*attacker*/)
@@ -873,7 +873,7 @@ class mob_ro_shen : public CreatureScript
 enum eShaReminantSpells
 {
     SPELL_SHADOW_CLAW               = 116128,
-    SPELL_OVERWHELMING_GUILT      	= 131150,
+    SPELL_OVERWHELMING_GUILT          = 131150,
 };
 
 enum eShaReminantEvents
@@ -949,7 +949,7 @@ class mob_sha_reminant : public CreatureScript
 enum ePandriarchWindfurSpells
 {
     SPELL_THUNDERING_PALM   = 109497,
-    SPELL_WIND_SWORD      	= 113504,
+    SPELL_WIND_SWORD          = 113504,
 //    SPELL_WINDFUR_PUNCH     = 105497, <-- Needs to be scritped
 };
 
@@ -1098,7 +1098,7 @@ class mob_pandriarch_windfur : public CreatureScript
 enum ePandriarchBramblestaffSpells
 {
     SPELL_ROLL                   = 113512,
-    SPELL_STAFF_STRIKE      	 = 84647,
+    SPELL_STAFF_STRIKE           = 84647,
     SPELL_THROW_BRAMBLESTAFF     = 106763,
 //    SPELL_WHIRLWIND              = 15576,  <-- Needs to be scripted
 //    SPELL_WHIRLWIND_2            = 17207,  <-- Needs to be scripted
@@ -1260,7 +1260,7 @@ class mob_pandriarch_bramblestaff : public CreatureScript
 enum ePandriarchGoldendraftSpells
 {
     SPELL_EXPLOSIVE_LAGER    = 104909,
-    SPELL_FIRE_ALE      	 = 105091,
+    SPELL_FIRE_ALE           = 105091,
 };
 
 enum ePandriarchGoldendraftEvents

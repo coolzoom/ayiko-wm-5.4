@@ -190,9 +190,9 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket* data, Battlegro
             data->Initialize(SMSG_BATTLEFIELD_STATUS);
 
             if (bg)
-            	*data << uint32(bg->isArena() ? bg->GetMaxPlayersPerTeam() : 1);                         // unk, always 1
+                *data << uint32(bg->isArena() ? bg->GetMaxPlayersPerTeam() : 1);                         // unk, always 1
             else
-            	*data << uint32(1);
+                *data << uint32(1);
             *data << uint32(QueueSlot);                 // Queue slot
             *data << uint32(Time1);                     // Join Time
 

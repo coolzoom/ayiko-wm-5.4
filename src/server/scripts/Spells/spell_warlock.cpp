@@ -69,7 +69,7 @@ enum WarlockSpells
     WARLOCK_TWILIGHT_WARD_S12               = 131623,
     WARLOCK_TWILIGHT_WARD_METAMORPHOSIS_S12 = 131624,
     WARLOCK_SHADOWFLAME                     = 47960,
-    WARLOCK_SOUL_LEECH_HEAL                 = 108366,
+    WARLOCK_SOUL_LEECH_ABSORB               = 108366,
     WARLOCK_DARK_REGENERATION               = 108359,
     WARLOCK_DARK_BARGAIN_DOT                = 110914,
     WARLOCK_MOLTEN_CORE                     = 122355,
@@ -1393,10 +1393,15 @@ class spell_warl_soul_leech : public SpellScriptLoader
                             if (!bp)
                                 return;
 
-                            player->CastCustomSpell(player, WARLOCK_SOUL_LEECH_HEAL, &bp, NULL, NULL, true);
+                            if (auto soulLeech = player->GetAuraEffect(WARLOCK_SOUL_LEECH_ABSORB, EFFECT_0))
+                                bp += soulLeech->GetAmount();
+                            // Calculate amount cap at 25% of caster health
+                            bp = std::min(bp, (int32)player->CountPctFromMaxHealth(25));
+
+                            player->CastCustomSpell(player, WARLOCK_SOUL_LEECH_ABSORB, &bp, NULL, NULL, true);
 
                             if (Pet* pet = player->GetPet())
-                                player->CastCustomSpell(pet, WARLOCK_SOUL_LEECH_HEAL, &bp, NULL, NULL, true);
+                                player->CastCustomSpell(pet, WARLOCK_SOUL_LEECH_ABSORB, &bp, NULL, NULL, true);
                         }
                     }
                 }

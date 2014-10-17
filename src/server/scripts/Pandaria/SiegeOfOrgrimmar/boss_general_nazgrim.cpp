@@ -29,32 +29,32 @@ enum eSays
 
 class boss_general_nazgrim : public CreatureScript
 {
-	public:
-		boss_general_nazgrim() : CreatureScript("boss_general_nazgrim") { }
+    public:
+        boss_general_nazgrim() : CreatureScript("boss_general_nazgrim") { }
 
-		struct boss_general_nazgrimAI : public BossAI
-		{
-			boss_general_nazgrimAI(Creature* creature) : BossAI(creature, DATA_GENERAL_NAZGRIM)
-			{
-				pInstance = creature->GetInstanceScript();
-			}
+        struct boss_general_nazgrimAI : public BossAI
+        {
+            boss_general_nazgrimAI(Creature* creature) : BossAI(creature, DATA_GENERAL_NAZGRIM)
+            {
+                pInstance = creature->GetInstanceScript();
+            }
 
-			EventMap events;
-			InstanceScript* pInstance;
+            EventMap events;
+            InstanceScript* pInstance;
 
-			void Reset()
-			{
-				Reset();
+            void Reset()
+            {
+                Reset();
 
-				events.Reset();
+                events.Reset();
 
-				summons.DespawnAll();
+                summons.DespawnAll();
 
-				if (pInstance)
+                if (pInstance)
                     pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-			}
+            }
 
-			void JustReachedHome()
+            void JustReachedHome()
             {
                 _JustReachedHome();
 
@@ -62,9 +62,9 @@ class boss_general_nazgrim : public CreatureScript
                     pInstance->SetBossState(DATA_GENERAL_NAZGRIM, FAIL);
             }
 
-			void EnterCombat(Unit* /*attacker*/)
+            void EnterCombat(Unit* /*attacker*/)
             {
-				// @TODO: Set in combat for other protectors
+                // @TODO: Set in combat for other protectors
                 if (pInstance)
                 {
                     pInstance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
@@ -72,7 +72,7 @@ class boss_general_nazgrim : public CreatureScript
                 }
             }
 
-			void JustSummoned(Creature* summon)
+            void JustSummoned(Creature* summon)
             {
                 summons.Summon(summon);
             }
@@ -82,11 +82,11 @@ class boss_general_nazgrim : public CreatureScript
                 summons.Despawn(summon);
             }
 
-			void KilledUnit(Unit* /*who*/)
+            void KilledUnit(Unit* /*who*/)
             {
             }
 
-			void JustDied(Unit* /*killer*/)
+            void JustDied(Unit* /*killer*/)
             {
                 _JustDied();
 
@@ -97,7 +97,7 @@ class boss_general_nazgrim : public CreatureScript
                 }
             }
 
-			void UpdateAI(const uint32 diff)
+            void UpdateAI(const uint32 diff)
             {
                 if (!UpdateVictim())
                     return;
@@ -106,13 +106,13 @@ class boss_general_nazgrim : public CreatureScript
                     return;
 
                 events.Update(diff);
-			}
-		};
+            }
+        };
 
         CreatureAI* GetAI(Creature* pCreature) const
-		{
-			return new boss_general_nazgrimAI(pCreature);
-		}
+        {
+            return new boss_general_nazgrimAI(pCreature);
+        }
 };
 
 class mob_orgrimmar_faithful : public CreatureScript
@@ -282,7 +282,7 @@ class mob_korkron_warshaman : public CreatureScript
 
 void AddSC_general_nazgrim()
 {
-	new boss_general_nazgrim();
+    new boss_general_nazgrim();
     new mob_orgrimmar_faithful();
     new mob_korkron_ironblade();
     new mob_korkron_arcweaver();

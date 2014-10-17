@@ -301,6 +301,82 @@ void MotionMaster::MovePoint(uint32 id, float x, float y, float z)
     }
 }
 
+void MotionMaster::MovePointSmooth(float x, float y, float diffDist, bool vmapsOnly, Movement::MoveSplineInit * _init)
+{
+    // Creature current(start) position
+    Movement::Location real_position(_owner->GetPositionX(), _owner->GetPositionY(), _owner->GetPositionZMinusOffset(), _owner->GetOrientation());
+
+    // Current position may differ if creature is moving
+    if (!_owner->movespline->Finalized())
+        real_position = _owner->movespline->ComputePosition();
+
+    Movement::MoveSplineInit init(_owner);
+
+    if (_init && _init->GetMasterUnit() == _owner)
+        init = *_init;
+
+    float dist = 5.f;
+    float angle = _owner->GetAngle(x, y);
+    float controllZ = _owner->GetPositionZ() + 5.f;
+    float _controllMinZ = controllZ;
+    float _controllMaxZ = controllZ;
+    float _x, _y, _z;
+
+    // Total travel distance based on real creature position
+    float dx = real_position.x - x;
+    float dy = real_position.y - y;;
+
+    // Dist between 2 last waypoints must be >= diffDist
+    float controllDist = sqrt(dx*dx + dy*dy) - diffDist;
+
+    // Fake waypoint for spline system
+    G3D::Vector3 fake_vertice(0.f, 0.f, 0.f);
+    init.Path().push_back(fake_vertice);
+
+    // Generate intermediate waypoints
+    while (dist < controllDist)
+    {
+        _x = real_position.x + dist * std::cos(angle);
+        _y = real_position.y + dist * std::sin(angle);
+
+        if (vmapsOnly)
+                _z = _owner->GetMap()->GetHeight(_x, _y, controllZ + diffDist);
+        else
+                _z = _owner->GetMap()->GetHeight(_owner->GetPhaseMask(), _x, _y, controllZ + diffDist);
+
+        dist += diffDist;
+        controllZ = _z;
+
+        if (controllZ > _controllMaxZ)
+        {
+            _controllMaxZ = controllZ;
+            _controllMinZ = controllZ;
+        }
+        else
+        {
+            if (_controllMaxZ - _controllMinZ > 250.f)
+                _controllMinZ = _controllMaxZ;
+
+            if (_controllMinZ - controllZ > diffDist * 2)
+                controllZ = _controllMinZ;
+            else
+                _controllMinZ = controllZ;
+        }
+
+        G3D::Vector3 vertice(_x, _y, _z);
+        init.Path().push_back(vertice);
+    }
+
+    // Add last waypoint
+    _x = x;
+    _y = y;
+    _z = _owner->GetMap()->GetHeight(_owner->GetPhaseMask(), _x, _y, controllZ, true);
+    G3D::Vector3 last_vertice(_x, _y, _z);
+    init.Path().push_back(last_vertice);
+    init.SetUncompressed();
+    init.Launch();
+}
+
 void MotionMaster::MoveLand(uint32 id, Position const& pos)
 {
     float x, y, z;
@@ -612,6 +688,41 @@ void MotionMaster::MovePath(uint32 path_id, bool repeatable)
     TC_LOG_DEBUG("misc", "%s (GUID: %u) start moving over path(Id:%u, repeatable: %s)",
         _owner->GetTypeId() == TYPEID_PLAYER ? "Player" : "Creature",
         _owner->GetGUIDLow(), path_id, repeatable ? "YES" : "NO");
+}
+
+void MotionMaster::MoveSplinePath(uint8 path_id, bool fly, bool walk, float speed, bool cyclic, bool catmullrom, bool uncompressed)
+{
+    if (_owner->isMoving())
+        _owner->StopMoving();
+
+    Movement::MoveSplineInit init(_owner);
+    float x, y, z;
+    _owner->GetPosition(x, y, z);
+    G3D::Vector3 vertice(x, y, z);
+    init.Path().push_back(vertice);
+    const SplineWaypointPath* path = sWaypointMgr->GetSplinePath(_owner->GetEntry(), path_id);
+
+    if (!path || path->empty())
+        return;
+
+    for (SplineWaypointPath::const_iterator i = path->begin(); i != path->end(); ++i)
+    {
+        SplineWaypointData const &node = *i;
+        init.Path().push_back(G3D::Vector3(node.x, node.y, node.z));
+    }
+
+    init.SetWalk(walk);
+    if (catmullrom)
+        init.SetSmooth();
+    if (fly)
+        init.SetFly();
+    if (cyclic)
+        init.SetCyclic();
+    if (speed)
+        init.SetVelocity(speed);
+    if (uncompressed)
+        init.SetUncompressed();
+    init.Launch();
 }
 
 void MotionMaster::MoveRotate(uint32 time, RotateDirection direction)

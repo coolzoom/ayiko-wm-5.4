@@ -181,7 +181,7 @@ public:
 
         guidLow = target->GetDBTableGUIDLow();
 
-        PreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_SEL_CREATURE_ADDON_BY_GUID);
+        PreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_SEL_CREATURE_PATH);
 
         stmt->setUInt32(0, guidLow);
 
@@ -189,14 +189,14 @@ public:
 
         if (result)
         {
-            stmt = WorldDatabase.GetPreparedStatement(WORLD_UPD_CREATURE_ADDON_PATH);
+            stmt = WorldDatabase.GetPreparedStatement(WORLD_UPD_CREATURE_PATH);
 
             stmt->setUInt32(0, pathid);
             stmt->setUInt32(1, guidLow);
         }
         else
         {
-            stmt = WorldDatabase.GetPreparedStatement(WORLD_INS_CREATURE_ADDON);
+            stmt = WorldDatabase.GetPreparedStatement(WORLD_INS_CREATURE_PATH);
 
             stmt->setUInt32(0, guidLow);
             stmt->setUInt32(1, pathid);
@@ -259,15 +259,19 @@ public:
             return true;
         }
 
-        PreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_DEL_CREATURE_ADDON);
+        PreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_DEL_CREATURE_PATH);
+
         stmt->setUInt32(0, guidLow);
+
         WorldDatabase.Execute(stmt);
 
         target->UpdateWaypointID(0);
 
         stmt = WorldDatabase.GetPreparedStatement(WORLD_UPD_CREATURE_MOVEMENT_TYPE);
+
         stmt->setUInt8(0, uint8(IDLE_MOTION_TYPE));
         stmt->setUInt32(1, guidLow);
+
         WorldDatabase.Execute(stmt);
 
         target->LoadPath(0);

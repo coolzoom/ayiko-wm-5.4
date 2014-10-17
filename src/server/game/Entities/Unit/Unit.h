@@ -482,7 +482,7 @@ enum UnitState
     UNIT_STATE_POSSESSED       = 0x00010000,
     UNIT_STATE_CHARGING        = 0x00020000,
     UNIT_STATE_JUMPING         = 0x00040000,
-    UNIT_STATE_ONVEHICLE       = 0x00080000,
+    UNIT_STATE_UNK1            = 0x00080000,
     UNIT_STATE_MOVE            = 0x00100000,
     UNIT_STATE_ROTATING        = 0x00200000,
     UNIT_STATE_EVADE           = 0x00400000,
@@ -491,7 +491,7 @@ enum UnitState
     UNIT_STATE_FLEEING_MOVE    = 0x02000000,
     UNIT_STATE_CHASE_MOVE      = 0x04000000,
     UNIT_STATE_FOLLOW_MOVE     = 0x08000000,
-    UNIT_STATE_UNATTACKABLE    = (UNIT_STATE_IN_FLIGHT | UNIT_STATE_ONVEHICLE),
+    UNIT_STATE_UNATTACKABLE    = UNIT_STATE_IN_FLIGHT,
     // for real move using movegen check and stop (except unstoppable flight)
     UNIT_STATE_MOVING          = UNIT_STATE_ROAMING_MOVE | UNIT_STATE_CONFUSED_MOVE | UNIT_STATE_FLEEING_MOVE | UNIT_STATE_CHASE_MOVE | UNIT_STATE_FOLLOW_MOVE ,
     UNIT_STATE_CONTROLLED      = (UNIT_STATE_CONFUSED | UNIT_STATE_STUNNED | UNIT_STATE_FLEEING),
@@ -2356,6 +2356,7 @@ class Unit : public WorldObject
         virtual bool CanFly() const = 0;
         bool IsFlying() const   { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_FLYING | MOVEMENTFLAG_DISABLE_GRAVITY); }
         void SetCanFly(bool apply);
+        bool SetSwim(bool enable);
 
         void RewardRage(float baseRage, bool attacker);
 

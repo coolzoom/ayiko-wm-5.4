@@ -50,6 +50,7 @@ class TempSummon : public Creature
         void SetTempSummonType(TempSummonType type);
         void SaveToDB(uint32 /*mapid*/, uint32 /*spawnMask*/, uint32 /*phaseMask*/) {}
         Unit* GetSummoner() const;
+        Creature* GetSummonerCreatureBase() const;
         uint64 GetSummonerGUID() const { return m_summonerGUID; }
         TempSummonType const& GetSummonType() { return m_type; }
         uint32 GetTimer() { return m_timer; }

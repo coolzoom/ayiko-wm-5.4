@@ -47,6 +47,8 @@ class BasicEvent
         // these can be used for time offset control
         uint64 m_addTime;                                   // time when the event was added to queue, filled by event handler
         uint64 m_execTime;                                  // planned time of next execution, filled by event handler
+
+        uint32 eventId;
 };
 
 typedef std::multimap<uint64, BasicEvent*> EventList;
@@ -59,8 +61,9 @@ class EventProcessor
 
         void Update(uint32 p_time);
         void KillAllEvents(bool force);
-        void AddEvent(BasicEvent* Event, uint64 e_time, bool set_addtime = true);
+        void AddEvent(BasicEvent* Event, uint64 e_time, bool set_addtime = true, uint32 eventId = 0);
         uint64 CalculateTime(uint64 t_offset) const;
+        void DeleteEventId(uint32 eventId, bool force = true);
     protected:
         uint64 m_time;
         EventList m_events;

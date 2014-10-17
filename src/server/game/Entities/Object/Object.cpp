@@ -2743,10 +2743,13 @@ namespace Trinity
 
 //===================================================================================================
 
-void WorldObject::GetNearPoint2D(float &x, float &y, float distance2d, float absAngle) const
+void WorldObject::GetNearPoint2D(float &x, float &y, float distance2d, float absAngle, bool withObjectSize) const
 {
-    x = GetPositionX() + (GetObjectSize() + distance2d) * std::cos(absAngle);
-    y = GetPositionY() + (GetObjectSize() + distance2d) * std::sin(absAngle);
+    if (withObjectSize)
+        distance2d += GetObjectSize();
+
+    x = GetPositionX() + distance2d * std::cos(absAngle);
+    y = GetPositionY() + distance2d * std::sin(absAngle);
 
     Trinity::NormalizeMapCoord(x);
     Trinity::NormalizeMapCoord(y);
@@ -2993,6 +2996,18 @@ void WorldObject::PlayDirectSound(uint32 sound_id, Player* target /*= NULL*/)
     data.WriteBitSeq<6, 7, 5, 2, 1, 4, 0, 3>(guid);
     data.WriteByteSeq<7, 0, 5, 4, 3, 1, 2, 6>(guid);
     data << sound_id;
+
+    if (target)
+        target->SendDirectMessage(&data);
+    else
+        SendMessageToSet(&data, true);
+}
+
+void WorldObject::PlayMusic(uint32 music_id, Player* target /*= NULL*/)
+{
+    WorldPacket data(SMSG_PLAY_MUSIC, 4);
+    data << uint32(music_id);
+    data << uint64(GetGUID());
 
     if (target)
         target->SendDirectMessage(&data);

@@ -78,7 +78,7 @@ class CreatureAI : public UnitAI
         Creature* DoSummonFlyer(uint32 entry, WorldObject* obj, float flightZ, float radius = 5.0f, uint32 despawnTime = 30000, TempSummonType summonType = TEMPSUMMON_CORPSE_TIMED_DESPAWN);
 
     public:
-        void Talk(uint8 id, uint64 WhisperGuid = 0);
+        void Talk(uint8 id, uint64 WhisperGuid = 0, bool personal = false);
         explicit CreatureAI(Creature* creature) : UnitAI(creature), me(creature), m_MoveInLineOfSight_locked(false), m_canSeeEvenInPassiveMode(false) {}
 
         virtual ~CreatureAI() {}
@@ -181,7 +181,11 @@ class CreatureAI : public UnitAI
         // Pointer to controlled by AI creature
         //Creature* const me;
 
+        virtual void PassengerWillBoard(Unit* /*passenger*/, Position& /*enterPos*/, int8 /*seatId*/) { }
+
         virtual void PassengerBoarded(Unit* /*passenger*/, int8 /*seatId*/, bool /*apply*/) {}
+
+        virtual void OnControlVehicle(Unit* /*base*/, int8 /*seatId*/, bool /*apply*/) { }
 
         virtual void OnSpellClick(Unit* /*clicker*/) { }
 

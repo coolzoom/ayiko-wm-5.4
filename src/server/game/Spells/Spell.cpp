@@ -4609,7 +4609,6 @@ void Spell::SendSpellStart()
     bool hasRuneStateAfter = false; // don't needed in spell_start
     uint8 predictedHealType = 0;
     bool unkByte5 = false;
-    bool unkByte6 = false;
     bool unkFloat = false;
 
     // Initialize predicated heal values
@@ -4722,7 +4721,7 @@ void Spell::SendSpellStart()
         data.WriteBits(unkStringLength, 7);                 // unk string length
 
     data.WriteBit(!unkInt5);                                // !has unk int 5
-    data.WriteBit(unkByte6);                               // has unk byte 6
+    data.WriteBit(castFlags & CAST_FLAG_PROJECTILE);        // hasProjectile
 
     for (uint32 i = 0; i < unkCounter4; i++)
     {
@@ -4809,10 +4808,22 @@ void Spell::SendSpellStart()
 
     data.WriteByteSeq<1, 7, 3, 0, 6, 2, 4, 5>(predictedHealOverrideTarget);
 
-    if (unkByte6)
+    if (castFlags & CAST_FLAG_PROJECTILE)
     {
-        data << uint32(0);
-        data << uint32(0);
+        uint32 ammoDisplayId = 0;
+        uint32 inventoryType = 0;
+
+        auto const &spellAmmoMap = sSpellMgr->GetSpellAmmoMap();
+
+        auto const itr = spellAmmoMap.find(m_spellInfo->Id);
+        if (itr != spellAmmoMap.end())
+        {
+            ammoDisplayId = itr->second.ammoDisplayID;
+            inventoryType = itr->second.inventoryType;
+        }
+
+        data << uint32(ammoDisplayId); // Ammo display ID
+        data << uint32(inventoryType); // Inventory Type
     }
 
     data.WriteByteSeq<4>(itemCaster);
@@ -4964,6 +4975,8 @@ void Spell::SendSpellGo()
     if (m_targets.HasTraj())
         castFlags |= CAST_FLAG_ADJUST_MISSILE;
 
+    if (m_spellInfo->AttributesCu & SPELL_ATTR0_CU_USE_AMMO)
+        castFlags |= CAST_FLAG_PROJECTILE;
 
     WorldPacket data(SMSG_SPELL_GO);
 
@@ -4996,7 +5009,6 @@ void Spell::SendSpellGo()
         hasRuneStateAfter = true;
     bool hasDelayMoment = m_delayMoment;
     bool hasBit368 = false;
-    bool hasBit380 = false;
     bool hasBit384 = false;
     bool hasBit428 = false;
 
@@ -5057,7 +5069,7 @@ void Spell::SendSpellGo()
     data.WriteBits(powerCount, 21);                         // powerCount
     data.WriteBit(!hasBit91);                               // !hasBit91
     data.WriteBits(0, 13);                                  // counter11 - sniffed value 0x10, look like flags, unk, maybe castFlags ?
-    data.WriteBit(hasBit380);                               // hasBit380
+    data.WriteBit(castFlags & CAST_FLAG_PROJECTILE);        // hasBit380
     data.WriteBit(hasSrc);                                  // hasGuid3
     data.WriteBitSeq<3>(itemCaster);
     data.WriteBits(extraTargets, 20);                       // extraTargets
@@ -5304,10 +5316,22 @@ void Spell::SendSpellGo()
         data.WriteByteSeq<4, 1, 3, 0, 7, 5>(extraTarget);
     }
 
-    if (hasBit380)
+    if (castFlags & CAST_FLAG_PROJECTILE)
     {
-        data << uint32(0);
-        data << uint32(0);
+        uint32 ammoDisplayId = 0;
+        uint32 inventoryType = 0;
+
+        auto const &spellAmmoMap = sSpellMgr->GetSpellAmmoMap();
+
+        auto const itr = spellAmmoMap.find(m_spellInfo->Id);
+        if (itr != spellAmmoMap.end())
+        {
+            ammoDisplayId = itr->second.ammoDisplayID;
+            inventoryType = itr->second.inventoryType;
+        }
+
+        data << uint32(ammoDisplayId); // Ammo display ID
+        data << uint32(inventoryType); // Inventory Type
     }
 
     data << uint32(m_spellInfo->Id);                        // spellId
@@ -5432,8 +5456,7 @@ void Spell::SendSpellGo()
 
     if (castFlags & CAST_FLAG_PROJECTILE)
     {
-        data << uint32(0); // Ammo display ID
-        data << uint32(0); // Inventory Type
+
     }
 
     if (castFlags & CAST_FLAG_VISUAL_CHAIN)
@@ -6464,17 +6487,12 @@ SpellCastResult Spell::CheckCast(bool strict)
         ConditionList conditions = sConditionMgr->GetConditionsForNotGroupedEntry(CONDITION_SOURCE_TYPE_SPELL, m_spellInfo->Id);
         if (!conditions.empty() && !sConditionMgr->IsObjectMeetToConditions(condInfo, conditions))
         {
-            // send error msg to player if condition failed and text message available
-            // TODO: using WorldSession::SendNotification is not blizzlike
-            if (Player* playerCaster = m_caster->ToPlayer())
+            // mLastFailedCondition can be NULL if there was an error processing the condition in Condition::Meets (i.e. wrong data for ConditionTarget or others)
+            if (condInfo.mLastFailedCondition && condInfo.mLastFailedCondition->ErrorType)
             {
-                // mLastFailedCondition can be NULL if there was an error processing the condition in Condition::Meets (i.e. wrong data for ConditionTarget or others)
-                if (playerCaster->GetSession() && condInfo.mLastFailedCondition
-                    && condInfo.mLastFailedCondition->ErrorTextId)
-                {
-                    playerCaster->GetSession()->SendNotification(condInfo.mLastFailedCondition->ErrorTextId);
-                    return SPELL_FAILED_DONT_REPORT;
-                }
+                if (condInfo.mLastFailedCondition->ErrorType == SPELL_FAILED_CUSTOM_ERROR)
+                    m_customError = SpellCustomErrors(condInfo.mLastFailedCondition->ErrorTextId);
+                return SpellCastResult(condInfo.mLastFailedCondition->ErrorType);
             }
             if (!condInfo.mLastFailedCondition || !condInfo.mLastFailedCondition->ConditionTarget)
                 return SPELL_FAILED_CASTER_AURASTATE;

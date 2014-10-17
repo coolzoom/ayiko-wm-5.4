@@ -3155,7 +3155,8 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
                     InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
                 m_AutoRepeatFirstCast = true;
             }
-            if (pSpell->m_spellInfo->CalcCastTime(this) > 0)
+
+            if (pSpell->GetCastTime() > 0)
                 AddUnitState(UNIT_STATE_CASTING);
 
             break;
@@ -3170,7 +3171,9 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
             if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL] &&
                 m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id != 75)
                 InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
-            AddUnitState(UNIT_STATE_CASTING);
+
+            if (!pSpell->IsTriggered())
+                AddUnitState(UNIT_STATE_CASTING);
 
             break;
         }
@@ -20244,6 +20247,19 @@ void Unit::SetCanFly(bool apply)
         AddUnitMovementFlag(MOVEMENTFLAG_CAN_FLY);
     else
         RemoveUnitMovementFlag(MOVEMENTFLAG_CAN_FLY);
+}
+
+bool Unit::SetSwim(bool enable)
+{
+    if (enable == HasUnitMovementFlag(MOVEMENTFLAG_SWIMMING))
+        return false;
+
+    if (enable)
+        AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
+    else
+        RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
+
+    return true;
 }
 
 void Unit::NearTeleportTo(float x, float y, float z, float orientation, bool casting /*= false*/)

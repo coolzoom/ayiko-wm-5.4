@@ -394,6 +394,15 @@ WorldObject* SpellScript::GetExplTargetWorldObject()
     return m_spell->m_targets.GetObjectTarget();
 }
 
+void SpellScript::GetTargetSpeedXYZ(float &speedXY, float &speedZ)
+{
+    if (m_spell->m_targets.HasTraj())
+    {
+        speedXY = m_spell->m_targets.GetSpeedXY();
+        speedZ = m_spell->m_targets.GetSpeedZ();
+    }
+}
+
 Unit* SpellScript::GetExplTargetUnit()
 {
     return m_spell->m_targets.GetUnitTarget();

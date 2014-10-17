@@ -775,7 +775,7 @@ class WorldObject : public Object, public WorldLocation
             Object::RemoveFromWorld();
         }
 
-        void GetNearPoint2D(float &x, float &y, float distance, float absAngle) const;
+        void GetNearPoint2D(float &x, float &y, float distance, float absAngle, bool withObjectSize = true) const;
         void GetNearPoint(WorldObject const* searcher, float &x, float &y, float &z, float searcher_size, float distance2d, float absAngle) const;
         void GetClosePoint(float &x, float &y, float &z, float size, float distance2d = 0, float angle = 0) const
         {
@@ -937,6 +937,7 @@ class WorldObject : public Object, public WorldLocation
 
         void PlayDistanceSound(uint32 sound_id, Player* target = NULL);
         void PlayDirectSound(uint32 sound_id, Player* target = NULL);
+        void PlayMusic(uint32 music_id, Player* target = NULL);
 
         void SendObjectDeSpawnAnim(uint64 guid);
 

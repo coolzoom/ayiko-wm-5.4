@@ -365,6 +365,103 @@ class WorldBossAI : public ScriptedAI
         SummonList summons;
 };
 
+struct SmoothCreatureMovement
+{
+    SmoothCreatureMovement(Creature* mover)
+        : _mover(mover)
+        , _x(0)
+        , _y(0)
+        , chaseVictimTimer(0)
+    { }
+
+    Creature* _mover;
+    float _x;
+    float _y;
+    uint32 chaseVictimTimer;
+
+    void UpdateMovement(uint32 diff)
+    {
+        if (chaseVictimTimer <= diff)
+        {
+            chaseVictimTimer = 100;
+
+            if (!_mover->CanFreeMove())
+                return;
+
+            if (Unit* target = _mover->getVictim())
+            {
+                if (_mover->IsWithinMeleeRange(target))
+                {
+                    if (_mover->isMoving())
+                        _mover->StopMoving();
+
+                    return;
+                }
+
+                float sizefactor = _mover->GetMeleeReach();
+                float dist = target->GetExactDist2d(_x, _y);
+
+                if (dist > sizefactor || !_mover->isMoving())
+                {
+                    float x, y;
+                    float angle = target->GetAngle(_mover);
+                    x = target->GetPositionX() + sizefactor * std::cos(angle);
+                    y = target->GetPositionY() + sizefactor * std::sin(angle);
+                    _x = x;
+                    _y  = y;
+                    _mover->GetMotionMaster()->MovePointSmooth(x, y, 5.f, true);
+                }
+            }
+        }
+        else
+            chaseVictimTimer -= diff;
+    }
+};
+
+class DelayEventDoAction : public BasicEvent
+{
+    public:
+        DelayEventDoAction(Unit* me, int32 action)
+            : _me(me)
+            , _action(action)
+        { }
+
+        bool Execute(uint64 /*execTime*/, uint32 /*diff*/)
+        {
+            if (_me->IsAIEnabled && _me->isAlive())
+                _me->GetAI()->DoAction(_action);
+
+            return false;
+        }
+
+    private:
+        Unit* _me;
+        int32 _action;
+};
+
+class DelayEventSetData : public BasicEvent
+{
+    public:
+        DelayEventSetData(Unit* me, uint32 type, uint32 data)
+            : _me(me)
+            , _type(type)
+            , _data(data)
+        { }
+
+        bool Execute(uint64 /*execTime*/, uint32 /*diff*/)
+        {
+            if (_me->IsAIEnabled && _me->isAlive())
+                _me->GetAI()->SetData(_type, _data);
+
+            return false;
+        }
+
+    private:
+        Unit* _me;
+        uint32 _type;
+        uint32 _data;
+};
+
 // SD2 grid searchers.
 Creature* GetClosestCreatureWithEntry(WorldObject* source, uint32 entry, float maxSearchRange, bool alive = true);
 GameObject* GetClosestGameObjectWithEntry(WorldObject* source, uint32 entry, float maxSearchRange);

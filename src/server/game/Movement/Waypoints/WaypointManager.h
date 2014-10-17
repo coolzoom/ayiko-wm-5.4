@@ -38,6 +38,26 @@ struct WaypointData
 typedef std::vector<WaypointData*> WaypointPath;
 typedef std::unordered_map<uint32, WaypointPath> WaypointPathContainer;
 
+struct SplineWaypointData
+{
+    uint8 wp_id;
+    float x, y, z;
+};
+
+typedef std::vector<SplineWaypointData> SplineWaypointPath;
+typedef std::unordered_map<uint8, SplineWaypointPath> SplineWaypointPathContainer;
+typedef std::unordered_map<uint32, SplineWaypointPathContainer> CreatureSplineWaypointPathContainer;
+
+struct WaypointAddon
+{
+    bool fly;
+    bool walk;
+    bool catmullRom;
+    float speed;
+};
+
+typedef std::unordered_map<uint32, WaypointAddon> WaypointAddonContainer;
+
 class WaypointMgr
 {
         friend class ACE_Singleton<WaypointMgr, ACE_Null_Mutex>;
@@ -52,19 +72,47 @@ class WaypointMgr
         // Returns the path from a given id
         WaypointPath const* GetPath(uint32 id) const
         {
-            WaypointPathContainer::const_iterator itr = _waypointStore.find(id);
-            if (itr != _waypointStore.end())
+            WaypointPathContainer::const_iterator itr = m_waypointStore.find(id);
+            if (itr != m_waypointStore.end())
                 return &itr->second;
 
             return NULL;
         }
+
+        SplineWaypointPath const* GetSplinePath(uint32 c_entry, uint8 path_id) const
+        {
+            CreatureSplineWaypointPathContainer::const_iterator itr = m_splineWaypointStore.find(c_entry);
+
+            if (itr != m_splineWaypointStore.end())
+            {
+                SplineWaypointPathContainer::const_iterator jitr = (*itr).second.find(path_id);
+
+                if (jitr != (*itr).second.end())
+                    return &jitr->second;
+            }
+
+            return NULL;
+        }
+
+        WaypointAddon const* GetWaypointAddon(uint32 path_id) const
+        {
+            WaypointAddonContainer::const_iterator itr = m_waypointAddonStore.find(path_id);
+
+            if (itr != m_waypointAddonStore.end())
+                return &itr->second;
+
+            return NULL;
+        }
+
 
     private:
         // Only allow instantiation from ACE_Singleton
         WaypointMgr();
         ~WaypointMgr();
 
-        WaypointPathContainer _waypointStore;
+        WaypointPathContainer m_waypointStore;
+        CreatureSplineWaypointPathContainer m_splineWaypointStore;
+        WaypointAddonContainer m_waypointAddonStore;
 };
 
 #define sWaypointMgr ACE_Singleton<WaypointMgr, ACE_Null_Mutex>::instance()

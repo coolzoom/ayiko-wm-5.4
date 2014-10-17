@@ -1536,6 +1536,9 @@ void World::SetInitialWorldSettings()
     TC_LOG_INFO("server.loading", "Loading spell custom attributes...");
     sSpellMgr->LoadSpellCustomAttr();
 
+    TC_LOG_INFO("server.loading", "Loading SpellInfo corrections...");
+    sSpellMgr->LoadSpellAmmo();
+
     TC_LOG_INFO("server.loading", "Loading Research Site Zones...");
     sObjectMgr->LoadResearchSiteZones();
 

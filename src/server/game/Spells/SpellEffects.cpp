@@ -1632,9 +1632,9 @@ void Spell::EffectForceCast(SpellEffIndex effIndex)
     }
 
     SpellCastTargets targets;
-    targets.SetUnitTarget(m_caster);
+    targets.SetUnitTarget(unitTarget);
 
-    unitTarget->CastSpell(targets, spellInfo, &values, TRIGGERED_FULL_MASK);
+    unitTarget->CastSpell(targets, spellInfo, &values, TRIGGERED_FULL_MASK, NULL, NULL, m_originalCasterGUID);
 }
 
 void Spell::EffectTriggerRitualOfSummoning(SpellEffIndex effIndex)
@@ -7360,9 +7360,8 @@ void Spell::EffectPlayMusic(SpellEffIndex effIndex)
     if (!sSoundEntriesStore.LookupEntry(soundId))
         return;
 
-    WorldPacket data(SMSG_PLAY_MUSIC, 4);
-    data << uint32(soundId);
-    unitTarget->ToPlayer()->GetSession()->SendPacket(&data);
+
+    unitTarget->PlayMusic(soundId, unitTarget->ToPlayer());
 }
 
 void Spell::EffectSpecCount(SpellEffIndex /*effIndex*/)

@@ -146,7 +146,79 @@ public:
     }
 };
 
+class PlayerLoginScript : public PlayerScript
+{
+public:
+    PlayerLoginScript() : PlayerScript("PlayerLoginScript") { }
+
+    void OnEndWatching(Player* player)
+    {
+        if (player->HasAura(91847))
+        {
+            //player->CastSpell(player, 74100, false);
+            WorldLocation loc;
+            loc.m_mapId = 1;
+            loc.m_positionX = 1440.89f;
+            loc.m_positionY = -5021.77f;
+            loc.m_positionZ = 12.0647f;
+            player->RemoveAllAuras();
+            player->SetHomebind(loc, 374);
+            player->TeleportTo(1, 1440.89f, -5021.77f, 12.0647f, 1.6081f);
+        }
+    }
+
+    void OnLogin(Player* player)
+    {
+        if (player->GetMapId() == 654 && player->GetPhaseMask() == 1)
+        {
+            PhaseShiftSet terrainswap;
+            terrainswap.insert(638);
+
+            PhaseShiftSet phaseId;
+            phaseId.insert(170);
+
+            PhaseShiftSet worldMapAreaIds;
+
+            player->GetSession()->SendSetPhaseShift(phaseId, terrainswap, worldMapAreaIds);
+        }
+
+        ////if(player->HasFlagExtraWorgenForm())
+        ////player->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_WORGEN_TRANSFORM2);
+
+        //if (player->HasAura(SPELL_KEYS_TO_THE_HOT_ROD))
+        //{
+        //    player->RemoveAura(SPELL_KEYS_TO_THE_HOT_ROD);
+        //    player->CastSpell(player, SPELL_KEYS_TO_THE_HOT_ROD, false);
+        //}
+
+        //uint32 uiSpellId = 0;
+        //Unit::AuraEffectList const& phases = player->GetAuraEffectsByType(SPELL_AURA_PHASE);
+        //if (!phases.empty())
+        //    for (Unit::AuraEffectList::const_iterator itr = phases.begin(); itr != phases.end(); ++itr)
+        //        uiSpellId = (*itr)->GetSpellInfo()->Id;
+
+        //if (uiSpellId)
+        //{
+        //    player->RemoveAura(uiSpellId);
+        //    player->CastSpell(player, uiSpellId, false);
+        //}
+
+        //uiSpellId = 0;
+        //Unit::AuraEffectList const& overrided = player->GetAuraEffectsByType(SPELL_AURA_OVERRIDE_SPELLS);
+        //if (!overrided.empty())
+        //    for (Unit::AuraEffectList::const_iterator itr = overrided.begin(); itr != overrided.end(); ++itr)
+        //        uiSpellId = (*itr)->GetSpellInfo()->Id;
+
+        //if (uiSpellId)
+        //{
+        //    player->RemoveAura(uiSpellId);
+        //    player->CastSpell(player, uiSpellId, false);
+        //}
+    }
+};
+
 void AddSC_player_scripts()
 {
     new HunterScript();
+    new PlayerLoginScript();
 }

@@ -400,17 +400,18 @@ bool Vehicle::AddPassenger(Unit* unit, int8 seatId)
         }
     }
 
-    if (seat->second.SeatInfo->m_flags && !(seat->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_ALLOW_TURNING))
-        unit->AddUnitState(UNIT_STATE_ONVEHICLE);
+    if (seat->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_PASSENGER_NOT_SELECTABLE)
+        unit->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
     VehicleSeatEntry const* veSeat = seat->second.SeatInfo;
-    unit->m_movementInfo.t_pos.m_positionX = veSeat->m_attachmentOffsetX;
-    unit->m_movementInfo.t_pos.m_positionY = veSeat->m_attachmentOffsetY;
-    unit->m_movementInfo.t_pos.m_positionZ = veSeat->m_attachmentOffsetZ;
-    unit->m_movementInfo.t_pos.SetOrientation(0);
+
+    unit->m_movementInfo.t_pos.Relocate(veSeat->m_attachmentOffsetX, veSeat->m_attachmentOffsetY, veSeat->m_attachmentOffsetZ, 0);
     unit->m_movementInfo.t_time = 0; // 1 for player
     unit->m_movementInfo.t_seat = seat->first;
     unit->m_movementInfo.t_guid = _me->GetGUID();
+
+    Position enterPosition;
+    enterPosition.Relocate(veSeat->m_attachmentOffsetX, veSeat->m_attachmentOffsetY, veSeat->m_attachmentOffsetZ, 0);
 
     // Hackfix
     switch (veSeat->m_ID)
@@ -424,36 +425,35 @@ bool Vehicle::AddPassenger(Unit* unit, int8 seatId)
             break;
     }
 
+    if (Creature* creature = _me->ToCreature())
+        if (creature->IsAIEnabled)
+            creature->AI()->PassengerWillBoard(unit, enterPosition, seatId);
+
     if (_me->GetTypeId() == TYPEID_UNIT
-        && unit->GetTypeId() == TYPEID_PLAYER
-        && seat->first == 0 && seat->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_CAN_CONTROL)
+            && unit->GetTypeId() == TYPEID_PLAYER
+            && (seat->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_CAN_CONTROL))
     {
-        if (!_me->SetCharmedBy(unit, CHARM_TYPE_VEHICLE))
-            ASSERT(false);
+        bool result = _me->SetCharmedBy(unit, CHARM_TYPE_VEHICLE);
+        ASSERT(result);  // SMSG_CLIENT_CONTROL
     }
 
-    if (_me->IsInWorld())
-    {
-        unit->SendClearTarget();                                 // SMSG_BREAK_TARGET
-        unit->SetControlled(true, UNIT_STATE_ROOT);              // SMSG_FORCE_ROOT - In some cases we send SMSG_SPLINE_MOVE_ROOT here (for creatures)
-                                                                 // also adds MOVEMENTFLAG_ROOT
-        Movement::MoveSplineInit init(unit);
-        init.DisableTransportPathTransformations();
-        init.MoveTo(unit->m_movementInfo.t_pos.m_positionX, unit->m_movementInfo.t_pos.m_positionY, unit->m_movementInfo.t_pos.m_positionZ);
-        init.SetFacing(0.0f);
-        init.SetTransportEnter();
-        init.Launch();
+    unit->SendClearTarget();                                // SMSG_BREAK_TARGET
+    unit->SetControlled(true, UNIT_STATE_ROOT);             // SMSG_FORCE_ROOT - In some cases we send SMSG_SPLINE_MOVE_ROOT here (for creatures)
+                                                            // also adds MOVEMENTFLAG_ROOT
+    Movement::MoveSplineInit init(unit);
+    init.DisableTransportPathTransformations();
+    init.MoveTo(enterPosition.GetPositionX(), enterPosition.GetPositionY(), enterPosition.GetPositionZ());
+    init.SetFacing(enterPosition.GetOrientation());
+    init.SetTransportEnter();
+    init.Launch();
 
-        if (_me->GetTypeId() == TYPEID_UNIT)
-        {
-            if (_me->ToCreature()->IsAIEnabled)
-                _me->ToCreature()->AI()->PassengerBoarded(unit, seat->first, true);
+    if (Creature* creature = _me->ToCreature())
+        if (creature->IsAIEnabled)
+            creature->AI()->PassengerBoarded(unit, seat->first, true);
 
-            // update all passenger's positions
-            //Passenger's spline OR vehicle movement will update positions
-            //RelocatePassengers(_me->GetPositionX(), _me->GetPositionY(), _me->GetPositionZ(), _me->GetOrientation());
-        }
-    }
+    if (Creature* creature = unit->ToCreature())
+        if (creature->IsAIEnabled)
+            creature->AI()->OnControlVehicle(_me, seat->first, true);
 
     if (GetBase()->GetTypeId() == TYPEID_UNIT)
         sScriptMgr->OnAddPassenger(this, unit, seatId);
@@ -485,9 +485,11 @@ void Vehicle::RemovePassenger(Unit* unit)
         ++_usableSeatNum;
     }
 
-    unit->ClearUnitState(UNIT_STATE_ONVEHICLE);
+    // Remove UNIT_FLAG_NOT_SELECTABLE if passenger did not have it before entering vehicle
+    if (seat->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_PASSENGER_NOT_SELECTABLE /*&& !seat->second.Passenger.IsUnselectable*/)
+        unit->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
-    if (_me->GetTypeId() == TYPEID_UNIT && unit->GetTypeId() == TYPEID_PLAYER && seat->first == 0 && seat->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_CAN_CONTROL)
+    if (_me->GetTypeId() == TYPEID_UNIT && unit->GetTypeId() == TYPEID_PLAYER && seat->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_CAN_CONTROL)
         _me->RemoveCharmedBy(unit);
 
     if (_me->IsInWorld())
@@ -503,6 +505,10 @@ void Vehicle::RemovePassenger(Unit* unit)
 
     if (_me->GetTypeId() == TYPEID_UNIT && _me->ToCreature()->IsAIEnabled)
         _me->ToCreature()->AI()->PassengerBoarded(unit, seat->first, false);
+
+    if (Creature* creature = unit->ToCreature())
+        if (creature->IsAIEnabled)
+            creature->AI()->OnControlVehicle(_me, seat->first, false);
 
     if (GetBase()->GetTypeId() == TYPEID_UNIT)
         sScriptMgr->OnRemovePassenger(this, unit);

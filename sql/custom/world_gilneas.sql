@@ -16870,3 +16870,5 @@ DELETE FROM `spell_linked_spell` WHERE `spell_trigger` = 70797;
 INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`)
 VALUES
   (70797, -70794, 0, 'Belrysa''s Talisman - remove Freezing Trap Effect');
+
+UPDATE `creature_template` SET `ScriptName` = 'npc_tobias_mistmantle_qaod' WHERE `entry` = 38051;

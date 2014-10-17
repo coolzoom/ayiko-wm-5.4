@@ -16872,3 +16872,8 @@ VALUES
   (70797, -70794, 0, 'Belrysa''s Talisman - remove Freezing Trap Effect');
 
 UPDATE `creature_template` SET `ScriptName` = 'npc_tobias_mistmantle_qaod' WHERE `entry` = 38051;
+
+DELETE FROM `creature_model_info` WHERE `modelid` = 29318;
+INSERT INTO `creature_model_info` (`modelid`, `bounding_radius`, `combat_reach`, `gender`, `modelid_other_gender`)
+VALUES
+  (29318, 0, 0, 2, 0);

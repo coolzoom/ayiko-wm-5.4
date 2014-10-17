@@ -195,6 +195,7 @@ void PhaseMgr::RegisterPhasingAuraEffect(AuraEffect const* auraEffect)
                 case 183:
                 case 184:
                     phaseInfo.terrainswapmap = 655;
+                    phaseInfo.worldMapAreaId = 678;
                     break;
                 case 186:
                 case 187:
@@ -204,6 +205,7 @@ void PhaseMgr::RegisterPhasingAuraEffect(AuraEffect const* auraEffect)
                 case 191:
                 case 194:
                     phaseInfo.terrainswapmap = 656;
+                    phaseInfo.worldMapAreaId = 679;
                     break;
             }
         }

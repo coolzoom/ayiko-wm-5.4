@@ -16877,3 +16877,5 @@ DELETE FROM `creature_model_info` WHERE `modelid` = 29318;
 INSERT INTO `creature_model_info` (`modelid`, `bounding_radius`, `combat_reach`, `gender`, `modelid_other_gender`)
 VALUES
   (29318, 0, 0, 2, 0);
+
+UPDATE `quest_template` SET `Method` = 0 WHERE `Id` = 26706;

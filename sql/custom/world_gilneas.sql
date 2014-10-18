@@ -16880,5 +16880,5 @@ VALUES
 
 UPDATE `quest_template` SET `Method` = 0 WHERE `Id` = 26706;
 
-DELETE FROM `creature` WHERE `id` = 35370;
+DELETE FROM `creature` WHERE `id` IN (35370, 35907);
 

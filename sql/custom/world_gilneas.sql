@@ -16879,3 +16879,6 @@ VALUES
   (29318, 0, 0, 2, 0);
 
 UPDATE `quest_template` SET `Method` = 0 WHERE `Id` = 26706;
+
+DELETE FROM `creature` WHERE `id` = 35370;
+

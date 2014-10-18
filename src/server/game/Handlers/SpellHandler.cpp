@@ -580,7 +580,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     std::string unkString;
 
     ObjectGuid itemTarget, Guid2, Guid3, targetGuid;
-
+#if 0
     MovementInfo movementInfo;
     ObjectGuid movementTransportGuid;
     ObjectGuid movementGuid;
@@ -597,7 +597,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     bool hasTransTime2 = false;
     bool hasTransTime3 = false;
     bool hasPitch = false;
-
+#endif
     bool hasTargetFlags = !recvPacket.ReadBit();
     bool hasCountCast = !recvPacket.ReadBit();
     bool hasUnk1 = !recvPacket.ReadBit();
@@ -624,6 +624,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
     if (hasMovement)
     {
+#if 0
         hasAliveTime = !recvPacket.ReadBit();
         recvPacket.ReadBitSeq<3>(movementGuid);
         hasSplineElevation = !recvPacket.ReadBit();
@@ -663,6 +664,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
             movementInfo.flags2 = recvPacket.ReadBits(13);
 
         hasTimeStamp = !recvPacket.ReadBit();
+#endif
     }
 
     if (hasTargetFlags)
@@ -703,6 +705,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
     if (hasMovement)
     {
+#if 0
         if (hasTransportData)
         {
             recvPacket.ReadByteSeq<5>(movementTransportGuid);
@@ -768,6 +771,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
             recvPacket.read_skip<float>();
 
         recvPacket.ReadByteSeq<7, 1>(movementGuid);
+#endif
     }
 
     if (hasSpellId)

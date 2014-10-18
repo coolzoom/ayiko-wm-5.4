@@ -1275,6 +1275,9 @@ void GameObject::Use(Unit* user)
 
                 if (info->goober.eventId)
                 {
+                    if (GetMap()->IsEventScriptActive(info->goober.eventId))
+                        return;
+
                     TC_LOG_DEBUG("maps.scripts", "Goober ScriptStart id %u for GO entry %u (GUID %u).", info->goober.eventId, GetEntry(), GetDBTableGUIDLow());
                     GetMap()->ScriptsStart(sEventScripts, info->goober.eventId, player, this);
                     EventInform(info->goober.eventId);
@@ -1330,7 +1333,7 @@ void GameObject::Use(Unit* user)
             if (info->camera.cinematicId)
                 player->SendCinematicStart(info->camera.cinematicId);
 
-            if (info->camera.eventID)
+            if (info->camera.eventID && !GetMap()->IsEventScriptActive(info->camera.eventID))
                 GetMap()->ScriptsStart(sEventScripts, info->camera.eventID, player, this);
 
             return;

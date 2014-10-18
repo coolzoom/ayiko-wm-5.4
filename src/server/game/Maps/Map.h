@@ -639,6 +639,13 @@ class Map
         ObjectUpdater i_objectUpdater;
 
         Trinity::DelayedUnitRelocation delayedUnitRelocation_;
+
+        // event Scripts
+    private:
+        typedef std::unordered_map<uint32, time_t> EventsExpireTimeMap;
+        EventsExpireTimeMap _eventsExpireTime;
+    public:
+        bool IsEventScriptActive(uint32 id);
 };
 
 enum InstanceResetMethod

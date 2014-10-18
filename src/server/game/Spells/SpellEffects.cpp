@@ -1984,6 +1984,10 @@ void Spell::EffectSendEvent(SpellEffIndex effIndex)
         && effectHandleMode != SPELL_EFFECT_HANDLE_HIT)
         return;
 
+    int32 miscValue = m_spellInfo->Effects[effIndex].MiscValue;
+    if (m_caster->GetMap()->IsEventScriptActive(miscValue))
+        return;
+
     WorldObject* target = NULL;
 
     // call events for object target if present
@@ -2009,11 +2013,11 @@ void Spell::EffectSendEvent(SpellEffIndex effIndex)
     }
 
     if (ZoneScript* zoneScript = m_caster->GetZoneScript())
-        zoneScript->ProcessEvent(target, m_spellInfo->Effects[effIndex].MiscValue);
+        zoneScript->ProcessEvent(target, miscValue);
     else if (InstanceScript* instanceScript = m_caster->GetInstanceScript())    // needed in case Player is the caster
-        instanceScript->ProcessEvent(target, m_spellInfo->Effects[effIndex].MiscValue);
+        instanceScript->ProcessEvent(target, miscValue);
 
-    m_caster->GetMap()->ScriptsStart(sEventScripts, m_spellInfo->Effects[effIndex].MiscValue, m_caster, target);
+    m_caster->GetMap()->ScriptsStart(sEventScripts, miscValue, m_caster, target);
 }
 
 void Spell::EffectPowerBurn(SpellEffIndex effIndex)
@@ -2820,9 +2824,16 @@ void Spell::SendLoot(uint64 guid, LootType loottype)
                 return;
 
             case GAMEOBJECT_TYPE_CHEST:
-                // TODO: possible must be moved to loot release (in different from linked triggering)
-                if (gameObjTarget->GetGOInfo()->chest.eventId)
-                    player->GetMap()->ScriptsStart(sEventScripts, gameObjTarget->GetGOInfo()->chest.eventId, player, gameObjTarget);
+                /// @todo possible must be moved to loot release (in different from linked triggering)
+                if (uint32 eventId = gameObjTarget->GetGOInfo()->chest.eventId)
+                {
+                    Map* map = player->GetMap();
+                    if (map->IsEventScriptActive(eventId))
+                        return;
+
+                    TC_LOG_DEBUG("spells", "Chest ScriptStart id %u for GO %u", gameObjTarget->GetGOInfo()->chest.eventId, gameObjTarget->GetDBTableGUIDLow());
+                    map->ScriptsStart(sEventScripts, gameObjTarget->GetGOInfo()->chest.eventId, player, gameObjTarget);
+                }
 
                 // triggering linked GO
                 if (uint32 trapEntry = gameObjTarget->GetGOInfo()->chest.linkedTrapId)

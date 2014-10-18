@@ -291,11 +291,14 @@ void FlightPathMovementGenerator::SetCurrentNodeAfterTeleport()
 
 void FlightPathMovementGenerator::DoEventIfAny(Player* player, TaxiPathNodeEntry const& node, bool departure)
 {
-    if (uint32 eventid = departure ? node.departureEventID : node.arrivalEventID)
+    if (uint32 eventId = departure ? node.departureEventID : node.arrivalEventID)
     {
-        TC_LOG_DEBUG("maps.scripts", "Taxi %s event %u of node %u of path %u for player %s",
-                     departure ? "departure" : "arrival", eventid, node.index, node.path, player->GetName().c_str());
-        player->GetMap()->ScriptsStart(sEventScripts, eventid, player, player);
+        if (!player->GetMap()->IsEventScriptActive(eventId))
+        {
+            TC_LOG_DEBUG("maps.scripts", "Taxi %s event %u of node %u of path %u for player %s",
+                        departure ? "departure" : "arrival", eventId, node.index, node.path, player->GetName().c_str());
+            player->GetMap()->ScriptsStart(sEventScripts, eventId, player, player);
+        }
     }
 }
 

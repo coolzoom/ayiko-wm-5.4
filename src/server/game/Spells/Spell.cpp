@@ -7058,6 +7058,10 @@ SpellCastResult Spell::CheckCast(bool strict)
                         return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
                 break;
             }
+            case SPELL_EFFECT_SEND_EVENT:
+                if (m_caster->GetMap()->IsEventScriptActive(m_spellInfo->Effects[i].MiscValue))
+                    return SPELL_FAILED_CHEST_IN_USE;
+                break;
             default:
                 break;
         }

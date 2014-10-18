@@ -46,6 +46,9 @@ void Map::ScriptsStart(ScriptMapMap const& scripts, uint32 id, Object* source, O
     ///- Schedule script execution for all scripts in the script map
     ScriptMap const &s2 = s->second;
     bool immedScript = false;
+    time_t now = time_t(sWorld->GetGameTime());
+
+    uint32 expireTime = 0;
     for (ScriptMap::const_iterator iter = s2.begin(); iter != s2.end(); ++iter)
     {
         ScriptAction sa;
@@ -54,12 +57,20 @@ void Map::ScriptsStart(ScriptMapMap const& scripts, uint32 id, Object* source, O
         sa.ownerGUID  = ownerGUID;
         sa.script = iter->second;
 
-        m_scriptSchedule.insert(ScriptScheduleMap::value_type(time_t(sWorld->GetGameTime() + iter->first), sa));
+        m_scriptSchedule.insert(ScriptScheduleMap::value_type(time_t(now + iter->first), sa));
         if (iter->first == 0)
             immedScript = true;
 
+        if (iter->second.type == SCRIPTS_EVENT && sa.script.command == SCRIPT_COMMAND_TEMP_SUMMON_CREATURE &&
+            sa.script.TempSummonCreature.DespawnDelay > expireTime)
+            expireTime = sa.script.TempSummonCreature.DespawnDelay;
+
         sScriptMgr->IncreaseScheduledScriptsCount();
     }
+
+    if (expireTime)
+        _eventsExpireTime[id] = time_t(now + expireTime / IN_MILLISECONDS);
+
     ///- If one of the effects should be immediate, launch the script execution
     if (/*start &&*/ immedScript && !i_scriptLock)
     {
@@ -924,4 +935,19 @@ void Map::ScriptsProcess()
         iter = m_scriptSchedule.begin();
         sScriptMgr->DecreaseScheduledScriptCount();
     }
+}
+
+bool Map::IsEventScriptActive(uint32 id)
+{
+    if (id)
+    {
+        EventsExpireTimeMap::iterator it = _eventsExpireTime.find(id);
+        if (it != _eventsExpireTime.end())
+        {
+            if (it->second > time_t(sWorld->GetGameTime()))
+                return true;
+            _eventsExpireTime.erase(it);
+        }
+    }
+    return false;
 }

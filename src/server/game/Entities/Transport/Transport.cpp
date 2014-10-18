@@ -477,11 +477,14 @@ void Transport::UpdateForMap(Map const* targetMap)
 
 void Transport::DoEventIfAny(WayPointMap::value_type const& node, bool departure)
 {
-    if (uint32 eventid = departure ? node.second.departureEventID : node.second.arrivalEventID)
+    if (uint32 eventId = departure ? node.second.departureEventID : node.second.arrivalEventID)
     {
-        TC_LOG_DEBUG("maps.scripts", "Taxi %s event %u of node %u of %s path", departure ? "departure" : "arrival", eventid, node.first, GetName().c_str());
-        GetMap()->ScriptsStart(sEventScripts, eventid, this, this);
-        EventInform(eventid);
+        TC_LOG_DEBUG("maps.scripts", "Taxi %s event %u of node %u of %s path", departure ? "departure" : "arrival", eventId, node.first, GetName().c_str());
+        if (!GetMap()->IsEventScriptActive(eventId))
+        {
+            GetMap()->ScriptsStart(sEventScripts, eventId, this, this);
+            EventInform(eventId);
+        }
     }
 }
 

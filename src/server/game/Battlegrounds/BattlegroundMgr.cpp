@@ -1164,7 +1164,8 @@ void BattlegroundMgr::CreateInitialBattlegrounds()
             continue;
         }
 
-        data.StartMaxDist = fields[9].GetFloat();
+        float dist = fields[9].GetFloat();
+        data.StartMaxDist = dist * dist;
 
         selectionWeight = fields[10].GetUInt8();
         data.holiday = fields[11].GetUInt32();

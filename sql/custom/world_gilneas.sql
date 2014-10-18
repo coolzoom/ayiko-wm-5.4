@@ -16881,4 +16881,5 @@ VALUES
 UPDATE `quest_template` SET `Method` = 0 WHERE `Id` = 26706;
 
 DELETE FROM `creature` WHERE `id` IN (35370, 35907, 44428);
+DELETE FROM `creature` WHERE `map` = 638;
 

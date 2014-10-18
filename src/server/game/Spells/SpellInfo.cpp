@@ -2694,6 +2694,7 @@ bool SpellInfo::_IsPositiveEffect(uint8 effIndex, bool deep) const
                 case 70194: // Dark Arrow (HoR)
                 case 70070: // Harvest Soul (HoR)
                 case 47310: // Direbrew's Disarm
+                case 128407: // Poisoned Barb
                     return false;
                 case 30877: // Tag Murloc
                 case 61716: // Rabbit Costume

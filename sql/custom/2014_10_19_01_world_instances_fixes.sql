@@ -111,3 +111,32 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 UPDATE `creature_template` SET `flags_extra`='0' WHERE (`entry`='24745');
 DELETE FROM `creature_template_aura` WHERE `entry` = '24745';
 INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES ('24745', '44326');
+-- Thrash AI
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE `entry` IN('24683', '24684', '24685', '24686', '24687', '24688', '24689', '24690', '24696', '24697', '24698', '24761', '24777', '24808', '24822', '25954', '25955', '25956', '25957', '25958', '25959', '25960');
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` IN(24684, 24686, 24687, 24688, 24689, 24690);
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+(24684, 0, 0, 0, 4, 0, 100, 3, 0, 0, 0, 0, 11, 44480, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Sunblade Blood Knight - On Aggro - Cast \'Seal of Wrath\' (No Repeat)'),
+(24684, 0, 1, 0, 4, 0, 100, 5, 0, 0, 0, 0, 11, 46030, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Sunblade Blood Knight - On Aggro - Cast \'Seal of Wrath\' (No Repeat)'),
+(24684, 0, 2, 0, 0, 0, 100, 2, 15000, 20000, 15000, 20000, 11, 44482, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 'Sunblade Blood Knight - In Combat - Cast \'Judgement of Wrath\' (No Repeat)'),
+(24684, 0, 3, 0, 0, 0, 100, 4, 15000, 20000, 15000, 20000, 11, 46033, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 'Sunblade Blood Knight - In Combat - Cast \'Judgement of Wrath\' (No Repeat)'),
+(24684, 0, 4, 0, 74, 0, 100, 2, 0, 40, 30000, 50000, 11, 44479, 1, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 'Sunblade Blood Knight - On Friendly Between 0-40% Health - Cast \'Holy Light\' (No Repeat)'),
+(24684, 0, 5, 0, 74, 0, 100, 4, 0, 40, 30000, 50000, 11, 46029, 1, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 'Sunblade Blood Knight - On Friendly Between 0-40% Health - Cast \'Holy Light\' (No Repeat)'),
+(24686, 0, 0, 0, 1, 0, 100, 7, 1000, 1000, 0, 0, 11, 44517, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Sunblade Warlock - Out of Combat - Cast \'Summon Sunblade Imp\''),
+(24686, 0, 1, 0, 1, 0, 100, 7, 1, 1000, 180000, 180000, 11, 44520, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Sunblade Warlock - Out of Combat - Cast \'Fel Armor\''),
+(24686, 0, 2, 0, 0, 0, 100, 2, 20000, 20000, 12000, 17000, 11, 44518, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Sunblade Warlock - In Combat - Cast \'Immolate\''),
+(24686, 0, 3, 0, 0, 0, 100, 4, 13900, 13900, 10000, 15000, 11, 46042, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Sunblade Warlock - In Combat - Cast \'Immolate\''),
+(24686, 0, 4, 0, 0, 0, 100, 2, 5000, 5000, 15000, 50000, 11, 44519, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 'Sunblade Warlock - In Combat - Cast \'Incinerate\''),
+(24686, 0, 5, 0, 0, 0, 100, 4, 4000, 4000, 5000, 20000, 11, 46043, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 'Sunblade Warlock - In Combat - Cast \'Incinerate\''),
+(24687, 0, 0, 0, 4, 0, 100, 3, 0, 0, 0, 0, 11, 44599, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Sunblade Physician - On Aggro - Cast \'Inject Poison\''),
+(24687, 0, 1, 0, 4, 0, 100, 5, 0, 0, 0, 0, 11, 46046, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Sunblade Physician - On Aggro - Cast \'Inject Poison\''),
+(24687, 0, 2, 0, 0, 0, 75, 2, 14000, 14000, 12000, 19500, 11, 44599, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Sunblade Physician - In Combat - Cast \'Inject Poison\''),
+(24687, 0, 3, 0, 0, 0, 100, 4, 12000, 14000, 10000, 25000, 11, 46046, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Sunblade Physician - In Combat - Cast \'Inject Poison\''),
+(24687, 0, 4, 0, 0, 0, 75, 2, 26000, 26000, 24000, 54000, 11, 44583, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Sunblade Physician - In Combat - Cast \'Prayer of Mending\''),
+(24687, 0, 5, 0, 0, 0, 100, 4, 24000, 24000, 24000, 54000, 11, 46045, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Sunblade Physician - In Combat - Cast \'Prayer of Mending\''),
+(24688, 0, 0, 0, 2, 0, 100, 6, 0, 20, 29000, 39000, 11, 44505, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Wretched Skulker - Between 0-20% Health - Cast \'Drink Fel Infusion\''),
+(24688, 0, 1, 0, 0, 0, 100, 6, 6200, 14000, 5000, 12000, 11, 44533, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Wretched Skulker - In Combat - Cast \'Wretched Stab\''),
+(24689, 0, 0, 0, 2, 0, 100, 6, 0, 20, 23000, 33000, 11, 44505, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Wretched Bruiser - Between 0-20% Health - Cast \'Drink Fel Infusion\''),
+(24689, 0, 1, 0, 0, 0, 100, 6, 3800, 3800, 6000, 11000, 11, 44534, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Wretched Bruiser - In Combat - Cast \'Wretched Strike\''),
+(24690, 0, 0, 0, 2, 0, 100, 6, 0, 20, 29000, 39000, 11, 44505, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Wretched Husk - Between 0-20% Health - Cast \'Drink Fel Infusion\''),
+(24690, 0, 1, 0, 0, 0, 50, 6, 5000, 5000, 7000, 17000, 11, 44503, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Wretched Husk - In Combat - Cast \'Wretched Fireball\''),
+(24690, 0, 2, 0, 0, 0, 50, 6, 6500, 6500, 14000, 24000, 11, 44504, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Wretched Husk - In Combat - Cast \'Wretched Frostbolt\'');

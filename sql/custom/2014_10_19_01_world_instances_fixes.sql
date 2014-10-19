@@ -59,3 +59,17 @@ UPDATE `creature_text` SET `type`='14' WHERE (`entry`='26796');
 -- Annhylde the Caller text
 DELETE FROM `creature_text` WHERE `entry` = '24068';
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES ('24068', '0', '0', 'Ingvar! Your pathetic failure will serve as a warning to all... you are damned! Arise and carry out the master\'s will!', '14', '0', '100', '0', '0', '13754', 'Annhylde the Caller to Ingvar the Plunderer');
+
+
+-- Correct Laughing Skull Rogue text
+UPDATE `creature_text` SET `type`='14' WHERE (`entry`='17491') AND (`groupid`='0') AND (`id`='0');
+-- The Maker AI
+UPDATE `creature_template` SET `ScriptName`='boss_the_maker' WHERE (`entry`='17381');
+-- Broggok AI
+UPDATE `creature_template` SET `ScriptName`='boss_broggok' WHERE (`entry`='17380');
+-- Spawn doors
+DELETE FROM `gameobject` WHERE `id` = '181819';
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `position_x`, `position_y`, `position_z`, `spawntimesecs`, `animprogress`, `state`) VALUES ('22297', '181819', '542', '0', '0', '6', '456.291', '34.151', '23.832', '181', '100', '1');
+
+-- Kelidan the Breaker AI
+UPDATE `creature_template` SET `ScriptName`='boss_kelidan_the_breaker' WHERE (`entry`='17377');

@@ -129,6 +129,25 @@ class boss_broggok : public CreatureScript
                 }
             }
 
+            void DoAction(int32 const action) override
+            {
+                switch (action)
+                {
+                case ACTION_PREPARE_BROGGOK:
+                    me->SetInCombatWithZone();
+                    break;
+                case ACTION_ACTIVATE_BROGGOK:
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NON_ATTACKABLE);
+                    canAttack = true;
+                    break;
+                case ACTION_RESET_BROGGOK:
+                    me->SetReactState(REACT_PASSIVE);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NON_ATTACKABLE);
+                    canAttack = false;
+                    break;
+                }
+            }
         };
 
         CreatureAI* GetAI(Creature* creature) const

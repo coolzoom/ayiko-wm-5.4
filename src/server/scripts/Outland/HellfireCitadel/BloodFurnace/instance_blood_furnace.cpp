@@ -205,6 +205,7 @@ class instance_blood_furnace : public InstanceMapScript
                          break;
                      case TYPE_BROGGOK_EVENT:
                          m_auiEncounter[1] = data;
+                         UpdateBroggokEvent(data);
                          break;
                      case TYPE_KELIDAN_THE_BREAKER_EVENT:
                          m_auiEncounter[2] = data;
@@ -398,7 +399,7 @@ class instance_blood_furnace : public InstanceMapScript
                 for (std::set<uint64>::iterator i = prisoners.begin(); i != prisoners.end(); ++i)
                     if (Creature* prisoner = instance->GetCreature(*i))
                     {
-                        prisoner->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NON_ATTACKABLE);
+                        prisoner->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                         prisoner->SetInCombatWithZone();
                     }
             }

@@ -140,3 +140,14 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (24690, 0, 0, 0, 2, 0, 100, 6, 0, 20, 29000, 39000, 11, 44505, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Wretched Husk - Between 0-20% Health - Cast \'Drink Fel Infusion\''),
 (24690, 0, 1, 0, 0, 0, 50, 6, 5000, 5000, 7000, 17000, 11, 44503, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Wretched Husk - In Combat - Cast \'Wretched Fireball\''),
 (24690, 0, 2, 0, 0, 0, 50, 6, 6500, 6500, 14000, 24000, 11, 44504, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Wretched Husk - In Combat - Cast \'Wretched Frostbolt\'');
+
+-- --------------------  --
+--  Halls of Lightning   --
+-- --------------------  --
+-- Heat - target Molten Golem
+DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`='13') AND (`SourceGroup`='1') AND (`SourceEntry`='52387') AND (`SourceId`='0') AND (`ElseGroup`='0') AND (`ConditionTypeOrReference`='31') AND (`ConditionTarget`='0') AND (`ConditionValue1`='3') AND (`ConditionValue2`='28695') AND (`ConditionValue3`='0');
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES ('13', '1', '52387', '0', '0', '31', '0', '3', '28695', '0', '0', '0', '0', '', 'Volkhan - target Heat on Molten Golem');
+-- Spark of Ionar
+UPDATE `creature_template` SET `speed_run`='0.571429' WHERE (`entry`='28926');
+-- Loken's (heroic) immunities
+UPDATE `creature_template` SET `mechanic_immune_mask`='617299935' WHERE (`entry`='31538');

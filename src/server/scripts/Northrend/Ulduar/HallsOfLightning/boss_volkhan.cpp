@@ -97,6 +97,7 @@ public:
         uint32 m_uiShatter_Timer;
         uint32 m_uiDelay_Timer;
         uint32 m_uiSummonPhase;
+        uint32 m_uiHeat_Timer;
 
         uint32 m_uiHealthAmountModifier;
 
@@ -216,9 +217,6 @@ public:
 
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                     summoned->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f);
-
-                // Why healing when just summoned?
-                summoned->CastSpell(summoned, DUNGEON_MODE(SPELL_HEAT_N, SPELL_HEAT_H), false, NULL, NULL, me->GetGUID());
             }
         }
 
@@ -353,6 +351,21 @@ public:
                     m_uiSummonPhase = 0;        // Reset back to Phase 0 for next time
                     break;
             }
+
+            if (m_uiHeat_Timer <= uiDiff)
+            {
+                m_uiHeat_Timer = 15000;
+                std::list<Creature*> list;
+                GetCreatureListWithEntryInGrid(list, me, NPC_MOLTEN_GOLEM, 30);
+                if (!list.empty())
+                {
+                    auto targetItr = list.begin();
+                    std::advance(targetItr , urand(0, list.size()));
+                    me->CastSpell(*targetItr, DUNGEON_MODE(SPELL_HEAT_N, SPELL_HEAT_H), false);
+                }
+            }
+            else
+                m_uiHeat_Timer -= uiDiff;
 
             DoMeleeAttackIfReady();
         }

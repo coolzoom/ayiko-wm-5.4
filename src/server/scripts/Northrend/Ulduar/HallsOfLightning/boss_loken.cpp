@@ -156,10 +156,10 @@ public:
             {
                 Talk(SAY_NOVA);
                 Talk(EMOTE_NOVA);
-                DoCast(me, SPELL_LIGHTNING_NOVA_N);
+                DoCast(me, DUNGEON_MODE<uint32>(SPELL_LIGHTNING_NOVA_N, SPELL_LIGHTNING_NOVA_H));
 
                 me->RemoveAurasDueToSpell(DUNGEON_MODE<uint32>(SPELL_PULSING_SHOCKWAVE_N, SPELL_PULSING_SHOCKWAVE_H));
-                m_uiResumePulsingShockwave_Timer = DUNGEON_MODE(5000, 4000); // Pause Pulsing Shockwave aura
+                m_uiResumePulsingShockwave_Timer = DUNGEON_MODE(6000, 5000); // Pause Pulsing Shockwave aura
                 m_uiLightningNova_Timer = urand(20000, 21000);
             }
             else

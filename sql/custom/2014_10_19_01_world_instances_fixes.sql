@@ -144,6 +144,8 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 -- --------------------  --
 --  Halls of Lightning   --
 -- --------------------  --
+-- Enable Instance
+DELETE FROM `disables` WHERE (`sourceType`='2') AND (`entry`='602');
 -- Heat - target Molten Golem
 DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`='13') AND (`SourceGroup`='1') AND (`SourceEntry`='52387') AND (`SourceId`='0') AND (`ElseGroup`='0') AND (`ConditionTypeOrReference`='31') AND (`ConditionTarget`='0') AND (`ConditionValue1`='3') AND (`ConditionValue2`='28695') AND (`ConditionValue3`='0');
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES ('13', '1', '52387', '0', '0', '31', '0', '3', '28695', '0', '0', '0', '0', '', 'Volkhan - target Heat on Molten Golem');

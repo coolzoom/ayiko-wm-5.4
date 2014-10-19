@@ -170,7 +170,7 @@ public:
                 CrystalChosen->CastSpell(CrystalChosen, SPELL_FEL_CRYSTAL_COSMETIC, true);
 
                 float x, y, z;                                  // coords that we move to, close to the crystal.
-                CrystalChosen->GetClosePoint(x, y, z, me->GetObjectSize(), CONTACT_DISTANCE);
+                CrystalChosen->GetClosePoint(x, y, z, me->GetObjectSize(), CONTACT_DISTANCE, me->GetAngle(CrystalChosen));
 
                 me->SetWalk(false);
                 me->GetMotionMaster()->MovePoint(1, x, y, z);

@@ -70,9 +70,9 @@ public:
         return new boss_vexallusAI (creature);
     };
 
-    struct boss_vexallusAI : public ScriptedAI
+    struct boss_vexallusAI : public BossAI
     {
-        boss_vexallusAI(Creature* creature) : ScriptedAI(creature)
+        boss_vexallusAI(Creature* creature) : BossAI(creature, DATA_VEXALLUS_EVENT)
         {
             instance = creature->GetInstanceScript();
         }
@@ -87,6 +87,7 @@ public:
 
         void Reset()
         {
+            summons.DespawnAll();
             ChainLightningTimer = 8000;
             ArcaneShockTimer = 5000;
             OverloadTimer = 1200;
@@ -104,6 +105,7 @@ public:
 
         void JustDied(Unit* /*killer*/)
         {
+            summons.DespawnAll();
             if (instance)
                 instance->SetData(DATA_VEXALLUS_EVENT, DONE);
         }
@@ -118,6 +120,7 @@ public:
 
         void JustSummoned(Creature* summoned)
         {
+            summons.Summon(summoned);
             if (Unit* temp = SelectTarget(SELECT_TARGET_RANDOM, 0))
                 summoned->GetMotionMaster()->MoveFollow(temp, 0, 0);
 
@@ -154,12 +157,6 @@ public:
                     }
                     else
                         DoCast(me, SPELL_SUMMON_PURE_ENERGY, false);
-
-                    //below are workaround summons, remove when summoning spells w/implicitTarget 73 implemented in the core
-                    me->SummonCreature(NPC_PURE_ENERGY, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
-
-                    if (IsHeroic())
-                        me->SummonCreature(NPC_PURE_ENERGY, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
                 }
 
                 if (ChainLightningTimer <= diff)
@@ -207,7 +204,10 @@ public:
 
     struct mob_pure_energyAI : public ScriptedAI
     {
-        mob_pure_energyAI(Creature* creature) : ScriptedAI(creature) {}
+        mob_pure_energyAI(Creature* creature) : ScriptedAI(creature)
+        {
+            me->SetDisplayId(me->GetCreatureTemplate()->Modelid2);
+        }
 
         void Reset() {}
 

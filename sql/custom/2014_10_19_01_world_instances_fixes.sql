@@ -79,11 +79,35 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, 
 -- Kelidan the Breaker AI
 UPDATE `creature_template` SET `ScriptName`='boss_kelidan_the_breaker' WHERE (`entry`='17377');
 
--- --------------  --
---  Razorfen Kraul --
--- --------------  --
+-- ----------------  --
+--  Razorfen Kraul   --
+-- ----------------  --
 -- Enable Instance
 DELETE FROM `disables` WHERE (`sourceType`='2') AND (`entry`='47');
 -- Correct texts
 UPDATE `creature_text` SET `type`='14' WHERE (`entry`='4420');
 UPDATE `creature_text` SET `type`='14' WHERE (`entry`='4421');
+
+-- --------------------  --
+--  Magister's Terrace   --
+-- --------------------  --
+-- Enable instance
+DELETE FROM `disables` WHERE (`sourceType`='2') AND (`entry`='585');
+-- Heroic mode haven't quest requirement anymore
+UPDATE `access_requirement` SET `quest_done_A`='0', `quest_done_H`='0' WHERE (`mapId`='585') AND (`difficulty`='1');
+
+UPDATE `creature_template` SET `ScriptName`='boss_priestess_delrissa' WHERE (`entry`='24560');
+UPDATE `creature_template` SET `ScriptName`='boss_felblood_kaelthas' WHERE (`entry`='24664');
+UPDATE `creature_template` SET `ScriptName`='mob_fel_crystal' WHERE (`entry`='24722');
+UPDATE `creature_template` SET `ScriptName`='boss_selin_fireheart' WHERE (`entry`='24723');
+UPDATE `creature_template` SET `ScriptName`='boss_vexallus' WHERE (`entry`='24744');
+
+-- Selin Fireheart
+UPDATE `conditions` SET `SourceGroup`='3', `SourceEntry`='44320', `ElseGroup`='1', `ConditionValue2`='24723' WHERE (`SourceTypeOrReferenceId`='13') AND (`SourceGroup`='1') AND (`SourceEntry`='44374') AND (`SourceId`='0') AND (`ElseGroup`='0') AND (`ConditionTypeOrReference`='31') AND (`ConditionTarget`='0') AND (`ConditionValue1`='3') AND (`ConditionValue2`='24722') AND (`ConditionValue3`='0');
+DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`='13') AND (`SourceGroup`='1') AND (`SourceEntry`='44374') AND (`SourceId`='0') AND (`ElseGroup`='0') AND (`ConditionTypeOrReference`='31') AND (`ConditionTarget`='0') AND (`ConditionValue1`='3') AND (`ConditionValue2`='24722');
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES ('13', '1', '44374', '0', '0', '31', '0', '3', '24722', '0', '0', '0', '0', '', '');
+
+-- Vexallus pure energy
+UPDATE `creature_template` SET `flags_extra`='0' WHERE (`entry`='24745');
+DELETE FROM `creature_template_aura` WHERE `entry` = '24745';
+INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES ('24745', '44326');

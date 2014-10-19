@@ -55,11 +55,16 @@ UPDATE `creature_text` SET `type`='14' WHERE (`entry`='26796');
 -- -------------- --
 --  UTGARDE KEEP  --
 -- -------------- --
-
+DELETE FROM `disables` WHERE (`sourceType`='2') AND (`entry`='574');
 -- Annhylde the Caller text
 DELETE FROM `creature_text` WHERE `entry` = '24068';
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES ('24068', '0', '0', 'Ingvar! Your pathetic failure will serve as a warning to all... you are damned! Arise and carry out the master\'s will!', '14', '0', '100', '0', '0', '13754', 'Annhylde the Caller to Ingvar the Plunderer');
 
+-- -------------- --
+--  BLOOD FURNACE --
+-- -------------- --
+-- Enable Instance
+DELETE FROM `disables` WHERE (`sourceType`='2') AND (`entry`='542');
 
 -- Correct Laughing Skull Rogue text
 UPDATE `creature_text` SET `type`='14' WHERE (`entry`='17491') AND (`groupid`='0') AND (`id`='0');

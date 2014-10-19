@@ -78,3 +78,12 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, 
 
 -- Kelidan the Breaker AI
 UPDATE `creature_template` SET `ScriptName`='boss_kelidan_the_breaker' WHERE (`entry`='17377');
+
+-- --------------  --
+--  Razorfen Kraul --
+-- --------------  --
+-- Enable Instance
+DELETE FROM `disables` WHERE (`sourceType`='2') AND (`entry`='47');
+-- Correct texts
+UPDATE `creature_text` SET `type`='14' WHERE (`entry`='4420');
+UPDATE `creature_text` SET `type`='14' WHERE (`entry`='4421');

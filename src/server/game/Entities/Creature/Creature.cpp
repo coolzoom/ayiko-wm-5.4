@@ -270,7 +270,12 @@ bool Creature::InitEntry(uint32 Entry, uint32 /*team*/, const CreatureData* data
     // get difficulty 1 mode entry
     // Si l'entry heroic du mode de joueur est introuvable, on utilise l'entry du mode normal correpondant au nombre de joueurs du mode
     CreatureTemplate const* cinfo = normalInfo;
-    uint8 diff = uint8(GetMap()->GetSpawnMode());
+    uint8 diff = GetMap()->GetSpawnMode();
+
+    // (Raufen) TODO: Difficulties handling must be redone in some way, this makes loading template from normal entry in regular difficulty and from difficulty_1 for heroic
+    if (diff == REGULAR_DIFFICULTY || diff == HEROIC_DIFFICULTY)
+        diff -= 1;
+
     if (diff)
     {
         if (normalInfo->DifficultyEntry[diff - 1])

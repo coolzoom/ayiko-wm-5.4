@@ -3066,9 +3066,14 @@ void SmartScript::FillScript(SmartAIEventList e, WorldObject* obj, AreaTriggerEn
 
         if ((*i).event.event_flags & SMART_EVENT_FLAG_DIFFICULTY_ALL)//if has instance flag add only if in it
         {
+            // (Raufen) TODO: Difficulties handling must be redone in some way, this makes loading event_flags 2 for normal dungeon and 4 for heroic but it was all changed
+            uint8 spawnMode = obj->GetMap()->GetSpawnMode();
+            if (spawnMode != REGULAR_DIFFICULTY && spawnMode != HEROIC_DIFFICULTY)
+                spawnMode += 1;
+
             if (obj && obj->GetMap()->IsDungeon())
             {
-                if ((1 << (obj->GetMap()->GetSpawnMode()+1)) & (*i).event.event_flags)
+                if ((1 << spawnMode) & (*i).event.event_flags)
                 {
                     mEvents.push_back((*i));
                 }

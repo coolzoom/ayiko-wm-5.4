@@ -50,3 +50,12 @@ UPDATE `gameobject_template` SET `ScriptName`='go_containment_sphere' WHERE `ent
 
 -- Correct Commander Stoutbeard text-type
 UPDATE `creature_text` SET `type`='14' WHERE (`entry`='26796');
+
+
+-- -------------- --
+--  UTGARDE KEEP  --
+-- -------------- --
+
+-- Annhylde the Caller text
+DELETE FROM `creature_text` WHERE `entry` = '24068';
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES ('24068', '0', '0', 'Ingvar! Your pathetic failure will serve as a warning to all... you are damned! Arise and carry out the master\'s will!', '14', '0', '100', '0', '0', '13754', 'Annhylde the Caller to Ingvar the Plunderer');

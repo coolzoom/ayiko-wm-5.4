@@ -28,15 +28,18 @@ EndScriptData */
 
 enum Yells
 {
-    //Yells Ingvar
-    YELL_AGGRO_1                                = -1574005,
-    YELL_AGGRO_2                                = -1574006,
+    // Ingvar (Human)
+    SAY_AGGRO_1                                 = 0,
+    SAY_SLAY_1                                  = 1,
+    SAY_DEATH_1                                 = 2,
 
-    YELL_DEAD_1                                 = -1574007,
-    YELL_DEAD_2                                 = -1574008,
+    // Ingvar (Undead)
+    SAY_AGGRO_2                                 = 3,
+    SAY_SLAY_2                                  = 4,
+    SAY_DEATH_2                                 = 5,
 
-    YELL_KILL_1                                 = -1574009,
-    YELL_KILL_2                                 = -1574010,
+    // Annhylde The Caller
+    YELL_RESURRECT                              = 0
 };
 
 enum Creatures
@@ -160,7 +163,7 @@ public:
                 bIsUndead = true;
                 events.SetPhase(PHASE_UNDEAD);
 
-                DoScriptText(YELL_DEAD_1, me);
+                Talk(SAY_DEATH_1);
             }
 
             if (bEventInProgress)
@@ -178,12 +181,12 @@ public:
             me->SetInCombatWith(me->getVictim());
             me->GetMotionMaster()->MoveChase(me->getVictim());
 
-            DoScriptText(YELL_AGGRO_2, me);
+            Talk(SAY_AGGRO_2);
         }
 
         void EnterCombat(Unit* /*who*/)
         {
-            DoScriptText(YELL_AGGRO_1, me);
+            Talk(SAY_AGGRO_1);
 
             if (instance)
                 instance->SetData(DATA_INGVAR_EVENT, IN_PROGRESS);
@@ -191,7 +194,7 @@ public:
 
         void JustDied(Unit* /*killer*/)
         {
-            DoScriptText(YELL_DEAD_2, me);
+            Talk(SAY_DEATH_2);
 
             if (instance)
             {
@@ -201,12 +204,9 @@ public:
             }
         }
 
-        void KilledUnit(Unit* /*victim*/)
+        void KilledUnit(Unit* /*victim*/) override
         {
-            if (bIsUndead)
-                DoScriptText(YELL_KILL_1, me);
-            else
-                DoScriptText(YELL_KILL_2, me);
+            Talk(bIsUndead ? SAY_SLAY_1 : SAY_SLAY_2);
         }
 
         void UpdateAI(const uint32 diff)
@@ -323,23 +323,11 @@ public:
 
         void Reset()
         {
-            //! HACK: Creature's can't have MOVEMENTFLAG_FLYING
-            me->AddUnitMovementFlag(MOVEMENTFLAG_FLYING | MOVEMENTFLAG_HOVER);
-            me->SetSpeed(MOVE_SWIM, 1.0f);
-            me->SetSpeed(MOVE_RUN, 1.0f);
-            me->SetSpeed(MOVE_WALK, 1.0f);
-            //me->SetSpeed(MOVE_FLIGHT, 1.0f);
-
+            me->SetCanFly(true);
+            me->SetDisableGravity(true);
             me->GetPosition(x, y, z);
             DoTeleportTo(x+1, y, z+30);
-
-            Unit* ingvar = Unit::GetUnit(*me, instance ? instance->GetData64(DATA_INGVAR) : 0);
-            if (ingvar)
-            {
-                me->GetMotionMaster()->MovePoint(1, x, y, z+15);
-
-    //            DoScriptText(YELL_RESSURECT, me);
-            }
+            me->GetMotionMaster()->MovePoint(1, x, y, z+15);
         }
 
         void MovementInform(uint32 type, uint32 id)
@@ -352,6 +340,7 @@ public:
                 switch (id)
                 {
                 case 1:
+                    Talk(YELL_RESURRECT);
                     ingvar->RemoveAura(SPELL_SUMMON_BANSHEE);
                     ingvar->CastSpell(ingvar, SPELL_SCOURG_RESURRECTION_DUMMY, true);
                     DoCast(ingvar, SPELL_SCOURG_RESURRECTION_BEAM);

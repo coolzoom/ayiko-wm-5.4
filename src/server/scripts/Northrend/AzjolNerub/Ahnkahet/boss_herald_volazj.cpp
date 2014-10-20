@@ -124,12 +124,13 @@ public:
                     if (!player || !player->isAlive())
                         continue;
                     // Summon clone
-                    if (Unit* summon = me->SummonCreature(MOB_TWISTED_VISAGE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 0))
+                    if (Creature * const summon = me->SummonCreature(MOB_TWISTED_VISAGE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 0))
                     {
                         // clone
                         player->CastSpell(summon, SPELL_CLONE_PLAYER, true);
                         // set phase
                         summon->SetPhaseMask((1<<(4+insanityHandled)), true);
+                        summon->AI()->AttackStart(player);
                     }
                 }
                 ++insanityHandled;

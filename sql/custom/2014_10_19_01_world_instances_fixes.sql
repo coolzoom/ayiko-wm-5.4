@@ -153,3 +153,19 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 UPDATE `creature_template` SET `speed_run`='0.571429' WHERE (`entry`='28926');
 -- Loken's (heroic) immunities
 UPDATE `creature_template` SET `mechanic_immune_mask`='617299935' WHERE (`entry`='31538');
+
+-- -----------  --
+--  AHN KAHET   --
+-- -----------  --
+-- Enable Instance
+DELETE FROM `disables` WHERE (`sourceType`='2') AND (`entry`='619');
+UPDATE `creature_template` SET `ScriptName`='mob_nadox_eggs' WHERE `entry` IN('30172', '30173');
+UPDATE `creature_template` SET `mechanic_immune_mask`='617299935', `ScriptName`='boss_elder_nadox' WHERE (`entry`='29309');
+UPDATE `creature_template` SET `mechanic_immune_mask`='617299935' WHERE (`entry`='31456');
+UPDATE `creature_template` SET `mechanic_immune_mask`='650854399', `ScriptName`='boss_jedoga_shadowseeker' WHERE (`entry`='29310');
+UPDATE `creature_template` SET `mechanic_immune_mask`='650854399' WHERE (`entry`='31465');
+UPDATE `creature_template` SET `flags_extra`='64', `ScriptName`='mob_jedoga_initiand' WHERE (`entry`='30114');
+UPDATE `creature_template` SET `mechanic_immune_mask`='617299935', `ScriptName`='boss_volazj' WHERE (`entry`='29311');
+UPDATE `creature_template` SET `flags_extra`='64' WHERE `entry` IN('30625', '31480');
+UPDATE `creature_template` SET `mechanic_immune_mask`='617299935' WHERE (`entry`='31464');
+UPDATE `creature_template` SET `flags_extra`='0' WHERE `entry` IN('31686', '31687', '30106');

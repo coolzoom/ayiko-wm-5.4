@@ -93,3 +93,7 @@ INSERT IGNORE INTO `game_graveyard_zone` (`id`, `ghost_zone`, `faction`) VALUES
 (3303, 5886, 0);
 
 DELETE t1 FROM creature t1 JOIN creature t2 ON t1.id = t2.id WHERE t1.guid < t2.guid AND t1.id IN (SELECT entry FROM creature_template WHERE NAME LIKE '%spirit healer%') AND t1.map = t2.map AND (POW(t1.position_x - t2.position_x, 2) + POW(t1.position_y - t2.position_y, 2) + POW(t1.position_z - t2.position_z, 2) <= 25);
+
+-- [SQL] Quests - Pandaren Quests: Joining the Alliance/Horde will now have correct race requirements (Refs #1372)
+UPDATE `quest_template` SET `RequiredRaces` = 25165824 WHERE `Id` = 30987;
+UPDATE `quest_template` SET `RequiredRaces` = 41943040 WHERE `Id` = 31012;

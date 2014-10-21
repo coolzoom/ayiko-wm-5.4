@@ -103,7 +103,8 @@ UPDATE `creature_template` SET `ScriptName`='boss_selin_fireheart' WHERE (`entry
 UPDATE `creature_template` SET `ScriptName`='boss_vexallus' WHERE (`entry`='24744');
 
 -- Selin Fireheart
-UPDATE `conditions` SET `SourceGroup`='3', `SourceEntry`='44320', `ElseGroup`='1', `ConditionValue2`='24723' WHERE (`SourceTypeOrReferenceId`='13') AND (`SourceGroup`='1') AND (`SourceEntry`='44374') AND (`SourceId`='0') AND (`ElseGroup`='0') AND (`ConditionTypeOrReference`='31') AND (`ConditionTarget`='0') AND (`ConditionValue1`='3') AND (`ConditionValue2`='24722') AND (`ConditionValue3`='0');
+DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`='13') AND (`SourceGroup`='3') AND (`SourceEntry`='44320');
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES ('13', '3', '44320', '0', '0', '31', '0', '3', '24723', '0', '0', '0', '0', '', '');
 DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`='13') AND (`SourceGroup`='1') AND (`SourceEntry`='44374') AND (`SourceId`='0') AND (`ElseGroup`='0') AND (`ConditionTypeOrReference`='31') AND (`ConditionTarget`='0') AND (`ConditionValue1`='3') AND (`ConditionValue2`='24722');
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES ('13', '1', '44374', '0', '0', '31', '0', '3', '24722', '0', '0', '0', '0', '', '');
 
@@ -176,3 +177,139 @@ UPDATE `creature_template` SET `flags_extra`='0' WHERE `entry` IN('31686', '3168
 -- Enable Instance
 DELETE FROM `disables` WHERE (`sourceType`='2') AND (`entry`='608');
 UPDATE `creature_template` SET `mechanic_immune_mask`='617299803' WHERE `entry` IN('31134', '31506', '29314', '31512', '29312', '31509', '29266', '31511', '29313', '31508', '29316', '31510', '29315', '31507');
+
+
+-- --------------  --
+--  The Botanica   --
+-- --------------  --
+-- Enable Instance
+DELETE FROM `disables` WHERE (`sourceType`='2') AND (`entry`='553');
+
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='18405');
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` = '18405';
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+('18405', '0', '0', '0', '0', '0', '90', '6', '0', '0', '17800', '21200', '11', '34785', '0', '0', '0', '0', '0', '5', '0', '0', '0', '0', '0', '0', '0', 'Tempest-Forge Peacekeeper - In Combat - Cast \'Arcane Volley\' (No Repeat)'),
+('18405', '0', '1', '0', '0', '0', '100', '6', '5000', '7100', '7600', '14500', '11', '34791', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', 'Tempest-Forge Peacekeeper - In Combat - Cast \'Arcane Explosion\' (No Repeat)');
+
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='17993');
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` = '17993';
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+('17993', '0', '0', '0', '0', '0', '100', '7', '0', '1000', '0', '0', '11', '34784', '0', '0', '0', '0', '0', '2', '0', '0', '0', '0', '0', '0', '0', 'Bloodwarder Protector - In Combat - Cast \'Intervene\' (No Repeat) (Dungeon)'),
+('17993', '0', '1', '0', '0', '0', '80', '6', '6900', '14700', '18000', '25000', '11', '35399', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', 'Bloodwarder Protector - In Combat - Cast \'Spell Reflection\' (No Repeat) (Dungeon)'),
+('17993', '0', '2', '0', '0', '0', '80', '6', '2000', '9000', '6000', '12000', '11', '29765', '0', '0', '0', '0', '0', '2', '0', '0', '0', '0', '0', '0', '0', 'Bloodwarder Protector - In Combat - Cast \'Crystal Strike\' (No Repeat) (Dungeon)'),
+('17993', '0', '3', '0', '2', '0', '100', '7', '0', '10', '0', '0', '11', '7', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', 'Bloodwarder Protector - Between 0-10% Health - Cast \'Suicide\' (No Repeat) (Dungeon)');
+
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='18419');
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` = '18419';
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+('18419', '0', '0', '0', '0', '0', '80', '6', '5000', '5000', '6000', '10000', '11', '34800', '0', '0', '0', '0', '0', '5', '0', '0', '0', '0', '0', '0', '0', 'Bloodwarder Greenkeeper - In Combat - Cast \'Impending Coma\' (No Repeat)'),
+('18419', '0', '1', '0', '0', '0', '80', '2', '1000', '1000', '5000', '8000', '11', '34798', '0', '0', '0', '0', '0', '2', '0', '0', '0', '0', '0', '0', '0', 'Bloodwarder Greenkeeper - In Combat - Cast \'Greenkeeper\'s Fury\' (No Repeat)'),
+('18419', '0', '2', '0', '0', '0', '80', '4', '1000', '1000', '5000', '8000', '11', '39121', '0', '0', '0', '0', '0', '2', '0', '0', '0', '0', '0', '0', '0', 'Bloodwarder Greenkeeper - In Combat - Cast \'Greenkeeper\'s Fury\' (No Repeat)'),
+('18419', '0', '3', '0', '0', '0', '70', '2', '8000', '8000', '6000', '10000', '11', '34797', '0', '0', '0', '0', '0', '5', '0', '0', '0', '0', '0', '0', '0', 'Bloodwarder Greenkeeper - In Combat - Cast \'Nature Shock\' (No Repeat)'),
+('18419', '0', '4', '0', '0', '0', '70', '4', '8000', '8000', '6000', '10000', '11', '39120', '0', '0', '0', '0', '0', '5', '0', '0', '0', '0', '0', '0', '0', 'Bloodwarder Greenkeeper - In Combat - Cast \'Nature Shock\' (No Repeat)');
+
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='19633');
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` = '19633';
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+('19633', '0', '0', '0', '1', '0', '100', '6', '1000', '1000', '180000', '180000', '11', '34809', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', 'Bloodwarder Mender - Out of Combat - Cast \'Holy Fury\' (Dungeon)'),
+('19633', '0', '1', '0', '0', '0', '80', '2', '5000', '8000', '10000', '14000', '11', '17194', '0', '0', '0', '0', '0', '2', '0', '0', '0', '0', '0', '0', '0', 'Bloodwarder Mender - In Combat - Cast \'Mind Blast\' (Dungeon)'),
+('19633', '0', '2', '0', '0', '0', '80', '4', '5000', '8000', '10000', '14000', '11', '17287', '0', '0', '0', '0', '0', '2', '0', '0', '0', '0', '0', '0', '0', 'Bloodwarder Mender - In Combat - Cast \'Mind Blast\' (Dungeon)'),
+('19633', '0', '3', '0', '2', '0', '100', '7', '0', '30', '0', '0', '11', '35096', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', 'Bloodwarder Mender - Between 0-30% Health - Cast \'Greater Heal\' (Dungeon)');
+
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='18155');
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` = '18155';
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+('18155', '0', '0', '0', '4', '0', '100', '7', '0', '0', '0', '0', '11', '32323', '0', '0', '0', '0', '0', '2', '0', '0', '0', '0', '0', '0', '0', 'Bloodfalcon - On Aggro - Cast \'Charge\''),
+('18155', '0', '1', '0', '0', '0', '100', '6', '7900', '7900', '12500', '12500', '11', '34856', '0', '0', '0', '0', '0', '2', '0', '0', '0', '0', '0', '0', '0', 'Bloodfalcon - In Combat - Cast \'Bloodburn\''),
+('18155', '0', '2', '0', '0', '0', '100', '7', '16700', '20100', '0', '0', '11', '18144', '0', '0', '0', '0', '0', '2', '0', '0', '0', '0', '0', '0', '0', 'Bloodfalcon - In Combat - Cast \'Swoop\'');
+
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='17994');
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` = '17994';
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES ('17994', '0', '0', '0', '0', '0', '100', '6', '3200', '3200', '20000', '25000', '11', '34852', '0', '0', '0', '0', '0', '5', '0', '0', '0', '0', '0', '0', '0', 'Bloodwarder Falconer - In Combat - Cast \'Call of the Falcon\' (No Repeat) (Dungeon)');
+
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='18404');
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` = '18404';
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES ('18404', '0', '0', '0', '0', '0', '80', '6', '10000', '10000', '15000', '20000', '11', '34821', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', 'Bloodwarder Steward - In Combat - Cast \'Arcane Flurry\' (No Repeat)');
+
+UPDATE `creature_template` SET `ScriptName`='boss_commander_sarannis' WHERE (`entry`='17976');
+
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='18422');
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` = '18422';
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+('18422', '0', '0', '0', '2', '0', '100', '2', '0', '60', '21000', '21000', '11', '27637', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', 'Sunseeker Botanist - Between 0-60% Health - Cast \'Regrowth\' (No Repeat)'),
+('18422', '0', '1', '0', '2', '0', '100', '4', '0', '60', '21000', '21000', '11', '39125', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', 'Sunseeker Botanist - Between 0-60% Health - Cast \'Regrowth\' (No Repeat)');
+
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='18421');
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` = '18421';
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+('18421', '0', '0', '0', '1', '0', '100', '6', '1000', '1000', '60000', '60000', '11', '34355', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', 'Sunseeker Researcher - Out of Combat - Cast \'Poison Shield\' (No Repeat)'),
+('18421', '0', '1', '0', '0', '0', '70', '6', '2000', '2000', '10000', '14000', '11', '34352', '0', '0', '0', '0', '0', '5', '0', '0', '0', '0', '0', '0', '0', 'Sunseeker Researcher - In Combat - Cast \'Mind Shock\' (No Repeat)'),
+('18421', '0', '2', '0', '0', '0', '70', '6', '5000', '5000', '10000', '14000', '11', '34353', '0', '0', '0', '0', '0', '5', '0', '0', '0', '0', '0', '0', '0', 'Sunseeker Researcher - In Combat - Cast \'Frost Shock\' (No Repeat)'),
+('18421', '0', '3', '0', '0', '0', '70', '6', '8000', '8000', '10000', '14000', '11', '34354', '0', '0', '0', '0', '0', '5', '0', '0', '0', '0', '0', '0', '0', 'Sunseeker Researcher - In Combat - Cast \'Flame Shock\' (No Repeat)');
+
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='19486');
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` = '19486';
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+('19486', '0', '0', '0', '0', '0', '80', '2', '10000', '10000', '20000', '25000', '11', '34358', '0', '0', '0', '0', '0', '5', '0', '0', '0', '0', '0', '0', '0', 'Sunseeker Chemist - In Combat - Cast \'Vial of Poison\''),
+('19486', '0', '1', '0', '0', '0', '80', '4', '12700', '20500', '20000', '25000', '11', '39127', '0', '0', '0', '0', '0', '5', '0', '0', '0', '0', '0', '0', '0', 'Sunseeker Chemist - In Combat - Cast \'Vial of Poison\''),
+('19486', '0', '2', '0', '0', '0', '80', '2', '5000', '5000', '10000', '15000', '11', '34359', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', 'Sunseeker Chemist - In Combat - Cast \'Fire Breath Potion\''),
+('19486', '0', '3', '0', '0', '0', '80', '4', '9600', '15600', '10000', '15000', '11', '39128', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', 'Sunseeker Chemist - In Combat - Cast \'Fire Breath Potion\'');
+
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='18420');
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` = '18420';
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+('18420', '0', '0', '0', '0', '0', '100', '6', '5000', '5000', '5000', '8000', '11', '35124', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', 'Sunseeker Geomancer - In Combat - Cast \'Arcane Explosion\' (No Repeat)'),
+('18420', '0', '1', '0', '1', '0', '100', '6', '1000', '1000', '12000', '12000', '11', '35265', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', 'Sunseeker Geomancer - Out of Combat - Cast \'Fire Shield\' (No Repeat)');
+
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='19511');
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` = '19511';
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+('19511', '0', '0', '0', '0', '0', '60', '6', '5000', '5000', '5000', '10000', '11', '34615', '0', '0', '0', '0', '0', '5', '0', '0', '0', '0', '0', '0', '0', 'Nethervine Inciter - In Combat - Cast \'Mind-numbing Poison\' (No Repeat) (Dungeon)'),
+('19511', '0', '1', '0', '0', '0', '100', '6', '3000', '3000', '10000', '15000', '11', '34616', '0', '0', '0', '0', '0', '5', '0', '0', '0', '0', '0', '0', '0', 'Nethervine Inciter - In Combat - Cast \'Deadly Poison\' (No Repeat) (Dungeon)');
+
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='19505');
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` = '19505';
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+('19505', '0', '0', '0', '1', '0', '100', '6', '1000', '1000', '30000', '30000', '11', '34173', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', 'Sunseeker Channeler - Out of Combat - Cast \'Sunseeker Blessing\''),
+('19505', '0', '1', '0', '0', '0', '70', '6', '4000', '4000', '10000', '15000', '11', '34637', '0', '0', '0', '0', '0', '5', '0', '0', '0', '0', '0', '0', '0', 'Sunseeker Channeler - In Combat - Cast \'Soul Channel\''),
+('19505', '0', '2', '0', '0', '0', '40', '6', '14000', '14000', '10000', '15000', '11', '34634', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', 'Sunseeker Channeler - In Combat - Cast \'Sunseeker Aura\'');
+
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='19512');
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` = '19512';
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+('19512', '0', '0', '0', '0', '0', '80', '6', '5000', '5000', '4000', '8000', '11', '15284', '0', '0', '0', '0', '0', '2', '0', '0', '0', '0', '0', '0', '0', 'Nethervine Reaper - In Combat - Cast \'Cleave\' (No Repeat) (Dungeon)'),
+('19512', '0', '1', '0', '0', '0', '100', '6', '1000', '1000', '12000', '16000', '11', '34626', '0', '0', '0', '0', '0', '5', '0', '0', '0', '0', '0', '0', '0', 'Nethervine Reaper - In Combat - Cast \'Pale Death\' (No Repeat) (Dungeon)');
+
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='19843');
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` = '19843';
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+('19843', '0', '0', '0', '1', '0', '100', '7', '1000', '1000', '0', '0', '11', '30831', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', 'Nethervine Trickster - Out of Combat - Cast \'Stealth\' (Phase 1) (No Repeat)'),
+('19843', '0', '1', '0', '0', '0', '50', '6', '7000', '7000', '7000', '10000', '11', '34614', '0', '0', '0', '0', '0', '2', '0', '0', '0', '0', '0', '0', '0', 'Nethervine Trickster - In Combat - Cast \'Backstab\' (Phase 1) (No Repeat)');
+
+UPDATE `creature_template` SET `ScriptName`='thorngrin_the_tender' WHERE (`entry`='17978');
+
+UPDATE `creature_template` SET `mechanic_immune_mask`='536941137', `ScriptName`='boss_laj' WHERE (`entry`='17980');
+
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE `entry` IN('19507', '19508', '19509', '19865');
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` IN('19507', '19508', '19509', '19865');
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+(19507, 0, 0, 0, 0, 0, 100, 2, 1000, 1000, 30000, 32000, 11, 34642, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 'Sunseeker Gene-Splicer - In Combat - Cast \'Death & Decay\''),
+(19507, 0, 1, 2, 0, 0, 100, 4, 1000, 1000, 30000, 32000, 11, 39347, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 'Sunseeker Gene-Splicer - In Combat - Cast \'Death & Decay\''),
+(19507, 0, 2, 3, 2, 0, 100, 7, 0, 50, 0, 0, 12, 19598, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Sunseeker Gene-Splicer - Between 0-50% Health - Summon Creature \'Mutate Fleshlasher\' (No Repeat) (Dungeon)'),
+(19507, 0, 3, 0, 61, 0, 100, 0, 0, 0, 0, 0, 12, 19598, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Sunseeker Gene-Splicer - Between 0-50% Health - Summon Creature \'Mutate Fleshlasher\' (No Repeat) (Dungeon)'),
+(19508, 0, 0, 0, 1, 0, 100, 7, 0, 0, 0, 0, 21, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Sunseeker Herbalist - Out of Combat - Disable Combat Movement (No Repeat) (Dungeon)'),
+(19508, 0, 1, 2, 4, 0, 100, 0, 0, 0, 0, 0, 11, 34641, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Sunseeker Herbalist - On Aggro - Cast \'Spade Toss\''),
+(19508, 0, 2, 0, 61, 0, 100, 0, 0, 0, 0, 0, 23, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Sunseeker Herbalist - On Aggro - Increment Phase By 1'),
+(19508, 0, 3, 0, 9, 0, 100, 2, 5, 30, 2200, 3800, 11, 34641, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Sunseeker Herbalist - Within 5-30 Range - Cast \'Spade Toss\''),
+(19508, 0, 4, 5, 4, 0, 100, 0, 0, 0, 0, 0, 11, 39129, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Sunseeker Herbalist - On Aggro - Cast \'Spade Toss\''),
+(19508, 0, 5, 0, 61, 0, 100, 0, 0, 0, 0, 0, 23, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Sunseeker Herbalist - On Aggro - Increment Phase By 1'),
+(19508, 0, 6, 0, 9, 0, 100, 4, 5, 30, 2200, 3800, 11, 39129, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Sunseeker Herbalist - Within 5-30 Range - Cast \'Spade Toss\''),
+(19508, 0, 7, 0, 9, 0, 100, 7, 25, 80, 0, 0, 21, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Sunseeker Herbalist - Within 25-80 Range - Enable Combat Movement'),
+(19508, 0, 8, 0, 9, 0, 100, 7, 0, 5, 0, 0, 21, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Sunseeker Herbalist - Within 0-5 Range - Enable Combat Movement'),
+(19508, 0, 9, 0, 9, 0, 100, 6, 5, 15, 0, 0, 21, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Sunseeker Herbalist - Within 5-15 Range - Disable Combat Movement'),
+(19508, 0, 10, 0, 0, 0, 100, 6, 2000, 5000, 13000, 16000, 11, 22127, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Sunseeker Herbalist - In Combat - Cast \'Entangling Roots\''),
+(19509, 0, 0, 0, 0, 0, 100, 6, 4000, 4000, 12000, 15000, 11, 37823, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Sunseeker Harvester - In Combat - Cast \'Entangling Roots\''),
+(19509, 0, 1, 0, 0, 0, 60, 6, 7000, 7000, 6000, 12000, 11, 34639, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 'Sunseeker Harvester - In Combat - Cast \'Polymorph\''),
+(19509, 0, 2, 3, 2, 0, 100, 7, 0, 50, 0, 0, 12, 19598, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Sunseeker Harvester - Between 0-50% Health - Summon Creature \'Mutate Fleshlasher\' (No Repeat) (Dungeon)'),
+(19509, 0, 3, 0, 61, 0, 100, 0, 0, 0, 0, 0, 12, 19598, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Sunseeker Harvester - Between 0-50% Health - Summon Creature \'Mutate Fleshlasher\' (No Repeat) (Dungeon)'),
+(19865, 0, 0, 0, 0, 0, 100, 6, 6000, 6000, 10000, 15000, 11, 34643, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Mutate Horror - In Combat - Cast \'Corrode Armor\' (Phase 1) (No Repeat)');

@@ -17,9 +17,9 @@ set(scripts_STAT_SRCS
   Maelstrom/TheStonecore/instance_the_stonecore.cpp
   Maelstrom/TheStonecore/the_stonecore.cpp
   Maelstrom/TheStonecore/the_stonecore.h
-  Maelstrom/zone_deepholm.cpp
-  Maelstrom/zone_kezan.cpp
-  Maelstrom/zone_lost_isles.cpp
+  Maelstrom/deepholm.cpp
+  Maelstrom/kezan.cpp
+  Maelstrom/lost_isles.cpp
 )
 
 message("  -> Prepared: The Maelstrom")

@@ -604,6 +604,23 @@ void AddSC_shattrath_city();
 void AddSC_terokkar_forest();
 void AddSC_zangarmarsh();
 
+// Maelstrom
+void AddSC_kezan();
+void AddSC_lost_isles();
+
+// Events
+void AddSC_darkmoon_faire();
+
+// Cata
+void AddSC_the_stonecore();                         // The Stonecore
+void AddSC_instance_the_stonecore();
+void AddSC_boss_corborus();
+void AddSC_boss_slabhide();
+void AddSC_boss_ozruk();
+void AddSC_boss_azil();
+
+void AddSC_deepholm();
+
 // Pandaria
 void AddSC_instance_temple_of_jade_serpent();       // Temple of Jade Serpent
 void AddSC_boss_wise_mari();
@@ -701,8 +718,6 @@ void AddSC_outdoorpvp_na();
 void AddSC_outdoorpvp_si();
 void AddSC_outdoorpvp_tf();
 void AddSC_outdoorpvp_zm();
-
-void AddSC_darkmoon_faire();
 
 // player
 void AddSC_chat_log();
@@ -989,6 +1004,14 @@ void AddEasternKingdomsScripts()
     AddSC_western_plaguelands();
     AddSC_westfall();
     AddSC_wetlands();
+// Cata
+    AddSC_the_stonecore();                      // The Stonecore
+    AddSC_instance_the_stonecore();
+    AddSC_boss_corborus();
+    AddSC_boss_slabhide();
+    AddSC_boss_ozruk();
+    AddSC_boss_azil();
+    
 #endif
 }
 
@@ -1339,7 +1362,7 @@ void AddNorthrendScripts()
 #endif
 }
 
-void AddPandarieScripts()
+void AddPandariaScripts()
 {
 #ifdef SCRIPTS
     AddSC_instance_temple_of_jade_serpent();        // Temple of Jade Serpent

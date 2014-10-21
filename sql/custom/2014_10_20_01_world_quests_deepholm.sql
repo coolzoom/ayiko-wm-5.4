@@ -7,17 +7,17 @@ INSERT INTO `spell_target_position` (`id`, `effIndex`, `target_map`, `target_pos
 (84073, 1, 646, 1040.91, 544.689, 681.86, 3.97935);
 DELETE FROM `vehicle_template_accessory` WHERE `entry` = 45004;
 DELETE FROM `creature_template` WHERE `entry` IN (45004, 45005, 45024, 45027, 45028);
-INSERT INTO `creature_template` (`entry`,`difficulty_entry_1`,`difficulty_entry_2`,`difficulty_entry_3`,`KillCredit1`,`KillCredit2`,`modelid1`,`modelid2`,`modelid3`,`modelid4`,`name`,`subname`,`IconName`,`gossip_menu_id`,`minlevel`,`maxlevel`,`exp`,`faction_A`,`faction_H`,`npcflag`,`speed_walk`,`speed_run`,`scale`,`rank`,`mindmg`,`maxdmg`,`dmgschool`,`attackpower`,`dmg_multiplier`,`baseattacktime`,`rangeattacktime`,`unit_class`,`unit_flags`,`unit_flags2`,`dynamicflags`,`family`,`trainer_type`,`trainer_class`,`trainer_race`,`minrangedmg`,`maxrangedmg`,`rangedattackpower`,`type`,`type_flags`,`lootid`,`pickpocketloot`,`skinloot`,`resistance1`,`resistance2`,`resistance3`,`resistance4`,`resistance5`,`resistance6`,`spell1`,`spell2`,`spell3`,`spell4`,`spell5`,`spell6`,`spell7`,`spell8`,`PetSpellDataId`,`VehicleId`,`mingold`,`maxgold`,`AIName`,`MovementType`,`InhabitType`,`HoverHeight`,`Health_mod`,`Mana_mod`,`Armor_mod`,`RacialLeader`,`questItem1`,`questItem2`,`questItem3`,`questItem4`,`questItem5`,`questItem6`,`movementId`,`RegenHealth`,`mechanic_immune_mask`,`flags_extra`,`ScriptName`,`WDBVerified`) VALUES
+INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`,`difficulty_entry_2`,`difficulty_entry_3`,`KillCredit1`,`KillCredit2`,`modelid1`,`modelid2`,`modelid3`,`modelid4`,`name`,`subname`,`IconName`,`gossip_menu_id`,`minlevel`,`maxlevel`,`exp`,`faction_A`,`faction_H`,`npcflag`,`speed_walk`,`speed_run`,`scale`,`rank`,`mindmg`,`maxdmg`,`dmgschool`,`attackpower`,`dmg_multiplier`,`baseattacktime`,`rangeattacktime`,`unit_class`,`unit_flags`,`unit_flags2`,`dynamicflags`,`family`,`trainer_type`,`trainer_class`,`trainer_race`,`minrangedmg`,`maxrangedmg`,`rangedattackpower`,`type`,`type_flags`,`lootid`,`pickpocketloot`,`skinloot`,`resistance1`,`resistance2`,`resistance3`,`resistance4`,`resistance5`,`resistance6`,`spell1`,`spell2`,`spell3`,`spell4`,`spell5`,`spell6`,`spell7`,`spell8`,`PetSpellDataId`,`VehicleId`,`mingold`,`maxgold`,`AIName`,`MovementType`,`InhabitType`,`HoverHeight`,`Health_mod`,`Mana_mod`,`Armor_mod`,`RacialLeader`,`questItem1`,`questItem2`,`questItem3`,`questItem4`,`questItem5`,`questItem6`,`movementId`,`RegenHealth`,`mechanic_immune_mask`,`flags_extra`,`ScriptName`,`WDBVerified`) VALUES
 (45004,0,0,0,0,0,17699,0,0,0,"Wyvern","","",0,1,1,0,2203,2203,16777216,1,1.14286,1,0,1,2,0,0,1,2000,2000,1,8,2048,0,0,0,0,0,1,2,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1071,0,0,"",0,4,1,1,1,1,0,0,0,0,0,0,0,199,1,0,0,"npc_first_wyvern_qdre",16048),
 (45005,0,0,0,0,0,17699,0,0,0,"Wyvern","","vehichleCursor",0,81,81,3,2167,2167,16777216,1,1.14286,1,0,436,654,0,163,1,2000,2000,1,0,2048,0,0,0,0,0,349,523,130,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"",0,3,1,1,1,1,0,0,0,0,0,0,0,0,1,0,0,"",16048),
 (45024,0,0,0,0,0,17699,0,0,0,"Wyvern","","",0,1,1,0,2203,2203,16777216,1,1.14286,1,0,1,2,0,0,1,2000,2000,1,8,2048,0,0,0,0,0,1,2,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1073,0,0,"",0,4,1,1,1,1,0,0,0,0,0,0,0,199,1,0,0,"npc_second_wyvern_qdre",16048),
 (45027,0,0,0,0,0,35825,0,0,0,"Aggra","","",0,82,82,3,2203,2203,0,1,1.14286,1,0,420,631,0,158,1.1,2000,2000,2,0,2048,0,0,0,0,0,336,505,126,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"",0,3,1,0.2,1,1,0,0,0,0,0,0,0,0,1,0,0,"npc_second_aggra_qdre",16048),
 (45028,0,0,0,0,0,35825,0,0,0,"Aggra","","",0,82,82,0,2203,2203,0,1,1.14286,1,0,420,631,0,158,1,2000,2000,2,0,2048,0,0,0,0,0,336,505,126,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"",0,3,1,1,1,1,0,0,0,0,0,0,0,0,1,0,0,"npc_first_aggra_qdre",16048);
 DELETE FROM `creature` WHERE `id` IN (45027, 45028);
-DELETE FROM `creature_template_addon` WHERE `entry` IN (45004,45024);
-INSERT INTO `creature_template_addon` (`entry`, `bytes1`)VALUES
-(45004, 50331648),
-(45024, 50331648);
+DELETE FROM `creature_template_bytes` WHERE `entry` IN (45004,45024);
+INSERT INTO `creature_template_bytes` (`entry`, `index`, `bytes`)VALUES
+(45004, 0, 50331648),
+(45024, 0, 50331648);
 SET @CGUID = (SELECT MAX(guid) FROM `creature`);
 DELETE FROM `creature` WHERE `id` IN (45004, 43718) AND `map` = 730;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `MovementType`) VALUES
@@ -82,8 +82,8 @@ INSERT INTO `creature` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`equ
 (@CGUID+0, @NPC_SLAIN_CANNONEER, 646, 1, 1, 4260, 0, 273.974, 192.455, 44.5388, 0, 60, 0, 0, 30951, 0, 0, 0, 0, 0),
 (@CGUID+1, @NPC_UNEXPLODED_ARTILLERY_SHELL, 646, 1, 1, 33182, 0, 196.566, 159.792, 42.2326, 2.14675, 60, 0, 0, 42, 0, 0, 0, 0, 0),
 (@CGUID+2, @NPC_UNEXPLODED_ARTILLERY_SHELL_MOUNT, 646, 1, 1, 11686, 0, 196.566, 159.792, 42.2326, 2.14675, 60, 0, 0, 42, 0, 0, 0, 0, 0);
-DELETE FROM `creature_template_addon` WHERE `entry` IN (@NPC_CAPTAIN_SKULLSHATTER, @NPC_SLAIN_CANNONEER);
-INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES
+DELETE FROM `creature_template_aura` WHERE `entry` IN (@NPC_CAPTAIN_SKULLSHATTER, @NPC_SLAIN_CANNONEER);
+INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES
 (@NPC_CAPTAIN_SKULLSHATTER, @SPELL_FEIGN_DEATH),
 (@NPC_SLAIN_CANNONEER, @SPELL_FEIGN_DEATH);
 
@@ -140,8 +140,8 @@ DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 17 AND `SourceEntry` 
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ScriptName`, `Comment`) VALUES
 (17, 0, @SPELL_SPIRIT_TOTEM, 0, 0, 31, 1, 3, @NPC_SLAIN_CREW_MEMBER_HOSTILE, 0, 0, "", "Spirit Totem targets Slain Crew Member"),
 (17, 0, @SPELL_SPIRIT_TOTEM, 0, 1, 31, 1, 3, @NPC_SLAIN_CREW_MEMBER_FRIENDLY, 0, 0, "", "Spirit Totem targets Slain Crew Member");
-DELETE FROM `creature_template_addon` WHERE `entry` IN (@NPC_SLAIN_CREW_MEMBER_HOSTILE, @NPC_SLAIN_CREW_MEMBER_FRIENDLY);
-INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES
+DELETE FROM `creature_template_aura` WHERE `entry` IN (@NPC_SLAIN_CREW_MEMBER_HOSTILE, @NPC_SLAIN_CREW_MEMBER_FRIENDLY);
+INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES
 (@NPC_SLAIN_CREW_MEMBER_HOSTILE, @SPELL_FEIGN_DEATH),
 (@NPC_SLAIN_CREW_MEMBER_FRIENDLY, @SPELL_FEIGN_DEATH);
 
@@ -158,8 +158,8 @@ UPDATE `creature_template` SET `minlevel` = 85, `maxlevel` = 85, `exp` = 3, `bas
 DELETE FROM `spell_linked_spell` WHERE `spell_trigger` = @SPELL_STONEFATHERS_BANNER_COVER;
 INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES
 (@SPELL_STONEFATHERS_BANNER_COVER, @SPELL_STONEFATHERS_BANNER_SUMMON, 1, "Stonefather's Banner - Cover casts Summon");
-DELETE FROM `creature_template_addon` WHERE `entry` = @NPC_STONEFATHERS_BANNER;
-INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES
+DELETE FROM `creature_template_aura` WHERE `entry` = @NPC_STONEFATHERS_BANNER;
+INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES
 (@NPC_STONEFATHERS_BANNER, @SPELL_STONEFATHERS_BANNER_VISUAL);
 
 -- [c++ and SQL] Quests - Imposing Confrontation scripted (Feedback #7406)
@@ -281,8 +281,8 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (@NPC_RED_MIST, 0, 0, 1, 10, 0, 100, 0, 0, 6, 30000, 30000, 33, @NPC_RED_MIST, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Red Mist - On LoS - Give KC"),
 (@NPC_RED_MIST, 0, 1, 0, 61, 0, 100, 0, 0, 0, 0, 0, 11, @SPELL_RED_MIST_DAMAGE_PLAYER, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Red Mist - On LoS - Cast Red Mist damage");
 -- UPDATE `quest_template` SET `Flags` = 0 WHERE `Id` = @QUEST_A_HEAD_FULL_OF_WIND;
-DELETE FROM `creature_template_addon` WHERE `entry` IN (@NPC_RED_MIST, @NPC_RED_WIND_DEVIL);
-INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES
+DELETE FROM `creature_template_aura` WHERE `entry` IN (@NPC_RED_MIST, @NPC_RED_WIND_DEVIL);
+INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES
 (@NPC_RED_MIST, @SPELL_RED_MIST_VISUAL),
 (@NPC_RED_WIND_DEVIL, @SPELL_RED_WIND_DEVIL_GUARDIAN_AURA);
 DELETE FROM `spell_linked_spell` WHERE `spell_trigger` IN (@SPELL_LORVARIUS_CLEAN_KILL_CREDIT, @SPELL_RED_MIST_KILL_CREDIT);
@@ -416,9 +416,10 @@ SET @NPC_PETRIFIED_STONE_BAT := 43182;
 SET @SPELL_PETRIFIED_BAT := 80945;
 SET @SPELL_CREATURE_SPARKLES_BIGGER := 94357;
 UPDATE `creature_template` SET `exp` = 3, `npcflag` = 16777216, `WDBVerified` = 15595 WHERE `entry` = @NPC_PETRIFIED_STONE_BAT;
-DELETE FROM `creature_template_addon` WHERE `entry` = @NPC_PETRIFIED_STONE_BAT;
-INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES
-(@NPC_PETRIFIED_STONE_BAT, '80945 94357');
+DELETE FROM `creature_template_aura` WHERE `entry` = @NPC_PETRIFIED_STONE_BAT;
+INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES
+(@NPC_PETRIFIED_STONE_BAT, @SPELL_PETRIFIED_BAT),
+(@NPC_PETRIFIED_STONE_BAT, @SPELL_CREATURE_SPARKLES_BIGGER);
 
 -- [SQL] Quests - On Even Ground scripted (Feedback #7407)
 SET @NPC_SERVANT_OF_THERAZANE := 44131;
@@ -620,9 +621,13 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 15 AND `SourceGroup` = @GOSSIP;
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ScriptName`, `Comment`) VALUES
 (15, @GOSSIP, 0, 0, 0, 9, 0, @QUEST_RALLYING_THE_EARTHEN_RING, 0, 0, 0, "", "Show gossip if on quest");
-DELETE FROM `creature_template_addon` WHERE `entry` = @NPC_THARM_WILDFIRE;
-INSERT INTO `creature_template_addon` (`entry`, `bytes1`, `auras`) VALUES
-(@NPC_THARM_WILDFIRE, 3, '78148 78150');
+DELETE FROM `creature_template_aura` WHERE `entry` = @NPC_THARM_WILDFIRE;
+INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES
+(@NPC_THARM_WILDFIRE, 78148),
+(@NPC_THARM_WILDFIRE, 78150);
+DELETE FROM `creature_template_bytes` WHERE `entry` = @NPC_THARM_WILDFIRE;
+INSERT INTO `creature_template_bytes` (`entry`, `index`, `bytes`) VALUES
+(@NPC_THARM_WILDFIRE, 0, 3);
 
 -- [SQL] General - Horde portal in the Temple of Earth (Deepholm) added
 /*DELETE FROM `gameobject` WHERE `id` IN (195139, 195140, 205272, 205273) AND `map` = 646;
@@ -669,12 +674,13 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 DELETE FROM `spell_linked_spell` WHERE `spell_trigger` = -@SPELL_HARDENED;
 INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES
 (-@SPELL_HARDENED, @SPELL_VULNERABLE, 0, "Hardened removed casts Vulnerable");
-DELETE FROM `creature_template_addon` WHERE `entry` = @NPC_DORMANT_STONEBOUND_ELEMENTAL;
+DELETE FROM `creature_template_aura` WHERE `entry` = @NPC_DORMANT_STONEBOUND_ELEMENTAL;
 DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = @NPC_DORMANT_STONEBOUND_ELEMENTAL;
 INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`, `user_type`) VALUES
 (@NPC_DORMANT_STONEBOUND_ELEMENTAL, @SPELL_GENERAL_TRIGGER, 1, 0);
 
 -- [SQL] Quests - Fly Over (A,H) scripted (Feedback #1556)
+SET @AREATRIGGER := 6216;
 DELETE FROM `areatrigger_involvedrelation` WHERE `quest` = 27006;
 DELETE FROM `creature_questrelation` WHERE `quest` = 27008;
 INSERT INTO `creature_questrelation` (`id`, `quest`) VALUES
@@ -683,6 +689,17 @@ DELETE FROM `creature_involvedrelation` WHERE `quest` = 27008;
 INSERT INTO `creature_involvedrelation` (`id`, `quest`) VALUES
 (44818, 27008);
 UPDATE `creature_template` SET `npcflag` = `npcflag`|2 WHERE `entry` = 44818;
-DELETE FROM `smart_scripts` WHERE `entryorguid` = 6216 AND `source_type` = 2;
+DELETE FROM `smart_scripts` WHERE `entryorguid` = @AREATRIGGER AND `source_type` = 2;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
-(6216, 2, 0, 0, 46, 0, 100, 0, 6216, 0, 0, 0, 33, 44839, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Areatrigger Masters' Gate - On Trigger - Quest Credit");
+(@AREATRIGGER, 2, 0, 0, 46, 0, 100, 0, @AREATRIGGER, 0, 0, 0, 33, 44839, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Areatrigger Masters' Gate - On Trigger - Quest Credit");
+DELETE FROM `areatrigger_scripts` WHERE `entry` = @AREATRIGGER;
+INSERT INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
+(@AREATRIGGER, 'SmartTrigger');
+
+-- [SQL] Quests - Something that Burns scripted (Feedback #7403)
+UPDATE `creature_template` SET `KillCredit2` = 0 WHERE `entry` = 46611;
+UPDATE `creature_template` SET `minlevel` = 82, `maxlevel` = 82, `exp` = 3 WHERE `entry` = 45100;
+DELETE FROM `gameobject` WHERE `id` = 301075;
+INSERT INTO `gameobject` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`spawntimesecs`,`animprogress`,`state`) VALUES
+(216759, 301075, 646, 1, 1, 797.528, 296.965, -66.1024, 1.68324, 0, 0, 0, 0, 120, 100, 1);
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (45100, 46611) AND `source_type` = 0;

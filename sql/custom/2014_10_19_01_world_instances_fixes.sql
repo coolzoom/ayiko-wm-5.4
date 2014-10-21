@@ -493,3 +493,4 @@ UPDATE `creature_template` SET `AIName` = '' WHERE `entry` = '8585';
 -- ----------  --
 -- Enable instance
 DELETE FROM `disables` WHERE (`sourceType`='2') AND (`entry`='349');
+UPDATE `creature_text` SET `type`='14' WHERE (`entry`='13601') AND (`groupid`='0') AND (`id`='0');

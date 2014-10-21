@@ -1527,9 +1527,10 @@ class npc_gilneas_worgen_class_quest final : public CreatureScript
 
                 SPELL_CHARGE            = 100,
                 SPELL_EVISCERATE        = 2098,
-                SPELL_IMMOLATE          = 348,
+                SPELL_CORRUPTION        = 172,
                 SPELL_STEADY_SHOT       = 56641,
                 SPELL_ARCANE_MISSILES   = 5143,
+                SPELL_MOONFIRE          = 8921,
 
                 NPC_CLASS_QUEST_CREDIT  = 44175,
             };
@@ -1548,9 +1549,10 @@ class npc_gilneas_worgen_class_quest final : public CreatureScript
                 {
                     case SPELL_CHARGE:
                     case SPELL_EVISCERATE:
-                    case SPELL_IMMOLATE:
+                    case SPELL_CORRUPTION:
                     case SPELL_STEADY_SHOT:
                     case SPELL_ARCANE_MISSILES:
+                    case SPELL_MOONFIRE:
                         {
                             if (Player* player = caster->ToPlayer())
                                 player->KilledMonsterCredit(NPC_CLASS_QUEST_CREDIT);

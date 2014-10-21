@@ -13560,6 +13560,23 @@ MountCapabilityEntry const* Unit::GetMountCapability(uint32 mountType) const
     return NULL;
 }
 
+bool Unit::SetVehicleId(uint32 id)
+{
+    RemoveVehicleKit();
+
+    if (!CreateVehicleKit(id, GetEntry()))
+        return false;
+
+    ObjectGuid guid = GetGUID();
+    WorldPacket data(SMSG_PLAYER_VEHICLE_DATA, GetPackGUID().size()+4);
+    data.WriteBitSeq<6, 3, 0, 1, 5, 7, 4, 2>(guid);
+    data.WriteByteSeq<4, 3, 1>(guid);
+    data << uint32(id);
+    data.WriteByteSeq<6, 7, 5, 2, 0>(guid);
+
+    return true;
+}
+
 void Unit::SetInCombatWith(Unit* enemy)
 {
     Unit* eOwner = enemy->GetCharmerOrOwnerOrSelf();

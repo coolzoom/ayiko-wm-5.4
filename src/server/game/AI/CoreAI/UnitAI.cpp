@@ -179,6 +179,22 @@ void UnitAI::DoCast(uint32 spellId)
         me->CastSpell(target, spellId, false);
 }
 
+void UnitAI::DoCast(SelectAggroTarget targetType, uint32 spellId, bool triggered, uint32 position, float dist, bool playerOnly, int32 aura)
+{
+    Unit * target = SelectTarget(targetType, position, DefaultTargetSelector(me, dist, playerOnly, aura));
+
+    if (!target)
+    {
+        if (position)
+            target = SelectTarget(targetType, 0, DefaultTargetSelector(me, dist, playerOnly, aura));
+        else if (dist > 0.0f)
+            target = SelectTarget(targetType, position, DefaultTargetSelector(me, 0.0f, playerOnly, aura));
+    }
+
+    if (target)
+        me->CastSpell(target, spellId, triggered);
+}
+
 #define UPDATE_TARGET(a) do { if (AIInfo->target<a) AIInfo->target=a; } while(0)
 
 void UnitAI::FillAISpellInfo()

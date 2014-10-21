@@ -106,14 +106,14 @@ class boss_ozruk : public CreatureScript
                     me->GetMotionMaster()->Clear();
                     me->GetMotionMaster()->MoveIdle();
                     me->SetTarget(0);
-                    me->SetFacingToObject(me->GetVictim());
+                    me->SetFacingToObject(me->getVictim());
                     DoCast(me, SPELL_GROUND_SLAM);
                     events.ScheduleEvent(EVENT_GROUND_SLAM, 30000);
                     events.ScheduleEvent(EVENT_GROUND_SLAM_END, 3500);
                     break;
                 case EVENT_GROUND_SLAM_END:
                     me->SetReactState(REACT_AGGRESSIVE);
-                    if (Unit * victim = me->GetVictim())
+                    if (Unit * victim = me->getVictim())
                     {
                         me->SetTarget(victim->GetGUID());
                         DoStartMovement(victim);

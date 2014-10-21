@@ -131,7 +131,7 @@ class boss_corborus : public CreatureScript
                     me->SetReactState(REACT_AGGRESSIVE);
                     me->SetFloatValue(UNIT_FIELD_COMBATREACH, 12.0f);
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                    if (Unit * victim = me->GetVictim())
+                    if (Unit * victim = me->getVictim())
                         DoStartMovement(victim);
                     events.ScheduleEvent(EVENT_SUBMERGE, 60000, 0, PHASE_NORMAL);
                     break;

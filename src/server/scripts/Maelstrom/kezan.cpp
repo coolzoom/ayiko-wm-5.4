@@ -1248,7 +1248,7 @@ class npc_foreman_dampwick : public CreatureScript
                         return;
 
 //                    for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
-//                        if (Player* player = itr->GetSource())
+//                        if (Player* player = itr->getSource())
 //                            if (player->GetPhaseMask() == 1 && player->GetAreaId() == AREA_KAJAMITE_MINE)
 //                            {
 //                                uint8 roll = urand(0, 7);
@@ -1500,7 +1500,7 @@ const uint16 TribuneEmotes[15]=
     EMOTE_ONESHOT_CHEER,
     EMOTE_ONESHOT_ROAR,
     EMOTE_ONESHOT_CHICKEN,
-    EMOTE_ONESHOT_EAT_NO_SHEATHE,
+    EMOTE_ONESHOT_EAT_NOSHEATHE,
     EMOTE_ONESHOT_RUDE,
     EMOTE_ONESHOT_LAUGH,
     EMOTE_ONESHOT_YES,
@@ -1660,7 +1660,7 @@ public:
             {
                 Follow = false;
 
-                if (me->IsSummon())
+                if (me->isSummon())
                     if (Player* player = me->ToTempSummon()->GetSummoner()->ToPlayer())
                     {
                         StartFollow(player);
@@ -1874,7 +1874,7 @@ public:
                 if (Boom)
                     uiDespawnTimer = 5000;
 
-                if (me->IsSummon())
+                if (me->isSummon())
                     if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                         if (Player* player = summoner->ToPlayer())
                         {
@@ -2078,7 +2078,7 @@ public:
             AtTribune = false;
         }
 
-        uint32 GetData(uint32 data) const
+        uint32 GetData(uint32 data)
         {
             if (data == DATA_KNOCKBACK)
                 return uiKnockbackData;
@@ -2623,7 +2623,7 @@ public:
 
         void Register()
         {
-            OnEffectHit += SpellEffectFn(spell_hot_rod_honk_horn_SpellScript::Beep, EFFECT_0, SPELL_EFFECT_PLAYER_NOTIFICATION);
+            OnEffectHit += SpellEffectFn(spell_hot_rod_honk_horn_SpellScript::Beep, EFFECT_0, SPELL_EFFECT_PLAY_SOUND);
         }
     };
 
@@ -2910,7 +2910,7 @@ public:
 
                                         if (!lHomies.empty())
                                             for (std::list<Creature*>::const_iterator homie = lHomies.begin(); homie != lHomies.end(); ++homie)
-                                                if ((*homie)->IsSummon())
+                                                if ((*homie)->isSummon())
                                                     if (uint64 guid = (*homie)->ToTempSummon()->GetSummonerGUID())
                                                         if (guid == (*itr).uiPlayerGUID)
                                                         {
@@ -2927,7 +2927,7 @@ public:
 
                                         if (!lHomies.empty())
                                             for (std::list<Creature*>::const_iterator homie = lHomies.begin(); homie != lHomies.end(); ++homie)
-                                                if ((*homie)->IsSummon())
+                                                if ((*homie)->isSummon())
                                                     if (uint64 guid = (*homie)->ToTempSummon()->GetSummonerGUID())
                                                         if (guid == (*itr).uiPlayerGUID)
                                                         {
@@ -3030,7 +3030,7 @@ public:
         void WaypointReached(uint32 point)
         {
             if (point == 1)
-                if (me->IsSummon())
+                if (me->isSummon())
                     if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                         if (Creature* buccaneer = summoner->ToCreature())
                             buccaneer->AI()->DoAction(ACTION_FAIL_NECESSARY_ROUGHNESS);
@@ -3060,7 +3060,7 @@ public:
             creature->AddUnitState(UNIT_STATE_ROOT);
             creature->AddUnitMovementFlag(MOVEMENTFLAG_ROOT);
 
-            if (me->IsSummon())
+            if (me->isSummon())
                 if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                 {
                     me->SetSeerGUID(summoner->GetGUID());
@@ -3126,7 +3126,7 @@ public:
                     Event = false;
                     uiEventTimer = 2000;
 
-                    if (me->IsSummon())
+                    if (me->isSummon())
                         if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                             if (Player* player = summoner->ToPlayer())
                                 if (player->GetQuestStatus(QUEST_NECESSARY_ROUGHNESS) == QUEST_STATUS_INCOMPLETE)
@@ -3177,7 +3177,7 @@ public:
                 if (target->GetEntry() == NPC_STEAMWHEEDLE_SHARK)
                     return;
 
-            target->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
+            target->SetFlag(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
         }
 
         void Register()
@@ -3211,7 +3211,7 @@ public:
             creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             uiSeatData = DATA_NONE;
 
-            if (creature->IsSummon())
+            if (creature->isSummon())
                 if (Unit* summoner = creature->ToTempSummon()->GetSummoner())
                 {
                     creature->SetSeerGUID(summoner->GetGUID());
@@ -3332,7 +3332,7 @@ public:
             uiPhase = 0;
             Event = false;
 
-            if (me->IsSummon())
+            if (me->isSummon())
                 if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                     if (Player* player = summoner->ToPlayer())
                         player->PlayDirectSound(DEATHWING_SOUND_1, player);
@@ -3349,7 +3349,7 @@ public:
                 Event = true;
                 DoCast(me, SPELL_XPLOSION);
 
-                if (me->IsSummon())
+                if (me->isSummon())
                     if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                         if (Player* player = summoner->ToPlayer())
                         {
@@ -3366,7 +3366,7 @@ public:
             switch (point)
             {
             case 1:
-                if (me->IsSummon())
+                if (me->isSummon())
                     if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                         if (Player* player = summoner->ToPlayer())
                         {
@@ -3380,7 +3380,7 @@ public:
                         }
                         break;
             case 3:
-                if (me->IsSummon())
+                if (me->isSummon())
                     if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                         if (Player* player = summoner->ToPlayer())
                         {
@@ -3408,7 +3408,7 @@ public:
                     case 1:
                         uiEventTimer = 500;
 
-                        if (me->IsSummon())
+                        if (me->isSummon())
                             if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                                 if (Player* player = summoner->ToPlayer())
                                     if (Creature* coach = me->FindNearestCreature(NPC_COACH_CROSSCHECK, 90.0f))
@@ -3432,7 +3432,7 @@ public:
 
                         if (Creature* coach = me->FindNearestCreature(NPC_COACH_CROSSCHECK, 90.0f))
                         {
-                            if (me->IsSummon())
+                            if (me->isSummon())
                                 if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                                     if (Player* player = summoner->ToPlayer())
                                         CAST_AI(npc_coach_crosscheck::npc_coach_crosscheckAI, coach->AI())->FinishDeathwingEvent(player->GetGUID());
@@ -3534,7 +3534,7 @@ public:
 
         void MoveInLineOfSight(Unit* who)
         {
-            if (me->IsInCombat())
+            if (me->isInCombat())
                 return;
 
             if (who->GetTypeId() == TYPEID_PLAYER && me->IsWithinDistInMap(who, 10.0f))
@@ -3560,7 +3560,7 @@ public:
                             me->GetCreatureListWithEntryInGrid(lHomies, Homies[i], 25.0f);
 
                             for (std::list<Creature*>::const_iterator itr = lHomies.begin(); itr != lHomies.end(); ++itr)
-                                if ((*itr)->IsSummon())
+                                if ((*itr)->isSummon())
                                     if ((*itr)->ToTempSummon()->GetSummonerGUID() == uiPlayerGUID)
                                     {
                                         uint8 roll = urand(0, 6);
@@ -3615,7 +3615,7 @@ public:
                     return;
 
                 for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
-                    if (Player* player = itr->GetSource())
+                    if (Player* player = itr->getSource())
                     {
                         QuestStatusMap::iterator incomplete_quest = player->getQuestStatusMap().find(QUEST_DO_IT_YOURSELF);
 
@@ -3671,7 +3671,7 @@ public:
 
         void MoveInLineOfSight(Unit* who)
         {
-            if (me->IsInCombat())
+            if (me->isInCombat())
                 return;
 
             if (who->GetTypeId() == TYPEID_PLAYER && me->IsWithinDistInMap(who, 10.0f))
@@ -3697,7 +3697,7 @@ public:
                             me->GetCreatureListWithEntryInGrid(lHomies, Homies[i], 25.0f);
 
                             for (std::list<Creature*>::const_iterator itr = lHomies.begin(); itr != lHomies.end(); ++itr)
-                                if ((*itr)->IsSummon())
+                                if ((*itr)->isSummon())
                                     if ((*itr)->ToTempSummon()->GetSummonerGUID() == uiPlayerGUID)
                                     {
                                         uint8 roll = urand(0, 6);
@@ -3752,7 +3752,7 @@ public:
                     return;
 
                 for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
-                    if (Player* player = itr->GetSource())
+                    if (Player* player = itr->getSource())
                     {
                         QuestStatusMap::iterator incomplete_quest = player->getQuestStatusMap().find(QUEST_DO_IT_YOURSELF);
 
@@ -3779,7 +3779,7 @@ public:
             if (uiThrowTimer <= diff)
             {
                 uiThrowTimer = urand(2000, 7000);
-                DoCast(me->GetVictim(), SPELL_THROW_GEARS);
+                DoCast(me->getVictim(), SPELL_THROW_GEARS);
             }
             else
                 uiThrowTimer -= diff;
@@ -3816,7 +3816,7 @@ public:
 
         void MoveInLineOfSight(Unit* who)
         {
-            if (me->IsInCombat())
+            if (me->isInCombat())
                 return;
 
             if (who->GetTypeId() == TYPEID_PLAYER && me->IsWithinDistInMap(who, 10.0f))
@@ -3843,7 +3843,7 @@ public:
                             me->GetCreatureListWithEntryInGrid(lHomies, Homies[i], 25.0f);
 
                             for (std::list<Creature*>::const_iterator itr = lHomies.begin(); itr != lHomies.end(); ++itr)
-                                if ((*itr)->IsSummon())
+                                if ((*itr)->isSummon())
                                     if ((*itr)->ToTempSummon()->GetSummonerGUID() == uiPlayerGUID)
                                     {
                                         uint8 roll = urand(0, 6);
@@ -3898,7 +3898,7 @@ public:
                     return;
 
                 for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
-                    if (Player* player = itr->GetSource())
+                    if (Player* player = itr->getSource())
                     {
                         QuestStatusMap::iterator incomplete_quest = player->getQuestStatusMap().find(QUEST_DO_IT_YOURSELF);
 
@@ -3925,7 +3925,7 @@ public:
             if (uiKnockbackTimer <= diff)
             {
                 uiKnockbackTimer = urand(3000, 8000);
-                DoCast(me->GetVictim(), SPELL_KNOCKBACK);
+                DoCast(me->getVictim(), SPELL_KNOCKBACK);
             }
             else
                 uiKnockbackTimer -= diff;
@@ -3964,7 +3964,7 @@ public:
 
         void MoveInLineOfSight(Unit* who)
         {
-            if (me->IsInCombat())
+            if (me->isInCombat())
                 return;
 
             if (who->GetTypeId() == TYPEID_PLAYER && me->IsWithinDistInMap(who, 10.0f))
@@ -3990,7 +3990,7 @@ public:
                             me->GetCreatureListWithEntryInGrid(lHomies, Homies[i], 25.0f);
 
                             for (std::list<Creature*>::const_iterator itr = lHomies.begin(); itr != lHomies.end(); ++itr)
-                                if ((*itr)->IsSummon())
+                                if ((*itr)->isSummon())
                                     if ((*itr)->ToTempSummon()->GetSummonerGUID() == uiPlayerGUID)
                                     {
                                         uint8 roll = urand(0, 6);
@@ -4045,7 +4045,7 @@ public:
                     return;
 
                 for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
-                    if (Player* player = itr->GetSource())
+                    if (Player* player = itr->getSource())
                     {
                         QuestStatusMap::iterator incomplete_quest = player->getQuestStatusMap().find(QUEST_DO_IT_YOURSELF);
 
@@ -4073,7 +4073,7 @@ public:
             {
                 uiBubbleBlastTimer = urand(2000, 8000);
                 me->CastStop();
-                DoCast(me->GetVictim(), SPELL_BUBBLE_BLAST);
+                DoCast(me->getVictim(), SPELL_BUBBLE_BLAST);
             }
             else
                 uiBubbleBlastTimer -= diff;
@@ -4081,7 +4081,7 @@ public:
             if (uiFrostboltTimer <= diff)
             {
                 uiFrostboltTimer = 3500;
-                DoCast(me->GetVictim(), SPELL_FROSTBOLT);
+                DoCast(me->getVictim(), SPELL_FROSTBOLT);
             }
             else
                 uiFrostboltTimer -= diff;
@@ -4447,7 +4447,7 @@ public:
                     return;
 
                 for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
-                    if (Player* player = itr->GetSource())
+                    if (Player* player = itr->getSource())
                     {
                         QuestStatusMap::iterator incomplete_quest;
 
@@ -4544,7 +4544,7 @@ public:
                     return;
 
                 for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
-                    if (Player* player = itr->GetSource())
+                    if (Player* player = itr->getSource())
                     {
                         QuestStatusMap::iterator incomplete_quest;
 
@@ -4641,7 +4641,7 @@ public:
                     return;
 
                 for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
-                    if (Player* player = itr->GetSource())
+                    if (Player* player = itr->getSource())
                     {
                         QuestStatusMap::iterator incomplete_quest;
 
@@ -4980,7 +4980,7 @@ public:
         {
             Player* player = NULL;
 
-            if (me->IsSummon())
+            if (me->isSummon())
                 if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                     player = summoner->ToPlayer();
 
@@ -5144,7 +5144,7 @@ public:
                 {
                     ++uiPhase;
 
-                    if (me->IsSummon())
+                    if (me->isSummon())
                         if (uint64 uiPlayerGUID = me->ToTempSummon()->GetSummonerGUID())
                             switch (uiPhase)
                         {
@@ -5193,7 +5193,7 @@ public:
                     me->ModifyPower(POWER_MANA, -10);
                     RemoveEventAuras();
 
-                    if (me->IsSummon())
+                    if (me->isSummon())
                         if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                             if (Player* player = summoner->ToPlayer())
                             {
@@ -5348,10 +5348,10 @@ me->setFaction(ORIGINAL_FACTION);
 
 void MoveInLineOfSight(Unit* who)
 {
-if (who->IsInCombat())
+if (who->isInCombat())
 {
 if (Player* player = who->ToPlayer())
-if (me->IsWithinDistInMap(player, 15.0f) && !me->IsInCombat())
+if (me->IsWithinDistInMap(player, 15.0f) && !me->isInCombat())
 if (player->GetQuestStatus(14123) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(14123) == QUEST_STATUS_COMPLETE)
 {
 me->setFaction(AGGRESSIVE_FACTION);
@@ -5459,7 +5459,7 @@ public:
             if (uiSwashbucklingSliceTimer <= diff)
             {
                 uiSwashbucklingSliceTimer = urand(2000, 5000);
-                DoCast(me->GetVictim(), 75361);
+                DoCast(me->getVictim(), 75361);
             }
             else
                 uiSwashbucklingSliceTimer -= diff;
@@ -6141,7 +6141,7 @@ public:
                 me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_USE_STANDING);
                 break;
             case POINT_BACK_OF_THE_DOCTOR_1:
-                if (me->IsSummon())
+                if (me->isSummon())
                     if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                     {
                         me->SetFacingToObject(summoner);
@@ -6149,12 +6149,12 @@ public:
                     }
                     break;
             case POINT_RUN_AWAY_FROM_CHICKEN:
-                if (me->IsSummon())
+                if (me->isSummon())
                     if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                         me->SetFacingToObject(summoner);
                 break;
             case POINT_BACK_OF_THE_DICTOR_2:
-                if (me->IsSummon())
+                if (me->isSummon())
                     if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                     {
                         me->SetFacingToObject(summoner);
@@ -6172,7 +6172,7 @@ public:
                 {
                     uiFollowTimer = 150;
 
-                    if (me->IsSummon())
+                    if (me->isSummon())
                         if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                             me->SetFacingToObject(summoner);
                 }
@@ -6578,7 +6578,7 @@ public:
                                     return;
 
                                 for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
-                                    if (Player* player = itr->GetSource())
+                                    if (Player* player = itr->getSource())
                                         if (player->GetPhaseMask() == 1)
                                             /*me->DoPersonalScriptText*/DoScriptText(GALLYWIX_RANDOM_YELL_FIRST_PHASE - roll, player);
                             }
@@ -6591,7 +6591,7 @@ public:
                                     return;
 
                                 for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
-                                    if (Player* player = itr->GetSource())
+                                    if (Player* player = itr->getSource())
                                         if (player->GetPhaseMask() == 1 && player->GetQuestStatus(QUEST_FOURTH_AND_GOAL) != QUEST_STATUS_COMPLETE)
                                             /*me->DoPersonalScriptText*/DoScriptText(GALLYWIX_RANDOM_YELL_FIRST_PHASE - roll, player);
                             }
@@ -6843,7 +6843,7 @@ public:
             if (me->GetPhaseMask() != 15)
                 return;
 
-            if (!me->IsSummon())
+            if (!me->isSummon())
                 if (Creature* brute = me->SummonCreature(35304, -8451.56f, 1249.52f, 57.3227f, 4.24208f))
                     uiBruteGUID = brute->GetGUID();
         }
@@ -6880,7 +6880,7 @@ public:
 
             uint64 uiPlayerGUID = player->GetGUID();
 
-            if (me->IsSummon())
+            if (me->isSummon())
             {
                 if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                     if (Creature* brute = summoner->ToCreature())
@@ -6979,7 +6979,7 @@ public:
             {
                 if (Creature* generator = (*itr))
                 {
-                    player->m_Controlled.remove(generator);
+                    player->m_Controlled.erase(generator);
                     itr = lControls.erase(itr);
                     generator->DespawnOrUnsummon();
                 }
@@ -6990,7 +6990,7 @@ public:
 
         if (Creature* generator = player->SummonCreature(NPC_OVERLOADED_GENERATOR, -8420.861f, 1372.611f, 105.7554f))
         {
-            player->m_Controlled.push_back(generator);
+            player->m_Controlled.insert(generator);
             generator->SetSeerGUID(player->GetGUID());
             generator->SetVisible(false);
             generator->CastSpell(generator, SPELL_OVERLOADED_GENERATOR_VISUAL, false);
@@ -7019,7 +7019,7 @@ public:
             {
                 if (Creature* leak = (*itr))
                 {
-                    player->m_Controlled.remove(leak);
+                    player->m_Controlled.erase(leak);
                     itr = lControls.erase(itr);
                     leak->DespawnOrUnsummon();
                 }
@@ -7030,7 +7030,7 @@ public:
 
         if (Creature* leak = player->SummonCreature(NPC_STOVE_LEAK, -8402.417f, 1371.373f, 105.6856f))
         {
-            player->m_Controlled.push_back(leak);
+            player->m_Controlled.insert(leak);
             leak->SetSeerGUID(player->GetGUID());
             leak->SetVisible(false);
             leak->CastSpell(leak, SPELL_STOVE_LEAK_VISUAL, false);
@@ -7085,7 +7085,7 @@ public:
                 {
                     if (Creature* bed = (*itr))
                     {
-                        player->m_Controlled.remove(bed);
+                        player->m_Controlled.erase(bed);
                         itr = lControls.erase(itr);
                         bed->DespawnOrUnsummon();
                     }
@@ -7096,7 +7096,7 @@ public:
 
             if (Creature* bed = player->SummonCreature(NPC_SMOLDERING_BED, -8402.31f, 1363.601f, 118.27f))
             {
-                player->m_Controlled.push_back(bed);
+                player->m_Controlled.insert(bed);
                 bed->SetSeerGUID(player->GetGUID());
                 bed->SetVisible(false);
                 bed->CastSpell(bed, SPELL_SMOLDERING_BED_VISUAL, false);
@@ -7143,7 +7143,7 @@ public:
             {
                 if (Creature* gasbot = (*itr))
                 {
-                    player->m_Controlled.remove(gasbot);
+                    player->m_Controlled.erase(gasbot);
                     itr = lControls.erase(itr);
                     gasbot->DespawnOrUnsummon();
                 }
@@ -7154,7 +7154,7 @@ public:
 
         if (Creature* gasbot = player->SummonCreature(NPC_GASBOT, -8424.346f, 1328.036f, 102.0427f, 1.570796f))
         {
-            player->m_Controlled.push_back(gasbot);
+            player->m_Controlled.insert(gasbot);
             gasbot->SetSeerGUID(player->GetGUID());
             gasbot->SetVisible(false);
             float x, y, z;
@@ -7225,7 +7225,7 @@ public:
                 {
                     if (Creature* controled = (*itr))
                     {
-                        player->m_Controlled.remove(controled);
+                        player->m_Controlled.erase(controled);
                         itr = lControls.erase(itr);
                         controled->DespawnOrUnsummon();
                     }
@@ -7241,7 +7241,7 @@ public:
             {
                 Player* player = NULL;
 
-                if (me->IsSummon())
+                if (me->isSummon())
                     if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                         player = summoner->ToPlayer();
 
@@ -7260,7 +7260,7 @@ public:
                 DespawnPlayerControled(player, NPC_OVERLOADED_GENERATOR);
                 DespawnPlayerControled(player, NPC_STOVE_LEAK);
                 DespawnPlayerControled(player, NPC_SMOLDERING_BED);
-                player->m_Controlled.remove(me);
+                player->m_Controlled.erase(me);
                 player->KilledMonsterCredit(NPC_GASBOT, 0);
 
                 me->DespawnOrUnsummon(2000);
@@ -7281,7 +7281,7 @@ public:
                     Say = false;
                     uiSayTimer = 500;
 
-                    if (me->IsSummon())
+                    if (me->isSummon())
                         if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                             if (Player* player = summoner->ToPlayer())
                                 if (/*Creature* claims_adjuster = */player->FindNearestCreature(37602, 75.0f))
@@ -7342,7 +7342,7 @@ public:
             {
             case 61:
                 Event = true;
-                if (me->IsSummon())
+                if (me->isSummon())
                     if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                         if (Player* player = summoner->ToPlayer())
                             if (Vehicle* vehicle = me->GetVehicleKit())
@@ -7362,7 +7362,7 @@ public:
                     if (Unit* passenger = vehicle->GetPassenger(1))
                         passenger->ExitVehicle();
 
-                    if (me->IsSummon())
+                    if (me->isSummon())
                         if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                             if (Player* player = summoner->ToPlayer())
                             {
@@ -7418,7 +7418,7 @@ public:
 
                     if (uiEventPhase == 1)
                     {
-                        if (me->IsSummon())
+                        if (me->isSummon())
                         {
                             if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                                 if (Player* player = summoner->ToPlayer())
@@ -7468,7 +7468,7 @@ public:
         uint32 uiKnockbackTimer;
         uint32 uiKnockbackData;
 
-        uint32 GetData(uint32 data) const
+        uint32 GetData(uint32 data)
         {
             if (data == DATA_KNOCKBACK)
                 return uiKnockbackData;

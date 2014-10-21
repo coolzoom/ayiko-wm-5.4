@@ -591,7 +591,7 @@ public:
                 case 3:
                     if (Creature* wugou = GetClosestCreatureWithEntry(me, 60916, 20.0f))
                         me->SetFacingToObject(wugou);
-                    me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READYUNARMED);
+                    me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY_UNARMED);
                     eventTimer = 2000;
                     ++eventProgress;
                     break;

@@ -134,7 +134,7 @@ class instance_the_stonecore : public InstanceMapScript
                 }
             }
 
-            uint64 GetData64(uint32 data) const
+            uint64 GetData64(uint32 data)
             {
                 if (data == DATA_SLABHIDE)
                     return _slabhideGUID;

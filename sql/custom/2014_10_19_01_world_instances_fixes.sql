@@ -487,3 +487,9 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 
 -- Frost Spectre summons corrected
 UPDATE `creature_template` SET `AIName` = '' WHERE `entry` = '8585';
+
+-- ----------  --
+--  Maraudon   --
+-- ----------  --
+-- Enable instance
+DELETE FROM `disables` WHERE (`sourceType`='2') AND (`entry`='349');

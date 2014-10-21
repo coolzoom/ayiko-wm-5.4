@@ -582,6 +582,7 @@ void AddSC_boss_laj();
 void AddSC_boss_warp_splinter();
 void AddSC_boss_thorngrin_the_tender();
 void AddSC_boss_commander_sarannis();
+void AddSC_instance_the_botanica();
 void AddSC_boss_alar();                      //TK The Eye
 void AddSC_boss_kaelthas();
 void AddSC_boss_void_reaver();
@@ -1176,6 +1177,7 @@ void AddOutlandScripts()
     AddSC_boss_warp_splinter();
     AddSC_boss_thorngrin_the_tender();
     AddSC_boss_commander_sarannis();
+    AddSC_instance_the_botanica();
     AddSC_boss_alar();                      //TK The Eye
     AddSC_boss_kaelthas();
     AddSC_boss_void_reaver();

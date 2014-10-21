@@ -17,7 +17,7 @@
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
-
+#include "the_botanica.h"
 #include "SpellScript.h"
 
 enum Says
@@ -50,7 +50,7 @@ class boss_commander_sarannis : public CreatureScript
 
         struct boss_commander_sarannisAI : public BossAI
         {
-            boss_commander_sarannisAI(Creature* creature) : BossAI(creature, 1) { }
+            boss_commander_sarannisAI(Creature* creature) : BossAI(creature, DATA_COMMANDER_SARANNIS) { }
 
             void Reset() override
             {
@@ -93,7 +93,7 @@ class boss_commander_sarannis : public CreatureScript
                 BossAI::JustSummoned(summon);
             }
 
-            void UpdateAI(uint32 const diff) override
+            void UpdateAI(uint32 diff) override
             {
                 if (!UpdateVictim())
                     return;

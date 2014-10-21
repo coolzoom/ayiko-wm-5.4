@@ -185,6 +185,8 @@ UPDATE `creature_template` SET `mechanic_immune_mask`='617299803' WHERE `entry` 
 -- Enable Instance
 DELETE FROM `disables` WHERE (`sourceType`='2') AND (`entry`='553');
 
+UPDATE `instance_template` SET `script`='instance_the_botanica' WHERE (`map`='553');
+
 UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='18405');
 DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` = '18405';
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
@@ -369,6 +371,8 @@ UPDATE `creature_template` SET `speed_walk`='0.8', `speed_run`='0.8' WHERE (`ent
 
 -- Summoned Bloodwarder Mender
 UPDATE `creature_template` SET `faction_A`='16', `faction_H`='16' WHERE `entry` IN('21568', '20083');
+
+UPDATE `creature_template` SET `ScriptName`='npc_warp_splinter_treant' WHERE (`entry`='19949');
 
 -- ----------------  --
 --  Razorfen Downs   --

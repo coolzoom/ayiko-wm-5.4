@@ -25,6 +25,7 @@ EndScriptData */
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "the_botanica.h"
 
 enum Says
 {
@@ -133,7 +134,7 @@ class boss_warp_splinter : public CreatureScript
         }
         struct boss_warp_splinterAI : public BossAI
         {
-            boss_warp_splinterAI(Creature* creature) : BossAI(creature, 5)
+            boss_warp_splinterAI(Creature* creature) : BossAI(creature, DATA_WARP_SPLINTER)
             {
                 Treant_Spawn_Pos_X = creature->GetPositionX();
                 Treant_Spawn_Pos_Y = creature->GetPositionY();

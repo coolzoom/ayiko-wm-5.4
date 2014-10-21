@@ -17,6 +17,7 @@
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "the_botanica.h"
 
 enum Says
 {
@@ -51,7 +52,7 @@ class boss_thorngrin_the_tender : public CreatureScript
 
         struct boss_thorngrin_the_tenderAI : public BossAI
         {
-            boss_thorngrin_the_tenderAI(Creature* creature) : BossAI(creature, 0) { }
+            boss_thorngrin_the_tenderAI(Creature* creature) : BossAI(creature, DATA_THORNGRIN_THE_TENDER) { }
 
             void Reset() override
             {
@@ -94,7 +95,7 @@ class boss_thorngrin_the_tender : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 const diff) override
+            void UpdateAI(uint32 diff) override
             {
                 if (!UpdateVictim())
                     return;

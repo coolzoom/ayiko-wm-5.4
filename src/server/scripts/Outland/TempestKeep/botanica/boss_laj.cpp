@@ -25,6 +25,7 @@ EndScriptData */
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "the_botanica.h"
 
 enum Spells
 {
@@ -61,7 +62,7 @@ class boss_laj : public CreatureScript
 
         struct boss_lajAI : public BossAI
         {
-            boss_lajAI(Creature* creature) : BossAI(creature, 4) { }
+            boss_lajAI(Creature* creature) : BossAI(creature, DATA_LAJ) { }
 
             bool CanSummon;
             uint32 Teleport_Timer;

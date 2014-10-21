@@ -307,6 +307,9 @@ void AddSC_boss_ptheradras();
 void AddSC_boss_onyxia();                    //Onyxia's Lair
 void AddSC_instance_onyxias_lair();
 void AddSC_boss_amnennar_the_coldbringer();  //Razorfen Downs
+void AddSC_boss_glutton();
+void AddSC_boss_tuten_kash();
+void AddSC_boss_mordresh_fire_eye();
 void AddSC_razorfen_downs();
 void AddSC_instance_razorfen_downs();
 void AddSC_razorfen_kraul();                 //Razorfen Kraul
@@ -1058,6 +1061,9 @@ void AddKalimdorScripts()
     AddSC_boss_onyxia();                    //Onyxia's Lair
     AddSC_instance_onyxias_lair();
     AddSC_boss_amnennar_the_coldbringer();  //Razorfen Downs
+    AddSC_boss_glutton();
+    AddSC_boss_tuten_kash();
+    AddSC_boss_mordresh_fire_eye();
     AddSC_razorfen_downs();
     AddSC_instance_razorfen_downs();
     AddSC_razorfen_kraul();                 //Razorfen Kraul

@@ -250,4 +250,16 @@ class InstanceScript : public ZoneScript
         MinionInfoMap minions;
         uint32 completedEncounters; // completed encounter mask, bit indexes are DungeonEncounter.dbc boss numbers, used for packets
 };
+
+template<class AI, class T>
+AI* GetInstanceAI(T* obj, char const* scriptName)
+{
+    if (InstanceMap* instance = obj->GetMap()->ToInstanceMap())
+        if (instance->GetInstanceScript())
+            if (instance->GetScriptId() == sObjectMgr->GetScriptId(scriptName))
+                return new AI(obj);
+
+    return NULL;
+}
+
 #endif

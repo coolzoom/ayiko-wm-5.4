@@ -48,6 +48,9 @@ UPDATE `gameobject_template` SET `data0` = 84463, `faction` = 35, `WDBVerified` 
 DELETE FROM `spell_script_names` WHERE `spell_id` = 84463;
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (84463, 'spell_gen_maelstrom_portal');
+DELETE FROM `spell_target_position` WHERE `id` = 84464;
+INSERT INTO `spell_target_position` (`id`, `effIndex`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
+(84464, 0, 730, 854, 1084, -13, 5);
 DELETE FROM `gameobject` WHERE `id` = 205268;
 INSERT INTO `gameobject` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`spawntimesecs`,`animprogress`,`state`) VALUES
 (211863, 205268, 1, 1, 1, 2039.47, -4382.77, 99.079, 0.546574, 0, 0, 0.269898, 0.962889, 60, 100, 1),

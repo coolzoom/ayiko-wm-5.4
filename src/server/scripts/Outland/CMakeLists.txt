@@ -60,6 +60,8 @@ set(scripts_STAT_SRCS
   Outland/TempestKeep/Eye/boss_alar.cpp
   Outland/TempestKeep/Eye/boss_kaelthas.cpp
   Outland/TempestKeep/Eye/the_eye.cpp
+  Outland/TempestKeep/botanica/boss_commander_sarannis.cpp
+  Outland/TempestKeep/botanica/boss_thorngrin_the_tender.cpp
   Outland/TempestKeep/botanica/boss_high_botanist_freywinn.cpp
   Outland/TempestKeep/botanica/boss_warp_splinter.cpp
   Outland/TempestKeep/botanica/boss_laj.cpp

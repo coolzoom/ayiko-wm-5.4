@@ -168,7 +168,10 @@ public:
             {
                 instance->SetData(TYPE_BROGGOK_EVENT, IN_PROGRESS);
                 if (Creature* broggok = Creature::GetCreature(*go, instance->GetData64(DATA_BROGGOK)))
+                {
+                    printf("\n ! did action ! \n ");
                     broggok->AI()->DoAction(ACTION_PREPARE_BROGGOK);
+                }
             }
             go->UseDoorOrButton();
             return false;

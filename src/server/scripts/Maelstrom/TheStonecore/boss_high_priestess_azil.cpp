@@ -165,7 +165,7 @@ class boss_azil : public CreatureScript
 
             if (forceGrip)
             {
-                Unit * victim = me->GetVictim();
+                Unit * victim = me->getVictim();
                 Vehicle * veh = me->GetVehicleKit();
 
                 if (forcegripTimer <= diff)
@@ -179,12 +179,16 @@ class boss_azil : public CreatureScript
                     {
                     case 0: // down
                     case 2:
+#if 0
                         veh->SendSeatChange(victim, 2);
+#endif
                         DoCast(victim, SPELL_FORCE_GRIP_DOWN, true);
                         break;
                     case 1: // up + damage
                     case 3:
+#if 0
                         veh->SendSeatChange(victim, 1);
+#endif
                         DoCast(victim, SPELL_FORCE_GRIP_UP, true);
                         break;
                     case 4: // exit vehicle + knockback
@@ -362,7 +366,7 @@ class npc_gravity_well_azil : public CreatureScript
 
         void SpellHitTarget(Unit * target, const SpellInfo * spell)
         {
-            if (target->IsAlive() && spell->Id == SPELL_GRAVITY_WELL_SCRIPT)
+            if (target->isAlive() && spell->Id == SPELL_GRAVITY_WELL_SCRIPT)
             {
                 int bp = IsHeroic() ? 20000 : 10000; // evtl needs to be increased / lowered
                 uint32 distFkt = uint32(me->GetDistance(target)) * 5;

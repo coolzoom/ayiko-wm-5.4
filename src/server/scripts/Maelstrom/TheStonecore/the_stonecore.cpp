@@ -374,7 +374,7 @@ class spell_stonecore_quake : public SpellScriptLoader
     {
         PrepareSpellScript(spell_impl)
 
-        void FilterTargets(WorldObjectList &objList)
+        void FilterTargets(std::list<WorldObject*> &objList)
         {
             objList.remove_if(JumpFilter());
         }
@@ -633,7 +633,7 @@ class npc_rock_borer : public CreatureScript
 
             if (rockboreTimer <= diff)
             {
-                if (Unit * victim = me->GetVictim())
+                if (Unit * victim = me->getVictim())
                 {
                     if (Aura * aur = victim->GetAura(IsHeroic() ? SPELL_ROCK_BORE_HC : SPELL_ROCK_BORE))
                     {
@@ -677,7 +677,7 @@ public:
             if (creature->GetEntry() == NPC_TELEPORTER_SLABHIDE)
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_INTERACT_1, "The Winding Halls", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
 
-            if (creature->GetEntry() == NPC_TELEPORTER_ENTRANCE && (instance->GetBossState(DATA_SLABHIDE) == DONE || player->IsGameMaster()))
+            if (creature->GetEntry() == NPC_TELEPORTER_ENTRANCE && (instance->GetBossState(DATA_SLABHIDE) == DONE || player->isGameMaster()))
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_INTERACT_1, "The Overlook", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
 
             player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());

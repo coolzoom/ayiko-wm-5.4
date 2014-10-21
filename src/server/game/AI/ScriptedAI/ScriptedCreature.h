@@ -198,7 +198,7 @@ struct ScriptedAI : public CreatureAI
     void SetCombatMovement(bool allowMovement);
     bool IsCombatMovementAllowed() const { return _isCombatMovementAllowed; }
 
-    bool EnterEvadeIfOutOfCombatArea(uint32 const diff);
+    bool EnterEvadeIfOutOfCombatArea(uint32 const diff, const float distance = 100.0f);
 
     // return true for heroic mode. i.e.
     //   - for dungeon in mode 10-heroic,

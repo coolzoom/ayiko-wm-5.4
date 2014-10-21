@@ -392,7 +392,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32 &damage)
         {
-            if(attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->IsPet())
+            if(attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
             {
                 if(me->GetHealth() < me->GetMaxHealth() || me->GetHealth() <= damage)
                 {
@@ -402,7 +402,7 @@ public:
             }
             else
             {
-                if(Unit* victim = me->GetVictim())
+                if(Unit* victim = me->getVictim())
                 {
                     if(victim->GetTypeId() == TYPEID_UNIT)
                     {
@@ -781,7 +781,7 @@ public:
     {
         PrepareSpellScript(spell_ktc_snapflash_qctu_SpellScript);
 
-        void FilterTargets(WorldObjectList& targets)
+        void FilterTargets(std::list<WorldObject*> &targets)
         {
             if(Unit* caster = GetCaster())
                 targets.remove_if(KtcSnapflashTargetSelector());
@@ -1002,7 +1002,7 @@ public:
                         break;
                     case EVENT_SECOND_PAUSE:
                         me->SetReactState(REACT_DEFENSIVE);
-                        if(me->IsSummon())
+                        if(me->isSummon())
                             if(Unit* owner = me->ToTempSummon()->GetOwner())
                                 Talk(TALK_3, owner->GetGUID(), true);
                         me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
@@ -1010,7 +1010,7 @@ public:
                         break;
                     case EVENT_THIRD_PAUSE:
                         me->SetReactState(REACT_DEFENSIVE);
-                        if(me->IsSummon())
+                        if(me->isSummon())
                             if(Unit* owner = me->ToTempSummon()->GetOwner())
                                 Talk(TALK_4, owner->GetGUID(), true);
                         me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
@@ -1018,7 +1018,7 @@ public:
                         break;
                     case EVENT_FOURTH_PAUSE:
                         me->SetReactState(REACT_DEFENSIVE);
-                        if(me->IsSummon())
+                        if(me->isSummon())
                             if(Unit* owner = me->ToTempSummon()->GetOwner())
                                 Talk(TALK_5, owner->GetGUID(), true);
                         me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
@@ -1026,7 +1026,7 @@ public:
                         break;
                     case EVENT_DONE:
                         me->SetReactState(REACT_DEFENSIVE);
-                        if(me->IsSummon())
+                        if(me->isSummon())
                             if(Unit* owner = me->ToTempSummon()->GetOwner())
                             {
                                 Talk(TALK_6, owner->GetGUID(), true);
@@ -1143,7 +1143,7 @@ public:
                 switch(eventId)
                 {
                     case EVENT_SHODOW_BOLT:
-                        me->CastSpell(me->GetVictim(), SPELL_SHADOW_BOLT, false);
+                        me->CastSpell(me->getVictim(), SPELL_SHADOW_BOLT, false);
                         events.ScheduleEvent(EVENT_SHODOW_BOLT, 3.05 * IN_MILLISECONDS);
                         break;
                     case EVENT_HEAL:
@@ -1151,7 +1151,7 @@ public:
                          events.ScheduleEvent(EVENT_HEAL, 6 * IN_MILLISECONDS);
                         break;
                     case EVENT_HEX:
-                         me->CastSpell(me->GetVictim(), SPELL_HEX, false);
+                         me->CastSpell(me->getVictim(), SPELL_HEX, false);
                          events.ScheduleEvent(EVENT_HEX, 12 * IN_MILLISECONDS);
                          break;
                 }
@@ -1589,7 +1589,7 @@ public:
     bool operator()(WorldObject* object)
     {
         if(Creature* cre = object->ToCreature())
-            if(cre->IsSummon() && cre->GetEntry() == NPC_ORC_SCOUT && cre->ToTempSummon()->GetOwner() == _caster)
+            if(cre->isSummon() && cre->GetEntry() == NPC_ORC_SCOUT && cre->ToTempSummon()->GetOwner() == _caster)
                 return false;
 
         return true;
@@ -1616,7 +1616,7 @@ public:
                 target->DespawnOrUnsummon();
         }
 
-        void FilterTargets(WorldObjectList& targets)
+        void FilterTargets(std::list<WorldObject*> &targets)
         {
             if(Unit* caster = GetCaster())
                 targets.remove_if(OrcScoutTargetSelector(caster));
@@ -1915,7 +1915,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32 &damage)
         {
-            if(attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->IsPet())
+            if(attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
             {
                 if(me->GetHealth() < me->GetMaxHealth() || me->GetHealth() <= damage)
                 {
@@ -1925,7 +1925,7 @@ public:
             }
             else
             {
-                if(Unit* victim = me->GetVictim())
+                if(Unit* victim = me->getVictim())
                 {
                     if(victim->GetTypeId() == TYPEID_UNIT)
                     {
@@ -2950,7 +2950,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32 &damage)
         {
-            if(attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->IsPet())
+            if(attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
             {
                 if(me->GetHealth() < me->GetMaxHealth() || me->GetHealth() <= damage)
                 {
@@ -2960,7 +2960,7 @@ public:
             }
             else
             {
-                if(Unit* victim = me->GetVictim())
+                if(Unit* victim = me->getVictim())
                 {
                     if(victim->GetTypeId() == TYPEID_UNIT)
                     {
@@ -2987,11 +2987,11 @@ public:
                 switch(eventId)
                 {
                     case EVENT_SHADOW_BOLT:
-                        me->CastSpell(me->GetVictim(), SPELL_SHADOWN_BOLT, false);
+                        me->CastSpell(me->getVictim(), SPELL_SHADOWN_BOLT, false);
                         events.ScheduleEvent(EVENT_SHADOW_BOLT, urand(4, 6) * IN_MILLISECONDS);
                         break;
                     case EVENT_CORRUPTION:
-                        me->CastSpell(me->GetVictim(), SPELL_CORRUPTION, false);
+                        me->CastSpell(me->getVictim(), SPELL_CORRUPTION, false);
                         events.ScheduleEvent(EVENT_CORRUPTION, urand(3, 7) * IN_MILLISECONDS);
                         break;
                 }
@@ -3042,7 +3042,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32 &damage)
         {
-            if(attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->IsPet())
+            if(attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
             {
                 if(me->GetHealth() < me->GetMaxHealth() || me->GetHealth() <= damage)
                 {
@@ -3052,7 +3052,7 @@ public:
             }
             else
             {
-                if(Unit* victim = me->GetVictim())
+                if(Unit* victim = me->getVictim())
                 {
                     if(victim->GetTypeId() == TYPEID_UNIT)
                     {
@@ -3178,7 +3178,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32 &damage)
         {
-            if(attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->IsPet())
+            if(attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
             {
                 if(me->GetHealth() < me->GetMaxHealth() || me->GetHealth() <= damage)
                 {
@@ -3188,7 +3188,7 @@ public:
             }
             else
             {
-                if(Unit* victim = me->GetVictim())
+                if(Unit* victim = me->getVictim())
                 {
                     if(victim->GetTypeId() == TYPEID_UNIT)
                     {
@@ -3298,7 +3298,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32 &damage)
         {
-            if(attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->IsPet())
+            if(attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
             {
                 if(me->GetHealth() < me->GetMaxHealth() || me->GetHealth() <= damage)
                 {
@@ -3308,7 +3308,7 @@ public:
             }
             else
             {
-                if(Unit* victim = me->GetVictim())
+                if(Unit* victim = me->getVictim())
                 {
                     if(victim->GetTypeId() == TYPEID_UNIT)
                     {
@@ -3346,11 +3346,11 @@ public:
                 switch(eventId)
                 {
                     case EVENT_FLAME_SHOCK:
-                        me->CastSpell(me->GetVictim(), SPELL_FLAME_SHOCK, false);
+                        me->CastSpell(me->getVictim(), SPELL_FLAME_SHOCK, false);
                         combatEvents.ScheduleEvent(EVENT_FLAME_SHOCK, urand(6, 8) * IN_MILLISECONDS);
                         break;
                     case EVENT_LIGHTNING_BOLT:
-                        me->CastSpell(me->GetVictim(), SPELL_LIGHTNING_BOLT, false);
+                        me->CastSpell(me->getVictim(), SPELL_LIGHTNING_BOLT, false);
                         combatEvents.ScheduleEvent(EVENT_LIGHTNING_BOLT, urand(6, 8) * IN_MILLISECONDS);
                         break;
                 }
@@ -3461,7 +3461,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32 &damage)
         {
-            if(attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->IsPet())
+            if(attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
             {
                 if(me->GetHealth() < me->GetMaxHealth() || me->GetHealth() <= damage)
                 {
@@ -3471,7 +3471,7 @@ public:
             }
             else
             {
-                if(Unit* victim = me->GetVictim())
+                if(Unit* victim = me->getVictim())
                 {
                     if(victim->GetTypeId() == TYPEID_UNIT)
                     {
@@ -3492,7 +3492,7 @@ public:
 
             if(events.ExecuteEvent() == EVENT_SHOT)
             {
-                me->CastSpell(me->GetVictim(), SPELL_SHOT, false);
+                me->CastSpell(me->getVictim(), SPELL_SHOT, false);
                 events.ScheduleEvent(EVENT_SHOT, urand(3, 5) * IN_MILLISECONDS);
             }
         }
@@ -3522,7 +3522,7 @@ public:
         {
             if(Creature* raptor = me->FindNearestCreature(NPC_SPINY_RAPTOR, 70.0f))
             {
-                if(raptor->IsInCombat())
+                if(raptor->isInCombat())
                 {
                     raptor->CombatStop(true);
                     raptor->DeleteThreatList();
@@ -3730,7 +3730,7 @@ public:
                 switch(eventId)
                 {
                     case EVENT_DEADLY_EGG_BARRAGE:
-                        if(UpdateVictim() && me->IsInCombat())
+                        if(UpdateVictim() && me->isInCombat())
                         {
                             me->CastSpell((Unit*)NULL, SPELL_DEADLY_EGG_BARRAGE, false);
                             events.ScheduleEvent(EVENT_DEADLY_EGG_BARRAGE, 5 * IN_MILLISECONDS);
@@ -4045,7 +4045,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32 &damage)
         {
-            if(attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->IsPet())
+            if(attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
             {
                 if(me->GetHealth() < me->GetMaxHealth() || me->GetHealth() <= damage)
                 {
@@ -4055,7 +4055,7 @@ public:
             }
             else
             {
-                if(Unit* victim = me->GetVictim())
+                if(Unit* victim = me->getVictim())
                 {
                     if(victim->GetTypeId() == TYPEID_UNIT)
                     {
@@ -4134,20 +4134,17 @@ public:
     {
         npc_naga_hatchling_qiipAI(Creature * c) : ScriptedAI(c) {}
 
-        void OnSpellClick(Unit* clicker, bool& result) override
+        void OnSpellClick(Unit* clicker) override
         {
-            if(result)
+            if(clicker->GetTypeId() == TYPEID_PLAYER)
             {
-                if(clicker->GetTypeId() == TYPEID_PLAYER)
+                uint8 questState = clicker->ToPlayer()->GetQuestStatus(QUEST_IRRESISTIBLE_POOL_PONY);
+                if(questState == QUEST_STATUS_INCOMPLETE)
                 {
-                    uint8 questState = clicker->ToPlayer()->GetQuestStatus(QUEST_IRRESISTIBLE_POOL_PONY);
-                    if(questState == QUEST_STATUS_INCOMPLETE)
-                    {
-                        for(int8 i = 0; i < irand(1, 4); ++i)
-                            clicker->CastSpell(clicker, NagaSummonSpellsQIPP[0][i], false);
+                    for(int8 i = 0; i < irand(1, 4); ++i)
+                        clicker->CastSpell(clicker, NagaSummonSpellsQIPP[0][i], false);
 
-                        me->DespawnOrUnsummon();
-                    }
+                    me->DespawnOrUnsummon();
                 }
             }
         }
@@ -4206,7 +4203,7 @@ public:
     bool operator()(WorldObject* object)
     {
         if(Creature* cre = object->ToCreature())
-            if(cre->IsSummon() && (cre->GetEntry() == NPC_NAGA_1 || cre->GetEntry() == NPC_NAGA_2 || cre->GetEntry() == NPC_NAGA_3 || cre->GetEntry() == NPC_NAGA_4) && cre->ToTempSummon()->GetOwner() == _caster)
+            if(cre->isSummon() && (cre->GetEntry() == NPC_NAGA_1 || cre->GetEntry() == NPC_NAGA_2 || cre->GetEntry() == NPC_NAGA_3 || cre->GetEntry() == NPC_NAGA_4) && cre->ToTempSummon()->GetOwner() == _caster)
                 return false;
 
         return true;
@@ -4233,7 +4230,7 @@ public:
                 target->DespawnOrUnsummon();
         }
 
-        void FilterTargets(WorldObjectList& targets)
+        void FilterTargets(std::list<WorldObject*> &targets)
         {
             if(Unit* caster = GetCaster())
                 targets.remove_if(NagasTargetSelectorQIPP(caster));
@@ -4302,7 +4299,7 @@ public:
 
         void InitializeAI()
         {
-            ASSERT(me->IsSummon());
+            ASSERT(me->isSummon());
         }
 
         void IsSummonedBy(Unit* summoner) override
@@ -4415,7 +4412,7 @@ public:
 
         void InitializeAI()
         {
-            ASSERT(me->IsSummon());
+            ASSERT(me->isSummon());
         }
 
         void IsSummonedBy(Unit* summoner) override
@@ -4789,7 +4786,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature) override
     {
-        if(creature->IsQuestGiver())
+        if(creature->isQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
         if((player->GetQuestStatus(QUEST_THE_PRIDE_OF_KEZAN) == QUEST_STATUS_INCOMPLETE))
@@ -4843,7 +4840,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32 &damage)
         {
-            if(attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->IsPet())
+            if(attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
             {
                 if(me->GetHealth() < me->GetMaxHealth() || me->GetHealth() <= damage)
                 {
@@ -4853,7 +4850,7 @@ public:
             }
             else
             {
-                if(Unit* victim = me->GetVictim())
+                if(Unit* victim = me->getVictim())
                 {
                     if(victim->GetTypeId() == TYPEID_UNIT)
                     {
@@ -4883,7 +4880,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32 &damage)
         {
-            if(attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->IsPet())
+            if(attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
             {
                 if(me->GetHealth() < me->GetMaxHealth() || me->GetHealth() <= damage)
                 {
@@ -4893,7 +4890,7 @@ public:
             }
             else
             {
-                if(Unit* victim = me->GetVictim())
+                if(Unit* victim = me->getVictim())
                 {
                     if(victim->GetTypeId() == TYPEID_UNIT)
                     {
@@ -4943,7 +4940,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32 &damage)
         {
-            if(attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->IsPet())
+            if(attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
             {
                 if(me->GetHealth() < me->GetMaxHealth() || me->GetHealth() <= damage)
                 {
@@ -4953,7 +4950,7 @@ public:
             }
             else
             {
-                if(Unit* victim = me->GetVictim())
+                if(Unit* victim = me->getVictim())
                 {
                     if(victim->GetTypeId() == TYPEID_UNIT)
                     {
@@ -5137,7 +5134,7 @@ public:
     {
         PrepareSpellScript(spell_super_booster_rocket_boots_filter_qzvsbrb_SpellScript);
 
-        void FilterTargets(WorldObjectList& targets)
+        void FilterTargets(std::list<WorldObject*> &targets)
         {
             if(Unit* caster = GetCaster())
                 targets.remove_if(GoblinZombieTargetSelector());
@@ -5572,7 +5569,7 @@ public:
     {
         PrepareSpellScript(spell_bootzooka_visual_filter_qvolcanoth_SpellScript);
 
-        void FilterTargets(WorldObjectList& targets)
+        void FilterTargets(std::list<WorldObject*> &targets)
         {
             if(Unit* caster = GetCaster())
                 targets.remove_if(CosmeticBootzookaTargetSelector());
@@ -5864,7 +5861,7 @@ public:
 
         void InitializeAI()
         {
-            ASSERT(me->IsSummon());
+            ASSERT(me->isSummon());
         }
 
         void IsSummonedBy(Unit* summoner) override
@@ -5943,7 +5940,7 @@ public:
     bool operator()(WorldObject* object)
     {
         if(Creature* cre = object->ToCreature())
-            if(cre->IsSummon() && cre->GetEntry() == NPC_FLYING_BOMBER && cre->ToTempSummon()->GetOwner() == _caster)
+            if(cre->isSummon() && cre->GetEntry() == NPC_FLYING_BOMBER && cre->ToTempSummon()->GetOwner() == _caster)
                 return false;
 
         return true;
@@ -5970,7 +5967,7 @@ public:
                 target->ToCreature()->DespawnOrUnsummon();
         }
 
-        void FilterTargets(WorldObjectList& targets)
+        void FilterTargets(std::list<WorldObject*> &targets)
         {
             if(Unit* caster = GetCaster())
                 targets.remove_if(FlyingBomberSelectorQOF(caster));
@@ -6188,7 +6185,7 @@ public:
 
         void InitializeAI() override
         {
-            ASSERT(me->IsSummon());
+            ASSERT(me->isSummon());
             countdown = false;
         }
 
@@ -6345,7 +6342,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32 &damage)
         {
-            if(attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->IsPet())
+            if(attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
             {
                 if(me->GetHealth() < me->GetMaxHealth() || me->GetHealth() <= damage)
                 {
@@ -6355,7 +6352,7 @@ public:
             }
             else
             {
-                if(Unit* victim = me->GetVictim())
+                if(Unit* victim = me->getVictim())
                 {
                     if(victim->GetTypeId() == TYPEID_UNIT)
                     {
@@ -6541,7 +6538,7 @@ public:
 
 		void DamageTaken(Unit* attacker, uint32 &damage)
 		{
-			if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->IsPet())
+			if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
 			{
 				if (me->GetHealth() < me->GetMaxHealth() || me->GetHealth() <= damage)
 				{
@@ -6551,7 +6548,7 @@ public:
 			}
 			else
 			{
-				if (Unit* victim = me->GetVictim())
+				if (Unit* victim = me->getVictim())
 				{
 					if (victim->GetTypeId() == TYPEID_UNIT)
 					{
@@ -6614,7 +6611,7 @@ public:
 
         void InitializeAI()
         {
-            ASSERT(me->IsSummon());
+            ASSERT(me->isSummon());
         }
 
         void IsSummonedBy(Unit* summoner) override
@@ -6721,7 +6718,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32 &damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->IsPet())
+            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
             {
                 if (me->GetHealth() < me->GetMaxHealth() || me->GetHealth() <= damage)
                 {
@@ -6731,7 +6728,7 @@ public:
             }
             else
             {
-                if (Unit* victim = me->GetVictim())
+                if (Unit* victim = me->getVictim())
                 {
                     if (victim->GetTypeId() == TYPEID_UNIT)
                     {
@@ -6780,7 +6777,7 @@ public:
 
         void InitializeAI()
         {
-            ASSERT(me->IsSummon());
+            ASSERT(me->isSummon());
         }
 
         void IsSummonedBy(Unit* summoner) override
@@ -6958,19 +6955,19 @@ public:
               if(who->GetTypeId() == TYPEID_PLAYER)
               {
                   if(Creature* assistant = who->FindNearestCreature(NPC_ASSISTANT, 20.0f))
-                     if(assistant->IsSummon() && assistant->ToTempSummon()->GetSummonerGUID() == who->GetGUID())
+                     if(assistant->isSummon() && assistant->ToTempSummon()->GetSummonerGUID() == who->GetGUID())
                          assistant->EnterVehicle(me, 1);
 
                    if(Creature* ace = who->FindNearestCreature(NPC_ACE, 20.0f))
-                      if(ace->IsSummon() && ace->ToTempSummon()->GetSummonerGUID() == who->GetGUID())
+                      if(ace->isSummon() && ace->ToTempSummon()->GetSummonerGUID() == who->GetGUID())
                           ace->EnterVehicle(me, 2);
 
                    if(Creature* izzy = who->FindNearestCreature(NPC_IZZY, 20.0f))
-                       if(izzy->IsSummon() && izzy->ToTempSummon()->GetSummonerGUID() == who->GetGUID())
+                       if(izzy->isSummon() && izzy->ToTempSummon()->GetSummonerGUID() == who->GetGUID())
                            izzy->EnterVehicle(me, 3);
 
                    if(Creature* gobber = who->FindNearestCreature(NPC_GOBBER, 20.0f))
-                      if(gobber->IsSummon() && gobber->ToTempSummon()->GetSummonerGUID() == who->GetGUID())
+                      if(gobber->isSummon() && gobber->ToTempSummon()->GetSummonerGUID() == who->GetGUID())
                           gobber->EnterVehicle(me, 3);
               }
         }
@@ -7085,19 +7082,19 @@ public:
                 target->RemoveAura(SPELL_ASSISTANT_CONTROLLER);
 
                 if (Creature* assistant = target->FindNearestCreature(NPC_ASSISTANT, 20.0f))
-                   if(assistant->IsSummon() && assistant->ToTempSummon()->GetSummonerGUID() == target->GetGUID())
+                   if(assistant->isSummon() && assistant->ToTempSummon()->GetSummonerGUID() == target->GetGUID())
                           assistant->DespawnOrUnsummon();
 
                 if(Creature* ace = target->FindNearestCreature(NPC_ACE, 20.0f))
-                   if(ace->IsSummon() && ace->ToTempSummon()->GetSummonerGUID() == target->GetGUID())
+                   if(ace->isSummon() && ace->ToTempSummon()->GetSummonerGUID() == target->GetGUID())
                        ace->DespawnOrUnsummon();
 
                 if(Creature* izzy = target->FindNearestCreature(NPC_IZZY, 20.0f))
-                   if(izzy->IsSummon() && izzy->ToTempSummon()->GetSummonerGUID() == target->GetGUID())
+                   if(izzy->isSummon() && izzy->ToTempSummon()->GetSummonerGUID() == target->GetGUID())
                        izzy->DespawnOrUnsummon();
 
                  if(Creature* gobber = target->FindNearestCreature(NPC_GOBBER, 20.0f))
-                    if(gobber->IsSummon() && gobber->ToTempSummon()->GetSummonerGUID() == target->GetGUID())
+                    if(gobber->isSummon() && gobber->ToTempSummon()->GetSummonerGUID() == target->GetGUID())
                         gobber->DespawnOrUnsummon();
             }
         }
@@ -7466,19 +7463,16 @@ public:
             me->CastSpell(me, SPELL_CAGE, false);
         }
 
-        void OnSpellClick(Unit* clicker, bool& result) override
+        void OnSpellClick(Unit* clicker) override
         {
-            if (result)
+            if (Player* player = clicker->ToPlayer())
             {
-                if (Player* player = clicker->ToPlayer())
+                if (player->GetQuestStatus(QUEST_ESCAPE_VELOCITY) == QUEST_STATUS_INCOMPLETE)
                 {
-                    if (player->GetQuestStatus(QUEST_ESCAPE_VELOCITY) == QUEST_STATUS_INCOMPLETE)
-                    {
-                        player->KilledMonsterCredit(me->GetEntry(), me->GetGUID());
-                        me->CastSpell(me, SPELL_ROCKETS, false);
-                        Talk(TALK_ROCKETS, player->GetGUID(), true);
-                        events.ScheduleEvent(EVENT_FLY, 2 * IN_MILLISECONDS);
-                    }
+                    player->KilledMonsterCredit(me->GetEntry(), me->GetGUID());
+                    me->CastSpell(me, SPELL_ROCKETS, false);
+                    Talk(TALK_ROCKETS, player->GetGUID(), true);
+                    events.ScheduleEvent(EVENT_FLY, 2 * IN_MILLISECONDS);
                 }
             }
         }
@@ -7573,7 +7567,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32 &damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->IsPet())
+            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
             {
                 if (me->GetHealth() < me->GetMaxHealth() || me->GetHealth() <= damage)
                 {
@@ -7583,7 +7577,7 @@ public:
             }
             else
             {
-                if (Unit* victim = me->GetVictim())
+                if (Unit* victim = me->getVictim())
                 {
                     if (victim->GetTypeId() == TYPEID_UNIT)
                     {
@@ -7706,7 +7700,7 @@ public:
             }
             else
             {
-                if (Unit* victim = me->GetVictim())
+                if (Unit* victim = me->getVictim())
                 {
                     if (victim->GetTypeId() == TYPEID_UNIT)
                     {
@@ -7864,7 +7858,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32 &damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->IsPet())
+            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
             {
                 if (me->GetHealth() < me->GetMaxHealth() || me->GetHealth() <= damage)
                 {
@@ -7874,7 +7868,7 @@ public:
             }
             else
             {
-                if (Unit* victim = me->GetVictim())
+                if (Unit* victim = me->getVictim())
                 {
                     if (victim->GetTypeId() == TYPEID_UNIT)
                     {
@@ -8166,7 +8160,7 @@ public:
 
             QuestStatusMap::const_iterator itr = owner->getQuestStatusMap().find(QUEST_MORALE_BOOST);
 
-            if (owner->IsAlive() && !owner->GetVehicle())
+            if (owner->isAlive() && !owner->GetVehicle())
             {
                 switch (aurEff->GetSpellInfo()->Id)
                 {
@@ -8237,7 +8231,7 @@ public:
             if (!owner)
                 return;
 
-            if (owner->IsAlive() && !owner->GetVehicle())
+            if (owner->isAlive() && !owner->GetVehicle())
             {
                 if (owner->GetQuestStatus(QUEST_KAJACOLA_GIVES_YOU_IDEAS) == QUEST_STATUS_REWARDED)
                 if (!owner->FindNearestCreature(NPC_ASSISTANT, 20.0f))

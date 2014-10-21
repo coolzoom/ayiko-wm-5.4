@@ -124,6 +124,7 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 ('29173','85','0','Light washes over the chapel ? the Light of Dawn is uncovered.','16','0','100','0','0','0','');
 
 -- [SQL] Death Knight - Quests - A Special Surprise races requirements corrected (Fixes #119)
+UPDATE `quest_template` SET `RequiredRaces` = 1 WHERE `Id` = 12742;
 UPDATE `quest_template` SET `RequiredRaces` = 32 WHERE `Id` = 12739;
 UPDATE `quest_template` SET `RequiredRaces` = 512 WHERE `Id` = 12747;
 UPDATE `quest_template` SET `RequiredRaces` = 4 WHERE `Id` = 12744;

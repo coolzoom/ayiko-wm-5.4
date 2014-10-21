@@ -170,7 +170,7 @@ public:
                     }
                     break;
                 case EVENT_TELEPORT:
-                    if (me->IsSummon())
+                    if (me->isSummon())
                     {
                         if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                         {
@@ -252,7 +252,7 @@ public:
                     }
                     break;
                 case EVENT_DONE:
-                    if (me->IsSummon())
+                    if (me->isSummon())
                     {
                         if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                         {
@@ -295,7 +295,7 @@ public:
 
         void InitializeAI()
         {
-            ASSERT(me->IsSummon());
+            ASSERT(me->isSummon());
         }
 
         void DoAction(int32 action)
@@ -351,7 +351,7 @@ public:
 
         void InitializeAI()
         {
-            ASSERT(me->IsSummon());
+            ASSERT(me->isSummon());
         }
 
         void DoAction(int32 action)
@@ -571,7 +571,7 @@ class npc_kor_the_immovable : public CreatureScript
                 std::list<Creature*> lMinions;
                 player->GetAllMinionsByEntry(lMinions, NPC_PEBBLE);
 
-                if (lMinions.size() == 1 && (*lMinions.begin())->IsAlive())
+                if (lMinions.size() == 1 && (*lMinions.begin())->isAlive())
                 {
                     return true;
                 }
@@ -660,7 +660,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* creature)
     {
-        if (creature->IsInCombat() || pPlayer->GetQuestStatus(QUEST_TAKE_HIM_TO_THE_EARTHCALLER) != QUEST_STATUS_INCOMPLETE)
+        if (creature->isInCombat() || pPlayer->GetQuestStatus(QUEST_TAKE_HIM_TO_THE_EARTHCALLER) != QUEST_STATUS_INCOMPLETE)
         return false;
 
         char const* _message = "Follow me to the Earthcaller!";
@@ -707,7 +707,7 @@ public:
         {
             FollowerAI::MoveInLineOfSight(who);
 
-            if (!me->GetVictim() && !HasFollowState(STATE_FOLLOW_COMPLETE) && who->GetEntry() == NPC_YEVAA)
+            if (!me->getVictim() && !HasFollowState(STATE_FOLLOW_COMPLETE) && who->GetEntry() == NPC_YEVAA)
             {
                 if (me->IsWithinDistInMap(who, INTERACTION_DISTANCE))
                 {
@@ -871,7 +871,7 @@ class npc_opalescent_guardian : public CreatureScript
             {
                 FollowerAI::MoveInLineOfSight(who);
 
-                if (!me->GetVictim() && !HasFollowState(STATE_FOLLOW_COMPLETE) && who->GetEntry() == NPC_OPAL_STONETHROWER)
+                if (!me->getVictim() && !HasFollowState(STATE_FOLLOW_COMPLETE) && who->GetEntry() == NPC_OPAL_STONETHROWER)
                 {
                     if (me->IsWithinDistInMap(who, 15.0f))
                     {
@@ -934,7 +934,7 @@ class npc_terrath_the_steady: public CreatureScript
 
         bool OnGossipHello(Player* player, Creature* creature)
         {
-            if (creature->IsQuestGiver())
+            if (creature->isQuestGiver())
                 player->PrepareQuestMenu(creature->GetGUID());
 
             if (player->GetQuestStatus(QUEST_DONT_STOP_MOVING)==QUEST_STATUS_INCOMPLETE)

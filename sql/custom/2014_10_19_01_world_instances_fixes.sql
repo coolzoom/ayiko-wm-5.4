@@ -169,3 +169,10 @@ UPDATE `creature_template` SET `mechanic_immune_mask`='617299935', `ScriptName`=
 UPDATE `creature_template` SET `flags_extra`='64' WHERE `entry` IN('30625', '31480');
 UPDATE `creature_template` SET `mechanic_immune_mask`='617299935' WHERE (`entry`='31464');
 UPDATE `creature_template` SET `flags_extra`='0' WHERE `entry` IN('31686', '31687', '30106');
+
+-- -----------------  --
+--  The Violet Hold   --
+-- -----------------  --
+-- Enable Instance
+DELETE FROM `disables` WHERE (`sourceType`='2') AND (`entry`='608');
+UPDATE `creature_template` SET `mechanic_immune_mask`='617299803' WHERE `entry` IN('31134', '31506', '29314', '31512', '29312', '31509', '29266', '31511', '29313', '31508', '29316', '31510', '29315', '31507');

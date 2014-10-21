@@ -361,6 +361,15 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 ('17977', '2', '1', 'Maybe this is not-- No, we fight! Come to my aid.', '14', '0', '100', '0', '0', '11234', 'warp SAY_SUMMON_2'),
 ('17977', '3', '0', 'So... confused. Do not... belong here!', '14', '0', '100', '0', '0', '11235', 'warp SAY_DEATH');
 
+DELETE FROM `spell_script_names` WHERE `spell_id` = '34803';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES ('34803', 'spell_commander_sarannis_summon_reinforcements');
+
+-- Warp Splinter's Sapling movement speed
+UPDATE `creature_template` SET `speed_walk`='0.8', `speed_run`='0.8' WHERE (`entry`='19949');
+
+-- Summoned Bloodwarder Mender
+UPDATE `creature_template` SET `faction_A`='16', `faction_H`='16' WHERE `entry` IN('21568', '20083');
+
 -- ----------------  --
 --  Razorfen Downs   --
 -- ----------------  --

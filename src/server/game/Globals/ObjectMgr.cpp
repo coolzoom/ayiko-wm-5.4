@@ -7344,7 +7344,7 @@ void ObjectMgr::LoadReservedPlayersNames()
 
     _reservedNamesStore.clear();                                // need for reload case
 
-    QueryResult result = CharacterDatabase.Query("SELECT name FROM reserved_name");
+    QueryResult result = WorldDatabase.Query("SELECT name FROM reserved_name");
 
     if (!result)
     {

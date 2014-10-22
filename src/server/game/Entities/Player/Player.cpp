@@ -2510,6 +2510,9 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                     if (getClass() == CLASS_DEATH_KNIGHT && !HasSpell(50977))
                         return false;
                     break;
+                case 648:
+                    if (getRace() == RACE_GOBLIN && GetQuestStatus(25266) != QUEST_STATUS_REWARDED)
+                        return false;
                 case 654:
                     if (getRace() == RACE_WORGEN && GetQuestStatus(14434) != QUEST_STATUS_REWARDED)
                         return false;

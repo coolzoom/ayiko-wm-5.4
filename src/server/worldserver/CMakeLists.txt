@@ -13,6 +13,10 @@ file(GLOB_RECURSE sources_RemoteAccess RemoteAccess/*.cpp RemoteAccess/*.h)
 file(GLOB_RECURSE sources_WorldThread WorldThread/*.cpp WorldThread/*.h)
 file(GLOB sources_localdir *.cpp *.h)
 
+if (USE_JEMALLOC)
+  add_definitions(-DHAVE_JEMALLOC)
+endif()
+
 if (USE_COREPCH)
   set(worldserver_PCH_HDR PrecompiledHeaders/worldPCH.h)
   set(worldserver_PCH_SRC PrecompiledHeaders/worldPCH.cpp)

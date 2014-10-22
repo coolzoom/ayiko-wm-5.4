@@ -31,6 +31,11 @@
 #include "Log.h"
 #include "Master.h"
 
+#ifdef HAVE_JEMALLOC
+# define JEMALLOC_NO_DEMANGLE
+# include <jemalloc/jemalloc.h>
+#endif
+
 #ifndef _TRINITY_CORE_CONFIG
 # define _TRINITY_CORE_CONFIG  "worldserver.conf"
 #endif
@@ -136,6 +141,16 @@ extern int main(int argc, char** argv)
 
     TC_LOG_INFO("server.worldserver", "Using SSL version: %s (library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
     TC_LOG_INFO("server.worldserver", "Using ACE version: %s", ACE_VERSION);
+
+#ifdef HAVE_JEMALLOC
+    {
+        char const *jmVersion;
+        size_t jmVersionSize = sizeof(jmVersion);
+        je_mallctl("version", &jmVersion, &jmVersionSize, NULL, 0);
+
+        TC_LOG_INFO("server.worldserver", "Using Jemalloc: %s", jmVersion);
+    }
+#endif
 
     ///- and run the 'Master'
     /// @todo Why do we need this 'Master'? Can't all of this be in the Main as for Realmd?

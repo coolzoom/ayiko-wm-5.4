@@ -5,6 +5,7 @@ SET @NPC_FROSTHOUND := 29677;
 SET @NPC_THULIN := 29695;
 SET @NPC_PURSUER := 29696;
 SET @NPC_TRACKER := 29652;
+SET @NPC_SNOW_TARGET := 29599;
 SET @SPELL_FROSTHOUND_PERIODIC := 54993;
 SET @SPELL_SUMMON_FROSTHOUND := 54964;
 SET @SPELL_RIDE_VEHICLE := 63151;
@@ -21,6 +22,7 @@ SET @GOSSIP_BRANN := 9853;
 SET @QUEST_PERPETRATOR_A := 12855;
 SET @QUEST_CATCHING_UP := 12920;
 SET @QUEST_KEYSTONE := 13285;
+SET @QUEST_PIECES_OF_THE_PUZZLE := 12926;
 -- Horde
 SET @NPC_FROSTBITE := 29857;
 SET @NPC_FROSTBITE_VEHICLE := 29903;
@@ -29,7 +31,7 @@ SET @SPELL_RIDE_FROSTBITE := 55460;
 SET @SPELL_FROSTBITE_KC := 55477;
 SET @QUEST_PERPETRATOR_H := 12910;
 UPDATE `creature_template` SET `minlevel` = 79, `maxlevel` = 79, `exp` = 2, `faction_A` = 1981, `faction_H` = 1981, `mindmg` = 376, `maxdmg` = 563, `attackpower` = 141, `unit_class` = 2, `VehicleId` = 0, `flags_extra` = 2  WHERE `entry` = @NPC_FROSTBITE;
-UPDATE `creature_template` SET `faction_A` = 190, `faction_H` = 190, `minlevel` = 79, `maxlevel` = 79, `exp` = 2, `faction_A` = 1981, `faction_H` = 1981, `mindmg` = 376, `maxdmg` = 563, `attackpower` = 141, `unit_class` = 2, `spell1` = @SPELL_NET, `spell2` = @SPELL_ICE_SLICK, `VehicleId` = 202, `flags_extra` = 2, `AIname` = 'SmartAI' WHERE `entry` = @NPC_FROSTBITE_VEHICLE;
+UPDATE `creature_template` SET `faction_A` = 190, `faction_H` = 190, `minlevel` = 79, `maxlevel` = 79, `exp` = 2, `faction_A` = 1981, `faction_H` = 1981, `mindmg` = 376, `maxdmg` = 563, `attackpower` = 141, `unit_class` = 2, `spell1` = @SPELL_NET, `spell2` = @SPELL_ICE_SLICK, `VehicleId` = 202, `flags_extra` = 2, `AIName` = "SmartAI", `ScriptName` = "" WHERE `entry` = @NPC_FROSTBITE_VEHICLE;
 UPDATE `creature` SET `spawntimesecs` = 10 WHERE  `id` = @NPC_FROSTBITE;
 DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = @NPC_FROSTBITE;
 INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`, `user_type`) VALUES 
@@ -41,11 +43,14 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 DELETE FROM `spell_linked_spell` WHERE `spell_trigger` = @SPELL_RIDE_FROSTBITE;
 INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES
 (@SPELL_RIDE_FROSTBITE, @SPELL_RIDE_VEHICLE, 2, 'Frostbite Vehicle');
-DELETE FROM `creature_template_addon` WHERE `entry` IN (@NPC_THULIN, @NPC_FROSTHOUND, @NPC_FROSTBITE_VEHICLE);
-INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES
-(@NPC_THULIN, 0, 0, 1, 257, 0, ''),
-(@NPC_FROSTHOUND, 0, 0, 0, 0, 0, 54993),
-(@NPC_FROSTBITE_VEHICLE, 0, 0, 0, 0, 0, 54993);
+DELETE FROM `creature_template_bytes` WHERE `entry` IN (@NPC_THULIN, @NPC_FROSTHOUND, @NPC_FROSTBITE_VEHICLE);
+INSERT INTO `creature_template_bytes` (`entry`, `index`, `bytes`) VALUES
+(@NPC_THULIN, 0, 1),
+(@NPC_THULIN, 1, 257);
+DELETE FROM `creature_template_aura` WHERE `entry` IN (@NPC_THULIN, @NPC_FROSTHOUND, @NPC_FROSTBITE_VEHICLE);
+INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES
+(@NPC_FROSTHOUND, @SPELL_FROSTHOUND_PERIODIC),
+(@NPC_FROSTBITE_VEHICLE, @SPELL_FROSTHOUND_PERIODIC);
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@NPC_FROSTBITE, @NPC_FROSTBITE_VEHICLE);
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
 (@NPC_FROSTBITE_VEHICLE, 0, 0, 1, 27, 0, 100, 0, 300000, 300000, 0, 0, 8, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Frostbite Vehicle - On Passenger Boarded - Set React State Passive"),
@@ -85,35 +90,19 @@ INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `positi
 (@NPC_FROSTBITE_VEHICLE, 18, 7325.03, -1548.56, 937.637, 'Frostbite'),
 (@NPC_FROSTBITE_VEHICLE, 19, 7309.73, -1569.84, 941.399, 'Frostbite');
 -- Alliance
-UPDATE `creature_template` SET `faction_A` = 190, `faction_H` = 190, `minlevel` = 80, `maxlevel` = 80, `mindmg` = 422, `maxdmg` = 586, `attackpower` = 642, `spell1` = @SPELL_NET, `spell2` = @SPELL_ICE_SLICK, `flags_extra` = 2, `AIname` = 'SmartAI' WHERE `entry` = @NPC_FROSTHOUND;
+UPDATE `creature_template` SET `faction_A` = 190, `faction_H` = 190, `minlevel` = 80, `maxlevel` = 80, `mindmg` = 422, `maxdmg` = 586, `attackpower` = 642, `spell1` = @SPELL_NET, `spell2` = @SPELL_ICE_SLICK, `flags_extra` = 2, `AIName` = "SmartAI", `ScriptName` = "" WHERE `entry` = @NPC_FROSTHOUND;
 UPDATE `creature_template` SET `minlevel` = 79, `speed_run` = 0.99206, `maxdmg` = 564, `attackpower` = 582 WHERE `entry` = @NPC_THULIN;
-UPDATE `creature_template` SET `lootid` = 0, `mingold` = 0, `maxgold` = 0, `flags_extra` = 64, `AIname` = 'SmartAI' WHERE `entry` = @NPC_PURSUER;
+UPDATE `creature_template` SET `lootid` = 0, `mingold` = 0, `maxgold` = 0, `flags_extra` = 64, `AIName` = "SmartAI", `ScriptName` = "" WHERE `entry` = @NPC_PURSUER;
 DELETE FROM `smart_scripts` WHERE `entryorguid`=@NPC_PURSUER AND `source_type`=0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
 (@NPC_PURSUER, 0, 0, 0, 11, 0, 100, 0, 0, 0, 0, 0, 46, 10, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Stormforged Pursuer - On Spawn - Move Forward"),
 (@NPC_PURSUER, 0, 1, 0, 9, 0, 100, 0, 5, 25, 3500, 6100, 11, 55007, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Stormforged Pursuer - IC - Cast Throw Hammer");
 DELETE FROM `creature_loot_template` WHERE `entry` = @NPC_PURSUER;
-DELETE FROM `creature` WHERE `id` IN (@NPC_PURSUER, @NPC_THULIN);
-UPDATE `creature_loot_template` SET `ChanceOrQuestChance` = -33 WHERE `item` = 42105;
-UPDATE `creature_loot_template` SET `ChanceOrQuestChance` = 100 WHERE `item` = @ITEM_BRANNS_COMMUNICATOR;
-DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 1 AND `SourceEntry` = @ITEM_BRANNS_COMMUNICATOR;
-INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
-(1, @NPC_THULIN, @ITEM_BRANNS_COMMUNICATOR, 0, 9, @QUEST_PERPETRATOR_A, 0, 0, 0, '',"Tracker Thulin drops Brann's Communicator when player has quest"),
-(1, @NPC_THULIN, @ITEM_BRANNS_COMMUNICATOR, 0, 9, @QUEST_PERPETRATOR_H, 0, 0, 0, '',"Tracker Thulin drops Brann's Communicator when player has quest");
+DELETE FROM `creature` WHERE `id` IN (@NPC_PURSUER, @NPC_THULIN, @NPC_BRANN);
+DELETE FROM `conditions` WHERE `SourceEntry` IN (@SPELL_ICE_SLICK, @SPELL_NET, @SPELL_NET2) AND `SourceTypeOrReferenceId` = 17;
 DELETE FROM `spell_linked_spell` WHERE `spell_trigger` = @SPELL_SUMMON_FROSTHOUND;
 INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES
 (@SPELL_SUMMON_FROSTHOUND, @SPELL_RIDE_VEHICLE, 2, 'Summon and Mount Frosthound');
-DELETE FROM `spell_scripts` WHERE `id` = @SPELL_CONTACT_BRANN1;
-INSERT INTO `spell_scripts` (`id`, `effIndex`, `delay`, `command`, `datalong`, `datalong2`, `dataint`, `x`, `y`, `z`, `o`) VALUES
-(@SPELL_CONTACT_BRANN1, 0, 2, 7, @QUEST_CATCHING_UP, 50, 0, 0, 0, 0, 0);
-DELETE FROM `spell_linked_spell` WHERE `spell_trigger` = @SPELL_CONTACT_BRANN1;
-INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES
-(@SPELL_CONTACT_BRANN1, @SPELL_CONTACT_BRANN2, 1, 'Contact Brann');
-DELETE FROM `conditions` WHERE `SourceTypeOrReferenceID`=15 AND `SourceGroup`=@GOSSIP_BRANN;
-INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
-(15, @GOSSIP_BRANN, 1, 0, 9, @QUEST_CATCHING_UP, 0, 0, 0, '', "Show gossip option if player is on quest"),
-(15, @GOSSIP_BRANN, 2, 0, 9, @QUEST_KEYSTONE, 0, 0, 0, '', "Show gossip option if player is on quest");
-DELETE FROM `conditions` WHERE `SourceEntry` IN (@SPELL_ICE_SLICK, @SPELL_NET, @SPELL_NET2) AND `SourceTypeOrReferenceId` = 17;
 DELETE FROM `smart_scripts` WHERE `entryorguid`=@NPC_FROSTHOUND AND `source_type`=0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
 (@NPC_FROSTHOUND, 0, 0, 1, 27, 0, 100, 0, 300000, 300000, 0, 0, 8, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Frosthound - On Passenger Boarded - Set React State Passive"),
@@ -198,22 +187,57 @@ INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `positi
 (@NPC_FROSTHOUND, 60, 7308.43, -1584.27, 943.497,'Frosthound');
 
 -- Catching up with Brann
+UPDATE `creature_template` SET `gossip_menu_id` = @GOSSIP_BRANN, `minlevel` = 80, `maxlevel` = 80, `npcflag` = `npcflag`|1, `unit_flags` = `unit_flags`|32776, `AIName` = "SmartAI", `ScriptName` = "" WHERE `entry` = @NPC_BRANN;
+UPDATE `creature_template` SET `AIName` = "SmartAI", `ScriptName` = "" WHERE `entry` = @NPC_SNOW_TARGET;
+UPDATE `creature_model_info` SET `bounding_radius` = 0.347, `combat_reach` = 1.5, `gender` = 0 WHERE `modelid` = 26356;
+DELETE FROM `creature_template_addon` WHERE `entry` IN (@NPC_BRANN, @NPC_SNOW_TARGET);
+INSERT INTO `creature_template_addon` (`entry`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES
+(@NPC_BRANN, 0, 0, 2, 0, ''),
+(@NPC_SNOW_TARGET, 0, 0, 1, 0, '54717');
+DELETE FROM `creature_equip_template` WHERE `entry` = @NPC_BRANN;
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`,`itemEntry2`,`itemEntry3`) VALUES
+(@NPC_BRANN, 0, 0, 25972);
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = @NPC_BRANN;
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`, `user_type`) VALUES
+(@NPC_BRANN, 46598, 1, 1);
+DELETE FROM `vehicle_template_accessory` WHERE `entry` = @NPC_BRANN;
+INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `seat_id`, `minion`, `description`, `summontype`, `summontimer`) VALUES
+(@NPC_BRANN, @NPC_SNOW_TARGET, 0, 1, 'Brann Snow Target', 7, 0);
+DELETE FROM `gossip_menu` WHERE `entry` = @GOSSIP_BRANN AND `text_id` = 13641;
+DELETE FROM `gossip_menu` WHERE `entry` = 10145 AND `text_id` = 14089;
+INSERT INTO `gossip_menu` (`entry`, `text_id`) VALUES
+(@GOSSIP_BRANN, 13641),
+(10145, 14089);
 DELETE FROM `gossip_menu_option` WHERE `menu_id` = @GOSSIP_BRANN;
 INSERT INTO `gossip_menu_option` (`menu_id`, `id`, `option_icon`, `option_text`, `option_id`, `npc_option_npcflag`, `action_menu_id`, `action_poi_id`, `box_coded`, `box_money`) VALUES
 (@GOSSIP_BRANN, 0, 0, "Do you understand me? We should be able to understand each other now.", 1, 1, 0, 0, 0, 0),
 (@GOSSIP_BRANN, 1, 0, "What kind of help do you require?", 1, 1, 10145, 0, 0, 0);
-
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceID` = 15 AND `SourceGroup` = @GOSSIP_BRANN;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(15, @GOSSIP_BRANN, 0, 0, 9, @QUEST_CATCHING_UP, 0, 0, 0, '', "Show gossip option if player is on quest"),
+(15, @GOSSIP_BRANN, 1, 0, 9, @QUEST_PIECES_OF_THE_PUZZLE, 0, 0, 0, '', "Show gossip option if player is on quest");
+UPDATE `creature_loot_template` SET `ChanceOrQuestChance` = -33 WHERE `item` = 42105;
+UPDATE `creature_loot_template` SET `ChanceOrQuestChance` = 100 WHERE `item` = @ITEM_BRANNS_COMMUNICATOR;
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 1 AND `SourceEntry` = @ITEM_BRANNS_COMMUNICATOR;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(1, @NPC_THULIN, @ITEM_BRANNS_COMMUNICATOR, 0, 9, @QUEST_PERPETRATOR_A, 0, 0, 0, '',"Tracker Thulin drops Brann's Communicator when player has quest"),
+(1, @NPC_THULIN, @ITEM_BRANNS_COMMUNICATOR, 0, 9, @QUEST_PERPETRATOR_H, 0, 0, 0, '',"Tracker Thulin drops Brann's Communicator when player has quest");
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 13 AND `SourceGroup` = 1 AND `SourceEntry` = @SPELL_BRANN_SIGNAL;
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 (13, 1, @SPELL_BRANN_SIGNAL, 0, 0, 31, 0, 3, @NPC_BRANN, 0, 0, 0, "", "Spell Brann Signal to Self targets Brann");
-
-UPDATE `creature_template` SET `AIName` = "SmartAI" WHERE `entry` = @NPC_BRANN;
-DELETE FROM `smart_scripts` WHERE `entryorguid` = @NPC_BRANN AND `source_type` = 0;
+DELETE FROM `spell_scripts` WHERE `id` = @SPELL_CONTACT_BRANN1;
+INSERT INTO `spell_scripts` (`id`, `effIndex`, `delay`, `command`, `datalong`, `datalong2`, `dataint`, `x`, `y`, `z`, `o`) VALUES
+(@SPELL_CONTACT_BRANN1, 0, 2, 7, @QUEST_CATCHING_UP, 50, 0, 0, 0, 0, 0);
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger` = @SPELL_CONTACT_BRANN1;
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES
+(@SPELL_CONTACT_BRANN1, @SPELL_CONTACT_BRANN2, 1, 'Contact Brann');
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@NPC_BRANN, @NPC_SNOW_TARGET) AND `source_type` = 0;
 DELETE FROM `smart_scripts` WHERE `entryorguid` = @NPC_BRANN*100 AND `source_type` = 9;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
 (@NPC_BRANN, 0, 0, 1, 62, 0, 100, 0, @GOSSIP_BRANN, 0, 0, 0, 11, 55579, 2, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Brann Bronzebeard - On gossip select - Spellcast Trigger Brann Signal'),
 (@NPC_BRANN, 0, 1, 0, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Brann Bronzebeard - On gossip select - Close gossip'),
 (@NPC_BRANN, 0, 2, 0, 8, 0, 100, 0, @SPELL_BRANN_SIGNAL, 0, 0, 0, 80, @NPC_BRANN*100, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Brann Bronzebeard - On spellhit Brann Signal to Self - Start script'),
+(@NPC_SNOW_TARGET, 0, 0, 0, 11, 0, 100, 0, 0, 0, 0, 0, 3, 0, 26241, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Brann Snow Target - On spawn - Morph to model'),
 (@NPC_BRANN*100, 9, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 66, 0, 0, 0, 0, 0, 0, 23, 0, 0, 0, 0, 0, 0, 0, 'Brann Bronzebeard script - Say text0'),
 (@NPC_BRANN*100, 9, 1, 0, 0, 0, 100, 0, 2000, 2000, 0, 0, 1, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Brann Bronzebeard script - Say text0'),
 (@NPC_BRANN*100, 9, 2, 0, 0, 0, 100, 0, 3100, 3100, 0, 0, 5, 25, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Brann Bronzebeard script - Play emote point'),

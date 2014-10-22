@@ -1477,3 +1477,6 @@ UPDATE `creature_template` SET `VehicleId` = 0 WHERE `entry` = 28446; -- hack
 DELETE FROM `creature_addon` WHERE `guid` = 129547;
 INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES
 (129547, 0, 26308, 65536, 1, 30, 0);
+
+-- [SQL] Quests - Warchief's Blessing will no longer mention Thrall
+UPDATE `quest_template` SET `CompletedText` = 'Return to the Warchief in Orgrimmar.' WHERE `Id` = 13189;

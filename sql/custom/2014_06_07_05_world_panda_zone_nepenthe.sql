@@ -50,12 +50,13 @@ UPDATE `creature` SET `spawntimesecs` = 30 WHERE `id` = 54734;
 -- [SQL] Npcs - Added all Spirit Healers for Wandering Isle (fixes #534)
 UPDATE `creature_template` SET `npcflag` = 16384 WHERE `entry` IN (72676, 65183);
 DELETE FROM `creature` WHERE `id` = 6491 AND `map` = 860;
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `npcflag2`, `unit_flags`, `unit_flags2`, `dynamicflags`) VALUES
-(941440, 6491, 860, 5736, 5829, 1, 65536, 5233, 0, 945.076, 4067.9, 199.638, 2.25147, 120, 0, 0, 8240, 0, 0, 0, 0, 0, 0, 0),
-(941532, 6491, 860, 5736, 5832, 1, 65536, 5233, 0, 903.941, 4335.09, 243.798, 2.1293, 120, 0, 0, 8240, 0, 0, 0, 0, 0, 0, 0),
-(941735, 6491, 860, 5736, 5737, 1, 65536, 5233, 0, 407.503, 3565.25, 78.078, 4.46804, 120, 0, 0, 8240, 0, 0, 0, 0, 0, 0, 0),
-(5035373, 6491, 860, 0, 0, 1, 65536, 5233, 0, 1236.16, 3560.25, 102.572, 4.72354, 120, 0, 0, 8240, 0, 0, 0, 0, 0, 0, 0),
-(5036607, 6491, 860, 0, 0, 1, 65536, 5233, 0, 648.916, 3041.11, 77.3114, 3.0282, 120, 0, 0, 8240, 0, 0, 0, 0, 0, 0, 0);
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`,`dynamicflags`) VALUES
+(941440, 6491, 860, 1, 65536, 5233, 0, 945.076, 4067.9, 199.638, 2.25147, 120, 0, 0, 8240, 0, 0, 0, 0, 0),
+(941532, 6491, 860, 1, 65536, 5233, 0, 903.941, 4335.09, 243.798, 2.1293, 120, 0, 0, 8240, 0, 0, 0, 0, 0),
+(941735, 6491, 860, 1, 65536, 5233, 0, 407.503, 3565.25, 78.078, 4.46804, 120, 0, 0, 8240, 0, 0, 0, 0, 0),
+(5035373, 6491, 860, 1, 65536, 5233, 0, 1236.16, 3560.25, 102.572, 4.72354, 120, 0, 0, 8240, 0, 0, 0, 0, 0),
+(5036607, 6491, 860, 1, 65536, 5233, 0, 648.916, 3041.11, 77.3114, 3.0282, 120, 0, 0, 8240, 0, 0, 0, 0, 0),
+(7343920, 6491, 860, 1, 65535, 5233, 0, 1068.58, 3267.88, 129.841, 2.93034, 120, 0, 0, 8240, 0, 0, 0, 0, 0);
 INSERT IGNORE INTO `game_graveyard_zone` (`id`, `ghost_zone`, `faction`) VALUES
 (4143, 5834, 0),
 (3295, 5825, 0),

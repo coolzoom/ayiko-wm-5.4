@@ -801,8 +801,14 @@ bool Creature::Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, 
         return false;
     }
 
-    switch (GetCreatureTemplate()->rank)
+    CreatureTemplate const * const crTemplate = GetCreatureTemplate();
+
+    if (IsDungeonBoss())
+        m_corpseDelay = sWorld->getIntConfig(CONFIG_CORPSE_DECAY_WORLDBOSS);
+    else
     {
+        switch (crTemplate->rank)
+        {
         case CREATURE_ELITE_RARE:
             m_corpseDelay = sWorld->getIntConfig(CONFIG_CORPSE_DECAY_RARE);
             break;
@@ -813,11 +819,14 @@ bool Creature::Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, 
             m_corpseDelay = sWorld->getIntConfig(CONFIG_CORPSE_DECAY_RAREELITE);
             break;
         case CREATURE_ELITE_WORLDBOSS:
-            m_corpseDelay = sWorld->getIntConfig(CONFIG_CORPSE_DECAY_WORLDBOSS);
+            m_corpseDelay = (crTemplate->lootid || crTemplate->mingold || crTemplate->maxgold)
+                    ? sWorld->getIntConfig(CONFIG_CORPSE_DECAY_WORLDBOSS)
+                    : sWorld->getIntConfig(CONFIG_CORPSE_DECAY_NORMAL);
             break;
         default:
             m_corpseDelay = sWorld->getIntConfig(CONFIG_CORPSE_DECAY_NORMAL);
             break;
+        }
     }
 
     LoadCreaturesAddon();
@@ -840,7 +849,7 @@ bool Creature::Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, 
         SetByteValue(UNIT_FIELD_BYTES_0, 3, minfo->gender);
     }
 
-    LastUsedScriptID = GetCreatureTemplate()->ScriptID;
+    LastUsedScriptID = crTemplate->ScriptID;
 
     // TODO: Replace with spell, handle from DB
     if (isSpiritHealer() || isSpiritGuide())

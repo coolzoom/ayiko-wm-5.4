@@ -2077,9 +2077,9 @@ void WorldSession::SendSetPhaseShift(PhaseShiftSet const& phaseIds, PhaseShiftSe
     WorldPacket data(SMSG_SET_PHASE_SHIFT, 4 + 4 + 2 * terrainswaps.size() + 4 + 2 * phaseIds.size() + 4 + 2 * worldMapAreaIds.size() + 4 + 8);
 
     // 0x8 or 0x10 is related to areatrigger, if we send flags 0x00 areatrigger doesn't work in some case
-    data << uint32(phaseIds.size() ? 0 : 8);    // flags (not phasemask)
+    data << uint32(0x8);                        // flags (not phasemask)
 
-    // Active terrain swaps, may switch with inactive terrain
+    // Active terrain swaps
     data << uint32(terrainswaps.size() * 2);    // Map.dbc Ids
     for (auto const &id : terrainswaps)
         data << uint16(id);

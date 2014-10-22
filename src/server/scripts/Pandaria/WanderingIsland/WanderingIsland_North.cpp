@@ -747,7 +747,7 @@ public:
     struct mob_aysaAI : public ScriptedAI
     {
         EventMap events;
-        std::list<Player*> playersInvolved;
+        std::vector<Player*> playersInvolved;
 
         uint64 lifeiGUID;
 
@@ -851,7 +851,11 @@ public:
                     case EVENT_SPAWN_MOBS: //Spawn 3 mobs
                     {
                         updatePlayerList();
-                        for(int i = 0; i < std::max((int)playersInvolved.size()*3,3); i++)
+
+                        auto const maxSize = std::min<size_t>(playersInvolved.size(), 5);
+                        auto const maxSpawns = std::max<size_t>(maxSize * 3, 3);
+
+                        for(size_t i = 0; i < maxSpawns; ++i)
                             if(TempSummon* temp = me->SummonCreature(NPC_TROUBLEMAKER, 1171.71f, 3443.82f, 104.20f, 3.3f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000))
                             {
                                 temp->AddThreat(me, 250.0f);

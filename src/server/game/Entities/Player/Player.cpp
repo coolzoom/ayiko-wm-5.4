@@ -2502,16 +2502,36 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     }
     else
     {
-        // Pandaria
-        if (mapid == 870  && getLevel() < 85 && getClass() != CLASS_MONK  && !isGameMaster())
-            return false;
+        if (!isGameMaster())
+        {
+            switch (GetMapId())
+            {
+                case 609:
+                    if (getClass() == CLASS_DEATH_KNIGHT && !HasSpell(50977))
+                        return false;
+                    break;
+                case 654:
+                    if (getRace() == RACE_WORGEN && GetQuestStatus(14434) != QUEST_STATUS_REWARDED)
+                        return false;
+                    break;
+                case 860:
+                    if (GetTeamId() == TEAM_NEUTRAL)
+                        return false;
+                    break;
+            }
 
-        // Tréfonds
-         if ( mapid == 646  && getLevel() < 80 && !isGameMaster())
-            return false;
-
-        if (GetMapId() == 860 && GetTeamId() == TEAM_NEUTRAL)
-            return false;
+            switch (mapid)
+            {
+                case 646:
+                    if (getLevel() < 80)
+                        return false;
+                    break;
+                case 870:
+                    if (getLevel() < 85 && getClass() != CLASS_MONK)
+                        return false;
+                    break;
+            }
+        }
 
         // far teleport to another map
         Map* oldmap = IsInWorld() ? GetMap() : NULL;

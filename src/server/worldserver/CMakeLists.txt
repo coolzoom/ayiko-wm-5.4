@@ -135,6 +135,7 @@ include_directories(
   ${ACE_INCLUDE_DIRS}
   ${MYSQL_INCLUDE_DIR}
   ${OPENSSL_INCLUDE_DIR}
+  ${JEMALLOC_INCLUDE_DIRS}
 )
 
 add_executable(worldserver
@@ -161,6 +162,7 @@ target_link_libraries(worldserver
   ${MYSQL_LIBRARY}
   ${OPENSSL_LIBRARIES}
   ${ZLIB_LIBRARIES}
+  ${JEMALLOC_LIBRARIES}
 )
 
 if( WIN32 )

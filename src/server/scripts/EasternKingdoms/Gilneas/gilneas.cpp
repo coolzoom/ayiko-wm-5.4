@@ -803,7 +803,7 @@ class npc_gilneas_worgen final : public CreatureScript
 
             void DamageTaken(Unit* attacker, uint32 &damage) final
             {
-                if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->isPet())
+                if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 {
                     if (me->GetHealth() < me->GetMaxHealth() || me->GetHealth() <= damage)
                     {
@@ -869,7 +869,7 @@ struct ShooterGuardAI final : public ScriptedAI
 
     void DamageTaken(Unit* attacker, uint32 &damage) final
     {
-        if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->isPet())
+        if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
         {
             if (me->GetHealth() < me->GetMaxHealth() || me->GetHealth() <= damage)
             {
@@ -1422,7 +1422,7 @@ class npc_myriam_spellwaker final : public CreatureScript
 
             void DamageTaken(Unit* attacker, uint32 &damage) final
             {
-                if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->isPet())
+                if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 {
                     if (me->GetHealth() < me->GetMaxHealth() || me->GetHealth() <= damage)
                     {
@@ -1494,7 +1494,7 @@ class npc_sergeant_cleese final : public CreatureScript
 
             void DamageTaken(Unit* attacker, uint32 &damage) final
             {
-                if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->isPet())
+                if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 {
                     if (me->GetHealth() < me->GetMaxHealth() || me->GetHealth() <= damage)
                     {
@@ -1529,7 +1529,7 @@ class npc_gilneas_worgen_class_quest final : public CreatureScript
                 SPELL_EVISCERATE        = 2098,
                 SPELL_CORRUPTION        = 172,
                 SPELL_STEADY_SHOT       = 56641,
-                SPELL_ARCANE_MISSILES   = 5143,
+                SPELL_FROST_NOVA        = 122,
                 SPELL_MOONFIRE          = 8921,
 
                 NPC_CLASS_QUEST_CREDIT  = 44175,
@@ -1551,19 +1551,17 @@ class npc_gilneas_worgen_class_quest final : public CreatureScript
                     case SPELL_EVISCERATE:
                     case SPELL_CORRUPTION:
                     case SPELL_STEADY_SHOT:
-                    case SPELL_ARCANE_MISSILES:
+                    case SPELL_FROST_NOVA:
                     case SPELL_MOONFIRE:
-                        {
-                            if (Player* player = caster->ToPlayer())
-                                player->KilledMonsterCredit(NPC_CLASS_QUEST_CREDIT);
-                        }
+                        if (Player* player = caster->ToPlayer())
+                            player->KilledMonsterCredit(NPC_CLASS_QUEST_CREDIT);
                         break;
                 }
             }
 
             void DamageTaken(Unit* attacker, uint32 &damage) final
             {
-                if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->isPet())
+                if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 {
                     if (me->GetHealth() < me->GetMaxHealth() || me->GetHealth() <= damage)
                     {
@@ -4268,7 +4266,7 @@ class npc_forsaken_invader final : public CreatureScript
 
             void DamageTaken(Unit* attacker, uint32 &damage) final
             {
-                if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->isPet())
+                if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 {
                     if (me->GetHealth() < me->GetMaxHealth() || me->GetHealth() <= damage)
                     {
@@ -5364,7 +5362,7 @@ class npc_hayward_brother final : public CreatureScript
 
             void DamageTaken(Unit* attacker, uint32 &damage) final
             {
-                if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->isPet())
+                if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 {
                     if (me->GetHealth() < me->GetMaxHealth() || me->GetHealth() <= damage)
                     {
@@ -6053,7 +6051,7 @@ class npc_crash_survivor final : public CreatureScript
 
             void DamageTaken(Unit* attacker, uint32 &damage) final
             {
-                if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->isPet())
+                if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 {
                     if (me->GetHealth() < me->GetMaxHealth() || me->GetHealth() <= damage)
                     {
@@ -6100,7 +6098,7 @@ class npc_swamp_crocolisk final : public CreatureScript
 
             void DamageTaken(Unit* attacker, uint32 &damage) final
             {
-                if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->isPet())
+                if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 {
                     if (me->GetHealth() < me->GetMaxHealth() || me->GetHealth() <= damage)
                     {
@@ -8844,7 +8842,7 @@ class npc_myriam_spellwaker_tbfgc final : public CreatureScript
 
             void DamageTaken(Unit* attacker, uint32 &damage) final
             {
-                if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->isPet())
+                if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 {
                     if (me->GetHealth() < me->GetMaxHealth() || me->GetHealth() <= damage)
                     {
@@ -8985,7 +8983,7 @@ class npc_sister_almyra_tbfgc final : public CreatureScript
 
             void DamageTaken(Unit* attacker, uint32 &damage) final
             {
-                if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->isPet())
+                if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 {
                     if (me->GetHealth() < me->GetMaxHealth() || me->GetHealth() <= damage)
                     {
@@ -9559,7 +9557,7 @@ class npc_lord_darius_crowley_tbfgc final : public CreatureScript
 
             void DamageTaken(Unit* attacker, uint32 &damage) final
             {
-                if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->isPet())
+                if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 {
                     if (me->GetHealth() < me->GetMaxHealth() || me->GetHealth() <= damage)
                     {
@@ -9656,7 +9654,7 @@ class npc_worgen_warrior_tbfgc final : public CreatureScript
 
             void DamageTaken(Unit* attacker, uint32 &damage) final
             {
-                if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->isPet())
+                if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 {
                     if (me->GetHealth() < me->GetMaxHealth() || me->GetHealth() <= damage)
                     {
@@ -9954,7 +9952,7 @@ class npc_king_genn_greymane_tbfgc final : public CreatureScript
 
             void DamageTaken(Unit* attacker, uint32 &damage) final
             {
-                if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->isPet())
+                if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 {
                     if (me->GetHealth() < me->GetMaxHealth() || me->GetHealth() <= damage)
                     {
@@ -11035,7 +11033,7 @@ class npc_gilneas_towering_ancient final : public CreatureScript
 
             void DamageTaken(Unit* attacker, uint32 &damage) final
             {
-                if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->isPet())
+                if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 {
                     if (me->GetHealth() < me->GetMaxHealth() || me->GetHealth() <= damage)
                     {

@@ -138,17 +138,18 @@ public:
 
 enum eTrainingDummySpells
 {
-    SPELL_CHARGE        = 100,
-    SPELL_AUTORITE      = 105361, // OnDamage
-    SPELL_ASSURE        = 56641,
-    SPELL_EVISCERATION  = 2098,
-    SPELL_MOT_DOULEUR_1 = 589,
-    SPELL_MOT_DOULEUR_2 = 124464, // Je ne sais pas si un des deux est le bon
-    SPELL_NOVA          = 122,
-    SPELL_CORRUPTION_1  = 172,
-    SPELL_CORRUPTION_2  = 87389,
-    SPELL_CORRUPTION_3  = 131740,
-    SPELL_PAUME_TIGRE   = 100787
+    SPELL_CHARGE                = 100,
+    SPELL_MOONFIRE              = 8921,
+    SPELL_SEAL_OF_COMMAND       = 105361, // OnDamage
+    SPELL_STEADY_SHOT           = 56641,
+    SPELL_EVISCERATION          = 2098,
+    SPELL_SHADOW_WORD_PAIN_1    = 589,
+    SPELL_SHADOW_WORD_PAIN_2    = 124464, // Je ne sais pas si un des deux est le bon
+    SPELL_FROST_NOVA            = 122,
+    SPELL_CORRUPTION_1          = 172,
+    SPELL_CORRUPTION_2          = 87389,
+    SPELL_CORRUPTION_3          = 131740,
+    SPELL_TIGER_PALM            = 100787
 };
 
 class npc_training_dummy_start_zones : public CreatureScript
@@ -184,7 +185,7 @@ public:
             resetTimer = 5000;
             damage = 0;
 
-            if (doneBy->HasAura(SPELL_AUTORITE))
+            if (doneBy->HasAura(SPELL_SEAL_OF_COMMAND))
                 if (doneBy->ToPlayer())
                     doneBy->ToPlayer()->KilledMonsterCredit(44175, 0);
         }
@@ -198,16 +199,17 @@ public:
         {
             switch (Spell->Id)
             {
+                case SPELL_MOONFIRE:
                 case SPELL_CHARGE:
-                case SPELL_ASSURE:
+                case SPELL_STEADY_SHOT:
                 case SPELL_EVISCERATION:
-                case SPELL_MOT_DOULEUR_1:
-                case SPELL_MOT_DOULEUR_2:
-                case SPELL_NOVA:
+                case SPELL_SHADOW_WORD_PAIN_1:
+                case SPELL_SHADOW_WORD_PAIN_2:
+                case SPELL_FROST_NOVA:
                 case SPELL_CORRUPTION_1:
                 case SPELL_CORRUPTION_2:
                 case SPELL_CORRUPTION_3:
-                case SPELL_PAUME_TIGRE:
+                case SPELL_TIGER_PALM:
                     if (Caster->ToPlayer())
                         Caster->ToPlayer()->KilledMonsterCredit(44175, 0);
                     break;

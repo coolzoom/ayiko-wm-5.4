@@ -632,7 +632,7 @@ void WorldSession::HandleCharCreateCallback(PreparedQueryResult result, Characte
                     if (!haveSameRace)
                         haveSameRace = createInfo->Race == accRace;
 
-                    if (AccountMgr::IsPlayerAccount(GetSecurity()) && createInfo->Class == CLASS_DEATH_KNIGHT)
+                    if (checkHeroicReqs)
                     {
                         uint8 acc_class = field[2].GetUInt8();
                         if (acc_class == CLASS_DEATH_KNIGHT)
@@ -661,7 +661,7 @@ void WorldSession::HandleCharCreateCallback(PreparedQueryResult result, Characte
                 }
             }
 
-            if (AccountMgr::IsPlayerAccount(GetSecurity()) && createInfo->Class == CLASS_DEATH_KNIGHT && !hasHeroicReqLevel)
+            if (checkHeroicReqs && !hasHeroicReqLevel)
             {
                 WorldPacket data(SMSG_CHAR_CREATE, 1);
                 data << uint8(CHAR_CREATE_LEVEL_REQUIREMENT);

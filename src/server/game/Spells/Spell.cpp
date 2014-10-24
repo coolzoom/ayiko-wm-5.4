@@ -8966,8 +8966,14 @@ bool Spell::HasGlobalCooldown() const
 void Spell::TriggerGlobalCooldown()
 {
     int32 gcd = m_spellInfo->StartRecoveryTime;
-    if (!gcd)
-        return;
+
+    if (gcd == 0)
+    {
+        if (!m_caster->GetCharmInfo())
+            return;
+        if (m_spellInfo->CategoryRecoveryTime == 0 && m_spellInfo->RecoveryTime == 0)
+            gcd = MIN_GCD;
+    }
 
      if (m_caster->GetTypeId() == TYPEID_PLAYER)
           if (m_caster->ToPlayer()->GetCommandStatus(CHEAT_COOLDOWN))

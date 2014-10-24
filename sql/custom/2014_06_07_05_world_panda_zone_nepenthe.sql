@@ -99,3 +99,6 @@ DELETE t1 FROM creature t1 JOIN creature t2 ON t1.id = t2.id WHERE t1.guid < t2.
 -- [SQL] Quests - Pandaren Quests: Joining the Alliance/Horde will now have correct race requirements (Refs #1372)
 UPDATE `quest_template` SET `RequiredRaces` = 25165824 WHERE `Id` = 30987;
 UPDATE `quest_template` SET `RequiredRaces` = 41943040 WHERE `Id` = 31012;
+
+-- [SQL] Quests - The King's Command and The Art of War will always be automatically accepted (Feedback #3549)
+UPDATE `quest_template` SET `SpecialFlags` = 4 WHERE `Id` IN (29547, 29611, 29612);

@@ -1,0 +1,2 @@
+-- [SQL] Quests - ... and the Pot, Too! text corrected (Fixes #4916)
+UPDATE `quest_template` SET `Title` = '... and the Pot, Too!', `Objectives` = 'Collect 12 Root Vegetables and 1 Cast Iron Pot.', `Details` = 'Sure, I''m willing to help you guys out. But we need to eat, too! I don''t even have a pot to cook in! Let alone ingredients to put in it!$B$BHere''s a list of the things that I need. Now get!', `CompletedText` = 'Return to Uyen Chow at the Chow Farmstead in Kun-Lai Summit.' WHERE `Id` = 30581;

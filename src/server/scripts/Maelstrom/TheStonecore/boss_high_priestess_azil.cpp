@@ -165,7 +165,7 @@ class boss_azil : public CreatureScript
 
             if (forceGrip)
             {
-                Unit * victim = me->getVictim();
+                Unit * victim = me->GetVictim();
                 Vehicle * veh = me->GetVehicleKit();
 
                 if (forcegripTimer <= diff)
@@ -366,7 +366,7 @@ class npc_gravity_well_azil : public CreatureScript
 
         void SpellHitTarget(Unit * target, const SpellInfo * spell)
         {
-            if (target->isAlive() && spell->Id == SPELL_GRAVITY_WELL_SCRIPT)
+            if (target->IsAlive() && spell->Id == SPELL_GRAVITY_WELL_SCRIPT)
             {
                 int bp = IsHeroic() ? 20000 : 10000; // evtl needs to be increased / lowered
                 uint32 distFkt = uint32(me->GetDistance(target)) * 5;

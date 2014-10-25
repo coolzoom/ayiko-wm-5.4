@@ -234,7 +234,7 @@ public:
                     if (RingBossGUID)
                     {
                         Creature* boss = Unit::GetCreature(*me, RingBossGUID);
-                        if (boss && !boss->isAlive() && boss->isDead())
+                        if (boss && !boss->IsAlive() && boss->isDead())
                         {
                             RingBossGUID = 0;
                             Event_Timer = 5000;
@@ -247,7 +247,7 @@ public:
                     for (uint8 i = 0; i < MAX_MOB_AMOUNT; ++i)
                     {
                         Creature* mob = Unit::GetCreature(*me, RingMobGUID[i]);
-                        if (mob && !mob->isAlive() && mob->isDead())
+                        if (mob && !mob->IsAlive() && mob->isDead())
                         {
                             RingMobGUID[i] = 0;
                             --MobCount;
@@ -383,7 +383,7 @@ public:
             //ThunderClap_Timer
             if (ThunderClap_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_THUNDERCLAP);
+                DoCast(me->GetVictim(), SPELL_THUNDERCLAP);
                 ThunderClap_Timer = 10000;
             }
             else
@@ -394,7 +394,7 @@ public:
             {
                 if (FireballVolley_Timer <= diff)
                 {
-                    DoCast(me->getVictim(), SPELL_FIREBALLVOLLEY);
+                    DoCast(me->GetVictim(), SPELL_FIREBALLVOLLEY);
                     FireballVolley_Timer = 15000;
                 }
                 else
@@ -404,7 +404,7 @@ public:
             //MightyBlow_Timer
             if (MightyBlow_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_MIGHTYBLOW);
+                DoCast(me->GetVictim(), SPELL_MIGHTYBLOW);
                 MightyBlow_Timer = 10000;
             }
             else

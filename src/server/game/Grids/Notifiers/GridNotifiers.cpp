@@ -34,8 +34,8 @@ bool shouldCallMoveInLineOfSight(Creature const *c, Unit const *u)
 {
     return c != u
             && c->IsAIEnabled
-            && c->isAlive()
-            && u->isAlive()
+            && c->IsAlive()
+            && u->IsAlive()
             && !u->isInFlight()
             && !c->HasUnitState(UNIT_STATE_SIGHTLESS)
             && (c->HasReactState(REACT_AGGRESSIVE) || c->AI()->CanSeeEvenInPassiveMode())
@@ -304,7 +304,7 @@ void UnfriendlyMessageDistDeliverer::Visit(PlayerMapType &m)
 
 bool AnyDeadUnitObjectInRangeCheck::operator()(Player* u)
 {
-    return !u->isAlive() && !u->HasAuraType(SPELL_AURA_GHOST) && i_searchObj->IsWithinDistInMap(u, i_range);
+    return !u->IsAlive() && !u->HasAuraType(SPELL_AURA_GHOST) && i_searchObj->IsWithinDistInMap(u, i_range);
 }
 
 bool AnyDeadUnitObjectInRangeCheck::operator()(Corpse* u)
@@ -314,7 +314,7 @@ bool AnyDeadUnitObjectInRangeCheck::operator()(Corpse* u)
 
 bool AnyDeadUnitObjectInRangeCheck::operator()(Creature* u)
 {
-    return !u->isAlive() && i_searchObj->IsWithinDistInMap(u, i_range);
+    return !u->IsAlive() && i_searchObj->IsWithinDistInMap(u, i_range);
 }
 
 bool AnyDeadUnitSpellTargetInRangeCheck::operator()(Player* u)

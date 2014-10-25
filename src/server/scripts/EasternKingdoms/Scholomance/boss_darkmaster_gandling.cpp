@@ -101,7 +101,7 @@ public:
             //ArcaneMissiles_Timer
             if (ArcaneMissiles_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_ARCANEMISSILES);
+                DoCast(me->GetVictim(), SPELL_ARCANEMISSILES);
                 ArcaneMissiles_Timer = 8000;
             }
             else
@@ -119,7 +119,7 @@ public:
             //Curse_Timer
             if (Curse_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_CURSE);
+                DoCast(me->GetVictim(), SPELL_CURSE);
                 Curse_Timer = urand(15000, 27000);
             }
             else

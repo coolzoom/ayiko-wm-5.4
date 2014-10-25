@@ -486,19 +486,19 @@ public:
                 switch(eventId)
                 {
                     case EVENT_JAOMIN_JUMP: //on monte
-                        if (me->getVictim())
-                            me->CastSpell(me->getVictim(), 108938, true);
+                        if (me->GetVictim())
+                            me->CastSpell(me->GetVictim(), 108938, true);
                         events.ScheduleEvent(EVENT_JAOMIN_JUMP, 30000);
                         break;
                     case EVENT_HIT_CIRCLE: //baffe
-                        if (me->getVictim())
-                            me->CastSpell(me->getVictim(), 119301, true);
+                        if (me->GetVictim())
+                            me->CastSpell(me->GetVictim(), 119301, true);
 
                         events.ScheduleEvent(EVENT_HIT_CIRCLE, 3000);
                         break;
                     case EVENT_FALCON: //attaque du faucon
-                        if (me->getVictim())
-                            me->CastSpell(me->getVictim(), 108935, true);
+                        if (me->GetVictim())
+                            me->CastSpell(me->GetVictim(), 108935, true);
 
                         events.ScheduleEvent(EVENT_FALCON, 4000);
                         break;
@@ -966,10 +966,10 @@ public:
                 switch(eventId)
                 {
                     case 1:
-                        me->CastSpell(me->getVictim(), 108693);
+                        me->CastSpell(me->GetVictim(), 108693);
                         break;
                     case 2:
-                        me->CastSpell(me->getVictim(), 73212);
+                        me->CastSpell(me->GetVictim(), 73212);
                         events.ScheduleEvent(2, 5000);
                         break;
                 }
@@ -1068,18 +1068,18 @@ class boss_li_fei_fight : public CreatureScript
                 switch (eventId)
                 {
                     case EVENT_FEET_OF_FURY:
-                        if (auto const victim = me->getVictim())
+                        if (auto const victim = me->GetVictim())
                             me->CastSpell(victim, 108958);
                         events.ScheduleEvent(EVENT_FEET_OF_FURY, 13000);
                         break;
                     case EVENT_SHADOW_KICK:
-                        if (auto const victim = me->getVictim())
+                        if (auto const victim = me->GetVictim())
                             me->CastSpell(victim, 108936);
                         events.ScheduleEvent(EVENT_SHADOW_KICK_STUN, 2500);
                         events.ScheduleEvent(EVENT_SHADOW_KICK, 30000);
                         break;
                     case EVENT_SHADOW_KICK_STUN:
-                        if (auto const victim = me->getVictim())
+                        if (auto const victim = me->GetVictim())
                             me->CastSpell(victim, 108944);
                         break;
                 }
@@ -1458,7 +1458,7 @@ class spell_feet_of_fury final : public SpellScriptLoader
             if (!caster)
                 return;
 
-            if (auto const target = caster->getVictim())
+            if (auto const target = caster->GetVictim())
                 targetGuid = target->GetGUID();
         }
 

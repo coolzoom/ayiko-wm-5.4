@@ -81,7 +81,7 @@ public:
             //Cleave_Timer
             if (Cleave_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_CLEAVE);
+                DoCast(me->GetVictim(), SPELL_CLEAVE);
                 Cleave_Timer = 7000;
             }
             else
@@ -90,7 +90,7 @@ public:
             // BlastWave
             if (BlastWave_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_BLASTWAVE);
+                DoCast(me->GetVictim(), SPELL_BLASTWAVE);
                 BlastWave_Timer = urand(8000, 16000);
             }
             else
@@ -99,7 +99,7 @@ public:
             //MortalStrike_Timer
             if (MortalStrike_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_MORTALSTRIKE);
+                DoCast(me->GetVictim(), SPELL_MORTALSTRIKE);
                 MortalStrike_Timer = urand(25000, 35000);
             }
             else
@@ -107,10 +107,10 @@ public:
 
             if (KnockBack_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_KNOCKBACK);
+                DoCast(me->GetVictim(), SPELL_KNOCKBACK);
                 //Drop 50% aggro
-                if (DoGetThreat(me->getVictim()))
-                    DoModifyThreatPercent(me->getVictim(), -50);
+                if (DoGetThreat(me->GetVictim()))
+                    DoModifyThreatPercent(me->GetVictim(), -50);
 
                 KnockBack_Timer = urand(15000, 30000);
             }

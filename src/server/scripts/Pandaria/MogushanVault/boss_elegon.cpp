@@ -532,7 +532,7 @@ class boss_elegon : public CreatureScript
                                 if (player->isGameMaster())
                                     continue;
 
-                                if (player->isAlive())
+                                if (player->IsAlive())
                                 {
                                     player->CombatStop();
                                     player->CombatStopWithPets(true);
@@ -581,7 +581,7 @@ class boss_elegon : public CreatureScript
                         if (player->isGameMaster())
                             return;
 
-                        if (player->isAlive())
+                        if (player->IsAlive())
                         {
                             player->CastSpell(player, SPELL_TOUCH_OF_THE_TITANS, true);
                             player->AddAura(SPELL_TOUCH_OF_TITANS_VISUAL, player);
@@ -609,7 +609,7 @@ class boss_elegon : public CreatureScript
                         if (phase != PHASE_1)
                             break;
 
-                        if (!me->IsWithinMeleeRange(me->getVictim(), 10.0f))
+                        if (!me->IsWithinMeleeRange(me->GetVictim(), 10.0f))
                             me->CastSpell(me, SPELL_GRASPING_ENERGY_TENDRILS, false);
 
                         events.ScheduleEvent(EVENT_CHECK_MELEE, 2500);

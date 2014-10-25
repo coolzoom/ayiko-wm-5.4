@@ -119,7 +119,7 @@ public:
             //Sand Breath
             if (SandBreath_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_SAND_BREATH);
+                DoCast(me->GetVictim(), SPELL_SAND_BREATH);
                 SandBreath_Timer = 15000+rand()%10000;
             }
             else
@@ -128,7 +128,7 @@ public:
             //Time Stop
             if (TimeStop_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_TIME_STOP);
+                DoCast(me->GetVictim(), SPELL_TIME_STOP);
                 TimeStop_Timer = 20000+rand()%15000;
             }
             else

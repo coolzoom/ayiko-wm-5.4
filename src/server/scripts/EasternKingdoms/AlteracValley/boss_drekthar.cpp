@@ -82,7 +82,7 @@ public:
 
             if (WhirlwindTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_WHIRLWIND);
+                DoCast(me->GetVictim(), SPELL_WHIRLWIND);
                 WhirlwindTimer =  urand(8 * IN_MILLISECONDS, 18 * IN_MILLISECONDS);
             }
             else
@@ -90,7 +90,7 @@ public:
 
             if (Whirlwind2Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_WHIRLWIND2);
+                DoCast(me->GetVictim(), SPELL_WHIRLWIND2);
                 Whirlwind2Timer = urand(7 * IN_MILLISECONDS, 25 * IN_MILLISECONDS);
             }
             else
@@ -98,7 +98,7 @@ public:
 
             if (KnockdownTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_KNOCKDOWN);
+                DoCast(me->GetVictim(), SPELL_KNOCKDOWN);
                 KnockdownTimer = urand(10 * IN_MILLISECONDS, 15 * IN_MILLISECONDS);
             }
             else
@@ -106,7 +106,7 @@ public:
 
             if (FrenzyTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_FRENZY);
+                DoCast(me->GetVictim(), SPELL_FRENZY);
                 FrenzyTimer = urand(20 * IN_MILLISECONDS, 30 * IN_MILLISECONDS);
             }
             else

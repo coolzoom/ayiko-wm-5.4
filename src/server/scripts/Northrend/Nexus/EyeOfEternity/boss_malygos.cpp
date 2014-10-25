@@ -556,11 +556,11 @@ public:
                         Talk(SAY_AGGRO_P_TWO);
                         break;
                     case EVENT_ARCANE_BREATH:
-                        DoCast(me->getVictim(), SPELL_ARCANE_BREATH);
+                        DoCast(me->GetVictim(), SPELL_ARCANE_BREATH);
                         events.ScheduleEvent(EVENT_ARCANE_BREATH, urand(35, 60)*IN_MILLISECONDS, 0, PHASE_ONE);
                         break;
                     case EVENT_ARCANE_STORM:
-                        DoCast(me->getVictim(), SPELL_ARCANE_STORM);
+                        DoCast(me->GetVictim(), SPELL_ARCANE_STORM);
                         events.ScheduleEvent(EVENT_ARCANE_STORM, urand(5, 10)*IN_MILLISECONDS, 0, PHASE_ONE);
                         break;
                     case EVENT_VORTEX:
@@ -711,7 +711,7 @@ class spell_malygos_vortex_visual : public SpellScriptLoader
                         malygos->SetDisableGravity(false);
                         malygos->SetCanFly(false);
 
-                        malygos->GetMotionMaster()->MoveChase(caster->getVictim());
+                        malygos->GetMotionMaster()->MoveChase(caster->GetVictim());
                         malygos->RemoveAura(SPELL_VORTEX_1);
                     }
                 }

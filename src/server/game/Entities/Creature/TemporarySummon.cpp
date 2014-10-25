@@ -154,7 +154,7 @@ void TempSummon::Update(uint32 diff)
                 return;
             }
 
-            if (!isInCombat() && isAlive())
+            if (!isInCombat() && IsAlive())
             {
                 if (m_timer <= diff)
                 {
@@ -383,7 +383,7 @@ void Puppet::Update(uint32 time)
     //check if caster is channelling?
     if (IsInWorld())
     {
-        if (!isAlive())
+        if (!IsAlive())
         {
             UnSummon();
             // TODO: why long distance .die does not remove it

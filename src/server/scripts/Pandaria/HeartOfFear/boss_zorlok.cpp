@@ -534,7 +534,7 @@ class boss_zorlok : public CreatureScript
                             me->RemoveAurasDueToSpell(SPELL_SONG_OF_THE_EMPRESS);
                         }
 
-                        else if (!me->getVictim())
+                        else if (!me->GetVictim())
                         {
                             for (auto target : playerList)
                             {
@@ -543,7 +543,7 @@ class boss_zorlok : public CreatureScript
                                 break;
                             }
                         }
-                        else if (Unit* target = me->getVictim())
+                        else if (Unit* target = me->GetVictim())
                         {
                             AttackStart(target);
                             me->SetInCombatWith(target);

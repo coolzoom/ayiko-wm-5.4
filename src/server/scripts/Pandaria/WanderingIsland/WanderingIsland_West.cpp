@@ -378,7 +378,7 @@ public:
 
             for (auto player : playerList)
                 if (player->GetQuestStatus(29786) == QUEST_STATUS_INCOMPLETE)
-                    if (player->isAlive())
+                    if (player->IsAlive())
                         return true;
 
             return false;
@@ -430,7 +430,7 @@ public:
 
             for (auto player : playerList)
                 if (player->GetQuestStatus(29786) == QUEST_STATUS_INCOMPLETE)
-                    if (player->isAlive())
+                    if (player->IsAlive())
                         player->KilledMonsterCredit(me->GetEntry());
         }
 

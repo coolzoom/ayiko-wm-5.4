@@ -785,7 +785,7 @@ void WorldSession::HandleListInventoryOpcode(WorldPacket& recvData)
     recvData.ReadBitSeq<3, 4, 0, 1, 6, 2, 5, 7>(guid);
     recvData.ReadByteSeq<2, 6, 5, 1, 7, 0, 4, 3>(guid);
 
-    if (!GetPlayer()->isAlive())
+    if (!GetPlayer()->IsAlive())
         return;
 
     TC_LOG_DEBUG("network", "WORLD: Recvd CMSG_LIST_INVENTORY");

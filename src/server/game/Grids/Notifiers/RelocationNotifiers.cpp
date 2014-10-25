@@ -12,8 +12,8 @@ bool shouldCallMoveInLineOfSight(Creature const *c, Unit const *u)
 {
     return c != u
             && c->IsAIEnabled
-            && c->isAlive()
-            && u->isAlive()
+            && c->IsAlive()
+            && u->IsAlive()
             && !u->isInFlight()
             && !c->HasUnitState(UNIT_STATE_SIGHTLESS)
             && (c->HasReactState(REACT_AGGRESSIVE) || c->AI()->CanSeeEvenInPassiveMode())

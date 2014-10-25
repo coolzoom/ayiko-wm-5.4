@@ -1421,7 +1421,7 @@ public:
             {
                 if (uiShadowBoltTimer <= uiDiff)
                 {
-                    DoCast(me->getVictim(), SPELL_SHADOW_BOLT);
+                    DoCast(me->GetVictim(), SPELL_SHADOW_BOLT);
                     uiShadowBoltTimer = urand(5000, 12000);
                 }
                 else
@@ -1429,7 +1429,7 @@ public:
 
                 if (uiDeflectionTimer <= uiDiff)
                 {
-                    DoCast(me->getVictim(), SPELL_DEFLECTION);
+                    DoCast(me->GetVictim(), SPELL_DEFLECTION);
                     uiDeflectionTimer = urand(20000, 25000);
                 }
                 else
@@ -1437,7 +1437,7 @@ public:
 
                 if (uiSoulBlastTimer <= uiDiff)
                 {
-                    DoCast(me->getVictim(), SPELL_SOUL_BLAST);
+                    DoCast(me->GetVictim(), SPELL_SOUL_BLAST);
                     uiSoulBlastTimer  = urand (12000, 18000);
                 }
                 else

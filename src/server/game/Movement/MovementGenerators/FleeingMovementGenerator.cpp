@@ -361,7 +361,7 @@ void FleeingMovementGenerator<Creature>::DoFinalize(Creature *owner)
     owner->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
     owner->ClearUnitState(UNIT_STATE_FLEEING|UNIT_STATE_FLEEING_MOVE);
 
-    if (Unit const * const victim = owner->getVictim())
+    if (Unit const * const victim = owner->GetVictim())
         owner->SetTarget(victim->GetGUID());
 }
 
@@ -374,7 +374,7 @@ void FleeingMovementGenerator<T>::DoReset(T *owner)
 template<class T>
 bool FleeingMovementGenerator<T>::DoUpdate(T *owner, uint32 time_diff)
 {
-    if (!owner->isAlive())
+    if (!owner->IsAlive())
         return false;
 
     if (owner->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED))
@@ -405,7 +405,7 @@ template bool FleeingMovementGenerator<Creature>::DoUpdate(Creature *, uint32);
 
 bool TimedFleeingMovementGenerator::Update(Unit *owner, uint32 time_diff)
 {
-    if (!owner->isAlive())
+    if (!owner->IsAlive())
         return false;
 
     if (owner->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED))

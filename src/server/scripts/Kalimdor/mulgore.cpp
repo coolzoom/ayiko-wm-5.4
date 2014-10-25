@@ -118,7 +118,7 @@ public:
 
         void SpellHit(Unit* Caster, SpellInfo const* Spell)
         {
-            if (!me->getVictim() && !EventActive && Spell->Id == SPELL_LUNCH)
+            if (!me->GetVictim() && !EventActive && Spell->Id == SPELL_LUNCH)
             {
                 if (Caster->GetTypeId() == TYPEID_PLAYER)
                     PlayerGUID = Caster->GetGUID();

@@ -476,7 +476,7 @@ public:
         void MoveInLineOfSight(Unit* who) override
         {
             Player * const player = who->ToPlayer();
-            if (!player || me->getVictim())
+            if (!player || me->GetVictim())
                 return;
 
             if (player->GetQuestStatus(QUEST_AN_ANCIENT_EVIL) == QUEST_STATUS_INCOMPLETE)
@@ -497,7 +497,7 @@ public:
 
             for (auto player : playerList)
                 if (player->GetQuestStatus(QUEST_AN_ANCIENT_EVIL) == QUEST_STATUS_INCOMPLETE)
-                    if (player->isAlive())
+                    if (player->IsAlive())
                         player->KilledMonsterCredit(me->GetEntry());
         }
 
@@ -868,7 +868,7 @@ public:
 
             for (auto player : playerList)
                 if (player->GetQuestStatus(QUEST_HEALING_SHEN) == QUEST_STATUS_INCOMPLETE)
-                    if (player->isAlive())
+                    if (player->IsAlive())
                         return true;
 
             return false;
@@ -885,7 +885,7 @@ public:
             {
                 if (player->GetQuestStatus(QUEST_HEALING_SHEN) == QUEST_STATUS_INCOMPLETE)
                 {
-                    if (player->isAlive())
+                    if (player->IsAlive())
                     {
                         if (actualPower < 700) // IN_PROGRESS
                         {

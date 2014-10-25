@@ -51,7 +51,7 @@ void FollowerAI::AttackStart(Unit* who)
 //The flag (type_flag) is unconfirmed, but used here for further research and is a good candidate.
 bool FollowerAI::AssistPlayerInCombat(Unit* who)
 {
-    if (!who || !who->getVictim())
+    if (!who || !who->GetVictim())
         return false;
 
     //experimental (unknown) flag not present
@@ -59,7 +59,7 @@ bool FollowerAI::AssistPlayerInCombat(Unit* who)
         return false;
 
     //not a player
-    if (!who->getVictim()->GetCharmerOrOwnerPlayerOrPlayerItself())
+    if (!who->GetVictim()->GetCharmerOrOwnerPlayerOrPlayerItself())
         return false;
 
     //never attack friendly
@@ -70,7 +70,7 @@ bool FollowerAI::AssistPlayerInCombat(Unit* who)
     if (me->IsWithinDistInMap(who, MAX_PLAYER_DISTANCE) && me->IsWithinLOSInMap(who))
     {
         //already fighting someone?
-        if (!me->getVictim())
+        if (!me->GetVictim())
         {
             AttackStart(who);
             return true;
@@ -101,7 +101,7 @@ void FollowerAI::MoveInLineOfSight(Unit* who)
             float fAttackRadius = me->GetAttackDistance(who);
             if (me->IsWithinDistInMap(who, fAttackRadius) && me->IsWithinLOSInMap(who))
             {
-                if (!me->getVictim())
+                if (!me->GetVictim())
                 {
                     who->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
                     AttackStart(who);
@@ -183,7 +183,7 @@ void FollowerAI::EnterEvadeMode()
 
 void FollowerAI::UpdateAI(const uint32 uiDiff)
 {
-    if (HasFollowState(STATE_FOLLOW_INPROGRESS) && !me->getVictim())
+    if (HasFollowState(STATE_FOLLOW_INPROGRESS) && !me->GetVictim())
     {
         if (m_uiUpdateFollowTimer <= uiDiff)
         {
@@ -270,7 +270,7 @@ void FollowerAI::MovementInform(uint32 motionType, uint32 pointId)
 
 void FollowerAI::StartFollow(Player* player, uint32 factionForFollower, const Quest* quest)
 {
-    if (me->getVictim())
+    if (me->GetVictim())
     {
         TC_LOG_DEBUG("scripts", "FollowerAI attempt to StartFollow while in combat.");
         return;
@@ -311,7 +311,7 @@ Player* FollowerAI::GetLeaderForFollower()
 {
     if (Player* player = Unit::GetPlayer(*me, m_uiLeaderGUID))
     {
-        if (player->isAlive())
+        if (player->IsAlive())
             return player;
         else
         {
@@ -321,7 +321,7 @@ Player* FollowerAI::GetLeaderForFollower()
                 {
                     Player* member = groupRef->getSource();
 
-                    if (member && member->isAlive() && me->IsWithinDistInMap(member, MAX_PLAYER_DISTANCE))
+                    if (member && member->IsAlive() && me->IsWithinDistInMap(member, MAX_PLAYER_DISTANCE))
                     {
                         TC_LOG_DEBUG("scripts", "FollowerAI GetLeader changed and returned new leader.");
                         m_uiLeaderGUID = member->GetGUID();

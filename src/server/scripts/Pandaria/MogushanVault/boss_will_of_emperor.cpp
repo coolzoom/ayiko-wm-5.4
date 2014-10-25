@@ -255,7 +255,7 @@ class boss_jin_qin_xi : public CreatureScript
 
             void Reset()
             {
-                if (!me->isAlive())
+                if (!me->IsAlive())
                     return;
 
                 me->ResetLootMode();
@@ -650,7 +650,7 @@ class boss_jin_qin_xi : public CreatureScript
                             aliveList.clear();
                             GetPlayerListInGrid(plyrList, me, 500.0f);
                             for (auto plyr : plyrList)
-                                if (plyr->isAlive())
+                                if (plyr->IsAlive())
                                     aliveList.push_back(plyr);
 
                             // Scheduling
@@ -711,7 +711,7 @@ class boss_jin_qin_xi : public CreatureScript
                     /* END OF DEVASTATING COMBO */
                     case EVENT_CHECK_MAGNETIC_ARMOR:
                     {
-                        if (Unit* victim = me->getVictim())
+                        if (Unit* victim = me->GetVictim())
                         {
                             bool isJan = me->GetEntry() == NPC_JAN_XI;
                             if (!victim->HasAura((isJan ? SPELL_MAGNETIC_ARMOR_JAN : SPELL_MAGNETIC_ARMOR_QIN)))
@@ -963,13 +963,13 @@ class mob_woe_add_generic : public CreatureScript
                         {
                             bool shouldSwitchVictim = false;
 
-                            if (me->getVictim())
+                            if (me->GetVictim())
                             {
-                                if (me->getVictim()->GetGUID() != targetGuid)
+                                if (me->GetVictim()->GetGUID() != targetGuid)
                                 {
                                     if (Unit* target = ObjectAccessor::FindUnit(targetGuid))
                                     {
-                                        if (!target->isAlive())
+                                        if (!target->IsAlive())
                                             shouldSwitchVictim = true;
                                     }
                                     else
@@ -979,7 +979,7 @@ class mob_woe_add_generic : public CreatureScript
                                 {
                                     if (Unit* target = ObjectAccessor::FindUnit(targetGuid))
                                     {
-                                        if (target->isAlive())
+                                        if (target->IsAlive())
                                         {
                                             targetGuid = target->GetGUID();
                                             AttackStart(target);
@@ -1004,7 +1004,7 @@ class mob_woe_add_generic : public CreatureScript
                         }
                         case EVENT_IMPEDING_THRUST:
                         {
-                            if (Unit* victim = me->getVictim())
+                            if (Unit* victim = me->GetVictim())
                             {
                                 if (me->IsWithinMeleeRange(victim))
                                 {
@@ -1021,15 +1021,15 @@ class mob_woe_add_generic : public CreatureScript
                         case EVENT_CHECK_FOCDEF:
                         {
                             Unit* target;
-                            if (!me->getVictim())
+                            if (!me->GetVictim())
                             {
                                 // Check bosses
                                 if (Creature* janxi = pInstance->instance->GetCreature(pInstance->GetData64(NPC_JAN_XI)))
                                     if (Creature* qinxi = pInstance->instance->GetCreature(pInstance->GetData64(NPC_QIN_XI)))
                                 {
                                     // Retrieving tanks on bosses
-                                    Unit* tankj = janxi->getVictim();
-                                    Unit* tankq = qinxi->getVictim();
+                                    Unit* tankj = janxi->GetVictim();
+                                    Unit* tankq = qinxi->GetVictim();
 
                                     // Checking distance : Courage will go on the further tank
                                     if (tankj && tankq)
@@ -1081,7 +1081,7 @@ class mob_woe_add_generic : public CreatureScript
                             for (auto target : tarList)
                                 me->AddAura(SPELL_ENERGIZING_VISUAL, target);
 
-                            if (Unit* victim = me->getVictim())
+                            if (Unit* victim = me->GetVictim())
                                 me->CastSpell(victim, SPELL_ENERGIZING_VISUAL, true);
 
                             events.ScheduleEvent(EVENT_ENERGIZING_SMASH, urand(15000, 20000));
@@ -1090,7 +1090,7 @@ class mob_woe_add_generic : public CreatureScript
                         }
                         case EVENT_SELECT_TARGET:
                         {
-                            if (!me->getVictim())
+                            if (!me->GetVictim())
                                 DoAction(ACTION_LAND);
                             events.ScheduleEvent(EVENT_SELECT_TARGET, 2000);
                             break;

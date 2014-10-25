@@ -64,7 +64,7 @@ class npc_generic_darkspear_novice : public CreatureScript
 
         void UpdateAI(uint32 const diff)
         {
-            if (!me->getVictim())
+            if (!me->GetVictim())
             {
                 if (targetTimer <= diff)
                 {
@@ -143,7 +143,7 @@ class npc_tiki_target_troll : public CreatureScript
 
         void UpdateAI(uint32 const diff)
         {
-            if (me->getVictim())
+            if (me->GetVictim())
             {
                 if (resetTimer <= diff)
                 {

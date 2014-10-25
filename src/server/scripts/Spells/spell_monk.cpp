@@ -2437,7 +2437,7 @@ class spell_monk_disable : public SpellScriptLoader
                 snaredOnHit = false;
 
                 if (GetCaster())
-                    if (Unit* target = GetCaster()->getVictim())
+                    if (Unit* target = GetCaster()->GetVictim())
                         if (target->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED))
                             snaredOnHit = true;
 

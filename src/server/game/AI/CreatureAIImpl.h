@@ -560,7 +560,7 @@ inline bool CreatureAI::UpdateVictimWithGaze()
 
     if (me->HasReactState(REACT_PASSIVE))
     {
-        if (me->getVictim())
+        if (me->GetVictim())
             return true;
         else
             me->SetReactState(REACT_AGGRESSIVE);
@@ -568,7 +568,7 @@ inline bool CreatureAI::UpdateVictimWithGaze()
 
     if (Unit* victim = me->SelectVictim())
         AttackStart(victim);
-    return me->getVictim();
+    return me->GetVictim();
 }
 
 inline bool CreatureAI::UpdateVictim()
@@ -580,7 +580,7 @@ inline bool CreatureAI::UpdateVictim()
     {
         if (Unit* victim = me->SelectVictim())
             AttackStart(victim);
-        return me->getVictim();
+        return me->GetVictim();
     }
     else if (me->getThreatManager().isThreatListEmpty())
     {
@@ -593,7 +593,7 @@ inline bool CreatureAI::UpdateVictim()
 
 inline bool CreatureAI::_EnterEvadeMode()
 {
-    if (!me->isAlive())
+    if (!me->IsAlive())
         return false;
 
     // dont remove vehicle auras, passengers arent supposed to drop off the vehicle
@@ -624,7 +624,7 @@ inline void UnitAI::DoCast(Unit* victim, uint32 spellId, bool triggered)
 inline void UnitAI::DoCastVictim(uint32 spellId, bool triggered)
 {
     // Why don't we check for casting unit_state and existing target as we do in DoCast(.. ?
-    me->CastSpell(me->getVictim(), spellId, triggered);
+    me->CastSpell(me->GetVictim(), spellId, triggered);
 }
 
 inline void UnitAI::DoCastAOE(uint32 spellId, bool triggered)

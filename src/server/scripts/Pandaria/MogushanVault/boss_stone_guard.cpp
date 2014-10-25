@@ -160,7 +160,7 @@ class boss_stone_guard_controler : public CreatureScript
                     {
                         for (uint32 entry: guardiansEntry)
                             if (Creature* guardian = me->GetMap()->GetCreature(pInstance->GetData64(entry)))
-                                if (guardian->isAlive())
+                                if (guardian->IsAlive())
                                     pInstance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, guardian);
 
                         events.ScheduleEvent(EVENT_PETRIFICATION, 15000);
@@ -178,7 +178,7 @@ class boss_stone_guard_controler : public CreatureScript
                         totalGuardian = 0;
                         for (uint32 entry: guardiansEntry)
                             if (Creature* guardian = me->GetMap()->GetCreature(pInstance->GetData64(entry)))
-                                if (guardian->isAlive())
+                                if (guardian->IsAlive())
                                     ++totalGuardian;
 
                         if (--totalGuardian) // break if a guardian is still alive
@@ -293,7 +293,7 @@ class boss_stone_guard_controler : public CreatureScript
                             {
                                 if (Creature* stoneGuard = pInstance->instance->GetCreature(stoneGuardGuid))
                                 {
-                                    if (stoneGuard->isAlive() && stoneGuard->isInCombat())
+                                    if (stoneGuard->IsAlive() && stoneGuard->isInCombat())
                                     {
                                         stoneGuard->AI()->DoAction(ACTION_PETRIFICATION);
                                         lastPetrifierEntry = nextPetrifierEntry;
@@ -315,7 +315,7 @@ class boss_stone_guard_controler : public CreatureScript
                         for (uint8 i = 0; i < 4; ++i)
                             if (uint64 stoneGuardGuid = pInstance->GetData64(guardiansEntry[i]))
                                 if (Creature* stoneGuard = pInstance->instance->GetCreature(stoneGuardGuid))
-                                    if (stoneGuard->isAlive())
+                                    if (stoneGuard->IsAlive())
                                     {
                                         switch(stoneGuard->GetEntry())
                                         {
@@ -519,7 +519,7 @@ class boss_generic_guardian : public CreatureScript
             {
                 if (Creature* controller = GetController())
                 {
-                    if (damage >= me->GetHealth() && me->isAlive())
+                    if (damage >= me->GetHealth() && me->IsAlive())
                     {
                         me->LowerPlayerDamageReq(me->GetMaxHealth()); // Allow player loots even if only the controller has damaged the guardian
                         controller->AI()->DoAction(ACTION_GUARDIAN_DIED);
@@ -696,11 +696,11 @@ class boss_generic_guardian : public CreatureScript
                                         GetPlayerListInGrid(playerList, me, 100.0f);
 
                                         uint64 victimGuid = 0;
-                                        if (me->getVictim())
-                                            victimGuid = me->getVictim()->GetGUID();
+                                        if (me->GetVictim())
+                                            victimGuid = me->GetVictim()->GetGUID();
 
                                         for (auto player: playerList)
-                                            if (player->isAlive() && !player->HasAura(SPELL_JASPER_CHAINS) && !player->HasAura(SPELL_TOTALY_PETRIFIED) && player->GetGUID() != victimGuid)
+                                            if (player->IsAlive() && !player->HasAura(SPELL_JASPER_CHAINS) && !player->HasAura(SPELL_TOTALY_PETRIFIED) && player->GetGUID() != victimGuid)
                                                 tempPlayerList.push_back(player);
 
                                         if (tempPlayerList.size() < 2)
@@ -1124,7 +1124,7 @@ class spell_jasper_chains : public SpellScriptLoader
                 const SpellInfo* spell = GetSpellInfo();
                 Player* linkedPlayer = sObjectAccessor->GetPlayer(*target, playerLinkedGuid);
 
-                if (!caster || !target || !spell || !linkedPlayer || !linkedPlayer->isAlive() || !linkedPlayer->HasAura(spell->Id))
+                if (!caster || !target || !spell || !linkedPlayer || !linkedPlayer->IsAlive() || !linkedPlayer->HasAura(spell->Id))
                     if (Aura *myaura = GetAura())
                     {
                         myaura->Remove();

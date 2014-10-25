@@ -571,7 +571,7 @@ class npc_kor_the_immovable : public CreatureScript
                 std::list<Creature*> lMinions;
                 player->GetAllMinionsByEntry(lMinions, NPC_PEBBLE);
 
-                if (lMinions.size() == 1 && (*lMinions.begin())->isAlive())
+                if (lMinions.size() == 1 && (*lMinions.begin())->IsAlive())
                 {
                     return true;
                 }
@@ -707,7 +707,7 @@ public:
         {
             FollowerAI::MoveInLineOfSight(who);
 
-            if (!me->getVictim() && !HasFollowState(STATE_FOLLOW_COMPLETE) && who->GetEntry() == NPC_YEVAA)
+            if (!me->GetVictim() && !HasFollowState(STATE_FOLLOW_COMPLETE) && who->GetEntry() == NPC_YEVAA)
             {
                 if (me->IsWithinDistInMap(who, INTERACTION_DISTANCE))
                 {
@@ -871,7 +871,7 @@ class npc_opalescent_guardian : public CreatureScript
             {
                 FollowerAI::MoveInLineOfSight(who);
 
-                if (!me->getVictim() && !HasFollowState(STATE_FOLLOW_COMPLETE) && who->GetEntry() == NPC_OPAL_STONETHROWER)
+                if (!me->GetVictim() && !HasFollowState(STATE_FOLLOW_COMPLETE) && who->GetEntry() == NPC_OPAL_STONETHROWER)
                 {
                     if (me->IsWithinDistInMap(who, 15.0f))
                     {

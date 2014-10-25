@@ -127,7 +127,7 @@ class mob_av_marshal_or_warmaster : public CreatureScript
 
                 if (ChargeTimer <= diff)
                 {
-                    DoCast(me->getVictim(), SPELL_CHARGE);
+                    DoCast(me->GetVictim(), SPELL_CHARGE);
                     ChargeTimer = urand(10 * IN_MILLISECONDS, 25 * IN_MILLISECONDS);
                 }
                 else
@@ -135,7 +135,7 @@ class mob_av_marshal_or_warmaster : public CreatureScript
 
                 if (CleaveTimer <= diff)
                 {
-                    DoCast(me->getVictim(), SPELL_CLEAVE);
+                    DoCast(me->GetVictim(), SPELL_CLEAVE);
                     CleaveTimer =  urand(10 * IN_MILLISECONDS, 16 * IN_MILLISECONDS);
                 }
                 else
@@ -143,7 +143,7 @@ class mob_av_marshal_or_warmaster : public CreatureScript
 
                 if (DemoralizingShoutTimer <= diff)
                 {
-                    DoCast(me->getVictim(), SPELL_DEMORALIZING_SHOUT);
+                    DoCast(me->GetVictim(), SPELL_DEMORALIZING_SHOUT);
                     DemoralizingShoutTimer = urand(10 * IN_MILLISECONDS, 15 * IN_MILLISECONDS);
                 }
                 else
@@ -151,7 +151,7 @@ class mob_av_marshal_or_warmaster : public CreatureScript
 
                 if (Whirlwind1Timer <= diff)
                 {
-                    DoCast(me->getVictim(), SPELL_WHIRLWIND1);
+                    DoCast(me->GetVictim(), SPELL_WHIRLWIND1);
                     Whirlwind1Timer = urand(6 * IN_MILLISECONDS, 20 * IN_MILLISECONDS);
                 }
                 else
@@ -159,7 +159,7 @@ class mob_av_marshal_or_warmaster : public CreatureScript
 
                 if (Whirlwind2Timer <= diff)
                 {
-                    DoCast(me->getVictim(), SPELL_WHIRLWIND2);
+                    DoCast(me->GetVictim(), SPELL_WHIRLWIND2);
                     Whirlwind2Timer = urand(10 * IN_MILLISECONDS, 25 * IN_MILLISECONDS);
                 }
                 else
@@ -167,7 +167,7 @@ class mob_av_marshal_or_warmaster : public CreatureScript
 
                 if (EnrageTimer <= diff)
                 {
-                    DoCast(me->getVictim(), SPELL_ENRAGE);
+                    DoCast(me->GetVictim(), SPELL_ENRAGE);
                     EnrageTimer = urand(10 * IN_MILLISECONDS, 30 * IN_MILLISECONDS);
                 }
                 else

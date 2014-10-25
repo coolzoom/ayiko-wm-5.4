@@ -48,10 +48,10 @@ void SmoothEscortAI::MoveInLineOfSight(Unit* who)
 
             if (me->IsWithinDistInMap(who, fAttackRadius) && me->IsWithinLOSInMap(who))
             {
-                if (who->GetTypeId() == TYPEID_UNIT && !who->getVictim())
+                if (who->GetTypeId() == TYPEID_UNIT && !who->GetVictim())
                     who->Attack(me, false);
 
-                if (!me->getVictim())
+                if (!me->GetVictim())
                 {
                     who->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
                     AttackStart(who);

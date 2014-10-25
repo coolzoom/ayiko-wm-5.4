@@ -289,7 +289,7 @@ struct boss_twinemperorsAI : public ScriptedAI
 
     void MoveInLineOfSight(Unit* who)
     {
-        if (!who || me->getVictim())
+        if (!who || me->GetVictim())
             return;
 
         if (me->canCreatureAttack(who))
@@ -436,7 +436,7 @@ public:
             //UnbalancingStrike_Timer
             if (UnbalancingStrike_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_UNBALANCING_STRIKE);
+                DoCast(me->GetVictim(), SPELL_UNBALANCING_STRIKE);
                 UnbalancingStrike_Timer = 8000+rand()%12000;
             } else UnbalancingStrike_Timer -= diff;
 
@@ -530,10 +530,10 @@ public:
             //ShadowBolt_Timer
             if (ShadowBolt_Timer <= diff)
             {
-                if (!me->IsWithinDist(me->getVictim(), 45.0f))
-                    me->GetMotionMaster()->MoveChase(me->getVictim(), VEKLOR_DIST, 0);
+                if (!me->IsWithinDist(me->GetVictim(), 45.0f))
+                    me->GetMotionMaster()->MoveChase(me->GetVictim(), VEKLOR_DIST, 0);
                 else
-                    DoCast(me->getVictim(), SPELL_SHADOWBOLT);
+                    DoCast(me->GetVictim(), SPELL_SHADOWBOLT);
                 ShadowBolt_Timer = 2000;
             } else ShadowBolt_Timer -= diff;
 

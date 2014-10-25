@@ -170,7 +170,7 @@ class RisenArchmageCheck
         // look for all permanently spawned Risen Archmages that are not yet in combat
         bool operator()(Creature* creature)
         {
-            return creature->isAlive() && creature->GetEntry() == NPC_RISEN_ARCHMAGE &&
+            return creature->IsAlive() && creature->GetEntry() == NPC_RISEN_ARCHMAGE &&
                 creature->GetDBTableGUIDLow() && !creature->isInCombat();
         }
 };
@@ -583,7 +583,7 @@ class npc_green_dragon_combat_trigger : public CreatureScript
                 if (!PlayerList.isEmpty())
                     for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                         if (Player* player = i->getSource())
-                            if (player->isAlive())
+                            if (player->IsAlive())
                                 wipe = false;
 
                 if (wipe)
@@ -880,7 +880,7 @@ class npc_blazing_skeleton : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_FIREBALL:
-                            if (!me->IsWithinMeleeRange(me->getVictim()))
+                            if (!me->IsWithinMeleeRange(me->GetVictim()))
                                 DoCastVictim(SPELL_FIREBALL);
                             _events.ScheduleEvent(EVENT_FIREBALL, urand(2000, 4000));
                             break;
@@ -957,7 +957,7 @@ class npc_suppresser : public CreatureScript
                 }
 
                 // this creature has REACT_PASSIVE so it does not always have victim here
-                if (Unit* victim = me->getVictim())
+                if (Unit* victim = me->GetVictim())
                     if (victim->GetEntry() != NPC_VALITHRIA_DREAMWALKER)
                         DoMeleeAttackIfReady();
             }

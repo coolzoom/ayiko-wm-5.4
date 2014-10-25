@@ -106,7 +106,7 @@ void AggroAllPlayers(Creature* temp)
             if (player->isGameMaster())
                 continue;
 
-            if (player->isAlive())
+            if (player->IsAlive())
             {
                 temp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
                 temp->SetReactState(REACT_AGGRESSIVE);
@@ -534,7 +534,7 @@ public:
 
             if (uiFireBallTimer <= uiDiff)
             {
-                if (me->getVictim())
+                if (me->GetVictim())
                     DoCastVictim(SPELL_FIREBALL);
                 uiFireBallTimer = 5000;
             } else uiFireBallTimer -= uiDiff;
@@ -980,7 +980,7 @@ public:
 
             if (uiEviscerateTimer <= uiDiff)
             {
-                DoCast(me->getVictim(), SPELL_EVISCERATE);
+                DoCast(me->GetVictim(), SPELL_EVISCERATE);
                 uiEviscerateTimer = 8000;
             } else uiEviscerateTimer -= uiDiff;
 

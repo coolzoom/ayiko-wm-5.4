@@ -1076,7 +1076,7 @@ class spell_algalon_phase_punch : public SpellScriptLoader
 class NotVictimFilter
 {
     public:
-        NotVictimFilter(Unit* caster) : _victim(caster->getVictim())
+        NotVictimFilter(Unit* caster) : _victim(caster->GetVictim())
         {
         }
 

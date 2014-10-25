@@ -1539,7 +1539,7 @@ class spell_hun_kill_command : public SpellScriptLoader
 
                     pet->CastSpell(GetExplTargetUnit(), HUNTER_SPELL_KILL_COMMAND_TRIGGER, true);
 
-                    if (pet->getVictim())
+                    if (pet->GetVictim())
                     {
                         pet->AttackStop();
                         pet->ToCreature()->AI()->AttackStart(GetExplTargetUnit());

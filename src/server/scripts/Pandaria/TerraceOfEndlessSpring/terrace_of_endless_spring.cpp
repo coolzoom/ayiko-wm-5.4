@@ -133,7 +133,7 @@ class npc_apparition_of_fear : public CreatureScript
                 bool done = true;
                 for (auto itr : fear)
                 {
-                    if (itr->isAlive())
+                    if (itr->IsAlive())
                     {
                         done = false;
                         break;
@@ -142,7 +142,7 @@ class npc_apparition_of_fear : public CreatureScript
 
                 for (auto itr : terror)
                 {
-                    if (itr->isAlive())
+                    if (itr->IsAlive())
                     {
                         done = false;
                         break;
@@ -283,7 +283,7 @@ class npc_apparition_of_terror : public CreatureScript
                 bool done = true;
                 for (auto itr : fear)
                 {
-                    if (itr->isAlive())
+                    if (itr->IsAlive())
                     {
                         done = false;
                         break;
@@ -292,7 +292,7 @@ class npc_apparition_of_terror : public CreatureScript
 
                 for (auto itr : terror)
                 {
-                    if (itr->isAlive())
+                    if (itr->IsAlive())
                     {
                         done = false;
                         break;

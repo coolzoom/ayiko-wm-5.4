@@ -86,7 +86,7 @@ class boss_slabhide : public CreatureScript
 
         void DoAction(int32 action)
         {
-            if (!me->isAlive())
+            if (!me->IsAlive())
                 return;
 
             if (action == ACTION_SLABHIDE_END_INTRO)
@@ -208,7 +208,7 @@ class boss_slabhide : public CreatureScript
                     }
                     break;
                 case EVENT_CRYSTAL_STORM:
-                    //if (Unit * victim = me->getVictim())
+                    //if (Unit * victim = me->GetVictim())
                     //    me->SetTarget(victim->GetGUID());
                     me->GetMotionMaster()->Clear();
                     me->GetMotionMaster()->MoveIdle();

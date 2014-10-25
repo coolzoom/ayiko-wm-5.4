@@ -3779,7 +3779,7 @@ public:
             if (uiThrowTimer <= diff)
             {
                 uiThrowTimer = urand(2000, 7000);
-                DoCast(me->getVictim(), SPELL_THROW_GEARS);
+                DoCast(me->GetVictim(), SPELL_THROW_GEARS);
             }
             else
                 uiThrowTimer -= diff;
@@ -3925,7 +3925,7 @@ public:
             if (uiKnockbackTimer <= diff)
             {
                 uiKnockbackTimer = urand(3000, 8000);
-                DoCast(me->getVictim(), SPELL_KNOCKBACK);
+                DoCast(me->GetVictim(), SPELL_KNOCKBACK);
             }
             else
                 uiKnockbackTimer -= diff;
@@ -4073,7 +4073,7 @@ public:
             {
                 uiBubbleBlastTimer = urand(2000, 8000);
                 me->CastStop();
-                DoCast(me->getVictim(), SPELL_BUBBLE_BLAST);
+                DoCast(me->GetVictim(), SPELL_BUBBLE_BLAST);
             }
             else
                 uiBubbleBlastTimer -= diff;
@@ -4081,7 +4081,7 @@ public:
             if (uiFrostboltTimer <= diff)
             {
                 uiFrostboltTimer = 3500;
-                DoCast(me->getVictim(), SPELL_FROSTBOLT);
+                DoCast(me->GetVictim(), SPELL_FROSTBOLT);
             }
             else
                 uiFrostboltTimer -= diff;
@@ -5459,7 +5459,7 @@ public:
             if (uiSwashbucklingSliceTimer <= diff)
             {
                 uiSwashbucklingSliceTimer = urand(2000, 5000);
-                DoCast(me->getVictim(), 75361);
+                DoCast(me->GetVictim(), 75361);
             }
             else
                 uiSwashbucklingSliceTimer -= diff;

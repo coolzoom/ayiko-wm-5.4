@@ -402,7 +402,7 @@ public:
             }
             else
             {
-                if(Unit* victim = me->getVictim())
+                if(Unit* victim = me->GetVictim())
                 {
                     if(victim->GetTypeId() == TYPEID_UNIT)
                     {
@@ -1143,7 +1143,7 @@ public:
                 switch(eventId)
                 {
                     case EVENT_SHODOW_BOLT:
-                        me->CastSpell(me->getVictim(), SPELL_SHADOW_BOLT, false);
+                        me->CastSpell(me->GetVictim(), SPELL_SHADOW_BOLT, false);
                         events.ScheduleEvent(EVENT_SHODOW_BOLT, 3.05 * IN_MILLISECONDS);
                         break;
                     case EVENT_HEAL:
@@ -1151,7 +1151,7 @@ public:
                          events.ScheduleEvent(EVENT_HEAL, 6 * IN_MILLISECONDS);
                         break;
                     case EVENT_HEX:
-                         me->CastSpell(me->getVictim(), SPELL_HEX, false);
+                         me->CastSpell(me->GetVictim(), SPELL_HEX, false);
                          events.ScheduleEvent(EVENT_HEX, 12 * IN_MILLISECONDS);
                          break;
                 }
@@ -1925,7 +1925,7 @@ public:
             }
             else
             {
-                if(Unit* victim = me->getVictim())
+                if(Unit* victim = me->GetVictim())
                 {
                     if(victim->GetTypeId() == TYPEID_UNIT)
                     {
@@ -2960,7 +2960,7 @@ public:
             }
             else
             {
-                if(Unit* victim = me->getVictim())
+                if(Unit* victim = me->GetVictim())
                 {
                     if(victim->GetTypeId() == TYPEID_UNIT)
                     {
@@ -2987,11 +2987,11 @@ public:
                 switch(eventId)
                 {
                     case EVENT_SHADOW_BOLT:
-                        me->CastSpell(me->getVictim(), SPELL_SHADOWN_BOLT, false);
+                        me->CastSpell(me->GetVictim(), SPELL_SHADOWN_BOLT, false);
                         events.ScheduleEvent(EVENT_SHADOW_BOLT, urand(4, 6) * IN_MILLISECONDS);
                         break;
                     case EVENT_CORRUPTION:
-                        me->CastSpell(me->getVictim(), SPELL_CORRUPTION, false);
+                        me->CastSpell(me->GetVictim(), SPELL_CORRUPTION, false);
                         events.ScheduleEvent(EVENT_CORRUPTION, urand(3, 7) * IN_MILLISECONDS);
                         break;
                 }
@@ -3052,7 +3052,7 @@ public:
             }
             else
             {
-                if(Unit* victim = me->getVictim())
+                if(Unit* victim = me->GetVictim())
                 {
                     if(victim->GetTypeId() == TYPEID_UNIT)
                     {
@@ -3188,7 +3188,7 @@ public:
             }
             else
             {
-                if(Unit* victim = me->getVictim())
+                if(Unit* victim = me->GetVictim())
                 {
                     if(victim->GetTypeId() == TYPEID_UNIT)
                     {
@@ -3308,7 +3308,7 @@ public:
             }
             else
             {
-                if(Unit* victim = me->getVictim())
+                if(Unit* victim = me->GetVictim())
                 {
                     if(victim->GetTypeId() == TYPEID_UNIT)
                     {
@@ -3346,11 +3346,11 @@ public:
                 switch(eventId)
                 {
                     case EVENT_FLAME_SHOCK:
-                        me->CastSpell(me->getVictim(), SPELL_FLAME_SHOCK, false);
+                        me->CastSpell(me->GetVictim(), SPELL_FLAME_SHOCK, false);
                         combatEvents.ScheduleEvent(EVENT_FLAME_SHOCK, urand(6, 8) * IN_MILLISECONDS);
                         break;
                     case EVENT_LIGHTNING_BOLT:
-                        me->CastSpell(me->getVictim(), SPELL_LIGHTNING_BOLT, false);
+                        me->CastSpell(me->GetVictim(), SPELL_LIGHTNING_BOLT, false);
                         combatEvents.ScheduleEvent(EVENT_LIGHTNING_BOLT, urand(6, 8) * IN_MILLISECONDS);
                         break;
                 }
@@ -3471,7 +3471,7 @@ public:
             }
             else
             {
-                if(Unit* victim = me->getVictim())
+                if(Unit* victim = me->GetVictim())
                 {
                     if(victim->GetTypeId() == TYPEID_UNIT)
                     {
@@ -3492,7 +3492,7 @@ public:
 
             if(events.ExecuteEvent() == EVENT_SHOT)
             {
-                me->CastSpell(me->getVictim(), SPELL_SHOT, false);
+                me->CastSpell(me->GetVictim(), SPELL_SHOT, false);
                 events.ScheduleEvent(EVENT_SHOT, urand(3, 5) * IN_MILLISECONDS);
             }
         }
@@ -4055,7 +4055,7 @@ public:
             }
             else
             {
-                if(Unit* victim = me->getVictim())
+                if(Unit* victim = me->GetVictim())
                 {
                     if(victim->GetTypeId() == TYPEID_UNIT)
                     {
@@ -4850,7 +4850,7 @@ public:
             }
             else
             {
-                if(Unit* victim = me->getVictim())
+                if(Unit* victim = me->GetVictim())
                 {
                     if(victim->GetTypeId() == TYPEID_UNIT)
                     {
@@ -4890,7 +4890,7 @@ public:
             }
             else
             {
-                if(Unit* victim = me->getVictim())
+                if(Unit* victim = me->GetVictim())
                 {
                     if(victim->GetTypeId() == TYPEID_UNIT)
                     {
@@ -4950,7 +4950,7 @@ public:
             }
             else
             {
-                if(Unit* victim = me->getVictim())
+                if(Unit* victim = me->GetVictim())
                 {
                     if(victim->GetTypeId() == TYPEID_UNIT)
                     {
@@ -6352,7 +6352,7 @@ public:
             }
             else
             {
-                if(Unit* victim = me->getVictim())
+                if(Unit* victim = me->GetVictim())
                 {
                     if(victim->GetTypeId() == TYPEID_UNIT)
                     {
@@ -6548,7 +6548,7 @@ public:
 			}
 			else
 			{
-				if (Unit* victim = me->getVictim())
+				if (Unit* victim = me->GetVictim())
 				{
 					if (victim->GetTypeId() == TYPEID_UNIT)
 					{
@@ -6728,7 +6728,7 @@ public:
             }
             else
             {
-                if (Unit* victim = me->getVictim())
+                if (Unit* victim = me->GetVictim())
                 {
                     if (victim->GetTypeId() == TYPEID_UNIT)
                     {
@@ -7577,7 +7577,7 @@ public:
             }
             else
             {
-                if (Unit* victim = me->getVictim())
+                if (Unit* victim = me->GetVictim())
                 {
                     if (victim->GetTypeId() == TYPEID_UNIT)
                     {
@@ -7700,7 +7700,7 @@ public:
             }
             else
             {
-                if (Unit* victim = me->getVictim())
+                if (Unit* victim = me->GetVictim())
                 {
                     if (victim->GetTypeId() == TYPEID_UNIT)
                     {
@@ -7868,7 +7868,7 @@ public:
             }
             else
             {
-                if (Unit* victim = me->getVictim())
+                if (Unit* victim = me->GetVictim())
                 {
                     if (victim->GetTypeId() == TYPEID_UNIT)
                     {
@@ -8160,7 +8160,7 @@ public:
 
             QuestStatusMap::const_iterator itr = owner->getQuestStatusMap().find(QUEST_MORALE_BOOST);
 
-            if (owner->isAlive() && !owner->GetVehicle())
+            if (owner->IsAlive() && !owner->GetVehicle())
             {
                 switch (aurEff->GetSpellInfo()->Id)
                 {
@@ -8231,7 +8231,7 @@ public:
             if (!owner)
                 return;
 
-            if (owner->isAlive() && !owner->GetVehicle())
+            if (owner->IsAlive() && !owner->GetVehicle())
             {
                 if (owner->GetQuestStatus(QUEST_KAJACOLA_GIVES_YOU_IDEAS) == QUEST_STATUS_REWARDED)
                 if (!owner->FindNearestCreature(NPC_ASSISTANT, 20.0f))

@@ -819,7 +819,7 @@ class npc_gilneas_worgen final : public CreatureScript
                         me->CastSpell(me, SPELL_ENRAGE, false);
                     }
 
-                    if (Unit* victim = me->getVictim())
+                    if (Unit* victim = me->GetVictim())
                     {
                         if (victim->GetTypeId() == TYPEID_UNIT)
                         {
@@ -893,7 +893,7 @@ struct ShooterGuardAI final : public ScriptedAI
         if (!UpdateVictim())
             return false;
 
-        if (Unit* victim = me->getVictim())
+        if (Unit* victim = me->GetVictim())
             if (victim->GetTypeId() == TYPEID_PLAYER)
                 if (me->GetDistance(victim) <= rangeDist)
                     return true;
@@ -905,7 +905,7 @@ struct ShooterGuardAI final : public ScriptedAI
                 EnterEvadeMode();
                 return false;
             }
-            else if (me->getVictim() != target)
+            else if (me->GetVictim() != target)
             {
                 me->getThreatManager().resetAllAggro();
                 me->getThreatManager().addThreat(target, std::numeric_limits<float>::max());
@@ -928,7 +928,7 @@ struct ShooterGuardAI final : public ScriptedAI
 
         if (events.ExecuteEvent() == EVENT_SHOOT)
         {
-            if (Unit* victim = me->getVictim())
+            if (Unit* victim = me->GetVictim())
             {
                 if (!me->IsWithinMeleeRange(victim))
                 {
@@ -1446,7 +1446,7 @@ class npc_myriam_spellwaker final : public CreatureScript
 
                 if (events.ExecuteEvent() == EVENT_CAST_FROSTBOLT)
                 {
-                    me->CastSpell(me->getVictim(), SPELL_FROSTBOLT, false);
+                    me->CastSpell(me->GetVictim(), SPELL_FROSTBOLT, false);
                     events.ScheduleEvent(EVENT_CAST_FROSTBOLT, 3000);
                 }
             }
@@ -1577,7 +1577,7 @@ class npc_gilneas_worgen_class_quest final : public CreatureScript
                         me->CastSpell(me, SPELL_ENRAGE, false);
                     }
 
-                    if (Unit* victim = me->getVictim())
+                    if (Unit* victim = me->GetVictim())
                     {
                         if (victim->GetTypeId() == TYPEID_UNIT)
                         {
@@ -2038,11 +2038,11 @@ class npc_lord_darius_crowley final : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_LEFT_HOOK:
-                            me->CastSpell(me->getVictim(), SPELL_LEFT_HOOK, false);
+                            me->CastSpell(me->GetVictim(), SPELL_LEFT_HOOK, false);
                             events.ScheduleEvent(EVENT_SNAP_KICK, urand(3500, 7000));
                             break;
                         case EVENT_SNAP_KICK:
-                            me->CastSpell(me->getVictim(), SPELL_SNAP_KICK, false);
+                            me->CastSpell(me->GetVictim(), SPELL_SNAP_KICK, false);
                             events.ScheduleEvent(EVENT_LEFT_HOOK, urand(3500, 7000));
                             break;
                         case EVENT_DEMORALIZING_SHOUT:
@@ -2764,7 +2764,7 @@ class npc_cannon_camera final : public CreatureScript
 
                     for (SummonList::const_iterator itr = summons.begin(); itr != summons.end(); ++itr)
                         if(Creature * worgen = ObjectAccessor::GetCreature(*me, *itr))
-                            if (worgen->isAlive())
+                            if (worgen->IsAlive())
                                 worgen->Kill(worgen);
 
                     summons.DespawnAll();
@@ -4276,7 +4276,7 @@ class npc_forsaken_invader final : public CreatureScript
                 }
                 else
                 {
-                    if (Unit* victim = me->getVictim())
+                    if (Unit* victim = me->GetVictim())
                     {
                         if (victim->GetTypeId() == TYPEID_UNIT)
                         {
@@ -4562,7 +4562,7 @@ class npc_gilneas_forsaken_captain final : public CreatureScript
 
                 if (events.ExecuteEvent() == EVENT_RUSTY_RAPIER)
                 {
-                    me->CastSpell(me->getVictim(), SPELL_RUSTY_RAPIER, false);
+                    me->CastSpell(me->GetVictim(), SPELL_RUSTY_RAPIER, false);
                     events.ScheduleEvent(EVENT_RUSTY_RAPIER, urand(15000, 30000));
                 }
             }
@@ -4722,11 +4722,11 @@ class npc_attack_mastiff final : public CreatureScript
                             events.ScheduleEvent(EVENT_DEMORALIZING_ROAR, urand(5000, 15000));
                             break;
                         case SPELL_TAUNT:
-                            me->CastSpell(me->getVictim(), SPELL_TAUNT, false);
+                            me->CastSpell(me->GetVictim(), SPELL_TAUNT, false);
                             events.ScheduleEvent(SPELL_TAUNT, urand(5000, 10000));
                             break;
                         case SPELL_LEAP:
-                            me->CastSpell(me->getVictim(), SPELL_LEAP, false);
+                            me->CastSpell(me->GetVictim(), SPELL_LEAP, false);
                             events.ScheduleEvent(SPELL_LEAP, urand(5000, 10000));
                             break;
                     }
@@ -4759,7 +4759,7 @@ class spell_call_attack_mastiffs final : public SpellScriptLoader
                 Unit* caster = GetCaster();
                 Creature* target = GetHitCreature();
 
-                if (!(caster && target && target->isAlive()))
+                if (!(caster && target && target->IsAlive()))
                     return;
 
                 float angle = target->GetHomePosition().GetOrientation();
@@ -6108,7 +6108,7 @@ class npc_swamp_crocolisk final : public CreatureScript
                 }
                 else
                 {
-                    if (Unit* victim = me->getVictim())
+                    if (Unit* victim = me->GetVictim())
                     {
                         if (victim->GetTypeId() == TYPEID_UNIT)
                         {
@@ -6218,7 +6218,7 @@ class npc_koroth_the_hillbreaker_friend final : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_CLEAVE:
-                            me->CastSpell(me->getVictim(), SPELL_CLEAVE, false);
+                            me->CastSpell(me->GetVictim(), SPELL_CLEAVE, false);
                             events.ScheduleEvent(EVENT_CLEAVE, urand(5000, 15000));
                             break;
                         case EVENT_DEMORALIZING_SHOUT:
@@ -6306,7 +6306,7 @@ class npc_captain_asther_qiao final : public CreatureScript
                 {
                     if (Creature* member = ObjectAccessor::GetCreature(*me, itr->minionGUID))
                     {
-                        if (!member->isAlive() || member->isInCombat())
+                        if (!member->IsAlive() || member->isInCombat())
                             continue;
 
                         float dx = x - cos(itr->angle + pathangle) * itr->dist;
@@ -8142,7 +8142,7 @@ struct BattleForGilneasLeaderAI : public SmoothEscortAI
         {
             if (Creature* militia = ObjectAccessor::GetCreature(*me, itr->guid))
             {
-                if (!militia->isAlive() || militia->getVictim())
+                if (!militia->IsAlive() || militia->GetVictim())
                     continue;
 
                 float angle = itr->angle;
@@ -8232,10 +8232,10 @@ struct BattleForGilneasLeaderAI : public SmoothEscortAI
         {
             if (Creature* militia = ObjectAccessor::GetCreature(*me, itr->guid))
             {
-                if (!militia->isAlive())
+                if (!militia->IsAlive())
                     continue;
 
-                if (militia->getVictim())
+                if (militia->GetVictim())
                 {
                     militia->CombatStart(who);
                     militia->AddThreat(who, 0.0f);
@@ -8257,10 +8257,10 @@ struct BattleForGilneasLeaderAI : public SmoothEscortAI
             {
                 if (Creature* militia = ObjectAccessor::GetCreature(*me, itr->guid))
                 {
-                    if (!militia->isAlive() || !militia->IsAIEnabled)
+                    if (!militia->IsAlive() || !militia->IsAIEnabled)
                         continue;
 
-                    if (Unit* victim = militia->getVictim())
+                    if (Unit* victim = militia->GetVictim())
                     {
                         AttackStart(victim);
                         return;
@@ -8744,7 +8744,7 @@ class npc_prince_liam_greymane_tbfgc final : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_MULTI_SHOT:
-                            me->CastSpell(me->getVictim(), SPELL_MULTI_SHOT, false);
+                            me->CastSpell(me->GetVictim(), SPELL_MULTI_SHOT, false);
                             events.ScheduleEvent(EVENT_MULTI_SHOT, urand(2500, 5000));
                             break;
                         case EVENT_LIAM_BATTLE_YELL:
@@ -8879,15 +8879,15 @@ class npc_myriam_spellwaker_tbfgc final : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_FIRE_BLAST:
-                            me->CastSpell(me->getVictim(), SPELL_FIRE_BLAST, false);
+                            me->CastSpell(me->GetVictim(), SPELL_FIRE_BLAST, false);
                             events.ScheduleEvent(EVENT_FIRE_BLAST, urand(3500, 7000));
                             break;
                         case EVENT_FROSTBOLT:
-                            me->CastSpell(me->getVictim(), SPELL_FROSTBOLT, false);
+                            me->CastSpell(me->GetVictim(), SPELL_FROSTBOLT, false);
                             events.ScheduleEvent(EVENT_FROSTBOLT, 3000);
                             break;
                         case EVENT_BLIZZARD:
-                            me->CastSpell(me->getVictim(), SPELL_BLIZZARD, false);
+                            me->CastSpell(me->GetVictim(), SPELL_BLIZZARD, false);
                             events.ScheduleEvent(EVENT_BLIZZARD, urand(10000, 20000));
                             break;
                     }
@@ -9092,8 +9092,8 @@ class npc_gilnean_militia_tbfgc final : public CreatureScript
                 {
                     if (Creature* summoner = me->ToTempSummon()->GetSummonerCreatureBase())
                     {
-                        if (summoner->getVictim())
-                            AttackStart(summoner->getVictim());
+                        if (summoner->GetVictim())
+                            AttackStart(summoner->GetVictim());
 
                         if (summoner->isInCombat())
                             return;
@@ -9123,7 +9123,7 @@ class npc_gilnean_militia_tbfgc final : public CreatureScript
                 {
                     if (Creature* summoner = me->ToTempSummon()->GetSummonerCreatureBase())
                     {
-                        if (!summoner->getVictim())
+                        if (!summoner->GetVictim())
                         {
                             if (summoner->IsAIEnabled)
                                 summoner->AI()->AttackStart(who);
@@ -9611,7 +9611,7 @@ class npc_lord_darius_crowley_tbfgc final : public CreatureScript
                             events.ScheduleEvent(EVENT_JUMP, urand(10000, 20000));
                             break;
                         case EVENT_TAUNT:
-                            me->CastSpell(me->getVictim(), SPELL_TAUNT, false);
+                            me->CastSpell(me->GetVictim(), SPELL_TAUNT, false);
                             events.ScheduleEvent(EVENT_TAUNT, 7000);
                             break;
                         case EVENT_SLICE_AND_DICE:
@@ -9670,8 +9670,8 @@ class npc_worgen_warrior_tbfgc final : public CreatureScript
                 {
                     if (Creature* summoner = me->ToTempSummon()->GetSummonerCreatureBase())
                     {
-                        if (summoner->getVictim())
-                            AttackStart(summoner->getVictim());
+                        if (summoner->GetVictim())
+                            AttackStart(summoner->GetVictim());
 
                         if (summoner->isInCombat())
                             return;
@@ -9823,7 +9823,7 @@ class npc_gorerot_tbfgc final : public CreatureScript
                                         {
                                             if (Creature* worgen = *itr)
                                             {
-                                                if (!worgen->GetVehicle() && worgen->isAlive())
+                                                if (!worgen->GetVehicle() && worgen->IsAlive())
                                                 {
                                                     worgen->EnterVehicle(me, seatId);
                                                     ++seatId;

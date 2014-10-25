@@ -76,7 +76,7 @@ public:
 
         void SpellHit(Unit* caster, const SpellInfo* spell) override
         {
-            if (spell->Id == SPELL_PERSUASIVE_STRIKE && caster->GetTypeId() == TYPEID_PLAYER && me->isAlive() && !speechCounter)
+            if (spell->Id == SPELL_PERSUASIVE_STRIKE && caster->GetTypeId() == TYPEID_PLAYER && me->IsAlive() && !speechCounter)
             {
                 if (Player* player = caster->ToPlayer())
                 {
@@ -323,7 +323,7 @@ public:
                         {
                             Creature* temp = ObjectAccessor::GetCreature(*me, valrothGUID);
 
-                            if (!temp || !temp->isAlive())
+                            if (!temp || !temp->IsAlive())
                             {
                                 Talk(SAY_BREAKOUT8);
                                 waveTimer = 5000;
@@ -726,7 +726,7 @@ public:
 
         void UpdateAI(uint32 diff) override
         {
-            if (PlayerGUID && !me->getVictim() && me->isAlive())
+            if (PlayerGUID && !me->GetVictim() && me->IsAlive())
             {
                 if (ExecuteSpeech_Timer <= diff)
                 {

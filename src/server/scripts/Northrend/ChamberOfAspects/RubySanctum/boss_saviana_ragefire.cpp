@@ -110,7 +110,7 @@ class boss_saviana_ragefire : public CreatureScript
                         me->SetDisableGravity(false);
                         me->SetReactState(REACT_AGGRESSIVE);
                         me->GetMotionMaster()->MovementExpired();
-                        DoStartMovement(me->getVictim());
+                        DoStartMovement(me->GetVictim());
                         break;
                     default:
                         break;

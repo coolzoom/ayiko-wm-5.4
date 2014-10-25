@@ -132,7 +132,7 @@ class npc_torek : public CreatureScript
 
                 if (Rend_Timer <= diff)
                 {
-                    DoCast(me->getVictim(), SPELL_REND);
+                    DoCast(me->GetVictim(), SPELL_REND);
                     Rend_Timer = 20000;
                 }
                 else
@@ -418,7 +418,7 @@ class npc_muglash : public CreatureScript
             {
                 npc_escortAI::UpdateAI(uiDiff);
 
-                if (!me->getVictim())
+                if (!me->GetVictim())
                 {
                     if (HasEscortState(STATE_ESCORT_PAUSED) && IsBrazierExtinguished)
                     {

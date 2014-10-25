@@ -252,7 +252,7 @@ class spell_pri_psyfiend_hit_me_driver : public SpellScriptLoader
 
                     for (auto itr : tempList)
                     {
-                        if (!itr->isAlive())
+                        if (!itr->IsAlive())
                             continue;
 
                         if (!itr->GetOwner())
@@ -2231,7 +2231,7 @@ class spell_pri_penance : public SpellScriptLoader
                 {
                     if (Unit* unitTarget = GetHitUnit())
                     {
-                        if (!unitTarget->isAlive())
+                        if (!unitTarget->IsAlive())
                             return;
 
                         uint8 rank = sSpellMgr->GetSpellRank(GetSpellInfo()->Id);
@@ -2969,7 +2969,7 @@ class spell_pri_shadow_word_death_glyphed : public SpellScriptLoader
         {
             Unit * const caster = GetCaster();
             Unit * const target = GetHitUnit();
-            if (!caster || !target || !target->isAlive() || caster->GetTypeId() != TYPEID_PLAYER)
+            if (!caster || !target || !target->IsAlive() || caster->GetTypeId() != TYPEID_PLAYER)
                 return;
 
             int32 backfireDamage = GetHitDamage();

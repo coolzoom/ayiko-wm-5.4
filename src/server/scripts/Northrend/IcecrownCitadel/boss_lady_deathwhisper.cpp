@@ -308,7 +308,7 @@ class boss_lady_deathwhisper : public CreatureScript
                 // Full House achievement
                 for (SummonList::iterator itr = summons.begin(); itr != summons.end(); ++itr)
                     if (Unit* unit = ObjectAccessor::GetUnit(*me, *itr))
-                        if (unit->isAlive() && unit->GetEntry() != NPC_VENGEFUL_SHADE)
+                        if (unit->IsAlive() && unit->GetEntry() != NPC_VENGEFUL_SHADE)
                             livingAddEntries.insert(unit->GetEntry());
 
                 //if (livingAddEntries.size() >= 5)
@@ -316,7 +316,7 @@ class boss_lady_deathwhisper : public CreatureScript
 
                 if (Creature* darnavan = ObjectAccessor::GetCreature(*me, _darnavanGUID))
                 {
-                    if (darnavan->isAlive())
+                    if (darnavan->IsAlive())
                     {
                         darnavan->setFaction(35);
                         darnavan->CombatStop(true);
@@ -367,7 +367,7 @@ class boss_lady_deathwhisper : public CreatureScript
                 {
                     Talk(SAY_PHASE_2);
                     Talk(EMOTE_PHASE_2);
-                    DoStartMovement(me->getVictim());
+                    DoStartMovement(me->GetVictim());
                     damage -= me->GetPower(POWER_MANA);
                     me->SetPower(POWER_MANA, 0);
                     me->RemoveAurasDueToSpell(SPELL_MANA_BARRIER);
@@ -626,7 +626,7 @@ class boss_lady_deathwhisper : public CreatureScript
                 std::list<Creature*> temp;
                 for (SummonList::iterator itr = summons.begin(); itr != summons.end(); ++itr)
                     if (Creature* cre = ObjectAccessor::GetCreature(*me, *itr))
-                        if (cre->isAlive() && (cre->GetEntry() == NPC_CULT_FANATIC || cre->GetEntry() == NPC_CULT_ADHERENT))
+                        if (cre->IsAlive() && (cre->GetEntry() == NPC_CULT_FANATIC || cre->GetEntry() == NPC_CULT_ADHERENT))
                             temp.push_back(cre);
 
                 // noone to empower
@@ -952,7 +952,7 @@ class npc_darnavan : public CreatureScript
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
-                if (_canShatter && me->getVictim() && me->getVictim()->IsImmunedToDamage(SPELL_SCHOOL_MASK_NORMAL))
+                if (_canShatter && me->GetVictim() && me->GetVictim()->IsImmunedToDamage(SPELL_SCHOOL_MASK_NORMAL))
                 {
                     DoCastVictim(SPELL_SHATTERING_THROW);
                     _canShatter = false;
@@ -960,7 +960,7 @@ class npc_darnavan : public CreatureScript
                     return;
                 }
 
-                if (_canCharge && !me->IsWithinMeleeRange(me->getVictim()))
+                if (_canCharge && !me->IsWithinMeleeRange(me->GetVictim()))
                 {
                     DoCastVictim(SPELL_CHARGE);
                     _canCharge = false;

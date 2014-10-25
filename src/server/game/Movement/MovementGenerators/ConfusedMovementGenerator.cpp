@@ -156,7 +156,7 @@ void ConfusedMovementGenerator<Creature>::DoFinalize(Creature *unit)
     unit->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
     unit->ClearUnitState(UNIT_STATE_CONFUSED | UNIT_STATE_CONFUSED_MOVE);
 
-    if (Unit const * const victim = unit->getVictim())
+    if (Unit const * const victim = unit->GetVictim())
         unit->SetTarget(victim->GetGUID());
 }
 

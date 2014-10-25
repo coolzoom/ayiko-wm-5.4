@@ -419,7 +419,7 @@ public:
 
             if (Silence_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_SILENCE);
+                DoCast(me->GetVictim(), SPELL_SILENCE);
                 Silence_Timer = 30000;
             } else Silence_Timer -= diff;
 
@@ -431,7 +431,7 @@ public:
 
             if (Frostbolt_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_FROSTBOLT);
+                DoCast(me->GetVictim(), SPELL_FROSTBOLT);
                 Frostbolt_Timer = 5000;
             } else Frostbolt_Timer -= diff;
 

@@ -220,7 +220,7 @@ class npc_announcer_toc10 : public CreatureScript
                     creature->CastSpell(creature, 69016, false);
 
                     Creature* anubArak = Unit::GetCreature(*creature, instanceScript->GetData64(NPC_ANUBARAK));
-                    if (!anubArak || !anubArak->isAlive())
+                    if (!anubArak || !anubArak->IsAlive())
                         anubArak = creature->SummonCreature(NPC_ANUBARAK, AnubarakLoc[0].GetPositionX(), AnubarakLoc[0].GetPositionY(), AnubarakLoc[0].GetPositionZ(), 3, TEMPSUMMON_CORPSE_TIMED_DESPAWN, DESPAWN_TIME);
 
                     instanceScript->SetData(TYPE_ANUBARAK, NOT_STARTED);
@@ -337,7 +337,7 @@ class boss_lich_king_toc : public CreatureScript
                             me->CastSpell(me, 69016, false);
                             instance->SetData(TYPE_LICH_KING, DONE);
                             Creature* temp = Unit::GetCreature(*me, instance->GetData64(NPC_ANUBARAK));
-                            if (!temp || !temp->isAlive())
+                            if (!temp || !temp->IsAlive())
                                 temp = me->SummonCreature(NPC_ANUBARAK, AnubarakLoc[0].GetPositionX(), AnubarakLoc[0].GetPositionY(), AnubarakLoc[0].GetPositionZ(), 3, TEMPSUMMON_CORPSE_TIMED_DESPAWN, DESPAWN_TIME);
 
 

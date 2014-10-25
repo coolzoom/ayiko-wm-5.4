@@ -452,7 +452,7 @@ public:
                 if (instance->GetData(DATA_ALLIANCE_RETREAT))//2.alliance boss down, attack thrall
                 {
                     Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_THRALL));
-                    if (target && target->isAlive())
+                    if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
             }
@@ -497,7 +497,7 @@ public:
                         if (instance->GetData(DATA_ALLIANCE_RETREAT) && !instance->GetData(DATA_HORDE_RETREAT))
                         {
                             Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_THRALL));
-                            if (target && target->isAlive())
+                            if (target && target->IsAlive())
                                 me->AddThreat(target, 0.0f);
                         }
                         else if (instance->GetData(DATA_ALLIANCE_RETREAT) && instance->GetData(DATA_HORDE_RETREAT))
@@ -534,7 +534,7 @@ public:
             }
             if (FlameBuffetTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_FLAME_BUFFET, true);
+                DoCast(me->GetVictim(), SPELL_FLAME_BUFFET, true);
                 FlameBuffetTimer = 7000;
             } else FlameBuffetTimer -= diff;
             DoMeleeAttackIfReady();
@@ -580,13 +580,13 @@ public:
                 if (instance->GetData(DATA_ALLIANCE_RETREAT))//2.alliance boss down, attack thrall
                 {
                     Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_THRALL));
-                    if (target && target->isAlive())
+                    if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
                 else
                 {
                     Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_JAINAPROUDMOORE));
-                    if (target && target->isAlive())
+                    if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
             }
@@ -637,7 +637,7 @@ public:
                 return;
             if (KnockDownTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_KNOCKDOWN);
+                DoCast(me->GetVictim(), SPELL_KNOCKDOWN);
                 KnockDownTimer = 15000+rand()%10000;
             } else KnockDownTimer -= diff;
             DoMeleeAttackIfReady();
@@ -683,13 +683,13 @@ public:
                 if (instance->GetData(DATA_ALLIANCE_RETREAT))//2.alliance boss down, attack thrall
                 {
                     Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_THRALL));
-                    if (target && target->isAlive())
+                    if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
                 else
                 {
                     Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_JAINAPROUDMOORE));
-                    if (target && target->isAlive())
+                    if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
             }
@@ -798,13 +798,13 @@ public:
                 if (instance->GetData(DATA_ALLIANCE_RETREAT))//2.alliance boss down, attack thrall
                 {
                     Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_THRALL));
-                    if (target && target->isAlive())
+                    if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
                 else
                 {
                     Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_JAINAPROUDMOORE));
-                    if (target && target->isAlive())
+                    if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
             }
@@ -867,7 +867,7 @@ public:
 
             if (ShadowBoltTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_SHADOW_BOLT);
+                DoCast(me->GetVictim(), SPELL_SHADOW_BOLT);
                 ShadowBoltTimer = 20000+rand()%10000;
             } else ShadowBoltTimer -= diff;
 
@@ -915,13 +915,13 @@ public:
                 if (instance->GetData(DATA_ALLIANCE_RETREAT))//2.alliance boss down, attack thrall
                 {
                     Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_THRALL));
-                    if (target && target->isAlive())
+                    if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
                 else
                 {
                     Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_JAINAPROUDMOORE));
-                    if (target && target->isAlive())
+                    if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
             }
@@ -962,12 +962,12 @@ public:
                 return;
             if (CourseTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_BANSHEE_CURSE);
+                DoCast(me->GetVictim(), SPELL_BANSHEE_CURSE);
                 CourseTimer = 20000+rand()%5000;
             } else CourseTimer -= diff;
             if (WailTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_BANSHEE_WAIL);
+                DoCast(me->GetVictim(), SPELL_BANSHEE_WAIL);
                 WailTimer = 15000+rand()%5000;
             } else WailTimer -= diff;
             if (ShellTimer <= diff)
@@ -1015,13 +1015,13 @@ public:
                 if (instance->GetData(DATA_ALLIANCE_RETREAT))//2.alliance boss down, attack thrall
                 {
                     Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_THRALL));
-                    if (target && target->isAlive())
+                    if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
                 else
                 {
                     Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_JAINAPROUDMOORE));
-                    if (target && target->isAlive())
+                    if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
             }
@@ -1063,7 +1063,7 @@ public:
                 return;
             if (WebTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_WEB);
+                DoCast(me->GetVictim(), SPELL_WEB);
                 WebTimer = 20000+rand()%5000;
             } else WebTimer -= diff;
             DoMeleeAttackIfReady();
@@ -1106,13 +1106,13 @@ public:
                 if (instance->GetData(DATA_ALLIANCE_RETREAT))//2.alliance boss down, attack thrall
                 {
                     Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_THRALL));
-                    if (target && target->isAlive())
+                    if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
                 else
                 {
                     Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_JAINAPROUDMOORE));
-                    if (target && target->isAlive())
+                    if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
             }
@@ -1154,7 +1154,7 @@ public:
                 return;
             if (ManaBurnTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_MANA_BURN);
+                DoCast(me->GetVictim(), SPELL_MANA_BURN);
                 ManaBurnTimer = 9000+rand()%5000;
             } else ManaBurnTimer -= diff;
             DoMeleeAttackIfReady();
@@ -1198,7 +1198,7 @@ public:
             if (waypointId == 2 && instance && !IsOverrun)
             {
                 Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_THRALL));
-                if (target && target->isAlive())
+                if (target && target->IsAlive())
                 {
                     me->AddThreat(target, 0.0f);
                     DoCast(target, SPELL_FROST_BREATH, true);
@@ -1254,20 +1254,20 @@ public:
             }
             if (!UpdateVictim())
                 return;
-            if (!me->IsWithinDist(me->getVictim(), 25))
+            if (!me->IsWithinDist(me->GetVictim(), 25))
             {
                 if (MoveTimer <= diff)
                 {
-                    me->GetMotionMaster()->MoveChase(me->getVictim());
+                    me->GetMotionMaster()->MoveChase(me->GetVictim());
                     MoveTimer = 2000;
                 } else MoveTimer-=diff;
             }
 
             if (FrostBreathTimer <= diff)
             {
-                if (!me->IsWithinDist(me->getVictim(), 25))
+                if (!me->IsWithinDist(me->GetVictim(), 25))
                 {
-                    DoCast(me->getVictim(), SPELL_FROST_BREATH);
+                    DoCast(me->GetVictim(), SPELL_FROST_BREATH);
                     me->StopMoving();
                     me->GetMotionMaster()->Clear();
                     FrostBreathTimer = 4000;
@@ -1318,7 +1318,7 @@ public:
             if (waypointId == 2 && instance && !IsOverrun)
             {
                 Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_THRALL));
-                if (target && target->isAlive())
+                if (target && target->IsAlive())
                 {
                     me->AddThreat(target, 0.0f);
                     DoCast(target, SPELL_GARGOYLE_STRIKE, true);
@@ -1389,7 +1389,7 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (!me->getVictim() || (me->getVictim() && !me->IsWithinDist(me->getVictim(), 20)) || forcemove)
+            if (!me->GetVictim() || (me->GetVictim() && !me->IsWithinDist(me->GetVictim(), 20)) || forcemove)
             {
                 forcemove = false;
 
@@ -1403,7 +1403,7 @@ public:
                 if (MoveTimer <= diff)
                 {
                     float x, y, z;
-                    me->getVictim()->GetPosition(x, y, z);
+                    me->GetVictim()->GetPosition(x, y, z);
                     me->GetMotionMaster()->MovePoint(0, x, y, z+Zpos);
                     Zpos -= 1.0f;
                     if (Zpos <= 0)
@@ -1416,9 +1416,9 @@ public:
 
             if (StrikeTimer <= diff)
             {
-                if (me->getVictim() && me->IsWithinDist(me->getVictim(), 20))
+                if (me->GetVictim() && me->IsWithinDist(me->GetVictim(), 20))
                 {
-                    DoCast(me->getVictim(), SPELL_GARGOYLE_STRIKE);
+                    DoCast(me->GetVictim(), SPELL_GARGOYLE_STRIKE);
                     me->StopMoving();
                     me->GetMotionMaster()->Clear();
                     StrikeTimer = 2000+rand()%1000;
@@ -1463,7 +1463,7 @@ public:
 
         void MoveInLineOfSight(Unit* who)
         {
-            if (!who || me->getVictim())
+            if (!who || me->GetVictim())
                 return;
 
             if (me->IsValidAttackTarget(who))
@@ -1485,13 +1485,13 @@ public:
                 return;
             if (ExplodeTimer <= diff)
             {
-                if (!me->IsWithinDistInMap(me->getVictim(), 30))
+                if (!me->IsWithinDistInMap(me->GetVictim(), 30))
                 {
                     EnterEvadeMode();
                     return;
                 }
                 int dmg = 500+rand()%700;
-                me->CastCustomSpell(me->getVictim(), SPELL_EXPLODING_SHOT, &dmg, 0, 0, false);
+                me->CastCustomSpell(me->GetVictim(), SPELL_EXPLODING_SHOT, &dmg, 0, 0, false);
                 ExplodeTimer = 5000+rand()%5000;
             } else ExplodeTimer -= diff;
             DoMeleeAttackIfReady();

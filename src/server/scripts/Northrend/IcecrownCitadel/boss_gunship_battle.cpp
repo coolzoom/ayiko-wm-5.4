@@ -477,7 +477,7 @@ public:
             }
             else
             {
-                if (Unit * victim = me->getVictim())
+                if (Unit * victim = me->GetVictim())
                 {
                     if (victim->GetTypeId() != TYPEID_PLAYER)
                     {
@@ -491,7 +491,7 @@ public:
                         if (victim->GetVehicle())
                             checkPassed = false;
 
-                        if (!victim->isAlive())
+                        if (!victim->IsAlive())
                             checkPassed = false;
                     }
                     else
@@ -547,13 +547,13 @@ public:
                         events.ScheduleEvent(EVENT_CLEAVE, CONFIG_CLEAVE_TIMER);
                         break;
                     case EVENT_THROW:
-                        if (!me->getVictim() || me->IsWithinMeleeRange(me->getVictim()))
+                        if (!me->GetVictim() || me->IsWithinMeleeRange(me->GetVictim()))
                         {
                             events.ScheduleEvent(EVENT_THROW, CONFIG_THROW_TIMER);
                             break;
                         }
                         else
-                            DoCast(me->getVictim(), SPELL_RENDING_THROW);
+                            DoCast(me->GetVictim(), SPELL_RENDING_THROW);
 
                         events.ScheduleEvent(EVENT_THROW, CONFIG_THROW_TIMER);
                         break;
@@ -919,11 +919,11 @@ public:
 
             events.Update(diff);
 
-            if (me->getVictim())
+            if (me->GetVictim())
             {
-                if (me->getVictim()->GetTransport())
+                if (me->GetVictim()->GetTransport())
                 {
-                    if (me->getVictim()->GetTransport()->GetGUID() != pInstance->GetData64(DATA_GUNSHIP_TRANSPORT_MAIN))
+                    if (me->GetVictim()->GetTransport()->GetGUID() != pInstance->GetData64(DATA_GUNSHIP_TRANSPORT_MAIN))
                     {
                         if (Transport * FriendlyTransport = GetTransportByGUID(me, pInstance->GetData64(DATA_GUNSHIP_TRANSPORT_MAIN)))
                         {
@@ -1199,7 +1199,7 @@ public:
             if (IsPortalMage)
                 return;
 
-            if (me->isAlive() && IsCasting && !me->HasUnitState(UNIT_STATE_CASTING))
+            if (me->IsAlive() && IsCasting && !me->HasUnitState(UNIT_STATE_CASTING))
                 me->CastSpell(me, SPELL_BEHIND_ZERO, false);
 
             if (!MovementDone)

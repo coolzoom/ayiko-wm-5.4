@@ -286,7 +286,7 @@ class boss_sha_of_fear : public CreatureScript
                 {
                     case EVENT_CHECK_MELEE:
                     {
-                        if (!me->IsWithinMeleeRange(me->getVictim(), 2.0f))
+                        if (!me->IsWithinMeleeRange(me->GetVictim(), 2.0f))
                         {
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 80.0f))
                                 me->CastSpell(target, SPELL_REACHING_ATTACK, false);
@@ -295,7 +295,7 @@ class boss_sha_of_fear : public CreatureScript
                         {
                             // Always attack champion of light
                             if (Player* target = GetChampionOfLight(me))
-                                if (me->getVictim() && me->getVictim()->GetGUID() != target->GetGUID())
+                                if (me->GetVictim() && me->GetVictim()->GetGUID() != target->GetGUID())
                                     AttackStart(target);
                         }
                         events.ScheduleEvent(EVENT_CHECK_MELEE, 1000);

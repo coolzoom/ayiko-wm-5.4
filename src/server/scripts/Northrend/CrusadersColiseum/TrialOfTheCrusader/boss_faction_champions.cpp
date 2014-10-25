@@ -1316,7 +1316,7 @@ class mob_toc_hunter : public CreatureScript
 
                 if (m_uiWingClipTimer <= uiDiff)
                 {
-                    if (me->GetDistance2d(me->getVictim()) < 5.0f)
+                    if (me->GetDistance2d(me->GetVictim()) < 5.0f)
                         DoCastVictim(SPELL_WING_CLIP);
                     m_uiWingClipTimer = urand(4*IN_MILLISECONDS, 8*IN_MILLISECONDS);
                 }
@@ -1706,7 +1706,7 @@ class mob_toc_dk : public CreatureScript
 
                 if (m_uiDeathGripTimer <= uiDiff)
                 {
-                    if (me->IsInRange(me->getVictim(), 10.0f, 30.0f, false))
+                    if (me->IsInRange(me->GetVictim(), 10.0f, 30.0f, false))
                         DoCastVictim(SPELL_DEATH_GRIP);
                     m_uiDeathGripTimer = urand(5*IN_MILLISECONDS, 15*IN_MILLISECONDS);
                 }
@@ -1796,7 +1796,7 @@ class mob_toc_rogue : public CreatureScript
 
                 if (m_uiShadowstepTimer <= uiDiff)
                 {
-                    if (Unit* victim = me->getVictim())
+                    if (Unit* victim = me->GetVictim())
                         if (me->IsInRange(victim, 10.0f, 40.0f))
                             DoCastVictim(SPELL_SHADOWSTEP);
                     m_uiShadowstepTimer = urand(10*IN_MILLISECONDS, 80*IN_MILLISECONDS);

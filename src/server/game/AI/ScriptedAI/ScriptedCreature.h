@@ -388,7 +388,7 @@ struct SmoothCreatureMovement
             if (!_mover->CanFreeMove())
                 return;
 
-            if (Unit* target = _mover->getVictim())
+            if (Unit* target = _mover->GetVictim())
             {
                 if (_mover->IsWithinMeleeRange(target))
                 {
@@ -428,7 +428,7 @@ class DelayEventDoAction : public BasicEvent
 
         bool Execute(uint64 /*execTime*/, uint32 /*diff*/)
         {
-            if (_me->IsAIEnabled && _me->isAlive())
+            if (_me->IsAIEnabled && _me->IsAlive())
                 _me->GetAI()->DoAction(_action);
 
             return false;
@@ -450,7 +450,7 @@ class DelayEventSetData : public BasicEvent
 
         bool Execute(uint64 /*execTime*/, uint32 /*diff*/)
         {
-            if (_me->IsAIEnabled && _me->isAlive())
+            if (_me->IsAIEnabled && _me->IsAlive())
                 _me->GetAI()->SetData(_type, _data);
 
             return false;

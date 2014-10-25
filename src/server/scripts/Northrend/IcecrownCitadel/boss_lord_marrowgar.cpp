@@ -285,7 +285,7 @@ class boss_lord_marrowgar : public CreatureScript
 
                 // lock movement
                 _boneStormVictimCount++;
-                DoStartNoMovement(me->getVictim());
+                DoStartNoMovement(me->GetVictim());
 
                 _coldflameLastPos.Relocate(me);
                 DoCast(me, SPELL_COLDFLAME_BONE_STORM);

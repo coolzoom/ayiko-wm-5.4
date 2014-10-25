@@ -259,7 +259,7 @@ struct boss_twin_baseAI : public ScriptedAI
         {
             if (Creature* pSister = GetSister())
             {
-                if (!pSister->isAlive())
+                if (!pSister->IsAlive())
                 {
                     me->SetFlag(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
                     pSister->SetFlag(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);

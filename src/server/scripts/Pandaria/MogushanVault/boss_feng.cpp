@@ -571,7 +571,7 @@ class boss_feng : public CreatureScript
                     {
                         if (dotSpellId == SPELL_SHADOWBURN)
                         {
-                            if (Unit* target = me->getVictim())
+                            if (Unit* target = me->GetVictim())
                                 me->CastSpell(target, dotSpellId, false);
                             else if (Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO))
                                 me->CastSpell(target, dotSpellId, false);

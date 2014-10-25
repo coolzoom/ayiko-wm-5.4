@@ -2141,7 +2141,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 if (!PlayerList.isEmpty())
                     for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                         if (Player* player = i->getSource())
-                            if (player->isAlive())
+                            if (player->IsAlive())
                                 wipe = false;
 
                 if (wipe)

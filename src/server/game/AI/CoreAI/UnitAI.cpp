@@ -43,7 +43,7 @@ void UnitAI::DoMeleeAttackIfReady()
     if (me->HasUnitState(UNIT_STATE_CASTING))
         return;
 
-    Unit* victim = me->getVictim();
+    Unit* victim = me->GetVictim();
     //Make sure our attack is ready and we aren't currently casting before checking distance
     if (me->isAttackReady() && me->IsWithinMeleeRange(victim))
     {
@@ -67,9 +67,9 @@ bool UnitAI::DoSpellAttackIfReady(uint32 spell)
     {
         if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spell))
         {
-            if (me->IsWithinCombatRange(me->getVictim(), spellInfo->GetMaxRange(false)))
+            if (me->IsWithinCombatRange(me->GetVictim(), spellInfo->GetMaxRange(false)))
             {
-                me->CastSpell(me->getVictim(), spell, false);
+                me->CastSpell(me->GetVictim(), spell, false);
                 me->resetAttackTimer();
             }
             else
@@ -140,7 +140,7 @@ void UnitAI::DoCast(uint32 spellId)
            target = me;
            break;
         case AITARGET_VICTIM:
-            target = me->getVictim();
+            target = me->GetVictim();
             break;
         case AITARGET_ENEMY:
         {
@@ -166,8 +166,8 @@ void UnitAI::DoCast(uint32 spellId)
 
                 DefaultTargetSelector targetSelector(me, range, playerOnly, -(int32)spellId);
                 if (!(spellInfo->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_VICTIM)
-                    && targetSelector(me->getVictim()))
-                    target = me->getVictim();
+                    && targetSelector(me->GetVictim()))
+                    target = me->GetVictim();
                 else
                     target = SelectTarget(SELECT_TARGET_RANDOM, 0, targetSelector);
             }
@@ -271,7 +271,7 @@ void SimpleCharmedAI::UpdateAI(const uint32 /*diff*/)
     if (!charmer->isInCombat())
         me->GetMotionMaster()->MoveFollow(charmer, PET_FOLLOW_DIST, me->GetFollowAngle());
 
-    Unit* target = me->getVictim();
+    Unit* target = me->GetVictim();
     if (!target || !charmer->IsValidAttackTarget(target))
         AttackStart(charmer->SelectNearestTargetInAttackDistance());
 }
@@ -327,5 +327,5 @@ bool NonTankTargetSelector::operator()(Unit const* target) const
     if (_playerOnly && target->GetTypeId() != TYPEID_PLAYER)
         return false;
 
-    return target != _source->getVictim();
+    return target != _source->GetVictim();
 }

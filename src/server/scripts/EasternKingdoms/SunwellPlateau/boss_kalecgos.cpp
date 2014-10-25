@@ -311,7 +311,7 @@ public:
                         Unit* target = (*itr)->getTarget();
                         if (target
                                 && target->GetTypeId() == TYPEID_PLAYER
-                                && target->GetGUID() != me->getVictim()->GetGUID()
+                                && target->GetGUID() != me->GetVictim()->GetGUID()
                                 && target->GetPositionZ() > me->GetPositionZ() - 5
                                 && !target->HasAura(AURA_SPECTRAL_EXHAUSTION))
                         {
@@ -341,7 +341,7 @@ public:
             if (bJustReset)//boss is invisible, don't attack
                 return;
 
-            if (!me->getVictim() && me->IsValidAttackTarget(who))
+            if (!me->GetVictim() && me->IsValidAttackTarget(who))
             {
                 float attackRadius = me->GetAttackDistance(who);
                 if (me->IsWithinDistInMap(who, attackRadius))
@@ -535,7 +535,7 @@ public:
 
             if (HeroicStrikeTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_HEROIC_STRIKE);
+                DoCast(me->GetVictim(), SPELL_HEROIC_STRIKE);
                 HeroicStrikeTimer = 2000;
             } else HeroicStrikeTimer -= diff;
 
@@ -725,7 +725,7 @@ public:
             if (CheckTimer <= diff)
             {
                 Creature* Kalec = Unit::GetCreature(*me, KalecGUID);
-                if (!Kalec || (Kalec && !Kalec->isAlive()))
+                if (!Kalec || (Kalec && !Kalec->IsAlive()))
                 {
                     if (Creature* Kalecgos = Unit::GetCreature(*me, KalecgosGUID))
                         Kalecgos->AI()->EnterEvadeMode();
@@ -793,7 +793,7 @@ public:
             if (AgonyCurseTimer <= diff)
             {
                 Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0);
-                if (!target) target = me->getVictim();
+                if (!target) target = me->GetVictim();
                 DoCast(target, SPELL_AGONY_CURSE);
                 AgonyCurseTimer = 20000;
             } else AgonyCurseTimer -= diff;
@@ -801,7 +801,7 @@ public:
             if (CorruptionStrikeTimer <= diff)
             {
                 if (!(rand()%5))DoScriptText(SAY_SATH_SPELL2, me);
-                DoCast(me->getVictim(), SPELL_CORRUPTION_STRIKE);
+                DoCast(me->GetVictim(), SPELL_CORRUPTION_STRIKE);
                 CorruptionStrikeTimer = 13000;
             } else CorruptionStrikeTimer -= diff;
 

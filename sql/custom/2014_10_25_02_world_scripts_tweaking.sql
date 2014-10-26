@@ -1,7 +1,6 @@
 -- [SQL] [Internal] Added primary keys to *_scripts tables in order to forbid any possibility of duplicates, Summon timers have been mass-tweaked in all *_scripts tables
 -- event_scripts
 ALTER TABLE `event_scripts`
-  DROP PRIMARY KEY,
   ADD PRIMARY KEY (`id`, `delay`, `command`, `datalong`, `datalong2`, `dataint`, `x`, `y`, `z`, `o`);
   
 UPDATE
@@ -22,7 +21,6 @@ WHERE
 
 -- waypoint_scripts
 ALTER TABLE `waypoint_scripts`
-  DROP PRIMARY KEY,
   ADD PRIMARY KEY (`id`, `delay`, `command`, `datalong`, `datalong2`, `dataint`, `x`, `y`, `z`, `o`);
 
 UPDATE

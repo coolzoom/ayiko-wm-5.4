@@ -40,3 +40,13 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 ('28041', '0', '2', '3', '61', '0', '100', '0', '0', '0', '0', '0', '11', '50289', '0', '0', '0', '0', '0', '7', '0', '0', '0', '0', '0', '0', '0', 'On link - Cast credit spell - Invoker'),
 ('28041', '0', '3', '4', '61', '0', '100', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '7', '0', '0', '0', '0', '0', '0', '0', 'On link - Whisper - Invoker'),
 ('28041', '0', '4', '0', '61', '0', '100', '0', '0', '0', '0', '0', '41', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', 'On link - Despawn - Self');
+
+-- Blood in The Water
+DELETE FROM `smart_scripts` WHERE (`entryorguid`='29392') AND (`source_type`='0');
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+('29392', '0', '0', '0', '0', '0', '100', '0', '5000', '8000', '11300', '13400', '11', '3391', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', 'Nepenthe-Ravenous Jaws - IC - Cast Thrash'),
+('29392', '0', '1', '0', '6', '0', '100', '0', '0', '0', '0', '0', '11', '47172', '2', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', 'Nepenthe-Ravenous Jaws - On Death - Cast Underwater Blood'),
+('29392', '0', '2', '3', '8', '0', '100', '0', '6509', '0', '0', '0', '33', '29391', '0', '0', '0', '0', '0', '7', '0', '0', '0', '0', '0', '0', '0', 'Nepenthe-Ravenous Jaws - On Spellhit - KC'),
+('29392', '0', '3', '0', '61', '0', '100', '0', '0', '0', '0', '0', '41', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', 'Nepenthe-Ravenous Jaws - On Spellhit - Despawn');
+
+DELETE FROM `spell_scripts` WHERE (`id`='6509') AND (`effIndex`='0') AND (`delay`='0') AND (`command`='8') AND (`datalong`='29391');

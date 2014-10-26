@@ -673,7 +673,6 @@ struct ResetNotifier
 void Map::ProcessRelocationNotifies(uint32 diff)
 {
     ResetNotifier reset;
-
     auto gridResetNotifier(Trinity::makeGridVisitor(reset));
     auto worldResetNotifier(Trinity::makeWorldVisitor(reset));
 
@@ -688,6 +687,8 @@ void Map::ProcessRelocationNotifies(uint32 diff)
             continue;
 
         uint32 gx = ngrid.getX(), gy = ngrid.getY();
+
+        TC_PROBE3(worldserver, map_relocation_notifiers.grid.begin, this, gx, gy);
 
         CellCoord cell_min(gx*MAX_NUMBER_OF_CELLS, gy*MAX_NUMBER_OF_CELLS);
         CellCoord cell_max(cell_min.x_coord + MAX_NUMBER_OF_CELLS, cell_min.y_coord+MAX_NUMBER_OF_CELLS);
@@ -712,6 +713,8 @@ void Map::ProcessRelocationNotifies(uint32 diff)
         }
 
         ngrid.getGridInfo().getRelocationTimer().TReset(diff, m_VisibilityNotifyPeriod);
+
+        TC_PROBE3(worldserver, map_relocation_notifiers.grid.end, this, gx, gy);
     }
 }
 

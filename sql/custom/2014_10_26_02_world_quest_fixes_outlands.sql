@@ -155,3 +155,6 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 
 UPDATE `gameobject_template` SET `displayId`='299' WHERE (`entry`='183123');
 UPDATE `quest_template` SET `RequiredSpellCast1`='0', `RequiredSpellCast2`='0', `RequiredSpellCast3`='0', `RequiredSpellCast4`='0' WHERE (`Id`='10078');
+
+-- Burn It Up... For the Horde!
+UPDATE `creature_template` SET `flags_extra`='130' WHERE `entry` IN('19008', '18849');

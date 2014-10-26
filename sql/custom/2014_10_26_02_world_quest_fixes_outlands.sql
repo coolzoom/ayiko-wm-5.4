@@ -49,3 +49,6 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 ('17999', '0', '0', '0', '8', '0', '100', '0', '31736', '0', '0', '0', '33', '17999', '0', '0', '0', '0', '0', '7', '0', '0', '0', '0', '0', '0', '0', 'Raufen - give KC on spellhit'),
 ('18002', '0', '0', '0', '8', '0', '100', '0', '31736', '0', '0', '0', '33', '18002', '0', '0', '0', '0', '0', '7', '0', '0', '0', '0', '0', '0', '0', 'Raufen - give KC on spellhit'),
 ('18000', '0', '0', '0', '8', '0', '100', '0', '31736', '0', '0', '0', '33', '18000', '0', '0', '0', '0', '0', '7', '0', '0', '0', '0', '0', '0', '0', 'Raufen - give KC on spellhit');
+
+-- Felblood Sample
+UPDATE `creature_loot_template` SET `ChanceOrQuestChance`='-39' WHERE (`entry`='16951') AND (`item`='23269');

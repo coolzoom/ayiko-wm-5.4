@@ -1789,7 +1789,7 @@ void Player::Update(uint32 p_time)
         UpdateItemDuration(uint32(now - m_Last_tick));
 
     // check every second
-    if (now > m_Last_tick + 1000)
+    if (now > m_Last_tick + 1)
         UpdateSoulboundTradeItems();
 
     // If mute expired, remove it from the DB

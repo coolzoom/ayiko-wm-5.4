@@ -80,7 +80,7 @@ public:
             { "creature_linked_respawn",       rbac::RBAC_PERM_COMMAND_RELOAD_CREATURE_LINKED_RESPAWN,    true,  &HandleReloadLinkedRespawnCommand,              "", NULL },
             { "creature_loot_template",        rbac::RBAC_PERM_COMMAND_RELOAD_CREATURE_LOOT_TEMPLATE, true,  &HandleReloadLootTemplatesCreatureCommand,      "", NULL },
             { "creature_onkill_reputation",    rbac::RBAC_PERM_COMMAND_RELOAD_CREATURE_ONKILL_REPUTATION, true,  &HandleReloadOnKillReputationCommand,           "", NULL },
-            { "creature_queststarter",         rbac::RBAC_PERM_COMMAND_RELOAD_CREATURE_QUESTSTARTER, true,  &HandleReloadCreatureQuestRelationsCommand,     "", NULL },
+            { "creature_queststarter",         rbac::RBAC_PERM_COMMAND_RELOAD_CREATURE_QUESTSTARTER, true,  &HandleReLoadCreatureQuestStartersCommand,     "", NULL },
             { "creature_summon_groups",        rbac::RBAC_PERM_COMMAND_RELOAD_CREATURE_SUMMON_GROUPS, true,  &HandleReloadCreatureSummonGroupsCommand,       "", NULL },
             { "creature_template",             rbac::RBAC_PERM_COMMAND_RELOAD_CREATURE_TEMPLATE, true,  &HandleReloadCreatureTemplateCommand,           "", NULL },
             { "disables",                      rbac::RBAC_PERM_COMMAND_RELOAD_DISABLES, true,  &HandleReloadDisablesCommand,                   "", NULL },
@@ -508,10 +508,10 @@ public:
         return true;
     }
 
-    static bool HandleReloadCreatureQuestRelationsCommand(ChatHandler* handler, const char* /*args*/)
+    static bool HandleReLoadCreatureQuestStartersCommand(ChatHandler* handler, const char* /*args*/)
     {
         TC_LOG_INFO("misc", "Loading Quests Relations... (`creature_questrelation`)");
-        sObjectMgr->LoadCreatureQuestRelations();
+        sObjectMgr->LoadCreatureQuestStarters();
         handler->SendGlobalGMSysMessage("DB table `creature_questrelation` (creature quest givers) reloaded.");
         return true;
     }
@@ -527,7 +527,7 @@ public:
     static bool HandleReloadCreatureQuestInvRelationsCommand(ChatHandler* handler, const char* /*args*/)
     {
         TC_LOG_INFO("misc", "Loading Quests Relations... (`creature_involvedrelation`)");
-        sObjectMgr->LoadCreatureInvolvedRelations();
+        sObjectMgr->LoadCreatureQuestEnders();
         handler->SendGlobalGMSysMessage("DB table `creature_involvedrelation` (creature quest takers) reloaded.");
         return true;
     }
@@ -552,17 +552,17 @@ public:
 
     static bool HandleReloadGOQuestRelationsCommand(ChatHandler* handler, const char* /*args*/)
     {
-        TC_LOG_INFO("misc", "Loading Quests Relations... (`gameobject_questrelation`)");
-        sObjectMgr->LoadGameobjectQuestRelations();
-        handler->SendGlobalGMSysMessage("DB table `gameobject_questrelation` (gameobject quest givers) reloaded.");
+        TC_LOG_INFO("misc", "Loading Quests Relations... (`gameobject_queststarter`)");
+        sObjectMgr->LoadGameobjectQuestStarters();
+        handler->SendGlobalGMSysMessage("DB table `gameobject_queststarter` (gameobject quest givers) reloaded.");
         return true;
     }
 
     static bool HandleReloadGOQuestInvRelationsCommand(ChatHandler* handler, const char* /*args*/)
     {
-        TC_LOG_INFO("misc", "Loading Quests Relations... (`gameobject_involvedrelation`)");
-        sObjectMgr->LoadGameobjectInvolvedRelations();
-        handler->SendGlobalGMSysMessage("DB table `gameobject_involvedrelation` (gameobject quest takers) reloaded.");
+        TC_LOG_INFO("misc", "Loading Quests Relations... (`gameobject_questender`)");
+        sObjectMgr->LoadGameobjectQuestEnders();
+        handler->SendGlobalGMSysMessage("DB table `gameobject_questender` (gameobject quest takers) reloaded.");
         return true;
     }
 

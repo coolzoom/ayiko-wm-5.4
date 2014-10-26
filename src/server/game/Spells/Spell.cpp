@@ -6542,7 +6542,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             {
                 // Hackfix for Raigonn
                 if (m_caster->GetEntry() != WORLD_TRIGGER && target->GetEntry() != 56895) // Ignore LOS for gameobjects casts (wrongly casted by a trigger)
-                    if (!(m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS) && !m_caster->IsWithinLOSInMap(target))
+                    if (!(m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS) && !DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->Id, NULL, SPELL_DISABLE_LOS) && !m_caster->IsWithinLOSInMap(target))
                         return SPELL_FAILED_LINE_OF_SIGHT;
 
                 if (m_caster->IsVisionObscured(target, m_spellInfo))
@@ -6557,7 +6557,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         float x, y, z;
         m_targets.GetDstPos()->GetPosition(x, y, z);
 
-        if (!(m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS) && !m_caster->IsWithinLOS(x, y, z))
+        if (!(m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS) && !DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->Id, NULL, SPELL_DISABLE_LOS) && !m_caster->IsWithinLOS(x, y, z))
             return SPELL_FAILED_LINE_OF_SIGHT;
     }
 
@@ -8224,7 +8224,7 @@ bool Spell::CheckEffectTarget(Unit const* target, uint32 eff) const
             return false;
     }
 
-    if (!m_spellInfo->IsNeedAdditionalLosChecks() && (IsTriggered() || m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS))
+    if (!m_spellInfo->IsNeedAdditionalLosChecks() && (IsTriggered() || m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS) || DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->Id, NULL, SPELL_DISABLE_LOS))
         return true;
 
     // Hack fix for Ice Tombs (Sindragosa encounter)

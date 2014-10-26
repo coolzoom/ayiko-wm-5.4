@@ -135,3 +135,23 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 
 -- Boiling Blood
 UPDATE `creature_loot_template` SET `ChanceOrQuestChance`='-50' WHERE (`item`='30425');
+
+-- Laying Waste to the Unwanted
+DELETE FROM `disables` WHERE `SourceType` = '0' AND `entry` = '32979';
+INSERT INTO `disables` (`sourceType`, `entry`, `flags`, `comment`) VALUES ('0', '32979', '64', 'Ignore LOS on Ignite Horde Siege Engine');
+
+UPDATE `creature_template` SET `flags_extra`='130', `AIName` = 'SmartAI' WHERE `entry` IN(19009, 21236, 21237, 18818);
+
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` IN(19009, 21236, 21237, 18818);
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+(18818, 0, 0, 1, 8, 0, 100, 0, 32979, 0, 60000, 60000, 11, 34386, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invis Horde Siege Engine - East 02 - On Spellhit - Cast Create Hellfire Fire'),
+(18818, 0, 1, 0, 61, 0, 100, 0, 0, 0, 0, 0, 33, 18818, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Invis Horde Siege Engine - East 02 - On Spellhit - Quest Credit'),
+(19009, 0, 0, 1, 8, 0, 100, 0, 32979, 0, 60000, 60000, 11, 34386, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invis Horde Siege Engine - West - On Spellhit - Cast Create Hellfire Fire'),
+(19009, 0, 1, 0, 61, 0, 100, 0, 0, 0, 0, 0, 33, 19009, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Invis Horde Siege Engine - West - On Spellhit - Quest Credit'),
+(21236, 0, 0, 1, 8, 0, 100, 0, 32979, 0, 60000, 60000, 11, 34386, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invis Horde Siege Engine - West 02 - On Spellhit - Cast Create Hellfire Fire'),
+(21236, 0, 1, 0, 61, 0, 100, 0, 0, 0, 0, 0, 33, 21236, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Invis Horde Siege Engine - West 02 - On Spellhit - Quest Credit'),
+(21237, 0, 0, 1, 8, 0, 100, 0, 32979, 0, 60000, 60000, 11, 34386, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invis Horde Siege Engine - East - On Spellhit - Cast Create Hellfire Fire'),
+(21237, 0, 1, 0, 61, 0, 100, 0, 0, 0, 0, 0, 33, 21237, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Invis Horde Siege Engine - East - On Spellhit - Quest Credit');
+
+UPDATE `gameobject_template` SET `displayId`='299' WHERE (`entry`='183123');
+UPDATE `quest_template` SET `RequiredSpellCast1`='0', `RequiredSpellCast2`='0', `RequiredSpellCast3`='0', `RequiredSpellCast4`='0' WHERE (`Id`='10078');

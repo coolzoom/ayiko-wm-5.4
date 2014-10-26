@@ -33,6 +33,7 @@
 #include "Language.h"
 #include "WorldPacket.h"
 #include "Group.h"
+#include "Profiler/ProbePoint.hpp"
 
 MapManager::MapManager()
 {
@@ -263,6 +264,8 @@ void MapManager::Update(uint32 diff)
         (*itr)->Update(uint32(i_timer.GetCurrent()));
 
     i_timer.SetCurrent(0);
+
+    TC_PROBE(worldserver, map_manager_update.end);
 }
 
 void MapManager::DoDelayedMovesAndRemoves()

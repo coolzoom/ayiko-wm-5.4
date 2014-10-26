@@ -16,6 +16,10 @@ if(CMAKE_COMPILER_IS_GNUCXX)
   add_definitions(-fno-delete-null-pointer-checks)
 endif()
 
+if(HAVE_SYS_SDT_H)
+  add_definitions(-DHAVE_SYS_SDT_H)
+endif()
+
 if( SERVERS )
   set(sources_Debugging
     ${CMAKE_SOURCE_DIR}/src/server/shared/Debugging/WheatyExceptionReport.cpp

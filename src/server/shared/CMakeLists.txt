@@ -16,6 +16,7 @@ file(GLOB_RECURSE sources_Debugging Debugging/*.cpp Debugging/*.h)
 file(GLOB_RECURSE sources_Dynamic Dynamic/*.cpp Dynamic/*.h)
 file(GLOB_RECURSE sources_Logging Logging/*.cpp Logging/*.h)
 file(GLOB_RECURSE sources_Packets Packets/*.cpp Packets/*.h)
+file(GLOB_RECURSE sources_Profiler Profiler/*.cpp Profiler/*.h)
 file(GLOB_RECURSE sources_Threading Threading/*.cpp Threading/*.h)
 file(GLOB_RECURSE sources_Utilities Utilities/*.cpp Utilities/*.h)
 
@@ -40,6 +41,7 @@ set(shared_STAT_SRCS
   ${sources_Dynamic}
   ${sources_Logging}
   ${sources_Packets}
+  ${sources_Profiler}
   ${sources_Threading}
   ${sources_Utilities}
   ${sources_localdir}

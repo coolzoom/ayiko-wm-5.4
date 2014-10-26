@@ -58,6 +58,8 @@ if( USE_JEMALLOC )
 endif()
 
 if( UNIX )
+  check_include_files("sys/sdt.h" HAVE_SYS_SDT_H)
+
   find_package(Readline)
   find_package(ZLIB)
   find_package(BZip2)

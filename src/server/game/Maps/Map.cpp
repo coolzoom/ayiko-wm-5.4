@@ -33,6 +33,7 @@
 #include "DynamicTree.h"
 #include "Vehicle.h"
 #include "ObjectGridLoader.h"
+#include "Profiler/ProbePoint.hpp"
 
 namespace {
 
@@ -584,40 +585,57 @@ bool Map::IsGridLoaded(const GridCoord &p) const
 
 void Map::Update(const uint32 diff)
 {
-    _dynamicTree.update(diff);
-
-    // update active cells around players and active objects
-    resetMarkedCells();
-
     // for creature
     auto gridObjectUpdate(Trinity::makeGridVisitor(i_objectUpdater));
     // for pets
     auto worldObjectUpdate(Trinity::makeWorldVisitor(i_objectUpdater));
+
+    TC_PROBE1(worldserver, map_update.begin, this);
+
+    _dynamicTree.update(diff);
+    TC_PROBE1(worldserver, map_update.dynamic_tree.end, this);
+
+    // update active cells around players and active objects
+    resetMarkedCells();
+    TC_PROBE1(worldserver, map_update.marked_cells.end, this);
 
     // update worldsessions for existing players
     for (m_mapRefIter = m_mapRefManager.begin(); m_mapRefIter != m_mapRefManager.end(); ++m_mapRefIter)
     {
         if (Player* player = m_mapRefIter->getSource())
         {
+            TC_PROBE2(worldserver, map_update.player.begin, this, player);
+
             player->GetSession()->Update(diff, MapSessionFilter(player->GetSession()));
+            TC_PROBE2(worldserver, map_update.player_session.end, this, player);
 
             // Can be not in world after WorldSession::Update
             if (player->IsInWorld())
             {
                 player->Update(diff);
+                TC_PROBE2(worldserver, map_update.player_update.end, this, player);
+
                 VisitNearbyCellsOf(this, player, gridObjectUpdate, worldObjectUpdate);
+                TC_PROBE2(worldserver, map_update.player_cells.end, this, player);
             }
         }
     }
+    TC_PROBE1(worldserver, map_update.players_loop.end, this);
 
     // non-player active objects, increasing iterator in the loop in case of object removal
     for (auto &obj : m_activeNonPlayers)
     {
         if (obj && obj->IsInWorld())
+        {
+            TC_PROBE2(worldserver, map_update.object_cells.begin, this, obj);
             VisitNearbyCellsOf(this, obj, gridObjectUpdate, worldObjectUpdate);
+            TC_PROBE2(worldserver, map_update.object_cells.end, this, obj);
+        }
     }
+    TC_PROBE1(worldserver, map_update.objects_loop.end, this);
 
     i_objectUpdater.updateCollected(diff);
+    TC_PROBE1(worldserver, map_update.collected.end, this);
 
     ///- Process necessary scripts
     if (!m_scriptSchedule.empty())
@@ -626,11 +644,14 @@ void Map::Update(const uint32 diff)
         ScriptsProcess();
         i_scriptLock = false;
     }
+    TC_PROBE1(worldserver, map_update.scripts.end, this);
 
     MoveAllCreaturesInMoveList();
+    TC_PROBE1(worldserver, map_update.move_list.end, this);
 
     if (!m_mapRefManager.isEmpty() || !m_activeNonPlayers.empty())
         ProcessRelocationNotifies(diff);
+    TC_PROBE1(worldserver, map_update.relocation.end, this);
 }
 
 struct ResetNotifier

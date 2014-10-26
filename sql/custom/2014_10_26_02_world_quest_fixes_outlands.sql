@@ -132,3 +132,6 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 ('16847', '1', '0', 'My strength.... is... returning!', '12', '0', '100', '0', '0', '0', 'Debilitated Mag\'har Grunt'),
 ('16847', '1', '1', 'You\'ve found a cure! We will crush our enemies!', '12', '0', '100', '0', '0', '0', 'Debilitated Mag\'har Grunt'),
 ('16847', '1', '2', 'You\'ve restored my health! I\'m in your debt, $N.', '12', '0', '100', '0', '0', '0', 'Debilitated Mag\'har Grunt');
+
+-- Boiling Blood
+UPDATE `creature_loot_template` SET `ChanceOrQuestChance`='-50' WHERE (`item`='30425');

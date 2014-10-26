@@ -35,3 +35,6 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 ('18142', '0', '1', '0', '61', '0', '100', '0', '0', '0', '0', '0', '33', '18142', '0', '0', '0', '0', '0', '7', '0', '0', '0', '0', '0', '0', '0', 'Windyreed Quest Credit - On Spellhit (Link) - Quest Credit'),
 ('18143', '0', '1', '0', '61', '0', '100', '0', '0', '0', '0', '0', '33', '18143', '0', '0', '0', '0', '0', '7', '0', '0', '0', '0', '0', '0', '0', 'Windyreed Quest Credit - On Spellhit (Link) - Quest Credit'),
 ('18144', '0', '1', '0', '61', '0', '100', '0', '0', '0', '0', '0', '33', '18144', '0', '0', '0', '0', '0', '7', '0', '0', '0', '0', '0', '0', '0', 'Windyreed Quest Credit - On Spellhit (Link) - Quest Credit');
+
+-- Drain Schematics
+DELETE FROM `creature_queststarter` WHERE (`id`='17841') AND (`quest`='9731');

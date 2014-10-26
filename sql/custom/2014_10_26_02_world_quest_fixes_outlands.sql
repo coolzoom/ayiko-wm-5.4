@@ -38,3 +38,14 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 
 -- Drain Schematics
 DELETE FROM `creature_queststarter` WHERE (`id`='17841') AND (`quest`='9731');
+
+-- Balance Must Be Preserved
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE `entry` IN('17998', '17999', '18000', '18002');
+UPDATE `quest_template` SET `RequiredSpellCast4`='0' WHERE (`Id`='9720');
+
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` IN('17998', '17999', '18000', '18002');
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+('17998', '0', '0', '0', '8', '0', '100', '0', '31736', '0', '0', '0', '33', '17998', '0', '0', '0', '0', '0', '7', '0', '0', '0', '0', '0', '0', '0', 'Raufen - give KC on spellhit'),
+('17999', '0', '0', '0', '8', '0', '100', '0', '31736', '0', '0', '0', '33', '17999', '0', '0', '0', '0', '0', '7', '0', '0', '0', '0', '0', '0', '0', 'Raufen - give KC on spellhit'),
+('18002', '0', '0', '0', '8', '0', '100', '0', '31736', '0', '0', '0', '33', '18002', '0', '0', '0', '0', '0', '7', '0', '0', '0', '0', '0', '0', '0', 'Raufen - give KC on spellhit'),
+('18000', '0', '0', '0', '8', '0', '100', '0', '31736', '0', '0', '0', '33', '18000', '0', '0', '0', '0', '0', '7', '0', '0', '0', '0', '0', '0', '0', 'Raufen - give KC on spellhit');

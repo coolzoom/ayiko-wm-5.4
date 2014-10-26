@@ -3534,7 +3534,7 @@ public:
 
         void MoveInLineOfSight(Unit* who)
         {
-            if (me->isInCombat())
+            if (me->IsInCombat())
                 return;
 
             if (who->GetTypeId() == TYPEID_PLAYER && me->IsWithinDistInMap(who, 10.0f))
@@ -3671,7 +3671,7 @@ public:
 
         void MoveInLineOfSight(Unit* who)
         {
-            if (me->isInCombat())
+            if (me->IsInCombat())
                 return;
 
             if (who->GetTypeId() == TYPEID_PLAYER && me->IsWithinDistInMap(who, 10.0f))
@@ -3816,7 +3816,7 @@ public:
 
         void MoveInLineOfSight(Unit* who)
         {
-            if (me->isInCombat())
+            if (me->IsInCombat())
                 return;
 
             if (who->GetTypeId() == TYPEID_PLAYER && me->IsWithinDistInMap(who, 10.0f))
@@ -3964,7 +3964,7 @@ public:
 
         void MoveInLineOfSight(Unit* who)
         {
-            if (me->isInCombat())
+            if (me->IsInCombat())
                 return;
 
             if (who->GetTypeId() == TYPEID_PLAYER && me->IsWithinDistInMap(who, 10.0f))
@@ -5348,10 +5348,10 @@ me->setFaction(ORIGINAL_FACTION);
 
 void MoveInLineOfSight(Unit* who)
 {
-if (who->isInCombat())
+if (who->IsInCombat())
 {
 if (Player* player = who->ToPlayer())
-if (me->IsWithinDistInMap(player, 15.0f) && !me->isInCombat())
+if (me->IsWithinDistInMap(player, 15.0f) && !me->IsInCombat())
 if (player->GetQuestStatus(14123) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(14123) == QUEST_STATUS_COMPLETE)
 {
 me->setFaction(AGGRESSIVE_FACTION);

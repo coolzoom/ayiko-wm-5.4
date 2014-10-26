@@ -360,7 +360,7 @@ class boss_gothik : public CreatureScript
                     case SPELL_INFORM_LIVE_KNIGHT:  spellId = SPELL_INFORM_DEAD_KNIGHT;     break;
                     case SPELL_INFORM_LIVE_RIDER:   spellId = SPELL_INFORM_DEAD_RIDER;      break;
                 }
-                if (spellId && me->isInCombat())
+                if (spellId && me->IsInCombat())
                 {
                     me->HandleEmoteCommand(EMOTE_ONESHOT_SPELL_CAST);
                     if (Creature* pRandomDeadTrigger = Unit::GetCreature(*me, DeadTriggerGUID[rand() % POS_DEAD]))
@@ -376,7 +376,7 @@ class boss_gothik : public CreatureScript
 
             void SpellHitTarget(Unit* target, SpellInfo const* spell)
             {
-                if (!me->isInCombat())
+                if (!me->IsInCombat())
                     return;
 
                 switch (spell->Id)

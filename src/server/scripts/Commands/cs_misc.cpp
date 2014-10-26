@@ -885,7 +885,7 @@ public:
         if (!handler->extractPlayerTarget(player_str, &player))
             return false;
 
-        if (player->isInFlight() || player->isInCombat())
+        if (player->isInFlight() || player->IsInCombat())
         {
             SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(7355);
             if (!spellInfo)

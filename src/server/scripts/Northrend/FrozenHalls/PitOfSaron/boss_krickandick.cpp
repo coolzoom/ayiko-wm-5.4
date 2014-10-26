@@ -207,7 +207,7 @@ class boss_ick : public CreatureScript
 
             void UpdateAI(const uint32 diff)
             {
-                if (!me->isInCombat())
+                if (!me->IsInCombat())
                     return;
 
                 if (!me->GetVictim() && me->getThreatManager().isThreatListEmpty())

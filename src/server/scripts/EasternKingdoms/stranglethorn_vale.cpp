@@ -94,7 +94,7 @@ public:
                 }
                 else Reset_Timer -= diff;
 
-                if (me->isInCombat() && me->GetVictim())
+                if (me->IsInCombat() && me->GetVictim())
                 {
                     if (me->GetVictim()->GetTypeId() == TYPEID_PLAYER)
                     {

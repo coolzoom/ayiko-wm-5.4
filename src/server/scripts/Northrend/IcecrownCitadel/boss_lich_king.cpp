@@ -797,7 +797,7 @@ class boss_the_lich_king : public CreatureScript
 
             void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
             {
-                if (spell->Id == SPELL_HARVESTED_SOUL && me->isInCombat() && !IsHeroic())
+                if (spell->Id == SPELL_HARVESTED_SOUL && me->IsInCombat() && !IsHeroic())
                     Talk(SAY_LK_FROSTMOURNE_KILL);
             }
 
@@ -2000,7 +2000,7 @@ class npc_terenas_menethil : public CreatureScript
                 }
 
                 // fighting Spirit Warden
-                if (me->isInCombat())
+                if (me->IsInCombat())
                     DoMeleeAttackIfReady();
             }
 

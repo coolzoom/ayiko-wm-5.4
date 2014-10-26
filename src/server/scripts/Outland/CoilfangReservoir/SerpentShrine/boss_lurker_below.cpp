@@ -215,7 +215,7 @@ public:
 
             if (me->getThreatManager().getThreatList().empty()) // check if should evade
             {
-                if (me->isInCombat())
+                if (me->IsInCombat())
                     EnterEvadeMode();
                 return;
             }
@@ -340,7 +340,7 @@ public:
                     return;
                 }
 
-                if (!me->isInCombat())
+                if (!me->IsInCombat())
                     DoZoneInCombat();
 
                 if (!Spawned)

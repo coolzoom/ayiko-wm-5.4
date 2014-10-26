@@ -554,7 +554,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
         }
         case CHAT_MSG_AFK:
         {
-            if ((msg.empty() || !_player->isAFK()) && !_player->isInCombat())
+            if ((msg.empty() || !_player->isAFK()) && !_player->IsInCombat())
             {
                 if (!_player->isAFK())
                 {

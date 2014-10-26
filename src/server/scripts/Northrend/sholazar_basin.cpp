@@ -125,7 +125,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->isQuestGiver())
+        if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
         if (player->GetQuestStatus(QUEST_FORTUNATE_MISUNDERSTANDINGS) == QUEST_STATUS_INCOMPLETE)
@@ -197,7 +197,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->isQuestGiver())
+        if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
         if (player->GetQuestStatus(QUEST_MAKING_PEACE) == QUEST_STATUS_INCOMPLETE)
@@ -258,7 +258,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->isQuestGiver())
+        if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
         if (player->GetQuestStatus(QUEST_FREYA_PACT) == QUEST_STATUS_INCOMPLETE)

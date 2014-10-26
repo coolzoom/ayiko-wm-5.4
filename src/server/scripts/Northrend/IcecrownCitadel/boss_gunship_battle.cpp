@@ -463,7 +463,7 @@ public:
 
             if(pSet.empty()) // Stop l'attaque si personne sur le transport
             {
-                if (me->isInCombat())
+                if (me->IsInCombat())
                     EnterEvadeMode();
 
                 return false;
@@ -471,7 +471,7 @@ public:
 
             bool checkPassed = true;
 
-            if (!me->isInCombat()) // D�bute l'attaque si un joueur arrive sur le transport
+            if (!me->IsInCombat()) // D�bute l'attaque si un joueur arrive sur le transport
             {
                 checkPassed = false;
             }
@@ -506,11 +506,11 @@ public:
                 Player * pPassenger = Trinity::Containers::SelectRandomContainerElement(pSet);
 
                 if (!pPassenger)
-                    if (me->isInCombat())
+                    if (me->IsInCombat())
                         EnterEvadeMode();
 
                 if(!pPassenger->IsHostileTo(me))
-                    if (me->isInCombat())
+                    if (me->IsInCombat())
                         EnterEvadeMode();
 
                 me->CombatStop();

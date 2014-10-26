@@ -1130,7 +1130,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     m_caster->CastSpell(m_caster, 51755, true);
                     m_caster->CastSpell(m_caster, 80326, true);
 
-                    if (m_caster->isInCombat())
+                    if (m_caster->IsInCombat())
                         if (Aura *camouflage = m_caster->GetAura(51755))
                             camouflage->SetDuration(6000);
 
@@ -3608,7 +3608,7 @@ void Spell::EffectDistract(SpellEffIndex /*effIndex*/)
         return;
 
     // Check for possible target
-    if (!unitTarget || unitTarget->isInCombat())
+    if (!unitTarget || unitTarget->IsInCombat())
         return;
 
     // target must be OK to do this

@@ -951,7 +951,7 @@ class npc_garments_of_quests : public CreatureScript
                 if (Spell->Id == SPELL_LESSER_HEAL_R2 || Spell->Id == SPELL_FORTITUDE_R1)
                 {
                     //not while in combat
-                    if (me->isInCombat())
+                    if (me->IsInCombat())
                         return;
 
                     //nothing to be done now
@@ -1063,7 +1063,7 @@ class npc_garments_of_quests : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
-                if (CanRun && !me->isInCombat())
+                if (CanRun && !me->IsInCombat())
                 {
                     if (RunAwayTimer <= diff)
                     {
@@ -1163,7 +1163,7 @@ class npc_mount_vendor : public CreatureScript
 
         bool OnGossipHello(Player* player, Creature* creature)
         {
-            if (creature->isQuestGiver())
+            if (creature->IsQuestGiver())
                 player->PrepareQuestMenu(creature->GetGUID());
 
             bool canBuy = false;
@@ -1240,7 +1240,7 @@ class npc_mount_vendor : public CreatureScript
 
             if (canBuy)
             {
-                if (creature->isVendor())
+                if (creature->IsVendor())
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
                 player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
             }
@@ -1273,10 +1273,10 @@ class npc_rogue_trainer : public CreatureScript
 
         bool OnGossipHello(Player* player, Creature* creature)
         {
-            if (creature->isQuestGiver())
+            if (creature->IsQuestGiver())
                 player->PrepareQuestMenu(creature->GetGUID());
 
-            if (creature->isTrainer())
+            if (creature->IsTrainer())
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER, GOSSIP_TEXT_TRAIN, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRAIN);
 
             if (creature->isCanTrainingAndResetTalentsOf(player))
@@ -1386,7 +1386,7 @@ class npc_sayge : public CreatureScript
 
         bool OnGossipHello(Player* player, Creature* creature)
         {
-            if (creature->isQuestGiver())
+            if (creature->IsQuestGiver())
                 player->PrepareQuestMenu(creature->GetGUID());
 
             if (player->HasSpellCooldown(SPELL_INT) ||
@@ -2340,7 +2340,7 @@ class npc_pet_trainer : public CreatureScript
 
         bool OnGossipHello(Player* player, Creature* creature)
         {
-            if (creature->isQuestGiver())
+            if (creature->IsQuestGiver())
                 player->PrepareQuestMenu(creature->GetGUID());
 
             if (player->getClass() == CLASS_HUNTER)

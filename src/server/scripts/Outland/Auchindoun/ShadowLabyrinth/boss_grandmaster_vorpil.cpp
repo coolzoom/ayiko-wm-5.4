@@ -124,7 +124,7 @@ public:
                     move = 500;
                     return;
                 }
-                if (!Vorpil->isInCombat() || Vorpil->isDead())
+                if (!Vorpil->IsInCombat() || Vorpil->isDead())
                 {
                     me->Kill(me);
                     return;

@@ -105,7 +105,7 @@ public:
                 CheckTeronTimer = 5000;
             } else CheckTeronTimer -= diff;
 
-            if (ShadowBoltTimer < diff && me->isInCombat())
+            if (ShadowBoltTimer < diff && me->IsInCombat())
             {
                 DoCast(SelectTarget(SELECT_TARGET_RANDOM, 0), SPELL_SHADOWBOLT);
                 ShadowBoltTimer = 10000;

@@ -311,7 +311,7 @@ public:
             return false;
         }
 
-        if (me->isInCombat())
+        if (me->IsInCombat())
         {
             handler->SendSysMessage(LANG_YOU_IN_COMBAT);
             handler->SetSentErrorMessage(true);

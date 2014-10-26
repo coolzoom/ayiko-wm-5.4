@@ -249,7 +249,7 @@ class boss_sha_of_fear : public CreatureScript
                 if (power != POWER_ENERGY)
                     return;
 
-                if (!me->isInCombat())
+                if (!me->IsInCombat())
                 {
                     value = 0;
                     return;

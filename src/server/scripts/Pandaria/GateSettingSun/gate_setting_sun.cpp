@@ -40,7 +40,7 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if (!me->isInCombat())
+            if (!me->IsInCombat())
             {
                 if (attackTimer <= diff)
                 {

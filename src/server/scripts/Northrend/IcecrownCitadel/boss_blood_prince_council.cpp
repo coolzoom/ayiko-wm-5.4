@@ -921,7 +921,7 @@ class boss_prince_valanar_icc : public CreatureScript
                         break;
                 }
                 summons.Summon(summon);
-                if (me->isInCombat())
+                if (me->IsInCombat())
                     DoZoneInCombat(summon);
             }
 

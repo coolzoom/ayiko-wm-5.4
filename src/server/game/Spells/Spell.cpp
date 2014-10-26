@@ -2984,7 +2984,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
                 if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     m_caster->ToPlayer()->UpdatePvP(true);
             }
-            if (unit->isInCombat() && !(m_spellInfo->AttributesEx3 & SPELL_ATTR3_NO_INITIAL_AGGRO) && !m_spellInfo->IsIgnoringCombat())
+            if (unit->IsInCombat() && !(m_spellInfo->AttributesEx3 & SPELL_ATTR3_NO_INITIAL_AGGRO) && !m_spellInfo->IsIgnoringCombat())
             {
                 m_caster->SetInCombatState(unit->GetCombatTimer() > 0, unit);
                 unit->getHostileRefManager().threatAssist(m_caster, 0.0f);
@@ -6457,7 +6457,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         if (m_spellInfo->ExcludeCasterAuraSpell && m_caster->HasAura(m_spellInfo->ExcludeCasterAuraSpell))
             return SPELL_FAILED_CASTER_AURASTATE;
 
-        if (reqCombat && m_caster->isInCombat() && !m_spellInfo->CanBeUsedInCombat())
+        if (reqCombat && m_caster->IsInCombat() && !m_spellInfo->CanBeUsedInCombat())
             return SPELL_FAILED_AFFECTING_COMBAT;
     }
 
@@ -6771,7 +6771,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (!pet->GetCurrentFoodBenefitLevel(foodItem->GetTemplate()->ItemLevel))
                     return SPELL_FAILED_FOOD_LOWLEVEL;
 
-                if (m_caster->isInCombat() || pet->isInCombat())
+                if (m_caster->IsInCombat() || pet->IsInCombat())
                     return SPELL_FAILED_AFFECTING_COMBAT;
 
                 break;

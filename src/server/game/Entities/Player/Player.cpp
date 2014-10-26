@@ -2882,7 +2882,7 @@ void Player::RegenerateAll()
     if (m_regenTimerCount >= 2000)
     {
         // Not in combat or they have regeneration
-        if (!isInCombat() || IsPolymorphed() || m_baseHealthRegen ||
+        if (!IsInCombat() || IsPolymorphed() || m_baseHealthRegen ||
             HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT) ||
             HasAuraType(SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT))
         {
@@ -2927,14 +2927,14 @@ void Player::Regenerate(Powers power)
                     : 1;
 
             addvalue += 0.001f * m_regenTimer / regenRate * sWorld->getRate(RATE_POWER_MANA);
-            addvalue *= GetFloatValue(isInCombat() ? UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER : UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER);
+            addvalue *= GetFloatValue(IsInCombat() ? UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER : UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER);
 
             break;
         }
         // Regenerate Rage
         case POWER_RAGE:
         {
-            if (!isInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
+            if (!IsInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
             {
                 // 2.5 rage by tick (= 2 seconds => 1.25 rage/sec)
                 addvalue += -25 * sWorld->getRate(RATE_POWER_RAGE_LOSS);
@@ -2958,7 +2958,7 @@ void Player::Regenerate(Powers power)
         // Regenerate Runic Power
         case POWER_RUNIC_POWER:
         {
-            if (!isInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
+            if (!IsInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
             {
                 // 3 RunicPower by tick
                 addvalue += -30 * sWorld->getRate(RATE_POWER_RUNICPOWER_LOSS);
@@ -2967,7 +2967,7 @@ void Player::Regenerate(Powers power)
         }
         case POWER_HOLY_POWER:
         case POWER_CHI:
-            if (!isInCombat())
+            if (!IsInCombat())
                 addvalue += -1.0f; // remove 1 each 10 sec
             break;
         case POWER_RUNES:
@@ -2975,9 +2975,9 @@ void Player::Regenerate(Powers power)
             break;
         case POWER_DEMONIC_FURY:
         {
-            if (!isInCombat() && GetPower(POWER_DEMONIC_FURY) >= 300 && GetShapeshiftForm() != FORM_METAMORPHOSIS)
+            if (!IsInCombat() && GetPower(POWER_DEMONIC_FURY) >= 300 && GetShapeshiftForm() != FORM_METAMORPHOSIS)
                 addvalue += -1.0f;    // remove 1 each 100ms
-            else if (!isInCombat() && GetPower(POWER_DEMONIC_FURY) < 200 && GetShapeshiftForm() != FORM_METAMORPHOSIS)
+            else if (!IsInCombat() && GetPower(POWER_DEMONIC_FURY) < 200 && GetShapeshiftForm() != FORM_METAMORPHOSIS)
                 addvalue += 1.0f;     // give 1 each 100ms while player has less than 200 demonic fury
 
             if (GetPower(POWER_DEMONIC_FURY) <= 40)
@@ -3013,9 +3013,9 @@ void Player::Regenerate(Powers power)
         {
             // After 15s return to one embers if no one
             // or return to one if more than one
-            if (!isInCombat() && GetPower(POWER_BURNING_EMBERS) < 10)
+            if (!IsInCombat() && GetPower(POWER_BURNING_EMBERS) < 10)
                 SetPower(POWER_BURNING_EMBERS, GetPower(POWER_BURNING_EMBERS) + 1);
-            else if (!isInCombat() && GetPower(POWER_BURNING_EMBERS) > 10)
+            else if (!IsInCombat() && GetPower(POWER_BURNING_EMBERS) > 10)
                 SetPower(POWER_BURNING_EMBERS, GetPower(POWER_BURNING_EMBERS) - 1);
 
             if (HasAura(56241))
@@ -3064,7 +3064,7 @@ void Player::Regenerate(Powers power)
         }
         case POWER_SOUL_SHARDS:
             // If isn't in combat, gain 1 shard every 20s
-            if (!isInCombat())
+            if (!IsInCombat())
                 SetPower(POWER_SOUL_SHARDS, GetPower(POWER_SOUL_SHARDS) + 100);
 
             if (HasAura(56241))
@@ -3099,7 +3099,7 @@ void Player::Regenerate(Powers power)
         AddPct(addvalue, fromPctAuras);
 
         // Butchery requires combat for this effect
-        if (power != POWER_RUNIC_POWER || isInCombat())
+        if (power != POWER_RUNIC_POWER || IsInCombat())
             addvalue += GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_POWER_REGEN, power) * ((power != POWER_ENERGY) ? m_regenTimerCount : m_regenTimer) / (5 * IN_MILLISECONDS);
     }
 
@@ -3162,7 +3162,7 @@ void Player::RegenerateHealth()
     float HealthIncreaseRate = sWorld->getRate(RATE_HEALTH);
 
     float addvalue = 0.0f;
-    bool inFight = isInCombat();
+    bool inFight = IsInCombat();
 
     // polymorphed case
     if (IsPolymorphed())
@@ -12534,7 +12534,7 @@ InventoryResult Player::CanEquipItem(uint8 slot, uint16 &dest, Item* pItem, bool
                 // - in-progress arenas
                 if (!pProto->CanChangeEquipStateInCombat())
                 {
-                    if (isInCombat())
+                    if (IsInCombat())
                         return EQUIP_ERR_NOT_IN_COMBAT;
 
                     if (Battleground* bg = GetBattleground())
@@ -12545,7 +12545,7 @@ InventoryResult Player::CanEquipItem(uint8 slot, uint16 &dest, Item* pItem, bool
                 if (pProto->Class == ITEM_CLASS_WEAPON && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISARMED))
                     return EQUIP_ERR_CLIENT_LOCKED_OUT;
 
-                if (isInCombat()&& (pProto->Class == ITEM_CLASS_WEAPON || pProto->InventoryType == INVTYPE_RELIC) && m_weaponChangeTimer != 0)
+                if (IsInCombat()&& (pProto->Class == ITEM_CLASS_WEAPON || pProto->InventoryType == INVTYPE_RELIC) && m_weaponChangeTimer != 0)
                     return EQUIP_ERR_CLIENT_LOCKED_OUT;         // maybe exist better err
 
                 if (IsNonMeleeSpellCasted(false))
@@ -12663,7 +12663,7 @@ InventoryResult Player::CanUnequipItem(uint16 pos, bool swap) const
     // - in-progress arenas
     if (!pProto->CanChangeEquipStateInCombat())
     {
-        if (isInCombat())
+        if (IsInCombat())
             return EQUIP_ERR_NOT_IN_COMBAT;
 
         if (Battleground* bg = GetBattleground())
@@ -13279,7 +13279,7 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
 
             _ApplyItemMods(pItem, slot, true);
 
-            if (pProto && isInCombat() && (pProto->Class == ITEM_CLASS_WEAPON || pProto->InventoryType == INVTYPE_RELIC) && m_weaponChangeTimer == 0)
+            if (pProto && IsInCombat() && (pProto->Class == ITEM_CLASS_WEAPON || pProto->InventoryType == INVTYPE_RELIC) && m_weaponChangeTimer == 0)
             {
                 uint32 cooldownSpell = getClass() == CLASS_ROGUE ? 6123 : 6119;
                 SpellInfo const* spellProto = sSpellMgr->GetSpellInfo(cooldownSpell);
@@ -22032,7 +22032,7 @@ void Player::UpdateAfkReport(time_t currTime)
 
 void Player::UpdateContestedPvP(uint32 diff)
 {
-    if (!m_contestedPvPTimer||isInCombat())
+    if (!m_contestedPvPTimer||IsInCombat())
         return;
     if (m_contestedPvPTimer <= diff)
     {
@@ -23129,7 +23129,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
         return false;
 
     // not let cheating with start flight in time of logout process || while in combat || has type state: stunned || has type state: root
-    if (GetSession()->isLogingOut() || isInCombat() || HasUnitState(UNIT_STATE_STUNNED) || HasUnitState(UNIT_STATE_ROOT))
+    if (GetSession()->isLogingOut() || IsInCombat() || HasUnitState(UNIT_STATE_STUNNED) || HasUnitState(UNIT_STATE_ROOT))
     {
         GetSession()->SendActivateTaxiReply(ERR_TAXI_PLAYER_BUSY);
         return false;
@@ -24211,7 +24211,7 @@ void Player::SendCooldownEvent(SpellInfo const* spellInfo, uint32 itemId /*= 0*/
 void Player::UpdatePotionCooldown(Spell* spell)
 {
     // no potion used i combat or still in combat
-    if (!m_lastPotionId || isInCombat())
+    if (!m_lastPotionId || IsInCombat())
         return;
 
     // Call not from spell cast, send cooldown event for item spells if no in combat
@@ -26302,7 +26302,7 @@ PartyResult Player::CanUninviteFromGroup() const
 
         // TODO: Should also be sent when anyone has recently left combat, with an aprox ~5 seconds timer.
         for (GroupReference const* itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
-            if (itr->getSource() && itr->getSource()->isInCombat())
+            if (itr->getSource() && itr->getSource()->IsInCombat())
                 return ERR_PARTY_LFG_BOOT_IN_COMBAT;
 
         /* Missing support for these types
@@ -26761,7 +26761,7 @@ void Player::UpdateCharmedAI()
             }
     }
 
-    if (!charmer->isInCombat())
+    if (!charmer->IsInCombat())
         GetMotionMaster()->MoveFollow(charmer, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
 
     Unit* target = GetVictim();
@@ -28719,7 +28719,7 @@ bool Player::CanSwitch() const
     if (getRace() != RACE_WORGEN)
         return false;
 
-    if (isInCombat() || !HasAuraType(SPELL_AURA_ALLOW_WORGEN_TRANSFORM))
+    if (IsInCombat() || !HasAuraType(SPELL_AURA_ALLOW_WORGEN_TRANSFORM))
         return false;
 
     return true;

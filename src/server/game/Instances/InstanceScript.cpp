@@ -89,7 +89,7 @@ void InstanceScript::UpdateMinionState(Creature* minion, EncounterState state)
         case NOT_STARTED:
             if (!minion->IsAlive())
                 minion->Respawn();
-            else if (minion->isInCombat())
+            else if (minion->IsInCombat())
                 minion->AI()->EnterEvadeMode();
             break;
         case IN_PROGRESS:

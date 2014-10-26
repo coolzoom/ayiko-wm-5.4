@@ -293,7 +293,7 @@ class boss_stone_guard_controler : public CreatureScript
                             {
                                 if (Creature* stoneGuard = pInstance->instance->GetCreature(stoneGuardGuid))
                                 {
-                                    if (stoneGuard->IsAlive() && stoneGuard->isInCombat())
+                                    if (stoneGuard->IsAlive() && stoneGuard->IsInCombat())
                                     {
                                         stoneGuard->AI()->DoAction(ACTION_PETRIFICATION);
                                         lastPetrifierEntry = nextPetrifierEntry;
@@ -545,7 +545,7 @@ class boss_generic_guardian : public CreatureScript
 
             void RegeneratePower(Powers /*power*/, int32& value)
             {
-                if (!me->isInCombat())
+                if (!me->IsInCombat())
                 {
                     value = 0;
                     return;
@@ -570,7 +570,7 @@ class boss_generic_guardian : public CreatureScript
                 switch (action)
                 {
                     case ACTION_ENTER_COMBAT:
-                        if (!me->isInCombat())
+                        if (!me->IsInCombat())
                             if (Player* victim = me->SelectNearestPlayerNotGM(100.0f))
                                 AttackStart(victim);
                         break;

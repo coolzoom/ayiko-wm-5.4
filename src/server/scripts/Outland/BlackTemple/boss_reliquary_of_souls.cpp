@@ -186,7 +186,7 @@ public:
         {
             if (!who)
                 return;
-            if (me->isInCombat())
+            if (me->IsInCombat())
                 return;
             if (who->GetTypeId() != TYPEID_PLAYER)
                 return;
@@ -475,7 +475,7 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if (me->isInCombat())
+            if (me->IsInCombat())
             {
                 //Supposed to be cast on nearest target
                 if (FixateTimer <= diff)

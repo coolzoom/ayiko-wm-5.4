@@ -108,7 +108,7 @@ void PetAI::UpdateAI(const uint32 diff)
             return;
         }
 
-        if (owner && !owner->isInCombat())
+        if (owner && !owner->IsInCombat())
             owner->SetInCombatWith(me->GetVictim());
 
         DoMeleeAttackIfReady();
@@ -166,7 +166,7 @@ void PetAI::UpdateAI(const uint32 diff)
                         continue;
 
                     // Check if we're in combat or commanded to attack
-                    if (!me->isInCombat() && !me->GetCharmInfo()->IsCommandAttack())
+                    if (!me->IsInCombat() && !me->GetCharmInfo()->IsCommandAttack())
                         continue;
                 }
 

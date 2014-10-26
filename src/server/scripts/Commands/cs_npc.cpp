@@ -540,7 +540,7 @@ public:
             return false;
 
         Creature* vendor = handler->getSelectedCreature();
-        if (!vendor || !vendor->isVendor())
+        if (!vendor || !vendor->IsVendor())
         {
             handler->SendSysMessage(LANG_COMMAND_VENDORSELECTION);
             handler->SetSentErrorMessage(true);

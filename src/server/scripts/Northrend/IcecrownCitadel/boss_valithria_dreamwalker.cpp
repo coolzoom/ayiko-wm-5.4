@@ -171,7 +171,7 @@ class RisenArchmageCheck
         bool operator()(Creature* creature)
         {
             return creature->IsAlive() && creature->GetEntry() == NPC_RISEN_ARCHMAGE &&
-                creature->GetDBTableGUIDLow() && !creature->isInCombat();
+                creature->GetDBTableGUIDLow() && !creature->IsInCombat();
         }
 };
 
@@ -574,7 +574,7 @@ class npc_green_dragon_combat_trigger : public CreatureScript
 
             void UpdateAI(uint32 const /*diff*/)
             {
-                if (!me->isInCombat())
+                if (!me->IsInCombat())
                     return;
 
                 bool wipe = true;
@@ -796,7 +796,7 @@ class npc_risen_archmage : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
-                if (!me->isInCombat())
+                if (!me->IsInCombat())
                     if (me->GetDBTableGUIDLow())
                         if (!me->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
                             DoCast(me, SPELL_CORRUPTION);

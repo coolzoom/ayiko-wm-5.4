@@ -213,7 +213,7 @@ class boss_alar : public CreatureScript
 
             void UpdateAI(const uint32 diff)
             {
-                if (!me->isInCombat()) // sometimes isincombat but !incombat, faction bug?
+                if (!me->IsInCombat()) // sometimes isincombat but !incombat, faction bug?
                     return;
 
                 if (Berserk_Timer <= diff)

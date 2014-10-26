@@ -222,7 +222,7 @@ public:
         void UpdateAI(const uint32 diff)
         {
             //Only if not incombat check if the event is started
-            if (!me->isInCombat() && instance && instance->GetData(DATA_MAULGAREVENT))
+            if (!me->IsInCombat() && instance && instance->GetData(DATA_MAULGAREVENT))
             {
                 Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_MAULGAREVENT_TANK));
 
@@ -382,7 +382,7 @@ public:
         void UpdateAI(const uint32 diff)
         {
             //Only if not incombat check if the event is started
-            if (!me->isInCombat() && instance && instance->GetData(DATA_MAULGAREVENT))
+            if (!me->IsInCombat() && instance && instance->GetData(DATA_MAULGAREVENT))
             {
                 Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_MAULGAREVENT_TANK));
 
@@ -497,7 +497,7 @@ public:
         void UpdateAI(const uint32 diff)
         {
             //Only if not incombat check if the event is started
-            if (!me->isInCombat() && instance && instance->GetData(DATA_MAULGAREVENT))
+            if (!me->IsInCombat() && instance && instance->GetData(DATA_MAULGAREVENT))
             {
                 Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_MAULGAREVENT_TANK));
 
@@ -617,7 +617,7 @@ public:
          void UpdateAI(const uint32 diff)
         {
             //Only if not incombat check if the event is started
-            if (!me->isInCombat() && instance && instance->GetData(DATA_MAULGAREVENT))
+            if (!me->IsInCombat() && instance && instance->GetData(DATA_MAULGAREVENT))
             {
                 Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_MAULGAREVENT_TANK));
 
@@ -727,7 +727,7 @@ public:
         void UpdateAI(const uint32 diff)
         {
             //Only if not incombat check if the event is started
-            if (!me->isInCombat() && instance && instance->GetData(DATA_MAULGAREVENT))
+            if (!me->IsInCombat() && instance && instance->GetData(DATA_MAULGAREVENT))
             {
                 Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_MAULGAREVENT_TANK));
 

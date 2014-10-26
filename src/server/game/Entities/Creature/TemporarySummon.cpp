@@ -72,7 +72,7 @@ void TempSummon::Update(uint32 diff)
         }
         case TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT:
         {
-            if (!isInCombat())
+            if (!IsInCombat())
             {
                 if (m_timer <= diff)
                 {
@@ -131,7 +131,7 @@ void TempSummon::Update(uint32 diff)
                 return;
             }
 
-            if (!isInCombat())
+            if (!IsInCombat())
             {
                 if (m_timer <= diff)
                 {
@@ -154,7 +154,7 @@ void TempSummon::Update(uint32 diff)
                 return;
             }
 
-            if (!isInCombat() && IsAlive())
+            if (!IsInCombat() && IsAlive())
             {
                 if (m_timer <= diff)
                 {

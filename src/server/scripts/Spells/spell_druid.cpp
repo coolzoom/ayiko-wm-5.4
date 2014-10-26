@@ -455,7 +455,7 @@ class spell_dru_wild_charge_moonkin : public SpellScriptLoader
             {
                 if (GetCaster())
                 {
-                    if (!GetCaster()->isInCombat())
+                    if (!GetCaster()->IsInCombat())
                         return SPELL_FAILED_DONT_REPORT;
                 }
                 else

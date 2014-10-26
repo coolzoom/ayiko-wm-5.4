@@ -317,7 +317,7 @@ class boss_professor_putricide : public CreatureScript
                         break;
                 }
 
-                if (me->isInCombat())
+                if (me->IsInCombat())
                     DoZoneInCombat(summon);
             }
 

@@ -556,7 +556,7 @@ bool BossAI::CheckBoundary(Unit* who)
 void BossAI::JustSummoned(Creature* summon)
 {
     summons.Summon(summon);
-    if (me->isInCombat())
+    if (me->IsInCombat())
         DoZoneInCombat(summon);
 }
 

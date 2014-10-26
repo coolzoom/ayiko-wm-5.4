@@ -373,7 +373,7 @@ class mob_enormous_stone_quilen : public CreatureScript
                 if (typeId != POINT_MOTION_TYPE)
                     return;
 
-                if (me->isInCombat())
+                if (me->IsInCombat())
                     return;
 
                 prevPosition = pointId;

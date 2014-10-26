@@ -660,7 +660,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* creature)
     {
-        if (creature->isInCombat() || pPlayer->GetQuestStatus(QUEST_TAKE_HIM_TO_THE_EARTHCALLER) != QUEST_STATUS_INCOMPLETE)
+        if (creature->IsInCombat() || pPlayer->GetQuestStatus(QUEST_TAKE_HIM_TO_THE_EARTHCALLER) != QUEST_STATUS_INCOMPLETE)
         return false;
 
         char const* _message = "Follow me to the Earthcaller!";
@@ -934,7 +934,7 @@ class npc_terrath_the_steady: public CreatureScript
 
         bool OnGossipHello(Player* player, Creature* creature)
         {
-            if (creature->isQuestGiver())
+            if (creature->IsQuestGiver())
                 player->PrepareQuestMenu(creature->GetGUID());
 
             if (player->GetQuestStatus(QUEST_DONT_STOP_MOVING)==QUEST_STATUS_INCOMPLETE)

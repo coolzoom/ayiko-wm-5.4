@@ -489,7 +489,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->isQuestGiver())
+        if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
         if (player->GetQuestStatus(QUEST_4001) == QUEST_STATUS_INCOMPLETE)
@@ -548,10 +548,10 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->isQuestGiver())
+        if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
-        if (creature->isVendor() && player->GetReputationRank(59) >= REP_FRIENDLY)
+        if (creature->IsVendor() && player->GetReputationRank(59) >= REP_FRIENDLY)
               player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_ITEM_SHOW_ACCESS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
 
         if (player->GetQuestRewardStatus(QUEST_A_BINDING_CONTRACT) != 1 &&

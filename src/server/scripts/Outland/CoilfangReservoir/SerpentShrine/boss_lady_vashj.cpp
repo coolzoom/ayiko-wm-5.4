@@ -285,7 +285,7 @@ public:
                 float attackRadius = me->GetAttackDistance(who);
                 if (me->IsWithinDistInMap(who, attackRadius) && me->GetDistanceZ(who) <= CREATURE_Z_ATTACK_RANGE && me->IsWithinLOSInMap(who))
                 {
-                    if (!me->isInCombat()) // AttackStart() sets UNIT_FLAG_IN_COMBAT, so this msut be before attacking
+                    if (!me->IsInCombat()) // AttackStart() sets UNIT_FLAG_IN_COMBAT, so this msut be before attacking
                         StartEvent();
 
                     if (Phase != 2)
@@ -332,7 +332,7 @@ public:
                 }
             }
             // to prevent abuses during phase 2
-            if (Phase == 2 && !me->GetVictim() && me->isInCombat())
+            if (Phase == 2 && !me->GetVictim() && me->IsInCombat())
             {
                 EnterEvadeMode();
                 return;
@@ -631,7 +631,7 @@ public:
                         DoCast(me, SPELL_SURGE);
                 }
                 if (Creature* vashj = Unit::GetCreature(*me, VashjGUID))
-                    if (!vashj->isInCombat() || CAST_AI(boss_lady_vashj::boss_lady_vashjAI, vashj->AI())->Phase != 2 || vashj->isDead())
+                    if (!vashj->IsInCombat() || CAST_AI(boss_lady_vashj::boss_lady_vashjAI, vashj->AI())->Phase != 2 || vashj->isDead())
                         me->Kill(me);
                 Move = 1000;
             } else Move -= diff;

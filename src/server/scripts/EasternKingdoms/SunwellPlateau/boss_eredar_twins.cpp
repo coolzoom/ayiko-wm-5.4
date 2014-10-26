@@ -131,7 +131,7 @@ public:
                 }
             }
 
-            if (!me->isInCombat())
+            if (!me->IsInCombat())
             {
                 ShadowbladesTimer = 10000;
                 ShadownovaTimer = 30000;
@@ -409,7 +409,7 @@ public:
                 }
             }
 
-            if (!me->isInCombat())
+            if (!me->IsInCombat())
             {
                 ConflagrationTimer = 45000;
                 BlazeTimer = 100;
@@ -443,7 +443,7 @@ public:
 
         void AttackStart(Unit* who)
         {
-            if (!me->isInCombat())
+            if (!me->IsInCombat())
             {
                 Scripted_NoMovementAI::AttackStart(who);
             }
@@ -459,7 +459,7 @@ public:
                 float attackRadius = me->GetAttackDistance(who);
                 if (me->IsWithinDistInMap(who, attackRadius) && me->GetDistanceZ(who) <= CREATURE_Z_ATTACK_RANGE && me->IsWithinLOSInMap(who))
                 {
-                    if (!me->isInCombat())
+                    if (!me->IsInCombat())
                     {
                         DoStartNoMovement(who);
                     }

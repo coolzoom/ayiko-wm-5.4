@@ -227,7 +227,7 @@ public:
                     if (instance->GetData(DATA_JEDOGA_SHADOWSEEKER_EVENT) != IN_PROGRESS)
                         EnterCombat(target);
                 }
-                else if (!me->isInCombat())
+                else if (!me->IsInCombat())
                     EnterEvadeMode();
             }
         }

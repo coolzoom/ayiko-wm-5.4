@@ -88,7 +88,7 @@ void SmoothEscortAI::EnterEvadeMode()
 
 void SmoothEscortAI::UpdateAI(uint32 diff)
 {
-    if (HasEscortState(ESCORT_STATE_COMBAT) && !me->isInCombat())
+    if (HasEscortState(ESCORT_STATE_COMBAT) && !me->IsInCombat())
         EnterEvadeMode();
 
     if (HasEscortState(ESCORT_STATE_PAUSED) || HasEscortState(ESCORT_STATE_NONE) || HasEscortState(ESCORT_STATE_COMBAT))

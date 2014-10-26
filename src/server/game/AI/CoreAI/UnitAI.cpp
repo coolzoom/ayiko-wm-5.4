@@ -99,7 +99,7 @@ float UnitAI::DoGetSpellMaxRange(uint32 spellId, bool positive)
 
 void UnitAI::DoAddAuraToAllHostilePlayers(uint32 spellid)
 {
-    if (me->isInCombat())
+    if (me->IsInCombat())
     {
         ThreatContainer::StorageType threatlist = me->getThreatManager().getThreatList();
         for (ThreatContainer::StorageType::const_iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr)
@@ -115,7 +115,7 @@ void UnitAI::DoAddAuraToAllHostilePlayers(uint32 spellid)
 
 void UnitAI::DoCastToAllHostilePlayers(uint32 spellid, bool triggered)
 {
-    if (me->isInCombat())
+    if (me->IsInCombat())
     {
         ThreatContainer::StorageType threatlist = me->getThreatManager().getThreatList();
         for (ThreatContainer::StorageType::const_iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr)
@@ -268,7 +268,7 @@ void SimpleCharmedAI::UpdateAI(const uint32 /*diff*/)
             }
     }
 
-    if (!charmer->isInCombat())
+    if (!charmer->IsInCombat())
         me->GetMotionMaster()->MoveFollow(charmer, PET_FOLLOW_DIST, me->GetFollowAngle());
 
     Unit* target = me->GetVictim();

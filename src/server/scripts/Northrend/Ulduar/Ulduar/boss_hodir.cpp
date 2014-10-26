@@ -278,7 +278,7 @@ class npc_ice_block : public CreatureScript
 
                     if (Creature* Hodir = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(BOSS_HODIR) : 0))
                     {
-                        if (!Hodir->isInCombat())
+                        if (!Hodir->IsInCombat())
                         {
                             Hodir->SetReactState(REACT_AGGRESSIVE);
                             Hodir->AI()->DoZoneInCombat();

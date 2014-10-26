@@ -263,7 +263,7 @@ public:
                 KillSelf();
                 return;
             }
-            if (!Shaffar->isInCombat())
+            if (!Shaffar->IsInCombat())
                 Shaffar->AI()->AttackStart(who);
         }
 
@@ -280,7 +280,7 @@ public:
             if (Check_Timer <= diff)
             {
                 Creature* Shaffar = me->FindNearestCreature(NPC_SHAFFAR, 100);
-                if (!Shaffar || Shaffar->isDead() || !Shaffar->isInCombat())
+                if (!Shaffar || Shaffar->isDead() || !Shaffar->IsInCombat())
                 {
                     KillSelf();
                     return;

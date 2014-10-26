@@ -265,7 +265,7 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if (!me->isInCombat() && !IsTreeEvent)
+            if (!me->IsInCombat() && !IsTreeEvent)
             {
                 if (EmoteTimer <= diff)
                 {

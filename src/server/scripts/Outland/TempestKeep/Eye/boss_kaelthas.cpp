@@ -327,7 +327,7 @@ class boss_kaelthas : public CreatureScript
                 IsCastingFireball = false;
                 ChainPyros = false;
 
-                if (me->isInCombat())
+                if (me->IsInCombat())
                     PrepareAdvisors();
 
                 summons.DespawnAll();

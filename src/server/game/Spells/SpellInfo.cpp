@@ -1798,7 +1798,7 @@ SpellCastResult SpellInfo::CheckTarget(Unit const* caster, WorldObject const* ta
     // creature/player specific target checks
     if (unitTarget)
     {
-        if (AttributesEx & SPELL_ATTR1_CANT_TARGET_IN_COMBAT && unitTarget->isInCombat())
+        if (AttributesEx & SPELL_ATTR1_CANT_TARGET_IN_COMBAT && unitTarget->IsInCombat())
             return SPELL_FAILED_TARGET_AFFECTING_COMBAT;
 
         // only spells with SPELL_ATTR3_ONLY_TARGET_GHOSTS can target ghosts

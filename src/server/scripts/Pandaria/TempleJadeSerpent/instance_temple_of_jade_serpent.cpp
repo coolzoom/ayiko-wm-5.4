@@ -308,7 +308,7 @@ public:
                         if (!wiseMari)
                             continue;
 
-                        if (!wiseMari->IsAlive() || !wiseMari->isInCombat())
+                        if (!wiseMari->IsAlive() || !wiseMari->IsInCombat())
                             continue;
 
                         // position : center of the wise mari's room

@@ -482,14 +482,14 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket& /*recvData*/)
     if (uint64 lguid = GetPlayer()->GetLootGUID())
         DoLootRelease(lguid);
 
-    bool instantLogout = (GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) && !GetPlayer()->isInCombat()) ||
+    bool instantLogout = (GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) && !GetPlayer()->IsInCombat()) ||
             GetPlayer()->isInFlight() || HasPermission(rbac::RBAC_PERM_INSTANT_LOGOUT);
 
     /// TODO: Possibly add RBAC permission to log out in combat
     bool canLogoutInCombat = GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
 
     uint32 reason = 0;
-    if (GetPlayer()->isInCombat() && !canLogoutInCombat)
+    if (GetPlayer()->IsInCombat() && !canLogoutInCombat)
         reason = 1;
     else if (GetPlayer()->m_movementInfo.HasMovementFlag(MOVEMENTFLAG_FALLING | MOVEMENTFLAG_FALLING_FAR))
         reason = 3;                                         // is jumping or falling

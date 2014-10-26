@@ -555,7 +555,7 @@ inline void CreatureAI::SetGazeOn(Unit* target)
 
 inline bool CreatureAI::UpdateVictimWithGaze()
 {
-    if (!me->isInCombat())
+    if (!me->IsInCombat())
         return false;
 
     if (me->HasReactState(REACT_PASSIVE))
@@ -573,7 +573,7 @@ inline bool CreatureAI::UpdateVictimWithGaze()
 
 inline bool CreatureAI::UpdateVictim()
 {
-    if (!me->isInCombat())
+    if (!me->IsInCombat())
         return false;
 
     if (!me->HasReactState(REACT_PASSIVE))

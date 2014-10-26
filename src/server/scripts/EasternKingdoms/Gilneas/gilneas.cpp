@@ -764,7 +764,7 @@ class AggroEvent final : public BasicEvent
     private:
         bool Execute(uint64 /*time*/, uint32 /*diff*/) final
         {
-            if (!_creature->isInCombat())
+            if (!_creature->IsInCombat())
                 _creature->CastCustomSpell(43263, SPELLVALUE_MAX_TARGETS, 1);
 
             return true;
@@ -6306,7 +6306,7 @@ class npc_captain_asther_qiao final : public CreatureScript
                 {
                     if (Creature* member = ObjectAccessor::GetCreature(*me, itr->minionGUID))
                     {
-                        if (!member->IsAlive() || member->isInCombat())
+                        if (!member->IsAlive() || member->IsInCombat())
                             continue;
 
                         float dx = x - cos(itr->angle + pathangle) * itr->dist;
@@ -9095,7 +9095,7 @@ class npc_gilnean_militia_tbfgc final : public CreatureScript
                         if (summoner->GetVictim())
                             AttackStart(summoner->GetVictim());
 
-                        if (summoner->isInCombat())
+                        if (summoner->IsInCombat())
                             return;
                     }
                 }
@@ -9673,7 +9673,7 @@ class npc_worgen_warrior_tbfgc final : public CreatureScript
                         if (summoner->GetVictim())
                             AttackStart(summoner->GetVictim());
 
-                        if (summoner->isInCombat())
+                        if (summoner->IsInCombat())
                             return;
                     }
                 }

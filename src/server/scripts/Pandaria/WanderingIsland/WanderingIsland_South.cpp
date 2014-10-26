@@ -1048,7 +1048,7 @@ class npc_shang_xi_choose_faction : public CreatureScript
 
         bool OnGossipHello(Player* player, Creature* creature)
         {
-            if (creature->isQuestGiver())
+            if (creature->IsQuestGiver())
                 player->PrepareQuestMenu(creature->GetGUID());
 
             if (player->getRace() == RACE_PANDAREN_NEUTRAL)

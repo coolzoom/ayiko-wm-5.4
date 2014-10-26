@@ -372,7 +372,7 @@ void Unit::Update(uint32 p_time)
         SendThreatListUpdate();
 
     // update combat timer only for players and pets (only pets with PetAI)
-    if (isInCombat() && (GetTypeId() == TYPEID_PLAYER || (ToCreature()->isPet() && IsControlledByPlayer())))
+    if (IsInCombat() && (GetTypeId() == TYPEID_PLAYER || (ToCreature()->isPet() && IsControlledByPlayer())))
     {
         // Check UNIT_STATE_MELEE_ATTACKING or UNIT_STATE_CHASE (without UNIT_STATE_FOLLOW in this case) so pets can reach far away
         // targets without stopping half way there and running off.
@@ -7061,7 +7061,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                     if (!player)
                         return false;
 
-                    if (!player->isInCombat())
+                    if (!player->IsInCombat())
                         return false;
 
                     if (player->HasSpellCooldown(51701))
@@ -8491,7 +8491,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
             if (GetTypeId() != TYPEID_PLAYER)
                 return false;
 
-            if (!isInCombat())
+            if (!IsInCombat())
                 return false;
 
             int32 aviableBasepoints = 0;
@@ -13606,7 +13606,7 @@ void Unit::CombatStart(Unit* target, bool initialAggro)
         if (!target->IsStandState())
             target->SetStandState(UNIT_STAND_STATE_STAND);
 
-        if (!target->isInCombat() && target->GetTypeId() != TYPEID_PLAYER
+        if (!target->IsInCombat() && target->GetTypeId() != TYPEID_PLAYER
             && !target->ToCreature()->HasReactState(REACT_PASSIVE) && target->ToCreature()->IsAIEnabled)
         {
             target->ToCreature()->AI()->AttackStart(this);
@@ -13638,7 +13638,7 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy, bool isControlled)
     if (PvP)
         m_CombatTimer = 5000;
 
-    if (isInCombat() || HasUnitState(UNIT_STATE_EVADE))
+    if (IsInCombat() || HasUnitState(UNIT_STATE_EVADE))
         return;
 
     for (Unit::ControlList::iterator itr = m_Controlled.begin(); itr != m_Controlled.end(); ++itr)
@@ -14232,7 +14232,7 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
             if (GetTypeId() == TYPEID_UNIT)
             {
                 Unit* pOwner = GetCharmerOrOwner();
-                if ((isPet() || isGuardian()) && !isInCombat() && pOwner) // Must check for owner or crash on "Tame Beast"
+                if ((isPet() || isGuardian()) && !IsInCombat() && pOwner) // Must check for owner or crash on "Tame Beast"
                 {
                     // For every yard over 5, increase speed by 0.01
                     //  to help prevent pet from lagging behind and despawning
@@ -14426,7 +14426,7 @@ void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
             // and do it only for real sent packets and use run for run/mounted as client expected
             ++ToPlayer()->m_forced_speed_changes[mtype];
 
-            if (!isInCombat())
+            if (!IsInCombat())
                 if (Pet* pet = ToPlayer()->GetPet())
                     pet->SetSpeed(mtype, m_speed_rate[mtype], forced);
         }
@@ -14826,13 +14826,13 @@ Unit* Creature::SelectVictim()
         {
             if (Unit* owner = ToTempSummon()->GetOwner())
             {
-                if (owner->isInCombat())
+                if (owner->IsInCombat())
                     target = owner->getAttackerForHelper();
                 if (!target)
                 {
                     for (ControlList::const_iterator itr = owner->m_Controlled.begin(); itr != owner->m_Controlled.end(); ++itr)
                     {
-                        if ((*itr)->isInCombat())
+                        if ((*itr)->IsInCombat())
                         {
                             target = (*itr)->getAttackerForHelper();
                             if (target)
@@ -20031,7 +20031,7 @@ void Unit::_EnterVehicle(Vehicle* vehicle, int8 seatId, AuraApplication const* a
 
     if (Player* player = ToPlayer())
     {
-        if (vehicle->GetBase()->GetTypeId() == TYPEID_PLAYER && player->isInCombat())
+        if (vehicle->GetBase()->GetTypeId() == TYPEID_PLAYER && player->IsInCombat())
             return;
 
         InterruptNonMeleeSpells(false);

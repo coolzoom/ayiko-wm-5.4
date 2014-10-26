@@ -740,7 +740,7 @@ public:
                 Creature* Kalecgos = Unit::GetCreature(*me, KalecgosGUID);
                 if (Kalecgos)
                 {
-                    if (!Kalecgos->isInCombat())
+                    if (!Kalecgos->IsInCombat())
                     {
                         me->AI()->EnterEvadeMode();
                         return;

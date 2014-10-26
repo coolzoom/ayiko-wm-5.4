@@ -182,7 +182,7 @@ void ObjectGridStoper::Visit(CreatureMapType &m)
     // stop any fights at grid de-activation and remove dynobjects created at cast by creatures
     for (auto &source : m)
     {
-        if (source->isInCombat())
+        if (source->IsInCombat())
         {
             source->CombatStop();
             source->DeleteThreatList();

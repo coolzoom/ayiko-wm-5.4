@@ -379,7 +379,7 @@ public:
         {
             player->CLOSE_GOSSIP_MENU();
 
-            if (player->isInCombat() || creature->isInCombat())
+            if (player->IsInCombat() || creature->IsInCombat())
                 return true;
 
             if (npc_death_knight_initiateAI* pInitiateAI = CAST_AI(npc_death_knight_initiate::npc_death_knight_initiateAI, creature->AI()))
@@ -407,7 +407,7 @@ public:
             if (player->HealthBelowPct(10))
                 return true;
 
-            if (player->isInCombat() || creature->isInCombat())
+            if (player->IsInCombat() || creature->IsInCombat())
                 return true;
 
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ACCEPT_DUEL, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
@@ -819,7 +819,7 @@ public:
                 {
                     if ((*itr)->GetOwner()->GetGUID() == me->GetOwner()->GetGUID())
                     {
-                        if ((*itr)->isInCombat() && (*itr)->getAttackerForHelper())
+                        if ((*itr)->IsInCombat() && (*itr)->getAttackerForHelper())
                         {
                             AttackStart((*itr)->getAttackerForHelper());
                         }
@@ -830,12 +830,12 @@ public:
 
         void UpdateAI(const uint32 /*diff*/)
         {
-            if (!me->isInCombat())
+            if (!me->IsInCombat())
             {
                 if (Unit* owner = me->GetOwner())
                 {
                     Player* plrOwner = owner->ToPlayer();
-                    if (plrOwner && plrOwner->isInCombat())
+                    if (plrOwner && plrOwner->IsInCombat())
                     {
                         if (plrOwner->getAttackerForHelper() && plrOwner->getAttackerForHelper()->GetEntry() == GHOSTS)
                             AttackStart(plrOwner->getAttackerForHelper());

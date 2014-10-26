@@ -115,7 +115,7 @@ public:
 
         void CheckDistance(float dist, const uint32 uiDiff)
         {
-            if (!me->isInCombat())
+            if (!me->IsInCombat())
                 return;
 
             float x=0.0f, y=0.0f, z=0.0f;

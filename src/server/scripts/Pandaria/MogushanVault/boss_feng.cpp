@@ -686,7 +686,7 @@ class boss_feng : public CreatureScript
             private:
                 void CheckPlatform()
                 {
-                    if (!me->isInCombat())
+                    if (!me->IsInCombat())
                         return;
 
                     if ((me->GetPositionX() - centerPos.GetPositionX()) > 37.0f ||
@@ -1382,7 +1382,7 @@ class go_inversion : public GameObjectScript
 
             bool GossipHello(Player* player)
             {
-                if (!player->isInCombat())
+                if (!player->IsInCombat())
                     return true;
 
                 if (player->GetRoleForGroup(player->GetSpecializationId(player->GetActiveSpec())) != ROLES_TANK)
@@ -1410,7 +1410,7 @@ class go_cancel : public GameObjectScript
 
             bool GossipHello(Player* player)
             {
-                if (!player->isInCombat())
+                if (!player->IsInCombat())
                     return true;
 
                 if (player->GetRoleForGroup(player->GetSpecializationId(player->GetActiveSpec())) != ROLES_TANK)

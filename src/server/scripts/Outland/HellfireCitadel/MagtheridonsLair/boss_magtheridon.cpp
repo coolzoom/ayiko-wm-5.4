@@ -353,7 +353,7 @@ class boss_magtheridon : public CreatureScript
 
             void UpdateAI(const uint32 diff)
             {
-                if (!me->isInCombat())
+                if (!me->IsInCombat())
                 {
                     if (RandChat_Timer <= diff)
                     {

@@ -52,3 +52,15 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 
 -- Felblood Sample
 UPDATE `creature_loot_template` SET `ChanceOrQuestChance`='-39' WHERE (`entry`='16951') AND (`item`='23269');
+
+-- The Demoniac Scryer
+UPDATE `creature_template` SET `gossip_menu_id`='8524', `faction_A`='495', `faction_H`='495', `ScriptName`='npc_demoniac_scryer' WHERE (`entry`='22258');
+DELETE FROM `gossip_menu_option` WHERE (`menu_id`='8524') AND (`id`='0');
+DELETE FROM `creature` WHERE (`id`='22258');
+
+DELETE FROM `creature_text` WHERE `entry` = '22259';
+INSERT INTO `creature_text` (`entry`, `id`, `text`, `type`, `probability`) VALUES
+('22259', '0', 'An intruder! Begone!', '12', '100'),
+('22259', '1', 'Die!', '12', '100'),
+('22259', '2', 'You will burn!', '12', '100'),
+('22259', '3', 'Your end has come!', '12', '100');

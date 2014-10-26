@@ -27,7 +27,7 @@ class mob_master_shang_xi_temple : public CreatureScript
 
         bool OnGossipHello(Player* player, Creature* creature)
         {
-            if (creature->isQuestGiver())
+            if (creature->IsQuestGiver())
                 player->PrepareQuestMenu(creature->GetGUID());
 
             if (player->GetQuestStatus(29776) != QUEST_STATUS_NONE)

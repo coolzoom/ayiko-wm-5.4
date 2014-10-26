@@ -736,7 +736,7 @@ public:
 
         void CastChanneling()
         {
-            if (!me->isInCombat() && !me->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
+            if (!me->IsInCombat() && !me->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
             {
                 if (leotherasGUID)
                 {
@@ -754,7 +754,7 @@ public:
                 if (!leotherasGUID)
                     leotherasGUID = instance->GetData64(DATA_LEOTHERAS);
 
-                if (!me->isInCombat() && instance->GetData64(DATA_LEOTHERAS_EVENT_STARTER))
+                if (!me->IsInCombat() && instance->GetData64(DATA_LEOTHERAS_EVENT_STARTER))
                 {
                     Unit* victim = NULL;
                     victim = Unit::GetUnit(*me, instance->GetData64(DATA_LEOTHERAS_EVENT_STARTER));

@@ -808,7 +808,7 @@ namespace Trinity
             MostHPMissingInRange(Unit const* obj, float range, uint32 hp) : i_obj(obj), i_range(range), i_hp(hp) {}
             bool operator()(Unit* u)
             {
-                if (u->IsAlive() && u->isInCombat() && !i_obj->IsHostileTo(u) && i_obj->IsWithinDistInMap(u, i_range) && u->GetMaxHealth() - u->GetHealth() > i_hp)
+                if (u->IsAlive() && u->IsInCombat() && !i_obj->IsHostileTo(u) && i_obj->IsWithinDistInMap(u, i_range) && u->GetMaxHealth() - u->GetHealth() > i_hp)
                 {
                     i_hp = u->GetMaxHealth() - u->GetHealth();
                     return true;
@@ -827,7 +827,7 @@ namespace Trinity
             FriendlyCCedInRange(Unit const* obj, float range) : i_obj(obj), i_range(range) {}
             bool operator()(Unit* u)
             {
-                if (u->IsAlive() && u->isInCombat() && !i_obj->IsHostileTo(u) && i_obj->IsWithinDistInMap(u, i_range) &&
+                if (u->IsAlive() && u->IsInCombat() && !i_obj->IsHostileTo(u) && i_obj->IsWithinDistInMap(u, i_range) &&
                     (u->isFeared() || u->isCharmed() || u->isFrozen() || u->HasUnitState(UNIT_STATE_STUNNED) || u->HasUnitState(UNIT_STATE_CONFUSED)))
                 {
                     return true;
@@ -845,7 +845,7 @@ namespace Trinity
             FriendlyMissingBuffInRange(Unit const* obj, float range, uint32 spellid) : i_obj(obj), i_range(range), i_spell(spellid) {}
             bool operator()(Unit* u)
             {
-                if (u->IsAlive() && u->isInCombat() && !i_obj->IsHostileTo(u) && i_obj->IsWithinDistInMap(u, i_range) &&
+                if (u->IsAlive() && u->IsInCombat() && !i_obj->IsHostileTo(u) && i_obj->IsWithinDistInMap(u, i_range) &&
                     !(u->HasAura(i_spell)))
                 {
                     return true;

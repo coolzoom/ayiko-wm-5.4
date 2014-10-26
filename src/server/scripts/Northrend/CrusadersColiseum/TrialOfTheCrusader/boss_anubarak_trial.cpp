@@ -474,7 +474,7 @@ public:
             m_uiDeterminationTimer = urand(5*IN_MILLISECONDS, 60*IN_MILLISECONDS);
             DoCast(me, SPELL_ACID_MANDIBLE);
             me->SetInCombatWithZone();
-            if (me->isInCombat())
+            if (me->IsInCombat())
                 if (Creature* Anubarak = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_ANUBARAK)))
                     Anubarak->AI()->JustSummoned(me);
         }
@@ -545,7 +545,7 @@ public:
             DoCast(me, SPELL_EXPOSE_WEAKNESS);
             DoCast(me, SPELL_SPIDER_FRENZY);
             me->SetInCombatWithZone();
-            if (me->isInCombat())
+            if (me->IsInCombat())
                 if (Creature* Anubarak = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_ANUBARAK)))
                     Anubarak->AI()->JustSummoned(me);
         }

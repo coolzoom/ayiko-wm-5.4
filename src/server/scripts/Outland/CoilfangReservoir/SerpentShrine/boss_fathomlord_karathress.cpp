@@ -224,7 +224,7 @@ public:
         void UpdateAI(const uint32 diff)
         {
             //Only if not incombat check if the event is started
-            if (!me->isInCombat() && instance && instance->GetData(DATA_KARATHRESSEVENT))
+            if (!me->IsInCombat() && instance && instance->GetData(DATA_KARATHRESSEVENT))
             {
                 Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_KARATHRESSEVENT_STARTER));
 
@@ -380,7 +380,7 @@ public:
         void UpdateAI(const uint32 diff)
         {
             //Only if not incombat check if the event is started
-            if (!me->isInCombat() && instance && instance->GetData(DATA_KARATHRESSEVENT))
+            if (!me->IsInCombat() && instance && instance->GetData(DATA_KARATHRESSEVENT))
             {
                 Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_KARATHRESSEVENT_STARTER));
 
@@ -521,7 +521,7 @@ public:
         void UpdateAI(const uint32 diff)
         {
             //Only if not incombat check if the event is started
-            if (!me->isInCombat() && instance && instance->GetData(DATA_KARATHRESSEVENT))
+            if (!me->IsInCombat() && instance && instance->GetData(DATA_KARATHRESSEVENT))
             {
                 Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_KARATHRESSEVENT_STARTER));
 
@@ -647,7 +647,7 @@ public:
         void UpdateAI(const uint32 diff)
         {
             //Only if not incombat check if the event is started
-            if (!me->isInCombat() && instance && instance->GetData(DATA_KARATHRESSEVENT))
+            if (!me->IsInCombat() && instance && instance->GetData(DATA_KARATHRESSEVENT))
             {
                 Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_KARATHRESSEVENT_STARTER));
 

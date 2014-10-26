@@ -433,7 +433,7 @@ public:
             if (pFetchTene && pFetchTene->IsAlive() && !pFetchTene->GetVictim())
             {
                 bCanUseWill = true;
-                if (!pFetchTene->isInCombat())
+                if (!pFetchTene->IsInCombat())
                 {
                     DoCast(me, SPELL_POWER_OF_TENEBRON);
                     AddDrakeLootMode();
@@ -448,7 +448,7 @@ public:
             if (pFetchShad && pFetchShad->IsAlive() && !pFetchShad->GetVictim())
             {
                 bCanUseWill = true;
-                if (!pFetchShad->isInCombat())
+                if (!pFetchShad->IsInCombat())
                 {
                     DoCast(me, SPELL_POWER_OF_SHADRON);
                     AddDrakeLootMode();
@@ -463,7 +463,7 @@ public:
             if (pFetchVesp && pFetchVesp->IsAlive() && !pFetchVesp->GetVictim())
             {
                 bCanUseWill = true;
-                if (!pFetchVesp->isInCombat())
+                if (!pFetchVesp->IsInCombat())
                 {
                     DoCast(me, SPELL_POWER_OF_VESPERON);
                     AddDrakeLootMode();

@@ -404,7 +404,7 @@ public:
 
         void MoveInLineOfSight(Unit* who)
         {
-            if (!me->isInCombat())
+            if (!me->IsInCombat())
                 return;
 
             if (who->GetEntry() == NPC_POWER_SPARK)

@@ -963,7 +963,7 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if (!me->isInCombat())
+            if (!me->IsInCombat())
                 DoCast(me, SPELL_SHADOW_CHANNELING);
 
             if (!UpdateVictim())

@@ -3522,7 +3522,7 @@ public:
         {
             if(Creature* raptor = me->FindNearestCreature(NPC_SPINY_RAPTOR, 70.0f))
             {
-                if(raptor->isInCombat())
+                if(raptor->IsInCombat())
                 {
                     raptor->CombatStop(true);
                     raptor->DeleteThreatList();
@@ -3730,7 +3730,7 @@ public:
                 switch(eventId)
                 {
                     case EVENT_DEADLY_EGG_BARRAGE:
-                        if(UpdateVictim() && me->isInCombat())
+                        if(UpdateVictim() && me->IsInCombat())
                         {
                             me->CastSpell((Unit*)NULL, SPELL_DEADLY_EGG_BARRAGE, false);
                             events.ScheduleEvent(EVENT_DEADLY_EGG_BARRAGE, 5 * IN_MILLISECONDS);
@@ -4786,7 +4786,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature) override
     {
-        if(creature->isQuestGiver())
+        if(creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
         if((player->GetQuestStatus(QUEST_THE_PRIDE_OF_KEZAN) == QUEST_STATUS_INCOMPLETE))

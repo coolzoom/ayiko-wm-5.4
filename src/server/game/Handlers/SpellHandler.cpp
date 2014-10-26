@@ -385,7 +385,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (pUser->isInCombat())
+    if (pUser->IsInCombat())
     {
         for (int i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
         {

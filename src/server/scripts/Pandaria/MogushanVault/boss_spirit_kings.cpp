@@ -623,7 +623,7 @@ class boss_spirit_kings : public CreatureScript
                     _introQiangDone = true;
                     Talk(QIANG_INTRO);
                 }
-                else if (me->IsWithinDistInMap(who, 20.0f, false) && !me->isInCombat())
+                else if (me->IsWithinDistInMap(who, 20.0f, false) && !me->IsInCombat())
                 {
                     if (me->canStartAttack(who, false))
                         AttackStart(who);
@@ -701,7 +701,7 @@ class boss_spirit_kings : public CreatureScript
                 switch (action)
                 {
                     case ACTION_ENTER_COMBAT:
-                        if (!me->isInCombat())
+                        if (!me->IsInCombat())
                             if (Player* victim = me->SelectNearestPlayerNotGM(50.0f))
                                 AttackStart(victim);
                     // No Break

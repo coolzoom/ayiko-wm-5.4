@@ -269,7 +269,7 @@ class spell_monk_chi_wave_bolt : public SpellScriptLoader
                     targetList.remove_if([player, target, requireFriendly](Unit const *obj)
                     {
                         return (!obj->IsWithinLOSInMap(player) || obj == target ||
-                            (requireFriendly ? false : (obj->IsFriendlyTo(player) || !player->IsValidAttackTarget(obj)) || !obj->isInCombat()) );
+                            (requireFriendly ? false : (obj->IsFriendlyTo(player) || !player->IsValidAttackTarget(obj)) || !obj->IsInCombat()) );
                     });
 
                     if (targetList.empty())
@@ -1879,7 +1879,7 @@ class spell_monk_energizing_brew : public SpellScriptLoader
 
             SpellCastResult CheckFight()
             {
-                if (!GetCaster()->isInCombat())
+                if (!GetCaster()->IsInCombat())
                     return SPELL_FAILED_CASTER_AURASTATE;
                 return SPELL_CAST_OK;
             }

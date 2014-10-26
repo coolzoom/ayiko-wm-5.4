@@ -1829,7 +1829,7 @@ void WorldSession::HandleEquipmentSetUse(WorldPacket& recvData)
 
     ObjectGuid itemGuid[EQUIPMENT_SLOT_END];
 
-    EquipmentSlots startSlot = _player->isInCombat() ? EQUIPMENT_SLOT_MAINHAND : EQUIPMENT_SLOT_START;
+    EquipmentSlots startSlot = _player->IsInCombat() ? EQUIPMENT_SLOT_MAINHAND : EQUIPMENT_SLOT_START;
 
     for (uint8 i = 0; i < EQUIPMENT_SLOT_END; ++i)
         recvData >> srcslot[i] >> srcbag[i];

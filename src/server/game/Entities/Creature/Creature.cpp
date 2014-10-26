@@ -586,7 +586,7 @@ void Creature::Update(uint32 diff)
             m_regenTimer += diff;
             m_regenTimerCount += diff;
 
-            bool bInCombat = isInCombat() && (!GetVictim() ||                                        // if isInCombat() is true and this has no victim
+            bool bInCombat = IsInCombat() && (!GetVictim() ||                                        // if IsInCombat() is true and this has no victim
                              !GetVictim()->GetCharmerOrOwnerPlayerOrPlayerItself() ||                // or the victim/owner/charmer is not a player
                              !GetVictim()->GetCharmerOrOwnerPlayerOrPlayerItself()->isGameMaster()); // or the victim/owner/charmer is not a GameMaster
 
@@ -650,7 +650,7 @@ void Creature::RegenerateMana()
     uint32 addvalue = 0;
 
     // Combat and any controlled creature
-    if (isInCombat() || GetCharmerOrOwnerGUID())
+    if (IsInCombat() || GetCharmerOrOwnerGUID())
     {
         float ManaIncreaseRate = sWorld->getRate(RATE_POWER_MANA);
         float Spirit = GetStat(STAT_SPIRIT);
@@ -852,7 +852,7 @@ bool Creature::Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, 
     LastUsedScriptID = crTemplate->ScriptID;
 
     // TODO: Replace with spell, handle from DB
-    if (isSpiritHealer() || isSpiritGuide())
+    if (IsSpiritHealer() || IsSpiritGuide())
     {
         m_serverSideVisibility.SetValue(SERVERSIDE_VISIBILITY_GHOST, GHOST_VISIBILITY_GHOST);
         m_serverSideVisibilityDetect.SetValue(SERVERSIDE_VISIBILITY_GHOST, GHOST_VISIBILITY_GHOST);
@@ -868,7 +868,7 @@ bool Creature::Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, 
 
 bool Creature::isCanTrainingOf(Player* player, bool msg) const
 {
-    if (!isTrainer())
+    if (!IsTrainer())
         return false;
 
     TrainerSpellData const* trainer_spells = GetTrainerSpells();
@@ -952,7 +952,7 @@ bool Creature::isCanTrainingOf(Player* player, bool msg) const
 
 bool Creature::isCanInteractWithBattleMaster(Player* player, bool msg) const
 {
-    if (!isBattleMaster())
+    if (!IsBattleMaster())
         return false;
 
     BattlegroundTypeId bgTypeId = sBattlegroundMgr->GetBattleMasterBG(GetEntry());
@@ -1635,7 +1635,7 @@ bool Creature::canStartAttack(Unit const* who, bool force) const
         if (!_IsTargetAcceptable(who))
             return false;
 
-        if (who->isInCombat() && IsWithinDist(who, ATTACK_DISTANCE))
+        if (who->IsInCombat() && IsWithinDist(who, ATTACK_DISTANCE))
             if (Unit* victim = who->getAttackerForHelper())
                 if (IsWithinDistInMap(victim, sWorld->getFloatConfig(CONFIG_CREATURE_FAMILY_ASSISTANCE_RADIUS)))
                     force = true;
@@ -2172,7 +2172,7 @@ bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /
         return false;
 
     // skip fighting creature
-    if (isInCombat())
+    if (IsInCombat())
         return false;
 
     // only free creature

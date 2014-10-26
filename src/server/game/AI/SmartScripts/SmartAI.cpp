@@ -118,7 +118,7 @@ WayPoint* SmartAI::GetNextWayPoint()
 
 void SmartAI::StartPath(bool run, uint32 path, bool repeat, Unit* /*invoker*/)
 {
-    if (me->isInCombat())// no wp movement in combat
+    if (me->IsInCombat())// no wp movement in combat
     {
         TC_LOG_ERROR("misc", "SmartAI::StartPath: Creature entry %u wanted to start waypoint movement while in combat, ignoring.", me->GetEntry());
         return;
@@ -289,7 +289,7 @@ void SmartAI::UpdatePath(const uint32 diff)
     {
         if (mWPPauseTimer < diff)
         {
-            if (!me->isInCombat() && !HasEscortState(SMART_ESCORT_RETURNING) && (mWPReached || mLastWPIDReached == SMART_ESCORT_LAST_OOC_POINT || mForcedPaused))
+            if (!me->IsInCombat() && !HasEscortState(SMART_ESCORT_RETURNING) && (mWPReached || mLastWPIDReached == SMART_ESCORT_LAST_OOC_POINT || mForcedPaused))
             {
                 GetScript()->ProcessEventsFor(SMART_EVENT_WAYPOINT_RESUMED, NULL, mLastWP->id, GetScript()->GetPathId());
                 RemoveEscortState(SMART_ESCORT_PAUSED);
@@ -319,7 +319,7 @@ void SmartAI::UpdatePath(const uint32 diff)
             mWPReached = false;
         }
     }
-    if ((!me->HasReactState(REACT_PASSIVE) && me->isInCombat()) || HasEscortState(SMART_ESCORT_PAUSED | SMART_ESCORT_RETURNING))
+    if ((!me->HasReactState(REACT_PASSIVE) && me->IsInCombat()) || HasEscortState(SMART_ESCORT_PAUSED | SMART_ESCORT_RETURNING))
         return;
     // handle next wp
     if (mWPReached)//reached WP

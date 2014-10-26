@@ -158,3 +158,6 @@ UPDATE `quest_template` SET `RequiredSpellCast1`='0', `RequiredSpellCast2`='0', 
 
 -- Burn It Up... For the Horde!
 UPDATE `creature_template` SET `flags_extra`='130' WHERE `entry` IN('19008', '18849');
+
+-- Bury Those Cockroaches!
+UPDATE `creature_template` SET `minlevel`='70', `maxlevel`='70', `faction_A`='7', `faction_H`='7', `unit_flags`='4', `flags_extra`='128' WHERE `entry` IN('25402', '25403', '25404', '25405');

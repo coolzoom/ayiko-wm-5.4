@@ -434,7 +434,29 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData* data)
 
     // trigger creature is always not selectable and can not be attacked
     if (isTrigger())
+    {
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+
+        ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+        ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
+        ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_PULL, true);
+        ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_PULL_TOWARDS, true);
+        ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_PULL_TOWARDS_DEST, true);
+
+        ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_SCHOOL_DAMAGE, true);
+        ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_HEALTH_LEECH, true);
+        ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL, true);
+        ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE, true);
+        ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_WEAPON_DAMAGE, true);
+        ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_NORMALIZED_WEAPON_DMG, true);
+        ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_DAMAGE_FROM_MAX_HEALTH_PCT, true);
+        ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ENVIRONMENTAL_DAMAGE, true);
+
+        ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_PERIODIC_DAMAGE_PERCENT, true);
+        ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_SPLIT_DAMAGE_PCT, true);
+        ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_PERIODIC_HEALTH_FUNNEL, true);
+        ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_PERIODIC_LEECH, true);
+    }
 
     InitializeReactState();
 

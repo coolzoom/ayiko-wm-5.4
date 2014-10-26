@@ -77,3 +77,20 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 
 -- Finding the Survivors
 UPDATE `creature_loot_template` SET `ChanceOrQuestChance`='-75' WHERE (`item`='25604');
+
+-- Not on My Watch!
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` = '18351';
+DELETE FROM `smart_scripts` WHERE `source_type` = '9' AND `entryorguid` = '1835100';
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(18351, 0, 0, 0, 11, 0, 100, 0, 0, 0, 0, 0, 11, 42648, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Lump - Out Of Combat - Cast Sleeping Sleep'),
+(18351, 0, 1, 0, 4, 0, 100, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Lump - On Aggro - Say Line (random)'),
+(18351, 0, 2, 0, 62, 0, 100, 0, 21293, 3, 0, 0, 33, 18354, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Lump - On Gossip Select - Give Quest Credit'),
+(18351, 0, 3, 0, 2, 0, 100, 1, 0, 30, 0, 0, 80, 1835100, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Lump - On 30% HP - Run Script'),
+(18351, 0, 4, 0, 9, 0, 100, 0, 8, 25, 1500, 2000, 11, 31994, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Lump - On Player Range - Cast Shoulder Charge'),
+(18351, 0, 5, 0, 9, 0, 100, 0, 5, 40, 1500, 2000, 11, 32248, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Lump - On Player Range - Cast Spear Throw'),
+(1835100, 9, 0, 0, 2, 0, 100, 1, 0, 0, 0, 0, 2, 1080, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Lump - On Script - Set Faction Friendly'),
+(1835100, 9, 1, 0, 2, 0, 100, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Lump - On Script - Say Line 1'),
+(1835100, 9, 2, 0, 2, 0, 100, 1, 1000, 1000, 0, 0, 5, 447, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Lump - On Script - Emote ONESHOT_FLY_SIT_GROUND_DOWN'),
+(1835100, 9, 3, 0, 2, 0, 100, 1, 0, 0, 0, 0, 20, 9, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Lump - On Script - Stop auto-attack'),
+(1835100, 9, 4, 0, 2, 0, 100, 1, 0, 0, 0, 0, 24, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Lump - On Script - Evade'),
+(1835100, 9, 5, 0, 2, 0, 100, 1, 0, 0, 0, 0, 28, 42648, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Lump - On Script - Remove Aura Sleeping Sleep');

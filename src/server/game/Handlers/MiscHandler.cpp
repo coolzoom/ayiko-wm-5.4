@@ -288,7 +288,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
 
     bitsData.WriteBits(0, 6);
 
-    TRINITY_READ_GUARD(HashMapHolder<Player>::LockType, *HashMapHolder<Player>::GetLock());
+    HashMapHolder<Player>::ReadGuardType guard(HashMapHolder<Player>::GetLock());
 
     for (auto const &kvPair : sObjectAccessor->GetPlayers())
     {

@@ -24,6 +24,7 @@
 #include "InstanceSaveMgr.h"
 #include "World.h"
 #include "Group.h"
+#include "ThreadPoolMgr.hpp"
 
 MapInstanced::MapInstanced(uint32 id, time_t expiry) : Map(id, expiry, 0, REGULAR_DIFFICULTY)
 {
@@ -44,30 +45,26 @@ void MapInstanced::InitVisibilityDistance()
     }
 }
 
-void MapInstanced::Update(const uint32 t)
+void MapInstanced::Update(const uint32 diff)
 {
     // take care of loaded GridMaps (when unused, unload it!)
-    Map::Update(t);
+    Map::Update(diff);
 
     // update the instanced maps
     InstancedMaps::iterator i = m_InstancedMaps.begin();
 
     while (i != m_InstancedMaps.end())
     {
-        if (i->second->CanUnload(t))
+        Map * const instanced = i->second;
+        if (instanced->CanUnload(diff))
         {
-            if (!DestroyInstance(i))                             // iterator incremented
-            {
-                //m_unloadTimer
-            }
+            // iterator incremented inside
+            DestroyInstance(i);
         }
         else
         {
             // update only here, because it may schedule some bad things before delete
-            if (sMapMgr->GetMapUpdater()->activated())
-                sMapMgr->GetMapUpdater()->schedule_update(*i->second, t);
-            else
-                i->second->Update(t);
+            sThreadPoolMgr->schedule([instanced, diff] { instanced->Update(diff); });
             ++i;
         }
     }
@@ -75,8 +72,10 @@ void MapInstanced::Update(const uint32 t)
 
 void MapInstanced::DelayedUpdate(const uint32 diff)
 {
-    for (InstancedMaps::iterator i = m_InstancedMaps.begin(); i != m_InstancedMaps.end(); ++i)
-        i->second->DelayedUpdate(diff);
+    for (InstancedMaps::iterator i = m_InstancedMaps.begin(); i != m_InstancedMaps.end(); ++i) {
+        Map * const instanced = i->second;
+        sThreadPoolMgr->schedule([instanced, diff] { instanced->DelayedUpdate(diff); });
+    }
 
     Map::DelayedUpdate(diff); // this may be removed
 }

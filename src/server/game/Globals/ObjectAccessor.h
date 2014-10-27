@@ -25,9 +25,9 @@
 #include "Object.h"
 #include "Player.h"
 #include "Transport.h"
+#include "SpinLock.hpp"
 
-#include <ace/Singleton.h>
-#include <ace/Thread_Mutex.h>
+#include <ting/shared_mutex.hpp>
 
 #include <set>
 #include <unordered_map>
@@ -49,30 +49,33 @@ class HashMapHolder
     public:
 
         typedef std::unordered_map<uint64, T*> MapType;
-        typedef ACE_RW_Thread_Mutex LockType;
+
+        typedef ting::shared_mutex LockType;
+        typedef std::lock_guard<LockType> WriteGuardType;
+        typedef ting::shared_lock<LockType> ReadGuardType;
 
         static void Insert(T* o)
         {
-            TRINITY_WRITE_GUARD(LockType, i_lock);
+            WriteGuardType guard(i_lock);
             m_objectMap[o->GetGUID()] = o;
         }
 
         static void Remove(T* o)
         {
-            TRINITY_WRITE_GUARD(LockType, i_lock);
+            WriteGuardType guard(i_lock);
             m_objectMap.erase(o->GetGUID());
         }
 
         static T* Find(uint64 guid)
         {
-            TRINITY_READ_GUARD(LockType, i_lock);
+            ReadGuardType guard(i_lock);
             typename MapType::iterator itr = m_objectMap.find(guid);
             return (itr != m_objectMap.end()) ? itr->second : NULL;
         }
 
-        static MapType& GetContainer() { return m_objectMap; }
+        static MapType & GetContainer() { return m_objectMap; }
 
-        static LockType* GetLock() { return &i_lock; }
+        static LockType & GetLock() { return i_lock; }
 
     private:
 
@@ -85,7 +88,13 @@ class HashMapHolder
 
 class ObjectAccessor
 {
-    friend class ACE_Singleton<ObjectAccessor, ACE_Null_Mutex>;
+    typedef Trinity::SpinLock ObjectLock;
+    typedef std::lock_guard<ObjectLock> ObjectGuard;
+
+    typedef ting::shared_mutex CorpseLock;
+    typedef std::lock_guard<CorpseLock> CorpseReadGuard;
+    typedef ting::shared_lock<CorpseLock> CorpseWriteGuard;
+
     private:
         ObjectAccessor();
         ~ObjectAccessor();
@@ -93,6 +102,12 @@ class ObjectAccessor
         ObjectAccessor& operator=(const ObjectAccessor&);
 
     public:
+        static ObjectAccessor * instance()
+        {
+            static ObjectAccessor accessor;
+            return &accessor;
+        }
+
         // TODO: override these template functions for each holder type and add assertions
 
         template<class T> static T* GetObjectInOrOutOfWorld(uint64 guid, T* /*typeSpecifier*/)
@@ -231,13 +246,13 @@ class ObjectAccessor
         //non-static functions
         void AddUpdateObject(Object* obj)
         {
-            TRINITY_GUARD(ACE_Thread_Mutex, i_objectLock);
+            ObjectGuard guard(i_objectLock);
             i_objects.insert(obj);
         }
 
         void RemoveUpdateObject(Object* obj)
         {
-            TRINITY_GUARD(ACE_Thread_Mutex, i_objectLock);
+            ObjectGuard guard(i_objectLock);
             i_objects.erase(obj);
         }
 
@@ -262,11 +277,12 @@ class ObjectAccessor
         typedef std::unordered_map<Player*, UpdateData>::value_type UpdateDataValueType;
 
         std::set<Object*> i_objects;
-        Player2CorpsesMapType i_player2corpse;
+        ObjectLock i_objectLock;
 
-        ACE_Thread_Mutex i_objectLock;
-        ACE_RW_Thread_Mutex i_corpseLock;
+        Player2CorpsesMapType i_player2corpse;
+        CorpseLock i_corpseLock;
 };
 
-#define sObjectAccessor ACE_Singleton<ObjectAccessor, ACE_Null_Mutex>::instance()
+#define sObjectAccessor ObjectAccessor::instance()
+
 #endif

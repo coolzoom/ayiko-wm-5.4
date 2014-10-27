@@ -40,6 +40,7 @@ endif()
 
 include_directories(
   ${CMAKE_BINARY_DIR}
+  ${CMAKE_SOURCE_DIR}/dep
   ${CMAKE_SOURCE_DIR}/dep/g3dlite/include
   ${CMAKE_SOURCE_DIR}/dep/sockets/include
   ${CMAKE_SOURCE_DIR}/dep/SFMT

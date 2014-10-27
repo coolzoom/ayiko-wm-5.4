@@ -188,6 +188,7 @@ class ReactorRunnable : protected ACE_Task_Base
 
             TC_LOG_DEBUG("misc", "Network Thread exits");
 
+            MySQLHelper::stopThread();
             return 0;
         }
 

@@ -81,6 +81,7 @@
 #include "BlackMarketMgr.h"
 #include "PlayerDump.h"
 #include "Compress.hpp"
+#include "ThreadPoolMgr.hpp"
 
 #include <zmq.h>
 
@@ -1514,6 +1515,9 @@ void World::SetInitialWorldSettings()
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_OLD_CORPSES);
     stmt->setUInt32(0, 3 * DAY);
     CharacterDatabase.Execute(stmt);
+
+    TC_LOG_INFO("misc", "Starting thread pool manager");
+    sThreadPoolMgr->start(getIntConfig(CONFIG_NUMTHREADS));
 
     ///- Load the DBC files
     TC_LOG_INFO("server.loading", "Initialize data stores...");
@@ -3492,8 +3496,11 @@ void World::ReloadRBAC()
 {
     // Pasive reload, we mark the data as invalidated and next time a permission is checked it will be reloaded
     TC_LOG_INFO("rbac", "World::ReloadRBAC()");
-    for (SessionMap::iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
-        itr->second->ReloadRBACData();
+    for (auto &kvPair : m_sessions) {
+        auto const session = kvPair.second;
+        sThreadPoolMgr->schedule([session] { session->ReloadRBACData(); });
+    }
+    sThreadPoolMgr->wait();
 }
 
 void World::ProcessRealmTransfers()

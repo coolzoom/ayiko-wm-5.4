@@ -5,6 +5,7 @@
 #include "CreatureAI.h"
 #include "Player.h"
 #include "CellImpl.h"
+#include "Profiler/ProbePoint.hpp"
 
 namespace {
 
@@ -73,18 +74,24 @@ void DelayedUnitRelocation::operator()(Map &map, Cell &cell, CellCoord const &pa
 
     for (auto &creature : creatures_)
     {
+        TC_PROBE2(worldserver, delayed_unit_relocation.creature.begin, &map, creature);
+
         creatureNotifier_.setCreature(*creature);
 
         cell.Visit(pair, Trinity::makeWorldVisitor(creatureNotifier_), map, *creature, radius);
         cell.Visit(pair, Trinity::makeGridVisitor(creatureNotifier_), map, *creature, radius);
 
         creatureNotifier_.processCollected();
+
+        TC_PROBE2(worldserver, delayed_unit_relocation.creature.end, &map, creature);
     }
 
     for (auto &p : players_)
     {
         auto &player = p.first;
         auto &data = p.second;
+
+        TC_PROBE2(worldserver, delayed_unit_relocation.player.begin, &map, player);
 
         Cell cell2(data.coord);
         PlayerRelocationNotifier relocate(*player);
@@ -93,6 +100,8 @@ void DelayedUnitRelocation::operator()(Map &map, Cell &cell, CellCoord const &pa
         cell2.Visit(data.coord, Trinity::makeGridVisitor(relocate), map, *data.viewPoint, radius);
 
         relocate.SendToSelf();
+
+        TC_PROBE2(worldserver, delayed_unit_relocation.player.end, &map, player);
     }
 }
 

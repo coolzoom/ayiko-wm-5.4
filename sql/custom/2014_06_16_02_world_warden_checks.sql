@@ -69,4 +69,13 @@ insert into warden_checks (`id`, `type`, `data`, `str`, `address`, `length`, `re
   (63, 52, '', '', 9819828, 8, '2f549a4177be7f3f', ''),
   (64, 52, '', '', 9853640, 4, 'bb8d243f', ''),
   (65, 52, '', '', 11163932, 8, 'd893fec0488c11c1', ''),
-  (66, 52, '', '', 11696524, 6, '040000005086', '');
+  (66, 52, '', '', 11696524, 6, '040000005086', ''),
+  (67, 78, '', "MOLTENTELEPORTER.DLL", 0, 0, '', "Molten-Molten Teleporter - injected dll"),
+  (68, 78, '', "RPE.DLL", 0, 0, '', "Molten-rEdoX Packet Editor - injected dll"),
+  (69, 78, '', "WPESPY.DLL", 0, 0, '', "Molten-WPE PRO - injected dll"),
+  (70, 78, '', "TNXYZ.DLL", 0, 0, '', "Molten-The New XYZ - injected dll"),
+  (71, 78, '', "AMULTI.DLL", 0, 0, '', "Molten-AMulti - injected dll"),
+  (72, 78, '', "WEXT.DLL", 0, 0, '', "Molten-WoWExt XYZ - injected dll"),
+  (73, 78, '', "WOWAUWAU.DLL", 0, 0, '', "Molten-WoWauWau - injected dll"),
+  (74, 78, '', "KBD.DLL", 0, 0, '', "Molten-Injector_sniffer - injected dll"),
+  (75, 78, '', "FASMDLL_MANAGED.DLL", 0, 0, '', "Molten-Fishing - injected dll");

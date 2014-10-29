@@ -1789,9 +1789,6 @@ class spell_warl_nightfall : public SpellScriptLoader
                     if (player->HasAura(WARLOCK_NIGHTFALL))
                         if (roll_chance_i(5))
                             player->SetPower(POWER_SOUL_SHARDS, player->GetPower(POWER_SOUL_SHARDS) + 100);
-
-                    if (player->HasAura(WARLOCK_GLYPH_OF_SIPHON_LIFE))
-                        player->HealBySpell(player, sSpellMgr->GetSpellInfo(WARLOCK_GLYPH_OF_SIPHON_LIFE), int32(player->GetMaxHealth() / 200), false);
                 }
             }
 

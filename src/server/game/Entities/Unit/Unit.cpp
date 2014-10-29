@@ -6454,6 +6454,8 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
             switch (dummySpell->Id)
             {
                 case 56218: // Glyph of Siphon Life
+                    if (!procSpell || procSpell->Effects[0].ApplyAuraName != SPELL_AURA_PERIODIC_DAMAGE)
+                        return false;
                     triggered_spell_id = 63106;
                     target = this;
                     break;

@@ -4538,6 +4538,11 @@ void Spell::EffectHealMaxHealth(SpellEffIndex /*effIndex*/)
     else
         addhealth = unitTarget->GetMaxHealth() - unitTarget->GetHealth();
 
+    // Lay on Hands - Reduce by Battle Fatigue
+    if (m_spellInfo->Id == 633)
+        if (auto battleFatigue = unitTarget->GetAuraEffect(134735, EFFECT_0))
+            AddPct(addhealth, battleFatigue->GetAmount());
+
     m_healing += addhealth;
 }
 

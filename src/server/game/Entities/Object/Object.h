@@ -19,19 +19,19 @@
 #ifndef _OBJECT_H
 #define _OBJECT_H
 
-#include "Common.h"
-#include "UpdateFields.h"
-#include "UpdateData.h"
-#include "ObjectDefines.h"
+#include "Errors.h"
 #include "GridDefines.h"
-#include "Map.h"
+#include "ObjectDefines.h"
+#include "Locale.hpp"
+#include "SharedDefines.h"
+#include "UpdateData.h"
+#include "UpdateFields.h"
 
 #include <bitset>
-#include <set>
+#include <list>
 #include <string>
-#include <sstream>
-
 #include <unordered_map>
+#include <vector>
 
 #define CONTACT_DISTANCE            0.5f
 #define INTERACTION_DISTANCE        5.0f
@@ -107,20 +107,18 @@ enum NotifyFlags
 };
 
 class WorldPacket;
-class UpdateData;
-class ByteBuffer;
 class WorldSession;
 class Creature;
 class Player;
-class UpdateMask;
 class InstanceScript;
 class GameObject;
 class TempSummon;
 class Vehicle;
-class CreatureAI;
 class ZoneScript;
 class Unit;
 class Transport;
+class Map;
+struct WMOAreaTableEntry;
 
 struct ObjectInvisibility final
 {
@@ -252,12 +250,7 @@ class Object
         void ApplyModPositiveFloatValue(uint16 index, float val, bool apply);
         void ApplyModSignedFloatValue(uint16 index, float val, bool apply);
 
-        void ApplyPercentModFloatValue(uint16 index, float val, bool apply)
-        {
-            float value = GetFloatValue(index);
-            ApplyPercentModFloatVar(value, val, apply);
-            SetFloatValue(index, value);
-        }
+        void ApplyPercentModFloatValue(uint16 index, float val, bool apply);
 
         void SetFlag(uint16 index, uint32 newFlag);
         void RemoveFlag(uint16 index, uint32 oldFlag);
@@ -528,7 +521,6 @@ struct Position
     bool IsInDist(const Position* pos, float dist) const
         { return GetExactDistSq(pos) < dist * dist; }
     bool HasInArc(float arcangle, const Position* pos) const;
-    bool HasInLine(WorldObject const* target, float width) const;
     std::string ToString() const;
 
     // modulos a radian orientation to the range of 0..2PI
@@ -803,11 +795,7 @@ class WorldObject : public Object, public WorldLocation
             GetPosition(&pos);
             MovePositionToCollisionBetween(pos, distMin, distMax, angle);
         }
-        void GetRandomNearPosition(Position &pos, float radius)
-        {
-            GetPosition(&pos);
-            MovePosition(pos, radius * (float)rand_norm(), (float)rand_norm() * static_cast<float>(2 * M_PI));
-        }
+        void GetRandomNearPosition(Position &pos, float radius);
 
         void GetContactPoint(const WorldObject* obj, float &x, float &y, float &z, float distance2d = CONTACT_DISTANCE) const
         {
@@ -887,6 +875,9 @@ class WorldObject : public Object, public WorldLocation
                 return IsInWorld() && obj->IsInWorld() && (GetMap() == obj->GetMap());
             return false;
         }
+
+        bool HasInLine(WorldObject const* target, float width) const;
+
         bool IsWithinDist3d(float x, float y, float z, float dist) const
             { return IsInDist(x, y, z, dist + GetObjectSize()); }
         bool IsWithinDist3d(const Position* pos, float dist) const
@@ -991,7 +982,7 @@ class WorldObject : public Object, public WorldLocation
             return SummonCreature(id, pos, spwtype, despwtime, 0);
         }
         GameObject* SummonGameObject(uint32 entry, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 respawnTime);
-        Creature*   SummonTrigger(float x, float y, float z, float ang, uint32 dur, CreatureAI* (*GetAI)(Creature*) = NULL);
+        Creature*   SummonTrigger(float x, float y, float z, float ang, uint32 dur);
         void SummonCreatureGroup(uint8 group, std::list<TempSummon*>& list);
 
         Creature*   FindNearestCreature(uint32 entry, float range, bool alive = true) const;
@@ -1023,28 +1014,7 @@ class WorldObject : public Object, public WorldLocation
         bool IsPermanentWorldObject() const { return m_isWorldObject; }
         bool IsWorldObject() const;
 
-        template <typename Notifier>
-        void VisitNearbyObject(const float &radius, Notifier &notifier) const
-        {
-            if (IsInWorld())
-                GetMap()->VisitAll(GetPositionX(), GetPositionY(), radius, notifier);
-        }
-
-        template <typename Notifier>
-        void VisitNearbyGridObject(const float &radius, Notifier &notifier) const
-        {
-            if (IsInWorld())
-                GetMap()->VisitGrid(GetPositionX(), GetPositionY(), radius, notifier);
-        }
-
-        template <typename Notifier>
-        void VisitNearbyWorldObject(const float &radius, Notifier &notifier) const
-        {
-            if (IsInWorld())
-                GetMap()->VisitWorld(GetPositionX(), GetPositionY(), radius, notifier);
-        }
-
-        uint32  LastUsedScriptID;
+        uint32 LastUsedScriptID;
 
         // Transports
         Transport* GetTransport() const { return m_transport; }
@@ -1106,30 +1076,6 @@ class WorldObject : public Object, public WorldLocation
 
 namespace Trinity
 {
-    template<class T>
-    void RandomResizeList(std::list<T> &_list, uint32 _size)
-    {
-        while (_list.size() > _size)
-        {
-            typename std::list<T>::iterator itr = _list.begin();
-            advance(itr, urand(0, _list.size() - 1));
-            _list.erase(itr);
-        }
-    }
-    template<class T, class Predicate>
-    void RandomResizeList(std::list<T> &list, Predicate& predicate, uint32 size)
-    {
-        //! First use predicate filter
-        std::list<T> listCopy;
-        for (typename std::list<T>::iterator itr = list.begin(); itr != list.end(); ++itr)
-            if (predicate(*itr))
-                listCopy.push_back(*itr);
-
-        if (size)
-            RandomResizeList(listCopy, size);
-
-        list = listCopy;
-    }
     // Binary predicate to sort WorldObjects based on the distance to a reference WorldObject
     class ObjectDistanceOrderPred
     {

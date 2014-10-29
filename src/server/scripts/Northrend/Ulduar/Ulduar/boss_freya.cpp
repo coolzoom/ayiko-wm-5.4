@@ -23,6 +23,7 @@
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "ulduar.h"
+#include "ObjectVisitors.hpp"
 
 enum FreyaYells
 {
@@ -423,7 +424,7 @@ class boss_freya : public CreatureScript
                             std::list<Player*> PlayerList;
                             Trinity::AnyPlayerInObjectRangeCheck checker(me, 50.0f);
                             Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, PlayerList, checker);
-                            me->VisitNearbyWorldObject(50.0f, searcher);
+                            Trinity::VisitNearbyWorldObject(me, 50.0f, searcher);
                             for (std::list<Player*>::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
                                 (*itr)->CastSpell(*itr, SPELL_SUMMON_NATURE_BOMB, true);
                             events.ScheduleEvent(EVENT_NATURE_BOMB, urand(10000, 12000));

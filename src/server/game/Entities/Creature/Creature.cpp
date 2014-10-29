@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Creature.h"
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "WorldPacket.h"
@@ -23,7 +24,6 @@
 #include "ObjectMgr.h"
 #include "GroupMgr.h"
 #include "SpellMgr.h"
-#include "Creature.h"
 #include "QuestDef.h"
 #include "GossipDef.h"
 #include "Player.h"
@@ -50,6 +50,7 @@
 #include "Group.h"
 #include "MoveSplineInit.h"
 #include "MoveSpline.h"
+#include "ObjectVisitors.hpp"
 // apply implementation of the singletons
 
 TrainerSpell const* TrainerSpellData::Find(uint32 spell_id) const
@@ -145,7 +146,7 @@ m_PlayerDamageReq(0), m_lootRecipient(0), m_lootRecipientGroup(0), m_corpseRemov
 m_respawnDelay(300), m_corpseDelay(60), m_respawnradius(0.0f), m_reactState(REACT_AGGRESSIVE),
 m_defaultMovementType(IDLE_MOTION_TYPE), m_DBTableGuid(0), m_equipmentId(0), m_AlreadyCallAssistance(false),
 m_AlreadySearchedAssistance(false), m_regenHealth(true), m_AI_locked(false), m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL),
-m_creatureInfo(NULL), m_creatureData(NULL), m_path_id(0), m_formation(NULL), m_seerGUID(0)
+m_creatureInfo(NULL), m_creatureData(NULL), m_seerGUID(0), m_path_id(0), m_formation(NULL)
 {
     m_regenTimer = 0;
     m_powerFraction = 0;
@@ -2092,7 +2093,7 @@ Player* Creature::SelectNearestPlayer(float distance) const
 
     Trinity::NearestPlayerInObjectRangeCheck checker(this, distance);
     Trinity::PlayerLastSearcher<Trinity::NearestPlayerInObjectRangeCheck> searcher(this, target, checker);
-    VisitNearbyObject(distance, searcher);
+    Trinity::VisitNearbyObject(this, distance, searcher);
 
     return target;
 }
@@ -2103,7 +2104,7 @@ Player* Creature::SelectNearestPlayerNotGM(float distance) const
 
     Trinity::NearestPlayerNotGMInObjectRangeCheck checker(this, distance);
     Trinity::PlayerLastSearcher<Trinity::NearestPlayerNotGMInObjectRangeCheck> searcher(this, target, checker);
-    VisitNearbyObject(distance, searcher);
+    Trinity::VisitNearbyObject(this, distance, searcher);
 
     return target;
 }

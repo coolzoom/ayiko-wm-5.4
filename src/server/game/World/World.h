@@ -29,6 +29,7 @@
 #include "MySQLPtrTypesFwd.h"
 #include "Callback.h"
 #include "AuctionBroker.hpp"
+#include "Threading/LockedQueue.h"
 
 #include <ace/Singleton.h>
 

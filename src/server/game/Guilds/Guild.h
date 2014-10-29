@@ -22,7 +22,7 @@
 #include "World.h"
 #include "Item.h"
 #include "WorldPacket.h"
-#include "ObjectMgr.h"
+#include "ObjectAccessor.h"
 #include "Player.h"
 #include "DBCStore.h"
 
@@ -38,9 +38,9 @@ enum GuildMisc
     GUILD_RANKS_MIN_COUNT               = 5,
     GUILD_RANKS_MAX_COUNT               = 10,
     GUILD_RANK_NONE                     = 0xFF,
-    GUILD_WITHDRAW_MONEY_UNLIMITED      = 0xFFFFFFFF,
-    GUILD_WITHDRAW_SLOT_UNLIMITED       = 0xFFFFFFFF,
-    GUILD_EVENT_LOG_GUID_UNDEFINED      = 0xFFFFFFFF
+    GUILD_WITHDRAW_MONEY_UNLIMITED      = 0xFFFFFFFFu,
+    GUILD_WITHDRAW_SLOT_UNLIMITED       = 0xFFFFFFFFu,
+    GUILD_EVENT_LOG_GUID_UNDEFINED      = 0xFFFFFFFFu
 };
 
 enum GuildDefaultRanks
@@ -367,10 +367,10 @@ class Guild
 
                 void ChangeRank(uint8 newRank);
 
-                inline void UpdateLogoutTime() { m_logoutTime = ::time(NULL); }
-                inline bool IsRank(uint8 rankId) const { return m_rankId == rankId; }
-                inline bool IsRankNotLower(uint8 rankId) const { return m_rankId <= rankId; }
-                inline bool IsSamePlayer(uint64 guid) const { return m_guid == guid; }
+                void UpdateLogoutTime() { m_logoutTime = ::time(NULL); }
+                bool IsRank(uint8 rankId) const { return m_rankId == rankId; }
+                bool IsRankNotLower(uint8 rankId) const { return m_rankId <= rankId; }
+                bool IsSamePlayer(uint64 guid) const { return m_guid == guid; }
 
                 void DecreaseBankRemainingValue(SQLTransaction& trans, uint8 tabId, uint32 amount);
                 uint32 GetBankRemainingValue(uint8 tabId, const Guild* guild) const;
@@ -378,7 +378,7 @@ class Guild
                 void ResetTabTimes();
                 void ResetMoneyTime();
 
-                inline Player* FindPlayer() const { return ObjectAccessor::FindPlayer(m_guid); }
+                Player* FindPlayer() const { return ObjectAccessor::FindPlayer(m_guid); }
 
                 uint32 GetRemainingWeeklyReputation() const { return 0; }
 
@@ -559,13 +559,18 @@ class Guild
                 uint32 GetBankMoneyPerDay() const { return m_rankId == GR_GUILDMASTER ? GUILD_WITHDRAW_MONEY_UNLIMITED : m_bankMoneyPerDay; }
                 void SetBankMoneyPerDay(uint32 money);
 
-                inline uint32 GetBankTabRights(uint8 tabId) const { return tabId < GUILD_BANK_MAX_TABS ? m_bankTabRightsAndSlots[tabId].rights : 0; }
-                inline uint32 GetBankTabSlotsPerDay(uint8 tabId) const
+                uint32 GetBankTabRights(uint8 tabId) const
+                {
+                    return tabId < GUILD_BANK_MAX_TABS ? m_bankTabRightsAndSlots[tabId].rights : 0;
+                }
+
+                uint32 GetBankTabSlotsPerDay(uint8 tabId) const
                 {
                     if (tabId < GUILD_BANK_MAX_TABS)
                         return m_rankId == GR_GUILDMASTER ? GUILD_WITHDRAW_SLOT_UNLIMITED : m_bankTabRightsAndSlots[tabId].slots;
                     return 0;
                 }
+
                 void SetBankTabSlotsAndRights(uint8 tabId, GuildBankRightsAndSlots rightsAndSlots, bool saveToDB);
 
             private:
@@ -804,7 +809,7 @@ class Guild
         void SwapItems(Player* player, uint8 tabId, uint8 slotId, uint8 destTabId, uint8 destSlotId, uint32 splitedAmount);
         void SwapItemsWithInventory(Player* player, bool toChar, uint8 tabId, uint8 slotId, uint8 playerBag, uint8 playerSlotId, uint32 splitedAmount);
         void AutoStoreItemInInventory(Player* player, uint8 tabId, uint8 slotId, uint32 amount);
-        uint64 GetBankMoney() { return m_bankMoney; }
+        uint64 GetBankMoney() const { return m_bankMoney; }
 
         // Bank tabs
         void SetBankTabText(uint8 tabId, const std::string& text);

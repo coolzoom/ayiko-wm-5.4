@@ -37,6 +37,7 @@ EndScriptData */
 #include "Cell.h"
 #include "CellImpl.h"
 #include "trial_of_the_crusader.h"
+#include "ObjectVisitors.hpp"
 
 enum Yells
 {
@@ -124,7 +125,7 @@ class OrbsDespawner : public BasicEvent
         bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
         {
             Trinity::CreatureWorker<OrbsDespawner> worker(_creature, *this);
-            _creature->VisitNearbyGridObject(5000.0f, worker);
+            Trinity::VisitNearbyGridObject(_creature, 5000.0f, worker);
             return true;
         }
 

@@ -16,14 +16,15 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Common.h"
 #include "TicketMgr.h"
+#include "Common.h"
 #include "DatabaseEnv.h"
 #include "Log.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "Chat.h"
 #include "World.h"
+#include "ObjectMgr.h"
 
 inline float GetAge(uint64 t) { return float(time(NULL) - t) / DAY; }
 
@@ -256,6 +257,26 @@ void GmTicket::SetUnassigned()
 void GmTicket::TeleportTo(Player* player) const
 {
     player->TeleportTo(_mapId, _posX, _posY, _posZ, 0.0f, 0);
+}
+
+Player* GmTicket::GetPlayer() const
+{
+    return ObjectAccessor::FindPlayer(_playerGuid);
+}
+
+Player* GmTicket::GetAssignedPlayer() const
+{
+    return ObjectAccessor::FindPlayer(_assignedTo);
+}
+
+std::string GmTicket::GetAssignedToName() const
+{
+    std::string name;
+    // save queries if ticket is not assigned
+    if (_assignedTo)
+        sObjectMgr->GetPlayerNameByGUID(_assignedTo, name);
+
+    return name;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

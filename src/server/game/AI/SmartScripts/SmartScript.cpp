@@ -34,6 +34,7 @@
 #include "Vehicle.h"
 #include "ScriptedGossip.h"
 #include "CreatureTextMgr.h"
+#include "ObjectVisitors.hpp"
 
 class TrinityStringTextBuilder
 {
@@ -2448,7 +2449,7 @@ ObjectList* SmartScript::GetWorldObjectsInDist(float dist)
     {
         Trinity::AllWorldObjectsInRange u_check(obj, dist);
         Trinity::WorldObjectListSearcher<Trinity::AllWorldObjectsInRange> searcher(obj, *targets, u_check);
-        obj->VisitNearbyObject(dist, searcher);
+        Trinity::VisitNearbyObject(obj, dist, searcher);
     }
     return targets;
 }

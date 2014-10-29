@@ -26,6 +26,7 @@
 #include "Unit.h"
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
+#include "ObjectVisitors.hpp"
 
 enum ShamanSpells
 {
@@ -922,7 +923,7 @@ class spell_sha_fire_nova : public SpellScriptLoader
                 UnitList targets;
                 Trinity::AnyUnitHavingBuffInObjectRangeCheck u_check(GetCaster(), GetCaster(), 100, SPELL_SHA_FLAME_SHOCK, false);
                 Trinity::UnitListSearcher<Trinity::AnyUnitHavingBuffInObjectRangeCheck> searcher(GetCaster(), targets, u_check);
-                GetCaster()->VisitNearbyObject(100, searcher);
+                Trinity::VisitNearbyObject(GetCaster(), 100, searcher);
 
                 return targets.size() == 0 ? SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW : SPELL_CAST_OK;
             }
@@ -1814,7 +1815,7 @@ class spell_sha_lava_lash : public SpellScriptLoader
             std::list<Unit*> targets;
             Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(player, player, 12.0f);
             Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(player, targets, u_check);
-            player->VisitNearbyObject(12.0f, searcher);
+            Trinity::VisitNearbyObject(player, 12.0f, searcher);
             // Limit to 4
             int8 count = 0;
             for (std::list<Unit*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)

@@ -61,6 +61,8 @@
 #include "BattlefieldMgr.h"
 #include "SpellAuraEffects.h"
 #include "ScriptMgr.h"
+#include "ObjectVisitors.hpp"
+
 #include <numeric>
 
 float baseMoveSpeed[MAX_MOVE_TYPE] =
@@ -6802,7 +6804,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                     std::list<Player*> plrList;
                     Trinity::AnyFriendlyUnitInObjectRangeCheck check(this, this, 15.0f);
                     Trinity::PlayerListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(this, plrList, check);
-                    VisitNearbyObject(15.0f, searcher);
+                    Trinity::VisitNearbyObject(this, 15.0f, searcher);
                     if (plrList.empty())
                         return false;
 
@@ -7315,7 +7317,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                     std::list<Player*> plrList;
                     Trinity::AnyFriendlyUnitInObjectRangeCheck check(this, this, 15.0f);
                     Trinity::PlayerListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(this, plrList, check);
-                    VisitNearbyObject(15.0f, searcher);
+                    Trinity::VisitNearbyObject(this, 15.0f, searcher);
                     if (plrList.empty())
                         return false;
 
@@ -11045,7 +11047,7 @@ int32 Unit::DealHeal(Unit* victim, uint32 addhealth, SpellInfo const* spellProto
 
             Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(unit, unit, 6.0f);
             Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(unit, targetList, u_check);
-            unit->VisitNearbyObject(6.0f, searcher);
+            Trinity::VisitNearbyObject(unit, 6.0f, searcher);
 
             if (!targetList.empty())
             {
@@ -17218,7 +17220,7 @@ Unit* Unit::SelectNearbyTarget(Unit* exclude, float dist) const
     std::list<Unit*> targets;
     Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, this, dist);
     Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(this, targets, u_check);
-    VisitNearbyObject(dist, searcher);
+    Trinity::VisitNearbyObject(this, dist, searcher);
 
     // remove current target
     if (GetVictim())
@@ -17249,7 +17251,7 @@ Unit* Unit::SelectNearbyAlly(Unit* exclude, float dist) const
     std::list<Unit*> targets;
     Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(this, this, dist);
     Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(this, targets, u_check);
-    VisitNearbyObject(dist, searcher);
+    Trinity::VisitNearbyObject(this, dist, searcher);
 
     if (exclude)
         targets.remove(exclude);
@@ -18949,7 +18951,7 @@ void Unit::UpdateObjectVisibility(bool forced)
         WorldObject::UpdateObjectVisibility(true);
         // call MoveInLineOfSight for nearby creatures
         Trinity::AIRelocationNotifier notifier(*this);
-        VisitNearbyObject(GetVisibilityRange(), notifier);
+        Trinity::VisitNearbyObject(this, GetVisibilityRange(), notifier);
     }
 }
 

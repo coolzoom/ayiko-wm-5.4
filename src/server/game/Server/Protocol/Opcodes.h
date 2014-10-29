@@ -980,7 +980,7 @@ enum Opcodes
     SMSG_GUILD_ACHIEVEMENT_MEMBERS                    = 0x000,  // 5.0.5 16048
     SMSG_GUILD_BANK_LIST                              = 0xC77,  // 5.4.0 17399
     SMSG_GUILD_BANK_LOG_QUERY_RESULT                  = 0x472,  // 5.4.0 17399
-    SMSG_GUILD_BANK_MONEY_WITHDRAWN                   = 0x557,  // 5.4.0 17399
+    SMSG_GUILD_BANK_MONEY_WITHDRAWN                   = 0x473,  // 5.4.0 17399
     SMSG_GUILD_BANK_QUERY_TEXT_RESULT                 = 0x54A,  // 5.4.0 17399
     SMSG_GUILD_CANCEL                                 = 0x000,  // 5.0.5 16048
     SMSG_GUILD_CHALLENGE_COMPLETED                    = 0x552,  // 5.4.0 17399
@@ -1026,7 +1026,7 @@ enum Opcodes
     SMSG_GUILD_TRADESKILL_UPDATE                      = 0x000,  // 5.0.5 16048
     SMSG_GUILD_UPDATE_ROSTER                          = 0x000,  // 5.0.5 16048
     SMSG_GUILD_XP                                     = 0x572,  // 5.4.0 17399
-    SMSG_GUILD_XP_GAIN                                = 0x473,  // 5.4.0 17399
+    SMSG_GUILD_XP_GAIN                                = 0x557,  // 5.4.0 17399
     SMSG_GUILD_XP_UPDATE                              = 0x000,  // 5.0.5 16048
     SMSG_HEALTH_UPDATE                                = 0x018,  // 5.4.0 17399 (JamList)
     SMSG_HIGHEST_THREAT_UPDATE                        = 0x00B,  // 5.4.0 17399

@@ -59,6 +59,7 @@ EndContentData */
 #include "SpellAuras.h"
 #include "Vehicle.h"
 #include "Player.h"
+#include "ObjectVisitors.hpp"
 
 /*########
 # npc_air_force_bots
@@ -1904,7 +1905,7 @@ class npc_ebon_gargoyle : public CreatureScript
                 std::list<Unit*> targets;
                 Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(me, me, 30);
                 Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(me, targets, u_check);
-                me->VisitNearbyObject(30, searcher);
+                Trinity::VisitNearbyObject(me, 30, searcher);
                 for (std::list<Unit*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
                     if ((*iter)->GetAura(49206, owner->GetGUID()))
                     {
@@ -3845,7 +3846,7 @@ class npc_ring_of_frost : public CreatureScript
                 std::list<Unit*> targets;
                 Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(me, me, 10.0f);
                 Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(me, targets, u_check);
-                me->VisitNearbyObject(10.0f, searcher);
+                Trinity::VisitNearbyObject(me, 10.0f, searcher);
                 for (std::list<Unit*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
                     if (!(*iter)->isTotem())
                         CheckIfMoveInRing(*iter);

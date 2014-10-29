@@ -28,6 +28,7 @@
 #include "GridNotifiersImpl.h"
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
+#include "ObjectVisitors.hpp"
 
 enum HunterSpells
 {
@@ -182,7 +183,7 @@ class spell_hun_glaive_toss_damage : public SpellScriptLoader
 
                 Trinity::NearestAttackableUnitInObjectRangeCheck u_check(GetCaster(), GetCaster(), radius);
                 Trinity::UnitListSearcher<Trinity::NearestAttackableUnitInObjectRangeCheck> searcher(GetCaster(), targetList, u_check);
-                GetCaster()->VisitNearbyObject(radius, searcher);
+                Trinity::VisitNearbyObject(GetCaster(), radius, searcher);
 
                 for (auto itr : targetList)
                 {
@@ -216,7 +217,7 @@ class spell_hun_glaive_toss_damage : public SpellScriptLoader
 
                 Trinity::NearestAttackableUnitInObjectRangeCheck u_check(GetCaster(), GetCaster(), radius);
                 Trinity::UnitListSearcher<Trinity::NearestAttackableUnitInObjectRangeCheck> searcher(GetCaster(), targetList, u_check);
-                GetCaster()->VisitNearbyObject(radius, searcher);
+                Trinity::VisitNearbyObject(GetCaster(), radius, searcher);
 
                 for (auto itr : targetList)
                 {

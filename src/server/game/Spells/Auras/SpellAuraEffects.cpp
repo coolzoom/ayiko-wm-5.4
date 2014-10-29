@@ -39,6 +39,7 @@
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
 #include "WeatherMgr.h"
+#include "ObjectVisitors.hpp"
 
 namespace Trinity {
 
@@ -2292,7 +2293,7 @@ void AuraEffect::HandleModStealth(AuraApplication const* aurApp, uint8 mode, boo
         data << uint64(target->GetGUID());
 
         Trinity::UnfriendlyMessageDistDeliverer notifier(target, &data, target->GetVisibilityRange());
-        target->VisitNearbyWorldObject(target->GetVisibilityRange(), notifier);
+        Trinity::VisitNearbyWorldObject(target, target->GetVisibilityRange(), notifier);
 
         Unit::AttackerSet const& attackers = target->getAttackers();
         for (Unit::AttackerSet::const_iterator itr = attackers.begin(); itr != attackers.end();)
@@ -2967,7 +2968,7 @@ void AuraEffect::HandleFeignDeath(AuraApplication const* aurApp, uint8 mode, boo
         UnitList targets;
         Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(target, target, target->GetMap()->GetVisibilityRange());
         Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(target, targets, u_check);
-        target->VisitNearbyObject(target->GetMap()->GetVisibilityRange(), searcher);
+        Trinity::VisitNearbyObject(target, target->GetMap()->GetVisibilityRange(), searcher);
         for (UnitList::iterator iter = targets.begin(); iter != targets.end(); ++iter)
         {
             if (!(*iter)->HasUnitState(UNIT_STATE_CASTING))

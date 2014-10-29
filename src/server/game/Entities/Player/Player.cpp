@@ -82,6 +82,7 @@
 #include "LexicalCast.h"
 #include "GameObjectAI.h"
 #include "ScriptMgr.h"
+#include "ObjectVisitors.hpp"
 
 #include <cmath>
 
@@ -220,6 +221,11 @@ uint8 const initialSetupDataBlob[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
+
+float finiteAlways(float f)
+{
+    return finite(f) ? f : 0.0f;
+}
 
 } // namespace
 
@@ -7536,7 +7542,7 @@ void Player::SendMessageToSetInRange(WorldPacket* data, float dist, bool self)
         GetSession()->SendPacket(data);
 
     Trinity::MessageDistDeliverer notifier(this, data, dist);
-    VisitNearbyWorldObject(dist, notifier);
+    Trinity::VisitNearbyWorldObject(this, dist, notifier);
 }
 
 void Player::SendMessageToSetInRange(WorldPacket* data, float dist, bool self, bool own_team_only)
@@ -7545,7 +7551,7 @@ void Player::SendMessageToSetInRange(WorldPacket* data, float dist, bool self, b
         GetSession()->SendPacket(data);
 
     Trinity::MessageDistDeliverer notifier(this, data, dist, own_team_only);
-    VisitNearbyWorldObject(dist, notifier);
+    Trinity::VisitNearbyWorldObject(this, dist, notifier);
 }
 
 void Player::SendMessageToSet(WorldPacket* data, Player const* skipped_rcvr)
@@ -7554,7 +7560,7 @@ void Player::SendMessageToSet(WorldPacket* data, Player const* skipped_rcvr)
         GetSession()->SendPacket(data);
 
     Trinity::MessageDistDeliverer notifier(this, data, GetVisibilityRange(), false, skipped_rcvr);
-    VisitNearbyWorldObject(GetVisibilityRange(), notifier);
+    Trinity::VisitNearbyWorldObject(this, GetVisibilityRange(), notifier);
 }
 
 void Player::SendDirectMessage(WorldPacket const *data) const
@@ -24763,7 +24769,7 @@ void Player::UpdateVisibilityForPlayer()
 {
     // updates visibility of all objects around point of view for current player
     Trinity::VisibleNotifier notifier(*this);
-    m_seer->VisitNearbyObject(GetSightRange(), notifier);
+    Trinity::VisitNearbyObject(m_seer, GetSightRange(), notifier);
     notifier.SendToSelf();   // send gathered data
 }
 

@@ -22,10 +22,10 @@
 #include "DBCStores.h"
 #include "ObjectAccessor.h"
 #include "SpellMgr.h"
-
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
+#include "ObjectVisitors.hpp"
 
 int TotemAI::Permissible(Creature const* creature)
 {
@@ -90,7 +90,7 @@ void TotemAI::UpdateAI(uint32 const /*diff*/)
             std::list<Unit*> targets;
             Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(me, me, max_range);
             Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(me, targets, u_check);
-            caster->VisitNearbyObject(max_range, searcher);
+            Trinity::VisitNearbyObject(caster, max_range, searcher);
             // Find Stormstrike and Flame Shock -> Stormstrike -> Flame Shock
             const uint64 guid = caster->GetGUID();
             auto itr = std::find_if(targets.begin(), targets.end(), [guid](Unit *u) { return u->HasAura(17364, guid) && u->HasAura(8050, guid); });
@@ -118,7 +118,7 @@ void TotemAI::UpdateAI(uint32 const /*diff*/)
         victim = NULL;
         Trinity::NearestAttackableNoCCUnitInObjectRangeCheck u_check(me, me, max_range);
         Trinity::UnitLastSearcher<Trinity::NearestAttackableNoCCUnitInObjectRangeCheck> checker(me, victim, u_check);
-        me->VisitNearbyObject(max_range, checker);
+        Trinity::VisitNearbyObject(me, max_range, checker);
     }
 
     // If have target

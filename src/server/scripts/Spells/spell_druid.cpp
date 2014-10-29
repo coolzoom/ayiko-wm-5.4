@@ -26,6 +26,7 @@
 #include "SpellAuraEffects.h"
 #include "Group.h"
 #include "Containers.h"
+#include "ObjectVisitors.hpp"
 
 enum DruidSpells
 {
@@ -1520,7 +1521,7 @@ class spell_dru_natures_vigil : public SpellScriptLoader
                     std::list<Unit*> targets;
                     Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(_player, _player, 40.f);
                     Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(_player, targets, u_check);
-                    _player->VisitNearbyObject(40.f, searcher);
+                    Trinity::VisitNearbyObject(_player, 40.f, searcher);
                     // remove invalid targets
                     for (std::list<Unit*>::iterator tIter = targets.begin(); tIter != targets.end();)
                     {

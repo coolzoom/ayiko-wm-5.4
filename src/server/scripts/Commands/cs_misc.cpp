@@ -38,6 +38,8 @@
 
 #include <ace/INET_Addr.h>
 
+#include <cstdlib>
+
 class misc_commandscript : public CommandScript
 {
 public:
@@ -1367,7 +1369,9 @@ public:
             return false;
         }
 
-        uint16 max = maxPureSkill ? atol (maxPureSkill) : target->GetPureMaxSkillValue(skill);
+        uint16 max = maxPureSkill
+                ? std::strtoul(maxPureSkill, nullptr, 10)
+                : target->GetPureMaxSkillValue(skill);
 
         if (level <= 0 || level > max || max <= 0)
             return false;

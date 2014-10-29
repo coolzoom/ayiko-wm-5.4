@@ -22,6 +22,7 @@
 #include "GridNotifiers.h"
 #include "ObjectAccessor.h"
 #include "SharedDefines.h"
+#include "ObjectVisitors.hpp"
 
 #include <unordered_map>
 
@@ -252,7 +253,7 @@ void CreatureTextMgr::SendChatPacket(WorldObject* source, Builder const& builder
 
     float dist = range == TEXT_RANGE_CUSTOM ? customRange : GetRangeForChatType(msgType);
     Trinity::PlayerDistWorker<CreatureTextLocalizer<Builder> > worker(source, dist, localizer);
-    source->VisitNearbyWorldObject(dist, worker);
+    Trinity::VisitNearbyWorldObject(source, dist, worker);
 }
 
 #endif

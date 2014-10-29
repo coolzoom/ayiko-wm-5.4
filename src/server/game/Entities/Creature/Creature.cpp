@@ -487,8 +487,7 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData* data)
     */
 
     // TODO: Shouldn't we check whether or not the creature is in water first?
-    if (cInfo->InhabitType & INHABIT_WATER && IsInWater())
-        AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
+    SetSwim(GetCreatureTemplate()->InhabitType & INHABIT_WATER && IsInWater());
 
     return true;
 }
@@ -1780,10 +1779,7 @@ void Creature::setDeathState(DeathState s)
             SetDisableGravity(false);
         }
 
-        if (cinfo->InhabitType & INHABIT_WATER && IsInWater())
-            AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
-        else
-            RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
+        SetSwim(cinfo->InhabitType & INHABIT_WATER && IsInWater());
 
         SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
         SetUInt32Value(UNIT_NPC_FLAGS + 1, cinfo->npcflag2);

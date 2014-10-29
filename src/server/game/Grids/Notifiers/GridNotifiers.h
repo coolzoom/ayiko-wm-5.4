@@ -28,7 +28,6 @@
 #include "Player.h"
 #include "CreatureAI.h"
 #include "Spell.h"
-#include "RelocationNotifiers.hpp"
 
 namespace Trinity
 {
@@ -61,24 +60,6 @@ namespace Trinity
         void Visit(NotInterested &) {}
     };
 
-    class PlayerRelocationNotifier : public VisibleNotifier
-    {
-    public:
-        PlayerRelocationNotifier(Player &player) : VisibleNotifier(player) { }
-
-        void Visit(CreatureMapType &);
-        void Visit(PlayerMapType &);
-
-        template <typename AnyMapType>
-        void Visit(AnyMapType &m)
-        {
-            VisibleNotifier::Visit(m);
-        }
-
-    private:
-        CreatureMapType movedInLos_;
-    };
-
     class AIRelocationNotifier
     {
     public:
@@ -94,27 +75,6 @@ namespace Trinity
     private:
         Unit *unit_;
         std::vector<std::pair<Creature *, bool>> movedInLos_;
-    };
-
-    struct GridUpdater
-    {
-        Grid &i_grid;
-        uint32 i_timeDiff;
-        GridUpdater(Grid &grid, uint32 diff) : i_grid(grid), i_timeDiff(diff) {}
-
-        template <typename MapType>
-        void updateObjects(MapType &m)
-        {
-            for (auto &object : m)
-                object->Update(i_timeDiff);
-        }
-
-        void Visit(PlayerMapType &m) { updateObjects(m); }
-        void Visit(CreatureMapType &m) { updateObjects(m); }
-        void Visit(GameObjectMapType &m) { updateObjects(m); }
-        void Visit(DynamicObjectMapType &m) { updateObjects(m); }
-        void Visit(CorpseMapType &m) { updateObjects(m); }
-        void Visit(AreaTriggerMapType &m) { updateObjects(m); }
     };
 
     struct MessageDistDeliverer

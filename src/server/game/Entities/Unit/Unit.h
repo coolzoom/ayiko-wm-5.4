@@ -2093,6 +2093,8 @@ class Unit : public WorldObject
         void SetPhaseMask(uint32 newPhaseMask, bool update);// overwrite WorldObject::SetPhaseMask
         void UpdateObjectVisibility(bool forced = true);
 
+        void OnRelocated();
+
         SpellImmuneList m_spellImmune[MAX_SPELL_IMMUNITY];
         uint32 m_lastSanctuaryTime;
 
@@ -2382,6 +2384,9 @@ class Unit : public WorldObject
         TempSummon* ToTempSummon() { if (isSummon()) return reinterpret_cast<TempSummon*>(this); else return NULL; }
         TempSummon const* ToTempSummon() const { if (isSummon()) return reinterpret_cast<TempSummon const*>(this); else return NULL; }
 
+        bool isAINotifyScheduled() const { return m_AINotifyScheduled; }
+        void setAINotifyScheduled(bool val) { m_AINotifyScheduled = val; }
+
         void SetTarget(uint64 guid)
         {
             if (!_focusSpell)
@@ -2516,6 +2521,9 @@ class Unit : public WorldObject
         void SetRooted(bool apply);
 
     private:
+        Position m_lastVisibilityUpdPos;
+        bool m_AINotifyScheduled;
+
         uint32 m_rootTimes;
 
         uint32 m_state;                                     // Even derived shouldn't modify

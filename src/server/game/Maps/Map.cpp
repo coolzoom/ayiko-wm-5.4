@@ -648,74 +648,6 @@ void Map::Update(const uint32 diff)
 
     MoveAllCreaturesInMoveList();
     TC_PROBE1(worldserver, map_update.move_list.end, this);
-
-    if (!m_mapRefManager.isEmpty() || !m_activeNonPlayers.empty())
-        ProcessRelocationNotifies(diff);
-    TC_PROBE1(worldserver, map_update.relocation.end, this);
-}
-
-struct ResetNotifier
-{
-    template <typename MapType>
-    void resetNotify(MapType &m)
-    {
-        for (auto &object : m)
-            object->ResetAllNotifies();
-    }
-
-    void Visit(CreatureMapType &m) { resetNotify(m); }
-    void Visit(PlayerMapType &m) { resetNotify(m); }
-
-    template <typename NotInterested>
-    void Visit(NotInterested &) { }
-};
-
-void Map::ProcessRelocationNotifies(uint32 diff)
-{
-    ResetNotifier reset;
-    auto gridResetNotifier(Trinity::makeGridVisitor(reset));
-    auto worldResetNotifier(Trinity::makeWorldVisitor(reset));
-
-    for (auto &kvPair : i_loadedGrids)
-    {
-        auto &ngrid = kvPair.second;
-        if (ngrid.GetGridState() != GRID_STATE_ACTIVE)
-            continue;
-
-        ngrid.getGridInfo().getRelocationTimer().TUpdate(diff);
-        if (!ngrid.getGridInfo().getRelocationTimer().TPassed())
-            continue;
-
-        uint32 gx = ngrid.getX(), gy = ngrid.getY();
-
-        TC_PROBE3(worldserver, map_relocation_notifiers.grid.begin, this, gx, gy);
-
-        CellCoord cell_min(gx*MAX_NUMBER_OF_CELLS, gy*MAX_NUMBER_OF_CELLS);
-        CellCoord cell_max(cell_min.x_coord + MAX_NUMBER_OF_CELLS, cell_min.y_coord+MAX_NUMBER_OF_CELLS);
-
-        for (uint32 x = cell_min.x_coord; x < cell_max.x_coord; ++x)
-        {
-            for (uint32 y = cell_min.y_coord; y < cell_max.y_coord; ++y)
-            {
-                uint32 cell_id = (y * TOTAL_NUMBER_OF_CELLS_PER_MAP) + x;
-                if (!isCellMarked(cell_id))
-                    continue;
-
-                CellCoord pair(x, y);
-                Cell cell(pair);
-                cell.SetNoCreate();
-
-                delayedUnitRelocation_(*this, cell, pair, MAX_VISIBILITY_DISTANCE);
-
-                Visit(cell, gridResetNotifier);
-                Visit(cell, worldResetNotifier);
-            }
-        }
-
-        ngrid.getGridInfo().getRelocationTimer().TReset(diff, m_VisibilityNotifyPeriod);
-
-        TC_PROBE3(worldserver, map_relocation_notifiers.grid.end, this, gx, gy);
-    }
 }
 
 void Map::RemovePlayerFromMap(Player* player, bool remove)
@@ -787,7 +719,7 @@ void Map::PlayerRelocation(Player* player, float x, float y, float z, float orie
         AddToGrid(player, new_cell);
     }
 
-    player->UpdateObjectVisibility(false);
+    player->OnRelocated();
 }
 
 void Map::CreatureRelocation(Creature* creature, float x, float y, float z, float ang, bool respawnRelocationOnFail)
@@ -818,8 +750,8 @@ void Map::CreatureRelocation(Creature* creature, float x, float y, float z, floa
         creature->Relocate(x, y, z, ang);
         if (creature->IsVehicle())
             creature->GetVehicleKit()->RelocatePassengers();
-        creature->UpdateObjectVisibility(false);
         RemoveCreatureFromMoveList(creature);
+        creature->OnRelocated();
     }
 }
 
@@ -866,7 +798,6 @@ void Map::MoveAllCreaturesInMoveList()
         {
             // update pos
             c->Relocate(c->_newPosition);
-            //c->SendMovementFlagUpdate(); possible creature crash fix.
             c->UpdateObjectVisibility(false);
         }
         else

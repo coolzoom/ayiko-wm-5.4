@@ -33,14 +33,12 @@ class GridInfo final
 {
 public:
     GridInfo()
-        : i_timer(0), i_visUpdate(0, irand(0, DEFAULT_VISIBILITY_NOTIFY_PERIOD))
-        , i_unloadActiveLockCount(0), i_unloadReferenceLock(0)
+        : i_timer(0), i_unloadActiveLockCount(0), i_unloadReferenceLock(0)
         , i_unloadExplicitLock(0)
     { }
 
     explicit GridInfo(time_t expiry, bool unload = true)
-        : i_timer(expiry), i_visUpdate(0, irand(0, DEFAULT_VISIBILITY_NOTIFY_PERIOD))
-        , i_unloadActiveLockCount(0), i_unloadReferenceLock(0)
+        : i_timer(expiry), i_unloadActiveLockCount(0), i_unloadReferenceLock(0)
         , i_unloadExplicitLock(unload ? 0 : 1)
     { }
 
@@ -82,11 +80,8 @@ public:
         i_timer.Update(diff);
     }
 
-    PeriodicTimer & getRelocationTimer() { return i_visUpdate; }
-
 private:
     TimeTracker i_timer;
-    PeriodicTimer i_visUpdate;
 
     uint16 i_unloadActiveLockCount;                     // lock from active object spawn points (prevent clone loading)
     uint8 i_unloadReferenceLock;                        // lock from instance map copy

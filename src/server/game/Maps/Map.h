@@ -30,7 +30,6 @@
 #include "GameObjectModel.h"
 #include "NGrid.h"
 #include "ScriptInfo.hpp"
-#include "RelocationNotifiers.hpp"
 
 #include <bitset>
 #include <list>
@@ -246,9 +245,7 @@ class Map
         template <typename OtherMapType>
         void Visit(OtherMapType &m)
         {
-            for (auto &object : m)
-                if (object->IsInWorld())
-                    i_objectsToUpdate.emplace_back(object);
+            i_objectsToUpdate.insert(i_objectsToUpdate.end(), m.begin(), m.end());
         }
 
         void updateCollected(uint32 diff);
@@ -606,10 +603,6 @@ class Map
 
         std::bitset<TOTAL_NUMBER_OF_CELLS_PER_MAP*TOTAL_NUMBER_OF_CELLS_PER_MAP> marked_cells;
 
-        //these functions used to process player/mob aggro reactions and
-        //visibility calculations. Highly optimized for massive calculations
-        void ProcessRelocationNotifies(uint32 diff);
-
         bool i_scriptLock;
         std::set<WorldObject*> i_objectsToRemove;
         std::map<WorldObject*, bool> i_objectsToSwitch;
@@ -637,8 +630,6 @@ class Map
         std::unordered_map<uint32 /*dbGUID*/, time_t> _goRespawnTimes;
 
         ObjectUpdater i_objectUpdater;
-
-        Trinity::DelayedUnitRelocation delayedUnitRelocation_;
 
         // event Scripts
     private:

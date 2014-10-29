@@ -102,6 +102,73 @@ static bool isAlwaysTriggeredAura[TOTAL_AURAS];
 // Prepare lists
 static bool procPrepared = InitTriggerAuraData();
 
+class AINotifyTask final : public BasicEvent
+{
+public:
+    explicit AINotifyTask(Unit* me)
+        : m_owner(me)
+    {
+        m_owner->setAINotifyScheduled(true);
+    }
+
+    ~AINotifyTask()
+    {
+        m_owner->setAINotifyScheduled(false);
+    }
+
+    bool Execute(uint64, uint32) final
+    {
+        Trinity::AIRelocationNotifier notifier(*m_owner);
+        Trinity::VisitNearbyObject(m_owner, m_owner->GetVisibilityRange(), notifier);
+        return true;
+    }
+
+    static void Schedule(Unit* me)
+    {
+        if (!me->isAINotifyScheduled())
+        {
+            EventProcessor &events = me->m_Events;
+            events.AddEvent(new AINotifyTask(me), events.CalculateTime(sWorld->GetVisibilityAINotifyDelay()));
+        }
+    }
+
+private:
+    Unit* m_owner;
+};
+
+class VisibilityUpdateTask final : public BasicEvent
+{
+public:
+    explicit VisibilityUpdateTask(Unit* me)
+        : m_owner(me)
+    { }
+
+    bool Execute(uint64, uint32) final
+    {
+        UpdateVisibility(m_owner);
+        return true;
+    }
+
+    static void UpdateVisibility(Unit* me)
+    {
+        SharedVisionList const &shList = me->GetSharedVisionList();
+
+        if (!shList.empty())
+        {
+            for (SharedVisionList::const_iterator it = shList.begin(); it != shList.end();)
+                (*it++)->UpdateVisibilityForPlayer();
+        }
+
+        if (Player* player = me->ToPlayer())
+            player->UpdateVisibilityForPlayer();
+
+        me->WorldObject::UpdateObjectVisibility(true);
+    }
+
+private:
+    Unit* m_owner;
+};
+
 DamageInfo::DamageInfo(Unit* _attacker, Unit* _victim, uint32 _damage, SpellInfo const* _spellInfo, SpellSchoolMask _schoolMask, DamageEffectType _damageType)
 : m_attacker(_attacker), m_victim(_victim), m_damage(_damage), m_spellInfo(_spellInfo), m_schoolMask(_schoolMask),
 m_damageType(_damageType), m_attackType(BASE_ATTACK)
@@ -201,6 +268,7 @@ Unit::Unit(bool isWorldObject): WorldObject(isWorldObject)
     m_extraAttacks = 0;
     insightCount = 0;
     m_canDualWield = false;
+    m_AINotifyScheduled = false;
 
     m_rootTimes = 0;
 
@@ -18944,17 +19012,25 @@ void Unit::SetPhaseMask(uint32 newPhaseMask, bool update)
                 summon->SetPhaseMask(newPhaseMask, true);
 }
 
+void Unit::OnRelocated()
+{
+    if (!m_lastVisibilityUpdPos.IsInDist(this, sWorld->GetVisibilityRelocationLowerLimit()))
+    {
+        m_lastVisibilityUpdPos = *this;
+        m_Events.AddEvent(new VisibilityUpdateTask(this), m_Events.CalculateTime(1));
+    }
+
+    AINotifyTask::Schedule(this);
+}
+
 void Unit::UpdateObjectVisibility(bool forced)
 {
-    if (!forced)
-        AddToNotify(NOTIFY_VISIBILITY_CHANGED);
+    if (forced)
+        VisibilityUpdateTask::UpdateVisibility(this);
     else
-    {
-        WorldObject::UpdateObjectVisibility(true);
-        // call MoveInLineOfSight for nearby creatures
-        Trinity::AIRelocationNotifier notifier(*this);
-        Trinity::VisitNearbyObject(this, GetVisibilityRange(), notifier);
-    }
+        m_Events.AddEvent(new VisibilityUpdateTask(this), m_Events.CalculateTime(1));
+
+    AINotifyTask::Schedule(this);
 }
 
 void Unit::SendMoveKnockBack(Player* player, float speedXY, float speedZ, float vcos, float vsin)

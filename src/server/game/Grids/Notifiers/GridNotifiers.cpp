@@ -58,9 +58,7 @@ void VisibleNotifier::SendToSelf()
                 vis_guids.erase((*itr)->GetGUID());
 
                 i_player.UpdateVisibilityOf((*itr), i_data, i_visibleNow);
-
-                if (!(*itr)->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
-                    (*itr)->UpdateVisibilityOf(&i_player);
+                (*itr)->UpdateVisibilityOf(&i_player);
             }
         }
 
@@ -72,7 +70,7 @@ void VisibleNotifier::SendToSelf()
         if (IS_PLAYER_GUID(*it))
         {
             Player* player = ObjectAccessor::FindPlayer(*it);
-            if (player && player->IsInWorld() && !player->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
+            if (player && player->IsInWorld())
                 player->UpdateVisibilityOf(&i_player);
         }
     }
@@ -131,45 +129,6 @@ void VisibleChangesNotifier::Visit(DynamicObjectMapType &m)
         if (caster && caster->m_seer == obj)
             caster->UpdateVisibilityOf(&i_object);
     }
-}
-
-void PlayerRelocationNotifier::Visit(PlayerMapType &m)
-{
-    for (auto &player : m)
-    {
-        vis_guids.erase(player->GetGUID());
-
-        i_player.UpdateVisibilityOf(player, i_data, i_visibleNow);
-
-        if (player->m_seer->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
-            continue;
-
-        player->UpdateVisibilityOf(&i_player);
-    }
-}
-
-void PlayerRelocationNotifier::Visit(CreatureMapType &m)
-{
-    bool const relocatedForAI = (&i_player == i_player.m_seer);
-
-    for (auto &creature : m)
-    {
-        vis_guids.erase(creature->GetGUID());
-
-        i_player.UpdateVisibilityOf(creature, i_data, i_visibleNow);
-
-        if (relocatedForAI && !creature->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
-            if (shouldCallMoveInLineOfSight(creature, &i_player))
-                movedInLos_.emplace_back(creature);
-    }
-
-    if (movedInLos_.empty())
-        return;
-
-    for (auto &creature : movedInLos_)
-        creature->AI()->MoveInLineOfSight_Safe(&i_player);
-
-    movedInLos_.clear();
 }
 
 void AIRelocationNotifier::Visit(CreatureMapType &m)

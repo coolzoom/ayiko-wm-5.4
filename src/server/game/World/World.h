@@ -753,6 +753,9 @@ class World
         int32 GetVisibilityNotifyPeriodInInstances() const { return m_visibility_notify_periodInInstances; }
         int32 GetVisibilityNotifyPeriodInBGArenas() const { return m_visibility_notify_periodInBGArenas;   }
 
+        float GetVisibilityRelocationLowerLimit() const { return m_visibilityRelocationLowerLimit; }
+        uint32 GetVisibilityAINotifyDelay() const { return m_visibilityAINotifyDelay; }
+
         void ProcessCliCommands();
         void QueueCliCommand(CliCommandHolder* commandHolder) { cliCmdQueue.add(commandHolder); }
 
@@ -854,6 +857,9 @@ class World
         int32 m_visibility_notify_periodOnContinents;
         int32 m_visibility_notify_periodInInstances;
         int32 m_visibility_notify_periodInBGArenas;
+
+        float m_visibilityRelocationLowerLimit;
+        uint32 m_visibilityAINotifyDelay;
 
         // CLI command holder to be thread safe
         ACE_Based::LockedQueue<CliCommandHolder*, ACE_Thread_Mutex> cliCmdQueue;

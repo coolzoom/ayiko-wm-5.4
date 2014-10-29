@@ -4714,9 +4714,7 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(1);
                     break;
                 case 115129:// Expel Harm - Damage to a nearby ennemy within 10 yards
-                    spellInfo->Effects[0].TargetA = TARGET_SRC_CASTER;
-                    spellInfo->Effects[0].TargetB = TARGET_UNIT_NEARBY_ENEMY;
-                    spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(13);
+                    spellInfo->MaxAffectedTargets = 0;
                     break;
                 case 126892:// Zen Pilgrimage
                 case 126895:// Zen Pilgrimage : Return

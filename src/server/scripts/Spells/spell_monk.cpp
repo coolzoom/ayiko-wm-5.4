@@ -150,26 +150,10 @@ class spell_monk_expel_harm : public SpellScriptLoader
 
             void HandleOnHit()
             {
-                if (!GetCaster())
-                    return;
-
-                if (Player* player = GetCaster()->ToPlayer())
+                if (auto caster = GetCaster())
                 {
-                    std::list<Unit*> targetList;
-                    float radius = 10.0f;
-
-                    Trinity::NearestAttackableUnitInObjectRangeCheck u_check(player, player, radius);
-                    Trinity::UnitListSearcher<Trinity::NearestAttackableUnitInObjectRangeCheck> searcher(player, targetList, u_check);
-                    Trinity::VisitNearbyObject(player, radius, searcher);
-
-                    for (auto itr : targetList)
-                    {
-                        if (player->IsValidAttackTarget(itr))
-                        {
-                            int32 bp = CalculatePct((-GetHitDamage()), 50);
-                            player->CastCustomSpell(itr, 115129, &bp, NULL, NULL, true);
-                        }
-                    }
+                    int32 bp = CalculatePct((-GetHitDamage()), 50);
+                    caster->CastCustomSpell(caster, 115129, &bp, NULL, NULL, true);
                 }
             }
 

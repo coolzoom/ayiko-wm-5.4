@@ -677,6 +677,46 @@ class spell_hun_dire_beast : public SpellScriptLoader
         }
 };
 
+class spell_hun_dire_beast_focus_driver : public SpellScriptLoader
+{
+    enum
+    {
+        SPELL_DIRE_BEAST_ENERGIZE       = 131487
+    };
+
+public:
+    spell_hun_dire_beast_focus_driver() : SpellScriptLoader("spell_hun_dire_beast_focus_driver") {}
+
+    class aura_impl : public AuraScript
+    {
+        PrepareAuraScript(aura_impl);
+
+        void OnProc(AuraEffect const *aurEff, ProcEventInfo& eventInfo)
+        {
+            PreventDefaultAction();
+
+            Unit * direbeast = eventInfo.GetActor();
+
+            if (Unit * owner = direbeast->GetOwner())
+            {
+                int32 focusAmt = aurEff->GetAmount();
+                owner->CastCustomSpell(owner, SPELL_DIRE_BEAST_ENERGIZE, &focusAmt, NULL, NULL, true);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectProc += AuraEffectProcFn(aura_impl::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new aura_impl();
+    }
+};
+
+
 // A Murder of Crows - 131894
 class spell_hun_a_murder_of_crows : public SpellScriptLoader
 {
@@ -2219,4 +2259,5 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_disengage();
     new spell_hun_tame_beast();
     new spell_hun_pet_dust_cloud();
+    new spell_hun_dire_beast_focus_driver();
 }

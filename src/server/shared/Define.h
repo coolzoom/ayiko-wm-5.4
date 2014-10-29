@@ -51,14 +51,9 @@
 #  define DECLSPEC_DEPRECATED
 #endif //PLATFORM
 
-#if !defined(COREDEBUG)
-#  define TRINITY_INLINE inline
-#else //COREDEBUG
-#  if !defined(TRINITY_DEBUG)
-#    define TRINITY_DEBUG
-#  endif //TRINITY_DEBUG
-#  define TRINITY_INLINE
-#endif //!COREDEBUG
+#if defined(COREDEBUG) && !defined(TRINITY_DEBUG)
+#  define TRINITY_DEBUG
+#endif //COREDEBUG && !TRINITY_DEBUG
 
 #if COMPILER == COMPILER_GNU
 #  define ATTR_NORETURN __attribute__((noreturn))
@@ -86,6 +81,10 @@ typedef ACE_UINT64 uint64;
 typedef ACE_UINT32 uint32;
 typedef ACE_UINT16 uint16;
 typedef ACE_UINT8 uint8;
+
+#ifndef M_PI
+#  define M_PI 3.14159265358979323846f
+#endif
 
 enum DBCFormer
 {

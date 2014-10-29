@@ -94,10 +94,6 @@ typedef std::vector<std::string> StringVector;
 #undef min
 #endif
 
-#ifndef M_PI
-#define M_PI            3.14159265358979323846f
-#endif
-
 #define MAX_QUERY_LEN 32*1024
 
 #endif

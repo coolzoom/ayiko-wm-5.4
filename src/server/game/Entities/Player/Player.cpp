@@ -16716,6 +16716,9 @@ void Player::AddQuest(Quest const* quest, Object* questGiver)
 
     GetAchievementMgr().StartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_QUEST, quest_id);
 
+    if (quest->GetSrcSpell() > 0)
+        CastSpell(this, quest->GetSrcSpell(), true);
+
     //starting initial quest script
     if (questGiver && quest->GetQuestStartScript() != 0)
         GetMap()->ScriptsStart(sQuestStartScripts, quest->GetQuestStartScript(), questGiver, this);

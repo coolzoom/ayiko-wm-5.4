@@ -5643,6 +5643,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 145110: // Ysera's Gift (Party Heal)
                     spellInfo->Effects[EFFECT_0].SetRadiusIndex(EFFECT_RADIUS_100_YARDS);
                     break;
+                case 116023: // Sparring
+                    spellInfo->AuraInterruptFlags = 0;
+                    break;
                 default:
                     break;
             }

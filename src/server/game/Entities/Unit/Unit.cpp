@@ -8463,7 +8463,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                     triggered_spell_id = 116033;
                     target = this;
 
-                    ToPlayer()->AddSpellCooldown(fakeCooldownId, 0, 30 * IN_MILLISECONDS);
                     victim->CastSpell(victim, 116087, true); // Marker
 
                     break;

@@ -771,24 +771,27 @@ void Player::UpdatePvPPowerPercentage()
     switch (GetSpecializationId(GetActiveSpec()))
     {
         // All other specializations and classes (including tanking) receive a 40% bonus to healing from PvP Power.
+        case SPEC_MAGE_ARCANE:
+        case SPEC_MAGE_FIRE:
+        case SPEC_MAGE_FROST:
+        case SPEC_PALADIN_PROTECTION:
         case SPEC_WARRIOR_ARMS:
         case SPEC_WARRIOR_FURY:
         case SPEC_WARRIOR_PROTECTION:
+        case SPEC_DRUID_GUARDIAN:
+        case SPEC_DK_BLOOD:
+        case SPEC_DK_FROST:
+        case SPEC_DK_UNHOLY:
         case SPEC_HUNTER_BEASTMASTER:
         case SPEC_HUNTER_MARKSMAN:
         case SPEC_HUNTER_SURVIVAL:
         case SPEC_ROGUE_ASSASSINATION:
         case SPEC_ROGUE_COMBAT:
         case SPEC_ROGUE_SUBTLETY:
-        case SPEC_DK_BLOOD:
-        case SPEC_DK_FROST:
-        case SPEC_DK_UNHOLY:
-        case SPEC_MAGE_ARCANE:
-        case SPEC_MAGE_FIRE:
-        case SPEC_MAGE_FROST:
         case SPEC_WARLOCK_AFFLICTION:
         case SPEC_WARLOCK_DEMONOLOGY:
         case SPEC_WARLOCK_DESTRUCTION:
+        case SPEC_MONK_BREWMASTER:
             heal_value *= 0.4f;
             break;
         // Healing specializations receive a 100% bonus to healing from PvP Power.
@@ -798,11 +801,11 @@ void Player::UpdatePvPPowerPercentage()
         case SPEC_SHAMAN_RESTORATION:
         case SPEC_DRUID_RESTORATION:
         case SPEC_MONK_WINDWALKER:
-            damage_value = 0.0f;
             break;
         // Damage specializations for Druids, Monks, Paladins, Priests, and Shaman receive a 70% bonus to healing from PvP Power.
         default:
             heal_value *= 0.7f;
+            break;
     }
 
     SetFloatValue(PLAYER_FIELD_PVP_POWER_DAMAGE, damage_value);

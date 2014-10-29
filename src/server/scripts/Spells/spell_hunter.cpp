@@ -72,7 +72,7 @@ enum HunterSpells
     HUNTER_SPELL_BEAST_CLEAVE_PROC                  = 118455,
     HUNTER_SPELL_BEAST_CLEAVE_DAMAGE                = 118459,
     HUNTER_SPELL_LYNX_RUSH_AURA                     = 120697,
-    HUNTER_SPELL_LYNX_CRUSH_DAMAGE                  = 120699,
+    HUNTER_SPELL_LYNX_RUSH_DAMAGE                   = 120699,
     HUNTER_SPELL_FRENZY_STACKS                      = 19615,
     HUNTER_SPELL_FRENZY_ENERGIZE                    = 83468,
     HUNTER_SPELL_FOCUS_FIRE_READY                   = 88843,
@@ -891,23 +891,24 @@ class spell_hun_lynx_rush : public SpellScriptLoader
         {
             PrepareAuraScript(spell_hun_lynx_rush_AuraScript);
 
-            void OnTick(AuraEffect const * /*aurEff*/)
+            void OnTick(AuraEffect const * aurEff)
             {
                 std::list<Unit*> tempList;
                 std::list<Unit*> targetList;
                 Unit* unitTarget = NULL;
+                Unit * pet = GetTarget();
 
-                GetTarget()->GetAttackableUnitListInRange(tempList, 10.0f);
+                pet->GetAttackableUnitListInRange(tempList, 10.0f);
 
                 for (auto itr : tempList)
                 {
-                    if (itr->GetGUID() == GetTarget()->GetGUID())
+                    if (itr->GetGUID() == pet->GetGUID())
                         continue;
 
-                    if (GetTarget()->GetOwner() && GetTarget()->GetOwner()->GetGUID() == itr->GetGUID())
+                    if (pet->GetOwner() && pet->GetOwner()->GetGUID() == itr->GetGUID())
                         continue;
 
-                    if (!GetTarget()->IsValidAttackTarget(itr))
+                    if (!pet->IsValidAttackTarget(itr))
                         continue;
 
                     targetList.push_back(itr);
@@ -929,14 +930,14 @@ class spell_hun_lynx_rush : public SpellScriptLoader
                 if (!unitTarget)
                     return;
 
-                float angle = unitTarget->GetRelativeAngle(GetTarget());
+                float angle = unitTarget->GetRelativeAngle(pet);
                 Position pos;
 
-                unitTarget->GetContactPoint(GetTarget(), pos.m_positionX, pos.m_positionY, pos.m_positionZ);
+                unitTarget->GetContactPoint(pet, pos.m_positionX, pos.m_positionY, pos.m_positionZ);
                 unitTarget->GetFirstCollisionPosition(pos, unitTarget->GetObjectSize(), angle);
-                GetTarget()->GetMotionMaster()->MoveCharge(pos.m_positionX, pos.m_positionY, pos.m_positionZ + unitTarget->GetObjectSize());
+                pet->GetMotionMaster()->MoveCharge(pos.m_positionX, pos.m_positionY, pos.m_positionZ + unitTarget->GetObjectSize());
 
-                GetTarget()->CastSpell(unitTarget, HUNTER_SPELL_LYNX_CRUSH_DAMAGE, true);
+                pet->CastSpell(unitTarget, HUNTER_SPELL_LYNX_RUSH_DAMAGE, true);
             }
 
             void Register()
@@ -948,81 +949,6 @@ class spell_hun_lynx_rush : public SpellScriptLoader
         AuraScript* GetAuraScript() const
         {
             return new spell_hun_lynx_rush_AuraScript();
-        }
-
-        class spell_hun_lynx_rush_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_hun_lynx_rush_SpellScript);
-
-            void HandleOnHit()
-            {
-                if (Player* _player = GetCaster()->ToPlayer())
-                {
-                    if (GetHitUnit())
-                    {
-                        if (Pet* pet = _player->GetPet())
-                        {
-                            if (pet->GetGUID() == GetHitUnit()->GetGUID())
-                            {
-                                std::list<Unit*> tempList;
-                                std::list<Unit*> targetList;
-                                Unit* unitTarget = NULL;
-
-                                pet->GetAttackableUnitListInRange(tempList, 10.0f);
-
-                                for (auto itr : tempList)
-                                {
-                                    if (itr->GetGUID() == pet->GetGUID())
-                                        continue;
-
-                                    if (_player->GetGUID() == itr->GetGUID())
-                                        continue;
-
-                                    if (!pet->IsValidAttackTarget(itr))
-                                        continue;
-
-                                    targetList.push_back(itr);
-                                }
-
-                                tempList.clear();
-
-                                if (targetList.empty())
-                                    return;
-
-                                Trinity::Containers::RandomResizeList(targetList, 1);
-
-                                for (auto itr : targetList)
-                                {
-                                    unitTarget = itr;
-                                    break;
-                                }
-
-                                if (!unitTarget)
-                                    return;
-
-                                float angle = unitTarget->GetRelativeAngle(pet);
-                                Position pos;
-
-                                unitTarget->GetContactPoint(pet, pos.m_positionX, pos.m_positionY, pos.m_positionZ);
-                                unitTarget->GetFirstCollisionPosition(pos, unitTarget->GetObjectSize(), angle);
-                                pet->GetMotionMaster()->MoveCharge(pos.m_positionX, pos.m_positionY, pos.m_positionZ + unitTarget->GetObjectSize());
-
-                                pet->CastSpell(unitTarget, HUNTER_SPELL_LYNX_CRUSH_DAMAGE, true);
-                            }
-                        }
-                    }
-                }
-            }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_hun_lynx_rush_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_hun_lynx_rush_SpellScript();
         }
 };
 

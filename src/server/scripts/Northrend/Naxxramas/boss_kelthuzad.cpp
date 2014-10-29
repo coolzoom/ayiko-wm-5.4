@@ -621,7 +621,7 @@ public:
                             if (!unitList.empty())
                             {
                                 std::vector<Unit*>::const_iterator itr = unitList.begin();
-                                std::advance(itr, rand()%unitList.size());
+                                std::advance(itr, urand(0, unitList.size() - 1));
                                 DoCast(*itr, SPELL_MANA_DETONATION);
                                 DoScriptText(RAND(SAY_SPECIAL_1, SAY_SPECIAL_2, SAY_SPECIAL_3), me);
                             }

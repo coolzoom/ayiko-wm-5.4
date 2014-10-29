@@ -290,7 +290,7 @@ class spell_monk_chi_wave_bolt : public SpellScriptLoader
                     {
                         // Select random target
                         auto randomTarget = targetList.begin();
-                        std::advance(randomTarget, std::rand() % targetList.size());
+                        std::advance(randomTarget, urand(0, targetList.size() - 1));
 
                         target->CastSpell(*randomTarget, SPELL_MONK_CHI_WAVE_DAMAGE, true, NULL, NULL, player->GetGUID());
                         chiWave->SetUserData(0);

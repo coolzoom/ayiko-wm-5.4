@@ -360,7 +360,7 @@ public:
                 if (!list.empty())
                 {
                     auto targetItr = list.begin();
-                    std::advance(targetItr , urand(0, list.size()));
+                    std::advance(targetItr , urand(0, list.size() - 1));
                     me->CastSpell(*targetItr, DUNGEON_MODE(SPELL_HEAT_N, SPELL_HEAT_H), false);
                 }
             }

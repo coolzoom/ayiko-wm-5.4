@@ -3768,6 +3768,7 @@ void Spell::EffectEnchantItemPerm(SpellEffIndex effIndex)
     {
         // destroy one vellum from stack
         uint32 count = 1;
+        damage = 1;
         player->DestroyItemCount(itemTarget, count, true);
         unitTarget = player;
         // and add a scroll

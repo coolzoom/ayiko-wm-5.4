@@ -1385,10 +1385,7 @@ void Guild::HandleQuery(WorldSession* session)
     for (uint8 i = 0; i < _GetRanksSize(); ++i)
     {
         data << uint32(i);
-
-        if (m_ranks[i].GetName().size() > 0)
-            data.append(m_ranks[i].GetName().c_str(), m_ranks[i].GetName().size());
-
+        data.WriteString(m_ranks[i].GetName());
         data << uint32(m_ranks[i].GetId());
     }
 
@@ -1401,8 +1398,7 @@ void Guild::HandleQuery(WorldSession* session)
     data << uint32(m_emblemInfo.GetBorderColor());
     data.WriteByteSeq<6>(guildGuid);
 
-    if (m_name.size() > 0)
-        data.append(m_name.c_str(), m_name.size());
+    data.WriteString(m_name);
 
     data.WriteByteSeq<5, 3, 2, 7, 4>(guildGuid);
     data.WriteByteSeq<4, 1, 0, 3, 5, 7, 6, 2>(guildGuid);
@@ -1427,6 +1423,8 @@ void Guild::HandleGuildRanks(WorldSession* session) const
         data.WriteBits(rankInfo->GetName().length(), 7);
     }
 
+    data.FlushBits();
+
     for (uint8 i = 0; i < _GetRanksSize(); i++)
     {
         RankInfo const* rankInfo = GetRankInfo(i);
@@ -1443,8 +1441,7 @@ void Guild::HandleGuildRanks(WorldSession* session) const
 
         data << uint32(rankInfo->GetRights());
 
-        if (!rankInfo->GetName().empty())
-            data.append(rankInfo->GetName().c_str(), rankInfo->GetName().size());
+        data.WriteString(rankInfo->GetName());
 
         data << uint32(i);
         data << uint32(rankInfo->GetId());
@@ -1631,8 +1628,8 @@ void Guild::HandleBuyBankTab(WorldSession* session, uint8 tabId)
         return;
 
     player->ModifyMoney(-int64(tabCost));
-    _SetRankBankMoneyPerDay(player->GetRank(), uint32(GUILD_WITHDRAW_MONEY_UNLIMITED));
-    _SetRankBankTabRightsAndSlots(player->GetRank(), tabId, GuildBankRightsAndSlots(GUILD_BANK_RIGHT_FULL, uint32(GUILD_WITHDRAW_SLOT_UNLIMITED)));
+    _SetRankBankMoneyPerDay(player->GetRank(), GUILD_WITHDRAW_MONEY_UNLIMITED);
+    _SetRankBankTabRightsAndSlots(player->GetRank(), tabId, GuildBankRightsAndSlots(GUILD_BANK_RIGHT_FULL, GUILD_WITHDRAW_SLOT_UNLIMITED));
     HandleRoster();                                         // Broadcast for tab rights update
     SendBankList(session, tabId, false, true);
     HandleGuildRanks(session);
@@ -1648,7 +1645,7 @@ void Guild::HandleSpellEffectBuyBankTab(WorldSession* session, uint8 tabId)
         return;
 
     _SetRankBankMoneyPerDay(player->GetRank(), uint32(GUILD_WITHDRAW_MONEY_UNLIMITED));
-    _SetRankBankTabRightsAndSlots(player->GetRank(), tabId, GuildBankRightsAndSlots(GUILD_BANK_RIGHT_FULL, uint32(GUILD_WITHDRAW_SLOT_UNLIMITED)));
+    _SetRankBankTabRightsAndSlots(player->GetRank(), tabId, GuildBankRightsAndSlots(GUILD_BANK_RIGHT_FULL, GUILD_WITHDRAW_SLOT_UNLIMITED));
     HandleRoster();                                         // Broadcast for tab rights update
     SendBankList(session, tabId, false, true);
     HandleGuildRanks(session);
@@ -1776,9 +1773,9 @@ void Guild::HandleAcceptMember(WorldSession* session)
     data.Initialize(SMSG_GUILD_SEND_PLAYER_JOINED);
     data.WriteBits(player->GetName().length(), 6);
     data.WriteBitSeq<7, 1, 3, 0, 5, 6, 2, 4>(playerGuid);
+    data.FlushBits();
     data.WriteByteSeq<1, 3, 2>(playerGuid);
-    if (!player->GetName().empty())
-        data.append(player->GetName().c_str(), player->GetName().length());
+    data.WriteString(player->GetName());
     data.WriteByteSeq<4, 6, 5>(playerGuid);
     data << uint32(realmID);
     data.WriteByteSeq<0, 7>(playerGuid);
@@ -1787,8 +1784,7 @@ void Guild::HandleAcceptMember(WorldSession* session)
     data.Initialize(SMSG_GUILD_SEND_MOTD);
     data.WriteBits(m_motd.size(), 10);
     data.FlushBits();
-    if (m_motd.size() > 0)
-        data.append(m_motd.c_str(), m_motd.size());
+    data.WriteString(m_motd);
     session->SendPacket(&data);
 
     data.Initialize(SMSG_GUILD_SEND_PLAYER_LOGIN_STATUS);
@@ -1796,9 +1792,9 @@ void Guild::HandleAcceptMember(WorldSession* session)
     data.WriteBits(player->GetName().length(), 6);
     data.WriteBit(1);
     data.WriteBitSeq<0, 2, 6, 7, 3, 4, 5, 1>(playerGuid);
+    data.FlushBits();
     data.WriteByteSeq<6, 4>(playerGuid);
-    if (!player->GetName().empty())
-        data.append(player->GetName().c_str(), player->GetName().length());
+    data.WriteString(player->GetName());
     data.WriteByteSeq<5, 0, 7, 1>(playerGuid);
     data << uint32(realmID);
     data.WriteByteSeq<2, 3>(playerGuid);
@@ -2079,6 +2075,7 @@ void Guild::HandleMemberLogout(WorldSession* session)
     data.WriteBit(0);
 
     data.WriteBitSeq<0, 2, 6, 7, 3, 4, 5, 1>(playerGuid);
+    data.FlushBits();
 
     data.WriteByteSeq<6, 4>(playerGuid);
 
@@ -2270,6 +2267,7 @@ void Guild::SendPermissions(WorldSession* session) const
     data << uint32(_GetMemberRemainingMoney(guid));
 
     data.WriteBits<uint32>(GUILD_BANK_MAX_TABS, 21);
+    data.FlushBits();
 
     for (uint8 tabId = 0; tabId < GUILD_BANK_MAX_TABS; ++tabId)
     {
@@ -2337,6 +2335,7 @@ void Guild::SendLoginInfo(WorldSession* session)
     data.WriteBit(1);
 
     data.WriteBitSeq<0, 2, 6, 7, 3, 4, 5, 1>(playerGuid);
+    data.FlushBits();
 
     data.WriteByteSeq<6, 4>(playerGuid);
 

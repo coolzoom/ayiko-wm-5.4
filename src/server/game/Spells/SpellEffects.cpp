@@ -66,6 +66,7 @@
 #include "InstanceScript.h"
 #include "Guild.h"
 #include "GuildMgr.h"
+#include "ObjectVisitors.hpp"
 
 namespace {
 
@@ -1316,7 +1317,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             UnitList friends;
             Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(m_caster, m_caster, 5.0f);
             Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(m_caster, friends, u_check);
-            m_caster->VisitNearbyObject(5.0f, searcher);
+            Trinity::VisitNearbyObject(m_caster, 5.0f, searcher);
 
             for (auto unit : friends)
             {
@@ -3767,6 +3768,7 @@ void Spell::EffectEnchantItemPerm(SpellEffIndex effIndex)
     {
         // destroy one vellum from stack
         uint32 count = 1;
+        damage = 1;
         player->DestroyItemCount(itemTarget, count, true);
         unitTarget = player;
         // and add a scroll

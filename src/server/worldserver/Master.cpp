@@ -447,6 +447,7 @@ void Master::_StopDB()
     WorldDatabase.Close();
     LoginDatabase.Close();
 
+    MySQLHelper::stopThread();
     MySQLHelper::stopLibrary();
 }
 

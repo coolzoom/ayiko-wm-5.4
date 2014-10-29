@@ -29,6 +29,7 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "SpellAuraEffects.h"
+#include "ObjectVisitors.hpp"
 
 class spell_generic_quest_update_entry_SpellScript : public SpellScript
 {
@@ -1432,7 +1433,7 @@ class spell_q11010_q11102_q11023_choose_loc : public SpellScriptLoader
                 std::list<Player*> PlayerList;
                 Trinity::AnyPlayerInObjectRangeCheck checker(caster, 765.0f);
                 Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(caster, PlayerList, checker);
-                caster->VisitNearbyWorldObject(65.0f, searcher);
+                Trinity::VisitNearbyWorldObject(caster, 65.0f, searcher);
                 for (std::list<Player*>::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
                     // Check if found player target is on fly mount or using flying form
                         if ((*itr)->HasAuraType(SPELL_AURA_FLY) || (*itr)->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED))

@@ -61,6 +61,8 @@
 #include "BattlefieldMgr.h"
 #include "SpellAuraEffects.h"
 #include "ScriptMgr.h"
+#include "ObjectVisitors.hpp"
+
 #include <numeric>
 
 float baseMoveSpeed[MAX_MOVE_TYPE] =
@@ -99,6 +101,73 @@ static bool isNonTriggerAura[TOTAL_AURAS];
 static bool isAlwaysTriggeredAura[TOTAL_AURAS];
 // Prepare lists
 static bool procPrepared = InitTriggerAuraData();
+
+class AINotifyTask final : public BasicEvent
+{
+public:
+    explicit AINotifyTask(Unit* me)
+        : m_owner(me)
+    {
+        m_owner->setAINotifyScheduled(true);
+    }
+
+    ~AINotifyTask()
+    {
+        m_owner->setAINotifyScheduled(false);
+    }
+
+    bool Execute(uint64, uint32) final
+    {
+        Trinity::AIRelocationNotifier notifier(*m_owner);
+        Trinity::VisitNearbyObject(m_owner, m_owner->GetVisibilityRange(), notifier);
+        return true;
+    }
+
+    static void Schedule(Unit* me)
+    {
+        if (!me->isAINotifyScheduled())
+        {
+            EventProcessor &events = me->m_Events;
+            events.AddEvent(new AINotifyTask(me), events.CalculateTime(sWorld->GetVisibilityAINotifyDelay()));
+        }
+    }
+
+private:
+    Unit* m_owner;
+};
+
+class VisibilityUpdateTask final : public BasicEvent
+{
+public:
+    explicit VisibilityUpdateTask(Unit* me)
+        : m_owner(me)
+    { }
+
+    bool Execute(uint64, uint32) final
+    {
+        UpdateVisibility(m_owner);
+        return true;
+    }
+
+    static void UpdateVisibility(Unit* me)
+    {
+        SharedVisionList const &shList = me->GetSharedVisionList();
+
+        if (!shList.empty())
+        {
+            for (SharedVisionList::const_iterator it = shList.begin(); it != shList.end();)
+                (*it++)->UpdateVisibilityForPlayer();
+        }
+
+        if (Player* player = me->ToPlayer())
+            player->UpdateVisibilityForPlayer();
+
+        me->WorldObject::UpdateObjectVisibility(true);
+    }
+
+private:
+    Unit* m_owner;
+};
 
 DamageInfo::DamageInfo(Unit* _attacker, Unit* _victim, uint32 _damage, SpellInfo const* _spellInfo, SpellSchoolMask _schoolMask, DamageEffectType _damageType)
 : m_attacker(_attacker), m_victim(_victim), m_damage(_damage), m_spellInfo(_spellInfo), m_schoolMask(_schoolMask),
@@ -199,6 +268,7 @@ Unit::Unit(bool isWorldObject): WorldObject(isWorldObject)
     m_extraAttacks = 0;
     insightCount = 0;
     m_canDualWield = false;
+    m_AINotifyScheduled = false;
 
     m_rootTimes = 0;
 
@@ -6452,6 +6522,8 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
             switch (dummySpell->Id)
             {
                 case 56218: // Glyph of Siphon Life
+                    if (!procSpell || procSpell->Effects[0].ApplyAuraName != SPELL_AURA_PERIODIC_DAMAGE)
+                        return false;
                     triggered_spell_id = 63106;
                     target = this;
                     break;
@@ -6802,7 +6874,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                     std::list<Player*> plrList;
                     Trinity::AnyFriendlyUnitInObjectRangeCheck check(this, this, 15.0f);
                     Trinity::PlayerListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(this, plrList, check);
-                    VisitNearbyObject(15.0f, searcher);
+                    Trinity::VisitNearbyObject(this, 15.0f, searcher);
                     if (plrList.empty())
                         return false;
 
@@ -7315,7 +7387,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                     std::list<Player*> plrList;
                     Trinity::AnyFriendlyUnitInObjectRangeCheck check(this, this, 15.0f);
                     Trinity::PlayerListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(this, plrList, check);
-                    VisitNearbyObject(15.0f, searcher);
+                    Trinity::VisitNearbyObject(this, 15.0f, searcher);
                     if (plrList.empty())
                         return false;
 
@@ -11045,7 +11117,7 @@ int32 Unit::DealHeal(Unit* victim, uint32 addhealth, SpellInfo const* spellProto
 
             Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(unit, unit, 6.0f);
             Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(unit, targetList, u_check);
-            unit->VisitNearbyObject(6.0f, searcher);
+            Trinity::VisitNearbyObject(unit, 6.0f, searcher);
 
             if (!targetList.empty())
             {
@@ -17218,7 +17290,7 @@ Unit* Unit::SelectNearbyTarget(Unit* exclude, float dist) const
     std::list<Unit*> targets;
     Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, this, dist);
     Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(this, targets, u_check);
-    VisitNearbyObject(dist, searcher);
+    Trinity::VisitNearbyObject(this, dist, searcher);
 
     // remove current target
     if (GetVictim())
@@ -17249,7 +17321,7 @@ Unit* Unit::SelectNearbyAlly(Unit* exclude, float dist) const
     std::list<Unit*> targets;
     Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(this, this, dist);
     Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(this, targets, u_check);
-    VisitNearbyObject(dist, searcher);
+    Trinity::VisitNearbyObject(this, dist, searcher);
 
     if (exclude)
         targets.remove(exclude);
@@ -18940,17 +19012,25 @@ void Unit::SetPhaseMask(uint32 newPhaseMask, bool update)
                 summon->SetPhaseMask(newPhaseMask, true);
 }
 
+void Unit::OnRelocated()
+{
+    if (!m_lastVisibilityUpdPos.IsInDist(this, sWorld->GetVisibilityRelocationLowerLimit()))
+    {
+        m_lastVisibilityUpdPos = *this;
+        m_Events.AddEvent(new VisibilityUpdateTask(this), m_Events.CalculateTime(1));
+    }
+
+    AINotifyTask::Schedule(this);
+}
+
 void Unit::UpdateObjectVisibility(bool forced)
 {
-    if (!forced)
-        AddToNotify(NOTIFY_VISIBILITY_CHANGED);
+    if (forced)
+        VisibilityUpdateTask::UpdateVisibility(this);
     else
-    {
-        WorldObject::UpdateObjectVisibility(true);
-        // call MoveInLineOfSight for nearby creatures
-        Trinity::AIRelocationNotifier notifier(*this);
-        VisitNearbyObject(GetVisibilityRange(), notifier);
-    }
+        m_Events.AddEvent(new VisibilityUpdateTask(this), m_Events.CalculateTime(1));
+
+    AINotifyTask::Schedule(this);
 }
 
 void Unit::SendMoveKnockBack(Player* player, float speedXY, float speedZ, float vcos, float vsin)

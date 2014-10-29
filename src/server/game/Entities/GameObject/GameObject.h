@@ -19,22 +19,20 @@
 #ifndef GAMEOBJECT_H
 #define GAMEOBJECT_H
 
+#include "Object.h"
 #include "Common.h"
 #include "SharedDefines.h"
-#include "Object.h"
 #include "LootMgr.h"
-#include "DatabaseEnv.h"
 
+#include <list>
+#include <set>
+#include <string>
 #include <unordered_map>
 
 class GameObjectAI;
-
-// GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push, N), also any gcc version not support it at some platform
-#if defined(__GNUC__)
-#pragma pack(1)
-#else
-#pragma pack(push, 1)
-#endif
+class Group;
+class Unit;
+class GameObjectModel;
 
 #define MAX_GAMEOBJECT_QUEST_ITEMS 6
 
@@ -568,17 +566,10 @@ union GameObjectValue
     } Building;
 };
 
-// GCC have alternative #pragma pack() syntax and old gcc version not support pack(pop), also any gcc version not support it at some platform
-#if defined(__GNUC__)
-#pragma pack()
-#else
-#pragma pack(pop)
-#endif
-
 struct GameObjectLocale
 {
-    StringVector Name;
-    StringVector CastBarCaption;
+    std::vector<std::string> Name;
+    std::vector<std::string> CastBarCaption;
 };
 
 // client side GO show states
@@ -626,9 +617,6 @@ enum LootState
     GO_ACTIVATED,
     GO_JUST_DEACTIVATED
 };
-
-class Unit;
-class GameObjectModel;
 
 // 5 sec for bobber catch
 #define FISHING_BOBBER_READY_TIME 5

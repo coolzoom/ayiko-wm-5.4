@@ -34,6 +34,7 @@
 #include "DynamicTree.h"
 #include "SpellAuraEffects.h"
 #include "UpdateFieldFlags.h"
+#include "ObjectVisitors.hpp"
 
 GameObject::GameObject() : WorldObject(false), m_model(NULL), m_goValue(), m_AI(NULL)
 {
@@ -456,8 +457,8 @@ void GameObject::Update(uint32 diff)
                     {
                         Trinity::AnyUnfriendlyNoTotemUnitInObjectRangeCheck checker(this, owner, radius);
                         Trinity::UnitSearcher<Trinity::AnyUnfriendlyNoTotemUnitInObjectRangeCheck> searcher(this, ok, checker);
-                        VisitNearbyGridObject(radius, searcher);
-                        if (!ok) VisitNearbyWorldObject(radius, searcher);
+                        Trinity::VisitNearbyGridObject(this, radius, searcher);
+                        if (!ok) Trinity::VisitNearbyWorldObject(this, radius, searcher);
                     }
                     else                                        // environmental trap
                     {
@@ -466,7 +467,7 @@ void GameObject::Update(uint32 diff)
                         Player* player = NULL;
                         Trinity::AnyPlayerInObjectRangeCheck checker(this, radius);
                         Trinity::PlayerSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(this, player, checker);
-                        VisitNearbyWorldObject(radius, searcher);
+                        Trinity::VisitNearbyWorldObject(this, radius, searcher);
                         ok = player;
                     }
 

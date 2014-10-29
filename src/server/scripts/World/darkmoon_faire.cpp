@@ -2,6 +2,7 @@
 #include "ScriptedEscortAI.h"
 #include "SpellScript.h"
 #include "GameObjectAI.h"
+#include "ObjectVisitors.hpp"
 
 enum DarkmoonFaireRingToss
 {
@@ -1216,7 +1217,7 @@ public:
                     std::list<Player*> playerList;
                     Trinity::AnyPlayerInObjectRangeCheck checker(me, 18.0f);
                     Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, playerList, checker);
-                    me->VisitNearbyWorldObject(18.0f, searcher);
+                    Trinity::VisitNearbyWorldObject(me, 18.0f, searcher);
 
                     for (std::list<Player*>::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
                     {
@@ -1774,7 +1775,7 @@ public:
                     std::list<Player*> playerList;
                     Trinity::AnyPlayerInObjectRangeCheck checker(me, 95.0f);
                     Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, playerList, checker);
-                    me->VisitNearbyWorldObject(95.0f, searcher);
+                    Trinity::VisitNearbyWorldObject(me, 95.0f, searcher);
 
                     for (std::list<Player*>::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
                     {
@@ -1798,7 +1799,7 @@ public:
                 std::list<Player*> playerList;
                 Trinity::AnyPlayerInObjectRangeCheck checker(me, 95.0f);
                 Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, playerList, checker);
-                me->VisitNearbyWorldObject(95.0f, searcher);
+                Trinity::VisitNearbyWorldObject(me, 95.0f, searcher);
 
                 for (std::list<Player*>::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
                 {

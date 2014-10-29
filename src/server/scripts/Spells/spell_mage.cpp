@@ -25,11 +25,11 @@
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
 #include "ScriptedCreature.h"
-
 #include "Cell.h"
 #include "CellImpl.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
+#include "ObjectVisitors.hpp"
 
 enum MageSpells
 {
@@ -217,7 +217,7 @@ class spell_mage_glyph_of_slow : public SpellScriptLoader
 
                         Trinity::NearestAttackableUnitInObjectRangeCheck u_check(caster, caster, radius);
                         Trinity::UnitListSearcher<Trinity::NearestAttackableUnitInObjectRangeCheck> searcher(caster, targetList, u_check);
-                        caster->VisitNearbyObject(radius, searcher);
+                        Trinity::VisitNearbyObject(caster, radius, searcher);
 
                         for (auto itr : targetList)
                             if (itr->HasAura(SPELL_MAGE_SLOW))

@@ -37,6 +37,7 @@
 #include "ChatLink.h"
 #include "Guild.h"
 #include "LexicalCast.h"
+#include "ObjectVisitors.hpp"
 
 bool ChatHandler::load_command_table = true;
 
@@ -985,7 +986,7 @@ GameObject* ChatHandler::GetNearbyGameObject()
     GameObject* obj = NULL;
     Trinity::NearestGameObjectCheck check(*pl);
     Trinity::GameObjectLastSearcher<Trinity::NearestGameObjectCheck> searcher(pl, obj, check);
-    pl->VisitNearbyGridObject(SIZE_OF_GRIDS, searcher);
+    Trinity::VisitNearbyGridObject(pl, SIZE_OF_GRIDS, searcher);
     return obj;
 }
 

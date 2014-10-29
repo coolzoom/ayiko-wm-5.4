@@ -20,7 +20,9 @@
 #define COMMON_H
 
 #include "Define.h"
+#include "Locale.hpp"
 
+#include <cstddef>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -30,12 +32,6 @@
 #include <csignal>
 #include <cassert>
 
-#if PLATFORM == PLATFORM_WINDOWS
-#define STRCASECMP stricmp
-#else
-#define STRCASECMP strcasecmp
-#endif
-
 #include <set>
 #include <list>
 #include <string>
@@ -44,30 +40,6 @@
 #include <sstream>
 #include <algorithm>
 
-#include "Threading/LockedQueue.h"
-#include "Threading/Threading.h"
-
-#include <ace/Basic_Types.h>
-#include <ace/Guard_T.h>
-#include <ace/RW_Thread_Mutex.h>
-#include <ace/Thread_Mutex.h>
-
-#if PLATFORM == PLATFORM_WINDOWS
-#  include <ace/config-all.h>
-// XP winver - needed to compile with standard leak check in MemoryLeaks.h
-// uncomment later if needed
-//#define _WIN32_WINNT 0x0501
-#  include <ws2tcpip.h>
-//#undef WIN32_WINNT
-#else
-#  include <sys/types.h>
-#  include <sys/ioctl.h>
-#  include <sys/socket.h>
-#  include <netinet/in.h>
-#  include <unistd.h>
-#  include <netdb.h>
-#endif
-
 #if COMPILER == COMPILER_MICROSOFT
 
 #include <float.h>
@@ -75,7 +47,6 @@
 #define I32FMT "%08I32X"
 #define I64FMT "%016I64X"
 #define snprintf _snprintf
-#define atoll _atoi64
 #define vsnprintf _vsnprintf
 #define finite(X) _finite(X)
 #define llabs _abs64
@@ -83,15 +54,10 @@
 #else
 
 #define stricmp strcasecmp
-#define strnicmp strncasecmp
 #define I32FMT "%08X"
 #define I64FMT "%016llX"
 
 #endif
-
-inline float finiteAlways(float f) { return finite(f) ? f : 0.0f; }
-
-#define atol(a) strtoul( a, NULL, 10)
 
 #define STRINGIZE(a) #a
 
@@ -115,67 +81,9 @@ enum AccountTypes
     SEC_CONSOLE               = 4                                  // must be always last in list, accounts must have less security level always also
 };
 
-enum LocaleConstant
-{
-    LOCALE_enUS =  0,
-    LOCALE_koKR =  1,
-    LOCALE_frFR =  2,
-    LOCALE_deDE =  3,
-    LOCALE_zhCN =  4,
-    LOCALE_zhTW =  5,
-    LOCALE_esES =  6,
-    LOCALE_esMX =  7,
-    LOCALE_ruRU =  8,
-    LOCALE_ptPT =  9,
-    LOCALE_itIT = 10,
-};
-
-const uint8 TOTAL_LOCALES = 11;
-const LocaleConstant DEFAULT_LOCALE = LOCALE_enUS;
-
-#define MAX_LOCALES 10
 #define MAX_ACCOUNT_TUTORIAL_VALUES 8
 
-extern char const* localeNames[TOTAL_LOCALES];
-
-LocaleConstant GetLocaleByName(const std::string& name);
-
 typedef std::vector<std::string> StringVector;
-
-enum GM_COMMAND_TAB
-{
-    GM,
-    PLAYER
-};
-
-struct GmCommand
-{
-    uint32 accountID[2];
-    std::string accountName[2];
-    uint32 characterID[2];
-    std::string characterName[2];
-    std::string command;
-};
-
-struct GmChat
-{
-    uint32 type;
-    uint32 accountID[2];
-    std::string accountName[2];
-    uint32 characterID[2];
-    std::string characterName[2];
-    std::string message;
-};
-
-struct ArenaLog
-{
-    uint32 timestamp;
-    std::string str;
-};
-
-extern ACE_Based::LockedQueue<GmCommand*, ACE_Thread_Mutex> GmLogQueue;
-extern ACE_Based::LockedQueue<GmChat*,    ACE_Thread_Mutex> GmChatLogQueue;
-extern ACE_Based::LockedQueue<ArenaLog*,  ACE_Thread_Mutex> ArenaLogQueue;
 
 // we always use stdlibc++ std::max/std::min, undefine some not C++ standard defines (Win API and some other platforms)
 #ifdef max
@@ -186,26 +94,6 @@ extern ACE_Based::LockedQueue<ArenaLog*,  ACE_Thread_Mutex> ArenaLogQueue;
 #undef min
 #endif
 
-#ifndef M_PI
-#define M_PI            3.14159265358979323846f
-#endif
-
 #define MAX_QUERY_LEN 32*1024
-
-#define TRINITY_GUARD(MUTEX, LOCK) \
-  ACE_Guard< MUTEX > TRINITY_GUARD_OBJECT (LOCK); \
-    if (TRINITY_GUARD_OBJECT.locked() == 0) ASSERT(false);
-
-//! For proper implementation of multiple-read, single-write pattern, use
-//! ACE_RW_Mutex as underlying @MUTEX
-# define TRINITY_WRITE_GUARD(MUTEX, LOCK) \
-  ACE_Write_Guard< MUTEX > TRINITY_GUARD_OBJECT (LOCK); \
-    if (TRINITY_GUARD_OBJECT.locked() == 0) ASSERT(false);
-
-//! For proper implementation of multiple-read, single-write pattern, use
-//! ACE_RW_Mutex as underlying @MUTEX
-# define TRINITY_READ_GUARD(MUTEX, LOCK) \
-  ACE_Read_Guard< MUTEX > TRINITY_GUARD_OBJECT (LOCK); \
-    if (TRINITY_GUARD_OBJECT.locked() == 0) ASSERT(false);
 
 #endif

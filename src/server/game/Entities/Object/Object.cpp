@@ -17,7 +17,6 @@
  */
 
 #include "Object.h"
-#include "Common.h"
 #include "SharedDefines.h"
 #include "WorldPacket.h"
 #include "Opcodes.h"
@@ -53,6 +52,7 @@
 #include "BattlefieldMgr.h"
 #include "MoveSpline.h"
 #include "LexicalCast.h"
+#include "ObjectVisitors.hpp"
 
 uint32 GuidHigh2TypeId(uint32 guid_hi)
 {
@@ -1079,6 +1079,13 @@ void Object::ApplyModSignedFloatValue(uint16 index, float  val, bool apply)
     SetFloatValue(index, cur);
 }
 
+void Object::ApplyPercentModFloatValue(uint16 index, float val, bool apply)
+{
+    float value = GetFloatValue(index);
+    ApplyPercentModFloatVar(value, val, apply);
+    SetFloatValue(index, value);
+}
+
 void Object::ApplyModPositiveFloatValue(uint16 index, float  val, bool apply)
 {
     float cur = GetFloatValue(index);
@@ -1199,15 +1206,6 @@ bool Object::PrintIndexError(uint32 index, bool set) const
     return false;
 }
 
-bool Position::HasInLine(WorldObject const* target, float width) const
-{
-    if (!HasInArc(M_PI, target))
-        return false;
-    width += target->GetObjectSize();
-    float angle = GetRelativeAngle(target);
-    return fabs(sin(angle)) * GetExactDist2d(target->GetPositionX(), target->GetPositionY()) < width;
-}
-
 std::string Position::ToString() const
 {
     std::stringstream sstr;
@@ -1290,7 +1288,7 @@ void MovementInfo::Normalize()
 WorldObject::WorldObject(bool isWorldObject)
     : m_isActive(false), m_isWorldObject(isWorldObject), m_zoneScript(NULL)
     , m_transport(NULL), m_currMap(NULL), m_InstanceId(0), m_phaseMask(PHASEMASK_NORMAL)
-    , m_notifyflags(0), m_executed_notifies(0), m_explicitSeerGuid()
+    , m_explicitSeerGuid()
 {
     m_serverSideVisibility.SetValue(SERVERSIDE_VISIBILITY_GHOST, GHOST_VISIBILITY_ALIVE | GHOST_VISIBILITY_GHOST);
     m_serverSideVisibilityDetect.SetValue(SERVERSIDE_VISIBILITY_GHOST, GHOST_VISIBILITY_ALIVE);
@@ -1429,6 +1427,15 @@ bool WorldObject::CanNeverSee(WorldObject const* obj) const
 
     // if this and obj do not have common seer, they should not see each other
     return m_explicitSeerGuid != obj->m_explicitSeerGuid;
+}
+
+bool WorldObject::HasInLine(WorldObject const* target, float width) const
+{
+    if (!HasInArc(M_PI, target))
+        return false;
+    width += target->GetObjectSize();
+    float angle = GetRelativeAngle(target);
+    return fabs(sin(angle)) * GetExactDist2d(target->GetPositionX(), target->GetPositionY()) < width;
 }
 
 bool WorldObject::IsWithinLOSInMap(const WorldObject* obj) const
@@ -1780,8 +1787,6 @@ float WorldObject::GetVisibilityRange() const
         return MAX_VISIBILITY_DISTANCE;
     else
         return GetMap()->GetVisibilityRange();
-
-    return MAX_VISIBILITY_DISTANCE;
 }
 
 float WorldObject::GetSightRange(const WorldObject* target) const
@@ -2308,13 +2313,13 @@ void WorldObject::SendMessageToSet(WorldPacket* data, bool self)
 void WorldObject::SendMessageToSetInRange(WorldPacket* data, float dist, bool /*self*/)
 {
     Trinity::MessageDistDeliverer notifier(this, data, dist);
-    VisitNearbyWorldObject(dist, notifier);
+    Trinity::VisitNearbyWorldObject(this, dist, notifier);
 }
 
 void WorldObject::SendMessageToSet(WorldPacket* data, Player const* skipped_rcvr)
 {
     Trinity::MessageDistDeliverer notifier(this, data, GetVisibilityRange(), false, skipped_rcvr);
-    VisitNearbyWorldObject(GetVisibilityRange(), notifier);
+    Trinity::VisitNearbyWorldObject(this, GetVisibilityRange(), notifier);
 }
 
 void WorldObject::SendObjectDeSpawnAnim(uint64 guid)
@@ -2554,7 +2559,7 @@ GameObject* WorldObject::SummonGameObject(uint32 entry, float x, float y, float 
     return go;
 }
 
-Creature* WorldObject::SummonTrigger(float x, float y, float z, float ang, uint32 duration, CreatureAI* (*GetAI)(Creature*))
+Creature* WorldObject::SummonTrigger(float x, float y, float z, float ang, uint32 duration)
 {
     TempSummonType summonType = (duration == 0) ? TEMPSUMMON_DEAD_DESPAWN : TEMPSUMMON_TIMED_DESPAWN;
     Creature* summon = SummonCreature(WORLD_TRIGGER, x, y, z, ang, summonType, duration);
@@ -2568,8 +2573,6 @@ Creature* WorldObject::SummonTrigger(float x, float y, float z, float ang, uint3
         summon->SetLevel(((Unit*)this)->getLevel());
     }
 
-    if (GetAI)
-        summon->AIM_Initialize(GetAI(summon));
     return summon;
 }
 
@@ -2597,7 +2600,7 @@ Creature* WorldObject::FindNearestCreature(uint32 entry, float range, bool alive
     Creature* creature = NULL;
     Trinity::NearestCreatureEntryWithLiveStateInObjectRangeCheck checker(*this, entry, alive, range);
     Trinity::CreatureLastSearcher<Trinity::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(this, creature, checker);
-    VisitNearbyObject(range, searcher);
+    Trinity::VisitNearbyObject(this, range, searcher);
     return creature;
 }
 
@@ -2606,7 +2609,7 @@ GameObject* WorldObject::FindNearestGameObject(uint32 entry, float range) const
     GameObject* go = NULL;
     Trinity::NearestGameObjectEntryInObjectRangeCheck checker(*this, entry, range);
     Trinity::GameObjectLastSearcher<Trinity::NearestGameObjectEntryInObjectRangeCheck> searcher(this, go, checker);
-    VisitNearbyGridObject(range, searcher);
+    Trinity::VisitNearbyGridObject(this, range, searcher);
     return go;
 }
 
@@ -2615,7 +2618,7 @@ GameObject* WorldObject::FindNearestGameObjectOfType(GameobjectTypes type, float
     GameObject* go = NULL;
     Trinity::NearestGameObjectTypeInObjectRangeCheck checker(*this, type, range);
     Trinity::GameObjectLastSearcher<Trinity::NearestGameObjectTypeInObjectRangeCheck> searcher(this, go, checker);
-    VisitNearbyGridObject(range, searcher);
+    Trinity::VisitNearbyGridObject(this, range, searcher);
     return go;
 }
 
@@ -2647,7 +2650,7 @@ void WorldObject::GetPlayerListInGrid(std::list<Player*>& playerList, float maxS
 {
     Trinity::AnyPlayerInObjectRangeCheck checker(this, maxSearchRange);
     Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(this, playerList, checker);
-    this->VisitNearbyWorldObject(maxSearchRange, searcher);
+    Trinity::VisitNearbyWorldObject(this, maxSearchRange, searcher);
 }
 
 void WorldObject::GetGameObjectListWithEntryInGridAppend(std::list<GameObject*>& gameobjectList, uint32 entry, float maxSearchRange) const
@@ -2817,6 +2820,12 @@ void WorldObject::MovePositionFixedXY(Position &pos, float dist, float angle)
     Trinity::NormalizeMapCoord(pos.m_positionY);
     UpdateGroundPositionZ(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
     pos.SetOrientation(GetOrientation());
+}
+
+void WorldObject::GetRandomNearPosition(Position &pos, float radius)
+{
+    GetPosition(&pos);
+    MovePosition(pos, radius * (float)rand_norm(), (float)rand_norm() * static_cast<float>(2 * M_PI));
 }
 
 void WorldObject::MovePositionToFirstCollision(Position &pos, float dist, float angle)
@@ -3023,7 +3032,7 @@ void WorldObject::DestroyForNearbyPlayers()
     std::list<Player*> targets;
     Trinity::AnyPlayerInObjectRangeCheck check(this, GetVisibilityRange(), false);
     Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(this, targets, check);
-    VisitNearbyWorldObject(GetVisibilityRange(), searcher);
+    Trinity::VisitNearbyWorldObject(this, GetVisibilityRange(), searcher);
     for (std::list<Player*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
     {
         Player* player = (*iter);
@@ -3046,7 +3055,7 @@ void WorldObject::UpdateObjectVisibility(bool /*forced*/)
 {
     //updates object's visibility for nearby players
     Trinity::VisibleChangesNotifier notifier(*this);
-    VisitNearbyWorldObject(GetVisibilityRange(), notifier);
+    Trinity::VisitNearbyWorldObject(this, GetVisibilityRange(), notifier);
 }
 
 struct WorldObjectChangeAccumulator

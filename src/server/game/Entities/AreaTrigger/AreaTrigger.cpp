@@ -24,6 +24,7 @@
 #include "SpellInfo.h"
 #include "Log.h"
 #include "AreaTrigger.h"
+#include "ObjectVisitors.hpp"
 
 AreaTrigger::AreaTrigger() : WorldObject(false), _duration(0), m_caster(NULL), m_visualRadius(0.0f)
 {
@@ -136,7 +137,7 @@ void AreaTrigger::Update(uint32 p_time)
 
             Trinity::NearestAttackableUnitInObjectRangeCheck u_check(this, caster, radius);
             Trinity::UnitListSearcher<Trinity::NearestAttackableUnitInObjectRangeCheck> searcher(this, targetList, u_check);
-            VisitNearbyObject(radius, searcher);
+            Trinity::VisitNearbyObject(this, radius, searcher);
 
             for (auto itr : targetList)
                 itr->CastSpell(itr, 135299, true);
@@ -150,7 +151,7 @@ void AreaTrigger::Update(uint32 p_time)
 
             Trinity::NearestAttackableUnitInObjectRangeCheck u_check(this, caster, radius);
             Trinity::UnitListSearcher<Trinity::NearestAttackableUnitInObjectRangeCheck> searcher(this, targetList, u_check);
-            VisitNearbyObject(radius, searcher);
+            Trinity::VisitNearbyObject(this, radius, searcher);
 
             if (!targetList.empty())
                 for (auto itr : targetList)
@@ -166,7 +167,7 @@ void AreaTrigger::Update(uint32 p_time)
 
             Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(this, caster, radius);
             Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(this, targetList, u_check);
-            VisitNearbyObject(radius, searcher);
+            Trinity::VisitNearbyObject(this, radius, searcher);
 
             if (!targetList.empty())
             {
@@ -187,7 +188,7 @@ void AreaTrigger::Update(uint32 p_time)
 
             Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(this, caster, radius);
             Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(this, targetList, u_check);
-            VisitNearbyObject(radius, searcher);
+            Trinity::VisitNearbyObject(this, radius, searcher);
 
             if (!targetList.empty())
                 for (auto itr : targetList)
@@ -203,7 +204,7 @@ void AreaTrigger::Update(uint32 p_time)
 
             Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(this, caster, radius);
             Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(this, targetList, u_check);
-            VisitNearbyObject(radius, searcher);
+            Trinity::VisitNearbyObject(this, radius, searcher);
 
             if (!targetList.empty())
             {
@@ -234,7 +235,7 @@ void AreaTrigger::Update(uint32 p_time)
 
             Trinity::NearestAttackableUnitInObjectRangeCheck u_check(this, caster, radius);
             Trinity::UnitListSearcher<Trinity::NearestAttackableUnitInObjectRangeCheck> searcher(this, targetList, u_check);
-            VisitNearbyObject(radius, searcher);
+            Trinity::VisitNearbyObject(this, radius, searcher);
 
             if (!targetList.empty())
             {
@@ -257,7 +258,7 @@ void AreaTrigger::Update(uint32 p_time)
 
             Trinity::NearestAttackableUnitInObjectRangeCheck u_check(this, caster, radius);
             Trinity::UnitListSearcher<Trinity::NearestAttackableUnitInObjectRangeCheck> searcher(this, targetList, u_check);
-            VisitNearbyObject(radius, searcher);
+            Trinity::VisitNearbyObject(this, radius, searcher);
 
             if (!targetList.empty())
             {
@@ -299,7 +300,7 @@ void AreaTrigger::Update(uint32 p_time)
 
             Trinity::NearestAttackableUnitInObjectRangeCheck u_check(this, caster, radius);
             Trinity::UnitListSearcher<Trinity::NearestAttackableUnitInObjectRangeCheck> searcher(this, targetList, u_check);
-            VisitNearbyObject(radius, searcher);
+            Trinity::VisitNearbyObject(this, radius, searcher);
 
             for (auto itr : targetList)
             {
@@ -321,7 +322,7 @@ void AreaTrigger::Update(uint32 p_time)
 
             Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(this, caster, radius);
             Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(this, targetList, u_check);
-            VisitNearbyObject(radius, searcher);
+            Trinity::VisitNearbyObject(this, radius, searcher);
 
             if (!targetList.empty())
             {
@@ -345,7 +346,7 @@ void AreaTrigger::Update(uint32 p_time)
 
             Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(this, caster, radius);
             Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(this, targetList, u_check);
-            VisitNearbyObject(radius, searcher);
+            Trinity::VisitNearbyObject(this, radius, searcher);
 
             if (!targetList.empty())
             {
@@ -366,7 +367,7 @@ void AreaTrigger::Update(uint32 p_time)
 
             Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(this, caster, radius);
             Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(this, targetList, u_check);
-            VisitNearbyObject(radius, searcher);
+            Trinity::VisitNearbyObject(this, radius, searcher);
 
             if (!targetList.empty())
             {
@@ -390,7 +391,7 @@ void AreaTrigger::Update(uint32 p_time)
 
             Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(this, caster, radius);
             Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(this, targetList, u_check);
-            VisitNearbyObject(radius, searcher);
+            Trinity::VisitNearbyObject(this, radius, searcher);
 
             if (!targetList.empty())
             {
@@ -411,7 +412,7 @@ void AreaTrigger::Update(uint32 p_time)
 
             Trinity::NearestAttackableUnitInObjectRangeCheck u_check(this, caster, radius);
             Trinity::UnitListSearcher<Trinity::NearestAttackableUnitInObjectRangeCheck> searcher(this, targetList, u_check);
-            VisitNearbyObject(radius, searcher);
+            Trinity::VisitNearbyObject(this, radius, searcher);
 
             if (!targetList.empty())
             {
@@ -433,7 +434,7 @@ void AreaTrigger::Update(uint32 p_time)
 
             Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(this, caster, radius);
             Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(this, targetList, u_check);
-            VisitNearbyObject(radius, searcher);
+            Trinity::VisitNearbyObject(this, radius, searcher);
 
             for (auto itr : targetList)
             {

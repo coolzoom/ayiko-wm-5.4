@@ -36,6 +36,7 @@ EndContentData */
 #include "GridNotifiersImpl.h"
 #include "Cell.h"
 #include "CellImpl.h"
+#include "ObjectVisitors.hpp"
 
 /*###
 # npc_henry_stern
@@ -275,7 +276,7 @@ public:
                         std::list<WorldObject*> ClusterList;
                         Trinity::AllWorldObjectsInRange objects(me, 50.0f);
                         Trinity::WorldObjectListSearcher<Trinity::AllWorldObjectsInRange> searcher(me, ClusterList, objects);
-                        me->VisitNearbyObject(50.0f, searcher);
+                        Trinity::VisitNearbyObject(me, 50.0f, searcher);
                         for (std::list<WorldObject*>::const_iterator itr = ClusterList.begin(); itr != ClusterList.end(); ++itr)
                         {
                             if (Player* player = (*itr)->ToPlayer())

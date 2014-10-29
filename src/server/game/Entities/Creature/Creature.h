@@ -30,13 +30,13 @@
 #include <list>
 #include <unordered_map>
 
-class SpellInfo;
-
 class CreatureAI;
+class CreatureGroup;
+class Group;
 class Quest;
 class Player;
+class SpellInfo;
 class WorldSession;
-class CreatureGroup;
 
 enum CreatureFlagsExtra
 {
@@ -255,19 +255,19 @@ typedef std::unordered_map<uint16, CreatureBaseStats> CreatureBaseStatsContainer
 
 struct CreatureLocale
 {
-    StringVector Name;
-    StringVector SubName;
+    std::vector<std::string> Name;
+    std::vector<std::string> SubName;
 };
 
 struct GossipMenuItemsLocale
 {
-    StringVector OptionText;
-    StringVector BoxText;
+    std::vector<std::string> OptionText;
+    std::vector<std::string> BoxText;
 };
 
 struct PointOfInterestLocale
 {
-    StringVector IconName;
+    std::vector<std::string> IconName;
 };
 
 struct EquipmentInfo

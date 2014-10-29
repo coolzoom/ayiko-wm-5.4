@@ -22,7 +22,7 @@
 #ifndef _TRINITY_RARUNNABLE_H_
 #define _TRINITY_RARUNNABLE_H_
 
-#include "Common.h"
+#include "Threading/Threading.h"
 
 #include <ace/Reactor.h>
 

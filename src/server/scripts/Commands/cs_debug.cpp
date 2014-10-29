@@ -34,6 +34,7 @@ EndScriptData */
 #include "Language.h"
 #include "QuestDef.h"
 #include "LexicalCast.h"
+#include "ObjectVisitors.hpp"
 
 #include <fstream>
 
@@ -923,7 +924,7 @@ public:
             Creature* passenger = NULL;
             Trinity::AllCreaturesOfEntryInRange check(handler->GetSession()->GetPlayer(), entry, 20.0f);
             Trinity::CreatureSearcher<Trinity::AllCreaturesOfEntryInRange> searcher(handler->GetSession()->GetPlayer(), passenger, check);
-            handler->GetSession()->GetPlayer()->VisitNearbyObject(30.0f, searcher);
+            Trinity::VisitNearbyObject(handler->GetSession()->GetPlayer(), 30.0f, searcher);
             if (!passenger || passenger == target)
                 return false;
             passenger->EnterVehicle(target, seatId);

@@ -19,24 +19,37 @@
 #ifndef TRINITY_MAPMANAGER_H
 #define TRINITY_MAPMANAGER_H
 
-#include "Define.h"
-#include "Common.h"
+#include "Object.h"
 #include "Map.h"
-#include "MapUpdater.h"
 
-#include <ace/Singleton.h>
-#include <ace/Thread_Mutex.h>
-
+#include <mutex>
 #include <unordered_map>
+#include <vector>
 
 class Transport;
 struct TransportCreatureProto;
 
 class MapManager
 {
-    friend class ACE_Singleton<MapManager, ACE_Thread_Mutex>;
+    typedef std::mutex LockType;
+    typedef std::lock_guard<LockType> GuardType;
+
+    typedef std::unordered_map<uint32, Map*> MapMapType;
+    typedef std::vector<bool> InstanceIds;
+
+    MapManager();
+    ~MapManager();
+
+    MapManager(const MapManager &);
+    MapManager& operator=(const MapManager &);
 
     public:
+        static MapManager * instance()
+        {
+            static MapManager mgr;
+            return &mgr;
+        }
+
         Map* CreateBaseMap(uint32 mapId);
         Map* FindBaseNonInstanceMap(uint32 mapId) const;
         Map* CreateMap(uint32 mapId, Player* player);
@@ -150,34 +163,22 @@ class MapManager
         uint32 GetNextInstanceId() const { return _nextInstanceId; };
         void SetNextInstanceId(uint32 nextInstanceId) { _nextInstanceId = nextInstanceId; };
 
-        MapUpdater * GetMapUpdater() { return &m_updater; }
-
     private:
-        typedef std::unordered_map<uint32, Map*> MapMapType;
-        typedef std::vector<bool> InstanceIds;
-
-        MapManager();
-        ~MapManager();
-
         Map* FindBaseMap(uint32 mapId) const
         {
             MapMapType::const_iterator iter = i_maps.find(mapId);
             return (iter == i_maps.end() ? NULL : iter->second);
         }
 
-        MapManager(const MapManager &);
-        MapManager& operator=(const MapManager &);
-
-        ACE_Thread_Mutex Lock;
+        LockType i_lock;
         uint32 i_gridCleanUpDelay;
         MapMapType i_maps;
         IntervalTimer i_timer;
 
         InstanceIds _instanceIds;
         uint32 _nextInstanceId;
-        MapUpdater m_updater;
 };
 
-#define sMapMgr ACE_Singleton<MapManager, ACE_Thread_Mutex>::instance()
+#define sMapMgr MapManager::instance()
 
 #endif

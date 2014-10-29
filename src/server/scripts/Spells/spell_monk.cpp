@@ -25,6 +25,7 @@
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
 #include "GridNotifiers.h"
+#include "ObjectVisitors.hpp"
 
 enum MonkSpells
 {
@@ -152,21 +153,21 @@ class spell_monk_expel_harm : public SpellScriptLoader
                 if (!GetCaster())
                     return;
 
-                if (Player* _player = GetCaster()->ToPlayer())
+                if (Player* player = GetCaster()->ToPlayer())
                 {
                     std::list<Unit*> targetList;
                     float radius = 10.0f;
 
-                    Trinity::NearestAttackableUnitInObjectRangeCheck u_check(_player, _player, radius);
-                    Trinity::UnitListSearcher<Trinity::NearestAttackableUnitInObjectRangeCheck> searcher(_player, targetList, u_check);
-                    _player->VisitNearbyObject(radius, searcher);
+                    Trinity::NearestAttackableUnitInObjectRangeCheck u_check(player, player, radius);
+                    Trinity::UnitListSearcher<Trinity::NearestAttackableUnitInObjectRangeCheck> searcher(player, targetList, u_check);
+                    Trinity::VisitNearbyObject(player, radius, searcher);
 
                     for (auto itr : targetList)
                     {
-                        if (_player->IsValidAttackTarget(itr))
+                        if (player->IsValidAttackTarget(itr))
                         {
                             int32 bp = CalculatePct((-GetHitDamage()), 50);
-                            _player->CastCustomSpell(itr, 115129, &bp, NULL, NULL, true);
+                            player->CastCustomSpell(itr, 115129, &bp, NULL, NULL, true);
                         }
                     }
                 }
@@ -260,10 +261,11 @@ class spell_monk_chi_wave_bolt : public SpellScriptLoader
                         return;
 
                     std::list<Unit*> targetList;
+
                     {
-                    Trinity::AnyUnitInObjectRangeCheck u_check(player, 20.f);
-                    Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(player, targetList, u_check);
-                    player->VisitNearbyObject(20.0f, searcher);
+                        Trinity::AnyUnitInObjectRangeCheck u_check(player, 20.f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(player, targetList, u_check);
+                        Trinity::VisitNearbyObject(player, 20.0f, searcher);
                     }
 
                     targetList.remove_if([player, target, requireFriendly](Unit const *obj)
@@ -288,7 +290,7 @@ class spell_monk_chi_wave_bolt : public SpellScriptLoader
                     {
                         // Select random target
                         auto randomTarget = targetList.begin();
-                        std::advance(randomTarget, std::rand() % targetList.size());
+                        std::advance(randomTarget, urand(0, targetList.size() - 1));
 
                         target->CastSpell(*randomTarget, SPELL_MONK_CHI_WAVE_DAMAGE, true, NULL, NULL, player->GetGUID());
                         chiWave->SetUserData(0);

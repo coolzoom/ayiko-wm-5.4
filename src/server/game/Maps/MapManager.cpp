@@ -33,6 +33,7 @@
 #include "Language.h"
 #include "WorldPacket.h"
 #include "Group.h"
+#include "ThreadPoolMgr.hpp"
 #include "Profiler/ProbePoint.hpp"
 
 MapManager::MapManager()
@@ -47,10 +48,7 @@ MapManager::~MapManager()
 
 void MapManager::Initialize()
 {
-    int num_threads(sWorld->getIntConfig(CONFIG_NUMTHREADS));
-    // Start mtmaps if needed.
-    if (num_threads > 0 && m_updater.activate(num_threads) == -1)
-        abort();
+
 }
 
 void MapManager::InitializeVisibilityDistanceInfo()
@@ -65,7 +63,7 @@ Map* MapManager::CreateBaseMap(uint32 id)
 
     if (map == NULL)
     {
-        TRINITY_GUARD(ACE_Thread_Mutex, Lock);
+        GuardType guard(i_lock);
 
         MapEntry const* entry = sMapStore.LookupEntry(id);
         ASSERT(entry);
@@ -245,25 +243,25 @@ void MapManager::Update(uint32 diff)
     if (!i_timer.Passed())
         return;
 
-    MapMapType::iterator iter = i_maps.begin();
-    for (; iter != i_maps.end(); ++iter)
-    {
-        if (m_updater.activated())
-            m_updater.schedule_update(*iter->second, uint32(i_timer.GetCurrent()));
-        else
-            iter->second->Update(uint32(i_timer.GetCurrent()));
-    }
-    if (m_updater.activated())
-        m_updater.wait();
-
-    for (iter = i_maps.begin(); iter != i_maps.end(); ++iter)
-        iter->second->DelayedUpdate(uint32(i_timer.GetCurrent()));
-
-    sObjectAccessor->Update(uint32(i_timer.GetCurrent()));
-    for (TransportSet::iterator itr = m_Transports.begin(); itr != m_Transports.end(); ++itr)
-        (*itr)->Update(uint32(i_timer.GetCurrent()));
-
+    uint32 curr = uint32(i_timer.GetCurrent());
     i_timer.SetCurrent(0);
+
+    for (MapMapType::iterator i = i_maps.begin(); i != i_maps.end(); ++i) {
+        Map * const map = i->second;
+        sThreadPoolMgr->schedule([map, curr] { map->Update(curr); });
+    }
+    sThreadPoolMgr->wait();
+
+    for (MapMapType::iterator i = i_maps.begin(); i != i_maps.end(); ++i) {
+        Map * const map = i->second;
+        sThreadPoolMgr->schedule([map, curr] { map->DelayedUpdate(curr); });
+    }
+    sThreadPoolMgr->wait();
+
+    sObjectAccessor->Update(curr);
+
+    for (auto itr = m_Transports.begin(); itr != m_Transports.end(); ++itr)
+        (*itr)->Update(curr);
 
     TC_PROBE(worldserver, map_manager_update.end);
 }
@@ -308,14 +306,11 @@ void MapManager::UnloadAll()
         delete iter->second;
         i_maps.erase(iter++);
     }
-
-    if (m_updater.activated())
-        m_updater.deactivate();
 }
 
 uint32 MapManager::GetNumInstances()
 {
-    TRINITY_GUARD(ACE_Thread_Mutex, Lock);
+    GuardType guard(i_lock);
 
     uint32 ret = 0;
     for (MapMapType::iterator itr = i_maps.begin(); itr != i_maps.end(); ++itr)
@@ -332,7 +327,7 @@ uint32 MapManager::GetNumInstances()
 
 uint32 MapManager::GetNumPlayersInInstances()
 {
-    TRINITY_GUARD(ACE_Thread_Mutex, Lock);
+    GuardType guard(i_lock);
 
     uint32 ret = 0;
     for (MapMapType::iterator itr = i_maps.begin(); itr != i_maps.end(); ++itr)

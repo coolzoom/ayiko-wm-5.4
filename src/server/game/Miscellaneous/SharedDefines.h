@@ -20,7 +20,6 @@
 #define TRINITY_SHAREDDEFINES_H
 
 #include "Define.h"
-#include <cassert>
 
 #define MAX_CREATURE_BASE_HP 5
 

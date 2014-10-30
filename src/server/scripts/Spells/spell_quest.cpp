@@ -2086,6 +2086,72 @@ class spell_q13400_illidan_kill_master : public SpellScriptLoader
         }
 };
 
+class spell_q26205_multibot_aura : public SpellScriptLoader
+{
+    class script_impl : public SpellScript
+    {
+        PrepareSpellScript(script_impl)
+
+        enum
+        {
+            NPC_TOXIC_POOL                    = 42563,
+            OBJECT_TOXIC_POOL                 = 203975,
+
+            SPELL_CLEAN_UP_TOXIC_POOL         = 79424,
+            SPELL_DESPAWN_TOXIC_POOL          = 79421,
+            SPELL_TOXIC_POOL_CREDIT_TO_MASTER = 79422,
+
+            SAY_MULTI_BOT                     = 0,
+
+            DISPLAY_ID_MULTIBOT_FULL          = 37140
+        };
+
+        void HandleScript(SpellEffIndex /*effIndex*/)
+        {
+            Creature * const multibot = GetCaster()->ToCreature();
+            if (!multibot)
+                return;
+
+            Player * const player = multibot->GetCharmerOrOwnerPlayerOrPlayerItself();
+            if (!player)
+                return;
+
+            GameObject * const goPool = multibot->FindNearestGameObject(OBJECT_TOXIC_POOL, 2.0f);
+            if (!goPool || !goPool->isSpawned())
+                return;
+
+            Creature * const npcPool = multibot->FindNearestCreature(NPC_TOXIC_POOL, 2.0f);
+            if (!npcPool || npcPool->getDeathState() != ALIVE)
+                return;
+
+            sCreatureTextMgr->SendChat(multibot, SAY_MULTI_BOT);
+            if (multibot->GetDisplayId() != DISPLAY_ID_MULTIBOT_FULL)
+                multibot->SetDisplayId(DISPLAY_ID_MULTIBOT_FULL);
+
+            multibot->CastSpell(multibot, SPELL_DESPAWN_TOXIC_POOL, true);
+            multibot->CastSpell(multibot, SPELL_CLEAN_UP_TOXIC_POOL, true);
+
+            multibot->CastSpell(player, SPELL_TOXIC_POOL_CREDIT_TO_MASTER, true);
+            npcPool->ForcedDespawn();
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(script_impl::HandleScript, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+public:
+    spell_q26205_multibot_aura()
+        : SpellScriptLoader("spell_q26205_multibot_aura")
+    { }
+
+    SpellScript * GetSpellScript() const
+    {
+        return new script_impl;
+    }
+};
+
 void AddSC_quest_spell_scripts()
 {
     new spell_q55_sacred_cleansing();
@@ -2137,4 +2203,5 @@ void AddSC_quest_spell_scripts()
     new spell_q12919_gymers_grab();
     new spell_q12919_gymers_throw();
     new spell_q13400_illidan_kill_master();
+    new spell_q26205_multibot_aura();
 }

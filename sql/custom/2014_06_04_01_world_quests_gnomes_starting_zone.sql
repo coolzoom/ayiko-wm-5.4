@@ -1484,7 +1484,7 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 -- Core part
 DELETE FROM `spell_script_names` WHERE `spell_id` = 79416;
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
-(79416, 'spell_gen_multibot_aura');
+(79416, 'spell_q26205_multibot_aura');
 DELETE FROM `creature_text` WHERE `entry`=@NPC_MULTIBOT;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
 (@NPC_MULTIBOT,0,0,"Initiating cleanup ... ...",12,0,0,0,0,0,"GS-9x Multi-Bot");

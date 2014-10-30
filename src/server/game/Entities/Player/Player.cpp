@@ -28251,6 +28251,8 @@ void Player::ActivateSpec(uint8 spec)
         SetPower(POWER_MANA, 0); // Mana must be 0 even if it isn't the active power type.
 
     SetPower(pw, 0);
+
+    UpdatePvPPowerPercentage();
 }
 
 void Player::ResetTimeSync()

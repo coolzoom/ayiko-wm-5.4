@@ -978,9 +978,17 @@ void Aura::SetDuration(int32 duration, bool withMods)
 void Aura::RefreshDuration(bool recalculate)
 {
     SetDuration(GetMaxDuration());
-
+    
     if (m_spellPowerData->manaPerSecond)
         m_timeCla = 1 * IN_MILLISECONDS;
+
+    if (GetSpellInfo()->IsChanneled())
+    {
+        if (Unit * caster = GetCaster())
+            if (Spell * channeled = caster->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
+                if (channeled->GetSpellInfo()->Id == GetSpellInfo()->Id)
+                    channeled->SendChannelStart(GetMaxDuration());
+    }
 
     if (recalculate)
         RecalculateAmountOfEffects();

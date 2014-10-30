@@ -431,7 +431,7 @@ SET @SPELL_ELEMENTIUM_GRAPPLE_LINE_BEAM := 79798;
 SET @SPELL_ELEMENTIUM_GRAPPLE_LINE_BREAK := 84008;
 SET @QUEST_ON_EVEN_GROUND := 26314;
 SET @CGUID := 40412;
-UPDATE `quest_template` SET `RequiredNpcOrGo1` = @KILL_CREDIT, `RequiredSpellCast1` = 0, `WDBVerified` = 15595 WHERE `Id` = @QUEST_ON_EVEN_GROUND;
+UPDATE `quest_template` SET `RequiredNpcOrGo1` = @KILL_CREDIT, `RequiredSpellCast1` = 0, `Method` = 2, `WDBVerified` = 15595 WHERE `Id` = @QUEST_ON_EVEN_GROUND;
 UPDATE `creature_template` SET `minlevel` = 83, `maxlevel` = 83, `exp` = 3, `faction_A` = 2285, `faction_H` = 2285, `mindmg` = 468, `maxdmg` = 702, `attackpower` = 175, `dmg_multiplier` = 15, `baseattacktime` = 2000, `unit_class` = 1, `unit_flags` = 64, `speed_run` = 0.992063, `WDBVerified` = 15595, `AIName` = "SmartAI" WHERE `entry` = @NPC_SERVANT_OF_THERAZANE;
 DELETE FROM `smart_scripts` WHERE `entryorguid` = @NPC_SERVANT_OF_THERAZANE;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 

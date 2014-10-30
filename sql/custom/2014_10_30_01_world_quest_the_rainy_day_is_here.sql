@@ -1,0 +1,2 @@
+-- [SQL] Quests - The Rainy Day is Here will now have pre-requisites and completion text
+UPDATE `quest_template` SET `PrevQuestId` = 33137, `OfferRewardText` = '$n, I can see the look in your eyes.  I have heard of your deeds in the tournament.  You are ready to choose a companion!$B$BThis one time I will gift you these two additional coins.  Use them wisely, as you will only be able to earn one coin each week from this point forward.' WHERE `Id` = 33136;

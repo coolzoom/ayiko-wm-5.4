@@ -30,6 +30,7 @@
 #include "CellImpl.h"
 #include "SpellAuraEffects.h"
 #include "ObjectVisitors.hpp"
+#include "CreatureTextMgr.h"
 
 class spell_generic_quest_update_entry_SpellScript : public SpellScript
 {

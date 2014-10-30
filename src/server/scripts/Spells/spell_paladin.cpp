@@ -1815,6 +1815,39 @@ public:
     }
 };
 
+// Divine Plea - 54428
+class spell_pal_divine_plea : public SpellScriptLoader
+{
+public:
+    spell_pal_divine_plea() : SpellScriptLoader("spell_pal_divine_plea") {}
+
+    class aura_impl : public AuraScript
+    {
+        PrepareAuraScript(aura_impl);
+
+        void CalculateAmount(AuraEffect const *aurEff, int32 & amount, bool &)
+        {
+            Unit * caster = GetCaster();
+
+            if (!caster)
+                return;
+
+            int32 minMana = CalculatePct(caster->GetMaxPower(POWER_MANA), GetSpellInfo()->Effects[EFFECT_1].CalcValue(caster));
+            amount = std::max(CalculatePct(caster->GetTotalStatValue(STAT_SPIRIT), aurEff->GetBaseAmount()), minMana);
+        }
+
+        void Register()
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(aura_impl::CalculateAmount, EFFECT_0, SPELL_AURA_PERIODIC_ENERGIZE);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new aura_impl();
+    }
+};
+
 void AddSC_paladin_spell_scripts()
 {
     new spell_pal_glyph_of_devotian_aura();
@@ -1859,4 +1892,5 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_exorcism();
     new spell_pal_hammer_of_wrath();
     new spell_pal_sanctified_wrath();
+    new spell_pal_divine_plea();
 }

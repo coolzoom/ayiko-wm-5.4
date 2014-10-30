@@ -170,6 +170,9 @@ UPDATE `creature` SET `position_x` = 1240.73, `position_y` = 698.281, `position_
 DELETE FROM `quest_start_scripts` WHERE `id` = 26315;
 UPDATE `quest_template` SET `StartScript` = 0 WHERE `Id` = 26315;
 DELETE FROM `smart_scripts` WHERE `entryorguid` = 42731 AND `source_type` = 0;
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 13 AND `SourceEntry` = 79715;
+-- insert into `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) values
+-- ('13','7','79715','0','0','31','0','3','42731','0','0','0','0','','Quest');
 
 -- [c++ and SQL] Quests - Underground Economy scripted (Feedback #3121)
 SET @NPC_RICKET_TICKER := 49823;

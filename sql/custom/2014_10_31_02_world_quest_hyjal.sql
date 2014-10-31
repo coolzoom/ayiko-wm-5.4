@@ -216,3 +216,24 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 ('39446', '0', '6', '0', '61', '0', '100', '0', '0', '0', '0', '0', '28', '74061', '0', '0', '0', '0', '0', '2', '0', '0', '0', '0', '0', '0', '0', 'Nepenthe - Lycanthoth - On Death - Remove Miasma of Terror');
 
 UPDATE `gameobject` SET `spawnMask`='1' WHERE (`id`='202660');
+
+-- Elementary!
+UPDATE creature_template SET npcflag = 0x1, ScriptName = 'npc_elementary_crucible' WHERE entry IN (39730, 39736, 39737, 39738);
+UPDATE creature_template SET AIName = '', unit_class = 8, ScriptName = 'npc_the_manipulator' WHERE entry = 39756;
+DELETE FROM spell_script_names WHERE spell_id = 74303;
+INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
+(74303, 'spell_elementary_remove_auras');
+
+DELETE FROM gameobject WHERE id = 202723;
+SET @OGUID = (SELECT MAX(guid) FROM gameobject);
+INSERT INTO gameobject (guid, id, map, spawnMask, phaseMask, position_x, position_y, position_z, orientation, rotation0, rotation1, rotation2, rotation3, spawntimesecs, animprogress, state) VALUES(@OGUID+349, 207897, 725, 1, 1, 822.2258, 986.4875, 324.2448, 0, 0, 0, 1, -4.371139E-08, 7200, 255, 1), -- Doodad_InstanceNewPortal_Purple01
+(@OGUID+1, 202723, 1, 1, 1, 5002.502441, -2033.615845, 1273.269653, 0.517997, 0, 0, 1, -4.371139E-08, 86400, 255, 1); -- Elementary! portal
+
+REPLACE INTO spell_area (spell, area, quest_start, quest_end, gender, autocast, quest_start_status, quest_end_status) VALUES
+(74287, 4988, 25303, 0, 2, 0, 8, 0), -- Elementary - Crucible of Fire
+(74288, 4988, 25303, 0, 2, 0, 8, 0), -- Elementary - Crucible of Earth
+(74290, 4988, 25303, 0, 2, 0, 8, 0); -- Elementary - Crucible of Air
+
+REPLACE INTO `creature_text`(`entry`,`groupid`,`id`,`type`,`text`,`probability`,`comment`) VALUES
+(39756,0,0,12,"What do you think you're doing, $C? Get away from those instruments!",100,"Elementary! - Aggro"),
+(39756,1,0,12,"You cannot ... control the Eye! Cho'gall will know. You will be ... punished.",100,"Elementary! - Death");

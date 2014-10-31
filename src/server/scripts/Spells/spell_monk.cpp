@@ -2189,26 +2189,27 @@ class spell_monk_keg_smash : public SpellScriptLoader
 
             void HandleOnHit()
             {
-                if (Unit* caster = GetCaster())
+                if (auto caster = GetCaster())
                 {
-                    if (Player* player = caster->ToPlayer())
+                    if (Unit* target = GetHitUnit())
                     {
-                        if (Unit* target = GetHitUnit())
-                        {
-                            player->CastSpell(target, SPELL_MONK_KEG_SMASH_VISUAL, true);
-                            player->CastSpell(target, SPELL_MONK_WEAKENED_BLOWS, true);
-                            player->CastSpell(player, SPELL_MONK_KEG_SMASH_ENERGIZE, true);
-                            // Prevent to receive 2 CHI more than once time per cast
-                            player->AddSpellCooldown(SPELL_MONK_KEG_SMASH_ENERGIZE, 0, 1 * IN_MILLISECONDS);
-                            player->CastSpell(target, SPELL_MONK_DIZZYING_HAZE, true);
-                        }
+                        caster->CastSpell(target, SPELL_MONK_KEG_SMASH_VISUAL, true);
+                        caster->CastSpell(target, SPELL_MONK_WEAKENED_BLOWS, true);
+                        caster->CastSpell(target, SPELL_MONK_DIZZYING_HAZE, true);
                     }
                 }
+            }
+
+            void HandleAfterCast()
+            {
+                if (auto caster = GetCaster())
+                    caster->CastSpell(caster, SPELL_MONK_KEG_SMASH_ENERGIZE, true);
             }
 
             void Register()
             {
                 OnHit += SpellHitFn(spell_monk_keg_smash_SpellScript::HandleOnHit);
+                AfterCast += SpellCastFn(spell_monk_keg_smash_SpellScript::HandleAfterCast);
             }
         };
 

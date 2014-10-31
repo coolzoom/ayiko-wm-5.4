@@ -4991,16 +4991,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 78628:
                     spellInfo->Effects[EFFECT_0].Effect = 0;
                     break;
-                // Flamebreaker, Flameseer's Staff, Flamebreaker quest
-                case 75206:
-                    spellInfo->Effects[EFFECT_0].Effect = 0;
-                    spellInfo->Effects[EFFECT_0].ApplyAuraName = 0;
-                    spellInfo->Effects[EFFECT_0].TriggerSpell = 0;
-                    break;
-                // Summon Unbound Flamesparks, Flameseer's Staff, Flamebreaker quest
-                case 74723:
-                    spellInfo->Effects[EFFECT_0].MiscValue = 40065;
-                    break;
                 // Inflate Air Balloon, Undersea Inflation quest
                 case 75346:
                     spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_KILL_CREDIT;

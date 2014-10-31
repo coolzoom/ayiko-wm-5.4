@@ -362,6 +362,7 @@ void AddSC_thunder_bluff();
 void AddSC_ungoro_crater();
 void AddSC_winterspring();
 void AddSC_uldum();
+void AddSC_mount_hyjal();
 
 //northrend
 void AddSC_boss_slad_ran();
@@ -1116,6 +1117,7 @@ void AddKalimdorScripts()
     AddSC_ungoro_crater();
     AddSC_winterspring();
     AddSC_uldum();
+    AddSC_mount_hyjal();
 #endif
 }
 

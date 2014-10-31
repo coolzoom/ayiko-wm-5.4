@@ -278,7 +278,12 @@ class spell_weakening_baron_geddon : public SpellScriptLoader
                 PreventDefaultAction();
 
                 if (Unit * const caster = GetCaster())
+                {
                     caster->CastSpell(caster, 75193, true);
+                    // TODO: Check spell_dbc why custom spell doesn't work
+                    if (auto player = caster->ToPlayer())
+                        player->KilledMonsterCredit(40334);
+                }
             }
 
             void Register()

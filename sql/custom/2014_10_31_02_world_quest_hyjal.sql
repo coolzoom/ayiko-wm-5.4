@@ -129,3 +129,77 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 ('17','0',@SPELL_FLAMEBREAKER,'0','0','31','1','3',@ENTRY_BLAZEBOUND_ELEMENTAL,'0','0','0','0','',"Flameseer's Staff targets Blazebound Elemental");
 
 UPDATE `quest_template` SET `Method`='2' WHERE (`Id`='25323');
+
+-- [c++ and SQL] [Implex' report] [10958] Quests - The Return of Baron Geddon scripted (thanks Green for c++ part)
+SET @ENTRY_BARON_GEDDON := 40147;
+SET @ENTRY_BARON_GEDDON_WARNING_TRIGGER := 44412;
+SET @ENTRY_GALROND := 40148;
+SET @ENTRY_TELESSRA := 40149;
+SET @ENTRY_ARCH_DRUID_OF_HYJAL := 40150;
+SET @KILL_CREDIT := 40334;
+SET @SPELL_WEAKENING := 75192;
+SET @SPELL_WEAKENING_SERVERSIDE := 75193;
+SET @SPELL_WEAKENING_EFFECTDBC_ID := 300008;
+SET @SPELL_INFERNO_PING := 75072;
+SET @SPELL_INFERNO := 74813;
+SET @SPELL_INFERNO_SERVERSIDE := 18947;
+SET @SPELL_INFERNO_EFFECTDBC_ID := 300009;
+SET @SPELL_INFERNO_DAMAGE := 74817;
+SET @SPELL_LIVING_BOMB := 82924;
+SET @SPELL_SWIPE := 74811;
+SET @SPELL_NATURE_CHANNELING := 71467;
+UPDATE `creature_template` SET `exp` = 3, `mindmg` = 468, `maxdmg` = 702, `attackpower` = 175, `dmg_multiplier` = 35, `unit_flags` = 131072, `InhabitType` = 3, `unit_flags` = 0, `mechanic_immune_mask` = 613097244, `WDBVerified` = 15595, `AIName` = "SmartAI" WHERE `entry` = @ENTRY_BARON_GEDDON;
+UPDATE `creature_template` SET `exp` = 3, `speed_run` = 0.992063, `mindmg` = 468, `maxdmg` = 702, `attackpower` = 175, `dmg_multiplier` = 35, `InhabitType` = 3, `WDBVerified` = 15595, `AIName` = "SmartAI" WHERE `entry` = @ENTRY_GALROND;
+UPDATE `creature_template` SET `exp` = 3, `mindmg` = 468, `maxdmg` = 702, `attackpower` = 175, `dmg_multiplier` = 35, `InhabitType` = 3, `WDBVerified` = 15595, `AIName` = "SmartAI" WHERE `entry` = @ENTRY_TELESSRA;
+UPDATE `creature_template` SET `exp` = 3, `mindmg` = 405, `maxdmg` = 609, `attackpower` = 152, `dmg_multiplier` = 37.6, `unit_flags` = 33280, `InhabitType` = 3, `flags_extra` = 2, `WDBVerified` = 15595, `AIName` = "SmartAI" WHERE `entry` = @ENTRY_ARCH_DRUID_OF_HYJAL;
+UPDATE `creature_template` SET `WDBVerified` = 15595, `AIName` = "SmartAI" WHERE `entry` = @ENTRY_BARON_GEDDON_WARNING_TRIGGER;
+UPDATE `creature` SET `spawntimesecs` = 60 WHERE `id` IN (@ENTRY_BARON_GEDDON, @ENTRY_GALROND, @ENTRY_TELESSRA, @ENTRY_ARCH_DRUID_OF_HYJAL);
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@ENTRY_BARON_GEDDON, @ENTRY_GALROND, @ENTRY_BARON_GEDDON_WARNING_TRIGGER, @ENTRY_TELESSRA, @ENTRY_ARCH_DRUID_OF_HYJAL) AND `source_type` = 0;
+DELETE FROM `smart_scripts` WHERE `entryorguid` = @ENTRY_GALROND*100 AND `source_type` = 9;
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(@ENTRY_BARON_GEDDON, 0, 0, 0, 4, 0, 100, 0, 0, 0, 0, 0, 42, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Baron Geddon - On Aggro - Set Invincibility HP 1 per cent"),
+(@ENTRY_BARON_GEDDON, 0, 1, 0, 0, 0, 100, 0, 28000, 28000, 28000, 28000, 45, 1, 1, 0, 0, 0, 0, 19, @ENTRY_GALROND, 50, 0, 0, 0, 0, 0, "Nepenthe-Baron Geddon - IC - Set Data 1 1 Galrond"),
+(@ENTRY_BARON_GEDDON, 0, 2, 0, 0, 0, 100, 0, 30000, 30000, 30000, 30000, 11, @SPELL_INFERNO, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Baron Geddon - IC - Cast Inferno"),
+(@ENTRY_GALROND, 0, 0, 0, 4, 0, 100, 0, 0, 0, 0, 0, 42, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Galrond of the Claw - On Aggro - Set Invincibility HP 1 per cent"),
+(@ENTRY_GALROND, 0, 1, 0, 0, 0, 100, 0, 4900, 5100, 11000, 12000, 11, @SPELL_SWIPE, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Galrond of the Claw - IC - Cast Swipe"),
+(@ENTRY_GALROND, 0, 2, 0, 38, 0, 100, 0, 1, 1, 0, 0, 80, @ENTRY_GALROND*100, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Galrond of the Claw - On Data set 1 1 - Run Script"),
+(@ENTRY_GALROND*100, 9, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Galrond of the Claw - On Script - Yell Line 0"),
+(@ENTRY_GALROND*100, 9, 1, 0, 0, 0, 100, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Galrond of the Claw - On Script - React Passive"),
+(@ENTRY_GALROND*100, 9, 2, 0, 0, 0, 100, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Galrond of the Claw - On Script - Stop Autoattack"),
+(@ENTRY_GALROND*100, 9, 3, 0, 0, 0, 100, 0, 0, 0, 0, 0, 21, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Galrond of the Claw - On Script - Stop Combat Movement"),
+(@ENTRY_GALROND*100, 9, 4, 0, 0, 0, 100, 0, 0, 0, 0, 0, 59, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Galrond of the Claw - On Script - Set Run"),
+(@ENTRY_GALROND*100, 9, 5, 0, 0, 0, 100, 0, 0, 0, 0, 0, 69, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 5436.073242, -2793.436279, 1516.093628, 3.813380, "Nepenthe-Galrond of the Claw - On Script - Move To Pos Far"),
+(@ENTRY_GALROND*100, 9, 6, 0, 0, 0, 100, 0, 0, 0, 0, 0, 8, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Galrond of the Claw - On Script - React Aggressive"),
+(@ENTRY_GALROND*100, 9, 7, 0, 0, 0, 100, 0, 0, 0, 0, 0, 20, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Galrond of the Claw - On Script - Enable Autoattack"),
+(@ENTRY_GALROND*100, 9, 8, 0, 0, 0, 100, 0, 0, 0, 0, 0, 21, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Galrond of the Claw - On Script - Enable Combat Movement"),
+(@ENTRY_GALROND*100, 9, 9, 0, 0, 0, 100, 0, 5000, 5000, 0, 0, 69, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 5436.294922, -2793.299072, 1516.208862, 3.805633, "Nepenthe-Galrond of the Claw - On Script - Move To Pos Fight"),
+(@ENTRY_GALROND*100, 9, 10, 0, 0, 0, 100, 0, 0, 0, 0, 0, 49, 0, 0, 0, 0, 0, 0, 19, @ENTRY_BARON_GEDDON, 50, 0, 0, 0, 0, 0, "Nepenthe-Galrond of the Claw - On Script - Attack Start"),
+(@ENTRY_TELESSRA, 0, 0, 0, 4, 0, 100, 0, 0, 0, 0, 0, 42, 0, 25, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Telessra - On Aggro - Set Invincibility HP 25%"),
+(@ENTRY_BARON_GEDDON_WARNING_TRIGGER, 0, 0, 0, 54, 0, 100, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Baron Geddon Warning Trigger - Just Summoned - Boss Emote 0"),
+(@ENTRY_ARCH_DRUID_OF_HYJAL, 0, 0, 0, 1, 0, 100, 0, 500, 1000, 60000, 60000, 11, @SPELL_NATURE_CHANNELING, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Arch Druid of Hyjal - On Spawn - Cast Nature Channeling");
+DELETE FROM `creature_text` WHERE `entry` IN (@ENTRY_GALROND, @ENTRY_BARON_GEDDON_WARNING_TRIGGER);
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(@ENTRY_GALROND, 0, 0, "Fall back!!!", 14, 0, 100, 0, 0, 0, "Galrond of the Claw"),
+(@ENTRY_GALROND, 0, 1, "Get away from him until the fire dies down!", 14, 0, 100, 0, 0, 0, "Galrond of the Claw"),
+(@ENTRY_GALROND, 0, 2, "Here it comes, fall back!", 14, 0, 100, 0, 0, 0, "Galrond of the Claw"),
+(@ENTRY_GALROND, 0, 3, "Look out!", 14, 0, 100, 0, 0, 0, "Galrond of the Claw"),
+(@ENTRY_GALROND, 0, 4, "Move back!", 14, 0, 100, 0, 0, 0, "Galrond of the Claw"),
+(@ENTRY_GALROND, 0, 5, "Move back! His flames are too intense!", 14, 0, 100, 0, 0, 0, "Galrond of the Claw"),
+(@ENTRY_BARON_GEDDON_WARNING_TRIGGER, 0, 0, "As a final act of revenge, Baron Geddon has made you a living bomb! Move away from your allies!", 41, 0, 100, 0, 0, 0, "Baron Geddon Warning Trigger");
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` IN (13, 17) AND `SourceEntry` IN (@SPELL_WEAKENING, @SPELL_INFERNO_PING, @SPELL_LIVING_BOMB);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(17, 0, @SPELL_WEAKENING, 0, 0, 31, 1, 3, @ENTRY_BARON_GEDDON, 0, 0, 0, "", "Weakening targets Baron Geddon"),
+(13, 1, @SPELL_INFERNO_PING, 0, 0, 31, 1, 3, @ENTRY_GALROND, 0, 0, 0, "", "Inferno Ping targets Baron Geddon");
+DELETE FROM `spell_dbc` WHERE  `Id` IN (@SPELL_WEAKENING_SERVERSIDE, @SPELL_INFERNO_SERVERSIDE);
+INSERT INTO `spell_dbc` (`Id`, `castingTimeIndex`, `rangeIndex`, `durationIndex`, `Comment`, `Effect1`, effectMiscValue1, effectImplicitTargetA1) VALUES
+(@SPELL_WEAKENING_SERVERSIDE, 1, 1, 0, 'The Return of Baron Geddon - Weakening Serverside', 90, @KILL_CREDIT, 106);
+-- DELETE FROM `spelleffect_dbc` WHERE `effectSpellId` IN (@SPELL_WEAKENING_SERVERSIDE, @SPELL_INFERNO_SERVERSIDE);
+-- INSERT INTO `spelleffect_dbc` (`Id`, `effect`, `effectApplyAuraName`, `effectRadiusIndex`, `effectBasePoints`, `effectMiscValue`, `effectImplicitTargetA`, `effectImplicitTargetB`, `effectSpellId`, `effectIndex`) VALUES
+-- (@SPELL_WEAKENING_EFFECTDBC_ID, 90, 0, 0, 0, @KILL_CREDIT, 106, 0, @SPELL_WEAKENING_SERVERSIDE, 0);
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger` IN (-@SPELL_WEAKENING, @SPELL_INFERNO_SERVERSIDE);
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (@SPELL_WEAKENING, @SPELL_INFERNO, @SPELL_INFERNO_DAMAGE);
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(@SPELL_WEAKENING, "spell_weakening_baron_geddon"),
+(@SPELL_INFERNO, "spell_inferno_baron_geddon");
+
+UPDATE `creature_template` SET `mechanic_immune_mask`='613097436' WHERE (`entry`='40147');

@@ -237,3 +237,44 @@ REPLACE INTO spell_area (spell, area, quest_start, quest_end, gender, autocast, 
 REPLACE INTO `creature_text`(`entry`,`groupid`,`id`,`type`,`text`,`probability`,`comment`) VALUES
 (39756,0,0,12,"What do you think you're doing, $C? Get away from those instruments!",100,"Elementary! - Aggro"),
 (39756,1,0,12,"You cannot ... control the Eye! Cho'gall will know. You will be ... punished.",100,"Elementary! - Death");
+
+-- [SQL] [Kysio's report] Quests - Free Your Mind, the Rest Follows hotfixed
+SET @ENTRY_SERVITOR := 39644;
+SET @ENTRY_KC := 39719;
+SET @GOSSIP := 11281;
+SET @ITEM := 52730;
+SET @QUEST := 25298;
+UPDATE `creature_template` SET `gossip_menu_id` = @GOSSIP, `npcflag` = `npcflag`|1, `AIName` = 'SmartAI' WHERE `entry` = @ENTRY_SERVITOR;
+DELETE FROM `gossip_menu_option` WHERE `menu_id` = @GOSSIP;
+INSERT INTO `gossip_menu_option` (`menu_id`, `id`, `option_icon`, `option_text`, `option_id`, `npc_option_npcflag`, `action_menu_id`, `action_poi_id`, `box_coded`, `box_money`, `box_text`) VALUES
+(@GOSSIP, 0, 0, "<Administer the draught.>", 1, 1, 0, 0, 0, 0 ,'');
+UPDATE `creature` SET `spawntimesecs` = 60 WHERE `id` = @ENTRY_SERVITOR;
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@ENTRY_SERVITOR, @ENTRY_SERVITOR*100);
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(@ENTRY_SERVITOR, 0, 0, 0, 10, 0, 100, 0, 1, 10, 60000, 60000, 1, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Twilight Servitor - OOC LoS - Say Line 0 (random)"),
+(@ENTRY_SERVITOR, 0, 1, 0, 62, 0, 100, 0, @GOSSIP, 0, 0, 0, 33, @ENTRY_KC, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Twilight Servitor - On Gossip Select - KC"),
+(@ENTRY_SERVITOR, 0, 2, 3, 62, 0, 100, 0, @GOSSIP, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Twilight Servitor - On Gossip Select - Close Gossip"),
+(@ENTRY_SERVITOR, 0, 3, 0, 61, 0, 100, 0, 0, 0, 0, 0, 80, @ENTRY_SERVITOR*100, 0, 2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Twilight Servitor - On Gossip Select - Run Script"),
+(@ENTRY_SERVITOR*100, 9, 0, 0, 0, 0, 100, 0, 1000, 1000, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Twilight Servitor - On Script - Say Line 1 (random)"),
+(@ENTRY_SERVITOR*100, 9, 1, 0, 0, 0, 100, 0, 2000, 2000, 0, 0, 46, 30, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,  'Nepenthe-Twilight Servitor - On Script - Move Forward 30 yards'),
+(@ENTRY_SERVITOR*100, 9, 2, 0, 0, 0, 100, 0, 0, 0, 0, 0, 41, 5000, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Twilight Servitor - On Script - Timed Despawn");
+DELETE FROM `creature_text` WHERE `entry` = @ENTRY_SERVITOR;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(@ENTRY_SERVITOR, 0, 0, "Mar'kowa tallol ye'tarin, it knows, it knows.", 12, 0, 100, 0, 0, 0, "Twilight Servitor"),
+(@ENTRY_SERVITOR, 0, 1, "Thoth'al amun Ree'thael vormos! Vormos! Vormos!", 12, 0, 100, 0, 0, 0, "Twilight Servitor"),
+(@ENTRY_SERVITOR, 0, 2, "We are nothing. Tulall par'okoth. Far'al, ka'kar. The void devours.", 12, 0, 100, 0, 0, 0, "Twilight Servitor"),
+(@ENTRY_SERVITOR, 0, 3, "The shadow sees. Bo'al lal arwi C'toth. The end comes, cloaked in silent fire.", 12, 0, 100, 0, 0, 0, "Twilight Servitor"),
+(@ENTRY_SERVITOR, 0, 4, "Al'tha, Al'tha bormaz. Ni bormaz ta'thall? It comes, it walks in flames, $r!", 12, 0, 100, 0, 0, 0, "Twilight Servitor"),
+(@ENTRY_SERVITOR, 0, 5, "<The Twilight Servitor gurgles at you, white spittle foaming and bubbling from his mouth.>", 12, 0, 100, 0, 0, 0, "Twilight Servitor"),
+(@ENTRY_SERVITOR, 0, 6, "Fear broils forth from the heart of the infinite. Don't make me look! I've seen more than I can stand!", 12, 0, 100, 0, 0, 0, "Twilight Servitor"),
+(@ENTRY_SERVITOR, 0, 7, "H'thon, the column of darkness stretching beyond sight. H'thon marwol qualar: the infinite grasp of night.", 12, 0, 100, 0, 0, 0, "Twilight Servitor"),
+(@ENTRY_SERVITOR, 1, 0, "...What am I saying? Nothing makes sense anymore. I've got to get out of this place!", 12, 0, 100, 0, 0, 0, "Twilight Servitor"),
+(@ENTRY_SERVITOR, 1, 1, "My ... brain ... hurts!", 12, 0, 100, 0, 0, 0, "Twilight Servitor"),
+(@ENTRY_SERVITOR, 1, 2, "Wha - what? Where am I? I've got to get out of here!", 12, 0, 100, 0, 0, 0, "Twilight Servitor"),
+(@ENTRY_SERVITOR, 1, 3, "What did they do to me? I've got to get back to camp...", 12, 0, 100, 0, 0, 0, "Twilight Servitor"),
+(@ENTRY_SERVITOR, 1, 4, "What happened to me? I'm leaving!", 12, 0, 100, 0, 0, 0, "Twilight Servitor"),
+(@ENTRY_SERVITOR, 1, 5, "Whoa,  you made the voices go away. I'm outta here!", 12, 0, 100, 0, 0, 0, "Twilight Servitor");
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 15 AND `SourceGroup` = @GOSSIP;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`,`SourceGroup`,`SourceEntry`,`ElseGroup`,`ConditionTypeOrReference`,`ConditionValue1`,`ConditionValue2`,`ConditionValue3`,`ErrorTextId`,`ScriptName`,`Comment`) VALUES
+(15, @GOSSIP, 0, 0, 9, @QUEST, 0, 0, 0, '', "Only show gossip if player has quest"),
+(15, @GOSSIP, 0, 0, 2, @ITEM, 1, 0, 0, '', "Only show gossip if player has item");

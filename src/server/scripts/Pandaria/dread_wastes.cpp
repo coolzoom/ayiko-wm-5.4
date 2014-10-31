@@ -2078,6 +2078,103 @@ class mob_vengeful_spirit : public CreatureScript
         };
 };
 
+// Adjunct Zet'uk (65478) - Sha Eruption (130061)
+
+enum
+{
+    SPELL_SHA_ERUPTION_SUMMON       = 130062,
+    SPELL_SHA_ERUPTION_SUMMON_FIRE  = 130065, // NYI target type 138
+    SPELL_SHA_ERUPTION_PERIODIC     = 130063,
+    SPELL_SHA_ERUPTION_DAMAGE       = 130066,
+
+    NPC_SHA_ERUPTION_FIRE           = 66146
+};
+
+// Sha Eruption targeting 130061
+class spell_zet_uk_sha_eruption : public SpellScriptLoader
+{
+public:
+    spell_zet_uk_sha_eruption() : SpellScriptLoader("spell_zet_uk_sha_eruption") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void ResizeTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.size() > 1)
+                Trinity::Containers::RandomResizeList(targets, 1);
+        }
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            Unit* caster = GetCaster();
+            if (Unit* target = GetHitUnit())
+            {
+                caster->SetFacingToObject(target);
+                caster->SetOrientation(caster->GetAngle(target));
+                caster->CastSpell(caster, SPELL_SHA_ERUPTION_SUMMON, false);
+            }
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_impl::ResizeTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnEffectHitTarget += SpellEffectFn(spell_impl::HandleDummy, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
+// Sha Eruption Periodic trigger - 130063
+class spell_zet_uk_sha_eruption_periodic_summon : public SpellScriptLoader
+{
+public:
+    spell_zet_uk_sha_eruption_periodic_summon() : SpellScriptLoader("spell_zet_uk_sha_eruption_periodic_summon") {}
+
+    class aura_impl : public AuraScript
+    {
+        PrepareAuraScript(aura_impl);
+
+        void HandleEffectPeriodic(AuraEffect const * aurEff)
+        {
+            Unit * caster = GetCaster();
+            if (!caster)
+                return;
+
+            float dist = (float)aurEff->GetTickNumber() * 6.0f; // radius of damage spell * 2
+            Position pos;
+            caster->GetNearPosition(pos, dist, 0.0f);
+            if (Creature * summon = caster->SummonCreature(NPC_SHA_ERUPTION_FIRE, pos, TEMPSUMMON_TIMED_DESPAWN, 20000)) // Summon spell target type NYI (138)
+                summon->CastSpell(summon, SPELL_SHA_ERUPTION_DAMAGE, true);
+        }
+
+        void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (!GetCaster())
+                return;
+
+            if (TempSummon * casterTrigger = GetCaster()->ToTempSummon())
+                casterTrigger->DespawnOrUnsummon(0);
+        }
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(aura_impl::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+            AfterEffectRemove += AuraEffectRemoveFn(aura_impl::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new aura_impl();
+    }
+};
+
 void AddSC_dread_wastes()
 {
     //Rare Mobs
@@ -2106,4 +2203,7 @@ void AddSC_dread_wastes()
     //Standard Mobs
     new mob_overgrown_seacarp();
     new mob_hisek_the_swarmkeeper();
+    // Extending the Vocerage
+    new spell_zet_uk_sha_eruption();
+    new spell_zet_uk_sha_eruption_periodic_summon();
 }

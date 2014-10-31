@@ -1833,7 +1833,7 @@ public:
                 return;
 
             int32 minMana = CalculatePct(caster->GetMaxPower(POWER_MANA), GetSpellInfo()->Effects[EFFECT_1].CalcValue(caster));
-            amount = std::max(CalculatePct(caster->GetTotalStatValue(STAT_SPIRIT), aurEff->GetBaseAmount()), minMana);
+            amount = std::max(CalculatePct((int32)caster->GetTotalStatValue(STAT_SPIRIT), aurEff->GetBaseAmount()), minMana);
         }
 
         void Register()

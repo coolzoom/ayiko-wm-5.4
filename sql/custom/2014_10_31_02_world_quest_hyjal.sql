@@ -203,3 +203,16 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (@SPELL_INFERNO, "spell_inferno_baron_geddon");
 
 UPDATE `creature_template` SET `mechanic_immune_mask`='613097436' WHERE (`entry`='40147');
+
+-- Lycanthoth the Corruptor
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` = '39446';
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+('39446', '0', '0', '1', '4', '0', '100', '0', '0', '0', '0', '0', '11', '74061', '0', '0', '0', '0', '0', '2', '0', '0', '0', '0', '0', '0', '0', 'Nepenthe - Lycanthoth - On Aggro - Cast Miasma of Terror'),
+('39446', '0', '1', '0', '61', '0', '100', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '2', '0', '0', '0', '0', '0', '0', '0', 'Nepenthe - Lycanthoth - On Aggro - Say Line 0'),
+('39446', '0', '2', '0', '0', '0', '100', '0', '8000', '8000', '18000', '21000', '11', '37776', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', 'Nepenthe - Lycanthoth - Cast Blood Howl'),
+('39446', '0', '3', '0', '0', '0', '100', '0', '8000', '8000', '120000', '120000', '1', '1', '0', '0', '0', '0', '0', '2', '0', '0', '0', '0', '0', '0', '0', 'Nepenthe - Lycanthoth - IC - Say Line 1'),
+('39446', '0', '4', '5', '6', '0', '100', '0', '0', '0', '0', '0', '85', '74078', '0', '0', '0', '0', '0', '7', '0', '0', '0', '0', '0', '0', '0', 'Nepenthe - Lycanthoth - On Death - Cast Summon Spirit of Goldrinn-q25273'),
+('39446', '0', '5', '6', '61', '0', '100', '0', '0', '0', '0', '0', '85', '74077', '0', '0', '0', '0', '0', '7', '0', '0', '0', '0', '0', '0', '0', 'Nepenthe - Lycanthoth - On Death - Cast Summon Spirit of Lo\'Gosh-q25272'),
+('39446', '0', '6', '0', '61', '0', '100', '0', '0', '0', '0', '0', '28', '74061', '0', '0', '0', '0', '0', '2', '0', '0', '0', '0', '0', '0', '0', 'Nepenthe - Lycanthoth - On Death - Remove Miasma of Terror');
+
+UPDATE `gameobject` SET `spawnMask`='1' WHERE (`id`='202660');

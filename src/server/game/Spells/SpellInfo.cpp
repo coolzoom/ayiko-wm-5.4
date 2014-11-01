@@ -1654,6 +1654,10 @@ SpellCastResult SpellInfo::CheckLocation(uint32 map_id, uint32 zone_id, uint32 a
             groupEntry = sAreaGroupStore.LookupEntry(groupEntry->nextGroup);
         }
 
+        // Summoning Ritual for Black Heart of Flame quest (wrong zone in DBC)
+        if (Id == 74793 && area_id == 4861)
+            found = true;
+
         if (!found)
             return SPELL_FAILED_INCORRECT_AREA;
     }

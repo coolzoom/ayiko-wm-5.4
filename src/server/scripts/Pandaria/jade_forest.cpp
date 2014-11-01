@@ -1632,6 +1632,42 @@ class mob_hutia : public CreatureScript
         };
 };
 
+class npc_nectarbreeze_farmer : public CreatureScript
+{
+    public:
+        npc_nectarbreeze_farmer() : CreatureScript("npc_nectarbreeze_farmer")
+        {
+        }
+
+        bool OnGossipHello(Player* player, Creature* creature)
+        {
+            if (player->GetQuestStatus(29579) == QUEST_STATUS_INCOMPLETE)
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Get to Hanae's house. It's safe there.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+
+            return true;
+        }
+
+        bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
+        {
+            player->PlayerTalkClass->ClearMenus();
+
+            if (action == GOSSIP_ACTION_INFO_DEF + 1)
+            {
+                if (player->GetQuestStatus(29579) == QUEST_STATUS_INCOMPLETE)
+                {
+                    player->CastSpell(player, 102469, true);
+                    creature->AI()->Talk(0);
+                    creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    creature->ForcedDespawn(2000);
+                }
+                player->CLOSE_GOSSIP_MENU();
+            }
+
+            return true;
+        }
+};
+
 void AddSC_jade_forest()
 {
     //Rare mobs
@@ -1653,4 +1689,6 @@ void AddSC_jade_forest()
     new mob_pandriarch_bramblestaff();
     new mob_pandriarch_goldendraft();
     new mob_big_bao();
+    //Quest scripts
+    new npc_nectarbreeze_farmer();
 }

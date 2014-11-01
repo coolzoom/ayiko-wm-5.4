@@ -68,3 +68,6 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 
 -- Scouting the Sinkholes
 UPDATE `creature` SET `position_z`='-18' WHERE `id` IN('25664', '25665', '25666');
+
+-- Orabus the Helmsman
+UPDATE `gameobject_template` SET `data1`='15' WHERE (`entry`='300174');

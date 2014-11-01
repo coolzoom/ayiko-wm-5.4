@@ -49,3 +49,7 @@ INSERT INTO `creature_text` (`entry`, `id`, `text`, `type`, `probability`, `comm
 ('57400', '3', 'You will not break us, sha!', '12', '100', 'Raufen - Talk on SpellHit'),
 ('57326', '3', 'You will not break us, sha!', '12', '100', 'Raufen - Talk on SpellHit'),
 ('57316', '3', 'You will not break us, sha!', '12', '100', 'Raufen - Talk on SpellHit');
+
+-- Kota Blend
+UPDATE `gameobject_loot_template` SET `ChanceOrQuestChance`='-100' WHERE (`entry`='211480') AND (`item`='81054');
+UPDATE `gameobject_template` SET `data1`='211480' WHERE (`entry`='211480');

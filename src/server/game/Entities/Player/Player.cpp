@@ -22910,6 +22910,10 @@ void Player::RemoveSpellMods(Spell &spell)
         case 30451:
             unusedAura = 36032;
             break;
+        // Incinerate: Prioritize Backlash over Backdraft
+        case 29722:
+            firstId = 34936;
+            secondId = 117828;
         default:
             break;
     }

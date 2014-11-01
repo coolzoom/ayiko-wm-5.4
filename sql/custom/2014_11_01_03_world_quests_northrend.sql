@@ -10,7 +10,15 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `modelid`, `position_x
 -- Hampering Their Escape
 UPDATE `creature_template` SET `AIName`='SmartAI' WHERE `entry` IN('25441', '25442', '25443');
 DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` IN('25441', '25442', '25443');
-INSERT INTO `smart_scripts` (`entryorguid`, `event_type`, `event_param1`, `action_type`, `action_param1`, `target_type`, `comment`) VALUES
-('25441', '8', '45583', '33', '25441', '7', 'Raufen - On Spell Hit - Give KC'),
-('25442', '8', '45583', '33', '25442', '7', 'Raufen - On Spell Hit - Give KC'),
-('25443', '8', '45583', '33', '25443', '7', 'Raufen - On Spell Hit - Give KC');
+INSERT INTO `smart_scripts` (`entryorguid`, `id`, `event_type`, `link`, `event_param1`, `action_type`, `action_param1`, `target_type`, `comment`) VALUES
+('25441', '0', '8', '1', '45583', '33', '25441', '7', 'Raufen - On Spell Hit - Give KC'),
+('25442', '0', '8', '1', '45583', '33', '25442', '7', 'Raufen - On Spell Hit - Give KC'),
+('25443', '0', '8', '1', '45583', '33', '25443', '7', 'Raufen - On Spell Hit - Give KC'),
+('25441', '1', '61', '0', '45583', '11', '60080', '1', 'Raufen - On Spell Hit - Cast Visual'),
+('25442', '1', '61', '0', '45583', '11', '60080', '1', 'Raufen - On Spell Hit - Cast Visual'),
+('25443', '1', '61', '0', '45583', '11', '60080', '1', 'Raufen - On Spell Hit - Cast Visual');
+
+-- This Just In: Fire Still Hot!
+UPDATE `smart_scripts` SET `link`='2' WHERE (`entryorguid`='29692') AND (`source_type`='0') AND (`id`='1') AND (`link`='0');
+DELETE FROM `smart_scripts` WHERE (`entryorguid`='29692') AND (`source_type`='0') AND (`id`='2') AND (`link`='0');
+INSERT INTO `smart_scripts` (`entryorguid`, `id`, `event_type`, `action_type`, `action_param1`, `target_type`, `comment`) VALUES ('29692', '2', '61', '33', '29692', '7', 'Raufen - On Link - Give KC');

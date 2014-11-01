@@ -22,3 +22,19 @@ INSERT INTO `smart_scripts` (`entryorguid`, `id`, `event_type`, `link`, `event_p
 UPDATE `smart_scripts` SET `link`='2' WHERE (`entryorguid`='29692') AND (`source_type`='0') AND (`id`='1') AND (`link`='0');
 DELETE FROM `smart_scripts` WHERE (`entryorguid`='29692') AND (`source_type`='0') AND (`id`='2') AND (`link`='0');
 INSERT INTO `smart_scripts` (`entryorguid`, `id`, `event_type`, `action_type`, `action_param1`, `target_type`, `comment`) VALUES ('29692', '2', '61', '33', '29692', '7', 'Raufen - On Link - Give KC');
+
+-- Torture the Torturer
+UPDATE `creature_template` SET `ScriptName`='npc_torturer_lecraft' WHERE (`entry`='27209');
+
+DELETE FROM `creature_text` WHERE `entry` = '27209';
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES (27209, 0, 0, 'Come to play?', 12, 0, 100, 0, 0, 0, 'combat Say'),
+(27209, 1, 0, 'Ow! I\'ll tell you NOTHING, filthy $R', 15, 0, 100, 0, 0, 0, 'Torturer LeCraft SAY_1'),
+(27209, 2, 0, 'Wait... WAIT! What is it that you want to know? I know you\'re the $C named $N', 15, 0, 100, 0, 0, 0, 'Torturer LeCraft SAY_2'),
+(27209, 3, 0, 'OW...NO! We know that you\'ve been stealing our armor and weapons and horses!', 15, 0, 100, 0, 0, 0, 'Torturer LeCraft SAY_3'),
+(27209, 4, 0, 'We know... that you don\'t... know why we\'re immune... to your so-called blight. Grand Admiral Westwind somehow gave the high abbot that prayer. I beg you... no more... please?', 15, 0, 100, 0, 0, 0, 'Torturer LeCraft SAY_4'),
+(27209, 5, 0, 'AHHHHHHHHH! Please... we know... that you... have a spy... disguised as... one of us! There... that\'s all that I know. Please... mercy... STOP!', 15, 0, 100, 0, 0, 0, 'Torturer LeCraft SAY_5'),
+(27209, 6, 0, 'I TOLD YOU... I don\'t know... anything... else!', 15, 0, 100, 0, 0, 0, 'Torturer LeCraft_SAY_6'),
+(27209, 7, 0, 'Just... end it.', 15, 0, 100, 0, 0, 0, 'Torturer LeCraft_SAY_7'),
+(27209, 7, 1, 'THIS IS TORTURE!', 15, 0, 100, 0, 0, 0, 'Torturer LeCraft SAY_7'),
+(27209, 7, 2, 'They all... begged... for their... lives!', 15, 0, 100, 0, 0, 0, 'Torturer LeCraft SAY_7'),
+(27209, 7, 3, 'Please... stop. I\'ll do... anything....', 15, 0, 100, 0, 0, 0, 'Torturer LeCraft SAY_7');

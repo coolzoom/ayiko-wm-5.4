@@ -216,10 +216,66 @@ public:
     }
 };
 
+enum TortureTheTorturer
+{
+    SPELL_BRANDING_IRON     = 48603,
+    TORTURING_CREDIT        = 27394,
+};
+
+class npc_torturer_lecraft : public CreatureScript
+{
+public:
+    npc_torturer_lecraft() : CreatureScript("npc_torturer_lecraft") { }
+
+    struct npc_torturer_lecraftAI : public ScriptedAI
+    {
+        npc_torturer_lecraftAI(Creature* creature) : ScriptedAI(creature) { }
+
+
+        void UpdateAI(uint32 const /*diff*/) override
+        {
+            if (UpdateVictim())
+                DoMeleeAttackIfReady();
+        }
+
+        void SpellHit(Unit* unit, const SpellInfo* spell) override
+        {
+            if (spell->Id == SPELL_BRANDING_IRON && unit->GetTypeId() == TYPEID_PLAYER)
+            {
+                if (Player* player = unit->ToPlayer())
+                    GotStinged(player->GetGUID());
+            }
+        }
+
+        void EnterCombat(Unit * who)
+        {
+            Talk(0);
+            ScriptedAI::EnterCombat(who);
+        }
+
+        void GotStinged(uint64 casterGUID)
+        {
+            if (Player* caster = ObjectAccessor::GetPlayer(*me, casterGUID))
+            {
+                uint32 step = caster->GetAuraCount(SPELL_BRANDING_IRON) + 1;
+                Talk(step, caster->GetGUID());
+                if (step == 5)
+                    caster->KilledMonsterCredit(TORTURING_CREDIT);
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_torturer_lecraftAI(creature);
+    }
+};
+
 void AddSC_dragonblight()
 {
     new npc_alexstrasza_wr_gate;
     new spell_q12096_q12092_dummy;
     new spell_q12096_q12092_bark;
     new npc_wyrmrest_defender;
+    new npc_torturer_lecraft();
 }

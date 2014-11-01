@@ -14,3 +14,38 @@ UPDATE `creature_template` SET `ScriptName`='npc_windward_hatchling' WHERE `entr
 UPDATE `creature_template` SET `flags_extra`='0', `ScriptName`='npc_windward_nest_trigger' WHERE (`entry`='58275');
 UPDATE `creature` SET `spawndist`='0' WHERE (`id`='58275');
 UPDATE `creature_template` SET `speed_walk`='1.5', `speed_run`='1.5' WHERE (`entry`='58248');
+
+-- Hidden Power
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE `entry` IN('57400', '57326', '57316');
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` IN('57400', '57326', '57316');
+INSERT INTO `smart_scripts` (`entryorguid`, `id`, `link`, `event_type`, `event_param1`, `action_type`, `action_param1`, `target_type`, `comment`) VALUES
+('57400', '0', '1', '8', '108863', '11', '108865', '1', 'Raufen - On Spell Hit - Cast Summon Mantra'),
+('57326', '0', '1', '8', '108863', '11', '108865', '1', 'Raufen - On Spell Hit - Cast Summon Mantra'),
+('57316', '0', '1', '8', '108863', '11', '108865', '1', 'Raufen - On Spell Hit - Cast Summon Mantra');
+INSERT INTO `smart_scripts` (`entryorguid`, `id`, `link`, `event_type`, `action_type`, `action_param1`, `target_type`, `comment`) VALUES
+('57400', '1', '2', '61', '33', '57705', '7', 'Raufen - On Link - Give KC'),
+('57326', '1', '2', '61', '33', '57705', '7', 'Raufen - On Link - Give KC'),
+('57316', '1', '2', '61', '33', '57705', '7', 'Raufen - On Link - Give KC');
+INSERT INTO `smart_scripts` (`entryorguid`, `id`, `link`, `event_type`, `action_type`, `target_type`, `comment`) VALUES
+('57400', '2', '3', '61', '1', '1', 'Raufen - On Link - Talk'),
+('57326', '2', '3', '61', '1', '1', 'Raufen - On Link - Talk'),
+('57316', '2', '3', '61', '1', '1', 'Raufen - On Link - Talk');
+INSERT INTO `smart_scripts` (`entryorguid`, `id`, `event_type`, `action_type`, `action_param1`, `target_type`, `comment`) VALUES
+('57400', '3', '61', '11', '108868', '1', 'Raufen - On Link - Cast Transcendence'),
+('57326', '3', '61', '11', '108868', '1', 'Raufen - On Link - Cast Transcendence'),
+('57316', '3', '61', '11', '108868', '1', 'Raufen - On Link - Cast Transcendence');
+
+DELETE FROM `creature_text` WHERE `entry` IN('57400', '57326', '57316');
+INSERT INTO `creature_text` (`entry`, `id`, `text`, `type`, `probability`, `comment`) VALUES
+('57400', '0', 'Begone, minions of doubt!', '12', '100', 'Raufen - Talk on SpellHit'),
+('57326', '0', 'Begone, minions of doubt!', '12', '100', 'Raufen - Talk on SpellHit'),
+('57316', '0', 'Begone, minions of doubt!', '12', '100', 'Raufen - Talk on SpellHit'),
+('57400', '1', 'Return to the earth!', '12', '100', 'Raufen - Talk on SpellHit'),
+('57326', '1', 'Return to the earth!', '12', '100', 'Raufen - Talk on SpellHit'),
+('57316', '1', 'Return to the earth!', '12', '100', 'Raufen - Talk on SpellHit'),
+('57400', '2', 'We shall dispel you from this land!', '12', '100', 'Raufen - Talk on SpellHit'),
+('57326', '2', 'We shall dispel you from this land!', '12', '100', 'Raufen - Talk on SpellHit'),
+('57316', '2', 'We shall dispel you from this land!', '12', '100', 'Raufen - Talk on SpellHit'),
+('57400', '3', 'You will not break us, sha!', '12', '100', 'Raufen - Talk on SpellHit'),
+('57326', '3', 'You will not break us, sha!', '12', '100', 'Raufen - Talk on SpellHit'),
+('57316', '3', 'You will not break us, sha!', '12', '100', 'Raufen - Talk on SpellHit');

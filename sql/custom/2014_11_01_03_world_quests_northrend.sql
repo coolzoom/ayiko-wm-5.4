@@ -71,3 +71,15 @@ UPDATE `creature` SET `position_z`='-18' WHERE `id` IN('25664', '25665', '25666'
 
 -- Orabus the Helmsman
 UPDATE `gameobject_template` SET `data1`='15' WHERE (`entry`='300174');
+
+-- Destroy the Forges!
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE `entry` IN('30209', '30211', '30212');
+
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` IN('30209', '30211', '30212');
+INSERT INTO `smart_scripts` (`entryorguid`, `id`, `link`, `event_type`, `event_param1`, `action_type`, `action_param1`, `target_type`, `comment`) VALUES
+('30209', '0', '1', '8', '56275', '33', '30209', '7', 'Raufen - On Spell Hit - Give KC'),
+('30209', '1', '0', '61', '0', '11', '60080', '1', 'Raufen - On Spell Hit - Give KC'),
+('30211', '0', '1', '8', '56275', '33', '30211', '7', 'Raufen - On Spell Hit - Give KC'),
+('30211', '1', '0', '61', '0', '11', '60080', '1', 'Raufen - On Spell Hit - Give KC'),
+('30212', '0', '1', '8', '56275', '33', '30212', '7', 'Raufen - On Spell Hit - Give KC'),
+('30212', '1', '0', '61', '0', '11', '60080', '1', 'Raufen - On Spell Hit - Give KC');

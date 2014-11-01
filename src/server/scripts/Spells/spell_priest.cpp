@@ -1141,58 +1141,62 @@ class spell_pri_grace : public SpellScriptLoader
         }
 };
 
-// Called by Smite - 585, Holy Fire - 14914 and Penance - 47666
 // Atonement - 81749
 class spell_pri_atonement : public SpellScriptLoader
 {
-    public:
-        spell_pri_atonement() : SpellScriptLoader("spell_pri_atonement") { }
+public:
+    spell_pri_atonement() : SpellScriptLoader("spell_pri_atonement") { }
 
-        class spell_pri_atonement_SpellScript : public SpellScript
+    class script_impl : public AuraScript
+    {
+        PrepareAuraScript(script_impl);
+
+        bool Validate(SpellInfo const* /*spellInfo*/)
         {
-            PrepareSpellScript(spell_pri_atonement_SpellScript);
-
-            void HandleOnHit()
-            {
-                if (Player* player = GetCaster()->ToPlayer())
-                {
-                    if (GetHitUnit())
-                    {
-                        if (player->HasAura(PRIEST_ATONEMENT_AURA))
-                        {
-                            int32 bp = GetHitDamage();
-
-                            std::list<Unit*> groupList;
-                            player->GetPartyMembers(groupList);
-
-                            if (groupList.size() > 1)
-                            {
-                                groupList.sort(Trinity::HealthPctOrderPred());
-                                groupList.resize(1);
-                            }
-
-                            for (auto itr : groupList)
-                            {
-                                if (itr->GetGUID() == player->GetGUID())
-                                    bp /= 2;
-
-                                player->CastCustomSpell(itr, PRIEST_ATONEMENT_HEAL, &bp, NULL, NULL, true);
-                            }
-                        }
-                    }
-                }
-            }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_pri_atonement_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_pri_atonement_SpellScript();
+            if (!sSpellMgr->GetSpellInfo(PRIEST_ATONEMENT_HEAL))
+                return false;
+            return true;
         }
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            return eventInfo.GetProcTarget() && eventInfo.GetSpellInfo();
+        }
+
+        void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+        {
+            PreventDefaultAction();
+
+            auto target = eventInfo.GetProcTarget();
+            auto player = GetTarget()->ToPlayer();
+            if (!player || !target)
+                return;
+
+            int32 bp = eventInfo.GetDamageInfo()->GetDamage();
+
+            std::list<Unit*> groupList;
+            player->GetPartyMembers(groupList);
+
+            groupList.sort(Trinity::HealthPctOrderPred());
+            auto healTarget = *groupList.begin();
+
+            if (healTarget ->GetGUID() == player->GetGUID())
+                bp /= 2;
+
+            player->CastCustomSpell(healTarget, PRIEST_ATONEMENT_HEAL, &bp, NULL, NULL, true);
+        }
+
+        void Register()
+        {
+            DoCheckProc += AuraCheckProcFn(script_impl::CheckProc);
+            OnEffectProc += AuraEffectProcFn(script_impl::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new script_impl();
+    }
 };
 
 // Called by Heal - 2050, Flash Heal - 2061, Greater Heal - 2060 and Prayer of Healing - 596

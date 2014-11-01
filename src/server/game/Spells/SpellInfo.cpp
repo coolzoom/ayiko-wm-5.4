@@ -1460,7 +1460,6 @@ bool SpellInfo::CanCritDamageClassNone() const
     {
         case 379:   // Shaman - Earth Shield
         case 73685: // Shaman - Unleash Elements - Unleash Life
-
         case 86958: // Shaman - Cleansing Waters
         case 86961:
 
@@ -1468,6 +1467,7 @@ bool SpellInfo::CanCritDamageClassNone() const
         case 22845: // Druid - Frenzied Regeneration
 
         case 64844: // Priest - Divine Hymn
+        case 81751: // Priest - Atonement Heal
 
         case 85222: // Paladin - Light of Dawn
 

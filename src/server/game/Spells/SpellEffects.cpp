@@ -457,6 +457,10 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                             (unitTarget->GetTypeId() == TYPEID_UNIT && unitTarget->GetOwner() && unitTarget->GetOwner()->ToPlayer()))
                             return;
                         break;
+                    case 49882:// Leviroth Self-Impale
+                        if (unitTarget->GetEntry() == 26452)
+                            damage = unitTarget->CountPctFromMaxHealth(95);
+                        break;
                 }
                 break;
             }

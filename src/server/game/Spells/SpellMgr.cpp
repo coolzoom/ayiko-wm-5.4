@@ -5634,6 +5634,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 116023: // Sparring
                     spellInfo->AuraInterruptFlags = 0;
                     break;
+                case 49882: // Leviroth Self-Impale
+                    spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
+                    break;
                 default:
                     break;
             }

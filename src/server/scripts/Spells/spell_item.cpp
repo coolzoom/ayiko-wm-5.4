@@ -1475,18 +1475,11 @@ class spell_item_impale_leviroth : public SpellScriptLoader
         {
             PrepareSpellScript(spell_item_impale_leviroth_SpellScript);
 
-            bool Validate(SpellInfo const* /*spell*/)
-            {
-                if (!sObjectMgr->GetCreatureTemplate(NPC_LEVIROTH))
-                    return false;
-                return true;
-            }
-
             void HandleDummy(SpellEffIndex /* effIndex */)
             {
                 if (Unit* target = GetHitCreature())
                     if (target->GetEntry() == NPC_LEVIROTH && !target->HealthBelowPct(95))
-                        target->CastSpell(target, SPELL_LEVIROTH_SELF_IMPALE, true);
+                        target->CastSpell(target, SPELL_LEVIROTH_SELF_IMPALE, true, nullptr, nullptr, GetCaster()->GetGUID());
             }
 
             void Register()

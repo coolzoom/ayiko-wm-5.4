@@ -83,3 +83,8 @@ INSERT INTO `smart_scripts` (`entryorguid`, `id`, `link`, `event_type`, `event_p
 ('30211', '1', '0', '61', '0', '11', '60080', '1', 'Raufen - On Spell Hit - Give KC'),
 ('30212', '0', '1', '8', '56275', '33', '30212', '7', 'Raufen - On Spell Hit - Give KC'),
 ('30212', '1', '0', '61', '0', '11', '60080', '1', 'Raufen - On Spell Hit - Give KC');
+
+-- Slaves to Saronite
+DELETE FROM `smart_scripts` WHERE (`entryorguid`='31397') AND (`source_type`='0') AND (`id`='3') AND (`link`='0');
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+('31397', '0', '3', '0', '62', '0', '100', '0', '10137', '0', '0', '0', '80', '3139700', '2', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', 'Saronite Mine Slave - On Gossip Select - Run Script');

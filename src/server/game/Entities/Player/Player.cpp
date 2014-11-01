@@ -3385,6 +3385,21 @@ GameObject* Player::GetGameObjectIfCanInteractWith(uint64 guid, GameobjectTypes 
                     break;
             }
 
+            if (type == GAMEOBJECT_TYPE_QUESTGIVER)
+            {
+                // Some gameobjects cannot be interracted due to its size
+                switch (go->GetEntry())
+                {
+                case 190602: // Zim'Torga
+                case 190657: // Zim'Rhuk
+                case 190535: // Zim'Abwa
+                    maxdist = 20.0f;
+                    break;
+                default:
+                    break;
+                }
+            }
+
             if (go->IsWithinDistInMap(this, maxdist))
                 return go;
 

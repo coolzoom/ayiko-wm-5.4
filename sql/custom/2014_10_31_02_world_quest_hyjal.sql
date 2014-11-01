@@ -292,3 +292,18 @@ DELETE FROM `creature` WHERE (`id`='41084');
 
 -- Black Heart of Flame
 DELETE FROM `creature` WHERE (`id`='40107');
+
+-- Inciting the Elements
+DELETE FROM `creature` WHERE (`id`='39926');
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='39921');
+
+DELETE FROM `smart_scripts` WHERE (`entryorguid`='3992100') AND (`source_type`='9');
+DELETE FROM `smart_scripts` WHERE (`entryorguid`='39921') AND (`source_type`='0');
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+('39921', '0', '0', '1', '8', '0', '100', '0', '74513', '0', '0', '0', '64', '1', '0', '0', '0', '0', '0', '7', '0', '0', '0', '0', '0', '0', '0', 'Nepenthe-Faerie Dragon - On Spellhit - Store Target'),
+('39921', '0', '1', '2', '61', '0', '100', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '12', '1', '0', '0', '0', '0', '0', '0', 'Nepenthe-Faerie Dragon - On Spellhit - Say Random Line 0'),
+('39921', '0', '2', '0', '61', '0', '100', '0', '0', '0', '0', '0', '80', '3992100', '0', '2', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', 'Nepenthe-Faerie Dragon - On Spellhit - Run Script'),
+('3992100', '9', '0', '0', '0', '0', '100', '0', '0', '0', '0', '0', '46', '15', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', 'Nepenthe-Faerie Dragon - On Script - Move Forward 15 yards'),
+('3992100', '9', '1', '0', '0', '0', '100', '0', '0', '0', '0', '0', '12', '39926', '3', '90000', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', 'Nepenthe-Faerie Dragon - On Script - Summon Twilight Inciter'),
+('3992100', '9', '2', '0', '0', '0', '100', '0', '0', '0', '0', '0', '1', '1', '0', '0', '0', '0', '0', '12', '1', '0', '0', '0', '0', '0', '0', 'Nepenthe-Faerie Dragon - On Script - Say Line 1'),
+('3992100', '9', '3', '0', '0', '0', '100', '0', '0', '0', '0', '0', '41', '1000', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', 'Nepenthe-Faerie Dragon - On Script - Despawn');

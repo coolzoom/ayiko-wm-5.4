@@ -1010,61 +1010,84 @@ class spell_dk_death_strike : public SpellScriptLoader
     public:
         spell_dk_death_strike() : SpellScriptLoader("spell_dk_death_strike") { }
 
-        class spell_dk_death_strike_SpellScript : public SpellScript
+        class script_impl : public SpellScript
         {
-            PrepareSpellScript(spell_dk_death_strike_SpellScript);
+            PrepareSpellScript(script_impl);
 
             void HandleOnHit()
             {
-                if (Player* player = GetCaster()->ToPlayer())
+                auto player = GetCaster()->ToPlayer();
+                if (!player)
+                    return;
+
+                // Apply Blood Rites effects
+                if (player->HasAura(DK_SPELL_BLOOD_RITES))
                 {
-                    if (GetHitUnit())
+                    SetHitDamage(int32(GetHitDamage() * 1.4f));
+
+                    bool runeFrost = false;
+                    bool runeUnholy = false;
+
+                    for (uint8 i = 0; i < MAX_RUNES; ++i)
                     {
-                        // Apply Blood Rites effects
-                        if (player->HasAura(DK_SPELL_BLOOD_RITES))
+                        if (player->GetCurrentRune(i) == RUNE_DEATH
+                            || player->GetCurrentRune(i) == RUNE_BLOOD
+                            || player->GetBaseRune(i) == RUNE_BLOOD)
                         {
-                            SetHitDamage(int32(GetHitDamage() * 1.4f));
+                            continue;
+                        }
 
-                            bool runeFrost = false;
-                            bool runeUnholy = false;
+                        if (runeUnholy && player->GetCurrentRune(i) == RUNE_UNHOLY)
+                            continue;
 
-                            for (uint8 i = 0; i < MAX_RUNES; ++i)
-                            {
-                                if (player->GetCurrentRune(i) == RUNE_DEATH
-                                    || player->GetCurrentRune(i) == RUNE_BLOOD
-                                    || player->GetBaseRune(i) == RUNE_BLOOD)
-                                    continue;
+                        if (runeFrost && player->GetCurrentRune(i) == RUNE_FROST)
+                            continue;
 
-                                if (runeUnholy && player->GetCurrentRune(i) == RUNE_UNHOLY)
-                                    continue;
+                        if (player->GetRuneCooldown(i))
+                        {
+                            if (player->GetCurrentRune(i) == RUNE_FROST)
+                                runeFrost = true;
+                            else
+                                runeUnholy = true;
 
-                                if (runeFrost && player->GetCurrentRune(i) == RUNE_FROST)
-                                    continue;
-
-                                if (player->GetRuneCooldown(i))
-                                {
-                                    if (player->GetCurrentRune(i) == RUNE_FROST)
-                                        runeFrost = true;
-                                    else
-                                        runeUnholy = true;
-
-                                    player->ConvertRune(i, RUNE_DEATH);
-                                }
-                            }
+                            player->ConvertRune(i, RUNE_DEATH);
                         }
                     }
                 }
             }
 
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                int32 bp = 0;
+                auto caster = GetCaster();
+                if ((caster->CountPctFromMaxHealth(7)) > (20 * caster->GetDamageTakenInPastSecs(5) / 100))
+                    bp = caster->CountPctFromMaxHealth(7);
+                else
+                    bp = (20 * caster->GetDamageTakenInPastSecs(5) / 100);
+
+                // Item - Death Knight T14 Blood 4P bonus
+                if (caster->HasAura(123080))
+                    bp *= 1.1f;
+
+                // Glyph of Dark Succor
+                if (AuraEffect const *aurEff = caster->GetAuraEffect(101568, 0))
+                    if (bp < int32(caster->CountPctFromMaxHealth(aurEff->GetAmount())))
+                        if (caster->HasAura(48265) || caster->HasAura(48266)) // Only in frost/unholy presence
+                            bp = caster->CountPctFromMaxHealth(aurEff->GetAmount());
+
+                caster->CastCustomSpell(caster, 45470, &bp, NULL, NULL, false);
+            }
+
             void Register()
             {
-                OnHit += SpellHitFn(spell_dk_death_strike_SpellScript::HandleOnHit);
+                OnHit += SpellHitFn(script_impl::HandleOnHit);
+                OnEffectHit += SpellEffectFn(script_impl::HandleDummy, EFFECT_2, SPELL_EFFECT_DUMMY);
             }
         };
 
         SpellScript* GetSpellScript() const
         {
-            return new spell_dk_death_strike_SpellScript();
+            return new script_impl();
         }
 };
 

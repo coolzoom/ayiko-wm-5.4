@@ -100,12 +100,14 @@ public:
         {
             player->CLOSE_GOSSIP_MENU();
             player->Kill(creature);
+            player->KilledMonsterCredit(41170);
         }
         else if(action == GOSSIP_ACTION_INFO_DEF+6)
         {
             creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             player->CLOSE_GOSSIP_MENU();
             creature->ForcedDespawn(3000);
+            player->KilledMonsterCredit(41170);
         }
         return true;
     }
@@ -555,7 +557,7 @@ class npc_the_manipulator : public CreatureScript
             Talk(SAY_DEATH);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
                 return;

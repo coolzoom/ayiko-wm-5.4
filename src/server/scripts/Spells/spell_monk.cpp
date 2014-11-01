@@ -150,6 +150,7 @@ class spell_monk_expel_harm : public SpellScriptLoader
 
             void HandleOnHit()
             {
+                printf("\n ! expelHarm damage %i ! \n ", GetHitDamage());
                 if (auto caster = GetCaster())
                 {
                     int32 bp = CalculatePct((-GetHitDamage()), 50);

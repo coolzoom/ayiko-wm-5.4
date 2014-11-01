@@ -7009,6 +7009,10 @@ void Spell::EffectKillCreditPersonal(SpellEffIndex effIndex)
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
 
+    // Switch target for Offering Credit (hack)
+    if (m_spellInfo->Id == 76724)
+        unitTarget = m_caster;
+
     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
 

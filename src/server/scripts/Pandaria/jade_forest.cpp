@@ -1668,6 +1668,82 @@ class npc_nectarbreeze_farmer : public CreatureScript
         }
 };
 
+class npc_windward_hatchling : public CreatureScript
+{
+public:
+    npc_windward_hatchling() : CreatureScript("npc_windward_hatchling") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_windward_hatchlingAI(creature);
+    }
+
+    struct npc_windward_hatchlingAI : public ScriptedAI
+    {
+        npc_windward_hatchlingAI(Creature* creature) : ScriptedAI(creature) { }
+
+        void Reset()
+        {
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            if (auto player = caster->ToPlayer())
+                if (player->GetQuestStatus(30136) == QUEST_STATUS_INCOMPLETE && spell->Id == 110171)
+                    if (auto summon = player->SummonCreature(58248, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 120000))
+                    {
+                        summon->SetOwnerGUID(player->GetGUID());
+                        summon->SetDisplayId(me->GetDisplayId());
+                        summon->GetMotionMaster()->MoveFollow(player, PET_FOLLOW_DIST, M_PI);
+                        me->ForcedDespawn();
+                    }
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+class npc_windward_nest_trigger : public CreatureScript
+{
+public:
+    npc_windward_nest_trigger() : CreatureScript("npc_windward_nest_trigger") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_windward_nest_triggerAI(creature);
+    }
+
+    struct npc_windward_nest_triggerAI : public ScriptedAI
+    {
+        npc_windward_nest_triggerAI(Creature* creature) : ScriptedAI(creature) { }
+
+        void Reset() { }
+
+        void MoveInLineOfSight(Unit* who) override
+        {
+            if (who->GetTypeId() == TYPEID_UNIT && who->GetEntry() == 58248)
+            {
+                if (who->GetDistance(me) > 5.0f)
+                    return;
+
+                if (auto owner = who->GetCharmerOrOwnerPlayerOrPlayerItself())
+                {
+                    owner->KilledMonsterCredit(58246);
+                    who->GetMotionMaster()->MoveFollow(me, 0, 0);
+                    who->ToCreature()->SetOwnerGUID(0);
+                    who->ToCreature()->ForcedDespawn(1000);
+                }
+            }
+        }
+    };
+};
+
 void AddSC_jade_forest()
 {
     //Rare mobs
@@ -1691,4 +1767,6 @@ void AddSC_jade_forest()
     new mob_big_bao();
     //Quest scripts
     new npc_nectarbreeze_farmer();
+    new npc_windward_hatchling();
+    new npc_windward_nest_trigger();
 }

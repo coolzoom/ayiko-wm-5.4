@@ -9,3 +9,8 @@ INSERT INTO `creature_text` (`entry`, `id`, `text`, `type`, `probability`, `comm
 
 UPDATE `creature_template` SET `npcflag`='1', `AIName`='', `ScriptName`='npc_nectarbreeze_farmer' WHERE (`entry`='54763');
 
+-- Empty Nests
+UPDATE `creature_template` SET `ScriptName`='npc_windward_hatchling' WHERE `entry` IN ('58220', '58243', '58244');
+UPDATE `creature_template` SET `flags_extra`='0', `ScriptName`='npc_windward_nest_trigger' WHERE (`entry`='58275');
+UPDATE `creature` SET `spawndist`='0' WHERE (`id`='58275');
+UPDATE `creature_template` SET `speed_walk`='1.5', `speed_run`='1.5' WHERE (`entry`='58248');

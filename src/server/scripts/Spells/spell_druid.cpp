@@ -3550,6 +3550,22 @@ class spell_dru_starfall_dummy : public SpellScriptLoader
 
             void FilterTargets(std::list<WorldObject*>& targets)
             {
+                // Remove creatures caster is not in combat with
+                if (Unit * caster = GetCaster())
+                {
+                    for (auto itr = targets.begin(); itr != targets.end();)
+                        if (Creature * creature = (*itr)->ToCreature())
+                        {
+                            if (creature->getThreatManager().getOnlineContainer().getReferenceByTarget(caster))
+                                ++itr;
+                            else
+                                itr = targets.erase(itr);
+                        }
+                        else
+                            ++itr;
+
+                }
+
                 Trinity::Containers::RandomResizeList(targets, 2);
             }
 

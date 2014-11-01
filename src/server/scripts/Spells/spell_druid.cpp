@@ -1513,7 +1513,7 @@ class spell_dru_natures_vigil : public SpellScriptLoader
 
 
                 // Healing from both damage and heal spells
-                if (auto target = _player->SelectNearbyAlly(_player, 40.0f))
+                if (auto target = _player->SelectNearbyAlly(nullptr, 40.0f))
                     _player->CastCustomSpell(target, SPELL_DRUID_NATURES_VIGIL_HEAL, &bp, NULL, NULL, true);
 
                 if (isPositive)

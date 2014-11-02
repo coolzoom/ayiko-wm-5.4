@@ -279,8 +279,58 @@ public:
     };
 };
 
+class npc_captured_razormane : public CreatureScript
+{
+public:
+    npc_captured_razormane() : CreatureScript("npc_captured_razormane") { }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
+    {
+        player->PlayerTalkClass->ClearMenus();
+        if (action <= GOSSIP_ACTION_INFO_DEF + 2)
+        {
+            if (roll_chance_i(15))
+            {
+                creature->AI()->Talk(3);
+                creature->CastSpell(player, 65629, true);
+                player->KilledMonsterCredit(34529);
+                // TODO: Delayed message
+                //creature->AI()->Talk(4);
+            }
+            else
+                creature->AI()->Talk(0);
+        }
+        else
+        {
+            creature->AI()->Talk(action - GOSSIP_ACTION_INFO_DEF - 2);
+            creature->CastSpell(player, 65628, true);
+            player->KilledMonsterCredit(34529);
+            //creature->AI()->Talk(4);
+        }
+
+        player->CLOSE_GOSSIP_MENU();
+        return true;
+    }
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(13963) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "<Punch him in the mouth.>", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "<Kick him in his big fat face.>", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "<Offer food.>", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "<Tickle Time!>", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
+        }
+        player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+
+        return true;
+    }
+};
+
+
 void AddSC_the_barrens()
 {
     new npc_wizzlecrank_shredder();
     new npc_brutusk_qgw();
+    new npc_captured_razormane();
 }

@@ -64,3 +64,18 @@ UPDATE `creature_loot_template` SET `ChanceOrQuestChance`='-25' WHERE (`entry`='
 UPDATE `creature_loot_template` SET `ChanceOrQuestChance`='-45' WHERE (`entry`='52356') AND (`item`='68820');
 UPDATE `creature_loot_template` SET `ChanceOrQuestChance`='-55' WHERE (`entry`='52357') AND (`item`='68820');
 UPDATE `creature_loot_template` SET `ChanceOrQuestChance`='-30' WHERE (`entry`='3284') AND (`item`='68820');
+
+-- By Hook Or By Crook
+UPDATE `creature_template` SET `KillCredit2`='0', `gossip_menu_id`='10521', `ScriptName`='npc_captured_razormane' WHERE (`entry`='34523');
+
+DELETE FROM `creature_text` WHERE `entry` = '34523';
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+('34523', '0', '0', 'That all you got?', '12', '0', '100', '0', '0', '0', 'Raufen - Captured Razormane Talk 0'),
+('34523', '0', '1', 'Unf. You learn nothing from me!', '12', '0', '100', '0', '0', '0', 'Raufen - Captured Razormane talk 0'),
+('34523', '0', '2', 'I not scared of you!', '12', '0', '100', '0', '0', '0', 'Raufen - Captured Razormane talk 0'),
+('34523', '0', '3', 'Unf - Not the face!', '12', '0', '100', '0', '0', '0', 'Raufen - Captured Razormane - Talk 0'),
+('34523', '0', '4', 'I say nothing! <snort>', '12', '0', '100', '0', '0', '0', 'Raufen - Captured Razormane talk 0'),
+('34523', '1', '0', 'Mnn, <snort> why you cook this meat? Tortusk tells us meat taste best when stolen and raw.', '12', '0', '100', '0', '0', '0', 'Raufen - Captured Razormane Talk 1'),
+('34523', '2', '0', 'Haha - <snort> ha - heee! <snort> Haha no stop haha <SNORT> <wheeze> Hee hee! Battlemaster Tortusk never prepared us for this!', '12', '0', '100', '0', '0', '0', 'Raufen - Captured Razormane Talk 2'),
+('34523', '3', '0', 'You waste your strength! Tortusk train us warriors never to talk.', '12', '0', '100', '0', '0', '0', 'Raufen - Captured Razormane Talk 0'),
+('34523', '4', '0', 'Oh - I\'ve said too much!', '12', '0', '100', '0', '0', '0', 'Raufen - Captured Razormane talk 4');

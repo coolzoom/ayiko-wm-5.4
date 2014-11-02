@@ -57,3 +57,10 @@ INSERT INTO `smart_scripts` (`entryorguid`, `id`, `link`, `event_type`, `event_p
 DELETE FROM `creature_loot_template` WHERE (`entry`='37923') AND (`item`='49945');
 DELETE FROM `gameobject_loot_template` WHERE `entry` = '201904';
 INSERT INTO `gameobject_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES ('201904', '49945', '-100', '1', '0', '1', '3');
+
+-- Competition Schmompetition
+UPDATE `creature_loot_template` SET `ChanceOrQuestChance`='-29' WHERE (`entry`='3282') AND (`item`='68820');
+UPDATE `creature_loot_template` SET `ChanceOrQuestChance`='-25' WHERE (`entry`='3285') AND (`item`='68820');
+UPDATE `creature_loot_template` SET `ChanceOrQuestChance`='-45' WHERE (`entry`='52356') AND (`item`='68820');
+UPDATE `creature_loot_template` SET `ChanceOrQuestChance`='-55' WHERE (`entry`='52357') AND (`item`='68820');
+UPDATE `creature_loot_template` SET `ChanceOrQuestChance`='-30' WHERE (`entry`='3284') AND (`item`='68820');

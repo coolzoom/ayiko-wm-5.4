@@ -134,3 +134,35 @@ INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `comment`) VA
 
 -- WARNING: This removes hacky stuff being in DB making some quests doable by just killing NPC
 update creature_template ct SET ct.KillCredit2 = 0 WHERE ct.KillCredit1 = 0 AND ct.KillCredit2 <> 0;
+
+-- (13031) Coaxing the Spirits
+UPDATE `creature_template` SET `gossip_menu_id`='10272' WHERE (`entry`='33001');
+UPDATE `creature_template` SET `gossip_menu_id`='10277' WHERE (`entry`='33033');
+UPDATE `creature_template` SET `gossip_menu_id`='10278' WHERE (`entry`='33035');
+UPDATE `creature_template` SET `gossip_menu_id`='10279' WHERE (`entry`='33037');
+
+DELETE FROM `gossip_menu_option` WHERE `menu_id` IN('10272', '10277', '10278', '10279');
+INSERT INTO `gossip_menu_option` (`menu_id`, `id`, `option_icon`, `option_text`, `option_id`, `npc_option_npcflag`, `action_menu_id`, `action_poi_id`, `box_coded`, `box_money`) VALUES
+('10272', '0', '0', 'Coax Thundris Windweaver\'s spirit.', '1', '1', '0', '0', '0', '0'),
+('10277', '0', '0', 'Coax the spirit out of Sentinel Elissa Starbreeze\'s corpse.', '1', '1', '0', '0', '0', '0'),
+('10278', '0', '0', 'Coax Taldan\'s corpse to give up its spirit.', '1', '1', '0', '0', '0', '0'),
+('10279', '0', '0', 'Coax the spirit out of Caylais Moonfeather\'s still corpse.', '1', '1', '0', '0', '0', '0');
+
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE `entry` IN('33001', '33033', '33035', '33037');
+
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` IN('33001', '33033', '33035', '33037');
+INSERT INTO `smart_scripts` (`entryorguid`, `id`, `event_type`, `event_param1`, `action_type`, `action_param1`, `target_type`, `comment`) VALUES
+('33001', '0', '62', '10272', '33', '33001', '7', 'Raufen - On Gossip Select - Give KC'),
+('33033', '0', '62', '10277', '33', '33033', '7', 'Raufen - On Gossip Select - Give KC'),
+('33035', '0', '62', '10278', '33', '33035', '7', 'Raufen - On Gossip Select - Give KC'),
+('33037', '0', '62', '10279', '33', '33037', '7', 'Raufen - On Gossip Select - Give KC'),
+('33001', '1', '62', '10272', '72', '0', '7', 'Raufen - On Gossip Select - Close Gossip'),
+('33033', '1', '62', '10277', '72', '0', '7', 'Raufen - On Gossip Select - Close Gossip'),
+('33035', '1', '62', '10278', '72', '0', '7', 'Raufen - On Gossip Select - Close Gossip'),
+('33037', '1', '62', '10279', '72', '0', '7', 'Raufen - On Gossip Select - Close Gossip');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '15' AND `SourceGroup` IN('10272', '10277', '10278', '10279');
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `ConditionTypeOrReference`, `ConditionValue1`, `Comment`) VALUES
+('15', '10272', '9', '13547', 'Raufen - Show Gossip on quest'),
+('15', '10277', '9', '13547', 'Raufen - Show Gossip on quest'),
+('15', '10278', '9', '13547', 'Raufen - Show Gossip on quest'),('15', '10279', '9', '13547', 'Raufen - Show Gossip on quest');

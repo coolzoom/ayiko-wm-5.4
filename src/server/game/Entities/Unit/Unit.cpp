@@ -20069,7 +20069,11 @@ bool Unit::HandleSpellClick(Unit* clicker, int8 seatId)
         else
         {
             if (IsInMap(caster))
+            {
                 caster->CastSpell(target, spellEntry, false, NULL, NULL, origCasterGUID);
+                if (itr->second.castFlags & NPC_CLICK_CAST_DIE_AND_DISAPPEAR && GetTypeId() == TYPEID_UNIT)
+                    ToCreature()->DisappearAndDie();
+            }
             else
                 Aura::TryRefreshStackOrCreate(spellEntry, MAX_EFFECT_MASK, this, clicker, &spellEntry->spellPower, NULL, NULL, origCasterGUID);
         }

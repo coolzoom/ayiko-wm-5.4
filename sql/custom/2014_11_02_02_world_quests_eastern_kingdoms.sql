@@ -27,3 +27,8 @@ UPDATE `creature_loot_template` SET `ChanceOrQuestChance`='-53' WHERE (`entry`='
 UPDATE `creature_loot_template` SET `ChanceOrQuestChance`='-36' WHERE (`entry`='43911') AND (`item`='60263');
 UPDATE `creature_loot_template` SET `ChanceOrQuestChance`='-33' WHERE (`entry`='43912') AND (`item`='60263');
 UPDATE `creature_loot_template` SET `ChanceOrQuestChance`='-44' WHERE (`entry`='43913') AND (`item`='60263');
+
+-- 'All That Skitters
+UPDATE `npc_spellclick_spells` SET `cast_flags`='11' WHERE (`npc_entry`='42689') AND (`spell_id`='79591');
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` = '42689';
+UPDATE creature_template SET AIName = '' WHERE `entry` = '42689';

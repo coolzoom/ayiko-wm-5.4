@@ -79,3 +79,18 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 ('34523', '2', '0', 'Haha - <snort> ha - heee! <snort> Haha no stop haha <SNORT> <wheeze> Hee hee! Battlemaster Tortusk never prepared us for this!', '12', '0', '100', '0', '0', '0', 'Raufen - Captured Razormane Talk 2'),
 ('34523', '3', '0', 'You waste your strength! Tortusk train us warriors never to talk.', '12', '0', '100', '0', '0', '0', 'Raufen - Captured Razormane Talk 0'),
 ('34523', '4', '0', 'Oh - I\'ve said too much!', '12', '0', '100', '0', '0', '0', 'Raufen - Captured Razormane talk 4');
+
+-- Taking Part'
+UPDATE `quest_template` SET `RequiredNpcOrGo1`='-195687' WHERE (`Id`='14311');
+UPDATE `gameobject_template` SET `faction`='0', `data3`='10000' WHERE (`entry`='195687');
+DELETE FROM `gameobject` WHERE `id` = '195687';
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `isActive`) VALUES
+('175029', '195687', '1', '1', '1', '-1084.24', '1416.61', '61.771', '0', '0', '0', '0', '1', '180', '100', '1', '0'),
+('175069', '195687', '1', '1', '1', '-1063.63', '1947.84', '63.501', '0', '0', '0', '0', '1', '180', '100', '1', '0'),
+('175185', '195687', '1', '1', '1', '-872.094', '1828.09', '62.011', '0', '0', '0', '0', '1', '180', '100', '1', '0'),
+('175238', '195687', '1', '1', '1', '-1340.85', '1389.97', '63.953', '0', '0', '0', '0', '1', '180', '100', '1', '0'),
+('175293', '195687', '1', '1', '1', '-1068.2', '1887.38', '60.228', '0', '0', '0', '0', '1', '180', '100', '1', '0'),
+('175296', '195687', '1', '1', '1', '-1308.6', '1384.82', '62.755', '0', '0', '0', '0', '1', '180', '100', '1', '0'),
+('175393', '195687', '1', '1', '1', '-1090.97', '1385.4', '61.983', '0', '0', '0', '0', '1', '180', '100', '1', '0'),
+('175448', '195687', '1', '1', '1', '-1049.99', '1358.8', '65.772', '0', '0', '0', '0', '1', '180', '100', '1', '0'),
+('175509', '195687', '1', '1', '1', '-1103.98', '1303.44', '90.582', '0', '0', '0', '0', '1', '180', '100', '1', '0');

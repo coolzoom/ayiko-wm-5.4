@@ -264,76 +264,122 @@ public:
     };
 };
 
-enum clodoEnum {
-
-    NPC_HOMELESS_STORMWIND_CITIZEN      = 42384,
-    NPC_HOMELESS_STORMWIND_CITIZEN2     = 42386,
-    NPC_WEST_PLAINS_DRIFTER             = 42391,
-    KILL_CREDIT_WESTFALL_STEW           = 42617
-
+enum homelessStormwindCitizen
+{
+    QUEST_MURDER_WAS_THE_CASE_THAT_THEY_GAVE_ME  = 26209,
+    QUEST_CREDIT_ENTRY                      = 42414,
 };
 
-class npc_westfall_stew : public CreatureScript
+class npc_homeless_stormwind_citizen : public CreatureScript
 {
 public:
-    npc_westfall_stew() : CreatureScript("npc_westfall_stew") { }
+    npc_homeless_stormwind_citizen() : CreatureScript("npc_homeless_stormwind_citizen") { }
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new npc_westfall_stewAI (creature);
+        return new npc_homeless_stormwind_citizenAI(creature);
     }
 
-    struct npc_westfall_stewAI : public ScriptedAI
+    struct npc_homeless_stormwind_citizenAI : public ScriptedAI
     {
-        npc_westfall_stewAI(Creature* creature) : ScriptedAI(creature) {}
-        uint32 time;
-        bool booltest;
-        std::list<Creature*> clodoList;
+        npc_homeless_stormwind_citizenAI(Creature* creature) : ScriptedAI(creature) { Reset(); }
+
+        bool feedingStarted;
+        uint64 playerGUID;
 
         void Reset()
         {
-            time = 30000;
-            booltest = true;
-            if(Player* invocer = me->ToTempSummon()->GetSummoner()->ToPlayer())
-            {
-                GetCreatureListWithEntryInGrid(clodoList, me, NPC_HOMELESS_STORMWIND_CITIZEN, 15.0f);
-                for (auto clodo: clodoList)
-                {
-                    if(clodo->getStandState() != UNIT_STAND_STATE_SIT)
-                    {
-                        clodo->GetMotionMaster()->MoveFollow(me, 1, me->GetAngle(clodo));
-                        clodo->SetStandState(UNIT_STAND_STATE_SIT);
-                        invocer->KilledMonsterCredit(KILL_CREDIT_WESTFALL_STEW, 0);
-                    }
-                }
-            }
+            playerGUID = 0;
+            feedingStarted = false;
+            me->RestoreFaction();
+            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
         }
-        void UpdateAI(const uint32 diff)
+
+        void MoveInLineOfSight(Unit * who)
         {
-            if(booltest)
+            if (who->GetEntry() == 42617 && !feedingStarted && who->GetDistance(me) < 7.0f)
             {
-                if (time < diff)
-                {
-                    for (auto clodo: clodoList)
-                    {
-                        clodo->SetStandState(UNIT_STAND_STATE_STAND);
-                        clodo->SetDefaultMovementType(RANDOM_MOTION_TYPE);
-                    }
-                    me->DespawnOrUnsummon();
-                    booltest = false;
-                }
-                else
-                    time -= diff;
+                if(auto const invocer = who->ToTempSummon()->GetSummoner()->ToPlayer())
+                    playerGUID = invocer->GetGUID();
+
+                feedingStarted = true;
+                float x,y,z;
+                who->GetClosePoint(x,y,z, 1.0f, 0.0f, me->GetAngle(who));
+                me->GetMotionMaster()->MovePoint(1, x,y,z);
+            }
+
+            ScriptedAI::MoveInLineOfSight(who);
+        }
+
+        void MovementInform(uint32 type, uint32 id)
+        {
+            if(type == POINT_MOTION_TYPE && id == 1)
+            {
+                if (auto player = Player::GetPlayer(*me, playerGUID))
+                    player->KilledMonsterCredit(42617);
+
+                me->SetStandState(UNIT_STAND_STATE_SIT);
+                me->ForcedDespawn(5000);
             }
         }
     };
 
-};
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
+    {
+        player->PlayerTalkClass->ClearMenus();
+        switch (action)
+        {
+        case GOSSIP_ACTION_INFO_DEF+1:
+        case GOSSIP_ACTION_INFO_DEF+2:
+            {
+                player->CLOSE_GOSSIP_MENU();
+                if (urand(0,1))
+                {
+                    // Must have first completed to trigger second
+                    QuestStatusMap::iterator itr = player->getQuestStatusMap().find(QUEST_MURDER_WAS_THE_CASE_THAT_THEY_GAVE_ME);
+                    if (itr == player->getQuestStatusMap().end())
+                        return false;
 
+                    for (uint32 i = 0; i < 4; ++i)
+                    {
+                        if (itr->second.CreatureOrGOCount[i] == 0)
+                        {
+                            creature->AI()->Talk(i);
+                            creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                            creature->ForcedDespawn(10000);
+                            player->KilledMonsterCredit(QUEST_CREDIT_ENTRY + i);
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    creature->setFaction(14);
+                    creature->AI()->AttackStart(player);
+                }
+                break;
+            }
+        }
+        return true;
+    }
+
+    bool OnGossipHello(Player* player, Creature* creature) override
+    {
+        if (player->GetQuestStatus(QUEST_MURDER_WAS_THE_CASE_THAT_THEY_GAVE_ME) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Did you see who killed the Furlbrows?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+            player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_CHAT, "Maybe a couple of copper will loosen your tongue? Now tell me, did you see who killed the Furlbrows?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2, "Are you sure you want to give this hobo money?", 2, false);
+        }
+
+        player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+
+        return true;
+    }
+};
 
 void AddSC_westfall()
 {
     new npc_daphne_stilwell();
     new npc_defias_traitor();
-    new npc_westfall_stew();
+    new npc_homeless_stormwind_citizen();
 }

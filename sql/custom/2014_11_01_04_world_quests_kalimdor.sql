@@ -166,3 +166,27 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `ConditionTy
 ('15', '10272', '9', '13547', 'Raufen - Show Gossip on quest'),
 ('15', '10277', '9', '13547', 'Raufen - Show Gossip on quest'),
 ('15', '10278', '9', '13547', 'Raufen - Show Gossip on quest'),('15', '10279', '9', '13547', 'Raufen - Show Gossip on quest');
+
+-- Freezing the Pipes
+SET @NPC_FREEZING_PIPES_BUNNY_1 := 47423;
+SET @NPC_FREEZING_PIPES_BUNNY_2 := 47424;
+SET @NPC_FREEZING_PIPES_BUNNY_3 := 47425;
+SET @NPC_FREEZING_PIPES_BUNNY_4 := 47426;
+SET @SPELL_CRYOCANNON := 88452;
+UPDATE `creature_template` SET `AIName` = "SmartAI" WHERE `entry` BETWEEN @NPC_FREEZING_PIPES_BUNNY_1 AND @NPC_FREEZING_PIPES_BUNNY_4;
+DELETE FROM `smart_scripts` WHERE `entryorguid` BETWEEN @NPC_FREEZING_PIPES_BUNNY_1 AND @NPC_FREEZING_PIPES_BUNNY_4;
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(@NPC_FREEZING_PIPES_BUNNY_1, 0, 0, 0, 8, 0, 100, 0, @SPELL_CRYOCANNON, 0, 0, 0, 33, @NPC_FREEZING_PIPES_BUNNY_1, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Freezing the Pipes Bunny 1 - On Spellhit - KC"),
+(@NPC_FREEZING_PIPES_BUNNY_2, 0, 0, 0, 8, 0, 100, 0, @SPELL_CRYOCANNON, 0, 0, 0, 33, @NPC_FREEZING_PIPES_BUNNY_2, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Freezing the Pipes Bunny 2 - On Spellhit - KC"),
+(@NPC_FREEZING_PIPES_BUNNY_3, 0, 0, 0, 8, 0, 100, 0, @SPELL_CRYOCANNON, 0, 0, 0, 33, @NPC_FREEZING_PIPES_BUNNY_3, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Freezing the Pipes Bunny 3 - On Spellhit - KC"),
+(@NPC_FREEZING_PIPES_BUNNY_4, 0, 0, 0, 8, 0, 100, 0, @SPELL_CRYOCANNON, 0, 0, 0, 33, @NPC_FREEZING_PIPES_BUNNY_4, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Freezing the Pipes Bunny 4 - On Spellhit - KC");
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` IN (13, 17) AND `SourceEntry` = @SPELL_CRYOCANNON;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+('17', '0', '88452', '0', '0', '29', '0', '47423', '5', '0', '0', '0', '0', '', 'I-Scream Cryocannon can be casted near Freezing the Pipes Bunny 1'),
+('17', '0', '88452', '0', '1', '29', '0', '47424', '5', '0', '0', '0', '0', '', 'I-Scream Cryocannon can be casted near Freezing the Pipes Bunny 2'),
+('17', '0', '88452', '0', '2', '29', '0', '47425', '5', '0', '0', '0', '0', '', 'I-Scream Cryocannon can be casted near Freezing the Pipes Bunny 3'),
+('17', '0', '88452', '0', '3', '29', '0', '47426', '5', '0', '0', '0', '0', '', 'I-Scream Cryocannon can be casted near Freezing the Pipes Bunny 4');
+
+UPDATE `quest_template` SET `RequiredSpellCast4`='0' WHERE (`Id`='28047');
+
+UPDATE `creature` SET `spawndist`='0', `MovementType`='0' WHERE `id` IN(@NPC_FREEZING_PIPES_BUNNY_1, @NPC_FREEZING_PIPES_BUNNY_2, @NPC_FREEZING_PIPES_BUNNY_3, @NPC_FREEZING_PIPES_BUNNY_4);

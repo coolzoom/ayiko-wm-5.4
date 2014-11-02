@@ -51,7 +51,7 @@ DELETE FROM `gameobject` WHERE (`id`='201904');
 
 DELETE FROM `smart_scripts` WHERE (`entryorguid`='37923') AND (`source_type`='0') AND `id` IN('2', '3');
 INSERT INTO `smart_scripts` (`entryorguid`, `id`, `link`, `event_type`, `event_param1`, `action_type`, `action_param1`, `target_type`, `comment`) VALUES
-('37923', '2', '3', '8', '70813', '11', '70828', '1', 'Raufen - On Spell Hit - Cast Summon Object');
+('37923', '2', '3', '8', '70813', '11', '70828', '1', 'Raufen - On Spell Hit - Cast Summon Object'),
 ('37923', '3', '0', '61', '0', '41', '0', '1', 'Raufen - On Link - Despawn');
 
 DELETE FROM `creature_loot_template` WHERE (`entry`='37923') AND (`item`='49945');
@@ -114,3 +114,23 @@ DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` = '52171
 INSERT INTO `smart_scripts` (`entryorguid`, `id`, `link`, `event_type`, `action_type`, `action_param1`, `target_type`, `comment`) VALUES
 ('52171', '0', '1', '73', '41', '0', '1', 'Raufen - On Spellclick - Force Despawn'),
 ('52171', '1', '0', '61', '33', '52166', '7', 'Raufen - On Spellclick - Force Despawn');
+
+-- Butcherbot, Scavengers Scavenged, Blisterpaw Butchery
+DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`='17') AND (`SourceGroup`='0') AND (`SourceEntry`='74175');
+
+DELETE FROM `creature_template_aura` WHERE (`entry`='5419') AND (`aura`='29266');
+DELETE caura.* FROM creature_aura caura INNER JOIN creature c ON c.guid = caura.guid WHERE c.id = 5419;
+
+UPDATE `creature_template` SET `ScriptName`='npc_butcherbot' WHERE (`entry`='39696');
+
+DELETE FROM `creature_text` WHERE `entry` = '39696';
+INSERT INTO `creature_text` (`entry`, `id`, `text`, `type`, `probability`, `comment`) VALUES
+('39696', '0', 'Butcherbot will harvest meat, tra la la la la.', '12', '100', 'Raufen - Butcherbot Random text'),
+('39696', '1', 'I want the arterieeeeeeeeees!', '12', '100', 'Raufen - Butcherbot Random text'),
+('39696', '2', 'VWHHHHHRRRRRRRRRRRRRRRRHHHHHHMNNNGHHHGH', '12', '100', 'Raufen - Butcherbot Random text');
+
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger` = '74175';
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `comment`) VALUES ('74175', '74176', 'Raufen - Summon Butcherbot on dummy');
+
+-- WARNING: This removes hacky stuff being in DB making some quests doable by just killing NPC
+update creature_template ct SET ct.KillCredit2 = 0 WHERE ct.KillCredit1 = 0 AND ct.KillCredit2 <> 0;

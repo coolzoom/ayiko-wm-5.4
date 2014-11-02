@@ -305,9 +305,120 @@ public:
     };
 };
 
+enum Butcherbot
+{
+    SAY_BUTCHING            = 0,
+    NPC_GLASSHIDE_BASILISK  = 5419,
+    NPC_FIRE_ROC            = 5429,
+    NPC_BLISTERPAW_HYENA    = 5426,
+    BUTCHERBOT_QUEST_1      = 25112,
+    BUTCHERBOT_QUEST_2      = 25111,
+    BUTCHERBOT_QUEST_3      = 25115,
+    BUTCHERBOT_CREDIT_1     = 39702,
+    BUTCHERBOT_CREDIT_2     = 40507,
+    BUTCHERBOT_CREDIT_3     = 40509,
+    SPELL_BUTCHERING        = 74168
+};
+
+class npc_butcherbot : public CreatureScript
+{
+public:
+    npc_butcherbot() : CreatureScript("npc_butcherbot") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_butcherbotAI (creature);
+    }
+
+    struct npc_butcherbotAI : public ScriptedAI
+    {
+        npc_butcherbotAI(Creature* creature) : ScriptedAI(creature) { }
+
+        bool isButchering;
+        uint32 butcheringDelay;
+        uint64 playerGUID;
+        uint32 questId;
+
+        void MovementInform(uint32 type, uint32 id)
+        {
+            if (type == POINT_MOTION_TYPE && id == 1)
+            {
+                me->CastSpell(me, SPELL_BUTCHERING, true);
+                Talk(SAY_BUTCHING);
+                isButchering = true;
+
+                if (Creature * const creature = GetQuestCreature())
+                    creature->ForcedDespawn(1000);
+            }
+        }
+
+        Creature* GetQuestCreature() const
+        {
+            uint32 entry = NPC_GLASSHIDE_BASILISK;
+            if (questId == BUTCHERBOT_QUEST_2)
+                entry = NPC_FIRE_ROC;
+            else if (questId == BUTCHERBOT_QUEST_3)
+                entry = NPC_BLISTERPAW_HYENA;
+
+            return me->FindNearestCreature(entry, 20.f, false);
+        }
+
+        void Reset()
+        {
+            isButchering = false;
+            butcheringDelay = 2000;
+
+            if (Player * player = me->SelectNearestPlayer(20.f))
+            {
+                playerGUID = player->GetGUID();
+                questId = BUTCHERBOT_QUEST_1;
+                if (player->GetQuestStatus(BUTCHERBOT_QUEST_2) == QUEST_STATUS_INCOMPLETE)
+                    questId = BUTCHERBOT_QUEST_2;
+                else if (player->GetQuestStatus(BUTCHERBOT_QUEST_3) == QUEST_STATUS_INCOMPLETE)
+                    questId = BUTCHERBOT_QUEST_3;
+            }
+
+            if (Creature * const creature = GetQuestCreature())
+            {
+                float x, y, z;
+                creature->GetPosition(x,y,z);
+                creature->GetNearPoint(creature, x, y, z, 0.5f, 0.5f, creature->GetAngle(me));
+                me->GetMotionMaster()->MovePoint(1, x,y,z);
+            }
+        }
+
+        void UpdateAI(uint32 const diff)
+        {
+            if (isButchering)
+            {
+                if (butcheringDelay <= diff)
+                {
+                    uint32 credit = BUTCHERBOT_CREDIT_1;
+                    if (questId == BUTCHERBOT_QUEST_2)
+                        credit = BUTCHERBOT_CREDIT_2;
+                    else if (questId == BUTCHERBOT_QUEST_3)
+                        credit = BUTCHERBOT_CREDIT_3;
+
+                    if (Player * const player = me->GetPlayer(*me, playerGUID))
+                        player->KilledMonsterCredit(credit);
+
+                    if (Creature * const creature = GetQuestCreature())
+                        creature->ForcedDespawn();
+
+                    me->ForcedDespawn(1000);
+                    isButchering = false;
+                }
+                else
+                    butcheringDelay -= diff;
+            }
+        }
+    };
+};
+
 void AddSC_tanaris()
 {
     new npc_custodian_of_time();
     new npc_steward_of_time();
     new npc_OOX17();
+    new npc_butcherbot();
 }

@@ -38,3 +38,10 @@ INSERT INTO `event_scripts` (`id`, `delay`, `command`, `datalong`, `datalong2`, 
 ('6721', '60', '10', '12918', '120000', '0', '2239.35', '-1557.46', '89.81', '0'),
 ('6721', '60', '10', '12921', '120000', '0', '2231.03', '-1543.77', '90.76', '0'),
 ('6721', '60', '10', '12921', '120000', '0', '2237.97', '-1551.94', '90.23', '0');
+
+-- Echeyakee
+DELETE FROM `gameobject` WHERE `id` = '164651';
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `isActive`, `protect_anti_doublet`) VALUES
+('280465', '164651', '1', '0', '0', '1', '1', '125', '-2541', '91.668', '0.865', '0', '0', '0.419357', '0.907821', '300', '0', '1', '0', NULL);
+DELETE FROM `event_scripts` WHERE (`id`='2980') AND (`delay`='0') AND (`command`='10') AND (`datalong`='3475');
+INSERT INTO `event_scripts` (`id`, `delay`, `command`, `datalong`, `datalong2`, `dataint`, `x`, `y`, `z`, `o`) VALUES ('2980', '0', '10', '3475', '180000', '0', '116.2', '-2559', '91.6667', '1.19');

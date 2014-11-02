@@ -207,3 +207,6 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 UPDATE `creature_template` SET `faction_A`='855', `faction_H`='855', `AIName`='SmartAI' WHERE (`entry`='10978');
 DELETE FROM `smart_scripts` WHERE (`entryorguid`='10978') AND (`source_type`='0') AND (`id`='0');
 INSERT INTO `smart_scripts` (`entryorguid`, `event_type`, `event_param1`, `action_type`, `action_param1`, `target_type`, `comment`) VALUES ('10978', '8', '17166', '33', '10978', '7', 'Raufen - Give Killcredit On Spellhit');
+
+-- Mysterious Azsharite
+UPDATE `gameobject_loot_template` SET `item`='49207' WHERE (`entry`='9820') AND (`item`='49207');

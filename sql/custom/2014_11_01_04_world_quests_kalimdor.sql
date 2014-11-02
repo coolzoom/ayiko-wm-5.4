@@ -190,3 +190,10 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 UPDATE `quest_template` SET `RequiredSpellCast4`='0' WHERE (`Id`='28047');
 
 UPDATE `creature` SET `spawndist`='0', `MovementType`='0' WHERE `id` IN(@NPC_FREEZING_PIPES_BUNNY_1, @NPC_FREEZING_PIPES_BUNNY_2, @NPC_FREEZING_PIPES_BUNNY_3, @NPC_FREEZING_PIPES_BUNNY_4);
+
+-- Slitherblade Slaughter
+DELETE FROM `creature_loot_template` WHERE `item` IN('49056', '49058', '49060');
+INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
+('4711', '49056', '-100', '1', '0', '1', '1'),
+('4712', '49058', '-80', '1', '0', '1', '1'),
+('4713', '49060', '-60', '1', '0', '1', '1');

@@ -102,3 +102,15 @@ UPDATE `creature_template` SET `ScriptName`='npc_zelfrax' WHERE `entry`=23864;
 DELETE FROM `creature_text` WHERE `entry` = '23864';
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES ('23864', '0', '0', 'This land was mine long before your wretched kind set foot here.', '14', '0', '100', '0', '0', '0', 'zelfrax SAY_ZELFRAX1');
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES ('23864', '1', '0', 'All who venture here belong to me,including you!', '14', '0', '100', '0', '0', '0', 'zelfrax SAY_ZELFRAX2');
+
+-- Sludge Investigation
+DELETE FROM `creature` WHERE (`id`='52166');
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='52171');
+
+DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`='18') AND (`SourceGroup`='52171') AND (`SourceEntry`='96982');
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`, `Comment`) VALUES ('18', '52171', '96982', '9', '29087', 'Raufen - Require quest for Spellclick');
+
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` = '52171';
+INSERT INTO `smart_scripts` (`entryorguid`, `id`, `link`, `event_type`, `action_type`, `action_param1`, `target_type`, `comment`) VALUES
+('52171', '0', '1', '73', '41', '0', '1', 'Raufen - On Spellclick - Force Despawn'),
+('52171', '1', '0', '61', '33', '52166', '7', 'Raufen - On Spellclick - Force Despawn');

@@ -16,8 +16,8 @@ UPDATE `creature_template` SET `speed_run` = 1.28571 WHERE `entry` = @NPC_BRUNNI
 UPDATE `creature_template` SET `minlevel` = 80, `maxlevel` = 80, `speed_walk` = 1.44444, `speed_run` = 2.85714, `InhabitType` = 4, `AIName` = "", `ScriptName` = "npc_hyldsmeet_protodrake" WHERE `entry` = @NPC_HYLDSMEET_PROTODRAKE;
 UPDATE `creature_template` SET `InhabitType` = 4, `speed_walk` = 6, `speed_run` = 3.14286, `HoverHeight` = 2.25, `AIName` = "", `ScriptName` = "npc_hyldsmeet_protodrake_static" WHERE `entry` = @NPC_HYLDSMEET_PROTODRAKE_STATIC;
 UPDATE `creature_template` SET `InhabitType` = 4, `AIName` = "", `ScriptName` = "npc_column_ornament" WHERE `entry` = @NPC_COLUMN_ORNAMENT;
-DELETE FROM `creature_addon` WHERE `guid` IN (SELECT `guid` FROM `creature` WHERE `id` = @NPC_HYLDSMEET_PROTODRAKE_STATIC);
-DELETE FROM `creature_template_addon` WHERE `entry` IN (@NPC_HYLDSMEET_PROTODRAKE, @NPC_HYLDSMEET_PROTODRAKE_STATIC);
+DELETE FROM `creature_aura` WHERE `guid` IN (SELECT `guid` FROM `creature` WHERE `id` = @NPC_HYLDSMEET_PROTODRAKE_STATIC);
+DELETE FROM `creature_template_aura` WHERE `entry` IN (@NPC_HYLDSMEET_PROTODRAKE, @NPC_HYLDSMEET_PROTODRAKE_STATIC);
 UPDATE `creature` SET `MovementType` = 0 WHERE `id` = @NPC_HYLDSMEET_PROTODRAKE_STATIC;
 DELETE FROM `vehicle_template_accessory` WHERE `entry` = @NPC_HYLDSMEET_PROTODRAKE_STATIC;
 INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `seat_id`, `minion`, `description`, `summontype`, `summontimer`) VALUES

@@ -102,7 +102,7 @@ INSERT INTO `gameobject` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`position_x`
 
 -- [SQL] Quests - Hero's Call: Deepholm! will no longer have pre-requisite quests
 UPDATE `quest_template` SET `PrevQuestId` = 0, `NextQuestIdChain` = 27203 WHERE `Id` = 27727;
-DELETE FROM `creature_questrelation` WHERE `id` = 48128;
+DELETE FROM `creature_queststarter` WHERE `id` = 48128;
 UPDATE `creature_template` SET `npcflag` = 0 WHERE `entry` = 48128;
 
 -- [c++ and SQL] Quests - All Our Friends Are Dead scripted (Feedback #7463)
@@ -148,6 +148,7 @@ INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES
 -- [c++ and SQL] Quests - Take him to the Earthcaller scripted (Feedback #7405)
 SET @NPC_FLINT_OREMANTLE := 43036;
 UPDATE `creature_template` SET `minlevel` = 83, `maxlevel` = 83, `exp` = 3, `mindmg` = 468, `maxdmg` = 702, `attackpower` = 175, `dmg_multiplier` = 35, `baseattacktime` = 2000, `unit_flags` = 768, `WDBVerified` = 15595, `AIName` = "", `ScriptName` = "npc_flint_oremantle" WHERE `entry` = @NPC_FLINT_OREMANTLE;
+UPDATE `quest_template` SET `RequiredNpcOrGo1` = 44207, `RequiredNpcOrGoCount1` = 1 WHERE `Id` = 26413;
 
 -- [c++ and SQL] Quests - Stonefather's Boon scripted
 SET @NPC_STONEFATHERS_BANNER := 43163;
@@ -685,11 +686,11 @@ INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`, `use
 -- [SQL] Quests - Fly Over (A,H) scripted (Feedback #1556)
 SET @AREATRIGGER := 6216;
 DELETE FROM `areatrigger_involvedrelation` WHERE `quest` = 27006;
-DELETE FROM `creature_questrelation` WHERE `quest` = 27008;
-INSERT INTO `creature_questrelation` (`id`, `quest`) VALUES
+DELETE FROM `creature_queststarter` WHERE `quest` = 27008;
+INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES
 (44818, 27008);
-DELETE FROM `creature_involvedrelation` WHERE `quest` = 27008;
-INSERT INTO `creature_involvedrelation` (`id`, `quest`) VALUES
+DELETE FROM `creature_questender` WHERE `quest` = 27008;
+INSERT INTO `creature_questender` (`id`, `quest`) VALUES
 (44818, 27008);
 UPDATE `creature_template` SET `npcflag` = `npcflag`|2 WHERE `entry` = 44818;
 DELETE FROM `smart_scripts` WHERE `entryorguid` = @AREATRIGGER AND `source_type` = 2;

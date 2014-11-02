@@ -94,3 +94,11 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 ('175393', '195687', '1', '1', '1', '-1090.97', '1385.4', '61.983', '0', '0', '0', '0', '1', '180', '100', '1', '0'),
 ('175448', '195687', '1', '1', '1', '-1049.99', '1358.8', '65.772', '0', '0', '0', '0', '1', '180', '100', '1', '0'),
 ('175509', '195687', '1', '1', '1', '-1103.98', '1303.44', '90.582', '0', '0', '0', '0', '1', '180', '100', '1', '0');
+
+-- Cleansing Witch Hill
+DELETE FROM `gameobject` WHERE `id` = '300143';
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `isActive`) VALUES ('47621', '300143', '1', '1', '1', '-2967.28', '-3871.99', '33.06', '0', '0', '0', '0', '0', '180', '0', '0', '0');
+UPDATE `creature_template` SET `ScriptName`='npc_zelfrax' WHERE `entry`=23864;
+DELETE FROM `creature_text` WHERE `entry` = '23864';
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES ('23864', '0', '0', 'This land was mine long before your wretched kind set foot here.', '14', '0', '100', '0', '0', '0', 'zelfrax SAY_ZELFRAX1');
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES ('23864', '1', '0', 'All who venture here belong to me,including you!', '14', '0', '100', '0', '0', '0', 'zelfrax SAY_ZELFRAX2');

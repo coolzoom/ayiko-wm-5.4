@@ -329,6 +329,82 @@ public:
     }
 };
 
+/*######
+## npc_zelfrax
+######*/
+
+Position const MovePosition = {-2967.030f, -3872.1799f, 32.620f, 0.0f};
+
+enum Zelfrax
+{
+    SAY_ZELFRAX1     = 0,
+    SAY_ZELFRAX2     = 1
+};
+
+class npc_zelfrax : public CreatureScript
+{
+public:
+    npc_zelfrax() : CreatureScript("npc_zelfrax") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_zelfraxAI(creature);
+    }
+
+    struct npc_zelfraxAI : public ScriptedAI
+    {
+        npc_zelfraxAI(Creature* creature) : ScriptedAI(creature)
+        {
+            MoveToDock();
+        }
+
+        void AttackStart(Unit* who)
+        {
+            if (!who)
+                return;
+
+            if (me->Attack(who, true))
+            {
+                me->SetInCombatWith(who);
+                who->SetInCombatWith(me);
+
+                if (IsCombatMovementAllowed())
+                    me->GetMotionMaster()->MoveChase(who);
+            }
+        }
+
+        void MovementInform(uint32 Type, uint32 /*Id*/)
+        {
+            if (Type != POINT_MOTION_TYPE)
+                return;
+
+            me->SetHomePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+            SetCombatMovement(true);
+
+            if (me->IsInCombat())
+                if (Unit* unit = me->GetVictim())
+                    me->GetMotionMaster()->MoveChase(unit);
+        }
+
+        void MoveToDock()
+        {
+            SetCombatMovement(false);
+            me->GetMotionMaster()->MovePoint(0, MovePosition);
+            Talk(SAY_ZELFRAX1);
+            Talk(SAY_ZELFRAX2);
+        }
+
+        void UpdateAI(uint32 const /*Diff*/)
+        {
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
 void AddSC_dustwallow_marsh()
 {
     new npc_stinky();
@@ -336,4 +412,5 @@ void AddSC_dustwallow_marsh()
     new spell_ooze_zap_channel_end();
     new spell_energize_aoe();
     new go_blackhoof_cage();
+    new npc_zelfrax();
 }

@@ -45,3 +45,15 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, 
 ('280465', '164651', '1', '0', '0', '1', '1', '125', '-2541', '91.668', '0.865', '0', '0', '0.419357', '0.907821', '300', '0', '1', '0', NULL);
 DELETE FROM `event_scripts` WHERE (`id`='2980') AND (`delay`='0') AND (`command`='10') AND (`datalong`='3475');
 INSERT INTO `event_scripts` (`id`, `delay`, `command`, `datalong`, `datalong2`, `dataint`, `x`, `y`, `z`, `o`) VALUES ('2980', '0', '10', '3475', '180000', '0', '116.2', '-2559', '91.6667', '1.19');
+
+-- Parts-is-Parts
+DELETE FROM `gameobject` WHERE (`id`='201904');
+
+DELETE FROM `smart_scripts` WHERE (`entryorguid`='37923') AND (`source_type`='0') AND `id` IN('2', '3');
+INSERT INTO `smart_scripts` (`entryorguid`, `id`, `link`, `event_type`, `event_param1`, `action_type`, `action_param1`, `target_type`, `comment`) VALUES
+('37923', '2', '3', '8', '70813', '11', '70828', '1', 'Raufen - On Spell Hit - Cast Summon Object');
+('37923', '3', '0', '61', '0', '41', '0', '1', 'Raufen - On Link - Despawn');
+
+DELETE FROM `creature_loot_template` WHERE (`entry`='37923') AND (`item`='49945');
+DELETE FROM `gameobject_loot_template` WHERE `entry` = '201904';
+INSERT INTO `gameobject_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES ('201904', '49945', '-100', '1', '0', '1', '3');

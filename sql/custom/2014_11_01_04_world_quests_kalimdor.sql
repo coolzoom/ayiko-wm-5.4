@@ -210,3 +210,26 @@ INSERT INTO `smart_scripts` (`entryorguid`, `event_type`, `event_param1`, `actio
 
 -- Mysterious Azsharite
 UPDATE `gameobject_loot_template` SET `item`='49207' WHERE (`entry`='9820') AND (`item`='49207');
+
+-- And That's Why They Call Them Peons...
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '41989';
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES ('41989', '78269', '2');
+
+DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`='18') AND (`SourceGroup`='41989') AND (`SourceEntry`='78269');
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`, `NegativeCondition`, `Comment`) VALUES ('18', '41989', '78269', '8', '26047', '1', 'Raufen - Require quest for spellclick');
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`, `Comment`) VALUES ('18', '41989', '78269', '9', '26047', 'Raufen - Require quest for spellclick');
+
+UPDATE `creature_template` SET `faction_A`='29', `faction_H`='29', `AIName`='SmartAI' WHERE (`entry`='41989');
+
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` = '41989';
+INSERT INTO `smart_scripts` (`entryorguid`, `event_type`, `event_param1`, `action_type`, `target_type`, `comment`) VALUES ('41989', '8', '78269', '1', '1', 'Raufen - On Spellhit - Talk');
+INSERT INTO `smart_scripts` (`entryorguid`, `id`, `event_type`, `event_param1`, `action_type`, `action_param1`, `target_type`, `comment`) VALUES ('41989', '1', '8', '78269', '41', '3000', '1', 'Raufen - On Spell Hit - Forced Despawn');
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES ('41989', '0', '2', '0', '8', '0', '100', '0', '78269', '0', '0', '0', '83', '16777216', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', 'Raufen - On Spellhit - Remove Spellclick NpcFlag');
+
+DELETE FROM `creature_text` WHERE `entry` = '41989';
+INSERT INTO `creature_text` (`entry`, `id`, `text`, `type`, `probability`, `comment`) VALUES
+('41989', '0', 'Oof! You touch naughty spot!', '12', '100', 'Raufen - Frightened Peon on spellclick'),
+('41989', '1', 'Thanks!', '12', '100', 'Raufen - Frightened Peon on spellclick'),
+('41989', '2', 'Which way to go???', '12', '100', 'Raufen - Frightened Peon on spellclick'),
+('41989', '3', 'Why dis happen???', '12', '100', 'Raufen - Frightened Peon on spellclick'),
+('41989', '4', 'You is friend. Thanks!', '12', '100', 'Raufen - Frightened Peon on spellclick');

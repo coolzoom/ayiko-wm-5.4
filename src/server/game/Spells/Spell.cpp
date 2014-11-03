@@ -7174,6 +7174,18 @@ SpellCastResult Spell::CheckCast(bool strict)
                 }
                 break;
             }
+            case SPELL_AURA_MOD_ATTACKER_MELEE_HIT_CHANCE:
+            case SPELL_AURA_FEIGN_DEATH:
+            {
+                // Feign Death and Deterrence is disabled while carrying flag
+                if (m_spellInfo->Id == 5384 || m_spellInfo->Id == 19263)
+                    if (m_caster->HasAura(23335) || m_caster->HasAura(23333))
+                    {
+                        m_customError = SPELL_CUSTOM_ERROR_HOLDING_FLAG;
+                        return SPELL_FAILED_CUSTOM_ERROR;
+                    }
+            break;
+            }
             default:
                 break;
         }

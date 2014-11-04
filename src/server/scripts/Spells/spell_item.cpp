@@ -2186,6 +2186,86 @@ class spell_alchemist_rejuvenation : public SpellScriptLoader
         }
 };
 
+// Wrath of Tarecgosa - 101056
+class spell_item_dragonwrath_tarecgosas_rest final : public SpellScriptLoader
+{
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        enum
+        {
+            SPELL_TARCEGOSA_PERIODIC_PROC = 101085,
+        };
+
+        bool CheckProc(ProcEventInfo &eventInfo)
+        {
+
+            if (!eventInfo.GetSpellInfo())
+                return false;
+
+            if (!eventInfo.GetActionTarget() || !GetCaster())
+                return false;
+
+            if (GetCaster() == eventInfo.GetActionTarget())
+                return false;
+
+            return true;
+        }
+
+        void OnProc(AuraEffect const * aurEff, ProcEventInfo &eventInfo)
+        {
+            PreventDefaultAction();
+            uint32 triggered_spell_id = 0;
+            int32 basepoints0 = 0;
+            auto caster = GetCaster();
+            auto target = eventInfo.GetActionTarget();
+
+            if (eventInfo.GetTypeMask() & PROC_FLAG_DONE_PERIODIC)
+            {
+                if (!roll_chance_i(10))
+                    return;
+
+                basepoints0 = eventInfo.GetDamageInfo()->GetDamage();
+                triggered_spell_id = SPELL_TARCEGOSA_PERIODIC_PROC;
+            }
+            else
+            {
+                if (!roll_chance_i(5))
+                    return;
+
+                triggered_spell_id = eventInfo.GetSpellInfo()->Id;
+
+                // Probably all spells with custom damage handling will have to be moved here(?):
+                // Fulmination              Improved Devouring Plague
+                if (triggered_spell_id == 88767 || triggered_spell_id == 63675)
+                    basepoints0 = eventInfo.GetDamageInfo()->GetDamage();
+            }
+
+            if (basepoints0)
+                caster->CastCustomSpell(target, triggered_spell_id, &basepoints0, NULL, NULL, true, nullptr, aurEff, caster->GetGUID());
+            else
+                caster->CastSpell(target, triggered_spell_id, true, nullptr, aurEff, caster->GetGUID());
+        }
+
+        void Register() final
+        {
+            DoCheckProc += AuraCheckProcFn(script_impl::CheckProc);
+            OnEffectProc += AuraEffectProcFn(script_impl::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+public:
+    spell_item_dragonwrath_tarecgosas_rest()
+        : SpellScriptLoader("spell_item_dragonwrath_tarecgosas_rest")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
+};
+
 void AddSC_item_spell_scripts()
 {
     // 23074 Arcanite Dragonling
@@ -2239,4 +2319,5 @@ void AddSC_item_spell_scripts()
     new spell_item_bandage_q24944();
     new spell_item_gen_alchemy_mop();
     new spell_alchemist_rejuvenation();
+    new spell_item_dragonwrath_tarecgosas_rest();
 }

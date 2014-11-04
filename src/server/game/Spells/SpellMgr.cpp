@@ -5637,6 +5637,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 49882: // Leviroth Self-Impale
                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
                     break;
+                case 101056: // Wrath of Tarecgosa
+                    spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
+                    break;
                 default:
                     break;
             }

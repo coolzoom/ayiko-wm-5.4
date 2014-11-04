@@ -2669,6 +2669,8 @@ bool AchievementMgr<T>::ConditionsSatisfied(AchievementCriteriaEntry const *crit
                 if (referencePlayer->GetGroup())
                     return false;
                 break;
+            case ACHIEVEMENT_CRITERIA_CONDITION_SERVER_SIDE_CHECK:
+                // FIXME: return criteria->scriptId != 0;
             default:
                 break;
         }
@@ -3278,7 +3280,28 @@ bool AchievementMgr<T>::AdditionalRequirementsSatisfied(AchievementCriteriaEntry
                     return false;
                 break;
             }
-            case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_ITEM_LEVEL: // 2
+            case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_SERVER_SIDE_CHECK:
+            {
+#if 0
+                if (!referencePlayer)
+                    return criteria->scriptId != 0;
+#endif
+                switch (reqValue)
+                {
+                    case 924: // Alliance faction
+                    case 11835: // Alliance faction
+                        return referencePlayer->GetTeam() == ALLIANCE;
+                    case 923: // Horde faction
+                    case 11836: // Horde faction
+                        return referencePlayer->GetTeam() == HORDE;
+#if 0
+                    default:
+                        return criteria->scriptId != 0;
+#endif
+                }
+                break;
+            }
+            case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_ITEM_LEVEL: // 3
             {
                 ItemTemplate const* pItem = sObjectMgr->GetItemTemplate(miscValue1);
                 if (!pItem)
@@ -3345,8 +3368,8 @@ bool AchievementMgr<T>::AdditionalRequirementsSatisfied(AchievementCriteriaEntry
                 if (!unit || !unit->IsInWorld() || !unit->HasAura(reqValue))
                     return false;
                 break;
-            case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_TARGET_MUST_BE_MOUNTED: // 11
-                if (!unit || !unit->IsMounted())
+            case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_TARGET_HAS_AURA_TYPE: // 11
+                if (!unit || !unit->HasAuraType(AuraType(reqValue)))
                     return false;
                 break;
             case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_ITEM_QUALITY_MIN: // 14
@@ -3406,6 +3429,20 @@ bool AchievementMgr<T>::AdditionalRequirementsSatisfied(AchievementCriteriaEntry
                     return false;
                 break;
             }
+            case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_TARGET_CREATURE_YIELDS_XP: // 21
+                if (!unit || unit->GetTypeId() != TYPEID_UNIT || !referencePlayer || !referencePlayer->isHonorOrXPTarget(unit))
+                    return false;
+                break;
+            case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_ARENA_TYPE: // 24
+            {
+                if (!referencePlayer)
+                    return false;
+
+                Battleground const * const bg = referencePlayer->GetBattleground();
+                if (!bg || !bg->isArena() || bg->GetArenaType() != reqValue)
+                    return false;
+                break;
+            }
             case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_SOURCE_RACE: // 25
                 if (!referencePlayer || (referencePlayer->getRace() != reqValue))
                     return false;
@@ -3459,9 +3496,14 @@ bool AchievementMgr<T>::AdditionalRequirementsSatisfied(AchievementCriteriaEntry
                     return false;
                 break;
             }
+            case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_COMPLETE_QUEST_NOT_IN_GROUP: // 35
+                // miscValue is questid
+                if (!referencePlayer || !referencePlayer->IsQuestRewarded(uint32(miscValue1)) || referencePlayer->GetGroup())
+                    return false;
+                break;
             case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_MIN_PERSONAL_RATING: // 37
             {
-                if (miscValue1 < reqValue)
+                if (miscValue1 <= reqValue)
                     return false;
                 break;
             }
@@ -3478,8 +3520,8 @@ bool AchievementMgr<T>::AdditionalRequirementsSatisfied(AchievementCriteriaEntry
                 if (!unit || !unit->IsInWorld() || unit->getLevel() != reqValue)
                     return false;
                 break;
-            case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_TARGET_ZONE: // 41
-                if (!unit || !unit->IsInWorld() || unit->GetZoneId() != reqValue)
+            case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_SOURCE_ZONE: // 41
+                if (!referencePlayer || referencePlayer->GetZoneId() != reqValue)
                     return false;
                 break;
             case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_TARGET_HEALTH_PERCENT_BELOW: // 46
@@ -3490,6 +3532,12 @@ bool AchievementMgr<T>::AdditionalRequirementsSatisfied(AchievementCriteriaEntry
                 if (!referencePlayer || (referencePlayer->GetAchievementMgr().GetAchievementPoints() < reqValue))
                     return false;
                 break;
+#if 0
+            case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_REQUIRES_LFG_GROUP: // 58
+                if (!referencePlayer || !referencePlayer->inRandomLfgDungeon())
+                    return false;
+                break;
+#endif
             case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_REQUIRES_GUILD_GROUP: // 61
             {
                 if (!referencePlayer)
@@ -3507,6 +3555,16 @@ bool AchievementMgr<T>::AdditionalRequirementsSatisfied(AchievementCriteriaEntry
                     return false;
 
                 if (uint32(referencePlayer->GetReputationMgr().GetReputation(1168)) < reqValue) // 1168 = Guild faction
+                    return false;
+                break;
+            }
+            case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_RATED_BATTLEGROUND: // 63
+            {
+                if (!referencePlayer)
+                    return false;
+
+                Battleground const * const bg = referencePlayer->GetBattleground();
+                if (!bg || !bg->isRated())
                     return false;
                 break;
             }

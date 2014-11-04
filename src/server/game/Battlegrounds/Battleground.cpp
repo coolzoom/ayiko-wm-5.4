@@ -865,9 +865,6 @@ void Battleground::EndBattleground(uint32 winner)
             }
         }
 
-        uint32 winner_bonus = player->GetRandomWinner() ? BG_REWARD_WINNER_HONOR_LAST : BG_REWARD_WINNER_HONOR_FIRST;
-        uint32 loser_bonus = player->GetRandomWinner() ? BG_REWARD_LOSER_HONOR_LAST : BG_REWARD_LOSER_HONOR_FIRST;
-
         // remove temporary currency bonus auras before rewarding player
         player->RemoveAura(SPELL_HONORABLE_DEFENDER_25Y);
         player->RemoveAura(SPELL_HONORABLE_DEFENDER_60Y);
@@ -877,16 +874,18 @@ void Battleground::EndBattleground(uint32 winner)
         {
             if (IsRandom() || BattlegroundMgr::IsBGWeekend(GetTypeID()))
             {
-                UpdatePlayerScore(player, SCORE_BONUS_HONOR, winner_bonus);
                 if (!player->GetRandomWinner())
                 {
-                    // 100cp awarded for the first rated battleground won each day
+                    UpdatePlayerScore(player, SCORE_BONUS_HONOR, BG_REWARD_WINNER_HONOR_FIRST);
                     player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_META_RANDOM_BG, BG_REWARD_WINNER_CONQUEST_FIRST);
                     player->SetRandomWinner(true);
                 }
+                else
+                {
+                    UpdatePlayerScore(player, SCORE_BONUS_HONOR, BG_REWARD_WINNER_HONOR_LAST);
+                    player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_META_RANDOM_BG, BG_REWARD_WINNER_CONQUEST_LAST);
+                }
             }
-            else if (!isArena()) // 50cp awarded for each non-rated battleground won
-                player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_META_RANDOM_BG, BG_REWARD_WINNER_CONQUEST_LAST );
 
             player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_BG, 1);
             if (!guildAwarded)
@@ -904,7 +903,7 @@ void Battleground::EndBattleground(uint32 winner)
         else
         {
             if (IsRandom() || BattlegroundMgr::IsBGWeekend(GetTypeID()))
-                UpdatePlayerScore(player, SCORE_BONUS_HONOR, loser_bonus);
+                UpdatePlayerScore(player, SCORE_BONUS_HONOR, BG_REWARD_LOSER_HONOR);
         }
 
         player->ResetAllPowers();

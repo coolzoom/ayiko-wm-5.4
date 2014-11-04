@@ -117,23 +117,45 @@ struct PlayerTalent
     uint8 spec;
 };
 
-enum PlayerCurrencyState
+struct PlayerCurrency final
 {
-   PLAYERCURRENCY_UNCHANGED = 0,
-   PLAYERCURRENCY_CHANGED   = 1,
-   PLAYERCURRENCY_NEW       = 2,
-   PLAYERCURRENCY_REMOVED   = 3     //not removed just set count == 0
+    enum State
+    {
+        Unchanged,
+        Changed,
+        New,
+        Removed     // not removed just set count == 0
+    };
+
+    PlayerCurrency()
+        : state(New)
+        , seasonCount()
+        , weekCount()
+        , currentCount()
+        , flags()
+    { }
+
+    PlayerCurrency(State newState, uint32 newSeasonCount, uint32 newWeekCount,
+                   uint32 newCurrentCount, uint8 newFlags)
+        : state(newState)
+        , seasonCount(newSeasonCount)
+        , weekCount(newWeekCount)
+        , currentCount(newCurrentCount)
+        , flags(newFlags)
+    { }
+
+    State state;
+    uint32 seasonCount;
+    uint32 weekCount;
+    uint32 currentCount;
+    uint8 flags;
 };
 
-struct PlayerCurrency
+enum ModifyCurrencyFlag
 {
-   PlayerCurrencyState state;
-   uint32 totalCount;
-   uint32 weekCount;
-   uint32 seasonTotal;
-   uint32 weekCap;
-   uint8 flags;
-   bool needResetCap;
+    MODIFY_CURRENCY_NO_PRINT_LOG    = 0x1,
+    MODIFY_CURRENCY_NO_GUILD_PERKS  = 0x2,
+    MODIFY_CURRENCY_NO_CAP_CHANGE   = 0x4
 };
 
 typedef std::unordered_map<uint32, PlayerTalent> PlayerTalentMap;
@@ -767,6 +789,7 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOAD_CUF_PROFILES                = 39,
     PLAYER_LOGIN_QUERY_LOAD_ARCHAEOLOGY                 = 40,
     PLAYER_LOGIN_QUERY_LOAD_KNOWN_TITLES                = 41,
+    PLAYER_LOGIN_QUERY_LOAD_CP_WEEK_CAP                 = 42,
     MAX_PLAYER_LOGIN_QUERY
 };
 
@@ -1332,8 +1355,6 @@ class Player final : public Unit, public GridObject<Player>
         void AddRefundReference(uint32 it);
         void DeleteRefundReference(uint32 it);
 
-        /// send initialization of new currency for client
-        void SendNewCurrency(uint32 id);
         /// send full data about all currencies to client
         void ModifyCurrencyFlags(uint32 currencyId, uint8 flags);
         void SendCurrencies();
@@ -1341,16 +1362,12 @@ class Player final : public Unit, public GridObject<Player>
         /// return count of currency witch has plr
         uint32 GetCurrency(uint32 id, bool usePrecision) const;
         uint32 GetCurrencyOnWeek(uint32 id, bool usePrecision) const;
-        uint32 GetCurrencyOnSeason(uint32 id, bool usePrecision) const;
+        bool hasEnoughSeasonCurrency(uint32 id, uint32 count) const;
         /// return presence related currency
         bool HasCurrency(uint32 id, uint32 count) const;
-        /// @todo: not understand why it subtract from total count and for what it used. It should be remove and replaced by ModifyCurrency
-        void SetCurrency(uint32 id, uint32 count, bool printLog = true);
-        uint32 GetCurrencyWeekCap(uint32 id, bool usePrecision = false);
+        void SetCurrency(uint32 id, uint32 count);
+        uint32 GetCurrencyWeekCap(uint32 id, bool usePrecision) const;
         void ResetCurrencyWeekCap();
-        uint32 CalculateCurrencyWeekCap(uint32 id);
-        uint32 GetCurrencyTotalCap(CurrencyTypesEntry const* currency) const;
-        void UpdateConquestCurrencyCap(uint32 currency);
 
         /**
         * @name ModifyCurrency
@@ -1362,7 +1379,7 @@ class Player final : public Unit, public GridObject<Player>
         * @param ignore gain multipliers
         */
 
-        void ModifyCurrency(uint32 id, int32 count, bool printLog = true, bool ignoreMultipliers = false, bool ignoreLimit = false);
+        void ModifyCurrency(uint32 id, int32 count, uint32 modifyFlags = 0);
 
         void ApplyEquipCooldown(Item* pItem);
         void QuickEquipItem(uint16 pos, Item* pItem);
@@ -1941,7 +1958,7 @@ class Player final : public Unit, public GridObject<Player>
         Guild const * GetGuild() const;
         static uint32 GetGuildIdFromDB(uint64 guid);
         static uint8 GetRankFromDB(uint64 guid);
-        int GetGuildIdInvited() { return m_GuildIdInvited; }
+        uint32 GetGuildIdInvited() const { return m_GuildIdInvited; }
         static void RemovePetitionsAndSigns(uint64 guid, uint32 type);
 
         // Arena
@@ -1955,25 +1972,9 @@ class Player final : public Unit, public GridObject<Player>
         uint32 GetSeasonGames(uint8 slot) const { return m_SeasonGames[slot]; }
         uint32 GetArenaMatchMakerRating(uint8 slot) const { return m_ArenaMatchMakerRating[slot]; }
 
-        uint32 GetMaxRating() const
-        {
-            uint32 max_value = 0;
+        uint32 GetMaxPersonalRatingRequirement(uint32 startSlot) const;
 
-            for (uint8 i = 0; i < MAX_ARENA_SLOT; i++)
-                if (max_value < GetArenaPersonalRating(i))
-                    max_value = GetArenaPersonalRating(i);
-
-            return max_value;
-        }
-
-        void SetArenaPersonalRating(uint8 slot, uint32 value)
-        {
-            m_ArenaPersonalRating[slot] = value;
-            if (m_BestRatingOfWeek[slot] < value)
-                m_BestRatingOfWeek[slot] = value;
-            if (m_BestRatingOfSeason[slot] < value)
-                m_BestRatingOfSeason[slot] = value;
-        }
+        void SetArenaPersonalRating(uint8 slot, uint32 value);
 
         void SetArenaMatchMakerRating(uint8 slot, uint32 value)
         {
@@ -2111,7 +2112,7 @@ class Player final : public Unit, public GridObject<Player>
         void RepopAtGraveyard();
         void SendCemeteryList(bool onMap);
 
-        uint32 GetCurrentMovieId() { return m_currentMovie; }
+        uint32 GetCurrentMovieId() const { return m_currentMovie; }
         void SetCurrentMovieId(uint32 movieID) { m_currentMovie = movieID; }
 
         void DurabilityLossAll(double percent, bool inventory);
@@ -2196,7 +2197,6 @@ class Player final : public Unit, public GridObject<Player>
         // @TODO: Properly implement correncies as of Cataclysm
         void UpdateHonorFields();
         bool RewardHonor(Unit* victim, uint32 groupsize, int32 honor = -1, bool pvptoken = false);
-        uint32 GetMaxPersonalArenaRatingRequirement(uint32 minarenaslot) const;
 
         //End of PvP System
 
@@ -2394,7 +2394,7 @@ class Player final : public Unit, public GridObject<Player>
         bool isTotalImmune();
         bool CanCaptureTowerPoint();
 
-        bool GetRandomWinner() { return m_IsBGRandomWinner; }
+        bool GetRandomWinner() const { return m_IsBGRandomWinner; }
         void SetRandomWinner(bool isWinner);
 
         /*********************************************************/
@@ -2857,6 +2857,7 @@ class Player final : public Unit, public GridObject<Player>
         void _LoadTalents(PreparedQueryResult result);
         void _LoadInstanceTimeRestrictions(PreparedQueryResult result);
         void _LoadCUFProfiles(PreparedQueryResult result);
+        void _LoadConquestPointsWeekCap(PreparedQueryResult result);
         void _LoadCurrency(PreparedQueryResult result);
         void _LoadKnownTitles(PreparedQueryResult result);
 
@@ -2883,6 +2884,7 @@ class Player final : public Unit, public GridObject<Player>
         void _SaveTalents(SQLTransaction& trans);
         void _SaveStats(SQLTransaction& trans);
         void _SaveInstanceTimeRestrictions(SQLTransaction& trans);
+        void _SaveConquestPointsWeekCap(SQLTransaction& trans);
         void _SaveCurrency(SQLTransaction& trans);
         void _SaveKnownTitles(SQLTransaction& trans);
 
@@ -2920,7 +2922,30 @@ class Player final : public Unit, public GridObject<Player>
 
         PlayerCurrenciesMap _currencyStorage;
 
+        /**
+         * @name   GetCurrencyWeekCap
+         * @brief  return week cap for selected currency
+         * @param  CurrencyTypesEntry for which to retrieve weekly cap
+         */
+        uint32 GetCurrencyWeekCap(CurrencyTypesEntry const* currency) const;
+
+        /**
+         * @name   GetCurrencyTotalCap
+         * @brief  return total cap for selected currency
+         * @param  CurrencyTypesEntry for which to retrieve total cap
+         */
+        uint32 GetCurrencyTotalCap(CurrencyTypesEntry const* currency) const;
+
+        /// Updates weekly conquest point cap (dynamic cap)
+        void UpdateConquestCurrencyCap(uint32 currency);
+
         VoidStorageItem* _voidStorageItems[VOID_STORAGE_MAX_SLOT];
+
+        uint16 m_maxPersonalRating;
+        uint16 m_arenaCpCap;
+
+        uint16 m_maxRatedBgRating;
+        uint16 m_bgCpCap;
 
         std::vector<Item*> m_itemUpdateQueue;
         bool m_itemUpdateQueueBlocked;

@@ -852,6 +852,12 @@ Player::Player(WorldSession* session)
     // Honor System
     m_lastHonorUpdateTime = time(NULL);
 
+    m_maxPersonalRating = 0;
+    m_arenaCpCap = 1800;
+
+    m_maxRatedBgRating = 0;
+    m_bgCpCap = m_arenaCpCap * 1.222f + 0.5f;
+
     m_IsBGRandomWinner = false;
 
     // Player summoning
@@ -8088,6 +8094,31 @@ bool Player::RewardHonor(Unit* victim, uint32 groupsize, int32 honor, bool pvpto
     return true;
 }
 
+void Player::_LoadConquestPointsWeekCap(PreparedQueryResult result)
+{
+    if (result)
+    {
+        Field* fields = result->Fetch();
+
+        m_maxPersonalRating = fields[0].GetUInt16();
+        m_arenaCpCap = fields[1].GetUInt16();
+        m_maxRatedBgRating = fields[2].GetUInt16();
+        m_bgCpCap = fields[3].GetUInt16();
+    }
+}
+
+void Player::_SaveConquestPointsWeekCap(SQLTransaction &trans)
+{
+    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_CHARACTER_CP_WEEK_CAP);
+    stmt->setUInt32(0, GetGUIDLow());
+    stmt->setUInt16(1, m_maxPersonalRating);
+    stmt->setUInt16(2, m_arenaCpCap);
+    stmt->setUInt16(3, m_maxRatedBgRating);
+    stmt->setUInt16(4, m_bgCpCap);
+
+    trans->Append(stmt);
+}
+
 void Player::_LoadCurrency(PreparedQueryResult result)
 {
     if (!result)
@@ -8097,29 +8128,17 @@ void Player::_LoadCurrency(PreparedQueryResult result)
     {
         Field* fields = result->Fetch();
 
-        uint16 currencyID = fields[0].GetUInt16();
+        uint16 currencyId = fields[0].GetUInt16();
 
-        CurrencyTypesEntry const* currency = sCurrencyTypesStore.LookupEntry(currencyID);
+        CurrencyTypesEntry const* currency = sCurrencyTypesStore.LookupEntry(currencyId);
         if (!currency)
             continue;
 
-        PlayerCurrency cur;
-        cur.state = PLAYERCURRENCY_UNCHANGED;
-        cur.weekCount = fields[1].GetUInt32();
-        cur.totalCount = fields[2].GetUInt32();
-        cur.seasonTotal = fields[3].GetUInt32();
-        cur.flags = fields[4].GetUInt32();
-        cur.weekCap = fields[5].GetUInt32();
-        cur.needResetCap = fields[6].GetUInt8();
+        PlayerCurrency cur(PlayerCurrency::Unchanged, fields[1].GetUInt32(),
+                           fields[2].GetUInt32(), fields[3].GetUInt32(),
+                           fields[4].GetUInt8());
 
-        if (cur.needResetCap)
-        {
-            cur.weekCap = CalculateCurrencyWeekCap(currencyID);
-            cur.needResetCap = false;
-            cur.state = PLAYERCURRENCY_CHANGED;
-        }
-
-        _currencyStorage.insert(PlayerCurrenciesMap::value_type(currencyID, cur));
+        _currencyStorage.insert(PlayerCurrenciesMap::value_type(currencyId, cur));
 
     }
     while (result->NextRow());
@@ -8134,37 +8153,35 @@ void Player::_SaveCurrency(SQLTransaction& trans)
         if (!entry) // should never happen
             continue;
 
-        switch (itr->second.state)
+        PlayerCurrency &currency = itr->second;
+
+        switch (currency.state)
         {
-            case PLAYERCURRENCY_NEW:
+            case PlayerCurrency::New:
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_PLAYER_CURRENCY);
                 stmt->setUInt32(0, GetGUIDLow());
                 stmt->setUInt16(1, itr->first);
-                stmt->setUInt32(2, itr->second.weekCount);
-                stmt->setUInt32(3, itr->second.totalCount);
-                stmt->setUInt32(4, itr->second.seasonTotal);
-                stmt->setUInt32(5, itr->second.flags);
-                stmt->setUInt32(6, itr->second.weekCap);
-                stmt->setUInt8(7, itr->second.needResetCap);
+                stmt->setUInt32(2, currency.seasonCount);
+                stmt->setUInt32(3, currency.weekCount);
+                stmt->setUInt32(4, currency.currentCount);
+                stmt->setUInt8(5, currency.flags);
                 trans->Append(stmt);
                 break;
-            case PLAYERCURRENCY_CHANGED:
+            case PlayerCurrency::Changed:
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_PLAYER_CURRENCY);
-                stmt->setUInt32(0, itr->second.weekCount);
-                stmt->setUInt32(1, itr->second.totalCount);
-                stmt->setUInt32(2, itr->second.seasonTotal);
-                stmt->setUInt32(3, itr->second.flags);
-                stmt->setUInt32(4, itr->second.weekCap);
-                stmt->setUInt8(5, itr->second.needResetCap);
-                stmt->setUInt32(6, GetGUIDLow());
-                stmt->setUInt16(7, itr->first);
+                stmt->setUInt32(0, currency.seasonCount);
+                stmt->setUInt32(1, currency.weekCount);
+                stmt->setUInt32(2, currency.currentCount);
+                stmt->setUInt8(3, currency.flags);
+                stmt->setUInt32(4, GetGUIDLow());
+                stmt->setUInt16(5, itr->first);
                 trans->Append(stmt);
                 break;
             default:
                 break;
         }
 
-        itr->second.state = PLAYERCURRENCY_UNCHANGED;
+        currency.state = PlayerCurrency::Unchanged;
     }
 }
 
@@ -8205,6 +8222,7 @@ void Player::_SaveKnownTitles(SQLTransaction &trans)
     }
 }
 
+#if 0
 void Player::SendNewCurrency(uint32 id)
 {
     PlayerCurrenciesMap::const_iterator itr = _currencyStorage.find(id);
@@ -8242,6 +8260,7 @@ void Player::SendNewCurrency(uint32 id)
 
     GetSession()->SendPacket(&packet);
 }
+#endif
 
 void Player::SendCurrencies()
 {
@@ -8256,24 +8275,28 @@ void Player::SendCurrencies()
         if (!entry) // should never happen
             continue;
 
+        PlayerCurrency const &currency = itr->second;
+
         uint32 precision = (entry->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? CURRENCY_PRECISION : 1;
-        uint32 weekCount = itr->second.weekCount / precision;
-        uint32 weekCap = GetCurrencyWeekCap(entry->ID) / precision;
-        uint32 seasonTotal = itr->second.seasonTotal / precision;
+        uint32 weekCount = currency.weekCount / precision;
+        uint32 weekCap = GetCurrencyWeekCap(entry) / precision;
+
+        bool const hasSeasonCount = (entry->Flags & CURRENCY_FLAG_COUNT_SEASON_TOTAL) != 0
+                && currency.seasonCount != 0;
 
         packet.WriteBit(weekCount);
-        packet.WriteBit(seasonTotal);
+        packet.WriteBit(hasSeasonCount);
         packet.WriteBit(weekCap);
-        packet.WriteBits(itr->second.flags, 5);
+        packet.WriteBits(currency.flags, 5);
 
-        currencyData << uint32(itr->second.totalCount / precision);
+        currencyData << uint32(currency.currentCount / precision);
 
         if (weekCount)
             currencyData << uint32(weekCount);
         if (weekCap)
             currencyData << uint32(weekCap);
-        if (seasonTotal)
-            currencyData << uint32(seasonTotal);
+        if (hasSeasonCount)
+            currencyData << uint32(currency.seasonCount / precision);
 
         currencyData << uint32(entry->ID);
     }
@@ -8287,16 +8310,16 @@ void Player::SendCurrencies()
 void Player::SendPvpRewards()
 {
     WorldPacket packet(SMSG_REQUEST_PVP_REWARDS_RESPONSE, 40);
-    packet << (uint32)GetCurrencyOnWeek(CURRENCY_TYPE_CONQUEST_META_RANDOM_BG, true); // Count of gived conquest points from Random BG in week - dword34
+    packet << (uint32)GetCurrencyOnWeek(CURRENCY_TYPE_CONQUEST_META_RANDOM_BG, true); // Count of given conquest points from Random BG in week - dword34
     packet << (uint32)GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, true); // Max Conquest points cap - dword20
     packet << (uint32)sWorld->getIntConfig(CONFIG_CURRENCY_CONQUEST_POINTS_ARENA_REWARD) / 100; // Conquest points from Arena win - dword30
-    packet << (uint32)GetCurrencyOnWeek(CURRENCY_TYPE_CONQUEST_META_ARENA, true); // Count of gived conquest points from Arena in week - dword28
-    packet << (uint32)GetCurrencyOnWeek(CURRENCY_TYPE_CONQUEST_META_RBG, true); // Count of gived conquest points from Rated BG in week - dword2C
+    packet << (uint32)GetCurrencyOnWeek(CURRENCY_TYPE_CONQUEST_META_ARENA, true); // Count of given conquest points from Arena in week - dword28
+    packet << (uint32)GetCurrencyOnWeek(CURRENCY_TYPE_CONQUEST_META_RATED_BG, true); // Count of given conquest points from Rated BG in week - dword2C
     packet << (uint32)sWorld->getIntConfig(CONFIG_CURRENCY_CONQUEST_POINTS_RATED_BG_REWARD)  / 100; // Conquest points from Rated BG win - dword18
     packet << (uint32)GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_META_ARENA, true); // Conquest points cap for Arena dword10
-    packet << (uint32)GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_META_RBG, true); // Conquest points cap for Rated BG - dword14
+    packet << (uint32)GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_META_RATED_BG, true); // Conquest points cap for Rated BG - dword14
     packet << (uint32)GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_META_RANDOM_BG, true); // Conquest points cap for Random BG - dword24
-    packet << (uint32)GetCurrencyOnWeek(CURRENCY_TYPE_CONQUEST_POINTS, true); // Count of gived all conquest points in week - dword1C
+    packet << (uint32)GetCurrencyOnWeek(CURRENCY_TYPE_CONQUEST_POINTS, true); // Count of given all conquest points in week - dword1C
     GetSession()->SendPacket(&packet);
 }
 
@@ -8306,10 +8329,11 @@ uint32 Player::GetCurrency(uint32 id, bool usePrecision) const
     if (itr == _currencyStorage.end())
         return 0;
 
-    CurrencyTypesEntry const* currency = sCurrencyTypesStore.LookupEntry(id);
-    uint32 precision = (usePrecision && currency->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? CURRENCY_PRECISION : 1;
+    CurrencyTypesEntry const* entry = sCurrencyTypesStore.LookupEntry(id);
+    uint32 precision = (usePrecision && entry->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? CURRENCY_PRECISION : 1;
 
-    return itr->second.totalCount / precision;
+    PlayerCurrency const &currency = itr->second;
+    return currency.currentCount / precision;
 }
 
 uint32 Player::GetCurrencyOnWeek(uint32 id, bool usePrecision) const
@@ -8318,185 +8342,191 @@ uint32 Player::GetCurrencyOnWeek(uint32 id, bool usePrecision) const
     if (itr == _currencyStorage.end())
         return 0;
 
-    CurrencyTypesEntry const* currency = sCurrencyTypesStore.LookupEntry(id);
-    uint32 precision = (usePrecision && currency->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? CURRENCY_PRECISION : 1;
+    CurrencyTypesEntry const* entry = sCurrencyTypesStore.LookupEntry(id);
+    uint32 precision = (usePrecision && entry->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? CURRENCY_PRECISION : 1;
 
-    return itr->second.weekCount / precision;
+    PlayerCurrency const &currency = itr->second;
+    return currency.weekCount / precision;
 }
 
-uint32 Player::GetCurrencyOnSeason(uint32 id, bool usePrecision) const
+bool Player::hasEnoughSeasonCurrency(uint32 id, uint32 count) const
 {
     PlayerCurrenciesMap::const_iterator itr = _currencyStorage.find(id);
     if (itr == _currencyStorage.end())
-        return 0;
+        return false;
 
-    CurrencyTypesEntry const* currency = sCurrencyTypesStore.LookupEntry(id);
-    uint32 precision = (usePrecision && currency->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? CURRENCY_PRECISION : 1;
-
-    return itr->second.seasonTotal / precision;
+    PlayerCurrency const &currency = itr->second;
+    return currency.seasonCount >= count;
 }
 
 bool Player::HasCurrency(uint32 id, uint32 count) const
 {
     PlayerCurrenciesMap::const_iterator itr = _currencyStorage.find(id);
-    return itr != _currencyStorage.end() && itr->second.totalCount >= count;
+    if (itr == _currencyStorage.end())
+        return false;
+
+    PlayerCurrency const &currency = itr->second;
+    return currency.currentCount >= count;
 }
 
 void Player::ModifyCurrencyFlags(uint32 currencyId, uint8 flags)
 {
-    if (!currencyId)
+    auto const itr = _currencyStorage.find(currencyId);
+    if (itr == _currencyStorage.end())
         return;
 
-    if (_currencyStorage.find(currencyId) == _currencyStorage.end())
-        return;
+    PlayerCurrency &currency = itr->second;
 
-    _currencyStorage[currencyId].flags = flags;
-
-    if (_currencyStorage[currencyId].state != PLAYERCURRENCY_NEW)
-        _currencyStorage[currencyId].state = PLAYERCURRENCY_CHANGED;
+    currency.flags = flags;
+    if (currency.state != PlayerCurrency::New)
+        currency.state = PlayerCurrency::Changed;
 }
 
-void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bool ignoreMultipliers/* = false*/, bool ignoreLimit /* = false */)
+void Player::ModifyCurrency(uint32 id, int32 count, uint32 modifyFlags)
 {
     if (!count)
         return;
 
-    CurrencyTypesEntry const* currency = sCurrencyTypesStore.LookupEntry(id);
-    ASSERT(currency);
+    CurrencyTypesEntry const* currEntry = sCurrencyTypesStore.LookupEntry(id);
+    ASSERT(currEntry);
 
-    if (!ignoreMultipliers)
+    if (!(modifyFlags & MODIFY_CURRENCY_NO_GUILD_PERKS))
         count *= GetTotalAuraMultiplierByMiscValue(SPELL_AURA_MOD_CURRENCY_GAIN, id);
 
-    int32 precision = currency->Flags & CURRENCY_FLAG_HIGH_PRECISION ? CURRENCY_PRECISION : 1;
-    uint32 oldTotalCount = 0;
-    uint32 oldWeekCount = 0;
-    uint32 oldSeasonTotalCount = 0;
+    PlayerCurrency &currency = _currencyStorage[id];
 
-    PlayerCurrenciesMap::iterator itr = _currencyStorage.find(id);
-    if (itr == _currencyStorage.end())
+    int32 const precision = (currEntry->Flags & CURRENCY_FLAG_HIGH_PRECISION)
+            ? CURRENCY_PRECISION
+            : 1;
+
+    int32 const oldSeasonCount = static_cast<int32>(currency.seasonCount);
+    int32 const oldWeekCount = static_cast<int32>(currency.weekCount);
+    int32 const oldCurrentCount = static_cast<int32>(currency.currentCount);
+
+    int32 const weekCap = static_cast<int32>(GetCurrencyWeekCap(currEntry));
+    int32 const totalCap = static_cast<int32>(GetCurrencyTotalCap(currEntry));
+
+    int32 newSeasonCount;
+    int32 newWeekCount;
+    int32 newCurrentCount;
+
+    if (!(modifyFlags & MODIFY_CURRENCY_NO_CAP_CHANGE))
     {
-        PlayerCurrency cur;
-        cur.state = PLAYERCURRENCY_NEW;
-        cur.totalCount = 0;
-        cur.weekCount = 0;
-        cur.seasonTotal = 0;
-        cur.flags = 0;
-        cur.weekCap = CalculateCurrencyWeekCap(id);
-        cur.needResetCap = false;
-        _currencyStorage[id] = cur;
-        itr = _currencyStorage.find(id);
+        // count can't be more than weekCap if used (weekCap > 0)
+        if (weekCap && count > weekCap)
+            count = weekCap;
+
+        // count can't be more than totalCap if used (totalCap > 0)
+        if (totalCap && count > totalCap)
+            count = totalCap;
+
+        newWeekCount = oldWeekCount + (count > 0 ? count : 0);
+        if (newWeekCount < 0)
+            newWeekCount = 0;
+
+        newCurrentCount = oldCurrentCount + count;
+        if (newCurrentCount < 0)
+            newCurrentCount = 0;
+
+        if (currEntry->Category != CURRENCY_CATEGORY_ARCHAEOLOGY)
+        {
+            // if we get more than weekCap just set to limit
+            if (weekCap && weekCap < newWeekCount)
+            {
+                newWeekCount = weekCap;
+                // weekCap - oldWeekCount alwayt >= 0 as we set limit before!
+                newCurrentCount = oldCurrentCount + (weekCap - oldWeekCount);
+            }
+        }
+
+        // if we get more than totalCap set to maximum;
+        if (totalCap && totalCap < newCurrentCount)
+        {
+            newCurrentCount = totalCap;
+            newWeekCount = weekCap;
+        }
+
+        if (currEntry->Category == CURRENCY_CATEGORY_META_CONQUEST)
+        {
+            int32 const canBeAdded = GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, false)
+                    - GetCurrencyOnWeek(CURRENCY_TYPE_CONQUEST_POINTS, false);
+
+            // week delta should be the same in case of positive increase
+            int32 const currentDelta = newCurrentCount - oldCurrentCount;
+
+            if (currentDelta > 0 && currentDelta > canBeAdded)
+            {
+                newCurrentCount = oldCurrentCount + canBeAdded;
+                newWeekCount = oldWeekCount + canBeAdded;
+            }
+        }
+
+        {
+            int32 const delta = newCurrentCount - oldCurrentCount;
+            newSeasonCount = oldSeasonCount + std::max(delta, 0);
+        }
     }
     else
     {
-        oldTotalCount = itr->second.totalCount;
-        oldWeekCount = itr->second.weekCount;
-        oldSeasonTotalCount = itr->second.seasonTotal;
+        newSeasonCount = oldSeasonCount;
+        newWeekCount = oldWeekCount;
+        newCurrentCount = std::max<int32>(oldCurrentCount + count, 0);
     }
 
-    // count can't be more then weekCap.
-    uint32 weekCap = GetCurrencyWeekCap(currency->ID);
-    if (!ignoreLimit && weekCap && count > int32(weekCap))
-        count = weekCap;
-
-    int32 newTotalCount = int32(oldTotalCount) + count;
-    if (newTotalCount < 0)
-        newTotalCount = 0;
-
-    int32 newWeekCount = int32(oldWeekCount) + (count > 0 ? count : 0);
-    if (newWeekCount < 0)
-        newWeekCount = 0;
-
-    int32 newSeasonTotalCount = int32(oldSeasonTotalCount) + (count > 0 ? count : 0);
-
-    if (!ignoreLimit)
+    if (newCurrentCount != oldCurrentCount)
     {
-        // if we get more then weekCap just set to limit
-        if (weekCap && int32(weekCap) < newWeekCount)
+        if (currency.state != PlayerCurrency::New)
+            currency.state = PlayerCurrency::Changed;
+
+        currency.seasonCount = newSeasonCount;
+        currency.weekCount = newWeekCount;
+        currency.currentCount = newCurrentCount;
+
+        if (count > 0 && !(modifyFlags & MODIFY_CURRENCY_NO_CAP_CHANGE))
+            UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CURRENCY, id, count);
+
+        if (currEntry->Category == CURRENCY_CATEGORY_META_CONQUEST)
         {
-            newWeekCount = int32(weekCap);
-            // weekCap - oldWeekCount alwayt >= 0 as we set limit before!
-            newTotalCount = oldTotalCount + (weekCap - oldWeekCount);
+            // count was changed to week limit, now we can modify original points.
+            ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, newCurrentCount - oldCurrentCount, modifyFlags);
+            // meta currencies do not appear in chat log, but are still sent to client
+            modifyFlags |= MODIFY_CURRENCY_NO_PRINT_LOG;
         }
 
-        // if we get more then totalCap set to maximum;
-        if (currency->TotalCap && int32(currency->TotalCap) < newTotalCount)
-        {
-            newTotalCount = int32(currency->TotalCap);
-            newWeekCount = weekCap;
-        }
-    }
+        WorldPacket packet(SMSG_UPDATE_CURRENCY);
 
-    if (newWeekCount < 0)
-        newWeekCount = 0;
-    if (newTotalCount < 0)
-        newTotalCount = 0;
+        bool const hasSeasonCount = (currEntry->Flags & CURRENCY_FLAG_COUNT_SEASON_TOTAL) != 0
+                && newSeasonCount != 0;
 
-    if (id == CURRENCY_TYPE_HONOR_POINTS || id == CURRENCY_TYPE_JUSTICE_POINTS)
-    {
-        newWeekCount = newTotalCount;
-        weekCap = 0;
-    }
+        packet.WriteBit(weekCap != 0);
+        packet.WriteBit(modifyFlags & MODIFY_CURRENCY_NO_PRINT_LOG); // print in log
+        packet.WriteBit(hasSeasonCount);
 
-    if (uint32(newTotalCount) != oldTotalCount)
-    {
-        if (itr->second.state != PLAYERCURRENCY_NEW)
-            itr->second.state = PLAYERCURRENCY_CHANGED;
+        if (hasSeasonCount)
+            packet << uint32(newSeasonCount / precision);
 
-        itr->second.totalCount = newTotalCount;
-        itr->second.weekCount = newWeekCount;
-        itr->second.seasonTotal = newSeasonTotalCount;
+        packet << uint32(id);
+        packet << uint32(newCurrentCount / precision);
+        packet << uint32(0);                        // Unk
 
-        // probably excessive checks
-        if (IsInWorld() && !GetSession()->PlayerLoading())
-        {
-            if (count > 0)
-                UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CURRENCY, id, count);
+        if (weekCap)
+            packet << uint32(newWeekCount / precision);
 
-            if (currency->Category == CURRENCY_CATEGORY_META_CONQUEST)
-            {
-                // count was changed to week limit, now we can modify original points.
-                ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, count, printLog);
-                return;
-            }
-
-            if (id == CURRENCY_TYPE_CONQUEST_POINTS)
-                SendPvpRewards();
-
-             // on new case just set init.
-            if (itr->second.state == PLAYERCURRENCY_NEW)
-            {
-                itr->second.weekCap = CalculateCurrencyWeekCap(id);
-                SendNewCurrency(id);
-                return;
-            }
-
-            WorldPacket packet(SMSG_UPDATE_CURRENCY);
-
-            packet.WriteBit(weekCap != 0);
-            packet.WriteBit(0);                         // Print in log
-            packet.WriteBit(itr->second.seasonTotal);
-
-            if (itr->second.seasonTotal)
-                packet << uint32(itr->second.seasonTotal);
-
-            packet << uint32(id);
-            packet << uint32(newTotalCount / precision);
-            packet << uint32(0);                        // Unk
-
-            if (weekCap)
-                packet << uint32(newWeekCount / precision);
-
-            GetSession()->SendPacket(&packet);
-        }
+        SendDirectMessage(&packet);
     }
 }
 
-void Player::SetCurrency(uint32 id, uint32 count, bool printLog /*= true*/)
+void Player::SetCurrency(uint32 id, uint32 count)
 {
-    ModifyCurrency(id, int32(count) - GetCurrency(id, true), printLog);
+    PlayerCurrenciesMap::iterator itr = _currencyStorage.find(id);
+    if (itr == _currencyStorage.end())
+    {
+        PlayerCurrency &cur = _currencyStorage[id];
+        cur.seasonCount = cur.currentCount = count;
+    }
 }
 
-uint32 Player::GetCurrencyWeekCap(uint32 id, bool usePrecision)
+uint32 Player::GetCurrencyWeekCap(uint32 id, bool usePrecision) const
 {
     CurrencyTypesEntry const* entry = sCurrencyTypesStore.LookupEntry(id);
     if (!entry)
@@ -8504,80 +8534,51 @@ uint32 Player::GetCurrencyWeekCap(uint32 id, bool usePrecision)
 
     uint32 precision = (usePrecision && entry->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? CURRENCY_PRECISION : 1;
 
-    PlayerCurrenciesMap::const_iterator itr = _currencyStorage.find(id);
-    if (itr == _currencyStorage.end())
-    {
-        PlayerCurrency cur;
-        cur.state = PLAYERCURRENCY_NEW;
-        cur.totalCount = 0;
-        cur.weekCount = 0;
-        cur.seasonTotal = 0;
-        cur.flags = 0;
-        cur.weekCap = CalculateCurrencyWeekCap(id);
-        cur.needResetCap = false;
-        _currencyStorage[id] = cur;
-        itr = _currencyStorage.find(id);
-    }
-
-    if (id == CURRENCY_TYPE_CONQUEST_POINTS)
-        return std::max(GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_META_ARENA, usePrecision), GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_META_RANDOM_BG, usePrecision));
-
-    return itr->second.weekCap / precision;
+    return GetCurrencyWeekCap(entry) / precision;
 }
 
 void Player::ResetCurrencyWeekCap()
 {
-    FinishWeek();                              // set played this week etc values to 0 in memory, too
+    // set played this week etc values to 0 in memory, too
+    FinishWeek();
 
-    for (PlayerCurrenciesMap::iterator itr = _currencyStorage.begin(); itr != _currencyStorage.end(); ++itr)
+    for (auto &kvPair : _currencyStorage)
     {
-        itr->second.weekCount = 0;
-        itr->second.state = PLAYERCURRENCY_CHANGED;
-        itr->second.weekCap = CalculateCurrencyWeekCap(itr->first);
+        PlayerCurrency &currency = kvPair.second;
+        currency.weekCount = 0;
+        currency.state = PlayerCurrency::Changed;
     }
+
+    m_arenaCpCap = Trinity::Currency::ConquestRatingCalculator(m_maxPersonalRating);
+    m_maxPersonalRating = 0;
+
+    m_bgCpCap = Trinity::Currency::BgConquestRatingCalculator(m_maxRatedBgRating);
+    m_maxRatedBgRating = 0;
+
+    SQLTransaction trans = CharacterDatabase.BeginTransaction();
+    _SaveCurrency(trans);
+    _SaveConquestPointsWeekCap(trans);
+    CharacterDatabase.CommitTransaction(trans);
 
     WorldPacket data(SMSG_WEEKLY_RESET_CURRENCY, 0);
     SendDirectMessage(&data);
 }
 
-uint32 Player::CalculateCurrencyWeekCap(uint32 id)
+uint32 Player::GetCurrencyWeekCap(CurrencyTypesEntry const* currency) const
 {
-    CurrencyTypesEntry const* entry = sCurrencyTypesStore.LookupEntry(id);
-
-    if (!entry)
-        return 0;
-
-    uint32 cap = entry->WeekCap;
-
-    switch (entry->ID)
+    switch (currency->ID)
     {
-        // should add precision mod = 100
+        case CURRENCY_TYPE_CONQUEST_POINTS:
+            return std::max(m_arenaCpCap, m_bgCpCap) * CURRENCY_PRECISION;
         case CURRENCY_TYPE_CONQUEST_META_ARENA:
-        case CURRENCY_TYPE_CONQUEST_META_RBG: // Temp
-            cap = Trinity::Currency::ConquestRatingCalculator(GetMaxRating()) * CURRENCY_PRECISION;
-            break;
-        // should add precision mod = 100
+            return m_arenaCpCap * CURRENCY_PRECISION;
+        case CURRENCY_TYPE_CONQUEST_META_RATED_BG:
+            return m_bgCpCap * CURRENCY_PRECISION;
         case CURRENCY_TYPE_CONQUEST_META_RANDOM_BG:
-            cap = Trinity::Currency::BgConquestRatingCalculator(GetMaxRating()) * CURRENCY_PRECISION;
-            break;
-        // No week cap for Justice Points
-        case CURRENCY_TYPE_JUSTICE_POINTS:
-            cap = 0;
-            break;
-        case CURRENCY_TYPE_VALOR_POINTS:
-            cap = 1000 * CURRENCY_PRECISION;
-            break;
+            return std::min(m_arenaCpCap, m_bgCpCap) * CURRENCY_PRECISION;
     }
 
-    /*if (cap != currency->WeekCap && IsInWorld() && !GetSession()->PlayerLoading())
-    {
-        WorldPacket packet(SMSG_UPDATE_CURRENCY_WEEK_LIMIT, 8);
-        packet << uint32(cap / ((currency->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? CURRENCY_PRECISION : 1));
-        packet << uint32(currency->ID);
-        GetSession()->SendPacket(&packet);
-    }*/
-
-    return cap;
+    return currency->WeekCap;
 }
 
 uint32 Player::GetCurrencyTotalCap(CurrencyTypesEntry const* currency) const
@@ -8588,19 +8589,22 @@ uint32 Player::GetCurrencyTotalCap(CurrencyTypesEntry const* currency) const
     {
         case CURRENCY_TYPE_HONOR_POINTS:
         {
-            uint32 honorcap = sWorld->getIntConfig(CONFIG_CURRENCY_MAX_HONOR_POINTS) * CURRENCY_PRECISION;
+            uint32 honorcap = sWorld->getIntConfig(CONFIG_CURRENCY_MAX_HONOR_POINTS);
             if (honorcap > 0)
                 cap = honorcap;
             break;
         }
         case CURRENCY_TYPE_JUSTICE_POINTS:
         {
-            uint32 justicecap = sWorld->getIntConfig(CONFIG_CURRENCY_MAX_JUSTICE_POINTS) * CURRENCY_PRECISION;
+            uint32 justicecap = sWorld->getIntConfig(CONFIG_CURRENCY_MAX_JUSTICE_POINTS);
             if (justicecap > 0)
                 cap = justicecap;
             break;
         }
     }
+
+    if (currency->Category == CURRENCY_CATEGORY_ARCHAEOLOGY)
+        cap = 0;
 
     return cap;
 }
@@ -8615,8 +8619,8 @@ void Player::UpdateConquestCurrencyCap(uint32 currency)
         if (!currencyEntry)
             continue;
 
-        uint32 precision = (currencyEntry->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? 100 : 1;
-        uint32 cap = GetCurrencyWeekCap(currencyEntry->ID);
+        uint32 precision = (currencyEntry->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? CURRENCY_PRECISION : 1;
+        uint32 cap = GetCurrencyWeekCap(currencyEntry);
 
         WorldPacket packet(SMSG_UPDATE_CURRENCY_WEEK_LIMIT, 8);
         packet << uint32(cap / precision);
@@ -15160,7 +15164,7 @@ void Player::ApplyItemUpgrade(Item* item, bool apply)
     if (!itemUpgrade || itemUpgrade->itemLevelUpgrade == 0)
         return;
 
-    ItemUpgradeEntry const* prevItemUpgrade = sItemUpgradeStore.LookupEntry(itemUpgrade->precItemUpgradeId);
+    ItemUpgradeEntry const* prevItemUpgrade = sItemUpgradeStore.LookupEntry(itemUpgrade->prevItemUpgradeId);
     ItemTemplate const* proto = item->GetTemplate();
     if (!proto)
         return;
@@ -18844,6 +18848,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     _LoadGroup(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_GROUP));
 
     _LoadArenaData(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_ARENA_DATA));
+    _LoadConquestPointsWeekCap(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_CP_WEEK_CAP));
     _LoadCurrency(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_CURRENCY));
     SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, fields[36].GetUInt32());
     SetUInt16Value(PLAYER_FIELD_KILLS, 0, fields[37].GetUInt16());
@@ -21049,6 +21054,7 @@ void Player::SaveToDB(bool create /*=false*/)
     GetSession()->SaveTutorialsData(trans);                 // changed only while character in game
     _SaveGlyphs(trans);
     _SaveInstanceTimeRestrictions(trans);
+    _SaveConquestPointsWeekCap(trans);
     _SaveCurrency(trans);
     m_archaeologyMgr.SaveArchaeology(trans);
 
@@ -23545,8 +23551,9 @@ void Player::InitDisplayIds()
     }
 }
 
-inline bool Player::_StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot, int64 price, ItemTemplate const *pProto, Creature *pVendor, VendorItem const* crItem, bool bStore)
+bool Player::_StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot, int64 price, ItemTemplate const *pProto, Creature *pVendor, VendorItem const* crItem, bool bStore)
 {
+    uint32 stacks = count / pProto->BuyCount;
     ItemPosCountVec vDest;
     uint16 uiDest = 0;
 
@@ -23568,14 +23575,19 @@ inline bool Player::_StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 c
         for (int i = 0; i < MAX_ITEM_EXT_COST_CURRENCIES; ++i)
         {
             if (iece->RequiredItem[i])
-                DestroyItemCount(iece->RequiredItem[i], iece->RequiredItemCount[i], true);
+                DestroyItemCount(iece->RequiredItem[i], iece->RequiredItemCount[i] * stacks, true);
         }
 
         for (int i = 0; i < MAX_ITEM_EXT_COST_CURRENCIES; ++i)
         {
+            if (iece->RequirementFlags & (ITEM_EXT_COST_CURRENCY_REQ_IS_SEASON_EARNED_1 << i))
+                continue;
+
             if (iece->RequiredCurrency[i])
-                if (i != 1 || iece->ID == 2999) // 1 are season count request, we must not substract it
-                    ModifyCurrency(iece->RequiredCurrency[i], -int32(iece->RequiredCurrencyCount[i]), true, true);
+            {
+                uint32 flags = MODIFY_CURRENCY_NO_GUILD_PERKS | MODIFY_CURRENCY_NO_CAP_CHANGE;
+                ModifyCurrency(iece->RequiredCurrency[i], -int32(iece->RequiredCurrencyCount[i] * stacks), flags);
+            }
         }
     }
 
@@ -23633,11 +23645,6 @@ inline bool Player::_StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 c
 
 bool Player::BuyCurrencyFromVendorSlot(uint64 vendorGuid, uint32 vendorSlot, uint32 currency, uint32 count)
 {
-    //vendorSlot += 1; Already handled in HandleBuyItemOpcode ?
-
-    // cheating attempt
-    if (count < 1) count = 1;
-
     if (!IsAlive())
         return false;
 
@@ -23677,83 +23684,128 @@ bool Player::BuyCurrencyFromVendorSlot(uint64 vendorGuid, uint32 vendorSlot, uin
         return false;
     }
 
-    int32 precision = (proto->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? CURRENCY_PRECISION : 1;
-
-    if (crItem->ExtendedCost)
+    // Cheating attempt
+    if (crItem->maxcount != count)
     {
-        // Can only buy full stacks for extended cost
-        if ((crItem->maxcount * precision) != count)
+        SendEquipError(EQUIP_ERR_CANT_BUY_QUANTITY, NULL, NULL);
+        return false;
+    }
+
+    if (uint32 const totalCap = GetCurrencyTotalCap(proto))
+    {
+        if (GetCurrency(proto->ID, false) + count > totalCap)
         {
             SendEquipError(EQUIP_ERR_CANT_BUY_QUANTITY, NULL, NULL);
             return false;
         }
-
-        ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(crItem->ExtendedCost);
-        if (!iece)
-        {
-            TC_LOG_ERROR("entities.player", "Currency %u have wrong ExtendedCost field value %u", currency, crItem->ExtendedCost);
-            return false;
-        }
-
-        for (uint8 i = 0; i < MAX_ITEM_EXT_COST_ITEMS; ++i)
-        {
-            if (iece->RequiredItem[i] && !HasItemCount(iece->RequiredItem[i], iece->RequiredItemCount[i]))
-            {
-                SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
-                return false;
-            }
-        }
-
-        for (uint8 i = 0; i < MAX_ITEM_EXT_COST_CURRENCIES; ++i)
-        {
-            if (!iece->RequiredCurrency[i])
-                continue;
-
-            CurrencyTypesEntry const* entry = sCurrencyTypesStore.LookupEntry(iece->RequiredCurrency[i]);
-            if (!entry)
-            {
-                SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, currency, 0); // Find correct error
-                return false;
-            }
-
-            if (!HasCurrency(iece->RequiredCurrency[i], iece->RequiredCurrencyCount[i]))
-            {
-                SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL); // Find correct error
-                return false;
-            }
-        }
-
-        // check for personal arena rating requirement
-        if (GetMaxPersonalArenaRatingRequirement(iece->RequiredArenaSlot) < iece->RequiredPersonalArenaRating)
-        {
-            // probably not the proper equip err
-            SendEquipError(EQUIP_ERR_CANT_EQUIP_RANK, NULL, NULL);
-            return false;
-        }
     }
-    else // currencies have no price defined, can only be bought with ExtendedCost
+
+    // currencies have no price defined, can only be bought with ExtendedCost
+    if (!crItem->ExtendedCost)
     {
         SendBuyError(BUY_ERR_CANT_FIND_ITEM, NULL, currency, 0);
         return false;
     }
 
-    ModifyCurrency(currency, crItem->maxcount * precision, true, true);
-
-    if (crItem->ExtendedCost)
+    ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(crItem->ExtendedCost);
+    if (!iece)
     {
-        ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(crItem->ExtendedCost);
-        for (int i = 0; i < MAX_ITEM_EXT_COST_CURRENCIES; ++i)
+        TC_LOG_ERROR("entities.player", "Currency %u have wrong ExtendedCost field value %u", currency, crItem->ExtendedCost);
+        return false;
+    }
+
+    for (uint8 i = 0; i < MAX_ITEM_EXT_COST_ITEMS; ++i)
+    {
+        if (iece->RequiredItem[i] && !HasItemCount(iece->RequiredItem[i], iece->RequiredItemCount[i]))
         {
-            if (iece->RequiredItem[i])
-                DestroyItemCount(iece->RequiredItem[i], iece->RequiredItemCount[i], true);
+            SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
+            return false;
+        }
+    }
+
+    for (uint8 i = 0; i < MAX_ITEM_EXT_COST_CURRENCIES; ++i)
+    {
+        if (!iece->RequiredCurrency[i])
+            continue;
+
+        CurrencyTypesEntry const* entry = sCurrencyTypesStore.LookupEntry(iece->RequiredCurrency[i]);
+        if (!entry)
+        {
+            SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, currency, 0); // Find correct error
+            return false;
         }
 
-        for (int i = 0; i < MAX_ITEM_EXT_COST_CURRENCIES; ++i)
+        if (iece->RequirementFlags & (ITEM_EXT_COST_CURRENCY_REQ_IS_SEASON_EARNED_1 << i))
         {
-            if (iece->RequiredCurrency[i])
-                if (i != 1 || iece->ID == 2999) // 1 are season count request, we must not substract it
-                    ModifyCurrency(iece->RequiredCurrency[i], -int32(iece->RequiredCurrencyCount[i]), true, true);
+            if (!hasEnoughSeasonCurrency(iece->RequiredCurrency[i], iece->RequiredCurrencyCount[i]))
+            {
+                // probably not the proper equip err
+                SendEquipError(EQUIP_ERR_CANT_EQUIP_RANK, NULL, NULL);
+                return false;
+            }
         }
+        else if (!HasCurrency(iece->RequiredCurrency[i], iece->RequiredCurrencyCount[i]))
+        {
+            SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL); // Find correct error
+            return false;
+        }
+    }
+
+    // check for personal rating requirement
+    if (GetMaxPersonalRatingRequirement(iece->RequiredArenaSlot) < iece->RequiredPersonalArenaRating)
+    {
+        // probably not the proper equip err
+        SendEquipError(EQUIP_ERR_CANT_EQUIP_RANK, NULL, NULL);
+        return false;
+    }
+
+    if (iece->RequiredFactionId && uint32(GetReputationRank(iece->RequiredFactionId)) < iece->RequiredFactionStanding)
+    {
+        SendBuyError(BUY_ERR_REPUTATION_REQUIRE, creature, currency, 0);
+        return false;
+    }
+
+    if (iece->RequirementFlags & ITEM_EXT_COST_FLAG_REQUIRE_GUILD && !GetGuildId())
+    {
+        SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL); // Find correct error
+        return false;
+    }
+
+    if (iece->RequiredGuildLevel && iece->RequiredGuildLevel < GetGuildLevel())
+    {
+        SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL); // Find correct error
+        return false;
+    }
+
+    if (iece->RequiredAchievement && !GetAchievementMgr().HasAchieved(iece->RequiredAchievement))
+    {
+        SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL); // Find correct error
+        return false;
+    }
+
+    {
+        uint32 flags = MODIFY_CURRENCY_NO_GUILD_PERKS | MODIFY_CURRENCY_NO_CAP_CHANGE;
+        ModifyCurrency(currency, count, flags);
+    }
+
+    for (int i = 0; i < MAX_ITEM_EXT_COST_CURRENCIES; ++i)
+    {
+        if (!iece->RequiredItem[i])
+            continue;
+
+        DestroyItemCount(iece->RequiredItem[i], iece->RequiredItemCount[i], true);
+    }
+
+    for (int i = 0; i < MAX_ITEM_EXT_COST_CURRENCIES; ++i)
+    {
+        if (!iece->RequiredCurrency[i]
+                || iece->RequirementFlags & (ITEM_EXT_COST_CURRENCY_REQ_IS_SEASON_EARNED_1 << i))
+        {
+            continue;
+        }
+
+        uint32 flags = MODIFY_CURRENCY_NO_PRINT_LOG | MODIFY_CURRENCY_NO_GUILD_PERKS | MODIFY_CURRENCY_NO_CAP_CHANGE;
+        ModifyCurrency(iece->RequiredCurrency[i], -int32(iece->RequiredCurrencyCount[i]), flags);
     }
 
     return true;
@@ -23763,8 +23815,7 @@ bool Player::BuyCurrencyFromVendorSlot(uint64 vendorGuid, uint32 vendorSlot, uin
 bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot)
 {
     // cheating attempt
-    if (count < 1)
-        count = 1;
+    if (count < 1) count = 1;
 
     // cheating attempt
     if (slot > MAX_BAG_SIZE && slot != NULL_SLOT)
@@ -23809,7 +23860,7 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
         return false;
     }
 
-    // check current item amount if it limited
+    // check current item amount if it is limited
     if (crItem->maxcount != 0)
     {
         if (creature->GetVendorItemCurrentCount(crItem) < pProto->BuyCount * count)
@@ -23828,12 +23879,13 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
     if (crItem->ExtendedCost)
     {
         // Can only buy full stacks for extended cost
-        if (pProto->BuyCount != count)
+        if (count % pProto->BuyCount)
         {
             SendEquipError(EQUIP_ERR_CANT_BUY_QUANTITY, NULL, NULL);
             return false;
         }
 
+        uint32 stacks = count / pProto->BuyCount;
         ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(crItem->ExtendedCost);
         if (!iece)
         {
@@ -23843,7 +23895,7 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
 
         for (uint8 i = 0; i < MAX_ITEM_EXT_COST_ITEMS; ++i)
         {
-            if (iece->RequiredItem[i] && !HasItemCount(iece->RequiredItem[i], iece->RequiredItemCount[i]))
+            if (iece->RequiredItem[i] && !HasItemCount(iece->RequiredItem[i], iece->RequiredItemCount[i] * stacks))
             {
                 SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
                 return false;
@@ -23862,33 +23914,56 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
                 return false;
             }
 
-            uint32 precision = (entry->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? CURRENCY_PRECISION : 1;
-
-            // Second field in dbc is season count except two strange rows
-            if (i == 1 && iece->ID != 2999)
+            if (iece->RequirementFlags & (ITEM_EXT_COST_CURRENCY_REQ_IS_SEASON_EARNED_1 << i))
             {
-                if ((iece->RequiredCurrencyCount[i] / precision) > GetCurrencyOnSeason(iece->RequiredCurrency[i], false))
+                if (!hasEnoughSeasonCurrency(iece->RequiredCurrency[i], iece->RequiredCurrencyCount[i] * stacks))
                 {
-                    SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
+                    // probably not the proper equip err
+                    SendEquipError(EQUIP_ERR_CANT_EQUIP_RANK, NULL, NULL);
                     return false;
                 }
             }
-            else if (!HasCurrency(iece->RequiredCurrency[i], iece->RequiredCurrencyCount[i]))
+            else if (!HasCurrency(iece->RequiredCurrency[i], iece->RequiredCurrencyCount[i] * stacks))
             {
                 SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
                 return false;
             }
         }
 
-        // check for personal arena rating requirement
-        if (GetMaxPersonalArenaRatingRequirement(iece->RequiredArenaSlot) < iece->RequiredPersonalArenaRating)
+        // check for personal rating requirement
+        if (GetMaxPersonalRatingRequirement(iece->RequiredArenaSlot) < iece->RequiredPersonalArenaRating)
         {
             // probably not the proper equip err
             SendEquipError(EQUIP_ERR_CANT_EQUIP_RANK, NULL, NULL);
             return false;
         }
+
+        if (iece->RequiredFactionId && uint32(GetReputationRank(iece->RequiredFactionId)) < iece->RequiredFactionStanding)
+        {
+            SendBuyError(BUY_ERR_REPUTATION_REQUIRE, creature, item, 0);
+            return false;
+        }
+
+        if (iece->RequirementFlags & ITEM_EXT_COST_FLAG_REQUIRE_GUILD && !GetGuildId())
+        {
+            SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL); // Find correct error
+            return false;
+        }
+
+        if (iece->RequiredGuildLevel && iece->RequiredGuildLevel < GetGuildLevel())
+        {
+            SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL); // Find correct error
+            return false;
+        }
+
+        if (iece->RequiredAchievement && !GetAchievementMgr().HasAchieved(iece->RequiredAchievement))
+        {
+            SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL); // Find correct error
+            return false;
+        }
     }
 
+    // FIXME: what is it?
     std::vector<GuildReward> const& rewards = sGuildMgr->GetGuildRewards();
 
     for (auto reward: rewards)
@@ -23973,18 +24048,26 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
     return false;
 }
 
-uint32 Player::GetMaxPersonalArenaRatingRequirement(uint32 minarenaslot) const
+uint32 Player::GetMaxPersonalRatingRequirement(uint32 startSlot) const
 {
-    // returns the maximal personal arena rating that can be used to purchase items requiring this condition
-    // the personal rating of the arena team must match the required limit as well
-    // so return max[in arenateams](min(personalrating[teamtype], teamrating[teamtype]))
-    uint32 max_personal_rating = 0;
-    for (uint8 i = minarenaslot; i < MAX_ARENA_SLOT; ++i)
+    return *std::max_element(m_ArenaPersonalRating + startSlot, std::end(m_ArenaPersonalRating));
+}
+
+void Player::SetArenaPersonalRating(uint8 slot, uint32 value)
+{
+    m_ArenaPersonalRating[slot] = value;
+
+    if (m_BestRatingOfSeason[slot] < value)
+        m_BestRatingOfSeason[slot] = value;
+
+    if (m_BestRatingOfWeek[slot] < value)
+        m_BestRatingOfWeek[slot] = value;
+
+    if (value > m_maxPersonalRating)
     {
-        if (max_personal_rating < GetArenaPersonalRating(i))
-            max_personal_rating = GetArenaPersonalRating(i);
+        m_maxPersonalRating = value;
+        // UpdateConquestCurrencyCap(CURRENCY_TYPE_CONQUEST_META_ARENA);
     }
-    return max_personal_rating;
 }
 
 void Player::UpdateHomebindTime(uint32 time)
@@ -28369,8 +28452,18 @@ void Player::SendRefundInfo(Item* item)
 
     for (uint8 i = 0; i < MAX_ITEM_EXT_COST_CURRENCIES; ++i)
     {
+        if (iece->RequirementFlags & (ITEM_EXT_COST_CURRENCY_REQ_IS_SEASON_EARNED_1 << i))
+        {
+            data << uint32(0);
+            data << uint32(0);
+            continue;
+        }
+
+        CurrencyTypesEntry const* currencyType = sCurrencyTypesStore.LookupEntry(iece->RequiredCurrency[i]);
+        uint32 precision = (currencyType && currencyType->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? CURRENCY_PRECISION : 1;
+
+        data << uint32(iece->RequiredCurrencyCount[i] / precision);
         data << uint32(iece->RequiredCurrency[i]);
-        data << uint32(iece->RequiredCurrencyCount[i] / 100);       // Must be devided by precision
     }
 
     data.WriteBitSeq<1, 0, 7, 2, 3, 6, 4, 5>(itemGuid);
@@ -28425,8 +28518,18 @@ void Player::SendItemRefundResult(Item* item, ItemExtendedCostEntry const* iece,
 
         for (uint8 i = 0; i < MAX_ITEM_EXT_COST_CURRENCIES; ++i)
         {
+            if (iece->RequirementFlags & (ITEM_EXT_COST_CURRENCY_REQ_IS_SEASON_EARNED_1 << i))
+            {
+                data << uint32(0);
+                data << uint32(0);
+                continue;
+            }
+
+            CurrencyTypesEntry const* currencyType = sCurrencyTypesStore.LookupEntry(iece->RequiredCurrency[i]);
+            uint32 precision = (currencyType && currencyType->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? CURRENCY_PRECISION : 1;
+
+            data << uint32(iece->RequiredCurrencyCount[i] / precision);
             data << uint32(iece->RequiredCurrency[i]);
-            data << uint32(iece->RequiredCurrencyCount[i]);
         }
 
         data << uint32(item->GetPaidMoney());
@@ -28466,7 +28569,6 @@ void Player::RefundItem(Item* item)
         return;
     }
 
-    bool store_error = false;
     for (uint8 i = 0; i < MAX_ITEM_EXT_COST_ITEMS; ++i)
     {
         uint32 count = iece->RequiredItemCount[i];
@@ -28478,34 +28580,32 @@ void Player::RefundItem(Item* item)
             InventoryResult msg = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemid, count);
             if (msg != EQUIP_ERR_OK)
             {
-                store_error = true;
-                break;
+                SendItemRefundResult(item, iece, 10);
+                return;
             }
          }
-    }
-
-    if (store_error)
-    {
-        SendItemRefundResult(item, iece, 10);
-        return;
     }
 
     // Check total cap
     for (uint8 i = 0; i < MAX_ITEM_EXT_COST_CURRENCIES; ++i)
     {
-        // Second field in dbc is season count except one row
-        if (i == 1 && iece->ID != 2999)
+        if (iece->RequirementFlags & (ITEM_EXT_COST_CURRENCY_REQ_IS_SEASON_EARNED_1 << i))
             continue;
 
-        uint32 currencyId = iece->RequiredCurrency[i];
-        CurrencyTypesEntry const* cte = sCurrencyTypesStore.LookupEntry(currencyId);
-        if (!cte)
+        uint32 const id = iece->RequiredCurrency[i];
+        if (!id)
             continue;
 
-        uint32 count = iece->RequiredCurrencyCount[i] / cte->GetPrecision();
-        uint32 plrCount = GetCurrency(currencyId, cte->HasPrecision());
+        CurrencyTypesEntry const * const entry = sCurrencyTypesStore.LookupEntry(id);
+        if (!entry)
+            continue;
 
-        if (cte->TotalCap && (plrCount + count > (cte->TotalCap / cte->GetPrecision())))
+        uint32 const totalCap = GetCurrencyTotalCap(entry);
+        uint32 const count = iece->RequiredCurrencyCount[i];
+
+        if (totalCap
+                && count
+                && GetCurrency(entry->ID, false) + count > totalCap)
         {
             SendItemRefundResult(item, iece, 10);
             return;
@@ -28525,8 +28625,8 @@ void Player::RefundItem(Item* item)
     // Destroy item
     DestroyItem(item->GetBagSlot(), item->GetSlot(), true);
 
-    // Grant back extended cost items ...
-    for (uint8 i = 0; i < MAX_ITEM_EXT_COST_CURRENCIES; ++i)
+    // Grant back extendedcost items
+    for (uint8 i = 0; i < MAX_ITEM_EXT_COST_ITEMS; ++i)
     {
         uint32 count = iece->RequiredItemCount[i];
         uint32 itemid = iece->RequiredItem[i];
@@ -28540,24 +28640,24 @@ void Player::RefundItem(Item* item)
         }
     }
 
-    // ... and currencies
+    // Grant back currencies
     for (uint8 i = 0; i < MAX_ITEM_EXT_COST_CURRENCIES; ++i)
     {
-        // Second field in dbc is season count except one row
-        if (i == 1 && iece->ID != 2999)
+        if (iece->RequirementFlags & (ITEM_EXT_COST_CURRENCY_REQ_IS_SEASON_EARNED_1 << i))
             continue;
 
-        uint32 currency = iece->RequiredCurrency[i];
         uint32 count = iece->RequiredCurrencyCount[i];
-        if (currency && count)
-            ModifyCurrency(currency, count, false, true, true);
+        uint32 currencyid = iece->RequiredCurrency[i];
+        if (count && currencyid)
+        {
+            uint32 flags = MODIFY_CURRENCY_NO_GUILD_PERKS | MODIFY_CURRENCY_NO_CAP_CHANGE;
+            ModifyCurrency(currencyid, count, flags);
+        }
     }
 
     // Grant back money
     if (moneyRefund)
         ModifyMoney((int64)moneyRefund); // Saved in SaveInventoryAndGoldToDB
-
-    // Grant back Arena and Honor points ?
 
     SaveInventoryAndGoldToDB(trans);
 

@@ -324,9 +324,15 @@ void DoPrepareStatements(MySQLConnection &conn)
     conn.prepareStatement(CHAR_SEL_CUF_PROFILE, "SELECT id, name, unk0, unk1, frameWidth, frameHeight, unk4, unk5, unk6, unk7, sortType, healthText, bits FROM character_cuf_profiles WHERE guid = ?");
 
     // Currency
-    conn.prepareStatement(CHAR_SEL_PLAYER_CURRENCY, "SELECT currency, week_count, total_count, season_total, flags, weekCap, needResetCap FROM character_currency WHERE guid = ?");
-    conn.prepareStatement(CHAR_UPD_PLAYER_CURRENCY, "UPDATE character_currency SET week_count = ?, total_count = ?, season_total = ?, flags = ?, weekCap = ?, needResetCap = ? WHERE guid = ? AND currency = ?");
-    conn.prepareStatement(CHAR_REP_PLAYER_CURRENCY, "REPLACE INTO character_currency (guid, currency, week_count, total_count, season_total, flags, weekCap, needResetCap) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+    conn.prepareStatement(CHAR_SEL_PLAYER_CURRENCY, "SELECT currency, season_count, week_count, current_count, flags FROM character_currency WHERE guid = ?");
+    conn.prepareStatement(CHAR_UPD_PLAYER_CURRENCY, "UPDATE character_currency SET season_count = ?, week_count = ?, current_count = ?, flags = ? WHERE guid = ? AND currency = ?");
+    conn.prepareStatement(CHAR_REP_PLAYER_CURRENCY, "REPLACE INTO character_currency (guid, currency, season_count, week_count, current_count, flags) VALUES (?, ?, ?, ?, ?, ?)");
+    conn.prepareStatement(CHAR_SEL_CHARACTER_CP_WEEK_CAP, "SELECT max_personal_rating, arena_cap, max_rated_bg_rating, rated_bg_cap FROM character_cp_weekcap WHERE guid = ?");
+    conn.prepareStatement(CHAR_REP_CHARACTER_CP_WEEK_CAP, "REPLACE INTO character_cp_weekcap (guid, max_personal_rating, arena_cap, max_rated_bg_rating, rated_bg_cap) VALUES (?, ?, ?, ?, ?)");
+    conn.prepareStatement(CHAR_UPD_CHARACTER_CP_WEEK_CAP, "UPDATE character_cp_weekcap SET arena_cap = CP_CAP_FROM_RATING(max_personal_rating), max_personal_rating = 0, "
+                          "rated_bg_cap = CONVERT(CP_CAP_FROM_RATING(max_rated_bg_rating) * 1.222 + 0.5, UNSIGNED INTEGER), max_rated_bg_rating = 0");
+    conn.prepareStatement(CHAR_UPD_CURRENCY_WEEK_COUNT, "UPDATE character_currency SET week_count = 0");
+    conn.prepareStatement(CHAR_UPD_ARENA_DATA, "UPDATE character_arena_data SET prevWeekWins = weekWins, weekWins = 0, weekGames = 0, bestRatingOfWeek = 0");
 
     // Account data
     conn.prepareStatement(CHAR_SEL_ACCOUNT_DATA, "SELECT type, time, data FROM account_data WHERE accountId = ?");

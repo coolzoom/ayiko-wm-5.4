@@ -129,7 +129,7 @@ struct ItemUpgradeEntry
     uint32 Id;
     uint32 itemUpgradePath;
     uint32 itemLevelUpgrade;
-    uint32 precItemUpgradeId;
+    uint32 prevItemUpgradeId;
     uint32 currencyId;
     uint32 currencyCost;
 };
@@ -157,11 +157,11 @@ struct ItemExtendedCostEntry
     //uint32    ItemPurchaseGroup;                                      // 15, only 0
     uint32      RequiredCurrency[MAX_ITEM_EXT_COST_CURRENCIES];         // 16-20 required curency id
     uint32      RequiredCurrencyCount[MAX_ITEM_EXT_COST_CURRENCIES];    // 21-25 required curency count
-    //uint32    Unk_1;                                                  // 26 Only 0
-    //uint32    Unk_2;                                                  // 27 Only 0
-    //uint32    Unk_3;                                                  // 28
-    //uint32    Unk_4;                                                  // 29 Only 0
-    //uint32    Unk_5;                                                  // 30 Only 0
+    uint32      RequiredFactionId;
+    uint32      RequiredFactionStanding;
+    uint32      RequirementFlags;
+    uint32      RequiredGuildLevel;
+    uint32      RequiredAchievement;
 };
 
 struct BattlePetSpeciesEntry

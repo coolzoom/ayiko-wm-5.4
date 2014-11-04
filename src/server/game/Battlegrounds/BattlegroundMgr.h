@@ -33,8 +33,6 @@ typedef std::map<uint32, Battleground*> BattlegroundSet;
 
 typedef std::unordered_map<uint32, BattlegroundTypeId> BattleMastersMap;
 
-#define WS_CURRENCY_RESET_TIME 20001                    // Custom worldstate
-
 struct CreateBattlegroundData
 {
     BattlegroundTypeId bgTypeId;

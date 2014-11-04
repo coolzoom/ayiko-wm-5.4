@@ -2185,7 +2185,7 @@ void WorldSession::HandleUpgradeItemOpcode(WorldPacket& recvData)
     }
 
     // Check if player has enough currency
-    if (player->GetCurrency(itemUpEntry->currencyId, false) < itemUpEntry->currencyCost)
+    if (!player->HasCurrency(itemUpEntry->currencyId, itemUpEntry->currencyCost))
     {
         TC_LOG_DEBUG("network", "WORLD: HandleReforgeItemOpcode - Player has not enougth currency (ID: %u, Cost: %u) not found.", itemUpEntry->currencyId, itemUpEntry->currencyCost);
         SendItemUpgradeResult(false);
@@ -2193,7 +2193,7 @@ void WorldSession::HandleUpgradeItemOpcode(WorldPacket& recvData)
     }
 
     uint32 actualUpgrade = item->GetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 2);
-    if (actualUpgrade != itemUpEntry->precItemUpgradeId)
+    if (actualUpgrade != itemUpEntry->prevItemUpgradeId)
     {
         TC_LOG_DEBUG("network", "WORLD: HandleReforgeItemOpcode - ItemUpgradeEntry (%u) is not related to this ItemUpgradePath (%u).", itemUpEntry->Id, actualUpgrade);
         SendItemUpgradeResult(false);
@@ -2210,7 +2210,8 @@ void WorldSession::HandleUpgradeItemOpcode(WorldPacket& recvData)
     if (item->IsEquipped())
         player->ApplyItemUpgrade(item, true);
 
-    player->ModifyCurrency(itemUpEntry->currencyId, -int32(itemUpEntry->currencyCost), false, true, true);
+    uint32 const flags = MODIFY_CURRENCY_NO_GUILD_PERKS | MODIFY_CURRENCY_NO_CAP_CHANGE;
+    player->ModifyCurrency(itemUpEntry->currencyId, -int32(itemUpEntry->currencyCost), flags);
 }
 
 void WorldSession::HandleSetLootSpecialization(WorldPacket& /*recvData*/)

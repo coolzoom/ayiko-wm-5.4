@@ -1130,7 +1130,7 @@ public:
             return false;
 
         int32 amount = (int32)atoi(args);
-        target->ModifyCurrency(CURRENCY_TYPE_HONOR_POINTS, amount, true, true);
+        target->ModifyCurrency(CURRENCY_TYPE_HONOR_POINTS, amount, MODIFY_CURRENCY_NO_GUILD_PERKS);
 
         handler->PSendSysMessage(LANG_COMMAND_MODIFY_HONOR, handler->GetNameLink(target).c_str(), target->GetCurrency(CURRENCY_TYPE_HONOR_POINTS, false));
 
@@ -1405,7 +1405,7 @@ public:
         if (amount == 0)
             return false;
 
-        target->ModifyCurrency(currencyId, amount, true, true);
+        target->ModifyCurrency(currencyId, amount, MODIFY_CURRENCY_NO_GUILD_PERKS);
         return true;
     }
 };

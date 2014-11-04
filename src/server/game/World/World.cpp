@@ -3185,19 +3185,38 @@ void World::ResetDailyQuests()
 
 void World::ResetCurrencyWeekCap()
 {
-#if 0
-    CharacterDatabase.Execute("UPDATE `character_currency` SET `week_count` = 0, `needResetCap` = 1");
-    CharacterDatabase.Execute("UPDATE `character_arena_data` SET `prevWeekWins0` = `weekWins0`, `prevWeekWins1` = `weekWins1`, `prevWeekWins2` = `weekWins2`");
-    CharacterDatabase.Execute("UPDATE `character_arena_data` SET `bestRatingOfWeek0` = 0, `weekGames0` = 0, `weekWins0` = 0, `bestRatingOfWeek1` = 0, `weekGames1` = 0, `weekWins1` = 0, `bestRatingOfWeek2` = 0, `weekGames2` = 0, `weekWins2` = 0");
-#endif
+    // These 3 updates take a lot of time to complete, as they have to change
+    // each and every row in the table. However, they do not depend on each
+    // other. So, let's try to execute them in parallel and wait for completion.
+
+    sThreadPoolMgr->schedule([] {
+        CharacterDatabase.Execute(CharacterDatabase.GetPreparedStatement(CHAR_UPD_ARENA_DATA));
+    });
+
+    sThreadPoolMgr->schedule([] {
+        CharacterDatabase.Execute(CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHARACTER_CP_WEEK_CAP));
+    });
+
+    sThreadPoolMgr->schedule([] {
+        CharacterDatabase.Execute(CharacterDatabase.GetPreparedStatement(CHAR_UPD_CURRENCY_WEEK_COUNT));
+    });
+
+    sThreadPoolMgr->wait();
+
     for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
-        if (itr->second->GetPlayer())
-            itr->second->GetPlayer()->ResetCurrencyWeekCap();
+    {
+        if (Player* player = itr->second->GetPlayer())
+        {
+            player->ResetCurrencyWeekCap();
 
-    m_NextCurrencyReset = time_t(m_NextCurrencyReset + DAY * getIntConfig(CONFIG_CURRENCY_RESET_INTERVAL));
+            WorldPacket data(SMSG_WEEKLY_LAST_RESET, 4);
+            data << uint32(m_NextCurrencyReset);
+            player->SendDirectMessage(&data);
+        }
+    }
+
+    m_NextCurrencyReset += DAY * getIntConfig(CONFIG_CURRENCY_RESET_INTERVAL);
     setWorldState(WS_CURRENCY_RESET_TIME, uint64(m_NextCurrencyReset));
-
-    TC_LOG_INFO("molten", "World::ResetCurrencyWeekCap()");
 }
 
 void World::ResetProfessionCooldowns()

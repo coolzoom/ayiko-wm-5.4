@@ -10,10 +10,15 @@ INSERT INTO `creature_text` (`entry`, `id`, `text`, `type`, `probability`, `comm
 UPDATE `creature_template` SET `npcflag`='1', `AIName`='', `ScriptName`='npc_nectarbreeze_farmer' WHERE (`entry`='54763');
 
 -- Empty Nests
-UPDATE `creature_template` SET `ScriptName`='npc_windward_hatchling' WHERE `entry` IN ('58220', '58243', '58244');
+UPDATE `creature_template` SET `KillCredit2`='0', `ScriptName`='npc_windward_hatchling' WHERE `entry` IN ('58220', '58243', '58244');
 UPDATE `creature_template` SET `flags_extra`='0', `ScriptName`='npc_windward_nest_trigger' WHERE (`entry`='58275');
-UPDATE `creature` SET `spawndist`='0' WHERE (`id`='58275');
+UPDATE `creature` SET `spawndist`='0', `MovementType`='0' WHERE (`id`='58275');
 UPDATE `creature_template` SET `speed_walk`='1.5', `speed_run`='1.5' WHERE (`entry`='58248');
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 17 AND `SourceEntry` = 110171;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(17, 0, 110171, 0, 0, 31, 0, 3, 58220, 0, 0, 0, 0, '', "Silken Rope targets Windward Hatchling"),
+(17, 0, 110171, 0, 1, 31, 0, 3, 58243, 0, 0, 0, 0, '', "Silken Rope targets Windward Hatchling"),
+(17, 0, 110171, 0, 2, 31, 0, 3, 58244, 0, 0, 0, 0, '', "Silken Rope targets Windward Hatchling");
 
 -- Hidden Power
 UPDATE `creature_template` SET `AIName`='SmartAI' WHERE `entry` IN('57400', '57326', '57316');

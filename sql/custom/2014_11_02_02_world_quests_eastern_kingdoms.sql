@@ -15,7 +15,7 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `text`, `type`, `probability`) 
 ('42384', '2', 'Who killed the Furlbrows? I\'ll tell you who killed the Furlbrows: KING VARIAN WRYNN. THAT\'S WHO! And he\'s killin\' the rest of us too. One bum at a time. The only thing I can tell you is that I saw some gnolls leavin\' the place a few hours before the law arrived.', '12', '100'),
 ('42384', '3', 'Between you, me, and the tree, murlocs killed the Furlbrows. Yep, saw \'em with my own two eyes. Think they\'d been casin\' the joint for days, maybe months. They left in a hurry once they got wind of \"Johnny Law\" and the idiot brigade over there...', '12', '100');
 
-UPDATE `creature_template` SET `KillCredit1`='0', `KillCredit2`='0' WHERE `entry`='IN('42383', '42384', '42385', '42386', '42390', '42391', '42400', '48840');
+UPDATE `creature_template` SET `KillCredit1`='0', `KillCredit2`='0' WHERE `entry` IN ('42383', '42384', '42385', '42386', '42390', '42391', '42400', '48840');
 
 -- The Source of the Madness
 UPDATE `creature_loot_template` SET `ChanceOrQuestChance`='-26' WHERE (`entry`='939') AND (`item`='60263');

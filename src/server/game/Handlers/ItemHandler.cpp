@@ -2097,6 +2097,7 @@ void WorldSession::HandleChangeCurrencyFlags(WorldPacket& recvPacket)
 {
     uint32 currencyId, flags;
 
+    // 0x4 - show on backpack. 0x8 - move to unused. Are 0x1 and 0x2 ever sent?
     recvPacket >> flags >> currencyId;
 
     if (GetPlayer())

@@ -72,7 +72,7 @@ enum eSpells
 
 enum eEvents
 {
-    // Controler
+    // Controller
     EVENT_PETRIFICATION                 = 1,
     EVENT_CRYSTALS                      = 2,
 
@@ -111,14 +111,14 @@ Position stoneGuardsPos[4] =
 #define INVISIBLE_DISPLAYID 11686
 
 // 60089 - Stone Guard Controller
-class boss_stone_guard_controler : public CreatureScript
+class boss_stone_guard_controller : public CreatureScript
 {
     public:
-        boss_stone_guard_controler() : CreatureScript("boss_stone_guard_controler") {}
+        boss_stone_guard_controller() : CreatureScript("boss_stone_guard_controller") {}
 
-        struct boss_stone_guard_controlerAI : public ScriptedAI
+        struct boss_stone_guard_controllerAI : public ScriptedAI
         {
-            boss_stone_guard_controlerAI(Creature* creature) : ScriptedAI(creature)
+            boss_stone_guard_controllerAI(Creature* creature) : ScriptedAI(creature)
             {
                 pInstance = creature->GetInstanceScript();
             }
@@ -351,7 +351,7 @@ class boss_stone_guard_controler : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return new boss_stone_guard_controlerAI(creature);
+            return new boss_stone_guard_controllerAI(creature);
         }
 };
 
@@ -387,7 +387,7 @@ class boss_generic_guardian : public CreatureScript
 
             Creature* GetController()
             {
-                if (pInstance) return me->GetMap()->GetCreature(pInstance->GetData64(NPC_STONE_GUARD_CONTROLER)); else return NULL;
+                if (pInstance) return me->GetMap()->GetCreature(pInstance->GetData64(NPC_STONE_GUARD_CONTROLLER)); else return NULL;
             }
 
             void Reset()
@@ -404,8 +404,8 @@ class boss_generic_guardian : public CreatureScript
                 me->CastSpell(me, SPELL_ANIM_SIT,    true);
                 me->CastSpell(me, SPELL_ZERO_ENERGY, true);
 
-                if (Creature* stoneGuardControler = me->GetMap()->GetCreature(GetData(NPC_STONE_GUARD_CONTROLER)))
-                    stoneGuardControler->AI()->Reset();
+                if (Creature* stoneGuardController = me->GetMap()->GetCreature(GetData(NPC_STONE_GUARD_CONTROLLER)))
+                    stoneGuardController->AI()->Reset();
 
                 summons.DespawnAll();
                 me->RemoveAllAreasTrigger();
@@ -940,7 +940,7 @@ class mob_tiling_creature : public CreatureScript
                 {
                     case ACTION_TILING:
                     {
-                        if (Creature* controller = me->GetMap()->GetCreature(pInstance->GetData64(NPC_STONE_GUARD_CONTROLER)))
+                        if (Creature* controller = me->GetMap()->GetCreature(pInstance->GetData64(NPC_STONE_GUARD_CONTROLLER)))
                             controller->CastSpell(me, SPELL_TILES_DISPLAYED, false);
 
                         // me->CastSpell(me, SPELL_TILES_DISPLAYED, false);
@@ -1200,7 +1200,7 @@ class spell_jasper_chains_damage : public SpellScriptLoader
 
 void AddSC_boss_stone_guard()
 {
-    new boss_stone_guard_controler();
+    new boss_stone_guard_controller();
     new boss_generic_guardian();
     new mob_cobalt_mine();
     new mob_living_crystal();

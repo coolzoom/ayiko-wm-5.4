@@ -107,10 +107,10 @@ class instance_mogu_shan_vault : public InstanceMapScript
             uint64 cursedMogu2Guid;
             uint64 ghostEssenceGuid;
 
-            uint64 stoneGuardControlerGuid;
+            uint64 stoneGuardControllerGuid;
             uint64 fengGuid;
             uint64 siphonShieldGuid;
-            uint64 spiritKingsControlerGuid;
+            uint64 spiritKingsControllerGuid;
             uint64 elegonGuid;
             uint64 infiniteEnergyGuid;
 
@@ -140,7 +140,7 @@ class instance_mogu_shan_vault : public InstanceMapScript
                 guardianCount                   = 0;
                 guardianAliveCount              = 0;
 
-                stoneGuardControlerGuid         = 0;
+                stoneGuardControllerGuid        = 0;
                 fengGuid                        = 0;
                 siphonShieldGuid                = 0;
 
@@ -167,10 +167,10 @@ class instance_mogu_shan_vault : public InstanceMapScript
                 cursedMogu2Guid                 = 0;
                 ghostEssenceGuid                = 0;
 
-                stoneGuardControlerGuid         = 0;
+                stoneGuardControllerGuid        = 0;
                 inversionGobGuid                = 0;
                 cancelGobGuid                   = 0;
-                spiritKingsControlerGuid        = 0;
+                spiritKingsControllerGuid       = 0;
 
                 qinxiGuid                       = 0;
                 janxiGuid                       = 0;
@@ -184,8 +184,8 @@ class instance_mogu_shan_vault : public InstanceMapScript
             {
                 switch (creature->GetEntry())
                 {
-                    case NPC_STONE_GUARD_CONTROLER:
-                        stoneGuardControlerGuid = creature->GetGUID();
+                    case NPC_STONE_GUARD_CONTROLLER:
+                        stoneGuardControllerGuid = creature->GetGUID();
                         break;
                     case NPC_JASPER:
                     case NPC_JADE:
@@ -228,8 +228,8 @@ class instance_mogu_shan_vault : public InstanceMapScript
                     case NPC_SIPHONING_SHIELD:
                         siphonShieldGuid = creature->GetGUID();
                         break;
-                    case NPC_SPIRIT_GUID_CONTROLER:
-                        spiritKingsControlerGuid = creature->GetGUID();
+                    case NPC_SPIRIT_GUID_CONTROLLER:
+                        spiritKingsControllerGuid = creature->GetGUID();
                         break;
                     case NPC_ZIAN:
                     case NPC_MENG:
@@ -347,8 +347,8 @@ class instance_mogu_shan_vault : public InstanceMapScript
                         switch (state)
                         {
                             case IN_PROGRESS:
-                                if (Creature* stoneGuardControler = instance->GetCreature(stoneGuardControlerGuid))
-                                    stoneGuardControler->AI()->DoAction(ACTION_ENTER_COMBAT);
+                                if (Creature* stoneGuardController = instance->GetCreature(stoneGuardControllerGuid))
+                                    stoneGuardController->AI()->DoAction(ACTION_ENTER_COMBAT);
 
                                 for (auto stoneGuardGuid: stoneGuardGUIDs)
                                     if (Creature* stoneGuard = instance->GetCreature(stoneGuardGuid))
@@ -360,8 +360,8 @@ class instance_mogu_shan_vault : public InstanceMapScript
                                         stoneGuard->AI()->DoAction(ACTION_FAIL);
                                 break;
                             case DONE:
-                                if (Creature* stoneGuardControler = instance->GetCreature(stoneGuardControlerGuid))
-                                    stoneGuardControler->CastSpell(stoneGuardControler, ACHIEVEMENT_STONE_GUARD_KILL, true);
+                                if (Creature* stoneGuardController = instance->GetCreature(stoneGuardControllerGuid))
+                                    stoneGuardController->CastSpell(stoneGuardController, ACHIEVEMENT_STONE_GUARD_KILL, true);
                                 break;
                             default:
                                 break;
@@ -374,8 +374,8 @@ class instance_mogu_shan_vault : public InstanceMapScript
                         {
                             case IN_PROGRESS:
                             {
-                                if (Creature* spiritKingsControler = instance->GetCreature(spiritKingsControlerGuid))
-                                    spiritKingsControler->AI()->DoAction(ACTION_ENTER_COMBAT);
+                                if (Creature* spiritKingsController = instance->GetCreature(spiritKingsControllerGuid))
+                                    spiritKingsController->AI()->DoAction(ACTION_ENTER_COMBAT);
                                 break;
                             }
                             default:
@@ -472,8 +472,8 @@ class instance_mogu_shan_vault : public InstanceMapScript
                 {
                     // Creature
                     // Stone Guard
-                    case NPC_STONE_GUARD_CONTROLER:
-                        return stoneGuardControlerGuid;
+                    case NPC_STONE_GUARD_CONTROLLER:
+                        return stoneGuardControllerGuid;
                     case NPC_CURSED_MOGU_SCULPTURE_1:
                         return cursedMogu1Guid;
                     case NPC_CURSED_MOGU_SCULPTURE_2:
@@ -498,8 +498,8 @@ class instance_mogu_shan_vault : public InstanceMapScript
                     case NPC_SIPHONING_SHIELD:
                         return siphonShieldGuid;
                     // Spirit Kings
-                    case NPC_SPIRIT_GUID_CONTROLER:
-                        return spiritKingsControlerGuid;
+                    case NPC_SPIRIT_GUID_CONTROLLER:
+                        return spiritKingsControllerGuid;
                     case NPC_ZIAN:
                     case NPC_MENG:
                     case NPC_QIANG:

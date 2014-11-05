@@ -95,7 +95,7 @@ enum eActions
 enum eCreatures
 {
     // The Stone Guard
-    NPC_STONE_GUARD_CONTROLER       = 60089,
+    NPC_STONE_GUARD_CONTROLLER      = 60089,
     NPC_JASPER                      = 59915,
     NPC_JADE                        = 60043,
     NPC_AMETHYST                    = 60047,
@@ -112,7 +112,7 @@ enum eCreatures
     NPC_CURSED_MOGU_SCULPTURE_2     = 61334,
     NPC_GHOST_ESSENCE               = 62004,
     NPC_FENG                        = 60009,
-    NPC_PHASE_CONTROLER             = 61124,
+    NPC_PHASE_CONTROLLER            = 61124,
     NPC_WILDFIRE_SPARK              = 60438,
     NPC_SIPHONING_SHIELD            = 60627,
     NPC_SOUL_FRAGMENT               = 60781,
@@ -128,7 +128,7 @@ enum eCreatures
     NPC_SPIRITUAL_PORTAL            = 61172,
 
     // Spirit kings
-    NPC_SPIRIT_GUID_CONTROLER       = 60984,
+    NPC_SPIRIT_GUID_CONTROLLER      = 60984,
 
     NPC_ZIAN                        = 60701,
     NPC_MENG                        = 60708,

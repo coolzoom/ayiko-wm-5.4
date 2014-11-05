@@ -1,10 +1,10 @@
 /*
-    Dungeon : Stormstout Brewery 85-87
+    Dungeon : Siege of Niuzao Temple 88-90
     Instance General Script
 */
 
-#ifndef SIEGE_NIUZOA_TEMPLE_H_
-#define SIEGE_NIUZOA_TEMPLE_H_
+#ifndef SIEGE_OF_NIUZAO_TEMPLE_H_
+#define SIEGE_OF_NIUZAO_TEMPLE_H_
 
 #include "SpellScript.h"
 #include "Map.h"
@@ -29,4 +29,4 @@ enum CreaturesIds
     NPC_SAP_PUDDLE  = 61613
 };
 
-#endif // SIEGE_NIUZOA_TEMPLE_H_
+#endif // SIEGE_OF_NIUZAO_TEMPLE_H_

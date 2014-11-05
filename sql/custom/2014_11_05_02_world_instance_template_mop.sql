@@ -13,5 +13,5 @@ INSERT INTO `instance_template` (`map`, `parent`, `script`, `allowMount`) VALUES
 (1008, 870, "instance_mogu_shan_vault", 0), -- Mogu'shan Vaults
 (1009, 870, "instance_heart_of_fear", 0), -- Heart of Fear
 (1011, 870, "instance_siege_of_niuzao_temple", 0), -- Siege of Niuzao Temple
-(1098, 870, "", 0), -- Throne of Thunder
+(1098, 1064, "", 0), -- Throne of Thunder
 (1136, 870, "instance_siege_of_orgrimmar", 0); -- Siege of Orgrimmar

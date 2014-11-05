@@ -3622,7 +3622,7 @@ void Spell::EffectPickPocket(SpellEffIndex /*effIndex*/)
     if (unitTarget->IsAlive() && (unitTarget->GetCreatureTypeMask() & CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD) != 0)
     {
         // Glyph of Disguise
-        if (unitTarget->GetCreatureType() != CREATURE_TYPE_UNDEAD)
+        if (unitTarget->GetCreatureType() != CREATURE_TYPE_UNDEAD && unitTarget->ToCreature()->GetCreatureTemplate()->pickpocketLootId)
             if (m_caster->HasAura(63268))
                 unitTarget->AddAura(121308, m_caster);
 

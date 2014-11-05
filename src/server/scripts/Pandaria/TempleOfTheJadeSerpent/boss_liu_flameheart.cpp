@@ -1,7 +1,6 @@
 /*
     Dungeon : Template of the Jade Serpent 85-87
     Liu Flameheat third boss
-    Jade servers
 */
 
 #include "ScriptMgr.h"

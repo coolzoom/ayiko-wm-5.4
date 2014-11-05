@@ -1,7 +1,6 @@
 /*
     Dungeon : Template of the Jade Serpent 85-87
     Instance General Script
-    Jade servers
 */
 
 #include "ScriptMgr.h"
@@ -130,17 +129,17 @@ enum eStatus
     STATUS_LOREWALKER_STONESTEP_FINISH      = 6,
 };
 
-class instance_temple_of_jade_serpent : public InstanceMapScript
+class instance_temple_of_the_jade_serpent : public InstanceMapScript
 {
 public:
-    instance_temple_of_jade_serpent() : InstanceMapScript("instance_temple_of_jade_serpent", 960) { }
+    instance_temple_of_the_jade_serpent() : InstanceMapScript("instance_temple_of_the_jade_serpent", 960) { }
 
     InstanceScript* GetInstanceScript(InstanceMap* map) const
     {
-        return new instance_temple_of_jade_serpent_InstanceMapScript(map);
+        return new instance_temple_of_the_jade_serpent_InstanceMapScript(map);
     }
 
-    struct instance_temple_of_jade_serpent_InstanceMapScript : public InstanceScript
+    struct instance_temple_of_the_jade_serpent_InstanceMapScript : public InstanceScript
     {
         /*
         ** Wise Mari script.
@@ -199,7 +198,7 @@ public:
         ** End of Sha of Doubt script.
         */
 
-        instance_temple_of_jade_serpent_InstanceMapScript(Map* map) : InstanceScript(map)
+        instance_temple_of_the_jade_serpent_InstanceMapScript(Map* map) : InstanceScript(map)
         {
             // Wise Mari script
             doorWiseMari = 0;
@@ -968,7 +967,7 @@ public:
 
 };
 
-void AddSC_instance_temple_of_jade_serpent()
+void AddSC_instance_temple_of_the_jade_serpent()
 {
-    new instance_temple_of_jade_serpent();
+    new instance_temple_of_the_jade_serpent();
 }

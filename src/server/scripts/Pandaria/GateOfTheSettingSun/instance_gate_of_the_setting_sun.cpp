@@ -6,7 +6,7 @@
 #include "ScriptMgr.h"
 #include "InstanceScript.h"
 #include "ScriptedCreature.h"
-#include "gate_setting_sun.h"
+#include "gate_of_the_setting_sun.h"
 
 DoorData const doorData[] =
 {
@@ -21,17 +21,17 @@ DoorData const doorData[] =
     {0,                                     0,                          DOOR_TYPE_ROOM,         BOUNDARY_NONE},// END
 };
 
-class instance_gate_setting_sun : public InstanceMapScript
+class instance_gate_of_the_setting_sun : public InstanceMapScript
 {
 public:
-    instance_gate_setting_sun() : InstanceMapScript("instance_gate_setting_sun", 962) { }
+    instance_gate_of_the_setting_sun() : InstanceMapScript("instance_gate_of_the_setting_sun", 962) { }
 
     InstanceScript* GetInstanceScript(InstanceMap* map) const
     {
-        return new instance_gate_setting_sun_InstanceMapScript(map);
+        return new instance_gate_of_the_setting_sun_InstanceMapScript(map);
     }
 
-    struct instance_gate_setting_sun_InstanceMapScript : public InstanceScript
+    struct instance_gate_of_the_setting_sun_InstanceMapScript : public InstanceScript
     {
         uint64 kiptilakGuid;
         uint64 gadokGuid;
@@ -57,7 +57,7 @@ public:
 
         uint32 dataStorage[MAX_DATA];
 
-        instance_gate_setting_sun_InstanceMapScript(Map* map) : InstanceScript(map)
+        instance_gate_of_the_setting_sun_InstanceMapScript(Map* map) : InstanceScript(map)
         {}
 
         void Initialize()
@@ -381,7 +381,7 @@ public:
 
 };
 
-void AddSC_instance_gate_setting_sun()
+void AddSC_instance_gate_of_the_setting_sun()
 {
-    new instance_gate_setting_sun();
+    new instance_gate_of_the_setting_sun();
 }

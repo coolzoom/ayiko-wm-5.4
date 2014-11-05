@@ -3,7 +3,7 @@
     Instance General Script
 */
 
-#include "gate_setting_sun.h"
+#include "gate_of_the_setting_sun.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "Vehicle.h"
@@ -221,7 +221,7 @@ class vehicle_artillery_to_wall : public VehicleScript
         }
 };
 
-void AddSC_gate_setting_sun()
+void AddSC_gate_of_the_setting_sun()
 {
     new mob_serpent_spine_defender();
     new npc_krikthik_bombarder();

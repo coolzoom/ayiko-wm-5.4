@@ -356,7 +356,7 @@ class boss_feng : public CreatureScript
                 if (IsHeroic())
                     me->CastSpell(me, SPELL_STRENGHT_OF_SPIRIT, false);
 
-                if (Creature* controler = GetClosestCreatureWithEntry(me, NPC_PHASE_CONTROLER, 20.0f))
+                if (Creature* controler = GetClosestCreatureWithEntry(me, NPC_PHASE_CONTROLLER, 20.0f))
                     controler->DespawnOrUnsummon();
 
                 // Desactivate old statue and enable the new one
@@ -537,7 +537,7 @@ class boss_feng : public CreatureScript
                             me->GetMotionMaster()->MovePoint(newPhase, modPhasePositions[statue]);
                         }
 
-                        if (Creature* controler = me->SummonCreature(NPC_PHASE_CONTROLER, modPhasePositions[newPhase - 1].GetPositionX(), modPhasePositions[newPhase - 1].GetPositionY(), modPhasePositions[newPhase - 1].GetPositionZ()))
+                        if (Creature* controler = me->SummonCreature(NPC_PHASE_CONTROLLER, modPhasePositions[newPhase - 1].GetPositionX(), modPhasePositions[newPhase - 1].GetPositionY(), modPhasePositions[newPhase - 1].GetPositionZ()))
                             controler->AddAura(controlerVisualId[newPhase - 1], controler);
 
                         me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);

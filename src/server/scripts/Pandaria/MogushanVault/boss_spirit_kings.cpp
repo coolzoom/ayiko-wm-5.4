@@ -607,7 +607,7 @@ class boss_spirit_kings : public CreatureScript
             Creature* GetControler()
             {
                 if (pInstance)
-                    return pInstance->instance->GetCreature(pInstance->GetData64(NPC_SPIRIT_GUID_CONTROLER));
+                    return pInstance->instance->GetCreature(pInstance->GetData64(NPC_SPIRIT_GUID_CONTROLLER));
                 else
                     return NULL;
             }

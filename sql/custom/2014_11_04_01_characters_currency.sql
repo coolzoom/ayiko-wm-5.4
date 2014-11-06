@@ -6,7 +6,7 @@ ALTER TABLE character_currency
   DROP COLUMN weekCap,
   DROP COLUMN needResetCap;
 
-UPDATE character_currency SET season_total = 400000 WHERE currency IN (390, 484, 484, 692) AND season_total > 400000;
+UPDATE character_currency SET season_count = 400000 WHERE currency IN (390, 484, 484, 692) AND season_count > 400000;
 
 DROP TABLE IF EXISTS character_cp_weekcap;
 CREATE TABLE character_cp_weekcap (

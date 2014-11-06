@@ -262,6 +262,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recvData)
     Item* items[MAX_AUCTION_ITEMS];
 
     uint32 finalCount = 0;
+    uint32 itemEntry = 0;
 
     for (uint32 i = 0; i < itemsCount; ++i)
     {
@@ -273,9 +274,17 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recvData)
             return;
         }
 
-        if (sAuctionMgr->GetAItem(item->GetGUIDLow()) || !item->CanBeTraded() || item->IsNotEmptyBag() ||
-            item->GetTemplate()->Flags & ITEM_PROTO_FLAG_CONJURED || item->GetUInt32Value(ITEM_FIELD_DURATION) ||
-            item->GetCount() < count[i])
+        // It is not possible to sell items with different entries.
+        if (itemEntry == 0)
+            itemEntry = item->GetEntry();
+
+        if (sAuctionMgr->GetAItem(item->GetGUIDLow())
+                || !item->CanBeTraded()
+                || item->IsNotEmptyBag()
+                || item->GetTemplate()->Flags & ITEM_PROTO_FLAG_CONJURED
+                || item->GetUInt32Value(ITEM_FIELD_DURATION)
+                || item->GetCount() < count[i]
+                || itemEntry != item->GetEntry())
         {
             SendAuctionCommandResult(NULL, AUCTION_SELL_ITEM, ERR_AUCTION_DATABASE_ERROR);
             return;

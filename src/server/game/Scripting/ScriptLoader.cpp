@@ -629,7 +629,7 @@ void AddSC_boss_azil();
 void AddSC_deepholm();
 
 // Pandaria
-void AddSC_instance_temple_of_jade_serpent();       // Temple of Jade Serpent
+void AddSC_instance_temple_of_the_jade_serpent();       // Temple of the Jade Serpent
 void AddSC_boss_wise_mari();
 void AddSC_boss_lorewalker_stonestep();
 void AddSC_boss_liu_flameheat();
@@ -637,8 +637,8 @@ void AddSC_boss_sha_of_doubt();
 void AddSC_instance_stormstout_brewery();           // The Stormstout Brewery
 void AddSC_stormstout_brewery();
 void AddSC_boss_ook_ook();
-void AddSC_instance_gate_setting_sun();             // Gate of the Setting Sun
-void AddSC_gate_setting_sun();
+void AddSC_instance_gate_of_the_setting_sun();             // Gate of the Setting Sun
+void AddSC_gate_of_the_setting_sun();
 void AddSC_boss_saboteur_kiptilak();
 void AddSC_boss_striker_gadok();
 void AddSC_boss_commander_rimok();
@@ -662,8 +662,8 @@ void AddSC_boss_gu_cloudstrike();
 void AddSC_boss_master_snowdrift();
 void AddSC_boss_sha_of_violence();
 void AddSC_boss_taran_zhu();
-void AddSC_instance_siege_of_the_niuzoa_temple();   // Siege of the Niuzoa Temple
-void AddSC_siege_of_the_niuzoa_temple();
+void AddSC_instance_siege_of_niuzao_temple();       // Siege of Niuzao Temple
+void AddSC_siege_of_niuzao_temple();
 void AddSC_boss_jinbak();
 void AddSC_instance_mogu_shan_vault();              // Mogu'Shan Vault
 void AddSC_mogu_shan_vault();
@@ -702,7 +702,7 @@ void AddSC_spoils_of_pandaria();
 void AddSC_thok_the_bloodthirsty();
 void AddSC_siegecrafter_blackfuse();
 void AddSC_paragons_of_the_klaxxi();
-void AddSC_Garrosh_Hellscream();
+void AddSC_garrosh_hellscream();
 
 void AddSC_townlong_steppes();
 void AddSC_dread_wastes();
@@ -1379,7 +1379,7 @@ void AddNorthrendScripts()
 void AddPandariaScripts()
 {
 #ifdef SCRIPTS
-    AddSC_instance_temple_of_jade_serpent();        // Temple of Jade Serpent
+    AddSC_instance_temple_of_the_jade_serpent();        // Temple of the Jade Serpent
     AddSC_boss_wise_mari();
     AddSC_boss_lorewalker_stonestep();
     AddSC_boss_liu_flameheat();
@@ -1391,8 +1391,8 @@ void AddPandariaScripts()
     AddSC_boss_trial_of_the_king();
     AddSC_boss_gekkan();
     AddSC_boss_xin_the_weaponmaster();
-    AddSC_instance_gate_setting_sun();              // Gate of the Setting Sun
-    AddSC_gate_setting_sun();
+    AddSC_instance_gate_of_the_setting_sun();              // Gate of the Setting Sun
+    AddSC_gate_of_the_setting_sun();
     AddSC_boss_saboteur_kiptilak();
     AddSC_boss_striker_gadok();
     AddSC_boss_commander_rimok();
@@ -1412,8 +1412,8 @@ void AddPandariaScripts()
     AddSC_boss_master_snowdrift();
     AddSC_boss_sha_of_violence();
     AddSC_boss_taran_zhu();
-    AddSC_instance_siege_of_the_niuzoa_temple();    // Siege of the Niuzoa Temple
-    AddSC_siege_of_the_niuzoa_temple();
+    AddSC_instance_siege_of_niuzao_temple();    // Siege of Niuzao Temple
+    AddSC_siege_of_niuzao_temple();
     AddSC_boss_jinbak();
     AddSC_instance_mogu_shan_vault();               // Mogu'Shan Vault
     AddSC_mogu_shan_vault();
@@ -1423,7 +1423,7 @@ void AddPandariaScripts()
     AddSC_boss_spirit_kings();
     AddSC_boss_elegon();
     AddSC_boss_will_of_emperor();
-    AddSC_instance_heart_of_fear();                 // Heart of fear
+    AddSC_instance_heart_of_fear();                 // Heart of Fear
     AddSC_heart_of_fear();
     AddSC_boss_zorlok();
     AddSC_boss_tayak();
@@ -1452,7 +1452,7 @@ void AddPandariaScripts()
     AddSC_thok_the_bloodthirsty();
     AddSC_siegecrafter_blackfuse();
     AddSC_paragons_of_the_klaxxi();
-    AddSC_Garrosh_Hellscream();
+    AddSC_garrosh_hellscream();
 
     AddSC_townlong_steppes();
     AddSC_dread_wastes();

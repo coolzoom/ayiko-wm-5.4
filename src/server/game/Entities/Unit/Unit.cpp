@@ -5797,42 +5797,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                     CastCustomSpell(victim, 96881, &bp0, 0, 0, true);
                     return true;
                 }
-                // Wrath of Tarecgosa
-                case 101056:
-                {
-                    if (!procSpell)
-                        return false;
-
-                    if (!victim)
-                        return false;
-
-                    if (GetGUID() == victim->GetGUID())
-                        return false;
-
-                    if (procFlag & PROC_FLAG_DONE_PERIODIC)
-                    {
-                        if (!roll_chance_i(10))
-                            return false;
-
-                        basepoints0 = damage;
-                        triggered_spell_id = 101085;
-                        break;
-                    }
-                    else
-                    {
-                        if (!roll_chance_i(5))
-                            return false;
-
-                        triggered_spell_id = procSpell->Id;
-
-                        // Fulmination              Improved Devouring Plague
-                        if (procSpell->Id == 88767 || procSpell->Id == 63675)
-                            basepoints0 = damage;
-
-                        break;
-                    }
-                    break;
-                }
                 // Eye for an Eye
                 case 9799:
                 case 25988:

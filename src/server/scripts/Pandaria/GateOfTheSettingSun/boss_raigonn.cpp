@@ -18,7 +18,7 @@
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
-#include "gate_setting_sun.h"
+#include "gate_of_the_setting_sun.h"
 #include "Vehicle.h"
 #include "Spline.h"
 

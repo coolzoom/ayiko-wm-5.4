@@ -1,7 +1,6 @@
 /*
     Dungeon : Template of the Jade Serpent 85-87
     Wise mari
-    Jade servers
 */
 
 #include "ScriptMgr.h"

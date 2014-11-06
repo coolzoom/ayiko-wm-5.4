@@ -25,24 +25,24 @@ set(scripts_STAT_SRCS
   Pandaria/MogushanPalace/boss_gekkan.cpp
   Pandaria/MogushanPalace/boss_xin_the_weaponmaster.cpp
 
-  Pandaria/TempleJadeSerpent/instance_temple_of_jade_serpent.cpp
-  Pandaria/TempleJadeSerpent/boss_wise_mari.cpp
-  Pandaria/TempleJadeSerpent/boss_lorewalker_stonestep.cpp
-  Pandaria/TempleJadeSerpent/boss_liu_flameheart.cpp
-  Pandaria/TempleJadeSerpent/boss_sha_of_doubt.cpp
+  Pandaria/TempleOfTheJadeSerpent/instance_temple_of_the_jade_serpent.cpp
+  Pandaria/TempleOfTheJadeSerpent/boss_wise_mari.cpp
+  Pandaria/TempleOfTheJadeSerpent/boss_lorewalker_stonestep.cpp
+  Pandaria/TempleOfTheJadeSerpent/boss_liu_flameheart.cpp
+  Pandaria/TempleOfTheJadeSerpent/boss_sha_of_doubt.cpp
 
   Pandaria/StormstoutBrewery/instance_stormstout_brewery.cpp
   Pandaria/StormstoutBrewery/stormstout_brewery.cpp
   Pandaria/StormstoutBrewery/stormstout_brewery.h
   Pandaria/StormstoutBrewery/boss_ook_ook.cpp
 
-  Pandaria/GateSettingSun/instance_gate_setting_sun.cpp
-  Pandaria/GateSettingSun/gate_setting_sun.cpp
-  Pandaria/GateSettingSun/gate_setting_sun.h
-  Pandaria/GateSettingSun/boss_saboteur_kiptilak.cpp
-  Pandaria/GateSettingSun/boss_striker_gadok.cpp
-  Pandaria/GateSettingSun/boss_commander_rimok.cpp
-  Pandaria/GateSettingSun/boss_raigonn.cpp
+  Pandaria/GateOfTheSettingSun/instance_gate_of_the_setting_sun.cpp
+  Pandaria/GateOfTheSettingSun/gate_of_the_setting_sun.cpp
+  Pandaria/GateOfTheSettingSun/gate_of_the_setting_sun.h
+  Pandaria/GateOfTheSettingSun/boss_saboteur_kiptilak.cpp
+  Pandaria/GateOfTheSettingSun/boss_striker_gadok.cpp
+  Pandaria/GateOfTheSettingSun/boss_commander_rimok.cpp
+  Pandaria/GateOfTheSettingSun/boss_raigonn.cpp
 
   Pandaria/ShadopanMonastery/instance_shadopan_monastery.cpp
   Pandaria/ShadopanMonastery/shadopan_monastery.cpp
@@ -52,10 +52,10 @@ set(scripts_STAT_SRCS
   Pandaria/ShadopanMonastery/boss_sha_of_violence.cpp
   Pandaria/ShadopanMonastery/boss_taran_zhu.cpp
 
-  Pandaria/SiegeNiuzaoTemple/instance_siege_of_the_niuzoa_temple.cpp
-  Pandaria/SiegeNiuzaoTemple/siege_of_the_niuzoa_temple.cpp
-  Pandaria/SiegeNiuzaoTemple/siege_of_the_niuzoa_temple.h
-  Pandaria/SiegeNiuzaoTemple/boss_jinbak.cpp
+  Pandaria/SiegeOfNiuzaoTemple/instance_siege_of_niuzao_temple.cpp
+  Pandaria/SiegeOfNiuzaoTemple/siege_of_niuzao_temple.cpp
+  Pandaria/SiegeOfNiuzaoTemple/siege_of_niuzao_temple.h
+  Pandaria/SiegeOfNiuzaoTemple/boss_jinbak.cpp
 
   Pandaria/MogushanVault/instance_mogu_shan_vault.cpp
   Pandaria/MogushanVault/mogu_shan_vault.cpp

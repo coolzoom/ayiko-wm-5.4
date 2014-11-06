@@ -1,5 +1,4 @@
 /*
- * Copyright (C) 2012-2013 Trinity <http://www.pandashan.com/>
  * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
@@ -235,14 +234,14 @@ uint32 spiritsOrder[4] =
 };
 
 // 60984 - Controller
-class boss_spirit_kings_controler : public CreatureScript
+class boss_spirit_kings_controller : public CreatureScript
 {
     public:
-        boss_spirit_kings_controler() : CreatureScript("boss_spirit_kings_controler") {}
+        boss_spirit_kings_controller() : CreatureScript("boss_spirit_kings_controller") {}
 
-        struct boss_spirit_kings_controlerAI : public BossAI
+        struct boss_spirit_kings_controllerAI : public BossAI
         {
-            boss_spirit_kings_controlerAI(Creature* creature) : BossAI(creature, DATA_SPIRIT_KINGS)
+            boss_spirit_kings_controllerAI(Creature* creature) : BossAI(creature, DATA_SPIRIT_KINGS)
             {
                 pInstance = creature->GetInstanceScript();
 
@@ -531,7 +530,7 @@ class boss_spirit_kings_controler : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return new boss_spirit_kings_controlerAI(creature);
+            return new boss_spirit_kings_controllerAI(creature);
         }
 };
 
@@ -1560,7 +1559,7 @@ class spell_coalescing_shadow : public SpellScriptLoader
 
 void AddSC_boss_spirit_kings()
 {
-    new boss_spirit_kings_controler();
+    new boss_spirit_kings_controller();
     new boss_spirit_kings();
     new mob_pinning_arrow();
     new mob_undying_shadow();

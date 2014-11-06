@@ -1,16 +1,12 @@
-DROP TABLE IF EXISTS character_currency;
-CREATE TABLE character_currency (
-  guid int(10) UNSIGNED NOT NULL,
-  currency smallint(5) UNSIGNED NOT NULL,
-  season_count int(10) UNSIGNED NOT NULL DEFAULT 0,
-  week_count int(10) UNSIGNED NOT NULL,
-  current_count int(10) UNSIGNED NOT NULL DEFAULT 0,
-  flags tinyint UNSIGNED NOT NULL DEFAULT 0,
-  PRIMARY KEY (guid, currency),
-  CONSTRAINT fk__character_currency__characters
-    FOREIGN KEY (guid) REFERENCES characters (guid)
-    ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = INNODB DEFAULT CHARSET = utf8 ROW_FORMAT = DYNAMIC;
+ALTER TABLE character_currency
+  CHANGE COLUMN total_count current_count int(10) UNSIGNED NOT NULL DEFAULT 0,
+  MODIFY COLUMN week_count int(10) UNSIGNED NOT NULL DEFAULT 0,
+  CHANGE COLUMN season_total season_count int(10) UNSIGNED NOT NULL DEFAULT 0,
+  MODIFY COLUMN flags tinyint(3) UNSIGNED NOT NULL DEFAULT 0,
+  DROP COLUMN weekCap,
+  DROP COLUMN needResetCap;
+
+UPDATE character_currency SET season_total = 400000 WHERE currency IN (390, 484, 484, 692) AND season_total > 400000;
 
 DROP TABLE IF EXISTS character_cp_weekcap;
 CREATE TABLE character_cp_weekcap (

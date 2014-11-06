@@ -276,10 +276,21 @@ void Battleground::Update(uint32 diff)
                     m_PlayersPositionsTimer -= diff;
 
                 _ProcessRessurect(diff);
-                if (sBattlegroundMgr->GetPrematureFinishTime() && (GetPlayersCountByTeam(ALLIANCE) < GetMinPlayersPerTeam() || GetPlayersCountByTeam(HORDE) < GetMinPlayersPerTeam()))
-                    _ProcessProgress(diff);
-                else if (m_PrematureCountDown)
-                    m_PrematureCountDown = false;
+
+                if (!isRated())
+                {
+                    if (sBattlegroundMgr->GetPrematureFinishTime() && (GetPlayersCountByTeam(ALLIANCE) < GetMinPlayersPerTeam() || GetPlayersCountByTeam(HORDE) < GetMinPlayersPerTeam()))
+                        _ProcessProgress(diff);
+                    else if (m_PrematureCountDown)
+                        m_PrematureCountDown = false;
+                }
+                else
+                {
+                    if (GetPlayersCountByTeam(ALLIANCE) == 0)
+                        EndBattleground(HORDE);
+                    else if (GetPlayersCountByTeam(HORDE) == 0)
+                        EndBattleground(ALLIANCE);
+                }
             }
             break;
         case STATUS_WAIT_LEAVE:

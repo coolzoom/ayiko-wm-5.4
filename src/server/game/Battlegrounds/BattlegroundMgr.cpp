@@ -1505,15 +1505,15 @@ BattlegroundTypeId BattlegroundMgr::GetRandomBG(BattlegroundTypeId bgTypeId)
     }
     else if (bgTypeId == BATTLEGROUND_RB || bgTypeId == BATTLEGROUND_RA_BG)
     {
-        uint8 const size = (bgTypeId == BATTLEGROUND_RA_BG) ? 10 : 0;
+        uint8 const size = (bgTypeId == BATTLEGROUND_RA_BG) ? 15 : 0;
 
         for (BattlegroundSelectionWeightMap::const_iterator it = m_BGSelectionWeights.begin(); it != m_BGSelectionWeights.end(); ++it)
         {
             // Filter the bg's by size
             if (size)
             {
-                Battleground const* bg = GetBattlegroundTemplate(it->first);
-                if (!bg || bg->GetMaxPlayersPerTeam() != size)
+                auto const bg = GetBattlegroundTemplate(it->first);
+                if (!bg || bg->GetMaxPlayersPerTeam() > size)
                     continue;
             }
 

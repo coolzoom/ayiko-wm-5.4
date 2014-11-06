@@ -702,7 +702,6 @@ void AddSC_spoils_of_pandaria();
 void AddSC_thok_the_bloodthirsty();
 void AddSC_siegecrafter_blackfuse();
 void AddSC_paragons_of_the_klaxxi();
-void AddSC_garrosh_hellscream();
 
 void AddSC_townlong_steppes();
 void AddSC_dread_wastes();
@@ -1018,7 +1017,7 @@ void AddEasternKingdomsScripts()
     AddSC_boss_slabhide();
     AddSC_boss_ozruk();
     AddSC_boss_azil();
-    
+
 #endif
 }
 
@@ -1452,7 +1451,6 @@ void AddPandariaScripts()
     AddSC_thok_the_bloodthirsty();
     AddSC_siegecrafter_blackfuse();
     AddSC_paragons_of_the_klaxxi();
-    AddSC_garrosh_hellscream();
 
     AddSC_townlong_steppes();
     AddSC_dread_wastes();

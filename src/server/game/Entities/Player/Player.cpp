@@ -28488,8 +28488,8 @@ void Player::SendRefundInfo(Item* item)
         CurrencyTypesEntry const* currencyType = sCurrencyTypesStore.LookupEntry(iece->RequiredCurrency[i]);
         uint32 precision = (currencyType && currencyType->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? CURRENCY_PRECISION : 1;
 
-        data << uint32(iece->RequiredCurrencyCount[i] / precision);
         data << uint32(iece->RequiredCurrency[i]);
+        data << uint32(iece->RequiredCurrencyCount[i] / precision);
     }
 
     data.WriteBitSeq<1, 0, 7, 2, 3, 6, 4, 5>(itemGuid);
@@ -28554,8 +28554,8 @@ void Player::SendItemRefundResult(Item* item, ItemExtendedCostEntry const* iece,
             CurrencyTypesEntry const* currencyType = sCurrencyTypesStore.LookupEntry(iece->RequiredCurrency[i]);
             uint32 precision = (currencyType && currencyType->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? CURRENCY_PRECISION : 1;
 
-            data << uint32(iece->RequiredCurrencyCount[i] / precision);
             data << uint32(iece->RequiredCurrency[i]);
+            data << uint32(iece->RequiredCurrencyCount[i] / precision);
         }
 
         data << uint32(item->GetPaidMoney());

@@ -3203,7 +3203,7 @@ T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T &basevalue, Spell* spel
 
     for (auto const &mod : m_spellMods[op])
     {
-        if (!IsAffectedBySpellmod(spellInfo, mod, spell))
+        if (!mod->ownerEffect || !IsAffectedBySpellmod(spellInfo, mod, spell))
             continue;
 
         if (mod->type == SPELLMOD_FLAT)

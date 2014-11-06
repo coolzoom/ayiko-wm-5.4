@@ -57,7 +57,7 @@ CREATE TABLE character_rated_bg_stats (
   bestWeekRating int(10) UNSIGNED NOT NULL,
   bestSeasonRating int(10) UNSIGNED NOT NULL,
   PRIMARY KEY (guid),
-  CONSTRAINT fk__character_rated_bg_stats__characters FOREIGN KEY (guid)
-    REFERENCES characters (guid) ON DELETE CASCADE ON UPDATE RESTRICT
-)
-ENGINE = INNODB DEFAULT CHARSET = utf8 ROW_FORMAT = DYNAMIC;
+  CONSTRAINT fk__character_rated_bg_stats__characters
+    FOREIGN KEY (guid) REFERENCES characters (guid)
+    ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = INNODB DEFAULT CHARSET = utf8 ROW_FORMAT = DYNAMIC;

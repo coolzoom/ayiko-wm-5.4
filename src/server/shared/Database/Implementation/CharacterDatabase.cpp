@@ -333,6 +333,7 @@ void DoPrepareStatements(MySQLConnection &conn)
                           "rated_bg_cap = CONVERT(CP_CAP_FROM_RATING(max_rated_bg_rating) * 1.222 + 0.5, UNSIGNED INTEGER), max_rated_bg_rating = 0");
     conn.prepareStatement(CHAR_UPD_CURRENCY_WEEK_COUNT, "UPDATE character_currency SET week_count = 0");
     conn.prepareStatement(CHAR_UPD_ARENA_DATA, "UPDATE character_arena_data SET prevWeekWins = weekWins, weekWins = 0, weekGames = 0, bestRatingOfWeek = 0");
+    conn.prepareStatement(CHAR_UPD_RATED_BG_STATS, "UPDATE character_rated_bg_stats SET prevWeekWins = thisWeekWins, thisWeekWins = 0, weekGames = 0, bestWeekRating = 0");
 
     // Account data
     conn.prepareStatement(CHAR_SEL_ACCOUNT_DATA, "SELECT type, time, data FROM account_data WHERE accountId = ?");

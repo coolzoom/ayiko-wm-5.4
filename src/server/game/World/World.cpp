@@ -20,6 +20,7 @@
     \ingroup world
 */
 
+#include "World.h"
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "Config.h"
@@ -32,7 +33,6 @@
 #include "Vehicle.h"
 #include "SkillExtraItems.h"
 #include "SkillDiscovery.h"
-#include "World.h"
 #include "AccountMgr.h"
 #include "AchievementMgr.h"
 #include "AuctionHouseMgr.h"
@@ -3193,6 +3193,10 @@ void World::ResetCurrencyWeekCap()
 
     sThreadPoolMgr->schedule([] {
         CharacterDatabase.Execute(CharacterDatabase.GetPreparedStatement(CHAR_UPD_CURRENCY_WEEK_COUNT));
+    });
+
+    sThreadPoolMgr->schedule([] {
+        CharacterDatabase.Execute(CharacterDatabase.GetPreparedStatement(CHAR_UPD_RATED_BG_STATS));
     });
 
     sThreadPoolMgr->wait();

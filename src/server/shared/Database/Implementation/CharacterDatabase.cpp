@@ -375,6 +375,11 @@ void DoPrepareStatements(MySQLConnection &conn)
     conn.prepareStatement(CHAR_SEL_PETITION_SIG_BY_GUID, "SELECT ownerguid, petitionguid FROM petition_sign WHERE playerguid = ?");
     conn.prepareStatement(CHAR_SEL_PETITION_SIG_BY_GUID_TYPE, "SELECT ownerguid, petitionguid FROM petition_sign WHERE playerguid = ? AND type = ?");
 
+    conn.prepareStatement(CHAR_SEL_RATED_BG_STATS, "SELECT personalRating, matchmakerRating, seasonGames, weekGames,"
+                          " thisWeekWins, prevWeekWins, bestWeekRating, bestSeasonRating FROM character_rated_bg_stats WHERE guid = ?");
+    conn.prepareStatement(CHAR_REP_RATED_BG_STATS, "REPLACE INTO character_rated_bg_stats (guid, personalRating, matchmakerRating,"
+                          " seasonGames, weekGames, thisWeekWins, prevWeekWins, bestWeekRating, bestSeasonRating) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
     // Character arena data
     conn.prepareStatement(CHAR_SEL_CHARACTER_ARENA_DATA, "SELECT slot, rating, bestRatingOfWeek, bestRatingOfSeason, matchMakerRating, weekGames, weekWins, prevWeekWins, seasonGames, seasonWins FROM character_arena_data WHERE guid = ?");
     conn.prepareStatement(CHAR_INS_CHARACTER_ARENA_DATA, "INSERT INTO character_arena_data (guid, slot, rating, bestRatingOfWeek, bestRatingOfSeason, matchMakerRating, weekGames, weekWins, prevWeekWins, seasonGames, seasonWins) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");

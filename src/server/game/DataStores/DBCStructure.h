@@ -562,6 +562,13 @@ struct AchievementCriteriaEntry
             uint32 winCount;
         } win_rated_battleground;
 
+        // ACHIEVEMENT_CRITERIA_TYPE_REACH_BG_RATING        = 132
+        struct
+        {
+            uint32 unused;
+            uint32 count;
+        } reach_battleground_rating;
+
         // ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUESTS_GUILD = 134
         struct
         {
@@ -764,12 +771,12 @@ struct BattlemasterListEntry
     uint32  type;                                           // 17 (3 - BG, 4 - arena)
     //uint32 canJoinAsGroup;                                // 18
     char* name;                                             // 19 Map name
-    //uint32 minPlayers;                                    // 20
+    uint32 maxGroupSize;                                    // 12 maxGroupSize, used for checking if queue as group
     uint32 HolidayWorldStateId;                             // 21
     uint32 minLevel;                                        // 22 min level (sync with PvPDifficulty.dbc content)
     uint32 maxLevel;                                        // 23 max level (sync with PvPDifficulty.dbc content)
-    uint32 maxGroupSize;                                    // 24
-    //uint32 unk_6;                                         // 25 groupe size related (guild challenge ?)
+    uint32 maxGroupSizeRated;                               // 16 4.0.1
+    //uint32 minPlayers;                                    // 25 groupe size related (guild challenge ?)
     //uint32 maxPlayers;                                    // 26
     //uint32 isRated;                                       // 27 0 for normal 2 rated
     //uint32 unk_11;                                        // 28 data only for BG
@@ -878,18 +885,18 @@ struct ChrPowerTypesEntry
 struct ChrSpecializationsEntry
 {
     uint32 entry;                                           // 0
-    char*  iconName;                                        // 1
+    //char*  iconName;                                      // 1
     uint32 classId;                                         // 2
     uint32 specializationSpell;                             // 3
     //uint32 unk                                            // 4, empty
     uint32 tabId;                                           // 5
     //uint32 unk                                            // 6
-    //uint32 unk                                            // 7
+    int32 role;                                             // 7
     //uint32 unk                                            // 8
     //uint32 unk                                            // 9
     //uint32 unk                                            // 10
-    char* specializationName;                               // 11
-    char* description;                                      // 12
+    //char* specializationName;                             // 11
+    //char* description;                                    // 12
     //uint32 unk                                            // 13
 };
 

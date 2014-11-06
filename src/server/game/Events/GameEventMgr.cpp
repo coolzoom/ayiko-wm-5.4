@@ -1132,14 +1132,19 @@ void GameEventMgr::UpdateEventNPCFlags(uint16 event_id)
 
 void GameEventMgr::UpdateBattlegroundSettings()
 {
-    std::list<uint32> activeHollidayList;
-    GameEventMgr::GameEventDataMap const events = sGameEventMgr->GetEventMap();
-
+    BattlegroundTypeId bgQueueTypeId = BATTLEGROUND_TYPE_NONE;
     for (ActiveEvents::const_iterator itr = m_ActiveEvents.begin(); itr != m_ActiveEvents.end(); ++itr)
-        if (events[*itr].holiday_id)
-            activeHollidayList.push_back(events[*itr].holiday_id);
+    {
+        GameEventData const& event = mGameEvent[*itr];
+        if (event.holiday_id != HOLIDAY_NONE)
+        {
+            BattlegroundTypeId bgTypeId = BattlegroundMgr::WeekendHolidayIdToBGType(event.holiday_id);
+            if (bgTypeId != BATTLEGROUND_TYPE_NONE)
+                break;
+        }
+    }
 
-    sBattlegroundMgr->SetHolidayWeekends(activeHollidayList);
+    sBattlegroundMgr->SetHolidayWeekends(bgQueueTypeId);
 }
 
 void GameEventMgr::UpdateEventNPCVendor(uint16 event_id, bool activate)

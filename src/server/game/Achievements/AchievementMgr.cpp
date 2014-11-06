@@ -1383,7 +1383,8 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
             case ACHIEVEMENT_CRITERIA_TYPE_SPECIAL_PVP_KILL:
             case ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS:
             case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL_AT_AREA:
-            case ACHIEVEMENT_CRITERIA_TYPE_WIN_ARENA: // This also behaves like ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA
+            case ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_BATTLEGROUND:
+            case ACHIEVEMENT_CRITERIA_TYPE_WIN_ARENA:
             case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE_GUILD:
             case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_ARCHAEOLOGY_PROJECTS:
             case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_GUILD_CHALLENGE_TYPE:
@@ -1610,6 +1611,7 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
                 break;
             }
             case ACHIEVEMENT_CRITERIA_TYPE_REACH_GUILD_LEVEL:
+            case ACHIEVEMENT_CRITERIA_TYPE_REACH_BG_RATING:
             {
                 if (!miscValue1)
                     continue;
@@ -1631,8 +1633,6 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
             case ACHIEVEMENT_CRITERIA_TYPE_OWN_RANK:
             case ACHIEVEMENT_CRITERIA_TYPE_EARNED_PVP_TITLE:
             case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE:
-            case ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_BATTLEGROUND:
-            case ACHIEVEMENT_CRITERIA_TYPE_REACH_BG_RATING:
                 break;                                   // Not implemented yet :(
             default:
                 break;
@@ -1698,6 +1698,8 @@ bool AchievementMgr<T>::IsCompletedCriteria(AchievementCriteriaEntry const* achi
 
     switch (AchievementCriteriaTypes(achievementCriteria->type))
     {
+        case ACHIEVEMENT_CRITERIA_TYPE_REACH_BG_RATING:
+            return progress->counter >= achievementCriteria->reach_battleground_rating.count;
         case ACHIEVEMENT_CRITERIA_TYPE_WIN_BG:
             return progress->counter >= achievementCriteria->win_bg.winCount;
         case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE:
@@ -2708,6 +2710,7 @@ bool AchievementMgr<T>::RequirementsSatisfied(AchievementCriteriaEntry const *ac
         case ACHIEVEMENT_CRITERIA_TYPE_MONEY_FROM_VENDORS:
         case ACHIEVEMENT_CRITERIA_TYPE_NUMBER_OF_TALENT_RESETS:
         case ACHIEVEMENT_CRITERIA_TYPE_QUEST_ABANDONED:
+        case ACHIEVEMENT_CRITERIA_TYPE_REACH_BG_RATING:
         case ACHIEVEMENT_CRITERIA_TYPE_REACH_GUILD_LEVEL:
         case ACHIEVEMENT_CRITERIA_TYPE_ROLL_GREED:
         case ACHIEVEMENT_CRITERIA_TYPE_ROLL_NEED:
@@ -2718,6 +2721,7 @@ bool AchievementMgr<T>::RequirementsSatisfied(AchievementCriteriaEntry const *ac
         case ACHIEVEMENT_CRITERIA_TYPE_VISIT_BARBER_SHOP:
         case ACHIEVEMENT_CRITERIA_TYPE_WIN_DUEL:
         case ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA:
+        case ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_BATTLEGROUND:
         case ACHIEVEMENT_CRITERIA_TYPE_WON_AUCTIONS:
             if (!miscValue1)
                 return false;

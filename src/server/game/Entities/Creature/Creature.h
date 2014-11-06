@@ -538,7 +538,6 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
 
         ///// TODO RENAME THIS!!!!!
         bool isCanTrainingOf(Player* player, bool msg) const;
-        bool isCanInteractWithBattleMaster(Player* player, bool msg) const;
         bool isCanTrainingAndResetTalentsOf(Player* player) const;
         bool canCreatureAttack(Unit const* victim, bool force = true) const;
         bool IsImmunedToSpell(SpellInfo const* spellInfo);
@@ -584,7 +583,6 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
             return true;
         }
 
-        void AI_SendMoveToPacket(float x, float y, float z, uint32 time, uint32 MovementFlags, uint8 type);
         inline CreatureAI* AI() const { return (CreatureAI*)i_AI; }
 
         bool SetWalk(bool enable);

@@ -779,14 +779,14 @@ LootItem* Loot::LootItemInSlot(uint32 lootSlot, Player* player, QuestItem* *qite
     return item;
 }
 
-uint32 Loot::GetMaxSlotInLootFor(Player* player) const
+uint32 Loot::GetMaxSlotInLootFor(Player const *player) const
 {
     QuestItemMap::const_iterator itr = PlayerQuestItems.find(player->GetGUIDLow());
     return items.size() + (itr != PlayerQuestItems.end() ?  itr->second->size() : 0);
 }
 
 // return true if there is any FFA, quest or conditional item for the player.
-bool Loot::hasItemFor(Player* player) const
+bool Loot::hasItemFor(Player const *player) const
 {
     QuestItemMap const& lootPlayerQuestItems = GetPlayerQuestItems();
     QuestItemMap::const_iterator q_itr = lootPlayerQuestItems.find(player->GetGUIDLow());

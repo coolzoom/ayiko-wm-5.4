@@ -3522,17 +3522,18 @@ enum HolidayIds
     HOLIDAY_DARKMOON_FAIRE_TEROKKAR  = 479,
     HOLIDAY_ANNIVERSARY_8_YEARS      = 484,
     HOLIDAY_CALL_TO_ARMS_SM          = 488,    // Call to Arms: Silvershard Mines
-    HOLIDAY_CALL_TO_ARMS_TOK         = 489,    // Call to Arms: Temple of Kotmogu
+    HOLIDAY_CALL_TO_ARMS_KT          = 489,    // Call to Arms: Temple of Kotmogu
     HOLIDAY_CALL_TO_ARMS_AV2         = 490,    // Call to Arms: Alterac Valley
     HOLIDAY_CALL_TO_ARMS_AB2         = 491,    // Call to Arms: Arathi Basin
     HOLIDAY_CALL_TO_ARMS_EY2         = 492,    // Call to Arms: Eye of the Storm
     HOLIDAY_CALL_TO_ARMS_IC2         = 493,    // Call to Arms: Isle of Conquest
     HOLIDAY_CALL_TO_ARMS_SM2         = 494,    // Call to Arms: Silvershard Mines
     HOLIDAY_CALL_TO_ARMS_SA2         = 495,    // Call to Arms: Strand of the Ancients
-    HOLIDAY_CALL_TO_ARMS_TOK2        = 496,    // Call to Arms: Temple of Kotmogu
+    HOLIDAY_CALL_TO_ARMS_KT2         = 496,    // Call to Arms: Temple of Kotmogu
     HOLIDAY_CALL_TO_ARMS_BG2         = 497,    // Call to Arms: The Battle for Gilneas
     HOLIDAY_CALL_TO_ARMS_TP2         = 498,    // Call to Arms: Twin Peaks
-    HOLIDAY_CALL_TO_ARMS_WS2         = 499     // Call to Arms: Warsong Gulch
+    HOLIDAY_CALL_TO_ARMS_WS2         = 499,    // Call to Arms: Warsong Gulch
+    HOLIDAY_CALL_TO_ARMS_DG          = 515     // Call to Arms: Deepwind Gorge
 };
 
 // values based at QuestInfo.dbc
@@ -4312,23 +4313,19 @@ enum BattlegroundTypeId
     BATTLEGROUND_RV                 = 11,   // Ring of Valor
     BATTLEGROUND_IC                 = 30,   // Isle of Conquest
     BATTLEGROUND_RB                 = 32,   // Random Battleground
-    BATTLEGROUND_RATED_10_VS_10     = 100,  // Rated BG 10 vs 10
-    BATTLEGROUND_RATED_15_VS_15     = 101,  // Rated BG 15 vs 15
-    BATTLEGROUND_RATED_25_VS_25     = 102,  // Rated BG 25 vs 25
+    BATTLEGROUND_RA_BG              = 100,  // Rated BG 10 vs 10
     BATTLEGROUND_TP                 = 108,  // Twin Peaks
     BATTLEGROUND_BFG                = 120,  // Battle For Gilneas
     // 441 = "Icecrown Citadel"
     // 443 = "The Ruby Sanctum"
     // 656 = "Rated Eye of the Storm"
-    BATTLEGROUND_KT                 = 699,  // Valley of Power
+    BATTLEGROUND_KT                 = 699,  // Kotmogu's Temple
     BATTLEGROUND_CTF3               = 706,  // CTF3 not implemented on MoP
     BATTLEGROUND_SSM                = 708,  // Silver shard Mine
     BATTLEGROUND_TV                 = 719,  // Tol'viron Arena
     BATTLEGROUND_DG                 = 754,  // Deepwind Gorge   @todo NYI
     BATTLEGROUND_TTP                = 757   // The Tiger's Peak @todo NYI
 };
-
-#define MAX_BATTLEGROUND_TYPE_ID 758
 
 enum MailResponseType
 {
@@ -4606,6 +4603,13 @@ enum MountResult
     ERROR_YOUR_RACE_CANT_RIDE                 = 7,
     ERROR_YOU_CANT_RIDE_WHILE_IN_ANOTHER_FORM = 8,
     ERROR_YOU_CANT_CONTINUE                   = 9,
+};
+
+enum SpecRole
+{
+    SPEC_ROLE_TANK      = 0,
+    SPEC_ROLE_HEALING   = 1,
+    SPEC_ROLE_DAMAGE    = 2
 };
 
 #define CURRENCY_PRECISION 100

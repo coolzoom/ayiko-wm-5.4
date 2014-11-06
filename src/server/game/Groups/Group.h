@@ -280,7 +280,9 @@ class Group
 
         void SetBattlegroundGroup(Battleground* bg);
         void SetBattlefieldGroup(Battlefield* bf);
-        GroupJoinBattlegroundResult CanJoinBattlegroundQueue(Battleground const* bgOrTemplate, BattlegroundQueueTypeId bgQueueTypeId, uint32 MinPlayerCount, uint32 MaxPlayerCount, bool isRated, uint32 arenaSlot);
+        GroupJoinBattlegroundResult CanJoinBattlegroundQueue(Battleground const* bgOrTemplate, BattlegroundQueueTypeId bgQueueTypeId, uint32 MinPlayerCount);
+
+        uint32 ratedBgTeamMMR() const;
 
         void ChangeMembersGroup(uint64 guid, uint8 group);
         void ChangeMembersGroup(Player* player, uint8 group);

@@ -244,6 +244,10 @@ bool LoginQueryHolder::Initialize()
     stmt->setUInt32(0, lowGuid);
     res &= SetPreparedQuery(PLAYER_LOGIN_QUERY_LOAD_KNOWN_TITLES, stmt);
 
+    stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_RATED_BG_STATS);
+    stmt->setUInt32(0, lowGuid);
+    res &= SetPreparedQuery(PLAYER_LOGIN_QUERY_LOAD_RATED_BG_STATS, stmt);
+
     return res;
 }
 

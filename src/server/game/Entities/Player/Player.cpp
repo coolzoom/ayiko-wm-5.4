@@ -903,10 +903,6 @@ Player::Player(WorldSession* session)
 
     _activeCheats = CHEAT_NONE;
 
-    _lastTargetedGO = 0;
-
-    m_PersonnalXpRate = 0;
-
     m_knockBackTimer = 0;
 
     m_ignoreMovementCount = 0;
@@ -8202,6 +8198,21 @@ void Player::_LoadKnownTitles(PreparedQueryResult result)
     }
 }
 
+void Player::_SaveRatedBgStats(SQLTransaction &trans)
+{
+    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_RATED_BG_STATS);
+    stmt->setUInt32(0, GetGUIDLow());
+    stmt->setUInt32(1, ratedBgStats().personalRating());
+    stmt->setUInt32(2, ratedBgStats().matchmakerRating());
+    stmt->setUInt32(3, ratedBgStats().seasonGames());
+    stmt->setUInt32(4, ratedBgStats().weekGames());
+    stmt->setUInt32(5, ratedBgStats().thisWeekWins());
+    stmt->setUInt32(6, ratedBgStats().prevWeekWins());
+    stmt->setUInt32(7, ratedBgStats().bestWeekRating());
+    stmt->setUInt32(8, ratedBgStats().bestSeasonRating());
+    trans->Append(stmt);
+}
+
 void Player::_SaveKnownTitles(SQLTransaction &trans)
 {
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_KNOWN_TITLES);
@@ -8315,7 +8326,7 @@ void Player::SendPvpRewards()
     packet << (uint32)sWorld->getIntConfig(CONFIG_CURRENCY_CONQUEST_POINTS_ARENA_REWARD) / 100; // Conquest points from Arena win - dword30
     packet << (uint32)GetCurrencyOnWeek(CURRENCY_TYPE_CONQUEST_META_ARENA, true); // Count of given conquest points from Arena in week - dword28
     packet << (uint32)GetCurrencyOnWeek(CURRENCY_TYPE_CONQUEST_META_RATED_BG, true); // Count of given conquest points from Rated BG in week - dword2C
-    packet << (uint32)sWorld->getIntConfig(CONFIG_CURRENCY_CONQUEST_POINTS_RATED_BG_REWARD)  / 100; // Conquest points from Rated BG win - dword18
+    packet << (uint32)sWorld->getIntConfig(CONFIG_CURRENCY_CONQUEST_POINTS_RATED_BG_REWARD) / 100; // Conquest points from Rated BG win - dword18
     packet << (uint32)GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_META_ARENA, true); // Conquest points cap for Arena dword10
     packet << (uint32)GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_META_RATED_BG, true); // Conquest points cap for Rated BG - dword14
     packet << (uint32)GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_META_RANDOM_BG, true); // Conquest points cap for Random BG - dword24
@@ -15911,7 +15922,7 @@ void Player::PrepareGossipMenu(WorldObject* source, uint32 menuId /*= 0*/, bool 
                         return;
                     break;
                 case GOSSIP_OPTION_BATTLEFIELD:
-                    if (!creature->isCanInteractWithBattleMaster(this, false))
+                    if (!creature->IsBattleMaster())
                         canTalk = false;
                     break;
                 case GOSSIP_OPTION_STABLEPET:
@@ -16133,15 +16144,13 @@ void Player::OnGossipSelect(WorldObject* source, uint32 gossipListId, uint32 men
             break;
         case GOSSIP_OPTION_BATTLEFIELD:
         {
-            BattlegroundTypeId bgTypeId = sBattlegroundMgr->GetBattleMasterBG(source->GetEntry());
-
-            if (bgTypeId == BATTLEGROUND_TYPE_NONE)
+            if (source->GetTypeId() != TYPEID_UNIT || !source->ToCreature()->IsBattleMaster())
             {
                 TC_LOG_ERROR("entities.player", "a user (guid %u) requested battlegroundlist from a npc who is no battlemaster", GetGUIDLow());
                 return;
             }
 
-            GetSession()->SendBattleGroundList(guid, bgTypeId);
+            GetSession()->SendBattleGroundList(guid);
             break;
         }
     }
@@ -19345,12 +19354,15 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
 
     _LoadCUFProfiles(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_CUF_PROFILES));
 
+    if (auto res = holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_RATED_BG_STATS))
+        m_ratedBgStats.loadFromDB(res->Fetch());
+
     SetUInt32Value(PLAYER_FIELD_VIRTUAL_PLAYER_REALM, realmID);
 
     return true;
 }
 
-bool Player::isAllowedToLoot(const Creature* creature)
+bool Player::isAllowedToLoot(const Creature* creature) const
 {
     if (!creature->isDead() || !creature->IsDamageEnoughForLootingAndReward())
         return false;
@@ -19362,7 +19374,7 @@ bool Player::isAllowedToLoot(const Creature* creature)
     if (loot->isLooted()) // nothing to loot or everything looted.
         return false;
 
-    Group* thisGroup = GetGroup();
+    Group const * const thisGroup = GetGroup();
     if (!thisGroup)
         return this == creature->GetLootRecipient();
     else if (thisGroup != creature->GetLootRecipientGroup())
@@ -21063,6 +21075,7 @@ void Player::SaveToDB(bool create /*=false*/)
     if (m_session->isLogingOut() || !sWorld->getBoolConfig(CONFIG_STATS_SAVE_ONLY_ON_LOGOUT))
         _SaveStats(trans);
 
+    _SaveRatedBgStats(trans);
     _SaveKnownTitles(trans);
 
     if (create)
@@ -24067,6 +24080,15 @@ void Player::SetArenaPersonalRating(uint8 slot, uint32 value)
     {
         m_maxPersonalRating = value;
         // UpdateConquestCurrencyCap(CURRENCY_TYPE_CONQUEST_META_ARENA);
+    }
+}
+
+void Player::UpdateMaxRatedBgRating(uint16 newRating)
+{
+    if (newRating > m_maxRatedBgRating)
+    {
+        m_maxRatedBgRating = newRating;
+        // UpdateConquestCurrencyCap(CURRENCY_TYPE_CONQUEST_META_RATED_BG);
     }
 }
 
@@ -28668,6 +28690,58 @@ void Player::RefundItem(Item* item)
     CharacterDatabase.CommitTransaction(trans);
 }
 
+void Player::wonRatedBg(uint32 otherTeamMMR, int32 mmrChange)
+{
+    uint32 const reward = sWorld->getIntConfig(CONFIG_CURRENCY_CONQUEST_POINTS_RATED_BG_REWARD);
+    ModifyCurrency(CURRENCY_TYPE_CONQUEST_META_RATED_BG, reward);
+
+    int32 const personalChange = Arena::GetRatingMod(ratedBgStats().personalRating(), otherTeamMMR, true);
+    m_ratedBgStats.modifyDueToWin(personalChange, mmrChange);
+
+    // SetUInt32Value(PLAYER_FIELD_BATTLEGROUND_RATING, ratedBgStats().personalRating());
+    UpdateMaxRatedBgRating(ratedBgStats().personalRating());
+
+    UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_BATTLEGROUND, 1);
+    UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_BG_RATING, ratedBgStats().personalRating());
+}
+
+void Player::lostRatedBg(uint32 otherTeamMMR, int32 mmrChange)
+{
+    int32 const personalChange = Arena::GetRatingMod(ratedBgStats().personalRating(), otherTeamMMR, false);
+    m_ratedBgStats.modifyDueToLoss(personalChange, mmrChange);
+    // SetUInt32Value(PLAYER_FIELD_BATTLEGROUND_RATING, ratedBgStats().personalRating());
+}
+
+void Player::offlineLostRatedBg(uint32 guid, uint32 otherTeamMMR, int32 mmrChange)
+{
+    Trinity::RatedBgStats rbgStats;
+
+    {
+        PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_RATED_BG_STATS);
+        stmt->setUInt32(0, guid);
+
+        if (PreparedQueryResult result = CharacterDatabase.Query(stmt))
+            rbgStats.loadFromDB(result->Fetch());
+    }
+
+    int32 const personalChange = Arena::GetRatingMod(rbgStats.personalRating(), otherTeamMMR, false);
+    rbgStats.modifyDueToLoss(personalChange, mmrChange);
+
+    {
+        PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_RATED_BG_STATS);
+        stmt->setUInt32(0, guid);
+        stmt->setUInt32(1, rbgStats.personalRating());
+        stmt->setUInt32(2, rbgStats.matchmakerRating());
+        stmt->setUInt32(3, rbgStats.seasonGames());
+        stmt->setUInt32(4, rbgStats.weekGames());
+        stmt->setUInt32(5, rbgStats.thisWeekWins());
+        stmt->setUInt32(6, rbgStats.prevWeekWins());
+        stmt->setUInt32(7, rbgStats.bestWeekRating());
+        stmt->setUInt32(8, rbgStats.bestSeasonRating());
+        CharacterDatabase.Execute(stmt);
+    }
+}
+
 void Player::SetRandomWinner(bool isWinner)
 {
     m_IsBGRandomWinner = isWinner;
@@ -29260,6 +29334,8 @@ void Player::FinishWeek()
         m_WeekGames[slot] = 0;
         m_WeekWins[slot] = 0;
     }
+
+    m_ratedBgStats.finishWeek();
 }
 
 Pet* Player::CreateTamedPetFrom(Creature* creatureTarget, uint32 spellId)

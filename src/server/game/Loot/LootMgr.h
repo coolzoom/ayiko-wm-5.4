@@ -360,8 +360,8 @@ struct Loot
     void AddItem(LootStoreItem const & item);
 
     LootItem* LootItemInSlot(uint32 lootslot, Player* player, QuestItem** qitem = NULL, QuestItem** ffaitem = NULL, QuestItem** conditem = NULL);
-    uint32 GetMaxSlotInLootFor(Player* player) const;
-    bool hasItemFor(Player* player) const;
+    uint32 GetMaxSlotInLootFor(Player const *player) const;
+    bool hasItemFor(Player const *player) const;
     bool hasOverThresholdItem() const;
 
 private:

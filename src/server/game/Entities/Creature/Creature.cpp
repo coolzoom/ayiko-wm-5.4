@@ -973,67 +973,11 @@ bool Creature::isCanTrainingOf(Player* player, bool msg) const
     return true;
 }
 
-bool Creature::isCanInteractWithBattleMaster(Player* player, bool msg) const
-{
-    if (!IsBattleMaster())
-        return false;
-
-    BattlegroundTypeId bgTypeId = sBattlegroundMgr->GetBattleMasterBG(GetEntry());
-    if (!msg)
-        return player->GetBGAccessByLevel(bgTypeId);
-
-    if (!player->GetBGAccessByLevel(bgTypeId))
-    {
-        player->PlayerTalkClass->ClearMenus();
-        switch (bgTypeId)
-        {
-            case BATTLEGROUND_AV:  player->PlayerTalkClass->SendGossipMenu(7616, GetGUID()); break;
-            case BATTLEGROUND_WS:  player->PlayerTalkClass->SendGossipMenu(7599, GetGUID()); break;
-            case BATTLEGROUND_AB:  player->PlayerTalkClass->SendGossipMenu(7642, GetGUID()); break;
-            case BATTLEGROUND_EY:
-            case BATTLEGROUND_NA:
-            case BATTLEGROUND_BE:
-            case BATTLEGROUND_AA:
-            case BATTLEGROUND_RL:
-            case BATTLEGROUND_SA:
-            case BATTLEGROUND_DS:
-            case BATTLEGROUND_RV: player->PlayerTalkClass->SendGossipMenu(10024, GetGUID()); break;
-            default: break;
-        }
-        return false;
-    }
-    return true;
-}
-
 bool Creature::isCanTrainingAndResetTalentsOf(Player* player) const
 {
     return player->getLevel() >= 10
         && GetCreatureTemplate()->trainer_type == TRAINER_TYPE_CLASS
         && player->getClass() == GetCreatureTemplate()->trainer_class;
-}
-
-void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, uint32 /*MovementFlags*/, uint8 /*type*/)
-{
-    /*    uint32 timeElap = getMSTime();
-        if ((timeElap - m_startMove) < m_moveTime)
-        {
-            oX = (dX - oX) * ((timeElap - m_startMove) / m_moveTime);
-            oY = (dY - oY) * ((timeElap - m_startMove) / m_moveTime);
-        }
-        else
-        {
-            oX = dX;
-            oY = dY;
-        }
-
-        dX = x;
-        dY = y;
-        m_orientation = atan2((oY - dY), (oX - dX));
-
-        m_startMove = getMSTime();
-        m_moveTime = time;*/
-    float speed = GetDistance(x, y, z) / ((float)time * 0.001f);
-    MonsterMoveWithSpeed(x, y, z, speed);
 }
 
 Player* Creature::GetLootRecipient() const

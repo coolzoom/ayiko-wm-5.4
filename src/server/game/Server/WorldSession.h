@@ -339,7 +339,7 @@ class WorldSession
 
         void SendAttackStop(Unit const* enemy);
 
-        void SendBattleGroundList(uint64 guid, BattlegroundTypeId bgTypeId);
+        void SendBattleGroundList(uint64 guid);
 
         void SendTradeStatus(TradeStatus status);
         void SendUpdateTrade(bool trader_data = true);
@@ -846,6 +846,7 @@ class WorldSession
         void HandleBattlemasterJoinArena(WorldPacket& recvData);
 
         void HandleReportPvPAFK(WorldPacket& recvData);
+        void HandleBattlemasterJoinRated(WorldPacket& recvData);
         void HandleRequestRatedBgInfo(WorldPacket & recvData);
         void HandleRequestPvpOptions(WorldPacket& recvData);
         void HandleRequestPvpReward(WorldPacket& recvData);

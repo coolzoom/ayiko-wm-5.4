@@ -2366,7 +2366,7 @@ void Group::UpdateLooterGuid(WorldObject* pLootedObject, bool ifneed)
     }
 }
 
-GroupJoinBattlegroundResult Group::CanJoinBattlegroundQueue(Battleground const* bgOrTemplate, BattlegroundQueueTypeId bgQueueTypeId, uint32 MinPlayerCount, uint32 /*MaxPlayerCount*/, bool /*isRated*/, uint32 /*arenaSlot*/)
+GroupJoinBattlegroundResult Group::CanJoinBattlegroundQueue(Battleground const* bgOrTemplate, BattlegroundQueueTypeId bgQueueTypeId, uint32 MinPlayerCount)
 {
     // check if this group is LFG group
     if (isLFGGroup())
@@ -2380,7 +2380,7 @@ GroupJoinBattlegroundResult Group::CanJoinBattlegroundQueue(Battleground const* 
     uint32 memberscount = GetMembersCount();
 
     if (memberscount > bgEntry->maxGroupSize)                // no MinPlayerCount for battlegrounds
-        return ERR_BATTLEGROUND_NONE;                        // ERR_GROUP_JOIN_BATTLEGROUND_TOO_MANY handled on client side
+        return ERR_BATTLEFIELD_TEAM_PARTY_SIZE;              // ERR_GROUP_JOIN_BATTLEGROUND_TOO_MANY handled on client side
 
     // get a player as reference, to compare other players' stats to (arena team id, queue id based on level, etc.)
     Player* reference = GetFirstMember()->getSource();
@@ -2395,6 +2395,7 @@ GroupJoinBattlegroundResult Group::CanJoinBattlegroundQueue(Battleground const* 
     uint32 team = reference->GetTeam();
 
     BattlegroundQueueTypeId bgQueueTypeIdRandom = BattlegroundMgr::BGQueueTypeId(BATTLEGROUND_RB, 0);
+    BattlegroundQueueTypeId bgQueueTypeIdRated = BattlegroundMgr::BGQueueTypeId(BATTLEGROUND_RA_BG, 0);
 
     // check every member of the group to be able to join
     memberscount = 0;
@@ -2432,13 +2433,42 @@ GroupJoinBattlegroundResult Group::CanJoinBattlegroundQueue(Battleground const* 
         // check is someone in party is loading or teleporting
         if (member->GetSession()->PlayerLoading() || member->IsBeingTeleported())
             return ERR_BATTLEGROUND_JOIN_FAILED;
+
+        // don't let join Rated bg while queued for non-rated and viceversa
+        if (bgOrTemplate->GetTypeID() == BATTLEGROUND_RA_BG)
+        {
+            if (member->InBattlegroundQueue())
+                return ERR_BATTLEGROUND_CANNOT_QUEUE_FOR_RATED;
+        }
+        else if (member->InBattlegroundQueueForBattlegroundQueueType(bgQueueTypeIdRated))
+            return ERR_BATTLEDGROUND_QUEUED_FOR_RATED;
     }
 
     // only check for MinPlayerCount since MinPlayerCount == MaxPlayerCount for arenas...
     if (bgOrTemplate->isArena() && memberscount != MinPlayerCount)
         return ERR_ARENA_TEAM_PARTY_SIZE;
 
+    if (bgOrTemplate->isBattleground() && bgOrTemplate->isRated() && memberscount != bgEntry->maxGroupSizeRated)
+        return ERR_BATTLEFIELD_TEAM_PARTY_SIZE;
+
     return ERR_BATTLEGROUND_NONE;
+}
+
+uint32 Group::ratedBgTeamMMR() const
+{
+    uint32 mmr = 0;
+    uint32 count = 0;
+
+    for (member_citerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
+    {
+        if (Player const * const player = ObjectAccessor::FindPlayer(itr->guid))
+        {
+            mmr += player->ratedBgStats().matchmakerRating();
+            ++count;
+        }
+    }
+
+    return mmr / count;
 }
 
 //===================================================

@@ -34,7 +34,7 @@ enum HighGuid
     HIGHGUID_DYNAMICOBJECT      = 0xF10,                        // blizz F100
     HIGHGUID_CORPSE             = 0xF101,                       // blizz F100
     HIGHGUID_AREATRIGGER        = 0xF1B,                        // blizz F100
-    HIGHGUID_TYPE_BATTLEGROUND  = 0x1F1,                        // new 4.x
+    HIGHGUID_BATTLEGROUND       = 0x1F1,                       // new 4.x
     HIGHGUID_MO_TRANSPORT       = 0x1FC,                        // blizz 1FC0 (for GAMEOBJECT_TYPE_MO_TRANSPORT)
     HIGHGUID_GROUP              = 0x1F5,
     HIGHGUID_GUILD              = 0x1FF,                        // new 4.x

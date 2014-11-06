@@ -113,8 +113,8 @@ void Battleground::BroadcastWorker(Do& _do)
 
 Battleground::Battleground()
 {
+    m_Guid              = 0;
     m_TypeID            = BATTLEGROUND_TYPE_NONE;
-    m_Guid              = MAKE_NEW_GUID(m_TypeID, 0, HIGHGUID_TYPE_BATTLEGROUND);
     m_RandomTypeID      = BATTLEGROUND_TYPE_NONE;
     m_InstanceID        = 0;
     m_Status            = STATUS_NONE;
@@ -164,7 +164,6 @@ Battleground::Battleground()
     m_TeamStartLocO[BG_TEAM_HORDE]      = 0;
 
     m_StartMaxDist = 0.0f;
-    m_holiday = 0;
 
     m_ArenaTeamRatingChanges[BG_TEAM_ALLIANCE]   = 0;
     m_ArenaTeamRatingChanges[BG_TEAM_HORDE]      = 0;
@@ -205,7 +204,7 @@ Battleground::~Battleground()
     for (uint32 i = 0; i < size; ++i)
         DelObject(i);
 
-    sBattlegroundMgr->RemoveBattleground(GetInstanceID(), GetTypeID());
+    sBattlegroundMgr->RemoveBattleground(GetTypeID(), GetInstanceID());
     // unload map
     if (m_Map)
     {
@@ -297,7 +296,7 @@ void Battleground::Update(uint32 diff)
     PostUpdateImpl(diff);
 }
 
-inline void Battleground::_CheckSafePositions(uint32 diff)
+void Battleground::_CheckSafePositions(uint32 diff)
 {
     float maxDist = GetStartMaxDist();
     if (!maxDist)
@@ -325,7 +324,7 @@ inline void Battleground::_CheckSafePositions(uint32 diff)
     }
 }
 
-inline void Battleground::_ProcessOfflineQueue()
+void Battleground::_ProcessOfflineQueue()
 {
     // remove offline players from bg after 5 minutes
     if (!m_OfflineQueue.empty())
@@ -343,7 +342,7 @@ inline void Battleground::_ProcessOfflineQueue()
     }
 }
 
-inline void Battleground::_ProcessRessurect(uint32 diff)
+void Battleground::_ProcessRessurect(uint32 diff)
 {
     // *********************************************************
     // ***        BATTLEGROUND RESSURECTION SYSTEM           ***
@@ -402,7 +401,7 @@ inline void Battleground::_ProcessRessurect(uint32 diff)
     }
 }
 
-inline void Battleground::_ProcessProgress(uint32 diff)
+void Battleground::_ProcessProgress(uint32 diff)
 {
     // *********************************************************
     // ***           BATTLEGROUND BALLANCE SYSTEM            ***
@@ -444,7 +443,7 @@ inline void Battleground::_ProcessProgress(uint32 diff)
     }
 }
 
-inline void Battleground::_ProcessJoin(uint32 diff)
+void Battleground::_ProcessJoin(uint32 diff)
 {
     // *********************************************************
     // ***           BATTLEGROUND STARTING SYSTEM            ***
@@ -565,7 +564,7 @@ inline void Battleground::_ProcessJoin(uint32 diff)
         m_EndTime -= diff;
 }
 
-inline void Battleground::_ProcessLeave(uint32 diff)
+void Battleground::_ProcessLeave(uint32 diff)
 {
     // *********************************************************
     // ***           BATTLEGROUND ENDING SYSTEM              ***
@@ -587,7 +586,7 @@ inline void Battleground::_ProcessLeave(uint32 diff)
     }
 }
 
-inline Player* Battleground::_GetPlayer(uint64 guid, bool offlineRemove, const char* context) const
+Player* Battleground::_GetPlayer(uint64 guid, bool offlineRemove, const char* context) const
 {
     Player* player = NULL;
     if (!offlineRemove)
@@ -600,17 +599,17 @@ inline Player* Battleground::_GetPlayer(uint64 guid, bool offlineRemove, const c
     return player;
 }
 
-inline Player* Battleground::_GetPlayer(BattlegroundPlayerMap::iterator itr, const char* context)
+Player* Battleground::_GetPlayer(BattlegroundPlayerMap::iterator itr, const char* context)
 {
     return _GetPlayer(itr->first, itr->second.OfflineRemoveTime, context);
 }
 
-inline Player* Battleground::_GetPlayer(BattlegroundPlayerMap::const_iterator itr, const char* context) const
+Player* Battleground::_GetPlayer(BattlegroundPlayerMap::const_iterator itr, const char* context) const
 {
     return _GetPlayer(itr->first, itr->second.OfflineRemoveTime, context);
 }
 
-inline Player* Battleground::_GetPlayerForTeam(uint32 teamId, BattlegroundPlayerMap::const_iterator itr, const char* context) const
+Player* Battleground::_GetPlayerForTeam(uint32 teamId, BattlegroundPlayerMap::const_iterator itr, const char* context) const
 {
     Player* player = _GetPlayer(itr, context);
     if (player)
@@ -759,32 +758,36 @@ void Battleground::EndBattleground(uint32 winner)
     SetRemainingTime(TIME_AUTOCLOSE_BATTLEGROUND);
 
     // arena rating calculation
-    if (isArena() && isRated())
+    if (isRated())
     {
-        loser_arena_team = GetBgRaid(GetOtherTeam(winner));
-        winner_arena_team = GetBgRaid(winner);
-        uint8 slot = Arena::GetSlotByType(GetArenaType());
-
-        if (winner_arena_team && loser_arena_team && winner_arena_team != loser_arena_team)
+        if (isArena())
         {
-            loser_matchmaker_rating = GetArenaMatchmakerRating(GetOtherTeam(winner), slot);
-            winner_matchmaker_rating = GetArenaMatchmakerRating(winner, slot);
+            loser_arena_team = GetBgRaid(GetOtherTeam(winner));
+            winner_arena_team = GetBgRaid(winner);
 
-            winner_arena_team->WonAgainst(winner_matchmaker_rating, loser_matchmaker_rating, winner_change, slot);
-            loser_arena_team->LostAgainst(loser_matchmaker_rating, winner_matchmaker_rating, loser_change, slot);
+            if (winner_arena_team && loser_arena_team && winner_arena_team != loser_arena_team)
+            {
 
-            SetArenaMatchmakerRating(winner, winner_matchmaker_rating + winner_matchmaker_change);
-            SetArenaMatchmakerRating(GetOtherTeam(winner), loser_matchmaker_rating + loser_matchmaker_change);
-            SetArenaTeamRatingChangeForTeam(winner, winner_change);
-            SetArenaTeamRatingChangeForTeam(GetOtherTeam(winner), loser_change);
+                loser_matchmaker_rating = GetArenaMatchmakerRating(GetOtherTeam(winner));
+                winner_matchmaker_rating = GetArenaMatchmakerRating(winner);
+
+                auto const slot = Arena::GetSlotByType(GetArenaType());
+                winner_arena_team->WonAgainst(winner_matchmaker_rating, loser_matchmaker_rating, winner_change, slot);
+                loser_arena_team->LostAgainst(loser_matchmaker_rating, winner_matchmaker_rating, loser_change, slot);
+
+                SetArenaMatchmakerRating(winner, winner_matchmaker_rating + winner_matchmaker_change);
+                SetArenaMatchmakerRating(GetOtherTeam(winner), loser_matchmaker_rating + loser_matchmaker_change);
+                SetArenaTeamRatingChangeForTeam(winner, winner_change);
+                SetArenaTeamRatingChangeForTeam(GetOtherTeam(winner), loser_change);
+            }
         }
-        // Deduct 16 points from each teams arena-rating if there are no winners after 45+2 minutes
         else
         {
-            //SetArenaTeamRatingChangeForTeam(ALLIANCE, ARENA_TIMELIMIT_POINTS_LOSS);
-            //SetArenaTeamRatingChangeForTeam(HORDE, ARENA_TIMELIMIT_POINTS_LOSS);
-            //winner_arena_team->FinishGame(ARENA_TIMELIMIT_POINTS_LOSS);
-            //loser_arena_team->FinishGame(ARENA_TIMELIMIT_POINTS_LOSS);
+            loser_matchmaker_rating = GetArenaMatchmakerRating(GetOtherTeam(winner));
+            winner_matchmaker_rating = GetArenaMatchmakerRating(winner);
+
+            loser_change = Arena::GetRatingMod(loser_matchmaker_rating, winner_matchmaker_rating, false);
+            winner_change = Arena::GetRatingMod(winner_matchmaker_rating, loser_matchmaker_rating, true);
         }
     }
 
@@ -796,13 +799,26 @@ void Battleground::EndBattleground(uint32 winner)
 
         if (itr->second.OfflineRemoveTime)
         {
-            //if rated arena match - make member lost!
-            if (isArena() && isRated() && winner_arena_team && loser_arena_team && winner_arena_team != loser_arena_team)
+            //if rated match - make member lost!
+            if (isRated())
             {
-                if (team == winner)
-                    winner_arena_team->OfflineMemberLost(itr->first, loser_matchmaker_rating, Arena::GetSlotByType(GetArenaType()), winner_matchmaker_change);
+                if (isArena())
+                {
+                    if (winner_arena_team && loser_arena_team && winner_arena_team != loser_arena_team)
+                    {
+                        if (team == winner)
+                            winner_arena_team->OfflineMemberLost(itr->first, loser_matchmaker_rating, Arena::GetSlotByType(GetArenaType()), winner_matchmaker_change);
+                        else
+                            loser_arena_team->OfflineMemberLost(itr->first, winner_matchmaker_rating, Arena::GetSlotByType(GetArenaType()), loser_matchmaker_change);
+                    }
+                }
                 else
-                    loser_arena_team->OfflineMemberLost(itr->first, winner_matchmaker_rating, Arena::GetSlotByType(GetArenaType()), loser_matchmaker_change);
+                {
+                    if (team == winner)
+                        Player::offlineLostRatedBg(GUID_LOPART(itr->first), loser_matchmaker_rating, winner_change);
+                    else
+                        Player::offlineLostRatedBg(GUID_LOPART(itr->first), winner_matchmaker_rating, loser_change);
+                }
             }
             continue;
         }
@@ -872,7 +888,11 @@ void Battleground::EndBattleground(uint32 winner)
         // Reward winner team
         if (team == winner)
         {
-            if (IsRandom() || BattlegroundMgr::IsBGWeekend(GetTypeID()))
+            if (isRated())
+            {
+                player->wonRatedBg(loser_matchmaker_rating, winner_change);
+            }
+            else if (IsRandom() || BattlegroundMgr::IsBGWeekend(GetTypeID()))
             {
                 if (!player->GetRandomWinner())
                 {
@@ -902,7 +922,9 @@ void Battleground::EndBattleground(uint32 winner)
         }
         else
         {
-            if (IsRandom() || BattlegroundMgr::IsBGWeekend(GetTypeID()))
+            if (isRated())
+                player->lostRatedBg(winner_matchmaker_rating, loser_change);
+            else if (IsRandom() || BattlegroundMgr::IsBGWeekend(GetTypeID()))
                 UpdatePlayerScore(player, SCORE_BONUS_HONOR, BG_REWARD_LOSER_HONOR);
         }
 
@@ -1011,11 +1033,11 @@ void Battleground::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
                         uint8 slot = Arena::GetSlotByType(GetArenaType());
 
                         // Update personal rating
-                        int32 mod = Arena::GetRatingMod(player->GetArenaPersonalRating(slot), GetArenaMatchmakerRating(GetOtherTeam(team), slot), false);
+                        int32 mod = Arena::GetRatingMod(player->GetArenaPersonalRating(slot), GetArenaMatchmakerRating(GetOtherTeam(team)), false);
                         player->SetArenaPersonalRating(slot, player->GetArenaPersonalRating(slot) + mod);
 
                         // Update matchmaker rating
-                        player->SetArenaMatchMakerRating(slot, player->GetArenaMatchMakerRating(slot) -12);
+                        player->SetArenaMatchMakerRating(slot, player->GetArenaMatchMakerRating(slot) - 12);
 
                         // Update personal played stats
                         player->IncrementWeekGames(slot);
@@ -1023,6 +1045,15 @@ void Battleground::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
                     }
                 }
             }
+            else if (isRated() && GetStatus() == STATUS_IN_PROGRESS)
+            {
+                uint32 const ourMMR = GetArenaMatchmakerRating(team);
+                uint32 const theirMMR = GetArenaMatchmakerRating(GetOtherTeam(team));
+
+                int32 const mmrChange = Arena::GetRatingMod(ourMMR, theirMMR, false);
+                player->lostRatedBg(theirMMR, mmrChange);
+            }
+
             if (SendPacket)
             {
                 WorldPacket data;
@@ -1033,16 +1064,25 @@ void Battleground::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
             // this call is important, because player, when joins to battleground, this method is not called, so it must be called when leaving bg
             player->RemoveBattlegroundQueueId(bgQueueTypeId);
         }
-        else
-        // removing offline participant
+        else // removing offline participant
         {
             if (isRated() && GetStatus() == STATUS_IN_PROGRESS)
             {
-                //left a rated match while the encounter was in progress, consider as loser
-                Group* others_group = GetBgRaid(GetOtherTeam(team));
-                Group* players_group = GetBgRaid(team);
-                if (others_group && players_group)
-                    players_group->OfflineMemberLost(guid, GetArenaMatchmakerRating(GetOtherTeam(team), Arena::GetSlotByType(GetArenaType())), Arena::GetSlotByType(GetArenaType()));
+                if (isArena())
+                {
+                    Group* others_group = GetBgRaid(GetOtherTeam(team));
+                    Group* players_group = GetBgRaid(team);
+                    if (others_group && players_group)
+                        players_group->OfflineMemberLost(guid, GetArenaMatchmakerRating(GetOtherTeam(team)), Arena::GetSlotByType(GetArenaType()));
+                }
+                else
+                {
+                    uint32 const ourMMR = GetArenaMatchmakerRating(team);
+                    uint32 const theirMMR = GetArenaMatchmakerRating(GetOtherTeam(team));
+
+                    int32 const mmrChange = Arena::GetRatingMod(ourMMR, theirMMR, false);
+                    Player::offlineLostRatedBg(GUID_LOPART(guid), theirMMR, mmrChange);
+                }
             }
         }
 
@@ -1126,7 +1166,7 @@ void Battleground::StartBattleground()
     // add bg to update list
     // This must be done here, because we need to have already invited some players when first BG::Update() method is executed
     // and it doesn't matter if we call StartBattleground() more times, because m_Battlegrounds is a map and instance id never changes
-    sBattlegroundMgr->AddBattleground(GetInstanceID(), GetTypeID(), this);
+    sBattlegroundMgr->AddBattleground(this);
     //if (m_IsRated)
     //    sLog->outArena("Arena match type: %u for Team1Id: %u - Team2Id: %u started.", m_ArenaType, m_ArenaTeamIds[BG_TEAM_ALLIANCE], m_ArenaTeamIds[BG_TEAM_HORDE]);
 }
@@ -1365,10 +1405,9 @@ void Battleground::EventPlayerLoggedOut(Player* player)
 // This method should be called only once ... it adds pointer to queue
 void Battleground::AddToBGFreeSlotQueue()
 {
-    // make sure to add only once
     if (!m_InBGFreeSlotQueue && isBattleground())
     {
-        sBattlegroundMgr->BGFreeSlotQueue[m_TypeID].push_front(this);
+        sBattlegroundMgr->AddToBGFreeSlotQueue(m_TypeID, this);
         m_InBGFreeSlotQueue = true;
     }
 }
@@ -1376,16 +1415,10 @@ void Battleground::AddToBGFreeSlotQueue()
 // This method removes this battleground from free queue - it must be called when deleting battleground - not used now
 void Battleground::RemoveFromBGFreeSlotQueue()
 {
-    // set to be able to re-add if needed
-    m_InBGFreeSlotQueue = false;
-    // uncomment this code when battlegrounds will work like instances
-    for (BGFreeSlotQueueType::iterator itr = sBattlegroundMgr->BGFreeSlotQueue[m_TypeID].begin(); itr != sBattlegroundMgr->BGFreeSlotQueue[m_TypeID].end(); ++itr)
+    if (m_InBGFreeSlotQueue)
     {
-        if ((*itr)->GetInstanceID() == m_InstanceID)
-        {
-            sBattlegroundMgr->BGFreeSlotQueue[m_TypeID].erase(itr);
-            return;
-        }
+        sBattlegroundMgr->RemoveFromBGFreeSlotQueue(m_TypeID, m_InstanceID);
+        m_InBGFreeSlotQueue = false;
     }
 }
 
@@ -2104,29 +2137,4 @@ void Battleground::RelocateDeadPlayers(uint64 queueIndex)
         }
         ghostList.clear();
     }
-}
-
-uint32 Battleground::GetArenaMatchmakerRating(uint32 Team, uint8 slot)
-{
-    uint32 MMR = 0;
-    uint32 count = 0;
-
-    if (Group* group = GetBgRaid(Team))
-    {
-        for (GroupReference* ref = group->GetFirstMember(); ref != NULL; ref = ref->next())
-        {
-            if (Player* groupMember = ref->getSource())
-            {
-                MMR += groupMember->GetArenaMatchMakerRating(slot);
-                ++count;
-            }
-        }
-    }
-
-    if (!count)
-        count = 1;
-
-    MMR /= count;
-
-    return MMR;
 }

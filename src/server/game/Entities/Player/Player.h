@@ -44,6 +44,7 @@
 #include "PlayerTaxi.hpp"
 #include "Flag128.hpp"
 #include "SpellModifier.hpp"
+#include "RatedBgStats.hpp"
 
 // for template
 #include "SpellMgr.h"
@@ -676,19 +677,6 @@ enum InstanceResetWarningType
     RAID_INSTANCE_EXPIRED           = 5
 };
 
-// PLAYER_FIELD_ARENA_TEAM_INFO_1_1 offsets
-enum ArenaTeamInfoType
-{
-    ARENA_TEAM_ID                = 0,
-    ARENA_TEAM_TYPE              = 1,                       // new in 3.2 - team type?
-    ARENA_TEAM_MEMBER            = 2,                       // 0 - captain, 1 - member
-    ARENA_TEAM_GAMES_WEEK        = 3,
-    ARENA_TEAM_GAMES_SEASON      = 4,
-    ARENA_TEAM_WINS_SEASON       = 5,
-    ARENA_TEAM_PERSONAL_RATING   = 6,
-    ARENA_TEAM_END               = 7
-};
-
 class InstanceSave;
 
 enum RestType
@@ -790,6 +778,7 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOAD_ARCHAEOLOGY                 = 40,
     PLAYER_LOGIN_QUERY_LOAD_KNOWN_TITLES                = 41,
     PLAYER_LOGIN_QUERY_LOAD_CP_WEEK_CAP                 = 42,
+    PLAYER_LOGIN_QUERY_LOAD_RATED_BG_STATS              = 43,
     MAX_PLAYER_LOGIN_QUERY
 };
 
@@ -1036,7 +1025,7 @@ class TradeData
         uint64     m_items[TRADE_SLOT_COUNT];               // traded items from m_player side including non-traded slot
 };
 
-struct ResurrectionData
+struct ResurrectionData final
 {
     uint64 GUID;
     WorldLocation Location;
@@ -1975,6 +1964,7 @@ class Player final : public Unit, public GridObject<Player>
         uint32 GetMaxPersonalRatingRequirement(uint32 startSlot) const;
 
         void SetArenaPersonalRating(uint8 slot, uint32 value);
+        void UpdateMaxRatedBgRating(uint16 newRating);
 
         void SetArenaMatchMakerRating(uint8 slot, uint32 value)
         {
@@ -2629,7 +2619,7 @@ class Player final : public Unit, public GridObject<Player>
         void SetMap(Map* map);
         void ResetMap();
 
-        bool isAllowedToLoot(const Creature* creature);
+        bool isAllowedToLoot(const Creature* creature) const;
 
         DeclinedName const* GetDeclinedNames() const { return m_declinedname; }
         uint8 GetRunesState() const { return m_runes.runeState; }
@@ -2753,8 +2743,11 @@ class Player final : public Unit, public GridObject<Player>
         VoidStorageItem* GetVoidStorageItem(uint8 slot) const;
         VoidStorageItem* GetVoidStorageItem(uint64 id, uint8& slot) const;
 
-        uint32 GetLastTargetedGO() { return _lastTargetedGO; }
-        void SetLastTargetedGO(uint32 lastTargetedGO) { _lastTargetedGO = lastTargetedGO; }
+        Trinity::RatedBgStats const & ratedBgStats() const { return m_ratedBgStats; }
+        void wonRatedBg(uint32 otherTeamMMR, int32 mmrChange);
+        void lostRatedBg(uint32 otherTeamMMR, int32 mmrChange);
+        static void offlineLostRatedBg(uint32 guid, uint32 otherTeamMMR, int32 mmrChange);
+
         void ShowNeutralPlayerFactionSelectUI();
 
         void SetKnockBackTime(uint32 timer) { m_knockBackTimer = timer; }
@@ -2886,6 +2879,7 @@ class Player final : public Unit, public GridObject<Player>
         void _SaveInstanceTimeRestrictions(SQLTransaction& trans);
         void _SaveConquestPointsWeekCap(SQLTransaction& trans);
         void _SaveCurrency(SQLTransaction& trans);
+        void _SaveRatedBgStats(SQLTransaction& trans);
         void _SaveKnownTitles(SQLTransaction& trans);
 
         /*********************************************************/
@@ -3162,9 +3156,6 @@ class Player final : public Unit, public GridObject<Player>
 
         PhaseMgr m_phaseMgr;
 
-        uint32 _lastTargetedGO;
-        float m_PersonnalXpRate;
-
         uint32 m_knockBackTimer;
         uint8  m_ignoreMovementCount;
 
@@ -3188,6 +3179,8 @@ class Player final : public Unit, public GridObject<Player>
         std::vector<CufProfile> m_cufProfiles;
 
         Trinity::SpellChargesTracker spellChargesTracker_;
+
+        Trinity::RatedBgStats m_ratedBgStats;
 };
 
 void AddItemsSetItem(Player*player, Item* item);

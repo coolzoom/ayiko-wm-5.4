@@ -316,7 +316,7 @@ enum EPlayerFields
     PLAYER_FIELD_LIFETIME_HONORABLE_KILLS            = 1890, // SIZE:1
     PLAYER_FIELD_WATCHED_FACTION_INDEX               = 1891, // SIZE:1
     PLAYER_FIELD_COMBAT_RATING_1                     = 1892, // SIZE:27
-    PLAYER_FIELD_ARENA_TEAM_INFO_1_1                 = 1919, // SIZE:24
+    PLAYER_FIELD_PVP_INFO                            = 1919, // SIZE:24
     PLAYER_FIELD_MAX_LEVEL                           = 1943, // SIZE:1
     PLAYER_RUNE_REGEN_1                              = 1944, // SIZE:4
     PLAYER_NO_REAGENT_COST_1                         = 1948, // SIZE:4

@@ -25,6 +25,7 @@
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
 #include "Opcodes.h"
+#include "Formulas.h"
 
 //This send to player windows for invite player to join the war
 //Param1:(m_Guid) the BattleId of Bf
@@ -311,7 +312,7 @@ void WorldSession::HandleRequestRatedBgInfo(WorldPacket & recvData)
 
     TC_LOG_DEBUG("bg.battleground", "WorldSession::HandleRequestRatedBgInfo: get unk = %u", unk);
 
-    /// @Todo: perfome research in this case
+    /// @Todo: perform research in this case
     WorldPacket data(SMSG_RATED_BG_STATS, 72);
     for (int32 i = 0; i < 18; ++i)
         data << uint32(0);
@@ -344,7 +345,7 @@ void WorldSession::HandleRequestRatedBgStats(WorldPacket& /*recvData*/)
 {
     TC_LOG_DEBUG("network", "WORLD: CMSG_REQUEST_RATED_BG_STATS");
 
-    WorldPacket data(SMSG_BATTLEFIELD_RATED_INFO, 29);
+    WorldPacket data(SMSG_BATTLEFIELD_RATED_INFO, (MAX_ARENA_SLOT + 1) * 8 * 4);
 
     for (int i = 0; i < MAX_ARENA_SLOT; i++)
     {
@@ -358,15 +359,16 @@ void WorldSession::HandleRequestRatedBgStats(WorldPacket& /*recvData*/)
         data << uint32(_player->GetPrevWeekWins(i)); // wins of prev week
     }
 
-    // rated bg part
-    data << uint32(0); // games of week
-    data << uint32(0); // games of season
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(0); // wins of current week
-    data << uint32(0); // best rating of season
-    data << uint32(0); // best rating of week
-    data << uint32(0); // wins of prev week
+    auto const &ratedBgStats = GetPlayer()->ratedBgStats();
+
+    data << ratedBgStats.weekGames();
+    data << ratedBgStats.seasonGames();
+    data << 0;
+    data << 0;
+    data << ratedBgStats.personalRating();
+    data << ratedBgStats.bestSeasonRating();
+    data << ratedBgStats.bestWeekRating();
+    data << ratedBgStats.thisWeekWins();
 
     SendPacket(&data);
 }

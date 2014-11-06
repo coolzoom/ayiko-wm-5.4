@@ -110,7 +110,8 @@ enum BattlegroundTimeIntervals
     RESURRECTION_INTERVAL           = 30000,                // ms
     //REMIND_INTERVAL                 = 10000,                // ms
     INVITATION_REMIND_TIME          = 20000,                // ms
-    INVITE_ACCEPT_WAIT_TIME         = 90000,                // ms
+    INVITE_ACCEPT_WAIT_TIME_BG      = 90000,                // ms
+    INVITE_ACCEPT_WAIT_TIME_ARENA   = 45000,                // ms
     TIME_AUTOCLOSE_BATTLEGROUND     = 120000,               // ms
     MAX_OFFLINE_TIME                = 300,                  // secs
     RESPAWN_ONE_DAY                 = 86400,                // secs
@@ -192,6 +193,7 @@ enum BattlegroundQueueTypeId
     BATTLEGROUND_QUEUE_CTF3     = 14,
     BATTLEGROUND_QUEUE_SSM      = 15,
     BATTLEGROUND_QUEUE_TV       = 16,
+    BATTLEGROUND_QUEUE_RATED    = 17,
     MAX_BATTLEGROUND_QUEUE_TYPES
 };
 
@@ -381,15 +383,14 @@ class Battleground
         int32 GetStartDelayTime() const     { return m_StartDelayTime; }
         uint8 GetArenaType() const          { return m_ArenaType; }
         uint8 GetWinner() const             { return m_Winner; }
-        uint32 GetHolidayId() const         { return m_holiday; }
         uint32 GetScriptId() const          { return ScriptId; }
         uint32 GetBonusHonorFromKill(uint32 kills) const;
         bool IsRandom() const { return m_IsRandom; }
 
         // Set methods:
+        void SetGuid(uint64 newGuid)        { m_Guid = newGuid; }
         void SetName(char const* Name)      { m_Name = Name; }
         void SetTypeID(BattlegroundTypeId TypeID) { m_TypeID = TypeID; }
-        void InitGUID() {m_Guid = MAKE_NEW_GUID(m_TypeID, 0, 0x01F1); }
         void SetRandomTypeID(BattlegroundTypeId TypeID) { m_RandomTypeID = TypeID; }
         //here we can count minlevel and maxlevel for players
         void SetBracket(PvPDifficultyEntry const* bracketEntry);
@@ -406,13 +407,12 @@ class Battleground
         void SetArenaType(uint8 type)       { m_ArenaType = type; }
         void SetArenaorBGType(bool _isArena) { m_IsArena = _isArena; }
         void SetWinner(uint8 winner)        { m_Winner = winner; }
-        void SetHolidayId(uint8 holiday)        { m_holiday = holiday; }
         void SetScriptId(uint32 scriptId)   { ScriptId = scriptId; }
 
         void ResetCountdownTimer() { m_CountdownTimer = m_IsArena ? ARENA_COUNTDOWN_MAX : BATTLEGROUND_COUNTDOWN_MAX; }
         void SetCountdownTimer(int Time) { m_CountdownTimer = Time; }
         void ModifyCountdownTimer(int diff) { m_CountdownTimer -= diff; }
-        int32 GetMaxCountdownTimer() { return m_IsArena ? ARENA_COUNTDOWN_MAX / 1000 : BATTLEGROUND_COUNTDOWN_MAX / 1000; }
+        int32 GetMaxCountdownTimer() const { return m_IsArena ? ARENA_COUNTDOWN_MAX / 1000 : BATTLEGROUND_COUNTDOWN_MAX / 1000; }
 
         void ModifyStartDelayTime(int diff) { m_StartDelayTime -= diff; }
         void SetStartDelayTime(int Time)    { m_StartDelayTime = Time; }
@@ -527,12 +527,13 @@ class Battleground
         }
 
         // used for rated arena battles
-        int32 GetArenaTeamRatingChangeByIndex(uint32 index) const   { return m_ArenaTeamRatingChanges[index]; }
-        uint32 GetArenaMatchmakerRatingByIndex(uint32 index) const  { return m_ArenaTeamMMR[index]; }
-        void SetArenaMatchmakerRating(uint32 Team, uint32 MMR){ m_ArenaTeamMMR[GetTeamIndexByTeamId(Team)] = MMR; }
+        int32 GetArenaTeamRatingChangeByIndex(uint32 index) const { return m_ArenaTeamRatingChanges[index]; }
         void SetArenaTeamRatingChangeForTeam(uint32 Team, int32 RatingChange) { m_ArenaTeamRatingChanges[GetTeamIndexByTeamId(Team)] = RatingChange; }
 
-        uint32 GetArenaMatchmakerRating(uint32 Team, uint8 slot);
+        uint32 GetArenaMatchmakerRatingByIndex(uint32 index) const { return m_ArenaTeamMMR[index]; }
+        void SetArenaMatchmakerRating(uint32 Team, uint32 MMR) { m_ArenaTeamMMR[GetTeamIndexByTeamId(Team)] = MMR; }
+        uint32 GetArenaMatchmakerRating(uint32 team) const { return m_ArenaTeamMMR[GetTeamIndexByTeamId(team)]; }
+
         void CheckArenaAfterTimerConditions();
         void CheckArenaWinConditions();
         void UpdateArenaWorldState();
@@ -688,7 +689,7 @@ class Battleground
          *
          * @see Update(), PostUpdateImpl().
          */
-        virtual bool PreUpdateImpl(uint32 /* diff */) { return true; };
+        virtual bool PreUpdateImpl(uint32 /* diff */) { return true; }
 
         /**
          * @brief Post-update hook.
@@ -701,7 +702,7 @@ class Battleground
          *
          * @see Update(), PreUpdateImpl().
          */
-        virtual void PostUpdateImpl(uint32 /* diff */) { };
+        virtual void PostUpdateImpl(uint32 /* diff */) { }
 
         // Player lists
         std::vector<uint64> m_ResurrectQueue;               // Player GUID
@@ -741,7 +742,6 @@ class Battleground
         float m_TeamStartLocZ[BG_TEAMS_COUNT];
         float m_TeamStartLocO[BG_TEAMS_COUNT];
         float m_StartMaxDist;
-        uint32 m_holiday;
         uint32 ScriptId;
 };
 

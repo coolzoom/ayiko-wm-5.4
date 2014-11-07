@@ -253,8 +253,7 @@ void BlackMarketMgr::CreateAuctions(uint32 number, SQLTransaction& trans)
         auction->bidderCount = 0;
         auction->startTime = std::time(NULL)
                 + sWorld->getIntConfig(CONFIG_BLACKMARKET_AUCTION_DELAY)
-                + urand(0, sWorld->getIntConfig(CONFIG_BLACKMARKET_AUCTION_DELAY_MOD) * 2)
-                - sWorld->getIntConfig(CONFIG_BLACKMARKET_AUCTION_DELAY_MOD) / 2;
+                + urand(0, sWorld->getIntConfig(CONFIG_BLACKMARKET_AUCTION_DELAY_MOD));
 
         auction->bmTemplate = selTemplate;
 

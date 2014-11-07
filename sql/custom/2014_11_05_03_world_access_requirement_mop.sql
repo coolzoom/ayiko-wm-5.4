@@ -1,5 +1,25 @@
 -- [SQL] Instances - access to Black Morass will no longer require a quest, added Pit of Saron and Halls of Reflection quest required text
 -- [SQL] [Internal] access_requirement redone, added some mop LFR (Raid Finder difficulty) entries, which are probably portable to cata if that difficulty is implemented there
+/*
+        DungeonDifficulty_Normal = 1,
+        DungeonDifficulty_Heroic = 2,
+        RaidDifficulty_10man_Normal = 3,
+        RaidDifficulty_25man_Normal = 4,
+        RaidDifficulty_10man_Heroic = 5,
+        RaidDifficulty_25man_Heroic = 6,
+        RaidDifficulty_25man_LFR = 7,
+        DungeonDifficulty_Challenge = 8,
+        RaidDifficulty_40man = 9,
+        Difficulty_none_1 = 10,
+        ScenarioDifficulty_Heroic = 11,
+        ScenarioDifficulty_Normal = 12,
+        Difficulty_none_2 = 13,
+        RaidDifficulty_10man_Flex = 14,
+        total = 15
+dungeons:    1, 2, 8
+raids:       3, 4, 5, 6, 7, 9, 14
+scenarios:   11, 12
+*/
 REPLACE INTO `access_requirement` (`mapId`, `difficulty`, `level_min`, `level_max`, `quest_done_A`, `quest_done_H`, `completed_achievement`, `quest_failed_text`, `comment`) VALUES
 ('33','0','11','0','0','0','0',NULL,'Shadowfang Keep (Entrance)'),
 ('33','1','85','0','0','0','0',NULL,'Shadowfang Keep (Entrance)'),
@@ -205,4 +225,6 @@ INSERT INTO `access_requirement` (`mapId`, `difficulty`, `level_min`, `level_max
 (1136, 4, 90, 0, 0, 0, 0, 0, 0, NULL, "Siege of Orgrimmar (Entrance) - 25N"),
 (1136, 5, 90, 0, 0, 0, 0, 0, 0, NULL, "Siege of Orgrimmar (Entrance) - 10H"),
 (1136, 6, 90, 0, 0, 0, 0, 0, 0, NULL, "Siege of Orgrimmar (Entrance) - 25H"),
-(1136, 7, 90, 0, 0, 0, 0, 0, 0, NULL, "Siege of Orgrimmar (Entrance) - LFR");
+(1136, 7, 90, 0, 0, 0, 0, 0, 0, NULL, "Siege of Orgrimmar (Entrance) - LFR"),
+(1136, 9, 90, 0, 0, 0, 0, 0, 0, NULL, "Siege of Orgrimmar (Entrance) - 40M"),
+(1136, 14, 90, 0, 0, 0, 0, 0, 0, NULL, "Siege of Orgrimmar (Entrance) - Flex");

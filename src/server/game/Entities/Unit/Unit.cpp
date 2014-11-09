@@ -11865,6 +11865,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
 
                 switch(spellProto->Id)
                 {
+                    case 770: // Faerie Fire
                     case 879: // Exorcism
                     case 45477: // Icy Touch
                     case 45524: // Chains of Ice (Glyphed)

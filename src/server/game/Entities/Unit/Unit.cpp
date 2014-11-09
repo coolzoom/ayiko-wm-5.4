@@ -7047,6 +7047,19 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                     CastCustomSpell(70691, SPELLVALUE_BASE_POINT0, damage, victim, true);
                     return true;
                 }
+                case 108373: // Dream of Cenarius
+                {
+                    auto player = ToPlayer();
+                    if (!player || effIndex != EFFECT_0 || !procSpell || procSpell->Id != 33878)
+                        return false;
+
+                    if (player->GetSpecializationId(player->GetActiveSpec()) == SPEC_DRUID_GUARDIAN && procEx & PROC_EX_CRITICAL_HIT)
+                    {
+                        player->CastSpell(player, 145162, true);
+                        return true;
+                    }
+                    break;
+                }
             }
             // Living Seed
             if (dummySpell->SpellIconID == 2860)

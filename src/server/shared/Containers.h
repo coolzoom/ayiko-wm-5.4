@@ -18,6 +18,7 @@
 #ifndef CONTAINERS_H
 #define CONTAINERS_H
 
+#include "Define.h"
 #include <list>
 
 //! Because circular includes are bad

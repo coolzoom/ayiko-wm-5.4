@@ -329,14 +329,14 @@ public:
 
             if (BurnTimer <= diff)
             {
-                std::list<Unit*> targets;
-                SelectTargetList(targets, 10, SELECT_TARGET_RANDOM, 100, true);
-                for (std::list<Unit*>::const_iterator i = targets.begin(); i != targets.end(); ++i)
-                    if (!(*i)->HasAura(SPELL_BURN))
+                for (auto &target : SelectTargetList(10, SELECT_TARGET_RANDOM, 100, true))
+                {
+                    if (!target->HasAura(SPELL_BURN))
                     {
-                        (*i)->CastSpell((*i), SPELL_BURN, true);
+                        target->CastSpell(target, SPELL_BURN, true);
                         break;
                     }
+                }
                 BurnTimer = urand(60000, 180000);
             }
             else

@@ -1167,20 +1167,19 @@ public:
         {
             PreventDefaultAction();
 
-            auto target = eventInfo.GetProcTarget();
-            auto player = GetTarget()->ToPlayer();
-            if (!player || !target)
+            auto const target = eventInfo.GetProcTarget();
+            auto const player = GetTarget()->ToPlayer();
+            if (!target || !player || !player->IsAlive())
                 return;
-
-            int32 bp = eventInfo.GetDamageInfo()->GetDamage();
 
             std::list<Unit*> groupList;
             player->GetPartyMembers(groupList);
 
             groupList.sort(Trinity::HealthPctOrderPred());
-            auto healTarget = *groupList.begin();
+            auto const healTarget = groupList.front();
 
-            if (healTarget ->GetGUID() == player->GetGUID())
+            int32 bp = eventInfo.GetDamageInfo()->GetDamage();
+            if (healTarget->GetGUID() == player->GetGUID())
                 bp /= 2;
 
             player->CastCustomSpell(healTarget, PRIEST_ATONEMENT_HEAL, &bp, NULL, NULL, true);

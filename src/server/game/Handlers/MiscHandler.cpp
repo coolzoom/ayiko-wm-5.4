@@ -2353,7 +2353,10 @@ void WorldSession::HandleCategoryCooldownOpcode(WorldPacket& /*recvPacket*/)
     Unit::AuraEffectList const& list = GetPlayer()->GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_CATEGORY_COOLDOWN);
 
     WorldPacket data(SMSG_SPELL_CATEGORY_COOLDOWN, 4 + (list.size() * 8));
+
     data.WriteBits<uint32>(list.size(), 21);
+    data.FlushBits();
+
     for (Unit::AuraEffectList::const_iterator itr = list.begin(); itr != list.end(); ++itr)
     {
         AuraEffect *effect = *itr;

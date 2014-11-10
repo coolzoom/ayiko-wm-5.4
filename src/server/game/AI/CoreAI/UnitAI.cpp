@@ -86,9 +86,9 @@ Unit* UnitAI::SelectTarget(SelectAggroTarget targetType, uint32 position, float 
     return SelectTarget(targetType, position, DefaultTargetSelector(me, dist, playerOnly, aura));
 }
 
-void UnitAI::SelectTargetList(std::list<Unit*>& targetList, uint32 num, SelectAggroTarget targetType, float dist, bool playerOnly, int32 aura)
+std::list<Unit*> UnitAI::SelectTargetList(uint32 num, SelectAggroTarget targetType, float dist, bool playerOnly, int32 aura)
 {
-    SelectTargetList(targetList, DefaultTargetSelector(me, dist, playerOnly, aura), num, targetType);
+    return SelectTargetList(targetType, num, DefaultTargetSelector(me, dist, playerOnly, aura));
 }
 
 float UnitAI::DoGetSpellMaxRange(uint32 spellId, bool positive)

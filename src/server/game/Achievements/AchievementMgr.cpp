@@ -2356,7 +2356,9 @@ template<>
 void AchievementMgr<Guild>::SendAllAchievementData(Player* receiver)
 {
     WorldPacket data(SMSG_GUILD_ACHIEVEMENT_DATA, m_completedAchievements.size() * (4 + 4) + 3);
+
     data.WriteBits(m_completedAchievements.size(), 22);
+
     for (CompletedAchievementMap::const_iterator itr = m_completedAchievements.begin(); itr != m_completedAchievements.end(); ++itr)
     {
         data.WriteBit(0);
@@ -2368,6 +2370,9 @@ void AchievementMgr<Guild>::SendAllAchievementData(Player* receiver)
         data.WriteBit(0);
         data.WriteBit(0);
     }
+
+    data.FlushBits();
+
     for (CompletedAchievementMap::const_iterator itr = m_completedAchievements.begin(); itr != m_completedAchievements.end(); ++itr)
     {
         data << uint32(0); //0 or time ?

@@ -188,10 +188,8 @@ public:
                     case EVENT_NEEDLE:
                     {
                         //DoCast(me, SPELL_NEEDLE_SPINE, true);
-                        std::list<Unit*> targets;
-                        SelectTargetList(targets, 3, SELECT_TARGET_RANDOM, 80, true);
-                        for (std::list<Unit*>::const_iterator i = targets.begin(); i != targets.end(); ++i)
-                            DoCast(*i, 39835, true);
+                        for (auto &target : SelectTargetList(3, SELECT_TARGET_RANDOM, 80, true))
+                            DoCast(target, 39835, true);
                         events.ScheduleEvent(EVENT_NEEDLE, urand(15000, 25000), GCD_CAST);
                         events.DelayEvents(1500, GCD_CAST);
                         return;

@@ -633,11 +633,8 @@ class boss_professor_putricide : public CreatureScript
                             break;
                         case EVENT_SLIME_PUDDLE:
                         {
-                            std::list<Unit*> targets;
-                            SelectTargetList(targets, 2, SELECT_TARGET_RANDOM, 0.0f, true);
-                            if (!targets.empty())
-                                for (std::list<Unit*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
-                                    DoCast(*itr, SPELL_SLIME_PUDDLE_TRIGGER);
+                            for (auto &target : SelectTargetList(2, SELECT_TARGET_RANDOM, 0.0f, true))
+                                DoCast(target, SPELL_SLIME_PUDDLE_TRIGGER);
                             events.ScheduleEvent(EVENT_SLIME_PUDDLE, 35000);
                             break;
                         }
@@ -661,13 +658,12 @@ class boss_professor_putricide : public CreatureScript
                         case EVENT_MALLEABLE_GOO:
                             if (Is25ManRaid())
                             {
-                                std::list<Unit*> targets;
-                                SelectTargetList(targets, 2, SELECT_TARGET_RANDOM, -7.0f, true);
+                                auto targets = SelectTargetList(2, SELECT_TARGET_RANDOM, -7.0f, true);
                                 if (!targets.empty())
                                 {
                                     Talk(EMOTE_MALLEABLE_GOO);
-                                    for (std::list<Unit*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
-                                        DoCast(*itr, SPELL_MALLEABLE_GOO);
+                                    for (auto &target : targets)
+                                        DoCast(target, SPELL_MALLEABLE_GOO);
                                 }
                             }
                             else

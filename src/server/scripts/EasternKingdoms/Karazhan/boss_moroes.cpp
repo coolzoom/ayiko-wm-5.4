@@ -281,15 +281,15 @@ public:
 
                 if (Blind_Timer <= diff)
                 {
-                    std::list<Unit*> targets;
-                    SelectTargetList(targets, 5, SELECT_TARGET_RANDOM, me->GetMeleeReach()*5, true);
-                    for (std::list<Unit*>::const_iterator i = targets.begin(); i != targets.end(); ++i)
-                        if (!me->IsWithinMeleeRange(*i))
+                    for (auto &target : SelectTargetList(5, SELECT_TARGET_RANDOM, me->GetMeleeReach() * 5, true))
+                    {
+                        if (!me->IsWithinMeleeRange(target))
                         {
-                            DoCast(*i, SPELL_BLIND);
+                            DoCast(target, SPELL_BLIND);
                             break;
                         }
-                        Blind_Timer = 40000;
+                    }
+                    Blind_Timer = 40000;
                 }
                 else Blind_Timer -= diff;
             }

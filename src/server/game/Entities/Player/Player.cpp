@@ -10336,12 +10336,10 @@ void Player::SendNotifyLootItemRemoved(uint8 lootSlot)
     GetSession()->SendPacket(&data);
 }
 
-void Player::SendUpdateWorldState(uint32 Field, uint32 Value)
+void Player::SendUpdateWorldState(uint32 field, uint32 value)
 {
     WorldPacket data(SMSG_UPDATE_WORLD_STATE, 4+4+1);
-    data << Field;
-    data << Value;
-    data.WriteBit(0);
+    data << field << value << uint8(0);
     GetSession()->SendPacket(&data);
 }
 
@@ -27873,6 +27871,8 @@ void Player::SendEquipmentSetList()
         data.WriteBit(wrongLen != 0);
         data.WriteBitSeq<4, 7, 1>(setGuid);
     }
+
+    data.FlushBits();
 
     for (EquipmentSets::iterator itr = m_EquipmentSets.begin(); itr != m_EquipmentSets.end(); ++itr)
     {

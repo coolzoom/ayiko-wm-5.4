@@ -152,14 +152,12 @@ public:
                         DoScriptText(RAND(SAY_FLESH_1, SAY_FLESH_2), me);
                         me->SetDisplayId(MODEL_FLESH);
 
-                        std::list<Unit*> playerList;
-                        SelectTargetList(playerList, 5, SELECT_TARGET_TOPAGGRO, 0, true);
-                        for (std::list<Unit*>::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
+                        for (auto &target : SelectTargetList(5, SELECT_TARGET_TOPAGGRO, 0, true))
                         {
-                            Unit* temp = (*itr);
-                            me->AddAura(SPELL_GIFT_OF_THARON_JA, temp);
-                            temp->SetDisplayId(MODEL_SKELETON);
+                            me->AddAura(SPELL_GIFT_OF_THARON_JA, target);
+                            target->SetDisplayId(MODEL_SKELETON);
                         }
+
                         uiPhaseTimer = 20*IN_MILLISECONDS;
                         uiLightningBreathTimer = urand(3*IN_MILLISECONDS, 4*IN_MILLISECONDS);
                         uiEyeBeamTimer = urand(4*IN_MILLISECONDS, 8*IN_MILLISECONDS);
@@ -207,14 +205,11 @@ public:
                         uiRainOfFireTimer = urand(14*IN_MILLISECONDS, 18*IN_MILLISECONDS);
                         uiShadowVolleyTimer = urand(8*IN_MILLISECONDS, 10*IN_MILLISECONDS);
 
-                        std::list<Unit*> playerList;
-                        SelectTargetList(playerList, 5, SELECT_TARGET_TOPAGGRO, 0, true);
-                        for (std::list<Unit*>::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
+                        for (auto &target : SelectTargetList(5, SELECT_TARGET_TOPAGGRO, 0, true))
                         {
-                            Unit* temp = (*itr);
-                            if (temp->HasAura(SPELL_GIFT_OF_THARON_JA))
-                                temp->RemoveAura(SPELL_GIFT_OF_THARON_JA);
-                            temp->DeMorph();
+                            if (target->HasAura(SPELL_GIFT_OF_THARON_JA))
+                                target->RemoveAura(SPELL_GIFT_OF_THARON_JA);
+                            target->DeMorph();
                         }
                     } else uiPhaseTimer -= diff;
                     break;

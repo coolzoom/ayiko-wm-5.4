@@ -156,6 +156,7 @@ void ReputationMgr::SendForceReactions()
     WorldPacket data(SMSG_SET_FORCED_REACTIONS, 6 + _forcedReactions.size() *(4 + 4));
 
     data.WriteBits(_forcedReactions.size(), 6);
+    data.FlushBits();
 
     for (ForcedReactions::const_iterator itr = _forcedReactions.begin(); itr != _forcedReactions.end(); ++itr)
     {

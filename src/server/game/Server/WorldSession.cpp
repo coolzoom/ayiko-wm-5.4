@@ -179,6 +179,8 @@ uint32 WorldSession::GetGuidLow() const
 /// Send a packet to the client
 void WorldSession::SendPacket(WorldPacket const* packet, bool forced /*= false*/)
 {
+    ASSERT(packet->GetBitPos() == 8 && "WorldPacket::FlushBits was not called.");
+
     if (!m_Socket)
         return;
 

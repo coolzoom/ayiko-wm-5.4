@@ -10339,7 +10339,9 @@ void Player::SendNotifyLootItemRemoved(uint8 lootSlot)
 void Player::SendUpdateWorldState(uint32 field, uint32 value)
 {
     WorldPacket data(SMSG_UPDATE_WORLD_STATE, 4+4+1);
-    data << field << value << uint8(0);
+    data << field << value;
+    data.WriteBit(0);
+    data.FlushBits();
     GetSession()->SendPacket(&data);
 }
 

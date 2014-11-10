@@ -404,35 +404,30 @@ bool WorldSession::Update(uint32 diff, PacketFilter const &filter)
             break;
     }
 
+    ProcessQueryCallbacks();
+
+    // code below is safe to execute in World::UpdateSessions only
+    if (!filter.ProcessLogout())
+        return true;
+
+    // All remove packets are parsed and data is queued to produce exactly one
+    // transaction. Should avoid deadlocks that cause duplicate items.
+    processAuctionsToRemove();
+
     if (m_Socket && !m_Socket->IsClosed() && _warden)
         _warden->Update();
 
-    ProcessQueryCallbacks();
+    time_t currTime = std::time(nullptr);
+    if (ShouldLogOut(currTime) && !m_playerLoading)
+        LogoutPlayer(true);
 
-    //check if we are safe to proceed with logout
-    //logout procedure should happen only in World::UpdateSessions() method!!!
-    if (filter.ProcessLogout())
+    if (m_Socket && m_Socket->IsClosed())
     {
-        time_t currTime = time(NULL);
-        ///- If necessary, log the player out
-        if (ShouldLogOut(currTime) && !m_playerLoading)
-            LogoutPlayer(true);
-
-        if (m_Socket && GetPlayer() && _warden)
-            _warden->Update();
-
-        ///- Cleanup socket pointer if need
-        if (m_Socket && m_Socket->IsClosed())
-        {
-            m_Socket->RemoveReference();
-            m_Socket = NULL;
-        }
-
-        if (!m_Socket)
-            return false;                                       //Will remove this session from the world session map
+        m_Socket->RemoveReference();
+        m_Socket = nullptr;
     }
 
-    return true;
+    return m_Socket != nullptr;
 }
 
 /// %Log the player out

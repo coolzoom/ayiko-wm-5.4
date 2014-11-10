@@ -5067,11 +5067,8 @@ void Player::RemoveSpellCooldown(uint32 spell_id, bool update /* = false */)
 
 void Player::RemoveSpellCategoryCooldown(uint32 cat, bool update /* = false */)
 {
-    SpellsByCategoryRange range = sSpellMgr->getSpellsWithCategory(cat);
-    if (range.first == range.second)
-        return;
-
-    for (SpellsByCategoryStore::const_iterator i = range.first; i != range.second; ++i)
+    auto const range = sSpellMgr->getSpellsWithCategory(cat);
+    for (auto i = range.first; i != range.second; ++i)
     {
         SpellCooldowns::iterator j = m_spellCooldowns.find(i->second);
         if (j == m_spellCooldowns.end())
@@ -14154,7 +14151,8 @@ void Player::SwapItem(uint16 src, uint16 dst)
 
     // SRC checks
 
-    if (pSrcItem->m_lootGenerated)                           // prevent swap looting item
+    // prevent swap looting item
+    if (pSrcItem->m_lootGenerated)
     {
         //best error message found for attempting to swap while looting
         SendEquipError(EQUIP_ERR_CLIENT_LOCKED_OUT, pSrcItem, NULL);
@@ -14191,7 +14189,8 @@ void Player::SwapItem(uint16 src, uint16 dst)
 
     if (pDstItem)
     {
-        if (pDstItem->m_lootGenerated)                       // prevent swap looting item
+        // prevent swap looting item
+        if (pDstItem->m_lootGenerated)
         {
             //best error message found for attempting to swap while looting
             SendEquipError(EQUIP_ERR_CLIENT_LOCKED_OUT, pDstItem, NULL);
@@ -14208,6 +14207,17 @@ void Player::SwapItem(uint16 src, uint16 dst)
                 SendEquipError(msg, pSrcItem, pDstItem);
                 return;
             }
+        }
+    }
+
+    // Make sure that neither src, nor dst items are used in trade
+    if (auto const tradeData = GetTradeData())
+    {
+        if (tradeData->HasItem(pSrcItem->GetGUID())
+                || (pDstItem && tradeData->HasItem(pDstItem->GetGUID())))
+        {
+            SendEquipError(EQUIP_ERR_CLIENT_LOCKED_OUT, nullptr, nullptr);
+            return;
         }
     }
 
@@ -14248,12 +14258,6 @@ void Player::SwapItem(uint16 src, uint16 dst)
         }
         else if (IsEquipmentPos(dst))
         {
-            if (pSrcItem->ToBag() && GetTrader())
-            {
-                SendEquipError(EQUIP_ERR_CANT_SWAP, pSrcItem, NULL);
-                return;
-            }
-
             // If we move trinket/ring from one slot to another, we should consider
             // it as swap with NULL item to prevent unique equipped errors
 
@@ -15724,13 +15728,13 @@ void Player::UpdateSkillEnchantments(uint16 skillId, uint16 curValue, uint16 new
             if (slot > PRISMATIC_ENCHANTMENT_SLOT && slot < PROP_ENCHANTMENT_SLOT_0)    // not holding enchantment id
                 continue;
 
-            uint32 ench_id = m_items[i]->GetEnchantmentId(EnchantmentSlot(slot));
-            if (!ench_id)
+            uint32 enchantId = m_items[i]->GetEnchantmentId(EnchantmentSlot(slot));
+            if (!enchantId)
                 continue;
 
-            SpellItemEnchantmentEntry const* enchant = sSpellItemEnchantmentStore.LookupEntry(ench_id);
+            SpellItemEnchantmentEntry const* enchant = sSpellItemEnchantmentStore.LookupEntry(enchantId);
             if (!enchant)
-                return;
+                continue;
 
             if (enchant->requiredSkill == skillId)
             {
@@ -15756,7 +15760,7 @@ void Player::UpdateSkillEnchantments(uint16 skillId, uint16 curValue, uint16 new
             // If we're dealing with a gem inside a prismatic socket we need to check the prismatic socket requirements
             // rather than the gem requirements itself. If the socket has no color it is a prismatic socket.
             if ((slot == SOCK_ENCHANTMENT_SLOT || slot == SOCK_ENCHANTMENT_SLOT_2 || slot == SOCK_ENCHANTMENT_SLOT_3)
-                && !m_items[i]->GetTemplate()->Socket[slot-SOCK_ENCHANTMENT_SLOT].Color)
+                    && !m_items[i]->GetTemplate()->Socket[slot-SOCK_ENCHANTMENT_SLOT].Color)
             {
                 SpellItemEnchantmentEntry const* prismaticEnchant = sSpellItemEnchantmentStore.LookupEntry(m_items[i]->GetEnchantmentId(PRISMATIC_ENCHANTMENT_SLOT));
 
@@ -21494,7 +21498,7 @@ void Player::_SaveQuestStatus(SQLTransaction& trans)
     {
         if (saveItr->second)
         {
-            stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_CHAR_QUESTSTATUS);
+            stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_CHAR_QUESTSTATUS_REWARDED);
             stmt->setUInt32(0, GetGUIDLow());
             stmt->setUInt32(1, saveItr->first);
             trans->Append(stmt);

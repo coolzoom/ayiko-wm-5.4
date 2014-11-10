@@ -291,7 +291,7 @@ class WorldSession
         std::string GetPlayerName(bool simple = true) const;
         uint32 GetGuidLow() const;
         void SetSecurity(AccountTypes security) { _security = security; }
-        std::string const& GetRemoteAddress() { return m_Address; }
+        std::string const& GetRemoteAddress() const { return m_Address; }
         void SetPlayer(Player* player);
         uint8 Expansion() const { return m_expansion; }
 
@@ -1084,6 +1084,8 @@ class WorldSession
             return _allowedCharsToLogin.find(lowGUID) != _allowedCharsToLogin.end();
         }
 
+        void processAuctionsToRemove();
+
         // this stores the GUIDs of the characters who can login
         // characters who failed on Player::BuildEnumData shouldn't login
         std::set<uint32> _allowedCharsToLogin;
@@ -1143,6 +1145,8 @@ class WorldSession
         time_t timeLastSellItemOpcode;
 
         rbac::RBACData* _RBACData;
+
+        std::vector<std::pair<uint32, uint32>> m_auctionsToRemove;
 };
 
 #endif

@@ -612,63 +612,7 @@ void WorldSession::HandleAuctionRemoveItem(WorldPacket & recvData)
         return;
     }
 
-    // remove fake death
-    if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
-        GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
-
-    AuctionHouseObject* auctionHouse = sAuctionMgr->GetAuctionsMapByFaction(creature->getFaction());
-
-    AuctionEntry* auction = auctionHouse->GetAuction(auctionId);
-    Player* player = GetPlayer();
-
-    SQLTransaction trans = CharacterDatabase.BeginTransaction();
-    if (auction && auction->owner == player->GetGUID())
-    {
-        Item* pItem = sAuctionMgr->GetAItem(auction->itemGUIDLow);
-        if (pItem)
-        {
-            if (auction->bidder > 0)                        // If we have a bidder, we have to send him the money he paid
-            {
-                uint64 auctionCut = auction->GetAuctionCut();
-                if (!player->HasEnoughMoney(auctionCut))          //player doesn't have enough money, maybe message needed
-                    return;
-                sAuctionMgr->SendAuctionCancelledToBidderMail(auction, trans, pItem);
-                player->ModifyMoney(-int64(auctionCut));
-            }
-
-            // item will deleted or added to received mail list
-            MailDraft(auction->BuildAuctionMailSubject(AUCTION_CANCELED),
-                      AuctionEntry::BuildAuctionMailBody(0, 0, auction->buyout, auction->deposit, 0))
-                .AddItem(pItem)
-                .SendMailTo(trans, player, auction, MAIL_CHECK_MASK_COPIED);
-        }
-        else
-        {
-            TC_LOG_ERROR("network", "Auction id: %u got non existing item (item guid : %u)!", auction->Id, auction->itemGUIDLow);
-            SendAuctionCommandResult(NULL, AUCTION_CANCEL, ERR_AUCTION_DATABASE_ERROR);
-            return;
-        }
-    }
-    else
-    {
-        SendAuctionCommandResult(NULL, AUCTION_CANCEL, ERR_AUCTION_DATABASE_ERROR);
-        //this code isn't possible ... maybe there should be assert
-        TC_LOG_ERROR("network", "CHEATER: %u tried to cancel auction (id: %u) of another player or auction is NULL", player->GetGUIDLow(), auctionId);
-        return;
-    }
-
-    //inform player, that auction is removed
-    SendAuctionCommandResult(auction, AUCTION_CANCEL, ERR_AUCTION_OK);
-
-    // Now remove the auction
-
-    player->SaveInventoryAndGoldToDB(trans);
-    auction->DeleteFromDB(trans);
-    CharacterDatabase.CommitTransaction(trans);
-
-    uint32 itemEntry = auction->itemEntry;
-    sAuctionMgr->RemoveAItem(auction->itemGUIDLow);
-    auctionHouse->RemoveAuction(auction, itemEntry);
+    m_auctionsToRemove.emplace_back(creature->getFaction(), auctionId);
 }
 
 //called when player lists his bids
@@ -854,4 +798,76 @@ void WorldSession::HandleAuctionListPendingSales(WorldPacket & /*recvData*/)
         data << float(0);
     }*/
     SendPacket(&data);
+}
+
+void WorldSession::processAuctionsToRemove()
+{
+    if (m_auctionsToRemove.empty())
+        return;
+
+    auto toRemove(std::move(m_auctionsToRemove));
+    m_auctionsToRemove.clear();
+
+    auto const player = GetPlayer();
+
+    if (player->HasUnitState(UNIT_STATE_DIED))
+        player->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
+
+    auto trans = CharacterDatabase.BeginTransaction();
+
+    for (auto const &pair : toRemove)
+    {
+        auto const &faction = pair.first;
+        auto const &auctionId = pair.second;
+
+        auto const auctionHouse = sAuctionMgr->GetAuctionsMapByFaction(faction);
+
+        auto const auction = auctionHouse->GetAuction(auctionId);
+        if (!auction || auction->owner != player->GetGUIDLow())
+        {
+            SendAuctionCommandResult(auction, AUCTION_CANCEL, ERR_AUCTION_ITEM_NOT_FOUND);
+            continue;
+        }
+
+        auto const item = sAuctionMgr->GetAItem(auction->itemGUIDLow);
+        if (!item)
+        {
+            TC_LOG_ERROR("network", "Auction id: %u has non existing item (item guid: %u)!", auction->Id, auction->itemGUIDLow);
+            SendAuctionCommandResult(auction, AUCTION_CANCEL, ERR_AUCTION_DATABASE_ERROR);
+            continue;
+        }
+
+        // If we have a bidder, we have to send him the money he paid
+        if (auction->bidder != 0)
+        {
+            auto const auctionCut = auction->GetAuctionCut();
+
+            // player doesn't have enough money, maybe message needed
+            if (!player->HasEnoughMoney(auctionCut))
+                continue;
+
+            sAuctionMgr->SendAuctionCancelledToBidderMail(auction, trans, item);
+            player->ModifyMoney(-int64(auctionCut));
+        }
+
+        // item will be deleted or added to received mail list
+        MailDraft(auction->BuildAuctionMailSubject(AUCTION_CANCELED),
+                  AuctionEntry::BuildAuctionMailBody(0, 0, auction->buyout, auction->deposit, 0))
+        .AddItem(item)
+        .SendMailTo(trans, player, auction, MAIL_CHECK_MASK_COPIED);
+
+        // inform player that auction is removed
+        SendAuctionCommandResult(auction, AUCTION_CANCEL, ERR_AUCTION_OK);
+
+        // Now remove the auction
+        auction->DeleteFromDB(trans);
+
+        auto const itemEntry = auction->itemEntry;
+        sAuctionMgr->RemoveAItem(auction->itemGUIDLow);
+        auctionHouse->RemoveAuction(auction, itemEntry);
+    }
+
+    player->SaveInventoryAndGoldToDB(trans);
+
+    CharacterDatabase.CommitTransaction(trans);
 }

@@ -82,6 +82,7 @@ void WorldSession::HandleGuildFinderBrowse(WorldPacket& recvPacket)
     {
         WorldPacket packet(SMSG_LF_GUILD_BROWSE_UPDATED);
         packet.WriteBits(0, 18);
+        packet.FlushBits();
         player->SendDirectMessage(&packet);
         return;
     }

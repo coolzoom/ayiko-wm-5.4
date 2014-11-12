@@ -1173,6 +1173,7 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recvData)
     data.WriteBitSeq<4, 2, 0>(playerGuid);
     data.WriteBits(type, 3);
     data.WriteBitSeq<7, 5, 1, 3, 6>(playerGuid);
+    data.FlushBits();
 
     data.WriteByteSeq<4, 2, 7, 5, 3, 1, 6, 0>(playerGuid);
 

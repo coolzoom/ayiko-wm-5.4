@@ -871,6 +871,7 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
         b.WriteBits(0, 19); // Items count
         b.WriteBit(0);      // Creature guid 5
         b.WriteBit(0);      // Unk bit
+        b.FlushBits();
         return b;
     }
 

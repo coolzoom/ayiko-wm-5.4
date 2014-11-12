@@ -126,23 +126,19 @@ void WorldSession::HandleGuildFinderBrowse(WorldPacket& recvPacket)
         data.WriteBitSeq<2, 7, 3, 6, 5>(guildGUID);
 
         bufferData << uint8(sGuildFinderMgr->HasRequest(player->GetGUIDLow(), guild->GetGUID()));
-        bufferData << guild->GetLevel();
+        bufferData << uint32(guild->GetLevel());
         bufferData << uint32(guildSettings.GetInterests());
         bufferData << uint32(0);                                                                    // Unk
         bufferData << uint32(guild->GetEmblemInfo().GetBorderStyle());
         bufferData.WriteByteSeq<1, 4>(guildGUID);
         bufferData << uint32(guild->GetEmblemInfo().GetStyle());
         bufferData.WriteByteSeq<3>(guildGUID);
-        bufferData << uint32(50397223);                                                              // Unk Flags
+        bufferData << uint32(50397223);                                                             // Unk Flags
         bufferData << uint32(guild->GetEmblemInfo().GetColor());
-
         bufferData.WriteString(guild->GetName());
-
         bufferData << uint32(guildSettings.GetClassRoles());
         bufferData << uint32(guildSettings.GetAvailability());
-
         bufferData.WriteString(guildSettings.GetComment());
-
         bufferData.WriteByteSeq<6, 7>(guildGUID);
         bufferData << uint8(0);                                                                     // Cached
         bufferData.WriteByteSeq<5, 0>(guildGUID);

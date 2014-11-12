@@ -7091,7 +7091,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (m_caster->GetPetGUID())
                         return SPELL_FAILED_ALREADY_HAVE_SUMMON;
 
-                    if (m_caster->GetCharmGUID())
+                    if (m_caster->GetCharmGUID() || (m_spellInfo->Id == 605 && m_caster->HasAura(605, m_caster->GetGUID())))
                         return SPELL_FAILED_ALREADY_HAVE_CHARM;
                 }
 

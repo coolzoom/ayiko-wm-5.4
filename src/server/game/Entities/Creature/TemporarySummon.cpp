@@ -316,13 +316,24 @@ bool Minion::IsGuardianPet() const
     return isPet() || (m_Properties && m_Properties->Category == SUMMON_CATEGORY_PET);
 }
 
-Guardian::Guardian(SummonPropertiesEntry const* properties, Unit* owner, bool isWorldObject) : Minion(properties, owner, isWorldObject)
-, m_bonusSpellDamage(0)
+Guardian::Guardian(SummonPropertiesEntry const* properties, Unit* owner, bool isWorldObject)
+    : Minion(properties, owner, isWorldObject)
+    , m_bonusSpellDamage(0)
+    , m_statFromOwner()
 {
-    memset(m_statFromOwner, 0, sizeof(float)*MAX_STATS);
     m_unitTypeMask |= UNIT_MASK_GUARDIAN;
-    if (properties
-            && (properties->Type == SUMMON_TYPE_PET || (properties->Category == SUMMON_CATEGORY_PET && (properties->Flags & 0x800))))
+
+    bool controllable = false;
+
+    if (properties)
+    {
+        if (properties->Type == SUMMON_TYPE_PET)
+            controllable = properties->Flags != 0x4800;
+        else if (properties->Category == SUMMON_CATEGORY_PET)
+            controllable = (properties->Flags & 0x800) != 0;
+    }
+
+    if (controllable)
     {
         m_unitTypeMask |= UNIT_MASK_CONTROLABLE_GUARDIAN;
         InitCharmInfo();

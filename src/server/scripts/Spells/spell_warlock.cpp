@@ -761,9 +761,10 @@ class spell_warl_flames_of_xoroth : public SpellScriptLoader
 {
     enum NPCEntries
     {
-        NPC_DOOMGUARD = 11859,
-        NPC_INFERNAL = 89,
-        NPC_IMP = 416,
+        NPC_FELGUARD    = 17252,
+        NPC_DOOMGUARD   = 11859,
+        NPC_INFERNAL    = 89,
+        NPC_IMP         = 416,
     };
 
     public:
@@ -783,14 +784,14 @@ class spell_warl_flames_of_xoroth : public SpellScriptLoader
                 if (!GetCaster())
                     return SPELL_FAILED_DONT_REPORT;
 
-                Player* plr = GetCaster()->ToPlayer();
-                if (!plr)
+                auto const player = GetCaster()->ToPlayer();
+                if (!player)
                     return SPELL_FAILED_DONT_REPORT;
 
-                if (plr->GetPet())
+                if (player->GetPet())
                     return SPELL_FAILED_ALREADY_HAVE_PET;
 
-                if (!plr->GetLastPetNumber(true))
+                if (!player->GetLastPetNumber(true))
                     return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
 
                 return SPELL_CAST_OK;
@@ -798,10 +799,7 @@ class spell_warl_flames_of_xoroth : public SpellScriptLoader
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
-                if (!GetCaster())
-                    return;
-
-                Player* player = GetCaster()->ToPlayer();
+                auto player = GetCaster()->ToPlayer();
 
                 if (uint32 petId = player->GetLastPetNumber(true))
                 {
@@ -817,14 +815,24 @@ class spell_warl_flames_of_xoroth : public SpellScriptLoader
                             newPet->SetFullHealth();
                             newPet->SetPower(newPet->getPowerType(), newPet->GetMaxPower(newPet->getPowerType()));
 
+                            bool needResummon = false;
                             switch (newPet->GetEntry())
                             {
                                 case NPC_DOOMGUARD:
                                 case NPC_INFERNAL:
-                                    newPet->SetEntry(NPC_IMP);
+                                    needResummon = true;
+                                    break;
+                                case NPC_FELGUARD:
+                                    if (player->GetSpecializationId(player->GetActiveSpec()) != SPEC_WARLOCK_DEMONOLOGY)
+                                        needResummon = true;
                                     break;
                                 default:
                                     break;
+                            }
+                            if (needResummon)
+                            {
+                                newPet->UnSummon();
+                                player->SummonPet(NPC_IMP, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation(), 0);
                             }
                         }
                         else

@@ -1444,6 +1444,7 @@ void Player::SendMirrorTimer(MirrorTimerType Type, uint32 MaxValue, uint32 Curre
     data << MaxValue;
     data << CurrentValue;
     data.WriteBit(0);
+    data.FlushBits();
     GetSession()->SendPacket(&data);
 }
 

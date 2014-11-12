@@ -18425,6 +18425,7 @@ void Player::SendQuestReward(Quest const* quest, uint32 XP, Object* questGiver)
 
     data.WriteBit(1);                                      // FIXME: unknown bits, common values sent
     data.WriteBit(1);
+    data.FlushBits();
 
     GetSession()->SendPacket(&data);
 

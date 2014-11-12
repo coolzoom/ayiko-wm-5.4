@@ -225,6 +225,10 @@ void WorldSession::HandleGuildFinderGetApplications(WorldPacket& /*recvPacket*/)
         data.FlushBits();
         data.append(bufferData);
     }
+    else
+    {
+        data.FlushBits();
+    }
 
     GetPlayer()->SendDirectMessage(&data);
 }

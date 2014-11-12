@@ -28876,6 +28876,8 @@ void Player::SendCUFProfiles()
         data.WriteBit(profile.bits[CufProfile::AutoActivateSpec1]);
     }
 
+    data.FlushBits();
+
     for (CufProfile const &profile : m_cufProfiles)
     {
         data << profile.unk0; //150

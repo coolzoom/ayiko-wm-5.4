@@ -26228,10 +26228,10 @@ void Player::ResurectUsingRequestData()
     SpawnCorpseBones();
 }
 
-void Player::SetClientControl(Unit* target, uint8 allowMove)
+void Player::SetClientControl(Unit* newMover, uint8 allowMove)
 {
     WorldPacket data(SMSG_CLIENT_CONTROL_UPDATE);
-    ObjectGuid targetGuid = target->GetGUID();
+    ObjectGuid targetGuid = newMover->GetGUID();
 
     data.WriteBit(allowMove);
 
@@ -26240,11 +26240,9 @@ void Player::SetClientControl(Unit* target, uint8 allowMove)
 
     GetSession()->SendPacket(&data);
 
-    if (Player* player = target->ToPlayer())
-        player->SetRooted(!allowMove);
-
-    if (target == this)
-        SetMover(this);
+    // Send only if mover is actually changed
+    if (newMover == this && m_mover != newMover)
+        SetMover(newMover);
 }
 
 void Player::UpdateZoneDependentAuras(uint32 newZone)

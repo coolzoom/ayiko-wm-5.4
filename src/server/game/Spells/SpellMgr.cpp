@@ -579,6 +579,7 @@ bool IsDiminishingReturnsGroupDurationLimited(DiminishingGroup group)
         case DIMINISHING_RANDOM_STUN:
         case DIMINISHING_SLEEP:
         case DIMINISHING_LIMITONLY:
+        case DIMINISHING_DOMINATE_MIND:
             return true;
         default:
             return false;

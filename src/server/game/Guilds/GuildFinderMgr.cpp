@@ -349,15 +349,9 @@ void GuildFinderMgr::SendApplicantListUpdate(Guild& guild)
         dataBuffer << uint32(request.GetAvailability());
         dataBuffer.WriteByteSeq<7>(playerGuid);
         dataBuffer << uint32(time(NULL) - request.GetSubmitTime()); // Time in seconds since application submitted.
-
-        if (request.GetComment().size() > 0)
-            dataBuffer.append(request.GetComment().c_str(), request.GetComment().size());
-
+        dataBuffer.WriteString(request.GetComment());
         dataBuffer.WriteByteSeq<6>(playerGuid);
-
-        if (request.GetName().size() > 0)
-            dataBuffer.append(request.GetName().c_str(), request.GetName().size());
-
+        dataBuffer.WriteString(request.GetName());
         dataBuffer << uint32(request.GetClassRoles());
         dataBuffer.WriteByteSeq<1>(playerGuid);
         dataBuffer << uint32(request.GetInterests());
@@ -406,17 +400,12 @@ void GuildFinderMgr::SendMembershipRequestListUpdate(Player& player)
 
             bufferData << uint32(50397223);                             // unk Flags
             bufferData.WriteByteSeq<1, 5, 6>(guildGuid);
-
-            if (request.GetComment().size() > 0)
-                bufferData.append(request.GetComment().c_str(), request.GetComment().size());
-
+            bufferData.WriteString(request.GetComment());
             bufferData.WriteByteSeq<0, 2>(guildGuid);
             bufferData << uint32(guildSettings.GetClassRoles());
             bufferData.WriteByteSeq<4>(guildGuid);
             bufferData << uint32(guildSettings.GetAvailability());
-
             bufferData.WriteString(guild->GetName());
-
             bufferData << uint32(time(NULL) - request.GetSubmitTime()); // Time since application (seconds)
             bufferData << uint32(guildSettings.GetInterests());
             bufferData << uint32(request.GetExpiryTime() - time(NULL)); // Time left to application expiry (seconds)
@@ -425,6 +414,10 @@ void GuildFinderMgr::SendMembershipRequestListUpdate(Player& player)
 
         data.FlushBits();
         data.append(bufferData);
+    }
+    else
+    {
+        data.FlushBits();
     }
 
     player.SendDirectMessage(&data);

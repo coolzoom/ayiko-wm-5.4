@@ -4382,6 +4382,7 @@ void Spell::SendCastResult(Player* caster, SpellInfo const* spellInfo, SpellPowe
         {
             data.WriteBit(0);
             data.WriteBit(1);
+            data.FlushBits();
 
             // hardcode areas limitation case
             switch (spellInfo->Id)
@@ -4417,6 +4418,8 @@ void Spell::SendCastResult(Player* caster, SpellInfo const* spellInfo, SpellPowe
                 data.WriteBit(1);
             }
 
+            data.FlushBits();
+
             if (spellInfo->Totem[0])
                 data << uint32(spellInfo->Totem[0]);
             if (spellInfo->Totem[1])
@@ -4436,6 +4439,8 @@ void Spell::SendCastResult(Player* caster, SpellInfo const* spellInfo, SpellPowe
                 data.WriteBit(0);
                 data.WriteBit(1);
             }
+
+            data.FlushBits();
 
             if (spellInfo->TotemCategory[0])
                 data << uint32(spellInfo->TotemCategory[0]);
@@ -4472,6 +4477,7 @@ void Spell::SendCastResult(Player* caster, SpellInfo const* spellInfo, SpellPowe
             {
                 data.WriteBit(1);
                 data.WriteBit(1);
+                data.FlushBits();
             }
 
             break;
@@ -4554,6 +4560,7 @@ void Spell::SendCastResult(Player* caster, SpellInfo const* spellInfo, SpellPowe
         default:
             data.WriteBit(1);
             data.WriteBit(1);
+            data.FlushBits();
             break;
     }
 

@@ -420,27 +420,26 @@ void AchievementMgr<Player>::SendPacket(WorldPacket* data) const
 template<class T>
 void AchievementMgr<T>::RemoveCriteriaProgress(const AchievementCriteriaEntry* entry)
 {
-    CriteriaProgressMap* progressMap = GetCriteriaProgressMap();
+    CriteriaProgressMap &progressMap = GetCriteriaProgressMap();
 
-    if (!progressMap)
-        return;
-
-    CriteriaProgressMap::iterator criteriaProgress = progressMap->find(entry->ID);
-    if (criteriaProgress == progressMap->end())
+    auto const itr = progressMap.find(entry->ID);
+    if (itr == progressMap.end())
         return;
 
     WorldPacket data(SMSG_CRITERIA_DELETED, 4);
     data << uint32(entry->ID);
     SendPacket(&data);
 
-    progressMap->erase(criteriaProgress);
+    progressMap.erase(itr);
 }
 
 template<>
 void AchievementMgr<Guild>::RemoveCriteriaProgress(const AchievementCriteriaEntry* entry)
 {
-    CriteriaProgressMap::iterator criteriaProgress = GetCriteriaProgressMap()->find(entry->ID);
-    if (criteriaProgress == GetCriteriaProgressMap()->end())
+    CriteriaProgressMap &progressMap = GetCriteriaProgressMap();
+
+    auto const itr = progressMap.find(entry->ID);
+    if (itr == progressMap.end())
         return;
 
     ObjectGuid guid = GetOwner()->GetGUID();
@@ -455,7 +454,7 @@ void AchievementMgr<Guild>::RemoveCriteriaProgress(const AchievementCriteriaEntr
 
     SendPacket(&data);
 
-    GetCriteriaProgressMap()->erase(criteriaProgress);
+    progressMap.erase(itr);
 }
 
 template<class T>
@@ -536,9 +535,12 @@ void AchievementMgr<T>::SaveToDB(SQLTransaction& /*trans*/)
 template<>
 void AchievementMgr<Player>::SaveToDB(SQLTransaction& trans)
 {
+    uint32 const guidLow = GetOwner()->GetGUIDLow();
+    uint32 const accountId = GetOwner()->GetSession()->GetAccountId();
+
     if (!m_completedAchievements.empty())
     {
-        bool need_execute = false;
+        bool needExecute = false;
 
         std::ostringstream ssAccDel;
         std::ostringstream ssAccIns;
@@ -547,25 +549,28 @@ void AchievementMgr<Player>::SaveToDB(SQLTransaction& trans)
         std::ostringstream ssCharIns;
         std::ostringstream sscount;
 
-        for (CompletedAchievementMap::iterator iter = m_completedAchievements.begin(); iter != m_completedAchievements.end(); ++iter)
+        for (auto &kvPair : m_completedAchievements)
         {
-            if (!iter->second.changed)
+            auto const achievementId = kvPair.first;
+            auto &completionData = kvPair.second;
+
+            if (!completionData.changed)
                 continue;
 
-            bool mustSaveForCharacter = iter->second.completedByThisCharacter;
+            bool const mustSaveForCharacter = completionData.completedByThisCharacter;
 
             // First new/changed record prefix
-            if (!need_execute)
+            if (!needExecute)
             {
-                ssAccDel << "DELETE FROM account_achievement WHERE account = " << GetOwner()->GetSession()->GetAccountId() << " AND achievement IN (";
+                ssAccDel << "DELETE FROM account_achievement WHERE account = " << accountId << " AND achievement IN (";
                 ssAccIns << "INSERT INTO account_achievement (account, first_guid, achievement, date) VALUES ";
 
                 if (mustSaveForCharacter)
                 {
-                    ssCharDel << "DELETE FROM character_achievement WHERE guid = " << GetOwner()->GetGUIDLow() << " AND achievement IN (";
+                    ssCharDel << "DELETE FROM character_achievement WHERE guid = " << guidLow << " AND achievement IN (";
                     ssCharIns << "INSERT INTO character_achievement (guid, achievement) VALUES ";
                 }
-                need_execute = true;
+                needExecute = true;
             }
             // Next new/changed record prefix
             else
@@ -581,22 +586,22 @@ void AchievementMgr<Player>::SaveToDB(SQLTransaction& trans)
             }
 
             // New/changed record data
-            ssAccDel << iter->first;
-            ssAccIns << '(' << GetOwner()->GetSession()->GetAccountId() << ',' << iter->second.first_guid << ',' << iter->first << ',' << iter->second.date << ')';
+            ssAccDel << achievementId;
+            ssAccIns << '(' << accountId << ',' << completionData.first_guid << ',' << achievementId << ',' << completionData.date << ')';
 
             if (mustSaveForCharacter)
             {
-                ssCharDel << iter->first;
-                ssCharIns << '(' << GetOwner()->GetGUIDLow() << ',' << iter->first << ')';
+                ssCharDel << achievementId;
+                ssCharIns << '(' << guidLow << ',' << achievementId << ')';
             }
 
             /// Mark as saved in db
-            iter->second.changed = false;
+            completionData.changed = false;
         }
 
-        if (need_execute)
+        if (needExecute)
         {
-            ssAccDel  << ')';
+            ssAccDel << ')';
             ssCharDel << ')';
             trans->Append(ssAccDel.str().c_str());
             trans->Append(ssAccIns.str().c_str());
@@ -606,161 +611,154 @@ void AchievementMgr<Player>::SaveToDB(SQLTransaction& trans)
         }
     }
 
-    CriteriaProgressMap* progressMap = GetCriteriaProgressMap();
-
-    if (!progressMap)
+    CriteriaProgressMap &progressMap = GetCriteriaProgressMap();
+    if (progressMap.empty())
         return;
 
-    if (!progressMap->empty())
+    // Prepare deleting and insert
+    bool needExecuteDel     = false;
+    bool needExecuteIns     = false;
+    bool needExecuteAccount = false;
+
+    bool isAccountAchievement = false;
+
+    bool alreadyOneCharDelLine = false;
+    bool alreadyOneAccDelLine  = false;
+    bool alreadyOneCharInsLine = false;
+    bool alreadyOneAccInsLine  = false;
+
+    std::ostringstream ssAccDel;
+    std::ostringstream ssAccIns;
+    std::ostringstream ssCharDel;
+    std::ostringstream ssCharIns;
+
+    for (auto &kvPair : progressMap)
     {
-        // Prepare deleting and insert
-        bool need_execute_del       = false;
-        bool need_execute_ins       = false;
-        bool need_execute_account   = false;
+        auto const criteriaId = kvPair.first;
+        auto &progressData = kvPair.second;
 
-        bool isAccountAchievement   = false;
+        if (!progressData.changed)
+            continue;
 
-        bool alreadyOneCharDelLine  = false;
-        bool alreadyOneAccDelLine   = false;
-        bool alreadyOneCharInsLine  = false;
-        bool alreadyOneAccInsLine   = false;
+        auto const criteria = sAchievementMgr->GetAchievementCriteria(criteriaId);
+        if (!criteria)
+            continue;
 
-        std::ostringstream ssAccdel;
-        std::ostringstream ssAccins;
-        std::ostringstream ssChardel;
-        std::ostringstream ssCharins;
+        auto const achievement = sAchievementMgr->GetAchievement(criteria->achievement);
+        if (!achievement)
+            continue;
 
-
-        uint64 guid      = GetOwner()->GetGUIDLow();
-        uint32 accountId = GetOwner()->GetSession()->GetAccountId();
-
-        for (CriteriaProgressMap::iterator iter = progressMap->begin(); iter != progressMap->end(); ++iter)
+        if (achievement->flags & ACHIEVEMENT_FLAG_ACCOUNT)
         {
-            if (!iter->second.changed)
-                continue;
+            isAccountAchievement = true;
+            needExecuteAccount = true;
+        }
+        else
+            isAccountAchievement = false;
 
-            AchievementCriteriaEntry const* criteria = sAchievementMgr->GetAchievementCriteria(iter->first);
+        // Deleted data (including 0 progress state)
 
-            if (!criteria)
-                continue;
-
-            AchievementEntry const* achievement = sAchievementMgr->GetAchievement(criteria->achievement);
-
-            if (!achievement)
-                continue;
-
-            if (achievement->flags & ACHIEVEMENT_FLAG_ACCOUNT)
+        if (!needExecuteDel)
+        {
+            // First new/changed record prefix (for any counter value)
+            ssAccDel << "DELETE FROM account_achievement_progress WHERE account = " << accountId << " AND criteria IN (";
+            ssCharDel << "DELETE FROM character_achievement_progress WHERE guid = " << guidLow << " AND criteria IN (";
+            needExecuteDel = true;
+        }
+        else
+        {
+            // Next new/changed record prefix
+            if (isAccountAchievement)
             {
-                isAccountAchievement = true;
-                need_execute_account = true;
+                if (alreadyOneAccDelLine)
+                    ssAccDel << ',';
             }
             else
-                isAccountAchievement = false;
-
-            // Deleted data (including 0 progress state)
             {
-                // First new/changed record prefix (for any counter value)
-                if (!need_execute_del)
-                {
-                    ssAccdel  << "DELETE FROM account_achievement_progress   WHERE account = " << accountId << " AND criteria IN (";
-                    ssChardel << "DELETE FROM character_achievement_progress WHERE guid    = " << guid      << " AND criteria IN (";
-                    need_execute_del = true;
-                }
-                // Next new/changed record prefix
-                else
-                {
-                    if (isAccountAchievement)
-                    {
-                        if (alreadyOneAccDelLine)
-                            ssAccdel  << ',';
-                    }
-                    else
-                    {
-                        if (alreadyOneCharDelLine)
-                            ssChardel << ',';
-                    }
-                }
-
-                // New/changed record data
-                if (isAccountAchievement)
-                {
-                    ssAccdel << iter->first;
-                    alreadyOneAccDelLine  = true;
-                }
-                else
-                {
-                    ssChardel << iter->first;
-                    alreadyOneCharDelLine = true;
-                }
-            }
-
-            // Store data only for real progress
-            if (iter->second.counter != 0)
-            {
-                /// First new/changed record prefix
-                if (!need_execute_ins)
-                {
-                    ssAccins  << "INSERT INTO account_achievement_progress   (account, criteria, counter, date) VALUES ";
-                    ssCharins << "INSERT INTO character_achievement_progress (guid,    criteria, counter, date) VALUES ";
-                    need_execute_ins = true;
-                }
-                // Next new/changed record prefix
-                else
-                {
-                    if (isAccountAchievement)
-                    {
-                        if (alreadyOneAccInsLine)
-                            ssAccins  << ',';
-                    }
-                    else
-                    {
-                        if (alreadyOneCharInsLine)
-                            ssCharins << ',';
-                    }
-                }
-
-                // New/changed record data
-                if (isAccountAchievement)
-                {
-                    ssAccins  << '(' << accountId << ',' << iter->first << ',' << iter->second.counter << ',' << iter->second.date << ')';
-                    alreadyOneAccInsLine  = true;
-                }
-                else
-                {
-                    ssCharins << '(' << guid      << ',' << iter->first << ',' << iter->second.counter << ',' << iter->second.date << ')';
-                    alreadyOneCharInsLine = true;
-                }
-            }
-
-            // Mark as updated in db
-            iter->second.changed = false;
-        }
-
-        if (need_execute_del)                                // DELETE ... IN (.... _)_
-        {
-            ssAccdel  << ')';
-            ssChardel << ')';
-        }
-
-        if (need_execute_del || need_execute_ins)
-        {
-            if (need_execute_del)
-            {
-                if (need_execute_account && alreadyOneAccDelLine)
-                    trans->Append(ssAccdel.str().c_str());
-
                 if (alreadyOneCharDelLine)
-                    trans->Append(ssChardel.str().c_str());
+                    ssCharDel << ',';
             }
+        }
 
-            if (need_execute_ins)
+        // New/changed record data
+        if (isAccountAchievement)
+        {
+            ssAccDel << criteriaId;
+            alreadyOneAccDelLine = true;
+        }
+        else
+        {
+            ssCharDel << criteriaId;
+            alreadyOneCharDelLine = true;
+        }
+
+        // Store data only for real progress
+        if (progressData.counter != 0)
+        {
+            if (!needExecuteIns)
             {
-                if (need_execute_account && alreadyOneAccInsLine)
-                    trans->Append(ssAccins.str().c_str());
-
-                if (alreadyOneCharInsLine)
-                    trans->Append(ssCharins.str().c_str());
+                // First new/changed record prefix
+                ssAccIns << "INSERT INTO account_achievement_progress (account, criteria, counter, date) VALUES ";
+                ssCharIns << "INSERT INTO character_achievement_progress (guid, criteria, counter, date) VALUES ";
+                needExecuteIns = true;
             }
+            else
+            {
+                // Next new/changed record prefix
+                if (isAccountAchievement)
+                {
+                    if (alreadyOneAccInsLine)
+                        ssAccIns << ',';
+                }
+                else
+                {
+                    if (alreadyOneCharInsLine)
+                        ssCharIns << ',';
+                }
+            }
+
+            // New/changed record data
+            if (isAccountAchievement)
+            {
+                ssAccIns << '(' << accountId << ',' << criteriaId << ',' << progressData.counter << ',' << progressData.date << ')';
+                alreadyOneAccInsLine = true;
+            }
+            else
+            {
+                ssCharIns << '(' << guidLow << ',' << criteria << ',' << progressData.counter << ',' << progressData.date << ')';
+                alreadyOneCharInsLine = true;
+            }
+        }
+
+        // Mark as updated in db
+        progressData.changed = false;
+    }
+
+    // DELETE ... IN (.... _)_
+    if (needExecuteDel)
+    {
+        ssAccDel << ')';
+        ssCharDel << ')';
+    }
+
+    if (needExecuteDel || needExecuteIns)
+    {
+        if (needExecuteDel)
+        {
+            if (needExecuteAccount && alreadyOneAccDelLine)
+                trans->Append(ssAccDel.str().c_str());
+
+            if (alreadyOneCharDelLine)
+                trans->Append(ssCharDel.str().c_str());
+        }
+
+        if (needExecuteIns)
+        {
+            if (needExecuteAccount && alreadyOneAccInsLine)
+                trans->Append(ssAccIns.str().c_str());
+
+            if (alreadyOneCharInsLine)
+                trans->Append(ssCharIns.str().c_str());
         }
     }
 }
@@ -770,51 +768,56 @@ void AchievementMgr<Guild>::SaveToDB(SQLTransaction& trans)
 {
     PreparedStatement* stmt;
     std::ostringstream guidstr;
-    for (CompletedAchievementMap::const_iterator itr = m_completedAchievements.begin(); itr != m_completedAchievements.end(); ++itr)
+
+    for (auto &kvPair : m_completedAchievements)
     {
-        if (!itr->second.changed)
+        auto const achievementId = kvPair.first;
+        auto &completionData = kvPair.second;
+
+        if (!completionData.changed)
             continue;
 
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GUILD_ACHIEVEMENT);
         stmt->setUInt32(0, GetOwner()->GetId());
-        stmt->setUInt16(1, itr->first);
+        stmt->setUInt16(1, achievementId);
         trans->Append(stmt);
 
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_GUILD_ACHIEVEMENT);
         stmt->setUInt32(0, GetOwner()->GetId());
-        stmt->setUInt16(1, itr->first);
-        stmt->setUInt32(2, itr->second.date);
-        for (std::set<uint64>::const_iterator gItr = itr->second.guids.begin(); gItr != itr->second.guids.end(); ++gItr)
-            guidstr << GUID_LOPART(*gItr) << ',';
-
+        stmt->setUInt16(1, achievementId);
+        stmt->setUInt32(2, completionData.date);
+        for (auto const &guid : completionData.guids)
+            guidstr << GUID_LOPART(guid) << ',';
         stmt->setString(3, guidstr.str());
         trans->Append(stmt);
 
         guidstr.str("");
+
+        completionData.changed = false;
     }
 
-    CriteriaProgressMap* progressMap = GetCriteriaProgressMap();
-
-    if (!progressMap)
-        return;
-
-    for (CriteriaProgressMap::const_iterator itr = progressMap->begin(); itr != progressMap->end(); ++itr)
+    for (auto &kvPair : GetCriteriaProgressMap())
     {
-        if (!itr->second.changed)
+        auto const criteriaId = kvPair.first;
+        auto &progressData = kvPair.second;
+
+        if (!progressData.changed)
             continue;
 
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GUILD_ACHIEVEMENT_CRITERIA);
         stmt->setUInt32(0, GetOwner()->GetId());
-        stmt->setUInt16(1, itr->first);
+        stmt->setUInt16(1, criteriaId);
         trans->Append(stmt);
 
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_GUILD_ACHIEVEMENT_CRITERIA);
         stmt->setUInt32(0, GetOwner()->GetId());
-        stmt->setUInt16(1, itr->first);
-        stmt->setUInt64(2, itr->second.counter);
-        stmt->setUInt32(3, itr->second.date);
-        stmt->setUInt32(4, GUID_LOPART(itr->second.CompletedGUID));
+        stmt->setUInt16(1, criteriaId);
+        stmt->setUInt64(2, progressData.counter);
+        stmt->setUInt32(3, progressData.date);
+        stmt->setUInt32(4, GUID_LOPART(progressData.CompletedGUID));
         trans->Append(stmt);
+
+        progressData.changed = false;
     }
 }
 
@@ -890,12 +893,7 @@ void AchievementMgr<Player>::LoadFromDB(PreparedQueryResult achievementResult, P
             if (achievement && (achievement->flags & ACHIEVEMENT_FLAG_GUILD))
                 continue;
 
-            CriteriaProgressMap* progressMap = GetCriteriaProgressMap();
-
-            if (!progressMap)
-                continue;
-
-            CriteriaProgress& progress = (*progressMap)[id];
+            CriteriaProgress& progress = GetCriteriaProgressMap()[id];
             progress.counter = counter;
             progress.date    = date;
             progress.changed = false;
@@ -956,19 +954,16 @@ void AchievementMgr<Player>::LoadFromDB(PreparedQueryResult achievementResult, P
             if (criteria->timeLimit && time_t(date + criteria->timeLimit) < now)
                 continue;
 
-            CriteriaProgressMap* progressMap = GetCriteriaProgressMap();
-
-            if (!progressMap)
-                continue;
+            CriteriaProgressMap &progressMap = GetCriteriaProgressMap();
 
             // Achievement in both account & characters achievement_progress, problem
-            if (progressMap->find(id) != progressMap->end())
+            if (progressMap.find(id) != progressMap.end())
             {
                 TC_LOG_ERROR("achievement", "Achievement '%u' in both account & characters achievement_progress", id);
                 continue;
             }
 
-            CriteriaProgress& progress = (*progressMap)[id];
+            CriteriaProgress& progress = progressMap[id];
             progress.counter = counter;
             progress.date    = date;
             progress.changed = false;
@@ -1038,12 +1033,7 @@ void AchievementMgr<Guild>::LoadFromDB(PreparedQueryResult achievementResult, Pr
             if (achievement && !(achievement->flags & ACHIEVEMENT_FLAG_GUILD))
                 continue;
 
-            CriteriaProgressMap* progressMap = GetCriteriaProgressMap();
-
-            if (!progressMap)
-                continue;
-
-            CriteriaProgress& progress = (*progressMap)[id];
+            CriteriaProgress& progress = GetCriteriaProgressMap()[id];
             progress.counter = counter;
             progress.date    = date;
             progress.CompletedGUID = guid;
@@ -1061,28 +1051,23 @@ void AchievementMgr<T>::Reset()
 template<>
 void AchievementMgr<Player>::Reset()
 {
-    for (CompletedAchievementMap::const_iterator iter = m_completedAchievements.begin(); iter != m_completedAchievements.end(); ++iter)
+    for (auto const &kvPair : m_completedAchievements)
     {
         WorldPacket data(SMSG_ACHIEVEMENT_DELETED, 4);
-        data << uint32(iter->first);
+        data << uint32(kvPair.first);
         SendPacket(&data);
     }
+    m_completedAchievements.clear();
 
-    CriteriaProgressMap* criteriaProgress = GetCriteriaProgressMap();
-
-    if (!criteriaProgress)
-        return;
-
-    for (CriteriaProgressMap::const_iterator iter = criteriaProgress->begin(); iter != criteriaProgress->end(); ++iter)
+    for (auto const &kvPair : GetCriteriaProgressMap())
     {
         WorldPacket data(SMSG_CRITERIA_DELETED, 4);
-        data << uint32(iter->first);
+        data << uint32(kvPair.first);
         SendPacket(&data);
     }
+    GetCriteriaProgressMap().clear();
 
-    m_completedAchievements.clear();
     _achievementPoints = 0;
-    criteriaProgress->clear();
     DeleteFromDB(GetOwner()->GetGUIDLow());
 
     // re-fill data
@@ -1092,31 +1077,36 @@ void AchievementMgr<Player>::Reset()
 template<>
 void AchievementMgr<Guild>::Reset()
 {
-    ObjectGuid guid = GetOwner()->GetGUID();
-    for (CompletedAchievementMap::const_iterator iter = m_completedAchievements.begin(); iter != m_completedAchievements.end(); ++iter)
+    ObjectGuid const guid = GetOwner()->GetGUID();
+
+    for (auto const &kvPair : m_completedAchievements)
     {
         WorldPacket data(SMSG_GUILD_ACHIEVEMENT_DELETED, 4);
 
         data.WriteBitSeq<4, 1, 2, 3, 0, 7, 5, 6>(guid);
-
-        data << uint32(iter->first);
+        data << uint32(kvPair.first);
         data.WriteByteSeq<5, 1, 3, 6, 0, 7>(guid);
-        data << uint32(secsToTimeBitFields(iter->second.date));
+        data << uint32(secsToTimeBitFields(kvPair.second.date));
         data.WriteByteSeq<4, 2>(guid);
+
         SendPacket(&data);
     }
+    m_completedAchievements.clear();
 
-    CriteriaProgressMap* criteriaProgressMap = GetCriteriaProgressMap();
+    for (auto const &kvPair : GetCriteriaProgressMap())
+    {
+        WorldPacket data(SMSG_GUILD_CRITERIA_DELETED, 4 + 8);
 
-    if (!criteriaProgressMap)
-        return;
+        data.WriteBitSeq<7, 3, 4, 2, 1, 5, 6, 0>(guid);
+        data.WriteByteSeq<5, 7, 4, 6, 2, 1, 3>(guid);
+        data << uint32(kvPair.first);
+        data.WriteByteSeq<0>(guid);
 
-    while (!criteriaProgressMap->empty())
-       if (AchievementCriteriaEntry const* criteria = sAchievementMgr->GetAchievementCriteria(criteriaProgressMap->begin()->first))
-            RemoveCriteriaProgress(criteria);
+        SendPacket(&data);
+    }
+    GetCriteriaProgressMap().clear();
 
     _achievementPoints = 0;
-    m_completedAchievements.clear();
     DeleteFromDB(GetOwner()->GetId());
 }
 
@@ -1285,9 +1275,9 @@ void AchievementMgr<Guild>::SendCriteriaUpdate(AchievementCriteriaEntry const* e
 }
 
 template<class T>
-CriteriaProgressMap* AchievementMgr<T>::GetCriteriaProgressMap()
+CriteriaProgressMap & AchievementMgr<T>::GetCriteriaProgressMap()
 {
-    return &m_criteriaProgress;
+    return m_criteriaProgress;
 }
 
 static const uint32 achievIdByArenaSlot[MAX_ARENA_SLOT] = {1057, 1107, 1108};
@@ -1949,35 +1939,18 @@ bool AchievementMgr<T>::IsCompletedAchievement(AchievementEntry const* entry)
 }
 
 template<class T>
-CriteriaProgress* AchievementMgr<T>::GetCriteriaProgress(uint32 entry)
+CriteriaProgress* AchievementMgr<T>::GetCriteriaProgress(uint32 entryId)
 {
-    CriteriaProgressMap* criteriaProgressMap = GetCriteriaProgressMap();
+    CriteriaProgressMap &progressMap = GetCriteriaProgressMap();
 
-    if (!criteriaProgressMap)
-        return NULL;
-
-    CriteriaProgressMap::iterator iter = criteriaProgressMap->find(entry);
-
-    if (iter == criteriaProgressMap->end())
-        return NULL;
-
-    return &(iter->second);
+    CriteriaProgressMap::iterator iter = progressMap.find(entryId);
+    return (iter != progressMap.end()) ? &iter->second : nullptr;
 }
 
 template<class T>
 CriteriaProgress* AchievementMgr<T>::GetCriteriaProgress(AchievementCriteriaEntry const* entry)
 {
-   CriteriaProgressMap* criteriaProgressMap = GetCriteriaProgressMap();
-
-    if (!criteriaProgressMap)
-        return NULL;
-
-    CriteriaProgressMap::iterator iter = criteriaProgressMap->find(entry->ID);
-
-    if (iter == criteriaProgressMap->end())
-        return NULL;
-
-    return &(iter->second);
+    return GetCriteriaProgress(entry->ID);
 }
 
 template<class T>
@@ -1996,12 +1969,7 @@ void AchievementMgr<T>::SetCriteriaProgress(AchievementCriteriaEntry const* entr
         if (changeValue == 0 && !entry->timeLimit)
             return;
 
-        CriteriaProgressMap* progressMap = GetCriteriaProgressMap();
-
-        if (!progressMap)
-            return;
-
-        progress = &(*progressMap)[entry->ID];
+        progress = &GetCriteriaProgressMap()[entry->ID];
         progress->counter = changeValue;
     }
     else
@@ -2257,9 +2225,9 @@ void AchievementMgr<Guild>::CompletedAchievement(AchievementEntry const* achieve
     UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EARN_GUILD_ACHIEVEMENT_POINTS, achievement->points, 0, 0, NULL, referencePlayer);
 }
 
-struct VisibleAchievementPred
+struct VisibleAchievementPred final
 {
-    bool operator()(CompletedAchievementMap::value_type const& val)
+    bool operator()(CompletedAchievementMap::value_type const& val) const
     {
         AchievementEntry const* achievement = sAchievementMgr->GetAchievement(val.first);
         return achievement && !(achievement->flags & ACHIEVEMENT_FLAG_HIDDEN);
@@ -2269,13 +2237,10 @@ struct VisibleAchievementPred
 template<class T>
 void AchievementMgr<T>::SendAllAchievementData(Player* /*receiver*/)
 {
-    const CriteriaProgressMap* progressMap = GetCriteriaProgressMap();
-
-    if (!progressMap)
-        return;
+    CriteriaProgressMap const &progressMap = GetCriteriaProgressMap();
 
     VisibleAchievementPred isVisible;
-    size_t numCriteria = progressMap->size();
+    size_t numCriteria = progressMap.size();
     size_t numAchievements = std::count_if(m_completedAchievements.begin(), m_completedAchievements.end(), isVisible);
     ObjectGuid guid = GetOwner()->GetGUID();
     ObjectGuid counter;
@@ -2284,20 +2249,20 @@ void AchievementMgr<T>::SendAllAchievementData(Player* /*receiver*/)
 
     data.WriteBits(numAchievements, 20);
 
-    for (CompletedAchievementMap::const_iterator itr = m_completedAchievements.begin(); itr != m_completedAchievements.end(); ++itr)
+    for (auto const &kvPair : m_completedAchievements)
     {
-        if (!isVisible(*itr))
+        if (!isVisible(kvPair))
             continue;
 
-        ObjectGuid firstAccountGuid = (*itr).second.first_guid;
+        ObjectGuid const firstAccountGuid = kvPair.second.first_guid;
         data.WriteBitSeq<6, 1, 5, 3, 2, 7, 0, 4>(firstAccountGuid);
     }
 
     data.WriteBits(numCriteria, 19);
 
-    for (CriteriaProgressMap::const_iterator itr = progressMap->begin(); itr != progressMap->end(); ++itr)
+    for (auto const &kvPair : progressMap)
     {
-        counter = uint64(itr->second.counter);
+        counter = uint64(kvPair.second.counter);
 
         data.WriteBitSeq<5>(counter);
         data.WriteBitSeq<2, 4>(guid);
@@ -2311,18 +2276,20 @@ void AchievementMgr<T>::SendAllAchievementData(Player* /*receiver*/)
         data.WriteBitSeq<2>(counter);
     }
 
-    for (CriteriaProgressMap::const_iterator itr = progressMap->begin(); itr != progressMap->end(); ++itr)
+    data.FlushBits();
+
+    for (auto const &kvPair : progressMap)
     {
-        counter = uint64(itr->second.counter);
+        counter = uint64(kvPair.second.counter);
 
         data.WriteByteSeq<1>(guid);
-        data << uint32(itr->first);     // Criteria id
+        data << uint32(kvPair.first);   // Criteria id
         data.WriteByteSeq<7>(guid);
         data.WriteByteSeq<5>(counter);
         data << uint32(0);              // Unk value from 5.4.0, always 0
         data.WriteByteSeq<6>(guid);
         data.WriteByteSeq<0>(counter);
-        data  << uint32(227545947);     // Unk value from 5.4.0, always 227545947
+        data << uint32(227545947);      // Unk value from 5.4.0, always 227545947
         data.WriteByteSeq<2>(guid);
         data.WriteByteSeq<2, 1>(counter);
         data << uint32(0);              // Unk value from 5.4.0, always 0
@@ -2333,20 +2300,20 @@ void AchievementMgr<T>::SendAllAchievementData(Player* /*receiver*/)
         data.WriteByteSeq<0>(guid);
     }
 
-    for (CompletedAchievementMap::const_iterator itr = m_completedAchievements.begin(); itr != m_completedAchievements.end(); ++itr)
+    for (auto const &kvPair : m_completedAchievements)
     {
-        if (!isVisible(*itr))
+        if (!isVisible(kvPair))
             continue;
 
-        ObjectGuid firstAccountGuid = (*itr).second.first_guid;
+        ObjectGuid firstAccountGuid = kvPair.second.first_guid;
 
         data.WriteByteSeq<4, 6, 3, 0>(firstAccountGuid);
         data << uint32(realmID);                                   // Unk timer from 5.4.0 17399, sometimes 50724907
         data.WriteByteSeq<1, 2>(firstAccountGuid);
-        data << uint32(secsToTimeBitFields((*itr).second.date));
+        data << uint32(secsToTimeBitFields(kvPair.second.date));
         data.WriteByteSeq<7, 5>(firstAccountGuid);
         data << uint32(realmID);                                   // Unk timer from 5.4.0 17399, sometimes 50724907
-        data << uint32(itr->first);
+        data << uint32(kvPair.first);
     }
 
     SendPacket(&data);
@@ -2391,16 +2358,13 @@ void AchievementMgr<T>::SendAchievementInfo(Player* /*receiver*/, uint32 /*achie
 template<>
 void AchievementMgr<Player>::SendAchievementInfo(Player* receiver, uint32 /*achievementId = 0 */)
 {
-    CriteriaProgressMap* progressMap = GetCriteriaProgressMap();
-
-    if (!progressMap)
-        return;
+    CriteriaProgressMap const &progressMap = GetCriteriaProgressMap();
 
     ObjectGuid guid = GetOwner()->GetGUID();
     ObjectGuid counter;
 
     VisibleAchievementPred isVisible;
-    size_t numCriteria = progressMap->size();
+    size_t numCriteria = progressMap.size();
     size_t numAchievements = std::count_if(m_completedAchievements.begin(), m_completedAchievements.end(), isVisible);
 
     WorldPacket data(SMSG_RESPOND_INSPECT_ACHIEVEMENTS);
@@ -2408,9 +2372,9 @@ void AchievementMgr<Player>::SendAchievementInfo(Player* receiver, uint32 /*achi
     data.WriteBits(numCriteria, 19);
     data.WriteBits(numAchievements, 20);
 
-    for (CriteriaProgressMap::const_iterator itr = progressMap->begin(); itr != progressMap->end(); ++itr)
+    for (auto const &kvPair : progressMap)
     {
-        counter = itr->second.counter;
+        counter = kvPair.second.counter;
 
         data.WriteBitSeq<4>(guid);
         data.WriteBitSeq<2>(counter);
@@ -2426,20 +2390,21 @@ void AchievementMgr<Player>::SendAchievementInfo(Player* receiver, uint32 /*achi
 
     data.WriteBitSeq<6, 2>(guid);
 
-    for (CompletedAchievementMap::const_iterator itr = m_completedAchievements.begin(); itr != m_completedAchievements.end(); ++itr)
+    for (auto const &kvPair : m_completedAchievements)
     {
-        if (!isVisible(*itr))
+        if (!isVisible(kvPair))
             continue;
 
-        ObjectGuid firstGuid = (*itr).second.first_guid;
+        ObjectGuid const firstGuid = kvPair.second.first_guid;
         data.WriteBitSeq<2, 3, 7, 5, 4, 6, 0, 1>(firstGuid);
     }
 
     data.WriteBitSeq<4, 7, 3, 0, 5, 1>(guid);
+    data.FlushBits();
 
-    for (CriteriaProgressMap::const_iterator itr = progressMap->begin(); itr != progressMap->end(); ++itr)
+    for (auto const &kvPair : progressMap)
     {
-        counter = itr->second.counter;
+        counter = kvPair.second.counter;
 
         data.WriteByteSeq<5>(counter);
         data.WriteByteSeq<0, 1>(guid);
@@ -2448,8 +2413,8 @@ void AchievementMgr<Player>::SendAchievementInfo(Player* receiver, uint32 /*achi
         data.WriteByteSeq<7, 0, 1>(counter);
         data << uint32(0);
         data.WriteByteSeq<4, 3>(counter);
-        data << uint32(itr->first);     // criteria id
-        data << uint32(secsToTimeBitFields(itr->second.date));
+        data << uint32(kvPair.first);     // criteria id
+        data << uint32(secsToTimeBitFields(kvPair.second.date));
         data << uint32(227545947);
         data.WriteByteSeq<2, 5, 6>(guid);
         data.WriteByteSeq<2>(counter);
@@ -2458,18 +2423,18 @@ void AchievementMgr<Player>::SendAchievementInfo(Player* receiver, uint32 /*achi
 
     data.WriteByteSeq<5, 3>(guid);
 
-    for (CompletedAchievementMap::const_iterator itr = m_completedAchievements.begin(); itr != m_completedAchievements.end(); ++itr)
+    for (auto const &kvPair : m_completedAchievements)
     {
-        if (!isVisible(*itr))
+        if (!isVisible(kvPair))
             continue;
 
-        ObjectGuid firstGuid = (*itr).second.first_guid;
+        ObjectGuid const firstGuid = kvPair.second.first_guid;
 
         data.WriteByteSeq<0, 7, 6>(firstGuid);
         data << uint32(0);
-        data << uint32(itr->first);
+        data << uint32(kvPair.first);
         data << uint32(50397223);
-        data << uint32(secsToTimeBitFields((*itr).second.date));
+        data << uint32(secsToTimeBitFields(kvPair.second.date));
         data.WriteByteSeq<4, 5, 1, 3, 2>(firstGuid);
     }
 
@@ -2488,81 +2453,61 @@ void AchievementMgr<Guild>::SendAchievementInfo(Player* receiver, uint32 achieve
         // Send empty packet
         WorldPacket data(SMSG_GUILD_CRITERIA_DATA, 3);
         data.WriteBits(0, 19);
-        receiver->GetSession()->SendPacket(&data);
+        data.FlushBits();
+        receiver->SendDirectMessage(&data);
         return;
     }
 
-    ObjectGuid counter;
-    ObjectGuid guid;
-    uint32 numCriteria = 0;
+    ObjectGuid counter, guid;
     ByteBuffer criteriaData;
-    ByteBuffer criteriaBits;
 
-    CriteriaProgressMap* progressMap = GetCriteriaProgressMap();
+    CriteriaProgressMap const &progressMap = GetCriteriaProgressMap();
 
-    if (!progressMap)
-        return;
+    WorldPacket data(SMSG_GUILD_CRITERIA_DATA, 3 + (2 + 8 + 5 * 4) * progressMap.size());
 
-    for (AchievementCriteriaEntryList::const_iterator itr = criteria->begin(); itr != criteria->end(); ++itr)
+    data.WriteBits(progressMap.size(), 19);
+
+    for (auto const &kvPair : progressMap)
     {
-        uint32 criteriaId = (*itr)->ID;
-        CriteriaProgress* progress = GetCriteriaProgress(criteriaId);
-        if (!progress)
-            continue;
+        auto const &criteriaId = kvPair.first;
+        auto const &progressData = kvPair.second;
 
-        ++numCriteria;
-    }
+        counter = progressData.counter;
+        guid = progressData.CompletedGUID;
 
-    criteriaBits.WriteBits(numCriteria, 19);
-
-    for (AchievementCriteriaEntryList::const_iterator itr = criteria->begin(); itr != criteria->end(); ++itr)
-    {
-        uint32 criteriaId = (*itr)->ID;
-        CriteriaProgress* progress = GetCriteriaProgress(criteriaId);
-        if (!progress)
-            continue;
-
-        counter = progress->counter;
-        guid = progress->CompletedGUID;
-
-        criteriaBits.WriteBitSeq<3, 6>(counter);
-        criteriaBits.WriteBitSeq<5, 4>(guid);
-        criteriaBits.WriteBitSeq<2>(counter);
-        criteriaBits.WriteBitSeq<0>(guid);
-        criteriaBits.WriteBitSeq<7>(counter);
-        criteriaBits.WriteBitSeq<6, 7, 3>(guid);
-        criteriaBits.WriteBitSeq<5, 0>(counter);
-        criteriaBits.WriteBitSeq<2>(guid);
-        criteriaBits.WriteBitSeq<1, 4>(counter);
-        criteriaBits.WriteBitSeq<1>(guid);
+        data.WriteBitSeq<3, 6>(counter);
+        data.WriteBitSeq<5, 4>(guid);
+        data.WriteBitSeq<2>(counter);
+        data.WriteBitSeq<0>(guid);
+        data.WriteBitSeq<7>(counter);
+        data.WriteBitSeq<6, 7, 3>(guid);
+        data.WriteBitSeq<5, 0>(counter);
+        data.WriteBitSeq<2>(guid);
+        data.WriteBitSeq<1, 4>(counter);
+        data.WriteBitSeq<1>(guid);
 
         criteriaData.WriteByteSeq<4>(guid);
-        criteriaData << uint32(progress->date);      // Unknown date
+        criteriaData << uint32(progressData.date);      // Unknown date
         criteriaData.WriteByteSeq<2, 0>(counter);
-        criteriaData << uint32(progress->changed);
+        criteriaData << uint32(progressData.changed);
         criteriaData.WriteByteSeq<7, 1>(guid);
         criteriaData << uint32(criteriaId);
-        criteriaData << uint32(progress->date);      // Last update time (not packed!)
+        criteriaData << uint32(progressData.date);      // Last update time (not packed!)
         criteriaData.WriteByteSeq<6>(guid);
         criteriaData.WriteByteSeq<1>(counter);
         criteriaData.WriteByteSeq<3>(guid);
         criteriaData.WriteByteSeq<4>(counter);
-        criteriaData << uint32(progress->date);      // Unknown date
+        criteriaData << uint32(progressData.date);      // Unknown date
         criteriaData.WriteByteSeq<5, 3>(counter);
         criteriaData.WriteByteSeq<0>(guid);
         criteriaData.WriteByteSeq<6, 7>(counter);
         criteriaData.WriteByteSeq<2, 5>(guid);
     }
 
-    WorldPacket data(SMSG_GUILD_CRITERIA_DATA, criteriaBits.size() + criteriaData.size());
-
-    data.append(criteriaBits);
     data.FlushBits();
+    data.append(criteriaData);
 
-    if (numCriteria)
-        data.append(criteriaData);
-
-    receiver->GetSession()->SendPacket(&data);
+    receiver->SendDirectMessage(&data);
 }
 
 template<class T>

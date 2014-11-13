@@ -3216,7 +3216,9 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
         case SUMMON_CATEGORY_WILD:
         case SUMMON_CATEGORY_ALLY:
         case SUMMON_CATEGORY_UNK:
-            if (properties->Flags & 512)
+            // 0x4800 is used for Druid's Treants. May be 0x4000 is fine too, but
+            // it requires additional tests.
+            if (properties->Flags & 512 || properties->Flags == 0x4800)
             {
                 SummonGuardian(effIndex, entry, properties, numSummons);
                 break;

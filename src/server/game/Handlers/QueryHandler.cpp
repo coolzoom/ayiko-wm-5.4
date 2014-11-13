@@ -39,6 +39,8 @@ void WorldSession::SendNameQueryOpcode(Player const *player)
     ObjectGuid unkGuid = 0;
 
     data.WriteBitSeq<5, 7, 3, 0, 4, 1, 6, 2>(playerGuid);
+    data.FlushBits();
+
     data.WriteByteSeq<7, 4, 3>(playerGuid);
 
     data << uint8(0);
@@ -79,6 +81,7 @@ void WorldSession::SendNameQueryOpcode(Player const *player)
     data.WriteBit(false); // unk
     data.WriteBitSeq<2, 6>(unkGuid);
     data.FlushBits();
+
     data.WriteString(player->GetName());
     data.WriteByteSeq<4>(playerGuid);
     data.WriteByteSeq<3>(unkGuid);
@@ -90,11 +93,6 @@ void WorldSession::SendNameQueryOpcode(Player const *player)
     {
         for (auto const &name : declinedNames->name)
             data.WriteString(name);
-    }
-    else
-    {
-        for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
-            data.WriteBits(0, 7);
     }
 
     data.WriteByteSeq<3>(playerGuid);
@@ -130,6 +128,8 @@ void WorldSession::SendNameQueryOpcodeCallBack(uint64 guid, PreparedQueryResult 
     ObjectGuid unkGuid = 0;
 
     data.WriteBitSeq<5, 7, 3, 0, 4, 1, 6, 2>(playerGuid);
+    data.FlushBits();
+
     data.WriteByteSeq<7, 4, 3>(playerGuid);
 
     if (!result)
@@ -185,6 +185,7 @@ void WorldSession::SendNameQueryOpcodeCallBack(uint64 guid, PreparedQueryResult 
     data.WriteBit(false); // unk
     data.WriteBitSeq<2, 6>(unkGuid);
     data.FlushBits();
+
     data.WriteString(playerName);
     data.WriteByteSeq<4>(playerGuid);
     data.WriteByteSeq<3>(unkGuid);
@@ -196,11 +197,6 @@ void WorldSession::SendNameQueryOpcodeCallBack(uint64 guid, PreparedQueryResult 
     {
         for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
             data.WriteString(fields[5 + i].GetString());
-    }
-    else
-    {
-        for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
-            data.WriteBits(0, 7);
     }
 
     data.WriteByteSeq<3>(playerGuid);

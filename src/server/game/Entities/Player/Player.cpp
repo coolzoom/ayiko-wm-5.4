@@ -1444,6 +1444,7 @@ void Player::SendMirrorTimer(MirrorTimerType Type, uint32 MaxValue, uint32 Curre
     data << MaxValue;
     data << CurrentValue;
     data.WriteBit(0);
+    data.FlushBits();
     GetSession()->SendPacket(&data);
 }
 
@@ -18425,6 +18426,7 @@ void Player::SendQuestReward(Quest const* quest, uint32 XP, Object* questGiver)
 
     data.WriteBit(1);                                      // FIXME: unknown bits, common values sent
     data.WriteBit(1);
+    data.FlushBits();
 
     GetSession()->SendPacket(&data);
 
@@ -28875,6 +28877,8 @@ void Player::SendCUFProfiles()
         data.WriteBit(profile.bits[CufProfile::AutoActivate40Players]);
         data.WriteBit(profile.bits[CufProfile::AutoActivateSpec1]);
     }
+
+    data.FlushBits();
 
     for (CufProfile const &profile : m_cufProfiles)
     {

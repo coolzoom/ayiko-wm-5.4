@@ -2363,6 +2363,7 @@ void Guild::SendGuildRecipes(WorldSession* session) const
     WorldPacket data(SMSG_GUILD_RECIPES);
 
     data.WriteBits(0, 15);
+    data.FlushBits();
 
     /*var count = packet.ReadBits("Count", 15);
 

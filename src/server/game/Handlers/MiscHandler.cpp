@@ -390,7 +390,9 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
         ObjectGuid playerGuid = target->GetGUID();
         ObjectGuid unkGuid = 0;
         ObjectGuid guildGuid = target->GetGuild() ? target->GetGuild()->GetGUID() : 0;
+
         bitsData.WriteBitSeq<4>(guildGuid);
+
         if (DeclinedName const* names = target->GetDeclinedNames())
         {
             for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
@@ -401,6 +403,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
             for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
                 bitsData.WriteBits(0, 7);
         }
+
         bitsData.WriteBits(gname.size(), 7);
         bitsData.WriteBitSeq<3>(unkGuid);
         bitsData.WriteBitSeq<1>(playerGuid);
@@ -423,12 +426,12 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
         bitsData.WriteBitSeq<5>(guildGuid);
         bitsData.WriteBitSeq<5>(unkGuid);
         bitsData.WriteBitSeq<0>(playerGuid);
+
         bytesData.WriteByteSeq<7>(playerGuid);
         bytesData.WriteByteSeq<4, 1>(guildGuid);
         bytesData << uint32(38297239);
         bytesData.WriteByteSeq<0>(playerGuid);
-        if (pname.size() > 0)
-            bytesData.append(pname.c_str(), pname.size());
+        bytesData.WriteString(pname);
         bytesData.WriteByteSeq<0>(unkGuid);
         bytesData.WriteByteSeq<6>(guildGuid);
         bytesData << uint32(pzoneid);
@@ -441,16 +444,15 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
         bytesData << uint8(gender);
         bytesData << uint32(realmID);
         bytesData.WriteByteSeq<0, 5, 7>(guildGuid);
+
         if (DeclinedName const* names = target->GetDeclinedNames())
             for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
-                if (names->name[i].size() > 0)
-                    bytesData.append(names->name[i].c_str(), names->name[i].size());
+                bytesData.WriteString(names->name[i]);
 
         bytesData.WriteByteSeq<5>(playerGuid);
         bytesData.WriteByteSeq<3>(guildGuid);
         bytesData.WriteByteSeq<4>(playerGuid);
-        if (gname.size() > 0)
-            bytesData.append(gname.c_str(), gname.size());
+        bytesData.WriteString(gname);
 
         bytesData << uint8(class_);
         bytesData.WriteByteSeq<4>(unkGuid);
@@ -470,7 +472,11 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
         data.append(bytesData);
     }
     else
+    {
         data.WriteBits(0, 6);
+        data.FlushBits();
+    }
+
     SendPacket(&data);
 
     TC_LOG_DEBUG("network", "WORLD: Send SMSG_WHO Message");
@@ -1173,6 +1179,7 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recvData)
     data.WriteBitSeq<4, 2, 0>(playerGuid);
     data.WriteBits(type, 3);
     data.WriteBitSeq<7, 5, 1, 3, 6>(playerGuid);
+    data.FlushBits();
 
     data.WriteByteSeq<4, 2, 7, 5, 3, 1, 6, 0>(playerGuid);
 

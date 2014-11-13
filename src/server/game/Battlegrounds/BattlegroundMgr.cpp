@@ -755,6 +755,7 @@ void BattlegroundMgr::BuildUpdateWorldStatePacket(WorldPacket* data, uint32 fiel
     *data << uint32(field);
     *data << uint32(value);
     data->WriteBit(0);
+    data->FlushBits();
 }
 
 void BattlegroundMgr::BuildPlayerLeftBattlegroundPacket(WorldPacket* data, uint64 guid)

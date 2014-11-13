@@ -478,37 +478,6 @@ class spell_pri_item_s12_4p_heal : public SpellScriptLoader
         }
 };
 
-// Called by Power Word : Shield - 17
-// Item : S12 2P bonus - Heal
-class spell_pri_item_s12_2p_heal : public SpellScriptLoader
-{
-    public:
-        spell_pri_item_s12_2p_heal() : SpellScriptLoader("spell_pri_item_s12_2p_heal") { }
-
-        class spell_pri_item_s12_2p_heal_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_pri_item_s12_2p_heal_SpellScript);
-
-            void HandleOnHit()
-            {
-                if (Player* _player = GetCaster()->ToPlayer())
-                    if (Unit* target = GetHitUnit())
-                        if (_player->HasAura(PRIEST_SPELL_2P_S12_HEAL))
-                            target->CastSpell(target, PRIEST_SPELL_SOUL_OF_DIAMOND, true);
-            }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_pri_item_s12_2p_heal_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_pri_item_s12_2p_heal_SpellScript();
-        }
-};
-
 // Called by Dispersion - 47585
 // Item : S12 2P bonus - Shadow
 class spell_pri_item_s12_2p_shadow : public SpellScriptLoader
@@ -3018,7 +2987,6 @@ void AddSC_priest_spell_scripts()
     new spell_pri_spirit_of_redemption_form();
     new spell_pri_spirit_of_redemption();
     new spell_pri_item_s12_4p_heal();
-    new spell_pri_item_s12_2p_heal();
     new spell_pri_item_s12_2p_shadow();
     new spell_pri_divine_insight_shadow();
     new spell_pri_power_word_insanity();

@@ -985,11 +985,6 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                     amount *= holyPower;
 
                     caster->ModifyPower(POWER_HOLY_POWER, (holyPower > 1) ? (-(holyPower - 1)) : 0);
-
-                    // Item - Paladin PvP Set Holy 4P Bonus
-                    if (caster->HasAura(131665) && holyPower == 3)
-                        caster->ModifyPower(POWER_HOLY_POWER, 1);
-
                     break;
                 }
                 default:

@@ -7486,67 +7486,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
 
                     return true;
                 }
-            }
-            // Seal of Command
-            if (dummySpell->Id == 105361 &&  effIndex == 0)
-            {
-                triggered_spell_id = 118215;
-                break;
-            }
-            // Seal of Righteousness
-            if (dummySpell->Id == 20154)
-            {
-                triggered_spell_id = 101423;
-                break;
-            }
-            // Light's Beacon - Beacon of Light
-            if (dummySpell->Id == 53651)
-            {
-                // Get target of beacon of light
-                if (Unit* beaconTarget = triggeredByAura->GetBase()->GetCaster())
-                {
-                    // do not proc when target of beacon of light is healed
-                    if (!victim || beaconTarget->GetGUID() == GetGUID())
-                        return false;
-
-                    // check if it was heal by paladin which casted this beacon of light
-                    if (beaconTarget->GetAura(53563, victim->GetGUID()))
-                    {
-                        if (beaconTarget->IsWithinLOSInMap(victim))
-                        {
-                            int32 percent = 0;
-                            switch (procSpell->Id)
-                            {
-                                case 82327: // Holy Radiance
-                                case 119952:// Light's Hammer
-                                case 114871:// Holy Prism
-                                case 85222: // Light of Dawn
-                                    percent = 15; // 15% heal from these spells
-                                    break;
-                                case 635:   // Holy Light
-                                    percent = triggerAmount * 2; // 100% heal from Holy Light
-                                    break;
-                                default:
-                                    percent = triggerAmount; // 50% heal from all other heals
-                                    break;
-                            }
-                            basepoints0 = CalculatePct(damage, percent);
-                            victim->CastCustomSpell(beaconTarget, 53652, &basepoints0, NULL, NULL, true);
-                            return true;
-                        }
-                    }
-                }
-                return false;
-            }
-            // Judgements of the Wise
-            if (dummySpell->SpellIconID == 3017)
-            {
-                target = this;
-                triggered_spell_id = 31930;
-                break;
-            }
-            switch (dummySpell->Id)
-            {
                 // Holy Power (Redemption Armor set)
                 case 28789:
                 {
@@ -7686,8 +7625,73 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                     }
                     break;
                 }
+                // Paladin PvP Set Holy 4P Bonus
+                case 131665:
+                {
+                    target = this;
+                    triggered_spell_id = 141462;
+                    break;
+                }
+                break;
             }
-            break;
+            // Seal of Command
+            if (dummySpell->Id == 105361 &&  effIndex == 0)
+            {
+                triggered_spell_id = 118215;
+                break;
+            }
+            // Seal of Righteousness
+            if (dummySpell->Id == 20154)
+            {
+                triggered_spell_id = 101423;
+                break;
+            }
+            // Light's Beacon - Beacon of Light
+            if (dummySpell->Id == 53651)
+            {
+                // Get target of beacon of light
+                if (Unit* beaconTarget = triggeredByAura->GetBase()->GetCaster())
+                {
+                    // do not proc when target of beacon of light is healed
+                    if (!victim || beaconTarget->GetGUID() == GetGUID())
+                        return false;
+
+                    // check if it was heal by paladin which casted this beacon of light
+                    if (beaconTarget->GetAura(53563, victim->GetGUID()))
+                    {
+                        if (beaconTarget->IsWithinLOSInMap(victim))
+                        {
+                            int32 percent = 0;
+                            switch (procSpell->Id)
+                            {
+                                case 82327: // Holy Radiance
+                                case 119952:// Light's Hammer
+                                case 114871:// Holy Prism
+                                case 85222: // Light of Dawn
+                                    percent = 15; // 15% heal from these spells
+                                    break;
+                                case 635:   // Holy Light
+                                    percent = triggerAmount * 2; // 100% heal from Holy Light
+                                    break;
+                                default:
+                                    percent = triggerAmount; // 50% heal from all other heals
+                                    break;
+                            }
+                            basepoints0 = CalculatePct(damage, percent);
+                            victim->CastCustomSpell(beaconTarget, 53652, &basepoints0, NULL, NULL, true);
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+            // Judgements of the Wise
+            if (dummySpell->SpellIconID == 3017)
+            {
+                target = this;
+                triggered_spell_id = 31930;
+                break;
+            }
         }
         case SPELLFAMILY_SHAMAN:
         {

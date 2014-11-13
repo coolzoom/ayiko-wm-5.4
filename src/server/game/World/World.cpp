@@ -2253,10 +2253,10 @@ void World::Update(uint32 diff)
 
     if (m_gameTime > m_NextRandomBGReset)
         ResetRandomBG();
-
+#if 0
     if (m_gameTime > m_NextCurrencyReset)
         ResetCurrencyWeekCap();
-
+#endif
     if (m_gameTime > m_NextProfessionCooldownReset)
         ResetProfessionCooldowns();
 
@@ -3184,19 +3184,19 @@ void World::ResetCurrencyWeekCap()
     // other. So, let's try to execute them in parallel and wait for completion.
 
     sThreadPoolMgr->schedule([] {
-        CharacterDatabase.Execute(CharacterDatabase.GetPreparedStatement(CHAR_UPD_ARENA_DATA));
+        CharacterDatabase.DirectExecute(CharacterDatabase.GetPreparedStatement(CHAR_UPD_ARENA_DATA));
     });
 
     sThreadPoolMgr->schedule([] {
-        CharacterDatabase.Execute(CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHARACTER_CP_WEEK_CAP));
+        CharacterDatabase.DirectExecute(CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHARACTER_CP_WEEK_CAP));
     });
 
     sThreadPoolMgr->schedule([] {
-        CharacterDatabase.Execute(CharacterDatabase.GetPreparedStatement(CHAR_UPD_CURRENCY_WEEK_COUNT));
+        CharacterDatabase.DirectExecute(CharacterDatabase.GetPreparedStatement(CHAR_UPD_CURRENCY_WEEK_COUNT));
     });
 
     sThreadPoolMgr->schedule([] {
-        CharacterDatabase.Execute(CharacterDatabase.GetPreparedStatement(CHAR_UPD_RATED_BG_STATS));
+        CharacterDatabase.DirectExecute(CharacterDatabase.GetPreparedStatement(CHAR_UPD_RATED_BG_STATS));
     });
 
     sThreadPoolMgr->wait();

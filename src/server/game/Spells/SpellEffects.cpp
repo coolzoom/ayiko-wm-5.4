@@ -3258,6 +3258,15 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                         summon->SetMaxHealth(damage);
                         summon->SetHealth(damage);
                     }
+
+                    // Glyph of Totemic Vigor
+                    if (auto vigorGlyph = m_caster->GetAuraEffect(63298, EFFECT_0))
+                    {
+                        uint32 bonusHealth = summon->GetHealth() + CalculatePct(m_caster->GetMaxHealth(), vigorGlyph->GetAmount());
+                        summon->SetMaxHealth(bonusHealth);
+                        summon->SetHealth(bonusHealth);
+                    }
+
                     break;
                 }
                 case SUMMON_TYPE_MINIPET:

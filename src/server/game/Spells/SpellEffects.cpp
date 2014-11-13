@@ -5360,6 +5360,12 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                 unitTarget->RemoveAurasWithMechanic(1<<MECHANIC_IMMUNE_SHIELD, AURA_REMOVE_BY_ENEMY_SPELL);
                 return;
             }
+            // Avatar
+            else if (m_spellInfo->Id == 107574)
+            {
+                m_caster->RemoveMovementImpairingAuras();
+                break;
+            }
             break;
         }
         case SPELLFAMILY_SHAMAN:

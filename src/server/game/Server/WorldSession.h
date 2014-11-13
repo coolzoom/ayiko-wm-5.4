@@ -40,7 +40,8 @@ class Creature;
 class GameObject;
 class InstanceSave;
 class Item;
-class LoginQueryHolder;
+class CharLoginQueryHolder;
+class AuthLoginQueryHolder;
 class Object;
 class Player;
 class Quest;
@@ -451,7 +452,7 @@ class WorldSession
         void HandlePlayerLoginOpcode(WorldPacket& recvPacket);
         void HandleLoadScreenOpcode(WorldPacket& recvPacket);
         void HandleCharEnum(PreparedQueryResult result);
-        void HandlePlayerLogin(LoginQueryHolder *holder);
+        void HandlePlayerLogin(CharLoginQueryHolder *charHolder, AuthLoginQueryHolder *authHolder);
         void HandleCharFactionOrRaceChange(WorldPacket& recvData);
         void HandleRandomizeCharNameOpcode(WorldPacket& recvData);
         void HandleReorderCharacters(WorldPacket& recvData);
@@ -1068,7 +1069,9 @@ class WorldSession
         QueryCallback<PreparedQueryResult, uint64> _sendPetListCallback;
         QueryCallback<PreparedQueryResult, uint8> _setPetSlotCallback;
         QueryCallback<PreparedQueryResult, CharacterCreateInfo*, true> _charCreateCallback;
+
         QueryResultHolderFuture _charLoginCallback;
+        QueryResultHolderFuture _authLoginCallback;
 
     private:
         // private trade methods

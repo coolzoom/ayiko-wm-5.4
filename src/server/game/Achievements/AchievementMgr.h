@@ -234,7 +234,7 @@ class AchievementMgr
         void Reset();
         static void DeleteFromDB(uint32 lowguid, uint32 accountId = 0);
         void LoadFromDB(PreparedQueryResult achievementResult, PreparedQueryResult criteriaResult, PreparedQueryResult achievementAccountResult = NULL, PreparedQueryResult criteriaAccountResult = NULL);
-        void SaveToDB(SQLTransaction& trans);
+        void SaveToDB(SQLTransaction& charTrans, SQLTransaction& authTrans);
         void ResetAchievementCriteria(AchievementCriteriaTypes type, uint64 miscValue1 = 0, uint64 miscValue2 = 0, bool evenIfCriteriaComplete = false);
         void UpdateAchievementCriteria(AchievementCriteriaTypes type, uint64 miscValue1 = 0, uint64 miscValue2 = 0, uint64 miscValue3 = 0, Unit const* unit = NULL, Player* referencePlayer = NULL);
         void CompletedAchievement(AchievementEntry const* entry, Player* referencePlayer);

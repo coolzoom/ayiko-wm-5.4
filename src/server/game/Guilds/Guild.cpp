@@ -26,6 +26,7 @@
 #include "SocialMgr.h"
 #include "Log.h"
 #include "AccountMgr.h"
+#include "ObjectMgr.h"
 
 #define MAX_GUILD_BANK_TAB_TEXT_LEN 500
 #define EMBLEM_PRICE 10 * GOLD
@@ -1237,7 +1238,8 @@ void Guild::SaveToDB()
     stmt->setUInt32(3, GetId());
     trans->Append(stmt);
 
-    m_achievementMgr.SaveToDB(trans);
+    SQLTransaction dummy;
+    m_achievementMgr.SaveToDB(trans, dummy);
 
     CharacterDatabase.CommitTransaction(trans);
 }

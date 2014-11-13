@@ -37,7 +37,6 @@ typedef std::vector<uint32> AutoSpellList;
 #define PET_FOCUS_REGEN_INTERVAL 4 * IN_MILLISECONDS
 
 class Player;
-class PetLoginQueryHolder;
 
 class Pet : public Guardian
 {

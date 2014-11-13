@@ -733,75 +733,60 @@ enum PlayedTimeIndex
 #define MAX_PLAYED_TIME_INDEX 2
 
 // used at player loading query list preparing, and later result selection
-enum PlayerLoginQueryIndex
+enum CharLoginQueryIndex
 {
-    PLAYER_LOGIN_QUERY_LOAD_FROM                        = 0,
-    PLAYER_LOGIN_QUERY_LOAD_GROUP                       = 1,
-    PLAYER_LOGIN_QUERY_LOAD_BOUND_INSTANCES             = 2,
-    PLAYER_LOGIN_QUERY_LOAD_AURAS                       = 3,
-    PLAYER_LOGIN_QUERY_LOAD_AURAS_EFFECTS               = 4,
-    PLAYER_LOGIN_QUERY_LOGIN_LOAD_SPELLS                = 5,
-    PLAYER_LOGIN_QUERY_CHAR_LOAD_SPELLS                 = 6,
-    PLAYER_LOGIN_QUERY_LOAD_QUEST_STATUS                = 7,
-    PLAYER_LOGIN_QUERY_LOAD_DAILY_QUEST_STATUS          = 8,
-    PLAYER_LOGIN_QUERY_LOAD_REPUTATION                  = 9,
-    PLAYER_LOGIN_QUERY_LOAD_INVENTORY                   = 10,
-    PLAYER_LOGIN_QUERY_LOAD_ACTIONS                     = 11,
-    PLAYER_LOGIN_QUERY_LOAD_MAIL_COUNT                  = 12,
-    PLAYER_LOGIN_QUERY_LOAD_MAIL_DATE                   = 13,
-    PLAYER_LOGIN_QUERY_LOAD_SOCIAL_LIST                 = 14,
-    PLAYER_LOGIN_QUERY_LOAD_HOMEBIND                    = 15,
-    PLAYER_LOGIN_QUERY_LOAD_SPELL_COOLDOWNS             = 16,
-    PLAYER_LOGIN_QUERY_LOAD_DECLINED_NAMES              = 17,
-    PLAYER_LOGIN_QUERY_LOAD_GUILD                       = 18,
-    PLAYER_LOGIN_QUERY_LOAD_ACHIEVEMENTS                = 19,
-    PLAYER_LOGIN_QUERY_LOAD_ACCOUNT_ACHIEVEMENTS        = 20,
-    PLAYER_LOGIN_QUERY_LOAD_CRITERIA_PROGRESS           = 21,
-    PLAYER_LOGIN_QUERY_LOAD_ACCOUNT_CRITERIA_PROGRESS   = 22,
-    PLAYER_LOGIN_QUERY_LOAD_EQUIPMENT_SETS              = 23,
-    PLAYER_LOGIN_QUERY_LOAD_ARENA_DATA                  = 24,
-    PLAYER_LOGIN_QUERY_LOAD_BG_DATA                     = 25,
-    PLAYER_LOGIN_QUERY_LOAD_GLYPHS                      = 26,
-    PLAYER_LOGIN_QUERY_LOAD_TALENTS                     = 27,
-    PLAYER_LOGIN_QUERY_LOAD_ACCOUNT_DATA                = 28,
-    PLAYER_LOGIN_QUERY_LOAD_SKILLS                      = 29,
-    PLAYER_LOGIN_QUERY_LOAD_WEEKLY_QUEST_STATUS         = 30,
-    PLAYER_LOGIN_QUERY_LOAD_RANDOM_BG                   = 31,
-    PLAYER_LOGIN_QUERY_LOAD_BANNED                      = 32,
-    PLAYER_LOGIN_QUERY_LOAD_QUEST_STATUS_REW            = 33,
-    PLAYER_LOGIN_QUERY_LOAD_INSTANCE_LOCK_TIMES         = 34,
-    PLAYER_LOGIN_QUERY_LOAD_SEASONAL_QUEST_STATUS       = 35,
-    PLAYER_LOGIN_QUERY_LOAD_MONTHLY_QUEST_STATUS        = 36,
-    PLAYER_LOGIN_QUERY_LOAD_VOID_STORAGE                = 37,
-    PLAYER_LOGIN_QUERY_LOAD_CURRENCY                    = 38,
-    PLAYER_LOGIN_QUERY_LOAD_CUF_PROFILES                = 39,
-    PLAYER_LOGIN_QUERY_LOAD_ARCHAEOLOGY                 = 40,
-    PLAYER_LOGIN_QUERY_LOAD_KNOWN_TITLES                = 41,
-    PLAYER_LOGIN_QUERY_LOAD_CP_WEEK_CAP                 = 42,
-    PLAYER_LOGIN_QUERY_LOAD_RATED_BG_STATS              = 43,
-    MAX_PLAYER_LOGIN_QUERY
+    CHAR_LOGIN_QUERY_LOAD_FROM = 0,
+    CHAR_LOGIN_QUERY_LOAD_GROUP,
+    CHAR_LOGIN_QUERY_LOAD_BOUND_INSTANCES,
+    CHAR_LOGIN_QUERY_LOAD_AURAS,
+    CHAR_LOGIN_QUERY_LOAD_AURAS_EFFECTS,
+    CHAR_LOGIN_QUERY_LOAD_SPELLS,
+    CHAR_LOGIN_QUERY_LOAD_QUEST_STATUS,
+    CHAR_LOGIN_QUERY_LOAD_DAILY_QUEST_STATUS,
+    CHAR_LOGIN_QUERY_LOAD_REPUTATION,
+    CHAR_LOGIN_QUERY_LOAD_INVENTORY,
+    CHAR_LOGIN_QUERY_LOAD_ACTIONS,
+    CHAR_LOGIN_QUERY_LOAD_MAIL_COUNT,
+    CHAR_LOGIN_QUERY_LOAD_MAIL_DATE,
+    CHAR_LOGIN_QUERY_LOAD_SOCIAL_LIST,
+    CHAR_LOGIN_QUERY_LOAD_HOMEBIND,
+    CHAR_LOGIN_QUERY_LOAD_SPELL_COOLDOWNS,
+    CHAR_LOGIN_QUERY_LOAD_DECLINED_NAMES,
+    CHAR_LOGIN_QUERY_LOAD_GUILD,
+    CHAR_LOGIN_QUERY_LOAD_ACHIEVEMENTS,
+    CHAR_LOGIN_QUERY_LOAD_CRITERIA_PROGRESS,
+    CHAR_LOGIN_QUERY_LOAD_EQUIPMENT_SETS,
+    CHAR_LOGIN_QUERY_LOAD_ARENA_DATA,
+    CHAR_LOGIN_QUERY_LOAD_BG_DATA,
+    CHAR_LOGIN_QUERY_LOAD_GLYPHS,
+    CHAR_LOGIN_QUERY_LOAD_TALENTS,
+    CHAR_LOGIN_QUERY_LOAD_ACCOUNT_DATA,
+    CHAR_LOGIN_QUERY_LOAD_SKILLS,
+    CHAR_LOGIN_QUERY_LOAD_WEEKLY_QUEST_STATUS,
+    CHAR_LOGIN_QUERY_LOAD_RANDOM_BG,
+    CHAR_LOGIN_QUERY_LOAD_BANNED,
+    CHAR_LOGIN_QUERY_LOAD_QUEST_STATUS_REW,
+    CHAR_LOGIN_QUERY_LOAD_INSTANCE_LOCK_TIMES,
+    CHAR_LOGIN_QUERY_LOAD_SEASONAL_QUEST_STATUS,
+    CHAR_LOGIN_QUERY_LOAD_MONTHLY_QUEST_STATUS,
+    CHAR_LOGIN_QUERY_LOAD_VOID_STORAGE,
+    CHAR_LOGIN_QUERY_LOAD_CURRENCY,
+    CHAR_LOGIN_QUERY_LOAD_CUF_PROFILES,
+    CHAR_LOGIN_QUERY_LOAD_ARCHAEOLOGY,
+    CHAR_LOGIN_QUERY_LOAD_KNOWN_TITLES,
+    CHAR_LOGIN_QUERY_LOAD_CP_WEEK_CAP,
+    CHAR_LOGIN_QUERY_LOAD_RATED_BG_STATS,
+
+    MAX_CHAR_LOGIN_QUERY
 };
 
-class PetLoginQueryHolder : public SQLQueryHolder
+enum AuthLoginQueryIndex
 {
-    private:
-        uint32 m_guid;
-        PreparedQueryResult m_petResult;
-    public:
-        PetLoginQueryHolder(uint32 guid, PreparedQueryResult result)
-            : m_guid(guid), m_petResult(result) { }
-        uint32 GetGuid() const { return m_guid; }
-        PreparedQueryResult GetPetResult() const { return m_petResult; }
-        bool Initialize();
-};
+    AUTH_LOGIN_QUERY_LOAD_SPELLS = 0,
+    AUTH_LOGIN_QUERY_LOAD_ACHIEVEMENTS,
+    AUTH_LOGIN_QUERY_LOAD_CRITERIA_PROGRESS,
 
-enum PetLoginQueryIndex
-{
-    PET_LOGIN_QUERY_LOAD_AURA           = 0,
-    PET_LOGIN_QUERY_LOAD_AURA_EFFECT    = 1,
-    PET_LOGIN_QUERY_LOAD_SPELL          = 2,
-    PET_LOGIN_QUERY_LOAD_SPELL_COOLDOWN = 3,
-    MAX_PET_LOGIN_QUERY                 = 4
+    MAX_AUTH_LOGIN_QUERY
 };
 
 enum PlayerDelayedOperations
@@ -1593,7 +1578,7 @@ class Player final : public Unit, public GridObject<Player>
         /***                   LOAD SYSTEM                     ***/
         /*********************************************************/
 
-        bool LoadFromDB(uint32 guid, SQLQueryHolder *holder);
+        bool LoadFromDB(uint32 guid, SQLQueryHolder *charHolder, SQLQueryHolder *authHolder);
         bool isBeingLoaded() const { return GetSession()->PlayerLoading();}
 
         void Initialize(uint32 guid);
@@ -2869,7 +2854,7 @@ class Player final : public Unit, public GridObject<Player>
         void _SaveMonthlyQuestStatus(SQLTransaction& trans);
         void _SaveSeasonalQuestStatus(SQLTransaction& trans);
         void _SaveSkills(SQLTransaction& trans);
-        void _SaveSpells(SQLTransaction& charTrans);
+        void _SaveSpells(SQLTransaction& charTrans, SQLTransaction& authTrans);
         void _SaveEquipmentSets(SQLTransaction& trans);
         void _SaveArenaData(SQLTransaction& trans);
         void _SaveBGData(SQLTransaction& trans);

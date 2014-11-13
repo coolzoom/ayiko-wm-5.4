@@ -1,0 +1,4 @@
+-- RENAME TABLE
+--   540_characters.account_achievement TO auth.account_achievement,
+--   540_characters.account_achievement_progress TO auth.account_achievement_progress,
+--   540_characters.account_spell TO auth.account_spell;

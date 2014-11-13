@@ -99,6 +99,12 @@ void DoPrepareStatements(MySQLConnection &conn)
     conn.prepareStatement(LOGIN_SEL_RBAC_ACCOUNT_PERMISSIONS, "SELECT permissionId, granted FROM rbac_account_permissions WHERE accountId = ? AND (realmId = ? OR realmId = -1) ORDER BY permissionId, realmId");
     conn.prepareStatement(LOGIN_INS_RBAC_ACCOUNT_PERMISSION, "INSERT INTO rbac_account_permissions (accountId, permissionId, granted, realmId) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE granted = VALUES(granted)");
     conn.prepareStatement(LOGIN_DEL_RBAC_ACCOUNT_PERMISSION, "DELETE FROM rbac_account_permissions WHERE accountId = ? AND permissionId = ? AND (realmId = ? OR realmId = -1)");
+
+    conn.prepareStatement(LOGIN_SEL_ACCOUNT_ACHIEVEMENTS, "SELECT first_guid, achievement, date FROM account_achievement WHERE account = ?");
+    conn.prepareStatement(LOGIN_SEL_ACCOUNT_CRITERIAPROGRESS, "SELECT criteria, counter, date FROM account_achievement_progress WHERE account = ?");
+    conn.prepareStatement(LOGIN_SEL_ACCOUNT_SPELL, "SELECT spell, active, disabled FROM account_spell WHERE accountId = ?");
+    conn.prepareStatement(LOGIN_INS_ACCOUNT_SPELL, "INSERT INTO account_spell (accountId, spell, active, disabled) VALUES (?, ?, ?, ?)");
+    conn.prepareStatement(LOGIN_DEL_ACCOUNT_SPELL_BY_SPELL, "DELETE FROM account_spell WHERE accountId = ? AND spell = ?");
 }
 
 } // namespace LoginDatabaseConnection

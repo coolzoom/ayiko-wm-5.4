@@ -645,35 +645,6 @@ void KillRewarder::Reward()
 
 }
 
-bool PetLoginQueryHolder::Initialize()
-{
-    SetSize(MAX_PET_LOGIN_QUERY);
-
-    bool res = true;
-
-    PreparedStatement* stmt = NULL;
-
-    stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_PET_AURA);
-    stmt->setUInt32(0, m_guid);
-    res &= SetPreparedQuery(PET_LOGIN_QUERY_LOAD_AURA, stmt);
-
-    stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_PET_AURA_EFFECT);
-    stmt->setUInt32(0, m_guid);
-    res &= SetPreparedQuery(PET_LOGIN_QUERY_LOAD_AURA_EFFECT, stmt);
-
-    stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_PET_SPELL);
-    stmt->setUInt32(0, m_guid);
-    res &= SetPreparedQuery(PET_LOGIN_QUERY_LOAD_SPELL, stmt);
-
-    stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_PET_SPELL_COOLDOWN);
-    stmt->setUInt32(0, m_guid);
-    res &= SetPreparedQuery(PET_LOGIN_QUERY_LOAD_SPELL_COOLDOWN, stmt);
-
-    return res;
-}
-
-
-
 // == Player ====================================================
 
 // we can disable this warning for this since it only
@@ -5339,9 +5310,13 @@ bool Player::ResetTalents(bool no_cost)
     SetUsedTalentCount(0);
 
     SQLTransaction charTrans = CharacterDatabase.BeginTransaction();
+    SQLTransaction authTrans = LoginDatabase.BeginTransaction();
+
     _SaveTalents(charTrans);
-    _SaveSpells(charTrans);
+    _SaveSpells(charTrans, authTrans);
+
     CharacterDatabase.CommitTransaction(charTrans);
+    LoginDatabase.CommitTransaction(authTrans);
 
     if (!no_cost)
     {
@@ -18576,7 +18551,7 @@ void Player::_LoadDeclinedNames(PreparedQueryResult result)
 
 void Player::_LoadEquipmentSets(PreparedQueryResult result)
 {
-    // SetPQuery(PLAYER_LOGIN_QUERY_LOAD_EQUIPMENT_SETS,   "SELECT setguid, setindex, name, iconname, item0, item1, item2, item3, item4, item5, item6, item7, item8, item9, item10, item11, item12, item13, item14, item15, item16, item17, item18 FROM character_equipmentsets WHERE guid = '%u' ORDER BY setindex", GUID_LOPART(m_guid));
+    // SetPQuery(CHAR_LOGIN_QUERY_LOAD_EQUIPMENT_SETS,   "SELECT setguid, setindex, name, iconname, item0, item1, item2, item3, item4, item5, item6, item7, item8, item9, item10, item11, item12, item13, item14, item15, item16, item17, item18 FROM character_equipmentsets WHERE guid = '%u' ORDER BY setindex", GUID_LOPART(m_guid));
     if (!result)
         return;
 
@@ -18709,7 +18684,7 @@ float Player::GetFloatValueFromArray(Tokenizer const& data, uint16 index)
     return result;
 }
 
-bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
+bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *charHolder, SQLQueryHolder *authHolder)
 {
     //                                                       0     1        2     3     4      5       6      7   8      9            10            11
     //QueryResult* result = CharacterDatabase.PQuery("SELECT guid, account, name, race, class, gender, level, xp, money, playerBytes, playerBytes2, playerFlags, "
@@ -18724,7 +18699,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     // 54          55               56                        57                        58
     //"actionBars, grantableLevels, resetspecialization_cost, resetspecialization_time, pet_id FROM characters WHERE guid = %u", guid);
 
-    PreparedQueryResult result = holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_FROM);
+    PreparedQueryResult result = charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_FROM);
     if (!result)
     {
         TC_LOG_ERROR("entities.player", "Player (GUID: %u) not found in table `characters`, can't load. ", guid);
@@ -18743,7 +18718,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
         return false;
     }
 
-    if (holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_BANNED))
+    if (charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_BANNED))
     {
         TC_LOG_ERROR("entities.player", "Player (GUID: %u) is banned, can't load.", guid);
         return false;
@@ -18789,17 +18764,17 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     SetUInt32Value(PLAYER_XP, fields[7].GetUInt32());
 
     _LoadIntoDataField(fields[53].GetCString(), PLAYER_EXPLORED_ZONES_1, PLAYER_EXPLORED_ZONES_SIZE);
-    _LoadKnownTitles(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_KNOWN_TITLES));
+    _LoadKnownTitles(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_KNOWN_TITLES));
 
     SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, DEFAULT_WORLD_OBJECT_SIZE);
     SetFloatValue(UNIT_FIELD_COMBATREACH, 1.5f);
     SetFloatValue(UNIT_FIELD_HOVERHEIGHT, 1.0f);
 
     // load achievements before anything else to prevent multiple gains for the same achievement/criteria on every loading (as loading does call UpdateAchievementCriteria)
-    m_achievementMgr.LoadFromDB(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_ACHIEVEMENTS),
-                                holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_CRITERIA_PROGRESS),
-                                holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_ACCOUNT_ACHIEVEMENTS),
-                                holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_ACCOUNT_CRITERIA_PROGRESS));
+    m_achievementMgr.LoadFromDB(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_ACHIEVEMENTS),
+                                charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_CRITERIA_PROGRESS),
+                                authHolder->GetPreparedResult(AUTH_LOGIN_QUERY_LOAD_ACHIEVEMENTS),
+                                authHolder->GetPreparedResult(AUTH_LOGIN_QUERY_LOAD_CRITERIA_PROGRESS));
 
     SetMoney(std::min<uint64>(fields[8].GetUInt64(), MAX_MONEY_AMOUNT));
 
@@ -18834,7 +18809,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     setFactionForRace(getRace());
 
     // load home bind and check in same time class/race pair, it used later for restore broken positions
-    if (!_LoadHomeBind(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_HOMEBIND)))
+    if (!_LoadHomeBind(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_HOMEBIND)))
         return false;
 
     InitPrimaryProfessions();                               // to max set before any spell loaded
@@ -18860,18 +18835,18 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
 
 #define RelocateToHomebind(){ mapId = m_homebindMapId; instanceId = 0; Relocate(m_homebindX, m_homebindY, m_homebindZ); }
 
-    _LoadGroup(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_GROUP));
+    _LoadGroup(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_GROUP));
 
-    _LoadArenaData(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_ARENA_DATA));
-    _LoadConquestPointsWeekCap(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_CP_WEEK_CAP));
-    _LoadCurrency(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_CURRENCY));
+    _LoadArenaData(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_ARENA_DATA));
+    _LoadConquestPointsWeekCap(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_CP_WEEK_CAP));
+    _LoadCurrency(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_CURRENCY));
     SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, fields[36].GetUInt32());
     SetUInt16Value(PLAYER_FIELD_KILLS, 0, fields[37].GetUInt16());
     SetUInt16Value(PLAYER_FIELD_KILLS, 1, fields[38].GetUInt16());
 
-    _LoadBoundInstances(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_BOUND_INSTANCES));
-    _LoadInstanceTimeRestrictions(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_INSTANCE_LOCK_TIMES));
-    _LoadBGData(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_BG_DATA));
+    _LoadBoundInstances(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_BOUND_INSTANCES));
+    _LoadInstanceTimeRestrictions(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_INSTANCE_LOCK_TIMES));
+    _LoadBGData(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_BG_DATA));
 
     GetSession()->SetPlayer(this);
 
@@ -19177,8 +19152,8 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     }
 
     // load skills after InitStatsForLevel because it triggering aura apply also
-    _LoadSkills(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_SKILLS));
-    m_archaeologyMgr.LoadArchaeology(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_ARCHAEOLOGY));
+    _LoadSkills(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_SKILLS));
+    m_archaeologyMgr.LoadArchaeology(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_ARCHAEOLOGY));
 
     // apply original stats mods before spell loading or item equipment that call before equip _RemoveStatsMods()
 
@@ -19200,25 +19175,25 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
         TC_LOG_ERROR("entities.player", "Player %s(GUID: %u) has SpecCount = %u and ActiveSpec = %u.", GetName().c_str(), GetGUIDLow(), GetSpecsCount(), GetActiveSpec());
     }
 
-    _LoadTalents(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_TALENTS));
-    _LoadSpells(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_CHAR_LOAD_SPELLS));
-    _LoadSpells(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOGIN_LOAD_SPELLS));
+    _LoadTalents(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_TALENTS));
+    _LoadSpells(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_SPELLS));
+    _LoadSpells(authHolder->GetPreparedResult(AUTH_LOGIN_QUERY_LOAD_SPELLS));
 
-    _LoadGlyphs(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_GLYPHS));
-    _LoadAuras(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_AURAS), holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_AURAS_EFFECTS), time_diff);
+    _LoadGlyphs(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_GLYPHS));
+    _LoadAuras(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_AURAS), charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_AURAS_EFFECTS), time_diff);
     _LoadGlyphAuras();
     // add ghost flag (must be after aura load: PLAYER_FLAGS_GHOST set in aura)
     if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
         m_deathState = DEAD;
 
     // after spell load, learn rewarded spell if need also
-    _LoadQuestStatus(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_QUEST_STATUS));
-    _LoadQuestStatusRewarded(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_QUEST_STATUS_REW));
-    _LoadDailyQuestStatus(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_DAILY_QUEST_STATUS));
-    _LoadWeeklyQuestStatus(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_WEEKLY_QUEST_STATUS));
-    _LoadSeasonalQuestStatus(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_SEASONAL_QUEST_STATUS));
-    _LoadMonthlyQuestStatus(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_MONTHLY_QUEST_STATUS));
-    _LoadRandomBGStatus(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_RANDOM_BG));
+    _LoadQuestStatus(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_QUEST_STATUS));
+    _LoadQuestStatusRewarded(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_QUEST_STATUS_REW));
+    _LoadDailyQuestStatus(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_DAILY_QUEST_STATUS));
+    _LoadWeeklyQuestStatus(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_WEEKLY_QUEST_STATUS));
+    _LoadSeasonalQuestStatus(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_SEASONAL_QUEST_STATUS));
+    _LoadMonthlyQuestStatus(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_MONTHLY_QUEST_STATUS));
+    _LoadRandomBGStatus(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_RANDOM_BG));
 
     // after spell and quest load
     InitTalentForLevel();
@@ -19226,22 +19201,22 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     learnDefaultSpells();
 
     // must be before inventory (some items required reputation check)
-    m_reputationMgr.LoadFromDB(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_REPUTATION));
+    m_reputationMgr.LoadFromDB(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_REPUTATION));
 
-    _LoadInventory(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_INVENTORY), time_diff);
+    _LoadInventory(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_INVENTORY), time_diff);
 
     if (IsVoidStorageUnlocked())
-        _LoadVoidStorage(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_VOID_STORAGE));
+        _LoadVoidStorage(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_VOID_STORAGE));
 
     // update items with duration and realtime
     UpdateItemDuration(time_diff, true);
 
-    _LoadActions(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_ACTIONS));
+    _LoadActions(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_ACTIONS));
 
     // unread mails and next delivery time, actual mails not loaded
-    _LoadMailInit(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_MAIL_COUNT), holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_MAIL_DATE));
+    _LoadMailInit(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_MAIL_COUNT), charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_MAIL_DATE));
 
-    m_social = sSocialMgr->LoadFromDB(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_SOCIAL_LIST), GetGUIDLow());
+    m_social = sSocialMgr->LoadFromDB(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_SOCIAL_LIST), GetGUIDLow());
 
     // check PLAYER_CHOSEN_TITLE compatibility with PLAYER_FIELD_KNOWN_TITLES
     // note: PLAYER_FIELD_KNOWN_TITLES updated at quest status loaded
@@ -19254,7 +19229,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     // has to be called after last Relocate() in Player::LoadFromDB
     SetFallInformation(0, GetPositionZ());
 
-    _LoadSpellCooldowns(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_SPELL_COOLDOWNS));
+    _LoadSpellCooldowns(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_SPELL_COOLDOWNS));
 
     // Spell code allow apply any auras to dead character in load time in aura/spell/item loading
     // Do now before stats re-calculation cleanup for ghost state unexpected auras
@@ -19352,15 +19327,15 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
 
     m_currentPetId = fields[58].GetUInt32();
 
-    _LoadDeclinedNames(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_DECLINED_NAMES));
+    _LoadDeclinedNames(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_DECLINED_NAMES));
 
     CheckAllAchievementCriteria();
 
-    _LoadEquipmentSets(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_EQUIPMENT_SETS));
+    _LoadEquipmentSets(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_EQUIPMENT_SETS));
 
-    _LoadCUFProfiles(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_CUF_PROFILES));
+    _LoadCUFProfiles(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_CUF_PROFILES));
 
-    if (auto res = holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_RATED_BG_STATS))
+    if (auto res = charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_RATED_BG_STATS))
         m_ratedBgStats.loadFromDB(res->Fetch());
 
     SetUInt32Value(PLAYER_FIELD_VIRTUAL_PLAYER_REALM, realmID);
@@ -21044,50 +21019,57 @@ void Player::SaveToDB(bool create /*=false*/)
         stmt->setUInt32(index++, GetGUIDLow());
     }
 
-    SQLTransaction trans = CharacterDatabase.BeginTransaction();
+    SQLTransaction charTrans = CharacterDatabase.BeginTransaction();
+    SQLTransaction authTrans = LoginDatabase.BeginTransaction();
 
-    trans->Append(stmt);
+    charTrans->Append(stmt);
 
     if (m_mailsUpdated)                                     // save mails only when needed
-        _SaveMail(trans);
+        _SaveMail(charTrans);
 
-    _SaveArenaData(trans);
-    _SaveBGData(trans);
-    _SaveInventory(trans);
-    _SaveVoidStorage(trans);
-    _SaveQuestStatus(trans);
-    _SaveDailyQuestStatus(trans);
-    _SaveWeeklyQuestStatus(trans);
-    _SaveSeasonalQuestStatus(trans);
-    _SaveMonthlyQuestStatus(trans);
-    _SaveTalents(trans);
-    _SaveSpells(trans);
-    _SaveSpellCooldowns(trans);
-    _SaveActions(trans);
-    _SaveAuras(trans);
-    _SaveSkills(trans);
-    m_achievementMgr.SaveToDB(trans);
-    m_reputationMgr.SaveToDB(trans);
-    _SaveEquipmentSets(trans);
-    GetSession()->SaveTutorialsData(trans);                 // changed only while character in game
-    _SaveGlyphs(trans);
-    _SaveInstanceTimeRestrictions(trans);
-    _SaveConquestPointsWeekCap(trans);
-    _SaveCurrency(trans);
-    m_archaeologyMgr.SaveArchaeology(trans);
+    _SaveArenaData(charTrans);
+    _SaveBGData(charTrans);
+    _SaveInventory(charTrans);
+    _SaveVoidStorage(charTrans);
+    _SaveQuestStatus(charTrans);
+    _SaveDailyQuestStatus(charTrans);
+    _SaveWeeklyQuestStatus(charTrans);
+    _SaveSeasonalQuestStatus(charTrans);
+    _SaveMonthlyQuestStatus(charTrans);
+    _SaveTalents(charTrans);
+    _SaveSpells(charTrans, authTrans);
+    _SaveSpellCooldowns(charTrans);
+    _SaveActions(charTrans);
+    _SaveAuras(charTrans);
+    _SaveSkills(charTrans);
+    m_achievementMgr.SaveToDB(charTrans, authTrans);
+    m_reputationMgr.SaveToDB(charTrans);
+    _SaveEquipmentSets(charTrans);
+    GetSession()->SaveTutorialsData(charTrans);             // changed only while character in game
+    _SaveGlyphs(charTrans);
+    _SaveInstanceTimeRestrictions(charTrans);
+    _SaveConquestPointsWeekCap(charTrans);
+    _SaveCurrency(charTrans);
+    m_archaeologyMgr.SaveArchaeology(charTrans);
 
     // check if stats should only be saved on logout
     // save stats can be out of transaction
     if (m_session->isLogingOut() || !sWorld->getBoolConfig(CONFIG_STATS_SAVE_ONLY_ON_LOGOUT))
-        _SaveStats(trans);
+        _SaveStats(charTrans);
 
-    _SaveRatedBgStats(trans);
-    _SaveKnownTitles(trans);
+    _SaveRatedBgStats(charTrans);
+    _SaveKnownTitles(charTrans);
 
     if (create)
-        CharacterDatabase.DirectCommitTransaction(trans);
+    {
+        CharacterDatabase.DirectCommitTransaction(charTrans);
+        LoginDatabase.DirectCommitTransaction(authTrans);
+    }
     else
-        CharacterDatabase.CommitTransaction(trans);
+    {
+        CharacterDatabase.CommitTransaction(charTrans);
+        LoginDatabase.CommitTransaction(authTrans);
+    }
 
     // we save the data here to prevent spamming
     // sAnticheatMgr->SavePlayerData(this);
@@ -21680,10 +21662,7 @@ void Player::_SaveSkills(SQLTransaction& trans)
     }
 }
 
-#define SKILL_MOUNT     777
-#define SKILL_MINIPET   778
-
-void Player::_SaveSpells(SQLTransaction& charTrans)
+void Player::_SaveSpells(SQLTransaction& charTrans, SQLTransaction& authTrans)
 {
     PreparedStatement* stmt = NULL;
 
@@ -21693,14 +21672,15 @@ void Player::_SaveSpells(SQLTransaction& charTrans)
         {
             if (const SpellInfo* spell = sSpellMgr->GetSpellInfo(itr->first))
             {
-                if (GetSession() && ((spell->IsAbilityOfSkillType(SKILL_MOUNT) && !(spell->AttributesEx10 & SPELL_ATTR10_MOUNT_CHARACTER))
-                    || spell->IsAbilityOfSkillType(SKILL_MINIPET))
-                    && sWorld->getIntConfig(CONFIG_REALM_ZONE) != REALM_ZONE_DEVELOPMENT)
+                if (GetSession()
+                        && ((spell->IsAbilityOfSkillType(SKILL_MOUNTS) && !(spell->AttributesEx10 & SPELL_ATTR10_MOUNT_CHARACTER))
+                                || spell->IsAbilityOfSkillType(SKILL_COMPANIONS))
+                        && sWorld->getIntConfig(CONFIG_REALM_ZONE) != REALM_ZONE_DEVELOPMENT)
                 {
-                    stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ACCOUNT_SPELL_BY_SPELL);
+                    stmt = LoginDatabase.GetPreparedStatement(LOGIN_DEL_ACCOUNT_SPELL_BY_SPELL);
                     stmt->setUInt32(0, GetSession()->GetAccountId());
                     stmt->setUInt32(1, itr->first);
-                    charTrans->Append(stmt);
+                    authTrans->Append(stmt);
                 }
                 else
                 {
@@ -21717,16 +21697,17 @@ void Player::_SaveSpells(SQLTransaction& charTrans)
         {
             if (const SpellInfo* spell = sSpellMgr->GetSpellInfo(itr->first))
             {
-                if (GetSession() && ((spell->IsAbilityOfSkillType(SKILL_MOUNT) && ((spell->AttributesEx10 & SPELL_ATTR10_MOUNT_CHARACTER) == 0))
-                    || spell->IsAbilityOfSkillType(SKILL_MINIPET))
-                    && sWorld->getIntConfig(CONFIG_REALM_ZONE) != REALM_ZONE_DEVELOPMENT)
+                if (GetSession()
+                        && ((spell->IsAbilityOfSkillType(SKILL_MOUNTS) && !(spell->AttributesEx10 & SPELL_ATTR10_MOUNT_CHARACTER))
+                                || spell->IsAbilityOfSkillType(SKILL_COMPANIONS))
+                        && sWorld->getIntConfig(CONFIG_REALM_ZONE) != REALM_ZONE_DEVELOPMENT)
                 {
-                    stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_ACCOUNT_SPELL);
+                    stmt = LoginDatabase.GetPreparedStatement(LOGIN_INS_ACCOUNT_SPELL);
                     stmt->setUInt32(0, GetSession()->GetAccountId());
                     stmt->setUInt32(1, itr->first);
                     stmt->setBool(2, itr->second.active);
                     stmt->setBool(3, itr->second.disabled);
-                    charTrans->Append(stmt);
+                    authTrans->Append(stmt);
                 }
                 else
                 {
@@ -27305,7 +27286,7 @@ void Player::learnSpellHighRank(uint32 spellid)
 void Player::_LoadSkills(PreparedQueryResult result)
 {
     //                                                           0      1      2
-    // SetPQuery(PLAYER_LOGIN_QUERY_LOAD_SKILLS,          "SELECT skill, value, max FROM character_skills WHERE guid = '%u'", GUID_LOPART(m_guid));
+    // SetPQuery(CHAR_LOGIN_QUERY_LOAD_SKILLS,          "SELECT skill, value, max FROM character_skills WHERE guid = '%u'", GUID_LOPART(m_guid));
 
     uint32 count = 0;
     uint8 professionCount = 0;
@@ -28198,7 +28179,7 @@ void Player::_SaveGlyphs(SQLTransaction& trans)
 
 void Player::_LoadTalents(PreparedQueryResult result)
 {
-    // SetPQuery(PLAYER_LOGIN_QUERY_LOAD_TALENTS, "SELECT spell, spec FROM character_talent WHERE guid = '%u'", GUID_LOPART(m_guid));
+    // SetPQuery(CHAR_LOGIN_QUERY_LOAD_TALENTS, "SELECT spell, spec FROM character_talent WHERE guid = '%u'", GUID_LOPART(m_guid));
     if (result)
     {
         do

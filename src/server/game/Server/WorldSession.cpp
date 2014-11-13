@@ -1068,12 +1068,17 @@ void WorldSession::ProcessQueryCallbacks()
     }
 
     //! HandlePlayerLoginOpcode
-    if (_charLoginCallback.ready())
+    if (_charLoginCallback.ready() && _authLoginCallback.ready())
     {
-        SQLQueryHolder* param;
-        _charLoginCallback.get(param);
-        HandlePlayerLogin((LoginQueryHolder*)param);
+        SQLQueryHolder *charParam, *authParam;
+
+        _charLoginCallback.get(charParam);
+        _authLoginCallback.get(authParam);
+
+        HandlePlayerLogin((CharLoginQueryHolder*)charParam, (AuthLoginQueryHolder*)authParam);
+
         _charLoginCallback.cancel();
+        _authLoginCallback.cancel();
     }
 
     //! HandleAddFriendOpcode

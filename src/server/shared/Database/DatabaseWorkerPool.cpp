@@ -310,7 +310,7 @@ QueryResultHolderFuture DatabaseWorkerPool::DelayQueryHolder(SQLQueryHolder *hol
 
 SQLTransaction DatabaseWorkerPool::BeginTransaction()
 {
-    return SQLTransaction(new Transaction);
+    return std::make_shared<Transaction>();
 }
 
 void DatabaseWorkerPool::CommitTransaction(SQLTransaction transaction)

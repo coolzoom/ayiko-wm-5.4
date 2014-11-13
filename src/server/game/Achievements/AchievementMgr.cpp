@@ -528,12 +528,12 @@ void AchievementMgr<Guild>::DeleteFromDB(uint32 lowguid, uint32 /*accountId*/)
 }
 
 template<class T>
-void AchievementMgr<T>::SaveToDB(SQLTransaction& /*trans*/)
+void AchievementMgr<T>::SaveToDB(SQLTransaction& /*charTrans*/, SQLTransaction& /*authTrans*/)
 {
 }
 
 template<>
-void AchievementMgr<Player>::SaveToDB(SQLTransaction& trans)
+void AchievementMgr<Player>::SaveToDB(SQLTransaction& charTrans, SQLTransaction& authTrans)
 {
     uint32 const guidLow = GetOwner()->GetGUIDLow();
     uint32 const accountId = GetOwner()->GetSession()->GetAccountId();
@@ -559,9 +559,9 @@ void AchievementMgr<Player>::SaveToDB(SQLTransaction& trans)
 
             bool const mustSaveForCharacter = completionData.completedByThisCharacter;
 
-            // First new/changed record prefix
             if (!needExecute)
             {
+                // First new/changed record prefix
                 ssAccDel << "DELETE FROM account_achievement WHERE account = " << accountId << " AND achievement IN (";
                 ssAccIns << "INSERT INTO account_achievement (account, first_guid, achievement, date) VALUES ";
 
@@ -572,9 +572,9 @@ void AchievementMgr<Player>::SaveToDB(SQLTransaction& trans)
                 }
                 needExecute = true;
             }
-            // Next new/changed record prefix
             else
             {
+                // Next new/changed record prefix
                 ssAccDel << ',';
                 ssAccIns << ',';
 
@@ -603,11 +603,12 @@ void AchievementMgr<Player>::SaveToDB(SQLTransaction& trans)
         {
             ssAccDel << ')';
             ssCharDel << ')';
-            trans->Append(ssAccDel.str().c_str());
-            trans->Append(ssAccIns.str().c_str());
 
-            trans->Append(ssCharDel.str().c_str());
-            trans->Append(ssCharIns.str().c_str());
+            authTrans->Append(ssAccDel.str().c_str());
+            authTrans->Append(ssAccIns.str().c_str());
+
+            charTrans->Append(ssCharDel.str().c_str());
+            charTrans->Append(ssCharIns.str().c_str());
         }
     }
 
@@ -725,7 +726,7 @@ void AchievementMgr<Player>::SaveToDB(SQLTransaction& trans)
             }
             else
             {
-                ssCharIns << '(' << guidLow << ',' << criteria << ',' << progressData.counter << ',' << progressData.date << ')';
+                ssCharIns << '(' << guidLow << ',' << criteriaId << ',' << progressData.counter << ',' << progressData.date << ')';
                 alreadyOneCharInsLine = true;
             }
         }
@@ -746,25 +747,25 @@ void AchievementMgr<Player>::SaveToDB(SQLTransaction& trans)
         if (needExecuteDel)
         {
             if (needExecuteAccount && alreadyOneAccDelLine)
-                trans->Append(ssAccDel.str().c_str());
+                authTrans->Append(ssAccDel.str().c_str());
 
             if (alreadyOneCharDelLine)
-                trans->Append(ssCharDel.str().c_str());
+                charTrans->Append(ssCharDel.str().c_str());
         }
 
         if (needExecuteIns)
         {
             if (needExecuteAccount && alreadyOneAccInsLine)
-                trans->Append(ssAccIns.str().c_str());
+                authTrans->Append(ssAccIns.str().c_str());
 
             if (alreadyOneCharInsLine)
-                trans->Append(ssCharIns.str().c_str());
+                charTrans->Append(ssCharIns.str().c_str());
         }
     }
 }
 
 template<>
-void AchievementMgr<Guild>::SaveToDB(SQLTransaction& trans)
+void AchievementMgr<Guild>::SaveToDB(SQLTransaction& trans, SQLTransaction& /*trans*/)
 {
     PreparedStatement* stmt;
     std::ostringstream guidstr;

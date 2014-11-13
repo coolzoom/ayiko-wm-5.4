@@ -8135,6 +8135,10 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                 else
                     return false;
 
+                // Frostflame Weapon (Shaman 4-Part PvP Set Bonus)
+                if (HasAura(131554))
+                    CastSpell(victim, 147732, true);
+
                 CastCustomSpell(victim, triggered_spell_id, &basepoints0, NULL, NULL, true, castItem, triggeredByAura);
                 return true;
             }

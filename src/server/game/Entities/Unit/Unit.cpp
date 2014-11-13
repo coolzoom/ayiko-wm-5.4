@@ -9227,14 +9227,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
 
             break;
         }
-        case 31829: // Item Paladin - Pvp Retributon 4P bonus
-        {
-            if (GetTypeId() != TYPEID_PLAYER)
-                return false;
-
-            ToPlayer()->AddSpellCooldown(fakeCooldownId, 0, 8 * IN_MILLISECONDS);
-            break;
-        }
         case 54926: // Glyph of Templar's Verdict
         {
             if (GetTypeId() != TYPEID_PLAYER)

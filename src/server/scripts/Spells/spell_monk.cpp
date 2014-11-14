@@ -1510,64 +1510,6 @@ class spell_monk_renewing_mist : public SpellScriptLoader
     public:
         spell_monk_renewing_mist() : SpellScriptLoader("spell_monk_renewing_mist") { }
 
-        class spell_monk_renewing_mist_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_monk_renewing_mist_SpellScript);
-
-            void HandleOnHit()
-            {
-                if (Player* _player = GetCaster()->ToPlayer())
-                {
-                    std::list<Unit*> playerList;
-                    std::list<Creature*> statueList;
-
-                    _player->GetPartyMembers(playerList);
-                    if (playerList.empty())
-                        return;
-
-                    playerList.sort(Trinity::HealthPctOrderPred());
-                    playerList.resize(1);
-
-                    _player->GetCreatureListWithEntryInGrid(statueList, 60849, 100.0f);
-                    // Remove other players jade statue
-                    for(auto i = statueList.begin(); i != statueList.end();)
-                    {
-                        Unit* owner = (*i)->GetOwner();
-                        if (owner && owner == _player && (*i)->isSummon())
-                            ++i;
-                        else
-                            i = statueList.erase(i);
-
-                    }
-
-                    auto playerTarget = *playerList.begin();
-                    if (statueList.size())
-                    {
-                        auto statue = *statueList.begin();
-
-                        if (statue && (statue->isPet() || statue->isGuardian()))
-                        {
-                            if (statue->GetOwner() && statue->GetOwner()->GetGUID() == _player->GetGUID())
-                            {
-                                _player->AddAura(SPELL_MONK_RENEWING_MIST_HOT, playerTarget);
-                                _player->CastSpell(playerTarget, SPELL_MONK_RENEWING_MIST_JUMP_AURA, true);
-                            }
-                        }
-                    }
-                }
-            }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_monk_renewing_mist_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_monk_renewing_mist_SpellScript();
-        }
-
         class spell_monk_renewing_mist_AuraScript : public AuraScript
         {
             PrepareAuraScript(spell_monk_renewing_mist_AuraScript);
@@ -1575,10 +1517,15 @@ class spell_monk_renewing_mist : public SpellScriptLoader
             uint32 update;
             uint8  spreadCount;
 
+            bool Load()
+            {
+                spreadCount = 0;
+                return true;
+            }
+
             bool Validate(SpellInfo const* /*spell*/)
             {
                 update = 0;
-                spreadCount = 1;
 
                 if (!sSpellMgr->GetSpellInfo(119611))
                     return false;
@@ -1599,50 +1546,39 @@ class spell_monk_renewing_mist : public SpellScriptLoader
                 }
             }
 
-            void OnTick(AuraEffect const * /*aurEff*/)
+            void OnTick(AuraEffect const * aurEff)
             {
-                if (Unit* caster = GetCaster())
+                if (spreadCount || aurEff->GetTickNumber() > 1)
+                    return;
+
+                auto caster = GetCaster();
+                auto target = GetTarget();
+                if (!caster || caster->GetTypeId() != TYPEID_PLAYER || !target)
+                    return;
+
+                auto player = caster->ToPlayer();
+
+                std::list<Unit*> playerList;
+                player->GetPartyMembers(playerList);
+                for (auto itr = playerList.begin(); itr != playerList.end();)
                 {
-                    if (Player* player = caster->ToPlayer())
-                    {
-                        Player* target = GetTarget()->ToPlayer();
-                        if (!target)
-                            return;
-
-                        if (target->HasAura(SPELL_MONK_RENEWING_MIST_JUMP_AURA, player->GetGUID()))
-                        {
-                            Unit* newTarget;
-
-                            if (player->HasAura(SPELL_MONK_GLYPH_OF_RENEWING_MIST))
-                                newTarget = target->GetNextRandomRaidMemberOrPet(40.0f);
-                            else
-                                newTarget = target->GetNextRandomRaidMemberOrPet(20.0f);
-
-                            if (!newTarget)
-                                return;
-
-                            if (Aura *renewingMistJump = target->GetAura(SPELL_MONK_RENEWING_MIST_JUMP_AURA, player->GetGUID()))
-                            {
-                                if (renewingMistJump->GetCharges() > 1)
-                                {
-                                    renewingMistJump->DropCharge();
-
-                                    // Spreads Renewing Mists 3 times maximum
-                                    if (target->GetAura(SPELL_MONK_RENEWING_MIST_HOT, player->GetGUID()))
-                                        player->AddAura(SPELL_MONK_RENEWING_MIST_HOT, newTarget);
-                                }
-                                else
-                                {
-                                    target->RemoveAura(SPELL_MONK_RENEWING_MIST_JUMP_AURA, player->GetGUID());
-
-                                    // Spreads Renewing Mists 3 times maximum
-                                    if (target->GetAura(SPELL_MONK_RENEWING_MIST_HOT, player->GetGUID()))
-                                        player->AddAura(SPELL_MONK_RENEWING_MIST_HOT, newTarget);
-                                }
-                            }
-                        }
-                    }
+                    if ((*itr)->IsWithinDist(player, caster->HasAura(SPELL_MONK_GLYPH_OF_RENEWING_MIST) ? 40.f : 20.f) && !(*itr)->HasAura(SPELL_MONK_RENEWING_MIST_HOT, caster->GetGUID()))
+                        ++itr;
+                    else
+                        itr = playerList.erase(itr);
                 }
+
+                if (playerList.empty())
+                    return;
+                playerList.sort(Trinity::HealthPctOrderPred());
+                playerList.resize(1);
+
+                ++spreadCount;
+                if (aurEff->GetUserData() > 1)
+                    return;
+
+                if (auto newAura = player->AddAura(SPELL_MONK_RENEWING_MIST_HOT, *playerList.begin()))
+                    newAura->GetEffect(EFFECT_0)->SetUserData(aurEff->GetUserData() + 1);
             }
 
             void HandleRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)

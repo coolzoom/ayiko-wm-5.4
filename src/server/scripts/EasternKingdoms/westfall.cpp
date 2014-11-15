@@ -299,8 +299,8 @@ public:
         {
             if (who->GetEntry() == 42617 && !feedingStarted && who->GetDistance(me) < 7.0f)
             {
-                if(auto const invocer = who->ToTempSummon()->GetSummoner()->ToPlayer())
-                    playerGUID = invocer->GetGUID();
+                if (auto invocer = who->ToTempSummon())
+                    playerGUID = invocer->GetSummonerGUID();
 
                 feedingStarted = true;
                 float x,y,z;

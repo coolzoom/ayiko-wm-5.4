@@ -735,9 +735,7 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
     {
         int32 bp = damage / 4;
         std::list<Unit*> targetList;
-        std::list<Creature*> tempList;
         std::list<Creature*> statueList;
-        Creature* statue;
 
         ToPlayer()->GetPartyMembers(targetList);
 
@@ -748,17 +746,16 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
             targetList.resize(1);
         }
 
-        ToPlayer()->GetCreatureListWithEntryInGrid(tempList, 60849, 100.0f);
         ToPlayer()->GetCreatureListWithEntryInGrid(statueList, 60849, 100.0f);
 
         // Remove other players jade statue
-        for (std::list<Creature*>::iterator i = tempList.begin(); i != tempList.end(); ++i)
+        for (auto i = statueList.begin(); i != statueList.end();)
         {
             Unit* owner = (*i)->GetOwner();
-            if (owner && owner == ToPlayer() && (*i)->isSummon())
-                continue;
-
-            statueList.remove((*i));
+            if (owner && owner == this && (*i)->isSummon())
+                ++i;
+            else
+                i = statueList.erase(i);
         }
 
         // In addition, you also gain Eminence, causing you to heal the lowest health nearby target within 20 yards for an amount equal to 50% of non-autoattack damage you deal
@@ -766,15 +763,10 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         {
             CastCustomSpell(itr, 117895, &bp, NULL, NULL, true, 0, NULL, GetGUID()); // Eminence - statue
 
-            if (statueList.size() == 1)
-            {
-                for (auto itrBis : statueList)
-                    statue = itrBis;
-
-                if (statue && (statue->isPet() || statue->isGuardian()))
-                    if (statue->GetOwner() && statue->GetOwner()->GetGUID() == GetGUID())
+            if (statueList.size())
+                if (auto statue = *statueList.begin())
+                    if (statue->GetOwnerGUID() == GetGUID())
                         statue->CastCustomSpell(itr, 117895, &bp, NULL, NULL, true, 0, NULL, GetGUID()); // Eminence - statue
-            }
         }
     }
 

@@ -2275,21 +2275,18 @@ class spell_monk_soothing_mist : public SpellScriptLoader
                     // Remove other players jade statue
                     for (auto i = statueList.begin(); i != statueList.end();)
                     {
-                            Unit* owner = (*i)->GetOwner();
-                            if (owner && owner == _player && (*i)->isSummon())
-                                ++i;
-                            else
-                                i = statueList.erase(i);
+                        Unit* owner = (*i)->GetOwner();
+                        if (owner && owner == _player && (*i)->isSummon())
+                            ++i;
+                        else
+                            i = statueList.erase(i);
                     }
 
                     auto playerTarget = *playerList.begin();
                     if (statueList.size())
-                    {
-                        auto statue = *statueList.begin();
-                        if (statue && (statue->isPet() || statue->isGuardian()))
-                            if (statue->GetOwner() && statue->GetOwner()->GetGUID() == _player->GetGUID())
+                        if (auto statue = *statueList.begin())
+                            if (statue->GetOwnerGUID() == _player->GetGUID())
                                 statue->CastSpell(playerTarget, GetSpellInfo()->Id, true);
-                    }
                 }
             }
 

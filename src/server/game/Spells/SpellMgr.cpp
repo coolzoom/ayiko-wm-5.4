@@ -5641,6 +5641,17 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 101056: // Wrath of Tarecgosa
                     spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
                     break;
+                case 53563: // Beacon of Light
+                    spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_PERIODIC_TRIGGER_SPELL;
+                    spellInfo->Effects[EFFECT_0].Amplitude = 1500;
+                    spellInfo->Effects[EFFECT_1].Effect = 0;
+                    break;
+                case 53651: // Beacon of Light (triggered)
+                    spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_CASTER_AREA_RAID;
+                    spellInfo->Effects[EFFECT_0].SetRadiusIndex(EFFECT_RADIUS_60_YARDS);
+                    spellInfo->AttributesEx4 = 0;
+                    spellInfo->SetDurationIndex(39);
+                    break;
                 default:
                     break;
             }

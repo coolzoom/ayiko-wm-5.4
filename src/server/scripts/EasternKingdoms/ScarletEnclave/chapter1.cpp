@@ -661,25 +661,23 @@ public:
         {
             ScriptedAI::MoveInLineOfSight(who);
 
-            if (who->GetTypeId() == TYPEID_UNIT && who->IsVehicle() && me->IsWithinDistInMap(who, 5.0f))
-            {
-                if (Unit* charmer = who->GetCharmer())
-                {
-                    if (charmer->GetTypeId() == TYPEID_PLAYER)
-                    {
-                        // for quest Into the Realm of Shadows(12687)
-                        if (me->GetEntry() == 28788 && CAST_PLR(charmer)->GetQuestStatus(12687) == QUEST_STATUS_INCOMPLETE)
-                        {
-                            CAST_PLR(charmer)->GroupEventHappens(12687, me);
-                            charmer->RemoveAurasDueToSpell(SPELL_EFFECT_OVERTAKE);
-                            CAST_CRE(who)->DespawnOrUnsummon();
-                            //CAST_CRE(who)->Respawn(true);
-                        }
+            if (who->GetTypeId() != TYPEID_UNIT || !who->IsVehicle() || !me->IsWithinDistInMap(who, 5.0f))
+                return;
 
-                        if (CAST_PLR(charmer)->HasAura(REALM_OF_SHADOWS))
-                            charmer->RemoveAurasDueToSpell(REALM_OF_SHADOWS);
-                    }
+            Unit* charmer = who->GetCharmer();
+            if (auto const player = (charmer ? charmer->ToPlayer() : nullptr))
+            {
+                // for quest Into the Realm of Shadows(12687)
+                if (me->GetEntry() == 28788 && player->GetQuestStatus(12687) == QUEST_STATUS_INCOMPLETE)
+                {
+                    player->GroupEventHappens(12687, me);
+                    player->RemoveAurasDueToSpell(SPELL_EFFECT_OVERTAKE);
+                    CAST_CRE(who)->DespawnOrUnsummon();
+                    //CAST_CRE(who)->Respawn(true);
                 }
+
+                if (player->HasAura(REALM_OF_SHADOWS))
+                    player->RemoveAurasDueToSpell(REALM_OF_SHADOWS);
             }
         }
     };
@@ -763,24 +761,22 @@ public:
         {
             ScriptedAI::MoveInLineOfSight(who);
 
-            if (who->GetEntry() == GHOULS && me->IsWithinDistInMap(who, 10.0f))
+            if (who->GetEntry() != GHOULS || !me->IsWithinDistInMap(who, 10.0f))
+                return;
+
+            Unit* owner = who->GetOwner();
+            if (auto const player = (owner ? owner->ToPlayer() : nullptr))
             {
-                if (Unit* owner = who->GetOwner())
-                {
-                    if (owner->GetTypeId() == TYPEID_PLAYER)
-                    {
-                        if (CAST_PLR(owner)->GetQuestStatus(12698) == QUEST_STATUS_INCOMPLETE)
-                            CAST_CRE(who)->CastSpell(owner, 52517, true);
+                if (player->GetQuestStatus(12698) == QUEST_STATUS_INCOMPLETE)
+                    CAST_CRE(who)->CastSpell(player, 52517, true);
 
-                        //Todo: Creatures must not be removed, but, must instead
-                        //      stand next to Gothik and be commanded into the pit
-                        //      and dig into the ground.
-                        CAST_CRE(who)->DespawnOrUnsummon();
+                //Todo: Creatures must not be removed, but, must instead
+                //      stand next to Gothik and be commanded into the pit
+                //      and dig into the ground.
+                CAST_CRE(who)->DespawnOrUnsummon();
 
-                        if (CAST_PLR(owner)->GetQuestStatus(12698) == QUEST_STATUS_COMPLETE)
-                            owner->RemoveAllMinionsByEntry(GHOULS);
-                    }
-                }
+                if (player->GetQuestStatus(12698) == QUEST_STATUS_COMPLETE)
+                    player->RemoveAllMinionsByEntry(GHOULS);
             }
         }
     };

@@ -67,8 +67,7 @@ public:
                 Player* player = NULL;
                 if (me->isSummon())
                     if (Unit* summoner = me->ToTempSummon()->GetSummoner())
-                        if (summoner->GetTypeId() == TYPEID_PLAYER)
-                            player = CAST_PLR(summoner);
+                        player = summoner->ToPlayer();
 
                 if (!player)
                     phase = 3;

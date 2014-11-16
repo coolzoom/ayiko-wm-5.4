@@ -77,11 +77,11 @@ public:
 
         void SpellHit(Unit* caster, const SpellInfo* spell)
         {
-            if (Phase)
+            if (Phase || spell->Id != SPELL_SET_CART)
                 return;
 
-            if (spell->Id == SPELL_SET_CART && caster->GetTypeId() == TYPEID_PLAYER
-                && CAST_PLR(caster)->GetQuestStatus(11897) == QUEST_STATUS_INCOMPLETE)
+            auto const player = caster->ToPlayer();
+            if (player && player->GetQuestStatus(11897) == QUEST_STATUS_INCOMPLETE)
             {
                 Phase = 1;
                 casterGuid = caster->GetGUID();
@@ -454,7 +454,7 @@ public:
 
             me->SetReactState(REACT_PASSIVE);
 
-            switch (CAST_PLR(me->GetOwner())->GetTeamId())
+            switch (me->GetOwner()->ToPlayer()->GetTeamId())
             {
                 case TEAM_ALLIANCE:
                     me->setFaction(FACTION_ESCORT_A_NEUTRAL_ACTIVE);
@@ -515,16 +515,14 @@ public:
 
             if (who->GetEntry() == NPC_JENNY && me->IsWithinDistInMap(who, 10.0f))
             {
-                if (Unit* owner = who->GetOwner())
+                Unit* owner = who->GetOwner();
+                if (auto const player = (owner ? owner->ToPlayer() : nullptr))
                 {
-                    if (owner->GetTypeId() == TYPEID_PLAYER)
+                    if (player && who->HasAura(SPELL_CRATES_CARRIED))
                     {
-                        if (who->HasAura(SPELL_CRATES_CARRIED))
-                        {
-                            owner->CastSpell(owner, SPELL_GIVE_JENNY_CREDIT, true); // Maybe is not working.
-                            CAST_PLR(owner)->CompleteQuest(QUEST_LOADER_UP);
-                            CAST_CRE(who)->DisappearAndDie();
-                        }
+                        player->CastSpell(player, SPELL_GIVE_JENNY_CREDIT, true); // Maybe is not working.
+                        player->CompleteQuest(QUEST_LOADER_UP);
+                        CAST_CRE(who)->DisappearAndDie();
                     }
                 }
             }
@@ -602,10 +600,11 @@ public:
                 go_caribou->SetLootState(GO_JUST_DEACTIVATED);
 
             if (TempSummon* summon = me->ToTempSummon())
-                if (summon->isSummon())
-                    if (Unit* temp = summon->GetSummoner())
-                        if (temp->GetTypeId() == TYPEID_PLAYER)
-                            CAST_PLR(temp)->KilledMonsterCredit(me->GetEntry(), 0);
+            {
+                Unit* temp = summon->GetSummoner();
+                if (auto const player = (temp ? temp->ToPlayer() : nullptr))
+                    player->KilledMonsterCredit(me->GetEntry(), 0);
+            }
 
             if (GameObject* go_caribou = me->GetMap()->GetGameObject(go_caribouGUID))
                 go_caribou->SetGoState(GO_STATE_READY);

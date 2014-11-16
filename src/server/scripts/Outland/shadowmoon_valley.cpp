@@ -1365,12 +1365,14 @@ public:
             switch (killer->GetTypeId())
             {
                 case TYPEID_UNIT:
-                    if (Unit* owner = killer->GetOwner())
-                        if (owner->GetTypeId() == TYPEID_PLAYER)
-                            CAST_PLR(owner)->GroupEventHappens(QUEST_BATTLE_OF_THE_CRIMSON_WATCH, me);
+                {
+                    Unit* owner = killer->GetOwner();
+                    if (auto const player = (owner ? owner->ToPlayer() : nullptr))
+                        player->GroupEventHappens(QUEST_BATTLE_OF_THE_CRIMSON_WATCH, me);
                     break;
+                }
                 case TYPEID_PLAYER:
-                    CAST_PLR(killer)->GroupEventHappens(QUEST_BATTLE_OF_THE_CRIMSON_WATCH, me);
+                    killer->ToPlayer()->GroupEventHappens(QUEST_BATTLE_OF_THE_CRIMSON_WATCH, me);
                     break;
                 default:
                     break;
@@ -1851,18 +1853,17 @@ public:
             // FIND TOTEM, PROCESS QUEST
             if (Summoned)
             {
-                 totemOspirits = me->FindNearestCreature(ENTRY_TOTEM_OF_SPIRITS, RADIUS_TOTEM_OF_SPIRITS);
-                 if (totemOspirits)
-                 {
-                     Summoned->setFaction(ENRAGED_SOUL_FRIENDLY);
-                     Summoned->GetMotionMaster()->MovePoint(0, totemOspirits->GetPositionX(), totemOspirits->GetPositionY(), Summoned->GetPositionZ());
+                totemOspirits = me->FindNearestCreature(ENTRY_TOTEM_OF_SPIRITS, RADIUS_TOTEM_OF_SPIRITS);
+                if (totemOspirits)
+                {
+                    Summoned->setFaction(ENRAGED_SOUL_FRIENDLY);
+                    Summoned->GetMotionMaster()->MovePoint(0, totemOspirits->GetPositionX(), totemOspirits->GetPositionY(), Summoned->GetPositionZ());
 
-                     Unit* Owner = totemOspirits->GetOwner();
-                     if (Owner && Owner->GetTypeId() == TYPEID_PLAYER)
-                         // DoCast(Owner, credit); -- not working!
-                         CAST_PLR(Owner)->KilledMonsterCredit(credit, 0);
-                     DoCast(totemOspirits, SPELL_SOUL_CAPTURED);
-                 }
+                    Unit* owner = totemOspirits->GetOwner();
+                    if (auto const player = (owner ? owner->ToPlayer() : nullptr))
+                        player->KilledMonsterCredit(credit, 0);
+                    DoCast(totemOspirits, SPELL_SOUL_CAPTURED);
+                }
             }
         }
     };

@@ -198,7 +198,7 @@ void AuraApplication::BuildBitsUpdatePacket(ByteBuffer& data, bool remove) const
     uint8 count = 0;
     if (flags & AFLAG_ANY_EFFECT_AMOUNT_SENT)
     {
-        for (uint8 i  = 0; i < aura->GetSpellInfo()->Effects.size(); ++i)
+        for (uint8 i = 0; i < aura->GetSpellInfo()->Effects.size(); ++i)
         {
             if (aura->GetEffect(i))
                 ++count;
@@ -232,8 +232,6 @@ void AuraApplication::BuildBytesUpdatePacket(ByteBuffer& data, bool remove, uint
     if (aura->GetMaxDuration() > 0 && !(aura->GetSpellInfo()->AttributesEx5 & SPELL_ATTR5_HIDE_DURATION))
         flags |= AFLAG_DURATION;
 
-    uint32 mask = 0;
-
     if (flags & AFLAG_DURATION)
         data << uint32(aura->GetMaxDuration());
 
@@ -245,14 +243,12 @@ void AuraApplication::BuildBytesUpdatePacket(ByteBuffer& data, bool remove, uint
 
     data << uint8(flags);
 
-    for (uint8 i = 0; i < aura->GetSpellInfo()->Effects.size(); ++i)
+    if (flags & AFLAG_ANY_EFFECT_AMOUNT_SENT)
     {
-        if (AuraEffect const *eff = aura->GetEffect(i)) // NULL if effect flag not set
+        for (uint8 i = 0; i < aura->GetSpellInfo()->Effects.size(); ++i)
         {
-            if (flags & AFLAG_ANY_EFFECT_AMOUNT_SENT)
+            if (AuraEffect const *eff = aura->GetEffect(i))
                 data << float(eff->GetAmount());
-
-            mask |= 1 << i;
         }
     }
 
@@ -267,7 +263,7 @@ void AuraApplication::BuildBytesUpdatePacket(ByteBuffer& data, bool remove, uint
     // effect value 2 for
 
     data << uint8(aura->GetSpellInfo()->StackAmount ? aura->GetStackAmount() : aura->GetCharges());
-    data << uint32(mask);
+    data << uint32(GetEffectMask());
     data << uint16(aura->GetCasterLevel());
     data << uint8(_slot);
 }
@@ -978,7 +974,7 @@ void Aura::SetDuration(int32 duration, bool withMods)
 void Aura::RefreshDuration(bool recalculate)
 {
     SetDuration(GetMaxDuration());
-    
+
     if (m_spellPowerData->manaPerSecond)
         m_timeCla = 1 * IN_MILLISECONDS;
 

@@ -337,16 +337,16 @@ public:
             if (!who)
                 return;
 
-            if (who->GetTypeId() == TYPEID_PLAYER)
+            if (auto const player = who->ToPlayer())
             {
-                if (CAST_PLR(who)->GetQuestStatus(10085) == QUEST_STATUS_INCOMPLETE)
+                if (player->GetQuestStatus(10085) == QUEST_STATUS_INCOMPLETE)
                 {
                     uint32 creditMarkerId = me->GetEntry();
                     if ((creditMarkerId >= 18840) && (creditMarkerId <= 18843))
                     {
                         // 18840: Sunspring, 18841: Laughing, 18842: Garadar, 18843: Bleeding
-                        if (!CAST_PLR(who)->GetReqKillOrCastCurrentCount(10085, creditMarkerId))
-                            CAST_PLR(who)->KilledMonsterCredit(creditMarkerId, me->GetGUID());
+                        if (!player->GetReqKillOrCastCurrentCount(10085, creditMarkerId))
+                            player->KilledMonsterCredit(creditMarkerId, me->GetGUID());
                     }
                 }
             }

@@ -238,15 +238,12 @@ public:
 
             for (uint16 i = 0; i < 41; ++i)
             {
-                if (Player* target = CAST_PLR(SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true)))
+                auto const target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true);
+                if (auto const player = (target ? target->ToPlayer() : nullptr))
                 {
-                    if (Group* pGrp = target->GetGroup())
+                    if (Group* pGrp = player->GetGroup())
                         for (uint8 ico = 0; ico < TARGETICONCOUNT; ++ico)
-                        {
-                            //if (grp->m_targetIcons[ico] == me->GetGUID()) -- private member :(
                             pGrp->SetTargetIcon(ico, 0, 0);
-                        }
-
                     break;
                 }
             }

@@ -6410,12 +6410,11 @@ void Spell::EffectQuestClear(SpellEffIndex effIndex)
     uint32 quest_id = m_spellInfo->Effects[effIndex].MiscValue;
 
     Quest const* quest = sObjectMgr->GetQuestTemplate(quest_id);
-
     if (!quest)
         return;
 
     // Player has never done this quest
-    if (player->GetQuestStatus(quest_id) == QUEST_STATUS_NONE)
+    if (player->GetQuestStatus(quest) == QUEST_STATUS_NONE)
         return;
 
     // remove all quest entries for 'entry' from quest log

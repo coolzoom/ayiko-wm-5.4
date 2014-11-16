@@ -62,10 +62,10 @@ public:
 
         void SpellHit(Unit* caster, const SpellInfo* spell)
         {
-            if (caster->GetTypeId() == TYPEID_PLAYER)
+            if (auto const player = caster->ToPlayer())
             {
                                                                 //Yenniku's Release
-                if (!bReset && CAST_PLR(caster)->GetQuestStatus(592) == QUEST_STATUS_INCOMPLETE && spell->Id == 3607)
+                if (!bReset && player->GetQuestStatus(592) == QUEST_STATUS_INCOMPLETE && spell->Id == 3607)
                 {
                     me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_STUN);
                     me->CombatStop();                   //stop combat
@@ -96,14 +96,11 @@ public:
 
                 if (me->IsInCombat() && me->GetVictim())
                 {
-                    if (me->GetVictim()->GetTypeId() == TYPEID_PLAYER)
+                    auto const player = me->GetVictim()->ToPlayer();
+                    if (player && player->GetTeam() == HORDE)
                     {
-                        Unit* victim = me->GetVictim();
-                        if (CAST_PLR(victim)->GetTeam() == HORDE)
-                        {
-                            me->CombatStop();
-                            me->DeleteThreatList();
-                        }
+                        me->CombatStop();
+                        me->DeleteThreatList();
                     }
                 }
              }

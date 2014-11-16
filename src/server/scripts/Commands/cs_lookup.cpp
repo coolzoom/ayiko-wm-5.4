@@ -615,7 +615,7 @@ public:
 
                             if (target)
                             {
-                                QuestStatus status = target->GetQuestStatus(qInfo->GetQuestId());
+                                QuestStatus status = target->GetQuestStatus(qInfo);
 
                                 switch (status)
                                 {
@@ -663,7 +663,7 @@ public:
 
                 if (target)
                 {
-                    QuestStatus status = target->GetQuestStatus(qInfo->GetQuestId());
+                    QuestStatus status = target->GetQuestStatus(qInfo);
 
                     switch (status)
                     {

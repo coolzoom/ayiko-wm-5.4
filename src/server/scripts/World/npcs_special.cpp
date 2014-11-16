@@ -762,12 +762,16 @@ class npc_injured_patient : public CreatureScript
 
             void SpellHit(Unit* caster, SpellInfo const* spell)
             {
-                if (caster->GetTypeId() == TYPEID_PLAYER && me->IsAlive() && spell->Id == 20804)
+                auto const player = caster->ToPlayer();
+                if (!player)
+                    return;
+
+                if (me->IsAlive() && spell->Id == 20804)
                 {
-                    if ((CAST_PLR(caster)->GetQuestStatus(6624) == QUEST_STATUS_INCOMPLETE) || (CAST_PLR(caster)->GetQuestStatus(6622) == QUEST_STATUS_INCOMPLETE))
+                    if ((player->GetQuestStatus(6624) == QUEST_STATUS_INCOMPLETE) || (player->GetQuestStatus(6622) == QUEST_STATUS_INCOMPLETE))
                         if (DoctorGUID)
                             if (Creature* doctor = Unit::GetCreature(*me, DoctorGUID))
-                                CAST_AI(npc_doctor::npc_doctorAI, doctor->AI())->PatientSaved(me, CAST_PLR(caster), Coord);
+                                CAST_AI(npc_doctor::npc_doctorAI, doctor->AI())->PatientSaved(me, player, Coord);
 
                     //make not selectable
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -1774,7 +1778,7 @@ class mob_mojo : public CreatureScript
             {
                 me->HandleEmoteCommand(emote);
                 Unit* own = me->GetOwner();
-                if (!own || own->GetTypeId() != TYPEID_PLAYER || CAST_PLR(own)->GetTeam() != player->GetTeam())
+                if (!own || own->GetTypeId() != TYPEID_PLAYER || own->ToPlayer()->GetTeam() != player->GetTeam())
                     return;
                 if (emote == TEXT_EMOTE_KISS)
                 {

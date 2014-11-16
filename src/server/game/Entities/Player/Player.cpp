@@ -3701,7 +3701,6 @@ void Player::GiveGatheringXP()
 // Current player experience not update (must be update by caller)
 void Player::GiveLevel(uint8 level)
 {
-
     uint8 oldLevel = getLevel();
     if (level == oldLevel)
         return;
@@ -3739,7 +3738,7 @@ void Player::GiveLevel(uint8 level)
     data << uint32(talent);                                 // Has talent
     data << uint32(level);
 
-    data << uint32(int32(basemana)   - int32(GetCreateMana()));
+    data << uint32(int32(basemana) - int32(GetCreateMana()));
     data << uint32(0);
     data << uint32(0);
     data << uint32(0);
@@ -3798,28 +3797,21 @@ void Player::GiveLevel(uint8 level)
     m_phaseMgr.NotifyConditionChanged(phaseUdateData);
 
     // Refer-A-Friend
-    if (GetSession()->GetRecruiterId())
-        if (level < sWorld->getIntConfig(CONFIG_MAX_RECRUIT_A_FRIEND_BONUS_PLAYER_LEVEL))
-            if (level % 2 == 0)
-            {
-                ++m_grantableLevels;
-
-                if (!HasByteFlag(PLAYER_FIELD_BYTES, 1, 0x01))
-                    SetByteFlag(PLAYER_FIELD_BYTES, 1, 0x01);
-            }
-
-    if (level == 85)
+    if (GetSession()->GetRecruiterId()
+            && level < sWorld->getIntConfig(CONFIG_MAX_RECRUIT_A_FRIEND_BONUS_PLAYER_LEVEL)
+            && level % 2 == 0)
     {
-        uint32 idQuest;
-        if (TeamForRace(getRace()) == ALLIANCE)
-        {
-            idQuest = 29547;
-        }
-        else
-            idQuest = 29611;
+        ++m_grantableLevels;
 
-        Quest const* quest = sObjectMgr->GetQuestTemplate(idQuest);
-        if (quest)
+        if (!HasByteFlag(PLAYER_FIELD_BYTES, 1, 0x01))
+            SetByteFlag(PLAYER_FIELD_BYTES, 1, 0x01);
+    }
+
+    if (level >= 85)
+    {
+        uint32 const idQuest = (TeamForRace(getRace()) == ALLIANCE) ? 29547 : 29611;
+        auto const quest = sObjectMgr->GetQuestTemplate(idQuest);
+        if (quest && GetQuestStatus(quest) == QUEST_STATUS_NONE)
             AddQuest(quest, NULL);
     }
 
@@ -16498,7 +16490,7 @@ bool Player::CanCompleteRepeatableQuest(Quest const* quest)
 bool Player::CanRewardQuest(Quest const* quest, bool msg)
 {
     // not auto complete quest and not completed quest (only cheating case, then ignore without message)
-    if (!quest->IsDFQuest() && !quest->IsAutoComplete() && GetQuestStatus(quest->GetQuestId()) != QUEST_STATUS_COMPLETE)
+    if (!quest->IsDFQuest() && !quest->IsAutoComplete() && GetQuestStatus(quest) != QUEST_STATUS_COMPLETE)
         return false;
 
     // daily quest can't be rewarded (25 daily quest already completed)
@@ -16743,7 +16735,7 @@ void Player::AddQuest(Quest const* quest, Object* questGiver)
 void Player::FullfillQuestRequirements(Quest const *quest)
 {
     // If player doesn't have the quest
-    if (!quest || GetQuestStatus(quest->GetQuestId()) == QUEST_STATUS_NONE)
+    if (!quest || GetQuestStatus(quest) == QUEST_STATUS_NONE)
         return;
 
     // Add quest items for quests that require items
@@ -17361,7 +17353,7 @@ bool Player::SatisfyQuestReputation(Quest const* qInfo, bool msg)
 
 bool Player::SatisfyQuestStatus(Quest const* qInfo, bool msg)
 {
-    if (GetQuestStatus(qInfo->GetQuestId()) != QUEST_STATUS_NONE)
+    if (GetQuestStatus(qInfo) != QUEST_STATUS_NONE)
     {
         if (msg)
             SendCanTakeQuestResponse(INVALIDREASON_QUEST_ALREADY_ON);
@@ -17618,6 +17610,20 @@ QuestStatus Player::GetQuestStatus(uint32 quest_id) const
             if (!qInfo->IsRepeatable() && m_RewardedQuests.find(quest_id) != m_RewardedQuests.end())
                 return QUEST_STATUS_REWARDED;
     }
+    return QUEST_STATUS_NONE;
+}
+
+QuestStatus Player::GetQuestStatus(Quest const *qInfo) const
+{
+    auto const id = qInfo->GetQuestId();
+
+    auto const itr = m_QuestStatus.find(id);
+    if (itr != m_QuestStatus.end())
+        return itr->second.Status;
+
+    if (!qInfo->IsRepeatable() && m_RewardedQuests.find(id) != m_RewardedQuests.end())
+        return QUEST_STATUS_REWARDED;
+
     return QUEST_STATUS_NONE;
 }
 

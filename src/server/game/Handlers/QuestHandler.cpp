@@ -284,8 +284,8 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvData)
             return;
     }
 
-    if ((!_player->CanSeeStartQuest(quest) &&  _player->GetQuestStatus(questId) == QUEST_STATUS_NONE) ||
-        (_player->GetQuestStatus(questId) != QUEST_STATUS_COMPLETE && !quest->IsAutoComplete()))
+    if ((!_player->CanSeeStartQuest(quest) &&  _player->GetQuestStatus(quest) == QUEST_STATUS_NONE) ||
+        (_player->GetQuestStatus(quest) != QUEST_STATUS_COMPLETE && !quest->IsAutoComplete()))
     {
         TC_LOG_ERROR("network", "HACK ALERT: Player %s (guid: %u) is trying to complete quest (id: %u) but he has no right to do it!",
             _player->GetName().c_str(), _player->GetGUIDLow(), questId);
@@ -389,7 +389,7 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode(WorldPacket & recvData)
     if (_player->CanCompleteQuest(questId))
         _player->CompleteQuest(questId);
 
-    if (_player->GetQuestStatus(questId) != QUEST_STATUS_COMPLETE)
+    if (_player->GetQuestStatus(quest) != QUEST_STATUS_COMPLETE)
         return;
 
     _player->PlayerTalkClass->SendQuestGiverOfferReward(quest, guid, true);
@@ -476,7 +476,7 @@ void WorldSession::HandleQuestgiverCompleteQuest(WorldPacket& recvData)
 
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_QUESTGIVER_COMPLETE_QUEST npc = %u, questId = %u", uint32(GUID_LOPART(playerGuid)), questId);
 
-        Quest const* quest = sObjectMgr->GetQuestTemplate(questId);
+    Quest const* quest = sObjectMgr->GetQuestTemplate(questId);
     if (!quest)
         return;
 
@@ -503,7 +503,7 @@ void WorldSession::HandleQuestgiverCompleteQuest(WorldPacket& recvData)
         }
     }
 
-    if (!_player->CanSeeStartQuest(quest) && _player->GetQuestStatus(questId) == QUEST_STATUS_NONE)
+    if (!_player->CanSeeStartQuest(quest) && _player->GetQuestStatus(quest) == QUEST_STATUS_NONE)
     {
         TC_LOG_ERROR("network", "Possible hacking attempt: Player %s [playerGuid: %u] tried to complete questId [entry: %u] without being in possession of the questId!",
                       _player->GetName().c_str(), _player->GetGUIDLow(), questId);
@@ -516,7 +516,7 @@ void WorldSession::HandleQuestgiverCompleteQuest(WorldPacket& recvData)
             if (bg->GetTypeID() == BATTLEGROUND_AV)
                 ((BattlegroundAV*)bg)->HandleQuestComplete(questId, _player);
 
-    if (_player->GetQuestStatus(questId) != QUEST_STATUS_COMPLETE)
+    if (_player->GetQuestStatus(quest) != QUEST_STATUS_COMPLETE)
     {
         if (quest->IsRepeatable())
             _player->PlayerTalkClass->SendQuestGiverRequestItems(quest, playerGuid, _player->CanCompleteRepeatableQuest(quest), false);
@@ -539,12 +539,15 @@ void WorldSession::HandlePushQuestToParty(WorldPacket& recvPacket)
 
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_PUSHQUESTTOPARTY questId = %u", questId);
 
-    if (_player->GetQuestStatus(questId) == QUEST_STATUS_NONE || _player->GetQuestStatus(questId) == QUEST_STATUS_REWARDED)
-        return;
-
     Quest const* quest = sObjectMgr->GetQuestTemplate(questId);
     if (!quest)
         return;
+
+    {
+        auto const questStatus = _player->GetQuestStatus(quest);
+        if (questStatus == QUEST_STATUS_NONE || questStatus == QUEST_STATUS_REWARDED)
+            return;
+    }
 
     Player * const sender = GetPlayer();
 
@@ -567,7 +570,7 @@ void WorldSession::HandlePushQuestToParty(WorldPacket& recvPacket)
             continue;
         }
 
-        if (receiver->GetQuestStatus(questId) == QUEST_STATUS_COMPLETE)
+        if (receiver->GetQuestStatus(quest) == QUEST_STATUS_COMPLETE)
         {
             sender->SendPushToPartyResponse(receiver, QUEST_PARTY_MSG_FINISH_QUEST);
             continue;
@@ -669,7 +672,7 @@ uint32 WorldSession::getDialogStatus(Player* player, Object* questgiver, uint32 
         if (!sConditionMgr->IsObjectMeetToConditions(player, conditions))
             continue;
 
-        QuestStatus status = player->GetQuestStatus(quest_id);
+        QuestStatus status = player->GetQuestStatus(quest);
         if ((status == QUEST_STATUS_COMPLETE && !player->GetQuestRewardStatus(quest_id)) ||
             (quest->IsAutoComplete() && player->CanTakeQuest(quest, false)))
         {
@@ -697,7 +700,7 @@ uint32 WorldSession::getDialogStatus(Player* player, Object* questgiver, uint32 
         if (!sConditionMgr->IsObjectMeetToConditions(player, conditions))
             continue;
 
-        QuestStatus status = player->GetQuestStatus(quest_id);
+        QuestStatus status = player->GetQuestStatus(quest);
         if (status == QUEST_STATUS_NONE)
         {
             if (player->CanSeeStartQuest(quest))

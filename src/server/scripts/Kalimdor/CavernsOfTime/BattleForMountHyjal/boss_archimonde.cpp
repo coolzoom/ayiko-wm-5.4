@@ -319,8 +319,8 @@ public:
         {
             Talk(SAY_SLAY);
 
-            if (victim && (victim->GetTypeId() == TYPEID_PLAYER))
-                GainSoulCharge(CAST_PLR(victim));
+            if (auto const player = victim->ToPlayer())
+                GainSoulCharge(player);
         }
 
         void GainSoulCharge(Player* victim)

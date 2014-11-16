@@ -130,14 +130,14 @@ void FollowerAI::JustDied(Unit* /*pKiller*/)
             {
                 if (Player* member = groupRef->getSource())
                 {
-                    if (member->GetQuestStatus(m_pQuestForFollow->GetQuestId()) == QUEST_STATUS_INCOMPLETE)
+                    if (member->GetQuestStatus(m_pQuestForFollow) == QUEST_STATUS_INCOMPLETE)
                         member->FailQuest(m_pQuestForFollow->GetQuestId());
                 }
             }
         }
         else
         {
-            if (player->GetQuestStatus(m_pQuestForFollow->GetQuestId()) == QUEST_STATUS_INCOMPLETE)
+            if (player->GetQuestStatus(m_pQuestForFollow) == QUEST_STATUS_INCOMPLETE)
                 player->FailQuest(m_pQuestForFollow->GetQuestId());
         }
     }

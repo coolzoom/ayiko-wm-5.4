@@ -117,26 +117,25 @@ public:
 
             if (someplayer)
             {
-                Unit* p = Unit::GetUnit(*me, someplayer);
-                if (p && p->GetTypeId() == TYPEID_PLAYER)
+                if (auto const p = Unit::GetPlayer(*me, someplayer))
                 {
                     switch (me->GetEntry())
                     {
                         case ENTRY_BNAAR_C_CONSOLE:
-                            CAST_PLR(p)->FailQuest(10299);
-                            CAST_PLR(p)->FailQuest(10329);
+                            p->FailQuest(10299);
+                            p->FailQuest(10329);
                             break;
                         case ENTRY_CORUU_C_CONSOLE:
-                            CAST_PLR(p)->FailQuest(10321);
-                            CAST_PLR(p)->FailQuest(10330);
+                            p->FailQuest(10321);
+                            p->FailQuest(10330);
                             break;
                         case ENTRY_DURO_C_CONSOLE:
-                            CAST_PLR(p)->FailQuest(10322);
-                            CAST_PLR(p)->FailQuest(10338);
+                            p->FailQuest(10322);
+                            p->FailQuest(10338);
                             break;
                         case ENTRY_ARA_C_CONSOLE:
-                            CAST_PLR(p)->FailQuest(10323);
-                            CAST_PLR(p)->FailQuest(10365);
+                            p->FailQuest(10323);
+                            p->FailQuest(10365);
                             break;
                     }
                 }
@@ -273,9 +272,8 @@ public:
                         DoScriptText(EMOTE_COMPLETE, me);
                         if (someplayer)
                         {
-                            Unit* u = Unit::GetUnit(*me, someplayer);
-                            if (u && u->GetTypeId() == TYPEID_PLAYER)
-                                CAST_PLR(u)->KilledMonsterCredit(me->GetEntry(), me->GetGUID());
+                            if (auto const u = Unit::GetPlayer(*me, someplayer))
+                                u->KilledMonsterCredit(me->GetEntry(), me->GetGUID());
                             DoCast(me, SPELL_DISABLE_VISUAL);
                         }
                         if (goConsole)

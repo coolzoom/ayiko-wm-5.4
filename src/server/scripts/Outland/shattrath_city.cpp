@@ -163,12 +163,11 @@ public:
             me->RestoreFaction();
         }
 
-        void DamageTaken(Unit* done_by, uint32 &damage)
+        void DamageTaken(Unit* doneBy, uint32 &damage)
         {
-            if (done_by->GetTypeId() == TYPEID_PLAYER)
-                if (me->HealthBelowPctDamaged(20, damage))
+            if (doneBy->GetTypeId() == TYPEID_PLAYER && me->HealthBelowPctDamaged(20, damage))
             {
-                CAST_PLR(done_by)->GroupEventHappens(QUEST_10004, me);
+                doneBy->ToPlayer()->GroupEventHappens(QUEST_10004, me);
                 damage = 0;
                 EnterEvadeMode();
             }
@@ -408,16 +407,11 @@ public:
             if (HasEscortState(STATE_ESCORT_ESCORTING))
                 return;
 
-            if (who->GetTypeId() == TYPEID_PLAYER)
+            if (auto const player = who->ToPlayer())
             {
-                if (CAST_PLR(who)->GetQuestStatus(10211) == QUEST_STATUS_INCOMPLETE)
-                {
-                    float Radius = 10.0f;
-                    if (me->IsWithinDistInMap(who, Radius))
-                    {
-                        Start(false, false, who->GetGUID());
-                    }
-                }
+                if (player->GetQuestStatus(10211) == QUEST_STATUS_INCOMPLETE)
+                    if (me->IsWithinDistInMap(player, 10.0f))
+                        Start(false, false, player->GetGUID());
             }
         }
 
@@ -578,9 +572,8 @@ public:
                 me->DeleteThreatList();
                 me->CombatStop();
                 me->GetMotionMaster()->MoveTargetedHome();
-                Player* player = Unit::GetPlayer(*me, PlayerGUID);
-                if (player)
-                    CAST_PLR(player)->GroupEventHappens(QUEST_WBI, me);
+                if (auto const player = Unit::GetPlayer(*me, PlayerGUID))
+                    player->GroupEventHappens(QUEST_WBI, me);
             }
             DoMeleeAttackIfReady();
         }

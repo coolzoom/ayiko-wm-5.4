@@ -379,7 +379,7 @@ class npc_wg_quest_giver : public CreatureScript
                         case QUEST_DEFEND_THE_SIEGE_HORDE_ATT:
                             if (wintergrasp->GetAttackerTeam() == TEAM_HORDE)
                             {
-                                QuestStatus status = player->GetQuestStatus(questId);
+                                QuestStatus status = player->GetQuestStatus(quest);
 
                                 if (quest->IsAutoComplete() && player->CanTakeQuest(quest, false))
                                     qm.AddMenuItem(questId, 4);
@@ -397,7 +397,7 @@ class npc_wg_quest_giver : public CreatureScript
                         case QUEST_STOP_THE_SIEGE_HORDE_DEF:
                             if (wintergrasp->GetDefenderTeam() == TEAM_HORDE)
                             {
-                                QuestStatus status = player->GetQuestStatus(questId);
+                                QuestStatus status = player->GetQuestStatus(quest);
 
                                 if (quest->IsAutoComplete() && player->CanTakeQuest(quest, false))
                                     qm.AddMenuItem(questId, 4);
@@ -413,7 +413,7 @@ class npc_wg_quest_giver : public CreatureScript
                         case QUEST_A_RARE_HERB_ALLIANCE_ATT:
                             if (wintergrasp->GetAttackerTeam() == TEAM_ALLIANCE)
                             {
-                                QuestStatus status = player->GetQuestStatus(questId);
+                                QuestStatus status = player->GetQuestStatus(quest);
 
                                 if (quest->IsAutoComplete() && player->CanTakeQuest(quest, false))
                                     qm.AddMenuItem(questId, 4);
@@ -430,7 +430,7 @@ class npc_wg_quest_giver : public CreatureScript
                         case QUEST_A_RARE_HERB_ALLIANCE_DEF:
                             if (wintergrasp->GetDefenderTeam() == TEAM_ALLIANCE)
                             {
-                                QuestStatus status = player->GetQuestStatus(questId);
+                                QuestStatus status = player->GetQuestStatus(quest);
 
                                 if (quest->IsAutoComplete() && player->CanTakeQuest(quest, false))
                                     qm.AddMenuItem(questId, 4);
@@ -439,7 +439,7 @@ class npc_wg_quest_giver : public CreatureScript
                             }
                             break;
                         default:
-                            QuestStatus status = player->GetQuestStatus(questId);
+                            QuestStatus status = player->GetQuestStatus(quest);
 
                             if (quest->IsAutoComplete() && player->CanTakeQuest(quest, false))
                                 qm.AddMenuItem(questId, 4);

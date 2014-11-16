@@ -151,12 +151,12 @@ public:
 
         void SpellHit(Unit* caster, const SpellInfo* spell)
         {
-            if (caster->GetTypeId() == TYPEID_PLAYER)
+            if (auto const player = caster->ToPlayer())
             {
-                if (!Tagged && spell->Id == SPELL_EGAN_BLASTER && CAST_PLR(caster)->GetQuestStatus(QUEST_RESTLESS_SOUL) == QUEST_STATUS_INCOMPLETE)
+                if (!Tagged && spell->Id == SPELL_EGAN_BLASTER && player->GetQuestStatus(QUEST_RESTLESS_SOUL) == QUEST_STATUS_INCOMPLETE)
                 {
                     Tagged = true;
-                    Tagger = caster->GetGUID();
+                    Tagger = player->GetGUID();
                 }
             }
         }
@@ -178,9 +178,9 @@ public:
             {
                 if (Die_Timer <= diff)
                 {
-                    if (Unit* temp = Unit::GetUnit(*me, Tagger))
+                    if (auto const temp = Unit::GetPlayer(*me, Tagger))
                     {
-                        CAST_PLR(temp)->KilledMonsterCredit(ENTRY_RESTLESS, me->GetGUID());
+                        temp->KilledMonsterCredit(ENTRY_RESTLESS, me->GetGUID());
                         me->Kill(me);
                     }
                 } else Die_Timer -= diff;

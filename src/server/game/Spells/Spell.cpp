@@ -1778,11 +1778,11 @@ void Spell::SelectImplicitChainTargets(SpellEffIndex effIndex, SpellImplicitTarg
     // Havoc
     if (Aura *havoc = m_caster->GetAura(80240))
     {
-        if (havoc->GetCharges() > 0 && target->ToUnit() && !target->ToUnit()->HasAura(80240))
+        if (havoc->GetCharges() > 0 && target->ToUnit() && !target->ToUnit()->HasAura(80240) && effIndex == EFFECT_0)
         {
             std::list<Unit*> targets;
             Unit* secondTarget = NULL;
-            m_caster->GetAttackableUnitListInRange(targets, 40.0f);
+            m_caster->GetAttackableUnitListInRange(targets, 60.0f);
 
             if (target->ToUnit())
                 targets.remove(target->ToUnit());
@@ -1790,7 +1790,7 @@ void Spell::SelectImplicitChainTargets(SpellEffIndex effIndex, SpellImplicitTarg
 
             for (auto itr : targets)
             {
-                if (itr->IsWithinLOSInMap(m_caster) && itr->IsWithinDist(m_caster, 40.0f)
+                if (itr->IsWithinLOSInMap(m_caster) && itr->IsWithinDist(m_caster, 60.0f)
                     && target->GetGUID() != itr->GetGUID() && itr->HasAura(80240, m_caster->GetGUID()))
                 {
                     secondTarget = itr;

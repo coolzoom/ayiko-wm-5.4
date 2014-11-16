@@ -823,7 +823,7 @@ void WorldSession::processAuctionsToRemove()
         auto const auctionHouse = sAuctionMgr->GetAuctionsMapByFaction(faction);
 
         auto const auction = auctionHouse->GetAuction(auctionId);
-        if (!auction || auction->owner != player->GetGUIDLow())
+        if (!auction || auction->owner != player->GetGUID())
         {
             SendAuctionCommandResult(auction, AUCTION_CANCEL, ERR_AUCTION_ITEM_NOT_FOUND);
             continue;

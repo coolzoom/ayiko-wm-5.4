@@ -1883,23 +1883,6 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
 
     ASSERT(unitTarget == m_spellAura->GetOwner());
 
-    for (uint8 i = 0; i < m_spellAura->GetSpellInfo()->Effects.size(); i++)
-    {
-        if (m_spellAura->GetEffect(i) && m_spellAura->GetEffect(i)->GetAuraType() == SPELL_AURA_SCHOOL_ABSORB)
-        {
-            float AbsorbMod2 = 0.0f;
-
-            float minval = (float)unitTarget->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_ABSORPTION_PCT);
-            float maxval = (float)unitTarget->GetMaxPositiveAuraModifier(SPELL_AURA_MOD_ABSORPTION_PCT);
-
-            AbsorbMod2 = minval + maxval;
-
-            int32 currentValue = m_spellAura->GetEffect(i)->GetAmount();
-            AddPct(currentValue, AbsorbMod2);
-            m_spellAura->GetEffect(i)->SetAmount(currentValue);
-        }
-    }
-
     m_spellAura->_ApplyEffectForTargets(effIndex);
 }
 

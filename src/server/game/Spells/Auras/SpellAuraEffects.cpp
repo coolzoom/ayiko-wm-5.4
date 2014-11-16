@@ -1246,8 +1246,8 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
     if (caster && caster->GetTypeId() == TYPEID_PLAYER)
     {
         if (GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE ||
-        GetAuraType() == SPELL_AURA_PERIODIC_LEECH ||
-        GetAuraType() == SPELL_AURA_PERIODIC_HEAL)
+            GetAuraType() == SPELL_AURA_PERIODIC_LEECH ||
+            GetAuraType() == SPELL_AURA_PERIODIC_HEAL)
         {
             if (GetBase()->GetType() == UNIT_AURA_TYPE)
             {
@@ -1271,6 +1271,15 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
 
                 amount = temp_damage;
             }
+        }
+        else if (GetAuraType() == SPELL_AURA_SCHOOL_ABSORB && GetBase()->GetType() == UNIT_AURA_TYPE)
+        {
+            // Apply absorb-reduction auras
+            auto target = GetBase()->GetUnitOwner();
+            float AbsorbMod = target->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_ABSORPTION_PCT) + target->GetMaxPositiveAuraModifier(SPELL_AURA_MOD_ABSORPTION_PCT);
+            int32 currentValue = amount;
+            AddPct(currentValue, AbsorbMod);
+            amount = currentValue;
         }
     }
 

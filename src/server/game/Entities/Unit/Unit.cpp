@@ -734,17 +734,7 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         && spellProto->Id != 130651 && spellProto->Id != 117993) // Don't triggered by Zen Sphere, Spinning Crane Kick, Chi Wave, Chi Burst and Chi Torpedo
     {
         int32 bp = damage / 4;
-        std::list<Unit*> targetList;
         std::list<Creature*> statueList;
-
-        ToPlayer()->GetPartyMembers(targetList);
-
-        if (targetList.size() > 1)
-        {
-            targetList.remove(this); // Remove Player
-            targetList.sort(Trinity::HealthPctOrderPred());
-            targetList.resize(1);
-        }
 
         ToPlayer()->GetCreatureListWithEntryInGrid(statueList, 60849, 100.0f);
 
@@ -759,15 +749,11 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         }
 
         // In addition, you also gain Eminence, causing you to heal the lowest health nearby target within 20 yards for an amount equal to 50% of non-autoattack damage you deal
-        for (auto itr : targetList)
-        {
-            CastCustomSpell(itr, 117895, &bp, NULL, NULL, true, 0, NULL, GetGUID()); // Eminence - statue
-
-            if (statueList.size())
-                if (auto statue = *statueList.begin())
-                    if (statue->GetOwnerGUID() == GetGUID())
-                        statue->CastCustomSpell(itr, 117895, &bp, NULL, NULL, true, 0, NULL, GetGUID()); // Eminence - statue
-        }
+        CastCustomSpell(this, 126890, &bp, NULL, NULL, true, 0, NULL, GetGUID()); // Eminence - player
+        if (statueList.size())
+            if (auto statue = *statueList.begin())
+                if (statue->GetOwnerGUID() == GetGUID())
+                    statue->CastCustomSpell(statue, 117895, &bp, NULL, NULL, true, 0, NULL, GetGUID()); // Eminence - statue
     }
 
     if (victim->IsAIEnabled)

@@ -1409,6 +1409,7 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
                 break;
             }
             case SPELLFAMILY_DRUID:
+            {
                 switch(m_spellInfo->Id)
                 {
                     // Firebloom, Item  Druid T12 Restoration 4P Bonus
@@ -1442,6 +1443,30 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
                     else
                         ++itr;
                 break;
+            }
+            case SPELLFAMILY_MONK:
+            {
+                switch (m_spellInfo->Id)
+                {
+                    case 117895: // Eminence (Statue)
+                    case 126890: // Eminence (Player)
+                    {
+                        maxSize = 1;
+                        power = POWER_HEALTH;
+
+                        // Remove targets outside caster's raid
+                        for (std::list<Unit*>::iterator itr = unitTargets.begin(); itr != unitTargets.end();)
+                        {
+                            if (!(*itr)->IsInRaidWith(m_caster))
+                                itr = unitTargets.erase(itr);
+                            else
+                                ++itr;
+                        }
+                        break;
+                    }
+                }
+                break;
+            }
             default:
                 break;
         }

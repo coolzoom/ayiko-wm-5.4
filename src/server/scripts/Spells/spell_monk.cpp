@@ -100,6 +100,7 @@ enum MonkSpells
     SPELL_MONK_ITEM_4_S12_MISTWEAVER            = 124487,
     SPELL_MONK_ZEN_FOCUS                        = 124488,
     SPELL_MONK_EMINENCE_HEAL                    = 126890,
+    SPELL_MONK_EMINENCE_HEAL_STATUE             = 117895,
     SPELL_MONK_GRAPPLE_WEAPON_DPS_UPGRADE       = 123231,
     SPELL_MONK_GRAPPLE_WEAPON_TANK_UPGRADE      = 123232,
     SPELL_MONK_GRAPPLE_WEAPON_HEAL_UPGRADE      = 123234,
@@ -515,14 +516,10 @@ class spell_monk_serpents_zeal : public SpellScriptLoader
                     // you gain Serpent's Zeal causing you to heal nearby injured targets equal to 25% of your auto-attack damage. Stacks up to 2 times.
                     _player->CastCustomSpell(_player, SPELL_MONK_EMINENCE_HEAL, &bp, NULL, NULL, true);
 
-                    if (statueList.size() == 1)
-                    {
-                        auto statue = *statueList.begin();
-
-                        if (statue && (statue->isPet() || statue->isGuardian()))
-                            if (statue->GetOwner() && statue->GetOwner()->GetGUID() == _player->GetGUID())
-                                statue->CastCustomSpell(statue, SPELL_MONK_EMINENCE_HEAL, &bp, NULL, NULL, true, 0, NULL, _player->GetGUID()); // Eminence - statue
-                    }
+                    if (statueList.size())
+                        if (auto statue = *statueList.begin())
+                            if (statue->GetOwnerGUID() == _player->GetGUID())
+                                statue->CastCustomSpell(statue, SPELL_MONK_EMINENCE_HEAL_STATUE, &bp, NULL, NULL, true, 0, NULL, _player->GetGUID()); // Eminence - statue
                 }
             }
 

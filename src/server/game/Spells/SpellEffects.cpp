@@ -1567,6 +1567,7 @@ void Spell::EffectForceCast(SpellEffIndex effIndex)
             break;
         }
         case 119914: // Felguard's Felstorm hack
+        case 119915: // Wrathguard's Wrathstorm hack
         {
             if (Pet* pet = m_caster->ToPlayer()->GetPet())
             {

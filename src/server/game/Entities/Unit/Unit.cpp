@@ -18676,38 +18676,26 @@ bool Unit::IsInRaidWith(Unit const* unit) const
 
 void Unit::GetPartyMembers(std::list<Unit*> &TagUnitMap)
 {
-    Unit* owner = GetCharmerOrOwnerOrSelf();
-    Group* group = NULL;
-    if (owner->GetTypeId() == TYPEID_PLAYER)
-        group = owner->ToPlayer()->GetGroup();
+    auto owner = GetCharmerOrOwnerOrSelf();
+    if (owner->GetTypeId() != TYPEID_PLAYER)
+        return;
 
-    if (group)
+    if (auto group = owner->ToPlayer()->GetGroup())
     {
-        uint8 subgroup = owner->ToPlayer()->GetSubGroup();
-
         for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
         {
-            Player* Target = itr->getSource();
+            auto groupMember = itr->getSource();
 
             // IsHostileTo check duel and controlled by enemy
-            if (Target && Target->GetSubGroup() == subgroup && !IsHostileTo(Target))
-            {
-                if (Target->IsAlive() && IsInMap(Target))
-                    TagUnitMap.push_back(Target);
-
-                if (Guardian* pet = Target->GetGuardianPet())
-                    if (pet->IsAlive() && IsInMap(Target))
-                        TagUnitMap.push_back(pet);
-            }
+            if (groupMember && !IsHostileTo(groupMember))
+                if (groupMember->IsAlive() && IsInMap(groupMember))
+                    TagUnitMap.push_back(groupMember);
         }
     }
     else
     {
         if (owner->IsAlive() && (owner == this || IsInMap(owner)))
             TagUnitMap.push_back(owner);
-        if (Guardian* pet = owner->GetGuardianPet())
-            if (pet->IsAlive() && (pet == this || IsInMap(pet)))
-                TagUnitMap.push_back(pet);
     }
 }
 

@@ -2374,6 +2374,21 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 }
             }
         }
+        case SPELLFAMILY_MONK:
+        {
+            switch (GetSpellInfo()->Id)
+            {
+                // Vital Mists visual on 5 stacks
+                case 118674:
+                {
+                    if (!apply && !onReapply)
+                        target->RemoveAurasDueToSpell(122107);
+                    else if (apply && GetStackAmount() == 5)
+                        target->CastSpell(target, 122107, true);
+                    break;
+                }
+            }
+        }
         default:
             break;
     }

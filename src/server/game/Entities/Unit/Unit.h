@@ -2256,9 +2256,9 @@ class Unit : public WorldObject
 
         void ClearMovementData()
         {
-            m_movementInfo.Alive32 = 0;
-            m_movementInfo.hasFallData = false;
-            m_movementInfo.hasFallDirection = false;
+            m_movementInfo.alive32 = 0;
+            m_movementInfo.bits[MovementInfo::Bit::FallData] = false;
+            m_movementInfo.bits[MovementInfo::Bit::FallDirection] = false;
         }
 
         void AddExtraUnitMovementFlag(uint16 f) { m_movementInfo.flags2 |= f; }

@@ -20182,7 +20182,7 @@ void Unit::BuildMovementPacket(ByteBuffer *data) const
         || (m_movementInfo.flags2 & MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING));
     bool interPolatedTurning = m_movementInfo.flags2 & MOVEMENTFLAG2_INTERPOLATED_TURNING;
     bool jumping = GetUnitMovementFlags() & MOVEMENTFLAG_FALLING;
-    bool splineElevation = m_movementInfo.HaveSplineElevation;
+    bool splineElevation = m_movementInfo.bits[MovementInfo::Bit::SplineElevation];
     bool splineData = false;
 
     data->WriteBits(GetUnitMovementFlags(), 30);
@@ -21055,7 +21055,7 @@ uint32 Unit::GetDamageTakenInPastSecs(uint32 secs) const
 
 void Unit::WriteMovementUpdate(WorldPacket &data) const
 {
-    WorldSession::WriteMovementInfo(data, (MovementInfo*)&m_movementInfo);
+    WorldSession::WriteMovementInfo(data, &m_movementInfo);
 }
 
 void Unit::RemoveSoulSwapDOT(Unit* target)

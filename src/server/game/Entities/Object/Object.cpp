@@ -400,7 +400,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         data->WriteBits(0, 22);
         data->WriteBitSeq<6, 7>(guid);
         data->WriteBit(self->m_movementInfo.t_guid != 0);           // Has transport data
-        data->WriteBit(!self->m_movementInfo.HavePitch);
+        data->WriteBit(!self->m_movementInfo.bits[MovementInfo::Bit::Pitch]);
 
         if (self->m_movementInfo.t_guid)
         {
@@ -421,20 +421,20 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         if (movementFlags)
             data->WriteBits(movementFlags, 30);
 
-        data->WriteBit(self->m_movementInfo.hasFallData); // IsInterpolated ?
+        data->WriteBit(self->m_movementInfo.bits[MovementInfo::Bit::FallData]); // IsInterpolated ?
 
         if (movementFlagsExtra)
             data->WriteBits(movementFlagsExtra, 13);
 
         data->WriteBitSeq<4>(guid);
 
-        if (self->m_movementInfo.hasFallData)
-            data->WriteBit(self->m_movementInfo.hasFallDirection);
+        if (self->m_movementInfo.bits[MovementInfo::Bit::FallData])
+            data->WriteBit(self->m_movementInfo.bits[MovementInfo::Bit::FallDirection]);
 
         data->WriteBitSeq<0>(guid);
         data->WriteBit(0); // Unk
         data->WriteBit(1); // unk
-        data->WriteBit(!self->m_movementInfo.HaveSplineElevation);
+        data->WriteBit(!self->m_movementInfo.bits[MovementInfo::Bit::SplineElevation]);
     }
 
     if (flags & UPDATEFLAG_HAS_TARGET)
@@ -494,9 +494,9 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
 
         data->WriteByteSeq<2, 6, 0>(guid);
 
-        if (self->m_movementInfo.hasFallData)
+        if (self->m_movementInfo.bits[MovementInfo::Bit::FallData])
         {
-            if (self->m_movementInfo.hasFallDirection)
+            if (self->m_movementInfo.bits[MovementInfo::Bit::FallDirection])
             {
                 *data << float(self->m_movementInfo.j_cosAngle);
                 *data << float(self->m_movementInfo.j_sinAngle);
@@ -526,7 +526,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
 
         *data << float(self->GetPositionZMinusOffset());
 
-        if (self->m_movementInfo.HavePitch)
+        if (self->m_movementInfo.bits[MovementInfo::Bit::Pitch])
             *data << float(self->m_movementInfo.pitch);
 
         data->WriteByteSeq<4>(guid);
@@ -541,7 +541,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
 
         data->WriteByteSeq<5, 3>(guid);
 
-        if (self->m_movementInfo.HaveSplineElevation)
+        if (self->m_movementInfo.bits[MovementInfo::Bit::SplineElevation])
             *data << float(self->m_movementInfo.splineElevation);
 
         *data << self->GetSpeed(MOVE_WALK);
@@ -1244,36 +1244,6 @@ ByteBuffer& operator<<(ByteBuffer& buf, Position::PositionXYZOStreamer const& st
     return buf;
 }
 
-void MovementInfo::OutDebug()
-{
-    TC_LOG_INFO("misc", "MOVEMENT INFO");
-    TC_LOG_INFO("misc", "guid " UI64FMTD, guid);
-    TC_LOG_INFO("misc", "flags %u", flags);
-    TC_LOG_INFO("misc", "flags2 %u", flags2);
-    TC_LOG_INFO("misc", "time %u current time " UI64FMTD "", flags2, uint64(::time(NULL)));
-    TC_LOG_INFO("misc", "position: `%s`", pos.ToString().c_str());
-    if (t_guid)
-    {
-        TC_LOG_INFO("misc", "TRANSPORT:");
-        TC_LOG_INFO("misc", "guid: " UI64FMTD, t_guid);
-        TC_LOG_INFO("misc", "position: `%s`", t_pos.ToString().c_str());
-        TC_LOG_INFO("misc", "seat: %i", t_seat);
-        TC_LOG_INFO("misc", "time: %u", t_time);
-        if (flags2 & MOVEMENTFLAG2_INTERPOLATED_MOVEMENT)
-            TC_LOG_INFO("misc", "time2: %u", t_time2);
-    }
-
-    if ((flags & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || (flags2 & MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING))
-        TC_LOG_INFO("misc", "pitch: %f", pitch);
-
-    TC_LOG_INFO("misc", "fallTime: %u", fallTime);
-    if (flags & MOVEMENTFLAG_FALLING)
-        TC_LOG_INFO("misc", "j_zspeed: %f j_sinAngle: %f j_cosAngle: %f j_xyspeed: %f", j_zspeed, j_sinAngle, j_cosAngle, j_xyspeed);
-
-    if (flags & MOVEMENTFLAG_SPLINE_ELEVATION)
-        TC_LOG_INFO("misc", "splineElevation: %f", splineElevation);
-}
-
 void MovementInfo::Normalize()
 {
     pos.m_orientation = Position::NormalizeOrientation(pos.m_orientation);
@@ -1281,8 +1251,8 @@ void MovementInfo::Normalize()
 
     pitch = Position::NormalizePitch(pitch);
 
-    if (hasFallDirection && !hasFallData)
-        hasFallDirection = false;
+    if (bits[MovementInfo::Bit::FallDirection] && !bits[MovementInfo::Bit::FallData])
+        bits[MovementInfo::Bit::FallDirection] = false;
 }
 
 WorldObject::WorldObject(bool isWorldObject)

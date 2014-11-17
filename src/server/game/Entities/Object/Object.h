@@ -548,8 +548,34 @@ ByteBuffer& operator<<(ByteBuffer& buf, Position::PositionXYZStreamer const& str
 ByteBuffer& operator>>(ByteBuffer& buf, Position::PositionXYZStreamer const& streamer);
 ByteBuffer& operator<<(ByteBuffer& buf, Position::PositionXYZOStreamer const& streamer);
 
-struct MovementInfo
+struct MovementInfo final
 {
+    struct Bit final
+    {
+        enum Flag
+        {
+            MovementFlags,
+            MovementFlags2,
+            Timestamp,
+            Orientation,
+            TransportData,
+            TransportTime2,
+            TransportTime3,
+            Alive32,
+            Pitch,
+            FallData,
+            FallDirection,
+            SplineElevation,
+
+            // Do not forget to update when enum is changed
+            Last = SplineElevation
+        };
+    };
+
+    typedef std::bitset<Bit::Last + 1> BitSet;
+
+    BitSet bits;
+
     // common
     uint64 guid;
     uint32 flags;
@@ -564,25 +590,14 @@ struct MovementInfo
     uint32 t_time2;
     uint32 t_time3;
     // swimming/flying
-    union
-    {
-        float pitch;
-        uint32 HavePitch;
-    };
+    float pitch;
     // falling
     uint32 fallTime;
     // jumping
     float j_zspeed, j_cosAngle, j_sinAngle, j_xyspeed;
     // spline
-    union
-    {
-        float splineElevation;
-        uint32 HaveSplineElevation;
-    };
-    // BitClientData
-    bool hasFallData;
-    bool hasFallDirection;
-    uint32 Alive32;
+    float splineElevation;
+    uint32 alive32;
 
     MovementInfo()
     {
@@ -596,9 +611,7 @@ struct MovementInfo
         t_guid = 0;
         t_pos.Relocate(0, 0, 0, 0);
         t_seat = -1;
-        hasFallData = false;
-        hasFallDirection = false;
-        Alive32 = 0;
+        alive32 = 0;
     }
 
     uint32 GetMovementFlags() const { return flags; }
@@ -613,7 +626,6 @@ struct MovementInfo
 
     void SetFallTime(uint32 time) { fallTime = time; }
 
-    void OutDebug();
     void Normalize();
 };
 

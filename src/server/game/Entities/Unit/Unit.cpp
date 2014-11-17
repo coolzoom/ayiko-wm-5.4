@@ -550,6 +550,7 @@ void Unit::UpdateSplinePosition()
         loc.orientation = GetOrientation();
 
     UpdatePosition(loc.x, loc.y, loc.z, loc.orientation);
+    m_movementInfo.pos.Relocate(this);
 }
 
 void Unit::DisableSpline()

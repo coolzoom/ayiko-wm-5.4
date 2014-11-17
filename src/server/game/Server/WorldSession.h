@@ -1074,6 +1074,8 @@ class WorldSession
         QueryResultHolderFuture _authLoginCallback;
 
     private:
+        void checkMoveCheat(uint16 opcode, MovementInfo const &movementInfo);
+
         // private trade methods
         void moveItems(Item* myItems[], Item* hisItems[]);
 

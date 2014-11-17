@@ -291,6 +291,8 @@ void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recvData)
             SendDoFlight(mountDisplayId, path, 1);        // skip start fly node
         else
             GetPlayer()->m_taxi.ClearTaxiDestinations();    // clear problematic path and next
+
+        GetPlayer()->m_movementInfo.pos.Relocate(GetPlayer());
         return;
     }
     else
@@ -298,6 +300,8 @@ void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recvData)
 
     GetPlayer()->CleanupAfterTaxiFlight();
     GetPlayer()->SetFallInformation(0, GetPlayer()->GetPositionZ());
+    GetPlayer()->m_movementInfo.pos.Relocate(GetPlayer());
+
     if (GetPlayer()->pvpInfo.inHostileArea)
         GetPlayer()->CastSpell(GetPlayer(), 2479, true);
 }

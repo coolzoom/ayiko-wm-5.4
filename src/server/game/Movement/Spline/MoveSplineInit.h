@@ -20,6 +20,7 @@
 #define TRINITYSERVER_MOVESPLINEINIT_H
 
 #include "MoveSplineInitArgs.h"
+#include "UnitDefines.hpp"
 
 class Unit;
 
@@ -32,6 +33,8 @@ namespace Movement
         ToFly       = 2, // 458 = ToFly
         FlyToGround = 3  // 463 = FlyToGround
     };
+
+    UnitMoveType SelectSpeedType(uint32 moveFlags);
 
     // Transforms coordinates from global to transport offsets
     class TransportPathTransform

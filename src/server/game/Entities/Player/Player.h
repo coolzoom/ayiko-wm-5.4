@@ -3018,6 +3018,10 @@ class Player final : public Unit, public GridObject<Player>
         RestType rest_type;
         ////////////////////Rest System/////////////////////
 
+        /////////////////// Anti-Cheat System //////////////
+        uint32 m_numSpeedChecks;
+        float m_averageSpeed;
+
         // Social
         PlayerSocial *m_social;
 

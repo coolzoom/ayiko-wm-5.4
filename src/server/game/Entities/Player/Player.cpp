@@ -894,6 +894,10 @@ Player::Player(WorldSession* session)
         m_WeekGames[i] = 0;
         m_SeasonGames[i] = 0;
     }
+
+    // Anti-Cheat
+    m_numSpeedChecks = 0;
+    m_averageSpeed = 0.0f;
 }
 
 Player::~Player()
@@ -2477,6 +2481,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             Position oldPos;
             GetPosition(&oldPos);
             Relocate(x, y, z, orientation);
+            m_movementInfo.pos.Relocate(this);
             SendTeleportPacket(oldPos); // this automatically relocates to oldPos in order to broadcast the packet in the right place
         }
     }
@@ -18824,6 +18829,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *charHolder, SQLQueryHolder 
     uint32 transGUID = uint32(fields[30].GetUInt32());
 
     Relocate(fields[12].GetFloat(), fields[13].GetFloat(), fields[14].GetFloat(), fields[16].GetFloat());
+    m_movementInfo.pos.Relocate(this);
 
     uint32 mapId = fields[15].GetUInt16();
     uint32 instanceId = fields[48].GetUInt32();
@@ -18839,7 +18845,12 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *charHolder, SQLQueryHolder 
 
     std::string taxi_nodes = fields[34].GetString();
 
-#define RelocateToHomebind(){ mapId = m_homebindMapId; instanceId = 0; Relocate(m_homebindX, m_homebindY, m_homebindZ); }
+#define RelocateToHomebind() do { \
+    mapId = m_homebindMapId; \
+    instanceId = 0; \
+    Relocate(m_homebindX, m_homebindY, m_homebindZ); \
+    m_movementInfo.pos.Relocate(this); \
+} while (0)
 
     _LoadGroup(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_GROUP));
 
@@ -18903,7 +18914,10 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *charHolder, SQLQueryHolder 
                 RelocateToHomebind();
             }
             else
+            {
                 Relocate(&_loc);
+                m_movementInfo.pos.Relocate(this);
+            }
 
             // We are not in BG anymore
             m_bgData.bgInstanceID = 0;
@@ -18976,6 +18990,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *charHolder, SQLQueryHolder 
                 TC_LOG_ERROR("entities.player", "Character %u have too short taxi destination list, teleport to original node.", GetGUIDLow());
                 mapId = nodeEntry->map_id;
                 Relocate(nodeEntry->x, nodeEntry->y, nodeEntry->z, 0.0f);
+                m_movementInfo.pos.Relocate(this);
             }
             m_taxi.ClearTaxiDestinations();
         }
@@ -18989,6 +19004,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *charHolder, SQLQueryHolder 
                 ASSERT(nodeEntry);                                  // checked in m_taxi.LoadTaxiDestinationsFromString
                 mapId = nodeEntry->map_id;
                 Relocate(nodeEntry->x, nodeEntry->y, nodeEntry->z, 0.0f);
+                m_movementInfo.pos.Relocate(this);
             }
 
             // flight will started later
@@ -19025,6 +19041,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *charHolder, SQLQueryHolder 
         {
             TC_LOG_ERROR("entities.player", "Player (guidlow %d) is teleported to gobacktrigger (Map: %u X: %f Y: %f Z: %f O: %f).", guid, mapId, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
             Relocate(at->target_X, at->target_Y, at->target_Z, GetOrientation());
+            m_movementInfo.pos.Relocate(this);
             mapId = at->target_mapId;
         }
         else
@@ -19039,6 +19056,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *charHolder, SQLQueryHolder 
             PlayerInfo const* info = sObjectMgr->GetPlayerInfo(getRace(), getClass());
             mapId = info->mapId;
             Relocate(info->positionX, info->positionY, info->positionZ, 0.0f);
+            m_movementInfo.pos.Relocate(this);
             TC_LOG_ERROR("entities.player", "Player (guidlow %d) have invalid coordinates (X: %f Y: %f Z: %f O: %f). Teleport to default race/class locations.", guid, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
             map = sMapMgr->CreateMap(mapId, this);
             if (!map)
@@ -19054,7 +19072,10 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *charHolder, SQLQueryHolder 
     {
         AreaTriggerStruct const* at = sObjectMgr->GetMapEntranceTrigger(mapId);
         if (at)
+        {
             Relocate(at->target_X, at->target_Y, at->target_Z, at->target_Orientation);
+            m_movementInfo.pos.Relocate(this);
+        }
         else
         {
             TC_LOG_ERROR("entities.player", "Player %s(GUID: %u) logged in to a reset instance (map: %u) and there is no area-trigger leading to this map. Thus he can't be ported back to the entrance. This _might_ be an exploit attempt.",

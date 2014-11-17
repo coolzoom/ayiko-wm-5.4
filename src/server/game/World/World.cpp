@@ -1455,6 +1455,11 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_ANNOUNCE_BAN] = sConfigMgr->GetBoolDefault("AnnounceBan", false);
     m_bool_configs[CONFIG_ANNOUNCE_MUTE] = sConfigMgr->GetBoolDefault("AnnounceMute", false);
 
+    // Speed and teleport hack protection
+    m_float_configs[CONFIG_CHEAT_MOVING_TELEPORT_DISTANCE_DETECT] = sConfigMgr->GetFloatDefault("CheatMoving.TeleportDistanceDetect", 100.0f);
+    m_float_configs[CONFIG_CHEAT_MOVING_MAX_SPEED_MULTIPLIER] = sConfigMgr->GetFloatDefault("CheatMoving.MaxSpeedMultiplier", 1.3f);
+    m_int_configs[CONFIG_CHEAT_MOVING_MAX_FAILED_SPEED_CHECKS] = sConfigMgr->GetIntDefault("CheatMoving.MaxFailedSpeedChecks", 10);
+
     if (reload)
         sScriptMgr->OnConfigLoad(reload);
 }

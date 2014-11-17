@@ -31,6 +31,7 @@
 #include "InstanceSaveMgr.h"
 #include "ObjectMgr.h"
 #include "MovementStructures.h"
+#include "MoveSplineInit.h"
 
 namespace {
 
@@ -51,6 +52,76 @@ MovementStatusElements const * GetMovementStatusElementsSequence(Opcodes opcode)
 }
 
 } // namespace
+
+void WorldSession::checkMoveCheat(uint16 opcode, MovementInfo const &newMovementInfo)
+{
+    // This packet may be spammed by the client under unknown circumstances
+    if (opcode == MSG_MOVE_SET_FACING)
+        return;
+
+    auto player = GetPlayer();
+
+    // Completely ignore transition from land to transport or any movement on transport.
+    if (player->GetTransport() || newMovementInfo.bits[MovementInfo::Bit::TransportData])
+        return;
+
+    auto const &oldMovementInfo = player->m_movementInfo;
+    auto const distance = oldMovementInfo.pos.GetExactDist2d(&newMovementInfo.pos);
+
+    if (distance > sWorld->getFloatConfig(CONFIG_CHEAT_MOVING_TELEPORT_DISTANCE_DETECT)
+            && !player->IsBeingTeleported())
+    {
+        TC_LOG_DEBUG("entities.player.cheat", "%u (%s) - 0x%04X - teleport hack used",
+                     GetAccountId(), player->GetName().c_str(), opcode);
+        return KickPlayer();
+    }
+
+    auto const moveType = Movement::SelectSpeedType(newMovementInfo.GetMovementFlags());
+    auto const maxSpeed = player->GetSpeed(moveType);
+
+    auto const wasMoving = oldMovementInfo.HasMovementFlag(MOVEMENTFLAG_MASK_MOVING_CHEAT);
+    auto const isMoving = newMovementInfo.HasMovementFlag(MOVEMENTFLAG_MASK_MOVING_CHEAT);
+
+    if (!(wasMoving && isMoving && maxSpeed > 0.01f))
+    {
+        player->m_averageSpeed *= 0.5f;
+        return;
+    }
+
+    if (player->IsBeingTeleported() || player->IsFalling())
+        return;
+
+    auto const oldMoveTime = oldMovementInfo.time;
+    auto const newMoveTime = newMovementInfo.time;
+
+    // time in seconds
+    auto const timeDiff = (newMoveTime - oldMoveTime) * (1.0f / 1000.0f);
+    if (timeDiff <= 0.0001f)
+        return;
+
+    auto const speed = distance / timeDiff;
+
+    player->m_averageSpeed = (player->m_averageSpeed != 0.0f)
+            ? ((player->m_averageSpeed + speed) * 0.5f)
+            : speed;
+
+    if (player->m_averageSpeed / maxSpeed < sWorld->getFloatConfig(CONFIG_CHEAT_MOVING_MAX_SPEED_MULTIPLIER))
+    {
+        player->m_numSpeedChecks = 0;
+        return;
+    }
+
+    TC_LOG_DEBUG("entities.player.cheat", "%u (%s) - 0x%04X - move (%f) (%f, %f, %d)",
+                 GetAccountId(), player->GetName().c_str(), opcode, maxSpeed, timeDiff,
+                 player->m_averageSpeed, player->m_numSpeedChecks);
+
+    if (++player->m_numSpeedChecks > sWorld->getIntConfig(CONFIG_CHEAT_MOVING_MAX_FAILED_SPEED_CHECKS))
+    {
+        TC_LOG_DEBUG("entities.player.cheat", "%u (%s) - 0x%04X - speed hack used",
+                     GetAccountId(), player->GetName().c_str(), opcode);
+        KickPlayer();
+    }
+}
 
 void WorldSession::HandleMoveWorldportAckOpcode(WorldPacket& /*recvPacket*/)
 {
@@ -103,8 +174,9 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         GetPlayer()->TeleportTo(GetPlayer()->m_homebindMapId, GetPlayer()->m_homebindX, GetPlayer()->m_homebindY, GetPlayer()->m_homebindZ, GetPlayer()->GetOrientation());
         return;
     }
-    else
-        GetPlayer()->Relocate(&loc);
+
+    GetPlayer()->Relocate(&loc);
+    GetPlayer()->m_movementInfo.pos.Relocate(GetPlayer());
 
     GetPlayer()->ResetMap();
     GetPlayer()->SetMap(newMap);
@@ -319,6 +391,12 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
         return;
     }
 
+    movementInfo.alive32 = movementInfo.time; // hack, but it's work in 505 in this way ...
+    movementInfo.time = getMSTime();
+
+    if (GetSecurity() < SEC_GAMEMASTER && GetPlayer() == mover)
+        checkMoveCheat(opcode, movementInfo);
+
     /* handle special cases */
     if (movementInfo.t_guid)
     {
@@ -408,8 +486,6 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
 
     /* process position-change */
     WorldPacket data(SMSG_MOVE_UPDATE, recvPacket.size());
-    movementInfo.alive32 = movementInfo.time; // hack, but it's work in 505 in this way ...
-    movementInfo.time = getMSTime();
     movementInfo.guid = mover->GetGUID();
     WorldSession::WriteMovementInfo(data, &movementInfo);
     mover->SendMessageToSet(&data, _player);

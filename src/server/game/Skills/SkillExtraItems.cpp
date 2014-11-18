@@ -36,6 +36,8 @@ struct SkillExtraItemEntry
     // maximum number of extra items created per crafting
     uint8 additionalMaxNum;
 
+    uint32 newItemId;
+
     SkillExtraItemEntry()
         : requiredSpecialization(0), additionalCreateChance(0.0f), additionalMaxNum(0) {}
 
@@ -55,8 +57,8 @@ void LoadSkillExtraItemTable()
 
     SkillExtraItemStore.clear();                            // need for reload
 
-    //                                                  0               1                       2                    3
-    QueryResult result = WorldDatabase.Query("SELECT spellId, requiredSpecialization, additionalCreateChance, additionalMaxNum FROM skill_extra_item_template");
+    //                                                 0        1                       2                       3                  4
+    QueryResult result = WorldDatabase.Query("SELECT spellId, requiredSpecialization, additionalCreateChance, additionalMaxNum, newItemId FROM skill_extra_item_template");
 
     if (!result)
     {
@@ -100,21 +102,23 @@ void LoadSkillExtraItemTable()
             continue;
         }
 
+        uint32 newItemId = fields[4].GetUInt32();
+
         SkillExtraItemEntry& skillExtraItemEntry = SkillExtraItemStore[spellId];
 
         skillExtraItemEntry.requiredSpecialization = requiredSpecialization;
         skillExtraItemEntry.additionalCreateChance = additionalCreateChance;
         skillExtraItemEntry.additionalMaxNum       = additionalMaxNum;
+        skillExtraItemEntry.newItemId              = newItemId;
 
         ++count;
     }
     while (result->NextRow());
 
     TC_LOG_INFO("server.loading", ">> Loaded %u spell specialization definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-
 }
 
-bool canCreateExtraItems(Player* player, uint32 spellId, float &additionalChance, uint8 &additionalMax)
+bool canCreateExtraItems(Player* player, uint32 spellId, float &additionalChance, uint8 &additionalMax, uint32 &newItemId)
 {
     // get the info for the specified spell
     SkillExtraItemMap::const_iterator ret = SkillExtraItemStore.find(spellId);
@@ -134,6 +138,7 @@ bool canCreateExtraItems(Player* player, uint32 spellId, float &additionalChance
     // set the arguments to the appropriate values
     additionalChance = specEntry->additionalCreateChance;
     additionalMax = specEntry->additionalMaxNum;
+    newItemId = specEntry->newItemId;
 
     // enable extra item creation
     return true;

@@ -751,8 +751,8 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
 
         // In addition, you also gain Eminence, causing you to heal the lowest health nearby target within 20 yards for an amount equal to 50% of non-autoattack damage you deal
         CastCustomSpell(this, 126890, &bp, NULL, NULL, true, 0, NULL, GetGUID()); // Eminence - player
-        if (statueList.size())
-            if (auto statue = *statueList.begin())
+        if (!statueList.empty())
+            if (auto statue = statueList.front())
                 if (statue->GetOwnerGUID() == GetGUID())
                     statue->CastCustomSpell(statue, 117895, &bp, NULL, NULL, true, 0, NULL, GetGUID()); // Eminence - statue
     }

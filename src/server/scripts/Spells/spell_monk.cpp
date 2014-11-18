@@ -510,14 +510,14 @@ class spell_monk_serpents_zeal : public SpellScriptLoader
                         if (owner && owner == _player && (*i)->isSummon())
                             ++i;
                         else
-                            statueList.erase(i);
+                            i = statueList.erase(i);
                     }
 
                     // you gain Serpent's Zeal causing you to heal nearby injured targets equal to 25% of your auto-attack damage. Stacks up to 2 times.
                     _player->CastCustomSpell(_player, SPELL_MONK_EMINENCE_HEAL, &bp, NULL, NULL, true);
 
-                    if (statueList.size())
-                        if (auto statue = *statueList.begin())
+                    if (!statueList.empty())
+                        if (auto statue = statueList.front())
                             if (statue->GetOwnerGUID() == _player->GetGUID())
                                 statue->CastCustomSpell(statue, SPELL_MONK_EMINENCE_HEAL_STATUE, &bp, NULL, NULL, true, 0, NULL, _player->GetGUID()); // Eminence - statue
                 }
@@ -2280,8 +2280,8 @@ class spell_monk_soothing_mist : public SpellScriptLoader
                     }
 
                     auto playerTarget = *playerList.begin();
-                    if (statueList.size())
-                        if (auto statue = *statueList.begin())
+                    if (!statueList.empty())
+                        if (auto statue = statueList.front())
                             if (statue->GetOwnerGUID() == _player->GetGUID())
                                 statue->CastSpell(playerTarget, GetSpellInfo()->Id, true);
                 }

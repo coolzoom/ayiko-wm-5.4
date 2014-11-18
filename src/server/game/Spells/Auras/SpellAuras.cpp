@@ -1771,6 +1771,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     case 55041: // Freezing Trap Effect
                     {
                         target->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
+                        // Glyph of Solace
+                        if (caster->HasAura(119407))
+                        {
+                            target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE, 0, target->GetAura(32409)); // SW:D shall not be removed.
+                            target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
+                            target->RemoveAurasByType(SPELL_AURA_PERIODIC_LEECH);
+                        }
                         break;
                     }
                     case 53257: // Cobra Strikes

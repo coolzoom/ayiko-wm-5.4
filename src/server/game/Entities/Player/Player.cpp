@@ -24321,12 +24321,31 @@ void Player::AddSpellAndCategoryCooldowns(SpellInfo const* spellInfo, uint32 ite
     }
 }
 
-void Player::AddSpellCooldown(uint32 spellid, uint32 itemid, uint32 delay)
+void Player::AddSpellCooldown(uint32 spellid, uint32 itemid, uint32 delay, bool sendCooldownPacket)
 {
     SpellCooldown &sc = m_spellCooldowns[spellid];
     sc.start = ACE_OS::gettimeofday().get_msec();
     sc.delay = delay;
     sc.itemid = itemid;
+
+    if (sendCooldownPacket)
+    {
+        WorldPacket data(SMSG_SPELL_COOLDOWN, 12);
+        ObjectGuid guid = GetGUID();
+
+        data.WriteBits(1, 21);
+        data.WriteBit(0);
+
+        data.WriteBitSeq<4, 2, 5, 6, 0, 3, 7, 1>(guid);
+
+        data << uint32(spellid);
+        data << uint32(delay);
+        data.WriteByteSeq<4>(guid);
+        data << uint8(1);
+        data.WriteByteSeq<1, 5, 7, 6, 0, 2, 3>(guid);
+
+        GetSession()->SendPacket(&data);
+    }
 }
 
 void Player::SendCategoryCooldown(uint32 categoryId, int32 cooldown)

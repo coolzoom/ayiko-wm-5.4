@@ -71,8 +71,9 @@ void WorldSession::checkMoveCheat(uint16 opcode, MovementInfo const &newMovement
     if (distance > sWorld->getFloatConfig(CONFIG_CHEAT_MOVING_TELEPORT_DISTANCE_DETECT)
             && !player->IsBeingTeleported())
     {
-        TC_LOG_DEBUG("entities.player.cheat", "%u (%s) - 0x%04X - teleport hack used",
-                     GetAccountId(), player->GetName().c_str(), opcode);
+        TC_LOG_DEBUG("entities.player.cheat", "%u (%s) - 0x%04X - 0x%X - teleport hack used",
+                     GetAccountId(), player->GetName().c_str(), opcode,
+                     newMovementInfo.GetMovementFlags());
         return KickPlayer();
     }
 
@@ -111,14 +112,15 @@ void WorldSession::checkMoveCheat(uint16 opcode, MovementInfo const &newMovement
         return;
     }
 
-    TC_LOG_DEBUG("entities.player.cheat", "%u (%s) - 0x%04X - move (%f) (%f, %f, %d)",
-                 GetAccountId(), player->GetName().c_str(), opcode, maxSpeed, timeDiff,
-                 player->m_averageSpeed, player->m_numSpeedChecks);
+    TC_LOG_DEBUG("entities.player.cheat", "%u (%s) - 0x%04X - 0x%X - move (%f) (%f, %f, %d)",
+                 GetAccountId(), player->GetName().c_str(), opcode, newMovementInfo.GetMovementFlags(),
+                 maxSpeed, timeDiff, player->m_averageSpeed, player->m_numSpeedChecks);
 
     if (++player->m_numSpeedChecks > sWorld->getIntConfig(CONFIG_CHEAT_MOVING_MAX_FAILED_SPEED_CHECKS))
     {
-        TC_LOG_DEBUG("entities.player.cheat", "%u (%s) - 0x%04X - speed hack used",
-                     GetAccountId(), player->GetName().c_str(), opcode);
+        TC_LOG_DEBUG("entities.player.cheat", "%u (%s) - 0x%04X - 0x%X - speed hack used",
+                     GetAccountId(), player->GetName().c_str(), opcode,
+                     newMovementInfo.GetMovementFlags());
         KickPlayer();
     }
 }

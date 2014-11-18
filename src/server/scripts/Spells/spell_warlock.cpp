@@ -104,32 +104,35 @@ enum WarlockSpells
     WARLOCK_SOULBURN_DEMONIC_CIRCLE_TELE    = 114794,
 };
 
-// Soulburn : Health Funnel - 104220
-class spell_warl_soulburn_health_funnel : public SpellScriptLoader
+// Soulburn : Health Funnel - 755
+class spell_warl_health_funnel : public SpellScriptLoader
 {
     public:
-        spell_warl_soulburn_health_funnel() : SpellScriptLoader("spell_warl_soulburn_health_funnel") { }
+        spell_warl_health_funnel() : SpellScriptLoader("spell_warl_health_funnel") { }
 
-        class spell_warl_soulburn_health_funnel_SpellScript : public SpellScript
+        class script_impl : public SpellScript
         {
-            PrepareSpellScript(spell_warl_soulburn_health_funnel_SpellScript);
+            PrepareSpellScript(script_impl);
 
             void HandleOnHit()
             {
                 if (Player* player = GetCaster()->ToPlayer())
                     if (player->HasAura(WARLOCK_SOULBURN_AURA))
+                    {
+                        player->CastSpell(player, 104220, true);
                         player->RemoveAurasDueToSpell(WARLOCK_SOULBURN_AURA);
+                    }
             }
 
             void Register()
             {
-                OnHit += SpellHitFn(spell_warl_soulburn_health_funnel_SpellScript::HandleOnHit);
+                OnHit += SpellHitFn(script_impl::HandleOnHit);
             }
         };
 
         SpellScript* GetSpellScript() const
         {
-            return new spell_warl_soulburn_health_funnel_SpellScript();
+            return new script_impl();
         }
 };
 
@@ -265,7 +268,7 @@ class spell_warl_soulburn_override : public SpellScriptLoader
                     // Overrides Soul Swap
                     player->CastSpell(player, WARLOCK_SOULBURN_OVERRIDE_6, true);
                     // Overrides Health Funnel
-                    player->CastSpell(player, WARLOCK_SOULBURN_OVERRIDE_7, true);
+                    //player->CastSpell(player, WARLOCK_SOULBURN_OVERRIDE_7, true);
                 }
             }
 
@@ -289,7 +292,7 @@ class spell_warl_soulburn_override : public SpellScriptLoader
                     // Overrides Soul Swap
                     player->RemoveAura(WARLOCK_SOULBURN_OVERRIDE_6);
                     // Overrides Health Funnel
-                    player->RemoveAura(WARLOCK_SOULBURN_OVERRIDE_7);
+                    //player->RemoveAura(WARLOCK_SOULBURN_OVERRIDE_7);
                 }
             }
 
@@ -3013,7 +3016,7 @@ public:
 
 void AddSC_warlock_spell_scripts()
 {
-    new spell_warl_soulburn_health_funnel();
+    new spell_warl_health_funnel();
     new spell_warl_soulburn_seed_of_corruption_damage();
     new spell_warl_soulburn_seed_of_corruption();
     new spell_warl_soulburn_remove();

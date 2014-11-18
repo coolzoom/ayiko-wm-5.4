@@ -2396,6 +2396,21 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 }
             }
         }
+        case SPELLFAMILY_WARLOCK:
+        {
+            // Unending Breath
+            if (GetSpellInfo()->Id == 5697)
+            {
+                if (apply && caster)
+                {
+                    // Apply Soulburn effect
+                    if (caster->HasAura(74434))
+                        caster->CastSpell(target, 104242, true);
+                }
+                else
+                    target->RemoveAurasDueToSpell(104242);
+            }
+        }
         default:
             break;
     }

@@ -2087,6 +2087,77 @@ class spell_q13400_illidan_kill_master : public SpellScriptLoader
         }
 };
 
+// Highborne Prison - 77306
+
+enum ArcaneLegacy
+{
+    SPELL_SUMMON_ENRAGED_SPIRIT = 77304,
+    SPELL_SUMMON_BOUND_SPIRIT   = 77305,
+    NPC_HIGHBORNE_SORCERER      = 34932,
+    NPC_HIGHBORNE_CITIZEN       = 34938,
+    NPC_ENRAGED_SPIRIT          = 41231,
+    NPC_BOUND_SPIRIT            = 41232,
+};
+
+class spell_q25766_highborne_prison : public SpellScriptLoader
+{
+    public:
+        spell_q25766_highborne_prison() : SpellScriptLoader("spell_q25766_highborne_prison") { }
+
+        class spell_q25766_highborne_prison_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_q25766_highborne_prison_SpellScript);
+
+            void HandleEffect(SpellEffIndex /*effIndex*/)
+            {
+                Player* const caster = GetCaster()->ToPlayer();
+                if (!caster)
+                    return;
+
+                Position pos;
+                GetExplTargetDest()->GetPosition(&pos);
+                std::list<Creature*> cList;
+                std::list<Creature*> cList2;
+                GetCreatureListWithEntryInGrid(cList, caster, NPC_HIGHBORNE_SORCERER, 40.0f);
+                GetCreatureListWithEntryInGrid(cList2, caster, NPC_HIGHBORNE_CITIZEN, 40.0f);
+                cList.merge(cList2);
+
+                for (std::list<Creature*>::iterator itr = cList.begin(); itr != cList.end(); ++itr)
+                {
+                    Creature * target = *itr;
+                    if (target->GetDistance(pos) > 5.0f)
+                        continue;
+
+                    target->ForcedDespawn();
+
+                    bool friendly = roll_chance_i(33);
+                    {
+                        if (Creature * const spirit = caster->SummonCreature(friendly ? NPC_BOUND_SPIRIT : NPC_ENRAGED_SPIRIT, pos, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 30000))
+                        {
+                            if (friendly)
+                            {
+                                caster->KilledMonsterCredit(spirit->GetEntry(), spirit->GetGUID());
+                                spirit->AI()->Talk(0);
+                            }
+                            else
+                                spirit->AI()->AttackStart(caster);
+                        }
+                    }
+                }
+            }
+
+            void Register() override
+            {
+                OnEffectHit += SpellEffectFn(spell_q25766_highborne_prison_SpellScript::HandleEffect, EFFECT_0, SPELL_EFFECT_TRANS_DOOR);
+            }
+        };
+
+        SpellScript* GetSpellScript() const override
+        {
+            return new spell_q25766_highborne_prison_SpellScript();
+        }
+};
+
 class spell_q26205_multibot_aura : public SpellScriptLoader
 {
     class script_impl : public SpellScript
@@ -2204,5 +2275,6 @@ void AddSC_quest_spell_scripts()
     new spell_q12919_gymers_grab();
     new spell_q12919_gymers_throw();
     new spell_q13400_illidan_kill_master();
+    new spell_q25766_highborne_prison();
     new spell_q26205_multibot_aura();
 }

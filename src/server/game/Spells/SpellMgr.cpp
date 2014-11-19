@@ -5645,6 +5645,11 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 104242: // Unending Breath (from Soulburn)
                     spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_TAKE_DAMAGE;
                     break;
+                case 104225: // Curse of the Elements (Soulburn)
+                case 109468: // Curse of Enfeeblement (Soulburn)
+                    if (auto originalCurseInfo = GetSpellInfo(109466))
+                        spellInfo->spellPower = originalCurseInfo->spellPower;
+                    break;
                 default:
                     break;
             }

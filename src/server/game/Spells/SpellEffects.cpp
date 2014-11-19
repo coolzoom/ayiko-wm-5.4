@@ -572,8 +572,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     {
                         // Apply corruption to each target
                         if (m_caster->HasAura(86664))
-                            m_caster->AddAura(172, unitTarget);
-
+                            m_caster->CastSpell(unitTarget, 172, true);
                         break;
                     }
                     default:

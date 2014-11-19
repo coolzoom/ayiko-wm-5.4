@@ -3166,7 +3166,8 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
                         }
                     }
 
-                    if (duration != m_spellAura->GetMaxDuration())
+                    // Pandemic
+                    if (refresh && m_originalCaster->HasAura(131973))
                     {
                         bool periodicDamage = false;
                         for (uint8 i = 0; i < m_spellAura->GetSpellInfo()->Effects.size(); ++i)
@@ -3174,22 +3175,8 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
                                 if (m_spellAura->GetEffect(i)->GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE)
                                     periodicDamage = true;
 
-                        // Fix Pandemic
-                        if (periodicDamage && refresh && m_originalCaster->HasAura(131973))
-                        {
-                            int32 newDuration = (duration + m_spellAura->GetDuration()) <= (int32(m_spellAura->GetMaxDuration() * 1.5f)) ?
-                                duration + m_spellAura->GetDuration() : int32(m_spellAura->GetMaxDuration() * 1.5f);
-                            int32 newMaxDuration = (duration + m_spellAura->GetMaxDuration()) <= (int32(m_spellAura->GetMaxDuration() * 1.5f)) ?
-                                duration + m_spellAura->GetMaxDuration() : int32(m_spellAura->GetMaxDuration() * 1.5f);
-
-                            m_spellAura->SetMaxDuration(newMaxDuration);
-                            m_spellAura->SetDuration(newDuration);
-                        }
-                        else
-                        {
-                            m_spellAura->SetMaxDuration(duration);
-                            m_spellAura->SetDuration(duration);
-                        }
+                        if (periodicDamage)
+                            duration = std::min(duration + m_spellAura->GetDuration(), int32(m_spellAura->GetMaxDuration() * 1.5f));
                     }
 
                     if (duration != m_spellAura->GetMaxDuration())

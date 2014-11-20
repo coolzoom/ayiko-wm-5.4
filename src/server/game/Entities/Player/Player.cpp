@@ -22962,6 +22962,13 @@ void Player::RemoveSpellMods(Spell &spell)
         case 29722:
             firstId = 34936;
             secondId = 117828;
+            break;
+        // Ravage: Prioritize PvP Set bonus over Clearcasting
+        case 6785:
+        case 102545:
+            firstId = 81022;
+            secondId = 135700;
+            break;
         default:
             break;
     }

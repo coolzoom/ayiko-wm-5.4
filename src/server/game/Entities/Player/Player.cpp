@@ -24316,8 +24316,12 @@ void Player::AddSpellAndCategoryCooldowns(SpellInfo const* spellInfo, uint32 ite
     auto const categories = spellInfo->GetSpellCategories();
     if (categories && categories->ChargesCategory) {
         auto const category = sSpellCategoryStore.LookupEntry(categories->ChargesCategory);
-        if (category && category->ChargeRegenTime && category->MaxCharges)
-            spellChargesTracker_.consume(spellInfo->Id, category->ChargeRegenTime);
+        if (category && category->ChargeRegenTime)
+        {
+            uint32 maxCharges = GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_CHARGES, category->Id) + category->MaxCharges;
+            if (maxCharges)
+                spellChargesTracker_.consume(spellInfo->Id, category->ChargeRegenTime);
+        }
     }
 }
 

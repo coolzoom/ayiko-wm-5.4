@@ -21076,12 +21076,10 @@ void Unit::WriteMovementUpdate(WorldPacket &data) const
 
 void Unit::RemoveSoulSwapDOT(Unit* target)
 {
-   bool keepDOT = HasAura(56226); // Glyph of Soul Swap
-
     _SoulSwapDOTList.clear();
 
-    AuraEffectList const mPeriodic = target->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
-    for (AuraEffectList::const_iterator iter = mPeriodic.begin(); iter != mPeriodic.end(); ++iter)
+    auto const mPeriodic = target->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
+    for (auto iter = mPeriodic.begin(); iter != mPeriodic.end(); ++iter)
     {
         if (!(*iter)) // prevent crash
             continue;
@@ -21090,16 +21088,15 @@ void Unit::RemoveSoulSwapDOT(Unit* target)
             (*iter)->GetCasterGUID() != GetGUID()) // only warlock spells
             continue;
 
-        _SoulSwapDOTList.push_back((*iter)->GetId());
-        if (!keepDOT)
-            target->RemoveAura((*iter)->GetId(), (*iter)->GetCasterGUID());
+        _SoulSwapDOTList.insert(std::make_pair((*iter)->GetId(), (*iter)->GetBase()->GetDuration()));
     }
 }
 
 void Unit::ApplySoulSwapDOT(Unit* target)
 {
-    for (AuraIdList::const_iterator iter = _SoulSwapDOTList.begin(); iter != _SoulSwapDOTList.end(); ++iter)
-        AddAura((*iter), target);
+    for (auto iter = _SoulSwapDOTList.begin(); iter != _SoulSwapDOTList.end(); ++iter)
+        if (auto newAura = AddAura((*iter).first, target))
+            newAura->SetDuration((*iter).second);
 
     _SoulSwapDOTList.clear();
 }

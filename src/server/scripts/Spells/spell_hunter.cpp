@@ -462,9 +462,14 @@ class spell_hun_basic_attack_blink_strike : public SpellScriptLoader
             {
                 if (const Pet * caster = GetCaster()->ToPet())
                     if (Player * owner = caster->GetCharmerOrOwnerPlayerOrPlayerItself())
-                        if (owner->HasAura(SPELL_BLINK_STRIKE_AURA))
+                        if (owner->HasAura(SPELL_BLINK_STRIKE_AURA) && !owner->HasSpellCooldown(SPELL_BLINK_STRIKE_TELEPORT))
+                        {
                             if (Unit* target = GetHitUnit())
+                            {
                                 GetCaster()->CastSpell(target, SPELL_BLINK_STRIKE_TELEPORT, true);
+                                owner->AddSpellCooldown(SPELL_BLINK_STRIKE_TELEPORT, 0, 20 * IN_MILLISECONDS);
+                            }
+                        }
             }
 
             void Register()

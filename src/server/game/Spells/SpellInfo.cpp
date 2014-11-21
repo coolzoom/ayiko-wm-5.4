@@ -3806,6 +3806,7 @@ bool SpellInfo::IsRemoveLossControlEffects() const
 {
     switch (Id)
     {
+        case 53490: // Bullheaded (Cunning Ability)
         case 42292: // Pvp Trinket
         case 59752: // Every Man for Himself (racical)
         case 108201:// Desecrated Ground

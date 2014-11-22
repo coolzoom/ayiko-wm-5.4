@@ -1064,6 +1064,9 @@ bool Aura::ModCharges(int32 num, AuraRemoveMode removeMode)
         }
 
         SetCharges(charges);
+        // Incite needs stack-amount sync
+        if (GetId() == 122016)
+            SetStackAmount(charges);
     }
     return false;
 }

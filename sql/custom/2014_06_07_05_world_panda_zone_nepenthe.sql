@@ -102,3 +102,7 @@ UPDATE `quest_template` SET `RequiredRaces` = 41943040 WHERE `Id` = 31012;
 
 -- [SQL] Quests - The King's Command and The Art of War will always be automatically accepted (Feedback #3549)
 UPDATE `quest_template` SET `SpecialFlags` = 4 WHERE `Id` IN (29547, 29611, 29612);
+
+-- [SQL] Npcs - Aysa Cloudsinger will now be defensive and have a correct phase (Feedback #8708)
+UPDATE `creature_template` SET `flags_extra` = 2 WHERE `entry` = 56416;
+UPDATE `creature` SET `phaseMask` = 5 WHERE `guid` = 941905 AND `id` = 56416;

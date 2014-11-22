@@ -2286,7 +2286,12 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit* victim, WeaponAttackT
     {
         // Reduce dodge chance by attacker expertise rating
         if (GetTypeId() == TYPEID_PLAYER)
+        {
             dodge_chance -= int32(ToPlayer()->GetExpertiseDodgeOrParryReduction(attType) * 100);
+            // increase dodge-chance per level difference
+            if (victim->GetTypeId() == TYPEID_UNIT && !victim->isPet())
+                dodge_chance += (150 * (victim->getLevelForTarget(this) - getLevel()));
+        }
         else
         {
             if (isPet() && GetOwner())
@@ -2320,7 +2325,11 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit* victim, WeaponAttackT
     {
         // Reduce parry chance by attacker expertise rating
         if (GetTypeId() == TYPEID_PLAYER)
+        {
             parry_chance -= int32(ToPlayer()->GetExpertiseDodgeOrParryReduction(attType) * 100);
+            if (victim->GetTypeId() == TYPEID_UNIT && !victim->isPet())
+                parry_chance += (150 * (victim->getLevelForTarget(this) - getLevel()));
+        }
         else
         {
             if (isPet() && GetOwner())
@@ -2715,7 +2724,11 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* victim, SpellInfo const* spell)
         dodgeChance = int32(float(dodgeChance) * GetTotalAuraMultiplier(SPELL_AURA_MOD_ENEMY_DODGE));
         // Reduce dodge chance by attacker expertise rating
         if (GetTypeId() == TYPEID_PLAYER)
+        {
             dodgeChance -= int32(ToPlayer()->GetExpertiseDodgeOrParryReduction(attType) * 100.0f);
+            if (victim->GetTypeId() == TYPEID_UNIT && !victim->isPet())
+                dodgeChance += (150 * (victim->getLevelForTarget(this) - getLevel()));
+        }
         else
             dodgeChance -= GetTotalAuraModifier(SPELL_AURA_MOD_EXPERTISE) * 25;
         if (dodgeChance < 0)
@@ -2731,7 +2744,11 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* victim, SpellInfo const* spell)
         int32 parryChance = int32(victim->GetUnitParryChance() * 100.0f);
         // Reduce parry chance by attacker expertise rating
         if (GetTypeId() == TYPEID_PLAYER)
+        {
             parryChance -= int32(ToPlayer()->GetExpertiseDodgeOrParryReduction(attType) * 100.0f);
+            if (victim->GetTypeId() == TYPEID_UNIT && !victim->isPet())
+                parryChance += (150 * (victim->getLevelForTarget(this) - getLevel()));
+        }
         else
             parryChance -= GetTotalAuraModifier(SPELL_AURA_MOD_EXPERTISE) * 25;
         if (parryChance < 0)
@@ -2939,7 +2956,7 @@ float Unit::GetUnitDodgeChance() const
             return 0.0f;
         else
         {
-            float dodge = 5.0f;
+            float dodge = 3.0f;
             dodge += GetTotalAuraModifier(SPELL_AURA_MOD_DODGE_PERCENT);
             return dodge > 0.0f ? dodge : 0.0f;
         }
@@ -2968,7 +2985,7 @@ float Unit::GetUnitParryChance() const
     {
         if (GetCreatureType() == CREATURE_TYPE_HUMANOID)
         {
-            chance = 5.0f;
+            chance = 3.0f;
             chance += GetTotalAuraModifier(SPELL_AURA_MOD_PARRY_PERCENT);
         }
     }

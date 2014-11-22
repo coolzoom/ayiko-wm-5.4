@@ -1357,7 +1357,6 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool resetPeriodicTimer /*= tru
         // or maybe there's a spell attribute somewhere
         if (resetPeriodicTimer)
         {
-            m_periodicTimer = 0;
             // Start periodic on next tick or at aura apply
             if (m_amplitude && !(m_spellInfo->AttributesEx5 & SPELL_ATTR5_START_PERIODIC_AT_APPLY))
                 m_periodicTimer += m_amplitude;

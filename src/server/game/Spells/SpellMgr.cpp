@@ -3826,18 +3826,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
                     spellInfo->Effects[EFFECT_0].TriggerSpell = 0;
                     break;
-                case 12654: // Ignite
-                case 31803: // Censure
-                case 77661: // Searing Flame
-                case 77489: // Echo of Light
-                case 99002: // Fiery Claws, Item - Druid T12 Feral 2P Bonus
-                case 99132: // Divine Fire, Item - Priest T12 Healer 2P Bonus
-                case 99173: // Burning Wounds, Item - Rogue T12 2P Bonus
-                case 56161: // Glyph of Prayer of Healing
-                case 55078: // Blood Plague
-                case 55095: // Frost Fever
-                    spellInfo->AttributesCu |= SPELL_ATTR0_CU_DONT_RESET_PERIODIC_TIMER;
-                    break;
                 case 81662: // Will of the Necropolis
                     spellInfo->Effects[0].BasePoints = 25;
                     break;
@@ -3943,7 +3931,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[0].BasePoints = 35;
                     break;
                 case 2818:  // Deadly Poison
-                    spellInfo->AttributesCu |= SPELL_ATTR0_CU_DONT_RESET_PERIODIC_TIMER;
                     spellInfo->Attributes |= SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK;
                     spellInfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REDIRECTED;
                     spellInfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REFLECTED;

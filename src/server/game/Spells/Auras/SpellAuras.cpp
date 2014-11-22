@@ -993,7 +993,6 @@ void Aura::RefreshDuration(bool recalculate)
 void Aura::RefreshTimers(bool recalculate)
 {
     m_maxDuration = CalcMaxDuration();
-    bool resetPeriodic = true;
     if (m_spellInfo->AttributesEx8 & SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER)
     {
         int32 minAmplitude = m_maxDuration;
@@ -1004,21 +1003,15 @@ void Aura::RefreshTimers(bool recalculate)
 
         // If only one tick remaining, roll it over into new duration
         if (GetDuration() <= minAmplitude)
-        {
             m_maxDuration += GetDuration();
-            resetPeriodic = false;
-        }
     }
-
-    if (m_spellInfo->AttributesCu & SPELL_ATTR0_CU_DONT_RESET_PERIODIC_TIMER)
-        resetPeriodic = false;
 
     RefreshDuration(recalculate);
 
     Unit* caster = GetCaster();
     for (uint8 i = 0; i < GetSpellInfo()->Effects.size(); ++i)
         if (HasEffect(i))
-            GetEffect(i)->CalculatePeriodic(caster, resetPeriodic, false);
+            GetEffect(i)->CalculatePeriodic(caster, false, false);
 }
 
 void Aura::SetCharges(uint8 charges)

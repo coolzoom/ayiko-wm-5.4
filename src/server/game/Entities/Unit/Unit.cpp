@@ -8525,42 +8525,25 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
         case 93099:
         case 120267:
         {
-            if (!victim || victim->GetTypeId() == TYPEID_PLAYER)
+            if (!victim || victim->GetTypeId() == TYPEID_PLAYER || GetTypeId() != TYPEID_PLAYER)
                 return false;
 
             if (victim->GetOwner() && victim->GetOwner()->GetTypeId() == TYPEID_PLAYER)
                 return false;
 
-            if (GetTypeId() != TYPEID_PLAYER)
-                return false;
-
             if (!IsInCombat())
                 return false;
 
-            int32 aviableBasepoints = 0;
-            int32 maxAmount = 0;
+            triggered_spell_id = 132365;
 
-            triggered_spell_id = 76691;
+            float auraAmount = (float)triggerAmount / 100.f;
 
-            if (Aura *vengeance = GetAura(triggered_spell_id, GetGUID()))
-            {
-                aviableBasepoints += vengeance->GetEffect(EFFECT_0)->GetAmount();
-                maxAmount += vengeance->GetEffect(EFFECT_2)->GetAmount();
-            }
+            basepoints0 = CalculatePct(damage, auraAmount);
+            if (auto vengeance = GetAuraEffect(triggered_spell_id, EFFECT_0))
+                basepoints0 += vengeance->GetAmount();
+            basepoints0 = std::min((int32)GetMaxHealth(), basepoints0);
 
-            // First attack taken give 33% of the damage in attack power
-           if (!aviableBasepoints && (procFlag & (PROC_FLAG_TAKEN_MELEE_AUTO_ATTACK)))
-                triggerAmount = 33;
-
-            int32 cap = (GetCreateHealth() + GetStat(STAT_STAMINA) * 14) / 10;
-            basepoints0 = int32(damage * triggerAmount / 100);
-            basepoints0 += aviableBasepoints;
-            basepoints0 = std::min(cap, basepoints0);
-
-            // calculate max amount player's had during the fight
-            int32 basepoints1 = std::max(basepoints0, maxAmount);
-
-            CastCustomSpell(this, triggered_spell_id, &basepoints0, &basepoints0, &basepoints1, true, castItem, triggeredByAura, originalCaster);
+            CastCustomSpell(this, triggered_spell_id, &basepoints0, &basepoints0, NULL, true, castItem, triggeredByAura, originalCaster);
             return true;
         }
         default:

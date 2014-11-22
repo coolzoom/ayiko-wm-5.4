@@ -3507,8 +3507,6 @@ bool SpellInfo::IsCustomCastCanceled(Unit* caster) const
             if (caster->HasAura(Id))
                 return true;
             break;
-        case 132365:// Vengeance (old)
-            return true;
     }
 
     return false;

@@ -34,6 +34,8 @@
 #include "PetDefines.h"
 #include "PhaseMgr.h"
 
+#include <unordered_set>
+
 class CalendarEvent;
 class CalendarInvite;
 class Creature;
@@ -1084,16 +1086,16 @@ class WorldSession
         void LogUnprocessedTail(WorldPacket* packet);
 
         // EnumData helpers
-        bool CharCanLogin(uint32 lowGUID)
+        bool IsLegitCharacterForAccount(uint32 lowGUID) const
         {
-            return _allowedCharsToLogin.find(lowGUID) != _allowedCharsToLogin.end();
+            return _legitCharacters.find(lowGUID) != _legitCharacters.end();
         }
 
         void processAuctionsToRemove();
 
         // this stores the GUIDs of the characters who can login
         // characters who failed on Player::BuildEnumData shouldn't login
-        std::set<uint32> _allowedCharsToLogin;
+        std::unordered_set<uint32> _legitCharacters;
 
         uint32 m_GUIDLow;                                   // set loggined or recently logout player (while m_playerRecentlyLogout set)
         Player* _player;

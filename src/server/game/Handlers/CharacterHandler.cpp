@@ -289,7 +289,7 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
 
     if (result)
     {
-        _allowedCharsToLogin.clear();
+        _legitCharacters.clear();
 
         charCount = uint32(result->GetRowCount());
 
@@ -303,7 +303,7 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
 
             Player::BuildEnumData(result, &dataBuffer, &bitBuffer);
 
-            _allowedCharsToLogin.insert(guidLow);
+            _legitCharacters.insert(guidLow);
         }
         while (result->NextRow());
     }
@@ -779,6 +779,9 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recvData)
 
     recvData.ReadByteSeq<7, 5, 0, 1, 2, 4, 6, 3>(guid);
 
+    if (!IS_PLAYER_GUID(guid) || !IsLegitCharacterForAccount(GUID_LOPART(guid)))
+        return KickPlayer();
+
     // can't delete loaded character
     if (ObjectAccessor::FindPlayer(guid))
         return;
@@ -845,7 +848,7 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recvData)
 
     TC_LOG_DEBUG("network", "Character (Guid: %u) logging in", GUID_LOPART(playerGuid));
 
-    if (!CharCanLogin(GUID_LOPART(playerGuid)))
+    if (!IsLegitCharacterForAccount(GUID_LOPART(playerGuid)))
     {
         TC_LOG_ERROR("network", "Account (%u) can't login with that character (%u).", GetAccountId(), GUID_LOPART(playerGuid));
         KickPlayer();
@@ -1646,6 +1649,14 @@ void WorldSession::HandleCharCustomize(WorldPacket& recvData)
 
     recvData.ReadByteSeq<6, 3, 1, 4, 7, 2, 5, 0>(playerGuid);
 
+    if (!IsLegitCharacterForAccount(GUID_LOPART(playerGuid)))
+    {
+        TC_LOG_ERROR("network", "Account %u, IP: %s tried to customise character %u, but it does not belong to their account!",
+                     GetAccountId(), GetRemoteAddress().c_str(), GUID_LOPART(playerGuid));
+        KickPlayer();
+        return;
+    }
+
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHARACTER_AT_LOGIN);
     stmt->setUInt32(0, GUID_LOPART(playerGuid));
     PreparedQueryResult result = CharacterDatabase.Query(stmt);
@@ -1982,7 +1993,15 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
     if (hasFacialHair)
         recvData >> facialHair;
 
-    uint32 lowGuid = GUID_LOPART(guid);
+    uint32 const lowGuid = GUID_LOPART(guid);
+
+    if (!IsLegitCharacterForAccount(lowGuid))
+    {
+        TC_LOG_ERROR("network", "Account %u, IP: %s tried to factionchange character %u, but it does not belong to their account!",
+                     GetAccountId(), GetRemoteAddress().c_str(), lowGuid);
+        KickPlayer();
+        return;
+    }
 
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_FACTIONCHANGE_DATA);
 
@@ -2512,7 +2531,7 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
     CharacterDatabase.CommitTransaction(trans);
 
     std::string const &addr = GetRemoteAddress();
-    TC_LOG_DEBUG("entities.unit", "Account: %d (IP: %s), Character guid: %u Change Race/Faction to: %s", GetAccountId(), addr.c_str(), lowGuid, newname.c_str());
+    TC_LOG_DEBUG("entities.player", "Account: %u (IP: %s), Character guid: %u changed race from %u to %u", GetAccountId(), addr.c_str(), lowGuid, oldRace, race);
 
     WorldPacket data(SMSG_CHAR_FACTION_OR_RACE_CHANGE, 1 + 8 + (newname.size() + 1) + 1 + 1 + 1 + 1 + 1 + 1 + 1);
     data << uint8(RESPONSE_SUCCESS);

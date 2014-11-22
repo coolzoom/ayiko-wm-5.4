@@ -3949,6 +3949,7 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REFLECTED;
                     break;
                 case 108212:// Burst of Speed
+                case 107079:// Quaking Palm
                     spellInfo->AttributesEx |= SPELL_ATTR1_NOT_BREAK_STEALTH;
                     break;
                 case 31224: // Cloak of Shadows

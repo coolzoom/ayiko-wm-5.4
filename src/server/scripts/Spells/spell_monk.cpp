@@ -1587,8 +1587,7 @@ class spell_monk_renewing_mist : public SpellScriptLoader
 
                     if (GetCaster()->HasAura(SPELL_MONK_ITEM_2_S12_MISTWEAVER))
                     {
-                        AuraRemoveMode removeMode = GetTargetApplication()->GetRemoveMode();
-                        if (removeMode == AURA_REMOVE_BY_EXPIRE)
+                        if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_ENEMY_SPELL)
                         {
                             GetCaster()->CastSpell(GetCaster(), SPELL_MONK_MANA_TEA_STACKS, true);
                             GetCaster()->CastSpell(GetCaster(), SPELL_MONK_PLUS_ONE_MANA_TEA, true);

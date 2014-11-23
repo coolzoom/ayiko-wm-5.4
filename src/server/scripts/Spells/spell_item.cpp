@@ -2266,6 +2266,45 @@ public:
     }
 };
 
+// Zen Alchemist Stone - 105547
+class spell_item_zen_alchemist_stone final : public SpellScriptLoader
+{
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        void OnProc(AuraEffect const * aurEff, ProcEventInfo &eventInfo)
+        {
+            auto caster = GetTarget();
+            PreventDefaultAction();
+            uint32 trigger_spell_id = 0;
+            float stat = 0.0f;
+            // strength
+            if (caster->GetStat(STAT_STRENGTH) > stat) { trigger_spell_id = 60229;stat = caster->GetStat(STAT_STRENGTH); }
+            // agility
+            if (caster->GetStat(STAT_AGILITY)  > stat) { trigger_spell_id = 60233;stat = caster->GetStat(STAT_AGILITY);  }
+            // intellect
+            if (caster->GetStat(STAT_INTELLECT)> stat) { trigger_spell_id = 60234;stat = caster->GetStat(STAT_INTELLECT);}
+            caster->CastSpell(caster, trigger_spell_id, true);
+        }
+
+        void Register() final
+        {
+            OnEffectProc += AuraEffectProcFn(script_impl::OnProc, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
+        }
+    };
+
+public:
+    spell_item_zen_alchemist_stone()
+        : SpellScriptLoader("spell_item_zen_alchemist_stone")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
+};
+
 void AddSC_item_spell_scripts()
 {
     // 23074 Arcanite Dragonling
@@ -2320,4 +2359,5 @@ void AddSC_item_spell_scripts()
     new spell_item_gen_alchemy_mop();
     new spell_alchemist_rejuvenation();
     new spell_item_dragonwrath_tarecgosas_rest();
+    new spell_item_zen_alchemist_stone();
 }

@@ -740,7 +740,7 @@ int32 SpellEffectInfo::CalcValue(Unit const* caster, int32 const* bp, Unit const
     float value = float(basePoints);
 
     // Fix old items bonuses
-    if (BasePoints != basePoints && _spellInfo->Id < 121820 && _spellInfo->Id != 108300)
+    if (BasePoints != basePoints && _spellInfo->Id < 121820 && _spellInfo->Id != 108300 && _spellInfo->Id != 60229)
     {
         for (auto const &spellEffect : _spellInfo->Effects)
         {

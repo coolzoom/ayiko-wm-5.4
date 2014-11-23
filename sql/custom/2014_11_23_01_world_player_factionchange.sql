@@ -22,3 +22,5 @@ CREATE TABLE player_factionchange_rewarded_racials (
     FOREIGN KEY (spell) REFERENCES dbc_spell (id)
     ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE = INNODB DEFAULT CHARSET = UTF8 ROW_FORMAT = DYNAMIC;
+
+ALTER TABLE character_queststatus_rewarded ADD `active` tinyint(3) UNSIGNED NOT NULL DEFAULT 1;

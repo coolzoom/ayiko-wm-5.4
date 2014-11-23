@@ -8692,7 +8692,7 @@ void ObjectMgr::LoadFactionChangeAchievements()
         else if (!sAchievementStore.LookupEntry(horde))
             TC_LOG_ERROR("sql.sql", "Achievement %u referenced in `player_factionchange_achievement` does not exist, pair skipped!", horde);
         else
-            FactionChange_Achievements[alliance] = horde;
+            FactionChangeAchievements[alliance] = horde;
 
         ++count;
     }
@@ -8727,7 +8727,7 @@ void ObjectMgr::LoadFactionChangeItems()
         else if (!GetItemTemplate(horde))
             TC_LOG_ERROR("sql.sql", "Item %u referenced in `player_factionchange_items` does not exist, pair skipped!", horde);
         else
-            FactionChange_Items[alliance] = horde;
+            FactionChangeItems[alliance] = horde;
 
         ++count;
     }
@@ -8763,13 +8763,48 @@ void ObjectMgr::LoadFactionChangeSpells()
         else if (!sSpellMgr->GetSpellInfo(horde))
             TC_LOG_ERROR("sql.sql", "Spell %u referenced in `player_factionchange_spells` does not exist, pair skipped!", horde);
         else
-            FactionChange_Spells[alliance] = horde;
+            FactionChangeSpells[alliance] = horde;
 
         ++count;
     }
     while (result->NextRow());
 
     TC_LOG_INFO("server.loading", ">> Loaded %u faction change spell pairs in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
+void ObjectMgr::LoadFactionChangeQuests()
+{
+    uint32 oldMSTime = getMSTime();
+
+    QueryResult result = WorldDatabase.Query("SELECT alliance_id, horde_id FROM player_factionchange_quests");
+
+    if (!result)
+    {
+        TC_LOG_ERROR("server.loading", ">> Loaded 0 faction change quest pairs. DB table `player_factionchange_quests` is empty.");
+        return;
+    }
+
+    uint32 count = 0;
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        uint32 alliance = fields[0].GetUInt32();
+        uint32 horde = fields[1].GetUInt32();
+
+        if (!GetQuestTemplate(alliance))
+            TC_LOG_ERROR("sql.sql", "Quest %u (alliance_id) referenced in `player_factionchange_quests` does not exist, pair skipped!", alliance);
+        else if (!GetQuestTemplate(horde))
+            TC_LOG_ERROR("sql.sql", "Quest %u (horde_id) referenced in `player_factionchange_quests` does not exist, pair skipped!", horde);
+        else
+            FactionChangeQuests[alliance] = horde;
+
+        ++count;
+    }
+    while (result->NextRow());
+
+    TC_LOG_INFO("server.loading", ">> Loaded %u faction change quest pairs in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::LoadFactionChangeReputations()
@@ -8798,7 +8833,7 @@ void ObjectMgr::LoadFactionChangeReputations()
         else if (!sFactionStore.LookupEntry(horde))
             TC_LOG_ERROR("sql.sql", "Reputation %u referenced in `player_factionchange_reputations` does not exist, pair skipped!", horde);
         else
-            FactionChange_Reputation[alliance] = horde;
+            FactionChangeReputation[alliance] = horde;
 
         ++count;
     }
@@ -8833,7 +8868,7 @@ void ObjectMgr::LoadFactionChangeTitles()
         else if (!sCharTitlesStore.LookupEntry(horde))
             TC_LOG_ERROR("sql.sql", "Title %u referenced in `player_factionchange_title` does not exist, pair skipped!", horde);
         else
-            FactionChange_Titles[alliance] = horde;
+            FactionChangeTitles[alliance] = horde;
 
         ++count;
     }
@@ -8872,6 +8907,33 @@ void ObjectMgr::LoadHotfixData()
     while (result->NextRow());
 
     TC_LOG_INFO("server.loading", ">> Loaded %u hotfix info entries in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
+void ObjectMgr::LoadFactionChangeRewardedRacials()
+{
+    uint32 oldMSTime = getMSTime();
+
+    QueryResult result = WorldDatabase.Query("SELECT race, spell FROM player_factionchange_rewarded_racials");
+
+    if (!result)
+    {
+        TC_LOG_INFO("server.loading", ">> Loaded 0 faction change rewarded racials. DB table `player_factionchange_rewarded_racials` is empty.");
+        return;
+    }
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        uint8 race = fields[0].GetUInt8();
+        uint32 spell = fields[1].GetUInt32();
+
+        FactionChangeRewardedRacials.insert(RewardedRacialMap::value_type(race, spell));
+    }
+    while (result->NextRow());
+
+    TC_LOG_INFO("server.loading", ">> Loaded " SIZEFMTD " faction change rewarded racials in %u ms",
+                FactionChangeRewardedRacials.size(), GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::LoadPhaseDefinitions()
@@ -9272,4 +9334,25 @@ void ObjectMgr::LoadCreatureAddonAuras(char const *keyName, char const *tableNam
         uint32 entry = fields[0].GetUInt32();
         addonStorage[entry].auras.push_back(fields[1].GetUInt32());
     } while (result->NextRow());
+}
+
+// this allows calculating base reputations to offline players, just by race and class
+int32 ObjectMgr::GetBaseReputationOf(FactionEntry const* factionEntry, uint8 race, uint8 playerClass) const
+{
+    if (!factionEntry)
+        return 0;
+
+    uint32 raceMask = (1 << (race - 1));
+    uint32 classMask = (1 << (playerClass-1));
+
+    for (int i = 0; i < 4; i++)
+    {
+        if ((!factionEntry->BaseRepClassMask[i] ||
+            factionEntry->BaseRepClassMask[i] & classMask) &&
+            (!factionEntry->BaseRepRaceMask[i] ||
+            factionEntry->BaseRepRaceMask[i] & raceMask))
+            return factionEntry->BaseRepValue[i];
+    }
+
+    return 0;
 }

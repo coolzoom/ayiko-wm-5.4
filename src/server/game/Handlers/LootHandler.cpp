@@ -53,7 +53,8 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket & recvData)
         recvData >> lootSlot;
         recvData.ReadByteSeq<3, 1, 0, 2>(objGuid);
 
-        ASSERT(GUID_LOPART(objGuid) == GUID_LOPART(lguid));
+        if (GUID_LOPART(objGuid) != GUID_LOPART(lguid))
+            return;
 
         if (IS_GAMEOBJECT_GUID(lguid))
         {

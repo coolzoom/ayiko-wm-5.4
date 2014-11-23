@@ -25,3 +25,12 @@ DELETE FROM `creature` WHERE `id` IN('62766', '62765');
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `npcflag2`, `unit_flags`, `unit_flags2`, `dynamicflags`, `isActive`, `protec_anti_doublet`) VALUES
 ('7344275', '62766', '870', '0', '0', '1', '65535', '0', '0', '706.442', '4360.89', '164.858', '0.208731', '300', '0', '0', '787882', '0', '0', '0', '0', '0', '2048', '0', '0', NULL)
 ('7344273', '62765', '870', '0', '0', '1', '65535', '0', '0', '766.714', '4413.24', '155.442', '4.47344', '300', '0', '0', '787882', '0', '0', '0', '0', '0', '2048', '0', '0', NULL);
+
+-- Wood and Shade
+DELETE FROM `areatrigger_scripts` WHERE `entry` IN('8123', '8124');
+INSERT INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
+('8123', 'at_q_wood_and_shade'),
+('8124', 'at_q_wood_and_shade');
+
+DELETE FROM `gameobject` WHERE `id` = '212642';
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `isActive`, `protect_anti_doublet`) VALUES ('10000', '212642', '870', '1', '65535', '879.94', '3832.15', '276.86', '3.23956', '0', '0', '0.9988', '-0.0489659', '300', '0', '1', '0', NULL);

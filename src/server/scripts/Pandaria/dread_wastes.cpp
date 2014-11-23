@@ -2175,6 +2175,21 @@ public:
     }
 };
 
+class AreaTrigger_at_q_wood_and_shade : public AreaTriggerScript
+{
+public:
+    AreaTrigger_at_q_wood_and_shade() : AreaTriggerScript("at_q_wood_and_shade") { }
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+    {
+        if (trigger->id == 8124)
+            player->KilledMonsterCredit(62955);
+        else
+            player->KilledMonsterCredit(62956);
+        return true;
+    }
+};
+
 void AddSC_dread_wastes()
 {
     //Rare Mobs
@@ -2203,7 +2218,9 @@ void AddSC_dread_wastes()
     //Standard Mobs
     new mob_overgrown_seacarp();
     new mob_hisek_the_swarmkeeper();
-    // Extending the Vocerage
+    //Extending the Vocerage
     new spell_zet_uk_sha_eruption();
     new spell_zet_uk_sha_eruption_periodic_summon();
+    //Quest scripts
+    new AreaTrigger_at_q_wood_and_shade();
 }

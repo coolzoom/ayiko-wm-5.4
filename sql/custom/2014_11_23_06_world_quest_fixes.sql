@@ -10,3 +10,18 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 UPDATE `gameobject_template` SET `AIName`='SmartGameObjectAI' WHERE (`entry`='184725');
 DELETE FROM `smart_scripts` WHERE `source_type` = '1' AND `entryorguid` = '184725';
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES ('184725', '1', '0', '0', '70', '0', '100', '0', '2', '0', '0', '0', '33', '21039', '0', '0', '0', '0', '0', '7', '0', '0', '0', '0', '0', '0', '0', 'Raufen - give KC on activation');
+
+-- Incantations Fae and Primal
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE `entry` IN('62766', '62765');
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` IN('62766', '62765');
+INSERT INTO `smart_scripts` (`entryorguid`, `id`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `target_type`, `comment`) VALUES
+('62766', '0', '3000', '3000', '12000', '12000', '11', '128049', '1', 'Raufen - In Combat - Cast Spell'),
+('62766', '1', '1000', '1000', '6000', '6000', '11', '128056', '1', 'Raufen - In Combat - Cast Spell'),
+('62766', '2', '8000', '8000', '18000', '18000', '11', '127373', '1', 'Raufen - In Combat - Cast Spell'),
+('62765', '0', '3000', '3000', '12000', '12000', '11', '118510', '1', 'Raufen - In Combat - Cast Spell'),
+('62765', '1', '9000', '9000', '18000', '18000', '11', '128056', '1', 'Raufen - In Combat - Cast Spell');
+
+DELETE FROM `creature` WHERE `id` IN('62766', '62765');
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `npcflag2`, `unit_flags`, `unit_flags2`, `dynamicflags`, `isActive`, `protec_anti_doublet`) VALUES
+('7344275', '62766', '870', '0', '0', '1', '65535', '0', '0', '706.442', '4360.89', '164.858', '0.208731', '300', '0', '0', '787882', '0', '0', '0', '0', '0', '2048', '0', '0', NULL)
+('7344273', '62765', '870', '0', '0', '1', '65535', '0', '0', '766.714', '4413.24', '155.442', '4.47344', '300', '0', '0', '787882', '0', '0', '0', '0', '0', '2048', '0', '0', NULL);

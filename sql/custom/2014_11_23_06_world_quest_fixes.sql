@@ -34,3 +34,8 @@ INSERT INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
 
 DELETE FROM `gameobject` WHERE `id` = '212642';
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `isActive`, `protect_anti_doublet`) VALUES ('10000', '212642', '870', '1', '65535', '879.94', '3832.15', '276.86', '3.23956', '0', '0', '0.9988', '-0.0489659', '300', '0', '1', '0', NULL);
+
+-- Bound with Wood
+DELETE FROM `smart_scripts` WHERE (`entryorguid`=62876 AND `source_type`=0);
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(62876, 0, 0, 0, 73, 0, 100, 0, 0, 0, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Withered Husk - On Spellclick - Despawn");

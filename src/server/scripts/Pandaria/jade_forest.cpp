@@ -1744,6 +1744,71 @@ public:
     };
 };
 
+
+class npc_instructor_skythorn : public CreatureScript
+{
+public:
+    npc_instructor_skythorn() : CreatureScript("npc_instructor_skythorn") {}
+
+    struct npc_instructor_skythornAI : public ScriptedAI
+    {
+        npc_instructor_skythornAI(Creature* creature) : ScriptedAI(creature) {}
+
+        uint64 playerGUID;
+        uint8 eventPhase;
+        uint32 eventTimer;
+
+        void Reset()
+        {
+            eventTimer = 0;
+            playerGUID = 0;
+            eventPhase = 0;
+        }
+
+        void BeginEvent(Player* player)
+        {
+            eventTimer = 10000;
+            playerGUID = player->GetGUID();
+            Talk(0, playerGUID);
+            eventPhase = 1;
+        }
+
+        void UpdateAI(uint32 const diff)
+        {
+            if (eventPhase)
+            {
+                if (eventTimer < diff)
+                {
+                    Talk(eventPhase, playerGUID);
+                    eventTimer = 8000;
+                    ++eventPhase;
+                    if (eventPhase == 4)
+                    {
+                        if (auto player = Player::GetPlayer(*me, playerGUID))
+                            player->KilledMonsterCredit(58315);
+                        Reset();
+                    }
+                }
+                else
+                    eventTimer -= diff;
+            }
+        }
+    };
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == 30142)
+            CAST_AI(npc_instructor_skythorn::npc_instructor_skythornAI, creature->AI())->BeginEvent(player);
+
+        return true;
+    }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_instructor_skythornAI(creature);
+    }
+};
+
 void AddSC_jade_forest()
 {
     //Rare mobs
@@ -1769,4 +1834,5 @@ void AddSC_jade_forest()
     new npc_nectarbreeze_farmer();
     new npc_windward_hatchling();
     new npc_windward_nest_trigger();
+    new npc_instructor_skythorn();
 }

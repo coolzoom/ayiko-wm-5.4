@@ -17045,6 +17045,7 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
     // (to prevent rewarding this quest another time while rewards were already given out)
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
     _SaveQuestStatus(trans);
+    SaveInventoryAndGoldToDB(trans);
     CharacterDatabase.CommitTransaction(trans);
 
     if (announce)

@@ -80,3 +80,8 @@ DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`='18') AND (`SourceGrou
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`, `Comment`) VALUES
 ('18', '60669', '76309', '9', '30770', 'Raufen - Require quest for spellclick'),
 ('18', '60739', '76309', '9', '30770', 'Raufen - Require quest for spellclick');
+
+-- Back on Their Feet
+UPDATE `creature` SET `spawndist`='0', `currentwaypoint`='0', `unit_flags`='32768' WHERE (`id`='61692');
+DELETE FROM `spell_script_names` WHERE `spell_id` = '120573';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES ('120573', 'spell_item_cintron_infused_bandage');

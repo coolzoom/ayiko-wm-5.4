@@ -477,6 +477,40 @@ public:
     }
 };
 
+class spell_item_cintron_infused_bandage : public SpellScriptLoader
+{
+public:
+    spell_item_cintron_infused_bandage() : SpellScriptLoader("spell_item_cintron_infused_bandage") { }
+
+    class script_impl : public AuraScript
+    {
+        PrepareAuraScript(script_impl);
+
+        void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
+                if (auto target = GetTarget()->ToCreature())
+                    if (target->GetEntry() == 61692)
+                        if (auto player = GetCaster()->ToPlayer())
+                        {
+                            target->HandleEmoteCommand(EMOTE_STATE_STAND);
+                            target->ForcedDespawn(4000);
+                            player->KilledMonsterCredit(61692);
+                        }
+        }
+
+        void Register()
+        {
+            AfterEffectRemove += AuraEffectRemoveFn(script_impl::OnRemove, EFFECT_0, SPELL_AURA_OBS_MOD_HEALTH, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new script_impl();
+    }
+};
+
 void AddSC_townlong_steppes()
 {
     //Rare mobs
@@ -488,4 +522,5 @@ void AddSC_townlong_steppes()
     new mob_hei_feng();
     //Quests
     new go_sikthik_cage();
+    new spell_item_cintron_infused_bandage();
 }

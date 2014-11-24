@@ -162,7 +162,7 @@ public:
                     {
                         Map::PlayerList const &players = map->GetPlayers();
                         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                            itr->getSource()->CompletedAchievement(AchievShatterResistant);
+                            itr->GetSource()->CompletedAchievement(AchievShatterResistant);
                     }
                 }
             }

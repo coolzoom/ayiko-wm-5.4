@@ -513,7 +513,7 @@ class boss_jin_qin_xi : public CreatureScript
                         Map::PlayerList const& players = me->GetMap()->GetPlayers();
                         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                         {
-                            if (Player* plr = itr->getSource())
+                            if (Player* plr = itr->GetSource())
                             {
                                 if (plr->GetDistance(me) > 50.0f)
                                     continue;
@@ -1207,7 +1207,7 @@ class mob_ancient_mogu_machine : public CreatureScript
                     {
                         if (!me->GetMap()->GetPlayers().isEmpty())
                         {
-                            if (Player* plr = me->GetMap()->GetPlayers().begin()->getSource())
+                            if (Player* plr = me->GetMap()->GetPlayers().begin()->GetSource())
                             {
                                 //|cffffd000|Hspell:spell_id|h[name]|h|r
                                 plr->MonsterTextEmote("The Ancient Mogu Machine breaks down! |cffBA0022|Hspell:116779|h[Titan Gas]|h|r floods the room!", 0, true);
@@ -1728,7 +1728,7 @@ class achievement_show_me_you_moves : public AchievementCriteriaScript
     public:
         achievement_show_me_you_moves() : AchievementCriteriaScript("achievement_show_me_you_moves") { }
 
-        bool OnCheck(Player* source, Unit* /*target*/)
+        bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* source, Unit* /*target*/)
         {
             if (source->GetInstanceScript()->GetData(ACHIEVE))
                 return true;

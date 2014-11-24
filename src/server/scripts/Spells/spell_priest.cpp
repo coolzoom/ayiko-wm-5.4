@@ -1010,7 +1010,7 @@ class spell_pri_lightwell_renew : public SpellScriptLoader
                 {
                     if (Unit* unitTarget = GetHitUnit())
                     {
-                        if (m_caster->GetTypeId() != TYPEID_UNIT || !m_caster->ToCreature()->isSummon())
+                        if (m_caster->GetTypeId() != TYPEID_UNIT || !m_caster->ToCreature()->IsSummon())
                             return;
 
                         // proc a spellcast
@@ -1895,7 +1895,7 @@ class spell_pri_shadowy_apparition : public SpellScriptLoader
                     for (auto itr : tempList)
                     {
                         Unit* owner = itr->GetOwner();
-                        if (owner && owner == player && itr->isSummon())
+                        if (owner && owner == player && itr->IsSummon())
                             shadowyList.push_back(itr);
                     }
 

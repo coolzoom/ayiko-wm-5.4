@@ -426,7 +426,7 @@ class item_sylvanas_music_box : public ItemScript
 
             for (Map::PlayerList::const_iterator i = _list.begin(); i != _list.end(); ++i)
             {
-                if (Player* pPlayer = i->getSource())
+                if (Player* pPlayer = i->GetSource())
                     if (pPlayer->IsWithinDistInMap(player, 50.0f))
                         pPlayer->SendPlaySound(10896, player->GetGUID());
             }

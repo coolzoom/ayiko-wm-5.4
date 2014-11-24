@@ -292,6 +292,8 @@ struct Loot
     uint8 unlootedCount;
     uint64 roundRobinPlayer;                                // GUID of the player having the Round-Robin ownership for the loot. If 0, round robin owner has released.
     LootType loot_type;                                     // required for achievement system
+    uint32 currencyId;
+    uint32 currencyCnt;
     bool alreadyAskedForRoll;
 
     // GUIDLow of container that holds this loot (item_instance.entry)
@@ -303,6 +305,8 @@ struct Loot
         , unlootedCount(0)
         , roundRobinPlayer(0)
         , loot_type(LOOT_CORPSE)
+        , currencyId(0)
+        , currencyCnt(0)
         , alreadyAskedForRoll(false)
         , containerID(0)
     { }
@@ -319,7 +323,6 @@ struct Loot
         i_LootValidatorRefManager.insertFirst(pLootValidatorRef);
     }
 
-    // void clear();
     void clear()
     {
         for (QuestItemMap::const_iterator itr = PlayerQuestItems.begin(); itr != PlayerQuestItems.end(); ++itr)
@@ -340,6 +343,8 @@ struct Loot
         gold = 0;
         unlootedCount = 0;
         roundRobinPlayer = 0;
+        currencyId = 0;
+        currencyCnt = 0;
         i_LootValidatorRefManager.clearReferences();
     }
 

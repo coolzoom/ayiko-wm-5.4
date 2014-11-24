@@ -1621,7 +1621,7 @@ class achievement_getting_back_to_nature : public AchievementCriteriaScript
         {
         }
 
-        bool OnCheck(Player* /*player*/, Unit* target)
+        bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* /*player*/, Unit* target)
         {
             if (!target)
                 return false;
@@ -1641,7 +1641,7 @@ class achievement_knock_on_wood : public AchievementCriteriaScript
        {
        }
 
-       bool OnCheck(Player* /*player*/, Unit* target)
+       bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* /*player*/, Unit* target)
        {
            if (!target)
                return false;
@@ -1661,7 +1661,7 @@ class achievement_knock_knock_on_wood : public AchievementCriteriaScript
        {
        }
 
-       bool OnCheck(Player* /*player*/, Unit* target)
+       bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* /*player*/, Unit* target)
        {
            if (!target)
                return false;
@@ -1681,7 +1681,7 @@ class achievement_knock_knock_knock_on_wood : public AchievementCriteriaScript
        {
        }
 
-       bool OnCheck(Player* /*player*/, Unit* target)
+       bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* /*player*/, Unit* target)
        {
            if (!target)
                return false;

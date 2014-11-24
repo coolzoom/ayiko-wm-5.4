@@ -224,7 +224,7 @@ class achievement_momma_said_knock_you_out : public AchievementCriteriaScript
     public:
         achievement_momma_said_knock_you_out() : AchievementCriteriaScript("achievement_momma_said_knock_you_out") { }
 
-        bool OnCheck(Player* /*source*/, Unit* target)
+        bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* /*source*/, Unit* target)
         {
             return target && !target->GetAI()->GetData(DATA_FRENZY_DISPELS);
         }

@@ -484,7 +484,7 @@ void WorldSession::HandleGroupSetLeaderOpcode(WorldPacket& recvData)
 
     // Prevent exploits with instance saves
     for (GroupReference *itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
-        if (Player* plr = itr->getSource())
+        if (Player* plr = itr->GetSource())
             if (plr->GetMap() && plr->GetMap()->Instanceable())
                 return;
 

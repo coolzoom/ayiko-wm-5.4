@@ -65,7 +65,7 @@ Player* GetChampionOfLight(Creature* me)
 
     Map::PlayerList const& playerList = me->GetMap()->GetPlayers();
     for (Map::PlayerList::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
-        if (Player* player = itr->getSource())
+        if (Player* player = itr->GetSource())
             if (player->HasAura(SPELL_CHAMPION_OF_LIGHT))
                 return player;
 
@@ -412,7 +412,7 @@ class mob_pure_light_terrace : public CreatureScript
                 Map::PlayerList const& playerList = me->GetMap()->GetPlayers();
                 for (Map::PlayerList::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
                 {
-                    if (Player* player = itr->getSource())
+                    if (Player* player = itr->GetSource())
                     {
                         if (player->isInFront(me, M_PI / 3) && !player->HasAura(SPELL_WALL_OF_LIGHT_BUFF))
                             player->CastSpell(player, SPELL_WALL_OF_LIGHT_BUFF, true);
@@ -573,7 +573,7 @@ class spell_breath_of_fear : public SpellScriptLoader
                 Map::PlayerList const& players = GetCaster()->GetMap()->GetPlayers();
                 if (!players.isEmpty())
                     for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                        if (Player* player = itr->getSource())
+                        if (Player* player = itr->GetSource())
                             if (!GetCaster()->isInFront(player, M_PI / 3))
                                 targets.push_back(player);
             }

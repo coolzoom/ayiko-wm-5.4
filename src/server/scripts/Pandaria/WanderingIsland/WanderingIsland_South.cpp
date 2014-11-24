@@ -383,7 +383,7 @@ public:
             me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
         }
 
-        void OnSpellClick(Unit* Clicker) override
+        void OnSpellClick(Unit* Clicker, bool &/*result*/) override
         {
             me->RemoveAurasDueToSpell(130966); // Feign Death
             me->EnterVehicle(Clicker);

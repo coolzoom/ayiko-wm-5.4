@@ -511,7 +511,7 @@ class achievement_flu_shot_shortage : public AchievementCriteriaScript
     public:
         achievement_flu_shot_shortage() : AchievementCriteriaScript("achievement_flu_shot_shortage") { }
 
-        bool OnCheck(Player* /*source*/, Unit* target)
+        bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* /*source*/, Unit* target)
         {
             if (target && target->GetTypeId() == TYPEID_UNIT)
                 return target->ToCreature()->AI()->GetData(DATA_INOCULATED_STACK) < 3;

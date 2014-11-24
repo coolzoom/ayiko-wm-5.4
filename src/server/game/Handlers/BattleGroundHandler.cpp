@@ -211,7 +211,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recvData)
 
         for (GroupReference* itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
         {
-            Player* member = itr->getSource();
+            Player* member = itr->GetSource();
             if (!member)
                 continue;   // this should never happen
 
@@ -632,7 +632,7 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket & recvData)
     uint32 playerDivider = 0;
     for (GroupReference const* ref = grp->GetFirstMember(); ref != NULL; ref = ref->next())
     {
-        if (Player const* groupMember = ref->getSource())
+        if (Player const* groupMember = ref->GetSource())
         {
             arenaRating += groupMember->GetArenaPersonalRating(arenaslot);
             matchmakerRating += groupMember->GetArenaMatchMakerRating(arenaslot);
@@ -668,7 +668,7 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket & recvData)
 
     for (GroupReference* itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
     {
-        Player* member = itr->getSource();
+        Player* member = itr->GetSource();
         if (!member)
             continue;
 
@@ -753,7 +753,7 @@ void WorldSession::HandleBattlemasterJoinRated(WorldPacket& /*recvData*/)
 
     for (GroupReference* itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
     {
-        Player* member = itr->getSource();
+        Player* member = itr->GetSource();
         if (!member) continue;   // this should never happen
 
         if (err)

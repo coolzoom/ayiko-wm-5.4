@@ -625,7 +625,7 @@ class npc_ice_tomb : public CreatureScript
                 {
                     for (Map::PlayerList::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
                     {
-                        if (Player* player = itr->getSource())
+                        if (Player* player = itr->GetSource())
                         {
                             if (!player->HasAura(SPELL_ICE_TOMB_DAMAGE))
                                 IsOnePlayerFree = true;
@@ -637,7 +637,7 @@ class npc_ice_tomb : public CreatureScript
                     {
                         for (Map::PlayerList::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
                         {
-                            if (Player* player = itr->getSource())
+                            if (Player* player = itr->GetSource())
                             {
                                 player->Kill(player);
                             }
@@ -1632,7 +1632,7 @@ class achievement_all_you_can_eat : public AchievementCriteriaScript
     public:
         achievement_all_you_can_eat() : AchievementCriteriaScript("achievement_all_you_can_eat") { }
 
-        bool OnCheck(Player* /*source*/, Unit* target)
+        bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* /*source*/, Unit* target)
         {
             if (!target)
                 return false;

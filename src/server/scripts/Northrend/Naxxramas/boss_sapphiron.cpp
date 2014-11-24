@@ -161,7 +161,7 @@ public:
                     {
                         Map::PlayerList const &players = map->GetPlayers();
                         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                            itr->getSource()->CompletedAchievement(AchievTheHundredClub);
+                            itr->GetSource()->CompletedAchievement(AchievTheHundredClub);
                     }
                 }
             }
@@ -189,7 +189,7 @@ public:
                 Map::PlayerList const &players = map->GetPlayers();
                 for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                 {
-                    if (itr->getSource()->GetResistance(SPELL_SCHOOL_FROST) > MAX_FROST_RESISTANCE)
+                    if (itr->GetSource()->GetResistance(SPELL_SCHOOL_FROST) > MAX_FROST_RESISTANCE)
                     {
                         CanTheHundredClub = false;
                         break;

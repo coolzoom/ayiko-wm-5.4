@@ -563,7 +563,7 @@ class Unit : public WorldObject
 
         uint32 HasUnitTypeMask(uint32 mask) const { return mask & m_unitTypeMask; }
         void AddUnitTypeMask(uint32 mask) { m_unitTypeMask |= mask; }
-        bool isSummon() const   { return m_unitTypeMask & UNIT_MASK_SUMMON; }
+        bool IsSummon() const   { return m_unitTypeMask & UNIT_MASK_SUMMON; }
         bool isGuardian() const { return m_unitTypeMask & UNIT_MASK_GUARDIAN; }
         bool isPet() const      { return m_unitTypeMask & UNIT_MASK_PET; }
         bool isHunterPet() const{ return m_unitTypeMask & UNIT_MASK_HUNTER_PET; }
@@ -952,6 +952,8 @@ class Unit : public WorldObject
         void SendMovementWaterWalking();
         void SendMovementGravityChange();
         void SendMovementCanFlyChange();
+
+        void SendSetPlayHoverAnim(bool enable);
 
         bool IsLevitating() const { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY);}
         bool IsWalking() const { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_WALKING);}
@@ -1576,8 +1578,8 @@ class Unit : public WorldObject
         Totem* ToTotem() { if (isTotem()) return reinterpret_cast<Totem*>(this); else return NULL; }
         Totem const* ToTotem() const { if (isTotem()) return reinterpret_cast<Totem const*>(this); else return NULL; }
 
-        TempSummon* ToTempSummon() { if (isSummon()) return reinterpret_cast<TempSummon*>(this); else return NULL; }
-        TempSummon const* ToTempSummon() const { if (isSummon()) return reinterpret_cast<TempSummon const*>(this); else return NULL; }
+        TempSummon* ToTempSummon() { if (IsSummon()) return reinterpret_cast<TempSummon*>(this); else return NULL; }
+        TempSummon const* ToTempSummon() const { if (IsSummon()) return reinterpret_cast<TempSummon const*>(this); else return NULL; }
 
         bool isAINotifyScheduled() const { return m_AINotifyScheduled; }
         void setAINotifyScheduled(bool val) { m_AINotifyScheduled = val; }

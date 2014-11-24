@@ -170,7 +170,7 @@ public:
                     }
                     break;
                 case EVENT_TELEPORT:
-                    if (me->isSummon())
+                    if (me->IsSummon())
                     {
                         if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                         {
@@ -252,7 +252,7 @@ public:
                     }
                     break;
                 case EVENT_DONE:
-                    if (me->isSummon())
+                    if (me->IsSummon())
                     {
                         if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                         {
@@ -295,7 +295,7 @@ public:
 
         void InitializeAI()
         {
-            ASSERT(me->isSummon());
+            ASSERT(me->IsSummon());
         }
 
         void DoAction(int32 action)
@@ -351,7 +351,7 @@ public:
 
         void InitializeAI()
         {
-            ASSERT(me->isSummon());
+            ASSERT(me->IsSummon());
         }
 
         void DoAction(int32 action)

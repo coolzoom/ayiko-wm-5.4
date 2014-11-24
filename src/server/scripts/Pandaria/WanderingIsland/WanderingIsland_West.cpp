@@ -508,7 +508,7 @@ public:
             me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
         }
 
-        void OnSpellClick(Unit* Clicker)
+        void OnSpellClick(Unit* Clicker, bool &/*result*/)
         {
             if (cooldown)
                 return;

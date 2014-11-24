@@ -401,6 +401,16 @@ typedef std::vector<ResearchLootEntry> ResearchLootVector;
 typedef std::vector<ResearchPOIPoint> ResearchPOIPoints;
 typedef std::map<uint32 /*site id*/, ResearchZoneEntry> ResearchZoneMap;
 
+struct CreatureCurrency final
+{
+    CurrencyTypesEntry const *currency;
+    uint32 currencyCount;
+};
+
+typedef std::unordered_multimap<uint32, CreatureCurrency> CreatureCurrencyContainer;
+
+typedef std::pair<CreatureCurrencyContainer::const_iterator, CreatureCurrencyContainer::const_iterator> CreatureCurrencyContainerRange;
+
 class ObjectMgr
 {
     friend class ACE_Singleton<ObjectMgr, ACE_Null_Mutex>;
@@ -423,7 +433,6 @@ class ObjectMgr
         typedef std::unordered_map<uint32, RepRewardRate > RepRewardRateContainer;
         typedef std::unordered_map<uint32, ReputationOnKillEntry> RepOnKillContainer;
         typedef std::unordered_map<uint32, RepSpilloverTemplate> RepSpilloverTemplateContainer;
-        typedef std::unordered_map<uint32, CurrencyOnKillEntry> CurOnKillContainer;
 
         typedef std::unordered_map<uint32, PointOfInterest> PointOfInterestContainer;
 
@@ -444,6 +453,7 @@ class ObjectMgr
 
         CreatureTemplate const* GetCreatureTemplate(uint32 entry) const;
         CreatureTemplateContainer const* GetCreatureTemplates() const { return &_creatureTemplateStore; }
+        CreatureCurrencyContainerRange GetCreatureCurrencyReward(uint32 entry) const { return _creatureCurrencyStore.equal_range(entry); }
         CreatureModelInfo const* GetCreatureModelInfo(uint32 modelId);
         CreatureModelInfo const* GetCreatureModelRandomGender(uint32* displayID);
         static uint32 ChooseDisplayId(uint32 team, const CreatureTemplate* cinfo, const CreatureData* data = NULL);
@@ -575,14 +585,6 @@ class ObjectMgr
             return NULL;
         }
 
-        CurrencyOnKillEntry const* GetCurrencyOnKillEntry(uint32 id) const
-        {
-            CurOnKillContainer::const_iterator itr = _curOnKillStore.find(id);
-            if (itr != _curOnKillStore.end())
-                return &itr->second;
-            return NULL;
-        }
-
         PointOfInterest const* GetPointOfInterest(uint32 id) const
         {
             PointOfInterestContainer::const_iterator itr = _pointsOfInterestStore.find(id);
@@ -663,6 +665,7 @@ class ObjectMgr
         void LoadCreatureLocales();
         void LoadCreatureTemplates();
         void LoadCreatureTemplateAddons();
+        void LoadCreatureTemplateCurrency();
         void loadCreatureTemplateInvisibility();
         void ReplaceCreatureTemplate(uint32 entry, CreatureTemplate const &newTemplate);
         void LoadTempSummons();
@@ -715,7 +718,6 @@ class ObjectMgr
         void LoadReputationRewardRate();
         void LoadReputationOnKill();
         void LoadReputationSpilloverTemplate();
-        void LoadCurrencyOnKill();
 
         void LoadPointsOfInterest();
         void LoadQuestPOI();
@@ -1059,7 +1061,6 @@ class ObjectMgr
         RepRewardRateContainer _repRewardRateStore;
         RepOnKillContainer _repOnKillStore;
         RepSpilloverTemplateContainer _repSpilloverTemplateStore;
-        CurOnKillContainer _curOnKillStore;
 
         GossipMenusContainer _gossipMenusStore;
         GossipMenuItemsContainer _gossipMenuItemsStore;
@@ -1097,6 +1098,8 @@ class ObjectMgr
 
         ResearchZoneMap _researchZoneMap;
         ResearchLootVector _researchLoot;
+
+        CreatureCurrencyContainer _creatureCurrencyStore;
 
     private:
         // non-const version for internal use only

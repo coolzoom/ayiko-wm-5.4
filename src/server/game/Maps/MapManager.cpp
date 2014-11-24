@@ -460,8 +460,8 @@ void MapManager::UnLoadTransportFromMap(Transport* t)
 
     if (transData.BuildPacket(&out_packet))
         for (Map::PlayerList::const_iterator itr = map->GetPlayers().begin(); itr != map->GetPlayers().end(); ++itr)
-            if (t != itr->getSource()->GetTransport())
-                itr->getSource()->SendDirectMessage(&out_packet);
+            if (t != itr->GetSource()->GetTransport())
+                itr->GetSource()->SendDirectMessage(&out_packet);
 
     t->m_NPCPassengerSet.clear();
     m_TransportsByInstanceIdMap[t->GetInstanceId()].erase(t);

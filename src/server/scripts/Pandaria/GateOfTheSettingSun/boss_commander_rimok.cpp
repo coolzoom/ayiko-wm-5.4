@@ -352,7 +352,7 @@ class spell_rimok_saboteur_bombard : public SpellScriptLoader
                         if (it == PlayerList.end())
                             return;
 
-                        if (Player* player = it->getSource())
+                        if (Player* player = it->GetSource())
                             caster->CastSpell(player, GetSpellInfo()->Effects[0].TriggerSpell, true);
                     }
                 }

@@ -565,7 +565,7 @@ class instance_mogu_shan_vault : public InstanceMapScript
 
                 for (Map::PlayerList::const_iterator Itr = PlayerList.begin(); Itr != PlayerList.end(); ++Itr)
                 {
-                    Player* player = Itr->getSource();
+                    Player* player = Itr->GetSource();
 
                     if (!player)
                         continue;

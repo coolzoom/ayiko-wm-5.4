@@ -527,7 +527,7 @@ class boss_elegon : public CreatureScript
                     {
                         for (Map::PlayerList::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
                         {
-                            if (Player* player = itr->getSource())
+                            if (Player* player = itr->GetSource())
                             {
                                 if (player->isGameMaster())
                                     continue;
@@ -1648,7 +1648,7 @@ class spell_radiating_energies : public SpellScriptLoader
                 Map::PlayerList const& players = GetCaster()->GetMap()->GetPlayers();
                 if (!players.isEmpty())
                     for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                        if (Player* player = itr->getSource())
+                        if (Player* player = itr->GetSource())
                             if (player->GetExactDist2d(GetCaster()->GetPositionX(), GetCaster()->GetPositionY()) <= MaxDist &&
                                 player->GetExactDist2d(GetCaster()->GetPositionX(), GetCaster()->GetPositionY()) >= MinDist)
                                 targets.push_back(player);

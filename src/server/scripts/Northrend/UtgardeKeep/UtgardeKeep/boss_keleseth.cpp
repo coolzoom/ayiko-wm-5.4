@@ -84,7 +84,7 @@ public:
     {
         npc_frost_tombAI(Creature* creature) : ScriptedAI(creature)
         {
-            if (me->isSummon())
+            if (me->IsSummon())
                 if (Unit* summon = me->ToTempSummon()->GetSummoner())
                     DoCast(summon, SPELL_FROST_TOMB, true);
 
@@ -329,7 +329,7 @@ class achievement_on_the_rocks : public AchievementCriteriaScript
     public:
         achievement_on_the_rocks() : AchievementCriteriaScript("achievement_on_the_rocks") {}
 
-        bool OnCheck(Player* /*source*/, Unit* target)
+        bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* /*source*/, Unit* target)
         {
             return target && target->IsAIEnabled && target->GetAI()->GetData(DATA_ON_THE_ROCKS);
         }

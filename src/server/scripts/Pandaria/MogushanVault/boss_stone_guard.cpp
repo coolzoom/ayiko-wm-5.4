@@ -830,7 +830,7 @@ class mob_living_crystal : public CreatureScript
             {
             }
 
-            void OnSpellClick(Unit* clicker)
+            void OnSpellClick(Unit* clicker, bool &/*result*/)
             {
                 if (Player* player = clicker->ToPlayer())
                 {

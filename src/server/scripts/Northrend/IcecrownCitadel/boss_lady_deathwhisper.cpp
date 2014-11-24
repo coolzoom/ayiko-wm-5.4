@@ -329,7 +329,7 @@ class boss_lady_deathwhisper : public CreatureScript
                             if (Group* group = owner->GetGroup())
                             {
                                 for (GroupReference *itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
-                                    if (Player* member = itr->getSource())
+                                    if (Player* member = itr->GetSource())
                                         member->KilledMonsterCredit(NPC_DARNAVAN_CREDIT, 0);
                             }
                             else
@@ -921,7 +921,7 @@ class npc_darnavan : public CreatureScript
                     if (Group* group = owner->GetGroup())
                     {
                         for (GroupReference *itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
-                            if (Player* member = itr->getSource())
+                            if (Player* member = itr->GetSource())
                                 member->FailQuest(QUEST_DEPROGRAMMING);
                     }
                     else
@@ -1053,7 +1053,7 @@ class spell_cultist_dark_martyrdom : public SpellScriptLoader
 
             void HandleEffect(SpellEffIndex /*effIndex*/)
             {
-                if (GetCaster()->isSummon())
+                if (GetCaster()->IsSummon())
                     if (Unit* owner = GetCaster()->ToTempSummon()->GetSummoner())
                         owner->GetAI()->SetGUID(GetCaster()->GetGUID(), GUID_CULTIST);
 

@@ -720,7 +720,7 @@ class boss_flame_leviathan_overload_device : public CreatureScript
             {
             }
 
-            void OnSpellClick(Unit* /*clicker*/)
+            void OnSpellClick(Unit* /*clicker*/, bool &/*result*/)
             {
                 if (me->GetVehicle())
                 {
@@ -1304,7 +1304,7 @@ class achievement_three_car_garage_demolisher : public AchievementCriteriaScript
     public:
         achievement_three_car_garage_demolisher() : AchievementCriteriaScript("achievement_three_car_garage_demolisher") { }
 
-        bool OnCheck(Player* source, Unit* /*target*/)
+        bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* source, Unit* /*target*/)
         {
             if (Creature* vehicle = source->GetVehicleCreatureBase())
             {
@@ -1321,7 +1321,7 @@ class achievement_three_car_garage_chopper : public AchievementCriteriaScript
     public:
         achievement_three_car_garage_chopper() : AchievementCriteriaScript("achievement_three_car_garage_chopper") { }
 
-        bool OnCheck(Player* source, Unit* /*target*/)
+        bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* source, Unit* /*target*/)
         {
             if (Creature* vehicle = source->GetVehicleCreatureBase())
             {
@@ -1338,7 +1338,7 @@ class achievement_three_car_garage_siege : public AchievementCriteriaScript
     public:
         achievement_three_car_garage_siege() : AchievementCriteriaScript("achievement_three_car_garage_siege") { }
 
-        bool OnCheck(Player* source, Unit* /*target*/)
+        bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* source, Unit* /*target*/)
         {
             if (Creature* vehicle = source->GetVehicleCreatureBase())
             {
@@ -1355,7 +1355,7 @@ class achievement_shutout : public AchievementCriteriaScript
     public:
         achievement_shutout() : AchievementCriteriaScript("achievement_shutout") { }
 
-        bool OnCheck(Player* /*source*/, Unit* target)
+        bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* /*source*/, Unit* target)
         {
             if (target)
                 if (Creature* leviathan = target->ToCreature())
@@ -1371,7 +1371,7 @@ class achievement_unbroken : public AchievementCriteriaScript
     public:
         achievement_unbroken() : AchievementCriteriaScript("achievement_unbroken") { }
 
-        bool OnCheck(Player* /*source*/, Unit* target)
+        bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* /*source*/, Unit* target)
         {
             if (target)
                 if (InstanceScript* instance = target->GetInstanceScript())
@@ -1386,7 +1386,7 @@ class achievement_orbital_bombardment : public AchievementCriteriaScript
     public:
         achievement_orbital_bombardment() : AchievementCriteriaScript("achievement_orbital_bombardment") { }
 
-        bool OnCheck(Player* /*source*/, Unit* target)
+        bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* /*source*/, Unit* target)
         {
             if (!target)
                 return false;
@@ -1404,7 +1404,7 @@ class achievement_orbital_devastation : public AchievementCriteriaScript
     public:
         achievement_orbital_devastation() : AchievementCriteriaScript("achievement_orbital_devastation") { }
 
-        bool OnCheck(Player* /*source*/, Unit* target)
+        bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* /*source*/, Unit* target)
         {
             if (!target)
                 return false;
@@ -1422,7 +1422,7 @@ class achievement_nuked_from_orbit : public AchievementCriteriaScript
     public:
         achievement_nuked_from_orbit() : AchievementCriteriaScript("achievement_nuked_from_orbit") { }
 
-        bool OnCheck(Player* /*source*/, Unit* target)
+        bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* /*source*/, Unit* target)
         {
             if (!target)
                 return false;
@@ -1440,7 +1440,7 @@ class achievement_orbit_uary : public AchievementCriteriaScript
     public:
         achievement_orbit_uary() : AchievementCriteriaScript("achievement_orbit_uary") { }
 
-        bool OnCheck(Player* /*source*/, Unit* target)
+        bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* /*source*/, Unit* target)
         {
             if (!target)
                 return false;

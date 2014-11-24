@@ -606,7 +606,7 @@ class boss_professor_putricide : public CreatureScript
                                 break;
 
                             for (itr = players.begin(); itr != players.end(); ++itr)
-                                if (Player* player = itr->getSource())
+                                if (Player* player = itr->GetSource())
                                     if (player->GetExactDist2d(rotface->GetPositionX(), rotface->GetPositionY()) > minDist)
                                         RangedCount++;
 

@@ -717,9 +717,9 @@ void LFGMgr::Join(Player* player, uint8 roles, const LfgDungeonSet& selectedDung
             {
                 for (GroupReference* itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
                 {
-                    if (itr->getSource() && itr->getSource()->GetSession())
+                    if (itr->GetSource() && itr->GetSource()->GetSession())
                     {
-                        SendUpdateStatus(itr->getSource(), updateData);
+                        SendUpdateStatus(itr->GetSource(), updateData);
                     }
                 }
             }
@@ -759,7 +759,7 @@ void LFGMgr::Join(Player* player, uint8 roles, const LfgDungeonSet& selectedDung
             uint8 memberCount = 0;
             for (GroupReference* itr = grp->GetFirstMember(); itr != NULL && joinData.result == LFG_JOIN_OK; itr = itr->next())
             {
-                if (Player* plrg = itr->getSource())
+                if (Player* plrg = itr->GetSource())
                 {
                     if (plrg->HasAura(LFG_SPELL_DUNGEON_DESERTER))
                         joinData.result = LFG_JOIN_PARTY_DESERTER;
@@ -864,7 +864,7 @@ void LFGMgr::Join(Player* player, uint8 roles, const LfgDungeonSet& selectedDung
         LfgUpdateData updateData = LfgUpdateData(LFG_UPDATETYPE_JOIN_QUEUE, dungeons, comment);
         for (GroupReference* itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
         {
-            if (Player* plrg = itr->getSource())
+            if (Player* plrg = itr->GetSource())
             {
                 uint64 pguid = plrg->GetGUID();
                 SetState(pguid, LFG_STATE_ROLECHECK);
@@ -949,7 +949,7 @@ void LFGMgr::Leave(Player* player, Group* grp /* = NULL*/)
                     RestoreState(guid);
                     for (GroupReference* itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
                     {
-                        if (Player* plrg = itr->getSource())
+                        if (Player* plrg = itr->GetSource())
                         {
                             SendUpdateStatus(plrg, updateData);
                             uint64 pguid = plrg->GetGUID();
@@ -1983,7 +1983,7 @@ void LFGMgr::InitBoot(Group* grp, uint64 kicker, uint64 victim, std::string reas
     // Set votes
     for (GroupReference* itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
     {
-        if (Player* plrg = itr->getSource())
+        if (Player* plrg = itr->GetSource())
         {
             uint64 guid = plrg->GetGUID();
             SetState(guid, LFG_STATE_BOOT);
@@ -2128,7 +2128,7 @@ void LFGMgr::TeleportPlayer(Player* player, bool out, bool fromOpcode /*= false*
                 // Select a player inside to be teleported to
                 for (GroupReference* itr = grp->GetFirstMember(); itr != NULL && !mapid; itr = itr->next())
                 {
-                    Player* plrg = itr->getSource();
+                    Player* plrg = itr->GetSource();
                     if (plrg && plrg != player && plrg->GetMapId() == uint32(dungeon->map))
                     {
                         mapid = plrg->GetMapId();

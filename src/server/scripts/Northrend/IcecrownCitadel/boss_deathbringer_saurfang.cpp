@@ -1344,7 +1344,7 @@ class achievement_ive_gone_and_made_a_mess : public AchievementCriteriaScript
     public:
         achievement_ive_gone_and_made_a_mess() : AchievementCriteriaScript("achievement_ive_gone_and_made_a_mess") { }
 
-        bool OnCheck(Player* /*source*/, Unit* target)
+        bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* /*source*/, Unit* target)
         {
             if (target)
                 if (Creature* saurfang = target->ToCreature())

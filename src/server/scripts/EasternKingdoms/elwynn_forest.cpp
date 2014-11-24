@@ -117,7 +117,7 @@ public:
         void Reset()
         {}
 
-        void OnSpellClick(Unit* /*Clicker*/)
+        void OnSpellClick(Unit* /*Clicker*/, bool &/*result*/)
         {
             me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
             me->RemoveFlag(UNIT_FIELD_BYTES_1, UNIT_STAND_STATE_DEAD);

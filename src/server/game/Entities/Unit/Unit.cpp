@@ -743,7 +743,7 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         for (auto i = statueList.begin(); i != statueList.end();)
         {
             Unit* owner = (*i)->GetOwner();
-            if (owner && owner == this && (*i)->isSummon())
+            if (owner && owner == this && (*i)->IsSummon())
                 ++i;
             else
                 i = statueList.erase(i);
@@ -10915,7 +10915,7 @@ void Unit::GetAllMinionsByEntry(std::list<Creature*>& Minions, uint32 entry)
         Unit* unit = *itr;
         ++itr;
         if (unit->GetEntry() == entry && unit->GetTypeId() == TYPEID_UNIT
-            && unit->ToCreature()->isSummon()) // minion, actually
+            && unit->ToCreature()->IsSummon()) // minion, actually
             Minions.push_back(unit->ToCreature());
     }
 }
@@ -10927,7 +10927,7 @@ void Unit::RemoveAllMinionsByEntry(uint32 entry)
         Unit* unit = *itr;
         ++itr;
         if (unit->GetEntry() == entry && unit->GetTypeId() == TYPEID_UNIT
-            && unit->ToCreature()->isSummon()) // minion, actually
+            && unit->ToCreature()->IsSummon()) // minion, actually
             unit->ToTempSummon()->UnSummon();
         // i think this is safe because i have never heard that a despawned minion will trigger a same minion
     }
@@ -11160,7 +11160,7 @@ void Unit::RemoveAllControlled()
         m_Controlled.erase(m_Controlled.begin());
         if (target->GetCharmerGUID() == GetGUID())
             target->RemoveCharmAuras();
-        else if (target->GetOwnerGUID() == GetGUID() && target->isSummon())
+        else if (target->GetOwnerGUID() == GetGUID() && target->IsSummon())
             target->ToTempSummon()->UnSummon();
     }
 }
@@ -11196,7 +11196,7 @@ Unit* Unit::GetNextRandomRaidMemberOrPet(float radius)
     nearMembers.reserve(group->GetMembersCount() * 2);
 
     for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
-        if (Player* Target = itr->getSource())
+        if (Player* Target = itr->GetSource())
         {
             // IsHostileTo check duel and controlled by enemy
             if (Target != this && Target->IsAlive() && IsWithinDistInMap(Target, radius) && !IsHostileTo(Target))
@@ -11258,7 +11258,7 @@ void Unit::UnsummonAllTotems()
             continue;
 
         if (Creature* OldTotem = GetMap()->GetCreature(m_SummonSlot[i]))
-            if (OldTotem->isSummon())
+            if (OldTotem->IsSummon())
                 OldTotem->ToTempSummon()->UnSummon();
     }
 }
@@ -14816,7 +14816,7 @@ Unit* Creature::SelectVictim()
     {
         // We have player pet probably
         target = getAttackerForHelper();
-        if (!target && isSummon())
+        if (!target && IsSummon())
         {
             if (Unit* owner = ToTempSummon()->GetOwner())
             {
@@ -18700,7 +18700,7 @@ void Unit::GetPartyMembers(std::list<Unit*> &TagUnitMap)
     {
         for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
         {
-            auto groupMember = itr->getSource();
+            auto groupMember = itr->GetSource();
 
             // IsHostileTo check duel and controlled by enemy
             if (groupMember && !IsHostileTo(groupMember))
@@ -18883,7 +18883,7 @@ void Unit::SetPhaseMask(uint32 newPhaseMask, bool update)
 
             while (ref)
             {
-                if (Unit* unit = ref->getSource()->getOwner())
+                if (Unit* unit = ref->GetSource()->getOwner())
                     if (Creature* creature = unit->ToCreature())
                         refManager.setOnlineOfflineState(creature, creature->InSamePhase(newPhaseMask));
 
@@ -19931,6 +19931,7 @@ void Unit::JumpTo(WorldObject* obj, float speedZ)
 
 bool Unit::HandleSpellClick(Unit* clicker, int8 seatId)
 {
+    bool result = false;
     uint32 spellClickEntry = GetVehicleKit() ? GetVehicleKit()->GetCreatureEntry() : GetEntry();
     SpellClickInfoMapBounds clickPair = sObjectMgr->GetSpellClickInfoMapBounds(spellClickEntry);
     for (SpellClickInfoContainer::const_iterator itr = clickPair.first; itr != clickPair.second; ++itr)
@@ -19996,13 +19997,15 @@ bool Unit::HandleSpellClick(Unit* clicker, int8 seatId)
             else
                 Aura::TryRefreshStackOrCreate(spellEntry, MAX_EFFECT_MASK, this, clicker, &spellEntry->spellPower, NULL, NULL, origCasterGUID);
         }
+
+        result = true;
     }
 
     Creature* creature = ToCreature();
     if (creature && creature->IsAIEnabled)
-        creature->AI()->OnSpellClick(clicker);
+        creature->AI()->OnSpellClick(clicker, result);
 
-    return true;
+    return result;
 }
 
 void Unit::EnterVehicle(Unit* base, int8 seatId, bool fullTriggered)
@@ -20857,6 +20860,20 @@ bool Unit::SetHover(bool enable)
     }
 
     return true;
+}
+
+void Unit::SendSetPlayHoverAnim(bool enable)
+{
+    ObjectGuid const guid = GetGUID();
+
+    WorldPacket data(SMSG_SET_PLAY_HOVER_ANIM, 10);
+
+    data.WriteBitSeq<3, 1, 6, 0, 4>(guid);
+    data.WriteBit(enable);
+    data.WriteBitSeq<2, 5, 7>(guid);
+    data.WriteByteSeq<3, 2, 1, 4, 6, 7, 0, 5>(guid);
+
+    SendMessageToSet(&data, true);
 }
 
 void Unit::SendMovementHover(bool apply)

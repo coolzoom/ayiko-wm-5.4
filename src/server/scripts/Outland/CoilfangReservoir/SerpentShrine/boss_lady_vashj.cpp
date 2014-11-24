@@ -259,7 +259,7 @@ public:
                 Map* map = me->GetMap();
                 Map::PlayerList const &PlayerList = map->GetPlayers();
                 for (Map::PlayerList::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
-                    if (Player* player = itr->getSource())
+                    if (Player* player = itr->GetSource())
                         player->DestroyItemCount(31088, 1, true);
             }
             StartEvent(); // this is EnterCombat(), so were are 100% in combat, start the event

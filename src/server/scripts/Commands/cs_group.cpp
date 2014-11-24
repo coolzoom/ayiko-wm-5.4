@@ -91,7 +91,7 @@ public:
 
         for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
         {
-            Player* player = itr->getSource();
+            Player* player = itr->GetSource();
 
             if (!player || player == gmPlayer || !player->GetSession())
                 continue;

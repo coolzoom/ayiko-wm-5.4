@@ -150,7 +150,7 @@ class achievement_spore_loser : public AchievementCriteriaScript
     public:
         achievement_spore_loser() : AchievementCriteriaScript("achievement_spore_loser") { }
 
-        bool OnCheck(Player* /*source*/, Unit* target)
+        bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* /*source*/, Unit* target)
         {
             return target && target->GetAI()->GetData(DATA_ACHIEVEMENT_SPORE_LOSER);
         }

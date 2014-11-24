@@ -249,7 +249,7 @@ public:
                 std::list<HostileReference*> threatlist = me->getThreatManager().getThreatList();
                 for (std::list<HostileReference*>::const_iterator i = threatlist.begin(); i != threatlist.end(); ++i)
                 {
-                    if ((*i) && (*i)->getSource())
+                    if ((*i) && (*i)->GetSource())
                     {
                         if (Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid()))
                         {

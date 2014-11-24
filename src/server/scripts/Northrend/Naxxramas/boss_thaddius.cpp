@@ -548,7 +548,7 @@ class achievement_polarity_switch : public AchievementCriteriaScript
     public:
         achievement_polarity_switch() : AchievementCriteriaScript("achievement_polarity_switch") { }
 
-        bool OnCheck(Player* /*source*/, Unit* target)
+        bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* /*source*/, Unit* target)
         {
             return target && target->GetAI()->GetData(DATA_POLARITY_SWITCH);
         }

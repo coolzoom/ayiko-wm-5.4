@@ -457,35 +457,24 @@ class mob_eshelon : public CreatureScript
         };
 };
 
-class mob_restless_leng : public CreatureScript
+class go_sikthik_cage : public GameObjectScript
 {
-    public:
-        mob_restless_leng() : CreatureScript("mob_restless_leng")
+public:
+    go_sikthik_cage() : GameObjectScript("go_sikthik_cage") { }
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+
+        printf("\n ! quest counter is %i ! \n ", player->GetQuestSlotCounter(player->FindQuestSlot(31688), 0));
+        // If counter is 7 (script is called before counting) max is 8
+        if (player->GetQuestSlotCounter(player->FindQuestSlot(31688), 0) == 7 && player->GetQuestStatus(31688) == QUEST_STATUS_INCOMPLETE)
         {
+            player->SummonCreature(65586, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 15000);
+            player->KilledMonsterCredit(65586);
         }
 
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new mob_restless_lengAI(creature);
-        }
-
-        struct mob_restless_lengAI : public ScriptedAI
-        {
-            mob_restless_lengAI(Creature* creature) : ScriptedAI(creature)
-            {
-            }
-
-            void UpdateAI(const uint32 /*diff*/)
-            {
-                std::list<Player*> playerList;
-                playerList.clear();
-                GetPlayerListInGrid(playerList, me, 20.0f);
-
-                for (auto player: playerList)
-                    if (player->GetQuestStatus(31688) == QUEST_STATUS_INCOMPLETE)
-                        player->KilledMonsterCredit(65586);
-            }
-        };
+        return false;
+    }
 };
 
 void AddSC_townlong_steppes()
@@ -497,6 +486,6 @@ void AddSC_townlong_steppes()
     //Elite mobs
     new mob_darkwoods_faerie();
     new mob_hei_feng();
-    // Standard Mobs
-    new mob_restless_leng();
+    //Quests
+    new go_sikthik_cage();
 }

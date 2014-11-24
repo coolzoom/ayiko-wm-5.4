@@ -42,3 +42,15 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 
 -- Fiery Wings
 UPDATE `smart_scripts` SET `event_type`='73' WHERE (`entryorguid`='62764') AND (`source_type`='0') AND (`id`='0') AND (`link`='1');
+
+-- The Search for Restless Leng
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE `entry` = '65586';
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` = '65586';
+INSERT INTO `smart_scripts` (`entryorguid`, `id`, `event_type`, `event_flags`, `event_param1`, `event_param2`, `action_type`, `action_param1`, `target_type`, `comment`) VALUES
+('65586', '0', '1', '1', '0', '0', '1', '0', '1', 'Raufen - On Summon - Talk'),
+('65586', '1', '1', '1', '5000', '5000', '1', '1', '1', 'Raufen - On Summon - Talk');
+DELETE FROM `creature_text` WHERE `entry` = '65586';
+INSERT INTO `creature_text` (`entry`, `groupid`, `text`, `type`, `probability`, `comment`) VALUES
+('65586', '0', 'Thank you. I owe you greatly.', '12', '100', 'Raufen - On Spawn - Talk'),
+('65586', '1', 'I overheard a great deal through the cage. Rensai will be pleased with what I have to tell him.', '12', '100', 'Raufen - On Spawn - Talk');
+UPDATE `gameobject_template` SET `ScriptName`='go_sikthik_cage' WHERE (`entry`='214734');

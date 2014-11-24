@@ -85,3 +85,15 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 UPDATE `creature` SET `spawndist`='0', `currentwaypoint`='0', `unit_flags`='32768' WHERE (`id`='61692');
 DELETE FROM `spell_script_names` WHERE `spell_id` = '120573';
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES ('120573', 'spell_item_cintron_infused_bandage');
+
+-- Pitching In
+UPDATE `creature` SET `spawndist`='0', `MovementType`='0' WHERE (`id`='60705')
+DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`='13') AND (`SourceEntry`='117631');
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `Comment`) VALUES ('13', '1', '117631', '31', '0', '3', '60705', 'Raufen - Require proper target for effect');
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='60705');
+DELETE FROM `smart_scripts` WHERE `entryorguid` = '60705' AND `source_type` = '0';
+INSERT INTO `smart_scripts` (`entryorguid`, `id`, `event_type`, `event_param1`, `action_type`, `action_param1`, `target_type`, `comment`) VALUES
+('60705', '0', '8', '117631', '33', '60759', '7', 'Raufen - On Spell Hit - Give KC'),
+('60705', '1', '8', '117631', '37', '0', '1', 'Raufen - On Spell Hit - Die'),
+('60705', '2', '8', '117631', '41', '3000', '1', 'Raufen - On Spell Hit - Force Despawn');
+DELETE FROM `creature_template_aura` WHERE (`entry`='60705') AND (`aura`='107477');

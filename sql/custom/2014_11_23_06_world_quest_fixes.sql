@@ -54,3 +54,29 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `text`, `type`, `probability`, 
 ('65586', '0', 'Thank you. I owe you greatly.', '12', '100', 'Raufen - On Spawn - Talk'),
 ('65586', '1', 'I overheard a great deal through the cage. Rensai will be pleased with what I have to tell him.', '12', '100', 'Raufen - On Spawn - Talk');
 UPDATE `gameobject_template` SET `ScriptName`='go_sikthik_cage' WHERE (`entry`='214734');
+
+-- Running Rampant
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` IN('60669', '60739');
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+('60669', '76309', '0'),
+('60739', '76309', '0');
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE `entry` IN('60669', '60739');
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` IN('60669', '60739');
+INSERT INTO `smart_scripts` (`entryorguid`, `id`, `event_type`, `event_param1`, `action_type`, `action_param1`, `target_type`, `comment`) VALUES
+('60669', '0', '8', '76309', '41', '2000', '1', 'Raufen - On Spell Click - Force Despawn'),
+('60669', '1', '73', '76309', '33', '60669', '7', 'Raufen - On Spell Click - Give KC'),
+('60669', '2', '8', '76309', '83', '16777216', '1', 'Raufen - On Spell Click - Remove SpellClick Flag'),
+('60669', '3', '8', '76309', '59', '1', '1', 'Raufen - On Spell Click - Set Run'),
+('60669', '4', '8', '76309', '46', '15', '1', 'Raufen - On Spell Click - Move Forward'),
+
+('60739', '0', '8', '76309', '41', '2000', '1', 'Raufen - On Spell Click - Force Despawn'),
+('60739', '1', '73', '76309', '33', '60669', '7', 'Raufen - On Spell Click - Give KC'),
+('60739', '2', '8', '76309', '83', '16777216', '1', 'Raufen - On Spell Click - Remove SpellClick Flag'),
+('60739', '3', '8', '76309', '59', '1', '1', 'Raufen - On Spell Click - Set Run'),
+('60739', '4', '8', '76309', '46', '15', '1', 'Raufen - On Spell Click - Move Forward');
+
+DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`='18') AND (`SourceGroup`='60669') AND (`SourceEntry`='76309');
+DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`='18') AND (`SourceGroup`='60739') AND (`SourceEntry`='76309');
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`, `Comment`) VALUES
+('18', '60669', '76309', '9', '30770', 'Raufen - Require quest for spellclick'),
+('18', '60739', '76309', '9', '30770', 'Raufen - Require quest for spellclick');

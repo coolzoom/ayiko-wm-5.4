@@ -75,6 +75,7 @@ class boss_anzu : public CreatureScript
                 events.Reset();
                 _under33Percent = false;
                 _under66Percent = false;
+                _summonsCount = 0;
             }
 
             void EnterCombat(Unit* /*who*/) override
@@ -106,9 +107,15 @@ class boss_anzu : public CreatureScript
                 }
             }
 
+            void SummonedCreatureDies(Creature *, Unit *)
+            {
+                if (--_summonsCount == 0)
+                    me->RemoveAurasDueToSpell(SPELL_BANISH_SELF);
+            }
+
             void UpdateAI(uint32 const diff) override
             {
-                if (!UpdateVictim())
+                if (!UpdateVictim() || me->IsNonMeleeSpellCasted(true))
                     return;
 
                 events.Update(diff);
@@ -129,7 +136,10 @@ class boss_anzu : public CreatureScript
                         case EVENT_SUMMON:
                             // TODO: Add pathing for Brood of Anzu
                             for (uint8 i = 0; i < 7; i++)
-                                me->SummonCreature(NPC_BROOD_OF_ANZU, PosSummonBrood[i], TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 46000);
+                            {
+                                me->SummonCreature(NPC_BROOD_OF_ANZU, PosSummonBrood[i], TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 45000);
+                                ++_summonsCount;
+                            }
 
                             DoCast(me, SPELL_BANISH_SELF);
                             events.ScheduleEvent(EVENT_SPELL_BOMB, 12000);
@@ -137,11 +147,8 @@ class boss_anzu : public CreatureScript
                         case EVENT_SPELL_BOMB:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                             {
-                                if (target->getPowerType() == POWER_MANA)
-                                {
-                                    DoCast(target, SPELL_SPELL_BOMB);
-                                    Talk(SAY_SPELL_BOMB, target->GetGUID());
-                                }
+                                DoCast(target, SPELL_SPELL_BOMB);
+                                Talk(SAY_SPELL_BOMB, target->GetGUID());
                             }
                             break;
                         default:
@@ -155,11 +162,12 @@ class boss_anzu : public CreatureScript
             private:
                 bool _under33Percent;
                 bool _under66Percent;
+                uint8 _summonsCount;
         };
 
         CreatureAI* GetAI(Creature* creature) const override
         {
-            return new boss_anzuAI (creature);
+            return new boss_anzuAI(creature);
         }
 };
 

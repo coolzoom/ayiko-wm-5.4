@@ -689,7 +689,8 @@ void Item::SetItemRandomProperties(int32 randomPropId)
             if (GetInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID) != int32(item_rand->ID))
             {
                 SetInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID, item_rand->ID);
-                SetState(ITEM_CHANGED, GetOwner());
+                if (GetOwnerGUID() != 0)
+                    SetState(ITEM_CHANGED, GetOwner());
             }
             for (uint32 i = PROP_ENCHANTMENT_SLOT_1; i < PROP_ENCHANTMENT_SLOT_1 + 3; ++i)
                 SetEnchantment(EnchantmentSlot(i), item_rand->enchant_id[i - PROP_ENCHANTMENT_SLOT_1], 0, 0);
@@ -705,7 +706,8 @@ void Item::SetItemRandomProperties(int32 randomPropId)
             {
                 SetInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID, -int32(item_rand->ID));
                 UpdateItemSuffixFactor();
-                SetState(ITEM_CHANGED, GetOwner());
+                if (GetOwnerGUID() != 0)
+                    SetState(ITEM_CHANGED, GetOwner());
             }
 
             for (uint32 i = PROP_ENCHANTMENT_SLOT_0; i <= PROP_ENCHANTMENT_SLOT_4; ++i)
@@ -934,17 +936,20 @@ void Item::SetEnchantment(EnchantmentSlot slot, uint32 id, uint32 duration, uint
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_ID_OFFSET, id);
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_DURATION_OFFSET, duration);
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_CHARGES_OFFSET, charges);
-    SetState(ITEM_CHANGED, GetOwner());
+
+    if (GetOwnerGUID() != 0)
+        SetState(ITEM_CHANGED, GetOwner());
 }
 
-void Item::SetEnchantmentDuration(EnchantmentSlot slot, uint32 duration, Player* owner)
+void Item::SetEnchantmentDuration(EnchantmentSlot slot, uint32 duration)
 {
     if (GetEnchantmentDuration(slot) == duration)
         return;
 
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_DURATION_OFFSET, duration);
-    SetState(ITEM_CHANGED, owner);
-    // Cannot use GetOwner() here, has to be passed as an argument to avoid freeze due to hashtable locking
+
+    if (GetOwnerGUID() != 0)
+        SetState(ITEM_CHANGED, GetOwner());
 }
 
 void Item::SetEnchantmentCharges(EnchantmentSlot slot, uint32 charges)
@@ -953,7 +958,9 @@ void Item::SetEnchantmentCharges(EnchantmentSlot slot, uint32 charges)
         return;
 
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_CHARGES_OFFSET, charges);
-    SetState(ITEM_CHANGED, GetOwner());
+
+    if (GetOwnerGUID() != 0)
+        SetState(ITEM_CHANGED, GetOwner());
 }
 
 void Item::ClearEnchantment(EnchantmentSlot slot)

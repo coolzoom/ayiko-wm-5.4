@@ -23,7 +23,7 @@ INSERT INTO `smart_scripts` (`entryorguid`, `id`, `event_param1`, `event_param2`
 
 DELETE FROM `creature` WHERE `id` IN('62766', '62765');
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `npcflag2`, `unit_flags`, `unit_flags2`, `dynamicflags`, `isActive`, `protec_anti_doublet`) VALUES
-('7344275', '62766', '870', '0', '0', '1', '65535', '0', '0', '706.442', '4360.89', '164.858', '0.208731', '300', '0', '0', '787882', '0', '0', '0', '0', '0', '2048', '0', '0', NULL)
+('7344275', '62766', '870', '0', '0', '1', '65535', '0', '0', '706.442', '4360.89', '164.858', '0.208731', '300', '0', '0', '787882', '0', '0', '0', '0', '0', '2048', '0', '0', NULL),
 ('7344273', '62765', '870', '0', '0', '1', '65535', '0', '0', '766.714', '4413.24', '155.442', '4.47344', '300', '0', '0', '787882', '0', '0', '0', '0', '0', '2048', '0', '0', NULL);
 
 -- Wood and Shade
@@ -87,7 +87,7 @@ DELETE FROM `spell_script_names` WHERE `spell_id` = '120573';
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES ('120573', 'spell_item_cintron_infused_bandage');
 
 -- Pitching In
-UPDATE `creature` SET `spawndist`='0', `MovementType`='0' WHERE (`id`='60705')
+UPDATE `creature` SET `spawndist`='0', `MovementType`='0' WHERE (`id`='60705');
 DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`='13') AND (`SourceEntry`='117631');
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `Comment`) VALUES ('13', '1', '117631', '31', '0', '3', '60705', 'Raufen - Require proper target for effect');
 UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='60705');

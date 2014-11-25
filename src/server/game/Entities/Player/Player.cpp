@@ -19513,7 +19513,12 @@ void Player::_LoadAuras(PreparedQueryResult result, PreparedQueryResult resultEf
                     remaincharges = spellInfo->ProcCharges;
             }
             else
-                remaincharges = 0;
+            {
+                if (auto spellProcEntry = sSpellMgr->GetSpellProcEntry(spellInfo->Id))
+                    remaincharges = spellProcEntry->charges;
+                else
+                    remaincharges = 0;
+            }
 
             for(std::list<auraEffectData>::iterator itr = auraEffectList.begin(); itr != auraEffectList.end(); ++itr)
             {

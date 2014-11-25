@@ -374,6 +374,14 @@ public:
                         if (instance && Floor)
                             instance->SetData64(DATA_FLOOR_ERUPTION_GUID, Floor->GetGUID());
                         BellowingRoarTimer = 30000;
+
+                        int32 count = RAID_MODE(3, 6);
+                        for (int i = 0; i < count; ++i)
+                        {
+                            me->SummonCreature(NPC_WHELP, SpawnLocations[0], TEMPSUMMON_CORPSE_DESPAWN);
+                            me->SummonCreature(NPC_WHELP, SpawnLocations[1], TEMPSUMMON_CORPSE_DESPAWN);
+                        }
+                        SummonWhelpCount = 0;
                     }
                     else
                         BellowingRoarTimer -= Diff;

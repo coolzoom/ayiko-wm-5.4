@@ -457,35 +457,58 @@ class mob_eshelon : public CreatureScript
         };
 };
 
-class mob_restless_leng : public CreatureScript
+class go_sikthik_cage : public GameObjectScript
 {
-    public:
-        mob_restless_leng() : CreatureScript("mob_restless_leng")
+public:
+    go_sikthik_cage() : GameObjectScript("go_sikthik_cage") { }
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+
+        printf("\n ! quest counter is %i ! \n ", player->GetQuestSlotCounter(player->FindQuestSlot(31688), 0));
+        // If counter is 7 (script is called before counting) max is 8
+        if (player->GetQuestSlotCounter(player->FindQuestSlot(31688), 0) == 7 && player->GetQuestStatus(31688) == QUEST_STATUS_INCOMPLETE)
         {
+            player->SummonCreature(65586, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 15000);
+            player->KilledMonsterCredit(65586);
         }
 
-        CreatureAI* GetAI(Creature* creature) const
+        return false;
+    }
+};
+
+class spell_item_cintron_infused_bandage : public SpellScriptLoader
+{
+public:
+    spell_item_cintron_infused_bandage() : SpellScriptLoader("spell_item_cintron_infused_bandage") { }
+
+    class script_impl : public AuraScript
+    {
+        PrepareAuraScript(script_impl);
+
+        void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
-            return new mob_restless_lengAI(creature);
+            if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
+                if (auto target = GetTarget()->ToCreature())
+                    if (target->GetEntry() == 61692)
+                        if (auto player = GetCaster()->ToPlayer())
+                        {
+                            target->HandleEmoteCommand(EMOTE_STATE_STAND);
+                            target->ForcedDespawn(4000);
+                            player->KilledMonsterCredit(61692);
+                        }
         }
 
-        struct mob_restless_lengAI : public ScriptedAI
+        void Register()
         {
-            mob_restless_lengAI(Creature* creature) : ScriptedAI(creature)
-            {
-            }
+            AfterEffectRemove += AuraEffectRemoveFn(script_impl::OnRemove, EFFECT_0, SPELL_AURA_OBS_MOD_HEALTH, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
 
-            void UpdateAI(const uint32 /*diff*/)
-            {
-                std::list<Player*> playerList;
-                playerList.clear();
-                GetPlayerListInGrid(playerList, me, 20.0f);
-
-                for (auto player: playerList)
-                    if (player->GetQuestStatus(31688) == QUEST_STATUS_INCOMPLETE)
-                        player->KilledMonsterCredit(65586);
-            }
-        };
+    AuraScript* GetAuraScript() const
+    {
+        return new script_impl();
+    }
 };
 
 void AddSC_townlong_steppes()
@@ -497,6 +520,7 @@ void AddSC_townlong_steppes()
     //Elite mobs
     new mob_darkwoods_faerie();
     new mob_hei_feng();
-    // Standard Mobs
-    new mob_restless_leng();
+    //Quests
+    new go_sikthik_cage();
+    new spell_item_cintron_infused_bandage();
 }

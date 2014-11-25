@@ -4699,7 +4699,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 12975:// Last Stand
                     spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT;
                     break;
-                case 106922:// Might of Ursoc
                 case 113072:// Might of Ursoc (Symbiosis)
                     spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT;
                     break;

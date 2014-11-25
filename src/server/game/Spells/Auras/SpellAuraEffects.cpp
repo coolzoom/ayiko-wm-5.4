@@ -1020,8 +1020,8 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                 amount = GetBase()->GetUnitOwner()->CountPctFromMaxHealth(amount);
             break;
         case SPELL_AURA_MOD_INCREASE_HEALTH_2:
-            // Shadow Bulwark
-            if (GetId() == 132413)
+            // Shadow Bulwark, Might of Ursoc
+            if (GetId() == 132413 || GetId() == 106922)
                 amount = GetBase()->GetUnitOwner()->CountPctFromMaxHealth(amount);
             break;
         case SPELL_AURA_MOD_INCREASE_SPEED:

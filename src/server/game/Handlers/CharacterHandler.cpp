@@ -2404,13 +2404,13 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
 
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_QUESTSTATUS_REWARDED_BY_QUEST);
                 stmt->setUInt32(0, lowGuid);
-                stmt->setUInt32(1, (team == TEAM_ALLIANCE ? quest_alliance : quest_horde));
+                stmt->setUInt32(1, (team == BG_TEAM_ALLIANCE ? quest_alliance : quest_horde));
                 trans->Append(stmt);
 
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHAR_QUESTSTATUS_REWARDED_FACTION_CHANGE);
-                stmt->setUInt32(0, (team == TEAM_ALLIANCE ? quest_alliance : quest_horde));
+                stmt->setUInt32(0, (team == BG_TEAM_ALLIANCE ? quest_alliance : quest_horde));
                 stmt->setUInt32(1, lowGuid);
-                stmt->setUInt32(2, (team == TEAM_ALLIANCE ? quest_horde : quest_alliance));
+                stmt->setUInt32(2, (team == BG_TEAM_ALLIANCE ? quest_horde : quest_alliance));
                 trans->Append(stmt);
             }
 
@@ -2425,7 +2425,7 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
                 for (auto iter = questTemplates.cbegin(); iter != questTemplates.cend(); ++iter)
                 {
                     Quest const* quest = iter->second;
-                    uint32 newRaceMask = (team == TEAM_ALLIANCE) ? RACEMASK_ALLIANCE : RACEMASK_HORDE;
+                    uint32 newRaceMask = (team == BG_TEAM_ALLIANCE) ? RACEMASK_ALLIANCE : RACEMASK_HORDE;
                     if (!(quest->GetRequiredRaces() & newRaceMask))
                     {
                         stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHAR_QUESTSTATUS_REWARDED_ACTIVE_BY_QUEST);
@@ -2459,8 +2459,8 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
             {
                 uint32 reputation_alliance = it->first;
                 uint32 reputation_horde = it->second;
-                uint32 newReputation = (team == TEAM_ALLIANCE) ? reputation_alliance : reputation_horde;
-                uint32 oldReputation = (team == TEAM_ALLIANCE) ? reputation_horde : reputation_alliance;
+                uint32 newReputation = (team == BG_TEAM_ALLIANCE) ? reputation_alliance : reputation_horde;
+                uint32 oldReputation = (team == BG_TEAM_ALLIANCE) ? reputation_horde : reputation_alliance;
 
                 // select old standing set in db
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHAR_REP_BY_FACTION);

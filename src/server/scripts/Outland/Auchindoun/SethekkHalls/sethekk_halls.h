@@ -24,5 +24,17 @@ enum eTypes
     DATA_IKISSDOOREVENT = 1,
     TYPE_ANZU_ENCOUNTER = 2
 };
+
+enum CreatureIds
+{
+    NPC_ANZU                            = 23035,
+    NPC_BROOD_OF_ANZU                   = 23132
+};
+
+enum GameObjectIds
+{
+    GO_IKISS_DOOR                       = 177203
+};
+
 #endif
 

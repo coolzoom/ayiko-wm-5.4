@@ -14856,7 +14856,7 @@ void Player::RemoveEnchantmentDurations(Item* item)
         if (itr->item == item)
         {
             // save duration in item
-            item->SetEnchantmentDuration(EnchantmentSlot(itr->slot), itr->leftduration, this);
+            item->SetEnchantmentDuration(EnchantmentSlot(itr->slot), itr->leftduration);
             itr = m_enchantDuration.erase(itr);
         }
         else
@@ -14922,7 +14922,7 @@ void Player::AddEnchantmentDuration(Item* item, EnchantmentSlot slot, uint32 dur
     {
         if (itr->item == item && itr->slot == slot)
         {
-            itr->item->SetEnchantmentDuration(itr->slot, itr->leftduration, this);
+            itr->item->SetEnchantmentDuration(itr->slot, itr->leftduration);
             m_enchantDuration.erase(itr);
             break;
         }
@@ -19444,7 +19444,12 @@ void Player::_LoadAuras(PreparedQueryResult result, PreparedQueryResult resultEf
                     remaincharges = spellInfo->ProcCharges;
             }
             else
-                remaincharges = 0;
+            {
+                if (auto spellProcEntry = sSpellMgr->GetSpellProcEntry(spellInfo->Id))
+                    remaincharges = spellProcEntry->charges;
+                else
+                    remaincharges = 0;
+            }
 
             for(std::list<auraEffectData>::iterator itr = auraEffectList.begin(); itr != auraEffectList.end(); ++itr)
             {
@@ -21207,7 +21212,7 @@ void Player::_SaveInventory(SQLTransaction& trans)
 
     // update enchantment durations
     for (EnchantDurationList::iterator itr = m_enchantDuration.begin(); itr != m_enchantDuration.end(); ++itr)
-        itr->item->SetEnchantmentDuration(itr->slot, itr->leftduration, this);
+        itr->item->SetEnchantmentDuration(itr->slot, itr->leftduration);
 
     // if no changes
     if (m_itemUpdateQueue.empty())

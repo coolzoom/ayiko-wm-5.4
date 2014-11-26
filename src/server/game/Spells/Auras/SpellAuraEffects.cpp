@@ -609,8 +609,11 @@ Unit::AuraApplicationList AuraEffect::GetApplicationList() const
 int32 AuraEffect::CalculateAmount(Unit* caster)
 {
     int32 amount;
-    // default amount calculation
-    amount = m_spellInfo->Effects[m_effIndex].CalcValue(caster, &m_baseAmount, GetBase()->GetOwner()->ToUnit());
+
+    if (GetBase()->GetCastItemGUID() && (GetSpellInfo()->AttributesEx11 & SPELL_ATTR11_SCALING_FROM_ITEM))
+        amount = GetBaseAmount();
+    else
+        amount = m_spellInfo->Effects[m_effIndex].CalcValue(caster, &m_baseAmount, GetBase()->GetOwner()->ToUnit());
 
     // check item enchant aura cast
     if (!amount && caster)
@@ -1232,6 +1235,7 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
             break;
 
     }
+
     if (DoneActualBenefit != 0.0f)
     {
         DoneActualBenefit *= caster->CalculateLevelPenalty(GetSpellInfo());

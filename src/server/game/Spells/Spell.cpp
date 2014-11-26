@@ -2854,7 +2854,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         SpellNonMeleeDamage damageInfo(caster, unitTarget, m_spellInfo->Id, m_spellSchoolMask);
 
         // Add bonuses and fill damageInfo struct
-        caster->CalculateSpellDamageTaken(&damageInfo, m_damage, m_spellInfo, m_attackType,  target->crit);
+        caster->CalculateSpellDamageTaken(&damageInfo, m_damage, m_spellInfo, m_attackType, target->crit);
         caster->DealDamageMods(damageInfo.target, damageInfo.damage, &damageInfo.absorb);
 
         // Send log damage message to client
@@ -6332,12 +6332,22 @@ void Spell::HandleEffects(Unit* pUnitTarget, Item* pItemTarget, GameObject* pGOT
     gameObjTarget = pGOTarget;
     destTarget = &m_destTargets[i]._position;
 
-    uint8 eff = m_spellInfo->Effects[i].Effect;
+    if (m_CastItem
+            && (GetSpellInfo()->AttributesEx11 & SPELL_ATTR11_SCALING_FROM_ITEM)
+            && GetSpellInfo()->Effects[i].ScalingMultiplier != 0.0f)
+    {
+        auto const propPointsEntry = sRandomPropertiesPointsStore.LookupEntry(m_CastItem->GetTemplate()->ItemLevel);
+        auto const points = propPointsEntry->RarePropertiesPoints[0];
+        damage = std::lround(points * GetSpellInfo()->Effects[i].ScalingMultiplier);
+    }
+    else
+    {
+        damage = CalculateDamage(i, unitTarget);
+    }
 
-    damage = CalculateDamage(i, unitTarget);
+    bool const preventDefault = CallScriptEffectHandlers((SpellEffIndex)i, mode);
 
-    bool preventDefault = CallScriptEffectHandlers((SpellEffIndex)i, mode);
-
+    auto const eff = GetSpellInfo()->Effects[i].Effect;
     if (!preventDefault && eff < TOTAL_SPELL_EFFECTS)
     {
         (this->*SpellEffects[eff])((SpellEffIndex)i);

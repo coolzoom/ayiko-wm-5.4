@@ -571,7 +571,7 @@ void Aura::_InitEffects(uint32 effMask, Unit* caster, Item const *castItem, int3
 {
     CallScriptInitEffectsHandlers(effMask);
 
-    int32 amountOverride[MAX_SPELL_EFFECTS] = { };
+    int32 amountOverride[MAX_SPELL_EFFECTS];
 
     if (castItem && (GetSpellInfo()->AttributesEx11 & SPELL_ATTR11_SCALING_FROM_ITEM))
     {

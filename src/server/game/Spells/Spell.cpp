@@ -7224,7 +7224,24 @@ SpellCastResult Spell::CheckCast(bool strict)
                         m_customError = SPELL_CUSTOM_ERROR_HOLDING_FLAG;
                         return SPELL_FAILED_CUSTOM_ERROR;
                     }
-            break;
+                break;
+            }
+            case SPELL_AURA_MOD_PACIFY:
+            {
+                // Hand of Protection is disabled if target is carrying flag
+                if (m_spellInfo->Id == 1022)
+                {
+                    Unit *target = m_targets.GetUnitTarget();
+                    if (!target)
+                        break;
+                    if (target->HasAura(23335) || target->HasAura(23333))
+                    {
+                        this->m_customError = SPELL_CUSTOM_ERROR_HOLDING_FLAG;
+                        return SPELL_FAILED_CUSTOM_ERROR;
+                    }
+                    break;
+                }
+                break;
             }
             default:
                 break;

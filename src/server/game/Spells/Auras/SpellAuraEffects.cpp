@@ -978,16 +978,14 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                     if (caster == GetBase()->GetUnitOwner())
                         AddPct(amount, GetSpellInfo()->Effects[EFFECT_2].BasePoints);
 
-                    if (holyPower > 3)
-                        holyPower = 3;
-
-                    // Divine Purpose
-                    if (caster->HasAura(90174))
+                    bool hasDivinePurpose = caster->HasAura(90174);
+                    if (holyPower > 3 || hasDivinePurpose)
                         holyPower = 3;
 
                     amount *= holyPower;
 
-                    caster->ModifyPower(POWER_HOLY_POWER, (holyPower > 1) ? (-(holyPower - 1)) : 0);
+                    if (!hasDivinePurpose)
+                        caster->ModifyPower(POWER_HOLY_POWER, (holyPower > 1) ? (-(holyPower - 1)) : 0);
                     break;
                 }
                 default:

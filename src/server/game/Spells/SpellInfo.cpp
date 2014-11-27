@@ -653,49 +653,66 @@ bool SpellEffectInfo::IsUnitOwnedAuraEffect() const
     return IsAreaAuraEffect() || Effect == SPELL_EFFECT_APPLY_AURA;
 }
 
-int32 SpellEffectInfo::CalcValue(Unit const* caster, int32 const* bp, Unit const* target) const
+int32 SpellEffectInfo::CalcValue(Unit const* caster, int32 const* bp, Unit const* target, Item const *castItem) const
 {
     float basePointsPerLevel = RealPointsPerLevel;
-    int32 basePoints = bp ? *bp : BasePoints;
+    float basePoints = bp ? *bp : BasePoints;
     float comboDamage = PointsPerComboPoint;
 
     // base amount modification based on spell lvl vs caster lvl
     if (ScalingMultiplier != 0.0f)
     {
-        if (caster && !_spellInfo->IsCustomCalculated())
+        if (!_spellInfo->IsCustomCalculated())
         {
-            auto scalingEntry = SpellScalingEntry();
-            if (auto const existing = _spellInfo->GetSpellScaling())
-                scalingEntry = *existing;
+            float multiplier;
+            bool multiplierCalculated = false;
 
-            uint32 level = caster->getLevel();
-            if (target && _spellInfo->IsPositiveEffect(_effIndex) && (Effect == SPELL_EFFECT_APPLY_AURA) && _spellInfo->Id != 774) // Hack Fix Rejuvenation, doesn't use the target level for basepoints
-                level = target->getLevel();
-
-            auto const gtKeyBase = (scalingEntry.ScalingClass <= -1)
-                    ? MAX_CLASSES - 2 - scalingEntry.ScalingClass
-                    : scalingEntry.ScalingClass - 1;
-
-            auto const levelForKey = scalingEntry.MaxLevel != 0
-                    ? std::min(scalingEntry.MaxLevel, level)
-                    : level;
-
-            if (auto const gtScaling = sGtSpellScalingStore.LookupEntry(gtKeyBase * 100 + levelForKey - 1))
+            if (castItem && (_spellInfo->AttributesEx11 & SPELL_ATTR11_SCALING_FROM_ITEM))
             {
-                float multiplier = gtScaling->value;
-                if (scalingEntry.CastTimeMax > 0 && scalingEntry.CastTimeMaxLevel > level)
-                    multiplier *= float(scalingEntry.CastTimeMin + (level - 1) * (scalingEntry.CastTimeMax - scalingEntry.CastTimeMin) / (scalingEntry.CastTimeMaxLevel - 1)) / float(scalingEntry.CastTimeMax);
-                if (scalingEntry.CoefLevelBase > level)
-                    multiplier *= (1.0f - scalingEntry.CoefBase) * (float)(level - 1) / (float)(scalingEntry.CoefLevelBase - 1) + scalingEntry.CoefBase;
+                if (auto const propEntry = sRandomPropertiesPointsStore.LookupEntry(castItem->GetTemplate()->ItemLevel))
+                {
+                    // This one seems to be hardcoded
+                    multiplier = propEntry->RarePropertiesPoints[0];
+                    multiplierCalculated = true;
+                }
+            }
+            else if (caster)
+            {
+                auto scalingEntry = SpellScalingEntry();
+                if (auto const existing = _spellInfo->GetSpellScaling())
+                    scalingEntry = *existing;
 
-                float preciseBasePoints = ScalingMultiplier * multiplier;
+                uint32 level = caster->getLevel();
+                if (target && _spellInfo->IsPositiveEffect(_effIndex) && (Effect == SPELL_EFFECT_APPLY_AURA) && _spellInfo->Id != 774) // Hack Fix Rejuvenation, doesn't use the target level for basepoints
+                    level = target->getLevel();
+
+                auto const gtKeyBase = (scalingEntry.ScalingClass <= -1)
+                        ? MAX_CLASSES - 2 - scalingEntry.ScalingClass
+                        : scalingEntry.ScalingClass - 1;
+
+                auto const levelForKey = scalingEntry.MaxLevel != 0
+                        ? std::min(scalingEntry.MaxLevel, level)
+                        : level;
+
+                if (auto const gtScaling = sGtSpellScalingStore.LookupEntry(gtKeyBase * 100 + levelForKey - 1))
+                {
+                    multiplier = gtScaling->value;
+                    if (scalingEntry.CastTimeMax > 0 && scalingEntry.CastTimeMaxLevel > level)
+                        multiplier *= float(scalingEntry.CastTimeMin + (level - 1) * (scalingEntry.CastTimeMax - scalingEntry.CastTimeMin) / (scalingEntry.CastTimeMaxLevel - 1)) / float(scalingEntry.CastTimeMax);
+                    if (scalingEntry.CoefLevelBase > level)
+                        multiplier *= (1.0f - scalingEntry.CoefBase) * (float)(level - 1) / (float)(scalingEntry.CoefLevelBase - 1) + scalingEntry.CoefBase;
+                    multiplierCalculated = true;
+                }
+            }
+
+            if (multiplierCalculated)
+            {
+                basePoints = ScalingMultiplier * multiplier;
                 if (DeltaScalingMultiplier)
                 {
                     float delta = DeltaScalingMultiplier * ScalingMultiplier * multiplier * 0.5f;
-                    preciseBasePoints += frand(-delta, delta);
+                    basePoints += frand(-delta, delta);
                 }
-
-                basePoints = int32(preciseBasePoints);
 
                 if (ComboScalingMultiplier)
                     comboDamage = ComboScalingMultiplier * multiplier;
@@ -712,7 +729,7 @@ int32 SpellEffectInfo::CalcValue(Unit const* caster, int32 const* bp, Unit const
             else if (level < int32(_spellInfo->BaseLevel))
                 level = int32(_spellInfo->BaseLevel);
             level -= int32(_spellInfo->SpellLevel);
-            basePoints += int32(level * basePointsPerLevel);
+            basePoints += level * basePointsPerLevel;
 
             if (basePointsPerLevel && basePoints >= 100 && (Effect == SPELL_EFFECT_DAMAGE_FROM_MAX_HEALTH_PCT || ApplyAuraName == SPELL_AURA_PERIODIC_DAMAGE_PERCENT))  // Temporary
                 basePoints /= 10;
@@ -737,50 +754,7 @@ int32 SpellEffectInfo::CalcValue(Unit const* caster, int32 const* bp, Unit const
         }
     }
 
-    float value = float(basePoints);
-
-    // Fix old items bonuses
-    if (BasePoints != basePoints && _spellInfo->Id < 121820 && _spellInfo->Id != 108300 && _spellInfo->Id != 60229)
-    {
-        for (auto const &spellEffect : _spellInfo->Effects)
-        {
-            if (spellEffect.IsEffect() && (spellEffect.ApplyAuraName == SPELL_AURA_MOD_STAT ||
-                                           spellEffect.ApplyAuraName == SPELL_AURA_MOD_DAMAGE_DONE ||
-                                           spellEffect.ApplyAuraName == SPELL_AURA_MOD_ATTACK_POWER ||
-                                           spellEffect.ApplyAuraName == SPELL_AURA_MOD_RANGED_ATTACK_POWER))
-            {
-                if (spellEffect.BasePoints > 0)
-                    value = float(spellEffect.BasePoints);
-            }
-        }
-    }
-
-    if (ApplyAuraName == SPELL_AURA_MOD_STAT)
-    {
-        if (BasePoints == 0 && !DeltaScalingMultiplier)
-        {
-            switch(_spellInfo->Id)
-            {
-            case 105697:
-            case 105702:
-            case 105706:
-                value = 4000.0f;
-                break;
-            case 105698:
-                value = 12000.0f;
-                break;
-            case 105694:
-                value = 1500.0f;
-                break;
-            case 105689:
-            case 105691:
-            case 105693:
-            case 105696:
-                value = 1000.0f;
-                break;
-            }
-        }
-    }
+    float value = basePoints;
 
     // random damage
     if (caster)
@@ -808,10 +782,10 @@ int32 SpellEffectInfo::CalcValue(Unit const* caster, int32 const* bp, Unit const
 
         // Hack Fix Arcane Barrage triggered
         if (_spellInfo->Id == 50273)
-            value = float(basePoints);
+            value = basePoints;
     }
 
-    return int32(value);
+    return std::lround(value);
 }
 
 int32 SpellEffectInfo::CalcBaseValue(int32 value) const

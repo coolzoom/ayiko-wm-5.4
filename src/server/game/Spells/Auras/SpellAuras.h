@@ -98,7 +98,7 @@ class Aura
         static Aura *TryCreate(SpellInfo const* spellproto, uint32 effMask, WorldObject* owner, Unit* caster, SpellPowerEntry const* spellPowerData, int32 *baseAmount = NULL, Item* castItem = NULL, uint64 casterGUID = 0);
         static Aura *Create(SpellInfo const* spellproto, uint32 effMask, WorldObject* owner, Unit* caster, SpellPowerEntry const* spellPowerData, int32* baseAmount, Item* castItem, uint64 casterGUID);
         explicit Aura(SpellInfo const* spellproto, WorldObject* owner, Unit* caster, SpellPowerEntry const* spellPowerData, Item* castItem, uint64 casterGUID);
-        void _InitEffects(uint32 effMask, Unit* caster, Item const *castItem, int32 *baseAmount);
+        void _InitEffects(uint32 effMask, Unit* caster, int32 *baseAmount);
         virtual ~Aura();
 
         SpellInfo const* GetSpellInfo() const { return m_spellInfo; }

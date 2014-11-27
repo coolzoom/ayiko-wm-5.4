@@ -567,36 +567,9 @@ m_isRemoved(false), m_isSingleTarget(false), m_isUsingCharges(false)
     // m_casterLevel = cast item level/caster level, caster level should be saved to db, confirmed with sniffs
 }
 
-void Aura::_InitEffects(uint32 effMask, Unit* caster, Item const *castItem, int32 *baseAmount)
+void Aura::_InitEffects(uint32 effMask, Unit* caster, int32 *baseAmount)
 {
     CallScriptInitEffectsHandlers(effMask);
-
-    int32 amountOverride[MAX_SPELL_EFFECTS];
-
-    if (castItem && (GetSpellInfo()->AttributesEx11 & SPELL_ATTR11_SCALING_FROM_ITEM))
-    {
-        auto const propPointsEntry = sRandomPropertiesPointsStore.LookupEntry(castItem->GetTemplate()->ItemLevel);
-
-        // This one seems to be hardcoded.
-        int32 const points = propPointsEntry->RarePropertiesPoints[0];
-
-        for (size_t i = 0; i < GetSpellInfo()->Effects.size(); ++i)
-        {
-            if (effMask & (uint32(1) << i))
-            {
-                auto const scalingMult = GetSpellInfo()->Effects[i].ScalingMultiplier;
-
-                if (scalingMult != 0.0f)
-                    amountOverride[i] = std::lround(points * scalingMult);
-                else if (baseAmount)
-                    amountOverride[i] = baseAmount[i];
-                else
-                    ASSERT(false);
-            }
-        }
-
-        baseAmount = amountOverride;
-    }
 
     m_effects.resize(GetSpellInfo()->Effects.size());
     for (size_t i = 0; i < m_effects.size(); ++i)
@@ -3131,7 +3104,7 @@ UnitAura::UnitAura(SpellInfo const* spellproto, uint32 effMask, WorldObject* own
     m_spellPowerData = spellPowerData;
     m_AuraDRGroup = DIMINISHING_NONE;
 
-    _InitEffects(effMask, caster, castItem, baseAmount);
+    _InitEffects(effMask, caster, baseAmount);
     GetUnitOwner()->_AddAura(this, caster);
 }
 
@@ -3238,7 +3211,7 @@ DynObjAura::DynObjAura(SpellInfo const* spellproto, uint32 effMask, WorldObject*
 
     m_spellPowerData = spellPowerData;
 
-    _InitEffects(effMask, caster, castItem, baseAmount);
+    _InitEffects(effMask, caster, baseAmount);
     GetDynobjOwner()->SetAura(this);
 }
 

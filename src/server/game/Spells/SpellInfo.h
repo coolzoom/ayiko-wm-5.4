@@ -274,7 +274,7 @@ public:
     bool IsUnitOwnedAuraEffect() const;
     bool IsPeriodicEffect() const;
 
-    int32 CalcValue(Unit const* caster = NULL, int32 const* basePoints = NULL, Unit const* target = NULL) const;
+    int32 CalcValue(Unit const* caster = NULL, int32 const* basePoints = NULL, Unit const* target = NULL, Item const *castItem = nullptr) const;
     int32 CalcBaseValue(int32 value) const;
     float CalcValueMultiplier(Unit* caster, Spell* spell = NULL) const;
     float CalcDamageMultiplier(Unit* caster, Spell* spell = NULL) const;

@@ -6343,18 +6343,7 @@ void Spell::HandleEffects(Unit* pUnitTarget, Item* pItemTarget, GameObject* pGOT
     gameObjTarget = pGOTarget;
     destTarget = &m_destTargets[i]._position;
 
-    if (m_CastItem
-            && (GetSpellInfo()->AttributesEx11 & SPELL_ATTR11_SCALING_FROM_ITEM)
-            && GetSpellInfo()->Effects[i].ScalingMultiplier != 0.0f)
-    {
-        auto const propPointsEntry = sRandomPropertiesPointsStore.LookupEntry(m_CastItem->GetTemplate()->ItemLevel);
-        auto const points = propPointsEntry->RarePropertiesPoints[0];
-        damage = std::lround(points * GetSpellInfo()->Effects[i].ScalingMultiplier);
-    }
-    else
-    {
-        damage = CalculateDamage(i, unitTarget);
-    }
+    damage = GetSpellInfo()->Effects[i].CalcValue(m_caster, &m_spellValue.EffectBasePoints[i], unitTarget, m_CastItem);
 
     bool const preventDefault = CallScriptEffectHandlers((SpellEffIndex)i, mode);
 

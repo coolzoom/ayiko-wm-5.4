@@ -610,10 +610,17 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
 {
     int32 amount;
 
-    if (GetBase()->GetCastItemGUID() && (GetSpellInfo()->AttributesEx11 & SPELL_ATTR11_SCALING_FROM_ITEM))
-        amount = GetBaseAmount();
-    else
-        amount = m_spellInfo->Effects[m_effIndex].CalcValue(caster, &m_baseAmount, GetBase()->GetOwner()->ToUnit());
+    {
+        Item const *castItem = nullptr;
+        if (GetBase()->GetCastItemGUID()
+                && (GetSpellInfo()->AttributesEx11 & SPELL_ATTR11_SCALING_FROM_ITEM)
+                && caster->GetTypeId() == TYPEID_PLAYER)
+        {
+            castItem = caster->ToPlayer()->GetItemByGuid(GetBase()->GetCastItemGUID());
+        }
+
+        amount = m_spellInfo->Effects[m_effIndex].CalcValue(caster, &m_baseAmount, GetBase()->GetOwner()->ToUnit(), castItem);
+    }
 
     // check item enchant aura cast
     if (!amount && caster)

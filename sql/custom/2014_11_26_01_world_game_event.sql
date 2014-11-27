@@ -1,0 +1,2 @@
+-- [SQL] Events - Pilgrim's Bounty timer corrected (Fixes #3627)
+UPDATE `game_event` SET `start_time` = '2014-11-24 11:00:00', `end_time` = '2020-12-01 10:00:00', `occurence` = 525600, `length` = 10020 WHERE `holiday` = 404;

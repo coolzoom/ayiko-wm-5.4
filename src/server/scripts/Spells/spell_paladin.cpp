@@ -328,7 +328,14 @@ class spell_pal_shield_of_the_righteous : public SpellScriptLoader
                         {
                             int32 bp0 = spell->GetSpellEffect(EFFECT_0, 0)->EffectBasePoints;
                             bp0 = AddPct(bp0, player->GetFloatValue(PLAYER_MASTERY));
-                            player->CastCustomSpell(player, PALADIN_SPELL_SHIELD_OF_THE_RIGHTEOUS_PROC, &bp0, NULL, NULL, true);
+                            if (auto proc = player->GetAura(PALADIN_SPELL_SHIELD_OF_THE_RIGHTEOUS_PROC, player->GetGUID()))
+                            {
+                                auto duration = proc->GetDuration();
+                                proc->SetDuration(duration + 3 * IN_MILLISECONDS);
+                                proc->SetMaxDuration(duration + 3 * IN_MILLISECONDS);
+                            }
+                            else
+                                player->CastCustomSpell(player, PALADIN_SPELL_SHIELD_OF_THE_RIGHTEOUS_PROC, &bp0, NULL, NULL, true);
                         }
 
                         if (auto spell = sSpellStore.LookupEntry(PALADIN_SPELL_BASTION_OF_GLORY))

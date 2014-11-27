@@ -3221,30 +3221,41 @@ void Spell::DoTriggersOnSpellHit(Unit* unit, uint32 effMask)
     // info confirmed with retail sniffs of permafrost and shadow weaving
     if (!m_hitTriggerSpells.empty())
     {
-        int _duration = 0;
+        int32 duration = 0;
         for (HitTriggerSpellList::const_iterator i = m_hitTriggerSpells.begin(); i != m_hitTriggerSpells.end(); ++i)
         {
-            if (CanExecuteTriggersOnHit(effMask, i->triggeredByAura) && roll_chance_i(i->chance))
+            if (!CanExecuteTriggersOnHit(effMask, i->triggeredByAura) || !roll_chance_i(i->chance))
+                continue;
+
+            TC_LOG_DEBUG("spells", "Spell %u triggered spell %u by SPELL_AURA_ADD_TARGET_TRIGGER aura", m_spellInfo->Id, i->triggeredSpell->Id);
+
+            auto triggeredAur = unit->GetAura(i->triggeredSpell->Id, m_caster->GetGUID());
+
+            if (triggeredAur)
+            {
+                triggeredAur->RefreshDuration();
+            }
+            else
             {
                 m_caster->CastSpell(unit, i->triggeredSpell, true);
-
-                // SPELL_AURA_ADD_TARGET_TRIGGER auras shouldn't trigger auras without duration
-                // set duration of current aura to the triggered spell
-                if (i->triggeredSpell->GetDuration() == -1)
-                {
-                    Aura *triggeredAur = unit->GetAura(i->triggeredSpell->Id, m_caster->GetGUID());
-                    if (triggeredAur != NULL)
-                    {
-                        // get duration from aura-only once
-                        if (!_duration)
-                        {
-                            Aura *aur = unit->GetAura(m_spellInfo->Id, m_caster->GetGUID());
-                            _duration = aur ? aur->GetDuration() : -1;
-                        }
-                        triggeredAur->SetDuration(_duration);
-                    }
-                }
+                if (!(triggeredAur = unit->GetAura(i->triggeredSpell->Id, m_caster->GetGUID())))
+                    continue;
             }
+
+            // SPELL_AURA_ADD_TARGET_TRIGGER auras shouldn't trigger auras without duration
+            // set duration of current aura to the triggered spell
+            if (!triggeredAur->IsPermanent())
+                continue;
+
+            // get duration from aura-only once
+            if (duration == 0)
+            {
+                Aura const *aur = unit->GetAura(m_spellInfo->Id, m_caster->GetGUID());
+                duration = aur ? aur->GetDuration() : -1;
+            }
+
+            triggeredAur->SetMaxDuration(duration);
+            triggeredAur->RefreshDuration();
         }
     }
 

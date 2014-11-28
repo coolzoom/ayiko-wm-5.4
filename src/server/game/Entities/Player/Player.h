@@ -2667,6 +2667,9 @@ class Player final : public Unit, public GridObject<Player>
         void SendMovementSetWaterWalking(bool apply);
         void SendMovementSetFeatherFall(bool apply);
         void SendMovementSetCollisionHeight(float height);
+        void SendApplyMovementForce(bool apply, Position const &source, float force = 0.0f);
+
+        bool hasForcedMovement() const { return hasForcedMovement_; }
 
         bool CanFly() const { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_CAN_FLY); }
 
@@ -3171,6 +3174,8 @@ class Player final : public Unit, public GridObject<Player>
         Trinity::SpellChargesTracker spellChargesTracker_;
 
         Trinity::RatedBgStats m_ratedBgStats;
+
+        bool hasForcedMovement_;
 };
 
 void AddItemsSetItem(Player*player, Item* item);

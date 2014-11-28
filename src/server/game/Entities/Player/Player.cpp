@@ -662,6 +662,7 @@ Player::Player(WorldSession* session)
     , m_phaseMgr(this)
     , m_archaeologyMgr(this)
     , m_bgRoles()
+    , hasForcedMovement_()
 {
 #ifdef _MSC_VER
 #pragma warning(default:4355)
@@ -29247,6 +29248,57 @@ void Player::SendMovementSetCollisionHeight(float height)
     data.WriteByteSeq<0, 5, 4>(guid);
 
     SendDirectMessage(&data);
+}
+
+void Player::SendApplyMovementForce(bool apply, Position const &source, float force /*= 0.0f*/)
+{
+    ObjectGuid playerGuid = GetGUID();
+
+    if (apply)
+    {
+        // Forced movement can cumulate
+        if (hasForcedMovement())
+            return;
+
+        WorldPacket data(SMSG_APPLY_MOVEMENT_FORCE, 1 + 8 + 7 * 4);
+
+        data.WriteBitSeq<3, 5, 4, 6, 7, 1, 0, 2>(playerGuid);
+        data.WriteBits(1, 2);
+
+        data << float(source.GetPositionZ());
+        data << uint32(0);                  // Unk, sniffed value, not always the same
+        data.WriteByteSeq<5>(playerGuid);
+        data << uint32(1024);               // Unk, sniffed value, not always the same
+        data.WriteByteSeq<0>(playerGuid);
+        data << float(source.GetPositionY());
+        data.WriteByteSeq<7, 1>(playerGuid);
+        data << float(force);
+        data.WriteByteSeq<6, 2, 4>(playerGuid);
+        data << float(source.GetPositionX());
+        data.WriteByteSeq<3>(playerGuid);
+        data << uint32(268441055);          // Unk, sniffed value, not always the same
+
+        SendDirectMessage(&data);
+
+        hasForcedMovement_ = true;
+    }
+    else
+    {
+        if (!hasForcedMovement())
+            return;
+
+        WorldPacket data(SMSG_UNAPPLY_MOVEMENT_FORCE, 2 * 4 + 1 + 8);
+
+        data << uint32(1024);               // Unk, sniffed value, not always the same
+        data << uint32(268441055);          // Unk, sniffed value, not always the same
+
+        data.WriteBitSeq<6, 5, 7, 0, 4, 3, 1, 2>(playerGuid);
+        data.WriteByteSeq<2, 4, 5, 6, 3, 1, 0, 7>(playerGuid);
+
+        SendDirectMessage(&data);
+
+        hasForcedMovement_ = false;
+    }
 }
 
 void Player::SetMover(Unit* target)

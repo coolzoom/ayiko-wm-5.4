@@ -878,10 +878,10 @@ void WorldSession::HandleLoadScreenOpcode(WorldPacket& recvPacket)
     recvPacket >> mapID;
     recvPacket.ReadBit();
 
-    // Refresh spellmods for client
-    // This is Hackypig fix : find a better way
     if (auto const player = GetPlayer())
     {
+        // Refresh spellmods for client
+        // This is Hackypig fix : find a better way
         for (auto const &eff : player->GetAuraEffectsByType(SPELL_AURA_ADD_PCT_MODIFIER))
         {
             player->AddSpellMod(eff->GetSpellModifier(), false);
@@ -892,6 +892,9 @@ void WorldSession::HandleLoadScreenOpcode(WorldPacket& recvPacket)
             player->AddSpellMod(eff->GetSpellModifier(), false);
             player->AddSpellMod(eff->GetSpellModifier(), true);
         }
+
+        if (player->hasForcedMovement())
+            player->SendApplyMovementForce(false, *player);
     }
 }
 

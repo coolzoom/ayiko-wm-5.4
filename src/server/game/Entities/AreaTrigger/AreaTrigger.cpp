@@ -427,7 +427,7 @@ void AreaTrigger::Update(uint32 p_time)
             break;
         }
         case 124503:// Gift of the Ox
-        case 124506:// Gift of the Ox�
+        case 124506:// Gift of the Ox
         {
             std::list<Unit*> targetList;
             radius = 1.0f;
@@ -444,6 +444,26 @@ void AreaTrigger::Update(uint32 p_time)
                 caster->CastSpell(itr, 124507, true); // Gift of the Ox - Heal
                 SetDuration(0);
                 return;
+            }
+
+            break;
+        }
+        case 123461:// Get Away!
+        {
+            std::list<Player*> playerList;
+            GetPlayerListInGrid(playerList, 60.0f);
+
+            for (auto &player : playerList)
+            {
+                if (player->IsWithinDist(caster, 40.0f, false))
+                {
+                    if (player->IsAlive() && !player->hasForcedMovement())
+                        player->SendApplyMovementForce(true, *this, -3.0f);
+                    else if (!player->IsAlive() && player->hasForcedMovement())
+                        player->SendApplyMovementForce(false, *this);
+                }
+                else if (player->hasForcedMovement())
+                    player->SendApplyMovementForce(false, *this);
             }
 
             break;
@@ -475,6 +495,16 @@ void AreaTrigger::Remove()
                 for (auto player : playerList)
                     if (player->HasAura(122706))
                         player->RemoveAura(122706);
+                break;
+            }
+            case 123461:// Get Away!
+            {
+                std::list<Player*> playerList;
+                GetPlayerListInGrid(playerList, 60.0f);
+
+                for (auto &player : playerList)
+                    if (player->hasForcedMovement())
+                        player->SendApplyMovementForce(false, *this);
                 break;
             }
             default:

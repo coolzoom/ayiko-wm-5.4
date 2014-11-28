@@ -2045,3 +2045,15 @@ INSERT INTO `creature_template_currency` (`entry`, `currencyId`, `currencyCount`
 UPDATE gameobject SET spawnMask = 6 WHERE map = 36 AND spawnMask = 3;
 UPDATE creature SET spawnMask = 6 WHERE map = 36 AND spawnMask = 3;
 UPDATE creature SET spawnMask = 4 WHERE map = 36 AND spawnMask = 2;
+
+DELETE FROM spell_group WHERE id = 3000;
+INSERT INTO spell_group (id, spell_id)
+VALUES
+  (3000, 92016),
+  (3000, 92020),
+  (3000, 92029);
+
+DELETE FROM spell_group_stack_rules WHERE group_id = 3000;
+INSERT INTO spell_group_stack_rules (group_id, stack_rule)
+VALUES
+  (3000, 1);

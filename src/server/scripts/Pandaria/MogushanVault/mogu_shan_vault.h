@@ -20,10 +20,7 @@
 #ifndef MOGUSHAN_VAULT_H_
 #define MOGUSHAN_VAULT_H_
 
-#include "SpellScript.h"
-#include "Map.h"
-#include "Creature.h"
-#include "CreatureAIImpl.h"
+#define ENCOUNTERS 6
 
 enum eData
 {
@@ -33,7 +30,7 @@ enum eData
     DATA_SPIRIT_KINGS               = 3,
     DATA_ELEGON                     = 4,
     DATA_WILL_OF_EMPEROR            = 5,
-    DATA_MAX_BOSS_DATA              = 6
+    DATA_MAX_BOSS_DATA
 };
 
 enum eActions
@@ -156,21 +153,10 @@ enum eCreatures
     NPC_EMPEROR_STRENGHT            = 60397,
     NPC_EMPEROR_COURAGE             = 60398,
     NPC_TITAN_SPARK                 = 60480,
-    NPC_LOREWALKER_CHO              = 61348,
     NPC_MOGUSHAN_WARDEN             = 64947,
 
-    NPC_SORCERER_MOGU               = 61250,
-    NPC_MOGU_ARCHER                 = 61345,
-    NPC_KINGSGUARD                  = 61347,
-    NPC_MOUNTED_MOGU                = 61341,
-
-    MOB_SUBETAI                     = 61427,
-    MOB_MENG                        = 61429,
-    MOB_ZIAN                        = 61421,
-    MOB_QIANG                       = 61423,
-
     NPC_GENERAL_PURPOSE_BUNNY_JMF    = 55091,
-    NPC_ANCIENT_MOGU_MACHINE        = 60648
+    NPC_ANCIENT_MOGU_MACHINE         = 60648
 };
 
 enum eGameObjects
@@ -211,14 +197,10 @@ enum eGameObjects
 
     GOB_MOGU_RUNE_FIRST             = 213937,
     GOB_MOGU_RUNE_END               = 213955,
-};
 
-enum ePhases
-{
-    PHASE_WOE_RAGE                  = 1, // WOE = Will Of Emperor
-    PHASE_WOE_STRENGHT              = 2,
-    PHASE_WOE_COURAGE               = 3,
-    PHASE_WOE_GAZ                   = 4
+    // Will of Emperator
+    GOB_TERRACOTTA_DOOR             = 211603,
+    GOB_ANCIEN_CONTROL_CONSOLE      = 211584
 };
 
 enum eAchievementData
@@ -230,6 +212,11 @@ enum eAchievementData
 enum sharedSpells
 {
     SPELL_BERSERK   = 26662,
+};
+
+enum iEvents
+{
+    EVENT_RESET_WOE_CONSOLE = 1
 };
 
 #endif // MOGUSHAN_VAULT_H_

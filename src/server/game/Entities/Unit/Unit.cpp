@@ -15578,6 +15578,8 @@ uint32 Unit::GetPowerIndexByClass(uint32 powerId, uint32 classId) const
             case 60043:
             case 60047:
             case 60051:
+            case 62442:
+            case 63025:
                 return 0;
             default:
                 break;

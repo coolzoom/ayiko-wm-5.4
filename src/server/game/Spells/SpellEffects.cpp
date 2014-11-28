@@ -351,16 +351,22 @@ void Spell::EffectInstaKill(SpellEffIndex /*effIndex*/)
         if (unitTarget->ToPlayer()->GetCommandStatus(CHEAT_GOD))
             return;
 
-        if (m_caster == unitTarget)                              // prevent interrupt message
-            finish();
+    // Try to get original caster
+    Unit * const caster = m_originalCasterGUID ? m_originalCaster : m_caster;
+    if (!caster)
+        return;
 
-        WorldPacket data(SMSG_SPELLINSTAKILLLOG, 8+8+4);
-    data << uint64(m_caster->GetGUID());
+    // prevent interrupt message
+    if (caster == unitTarget)
+        finish();
+
+    WorldPacket data(SMSG_SPELLINSTAKILLLOG, 8+8+4);
+    data << uint64(caster->GetGUID());
     data << uint64(unitTarget->GetGUID());
     data << uint32(m_spellInfo->Id);
-    m_caster->SendMessageToSet(&data, true);
+    caster->SendMessageToSet(&data, true);
 
-    m_caster->DealDamage(unitTarget, unitTarget->GetMaxHealth(), NULL, NODAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+    caster->DealDamage(unitTarget, unitTarget->GetMaxHealth(), NULL, NODAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
 }
 
 void Spell::EffectEnvironmentalDMG(SpellEffIndex /*effIndex*/)

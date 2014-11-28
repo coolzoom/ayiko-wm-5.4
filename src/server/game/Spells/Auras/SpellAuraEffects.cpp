@@ -609,8 +609,18 @@ Unit::AuraApplicationList AuraEffect::GetApplicationList() const
 int32 AuraEffect::CalculateAmount(Unit* caster)
 {
     int32 amount;
-    // default amount calculation
-    amount = m_spellInfo->Effects[m_effIndex].CalcValue(caster, &m_baseAmount, GetBase()->GetOwner()->ToUnit());
+
+    {
+        Item const *castItem = nullptr;
+        if (GetBase()->GetCastItemGUID()
+                && (GetSpellInfo()->AttributesEx11 & SPELL_ATTR11_SCALING_FROM_ITEM)
+                && caster->GetTypeId() == TYPEID_PLAYER)
+        {
+            castItem = caster->ToPlayer()->GetItemByGuid(GetBase()->GetCastItemGUID());
+        }
+
+        amount = m_spellInfo->Effects[m_effIndex].CalcValue(caster, &m_baseAmount, GetBase()->GetOwner()->ToUnit(), castItem);
+    }
 
     // check item enchant aura cast
     if (!amount && caster)
@@ -975,16 +985,14 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                     if (caster == GetBase()->GetUnitOwner())
                         AddPct(amount, GetSpellInfo()->Effects[EFFECT_2].BasePoints);
 
-                    if (holyPower > 3)
-                        holyPower = 3;
-
-                    // Divine Purpose
-                    if (caster->HasAura(90174))
+                    bool hasDivinePurpose = caster->HasAura(90174);
+                    if (holyPower > 3 || hasDivinePurpose)
                         holyPower = 3;
 
                     amount *= holyPower;
 
-                    caster->ModifyPower(POWER_HOLY_POWER, (holyPower > 1) ? (-(holyPower - 1)) : 0);
+                    if (!hasDivinePurpose)
+                        caster->ModifyPower(POWER_HOLY_POWER, (holyPower > 1) ? (-(holyPower - 1)) : 0);
                     break;
                 }
                 default:
@@ -1232,6 +1240,7 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
             break;
 
     }
+
     if (DoneActualBenefit != 0.0f)
     {
         DoneActualBenefit *= caster->CalculateLevelPenalty(GetSpellInfo());

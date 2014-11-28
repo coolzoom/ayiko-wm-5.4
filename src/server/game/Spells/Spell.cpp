@@ -2854,7 +2854,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         SpellNonMeleeDamage damageInfo(caster, unitTarget, m_spellInfo->Id, m_spellSchoolMask);
 
         // Add bonuses and fill damageInfo struct
-        caster->CalculateSpellDamageTaken(&damageInfo, m_damage, m_spellInfo, m_attackType,  target->crit);
+        caster->CalculateSpellDamageTaken(&damageInfo, m_damage, m_spellInfo, m_attackType, target->crit);
         caster->DealDamageMods(damageInfo.target, damageInfo.damage, &damageInfo.absorb);
 
         // Send log damage message to client
@@ -3221,30 +3221,41 @@ void Spell::DoTriggersOnSpellHit(Unit* unit, uint32 effMask)
     // info confirmed with retail sniffs of permafrost and shadow weaving
     if (!m_hitTriggerSpells.empty())
     {
-        int _duration = 0;
+        int32 duration = 0;
         for (HitTriggerSpellList::const_iterator i = m_hitTriggerSpells.begin(); i != m_hitTriggerSpells.end(); ++i)
         {
-            if (CanExecuteTriggersOnHit(effMask, i->triggeredByAura) && roll_chance_i(i->chance))
+            if (!CanExecuteTriggersOnHit(effMask, i->triggeredByAura) || !roll_chance_i(i->chance))
+                continue;
+
+            TC_LOG_DEBUG("spells", "Spell %u triggered spell %u by SPELL_AURA_ADD_TARGET_TRIGGER aura", m_spellInfo->Id, i->triggeredSpell->Id);
+
+            auto triggeredAur = unit->GetAura(i->triggeredSpell->Id, m_caster->GetGUID());
+
+            if (triggeredAur)
+            {
+                triggeredAur->RefreshDuration();
+            }
+            else
             {
                 m_caster->CastSpell(unit, i->triggeredSpell, true);
-
-                // SPELL_AURA_ADD_TARGET_TRIGGER auras shouldn't trigger auras without duration
-                // set duration of current aura to the triggered spell
-                if (i->triggeredSpell->GetDuration() == -1)
-                {
-                    Aura *triggeredAur = unit->GetAura(i->triggeredSpell->Id, m_caster->GetGUID());
-                    if (triggeredAur != NULL)
-                    {
-                        // get duration from aura-only once
-                        if (!_duration)
-                        {
-                            Aura *aur = unit->GetAura(m_spellInfo->Id, m_caster->GetGUID());
-                            _duration = aur ? aur->GetDuration() : -1;
-                        }
-                        triggeredAur->SetDuration(_duration);
-                    }
-                }
+                if (!(triggeredAur = unit->GetAura(i->triggeredSpell->Id, m_caster->GetGUID())))
+                    continue;
             }
+
+            // SPELL_AURA_ADD_TARGET_TRIGGER auras shouldn't trigger auras without duration
+            // set duration of current aura to the triggered spell
+            if (!triggeredAur->IsPermanent())
+                continue;
+
+            // get duration from aura-only once
+            if (duration == 0)
+            {
+                Aura const *aur = unit->GetAura(m_spellInfo->Id, m_caster->GetGUID());
+                duration = aur ? aur->GetDuration() : -1;
+            }
+
+            triggeredAur->SetMaxDuration(duration);
+            triggeredAur->RefreshDuration();
         }
     }
 
@@ -6332,12 +6343,11 @@ void Spell::HandleEffects(Unit* pUnitTarget, Item* pItemTarget, GameObject* pGOT
     gameObjTarget = pGOTarget;
     destTarget = &m_destTargets[i]._position;
 
-    uint8 eff = m_spellInfo->Effects[i].Effect;
+    damage = GetSpellInfo()->Effects[i].CalcValue(m_caster, &m_spellValue.EffectBasePoints[i], unitTarget, m_CastItem);
 
-    damage = CalculateDamage(i, unitTarget);
+    bool const preventDefault = CallScriptEffectHandlers((SpellEffIndex)i, mode);
 
-    bool preventDefault = CallScriptEffectHandlers((SpellEffIndex)i, mode);
-
+    auto const eff = GetSpellInfo()->Effects[i].Effect;
     if (!preventDefault && eff < TOTAL_SPELL_EFFECTS)
     {
         (this->*SpellEffects[eff])((SpellEffIndex)i);
@@ -7203,7 +7213,24 @@ SpellCastResult Spell::CheckCast(bool strict)
                         m_customError = SPELL_CUSTOM_ERROR_HOLDING_FLAG;
                         return SPELL_FAILED_CUSTOM_ERROR;
                     }
-            break;
+                break;
+            }
+            case SPELL_AURA_MOD_PACIFY:
+            {
+                // Hand of Protection is disabled if target is carrying flag
+                if (m_spellInfo->Id == 1022)
+                {
+                    Unit *target = m_targets.GetUnitTarget();
+                    if (!target)
+                        break;
+                    if (target->HasAura(23335) || target->HasAura(23333))
+                    {
+                        this->m_customError = SPELL_CUSTOM_ERROR_HOLDING_FLAG;
+                        return SPELL_FAILED_CUSTOM_ERROR;
+                    }
+                    break;
+                }
+                break;
             }
             default:
                 break;

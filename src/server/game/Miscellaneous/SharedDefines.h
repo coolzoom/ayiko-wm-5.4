@@ -786,6 +786,11 @@ enum SpellAttr10
     SPELL_ATTR10_UNK31                            = 0x80000000  // 31
 };
 
+enum SpellAttr11
+{
+    SPELL_ATTR11_SCALING_FROM_ITEM                = 0x00000004
+};
+
 #define MIN_TALENT_SPEC         0
 #define MAX_TALENT_SPEC         1
 #define MIN_TALENT_SPECS        1

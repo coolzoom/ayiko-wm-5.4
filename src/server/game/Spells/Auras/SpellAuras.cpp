@@ -573,7 +573,7 @@ void Aura::_InitEffects(uint32 effMask, Unit* caster, int32 *baseAmount)
 
     m_effects.resize(GetSpellInfo()->Effects.size());
     for (size_t i = 0; i < m_effects.size(); ++i)
-        if (effMask & (uint8(1) << i))
+        if (effMask & (uint32(1) << i))
             m_effects[i].reset(new AuraEffect(this, i, baseAmount ? baseAmount + i : NULL, caster));
 }
 

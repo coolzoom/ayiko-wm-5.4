@@ -2061,3 +2061,24 @@ VALUES
 DELETE FROM creature_template WHERE entry = 49564;
 INSERT INTO creature_template(entry, difficulty_entry_1, difficulty_entry_2, difficulty_entry_3, KillCredit1, KillCredit2, modelid1, modelid2, modelid3, modelid4, name, subname, IconName, gossip_menu_id, minlevel, maxlevel, exp, exp_unk, faction_A, faction_H, npcflag, speed_walk, speed_run, scale, rank, mindmg, maxdmg, dmgschool, attackpower, dmg_multiplier, baseattacktime, rangeattacktime, unit_class, unit_flags, unit_flags2, dynamicflags, family, trainer_type, trainer_class, trainer_race, minrangedmg, maxrangedmg, rangedattackpower, type, type_flags, type_flags2, lootid, pickpocketloot, skinloot, resistance1, resistance2, resistance3, resistance4, resistance5, resistance6, spell1, spell2, spell3, spell4, spell5, spell6, spell7, spell8, PetSpellDataId, VehicleId, mingold, maxgold, AIName, MovementType, InhabitType, HoverHeight, Health_mod, Mana_mod, Mana_mod_extra, Armor_mod, RacialLeader, questItem1, questItem2, questItem3, questItem4, questItem5, questItem6, movementId, RegenHealth, mechanic_immune_mask, flags_extra, ScriptName, WDBVerified) VALUES
 (49564, 0, 0, 0, 0, 0, 36542, 0, 0, 0, 'A Note From Vanessa', '', 'Interact', 12504, 1, 1, 0, 0, 35, 35, 1, 1, 1.14286, 1, 0, 2, 2, 0, 24, 1, 0, 0, 1, 0, 67141632, 0, 0, 0, 0, 0, 1, 1, 0, 10, 72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'npc_note_from_vanessa', 1);
+
+UPDATE
+  `creature_template`
+SET
+  `dynamicflags` = CASE
+    WHEN `dynamicflags` = 1 THEN 2
+    WHEN `dynamicflags` = 32768 THEN 65536
+    WHEN `dynamicflags` = 33554432 THEN 67108864
+    ELSE `dynamicflags`
+  END
+WHERE
+  `entry` IN (
+    49454,49493,49494,49495,49520,49534,49535,49536,51594,51624,47282,47284,48280,48284,48439,48447,
+    48450,48451,48421,48522,48521,48502,48505,48417,48420,48419,48418,48445,48279,48338,48351,48278,
+    48440,48441,48442,48230,48262,48229,48266,47162,47296,47297,43778,47626,47739,48779,48781,48782,
+    48914,48777,48778,48787,48791,48792,48810,48811,48812,48814,48819,48820,48821,48823,48824,48826,
+    48827,48829,48830,48834,48913,48936,48940,48939,48941,48943,48944,47404,47403,48803,48804,45979,
+    47242,47282,47284,47314,47468,47714,47754,48006,48276,48293,48294,48295,48296,48297,48298,48299,
+    48300,48301,48302,48672,48974,48975,48976,49039,49040,49041,49042,49136,49137,49138,49139,49208,
+    49229,49429,49457,49481,49493,49532,49539,49541,49550,49552,49670,49671,49674,49681,49682,49850,
+    49852,49854,48957,48958,51462,49853,49855);

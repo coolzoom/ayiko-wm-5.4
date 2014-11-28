@@ -1,5 +1,6 @@
 -- [SQL] [Kysio's fix with collaboration by Blue] Items - Honor and Conquest vendor prices corrected (Fixes #8718)
-UPDATE `creature_template` SET `npcflag` = `npcflag`|128, `unit_flags` = `unit_flags`|256, `flags_extra` = `flags_extra`|2 WHERE `entry` IN (69967, 69965, 69981, 69982);
+UPDATE `creature_template` SET `npcflag` = `npcflag`|128, `unit_flags` = 32772, `flags_extra` = `flags_extra`|2 WHERE `entry` IN (69967, 69965, 69981, 69982);
+UPDATE `creature` SET `spawntimesecs` = 30 WHERE `id`IN (69967, 69965, 69981, 69982);
 DELETE FROM `npc_vendor` WHERE `entry` IN (69967, 69965, 69981, 69982);
 INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`, `type`) VALUES
 (69965, 3, 76061, 0, 0, 4312, 1),

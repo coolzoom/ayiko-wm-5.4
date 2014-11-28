@@ -2041,3 +2041,7 @@ INSERT INTO `creature_template_currency` (`entry`, `currencyId`, `currencyCount`
 (48943, 395, 70),
 (48944, 395, 70),
 (49541, 395, 70);
+
+UPDATE gameobject SET spawnMask = 6 WHERE map = 36 AND spawnMask = 3;
+UPDATE creature SET spawnMask = 6 WHERE map = 36 AND spawnMask = 3;
+UPDATE creature SET spawnMask = 4 WHERE map = 36 AND spawnMask = 2;

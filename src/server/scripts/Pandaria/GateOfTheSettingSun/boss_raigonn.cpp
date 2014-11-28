@@ -128,8 +128,6 @@ class boss_raigonn : public CreatureScript
 
                 if (Vehicle* meVehicle = me->GetVehicleKit())
                 {
-                    meVehicle->SetPassengersSpawnedByAI(true);
-
                     if (Unit* passenger = meVehicle->GetPassenger(1)) // Check if weak_spot already spawned
                     {
                         passenger->setFaction(35);
@@ -145,9 +143,6 @@ class boss_raigonn : public CreatureScript
 
                         if (pInstance)
                             pInstance->SetData64(NPC_WEAK_SPOT, weakSpot->GetGUID());
-
-                        if (Vehicle* vehicleWeakSpot = weakSpot->GetVehicleKit())
-                            vehicleWeakSpot->SetCanBeCastedByPassengers(true);
                     }
                 }
             }

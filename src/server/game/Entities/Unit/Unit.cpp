@@ -350,8 +350,6 @@ Unit::Unit(bool isWorldObject): WorldObject(isWorldObject)
     _isWalkingBeforeCharm = false;
 
     m_IsInKillingProcess = false;
-
-    m_SendTransportMoveTimer = 0;
 }
 
 ////////////////////////////////////////////////////////////
@@ -473,23 +471,6 @@ void Unit::Update(uint32 p_time)
         ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, HealthBelowPct(20));
         ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, HealthBelowPct(35));
         ModifyAuraState(AURA_STATE_HEALTH_ABOVE_75_PERCENT, HealthAbovePct(75));
-    }
-
-    if (m_SendTransportMoveTimer != 0)
-    {
-        if (m_SendTransportMoveTimer <= p_time)
-        {
-            Movement::MoveSplineInit init(this);
-            init.DisableTransportPathTransformations();
-            init.MoveTo(m_movementInfo.t_pos.m_positionX, m_movementInfo.t_pos.m_positionY, m_movementInfo.t_pos.m_positionZ);
-            init.SetFacing(0.0f);
-            init.SetTransportEnter();
-            init.Launch();
-
-            m_SendTransportMoveTimer = 0;
-        }
-        else
-            m_SendTransportMoveTimer -= p_time;
     }
 
     UpdateSplineMovement(p_time);
@@ -20064,17 +20045,12 @@ void Unit::_EnterVehicle(Vehicle* vehicle, int8 seatId, AuraApplication const* a
         }
     }
 
+    StopMoving();
     ASSERT(!m_vehicle);
+
     m_vehicle = vehicle;
     if (!m_vehicle->AddPassenger(this, seatId))
-    {
         m_vehicle = NULL;
-        return;
-    }
-
-    // Hack to force refresh of SMSG_TRANSPORT_MONSTER_MOVE
-    // It's needed in somes cases to have correct client-side animation
-    m_SendTransportMoveTimer = 1000;
 }
 
 void Unit::ChangeSeat(int8 seatId, bool next)
@@ -20103,10 +20079,7 @@ void Unit::ExitVehicle(Position const* exitPosition)
         return;
 
     GetVehicleBase()->RemoveAurasByType(SPELL_AURA_CONTROL_VEHICLE, GetGUID());
-
-    if (m_vehicle)
-        if (m_vehicle->ArePassengersSpawnedByAI())
-            _ExitVehicle(exitPosition);
+    _ExitVehicle(exitPosition);
 }
 
 void Unit::_ExitVehicle(Position const* exitPosition)

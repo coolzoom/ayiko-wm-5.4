@@ -3220,6 +3220,9 @@ void SpellMgr::LoadSpellCustomAttr()
             switch (spellInfo->Id)
             {
 #if 1 // Deadmines
+                case 84225: // Vehicle - Switch to Seat 3
+                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
+                    break;
                 case 95495: // Cannonball N
                 case 95496: // Cannonball H
                     spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;

@@ -2118,7 +2118,7 @@ public:
                     case EVENT_SHOOT:
                         {
                             if (Creature* target = Unit::GetCreature(*me, uiTargetGUID))
-                                me->CastSpell(target, 91065, false, NULL, NULL, uiTargetGUID);
+                                me->CastSpell(target, 89697, false, NULL, NULL, uiTargetGUID);
 
                             events.ScheduleEvent(EVENT_SHOOT, urand(2000, 5000));
                         }

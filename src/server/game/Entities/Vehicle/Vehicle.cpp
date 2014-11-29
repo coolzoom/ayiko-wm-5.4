@@ -497,7 +497,7 @@ void Vehicle::RemovePassenger(Unit* unit)
     }
 
     // only for flyable vehicles
-    if (unit->IsFlying())
+    if (unit->IsFlying() && unit->GetTypeId() == TYPEID_PLAYER && !unit->GetMap()->IsDungeon())
         _me->CastSpell(unit, VEHICLE_SPELL_PARACHUTE, true);
 
     if (_me->GetTypeId() == TYPEID_UNIT && _me->ToCreature()->IsAIEnabled)

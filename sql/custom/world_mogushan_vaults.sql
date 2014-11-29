@@ -828,6 +828,10 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
 (@GUID + 1, 60400, 1008, 6125, 6125, 760, 1, 0, 0, 3817.58, 1583.18, 368.22, 3.17812, 300, 0, 0, 360, 0, 0, 0, 0, 0);
+
+DELETE FROM `spell_target_position` WHERE `id` = 127712;
+INSERT INTO `spell_target_position` (`id`, `effIndex`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES 
+(127712, 0, 1008, 3870, 1550, 362.3, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/

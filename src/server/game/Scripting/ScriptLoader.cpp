@@ -663,9 +663,14 @@ void AddSC_boss_gu_cloudstrike();
 void AddSC_boss_master_snowdrift();
 void AddSC_boss_sha_of_violence();
 void AddSC_boss_taran_zhu();
+
 void AddSC_instance_siege_of_niuzao_temple();       // Siege of Niuzao Temple
 void AddSC_siege_of_niuzao_temple();
-void AddSC_boss_jinbak();
+void AddSC_vizier_jinbak();
+void AddSC_commander_vojak();
+void AddSC_general_pavalak();
+void AddSC_wing_leader_neronok();
+
 void AddSC_instance_mogu_shan_vault();              // Mogu'Shan Vault
 void AddSC_mogu_shan_vault();
 void AddSC_boss_stone_guard();
@@ -1416,9 +1421,14 @@ void AddPandariaScripts()
     AddSC_boss_master_snowdrift();
     AddSC_boss_sha_of_violence();
     AddSC_boss_taran_zhu();
-    AddSC_instance_siege_of_niuzao_temple();    // Siege of Niuzao Temple
+
+    AddSC_instance_siege_of_niuzao_temple();       // Siege of Niuzao Temple
     AddSC_siege_of_niuzao_temple();
-    AddSC_boss_jinbak();
+    AddSC_vizier_jinbak();
+    AddSC_commander_vojak();
+    AddSC_general_pavalak();
+    AddSC_wing_leader_neronok();
+
     AddSC_instance_mogu_shan_vault();               // Mogu'Shan Vault
     AddSC_mogu_shan_vault();
     AddSC_boss_stone_guard();

@@ -52,10 +52,13 @@ set(scripts_STAT_SRCS
   Pandaria/ShadopanMonastery/boss_sha_of_violence.cpp
   Pandaria/ShadopanMonastery/boss_taran_zhu.cpp
 
+  Pandaria/SiegeOfNiuzaoTemple/boss_commander_vojak.cpp
+  Pandaria/SiegeOfNiuzaoTemple/boss_general_pavalak.cpp
+  Pandaria/SiegeOfNiuzaoTemple/boss_vizier_jinbak.cpp
+  Pandaria/SiegeOfNiuzaoTemple/boss_wing_leader_neronok.cpp
   Pandaria/SiegeOfNiuzaoTemple/instance_siege_of_niuzao_temple.cpp
   Pandaria/SiegeOfNiuzaoTemple/siege_of_niuzao_temple.cpp
   Pandaria/SiegeOfNiuzaoTemple/siege_of_niuzao_temple.h
-  Pandaria/SiegeOfNiuzaoTemple/boss_jinbak.cpp
 
   Pandaria/MogushanVault/instance_mogu_shan_vault.cpp
   Pandaria/MogushanVault/mogu_shan_vault.cpp

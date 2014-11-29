@@ -1147,8 +1147,8 @@ enum Opcodes
     SMSG_MOVE_CHARACTER_CHEAT_FAILURE                 = 0x932,  // 5.4.0 17399 (JamList) (NYI)
     SMSG_MOVE_CHARACTER_CHEAT_SUCCESS                 = 0x506,  // 5.4.0 17399 (JamList) (NYI)
     SMSG_MOVE_FEATHER_FALL                            = 0x1377, // 5.4.0 17399
-    SMSG_MOVE_GRAVITY_DISABLE                         = 0x000,  // 5.0.5 16048 probably 6087
-    SMSG_MOVE_GRAVITY_ENABLE                          = 0x000,  // 5.0.5 16048
+    SMSG_MOVE_GRAVITY_DISABLE                         = 0x134E, // 5.4.0 17399
+    SMSG_MOVE_GRAVITY_ENABLE                          = 0x175B, // 5.4.0 17399
     SMSG_MOVE_KNOCK_BACK                              = 0x16FA, // 5.4.0 17399
     SMSG_MOVE_LAND_WALK                               = 0x1753, // 5.4.0 17399
     SMSG_MOVE_NORMAL_FALL                             = 0x1A07, // 5.4.0 17399

@@ -29173,6 +29173,34 @@ void Player::SendMovementSetCollisionHeight(float height)
     SendDirectMessage(&data);
 }
 
+bool Player::SetDisableGravity(bool disable, bool packetOnly/*=false*/)
+{
+    if (!packetOnly && !Unit::SetDisableGravity(disable))
+        return false;
+
+    ObjectGuid const guid = GetGUID();
+
+    if (disable)
+    {
+        WorldPacket data(SMSG_MOVE_GRAVITY_DISABLE, 12);
+        data << uint32(0);
+        data.WriteBitSeq<7, 1, 3, 0, 5, 6, 2, 4>(guid);
+        data.WriteByteSeq<4, 6, 0, 5, 3, 1, 2, 7>(guid);
+        SendMessageToSet(&data, true);
+    }
+    else
+    {
+        WorldPacket data(SMSG_MOVE_GRAVITY_ENABLE, 12);
+        data.WriteBitSeq<1, 7, 6, 3, 5, 2, 4, 0>(guid);
+        data.WriteByteSeq<4, 2, 7, 3, 1, 6>(guid);
+        data << uint32(0);
+        data.WriteByteSeq<5, 0>(guid);
+        SendMessageToSet(&data, true);
+    }
+
+    return true;
+}
+
 void Player::SetMover(Unit* target)
 {
     m_mover->m_movedPlayer = NULL;

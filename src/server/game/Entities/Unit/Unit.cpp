@@ -20094,6 +20094,9 @@ void Unit::_ExitVehicle(Position const* exitPosition)
     if (player && player->duel && player->duel->isMounted)
         player->DuelComplete(DUEL_FLED);
 
+    if (player)
+        SetDisableGravity(false);
+
     // This should be done before dismiss, because there may be some aura removal
     Vehicle* vehicle = m_vehicle;
     m_vehicle = NULL;

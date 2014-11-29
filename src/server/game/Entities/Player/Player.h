@@ -2667,6 +2667,7 @@ class Player final : public Unit, public GridObject<Player>
         void SendMovementSetWaterWalking(bool apply);
         void SendMovementSetFeatherFall(bool apply);
         void SendMovementSetCollisionHeight(float height);
+        bool SetDisableGravity(bool disable, bool packetOnly = false) override;
 
         bool CanFly() const { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_CAN_FLY); }
 

@@ -728,6 +728,9 @@ void AddSC_outdoorpvp_zm();
 
 // player
 void AddSC_chat_log();
+
+// custom
+void AddSC_molten_anniversary();
 #endif
 
 void AddScripts()
@@ -1495,5 +1498,6 @@ void AddCustomScripts()
 {
 #ifdef SCRIPTS
     AddSC_darkmoon_faire();
+    AddSC_molten_anniversary();
 #endif
 }

@@ -2067,6 +2067,7 @@ INSERT INTO creature_template(entry, difficulty_entry_1, difficulty_entry_2, dif
 (49851, 0, 0, 0, 0, 0, 36165, 36167, 36166, 36168, 'Defias Enforcer (1)', '', '', 0, 85, 85, 3, 0, 14, 14, 0, 1, 1.14286, 1, 0, 1680, 2399, 0, 492, 21, 2000, 0, 1, 0, 2048, 0, 0, 0, 0, 0, 1, 1, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1.5, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 1);
 
 UPDATE creature_template ct SET ct.unit_class = 8 WHERE entry = 49855;
+UPDATE creature_template ct SET ct.unit_class = 4 WHERE entry = 49853;
 
 UPDATE
   `creature_template`

@@ -325,6 +325,8 @@ public:
                         me->SetReactState(REACT_PASSIVE);
                         me->AttackStop();
                         me->StopMoving();
+                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MoveIdle();
                         me->CastSpell(me, SPELL_CLEARALLDEBUFFS, false);
                         me->RemoveAura(SPELL_DEADLY_BLADES);
                         events.Reset();
@@ -712,11 +714,7 @@ public:
 
     struct npc_defias_shadowguardAI : public ScriptedAI
     {
-        npc_defias_shadowguardAI(Creature* creature) : ScriptedAI(creature)
-        {
-            me->setPowerType(POWER_ENERGY);
-            me->SetMaxPower(POWER_ENERGY, 100);
-        }
+        npc_defias_shadowguardAI(Creature* creature) : ScriptedAI(creature) { }
 
         EventMap events;
         bool Enrage;

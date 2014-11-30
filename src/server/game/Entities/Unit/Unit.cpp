@@ -15674,7 +15674,7 @@ uint32 Unit::GetPowerIndex(uint32 powerType) const
     // NPC rogues, as they still expect index = 0. May be it's possible to fix
     // filling UNIT_FIELD_DISPLAY_POWER and/or UNIT_OVERRIDE_DISPLAY_POWER_ID,
     // but we don't know what to put there yet.
-    if (powerType == POWER_ENERGY && GetTypeId() != TYPEID_PLAYER)
+    if (GetTypeId() != TYPEID_PLAYER && powerType == POWER_ENERGY && getClass() == CLASS_ROGUE)
         return 0;
 
     return GetPowerIndexByClass(powerType, getClass());

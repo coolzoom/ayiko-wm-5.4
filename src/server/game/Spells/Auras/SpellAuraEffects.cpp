@@ -1651,10 +1651,6 @@ void AuraEffect::Update(uint32 diff, Unit* caster)
                         case 43265:
                             GetCaster()->CastSpell(d_owner->GetPositionX(), d_owner->GetPositionY(), d_owner->GetPositionZ(), 52212, true);
                             break;
-                        // Smoke Bomb
-                        case 76577:
-                            GetCaster()->CastSpell(d_owner->GetPositionX(), d_owner->GetPositionY(), d_owner->GetPositionZ(), 88611, true);
-                            break;
                         // Consecration
                         case 36946:
                             GetCaster()->CastSpell(d_owner->GetPositionX(), d_owner->GetPositionY(), d_owner->GetPositionZ(), 81297, true);

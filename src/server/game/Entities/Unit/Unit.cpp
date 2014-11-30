@@ -20654,63 +20654,41 @@ void Unit::SendClearTarget()
     SendMessageToSet(&data, false);
 }
 
-bool Unit::IsVisionObscured(Unit* victim, SpellInfo const* spellInfo)
+bool Unit::IsVisionObscured(Unit* victim, SpellInfo const * spellInfo)
 {
-    Aura *victimAura = NULL;
-    Aura *myAura = NULL;
-    Unit* victimCaster = NULL;
-    Unit* myCaster = NULL;
+    Aura* victimAura = nullptr;
+    Aura* myAura = nullptr;
+    Unit* victimCaster = nullptr;
+    Unit* myCaster = nullptr;
 
     AuraEffectList const& vAuras = victim->GetAuraEffectsByType(SPELL_AURA_INTERFERE_TARGETTING);
-    for (AuraEffectList::const_iterator i = vAuras.begin(); i != vAuras.end(); ++i)
+    if (!vAuras.empty())
     {
-        victimAura = (*i)->GetBase();
+        victimAura = vAuras.front()->GetBase();
         victimCaster = victimAura->GetCaster();
-        break;
     }
+
     AuraEffectList const& myAuras = GetAuraEffectsByType(SPELL_AURA_INTERFERE_TARGETTING);
-    for (AuraEffectList::const_iterator i = myAuras.begin(); i != myAuras.end(); ++i)
+    if (!myAuras.empty())
     {
-        myAura = (*i)->GetBase();
+        myAura = myAuras.front()->GetBase();
         myCaster = myAura->GetCaster();
-        break;
     }
+
+    // Stealth openers on camouflage are possible but not Sap
+    if (victimAura && victimAura->GetId() == 51755 && (spellInfo->Attributes & SPELL_ATTR0_ONLY_STEALTHED) && spellInfo->Id != 6770)
+        return false;
 
     if ((myAura != NULL && myCaster == NULL) || (victimAura != NULL && victimCaster == NULL))
-        return false; // Failed auras, will result in crash
+        return false;
 
-    // E.G. Victim is in smoke bomb, and I'm not
-    // Spells fail unless I'm friendly to the caster of victim's smoke bomb
+    // Victim is affected
     if (victimAura != NULL && myAura == NULL)
-    {
-        if (IsFriendlyTo(victimCaster) || spellInfo->GetMaxRange(false) <= 5.0f)
-            return false;
-        else
-            return true;
-    }
-    // Victim is not in smoke bomb, while I am
-    // Spells fail if my smoke bomb aura's caster is my enemy
+        return !IsFriendlyTo(victimCaster);
+    // I am affected
     else if (myAura != NULL && victimAura == NULL)
-    {
-        if (IsFriendlyTo(myCaster))
-            return false;
-        else
-            return true;
-    }
-    // Victim and caster have aura with effect SPELL_AURA_INTERFERE_TARGETTING, but aura may be not smoke bomb.
-    else if (myAura != NULL && victimAura != NULL)
-    {
-        for (uint8 i = 0; i < myAura->GetSpellInfo()->Effects.size(); ++i)
-        {
-            if (auto const effect = myAura->GetEffect(i))
-            {
-                if (effect->GetAuraType() != SPELL_AURA_INTERFERE_TARGETTING)
-                    continue;
-                if (effect->GetAmount() && !IsFriendlyTo(victimCaster))
-                    return true;
-            }
-        }
-    }
+        return !IsFriendlyTo(myCaster);
+
     return false;
 }
 

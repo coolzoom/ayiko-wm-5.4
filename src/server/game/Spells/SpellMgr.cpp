@@ -5547,7 +5547,7 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 73920: // Healing Rain
                     spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_PERSISTENT_AREA_AURA;
                     spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
-                    spellInfo->Effects[EFFECT_0].TargetB = TARGET_DEST_DYNOBJ_NONE;
+                    spellInfo->Effects[EFFECT_0].TargetB = TARGET_DEST_DYNOBJ_ALL_UNITS;
                     spellInfo->Effects[EFFECT_1].BasePoints = 0;
                     break;
                 case 86346: // Colossus Smash - swap effects

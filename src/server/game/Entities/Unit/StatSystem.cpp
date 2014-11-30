@@ -898,13 +898,12 @@ void Player::ApplyHealthRegenBonus(int32 amount, bool apply)
 
 void Player::UpdateManaRegen()
 {
-    if (getPowerType() != POWER_MANA && !IsInFeralForm())
+    if (GetPowerIndex(POWER_MANA) == MAX_POWERS)
         return;
 
     // Mana regen from spirit
     float spirit_regen = OCTRegenMPPerSpirit();
     // Apply PCT bonus from SPELL_AURA_MOD_POWER_REGEN_PERCENT aura on spirit base regen
-
 
     // SpiritRegen(SPI, INT, LEVEL) = (0.001 + (SPI x sqrt(INT) x BASE_REGEN[LEVEL])) x 5
     if (GetStat(STAT_INTELLECT) > 0.0f)

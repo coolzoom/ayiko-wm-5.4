@@ -10132,6 +10132,9 @@ bool Unit::HandleOverrideClassScriptAuraProc(Unit* victim, uint32 /*damage*/, Au
 
 void Unit::setPowerType(Powers new_powertype)
 {
+    if (getPowerType() == new_powertype)
+        return;
+
     SetUInt32Value(UNIT_FIELD_DISPLAY_POWER, new_powertype);
 
     if (GetTypeId() == TYPEID_PLAYER)
@@ -12022,7 +12025,7 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask)
         DoneAdvertisedBenefit += ToPlayer()->GetBaseSpellPowerBonus();
 
         // Check if we are ever using mana - PaperDollFrame.lua
-        if (GetPowerIndexByClass(POWER_MANA, getClass()) != MAX_POWERS)
+        if (GetPowerIndex(POWER_MANA) != MAX_POWERS)
             DoneAdvertisedBenefit += std::max(0, int32(GetStat(STAT_INTELLECT)) - 10); // spellpower from intellect
 
         // Spell power from SPELL_AURA_MOD_SPELL_POWER_PCT
@@ -12707,6 +12710,10 @@ int32 Unit::SpellBaseHealingBonusDone(SpellSchoolMask schoolMask)
     {
         // Base value
         AdvertisedBenefit += ToPlayer()->GetBaseSpellPowerBonus();
+
+        // Check if we are ever using mana - PaperDollFrame.lua
+        if (GetPowerIndex(POWER_MANA) != MAX_POWERS)
+            AdvertisedBenefit += std::max(0, int32(GetStat(STAT_INTELLECT)) - 10);  // spellpower from intellect
 
         // Healing bonus from stats
         AuraEffectList const& mHealingDoneOfStatPercent = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT);
@@ -15545,53 +15552,9 @@ void Unit::SetMaxHealth(uint32 val)
         SetHealth(val);
 }
 
-uint32 Unit::GetPowerIndexByClass(uint32 powerId, uint32 classId) const
-{
-    if (powerId == POWER_ENERGY)
-    {
-        if (ToPet() && ToPet()->IsWarlockPet())
-            return 0;
-
-        switch (this->GetEntry())
-        {
-            case 26125:
-            case 59915:
-            case 60043:
-            case 60047:
-            case 60051:
-                return 0;
-            default:
-                break;
-        }
-    }
-
-    ChrClassesEntry const* classEntry = sChrClassesStore.LookupEntry(classId);
-
-    ASSERT(classEntry && "Class not found");
-
-    uint32 index = 0;
-    for (uint32 i = 0; i <= sChrPowerTypesStore.GetNumRows(); ++i)
-    {
-        ChrPowerTypesEntry const* powerEntry = sChrPowerTypesStore.LookupEntry(i);
-        if (!powerEntry)
-            continue;
-
-        if (powerEntry->classId != classId)
-            continue;
-
-        if (powerEntry->power == powerId)
-            return index;
-
-        ++index;
-    }
-
-    // return invalid value - this class doesn't use this power
-    return MAX_POWERS;
-};
-
 int32 Unit::GetPower(Powers power) const
 {
-    uint32 powerIndex = GetPowerIndexByClass(power, getClass());
+    uint32 powerIndex = GetPowerIndex(power);
     if (powerIndex == MAX_POWERS)
         return 0;
 
@@ -15600,7 +15563,7 @@ int32 Unit::GetPower(Powers power) const
 
 int32 Unit::GetMaxPower(Powers power) const
 {
-    uint32 powerIndex = GetPowerIndexByClass(power, getClass());
+    uint32 powerIndex = GetPowerIndex(power);
     if (powerIndex == MAX_POWERS)
         return 0;
 
@@ -15609,7 +15572,7 @@ int32 Unit::GetMaxPower(Powers power) const
 
 void Unit::SetPower(Powers power, int32 val, bool sendLog)
 {
-    uint32 powerIndex = GetPowerIndexByClass(power, getClass());
+    uint32 powerIndex = GetPowerIndex(power);
     if (powerIndex == MAX_POWERS)
         return;
 
@@ -15677,7 +15640,7 @@ void Unit::SetPower(Powers power, int32 val, bool sendLog)
 
 void Unit::SetMaxPower(Powers power, int32 val)
 {
-    uint32 powerIndex = GetPowerIndexByClass(power, getClass());
+    uint32 powerIndex = GetPowerIndex(power);
     if (powerIndex == MAX_POWERS)
         return;
 
@@ -15702,6 +15665,19 @@ void Unit::SetMaxPower(Powers power, int32 val)
 
     if (val < cur_power)
         SetPower(power, val);
+}
+
+uint32 Unit::GetPowerIndex(uint32 powerType) const
+{
+    // FIXME According to ChrClassesXPowerTypes.dbc, rogues have POWER_MANA too
+    // now, and POWER_ENERGY has index = 1 there. However, it does not work for
+    // NPC rogues, as they still expect index = 0. May be it's possible to fix
+    // filling UNIT_FIELD_DISPLAY_POWER and/or UNIT_OVERRIDE_DISPLAY_POWER_ID,
+    // but we don't know what to put there yet.
+    if (powerType == POWER_ENERGY && GetTypeId() != TYPEID_PLAYER)
+        return 0;
+
+    return GetPowerIndexByClass(powerType, getClass());
 }
 
 int32 Unit::GetCreatePowers(Powers power) const

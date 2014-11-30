@@ -587,6 +587,11 @@ void Pet::Regenerate(Powers power)
     if (curValue >= maxValue)
         return;
 
+    // Skip regeneration for power type we cannot have
+    auto const powerIndex = GetPowerIndex(power);
+    if (powerIndex == MAX_POWERS)
+        return;
+
     float addvalue = 0.0f;
     float rangedHaste = (isHunterPet() && GetOwner()) ? GetOwner()->ToPlayer()->GetFloatValue(UNIT_FIELD_MOD_RANGED_HASTE) : 0.0f;
 

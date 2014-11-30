@@ -101,7 +101,8 @@ public:
                     warlord->RemoveAurasDueToSpell(SPELL_WARLORDS_RAGE);
                 }
 
-                instance->SetData(TYPE_DISTILLER, DONE);
+                if (instance)
+                    instance->SetData(TYPE_DISTILLER, DONE);
             }
         }
     };

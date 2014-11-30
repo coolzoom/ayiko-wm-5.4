@@ -4116,9 +4116,6 @@ void Unit::RemoveAurasByType(AuraType auraType, uint64 casterGUID, Aura *exceptA
 
         ++iter;
 
-        if (aura->GetSpellInfo()->Id == 1784 && HasAura(115192))
-            continue;
-
         if (aura != exceptAura && (!exceptAuraId || aura->GetId() != exceptAuraId) &&
             (!casterGUID || aura->GetCasterGUID() == casterGUID) &&
             ((negative && !aurApp->IsPositive()) || (positive && aurApp->IsPositive())))
@@ -4195,8 +4192,13 @@ void Unit::RemoveAurasWithInterruptFlags(uint32 flag, uint32 except)
         ++iter;
         if ((aura->GetSpellInfo()->AuraInterruptFlags & flag) && (!except || aura->GetId() != except))
         {
-            if (aura->GetSpellInfo()->Id == 1784 && HasAura(115192))
+            // Subterfuge - Do not remove stealth aura
+            if (aura->GetSpellInfo()->Id == 115191 && HasAura(108208))
+            {
+                if (!HasAura(115192))
+                    CastSpell(this, 115192, true);
                 continue;
+            }
 
             uint32 removedAuras = m_removedAurasCount;
             RemoveAura(aura);
@@ -13430,10 +13432,6 @@ void Unit::Mount(uint32 mount, uint32 VehicleId, uint32 creatureEntry)
             }
         }
 
-        // Remove subterfuge just AFTER cast
-        if (player->HasAura(115192))
-            player->RemoveAura(115192);
-
         // don't unsummon pet but SetFlag UNIT_FLAG_STUNNED to disable pet's interface
         if (Pet* pet = player->GetPet())
             pet->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
@@ -16635,8 +16633,18 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
         }
 
         // Hack Fix : Stealth is not removed on absorb damage
-        if (spellInfo->HasAura(SPELL_AURA_MOD_STEALTH) && procExtra & PROC_EX_ABSORB && isVictim)
-            useCharges = false;
+        if (spellInfo->HasAura(SPELL_AURA_MOD_STEALTH))
+        {
+            if (procExtra & PROC_EX_ABSORB && isVictim)
+                useCharges = false;
+            // Do not break stealth in normal way
+            if (HasAura(108208))
+            {
+                useCharges = false;
+                if (!HasAura(115192))
+                    CastSpell(this, 115192, true);
+            }
+        }
 
         // Note: must SetCantProc(false) before return
         if (spellInfo->AttributesEx3 & SPELL_ATTR3_DISABLE_PROC)

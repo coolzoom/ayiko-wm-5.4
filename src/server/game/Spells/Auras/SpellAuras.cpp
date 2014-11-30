@@ -1900,6 +1900,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             }
                         }
                         break;
+                    case 115192: // Subterfuge - Remove Stealth aura
+                        target->RemoveAurasDueToSpell(115191);
+                        break;
                 }
                 break;
             case SPELLFAMILY_MAGE:

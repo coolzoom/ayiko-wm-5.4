@@ -3619,16 +3619,6 @@ bool SpellInfo::IsNeedAdditionalLosChecks() const
 
 bool SpellInfo::IsBreakingStealth(Unit* m_caster) const
 {
-    if (m_caster && m_caster->HasAura(115192))
-        return false;
-
-    // Hearthstone shoudn't call subterfuge
-    if ((SpellIconID == 776 || SpellFamilyName == SPELLFAMILY_POTION) && m_caster->HasAura(115191) && !m_caster->HasAura(115192))
-    {
-        m_caster->RemoveAura(115191);
-        return true;
-    }
-
     switch (GetSpellSpecific())
     {
         case SPELL_SPECIFIC_FOOD:
@@ -3639,23 +3629,7 @@ bool SpellInfo::IsBreakingStealth(Unit* m_caster) const
             break;
     }
 
-    bool callSubterfuge = true;
-
-    if (m_caster && m_caster->HasAura(108208) && m_caster->HasAura(115191) && !m_caster->HasAura(115192) && !HasAttribute(SPELL_ATTR1_NOT_BREAK_STEALTH) && !m_caster->HasAura(51713))
-    {
-        // mount shouldn't call subterfuge
-        for (auto const &spellEffect : Effects)
-            if (spellEffect.ApplyAuraName == SPELL_AURA_MOUNTED)
-                callSubterfuge = false;
-
-        if (callSubterfuge)
-        {
-            m_caster->CastSpell(m_caster, 115192, true);
-            return false;
-        }
-    }
-
-    if (m_caster && m_caster->HasAura(115191))
+    if (m_caster && m_caster->HasAura(115192))
         return false;
 
     switch(Id)

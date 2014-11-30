@@ -1900,6 +1900,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             }
                         }
                         break;
+                    case 115192: // Subterfuge - Remove Stealth aura
+                        target->RemoveAurasDueToSpell(115191);
+                        break;
                 }
                 break;
             case SPELLFAMILY_MAGE:
@@ -3237,6 +3240,12 @@ void DynObjAura::FillTargetMap(std::map<Unit*, uint32> & targets, Unit* /*caster
         {
             Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(GetDynobjOwner(), dynObjOwnerCaster, radius);
             Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(GetDynobjOwner(), targetList, u_check);
+            Trinity::VisitNearbyObject(GetOwner(), radius, searcher);
+        }
+        else if (GetSpellInfo()->Effects[effIndex].TargetB.GetTarget() == TARGET_DEST_DYNOBJ_ALL_UNITS)
+        {
+            Trinity::AnyUnitInObjectRangeCheck u_check(GetDynobjOwner(), radius);
+            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(GetDynobjOwner(), targetList, u_check);
             Trinity::VisitNearbyObject(GetOwner(), radius, searcher);
         }
         else if (GetSpellInfo()->Effects[effIndex].Effect != SPELL_EFFECT_CREATE_AREATRIGGER)

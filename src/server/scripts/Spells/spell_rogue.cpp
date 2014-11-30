@@ -46,8 +46,6 @@ enum RogueSpells
     ROGUE_SPELL_DEADLY_POISON_DOT                = 2818,
     ROGUE_SPELL_DEADLY_POISON_INSTANT_DAMAGE     = 113780,
     ROGUE_SPELL_SLICE_AND_DICE                   = 5171,
-    ROGUE_SPELL_SMOKE_BOMB_AREA_DUMMY            = 76577,
-    ROGUE_SPELL_SMOKE_BOMB_AURA                  = 88611,
     ROGUE_SPELL_MASTER_POISONER_AURA             = 58410,
     ROGUE_SPELL_MASTER_POISONER_DEBUFF           = 93068,
     ROGUE_SPELL_CRIMSON_TEMPEST_DOT              = 122233,
@@ -1444,6 +1442,60 @@ public:
     }
 };
 
+// 76577 Smoke Bomb
+class spell_rog_smoke_bomb : public SpellScriptLoader
+{
+    enum
+    {
+        SPELL_SMOKE_BOMB_EFFECT = 88611
+    };
+
+    class aura_impl : public AuraScript
+    {
+        PrepareAuraScript(aura_impl)
+
+        void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit * target = GetTarget())
+                target->RemoveAurasDueToSpell(SPELL_SMOKE_BOMB_EFFECT);
+        }
+
+        void HandleEffectApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            Unit * target = GetTarget();
+            Unit * caster = GetCaster();
+            if (!target || !caster)
+                return;
+
+            if (!caster->IsFriendlyTo(target))
+                target->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
+
+            const SpellInfo * spell = sSpellMgr->GetSpellInfo(SPELL_SMOKE_BOMB_EFFECT);
+
+            if (Aura * const aur = Aura::TryCreate(spell, (1 << EFFECT_0), target, caster, &spell->spellPower))
+            {
+                int32 duration = aurEff->GetBase()->GetDuration();
+                aur->SetMaxDuration(duration);
+                aur->SetDuration(duration);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectRemove += AuraEffectRemoveFn(aura_impl::HandleEffectRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            OnEffectApply += AuraEffectApplyFn(aura_impl::HandleEffectApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+public:
+    spell_rog_smoke_bomb() : SpellScriptLoader("spell_rog_smoke_bomb") { }
+
+    AuraScript* GetAuraScript() const
+    {
+        return new aura_impl();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_glyph_of_expose_armor();
@@ -1474,4 +1526,5 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_shadowstep();
     new spell_rog_marked_for_death();
     new spell_rog_cloak_and_dagger();
+    new spell_rog_smoke_bomb();
 }

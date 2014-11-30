@@ -32,20 +32,24 @@ EndContentData */
 #include "ScriptedCreature.h"
 #include "steam_vault.h"
 
-#define SAY_MECHANICS               -1545007
-#define SAY_AGGRO_1                 -1545008
-#define SAY_AGGRO_2                 -1545009
-#define SAY_AGGRO_3                 -1545010
-#define SAY_AGGRO_4                 -1545011
-#define SAY_SLAY_1                  -1545012
-#define SAY_SLAY_2                  -1545013
-#define SAY_SLAY_3                  -1545014
-#define SAY_DEATH                   -1545015
+enum Yells
+{
+    SAY_MECHANICS = 0,
+    SAY_AGGRO = 1,
+    SAY_SLAY = 2,
+    SAY_DEATH = 3
+};
 
-#define SPELL_SUPER_SHRINK_RAY      31485
-#define SPELL_SAW_BLADE             31486
-#define SPELL_ELECTRIFIED_NET       35107
-#define H_SPELL_ENRAGE              1                       //corrent enrage spell not known
+enum Spells
+{
+    SPELL_SUPER_SHRINK_RAY = 31485,
+    SPELL_SAW_BLADE = 31486,
+    SPELL_ELECTRIFIED_NET = 35107,
+
+    SPELL_DISPEL_MAGIC = 17201,
+    SPELL_REPAIR = 31532,
+    H_SPELL_REPAIR = 37936
+};
 
 #define ENTRY_STREAMRIGGER_MECHANIC 17951
 
@@ -99,12 +103,12 @@ public:
 
         void KilledUnit(Unit* /*victim*/)
         {
-            DoScriptText(RAND(SAY_SLAY_1, SAY_SLAY_2, SAY_SLAY_3), me);
+            Talk(SAY_SLAY);
         }
 
         void EnterCombat(Unit* /*who*/)
         {
-            DoScriptText(RAND(SAY_AGGRO_1, SAY_AGGRO_2, SAY_AGGRO_3), me);
+            Talk(SAY_AGGRO);
 
             if (instance)
                 instance->SetData(TYPE_MEKGINEER_STEAMRIGGER, IN_PROGRESS);
@@ -113,7 +117,7 @@ public:
         //no known summon spells exist
         void SummonMechanichs()
         {
-            DoScriptText(SAY_MECHANICS, me);
+            Talk(SAY_MECHANICS);
 
             DoSpawnCreature(ENTRY_STREAMRIGGER_MECHANIC, 5, 5, 0, 0, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 240000);
             DoSpawnCreature(ENTRY_STREAMRIGGER_MECHANIC, -5, 5, 0, 0, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 240000);
@@ -185,10 +189,6 @@ public:
     };
 
 };
-
-#define SPELL_DISPEL_MAGIC          17201
-#define SPELL_REPAIR                31532
-#define H_SPELL_REPAIR              37936
 
 #define MAX_REPAIR_RANGE            (13.0f)                 //we should be at least at this range for repair
 #define MIN_REPAIR_RANGE            (7.0f)                  //we can stop movement at this range to repair but not required

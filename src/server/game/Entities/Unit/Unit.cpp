@@ -4097,9 +4097,6 @@ void Unit::RemoveAurasByType(AuraType auraType, uint64 casterGUID, Aura *exceptA
 
         ++iter;
 
-        if (aura->GetSpellInfo()->Id == 1784 && HasAura(115192))
-            continue;
-
         if (aura != exceptAura && (!exceptAuraId || aura->GetId() != exceptAuraId) &&
             (!casterGUID || aura->GetCasterGUID() == casterGUID) &&
             ((negative && !aurApp->IsPositive()) || (positive && aurApp->IsPositive())))
@@ -4176,8 +4173,13 @@ void Unit::RemoveAurasWithInterruptFlags(uint32 flag, uint32 except)
         ++iter;
         if ((aura->GetSpellInfo()->AuraInterruptFlags & flag) && (!except || aura->GetId() != except))
         {
-            if (aura->GetSpellInfo()->Id == 1784 && HasAura(115192))
+            // Subterfuge - Do not remove stealth aura
+            if (aura->GetSpellInfo()->Id == 115191 && HasAura(108208))
+            {
+                if (!HasAura(115192))
+                    CastSpell(this, 115192, true);
                 continue;
+            }
 
             uint32 removedAuras = m_removedAurasCount;
             RemoveAura(aura);
@@ -13418,10 +13420,6 @@ void Unit::Mount(uint32 mount, uint32 VehicleId, uint32 creatureEntry)
             }
         }
 
-        // Remove subterfuge just AFTER cast
-        if (player->HasAura(115192))
-            player->RemoveAura(115192);
-
         // don't unsummon pet but SetFlag UNIT_FLAG_STUNNED to disable pet's interface
         if (Pet* pet = player->GetPet())
             pet->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
@@ -16591,9 +16589,19 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
             }
         }
 
-        // Hack Fix : Stealth is not removed on absorb damage
-        if (spellInfo->HasAura(SPELL_AURA_MOD_STEALTH) && procExtra & PROC_EX_ABSORB && isVictim)
-            useCharges = false;
+        if (spellInfo->HasAura(SPELL_AURA_MOD_STEALTH))
+        {
+            // Hack Fix : Stealth is not removed on absorb damage
+            if ((procExtra & PROC_EX_ABSORB && isVictim))
+                useCharges = false;
+            // Do not break stealth with Subterfuge or Vanish in normal way
+            if (HasAura(108208) || HasAura(131369))
+            {
+                useCharges = false;
+                if (!HasAura(115192) && !HasAura(131369))
+                    CastSpell(this, 115192, true);
+            }
+        }
 
         // Note: must SetCantProc(false) before return
         if (spellInfo->AttributesEx3 & SPELL_ATTR3_DISABLE_PROC)
@@ -20601,63 +20609,41 @@ void Unit::SendClearTarget()
     SendMessageToSet(&data, false);
 }
 
-bool Unit::IsVisionObscured(Unit* victim, SpellInfo const* spellInfo)
+bool Unit::IsVisionObscured(Unit* victim, SpellInfo const * spellInfo)
 {
-    Aura *victimAura = NULL;
-    Aura *myAura = NULL;
-    Unit* victimCaster = NULL;
-    Unit* myCaster = NULL;
+    Aura* victimAura = nullptr;
+    Aura* myAura = nullptr;
+    Unit* victimCaster = nullptr;
+    Unit* myCaster = nullptr;
 
     AuraEffectList const& vAuras = victim->GetAuraEffectsByType(SPELL_AURA_INTERFERE_TARGETTING);
-    for (AuraEffectList::const_iterator i = vAuras.begin(); i != vAuras.end(); ++i)
+    if (!vAuras.empty())
     {
-        victimAura = (*i)->GetBase();
+        victimAura = vAuras.front()->GetBase();
         victimCaster = victimAura->GetCaster();
-        break;
     }
+
     AuraEffectList const& myAuras = GetAuraEffectsByType(SPELL_AURA_INTERFERE_TARGETTING);
-    for (AuraEffectList::const_iterator i = myAuras.begin(); i != myAuras.end(); ++i)
+    if (!myAuras.empty())
     {
-        myAura = (*i)->GetBase();
+        myAura = myAuras.front()->GetBase();
         myCaster = myAura->GetCaster();
-        break;
     }
+
+    // Stealth openers on camouflage are possible but not Sap
+    if (victimAura && victimAura->GetId() == 51755 && (spellInfo->Attributes & SPELL_ATTR0_ONLY_STEALTHED) && spellInfo->Id != 6770)
+        return false;
 
     if ((myAura != NULL && myCaster == NULL) || (victimAura != NULL && victimCaster == NULL))
-        return false; // Failed auras, will result in crash
+        return false;
 
-    // E.G. Victim is in smoke bomb, and I'm not
-    // Spells fail unless I'm friendly to the caster of victim's smoke bomb
+    // Victim is affected
     if (victimAura != NULL && myAura == NULL)
-    {
-        if (IsFriendlyTo(victimCaster) || spellInfo->GetMaxRange(false) <= 5.0f)
-            return false;
-        else
-            return true;
-    }
-    // Victim is not in smoke bomb, while I am
-    // Spells fail if my smoke bomb aura's caster is my enemy
+        return !IsFriendlyTo(victimCaster);
+    // I am affected
     else if (myAura != NULL && victimAura == NULL)
-    {
-        if (IsFriendlyTo(myCaster))
-            return false;
-        else
-            return true;
-    }
-    // Victim and caster have aura with effect SPELL_AURA_INTERFERE_TARGETTING, but aura may be not smoke bomb.
-    else if (myAura != NULL && victimAura != NULL)
-    {
-        for (uint8 i = 0; i < myAura->GetSpellInfo()->Effects.size(); ++i)
-        {
-            if (auto const effect = myAura->GetEffect(i))
-            {
-                if (effect->GetAuraType() != SPELL_AURA_INTERFERE_TARGETTING)
-                    continue;
-                if (effect->GetAmount() && !IsFriendlyTo(victimCaster))
-                    return true;
-            }
-        }
-    }
+        return !IsFriendlyTo(myCaster);
+
     return false;
 }
 

@@ -1677,7 +1677,7 @@ void Spell::SelectImplicitDestDestTargets(SpellEffIndex effIndex, SpellImplicitT
     {
         case TARGET_DEST_DYNOBJ_ENEMY:
         case TARGET_DEST_DYNOBJ_ALLY:
-        case TARGET_DEST_DYNOBJ_NONE:
+        case TARGET_DEST_DYNOBJ_ALL_UNITS:
         case TARGET_DEST_DEST:
             return;
         case TARGET_DEST_TRAJ:
@@ -6574,8 +6574,9 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (!(m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS) && !DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->Id, NULL, SPELL_DISABLE_LOS) && !m_caster->IsWithinLOSInMap(target))
                         return SPELL_FAILED_LINE_OF_SIGHT;
 
+                // Smoke Bomb, Camouflage
                 if (m_caster->IsVisionObscured(target, m_spellInfo))
-                    return SPELL_FAILED_VISION_OBSCURED; // smoke bomb, camouflage...
+                    return SPELL_FAILED_VISION_OBSCURED;
             }
         }
     }

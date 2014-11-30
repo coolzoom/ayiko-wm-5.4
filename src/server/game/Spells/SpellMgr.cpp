@@ -4636,25 +4636,8 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 1784:  // Stealth
                     spellInfo->OverrideSpellList.push_back(115191); // Add Stealth (talent) to override spell list of Stealth
                     break;
-                case 115191:// Subterfuge
-                    spellInfo->Attributes |= SPELL_ATTR0_DISABLED_WHILE_ACTIVE;
-                    spellInfo->Attributes |= SPELL_ATTR0_ABILITY;
-                    spellInfo->Attributes |= SPELL_ATTR0_NOT_SHAPESHIFT;
-                    spellInfo->Attributes |= SPELL_ATTR0_DONT_AFFECT_SHEATH_STATE;
-                    spellInfo->Attributes |= SPELL_ATTR0_STOP_ATTACK_TARGET;
-                    spellInfo->Attributes |= SPELL_ATTR0_CASTABLE_WHILE_SITTING;
-                    spellInfo->Attributes |= SPELL_ATTR0_CANT_USED_IN_COMBAT;
-                    spellInfo->AttributesEx |= SPELL_ATTR1_UNK4;
-                    spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
-                    spellInfo->AttributesEx2 |= SPELL_ATTR2_DAMAGE_REDUCED_SHIELD;
-                    spellInfo->AttributesEx3 |= SPELL_ATTR3_CAN_PROC_WITH_TRIGGERED;
-                    spellInfo->AttributesEx4 |= SPELL_ATTR4_UNK19;
-                    spellInfo->AttributesEx8 |= SPELL_ATTR8_AURA_SEND_AMOUNT;
-                    break;
-                case 115192:// Subterfuge
-                    spellInfo->Attributes |= SPELL_ATTR0_DONT_AFFECT_SHEATH_STATE;
-                    spellInfo->Attributes |= SPELL_ATTR0_NOT_SHAPESHIFT;
-                    spellInfo->AttributesEx |= SPELL_ATTR1_NOT_BREAK_STEALTH;
+                case 115191: // Stealth (from Subterfuge)
+                    spellInfo->AuraInterruptFlags = 0x08023C04;
                     break;
                 case 36554: // Shadowstep
                 case 36563: // Shadowstep (trigger)
@@ -5714,7 +5697,7 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 73920: // Healing Rain
                     spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_PERSISTENT_AREA_AURA;
                     spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
-                    spellInfo->Effects[EFFECT_0].TargetB = TARGET_DEST_DYNOBJ_NONE;
+                    spellInfo->Effects[EFFECT_0].TargetB = TARGET_DEST_DYNOBJ_ALL_UNITS;
                     spellInfo->Effects[EFFECT_1].BasePoints = 0;
                     break;
                 case 86346: // Colossus Smash - swap effects

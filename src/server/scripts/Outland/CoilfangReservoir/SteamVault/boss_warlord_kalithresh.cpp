@@ -27,21 +27,21 @@ EndScriptData */
 #include "ScriptedCreature.h"
 #include "steam_vault.h"
 
-#define SAY_INTRO                   -1545016
-#define SAY_REGEN                   -1545017
-#define SAY_AGGRO1                  -1545018
-#define SAY_AGGRO2                  -1545019
-#define SAY_AGGRO3                  -1545020
-#define SAY_SLAY1                   -1545021
-#define SAY_SLAY2                   -1545022
-#define SAY_DEATH                   -1545023
+enum NagaDistiller
+{
+    SAY_INTRO = 0,
+    SAY_REGEN = 1,
+    SAY_AGGRO = 2,
+    SAY_SLAY  = 3,
+    SAY_DEATH = 4,
 
-#define SPELL_SPELL_REFLECTION      31534
-#define SPELL_IMPALE                39061
-#define SPELL_WARLORDS_RAGE         37081
-#define SPELL_WARLORDS_RAGE_NAGA    31543
+    SPELL_SPELL_REFLECTION = 31534,
+    SPELL_IMPALE = 39061,
+    SPELL_WARLORDS_RAGE = 37081,
+    SPELL_WARLORDS_RAGE_NAGA = 31543,
 
-#define SPELL_WARLORDS_RAGE_PROC    36453
+    SPELL_WARLORDS_RAGE_PROC = 36453
+};
 
 class mob_naga_distiller : public CreatureScript
 {
@@ -67,7 +67,6 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
-            //hack, due to really weird spell behaviour :(
             if (instance)
             {
                 if (instance->GetData(TYPE_DISTILLER) == IN_PROGRESS)
@@ -78,6 +77,7 @@ public:
             }
         }
 
+        void AttackStart(Unit * /*who*/) { }
         void EnterCombat(Unit* /*who*/) { }
 
         void StartRageGen(Unit* /*caster*/)
@@ -94,8 +94,16 @@ public:
         void DamageTaken(Unit* /*done_by*/, uint32 &damage)
         {
             if (me->GetHealth() <= damage)
+            {
+                if (auto warlord = me->FindNearestCreature(17798, 50.f))
+                {
+                    warlord->RemoveAurasDueToSpell(SPELL_WARLORDS_RAGE_PROC);
+                    warlord->RemoveAurasDueToSpell(SPELL_WARLORDS_RAGE);
+                }
+
                 if (instance)
                     instance->SetData(TYPE_DISTILLER, DONE);
+            }
         }
     };
 
@@ -129,7 +137,7 @@ public:
         {
             Reflection_Timer = 10000;
             Impale_Timer = 7000+rand()%7000;
-            Rage_Timer = 45000;
+            Rage_Timer = 20000;
             CanRage = false;
 
             if (instance)
@@ -138,7 +146,7 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
-            DoScriptText(RAND(SAY_AGGRO1, SAY_AGGRO2, SAY_AGGRO3), me);
+            Talk(SAY_AGGRO);
 
             if (instance)
                 instance->SetData(TYPE_WARLORD_KALITHRESH, IN_PROGRESS);
@@ -146,21 +154,17 @@ public:
 
         void KilledUnit(Unit* /*victim*/)
         {
-            DoScriptText(RAND(SAY_SLAY1, SAY_SLAY2), me);
-        }
-
-        void SpellHit(Unit* /*caster*/, const SpellInfo* spell)
-        {
-            //hack :(
-            if (spell->Id == SPELL_WARLORDS_RAGE_PROC)
-                if (instance)
-                    if (instance->GetData(TYPE_DISTILLER) == DONE)
-                        me->RemoveAurasDueToSpell(SPELL_WARLORDS_RAGE_PROC);
+            Talk(SAY_SLAY);
         }
 
         void JustDied(Unit* /*killer*/)
         {
-            DoScriptText(SAY_DEATH, me);
+            Talk(SAY_DEATH);
+
+            std::list<Creature*> distillers;
+            me->GetCreatureListWithEntryInGrid(distillers, 17954, 50.f);
+            for (auto distiller : distillers)
+                distiller->Kill(distiller);
 
             if (instance)
                 instance->SetData(TYPE_WARLORD_KALITHRESH, DONE);
@@ -175,11 +179,11 @@ public:
             {
                 if (Creature* distiller = me->FindNearestCreature(17954, 100.0f))
                 {
-                    DoScriptText(SAY_REGEN, me);
-                    DoCast(me, SPELL_WARLORDS_RAGE);
+                    Talk(SAY_REGEN);
+                    me->AddAura(SPELL_WARLORDS_RAGE, me);
                     CAST_AI(mob_naga_distiller::mob_naga_distillerAI, distiller->AI())->StartRageGen(me);
                 }
-                Rage_Timer = 3000+rand()%15000;
+                Rage_Timer = urand(20000, 30000);
             } else Rage_Timer -= diff;
 
             //Reflection_Timer

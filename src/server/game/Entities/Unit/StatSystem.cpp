@@ -801,6 +801,7 @@ void Player::UpdatePvPPowerPercentage()
         case SPEC_SHAMAN_RESTORATION:
         case SPEC_DRUID_RESTORATION:
         case SPEC_MONK_MISTWEAVER:
+            damage_value = 0.0f;
             break;
         // Damage specializations for Druids, Monks, Paladins, Priests, and Shaman receive a 70% bonus to healing from PvP Power.
         default:

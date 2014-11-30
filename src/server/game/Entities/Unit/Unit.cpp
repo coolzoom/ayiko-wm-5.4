@@ -16632,16 +16632,16 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
             }
         }
 
-        // Hack Fix : Stealth is not removed on absorb damage
         if (spellInfo->HasAura(SPELL_AURA_MOD_STEALTH))
         {
-            if (procExtra & PROC_EX_ABSORB && isVictim)
+            // Hack Fix : Stealth is not removed on absorb damage
+            if ((procExtra & PROC_EX_ABSORB && isVictim))
                 useCharges = false;
-            // Do not break stealth in normal way
-            if (HasAura(108208))
+            // Do not break stealth with Subterfuge or Vanish in normal way
+            if (HasAura(108208) || HasAura(131369))
             {
                 useCharges = false;
-                if (!HasAura(115192))
+                if (!HasAura(115192) && !HasAura(131369))
                     CastSpell(this, 115192, true);
             }
         }

@@ -181,4 +181,4 @@ INSERT INTO `skill_extra_item_template` (`spellId`, `requiredSpecialization`, `a
 (53845,	55534,	20,	1,	41436),	 -- Perfect Smooth Sun Crystal
 (53843,	55534,	20,	1,	41439),	 -- Perfect Subtle Sun Crystal
 (53857,	55534,	20,	1,	41445),	 -- Perfect Mystic Sun Crystal
-(53856,	55534,	20,	1,	41446),	 -- Perfect Quick Sun Crystal
+(53856,	55534,	20,	1,	41446);	 -- Perfect Quick Sun Crystal

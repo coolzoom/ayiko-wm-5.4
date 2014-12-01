@@ -13493,9 +13493,14 @@ MountCapabilityEntry const* Unit::GetMountCapability(uint32 mountType) const
 
     uint32 zoneId, areaId;
     GetZoneAndAreaId(zoneId, areaId);
+    
+    // It is not possible to fly in Eversong Woods, Ghostlands, Isle of Quel'Danas, Bloodmyst Isle and Azuremyst Isle
+    bool const flightExplicitlyDisabled = GetTypeId() == TYPEID_PLAYER
+            && (zoneId == 3430 || zoneId == 3433 || zoneId == 4080 || zoneId == 3525 || zoneId == 3524);
+
     uint32 ridingSkill = 5000;
-    if (GetTypeId() == TYPEID_PLAYER)
-        ridingSkill = ToPlayer()->GetSkillValue(SKILL_RIDING);
+    if (Player const * const player = ToPlayer())
+        ridingSkill = player->GetSkillValue(SKILL_RIDING);
 
     for (uint32 i = MAX_MOUNT_CAPABILITIES; i > 0; --i)
     {
@@ -13533,6 +13538,12 @@ MountCapabilityEntry const* Unit::GetMountCapability(uint32 mountType) const
 
         if (mountCapability->RequiredSpell && (GetTypeId() != TYPEID_PLAYER || !ToPlayer()->HasSpell(mountCapability->RequiredSpell)))
             continue;
+
+        if (flightExplicitlyDisabled) {
+            SpellInfo const * const mountSpell = sSpellMgr->GetSpellInfo(mountCapability->SpeedModSpell);
+            if (mountSpell->HasAura(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED))
+                continue;
+        }
 
         return mountCapability;
     }

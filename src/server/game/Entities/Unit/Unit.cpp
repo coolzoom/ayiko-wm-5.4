@@ -742,7 +742,7 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         victim->GetAI()->DamageTaken(this, damage);
 
     if (IsAIEnabled)
-        GetAI()->DamageDealt(victim, damage, damagetype);
+        GetAI()->DamageDealt(victim, damage, damagetype, spellProto);
 
     if (GetTypeId() != TYPEID_PLAYER)
         victim->npcDamageTaken_[0] += damage;

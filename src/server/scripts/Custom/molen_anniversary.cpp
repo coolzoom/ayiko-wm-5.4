@@ -28,6 +28,82 @@
 *************************************
 */
 
+
+class npc_new_year_event_teleporter : public CreatureScript
+{
+    enum
+    {
+        OPTION_TELE_TO_MAZE = GOSSIP_ACTION_INFO_DEF + 30,
+        OPTION_TELE_TO_STAIRS,
+        OPTION_TELE_TO_BOB,
+        OPTION_MORPH
+    };
+
+public:
+    npc_new_year_event_teleporter() : CreatureScript("npc_new_year_event_teleporter") {}
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TAXI, "Teleport to |cFF9482C9Maze Event|r.", GOSSIP_SENDER_MAIN, OPTION_TELE_TO_MAZE);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TAXI, "Teleport to |cFF9482C9Stairs Event|r.", GOSSIP_SENDER_MAIN, OPTION_TELE_TO_STAIRS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_BATTLE, "Teleport to |cFF9482C9Bob's Place|r.", GOSSIP_SENDER_MAIN, OPTION_TELE_TO_BOB);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Morph me!", GOSSIP_SENDER_MAIN, OPTION_MORPH);
+        player->SEND_GOSSIP_MENU(800001, creature->GetGUID());
+
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 action)
+    {
+        static uint32 const morphs[20] =
+        {
+            8669,
+            13342,
+            13344,
+            13346,
+            13345,
+            13348,
+            13347,
+            13349,
+            13350,
+            13356,
+            13730,
+            15094,
+            15095,
+            15096,
+            15097,
+            15660,
+            15904,
+            15698,
+            15698,
+            15750,
+        };
+
+        player->PlayerTalkClass->ClearMenus();
+
+        switch (action)
+        {
+            case OPTION_TELE_TO_MAZE:
+                if (player->GetTeam() == ALLIANCE)
+                    player->TeleportTo(1, -6726.055176f, -3091.237549f, 584.508276f, 0.0f);
+                else
+                    player->TeleportTo(1, -6837.937988f, -3420.268066f, 584.459290f, 0.0f);
+                break;
+            case OPTION_TELE_TO_STAIRS:
+                player->TeleportTo(530, 8627.016602f, -7818.264648f, 145.147827f, 0.0f);
+                break;
+            case OPTION_TELE_TO_BOB:
+                player->TeleportTo(37, -210.602325f, 335.650421f, 303.182831f, 6.195761f);
+                break;
+            case OPTION_MORPH:
+                player->SetDisplayId(morphs[urand(0, 19)]);
+                break;
+        }
+
+        return true;
+    }
+};
+
 class npc_winter_snowman : public CreatureScript
 {
     enum
@@ -206,6 +282,7 @@ class npc_boss_raggy : public CreatureScript
 
         void Reset() override
         {
+            me->SetReactState(REACT_DEFENSIVE);
             events.Reset();
             phase = PHASE_ONE;
             speechCounter = 0;
@@ -221,7 +298,7 @@ class npc_boss_raggy : public CreatureScript
             {
                 if (itr.spellId == spell->Id && itr.damageType == damageType)
                 {
-                    damage = (GetDifficulty() == MAN10_DIFFICULTY) ? itr.damage10.CalcRandom() : itr.damage25.CalcRandom();
+                    damage = itr.damage10.CalcRandom();
                     break;
                 }
             }
@@ -504,7 +581,7 @@ public:
                 break;
             case GOSSIP_TELE_ORG:
                 player->CLOSE_GOSSIP_MENU();
-                player->TeleportTo(WorldLocation(1, 1352.14f, -4372.0f, 26.176f, 0.35f));
+                player->TeleportTo(WorldLocation(1, 1493.464233f, -4417.481445f, 23.951496f, 0.15f));
                 break;
             default:
                 break;
@@ -517,6 +594,7 @@ public:
 void AddSC_molten_anniversary()
 {
     // 2014
+    new npc_new_year_event_teleporter();
     new npc_winter_snowman();
     new npc_boss_raggy();
     new npc_reward_dude();

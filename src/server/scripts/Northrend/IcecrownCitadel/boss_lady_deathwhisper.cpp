@@ -696,7 +696,7 @@ class npc_cult_fanatic : public CreatureScript
                 }
             }
 
-            void DamageDealt(Unit* /*victim*/, uint32& damage, DamageEffectType /*damageType*/)
+            void DamageDealt(Unit* /*victim*/, uint32& damage, DamageEffectType /*damageType*/, const SpellInfo * /*spellInfo*/)
             {
                 if (me->HasAura(SPELL_VAMPIRIC_MIGHT))
                 {

@@ -124,7 +124,7 @@ class SmartAI : public CreatureAI
         void IsSummonedBy(Unit* summoner);
 
         // Called at any Damage to any victim (before damage apply)
-        void DamageDealt(Unit* doneTo, uint32& damage, DamageEffectType /*damagetype*/);
+        void DamageDealt(Unit* doneTo, uint32& damage, DamageEffectType /*damagetype*/, const SpellInfo * /*spellInfo*/);
 
         // Called when a summoned creature dissapears (UnSommoned)
         void SummonedCreatureDespawn(Creature* unit);

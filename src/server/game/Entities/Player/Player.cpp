@@ -8648,7 +8648,8 @@ void Player::UpdateArea(uint32 newArea)
 
     // previously this was in UpdateZone (but after UpdateArea) so nothing will break
     pvpInfo.inNoPvPArea = false;
-    if (area && area->IsSanctuary())    // in sanctuary
+    if (HasAura(69737) || // "Custom" Anniversary sanctuary spell
+        (area && area->IsSanctuary()))    // in sanctuary
     {
         SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY);
         pvpInfo.inNoPvPArea = true;

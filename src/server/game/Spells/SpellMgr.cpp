@@ -3219,6 +3219,9 @@ void SpellMgr::LoadSpellCustomAttr()
 
             switch (spellInfo->Id)
             {
+                case 69737: // "custom" anniversary sanctuary spell
+                    spellInfo->Attributes |= SPELL_ATTR0_PASSIVE | SPELL_ATTR0_HIDDEN_CLIENTSIDE;
+                    break;
 #if 1 // Deadmines
                 case 84225: // Vehicle - Switch to Seat 3
                     spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);

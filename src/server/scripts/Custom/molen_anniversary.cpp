@@ -46,8 +46,8 @@ public:
     {
         player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TAXI, "Teleport to |cFF9482C9Maze Event|r.", GOSSIP_SENDER_MAIN, OPTION_TELE_TO_MAZE);
         player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TAXI, "Teleport to |cFF9482C9Stairs Event|r.", GOSSIP_SENDER_MAIN, OPTION_TELE_TO_STAIRS);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_BATTLE, "Teleport to |cFF9482C9Bob's Place|r.", GOSSIP_SENDER_MAIN, OPTION_TELE_TO_BOB);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Morph me!", GOSSIP_SENDER_MAIN, OPTION_MORPH);
+        //player->ADD_GOSSIP_ITEM(GOSSIP_ICON_BATTLE, "Teleport to |cFF9482C9Bob's Place|r.", GOSSIP_SENDER_MAIN, OPTION_TELE_TO_BOB);
+        //player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Morph me!", GOSSIP_SENDER_MAIN, OPTION_MORPH);
         player->SEND_GOSSIP_MENU(800001, creature->GetGUID());
 
         return true;
@@ -84,13 +84,10 @@ public:
         switch (action)
         {
             case OPTION_TELE_TO_MAZE:
-                if (player->GetTeam() == ALLIANCE)
-                    player->TeleportTo(1, -6726.055176f, -3091.237549f, 584.508276f, 0.0f);
-                else
-                    player->TeleportTo(1, -6837.937988f, -3420.268066f, 584.459290f, 0.0f);
+                player->TeleportTo(1, 4199.866699f, -4286.674316f, 262.070160f, 1.578420f);
                 break;
             case OPTION_TELE_TO_STAIRS:
-                player->TeleportTo(530, 8627.016602f, -7818.264648f, 145.147827f, 0.0f);
+                player->TeleportTo(530, -3470.788574f, -14100.294922f, 1.186245f, 2.761339f);
                 break;
             case OPTION_TELE_TO_BOB:
                 player->TeleportTo(37, -210.602325f, 335.650421f, 303.182831f, 6.195761f);
@@ -577,11 +574,11 @@ public:
                 break;
             case GOSSIP_TELE_SW:
                 player->CLOSE_GOSSIP_MENU();
-                player->TeleportTo(WorldLocation(0, -9056.883f, 440.60f, 93.06f, 0.79f));
+                player->TeleportTo(WorldLocation(0, -9065.756836f, 432.428864f, 93.056526f, 0.67f));
                 break;
             case GOSSIP_TELE_ORG:
                 player->CLOSE_GOSSIP_MENU();
-                player->TeleportTo(WorldLocation(1, 1493.464233f, -4417.481445f, 23.951496f, 0.15f));
+                player->TeleportTo(WorldLocation(1, 1485.483521f, -4418.357422f, 25.340143f, 0.177814f));
                 break;
             default:
                 break;

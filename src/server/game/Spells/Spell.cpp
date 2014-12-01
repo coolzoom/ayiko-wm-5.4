@@ -4602,9 +4602,8 @@ void Spell::SendSpellStart()
     if ((IsTriggered() && !m_spellInfo->IsAutoRepeatRangedSpell()) || m_triggeredByAuraSpell)
         castFlags |= CAST_FLAG_PENDING;
 
-    if ((m_caster->GetTypeId() == TYPEID_PLAYER ||
-        (m_caster->GetTypeId() == TYPEID_UNIT && m_caster->ToCreature()->isPet()))
-        && m_spellPowerData->powerType != POWER_HEALTH)
+    if ((m_caster->GetTypeId() == TYPEID_PLAYER || (m_caster->GetTypeId() == TYPEID_UNIT && m_caster->ToCreature()->isPet()))
+            && m_spellPowerData->powerType != POWER_HEALTH)
         castFlags |= CAST_FLAG_POWER_LEFT_SELF;
 
     if (m_spellInfo->RuneCostID && m_spellPowerData->powerType == POWER_RUNES)
@@ -4982,9 +4981,8 @@ void Spell::SendSpellGo()
     if ((IsTriggered() && !m_spellInfo->IsAutoRepeatRangedSpell()) || m_triggeredByAuraSpell)
         castFlags |= CAST_FLAG_PENDING;
 
-    if ((m_caster->GetTypeId() == TYPEID_PLAYER ||
-        (m_caster->GetTypeId() == TYPEID_UNIT && m_caster->ToCreature()->isPet()))
-        && m_spellPowerData->powerType != POWER_HEALTH)
+    if ((m_caster->GetTypeId() == TYPEID_PLAYER || (m_caster->GetTypeId() == TYPEID_UNIT && m_caster->ToCreature()->isPet()))
+            && m_spellPowerData->powerType != POWER_HEALTH)
         castFlags |= CAST_FLAG_POWER_LEFT_SELF; // should only be sent to self, but the current messaging doesn't make that possible
 
     if ((m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -5019,8 +5017,8 @@ void Spell::SendSpellGo()
     ObjectGuid transportSrc = m_targets.GetSrc()->_transportGUID;
     ObjectGuid transportDst = m_targets.GetDst()->_transportGUID;
 
-    uint32 powerCount = 1;
-    uint32 powerTypeCount = 1;
+    uint32 powerCount = (m_spellPowerData->powerType != POWER_HEALTH) ? 1 : 0;
+    uint32 powerTypeCount = (m_spellPowerData->powerType != POWER_HEALTH) ? 1 : 0;
     uint32 runeCooldownCount = 0;
     uint32 unkStringLength = 0;
     uint32 extraTargets = m_targets.GetExtraTargetsCount();

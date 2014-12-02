@@ -154,18 +154,31 @@ class spell_warl_soulburn_seed_of_corruption_damage : public SpellScriptLoader
 
             void HandleScript()
             {
-                if (!GetCaster())
+                auto caster = GetCaster();
+                if (!caster)
                     return;
 
                 // Remove Soul Burn aura
-                if (GetCaster()->HasAura(WARLOCK_SEED_OF_CORRUPTION_DUMMY))
-                    GetCaster()->RemoveAurasDueToSpell(WARLOCK_SEED_OF_CORRUPTION_DUMMY);
+                if (caster->HasAura(WARLOCK_SEED_OF_CORRUPTION_DUMMY))
+                    caster->RemoveAurasDueToSpell(WARLOCK_SEED_OF_CORRUPTION_DUMMY);
+            }
+
+            void HandleAfterCast()
+            {
+                auto caster = GetCaster();
+                if (!caster)
+                    return;
+
+                // Give Soul Shard
+                if (caster->HasAura(WARLOCK_SEED_OF_CORRUPTION_DUMMY))
+                    caster->SetPower(POWER_SOUL_SHARDS, caster->GetPower(POWER_SOUL_SHARDS) + 100);
             }
 
             void Register()
             {
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_warl_soulburn_seed_of_corruption_damage_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
                 AfterHit += SpellHitFn(spell_warl_soulburn_seed_of_corruption_damage_SpellScript::HandleScript);
+                OnCast += SpellCastFn(spell_warl_soulburn_seed_of_corruption_damage_SpellScript::HandleAfterCast);
             }
         };
 

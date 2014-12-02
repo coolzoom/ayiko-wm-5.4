@@ -1391,7 +1391,6 @@ class Unit : public WorldObject
         void SetContestedPvP(Player* attackedPlayer = NULL);
 
         uint32 GetCastingTimeForBonus(SpellInfo const* spellProto, DamageEffectType damagetype, uint32 CastingTime) const;
-        float CalculateDefaultCoefficient(SpellInfo const *spellInfo, DamageEffectType damagetype) const;
 
         RemainingPeriodicAmount GetRemainingPeriodicAmount(uint64 caster, uint32 spellId, AuraType auraType, uint8 effectIndex = 0) const;
         int32 GetSplineDuration() const;
@@ -1427,7 +1426,6 @@ class Unit : public WorldObject
         int32 CalcSpellDuration(SpellInfo const* spellProto);
         int32 ModSpellDuration(SpellInfo const* spellProto, Unit const* target, int32 duration, bool positive, uint32 effectMask);
         void  ModSpellCastTime(SpellInfo const* spellProto, int32 & castTime, Spell* spell=NULL);
-        float CalculateLevelPenalty(SpellInfo const* spellProto) const;
 
         void addFollower(FollowerReference* pRef) { m_FollowingRefManager.insertFirst(pRef); }
         void removeFollower(FollowerReference* /*pRef*/) { /* nothing to do yet */ }

@@ -840,19 +840,6 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     case 115695:// Jab (Swords)
                         damage = CalculateMonkMeleeAttacks(m_caster, 1.5f, 14);
                         break;
-                    case 115080:// Touch of Death
-                        if (GetCaster())
-                        {
-                            if (unitTarget)
-                            {
-                                uint32 damage = unitTarget->GetHealth();
-                                m_caster->SendSpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_spellInfo->GetSchoolMask(), 0, 0, false, 0, false);
-                                m_caster->DealDamageMods(unitTarget, damage, NULL);
-                                m_caster->DealDamage(unitTarget, damage, NULL, SPELL_DIRECT_DAMAGE, m_spellInfo->GetSchoolMask(), m_spellInfo, false);
-                            }
-                        }
-
-                        return;
                     case 100787:// Tiger Palm
                         damage = CalculateMonkMeleeAttacks(m_caster, 3.0f, 14);
                         break;
@@ -889,6 +876,18 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     case 121253:// Keg Smash
                         damage = CalculateMonkMeleeAttacks(m_caster, 8.12f, 11);
                         break;
+                    case 115080:// Touch of Death
+                        if (GetCaster())
+                        {
+                            if (unitTarget)
+                            {
+                                uint32 damage = unitTarget->GetHealth();
+                                m_caster->SendSpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_spellInfo->GetSchoolMask(), 0, 0, false, 0, false);
+                                m_caster->DealDamageMods(unitTarget, damage, NULL);
+                                m_caster->DealDamage(unitTarget, damage, NULL, SPELL_DIRECT_DAMAGE, m_spellInfo->GetSchoolMask(), m_spellInfo, false);
+                            }
+                        }
+                        return;
                     default:
                         break;
                 }

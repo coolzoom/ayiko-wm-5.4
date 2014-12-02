@@ -3234,7 +3234,7 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                         return;
 
                     // Mana Tide Totem, Stone Bulwark Totem, Healing Tide Totem
-                    if (m_spellInfo->Id == 16190 || m_spellInfo->Id == 108270 || m_spellInfo->Id == 127945)
+                    if (m_spellInfo->Id == 16190 || m_spellInfo->Id == 108270 || m_spellInfo->Id == 108280)
                         damage = m_caster->CountPctFromMaxHealth(10);
                     // Monk statues receive 50% from owner's health
                     else if (properties->Type == SUMMON_TYPE_STATUE)

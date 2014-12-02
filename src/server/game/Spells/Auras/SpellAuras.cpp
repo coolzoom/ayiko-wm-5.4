@@ -1764,7 +1764,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 
                 switch(GetId())
                 {
-                    case 55041: // Freezing Trap Effect
+                    case 3355: // Freezing Trap Effect
                     {
                         target->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
                         // Glyph of Solace

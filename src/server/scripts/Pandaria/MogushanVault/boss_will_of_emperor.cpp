@@ -896,15 +896,15 @@ public:
                             text << "The " << (me->GetEntry() == NPC_EMPEROR_STRENGHT ? "Emperor's Strength" : "Emperor's Courage") << " appears in the alcoves!";
                             std::list<Player*> playerList;
                             GetPlayerListInGrid(playerList, me, 300.0f);
-                            /*if (!playerList.empty())
-                             *                                {
-                             *                                    auto emoteText(text.str());
-                             *                                    for (auto plr : playerList)
-                             *                                    {
-                             *                                        plr->MonsterTextEmote(emoteText, 0, true);
-                             *                                        break;
-                        }
-                        }*/
+                            if (!playerList.empty())
+                            {
+                                auto emoteText(text.str());
+                                for (auto plr : playerList)
+                                {
+                                    plr->MonsterTextEmote(emoteText, 0, true);
+                                    break;
+                                }
+                            }
                         }
                         // Wait invisible
                         events.ScheduleEvent(EVENT_WAIT, 5000);

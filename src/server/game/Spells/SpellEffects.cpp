@@ -7717,7 +7717,8 @@ int32 Spell::CalculateMonkMeleeAttacks(Unit* caster, float coeff, int32 APmultip
     float mainHandMaxDamage = 0;
     float offHandMinDamage = 0;
     float offHandMaxDamage = 0;
-    float minDamage, maxDamage = 0;
+    float minDamage = 0;
+    float maxDamage = 0;
 
     bool isDualWield = false;
     bool isTwoHandedWeapon = false;

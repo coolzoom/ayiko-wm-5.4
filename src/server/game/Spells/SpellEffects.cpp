@@ -4035,13 +4035,13 @@ void Spell::EffectSummonPet(SpellEffIndex effIndex)
     }
 
     // Hack to execute cooldown of Soulburn Summon effect
-    if (m_spellInfo->Id == 668 || m_spellInfo->Id == 691 || m_spellInfo->Id == 697 || m_spellInfo->Id == 712)
+    if (m_spellInfo->Id == 688 || m_spellInfo->Id == 691 || m_spellInfo->Id == 697 || m_spellInfo->Id == 712)
     {
         for (auto mod : m_appliedMods)
             if (auto effect = mod->ownerEffect)
                 if (effect->GetId() == 74434)
                 {
-                    owner->AddSpellCooldown(668, 0, 60 * IN_MILLISECONDS, true);
+                    owner->AddSpellCooldown(688, 0, 60 * IN_MILLISECONDS, true);
                     owner->AddSpellCooldown(691, 0, 60 * IN_MILLISECONDS, true);
                     owner->AddSpellCooldown(697, 0, 60 * IN_MILLISECONDS, true);
                     owner->AddSpellCooldown(712, 0, 60 * IN_MILLISECONDS, true);

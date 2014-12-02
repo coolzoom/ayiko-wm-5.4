@@ -7713,9 +7713,13 @@ void Spell::EffectCreateAreatrigger(SpellEffIndex effIndex)
 
 int32 Spell::CalculateMonkMeleeAttacks(Unit* caster, float coeff, int32 APmultiplier)
 {
-    float minDamage = 0;
-    float maxDamage = 0;
-    bool dualwield  = false;
+    float mainHandMinDamage, mainHandMaxDamage = 0;
+    float offHandMinDamage, offHandMaxDamage = 0;
+    float minDamage, maxDamage = 0;
+
+    bool isDualWield = false;
+    bool isTwoHandedWeapon = false;
+
     int32 AP = caster->GetTotalAttackPowerValue(BASE_ATTACK);
 
     if (Player* plr = caster->ToPlayer())
@@ -7723,7 +7727,8 @@ int32 Spell::CalculateMonkMeleeAttacks(Unit* caster, float coeff, int32 APmultip
         Item* mainItem = plr->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
         Item* offItem = plr->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
 
-        dualwield = (mainItem && offItem) ? 1 : 0;
+        isDualWield = (mainItem && offItem);
+        isTwoHandedWeapon = (mainItem && (mainItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_POLEARM || mainItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_STAFF));
 
         if (coeff < 0)
             coeff = 0.0f;
@@ -7731,25 +7736,36 @@ int32 Spell::CalculateMonkMeleeAttacks(Unit* caster, float coeff, int32 APmultip
         // Main Hand
         if (mainItem && !caster->HasAuraType(SPELL_AURA_MOD_DISARM))
         {
-            minDamage += mainItem->GetTemplate()->DamageMin;
-            maxDamage += mainItem->GetTemplate()->DamageMax;
+            mainHandMinDamage = mainItem->GetTemplate()->DamageMin;
+            mainHandMaxDamage = mainItem->GetTemplate()->DamageMax;
 
-            minDamage /= float(m_caster->GetAttackTime(BASE_ATTACK) / 1000.0f);
-            maxDamage /= float(m_caster->GetAttackTime(BASE_ATTACK) / 1000.0f);
+            mainHandMinDamage /= float(mainItem->GetTemplate()->Delay / 1000.0f);
+            mainHandMaxDamage /= float(mainItem->GetTemplate()->Delay / 1000.0f);
         }
 
         // Off Hand
         if (offItem && !caster->HasAuraType(SPELL_AURA_MOD_DISARM))
         {
-            minDamage += offItem->GetTemplate()->DamageMin / 2.0f;
-            maxDamage += offItem->GetTemplate()->DamageMax / 2.0f;
+            offHandMinDamage += offItem->GetTemplate()->DamageMin / 2.0f;
+            offHandMaxDamage += offItem->GetTemplate()->DamageMax / 2.0f;
 
-            minDamage /= float(m_caster->GetAttackTime(BASE_ATTACK) / 1000.0f);
-            maxDamage /= float(m_caster->GetAttackTime(BASE_ATTACK) / 1000.0f);
+            offHandMinDamage /= float(offItem->GetTemplate()->Delay / 1000.0f);
+            offHandMaxDamage /= float(offItem->GetTemplate()->Delay / 1000.0f);
         }
 
-        // DualWield coefficient
-        if (dualwield)
+        // Is one single-handed weapon equipped
+        if (mainItem && !offItem && isTwoHandedWeapon)
+        {
+            mainHandMinDamage *= 1.5f;
+            mainHandMaxDamage *= 1.5f;
+        }
+
+        // Add offhand weapon, if noone equipped it will add 0
+        minDamage = mainHandMinDamage + offHandMinDamage;
+        maxDamage = mainHandMaxDamage += offHandMaxDamage;
+
+        // if one single-handed or dual-wield is equipped
+        if (isDualWield || !isTwoHandedWeapon)
         {
             minDamage *= 0.898882275f;
             maxDamage *= 0.898882275f;
@@ -7758,7 +7774,7 @@ int32 Spell::CalculateMonkMeleeAttacks(Unit* caster, float coeff, int32 APmultip
         minDamage += float(AP / APmultiplier);
         maxDamage += float(AP / APmultiplier);
 
-        // Off Hand penalty reapplied if only equiped by an off hand weapon
+        // Apply penalty if off-hand is equipped without main-hand
         if (offItem && !mainItem)
         {
             minDamage /= 2.0f;
@@ -7768,9 +7784,9 @@ int32 Spell::CalculateMonkMeleeAttacks(Unit* caster, float coeff, int32 APmultip
     else
     {
         if (caster->GetEntry() != 69792) // Earth Spirit
-            dualwield = true;
+            isDualWield = true;
 
-        if (dualwield)
+        if (isDualWield)
         {
             minDamage += caster->GetWeaponDamageRange(BASE_ATTACK, MINDAMAGE);
             minDamage += caster->GetWeaponDamageRange(OFF_ATTACK, MINDAMAGE) / 2;
@@ -7793,7 +7809,7 @@ int32 Spell::CalculateMonkMeleeAttacks(Unit* caster, float coeff, int32 APmultip
         maxDamage += float(AP / APmultiplier);
     }
 
-    return irand(int32(minDamage * coeff), int32(maxDamage * coeff));
+    return irand(int32((minDamage-1) * coeff), int32((maxDamage+1) * coeff));
 }
 
 void Spell::EffectUnlockGuildVaultTab(SpellEffIndex effIndex)

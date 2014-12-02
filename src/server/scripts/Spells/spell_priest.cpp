@@ -1144,6 +1144,9 @@ public:
             std::list<Unit*> groupList;
             player->GetPartyMembers(groupList);
 
+            if (groupList.empty())
+                return;
+
             groupList.sort(Trinity::HealthPctOrderPred());
             auto const healTarget = groupList.front();
 

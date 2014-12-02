@@ -7713,8 +7713,10 @@ void Spell::EffectCreateAreatrigger(SpellEffIndex effIndex)
 
 int32 Spell::CalculateMonkMeleeAttacks(Unit* caster, float coeff, int32 APmultiplier)
 {
-    float mainHandMinDamage, mainHandMaxDamage = 0;
-    float offHandMinDamage, offHandMaxDamage = 0;
+    float mainHandMinDamage = 0;
+    float mainHandMaxDamage = 0;
+    float offHandMinDamage = 0;
+    float offHandMaxDamage = 0;
     float minDamage, maxDamage = 0;
 
     bool isDualWield = false;
@@ -7746,8 +7748,8 @@ int32 Spell::CalculateMonkMeleeAttacks(Unit* caster, float coeff, int32 APmultip
         // Off Hand
         if (offItem && !caster->HasAuraType(SPELL_AURA_MOD_DISARM))
         {
-            offHandMinDamage += offItem->GetTemplate()->DamageMin / 2.0f;
-            offHandMaxDamage += offItem->GetTemplate()->DamageMax / 2.0f;
+            offHandMinDamage = offItem->GetTemplate()->DamageMin / 2.0f;
+            offHandMaxDamage = offItem->GetTemplate()->DamageMax / 2.0f;
 
             offHandMinDamage /= float(offItem->GetTemplate()->Delay / 1000.0f);
             offHandMaxDamage /= float(offItem->GetTemplate()->Delay / 1000.0f);

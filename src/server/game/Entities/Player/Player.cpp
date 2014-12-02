@@ -13520,6 +13520,8 @@ void Player::RemoveItem(uint8 bag, uint8 slot, bool update)
         pItem->SetOwnerGUID(0);
 
         pItem->SetSlot(NULL_SLOT);
+        pItem->RemoveFromUpdateQueueOf(this);
+
         if (IsInWorld() && update)
             pItem->SendUpdateToPlayer(this);
     }

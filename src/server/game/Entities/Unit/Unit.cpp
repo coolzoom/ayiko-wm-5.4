@@ -12262,6 +12262,7 @@ float Unit::GetSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolM
                         switch (spellProto->Id)
                         {
                             case 6785:  // Ravage
+                            case 102545:// Ravage!
                                 // Ravage has a 50% increased chance to critically strike targets with over 80% health.
                                 if (victim->GetHealthPct() > 80.0f)
                                     crit_chance += 50.0f;

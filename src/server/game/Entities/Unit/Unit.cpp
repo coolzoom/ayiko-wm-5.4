@@ -11466,7 +11466,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
 
     // Custom MoP Script
     // 77493 - Mastery : Razor Claws
-    if (GetTypeId() == TYPEID_PLAYER && spellProto && damagetype == DOT)
+    if (GetTypeId() == TYPEID_PLAYER && spellProto && (damagetype == DOT || spellProto->Id == 1822 || spellProto->Id == 77758))
     {
         if (HasAura(77493))
         {

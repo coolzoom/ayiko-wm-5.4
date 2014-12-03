@@ -1390,8 +1390,6 @@ class Unit : public WorldObject
 
         void SetContestedPvP(Player* attackedPlayer = NULL);
 
-        uint32 GetCastingTimeForBonus(SpellInfo const* spellProto, DamageEffectType damagetype, uint32 CastingTime) const;
-
         RemainingPeriodicAmount GetRemainingPeriodicAmount(uint64 caster, uint32 spellId, AuraType auraType, uint8 effectIndex = 0) const;
         int32 GetSplineDuration() const;
 

@@ -3634,9 +3634,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[0].BasePoints = -10;
                     spellInfo->Effects[1].BasePoints = -10;
                     break;
-                case 125706:// Channeling Corruption
-                    spellInfo->Effects[0].TriggerSpell = 0;
-                    break;
                 case 125713:// Channeling Corruption (triggered)
                     spellInfo->Effects[0].TargetA = TARGET_UNIT_TARGET_ANY;
                     break;
@@ -4995,6 +4992,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 116000:// Voodoo Dolls
                     spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
                     break;
+                case 118566:
+                    spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_CASTER;
+                    break;
                 case 116161:// Crossed Over
                     spellInfo->Effects[EFFECT_1].MiscValue = 2; // Set Phase to 2
                     spellInfo->Effects[EFFECT_3].Effect    = 0; // No need to summon
@@ -5026,6 +5026,11 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 127362:
                     spellInfo->Effects[EFFECT_0].TargetB = TARGET_UNIT_SRC_AREA_ENEMY;
                     spellInfo->Effects[EFFECT_1].TargetB = TARGET_UNIT_SRC_AREA_ENEMY;
+                    break;
+                // Terrace of Endless Spring
+                case 125706:
+                case 130022:
+                    spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_CASTER;
                     break;
                 // Isle of Conquest Gunship Portal
                 case 66630:

@@ -922,41 +922,11 @@ void Player::UpdateManaRegen()
     SetStatFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER, 0.001f + base_regen + CalculatePct(spirit_regen, modManaRegenInterrupt));
 }
 
-void Player::UpdateRuneRegen(RuneType rune)
+void Player::UpdateRuneRegen()
 {
-    if (rune > NUM_RUNE_TYPES)
-        return;
-
-    uint32 cooldown = 0;
-
-    for (uint32 i = 0; i < MAX_RUNES; ++i)
-        if (GetBaseRune(i) == rune)
-        {
-            cooldown = GetRuneBaseCooldown(i);
-            break;
-        }
-
-    if (cooldown <= 0)
-        return;
-
-    float regen = float(1 * IN_MILLISECONDS) / float(cooldown);
-    SetFloatValue(PLAYER_RUNE_REGEN_1 + uint8(rune), regen);
-}
-
-void Player::UpdateAllRunesRegen()
-{
+    float const regen = float(1 * IN_MILLISECONDS) / GetRuneBaseCooldown();
     for (uint8 i = 0; i < NUM_RUNE_TYPES; ++i)
-    {
-        if (uint32 cooldown = GetRuneTypeBaseCooldown(RuneType(i)))
-        {
-            float regen = float(1 * IN_MILLISECONDS) / float(cooldown);
-
-            if (regen < 0.0099999998f)
-                regen = 0.01f;
-
-            SetFloatValue(PLAYER_RUNE_REGEN_1 + i, regen);
-        }
-    }
+        SetFloatValue(PLAYER_RUNE_REGEN_1 + i, regen);
 }
 
 void Player::_ApplyAllStatBonuses()

@@ -144,25 +144,29 @@ class spell_dk_runic_empowerment : public SpellScriptLoader
 
             void HandleOnHit()
             {
-                if (Player* _player = GetCaster()->ToPlayer())
+                Player * const player = GetCaster()->ToPlayer();
+                if (!player || !player->HasAura(DK_SPELL_RUNIC_EMPOWERMENT))
+                    return;
+
+                if (!roll_chance_i(45))
+                    return;
+
+                auto const baseCooldown = player->GetRuneBaseCooldown();
+
+                uint8 runes[MAX_RUNES];
+                uint8 *runesEnd = runes;
+
+                for (uint8 i = 0; i < MAX_RUNES; ++i)
+                    if (player->GetRuneCooldown(i) == baseCooldown)
+                        *runesEnd++ = i;
+
+                if (auto const count = std::distance(runes, runesEnd))
                 {
-                    if (_player->HasAura(DK_SPELL_RUNIC_EMPOWERMENT))
-                    {
-                        if (roll_chance_i(45))
-                        {
-                            std::set<uint8> runes;
-                            for (uint8 i = 0; i < MAX_RUNES; i++)
-                                if (_player->GetRuneCooldown(i) == _player->GetRuneBaseCooldown(i))
-                                    runes.insert(i);
-                            if (!runes.empty())
-                            {
-                                std::set<uint8>::iterator itr = runes.begin();
-                                std::advance(itr, urand(0, runes.size()-1));
-                                _player->SetRuneCooldown((*itr), 0);
-                                _player->ResyncRunes(MAX_RUNES);
-                            }
-                        }
-                    }
+                    uint8 const *itr = runes;
+                    std::advance(itr, irand(0, count - 1));
+
+                    player->SetRuneCooldown(*itr, 0);
+                    player->ResyncRunes(MAX_RUNES);
                 }
             }
 
@@ -439,13 +443,14 @@ class spell_dk_necrotic_strike : public SpellScriptLoader
                 {
                     if (GetHitUnit())
                     {
+                        uint32 const cooldown = player->GetRuneBaseCooldown();
+
                         for (uint32 i = 0; i < MAX_RUNES; ++i)
                         {
                             RuneType rune = player->GetCurrentRune(i);
 
                             if (!player->GetRuneCooldown(i) && rune == RUNE_DEATH)
                             {
-                                uint32 cooldown = player->GetRuneBaseCooldown(i);
                                 player->SetRuneCooldown(i, cooldown);
 
                                 bool takePower = true;
@@ -902,13 +907,14 @@ class spell_dk_death_siphon : public SpellScriptLoader
 
                         player->CastCustomSpell(player, DK_SPELL_DEATH_SIPHON_HEAL, &bp, NULL, NULL, true);
 
+                        uint32 const cooldown = player->GetRuneBaseCooldown();
+
                         for (uint32 i = 0; i < MAX_RUNES; ++i)
                         {
                             RuneType rune = player->GetCurrentRune(i);
 
                             if (!player->GetRuneCooldown(i) && rune == RUNE_DEATH)
                             {
-                                uint32 cooldown = player->GetRuneBaseCooldown(i);
                                 player->SetRuneCooldown(i, cooldown);
 
                                 bool takePower = true;
@@ -938,69 +944,6 @@ class spell_dk_death_siphon : public SpellScriptLoader
         SpellScript* GetSpellScript() const
         {
             return new spell_dk_death_siphon_SpellScript();
-        }
-};
-
-// Improved Blood Presence - 50371
-class spell_dk_improved_blood_presence : public SpellScriptLoader
-{
-    public:
-        spell_dk_improved_blood_presence() : SpellScriptLoader("spell_dk_improved_blood_presence") { }
-
-        class spell_dk_improved_blood_presence_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_dk_improved_blood_presence_SpellScript);
-
-            void HandleAfterCast()
-            {
-                if (Player* _player = GetCaster()->ToPlayer())
-                    _player->UpdateAllRunesRegen();
-            }
-
-            void Register()
-            {
-                AfterCast += SpellCastFn(spell_dk_improved_blood_presence_SpellScript::HandleAfterCast);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_dk_improved_blood_presence_SpellScript();
-        }
-};
-
-// Unholy Presence - 48265 and Improved Unholy Presence - 50392
-class spell_dk_unholy_presence : public SpellScriptLoader
-{
-    public:
-        spell_dk_unholy_presence() : SpellScriptLoader("spell_dk_unholy_presence") { }
-
-        class spell_dk_unholy_presence_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_dk_unholy_presence_AuraScript);
-
-            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
-            {
-                if (Player* _player = GetTarget()->ToPlayer())
-                    _player->UpdateAllRunesRegen();
-            }
-
-            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
-            {
-                if (Player* _player = GetTarget()->ToPlayer())
-                    _player->UpdateAllRunesRegen();
-            }
-
-            void Register()
-            {
-                OnEffectApply += AuraEffectApplyFn(spell_dk_unholy_presence_AuraScript::OnApply, EFFECT_1, SPELL_AURA_MOD_INCREASE_SPEED, AURA_EFFECT_HANDLE_REAL);
-                OnEffectRemove += AuraEffectRemoveFn(spell_dk_unholy_presence_AuraScript::OnRemove, EFFECT_1, SPELL_AURA_MOD_INCREASE_SPEED, AURA_EFFECT_HANDLE_REAL);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_dk_unholy_presence_AuraScript();
         }
 };
 
@@ -2108,8 +2051,6 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_blood_charges();
     new spell_dk_blood_tap();
     new spell_dk_death_siphon();
-    new spell_dk_improved_blood_presence();
-    new spell_dk_unholy_presence();
     new spell_dk_death_strike();
     new spell_dk_purgatory();
     new spell_dk_purgatory_absorb();

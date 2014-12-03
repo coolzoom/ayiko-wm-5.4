@@ -6755,6 +6755,9 @@ void Player::UpdateHasteAffectedPowerRegeneration(CombatRating cr, float value, 
     }
 
     ApplyPercentModFloatValue(UNIT_MOD_HASTE_REGEN, value, !apply);
+
+    if (getClass() == CLASS_DEATH_KNIGHT)
+        UpdateRuneRegen();
 }
 
 void Player::SetRegularAttackTime()
@@ -26968,24 +26971,9 @@ void Player::UpdateCharmedAI()
     }
 }
 
-uint32 Player::GetRuneTypeBaseCooldown(RuneType runeType) const
+uint32 Player::GetRuneBaseCooldown() const
 {
-    float cooldown = RUNE_BASE_COOLDOWN;
-    float hastePct = 0.0f;
-
-    AuraEffectList const& regenAura = GetAuraEffectsByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
-    for (AuraEffectList::const_iterator i = regenAura.begin();i != regenAura.end(); ++i)
-        if ((*i)->GetMiscValue() == POWER_RUNES && RuneType((*i)->GetMiscValueB()) == runeType)
-            cooldown /= ((*i)->GetAmount() + 100.0f) / 100.0f;
-
-    // Runes cooldown are now affected by player's haste from equipment ...
-    hastePct = GetRatingBonusValue(CR_HASTE_MELEE);
-    hastePct += GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_HASTE);
-    hastePct += GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_RANGED_HASTE) / 10.0f;
-
-    cooldown *=  1.0f - (hastePct / 100.0f);
-
-    return cooldown;
+    return uint32(RUNE_BASE_COOLDOWN * GetFloatValue(UNIT_MOD_HASTE_REGEN) + 0.5f);
 }
 
 void Player::RemoveRunesBySpell(uint32 spell_id)
@@ -27020,6 +27008,7 @@ void Player::ResyncRunes(uint8 count)
 {
     WorldPacket data(SMSG_RESYNC_RUNES, 4 + count * 2);
     data.WriteBits(count, 23);
+    data.FlushBits();
 
     for (uint32 i = 0; i < count; ++i)
     {
@@ -27081,7 +27070,8 @@ void Player::InitRunes()
         SetDeathRuneUsed(i, false);
     }
 
-    UpdateAllRunesRegen();
+    for (uint32 i = 0; i < NUM_RUNE_TYPES; ++i)
+        SetFloatValue(PLAYER_RUNE_REGEN_1 + i, 0.1f);
 }
 
 bool Player::IsBaseRuneSlotsOnCooldown(RuneType runeType) const

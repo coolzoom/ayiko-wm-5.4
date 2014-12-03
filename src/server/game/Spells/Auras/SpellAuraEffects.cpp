@@ -4792,7 +4792,9 @@ void AuraEffect::HandleModPowerRegen(AuraApplication const* aurApp, uint8 mode, 
             target->UpdateManaRegen();
             break;
         case POWER_RUNES:
-            target->UpdateAllRunesRegen();
+            // There's a separate effect for each rune type, but what for?
+            if (GetMiscValueB() == 0)
+                target->UpdateHasteAffectedPowerRegeneration(CR_HASTE_MELEE, GetAmount(), apply);
             break;
         case POWER_ENERGY:
             target->UpdateHasteAffectedPowerRegeneration(CR_HASTE_MELEE, GetAmount(), apply);

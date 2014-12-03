@@ -583,7 +583,7 @@ class npc_green_dragon_combat_trigger : public CreatureScript
                 const Map::PlayerList &PlayerList = instance->instance->GetPlayers();
                 if (!PlayerList.isEmpty())
                     for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                        if (Player* player = i->getSource())
+                        if (Player* player = i->GetSource())
                             if (player->IsAlive())
                                 wipe = false;
 
@@ -1494,7 +1494,7 @@ class achievement_portal_jockey : public AchievementCriteriaScript
     public:
         achievement_portal_jockey() : AchievementCriteriaScript("achievement_portal_jockey") { }
 
-        bool OnCheck(Player* /*source*/, Unit* target)
+        bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* /*source*/, Unit* target)
         {
             return target && !target->GetAI()->GetData(MISSED_PORTALS);
         }

@@ -819,7 +819,7 @@ class achievement_once_bitten_twice_shy_n : public AchievementCriteriaScript
     public:
         achievement_once_bitten_twice_shy_n() : AchievementCriteriaScript("achievement_once_bitten_twice_shy_n") { }
 
-        bool OnCheck(Player* source, Unit* target)
+        bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* source, Unit* target)
         {
             if (!target)
                 return false;
@@ -835,7 +835,7 @@ class achievement_once_bitten_twice_shy_v : public AchievementCriteriaScript
     public:
         achievement_once_bitten_twice_shy_v() : AchievementCriteriaScript("achievement_once_bitten_twice_shy_v") { }
 
-        bool OnCheck(Player* source, Unit* target)
+        bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* source, Unit* target)
         {
             if (!target)
                 return false;

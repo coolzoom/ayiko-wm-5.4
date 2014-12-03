@@ -249,6 +249,28 @@ void UnitAI::FillAISpellInfo()
     }
 }
 
+void UnitAI::DoCast(Unit* victim, uint32 spellId, bool triggered)
+{
+    if (!victim || (me->HasUnitState(UNIT_STATE_CASTING) && !triggered))
+        return;
+
+    me->CastSpell(victim, spellId, triggered);
+}
+
+void UnitAI::DoCastVictim(uint32 spellId, bool triggered)
+{
+    // Why don't we check for casting unit_state and existing target as we do in DoCast(.. ?
+    me->CastSpell(me->GetVictim(), spellId, triggered);
+}
+
+void UnitAI::DoCastAOE(uint32 spellId, bool triggered)
+{
+    if (!triggered && me->HasUnitState(UNIT_STATE_CASTING))
+        return;
+
+    me->CastSpell((Unit*)NULL, spellId, triggered);
+}
+
 // Enable PlayerAI when charmed
 void PlayerAI::OnCharmed(bool apply) { me->IsAIEnabled = apply; }
 

@@ -70,6 +70,7 @@ class CreatureAI : public UnitAI
 
         bool UpdateVictim();
         bool UpdateVictimWithGaze();
+        bool UpdatePlayerVictim();
 
         void SetGazeOn(Unit* target);
 
@@ -187,9 +188,10 @@ class CreatureAI : public UnitAI
 
         virtual void OnControlVehicle(Unit* /*base*/, int8 /*seatId*/, bool /*apply*/) { }
 
-        virtual void OnSpellClick(Unit* /*clicker*/) { }
+        virtual void OnSpellClick(Unit* /*clicker*/, bool& /*result*/) { }
 
         virtual bool CanSeeAlways(WorldObject const* /*obj*/) { return false; }
+
     protected:
         virtual void MoveInLineOfSight(Unit* /*who*/);
 

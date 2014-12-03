@@ -76,7 +76,7 @@ class boss_taran_zhu : public CreatureScript
                 summons.DespawnAll();
             }
 
-            void DamageDealt(Unit* target, uint32& damage, DamageEffectType /*damageType*/)
+            void DamageDealt(Unit* target, uint32& damage, DamageEffectType /*damageType*/, const SpellInfo * /*spellInfo*/)
             {
                 if (Player* player = target->ToPlayer())
                 {

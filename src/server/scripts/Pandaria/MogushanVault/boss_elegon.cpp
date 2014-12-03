@@ -528,7 +528,7 @@ public:
                 {
                     for (Map::PlayerList::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
                     {
-                        if (Player* player = itr->getSource())
+                        if (Player* player = itr->GetSource())
                         {
                             if (player->isGameMaster())
                                 continue;
@@ -1647,16 +1647,19 @@ public:
         {
             targets.clear();
 
-            float MaxDist = GetSpellInfo()->Id == SPELL_RADIATING_INSIDE_VORTEX ? 36.0f : 200.0f;
-            float MinDist = GetSpellInfo()->Id == SPELL_RADIATING_OUTSIDE_VORTEX ? 36.0f : 0.0f;
+            float const maxDist = GetSpellInfo()->Id == SPELL_RADIATING_INSIDE_VORTEX ? 36.0f : 200.0f;
+            float const minDist = GetSpellInfo()->Id == SPELL_RADIATING_OUTSIDE_VORTEX ? 36.0f : 0.0f;
 
-            Map::PlayerList const& players = GetCaster()->GetMap()->GetPlayers();
-            if (!players.isEmpty())
-                for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                    if (Player* player = itr->getSource())
-                        if (player->GetExactDist2d(GetCaster()->GetPositionX(), GetCaster()->GetPositionY()) <= MaxDist &&
-                            player->GetExactDist2d(GetCaster()->GetPositionX(), GetCaster()->GetPositionY()) >= MinDist)
-                            targets.push_back(player);
+            Map::PlayerList const &players = GetCaster()->GetMap()->GetPlayers();
+            for (auto itr = players.begin(); itr != players.end(); ++itr)
+            {
+                if (auto const player = itr->GetSource())
+                {
+                    auto const dist2d = player->GetExactDist2d(GetCaster()->GetPositionX(), GetCaster()->GetPositionY());
+                    if (dist2d <= maxDist && dist2d >= minDist)
+                        targets.push_back(player);
+                }
+            }
         }
 
         void Register()

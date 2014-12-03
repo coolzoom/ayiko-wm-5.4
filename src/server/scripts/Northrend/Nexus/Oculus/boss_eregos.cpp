@@ -317,7 +317,7 @@ class achievement_gen_eregos_void : public AchievementCriteriaScript
 public:
     achievement_gen_eregos_void(char const* name, uint32 data) : AchievementCriteriaScript(name), _data(data) { }
 
-    bool OnCheck(Player* /*player*/, Unit* target)
+    bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* /*player*/, Unit* target)
     {
         return target && target->GetAI()->GetData(_data);
     }

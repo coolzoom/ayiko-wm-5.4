@@ -348,7 +348,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 {
                     Map::PlayerList const &players = instance->GetPlayers();
                     if (!players.isEmpty())
-                        if (Player* player = players.begin()->getSource())
+                        if (Player* player = players.begin()->GetSource())
                             TeamInInstance = player->GetTeam();
                 }
 
@@ -1969,7 +1969,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                         const Map::PlayerList &PlayerList = instance->GetPlayers();
                         if (!PlayerList.isEmpty())
                             for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                                if (Player* player = i->getSource())
+                                if (Player* player = i->GetSource())
                                 {
                                     player->DestroyItemCount(49278, 1, true, false); // delete le jetpack
                                     player->CombatStop();
@@ -2140,7 +2140,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 const Map::PlayerList &PlayerList = instance->GetPlayers();
                 if (!PlayerList.isEmpty())
                     for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                        if (Player* player = i->getSource())
+                        if (Player* player = i->GetSource())
                             if (player->IsAlive())
                                 wipe = false;
 
@@ -2200,7 +2200,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 {
                     for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                     {
-                        if (Player* player = i->getSource())
+                        if (Player* player = i->GetSource())
                         {
                             player->Kill(player);
                         }
@@ -2494,7 +2494,7 @@ TPlayerList GetPlayersInTheMap(Map *pMap)
     const Map::PlayerList &PlayerList = pMap->GetPlayers();
     if (!PlayerList.isEmpty())
         for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-            if (Player* player = i->getSource())
+            if (Player* player = i->GetSource())
                 players.push_back(player);
     return players;
 }

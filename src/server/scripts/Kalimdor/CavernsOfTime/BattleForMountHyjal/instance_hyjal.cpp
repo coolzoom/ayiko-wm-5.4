@@ -211,20 +211,20 @@ public:
 
                                     for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                                     {
-                                         if (i->getSource())
+                                         if (i->GetSource())
                                          {
-                                            ObjectGuid guid = i->getSource()->GetGUID();
+                                            ObjectGuid guid = i->GetSource()->GetGUID();
 
                                             WorldPacket packet(SMSG_MESSAGE_CHAT, 200);
                                             unit->BuildMonsterChat(&packet, CHAT_MSG_MONSTER_YELL, YELL_EFFORTS, 0, YELL_EFFORTS_NAME, guid);
-                                            i->getSource()->GetSession()->SendPacket(&packet);
+                                            i->GetSource()->GetSession()->SendPacket(&packet);
 
                                             WorldPacket data2(SMSG_PLAY_SOUND, 4+8);
                                             data2.WriteBitSeq<6, 7, 5, 2, 1, 4, 0, 3>(guid);
                                             data2.WriteByteSeq<7, 0, 5, 4, 3, 1, 2, 6>(guid);
                                             data2 << 10986;
 
-                                            i->getSource()->GetSession()->SendPacket(&data2);
+                                            i->GetSource()->GetSession()->SendPacket(&data2);
                                          }
                                     }
                                 }

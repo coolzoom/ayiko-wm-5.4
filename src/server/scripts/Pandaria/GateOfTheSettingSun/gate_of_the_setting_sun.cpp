@@ -33,7 +33,7 @@ public:
             attackTimer = urand(1000, 5000);
         }
 
-        void DamageDealt(Unit* /*target*/, uint32& damage, DamageEffectType /*damageType*/)
+        void DamageDealt(Unit* /*target*/, uint32& damage, DamageEffectType /*damageType*/, const SpellInfo * /*spellInfo*/)
         {
             damage = 0;
         }

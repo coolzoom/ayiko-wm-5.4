@@ -36,8 +36,6 @@ Vehicle::Vehicle(Unit* unit, VehicleEntry const* vehInfo, uint32 creatureEntry)
     , _usableSeatNum(0)
     , _creatureEntry(creatureEntry)
     , _status(STATUS_NONE)
-    , _passengersSpawnedByAI(false)
-    , _canBeCastedByPassengers(false)
 {
     for (uint32 i = 0; i < MAX_VEHICLE_SEATS; ++i)
     {
@@ -107,9 +105,6 @@ void Vehicle::Install()
 
 void Vehicle::InstallAllAccessories(bool evading)
 {
-    if (ArePassengersSpawnedByAI())
-        return;
-
     if (GetBase()->GetTypeId() == TYPEID_PLAYER || !evading)
         RemoveAllPassengers();   // We might have aura's saved in the DB with now invalid casters - remove
 
@@ -438,6 +433,8 @@ bool Vehicle::AddPassenger(Unit* unit, int8 seatId)
     }
 
     unit->SendClearTarget();                                // SMSG_BREAK_TARGET
+    if (unit->GetTypeId() == TYPEID_PLAYER && _me->IsFlying())
+        unit->SetDisableGravity(true);
     unit->SetControlled(true, UNIT_STATE_ROOT);             // SMSG_FORCE_ROOT - In some cases we send SMSG_SPLINE_MOVE_ROOT here (for creatures)
                                                             // also adds MOVEMENTFLAG_ROOT
     Movement::MoveSplineInit init(unit);
@@ -500,7 +497,7 @@ void Vehicle::RemovePassenger(Unit* unit)
     }
 
     // only for flyable vehicles
-    if (unit->IsFlying())
+    if (unit->IsFlying() && unit->GetTypeId() == TYPEID_PLAYER && !unit->GetMap()->IsDungeon())
         _me->CastSpell(unit, VEHICLE_SPELL_PARACHUTE, true);
 
     if (_me->GetTypeId() == TYPEID_UNIT && _me->ToCreature()->IsAIEnabled)

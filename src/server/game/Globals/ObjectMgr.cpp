@@ -186,7 +186,7 @@ bool SpellClickInfo::IsFitToRequirements(Unit const* clicker, Unit const* clicke
 
     Unit const* summoner = NULL;
     // Check summoners for party
-    if (clickee->isSummon())
+    if (clickee->IsSummon())
         summoner = clickee->ToTempSummon()->GetSummoner();
     if (!summoner)
         summoner = clickee;
@@ -6352,8 +6352,8 @@ void ObjectMgr::LoadGameObjectTemplate()
                                              "questItem4, questItem5, questItem6, data0, data1, data2, data3, data4, data5, data6, data7, data8, data9, data10, data11, data12, "
     //                                          29      30      31      32      33      34      35      36      37      38      39      40      41      42      43      44
                                              "data13, data14, data15, data16, data17, data18, data19, data20, data21, data22, data23, data24, data25, data26, data27, data28, "
-    //                                          45      46      47       48       49        50
-                                             "data29, data30, data31, unkInt32, AIName, ScriptName "
+    //                                          45      46      47       48       49        50          51          52
+                                             "data29, data30, data31, unkInt32, AIName, ScriptName, currencyId, currencyCnt "
                                              "FROM gameobject_template");
 
     if (!result)
@@ -6392,6 +6392,9 @@ void ObjectMgr::LoadGameObjectTemplate()
         got.unkInt32 = fields[48].GetInt32();
         got.AIName = fields[49].GetString();
         got.ScriptId = GetScriptId(fields[50].GetCString());
+
+        got.currencyId     = fields[51].GetUInt32();
+        got.currencyCnt    = fields[52].GetUInt32();
 
         // Checks
 
@@ -6747,78 +6750,6 @@ void ObjectMgr::LoadReputationRewardRate()
     while (result->NextRow());
 
     TC_LOG_INFO("server.loading", ">> Loaded %u reputation_reward_rate in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-}
-
-void ObjectMgr::LoadCurrencyOnKill()
-{
-    uint32 oldMSTime = getMSTime();
-
-    _curOnKillStore.clear();
-
-    uint32 count = 0;
-
-    QueryResult result = WorldDatabase.Query("SELECT `creature_id`, `CurrencyId1`,  `CurrencyId2`,  `CurrencyId3`, `CurrencyCount1`, `CurrencyCount2`, `CurrencyCount3` FROM `creature_loot_currency`");
-
-    if (!result)
-    {
-        TC_LOG_ERROR("server.loading", ">> Loaded 0 creature currency definitions. DB table `creature_currency` is empty.");
-        return;
-    }
-
-    do
-    {
-        Field *fields = result->Fetch();
-
-        uint32 creature_id = fields[0].GetUInt32();
-
-        CurrencyOnKillEntry currOnKill;
-        currOnKill.currencyId1          = fields[1].GetUInt16();
-        currOnKill.currencyId2          = fields[2].GetUInt16();
-        currOnKill.currencyId3          = fields[3].GetUInt16();
-        currOnKill.currencyCount1       = fields[4].GetInt32();
-        currOnKill.currencyCount2       = fields[5].GetInt32();
-        currOnKill.currencyCount3       = fields[6].GetInt32();
-
-        if (!GetCreatureTemplate(creature_id))
-        {
-            TC_LOG_ERROR("sql.sql", "Table `creature_creature` have data for not existed creature entry (%u), skipped", creature_id);
-            continue;
-        }
-
-        if (currOnKill.currencyId1)
-        {
-            if (!sCurrencyTypesStore.LookupEntry(currOnKill.currencyId1))
-            {
-                TC_LOG_ERROR("sql.sql", "CurrencyType (CurrencyTypes.dbc) %u does not exist but is used in `creature_currency`", currOnKill.currencyId1);
-                continue;
-            }
-        }
-
-        if (currOnKill.currencyId2)
-        {
-            if (!sCurrencyTypesStore.LookupEntry(currOnKill.currencyId2))
-            {
-                TC_LOG_ERROR("sql.sql", "CurrencyType (CurrencyTypes.dbc) %u does not exist but is used in `creature_currency`", currOnKill.currencyId2);
-                continue;
-            }
-        }
-
-        if (currOnKill.currencyId3)
-        {
-            if (!sCurrencyTypesStore.LookupEntry(currOnKill.currencyId3))
-            {
-                TC_LOG_ERROR("sql.sql", "CurrencyType (CurrencyTypes.dbc) %u does not exist but is used in `creature_currency`", currOnKill.currencyId3);
-                continue;
-            }
-        }
-
-        _curOnKillStore[creature_id] = currOnKill;
-
-        ++count;
-    }
-    while (result->NextRow());
-
-    TC_LOG_INFO("server.loading", ">> Loaded %u creature currency definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::LoadReputationOnKill()
@@ -9334,6 +9265,42 @@ void ObjectMgr::LoadCreatureAddonAuras(char const *keyName, char const *tableNam
         uint32 entry = fields[0].GetUInt32();
         addonStorage[entry].auras.push_back(fields[1].GetUInt32());
     } while (result->NextRow());
+}
+
+void ObjectMgr::LoadCreatureTemplateCurrency()
+{
+    QueryResult result = WorldDatabase.Query("SELECT entry, currencyId, currencyCount FROM creature_template_currency");
+
+    if (!result)
+    {
+        TC_LOG_INFO("server.loading", "Loaded 0 creature currencies, creature_template_currency is empty");
+        return;
+    }
+
+    do
+    {
+        Field const * const fields = result->Fetch();
+
+        auto const entry = fields[0].GetUInt32();
+        auto const currencyId = fields[1].GetUInt32();
+        auto const currencyCount = fields[2].GetUInt32();
+
+        auto const currencyEntry = sCurrencyTypesStore.LookupEntry(currencyId);
+        if (!currencyEntry)
+        {
+            TC_LOG_ERROR("server.loading", "creature_template_currency contains nonexistent currency %u", entry);
+            continue;
+        }
+
+        CreatureCurrency currency;
+        currency.currency = currencyEntry;
+        currency.currencyCount = currencyCount;
+
+        _creatureCurrencyStore.insert(std::make_pair(entry, currency));
+    }
+    while (result->NextRow());
+
+    TC_LOG_INFO("misc", ">> Loaded " SIZEFMTD " Creature Currencies", _creatureCurrencyStore.size());
 }
 
 // this allows calculating base reputations to offline players, just by race and class

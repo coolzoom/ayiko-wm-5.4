@@ -477,7 +477,7 @@ class achievement_ignis_shattered : public AchievementCriteriaScript
     public:
         achievement_ignis_shattered() : AchievementCriteriaScript("achievement_ignis_shattered") { }
 
-        bool OnCheck(Player* /*source*/, Unit* target)
+        bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* /*source*/, Unit* target)
         {
             if (target && target->IsAIEnabled)
                 return target->GetAI()->GetData(DATA_SHATTERED);

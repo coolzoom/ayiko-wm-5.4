@@ -379,7 +379,7 @@ class npc_gilneas_tremors_credit final : public CreatureScript
                 Map::PlayerList const &players = me->GetMap()->GetPlayers();
 
                 for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
-                    if (Player* player = i->getSource())
+                    if (Player* player = i->GetSource())
                         if (phaseMask & player->GetPhaseMask())
                             player->CastSpell(player, uiSpellId, false);
             }
@@ -1167,7 +1167,7 @@ class npc_qems_citizen final : public CreatureScript
                     {
                         case EVENT_FINISH_RUN:
                             {
-                                if (me->isSummon())
+                                if (me->IsSummon())
                                     if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                                         if (Player* player = summoner->ToPlayer())
                                             player->KilledMonsterCredit(NPC_QEMS_KILL_CREDIT, 0);
@@ -1260,7 +1260,7 @@ class npc_qems_worgen final : public CreatureScript
                             break;
                         case EVENT_FINISH_RUN:
                             {
-                                if (me->isSummon())
+                                if (me->IsSummon())
                                 {
                                     if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                                     {
@@ -2139,7 +2139,7 @@ class npc_josiah_avery_worgen final : public CreatureScript
 
             void InitializeAI() final
             {
-                ASSERT(me->isSummon());
+                ASSERT(me->IsSummon());
                 me->SetReactState(REACT_PASSIVE);
                 me->SetPhaseMask(6, true);
             }
@@ -2213,7 +2213,7 @@ class npc_josiah_event_trigger final : public CreatureScript
 
             void InitializeAI() final
             {
-                ASSERT(me->isSummon());
+                ASSERT(me->IsSummon());
                 me->SetPhaseMask(6, true);
             }
 
@@ -2558,7 +2558,7 @@ class npc_vehicle_genn_horse final : public CreatureScript
 
             void InitializeAI() final
             {
-                ASSERT(me->isSummon());
+                ASSERT(me->IsSummon());
                 me->SetControlled(true, UNIT_STATE_ROOT);
             }
 
@@ -2644,7 +2644,7 @@ class npc_saved_aranas final : public CreatureScript
 
             void InitializeAI() final
             {
-                ASSERT(me->isSummon());
+                ASSERT(me->IsSummon());
                 me->SetReactState(REACT_PASSIVE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             }
@@ -3104,7 +3104,7 @@ class npc_crowley_horse_first_round final : public CreatureScript
 
             void InitializeAI() final
             {
-                ASSERT(me->isSummon());
+                ASSERT(me->IsSummon());
                 me->SetReactState(REACT_PASSIVE);
                 me->SetControlled(true, UNIT_STATE_ROOT);
             }
@@ -3208,7 +3208,7 @@ class npc_crowley_horse_second_round final : public CreatureScript
 
             void InitializeAI() final
             {
-                ASSERT(me->isSummon());
+                ASSERT(me->IsSummon());
                 me->SetReactState(REACT_PASSIVE);
                 me->SetControlled(true, UNIT_STATE_ROOT);
             }
@@ -3581,7 +3581,7 @@ class npc_krennan_aranas_last_stand final : public CreatureScript
 
             void InitializeAI() final
             {
-                ASSERT(me->isSummon());
+                ASSERT(me->IsSummon());
                 me->setActive(true);
             }
 
@@ -5109,7 +5109,7 @@ class npc_wahl final : public CreatureScript
 
             void JustReachedHome() final
             {
-                if (me->isSummon())
+                if (me->IsSummon())
                 {
                     me->GetMotionMaster()->MoveSplinePath(2, false, false, 0.f, false, false);
                     me->DespawnOrUnsummon(me->GetSplineDuration());
@@ -5122,7 +5122,7 @@ class npc_wahl final : public CreatureScript
 
                 if (events.ExecuteEvent() == EVENT_TRANSFORM)
                 {
-                    if (me->isSummon())
+                    if (me->IsSummon())
                     {
                         if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                         {
@@ -5182,7 +5182,7 @@ class npc_lucius_the_cruel final : public CreatureScript
 
             void InitializeAI() final
             {
-                ASSERT(me->isSummon());
+                ASSERT(me->IsSummon());
                 SetCombatMovement(false);
                 me->SetReactState(REACT_PASSIVE);
                 me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
@@ -5415,7 +5415,7 @@ class npc_swift_mountain_horse final : public CreatureScript
 
             void InitializeAI() final
             {
-                ASSERT(me->isSummon());
+                ASSERT(me->IsSummon());
             }
 
             void IsSummonedBy(Unit* summoner) final
@@ -5626,11 +5626,11 @@ class npc_stagecoach_carriage_summoner final : public CreatureScript
 
             void InitializeAI() final
             {
-                ASSERT(me->isSummon());
+                ASSERT(me->IsSummon());
                 me->m_Events.AddEvent(new DelayEventDoAction(me, ACTION_INSTALL_ACCESSORIES), me->m_Events.CalculateTime(250), true);
             }
 
-            void OnSpellClick(Unit* player) final
+            void OnSpellClick(Unit* player, bool &/*result*/) final
             {
                 player->RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT);
                 player->RemoveAurasByType(SPELL_AURA_MOD_INVISIBILITY_DETECT);
@@ -5743,7 +5743,7 @@ class npc_stagecoach_harness_escort final : public CreatureScript
 
             void InitializeAI() final
             {
-                ASSERT(me->isSummon());
+                ASSERT(me->IsSummon());
                 me->SetPhaseMask(EXODUS_PHASE_MASK, true);
                 me->setActive(true);
             }
@@ -5938,7 +5938,7 @@ class npc_stagecoach_carriage_escort final : public CreatureScript
 
             void InitializeAI() final
             {
-                ASSERT(me->isSummon());
+                ASSERT(me->IsSummon());
                 me->m_Events.AddEvent(new DelayEventDoAction(me, ACTION_INSTALL_ACCESSORIES), me->m_Events.CalculateTime(250), true);
             }
 
@@ -5955,7 +5955,7 @@ class npc_stagecoach_carriage_escort final : public CreatureScript
                             if (Creature* passenger = harness->SummonCreature(carriageAccessories[i].entry, pos))
                                 passenger->EnterVehicle(me, carriageAccessories[i].seatId);
 
-                        if (harness->isSummon())
+                        if (harness->IsSummon())
                             if (Unit* summoner = harness->ToTempSummon()->GetSummoner())
                                 summoner->EnterVehicle(me, 0);
                     }
@@ -6168,7 +6168,7 @@ class npc_koroth_the_hillbreaker_friend final : public CreatureScript
 
             void InitializeAI() final
             {
-                ASSERT(me->isSummon());
+                ASSERT(me->IsSummon());
                 SetCombatMovement(false);
             }
 
@@ -6192,7 +6192,7 @@ class npc_koroth_the_hillbreaker_friend final : public CreatureScript
                         if (summoner->IsAIEnabled)
                             summoner->GetAI()->DoAction(ACTION_KOROTH_ATTACK);
 
-                        if (summoner->isSummon())
+                        if (summoner->IsSummon())
                             Talk(KOROTH_YELL_MY_BANNER, summoner->ToTempSummon()->GetSummonerGUID(), true);
                     }
 
@@ -6273,7 +6273,7 @@ class npc_captain_asther_qiao final : public CreatureScript
 
             void InitializeAI() final
             {
-                ASSERT(me->isSummon());
+                ASSERT(me->IsSummon());
                 me->SetReactState(REACT_PASSIVE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 me->setActive(true);
@@ -6770,7 +6770,7 @@ class npc_tobias_mistmantle_qaod final : public CreatureScript
 
             void InitializeAI() final
             {
-                ASSERT(me->isSummon());
+                ASSERT(me->IsSummon());
             }
 
             void IsSummonedBy(Unit* summoner) final
@@ -6864,7 +6864,7 @@ class npc_taldoren_tracker final : public CreatureScript
 
             void InitializeAI() final
             {
-                ASSERT(me->isSummon());
+                ASSERT(me->IsSummon());
             }
 
             void DoAction(int32 const action) final
@@ -6942,7 +6942,7 @@ class npc_tobias_mistmantle_qtbwo final : public CreatureScript
 
             void InitializeAI() final
             {
-                ASSERT(me->isSummon());
+                ASSERT(me->IsSummon());
             }
 
             void IsSummonedBy(Unit* summoner) final
@@ -7122,7 +7122,7 @@ class npc_lord_godfrey_qnhnb final : public CreatureScript
 
             void InitializeAI() final
             {
-                ASSERT(me->isSummon());
+                ASSERT(me->IsSummon());
             }
 
             void IsSummonedBy(Unit* summoner) final
@@ -7187,7 +7187,7 @@ class npc_lorna_crowley_qnhnb final : public CreatureScript
 
             void InitializeAI() final
             {
-                ASSERT(me->isSummon());
+                ASSERT(me->IsSummon());
             }
 
             void IsSummonedBy(Unit* summoner) final
@@ -7252,7 +7252,7 @@ class npc_king_genn_greymane_qnhnb final : public CreatureScript
 
             void InitializeAI() final
             {
-                ASSERT(me->isSummon());
+                ASSERT(me->IsSummon());
             }
 
             void IsSummonedBy(Unit* summoner) final
@@ -7568,7 +7568,7 @@ class npc_stout_mountain_horse final : public CreatureScript
 
             void InitializeAI() final
             {
-                ASSERT(me->isSummon());
+                ASSERT(me->IsSummon());
             }
 
             void IsSummonedBy(Unit* summoner) final
@@ -8702,7 +8702,7 @@ class npc_prince_liam_greymane_tbfgc final : public CreatureScript
                                         if (greymane->IsAIEnabled)
                                             greymane->AI()->Talk(GREYMANE_YELL_LIAM);
 
-                                    if (me->isSummon())
+                                    if (me->IsSummon())
                                         if (Creature* krennan = me->ToTempSummon()->GetSummonerCreatureBase())
                                             if (krennan->IsAIEnabled)
                                                 krennan->AI()->DoAction(ACTION_BATTLE_COMPLETE);
@@ -8829,7 +8829,7 @@ class npc_myriam_spellwaker_tbfgc final : public CreatureScript
                     case 54:
                     case 102:
                         {
-                            if (me->isSummon())
+                            if (me->IsSummon())
                                 if (Creature* liam = me->ToTempSummon()->GetSummonerCreatureBase())
                                     if (liam->IsAIEnabled)
                                         liam->GetAI()->DoAction(ACTION_LEADER_ON_POSITION);
@@ -8970,7 +8970,7 @@ class npc_sister_almyra_tbfgc final : public CreatureScript
                     case 24:
                     case 87:
                         {
-                            if (me->isSummon())
+                            if (me->IsSummon())
                                 if (Creature* liam = me->ToTempSummon()->GetSummonerCreatureBase())
                                     if (liam->IsAIEnabled)
                                         liam->GetAI()->DoAction(ACTION_LEADER_ON_POSITION);
@@ -9088,7 +9088,7 @@ class npc_gilnean_militia_tbfgc final : public CreatureScript
 
             void EnterEvadeMode() final
             {
-                if (me->isSummon())
+                if (me->IsSummon())
                 {
                     if (Creature* summoner = me->ToTempSummon()->GetSummonerCreatureBase())
                     {
@@ -9119,7 +9119,7 @@ class npc_gilnean_militia_tbfgc final : public CreatureScript
             {
                 shooterAI.AttackStart(who);
 
-                if (me->isSummon())
+                if (me->IsSummon())
                 {
                     if (Creature* summoner = me->ToTempSummon()->GetSummonerCreatureBase())
                     {
@@ -9342,7 +9342,7 @@ class npc_lorna_crowley_tbfgc final : public CreatureScript
                         break;
                     case 41:
                         {
-                            if (me->isSummon())
+                            if (me->IsSummon())
                                 if (Creature* liam = me->ToTempSummon()->GetSummonerCreatureBase())
                                     if (liam->IsAIEnabled)
                                         liam->GetAI()->DoAction(ACTION_LEADER_ON_POSITION);
@@ -9546,7 +9546,7 @@ class npc_lord_darius_crowley_tbfgc final : public CreatureScript
             {
                 if (point == 18)
                 {
-                    if (me->isSummon())
+                    if (me->IsSummon())
                         if (Creature* liam = me->ToTempSummon()->GetSummonerCreatureBase())
                             if (liam->IsAIEnabled)
                                 liam->GetAI()->DoAction(ACTION_LEADER_ON_POSITION);
@@ -9666,7 +9666,7 @@ class npc_worgen_warrior_tbfgc final : public CreatureScript
 
             void EnterEvadeMode() final
             {
-                if (me->isSummon())
+                if (me->IsSummon())
                 {
                     if (Creature* summoner = me->ToTempSummon()->GetSummonerCreatureBase())
                     {
@@ -9759,7 +9759,7 @@ class npc_gorerot_tbfgc final : public CreatureScript
 
             void JustDied(Unit* /*killer*/) final
             {
-                if (me->isSummon())
+                if (me->IsSummon())
                     if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                         if (Creature* liam = summoner->ToTempSummon())
                             liam->AI()->DoAction(ACTION_GOREROT_DIED);
@@ -10043,7 +10043,7 @@ class npc_lady_sylvanas_windrunner_tbfgc final : public CreatureScript
                     me->AttackStop();
                     me->CastSpell((Unit*)NULL, SPELL_BANSHEE_QUEENS_WAIL, false);
 
-                    if (me->isSummon())
+                    if (me->IsSummon())
                         if (Creature* liam = me->ToTempSummon()->GetSummonerCreatureBase())
                             if (liam->IsAIEnabled)
                                 liam->AI()->DoAction(ACTION_BATTLE_COMPLETE);
@@ -10176,7 +10176,7 @@ class npc_tobias_mistmantle_qthfs final : public CreatureScript
 
             void InitializeAI() final
             {
-                ASSERT(me->isSummon());
+                ASSERT(me->IsSummon());
                 me->setActive(true);
             }
 
@@ -10484,7 +10484,7 @@ class npc_captured_riding_bat final : public CreatureScript
 
             void InitializeAI() final
             {
-                ASSERT(me->isSummon());
+                ASSERT(me->IsSummon());
                 me->SetCanFly(true);
                 me->SetDisableGravity(true);
                 me->setActive(true);
@@ -10760,7 +10760,7 @@ class npc_gilneas_funeral_camera final : public CreatureScript
 
             void InitializeAI() final
             {
-                ASSERT(me->isSummon());
+                ASSERT(me->IsSummon());
             }
 
             void IsSummonedBy(Unit* summoner) final

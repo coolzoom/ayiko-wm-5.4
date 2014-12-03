@@ -399,7 +399,7 @@ class boss_deathbringer_saurfang : public CreatureScript
                 }
             }
 
-            void DamageDealt(Unit* victim, uint32& damage, DamageEffectType damageType)
+            void DamageDealt(Unit* victim, uint32& damage, DamageEffectType damageType, const SpellInfo * /*spellInfo*/)
             {
                 damage *= (1 + energyPct);
 
@@ -613,7 +613,7 @@ class npc_saurfang_beasts : public CreatureScript
                 DoZoneInCombat(me);
             }
 
-            void DamageDealt(Unit* /*victim*/, uint32& /*damage*/, DamageEffectType /*damageType*/)
+            void DamageDealt(Unit* /*victim*/, uint32& /*damage*/, DamageEffectType /*damageType*/, const SpellInfo * /*spellInfo*/)
             {
                 if (Creature * Saurfang = GetClosestCreatureWithEntry(me, NPC_DEATHBRINGER_SAURFANG, 100, true))
                     Saurfang->AI()->DoAction(ACTION_GIVE_ENERGY_POWER_FROM_BEAST);
@@ -1344,7 +1344,7 @@ class achievement_ive_gone_and_made_a_mess : public AchievementCriteriaScript
     public:
         achievement_ive_gone_and_made_a_mess() : AchievementCriteriaScript("achievement_ive_gone_and_made_a_mess") { }
 
-        bool OnCheck(Player* /*source*/, Unit* target)
+        bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* /*source*/, Unit* target)
         {
             if (target)
                 if (Creature* saurfang = target->ToCreature())

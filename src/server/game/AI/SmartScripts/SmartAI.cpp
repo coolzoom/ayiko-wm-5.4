@@ -228,7 +228,7 @@ void SmartAI::EndPath(bool fail)
             {
                 for (GroupReference* groupRef = group->GetFirstMember(); groupRef != NULL; groupRef = groupRef->next())
                 {
-                    Player* groupGuy = groupRef->getSource();
+                    Player* groupGuy = groupRef->GetSource();
 
                     if (!fail && groupGuy->IsAtGroupRewardDistance(me) && !groupGuy->GetCorpse())
                         groupGuy->AreaExploredOrEventHappens(mEscortQuestID);
@@ -399,7 +399,7 @@ bool SmartAI::IsEscortInvokerInRange()
             {
                 for (GroupReference* groupRef = group->GetFirstMember(); groupRef != NULL; groupRef = groupRef->next())
                 {
-                    Player* groupGuy = groupRef->getSource();
+                    Player* groupGuy = groupRef->GetSource();
 
                     if (me->GetDistance(groupGuy) <= SMART_ESCORT_MAX_PLAYER_DIST)
                         return true;
@@ -670,7 +670,7 @@ void SmartAI::IsSummonedBy(Unit* summoner)
     GetScript()->ProcessEventsFor(SMART_EVENT_JUST_SUMMONED, summoner);
 }
 
-void SmartAI::DamageDealt(Unit* doneTo, uint32& damage, DamageEffectType /*damagetype*/)
+void SmartAI::DamageDealt(Unit* doneTo, uint32& damage, DamageEffectType /*damagetype*/, const SpellInfo * /*spellInfo*/)
 {
     GetScript()->ProcessEventsFor(SMART_EVENT_DAMAGED_TARGET, doneTo, damage);
 }
@@ -838,8 +838,11 @@ void SmartAI::sOnGameEvent(bool start, uint16 eventId)
     GetScript()->ProcessEventsFor(start ? SMART_EVENT_GAME_EVENT_START : SMART_EVENT_GAME_EVENT_END, NULL, eventId);
 }
 
-void SmartAI::OnSpellClick(Unit* clicker)
+void SmartAI::OnSpellClick(Unit* clicker, bool &result)
 {
+    if (!result)
+        return;
+
     GetScript()->ProcessEventsFor(SMART_EVENT_ON_SPELLCLICK, clicker);
 }
 

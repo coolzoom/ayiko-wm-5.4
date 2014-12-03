@@ -762,8 +762,8 @@ class boss_sister_svalna : public CreatureScript
                     Map::PlayerList const &players = instance->instance->GetPlayers();
                     if (!players.isEmpty())
                         for(Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                            if((*itr).getSource())
-                                (*itr).getSource()->RemoveAurasDueToSpell(SPELL_IMPALING_SPEAR_KILL);
+                            if((*itr).GetSource())
+                                (*itr).GetSource()->RemoveAurasDueToSpell(SPELL_IMPALING_SPEAR_KILL);
                 }
             }
 

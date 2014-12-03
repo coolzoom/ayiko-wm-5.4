@@ -58,7 +58,7 @@ template <class TO, class FROM> class Reference : public LinkedListElement
         // We don't need the reference anymore. Call comes from the refFrom object
         // Tell our refTo object, that the link is cut
         void unlink()
-        { 
+        {
             targetObjectDestroyLink();
             delink();
             iRefTo = NULL;
@@ -92,7 +92,7 @@ template <class TO, class FROM> class Reference : public LinkedListElement
         TO* operator ->() const { return iRefTo; }
         TO* getTarget() const { return iRefTo; }
 
-        FROM* getSource() const { return iRefFrom; }
+        FROM* GetSource() const { return iRefFrom; }
 };
 
 //=====================================================

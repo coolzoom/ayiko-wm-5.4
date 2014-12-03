@@ -1623,7 +1623,7 @@ namespace Trinity
             SummonTimerOrderPred(bool ascending = true) : m_ascending(ascending) {}
             bool operator() (const Unit* a, const Unit* b) const
             {
-                if (!a->isSummon() || !b->isSummon())
+                if (!a->IsSummon() || !b->IsSummon())
                     return (urand(0, 1) ? false : true);
 
                 uint32 rA = ((TempSummon*)a)->GetTimer();

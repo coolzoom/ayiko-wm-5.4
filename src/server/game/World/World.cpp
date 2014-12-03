@@ -1660,11 +1660,11 @@ void World::SetInitialWorldSettings()
     TC_LOG_INFO("server.loading", "Loading Creature template addons...");
     sObjectMgr->LoadCreatureTemplateAddons();
 
+    TC_LOG_INFO("server.loading", "Loading Creature template currencies...");
+    sObjectMgr->LoadCreatureTemplateCurrency();
+
     TC_LOG_INFO("server.loading", "Loading Reputation Reward Rates...");
     sObjectMgr->LoadReputationRewardRate();
-
-    TC_LOG_INFO("server.loading", "Loading Currency Loot Templates...");
-    sObjectMgr->LoadCurrencyOnKill();
 
     TC_LOG_INFO("server.loading", "Loading Creature Reputation OnKill Data...");
     sObjectMgr->LoadReputationOnKill();

@@ -1139,7 +1139,7 @@ class achievement_denyin_the_scion : public AchievementCriteriaScript
     public:
         achievement_denyin_the_scion() : AchievementCriteriaScript("achievement_denyin_the_scion") {}
 
-        bool OnCheck(Player* source, Unit* /*target*/)
+        bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* source, Unit* /*target*/)
         {
             if (Unit* disk = source->GetVehicleBase())
                 if (disk->GetEntry() == NPC_HOVER_DISK_CASTER || disk->GetEntry() == NPC_HOVER_DISK_MELEE)

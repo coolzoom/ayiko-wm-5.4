@@ -1041,7 +1041,7 @@ class achievement_nerf_engineering : public AchievementCriteriaScript
     public:
         achievement_nerf_engineering() : AchievementCriteriaScript("achievement_nerf_engineering") { }
 
-        bool OnCheck(Player* /*source*/, Unit* target)
+        bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* /*source*/, Unit* target)
         {
             if (!target || !target->GetAI())
                 return false;
@@ -1055,7 +1055,7 @@ class achievement_heartbreaker : public AchievementCriteriaScript
     public:
         achievement_heartbreaker() : AchievementCriteriaScript("achievement_heartbreaker") { }
 
-        bool OnCheck(Player* /*source*/, Unit* target)
+        bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* /*source*/, Unit* target)
         {
             if (!target || !target->GetAI())
                 return false;
@@ -1069,7 +1069,7 @@ class achievement_nerf_gravity_bombs : public AchievementCriteriaScript
     public:
         achievement_nerf_gravity_bombs() : AchievementCriteriaScript("achievement_nerf_gravity_bombs") { }
 
-        bool OnCheck(Player* /*source*/, Unit* target)
+        bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* /*source*/, Unit* target)
         {
             if (!target || !target->GetAI())
                 return false;

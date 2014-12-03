@@ -1531,14 +1531,13 @@ public:
         {
             targets.clear();
 
-            float MaxDist = 10.0f * GetCaster()->GetFloatValue(OBJECT_FIELD_SCALE_X);
+            float const maxDist = 10.0f * GetCaster()->GetFloatValue(OBJECT_FIELD_SCALE_X);
 
             Map::PlayerList const& players = GetCaster()->GetMap()->GetPlayers();
-            if (!players.isEmpty())
-                for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                    if (Player* player = itr->getSource())
-                        if (player->GetExactDist2d(GetCaster()->GetPositionX(), GetCaster()->GetPositionY()) < MaxDist)
-                            targets.push_back(player);
+            for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                if (Player* player = itr->GetSource())
+                    if (player->GetExactDist2d(GetCaster()->GetPositionX(), GetCaster()->GetPositionY()) < maxDist)
+                        targets.push_back(player);
         }
 
         void Register()

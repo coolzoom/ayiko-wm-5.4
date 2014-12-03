@@ -670,7 +670,7 @@ public:
             Map::PlayerList const &players = instance->GetPlayers();
             for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
             {
-                Player* player = itr->getSource();
+                Player* player = itr->GetSource();
                 if (player->isGameMaster())
                     continue;
 

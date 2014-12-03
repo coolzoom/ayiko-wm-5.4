@@ -120,7 +120,7 @@ public:
                 Map::PlayerList const &players = me->GetMap()->GetPlayers();
                 for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
                 {
-                    Player* player = i->getSource();
+                    Player* player = i->GetSource();
                     if (!player || !player->IsAlive())
                         continue;
                     // Summon clone
@@ -142,7 +142,7 @@ public:
             Map::PlayerList const &players = me->GetMap()->GetPlayers();
             for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
             {
-                Player* player = i->getSource();
+                Player* player = i->GetSource();
                 player->RemoveAurasDueToSpell(GetSpellForPhaseMask(player->GetPhaseMask()));
             }
         }
@@ -243,7 +243,7 @@ public:
             {
                 for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                 {
-                    if (Player* player = i->getSource())
+                    if (Player* player = i->GetSource())
                     {
                         if (player->HasAura(spell))
                         {

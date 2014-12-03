@@ -1677,7 +1677,7 @@ void Spell::SelectImplicitDestDestTargets(SpellEffIndex effIndex, SpellImplicitT
     {
         case TARGET_DEST_DYNOBJ_ENEMY:
         case TARGET_DEST_DYNOBJ_ALLY:
-        case TARGET_DEST_DYNOBJ_NONE:
+        case TARGET_DEST_DYNOBJ_ALL_UNITS:
         case TARGET_DEST_DEST:
             return;
         case TARGET_DEST_TRAJ:
@@ -1716,7 +1716,7 @@ void Spell::SelectImplicitCasterObjectTargets(SpellEffIndex effIndex, SpellImpli
             target = m_caster->GetGuardianPet();
             break;
         case TARGET_UNIT_SUMMONER:
-            if (m_caster->isSummon())
+            if (m_caster->IsSummon())
                 target = m_caster->ToTempSummon()->GetSummoner();
             break;
         case TARGET_UNIT_VEHICLE:
@@ -4228,7 +4228,7 @@ void Spell::finish(bool ok)
     if (!ok)
         return;
 
-    if (m_caster->GetTypeId() == TYPEID_UNIT && m_caster->ToCreature()->isSummon())
+    if (m_caster->GetTypeId() == TYPEID_UNIT && m_caster->ToCreature()->IsSummon())
     {
         // Unsummon statue
         uint32 spell = m_caster->GetUInt32Value(UNIT_CREATED_BY_SPELL);
@@ -4602,9 +4602,8 @@ void Spell::SendSpellStart()
     if ((IsTriggered() && !m_spellInfo->IsAutoRepeatRangedSpell()) || m_triggeredByAuraSpell)
         castFlags |= CAST_FLAG_PENDING;
 
-    if ((m_caster->GetTypeId() == TYPEID_PLAYER ||
-        (m_caster->GetTypeId() == TYPEID_UNIT && m_caster->ToCreature()->isPet()))
-        && m_spellPowerData->powerType != POWER_HEALTH)
+    if ((m_caster->GetTypeId() == TYPEID_PLAYER || (m_caster->GetTypeId() == TYPEID_UNIT && m_caster->ToCreature()->isPet()))
+            && m_spellPowerData->powerType != POWER_HEALTH)
         castFlags |= CAST_FLAG_POWER_LEFT_SELF;
 
     if (m_spellInfo->RuneCostID && m_spellPowerData->powerType == POWER_RUNES)
@@ -4982,9 +4981,8 @@ void Spell::SendSpellGo()
     if ((IsTriggered() && !m_spellInfo->IsAutoRepeatRangedSpell()) || m_triggeredByAuraSpell)
         castFlags |= CAST_FLAG_PENDING;
 
-    if ((m_caster->GetTypeId() == TYPEID_PLAYER ||
-        (m_caster->GetTypeId() == TYPEID_UNIT && m_caster->ToCreature()->isPet()))
-        && m_spellPowerData->powerType != POWER_HEALTH)
+    if ((m_caster->GetTypeId() == TYPEID_PLAYER || (m_caster->GetTypeId() == TYPEID_UNIT && m_caster->ToCreature()->isPet()))
+            && m_spellPowerData->powerType != POWER_HEALTH)
         castFlags |= CAST_FLAG_POWER_LEFT_SELF; // should only be sent to self, but the current messaging doesn't make that possible
 
     if ((m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -5019,8 +5017,8 @@ void Spell::SendSpellGo()
     ObjectGuid transportSrc = m_targets.GetSrc()->_transportGUID;
     ObjectGuid transportDst = m_targets.GetDst()->_transportGUID;
 
-    uint32 powerCount = 1;
-    uint32 powerTypeCount = 1;
+    uint32 powerCount = (m_spellPowerData->powerType != POWER_HEALTH) ? 1 : 0;
+    uint32 powerTypeCount = (m_spellPowerData->powerType != POWER_HEALTH) ? 1 : 0;
     uint32 runeCooldownCount = 0;
     uint32 unkStringLength = 0;
     uint32 extraTargets = m_targets.GetExtraTargetsCount();
@@ -6574,8 +6572,9 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (!(m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS) && !DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->Id, NULL, SPELL_DISABLE_LOS) && !m_caster->IsWithinLOSInMap(target))
                         return SPELL_FAILED_LINE_OF_SIGHT;
 
+                // Smoke Bomb, Camouflage
                 if (m_caster->IsVisionObscured(target, m_spellInfo))
-                    return SPELL_FAILED_VISION_OBSCURED; // smoke bomb, camouflage...
+                    return SPELL_FAILED_VISION_OBSCURED;
             }
         }
     }
@@ -7168,10 +7167,17 @@ SpellCastResult Spell::CheckCast(bool strict)
                 // allow always ghost flight spells
                 if (m_originalCaster && m_originalCaster->GetTypeId() == TYPEID_PLAYER && m_originalCaster->IsAlive())
                 {
-                    Battlefield* Bf = sBattlefieldMgr->GetBattlefieldToZoneId(m_originalCaster->GetZoneId());
-                    if (AreaTableEntry const* area = GetAreaEntryByAreaID(m_originalCaster->GetAreaId()))
-                        if (area->flags & AREA_FLAG_NO_FLY_ZONE  || (Bf && !Bf->CanFlyIn()))
-                            return (_triggeredCastFlags & TRIGGERED_DONT_REPORT_CAST_ERROR) ? SPELL_FAILED_DONT_REPORT : SPELL_FAILED_NOT_HERE;
+                    SpellCastResult const failReason = (_triggeredCastFlags & TRIGGERED_DONT_REPORT_CAST_ERROR)
+                            ? SPELL_FAILED_DONT_REPORT
+                            : SPELL_FAILED_NOT_HERE;
+
+                    AreaTableEntry const * const area = GetAreaEntryByAreaID(m_originalCaster->GetAreaId());
+                    if (area && (area->flags & AREA_FLAG_NO_FLY_ZONE) != 0)
+                        return failReason;
+
+                    Battlefield const * const battleField = sBattlefieldMgr->GetBattlefieldToZoneId(m_originalCaster->GetZoneId());
+                    if (battleField && !battleField->CanFlyIn())
+                        return failReason;
                 }
                 break;
             }

@@ -795,13 +795,11 @@ public:
             {
                 if (InstanceScript* pInstance = Garajal->GetInstanceScript())
                 {
-                    Map::PlayerList const &PlayerList = pInstance->instance->GetPlayers();
-
-                    if (!PlayerList.isEmpty())
-                        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                            if (Player* player = i->getSource())
-                                if (player->IsAlive())
-                                    Garajal->CastSpell(player, SPELL_INSTANTLY_DEATH, true);
+                    Map::PlayerList const &playerList = pInstance->instance->GetPlayers();
+                    for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
+                        if (Player* player = i->GetSource())
+                            if (player->IsAlive())
+                                Garajal->CastSpell(player, SPELL_INSTANTLY_DEATH, true);
                 }
             }
         }

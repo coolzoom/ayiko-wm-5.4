@@ -206,7 +206,7 @@ class boss_liu_flameheart : public CreatureScript
                             {
                                 for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                                 {
-                                    Player* plr = i->getSource();
+                                    Player* plr = i->GetSource();
                                     if (!plr)
                                         continue;
                                     if (plr->GetDistance2d(me) < 10.f)
@@ -272,7 +272,7 @@ class boss_liu_flameheart : public CreatureScript
                             {
                                 for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                                 {
-                                    Player* plr = i->getSource();
+                                    Player* plr = i->GetSource();
                                     if (!plr)
                                         continue;
                                     if (plr->GetDistance2d(me) < 10.f)

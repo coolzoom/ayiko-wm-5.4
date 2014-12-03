@@ -1764,7 +1764,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 
                 switch(GetId())
                 {
-                    case 55041: // Freezing Trap Effect
+                    case 3355: // Freezing Trap Effect
                     {
                         target->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
                         // Glyph of Solace
@@ -1899,6 +1899,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                                     caster->CastCustomSpell(caster, 72373, NULL, &remainingDamage, NULL, true);
                             }
                         }
+                        break;
+                    case 115192: // Subterfuge - Remove Stealth aura
+                        target->RemoveAurasDueToSpell(115191);
                         break;
                 }
                 break;
@@ -3237,6 +3240,12 @@ void DynObjAura::FillTargetMap(std::map<Unit*, uint32> & targets, Unit* /*caster
         {
             Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(GetDynobjOwner(), dynObjOwnerCaster, radius);
             Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(GetDynobjOwner(), targetList, u_check);
+            Trinity::VisitNearbyObject(GetOwner(), radius, searcher);
+        }
+        else if (GetSpellInfo()->Effects[effIndex].TargetB.GetTarget() == TARGET_DEST_DYNOBJ_ALL_UNITS)
+        {
+            Trinity::AnyUnitInObjectRangeCheck u_check(GetDynobjOwner(), radius);
+            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(GetDynobjOwner(), targetList, u_check);
             Trinity::VisitNearbyObject(GetOwner(), radius, searcher);
         }
         else if (GetSpellInfo()->Effects[effIndex].Effect != SPELL_EFFECT_CREATE_AREATRIGGER)

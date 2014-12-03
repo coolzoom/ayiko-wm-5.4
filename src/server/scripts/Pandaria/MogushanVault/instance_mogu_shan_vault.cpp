@@ -483,15 +483,11 @@ public:
 
         bool IsWipe()
         {
-            Map::PlayerList const& PlayerList = instance->GetPlayers();
+            Map::PlayerList const &playerList = instance->GetPlayers();
 
-            if (PlayerList.isEmpty())
-                return true;
-
-            for (Map::PlayerList::const_iterator Itr = PlayerList.begin(); Itr != PlayerList.end(); ++Itr)
+            for (Map::PlayerList::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
             {
-                Player* player = Itr->getSource();
-
+                Player* player = itr->GetSource();
                 if (!player)
                     continue;
 

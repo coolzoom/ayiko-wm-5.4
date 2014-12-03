@@ -1002,7 +1002,7 @@ public:
                         break;
                     case EVENT_SECOND_PAUSE:
                         me->SetReactState(REACT_DEFENSIVE);
-                        if(me->isSummon())
+                        if(me->IsSummon())
                             if(Unit* owner = me->ToTempSummon()->GetOwner())
                                 Talk(TALK_3, owner->GetGUID(), true);
                         me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
@@ -1010,7 +1010,7 @@ public:
                         break;
                     case EVENT_THIRD_PAUSE:
                         me->SetReactState(REACT_DEFENSIVE);
-                        if(me->isSummon())
+                        if(me->IsSummon())
                             if(Unit* owner = me->ToTempSummon()->GetOwner())
                                 Talk(TALK_4, owner->GetGUID(), true);
                         me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
@@ -1018,7 +1018,7 @@ public:
                         break;
                     case EVENT_FOURTH_PAUSE:
                         me->SetReactState(REACT_DEFENSIVE);
-                        if(me->isSummon())
+                        if(me->IsSummon())
                             if(Unit* owner = me->ToTempSummon()->GetOwner())
                                 Talk(TALK_5, owner->GetGUID(), true);
                         me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
@@ -1026,7 +1026,7 @@ public:
                         break;
                     case EVENT_DONE:
                         me->SetReactState(REACT_DEFENSIVE);
-                        if(me->isSummon())
+                        if(me->IsSummon())
                             if(Unit* owner = me->ToTempSummon()->GetOwner())
                             {
                                 Talk(TALK_6, owner->GetGUID(), true);
@@ -1589,7 +1589,7 @@ public:
     bool operator()(WorldObject* object)
     {
         if(Creature* cre = object->ToCreature())
-            if(cre->isSummon() && cre->GetEntry() == NPC_ORC_SCOUT && cre->ToTempSummon()->GetOwner() == _caster)
+            if(cre->IsSummon() && cre->GetEntry() == NPC_ORC_SCOUT && cre->ToTempSummon()->GetOwner() == _caster)
                 return false;
 
         return true;
@@ -4134,7 +4134,7 @@ public:
     {
         npc_naga_hatchling_qiipAI(Creature * c) : ScriptedAI(c) {}
 
-        void OnSpellClick(Unit* clicker) override
+        void OnSpellClick(Unit* clicker, bool &/*result*/) override
         {
             if(clicker->GetTypeId() == TYPEID_PLAYER)
             {
@@ -4203,7 +4203,7 @@ public:
     bool operator()(WorldObject* object)
     {
         if(Creature* cre = object->ToCreature())
-            if(cre->isSummon() && (cre->GetEntry() == NPC_NAGA_1 || cre->GetEntry() == NPC_NAGA_2 || cre->GetEntry() == NPC_NAGA_3 || cre->GetEntry() == NPC_NAGA_4) && cre->ToTempSummon()->GetOwner() == _caster)
+            if(cre->IsSummon() && (cre->GetEntry() == NPC_NAGA_1 || cre->GetEntry() == NPC_NAGA_2 || cre->GetEntry() == NPC_NAGA_3 || cre->GetEntry() == NPC_NAGA_4) && cre->ToTempSummon()->GetOwner() == _caster)
                 return false;
 
         return true;
@@ -4299,7 +4299,7 @@ public:
 
         void InitializeAI()
         {
-            ASSERT(me->isSummon());
+            ASSERT(me->IsSummon());
         }
 
         void IsSummonedBy(Unit* summoner) override
@@ -4412,7 +4412,7 @@ public:
 
         void InitializeAI()
         {
-            ASSERT(me->isSummon());
+            ASSERT(me->IsSummon());
         }
 
         void IsSummonedBy(Unit* summoner) override
@@ -5861,7 +5861,7 @@ public:
 
         void InitializeAI()
         {
-            ASSERT(me->isSummon());
+            ASSERT(me->IsSummon());
         }
 
         void IsSummonedBy(Unit* summoner) override
@@ -5940,7 +5940,7 @@ public:
     bool operator()(WorldObject* object)
     {
         if(Creature* cre = object->ToCreature())
-            if(cre->isSummon() && cre->GetEntry() == NPC_FLYING_BOMBER && cre->ToTempSummon()->GetOwner() == _caster)
+            if(cre->IsSummon() && cre->GetEntry() == NPC_FLYING_BOMBER && cre->ToTempSummon()->GetOwner() == _caster)
                 return false;
 
         return true;
@@ -6185,7 +6185,7 @@ public:
 
         void InitializeAI() override
         {
-            ASSERT(me->isSummon());
+            ASSERT(me->IsSummon());
             countdown = false;
         }
 
@@ -6611,7 +6611,7 @@ public:
 
         void InitializeAI()
         {
-            ASSERT(me->isSummon());
+            ASSERT(me->IsSummon());
         }
 
         void IsSummonedBy(Unit* summoner) override
@@ -6777,7 +6777,7 @@ public:
 
         void InitializeAI()
         {
-            ASSERT(me->isSummon());
+            ASSERT(me->IsSummon());
         }
 
         void IsSummonedBy(Unit* summoner) override
@@ -6955,19 +6955,19 @@ public:
               if(who->GetTypeId() == TYPEID_PLAYER)
               {
                   if(Creature* assistant = who->FindNearestCreature(NPC_ASSISTANT, 20.0f))
-                     if(assistant->isSummon() && assistant->ToTempSummon()->GetSummonerGUID() == who->GetGUID())
+                     if(assistant->IsSummon() && assistant->ToTempSummon()->GetSummonerGUID() == who->GetGUID())
                          assistant->EnterVehicle(me, 1);
 
                    if(Creature* ace = who->FindNearestCreature(NPC_ACE, 20.0f))
-                      if(ace->isSummon() && ace->ToTempSummon()->GetSummonerGUID() == who->GetGUID())
+                      if(ace->IsSummon() && ace->ToTempSummon()->GetSummonerGUID() == who->GetGUID())
                           ace->EnterVehicle(me, 2);
 
                    if(Creature* izzy = who->FindNearestCreature(NPC_IZZY, 20.0f))
-                       if(izzy->isSummon() && izzy->ToTempSummon()->GetSummonerGUID() == who->GetGUID())
+                       if(izzy->IsSummon() && izzy->ToTempSummon()->GetSummonerGUID() == who->GetGUID())
                            izzy->EnterVehicle(me, 3);
 
                    if(Creature* gobber = who->FindNearestCreature(NPC_GOBBER, 20.0f))
-                      if(gobber->isSummon() && gobber->ToTempSummon()->GetSummonerGUID() == who->GetGUID())
+                      if(gobber->IsSummon() && gobber->ToTempSummon()->GetSummonerGUID() == who->GetGUID())
                           gobber->EnterVehicle(me, 3);
               }
         }
@@ -7082,19 +7082,19 @@ public:
                 target->RemoveAura(SPELL_ASSISTANT_CONTROLLER);
 
                 if (Creature* assistant = target->FindNearestCreature(NPC_ASSISTANT, 20.0f))
-                   if(assistant->isSummon() && assistant->ToTempSummon()->GetSummonerGUID() == target->GetGUID())
+                   if(assistant->IsSummon() && assistant->ToTempSummon()->GetSummonerGUID() == target->GetGUID())
                           assistant->DespawnOrUnsummon();
 
                 if(Creature* ace = target->FindNearestCreature(NPC_ACE, 20.0f))
-                   if(ace->isSummon() && ace->ToTempSummon()->GetSummonerGUID() == target->GetGUID())
+                   if(ace->IsSummon() && ace->ToTempSummon()->GetSummonerGUID() == target->GetGUID())
                        ace->DespawnOrUnsummon();
 
                 if(Creature* izzy = target->FindNearestCreature(NPC_IZZY, 20.0f))
-                   if(izzy->isSummon() && izzy->ToTempSummon()->GetSummonerGUID() == target->GetGUID())
+                   if(izzy->IsSummon() && izzy->ToTempSummon()->GetSummonerGUID() == target->GetGUID())
                        izzy->DespawnOrUnsummon();
 
                  if(Creature* gobber = target->FindNearestCreature(NPC_GOBBER, 20.0f))
-                    if(gobber->isSummon() && gobber->ToTempSummon()->GetSummonerGUID() == target->GetGUID())
+                    if(gobber->IsSummon() && gobber->ToTempSummon()->GetSummonerGUID() == target->GetGUID())
                         gobber->DespawnOrUnsummon();
             }
         }
@@ -7463,7 +7463,7 @@ public:
             me->CastSpell(me, SPELL_CAGE, false);
         }
 
-        void OnSpellClick(Unit* clicker) override
+        void OnSpellClick(Unit* clicker, bool &/*result*/) override
         {
             if (Player* player = clicker->ToPlayer())
             {

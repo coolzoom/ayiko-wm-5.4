@@ -492,7 +492,7 @@ class spell_warr_mocking_banner : public SpellScriptLoader
                     for (auto itr : tempList)
                     {
                         Unit* owner = itr->GetOwner();
-                        if (owner && owner == player && itr->isSummon())
+                        if (owner && owner == player && itr->IsSummon())
                             continue;
 
                         bannerList.remove(itr);

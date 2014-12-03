@@ -511,7 +511,7 @@ public:
             // Randomize it, everything is done in the "for"
             for (uint8 i = 0; i < urand(0, PlayerList.getSize() - 1); ++i, ++it);
 
-            if (Player* player = it->getSource())
+            if (Player* player = it->GetSource())
                 AttackStart(player);
         }
 
@@ -582,7 +582,7 @@ public:
                     if (it == PlayerList.end())
                         return;
 
-                    if (Player* player = it->getSource())
+                    if (Player* player = it->GetSource())
                         me->CastSpell(player, SPELL_BOMB, true); //Triggered to avoid pillars line of sight
 
                     events.ScheduleEvent(EVENT_DISRUPTOR_BOMBARD, urand(5000, 20000));

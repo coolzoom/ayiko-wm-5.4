@@ -457,7 +457,7 @@ inline void KillRewarder::_InitGroupData()
     {
         // 2. In case when player is in group, initialize variables necessary for group calculations:
         for (GroupReference* itr = _group->GetFirstMember(); itr != NULL; itr = itr->next())
-            if (Player* member = itr->getSource())
+            if (Player* member = itr->GetSource())
                 if (member->IsAlive() && member->IsAtGroupRewardDistance(_victim))
                 {
                     const uint8 lvl = member->getLevel();
@@ -561,6 +561,10 @@ void KillRewarder::_RewardPlayer(Player* player, bool isDungeon)
         if (_victim->GetTypeId() == TYPEID_PLAYER)
             player->KilledPlayerCredit();
     }
+
+    if (auto const creature = _victim->ToCreature())
+        player->RewardCreatureCurrency(creature->GetCreatureTemplate()->Entry);
+
     // Give XP only in PvE or in battlegrounds.
     // Give reputation and kill credit only in PvE.
     if (!_isPvP || _isBattleGround)
@@ -603,7 +607,7 @@ void KillRewarder::_RewardGroup()
 
             // 3.1.3. Reward each group member (even dead or corpse) within reward distance.
             for (GroupReference* itr = _group->GetFirstMember(); itr != NULL; itr = itr->next())
-                if (Player* member = itr->getSource())
+                if (Player* member = itr->GetSource())
                     if (member->IsAtGroupRewardDistance(_victim))
                         _RewardPlayer(member, isDungeon);
         }
@@ -1314,94 +1318,14 @@ bool Player::StoreNewItemInBestSlots(uint32 titem_id, uint32 titem_amount)
     return false;
 }
 
-void Player::RewardCurrencyAtKill(Unit* victim)
+void Player::RewardCreatureCurrency(uint32 entry)
 {
-    if (!victim || victim->GetTypeId() == TYPEID_PLAYER)
-        return;
+    CreatureCurrencyContainerRange range = sObjectMgr->GetCreatureCurrencyReward(entry);
 
-    if (!victim->ToCreature())
-        return;
-
-    if (!victim->ToCreature()->GetEntry())
-        return;
-
-    CurrencyOnKillEntry const* Curr = sObjectMgr->GetCurrencyOnKillEntry(victim->ToCreature()->GetEntry());
-    if (!Curr)
-        return;
-
-    if (Curr->currencyId1 && Curr->currencyCount1)
+    for (CreatureCurrencyContainer::const_iterator itr = range.first; itr != range.second; ++itr)
     {
-        if (CurrencyTypesEntry const* entry = sCurrencyTypesStore.LookupEntry(Curr->currencyId1))
-        {
-            if (Curr->currencyId1 == CURRENCY_TYPE_JUSTICE_POINTS)
-            {
-                if ((GetCurrency(Curr->currencyId1, true) + Curr->currencyCount1) > GetCurrencyTotalCap(entry))
-                {
-                    uint32 max = GetCurrencyTotalCap(entry);
-                    uint32 lessPoint = max - GetCurrency(Curr->currencyId1, true);
-                    uint32 rest = Curr->currencyCount1 - lessPoint;
-
-                    ModifyCurrency(Curr->currencyId1, lessPoint);
-
-                    if (rest > 0)
-                        ModifyMoney(rest * 4750);
-                }
-                else
-                    ModifyCurrency(Curr->currencyId1, Curr->currencyCount1);
-            }
-            else
-                ModifyCurrency(Curr->currencyId1, Curr->currencyCount1);
-        }
-    }
-
-    if (Curr->currencyId2 && Curr->currencyCount2)
-    {
-        if (CurrencyTypesEntry const* entry = sCurrencyTypesStore.LookupEntry(Curr->currencyId2))
-        {
-            if (Curr->currencyId2 == CURRENCY_TYPE_JUSTICE_POINTS)
-            {
-                if ((GetCurrency(Curr->currencyId2, true) + Curr->currencyCount2) > GetCurrencyTotalCap(entry))
-                {
-                    uint32 max = GetCurrencyTotalCap(entry);
-                    uint32 lessPoint = max - GetCurrency(Curr->currencyId2, true);
-                    uint32 rest = Curr->currencyCount2 - lessPoint;
-
-                    ModifyCurrency(Curr->currencyId2, lessPoint);
-
-                    if (rest > 0)
-                        ModifyMoney(rest * 4750);
-                }
-                else
-                    ModifyCurrency(Curr->currencyId2, Curr->currencyCount2);
-            }
-            else
-                ModifyCurrency(Curr->currencyId2, Curr->currencyCount2);
-        }
-    }
-
-    if (Curr->currencyId3 && Curr->currencyCount3)
-    {
-        if (CurrencyTypesEntry const* entry = sCurrencyTypesStore.LookupEntry(Curr->currencyId3))
-        {
-            if (Curr->currencyId3 == CURRENCY_TYPE_JUSTICE_POINTS)
-            {
-                if ((GetCurrency(Curr->currencyId3, true) + Curr->currencyCount3) > GetCurrencyTotalCap(entry))
-                {
-                    uint32 max = GetCurrencyTotalCap(entry);
-                    uint32 lessPoint = max - GetCurrency(Curr->currencyId3, true);
-                    uint32 rest = Curr->currencyCount3 - lessPoint;
-
-                    ModifyCurrency(Curr->currencyId3, lessPoint);
-
-                    if (rest > 0)
-                        ModifyMoney(rest * 4750);
-                }
-                else
-                    ModifyCurrency(Curr->currencyId3, Curr->currencyCount3);
-            }
-            else
-                ModifyCurrency(Curr->currencyId3, Curr->currencyCount3);
-        }
+        uint32 const precision = itr->second.currency->Flags & CURRENCY_FLAG_HIGH_PRECISION ? CURRENCY_PRECISION : 1;
+        ModifyCurrency(itr->second.currency->ID, itr->second.currencyCount * precision);
     }
 }
 
@@ -2888,7 +2812,7 @@ void Player::RegenerateAll()
 void Player::Regenerate(Powers power)
 {
     // Skip regeneration for power type we cannot have
-    uint32 powerIndex = GetPowerIndexByClass(power, getClass());
+    uint32 powerIndex = GetPowerIndex(power);
     if (powerIndex == MAX_POWERS)
         return;
 
@@ -3546,7 +3470,7 @@ void Player::LootMoneyInGroup(uint32 money, MoneyLootFlags lootFlags)
     std::vector<Player*> playersNear;
     for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
     {
-        Player* member = itr->getSource();
+        Player* member = itr->GetSource();
         if (!member)
             continue;
 
@@ -8725,7 +8649,8 @@ void Player::UpdateArea(uint32 newArea)
 
     // previously this was in UpdateZone (but after UpdateArea) so nothing will break
     pvpInfo.inNoPvPArea = false;
-    if (area && area->IsSanctuary())    // in sanctuary
+    if (HasAura(69737) || // "Custom" Anniversary sanctuary spell
+        (area && area->IsSanctuary()))    // in sanctuary
     {
         SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY);
         pvpInfo.inNoPvPArea = true;
@@ -8758,7 +8683,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
         {
             for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
             {
-                if (Player* member = itr->getSource())
+                if (Player* member = itr->GetSource())
                     GetSession()->SendNameQueryOpcode(member->GetGUID());
             }
         }
@@ -9986,6 +9911,13 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                     group->UpdateLooterGuid(go, true);
 
                 loot->FillLoot(lootid, LootTemplates_Gameobject, this, !groupRules, false, go->GetLootMode());
+
+                if (goTemp->currencyId)
+                {
+                    loot->currencyId = goTemp->currencyId;
+                    auto const archaeologyBonus = std::max<uint32>(goTemp->currencyCnt * 10, GetTotalAuraModifier(SPELL_AURA_CURRENCY_BONUS));
+                    loot->currencyCnt = urand(archaeologyBonus, archaeologyBonus * 2) / 10;
+                }
 
                 // get next RR player (for next loot)
                 if (groupRules)
@@ -13589,6 +13521,8 @@ void Player::RemoveItem(uint8 bag, uint8 slot, bool update)
         pItem->SetOwnerGUID(0);
 
         pItem->SetSlot(NULL_SLOT);
+        pItem->RemoveFromUpdateQueueOf(this);
+
         if (IsInWorld() && update)
             pItem->SendUpdateToPlayer(this);
     }
@@ -17795,7 +17729,7 @@ void Player::GroupEventHappens(uint32 questId, WorldObject const* pEventObject)
     {
         for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
         {
-            Player* player = itr->getSource();
+            Player* player = itr->GetSource();
 
             // for any leave or dead (with not released body) group member at appropriate distance
             if (player && player->IsAtGroupRewardDistance(pEventObject) && !player->GetCorpse())
@@ -19280,7 +19214,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *charHolder, SQLQueryHolder 
     uint32 loadedPowers = 0;
     for (uint32 i = 0; i < MAX_POWERS; ++i)
     {
-        if (GetPowerIndexByClass(Powers(i), getClass()) != MAX_POWERS)
+        if (GetPowerIndex(i) != MAX_POWERS)
         {
             int32 savedPower = fields[43+loadedPowers].GetInt32();
             int32 maxPower = GetInt32Value(UNIT_FIELD_MAXPOWER1 + loadedPowers);
@@ -20880,7 +20814,7 @@ void Player::SaveToDB(bool create /*=false*/)
         uint32 storedPowers = 0;
         for (uint32 i = 0; i < MAX_POWERS; ++i)
         {
-            if (GetPowerIndexByClass(Powers(i), getClass()) != MAX_POWERS)
+            if (GetPowerIndex(i) != MAX_POWERS)
             {
                 stmt->setInt32(index++, GetInt32Value(UNIT_FIELD_POWER1 + storedPowers));
                 if (++storedPowers >= MAX_POWERS_PER_CLASS)
@@ -21000,7 +20934,7 @@ void Player::SaveToDB(bool create /*=false*/)
         uint32 storedPowers = 0;
         for (uint32 i = 0; i < MAX_POWERS; ++i)
         {
-            if (GetPowerIndexByClass(Powers(i), getClass()) != MAX_POWERS)
+            if (GetPowerIndex(i) != MAX_POWERS)
             {
                 stmt->setInt32(index++, GetInt32Value(UNIT_FIELD_POWER1 + storedPowers));
                 if (++storedPowers >= MAX_POWERS_PER_CLASS)
@@ -22676,7 +22610,7 @@ void Player::VehicleSpellInitialize()
     }
 
     data.WriteByteSeq<2, 7>(guid);
-    data << uint32(vehicle->isSummon() ? vehicle->ToTempSummon()->GetTimer() : 0);
+    data << uint32(vehicle->IsSummon() ? vehicle->ToTempSummon()->GetTimer() : 0);
     data << uint16(0);
     data << uint16(0);
     data.WriteByteSeq<3, 0, 4, 5>(guid);
@@ -26127,7 +26061,7 @@ bool Player::GetsRecruitAFriendBonus(bool forXP)
         {
             for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
             {
-                Player* player = itr->getSource();
+                Player* player = itr->GetSource();
                 if (!player)
                     continue;
 
@@ -26161,21 +26095,6 @@ bool Player::GetsRecruitAFriendBonus(bool forXP)
 
 void Player::RewardPlayerAndGroupAtKill(Unit* victim, bool isBattleGround)
 {
-     //currency reward
-    if (sMapStore.LookupEntry(GetMapId())->IsDungeon())
-    {
-        if (Group *pGroup = GetGroup())
-        {
-            for (GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
-            {
-                Player* pGroupGuy = itr->getSource();
-                if (IsInMap(pGroupGuy))
-                    pGroupGuy->RewardCurrencyAtKill(victim);
-            }
-        }
-        else
-            RewardCurrencyAtKill(victim);
-    }
     KillRewarder(this, victim, isBattleGround).Reward();
 }
 
@@ -26190,12 +26109,15 @@ void Player::RewardPlayerAndGroupAtEvent(uint32 creature_id, WorldObject* pRewar
     {
         for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
         {
-            Player* player = itr->getSource();
+            Player* player = itr->GetSource();
             if (!player)
                 continue;
 
             if (!player->IsAtGroupRewardDistance(pRewardSource))
                 continue;                               // member (alive or dead) or his corpse at req. distance
+
+            if (auto const creature = pRewardSource->ToCreature())
+                player->RewardCreatureCurrency(creature->GetCreatureTemplate()->Entry);
 
             // quest objectives updated only for alive group member or dead but with not released body
             if (player->IsAlive()|| !player->GetCorpse())
@@ -26203,7 +26125,12 @@ void Player::RewardPlayerAndGroupAtEvent(uint32 creature_id, WorldObject* pRewar
         }
     }
     else                                                    // if (!group)
+    {
+        if (auto const creature = pRewardSource->ToCreature())
+            RewardCreatureCurrency(creature->GetCreatureTemplate()->Entry);
+
         KilledMonsterCredit(creature_id, creature_guid);
+    }
 }
 
 bool Player::IsAtGroupRewardDistance(WorldObject const* pRewardSource) const
@@ -26434,7 +26361,7 @@ Player* Player::GetNextRandomRaidMember(float radius)
 
     for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
     {
-        Player* Target = itr->getSource();
+        Player* Target = itr->GetSource();
 
         // IsHostileTo check duel and controlled by enemy
         if (Target && Target != this && IsWithinDistInMap(Target, radius) &&
@@ -26476,7 +26403,7 @@ PartyResult Player::CanUninviteFromGroup() const
 
         // TODO: Should also be sent when anyone has recently left combat, with an aprox ~5 seconds timer.
         for (GroupReference const* itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
-            if (itr->getSource() && itr->getSource()->IsInCombat())
+            if (itr->GetSource() && itr->GetSource()->IsInCombat())
                 return ERR_PARTY_LFG_BOOT_IN_COMBAT;
 
         /* Missing support for these types
@@ -29299,6 +29226,34 @@ void Player::SendApplyMovementForce(bool apply, Position const &source, float fo
 
         hasForcedMovement_ = false;
     }
+}
+
+bool Player::SetDisableGravity(bool disable, bool packetOnly/*=false*/)
+{
+    if (!packetOnly && !Unit::SetDisableGravity(disable))
+        return false;
+
+    ObjectGuid const guid = GetGUID();
+
+    if (disable)
+    {
+        WorldPacket data(SMSG_MOVE_GRAVITY_DISABLE, 12);
+        data << uint32(0);
+        data.WriteBitSeq<7, 1, 3, 0, 5, 6, 2, 4>(guid);
+        data.WriteByteSeq<4, 6, 0, 5, 3, 1, 2, 7>(guid);
+        SendMessageToSet(&data, true);
+    }
+    else
+    {
+        WorldPacket data(SMSG_MOVE_GRAVITY_ENABLE, 12);
+        data.WriteBitSeq<1, 7, 6, 3, 5, 2, 4, 0>(guid);
+        data.WriteByteSeq<4, 2, 7, 3, 1, 6>(guid);
+        data << uint32(0);
+        data.WriteByteSeq<5, 0>(guid);
+        SendMessageToSet(&data, true);
+    }
+
+    return true;
 }
 
 void Player::SetMover(Unit* target)

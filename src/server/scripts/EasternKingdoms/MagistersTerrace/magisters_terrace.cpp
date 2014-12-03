@@ -144,7 +144,7 @@ public:
 
             for (Map::PlayerList::const_iterator i = lList.begin(); i != lList.end(); ++i)
             {
-                if (Player* player = i->getSource())
+                if (Player* player = i->GetSource())
                 {
                     if (pSpell && pSpell->Effects[0].MiscValue)
                         player->KilledMonsterCredit(pSpell->Effects[0].MiscValue, 0);

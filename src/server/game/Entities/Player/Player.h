@@ -2147,7 +2147,7 @@ class Player final : public Unit, public GridObject<Player>
 
         bool IsAtGroupRewardDistance(WorldObject const* pRewardSource) const;
         bool IsAtRecruitAFriendDistance(WorldObject const* pOther) const;
-        void RewardCurrencyAtKill(Unit* victim);
+        void RewardCreatureCurrency(uint32 entry);
         void RewardPlayerAndGroupAtKill(Unit* victim, bool isBattleGround);
         void RewardPlayerAndGroupAtEvent(uint32 creature_id, WorldObject* pRewardSource);
         bool isHonorOrXPTarget(Unit const *victim) const;
@@ -2667,6 +2667,7 @@ class Player final : public Unit, public GridObject<Player>
         void SendMovementSetWaterWalking(bool apply);
         void SendMovementSetFeatherFall(bool apply);
         void SendMovementSetCollisionHeight(float height);
+        bool SetDisableGravity(bool disable, bool packetOnly = false) override;
         void SendApplyMovementForce(bool apply, Position const &source, float force = 0.0f);
 
         bool hasForcedMovement() const { return hasForcedMovement_; }

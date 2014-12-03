@@ -20,6 +20,9 @@
 #include "DatabaseEnv.h"
 #include "Log.h"
 #include "Player.h"
+#include "ObjectMgr.h"
+#include "SpellMgr.h"
+
 #include <map>
 
 // some type definitions
@@ -39,10 +42,18 @@ struct SkillExtraItemEntry
     uint32 newItemId;
 
     SkillExtraItemEntry()
-        : requiredSpecialization(0), additionalCreateChance(0.0f), additionalMaxNum(0) {}
+        : requiredSpecialization(0)
+        , additionalCreateChance(0.0f)
+        , additionalMaxNum(0)
+        , newItemId(0)
+    { }
 
-    SkillExtraItemEntry(uint32 rS, float aCC, uint8 aMN)
-        : requiredSpecialization(rS), additionalCreateChance(aCC), additionalMaxNum(aMN) {}
+    SkillExtraItemEntry(uint32 rS, float aCC, uint8 aMN, uint32 nII)
+        : requiredSpecialization(rS)
+        , additionalCreateChance(aCC)
+        , additionalMaxNum(aMN)
+        , newItemId(nII)
+    { }
 };
 
 // map to store the extra item creation info, the key is the spellId of the creation spell, the mapped value is the assigned SkillExtraItemEntry
@@ -77,14 +88,14 @@ void LoadSkillExtraItemTable()
 
         if (!sSpellMgr->GetSpellInfo(spellId))
         {
-            TC_LOG_ERROR("misc", "Skill specialization %u has non-existent spell id in `skill_extra_item_template`!", spellId);
+            TC_LOG_ERROR("misc", "Skill specialization %u has nonexistent spell id in `skill_extra_item_template`!", spellId);
             continue;
         }
 
         uint32 requiredSpecialization = fields[1].GetUInt32();
         if (!sSpellMgr->GetSpellInfo(requiredSpecialization))
         {
-            TC_LOG_ERROR("misc", "Skill specialization %u have not existed required specialization spell id %u in `skill_extra_item_template`!", spellId, requiredSpecialization);
+            TC_LOG_ERROR("misc", "Skill specialization %u has nonexistent required specialization spell id %u in `skill_extra_item_template`!", spellId, requiredSpecialization);
             continue;
         }
 
@@ -103,6 +114,11 @@ void LoadSkillExtraItemTable()
         }
 
         uint32 newItemId = fields[4].GetUInt32();
+        if (newItemId != 0 && !sObjectMgr->GetItemTemplate(newItemId))
+        {
+            TC_LOG_ERROR("misc", "Skill specialization %u has nonexistent item %u in `skill_extra_item_template`!", spellId, newItemId);
+            continue;
+        }
 
         SkillExtraItemEntry& skillExtraItemEntry = SkillExtraItemStore[spellId];
 
@@ -125,20 +141,18 @@ bool canCreateExtraItems(Player* player, uint32 spellId, float &additionalChance
     if (ret == SkillExtraItemStore.end())
         return false;
 
-    SkillExtraItemEntry const* specEntry = &ret->second;
-
-    // if no entry, then no extra items can be created
-    if (!specEntry)
-        return false;
+    SkillExtraItemEntry const &specEntry = ret->second;
 
     // the player doesn't have the required specialization, return false
-    if (!player->HasSpell(specEntry->requiredSpecialization))
+    if (!player->HasSpell(specEntry.requiredSpecialization))
         return false;
 
     // set the arguments to the appropriate values
-    additionalChance = specEntry->additionalCreateChance;
-    additionalMax = specEntry->additionalMaxNum;
-    newItemId = specEntry->newItemId;
+    additionalChance = specEntry.additionalCreateChance;
+    additionalMax = specEntry.additionalMaxNum;
+
+    if (specEntry.newItemId != 0)
+        newItemId = specEntry.newItemId;
 
     // enable extra item creation
     return true;

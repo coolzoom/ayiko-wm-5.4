@@ -393,7 +393,7 @@ class player_overlord_brandAI : public PlayerAI
             me->IsAIEnabled = tyrannus != NULL;
         }
 
-        void DamageDealt(Unit* /*victim*/, uint32& damage, DamageEffectType /*damageType*/)
+        void DamageDealt(Unit* /*victim*/, uint32& damage, DamageEffectType /*damageType*/, const SpellInfo * /*spellInfo*/)
         {
             if (tyrannus->GetVictim())
                 me->CastCustomSpell(SPELL_OVERLORD_BRAND_DAMAGE, SPELLVALUE_BASE_POINT0, damage, tyrannus->GetVictim(), true, NULL, NULL, tyrannus->GetGUID());

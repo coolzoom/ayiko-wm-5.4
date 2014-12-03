@@ -500,7 +500,7 @@ public:
                 }
                 case EVENT_BOSS_WAIT_VISIBLE:
                 {
-                    // Turn into ennemy and jump in the room
+                    // Turn into enemy and jump in the room
                     me->setFaction(14);
                     // Landing coords 1st boss
                     if (Creature* console = GetClosestCreatureWithEntry(me, NPC_ANCIENT_MOGU_MACHINE, 200.0f))
@@ -508,15 +508,15 @@ public:
                         float x, y;
                         GetPositionWithDistInOrientation(me, 15.0f, me->GetAngle(console->GetPositionX(), console->GetPositionY()), x, y);
                         me->GetMotionMaster()->MoveJump(x, y, 362.19f, 20.0f, 20.0f, 2);
+                        break;
                     }
-                    break;
                 }
                 case EVENT_BOSS_EMOTE:
                 {
                     Map::PlayerList const& players = me->GetMap()->GetPlayers();
                     for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                     {
-                        if (Player* plr = itr->getSource())
+                        if (Player* plr = itr->GetSource())
                         {
                             if (plr->GetDistance(me) > 50.0f)
                                 continue;
@@ -1202,7 +1202,7 @@ public:
 
                 for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                 {
-                    if (Player* plr = itr->getSource())
+                    if (Player* plr = itr->GetSource())
                         plr->CastSpell(plr, SPELL_TERRACOTTA_JUMP, false);
                 }
 
@@ -1223,7 +1223,7 @@ public:
                 {
                     if (!me->GetMap()->GetPlayers().isEmpty())
                     {
-                        if (Player* plr = me->GetMap()->GetPlayers().begin()->getSource())
+                        if (Player* plr = me->GetMap()->GetPlayers().begin()->GetSource())
                         {
                             //|cffffd000|Hspell:spell_id|h[name]|h|r
                             plr->MonsterTextEmote("The Ancient Mogu Machine breaks down! |cffBA0022|Hspell:116779|h[Titan Gas]|h|r floods the room!", 0, true);
@@ -1724,11 +1724,10 @@ class achievement_show_me_you_moves : public AchievementCriteriaScript
 public:
     achievement_show_me_you_moves() : AchievementCriteriaScript("achievement_show_me_you_moves") { }
 
-    bool OnCheck(Player* source, Unit* /*target*/)
+    bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue1*/, Player* source, Unit* /*target*/)
     {
         if (source->GetInstanceScript()->GetData(ACHIEVE))
             return true;
-
         return false;
     }
 };

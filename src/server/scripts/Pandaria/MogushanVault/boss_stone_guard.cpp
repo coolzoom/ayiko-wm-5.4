@@ -823,7 +823,7 @@ public:
         {
         }
 
-        void OnSpellClick(Unit* clicker)
+        void OnSpellClick(Unit* clicker, bool& /*result*/)
         {
             if (Player* player = clicker->ToPlayer())
             {
@@ -893,8 +893,6 @@ public:
                     player->GetAura(SPELL_LIVING_JASPER)->SetStackAmount(10);
             }
         }
-
-
     };
 
     CreatureAI* GetAI(Creature* creature) const

@@ -523,7 +523,7 @@ class achievement_wg_didnt_stand_a_chance : public AchievementCriteriaScript
 public:
     achievement_wg_didnt_stand_a_chance() : AchievementCriteriaScript("achievement_wg_didnt_stand_a_chance") { }
 
-    bool OnCheck(Player* source, Unit* target)
+    bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* source, Unit* target)
     {
         if (!target)
             return false;

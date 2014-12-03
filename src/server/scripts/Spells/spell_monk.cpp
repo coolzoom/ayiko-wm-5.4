@@ -507,7 +507,7 @@ class spell_monk_serpents_zeal : public SpellScriptLoader
                     for (auto i = statueList.begin(); i != statueList.end();)
                     {
                         Unit* owner = (*i)->GetOwner();
-                        if (owner && owner == _player && (*i)->isSummon())
+                        if (owner && owner == _player && (*i)->IsSummon())
                             ++i;
                         else
                             i = statueList.erase(i);
@@ -1283,7 +1283,7 @@ class spell_monk_jade_serpent_statue : public SpellScriptLoader
                     for (std::list<Creature*>::iterator i = tempList.begin(); i != tempList.end(); ++i)
                     {
                         Unit* owner = (*i)->GetOwner();
-                        if (owner && owner == player && (*i)->isSummon())
+                        if (owner && owner == player && (*i)->IsSummon())
                             continue;
 
                         jadeSerpentlist.remove((*i));
@@ -2272,7 +2272,7 @@ class spell_monk_soothing_mist : public SpellScriptLoader
                     for (auto i = statueList.begin(); i != statueList.end();)
                     {
                         Unit* owner = (*i)->GetOwner();
-                        if (owner && owner == _player && (*i)->isSummon())
+                        if (owner && owner == _player && (*i)->IsSummon())
                             ++i;
                         else
                             i = statueList.erase(i);

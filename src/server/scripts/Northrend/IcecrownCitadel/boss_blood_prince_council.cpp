@@ -248,7 +248,7 @@ class boss_blood_council_controller : public CreatureScript
 
                     for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
                     {
-                        if (Player* player = i->getSource())
+                        if (Player* player = i->GetSource())
                         {
                             if (player->isGameMaster())
                                 continue;
@@ -475,7 +475,7 @@ class boss_prince_keleseth_icc : public CreatureScript
                 summon->ToTempSummon()->SetTempSummonType(TEMPSUMMON_CORPSE_DESPAWN);
             }
 
-            void DamageDealt(Unit* /*target*/, uint32& damage, DamageEffectType damageType)
+            void DamageDealt(Unit* /*target*/, uint32& damage, DamageEffectType damageType, const SpellInfo * /*spellInfo*/)
             {
                 if (damageType != SPELL_DIRECT_DAMAGE)
                     return;
@@ -693,7 +693,7 @@ class boss_prince_taldaram_icc : public CreatureScript
                     summon->AI()->SetGUID(target->GetGUID());
             }
 
-            void DamageDealt(Unit* /*target*/, uint32& damage, DamageEffectType damageType)
+            void DamageDealt(Unit* /*target*/, uint32& damage, DamageEffectType damageType, const SpellInfo * /*spellInfo*/)
             {
                 if (damageType != SPELL_DIRECT_DAMAGE)
                     return;
@@ -931,7 +931,7 @@ class boss_prince_valanar_icc : public CreatureScript
                     DoAction(ACTION_CAST_INVOCATION);
             }
 
-            void DamageDealt(Unit* /*target*/, uint32& damage, DamageEffectType damageType)
+            void DamageDealt(Unit* /*target*/, uint32& damage, DamageEffectType damageType, const SpellInfo * /*spellInfo*/)
             {
                 if (damageType != SPELL_DIRECT_DAMAGE)
                     return;
@@ -1202,7 +1202,7 @@ class npc_ball_of_flame : public CreatureScript
                     }
             }
 
-            void DamageDealt(Unit* /*target*/, uint32& damage, DamageEffectType damageType)
+            void DamageDealt(Unit* /*target*/, uint32& damage, DamageEffectType damageType, const SpellInfo * /*spellInfo*/)
             {
                 if (damageType != SPELL_DIRECT_DAMAGE)
                     return;

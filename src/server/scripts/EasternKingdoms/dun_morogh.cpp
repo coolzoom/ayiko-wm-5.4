@@ -232,7 +232,7 @@ public:
                     damage = 0;
         }
 
-        void DamageDealt(Unit* target, uint32& damage, DamageEffectType /*damageType*/)
+        void DamageDealt(Unit* target, uint32& damage, DamageEffectType /*damageType*/, const SpellInfo * /*spellInfo*/)
         {
             if (target->ToCreature())
                 if (target->GetHealth() <= damage || target->GetHealthPct() <= 70.0f)

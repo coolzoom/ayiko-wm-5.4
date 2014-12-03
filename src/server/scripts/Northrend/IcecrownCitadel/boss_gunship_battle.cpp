@@ -411,7 +411,7 @@ public:
             }
         }
 
-        void DamageDealt(Unit* /*victim*/, uint32& /*damage*/, DamageEffectType damageType)
+        void DamageDealt(Unit* /*victim*/, uint32& /*damage*/, DamageEffectType damageType, const SpellInfo * /*spellInfo*/)
         {
             if (damageType == DIRECT_DAMAGE)
                 AddBattleFury();

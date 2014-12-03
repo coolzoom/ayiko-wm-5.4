@@ -166,7 +166,7 @@ class npc_shadopan_archery : public CreatureScript
                             uint8 advance = urand(0, playerList.getSize() - 1);
                             for (uint8 i = 0; i < advance; ++i, ++Itr);
 
-                            if (Player* player = Itr->getSource())
+                            if (Player* player = Itr->GetSource())
                                 targetGuid = player->GetGUID();
                         }
 

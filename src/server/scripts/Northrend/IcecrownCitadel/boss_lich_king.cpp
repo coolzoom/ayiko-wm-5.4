@@ -515,7 +515,7 @@ class boss_the_lich_king : public CreatureScript
                 Map::PlayerList const& players = me->GetMap()->GetPlayers();
                 if (!players.isEmpty())
                     for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                        if (Player* player = itr->getSource())
+                        if (Player* player = itr->GetSource())
                             player->CastSpell(player, SPELL_PLAY_MOVIE);
 
                 me->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, 0x03);
@@ -1046,7 +1046,7 @@ class boss_the_lich_king : public CreatureScript
                             {
                                 for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                                 {
-                                    if (Player* player = itr->getSource())
+                                    if (Player* player = itr->GetSource())
                                     {
                                         if (Creature * pTrigger = me->SummonCreature(22515, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 7000))
                                         {
@@ -1095,7 +1095,7 @@ class boss_the_lich_king : public CreatureScript
                             Map::PlayerList const& players = me->GetMap()->GetPlayers();
                             if (!players.isEmpty())
                                 for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                                    if (Player* player = itr->getSource())
+                                    if (Player* player = itr->GetSource())
                                         me->Kill(player, false);
                             break;
                         }
@@ -1162,7 +1162,7 @@ class boss_the_lich_king : public CreatureScript
                             const Map::PlayerList &PlayerList = instance->instance->GetPlayers();
                             if (!PlayerList.isEmpty())
                                 for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                                    if (Player* player = i->getSource())
+                                    if (Player* player = i->GetSource())
                                         if (player->GetPositionZ() <= 790)
                                             me->Kill(player);
                             events.ScheduleEvent(EVENT_CHECK_PLAYER_Z, 2000);
@@ -1224,7 +1224,7 @@ class boss_the_lich_king : public CreatureScript
                 Map::PlayerList const& players = me->GetMap()->GetPlayers();
                 if (!players.isEmpty())
                     for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                        if (Player* player = itr->getSource())
+                        if (Player* player = itr->GetSource())
                             if (player->GetAreaId() == AREA_THE_FROZEN_THRONE)
                                 player->GetSession()->SendPacket(data);
             }
@@ -1966,7 +1966,7 @@ class npc_terenas_menethil : public CreatureScript
                             Map::PlayerList const& players = me->GetMap()->GetPlayers();
                             if (!players.isEmpty())
                                 for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                                    if (Player* player = itr->getSource())
+                                    if (Player* player = itr->GetSource())
                                         player->ResurrectPlayer(75);
                             break;
                         }
@@ -1986,7 +1986,7 @@ class npc_terenas_menethil : public CreatureScript
                             Map::PlayerList const& players = me->GetMap()->GetPlayers();
                             if (!players.isEmpty())
                                 for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                                    if (Player* player = itr->getSource())
+                                    if (Player* player = itr->GetSource())
                                     {
                                         player->RemoveAurasDueToSpell(player->GetMap()->IsHeroic() ? SPELL_HARVEST_SOULS_TELEPORT : SPELL_HARVEST_SOUL_TELEPORT);
 
@@ -2686,7 +2686,7 @@ class spell_the_lich_king_defile : public SpellScriptLoader
                 Map::PlayerList const& players = GetCaster()->GetMap()->GetPlayers();
                     if (!players.isEmpty())
                         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                            if (Player* player = itr->getSource())
+                            if (Player* player = itr->GetSource())
                                 if (player->GetExactDist2d(GetCaster()->GetPositionX(), GetCaster()->GetPositionY()) < MaxDist)
                                     targets.push_back(player);
 
@@ -3500,7 +3500,7 @@ class spell_the_lich_king_mass_resurrection : public SpellScriptLoader
                 Map::PlayerList const& players = GetCaster()->GetMap()->GetPlayers();
                     if (!players.isEmpty())
                         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                            if (Player* player = itr->getSource())
+                            if (Player* player = itr->GetSource())
                                 player->ResurrectPlayer(75);
             }
 
@@ -3521,7 +3521,7 @@ class achievement_been_waiting_long_time : public AchievementCriteriaScript
     public:
         achievement_been_waiting_long_time() : AchievementCriteriaScript("achievement_been_waiting_long_time") { }
 
-        bool OnCheck(Player* /*source*/, Unit* target)
+        bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* /*source*/, Unit* target)
         {
             if (!target)
                 return false;
@@ -3535,7 +3535,7 @@ class achievement_neck_deep_in_vile : public AchievementCriteriaScript
     public:
         achievement_neck_deep_in_vile() : AchievementCriteriaScript("achievement_neck_deep_in_vile") { }
 
-        bool OnCheck(Player* /*source*/, Unit* target)
+        bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* /*source*/, Unit* target)
         {
             if (!target)
                 return false;

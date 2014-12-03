@@ -824,7 +824,7 @@ class achievement_just_cant_get_enough : public AchievementCriteriaScript
    public:
        achievement_just_cant_get_enough() : AchievementCriteriaScript("achievement_just_cant_get_enough") { }
 
-       bool OnCheck(Player* /*player*/, Unit* target)
+       bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* /*player*/, Unit* target)
        {
            if (!target)
                return false;

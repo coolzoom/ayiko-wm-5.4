@@ -2,6 +2,7 @@
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
 #include "ScriptedEscortAI.h"
+#include "SpellScript.h"
 
 enum eKahTirSpells
 {
@@ -464,8 +465,6 @@ public:
 
     bool OnGossipHello(Player* player, GameObject* go)
     {
-
-        printf("\n ! quest counter is %i ! \n ", player->GetQuestSlotCounter(player->FindQuestSlot(31688), 0));
         // If counter is 7 (script is called before counting) max is 8
         if (player->GetQuestSlotCounter(player->FindQuestSlot(31688), 0) == 7 && player->GetQuestStatus(31688) == QUEST_STATUS_INCOMPLETE)
         {

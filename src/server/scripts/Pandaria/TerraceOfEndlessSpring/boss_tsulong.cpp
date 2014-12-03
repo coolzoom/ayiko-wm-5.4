@@ -381,7 +381,7 @@ class spell_sunbeam : public SpellScriptLoader
                 Map::PlayerList const& players = GetCaster()->GetMap()->GetPlayers();
                 for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                 {
-                    Player* plr = itr->getSource();
+                    Player* plr = itr->GetSource();
                     if (!plr)
                         continue;
 

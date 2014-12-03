@@ -737,7 +737,7 @@ void WorldSession::SendLfgUpdateProposal(uint32 proposalId, const LfgProposal* p
         {
             for (GroupReference* itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
             {
-                Player* groupMember = itr->getSource();
+                Player* groupMember = itr->GetSource();
                 if (groupMember && groupMember->GetMapId() == uint32(dungeon->map))
                 {
                     if (InstanceScript* instance = groupMember->GetInstanceScript())

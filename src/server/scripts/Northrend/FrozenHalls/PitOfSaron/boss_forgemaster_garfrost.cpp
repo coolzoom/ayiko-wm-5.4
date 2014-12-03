@@ -333,7 +333,7 @@ class achievement_doesnt_go_to_eleven : public AchievementCriteriaScript
     public:
         achievement_doesnt_go_to_eleven() : AchievementCriteriaScript("achievement_doesnt_go_to_eleven") { }
 
-        bool OnCheck(Player* /*source*/, Unit* target)
+        bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* /*source*/, Unit* target)
         {
             if (target)
                 if (Creature* garfrost = target->ToCreature())

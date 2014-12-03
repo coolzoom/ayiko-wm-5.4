@@ -582,7 +582,7 @@ class AchievementCriteriaScript : public ScriptObject
         bool IsDatabaseBound() const { return true; }
 
         // Called when an additional criteria is checked.
-        virtual bool OnCheck(Player* source, Unit* target) = 0;
+        virtual bool OnCheck(uint32 criteriaId, uint64 miscValue1, Player* source, Unit* target) = 0;
 };
 
 class PlayerScript : public ScriptObject
@@ -883,7 +883,7 @@ class ScriptMgr
 
     public: /* AchievementCriteriaScript */
 
-        bool OnCriteriaCheck(uint32 scriptId, Player* source, Unit* target);
+        bool OnCriteriaCheck(uint32 scriptId, uint32 criteriaId, uint64 miscValue1, Player* source, Unit* target);
 
     public: /* PlayerScript */
 

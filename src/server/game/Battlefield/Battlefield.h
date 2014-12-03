@@ -337,7 +337,7 @@ class Battlefield : public ZoneScript
         virtual void SendInitWorldStatesToAll() {};
 
         /// Return if we can use mount in battlefield
-        bool CanFlyIn() { return !m_isActive; }
+        bool CanFlyIn() const { return !m_isActive; }
 
         void SendAreaSpiritHealerQueryOpcode(Player* player, const uint64 & guid);
 

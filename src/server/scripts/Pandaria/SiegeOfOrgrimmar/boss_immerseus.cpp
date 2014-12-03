@@ -185,7 +185,7 @@ class boss_immerseus : public CreatureScript
                             const Map::PlayerList &PlayerList = pInstance->instance->GetPlayers();
                             if (!PlayerList.isEmpty())
                                 for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                                    if (Player* player = i->getSource())
+                                    if (Player* player = i->GetSource())
                                         me->CastSpell(player, SPELL_SEEPING_SHA, false);
                         }
 

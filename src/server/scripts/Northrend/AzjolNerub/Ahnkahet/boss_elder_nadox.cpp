@@ -295,7 +295,7 @@ class achievement_respect_your_elders : public AchievementCriteriaScript
     public:
         achievement_respect_your_elders() : AchievementCriteriaScript("achievement_respect_your_elders") {}
 
-        bool OnCheck(Player* /*player*/, Unit* target)
+        bool OnCheck(uint32 /*criteriaId*/, uint64 /*miscValue*/, Player* /*player*/, Unit* target)
         {
             if (!target)
                 return false;

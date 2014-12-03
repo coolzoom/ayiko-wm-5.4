@@ -602,7 +602,7 @@ void Map::Update(const uint32 diff)
     // update worldsessions for existing players
     for (m_mapRefIter = m_mapRefManager.begin(); m_mapRefIter != m_mapRefManager.end(); ++m_mapRefIter)
     {
-        if (Player* player = m_mapRefIter->getSource())
+        if (Player* player = m_mapRefIter->GetSource())
         {
             TC_PROBE2(worldserver, map_update.player.begin, this, player);
 
@@ -1013,7 +1013,7 @@ void Map::RemoveAllPlayers()
     {
         for (MapRefManager::iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
         {
-            Player* player = itr->getSource();
+            Player* player = itr->GetSource();
             if (!player->IsBeingTeleportedFar())
             {
                 // this is happening for bg
@@ -2171,7 +2171,7 @@ uint32 Map::GetPlayersCountExceptGMs() const
 {
     uint32 count = 0;
     for (MapRefManager::const_iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
-        if (!itr->getSource()->isGameMaster())
+        if (!itr->GetSource()->isGameMaster())
             ++count;
     return count;
 }
@@ -2179,7 +2179,7 @@ uint32 Map::GetPlayersCountExceptGMs() const
 void Map::SendToPlayers(WorldPacket const* data) const
 {
     for (MapRefManager::const_iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
-        itr->getSource()->GetSession()->SendPacket(data);
+        itr->GetSource()->GetSession()->SendPacket(data);
 }
 
 bool Map::ActiveObjectsNearGrid(NGrid const &ngrid) const
@@ -2198,7 +2198,7 @@ bool Map::ActiveObjectsNearGrid(NGrid const &ngrid) const
 
     for (MapRefManager::const_iterator iter = m_mapRefManager.begin(); iter != m_mapRefManager.end(); ++iter)
     {
-        Player const * const player = iter->getSource();
+        Player const * const player = iter->GetSource();
 
         auto const p = Trinity::ComputeCellCoord(player->GetPositionX(), player->GetPositionY());
         if ((cell_min.x_coord <= p.x_coord && p.x_coord <= cell_max.x_coord)
@@ -2346,7 +2346,7 @@ bool InstanceMap::CanEnter(Player* player)
 
     if (!playerList.isEmpty())
         for (PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
-            if (Player* iPlayer = i->getSource())
+            if (Player* iPlayer = i->GetSource())
             {
                 if (iPlayer->isGameMaster()) // bypass GMs
                     continue;
@@ -2591,14 +2591,14 @@ bool InstanceMap::Reset(uint8 method)
         {
             // notify the players to leave the instance so it can be reset
             for (MapRefManager::iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
-                itr->getSource()->SendResetFailedNotify(GetId());
+                itr->GetSource()->SendResetFailedNotify(GetId());
         }
         else
         {
             if (method == INSTANCE_RESET_GLOBAL)
                 // set the homebind timer for players inside (1 minute)
                 for (MapRefManager::iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
-                    itr->getSource()->m_InstanceValid = false;
+                    itr->GetSource()->m_InstanceValid = false;
 
             // the unload timer is not started
             // instead the map will unload immediately after the players have left
@@ -2635,7 +2635,7 @@ void InstanceMap::PermBindAllPlayers(Player* source)
     // group members outside the instance group don't get bound
     for (MapRefManager::iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
     {
-        Player* player = itr->getSource();
+        Player* player = itr->GetSource();
         // players inside an instance cannot be bound to other instances
         // some players may already be permanently bound, in this case nothing happens
         InstancePlayerBind* bind = player->GetBoundInstance(save->GetMapId(), save->GetDifficulty());
@@ -2668,7 +2668,7 @@ void InstanceMap::UnloadAll()
 void InstanceMap::SendResetWarnings(uint32 timeLeft) const
 {
     for (MapRefManager::const_iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
-        itr->getSource()->SendInstanceResetWarning(GetId(), itr->getSource()->GetDifficulty(IsRaid()), timeLeft);
+        itr->GetSource()->SendInstanceResetWarning(GetId(), itr->GetSource()->GetDifficulty(IsRaid()), timeLeft);
 }
 
 void InstanceMap::SetResetSchedule(bool on)
@@ -2800,7 +2800,7 @@ void BattlegroundMap::RemoveAllPlayers()
 {
     if (HavePlayers())
         for (MapRefManager::iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
-            if (Player* player = itr->getSource())
+            if (Player* player = itr->GetSource())
                 if (!player->IsBeingTeleportedFar())
                     player->TeleportTo(player->GetBattlegroundEntryPoint());
 }

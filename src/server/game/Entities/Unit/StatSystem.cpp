@@ -801,6 +801,7 @@ void Player::UpdatePvPPowerPercentage()
         case SPEC_SHAMAN_RESTORATION:
         case SPEC_DRUID_RESTORATION:
         case SPEC_MONK_MISTWEAVER:
+            damage_value = 0.0f;
             break;
         // Damage specializations for Druids, Monks, Paladins, Priests, and Shaman receive a 70% bonus to healing from PvP Power.
         default:
@@ -898,13 +899,12 @@ void Player::ApplyHealthRegenBonus(int32 amount, bool apply)
 
 void Player::UpdateManaRegen()
 {
-    if (getPowerType() != POWER_MANA && !IsInFeralForm())
+    if (GetPowerIndex(POWER_MANA) == MAX_POWERS)
         return;
 
     // Mana regen from spirit
     float spirit_regen = OCTRegenMPPerSpirit();
     // Apply PCT bonus from SPELL_AURA_MOD_POWER_REGEN_PERCENT aura on spirit base regen
-
 
     // SpiritRegen(SPI, INT, LEVEL) = (0.001 + (SPI x sqrt(INT) x BASE_REGEN[LEVEL])) x 5
     if (GetStat(STAT_INTELLECT) > 0.0f)
@@ -1036,7 +1036,11 @@ void Creature::UpdateMaxPower(Powers power)
 {
     UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + power);
 
-    float value  = GetTotalAuraModValue(unitMod);
+    float value = GetModifierValue(unitMod, BASE_VALUE) + GetCreatePowers(power);
+    value *= GetModifierValue(unitMod, BASE_PCT);
+    value += GetModifierValue(unitMod, TOTAL_VALUE);
+    value *= GetModifierValue(unitMod, TOTAL_PCT);
+
     SetMaxPower(power, uint32(value));
 }
 

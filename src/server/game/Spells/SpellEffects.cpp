@@ -351,16 +351,22 @@ void Spell::EffectInstaKill(SpellEffIndex /*effIndex*/)
         if (unitTarget->ToPlayer()->GetCommandStatus(CHEAT_GOD))
             return;
 
-        if (m_caster == unitTarget)                              // prevent interrupt message
-            finish();
+    // Try to get original caster
+    Unit * const caster = m_originalCasterGUID ? m_originalCaster : m_caster;
+    if (!caster)
+        return;
 
-        WorldPacket data(SMSG_SPELLINSTAKILLLOG, 8+8+4);
-    data << uint64(m_caster->GetGUID());
+    // prevent interrupt message
+    if (caster == unitTarget)
+        finish();
+
+    WorldPacket data(SMSG_SPELLINSTAKILLLOG, 8+8+4);
+    data << uint64(caster->GetGUID());
     data << uint64(unitTarget->GetGUID());
     data << uint32(m_spellInfo->Id);
-    m_caster->SendMessageToSet(&data, true);
+    caster->SendMessageToSet(&data, true);
 
-    m_caster->DealDamage(unitTarget, unitTarget->GetMaxHealth(), NULL, NODAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+    caster->DealDamage(unitTarget, unitTarget->GetMaxHealth(), NULL, NODAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
 }
 
 void Spell::EffectEnvironmentalDMG(SpellEffIndex /*effIndex*/)
@@ -471,9 +477,9 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     case 34428: // Victory Rush
                     {
                         if (m_caster->ToPlayer()->GetSpecializationId(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_WARRIOR_ARMS)
-                            damage = CalculatePct(m_caster->GetTotalAttackPowerValue(BASE_ATTACK), 67.2f);
+                            damage += CalculatePct(m_caster->GetTotalAttackPowerValue(BASE_ATTACK), 67.2f);
                         else
-                            damage = CalculatePct(m_caster->GetTotalAttackPowerValue(BASE_ATTACK), 56.0f);
+                            damage += CalculatePct(m_caster->GetTotalAttackPowerValue(BASE_ATTACK), 56.0f);
 
                         break;
                     }
@@ -483,7 +489,6 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                             break;
 
                         int32 pct = 0;
-
                         switch (m_caster->ToPlayer()->GetSpecializationId(m_caster->ToPlayer()->GetActiveSpec()))
                         {
                             case SPEC_WARRIOR_ARMS:
@@ -812,11 +817,11 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                 {
                     // Custom MoP script
                     case 123408:// Spinning Fire Blossom
-                        damage = CalculateMonkMeleeAttacks(m_caster, 1.5f, 6);
+                        damage = CalculateMonkMeleeAttacks(m_caster, 2.1f);
                         break;
                     case 117418:// Fists of Fury
                     {
-                        damage = CalculateMonkMeleeAttacks(m_caster, 7.5f, 14);
+                        damage = CalculateMonkMeleeAttacks(m_caster, 7.5f);
 
                         uint32 count = 0;
                         for (std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
@@ -833,7 +838,27 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     case 115687:// Jab (Axes)
                     case 115693:// Jab (Maces)
                     case 115695:// Jab (Swords)
-                        damage = CalculateMonkMeleeAttacks(m_caster, 1.5f, 14);
+                        damage = CalculateMonkMeleeAttacks(m_caster, 1.5f);
+                        break;
+                    case 100787:// Tiger Palm
+                        damage = CalculateMonkMeleeAttacks(m_caster, 3.0f);
+                        break;
+                    case 107270:// Spinning Crane Kick
+                    case 148187:// Rushing Jade Wind
+                        damage = CalculateMonkMeleeAttacks(m_caster, 1.59f);
+                        break;
+                    case 107428:// Rising Sun Kick
+                        damage = CalculateMonkMeleeAttacks(m_caster, 12.816f);
+                        m_caster->CastSpell(unitTarget, 130320, true);
+                        break;
+                    case 100784:// Blackout Kick
+                        damage = CalculateMonkMeleeAttacks(m_caster, 7.12f);
+                        break;
+                    case 124335:// Swift Reflexes
+                        damage = CalculateMonkMeleeAttacks(m_caster, 0.3f);
+                        break;
+                    case 121253:// Keg Smash
+                        damage = CalculateMonkMeleeAttacks(m_caster, 10.0f);
                         break;
                     case 115080:// Touch of Death
                         if (GetCaster())
@@ -846,44 +871,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                                 m_caster->DealDamage(unitTarget, damage, NULL, SPELL_DIRECT_DAMAGE, m_spellInfo->GetSchoolMask(), m_spellInfo, false);
                             }
                         }
-
                         return;
-                    case 100787:// Tiger Palm
-                        damage = CalculateMonkMeleeAttacks(m_caster, 3.0f, 14);
-                        break;
-                    case 107270:// Spinning Crane Kick
-                    case 148187:// Rushing Jade Wind
-                        damage = CalculateMonkMeleeAttacks(m_caster, 1.59f, 14);
-                        break;
-                    case 107428:// Rising Sun Kick
-                        damage = CalculateMonkMeleeAttacks(m_caster, 12.816f, 14);
-                        m_caster->CastSpell(unitTarget, 130320, true);
-                        break;
-                    case 100784:// Blackout Kick
-                        damage = CalculateMonkMeleeAttacks(m_caster, 7.12f, 14);
-                        break;
-                    case 124335:// Swift Reflexes
-                        if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                        {
-                            switch (m_caster->ToPlayer()->GetSpecializationId(m_caster->ToPlayer()->GetActiveSpec()))
-                            {
-                                case SPEC_MONK_BREWMASTER:
-                                    damage = CalculateMonkMeleeAttacks(m_caster, 0.3f, 5);
-                                    break;
-                                case SPEC_MONK_MISTWEAVER:
-                                    damage = CalculateMonkMeleeAttacks(m_caster, 0.3f, 6);
-                                    break;
-                                case SPEC_MONK_WINDWALKER:
-                                    damage = CalculateMonkMeleeAttacks(m_caster, 0.3f, 6);
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                        break;
-                    case 121253:// Keg Smash
-                        damage = CalculateMonkMeleeAttacks(m_caster, 8.12f, 11);
-                        break;
                     default:
                         break;
                 }
@@ -2148,7 +2136,7 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
             {
                 if (caster->getClass() == CLASS_MONK && addhealth && (m_spellInfo->Id == 115072 || m_spellInfo->Id == 147489))
                 {
-                    addhealth = Spell::CalculateMonkMeleeAttacks(m_caster, 7, 14);
+                    addhealth = Spell::CalculateMonkMeleeAttacks(m_caster, 7);
                     addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
                 }
 
@@ -3098,7 +3086,7 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                 for (std::list<Creature*>::iterator i = tempList.begin(); i != tempList.end(); ++i)
                 {
                     Unit* owner = (*i)->GetOwner();
-                    if (owner && owner == m_caster && (*i)->isSummon())
+                    if (owner && owner == m_caster && (*i)->IsSummon())
                         continue;
 
                     gatewayList.remove((*i));
@@ -3125,7 +3113,7 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                 for (std::list<Creature*>::iterator i = tempList.begin(); i != tempList.end(); ++i)
                 {
                     Unit* owner = (*i)->GetOwner();
-                    if (owner && owner == m_caster && (*i)->isSummon())
+                    if (owner && owner == m_caster && (*i)->IsSummon())
                         continue;
 
                     gatewayList.remove((*i));
@@ -3228,7 +3216,7 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                         return;
 
                     // Mana Tide Totem, Stone Bulwark Totem, Healing Tide Totem
-                    if (m_spellInfo->Id == 16190 || m_spellInfo->Id == 108270 || m_spellInfo->Id == 127945)
+                    if (m_spellInfo->Id == 16190 || m_spellInfo->Id == 108270 || m_spellInfo->Id == 108280)
                         damage = m_caster->CountPctFromMaxHealth(10);
                     // Monk statues receive 50% from owner's health
                     else if (properties->Type == SUMMON_TYPE_STATUE)
@@ -3295,7 +3283,7 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                                     if (m_caster->m_SummonSlot[slot] && m_caster->m_SummonSlot[slot] != summon->GetGUID())
                                     {
                                         Creature* oldSummon = m_caster->GetMap()->GetCreature(m_caster->m_SummonSlot[slot]);
-                                        if (oldSummon && oldSummon->isSummon())
+                                        if (oldSummon && oldSummon->IsSummon())
                                             oldSummon->ToTempSummon()->UnSummon();
                                     }
                                     m_caster->m_SummonSlot[slot] = summon->GetGUID();
@@ -4029,13 +4017,13 @@ void Spell::EffectSummonPet(SpellEffIndex effIndex)
     }
 
     // Hack to execute cooldown of Soulburn Summon effect
-    if (m_spellInfo->Id == 668 || m_spellInfo->Id == 691 || m_spellInfo->Id == 697 || m_spellInfo->Id == 712)
+    if (m_spellInfo->Id == 688 || m_spellInfo->Id == 691 || m_spellInfo->Id == 697 || m_spellInfo->Id == 712)
     {
         for (auto mod : m_appliedMods)
             if (auto effect = mod->ownerEffect)
                 if (effect->GetId() == 74434)
                 {
-                    owner->AddSpellCooldown(668, 0, 60 * IN_MILLISECONDS, true);
+                    owner->AddSpellCooldown(688, 0, 60 * IN_MILLISECONDS, true);
                     owner->AddSpellCooldown(691, 0, 60 * IN_MILLISECONDS, true);
                     owner->AddSpellCooldown(697, 0, 60 * IN_MILLISECONDS, true);
                     owner->AddSpellCooldown(712, 0, 60 * IN_MILLISECONDS, true);
@@ -5070,7 +5058,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                 }
                 case 52173: // Coyote Spirit Despawn
                 case 60243: // Blood Parrot Despawn
-                    if (unitTarget->GetTypeId() == TYPEID_UNIT && unitTarget->ToCreature()->isSummon())
+                    if (unitTarget->GetTypeId() == TYPEID_UNIT && unitTarget->ToCreature()->IsSummon())
                         unitTarget->ToTempSummon()->UnSummon();
                     return;
                 case 52479: // Gift of the Harvester
@@ -7706,11 +7694,18 @@ void Spell::EffectCreateAreatrigger(SpellEffIndex effIndex)
     }
 }
 
-int32 Spell::CalculateMonkMeleeAttacks(Unit* caster, float coeff, int32 APmultiplier)
+int32 Spell::CalculateMonkMeleeAttacks(Unit* caster, float coeff)
 {
+    float mainHandMinDamage = 0;
+    float mainHandMaxDamage = 0;
+    float offHandMinDamage = 0;
+    float offHandMaxDamage = 0;
     float minDamage = 0;
     float maxDamage = 0;
-    bool dualwield  = false;
+
+    bool isDualWield = false;
+    bool isTwoHandedWeapon = false;
+
     int32 AP = caster->GetTotalAttackPowerValue(BASE_ATTACK);
 
     if (Player* plr = caster->ToPlayer())
@@ -7718,7 +7713,8 @@ int32 Spell::CalculateMonkMeleeAttacks(Unit* caster, float coeff, int32 APmultip
         Item* mainItem = plr->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
         Item* offItem = plr->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
 
-        dualwield = (mainItem && offItem) ? 1 : 0;
+        isDualWield = (mainItem && offItem);
+        isTwoHandedWeapon = (mainItem && (mainItem->GetTemplate()->InventoryType == INVTYPE_2HWEAPON));
 
         if (coeff < 0)
             coeff = 0.0f;
@@ -7726,34 +7722,45 @@ int32 Spell::CalculateMonkMeleeAttacks(Unit* caster, float coeff, int32 APmultip
         // Main Hand
         if (mainItem && !caster->HasAuraType(SPELL_AURA_MOD_DISARM))
         {
-            minDamage += mainItem->GetTemplate()->DamageMin;
-            maxDamage += mainItem->GetTemplate()->DamageMax;
+            mainHandMinDamage = mainItem->GetTemplate()->DamageMin;
+            mainHandMaxDamage = mainItem->GetTemplate()->DamageMax;
 
-            minDamage /= float(m_caster->GetAttackTime(BASE_ATTACK) / 1000.0f);
-            maxDamage /= float(m_caster->GetAttackTime(BASE_ATTACK) / 1000.0f);
+            mainHandMinDamage /= float(mainItem->GetTemplate()->Delay / 1000.0f);
+            mainHandMaxDamage /= float(mainItem->GetTemplate()->Delay / 1000.0f);
         }
 
         // Off Hand
         if (offItem && !caster->HasAuraType(SPELL_AURA_MOD_DISARM))
         {
-            minDamage += offItem->GetTemplate()->DamageMin / 2.0f;
-            maxDamage += offItem->GetTemplate()->DamageMax / 2.0f;
+            offHandMinDamage = offItem->GetTemplate()->DamageMin / 2.0f;
+            offHandMaxDamage = offItem->GetTemplate()->DamageMax / 2.0f;
 
-            minDamage /= float(m_caster->GetAttackTime(BASE_ATTACK) / 1000.0f);
-            maxDamage /= float(m_caster->GetAttackTime(BASE_ATTACK) / 1000.0f);
+            offHandMinDamage /= float(offItem->GetTemplate()->Delay / 1000.0f);
+            offHandMaxDamage /= float(offItem->GetTemplate()->Delay / 1000.0f);
         }
 
-        // DualWield coefficient
-        if (dualwield)
+        // Is one single-handed weapon equipped
+        if (mainItem && !offItem && !isTwoHandedWeapon)
+        {
+            mainHandMinDamage *= 1.5f;
+            mainHandMaxDamage *= 1.5f;
+        }
+
+        // Add offhand weapon, if noone equipped it will add 0
+        minDamage = mainHandMinDamage + offHandMinDamage;
+        maxDamage = mainHandMaxDamage += offHandMaxDamage;
+
+        // if one single-handed or dual-wield is equipped
+        if (isDualWield || !isTwoHandedWeapon)
         {
             minDamage *= 0.898882275f;
             maxDamage *= 0.898882275f;
         }
 
-        minDamage += float(AP / APmultiplier);
-        maxDamage += float(AP / APmultiplier);
+        minDamage += float(AP / 14.0f);
+        maxDamage += float(AP / 14.0f);
 
-        // Off Hand penalty reapplied if only equiped by an off hand weapon
+        // Apply penalty if off-hand is equipped without main-hand
         if (offItem && !mainItem)
         {
             minDamage /= 2.0f;
@@ -7763,9 +7770,9 @@ int32 Spell::CalculateMonkMeleeAttacks(Unit* caster, float coeff, int32 APmultip
     else
     {
         if (caster->GetEntry() != 69792) // Earth Spirit
-            dualwield = true;
+            isDualWield = true;
 
-        if (dualwield)
+        if (isDualWield)
         {
             minDamage += caster->GetWeaponDamageRange(BASE_ATTACK, MINDAMAGE);
             minDamage += caster->GetWeaponDamageRange(OFF_ATTACK, MINDAMAGE) / 2;
@@ -7784,11 +7791,11 @@ int32 Spell::CalculateMonkMeleeAttacks(Unit* caster, float coeff, int32 APmultip
         minDamage /= float(m_caster->GetAttackTime(BASE_ATTACK) / 1000.0f);
         maxDamage /= float(m_caster->GetAttackTime(BASE_ATTACK) / 1000.0f);
 
-        minDamage += float(AP / APmultiplier);
-        maxDamage += float(AP / APmultiplier);
+        minDamage += float(AP / 14.0f);
+        maxDamage += float(AP / 14.0f);
     }
 
-    return irand(int32(minDamage * coeff), int32(maxDamage * coeff));
+    return irand(int32((minDamage-1) * coeff), int32((maxDamage+1) * coeff));
 }
 
 void Spell::EffectUnlockGuildVaultTab(SpellEffIndex effIndex)

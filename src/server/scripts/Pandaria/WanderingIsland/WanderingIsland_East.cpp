@@ -456,7 +456,7 @@ public:
         {
             waypointToEject = 100;
 
-            if (me->isSummon())
+            if (me->IsSummon())
             {
                 IntroTimer = 2500;
 

@@ -54,12 +54,12 @@ struct Wave
 
 static Wave RiftWaves[]=
 {
-    {RIFT_BOSS, 0},
-    {C_DEJA, 0},
-    {RIFT_BOSS, 120000},
-    {C_TEMPO, 140000},
-    {RIFT_BOSS, 120000},
-    {C_AEONUS, 0}
+    {RIFT_BOSS,     0},
+    {C_DEJA,        120000},
+    {RIFT_BOSS,     0},
+    {C_TEMPO,       140000},
+    {RIFT_BOSS,     0},
+    {C_AEONUS,      0}
 };
 
 class instance_dark_portal : public InstanceMapScript
@@ -209,7 +209,7 @@ public:
                         {
                             for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                             {
-                                if (Player* player = itr->getSource())
+                                if (Player* player = itr->GetSource())
                                 {
                                     if (player->GetQuestStatus(QUEST_OPENING_PORTAL) == QUEST_STATUS_INCOMPLETE)
                                         player->AreaExploredOrEventHappens(QUEST_OPENING_PORTAL);
@@ -227,7 +227,7 @@ public:
             case TYPE_RIFT:
                 if (data == SPECIAL)
                 {
-                    if (mRiftPortalCount < 7)
+                    if (mRiftPortalCount != 6 && mRiftPortalCount != 12 && mRiftPortalCount != 18)
                         NextPortal_Timer = 5000;
                 }
                 else

@@ -31,6 +31,7 @@
 #include "GossipDef.h"
 #include "CreatureAIImpl.h"
 #include "SpellAuraEffects.h"
+#include "CreatureAI.h"
 
 namespace
 {
@@ -1045,13 +1046,13 @@ void ScriptMgr::OnShutdown()
     FOREACH_SCRIPT(WorldScript)->OnShutdown();
 }
 
-bool ScriptMgr::OnCriteriaCheck(uint32 scriptId, Player* source, Unit* target)
+bool ScriptMgr::OnCriteriaCheck(uint32 scriptId, uint32 criteriaId, uint64 miscValue1, Player* source, Unit* target)
 {
     ASSERT(source);
     // target can be NULL.
 
     GET_SCRIPT_RET(AchievementCriteriaScript, scriptId, tmpscript, false);
-    return tmpscript->OnCheck(source, target);
+    return tmpscript->OnCheck(criteriaId, miscValue1, source, target);
 }
 
 // Player

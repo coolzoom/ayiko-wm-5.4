@@ -84,7 +84,7 @@ public:
         switch (action)
         {
             case OPTION_TELE_TO_MAZE:
-                player->TeleportTo(1, 4199.866699f, -4286.674316f, 262.070160f, 1.578420f);
+                player->TeleportTo(0, 4199.866699f, -4286.674316f, 262.070160f, 1.578420f);
                 break;
             case OPTION_TELE_TO_STAIRS:
                 player->TeleportTo(530, -3470.788574f, -14100.294922f, 1.186245f, 2.761339f);

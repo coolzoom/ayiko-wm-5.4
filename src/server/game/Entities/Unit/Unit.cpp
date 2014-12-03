@@ -11780,16 +11780,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                 }
                 break;
             }
-
-
     }
-
-    // Done fixed damage bonus auras
-    int32 DoneAdvertisedBenefit  = SpellBaseDamageBonusDone(spellProto->GetSchoolMask());
-    // Pets just add their bonus damage to their spell damage
-    // note that their spell damage is just gain of their own auras
-    if (HasUnitTypeMask(UNIT_MASK_GUARDIAN))
-        DoneAdvertisedBenefit += ((Guardian*)this)->GetBonusDamage();
 
     // Check for table values
     float coeff = 0;
@@ -11836,6 +11827,25 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                 DoneTotal += int32(bonus->ap_bonus * stack * ApCoeffMod * APbonus);
             }
         }
+    }
+
+    // Done fixed damage bonus auras
+    int32 DoneAdvertisedBenefit = SpellBaseDamageBonusDone(spellProto->GetSchoolMask());
+    // Pets just add their bonus damage to their spell damage
+    // note that their spell damage is just gain of their own auras
+    if (HasUnitTypeMask(UNIT_MASK_GUARDIAN))
+        DoneAdvertisedBenefit += ((Guardian*)this)->GetBonusDamage();
+
+    // Default calculation
+    if (DoneAdvertisedBenefit && coeff > 0)
+    {
+        if (Player* modOwner = GetSpellModOwner())
+        {
+            coeff *= 100.0f;
+            modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_BONUS_MULTIPLIER, coeff);
+            coeff /= 100.0f;
+        }
+        DoneTotal += int32(DoneAdvertisedBenefit * coeff);
     }
 
     // Custom MoP Script
@@ -11932,12 +11942,22 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
     }
 
     int32 TakenAdvertisedBenefit = SpellBaseDamageBonusTaken(spellProto->GetSchoolMask());
-
     // Check for table values
-    float coeff = 0;
     SpellBonusEntry const* bonus = sSpellMgr->GetSpellBonusData(spellProto->Id);
-    if (bonus)
-        coeff = (damagetype == DOT) ? bonus->dot_damage : bonus->direct_damage;
+    if (TakenAdvertisedBenefit && bonus)
+    {
+        float coeff = (damagetype == DOT) ? bonus->dot_damage : bonus->direct_damage;
+        if (coeff > 0)
+        {
+            if (Player* modOwner = GetSpellModOwner())
+            {
+                coeff *= 100.0f;
+                modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_BONUS_MULTIPLIER, coeff);
+                coeff /= 100.0f;
+            }
+            TakenTotal += int32(TakenAdvertisedBenefit * coeff);
+        }
+    }
 
     float tmpDamage = 0.0f;
 
@@ -12438,12 +12458,6 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
         AddPct(DoneTotalMod, GetFloatValue(PLAYER_FIELD_PVP_POWER_HEALING));
     }
 
-    // Done fixed damage bonus auras
-    int32 DoneAdvertisedBenefit = SpellBaseHealingBonusDone(spellProto->GetSchoolMask());
-
-    if (!DoneAdvertisedBenefit || (SpellBaseHealingBonusDone(spellProto->GetSchoolMask()) < SpellBaseDamageBonusDone(spellProto->GetSchoolMask())))
-        DoneAdvertisedBenefit = SpellBaseDamageBonusDone(spellProto->GetSchoolMask());
-
     // Check for table values
     SpellBonusEntry const* bonus = sSpellMgr->GetSpellBonusData(spellProto->Id);
     float coeff = 0;
@@ -12469,6 +12483,25 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
         // No bonus healing for SPELL_DAMAGE_CLASS_NONE class spells by default
         if (spellProto->DmgClass == SPELL_DAMAGE_CLASS_NONE)
             return healamount;
+    }
+
+    // Done fixed damage bonus auras
+    int32 DoneAdvertisedBenefit = SpellBaseHealingBonusDone(spellProto->GetSchoolMask());
+
+    if (!DoneAdvertisedBenefit || (SpellBaseHealingBonusDone(spellProto->GetSchoolMask()) < SpellBaseDamageBonusDone(spellProto->GetSchoolMask())))
+        DoneAdvertisedBenefit = SpellBaseDamageBonusDone(spellProto->GetSchoolMask());
+
+    // Default calculation
+    if (DoneAdvertisedBenefit && coeff > 0)
+    {
+        if (Player* modOwner = GetSpellModOwner())
+        {
+            coeff *= 100.0f;
+            modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_BONUS_MULTIPLIER, coeff);
+            coeff /= 100.0f;
+        }
+
+        DoneTotal += int32(DoneAdvertisedBenefit * coeff);
     }
 
     for (auto const &spellEffect : spellProto->Effects)
@@ -12539,9 +12572,6 @@ uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, u
     // Healing Done
     int32 TakenTotal = 0;
 
-    // Taken fixed damage bonus auras
-    int32 TakenAdvertisedBenefit = SpellBaseHealingBonusTaken(spellProto->GetSchoolMask());
-
     // Nourish heal boost
     if (spellProto->Id == 50464)
     {
@@ -12568,7 +12598,6 @@ uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, u
     // Check for table values
     SpellBonusEntry const* bonus = sSpellMgr->GetSpellBonusData(spellProto->Id);
     float coeff = 0;
-    float factorMod = 1.0f;
     if (bonus)
         coeff = (damagetype == DOT) ? bonus->dot_damage : bonus->direct_damage;
     else
@@ -12579,6 +12608,21 @@ uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, u
             healamount = uint32(std::max((float(healamount) * TakenTotalMod), 0.0f));
             return healamount;
         }
+    }
+
+    // Taken fixed damage bonus auras
+    int32 TakenAdvertisedBenefit = SpellBaseHealingBonusTaken(spellProto->GetSchoolMask());
+    // Default calculation
+    if (TakenAdvertisedBenefit && coeff > 0)
+    {
+        if (Player* modOwner = GetSpellModOwner())
+        {
+            coeff *= 100.0f;
+            modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_BONUS_MULTIPLIER, coeff);
+            coeff /= 100.0f;
+        }
+
+        TakenTotal += int32(TakenAdvertisedBenefit * coeff);
     }
 
     AuraEffectList const& mHealingGet= GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_RECEIVED);
@@ -17222,97 +17266,6 @@ void Unit::ApplyCastTimePercentMod(float val, bool apply)
             (*itr)->ApplySpellMod((*itr)->GetBase()->GetUnitOwner(), true);
         }
     }
-}
-
-uint32 Unit::GetCastingTimeForBonus(SpellInfo const* spellProto, DamageEffectType damagetype, uint32 CastingTime) const
-{
-    // Not apply this to creature casted spells with casttime == 0
-    if (CastingTime == 0 && GetTypeId() == TYPEID_UNIT && !ToCreature()->isPet())
-        return 3500;
-
-    if (CastingTime > 7000) CastingTime = 7000;
-    if (CastingTime < 1500) CastingTime = 1500;
-
-    if (damagetype == DOT && !spellProto->IsChanneled())
-        CastingTime = 3500;
-
-    int32 overTime    = 0;
-    uint8 effects     = 0;
-    bool DirectDamage = false;
-    bool AreaEffect   = false;
-
-    for (auto const &spellEffect : spellProto->Effects)
-    {
-        switch (spellEffect.Effect)
-        {
-            case SPELL_EFFECT_SCHOOL_DAMAGE:
-            case SPELL_EFFECT_POWER_DRAIN:
-            case SPELL_EFFECT_HEALTH_LEECH:
-            case SPELL_EFFECT_ENVIRONMENTAL_DAMAGE:
-            case SPELL_EFFECT_POWER_BURN:
-            case SPELL_EFFECT_HEAL:
-                DirectDamage = true;
-                break;
-            case SPELL_EFFECT_APPLY_AURA:
-                switch (spellEffect.ApplyAuraName)
-                {
-                    case SPELL_AURA_PERIODIC_DAMAGE:
-                    case SPELL_AURA_PERIODIC_HEAL:
-                    case SPELL_AURA_PERIODIC_LEECH:
-                        if (spellProto->GetDuration())
-                            overTime = spellProto->GetDuration();
-                        break;
-                    default:
-                        // -5% per additional effect
-                        ++effects;
-                        break;
-                }
-            default:
-                break;
-        }
-
-        if (spellEffect.IsTargetingArea())
-            AreaEffect = true;
-    }
-
-    // Combined Spells with Both Over Time and Direct Damage
-    if (overTime > 0 && CastingTime > 0 && DirectDamage)
-    {
-        // mainly for DoTs which are 3500 here otherwise
-        uint32 OriginalCastTime = spellProto->CalcCastTime();
-        if (OriginalCastTime > 7000) OriginalCastTime = 7000;
-        if (OriginalCastTime < 1500) OriginalCastTime = 1500;
-        // Portion to Over Time
-        float PtOT = (overTime / 15000.0f) / ((overTime / 15000.0f) + (OriginalCastTime / 3500.0f));
-
-        if (damagetype == DOT)
-            CastingTime = uint32(CastingTime * PtOT);
-        else if (PtOT < 1.0f)
-            CastingTime  = uint32(CastingTime * (1 - PtOT));
-        else
-            CastingTime = 0;
-    }
-
-    // Area Effect Spells receive only half of bonus
-    if (AreaEffect)
-        CastingTime /= 2;
-
-    // 50% for damage and healing spells for leech spells from damage bonus and 0% from healing
-    for (auto const &spellEffect : spellProto->Effects)
-    {
-        if (spellEffect.Effect == SPELL_EFFECT_HEALTH_LEECH
-                || (spellEffect.Effect == SPELL_EFFECT_APPLY_AURA && spellEffect.ApplyAuraName == SPELL_AURA_PERIODIC_LEECH))
-        {
-            CastingTime /= 2;
-            break;
-        }
-    }
-
-    // -5% of total per any additional effect
-    for (uint8 i = 0; i < effects; ++i)
-        CastingTime *= 0.95f;
-
-    return CastingTime;
 }
 
 void Unit::UpdateAuraForGroup(uint8 slot)

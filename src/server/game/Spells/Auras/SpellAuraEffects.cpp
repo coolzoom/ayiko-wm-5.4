@@ -1244,6 +1244,9 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
 
     }
 
+    if (DoneActualBenefit != 0.0f)
+        amount += (int32)DoneActualBenefit;
+
     GetBase()->CallScriptEffectCalcAmountHandlers(this, amount, m_canBeRecalculated);
     amount *= GetBase()->GetStackAmount();
 

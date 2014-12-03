@@ -7730,7 +7730,7 @@ int32 Spell::CalculateMonkMeleeAttacks(Unit* caster, float coeff, int32 APmultip
         Item* offItem = plr->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
 
         isDualWield = (mainItem && offItem);
-        isTwoHandedWeapon = (mainItem && (mainItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_POLEARM || mainItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_STAFF));
+        isTwoHandedWeapon = (mainItem && (mainItem->GetTemplate()->InventoryType == INVTYPE_2HWEAPON));
 
         if (coeff < 0)
             coeff = 0.0f;
@@ -7756,7 +7756,7 @@ int32 Spell::CalculateMonkMeleeAttacks(Unit* caster, float coeff, int32 APmultip
         }
 
         // Is one single-handed weapon equipped
-        if (mainItem && !offItem && isTwoHandedWeapon)
+        if (mainItem && !offItem && !isTwoHandedWeapon)
         {
             mainHandMinDamage *= 1.5f;
             mainHandMaxDamage *= 1.5f;

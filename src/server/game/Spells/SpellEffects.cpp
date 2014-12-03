@@ -817,11 +817,11 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                 {
                     // Custom MoP script
                     case 123408:// Spinning Fire Blossom
-                        damage = CalculateMonkMeleeAttacks(m_caster, 1.5f, 6);
+                        damage = CalculateMonkMeleeAttacks(m_caster, 2.1f);
                         break;
                     case 117418:// Fists of Fury
                     {
-                        damage = CalculateMonkMeleeAttacks(m_caster, 7.5f, 14);
+                        damage = CalculateMonkMeleeAttacks(m_caster, 7.5f);
 
                         uint32 count = 0;
                         for (std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
@@ -838,43 +838,27 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     case 115687:// Jab (Axes)
                     case 115693:// Jab (Maces)
                     case 115695:// Jab (Swords)
-                        damage = CalculateMonkMeleeAttacks(m_caster, 1.5f, 14);
+                        damage = CalculateMonkMeleeAttacks(m_caster, 1.5f);
                         break;
                     case 100787:// Tiger Palm
-                        damage = CalculateMonkMeleeAttacks(m_caster, 3.0f, 14);
+                        damage = CalculateMonkMeleeAttacks(m_caster, 3.0f);
                         break;
                     case 107270:// Spinning Crane Kick
                     case 148187:// Rushing Jade Wind
-                        damage = CalculateMonkMeleeAttacks(m_caster, 1.59f, 14);
+                        damage = CalculateMonkMeleeAttacks(m_caster, 1.59f);
                         break;
                     case 107428:// Rising Sun Kick
-                        damage = CalculateMonkMeleeAttacks(m_caster, 12.816f, 14);
+                        damage = CalculateMonkMeleeAttacks(m_caster, 12.816f);
                         m_caster->CastSpell(unitTarget, 130320, true);
                         break;
                     case 100784:// Blackout Kick
-                        damage = CalculateMonkMeleeAttacks(m_caster, 7.12f, 14);
+                        damage = CalculateMonkMeleeAttacks(m_caster, 7.12f);
                         break;
                     case 124335:// Swift Reflexes
-                        if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                        {
-                            switch (m_caster->ToPlayer()->GetSpecializationId(m_caster->ToPlayer()->GetActiveSpec()))
-                            {
-                                case SPEC_MONK_BREWMASTER:
-                                    damage = CalculateMonkMeleeAttacks(m_caster, 0.3f, 5);
-                                    break;
-                                case SPEC_MONK_MISTWEAVER:
-                                    damage = CalculateMonkMeleeAttacks(m_caster, 0.3f, 6);
-                                    break;
-                                case SPEC_MONK_WINDWALKER:
-                                    damage = CalculateMonkMeleeAttacks(m_caster, 0.3f, 6);
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
+                        damage = CalculateMonkMeleeAttacks(m_caster, 0.3f);
                         break;
                     case 121253:// Keg Smash
-                        damage = CalculateMonkMeleeAttacks(m_caster, 8.12f, 11);
+                        damage = CalculateMonkMeleeAttacks(m_caster, 10.0f);
                         break;
                     case 115080:// Touch of Death
                         if (GetCaster())
@@ -2152,7 +2136,7 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
             {
                 if (caster->getClass() == CLASS_MONK && addhealth && (m_spellInfo->Id == 115072 || m_spellInfo->Id == 147489))
                 {
-                    addhealth = Spell::CalculateMonkMeleeAttacks(m_caster, 7, 14);
+                    addhealth = Spell::CalculateMonkMeleeAttacks(m_caster, 7);
                     addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
                 }
 
@@ -7710,7 +7694,7 @@ void Spell::EffectCreateAreatrigger(SpellEffIndex effIndex)
     }
 }
 
-int32 Spell::CalculateMonkMeleeAttacks(Unit* caster, float coeff, int32 APmultiplier)
+int32 Spell::CalculateMonkMeleeAttacks(Unit* caster, float coeff)
 {
     float mainHandMinDamage = 0;
     float mainHandMaxDamage = 0;
@@ -7773,8 +7757,8 @@ int32 Spell::CalculateMonkMeleeAttacks(Unit* caster, float coeff, int32 APmultip
             maxDamage *= 0.898882275f;
         }
 
-        minDamage += float(AP / APmultiplier);
-        maxDamage += float(AP / APmultiplier);
+        minDamage += float(AP / 14.0f);
+        maxDamage += float(AP / 14.0f);
 
         // Apply penalty if off-hand is equipped without main-hand
         if (offItem && !mainItem)
@@ -7807,8 +7791,8 @@ int32 Spell::CalculateMonkMeleeAttacks(Unit* caster, float coeff, int32 APmultip
         minDamage /= float(m_caster->GetAttackTime(BASE_ATTACK) / 1000.0f);
         maxDamage /= float(m_caster->GetAttackTime(BASE_ATTACK) / 1000.0f);
 
-        minDamage += float(AP / APmultiplier);
-        maxDamage += float(AP / APmultiplier);
+        minDamage += float(AP / 14.0f);
+        maxDamage += float(AP / 14.0f);
     }
 
     return irand(int32((minDamage-1) * coeff), int32((maxDamage+1) * coeff));

@@ -17,9 +17,10 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "mogu_shan_vault.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
-#include "mogu_shan_vault.h"
+#include "SpellScript.h"
 
 enum eSpells
 {
@@ -1529,13 +1530,23 @@ public:
     }
 };
 
+struct TitanGasTargetSelector final
+{
+    bool operator ()(WorldObject const *object) const
+    {
+        if(object->GetTypeId() == TYPEID_PLAYER)
+            return false;
+        return true;
+    }
+};
+
 // Titan gas - 116803 - triggered by Titan Gas (116779)
-class spell_titan_gas : public SpellScriptLoader
+class spell_titan_gas final : public SpellScriptLoader
 {
 public:
     spell_titan_gas() : SpellScriptLoader("spell_titan_gas") { }
 
-    class spell_titan_gas_AuraScript : public AuraScript
+    class spell_titan_gas_AuraScript final : public AuraScript
     {
         PrepareAuraScript(spell_titan_gas_AuraScript);
 
@@ -1545,15 +1556,35 @@ public:
                 target->AddAura(SPELL_TITAN_GAS_AURA, target);
         }
 
-        void Register()
+        void Register() final
         {
             OnEffectApply += AuraEffectApplyFn(spell_titan_gas_AuraScript::Apply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
-    AuraScript* GetAuraScript() const
+    class spell_titan_gas_SpellScript final : public SpellScript
+    {
+        PrepareSpellScript(spell_titan_gas_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            targets.remove_if(TitanGasTargetSelector());
+        }
+
+        void Register() final
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_titan_gas_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const final
     {
         return new spell_titan_gas_AuraScript();
+    }
+
+    SpellScript* GetSpellScript() const final
+    {
+        return new spell_titan_gas_SpellScript();
     }
 };
 
@@ -1579,9 +1610,29 @@ public:
         }
     };
 
-    AuraScript* GetAuraScript() const
+    class spell_titan_gas2_SpellScript final : public SpellScript
+    {
+        PrepareSpellScript(spell_titan_gas2_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*> &targets)
+        {
+            targets.remove_if(TitanGasTargetSelector());
+        }
+
+        void Register() final
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_titan_gas2_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const final
     {
         return new spell_titan_gas2_AuraScript();
+    }
+
+    SpellScript* GetSpellScript() const final
+    {
+        return new spell_titan_gas2_SpellScript();
     }
 };
 
@@ -1683,6 +1734,48 @@ public :
     };
 };
 
+struct FocusedTargetSelector final
+{
+    explicit FocusedTargetSelector(Unit* _caster) : caster(_caster) { }
+
+    bool operator ()(WorldObject const *unit) const
+    {
+        if (caster->GetVictim() && caster->GetVictim()->GetTypeId() == TYPEID_PLAYER && unit == caster->GetVictim())
+            return false;
+
+        return true;
+    }
+
+private:
+    Unit* caster;
+};
+
+class spell_woe_focused final : public SpellScriptLoader
+{
+public:
+    spell_woe_focused() : SpellScriptLoader("spell_woe_focused") { }
+
+    class spell_woe_focused_SpellScript final : public SpellScript
+    {
+        PrepareSpellScript(spell_woe_focused_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            targets.remove_if(FocusedTargetSelector(GetCaster()));
+        }
+
+        void Register() final
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_woe_focused_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript * GetSpellScript() const final
+    {
+        return new spell_woe_focused_SpellScript();
+    }
+};
+
 // Ancient Control Console - 211584
 class go_ancien_control_console : public GameObjectScript
 {
@@ -1751,6 +1844,7 @@ void AddSC_boss_will_of_emperor()
     new spell_energizing_smash();
     new spell_energizing_visual();
     new spell_energized();
+    new spell_woe_focused();
     new go_ancien_control_console();
     new achievement_show_me_you_moves();
 }

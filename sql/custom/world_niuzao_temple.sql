@@ -20,8 +20,22 @@ Niuzao Temple (Map 1011)
 
 -- First boss area
 
-UPDATE creature_template SET ScriptName = 'sikthik_guardian' WHERE entry = 61928;
-UPDATE creature_template SET ScriptName = 'sikthik_amber_weaver' WHERE entry = 61929;
+-- AMBER WEAVER
+UPDATE creature_template SET ScriptName = 'npc_sikthik_amber_weaver' WHERE entry = 61929;
+UPDATE creature_template SET faction_A = 16, faction_H = 16, flags_extra = 128 WHERE entry = 62208; -- Resin Shell
+
+DELETE FROM creature_template_aura WHERE entry = 62208;
+INSERT INTO creature_template_aura (entry, aura) VALUES
+(62208, 121095); -- Resin Shell damage reduction trigger
+
+UPDATE creature_template SET flags_extra = 128 WHERE entry = 61967;
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` = 120596;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(13, 1, 120596, 0, 0, 31, 0, 3, 61967, 0, 0, 0, 0, '', 'Resin Weave Visual - Target stalker');
+
+-- GUARDIAN
+UPDATE creature_template SET ScriptName = 'npc_sikthik_guardian' WHERE entry = 61928;
+-- RESIN FLAKE
 UPDATE creature_template SET ScriptName = 'npc_resin_flake' WHERE entry = 61910;
 
 /*
@@ -30,7 +44,35 @@ UPDATE creature_template SET ScriptName = 'npc_resin_flake' WHERE entry = 61910;
 *******************************
 */
 
--- Trash
+UPDATE creature_template SET ScriptName = 'boss_vizier_jinbak' WHERE entry = 61567;
+DELETE FROM creature_template_aura WHERE entry = 61613;
+INSERT INTO creature_template_aura (entry, aura) VALUES
+(61613, 119939); -- Sap Stalker - Sap Residue
+
+DELETE FROM spell_script_names WHERE spell_id IN(120001,120070, 119941);
+INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
+(120001, 'spell_jinbak_detonate'),
+(119941, 'spell_sap_residue'),
+(120070, 'spell_sap_residue');
+
+UPDATE creature_template SET ScriptName = 'npc_sap_globule' WHERE entry = 61623;
+UPDATE creature_template SET flags_extra = 128 WHERE entry = 61629; -- Globule summon dest
+UPDATE creature_template SET modelid1 = 38497, flags_extra = 128, ScriptName = 'npc_sap_puddle' WHERE entry = 61613;
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (120071, 120070, 120001, 120095);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(13, 1, 120001, 0, 0, 31, 0, 3, 61613, 0, 0, 0, 0, '', 'Detonate - Target Sap Puddle'),
+(13, 1, 120071, 0, 0, 31, 0, 3, 61613, 0, 0, 0, 0, '', 'Summon Sappling reverse - target Sap Puddle'),
+(13, 1, 120070, 0, 0, 31, 0, 3, 61623, 0, 0, 0, 0, '', 'Sap Residue - Target Sappling'),
+(13, 1, 120095, 0, 0, 31, 0, 3, 61613, 0, 0, 0, 0, '', 'Detonate Visual - Target Sap Puddle');
+
+DELETE FROM creature_text WHERE entry = 61567;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(61567, 0, 0, 'I hope they make it this far. Then my strength and skill will be clear to all!', 14, 0, 100, 0, 0, 29392, 'Vizier Jin''bak - SAY_INTRO'),
+(61567, 1, 0, 'Ah-hah! The lot of you will soon wish you hadn''t come this way...', 14, 0, 100, 0, 0, 29390, 'Vizier Jin''bak - SAY_AGGRO'),
+(61567, 2, 0, 'But... I was... who will...?!', 14, 0, 100, 0, 0, 29392, 'Vizier Jin''bak - SAY_SAY_DEATH'),
+(61567, 3, 0, 'Did you think you stood a chance?!', 14, 0, 100, 0, 0, 29394, 'Vizier Jin''bak - SAY_SLAY'),
+(61567, 4, 0, 'Allow me to show you the power of amber alchemy...', 14, 0, 100, 0, 0, 29395, 'Vizier Jin''bak - SAY_DETONATE'),
+(61567, 5, 0, '|cFFFE9A2ESap Globules|r begin to sprout from the tree!', 41, 0, 100, 0, 0, 0, 'Vizier Jin''bak - EMOTE_GLOBULE');
 
 
 /*

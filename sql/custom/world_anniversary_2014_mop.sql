@@ -3,7 +3,7 @@
 DELETE FROM `game_event` WHERE `eventEntry` IN (252, 253);
 INSERT INTO `game_event` (`eventEntry`, `start_time`, `end_time`, `occurence`, `length`, `holiday`, `description`) VALUES
 (252, '2014-12-05 00:00:01', '2014-12-25 23:59:59', 525600, 1728000, 0, "Molten Fifth Anniversary (Custom)"),
-(253, '2014-12-05 00:00:01', '2014-12-25 23:59:59', 525600, 18000, 0, "Molten Fifth Anniversary Race Event (Custom)");
+(253, '2013-12-05 00:00:01', '2013-12-25 23:59:59', 525600, 18000, 0, "Molten Fifth Anniversary Race Event (Custom)");  -- manually started
 
 REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES
 (500002, 0, 0, 0, 0, 0, 13730, 0, 0, 0, 'Angry Snowman', '', '', 0, 90, 90, 4, 16, 16, 0, 1, 1.14286, 1, 0, 5000, 6000, 0, 0, 2, 2000, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 2, 1, 1.5, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'npc_winter_snowman', 1),
@@ -15,10 +15,10 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 (500017, 0, 0, 0, 0, 0, 25006, 0, 0, 0, 'Gackt', 'Molten Staff', '', 0, 93, 93, 4, 35, 35, 1, 1, 1.14286, 1, 2, 20000, 50000, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1.164252, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, '', 1),
 (500018, 0, 0, 0, 0, 0, 25900, 0, 0, 0, 'Edifice', 'Molten Staff', '', 0, 93, 93, 4, 35, 35, 1, 1, 1.14286, 1, 2, 20000, 50000, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1.164252, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, '', 1),
 (500019, 0, 0, 0, 0, 0, 28127, 0, 0, 0, 'Kaer', 'Molten Staff', '', 0, 93, 93, 4, 35, 35, 1, 1, 1.14286, 1, 2, 20000, 50000, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1.164252, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, '', 1),
-(500020, 0, 0, 0, 0, 0, 52409, 0, 0, 0, 'Raggy', 'Tiny Aspect of the Dread Firelord', '', 0, 93, 93, 4, 14, 14, 0, 1, 2, 0.5, 3, 150000, 165000, 4, 0, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 148.57, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 'npc_boss_raggy', 1),
-(500021, 0, 0, 0, 0, 0, 52409, 0, 0, 0, 'Raggy (1)', 'Tiny Aspect of the Dread Firelord', '', 0, 93, 93, 4, 14, 14, 0, 1, 2, 0.5, 3, 180000, 250000, 4, 0, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 5000, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, '', 1),
-(500022, 0, 0, 0, 0, 0, 52409, 0, 0, 0, 'Raggy (2)', 'Tiny Aspect of the Dread Firelord', '', 0, 93, 93, 4, 14, 14, 0, 1, 2, 0.5, 3, 180000, 250000, 4, 0, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 5000, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, '', 1),
-(500023, 0, 0, 0, 0, 0, 52409, 0, 0, 0, 'Raggy (3)', 'Tiny Aspect of the Dread Firelord', '', 0, 93, 93, 4, 14, 14, 0, 1, 2, 0.5, 3, 180000, 250000, 4, 0, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 5000, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, '', 1),
+(500020, 0, 0, 0, 0, 0, 52409, 0, 0, 0, 'Raggy', 'Tiny Aspect of the Dread Firelord', '', 0, 93, 93, 4, 14, 14, 0, 1, 2, 0.5, 3, 150000, 165000, 4, 0, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 148.57, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 651116543, 1, 'npc_boss_raggy', 1),
+(500021, 0, 0, 0, 0, 0, 52409, 0, 0, 0, 'Raggy (1)', 'Tiny Aspect of the Dread Firelord', '', 0, 93, 93, 4, 14, 14, 0, 1, 2, 0.5, 3, 180000, 250000, 4, 0, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 5000, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 651116543, 1, '', 1),
+(500022, 0, 0, 0, 0, 0, 52409, 0, 0, 0, 'Raggy (2)', 'Tiny Aspect of the Dread Firelord', '', 0, 93, 93, 4, 14, 14, 0, 1, 2, 0.5, 3, 180000, 250000, 4, 0, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 5000, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 651116543, 1, '', 1),
+(500023, 0, 0, 0, 0, 0, 52409, 0, 0, 0, 'Raggy (3)', 'Tiny Aspect of the Dread Firelord', '', 0, 93, 93, 4, 14, 14, 0, 1, 2, 0.5, 3, 180000, 250000, 4, 0, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 5000, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 651116543, 1, '', 1),
 (500024, 0, 0, 0, 0, 0, 19152, 0, 0, 0, 'Reward dude', 'Molten Staff', '', 0, 93, 93, 4, 35, 35, 1, 1, 1.14286, 1, 2, 20000, 50000, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1.164252, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, '', 1);
 
 DELETE FROM gameobject_template WHERE entry = 530001;
@@ -28,12 +28,10 @@ INSERT INTO gameobject_template (entry, type, displayId, name, IconName, castBar
 DELETE FROM gameobject_loot_template WHERE entry = 530001;
 INSERT INTO gameobject_loot_template (entry, item, ChanceOrQuestChance, lootmode, groupid, mincountOrRef, maxcount) VALUES
 -- Cache of the Champions
-(530001, 49703, 0, 1, 1, 5, 10), -- Firework
-(530001, 38578, 10, 1, 1, 1, 1); -- Flag of Ownership
--- (530001, 23162, 5, 1, 1, 1, 1); -- Furor's Crate of Endless Resist Gear (NOT FOR MOP)
--- (530001, 33993, 0, 1, 1, 1, 1); -- Conquest Points
-
-UPDATE gameobject_template SET currencyId = 390, currencyCnt = 100 WHERE entry = 530001;
+(530001, 49703, 70, 1, 0, 5, 10), -- Firework
+(530001, 38578, 10, 1, 0, 1, 1), -- Flag of Ownership
+(530001, 23162, 5, 1, 0, 1, 1), -- Furor's Crate of Endless Resist Gear
+(530001, 76061, 100, 1, 0, 5, 10); -- Spirit of Harmony (mop only)
 
 -- Quests
 -- Kaer is missing!
@@ -106,7 +104,7 @@ INSERT INTO `creature_questender` (`id`, `quest`) VALUES
 DELETE FROM `quest_template` WHERE `Id` = 100006;
 INSERT INTO `quest_template` (`Id`, `Method`, `Level`, `MinLevel`, `ZoneOrSort`, `PrevQuestId`, `NextQuestId`, `NextQuestIdChain`, `Title`, `Objectives`, `Details`, `EndText`, `OfferRewardText`, `RequestItemsText`, `CompletedText`, `RewardChoiceItemId1`, `RewardChoiceItemCount1`, `RewardChoiceItemId2`, `RewardChoiceItemCount2`) VALUES
 (100006, 2, 1, 1, -284, 0, 0, 0, 'Pick Your Prize!', 'Pick your prize.', 'You have made it! Now pick your prize!', '', '', '', '', 34518, 1, 34519, 1);
-UPDATE `creature_template` SET `npcflag`=`npcflag`|2 WHERE `entry` IN (500013, 500014, 500015, 500016, 500017, 500018, 500019, 500024);
+UPDATE `creature_template` SET `npcflag`=2 WHERE `entry` IN (500013, 500014, 500015, 500016, 500017, 500018, 500019, 500024);
 
 DELETE FROM creature_template_aura WHERE entry IN (500012);
 INSERT INTO creature_template_aura (entry, aura) VALUES

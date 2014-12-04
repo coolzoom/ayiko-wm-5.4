@@ -2136,14 +2136,14 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
             case 115072:// Expel Harm
                 if (caster->getClass() == CLASS_MONK && addhealth)
                 {
-                    addhealth = Spell::CalculateMonkMeleeAttacks(caster, 7);
+                    addhealth = CalculateMonkMeleeAttacks(caster, 7);
                     addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
                 }
                 break;
             case 147489:// Expel Harm with glyph of Targeted Expulsion
                 if (caster->getClass() == CLASS_MONK && addhealth)
                 {
-                    addhealth = Spell::CalculateMonkMeleeAttacks(caster, caster == unitTarget ? 7.0f : 3.5f);
+                    addhealth = CalculateMonkMeleeAttacks(caster, caster == unitTarget ? 7.0f : 3.5f);
                     addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
                 }
                 break;
@@ -7699,8 +7699,11 @@ void Spell::EffectCreateAreatrigger(SpellEffIndex effIndex)
     }
 }
 
-int32 Spell::CalculateMonkMeleeAttacks(Unit* caster, float coeff)
+int32 Spell::CalculateMonkMeleeAttacks(Unit const *caster, float coeff)
 {
+    if (coeff <= 0.0f)
+        return 0;
+
     float mainHandMinDamage = 0;
     float mainHandMaxDamage = 0;
     float offHandMinDamage = 0;
@@ -7711,41 +7714,35 @@ int32 Spell::CalculateMonkMeleeAttacks(Unit* caster, float coeff)
     bool isDualWield = false;
     bool isTwoHandedWeapon = false;
 
-    int32 AP = caster->GetTotalAttackPowerValue(BASE_ATTACK);
+    auto const normalizedAp = caster->GetTotalAttackPowerValue(BASE_ATTACK) / 14.0f;
 
-    if (Player* plr = caster->ToPlayer())
+    if (auto const plr = caster->ToPlayer())
     {
-        Item* mainItem = plr->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-        Item* offItem = plr->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+        Item const * const mainItem = plr->GetWeaponForAttack(BASE_ATTACK);
+        Item const * const offItem = plr->GetWeaponForAttack(OFF_ATTACK);
 
-        isDualWield = (mainItem && offItem);
-        isTwoHandedWeapon = (mainItem && (mainItem->GetTemplate()->InventoryType == INVTYPE_2HWEAPON));
+        auto const mainProto = mainItem ? mainItem->GetTemplate() : nullptr;
+        auto const offProto = offItem ? offItem->GetTemplate() : nullptr;
 
-        if (coeff < 0)
-            coeff = 0.0f;
+        isDualWield = mainProto && offProto;
+        isTwoHandedWeapon = mainProto && mainProto->InventoryType == INVTYPE_2HWEAPON;
 
         // Main Hand
-        if (mainItem && !caster->HasAuraType(SPELL_AURA_MOD_DISARM))
+        if (mainProto && !caster->HasAuraType(SPELL_AURA_MOD_DISARM))
         {
-            mainHandMinDamage = mainItem->GetTemplate()->DamageMin;
-            mainHandMaxDamage = mainItem->GetTemplate()->DamageMax;
-
-            mainHandMinDamage /= float(mainItem->GetTemplate()->Delay / 1000.0f);
-            mainHandMaxDamage /= float(mainItem->GetTemplate()->Delay / 1000.0f);
+            mainHandMinDamage = mainProto->DamageMin / mainProto->Delay * 1000.0f;
+            mainHandMaxDamage = mainProto->DamageMax / mainProto->Delay * 1000.0f;
         }
 
         // Off Hand
-        if (offItem && !caster->HasAuraType(SPELL_AURA_MOD_DISARM))
+        if (offProto && !caster->HasAuraType(SPELL_AURA_MOD_DISARM_OFFHAND))
         {
-            offHandMinDamage = offItem->GetTemplate()->DamageMin / 2.0f;
-            offHandMaxDamage = offItem->GetTemplate()->DamageMax / 2.0f;
-
-            offHandMinDamage /= float(offItem->GetTemplate()->Delay / 1000.0f);
-            offHandMaxDamage /= float(offItem->GetTemplate()->Delay / 1000.0f);
+            offHandMinDamage = offProto->DamageMin / 2.0f / offProto->Delay * 1000.0f;
+            offHandMaxDamage = offProto->DamageMax / 2.0f / offProto->Delay * 1000.0f;
         }
 
-        // Is one single-handed weapon equipped
-        if (mainItem && !offItem && !isTwoHandedWeapon)
+        // If one single-handed weapon equipped
+        if (mainProto && !offProto && !isTwoHandedWeapon)
         {
             mainHandMinDamage *= 1.5f;
             mainHandMaxDamage *= 1.5f;
@@ -7753,7 +7750,7 @@ int32 Spell::CalculateMonkMeleeAttacks(Unit* caster, float coeff)
 
         // Add offhand weapon, if noone equipped it will add 0
         minDamage = mainHandMinDamage + offHandMinDamage;
-        maxDamage = mainHandMaxDamage += offHandMaxDamage;
+        maxDamage = mainHandMaxDamage + offHandMaxDamage;
 
         // if one single-handed or dual-wield is equipped
         if (isDualWield || !isTwoHandedWeapon)
@@ -7762,11 +7759,11 @@ int32 Spell::CalculateMonkMeleeAttacks(Unit* caster, float coeff)
             maxDamage *= 0.898882275f;
         }
 
-        minDamage += float(AP / 14.0f);
-        maxDamage += float(AP / 14.0f);
+        minDamage += normalizedAp;
+        maxDamage += normalizedAp;
 
         // Apply penalty if off-hand is equipped without main-hand
-        if (offItem && !mainItem)
+        if (offProto && !mainProto)
         {
             minDamage /= 2.0f;
             maxDamage /= 2.0f;
@@ -7793,11 +7790,11 @@ int32 Spell::CalculateMonkMeleeAttacks(Unit* caster, float coeff)
             maxDamage += caster->GetWeaponDamageRange(BASE_ATTACK, MAXDAMAGE);
         }
 
-        minDamage /= float(m_caster->GetAttackTime(BASE_ATTACK) / 1000.0f);
-        maxDamage /= float(m_caster->GetAttackTime(BASE_ATTACK) / 1000.0f);
+        minDamage /= caster->GetAttackTime(BASE_ATTACK) / 1000.0f;
+        maxDamage /= caster->GetAttackTime(BASE_ATTACK) / 1000.0f;
 
-        minDamage += float(AP / 14.0f);
-        maxDamage += float(AP / 14.0f);
+        minDamage += normalizedAp;
+        maxDamage += normalizedAp;
     }
 
     return irand((minDamage - 1) * coeff, (maxDamage + 1) * coeff);

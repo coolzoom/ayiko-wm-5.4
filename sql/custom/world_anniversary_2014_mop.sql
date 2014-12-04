@@ -1,7 +1,4 @@
--- [SQL] [Internal] Anniversary - custom Fifth Anniversary event sql:
--- * added correct date to start and end event automatically
--- * all npc templates ready for all expansions (didn't add damage and health changes for boss Raggy for any expansion, for the rest, templates are ok for cata and structure is compatible with all expansions so it's easy to modify to adapt level, health, exp and damage)
-
+-- [SQL] [Internal] Anniversary - custom Fifth Anniversary event sql
 -- timer for custom fifth anniversary event 2014
 DELETE FROM `game_event` WHERE `eventEntry` IN (252, 253);
 INSERT INTO `game_event` (`eventEntry`, `start_time`, `end_time`, `occurence`, `length`, `holiday`, `description`) VALUES
@@ -9,29 +6,34 @@ INSERT INTO `game_event` (`eventEntry`, `start_time`, `end_time`, `occurence`, `
 (253, '2014-12-05 00:00:01', '2014-12-25 23:59:59', 525600, 18000, 0, "Molten Fifth Anniversary Race Event (Custom)");
 
 REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES
-(500002, 0, 0, 0, 0, 0, 13730, 0, 0, 0, 'Angry Snowman', '', '', 0, 85, 85, 3, 16, 16, 0, 1, 1.14286, 1, 0, 5000, 6000, 0, 0, 2, 2000, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 2, 1, 1.5, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'npc_winter_snowman', 1),
-(500012, 0, 0, 0, 0, 0, 18807, 0, 0, 0, 'Teleporter', 'Molten Staff', '', 0, 88, 88, 3, 35, 35, 1, 1, 1.14286, 1, 2, 20000, 50000, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1.164252, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 'npc_new_year_event_teleporter', 1),
-(500013, 0, 0, 0, 0, 0, 25041, 0, 0, 0, 'Hermes', 'Molten Staff', '', 0, 88, 88, 3, 35, 35, 1, 1, 1.14286, 1, 2, 20000, 50000, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1.164252, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, '', 1),
-(500014, 0, 0, 0, 0, 0, 16137, 0, 0, 0, 'Borrean', 'Molten Staff', '', 0, 88, 88, 3, 35, 35, 1, 1, 1.14286, 1, 2, 20000, 50000, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1.164252, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, '', 1),
-(500015, 0, 0, 0, 0, 0, 25062, 0, 0, 0, 'Aldtharios', 'Molten Staff', '', 0, 88, 88, 3, 35, 35, 1, 1, 1.14286, 1, 2, 20000, 50000, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1.164252, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, '', 1),
-(500016, 0, 0, 0, 0, 0, 24072, 0, 0, 0, 'Arlequina', 'Molten Staff', '', 0, 88, 88, 3, 35, 35, 1, 1, 1.14286, 1, 2, 20000, 50000, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1.164252, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, '', 1),
-(500017, 0, 0, 0, 0, 0, 25006, 0, 0, 0, 'Gackt', 'Molten Staff', '', 0, 88, 88, 3, 35, 35, 1, 1, 1.14286, 1, 2, 20000, 50000, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1.164252, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, '', 1),
-(500018, 0, 0, 0, 0, 0, 25900, 0, 0, 0, 'Edifice', 'Molten Staff', '', 0, 88, 88, 3, 35, 35, 1, 1, 1.14286, 1, 2, 20000, 50000, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1.164252, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, '', 1),
-(500019, 0, 0, 0, 0, 0, 28127, 0, 0, 0, 'Kaer', 'Molten Staff', '', 0, 88, 88, 3, 35, 35, 1, 1, 1.14286, 1, 2, 20000, 50000, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1.164252, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, '', 1),
-(500020, 500021, 500022, 500023, 0, 0, 52409, 0, 0, 0, 'Raggy', 'Tiny Aspect of the Dread Firelord', '', 0, 93, 93, 3, 14, 14, 0, 1, 2, 0.5, 3, 150000, 165000, 4, 0, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 148.58, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 'boss_new_year_raggy', 1),
-(500021, 0, 0, 0, 0, 0, 52409, 0, 0, 0, 'Raggy (1)', 'Tiny Aspect of the Dread Firelord', '', 0, 88, 88, 3, 14, 14, 0, 1, 2, 0.5, 3, 180000, 250000, 4, 0, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 5000, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, '', 1),
-(500022, 0, 0, 0, 0, 0, 52409, 0, 0, 0, 'Raggy (2)', 'Tiny Aspect of the Dread Firelord', '', 0, 88, 88, 3, 14, 14, 0, 1, 2, 0.5, 3, 180000, 250000, 4, 0, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 5000, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, '', 1),
-(500023, 0, 0, 0, 0, 0, 52409, 0, 0, 0, 'Raggy (3)', 'Tiny Aspect of the Dread Firelord', '', 0, 88, 88, 3, 14, 14, 0, 1, 2, 0.5, 3, 180000, 250000, 4, 0, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 5000, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, '', 1),
-(500024, 0, 0, 0, 0, 0, 19152, 0, 0, 0, 'Reward dude', 'Molten Staff', '', 0, 88, 88, 3, 35, 35, 1, 1, 1.14286, 1, 2, 20000, 50000, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1.164252, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, '', 1);
+(500002, 0, 0, 0, 0, 0, 13730, 0, 0, 0, 'Angry Snowman', '', '', 0, 90, 90, 4, 16, 16, 0, 1, 1.14286, 1, 0, 5000, 6000, 0, 0, 2, 2000, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 2, 1, 1.5, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'npc_winter_snowman', 1),
+(500012, 0, 0, 0, 0, 0, 18807, 0, 0, 0, 'Teleporter', 'Molten Staff', '', 0, 93, 93, 4, 35, 35, 1, 1, 1.14286, 1, 2, 20000, 50000, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1.164252, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 'npc_new_year_event_teleporter', 1),
+(500013, 0, 0, 0, 0, 0, 25041, 0, 0, 0, 'Hermes', 'Molten Staff', '', 0, 93, 93, 4, 35, 35, 1, 1, 1.14286, 1, 2, 20000, 50000, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1.164252, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, '', 1),
+(500014, 0, 0, 0, 0, 0, 16137, 0, 0, 0, 'Borrean', 'Molten Staff', '', 0, 93, 93, 4, 35, 35, 1, 1, 1.14286, 1, 2, 20000, 50000, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1.164252, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, '', 1),
+(500015, 0, 0, 0, 0, 0, 25062, 0, 0, 0, 'Aldtharios', 'Molten Staff', '', 0, 93, 93, 4, 35, 35, 1, 1, 1.14286, 1, 2, 20000, 50000, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1.164252, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, '', 1),
+(500016, 0, 0, 0, 0, 0, 24072, 0, 0, 0, 'Arlequina', 'Molten Staff', '', 0, 93, 93, 4, 35, 35, 1, 1, 1.14286, 1, 2, 20000, 50000, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1.164252, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, '', 1),
+(500017, 0, 0, 0, 0, 0, 25006, 0, 0, 0, 'Gackt', 'Molten Staff', '', 0, 93, 93, 4, 35, 35, 1, 1, 1.14286, 1, 2, 20000, 50000, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1.164252, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, '', 1),
+(500018, 0, 0, 0, 0, 0, 25900, 0, 0, 0, 'Edifice', 'Molten Staff', '', 0, 93, 93, 4, 35, 35, 1, 1, 1.14286, 1, 2, 20000, 50000, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1.164252, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, '', 1),
+(500019, 0, 0, 0, 0, 0, 28127, 0, 0, 0, 'Kaer', 'Molten Staff', '', 0, 93, 93, 4, 35, 35, 1, 1, 1.14286, 1, 2, 20000, 50000, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1.164252, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, '', 1),
+(500020, 500021, 500022, 500023, 0, 0, 52409, 0, 0, 0, 'Raggy', 'Tiny Aspect of the Dread Firelord', '', 0, 93, 93, 4, 14, 14, 0, 1, 2, 0.5, 3, 150000, 165000, 4, 0, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 35, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 'npc_boss_raggy', 1),
+(500021, 0, 0, 0, 0, 0, 52409, 0, 0, 0, 'Raggy (1)', 'Tiny Aspect of the Dread Firelord', '', 0, 93, 93, 4, 14, 14, 0, 1, 2, 0.5, 3, 180000, 250000, 4, 0, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 5000, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, '', 1),
+(500022, 0, 0, 0, 0, 0, 52409, 0, 0, 0, 'Raggy (2)', 'Tiny Aspect of the Dread Firelord', '', 0, 93, 93, 4, 14, 14, 0, 1, 2, 0.5, 3, 180000, 250000, 4, 0, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 5000, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, '', 1),
+(500023, 0, 0, 0, 0, 0, 52409, 0, 0, 0, 'Raggy (3)', 'Tiny Aspect of the Dread Firelord', '', 0, 93, 93, 4, 14, 14, 0, 1, 2, 0.5, 3, 180000, 250000, 4, 0, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 5000, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, '', 1),
+(500024, 0, 0, 0, 0, 0, 19152, 0, 0, 0, 'Reward dude', 'Molten Staff', '', 0, 93, 93, 4, 35, 35, 1, 1, 1.14286, 1, 2, 20000, 50000, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1.164252, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, '', 1);
 
 DELETE FROM gameobject_template WHERE entry = 530001;
 INSERT INTO gameobject_template (entry, type, displayId, name, IconName, castBarCaption, unk1, faction, flags, size, questItem1, questItem2, questItem3, questItem4, questItem5, questItem6, data0, data1, data2, data3, data4, data5, data6, data7, data8, data9, data10, data11, data12, data13, data14, data15, data16, data17, data18, data19, data20, data21, data22, data23, AIName, ScriptName, WDBVerified) VALUES
 (530001, 3, 9233, 'Cache of the Champions', '', 'Opening', '', 94, 0, 2.5, 0, 0, 0, 0, 0, 0, 1845, 530001, 0, 1, 0, 0, 0, 0, 0, 50, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0);
 
-UPDATE gameobject_template SET currencyId = 390, currencyCnt = 100 WHERE entry = 530001;
+DELETE FROM gameobject_loot_template WHERE entry = 530001;
+INSERT INTO gameobject_loot_template (entry, item, ChanceOrQuestChance, lootmode, groupid, mincountOrRef, maxcount) VALUES
+-- Cache of the Champions
+(530001, 49703, 0, 1, 1, 5, 10), -- Firework
+(530001, 38578, 10, 1, 1, 1, 1); -- Flag of Ownership
+-- (530001, 23162, 5, 1, 1, 1, 1); -- Furor's Crate of Endless Resist Gear (NOT FOR MOP)
+-- (530001, 33993, 0, 1, 1, 1, 1); -- Conquest Points
 
--- health for level 88 exp 3 = 85892
--- an npc with question mark above his head giving a quest that offers you rewards, to they can only take them once
+UPDATE gameobject_template SET currencyId = 390, currencyCnt = 100 WHERE entry = 530001;
 
 -- Quests
 -- Kaer is missing!
@@ -106,36 +108,6 @@ INSERT INTO `quest_template` (`Id`, `Method`, `Level`, `MinLevel`, `ZoneOrSort`,
 (100006, 2, 1, 1, -284, 0, 0, 0, 'Pick Your Prize!', 'Pick your prize.', 'You have made it! Now pick your prize!', '', '', '', '', 34518, 1, 34519, 1);
 UPDATE `creature_template` SET `npcflag`=`npcflag`|2 WHERE `entry` IN (500013, 500014, 500015, 500016, 500017, 500018, 500019, 500024);
 
-/*Maze and stairs must be sanctuary. DONE
-
-Maze must be moved for cata and mop (same zone, just a lift up in air) DONE
-
-Starting cords for maze and stairs must be picked for all 3 expansions. (for teleport npc)
-
-Teleport NPC must be updated with those starting cords and cords for pvp cave.
-
-Scavenger hunt NPC (Angry snowman) must be spawned in Wintergrasp and in pvp cave.
-
-Scavenger hunt npc must be updated and modified for MoP.
-
-Teleport npc will also offer cords for PVP cave.
-
-RP npcs must be placed on wotlk tb (save guids)
-
-PvP chest must be made (Sent info to Koz) and spawned.
-
-Once finished, boss must be tested.
-
-Reward npc (Sent info to Simon) must be made and place in maze and stairs DONE
-
-MAZE DONE
-
-STAIRS DONE
-
-RACE EVENT DONE
-
-SCAVENGING HUNT DONE*/
-
 DELETE FROM creature_template_aura WHERE entry IN (500012);
 INSERT INTO creature_template_aura (entry, aura) VALUES
 (500012, 50195);  -- teleporter
@@ -144,12 +116,15 @@ INSERT INTO `creature_template_bytes` (`entry`, `index`, `bytes`) VALUES
 (500012, 1, 1);
 
 DELETE FROM creature_equip_template WHERE entry IN (500012);
-INSERT INTO creature_equip_template (entry, id, itemEntry1, itemEntry2, itemEntry3) VALUES
-(500012, 1, 25441, 25441, 0);  -- teleporter
+INSERT INTO creature_equip_template (entry, itemEntry1, itemEntry2, itemEntry3) VALUES
+(500012, 25441, 25441, 0);  -- teleporter
 
 UPDATE creature_template SET ScriptName = "npc_boss_raggy", lootid = entry, scale = 0.3 WHERE entry = 500020;
 
 UPDATE creature_template SET modelid1 = 11121 WHERE entry IN (500020,500021,500022,500023);
+DELETE FROM `creature_model_info` WHERE `modelid`=11121;
+INSERT INTO `creature_model_info` (`modelid`, `bounding_radius`, `combat_reach`, `gender`, `modelid_other_gender`) VALUES
+(11121, 13, 14, 2, 0);
 UPDATE creature_template SET ScriptName = "npc_reward_dude" WHERE entry = 500024;
 
 DELETE FROM creature_text WHERE entry IN (500020);
@@ -171,26 +146,18 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 DELETE FROM creature_loot_template WHERE entry = 500020;
 INSERT INTO creature_loot_template (entry, item, ChanceOrQuestChance, lootmode, groupid, mincountOrRef, maxcount) VALUES
 -- Raggy
-(500020, 33079, 30, 1, 1, 1, 1),
-(500020, 32566, 40, 1, 1, 1, 1),
-(500020, 32588, 40, 1, 1, 1, 1),
-(500020, 33993, 40, 1, 1, 1, 1),
-(500020, 62540, 30, 1, 2, 1, 1),
-(500020, 73953, 40, 1, 2, 1, 1),
-(500020, 73762, 40, 1, 2, 1, 1),
+(500020, 33079, 0, 1, 1, 1, 1),
+(500020, 32566, 0, 1, 1, 1, 1),
+(500020, 32588, 0, 1, 1, 1, 1),
+(500020, 33993, 0, 1, 1, 1, 1),
+(500020, 62540, 0, 1, 2, 1, 1),
+(500020, 73953, 0, 1, 2, 1, 1),
+(500020, 73762, 0, 1, 2, 1, 1),
 (500020, 32458, 10, 1, 2, 1, 1),
-(500020, 37719, 40, 1, 3, 1, 1),
+(500020, 37719, 0, 1, 3, 1, 1),
 (500020, 44151, 10, 1, 3, 1, 1),
 (500020, 49284, 10, 1, 3, 1, 1),
 (500020, 50250, 5, 1, 3, 1, 1);
-
-DELETE FROM gameobject_loot_template WHERE entry = 530001;
-INSERT INTO gameobject_loot_template (entry, item, ChanceOrQuestChance, lootmode, groupid, mincountOrRef, maxcount) VALUES
--- Cache of the Champions
-(530001, 49703, 50, 1, 0, 5, 10), -- Firework
-(530001, 38578, 5, 1, 0, 1, 1), -- Flag of Ownership
-(530001, 23162, 5, 1, 0, 1, 1); -- Furor's Crate of Endless Resist Gear (NOT FOR MOP)
--- (530001, 33993, 40, 1, 0, 1, 1); -- Conquest Points 
 
 -- Sanctuary
 DELETE FROM `spell_area` WHERE `area` IN (2037, 3479) AND `spell` IN (54661, 69737);
@@ -227,7 +194,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (504004, 500012, 0, 1, 1, 0, 0, -8828.85, 627.315, 94.0289, 3.78902, 300, 0, 0, 16235, 0, 0, 0, 0, 0),
 (504005, 500012, 1, 1, 1, 0, 0, 1630.06, -4373.48, 31.4417, 3.82014, 300, 0, 0, 16235, 0, 0, 0, 0, 0),
 (504006, 500013, 0, 1, 1, 0, 0, -8853.12, 647.36, 96.3529, 5.92588, 300, 0, 0, 16235, 0, 0, 0, 0, 0),
-(504008, 500013, 1, 1, 1, 0, 0, 1604.93, -4394.57, 10.019, 3.67254, 300, 0, 0, 16235, 0, 0, 0, 0, 0),
+(504008, 500013, 1, 1, 1, 0, 0, 1604.852, -4394.841, 17.854, 3.673, 300, 0, 0, 16235, 0, 0, 0, 0, 0),
 (504010, 500014, 0, 1, 1, 0, 0, -13817.5, -331.118, 1.56906, 6.2661, 300, 0, 0, 16235, 0, 0, 0, 0, 0),
 (504011, 500015, 1, 1, 1, 0, 0, -10571.607, 2184.293, 3.433, 3.085, 300, 0, 0, 16235, 0, 0, 0, 0, 0),
 (504012, 500016, 530, 1, 1, 0, 0, -1559.15, 9836.39, 200.948, 5.45138, 300, 0, 0, 16235, 0, 0, 0, 0, 0),

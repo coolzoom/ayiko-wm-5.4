@@ -13501,8 +13501,8 @@ MountCapabilityEntry const* Unit::GetMountCapability(uint32 mountType) const
             continue;
 
         if (flightExplicitlyDisabled) {
-            SpellInfo const * const mountSpell = sSpellMgr->GetSpellInfo(mountCapability->SpeedModSpell);
-            if (mountSpell->HasAura(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED))
+            auto const mountSpell = sSpellMgr->GetSpellInfo(mountCapability->SpeedModSpell);
+            if (mountSpell && mountSpell->HasAura(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED))
                 continue;
         }
 

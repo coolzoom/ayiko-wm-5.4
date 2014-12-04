@@ -544,7 +544,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                             {
                                 uint8 stacks = aura->GetStackAmount();
                                 damage = stacks * (damage + 0.1f * m_caster->SpellBaseDamageBonusDone(m_spellInfo->GetSchoolMask()));
-                                damage = m_caster->SpellDamageBonusDone(unitTarget, m_spellInfo, damage, SPELL_DIRECT_DAMAGE);
+                                damage = m_caster->SpellDamageBonusDone(unitTarget, m_spellInfo, EFFECT_0, damage, SPELL_DIRECT_DAMAGE);
                                 uint32 count = 0;
                                 for (std::list<TargetInfo>::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
                                     ++count;
@@ -884,8 +884,8 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
 
         if (m_originalCaster && damage > 0 && apply_direct_bonus)
         {
-            damage = m_originalCaster->SpellDamageBonusDone(unitTarget, m_spellInfo, (uint32)damage, SPELL_DIRECT_DAMAGE);
-            damage = unitTarget->SpellDamageBonusTaken(m_originalCaster, m_spellInfo, (uint32)damage, SPELL_DIRECT_DAMAGE);
+            damage = m_originalCaster->SpellDamageBonusDone(unitTarget, m_spellInfo, effIndex, (uint32)damage, SPELL_DIRECT_DAMAGE);
+            damage = unitTarget->SpellDamageBonusTaken(m_originalCaster, m_spellInfo, effIndex, (uint32)damage, SPELL_DIRECT_DAMAGE);
         }
 
         // Holy Wrath - Need to be in this place as before SP scaling spell gets lowered to 0 and spell is not scaled
@@ -1915,8 +1915,8 @@ void Spell::EffectPowerDrain(SpellEffIndex effIndex)
         return;
 
     // add spell damage bonus
-    damage = m_caster->SpellDamageBonusDone(unitTarget, m_spellInfo, uint32(damage), SPELL_DIRECT_DAMAGE);
-    damage = unitTarget->SpellDamageBonusTaken(m_caster, m_spellInfo, uint32(damage), SPELL_DIRECT_DAMAGE);
+    damage = m_caster->SpellDamageBonusDone(unitTarget, m_spellInfo, effIndex, uint32(damage), SPELL_DIRECT_DAMAGE);
+    damage = unitTarget->SpellDamageBonusTaken(m_caster, m_spellInfo, effIndex, uint32(damage), SPELL_DIRECT_DAMAGE);
 
     int32 newDamage = -(unitTarget->ModifyPower(powerType, -damage));
 
@@ -2029,11 +2029,11 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
 
         // Death Pact - return pct of max health to caster
         if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && m_spellInfo->SpellFamilyFlags[0] & 0x00080000)
-            addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, int32(caster->CountPctFromMaxHealth(damage)), HEAL);
+            addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, effIndex, caster->CountPctFromMaxHealth(damage), HEAL);
         else
-            addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
+            addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
 
-        addhealth = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, addhealth, HEAL);
+        addhealth = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, effIndex, addhealth, HEAL);
 
         switch (m_spellInfo->Id)
         {
@@ -2129,7 +2129,7 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
                     caster->RemoveAurasDueToSpell(114637);
                 }
 
-                addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
+                addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
 
                 break;
             }
@@ -2137,14 +2137,14 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
                 if (caster->getClass() == CLASS_MONK && addhealth)
                 {
                     addhealth = CalculateMonkMeleeAttacks(caster, 7);
-                    addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
+                    addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
                 }
                 break;
             case 147489:// Expel Harm with glyph of Targeted Expulsion
                 if (caster->getClass() == CLASS_MONK && addhealth)
                 {
                     addhealth = CalculateMonkMeleeAttacks(caster, caster == unitTarget ? 7.0f : 3.5f);
-                    addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
+                    addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
                 }
                 break;
             case 121129:// Daybreak
@@ -2159,7 +2159,7 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
                 if (count > 0)
                     addhealth /= count;
 
-                addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
+                addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
 
                 break;
             }
@@ -2271,7 +2271,7 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
     }
 }
 
-void Spell::EffectHealPct(SpellEffIndex /*effIndex*/)
+void Spell::EffectHealPct(SpellEffIndex effIndex)
 {
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
@@ -2321,13 +2321,13 @@ void Spell::EffectHealPct(SpellEffIndex /*effIndex*/)
             break;
     }
 
-    uint32 heal = m_originalCaster->SpellHealingBonusDone(unitTarget, m_spellInfo, unitTarget->CountPctFromMaxHealth(damage), HEAL);
-    heal = unitTarget->SpellHealingBonusTaken(m_originalCaster, m_spellInfo, heal, HEAL);
+    uint32 heal = m_originalCaster->SpellHealingBonusDone(unitTarget, m_spellInfo, effIndex, unitTarget->CountPctFromMaxHealth(damage), HEAL);
+    heal = unitTarget->SpellHealingBonusTaken(m_originalCaster, m_spellInfo, effIndex, heal, HEAL);
 
     m_healing += heal;
 }
 
-void Spell::EffectHealMechanical(SpellEffIndex /*effIndex*/)
+void Spell::EffectHealMechanical(SpellEffIndex effIndex)
 {
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
@@ -2339,9 +2339,9 @@ void Spell::EffectHealMechanical(SpellEffIndex /*effIndex*/)
     if (!m_originalCaster)
         return;
 
-    uint32 heal = m_originalCaster->SpellHealingBonusDone(unitTarget, m_spellInfo, uint32(damage), HEAL);
+    uint32 heal = m_originalCaster->SpellHealingBonusDone(unitTarget, m_spellInfo, effIndex, uint32(damage), HEAL);
 
-    m_healing += unitTarget->SpellHealingBonusTaken(m_originalCaster, m_spellInfo, heal, HEAL);
+    m_healing += unitTarget->SpellHealingBonusTaken(m_originalCaster, m_spellInfo, effIndex, heal, HEAL);
 }
 
 void Spell::EffectHealthLeech(SpellEffIndex effIndex)
@@ -2352,8 +2352,8 @@ void Spell::EffectHealthLeech(SpellEffIndex effIndex)
     if (!unitTarget || !unitTarget->IsAlive() || damage < 0)
         return;
 
-    damage = m_caster->SpellDamageBonusDone(unitTarget, m_spellInfo, uint32(damage), SPELL_DIRECT_DAMAGE);
-    damage = unitTarget->SpellDamageBonusTaken(m_caster, m_spellInfo, uint32(damage), SPELL_DIRECT_DAMAGE);
+    damage = m_caster->SpellDamageBonusDone(unitTarget, m_spellInfo, effIndex, uint32(damage), SPELL_DIRECT_DAMAGE);
+    damage = unitTarget->SpellDamageBonusTaken(m_caster, m_spellInfo, effIndex, uint32(damage), SPELL_DIRECT_DAMAGE);
 
     float healMultiplier = m_spellInfo->Effects[effIndex].CalcValueMultiplier(m_originalCaster, this);
 
@@ -2363,8 +2363,8 @@ void Spell::EffectHealthLeech(SpellEffIndex effIndex)
 
     if (m_caster->IsAlive())
     {
-        healthGain = m_caster->SpellHealingBonusDone(m_caster, m_spellInfo, healthGain, HEAL);
-        healthGain = m_caster->SpellHealingBonusTaken(m_caster, m_spellInfo, healthGain, HEAL);
+        healthGain = m_caster->SpellHealingBonusDone(m_caster, m_spellInfo, effIndex, healthGain, HEAL);
+        healthGain = m_caster->SpellHealingBonusTaken(m_caster, m_spellInfo, effIndex, healthGain, HEAL);
 
         m_caster->HealBySpell(m_caster, m_spellInfo, uint32(healthGain));
     }

@@ -4647,12 +4647,12 @@ void Spell::SendSpellStart()
         {
             castFlags |= CAST_FLAG_HEAL_PREDICTION;
             predictedHealType = 2;
-            predictedHealOverrideTarget =  target->GetGUID();
+            predictedHealOverrideTarget = target->GetGUID();
 
             // Guess spell healing amount
-            predictedHealAmount = m_caster->CalculateSpellDamage(target, m_spellInfo, 0);
-            predictedHealAmount = m_caster->SpellHealingBonusDone(target, m_spellInfo, predictedHealAmount, HEAL);
-            predictedHealAmount = m_caster->SpellHealingBonusTaken(target, m_spellInfo, predictedHealAmount, HEAL);
+            predictedHealAmount = m_caster->CalculateSpellDamage(target, m_spellInfo, EFFECT_0);
+            predictedHealAmount = m_caster->SpellHealingBonusDone(target, m_spellInfo, EFFECT_0, predictedHealAmount, HEAL);
+            predictedHealAmount = m_caster->SpellHealingBonusTaken(target, m_spellInfo, EFFECT_0, predictedHealAmount, HEAL);
         }
     }
 

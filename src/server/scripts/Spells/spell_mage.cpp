@@ -1058,8 +1058,8 @@ class spell_mage_invocation : public SpellScriptLoader
                         {
                             int32 healthGain = caster->CountPctFromMaxHealth(10);
                             auto spellInfo = sSpellMgr->GetSpellInfo(12051);
-                            healthGain = caster->SpellHealingBonusDone(caster, spellInfo, healthGain, HEAL);
-                            healthGain = caster->SpellHealingBonusTaken(caster, spellInfo, healthGain, HEAL);
+                            healthGain = caster->SpellHealingBonusDone(caster, spellInfo, EFFECT_0, healthGain, HEAL);
+                            healthGain = caster->SpellHealingBonusTaken(caster, spellInfo, EFFECT_0, healthGain, HEAL);
                             caster->HealBySpell(caster, spellInfo, healthGain, false);
                         }
                     }
@@ -1301,7 +1301,7 @@ class spell_mage_combustion : public SpellScriptLoader
                             if (!(*i)->GetAmplitude())
                                 continue;
 
-                            combustionBp += _player->SpellDamageBonusDone(target, (*i)->GetSpellInfo(), (*i)->GetAmount(), DOT) * 1000 / (*i)->GetAmplitude();
+                            combustionBp += _player->SpellDamageBonusDone(target, (*i)->GetSpellInfo(), (*i)->GetEffIndex(), (*i)->GetAmount(), DOT) * 1000 / (*i)->GetAmplitude();
                         }
 
                         if (combustionBp)
@@ -1411,8 +1411,8 @@ class spell_mage_inferno_blast : public SpellScriptLoader
                             {
                                 if (itr->HasAura(SPELL_MAGE_PYROBLAST, player->GetGUID()))
                                 {
-                                    combustionBp += player->CalculateSpellDamage(target, sSpellMgr->GetSpellInfo(SPELL_MAGE_PYROBLAST), 1);
-                                    combustionBp = player->SpellDamageBonusDone(target, sSpellMgr->GetSpellInfo(SPELL_MAGE_PYROBLAST), combustionBp, DOT);
+                                    combustionBp += player->CalculateSpellDamage(target, sSpellMgr->GetSpellInfo(SPELL_MAGE_PYROBLAST), EFFECT_1);
+                                    combustionBp = player->SpellDamageBonusDone(target, sSpellMgr->GetSpellInfo(SPELL_MAGE_PYROBLAST), EFFECT_1, combustionBp, DOT);
                                 }
 
                                 auto const remaining = itr->GetRemainingPeriodicAmount(player->GetGUID(), SPELL_MAGE_IGNITE, SPELL_AURA_PERIODIC_DAMAGE);

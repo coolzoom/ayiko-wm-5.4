@@ -22014,6 +22014,7 @@ void Player::SendResetInstanceFailed(uint32 reason, uint32 MapId)
     WorldPacket data(SMSG_INSTANCE_RESET_FAILED);
     data << uint32(MapId);
     data.WriteBits(reason, 2);
+    data.FlushBits();
     GetSession()->SendPacket(&data);
 }
 

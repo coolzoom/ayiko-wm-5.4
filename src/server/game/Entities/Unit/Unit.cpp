@@ -1243,8 +1243,8 @@ uint32 Unit::SpellNonMeleeDamageLog(Unit* victim, uint32 spellID, uint32 damage)
 {
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellID);
     SpellNonMeleeDamage damageInfo(this, victim, spellInfo->Id, spellInfo->SchoolMask);
-    damage = SpellDamageBonusDone(victim, spellInfo, damage, SPELL_DIRECT_DAMAGE);
-    damage = victim->SpellDamageBonusTaken(this, spellInfo, damage, SPELL_DIRECT_DAMAGE);
+    damage = SpellDamageBonusDone(victim, spellInfo, EFFECT_0, damage, SPELL_DIRECT_DAMAGE);
+    damage = victim->SpellDamageBonusTaken(this, spellInfo, EFFECT_0, damage, SPELL_DIRECT_DAMAGE);
 
     CalculateSpellDamageTaken(&damageInfo, damage, spellInfo);
     DealDamageMods(damageInfo.target, damageInfo.damage, &damageInfo.absorb);
@@ -1669,8 +1669,9 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
 
             if (Unit* caster = (*dmgShieldItr)->GetCaster())
             {
-                damage = caster->SpellDamageBonusDone(this, i_spellProto, damage, SPELL_DIRECT_DAMAGE);
-                damage = this->SpellDamageBonusTaken(caster, i_spellProto, damage, SPELL_DIRECT_DAMAGE);
+                uint32 effIndex = (*dmgShieldItr)->GetEffIndex();
+                damage = caster->SpellDamageBonusDone(this, i_spellProto, effIndex, damage, SPELL_DIRECT_DAMAGE);
+                damage = this->SpellDamageBonusTaken(caster, i_spellProto, effIndex, damage, SPELL_DIRECT_DAMAGE);
             }
 
             // No Unit::CalcAbsorbResist here - opcode doesn't send that data - this damage is probably not affected by that
@@ -8503,12 +8504,31 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
 
             triggered_spell_id = 132365;
 
-            float auraAmount = (float)triggerAmount / 100.f;
+            if (procSpell)
+            {
+                if (procSpell->HasAreaAuraEffect())
+                    return false;
 
-            basepoints0 = CalculatePct(damage, auraAmount);
-            if (auto vengeance = GetAuraEffect(triggered_spell_id, EFFECT_0))
-                basepoints0 += vengeance->GetAmount();
-            basepoints0 = std::min((int32)GetMaxHealth(), basepoints0);
+                if ((procSpell->DmgClass != SPELL_DAMAGE_CLASS_MELEE && procSpell->DmgClass != SPELL_DAMAGE_CLASS_RANGED)
+                        || (procSpell->GetAllEffectsMechanicMask() & (1 << MECHANIC_BLEED)) != 0)
+                {
+                    triggerAmount *= 2.5f;
+                }
+            }
+
+            if (auto const vengeance = GetAura(triggered_spell_id))
+            {
+                basepoints0 = CalculatePct(damage, triggerAmount / 100.f);
+                float const pct = float(vengeance->GetDuration()) / vengeance->GetMaxDuration();
+                basepoints0 += vengeance->GetEffect(EFFECT_0)->GetAmount() * pct;
+            }
+            else
+            {
+                // This one seems to be hardcoded.
+                basepoints0 = CalculatePct(damage, 10);
+            }
+
+            basepoints0 = std::min<int32>(GetMaxHealth(), basepoints0);
 
             CastCustomSpell(this, triggered_spell_id, &basepoints0, &basepoints0, NULL, true, castItem, triggeredByAura, originalCaster);
             return true;
@@ -11330,7 +11350,7 @@ void Unit::EnergizeBySpell(Unit* victim, uint32 spellID, int32 damage, Powers po
     victim->getHostileRefManager().threatAssist(this, float(damage) * 0.5f, spellInfo);
 }
 
-uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uint32 pdamage, DamageEffectType damagetype, uint32 stack)
+uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uint32 effIndex, uint32 pdamage, DamageEffectType damagetype, uint32 stack)
 {
     if (!spellProto || !victim || damagetype == DIRECT_DAMAGE)
         return pdamage;
@@ -11362,7 +11382,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
     // For totems get damage bonus from owner
     if (GetTypeId() == TYPEID_UNIT && ToCreature()->isTotem())
         if (Unit* owner = GetOwner())
-            return owner->SpellDamageBonusDone(victim, spellProto, pdamage, damagetype);
+            return owner->SpellDamageBonusDone(victim, spellProto, effIndex, pdamage, damagetype);
 
     // Done total percent damage auras
     float DoneTotalMod = 1.0f;
@@ -11837,8 +11857,11 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
         DoneAdvertisedBenefit += ((Guardian*)this)->GetBonusDamage();
 
     // Default calculation
-    if (DoneAdvertisedBenefit && coeff > 0)
+    if (DoneAdvertisedBenefit && coeff >= 0)
     {
+        if (coeff == 0)
+            coeff = spellProto->Effects[effIndex].BonusMultiplier;
+
         if (Player* modOwner = GetSpellModOwner())
         {
             coeff *= 100.0f;
@@ -11866,7 +11889,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
     return uint32(std::max(tmpDamage, 0.0f));
 }
 
-uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, uint32 pdamage, DamageEffectType damagetype, uint32 stack)
+uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, uint32 effIndex, uint32 pdamage, DamageEffectType damagetype, uint32 stack)
 {
     if (!spellProto || damagetype == DIRECT_DAMAGE)
         return pdamage;
@@ -11942,21 +11965,27 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
     }
 
     int32 TakenAdvertisedBenefit = SpellBaseDamageBonusTaken(spellProto->GetSchoolMask());
+
     // Check for table values
+    float coeff = 0;
     SpellBonusEntry const* bonus = sSpellMgr->GetSpellBonusData(spellProto->Id);
-    if (TakenAdvertisedBenefit && bonus)
+    if (bonus)
+        coeff = (damagetype == DOT) ? bonus->dot_damage : bonus->direct_damage;
+
+    // Check for table values
+    if (TakenAdvertisedBenefit && coeff >= 0)
     {
-        float coeff = (damagetype == DOT) ? bonus->dot_damage : bonus->direct_damage;
-        if (coeff > 0)
+        if (coeff == 0)
+            coeff = spellProto->Effects[effIndex].BonusMultiplier;
+
+        if (Player* modOwner = GetSpellModOwner())
         {
-            if (Player* modOwner = GetSpellModOwner())
-            {
-                coeff *= 100.0f;
-                modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_BONUS_MULTIPLIER, coeff);
-                coeff /= 100.0f;
-            }
-            TakenTotal += int32(TakenAdvertisedBenefit * coeff);
+            coeff *= 100.0f;
+            modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_BONUS_MULTIPLIER, coeff);
+            coeff /= 100.0f;
         }
+
+        TakenTotal += int32(TakenAdvertisedBenefit * coeff);
     }
 
     float tmpDamage = 0.0f;
@@ -12385,12 +12414,12 @@ uint32 Unit::SpellCriticalHealingBonus(SpellInfo const* /*spellProto*/, uint32 d
     return damage;
 }
 
-uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, uint32 healamount, DamageEffectType damagetype, uint32 stack)
+uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, uint32 effIndex, uint32 healamount, DamageEffectType damagetype, uint32 stack)
 {
     // For totems get healing bonus from owner (statue isn't totem in fact)
     if (GetTypeId() == TYPEID_UNIT && isTotem())
         if (Unit* owner = GetOwner())
-            return owner->SpellHealingBonusDone(victim, spellProto, healamount, damagetype, stack);
+            return owner->SpellHealingBonusDone(victim, spellProto, effIndex, healamount, damagetype, stack);
 
     // No bonus healing for potion spells
     if (spellProto->SpellFamilyName == SPELLFAMILY_POTION)
@@ -12482,8 +12511,11 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
     else
     {
         // No bonus healing for SPELL_DAMAGE_CLASS_NONE class spells by default
-        if (spellProto->DmgClass == SPELL_DAMAGE_CLASS_NONE)
-            return healamount;
+        if (spellProto->DmgClass == SPELL_DAMAGE_CLASS_NONE
+                && spellProto->Effects[effIndex].BonusMultiplier == 0.0f)
+        {
+            return uint32(std::max(healamount * DoneTotalMod, 0.0f));
+        }
     }
 
     // Done fixed damage bonus auras
@@ -12493,8 +12525,11 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
         DoneAdvertisedBenefit = SpellBaseDamageBonusDone(spellProto->GetSchoolMask());
 
     // Default calculation
-    if (DoneAdvertisedBenefit && coeff > 0)
+    if (DoneAdvertisedBenefit && coeff >= 0)
     {
+        if (coeff == 0)
+            coeff = spellProto->Effects[effIndex].BonusMultiplier;
+
         if (Player* modOwner = GetSpellModOwner())
         {
             coeff *= 100.0f;
@@ -12537,7 +12572,7 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
     return uint32(std::max(heal, 0.0f));
 }
 
-uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, uint32 healamount, DamageEffectType damagetype, uint32 stack)
+uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, uint32 effIndex, uint32 healamount, DamageEffectType damagetype, uint32 stack)
 {
     float TakenTotalMod = 1.0f;
 
@@ -12604,18 +12639,21 @@ uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, u
     else
     {
         // No bonus healing for SPELL_DAMAGE_CLASS_NONE class spells by default
-        if (spellProto->DmgClass == SPELL_DAMAGE_CLASS_NONE)
+        if (spellProto->DmgClass == SPELL_DAMAGE_CLASS_NONE
+                && spellProto->Effects[effIndex].BonusMultiplier == 0.0f)
         {
-            healamount = uint32(std::max((float(healamount) * TakenTotalMod), 0.0f));
-            return healamount;
+            return uint32(std::max(healamount * TakenTotalMod, 0.0f));
         }
     }
 
     // Taken fixed damage bonus auras
     int32 TakenAdvertisedBenefit = SpellBaseHealingBonusTaken(spellProto->GetSchoolMask());
     // Default calculation
-    if (TakenAdvertisedBenefit && coeff > 0)
+    if (TakenAdvertisedBenefit && coeff >= 0)
     {
+        if (coeff == 0)
+            coeff = spellProto->Effects[effIndex].BonusMultiplier;
+
         if (Player* modOwner = GetSpellModOwner())
         {
             coeff *= 100.0f;
@@ -16620,8 +16658,8 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
                             break;
 
                         SpellNonMeleeDamage damageInfo(this, target, spellInfo->Id, spellInfo->SchoolMask);
-                        uint32 newDamage = SpellDamageBonusDone(target, spellInfo, triggeredByAura->GetAmount(), SPELL_DIRECT_DAMAGE);
-                        newDamage = target->SpellDamageBonusTaken(this, spellInfo, newDamage, SPELL_DIRECT_DAMAGE);
+                        uint32 newDamage = SpellDamageBonusDone(target, spellInfo, triggeredByAura->GetEffIndex(), triggeredByAura->GetAmount(), SPELL_DIRECT_DAMAGE);
+                        newDamage = target->SpellDamageBonusTaken(this, spellInfo, triggeredByAura->GetEffIndex(), newDamage, SPELL_DIRECT_DAMAGE);
                         CalculateSpellDamageTaken(&damageInfo, newDamage, spellInfo);
                         DealDamageMods(damageInfo.target, damageInfo.damage, &damageInfo.absorb);
                         SendSpellNonMeleeDamageLog(&damageInfo);

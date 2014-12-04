@@ -1215,7 +1215,7 @@ class spell_hun_improved_serpent_sting : public SpellScriptLoader
 
                 if (AuraEffect const* const improvedSting = caster->GetAuraEffect(HUNTER_SPELL_IMPROVED_SERPENT_STING_AURA, EFFECT_0))
                 {
-                    int32 bp = caster->SpellDamageBonusDone(GetTarget(), GetSpellInfo(), aurEff->GetAmount(), DOT);
+                    int32 bp = caster->SpellDamageBonusDone(GetTarget(), GetSpellInfo(), EFFECT_0, aurEff->GetAmount(), DOT);
                     bp *= aurEff->GetBase()->GetMaxDuration() / aurEff->GetAmplitude();
                     bp = CalculatePct(bp, improvedSting->GetAmount());
                     caster->CastCustomSpell(GetTarget(), HUNTER_SPELL_IMPROVED_SERPENT_STING, &bp, NULL, NULL, true);

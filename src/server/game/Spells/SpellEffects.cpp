@@ -821,7 +821,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         break;
                     case 117418:// Fists of Fury
                     {
-                        damage = CalculateMonkMeleeAttacks(m_caster, 7.5f);
+                        damage = CalculateMonkMeleeAttacks(m_caster, 6.675f);
 
                         uint32 count = 0;
                         for (std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
@@ -844,8 +844,10 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         damage = CalculateMonkMeleeAttacks(m_caster, 3.0f);
                         break;
                     case 107270:// Spinning Crane Kick
+                        damage = CalculateMonkMeleeAttacks(m_caster, 1.75f);
+                        break;
                     case 148187:// Rushing Jade Wind
-                        damage = CalculateMonkMeleeAttacks(m_caster, 1.59f);
+                        damage = CalculateMonkMeleeAttacks(m_caster, 1.4f);
                         break;
                     case 107428:// Rising Sun Kick
                         damage = CalculateMonkMeleeAttacks(m_caster, 12.816f);
@@ -2132,16 +2134,19 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
                 break;
             }
             case 115072:// Expel Harm
-            case 147489:// Expel Harm with glyph of Targeted Expulsion
-            {
-                if (caster->getClass() == CLASS_MONK && addhealth && (m_spellInfo->Id == 115072 || m_spellInfo->Id == 147489))
+                if (caster->getClass() == CLASS_MONK && addhealth)
                 {
-                    addhealth = Spell::CalculateMonkMeleeAttacks(m_caster, 7);
+                    addhealth = Spell::CalculateMonkMeleeAttacks(caster, 7);
                     addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
                 }
-
                 break;
-            }
+            case 147489:// Expel Harm with glyph of Targeted Expulsion
+                if (caster->getClass() == CLASS_MONK && addhealth)
+                {
+                    addhealth = Spell::CalculateMonkMeleeAttacks(caster, caster == unitTarget ? 7.0f : 3.5f);
+                    addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
+                }
+                break;
             case 121129:// Daybreak
             {
                 uint32 count = 0;
@@ -7795,7 +7800,7 @@ int32 Spell::CalculateMonkMeleeAttacks(Unit* caster, float coeff)
         maxDamage += float(AP / 14.0f);
     }
 
-    return irand(int32((minDamage-1) * coeff), int32((maxDamage+1) * coeff));
+    return irand((minDamage - 1) * coeff, (maxDamage + 1) * coeff);
 }
 
 void Spell::EffectUnlockGuildVaultTab(SpellEffIndex effIndex)

@@ -11,6 +11,8 @@
 #include "Log.h"
 #include "Containers.h"
 
+#include <numeric>
+
 class instance_mogu_shan_palace : public InstanceMapScript
 {
 public:
@@ -38,7 +40,7 @@ public:
         std::list<uint64> m_lGruntList;
 
         uint32 m_uiBossCount;
-        uint32 m_auiBossNumber[4];
+        uint32 m_auiBossNumber[3];
         /*
          * * End of the trial of the king.
          */
@@ -59,15 +61,11 @@ public:
          * * End of Xin the weaponmaster.
          */
 
-        uint64 m_uiPreTrialDoorGuid;
-        uint64 m_uiTrialChestGuid;
-        uint64 m_uiTrialDoorGuid;
-        uint64 m_uiXinDoorGuidngGuid;
-
         uint64 m_uiScoutGuid;
 
         // Storage
         uint64 m_auiGuids64[MAX_GUIDS];
+        std::unordered_map<uint32, uint64> m_mGoEntryGuidMap;
 
         void Initialize()
         {
@@ -80,11 +78,6 @@ public:
             m_uiHaiyanGuid = 0;
             m_uiBeaconGuid = 0;
 
-            m_uiPreTrialDoorGuid = 0;
-            m_uiTrialChestGuid = 0;
-            m_uiTrialDoorGuid = 0;
-            m_uiXinDoorGuidngGuid = 0;
-
             m_uiGekkanGuid = 0;
             m_uiAncientTreasureGuid = 0;
 
@@ -96,8 +89,21 @@ public:
         void InitializeTrialOfKing()
         {
             m_uiBossCount = 0;
+
             std::iota(std::begin(m_auiBossNumber), std::end(m_auiBossNumber), 0);
             std::random_shuffle(std::begin(m_auiBossNumber), std::end(m_auiBossNumber));
+        }
+
+        GameObject* GetGameObjectFromStorage(uint32 uiEntry)
+        {
+            GameObject* go = NULL;
+
+            std::unordered_map<uint32, uint64>::iterator find = m_mGoEntryGuidMap.find(uiEntry);
+
+            if (find != m_mGoEntryGuidMap.cend())
+                go = instance->GetGameObject(find->second);
+
+            return go;
         }
 
         bool SetBossState(uint32 id, EncounterState state)
@@ -108,18 +114,16 @@ public:
             switch (id)
             {
                 case DATA_TRIAL_OF_THE_KING:
-                    HandleGameObject(m_uiPreTrialDoorGuid, state != IN_PROGRESS);
-                    if (GameObject* chest = instance->GetGameObject(m_uiTrialChestGuid))
-                        chest->SetPhaseMask(state == DONE ? 1: 128, true);
+                    HandleGameObject(0, state != IN_PROGRESS, GetGameObjectFromStorage(GO_DOOR_BEFORE_TRIAL));
                     break;
                 case DATA_GEKKAN:
-                    HandleGameObject(m_uiTrialDoorGuid, state == DONE);
+                    HandleGameObject(0, state == DONE, GetGameObjectFromStorage(GO_DOOR_AFTER_TRIAL));
                     if (GameObject* pTreasure = instance->GetGameObject(m_uiAncientTreasureGuid))
                         pTreasure->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
                     // Todo : mod temp portal phasemask
                     break;
                 case DATA_XIN_THE_WEAPONMASTER:
-                    HandleGameObject(m_uiPreTrialDoorGuid, state != IN_PROGRESS);
+                    HandleGameObject(0, state != IN_PROGRESS, GetGameObjectFromStorage(GO_DOOR_BEFORE_KING));
                     break;
             }
 
@@ -130,20 +134,15 @@ public:
         {
             switch (go->GetEntry())
             {
-                case GO_DOOR_BEFORE_TRIAL:
-                    m_uiPreTrialDoorGuid = go->GetGUID();
-                    break;
                 case GO_TRIAL_CHEST:
-                    m_uiTrialChestGuid = go->GetGUID();
+                    m_mGoEntryGuidMap.insert(std::make_pair(go->GetEntry(), go->GetGUID()));
                     break;
+                case GO_DOOR_BEFORE_TRIAL:
                 case GO_DOOR_AFTER_TRIAL:
-                    m_uiTrialDoorGuid = go->GetGUID();
-                    break;
                 case GO_DOOR_BEFORE_KING:
-                    m_uiXinDoorGuidngGuid = go->GetGUID();
-                    break;
+                case GO_GEKKAN_TREASURE_DOOR:
                 case GO_ANCIENT_MOGU_TREASURE:
-                    m_uiAncientTreasureGuid = go->GetGUID();
+                    m_mGoEntryGuidMap.insert(std::make_pair(go->GetEntry(), go->GetGUID()));
                     go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
                     break;
             }
@@ -169,7 +168,15 @@ public:
 
         void OnUnitDeath(Unit* unit)
         {
-            OnUnitDeath_m_uiGekkanGuid(unit);
+            if (unit->ToCreature() && unit->ToCreature()->GetEntry() == CREATURE_GEKKAN)
+            {
+                SetBossState(DATA_GEKKAN, DONE);
+
+                if (GameObject* pGo = GetGameObjectFromStorage(GO_ANCIENT_MOGU_TREASURE))
+                    pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
+
+                HandleGameObject(0, true, GetGameObjectFromStorage(GO_GEKKAN_TREASURE_DOOR));
+            }
         }
 
         void SetData(uint32 type, uint32 data)
@@ -216,7 +223,7 @@ public:
                     if (Creature* pCreature = instance->GetCreature(Trinity::Containers::SelectRandomContainerElement(m_lStaffList)))
                         if (pCreature->GetAI())
                             pCreature->GetAI()->DoAction(0); //ACTION_ACTIVATE
-                            break;
+                    break;
                 }
                 case TYPE_ACTIVATE_ANIMATED_AXE:
                 {
@@ -259,16 +266,6 @@ public:
                     pCreature->CastSpell(pCreature, SPELL_PERMANENT_FEIGN_DEATH, true);
                     pCreature->SetDisplayId(42197);
                     break;
-            }
-        }
-
-        void OnUnitDeath_m_uiGekkanGuid(Unit* unit)
-        {
-            if (unit->ToCreature() && unit->ToCreature()->GetEntry() == CREATURE_GEKKAN)
-            {
-                SetBossState(DATA_GEKKAN, DONE);
-                if (GameObject* pGo = instance->GetGameObject(m_uiAncientTreasureGuid))
-                    pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
             }
         }
 
@@ -488,7 +485,8 @@ public:
                             {
                                 SetBossState(DATA_TRIAL_OF_THE_KING, DONE);
 
-                                SetData64(TYPE_TRIAL_ENDED, m_uiTrialChestGuid);
+                                if (GameObject* pGo = GetGameObjectFromStorage(GO_TRIAL_CHEST))
+                                    SetData64(TYPE_TRIAL_ENDED, pGo->GetGUID());
 
                                 if (Creature* pScout = instance->GetCreature(m_uiScoutGuid))
                                 {
@@ -498,7 +496,8 @@ public:
                             }
                             break;
                         case TYPE_TRIAL_CHEST:
-                            DoRespawnGameObject(m_uiTrialChestGuid, 180);
+                            if (GameObject* pGo = GetGameObjectFromStorage(GO_TRIAL_CHEST))
+                                DoRespawnGameObject(pGo->GetGUID(), 180);
                             if (Creature* pBeacon = instance->GetCreature(m_uiBeaconGuid))
                                 pBeacon->SetPhaseMask(1, true);
                             break;

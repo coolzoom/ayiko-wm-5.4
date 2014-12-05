@@ -672,10 +672,9 @@ private:
     Unit* _caster;
 };
 
-class CheckIfValidTarget
+struct CheckIfValidTarget
 {
-public:
-    bool operator()(WorldObject* target) const
+    bool operator ()(WorldObject const *target) const
     {
         return target->GetEntry() != 59481;
     }
@@ -684,7 +683,10 @@ public:
 class InBetweenCheck
 {
 public:
-    InBetweenCheck(Unit* caster, WorldObject* trigger) : _caster(caster), _trigger(trigger) {}
+    InBetweenCheck(Unit* caster, WorldObject* trigger)
+        : _caster(caster)
+        , _trigger(trigger)
+    { }
 
     bool operator ()(WorldObject const *target) const
     {
@@ -692,8 +694,8 @@ public:
     }
 
 private:
-    Unit* _caster;
-    WorldObject* _trigger;
+    Unit const *_caster;
+    WorldObject const *_trigger;
 };
 
 class spell_dart_damage : public SpellScriptLoader
@@ -705,7 +707,7 @@ public:
     {
         PrepareSpellScript(spell_dart_damage_SpellScript);
 
-        bool Validate(SpellInfo const* /*spell*/)
+        bool Validate(SpellInfo const*  )
         {
             return true;
         }
@@ -912,7 +914,7 @@ public:
     {
         PrepareSpellScript(spell_groundslam_xin_SpellScript);
 
-        bool Validate(SpellInfo const * /*spell*/)
+        bool Validate(SpellInfo const* /*spell*/)
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_GROUND_SLAM))
                 return false;
@@ -953,7 +955,7 @@ public:
     {
         PrepareSpellScript(spell_crossbow_xin_SpellScript);
 
-        bool Validate(SpellInfo const * /*spell*/)
+        bool Validate(SpellInfo const* /*spell*/)
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_DART_DAMAGE))
                 return false;

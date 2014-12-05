@@ -1,7 +1,7 @@
 /*
- *   Dungeon : Mogu'shan palace 87-89
- *   Gekkan
- *   Jade servers
+ *    Dungeon : Mogu'shan palace 87-89
+ *    Gekkan
+ *    Jade servers
  */
 
 #include "ScriptMgr.h"

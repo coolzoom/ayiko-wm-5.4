@@ -4698,14 +4698,20 @@ INSERT INTO creature
    (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `npcflag2`, `unit_flags`, `dynamicflags`, `isActive`)
 VALUES
    (0, 61415, 994, 6182, 6472, 2, 1, 0, 0, -4280.47, -2462.02, -19.0204, 4.71882, 7200, 0, 0, 1, 0, 0, 0, 0, 32768, 0, 0);
-   
+
 INSERT INTO creature
    (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `npcflag2`, `unit_flags`, `dynamicflags`, `isActive`)
 VALUES
    (0, 64250, 994, 6182, 6471, 3, 128, 0, 0, -4214.22, -2667.32, 21.0838, 1.53953, 300, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0);
 
+INSERT INTO creature
+   (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `npcflag2`, `unit_flags`, `dynamicflags`, `isActive`)
+VALUES
+   (0, 61392, 994, 6182, 6474, 2, 1, 0, 61392, -4594.01, -2622.11, 22.1127, 3.13609, 7200, 0, 0, 644955, 65170, 0, 0, 0, 32832, 0, 0);
 
-UPDATE creature SET `spawnMask` = 3 WHERE `map` = 994;
+
+
+UPDATE creature SET `spawnMask` = 15 WHERE `map` = 994;
 DELETE FROM creature WHERE id = 61415; -- Get rid of cave bats
 
 REPLACE INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`)
@@ -4877,3 +4883,32 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 (@OGUID+90, 214827, 994, 3, 1,  -4425.082, -2690.228, -39.21357, 0.1699049, 0, 0, 0, 1, 7200, 255, 1), -- 214827 (Area: 6182)
 (@OGUID+91, 212095, 994, 3, 1,  -4509.656, -2687.172, 31.96922, 1.567914, 0, 0, 0, 1, 7200, 255, 1); -- 212095 (Area: 6182)
 
+REPLACE INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`,  `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`,
+ `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+(61946, 0, 0, 0, 11, 0, 100, 0, 0, 0, 0, 0, 58, 1, 121601, 4000, 6000, 39, 0, 0, 64, 0, 0, 0, 0, 0, 0, 'Harthak Stormcaller set Caster AI'),
+(61946, 0, 1, 0, 0, 0, 100, 0, 10000, 15000, 15000, 20000, 11, 123648, 1, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 'Harthak Stormcaller cast Shock'),
+(61946, 0, 2, 0, 0, 0, 100, 0, 20000, 26000, 20000, 26000, 11, 120562, 1, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 'Harthak Stormcaller cast Lightning Storm'),
+(61945, 0, 0, 0, 0, 0, 100, 0, 6000,  8000,  10000, 10000, 11, 123647, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Gurthan Iron Maw cast Demo roar'),
+(61945, 0, 1, 0, 0, 0, 100, 0, 8000,  10000, 14000, 19000, 11, 120560, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Gurthan Iron Maw cast Rake'),
+(61945, 0, 2, 0, 0, 0, 100, 0, 5000,  15000, 15000, 25000, 11, 123646, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Gurthan Iron Maw cast Intimidation'),
+(61947, 0, 0, 0, 0, 0, 100, 0, 10000, 10000, 20000, 25000, 11, 123652, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Kargesh Ribcrusher cast Whirlwind'),
+(61947, 0, 1, 0, 0, 0, 100, 0, 3000 , 6000,  10000, 14000, 11, 123649, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Kargesh Ribcrusher cast Mace Smash'),
+(61242, 0, 1, 0, 23, 0, 100, 0, 118958, 0, 6000, 8000, 11, 118958, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Glintrok Ironhide cast Iron Protector'),
+(61240, 0, 0, 0, 25, 0, 100, 0, 0, 0, 0, 0, 11, 118969, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Glintrok Skulker cast Stealth on Reset'),
+(61240, 0, 1, 0, 0, 0, 100, 0, 7000, 11000, 10000, 14000, 11, 118963, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Glintrok Skulker cast Shank'),
+(61216, 0, 0, 0, 0, 0, 100, 0, 6000, 10000, 14000, 19000, 11, 118903, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 'Glintrok Hexxer cast Hex of Lethargy'),
+(61239, 0, 0, 0, 14, 0, 100, 0, 300000, 60, 20000, 20000, 11, 118940, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Glintrok Oracle cast Cleansing Flame'),
+(65402, 0, 0, 0, 0, 0, 100, 0, 1000, 7000, 11000, 20000, 11, 128239, 0, 0, 0, 0, 0, 17, 5, 25, 0, 0, 0, 0, 0, 'Gurthan Swiftblade cast Blade Rush'),
+(61392, 0, 0, 0, 11, 0, 100, 0, 0, 0, 0, 0, 58, 1, 121165, 4000, 4000, 39, 0, 0, 64, 0, 0, 0, 0, 0, 0, 'Harthak Flameseeker set Caster AI'),
+(61392, 0, 1, 0, 0, 0, 100, 0, 6000, 14000, 14000, 20000, 11, 121182, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Harthak Flameseeker cast Molten Barrage'),
+(61392, 0, 2, 0, 0, 0, 100, 0, 10000, 16000, 14000, 18000, 11, 121174, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 'Harthak Flameseeker cast Erupting Flame'),
+(61389, 0, 0, 0, 0, 0, 100, 0, 2500, 12000, 10000, 15000, 11, 121173, 0, 0, 0, 0, 0, 17, 5, 44, 0, 0, 0, 0, 0, 'Kargesh Highguard cast Hurl Shield'),
+(61389, 0, 1, 0, 0, 0, 100, 0, 5000, 10000, 5000, 10000, 11, 121185, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Kargesh Highguard cast Crunch Armor'),
+(61387, 0, 0, 0, 0, 0, 100, 0, 2000, 4000, 9000, 12000, 11, 121190, 0, 0, 0, 0, 0, 17, 5, 44, 0, 0, 0, 0, 0, 'Quilen Guardian cast Leaping Rush'),
+(61387, 0, 1, 0, 0, 0, 100, 0, 5000, 8000, 6000, 9000, 11, 12296, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Quilen Guardian cast Carnivorous Bite');
+
+
+UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` IN (61946, 61945, 61947, 61242, 61247, 61240, 61216, 61239, 65402, 61392, 61389, 61837);
+UPDATE `creature_template` SET `equipment_id` = `entry` WHERE `entry` IN (61239, 61240, 61242, 61243, 61389, 61392, 61398, 61946, 61947, 61399, 65402, 61431, 61442, 61444, 61445, 61884, 61337, 61338, 61339, 61340, 61216, 64243);
+
+UPDATE `creature` SET `orientation` = 1.570000 WHERE `id` = 61551;

@@ -63,7 +63,7 @@ static const Position apCaveBatPositions[6]
 struct BossAction
 {
     uint32 m_uiBoss;
-    int32 m_uiAction;
+    const int32 m_uiAction;
 };
 
 static const BossAction aBosses[3] =
@@ -573,6 +573,7 @@ public:
             events.ScheduleEvent(EVENT_CHECK_MOVE, 2500);
         }
         uint8 status;
+        uint32 m_uiKickCooldownTimer;
 
         void DoAction(const int32 action)
         {
@@ -630,7 +631,7 @@ public:
                 && status != STATUS_ATTACK_GRUNTS
                 && pWho->GetPositionZ() <= (me->GetPositionZ() + 4.f))
             {
-                if (me->isMoving())
+                if (me->isMoving() || m_uiKickCooldownTimer)
                     return;
 
                 DoCast(pWho, SPELL_GRUNT_KNOCK_2, true);
@@ -646,6 +647,9 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
+            if (m_uiKickCooldownTimer)
+                m_uiKickCooldownTimer -= diff;
+
             events.Update(diff);
 
             while (uint32 eventId = events.ExecuteEvent())
@@ -1396,6 +1400,15 @@ public:
 //     uint32 m_uiSpell;
 // };
 
+class PlayerCheck
+{
+public:
+    bool operator()(WorldObject* target) const
+    {
+        return !target->ToPlayer();
+    }
+};
+
 // static const SpellForTicks MagneticField[3] =
 // {
 //     { 3, SPELL_MAGNETIC_FIELD_10 },
@@ -1412,7 +1425,7 @@ public:
     {
         PrepareSpellScript(spell_magnetic_field_SpellScript)
 
-        bool Validate(SpellInfo const * /*spell*/)
+        bool Validate(SpellInfo const* /*spell*/)
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_MAGNETIC_FIELD_AURA))
                 return false;
@@ -1421,7 +1434,7 @@ public:
 
         void SelectTargets(std::list<WorldObject*>& targets)
         {
-            targets.clear();
+            targets.remove_if(PlayerCheck());
         }
 
         void Register()
@@ -1438,7 +1451,7 @@ public:
         uint32 m_uiAuraTicks;
         uint32 m_uiAuraTimer;
 
-        bool Validate(SpellInfo const * /*spell*/)
+        bool Validate(SpellInfo const* /*spell*/)
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_MAGNETIC_FIELD_AURA))
                 return false;
@@ -1452,7 +1465,7 @@ public:
             return true;
         }
 
-        void OnPeriodic(AuraEffect const * /*aurEff*/)
+        void OnPeriodic(AuraEffect const */*aurEff*/)
         {
             ++m_uiAuraTicks;
         }
@@ -1512,7 +1525,7 @@ public:
     {
         PrepareSpellScript(spell_magnetic_pull_SpellScript);
 
-        bool Validate(SpellInfo const * /*spell*/)
+        bool Validate(SpellInfo const* /*spell*/)
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_MAGNETIC_FIELD_10) || !sSpellMgr->GetSpellInfo(SPELL_MAGNETIC_FIELD_20) || !sSpellMgr->GetSpellInfo(SPELL_MAGNETIC_FIELD_40))
                 return false;
@@ -1611,7 +1624,7 @@ public:
     {
         PrepareSpellScript(spell_whirling_dervish_knock_SpellScript)
 
-        bool Validate(SpellInfo const * /*spell*/)
+        bool Validate(SpellInfo const* /*spell*/)
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_WHIRLING_DERVISH_TARGETS))
                 return false;
@@ -1647,16 +1660,6 @@ public:
 
 };
 
-class PlayerCheck
-{
-public:
-    bool operator()(WorldObject* target) const
-    {
-        return !target->ToPlayer();
-    }
-
-};
-
 class spell_shockwave_kuai : public SpellScriptLoader
 {
 public:
@@ -1666,7 +1669,7 @@ public:
     {
         PrepareAuraScript(spell_shockwave_kuai_AuraScript);
 
-        bool Validate(SpellInfo const * /*spell*/)
+        bool Validate(SpellInfo const* /*spell*/)
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_SHOCKWAVE))
                 return false;
@@ -1700,7 +1703,7 @@ public:
     {
         PrepareSpellScript(spell_shockwave_kuai_SpellScript)
 
-        bool Validate(SpellInfo const * /*spell*/)
+        bool Validate(SpellInfo const* /*spell*/)
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_PICK_SHOCKWAVE_TARGET))
                 return false;
@@ -1744,7 +1747,7 @@ public:
     {
         PrepareSpellScript(spell_haiyan_conflagrate_targeting_SpellScript);
 
-        bool Validate(SpellInfo const * /* spell */)
+        bool Validate(SpellInfo const* /* spell */)
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_CONFLAGRATE))
                 return false;
@@ -1789,7 +1792,7 @@ public:
     {
         PrepareSpellScript(spell_haiyan_conflagrate_aura_SpellScript);
 
-        bool Validate(SpellInfo const * /* spell */)
+        bool Validate(SpellInfo const* /*spell*/)
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_CONFLAGRATE_SPREAD))
                 return false;
@@ -1835,7 +1838,7 @@ public:
     {
         PrepareSpellScript(spell_haiyan_meteor_targeting_SpellScript);
 
-        bool Validate(SpellInfo const * /* spell */)
+        bool Validate(SpellInfo const* /* spell */)
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_METEOR_TARGETING))
                 return false;
@@ -1874,14 +1877,17 @@ public:
 class CorrectUnitCheck
 {
 public:
-    CorrectUnitCheck(Unit* pCaster) : caster(pCaster) {}
+    CorrectUnitCheck(Unit const *pCaster)
+        : casterGuid(pCaster->GetGUID())
+    { }
 
-    bool operator()(WorldObject* target) const
+    bool operator ()(WorldObject const *target) const
     {
-        return (target && (target->ToCreature() && target->ToCreature()->getFaction() != 16) || target->ToPlayer()) || target->GetGUID() == caster->GetGUID();
+        return target && ((target->ToCreature() && target->ToCreature()->getFaction() != 16) || target->ToPlayer() || target->GetGUID() == casterGuid);
     }
+
 private:
-    Unit* caster;
+    uint64 casterGuid;
 };
 
 class spell_saurok_help_call : public SpellScriptLoader
@@ -1893,7 +1899,7 @@ public:
     {
         PrepareSpellScript(spell_saurok_help_call_SpellScript);
 
-        bool Validate(SpellInfo const * /* spell */)
+        bool Validate(SpellInfo const* /* spell */)
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_GLINTROK_SCOUT_CALL))
                 return false;

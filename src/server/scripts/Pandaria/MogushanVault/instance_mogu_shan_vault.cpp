@@ -140,19 +140,9 @@ public:
                     uint32 difficulty = instance->GetSpawnMode();
                     bool turnOver = (difficulty == MAN10_DIFFICULTY || difficulty == MAN10_HEROIC_DIFFICULTY || difficulty == RAID_TOOL_DIFFICULTY);
 
-                    // if (guardianAliveCount >= 4 && GetBossState(DATA_STONE_GUARD) != DONE && instance->GetSpawnMode() <= MAN10_DIFFICULTY)
-                    if (guardianAliveCount >= 4 && GetBossState(DATA_STONE_GUARD) != DONE && instance->GetSpawnMode() && turnOver)
-                    {
-                        std::vector<uint64> stoneGuards;
-
-                        for (auto itr : stoneGuardGUIDs)
-                            stoneGuards.push_back(itr);
-
-                        std::random_shuffle(stoneGuards.begin(), stoneGuards.end());
-
-                        if (Creature* stoneGuard = instance->GetCreature((*stoneGuards.begin())))
+                    if (guardianAliveCount >= 4 && GetBossState(DATA_STONE_GUARD) != DONE && turnOver)
+                        if (Creature* stoneGuard = instance->GetCreature(stoneGuardGUIDs.front()))
                             stoneGuard->DespawnOrUnsummon();
-                    }
                     break;
                 }
                 case NPC_CURSED_MOGU_SCULPTURE_2:

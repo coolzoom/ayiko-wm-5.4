@@ -6,15 +6,15 @@ DELETE FROM `creature` WHERE `map` = 1008;
 DELETE FROM `gameobject` WHERE `map` = 1008;
 
 DELETE FROM `instance_template` WHERE `map` = 1008;
-INSERT INTO `instance_template` (`map`, `parent`, `script`, `allowMount`) VALUES 
+INSERT INTO `instance_template` (`map`, `parent`, `script`, `allowMount`) VALUES
 (1008, 0, 'instance_mogu_shan_vault', 0);
 
-DELETE FROM `creature_template` WHERE `entry` IN 
+DELETE FROM `creature_template` WHERE `entry` IN
 (
 60089, 55091, 60051, 59915, 54020, 59481, 61334, 62004, 61989, 60043, 64183,
 60047, 60397, 60398, 60143, 60558, 60559, 61139, 60009, 60385, 60402, 60381,
 60375, 64529, 64600, 65227, 61352, 61131, 61429, 60984, 60512, 60513, 60576,
-61250, 65343, 60776, 59677, 65297, 64947, 64061, 64063, 64068, 60709, 60710, 
+61250, 65343, 60776, 59677, 65297, 64947, 64061, 64063, 64068, 60709, 60710,
 60960, 61330, 65293, 60410, 60701, 60708, 60644, 60396, 60648, 60627, 65803,
 60399, 60400, 60480, 60304, 60306, 60307, 60308, 62026, 60241, 60793, 62618,
 60781, 60438, 61140, 60240, 60184, 60940, 62003, 60958, 60731, 60913
@@ -31,7 +31,7 @@ INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entr
 (60047, 0, 0, 0, 60049, 77044, 77085, 60048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41892, 0, 0, 0, 'Amethyst Guardian', '', '', 0, 93, 93, 4, 0, 16, 16, 0, 1.6, 1.71429, 1, 3, 100000, 140000, 0, 125, 1, 2000, 2000, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 1, 60043, 0, 0, 0, 0, 0, 0, 0, 0, 115844, 116060, 130774, 26662, 125206, 115745, 115829, 0, 0, 2116, 0, 0, '', 0, 3, 1, 300, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 167, 1, 0, 769638399, 1, 'boss_generic_guardian', 16048),
 (60051, 0, 0, 0, 60053, 77043, 77084, 60052, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41893, 0, 0, 0, 'Cobalt Guardian', '', '', 0, 93, 93, 4, 0, 16, 16, 0, 1.6, 1.71429, 1, 3, 465, 558, 0, 47, 4, 2000, 2000, 4, 0, 0, 0, 0, 0, 0, 0, 465, 558, 47, 1, 4, 1, 60051, 0, 0, 0, 0, 0, 0, 0, 0, 26662, 115840, 115861, 125206, 115745, 115771, 0, 0, 0, 2113, 3000000, 3100000, '', 0, 3, 1, 300, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 167, 1, 0, 769638399, 1, 'boss_generic_guardian', 16048),
 (60089, 0, 0, 0, 0, 0, 0, 60091, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 169, 11686, 0, 0, 'Stone Guard Controller', '', '', 0, 93, 93, 4, 0, 14, 14, 0, 1, 1.14286, 1, 1, 5174, 12574, 0, 62114, 4, 2000, 2000, 1, 60089, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 40, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 128, 'boss_stone_guard_controller', 16048),
-(60143, 0, 0, 0, 77008, 77052, 77095, 60144, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41256, 0, 0, 0, 'Gara\'jal the Spiritbinder', '', '', 0, 93, 93, 4, 0, 14, 14, 0, 3.2, 2, 1, 1, 5174, 12574, 0, 62114, 4, 1500, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 4, 0, 60143, 0, 0, 0, 0, 0, 0, 0, 0, 116272, 118469, 117752, 116174, 122151, 0, 0, 0, 0, 2132, 3000000, 3100000, '', 0, 3, 1, 1000, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 187, 1, 0, 769638399, 0, 'boss_garajal', 16048),
+(60143, 0, 0, 0, 77008, 77052, 77095, 60144, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41256, 0, 0, 0, 'Gara\'jal the Spiritbinder', '', '', 0, 93, 93, 4, 0, 14, 14, 0, 3.2, 2, 1, 1, 5174, 12574, 0, 62114, 4, 1500, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 4, 0, 60143, 0, 0, 0, 0, 0, 0, 0, 0, 116272, 118469, 117752, 116174, 122151, 0, 0, 0, 0, 2132, 3000000, 3100000, '', 0, 3, 1, 270, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 187, 1, 0, 769638399, 0, 'boss_garajal', 16048),
 (60375, 0, 0, 0, 77005, 77048, 77089, 60377, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43091, 0, 0, 0, 'Zandalari Skullcharger', '', '', 0, 92, 92, 4, 0, 16, 16, 0, 1, 1.14286, 1, 1, 4750, 11118, 0, 55538, 4, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 60375, 0, 0, 0, 0, 0, 0, 0, 0, 122219, 116607, 116606, 0, 0, 0, 0, 0, 0, 154, 11000, 12000, '', 0, 3, 1, 12, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'mob_zandalari_skullcharger', 16048),
 (60381, 0, 0, 0, 77007, 77050, 77091, 60417, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41379, 41380, 0, 0, 'Zandalari Infiltrator', '', '', 0, 92, 92, 4, 0, 16, 16, 0, 1.6, 1.71429, 1, 1, 4750, 11118, 0, 55538, 4, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 60381, 0, 0, 0, 0, 0, 0, 0, 0, 0, 116595, 116596, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 10, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 167, 1, 0, 0, 0, 'mob_zandalari_infiltrator', 16048),
 (60385, 0, 0, 0, 0, 0, 0, 60419, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41385, 0, 0, 0, 'Zandalari War Wyvern', '', '', 0, 92, 92, 4, 0, 16, 16, 0, 1, 1.14286, 1, 1, 4750, 11118, 0, 55538, 4, 2000, 2000, 1, 256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2448, 0, 0, '', 0, 3, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, '', 16048),
@@ -69,7 +69,7 @@ INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entr
 (65293, 0, 0, 0, 0, 0, 0, 65296, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43849, 0, 0, 0, 'Infinite Energy', '', '', 0, 90, 90, 4, 0, 35, 35, 0, 2.4, 1.28571, 1, 0, 9839, 14339, 0, 42299, 4, 2000, 2000, 1, 33554432, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 4, 3, 1.2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 136, 1, 0, 0, 0, 'mob_infinite_energy', 16048),
 (65297, 0, 0, 0, 0, 0, 0, 65299, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1126, 11686, 0, 0, 'Invisible Stalker', '', '', 0, 1, 1, 4, 0, 35, 35, 0, 1, 1.14286, 1, 0, 9839, 14339, 0, 42299, 4, 2000, 2000, 1, 33555200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1024, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 128, '', 16048),
 (65343, 0, 0, 0, 0, 0, 0, 65345, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43897, 43898, 43899, 0, 'Bone Spider', '', '', 0, 1, 1, 4, 0, 31, 31, 0, 1, 0.857143, 1, 0, 9839, 14339, 0, 42299, 4, 2000, 2000, 1, 32768, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 0.2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 100, 1, 0, 0, 64, '', 16048),
-(60184, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41286, 0, 0, 0, 'Shadowy Minion', '', '', 0, 92, 92, 0, 0, 16, 16, 0, 1, 1.14286, 1, 1, 0, 0, 0, 0, 2, 2000, 2000, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 2097160, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 122118, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 0.6, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'mob_shadowy_minion', 16048),
+(60184, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41286, 0, 0, 0, 'Shadowy Minion', '', '', 0, 92, 92, 4, 0, 16, 16, 0, 1, 1.14286, 1, 1, 0, 0, 0, 0, 2, 2000, 2000, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 2097160, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 122118, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 0.6, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'mob_shadowy_minion', 16048),
 (60240, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41320, 41321, 41322, 39314, 'Totem des esprits', '', '', 0, 92, 92, 4, 0, 16, 16, 0, 1, 1, 1, 1, 0, 0, 0, 0, 2, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 0.6, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'mob_spirit_totem', 16048),
 (60241, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11686, 31379, 0, 0, 'Lightning Charge', '', '', 0, 1, 1, 4, 0, 35, 35, 0, 1, 1.14286, 1, 1, 0, 0, 0, 0, 2, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 116374, 115856, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 129, 1, 0, 769638399, 128, 'mob_lightning_fist', 16048),
 (60304, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41366, 0, 0, 0, 'Living Cobalt Crystal', '', 'openhandglow', 0, 1, 1, 4, 0, 35, 35, 0, 1, 1.14286, 1, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1074791424, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 94, 1, 0, 0, 0, 'mob_living_crystal', 16048),
@@ -88,7 +88,7 @@ INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entr
 (60731, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41571, 41571, 0, 0, 'Undying Shadows', '', '', 0, 92, 92, 4, 0, 14, 14, 0, 0.8, 0.8, 1, 1, 0, 0, 0, 0, 2, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 117539, 118303, 117514, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1.5, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 80, 1, 0, 0, 0, 'mob_undying_shadow', 16048),
 (60793, 0, 0, 0, 0, 0, 0, 60805, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41593, 0, 0, 0, 'Celestial Protector', '', '', 0, 92, 92, 4, 0, 14, 14, 0, 1.55556, 1.14286, 1, 1, 4750, 11118, 0, 55538, 4, 1500, 2000, 1, 32768, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 117945, 0, 117911, 129711, 117870, 0, 0, 0, 0, 0, 0, 0, '', 0, 4, 1, 10, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'mob_celestial_protector', 16048),
 (60913, 0, 0, 0, 0, 0, 0, 60935, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41689, 0, 0, 0, 'Energy Charge', '', '', 0, 90, 90, 4, 0, 14, 14, 0, 0.92, 0.328571, 1, 0, 0, 0, 0, 0, 4, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 4, 2, 1.25, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 923, 1, 0, 0, 0, 'mob_energy_charge', 16048),
-(60940, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41286, 0, 0, 0, 'Shadowy Minion', '', '', 0, 1, 1, 4, 0, 35, 35, 0, 1, 1.14286, 1, 1, 0, 0, 0, 0, 2, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1074790400, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 769638399, 0, 'mob_shadowy_minion', 16048),
+(60940, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41286, 0, 0, 0, 'Shadowy Minion', '', '', 0, 92, 92, 4, 0, 35, 35, 0, 1, 1.14286, 1, 1, 0, 0, 0, 0, 2, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1074790400, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 769638399, 0, 'mob_shadowy_minion', 16048),
 (60958, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41718, 0, 0, 0, 'Pinning Arrow', '', '', 0, 90, 90, 4, 0, 14, 14, 0, 1, 1.14286, 1, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1024, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 94, 1, 0, 0, 0, 'mob_pinning_arrow', 16048),
 (61140, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 42429, 0, 0, 0, 'Gara\'jal the Spiritbinder', '', '', 0, 1, 1, 4, 0, 35, 35, 0, 1, 1.14286, 1, 1, 0, 0, 0, 0, 2, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 36, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 4, 1, 540, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 122, 1, 0, 0, 0, 'mob_garajal_ghost', 16048),
 (62003, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 42337, 0, 0, 0, 'Severer of Souls', '', '', 0, 92, 92, 4, 0, 14, 14, 0, 1.11111, 1.14286, 1, 1, 0, 0, 0, 0, 2, 2000, 2000, 1, 256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1074790400, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 0.4, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'mob_soul_cutter', 16048),
@@ -154,12 +154,12 @@ INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconNa
 (211584, 10, 8504, 'Ancient Control Console', '', 'Activating', '', 0, 0, 3, 0, 0, 0, 0, 0, 0, 93, 0, 0, 2147483647, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 27700, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 'go_ancien_control_console', 18291),
 (211603, 0, 11419, 'Terracotta Army Door', '', '', '', 0, 0, 0.4, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 18291);
 
-DELETE FROM `spell_script_names` WHERE `spell_id` IN 
+DELETE FROM `spell_script_names` WHERE `spell_id` IN
 (
 117241, 116545, 116510, 120764, 130404, 130395, 116040, 116583, 116821, 116816, 116711, 116365, 116434, 118300,
-118302, 118304, 118305, 118307, 118308, 132296, 132297, 132298, 118530, 118469, 120715, 116227, 117921, 118094, 
-118105, 118106, 118145, 117708, 117756, 117737, 117833, 117558, 127785, 127783, 127781, 117874, 118313, 122741, 
-119360, 124967, 118024, 127362, 132222, 127911, 116994, 127732, 118165, 116818, 117195, 116968, 117006, 117485, 
+118302, 118304, 118305, 118307, 118308, 132296, 132297, 132298, 118530, 118469, 120715, 116227, 117921, 118094,
+118105, 118106, 118145, 117708, 117756, 117737, 117833, 117558, 127785, 127783, 127781, 117874, 118313, 122741,
+119360, 124967, 118024, 127362, 132222, 127911, 116994, 127732, 118165, 116818, 117195, 116968, 117006, 117485,
 116803, 118327, 116550, 116556, 116605, 116525, 116778
 );
 
@@ -231,7 +231,7 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Spirit Totem
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 60512, 1008, 6125, 6125, 760, 65535, 0, 0, 4248.53, 1313.52, 458.282, 0.799902, 300, 0, 0, 1, 0, 0, 0, 0, 0),
 (@GUID + 2, 60512, 1008, 6125, 6125, 760, 65535, 0, 0, 4304.81, 1312.98, 457.941, 2.35734, 300, 0, 0, 1, 0, 0, 0, 0, 0),
 (@GUID + 3, 60512, 1008, 6125, 6125, 760, 65535, 0, 0, 4305.59, 1369.29, 458.192, 3.88057, 300, 0, 0, 1, 0, 0, 0, 0, 0),
@@ -241,7 +241,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Spirit Totem
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 60513, 1008, 6125, 6125, 760, 65535, 0, 0, 4249.03, 1369.91, 467.063, 5.47662, 300, 0, 0, 10, 0, 0, 0, 0, 0),
 (@GUID + 2, 60513, 1008, 6125, 6125, 760, 65535, 0, 0, 4305.45, 1369.34, 467.333, 3.9027, 300, 0, 0, 10, 0, 0, 0, 0, 0),
 (@GUID + 3, 60513, 1008, 6125, 6125, 760, 65535, 0, 0, 4305.35, 1312.46, 466.542, 2.34918, 300, 0, 0, 3939410, 0, 0, 0, 0, 0),
@@ -251,7 +251,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Stone Quilen
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 60576, 1008, 6125, 6125, 760, 1, 0, 0, 3908.99, 1132.18, 481.134, 4.6941, 7200, 0, 0, 1, 0, 0, 0, 0, 0),
 (@GUID + 2, 60576, 1008, 6125, 6125, 760, 1, 0, 0, 3916.61, 1128.52, 481.133, 4.6941, 7200, 0, 0, 1, 0, 0, 0, 0, 0),
 (@GUID + 3, 60576, 1008, 6125, 6125, 760, 1, 0, 0, 3912.78, 1132.16, 481.136, 4.6941, 7200, 0, 0, 1, 0, 0, 0, 0, 0),
@@ -317,7 +317,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Enormous Stone Quilen
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 64183, 1008, 6125, 6125, 760, 1, 0, 0, 3903.32, 1197.32, 466.17, 1.57357, 7200, 0, 0, 1, 0, 0, 0, 0, 0),
 (@GUID + 2, 64183, 1008, 6125, 6125, 760, 1, 0, 0, 3908.32, 1197.32, 466.17, 1.57357, 7200, 0, 0, 1, 0, 0, 0, 0, 0),
 (@GUID + 3, 64183, 1008, 6125, 6125, 760, 1, 0, 0, 3890.33, 1209.09, 466.17, 4.72358, 7200, 0, 0, 1, 0, 0, 0, 0, 0),
@@ -327,7 +327,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 /*---------------------------------------------------------------------------------------------------------------*/
 -- General Purpose Bunny JMF (Look 2 - Flying, Infinite AOI\)
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 55091, 1008, 6125, 6125, 760, 1, 0, 0, 3874.41, 1488.01, 398.912, 1.48778, 7200, 0, 0, 1, 0, 0, 0, 33554432, 0),
 (@GUID + 2, 55091, 1008, 6125, 6125, 760, 1, 0, 0, 3895.32, 1487.57, 398.912, 1.81724, 7200, 0, 0, 1, 0, 0, 0, 33554432, 0),
 (@GUID + 3, 55091, 1008, 6125, 6125, 760, 1, 0, 0, 3853.1, 1491.93, 398.912, 1.14406, 7200, 0, 0, 1, 0, 0, 0, 33554432, 0),
@@ -357,7 +357,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 /*---------------------------------------------------------------------------------------------------------------*/
 -- General Purpose Bunny JMF (Look 2 - Flying, Huge AOI\)
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 54020, 1008, 6125, 6125, 760, 1, 0, 0, 3874.55, 1483.5, 398.912, 1.59109, 7200, 0, 0, 1, 0, 0, 0, 33554432, 0),
 (@GUID + 2, 54020, 1008, 6125, 6125, 760, 1, 0, 0, 3895.03, 1483.62, 398.912, 1.48814, 7200, 0, 0, 1, 0, 0, 0, 33554432, 0),
 (@GUID + 3, 54020, 1008, 6125, 6125, 760, 1, 0, 0, 3851.71, 1487.36, 398.912, 1.28605, 7200, 0, 0, 1, 0, 0, 0, 33554432, 0),
@@ -387,7 +387,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 /*---------------------------------------------------------------------------------------------------------------*/
 -- World Trigger
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 59481, 1008, 6125, 6125, 760, 1, 0, 0, 4015.41, 1388.6, 477.997, 5.27373, 7200, 0, 0, 1, 0, 0, 0, 33554496, 0),
 (@GUID + 2, 59481, 1008, 6125, 6125, 760, 1, 0, 0, 4067.02, 1292.8, 477.094, 2.30378, 7200, 0, 0, 1, 0, 0, 0, 33554496, 0),
 (@GUID + 3, 59481, 1008, 6125, 6125, 760, 1, 0, 0, 4014.51, 1297.34, 477.871, 0.986037, 7200, 0, 0, 1, 0, 0, 0, 33554496, 0);
@@ -396,7 +396,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Cursed Mogu Sculpture
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 61334, 1008, 6125, 6125, 760, 1, 0, 0, 3907.96, 1337.48, 466.686, 2.67733, 7200, 0, 0, 1, 0, 0, 0, 33587200, 0),
 (@GUID + 2, 61334, 1008, 6125, 6125, 760, 1, 0, 0, 3892.1, 1341.48, 466.738, 6.01387, 7200, 0, 0, 1, 0, 0, 0, 33587200, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -404,7 +404,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Cursed Mogu Sculpture
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 61989, 1008, 6125, 6125, 760, 1, 0, 0, 3989.33, 1330.74, 462.025, 3.12713, 7200, 0, 0, 1, 0, 0, 0, 33587200, 0),
 (@GUID + 2, 61989, 1008, 6125, 6125, 760, 1, 0, 0, 3989.48, 1341.72, 462.061, 3.12713, 7200, 0, 0, 1, 0, 0, 0, 33587200, 0),
 (@GUID + 3, 61989, 1008, 6125, 6125, 760, 1, 0, 0, 3989.33, 1336.22, 462.056, 3.12452, 7200, 0, 0, 1, 0, 0, 0, 33587200, 0),
@@ -415,7 +415,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 /*---------------------------------------------------------------------------------------------------------------*/
 -- World Trigger
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 59481, 1008, 6125, 6125, 760, 1, 0, 0, 4069.09, 1389.19, 477.657, 4.19489, 7200, 0, 0, 1, 0, 0, 0, 33554496, 0),
 (@GUID + 2, 59481, 1008, 6125, 6125, 760, 1, 0, 0, 4014.51, 1297.34, 477.871, 0.986037, 7200, 0, 0, 1, 0, 0, 0, 33554496, 0),
 (@GUID + 3, 59481, 1008, 6125, 6125, 760, 1, 0, 0, 4067.02, 1292.8, 477.094, 2.30378, 7200, 0, 0, 1, 0, 0, 0, 33554496, 0),
@@ -436,7 +436,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Zandalari Spirit
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 60558, 1008, 6125, 6125, 760, 1, 0, 0, 4236.47, 1416.19, 454.417, 2.41795, 7200, 0, 0, 1, 0, 1, 0, 256, 0),
 (@GUID + 2, 60558, 1008, 6125, 6125, 760, 1, 0, 0, 4215.48, 1415.93, 454.417, 0.570452, 7200, 0, 0, 1, 0, 1, 0, 256, 0),
 (@GUID + 3, 60558, 1008, 6125, 6125, 760, 1, 0, 0, 4217.07, 1433.1, 454.417, 5.5714, 7200, 0, 0, 1, 0, 1, 0, 256, 0);
@@ -445,7 +445,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Zandalari Spirit
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 60559, 1008, 6125, 6125, 760, 1, 0, 0, 4231.94, 1420.63, 454.417, 2.57676, 7200, 0, 0, 1, 0, 1, 0, 256, 0),
 (@GUID + 2, 60559, 1008, 6125, 6125, 760, 1, 0, 0, 4231.53, 1426.77, 454.417, 3.61512, 7200, 0, 0, 1, 0, 1, 0, 256, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -453,7 +453,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Shan-xi Watershaper
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 61139, 1008, 6125, 6125, 760, 1, 0, 0, 4051.02, 1533.01, 378.917, 4.3926, 7200, 0, 0, 1, 0, 0, 0, 32768, 0),
 (@GUID + 2, 61139, 1008, 6125, 6125, 760, 1, 0, 0, 4034.11, 1533.26, 378.916, 4.54068, 7200, 0, 0, 1, 0, 0, 0, 32768, 0),
 (@GUID + 3, 61139, 1008, 6125, 6125, 760, 1, 0, 0, 4034.06, 1567.33, 378.917, 1.65153, 7200, 0, 0, 1, 0, 0, 0, 32768, 0),
@@ -464,7 +464,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Zandalari Fire-Dancer
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 60402, 1008, 6125, 6125, 760, 1, 0, 0, 4194.26, 1334.83, 461.961, 2.84378, 300, 0, 0, 3372736, 10312, 0, 0, 0, 0),
 (@GUID + 2, 60402, 1008, 6125, 6125, 760, 1, 0, 0, 4194.42, 1350.17, 462.045, 3.65015, 7200, 0, 0, 1, 0, 0, 0, 32768, 0),
 (@GUID + 3, 60402, 1008, 6125, 6125, 760, 1, 0, 0, 4196.27, 1342.11, 461.961, 3.12731, 300, 0, 0, 3372736, 10312, 0, 0, 0, 0),
@@ -476,7 +476,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Zandalari Infiltrator
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 60381, 1008, 6125, 6125, 760, 1, 0, 0, 4277.01, 1430.03, 445.377, 4.71607, 300, 0, 0, 4215920, 0, 0, 0, 0, 0),
 (@GUID + 2, 60381, 1008, 6125, 6125, 760, 1, 0, 0, 4200.24, 1353.99, 461.96, 3.41152, 300, 0, 0, 4215920, 0, 0, 0, 0, 0),
 (@GUID + 3, 60381, 1008, 6125, 6125, 760, 1, 0, 0, 4198.63, 1327.7, 462.043, 2.66567, 7200, 0, 0, 1, 0, 0, 0, 0, 0),
@@ -488,7 +488,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Zandalari Skullcharger
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 60375, 1008, 6125, 6125, 760, 1, 0, 0, 4189.33, 1350.75, 462.045, 3.23793, 7200, 0, 0, 1, 0, 0, 0, 0, 0),
 (@GUID + 2, 60375, 1008, 6125, 6125, 760, 1, 0, 0, 4188.57, 1332.68, 462.045, 3.04629, 7200, 0, 0, 1, 0, 0, 0, 0, 0),
 (@GUID + 3, 60375, 1008, 6125, 6125, 760, 1, 0, 0, 4282.09, 1414.33, 445.38, 4.59443, 300, 0, 0, 5059104, 0, 0, 0, 0, 0),
@@ -498,7 +498,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Mogu Runes (Vertical Visual\)
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 64600, 1008, 6125, 6125, 760, 2, 0, 0, 4231.44, 1341.77, 465.775, 6.27484, 7200, 0, 0, 1, 0, 0, 16777216, 33554688, 0),
 (@GUID + 2, 64600, 1008, 6125, 6125, 760, 2, 0, 0, 4310.77, 1306.64, 465.775, 2.31009, 7200, 0, 0, 1, 0, 0, 16777216, 33554688, 0),
 (@GUID + 3, 64600, 1008, 6125, 6125, 760, 2, 0, 0, 4310.12, 1373.95, 465.775, 3.91861, 7200, 0, 0, 1, 0, 0, 16777216, 33554688, 0),
@@ -510,7 +510,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Mogu Runes (Pitch Forward 120\) DNT
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 65227, 1008, 6125, 6125, 760, 2, 0, 0, 4236.93, 1341.77, 485.554, 6.27484, 7200, 0, 0, 1, 0, 0, 16777216, 33554688, 0),
 (@GUID + 2, 65227, 1008, 6125, 6125, 760, 2, 0, 0, 4248.43, 1313.66, 485.554, 0.782998, 7200, 0, 0, 1, 0, 0, 16777216, 33554688, 0),
 (@GUID + 3, 65227, 1008, 6125, 6125, 760, 2, 0, 0, 4276.56, 1301.63, 485.554, 1.54814, 7200, 0, 0, 1, 0, 0, 16777216, 33554688, 0),
@@ -523,7 +523,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Mogu'shan Secret-Keeper
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 61131, 1008, 6125, 6125, 760, 1, 0, 0, 3955.47, 1537.91, 369.645, 2.99139, 7200, 0, 0, 1, 0, 0, 0, 32832, 0),
 (@GUID + 2, 61131, 1008, 6125, 6125, 760, 1, 0, 0, 3951.66, 1549.92, 369.645, 3.10212, 7200, 0, 0, 1, 0, 0, 0, 32832, 0),
 (@GUID + 3, 61131, 1008, 6125, 6125, 760, 1, 0, 0, 3955.4, 1563.09, 369.645, 3.14108, 7200, 0, 0, 1, 0, 0, 0, 32832, 0),
@@ -531,7 +531,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 (@GUID + 5, 61131, 1008, 6125, 6125, 760, 1, 0, 0, 4044.59, 1560.88, 378.917, 1.4935, 7200, 0, 0, 1, 0, 2, 0, 32832, 0);
 
 DELETE FROM `waypoint_data` WHERE `id` = @GUID + 5;
-INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `orientation`, `delay`, `move_flag`, `action`, `action_chance`, `wpguid`) VALUES 
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `orientation`, `delay`, `move_flag`, `action`, `action_chance`, `wpguid`) VALUES
 (@GUID + 5, 1, 4042.3, 1535.84, 378.833, 0, 0, 0, 0, 100, 0),
 (@GUID + 5, 2, 4048.25, 1549.58, 378.833, 0, 10000, 0, 0, 100, 0),
 (@GUID + 5, 3, 4091.34, 1547.75, 378.833, 0, 0, 0, 0, 100, 0),
@@ -540,7 +540,7 @@ INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `positio
 (@GUID + 5, 6, 4046.1, 1558.39, 378.833, 0, 0, 0, 0, 100, 0);
 
 DELETE FROM `waypoint_data` WHERE `id` = @GUID + 4;
-INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `orientation`, `delay`, `move_flag`, `action`, `action_chance`, `wpguid`) VALUES 
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `orientation`, `delay`, `move_flag`, `action`, `action_chance`, `wpguid`) VALUES
 (@GUID + 4, 1, 4093.06, 1551.23, 378.834, 0, 0, 0, 0, 100, 0),
 (@GUID + 4, 2, 4090.19, 1551.69, 378.834, 0, 0, 0, 0, 100, 0),
 (@GUID + 4, 3, 4074.18, 1568.44, 378.829, 0, 0, 0, 0, 100, 0),
@@ -564,7 +564,7 @@ INSERT INTO `creature_path` (`guid`, `path`) VALUES
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Sorcerer Mogu
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 61250, 1008, 6125, 6125, 760, 1, 0, 0, 4195.52, 1495.25, 424.018, 1.47879, 7200, 0, 0, 1, 0, 0, 0, 33816576, 0),
 (@GUID + 2, 61250, 1008, 6125, 6125, 760, 1, 0, 0, 4183.19, 1495.07, 424.018, 1.58427, 7200, 0, 0, 1, 0, 0, 0, 33816576, 0),
 (@GUID + 3, 61250, 1008, 6125, 6125, 760, 1, 0, 0, 4207.33, 1494.25, 424.018, 1.47879, 7200, 0, 0, 1, 0, 0, 0, 33816576, 0),
@@ -575,7 +575,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Bone Spider
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 65343, 1008, 6125, 6125, 760, 1, 0, 0, 4233.5, 1609.28, 410.444, 1.64426, 7200, 0, 0, 1, 0, 0, 0, 32768, 0),
 (@GUID + 2, 65343, 1008, 6125, 6125, 760, 1, 0, 0, 4231.43, 1604.59, 410.362, 4.68638, 7200, 0, 0, 1, 0, 0, 0, 32768, 0),
 (@GUID + 3, 65343, 1008, 6125, 6125, 760, 1, 0, 0, 4170.36, 1542.88, 383.228, 5.33641, 7200, 0, 0, 1, 0, 0, 0, 32768, 0),
@@ -600,7 +600,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Empyreal Focus
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 60776, 1008, 6125, 6125, 760, 1, 0, 0, 4054.24, 1876.64, 358.872, 5.49779, 7200, 0, 0, 1, 0, 0, 0, 33554432, 0),
 (@GUID + 2, 60776, 1008, 6125, 6125, 760, 1, 0, 0, 3992.02, 1876.64, 358.872, 3.92699, 7200, 0, 0, 1, 0, 0, 0, 33554432, 0),
 (@GUID + 3, 60776, 1008, 6125, 6125, 760, 1, 0, 0, 4067.13, 1907.75, 358.872, 0, 7200, 0, 0, 1, 0, 0, 0, 33554432, 0),
@@ -612,7 +612,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 /*---------------------------------------------------------------------------------------------------------------*/
 -- General Purpose Bunny JMF (Look 2, Flying\)
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 59677, 1008, 6125, 6125, 760, 1, 0, 0, 4101.95, 1517.09, 375.731, 0, 7200, 0, 0, 1, 0, 0, 0, 33554432, 0),
 (@GUID + 2, 59677, 1008, 6125, 6125, 760, 1, 0, 0, 4101.83, 1596.03, 376.201, 0, 7200, 0, 0, 1, 0, 0, 0, 33554432, 0),
 (@GUID + 3, 59677, 1008, 6125, 6125, 760, 1, 0, 0, 4044.16, 1518.42, 376.107, 0, 7200, 0, 0, 1, 0, 0, 0, 33554432, 0),
@@ -622,7 +622,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Mogu'shan Warden
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 64947, 1008, 6125, 6125, 760, 1, 0, 0, 4059.69, 1692.13, 363.301, 0.0000399968, 7200, 0, 0, 1, 0, 0, 0, 32832, 0),
 (@GUID + 2, 64947, 1008, 6125, 6125, 760, 1, 0, 0, 4015.55, 1828.8, 358.867, 4.61707, 7200, 0, 0, 1, 0, 0, 0, 32832, 0),
 (@GUID + 3, 64947, 1008, 6125, 6125, 760, 1, 0, 0, 4017.13, 1847.62, 358.875, 4.71423, 7200, 0, 0, 1, 0, 0, 0, 32832, 0);
@@ -631,7 +631,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Mogu'shan Warden
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 64061, 1008, 6125, 6125, 760, 1, 0, 0, 4059.66, 1700.13, 363.304, 0.0000623791, 7200, 0, 0, 1, 0, 0, 0, 32832, 0),
 (@GUID + 2, 64061, 1008, 6125, 6125, 760, 1, 0, 0, 4030.54, 1829.01, 358.867, 4.61707, 7200, 0, 0, 1, 0, 0, 0, 32832, 0),
 (@GUID + 3, 64061, 1008, 6125, 6125, 760, 1, 0, 0, 4029.98, 1847.68, 358.875, 4.71423, 7200, 0, 0, 1, 0, 0, 0, 32832, 0);
@@ -640,7 +640,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Mogu'shan Arcanist
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 64063, 1008, 6125, 6125, 760, 1, 0, 0, 4023.23, 1828.29, 358.858, 4.61707, 7200, 0, 0, 1, 0, 0, 0, 32832, 0),
 (@GUID + 2, 64063, 1008, 6125, 6125, 760, 1, 0, 0, 4009.41, 1852.47, 358.873, 4.71423, 7200, 0, 0, 1, 0, 0, 0, 32832, 0),
 (@GUID + 3, 64063, 1008, 6125, 6125, 760, 1, 0, 0, 4036.97, 1853.23, 358.872, 4.71423, 7200, 0, 0, 1, 0, 0, 0, 32832, 0);
@@ -649,7 +649,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Core Target Stalker
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 60960, 1008, 6125, 6125, 760, 1, 0, 0, 3988.48, 1873.1, 358.872, 3.91917, 7200, 0, 0, 1, 0, 0, 0, 33554688, 0),
 (@GUID + 2, 60960, 1008, 6125, 6125, 760, 1, 0, 0, 4057.78, 1873.1, 358.872, 5.48581, 7200, 0, 0, 1, 0, 0, 0, 33554688, 0),
 (@GUID + 3, 60960, 1008, 6125, 6125, 760, 1, 0, 0, 3974.13, 1907.75, 358.872, 3.14504, 7200, 0, 0, 1, 0, 0, 0, 33554688, 0),
@@ -661,14 +661,14 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Elegon
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 60410, 1008, 6125, 6125, 760, 1, 0, 0, 4023.13, 1907.75, 360, 4.71239, 7200, 0, 0, 1, 0, 0, 0, 0, 0),
 (@GUID + 2, 60410, 1008, 6125, 6125, 760, 1, 0, 0, 4023.13, 1907.75, 360, 4.71239, 7200, 0, 0, 1, 0, 0, 0, 0, 0),
 (@GUID + 3, 60410, 1008, 6125, 6125, 760, 1, 0, 0, 4023.13, 1907.75, 360, 4.71239, 7200, 0, 0, 1, 0, 0, 0, 0, 0);
 
 UPDATE `gameobject_template` SET `data1` = 214383 WHERE `entry` = 214383;
 DELETE FROM `gameobject_loot_template` WHERE `entry` = 214383;
-INSERT INTO `gameobject_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES 
+INSERT INTO `gameobject_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
 (214383, 86133, 38, 1, 1, 1, 1),
 (214383, 86140, 31, 1, 3, 1, 1),
 (214383, 86132, 31, 1, 2, 1, 1),
@@ -708,54 +708,54 @@ INSERT INTO `gameobject_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Stone Guard Controller
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 60089, 1008, 6125, 6125, 760, 1, 0, 0, 3899.2, 1234.37, 466.262, 4.70953, 7200, 0, 0, 1, 0, 0, 0, 33554432, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Cobalt Guardian
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 60051, 1008, 6125, 6125, 760, 1, 0, 0, 3870.75, 1246.28, 466.364, 4.54348, 28800, 0, 0, 1, 0, 0, 0, 64, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Jasper Guardian
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 59915, 1008, 6125, 6125, 760, 1, 0, 0, 3919.89, 1258.59, 466.363, 4.66991, 28800, 0, 0, 1, 0, 0, 0, 64, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Ghost Essence
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 62004, 1008, 6125, 6125, 760, 1, 0, 0, 3900.33, 1340.38, 474.136, 0, 7200, 0, 0, 1, 0, 0, 0, 33554496, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Jade Guardian
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 60043, 1008, 6125, 6125, 760, 1, 0, 0, 3878.93, 1258.49, 466.363, 4.69497, 28800, 0, 0, 1, 0, 0, 0, 64, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Amethyst Guardian
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 60047, 1008, 6125, 6125, 760, 1, 0, 0, 3928, 1246.34, 466.363, 4.71147, 28800, 0, 0, 1, 0, 0, 0, 64, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Gara'jal the Spiritbinder
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 60143, 1008, 6125, 6125, 760, 1, 0, 0, 4276.96, 1341.28, 454.459, 3.13439, 7200, 0, 0, 1, 0, 0, 0, 0, 0);
 
 UPDATE `creature_template` SET `lootid` = 60143 WHERE `entry` = 60143;
 DELETE FROM `creature_loot_template` WHERE `entry` = 60143;
-INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES 
+INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
 (60143, 86038, 21, 1, 1, 1, 1),
 (60143, 85991, 17, 1, 3, 1, 1),
 (60143, 86041, 16, 1, 2, 1, 1),
@@ -793,12 +793,12 @@ INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `l
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Feng the Accursed
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 60009, 1008, 6125, 6125, 760, 1, 0, 0, 4041.98, 1341.86, 466.388, 3.14016, 28800, 0, 0, 1, 0, 0, 0, 32832, 0);
 
 UPDATE `creature_template` SET `lootid` = 60009 WHERE `entry` = 60009;
 DELETE FROM `creature_loot_template` WHERE `entry` = 60009;
-INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES 
+INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
 (60009, 85986, 18, 1, 3, 1, 1),
 (60009, 89803, 17, 1, 1, 1, 1),
 (60009, 89802, 12, 1, 2, 1, 1),
@@ -837,75 +837,75 @@ INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `l
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Zandalari War Wyvern
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 60385, 1008, 6125, 6125, 760, 1, 0, 0, 4220.87, 1416.62, 454.417, 5.10825, 7200, 0, 0, 1, 0, 0, 0, 256, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Mogu Runes (Horizontal Visual\)
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 64529, 1008, 6125, 6125, 760, 2, 0, 0, 4277.09, 1341.36, 454.543, 1.5708, 7200, 0, 0, 1, 0, 0, 16777216, 33554688, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Story Time
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 61352, 1008, 6125, 6125, 760, 1, 0, 0, 4226.74, 1486.16, 432.797, 1.51494, 7200, 0, 0, 1, 0, 0, 0, 33554432, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Invisible Stalker
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 65297, 1008, 6125, 6125, 760, 1, 0, 0, 4023.13, 1907.75, 378.083, 4.71239, 7200, 0, 0, 1, 0, 0, 0, 33555200, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Mogu'shan Engine Keeper
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 64068, 1008, 6125, 6125, 760, 1, 0, 0, 4023.67, 1844.99, 358.872, 4.71423, 7200, 0, 0, 1, 0, 0, 0, 32832, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Energy Vortex Stalker
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 61330, 1008, 6125, 6125, 760, 1, 0, 0, 4023.13, 1907.75, 358.872, 4.71239, 7200, 0, 0, 1, 0, 0, 0, 33555200, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Infinite Energy
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@GUID + 1, 65293, 1008, 6125, 6125, 760, 1, 0, 0, 4023.13, 1907.75, 378.167, 4.71239, 7200, 0, 0, 1, 0, 0, 0, 33554432, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Zian of the Endless Shadow
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
-(@GUID + 1, 60701, 1008, 6125, 6125, 760, 1, 0, 0, 4227.49, 1558.18, 438.804, 1.54848, 300, 0, 0, 43613700, 1051400, 0, 0, 0, 0);
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(@GUID + 1, 60701, 1008, 6125, 6125, 760, 1, 0, 0, 4227.49, 1558.18, 438.804, 1.54848, 7200, 0, 0, 43613700, 1051400, 0, 0, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Meng the Demented
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
-(@GUID + 1, 60708, 1008, 6125, 6125, 760, 1, 0, 0, 4197.54, 1591.49, 438.804, 6.24044, 300, 0, 0, 43613700, 0, 0, 0, 0, 0);
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(@GUID + 1, 60708, 1008, 6125, 6125, 760, 1, 0, 0, 4197.54, 1591.49, 438.804, 6.24044, 7200, 0, 0, 43613700, 0, 0, 0, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Qiang the Merciless
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
-(@GUID + 1, 60709, 1008, 6125, 6125, 760, 1, 0, 0, 4226.33, 1626.28, 438.804, 4.59662, 300, 0, 0, 43613700, 0, 0, 0, 0, 0);
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(@GUID + 1, 60709, 1008, 6125, 6125, 760, 1, 0, 0, 4226.33, 1626.28, 438.804, 4.59662, 7200, 0, 0, 43613700, 0, 0, 0, 0, 0);
 
 UPDATE `creature_template` SET `lootid` = 60709 WHERE `entry` = 60709;
 DELETE FROM `creature_loot_template` WHERE `entry` = 60709;
-INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES 
+INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
 (60709, 86047, 20, 1, 1, 1, 1),
 (60709, 86081, 15, 1, 3, 1, 1),
 (60709, 86076, 15, 1, 2, 1, 1),
@@ -943,48 +943,48 @@ INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `l
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Subetai the Swift
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
-(@GUID + 1, 60710, 1008, 6125, 6125, 760, 1, 0, 0, 4257.35, 1591.36, 438.805, 3.23001, 300, 0, 0, 43613700, 0, 0, 0, 0, 0);
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(@GUID + 1, 60710, 1008, 6125, 6125, 760, 1, 0, 0, 4257.35, 1591.36, 438.805, 3.23001, 7200, 0, 0, 43613700, 0, 0, 0, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Troll Explosives
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
-(@GUID + 1, 60644, 1008, 6125, 6125, 760, 1, 0, 0, 4196.7, 1372.44, 461.955, 4.52337, 300, 0, 0, 10, 0, 0, 0, 0, 0),
-(@GUID + 2, 60644, 1008, 6125, 6125, 760, 1, 0, 0, 4253.97, 1437.71, 445.37, 6.2693, 300, 0, 0, 10, 0, 0, 0, 0, 0),
-(@GUID + 3, 60644, 1008, 6125, 6125, 760, 1, 0, 0, 4196.72, 1310.78, 461.949, 1.6009, 300, 0, 0, 10, 0, 0, 0, 0, 0),
-(@GUID + 4, 60644, 1008, 6125, 6125, 760, 1, 0, 0, 4299.75, 1437.73, 445.373, 3.20664, 300, 0, 0, 10, 0, 0, 0, 0, 0),
-(@GUID + 5, 60644, 1008, 6125, 6125, 760, 1, 0, 0, 4187.24, 1347.68, 461.961, 3.15559, 300, 0, 0, 10, 0, 0, 0, 0, 0),
-(@GUID + 6, 60644, 1008, 6125, 6125, 760, 1, 0, 0, 4186.96, 1335.28, 461.961, 3.0904, 300, 0, 0, 10, 0, 0, 0, 0, 0),
-(@GUID + 7, 60644, 1008, 6125, 6125, 760, 1, 0, 0, 4202.1, 1360.21, 461.957, 4.69811, 300, 0, 0, 10, 0, 0, 0, 0, 0),
-(@GUID + 8, 60644, 1008, 6125, 6125, 760, 1, 0, 0, 4201.89, 1322.99, 461.958, 1.53609, 300, 0, 0, 10, 0, 0, 0, 0, 0),
-(@GUID + 9, 60644, 1008, 6125, 6125, 760, 1, 0, 0, 4254.59, 1422.13, 445.37, 6.25712, 300, 0, 0, 10, 0, 0, 0, 0, 0),
-(@GUID + 10, 60644, 1008, 6125, 6125, 760, 1, 0, 0, 4299.61, 1421.95, 445.375, 3.0794, 300, 0, 0, 10, 0, 0, 0, 0, 0),
-(@GUID + 11, 60644, 1008, 6125, 6125, 760, 1, 0, 0, 4262.79, 1414.4, 445.381, 1.56672, 300, 0, 0, 10, 0, 0, 0, 0, 0),
-(@GUID + 12, 60644, 1008, 6125, 6125, 760, 1, 0, 0, 4291.51, 1414.24, 445.38, 3.2027, 300, 0, 0, 10, 0, 0, 0, 0, 0);
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(@GUID + 1, 60644, 1008, 6125, 6125, 760, 1, 0, 0, 4196.7, 1372.44, 461.955, 4.52337, 7200, 0, 0, 10, 0, 0, 0, 0, 0),
+(@GUID + 2, 60644, 1008, 6125, 6125, 760, 1, 0, 0, 4253.97, 1437.71, 445.37, 6.2693, 7200, 0, 0, 10, 0, 0, 0, 0, 0),
+(@GUID + 3, 60644, 1008, 6125, 6125, 760, 1, 0, 0, 4196.72, 1310.78, 461.949, 1.6009, 7200, 0, 0, 10, 0, 0, 0, 0, 0),
+(@GUID + 4, 60644, 1008, 6125, 6125, 760, 1, 0, 0, 4299.75, 1437.73, 445.373, 3.20664, 7200, 0, 0, 10, 0, 0, 0, 0, 0),
+(@GUID + 5, 60644, 1008, 6125, 6125, 760, 1, 0, 0, 4187.24, 1347.68, 461.961, 3.15559, 7200, 0, 0, 10, 0, 0, 0, 0, 0),
+(@GUID + 6, 60644, 1008, 6125, 6125, 760, 1, 0, 0, 4186.96, 1335.28, 461.961, 3.0904, 7200, 0, 0, 10, 0, 0, 0, 0, 0),
+(@GUID + 7, 60644, 1008, 6125, 6125, 760, 1, 0, 0, 4202.1, 1360.21, 461.957, 4.69811, 7200, 0, 0, 10, 0, 0, 0, 0, 0),
+(@GUID + 8, 60644, 1008, 6125, 6125, 760, 1, 0, 0, 4201.89, 1322.99, 461.958, 1.53609, 7200, 0, 0, 10, 0, 0, 0, 0, 0),
+(@GUID + 9, 60644, 1008, 6125, 6125, 760, 1, 0, 0, 4254.59, 1422.13, 445.37, 6.25712, 7200, 0, 0, 10, 0, 0, 0, 0, 0),
+(@GUID + 10, 60644, 1008, 6125, 6125, 760, 1, 0, 0, 4299.61, 1421.95, 445.375, 3.0794, 7200, 0, 0, 10, 0, 0, 0, 0, 0),
+(@GUID + 11, 60644, 1008, 6125, 6125, 760, 1, 0, 0, 4262.79, 1414.4, 445.381, 1.56672, 7200, 0, 0, 10, 0, 0, 0, 0, 0),
+(@GUID + 12, 60644, 1008, 6125, 6125, 760, 1, 0, 0, 4291.51, 1414.24, 445.38, 3.2027, 7200, 0, 0, 10, 0, 0, 0, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Qin-xi
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
-(@GUID + 1, 60399, 1008, 6125, 6125, 760, 1, 0, 0, 3817.66, 1517.56, 368.22, 3.17812, 300, 0, 0, 360, 0, 0, 0, 0, 0);
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(@GUID + 1, 60399, 1008, 6125, 6125, 760, 1, 0, 0, 3817.66, 1517.56, 368.22, 3.17812, 7200, 0, 0, 360, 0, 0, 0, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Jan-xi
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
-(@GUID + 1, 60400, 1008, 6125, 6125, 760, 1, 0, 0, 3817.58, 1583.18, 368.22, 3.17812, 300, 0, 0, 360, 0, 0, 0, 0, 0);
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(@GUID + 1, 60400, 1008, 6125, 6125, 760, 1, 0, 0, 3817.58, 1583.18, 368.22, 3.17812, 7200, 0, 0, 360, 0, 0, 0, 0, 0);
 
 DELETE FROM `spell_target_position` WHERE `id` = 127712;
-INSERT INTO `spell_target_position` (`id`, `effIndex`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES 
+INSERT INTO `spell_target_position` (`id`, `effIndex`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
 (127712, 0, 1008, 3870, 1550, 362.3, 0);
 
 UPDATE `creature_template` SET `lootid` = 60400 WHERE `entry` = 60400;
 DELETE FROM `creature_loot_template` WHERE `entry` = 60400;
-INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES 
+INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
 (60400, 86144, 22, 1, 1, 1, 1),
 (60400, 86146, 17, 1, 3, 1, 1),
 (60400, 87827, 16, 1, 2, 1, 1),
@@ -1022,21 +1022,21 @@ INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `l
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Ancient Mogu Machine
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
-(@GUID + 1, 60648, 1008, 6125, 6125, 760, 1, 0, 0, 3869.82, 1550.58, 362.283, 3.24919, 300, 0, 0, 1, 0, 0, 0, 0, 0);
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(@GUID + 1, 60648, 1008, 6125, 6125, 760, 1, 0, 0, 3869.82, 1550.58, 362.283, 3.24919, 7200, 0, 0, 1, 0, 0, 0, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Controller
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
-(@GUID + 1, 60984, 1008, 6125, 6125, 760, 1, 0, 0, 4227.09, 1592.15, 438.804, 1.4834, 300, 0, 0, 843184, 0, 0, 0, 0, 0);
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(@GUID + 1, 60984, 1008, 6125, 6125, 760, 1, 0, 0, 4227.09, 1592.15, 438.804, 1.4834, 7200, 0, 0, 843184, 0, 0, 0, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Wind Wall
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 215114, 1008, 6125, 6125, 760, 1, 4262.08, 1577.39, 438.804, 2.74763, 0, 0, 0, 1, 7200, 255, 0),
 (@GUID + 2, 215114, 1008, 6125, 6125, 760, 1, 4192.52, 1577.41, 438.804, 0.334916, 0, 0, 0, 1, 7200, 255, 0),
 (@GUID + 3, 215114, 1008, 6125, 6125, 760, 1, 4262.08, 1577.39, 438.804, 2.74763, 0, 0, 0, 1, 7200, 255, 0),
@@ -1050,7 +1050,7 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Mogu_Raised_Gate01
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 213933, 1008, 6125, 6125, 760, 1, 4276.79, 1382.72, 454.158, 4.71239, 0, 0, 0, 1, 7200, 255, 0),
 (@GUID + 2, 213933, 1008, 6125, 6125, 760, 1, 4236.15, 1341.33, 454.158, 0, 0, 0, 0, 1, 7200, 255, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -1058,7 +1058,7 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Feng's Door
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 214452, 1008, 6125, 6125, 760, 1, 4077.35, 1341.2, 466.305, 0.0109063, 0, 0, 0, 1, 7200, 255, 0),
 (@GUID + 2, 214452, 1008, 6125, 6125, 760, 1, 4005.69, 1341.5, 466.304, 0.0109063, 0, 0, 0, 1, 7200, 255, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -1066,301 +1066,301 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Celestial Control Console
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 211650, 1008, 6125, 6125, 760, 1, 4023.13, 1863.6, 358.788, 4.70866, 0, 0, 0, 1, 7200, 255, 1);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Celestial's Door
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 214412, 1008, 6125, 6125, 760, 1, 4023.78, 1834.62, 358.788, 1.56657, 0, 0, 0, 1, 7200, 255, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Nullification Barrier
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 211626, 1008, 6125, 6125, 760, 65535, 4027.3, 1331.39, 466.3, 3.11775, 0, 0, 0.999929, 0.0119199, 300, 0, 1);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Shroud of Reversal
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 211628, 1008, 6125, 6125, 760, 1, 4028.32, 1352.85, 468.809, 5.25201, 0, 0, 0, 1, 7200, 255, 1);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Titan Energy Ring
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 213528, 1008, 6125, 6125, 760, 1, 4023.16, 1907.61, 300.17, 3.14159, 0, 0, 1, -0.0000000437114, 7200, 255, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Stone Guards Door
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 214497, 1008, 6125, 6125, 760, 1, 3899.17, 1140.78, 481.129, 4.71198, 0, 0, 0, 1, 7200, 255, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Mogu Energy Rune
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 213955, 1008, 6125, 6125, 760, 1, 4023.26, 1934.44, 95.6294, 3.1431, 0, 0, 1, -0.0000000437114, 7200, 255, 2);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Mogu Energy Rune
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 213952, 1008, 6125, 6125, 760, 1, 4023.26, 1936.81, 137.717, 3.1431, 0, 0, 1, -0.0000000437114, 7200, 255, 2);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Mogu Energy Rune
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 213948, 1008, 6125, 6125, 760, 1, 4023.26, 1939.19, 181.318, 3.1431, 0, 0, 1, -0.0000000437114, 7200, 255, 2);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Mogu Energy Rune
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 213954, 1008, 6125, 6125, 760, 1, 3996.32, 1907.69, 95.6294, 4.71239, 0, 0, 1, -0.0000000437114, 7200, 255, 2);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Mogu Energy Rune
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 213949, 1008, 6125, 6125, 760, 1, 4052.37, 1907.5, 137.717, 1.5708, 0, 0, 1, -0.0000000437114, 7200, 255, 2);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Mogu Energy Rune
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 213944, 1008, 6125, 6125, 760, 1, 4023.26, 1941.81, 224.676, 3.1431, 0, 0, 1, -0.0000000437114, 7200, 255, 2);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Mogu Energy Rune
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 213937, 1008, 6125, 6125, 760, 1, 4023.26, 1943.66, 260.993, 3.1431, 0, 0, 1, -0.0000000437114, 7200, 255, 2);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Mogu Energy Rune
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 213951, 1008, 6125, 6125, 760, 1, 3993.95, 1907.69, 137.717, 4.71239, 0, 0, 1, -0.0000000437114, 7200, 255, 2);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Mogu Energy Rune
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 213953, 1008, 6125, 6125, 760, 1, 4023.06, 1880.76, 95.6294, 0, 0, 0, 1, -0.0000000437114, 7200, 255, 2);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Mogu Energy Rune
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 213945, 1008, 6125, 6125, 760, 1, 4054.75, 1907.5, 181.318, 1.5708, 0, 0, 1, -0.0000000437114, 7200, 255, 2);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Mogu Energy Rune
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 213947, 1008, 6125, 6125, 760, 1, 3991.57, 1907.69, 181.318, 4.71239, 0, 0, 1, -0.0000000437114, 7200, 255, 2);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Mogu Energy Rune
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 213941, 1008, 6125, 6125, 760, 1, 4057.38, 1907.5, 224.676, 1.5708, 0, 0, 1, -0.0000000437114, 7200, 255, 2);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Mogu Energy Rune
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 213950, 1008, 6125, 6125, 760, 1, 4023.06, 1878.39, 137.717, 0, 0, 0, 1, -0.0000000437114, 7200, 255, 2);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Mogu Energy Rune
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 213940, 1008, 6125, 6125, 760, 1, 4059.22, 1907.5, 260.993, 1.5708, 0, 0, 1, -0.0000000437114, 7200, 255, 2);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Mogu Energy Rune
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 213943, 1008, 6125, 6125, 760, 1, 3988.94, 1907.69, 224.676, 4.71239, 0, 0, 1, -0.0000000437114, 7200, 255, 2);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Mogu Energy Rune
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 213938, 1008, 6125, 6125, 760, 1, 3987.1, 1907.69, 260.993, 4.71239, 0, 0, 1, -0.0000000437114, 7200, 255, 2);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Mogu Energy Rune
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 213946, 1008, 6125, 6125, 760, 1, 4023.06, 1876.01, 181.318, 0, 0, 0, 1, -0.0000000437114, 7200, 255, 2);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Titan Energy Ring
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 213527, 1008, 6125, 6125, 760, 1, 4023.16, 1907.61, 326.197, 3.14159, 0, 0, 1, -0.0000000437114, 7200, 255, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Titan Energy Discs
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 213506, 1008, 6125, 6125, 760, 1, 4022.84, 1908.99, 358.941, 3.14159, 0, 0, 1, -0.0000000437114, 7200, 255, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Titan Energy Ring
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 213529, 1008, 6125, 6125, 760, 1, 4023.16, 1907.61, 353.23, 3.14159, 0, 0, 1, -0.0000000437114, 7200, 255, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Mogu Energy Rune
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 213942, 1008, 6125, 6125, 760, 1, 4023.06, 1873.38, 224.676, 0, 0, 0, 1, -0.0000000437114, 7200, 255, 2);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Mogu Energy Rune
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 213939, 1008, 6125, 6125, 760, 1, 4023.06, 1871.54, 260.993, 0, 0, 0, 1, -0.0000000437114, 7200, 255, 2);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Mysterious Wall
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 213373, 1008, 6125, 6125, 760, 1, 4227.27, 1560.16, 423.97, 3.14159, 0, 0, 1, -0.0000000437114, 7200, 255, 1);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Ancient Mogu Door
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 213285, 1008, 6125, 6125, 760, 1, 4277.06, 1443.34, 445.364, 4.71239, 0, 0, 1, -0.0000000437114, 7200, 255, 1);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Outer Doors
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 210868, 1008, 0, 0, 760, 1, 3699.75, 545.34, 639.629, 3.01941, 0, 0, 0.998135, 0.0610487, 7200, 255, 1);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Inner Doors
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 211693, 1008, 0, 0, 760, 1, 3745.49, 539.723, 639.013, 3.01941, 0, 0, 0.998135, 0.0610487, 7200, 255, 1);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Ancient Mogu Door
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 213258, 1008, 6125, 6125, 760, 1, 3998.88, 1550.36, 374.166, 0, 0, 0, 1, -0.0000000437114, 7200, 255, 1);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Ancient Mogu Door
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 214696, 1008, 6125, 6125, 760, 1, 4177.42, 1341.57, 461.907, 0, 0, 0, 1, -0.0000000437114, 7200, 255, 1);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Doodad_Mogu_Statue_MoguShanVaults004
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 213247, 1008, 6125, 6125, 760, 1, 4069.48, 1389.81, 401.449, 4.27606, 0, 0, 1, -0.0000000437114, 7200, 255, 2);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Doodad_Mogu_Statue_MoguShanVaults003
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 213248, 1008, 6125, 6125, 760, 1, 4014.91, 1389.01, 401.449, 5.32326, 0, 0, 1, -0.0000000437114, 7200, 255, 1);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Doodad_Mogu_Statue_MoguShanVaults001
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 213246, 1008, 6125, 6125, 760, 1, 4069.11, 1293.33, 401.449, 2.09439, 0, 0, 1, -0.0000000437114, 7200, 255, 1);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Doodad_Mogu_Statue_MoguShanVaults002
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 213245, 1008, 6125, 6125, 760, 1, 4014.96, 1295.43, 401.449, 0.872664, 0, 0, 1, -0.0000000437114, 7200, 255, 1);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Ancient Mogu Door
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 214526, 1008, 6125, 6125, 760, 1, 3899.39, 1290.8, 470.851, 4.71239, 0, 0, 1, -0.0000000437114, 7200, 255, 1);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Instance Portal (Raid 4 Difficulties\)
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 214441, 1008, 6125, 6125, 760, 1, 3848.87, 1044.63, 492.389, 0.0197337, 0, 0, 0, 1, 7200, 255, 1);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Energy platform
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 213526, 1008, 6125, 6125, 760, 1, 4023.15, 1907.6, 360, 3.14159, 0.000488281, 0.00030613, 0.292623, 0.995623, 300, 0, 1);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Ancient Control Console
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 211584, 1008, 6125, 6125, 760, 1, 3942.39, 1550.27, 369.561, 0.0175383, 0, 0, 0, 1, 7200, 255, 1);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Terracotta Army Door
 SET @GUID = (SELECT MAX(guid) FROM `gameobject`);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@GUID + 1, 211603, 1008, 6125, 6125, 760, 1, 3934.41, 1524.99, 362.313, 3.12434, 0, 0, 0, 1, 7200, 255, 0),
 (@GUID + 2, 211603, 1008, 6125, 6125, 760, 1, 3934.33, 1575.06, 362.313, 3.12187, 0, 0, 0, 1, 7200, 255, 0);
 /*---------------------------------------------------------------------------------------------------------------*/

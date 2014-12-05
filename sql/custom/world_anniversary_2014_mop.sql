@@ -158,10 +158,19 @@ INSERT INTO creature_loot_template (entry, item, ChanceOrQuestChance, lootmode, 
 (500020, 50250, 5, 1, 3, 1, 1);
 
 -- Sanctuary
-DELETE FROM `spell_area` WHERE `area` IN (2037, 3479) AND `spell` IN (137080, 54661, 69737);
+DELETE FROM `spell_area` WHERE `area` IN (2037, 3479) AND `spell` IN (54661, 69737, 56401, 83100);
 INSERT INTO `spell_area` (`spell`, `area`, `autocast`) VALUES
-(137080, 2037, 1),  -- Maze
-(137080, 3479, 1);  -- Stairs
+(69737, 2037, 1),  -- Maze
+(69737, 3479, 1);  -- Stairs
+-- Dismount from flying mounts (CATA and MOP ONLY)
+INSERT INTO `spell_area` (`spell`, `area`, `autocast`) VALUES
+(56401, 2037, 1),  -- Maze
+(56401, 3479, 1),  -- Stairs
+(83100, 2037, 1),  -- Maze
+(83100, 3479, 1);  -- Stairs
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger` = -83100;
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES
+(-83100, 61286, 0, "Restricted Flight Area removed casts World Generic Dismount/Cancel Shapeshift");
 
 -- Set Phase in EoE to 256 so players don't see any NPCS / GOs
 -- This instance is closed, so it shouldn't hurt

@@ -1,4 +1,7 @@
 -- [c++ and SQL] Jewelcrafting - Gem Perfection implemented (Feedback #9573)
+DELETE FROM `spell_learn_spell` WHERE `SpellID` = 55534;
+INSERT INTO `spell_learn_spell` (`entry`, `SpellID`, `Active`) VALUES
+(51311, 55534, 1);
 ALTER TABLE `skill_extra_item_template` ADD (`newItemId` mediumint(8) unsigned NOT NULL DEFAULT 0);
 DELETE FROM `skill_extra_item_template` WHERE `requiredSpecialization` = 55534;
 INSERT INTO `skill_extra_item_template` (`spellId`, `requiredSpecialization`, `additionalCreateChance`, `additionalMaxNum`, `newItemId`) VALUES

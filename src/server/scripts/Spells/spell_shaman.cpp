@@ -1186,8 +1186,8 @@ class spell_sha_fulmination : public SpellScriptLoader
                         SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(SPELL_SHA_LIGHTNING_SHIELD_ORB_DAMAGE);
                         if (!spellInfo)
                             return;
-                        int32 basePoints = _player->CalculateSpellDamage(target, spellInfo, 0);
-                        uint32 damage = usedCharges * _player->SpellDamageBonusDone(target, spellInfo, basePoints, SPELL_DIRECT_DAMAGE);
+                        int32 basePoints = _player->CalculateSpellDamage(target, spellInfo, EFFECT_0);
+                        uint32 damage = usedCharges * _player->SpellDamageBonusDone(target, spellInfo, EFFECT_0, basePoints, SPELL_DIRECT_DAMAGE);
 
                         _player->CastCustomSpell(SPELL_SHA_FULMINATION_TRIGGERED, SPELLVALUE_BASE_POINT0, damage, target, true, NULL, fulminationAura);
                         lightningShield->SetCharges(lsCharges - usedCharges);

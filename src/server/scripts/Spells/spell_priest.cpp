@@ -2542,8 +2542,8 @@ public:
                 // Rapid Renewal
                 if (AuraEffect const* empoweredRenewAurEff = caster->GetAuraEffect(SPELL_PRIEST_RAPID_RENEWAL, EFFECT_2))
                 {
-                    uint32 heal = caster->SpellHealingBonusDone(GetTarget(), GetSpellInfo(), aurEff->GetAmount(), DOT);
-                    heal = GetTarget()->SpellHealingBonusTaken(caster, GetSpellInfo(), heal, DOT);
+                    uint32 heal = caster->SpellHealingBonusDone(GetTarget(), GetSpellInfo(), aurEff->GetEffIndex(), aurEff->GetAmount(), DOT);
+                    heal = GetTarget()->SpellHealingBonusTaken(caster, GetSpellInfo(), aurEff->GetEffIndex(), heal, DOT);
                     int32 basepoints0 = CalculatePct(int32(heal) * aurEff->GetTotalTicks(), empoweredRenewAurEff->GetAmount());
                     caster->CastCustomSpell(GetTarget(), SPELL_PRIEST_RAPID_RENEWAL_HEAL, &basepoints0, NULL, NULL, true, NULL, aurEff);
                 }

@@ -666,6 +666,7 @@ Player::Player(WorldSession* session)
     , m_phaseMgr(this)
     , m_archaeologyMgr(this)
     , m_bgRoles()
+    , hasForcedMovement_()
 {
 #ifdef _MSC_VER
 #pragma warning(default:4355)
@@ -6754,6 +6755,9 @@ void Player::UpdateHasteAffectedPowerRegeneration(CombatRating cr, float value, 
     }
 
     ApplyPercentModFloatValue(UNIT_MOD_HASTE_REGEN, value, !apply);
+
+    if (getClass() == CLASS_DEATH_KNIGHT)
+        UpdateRuneRegen();
 }
 
 void Player::SetRegularAttackTime()
@@ -8648,7 +8652,7 @@ void Player::UpdateArea(uint32 newArea)
 
     // previously this was in UpdateZone (but after UpdateArea) so nothing will break
     pvpInfo.inNoPvPArea = false;
-    if (HasAura(69737) || // "Custom" Anniversary sanctuary spell
+    if (HasAura(137080) || // "Custom" Anniversary sanctuary spell
         (area && area->IsSanctuary()))    // in sanctuary
     {
         SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY);
@@ -22010,6 +22014,7 @@ void Player::SendResetInstanceFailed(uint32 reason, uint32 MapId)
     WorldPacket data(SMSG_INSTANCE_RESET_FAILED);
     data << uint32(MapId);
     data.WriteBits(reason, 2);
+    data.FlushBits();
     GetSession()->SendPacket(&data);
 }
 
@@ -26967,24 +26972,9 @@ void Player::UpdateCharmedAI()
     }
 }
 
-uint32 Player::GetRuneTypeBaseCooldown(RuneType runeType) const
+uint32 Player::GetRuneBaseCooldown() const
 {
-    float cooldown = RUNE_BASE_COOLDOWN;
-    float hastePct = 0.0f;
-
-    AuraEffectList const& regenAura = GetAuraEffectsByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
-    for (AuraEffectList::const_iterator i = regenAura.begin();i != regenAura.end(); ++i)
-        if ((*i)->GetMiscValue() == POWER_RUNES && RuneType((*i)->GetMiscValueB()) == runeType)
-            cooldown /= ((*i)->GetAmount() + 100.0f) / 100.0f;
-
-    // Runes cooldown are now affected by player's haste from equipment ...
-    hastePct = GetRatingBonusValue(CR_HASTE_MELEE);
-    hastePct += GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_HASTE);
-    hastePct += GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_RANGED_HASTE) / 10.0f;
-
-    cooldown *=  1.0f - (hastePct / 100.0f);
-
-    return cooldown;
+    return uint32(RUNE_BASE_COOLDOWN * GetFloatValue(UNIT_MOD_HASTE_REGEN) + 0.5f);
 }
 
 void Player::RemoveRunesBySpell(uint32 spell_id)
@@ -27019,6 +27009,7 @@ void Player::ResyncRunes(uint8 count)
 {
     WorldPacket data(SMSG_RESYNC_RUNES, 4 + count * 2);
     data.WriteBits(count, 23);
+    data.FlushBits();
 
     for (uint32 i = 0; i < count; ++i)
     {
@@ -27080,7 +27071,8 @@ void Player::InitRunes()
         SetDeathRuneUsed(i, false);
     }
 
-    UpdateAllRunesRegen();
+    for (uint32 i = 0; i < NUM_RUNE_TYPES; ++i)
+        SetFloatValue(PLAYER_RUNE_REGEN_1 + i, 0.1f);
 }
 
 bool Player::IsBaseRuneSlotsOnCooldown(RuneType runeType) const
@@ -29174,6 +29166,57 @@ void Player::SendMovementSetCollisionHeight(float height)
     data.WriteByteSeq<0, 5, 4>(guid);
 
     SendDirectMessage(&data);
+}
+
+void Player::SendApplyMovementForce(bool apply, Position const &source, float force /*= 0.0f*/)
+{
+    ObjectGuid playerGuid = GetGUID();
+
+    if (apply)
+    {
+        // Forced movement can cumulate
+        if (hasForcedMovement())
+            return;
+
+        WorldPacket data(SMSG_APPLY_MOVEMENT_FORCE, 1 + 8 + 7 * 4);
+
+        data.WriteBitSeq<3, 5, 4, 6, 7, 1, 0, 2>(playerGuid);
+        data.WriteBits(1, 2);
+
+        data << float(source.GetPositionZ());
+        data << uint32(0);                  // Unk, sniffed value, not always the same
+        data.WriteByteSeq<5>(playerGuid);
+        data << uint32(1024);               // Unk, sniffed value, not always the same
+        data.WriteByteSeq<0>(playerGuid);
+        data << float(source.GetPositionY());
+        data.WriteByteSeq<7, 1>(playerGuid);
+        data << float(force);
+        data.WriteByteSeq<6, 2, 4>(playerGuid);
+        data << float(source.GetPositionX());
+        data.WriteByteSeq<3>(playerGuid);
+        data << uint32(268441055);          // Unk, sniffed value, not always the same
+
+        SendDirectMessage(&data);
+
+        hasForcedMovement_ = true;
+    }
+    else
+    {
+        if (!hasForcedMovement())
+            return;
+
+        WorldPacket data(SMSG_UNAPPLY_MOVEMENT_FORCE, 2 * 4 + 1 + 8);
+
+        data << uint32(1024);               // Unk, sniffed value, not always the same
+        data << uint32(268441055);          // Unk, sniffed value, not always the same
+
+        data.WriteBitSeq<6, 5, 7, 0, 4, 3, 1, 2>(playerGuid);
+        data.WriteByteSeq<2, 4, 5, 6, 3, 1, 0, 7>(playerGuid);
+
+        SendDirectMessage(&data);
+
+        hasForcedMovement_ = false;
+    }
 }
 
 bool Player::SetDisableGravity(bool disable, bool packetOnly/*=false*/)

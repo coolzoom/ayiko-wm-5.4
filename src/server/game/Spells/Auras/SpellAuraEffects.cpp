@@ -797,8 +797,8 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
             // Earth Shield
             if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_SHAMAN && m_spellInfo->SpellFamilyFlags[1] & 0x400)
             {
-                amount = caster->SpellHealingBonusDone(GetBase()->GetUnitOwner(), GetSpellInfo(), amount, SPELL_DIRECT_DAMAGE);
-                amount = GetBase()->GetUnitOwner()->SpellHealingBonusTaken(caster, GetSpellInfo(), amount, SPELL_DIRECT_DAMAGE);
+                amount = caster->SpellHealingBonusDone(GetBase()->GetUnitOwner(), GetSpellInfo(), GetEffIndex(), amount, SPELL_DIRECT_DAMAGE);
+                amount = GetBase()->GetUnitOwner()->SpellHealingBonusTaken(caster, GetSpellInfo(), GetEffIndex(), amount, SPELL_DIRECT_DAMAGE);
             }
             break;
         case SPELL_AURA_PERIODIC_DAMAGE:
@@ -1245,10 +1245,7 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
     }
 
     if (DoneActualBenefit != 0.0f)
-    {
-        DoneActualBenefit *= caster->CalculateLevelPenalty(GetSpellInfo());
         amount += (int32)DoneActualBenefit;
-    }
 
     GetBase()->CallScriptEffectCalcAmountHandlers(this, amount, m_canBeRecalculated);
     amount *= GetBase()->GetStackAmount();
@@ -1268,9 +1265,9 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                 float temp_crit = 0.0f;
 
                 if (GetAuraType() == SPELL_AURA_PERIODIC_HEAL)
-                    temp_damage = caster->SpellHealingBonusDone(target, GetSpellInfo(), temp_damage, DOT, GetBase()->GetStackAmount());
+                    temp_damage = caster->SpellHealingBonusDone(target, GetSpellInfo(), GetEffIndex(), temp_damage, DOT, GetBase()->GetStackAmount());
                 else
-                    temp_damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), temp_damage, DOT, GetBase()->GetStackAmount());
+                    temp_damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), GetEffIndex(), temp_damage, DOT, GetBase()->GetStackAmount());
 
                 temp_crit = caster->GetSpellCrit(target, GetSpellInfo(), SpellSchoolMask(GetSpellInfo()->SchoolMask));
 
@@ -4795,7 +4792,9 @@ void AuraEffect::HandleModPowerRegen(AuraApplication const* aurApp, uint8 mode, 
             target->UpdateManaRegen();
             break;
         case POWER_RUNES:
-            target->UpdateAllRunesRegen();
+            // There's a separate effect for each rune type, but what for?
+            if (GetMiscValueB() == 0)
+                target->UpdateHasteAffectedPowerRegeneration(CR_HASTE_MELEE, GetAmount(), apply);
             break;
         case POWER_ENERGY:
             target->UpdateHasteAffectedPowerRegeneration(CR_HASTE_MELEE, GetAmount(), apply);
@@ -7189,9 +7188,9 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
         if (GetFixedDamageInfo().HasDamage())
             damage = GetFixedDamageInfo().GetFixedDamage();
         else
-            damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
+            damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount());
 
-        damage = target->SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
+        damage = target->SpellDamageBonusTaken(caster, GetSpellInfo(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount());
 
         // Calculate armor mitigation
         if (Unit::IsDamageReducedByArmor(GetSpellInfo()->GetSchoolMask(), GetSpellInfo(), GetEffIndex()))
@@ -7259,7 +7258,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                     int32 chaosBoltDamage;
                     chaosBolt = sSpellMgr->GetSpellInfo(116858);
                     chaosBoltDamage = _player->CalculateSpellDamage(target, chaosBolt, 0);
-                    chaosBoltDamage = caster->SpellDamageBonusDone(target, chaosBolt, chaosBoltDamage, SPELL_DIRECT_DAMAGE);
+                    chaosBoltDamage = caster->SpellDamageBonusDone(target, chaosBolt, EFFECT_0, chaosBoltDamage, SPELL_DIRECT_DAMAGE);
                     chaosBoltDamage = CalculatePct(chaosBoltDamage, 15);
                     chaosBoltDamage /= 3;
                     damage = chaosBoltDamage;
@@ -7302,8 +7301,8 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
             {
                 afflictionSpell = sSpellMgr->GetSpellInfo(146739);
                 afflictionDamage = caster->CalculateSpellDamage(target, afflictionSpell, 0);
-                afflictionDamage = caster->SpellDamageBonusDone(target, afflictionSpell, afflictionDamage, DOT);
-                afflictionDamage = target->SpellDamageBonusTaken(caster, afflictionSpell, afflictionDamage, DOT);
+                afflictionDamage = caster->SpellDamageBonusDone(target, afflictionSpell, EFFECT_0, afflictionDamage, DOT);
+                afflictionDamage = target->SpellDamageBonusTaken(caster, afflictionSpell, EFFECT_0, afflictionDamage, DOT);
                 afflictionDamage = CalculatePct(afflictionDamage, GetSpellInfo()->Effects[2].BasePoints);
 
                 caster->CastCustomSpell(target, 131740, &afflictionDamage, NULL, NULL, true);
@@ -7313,8 +7312,8 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
             {
                 afflictionSpell = sSpellMgr->GetSpellInfo(30108);
                 afflictionDamage = caster->CalculateSpellDamage(target, afflictionSpell, 0);
-                afflictionDamage = caster->SpellDamageBonusDone(target, afflictionSpell, afflictionDamage, DOT);
-                afflictionDamage = target->SpellDamageBonusTaken(caster, afflictionSpell, afflictionDamage, DOT);
+                afflictionDamage = caster->SpellDamageBonusDone(target, afflictionSpell, EFFECT_0, afflictionDamage, DOT);
+                afflictionDamage = target->SpellDamageBonusTaken(caster, afflictionSpell, EFFECT_0, afflictionDamage, DOT);
                 afflictionDamage = CalculatePct(afflictionDamage, GetSpellInfo()->Effects[2].BasePoints);
 
                 caster->CastCustomSpell(target, 131736, &afflictionDamage, NULL, NULL, true);
@@ -7324,8 +7323,8 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
             {
                 afflictionSpell = sSpellMgr->GetSpellInfo(27243);
                 afflictionDamage = caster->CalculateSpellDamage(target, afflictionSpell, 0);
-                afflictionDamage = caster->SpellDamageBonusDone(target, afflictionSpell, afflictionDamage, DOT);
-                afflictionDamage = target->SpellDamageBonusTaken(caster, afflictionSpell, afflictionDamage, DOT);
+                afflictionDamage = caster->SpellDamageBonusDone(target, afflictionSpell, EFFECT_0, afflictionDamage, DOT);
+                afflictionDamage = target->SpellDamageBonusTaken(caster, afflictionSpell, EFFECT_0, afflictionDamage, DOT);
                 afflictionDamage = CalculatePct(afflictionDamage, GetSpellInfo()->Effects[2].BasePoints);
 
                 caster->CastCustomSpell(target, 132566, &afflictionDamage, NULL, NULL, true);
@@ -7335,8 +7334,8 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
             {
                 afflictionSpell = sSpellMgr->GetSpellInfo(980);
                 afflictionDamage = caster->CalculateSpellDamage(target, afflictionSpell, 0);
-                afflictionDamage = caster->SpellDamageBonusDone(target, afflictionSpell, afflictionDamage, DOT);
-                afflictionDamage = target->SpellDamageBonusTaken(caster, afflictionSpell, afflictionDamage, DOT);
+                afflictionDamage = caster->SpellDamageBonusDone(target, afflictionSpell, EFFECT_0, afflictionDamage, DOT);
+                afflictionDamage = target->SpellDamageBonusTaken(caster, afflictionSpell, EFFECT_0, afflictionDamage, DOT);
                 afflictionDamage = CalculatePct(afflictionDamage, GetSpellInfo()->Effects[2].BasePoints);
 
                 agony->ModStackAmount(1);
@@ -7367,8 +7366,8 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 {
                     afflictionSpell = sSpellMgr->GetSpellInfo(172);
                     afflictionDamage = caster->CalculateSpellDamage(target, afflictionSpell, 0);
-                    afflictionDamage = caster->SpellDamageBonusDone(target, afflictionSpell, afflictionDamage, DOT);
-                    afflictionDamage = target->SpellDamageBonusTaken(caster, afflictionSpell, afflictionDamage, DOT);
+                    afflictionDamage = caster->SpellDamageBonusDone(target, afflictionSpell, EFFECT_0, afflictionDamage, DOT);
+                    afflictionDamage = target->SpellDamageBonusTaken(caster, afflictionSpell, EFFECT_0, afflictionDamage, DOT);
 
                     if (grimoireOfSacrifice)
                         AddPct(afflictionDamage, 50);
@@ -7380,8 +7379,8 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 {
                     afflictionSpell = sSpellMgr->GetSpellInfo(30108);
                     afflictionDamage = caster->CalculateSpellDamage(target, afflictionSpell, 0);
-                    afflictionDamage = caster->SpellDamageBonusDone(target, afflictionSpell, afflictionDamage, DOT);
-                    afflictionDamage = target->SpellDamageBonusTaken(caster, afflictionSpell, afflictionDamage, DOT);
+                    afflictionDamage = caster->SpellDamageBonusDone(target, afflictionSpell, EFFECT_0, afflictionDamage, DOT);
+                    afflictionDamage = target->SpellDamageBonusTaken(caster, afflictionSpell, EFFECT_0, afflictionDamage, DOT);
 
                     if (grimoireOfSacrifice)
                         AddPct(afflictionDamage, 50);
@@ -7393,8 +7392,8 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 {
                     afflictionSpell = sSpellMgr->GetSpellInfo(27243);
                     afflictionDamage = caster->CalculateSpellDamage(target, afflictionSpell, 0);
-                    afflictionDamage = caster->SpellDamageBonusDone(target, afflictionSpell, afflictionDamage, DOT);
-                    afflictionDamage = target->SpellDamageBonusTaken(caster, afflictionSpell, afflictionDamage, DOT);
+                    afflictionDamage = caster->SpellDamageBonusDone(target, afflictionSpell, EFFECT_0, afflictionDamage, DOT);
+                    afflictionDamage = target->SpellDamageBonusTaken(caster, afflictionSpell, EFFECT_0, afflictionDamage, DOT);
 
                     if (grimoireOfSacrifice)
                         AddPct(afflictionDamage, 50);
@@ -7406,8 +7405,8 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 {
                     afflictionSpell = sSpellMgr->GetSpellInfo(980);
                     afflictionDamage = caster->CalculateSpellDamage(target, afflictionSpell, 0);
-                    afflictionDamage = caster->SpellDamageBonusDone(target, afflictionSpell, afflictionDamage, DOT);
-                    afflictionDamage = target->SpellDamageBonusTaken(caster, afflictionSpell, afflictionDamage, DOT);
+                    afflictionDamage = caster->SpellDamageBonusDone(target, afflictionSpell, EFFECT_0, afflictionDamage, DOT);
+                    afflictionDamage = target->SpellDamageBonusTaken(caster, afflictionSpell, EFFECT_0, afflictionDamage, DOT);
 
                     if (grimoireOfSacrifice)
                         AddPct(afflictionDamage, 50);
@@ -7542,8 +7541,8 @@ void AuraEffect::HandlePeriodicHealthLeechAuraTick(Unit* target, Unit* caster) c
     if (GetFixedDamageInfo().HasDamage())
         damage = GetFixedDamageInfo().GetFixedDamage();
     else
-        damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
-    damage = target->SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
+        damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount());
+    damage = target->SpellDamageBonusTaken(caster, GetSpellInfo(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount());
 
     bool crit = false;
     if (GetFixedDamageInfo().HasCritChance())
@@ -7584,8 +7583,8 @@ void AuraEffect::HandlePeriodicHealthLeechAuraTick(Unit* target, Unit* caster) c
     {
         float gainMultiplier = GetSpellInfo()->Effects[GetEffIndex()].CalcValueMultiplier(caster);
 
-        uint32 heal = uint32(caster->SpellHealingBonusDone(caster, GetSpellInfo(), uint32(new_damage * gainMultiplier), DOT, GetBase()->GetStackAmount()));
-        heal = uint32(caster->SpellHealingBonusTaken(caster, GetSpellInfo(), heal, DOT, GetBase()->GetStackAmount()));
+        uint32 heal = uint32(caster->SpellHealingBonusDone(caster, GetSpellInfo(), GetEffIndex(), uint32(new_damage * gainMultiplier), DOT, GetBase()->GetStackAmount()));
+        heal = uint32(caster->SpellHealingBonusTaken(caster, GetSpellInfo(), GetEffIndex(), heal, DOT, GetBase()->GetStackAmount()));
 
         int32 gain = caster->HealBySpell(caster, GetSpellInfo(), heal);
         caster->getHostileRefManager().threatAssist(caster, gain * 0.5f, GetSpellInfo());
@@ -7651,15 +7650,15 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
 
         damage = uint32(target->CountPctFromMaxHealth(damage));
 
-        damage = caster->SpellHealingBonusDone(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
-        damage = target->SpellHealingBonusTaken(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
+        damage = caster->SpellHealingBonusDone(target, GetSpellInfo(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount());
+        damage = target->SpellHealingBonusTaken(caster, GetSpellInfo(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount());
     }
     else
     {
         if (GetFixedDamageInfo().HasDamage())
             damage = GetFixedDamageInfo().GetFixedDamage();
         else
-            damage = caster->SpellHealingBonusDone(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
+            damage = caster->SpellHealingBonusDone(target, GetSpellInfo(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount());
 
         // Wild Growth = amount + (6 - 2*doneTicks) * ticks* amount / 100
         if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DRUID && m_spellInfo->SpellIconID == 2864)
@@ -7674,7 +7673,7 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
             damage += addition;
         }
 
-        damage = target->SpellHealingBonusTaken(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
+        damage = target->SpellHealingBonusTaken(caster, GetSpellInfo(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount());
     }
 
     // Stay of Execution heal-per-tick calculation
@@ -7833,8 +7832,8 @@ void AuraEffect::HandleObsModPowerAuraTick(Unit* target, Unit* caster) const
         {
             int32 healthGain = caster->CountPctFromMaxHealth(20);
             auto spellInfo = sSpellMgr->GetSpellInfo(12051);
-            healthGain = target->SpellHealingBonusDone(target, spellInfo, healthGain, HEAL);
-            healthGain = target->SpellHealingBonusTaken(target, spellInfo, healthGain, HEAL);
+            healthGain = target->SpellHealingBonusDone(target, spellInfo, EFFECT_0, healthGain, HEAL);
+            healthGain = target->SpellHealingBonusTaken(target, spellInfo, EFFECT_0, healthGain, HEAL);
             target->HealBySpell(target, spellInfo, healthGain, false);
         }
 
@@ -7945,8 +7944,8 @@ void AuraEffect::HandleProcTriggerDamageAuraProc(AuraApplication* aurApp, ProcEv
     Unit* target = aurApp->GetTarget();
     Unit* triggerTarget = eventInfo.GetProcTarget();
     SpellNonMeleeDamage damageInfo(target, triggerTarget, GetId(), GetSpellInfo()->SchoolMask);
-    uint32 damage = target->SpellDamageBonusDone(triggerTarget, GetSpellInfo(), GetAmount(), SPELL_DIRECT_DAMAGE);
-    damage = triggerTarget->SpellDamageBonusTaken(target, GetSpellInfo(), damage, SPELL_DIRECT_DAMAGE);
+    uint32 damage = target->SpellDamageBonusDone(triggerTarget, GetSpellInfo(), GetEffIndex(), GetAmount(), SPELL_DIRECT_DAMAGE);
+    damage = triggerTarget->SpellDamageBonusTaken(target, GetSpellInfo(), GetEffIndex(), damage, SPELL_DIRECT_DAMAGE);
     target->CalculateSpellDamageTaken(&damageInfo, damage, GetSpellInfo());
     target->DealDamageMods(damageInfo.target, damageInfo.damage, &damageInfo.absorb);
     target->SendSpellNonMeleeDamageLog(&damageInfo);

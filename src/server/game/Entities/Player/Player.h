@@ -2028,8 +2028,7 @@ class Player final : public Unit, public GridObject<Player>
         void ApplyManaRegenBonus(int32 amount, bool apply);
         void ApplyHealthRegenBonus(int32 amount, bool apply);
         void UpdateManaRegen();
-        void UpdateRuneRegen(RuneType rune);
-        void UpdateAllRunesRegen();
+        void UpdateRuneRegen();
 
         bool CanSwitch() const;
         bool IsInWorgenForm() const { return HasAuraType(SPELL_AURA_ALLOW_WORGEN_TRANSFORM); }
@@ -2612,9 +2611,8 @@ class Player final : public Unit, public GridObject<Player>
         RuneType GetBaseRune(uint8 index) const { return RuneType(m_runes.runes[index].BaseRune); }
         RuneType GetCurrentRune(uint8 index) const { return RuneType(m_runes.runes[index].CurrentRune); }
         uint32 GetRuneCooldown(uint8 index) const { return m_runes.runes[index].Cooldown; }
-        uint32 GetRuneBaseCooldown(uint8 index) const { return GetRuneTypeBaseCooldown(GetBaseRune(index)); }
+        uint32 GetRuneBaseCooldown() const;
         uint32 GetRuneConvertSpell(uint8 index) const { return m_runes.runes[index].spell_id; }
-        uint32 GetRuneTypeBaseCooldown(RuneType runeType) const;
         bool IsBaseRuneSlotsOnCooldown(RuneType runeType) const;
         void SetDeathRuneUsed(uint8 index, bool apply) { m_runes.runes[index].DeathUsed = apply; }
         bool IsDeathRuneUsed(uint8 index) { return m_runes.runes[index].DeathUsed; }
@@ -2668,6 +2666,9 @@ class Player final : public Unit, public GridObject<Player>
         void SendMovementSetFeatherFall(bool apply);
         void SendMovementSetCollisionHeight(float height);
         bool SetDisableGravity(bool disable, bool packetOnly = false) override;
+        void SendApplyMovementForce(bool apply, Position const &source, float force = 0.0f);
+
+        bool hasForcedMovement() const { return hasForcedMovement_; }
 
         bool CanFly() const { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_CAN_FLY); }
 
@@ -3172,6 +3173,8 @@ class Player final : public Unit, public GridObject<Player>
         Trinity::SpellChargesTracker spellChargesTracker_;
 
         Trinity::RatedBgStats m_ratedBgStats;
+
+        bool hasForcedMovement_;
 };
 
 void AddItemsSetItem(Player*player, Item* item);

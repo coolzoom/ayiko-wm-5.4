@@ -477,9 +477,9 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     case 34428: // Victory Rush
                     {
                         if (m_caster->ToPlayer()->GetSpecializationId(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_WARRIOR_ARMS)
-                            damage = CalculatePct(m_caster->GetTotalAttackPowerValue(BASE_ATTACK), 67.2f);
+                            damage += CalculatePct(m_caster->GetTotalAttackPowerValue(BASE_ATTACK), 67.2f);
                         else
-                            damage = CalculatePct(m_caster->GetTotalAttackPowerValue(BASE_ATTACK), 56.0f);
+                            damage += CalculatePct(m_caster->GetTotalAttackPowerValue(BASE_ATTACK), 56.0f);
 
                         break;
                     }
@@ -489,7 +489,6 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                             break;
 
                         int32 pct = 0;
-
                         switch (m_caster->ToPlayer()->GetSpecializationId(m_caster->ToPlayer()->GetActiveSpec()))
                         {
                             case SPEC_WARRIOR_ARMS:
@@ -545,7 +544,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                             {
                                 uint8 stacks = aura->GetStackAmount();
                                 damage = stacks * (damage + 0.1f * m_caster->SpellBaseDamageBonusDone(m_spellInfo->GetSchoolMask()));
-                                damage = m_caster->SpellDamageBonusDone(unitTarget, m_spellInfo, damage, SPELL_DIRECT_DAMAGE);
+                                damage = m_caster->SpellDamageBonusDone(unitTarget, m_spellInfo, EFFECT_0, damage, SPELL_DIRECT_DAMAGE);
                                 uint32 count = 0;
                                 for (std::list<TargetInfo>::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
                                     ++count;
@@ -818,11 +817,11 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                 {
                     // Custom MoP script
                     case 123408:// Spinning Fire Blossom
-                        damage = CalculateMonkMeleeAttacks(m_caster, 1.5f, 6);
+                        damage = CalculateMonkMeleeAttacks(m_caster, 2.1f);
                         break;
                     case 117418:// Fists of Fury
                     {
-                        damage = CalculateMonkMeleeAttacks(m_caster, 7.5f, 14);
+                        damage = CalculateMonkMeleeAttacks(m_caster, 6.675f);
 
                         uint32 count = 0;
                         for (std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
@@ -839,7 +838,29 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     case 115687:// Jab (Axes)
                     case 115693:// Jab (Maces)
                     case 115695:// Jab (Swords)
-                        damage = CalculateMonkMeleeAttacks(m_caster, 1.5f, 14);
+                        damage = CalculateMonkMeleeAttacks(m_caster, 1.5f);
+                        break;
+                    case 100787:// Tiger Palm
+                        damage = CalculateMonkMeleeAttacks(m_caster, 3.0f);
+                        break;
+                    case 107270:// Spinning Crane Kick
+                        damage = CalculateMonkMeleeAttacks(m_caster, 1.75f);
+                        break;
+                    case 148187:// Rushing Jade Wind
+                        damage = CalculateMonkMeleeAttacks(m_caster, 1.4f);
+                        break;
+                    case 107428:// Rising Sun Kick
+                        damage = CalculateMonkMeleeAttacks(m_caster, 12.816f);
+                        m_caster->CastSpell(unitTarget, 130320, true);
+                        break;
+                    case 100784:// Blackout Kick
+                        damage = CalculateMonkMeleeAttacks(m_caster, 7.12f);
+                        break;
+                    case 124335:// Swift Reflexes
+                        damage = CalculateMonkMeleeAttacks(m_caster, 0.3f);
+                        break;
+                    case 121253:// Keg Smash
+                        damage = CalculateMonkMeleeAttacks(m_caster, 10.0f);
                         break;
                     case 115080:// Touch of Death
                         if (GetCaster())
@@ -852,44 +873,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                                 m_caster->DealDamage(unitTarget, damage, NULL, SPELL_DIRECT_DAMAGE, m_spellInfo->GetSchoolMask(), m_spellInfo, false);
                             }
                         }
-
                         return;
-                    case 100787:// Tiger Palm
-                        damage = CalculateMonkMeleeAttacks(m_caster, 3.0f, 14);
-                        break;
-                    case 107270:// Spinning Crane Kick
-                    case 148187:// Rushing Jade Wind
-                        damage = CalculateMonkMeleeAttacks(m_caster, 1.59f, 14);
-                        break;
-                    case 107428:// Rising Sun Kick
-                        damage = CalculateMonkMeleeAttacks(m_caster, 12.816f, 14);
-                        m_caster->CastSpell(unitTarget, 130320, true);
-                        break;
-                    case 100784:// Blackout Kick
-                        damage = CalculateMonkMeleeAttacks(m_caster, 7.12f, 14);
-                        break;
-                    case 124335:// Swift Reflexes
-                        if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                        {
-                            switch (m_caster->ToPlayer()->GetSpecializationId(m_caster->ToPlayer()->GetActiveSpec()))
-                            {
-                                case SPEC_MONK_BREWMASTER:
-                                    damage = CalculateMonkMeleeAttacks(m_caster, 0.3f, 5);
-                                    break;
-                                case SPEC_MONK_MISTWEAVER:
-                                    damage = CalculateMonkMeleeAttacks(m_caster, 0.3f, 6);
-                                    break;
-                                case SPEC_MONK_WINDWALKER:
-                                    damage = CalculateMonkMeleeAttacks(m_caster, 0.3f, 6);
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                        break;
-                    case 121253:// Keg Smash
-                        damage = CalculateMonkMeleeAttacks(m_caster, 8.12f, 11);
-                        break;
                     default:
                         break;
                 }
@@ -900,8 +884,8 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
 
         if (m_originalCaster && damage > 0 && apply_direct_bonus)
         {
-            damage = m_originalCaster->SpellDamageBonusDone(unitTarget, m_spellInfo, (uint32)damage, SPELL_DIRECT_DAMAGE);
-            damage = unitTarget->SpellDamageBonusTaken(m_originalCaster, m_spellInfo, (uint32)damage, SPELL_DIRECT_DAMAGE);
+            damage = m_originalCaster->SpellDamageBonusDone(unitTarget, m_spellInfo, effIndex, (uint32)damage, SPELL_DIRECT_DAMAGE);
+            damage = unitTarget->SpellDamageBonusTaken(m_originalCaster, m_spellInfo, effIndex, (uint32)damage, SPELL_DIRECT_DAMAGE);
         }
 
         // Holy Wrath - Need to be in this place as before SP scaling spell gets lowered to 0 and spell is not scaled
@@ -1931,8 +1915,8 @@ void Spell::EffectPowerDrain(SpellEffIndex effIndex)
         return;
 
     // add spell damage bonus
-    damage = m_caster->SpellDamageBonusDone(unitTarget, m_spellInfo, uint32(damage), SPELL_DIRECT_DAMAGE);
-    damage = unitTarget->SpellDamageBonusTaken(m_caster, m_spellInfo, uint32(damage), SPELL_DIRECT_DAMAGE);
+    damage = m_caster->SpellDamageBonusDone(unitTarget, m_spellInfo, effIndex, uint32(damage), SPELL_DIRECT_DAMAGE);
+    damage = unitTarget->SpellDamageBonusTaken(m_caster, m_spellInfo, effIndex, uint32(damage), SPELL_DIRECT_DAMAGE);
 
     int32 newDamage = -(unitTarget->ModifyPower(powerType, -damage));
 
@@ -2045,11 +2029,11 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
 
         // Death Pact - return pct of max health to caster
         if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && m_spellInfo->SpellFamilyFlags[0] & 0x00080000)
-            addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, int32(caster->CountPctFromMaxHealth(damage)), HEAL);
+            addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, effIndex, caster->CountPctFromMaxHealth(damage), HEAL);
         else
-            addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
+            addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
 
-        addhealth = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, addhealth, HEAL);
+        addhealth = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, effIndex, addhealth, HEAL);
 
         switch (m_spellInfo->Id)
         {
@@ -2145,21 +2129,24 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
                     caster->RemoveAurasDueToSpell(114637);
                 }
 
-                addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
+                addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
 
                 break;
             }
             case 115072:// Expel Harm
-            case 147489:// Expel Harm with glyph of Targeted Expulsion
-            {
-                if (caster->getClass() == CLASS_MONK && addhealth && (m_spellInfo->Id == 115072 || m_spellInfo->Id == 147489))
+                if (caster->getClass() == CLASS_MONK && addhealth)
                 {
-                    addhealth = Spell::CalculateMonkMeleeAttacks(m_caster, 7, 14);
-                    addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
+                    addhealth = CalculateMonkMeleeAttacks(caster, 7);
+                    addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
                 }
-
                 break;
-            }
+            case 147489:// Expel Harm with glyph of Targeted Expulsion
+                if (caster->getClass() == CLASS_MONK && addhealth)
+                {
+                    addhealth = CalculateMonkMeleeAttacks(caster, caster == unitTarget ? 7.0f : 3.5f);
+                    addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
+                }
+                break;
             case 121129:// Daybreak
             {
                 uint32 count = 0;
@@ -2172,7 +2159,7 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
                 if (count > 0)
                     addhealth /= count;
 
-                addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
+                addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
 
                 break;
             }
@@ -2284,7 +2271,7 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
     }
 }
 
-void Spell::EffectHealPct(SpellEffIndex /*effIndex*/)
+void Spell::EffectHealPct(SpellEffIndex effIndex)
 {
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
@@ -2334,13 +2321,13 @@ void Spell::EffectHealPct(SpellEffIndex /*effIndex*/)
             break;
     }
 
-    uint32 heal = m_originalCaster->SpellHealingBonusDone(unitTarget, m_spellInfo, unitTarget->CountPctFromMaxHealth(damage), HEAL);
-    heal = unitTarget->SpellHealingBonusTaken(m_originalCaster, m_spellInfo, heal, HEAL);
+    uint32 heal = m_originalCaster->SpellHealingBonusDone(unitTarget, m_spellInfo, effIndex, unitTarget->CountPctFromMaxHealth(damage), HEAL);
+    heal = unitTarget->SpellHealingBonusTaken(m_originalCaster, m_spellInfo, effIndex, heal, HEAL);
 
     m_healing += heal;
 }
 
-void Spell::EffectHealMechanical(SpellEffIndex /*effIndex*/)
+void Spell::EffectHealMechanical(SpellEffIndex effIndex)
 {
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
@@ -2352,9 +2339,9 @@ void Spell::EffectHealMechanical(SpellEffIndex /*effIndex*/)
     if (!m_originalCaster)
         return;
 
-    uint32 heal = m_originalCaster->SpellHealingBonusDone(unitTarget, m_spellInfo, uint32(damage), HEAL);
+    uint32 heal = m_originalCaster->SpellHealingBonusDone(unitTarget, m_spellInfo, effIndex, uint32(damage), HEAL);
 
-    m_healing += unitTarget->SpellHealingBonusTaken(m_originalCaster, m_spellInfo, heal, HEAL);
+    m_healing += unitTarget->SpellHealingBonusTaken(m_originalCaster, m_spellInfo, effIndex, heal, HEAL);
 }
 
 void Spell::EffectHealthLeech(SpellEffIndex effIndex)
@@ -2365,8 +2352,8 @@ void Spell::EffectHealthLeech(SpellEffIndex effIndex)
     if (!unitTarget || !unitTarget->IsAlive() || damage < 0)
         return;
 
-    damage = m_caster->SpellDamageBonusDone(unitTarget, m_spellInfo, uint32(damage), SPELL_DIRECT_DAMAGE);
-    damage = unitTarget->SpellDamageBonusTaken(m_caster, m_spellInfo, uint32(damage), SPELL_DIRECT_DAMAGE);
+    damage = m_caster->SpellDamageBonusDone(unitTarget, m_spellInfo, effIndex, uint32(damage), SPELL_DIRECT_DAMAGE);
+    damage = unitTarget->SpellDamageBonusTaken(m_caster, m_spellInfo, effIndex, uint32(damage), SPELL_DIRECT_DAMAGE);
 
     float healMultiplier = m_spellInfo->Effects[effIndex].CalcValueMultiplier(m_originalCaster, this);
 
@@ -2376,8 +2363,8 @@ void Spell::EffectHealthLeech(SpellEffIndex effIndex)
 
     if (m_caster->IsAlive())
     {
-        healthGain = m_caster->SpellHealingBonusDone(m_caster, m_spellInfo, healthGain, HEAL);
-        healthGain = m_caster->SpellHealingBonusTaken(m_caster, m_spellInfo, healthGain, HEAL);
+        healthGain = m_caster->SpellHealingBonusDone(m_caster, m_spellInfo, effIndex, healthGain, HEAL);
+        healthGain = m_caster->SpellHealingBonusTaken(m_caster, m_spellInfo, effIndex, healthGain, HEAL);
 
         m_caster->HealBySpell(m_caster, m_spellInfo, uint32(healthGain));
     }
@@ -7712,55 +7699,71 @@ void Spell::EffectCreateAreatrigger(SpellEffIndex effIndex)
     }
 }
 
-int32 Spell::CalculateMonkMeleeAttacks(Unit* caster, float coeff, int32 APmultiplier)
+int32 Spell::CalculateMonkMeleeAttacks(Unit const *caster, float coeff)
 {
+    if (coeff <= 0.0f)
+        return 0;
+
+    float mainHandMinDamage = 0;
+    float mainHandMaxDamage = 0;
+    float offHandMinDamage = 0;
+    float offHandMaxDamage = 0;
     float minDamage = 0;
     float maxDamage = 0;
-    bool dualwield  = false;
-    int32 AP = caster->GetTotalAttackPowerValue(BASE_ATTACK);
 
-    if (Player* plr = caster->ToPlayer())
+    bool isDualWield = false;
+    bool isTwoHandedWeapon = false;
+
+    auto const normalizedAp = caster->GetTotalAttackPowerValue(BASE_ATTACK) / 14.0f;
+
+    if (auto const plr = caster->ToPlayer())
     {
-        Item* mainItem = plr->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-        Item* offItem = plr->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+        Item const * const mainItem = plr->GetWeaponForAttack(BASE_ATTACK);
+        Item const * const offItem = plr->GetWeaponForAttack(OFF_ATTACK);
 
-        dualwield = (mainItem && offItem) ? 1 : 0;
+        auto const mainProto = mainItem ? mainItem->GetTemplate() : nullptr;
+        auto const offProto = offItem ? offItem->GetTemplate() : nullptr;
 
-        if (coeff < 0)
-            coeff = 0.0f;
+        isDualWield = mainProto && offProto;
+        isTwoHandedWeapon = mainProto && mainProto->InventoryType == INVTYPE_2HWEAPON;
 
         // Main Hand
-        if (mainItem && !caster->HasAuraType(SPELL_AURA_MOD_DISARM))
+        if (mainProto && !caster->HasAuraType(SPELL_AURA_MOD_DISARM))
         {
-            minDamage += mainItem->GetTemplate()->DamageMin;
-            maxDamage += mainItem->GetTemplate()->DamageMax;
-
-            minDamage /= float(m_caster->GetAttackTime(BASE_ATTACK) / 1000.0f);
-            maxDamage /= float(m_caster->GetAttackTime(BASE_ATTACK) / 1000.0f);
+            mainHandMinDamage = mainProto->DamageMin / mainProto->Delay * 1000.0f;
+            mainHandMaxDamage = mainProto->DamageMax / mainProto->Delay * 1000.0f;
         }
 
         // Off Hand
-        if (offItem && !caster->HasAuraType(SPELL_AURA_MOD_DISARM))
+        if (offProto && !caster->HasAuraType(SPELL_AURA_MOD_DISARM_OFFHAND))
         {
-            minDamage += offItem->GetTemplate()->DamageMin / 2.0f;
-            maxDamage += offItem->GetTemplate()->DamageMax / 2.0f;
-
-            minDamage /= float(m_caster->GetAttackTime(BASE_ATTACK) / 1000.0f);
-            maxDamage /= float(m_caster->GetAttackTime(BASE_ATTACK) / 1000.0f);
+            offHandMinDamage = offProto->DamageMin / 2.0f / offProto->Delay * 1000.0f;
+            offHandMaxDamage = offProto->DamageMax / 2.0f / offProto->Delay * 1000.0f;
         }
 
-        // DualWield coefficient
-        if (dualwield)
+        // If one single-handed weapon equipped
+        if (mainProto && !offProto && !isTwoHandedWeapon)
+        {
+            mainHandMinDamage *= 1.5f;
+            mainHandMaxDamage *= 1.5f;
+        }
+
+        // Add offhand weapon, if noone equipped it will add 0
+        minDamage = mainHandMinDamage + offHandMinDamage;
+        maxDamage = mainHandMaxDamage + offHandMaxDamage;
+
+        // if one single-handed or dual-wield is equipped
+        if (isDualWield || !isTwoHandedWeapon)
         {
             minDamage *= 0.898882275f;
             maxDamage *= 0.898882275f;
         }
 
-        minDamage += float(AP / APmultiplier);
-        maxDamage += float(AP / APmultiplier);
+        minDamage += normalizedAp;
+        maxDamage += normalizedAp;
 
-        // Off Hand penalty reapplied if only equiped by an off hand weapon
-        if (offItem && !mainItem)
+        // Apply penalty if off-hand is equipped without main-hand
+        if (offProto && !mainProto)
         {
             minDamage /= 2.0f;
             maxDamage /= 2.0f;
@@ -7769,9 +7772,9 @@ int32 Spell::CalculateMonkMeleeAttacks(Unit* caster, float coeff, int32 APmultip
     else
     {
         if (caster->GetEntry() != 69792) // Earth Spirit
-            dualwield = true;
+            isDualWield = true;
 
-        if (dualwield)
+        if (isDualWield)
         {
             minDamage += caster->GetWeaponDamageRange(BASE_ATTACK, MINDAMAGE);
             minDamage += caster->GetWeaponDamageRange(OFF_ATTACK, MINDAMAGE) / 2;
@@ -7787,14 +7790,14 @@ int32 Spell::CalculateMonkMeleeAttacks(Unit* caster, float coeff, int32 APmultip
             maxDamage += caster->GetWeaponDamageRange(BASE_ATTACK, MAXDAMAGE);
         }
 
-        minDamage /= float(m_caster->GetAttackTime(BASE_ATTACK) / 1000.0f);
-        maxDamage /= float(m_caster->GetAttackTime(BASE_ATTACK) / 1000.0f);
+        minDamage /= caster->GetAttackTime(BASE_ATTACK) / 1000.0f;
+        maxDamage /= caster->GetAttackTime(BASE_ATTACK) / 1000.0f;
 
-        minDamage += float(AP / APmultiplier);
-        maxDamage += float(AP / APmultiplier);
+        minDamage += normalizedAp;
+        maxDamage += normalizedAp;
     }
 
-    return irand(int32(minDamage * coeff), int32(maxDamage * coeff));
+    return irand((minDamage - 1) * coeff, (maxDamage + 1) * coeff);
 }
 
 void Spell::EffectUnlockGuildVaultTab(SpellEffIndex effIndex)

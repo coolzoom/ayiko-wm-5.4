@@ -2027,8 +2027,8 @@ class spell_dru_lifebloom : public SpellScriptLoader
 
                 if (Player* plr = GetCaster()->ToPlayer())
                 {
-                    healAmount = plr->SpellHealingBonusDone(GetTarget(), GetSpellInfo(), healAmount, HEAL, stack);
-                    healAmount = GetTarget()->SpellHealingBonusTaken(plr, GetSpellInfo(), healAmount, HEAL, stack);
+                    healAmount = plr->SpellHealingBonusDone(GetTarget(), GetSpellInfo(), aurEff->GetEffIndex(), healAmount, HEAL, stack);
+                    healAmount = GetTarget()->SpellHealingBonusTaken(plr, GetSpellInfo(), aurEff->GetEffIndex(), healAmount, HEAL, stack);
 
                     // Increase final heal by 50%
                     if (plr->HasAura(SPELL_DRUID_GLYPH_OF_BLOOMING))
@@ -2060,8 +2060,8 @@ class spell_dru_lifebloom : public SpellScriptLoader
 
                         if (Unit* caster = GetCaster())
                         {
-                            healAmount = caster->SpellHealingBonusDone(target, GetSpellInfo(), healAmount, HEAL, dispelInfo->GetRemovedCharges());
-                            healAmount = target->SpellHealingBonusTaken(caster, GetSpellInfo(), healAmount, HEAL, dispelInfo->GetRemovedCharges());
+                            healAmount = caster->SpellHealingBonusDone(target, GetSpellInfo(), EFFECT_1, healAmount, HEAL, dispelInfo->GetRemovedCharges());
+                            healAmount = target->SpellHealingBonusTaken(caster, GetSpellInfo(), EFFECT_1, healAmount, HEAL, dispelInfo->GetRemovedCharges());
 
                             target->CastCustomSpell(target, SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, &healAmount, NULL, NULL, true, NULL, NULL, GetCasterGUID());
 
@@ -3044,7 +3044,7 @@ class spell_dru_frenzied_regeneration : public SpellScriptLoader
                             healAmount = std::max(int32(2 * (AP - agility * 2)), int32(stamina * 2.5f));
                             healAmount = rageused * healAmount / 600;
 
-                            healAmount = GetCaster()->SpellHealingBonusTaken(GetCaster(), GetSpellInfo(), healAmount, SPELL_DIRECT_DAMAGE);
+                            healAmount = GetCaster()->SpellHealingBonusTaken(GetCaster(), GetSpellInfo(), EFFECT_0, healAmount, SPELL_DIRECT_DAMAGE);
 
                             SetHitHeal(healAmount);
                             _player->EnergizeBySpell(_player, 22842, -rageused, POWER_RAGE);

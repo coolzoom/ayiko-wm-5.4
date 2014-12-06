@@ -1925,47 +1925,41 @@ class spell_monk_tigers_lust : public SpellScriptLoader
 // Flying Serpent Kick - 115057
 class spell_monk_flying_serpent_kick : public SpellScriptLoader
 {
-    public:
-        spell_monk_flying_serpent_kick() : SpellScriptLoader("spell_monk_flying_serpent_kick") { }
+public:
+    spell_monk_flying_serpent_kick() : SpellScriptLoader("spell_monk_flying_serpent_kick") { }
 
-        class spell_monk_flying_serpent_kick_SpellScript : public SpellScript
+    class script_impl : public AuraScript
+    {
+        PrepareAuraScript(script_impl);
+
+        void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
-            PrepareSpellScript(spell_monk_flying_serpent_kick_SpellScript);
-
-            bool Validate(SpellInfo const* /*spell*/)
+            if (auto target = GetTarget())
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_MONK_FLYING_SERPENT_KICK_NEW))
-                    return false;
-                return true;
+                if (target->HasAura(SPELL_MONK_FLYING_SERPENT_KICK))
+                    target->RemoveAura(SPELL_MONK_FLYING_SERPENT_KICK);
+
+                if (target->HasAura(SPELL_MONK_ITEM_PVP_GLOVES_BONUS))
+                    target->RemoveAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
             }
-
-            void HandleOnCast()
-            {
-                if (Unit* caster = GetCaster())
-                {
-                    if (Player* _player = caster->ToPlayer())
-                    {
-                        if (_player->HasAura(SPELL_MONK_FLYING_SERPENT_KICK))
-                            _player->RemoveAura(SPELL_MONK_FLYING_SERPENT_KICK);
-
-                        if (caster->HasAura(SPELL_MONK_ITEM_PVP_GLOVES_BONUS))
-                            caster->RemoveAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
-
-                        _player->CastSpell(_player, SPELL_MONK_FLYING_SERPENT_KICK_AOE, true);
-                    }
-                }
-            }
-
-            void Register()
-            {
-                OnCast += SpellCastFn(spell_monk_flying_serpent_kick_SpellScript::HandleOnCast);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_monk_flying_serpent_kick_SpellScript();
         }
+
+        void AfterRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            GetTarget()->CastSpell(GetTarget(), SPELL_MONK_FLYING_SERPENT_KICK_AOE, true);
+        }
+
+        void Register()
+        {
+            AfterEffectRemove += AuraEffectRemoveFn(script_impl::AfterRemove, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+            AfterEffectApply += AuraEffectApplyFn(script_impl::OnApply, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new script_impl();
+    }
 };
 
 // Chi Torpedo - 115008 or Chi Torpedo (3 charges) - 121828

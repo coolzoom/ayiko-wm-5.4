@@ -60,7 +60,6 @@ public:
         EventMap events;
 
         uint32 actualPetrifierEntry;
-        uint8  guardianAliveCount;
 
         uint64 cursedMogu1Guid;
         uint64 cursedMogu2Guid;
@@ -96,7 +95,6 @@ public:
         {
             SetBossNumber(DATA_MAX_BOSS_DATA);
             LoadDoorData(doorData);
-            guardianAliveCount              = 0;
             stoneGuardControllerGuid        = 0;
             fengGuid                        = 0;
             siphonShieldGuid                = 0;
@@ -135,14 +133,26 @@ public:
                 case NPC_COBALT:
                 {
                     stoneGuardGUIDs.push_back(creature->GetGUID());
-                    guardianAliveCount++;
 
-                    uint32 difficulty = instance->GetSpawnMode();
-                    bool turnOver = (difficulty == MAN10_DIFFICULTY || difficulty == MAN10_HEROIC_DIFFICULTY || difficulty == RAID_TOOL_DIFFICULTY);
+                    auto const difficulty = instance->GetSpawnMode();
+                    auto const turnOver = difficulty == MAN10_DIFFICULTY || difficulty == MAN10_HEROIC_DIFFICULTY || difficulty == RAID_TOOL_DIFFICULTY;
 
-                    if (guardianAliveCount >= 4 && GetBossState(DATA_STONE_GUARD) != DONE && turnOver)
-                        if (Creature* stoneGuard = instance->GetCreature(stoneGuardGUIDs.front()))
+                    if (stoneGuardGUIDs.size() >= 4 && GetBossState(DATA_STONE_GUARD) != DONE && turnOver)
+                    {
+                        std::random_shuffle(stoneGuardGUIDs.begin(), stoneGuardGUIDs.end());
+
+                        uint64 const toDespawn = stoneGuardGUIDs.back();
+
+                        Creature* stoneGuard = (toDespawn != creature->GetGUID())
+                                ? instance->GetCreature(toDespawn)
+                                : creature;
+
+                        if (stoneGuard)
+                        {
                             stoneGuard->DespawnOrUnsummon();
+                            stoneGuardGUIDs.pop_back();
+                        }
+                    }
                     break;
                 }
                 case NPC_CURSED_MOGU_SCULPTURE_2:

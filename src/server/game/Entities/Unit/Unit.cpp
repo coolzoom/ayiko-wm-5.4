@@ -8014,6 +8014,14 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                     // if not found Flame Shock
                     return false;
                 }
+                // Lightning Shield
+                case 324:
+                {
+                    // Glyph of Lightning Shield
+                    if (HasAura(101052))
+                        CastSpell(this, 142912, true);
+                    break;
+                }
                 break;
             }
             // Frozen Power

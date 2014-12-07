@@ -3174,8 +3174,8 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
         case SUMMON_CATEGORY_ALLY:
         case SUMMON_CATEGORY_UNK:
             // 0x4800 is used for Druid's Treants. May be 0x4000 is fine too, but
-            // it requires additional tests.
-            if (properties->Flags & 512 || properties->Flags == 0x4800)
+            // it requires additional tests - Searing Totem needs exception
+            if ((properties->Flags & 512 || properties->Flags == 0x4800) && m_spellInfo->Id != 3599)
             {
                 SummonGuardian(effIndex, entry, properties, numSummons);
                 break;

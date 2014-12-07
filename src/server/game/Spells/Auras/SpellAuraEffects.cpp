@@ -7482,6 +7482,18 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                     break;
             }
         }
+        // Stagger, update remaining total
+        if (GetSpellInfo()->Id == LIGHT_STAGGER || GetSpellInfo()->Id == MODERATE_STAGGER || GetSpellInfo()->Id == HEAVY_STAGGER)
+        {
+            auto aurEff = target->GetAuraEffect(LIGHT_STAGGER, EFFECT_1, target->GetGUID());
+            if (!aurEff)
+                aurEff = target->GetAuraEffect(MODERATE_STAGGER, EFFECT_1, target->GetGUID());
+            if (!aurEff)
+                aurEff = target->GetAuraEffect(HEAVY_STAGGER, EFFECT_1, target->GetGUID());
+            // Remove tick from total amount
+            if (aurEff)
+                aurEff->SetAmount(aurEff->GetAmount() - GetAmount());
+        }
     }
     else
         damage = uint32(target->CountPctFromMaxHealth(damage));
@@ -7503,6 +7515,10 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
     int32 dmg = damage;
     if (m_spellInfo->IsAffectedByResilience())
         caster->ApplyResilience(target, &dmg);
+
+    if (target != caster && target->GetTypeId() == TYPEID_PLAYER)
+        dmg = target->CalcStaggerDamage(target->ToPlayer(), dmg);
+
     damage = dmg;
 
     caster->CalcAbsorbResist(target, GetSpellInfo()->GetSchoolMask(), DOT, damage, &absorb, &resist, GetSpellInfo());
@@ -7578,6 +7594,10 @@ void AuraEffect::HandlePeriodicHealthLeechAuraTick(Unit* target, Unit* caster) c
 
     int32 dmg = damage;
     caster->ApplyResilience(target, &dmg);
+
+    if (target != caster && target->GetTypeId() == TYPEID_PLAYER)
+        dmg = target->CalcStaggerDamage(target->ToPlayer(), dmg);
+
     damage = dmg;
 
     caster->CalcAbsorbResist(target, GetSpellInfo()->GetSchoolMask(), DOT, damage, &absorb, &resist, m_spellInfo);

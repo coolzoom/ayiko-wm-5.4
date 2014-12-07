@@ -4839,6 +4839,7 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_PERIODIC_DAMAGE;
                     spellInfo->Effects[0].Amplitude = 1000;
                     spellInfo->Effects[0].BasePoints = 0;
+                    spellInfo->AttributesCu |= SPELL_ATTR0_CU_TRIGGERED_IGNORE_RESILENCE;
                     break;
                 case 108937:// Baby Elephant Takes a Bath
                     spellInfo->Effects[1].BasePoints = 40;

@@ -711,11 +711,6 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
     if (GetOwner() && GetOwner()->HasAura(77657) && ((GetTypeId() == TYPEID_UNIT && GetEntry() == 15438 && !spellProto) || (isTotem() && GetEntry() == 2523)))
         GetOwner()->CastSpell(GetOwner(), 77661, true);
 
-    // Stagger handler
-    if (victim && victim->ToPlayer() && victim->getClass() == CLASS_MONK)
-        if (!spellProto || (spellProto && spellProto->Id != LIGHT_STAGGER && spellProto->Id != MODERATE_STAGGER && spellProto->Id != HEAVY_STAGGER))
-            damage = victim->CalcStaggerDamage(victim->ToPlayer(), damage);
-
     // Stance of the Wise Serpent - 115070
     if (GetTypeId() == TYPEID_PLAYER && ToPlayer()->getClass() == CLASS_MONK && HasAura(115070) && spellProto
         && spellProto->Id != 124098 && spellProto->Id != 107270 && spellProto->Id != 132467
@@ -1091,15 +1086,18 @@ uint32 Unit::CalcStaggerDamage(Player* victim, uint32 damage)
     uint32 spellId = 0;
     uint32 ticksNumber = 10;
 
-    auto aurEff = victim->GetAuraEffect(LIGHT_STAGGER, 0, victim->GetGUID());
+    auto aurEff = victim->GetAuraEffect(LIGHT_STAGGER, EFFECT_0, victim->GetGUID());
     if (!aurEff)
-        aurEff = victim->GetAuraEffect(MODERATE_STAGGER, 0, victim->GetGUID());
+        aurEff = victim->GetAuraEffect(MODERATE_STAGGER, EFFECT_0, victim->GetGUID());
     if (!aurEff)
-        aurEff = victim->GetAuraEffect(HEAVY_STAGGER, 0, victim->GetGUID());
+        aurEff = victim->GetAuraEffect(HEAVY_STAGGER, EFFECT_0, victim->GetGUID());
 
     // Add remaining ticks to damage done
     if (aurEff)
-        bp += aurEff->GetAmount() * (ticksNumber - aurEff->GetTickNumber());
+    {
+        auto const remaining = victim->GetRemainingPeriodicAmount(victim->GetGUID(), aurEff->GetId(), SPELL_AURA_PERIODIC_DAMAGE);
+        bp += remaining.total();
+    }
 
     if (bp < int32(victim->CountPctFromMaxHealth(3)))
         spellId = LIGHT_STAGGER;
@@ -1108,12 +1106,25 @@ uint32 Unit::CalcStaggerDamage(Player* victim, uint32 damage)
     else
         spellId = HEAVY_STAGGER;
 
+    int32 total = bp;
     bp /= ticksNumber;
 
-    victim->RemoveAura(LIGHT_STAGGER);
-    victim->RemoveAura(MODERATE_STAGGER);
-    victim->RemoveAura(HEAVY_STAGGER);
-    victim->CastCustomSpell(victim, spellId, &bp, NULL, NULL, true);
+    // Switch aura or change amount to old one
+    if (aurEff && aurEff->GetId() == spellId)
+    {
+        aurEff->GetBase()->RefreshTimers(false);
+        aurEff->SetAmount(bp);
+        aurEff->GetFixedDamageInfo().SetFixedDamage(bp);
+        // Update total every refresh
+        aurEff->GetBase()->GetEffect(EFFECT_1)->SetAmount(total);
+    }
+    else
+    {
+        victim->RemoveAura(LIGHT_STAGGER);
+        victim->RemoveAura(MODERATE_STAGGER);
+        victim->RemoveAura(HEAVY_STAGGER);
+        victim->CastCustomSpell(victim, spellId, &bp, &total, NULL, true);
+    }
 
     return damage *= stagger;
 }
@@ -1327,6 +1338,9 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
             if (!spellInfo->HasCustomAttribute(SPELL_ATTR0_CU_TRIGGERED_IGNORE_RESILENCE))
                 ApplyResilience(victim, &damage);
 
+            if (this != victim && victim->GetTypeId() == TYPEID_PLAYER)
+                damage = victim->CalcStaggerDamage(victim->ToPlayer(), damage);
+
             break;
         }
         // Magical Attacks
@@ -1342,6 +1356,9 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
 
             if (!spellInfo->HasCustomAttribute(SPELL_ATTR0_CU_TRIGGERED_IGNORE_RESILENCE))
                 ApplyResilience(victim, &damage);
+
+            if (this != victim && victim->GetTypeId() == TYPEID_PLAYER)
+                damage = victim->CalcStaggerDamage(victim->ToPlayer(), damage);
             break;
         }
         default:
@@ -1546,8 +1563,20 @@ void Unit::CalculateMeleeDamage(Unit* victim, uint32 damage, CalcDamageInfo* dam
     int32 resilienceReduction = damageInfo->damage;
     ApplyResilience(victim, &resilienceReduction);
     resilienceReduction = damageInfo->damage - resilienceReduction;
+
     damageInfo->damage      -= resilienceReduction;
     damageInfo->cleanDamage += resilienceReduction;
+
+    // Reduce damage information by Stagger
+    if (this != victim && victim->GetTypeId() == TYPEID_PLAYER)
+    {
+        uint32 staggerReduction = damageInfo->damage - victim->CalcStaggerDamage(victim->ToPlayer(), damageInfo->damage);
+        if (staggerReduction)
+        {
+            damageInfo->damage -= staggerReduction;
+            damageInfo->cleanDamage += staggerReduction;
+        }
+    }
 
     // Calculate absorb resist
     if (int32(damageInfo->damage) > 0)

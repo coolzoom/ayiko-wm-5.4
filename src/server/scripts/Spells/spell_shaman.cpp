@@ -1957,6 +1957,57 @@ public:
     }
 };
 
+// 108287 - Totemic Projection
+class spell_sha_totemic_projection : public SpellScriptLoader
+{
+public:
+    spell_sha_totemic_projection() : SpellScriptLoader("spell_sha_totemic_projection") { }
+
+    class script_impl : public SpellScript
+    {
+        PrepareSpellScript(script_impl);
+
+        void ChangeSummonPos(SpellEffIndex /*effIndex*/)
+        {
+            auto player = GetCaster()->ToPlayer();
+            if (!player)
+                return;
+
+            for (int32 i = 0; i < 4; ++i)
+            {
+                Position pos;
+                GetHitDest()->GetPosition(&pos);
+                Creature* totem = player->GetMap()->GetCreature(player->m_SummonSlot[SUMMON_SLOT_TOTEM + i]);
+                if (totem && totem->isTotem())
+                {
+                    uint32 spell_id = totem->GetUInt32Value(UNIT_CREATED_BY_SPELL);
+                    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spell_id);
+                    auto effectInfo = spellInfo->Effects[EFFECT_0];
+                    auto targetInfo = SpellImplicitTargetInfo(effectInfo.GetImplicitTargetType());
+                    float angle = targetInfo.CalcDirectionAngle();
+                    float objSize = player->GetObjectSize();
+                    float dist = effectInfo.CalcRadius(player);
+                    if (dist < objSize)
+                        dist = objSize;
+
+                    //player->GetFirstCollisionPosition(pos, dist, angle);
+                    totem->NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), totem->GetOrientation());
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHit += SpellEffectFn(script_impl::ChangeSummonPos, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new script_impl();
+    }
+};
+
 void AddSC_shaman_spell_scripts()
 {
     new spell_sha_hex();
@@ -1993,4 +2044,5 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_lava_lash();
     new spell_sha_chain_heal();
     new spell_sha_lava_burst();
+    new spell_sha_totemic_projection();
 }

@@ -3597,7 +3597,7 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[7].SpellClassMask[1] = 0x400;
                     break;
                 case 108287:// Totemic Projection
-                    spellInfo->Effects[1].TargetA = TARGET_UNIT_CASTER;
+                    spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_DUMMY;
                     break;
                 case 137639:// Storm, Earth and Fire
                     spellInfo->AttributesCu &= ~(SPELL_ATTR0_CU_NEGATIVE_EFF1|SPELL_ATTR0_CU_NEGATIVE_EFF0);

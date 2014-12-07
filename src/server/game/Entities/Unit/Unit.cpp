@@ -139,13 +139,18 @@ private:
 class VisibilityUpdateTask final : public BasicEvent
 {
 public:
-    explicit VisibilityUpdateTask(Unit* me)
+    VisibilityUpdateTask(Unit* me, bool loadGrids)
         : m_owner(me)
+        , m_loadGrids(loadGrids)
     { }
 
     bool Execute(uint64, uint32) final
     {
         UpdateVisibility(m_owner);
+
+        if (m_loadGrids)
+            m_owner->GetMap()->loadGridsInRange(*m_owner, MAX_VISIBILITY_DISTANCE);
+
         return true;
     }
 
@@ -167,6 +172,7 @@ public:
 
 private:
     Unit* m_owner;
+    bool m_loadGrids;
 };
 
 DamageInfo::DamageInfo(Unit* _attacker, Unit* _victim, uint32 _damage, SpellInfo const* _spellInfo, SpellSchoolMask _schoolMask, DamageEffectType _damageType)
@@ -18804,7 +18810,7 @@ void Unit::OnRelocated()
     if (!m_lastVisibilityUpdPos.IsInDist(this, sWorld->GetVisibilityRelocationLowerLimit()))
     {
         m_lastVisibilityUpdPos = *this;
-        m_Events.AddEvent(new VisibilityUpdateTask(this), m_Events.CalculateTime(1));
+        m_Events.AddEvent(new VisibilityUpdateTask(this, GetTypeId() == TYPEID_PLAYER), m_Events.CalculateTime(1));
     }
 
     AINotifyTask::Schedule(this);
@@ -18815,7 +18821,7 @@ void Unit::UpdateObjectVisibility(bool forced)
     if (forced)
         VisibilityUpdateTask::UpdateVisibility(this);
     else
-        m_Events.AddEvent(new VisibilityUpdateTask(this), m_Events.CalculateTime(1));
+        m_Events.AddEvent(new VisibilityUpdateTask(this, false), m_Events.CalculateTime(1));
 
     AINotifyTask::Schedule(this);
 }

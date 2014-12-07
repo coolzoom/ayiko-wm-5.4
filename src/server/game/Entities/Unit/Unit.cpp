@@ -11873,7 +11873,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
     // Default calculation
     if (DoneAdvertisedBenefit && coeff >= 0)
     {
-        if (coeff == 0)
+        if (coeff == 0 && spellProto->Effects[effIndex].BonusMultiplier != 1)
             coeff = spellProto->Effects[effIndex].BonusMultiplier;
 
         if (Player* modOwner = GetSpellModOwner())
@@ -11989,7 +11989,7 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
     // Check for table values
     if (TakenAdvertisedBenefit && coeff >= 0)
     {
-        if (coeff == 0)
+        if (coeff == 0 && spellProto->Effects[effIndex].BonusMultiplier != 1)
             coeff = spellProto->Effects[effIndex].BonusMultiplier;
 
         if (Player* modOwner = GetSpellModOwner())
@@ -12541,7 +12541,7 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
     // Default calculation
     if (DoneAdvertisedBenefit && coeff >= 0)
     {
-        if (coeff == 0)
+        if (coeff == 0 && spellProto->Effects[effIndex].BonusMultiplier != 1)
             coeff = spellProto->Effects[effIndex].BonusMultiplier;
 
         if (Player* modOwner = GetSpellModOwner())
@@ -12665,7 +12665,7 @@ uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, u
     // Default calculation
     if (TakenAdvertisedBenefit && coeff >= 0)
     {
-        if (coeff == 0)
+        if (coeff == 0 && spellProto->Effects[effIndex].BonusMultiplier != 1)
             coeff = spellProto->Effects[effIndex].BonusMultiplier;
 
         if (Player* modOwner = GetSpellModOwner())

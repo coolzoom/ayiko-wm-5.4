@@ -1720,8 +1720,8 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 else if (GetId() == 79206)
                 {
                     // Item - Shaman T13 Restoration 4P Bonus (Spiritwalker's Grace)
-                    if (target->HasAura(105876))
-                        target->CastSpell(target, 105877, true);
+                    if (target->HasAura(131557))
+                        target->CastSpell(target, 131558, true);
                 }
 
                 break;

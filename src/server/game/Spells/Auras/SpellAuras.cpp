@@ -1185,8 +1185,6 @@ bool Aura::CanBeSaved() const
     if (HasEffectType(SPELL_AURA_CONTROL_VEHICLE))
         return false;
 
-    // Incanter's Absorbtion - considering the minimal duration and problems with aura stacking
-    // we skip saving this aura
     // Also for some reason other auras put as MultiSlot crash core on keeping them after restart,
     // so put here only these for which you are sure they get removed
     switch (GetId())
@@ -1222,6 +1220,7 @@ bool Aura::CanBeSaved() const
         case 125667: // Second Wind dummy
         case 111757: // Glyph of Levitate Speed Bonus
         case 114232: // Sanctified Wrath bonus
+        case 124458: // Healing Spheres tracker
             return false;
         default:
             break;

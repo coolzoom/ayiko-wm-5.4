@@ -100,6 +100,9 @@ bool AreaTrigger::CreateAreaTrigger(uint32 guidlow, uint32 triggerEntry, Unit* c
         case 123811:
             SetDuration(500000000);
             break;
+        case 115460: // Healing Sphere - add tracker
+            caster->CastSpell(caster, 124458, true);
+            break;
         default:
             break;
     }
@@ -119,21 +122,17 @@ void AreaTrigger::Update(uint32 p_time)
 
     WorldObject::Update(p_time);
 
-    SpellInfo const* m_spellInfo = sSpellMgr->GetSpellInfo(GetUInt32Value(AREATRIGGER_SPELLID));
-    if (!m_spellInfo)
-        return;
-
-    if (!GetCaster())
+    auto caster = GetCaster();
+    if (!caster)
     {
         Remove();
         return;
     }
 
-    Unit* caster = GetCaster();
     float radius = 0.0f;
 
     // Custom MoP Script
-    switch (m_spellInfo->Id)
+    switch (GetSpellId())
     {
         case 13810: // Ice Trap
         {
@@ -482,11 +481,7 @@ void AreaTrigger::Remove()
 {
     if (IsInWorld())
     {
-        SpellInfo const* m_spellInfo = sSpellMgr->GetSpellInfo(GetUInt32Value(AREATRIGGER_SPELLID));
-        if (!m_spellInfo)
-            return;
-
-        switch (m_spellInfo->Id)
+        switch (GetSpellId())
         {
             case 116011:// Rune of Power : Remove the buff if caster is still in radius
                 if (m_caster && m_caster->HasAura(116014))
@@ -512,6 +507,9 @@ void AreaTrigger::Remove()
                         player->SendApplyMovementForce(false, *this);
                 break;
             }
+            case 115460: // Healing Sphere - remove tracker
+                m_caster->RemoveAuraFromStack(124458);
+                break;
             default:
                 break;
         }

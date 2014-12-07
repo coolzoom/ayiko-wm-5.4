@@ -473,12 +473,12 @@ bool Map::EnsureGridLoaded(const Cell &cell)
     auto const ngrid = getNGrid(cell.GridX(), cell.GridY());
     ASSERT(ngrid != nullptr);
 
-    if (isGridObjectDataLoaded(cell.GridX(), cell.GridY()))
+    if (ngrid->isGridObjectDataLoaded())
         return false;
 
     TC_LOG_DEBUG("maps", "Loading grid[%u, %u] for map %u instance %u", cell.GridX(), cell.GridY(), GetId(), i_InstanceId);
 
-    setGridObjectDataLoaded(true, cell.GridX(), cell.GridY());
+    ngrid->setGridObjectDataLoaded(true);
 
     Trinity::ObjectGridLoader::LoadN(*ngrid, this, cell);
 
@@ -516,7 +516,7 @@ bool Map::AddPlayerToMap(Player* player)
     SendInitTransports(player);
 
     player->m_clientGUIDs.clear();
-    player->UpdateObjectVisibility(false);
+    player->OnRelocated();
 
     sScriptMgr->OnPlayerEnterMap(this, player);
     return true;
@@ -580,7 +580,8 @@ bool Map::AddToMap(T *obj)
 
 bool Map::IsGridLoaded(const GridCoord &p) const
 {
-    return (getNGrid(p.x_coord, p.y_coord) && isGridObjectDataLoaded(p.x_coord, p.y_coord));
+    auto const ngrid = getNGrid(p.x_coord, p.y_coord);
+    return ngrid && ngrid->isGridObjectDataLoaded();
 }
 
 void Map::Update(const uint32 diff)
@@ -2958,3 +2959,29 @@ time_t Map::GetLinkedRespawnTime(uint64 guid) const
     return time_t(0);
 }
 
+void Map::loadGridsInRange(Position const &center, float radius)
+{
+    auto const x = center.GetPositionX();
+    auto const y = center.GetPositionY();
+
+    CellCoord standingCellCoord(Trinity::ComputeCellCoord(x, y));
+    if (!standingCellCoord.IsCoordValid())
+        return;
+
+    if (radius > SIZE_OF_GRIDS)
+        radius = SIZE_OF_GRIDS;
+
+    CellArea area = Cell::CalculateCellArea(x, y, radius);
+    if (!area)
+        return;
+
+    for (uint32 x = area.low_bound.x_coord; x <= area.high_bound.x_coord; ++x)
+    {
+        for (uint32 y = area.low_bound.y_coord; y <= area.high_bound.y_coord; ++y)
+        {
+            CellCoord cellCoord(x, y);
+            if (cellCoord != standingCellCoord)
+                EnsureGridLoaded(Cell(cellCoord));
+        }
+    }
+}

@@ -295,6 +295,8 @@ class Map
         template <typename Visitor>
         void Visit(const Cell& cell, Visitor &&visitor);
 
+        void loadGridsInRange(Position const &center, float radius);
+
         bool IsRemovalGrid(float x, float y) const
         {
             GridCoord p = Trinity::ComputeGridCoord(x, y);
@@ -549,9 +551,6 @@ class Map
         {
             return i_grids[x][y];
         }
-
-        bool isGridObjectDataLoaded(uint32 x, uint32 y) const { return getNGrid(x, y)->isGridObjectDataLoaded(); }
-        void setGridObjectDataLoaded(bool pLoaded, uint32 x, uint32 y) { getNGrid(x, y)->setGridObjectDataLoaded(pLoaded); }
 
         void setNGrid(NGrid *grid, uint32 x, uint32 y);
         void ScriptsProcess();

@@ -798,16 +798,6 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         if (m_caster->HasUnitTypeMask(UNIT_MASK_GUARDIAN))
                             damage += int32(((Guardian*)m_caster)->GetBonusDamage() * 0.15f);
                         break;
-                    // Frost Bomb
-                    case 113092:
-                    {
-                        if (effIndex == 0)
-                            damage += m_caster->SpellBaseDamageBonusDone(m_spellInfo->GetSchoolMask()) * 3.447f;
-                        else if (effIndex == 1)
-                            damage += m_caster->SpellBaseDamageBonusDone(m_spellInfo->GetSchoolMask()) * 1.725f;
-                        if (unitTarget->GetTypeId() == TYPEID_PLAYER)
-                            damage *= 0.7f;
-                    }
                     break;
                 }
             }
@@ -2027,6 +2017,16 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
 
         int32 addhealth = damage;
 
+        // Expel Harm
+        if (caster->getClass() == CLASS_MONK && (m_spellInfo->Id == 115072 || m_spellInfo->Id == 147489))
+        {
+            // Expel Harm with Glyph does different calculation
+            float multiplier = 7.f;
+            if (m_spellInfo->Id == 147489 && caster != unitTarget)
+                multiplier = 3.5f;
+            addhealth = CalculateMonkMeleeAttacks(caster, multiplier);
+        }
+
         // Death Pact - return pct of max health to caster
         if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && m_spellInfo->SpellFamilyFlags[0] & 0x00080000)
             addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, effIndex, caster->CountPctFromMaxHealth(damage), HEAL);
@@ -2133,20 +2133,6 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
 
                 break;
             }
-            case 115072:// Expel Harm
-                if (caster->getClass() == CLASS_MONK && addhealth)
-                {
-                    addhealth = CalculateMonkMeleeAttacks(caster, 7);
-                    addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
-                }
-                break;
-            case 147489:// Expel Harm with glyph of Targeted Expulsion
-                if (caster->getClass() == CLASS_MONK && addhealth)
-                {
-                    addhealth = CalculateMonkMeleeAttacks(caster, caster == unitTarget ? 7.0f : 3.5f);
-                    addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
-                }
-                break;
             case 121129:// Daybreak
             {
                 uint32 count = 0;

@@ -4366,9 +4366,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 108283:// Echo of the Elements
                     spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_DUMMY;
                     break;
-                case 62099: // Shamanism
-                    spellInfo->Effects[0].SpellClassMask[2] |= 0x8000;
-                    break;
                 case 116943:// Earthgrab
                     spellInfo->AttributesEx5 |= SPELL_ATTR5_START_PERIODIC_AT_APPLY;
                     spellInfo->Effects[0].TargetB = 0;
@@ -5081,10 +5078,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 33891:  // Tree form
                 case 114282: // Tree form
                     spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(9);
-                    break;
-                // Chain Lightning Elemental Overload proc
-                case 45297:
-                    spellInfo->MaxLevel = spellInfo->SpellLevel;
                     break;
                 case 34490: // Silencing Shot
                 case 114157: // Execution Sentence

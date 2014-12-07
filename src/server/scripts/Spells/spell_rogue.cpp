@@ -676,7 +676,7 @@ class spell_rog_venomous_wounds : public SpellScriptLoader
             {
                 if (Unit* caster = GetCaster())
                 {
-                    if (GetTarget())
+                    if (GetTarget() && caster->HasAura(79134))
                     {
                         AuraRemoveMode removeMode = GetTargetApplication()->GetRemoveMode();
                         if (removeMode == AURA_REMOVE_BY_DEATH)

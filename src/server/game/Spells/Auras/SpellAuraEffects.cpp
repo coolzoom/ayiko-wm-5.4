@@ -3960,6 +3960,7 @@ void AuraEffect::HandleModStateImmunityMask(AuraApplication const* aurApp, uint8
     std::list <AuraType> aura_immunity_list;
     uint32 mechanic_immunity_list = 0;
     int32 miscVal = GetMiscValue();
+    bool needAuraImmunity = true;
 
     switch (miscVal)
     {
@@ -4212,34 +4213,48 @@ void AuraEffect::HandleModStateImmunityMask(AuraApplication const* aurApp, uint8
                         target->RemoveAura(90259);
                 }
             }
-
+            break;
+        }
+        case 1849:
+        {
+            if (GetId() == 8143) // Tremor Totem (overriding stun immunity)
+            {
+                needAuraImmunity = false;
+                mechanic_immunity_list = (1 << MECHANIC_SLEEP) | (1 << MECHANIC_FEAR) | (1 << MECHANIC_CHARM);
+                target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_SLEEP, apply);
+                target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_FEAR, apply);
+                target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_CHARM, apply);
+            }
             break;
         }
         default:
             break;
     }
 
-    if (aura_immunity_list.empty())
+    if (needAuraImmunity)
     {
-            if (miscVal & (1<<10))
+        if (aura_immunity_list.empty())
+        {
+            if (miscVal & (1 << 10))
                 aura_immunity_list.push_back(SPELL_AURA_MOD_STUN);
-            if (miscVal & (1<<1))
+            if (miscVal & (1 << 1))
                 aura_immunity_list.push_back(SPELL_AURA_TRANSFORM);
 
             // These flag can be recognized wrong:
-            if (miscVal & (1<<6))
+            if (miscVal & (1 << 6))
                 aura_immunity_list.push_back(SPELL_AURA_MOD_DECREASE_SPEED);
-            if (miscVal & (1<<0))
+            if (miscVal & (1 << 0))
                 aura_immunity_list.push_back(SPELL_AURA_MOD_ROOT);
-            if (miscVal & (1<<2))
+            if (miscVal & (1 << 2))
                 aura_immunity_list.push_back(SPELL_AURA_MOD_CONFUSE);
-            if (miscVal & (1<<9))
+            if (miscVal & (1 << 9))
             {
                 aura_immunity_list.push_back(SPELL_AURA_MOD_FEAR);
                 aura_immunity_list.push_back(SPELL_AURA_MOD_FEAR_2);
             }
-            if (miscVal & (1<<7))
+            if (miscVal & (1 << 7))
                 aura_immunity_list.push_back(SPELL_AURA_MOD_DISARM);
+        }
     }
 
     // apply immunities

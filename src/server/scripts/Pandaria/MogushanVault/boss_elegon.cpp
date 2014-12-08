@@ -240,6 +240,7 @@ public:
 
         void InitializeAI()
         {
+            me->setActive(true);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_UNK_15);
             me->SetDisplayId(11686);
 

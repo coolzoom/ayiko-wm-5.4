@@ -241,6 +241,12 @@ public:
         // Available positions -- Heroic mode purpose
         // uint8 availablePos[4];
 
+        void InitializeAI()
+        {
+            me->setActive(true);
+            Reset();
+        }
+
         void Reset()
         {
             _Reset();
@@ -1273,44 +1279,6 @@ public:
     }
 };
 
-// Arcane Resonance - 116434
-class spell_mogu_arcane_resonance : public SpellScriptLoader
-{
-public:
-    spell_mogu_arcane_resonance() : SpellScriptLoader("spell_mogu_arcane_resonance") { }
-
-    class spell_mogu_arcane_resonance_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_mogu_arcane_resonance_SpellScript);
-
-        uint8 targetCount;
-
-        void FilterTargets(std::list<WorldObject*>& targets)
-        {
-            targetCount = targets.size();
-        }
-
-        void DealDamage()
-        {
-            if (targetCount > 25)
-                targetCount = 0;
-
-            SetHitDamage(GetHitDamage() * targetCount);
-        }
-
-        void Register()
-        {
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_mogu_arcane_resonance_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
-            OnHit                    += SpellHitFn(spell_mogu_arcane_resonance_SpellScript::DealDamage);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_mogu_arcane_resonance_SpellScript();
-    }
-};
-
 // Mogu Inversion - 118300 / 118302 / 118304 / 118305 / 118307 / 118308 / 132296 / 132297 / 132298
 class spell_mogu_inversion : public SpellScriptLoader
 {
@@ -1431,6 +1399,82 @@ public:
     };
 };
 
+struct PlayerTargetSelector
+{
+    bool operator ()(WorldObject const *object) const
+    {
+        if (object->GetTypeId() == TYPEID_PLAYER)
+            return false;
+        return true;
+    }
+};
+
+class spell_feng_wildfire_spark : public SpellScriptLoader
+{
+public:
+    spell_feng_wildfire_spark() : SpellScriptLoader("spell_feng_wildfire_spark") { }
+
+    class spell_feng_wildfire_spark_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_feng_wildfire_spark_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            targets.remove_if(PlayerTargetSelector());
+        }
+
+        void Register() override
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_feng_wildfire_spark_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_feng_wildfire_spark_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_feng_wildfire_spark_SpellScript();
+    }
+};
+
+// Arcane Resonance - 116434
+class spell_mogu_arcane_resonance : public SpellScriptLoader
+{
+public:
+    spell_mogu_arcane_resonance() : SpellScriptLoader("spell_mogu_arcane_resonance") { }
+
+    class spell_mogu_arcane_resonance_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_mogu_arcane_resonance_SpellScript);
+
+        uint8 targetCount;
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            targets.remove_if(PlayerTargetSelector());
+            targetCount = targets.size();
+        }
+
+        void DealDamage()
+        {
+            if (targetCount > 25)
+                targetCount = 0;
+
+            SetHitDamage(GetHitDamage() * targetCount);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_mogu_arcane_resonance_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+            OnHit += SpellHitFn(spell_mogu_arcane_resonance_SpellScript::DealDamage);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_mogu_arcane_resonance_SpellScript();
+    }
+};
+
 void AddSC_boss_feng()
 {
     new boss_feng();
@@ -1447,6 +1491,7 @@ void AddSC_boss_feng()
     new spell_mogu_arcane_resonance();
     new spell_mogu_inversion();
     new spell_feng_spirit_bolts();
+    new spell_feng_wildfire_spark();
     new go_inversion;
     new go_cancel;
 }

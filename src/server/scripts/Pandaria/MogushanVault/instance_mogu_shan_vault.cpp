@@ -59,6 +59,7 @@ public:
 
         EventMap events;
 
+        uint32 stoneGuardiansState;
         uint32 actualPetrifierEntry;
 
         uint64 cursedMogu1Guid;
@@ -93,8 +94,9 @@ public:
 
         void Initialize()
         {
-            SetBossNumber(DATA_MAX_BOSS_DATA);
+            SetBossNumber(ENCOUNTERS);
             LoadDoorData(doorData);
+            stoneGuardiansState             = NOT_STARTED;
             stoneGuardControllerGuid        = 0;
             fengGuid                        = 0;
             siphonShieldGuid                = 0;
@@ -137,8 +139,10 @@ public:
                     auto const difficulty = instance->GetSpawnMode();
                     auto const turnOver = difficulty == MAN10_DIFFICULTY || difficulty == MAN10_HEROIC_DIFFICULTY || difficulty == RAID_TOOL_DIFFICULTY;
 
-                    if (stoneGuardGUIDs.size() >= 4 && GetBossState(DATA_STONE_GUARD) != DONE && turnOver)
+                    if (stoneGuardGUIDs.size() >= 4 && GetData(DATA_STONE_GUARD_STATE) == NOT_STARTED && GetBossState(DATA_STONE_GUARD) != DONE && turnOver)
                     {
+                        SetData(DATA_STONE_GUARD_STATE, DONE);
+
                         std::random_shuffle(stoneGuardGUIDs.begin(), stoneGuardGUIDs.end());
 
                         uint64 const toDespawn = stoneGuardGUIDs.back();
@@ -242,6 +246,7 @@ public:
                     break;
                 case GOB_WILL_OF_EMPEROR_ENTRANCE:
                     emperorsDoorGuid = go->GetGUID();
+                    AddDoor(go, true);
                     break;
                 case GOB_ENERGY_TITAN_DISK:
                     titanDiskGuid = go->GetGUID();
@@ -377,18 +382,31 @@ public:
             return true;
         }
 
-        void SetData(uint32 type, uint32 /*data*/)
+        void SetData(uint32 type, uint32 data)
         {
-            if (type == ACHIEVEMENT_SHOWMOVES)
-                SetAchievementValid(ACHIEVEMENT_SHOWMOVES);
+            switch (type)
+            {
+                case ACHIEVEMENT_SHOWMOVES:
+                    SetAchievementValid(ACHIEVEMENT_SHOWMOVES);
+                    break;
+                case DATA_STONE_GUARD_STATE:
+                    stoneGuardiansState = data;
+                    break;
+            }
+
+            if (data == DONE)
+                SaveToDB();
         }
 
         uint32 GetData(uint32 type)
         {
-            if (type == ACHIEVEMENT_SHOWMOVES)
-                return IsAchievementValid(ACHIEVEMENT_SHOWMOVES);
-
-            return 0;
+            switch (type)
+            {
+                case ACHIEVEMENT_SHOWMOVES:
+                    return IsAchievementValid(ACHIEVEMENT_SHOWMOVES);
+                case DATA_STONE_GUARD_STATE:
+                    return stoneGuardiansState;
+            }
         }
 
         uint64 GetData64(uint32 type)
@@ -517,7 +535,7 @@ public:
             OUT_SAVE_INST_DATA;
 
             std::ostringstream saveStream;
-            saveStream << "M S V " << GetBossSaveData();
+            saveStream << "M S V " << GetBossSaveData() << stoneGuardiansState;
 
             OUT_SAVE_INST_DATA_COMPLETE;
             return saveStream.str();
@@ -549,6 +567,10 @@ public:
 
                     SetBossState(i, EncounterState(tmpState));
                 }
+
+                uint32 temp = 0;
+                loadStream >> temp;
+                stoneGuardiansState = temp ? DONE : NOT_STARTED;
             }
             else OUT_LOAD_INST_DATA_FAIL;
 

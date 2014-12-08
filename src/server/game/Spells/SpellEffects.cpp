@@ -1422,6 +1422,14 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
                 m_caster->CastSpell(unitTarget, 31790, true);
                 return;
             }
+            // Explosive Trap Knockback
+            case 149575:
+            {
+                // Glyph of Explosive Trap
+                if (!m_caster->GetCharmerOrOwnerOrSelf()->HasAura(119403))
+                    return;
+                break;
+            }
         }
     }
 

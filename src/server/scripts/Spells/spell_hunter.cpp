@@ -2226,6 +2226,47 @@ class spell_hun_pet_dust_cloud : public SpellScriptLoader
         }
 };
 
+// Explosive Trap - 13812
+class spell_hun_explosive_trap final : public SpellScriptLoader
+{
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        enum
+        {
+            GLYPH_OF_EXPLOSIVE_TRAP = 119403
+        };
+
+        void onInitEffects(uint32 &effectMask)
+        {
+            auto const caster = GetCaster();
+            if (caster)
+                caster->MonsterSay("im caster", 0, 0);
+            if (caster)
+            {
+                if (caster->HasAura(GLYPH_OF_EXPLOSIVE_TRAP))
+                    effectMask &= ~(1 << EFFECT_0);
+            }
+        }
+
+        void Register() final
+        {
+            OnInitEffects += AuraInitEffectsFn(script_impl::onInitEffects);
+        }
+    };
+
+public:
+    spell_hun_explosive_trap()
+        : SpellScriptLoader("spell_hun_explosive_trap")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
+};
+
 void AddSC_hunter_spell_scripts()
 {
     new spell_hun_glyph_of_aspect_of_the_beast();
@@ -2269,4 +2310,5 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_tame_beast();
     new spell_hun_pet_dust_cloud();
     new spell_hun_dire_beast_focus_driver();
+    new spell_hun_explosive_trap();
 }

@@ -73,7 +73,7 @@ public:
                 {
                     player->PrepareGossipMenu(me, GOSSIP_COOKING_SKILL_HIGH);
                     player->SendPreparedGossip(me);
-                    DoCast(player, SPELL_TEACHING_GOLDTHORN_TEA);
+                    player->CastSpell(player, SPELL_TEACHING_GOLDTHORN_TEA, true);
                 }
                 else
                 {
@@ -88,7 +88,7 @@ public:
                 {
                     player->PrepareGossipMenu(me, GOSSIP_ALCHEMY_SKILL_HIGH);
                     player->SendPreparedGossip(me);
-                    DoCast(player, SPELL_TEACHING_MIGHTY_TROLLS_BLOOD_POTION);
+                    player->CastSpell(player, SPELL_TEACHING_MIGHTY_TROLLS_BLOOD_POTION, true);
                 }
                 else
                 {

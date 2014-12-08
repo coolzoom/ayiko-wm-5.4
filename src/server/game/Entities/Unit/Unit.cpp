@@ -20242,7 +20242,7 @@ bool Unit::UpdatePosition(float x, float y, float z, float orientation, bool tel
     }
 
     bool turn = (GetOrientation() != orientation);
-    bool relocated = (teleport || GetPositionX() != x || GetPositionY() != y || GetPositionZ() != z);
+    bool relocated = (teleport || GetPositionX() != x || GetPositionY() != y || (GetPositionZ() != z && !HasAuraType(SPELL_AURA_HOVER)));
 
     if (turn)
         RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TURNING);

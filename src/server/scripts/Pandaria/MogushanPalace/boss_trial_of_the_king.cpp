@@ -1300,7 +1300,7 @@ public:
                             me->GetInstanceScript()->SetData(TYPE_TRIAL_ENDED, 0);
                         break;
                     case EVENT_SUMMON_BAT:
-                        HandleBatSummons(6);
+                        HandleBatSummons(5);
                         events.ScheduleEvent(EVENT_SUMMON_BAT, urand(9000, 14000));
                         break;
                 }

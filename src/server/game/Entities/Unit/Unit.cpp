@@ -711,11 +711,6 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
     if (GetOwner() && GetOwner()->HasAura(77657) && ((GetTypeId() == TYPEID_UNIT && GetEntry() == 15438 && !spellProto) || (isTotem() && GetEntry() == 2523)))
         GetOwner()->CastSpell(GetOwner(), 77661, true);
 
-    // Stagger handler
-    if (victim && victim->ToPlayer() && victim->getClass() == CLASS_MONK)
-        if (!spellProto || (spellProto && spellProto->Id != LIGHT_STAGGER && spellProto->Id != MODERATE_STAGGER && spellProto->Id != HEAVY_STAGGER))
-            damage = victim->CalcStaggerDamage(victim->ToPlayer(), damage);
-
     // Stance of the Wise Serpent - 115070
     if (GetTypeId() == TYPEID_PLAYER && ToPlayer()->getClass() == CLASS_MONK && HasAura(115070) && spellProto
         && spellProto->Id != 124098 && spellProto->Id != 107270 && spellProto->Id != 132467
@@ -1091,15 +1086,18 @@ uint32 Unit::CalcStaggerDamage(Player* victim, uint32 damage)
     uint32 spellId = 0;
     uint32 ticksNumber = 10;
 
-    auto aurEff = victim->GetAuraEffect(LIGHT_STAGGER, 0, victim->GetGUID());
+    auto aurEff = victim->GetAuraEffect(LIGHT_STAGGER, EFFECT_0, victim->GetGUID());
     if (!aurEff)
-        aurEff = victim->GetAuraEffect(MODERATE_STAGGER, 0, victim->GetGUID());
+        aurEff = victim->GetAuraEffect(MODERATE_STAGGER, EFFECT_0, victim->GetGUID());
     if (!aurEff)
-        aurEff = victim->GetAuraEffect(HEAVY_STAGGER, 0, victim->GetGUID());
+        aurEff = victim->GetAuraEffect(HEAVY_STAGGER, EFFECT_0, victim->GetGUID());
 
     // Add remaining ticks to damage done
     if (aurEff)
-        bp += aurEff->GetAmount() * (ticksNumber - aurEff->GetTickNumber());
+    {
+        auto const remaining = victim->GetRemainingPeriodicAmount(victim->GetGUID(), aurEff->GetId(), SPELL_AURA_PERIODIC_DAMAGE);
+        bp += remaining.total();
+    }
 
     if (bp < int32(victim->CountPctFromMaxHealth(3)))
         spellId = LIGHT_STAGGER;
@@ -1108,12 +1106,25 @@ uint32 Unit::CalcStaggerDamage(Player* victim, uint32 damage)
     else
         spellId = HEAVY_STAGGER;
 
+    int32 total = bp;
     bp /= ticksNumber;
 
-    victim->RemoveAura(LIGHT_STAGGER);
-    victim->RemoveAura(MODERATE_STAGGER);
-    victim->RemoveAura(HEAVY_STAGGER);
-    victim->CastCustomSpell(victim, spellId, &bp, NULL, NULL, true);
+    // Switch aura or change amount to old one
+    if (aurEff && aurEff->GetId() == spellId)
+    {
+        aurEff->GetBase()->RefreshTimers(false);
+        aurEff->SetAmount(bp);
+        aurEff->GetFixedDamageInfo().SetFixedDamage(bp);
+        // Update total every refresh
+        aurEff->GetBase()->GetEffect(EFFECT_1)->SetAmount(total);
+    }
+    else
+    {
+        victim->RemoveAura(LIGHT_STAGGER);
+        victim->RemoveAura(MODERATE_STAGGER);
+        victim->RemoveAura(HEAVY_STAGGER);
+        victim->CastCustomSpell(victim, spellId, &bp, &total, NULL, true);
+    }
 
     return damage *= stagger;
 }
@@ -1327,6 +1338,9 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
             if (!spellInfo->HasCustomAttribute(SPELL_ATTR0_CU_TRIGGERED_IGNORE_RESILENCE))
                 ApplyResilience(victim, &damage);
 
+            if (this != victim && victim->GetTypeId() == TYPEID_PLAYER)
+                damage = victim->CalcStaggerDamage(victim->ToPlayer(), damage);
+
             break;
         }
         // Magical Attacks
@@ -1342,6 +1356,9 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
 
             if (!spellInfo->HasCustomAttribute(SPELL_ATTR0_CU_TRIGGERED_IGNORE_RESILENCE))
                 ApplyResilience(victim, &damage);
+
+            if (this != victim && victim->GetTypeId() == TYPEID_PLAYER)
+                damage = victim->CalcStaggerDamage(victim->ToPlayer(), damage);
             break;
         }
         default:
@@ -1546,8 +1563,20 @@ void Unit::CalculateMeleeDamage(Unit* victim, uint32 damage, CalcDamageInfo* dam
     int32 resilienceReduction = damageInfo->damage;
     ApplyResilience(victim, &resilienceReduction);
     resilienceReduction = damageInfo->damage - resilienceReduction;
+
     damageInfo->damage      -= resilienceReduction;
     damageInfo->cleanDamage += resilienceReduction;
+
+    // Reduce damage information by Stagger
+    if (this != victim && victim->GetTypeId() == TYPEID_PLAYER)
+    {
+        uint32 staggerReduction = damageInfo->damage - victim->CalcStaggerDamage(victim->ToPlayer(), damageInfo->damage);
+        if (staggerReduction)
+        {
+            damageInfo->damage -= staggerReduction;
+            damageInfo->cleanDamage += staggerReduction;
+        }
+    }
 
     // Calculate absorb resist
     if (int32(damageInfo->damage) > 0)
@@ -8078,30 +8107,27 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                     || (attType == OFF_ATTACK && procFlag & PROC_FLAG_DONE_MAINHAND_ATTACK))
                     return false;
 
-                float fire_onhit = float(CalculatePct(dummySpell->Effects[EFFECT_0].CalcValue(), 1.0f));
+                SpellInfo const * const flametongue = sSpellMgr->GetSpellInfo(8024);
+                if (!flametongue)
+                    return false;
 
-                float add_spellpower = (float)(SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE)
-                                     + victim->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_FIRE));
-
-                // 1.3speed = 5%, 2.6speed = 10%, 4.0 speed = 15%, so, 1.0speed = 3.84%
-                ApplyPct(add_spellpower, 5.76f);
+                float flametongueDamage = (float)(flametongue->Effects[1].CalcValue(this)) / 25.f + (0.088671f * GetTotalAttackPowerValue(BASE_ATTACK));
 
                 // Enchant on Off-Hand and ready?
                 if (castItem->GetSlot() == EQUIPMENT_SLOT_OFFHAND && procFlag & PROC_FLAG_DONE_OFFHAND_ATTACK)
                 {
                     float BaseWeaponSpeed = GetAttackTime(OFF_ATTACK) / 1000.0f;
+                    basepoints0 = int32(flametongueDamage * BaseWeaponSpeed / 4);
 
-                    // Value1: add the tooltip damage by swingspeed + Value2: add spelldmg by swingspeed
-                    basepoints0 = int32((fire_onhit * BaseWeaponSpeed) + (add_spellpower * BaseWeaponSpeed));
                     triggered_spell_id = 10444;
                 }
+
                 // Enchant on Main-Hand and ready?
                 else if (castItem->GetSlot() == EQUIPMENT_SLOT_MAINHAND && procFlag & PROC_FLAG_DONE_MAINHAND_ATTACK)
                 {
                     float BaseWeaponSpeed = GetAttackTime(BASE_ATTACK) / 1000.0f;
+                    basepoints0 = int32(flametongueDamage * BaseWeaponSpeed / 4);
 
-                    // Value1: add the tooltip damage by swingspeed +  Value2: add spelldmg by swingspeed
-                    basepoints0 = int32((fire_onhit * BaseWeaponSpeed) + (add_spellpower * BaseWeaponSpeed));
                     triggered_spell_id = 10444;
                 }
                 // If not ready, we should  return, shouldn't we?!
@@ -11873,7 +11899,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
     // Default calculation
     if (DoneAdvertisedBenefit && coeff >= 0)
     {
-        if (coeff == 0)
+        if (coeff == 0 && spellProto->Effects[effIndex].BonusMultiplier != 1)
             coeff = spellProto->Effects[effIndex].BonusMultiplier;
 
         if (Player* modOwner = GetSpellModOwner())
@@ -11989,7 +12015,7 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
     // Check for table values
     if (TakenAdvertisedBenefit && coeff >= 0)
     {
-        if (coeff == 0)
+        if (coeff == 0 && spellProto->Effects[effIndex].BonusMultiplier != 1)
             coeff = spellProto->Effects[effIndex].BonusMultiplier;
 
         if (Player* modOwner = GetSpellModOwner())
@@ -12541,7 +12567,7 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
     // Default calculation
     if (DoneAdvertisedBenefit && coeff >= 0)
     {
-        if (coeff == 0)
+        if (coeff == 0 && spellProto->Effects[effIndex].BonusMultiplier != 1)
             coeff = spellProto->Effects[effIndex].BonusMultiplier;
 
         if (Player* modOwner = GetSpellModOwner())
@@ -12665,7 +12691,7 @@ uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, u
     // Default calculation
     if (TakenAdvertisedBenefit && coeff >= 0)
     {
-        if (coeff == 0)
+        if (coeff == 0 && spellProto->Effects[effIndex].BonusMultiplier != 1)
             coeff = spellProto->Effects[effIndex].BonusMultiplier;
 
         if (Player* modOwner = GetSpellModOwner())

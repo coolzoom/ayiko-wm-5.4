@@ -3823,6 +3823,9 @@ bool SpellInfo::IsAffectedByResilience() const
             break;
     }
 
+    if (HasCustomAttribute(SPELL_ATTR0_CU_TRIGGERED_IGNORE_RESILENCE))
+        return false;
+
     return true;
 }
 

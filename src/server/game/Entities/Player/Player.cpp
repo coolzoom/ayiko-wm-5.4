@@ -22915,6 +22915,13 @@ void Player::RemoveSpellMods(Spell &spell)
             secondId = 135700;
             break;
         default:
+            // Shaman: Prioritize Ancestral Swiftness over Maelstrom Weapon
+            if (HasAura(16188))
+            {
+                firstId = 16188;
+                secondId = 53817;
+                break;
+            }
             break;
     }
 

@@ -2080,11 +2080,6 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
 
                 break;
             }
-            case 86961: // Cleansing Waters
-            {
-                addhealth = m_caster->CountPctFromMaxHealth(4);
-                break;
-            }
             case 90361: // Spirit Mend
             {
                 if (!caster->GetOwner())
@@ -3179,8 +3174,8 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
         case SUMMON_CATEGORY_ALLY:
         case SUMMON_CATEGORY_UNK:
             // 0x4800 is used for Druid's Treants. May be 0x4000 is fine too, but
-            // it requires additional tests.
-            if (properties->Flags & 512 || properties->Flags == 0x4800)
+            // it requires additional tests - Searing Totem needs exception
+            if ((properties->Flags & 512 || properties->Flags == 0x4800) && m_spellInfo->Id != 3599)
             {
                 SummonGuardian(effIndex, entry, properties, numSummons);
                 break;
@@ -3484,12 +3479,6 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
                 }
             }
         }
-        // Glyph of Dispel Magic
-        if (m_spellInfo->Id == 528)
-        {
-            if (m_caster->GetAuraEffect(119864, 0))
-                m_caster->CastSpell(unitTarget, 119856, true);
-        }
     }
 
     WorldPacket dataSuccess(SMSG_SPELLDISPELLOG, 8+8+4+1+4+success_list.size()*5);
@@ -3511,12 +3500,19 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
     // On success dispel
     switch (m_spellInfo->Id)
     {
-        case 527:   // Purify
+        // Purify
+        case 527:
             // Glyph of Purify
             if (m_caster->HasAura(55677))
                 m_caster->CastSpell(unitTarget, 56131, true);
             break;
-        case 19505: // Devour Magic
+        // Glyph of Dispel Magic
+        case 528:
+            if (m_caster->GetAuraEffect(119864, 0))
+                m_caster->CastSpell(unitTarget, 119856, true);
+            break;
+        // Devour Magic
+        case 19505:
         {
             int32 heal_amount = m_spellInfo->Effects[EFFECT_1].CalcValue(m_caster);
             m_caster->CastCustomSpell(m_caster, 19658, &heal_amount, NULL, NULL, true);
@@ -3529,8 +3525,11 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
         }
         case 51886: // Cleanse Spirit
         case 77130: // Purify Spirit
-            if (m_caster->HasAura(86959)) // Glyph of Cleansing Waters
-                m_caster->CastSpell(unitTarget, 86961, true);
+            if (auto const aurEff = m_caster->GetAuraEffect(55445, 0))
+            {
+                int32 bp = int32(unitTarget->CountPctFromMaxHealth(aurEff->GetAmount()));
+                m_caster->CastCustomSpell(unitTarget, 86961, &bp, 0, 0, true);
+            }
             break;
         default:
             break;

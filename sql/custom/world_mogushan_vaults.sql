@@ -796,7 +796,7 @@ INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `l
 -- Feng the Accursed
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
-(@GUID + 1, 60009, 1008, 6125, 6125, 760, 1, 0, 0, 4041.98, 1341.86, 466.388, 3.14016, 28800, 0, 0, 1, 0, 0, 0, 32832, 0);
+(@GUID + 1, 60009, 1008, 6125, 6125, 760, 1, 0, 0, 4041.98, 1341.86, 466.388, 3.14016, 604800, 0, 0, 1, 0, 0, 0, 32832, 0);
 
 UPDATE `creature_template` SET `lootid` = 60009 WHERE `entry` = 60009;
 DELETE FROM `creature_loot_template` WHERE `entry` = 60009;

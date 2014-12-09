@@ -407,6 +407,8 @@ public:
                 case DATA_STONE_GUARD_STATE:
                     return stoneGuardiansState;
             }
+
+            return 0;
         }
 
         uint64 GetData64(uint32 type)

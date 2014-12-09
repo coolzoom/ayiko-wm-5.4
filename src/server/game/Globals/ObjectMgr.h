@@ -786,9 +786,19 @@ class ObjectMgr
             return NULL;
         }
 
-        CellObjectGuids const& GetCellObjectGuids(uint16 mapid, uint8 spawnMode, uint32 cell_id)
+        CellObjectGuids const * GetCellObjectGuids(uint16 mapid, uint8 spawnMode, uint32 cell_id) const
         {
-            return _mapObjectGuidsStore[MAKE_PAIR32(mapid, spawnMode)][cell_id];
+            MapObjectReadGuard guard(_mapObjectGuidsStoreLock);
+
+            MapObjectGuids::const_iterator i = _mapObjectGuidsStore.find(MAKE_PAIR32(mapid, spawnMode));
+            if (i == _mapObjectGuidsStore.end())
+                return nullptr;
+
+            CellObjectGuidsMap::const_iterator j = i->second.find(cell_id);
+            if (j == i->second.end())
+                return nullptr;
+
+            return &j->second;
         }
 
        /**
@@ -1144,6 +1154,13 @@ class ObjectMgr
         HalfNameContainer _petHalfName1;
 
         MapObjectGuids _mapObjectGuidsStore;
+
+        typedef ting::shared_mutex MapObjectLock;
+        typedef ting::shared_lock<MapObjectLock> MapObjectReadGuard;
+        typedef std::lock_guard<MapObjectLock> MapObjectWriteGuard;
+
+        mutable MapObjectLock _mapObjectGuidsStoreLock;
+
         CreatureDataContainer _creatureDataStore;
         CreatureTemplateContainer _creatureTemplateStore;
         CreatureModelContainer _creatureModelStore;

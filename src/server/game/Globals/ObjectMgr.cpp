@@ -1548,6 +1548,7 @@ void ObjectMgr::AddCreatureToGrid(uint32 guid, CreatureData const* data)
         if (mask & 1)
         {
             CellCoord cellCoord = Trinity::ComputeCellCoord(data->posX, data->posY);
+            MapObjectWriteGuard guard(_mapObjectGuidsStoreLock);
             CellObjectGuids& cell_guids = _mapObjectGuidsStore[MAKE_PAIR32(data->mapid, i)][cellCoord.GetId()];
             cell_guids.creatures.insert(guid);
         }
@@ -1562,6 +1563,7 @@ void ObjectMgr::RemoveCreatureFromGrid(uint32 guid, CreatureData const* data)
         if (mask & 1)
         {
             CellCoord cellCoord = Trinity::ComputeCellCoord(data->posX, data->posY);
+            MapObjectWriteGuard guard(_mapObjectGuidsStoreLock);
             CellObjectGuids& cell_guids = _mapObjectGuidsStore[MAKE_PAIR32(data->mapid, i)][cellCoord.GetId()];
             cell_guids.creatures.erase(guid);
         }
@@ -1876,6 +1878,7 @@ void ObjectMgr::AddGameobjectToGrid(uint32 guid, GameObjectData const* data)
         if (mask & 1)
         {
             CellCoord cellCoord = Trinity::ComputeCellCoord(data->posX, data->posY);
+            MapObjectWriteGuard guard(_mapObjectGuidsStoreLock);
             CellObjectGuids& cell_guids = _mapObjectGuidsStore[MAKE_PAIR32(data->mapid, i)][cellCoord.GetId()];
             cell_guids.gameobjects.insert(guid);
         }
@@ -1890,6 +1893,7 @@ void ObjectMgr::RemoveGameobjectFromGrid(uint32 guid, GameObjectData const* data
         if (mask & 1)
         {
             CellCoord cellCoord = Trinity::ComputeCellCoord(data->posX, data->posY);
+            MapObjectWriteGuard guard(_mapObjectGuidsStoreLock);
             CellObjectGuids& cell_guids = _mapObjectGuidsStore[MAKE_PAIR32(data->mapid, i)][cellCoord.GetId()];
             cell_guids.gameobjects.erase(guid);
         }
@@ -7156,6 +7160,8 @@ void ObjectMgr::DeleteGOData(uint32 guid)
 
 void ObjectMgr::AddCorpseCellData(uint32 mapid, uint32 cellid, uint32 player_guid, uint32 instance)
 {
+    MapObjectWriteGuard guard(_mapObjectGuidsStoreLock);
+
     // corpses are always added to spawn mode 0 and they are spawned by their instance id
     CellObjectGuids& cell_guids = _mapObjectGuidsStore[MAKE_PAIR32(mapid, 0)][cellid];
     cell_guids.corpses[player_guid] = instance;
@@ -7163,6 +7169,8 @@ void ObjectMgr::AddCorpseCellData(uint32 mapid, uint32 cellid, uint32 player_gui
 
 void ObjectMgr::DeleteCorpseCellData(uint32 mapid, uint32 cellid, uint32 player_guid)
 {
+    MapObjectWriteGuard guard(_mapObjectGuidsStoreLock);
+
     // corpses are always added to spawn mode 0 and they are spawned by their instance id
     CellObjectGuids& cell_guids = _mapObjectGuidsStore[MAKE_PAIR32(mapid, 0)][cellid];
     cell_guids.corpses.erase(player_guid);

@@ -12616,26 +12616,25 @@ uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, u
 {
     float TakenTotalMod = 1.0f;
 
-    // No bonus for Eminence (statue) and Eminence
-    if (spellProto->Id == 117895 || spellProto->Id == 126890)
-        return healamount;
-
-    // No bonus for Living Seed
-    if (spellProto->Id == 48503)
-        return healamount;
-
-    // No bonus for Lifebloom : Final heal
-    if (spellProto->Id == 33778)
-        return healamount;
-
-    // No bonus for Devouring Plague heal
-    if (spellProto->Id == 127626)
-        return healamount;
+    // No bonus for:
+    switch (spellProto->Id)
+    {
+        case 33778: // Lifebloom: Final heal
+        case 48503: // Living Seed
+        case 117895: // Eminence (statue)
+        case 126890: // Eminence
+        case 127626: // Devouring Plague heal
+            return healamount;
+    }
 
     // Healing taken percent
     float minval = float(GetMaxNegativeAuraModifier(SPELL_AURA_MOD_HEALING_PCT));
     if (minval)
         AddPct(TakenTotalMod, minval);
+
+    // Handle Battle Fatigue stacking with other reductions
+    if (auto fatigue = GetAuraEffect(134735, EFFECT_0))
+        AddPct(TakenTotalMod, fatigue->GetAmount());
 
     float maxval = float(GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HEALING_PCT));
     if (maxval)

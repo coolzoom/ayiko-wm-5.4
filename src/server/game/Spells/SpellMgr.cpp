@@ -5773,6 +5773,9 @@ void SpellMgr::LoadSpellCustomAttr()
                     if (auto originalCurseInfo = GetSpellInfo(109466))
                         spellInfo->spellPower = originalCurseInfo->spellPower;
                     break;
+                case 134735: // Battle Fatigue, handled manually to stack with other reductions
+                    spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
+                    break;
                 default:
                     break;
             }

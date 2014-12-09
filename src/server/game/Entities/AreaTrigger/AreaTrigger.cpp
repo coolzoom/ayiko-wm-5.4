@@ -75,14 +75,18 @@ bool AreaTrigger::CreateAreaTrigger(uint32 guidlow, uint32 triggerEntry, Unit* c
 
     WorldObject::_Create(guidlow, HIGHGUID_AREATRIGGER, caster->GetPhaseMask());
 
+    int32 duration = spell->GetDuration();
+    if (Player* modOwner = caster->GetSpellModOwner())
+        modOwner->ApplySpellMod(spell->Id, SPELLMOD_DURATION, duration);
+
     SetEntry(triggerEntry);
-    SetDuration(spell->GetDuration());
+    SetDuration(duration);
     SetObjectScale(1);
 
     SetUInt64Value(AREATRIGGER_CASTER, caster->GetGUID());
     SetUInt32Value(AREATRIGGER_SPELLID, spell->Id);
     SetUInt32Value(AREATRIGGER_SPELLVISUALID, spell->SpellVisual[0]);
-    SetUInt32Value(AREATRIGGER_DURATION, spell->GetDuration());
+    SetUInt32Value(AREATRIGGER_DURATION, duration);
     // Anti-magic Zone TODO: Find proper scaling of areatriggers
     if (spell->Id == 51052)
         SetFloatValue(AREATRIGGER_FIELD_EXPLICIT_SCALE, 0.25f);

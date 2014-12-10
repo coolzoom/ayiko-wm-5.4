@@ -87,11 +87,23 @@ bool AreaTrigger::CreateAreaTrigger(uint32 guidlow, uint32 triggerEntry, Unit* c
     SetUInt32Value(AREATRIGGER_SPELLID, spell->Id);
     SetUInt32Value(AREATRIGGER_SPELLVISUALID, spell->SpellVisual[0]);
     SetUInt32Value(AREATRIGGER_DURATION, duration);
-    // Anti-magic Zone TODO: Find proper scaling of areatriggers
-    if (spell->Id == 51052)
-        SetFloatValue(AREATRIGGER_FIELD_EXPLICIT_SCALE, 0.25f);
-    else
-        SetFloatValue(AREATRIGGER_FIELD_EXPLICIT_SCALE, 1);
+    // TODO: Find proper scaling of areatriggers
+    float scale = 1.0f;
+    switch (spell->Id)
+    {
+        case 51052: //Anti-magic Zone
+            scale = 0.25f;
+            break;
+        case 124503: // Gift of the Ox
+        case 124506: // Gift of the Ox
+            scale = 0.5f;
+            break;
+        default:
+            scale = 1.0f;
+            break;
+    }
+
+    SetFloatValue(AREATRIGGER_FIELD_EXPLICIT_SCALE, scale);
 
     switch (spell->Id)
     {

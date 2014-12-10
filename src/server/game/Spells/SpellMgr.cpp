@@ -5776,6 +5776,10 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 134735: // Battle Fatigue, handled manually to stack with other reductions
                     spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
                     break;
+                case 124503: // Gift of the Ox
+                case 124506: // Gift of the Ox
+                    spellInfo->Effects[EFFECT_0].SetRadiusIndex(EFFECT_RADIUS_3_YARDS);
+                    break;
                 default:
                     break;
             }

@@ -5780,6 +5780,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 124506: // Gift of the Ox
                     spellInfo->Effects[EFFECT_0].SetRadiusIndex(EFFECT_RADIUS_3_YARDS);
                     break;
+                case 122278: // Dampen Harm
+                    spellInfo->AttributesEx5 |= SPELL_ATTR5_USABLE_WHILE_STUNNED;
+                    break;
                 default:
                     break;
             }

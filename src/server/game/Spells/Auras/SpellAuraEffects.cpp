@@ -1283,6 +1283,9 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
         }
         else if (GetAuraType() == SPELL_AURA_SCHOOL_ABSORB && GetBase()->GetType() == UNIT_AURA_TYPE)
         {
+            // Touch of Karma, probably more scripted absorbs must not be reduced...
+            if (GetId() == 122470)
+                return amount;
             // Apply absorb-reduction auras
             auto target = GetBase()->GetUnitOwner();
             float AbsorbMod = target->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_ABSORPTION_PCT) + target->GetMaxPositiveAuraModifier(SPELL_AURA_MOD_ABSORPTION_PCT);

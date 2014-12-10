@@ -11058,7 +11058,7 @@ int32 Unit::DealHeal(Unit* victim, uint32 addhealth, SpellInfo const* spellProto
 
     Unit* unit = this;
 
-    if (GetTypeId() == TYPEID_UNIT && (ToCreature()->isTotem() || ToCreature()->GetEntry() == 60849))
+    if (GetTypeId() == TYPEID_UNIT && (isTotem() || GetEntry() == 60849))
         unit = GetOwner();
 
     // Custom MoP Script
@@ -11108,7 +11108,7 @@ int32 Unit::DealHeal(Unit* victim, uint32 addhealth, SpellInfo const* spellProto
         }
     }
 
-    if (Player* player = unit->ToPlayer())
+    if (auto const player = (unit ? unit->ToPlayer() : nullptr))
     {
         if (Battleground* bg = player->GetBattleground())
             bg->UpdatePlayerScore(player, SCORE_HEALING_DONE, gain);

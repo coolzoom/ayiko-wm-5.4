@@ -974,11 +974,14 @@ class spell_monk_crackling_jade_lightning : public SpellScriptLoader
                 {
                     if (roll_chance_i(30))
                         caster->CastSpell(caster, SPELL_MONK_JADE_LIGHTNING_ENERGIZE, true);
-                    // Hack fix to consume energy per tick
-                    if (caster->GetPower(POWER_ENERGY) >= 20)
-                        caster->EnergizeBySpell(caster, GetId(), -20, POWER_ENERGY);
-                    else
-                        SetDuration(0);
+                    // Hack fix to consume energy per tick while not in Stance of the Wise Serpent
+                    if (!caster->HasAura(115070))
+                    {
+                        if (caster->GetPower(POWER_ENERGY) >= 20)
+                            caster->EnergizeBySpell(caster, GetId(), -20, POWER_ENERGY);
+                        else
+                            SetDuration(0);
+                    }
                 }
             }
 

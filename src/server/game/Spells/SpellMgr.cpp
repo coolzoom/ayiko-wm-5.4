@@ -4731,9 +4731,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Mechanic = MECHANIC_TURN;
                     spellInfo->OverrideSpellList.push_back(145067); // Evil is a point of view
                     break;
-                case 113656:// Fists of Fury
-                    spellInfo->PreventionType = SPELL_PREVENTION_TYPE_SILENCE;
-                    break;
                 case 13165: // Aspect of the Hawk
                     spellInfo->OverrideSpellList.push_back(109260); // Add Aspect of the Iron Hack to override spell list of Aspect of the Hawk
                     spellInfo->Effects[0].BasePoints = 35;

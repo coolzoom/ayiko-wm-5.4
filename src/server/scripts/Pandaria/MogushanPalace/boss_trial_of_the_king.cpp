@@ -1247,7 +1247,6 @@ public:
                         events.ScheduleEvent(EVENT_MOVECHECK, 200);
                         events.ScheduleEvent(EVENT_SUMMON_BAT, 4000);
                         m_uiWayPointCount = 0;
-                        // we should also emote here. Todo
                         break;
                     case EVENT_MOVECHECK:
                         me->GetMotionMaster()->Clear(false);

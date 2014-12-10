@@ -191,12 +191,14 @@ void AreaTrigger::Update(uint32 p_time)
 
             if (!targetList.empty())
             {
-                for (auto itr : targetList)
-                {
-                    caster->CastSpell(itr, 115464, true); // Healing Sphere heal
-                    SetDuration(0);
-                    return;
-                }
+                // Remove targets at full health
+                targetList.remove_if([](Unit const *obj) { return obj->GetHealth() == obj->GetMaxHealth(); });
+                if (targetList.empty())
+                    break;
+                targetList.sort(Trinity::HealthPctOrderPred());
+                caster->CastSpell(targetList.front(), 115464, true); // Healing Sphere heal
+                SetDuration(0);
+                return;
             }
 
             break;

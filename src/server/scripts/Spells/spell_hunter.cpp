@@ -2240,10 +2240,7 @@ class spell_hun_explosive_trap final : public SpellScriptLoader
 
         void onInitEffects(uint32 &effectMask)
         {
-            auto const caster = GetCaster();
-            if (caster)
-                caster->MonsterSay("im caster", 0, 0);
-            if (caster)
+            if (auto const caster = GetCaster())
             {
                 if (caster->HasAura(GLYPH_OF_EXPLOSIVE_TRAP))
                     effectMask &= ~(1 << EFFECT_0);

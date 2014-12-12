@@ -6,6 +6,7 @@ SET @OGUID := 900000;
 SET @CGUID := 900000;
 DELETE FROM creature WHERE map = 1011;
 DELETE FROM gameobject WHERE map = 1011;
+UPDATE instance_template SET script = 'instance_siege_of_niuzao_temple' WHERE map = 1011;
 
 /*
 Niuzao Temple (Map 1011)
@@ -38,11 +39,7 @@ UPDATE creature_template SET ScriptName = 'npc_sikthik_guardian' WHERE entry = 6
 -- RESIN FLAKE
 UPDATE creature_template SET ScriptName = 'npc_resin_flake' WHERE entry = 61910;
 
-/*
-*******************************
-***** VIZIER JIN'BAK **********
-*******************************
-*/
+
 
 UPDATE creature_template SET ScriptName = 'boss_vizier_jinbak' WHERE entry = 61567;
 DELETE FROM creature_template_aura WHERE entry = 61613;
@@ -73,6 +70,57 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (61567, 3, 0, 'Did you think you stood a chance?!', 14, 0, 100, 0, 0, 29394, 'Vizier Jin''bak - SAY_SLAY'),
 (61567, 4, 0, 'Allow me to show you the power of amber alchemy...', 14, 0, 100, 0, 0, 29395, 'Vizier Jin''bak - SAY_DETONATE'),
 (61567, 5, 0, '|cFFFE9A2ESap Globules|r begin to sprout from the tree!', 41, 0, 100, 0, 0, 0, 'Vizier Jin''bak - EMOTE_GLOBULE');
+
+/*
+*******************************
+***** COMMANDER VO'JAK ********
+*******************************
+*/
+
+UPDATE creature_template SET InhabitType = 4 WHERE entry = 57478; -- Invisible Stalker
+UPDATE creature_template SET flags_extra = 128 WHERE entry IN (66699, 61579); -- Gongable stalker
+UPDATE creature_template SET ScriptName = 'boss_commander_vojak' WHERE entry = 61634;
+
+UPDATE creature_template SET ScriptName = 'npc_sikthik_warrior' WHERE entry = 61701;
+UPDATE creature_template SET ScriptName = 'npc_sikthik_demolisher' WHERE entry = 61670;
+UPDATE creature_template SET ScriptName = 'npc_sikthik_swarmer' WHERE entry = 63106;
+UPDATE creature_template SET ScriptName = 'npc_yang_ironclaw' WHERE entry = 61620;
+
+UPDATE creature_template SET ScriptName = 'npc_mantid_tar_keg' WHERE entry = 61817;
+
+UPDATE creature_template SET ScriptName = 'npc_chu_helper' WHERE entry IN (62794, 61812);
+
+DELETE FROM spell_script_names WHERE spell_id IN (122346, 120405);
+INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
+(120405, 'spell_grab_barrel'),
+(122346, 'spell_barrel_assignment');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (122346, 120405);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(13, 1, 122346, 0, 0, 31, 0, 3, 62684, 0, 0, 0, 0, '', 'Barrel Assignment - target Barrel Target'),
+(13, 1, 120405, 0, 0, 31, 0, 3, 61817, 0, 0, 0, 0, '', 'Grab Barrel - target Mantid Tar Keg');
+
+DELETE FROM npc_spellclick_spells WHERE npc_entry = 61817; -- Tar Keg
+INSERT INTO npc_spellclick_spells (npc_entry, spell_id, cast_flags) VALUES
+(61817, 123032, 3); -- player casts on self
+
+DELETE FROM spell_linked_spell WHERE spell_trigger = 123039;
+INSERT INTO spell_linked_spell (spell_trigger, spell_effect, type, comment) VALUES
+(123039, -123032, 0, 'Throw Keg - Remove override aura'),
+(123039, -123035, 0, 'Throw Keg - Remove override master aura');
+
+-- WIP ONLY
+UPDATE creature_template SEt modelid2 = 41224 WHERE entry = 62684; -- make barrel target visible
+-- WIP ONLY END
+
+
+DELETE FROM creature_text WHERE entry IN (61634, 61620);
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(61620, 0, 0, 'A wave of |cFF00dc29Sik''thik Swarmers|r joins the battle.', 41, 0, 100, 0, 0, 0, 'Commander Vo''jak - SAY_'),
+(61620, 1, 0, 'A wave of |cFFB600B8Sik''thik Demolishers|r joins the battle.', 41, 0, 100, 0, 0, 0, 'Commander Vo''jak - SAY_'),
+(61620, 2, 0, 'A wave of |cFF00dc29Sik''thik Swarmers|r and a |cFF815d18Sik''thik Warrior|r joins the battle.', 41, 0, 100, 0, 0, 0, 'Commander Vo''jak - SAY_'),
+(61620, 3, 0, 'A wave of |cFFB600B8Sik''thik Demolishers|r and a |cFF815d18Sik''thik Warrior|r joins the battle.', 41, 0, 100, 0, 0, 0, 'Commander Vo''jak - SAY_');
+
 
 
 /*
@@ -156,26 +204,27 @@ UPDATE `creature_template` SET `equipment_id` = `entry` WHERE `entry` IN (61634,
 
 -- Auras
 
-DELETE FROM `creature_template_aura` WHERE `entry` IN (61964, 61965, 62091, 64517, 61613, 62794, 61812, 61817, 61670, 66699, 63106, 61634, 64520, 62348, 61483, 62205);
+DELETE FROM `creature_template_aura` WHERE `entry` IN (61579, 61964, 61965, 62091, 64517, 61613, 62794, 61812, 61817, 61670, 66699, 63106, 61634, 64520, 62348, 61483, 62205);
 INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES
 (61964, 120586), -- Sap Spray - Sap Spray
+(61579, 120473), -- Sap puddle - Sap Spray base
 -- (61965, 120591), -- Sap Puddle - Sap Puddle
 (62091, 126320), -- Sik'thik Flyer - Mantid Wings
 (62091, 132441), -- Sik'thik Flyer - Mantid Wings
 (64517, 86603), -- Shado-Master Chum Kiu - Stealth
 (61613, 131628), -- Sap Puddle - Cosmetic Shield
 -- (61613, 119939), -- Sap Puddle - Sap Puddle
-(62794, 122347), -- Lo Chu - Barrel Assignment
-(61812, 122347), -- Li Chu - Barrel Assignment
-(61817, 123218), -- Mantid Tar Keg - Mantid Barrel Inactive
+-- (62794, 122347), -- Lo Chu - Barrel Assignment
+-- (61812, 122347), -- Li Chu - Barrel Assignment
+-- (61817, 123218), -- Mantid Tar Keg - Mantid Barrel Inactive
 (61670, 121986), -- Sik'thik Demolisher - Carrying Explosives
 (66699, 131049), -- Generic Invisible Stalker Controller NonImmune - IH - Gongable
-(63106, 120270), -- Sik'thik Swarmer - Slowed
-(61634, 120757), -- Commander Vo'jak - Frantic Fighter
-(64520, 86603), -- Shado-Pan Prisoner - Stealth
+-- (63106, 120270), -- Sik'thik Swarmer - Slowed
+(61634, 120757); -- Commander Vo'jak - Frantic Fighter
+-- (64520, 86603), -- Shado-Pan Prisoner - Stealth
 -- (62348, 124067), -- Sik'thik Soldier - Catapult Channel
 -- (61483, 119781), -- Reinforcements Summoner - Summon Mantid Soldier
-(62205, 126303); -- Wing Leader Ner'onok - Mantid Wings
+-- (62205, 126303); -- Wing Leader Ner'onok - Mantid Wings
 
 -- Model Corrections
 

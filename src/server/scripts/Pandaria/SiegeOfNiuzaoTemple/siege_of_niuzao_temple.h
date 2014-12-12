@@ -23,7 +23,8 @@ enum Bosses
     BOSS_JINBAK,
     BOSS_VOJAK,
     BOSS_PAVALAK,
-    BOSS_NERONOK
+    BOSS_NERONOK,
+    TOTAL_ENCOUNTERS
 };
 
 enum Creatures
@@ -46,7 +47,7 @@ enum GameObjects
 
 enum WMOAreaEntries
 {
-
+    WMO_REAR_STAGING_AREA       = 59479
 };
 
 #endif

@@ -5637,6 +5637,18 @@ void SpellMgr::LoadSpellCustomAttr()
                     if (auto originalCurseInfo = GetSpellInfo(109466))
                         spellInfo->spellPower = originalCurseInfo->spellPower;
                     break;
+                    // Siege of Niuzao Temple
+                case 119990: // Summon Sappling
+                    spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_TARGET_ANY;
+                    spellInfo->Effects[EFFECT_0].TargetB = 0;
+                    break;
+                case 120095: // Detonate Visual
+                    spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
+                    break;
+                case 122376: // Barrel Drop
+                    spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_TARGET_ANY;
+                    break;
+                    // Siege of Niuzao temple end
                 default:
                     break;
             }

@@ -872,14 +872,29 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         caster = _player;
     }
 
-    if (caster->GetTypeId() == TYPEID_PLAYER
+
+    // SPELL_AURA_MOD_NEXT_SPELL - allow casting if players has aura with 
+    bool allowedCast = false;
+    const Unit::AuraEffectList &auraEffects = caster->GetAuraEffectsByType(SPELL_AURA_MOD_NEXT_SPELL);
+    if (!auraEffects.empty())
+        for (auto itr : auraEffects)
+            if (const SpellInfo * spellInfo = itr->GetSpellInfo())
+                if (spellInfo->Effects[itr->GetEffIndex()].TriggerSpell == spellId)
+                {
+                    allowedCast = true;
+                    caster->RemoveAllAurasByType(SPELL_AURA_MOD_NEXT_SPELL);
+                    break;
+                }
+
+    if ((caster->GetTypeId() == TYPEID_PLAYER
+            && !allowedCast
             // Hack for Throw Totem, Echo of Baine
             && spellId != 101603
             // Hack for disarm. Client sends the spell instead of gameobjectuse.
             && spellId != 1843
             // TODO may be add this attribute to spells above?
             && (spellInfo->AttributesCu & SPELL_ATTR0_CU_SKIP_SPELLBOOCK_CHECK) == 0
-            && !spellInfo->IsAbilityOfSkillType(SKILL_ARCHAEOLOGY))
+            && !spellInfo->IsAbilityOfSkillType(SKILL_ARCHAEOLOGY)))
     {
         // not have spell in spellbook
         // cheater? kick? ban?

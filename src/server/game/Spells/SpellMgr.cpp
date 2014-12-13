@@ -4500,6 +4500,7 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 20217: // Blessing of Kings
                 case 1126:  // Mark of the Wild
                 case 109773:// Dark Intent
+                case 115921:// Legacy of the Emperor
                     spellInfo->Effects[0].TargetA = TARGET_UNIT_TARGET_ANY;
                     break;
                 case 128997:// Spirit Beast Blessing

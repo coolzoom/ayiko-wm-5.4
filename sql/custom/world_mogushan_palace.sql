@@ -1140,9 +1140,10 @@ DELETE FROM `creature_template_emote` WHERE `entry` IN (61242, 61451, 61679, 614
 DELETE FROM `creature_template_mount` WHERE `entry` IN (61242, 61451, 61679, 61433);
 DELETE FROM `creature_template_path` WHERE `entry` IN (61242, 61451, 61679, 61433);
 
-DELETE FROM `gameobject_template` WHERE `entry` IN (214520);
+DELETE FROM `gameobject_template` WHERE `entry` IN (214520, 400003);
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `Data0`, `Data1`, `Data2`, `Data3`, `Data4`, `Data5`, `Data6`, `Data7`, `Data8`, `Data9`, `Data10`, `Data11`, `Data12`, `Data13`, `Data14`, `Data15`, `Data16`, `Data17`, `Data18`, `Data19`, `Data20`, `Data21`, `Data22`, `Data23`, `Data24`, `Data25`, `Data26`, `Data27`, `Data28`, `Data29`, `Data30`, `Data31`, `size`, `unkInt32`, `WDBVerified`) VALUES
-(214520, 3, 10314, 'Legacy of the Clan Leaders', '', '', '', 1634, 42825, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 89, 0, 0, 0, 0, 1442, 0, 0, 0, 0, 0, 0, 2, 0, 18291); -- 214520
+(214520, 3, 10314, 'Legacy of the Clan Leaders', '', '', '', 1634, 42825, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 89, 0, 0, 0, 0, 1442, 0, 0, 0, 0, 0, 0, 2, 0, 18291), -- 214520
+(400003, 10, 7146, 'Portal', '', '', '', 35, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 'go_mogushan_palace_temp_portal', 12340);
 
 SET @GUID = (SELECT MAX(`guid`) FROM `gameobject`);
 
@@ -1207,7 +1208,8 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 (@GUID + 57, 214813, 994, 3, 1,  -4426.816, -2680.549, -39.21353, 6.005708, 0, 0, 0, 1, 7200, 255, 1), -- 214813 (Area: 6182)
 (@GUID + 58, 214813, 994, 3, 1,  -4424.306, -2687.247, -39.21358, 4.704598, 0, 0, 0, 1, 7200, 255, 1), -- 214813 (Area: 6182)
 (@GUID + 59, 214827, 994, 3, 1,  -4425.082, -2690.228, -39.21357, 0.1699049, 0, 0, 0, 1, 7200, 255, 1), -- 214827 (Area: 6182)
-(@GUID + 60, 212095, 994, 3, 1,  -4509.656, -2687.172, 31.96922, 1.567914, 0, 0, 0, 1, 7200, 255, 1); -- 212095 (Area: 6182)
+(@GUID + 60, 212095, 994, 3, 1,  -4509.656, -2687.172, 31.96922, 1.567914, 0, 0, 0, 1, 7200, 255, 1), -- 212095 (Area: 6182)
+(@GUID + 61, 400003, 994, 6182, 6473, 15, 1, -4399.4, -2739.69, -39.9803, 4.70622, 0, 0, 0.709283, -0.704924, 300, 0, 1, 0);
 
 REPLACE INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`,  `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`,
  `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES

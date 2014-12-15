@@ -5792,6 +5792,23 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 122376: // Barrel Drop
                     spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_TARGET_ANY;
                     break;
+                //case 120473: // Drain Barrel (Base)
+                case 120270: // Drain Barrel (Top)
+                    //spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_PERSISTENT_AREA_AURA;
+                    //spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_DUMMY;
+                    //spellInfo->Effects[EFFECT_1].TargetA = SpellImplicitTargetInfo(TARGET_DEST_CASTER);
+                    //spellInfo->Effects[EFFECT_1].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_DEST_AREA_ENTRY);
+                    //spellInfo->ExplicitTargetMask = TARGET_FLAG_UNIT_MASK;
+                    ////spellInfo->Effects[EFFECT_1].BasePoints = 0;
+                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENTRY);
+                    spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(0);
+                    spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_10_YARDS);
+                    spellInfo->Effects[EFFECT_1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENTRY);
+                    spellInfo->Effects[EFFECT_1].TargetB = SpellImplicitTargetInfo(0);
+                    spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_10_YARDS);
+                    spellInfo->ExplicitTargetMask = TARGET_FLAG_UNIT_MASK;
+                    spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(285); // 1s
+                    break;
                     // Siege of Niuzao temple end
                 default:
                     break;

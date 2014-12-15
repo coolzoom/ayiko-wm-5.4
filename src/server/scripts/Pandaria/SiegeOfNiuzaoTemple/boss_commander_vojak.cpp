@@ -129,73 +129,20 @@ std::vector<SpawnData> RightSpawns[WAVE_COUNT] =
     }
 };
 
-class boss_commander_vojak : public CreatureScript
-{
-    enum Yells
-    {
-
-    };
-
-    enum Spells
-    {
-
-    };
-
-    enum Events
-    {
-
-    };
-
-    struct boss_commander_vojakAI : public BossAI
-    {
-        boss_commander_vojakAI(Creature * creature) : BossAI(creature, BOSS_JINBAK)
-        {
-        }
-
-        void Reset() override
-        {
-
-        }
-
-        void EnterCombat(Unit* ) override
-        {
-
-        }
-
-        void UpdateAI(uint32 diff) override
-        {
-            if (!UpdateVictim())
-                return;
-
-            events.Update(diff);
-
-            if (me->HasUnitState(UNIT_STATE_CASTING))
-                return;
-
-            if (uint32 eventId = events.ExecuteEvent())
-            {
-                switch (eventId)
-                {
-                    default:
-                        break;
-                }
-            }
-
-            DoMeleeAttackIfReady();
-        }
-    };
-public:
-    boss_commander_vojak() : CreatureScript("boss_commander_vojak") {}
-
-    CreatureAI * GetAI(Creature * creature) const override
-    {
-        return new boss_commander_vojakAI(creature);
-    }
-};
+/*
+    Koz:
+    This is a script for Yang Ironclaw
+    It functions as controller NPC:
+    - Instance State
+    - NPC spawns / resets
+    - Wave Generation / Timing
+    - Exploit checks
+    - Boss Summoning
+*/
 
 class npc_yang_ironclaw : public CreatureScript
 {
-    enum
+    enum 
     {
         EVENT_START_EVENT       = 1,
         EVENT_CALL_FIRST_WAVE,
@@ -254,6 +201,15 @@ class npc_yang_ironclaw : public CreatureScript
 
             if (Creature * creature = me->SummonCreature(entry, spawnPos))
                 creature->AI()->SetData(0, mask);
+        }
+
+        void DamageTaken(Unit* , uint32& damage)
+        {
+            if (damage >= me->GetHealth())
+            {
+                damage = 0;
+                ResetEncounter();
+            }
         }
 
         void DoAction(int32 const action) override
@@ -477,7 +433,7 @@ public:
 
 static const Position PATH_POINTS[] =
 {
-
+    
     {1511.885f, 5378.232f, 138.95970f, 4.761f},
     {1512.162f, 5372.485f, 139.08124f, 4.765f},
     {1512.879f, 5359.946f, 146.22418f, 4.816f},
@@ -492,6 +448,15 @@ static const Position PATH_POINTS[] =
     {1483.235f, 5286.341f, 179.77177f, 0.159f},
     {1493.571f, 5287.627f, 184.71986f, 0.127f}
 };
+
+/*
+    Koz:
+    This is a generic AI for the Demolishers, Swarmers and Warriors
+    It handles wave movement:
+    - wave assignment (side -> movement timer)
+    - randomized path generation
+    - engaging when platform is reached
+*/
 
 struct npc_vojak_addAI : public ScriptedAI
 {
@@ -532,7 +497,7 @@ struct npc_vojak_addAI : public ScriptedAI
             addCounter = (data >> 8) & 0xFF;
             waveNumber = data & 0xFF;
             uint32 entry = me->GetEntry();
-
+            
             TRIGGER_TIMER = ADD_STEP_DELAY + addCounter * ADD_STEP_DELAY + (leftSideAdd ? 0 : RIGHT_SIDE_DELAY);
 
         }
@@ -590,7 +555,123 @@ private:
     uint8 addCounter;
 };
 
+class boss_commander_vojak : public CreatureScript
+{
+    enum Yells
+    {
 
+    };
+
+    enum Spells
+    {
+        SPELL_FRANTIC_FIGHTER       = 120757,
+        SPELL_DASHING_STRIKE        = 120789,
+        SPELL_THOUSAND_BLADES       = 120759
+    };
+
+    enum Events
+    {
+        EVENT_ENGAGE_COMBAT     = 1,
+        EVENT_RISING_SPEED,
+        EVENT_DASHING_STRIKE,
+        EVENT_THOUSAND_BLADES,
+        EVENT_THOUSAND_BLADES_END
+    };
+
+    struct boss_commander_vojakAI : public ScriptedAI
+    {
+        boss_commander_vojakAI(Creature * creature) : ScriptedAI(creature)
+        {
+        }
+
+        void Reset() override
+        {
+            events.Reset();
+
+        }
+
+        void DoAction(int32 const action) override
+        {
+            if (action == ACTION_ENGAGE_COMBAT)
+            {
+                // move towards the upper platform
+                Movement::MoveSplineInit init(me);
+                for (auto itr : PATH_POINTS)
+                {
+                    float x, y, z;
+                    me->GetRandomPoint(itr, 5.0f, x, y, z);
+                    init.Path().push_back(G3D::Vector3(x, y, z));
+                }
+
+                init.SetSmooth();
+                init.SetUncompressed();
+                init.Launch();
+
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                me->SetReactState(REACT_PASSIVE);
+                DoZoneInCombat(me);
+                events.ScheduleEvent(EVENT_ENGAGE_COMBAT, me->GetSplineDuration());
+            }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (!UpdateVictimWithGaze() || !UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            if (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_ENGAGE_COMBAT:
+                        me->SetReactState(REACT_AGGRESSIVE);
+                        events.ScheduleEvent(EVENT_RISING_SPEED, 3000);
+                        events.ScheduleEvent(EVENT_DASHING_STRIKE, 5000);
+                        break;
+                    case EVENT_RISING_SPEED:
+                        DoCast(me, SPELL_FRANTIC_FIGHTER, true);
+                        break;
+                    case EVENT_DASHING_STRIKE:
+                        if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
+                        {
+                            SetGazeOn(target);
+                            DoCast(target, SPELL_DASHING_STRIKE, false);
+                            dashingTargetGUID = target->GetGUID();
+                        }
+                        events.ScheduleEvent(EVENT_THOUSAND_BLADES, 3000);
+                        events.ScheduleEvent(EVENT_DASHING_STRIKE, 60000);
+                        break;
+                    case EVENT_THOUSAND_BLADES:
+                        DoCast(me, SPELL_THOUSAND_BLADES, false);
+                        events.ScheduleEvent(EVENT_THOUSAND_BLADES_END, 4000);
+                        break;
+                    case EVENT_THOUSAND_BLADES_END:
+                        me->SetReactState(REACT_AGGRESSIVE);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    private:
+        EventMap events;
+        uint64 dashingTargetGUID;
+    };
+public:
+    boss_commander_vojak() : CreatureScript("boss_commander_vojak") {}
+
+    CreatureAI * GetAI(Creature * creature) const override
+    {
+        return new boss_commander_vojakAI(creature);
+    }
+};
 
 // 63106
 class npc_sikthik_swarmer : public CreatureScript
@@ -631,6 +712,20 @@ public:
     }
 };
 
+
+    /*
+    Koz:
+    This is a script for Lo Chu and Li Chu
+    Keg Rotation:
+        1. NPC runs towards the keg pool
+        2. NPC casts Assignment Spell (periodic trigger) on self when arrived at the pool
+    If Assignment spell hits an NPC (Barrel Target without "Has Barrel" aura):
+        3. NPC picks up a random Keg in 10yd radius (Grab Barrel spell)
+        4. NPC moves (WALKS!) to an invisible stalker near the said target NPC
+        5. When arrived, NPC ejects the keg (jumps to targeted Barrel Target NPC)
+        6. NPC moves (RUNS!) back to the keg pool
+    */
+
 enum HelperData
 {
     SIDE_LEFT           = 0,
@@ -643,7 +738,7 @@ enum HelperData
 
 };
 
-static const Position helperPositions[2][3] =
+static const Position helperPositions[2][3] = 
 {
     // SIDE_LEFT
     {
@@ -659,18 +754,18 @@ static const Position helperPositions[2][3] =
     }
 };
 
-    enum
-    {
-        SPELL_GRAB_BARREL           = 120405, // condition target keg, triggers SPELL_KEG_ENTER_VEHICLE
-        SPELL_KEG_ENTER_VEHICLE     = 120402,
-        SPELL_ASSIGNMENT            = 122347, // periodic, find nearest keg target
-        SPELL_ASSIGNMENT_EFF        = 122346, // condition target Barrel Target, triggers SPELL_HAS_BARREL
-        SPELL_HAS_BARREL            = 122345,
-        SPELL_CLEAR_HAS_BARREL      = 122518, // 5yd aoe
-        SPELL_EJECT_PASSENGERS      = 79737,
-        SPELL_BARREL_DROP_FORCE     = 122385,
-        SPELL_BARREL_JUMP           = 122376, // condition target Barrel Target?
-    };
+enum 
+{
+    SPELL_GRAB_BARREL           = 120405, // condition target keg, triggers SPELL_KEG_ENTER_VEHICLE
+    SPELL_KEG_ENTER_VEHICLE     = 120402,
+    SPELL_ASSIGNMENT            = 122347, // periodic, find nearest keg target
+    SPELL_ASSIGNMENT_EFF        = 122346, // condition target Barrel Target, triggers SPELL_HAS_BARREL
+    SPELL_HAS_BARREL            = 122345,
+    SPELL_CLEAR_HAS_BARREL      = 122518, // 5yd aoe
+    SPELL_EJECT_PASSENGERS      = 79737,
+    SPELL_BARREL_DROP_FORCE     = 122385,
+    SPELL_BARREL_JUMP           = 122376, // condition target Barrel Target?
+};
 
 class npc_chu_helper : public CreatureScript
 {
@@ -698,6 +793,7 @@ class npc_chu_helper : public CreatureScript
 
         void Reset()
         {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             barrelTargetGUID = 0;
             barrelGUID = 0;
             eventInProgress = false;
@@ -895,6 +991,12 @@ public:
     }
 };
 
+/*
+    Koz:
+    This is the script for Mantid Tar Keg
+    We handle respawn on wipe aswell as 
+    jumping after delivery here.
+*/
 class npc_mantid_tar_keg : public CreatureScript
 {
     enum
@@ -925,6 +1027,7 @@ class npc_mantid_tar_keg : public CreatureScript
 
         void Reset() override
         {
+            me->SetPosition(me->GetHomePosition());
             targetGUID = 0;
             me->GetMotionMaster()->MoveIdle();
             me->SetReactState(REACT_PASSIVE);
@@ -982,6 +1085,95 @@ public:
     }
 };
 
+class npc_sap_puddle_vojak : public CreatureScript
+{
+    enum
+    {
+        SPELL_DRAIN_BARREL_TOP          = 122522, // Areatrigger 349
+        SPELL_DRAIN_BARREL_BASE         = 120473  // Areatrigger 325, 359
+    };
+
+    struct npc_sap_puddle_vojakAI : public ScriptedAI
+    {
+        npc_sap_puddle_vojakAI(Creature * creature) : ScriptedAI(creature) {}
+
+        void Reset() override
+        {
+            aoeTimer = 500;
+
+            uint32 spellId = SPELL_DRAIN_BARREL_BASE;
+            if (fabs(me->GetPositionZ() - 185.22f) < INTERACTION_DISTANCE)
+                spellId = SPELL_DRAIN_BARREL_TOP;
+
+            DoCast(me, spellId, true);
+        }
+
+        void MoveInLineOfSight(Unit* who) override
+        {
+
+        }
+
+        void UpdateAI(uint32 const diff) override
+        {
+            if (aoeTimer <= diff)
+            {
+                DoCast(me, 120270, true);
+                aoeTimer = 500;
+            } else aoeTimer -= diff;
+        }
+    private:
+        uint32 aoeTimer;
+    };
+
+public:
+    npc_sap_puddle_vojak() : CreatureScript("npc_sap_puddle_vojak") {}
+
+    CreatureAI * GetAI(Creature * creature) const override
+    {
+        return new npc_sap_puddle_vojakAI(creature);
+    }
+};
+
+class at_sap_puddle_349 : public AreaTriggerScript
+{
+public:
+    at_sap_puddle_349() : AreaTriggerScript("at_sap_puddle_349") {}
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/)
+    {
+        TC_LOG_FATAL("script", "Areatrigger at_sap_puddle_349");
+
+        return false;
+    }
+};
+
+class at_sap_puddle_325 : public AreaTriggerScript
+{
+public:
+    at_sap_puddle_325() : AreaTriggerScript("at_sap_puddle_325") {}
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/)
+    {
+        TC_LOG_FATAL("script", "Areatrigger at_sap_puddle_325");
+
+        return false;
+    }
+};
+
+class at_sap_puddle_359 : public AreaTriggerScript
+{
+public:
+    at_sap_puddle_359() : AreaTriggerScript("at_sap_puddle_359") {}
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/)
+    {
+        TC_LOG_FATAL("script", "Areatrigger at_sap_puddle_359");
+
+        return false;
+    }
+};
+
+
 /*
 
 class npc_vojak_add : public CreatureScript
@@ -1015,4 +1207,9 @@ void AddSC_commander_vojak()
     new npc_mantid_tar_keg();
     new spell_barrel_assignment();
     new spell_grab_barrel();
+    new npc_sap_puddle_vojak();
+
+    new at_sap_puddle_325();
+    new at_sap_puddle_349();
+    new at_sap_puddle_359();
 }

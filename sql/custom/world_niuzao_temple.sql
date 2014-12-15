@@ -90,13 +90,27 @@ UPDATE creature_template SET ScriptName = 'npc_mantid_tar_keg' WHERE entry = 618
 
 UPDATE creature_template SET ScriptName = 'npc_chu_helper' WHERE entry IN (62794, 61812);
 
+UPDATE creature_template SET ScriptName = 'npc_sap_puddle_vojak' WHERE entry = 61579;
+
+DELETE FROM areatrigger_scripts WHERE entry IN (325, 349, 359);
+INSERT INTO areatrigger_scripts (entry, ScriptName) VALUES
+(325, 'at_sap_puddle_325'),
+(349, 'at_sap_puddle_349'),
+(359, 'at_sap_puddle_359');
+
 DELETE FROM spell_script_names WHERE spell_id IN (122346, 120405);
 INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
 (120405, 'spell_grab_barrel'),
 (122346, 'spell_barrel_assignment');
 
-DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (122346, 120405);
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (122522, 120473, 122346, 120405);
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(13, 3, 122522, 0, 0, 31, 0, 3, 63106, 0, 0, 0, 0, '', 'Drain Barrel - target Sik''Thik Swarmer'),
+(13, 3, 122522, 0, 1, 31, 0, 3, 61670, 0, 0, 0, 0, '', 'Drain Barrel - target Sik''Thik Demolisher'),
+(13, 3, 122522, 0, 2, 31, 0, 3, 61701, 0, 0, 0, 0, '', 'Drain Barrel - target Sik''Thik Warrior'),
+(13, 3, 120473, 0, 0, 31, 0, 3, 63106, 0, 0, 0, 0, '', 'Drain Barrel - target Sik''Thik Swarmer'),
+(13, 3, 120473, 0, 1, 31, 0, 3, 61670, 0, 0, 0, 0, '', 'Drain Barrel - target Sik''Thik Demolisher'),
+(13, 3, 120473, 0, 2, 31, 0, 3, 61701, 0, 0, 0, 0, '', 'Drain Barrel - target Sik''Thik Warrior'),
 (13, 1, 122346, 0, 0, 31, 0, 3, 62684, 0, 0, 0, 0, '', 'Barrel Assignment - target Barrel Target'),
 (13, 1, 120405, 0, 0, 31, 0, 3, 61817, 0, 0, 0, 0, '', 'Grab Barrel - target Mantid Tar Keg');
 
@@ -104,10 +118,14 @@ DELETE FROM npc_spellclick_spells WHERE npc_entry = 61817; -- Tar Keg
 INSERT INTO npc_spellclick_spells (npc_entry, spell_id, cast_flags) VALUES
 (61817, 123032, 3); -- player casts on self
 
-DELETE FROM spell_linked_spell WHERE spell_trigger = 123039;
+DELETE FROM spell_linked_spell WHERE spell_trigger IN(122522, 123039);
 INSERT INTO spell_linked_spell (spell_trigger, spell_effect, type, comment) VALUES
+(122522, 120270, 2, 'Drain Barrel - Trigger Slow effect'),
+(120473, 120270, 2, 'Drain Barrel - Trigger Slow effect'),
 (123039, -123032, 0, 'Throw Keg - Remove override aura'),
 (123039, -123035, 0, 'Throw Keg - Remove override master aura');
+
+
 
 -- WIP ONLY
 UPDATE creature_template SEt modelid2 = 41224 WHERE entry = 62684; -- make barrel target visible
@@ -122,6 +140,41 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (61620, 3, 0, 'A wave of |cFFB600B8Sik''thik Demolishers|r and a |cFF815d18Sik''thik Warrior|r joins the battle.', 41, 0, 100, 0, 0, 0, 'Commander Vo''jak - SAY_');
 
 
+(61699, x, x, '|TInterface\\Icons\\inv_misc_blackironbomb.blp:20|t |cFFdd7400Сик''тик Желтокрыл|r передвигается, чтобы |cFFFF0000|Hspell:120559|h[бомбардировать]|h|r платформу!', 41, 0, 100, 0, 0, 0, 0, 'Сик''тик Желтокрыл to Player'),
+(61699, x, x, '%s остается без боеприпасов и улетает!', 41, 0, 100, 0, 0, 0, 0, 'Сик''тик Желтокрыл to Сик''тик Желтокрыл'),
+(61699, x, x, '|TInterface\\Icons\\inv_misc_blackironbomb.blp:20|t |cFFdd7400Сик''тик Желтокрыл|r передвигается, чтобы |cFFFF0000|Hspell:120559|h[бомбардировать]|h|r платформу!', 41, 0, 100, 0, 0, 31512, 0, 'Сик''тик Желтокрыл'),
+(61699, x, x, '|TInterface\\Icons\\inv_misc_blackironbomb.blp:20|t |cFFdd7400Сик''тик Желтокрыл|r передвигается, чтобы |cFFFF0000|Hspell:120559|h[бомбардировать]|h|r платформу!', 41, 0, 100, 0, 0, 0, 0, 'Сик''тик Желтокрыл'),
+(61620, x, x, 'Спасибо, конечно, за спасение, но мы по-прежнему со всех сторон окружены богомолами.', 12, 0, 100, 2, 0, 31505, 0, 'Ян Железный Коготь'),
+(61620, x, x, 'Только посмотрите. Их слишком много. Мы не справимся.', 12, 0, 100, 397, 0, 31506, 0, 'Ян Железный Коготь'),
+(61620, x, x, 'Хм-м... У меня появилась идея. Это может сработать, но мне понадобится помощь!', 12, 0, 100, 273, 0, 31507, 0, 'Ян Железный Коготь'),
+(61620, x, x, 'Обратим оружие этих богомолов против них самих!', 12, 0, 100, 5, 0, 31508, 0, 'Ян Железный Коготь'),
+(61620, x, x, 'Ли! Ло! Нам нужен сок!', 12, 0, 100, 397, 0, 31509, 0, 'Ян Железный Коготь to Player'),
+(61620, x, x, 'Ну, начнем веселье?', 12, 0, 100, 6, 0, 31510, 0, 'Ян Железный Коготь to Player'),
+(61620, x, x, 'Мы раздавим вас, как жуков!', 14, 0, 100, 22, 0, 31514, 0, 'Ян Железный Коготь to Player'),
+(61620, x, x, 'Роевики взбираются по склону! Используй смолу, чтобы их замедлить!', 12, 0, 100, 25, 0, 31511, 0, 'Ян Железный Коготь to Player'),
+(61620, x, x, 'Желтокрыл приближается. Берегитесь!', 12, 0, 100, 25, 0, 31503, 0, 'Ян Железный Коготь to Player'),
+(61620, x, x, 'У подрывников бомбы! Прямой – и они взлетят на воздух!', 12, 0, 100, 25, 0, 31504, 0, 'Ян Железный Коготь'),
+(61620, x, x, 'Воин! Сосредоточьте огонь на нем!', 12, 0, 100, 25, 0, 31512, 0, 'Ян Железный Коготь'),
+(61620, x, x, 'По-моему, было весело!', 12, 0, 100, 11, 0, 31497, 0, 'Ян Железный Коготь to Командир Во''цзак'),
+(61620, x, x, 'Ли, Ло! Спуститесь к нашим друзьям!', 12, 0, 100, 0, 0, 31498, 0, 'Ян Железный Коготь to Командир Во''цзак'),
+(61620, x, x, 'Ворота заперты... но думаю, я смогу их открыть.', 12, 0, 100, 0, 0, 31499, 0, 'Ян Железный Коготь to Командир Во''цзак'),
+(61620, x, x, 'Дайте-ка подумать... запал на 30 секунд...', 12, 0, 100, 0, 0, 31500, 0, 'Ян Железный Коготь to Командир Во''цзак'),
+(61620, x, x, 'Что? Я сказал "тридцать?" Я имел в виду три!', 12, 0, 100, 0, 0, 31501, 0, 'Ян Железный Коготь to Командир Во''цзак'),
+(61620, x, x, 'Быстрее! Вы должны остановить осаду!', 12, 0, 100, 5, 0, 31502, 0, 'Ян Железный Коготь to Командир Во''цзак'),
+
+
+(61634, 0, 0, '', 14, 0, 100, 0, 0, 29392, 'Commander Vo''jak - SAY_'),
+(61634, 0, 0, '', 14, 0, 100, 0, 0, 29392, 'Commander Vo''jak - SAY_'),
+(61634, 0, 0, '', 14, 0, 100, 0, 0, 29392, 'Commander Vo''jak - SAY_'),
+(61634, 0, 0, '', 14, 0, 100, 0, 0, 29392, 'Commander Vo''jak - SAY_'),
+(61634, 0, 0, '', 14, 0, 100, 0, 0, 29392, 'Commander Vo''jak - SAY_'),
+(61634, 0, 0, '', 14, 0, 100, 0, 0, 29392, 'Commander Vo''jak - SAY_'),
+(61634, 0, 0, '', 14, 0, 100, 0, 0, 29392, 'Commander Vo''jak - SAY_'),
+(61634, 0, 0, '', 14, 0, 100, 0, 0, 29392, 'Commander Vo''jak - SAY_'),
+(61634, 0, 0, '', 14, 0, 100, 0, 0, 29392, 'Commander Vo''jak - SAY_'),
+(61634, 0, 0, '', 14, 0, 100, 0, 0, 29392, 'Commander Vo''jak - SAY_'),
+(61634, 0, 0, '', 14, 0, 100, 0, 0, 29392, 'Commander Vo''jak - SAY_'),
+(61634, 0, 0, '', 14, 0, 100, 0, 0, 29392, 'Commander Vo''jak - SAY_'),
 
 /*
 *******************************
@@ -207,7 +260,7 @@ UPDATE `creature_template` SET `equipment_id` = `entry` WHERE `entry` IN (61634,
 DELETE FROM `creature_template_aura` WHERE `entry` IN (61579, 61964, 61965, 62091, 64517, 61613, 62794, 61812, 61817, 61670, 66699, 63106, 61634, 64520, 62348, 61483, 62205);
 INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES
 (61964, 120586), -- Sap Spray - Sap Spray
-(61579, 120473), -- Sap puddle - Sap Spray base
+-- (61579, 120473), -- Sap puddle - Sap Spray base
 -- (61965, 120591), -- Sap Puddle - Sap Puddle
 (62091, 126320), -- Sik'thik Flyer - Mantid Wings
 (62091, 132441), -- Sik'thik Flyer - Mantid Wings

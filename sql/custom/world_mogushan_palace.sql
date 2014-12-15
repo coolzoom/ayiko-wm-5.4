@@ -1245,3 +1245,5 @@ INSERT INTO gameobject_loot_template (`entry`, `item`, `ChanceOrQuestChance`, `l
 (214795, 85182, 7.14286, 1, 0, 1, 1),
 (214795, 85183, 19.0476, 1, 0, 1, 1),
 (214795, 85184, 7.14286, 1, 0, 1, 1);
+
+UPDATE `creature_template` set `ScriptName` = 'mob_glintrok_ironhide' WHERE `entry` = 61242;

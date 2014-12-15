@@ -2623,20 +2623,35 @@ void InstanceMap::PermBindAllPlayers(Player* source)
         return;
 
     InstanceSave* save = sInstanceSaveMgr->GetInstanceSave(GetInstanceId());
-    if (!save)
+
+    if (!save) // Group disbanded just before killing the boss... create a new save
+        save = sInstanceSaveMgr->AddInstanceSave(GetId(), GetInstanceId(), GetDifficulty(), 0, true);
+
+    std::map<uint64, Player*> players;
+
+    // Bind group to instance even if leader is outside
+    if (Group* group = source->GetGroup())
     {
-        TC_LOG_ERROR("maps", "Cannot bind player (GUID: %u, Name: %s), because no instance save is available for"
-                     " instance map (Name: %s, Entry: %u, InstanceId: %u)!",
-                     source->GetGUIDLow(), source->GetName().c_str(), source->GetMap()->GetMapName(), source->GetMapId(), GetInstanceId());
-        return;
+        group->BindToInstance(save, true);
+
+        // Add all group members that have enter the instance (even before the fight began and
+        // currently outside. Fast check: See if the instance is in the list of last 5 entered
+        for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
+            if (Player* player = itr->GetSource())
+                if (player->HasEnterInstance(GetInstanceId()))
+                    players[player->GetGUID()] = player;
     }
 
-    Group* group = source->GetGroup();
-
-    // group members outside the instance group don't get bound
+    // Add all players inside (even if they are not in the same group)
     for (MapRefManager::iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
+        if (Player* player = itr->GetSource())
+            players[player->GetGUID()] = player;
+
+
+    // Now save all players to the instance
+    for (auto itr = players.begin(); itr != players.end(); ++itr)
     {
-        Player* player = itr->GetSource();
+        Player* player = itr->second;
         // players inside an instance cannot be bound to other instances
         // some players may already be permanently bound, in this case nothing happens
         InstancePlayerBind* bind = player->GetBoundInstance(save->GetMapId(), save->GetDifficulty());
@@ -2645,14 +2660,10 @@ void InstanceMap::PermBindAllPlayers(Player* source)
             player->BindToInstance(save, true);
             WorldPacket data(SMSG_INSTANCE_SAVE_CREATED, 4);
             data << uint32(0);
-            player->GetSession()->SendPacket(&data);
+            player->SendDirectMessage(&data);
 
             player->GetSession()->SendCalendarRaidLockout(save, true);
         }
-
-        // if the leader is not in the instance the group will not get a perm bind
-        if (group && group->GetLeaderGUID() == player->GetGUID())
-            group->BindToInstance(save, true);
     }
 }
 

@@ -2528,6 +2528,11 @@ class Player final : public Unit, public GridObject<Player>
                 _instanceResetTimes.insert(InstanceTimeMap::value_type(instanceId, enterTime + HOUR));
         }
 
+        bool HasEnterInstance(uint32 instanceId) const
+        {
+            return _instanceResetTimes.find(instanceId) != _instanceResetTimes.end();
+        }
+
         // last used pet number
         uint32 GetCurrentPetId() const { return m_currentPetId; }
         void SetCurrentPetId(uint32 newPetId);

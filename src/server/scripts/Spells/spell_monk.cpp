@@ -974,11 +974,14 @@ class spell_monk_crackling_jade_lightning : public SpellScriptLoader
                 {
                     if (roll_chance_i(30))
                         caster->CastSpell(caster, SPELL_MONK_JADE_LIGHTNING_ENERGIZE, true);
-                    // Hack fix to consume energy per tick
-                    if (caster->GetPower(POWER_ENERGY) >= 20)
-                        caster->EnergizeBySpell(caster, GetId(), -20, POWER_ENERGY);
-                    else
-                        SetDuration(0);
+                    // Hack fix to consume energy per tick while not in Stance of the Wise Serpent
+                    if (!caster->HasAura(115070))
+                    {
+                        if (caster->GetPower(POWER_ENERGY) >= 20)
+                            caster->EnergizeBySpell(caster, GetId(), -20, POWER_ENERGY);
+                        else
+                            SetDuration(0);
+                    }
                 }
             }
 
@@ -1028,14 +1031,6 @@ class spell_monk_touch_of_karma : public SpellScriptLoader
         {
             PrepareAuraScript(spell_monk_touch_of_karma_AuraScript);
 
-            uint32 totalAbsorbAmount;
-
-            bool Load()
-            {
-                totalAbsorbAmount = 0;
-                return true;
-            }
-
             void CalculateAmount(AuraEffect const * /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
             {
                 if (GetCaster())
@@ -1048,10 +1043,14 @@ class spell_monk_touch_of_karma : public SpellScriptLoader
                 {
                     if (Unit* attacker = dmgInfo.GetAttacker())
                     {
-                        totalAbsorbAmount += dmgInfo.GetDamage();
-
                         if (attacker->HasAura(aurEff->GetSpellInfo()->Id, caster->GetGUID()))
-                            caster->CastCustomSpell(SPELL_MONK_TOUCH_OF_KARMA_REDIRECT_DAMAGE, SPELLVALUE_BASE_POINT0, (totalAbsorbAmount / 16), attacker);
+                        {
+                            int32 damage = dmgInfo.GetDamage();
+                            if (auto eff = attacker->HasAura(SPELL_MONK_TOUCH_OF_KARMA_REDIRECT_DAMAGE, caster->GetGUID()))
+                                damage += attacker->GetRemainingPeriodicAmount(caster->GetGUID(), SPELL_MONK_TOUCH_OF_KARMA_REDIRECT_DAMAGE, SPELL_AURA_PERIODIC_DAMAGE).total();
+
+                            caster->CastCustomSpell(SPELL_MONK_TOUCH_OF_KARMA_REDIRECT_DAMAGE, SPELLVALUE_BASE_POINT0, (damage / 6), attacker);
+                        }
                     }
                 }
             }

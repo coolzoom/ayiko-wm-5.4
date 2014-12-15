@@ -4500,6 +4500,7 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 20217: // Blessing of Kings
                 case 1126:  // Mark of the Wild
                 case 109773:// Dark Intent
+                case 115921:// Legacy of the Emperor
                     spellInfo->Effects[0].TargetA = TARGET_UNIT_TARGET_ANY;
                     break;
                 case 128997:// Spirit Beast Blessing
@@ -4730,9 +4731,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 10326: // Turn Evil
                     spellInfo->Mechanic = MECHANIC_TURN;
                     spellInfo->OverrideSpellList.push_back(145067); // Evil is a point of view
-                    break;
-                case 113656:// Fists of Fury
-                    spellInfo->PreventionType = SPELL_PREVENTION_TYPE_SILENCE;
                     break;
                 case 13165: // Aspect of the Hawk
                     spellInfo->OverrideSpellList.push_back(109260); // Add Aspect of the Iron Hack to override spell list of Aspect of the Hawk
@@ -5772,6 +5770,16 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 109468: // Curse of Enfeeblement (Soulburn)
                     if (auto originalCurseInfo = GetSpellInfo(109466))
                         spellInfo->spellPower = originalCurseInfo->spellPower;
+                    break;
+                case 134735: // Battle Fatigue, handled manually to stack with other reductions
+                    spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
+                    break;
+                case 124503: // Gift of the Ox
+                case 124506: // Gift of the Ox
+                    spellInfo->Effects[EFFECT_0].SetRadiusIndex(EFFECT_RADIUS_3_YARDS);
+                    break;
+                case 122278: // Dampen Harm
+                    spellInfo->AttributesEx5 |= SPELL_ATTR5_USABLE_WHILE_STUNNED;
                     break;
                 default:
                     break;

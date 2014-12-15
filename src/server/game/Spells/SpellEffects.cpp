@@ -1422,6 +1422,14 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
                 m_caster->CastSpell(unitTarget, 31790, true);
                 return;
             }
+            // Explosive Trap Knockback
+            case 149575:
+            {
+                // Glyph of Explosive Trap
+                if (!m_caster->GetCharmerOrOwnerOrSelf()->HasAura(119403))
+                    return;
+                break;
+            }
         }
     }
 
@@ -2099,8 +2107,6 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
                 if (caster->GetTypeId() != TYPEID_PLAYER)
                     return;
 
-                addhealth += int32(0.49f * m_caster->SpellBaseDamageBonusDone(SpellSchoolMask(m_spellInfo->SchoolMask)));
-
                 int32 holyPower = caster->GetPower(POWER_HOLY_POWER) + 1;
 
                 if (holyPower > 3)
@@ -2123,9 +2129,6 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
 
                     caster->RemoveAurasDueToSpell(114637);
                 }
-
-                addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
-
                 break;
             }
             case 121129:// Daybreak

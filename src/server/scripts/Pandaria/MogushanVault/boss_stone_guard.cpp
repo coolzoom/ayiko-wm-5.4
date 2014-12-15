@@ -389,6 +389,12 @@ public:
                 return NULL;
         }
 
+        void InitalizeAI()
+        {
+            me->setActive(true);
+            Reset();
+        }
+
         void Reset()
         {
             _Reset();

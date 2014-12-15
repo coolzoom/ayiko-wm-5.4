@@ -450,18 +450,18 @@ public:
                                 break;
                         }
                     }
+                    break;
                 }
-                break;
-                            case ACTION_FIRST_FIGHT:
-                            {
-                                if (pInstance)
-                                {
-                                    pInstance->SetBossState(DATA_SPIRIT_KINGS, IN_PROGRESS);
-                                    pInstance->SetData(DATA_SPIRIT_KINGS, IN_PROGRESS);
-                                    events.ScheduleEvent(EVENT_CHECK_WIPE, 2.5 * IN_MILLISECONDS);
-                                }
-                            }
-                            break;
+                case ACTION_FIRST_FIGHT:
+                {
+                    if (pInstance)
+                    {
+                        pInstance->SetBossState(DATA_SPIRIT_KINGS, IN_PROGRESS);
+                        pInstance->SetData(DATA_SPIRIT_KINGS, IN_PROGRESS);
+                        events.ScheduleEvent(EVENT_CHECK_WIPE, 2.5 * IN_MILLISECONDS);
+                    }
+                    break;
+                }
             }
         }
 
@@ -504,7 +504,7 @@ public:
                         summons.DespawnAll();
                         events.Reset();
                 }
-                events.ScheduleEvent(EVENT_CHECK_WIPE, 2500);
+                events.ScheduleEvent(EVENT_CHECK_WIPE, 1 * IN_MILLISECONDS);
             }
         }
     };
@@ -544,6 +544,12 @@ public:
 
         uint8 shadowCount;
         uint8 maxShadowCount;
+
+        void InitializeAI()
+        {
+            me->setActive(true);
+            Reset();
+        }
 
         void Reset()
         {

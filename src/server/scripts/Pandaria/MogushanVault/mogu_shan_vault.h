@@ -30,6 +30,7 @@ enum eData
     DATA_SPIRIT_KINGS               = 3,
     DATA_ELEGON                     = 4,
     DATA_WILL_OF_EMPEROR            = 5,
+    DATA_STONE_GUARD_STATE          = 6,
     DATA_MAX_BOSS_DATA
 };
 

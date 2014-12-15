@@ -124,6 +124,18 @@ public:
 
         InstanceScript* pInstance;
         uint64 voodooTargets[3];
+        std::vector<uint64> shadowySpells;
+
+        void InitializeAI()
+        {
+            me->setActive(true);
+            shadowySpells.push_back(SPELL_RIGHT_CROSS);
+            shadowySpells.push_back(SPELL_LEFT_HOOK);
+            shadowySpells.push_back(SPELL_HAMMER_FIST);
+            shadowySpells.push_back(SPELL_SWEEPING_KICK);
+
+            Reset();
+        }
 
         void Reset()
         {
@@ -249,11 +261,9 @@ public:
                 {
                     case EVENT_SECONDARY_ATTACK:
                     {
-                        if (Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO))
-                        {
-                            uint32 spellId = RAND(SPELL_RIGHT_CROSS, SPELL_LEFT_HOOK, SPELL_HAMMER_FIST, SPELL_SWEEPING_KICK);
-                            me->CastSpell(target, spellId, true);
-                        }
+                        std::random_shuffle(shadowySpells.begin(), shadowySpells.end());
+                        uint32 const spellId = shadowySpells.back();
+                        me->CastSpell((Unit*)NULL, spellId, true);
                         events.ScheduleEvent(EVENT_SECONDARY_ATTACK, urand(5000, 10000));
                         break;
                     }

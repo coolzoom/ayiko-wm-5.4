@@ -3873,6 +3873,76 @@ public:
     }
 };
 
+class spell_gen_tome_of_discovery final : public SpellScriptLoader
+{
+    class spell_impl final : public SpellScript
+    {
+        PrepareSpellScript(spell_impl)
+
+        uint32 spellToLearn_;
+
+        static uint32 getSpellToLearn(Player const &player)
+        {
+            uint32 recipes[] = {
+                101799, 101797, 101795, 101798, 101796, 101803, 101804, 101802,
+                101800, 101801, 101735, 101742, 101741, 101740, 101773, 101775,
+                101768, 101762, 101761, 101769, 101772, 101776, 101764, 101774,
+                101778, 101765, 101763, 101771, 101766, 101782, 101777, 101781,
+                101767, 101779, 101770, 101780, 101784, 101793, 101787, 101783,
+                101791, 101788, 101789, 101786, 101790, 101794, 101792, 101785,
+                101749, 101754, 101757, 101747, 101755, 101745, 101743, 101758,
+                101744, 101759, 101752, 101756, 101746, 101753, 101760, 101751,
+                101750, 101748
+            };
+
+            auto const first = std::begin(recipes);
+            auto const last = std::remove_if(first, std::end(recipes), [&player](uint32 spellId) {
+                return player.HasSpell(spellId);
+            });
+
+            if (auto const size = std::distance(first, last))
+                return *std::next(first, irand(0, size - 1));
+            else
+                return 0;
+        }
+
+        SpellCastResult CheckCast()
+        {
+            auto const caster = GetCaster()->ToPlayer();
+            if (!caster)
+                return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
+
+            if ((spellToLearn_ = getSpellToLearn(*caster)))
+                return SPELL_CAST_OK;
+
+            SetCustomCastResultMessage(SPELL_CUSTOM_ERROR_LEARNED_EVERYTHING);
+            return SPELL_FAILED_CUSTOM_ERROR;
+        }
+
+        void HandleScript(SpellEffIndex effIndex)
+        {
+            PreventHitDefaultEffect(effIndex);
+            GetCaster()->ToPlayer()->learnSpell(spellToLearn_, false);
+        }
+
+        void Register() final
+        {
+            OnCheckCast += SpellCheckCastFn(spell_impl::CheckCast);
+            OnEffectHitTarget += SpellEffectFn(spell_impl::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+public:
+    spell_gen_tome_of_discovery()
+        : SpellScriptLoader("spell_gen_tome_of_discovery")
+    { }
+
+    SpellScript * GetSpellScript() const final
+    {
+        return new spell_impl;
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -3958,4 +4028,5 @@ void AddSC_generic_spell_scripts()
     new spell_gen_brewfest_dismount_ram();
     new spell_brewfest_ram_race_increase_duration();
     new spell_eject_all_passengers_script_effect();
+    new spell_gen_tome_of_discovery();
 }

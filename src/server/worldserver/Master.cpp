@@ -117,7 +117,7 @@ public:
             else if (getMSTimeDiff(w_lastchange, curtime) > _delaytime)
             {
                TC_LOG_ERROR("server.worldserver", "World Thread hangs, kicking out server!");
-               ASSERT(false);
+//               ASSERT(false);
             }
         }
         TC_LOG_INFO("server.worldserver", "Anti-freeze thread exiting without problems.");

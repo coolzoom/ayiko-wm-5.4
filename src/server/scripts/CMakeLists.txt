@@ -27,6 +27,23 @@ set(scripts_STAT_SRCS
   ../game/AI/ScriptedAI/ScriptedFollowerAI.cpp
 )
 
+function(create_source_group relativeSourcePath sourceFiles)
+    FOREACH(currentSourceFile ${ARGN})
+        FILE(RELATIVE_PATH folder ${relativeSourcePath} ${currentSourceFile})
+        get_filename_component(filename ${folder} NAME)
+        string(REPLACE ${filename} "" folder ${folder})
+        if(NOT folder STREQUAL "")
+            string(REGEX REPLACE "/+$" "" folderlast ${folder})
+            string(REPLACE "/" "\\" folderlast ${folderlast})
+            SOURCE_GROUP("${folderlast}" FILES ${currentSourceFile})
+        endif(NOT folder STREQUAL "")
+    ENDFOREACH(currentSourceFile ${ARGN})
+endfunction(create_source_group)
+
+
+file(GLOB_RECURSE EK_scripts ${CMAKE_CURRENT_SOURCE_DIR}/*)
+create_source_group("${CMAKE_CURRENT_SOURCE_DIR}" ${EK_scripts})
+
 if(SCRIPTS)
   include(Custom/CMakeLists.txt)
   include(World/CMakeLists.txt)

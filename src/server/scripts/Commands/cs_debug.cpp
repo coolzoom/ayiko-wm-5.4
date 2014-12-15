@@ -94,6 +94,7 @@ public:
             { "areatriggers",  rbac::RBAC_PERM_COMMAND_DEBUG_AREATRIGGERS,  false, &HandleDebugAreaTriggersCommand,     "", NULL },
             { "los",           rbac::RBAC_PERM_COMMAND_DEBUG_LOS,           false, &HandleDebugLoSCommand,              "", NULL },
             { "moveflags",     rbac::RBAC_PERM_COMMAND_DEBUG_MOVEFLAGS,     false, &HandleDebugMoveflagsCommand,        "", NULL },
+            { "wpgps",        rbac::RBAC_PERM_COMMAND_DEBUG_MOVEFLAGS,     false, &HandleWPGPSCommand,        "", NULL },
             { NULL,            0,                                     false, NULL,                                "", NULL }
         };
         static ChatCommand commandTable[] =

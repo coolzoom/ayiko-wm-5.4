@@ -344,7 +344,7 @@ public:
                 switch (eventId)
                 {
                     case 1:
-                        me->CastSpell(me, SPELL_IRON_PROTECTOR, false);
+                        me->CastSpell(me, SPELL_IRON_PROTECTOR, true);
                         events.ScheduleEvent(1, 15000);
                         break;
                 }

@@ -3586,9 +3586,18 @@ void AuraEffect::HandleModThreat(AuraApplication const* aurApp, uint8 mode, bool
         return;
 
     Unit* target = aurApp->GetTarget();
-    for (int8 i = 0; i < MAX_SPELL_SCHOOL; ++i)
-        if (GetMiscValue() & (1 << i))
-            ApplyPercentModFloatVar(target->m_threatModifier[i], float(GetAmount()), apply);
+
+    if (apply && !target->IsAlive())
+        return;
+
+    Unit* caster = GetCaster();
+    if (apply && (!caster || !caster->IsAlive()))
+        return;
+
+    if (target->GetTypeId() == TYPEID_PLAYER)
+        for (int8 x=0; x < MAX_SPELL_SCHOOL; x++)
+            if (GetMiscValue() & int32(1<<x))
+                ApplyPercentModFloatVar(target->m_threatModifier[x], (float)GetAmount(), apply);
 }
 
 void AuraEffect::HandleAuraModTotalThreat(AuraApplication const* aurApp, uint8 mode, bool apply) const
@@ -3602,8 +3611,10 @@ void AuraEffect::HandleAuraModTotalThreat(AuraApplication const* aurApp, uint8 m
         return;
 
     Unit* caster = GetCaster();
-    if (caster && caster->IsAlive())
-        target->getHostileRefManager().addTempThreat((float)GetAmount(), apply);
+    if (!caster || !caster->IsAlive())
+        return;
+
+    target->getHostileRefManager().addTempThreat((float)GetAmount(), apply);
 }
 
 void AuraEffect::HandleModTaunt(AuraApplication const* aurApp, uint8 mode, bool apply) const

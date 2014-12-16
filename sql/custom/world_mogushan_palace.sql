@@ -1244,12 +1244,12 @@ UPDATE `creature_template` SET `equipment_id` = `entry` WHERE `entry` IN (61239,
 
 UPDATE `creature` SET `orientation` = 1.570000 WHERE `id` = 61551;
 
-DELETE FROM gameobject_loot_template WHERE entry = 214795;
+DELETE FROM gameobject_loot_template WHERE entry IN (214795, 42826);
 INSERT INTO gameobject_loot_template (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
-(214795, 85180, 7.14286, 1, 0, 1, 1),
-(214795, 85181, 9.52381, 1, 0, 1, 1),
-(214795, 85182, 7.14286, 1, 0, 1, 1),
-(214795, 85183, 19.0476, 1, 0, 1, 1),
-(214795, 85184, 7.14286, 1, 0, 1, 1);
+(42826, 85180, 7.14286, 1, 0, 1, 1),
+(42826, 85181, 9.52381, 1, 0, 1, 1),
+(42826, 85182, 7.14286, 1, 0, 1, 1),
+(42826, 85183, 19.0476, 1, 0, 1, 1),
+(42826, 85184, 7.14286, 1, 0, 1, 1);
 
 UPDATE `creature_template` set `ScriptName` = 'mob_glintrok_ironhide' WHERE `entry` = 61242;

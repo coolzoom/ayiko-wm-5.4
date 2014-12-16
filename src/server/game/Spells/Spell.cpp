@@ -875,22 +875,22 @@ void Spell::SelectEffectImplicitTargets(SpellEffIndex effIndex, SpellImplicitTar
                     }
                     break;
                 case TARGET_OBJECT_TYPE_DEST:
-                     switch (targetType.GetReferenceType())
-                     {
-                         case TARGET_REFERENCE_TYPE_CASTER:
-                             SelectImplicitCasterDestTargets(effIndex, targetType);
-                             break;
-                         case TARGET_REFERENCE_TYPE_TARGET:
-                             SelectImplicitTargetDestTargets(effIndex, targetType);
-                             break;
-                         case TARGET_REFERENCE_TYPE_DEST:
-                             SelectImplicitDestDestTargets(effIndex, targetType);
-                             break;
-                         default:
-                             ASSERT(false && "Spell::SelectEffectImplicitTargets: received not implemented select target reference type for TARGET_TYPE_OBJECT_DEST");
-                             break;
-                     }
-                     break;
+                    switch (targetType.GetReferenceType())
+                    {
+                        case TARGET_REFERENCE_TYPE_CASTER:
+                            SelectImplicitCasterDestTargets(effIndex, targetType);
+                            break;
+                        case TARGET_REFERENCE_TYPE_TARGET:
+                            SelectImplicitTargetDestTargets(effIndex, targetType);
+                            break;
+                        case TARGET_REFERENCE_TYPE_DEST:
+                            SelectImplicitDestDestTargets(effIndex, targetType);
+                            break;
+                        default:
+                            ASSERT(false && "Spell::SelectEffectImplicitTargets: received not implemented select target reference type for TARGET_TYPE_OBJECT_DEST");
+                            break;
+                    }
+                    break;
                 default:
                     switch (targetType.GetReferenceType())
                     {

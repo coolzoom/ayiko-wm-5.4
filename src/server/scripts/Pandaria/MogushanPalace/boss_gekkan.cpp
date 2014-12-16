@@ -62,7 +62,7 @@ public:
             InitializeGekkan();
         }
 
-        std::list<uint64> m_uilGekkanAdds;
+        std::vector<uint64> m_uilGekkanAdds;
 
         bool m_bYelled;
 
@@ -94,12 +94,13 @@ public:
         {
             DoZoneInCombat();
 
-            //Get the four adds.
-            for (std::list<uint64>::const_iterator itr = m_uilGekkanAdds.begin(); itr != m_uilGekkanAdds.end(); ++itr)
+            if (me->GetVictim())
             {
-                if (Creature* pAdd = ObjectAccessor::GetCreature(*me, *itr))
+                // Get the four adds.
+                for (auto const &guid : m_uilGekkanAdds)
                 {
-                    if (me->GetVictim() && pAdd->AI())
+                    auto const pAdd = ObjectAccessor::GetCreature(*me, guid);
+                    if (pAdd && pAdd->AI())
                         pAdd->SetInCombatWithZone();
                 }
             }
@@ -123,9 +124,9 @@ public:
         void JustReachedHome()
         {
             // Respawn all adds on evade
-            for (std::list<uint64>::const_iterator itr = m_uilGekkanAdds.begin(); itr != m_uilGekkanAdds.end(); ++itr)
+            for (auto const &guid : m_uilGekkanAdds)
             {
-                if (Creature* pAdd = ObjectAccessor::GetCreature(*me, *itr))
+                if (Creature* pAdd = ObjectAccessor::GetCreature(*me, guid))
                 {
                     if (!pAdd->IsAlive())
                         pAdd->Respawn();
@@ -137,37 +138,32 @@ public:
 
         Creature* GetRandomAliveAdd()
         {
-            std::list<uint64> uiTempGuidList;
+            decltype(m_uilGekkanAdds) uiTempGuidList;
 
-            for (std::list<uint64>::const_iterator copy = m_uilGekkanAdds.begin(); copy != m_uilGekkanAdds.end(); ++copy)
+            for (auto const &guid : m_uilGekkanAdds)
             {
-                if (Creature* pAdd = ObjectAccessor::GetCreature(*me, *copy))
-                {
-                    if (pAdd->IsAlive())
-                        uiTempGuidList.push_back(*copy);
-                }
+                auto const pAdd = ObjectAccessor::GetCreature(*me, guid);
+                if (pAdd && pAdd->IsAlive())
+                    uiTempGuidList.push_back(guid);
             }
 
+            if (uiTempGuidList.empty())
+                return nullptr;
 
-            std::list<uint64>::iterator itr = uiTempGuidList.begin();
+            auto itr = uiTempGuidList.cbegin();
             std::advance(itr, urand(0, uiTempGuidList.size() - 1));
 
-            if (itr != uiTempGuidList.end())
-                return ObjectAccessor::GetCreature(*me, *itr);
-
-            return NULL;
+            return ObjectAccessor::GetCreature(*me, *itr);
         }
 
         void JustDied(Unit* /*who*/)
         {
             // If we die, all remaining adds should get buff
-            for (std::list<uint64>::const_iterator itr = m_uilGekkanAdds.begin(); itr != m_uilGekkanAdds.end(); ++itr)
+            for (auto const &guid : m_uilGekkanAdds)
             {
-                if (Creature* pAdd = ObjectAccessor::GetCreature(*me, *itr))
-                {
-                    if (pAdd->IsAlive())
-                        pAdd->CastSpell(pAdd, SPELL_RECKLESS_INSPIRATION_2, false);
-                }
+                auto const pAdd = ObjectAccessor::GetCreature(*me, guid);
+                if (pAdd && pAdd->IsAlive())
+                    pAdd->CastSpell(pAdd, SPELL_RECKLESS_INSPIRATION_2, false);
             }
 
             Talk(TALK_DEATH);

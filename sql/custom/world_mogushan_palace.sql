@@ -1253,3 +1253,7 @@ INSERT INTO gameobject_loot_template (`entry`, `item`, `ChanceOrQuestChance`, `l
 (42826, 85184, 7.14286, 1, 0, 1, 1);
 
 UPDATE `creature_template` set `ScriptName` = 'mob_glintrok_ironhide' WHERE `entry` = 61242;
+
+UPDATE creature_template SET lootid = 0 WHERE entry = 61243;
+DELETE FROM creature_loot_template WHERE entry = 61243;
+DELETE FROM reference_loot_template WHERE entry = 61243;

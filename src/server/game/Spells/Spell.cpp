@@ -1591,6 +1591,15 @@ void Spell::SelectImplicitCasterDestTargets(SpellEffIndex effIndex, SpellImplici
             m_targets.SetDst(x, y, liquidLevel, m_caster->GetOrientation());
             return;
         }
+        case TARGET_DEST_CASTER_GROUND:
+        {
+            if (Map * map = m_caster->GetMap())
+            {
+                float groundZ = map->GetHeight(m_caster->GetPhaseMask(), m_caster->GetPositionX(), m_caster->GetPositionY(), MAX_HEIGHT);
+                m_targets.SetDst(m_caster->GetPositionX(), m_caster->GetPositionY(), groundZ, m_caster->GetOrientation(), map->GetId());
+            }
+            return;
+        }
         default:
             break;
     }

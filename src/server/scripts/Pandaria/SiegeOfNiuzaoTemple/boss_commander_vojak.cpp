@@ -340,7 +340,7 @@ class npc_yang_ironclaw : public CreatureScript
                         Map::PlayerList const &players = me->GetMap()->GetPlayers();
                         for (auto itr = players.begin(); itr != players.end(); ++itr)
                         {
-                            if (Player* player = itr->getSource())
+                            if (Player* player = itr->GetSource())
                                 if (player->IsAlive() && !player->isGameMaster() && player->GetWMOAreaId() == WMO_REAR_STAGING_AREA)
                                 {
                                     playersAlive = true;
@@ -1040,7 +1040,7 @@ class npc_mantid_tar_keg : public CreatureScript
             return instance->GetBossState(BOSS_VOJAK) == NOT_STARTED;
         }
 
-        void OnSpellClick(Unit* clicker) override
+        void OnSpellClick(Unit* clicker, bool &) override
         {
             //clicker->CastSpell(clicker, SPELL_CARRYING_CAUSTIC_TAR, true);
             if (Creature * target = Creature::GetCreature(*me, targetGUID))
@@ -1048,7 +1048,7 @@ class npc_mantid_tar_keg : public CreatureScript
             me->DisappearAndDie();
         }
 
-        void MovementInform(uint32 type, uint32 id)
+        void MovementInform(uint32 type, uint32 id) override
         {
             if (type == EFFECT_MOTION_TYPE && id == EVENT_JUMP)
             {

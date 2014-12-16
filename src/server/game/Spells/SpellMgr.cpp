@@ -5809,6 +5809,9 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->ExplicitTargetMask = TARGET_FLAG_UNIT_MASK;
                     spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(285); // 1s
                     break;
+                case 124277: // Blade Rush Summon forcecast
+                    spellInfo->MaxAffectedTargets = 1;
+                    break;
                     // Siege of Niuzao temple end
                 default:
                     break;

@@ -1167,8 +1167,8 @@ public:
                     events.ScheduleEvent(EVENT_LOOT_CHEST, 5000);
                     events.ScheduleEvent(EVENT_TALK_1, 10000);
 
-                    if (me->GetInstanceScript())
-                        me->GetInstanceScript()->SetData(TYPE_TRIAL_CHEST, 0);
+                    if (auto const script = me->GetInstanceScript())
+                        script->SetData(TYPE_TRIAL_CHEST, 0);
                     break;
             }
         }
@@ -1295,8 +1295,8 @@ public:
                         }
                         break;
                     case EVENT_START_BATTLE:
-                        if (me->GetInstanceScript())
-                            me->GetInstanceScript()->SetData(TYPE_TRIAL_ENDED, 0);
+                        if (auto const script = me->GetInstanceScript())
+                            script->SetData(TYPE_TRIAL_ENDED, 0);
                         break;
                     case EVENT_SUMMON_BAT:
                         HandleBatSummons(5);

@@ -316,191 +316,191 @@ public:
                     }
                 }
                 break;
-                        case TYPE_MING:
+                case TYPE_MING:
+                {
+                    //Move the m_lAdeptList
+                    for (auto guid : m_lAdeptList)
+                    {
+                        Creature* pCreature = instance->GetCreature(guid);
+
+                        if (pCreature && pCreature->GetAI())
+                            pCreature->GetAI()->DoAction(0); //EVENT_ENCOURAGE
+                    }
+                    Creature* pMing = instance->GetCreature(m_uiMingGuid);
+                    if (!pMing)
+                        return;
+                    pMing->GetMotionMaster()->MovePoint(0, pTrialIntroPositions[type]);
+                    pMing->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                    pMing->SetReactState(REACT_AGGRESSIVE);
+
+                    if (pMing->GetAI())
+                        pMing->GetAI()->DoAction(0);
+                }
+                break;
+                case TYPE_KUAI:
+                {
+                    //Move the m_lScrapperList
+                    for (auto guid : m_lScrapperList)
+                    {
+                        Creature* pCreature = instance->GetCreature(guid);
+
+                        if (pCreature && pCreature->GetAI())
+                            pCreature->GetAI()->DoAction(0); //EVENT_ENCOURAGE
+                    }
+                    Creature* pKuai = instance->GetCreature(m_uiKuaiGuid);
+                    if (!pKuai)
+                        return;
+                    pKuai->GetMotionMaster()->MovePoint(0, pTrialIntroPositions[type]);
+                    pKuai->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                    pKuai->SetReactState(REACT_AGGRESSIVE);
+
+                    // special case action 2 for kuai
+                    if (pKuai->GetAI())
+                        pKuai->GetAI()->DoAction(2);
+                }
+                break;
+                case TYPE_HAIYAN:
+                {
+                    //Move the m_lScrapperList
+                    for (auto guid : m_lGruntList)
+                    {
+                        Creature* pCreature = instance->GetCreature(guid);
+
+                        if (pCreature && pCreature->GetAI())
+                            pCreature->GetAI()->DoAction(0); //EVENT_ENCOURAGE
+                    }
+                    Creature* pHaiyan = instance->GetCreature(m_uiHaiyanGuid);
+                    if (!pHaiyan)
+                        return;
+                    pHaiyan->GetMotionMaster()->MovePoint(0, pTrialIntroPositions[type]);
+                    pHaiyan->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                    pHaiyan->SetReactState(REACT_AGGRESSIVE);
+
+                    // Make sure he talks for the intro
+                    if (pHaiyan->GetAI())
+                        pHaiyan->GetAI()->DoAction(0);
+                }
+                break;
+                case TYPE_TRIAL_ENDED:
+                {
+                    for (auto guid : m_lAdeptList)
+                    {
+                        Creature* pCreature = instance->GetCreature(guid);
+
+                        if (pCreature && pCreature->GetAI())
+                            pCreature->GetAI()->DoAction(2); //ACTION_ATTACK
+
+                        std::list<uint64>::iterator itr = m_lGruntList.begin();
+                        std::advance(itr, urand(0, m_lGruntList.size() - 1));
+
+                        Creature* pGrunt = instance->GetCreature(*itr);
+                        if (pCreature && pGrunt)
                         {
-                            //Move the m_lAdeptList
-                            for (auto guid : m_lAdeptList)
-                            {
-                                Creature* pCreature = instance->GetCreature(guid);
-
-                                if (pCreature && pCreature->GetAI())
-                                    pCreature->GetAI()->DoAction(0); //EVENT_ENCOURAGE
-                            }
-                            Creature* pMing = instance->GetCreature(m_uiMingGuid);
-                            if (!pMing)
-                                return;
-                            pMing->GetMotionMaster()->MovePoint(0, pTrialIntroPositions[type]);
-                            pMing->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
-                            pMing->SetReactState(REACT_AGGRESSIVE);
-
-                            if (pMing->GetAI())
-                                pMing->GetAI()->DoAction(0);
+                            pCreature->Attack(pGrunt, true);
+                            if (pCreature->AI())
+                                pCreature->AI()->AttackStart(pGrunt);
                         }
-                        break;
-                        case TYPE_KUAI:
+                    }
+                    for (auto guid : m_lGruntList)
+                    {
+                        Creature* pCreature = instance->GetCreature(guid);
+
+                        if (pCreature && pCreature->GetAI())
+                            pCreature->GetAI()->DoAction(2); //ACTION_ATTACK
+
+                        std::list<uint64>::iterator itr = m_lScrapperList.begin();
+                        std::advance(itr, urand(0, m_lScrapperList.size() - 1));
+
+                        Creature* pScrapper = instance->GetCreature(*itr);
+                        if (pCreature && pScrapper)
                         {
-                            //Move the m_lScrapperList
-                            for (auto guid : m_lScrapperList)
-                            {
-                                Creature* pCreature = instance->GetCreature(guid);
-
-                                if (pCreature && pCreature->GetAI())
-                                    pCreature->GetAI()->DoAction(0); //EVENT_ENCOURAGE
-                            }
-                            Creature* pKuai = instance->GetCreature(m_uiKuaiGuid);
-                            if (!pKuai)
-                                return;
-                            pKuai->GetMotionMaster()->MovePoint(0, pTrialIntroPositions[type]);
-                            pKuai->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
-                            pKuai->SetReactState(REACT_AGGRESSIVE);
-
-                            // special case action 2 for kuai
-                            if (pKuai->GetAI())
-                                pKuai->GetAI()->DoAction(2);
+                            pCreature->Attack(pScrapper, true);
+                            if (pCreature->AI())
+                                pCreature->AI()->AttackStart(pScrapper);
                         }
-                        break;
-                        case TYPE_HAIYAN:
+                    }
+                    for (auto guid : m_lScrapperList)
+                    {
+                        Creature* pCreature = instance->GetCreature(guid);
+
+                        if (pCreature && pCreature->GetAI())
+                            pCreature->GetAI()->DoAction(2); //ACTION_ATTACK
+
+                        std::list<uint64>::iterator itr = m_lAdeptList.begin();
+                        std::advance(itr, urand(0, m_lAdeptList.size() - 1));
+
+                        Creature* pAdept = instance->GetCreature(*itr);
+                        if (pCreature && pAdept)
                         {
-                            //Move the m_lScrapperList
-                            for (auto guid : m_lGruntList)
-                            {
-                                Creature* pCreature = instance->GetCreature(guid);
-
-                                if (pCreature && pCreature->GetAI())
-                                    pCreature->GetAI()->DoAction(0); //EVENT_ENCOURAGE
-                            }
-                            Creature* pHaiyan = instance->GetCreature(m_uiHaiyanGuid);
-                            if (!pHaiyan)
-                                return;
-                            pHaiyan->GetMotionMaster()->MovePoint(0, pTrialIntroPositions[type]);
-                            pHaiyan->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
-                            pHaiyan->SetReactState(REACT_AGGRESSIVE);
-
-                            // Make sure he talks for the intro
-                            if (pHaiyan->GetAI())
-                                pHaiyan->GetAI()->DoAction(0);
+                            pCreature->Attack(pAdept, true);
+                            if (pCreature->AI())
+                                pCreature->AI()->AttackStart(pAdept);
                         }
-                        break;
-                        case TYPE_TRIAL_ENDED:
+                    }
+                }
+                break;
+                case TYPE_MING_RETIRED:
+                    // This boss is down, move on to next
+                    ++m_uiBossCount;
+
+                    //Retire the m_lAdeptList
+                    for (auto guid : m_lAdeptList)
+                    {
+                        Creature* pCreature = instance->GetCreature(guid);
+
+                        if (pCreature && pCreature->GetAI())
+                            pCreature->GetAI()->DoAction(1); //EVENT_RETIRE
+                    }
+                    break;
+                case TYPE_KUAI_RETIRED:
+                    // This boss is down, move on to next
+                    ++m_uiBossCount;
+
+                    //Retire the m_lAdeptList
+                    for (auto guid : m_lScrapperList)
+                    {
+                        Creature* pCreature = instance->GetCreature(guid);
+
+                        if (pCreature && pCreature->GetAI())
+                            pCreature->GetAI()->DoAction(1); //EVENT_RETIRE
+                    }
+                    break;
+                case TYPE_HAIYAN_RETIRED:
+                    // This boss is down, move on to next
+                    ++m_uiBossCount;
+
+                    //Retire the m_lAdeptList
+                    for (auto guid : m_lGruntList)
+                    {
+                        Creature* pCreature = instance->GetCreature(guid);
+
+                        if (pCreature && pCreature->GetAI())
+                            pCreature->GetAI()->DoAction(1); //EVENT_RETIRE
+                    }
+                    break;
+                case TYPE_SHUFFLE_ORDER:
+                    if (m_uiBossCount < 3)
+                        SetData(m_auiBossNumber[m_uiBossCount], 0);
+                    else
+                    {
+                        SetBossState(DATA_TRIAL_OF_THE_KING, DONE);
+
+                        if (GameObject* pGo = GetGameObjectFromStorage(GO_TRIAL_CHEST))
+                            SetData64(TYPE_TRIAL_ENDED, pGo->GetGUID());
+
+                        if (Creature* pScout = instance->GetCreature(m_uiScoutGuid))
                         {
-                            for (auto guid : m_lAdeptList)
-                            {
-                                Creature* pCreature = instance->GetCreature(guid);
-
-                                if (pCreature && pCreature->GetAI())
-                                    pCreature->GetAI()->DoAction(2); //ACTION_ATTACK
-
-                                    std::list<uint64>::iterator itr = m_lGruntList.begin();
-                                std::advance(itr, urand(0, m_lGruntList.size() - 1));
-
-                                Creature* pGrunt = instance->GetCreature(*itr);
-                                if (pCreature && pGrunt)
-                                {
-                                    pCreature->Attack(pGrunt, true);
-                                    if (pCreature->AI())
-                                        pCreature->AI()->AttackStart(pGrunt);
-                                }
-                            }
-                            for (auto guid : m_lGruntList)
-                            {
-                                Creature* pCreature = instance->GetCreature(guid);
-
-                                if (pCreature && pCreature->GetAI())
-                                    pCreature->GetAI()->DoAction(2); //ACTION_ATTACK
-
-                                    std::list<uint64>::iterator itr = m_lScrapperList.begin();
-                                std::advance(itr, urand(0, m_lScrapperList.size() - 1));
-
-                                Creature* pScrapper = instance->GetCreature(*itr);
-                                if (pCreature && pScrapper)
-                                {
-                                    pCreature->Attack(pScrapper, true);
-                                    if (pCreature->AI())
-                                        pCreature->AI()->AttackStart(pScrapper);
-                                }
-                            }
-                            for (auto guid : m_lScrapperList)
-                            {
-                                Creature* pCreature = instance->GetCreature(guid);
-
-                                if (pCreature && pCreature->GetAI())
-                                    pCreature->GetAI()->DoAction(2); //ACTION_ATTACK
-
-                                    std::list<uint64>::iterator itr = m_lAdeptList.begin();
-                                std::advance(itr, urand(0, m_lAdeptList.size() - 1));
-
-                                Creature* pAdept = instance->GetCreature(*itr);
-                                if (pCreature && pAdept)
-                                {
-                                    pCreature->Attack(pAdept, true);
-                                    if (pCreature->AI())
-                                        pCreature->AI()->AttackStart(pAdept);
-                                }
-                            }
+                            if (pScout->AI())
+                                pScout->AI()->DoAction(0);
                         }
-                        break;
-                        case TYPE_MING_RETIRED:
-                            // This boss is down, move on to next
-                            ++m_uiBossCount;
-
-                            //Retire the m_lAdeptList
-                            for (auto guid : m_lAdeptList)
-                            {
-                                Creature* pCreature = instance->GetCreature(guid);
-
-                                if (pCreature && pCreature->GetAI())
-                                    pCreature->GetAI()->DoAction(1); //EVENT_RETIRE
-                            }
-                            break;
-                        case TYPE_KUAI_RETIRED:
-                            // This boss is down, move on to next
-                            ++m_uiBossCount;
-
-                            //Retire the m_lAdeptList
-                            for (auto guid : m_lScrapperList)
-                            {
-                                Creature* pCreature = instance->GetCreature(guid);
-
-                                if (pCreature && pCreature->GetAI())
-                                    pCreature->GetAI()->DoAction(1); //EVENT_RETIRE
-                            }
-                            break;
-                        case TYPE_HAIYAN_RETIRED:
-                            // This boss is down, move on to next
-                            ++m_uiBossCount;
-
-                            //Retire the m_lAdeptList
-                            for (auto guid : m_lGruntList)
-                            {
-                                Creature* pCreature = instance->GetCreature(guid);
-
-                                if (pCreature && pCreature->GetAI())
-                                    pCreature->GetAI()->DoAction(1); //EVENT_RETIRE
-                            }
-                            break;
-                        case TYPE_SHUFFLE_ORDER:
-                            if (m_uiBossCount < 3)
-                                SetData(m_auiBossNumber[m_uiBossCount], 0);
-                            else
-                            {
-                                SetBossState(DATA_TRIAL_OF_THE_KING, DONE);
-
-                                if (GameObject* pGo = GetGameObjectFromStorage(GO_TRIAL_CHEST))
-                                    SetData64(TYPE_TRIAL_ENDED, pGo->GetGUID());
-
-                                if (Creature* pScout = instance->GetCreature(m_uiScoutGuid))
-                                {
-                                    if (pScout->AI())
-                                        pScout->AI()->DoAction(0);
-                                }
-                            }
-                            break;
-                        case TYPE_TRIAL_CHEST:
-                            if (GameObject* pGo = GetGameObjectFromStorage(GO_TRIAL_CHEST))
-                                DoRespawnGameObject(pGo->GetGUID(), 180);
-                            if (Creature* pBeacon = instance->GetCreature(m_uiBeaconGuid))
-                                pBeacon->SetPhaseMask(1, true);
-                            break;
+                    }
+                    break;
+                case TYPE_TRIAL_CHEST:
+                    if (GameObject* pGo = GetGameObjectFromStorage(GO_TRIAL_CHEST))
+                        DoRespawnGameObject(pGo->GetGUID(), 7 * DAY);
+                    if (Creature* pBeacon = instance->GetCreature(m_uiBeaconGuid))
+                        pBeacon->SetPhaseMask(1, true);
+                    break;
             }
         }
 

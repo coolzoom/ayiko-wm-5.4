@@ -1540,6 +1540,42 @@ public:
     }
 };
 
+// Fan of Knives - 51723
+class spell_rog_fan_of_knives final : public SpellScriptLoader
+{
+    class script_impl final : public SpellScript
+    {
+        PrepareSpellScript(script_impl)
+
+        void filterTargets(std::list<WorldObject*> &targets)
+        {
+            if (auto player = GetCaster()->ToPlayer())
+            {
+                auto comboTarget = player->GetComboTarget();
+                targets.remove_if([comboTarget](WorldObject * obj)
+                {
+                    return obj->GetGUID() != comboTarget;
+                });
+            }
+        }
+
+        void Register() final
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(script_impl::filterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+public:
+    spell_rog_fan_of_knives()
+        : SpellScriptLoader("spell_rog_fan_of_knives")
+    { }
+
+    SpellScript * GetSpellScript() const final
+    {
+        return new script_impl;
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_glyph_of_expose_armor();
@@ -1572,4 +1608,5 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_cloak_and_dagger();
     new spell_rog_smoke_bomb();
     new spell_rog_shuriken_toss();
+    new spell_rog_fan_of_knives();
 }

@@ -4114,7 +4114,8 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->SpellIconID = 2819;
                     break;
                 case 124271:// Sanguinary Vein
-                    spellInfo->Effects[0].BasePoints = 35;
+                    spellInfo->Effects[EFFECT_0].BasePoints = 35;
+                    spellInfo->Effects[EFFECT_1].BasePoints = 35;
                     break;
                 case 2818:  // Deadly Poison
                     spellInfo->Attributes |= SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK;

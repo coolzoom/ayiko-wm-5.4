@@ -446,7 +446,7 @@ class spell_rog_nightstalker : public SpellScriptLoader
         }
 };
 
-// Called by Rupture - 1943, Garrote - 703 and Crimson Tempest - 121411
+// Called by Rupture - 1943, Garrote - 703 and Crimson Tempest - 122233 and Hemorrhage - 89775 (required for glyph handling)
 // Sanguinary Vein - 79147
 class spell_rog_sanguinary_vein : public SpellScriptLoader
 {
@@ -464,6 +464,10 @@ class spell_rog_sanguinary_vein : public SpellScriptLoader
                 if (!caster || !target)
                     return;
 
+                // Glyph of Hemorrhaging Veins
+                if (GetId() == 89775 && !caster->HasAura(146631))
+                    return;
+
                 if (caster->HasAura(79147))
                     caster->CastSpell(target, ROGUE_SPELL_SANGUINARY_VEIN_DEBUFF, true);
             }
@@ -477,6 +481,10 @@ class spell_rog_sanguinary_vein : public SpellScriptLoader
                     for (uint32 i = 0; i < 3; ++i)
                         if (target->HasAura(spellsAffected[i], GetCasterGUID()))
                             hasFound = true;
+
+                    // Glyph of Hemorrhaging Veins
+                    if (GetCaster() && GetCaster()->HasAura(146631) && target->HasAura(89775, GetCasterGUID()))
+                        hasFound = true;
 
                     if (!hasFound)
                         target->RemoveAurasDueToSpell(ROGUE_SPELL_SANGUINARY_VEIN_DEBUFF, GetCasterGUID());

@@ -7193,6 +7193,12 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                     CastSpell(redirectTarget,57933,true);
                     break;
                 }
+                case 56805: // Glyph of Kick
+                {
+                    if (Player * player = ToPlayer())
+                        player->ReduceSpellCooldown(1766, triggerAmount);
+                    return true;
+                }
                 default:
                     break;
             }

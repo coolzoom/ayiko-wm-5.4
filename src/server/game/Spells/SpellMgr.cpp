@@ -3721,7 +3721,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 27002:
                 case 48571:
                 case 48572:
-                case 8676: // Ambush
                 case 8724:
                 case 8725:
                 case 11267:
@@ -5780,6 +5779,10 @@ void SpellMgr::LoadSpellCustomAttr()
                     break;
                 case 122278: // Dampen Harm
                     spellInfo->AttributesEx5 |= SPELL_ATTR5_USABLE_WHILE_STUNNED;
+                    break;
+                case 8676: // Ambush (damage increased in 5.4)
+                    spellInfo->AttributesCu |= SPELL_ATTR0_CU_REQ_CASTER_BEHIND_TARGET;
+                    spellInfo->Effects[EFFECT_1].BasePoints = 365;
                     break;
                 default:
                     break;

@@ -470,12 +470,17 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, Field* fields, uint32 entr
         return false;
 
     // set owner (not if item is only loaded for gbank/auction/mail
-    if (owner_guid != 0)
+    if (GUID_LOPART(owner_guid) != 0)
         SetOwnerGUID(owner_guid);
 
     bool need_save = false;                                 // need explicit save data at load fixes
-    SetUInt64Value(ITEM_FIELD_CREATOR, MAKE_NEW_GUID(fields[0].GetUInt32(), 0, HIGHGUID_PLAYER));
-    SetUInt64Value(ITEM_FIELD_GIFTCREATOR, MAKE_NEW_GUID(fields[1].GetUInt32(), 0, HIGHGUID_PLAYER));
+
+    if (auto const guid = fields[0].GetUInt32())
+        SetUInt64Value(ITEM_FIELD_CREATOR, MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER));
+
+    if (auto const guid = fields[1].GetUInt32())
+        SetUInt64Value(ITEM_FIELD_GIFTCREATOR, MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER));
+
     SetCount(fields[2].GetUInt32());
 
     uint32 duration = fields[3].GetUInt32();

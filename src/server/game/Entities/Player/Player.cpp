@@ -1791,6 +1791,12 @@ void Player::Update(uint32 p_time)
                         CastSpell(victim, 140308, true);
                         resetAttackTimer(BASE_ATTACK);
                     }
+                    // Shadow Blade - Main Hand
+                    else if (HasAura(121471))
+                    {
+                        CastSpell(victim, 121473, true);
+                        resetAttackTimer(BASE_ATTACK);
+                    }
                 }
             }
 
@@ -1822,6 +1828,12 @@ void Player::Update(uint32 p_time)
                     else if (HasAura(137586))
                     {
                         CastSpell(victim, 140309, true);
+                        resetAttackTimer(OFF_ATTACK);
+                    }
+                    // Shadow Blades - Off Hand
+                    else if (HasAura(121471))
+                    {
+                        CastSpell(victim, 121474, true);
                         resetAttackTimer(OFF_ATTACK);
                     }
                 }

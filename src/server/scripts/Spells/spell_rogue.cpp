@@ -58,7 +58,6 @@ enum RogueSpells
     ROGUE_SPELL_ADRENALINE_RUSH                  = 13750,
     ROGUE_SPELL_KILLING_SPREE                    = 51690,
     ROGUE_SPELL_REDIRECT                         = 73981,
-    ROGUE_SPELL_SHADOW_BLADES                    = 121471,
     ROGUE_SPELL_SPRINT                           = 2983,
     ROGUE_SPELL_HEMORRHAGE_DOT                   = 89775,
     ROGUE_SPELL_SANGUINARY_VEIN_DEBUFF           = 124271,
@@ -446,7 +445,7 @@ class spell_rog_nightstalker : public SpellScriptLoader
         }
 };
 
-// Called by Rupture - 1943, Garrote - 703 and Crimson Tempest - 121411
+// Called by Rupture - 1943, Garrote - 703 and Crimson Tempest - 122233 and Hemorrhage - 89775 (required for glyph handling)
 // Sanguinary Vein - 79147
 class spell_rog_sanguinary_vein : public SpellScriptLoader
 {
@@ -464,6 +463,10 @@ class spell_rog_sanguinary_vein : public SpellScriptLoader
                 if (!caster || !target)
                     return;
 
+                // Glyph of Hemorrhaging Veins
+                if (GetId() == 89775 && !caster->HasAura(146631))
+                    return;
+
                 if (caster->HasAura(79147))
                     caster->CastSpell(target, ROGUE_SPELL_SANGUINARY_VEIN_DEBUFF, true);
             }
@@ -477,6 +480,10 @@ class spell_rog_sanguinary_vein : public SpellScriptLoader
                     for (uint32 i = 0; i < 3; ++i)
                         if (target->HasAura(spellsAffected[i], GetCasterGUID()))
                             hasFound = true;
+
+                    // Glyph of Hemorrhaging Veins
+                    if (GetCaster() && GetCaster()->HasAura(146631) && target->HasAura(89775, GetCasterGUID()))
+                        hasFound = true;
 
                     if (!hasFound)
                         target->RemoveAurasDueToSpell(ROGUE_SPELL_SANGUINARY_VEIN_DEBUFF, GetCasterGUID());
@@ -557,7 +564,7 @@ class spell_rog_restless_blades : public SpellScriptLoader
             Player* player = GetUnitOwner()->ToPlayer();
             int32 const cooldownReduction = aurEff->GetAmount() * player->GetComboPoints();
 
-            uint32 const affectedSpells[] = { 13750, 51690, 73981, 121471, 2983 };
+            uint32 const affectedSpells[] = { 13750, 51690, 73981, 2983 };
 
             for (size_t i = 0; i < TC_ARRAY_SIZE(affectedSpells); ++i)
                 player->ReduceSpellCooldown(affectedSpells[i], cooldownReduction);
@@ -1496,6 +1503,79 @@ public:
     }
 };
 
+// Shuriken Toss - 114014
+class spell_rog_shuriken_toss : public SpellScriptLoader
+{
+public:
+    spell_rog_shuriken_toss() : SpellScriptLoader("spell_rog_shuriken_toss") { }
+
+    class script_impl : public SpellScript
+    {
+        PrepareSpellScript(script_impl);
+
+        enum
+        {
+            SPELL_SHURIKEN_TOSS_PROC = 137586,
+        };
+
+        void HandleOnHit()
+        {
+            auto caster = GetCaster();
+            auto target = GetHitUnit();
+            if (caster && target && caster->GetDistance(target) > 10.f)
+            {
+                caster->CastSpell(caster, SPELL_SHURIKEN_TOSS_PROC, true);
+            }
+        }
+
+        void Register()
+        {
+            OnHit += SpellHitFn(script_impl::HandleOnHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new script_impl();
+    }
+};
+
+// Fan of Knives - 51723
+class spell_rog_fan_of_knives final : public SpellScriptLoader
+{
+    class script_impl final : public SpellScript
+    {
+        PrepareSpellScript(script_impl)
+
+        void filterTargets(std::list<WorldObject*> &targets)
+        {
+            if (auto player = GetCaster()->ToPlayer())
+            {
+                auto comboTarget = player->GetComboTarget();
+                targets.remove_if([comboTarget](WorldObject * obj)
+                {
+                    return obj->GetGUID() != comboTarget;
+                });
+            }
+        }
+
+        void Register() final
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(script_impl::filterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+public:
+    spell_rog_fan_of_knives()
+        : SpellScriptLoader("spell_rog_fan_of_knives")
+    { }
+
+    SpellScript * GetSpellScript() const final
+    {
+        return new script_impl;
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_glyph_of_expose_armor();
@@ -1527,4 +1607,6 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_marked_for_death();
     new spell_rog_cloak_and_dagger();
     new spell_rog_smoke_bomb();
+    new spell_rog_shuriken_toss();
+    new spell_rog_fan_of_knives();
 }

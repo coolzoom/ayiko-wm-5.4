@@ -673,12 +673,15 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
     }
 
     // Leeching Poison - 112961 each attack heal the player for 10% of the damage (TODO: Make proper filter)
-    if (GetTypeId() == TYPEID_PLAYER && getClass() == CLASS_ROGUE && damage != 0 && damagetype != DOT && (!spellProto || spellProto->SpellFamilyName == SPELLFAMILY_ROGUE && spellProto->Id != 113780))
+    if (GetTypeId() == TYPEID_PLAYER && getClass() == CLASS_ROGUE && damage && damagetype != DOT)
     {
         if (Aura * const leechingPoison = victim->GetAura(112961, GetGUID()))
         {
-            int32 bp = damage / 10;
-            CastCustomSpell(this, 112974, &bp, NULL, NULL, true);
+            if (!spellProto || (spellProto->SpellFamilyName == SPELLFAMILY_ROGUE && spellProto->Id != 113780))
+            {
+                int32 bp = damage / 10;
+                CastCustomSpell(this, 112974, &bp, NULL, NULL, true);
+            }
         }
     }
     // Spirit Hunt - 58879 : Feral Spirit heal their owner for 150% of their damage
@@ -2656,6 +2659,36 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* victim, SpellInfo const* spell)
             if (roll < tmp)
                 return SPELL_MISS_DEFLECT;
         }
+
+        if (!victim->HasInArc(M_PI, this))
+            if (!victim->HasAuraType(SPELL_AURA_IGNORE_HIT_DIRECTION))
+                // Can`t dodge from behind in PvP (but its possible in PvE)
+                if (victim->GetTypeId() == TYPEID_PLAYER)
+                    canDodge = false;
+
+        if (canDodge)
+        {
+            // Roll dodge
+            int32 dodgeChance = int32(victim->GetUnitDodgeChance() * 100.0f);
+            // Reduce enemy dodge chance by SPELL_AURA_MOD_COMBAT_RESULT_CHANCE
+            dodgeChance += GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_COMBAT_RESULT_CHANCE, VICTIMSTATE_DODGE) * 100;
+            dodgeChance = int32(float(dodgeChance) * GetTotalAuraMultiplier(SPELL_AURA_MOD_ENEMY_DODGE));
+            // Reduce dodge chance by attacker expertise rating
+            if (GetTypeId() == TYPEID_PLAYER)
+            {
+                dodgeChance -= int32(ToPlayer()->GetExpertiseDodgeOrParryReduction(attType) * 100.0f);
+                if (victim->GetTypeId() == TYPEID_UNIT && !victim->isPet())
+                    dodgeChance += (150 * (victim->getLevelForTarget(this) - getLevel()));
+            }
+            else
+                dodgeChance -= GetTotalAuraModifier(SPELL_AURA_MOD_EXPERTISE) * 25;
+            if (dodgeChance < 0)
+                dodgeChance = 0;
+
+            if (roll < (tmp += dodgeChance))
+                return SPELL_MISS_DODGE;
+        }
+
         return SPELL_MISS_NONE;
     }
 
@@ -7192,6 +7225,12 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                     CastSpell(this,59628,true);
                     CastSpell(redirectTarget,57933,true);
                     break;
+                }
+                case 56805: // Glyph of Kick
+                {
+                    if (Player * player = ToPlayer())
+                        player->ReduceSpellCooldown(1766, triggerAmount);
+                    return true;
                 }
                 default:
                     break;
@@ -14671,7 +14710,7 @@ bool Unit::CanHaveThreatList() const
         return false;
 
     // only alive units can have threat list
-    if (!IsAlive() || isDying())
+    if (!IsAlive() && !isDying())
         return false;
 
     // totems can not have threat list

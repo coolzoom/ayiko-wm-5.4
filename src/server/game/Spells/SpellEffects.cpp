@@ -703,7 +703,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
 
                             if (combo)
                             {
-                                damage += int32(0.112f * combo * ap + damage * combo);
+                                damage = int32(0.112f * combo * ap + damage * combo);
 
                                 // Eviscerate and Envenom Bonus Damage (item set effect)
                                 if (m_caster->HasAura(37169))
@@ -717,9 +717,6 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     {
                         if (m_caster->GetTypeId() != TYPEID_PLAYER)
                             break;
-
-                        if (m_caster->ToPlayer()->GetComboTarget() == unitTarget->GetGUID())
-                            m_caster->ToPlayer()->AddComboPoints(unitTarget, 1);
 
                         // Fan of Knives - Vile Poisons
                         if (AuraEffect *aur = m_caster->GetDummyAuraEffect(SPELLFAMILY_ROGUE, 857, 2))

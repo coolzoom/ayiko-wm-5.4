@@ -2838,6 +2838,11 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spell)
     {
         // Chance hit from victim SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE auras
         modHitChance += victim->GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE, schoolMask);
+
+        // Cloak of Shadows hack due to schoolMask handling
+        if (spell->GetSchoolMask() == SPELL_SCHOOL_MASK_NORMAL && spell->DmgClass == SPELL_DAMAGE_CLASS_MAGIC)
+            if (auto cloak = victim->GetAuraEffect(31224, EFFECT_0))
+                modHitChance += cloak->GetAmount();
     }
 
     int32 HitChance = modHitChance * 100;

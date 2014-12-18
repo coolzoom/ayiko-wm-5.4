@@ -4126,11 +4126,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 107079:// Quaking Palm
                     spellInfo->AttributesEx |= SPELL_ATTR1_NOT_BREAK_STEALTH;
                     break;
-                case 31224: // Cloak of Shadows
-                    spellInfo->Effects[0].BasePoints = -200;
-                    spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE;
-                    spellInfo->Effects[0].ValueMultiplier = -200;
-                    break;
                 case 137619:// Marked for Death
                     spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
                     break;

@@ -3809,6 +3809,7 @@ bool SpellInfo::IsAffectedByResilience() const
 {
     switch (Id)
     {
+        case 22482: // Blade Flurry proc
         case 12723: // Sweeping Strikes proc
         case 32409: // Glyph of Shadow Word: Death (backfire)
         case 33619: // Glyph of Reflective Shield

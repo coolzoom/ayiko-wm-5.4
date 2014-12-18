@@ -25,6 +25,7 @@
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
 #include "ArraySize.h"
+#include "ObjectVisitors.hpp"
 
 enum RogueSpells
 {
@@ -201,8 +202,9 @@ class spell_rog_blade_flurry : public SpellScriptLoader
                     if (spellInfo && !spellInfo->CanTriggerBladeFlurry())
                         return;
 
-                    if (Unit* target = _player->SelectNearbyTarget(eventInfo.GetActionTarget()))
-                        _player->CastCustomSpell(target, ROGUE_SPELL_BLADE_FLURRY_DAMAGE, &damage, NULL, NULL, true);
+                    damage = CalculatePct(damage, 40);
+
+                    _player->CastCustomSpell(eventInfo.GetActionTarget(), ROGUE_SPELL_BLADE_FLURRY_DAMAGE, &damage, NULL, NULL, true);
                 }
             }
 
@@ -216,6 +218,55 @@ class spell_rog_blade_flurry : public SpellScriptLoader
         {
             return new spell_rog_blade_flurry_AuraScript();
         }
+};
+
+// Blade Flurry damage - 22482
+class spell_rog_blade_flurry_damage : public SpellScriptLoader
+{
+public:
+    spell_rog_blade_flurry_damage() : SpellScriptLoader("spell_rog_blade_flurry_damage") { }
+
+    class script_impl : public SpellScript
+    {
+        PrepareSpellScript(script_impl);
+
+        void RemoveInvalidTargets(std::list<WorldObject*>& targets)
+        {
+            auto caster = GetCaster();
+            if (!caster)
+                return;
+            // Clear targets, we make the new list
+            targets.clear();
+            Trinity::AllWorldObjectsInRange objects(caster, 5.0f);
+            Trinity::WorldObjectListSearcher<Trinity::AllWorldObjectsInRange> searcher(caster, targets, objects);
+            Trinity::VisitNearbyObject(caster, 5.0f, searcher);
+
+            targets.remove(GetExplTargetUnit());
+
+            targets.remove_if([caster](WorldObject * obj)
+            {
+                if (auto unit = obj->ToUnit())
+                {
+                    return unit->isTotem() || !caster->IsValidAttackTarget(unit);
+                }
+                else
+                    return true;
+            });
+
+            if (targets.size() > 4)
+                targets.resize(4);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(script_impl::RemoveInvalidTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new script_impl();
+    }
 };
 
 // Growl - 113613
@@ -1581,6 +1632,7 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_glyph_of_expose_armor();
     new spell_rog_cheat_death();
     new spell_rog_blade_flurry();
+    new spell_rog_blade_flurry_damage();
     new spell_rog_growl();
     new spell_rog_cloak_of_shadows();
     new spell_rog_combat_readiness();

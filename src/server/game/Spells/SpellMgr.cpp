@@ -5785,6 +5785,12 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_REQ_CASTER_BEHIND_TARGET;
                     spellInfo->Effects[EFFECT_1].BasePoints = 365;
                     break;
+                case 22482: // Blade Flurry proc
+                    spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
+                    spellInfo->Effects[EFFECT_0].ChainTarget = 0;
+                    spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_TARGET_ENEMY;
+                    spellInfo->Effects[EFFECT_0].TargetB = TARGET_UNIT_DEST_AREA_ENEMY;
+                    break;
                 default:
                     break;
             }

@@ -143,6 +143,9 @@ enum eTypes
     TYPE_ACTIVATE_ANIMATED_AXE,
 
     TYPE_SHUFFLE_ORDER,
+
+    TYPE_GEKKAN,
+    TYPE_XIN
 };
 
 enum eGameObjects
@@ -162,5 +165,7 @@ static const Position pTrialIntroPositions[] =
     { -4216.0f, -2590.4f, 17.50f, 0.0f },
     { -4215.8f, -2636.8f, 17.50f, 0.0f },
 };
+
+#define MAX_TYPES 14
 
 #endif // MOGUSHAN_PALACE_H_

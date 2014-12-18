@@ -27,6 +27,8 @@ public:
     {
         instance_mogu_shan_palace_InstanceMapScript(Map* map) : InstanceScript(map) {}
 
+        uint32 m_auiEncounter[MAX_TYPES];
+
         /*
          * * Trial of the king.
          */
@@ -69,6 +71,8 @@ public:
 
         void Initialize()
         {
+            memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+
             // pretty dumb to even try to utilize data without this... lol
             SetBossNumber(MAX_ENCOUNTER);
 
@@ -181,13 +185,35 @@ public:
 
         void SetData(uint32 type, uint32 data)
         {
+            if (type >= MAX_TYPES)
+                return;
+
             SetData_trial_of_the_king(type, data);
             SetData_xin_the_weaponmaster(type, data);
+
+            m_auiEncounter[type] = data;
+
+            if (data == DONE)
+                SaveToDB();
         }
 
-        uint32 GetData(uint32 /*type*/)
+        std::string GetSaveData()
         {
-            return 0;
+            std::ostringstream saveStream;
+            saveStream << m_auiEncounter[0] << ' ' << m_auiEncounter[1] << ' ' << m_auiEncounter[2] << ' '
+                       << m_auiEncounter[3] << ' ' << m_auiEncounter[4] << ' ' << m_auiEncounter[5] << ' '
+                       << m_auiEncounter[6] << ' ' << m_auiEncounter[7] << ' ' << m_auiEncounter[8] << ' '
+                       << m_auiEncounter[9] << ' ' << m_auiEncounter[10] << ' ' << m_auiEncounter[11] << ' '
+                       << m_auiEncounter[12] << ' ' << m_auiEncounter[13];
+            return saveStream.str();
+        }
+
+        uint32 GetData(uint32 type)
+        {
+            if (type >= MAX_TYPES)
+                return 0;
+
+            return m_auiEncounter[type];
         }
 
         uint64 GetData64(uint32 uiType)
@@ -551,8 +577,31 @@ public:
                     break;
             }
         }
-    };
 
+        void Load(const char* chrIn)
+        {
+            if (!chrIn)
+            {
+                OUT_LOAD_INST_DATA_FAIL;
+                return;
+            }
+
+            OUT_LOAD_INST_DATA(chrIn);
+            std::istringstream loadStream(chrIn);
+
+            loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3]
+                >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6] >> m_auiEncounter[7]
+                >> m_auiEncounter[8] >> m_auiEncounter[9] >> m_auiEncounter[10] >> m_auiEncounter[11]
+                >> m_auiEncounter[12] >> m_auiEncounter[13];
+
+            // Do not load an encounter as "In Progress" - reset it instead.
+            for (uint8 i = 0; i < MAX_TYPES; ++i)
+                if (m_auiEncounter[i] == IN_PROGRESS)
+                    m_auiEncounter[i] = NOT_STARTED;
+
+            OUT_LOAD_INST_DATA_COMPLETE;
+        }
+    };
 };
 
 class go_mogushan_palace_temp_portal : public GameObjectScript
@@ -562,6 +611,9 @@ public:
 
     bool OnGossipHello(Player* player, GameObject* go)
     {
+        if (go->GetInstanceScript() && go->GetInstanceScript()->GetData(TYPE_GEKKAN) != DONE)
+            return true;
+
         if (go->GetPositionZ() < 0.0f)
             player->NearTeleportTo(go->GetPositionX(), go->GetPositionY(), 22.31f, go->GetOrientation());
         else

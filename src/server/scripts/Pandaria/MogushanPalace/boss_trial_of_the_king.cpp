@@ -154,6 +154,12 @@ public:
             m_bEventGo = false;
             me->GetMotionMaster()->MoveTargetedHome();
             SetCanSeeEvenInPassiveMode(true);
+
+            if (me->GetInstanceScript() && me->GetInstanceScript()->GetData(TYPE_TRIAL_CHEST) == DONE)
+            {
+                m_bEventGo = true;
+                me->SetVisible(false);
+            }
         }
 
         void MoveInLineOfSight(Unit* who)
@@ -567,6 +573,7 @@ public:
         {
             me->SetWalk(false);
             status = STATUS_ATTACK_PLAYER;
+            m_uiKickCooldownTimer = 0;
             me->SetReactState(REACT_AGGRESSIVE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
             DoCast(auiGruntScaleSpells[urand(0, 2)]);
@@ -626,18 +633,20 @@ public:
         void MoveInLineOfSight(Unit* pWho)
         {
             if (pWho->GetTypeId() == TYPEID_PLAYER && pWho->GetAreaId() == 6471
-                && me->GetDistance2d(pWho) < 2.0f
-                && pWho->isInFront(me)
-                && status != STATUS_ATTACK_GRUNTS
-                && pWho->GetPositionZ() <= (me->GetPositionZ() + 4.f))
+                    && status != STATUS_ATTACK_GRUNTS
+                    && me->GetDistance2d(pWho) < 2.0f
+                    && pWho->isInFront(me)
+                    && pWho->GetPositionZ() <= (me->GetPositionZ() + 3.f))
             {
                 if (me->isMoving() || m_uiKickCooldownTimer)
                     return;
 
+                m_uiKickCooldownTimer = 1 * IN_MILLISECONDS;
+
                 DoCast(pWho, SPELL_GRUNT_KNOCK_2, true);
                 pWho->CastSpell(pWho, SPELL_GRUNT_KNOCK, true);
 
-                if (urand(0,2))
+                if (urand(0, 2))
                     Talk(TALK_00, pWho->GetGUID());
             }
 
@@ -647,8 +656,10 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if (m_uiKickCooldownTimer)
+            if (m_uiKickCooldownTimer > diff)
                 m_uiKickCooldownTimer -= diff;
+            else
+                m_uiKickCooldownTimer = 0;
 
             events.Update(diff);
 
@@ -1168,7 +1179,7 @@ public:
                     events.ScheduleEvent(EVENT_TALK_1, 10000);
 
                     if (auto const script = me->GetInstanceScript())
-                        script->SetData(TYPE_TRIAL_CHEST, 0);
+                        script->SetData(TYPE_TRIAL_CHEST, DONE);
                     break;
             }
         }

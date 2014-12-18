@@ -279,6 +279,9 @@ public:
             Talk(EMOTE_DEATH);
 
             DeactivateWeapons();
+
+            if (auto const script = me->GetInstanceScript())
+                script->SetData(TYPE_XIN, DONE);
         }
 
         void UpdateAI(const uint32 diff)

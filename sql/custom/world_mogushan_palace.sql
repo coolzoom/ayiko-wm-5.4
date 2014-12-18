@@ -1126,7 +1126,7 @@ UPDATE `creature_template` SET `ScriptName` = "mob_whirling_dervish", faction_a 
 UPDATE `creature_template` SET `ScriptName` = "npc_glintrok_scout_2" WHERE `entry` = 61399;
 UPDATE `creature_template` SET `ScriptName` = "npc_fire_ring_trigger", speed_walk = 0.75, speed_run = 0.75, speed_fly = 0.75 WHERE `entry` = 61499;
 UPDATE `creature_template` SET `ScriptName` = "npc_animated_axe" WHERE `entry` = 61451;
-
+UPDATE `creature_template` SET `flags_extra` = 128 WHERE `entry` = 64250;
 
 UPDATE `creature_template` SET `ScriptName` = "mob_adepts" WHERE `entry` IN (61551, 61550, 61549);
 UPDATE `creature_template` SET `faction_h` = 1339, `faction_a` = 1339 WHERE entry IN (61550, 61449);
@@ -1134,11 +1134,18 @@ UPDATE `creature_template` SET `faction_h` = 1338, `faction_a` = 1338 WHERE entr
 UPDATE `creature_template` SET `faction_h` = 1340, `faction_a` = 1340 WHERE entry IN (61551, 61450);
 
 -- This fucks up the visual massively. Handled in script instead
-DELETE FROM `creature_template_aura` WHERE `entry` IN (61242, 61451, 61679, 61433);
-DELETE FROM `creature_template_bytes` WHERE `entry` IN (61242, 61451, 61679, 61433);
-DELETE FROM `creature_template_emote` WHERE `entry` IN (61242, 61451, 61679, 61433);
-DELETE FROM `creature_template_mount` WHERE `entry` IN (61242, 61451, 61679, 61433);
-DELETE FROM `creature_template_path` WHERE `entry` IN (61242, 61451, 61679, 61433);
+DELETE FROM `creature_template_aura` WHERE `entry` IN (61242, 61451, 61679, 61433, 64250);
+DELETE FROM `creature_template_bytes` WHERE `entry` IN (61242, 61451, 61679, 61433, 64250);
+DELETE FROM `creature_template_emote` WHERE `entry` IN (61242, 61451, 61679, 61433, 64250);
+DELETE FROM `creature_template_mount` WHERE `entry` IN (61242, 61451, 61679, 61433, 64250);
+DELETE FROM `creature_template_path` WHERE `entry` IN (61242, 61451, 61679, 61433, 64250);
+
+INSERT INTO `creature_template_bytes` (entry, `index`, bytes) VALUES
+(64250, 0, 50331648),
+(64250, 1, 1);
+
+INSERT INTO `creature_template_aura` (entry, aura) VALUES
+(64250, 125313);
 
 DELETE FROM `gameobject_template` WHERE `entry` IN (214520, 400003);
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `Data0`, `Data1`, `Data2`, `Data3`, `Data4`, `Data5`, `Data6`, `Data7`, `Data8`, `Data9`, `Data10`, `Data11`, `Data12`, `Data13`, `Data14`, `Data15`, `Data16`, `Data17`, `Data18`, `Data19`, `Data20`, `Data21`, `Data22`, `Data23`, `Data24`, `Data25`, `Data26`, `Data27`, `Data28`, `Data29`, `Data30`, `Data31`, `size`, `unkInt32`, `WDBVerified`) VALUES
@@ -1225,7 +1232,7 @@ REPLACE INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event
 (61945, 0, 2, 0, 0, 0, 100, 0, 5000,  15000, 15000, 25000, 11, 123646, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Gurthan Iron Maw cast Intimidation'),
 (61947, 0, 0, 0, 0, 0, 100, 0, 10000, 10000, 20000, 25000, 11, 123652, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Kargesh Ribcrusher cast Whirlwind'),
 (61947, 0, 1, 0, 0, 0, 100, 0, 3000 , 6000,  10000, 14000, 11, 123649, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Kargesh Ribcrusher cast Mace Smash'),
-(61242, 0, 1, 0, 23, 0, 100, 0, 118958, 0, 6000, 8000, 11, 118958, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Glintrok Ironhide cast Iron Protector'),
+(61242, 0, 1, 0, 23, 0, 100, 0, 118958, 0, 6000, 8000, 11, 118958, 3, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Glintrok Ironhide cast Iron Protector'),
 (61240, 0, 0, 0, 25, 0, 100, 0, 0, 0, 0, 0, 11, 118969, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Glintrok Skulker cast Stealth on Reset'),
 (61240, 0, 1, 0, 0, 0, 100, 0, 7000, 11000, 10000, 14000, 11, 118963, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Glintrok Skulker cast Shank'),
 (61216, 0, 0, 0, 0, 0, 100, 0, 6000, 10000, 14000, 19000, 11, 118903, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 'Glintrok Hexxer cast Hex of Lethargy'),
@@ -1244,16 +1251,116 @@ UPDATE `creature_template` SET `equipment_id` = `entry` WHERE `entry` IN (61239,
 
 UPDATE `creature` SET `orientation` = 1.570000 WHERE `id` = 61551;
 
-DELETE FROM gameobject_loot_template WHERE entry IN (214795, 42826);
+DELETE FROM gameobject_loot_template WHERE entry IN (214795, 42826, 42825);
 INSERT INTO gameobject_loot_template (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
-(42826, 85180, 7.14286, 1, 0, 1, 1),
-(42826, 85181, 9.52381, 1, 0, 1, 1),
-(42826, 85182, 7.14286, 1, 0, 1, 1),
-(42826, 85183, 19.0476, 1, 0, 1, 1),
-(42826, 85184, 7.14286, 1, 0, 1, 1);
+(42826, 85180, 0, 1, 1, 1, 1),
+(42826, 85181, 0, 1, 1, 1, 1),
+(42826, 85182, 0, 1, 1, 1, 1),
+(42826, 85183, 0, 1, 1, 1, 1),
+(42826, 85184, 0, 1, 1, 1, 1),
+(42826, 81245, 0, 2, 1, 1, 1),
+(42826, 81244, 0, 2, 1, 1, 1),
+(42826, 81242, 0, 2, 1, 1, 1),
+(42826, 81246, 0, 2, 1, 1, 1),
+(42826, 81243, 0, 2, 1, 1, 1),
+(42825, 81237, 20.5528, 2, 0, 1, 1),
+(42825, 81238, 20.8161, 2, 0, 1, 1),
+(42825, 81239, 21.3426, 2, 0, 1, 1),
+(42825, 81240, 18.9733, 2, 0, 1, 1),
+(42825, 81241, 0, 2, 0, 1, 1),
+(42825, 85175, 0, 1, 0, 1, 1),
+(42825, 85176, 19.0297, 1, 0, 1, 1),
+(42825, 85177, 20.1392, 1, 0, 1, 1),
+(42825, 85178, 20.3648, 1, 0, 1, 1),
+(42825, 85179, 22.3768, 1, 0, 1, 1);
 
 UPDATE `creature_template` set `ScriptName` = 'mob_glintrok_ironhide' WHERE `entry` = 61242;
 
 UPDATE creature_template SET lootid = 0 WHERE entry = 61243;
 DELETE FROM creature_loot_template WHERE entry = 61243;
 DELETE FROM reference_loot_template WHERE entry = 61243;
+
+DELETE FROM creature_loot_template WHERE entry IN (61398, 109019);
+INSERT INTO creature_loot_template (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
+(61398, 85185, 0, 1, 1, 1, 1),
+(61398, 85188, 0, 1, 1, 1, 1),
+(61398, 85187, 0, 1, 1, 1, 1),
+(61398, 85190, 0, 1, 1, 1, 1),
+(61398, 85189, 0, 1, 1, 1, 1),
+(61398, 85193, 0, 1, 2, 1, 1),
+(61398, 85191, 0, 1, 2, 1, 1),
+(61398, 85194, 0, 1, 2, 1, 1),
+(61398, 85192, 0, 1, 2, 1, 1),
+(61398, 85186, 0, 1, 2, 1, 1),
+(109019, 81248, 0, 2, 1, 1, 1),
+(109019, 81254, 0, 2, 1, 1, 1),
+(109019, 81251, 0, 2, 1, 1, 1),
+(109019, 81252, 0, 2, 1, 1, 1),
+(109019, 81257, 0, 2, 1, 1, 1),
+(109019, 81253, 0, 2, 2, 1, 1),
+(109019, 81247, 0, 2, 2, 1, 1),
+(109019, 81256, 0, 2, 2, 1, 1),
+(109019, 81255, 0, 2, 2, 1, 1),
+(109019, 81249, 0, 2, 2, 1, 1),
+(109019, 87542, 1, 2, 0, 1, 1);
+
+REPLACE INTO `creature_template`
+   (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `difficulty_entry_4`, `difficulty_entry_5`, `difficulty_entry_6`, `difficulty_entry_7`, `difficulty_entry_8`, `difficulty_entry_9`, `difficulty_entry_10`, `difficulty_entry_11`, `difficulty_entry_12`, `difficulty_entry_13`, `difficulty_entry_14`, `difficulty_entry_15`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `exp_unk`, `faction_A`, `faction_H`, `npcflag`, `npcflag2`, `speed_walk`, `speed_run`, `speed_fly`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `type_flags2`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `Health_mod`, `Mana_mod`, `Mana_mod_extra`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`)
+VALUES
+   (109000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 42065, 42447, 42448, 0, 'Gurthan Iron Maw', '', '', 0, 90, 90, 4, 0, 16, 16, 0, 0, 1, 1.14286, 1.14286, 1, 1, 6939, 9786, 0, 29269, 5, 2000, 2000, 1, 32832, 2048, 0, 127, 0, 0, 0, 0, 0, 0, 0, 1, 2162761, 0, 61945, 0, 0, 0, 0, 0, 0, 0, 0, 123647, 0, 123646, 120560, 0, 0, 0, 0, 0, 2086, 10000, 11000, 'SmartAI', 0, 3, 1, 3, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, '', 16048),
+   (109001, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 42062, 0, 0, 0, 'Harthak Stormcaller', '', '', 0, 90, 90, 4, 0, 16, 16, 0, 0, 0.888888, 0.952381, 1.14286, 1, 1, 7326, 9786, 0, 29946, 5, 2000, 2000, 2, 32832, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 270532680, 0, 61946, 61946, 0, 0, 0, 0, 0, 0, 0, 0, 121601, 120562, 123648, 0, 0, 0, 0, 0, 2086, 9800, 9900, 'SmartAI', 0, 3, 1, 3, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, '', 16048),
+   (109002, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 42063, 0, 0, 0, 'Kargesh Ribcrusher', '', '', 0, 90, 90, 4, 0, 16, 16, 0, 0, 0.888888, 0.952381, 1.14286, 1, 1, 6939, 9786, 0, 29269, 5, 2000, 2000, 1, 32832, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 270532680, 0, 61947, 61947, 0, 0, 0, 0, 0, 0, 0, 0, 123649, 123651, 123652, 0, 0, 0, 0, 0, 2086, 9900, 10000, 'SmartAI', 0, 3, 1, 3, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, '', 16048),
+   (109003, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 42063, 0, 0, 0, 'Kargesh Grunt', '', '', 0, 90, 90, 4, 0, 2562, 2562, 0, 0, 0.888888, 0.952381, 1.14286, 1, 1, 6939, 9786, 0, 29269, 3, 2000, 2000, 1, 33024, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 3145800, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 120160, 120201, 0, 0, 0, 0, 0, 0, 0, 2086, 0, 0, '', 0, 3, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'mob_adepts', 16048),
+   (109004, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 42062, 0, 0, 0, 'Harthak Adept', '', '', 0, 90, 90, 4, 0, 2561, 2561, 0, 0, 0.888888, 0.952381, 1.14286, 1, 1, 6939, 9786, 0, 29269, 3, 2000, 2000, 1, 33024, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 3145800, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 120201, 120160, 0, 0, 0, 0, 0, 0, 0, 2086, 0, 0, '', 0, 3, 1, 3, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'mob_adepts', 16048),
+   (109005, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 42061, 0, 0, 0, 'Gurthan Scrapper', '', '', 0, 90, 90, 4, 0, 2560, 2560, 0, 0, 0.888888, 0.952381, 1.14286, 1, 1, 6939, 9786, 0, 29269, 3, 2000, 2000, 1, 33024, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 3145800, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 120201, 120160, 0, 0, 0, 0, 0, 0, 0, 2086, 0, 0, '', 0, 3, 1, 3, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'mob_adepts', 16048),
+   (109006, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41917, 0, 0, 0, 'Glintrok Hexxer', '', '', 0, 91, 91, 4, 0, 16, 16, 0, 0, 1, 1.42857, 1.14286, 1, 1, 8922, 10164, 0, 33400, 5, 2000, 2000, 2, 32832, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 61216, 61216, 0, 0, 0, 0, 0, 0, 0, 118903, 0, 0, 0, 0, 0, 0, 0, 0, 2086, 10000, 11000, 'SmartAI', 0, 3, 1, 6, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 0, 0, 0, '', 16048),
+   (109007, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41919, 0, 0, 0, 'Glintrok Oracle', '', '', 0, 91, 91, 4, 0, 16, 16, 0, 0, 1, 1.42857, 1.14286, 1, 1, 8922, 10164, 0, 33400, 5, 2000, 2000, 2, 32832, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 61239, 61239, 0, 0, 0, 0, 0, 0, 0, 118940, 0, 0, 0, 0, 0, 0, 0, 0, 2086, 10000, 11000, 'SmartAI', 0, 3, 1, 6, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 0, 0, 0, '', 16048),
+   (109008, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41921, 0, 0, 0, 'Glintrok Skulker', '', '', 0, 91, 91, 4, 0, 16, 16, 0, 0, 1, 1.42857, 1.14286, 1, 1, 7107, 10452, 0, 30728, 5, 2000, 2000, 1, 32832, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 61240, 61240, 0, 0, 0, 0, 0, 0, 0, 0, 118963, 118969, 0, 0, 0, 0, 0, 0, 2086, 10000, 11000, 'SmartAI', 0, 3, 1, 7, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 0, 0, 0, '', 16048),
+   (109009, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41922, 0, 0, 0, 'Glintrok Ironhide', '', '', 0, 91, 91, 4, 0, 16, 16, 0, 0, 1, 1.42857, 1.14286, 1, 1, 7107, 10452, 0, 30728, 5, 2000, 2000, 1, 32832, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 61242, 61242, 0, 0, 0, 0, 0, 0, 0, 0, 118958, 0, 0, 0, 0, 0, 0, 0, 2086, 10000, 11000, 'SmartAI', 0, 3, 1, 8, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 0, 0, 0, '', 16048),
+   (109010, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41920, 0, 0, 0, 'Gekkan', '', '', 0, 92, 92, 4, 0, 16, 16, 0, 0, 1, 1.42857, 1.14286, 1, 1, 8321, 12024, 0, 35604, 5, 2000, 2000, 1, 32832, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 61243, 0, 0, 0, 0, 0, 0, 0, 0, 129262, 118988, 0, 0, 0, 0, 0, 0, 0, 2086, 0, 0, '', 0, 3, 1, 20, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 0, 0, 0, 'boss_gekkan', 16048),
+   (109011, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41923, 0, 0, 0, 'Glintrok Greenhorn', '', '', 0, 89, 90, 4, 0, 16, 16, 0, 0, 1, 1.42857, 1.14286, 1, 0, 7326, 9786, 0, 29946, 3, 2000, 2000, 2, 32768, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2086, 0, 0, '', 0, 3, 1, 0.5, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 0, 0, 0, '', 16048),
+   (109012, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41922, 0, 0, 0, 'Glintrok Ironhide', '', '', 0, 91, 91, 4, 0, 16, 16, 0, 0, 1, 1.42857, 1.14286, 1, 1, 7107, 10452, 0, 30728, 5, 2000, 2000, 1, 32832, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 118958, 0, 0, 0, 0, 0, 0, 0, 2086, 0, 0, '', 0, 3, 1, 8, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 0, 0, 0, 'mob_glintrok_ironhide', 16048),
+   (109013, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41921, 0, 0, 0, 'Glintrok Skulker', '', '', 0, 91, 91, 4, 0, 16, 16, 0, 0, 1, 1.42857, 1.14286, 1, 1, 7107, 10452, 0, 30728, 5, 2000, 2000, 1, 32832, 2048, 12, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 118963, 118969, 0, 0, 0, 0, 0, 0, 2086, 0, 0, '', 0, 3, 1, 7, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 0, 0, 0, 'mob_glintrok_skulker', 16048),
+   (109014, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41919, 0, 0, 0, 'Glintrok Oracle', '', '', 0, 91, 91, 4, 0, 16, 16, 0, 0, 1, 1.42857, 1.14286, 1, 1, 8922, 10164, 0, 33400, 5, 2000, 2000, 2, 32832, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 118940, 0, 0, 0, 0, 0, 0, 0, 0, 2086, 0, 0, '', 0, 3, 1, 6, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 0, 0, 0, 'mob_glintrok_oracle', 16048),
+   (109015, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41917, 0, 0, 0, 'Glintrok Hexxer', '', '', 0, 91, 91, 4, 0, 16, 16, 0, 0, 1, 1.42857, 1.14286, 1, 1, 8922, 10164, 0, 33400, 5, 2000, 2000, 2, 32832, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 118903, 0, 0, 0, 0, 0, 0, 0, 0, 2086, 0, 0, '', 0, 3, 1, 6, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 0, 0, 0, 'mob_glintrok_hexxer', 16048),
+   (109016, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41233, 0, 0, 0, 'Quilen Guardian', '', '', 0, 91, 91, 4, 0, 16, 16, 0, 0, 1, 1.14286, 1.14286, 1, 1, 7326, 9786, 0, 29946, 5, 1500, 2000, 2, 32832, 2048, 0, 127, 0, 0, 0, 0, 0, 0, 0, 1, 2162761, 0, 61387, 0, 0, 0, 0, 0, 0, 0, 0, 122962, 0, 121190, 0, 0, 0, 0, 0, 0, 2086, 14000, 15000, 'SmartAI', 0, 3, 1, 4, 7, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, '', 16048),
+   (109017, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41982, 0, 0, 0, 'Kargesh Highguard', '', '', 0, 91, 92, 4, 0, 16, 16, 0, 0, 0.888888, 0.952381, 1.14286, 1, 1, 7326, 9786, 0, 29946, 5, 1500, 2000, 2, 32832, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 61389, 61389, 0, 0, 0, 0, 0, 0, 0, 121185, 121173, 0, 0, 0, 0, 0, 0, 0, 2086, 9900, 10000, 'SmartAI', 0, 3, 1, 6, 7, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, '', 16048),
+   (109018, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41984, 0, 0, 0, 'Harthak Flameseeker', '', '', 0, 91, 92, 4, 0, 16, 16, 0, 0, 0.888888, 0.952381, 1.14286, 1, 1, 7326, 9786, 0, 29946, 5, 1500, 2000, 2, 32832, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 61392, 61392, 0, 0, 0, 0, 0, 0, 0, 121174, 121165, 0, 121182, 0, 0, 0, 0, 0, 2086, 10000, 11000, 'SmartAI', 0, 3, 1, 3, 7, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, '', 16048),
+   (109019, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41987, 0, 0, 0, 'Xin the Weaponmaster', '', '', 0, 92, 92, 4, 0, 14, 14, 0, 0, 0.8, 2, 1.14286, 1, 1, 9352, 12526, 0, 38286, 5, 2000, 2000, 2, 32832, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2149580872, 0, 109019, 0, 0, 0, 0, 0, 0, 0, 0, 119684, 122959, 0, 0, 0, 0, 0, 0, 0, 2086, 450000, 460000, '', 0, 3, 1, 35, 20, 1, 1, 0, 0, 0, 0, 0, 0, 0, 181, 1, 0, 0, 0, 'boss_xin_the_weaponmaster', 16048),
+   (109020, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41923, 0, 0, 0, 'Glintrok Scout', '', '', 0, 90, 90, 4, 0, 14, 14, 0, 0, 1, 1.42857, 1.14286, 1, 0, 7326, 9786, 0, 29946, 3, 2000, 2000, 2, 32768, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2086, 0, 0, 'SmartAI', 0, 3, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 0, 0, 0, '', 16048),
+   (109021, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4735, 0, 0, 0, 'Giant Cave Bat', '', '', 0, 90, 90, 4, 0, 190, 190, 0, 0, 1, 1.14286, 1.14286, 1, 0, 6939, 9786, 0, 29269, 1, 2000, 2000, 1, 32768, 2048, 0, 24, 0, 0, 0, 0, 0, 0, 0, 1, 1074790465, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2086, 0, 0, 'SmartAI', 0, 3, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, '', 16048),
+   (109022, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 42058, 0, 0, 0, 'Kuai the Brute', '', '', 0, 92, 92, 4, 0, 14, 14, 0, 0, 0.888888, 0.952381, 1.14286, 1, 1, 8321, 12024, 0, 35604, 5, 1500, 2000, 1, 33088, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 270532680, 0, 61442, 0, 0, 0, 0, 0, 0, 0, 0, 119922, 0, 0, 0, 0, 0, 0, 0, 0, 2086, 0, 0, '', 0, 3, 1, 15, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'boss_kuai_the_brute', 16048),
+   (109023, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 42059, 0, 0, 0, 'Ming the Cunning', '', '', 0, 92, 92, 4, 0, 14, 14, 0, 0, 0.888888, 0.952381, 1.14286, 1, 1, 9352, 12526, 0, 38286, 5, 2000, 2000, 2, 33088, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 270532680, 0, 61444, 0, 0, 0, 0, 0, 0, 0, 0, 123654, 120100, 119981, 0, 0, 0, 0, 0, 0, 2086, 0, 0, '', 0, 3, 1, 15, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'boss_ming_the_cunning', 16048),
+   (109024, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 42060, 0, 0, 0, 'Haiyan the Unstoppable', '', '', 0, 92, 92, 4, 0, 14, 14, 0, 0, 0.888888, 0.952381, 1.14286, 1, 1, 8321, 12024, 0, 35604, 5, 2000, 2000, 1, 33088, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 270532680, 0, 61445, 0, 0, 0, 0, 0, 0, 0, 0, 120201, 120167, 120160, 120195, 123655, 0, 0, 0, 0, 2086, 0, 0, '', 0, 3, 1, 15, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'boss_haiyan_the_unstoppable', 16048),
+   (109025, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41987, 0, 0, 0, 'Xin the Weaponmaster', '', '', 0, 92, 92, 4, 0, 2502, 2502, 0, 0, 0.8, 2, 1.14286, 1, 1, 9352, 12526, 0, 38286, 3, 2000, 2000, 2, 33600, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 3145800, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2086, 0, 0, '', 0, 3, 1, 45, 20, 1, 1, 0, 0, 0, 0, 0, 0, 0, 181, 1, 0, 0, 0, 'mob_xian_the_weaponmaster_trigger', 16048),
+   (109026, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43546, 0, 0, 0, 'Glintrok Scout', '', '', 0, 90, 90, 4, 0, 14, 14, 0, 0, 1, 2.14286, 1.14286, 1, 0, 7326, 9786, 0, 29946, 1, 2000, 2000, 2, 33024, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2086, 0, 0, '', 0, 3, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 188, 1, 0, 0, 0, '', 16048),
+   (109027, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 42061, 0, 0, 0, 'Gurthan Swiftblade', '', '', 0, 91, 92, 4, 0, 16, 16, 0, 0, 0.888888, 0.952381, 1.14286, 1, 1, 7326, 9786, 0, 29946, 5, 1500, 2000, 2, 32832, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 65402, 65402, 0, 0, 0, 0, 0, 0, 0, 128239, 0, 128238, 0, 0, 0, 0, 0, 0, 2086, 10000, 11000, 'SmartAI', 0, 3, 1, 3, 7, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, '', 16048);
+
+UPDATE `creature_template` SET `difficulty_entry_2` = 109000 WHERE `entry` = 61945;
+UPDATE `creature_template` SET `difficulty_entry_2` = 109001 WHERE `entry` = 61946;
+UPDATE `creature_template` SET `difficulty_entry_2` = 109002 WHERE `entry` = 61947;
+UPDATE `creature_template` SET `difficulty_entry_2` = 109003 WHERE `entry` IN (61551, 61450);
+UPDATE `creature_template` SET `difficulty_entry_2` = 109004 WHERE `entry` IN (61449, 61550);
+UPDATE `creature_template` SET `difficulty_entry_2` = 109005 WHERE `entry` IN (61549, 61447);
+UPDATE `creature_template` SET `difficulty_entry_2` = 109006 WHERE `entry` = 61216;
+UPDATE `creature_template` SET `difficulty_entry_2` = 109007 WHERE `entry` = 61239;
+UPDATE `creature_template` SET `difficulty_entry_2` = 109008 WHERE `entry` = 61240;
+UPDATE `creature_template` SET `difficulty_entry_2` = 109009 WHERE `entry` = 61242;
+UPDATE `creature_template` SET `difficulty_entry_2` = 109010 WHERE `entry` = 61243;
+UPDATE `creature_template` SET `difficulty_entry_2` = 109011 WHERE `entry` = 61247;
+UPDATE `creature_template` SET `difficulty_entry_2` = 109012 WHERE `entry` = 61337;
+UPDATE `creature_template` SET `difficulty_entry_2` = 109013 WHERE `entry` = 61338;
+UPDATE `creature_template` SET `difficulty_entry_2` = 109014 WHERE `entry` = 61339;
+UPDATE `creature_template` SET `difficulty_entry_2` = 109015 WHERE `entry` = 61340;
+UPDATE `creature_template` SET `difficulty_entry_2` = 109016 WHERE `entry` = 61387;
+UPDATE `creature_template` SET `difficulty_entry_2` = 109017 WHERE `entry` = 61389;
+UPDATE `creature_template` SET `difficulty_entry_2` = 109018 WHERE `entry` = 61392;
+UPDATE `creature_template` SET `difficulty_entry_2` = 109019 WHERE `entry` = 61398;
+UPDATE `creature_template` SET `difficulty_entry_2` = 109020 WHERE `entry` = 61399;
+UPDATE `creature_template` SET `difficulty_entry_2` = 109021 WHERE `entry` = 61415;
+UPDATE `creature_template` SET `difficulty_entry_2` = 109022 WHERE `entry` = 61442;
+UPDATE `creature_template` SET `difficulty_entry_2` = 109023 WHERE `entry` = 61444;
+UPDATE `creature_template` SET `difficulty_entry_2` = 109024 WHERE `entry` = 61445;
+UPDATE `creature_template` SET `difficulty_entry_2` = 109025 WHERE `entry` = 61884;
+UPDATE `creature_template` SET `difficulty_entry_2` = 109026 WHERE `entry` = 64243;
+UPDATE `creature_template` SET `difficulty_entry_2` = 109027 WHERE `entry` = 65402;

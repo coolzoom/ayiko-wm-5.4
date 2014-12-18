@@ -167,6 +167,9 @@ public:
             }
 
             Talk(TALK_DEATH);
+
+            if (auto const script = me->GetInstanceScript())
+                script->SetData(TYPE_GEKKAN, DONE);
         }
 
         void KilledUnit(Unit* /*u*/)

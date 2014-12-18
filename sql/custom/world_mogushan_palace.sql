@@ -1364,3 +1364,5 @@ UPDATE `creature_template` SET `difficulty_entry_2` = 109024 WHERE `entry` = 614
 UPDATE `creature_template` SET `difficulty_entry_2` = 109025 WHERE `entry` = 61884;
 UPDATE `creature_template` SET `difficulty_entry_2` = 109026 WHERE `entry` = 64243;
 UPDATE `creature_template` SET `difficulty_entry_2` = 109027 WHERE `entry` = 65402;
+
+UPDATE `creature_template` SET `mechanic_immune_mask` = 650854399 WHERE `entry` IN (61444, 61442, 61445, 61243, 61398, 61453, 109023, 109022, 109024, 109010, 109019);

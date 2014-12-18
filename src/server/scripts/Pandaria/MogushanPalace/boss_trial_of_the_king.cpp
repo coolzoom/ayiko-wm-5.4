@@ -321,6 +321,12 @@ public:
 
         bool m_bIsMovingHome;
 
+        void InitializeAI() final
+        {
+            Reset();
+            SetImmuneToPullPushEffects(true);
+        }
+
         void EnterEvadeMode() override
         {
             _EnterEvadeMode();
@@ -743,6 +749,12 @@ public:
         uint64 pet_guid;
         bool m_bIsMovingHome;
 
+        void InitializeAI() final
+        {
+            Reset();
+            SetImmuneToPullPushEffects(true);
+        }
+
         void EnterEvadeMode() override
         {
             _EnterEvadeMode();
@@ -898,6 +910,12 @@ public:
         }
         EventMap events;
 
+        void InitializeAI() final
+        {
+            Reset();
+            SetImmuneToPullPushEffects(true);
+        }
+
         void Reset()
         {
             DoAction(ACTION_ATTACK_STOP);
@@ -1002,6 +1020,12 @@ public:
         }
 
         bool m_bIsMovingHome;
+
+        void InitializeAI() final
+        {
+            Reset();
+            SetImmuneToPullPushEffects(true);
+        }
 
         void EnterCombat(Unit* /*unit*/)
         {

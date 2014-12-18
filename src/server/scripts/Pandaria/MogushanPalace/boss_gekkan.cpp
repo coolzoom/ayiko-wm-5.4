@@ -66,6 +66,12 @@ public:
 
         bool m_bYelled;
 
+        void InitializeAI() final
+        {
+            Reset();
+            SetImmuneToPullPushEffects(true);
+        }
+
         void InitializeGekkan()
         {
             m_bYelled = false;

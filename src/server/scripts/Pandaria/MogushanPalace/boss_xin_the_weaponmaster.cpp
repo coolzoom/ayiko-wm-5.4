@@ -118,6 +118,12 @@ public:
         InstanceScript* pInstance;
         bool m_bHasYelled;
 
+        void InitializeAI() final
+        {
+            Reset();
+            SetImmuneToPullPushEffects(true);
+        }
+
         void Reset()
         {
             events.Reset();

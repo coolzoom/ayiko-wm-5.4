@@ -268,6 +268,8 @@ struct ScriptedAI : public CreatureAI
         return heroic25;
     }
 
+    void SetImmuneToPullPushEffects(bool immune);
+
     private:
         Difficulty _difficulty;
         uint32 _evadeCheckCooldown;

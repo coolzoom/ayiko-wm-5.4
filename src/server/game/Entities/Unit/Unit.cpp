@@ -2815,19 +2815,13 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spell)
     }
 
     SpellSchoolMask schoolMask = spell->GetSchoolMask();
-    // PvP - PvE spell misschances per leveldif > 2
-    int32 lchance = victim->GetTypeId() == TYPEID_PLAYER ? 7 : 11;
     int32 thisLevel = getLevelForTarget(victim);
     if (GetTypeId() == TYPEID_UNIT && ToCreature()->isTrigger())
         thisLevel = std::max<int32>(thisLevel, spell->SpellLevel);
     int32 leveldif = int32(victim->getLevelForTarget(this)) - thisLevel;
 
     // Base hit chance from attacker and victim levels
-    int32 modHitChance;
-    if (leveldif < 3)
-        modHitChance = 96 - leveldif;
-    else
-        modHitChance = 94 - (leveldif - 2) * lchance;
+    float modHitChance = 97 - 1.5f * leveldif;
 
     // Spellmod from SPELLMOD_RESIST_MISS_CHANCE
     if (Player* modOwner = GetSpellModOwner())
@@ -2845,16 +2839,16 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spell)
                 modHitChance += cloak->GetAmount();
     }
 
-    int32 HitChance = modHitChance * 100;
+    float HitChance = modHitChance * 100;
     // Increase hit chance from attacker SPELL_AURA_MOD_SPELL_HIT_CHANCE and attacker ratings
-    HitChance += int32(m_modSpellHitChance * 100.0f);
+    HitChance += m_modSpellHitChance * 100.0f;
 
-    if (HitChance < 100)
-        HitChance = 100;
-    else if (HitChance > 10000)
+    if (HitChance < 100.f)
+        HitChance = 100.f;
+    else if (HitChance > 10000.f)
         HitChance = 10000;
 
-    int32 tmp = 10000 - HitChance;
+    int32 tmp = int32(10000 - HitChance);
 
     int32 rand = irand(0, 10000);
 

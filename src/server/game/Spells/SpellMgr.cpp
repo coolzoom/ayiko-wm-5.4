@@ -1019,7 +1019,7 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const* spellPr
         active = true;
 
     // Always trigger for this
-    if (procFlags & (PROC_FLAG_KILLED | PROC_FLAG_KILL | PROC_FLAG_DEATH))
+    if (procFlags & (PROC_FLAG_KILLED | PROC_FLAG_KILL | PROC_FLAG_DEATH | PROC_FLAG_JUMPING))
         return true;
 
     if (spellProcEvent)     // Exist event data
@@ -1115,7 +1115,7 @@ bool SpellMgr::CanSpellTriggerProcOnEvent(SpellProcEntry const& procEntry, ProcE
                 return false;
 
     // always trigger for these types
-    if (eventInfo.GetTypeMask() & (PROC_FLAG_KILLED | PROC_FLAG_KILL | PROC_FLAG_DEATH))
+    if (eventInfo.GetTypeMask() & (PROC_FLAG_KILLED | PROC_FLAG_KILL | PROC_FLAG_DEATH | PROC_FLAG_JUMPING))
         return true;
 
     // check school mask (if set) for other trigger types
@@ -5811,6 +5811,23 @@ void SpellMgr::LoadSpellCustomAttr()
                     break;
                 case 124277: // Blade Rush Summon forcecast
                     spellInfo->MaxAffectedTargets = 1;
+                    break;
+                case 121442: // Caustic Pitch
+                    spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DEST;
+                    spellInfo->Effects[EFFECT_0].TargetB = 0;
+                    spellInfo->ExplicitTargetMask = TARGET_FLAG_UNIT_MASK;
+                    break;
+                case 121441: // Caustic Pitch
+                    spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_TARGET_ANY;
+                    spellInfo->Effects[EFFECT_0].TargetB = 0;
+                    spellInfo->AttributesEx3 &= ~SPELL_ATTR3_ONLY_TARGET_PLAYERS;
+                    break;
+                case 121448:
+                    spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_APPLY_AURA;
+                    spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_MOD_STUN;
+                    spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_CASTER;
+                    spellInfo->Effects[EFFECT_0].TargetB = 0;
+                    spellInfo->ExplicitTargetMask = TARGET_FLAG_UNIT_MASK;
                     break;
                     // Siege of Niuzao temple end
                 default:

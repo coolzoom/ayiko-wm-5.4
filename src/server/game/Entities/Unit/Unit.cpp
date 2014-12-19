@@ -11788,6 +11788,22 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
     // Custom scripted damage
     switch (spellProto->SpellFamilyName)
     {
+        case SPELLFAMILY_WARRIOR:
+        {
+            // Shield Slam
+            if (spellProto->Id == 23922)
+            {
+                // This formula is taken directly from SpellDescriptionVariables
+                float pct = 0.35f;
+                if (getLevel() >= 80)
+                    pct += 0.4f;
+                if (getLevel() >= 85)
+                    pct += 0.75f;
+
+                DoneTotal += (GetTotalAttackPowerValue(BASE_ATTACK) * pct);
+            }
+            break;
+        }
         case SPELLFAMILY_ROGUE:
         {
             // Revealing Strike for direct damage abilities

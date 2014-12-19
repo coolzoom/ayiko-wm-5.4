@@ -895,7 +895,7 @@ VALUES
    (@GUID + 779, 64250, 994, 6182, 6471, 3, 128, 0, 0, -4214.22, -2667.32, 21.0838, 1.53953, 300, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
    (@GUID + 780, 61392, 994, 6182, 6474, 2, 1, 0, 61392, -4594.01, -2622.11, 22.1127, 3.13609, 7200, 0, 0, 644955, 65170, 0, 0, 0, 32832, 0, 0);
 
-UPDATE creature SET `spawnMask` = 15 WHERE `map` = 994;
+UPDATE creature SET `spawnMask` = 6 WHERE `map` = 994;
 DELETE FROM creature WHERE id = 61415; -- Get rid of cave bats
 
 REPLACE INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`)
@@ -1078,9 +1078,9 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 (@GUID + 58, 214813, 994, 3, 1,  -4424.306, -2687.247, -39.21358, 4.704598, 0, 0, 0, 1, 7200, 255, 1), -- 214813 (Area: 6182)
 (@GUID + 59, 214827, 994, 3, 1,  -4425.082, -2690.228, -39.21357, 0.1699049, 0, 0, 0, 1, 7200, 255, 1), -- 214827 (Area: 6182)
 (@GUID + 60, 212095, 994, 3, 1,  -4509.656, -2687.172, 31.96922, 1.567914, 0, 0, 0, 1, 7200, 255, 1), -- 212095 (Area: 6182)
-(@GUID + 61, 400003, 994, 15, 1, -4399.4, -2739.69, -39.9803, 4.70622, 0, 0, 0.709283, -0.704924, 300, 0, 1);
+(@GUID + 61, 400003, 994, 3, 1, -4399.4, -2739.69, -39.9803, 4.70622, 0, 0, 0.709283, -0.704924, 300, 0, 1);
 
-UPDATE gameobject SET `spawnMask` = 15 WHERE `map` = 994;
+UPDATE gameobject SET `spawnMask` = 6 WHERE `map` = 994;
 
 REPLACE INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`,  `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`,
  `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
@@ -1226,3 +1226,5 @@ UPDATE `creature_template` SET `difficulty_entry_1` = 109026, `difficulty_entry_
 UPDATE `creature_template` SET `difficulty_entry_1` = 109027, `difficulty_entry_2` = 0 WHERE `entry` = 65402;
 
 UPDATE `creature_template` SET `mechanic_immune_mask` = 650854399 WHERE `entry` IN (61444, 61442, 61445, 61243, 61398, 61453, 109023, 109022, 109024, 109010, 109019);
+
+DELETE FROM disables WHERE sourceType = 2 AND entry = 994;

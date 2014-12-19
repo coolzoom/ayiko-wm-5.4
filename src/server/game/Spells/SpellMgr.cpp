@@ -3219,6 +3219,9 @@ void SpellMgr::LoadSpellCustomAttr()
 
             switch (spellInfo->Id)
             {
+                case 114232: // Sanctified Wrath effect
+                    spellInfo->Attributes |= SPELL_ATTR0_PASSIVE | SPELL_ATTR0_HIDDEN_CLIENTSIDE;
+                    break;
                 case 137080: // "custom" anniversary sanctuary spell
                     spellInfo->Attributes |= SPELL_ATTR0_PASSIVE | SPELL_ATTR0_HIDDEN_CLIENTSIDE;
                     spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(21);
@@ -4125,11 +4128,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 108212:// Burst of Speed
                 case 107079:// Quaking Palm
                     spellInfo->AttributesEx |= SPELL_ATTR1_NOT_BREAK_STEALTH;
-                    break;
-                case 31224: // Cloak of Shadows
-                    spellInfo->Effects[0].BasePoints = -200;
-                    spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE;
-                    spellInfo->Effects[0].ValueMultiplier = -200;
                     break;
                 case 137619:// Marked for Death
                     spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
@@ -5784,6 +5782,12 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 8676: // Ambush (damage increased in 5.4)
                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_REQ_CASTER_BEHIND_TARGET;
                     spellInfo->Effects[EFFECT_1].BasePoints = 365;
+                    break;
+                case 22482: // Blade Flurry proc
+                    spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
+                    spellInfo->Effects[EFFECT_0].ChainTarget = 0;
+                    spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_TARGET_ENEMY;
+                    spellInfo->Effects[EFFECT_0].TargetB = TARGET_UNIT_DEST_AREA_ENEMY;
                     break;
                 default:
                     break;

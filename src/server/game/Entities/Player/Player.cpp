@@ -1791,6 +1791,12 @@ void Player::Update(uint32 p_time)
                         CastSpell(victim, 140308, true);
                         resetAttackTimer(BASE_ATTACK);
                     }
+                    // Shadow Blade - Main Hand
+                    else if (HasAura(121471))
+                    {
+                        CastSpell(victim, 121473, true);
+                        resetAttackTimer(BASE_ATTACK);
+                    }
                 }
             }
 
@@ -1822,6 +1828,12 @@ void Player::Update(uint32 p_time)
                     else if (HasAura(137586))
                     {
                         CastSpell(victim, 140309, true);
+                        resetAttackTimer(OFF_ATTACK);
+                    }
+                    // Shadow Blades - Off Hand
+                    else if (HasAura(121471))
+                    {
+                        CastSpell(victim, 121474, true);
                         resetAttackTimer(OFF_ATTACK);
                     }
                 }
@@ -6559,23 +6571,13 @@ float Player::GetExpertiseDodgeOrParryReduction(WeaponAttackType attType) const
     return 0.0f;
 }
 
-float Player::OCTRegenMPPerSpirit()
+float Player::OCTRegenMPPerSpirit() const
 {
-    uint8 level = getLevel();
-    uint32 pclass = getClass();
+    auto const level = std::min<uint8>(getLevel(), GT_MAX_LEVEL);
+    auto const ratio = sGtRegenMPPerSptStore.LookupEntry((getClass() - 1) * GT_MAX_LEVEL + level - 1);
 
-    if (level > GT_MAX_LEVEL)
-        level = GT_MAX_LEVEL;
-
-//    GtOCTRegenMPEntry     const* baseRatio = sGtOCTRegenMPStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
-    GtRegenMPPerSptEntry  const* moreRatio = sGtRegenMPPerSptStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
-    if (moreRatio == NULL)
-        return 0.0f;
-
-    // Formula get from PaperDollFrame script
-    float spirit    = GetStat(STAT_SPIRIT);
-    float regen     = spirit * moreRatio->ratio;
-    return regen;
+    // Formula from PaperDollFrame script
+    return (ratio != nullptr) ? GetStat(STAT_SPIRIT) * ratio->ratio : 0.0f;
 }
 
 void Player::ApplyRatingMod(CombatRating cr, int32 value, bool apply)

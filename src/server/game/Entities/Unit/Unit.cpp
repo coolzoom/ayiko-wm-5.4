@@ -2838,6 +2838,11 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spell)
     {
         // Chance hit from victim SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE auras
         modHitChance += victim->GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE, schoolMask);
+
+        // Cloak of Shadows hack due to schoolMask handling
+        if (spell->GetSchoolMask() == SPELL_SCHOOL_MASK_NORMAL && spell->DmgClass == SPELL_DAMAGE_CLASS_MAGIC)
+            if (auto cloak = victim->GetAuraEffect(31224, EFFECT_0))
+                modHitChance += cloak->GetAmount();
     }
 
     int32 HitChance = modHitChance * 100;
@@ -11783,6 +11788,22 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
     // Custom scripted damage
     switch (spellProto->SpellFamilyName)
     {
+        case SPELLFAMILY_WARRIOR:
+        {
+            // Shield Slam
+            if (spellProto->Id == 23922)
+            {
+                // This formula is taken directly from SpellDescriptionVariables
+                float pct = 0.35f;
+                if (getLevel() >= 80)
+                    pct += 0.4f;
+                if (getLevel() >= 85)
+                    pct += 0.75f;
+
+                DoneTotal += (GetTotalAttackPowerValue(BASE_ATTACK) * pct);
+            }
+            break;
+        }
         case SPELLFAMILY_ROGUE:
         {
             // Revealing Strike for direct damage abilities

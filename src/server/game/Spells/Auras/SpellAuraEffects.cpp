@@ -7297,15 +7297,13 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
         // Curse of Agony damage-per-tick calculation
         if (GetSpellInfo()->Id == 980)
         {
-            uint32 totalTick = GetTotalTicks();
+            uint32 stackAmount = GetBase()->GetStackAmount();
             // 1..4 ticks, 1/2 from normal tick damage
-            if (m_tickNumber <= totalTick / 3)
-                damage = damage/2;
+            if (stackAmount <= 5)
+                damage /= 2;
             // 9..12 ticks, 3/2 from normal tick damage
-            else if (m_tickNumber > totalTick * 2 / 3)
-                damage += (damage+1)/2;           // +1 prevent 0.5 damage possible lost at 1..4 ticks
-            // 5..8 ticks have normal tick damage
-            damage /= 10; // Prevent insane damage with 10 stacks
+            else if (stackAmount > 9)
+                damage *= 1.5;
         }
         // Malefic Grasp
         if (GetSpellInfo()->Id == 103103)
@@ -7379,70 +7377,41 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
             if (m_tickNumber == 2 || m_tickNumber == 4 || m_tickNumber == 6)
                 caster->SetPower(POWER_SOUL_SHARDS, caster->GetPower(POWER_SOUL_SHARDS) + 100);
 
-            // if target is below 20% of life ...
             if (target->GetHealthPct() <= 20)
             {
-                // ... drain soul deal 100% more damage ...
+                // Drain Soul deals 100% more damage below 20%
                 damage *= 2;
-
-                int32 afflictionDamage;
-                SpellInfo const* afflictionSpell;
                 bool grimoireOfSacrifice = caster->HasAura(108503);
-
-                // ... and deals instantly 100% of tick-damage for each affliction effects on the target
-                // Corruption ...
-                if (target->GetAura(172, caster->GetGUID()))
+                // and deals instantly 100 % of tick - damage for each affliction effects on the target
+                auto periodicAuraList = target->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
+                for (auto eff : periodicAuraList)
                 {
-                    afflictionSpell = sSpellMgr->GetSpellInfo(172);
-                    afflictionDamage = caster->CalculateSpellDamage(target, afflictionSpell, 0);
-                    afflictionDamage = caster->SpellDamageBonusDone(target, afflictionSpell, EFFECT_0, afflictionDamage, DOT);
-                    afflictionDamage = target->SpellDamageBonusTaken(caster, afflictionSpell, EFFECT_0, afflictionDamage, DOT);
+                    if (eff->GetCasterGUID() != caster->GetGUID())
+                        continue;
 
-                    if (grimoireOfSacrifice)
-                        AddPct(afflictionDamage, 50);
+                    // Corruption, Unstable Affliction, Seed of Corruption, Agony
+                    if (eff->GetId() == 146739 || eff->GetId() == 30108 || eff->GetId() == 27243 || eff->GetId() == 980)
+                    {
+                        int32 afflictionDamage = eff->GetAmount();
+                        // Agony needs it's own handlng due to its damage chainging over stacks
+                        if (eff->GetId() == 980)
+                        {
+                            uint32 stackAmount = eff->GetBase()->GetStackAmount();
+                            // 1..4 ticks, 1/2 from normal tick damage
+                            if (stackAmount <= 5)
+                                damage /= 2;
+                            // 9..12 ticks, 3/2 from normal tick damage
+                            else if (stackAmount > 9)
+                                damage *= 1.5;
+                        }
 
-                    caster->CastCustomSpell(target, 131740, &afflictionDamage, NULL, NULL, true);
-                }
-                // Unstable Affliction ...
-                if (target->GetAura(30108, caster->GetGUID()))
-                {
-                    afflictionSpell = sSpellMgr->GetSpellInfo(30108);
-                    afflictionDamage = caster->CalculateSpellDamage(target, afflictionSpell, 0);
-                    afflictionDamage = caster->SpellDamageBonusDone(target, afflictionSpell, EFFECT_0, afflictionDamage, DOT);
-                    afflictionDamage = target->SpellDamageBonusTaken(caster, afflictionSpell, EFFECT_0, afflictionDamage, DOT);
+                        afflictionDamage = CalculatePct(afflictionDamage, 60);
 
-                    if (grimoireOfSacrifice)
-                        AddPct(afflictionDamage, 50);
+                        if (grimoireOfSacrifice)
+                            AddPct(afflictionDamage, 50);
 
-                    caster->CastCustomSpell(target, 131736, &afflictionDamage, NULL, NULL, true);
-                }
-                // Seed of Corruption ...
-                if (target->GetAura(27243, caster->GetGUID()))
-                {
-                    afflictionSpell = sSpellMgr->GetSpellInfo(27243);
-                    afflictionDamage = caster->CalculateSpellDamage(target, afflictionSpell, 0);
-                    afflictionDamage = caster->SpellDamageBonusDone(target, afflictionSpell, EFFECT_0, afflictionDamage, DOT);
-                    afflictionDamage = target->SpellDamageBonusTaken(caster, afflictionSpell, EFFECT_0, afflictionDamage, DOT);
-
-                    if (grimoireOfSacrifice)
-                        AddPct(afflictionDamage, 50);
-
-                    caster->CastCustomSpell(target, 132566, &afflictionDamage, NULL, NULL, true);
-                }
-                // Agony ...
-                if (Aura *agony = target->GetAura(980, caster->GetGUID()))
-                {
-                    afflictionSpell = sSpellMgr->GetSpellInfo(980);
-                    afflictionDamage = caster->CalculateSpellDamage(target, afflictionSpell, 0);
-                    afflictionDamage = caster->SpellDamageBonusDone(target, afflictionSpell, EFFECT_0, afflictionDamage, DOT);
-                    afflictionDamage = target->SpellDamageBonusTaken(caster, afflictionSpell, EFFECT_0, afflictionDamage, DOT);
-
-                    if (grimoireOfSacrifice)
-                        AddPct(afflictionDamage, 50);
-
-                    agony->ModStackAmount(1);
-
-                    caster->CastCustomSpell(target, 131737, &afflictionDamage, NULL, NULL, true);
+                        caster->CastCustomSpell(target, 131740, &afflictionDamage, NULL, NULL, true);
+                    }
                 }
             }
 

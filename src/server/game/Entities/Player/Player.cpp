@@ -6571,23 +6571,13 @@ float Player::GetExpertiseDodgeOrParryReduction(WeaponAttackType attType) const
     return 0.0f;
 }
 
-float Player::OCTRegenMPPerSpirit()
+float Player::OCTRegenMPPerSpirit() const
 {
-    uint8 level = getLevel();
-    uint32 pclass = getClass();
+    auto const level = std::min<uint8>(getLevel(), GT_MAX_LEVEL);
+    auto const ratio = sGtRegenMPPerSptStore.LookupEntry((getClass() - 1) * GT_MAX_LEVEL + level - 1);
 
-    if (level > GT_MAX_LEVEL)
-        level = GT_MAX_LEVEL;
-
-//    GtOCTRegenMPEntry     const* baseRatio = sGtOCTRegenMPStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
-    GtRegenMPPerSptEntry  const* moreRatio = sGtRegenMPPerSptStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
-    if (moreRatio == NULL)
-        return 0.0f;
-
-    // Formula get from PaperDollFrame script
-    float spirit    = GetStat(STAT_SPIRIT);
-    float regen     = spirit * moreRatio->ratio;
-    return regen;
+    // Formula from PaperDollFrame script
+    return (ratio != nullptr) ? GetStat(STAT_SPIRIT) * ratio->ratio : 0.0f;
 }
 
 void Player::ApplyRatingMod(CombatRating cr, int32 value, bool apply)

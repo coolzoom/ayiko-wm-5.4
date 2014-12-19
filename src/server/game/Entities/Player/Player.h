@@ -2004,7 +2004,7 @@ class Player final : public Unit, public GridObject<Player>
         float GetMeleeCritFromAgility();
         void GetDodgeFromAgility(float &diminishing, float &nondiminishing);
         float GetSpellCritFromIntellect();
-        float OCTRegenMPPerSpirit();
+        float OCTRegenMPPerSpirit() const;
         float GetRatingMultiplier(CombatRating cr) const;
         float GetRatingBonusValue(CombatRating cr) const;
         uint32 GetBaseSpellPowerBonus() { return m_baseSpellPower; }

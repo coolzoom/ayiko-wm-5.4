@@ -45,6 +45,8 @@ class boss_general_pavalak : public CreatureScript
         SPELL_BLADE_RUSH_EFF    = 124283, // condition targets 63720
         SPELL_BLADE_RUSH_DUMMY  = 124291,
         SPELL_BLADE_RUSH_CHARGE = 124312,
+        SPELL_BLADE_RUSH_DMG_C  = 124317,
+        SPELL_BLARE_RUSH_DMG_A  = 124290,
         SPELL_TEMPEST           = 119875
     };
 
@@ -96,7 +98,12 @@ class boss_general_pavalak : public CreatureScript
         void SpellHitTarget(Unit* target, SpellInfo const* spell) override
         {
             if (spell->Id == SPELL_BLADE_RUSH_DUMMY)
+            {
+                target->CastSpell(target, 124307, true);
                 DoCast(target, SPELL_BLADE_RUSH_CHARGE, false);
+                me->SetFacingToObject(target);
+                DoCast(target, SPELL_BLADE_RUSH_DMG_C, true);
+            }
 
         }
 
@@ -129,14 +136,16 @@ class boss_general_pavalak : public CreatureScript
         void MovementInform(uint32 type, uint32 id) override
         {
             if (type == EFFECT_MOTION_TYPE && id == EVENT_CHARGE)
-                events..RescheduleEvent(EVENT_BLADE_RUSH_END, 200);
+            {
+                DoCast(me, SPELL_BLARE_RUSH_DMG_A, true);
+                events.RescheduleEvent(EVENT_BLADE_RUSH_END, 1000);
+            }
         }
 
         void JustSummoned(Creature* summon) override
         {
             if (summon->GetEntry() == NPC_BLADE_RUSH_STALKER)
             {
-                me->AddThreat(summon, 100000.0f);
                 me->SetTarget(summon->GetGUID());
                 DoCast(me, SPELL_BLADE_RUSH_EFF, false);
             }
@@ -160,9 +169,11 @@ class boss_general_pavalak : public CreatureScript
                 {
                     case EVENT_BLADE_RUSH:
                         me->SetReactState(REACT_PASSIVE);
-                        me->GetMotionMaster()->Clear();
-                        me->GetMotionMaster()->MoveIdle();
+
                         DoCast(me, SPELL_BLADE_RUSH_SUMMON, true);
+                        me->StopMoving();
+                        me->AttackStop();
+
                         events.ScheduleEvent(EVENT_BLADE_RUSH, 20000);
                         events.ScheduleEvent(EVENT_BLADE_RUSH_END, 5000);
                         break;

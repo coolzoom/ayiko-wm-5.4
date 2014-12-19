@@ -195,12 +195,41 @@ INSERT INTO spell_linked_spell (spell_trigger, spell_effect, type, comment) VALU
 
 DELETE FROM creature WHERE id = 61483; -- reinforcements summoner
 
-DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (124283, 124291, 119703);
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (124290, 124283, 124291, 119703);
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(13, 1, 124290, 0, 0, 31, 0, 4, 0, 0, 0, 0, 0, '', 'Blade Rush Dmg - Target players'),
 (13, 1, 124283, 0, 0, 31, 0, 3, 63720, 0, 0, 0, 0, '', 'Blade Rush - Target Stalker'),
 (13, 1, 124291, 0, 0, 31, 0, 3, 63720, 0, 0, 0, 0, '', 'Blade Rush triggered - target Pavalak'),
 (13, 3, 119703, 0, 0, 31, 0, 4, 0, 0, 0, 0, 0, '', 'Detonate - Target players only');
 
+/*
+*******************************
+*** WING LEADER NER'ONOK ******
+*******************************
+*/
+
+UPDATE creature_template SET ScriptName = 'boss_wing_leader_neronok' WHERE entry = 62205;
+
+DELETE FROM creature_template_aura WHERE entry IN (62205);
+INSERT INTO creature_template_aura (entry, aura) VALUES
+(62205, 126303); -- Neronok - Mantid Wings
+
+
+DELETE FROM spell_target_position WHERE id IN (125318, 121282, 121284);
+INSERT INTO spell_target_position (id, effIndex, target_map, target_position_x, target_position_y, target_position_z, target_orientation) VALUES
+(125318, 0, 1011, 1906.24, 5161.08, 131.235, 0),
+(121282, 1, 1011, 1841.55, 5220.97, 131.17, 2.39632),
+(121284, 1, 1011, 1841.55, 5220.97, 131.17, 5.53791);
+
+DELETE FROM spell_script_names WHERE spell_id In (121447);
+INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
+(121447, 'spell_quick_dry_resin');
+
+
+DELETE FROM spell_linked_spell WHERE spell_trigger IN(121448, -121447);
+INSERT INTO spell_linked_spell (spell_trigger, spell_effect, type, comment) VALUES
+(-121447, -122063, 1, 'Quick Dry Resin - Remove indicator');
+-- (121448, 121116, 2, 'Quick Dry Resin - Stun');
 
 /*
 *******************************
@@ -325,6 +354,7 @@ UPDATE `creature_model_info` SET `bounding_radius`=2, `combat_reach`=2 WHERE `mo
 
 UPDATE `creature_template` SET `minlevel`=89, `maxlevel`=89, `faction_A`=2137, `faction_H`=2137, `speed_run`=0.9920629, `VehicleId`=2087 WHERE `entry`=59836; -- Panda Seat
 UPDATE `creature_template` SET `minlevel`=90, `maxlevel`=90, `faction_A`=14, `faction_H`=14, `speed_run`=1.428571 WHERE `entry`=62348; -- Sik'thik Soldier
+UPDATE `creature_template` SET `minlevel`=90, `maxlevel`=90, `faction_A`=14, `faction_H`=14, `speed_run`=1.428571 WHERE `entry`=61448; -- Sik'thik Soldier
 UPDATE `creature_template` SET `faction_A`=2028, `faction_H`=2028, `speed_run`=1 WHERE `entry`=59304; -- Bone Pile
 UPDATE `creature_template` SET `minlevel`=90, `maxlevel`=90, `faction_A`=16, `faction_H`=16, `speed_run`=1.428571 WHERE `entry`=62632; -- Sik'thik Engineer
 UPDATE `creature_template` SET `minlevel`=90, `maxlevel`=90, `faction_A`=16, `faction_H`=16, `speed_run`=1.428571 WHERE `entry`=62633; -- Sik'thik Builder

@@ -2429,6 +2429,15 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 else
                     target->RemoveAurasDueToSpell(104242);
             }
+            // Methamorphosis
+            else if (GetSpellInfo()->Id == 103958)
+            {
+                // Apply Nether Plating bonus
+                if (apply && target->HasSpell(114129))
+                    target->CastSpell(target, 54817, true);
+                else
+                    target->RemoveAurasDueToSpell(54817);
+            }
         }
         default:
             break;

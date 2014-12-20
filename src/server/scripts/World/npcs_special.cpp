@@ -4568,6 +4568,45 @@ class npc_shadowy_apparition : public CreatureScript
         };
 };
 
+class npc_warl_doomguard: public CreatureScript
+{
+public:
+    npc_warl_doomguard() : CreatureScript("npc_warl_doomguard") { }
+
+    struct npc_warl_doomguardAI : public ScriptedAI
+    {
+        npc_warl_doomguardAI(Creature* c) : ScriptedAI(c) { }
+
+        uint32 uiDoomboltTimer;
+
+        void Reset()
+        {
+            if (!me->HasAura(45631))
+                me->CastSpell(me, 45631, true);
+            uiDoomboltTimer = 4000;
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!me->GetVictim())
+                return;
+
+            if (uiDoomboltTimer <= diff)
+            {
+                me->CastSpell(me->GetVictim(), 85692, false);
+                uiDoomboltTimer = 4000;
+            }
+            else
+                uiDoomboltTimer -= diff;
+        }
+    };
+
+    CreatureAI* GetAI(Creature *creature) const
+    {
+        return new npc_warl_doomguardAI(creature);
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -4625,4 +4664,5 @@ void AddSC_npcs_special()
     new npc_psyfiend();
     new npc_spectral_guise();
     new npc_shadowy_apparition();
+    new npc_warl_doomguard();
 }

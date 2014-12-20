@@ -9730,6 +9730,8 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
                     return false;
 
             float offHandSpeed = GetAttackTime(OFF_ATTACK) / IN_MILLISECONDS;
+            if (Item const * const offItem = ToPlayer()->GetWeaponForAttack(OFF_ATTACK))
+                offHandSpeed = offItem->GetTemplate() ? (float)offItem->GetTemplate()->Delay / 1000.f : offHandSpeed;
 
             if (!procSpell && (procFlags & PROC_FLAG_DONE_OFFHAND_ATTACK))
                 if (!roll_chance_f(20.0f * offHandSpeed / 1.4f))

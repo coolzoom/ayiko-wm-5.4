@@ -3394,7 +3394,6 @@ bool SpellInfo::CanTriggerBladeFlurry() const
         case 8676:  // Ambush
         case 26679: // Deadly Throw
         case 27576: // Mutilate Off-Hand
-        case 51723: // Fan of Knives
         case 57841: // Killing Spree
         case 57842: // Killing Spree Off-Hand
         case 84617: // Revealing Strike

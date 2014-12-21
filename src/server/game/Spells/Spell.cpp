@@ -6565,7 +6565,11 @@ SpellCastResult Spell::CheckCast(bool strict)
         {
             // Must be behind the target
             if ((m_spellInfo->AttributesCu & SPELL_ATTR0_CU_REQ_CASTER_BEHIND_TARGET) && target->HasInArc(static_cast<float>(M_PI), m_caster))
-                return SPELL_FAILED_NOT_BEHIND;
+            {
+                // Ambush with Cloak and Dagger shouln't have requirement as it teleports player behind
+                if (m_spellInfo->Id != 8676 || !m_caster->HasAura(138106))
+                    return SPELL_FAILED_NOT_BEHIND;
+            }
 
             // Target must be facing you
             if ((m_spellInfo->AttributesCu & SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER) && !target->HasInArc(static_cast<float>(M_PI), m_caster))

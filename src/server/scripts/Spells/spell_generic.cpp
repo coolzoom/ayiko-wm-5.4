@@ -3974,6 +3974,43 @@ public:
     }
 };
 
+// Dancing Steel Enchantment - 118333
+class spell_gen_ench_dancing_steel final : public SpellScriptLoader
+{
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        void OnProc(AuraEffect const *, ProcEventInfo &eventInfo)
+        {
+            PreventDefaultAction();
+            auto const target = GetTarget();
+            // Agility of Strength depending on higher
+            float stat = target->GetStat(STAT_AGILITY);
+            uint32 enchantmentProc = 118334;
+            if (target->GetStat(STAT_STRENGTH) > stat)
+                enchantmentProc = 118335;
+
+            GetTarget()->CastSpell(GetTarget(), enchantmentProc, true);
+        }
+
+        void Register() final
+        {
+            OnEffectProc += AuraEffectProcFn(script_impl::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+public:
+    spell_gen_ench_dancing_steel()
+        : SpellScriptLoader("spell_gen_ench_dancing_steel")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -4061,4 +4098,5 @@ void AddSC_generic_spell_scripts()
     new spell_eject_all_passengers_script_effect();
     new spell_gen_tome_of_discovery();
     new spell_gen_ench_windsong();
+    new spell_gen_ench_dancing_steel();
 }

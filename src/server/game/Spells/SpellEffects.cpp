@@ -2163,7 +2163,7 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
 
         // Custom MoP Script
         // 77495 - Mastery : Harmony
-        if (caster && caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_DRUID)
+        if (caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_DRUID)
         {
             if (caster->HasAura(77495))
             {
@@ -2183,7 +2183,7 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
             }
         }
         // 77226 - Mastery : Deep Healing
-        if (caster && caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_SHAMAN)
+        if (caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_SHAMAN)
         {
             if (caster->HasAura(77226))
             {
@@ -2200,7 +2200,7 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
             }
         }
         // 77485 - Mastery : Echo of Light
-        if (caster && caster->getClass() == CLASS_PRIEST && caster->HasAura(77485) && caster->getLevel() >= 80 && addhealth)
+        if (caster->getClass() == CLASS_PRIEST && caster->HasAura(77485) && caster->getLevel() >= 80 && addhealth)
         {
             float Mastery = caster->GetFloatValue(PLAYER_MASTERY) * 1.25f / 100.0f;
             int32 bp = (Mastery * addhealth) / 6;
@@ -2211,12 +2211,12 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
             m_caster->CastCustomSpell(unitTarget, 77489, &bp, NULL, NULL, true);
         }
         // Chakra : Serenity - 81208
-        if (caster && addhealth && caster->HasAura(81208) && m_spellInfo->Effects[0].TargetA.GetTarget() == TARGET_UNIT_TARGET_ALLY) // Single heal target
+        if (addhealth && caster->HasAura(81208) && m_spellInfo->Effects[0].TargetA.GetTarget() == TARGET_UNIT_TARGET_ALLY) // Single heal target
             if (Aura *renew = unitTarget->GetAura(139, caster->GetGUID()))
                 renew->RefreshDuration();
 
         // Mogu'Shan Vault
-        if (caster && (caster->HasAura(116161) || unitTarget->HasAura(116161))) // SPELL_CROSSED_OVER
+        if ((caster->HasAura(116161) || unitTarget->HasAura(116161))) // SPELL_CROSSED_OVER
         {
             if (unitTarget == caster)
             {

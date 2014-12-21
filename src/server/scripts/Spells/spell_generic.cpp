@@ -4011,6 +4011,67 @@ public:
     }
 };
 
+// Jade Spirit Enchantment - 120033
+class spell_gen_ench_jade_spirit final : public SpellScriptLoader
+{
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        void OnProc(AuraEffect const *, ProcEventInfo &eventInfo)
+        {
+            PreventDefaultAction();
+            GetTarget()->CastSpell(GetTarget(), 104993, true);
+        }
+
+        void Register() final
+        {
+            OnEffectProc += AuraEffectProcFn(script_impl::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+public:
+    spell_gen_ench_jade_spirit()
+        : SpellScriptLoader("spell_gen_ench_jade_spirit")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
+};
+
+// Jade Spirit Enchantment proc - 104993
+class spell_gen_ench_jade_spirit_eff final : public SpellScriptLoader
+{
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        void initEffects(uint32 &effectMask)
+        {
+            auto const caster = GetCaster();
+            if (!caster || caster->GetPower(POWER_MANA) > CalculatePct(caster->GetMaxPower(POWER_MANA), 25))
+                effectMask &= ~(1 << EFFECT_1);
+        }
+
+        void Register() final
+        {
+            OnInitEffects += AuraInitEffectsFn(script_impl::initEffects);
+        }
+    };
+
+public:
+    spell_gen_ench_jade_spirit_eff()
+        : SpellScriptLoader("spell_gen_ench_jade_spirit_eff")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -4099,4 +4160,6 @@ void AddSC_generic_spell_scripts()
     new spell_gen_tome_of_discovery();
     new spell_gen_ench_windsong();
     new spell_gen_ench_dancing_steel();
+    new spell_gen_ench_jade_spirit();
+    new spell_gen_ench_jade_spirit_eff();
 }

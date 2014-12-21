@@ -685,66 +685,64 @@ class spell_rog_venomous_wounds : public SpellScriptLoader
         {
             PrepareAuraScript(spell_rog_venomous_wounds_AuraScript);
 
+            enum
+            {
+                SPELL_VENOMOUS_WOUNDS = 79134,
+            };
+
             void HandleEffectPeriodic(AuraEffect const * /*aurEff*/)
             {
-                if (Unit* caster = GetCaster())
+                auto caster = GetCaster();
+                auto target = GetTarget();
+                if (!caster || !target)
+                    return;
+
+                if (caster->HasAura(SPELL_VENOMOUS_WOUNDS))
                 {
-                    if (Unit* target = GetTarget())
+                    // Each time your Rupture or Garrote deals damage to an enemy that you have poisoned ...
+                    if (target->HasAura(8680, caster->GetGUID())
+                        || target->HasAura(2818, caster->GetGUID())
+                        || target->HasAura(5760, caster->GetGUID())
+                        || target->HasAura(3409, caster->GetGUID())
+                        || target->HasAura(113952, caster->GetGUID())
+                        || target->HasAura(112961, caster->GetGUID()))
                     {
-                        if (caster->HasAura(79134))
+                        if (target->GetAura(ROGUE_SPELL_RUPTURE_DOT, caster->GetGUID()))
+                            ProcEffect(caster, target);
+                        // Garrote will not trigger this effect if the enemy is also afflicted by your Rupture
+                        else if (target->GetAura(ROGUE_SPELL_GARROTE_DOT, caster->GetGUID()))
                         {
-                            // Each time your Rupture or Garrote deals damage to an enemy that you have poisoned ...
-                            if (target->HasAura(8680, caster->GetGUID())
-                                || target->HasAura(2818, caster->GetGUID())
-                                || target->HasAura(5760, caster->GetGUID())
-                                || target->HasAura(3409, caster->GetGUID())
-                                || target->HasAura(113952, caster->GetGUID())
-                                || target->HasAura(112961, caster->GetGUID()))
-                            {
-                                if (target->GetAura(ROGUE_SPELL_RUPTURE_DOT, caster->GetGUID()))
-                                {
-                                    // ... you have a 75% chance ...
-                                    if (roll_chance_i(75))
-                                    {
-                                        // ... to deal [ X + 16% of AP ] additional Nature damage and to regain 10 Energy
-                                        caster->CastSpell(target, ROGUE_SPELL_VENOMOUS_WOUND_DAMAGE, true);
-                                        int32 bp = 10;
-                                        caster->CastCustomSpell(caster, ROGUE_SPELL_VENOMOUS_VIM_ENERGIZE, &bp, NULL, NULL, true);
-                                    }
-                                }
-                                // Garrote will not trigger this effect if the enemy is also afflicted by your Rupture
-                                else if (target->GetAura(ROGUE_SPELL_GARROTE_DOT, caster->GetGUID()))
-                                {
-                                    // ... you have a 75% chance ...
-                                    if (roll_chance_i(75))
-                                    {
-                                        // ... to deal [ X + 16% of AP ] additional Nature damage and to regain 10 Energy
-                                        caster->CastSpell(target, ROGUE_SPELL_VENOMOUS_WOUND_DAMAGE, true);
-                                        int32 bp = 10;
-                                        caster->CastCustomSpell(caster, ROGUE_SPELL_VENOMOUS_VIM_ENERGIZE, &bp, NULL, NULL, true);
-                                    }
-                                }
-                            }
+                            ProcEffect(caster, target);
                         }
                     }
                 }
             }
 
+            void ProcEffect(Unit * const caster, Unit * const target)
+            {
+                // ... you have a 75% chance ...
+                if (roll_chance_i(75))
+                {
+                    // ... to deal [ X + 16% of AP ] additional Nature damage and to regain 10 Energy
+                    caster->CastSpell(target, ROGUE_SPELL_VENOMOUS_WOUND_DAMAGE, true);
+                    int32 bp = 10;
+                    caster->CastCustomSpell(caster, ROGUE_SPELL_VENOMOUS_VIM_ENERGIZE, &bp, NULL, NULL, true);
+                }
+            }
+
             void OnRemove(AuraEffect const *aurEff, AuraEffectHandleModes /*mode*/)
             {
-                if (Unit* caster = GetCaster())
+                auto caster = GetCaster();
+                if (caster && caster->HasAura(SPELL_VENOMOUS_WOUNDS) && GetId() == ROGUE_SPELL_RUPTURE_DOT)
                 {
-                    if (GetTarget() && caster->HasAura(79134))
+                    if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_DEATH)
                     {
-                        AuraRemoveMode removeMode = GetTargetApplication()->GetRemoveMode();
-                        if (removeMode == AURA_REMOVE_BY_DEATH)
+                        if (Aura const * const rupture = aurEff->GetBase())
                         {
-                            if (Aura *rupture = aurEff->GetBase())
-                            {
-                                // If an enemy dies while afflicted by your Rupture, you regain energy proportional to the remaining Rupture duration
-                                int32 duration = int32(rupture->GetDuration() / 1000);
-                                caster->CastCustomSpell(caster, ROGUE_SPELL_VENOMOUS_VIM_ENERGIZE, &duration, NULL, NULL, true);
-                            }
+                            // If an enemy dies while afflicted by your Rupture, you regain energy proportional to the remaining Rupture duration
+                            int32 duration = int32(rupture->GetDuration() / 1000);
+                            caster->CastCustomSpell(caster, ROGUE_SPELL_VENOMOUS_VIM_ENERGIZE, &duration, NULL, NULL, true);
+
                         }
                     }
                 }

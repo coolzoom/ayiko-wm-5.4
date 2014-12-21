@@ -228,45 +228,29 @@ class spell_pri_psyfiend_hit_me_driver : public SpellScriptLoader
 
             void OnProc(AuraEffect const * /*aurEff*/, ProcEventInfo& eventInfo)
             {
+                auto caster = GetCaster();
+                auto attacker = eventInfo.GetActor();
+
+                if (!caster || !attacker)
+                    return;
+
                 PreventDefaultAction();
 
-                if (!GetCaster())
-                    return;
-
-                Unit* attacker = eventInfo.GetActor();
-                if (!attacker)
-                    return;
-
-                if (eventInfo.GetActor()->GetGUID() != GetCaster()->GetGUID())
-                    return;
-
-                if (Player* _player = GetCaster()->ToPlayer())
+                std::list<Creature*> psyfiendList;
                 {
-                    std::list<Creature*> tempList;
-                    std::list<Creature*> psyfiendList;
-
-                    _player->GetCreatureListWithEntryInGrid(tempList, PRIEST_NPC_PSYFIEND, 100.0f);
-
-                    if (tempList.empty())
-                        return;
-
-                    for (auto itr : tempList)
-                    {
-                        if (!itr->IsAlive())
-                            continue;
-
-                        if (!itr->GetOwner())
-                            continue;
-
-                        if (itr->GetOwner() == _player->GetOwner())
-                        {
-                            psyfiendList.push_back(itr);
-                            break;
-                        }
-                    }
+                    caster->GetCreatureListWithEntryInGrid(psyfiendList, PRIEST_NPC_PSYFIEND, 100.0f);
 
                     if (psyfiendList.empty())
                         return;
+
+                    for (auto i = psyfiendList.begin(); i != psyfiendList.end();)
+                    {
+                        Unit* owner = (*i)->GetOwner();
+                        if (owner && owner == caster && (*i)->IsAlive())
+                            ++i;
+                        else
+                            i = psyfiendList.erase(i);
+                    }
 
                     if (psyfiendList.size() > 1)
                         Trinity::Containers::RandomResizeList(psyfiendList, 1);

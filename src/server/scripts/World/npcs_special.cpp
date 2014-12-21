@@ -4372,9 +4372,11 @@ class npc_psyfiend : public CreatureScript
             npc_psyfiendAI(Creature* c) : Scripted_NoMovementAI(c)
             {
                 me->SetReactState(REACT_AGGRESSIVE);
+                oldTarget = 0;
                 targetGUID = 0;
             }
 
+            uint64 oldTarget;
             uint64 targetGUID;
             uint32 psychicHorrorTimer;
 
@@ -4396,7 +4398,7 @@ class npc_psyfiend : public CreatureScript
                 if (owner && owner->GetTypeId() == TYPEID_PLAYER)
                 {
                     me->SetLevel(owner->getLevel());
-                    me->SetMaxHealth(owner->GetMaxHealth() / 2);
+                    me->SetMaxHealth(owner->CountPctFromMaxHealth(2.5f));
                     me->SetHealth(me->GetMaxHealth());
                     // Set no damage
                     me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, 0.0f);
@@ -4414,17 +4416,34 @@ class npc_psyfiend : public CreatureScript
                 {
                     if (psychicHorrorTimer <= diff)
                     {
-                        if (Unit* m_target = ObjectAccessor::FindUnit(targetGUID))
+                        // If target did not change, select random target
+                        if (!targetGUID || oldTarget == targetGUID)
                         {
-                            if (m_target->GetDistance2d(me) <= 20.0f)
-                                me->AddAura(SPELL_PSYCHIC_HORROR, m_target);
-                            else
-                                me->CastSpell(me, SPELL_PSYCHIC_HORROR, true);
-                        }
-                        else
-                            me->CastSpell(me, SPELL_PSYCHIC_HORROR, true);
+                            std::list<Unit*> targets;
+                            Trinity::AllWorldObjectsInRange objects(me, 20.0f);
+                            Trinity::UnitListSearcher<Trinity::AllWorldObjectsInRange> searcher(me, targets, objects);
+                            Trinity::VisitNearbyObject(me, 20.0f, searcher);
+                            Unit * psyfiend = me;
+                            uint64 oldTargetGUID = oldTarget;
+                            // Remove invalid targets and old target to prevent casting twice on same
+                            targets.remove_if([psyfiend, oldTargetGUID](Unit * obj)
+                            {
+                                return obj->isTotem() || !psyfiend->IsValidAttackTarget(obj) || obj->GetGUID() == oldTargetGUID;
+                            });
 
-                        psychicHorrorTimer = 1500;
+                            if (!targets.empty())
+                            {
+                                me->CastSpell(*targets.front(), SPELL_PSYCHIC_HORROR, false);
+                                oldTarget = (*targets.front()).GetGUID();
+                            }
+                        }
+                        else if (Unit* m_target = ObjectAccessor::FindUnit(targetGUID))
+                        {
+                            me->CastSpell(m_target, SPELL_PSYCHIC_HORROR, false);
+                            oldTarget = targetGUID;
+                        }
+
+                        psychicHorrorTimer = 2500;
                     }
                     else
                         psychicHorrorTimer -= diff;

@@ -5792,6 +5792,10 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 12723: // Sweeping Strike proc
                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
                     break;
+                case 140308: // Shuriken Toss - it should no longer deal shadow damage
+                case 140309: // Shuriken Toss (Offhand)
+                    spellInfo->SchoolMask = SPELL_SCHOOL_MASK_NORMAL;
+                    break;
                 default:
                     break;
             }

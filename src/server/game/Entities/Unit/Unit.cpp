@@ -9964,14 +9964,27 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
             break;
         }
         // Finish movies that add combo
-        case 14189: // Seal Fate (Netherblade set)
+        case 14189: // Seal Fate
         {
             if (!victim || victim == this)
                 return false;
 
-            // Don't proc from Fan of Knives
-            if (procSpell && procSpell->Id == 51723)
+            if (!procSpell)
                 return false;
+
+            // TODO: Find better filter - it should have only combo-point generating abilities
+            // Don't proc from following spells:
+            switch (procSpell->Id)
+            {
+                case 51723: // Fan of Knives
+                case 140308: // Shuriken Toss
+                case 140309:
+                case 121471: // Shadow Blades
+                case 121474:
+                    return false;
+                default:
+                    break;
+            }
             // Need add combopoint AFTER finish movie (or they dropped in finish phase)
             break;
         }

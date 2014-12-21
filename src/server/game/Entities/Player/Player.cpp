@@ -1773,8 +1773,8 @@ void Player::Update(uint32 p_time)
                         if (getAttackTimer(OFF_ATTACK) < ATTACK_DISPLAY_DELAY)
                             setAttackTimer(OFF_ATTACK, ATTACK_DISPLAY_DELAY);
 
-                    // do attack if player doesn't have Ascendance for Enhanced Shamans or Shuriken Toss for rogues
-                    if (!HasAura(114051) && !HasAura(137586))
+                    // do attack if player doesn't have Ascendance for Enhanced Shamans or Shuriken Toss/Shadow Blades for rogues
+                    if (!HasAura(114051) && !HasAura(137586) && !HasAura(121471))
                     {
                         AttackerStateUpdate(victim, BASE_ATTACK);
                         resetAttackTimer(BASE_ATTACK);

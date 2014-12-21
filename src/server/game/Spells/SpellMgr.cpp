@@ -5796,6 +5796,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 140309: // Shuriken Toss (Offhand)
                     spellInfo->SchoolMask = SPELL_SCHOOL_MASK_NORMAL;
                     break;
+                case 32592: // Mass Dispel (on enemy)
+                    spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
+                    break;
                 default:
                     break;
             }

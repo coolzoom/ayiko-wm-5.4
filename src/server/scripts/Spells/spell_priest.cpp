@@ -2980,6 +2980,58 @@ public:
     }
 };
 
+// 32592 - Mass Dispel
+class spell_pri_mass_dispel : public SpellScriptLoader
+{
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        bool _hasImmunity;
+
+        bool Load()
+        {
+            _hasImmunity = false;
+            return true;
+        }
+
+        void CheckAuras()
+        {
+            // Glyph of Mass Dispel
+            if (Unit* target = GetHitUnit())
+                if (GetCaster()->HasAura(55691))
+                    if (target->HasAuraWithMechanic(1 << MECHANIC_IMMUNE_SHIELD))
+                        _hasImmunity = true;
+        }
+
+        void HandleScript(SpellEffIndex effIndex)
+        {
+            if (_hasImmunity)
+            {
+                if (Unit* target = GetHitUnit())
+                {
+                    target->RemoveAurasWithMechanic(1 << MECHANIC_IMMUNE_SHIELD, AURA_REMOVE_BY_ENEMY_SPELL);
+                    PreventHitEffect(effIndex);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_impl::HandleScript, EFFECT_0, SPELL_EFFECT_DISPEL);
+            BeforeHit += SpellHitFn(spell_impl::CheckAuras);
+        }
+    };
+
+public:
+    spell_pri_mass_dispel() : SpellScriptLoader("spell_pri_mass_dispel") { }
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
 void AddSC_priest_spell_scripts()
 {
     new spell_pri_power_word_fortitude();
@@ -3040,4 +3092,5 @@ void AddSC_priest_spell_scripts()
     new spell_pri_divine_star_damage_heal();
     new spell_pri_mind_flay();
     new spell_pri_shadow_word_death_glyphed();
+    new spell_pri_mass_dispel();
 }

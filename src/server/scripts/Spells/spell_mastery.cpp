@@ -55,7 +55,7 @@ class spell_mastery_shield_discipline : public SpellScriptLoader
                 {
                     if (caster->HasAura(MASTERY_SPELL_DISCIPLINE_SHIELD) && caster->getLevel() >= 80)
                     {
-                        float Mastery = 1 + (caster->GetFloatValue(PLAYER_MASTERY) * 2.5f / 100.0f);
+                        float Mastery = 1 + (caster->GetFloatValue(PLAYER_MASTERY) * 1.6f / 100.0f);
                         amount = int32(amount * Mastery);
                     }
                 }

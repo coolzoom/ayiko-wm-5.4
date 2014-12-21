@@ -2636,7 +2636,7 @@ class spell_pri_power_word_shield : public SpellScriptLoader
             {
                 if (player->HasAura(MASTERY_SPELL_DISCIPLINE_SHIELD) && player->getLevel() >= 80)
                 {
-                    float Mastery = 1 + (player->GetFloatValue(PLAYER_MASTERY) * 2.5f / 100.0f);
+                    float Mastery = 1 + (player->GetFloatValue(PLAYER_MASTERY) * 1.6f / 100.0f);
                     amount = int32(amount * Mastery);
                 }
                 // Divine Aegis

@@ -2199,6 +2199,12 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
                 }
             }
         }
+        // 77484 - Mastery: Shield Discipline
+        if (caster->GetTypeId() == TYPEID_PLAYER && caster->HasAura(77484) && addhealth)
+        {
+            float Mastery = 1 + (caster->GetFloatValue(PLAYER_MASTERY) * 0.8f / 100.0f);
+            addhealth = int32(addhealth * Mastery);
+        }
         // 77485 - Mastery : Echo of Light
         if (caster->getClass() == CLASS_PRIEST && caster->HasAura(77485) && caster->getLevel() >= 80 && addhealth)
         {

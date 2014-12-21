@@ -615,7 +615,7 @@ class spell_rog_restless_blades : public SpellScriptLoader
             Player* player = GetUnitOwner()->ToPlayer();
             int32 const cooldownReduction = aurEff->GetAmount() * player->GetComboPoints();
 
-            uint32 const affectedSpells[] = { 13750, 51690, 73981, 2983 };
+            uint32 const affectedSpells[] = { 13750, 51690, 73981, 121471, 2983 };
 
             for (size_t i = 0; i < TC_ARRAY_SIZE(affectedSpells); ++i)
                 player->ReduceSpellCooldown(affectedSpells[i], cooldownReduction);

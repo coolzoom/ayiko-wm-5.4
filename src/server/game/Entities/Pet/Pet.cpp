@@ -1203,8 +1203,8 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                 }
                 case ENTRY_BLOODWORM:
                 {
-                    // In Mists of Pandaria, each Bloodworm receives exactly 6% of it's master's current health on spawn.
-                    SetCreateHealth(GetOwner()->CountPctFromMaxHealth(6));
+                    // In Mists of Pandaria, each Bloodworm receives exactly 15% of it's master's current health on spawn.
+                    SetCreateHealth(GetOwner()->CountPctFromMaxHealth(15));
                     SetBonusDamage(int32(GetOwner()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.006f));
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - 30 - (petlevel / 4)));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel - 30 + (petlevel / 4)));

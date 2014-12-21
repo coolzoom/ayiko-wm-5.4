@@ -11930,6 +11930,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                     case 49184: // Howling Blast
                     case 52212: // Death and Decay
                     case 108196: // Death Siphon
+                    case 114867: // Soul Reaper
                         attType = BASE_ATTACK;
                         break;
                     default:

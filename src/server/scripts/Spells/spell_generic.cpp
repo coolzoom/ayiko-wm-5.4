@@ -3943,6 +3943,37 @@ public:
     }
 };
 
+// Windsong Enchantment- 104561
+class spell_gen_ench_windsong final : public SpellScriptLoader
+{
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        void OnProc(AuraEffect const *, ProcEventInfo &eventInfo)
+        {
+            PreventDefaultAction();
+            uint32 enchantment_proc[3] = { 104423, 104509, 104510 };
+            GetTarget()->CastSpell(GetTarget(), enchantment_proc[urand(0, 2)], true);
+        }
+
+        void Register() final
+        {
+            OnEffectProc += AuraEffectProcFn(script_impl::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+public:
+    spell_gen_ench_windsong()
+        : SpellScriptLoader("spell_gen_ench_windsong")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -4029,4 +4060,5 @@ void AddSC_generic_spell_scripts()
     new spell_brewfest_ram_race_increase_duration();
     new spell_eject_all_passengers_script_effect();
     new spell_gen_tome_of_discovery();
+    new spell_gen_ench_windsong();
 }

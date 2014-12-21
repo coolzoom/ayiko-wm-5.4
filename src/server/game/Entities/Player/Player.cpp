@@ -1745,6 +1745,7 @@ void Player::Update(uint32 p_time)
 
             if (isAttackReady(BASE_ATTACK))
             {
+                // Ascendance and Shuriken Toss extend auto-attack range
                 if (!IsWithinMeleeRange(victim) && !HasAura(114051) && !HasAura(137586))
                 {
                     setAttackTimer(BASE_ATTACK, 100);

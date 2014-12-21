@@ -1650,10 +1650,6 @@ void AuraEffect::Update(uint32 diff, Unit* caster)
                 {
                     switch (GetSpellInfo()->Id)
                     {
-                        // Death and Decay
-                        case 43265:
-                            GetCaster()->CastSpell(d_owner->GetPositionX(), d_owner->GetPositionY(), d_owner->GetPositionZ(), 52212, true);
-                            break;
                         // Consecration
                         case 36946:
                             GetCaster()->CastSpell(d_owner->GetPositionX(), d_owner->GetPositionY(), d_owner->GetPositionZ(), 81297, true);
@@ -1663,6 +1659,13 @@ void AuraEffect::Update(uint32 diff, Unit* caster)
                             break;
                     }
                 }
+            }
+            else
+            {
+                // Death and Decay
+                if (GetSpellInfo()->Id == 43265)
+                    if (auto const d_owner = GetCaster()->GetDynObject(GetSpellInfo()->Id))
+                        GetCaster()->CastSpell(d_owner->GetPositionX(), d_owner->GetPositionY(), d_owner->GetPositionZ(), 52212, true);
             }
         }
     }

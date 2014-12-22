@@ -798,17 +798,6 @@ class spell_rog_redirect : public SpellScriptLoader
                 if (cp > 5)
                     cp = 5;
 
-                if (auto const oldTarget = Unit::GetUnit(*_player, _player->GetComboTarget()))
-                {
-                    // Bandit's Guile should be redirected too.
-                    if (AuraEffect const * const guile = oldTarget->GetAuraEffect(84748, EFFECT_0, _player->GetGUID()))
-                    {
-                        int32 const bp = guile->GetAmount();
-                        oldTarget->RemoveAurasDueToSpell(guile->GetId(), _player->GetGUID());
-                        _player->CastCustomSpell(target, 84748, &bp, NULL, NULL, true);
-                    }
-                }
-
                 _player->ClearComboPoints();
                 _player->AddComboPoints(target, cp, GetSpell());
             }

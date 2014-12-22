@@ -151,6 +151,9 @@ public:
 
             DeactivateWeapons();
             Talk(TALK_RESET);
+
+            if (auto const script = me->GetInstanceScript())
+                script->HandleGameObject(0, true, ObjectAccessor::GetGameObject(*me, script->GetData64(GO_DOOR_BEFORE_KING)));
         }
 
         void KilledUnit(Unit* /*pVictim*/)
@@ -277,6 +280,9 @@ public:
             events.ScheduleEvent(EVENT_CHECK_CROSSBOW, 1000);
 
             Talk(TALK_AGGRO);
+
+            if (auto const script = me->GetInstanceScript())
+                script->HandleGameObject(0, false, ObjectAccessor::GetGameObject(*me, script->GetData64(GO_DOOR_BEFORE_KING)));
         }
 
         void JustDied(Unit* /*pKiller*/)
@@ -287,7 +293,7 @@ public:
             DeactivateWeapons();
 
             if (auto const script = me->GetInstanceScript())
-                script->SetData(TYPE_XIN, DONE);
+                script->HandleGameObject(0, true, ObjectAccessor::GetGameObject(*me, script->GetData64(GO_DOOR_BEFORE_KING)));
         }
 
         void UpdateAI(const uint32 diff)

@@ -8294,10 +8294,10 @@ void Player::ModifyCurrencyFlags(uint32 currencyId, uint8 flags)
         currency.state = PlayerCurrency::Changed;
 }
 
-void Player::ModifyCurrency(uint32 id, int32 count, uint32 modifyFlags)
+int32 Player::ModifyCurrency(uint32 id, int32 count, uint32 modifyFlags)
 {
-    if (!count)
-        return;
+    if (count == 0)
+        return 0;
 
     CurrencyTypesEntry const* currEntry = sCurrencyTypesStore.LookupEntry(id);
     ASSERT(currEntry);
@@ -8426,6 +8426,8 @@ void Player::ModifyCurrency(uint32 id, int32 count, uint32 modifyFlags)
 
         SendDirectMessage(&packet);
     }
+
+    return newCurrentCount - oldCurrentCount;
 }
 
 void Player::SetCurrency(uint32 id, uint32 count)

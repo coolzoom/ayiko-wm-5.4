@@ -117,17 +117,10 @@ public:
 
             switch (id)
             {
-                case DATA_TRIAL_OF_THE_KING:
-                    HandleGameObject(0, state != IN_PROGRESS, GetGameObjectFromStorage(GO_DOOR_BEFORE_TRIAL));
-                    break;
                 case DATA_GEKKAN:
                     HandleGameObject(0, state == DONE, GetGameObjectFromStorage(GO_DOOR_AFTER_TRIAL));
                     if (GameObject* pTreasure = instance->GetGameObject(m_uiAncientTreasureGuid))
                         pTreasure->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
-                    // Todo : mod temp portal phasemask
-                    break;
-                case DATA_XIN_THE_WEAPONMASTER:
-                    HandleGameObject(0, state != IN_PROGRESS, GetGameObjectFromStorage(GO_DOOR_BEFORE_KING));
                     break;
             }
 
@@ -144,9 +137,14 @@ public:
                 case GO_DOOR_BEFORE_TRIAL:
                 case GO_DOOR_AFTER_TRIAL:
                 case GO_DOOR_BEFORE_KING:
+                case GO_DOOR_BEFORE_KING2:
                 case GO_GEKKAN_TREASURE_DOOR:
                 case GO_ANCIENT_MOGU_TREASURE:
                     m_mGoEntryGuidMap.insert(std::make_pair(go->GetEntry(), go->GetGUID()));
+                    go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
+                    break;
+                case GO_USELESS_DOOR:
+                    // dont need to use memory space for this
                     go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
                     break;
             }
@@ -218,10 +216,14 @@ public:
 
         uint64 GetData64(uint32 uiType)
         {
-            if (uiType >= MAX_GUIDS)
-                return 0;
+            if (uiType < MAX_GUIDS)
+                return m_auiGuids64[uiType];
 
-            return m_auiGuids64[uiType];
+            auto const find = m_mGoEntryGuidMap.find(uiType);
+            if (find != m_mGoEntryGuidMap.cend())
+                return find->second;
+
+            return 0;
         }
 
         bool isWipe()
@@ -271,6 +273,10 @@ public:
                     }
                     break;
                 }
+                case TYPE_XIN:
+                    HandleGameObject(0, type != IN_PROGRESS, GetGameObjectFromStorage(GO_DOOR_BEFORE_KING));
+                    HandleGameObject(0, type != IN_PROGRESS, GetGameObjectFromStorage(GO_DOOR_BEFORE_KING2));
+                    break;
             }
         }
 
@@ -301,6 +307,7 @@ public:
             {
                 case TYPE_WIPE_FIRST_BOSS:
                 {
+                    HandleGameObject(0, true, GetGameObjectFromStorage(GO_DOOR_BEFORE_TRIAL));
                     switch (data)
                     {
                         case 0:
@@ -506,7 +513,10 @@ public:
                     break;
                 case TYPE_SHUFFLE_ORDER:
                     if (m_uiBossCount < 3)
+                    {
                         SetData(m_auiBossNumber[m_uiBossCount], 0);
+                        HandleGameObject(0, false, GetGameObjectFromStorage(GO_DOOR_BEFORE_TRIAL));
+                    }
                     else
                     {
                         SetBossState(DATA_TRIAL_OF_THE_KING, DONE);
@@ -519,6 +529,8 @@ public:
                             if (pScout->AI())
                                 pScout->AI()->DoAction(0);
                         }
+
+                        HandleGameObject(0, true, GetGameObjectFromStorage(GO_DOOR_BEFORE_TRIAL));
                     }
                     break;
                 case TYPE_TRIAL_CHEST:
@@ -526,6 +538,20 @@ public:
                         DoRespawnGameObject(pGo->GetGUID(), 7 * DAY);
                     if (Creature* pBeacon = instance->GetCreature(m_uiBeaconGuid))
                         pBeacon->SetPhaseMask(1, true);
+
+                    if (instance->GetDifficulty() == HEROIC_DIFFICULTY)
+                    {
+                        Map::PlayerList const &lPlayers = instance->GetPlayers();
+                        for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+                        {
+                            if (Player * const player = itr->GetSource())
+                            {
+                                int32 const gain = player->ModifyCurrency(CURRENCY_TYPE_JUSTICE_POINTS, 10000);
+                                if (int32 const toMoney = (gain < 10000 ? 10000 - gain : 0))
+                                    player->ModifyMoney(toMoney * 475);
+                            }
+                        }
+                    }
                     break;
             }
         }

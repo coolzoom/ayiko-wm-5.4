@@ -1353,7 +1353,7 @@ class Player final : public Unit, public GridObject<Player>
         * @param ignore gain multipliers
         */
 
-        void ModifyCurrency(uint32 id, int32 count, uint32 modifyFlags = 0);
+        int32 ModifyCurrency(uint32 id, int32 count, uint32 modifyFlags = 0);
 
         void ApplyEquipCooldown(Item* pItem);
         void QuickEquipItem(uint16 pos, Item* pItem);

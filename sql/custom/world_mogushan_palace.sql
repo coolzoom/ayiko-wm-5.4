@@ -969,6 +969,7 @@ REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`)
 (120167, "spell_haiyan_conflagrate_targeting"),
 (120165, "spell_haiyan_conflagrate_aura"),
 (120194, "spell_haiyan_meteor_targeting"),
+(120196, "spell_haiyan_meteor"),
 (119076, "spell_saurok_help_call"),
 (124531, "spell_activate_blades"),
 (124534, "spell_activate_blades"),
@@ -992,6 +993,10 @@ UPDATE `creature_template` SET `ScriptName` = "mob_adepts" WHERE `entry` IN (615
 UPDATE `creature_template` SET `faction_h` = 1339, `faction_a` = 1339 WHERE entry IN (61550, 61449);
 UPDATE `creature_template` SET `faction_h` = 1338, `faction_a` = 1338 WHERE entry IN (61549, 61447);
 UPDATE `creature_template` SET `faction_h` = 1340, `faction_a` = 1340 WHERE entry IN (61551, 61450);
+
+REPLACE INTO `creature_template_currency` (`entry`, `currencyId`, `currencyCount`) VALUES
+(109019, 395, 100),
+(109010, 395, 100);
 
 -- This fucks up the visual massively. Handled in script instead
 DELETE FROM `creature_template_aura` WHERE `entry` IN (61242, 61451, 61679, 61433, 64250);
@@ -1078,7 +1083,7 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 (@GUID + 58, 214813, 994, 3, 1,  -4424.306, -2687.247, -39.21358, 4.704598, 0, 0, 0, 1, 7200, 255, 1), -- 214813 (Area: 6182)
 (@GUID + 59, 214827, 994, 3, 1,  -4425.082, -2690.228, -39.21357, 0.1699049, 0, 0, 0, 1, 7200, 255, 1), -- 214827 (Area: 6182)
 (@GUID + 60, 212095, 994, 3, 1,  -4509.656, -2687.172, 31.96922, 1.567914, 0, 0, 0, 1, 7200, 255, 1), -- 212095 (Area: 6182)
-(@GUID + 61, 400003, 994, 3, 1, -4399.4, -2739.69, -39.9803, 4.70622, 0, 0, 0.709283, -0.704924, 300, 0, 1);
+(@GUID + 61, 400003, 994, 3, 1,  -4399.400, -2739.690, -39.9803, 4.706220, 0, 0, 0.709283, -0.704924, 300, 0, 1);
 
 UPDATE gameobject SET `spawnMask` = 6 WHERE `map` = 994;
 

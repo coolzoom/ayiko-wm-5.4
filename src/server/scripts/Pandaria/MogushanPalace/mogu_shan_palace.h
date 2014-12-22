@@ -153,10 +153,11 @@ enum eGameObjects
     GO_DOOR_BEFORE_TRIAL    = 213594,
     GO_TRIAL_CHEST          = 214520,
     GO_DOOR_AFTER_TRIAL     = 213593,
+    GO_DOOR_BEFORE_KING2    = 213595,
     GO_DOOR_BEFORE_KING     = 213596,
     GO_ANCIENT_MOGU_TREASURE= 214795,
     GO_GEKKAN_TREASURE_DOOR = 214654,
-
+    GO_USELESS_DOOR         = 213666
 };
 
 static const Position pTrialIntroPositions[] =

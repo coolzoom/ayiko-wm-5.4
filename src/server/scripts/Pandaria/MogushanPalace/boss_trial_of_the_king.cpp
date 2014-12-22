@@ -335,6 +335,8 @@ public:
                 me->GetInstanceScript()->SetData(TYPE_WIPE_FIRST_BOSS, 0);
 
             me->GetMotionMaster()->MovePoint(1, me->GetHomePosition());
+
+            events.Reset();
         }
 
         void MovementInform(uint32 uiType, uint32 uiPointId)
@@ -382,6 +384,7 @@ public:
 
         void HandleRetire()
         {
+            me->RemoveAllAuras();
             me->SetReactState(REACT_PASSIVE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
             me->SetHomePosition(pTrialHomePositions[TYPE_MING]);
@@ -406,6 +409,9 @@ public:
 
                 HandleRetire();
             }
+
+            if (m_bIsMovingHome)
+                damage = 0;
         }
 
         void UpdateAI(const uint32 diff)
@@ -636,6 +642,11 @@ public:
                 me->SetFacingTo(me->GetOrientation() - M_PI);
         }
 
+        void DamageTaken(Unit* /*pWho*/, uint32& uiDamage)
+        {
+            uiDamage = 0;
+        }
+
         void MoveInLineOfSight(Unit* pWho)
         {
             if (pWho->GetTypeId() == TYPEID_PLAYER && pWho->GetAreaId() == 6471
@@ -655,9 +666,6 @@ public:
                 if (urand(0, 2))
                     Talk(TALK_00, pWho->GetGUID());
             }
-
-            if (status == STATUS_ATTACK_GRUNTS)
-                ScriptedAI::MoveInLineOfSight(pWho);
         }
 
         void UpdateAI(const uint32 diff)
@@ -763,6 +771,8 @@ public:
                 me->GetInstanceScript()->SetData(TYPE_WIPE_FIRST_BOSS, 0);
 
             me->GetMotionMaster()->MovePoint(1, me->GetHomePosition());
+
+            events.Reset();
         }
 
         void KilledUnit(Unit* /*u*/)
@@ -813,6 +823,7 @@ public:
 
         void HandleRetire()
         {
+            me->RemoveAllAuras();
             me->SetReactState(REACT_PASSIVE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
             me->SetHomePosition(pTrialHomePositions[TYPE_KUAI]);
@@ -847,6 +858,9 @@ public:
 
                 HandleRetire();
             }
+
+            if (m_bIsMovingHome)
+                damage = 0;
         }
 
         void UpdateAI(const uint32 diff)
@@ -1043,6 +1057,8 @@ public:
                 me->GetInstanceScript()->SetData(TYPE_WIPE_FIRST_BOSS, 0);
 
             me->GetMotionMaster()->MovePoint(1, me->GetHomePosition());
+
+            events.Reset();
         }
 
         void MovementInform(uint32 uiType, uint32 uiPointId)
@@ -1080,6 +1096,7 @@ public:
 
         void HandleRetire()
         {
+            me->RemoveAllAuras();
             me->SetReactState(REACT_PASSIVE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
             me->CastStop();
@@ -1104,6 +1121,9 @@ public:
 
                 HandleRetire();
             }
+
+            if (m_bIsMovingHome)
+                damage = 0;
         }
 
         void UpdateAI(const uint32 diff)
@@ -1905,7 +1925,58 @@ public:
     {
         return new spell_haiyan_meteor_targeting_SpellScript();
     }
+};
 
+struct NotPlayerCheck final
+{
+    bool operator ()(WorldObject const *target) const
+    {
+        return target && target->GetTypeId() != TYPEID_PLAYER;
+    }
+};
+
+class spell_haiyan_meteor final : public SpellScriptLoader
+{
+    class script_impl final : public SpellScript
+    {
+        PrepareSpellScript(script_impl)
+
+        uint32 m_targets;
+
+        bool Load() final
+        {
+            m_targets = 0;
+            return true;
+        }
+
+        void SelectTargets(std::list<WorldObject*> &targets)
+        {
+            targets.remove_if(NotPlayerCheck());
+            m_targets = targets.size();
+        }
+
+        void OnBeforeHit()
+        {
+            if (m_targets != 0)
+                SetHitDamage(float(GetHitDamage()) / m_targets);
+        }
+
+        void Register() final
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(script_impl::SelectTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+            OnHit += SpellHitFn(script_impl::OnBeforeHit);
+        }
+    };
+
+public:
+    spell_haiyan_meteor()
+        : SpellScriptLoader("spell_haiyan_meteor")
+    { }
+
+    SpellScript * GetSpellScript() const final
+    {
+        return new script_impl;
+    }
 };
 
 class CorrectUnitCheck
@@ -2000,5 +2071,6 @@ void AddSC_boss_trial_of_the_king()
     new spell_haiyan_conflagrate_targeting();
     new spell_haiyan_conflagrate_aura();
     new spell_haiyan_meteor_targeting();
+    new spell_haiyan_meteor();
     new spell_saurok_help_call();
 }

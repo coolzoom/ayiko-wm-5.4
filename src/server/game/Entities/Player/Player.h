@@ -2749,7 +2749,7 @@ class Player final : public Unit, public GridObject<Player>
         void SetIgnoreMovementCount(uint8 count) { m_ignoreMovementCount = count; }
         uint8 GetIgnoreMovementCount() const { return m_ignoreMovementCount; }
 
-        bool HasSpellCharge(uint32 spellId, SpellCategoryEntry const &category);
+        bool HasSpellCharge(uint32 spellId, SpellCategoryEntry const &category) const;
 
         void SendCUFProfiles();
 

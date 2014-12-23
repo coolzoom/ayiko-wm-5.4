@@ -24251,10 +24251,6 @@ void Player::AddSpellAndCategoryCooldowns(SpellInfo const* spellInfo, uint32 ite
         rec = std::max(rec, 0);
         catrec = std::max(catrec, 0);
 
-        // no cooldown after applying spell mods
-        if (rec == 0 && catrec == 0)
-            return;
-
         catrecTime = catrec;
         recTime = (rec != 0) ? uint32(rec) : catrecTime;
     }
@@ -29722,7 +29718,7 @@ void Player::SendBattlegroundTimer(uint32 currentTime, uint32 maxTime)
     SendDirectMessage(&data);
 }
 
-bool Player::HasSpellCharge(uint32 spellId, SpellCategoryEntry const &category)
+bool Player::HasSpellCharge(uint32 spellId, SpellCategoryEntry const &category) const
 {
     // Spell 127252 has charges category 133 with 0 regen time. Bad data in DBC?
     if (category.ChargeRegenTime == 0)

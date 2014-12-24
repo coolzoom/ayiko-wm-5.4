@@ -3470,6 +3470,10 @@ class spell_gen_battle_fatigue final : public SpellScriptLoader
             if (!target || target->GetTypeId() != TYPEID_PLAYER)
                 return false;
 
+            // Check if damage was not dealt by self (Stagger for example)
+            if (target == caster)
+                return false;
+
             return true;
         }
 

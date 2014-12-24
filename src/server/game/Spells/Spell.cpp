@@ -2362,10 +2362,6 @@ void Spell::AddUnitTarget(Unit* target, uint32 effectMask, bool checkIfValid /*=
         if (target->IsImmunedToSpellEffect(m_spellInfo, i))
             effectMask &= ~(1 << i);
 
-    if (m_spellInfo->Id == 44614 && effectIndex != 1)
-        if (m_caster->HasAura(61205) == (effectIndex == 0))
-            return;
-
     // Quest item spell 'Kill Golden Stonefish'
     if (m_spellInfo->Id == 80962)
     {

@@ -1924,7 +1924,6 @@ class spell_sha_lava_burst : public SpellScriptLoader
             Spell::UsedSpellMods const &mods = appliedSpellMods();
             AuraEffect * const aurEff = caster->GetAuraEffect(SPELL_LAVA_SURGE_PROC, EFFECT_0);
 
-
             if (!aurEff || mods.find(aurEff->GetSpellModifier()) != mods.end())
                 return;
 

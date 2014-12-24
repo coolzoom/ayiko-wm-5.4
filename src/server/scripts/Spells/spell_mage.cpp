@@ -1180,6 +1180,9 @@ class spell_mage_nether_tempest : public SpellScriptLoader
 
 
                         Player::AuraTargetList const *targets = _player->ToPlayer()->listOfTargetsOfAura(GetId());
+                        if (!targets || targets->empty())
+                            return;
+
                         Unit const * const lastTarget = Unit::GetUnit(*_player, targets->back());
                         if (GetTarget() == lastTarget && roll_chance_i(10) && _player->HasAura(SPELL_MAGE_BRAIN_FREEZE))
                             _player->CastSpell(_player, SPELL_MAGE_BRAIN_FREEZE_TRIGGERED, true);
@@ -1901,6 +1904,8 @@ class spell_mage_living_bomb : public SpellScriptLoader
                 if (auto caster = GetCaster()->ToPlayer())
                 {
                     Player::AuraTargetList const *targets = caster->ToPlayer()->listOfTargetsOfAura(GetId());
+                    if (!targets || targets->empty())
+                        return;
                     Unit const * const lastTarget = Unit::GetUnit(*caster, targets->back());
                     if (GetTarget() == lastTarget && roll_chance_i(25) && caster->HasAura(SPELL_MAGE_BRAIN_FREEZE))
                         caster->CastSpell(caster, SPELL_MAGE_BRAIN_FREEZE_TRIGGERED, true);

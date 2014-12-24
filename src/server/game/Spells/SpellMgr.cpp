@@ -5799,6 +5799,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 32592: // Mass Dispel (on enemy)
                     spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
                     break;
+                case 5487: // Bear Form - base armor increase is 120%
+                    spellInfo->Effects[EFFECT_2].BasePoints = 120;
+                    break;
                 default:
                     break;
             }

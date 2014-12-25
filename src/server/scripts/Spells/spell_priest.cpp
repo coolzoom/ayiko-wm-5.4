@@ -1269,34 +1269,32 @@ class spell_pri_devouring_plague : public SpellScriptLoader
         {
             PrepareSpellScript(spell_pri_devouring_plague_SpellScript);
 
-            void HandleOnHit()
+            void HandleDamage(SpellEffIndex /*eff*/)
             {
-                if (Player* player = GetCaster()->ToPlayer())
+                auto player = GetCaster()->ToPlayer();
+                if (player && player->GetSpecializationId(player->GetActiveSpec()) == SPEC_PRIEST_SHADOW)
                 {
-                    if (GetHitUnit())
-                    {
-                        if (player->GetSpecializationId(player->GetActiveSpec()) == SPEC_PRIEST_SHADOW)
-                        {
-                            uint8 powerUsed = player->GetPower(POWER_SHADOW_ORB) + 1; // Don't forget PowerCost
-                            // Shadow Orb visual
-                            if (player->HasAura(77487))
-                                player->RemoveAura(77487);
-                            // Glyph of Shadow Ravens
-                            else if (player->HasAura(127850))
-                                player->RemoveAura(127850);
+                    // Shadow Orb visual
+                    if (player->HasAura(77487))
+                        player->RemoveAura(77487);
+                    // Glyph of Shadow Ravens
+                    else if (player->HasAura(127850))
+                        player->RemoveAura(127850);
 
-                            // Instant damage equal to amount of shadow orb
-                            int32 damage = GetHitDamage();
-                            damage = AddPct(damage, powerUsed * 20);
-                            SetHitDamage(damage);
-                        }
-                    }
+                    // Instant damage equal to amount of shadow orb
+                    int32 damage = GetHitDamage();
+                    // First orb is consumed in spell-cast
+                    uint8 powerUsed = GetCaster()->GetPower(POWER_SHADOW_ORB) + 1;
+                    player->SetPower(POWER_SHADOW_ORB, 0);
+
+                    damage = AddPct(damage, powerUsed * 20);
+                    SetHitDamage(damage);
                 }
             }
 
             void Register()
             {
-                OnHit += SpellHitFn(spell_pri_devouring_plague_SpellScript::HandleOnHit);
+                OnEffectHitTarget += SpellEffectFn(spell_pri_devouring_plague_SpellScript::HandleDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
             }
         };
 
@@ -1322,8 +1320,8 @@ class spell_pri_devouring_plague : public SpellScriptLoader
                 if (!GetCaster())
                     return;
 
-                powerUsed = GetCaster()->GetPower(POWER_SHADOW_ORB);
-                GetCaster()->SetPower(POWER_SHADOW_ORB, 0);
+                // First orb is consumed in spell-cast
+                powerUsed = GetCaster()->GetPower(POWER_SHADOW_ORB) + 1;
 
                 amount *= powerUsed;
             }
@@ -2827,7 +2825,6 @@ class spell_pri_mind_flay final : public SpellScriptLoader
 
         enum
         {
-            TALENT_SOLACE_AND_INSANITY  = 139139,
             SPELL_DEVOURING_PLAGUE      = 2944,
             GLYPH_OF_MIND_FLAY          = 120585,
         };
@@ -2840,27 +2837,6 @@ class spell_pri_mind_flay final : public SpellScriptLoader
                 effectMask &= ~(1 << EFFECT_1);
         }
 
-        void calculateAmount(AuraEffect const *, int32 &amount, bool &canBeRecalculated)
-        {
-            canBeRecalculated = false;
-
-            if (!GetCaster())
-                return;
-
-            auto const caster = GetCaster()->ToPlayer();
-            auto const target = GetUnitOwner();
-            if (!caster || !target)
-                return;
-
-            // Mind flay with Solace and Insanity
-            if (caster->GetSpecializationId(caster->GetActiveSpec()) == SPEC_PRIEST_SHADOW && caster->HasAura(TALENT_SOLACE_AND_INSANITY))
-            {
-                // Get dummy aura where consumed Shadow Orbs are stored
-                if (auto const devouringPlague = target->GetAuraEffect(SPELL_DEVOURING_PLAGUE, EFFECT_2))
-                    AddPct(amount, 33.3f * (devouringPlague->GetAmount() + 1));
-            }
-        }
-
         void onTick(AuraEffect const * /*aurEff*/)
         {
             if (auto caster = GetCaster())
@@ -2871,7 +2847,6 @@ class spell_pri_mind_flay final : public SpellScriptLoader
         void Register() final
         {
             OnInitEffects += AuraInitEffectsFn(script_impl::initEffects);
-            DoEffectCalcAmount += AuraEffectCalcAmountFn(script_impl::calculateAmount, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
             OnEffectPeriodic += AuraEffectPeriodicFn(script_impl::onTick, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
         }
     };

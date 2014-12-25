@@ -7431,6 +7431,18 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
             else
                 damage *= 0.44125f;
         }
+        // Mind Flay
+        if (GetId() == 15407)
+        {
+            // Solace and Insanity bonus
+            auto player = caster->ToPlayer();
+            if (player && player->GetSpecializationId(player->GetActiveSpec()) == SPEC_PRIEST_SHADOW && player->HasSpell(139139))
+            {
+                // Get dummy aura where consumed Shadow Orbs are stored
+                if (auto const devouringPlague = target->GetAuraEffect(2944, EFFECT_2, player->GetGUID()))
+                    AddPct(damage, 33.3f * devouringPlague->GetAmount());
+            }
+        }
 
         if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_GENERIC)
         {

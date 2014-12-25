@@ -3470,6 +3470,10 @@ class spell_gen_battle_fatigue final : public SpellScriptLoader
             if (!target || target->GetTypeId() != TYPEID_PLAYER)
                 return false;
 
+            // Check if damage was not dealt by self (Stagger for example)
+            if (target == caster)
+                return false;
+
             return true;
         }
 
@@ -3943,6 +3947,135 @@ public:
     }
 };
 
+// Windsong Enchantment- 104561
+class spell_gen_ench_windsong final : public SpellScriptLoader
+{
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        void OnProc(AuraEffect const *, ProcEventInfo &eventInfo)
+        {
+            PreventDefaultAction();
+            uint32 enchantment_proc[3] = { 104423, 104509, 104510 };
+            GetTarget()->CastSpell(GetTarget(), enchantment_proc[urand(0, 2)], true);
+        }
+
+        void Register() final
+        {
+            OnEffectProc += AuraEffectProcFn(script_impl::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+public:
+    spell_gen_ench_windsong()
+        : SpellScriptLoader("spell_gen_ench_windsong")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
+};
+
+// Dancing Steel Enchantment - 118333
+class spell_gen_ench_dancing_steel final : public SpellScriptLoader
+{
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        void OnProc(AuraEffect const *, ProcEventInfo &eventInfo)
+        {
+            PreventDefaultAction();
+            auto const target = GetTarget();
+            // Agility of Strength depending on higher
+            float stat = target->GetStat(STAT_AGILITY);
+            uint32 enchantmentProc = 118334;
+            if (target->GetStat(STAT_STRENGTH) > stat)
+                enchantmentProc = 118335;
+
+            GetTarget()->CastSpell(GetTarget(), enchantmentProc, true);
+        }
+
+        void Register() final
+        {
+            OnEffectProc += AuraEffectProcFn(script_impl::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+public:
+    spell_gen_ench_dancing_steel()
+        : SpellScriptLoader("spell_gen_ench_dancing_steel")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
+};
+
+// Jade Spirit Enchantment - 120033
+class spell_gen_ench_jade_spirit final : public SpellScriptLoader
+{
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        void OnProc(AuraEffect const *, ProcEventInfo &eventInfo)
+        {
+            PreventDefaultAction();
+            GetTarget()->CastSpell(GetTarget(), 104993, true);
+        }
+
+        void Register() final
+        {
+            OnEffectProc += AuraEffectProcFn(script_impl::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+public:
+    spell_gen_ench_jade_spirit()
+        : SpellScriptLoader("spell_gen_ench_jade_spirit")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
+};
+
+// Jade Spirit Enchantment proc - 104993
+class spell_gen_ench_jade_spirit_eff final : public SpellScriptLoader
+{
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        void initEffects(uint32 &effectMask)
+        {
+            auto const caster = GetCaster();
+            if (!caster || caster->GetPower(POWER_MANA) > CalculatePct(caster->GetMaxPower(POWER_MANA), 25))
+                effectMask &= ~(1 << EFFECT_1);
+        }
+
+        void Register() final
+        {
+            OnInitEffects += AuraInitEffectsFn(script_impl::initEffects);
+        }
+    };
+
+public:
+    spell_gen_ench_jade_spirit_eff()
+        : SpellScriptLoader("spell_gen_ench_jade_spirit_eff")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -4029,4 +4162,8 @@ void AddSC_generic_spell_scripts()
     new spell_brewfest_ram_race_increase_duration();
     new spell_eject_all_passengers_script_effect();
     new spell_gen_tome_of_discovery();
+    new spell_gen_ench_windsong();
+    new spell_gen_ench_dancing_steel();
+    new spell_gen_ench_jade_spirit();
+    new spell_gen_ench_jade_spirit_eff();
 }

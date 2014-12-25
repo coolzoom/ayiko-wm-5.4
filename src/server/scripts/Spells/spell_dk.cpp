@@ -651,11 +651,11 @@ class spell_dk_conversion : public SpellScriptLoader
             {
                 if (GetCaster())
                 {
-                    // Drain 10 runic power to regen 3% of max health per second
+                    // Drain 5 runic power to regen 3% of max health per second
                     int32 runicPower = GetCaster()->GetPower(POWER_RUNIC_POWER);
 
-                    if (runicPower > 100)
-                        GetCaster()->SetPower(POWER_RUNIC_POWER, GetCaster()->GetPower(POWER_RUNIC_POWER) - 100);
+                    if (runicPower > 50)
+                        GetCaster()->SetPower(POWER_RUNIC_POWER, GetCaster()->GetPower(POWER_RUNIC_POWER) - 50);
                     else if (runicPower > 0)
                     {
                         GetCaster()->SetPower(POWER_RUNIC_POWER, 0);

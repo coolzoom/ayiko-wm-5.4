@@ -673,12 +673,15 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
     }
 
     // Leeching Poison - 112961 each attack heal the player for 10% of the damage (TODO: Make proper filter)
-    if (GetTypeId() == TYPEID_PLAYER && getClass() == CLASS_ROGUE && damage != 0 && damagetype != DOT && (!spellProto || spellProto->SpellFamilyName == SPELLFAMILY_ROGUE && spellProto->Id != 113780))
+    if (GetTypeId() == TYPEID_PLAYER && getClass() == CLASS_ROGUE && damage && damagetype != DOT)
     {
         if (Aura * const leechingPoison = victim->GetAura(112961, GetGUID()))
         {
-            int32 bp = damage / 10;
-            CastCustomSpell(this, 112974, &bp, NULL, NULL, true);
+            if (!spellProto || (spellProto->SpellFamilyName == SPELLFAMILY_ROGUE && spellProto->Id != 113780))
+            {
+                int32 bp = damage / 10;
+                CastCustomSpell(this, 112974, &bp, NULL, NULL, true);
+            }
         }
     }
     // Spirit Hunt - 58879 : Feral Spirit heal their owner for 150% of their damage
@@ -2656,6 +2659,36 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* victim, SpellInfo const* spell)
             if (roll < tmp)
                 return SPELL_MISS_DEFLECT;
         }
+
+        if (!victim->HasInArc(M_PI, this))
+            if (!victim->HasAuraType(SPELL_AURA_IGNORE_HIT_DIRECTION))
+                // Can`t dodge from behind in PvP (but its possible in PvE)
+                if (victim->GetTypeId() == TYPEID_PLAYER)
+                    canDodge = false;
+
+        if (canDodge)
+        {
+            // Roll dodge
+            int32 dodgeChance = int32(victim->GetUnitDodgeChance() * 100.0f);
+            // Reduce enemy dodge chance by SPELL_AURA_MOD_COMBAT_RESULT_CHANCE
+            dodgeChance += GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_COMBAT_RESULT_CHANCE, VICTIMSTATE_DODGE) * 100;
+            dodgeChance = int32(float(dodgeChance) * GetTotalAuraMultiplier(SPELL_AURA_MOD_ENEMY_DODGE));
+            // Reduce dodge chance by attacker expertise rating
+            if (GetTypeId() == TYPEID_PLAYER)
+            {
+                dodgeChance -= int32(ToPlayer()->GetExpertiseDodgeOrParryReduction(attType) * 100.0f);
+                if (victim->GetTypeId() == TYPEID_UNIT && !victim->isPet())
+                    dodgeChance += (150 * (victim->getLevelForTarget(this) - getLevel()));
+            }
+            else
+                dodgeChance -= GetTotalAuraModifier(SPELL_AURA_MOD_EXPERTISE) * 25;
+            if (dodgeChance < 0)
+                dodgeChance = 0;
+
+            if (roll < (tmp += dodgeChance))
+                return SPELL_MISS_DODGE;
+        }
+
         return SPELL_MISS_NONE;
     }
 
@@ -2782,19 +2815,13 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spell)
     }
 
     SpellSchoolMask schoolMask = spell->GetSchoolMask();
-    // PvP - PvE spell misschances per leveldif > 2
-    int32 lchance = victim->GetTypeId() == TYPEID_PLAYER ? 7 : 11;
     int32 thisLevel = getLevelForTarget(victim);
     if (GetTypeId() == TYPEID_UNIT && ToCreature()->isTrigger())
         thisLevel = std::max<int32>(thisLevel, spell->SpellLevel);
     int32 leveldif = int32(victim->getLevelForTarget(this)) - thisLevel;
 
     // Base hit chance from attacker and victim levels
-    int32 modHitChance;
-    if (leveldif < 3)
-        modHitChance = 96 - leveldif;
-    else
-        modHitChance = 94 - (leveldif - 2) * lchance;
+    float modHitChance = 97 - 1.5f * leveldif;
 
     // Spellmod from SPELLMOD_RESIST_MISS_CHANCE
     if (Player* modOwner = GetSpellModOwner())
@@ -2807,16 +2834,16 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spell)
         modHitChance += victim->GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE, schoolMask);
     }
 
-    int32 HitChance = modHitChance * 100;
+    float HitChance = modHitChance * 100;
     // Increase hit chance from attacker SPELL_AURA_MOD_SPELL_HIT_CHANCE and attacker ratings
-    HitChance += int32(m_modSpellHitChance * 100.0f);
+    HitChance += m_modSpellHitChance * 100.0f;
 
-    if (HitChance < 100)
-        HitChance = 100;
-    else if (HitChance > 10000)
+    if (HitChance < 100.f)
+        HitChance = 100.f;
+    else if (HitChance > 10000.f)
         HitChance = 10000;
 
-    int32 tmp = 10000 - HitChance;
+    int32 tmp = int32(10000 - HitChance);
 
     int32 rand = irand(0, 10000);
 
@@ -7193,6 +7220,12 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                     CastSpell(redirectTarget,57933,true);
                     break;
                 }
+                case 56805: // Glyph of Kick
+                {
+                    if (Player * player = ToPlayer())
+                        player->ReduceSpellCooldown(1766, triggerAmount);
+                    return true;
+                }
                 default:
                     break;
             }
@@ -9697,6 +9730,8 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
                     return false;
 
             float offHandSpeed = GetAttackTime(OFF_ATTACK) / IN_MILLISECONDS;
+            if (Item const * const offItem = ToPlayer()->GetWeaponForAttack(OFF_ATTACK))
+                offHandSpeed = offItem->GetTemplate() ? (float)offItem->GetTemplate()->Delay / 1000.f : offHandSpeed;
 
             if (!procSpell && (procFlags & PROC_FLAG_DONE_OFFHAND_ATTACK))
                 if (!roll_chance_f(20.0f * offHandSpeed / 1.4f))
@@ -9929,11 +9964,27 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
             break;
         }
         // Finish movies that add combo
-        case 14189: // Seal Fate (Netherblade set)
-        case 14157: // Ruthlessness
+        case 14189: // Seal Fate
         {
             if (!victim || victim == this)
                 return false;
+
+            if (!procSpell)
+                return false;
+
+            // TODO: Find better filter - it should have only combo-point generating abilities
+            // Don't proc from following spells:
+            switch (procSpell->Id)
+            {
+                case 51723: // Fan of Knives
+                case 140308: // Shuriken Toss
+                case 140309:
+                case 121471: // Shadow Blades
+                case 121474:
+                    return false;
+                default:
+                    break;
+            }
             // Need add combopoint AFTER finish movie (or they dropped in finish phase)
             break;
         }
@@ -11744,6 +11795,22 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
     // Custom scripted damage
     switch (spellProto->SpellFamilyName)
     {
+        case SPELLFAMILY_WARRIOR:
+        {
+            // Shield Slam
+            if (spellProto->Id == 23922)
+            {
+                // This formula is taken directly from SpellDescriptionVariables
+                float pct = 0.35f;
+                if (getLevel() >= 80)
+                    pct += 0.4f;
+                if (getLevel() >= 85)
+                    pct += 0.75f;
+
+                DoneTotal += (GetTotalAttackPowerValue(BASE_ATTACK) * pct);
+            }
+            break;
+        }
         case SPELLFAMILY_ROGUE:
         {
             // Revealing Strike for direct damage abilities
@@ -11863,6 +11930,8 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                     case 49184: // Howling Blast
                     case 52212: // Death and Decay
                     case 108196: // Death Siphon
+                    case 114867: // Soul Reaper
+                    case 48721: // Blood Boil
                         attType = BASE_ATTACK;
                         break;
                     default:
@@ -17250,7 +17319,7 @@ Unit* Unit::SelectNearbyTarget(Unit* exclude, float dist) const
     // remove not LoS targets
     for (std::list<Unit*>::iterator tIter = targets.begin(); tIter != targets.end();)
     {
-        if (!IsWithinLOSInMap(*tIter) || (*tIter)->isTotem() || (*tIter)->isSpiritService() || (*tIter)->GetCreatureType() == CREATURE_TYPE_CRITTER)
+        if (!IsWithinLOSInMap(*tIter) || (*tIter)->isTotem() || (*tIter)->isSpiritService() || (*tIter)->GetCreatureType() == CREATURE_TYPE_CRITTER || !IsValidAttackTarget(*tIter))
             targets.erase(tIter++);
         else
             ++tIter;

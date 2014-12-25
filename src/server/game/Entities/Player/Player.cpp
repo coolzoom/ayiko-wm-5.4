@@ -1745,7 +1745,8 @@ void Player::Update(uint32 p_time)
 
             if (isAttackReady(BASE_ATTACK))
             {
-                if (!IsWithinMeleeRange(victim) && !HasAura(114051))
+                // Ascendance and Shuriken Toss extend auto-attack range
+                if (!IsWithinMeleeRange(victim) && !HasAura(114051) && !HasAura(137586))
                 {
                     setAttackTimer(BASE_ATTACK, 100);
                     if (m_swingErrorMsg != 1)               // send single time (client auto repeat)
@@ -1773,8 +1774,8 @@ void Player::Update(uint32 p_time)
                         if (getAttackTimer(OFF_ATTACK) < ATTACK_DISPLAY_DELAY)
                             setAttackTimer(OFF_ATTACK, ATTACK_DISPLAY_DELAY);
 
-                    // do attack if player doesn't have Ascendance for Enhanced Shamans or Shadow Blades for rogues
-                    if (!HasAura(114051) && !HasAura(121471))
+                    // do attack if player doesn't have Ascendance for Enhanced Shamans or Shuriken Toss/Shadow Blades for rogues
+                    if (!HasAura(114051) && !HasAura(137586) && !HasAura(121471))
                     {
                         AttackerStateUpdate(victim, BASE_ATTACK);
                         resetAttackTimer(BASE_ATTACK);
@@ -1783,6 +1784,12 @@ void Player::Update(uint32 p_time)
                     else if (HasAura(114051))
                     {
                         CastSpell(victim, 114089, true);
+                        resetAttackTimer(BASE_ATTACK);
+                    }
+                    // Shuriken Toss - Main Hand
+                    else if (HasAura(137586))
+                    {
+                        CastSpell(victim, 140308, true);
                         resetAttackTimer(BASE_ATTACK);
                     }
                     // Shadow Blade - Main Hand
@@ -1796,7 +1803,7 @@ void Player::Update(uint32 p_time)
 
             if (haveOffhandWeapon() && isAttackReady(OFF_ATTACK))
             {
-                if (!IsWithinMeleeRange(victim) && !HasAura(114051))
+                if (!IsWithinMeleeRange(victim) && !HasAura(114051) && !HasAura(137586))
                     setAttackTimer(OFF_ATTACK, 100);
                 else if (!HasInArc(2*M_PI/3, victim))
                     setAttackTimer(OFF_ATTACK, 100);
@@ -1806,8 +1813,8 @@ void Player::Update(uint32 p_time)
                     if (getAttackTimer(BASE_ATTACK) < ATTACK_DISPLAY_DELAY)
                         setAttackTimer(BASE_ATTACK, ATTACK_DISPLAY_DELAY);
 
-                    // do attack if player doesn't have Ascendance for Enhanced Shamans or Shadow Blades for rogues
-                    if (!HasAura(114051) && !HasAura(121471))
+                    // do attack if player doesn't have Ascendance for Enhanced Shamans or Shuriken Toss for rogues
+                    if (!HasAura(114051) && !HasAura(121471) && !HasAura(137586))
                     {
                         AttackerStateUpdate(victim, OFF_ATTACK);
                         resetAttackTimer(OFF_ATTACK);
@@ -1816,6 +1823,12 @@ void Player::Update(uint32 p_time)
                     else if (HasAura(114051))
                     {
                         CastSpell(victim, 114093, true);
+                        resetAttackTimer(OFF_ATTACK);
+                    }
+                    // Shuriken Toss - Off-Hand
+                    else if (HasAura(137586))
+                    {
+                        CastSpell(victim, 140309, true);
                         resetAttackTimer(OFF_ATTACK);
                     }
                     // Shadow Blades - Off Hand
@@ -6559,23 +6572,13 @@ float Player::GetExpertiseDodgeOrParryReduction(WeaponAttackType attType) const
     return 0.0f;
 }
 
-float Player::OCTRegenMPPerSpirit()
+float Player::OCTRegenMPPerSpirit() const
 {
-    uint8 level = getLevel();
-    uint32 pclass = getClass();
+    auto const level = std::min<uint8>(getLevel(), GT_MAX_LEVEL);
+    auto const ratio = sGtRegenMPPerSptStore.LookupEntry((getClass() - 1) * GT_MAX_LEVEL + level - 1);
 
-    if (level > GT_MAX_LEVEL)
-        level = GT_MAX_LEVEL;
-
-//    GtOCTRegenMPEntry     const* baseRatio = sGtOCTRegenMPStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
-    GtRegenMPPerSptEntry  const* moreRatio = sGtRegenMPPerSptStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
-    if (moreRatio == NULL)
-        return 0.0f;
-
-    // Formula get from PaperDollFrame script
-    float spirit    = GetStat(STAT_SPIRIT);
-    float regen     = spirit * moreRatio->ratio;
-    return regen;
+    // Formula from PaperDollFrame script
+    return (ratio != nullptr) ? GetStat(STAT_SPIRIT) * ratio->ratio : 0.0f;
 }
 
 void Player::ApplyRatingMod(CombatRating cr, int32 value, bool apply)
@@ -8291,10 +8294,10 @@ void Player::ModifyCurrencyFlags(uint32 currencyId, uint8 flags)
         currency.state = PlayerCurrency::Changed;
 }
 
-void Player::ModifyCurrency(uint32 id, int32 count, uint32 modifyFlags)
+int32 Player::ModifyCurrency(uint32 id, int32 count, uint32 modifyFlags)
 {
-    if (!count)
-        return;
+    if (count == 0)
+        return 0;
 
     CurrencyTypesEntry const* currEntry = sCurrencyTypesStore.LookupEntry(id);
     ASSERT(currEntry);
@@ -8423,6 +8426,8 @@ void Player::ModifyCurrency(uint32 id, int32 count, uint32 modifyFlags)
 
         SendDirectMessage(&packet);
     }
+
+    return newCurrentCount - oldCurrentCount;
 }
 
 void Player::SetCurrency(uint32 id, uint32 count)
@@ -24246,10 +24251,6 @@ void Player::AddSpellAndCategoryCooldowns(SpellInfo const* spellInfo, uint32 ite
         rec = std::max(rec, 0);
         catrec = std::max(catrec, 0);
 
-        // no cooldown after applying spell mods
-        if (rec == 0 && catrec == 0)
-            return;
-
         catrecTime = catrec;
         recTime = (rec != 0) ? uint32(rec) : catrecTime;
     }
@@ -29717,7 +29718,7 @@ void Player::SendBattlegroundTimer(uint32 currentTime, uint32 maxTime)
     SendDirectMessage(&data);
 }
 
-bool Player::HasSpellCharge(uint32 spellId, SpellCategoryEntry const &category)
+bool Player::HasSpellCharge(uint32 spellId, SpellCategoryEntry const &category) const
 {
     // Spell 127252 has charges category 133 with 0 regen time. Bad data in DBC?
     if (category.ChargeRegenTime == 0)

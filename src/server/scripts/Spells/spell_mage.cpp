@@ -1178,9 +1178,14 @@ class spell_mage_nether_tempest : public SpellScriptLoader
                             GetTarget()->CastSpell(itr, SPELL_MAGE_NETHER_TEMPEST_MISSILE, true);
                         }
 
-                        if (GetCaster()->HasAura(SPELL_MAGE_BRAIN_FREEZE))
-                            if (roll_chance_i(10))
-                                GetCaster()->CastSpell(GetCaster(), SPELL_MAGE_BRAIN_FREEZE_TRIGGERED, true);
+
+                        Player::AuraTargetList const *targets = _player->ToPlayer()->listOfTargetsOfAura(GetId());
+                        if (!targets || targets->empty())
+                            return;
+
+                        Unit const * const lastTarget = Unit::GetUnit(*_player, targets->back());
+                        if (GetTarget() == lastTarget && roll_chance_i(10) && _player->HasAura(SPELL_MAGE_BRAIN_FREEZE))
+                            _player->CastSpell(_player, SPELL_MAGE_BRAIN_FREEZE_TRIGGERED, true);
                     }
                 }
             }
@@ -1876,9 +1881,9 @@ class spell_mage_living_bomb : public SpellScriptLoader
     public:
         spell_mage_living_bomb() : SpellScriptLoader("spell_mage_living_bomb") { }
 
-        class spell_mage_living_bomb_AuraScript : public AuraScript
+        class script_impl : public AuraScript
         {
-            PrepareAuraScript(spell_mage_living_bomb_AuraScript);
+            PrepareAuraScript(script_impl);
 
             void AfterRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
@@ -1890,20 +1895,39 @@ class spell_mage_living_bomb : public SpellScriptLoader
                 {
                     caster->CastSpell(GetTarget(), SPELL_MAGE_LIVING_BOMB_TRIGGERED, true);
 
-                    /*if (caster->HasAura(SPELL_MAGE_BRAIN_FREEZE))
-                        caster->CastSpell(caster, SPELL_MAGE_BRAIN_FREEZE_TRIGGERED, true);*/
+                    handleBrainFreeze();
                 }
+            }
+
+            void handleBrainFreeze()
+            {
+                if (auto caster = GetCaster()->ToPlayer())
+                {
+                    Player::AuraTargetList const *targets = caster->ToPlayer()->listOfTargetsOfAura(GetId());
+                    if (!targets || targets->empty())
+                        return;
+                    Unit const * const lastTarget = Unit::GetUnit(*caster, targets->back());
+                    if (GetTarget() == lastTarget && roll_chance_i(25) && caster->HasAura(SPELL_MAGE_BRAIN_FREEZE))
+                        caster->CastSpell(caster, SPELL_MAGE_BRAIN_FREEZE_TRIGGERED, true);
+                }
+            }
+
+            void OnTick(AuraEffect const * /*aurEff*/)
+            {
+                if (GetCaster())
+                    handleBrainFreeze();
             }
 
             void Register()
             {
-                AfterEffectRemove += AuraEffectRemoveFn(spell_mage_living_bomb_AuraScript::AfterRemove, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
+                AfterEffectRemove += AuraEffectRemoveFn(script_impl::AfterRemove, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
+                OnEffectPeriodic += AuraEffectPeriodicFn(script_impl::OnTick, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
             }
         };
 
         AuraScript* GetAuraScript() const
         {
-            return new spell_mage_living_bomb_AuraScript();
+            return new script_impl();
         }
 };
 

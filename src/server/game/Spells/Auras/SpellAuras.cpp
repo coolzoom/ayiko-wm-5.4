@@ -2297,6 +2297,19 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         target->RemoveAurasDueToSpell(126084);
                     break;
                 }
+                case 44457: // Living Bomb
+                case 114923: // Nether Tempest
+                case 112948: // Frost Bomb
+                {
+                    // Brain Freeze requies most recently applied aura to proc
+                    if (!caster || !caster->ToPlayer())
+                        break;
+
+                    if (apply)
+                        caster->ToPlayer()->auraAppliedOnTarget(GetSpellInfo()->Id, target->GetGUID());
+                    else
+                        caster->ToPlayer()->auraRemovedFromTarget(GetSpellInfo()->Id, target->GetGUID());
+                }
                 default:
                     break;
             }
@@ -2428,6 +2441,15 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 }
                 else
                     target->RemoveAurasDueToSpell(104242);
+            }
+            // Methamorphosis
+            else if (GetSpellInfo()->Id == 103958)
+            {
+                // Apply Nether Plating bonus
+                if (apply && target->HasSpell(114129))
+                    target->CastSpell(target, 54817, true);
+                else
+                    target->RemoveAurasDueToSpell(54817);
             }
         }
         default:

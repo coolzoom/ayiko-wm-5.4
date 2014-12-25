@@ -228,45 +228,29 @@ class spell_pri_psyfiend_hit_me_driver : public SpellScriptLoader
 
             void OnProc(AuraEffect const * /*aurEff*/, ProcEventInfo& eventInfo)
             {
+                auto caster = GetCaster();
+                auto attacker = eventInfo.GetActor();
+
+                if (!caster || !attacker)
+                    return;
+
                 PreventDefaultAction();
 
-                if (!GetCaster())
-                    return;
-
-                Unit* attacker = eventInfo.GetActor();
-                if (!attacker)
-                    return;
-
-                if (eventInfo.GetActor()->GetGUID() != GetCaster()->GetGUID())
-                    return;
-
-                if (Player* _player = GetCaster()->ToPlayer())
+                std::list<Creature*> psyfiendList;
                 {
-                    std::list<Creature*> tempList;
-                    std::list<Creature*> psyfiendList;
-
-                    _player->GetCreatureListWithEntryInGrid(tempList, PRIEST_NPC_PSYFIEND, 100.0f);
-
-                    if (tempList.empty())
-                        return;
-
-                    for (auto itr : tempList)
-                    {
-                        if (!itr->IsAlive())
-                            continue;
-
-                        if (!itr->GetOwner())
-                            continue;
-
-                        if (itr->GetOwner() == _player->GetOwner())
-                        {
-                            psyfiendList.push_back(itr);
-                            break;
-                        }
-                    }
+                    caster->GetCreatureListWithEntryInGrid(psyfiendList, PRIEST_NPC_PSYFIEND, 100.0f);
 
                     if (psyfiendList.empty())
                         return;
+
+                    for (auto i = psyfiendList.begin(); i != psyfiendList.end();)
+                    {
+                        Unit* owner = (*i)->GetOwner();
+                        if (owner && owner == caster && (*i)->IsAlive())
+                            ++i;
+                        else
+                            i = psyfiendList.erase(i);
+                    }
 
                     if (psyfiendList.size() > 1)
                         Trinity::Containers::RandomResizeList(psyfiendList, 1);
@@ -1285,34 +1269,32 @@ class spell_pri_devouring_plague : public SpellScriptLoader
         {
             PrepareSpellScript(spell_pri_devouring_plague_SpellScript);
 
-            void HandleOnHit()
+            void HandleDamage(SpellEffIndex /*eff*/)
             {
-                if (Player* player = GetCaster()->ToPlayer())
+                auto player = GetCaster()->ToPlayer();
+                if (player && player->GetSpecializationId(player->GetActiveSpec()) == SPEC_PRIEST_SHADOW)
                 {
-                    if (GetHitUnit())
-                    {
-                        if (player->GetSpecializationId(player->GetActiveSpec()) == SPEC_PRIEST_SHADOW)
-                        {
-                            uint8 powerUsed = player->GetPower(POWER_SHADOW_ORB) + 1; // Don't forget PowerCost
-                            // Shadow Orb visual
-                            if (player->HasAura(77487))
-                                player->RemoveAura(77487);
-                            // Glyph of Shadow Ravens
-                            else if (player->HasAura(127850))
-                                player->RemoveAura(127850);
+                    // Shadow Orb visual
+                    if (player->HasAura(77487))
+                        player->RemoveAura(77487);
+                    // Glyph of Shadow Ravens
+                    else if (player->HasAura(127850))
+                        player->RemoveAura(127850);
 
-                            // Instant damage equal to amount of shadow orb
-                            int32 damage = GetHitDamage();
-                            damage = AddPct(damage, powerUsed * 20);
-                            SetHitDamage(damage);
-                        }
-                    }
+                    // Instant damage equal to amount of shadow orb
+                    int32 damage = GetHitDamage();
+                    // First orb is consumed in spell-cast
+                    uint8 powerUsed = GetCaster()->GetPower(POWER_SHADOW_ORB) + 1;
+                    player->SetPower(POWER_SHADOW_ORB, 0);
+
+                    damage = AddPct(damage, powerUsed * 20);
+                    SetHitDamage(damage);
                 }
             }
 
             void Register()
             {
-                OnHit += SpellHitFn(spell_pri_devouring_plague_SpellScript::HandleOnHit);
+                OnEffectHitTarget += SpellEffectFn(spell_pri_devouring_plague_SpellScript::HandleDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
             }
         };
 
@@ -1338,8 +1320,8 @@ class spell_pri_devouring_plague : public SpellScriptLoader
                 if (!GetCaster())
                     return;
 
-                powerUsed = GetCaster()->GetPower(POWER_SHADOW_ORB);
-                GetCaster()->SetPower(POWER_SHADOW_ORB, 0);
+                // First orb is consumed in spell-cast
+                powerUsed = GetCaster()->GetPower(POWER_SHADOW_ORB) + 1;
 
                 amount *= powerUsed;
             }
@@ -2636,7 +2618,7 @@ class spell_pri_power_word_shield : public SpellScriptLoader
             {
                 if (player->HasAura(MASTERY_SPELL_DISCIPLINE_SHIELD) && player->getLevel() >= 80)
                 {
-                    float Mastery = 1 + (player->GetFloatValue(PLAYER_MASTERY) * 2.5f / 100.0f);
+                    float Mastery = 1 + (player->GetFloatValue(PLAYER_MASTERY) * 1.6f / 100.0f);
                     amount = int32(amount * Mastery);
                 }
                 // Divine Aegis
@@ -2843,7 +2825,6 @@ class spell_pri_mind_flay final : public SpellScriptLoader
 
         enum
         {
-            TALENT_SOLACE_AND_INSANITY  = 139139,
             SPELL_DEVOURING_PLAGUE      = 2944,
             GLYPH_OF_MIND_FLAY          = 120585,
         };
@@ -2856,27 +2837,6 @@ class spell_pri_mind_flay final : public SpellScriptLoader
                 effectMask &= ~(1 << EFFECT_1);
         }
 
-        void calculateAmount(AuraEffect const *, int32 &amount, bool &canBeRecalculated)
-        {
-            canBeRecalculated = false;
-
-            if (!GetCaster())
-                return;
-
-            auto const caster = GetCaster()->ToPlayer();
-            auto const target = GetUnitOwner();
-            if (!caster || !target)
-                return;
-
-            // Mind flay with Solace and Insanity
-            if (caster->GetSpecializationId(caster->GetActiveSpec()) == SPEC_PRIEST_SHADOW && caster->HasAura(TALENT_SOLACE_AND_INSANITY))
-            {
-                // Get dummy aura where consumed Shadow Orbs are stored
-                if (auto const devouringPlague = target->GetAuraEffect(SPELL_DEVOURING_PLAGUE, EFFECT_2))
-                    AddPct(amount, 33.3f * (devouringPlague->GetAmount() + 1));
-            }
-        }
-
         void onTick(AuraEffect const * /*aurEff*/)
         {
             if (auto caster = GetCaster())
@@ -2887,7 +2847,6 @@ class spell_pri_mind_flay final : public SpellScriptLoader
         void Register() final
         {
             OnInitEffects += AuraInitEffectsFn(script_impl::initEffects);
-            DoEffectCalcAmount += AuraEffectCalcAmountFn(script_impl::calculateAmount, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
             OnEffectPeriodic += AuraEffectPeriodicFn(script_impl::onTick, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
         }
     };
@@ -2980,6 +2939,58 @@ public:
     }
 };
 
+// 32592 - Mass Dispel
+class spell_pri_mass_dispel : public SpellScriptLoader
+{
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        bool _hasImmunity;
+
+        bool Load()
+        {
+            _hasImmunity = false;
+            return true;
+        }
+
+        void CheckAuras()
+        {
+            // Glyph of Mass Dispel
+            if (Unit* target = GetHitUnit())
+                if (GetCaster()->HasAura(55691))
+                    if (target->HasAuraWithMechanic(1 << MECHANIC_IMMUNE_SHIELD))
+                        _hasImmunity = true;
+        }
+
+        void HandleScript(SpellEffIndex effIndex)
+        {
+            if (_hasImmunity)
+            {
+                if (Unit* target = GetHitUnit())
+                {
+                    target->RemoveAurasWithMechanic(1 << MECHANIC_IMMUNE_SHIELD, AURA_REMOVE_BY_ENEMY_SPELL);
+                    PreventHitEffect(effIndex);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_impl::HandleScript, EFFECT_0, SPELL_EFFECT_DISPEL);
+            BeforeHit += SpellHitFn(spell_impl::CheckAuras);
+        }
+    };
+
+public:
+    spell_pri_mass_dispel() : SpellScriptLoader("spell_pri_mass_dispel") { }
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
 void AddSC_priest_spell_scripts()
 {
     new spell_pri_power_word_fortitude();
@@ -3040,4 +3051,5 @@ void AddSC_priest_spell_scripts()
     new spell_pri_divine_star_damage_heal();
     new spell_pri_mind_flay();
     new spell_pri_shadow_word_death_glyphed();
+    new spell_pri_mass_dispel();
 }

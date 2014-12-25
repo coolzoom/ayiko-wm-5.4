@@ -1101,6 +1101,7 @@ class Player final : public Unit, public GridObject<Player>
     typedef std::unordered_set<uint64> WhisperWhitelist;
 
     public:
+        typedef std::list<uint64> AuraTargetList;
         explicit Player (WorldSession* session);
         ~Player();
 
@@ -1353,7 +1354,7 @@ class Player final : public Unit, public GridObject<Player>
         * @param ignore gain multipliers
         */
 
-        void ModifyCurrency(uint32 id, int32 count, uint32 modifyFlags = 0);
+        int32 ModifyCurrency(uint32 id, int32 count, uint32 modifyFlags = 0);
 
         void ApplyEquipCooldown(Item* pItem);
         void QuickEquipItem(uint16 pos, Item* pItem);
@@ -2004,7 +2005,7 @@ class Player final : public Unit, public GridObject<Player>
         float GetMeleeCritFromAgility();
         void GetDodgeFromAgility(float &diminishing, float &nondiminishing);
         float GetSpellCritFromIntellect();
-        float OCTRegenMPPerSpirit();
+        float OCTRegenMPPerSpirit() const;
         float GetRatingMultiplier(CombatRating cr) const;
         float GetRatingBonusValue(CombatRating cr) const;
         uint32 GetBaseSpellPowerBonus() { return m_baseSpellPower; }
@@ -2749,7 +2750,7 @@ class Player final : public Unit, public GridObject<Player>
         void SetIgnoreMovementCount(uint8 count) { m_ignoreMovementCount = count; }
         uint8 GetIgnoreMovementCount() const { return m_ignoreMovementCount; }
 
-        bool HasSpellCharge(uint32 spellId, SpellCategoryEntry const &category);
+        bool HasSpellCharge(uint32 spellId, SpellCategoryEntry const &category) const;
 
         void SendCUFProfiles();
 
@@ -2763,6 +2764,38 @@ class Player final : public Unit, public GridObject<Player>
 
         uint8 GetBattleGroundRoles() const { return m_bgRoles; }
         void SetBattleGroundRoles(uint8 roles) { m_bgRoles = roles; }
+
+        void auraAppliedOnTarget(uint32 spellId, uint64 targetGuid)
+        {
+            AuraTargetList &targets = auraTargets_[spellId];
+            if (std::find(targets.begin(), targets.end(), targetGuid) == targets.end())
+                targets.push_back(targetGuid);
+        }
+
+        void auraRemovedFromTarget(uint32 spellId, uint64 targetGuid)
+        {
+            AuraTargetMap::iterator i = auraTargets_.find(spellId);
+            if (i == auraTargets_.end())
+                return;
+
+            AuraTargetList &targets = i->second;
+
+            AuraTargetList::iterator j = std::find(targets.begin(), targets.end(), targetGuid);
+            if (j != targets.end())
+                targets.erase(j);
+        }
+
+        size_t countOfTargetsOfAura(uint32 spellId) const
+        {
+            AuraTargetMap::const_iterator i = auraTargets_.find(spellId);
+            return (i != auraTargets_.end()) ? i->second.size() : 0;
+        }
+
+        AuraTargetList const * listOfTargetsOfAura(uint32 spellId) const
+        {
+            AuraTargetMap::const_iterator i = auraTargets_.find(spellId);
+            return (i != auraTargets_.end()) ? &i->second : NULL;
+        }
 
     private:
         typedef std::unordered_set<uint32> DFQuestsDoneList;
@@ -3180,6 +3213,9 @@ class Player final : public Unit, public GridObject<Player>
         Trinity::RatedBgStats m_ratedBgStats;
 
         bool hasForcedMovement_;
+
+        typedef std::unordered_map<uint32, AuraTargetList> AuraTargetMap;
+        AuraTargetMap auraTargets_;
 };
 
 void AddItemsSetItem(Player*player, Item* item);

@@ -677,20 +677,16 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     }
                     case 26679: // Deadly Throw
                     {
-                        if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                        if (auto player = m_caster->ToPlayer())
                         {
-                            if (uint32 combo = ((Player*)m_caster)->GetComboPoints())
-                            {
-                                float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
-
-                                if (m_caster->ToPlayer()->GetSpecializationId(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_ROGUE_ASSASSINATION
-                                    || m_caster->ToPlayer()->GetSpecializationId(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_ROGUE_COMBAT)
-                                    damage += int32(ap * combo * 0.12f);
-                                else if (m_caster->ToPlayer()->GetSpecializationId(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_ROGUE_SUBTLETY)
-                                    damage += int32(ap * combo * 0.149f);
-                            }
+                            uint8 cp = player->GetComboPoints();
+                            float ap = player->GetTotalAttackPowerValue(BASE_ATTACK);
+                            uint32 activeSpec = player->GetSpecializationId(player->GetActiveSpec());
+                            if (activeSpec == SPEC_ROGUE_ASSASSINATION || activeSpec == SPEC_ROGUE_COMBAT)
+                                m_damage += int32(ap * cp * 0.12f);
+                            else if (activeSpec == SPEC_ROGUE_SUBTLETY)
+                                m_damage += int32(ap * cp * 0.149f);
                         }
-
                         break;
                     }
                     case 32645: // Envenom
@@ -703,7 +699,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
 
                             if (combo)
                             {
-                                damage += int32(0.112f * combo * ap + damage * combo);
+                                damage = int32(0.112f * combo * ap + damage * combo);
 
                                 // Eviscerate and Envenom Bonus Damage (item set effect)
                                 if (m_caster->HasAura(37169))
@@ -717,9 +713,6 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     {
                         if (m_caster->GetTypeId() != TYPEID_PLAYER)
                             break;
-
-                        if (m_caster->ToPlayer()->GetComboTarget() == unitTarget->GetGUID())
-                            m_caster->ToPlayer()->AddComboPoints(unitTarget, 1);
 
                         // Fan of Knives - Vile Poisons
                         if (AuraEffect *aur = m_caster->GetDummyAuraEffect(SPELLFAMILY_ROGUE, 857, 2))
@@ -2170,7 +2163,7 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
 
         // Custom MoP Script
         // 77495 - Mastery : Harmony
-        if (caster && caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_DRUID)
+        if (caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_DRUID)
         {
             if (caster->HasAura(77495))
             {
@@ -2190,7 +2183,7 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
             }
         }
         // 77226 - Mastery : Deep Healing
-        if (caster && caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_SHAMAN)
+        if (caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_SHAMAN)
         {
             if (caster->HasAura(77226))
             {
@@ -2206,8 +2199,14 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
                 }
             }
         }
+        // 77484 - Mastery: Shield Discipline
+        if (caster->GetTypeId() == TYPEID_PLAYER && caster->HasAura(77484) && addhealth)
+        {
+            float Mastery = 1 + (caster->GetFloatValue(PLAYER_MASTERY) * 0.8f / 100.0f);
+            addhealth = int32(addhealth * Mastery);
+        }
         // 77485 - Mastery : Echo of Light
-        if (caster && caster->getClass() == CLASS_PRIEST && caster->HasAura(77485) && caster->getLevel() >= 80 && addhealth)
+        if (caster->getClass() == CLASS_PRIEST && caster->HasAura(77485) && caster->getLevel() >= 80 && addhealth)
         {
             float Mastery = caster->GetFloatValue(PLAYER_MASTERY) * 1.25f / 100.0f;
             int32 bp = (Mastery * addhealth) / 6;
@@ -2218,12 +2217,12 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
             m_caster->CastCustomSpell(unitTarget, 77489, &bp, NULL, NULL, true);
         }
         // Chakra : Serenity - 81208
-        if (caster && addhealth && caster->HasAura(81208) && m_spellInfo->Effects[0].TargetA.GetTarget() == TARGET_UNIT_TARGET_ALLY) // Single heal target
+        if (addhealth && caster->HasAura(81208) && m_spellInfo->Effects[0].TargetA.GetTarget() == TARGET_UNIT_TARGET_ALLY) // Single heal target
             if (Aura *renew = unitTarget->GetAura(139, caster->GetGUID()))
                 renew->RefreshDuration();
 
         // Mogu'Shan Vault
-        if (caster && (caster->HasAura(116161) || unitTarget->HasAura(116161))) // SPELL_CROSSED_OVER
+        if ((caster->HasAura(116161) || unitTarget->HasAura(116161))) // SPELL_CROSSED_OVER
         {
             if (unitTarget == caster)
             {

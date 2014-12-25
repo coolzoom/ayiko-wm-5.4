@@ -1,8 +1,8 @@
 /*
-    Dungeon : Mogu'shan palace 87-89
-    Gekkan
-    Jade servers
-*/
+ *    Dungeon : Mogu'shan palace 87-89
+ *    Gekkan
+ *    Jade servers
+ */
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
@@ -10,291 +10,411 @@
 
 #define TYPE_GET_ENTOURAGE 14
 
+const uint32 auiGekkanAdds[4] =
+{
+    CREATURE_GLINTROK_SKULKER,
+    CREATURE_GLINTROK_HEXXER,
+    CREATURE_GLINTROK_ORACLE,
+    CREATURE_GLINTROK_IRONHIDE
+};
+
+
 class boss_gekkan : public CreatureScript
 {
-    public:
-        boss_gekkan() : CreatureScript("boss_gekkan") { }
+public:
+    boss_gekkan() : CreatureScript("boss_gekkan") { }
 
-        CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new boss_gekkan_AI(creature);
+    }
+
+    enum eSpells
+    {
+        SPELL_RECKLESS_INSPIRATION     = 118988,
+        SPELL_RECKLESS_INSPIRATION_2   = 129262
+    };
+
+    enum eActions
+    {
+        ACTION_ADD_DEATH,
+        ACTION_COMBAT
+    };
+
+    enum eEvents
+    {
+        EVENT_RECKLESS_INSPIRATION = 1,
+    };
+
+    enum eTalks
+    {
+        TALK_INTRO,
+        TALK_KILLING,
+        TALK_SPELL,
+        TALK_AGGRO,
+        TALK_DEATH,
+    };
+
+    struct boss_gekkan_AI : public BossAI
+    {
+        boss_gekkan_AI(Creature* creature) : BossAI(creature, DATA_GEKKAN)
         {
-            return new boss_gekkan_AI(creature);
+            InitializeGekkan();
         }
 
-        enum eSpells
-        {
-            SPELL_RECKLESS_INSPIRATION = 118988,
-        };
+        std::vector<uint64> m_uilGekkanAdds;
 
-        enum eActions
-        {
-            ACTION_ENTOURAGE_DIED,
-        };
+        bool m_bYelled;
 
-        enum eEvents
+        void InitializeAI() final
         {
-            EVENT_RECKLESS_INSPIRATION = 1,
-        };
+            Reset();
+            SetImmuneToPullPushEffects(true);
+        }
 
-        enum eTalks
+        void InitializeGekkan()
         {
-            TALK_INTRO,
-            TALK_KILLING,
-            TALK_SPELL,
-            TALK_AGGRO,
-            TALK_DEATH,
-        };
+            m_bYelled = false;
 
-        struct boss_gekkan_AI : public BossAI
+            InsertAdds(3);
+        }
+
+        bool InsertAdds(int n)
         {
-            boss_gekkan_AI(Creature* creature) : BossAI(creature, DATA_GEKKAN)
+            if (n < 0)
+                return false;
+
+            if (Creature* pAdd = GetClosestCreatureWithEntry(me, auiGekkanAdds[n], 40.f))
+                m_uilGekkanAdds.push_back(pAdd->GetGUID());
+
+            return InsertAdds(n - 1);
+        }
+
+        void HandleAddDeath()
+        {
+            Talk(TALK_SPELL);
+            DoCast(SPELL_RECKLESS_INSPIRATION_2);
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            DoZoneInCombat();
+
+            if (me->GetVictim())
             {
-            }
-            std::list<uint64> entourage;
-
-            void EnterCombat(Unit* /*who*/)
-            {
-                //Get the four adds.
-                if (me->GetInstanceScript())
-                    for (int i = 0; i < 4; ++i)
-                        entourage.push_back(me->GetInstanceScript()->GetData64(TYPE_GET_ENTOURAGE + i));
-                events.ScheduleEvent(EVENT_RECKLESS_INSPIRATION, 3000);
-                Talk(TALK_AGGRO);
-
-                if (me->GetInstanceScript())
-                    me->GetInstanceScript()->SetData(DATA_GEKKAN_ADDS, 1);
-            }
-
-            void JustDied(Unit* /*who*/)
-            {
-                for (auto guid : entourage)
+                // Get the four adds.
+                for (auto const &guid : m_uilGekkanAdds)
                 {
-                    Creature* c = me->GetMap()->GetCreature(guid);
-                    if (!c)
-                        continue;
-                    if (c->IsAlive())
-                        me->CastSpell(c, SPELL_RECKLESS_INSPIRATION, false);
+                    auto const pAdd = ObjectAccessor::GetCreature(*me, guid);
+                    if (pAdd && pAdd->AI())
+                        pAdd->SetInCombatWithZone();
                 }
-                Talk(TALK_DEATH);
             }
 
-            void KilledUnit(Unit* /*u*/)
+            Talk(TALK_AGGRO);
+
+            events.ScheduleEvent(EVENT_RECKLESS_INSPIRATION, urand(10000, 16000));
+        }
+
+        void MoveInLineOfSight(Unit* pWho)
+        {
+            if (pWho && pWho->GetTypeId() == TYPEID_PLAYER && !m_bYelled)
             {
-                Talk(TALK_KILLING);
+                Talk(TALK_INTRO);
+                m_bYelled = true;
             }
 
-            void DoAction(const int32 action)
+            CreatureAI::MoveInLineOfSight(pWho);
+        }
+
+        void JustReachedHome()
+        {
+            // Respawn all adds on evade
+            for (auto const &guid : m_uilGekkanAdds)
             {
-                switch (action)
+                if (Creature* pAdd = ObjectAccessor::GetCreature(*me, guid))
                 {
-                case ACTION_ENTOURAGE_DIED:
-                    {
-                        //Delete the guid of the list if one dies.
-                        uint64 dead_entourage = 0;
-                        for (auto guid : entourage)
-                        {
-                            Creature* c = me->GetMap()->GetCreature(guid);
-                            if (!c)
-                                continue;
-                            if (c->isDead())
-                            {
-                                dead_entourage = guid;
-                                break;
-                            }
-                        }
-                        entourage.remove(dead_entourage);
-                        me->CastSpell(me, SPELL_RECKLESS_INSPIRATION, false);
-                        Talk(TALK_SPELL);
-                    }
+                    if (!pAdd->IsAlive())
+                        pAdd->Respawn();
+
+                    pAdd->RemoveAllAuras();
+                }
+            }
+        }
+
+        Creature* GetRandomAliveAdd()
+        {
+            decltype(m_uilGekkanAdds) uiTempGuidList;
+
+            for (auto const &guid : m_uilGekkanAdds)
+            {
+                auto const pAdd = ObjectAccessor::GetCreature(*me, guid);
+                if (pAdd && pAdd->IsAlive())
+                    uiTempGuidList.push_back(guid);
+            }
+
+            if (uiTempGuidList.empty())
+                return nullptr;
+
+            auto itr = uiTempGuidList.cbegin();
+            std::advance(itr, urand(0, uiTempGuidList.size() - 1));
+
+            return ObjectAccessor::GetCreature(*me, *itr);
+        }
+
+        void JustDied(Unit* /*who*/)
+        {
+            // If we die, all remaining adds should get buff
+            for (auto const &guid : m_uilGekkanAdds)
+            {
+                auto const pAdd = ObjectAccessor::GetCreature(*me, guid);
+                if (pAdd && pAdd->IsAlive())
+                    pAdd->CastSpell(pAdd, SPELL_RECKLESS_INSPIRATION_2, false);
+            }
+
+            Talk(TALK_DEATH);
+
+            if (auto const script = me->GetInstanceScript())
+                script->SetData(TYPE_GEKKAN, DONE);
+        }
+
+        void KilledUnit(Unit* /*u*/)
+        {
+            Talk(TALK_KILLING);
+        }
+
+        void DoAction(const int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_ADD_DEATH:
+                    HandleAddDeath();
                     break;
-                }
+                case ACTION_COMBAT:
+                    DoZoneInCombat();
+                    break;
             }
+        }
 
-            void UpdateAI(const uint32 diff)
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            while (uint32 eventId = events.ExecuteEvent())
             {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                if (me->HasUnitState(UNIT_STATE_CASTING))
-                    return;
-
-                while (uint32 eventId = events.ExecuteEvent())
+                switch (eventId)
                 {
-                    switch (eventId)
-                    {
                     case EVENT_RECKLESS_INSPIRATION:
-                        {
-                            //Cast on a random entourage the inspiration.
-                            std::list<uint64>::iterator itr = entourage.begin();
-                            std::advance(itr, urand(0, entourage.size() - 1));
-                            uint64 guid = *itr;
-                            Creature* c = me->GetMap()->GetCreature(guid);
-                            if (c)
-                            {
-                                me->CastSpell(c, SPELL_RECKLESS_INSPIRATION, false);
-                                Talk(TALK_SPELL);
-                            }
-                            events.ScheduleEvent(EVENT_RECKLESS_INSPIRATION, 5000);
-                        }
+                        if (Creature* pAdd = GetRandomAliveAdd())
+                            DoCast(pAdd, SPELL_RECKLESS_INSPIRATION, false);
+                        events.ScheduleEvent(EVENT_RECKLESS_INSPIRATION, urand(15000, 21000));
+                        Talk(TALK_SPELL);
                         break;
-                    }
                 }
-
-                DoMeleeAttackIfReady();
             }
-        };
+
+            DoMeleeAttackIfReady();
+        }
+    };
 };
 
 class mob_glintrok_skulker : public CreatureScript
 {
-    public:
-        mob_glintrok_skulker() : CreatureScript("mob_glintrok_skulker") { }
+public:
+    mob_glintrok_skulker() : CreatureScript("mob_glintrok_skulker") { }
 
-        CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new mob_glintrok_skulker_AI(creature);
+    }
+
+    enum eSpells
+    {
+        SPELL_SHANK        = 118963,
+        SPELL_STEALTH      = 118969
+    };
+
+    struct mob_glintrok_skulker_AI : public ScriptedAI
+    {
+        mob_glintrok_skulker_AI(Creature* creature) : ScriptedAI(creature)
         {
-            return new mob_glintrok_skulker_AI(creature);
+        }
+        EventMap events;
+
+        void EnterCombat(Unit* /*unit*/)
+        {
+            events.ScheduleEvent(1, 2000);
+
+            if (Creature* pGekkan = GetClosestCreatureWithEntry(me, CREATURE_GEKKAN, 100.0f))
+            {
+                if (pGekkan->AI())
+                    pGekkan->AI()->DoAction(1);
+            }
         }
 
-        enum eSpells
+        void Reset()
         {
-            SPELL_SHANK        = 118963,
-        };
+            DoCast(SPELL_STEALTH);
+        }
 
-        struct mob_glintrok_skulker_AI : public ScriptedAI
+        void JustDied(Unit* /*pKiller*/)
         {
-            mob_glintrok_skulker_AI(Creature* creature) : ScriptedAI(creature)
+            if (Creature* pGekkan = GetClosestCreatureWithEntry(me, CREATURE_GEKKAN, 100.0f))
             {
+                if (pGekkan->AI())
+                    pGekkan->AI()->DoAction(0);
             }
-            EventMap events;
+        }
 
-            void EnterCombat(Unit* /*unit*/)
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
             {
-                events.ScheduleEvent(1, 2000);
-
-                if (me->GetInstanceScript())
-                    me->GetInstanceScript()->SetData(DATA_GEKKAN_ADDS, 1);
-            }
-
-            void UpdateAI(const uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                while (uint32 eventId = events.ExecuteEvent())
+                switch (eventId)
                 {
-                    switch (eventId)
-                    {
                     case 1:
                         me->CastSpell(me->GetVictim(), SPELL_SHANK, false);
                         events.ScheduleEvent(1, 7000);
                         break;
-                    }
                 }
-
-                DoMeleeAttackIfReady();
             }
-        };
+
+            DoMeleeAttackIfReady();
+        }
+    };
 };
 
 class mob_glintrok_ironhide : public CreatureScript
 {
-    public:
-        mob_glintrok_ironhide() : CreatureScript("mob_glintrok_ironhide") { }
+public:
+    mob_glintrok_ironhide() : CreatureScript("mob_glintrok_ironhide") { }
 
-        CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new mob_glintrok_ironhide_AI(creature);
+    }
+
+    enum eSpells
+    {
+        SPELL_IRON_PROTECTOR        = 118958,
+    };
+
+    struct mob_glintrok_ironhide_AI : public ScriptedAI
+    {
+        mob_glintrok_ironhide_AI(Creature* creature) : ScriptedAI(creature)
         {
-            return new mob_glintrok_ironhide_AI(creature);
+        }
+        EventMap events;
+
+        void EnterCombat(Unit* /*unit*/)
+        {
+            events.ScheduleEvent(1, 2000);
+
+            if (Creature* pGekkan = GetClosestCreatureWithEntry(me, CREATURE_GEKKAN, 100.0f))
+            {
+                if (pGekkan->AI())
+                    pGekkan->AI()->DoAction(1);
+            }
         }
 
-        enum eSpells
+        void JustDied(Unit* /*pKiller*/)
         {
-            SPELL_IRON_PROTECTOR        = 118958,
-        };
+            if (Creature* pGekkan = GetClosestCreatureWithEntry(me, CREATURE_GEKKAN, 100.0f))
+            {
+                if (pGekkan->AI())
+                    pGekkan->AI()->DoAction(0);
+            }
+        }
 
-        struct mob_glintrok_ironhide_AI : public ScriptedAI
+        void UpdateAI(const uint32 diff)
         {
-            mob_glintrok_ironhide_AI(Creature* creature) : ScriptedAI(creature)
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
             {
-            }
-            EventMap events;
-
-            void EnterCombat(Unit* /*unit*/)
-            {
-                events.ScheduleEvent(1, 2000);
-
-                if (me->GetInstanceScript())
-                    me->GetInstanceScript()->SetData(DATA_GEKKAN_ADDS, 1);
-            }
-
-            void UpdateAI(const uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                while (uint32 eventId = events.ExecuteEvent())
+                switch (eventId)
                 {
-                    switch (eventId)
-                    {
                     case 1:
-                        me->CastSpell(me, SPELL_IRON_PROTECTOR, false);
+                        me->CastSpell(me, SPELL_IRON_PROTECTOR, true);
                         events.ScheduleEvent(1, 15000);
                         break;
-                    }
                 }
-
-                DoMeleeAttackIfReady();
             }
-        };
+
+            DoMeleeAttackIfReady();
+        }
+    };
 };
 
 class mob_glintrok_oracle : public CreatureScript
 {
-    public:
-        mob_glintrok_oracle() : CreatureScript("mob_glintrok_oracle") { }
+public:
+    mob_glintrok_oracle() : CreatureScript("mob_glintrok_oracle") { }
 
-        CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new mob_glintrok_oracle_AI(creature);
+    }
+
+    enum eSpells
+    {
+        SPELL_CLEANSING_FLAME        = 118940,
+        SPELL_FIRE_BOLT              = 118936,
+    };
+
+    struct mob_glintrok_oracle_AI : public ScriptedAI
+    {
+        mob_glintrok_oracle_AI(Creature* creature) : ScriptedAI(creature)
         {
-            return new mob_glintrok_oracle_AI(creature);
+        }
+        EventMap events;
+
+        void EnterCombat(Unit* /*unit*/)
+        {
+            events.ScheduleEvent(1, 16000);
+            events.ScheduleEvent(2, 4000);
+
+            if (Creature* pGekkan = GetClosestCreatureWithEntry(me, CREATURE_GEKKAN, 100.0f))
+            {
+                if (pGekkan->AI())
+                    pGekkan->AI()->DoAction(1);
+            }
         }
 
-        enum eSpells
+        void JustDied(Unit* /*pKiller*/)
         {
-            SPELL_CLEANSING_FLAME        = 118940,
-            SPELL_FIRE_BOLT              = 118936,
-        };
+            if (Creature* pGekkan = GetClosestCreatureWithEntry(me, CREATURE_GEKKAN, 100.0f))
+            {
+                if (pGekkan->AI())
+                    pGekkan->AI()->DoAction(0);
+            }
+        }
 
-        struct mob_glintrok_oracle_AI : public ScriptedAI
+        void UpdateAI(const uint32 diff)
         {
-            mob_glintrok_oracle_AI(Creature* creature) : ScriptedAI(creature)
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
             {
-            }
-            EventMap events;
-
-            void EnterCombat(Unit* /*unit*/)
-            {
-                events.ScheduleEvent(1, 2000);
-                events.ScheduleEvent(2, 4000);
-
-                if (me->GetInstanceScript())
-                    me->GetInstanceScript()->SetData(DATA_GEKKAN_ADDS, 1);
-            }
-
-            void UpdateAI(const uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                while (uint32 eventId = events.ExecuteEvent())
+                switch (eventId)
                 {
-                    switch (eventId)
-                    {
                     case 1:
                         me->CastSpell(me, SPELL_CLEANSING_FLAME, false);
                         events.ScheduleEvent(1, 25000);
@@ -303,57 +423,72 @@ class mob_glintrok_oracle : public CreatureScript
                         me->CastSpell(me->GetVictim(), SPELL_FIRE_BOLT, false);
                         events.ScheduleEvent(2, 7000);
                         break;
-                    }
                 }
-
-                DoMeleeAttackIfReady();
             }
-        };
+
+            DoMeleeAttackIfReady();
+        }
+    };
 };
 
 class mob_glintrok_hexxer : public CreatureScript
 {
-    public:
-        mob_glintrok_hexxer() : CreatureScript("mob_glintrok_hexxer") { }
+public:
+    mob_glintrok_hexxer() : CreatureScript("mob_glintrok_hexxer") { }
 
-        CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new mob_glintrok_hexxer_AI(creature);
+    }
+
+    enum eSpells
+    {
+        SPELL_HEX_OF_LETHARGY        = 118903,
+        SPELL_DARK_BOLT              = 118917,
+    };
+
+    struct mob_glintrok_hexxer_AI : public ScriptedAI
+    {
+        mob_glintrok_hexxer_AI(Creature* creature) : ScriptedAI(creature)
         {
-            return new mob_glintrok_hexxer_AI(creature);
+        }
+        EventMap events;
+
+        void EnterCombat(Unit* /*unit*/)
+        {
+            events.ScheduleEvent(1, 10000);
+            events.ScheduleEvent(2, 4000);
+
+            if (Creature* pGekkan = GetClosestCreatureWithEntry(me, CREATURE_GEKKAN, 100.0f))
+            {
+                if (pGekkan->AI())
+                    pGekkan->AI()->DoAction(1);
+            }
         }
 
-        enum eSpells
+        void JustDied(Unit* /*pKiller*/)
         {
-            SPELL_HEX_OF_LETHARGY        = 118903,
-            SPELL_DARK_BOLT              = 118917,
-        };
+            if (Creature* pGekkan = GetClosestCreatureWithEntry(me, CREATURE_GEKKAN, 100.0f))
+            {
+                if (pGekkan->AI())
+                    pGekkan->AI()->DoAction(0);
+            }
+        }
 
-        struct mob_glintrok_hexxer_AI : public ScriptedAI
+        void UpdateAI(const uint32 diff)
         {
-            mob_glintrok_hexxer_AI(Creature* creature) : ScriptedAI(creature)
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            while (uint32 eventId = events.ExecuteEvent())
             {
-            }
-            EventMap events;
-
-            void EnterCombat(Unit* /*unit*/)
-            {
-                events.ScheduleEvent(1, 2000);
-                events.ScheduleEvent(2, 4000);
-
-                if (me->GetInstanceScript())
-                    me->GetInstanceScript()->SetData(DATA_GEKKAN_ADDS, 1);
-            }
-
-            void UpdateAI(const uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                while (uint32 eventId = events.ExecuteEvent())
+                switch (eventId)
                 {
-                    switch (eventId)
-                    {
                     case 1:
                         me->CastSpell(me->GetVictim(), SPELL_HEX_OF_LETHARGY, false);
                         events.ScheduleEvent(1, 20000);
@@ -362,12 +497,12 @@ class mob_glintrok_hexxer : public CreatureScript
                         me->CastSpell(me->GetVictim(), SPELL_DARK_BOLT, false);
                         events.ScheduleEvent(2, 5000);
                         break;
-                    }
                 }
-
-                DoMeleeAttackIfReady();
             }
-        };
+
+            DoMeleeAttackIfReady();
+        }
+    };
 };
 
 void AddSC_boss_gekkan()

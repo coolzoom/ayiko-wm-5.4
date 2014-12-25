@@ -3394,7 +3394,6 @@ bool SpellInfo::CanTriggerBladeFlurry() const
         case 8676:  // Ambush
         case 26679: // Deadly Throw
         case 27576: // Mutilate Off-Hand
-        case 51723: // Fan of Knives
         case 57841: // Killing Spree
         case 57842: // Killing Spree Off-Hand
         case 84617: // Revealing Strike
@@ -3809,6 +3808,7 @@ bool SpellInfo::IsAffectedByResilience() const
 {
     switch (Id)
     {
+        case 22482: // Blade Flurry proc
         case 12723: // Sweeping Strikes proc
         case 32409: // Glyph of Shadow Word: Death (backfire)
         case 33619: // Glyph of Reflective Shield

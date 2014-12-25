@@ -3992,7 +3992,7 @@ class npc_bloodworm : public CreatureScript
                 if (Aura *bloodGorged = me->GetAura(BLOODWORM_BLOOD_STACKS))
                 {
                     uint32 stacks = std::min<uint32>(bloodGorged->GetStackAmount(), 10);
-                    int32 damage = stacks *  10;
+                    int32 damage = stacks *  25;
                     me->CastCustomSpell(me, BLOODWORM_BLOOD_BURST, &damage, NULL, NULL, true);
                     me->DespawnOrUnsummon(500);
                 }
@@ -4372,9 +4372,11 @@ class npc_psyfiend : public CreatureScript
             npc_psyfiendAI(Creature* c) : Scripted_NoMovementAI(c)
             {
                 me->SetReactState(REACT_AGGRESSIVE);
+                oldTarget = 0;
                 targetGUID = 0;
             }
 
+            uint64 oldTarget;
             uint64 targetGUID;
             uint32 psychicHorrorTimer;
 
@@ -4396,8 +4398,6 @@ class npc_psyfiend : public CreatureScript
                 if (owner && owner->GetTypeId() == TYPEID_PLAYER)
                 {
                     me->SetLevel(owner->getLevel());
-                    me->SetMaxHealth(owner->GetMaxHealth() / 2);
-                    me->SetHealth(me->GetMaxHealth());
                     // Set no damage
                     me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, 0.0f);
                     me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, 0.0f);
@@ -4414,17 +4414,34 @@ class npc_psyfiend : public CreatureScript
                 {
                     if (psychicHorrorTimer <= diff)
                     {
-                        if (Unit* m_target = ObjectAccessor::FindUnit(targetGUID))
+                        // If target did not change, select random target
+                        if (!targetGUID || oldTarget == targetGUID)
                         {
-                            if (m_target->GetDistance2d(me) <= 20.0f)
-                                me->AddAura(SPELL_PSYCHIC_HORROR, m_target);
-                            else
-                                me->CastSpell(me, SPELL_PSYCHIC_HORROR, true);
-                        }
-                        else
-                            me->CastSpell(me, SPELL_PSYCHIC_HORROR, true);
+                            std::list<Unit*> targets;
+                            Trinity::AllWorldObjectsInRange objects(me, 20.0f);
+                            Trinity::UnitListSearcher<Trinity::AllWorldObjectsInRange> searcher(me, targets, objects);
+                            Trinity::VisitNearbyObject(me, 20.0f, searcher);
+                            Unit * psyfiend = me;
+                            uint64 oldTargetGUID = oldTarget;
+                            // Remove invalid targets and old target to prevent casting twice on same
+                            targets.remove_if([psyfiend, oldTargetGUID](Unit * obj)
+                            {
+                                return obj->isTotem() || !psyfiend->IsValidAttackTarget(obj) || obj->GetGUID() == oldTargetGUID;
+                            });
 
-                        psychicHorrorTimer = 1500;
+                            if (!targets.empty())
+                            {
+                                me->CastSpell(*targets.front(), SPELL_PSYCHIC_HORROR, false);
+                                oldTarget = (*targets.front()).GetGUID();
+                            }
+                        }
+                        else if (Unit* m_target = ObjectAccessor::FindUnit(targetGUID))
+                        {
+                            me->CastSpell(m_target, SPELL_PSYCHIC_HORROR, false);
+                            oldTarget = targetGUID;
+                        }
+
+                        psychicHorrorTimer = 2500;
                     }
                     else
                         psychicHorrorTimer -= diff;
@@ -4568,6 +4585,45 @@ class npc_shadowy_apparition : public CreatureScript
         };
 };
 
+class npc_warl_doomguard: public CreatureScript
+{
+public:
+    npc_warl_doomguard() : CreatureScript("npc_warl_doomguard") { }
+
+    struct npc_warl_doomguardAI : public ScriptedAI
+    {
+        npc_warl_doomguardAI(Creature* c) : ScriptedAI(c) { }
+
+        uint32 uiDoomboltTimer;
+
+        void Reset()
+        {
+            if (!me->HasAura(45631))
+                me->CastSpell(me, 45631, true);
+            uiDoomboltTimer = 4000;
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!me->GetVictim())
+                return;
+
+            if (uiDoomboltTimer <= diff)
+            {
+                me->CastSpell(me->GetVictim(), 85692, false);
+                uiDoomboltTimer = 4000;
+            }
+            else
+                uiDoomboltTimer -= diff;
+        }
+    };
+
+    CreatureAI* GetAI(Creature *creature) const
+    {
+        return new npc_warl_doomguardAI(creature);
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -4625,4 +4681,5 @@ void AddSC_npcs_special()
     new npc_psyfiend();
     new npc_spectral_guise();
     new npc_shadowy_apparition();
+    new npc_warl_doomguard();
 }

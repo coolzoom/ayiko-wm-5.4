@@ -1398,14 +1398,14 @@ SET @GOSSIP := 12634;
 SET @TEXTID := 17763;
 SET @SPELL_FORCE_SUMMON := 79419;
 SET @NPC_PROTOTYPE := 42945;
-SET @SPELL_FEIGN_DEATH := 57685;
+SET @SPELL_FEIGN_DEATH := 29266;
 SET @SPELL_EXPLOSION := 62987;
 SET @NPC_MULTIBOT := 42598;
 SET @SPELL_CLEANUP_NPC_TOXIC_POOL := 79424;
-SET @NPC_OBJECT_TOXIC_POOL := 203975;
+SET @OBJECT_TOXIC_POOL := 203975;
 SET @SPELL_DESPAWN_OBJECT_TOXIC_POOL := 79421;
 SET @SPELL_DESPAWN_MULTIBOT := 79435;
-SET @NPC_NPC_TOXIC_POOL := 42563;
+SET @NPC_TOXIC_POOL := 42563;
 SET @SPELL_ERUPTION := 79391;
 UPDATE `creature_template` SET `AIName`='SmartAI', `ScriptName`='', `gossip_menu_id`=@GOSSIP WHERE `entry`=@NPC_GRINDSPARK;
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@NPC_GRINDSPARK,@NPC_GRINDSPARK*100);
@@ -1428,7 +1428,8 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (@NPC_GRINDSPARK,0,6,0,62,0,100,0,@GOSSIP,0,0,0,85,@SPELL_FORCE_SUMMON,0,0,0,0,0,7,0,0,0,0,0,0,0,"Nepenthe-Engineer Grindspark - On Gossip Select - Cast Force Cast Summon GS-9x Multi-Bot"),
 (@NPC_GRINDSPARK,0,7,0,62,0,100,0,@GOSSIP,0,0,0,72,0,0,0,0,0,0,7,0,0,0,0,0,0,0,"Nepenthe-Engineer Grindspark - On Gossip Select - Close Gossip");
 -- GS-9x Prototype
-UPDATE `creature_template` SET `AIName`='SmartAI', `ScriptName`='', `unit_flags`=0 WHERE `entry`=@NPC_PROTOTYPE;
+UPDATE `creature_template` SET `AIName`='SmartAI', `ScriptName`='', `unit_flags`=0, `speed_run` = 1, `dynamicflags` = 0, `mechanic_immune_mask` = 0 WHERE `entry`=@NPC_PROTOTYPE;
+DELETE FROM `creature_template_aura` WHERE `entry`=@NPC_PROTOTYPE;
 DELETE FROM `creature` WHERE `id`=@NPC_PROTOTYPE;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (244863, @NPC_PROTOTYPE, 0, 1, 1, 0, 0, -5069.47, 457.511, 410.605, 2.17201, 10, 0, 0, 71, 0, 0, 0, 0, 0);
@@ -1449,11 +1450,11 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (@NPC_GRINDSPARK,2,0,"Arise my, uh... what shall I call you? How about 'GS-9x Prototype'? Arise, my GS-9x Prototype!",12,0,0,0,0,0,"Engineer Grindspark"),
 (@NPC_GRINDSPARK,3,0,"Uh... a couple more tweaks should do it, I think...",12,0,0,0,0,0,"Engineer Grindspark");
 -- Toxic Pool
-UPDATE `creature_template` SET `AIName`='SmartAI', `ScriptName`='' WHERE `entry`=@NPC_NPC_TOXIC_POOL;
-UPDATE `creature` SET `spawntimesecs` = 120 WHERE `id` = @NPC_NPC_TOXIC_POOL;
-DELETE FROM `smart_scripts` WHERE `entryorguid`=@NPC_NPC_TOXIC_POOL AND `source_type` = 0;
+UPDATE `creature_template` SET `AIName`='SmartAI', `ScriptName`='' WHERE `entry`=@NPC_TOXIC_POOL;
+UPDATE `creature` SET `spawntimesecs` = 60 WHERE `id` = @NPC_TOXIC_POOL;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@NPC_TOXIC_POOL AND `source_type` = 0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
-(@NPC_NPC_TOXIC_POOL,0,0,0,1,0,100,0,1000,1000,6000,6000,11,@SPELL_ERUPTION,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Toxic Pool - OOC timer - Cast Toxic Eruption");
+(@NPC_TOXIC_POOL,0,0,0,1,0,100,0,1000,1000,6000,6000,11,@SPELL_ERUPTION,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Toxic Pool - OOC timer - Cast Toxic Eruption");
 -- GS-9x Multi-Bot
 UPDATE `creature_template` SET `ScriptName`='' WHERE `entry`=@NPC_MULTIBOT;
 DELETE FROM `creature_template_aura` WHERE `entry`=@NPC_MULTIBOT;
@@ -1462,8 +1463,8 @@ INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (@SPELL_DESPAWN_MULTIBOT, @SPELL_CLEANUP_NPC_TOXIC_POOL, @SPELL_DESPAWN_OBJECT_TOXIC_POOL);
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 (13,1,@SPELL_DESPAWN_MULTIBOT,0,31,1,3,@NPC_MULTIBOT,0,0,'',"Despawn GS-9x Multi-Bot"),
-(13,1,@SPELL_CLEANUP_NPC_TOXIC_POOL,0,31,1,3,@NPC_NPC_TOXIC_POOL,0,0,'',"Clean Up Toxic Pool"),
-(13,1,@SPELL_DESPAWN_OBJECT_TOXIC_POOL,0,31,1,5,@NPC_OBJECT_TOXIC_POOL,0,0,'',"Despawn Toxic Pool");
+(13,1,@SPELL_CLEANUP_NPC_TOXIC_POOL,0,31,1,3,@NPC_TOXIC_POOL,0,0,'',"Clean Up Toxic Pool"),
+(13,1,@SPELL_DESPAWN_OBJECT_TOXIC_POOL,0,31,1,5,@OBJECT_TOXIC_POOL,0,0,'',"Despawn Toxic Pool");
 DELETE FROM `spell_linked_spell` WHERE `spell_trigger` = @SPELL_CLEANUP_NPC_TOXIC_POOL;
 INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES
 (@SPELL_CLEANUP_NPC_TOXIC_POOL,'94516','0','Clean Up Toxic Pool');
@@ -1515,6 +1516,15 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (@NPC_HANDS_SPRINGSPROCKET, 0, 0, "Alright, so you're just going to head through this tunnel and whaaaaa....?", 12, 0, 100, 0, 0, 0, "Hands Springsprocket"),
 (@NPC_HANDS_SPRINGSPROCKET, 1, 0, "I recommend that you return to Anvilmar, $N... and quickly! I'll send the signal to the Gnomeregan Airmen.", 12, 0, 100, 430, 0, 0, "Hands Springsprocket"),
 (@NPC_HANDS_SPRINGSPROCKET, 2, 0, "Look for a fellow by the name of Milo Geartwinge. I suppose I'll see what I can do about this cave-in.", 12, 0, 100, 1, 0, 0, "Hands Springsprocket");
+
+-- Gnomeregan Infantry was unselectable
+UPDATE `creature_template` SET `unit_flags` = 32768, `mechanic_immune_mask` = 652951551, `flags_extra` = 32768 WHERE `entry` = 42316;
+-- Healing Shield was visible and moving
+UPDATE `creature` SET `modelid` = 23257, `spawndist` = 0, `curhealth` = 42, `MovementType` = 0 WHERE `id` = 42557;
+
+-- Quests - Scrounging for Parts: Spare Parts will only be selectable while on quest
+UPDATE `gameobject_template` SET `flags` = `flags`|4 WHERE `entry` IN (203968, 203443, 203965, 203966, 203967);
+
 -- TODO
 /*-- [SQL] Quests - Pack Your Bags quest completion event scripted
 SET @NPC_MILO_GEARTWINGE := 37113;

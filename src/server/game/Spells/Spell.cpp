@@ -2371,10 +2371,6 @@ void Spell::AddUnitTarget(Unit* target, uint32 effectMask, bool checkIfValid /*=
         if (target->IsImmunedToSpellEffect(m_spellInfo, i))
             effectMask &= ~(1 << i);
 
-    if (m_spellInfo->Id == 44614 && effectIndex != 1)
-        if (m_caster->HasAura(61205) == (effectIndex == 0))
-            return;
-
     // Quest item spell 'Kill Golden Stonefish'
     if (m_spellInfo->Id == 80962)
     {
@@ -3246,6 +3242,10 @@ void Spell::DoTriggersOnSpellHit(Unit* unit, uint32 effMask)
             }
             else
             {
+                // Ruthlessness - self-casted effects handled in other place
+                if (m_caster == unit && i->triggeredByAura->Id == 14161)
+                    continue;
+
                 m_caster->CastSpell(unit, i->triggeredSpell, true);
                 if (!(triggeredAur = unit->GetAura(i->triggeredSpell->Id, m_caster->GetGUID())))
                     continue;
@@ -4032,19 +4032,27 @@ void Spell::_handle_finish_phase()
         // Take for real after all targets are processed
         if (m_needComboPoints || m_spellInfo->Id == 127538)
         {
+            // Save combo info for further use
+            auto const comboTarget = Unit::GetUnit(*m_caster->m_movedPlayer, m_caster->m_movedPlayer->GetComboTarget());
+            auto const comboPoints = m_caster->m_movedPlayer->GetComboPoints();
+            // Clear combo points
             m_caster->m_movedPlayer->ClearComboPoints();
 
-            // Anticipation
             if (Player* _player = m_caster->ToPlayer())
             {
+                // Anticipation
                 if (_player->HasAura(115189) && m_spellInfo->Id != 5171 && m_spellInfo->Id != 73651)
                 {
                     int32 basepoints0 = _player->GetAura(115189) ? _player->GetAura(115189)->GetStackAmount() : 0;
-                    _player->CastCustomSpell(m_caster->GetVictim(), 115190, &basepoints0, NULL, NULL, true);
+                    _player->CastCustomSpell(comboTarget, 115190, &basepoints0, NULL, NULL, true);
 
                     if (basepoints0)
                         _player->RemoveAura(115189);
                 }
+
+                // Ruthlessness - need hack to prevent adding combo points to self
+                if (_player->HasAura(14161) && GetUnitTarget() == _player && roll_chance_i(20 * comboPoints))
+                    _player->CastSpell(comboTarget, 139569, true);
             }
         }
 
@@ -6562,7 +6570,11 @@ SpellCastResult Spell::CheckCast(bool strict)
         {
             // Must be behind the target
             if ((m_spellInfo->AttributesCu & SPELL_ATTR0_CU_REQ_CASTER_BEHIND_TARGET) && target->HasInArc(static_cast<float>(M_PI), m_caster))
-                return SPELL_FAILED_NOT_BEHIND;
+            {
+                // Ambush with Cloak and Dagger shouln't have requirement as it teleports player behind
+                if (m_spellInfo->Id != 8676 || !m_caster->HasAura(138106))
+                    return SPELL_FAILED_NOT_BEHIND;
+            }
 
             // Target must be facing you
             if ((m_spellInfo->AttributesCu & SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER) && !target->HasInArc(static_cast<float>(M_PI), m_caster))

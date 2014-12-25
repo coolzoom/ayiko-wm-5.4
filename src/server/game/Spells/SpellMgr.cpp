@@ -3219,6 +3219,9 @@ void SpellMgr::LoadSpellCustomAttr()
 
             switch (spellInfo->Id)
             {
+                case 114232: // Sanctified Wrath effect
+                    spellInfo->Attributes |= SPELL_ATTR0_PASSIVE | SPELL_ATTR0_HIDDEN_CLIENTSIDE;
+                    break;
                 case 137080: // "custom" anniversary sanctuary spell
                     spellInfo->Attributes |= SPELL_ATTR0_PASSIVE | SPELL_ATTR0_HIDDEN_CLIENTSIDE;
                     spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(21);
@@ -3721,7 +3724,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 27002:
                 case 48571:
                 case 48572:
-                case 8676: // Ambush
                 case 8724:
                 case 8725:
                 case 11267:
@@ -4115,7 +4117,8 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->SpellIconID = 2819;
                     break;
                 case 124271:// Sanguinary Vein
-                    spellInfo->Effects[0].BasePoints = 35;
+                    spellInfo->Effects[EFFECT_0].BasePoints = 35;
+                    spellInfo->Effects[EFFECT_1].BasePoints = 35;
                     break;
                 case 2818:  // Deadly Poison
                     spellInfo->Attributes |= SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK;
@@ -4125,11 +4128,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 108212:// Burst of Speed
                 case 107079:// Quaking Palm
                     spellInfo->AttributesEx |= SPELL_ATTR1_NOT_BREAK_STEALTH;
-                    break;
-                case 31224: // Cloak of Shadows
-                    spellInfo->Effects[0].BasePoints = -200;
-                    spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE;
-                    spellInfo->Effects[0].ValueMultiplier = -200;
                     break;
                 case 137619:// Marked for Death
                     spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
@@ -5780,6 +5778,29 @@ void SpellMgr::LoadSpellCustomAttr()
                     break;
                 case 122278: // Dampen Harm
                     spellInfo->AttributesEx5 |= SPELL_ATTR5_USABLE_WHILE_STUNNED;
+                    break;
+                case 8676: // Ambush (damage increased in 5.4)
+                    spellInfo->AttributesCu |= SPELL_ATTR0_CU_REQ_CASTER_BEHIND_TARGET;
+                    spellInfo->Effects[EFFECT_1].BasePoints = 365;
+                    break;
+                case 22482: // Blade Flurry proc
+                    spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
+                    spellInfo->Effects[EFFECT_0].ChainTarget = 0;
+                    spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_TARGET_ENEMY;
+                    spellInfo->Effects[EFFECT_0].TargetB = TARGET_UNIT_DEST_AREA_ENEMY;
+                    break;
+                case 12723: // Sweeping Strike proc
+                    spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
+                    break;
+                case 140308: // Shuriken Toss - it should no longer deal shadow damage
+                case 140309: // Shuriken Toss (Offhand)
+                    spellInfo->SchoolMask = SPELL_SCHOOL_MASK_NORMAL;
+                    break;
+                case 32592: // Mass Dispel (on enemy)
+                    spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
+                    break;
+                case 5487: // Bear Form - base armor increase is 120%
+                    spellInfo->Effects[EFFECT_2].BasePoints = 120;
                     break;
                     // Siege of Niuzao Temple
                 case 119990: // Summon Sappling

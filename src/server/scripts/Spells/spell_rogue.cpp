@@ -25,6 +25,7 @@
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
 #include "ArraySize.h"
+#include "ObjectVisitors.hpp"
 
 enum RogueSpells
 {
@@ -58,7 +59,6 @@ enum RogueSpells
     ROGUE_SPELL_ADRENALINE_RUSH                  = 13750,
     ROGUE_SPELL_KILLING_SPREE                    = 51690,
     ROGUE_SPELL_REDIRECT                         = 73981,
-    ROGUE_SPELL_SHADOW_BLADES                    = 121471,
     ROGUE_SPELL_SPRINT                           = 2983,
     ROGUE_SPELL_HEMORRHAGE_DOT                   = 89775,
     ROGUE_SPELL_SANGUINARY_VEIN_DEBUFF           = 124271,
@@ -202,8 +202,9 @@ class spell_rog_blade_flurry : public SpellScriptLoader
                     if (spellInfo && !spellInfo->CanTriggerBladeFlurry())
                         return;
 
-                    if (Unit* target = _player->SelectNearbyTarget(eventInfo.GetActionTarget()))
-                        _player->CastCustomSpell(target, ROGUE_SPELL_BLADE_FLURRY_DAMAGE, &damage, NULL, NULL, true);
+                    damage = CalculatePct(damage, 40);
+
+                    _player->CastCustomSpell(eventInfo.GetActionTarget(), ROGUE_SPELL_BLADE_FLURRY_DAMAGE, &damage, NULL, NULL, true);
                 }
             }
 
@@ -217,6 +218,55 @@ class spell_rog_blade_flurry : public SpellScriptLoader
         {
             return new spell_rog_blade_flurry_AuraScript();
         }
+};
+
+// Blade Flurry damage - 22482
+class spell_rog_blade_flurry_damage : public SpellScriptLoader
+{
+public:
+    spell_rog_blade_flurry_damage() : SpellScriptLoader("spell_rog_blade_flurry_damage") { }
+
+    class script_impl : public SpellScript
+    {
+        PrepareSpellScript(script_impl);
+
+        void RemoveInvalidTargets(std::list<WorldObject*>& targets)
+        {
+            auto caster = GetCaster();
+            if (!caster)
+                return;
+            // Clear targets, we make the new list
+            targets.clear();
+            Trinity::AllWorldObjectsInRange objects(caster, 5.0f);
+            Trinity::WorldObjectListSearcher<Trinity::AllWorldObjectsInRange> searcher(caster, targets, objects);
+            Trinity::VisitNearbyObject(caster, 5.0f, searcher);
+
+            targets.remove(GetExplTargetUnit());
+
+            targets.remove_if([caster](WorldObject * obj)
+            {
+                if (auto unit = obj->ToUnit())
+                {
+                    return unit->isTotem() || !caster->IsValidAttackTarget(unit);
+                }
+                else
+                    return true;
+            });
+
+            if (targets.size() > 4)
+                targets.resize(4);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(script_impl::RemoveInvalidTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new script_impl();
+    }
 };
 
 // Growl - 113613
@@ -446,7 +496,7 @@ class spell_rog_nightstalker : public SpellScriptLoader
         }
 };
 
-// Called by Rupture - 1943, Garrote - 703 and Crimson Tempest - 121411
+// Called by Rupture - 1943, Garrote - 703 and Crimson Tempest - 122233 and Hemorrhage - 89775 (required for glyph handling)
 // Sanguinary Vein - 79147
 class spell_rog_sanguinary_vein : public SpellScriptLoader
 {
@@ -464,6 +514,10 @@ class spell_rog_sanguinary_vein : public SpellScriptLoader
                 if (!caster || !target)
                     return;
 
+                // Glyph of Hemorrhaging Veins
+                if (GetId() == 89775 && !caster->HasAura(146631))
+                    return;
+
                 if (caster->HasAura(79147))
                     caster->CastSpell(target, ROGUE_SPELL_SANGUINARY_VEIN_DEBUFF, true);
             }
@@ -477,6 +531,10 @@ class spell_rog_sanguinary_vein : public SpellScriptLoader
                     for (uint32 i = 0; i < 3; ++i)
                         if (target->HasAura(spellsAffected[i], GetCasterGUID()))
                             hasFound = true;
+
+                    // Glyph of Hemorrhaging Veins
+                    if (GetCaster() && GetCaster()->HasAura(146631) && target->HasAura(89775, GetCasterGUID()))
+                        hasFound = true;
 
                     if (!hasFound)
                         target->RemoveAurasDueToSpell(ROGUE_SPELL_SANGUINARY_VEIN_DEBUFF, GetCasterGUID());
@@ -627,66 +685,64 @@ class spell_rog_venomous_wounds : public SpellScriptLoader
         {
             PrepareAuraScript(spell_rog_venomous_wounds_AuraScript);
 
+            enum
+            {
+                SPELL_VENOMOUS_WOUNDS = 79134,
+            };
+
             void HandleEffectPeriodic(AuraEffect const * /*aurEff*/)
             {
-                if (Unit* caster = GetCaster())
+                auto caster = GetCaster();
+                auto target = GetTarget();
+                if (!caster || !target)
+                    return;
+
+                if (caster->HasAura(SPELL_VENOMOUS_WOUNDS))
                 {
-                    if (Unit* target = GetTarget())
+                    // Each time your Rupture or Garrote deals damage to an enemy that you have poisoned ...
+                    if (target->HasAura(8680, caster->GetGUID())
+                        || target->HasAura(2818, caster->GetGUID())
+                        || target->HasAura(5760, caster->GetGUID())
+                        || target->HasAura(3409, caster->GetGUID())
+                        || target->HasAura(113952, caster->GetGUID())
+                        || target->HasAura(112961, caster->GetGUID()))
                     {
-                        if (caster->HasAura(79134))
+                        if (target->GetAura(ROGUE_SPELL_RUPTURE_DOT, caster->GetGUID()))
+                            ProcEffect(caster, target);
+                        // Garrote will not trigger this effect if the enemy is also afflicted by your Rupture
+                        else if (target->GetAura(ROGUE_SPELL_GARROTE_DOT, caster->GetGUID()))
                         {
-                            // Each time your Rupture or Garrote deals damage to an enemy that you have poisoned ...
-                            if (target->HasAura(8680, caster->GetGUID())
-                                || target->HasAura(2818, caster->GetGUID())
-                                || target->HasAura(5760, caster->GetGUID())
-                                || target->HasAura(3409, caster->GetGUID())
-                                || target->HasAura(113952, caster->GetGUID())
-                                || target->HasAura(112961, caster->GetGUID()))
-                            {
-                                if (target->GetAura(ROGUE_SPELL_RUPTURE_DOT, caster->GetGUID()))
-                                {
-                                    // ... you have a 75% chance ...
-                                    if (roll_chance_i(75))
-                                    {
-                                        // ... to deal [ X + 16% of AP ] additional Nature damage and to regain 10 Energy
-                                        caster->CastSpell(target, ROGUE_SPELL_VENOMOUS_WOUND_DAMAGE, true);
-                                        int32 bp = 10;
-                                        caster->CastCustomSpell(caster, ROGUE_SPELL_VENOMOUS_VIM_ENERGIZE, &bp, NULL, NULL, true);
-                                    }
-                                }
-                                // Garrote will not trigger this effect if the enemy is also afflicted by your Rupture
-                                else if (target->GetAura(ROGUE_SPELL_GARROTE_DOT, caster->GetGUID()))
-                                {
-                                    // ... you have a 75% chance ...
-                                    if (roll_chance_i(75))
-                                    {
-                                        // ... to deal [ X + 16% of AP ] additional Nature damage and to regain 10 Energy
-                                        caster->CastSpell(target, ROGUE_SPELL_VENOMOUS_WOUND_DAMAGE, true);
-                                        int32 bp = 10;
-                                        caster->CastCustomSpell(caster, ROGUE_SPELL_VENOMOUS_VIM_ENERGIZE, &bp, NULL, NULL, true);
-                                    }
-                                }
-                            }
+                            ProcEffect(caster, target);
                         }
                     }
                 }
             }
 
+            void ProcEffect(Unit * const caster, Unit * const target)
+            {
+                // ... you have a 75% chance ...
+                if (roll_chance_i(75))
+                {
+                    // ... to deal [ X + 16% of AP ] additional Nature damage and to regain 10 Energy
+                    caster->CastSpell(target, ROGUE_SPELL_VENOMOUS_WOUND_DAMAGE, true);
+                    int32 bp = 10;
+                    caster->CastCustomSpell(caster, ROGUE_SPELL_VENOMOUS_VIM_ENERGIZE, &bp, NULL, NULL, true);
+                }
+            }
+
             void OnRemove(AuraEffect const *aurEff, AuraEffectHandleModes /*mode*/)
             {
-                if (Unit* caster = GetCaster())
+                auto caster = GetCaster();
+                if (caster && caster->HasAura(SPELL_VENOMOUS_WOUNDS) && GetId() == ROGUE_SPELL_RUPTURE_DOT)
                 {
-                    if (GetTarget() && caster->HasAura(79134))
+                    if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_DEATH)
                     {
-                        AuraRemoveMode removeMode = GetTargetApplication()->GetRemoveMode();
-                        if (removeMode == AURA_REMOVE_BY_DEATH)
+                        if (Aura const * const rupture = aurEff->GetBase())
                         {
-                            if (Aura *rupture = aurEff->GetBase())
-                            {
-                                // If an enemy dies while afflicted by your Rupture, you regain energy proportional to the remaining Rupture duration
-                                int32 duration = int32(rupture->GetDuration() / 1000);
-                                caster->CastCustomSpell(caster, ROGUE_SPELL_VENOMOUS_VIM_ENERGIZE, &duration, NULL, NULL, true);
-                            }
+                            // If an enemy dies while afflicted by your Rupture, you regain energy proportional to the remaining Rupture duration
+                            int32 duration = int32(rupture->GetDuration() / 1000);
+                            caster->CastCustomSpell(caster, ROGUE_SPELL_VENOMOUS_VIM_ENERGIZE, &duration, NULL, NULL, true);
+
                         }
                     }
                 }
@@ -733,19 +789,17 @@ class spell_rog_redirect : public SpellScriptLoader
 
             void HandleOnHit()
             {
-                if (Player* _player = GetCaster()->ToPlayer())
-                {
-                    if (Unit* target = GetHitUnit())
-                    {
-                        uint8 cp = _player->GetComboPoints();
+                auto const _player = GetCaster()->ToPlayer();
+                auto const target = GetHitUnit();
+                if (!_player || !target)
+                    return;
 
-                        if (cp > 5)
-                            cp = 5;
+                uint8 cp = _player->GetComboPoints();
+                if (cp > 5)
+                    cp = 5;
 
-                        _player->ClearComboPoints();
-                        _player->AddComboPoints(target, cp, GetSpell());
-                    }
-                }
+                _player->ClearComboPoints();
+                _player->AddComboPoints(target, cp, GetSpell());
             }
 
             void Register()
@@ -1496,11 +1550,85 @@ public:
     }
 };
 
+// Shuriken Toss - 114014
+class spell_rog_shuriken_toss : public SpellScriptLoader
+{
+public:
+    spell_rog_shuriken_toss() : SpellScriptLoader("spell_rog_shuriken_toss") { }
+
+    class script_impl : public SpellScript
+    {
+        PrepareSpellScript(script_impl);
+
+        enum
+        {
+            SPELL_SHURIKEN_TOSS_PROC = 137586,
+        };
+
+        void HandleOnHit()
+        {
+            auto caster = GetCaster();
+            auto target = GetHitUnit();
+            if (caster && target && caster->GetDistance(target) > 10.f)
+            {
+                caster->CastSpell(caster, SPELL_SHURIKEN_TOSS_PROC, true);
+            }
+        }
+
+        void Register()
+        {
+            OnHit += SpellHitFn(script_impl::HandleOnHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new script_impl();
+    }
+};
+
+// Fan of Knives - 51723
+class spell_rog_fan_of_knives final : public SpellScriptLoader
+{
+    class script_impl final : public SpellScript
+    {
+        PrepareSpellScript(script_impl)
+
+        void filterTargets(std::list<WorldObject*> &targets)
+        {
+            if (auto player = GetCaster()->ToPlayer())
+            {
+                auto comboTarget = player->GetComboTarget();
+                targets.remove_if([comboTarget](WorldObject * obj)
+                {
+                    return obj->GetGUID() != comboTarget;
+                });
+            }
+        }
+
+        void Register() final
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(script_impl::filterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+public:
+    spell_rog_fan_of_knives()
+        : SpellScriptLoader("spell_rog_fan_of_knives")
+    { }
+
+    SpellScript * GetSpellScript() const final
+    {
+        return new script_impl;
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_glyph_of_expose_armor();
     new spell_rog_cheat_death();
     new spell_rog_blade_flurry();
+    new spell_rog_blade_flurry_damage();
     new spell_rog_growl();
     new spell_rog_cloak_of_shadows();
     new spell_rog_combat_readiness();
@@ -1527,4 +1655,6 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_marked_for_death();
     new spell_rog_cloak_and_dagger();
     new spell_rog_smoke_bomb();
+    new spell_rog_shuriken_toss();
+    new spell_rog_fan_of_knives();
 }

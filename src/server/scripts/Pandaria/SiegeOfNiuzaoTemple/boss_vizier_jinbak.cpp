@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include "siege_of_niuzao_temple.h"
+#include "MoveSplineInit.h"
 
 enum
 {
@@ -27,6 +28,8 @@ enum
 };
 
 typedef std::pair<float, uint64> SapplingTrigger;
+
+const Position centerPos = { 1529.520020f, 5163.240234f, 160.570999f, 0.0f };
 
 class boss_vizier_jinbak : public CreatureScript
 {
@@ -65,20 +68,33 @@ class boss_vizier_jinbak : public CreatureScript
 
         void Reset() override
         {
+            evadeCheckCooldown = 10000;
             events.Reset();
 
             if (Creature * trigger = Creature::GetCreature(*me, puddleGUID))
                 trigger->ToCreature()->AI()->EnterEvadeMode();
+
+            ClearDebuffs();
+
+            summonDestList.clear();
+
+            visualTimer = 5000;
+            _Reset();
+        }
+
+        void ClearDebuffs()
+        {
+            std::list<Creature *> stalkers;
+            me->GetCreatureListWithEntryInGrid(stalkers, NPC_GLOBULE_SUMMON_DEST, 500.0f);
+            if (!stalkers.empty())
+                for (auto itr : stalkers)
+                    itr->RemoveAllAuras();
 
             std::list<Creature *> globules;
             me->GetCreatureListWithEntryInGrid(globules, NPC_SAPPLING, 500.0f);
             if (!globules.empty())
                 for (auto itr : globules)
                     itr->DespawnOrUnsummon(500);
-
-            summonDestList.clear();
-
-            visualTimer = 5000;
         }
 
         void MoveInLineOfSight(Unit* who)
@@ -121,6 +137,7 @@ class boss_vizier_jinbak : public CreatureScript
             Talk(SAY_AGGRO);
             events.ScheduleEvent(EVENT_SUMMON_GLOBULES, 10000);
             events.ScheduleEvent(EVENT_DETONATE, 30000);
+            _EnterCombat();
         }
 
         void JustSummoned(Creature* summon) override
@@ -129,8 +146,26 @@ class boss_vizier_jinbak : public CreatureScript
             {
                 if (Creature * puddle = Creature::GetCreature(*me, puddleGUID))
                 {
+                    Movement::MoveSplineInit init(summon);
                     summon->SetReactState(REACT_PASSIVE);
-                    summon->GetMotionMaster()->MovePoint(0, *puddle);
+                    float angle = summon->GetAngle(&centerPos);
+                    float dist = summon->GetExactDist2d(&centerPos);
+                    float xPerStep = dist * std::cos(angle) / 10.0f;
+                    float yPerStep = dist * std::sin(angle) / 10.0f;
+
+                    float x, y, z;
+                    summon->GetPosition(x, y, z);
+                    for (float i = 0; i < 10.0f; ++i)
+                    {
+                        x += xPerStep;
+                        y += yPerStep;
+                        z = summon->GetMap()->GetHeight(summon->GetPhaseMask(), x, y, 160.0f);
+                        init.Path().push_back(G3D::Vector3(x, y, z));
+                    }
+
+                    init.SetWalk(true);
+                    init.SetVelocity(5.0f);
+                    init.Launch();
                 }
             }
         }
@@ -144,6 +179,9 @@ class boss_vizier_jinbak : public CreatureScript
         void JustDied(Unit* killer) override
         {
             Talk(SAY_DEATH);
+            if (Creature * puddle = Creature::GetCreature(*me, puddleGUID))
+                puddle->DespawnOrUnsummon();
+            ClearDebuffs();
             _JustDied();
         }
 
@@ -219,9 +257,22 @@ class boss_vizier_jinbak : public CreatureScript
             }
 
             DoMeleeAttackIfReady();
+
+            // Room check
+            if (evadeCheckCooldown <= diff)
+                evadeCheckCooldown = 2500;
+            else
+            {
+                evadeCheckCooldown -= diff;
+                return;
+            }
+
+            if (!me->IsWithinDist2d(1529.520020f, 5163.240234f, 30.0f))
+                EnterEvadeMode();
         }
 
     private:
+        uint32 evadeCheckCooldown;
         uint32 visualTimer;
         std::list<SapplingTrigger > summonDestList;
         uint64 puddleGUID;
@@ -251,7 +302,7 @@ class npc_sap_globule : public CreatureScript
 
         void Reset() override
         {
-
+            done = false;
         }
 
         void IsSummonedBy(Unit* summoner)
@@ -262,16 +313,20 @@ class npc_sap_globule : public CreatureScript
 
         void SpellHit(Unit * caster, SpellInfo const* spell) override
         {
-            if (spell->Id == SPELL_SAP_RESIDUE)
+            if (!done && spell->Id == SPELL_SAP_RESIDUE)
             {
+                done = true;
+                caster->ToCreature()->AI()->DoAction(1);
                 DoCast(me, SPELL_SAPPLING_SUMMON_VISUAL, true);
-                me->DespawnOrUnsummon(100);
+                me->DespawnOrUnsummon(500);
             }
         }
 
         void UpdateAI(uint32 const diff) override
         {
         }
+    private:
+        bool done;
     };
 
 public:
@@ -296,19 +351,12 @@ class npc_sap_puddle : public CreatureScript
 
         void Reset() override
         {
-
+            me->SetReactState(REACT_PASSIVE);
         }
 
-        void SpellHitTarget(Unit* target, SpellInfo const* spell) override
+        void DoAction(int32 const action)
         {
-            if (target->GetTypeId() == TYPEID_PLAYER && spell->Id == SPELL_RESIDUE_DOT)
-                if (Aura * growAura = me->GetAura(SPELL_GROW))
-                    growAura->ModStackAmount(-3); // 3 Per player each tick
-        }
-
-        void SpellHit(Unit * caster, SpellInfo const* spell) override
-        {
-            if (spell->Id == SPELL_SAPPLING_SUMMON_VISUAL)
+            if (action == 1)
             {
                 Aura * growAura = me->GetAura(SPELL_GROW);
                 if (!growAura)
@@ -320,6 +368,13 @@ class npc_sap_puddle : public CreatureScript
                 if (growAura)
                     growAura->ModStackAmount(5); // TODO: find proper value
             }
+        }
+
+        void SpellHitTarget(Unit* target, SpellInfo const* spell) override
+        {
+            if (target->GetTypeId() == TYPEID_PLAYER && spell->Id == SPELL_RESIDUE_DOT)
+                if (Aura * growAura = me->GetAura(SPELL_GROW))
+                    growAura->ModStackAmount(-3); // 3 Per player each tick
         }
 
         void UpdateAI(uint32 const diff) override

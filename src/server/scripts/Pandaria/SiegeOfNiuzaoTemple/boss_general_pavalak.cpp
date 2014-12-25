@@ -20,7 +20,8 @@ enum
 {
     ACTION_BULWARK_BREAKS       = 10,
     NPC_REINFORCEMENTS_STALKER  = 61483,
-    NPC_BLADE_RUSH_STALKER      = 63720
+    NPC_BLADE_RUSH_STALKER      = 63720,
+    POINT_BULWARK               = 10
 };
 
 static const Position reinforcements[4] = 
@@ -35,45 +36,60 @@ class boss_general_pavalak : public CreatureScript
 {
     enum Yells
     {
-
+        SAY_INTRO,
+        SAY_AGGRO,
+        SAY_BULWARK,
+        SAY_SLAY,
+        SAY_DEATH,
+        EMOTE_BULWARK
     };
 
     enum Spells
     {
         SPELL_BULWARK           = 119476,
-        SPELL_BLADE_RUSH_SUMMON = 124277, // summons 63720
+        SPELL_BLADE_RUSH_SUMMON = 124278, // summons 63720
         SPELL_BLADE_RUSH_EFF    = 124283, // condition targets 63720
         SPELL_BLADE_RUSH_DUMMY  = 124291,
         SPELL_BLADE_RUSH_CHARGE = 124312,
         SPELL_BLADE_RUSH_DMG_C  = 124317,
-        SPELL_BLARE_RUSH_DMG_A  = 124290,
+        SPELL_BLADE_RUSH_DMG_A  = 124290,
         SPELL_TEMPEST           = 119875
     };
 
     enum Events
     {
+        EVENT_GROUP_COMBAT      = 1,
+
         EVENT_BLADE_RUSH        = 1,
-        EVENT_REINFORCEMENTS,
-        EVENT_BOMBARDMENT,
-        EVENT_TEMPEST,
+        EVENT_BLADE_RUSH_CAST,
+        EVENT_BLADE_RUSH_CHARGE,
+        EVENT_BLADE_RUSH_DAMAGE,
         EVENT_BLADE_RUSH_END,
+        EVENT_TEMPEST,
+        EVENT_PLAYER_CHECK,
+        EVENT_BULWARK_END,
     };
 
     struct boss_general_pavalakAI : public BossAI
     {
-        boss_general_pavalakAI(Creature * creature) : BossAI(creature, BOSS_PAVALAK) {}
+        boss_general_pavalakAI(Creature * creature) : BossAI(creature, BOSS_PAVALAK)
+        {
+            introDone = false;
+        }
 
         void Reset() override
         {
             phase = 0;
+            rushTargetGUID = 0;
             me->SetReactState(REACT_AGGRESSIVE);
             _Reset();
         }
 
         void EnterCombat(Unit* ) override
         {
-            events.ScheduleEvent(EVENT_BLADE_RUSH, 10000);
-            events.ScheduleEvent(EVENT_TEMPEST, 15000);
+            Talk(SAY_AGGRO);
+            events.ScheduleEvent(EVENT_BLADE_RUSH, 10000, EVENT_GROUP_COMBAT);
+            events.ScheduleEvent(EVENT_TEMPEST, 15000, EVENT_GROUP_COMBAT);
             _EnterCombat();
         }
 
@@ -81,28 +97,45 @@ class boss_general_pavalak : public CreatureScript
         {
             if (action == ACTION_BULWARK_BREAKS)
             {
-                events.ScheduleEvent(EVENT_BLADE_RUSH, 10000);
-                events.ScheduleEvent(EVENT_TEMPEST, 15000);
+                events.ScheduleEvent(EVENT_BLADE_RUSH, 10000, EVENT_GROUP_COMBAT);
+                events.ScheduleEvent(EVENT_TEMPEST, 15000, EVENT_GROUP_COMBAT);
+                events.ScheduleEvent(EVENT_PLAYER_CHECK, 5000);
                 summons.DespawnEntry(NPC_REINFORCEMENTS_STALKER);
                 me->SetReactState(REACT_AGGRESSIVE);
-
+                events.ScheduleEvent(EVENT_BULWARK_END, 200);
             }
         }
 
-        //void SpellHit(Unit* caster, SpellInfo const* spell) override
-        //{
-        //    if (spell->Id == SPELL_BLADE_RUSH_DUMMY)
-        //        DoCast(caster, SPELL_BLADE_RUSH_CHARGE, false);
-        //}
+        void MoveInLineOfSight(Unit* who) override
+        {
+            if (!introDone && who->GetTypeId() == TYPEID_PLAYER && me->IsWithinDist2d(who, 50.0f))
+            {
+                Talk(SAY_INTRO);
+                introDone = true;
+            }
+            BossAI::MoveInLineOfSight(who);
+        }
+
+        void JustDied(Unit* ) override
+        {
+            Talk(SAY_DEATH);
+            _JustDied();
+        }
+
+        void KilledUnit(Unit* victim) override
+        {
+            if (victim->GetTypeId() == TYPEID_PLAYER)
+                Talk(SAY_SLAY);
+        }
 
         void SpellHitTarget(Unit* target, SpellInfo const* spell) override
         {
             if (spell->Id == SPELL_BLADE_RUSH_DUMMY)
             {
-                target->CastSpell(target, 124307, true);
-                DoCast(target, SPELL_BLADE_RUSH_CHARGE, false);
                 me->SetFacingToObject(target);
-                DoCast(target, SPELL_BLADE_RUSH_DMG_C, true);
+                target->CastSpell(target, 124307, true);
+                target->CastSpell(target, SPELL_BLADE_RUSH_DMG_A, true);
+                events.ScheduleEvent(EVENT_BLADE_RUSH_CHARGE, 200);
             }
 
         }
@@ -113,7 +146,6 @@ class boss_general_pavalak : public CreatureScript
             {
                 // Use bulwark at 65 and 35 %
                 uint32 healthChk = phase ? 35 : 65;
-                
 
                 if (me->HealthBelowPctDamaged(healthChk, damage))
                 {
@@ -122,23 +154,35 @@ class boss_general_pavalak : public CreatureScript
 
                     ++phase;
                     me->InterruptNonMeleeSpells(true);
-                    events.Reset();
+                    events.CancelEventGroup(EVENT_GROUP_COMBAT);
                     me->SetReactState(REACT_PASSIVE);
-                    DoCast(me, SPELL_BULWARK, false);
+                    me->GetMotionMaster()->MovePoint(POINT_BULWARK, 1701.693f, 5242.439f, 123.9606f);
 
-                    // Reinforcement waves
-                    for (auto itr : reinforcements)
-                        me->SummonCreature(NPC_REINFORCEMENTS_STALKER, itr);
                 }
             }
         }
 
         void MovementInform(uint32 type, uint32 id) override
         {
-            if (type == EFFECT_MOTION_TYPE && id == EVENT_CHARGE)
+            if (type == POINT_MOTION_TYPE)
             {
-                DoCast(me, SPELL_BLARE_RUSH_DMG_A, true);
-                events.RescheduleEvent(EVENT_BLADE_RUSH_END, 1000);
+                if (id == EVENT_CHARGE)
+                {
+                    me->StopMoving();
+                    me->AttackStop();
+                    events.RescheduleEvent(EVENT_BLADE_RUSH_DAMAGE, 200, EVENT_GROUP_COMBAT);
+                }
+                else if (id == POINT_BULWARK)
+                {
+                    Talk(SAY_BULWARK);
+                    Talk(EMOTE_BULWARK);
+                    DoCast(me, SPELL_BULWARK, false);
+
+                    // Reinforcement waves
+                    for (auto itr : reinforcements)
+                        me->SummonCreature(NPC_REINFORCEMENTS_STALKER, itr);
+                }
+                    
             }
         }
 
@@ -146,14 +190,16 @@ class boss_general_pavalak : public CreatureScript
         {
             if (summon->GetEntry() == NPC_BLADE_RUSH_STALKER)
             {
+                rushTargetGUID = summon->GetGUID();
                 me->SetTarget(summon->GetGUID());
-                DoCast(me, SPELL_BLADE_RUSH_EFF, false);
+                me->SetFacingToObject(summon);
+                events.ScheduleEvent(EVENT_BLADE_RUSH_CAST, 500, EVENT_GROUP_COMBAT);
             }
 
             BossAI::JustSummoned(summon);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -168,28 +214,75 @@ class boss_general_pavalak : public CreatureScript
                 switch (eventId)
                 {
                     case EVENT_BLADE_RUSH:
+                    {
                         me->SetReactState(REACT_PASSIVE);
 
-                        DoCast(me, SPELL_BLADE_RUSH_SUMMON, true);
-                        me->StopMoving();
-                        me->AttackStop();
+                        //DoCast(SELECT_TARGET_RANDOM, SPELL_BLADE_RUSH_SUMMON, true);
+                        Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 1, 50.0f, true);
+                        if (!target)
+                            target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f, true);
+                        if (target)
+                        {
+                            events.DelayEvents(15000);
+                            me->SummonCreature(NPC_BLADE_RUSH_STALKER, *target, TEMPSUMMON_TIMED_DESPAWN, 15000);
+                            me->GetMotionMaster()->Clear();
+                            me->GetMotionMaster()->MoveIdle();
+                            me->StopMoving();
+                            me->AttackStop();
+                            events.ScheduleEvent(EVENT_BLADE_RUSH_END, 30000, EVENT_GROUP_COMBAT);
+                        }
 
-                        events.ScheduleEvent(EVENT_BLADE_RUSH, 20000);
-                        events.ScheduleEvent(EVENT_BLADE_RUSH_END, 5000);
+                        events.ScheduleEvent(EVENT_BLADE_RUSH, 30000, EVENT_GROUP_COMBAT);
+                        break;
+                    }
+                    case EVENT_BLADE_RUSH_CAST:
+                        if (Creature * rushTarget = Creature::GetCreature(*me, rushTargetGUID))
+                            DoCast(rushTarget, SPELL_BLADE_RUSH_EFF, false);
+                        break;
+                    case EVENT_BLADE_RUSH_CHARGE:
+                        if (Creature * rushTarget = Creature::GetCreature(*me, rushTargetGUID))
+                            DoCast(rushTarget, SPELL_BLADE_RUSH_CHARGE, false);
+                        break;
+                    case EVENT_BLADE_RUSH_DAMAGE:
+                        //DoCast(me, SPELL_BLADE_RUSH_DMG_C, true);
+                        if (Creature * rushTarget = Creature::GetCreature(*me, rushTargetGUID))
+                            rushTarget->RemoveAllAuras();
+                        events.RescheduleEvent(EVENT_BLADE_RUSH_END, 1000, EVENT_GROUP_COMBAT);
                         break;
                     case EVENT_BLADE_RUSH_END:
+                        rushTargetGUID = 0;
                         me->SetReactState(REACT_AGGRESSIVE);
                         if (Unit * victim = me->GetVictim())
                             AttackStart(victim);
                         break;
-                    case EVENT_REINFORCEMENTS:
-                        break;
-                    case EVENT_BOMBARDMENT:
-                        break;
                     case EVENT_TEMPEST:
                         DoCast(me, SPELL_TEMPEST, false);
-                        events.ScheduleEvent(EVENT_TEMPEST, 40000);
+                        events.ScheduleEvent(EVENT_TEMPEST, 20000, EVENT_GROUP_COMBAT);
                         break;
+                    case EVENT_BULWARK_END:
+                        if (Unit * victim = me->GetVictim())
+                            me->GetMotionMaster()->MoveChase(victim);
+                        break;
+                    case EVENT_PLAYER_CHECK:
+                    {
+                        bool playersAlive = false;
+                        Map::PlayerList const &players = me->GetMap()->GetPlayers();
+                        for (auto itr = players.begin(); itr != players.end(); ++itr)
+                        {
+                            if (Player* player = itr->GetSource())
+                                if (player->IsAlive() && !player->isGameMaster() && player->GetAreaId() == 6411)
+                                {
+                                    playersAlive = true;
+                                    break;
+                                }
+                        }
+
+                        if (!playersAlive)
+                            EnterEvadeMode();
+                        else
+                            events.ScheduleEvent(EVENT_PLAYER_CHECK, 5000);
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -199,7 +292,9 @@ class boss_general_pavalak : public CreatureScript
         }
 
     private:
-        uint8 phase;
+        bool introDone;
+        int8 phase;
+        uint64 rushTargetGUID;
     };
 public:
     boss_general_pavalak() : CreatureScript("boss_general_pavalak") {}
@@ -303,6 +398,7 @@ class npc_pavalak_siege_explosive : public CreatureScript
                         events.ScheduleEvent(EVENT_ARMED, 2000);
                         break;
                     case EVENT_ARMED:
+                        DoCast(me, SPELL_BOMB_ARMED, true);
                         me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
                         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                         events.ScheduleEvent(EVENT_DETONATE, 4000);

@@ -7,6 +7,7 @@ SET @CGUID := 900000;
 DELETE FROM creature WHERE map = 1011;
 DELETE FROM gameobject WHERE map = 1011;
 UPDATE instance_template SET script = 'instance_siege_of_niuzao_temple' WHERE map = 1011;
+UPDATE creature_template SET mechanic_immune_mask = 667893759 WHERE entry IN (61567, 61634, 61485, 62205);
 
 /*
 Niuzao Temple (Map 1011)
@@ -24,6 +25,9 @@ Niuzao Temple (Map 1011)
 -- AMBER WEAVER
 UPDATE creature_template SET ScriptName = 'npc_sikthik_amber_weaver' WHERE entry = 61929;
 UPDATE creature_template SET faction_A = 16, faction_H = 16, flags_extra = 128 WHERE entry = 62208; -- Resin Shell
+DELETE FROM spell_script_names WHERE spell_id = 121114;
+INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
+(121114, 'spell_resin_weaving');
 
 DELETE FROM creature_template_aura WHERE entry = 62208;
 INSERT INTO creature_template_aura (entry, aura) VALUES
@@ -39,12 +43,40 @@ UPDATE creature_template SET ScriptName = 'npc_sikthik_guardian' WHERE entry = 6
 -- RESIN FLAKE
 UPDATE creature_template SET ScriptName = 'npc_resin_flake' WHERE entry = 61910;
 
+-- Rear Staging Area
+
+-- Battle-Mender
+UPDATE creature_template SET ScriptName = 'npc_sikthik_battle_mender' WHERE entry = 67093;
+UPDATE creature_template SET minlevel = 90, maxlevel = 90, flags_extra = 128 WHERE entry = 67094; -- Winds Grace
+DELETE FROM creature_template_aura WHERE entry = 67094;
+INSERT INTO creature_template_aura (entry, aura) VALUES
+(67094, 131970); -- Wind's Grace
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` = 131971;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(13, 6, 131971, 0, 0, 31, 0, 3, 61436, 0, 0, 0, 0, '', 'Wind''s Grace - target Friend'),
+(13, 6, 131971, 0, 1, 31, 0, 3, 61434, 0, 0, 0, 0, '', 'Wind''s Grace - target Friend'),
+(13, 6, 131971, 0, 2, 31, 0, 3, 67093, 0, 0, 0, 0, '', 'Wind''s Grace - target Friend');
+
+UPDATE creature_template SET ScriptName = 'npc_sikthik_bladedancer' WHERE entry = 61436;
+UPDATE creature_template SET ScriptName = 'npc_sikthik_builder' WHERE entry = 62633;
+UPDATE creature_template SET ScriptName = 'npc_sikthik_engineer' WHERE entry = 62632;
+UPDATE creature_template SET ScriptName = 'npc_sikthik_vanguard' WHERE entry = 61434;
+
+
+-- Somewhere inside quest
+UPDATE creature_template SET ScriptName = 'npc_niuzao_shado_pan_prisoner' WHERE entry = 64520;
+
+DELETE FROM npc_spellclick_spells WHERE npc_entry = 64520; -- Prisoner
+INSERT INTO npc_spellclick_spells (npc_entry, spell_id, cast_flags) VALUES
+(64520, 125993, 1);
+
+-- Cosmetic Catapults in rear staging area
+UPDATE creature_template SET ScriptName = 'npc_mantid_soldier_catapult' WHERE entry IN (62348, 61448);
+UPDATE creature_template SET ScriptName = 'npc_mantid_catapult' WHERE entry = 63565;
+
 
 
 UPDATE creature_template SET ScriptName = 'boss_vizier_jinbak' WHERE entry = 61567;
-DELETE FROM creature_template_aura WHERE entry = 61613;
-INSERT INTO creature_template_aura (entry, aura) VALUES
-(61613, 119939); -- Sap Stalker - Sap Residue
 
 DELETE FROM spell_script_names WHERE spell_id IN(120001,120070, 119941);
 INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
@@ -52,7 +84,7 @@ INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
 (119941, 'spell_sap_residue'),
 (120070, 'spell_sap_residue');
 
-UPDATE creature_template SET ScriptName = 'npc_sap_globule' WHERE entry = 61623;
+UPDATE creature_template SET InhabitType = 1,  ScriptName = 'npc_sap_globule' WHERE entry = 61623;
 UPDATE creature_template SET flags_extra = 128 WHERE entry = 61629; -- Globule summon dest
 UPDATE creature_template SET modelid1 = 38497, flags_extra = 128, ScriptName = 'npc_sap_puddle' WHERE entry = 61613;
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (120071, 120070, 120001, 120095);
@@ -66,7 +98,7 @@ DELETE FROM creature_text WHERE entry = 61567;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
 (61567, 0, 0, 'I hope they make it this far. Then my strength and skill will be clear to all!', 14, 0, 100, 0, 0, 29392, 'Vizier Jin''bak - SAY_INTRO'),
 (61567, 1, 0, 'Ah-hah! The lot of you will soon wish you hadn''t come this way...', 14, 0, 100, 0, 0, 29390, 'Vizier Jin''bak - SAY_AGGRO'),
-(61567, 2, 0, 'But... I was... who will...?!', 14, 0, 100, 0, 0, 29392, 'Vizier Jin''bak - SAY_SAY_DEATH'),
+(61567, 2, 0, 'But... I was... who will...?!', 14, 0, 100, 0, 0, 29391, 'Vizier Jin''bak - SAY_SAY_DEATH'),
 (61567, 3, 0, 'Did you think you stood a chance?!', 14, 0, 100, 0, 0, 29394, 'Vizier Jin''bak - SAY_SLAY'),
 (61567, 4, 0, 'Allow me to show you the power of amber alchemy...', 14, 0, 100, 0, 0, 29395, 'Vizier Jin''bak - SAY_DETONATE'),
 (61567, 5, 0, '|cFFFE9A2ESap Globules|r begin to sprout from the tree!', 41, 0, 100, 0, 0, 0, 'Vizier Jin''bak - EMOTE_GLOBULE');
@@ -85,6 +117,7 @@ UPDATE creature_template SET ScriptName = 'npc_sikthik_warrior' WHERE entry = 61
 UPDATE creature_template SET ScriptName = 'npc_sikthik_demolisher' WHERE entry = 61670;
 UPDATE creature_template SET ScriptName = 'npc_sikthik_swarmer' WHERE entry = 63106;
 UPDATE creature_template SET ScriptName = 'npc_yang_ironclaw' WHERE entry = 61620;
+UPDATE creature_template SET faction_A = 14, faction_H = 14,  modelid1 = 43955, modelid2 = 43955, InhabitType = 4, ScriptName = 'npc_sikthik_amberwing' WHERE entry = 61699;
 
 UPDATE creature_template SET ScriptName = 'npc_mantid_tar_keg' WHERE entry = 61817;
 
@@ -93,26 +126,113 @@ UPDATE creature_template SET ScriptName = 'npc_chu_helper' WHERE entry IN (62794
 UPDATE creature_template SET ScriptName = 'npc_sap_puddle_vojak' WHERE entry = 61579;
 
 DELETE FROM areatrigger_scripts WHERE entry IN (325, 349, 359);
-INSERT INTO areatrigger_scripts (entry, ScriptName) VALUES
-(325, 'at_sap_puddle_325'),
-(349, 'at_sap_puddle_349'),
-(359, 'at_sap_puddle_359');
+
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (127417, 127418);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(13, 1, 127417, 0, 0, 31, 0, 3, 61620, 0, 0, 0, 0, '', 'Door Breach - target Yang'),
+(13, 1, 127417, 0, 1, 31, 0, 4, 0, 0, 0, 0, 0, '', 'Door Breach - target Players'),
+(13, 1, 127418, 0, 0, 31, 0, 3, 65168, 0, 0, 0, 0, '', 'Door Breach - target Stalkers');
 
 DELETE FROM spell_script_names WHERE spell_id IN (122346, 120405);
 INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
 (120405, 'spell_grab_barrel'),
 (122346, 'spell_barrel_assignment');
 
-DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (120270, 122522, 120473, 122346, 120405);
-INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
-(13, 3, 120270, 0, 0, 31, 0, 3, 63106, 0, 0, 0, 0, '', 'Drain Barrel - target Sik''Thik Swarmer'),
-(13, 3, 120270, 0, 1, 31, 0, 3, 61670, 0, 0, 0, 0, '', 'Drain Barrel - target Sik''Thik Demolisher'),
-(13, 3, 120270, 0, 2, 31, 0, 3, 61701, 0, 0, 0, 0, '', 'Drain Barrel - target Sik''Thik Warrior'),
--- (13, 2, 120473, 0, 0, 31, 0, 3, 63106, 0, 0, 0, 0, '', 'Drain Barrel - target Sik''Thik Swarmer'),
--- (13, 2, 120473, 0, 1, 31, 0, 3, 61670, 0, 0, 0, 0, '', 'Drain Barrel - target Sik''Thik Demolisher'),
--- (13, 2, 120473, 0, 2, 31, 0, 3, 61701, 0, 0, 0, 0, '', 'Drain Barrel - target Sik''Thik Warrior'),
-(13, 1, 122346, 0, 0, 31, 0, 3, 62684, 0, 0, 0, 0, '', 'Barrel Assignment - target Barrel Target'),
-(13, 1, 120405, 0, 0, 31, 0, 3, 61817, 0, 0, 0, 0, '', 'Grab Barrel - target Mantid Tar Keg');
+DELETE FROM waypoint_spline_data WHERE c_entry IN (61620, 62794, 61812);
+INSERT INTO waypoint_spline_data (c_entry, path_id, wp_id, position_x, position_y, position_z) VALUES
+(61620, 1, 1, 1494.234, 5287.276, 184.71809),
+(61620, 1, 2, 1483.312, 5286.884, 179.77147),
+(61620, 1, 3, 1476.415, 5292.712, 179.70621),
+(61620, 1, 4, 1474.884, 5301.142, 176.12263),
+(61620, 1, 5, 1479.860, 5321.439, 176.12263),
+(61620, 1, 6, 1506.891, 5326.096, 161.20862),
+(61620, 1, 7, 1556.494, 5335.324, 161.65572),
+(61620, 1, 8, 1561.720, 5345.767, 161.21030),
+(61620, 1, 9, 1549.241, 5350.514, 161.00854),
+(61620, 1, 10, 1524.461, 5348.869, 146.23039),
+(61620, 1, 11, 1512.022, 5359.530, 146.23717),
+(61620, 1, 12, 1511.783, 5372.528, 139.08122),
+(61620, 1, 13, 1518.057, 5398.035, 139.31659),
+(61620, 1, 14, 1543.719, 5404.460, 139.15877),
+(61620, 1, 15, 1565.090, 5410.875, 137.89453),
+(61620, 1, 16, 1583.201, 5415.660, 138.41689),
+(61620, 1, 17, 1602.039, 5416.525, 138.47189),
+(61620, 1, 18, 1612.171, 5415.123, 138.69084),
+
+(62794, 1, 1, 1494.234, 5287.276, 184.71809),
+(62794, 1, 2, 1483.312, 5286.884, 179.77147),
+(62794, 1, 3, 1476.415, 5292.712, 179.70621),
+(62794, 1, 4, 1474.884, 5301.142, 176.12263),
+(62794, 1, 5, 1479.860, 5321.439, 176.12263),
+(62794, 1, 6, 1550.877, 5329.244, 161.349),
+(62794, 1, 7, 1557.127, 5332.744, 161.849),
+(62794, 1, 8, 1562.877, 5337.994, 161.349),
+(62794, 1, 9, 1561.377, 5346.244, 161.349),
+(62794, 1, 10, 1557.127, 5350.494, 161.349),
+(62794, 1, 11, 1549.877, 5351.744, 161.349),
+(62794, 1, 12, 1537.627, 5350.994, 154.099),
+(62794, 1, 13, 1525.127, 5349.994, 146.599),
+(62794, 1, 14, 1520.627, 5349.744, 146.599),
+(62794, 1, 15, 1516.627, 5351.744, 146.599),
+(62794, 1, 16, 1513.377, 5354.994, 146.599),
+(62794, 1, 17, 1513.127, 5359.244, 146.599),
+(62794, 1, 18, 1511.877, 5371.994, 139.849),
+(62794, 1, 19, 1512.127, 5381.744, 139.349),
+(62794, 1, 20, 1520.877, 5386.744, 139.099),
+(62794, 1, 21, 1534.377, 5388.994, 139.849),
+(62794, 1, 22, 1549.377, 5389.494, 139.349),
+(62794, 1, 23, 1568.377, 5390.994, 140.099),
+(62794, 1, 24, 1585.377, 5388.744, 139.849),
+(62794, 1, 25, 1589.127, 5387.994, 139.849),
+(62794, 1, 26, 1591.877, 5385.494, 140.099),
+
+(61812, 1, 1, 1494.234, 5287.276, 184.71809),
+(61812, 1, 2, 1483.312, 5286.884, 179.77147),
+(61812, 1, 3, 1476.415, 5292.712, 179.70621),
+(61812, 1, 4, 1474.884, 5301.142, 176.12263),
+(61812, 1, 5, 1479.860, 5321.439, 176.12263),
+(61812, 1, 6, 1521.958, 5324.577, 161.3554),
+(61812, 1, 7, 1540.708, 5326.327, 161.3554),
+(61812, 1, 8, 1550.958, 5328.077, 161.3554),
+(61812, 1, 9, 1556.958, 5330.077, 161.8554),
+(61812, 1, 10, 1561.458, 5333.577, 161.3554),
+(61812, 1, 11, 1564.708, 5337.577, 161.3554),
+(61812, 1, 12, 1565.208, 5342.577, 161.3554),
+(61812, 1, 13, 1562.708, 5347.577, 161.3554),
+(61812, 1, 14, 1558.958, 5350.827, 161.3554),
+(61812, 1, 15, 1554.708, 5352.827, 161.3554),
+(61812, 1, 16, 1550.208, 5353.577, 161.3554),
+(61812, 1, 17, 1537.708, 5352.827, 154.1054),
+(61812, 1, 18, 1525.208, 5351.577, 146.6054),
+(61812, 1, 19, 1520.208, 5351.327, 146.6054),
+(61812, 1, 20, 1516.958, 5354.577, 146.6054),
+(61812, 1, 21, 1515.458, 5358.827, 146.6054),
+(61812, 1, 22, 1514.458, 5365.827, 143.6054),
+(61812, 1, 23, 1514.458, 5371.827, 139.8554),
+(61812, 1, 24, 1517.708, 5380.827, 139.3554),
+(61812, 1, 25, 1523.208, 5384.077, 139.8554),
+(61812, 1, 26, 1535.708, 5385.327, 140.1054),
+(61812, 1, 27, 1548.708, 5385.827, 139.6054),
+(61812, 1, 28, 1564.458, 5386.077, 140.3554),
+(61812, 1, 29, 1574.958, 5384.827, 140.6054),
+(61812, 1, 30, 1582.208, 5381.827, 140.1054);
+
+DELETE FROM waypoint_data WHERE id = 6162001; -- Add Path
+INSERT INTO waypoint_data (id, point, position_x, position_y, position_z, orientation, delay, move_flag, action, action_chance, wpguid) VALUES
+(6162001, 1, 1511.885, 5378.232, 138.95970, 0, 1, 0, 0, 100, 0),
+(6162001, 2, 1512.162, 5372.485, 139.08124, 0, 1, 0, 0, 100, 0),
+(6162001, 3, 1512.879, 5359.946, 146.22418, 0, 1, 0, 0, 100, 0),
+(6162001, 4, 1524.942, 5348.655, 146.23088, 0, 1, 0, 0, 100, 0),
+(6162001, 5, 1549.231, 5350.165, 160.99088, 0, 1, 0, 0, 100, 0),
+(6162001, 6, 1567.434, 5341.903, 161.21361, 0, 1, 0, 0, 100, 0),
+(6162001, 7, 1555.366, 5329.321, 161.66699, 0, 1, 0, 0, 100, 0),
+(6162001, 8, 1507.551, 5326.483, 161.21100, 0, 1, 0, 0, 100, 0),
+(6162001, 9, 1480.644, 5324.358, 176.12379, 0, 1, 0, 0, 100, 0),
+(6162001, 10, 1470.566, 5301.831, 176.12379, 0, 1, 0, 0, 100, 0),
+(6162001, 11, 1471.052, 5292.643, 179.70631, 0, 1, 0, 0, 100, 0),
+(6162001, 12, 1483.235, 5286.341, 179.77177, 0, 1, 0, 0, 100, 0),
+(6162001, 13, 1493.571, 5287.627, 184.71986, 0, 1, 0, 0, 100, 0);
 
 DELETE FROM npc_spellclick_spells WHERE npc_entry = 61817; -- Tar Keg
 INSERT INTO npc_spellclick_spells (npc_entry, spell_id, cast_flags) VALUES
@@ -125,7 +245,29 @@ INSERT INTO spell_linked_spell (spell_trigger, spell_effect, type, comment) VALU
 (123039, -123032, 0, 'Throw Keg - Remove override aura'),
 (123039, -123035, 0, 'Throw Keg - Remove override master aura');
 
+DELETE FROM waypoint_spline_data WHERE c_entry = 61699;
+INSERT INTO waypoint_spline_data (c_entry, path_id, wp_id, position_x, position_y, position_z) VALUES
+(61699, 1, 1, 1648, 5398.483, 158.9442),
+(61699, 1, 2, 1630.078, 5402.018, 163.3863),
+(61699, 1, 3, 1574.807, 5394.819, 173.6126),
+(61699, 1, 4, 1548.351, 5376.471, 192.1736),
+(61699, 1, 5, 1529.559, 5346.958, 194.6447),
+(61699, 1, 6, 1527.813, 5316.797, 189.698),
 
+(61699, 2, 1, 1529.571, 5315.422, 190.5054),
+(61699, 2, 2, 1530.288, 5311.683, 195.0026),
+(61699, 2, 3, 1534.28, 5305.519, 200.1916),
+(61699, 2, 4, 1545.368, 5298.518, 204.197),
+(61699, 2, 5, 1557.868, 5291.63, 207.0067),
+(61699, 2, 6, 1585.382, 5277.699, 210.4706),
+(61699, 2, 7, 1611.844, 5282.317, 205.5108),
+(61699, 2, 8, 1622.958, 5288.12, 200.6926),
+(61699, 2, 9, 1628.595, 5301.054, 192.2618),
+(61699, 2, 10, 1631.007, 5318.358, 184.9743),
+(61699, 2, 11, 1635.658, 5336.343, 178.8382),
+(61699, 2, 12, 1639.063, 5356.228, 170.853),
+(61699, 2, 13, 1655.72, 5385.494, 158.4938),
+(61699, 2, 14, 1654.681, 5396.618, 153.9244);
 
 -- WIP ONLY
 UPDATE creature_template SEt modelid2 = 41224 WHERE entry = 62684; -- make barrel target visible
@@ -134,33 +276,55 @@ UPDATE creature_template SEt modelid2 = 41224 WHERE entry = 62684; -- make barre
 
 DELETE FROM creature_text WHERE entry IN (61634, 61620);
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
-(61620, 0, 0, 'A wave of |cFF00dc29Sik''thik Swarmers|r joins the battle.', 41, 0, 100, 0, 0, 0, 'Commander Vo''jak - SAY_'),
-(61620, 1, 0, 'A wave of |cFFB600B8Sik''thik Demolishers|r joins the battle.', 41, 0, 100, 0, 0, 0, 'Commander Vo''jak - SAY_'),
-(61620, 2, 0, 'A wave of |cFF00dc29Sik''thik Swarmers|r and a |cFF815d18Sik''thik Warrior|r joins the battle.', 41, 0, 100, 0, 0, 0, 'Commander Vo''jak - SAY_'),
-(61620, 3, 0, 'A wave of |cFFB600B8Sik''thik Demolishers|r and a |cFF815d18Sik''thik Warrior|r joins the battle.', 41, 0, 100, 0, 0, 0, 'Commander Vo''jak - SAY_');
-
-
--- (61699, x, x, '|TInterface\\Icons\\inv_misc_blackironbomb.blp:20|t |cFFdd7400Сик''тик Желтокрыл|r передвигается, чтобы |cFFFF0000|Hspell:120559|h[бомбардировать]|h|r платформу!', 41, 0, 100, 0, 0, 0, 0, 'Сик''тик Желтокрыл to Player'),
--- (61699, x, x, '%s остается без боеприпасов и улетает!', 41, 0, 100, 0, 0, 0, 0, 'Сик''тик Желтокрыл to Сик''тик Желтокрыл'),
--- (61699, x, x, '|TInterface\\Icons\\inv_misc_blackironbomb.blp:20|t |cFFdd7400Сик''тик Желтокрыл|r передвигается, чтобы |cFFFF0000|Hspell:120559|h[бомбардировать]|h|r платформу!', 41, 0, 100, 0, 0, 31512, 0, 'Сик''тик Желтокрыл'),
--- (61699, x, x, '|TInterface\\Icons\\inv_misc_blackironbomb.blp:20|t |cFFdd7400Сик''тик Желтокрыл|r передвигается, чтобы |cFFFF0000|Hspell:120559|h[бомбардировать]|h|r платформу!', 41, 0, 100, 0, 0, 0, 0, 'Сик''тик Желтокрыл'),
--- (61620, x, x, 'Спасибо, конечно, за спасение, но мы по-прежнему со всех сторон окружены богомолами.', 12, 0, 100, 2, 0, 31505, 0, 'Ян Железный Коготь'),
--- (61620, x, x, 'Только посмотрите. Их слишком много. Мы не справимся.', 12, 0, 100, 397, 0, 31506, 0, 'Ян Железный Коготь'),
--- (61620, x, x, 'Хм-м... У меня появилась идея. Это может сработать, но мне понадобится помощь!', 12, 0, 100, 273, 0, 31507, 0, 'Ян Железный Коготь'),
--- (61620, x, x, 'Обратим оружие этих богомолов против них самих!', 12, 0, 100, 5, 0, 31508, 0, 'Ян Железный Коготь'),
--- (61620, x, x, 'Ли! Ло! Нам нужен сок!', 12, 0, 100, 397, 0, 31509, 0, 'Ян Железный Коготь to Player'),
--- (61620, x, x, 'Ну, начнем веселье?', 12, 0, 100, 6, 0, 31510, 0, 'Ян Железный Коготь to Player'),
--- (61620, x, x, 'Мы раздавим вас, как жуков!', 14, 0, 100, 22, 0, 31514, 0, 'Ян Железный Коготь to Player'),
--- (61620, x, x, 'Роевики взбираются по склону! Используй смолу, чтобы их замедлить!', 12, 0, 100, 25, 0, 31511, 0, 'Ян Железный Коготь to Player'),
--- (61620, x, x, 'Желтокрыл приближается. Берегитесь!', 12, 0, 100, 25, 0, 31503, 0, 'Ян Железный Коготь to Player'),
--- (61620, x, x, 'У подрывников бомбы! Прямой – и они взлетят на воздух!', 12, 0, 100, 25, 0, 31504, 0, 'Ян Железный Коготь'),
--- (61620, x, x, 'Воин! Сосредоточьте огонь на нем!', 12, 0, 100, 25, 0, 31512, 0, 'Ян Железный Коготь'),
--- (61620, x, x, 'По-моему, было весело!', 12, 0, 100, 11, 0, 31497, 0, 'Ян Железный Коготь to Командир Во''цзак'),
--- (61620, x, x, 'Ли, Ло! Спуститесь к нашим друзьям!', 12, 0, 100, 0, 0, 31498, 0, 'Ян Железный Коготь to Командир Во''цзак'),
--- (61620, x, x, 'Ворота заперты... но думаю, я смогу их открыть.', 12, 0, 100, 0, 0, 31499, 0, 'Ян Железный Коготь to Командир Во''цзак'),
--- (61620, x, x, 'Дайте-ка подумать... запал на 30 секунд...', 12, 0, 100, 0, 0, 31500, 0, 'Ян Железный Коготь to Командир Во''цзак'),
--- (61620, x, x, 'Что? Я сказал "тридцать?" Я имел в виду три!', 12, 0, 100, 0, 0, 31501, 0, 'Ян Железный Коготь to Командир Во''цзак'),
--- (61620, x, x, 'Быстрее! Вы должны остановить осаду!', 12, 0, 100, 5, 0, 31502, 0, 'Ян Железный Коготь to Командир Во''цзак'),
+-- YANG IRONCLAW
+-- Meeting our backup
+(61620, 0, 0, 'Thanks for the save, but we''re still stuck in the middle of the entire mantid army.', 12, 0, 100, 11, 0, 31505, 'Yang Ironclaw - SAY_INTRO_1'),
+(61620, 1, 0, 'Look out there. Too many for us to take head on.', 12, 0, 100, 25, 0, 31506, 'Yang Ironclaw - SAY_INTRO_2'),
+(61620, 2, 0, 'Hmmm... I have a crazy idea that just might work, but we''ll need your help heroes!', 12, 0, 100, 0, 0, 31507, 'Yang Ironclaw - SAY_INTRO_3'),
+(61620, 3, 0, 'Let''s give these mantid a taste of their own medicine!', 12, 0, 100, 0, 0, 31508, 'Yang Ironclaw - SAY_INTRO_4'),
+-- Intro
+(61620, 4, 0, 'Li and Lo, get the sap into position!', 12, 0, 100, 0, 0, 31509, 'Yang Ironclaw - SAY_AGGRO_1'),
+(61620, 5, 0, 'Let''s get this party started, shall we?', 12, 0, 100, 0, 0, 31510, 'Yang Ironclaw - SAY_AGGRO_2'),
+(61620, 6, 0, 'Bring it, uglies!', 14, 0, 100, 5, 0, 31513, 'Yang Ironclaw - SAY_AGGRO_3'),
+(61620, 7, 0, 'We''ll squish you like bugs!', 14, 0, 100, 5, 0, 31514, 'Yang Ironclaw - SAY_AGGRO_4'),
+(61620, 8, 0, 'We''ve got your sap -- come and get it!', 14, 0, 100, 5, 0, 31515, 'Yang Ironclaw - SAY_AGGRO_5'),
+-- Swarmer (wave 1)
+(61620, 9, 0, 'A wave of |cFF00dc29Sik''thik Swarmers|r joins the battle.', 41, 0, 100, 0, 0, 0, 'Yang Ironclaw - EMOTE_WAVE_ONE'),
+(61620, 10, 0, 'Swarmers are coming up the ramp -- use the sap to slow them down!', 14, 0, 100, 0, 0, 31511, 'Yang Ironclaw - SAY_WAVE_ONE'),
+-- Demolisher (wave 2)
+(61620, 11, 0, 'A wave of |cFFB600B8Sik''thik Demolishers|r joins the battle.', 41, 0, 100, 0, 0, 0, 'Yang Ironclaw - EMOTE_WAVE_TWO'),
+(61620, 12, 0, 'Demolishers are carrying explosives! Any direct hit will blow them up!', 14, 0, 100, 0, 0, 31504, 'Yang Ironclaw - SAY_WAVE_TWO'),
+-- Warrior (wave 3)
+(61620, 13, 0, 'A wave of |cFF00dc29Sik''thik Swarmers|r and a |cFF815d18Sik''thik Warrior|r joins the battle.', 41, 0, 100, 0, 0, 0, 'Yang Ironclaw - EMOTE_WAVE_THREE'),
+(61620, 14, 0, 'Warrior coming in!  Focus your fire!', 14, 0, 100, 0, 0, 31512, 'Yang Ironclaw - SAY_WAVE_THREE'),
+-- All In (wave 4)
+(61620, 15, 0, 'A wave of |cFFB600B8Sik''thik Demolishers|r and a |cFF815d18Sik''thik Warrior|r joins the battle.', 41, 0, 100, 0, 0, 0, 'Yang Ironclaw - EMOTE_WAVE_FOUR'),
+-- Bombard
+(61620, 16, 0, '|TInterfaceIconsinv_misc_blackironbomb.blp:20|t The |cFFdd7400Sik''thik Amberwing|r moves into position to |cFFFF0000|Hspell:120559|h[Bombard]|h|r the platform!', 41, 0, 100, 0, 0, 0, 'Yang Ironclaw - EMOTE_BOMBARD'),
+(61620, 17, 0, 'The Amberwing is flying in, watch out!', 14, 0, 100, 0, 0, 31503, 'Yang Ironclaw - SAY_AMBERWING'),
+-- Outro
+(61620, 18, 0, 'Well, that was fun, wasn''t it?', 14, 0, 100, 5, 0, 31497, 'Yang Ironclaw - SAY_OUTRO_1'),
+(61620, 19, 0, 'Li and Lo, go look after our friends down below.', 14, 0, 100, 0, 0, 31498, 'Yang Ironclaw - SAY_OUTRO_2'),
+(61620, 20, 0, 'Ah, this gate is locked, but I think I have something that''ll open it.', 14, 0, 100, 0, 0, 31499, 'Yang Ironclaw - SAY_GATE_1'),
+(61620, 21, 0, 'Let me see here... thirty second fuse...', 14, 0, 100, 0, 0, 31500, 'Yang Ironclaw - SAY_GATE_2'),
+(61620, 22, 0, 'Whoops, did I say thirty? I meant three.', 14, 0, 100, 0, 0, 31501, 'Yang Ironclaw - SAY_GATE_3'),
+(61620, 23, 0, 'Go, hurry! You must stop the siege!', 14, 0, 100, 0, 0, 31502, 'Yang Ironclaw - SAY_GATE_4'),
+-- VOJAK
+(61634, 0, 0, 'Fools! Attacking the might of the mantid head on?  Your deaths will be swift.', 14, 0, 100, 0, 0, 30264, 'Commander Vo''jak - SAY_AGGRO'),
+(61634, 1, 0, 'Swarmers, attack!  Tear the flesh from their bones!', 14, 0, 100, 0, 0, 30265, 'Commander Vo''jak - SAY_WAVE_ONE'),
+(61634, 2, 0, 'Demolishers, get in there!  Leave nothing but a pile of ash!', 14, 0, 100, 0, 0, 30266, 'Commander Vo''jak - SAY_WAVE_TWO'),
+(61634, 3, 0, 'Warriors, trample these weaklings!  Crush them!', 14, 0, 100, 0, 0, 30267, 'Commander Vo''jak - SAY_WAVE_THREE'),
+(61634, 4, 0, 'Everyone! Send everything! Slaughter these cowards, they are making us look like fools!', 14, 0, 100, 0, 0, 30268, 'Commander Vo''jak - SAY_WAVE_FOUR'),
+(61634, 5, 0, 'Where... where is it? Worthless, useless... damn you!', 14, 0, 100, 0, 0, 30272, 'Commander Vo''jak - SAY_AIR_SUPPORT'),
+(61634, 6, 0, 'Pah! Those who failed deserved to die; you have merely culled the weak!', 14, 0, 100, 0, 0, 30262, 'Commander Vo''jak - SAY_ENGAGE_1'),
+(61634, 7, 0, 'I must finish this myself, then. So be it!', 14, 0, 100, 0, 0, 30263, 'Commander Vo''jak - SAY_ENGAGE_2'),
+(61634, 8, 0, 'Carpet bomb the platform! Send in the Amberwing!', 14, 0, 100, 0, 0, 30269, 'Commander Vo''jak - SAY_AMBERWING'),
+(61634, 8, 1, 'They are holding us off, bring in the air support!', 14, 0, 100, 0, 0, 30270, 'Commander Vo''jak - SAY_AMBERWING'),
+(61634, 8, 2, 'Amberwing, get in there! Lay siege to the holdouts!', 14, 0, 100, 0, 0, 30271, 'Commander Vo''jak - SAY_AMBERWING'),
+(61634, 9, 0, 'It was... a trap...', 14, 0, 100, 0, 0, 30273, 'Commander Vo''jak - SAY_DEATH'),
+(61634, 10, 0, 'Too easy!', 14, 0, 100, 0, 0, 30274, 'Commander Vo''jak - SAY_SLAY'),
+(61634, 10, 1, 'Were you even trying?!', 14, 0, 100, 0, 0, 30275, 'Commander Vo''jak - SAY_SLAY'),
+(61634, 10, 2, 'Haha, you die so easily!', 14, 0, 100, 0, 0, 30276, 'Commander Vo''jak - SAY_SLAY');
 
 /*
 *******************************
@@ -169,7 +333,7 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 */
 
 UPDATE creature_template SET ScriptName = 'boss_general_pavalak' WHERE entry = 61485;
-UPDATE creature_template SET minlevel = 93, maxlevel = 93 modelid1 = 38796, ScriptName = 'npc_pavalak_siege_explosive' WHERE entry = 61452;
+UPDATE creature_template SET minlevel = 93, maxlevel = 93, modelid1 = 38796, ScriptName = 'npc_pavalak_siege_explosive' WHERE entry = 61452;
 UPDATE creature_template SET InhabitType = 4, ScriptName = 'npc_pavalak_amber_sapper' WHERE entry = 61484;
 UPDATE creature_template SET flags_extra = 128, ScriptName = 'npc_pavalak_reinforcements_summoner' WHERE entry = 61483;
 
@@ -188,9 +352,10 @@ INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
 (119476, 'spell_general_pavalak_bulwark'),
 (119512, 'spell_pavalak_bombardment');
 
-DELETE FROM spell_linked_spell WHERE spell_trigger IN(119476);
+DELETE FROM spell_linked_spell WHERE spell_trigger IN(119393, 119476);
 INSERT INTO spell_linked_spell (spell_trigger, spell_effect, type, comment) VALUES
-(119476, 119512, 1, 'Bulwark - trigger Bombardment Effect');
+(119393, -119388, 0, 'Bulwark - trigger Bombardment Effect'),
+(119476, 119512, 1, 'Bulwark - trigger Bombardment Effect'),
 (119476, 119798, 2, 'Bulwark - trigger Bombardment');
 
 DELETE FROM creature WHERE id = 61483; -- reinforcements summoner
@@ -202,18 +367,30 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 (13, 1, 124291, 0, 0, 31, 0, 3, 63720, 0, 0, 0, 0, '', 'Blade Rush triggered - target Pavalak'),
 (13, 3, 119703, 0, 0, 31, 0, 4, 0, 0, 0, 0, 0, '', 'Detonate - Target players only');
 
+
+DELETE FROM creature_text WHERE entry IN (61485);
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(61485, 0, 0, 'Niuzao''s forces attack from the rear!', 14, 0, 100, 0, 0, 30279, 'Geleral Pavalak - SAY_INTRO'),
+(61485, 1, 0, 'The temple will fall! You cannot stop my forces!', 14, 0, 100, 0, 0, 30277, 'Geleral Pavalak - SAY_AGGRO'),
+(61485, 2, 0, 'My army will crush you!', 14, 0, 100, 0, 0, 30278, 'Geleral Pavalak - SAY_BULWARK'),
+(61485, 2, 1, 'Stop them! Mantid attack!', 14, 0, 100, 0, 0, 30280, 'Geleral Pavalak - SAY_BULWARK'),
+(61485, 2, 2, 'Put down your weapons or die!', 14, 0, 100, 0, 0, 30283, 'Geleral Pavalak - SAY_BULWARK'),
+(61485, 3, 0, 'The empress demands it!', 14, 0, 100, 0, 0, 30285, 'Geleral Pavalak - SAY_SLAY'),
+(61485, 3, 1, 'The forces of Niuzao are weak!', 14, 0, 100, 0, 0, 30286, 'Geleral Pavalak - SAY_SLAY'),
+(61485, 4, 0, 'I have failed you, empress...', 14, 0, 100, 0, 0, 30284, 'Geleral Pavalak - SAY_'),
+(61485, 5, 0, 'General Pa''valak calls for Reinforcements!', 41, 0, 100, 0, 0, 0, 'Geleral Pavalak - EMOTE_BULWARK');
+
 /*
 *******************************
 *** WING LEADER NER'ONOK ******
 *******************************
 */
+UPDATE creature_template SET mechanic_immune_mask = mechanic_immune_mask &~ 0x2000000, ScriptName = 'boss_wing_leader_neronok' WHERE entry = 62205;
 
-UPDATE creature_template SET ScriptName = 'boss_wing_leader_neronok' WHERE entry = 62205;
 
 DELETE FROM creature_template_aura WHERE entry IN (62205);
 INSERT INTO creature_template_aura (entry, aura) VALUES
 (62205, 126303); -- Neronok - Mantid Wings
-
 
 DELETE FROM spell_target_position WHERE id IN (125318, 121282, 121284);
 INSERT INTO spell_target_position (id, effIndex, target_map, target_position_x, target_position_y, target_position_z, target_orientation) VALUES
@@ -221,9 +398,10 @@ INSERT INTO spell_target_position (id, effIndex, target_map, target_position_x, 
 (121282, 1, 1011, 1841.55, 5220.97, 131.17, 2.39632),
 (121284, 1, 1011, 1841.55, 5220.97, 131.17, 5.53791);
 
-DELETE FROM spell_script_names WHERE spell_id In (121447);
+DELETE FROM spell_script_names WHERE spell_id In (121282, 121447);
 INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
-(121447, 'spell_quick_dry_resin');
+(121447, 'spell_quick_dry_resin'),
+(121282, 'spell_neronok_gusting_winds');
 
 
 DELETE FROM spell_linked_spell WHERE spell_trigger IN(121448, -121447);
@@ -231,6 +409,14 @@ INSERT INTO spell_linked_spell (spell_trigger, spell_effect, type, comment) VALU
 (-121447, -122063, 1, 'Quick Dry Resin - Remove indicator');
 -- (121448, 121116, 2, 'Quick Dry Resin - Stun');
 
+DELETE FROM creature_text WHERE entry IN (62205);
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(62205, 0, 0, 'You may have come this far. You may have carved a path through my army, but I... will kill you, and I will build the bridge.', 14, 0, 100, 0, 0, 30359, 'Wing Leader Neronok - SAY_AGGRO'),
+(62205, 1, 0, 'I will do what Pa''valak could not!', 14, 0, 100, 0, 0, 30360, 'Wing Leader Neronok - SAY_FLIGHT'),
+(62205, 2, 0, 'Get back to work! I want this bridge finished by first light!', 14, 0, 100, 0, 0, 30363, 'Wing Leader Neronok - SAY_WIPE'),
+(62205, 3, 0, 'The... bridge...', 14, 0, 100, 0, 0, 30361, 'Wing Leader Neronok - SAY_DEATH'),
+(62205, 4, 0, 'Out of my way.', 14, 0, 100, 0, 0, 30362, 'Wing Leader Neronok - SAY_SLAY'),
+(62205, 5, 0, '%s lifts off and flies to the other end of the bridge!', 41, 0, 100, 0, 0, 0, 'Wing Leader Neronok - EMOTE_WINDS');
 /*
 *******************************
 ***** GENERAL / MISC **********
@@ -312,7 +498,7 @@ UPDATE `creature_template` SET `equipment_id` = `entry` WHERE `entry` IN (61634,
 
 -- Auras
 
-DELETE FROM `creature_template_aura` WHERE `entry` IN (61579, 61964, 61965, 62091, 64517, 61613, 62794, 61812, 61817, 61670, 66699, 63106, 61634, 64520, 62348, 61483, 62205);
+DELETE FROM `creature_template_aura` WHERE `entry` IN (61964, 62091, 64517, 61613, 61670, 66699, 61634);
 INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES
 (61964, 120586), -- Sap Spray - Sap Spray
 -- (61579, 120473), -- Sap puddle - Sap Spray base
@@ -321,7 +507,7 @@ INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES
 (62091, 132441), -- Sik'thik Flyer - Mantid Wings
 (64517, 86603), -- Shado-Master Chum Kiu - Stealth
 (61613, 131628), -- Sap Puddle - Cosmetic Shield
--- (61613, 119939), -- Sap Puddle - Sap Puddle
+(61613, 119939), -- Sap Puddle - Sap Puddle
 -- (62794, 122347), -- Lo Chu - Barrel Assignment
 -- (61812, 122347), -- Li Chu - Barrel Assignment
 -- (61817, 123218), -- Mantid Tar Keg - Mantid Barrel Inactive
@@ -339,8 +525,8 @@ INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES
 UPDATE `creature_model_info` SET `bounding_radius`=1.25, `combat_reach`=1.25, `gender`=0 WHERE `modelid`=45766; -- Sik'thik Battle-Mender
 UPDATE `creature_model_info` SET `combat_reach`=1.5 WHERE `modelid`=42665; -- Mantid Tar Keg
 UPDATE `creature_model_info` SET `bounding_radius`=1.5, `gender`=0 WHERE `modelid`=43118; -- Sik'thik Bladedancer
-UPDATE `creature_model_info` SET `bounding_radius`=2, `combat_reach`=2, `gender`=0 WHERE `modelid`=43119; -- Sik'thik Vanguard
-UPDATE `creature_model_info` SET `bounding_radius`=4, `combat_reach`=4, `gender`=0 WHERE `modelid`=43120; -- General Pa'valak
+UPDATE `creature_model_info` SET `bounding_radius`=1, `combat_reach`=2, `gender`=0 WHERE `modelid`=43119; -- Sik'thik Vanguard
+UPDATE `creature_model_info` SET `bounding_radius`=1, `combat_reach`=4, `gender`=0 WHERE `modelid`=43120; -- General Pa'valak
 UPDATE `creature_model_info` SET `bounding_radius`=1, `combat_reach`=1, `gender`=0 WHERE `modelid`=43121; -- Sik'thik Soldier
 UPDATE `creature_model_info` SET `bounding_radius`=0.347222, `gender`=0 WHERE `modelid`=44773; -- Shado-Pan Prisoner
 UPDATE `creature_model_info` SET `bounding_radius`=0.3645831, `combat_reach`=1.575, `gender`=0 WHERE `modelid`=44774; -- Shado-Pan Prisoner 2
@@ -348,10 +534,13 @@ UPDATE `creature_model_info` SET `bounding_radius`=0.3819442, `combat_reach`=1.6
 UPDATE `creature_model_info` SET `bounding_radius`=0.347222, `gender`=1 WHERE `modelid`=44776; -- Shado-Pan Prisoner 4
 UPDATE `creature_model_info` SET `bounding_radius`=1, `combat_reach`=1 WHERE `modelid`=43149; -- Sik'thik Builder
 UPDATE `creature_model_info` SET `bounding_radius`=1.5 WHERE `modelid`=43150; -- Sik'thik Engineer
-UPDATE `creature_model_info` SET `bounding_radius`=2, `combat_reach`=2 WHERE `modelid`=43151; -- Wing Leader Ner'onok
+UPDATE `creature_model_info` SET `bounding_radius`=1, `combat_reach`=2 WHERE `modelid`=43151; -- Wing Leader Ner'onok
 
 -- Creature template Corrections
 
+UPDATE creature_template SET mindmg = 11839, maxdmg = 17339, unit_flags = 32768, unit_flags2 = 2048, lootId = entry, equipment_id = 62348 WHERE entry = 61448; -- Sik'Thik Soldier
+UPDATE creature_template SET mindmg = 11321, maxdmg = 16657, dmg_multiplier = 3, attackpower = 48962 WHERE entry IN (61436, 61434); -- Sik'Thik Bladedancer + Vanguard
+UPDATE creature_template SET mindmg = 12684, maxdmg = 19052, dmg_multiplier = 3, attackpower = 55538 WHERE entry IN (61485, 61634); -- Vo'Jak + Pa'Valak
 UPDATE `creature_template` SET `minlevel`=89, `maxlevel`=89, `faction_A`=2137, `faction_H`=2137, `speed_run`=0.9920629, `VehicleId`=2087 WHERE `entry`=59836; -- Panda Seat
 UPDATE `creature_template` SET `minlevel`=90, `maxlevel`=90, `faction_A`=14, `faction_H`=14, `speed_run`=1.428571 WHERE `entry`=62348; -- Sik'thik Soldier
 UPDATE `creature_template` SET `minlevel`=90, `maxlevel`=90, `faction_A`=14, `faction_H`=14, `speed_run`=1.428571 WHERE `entry`=61448; -- Sik'thik Soldier
@@ -537,7 +726,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position
 (@CGUID+108, 62091, 1011, 3, 1, 1829.125, 4939.059, 205.8205, 3.224343, 86400, 5, 1), -- Sik'thik Flyer (Area: Hollowed Out Tree) (Auras: 126320 - Mantid Wings, 132441 - Mantid Wings) (possible waypoints or random movement)
 (@CGUID+109, 62091, 1011, 3, 1, 1829.879, 4924.955, 205.8196, 3.22484, 86400, 5, 1), -- Sik'thik Flyer (Area: Hollowed Out Tree) (Auras: 126320 - Mantid Wings, 132441 - Mantid Wings) (possible waypoints or random movement)
 (@CGUID+110, 62091, 1011, 3, 1, 1823.255, 4931.143, 204.7348, 3.187474, 86400, 5, 1), -- Sik'thik Flyer (Area: Hollowed Out Tree) (Auras: 126320 - Mantid Wings, 132441 - Mantid Wings) (possible waypoints or random movement)
-(@CGUID+111, 61817, 1011, 3, 1, 1545.939, 5284.752, 184.8529, 1.224235, 86400, 5, 1), -- Mantid Tar Keg (Area: Hollowed Out Tree) (Auras: 123218 - Mantid Barrel Inactive) (possible waypoints or random movement)
+(@CGUID+111, 61817, 1011, 3, 1, 1545.939, 5284.752, 184.8529, 1.224235, 86400, 0, 0), -- Mantid Tar Keg (Area: Hollowed Out Tree) (Auras: 123218 - Mantid Barrel Inactive) (possible waypoints or random movement)
 (@CGUID+112, 61670, 1011, 3, 1, 1486.661, 5399.953, 142.1343, 5.106897, 86400, 0, 0), -- Sik'thik Demolisher (Area: Hollowed Out Tree) (Auras: 121986 - Carrying Explosives)
 (@CGUID+113, 61670, 1011, 3, 1, 1522.108, 5394.429, 139.1991, 4.594025, 86400, 0, 0), -- Sik'thik Demolisher (Area: Hollowed Out Tree) (Auras: 121986 - Carrying Explosives)
 (@CGUID+114, 61670, 1011, 3, 1, 1534.96, 5390.47, 139.256, 4.47834, 86400, 0, 0), -- Sik'thik Demolisher (Area: Hollowed Out Tree) (Auras: 121986 - Carrying Explosives)
@@ -545,11 +734,11 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position
 (@CGUID+116, 61817, 1011, 3, 1, 1545.234, 5285.461, 184.8475, 0.9035403, 86400, 0, 0), -- Mantid Tar Keg (Area: Hollowed Out Tree) (Auras: 123218 - Mantid Barrel Inactive)
 (@CGUID+117, 57478, 1011, 3, 1, 1488.946, 5298.888, 184.732, 1.732267, 86400, 0, 0), -- Invisible Stalker (Area: Hollowed Out Tree)
 (@CGUID+118, 61817, 1011, 3, 1, 1486.068, 5296.542, 184.732, 0.9035403, 86400, 0, 0), -- Mantid Tar Keg (Area: Hollowed Out Tree) (Auras: 123218 - Mantid Barrel Inactive)
-(@CGUID+119, 61817, 1011, 3, 1, 1549.337, 5285.652, 184.8485, 1.840594, 86400, 5, 1), -- Mantid Tar Keg (Area: Hollowed Out Tree) (Auras: 123218 - Mantid Barrel Inactive) (possible waypoints or random movement)
+(@CGUID+119, 61817, 1011, 3, 1, 1549.337, 5285.652, 184.8485, 1.840594, 86400, 0, 0), -- Mantid Tar Keg (Area: Hollowed Out Tree) (Auras: 123218 - Mantid Barrel Inactive) (possible waypoints or random movement)
 (@CGUID+120, 61670, 1011, 3, 1, 1517.696, 5406.799, 140.2151, 4.672641, 86400, 0, 0), -- Sik'thik Demolisher (Area: Hollowed Out Tree) (Auras: 121986 - Carrying Explosives)
 (@CGUID+121, 57478, 1011, 3, 1, 1548.208, 5287.304, 184.8364, 1.732267, 86400, 0, 0), -- Invisible Stalker (Area: Hollowed Out Tree)
 (@CGUID+122, 61817, 1011, 3, 1, 1488.127, 5295.745, 184.732, 1.338254, 86400, 0, 0), -- Mantid Tar Keg (Area: Hollowed Out Tree) (Auras: 123218 - Mantid Barrel Inactive)
-(@CGUID+123, 61817, 1011, 3, 1, 1549.302, 5284.602, 184.8558, 1.839002, 86400, 5, 1), -- Mantid Tar Keg (Area: Hollowed Out Tree) (Auras: 123218 - Mantid Barrel Inactive) (possible waypoints or random movement)
+(@CGUID+123, 61817, 1011, 3, 1, 1549.302, 5284.602, 184.8558, 1.839002, 86400, 0, 0), -- Mantid Tar Keg (Area: Hollowed Out Tree) (Auras: 123218 - Mantid Barrel Inactive) (possible waypoints or random movement)
 (@CGUID+124, 63106, 1011, 3, 1, 1518.575, 5386.583, 138.8989, 4.968798, 86400, 0, 0), -- Sik'thik Swarmer (Area: Hollowed Out Tree) (Auras: )
 (@CGUID+125, 61817, 1011, 3, 1, 1488.03, 5296.766, 184.7319, 1.41797, 86400, 0, 0), -- Mantid Tar Keg (Area: Hollowed Out Tree) (Auras: 123218 - Mantid Barrel Inactive)
 (@CGUID+126, 61670, 1011, 3, 1, 1499.731, 5404.56, 141.805, 5.038696, 86400, 0, 0), -- Sik'thik Demolisher (Area: Hollowed Out Tree) (Auras: 121986 - Carrying Explosives)
@@ -576,7 +765,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position
 (@CGUID+147, 61670, 1011, 3, 1, 1504.146, 5404.806, 140.7919, 4.947556, 86400, 0, 0), -- Sik'thik Demolisher (Area: Hollowed Out Tree) (Auras: 121986 - Carrying Explosives)
 (@CGUID+148, 61817, 1011, 3, 1, 1548.307, 5284.96, 184.8413, 1.654358, 86400, 0, 0), -- Mantid Tar Keg (Area: Hollowed Out Tree) (Auras: 123218 - Mantid Barrel Inactive)
 (@CGUID+149, 61817, 1011, 3, 1, 1493.016, 5296.44, 184.732, 2.79816, 86400, 0, 0), -- Mantid Tar Keg (Area: Hollowed Out Tree) (Auras: 123218 - Mantid Barrel Inactive)
-(@CGUID+150, 61817, 1011, 3, 1, 1551.351, 5284.819, 184.8554, 2.79816, 86400, 5, 1), -- Mantid Tar Keg (Area: Hollowed Out Tree) (Auras: 123218 - Mantid Barrel Inactive) (possible waypoints or random movement)
+(@CGUID+150, 61817, 1011, 3, 1, 1551.351, 5284.819, 184.8554, 2.79816, 86400, 0, 0), -- Mantid Tar Keg (Area: Hollowed Out Tree) (Auras: 123218 - Mantid Barrel Inactive) (possible waypoints or random movement)
 (@CGUID+151, 61670, 1011, 3, 1, 1495.177, 5403.714, 142.5123, 5.175195, 86400, 0, 0), -- Sik'thik Demolisher (Area: Hollowed Out Tree) (Auras: 121986 - Carrying Explosives)
 (@CGUID+152, 61670, 1011, 3, 1, 1531.144, 5392.999, 139.1139, 4.569481, 86400, 0, 0), -- Sik'thik Demolisher (Area: Hollowed Out Tree) (Auras: 121986 - Carrying Explosives)
 (@CGUID+153, 63106, 1011, 3, 1, 1490.227, 5395.728, 140.1251, 5.175195, 86400, 0, 0), -- Sik'thik Swarmer (Area: Hollowed Out Tree) (Auras: 120270 - Slowed)
@@ -591,10 +780,10 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position
 (@CGUID+162, 61817, 1011, 3, 1, 1545.389, 5286.476, 184.8406, 0.5643228, 86400, 0, 0), -- Mantid Tar Keg (Area: Hollowed Out Tree) (Auras: 123218 - Mantid Barrel Inactive)
 (@CGUID+163, 61817, 1011, 3, 1, 1544.521, 5287.002, 184.8364, 0.4674295, 86400, 0, 0), -- Mantid Tar Keg (Area: Hollowed Out Tree) (Auras: 123218 - Mantid Barrel Inactive)
 (@CGUID+164, 61817, 1011, 3, 1, 1487.021, 5296.897, 184.7319, 1.107405, 86400, 0, 0), -- Mantid Tar Keg (Area: Hollowed Out Tree) (Auras: 123218 - Mantid Barrel Inactive)
-(@CGUID+165, 61817, 1011, 3, 1, 1548.142, 5286.113, 184.8446, 1.633882, 86400, 5, 1), -- Mantid Tar Keg (Area: Hollowed Out Tree) (Auras: 123218 - Mantid Barrel Inactive) (possible waypoints or random movement)
+(@CGUID+165, 61817, 1011, 3, 1, 1548.142, 5286.113, 184.8446, 1.633882, 86400, 0, 0), -- Mantid Tar Keg (Area: Hollowed Out Tree) (Auras: 123218 - Mantid Barrel Inactive) (possible waypoints or random movement)
 (@CGUID+166, 63106, 1011, 3, 1, 1534.09, 5398.921, 139.1302, 4.436366, 86400, 0, 0), -- Sik'thik Swarmer (Area: Hollowed Out Tree) (Auras: )
 (@CGUID+167, 61670, 1011, 3, 1, 1485.809, 5387.146, 139.5372, 5.133074, 86400, 0, 0), -- Sik'thik Demolisher (Area: Hollowed Out Tree) (Auras: 121986 - Carrying Explosives)
-(@CGUID+168, 61817, 1011, 3, 1, 1547.295, 5284.664, 184.8542, 1.338254, 86400, 5, 1), -- Mantid Tar Keg (Area: Hollowed Out Tree) (Auras: 123218 - Mantid Barrel Inactive) (possible waypoints or random movement)
+(@CGUID+168, 61817, 1011, 3, 1, 1547.295, 5284.664, 184.8542, 1.338254, 86400, 0, 0), -- Mantid Tar Keg (Area: Hollowed Out Tree) (Auras: 123218 - Mantid Barrel Inactive) (possible waypoints or random movement)
 (@CGUID+169, 63106, 1011, 3, 1, 1524.627, 5385.994, 139.7608, 4.630273, 86400, 0, 0), -- Sik'thik Swarmer (Area: Hollowed Out Tree) (Auras: )
 (@CGUID+170, 63106, 1011, 3, 1, 1519.444, 5400.557, 139.5995, 4.664006, 86400, 0, 0), -- Sik'thik Swarmer (Area: Hollowed Out Tree) (Auras: )
 (@CGUID+171, 61817, 1011, 3, 1, 1486.793, 5295.687, 184.7319, 1.224235, 86400, 0, 0), -- Mantid Tar Keg (Area: Hollowed Out Tree) (Auras: 123218 - Mantid Barrel Inactive)

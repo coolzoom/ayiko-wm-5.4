@@ -24,7 +24,9 @@ enum Bosses
     BOSS_VOJAK,
     BOSS_PAVALAK,
     BOSS_NERONOK,
-    TOTAL_ENCOUNTERS
+    TOTAL_ENCOUNTERS,
+
+    DATA_VOJAK_DOOR
 };
 
 enum Creatures
@@ -33,7 +35,8 @@ enum Creatures
     NPC_JINBAK          = 61567,
     NPC_VOJAK           = 61634,
     NPC_PAVALAK         = 61485,
-    NPC_NERONOK         = 62205
+    NPC_NERONOK         = 62205,
+    NPC_MANTID_CATAPULT = 63565
 };
 
 enum GameObjects
@@ -42,7 +45,8 @@ enum GameObjects
     GO_DOOR                 = 212921, // after vojak
 
     GO_TEMPLE_INVIS_DOOR    = 213251, // before neronok bridge
-    GO_WIND_WALL            = 214548 // before neronok bridge
+    GO_WIND_WALL            = 214548, // before neronok bridge
+    GO_FIRE_WALL            = 210097,
 };
 
 enum WMOAreaEntries

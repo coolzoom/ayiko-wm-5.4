@@ -20,6 +20,7 @@
 #include "ScriptedGossip.h"
 #include "Map.h"
 #include "Vehicle.h"
+#include "CreatureTextMgr.h"
 
 /*
 
@@ -34,6 +35,8 @@ enum
     NPC_YANG_IRONCLAW       = 61620,
     NPC_SIKTHIK_WARDEN      = 62795,
     NPC_MANTID_TAR_KEG      = 61817,
+    NPC_AMBERWING           = 61699,
+    NPC_BREACHING_CHARGE    = 65168,
 
     // Adds
     ACTION_ENGAGE_COMBAT    = 1, // DNC
@@ -41,6 +44,10 @@ enum
     ACTION_CALL_WAVE        = 10,
     WAVE_COUNT              = 4,
     LEFT_SIDE_MASK          = (1 << 10),
+
+    POINT_INTRO             = 10,
+    POINT_BOMB,
+
 };
 
 enum WaveCreatures
@@ -57,6 +64,49 @@ enum
     SPELL_CARRYING_CAUSTIC_TAR      = 123032,
     SPELL_KEG_ACTIVE                = 123215, // keg sparkle visual
     SPELL_KEG_INACTIVE              = 123218,
+    SPELL_MAKESHIFT_CHARGE          = 127408,
+    SPELL_BREACH_DOOR_TARGET        = 127418,
+    SPELL_BREACH_DOOR_EFFECT        = 127417
+};
+
+enum Yells
+{
+    SAY_INTRO_1                 = 0,
+    SAY_INTRO_2,
+    SAY_INTRO_3,
+    SAY_INTRO_4,
+    SAY_AGGRO_1,
+    SAY_AGGRO_2,
+    SAY_AGGRO_3,
+    SAY_AGGRO_4,
+    SAY_AGGRO_5,
+    EMOTE_WAVE_ONE,
+    SAY_WAVE_ONE,
+    EMOTE_WAVE_TWO,
+    SAY_WAVE_TWO,
+    EMOTE_WAVE_THREE,
+    SAY_WAVE_THREE,
+    EMOTE_WAVE_FOUR,
+    EMOTE_BOMBARD,
+    SAY_AMBERWING,
+    SAY_OUTRO_1,
+    SAY_OUTRO_2,
+    SAY_GATE_1,
+    SAY_GATE_2,
+    SAY_GATE_3,
+    SAY_GATE_4,
+
+    SAY_VOJAK_AGGRO             = 0,
+    SAY_VOJAK_WAVE_ONE,
+    SAY_VOJAK_WAVE_TWO,
+    SAY_VOJAK_WAVE_THREE,
+    SAY_VOJAK_WAVE_FOUR,
+    SAY_VOJAK_AIR_SUPPORT,
+    SAY_VOJAK_ENGAGE_1,
+    SAY_VOJAK_ENGAGE_2,
+    SAY_VOJAK_AMBERWING,
+    SAY_VOJAK_DEATH,
+    SAY_VOJAK_SLAY,
 };
 
 struct SpawnData
@@ -129,6 +179,15 @@ std::vector<SpawnData> RightSpawns[WAVE_COUNT] =
     }
 };
 
+static const Position bombsPos[] = 
+{
+    { 1621.851f, 5411.984f, 138.73839f, 6.125f },
+    { 1621.851f, 5408.082f, 138.74924f, 6.126f },
+    { 1621.229f, 5404.804f, 138.73306f, 6.176f },
+    { 1620.734f, 5400.718f, 138.73073f, 6.141f },
+    { 1620.033f, 5397.146f, 139.07486f, 6.090f }
+};
+
 /*
     Koz:
     This is a script for Yang Ironclaw
@@ -142,6 +201,26 @@ std::vector<SpawnData> RightSpawns[WAVE_COUNT] =
 
 class npc_yang_ironclaw : public CreatureScript
 {
+
+    class CreatureTalkEvent final : public BasicEvent
+    {
+    public:
+        explicit CreatureTalkEvent(Creature * speaker, uint32 textId) : 
+            _speaker(speaker), _textId(textId)
+        {
+        }
+
+        bool Execute(uint64, uint32) final
+        {
+            sCreatureTextMgr->SendChat(_speaker, _textId, 0, CHAT_MSG_ADDON, LANG_ADDON, TEXT_RANGE_NORMAL, 0, TEAM_OTHER, false, NULL, false);
+            return true;
+        }
+
+    private:
+        Creature * _speaker;
+        uint32 _textId;
+    };
+
     enum 
     {
         EVENT_START_EVENT       = 1,
@@ -150,16 +229,24 @@ class npc_yang_ironclaw : public CreatureScript
         EVENT_CALL_THIRD_WAVE,
         EVENT_CALL_FOURTH_WAVE,
         EVENT_CALL_BOSS,
-        EVENT_PLAYER_CHECK
+        EVENT_PLAYER_CHECK,
+        EVENT_INTRO_MOVE,
+        EVENT_AMBERWING,
+        EVENT_OUTRO_MOVE,
+        EVENT_PLACE_BOMBS,
+        EVENT_DETONATE_SPEECH,
+        EVENT_DETONATE_BOMBS,
+
+        PATH_OUTRO              = 1
     };
 
-    enum Quotes
-    {
-        EMOTE_FIRST_WAVE,
-        EMOTE_SECOND_WAVE,
-        EMOTE_THIRD_WAVE,
-        EMOTE_FOURTH_WAVE,
-    };
+   //enum Quotes
+   //{
+   //    EMOTE_FIRST_WAVE,
+   //    EMOTE_SECOND_WAVE,
+   //    EMOTE_THIRD_WAVE,
+   //    EMOTE_FOURTH_WAVE,
+   //};
 
     enum Waves
     {
@@ -203,28 +290,36 @@ class npc_yang_ironclaw : public CreatureScript
                 creature->AI()->SetData(0, mask);
         }
 
+        void SpellHitTarget(Unit* target, SpellInfo const* spell)
+        {
+            if (spell->Id == SPELL_BREACH_DOOR_TARGET)
+            {
+                target->CastSpell(target, SPELL_BREACH_DOOR_EFFECT, true);
+                target->ToCreature()->DespawnOrUnsummon(300);
+            }
+        }
+
         void DamageTaken(Unit* , uint32& damage)
         {
-            if (damage >= me->GetHealth())
-            {
-                damage = 0;
-                ResetEncounter();
-            }
+            damage = 0;
         }
 
         void DoAction(int32 const action) override
         {
             if (action == ACTION_START_EVENT)
-                StartEncounter();
+                //if (instance->GetBossState(BOSS_VOJAK) != DONE)
+                    StartEncounter();
         }
 
         void ResetEncounter()
         {
+            me->GetMotionMaster()->MoveTargetedHome();
             instance->SetBossState(BOSS_VOJAK, NOT_STARTED);
             encounterInProgress = false;
             me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             summons.DespawnAll();
             events.Reset();
+            bombCnt = 0;
 
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CARRYING_CAUSTIC_TAR);
 
@@ -278,10 +373,73 @@ class npc_yang_ironclaw : public CreatureScript
             }
         }
 
+        Creature * GetVojak() const
+        {
+            ASSERT(vojakGUID);
+
+            if (Creature * vojak = Creature::GetCreature(*me, vojakGUID))
+                return vojak;
+        }
+
+        void DelayedTalk(Creature * speaker, uint32 id, uint32 timer)
+        {
+            if (!speaker)
+                return;
+             // Should be safe to pass a pointer here
+            CreatureTalkEvent * talkEvent = new CreatureTalkEvent(speaker, id);
+            speaker->m_Events.AddEvent(talkEvent, speaker->m_Events.CalculateTime(timer));
+        }
+
         void JustSummoned(Creature* summon) override
         {
             summon->setActive(true);
             summons.Summon(summon);
+        }
+
+        void SummonedCreatureDies(Creature* victim, Unit* )
+        {
+            if (victim->GetEntry() == NPC_VOJAK)
+            {
+                instance->SetBossState(BOSS_VOJAK, DONE);
+                summons.DespawnAll();
+                events.Reset();
+
+                if (Creature * loChu = me->FindNearestCreature(NPC_LO_CHU, 500.0f))
+                    loChu->AI()->DoAction(ACTION_RESET_COMBAT);
+
+                if (Creature * liChu = me->FindNearestCreature(NPC_LI_CHU, 500.0f))
+                    liChu->AI()->DoAction(ACTION_RESET_COMBAT);
+
+                DelayedTalk(me, SAY_OUTRO_1, 2000);
+                DelayedTalk(me, SAY_OUTRO_2, 5000);
+                events.ScheduleEvent(EVENT_OUTRO_MOVE, 6000);
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 id)
+        {
+            if (type == POINT_MOTION_TYPE)
+            {
+                if (id == POINT_INTRO)
+                {
+                    Talk(SAY_AGGRO_3);
+                    DelayedTalk(me, SAY_AGGRO_4, 3000);
+                    DelayedTalk(me, SAY_AGGRO_5, 5000);
+                }
+                else if (id == POINT_BOMB)
+                {
+                    if (bombCnt < 5)
+                    {
+                        DoCast(me, SPELL_MAKESHIFT_CHARGE, false);
+                        events.ScheduleEvent(EVENT_PLACE_BOMBS, 1000);
+                    }
+                    else
+                    {
+                        DoCast(me, SPELL_MAKESHIFT_CHARGE, false);
+                        events.ScheduleEvent(EVENT_DETONATE_SPEECH, 1000);
+                    }
+                }
+            }
         }
 
         void StartEncounter()
@@ -298,6 +456,11 @@ class npc_yang_ironclaw : public CreatureScript
             events.ScheduleEvent(EVENT_CALL_BOSS, 180000);
             events.ScheduleEvent(EVENT_PLAYER_CHECK, 5000);
 
+            Talk(SAY_AGGRO_1);
+            DelayedTalk(me, SAY_AGGRO_2, 3000);
+            events.ScheduleEvent(EVENT_INTRO_MOVE, 3000);
+            events.ScheduleEvent(EVENT_AMBERWING, 30000);
+
             if (Creature * loChu = me->FindNearestCreature(NPC_LO_CHU, 500.0f))
                 loChu->AI()->DoAction(ACTION_ENGAGE_COMBAT);
 
@@ -313,26 +476,41 @@ class npc_yang_ironclaw : public CreatureScript
                 switch (eventId)
                 {
                     case EVENT_CALL_FIRST_WAVE: // Swarmers
-                        Talk(EMOTE_FIRST_WAVE);
+                        Talk(EMOTE_WAVE_ONE);
+                        DelayedTalk(GetVojak(), SAY_VOJAK_WAVE_ONE, 500);
+                        DelayedTalk(me, SAY_WAVE_ONE, 6000);
                         summons.DoAction((ACTION_ENGAGE_COMBAT << WAVE_ONE), EntryCheckPredicate(NPC_SIKTHIK_SWARMER));
                         break;
                     case EVENT_CALL_SECOND_WAVE: // Demolishers
-                        Talk(EMOTE_SECOND_WAVE);
+                        Talk(EMOTE_WAVE_TWO);
+                        DelayedTalk(GetVojak(), SAY_VOJAK_WAVE_TWO, 500);
+                        DelayedTalk(me, SAY_WAVE_TWO, 5000);
                         summons.DoAction((ACTION_ENGAGE_COMBAT << WAVE_TWO), EntryCheckPredicate(NPC_SIKTHIK_DEMOLISHER));
                         break;
                     case EVENT_CALL_THIRD_WAVE: // Swarmers + Warrior
-                        Talk(EMOTE_THIRD_WAVE);
+                        Talk(EMOTE_WAVE_THREE);
+                        DelayedTalk(GetVojak(), SAY_VOJAK_WAVE_THREE, 500);
+                        DelayedTalk(me, SAY_WAVE_THREE, 5000);
                         summons.DoAction((ACTION_ENGAGE_COMBAT << WAVE_THREE), EntryCheckPredicate(NPC_SIKTHIK_WARRIOR));
                         summons.DoAction((ACTION_ENGAGE_COMBAT << WAVE_THREE), EntryCheckPredicate(NPC_SIKTHIK_SWARMER));
                         break;
                     case EVENT_CALL_FOURTH_WAVE: // Demolishers + Warrior
-                        Talk(EMOTE_FOURTH_WAVE);
+                        Talk(EMOTE_WAVE_FOUR);
+                        DelayedTalk(GetVojak(), SAY_VOJAK_WAVE_FOUR, 500);
                         summons.DoAction((ACTION_ENGAGE_COMBAT << WAVE_FOUR), EntryCheckPredicate(NPC_SIKTHIK_WARRIOR));
                         summons.DoAction((ACTION_ENGAGE_COMBAT << WAVE_FOUR), EntryCheckPredicate(NPC_SIKTHIK_DEMOLISHER));
+                        break;
+                    case EVENT_AMBERWING:
+                        DelayedTalk(me, EMOTE_BOMBARD, 4000);
+                        DelayedTalk(me, SAY_AMBERWING, 4500);
+                        me->SummonCreature(NPC_AMBERWING, 1651.384f, 5397.722f, 152.5865f);
                         break;
                     case EVENT_CALL_BOSS: // Vo'Jak
                         if (Creature * vojak = Creature::GetCreature(*me, vojakGUID))
                             vojak->AI()->DoAction(ACTION_ENGAGE_COMBAT);
+                        break;
+                    case EVENT_INTRO_MOVE:
+                        me->GetMotionMaster()->MovePoint(POINT_INTRO, 1523.673584f, 5313.781250f, 185.226746f);
                         break;
                     case EVENT_PLAYER_CHECK:
                     {
@@ -354,6 +532,34 @@ class npc_yang_ironclaw : public CreatureScript
                             events.ScheduleEvent(EVENT_PLAYER_CHECK, 5000);
                         break;
                     }
+                    case EVENT_OUTRO_MOVE:
+                        me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+
+                        if (Creature * loChu = me->FindNearestCreature(NPC_LO_CHU, 500.0f))
+                            loChu->GetMotionMaster()->MoveSplinePath(PATH_OUTRO, false, false, 5.0f, false, false, false);
+
+                        if (Creature * liChu = me->FindNearestCreature(NPC_LI_CHU, 500.0f))
+                            liChu->GetMotionMaster()->MoveSplinePath(PATH_OUTRO, false, false, 5.0f, false, false, false);
+
+                        me->GetMotionMaster()->MoveSplinePath(PATH_OUTRO, false, false, 8.0f, false, false, false);
+                        DelayedTalk(me, SAY_GATE_1, me->GetSplineDuration());
+                        events.ScheduleEvent(EVENT_PLACE_BOMBS, me->GetSplineDuration() + 5000);
+                        break;
+                    case EVENT_DETONATE_SPEECH:
+                        Talk(SAY_GATE_2);
+                        me->GetMotionMaster()->MovePoint(0, 1615.413f, 5407.448f, 138.68094f);
+                        DelayedTalk(me, SAY_GATE_3, 5000);
+                        events.ScheduleEvent(EVENT_DETONATE_BOMBS, 7500);
+                        break;
+                    case EVENT_PLACE_BOMBS:
+                        me->GetMotionMaster()->MovePoint(POINT_BOMB, bombsPos[bombCnt++]);
+                        break;
+                    case EVENT_DETONATE_BOMBS:
+                        instance->SetData(DATA_VOJAK_DOOR, 0);
+                        DoCast(me, SPELL_BREACH_DOOR_TARGET, true);
+                        me->GetMotionMaster()->MovePoint(0, 1615.413f, 5407.448f, 138.68094f);
+                        DelayedTalk(me, SAY_GATE_4, 4000);
+                        break;
                     default:
                         break;
                 }
@@ -365,6 +571,7 @@ class npc_yang_ironclaw : public CreatureScript
             DoMeleeAttackIfReady();
         }
     private:
+        uint8 bombCnt;
         EventMap events;
         SummonList summons;
         InstanceScript * instance;
@@ -499,9 +706,14 @@ struct npc_vojak_addAI : public ScriptedAI
             uint32 entry = me->GetEntry();
             
             TRIGGER_TIMER = ADD_STEP_DELAY + addCounter * ADD_STEP_DELAY + (leftSideAdd ? 0 : RIGHT_SIDE_DELAY);
-
         }
     }
+
+    //void MovementInform(uint32 type, uint32 id)
+    //{
+    //    if (type == WAYPOINT_MOTION_TYPE && id == 13)
+    //        aggrotimer = 500;
+    //}
 
     void UpdateAI(uint32 const diff) override
     {
@@ -517,11 +729,11 @@ struct npc_vojak_addAI : public ScriptedAI
                     me->GetRandomPoint(itr, 5.0f, x, y, z);
                     init.Path().push_back(G3D::Vector3(x, y, z));
                 }
-
+                
                 init.SetSmooth();
                 init.SetUncompressed();
                 init.Launch();
-
+                //me->GetMotionMaster()->MovePath(6162001, false);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
                 me->SetReactState(REACT_PASSIVE);
                 aggrotimer = me->GetSplineDuration();
@@ -538,6 +750,11 @@ struct npc_vojak_addAI : public ScriptedAI
                 aggrotimer = 0;
             } else aggrotimer -= diff;
         }
+
+        if (!UpdateVictim())
+            return;
+
+        DoMeleeAttackIfReady();
     }
 
     void IsSummonedBy(Unit* summoner)
@@ -644,7 +861,7 @@ class boss_commander_vojak : public CreatureScript
                             dashingTargetGUID = target->GetGUID();
                         }
                         events.ScheduleEvent(EVENT_THOUSAND_BLADES, 3000);
-                        events.ScheduleEvent(EVENT_DASHING_STRIKE, 60000);
+                        events.ScheduleEvent(EVENT_DASHING_STRIKE, 13500);
                         break;
                     case EVENT_THOUSAND_BLADES:
                         DoCast(me, SPELL_THOUSAND_BLADES, false);
@@ -793,6 +1010,7 @@ class npc_chu_helper : public CreatureScript
 
         void Reset()
         {
+            me->SetReactState(REACT_PASSIVE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             barrelTargetGUID = 0;
             barrelGUID = 0;
@@ -825,6 +1043,11 @@ class npc_chu_helper : public CreatureScript
             }
         }
 
+        void DamageTaken(Unit* , uint32& damage) override
+        {
+            damage = 0;
+        }
+
         void DoAction(int32 const action) override
         {
             switch (action)
@@ -835,6 +1058,7 @@ class npc_chu_helper : public CreatureScript
                     barrelTargetGUID = 0;
                     break;
                 case ACTION_RESET_COMBAT:
+                    me->RemoveAllAuras();
                     me->GetVehicleKit()->RemoveAllPassengers();
                     events.Reset();
                     eventInProgress = false;
@@ -1134,42 +1358,78 @@ public:
     }
 };
 
-class at_sap_puddle_349 : public AreaTriggerScript
+// Sik'Thik amberwing - 61699
+class npc_sikthik_amberwing : public CreatureScript
 {
-public:
-    at_sap_puddle_349() : AreaTriggerScript("at_sap_puddle_349") {}
-
-    bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/)
+    enum
     {
-        TC_LOG_FATAL("script", "Areatrigger at_sap_puddle_349");
+        SPELL_GREEN_WINGS           = 126316,
+        SPELL_BOMBARD               = 120559,
+        SPELL_BOMBARD_DUMMY         = 120202,
+        SPELL_BOMBARD_PROTECTION    = 120561,
 
-        return false;
-    }
-};
+        PATH_PLATFORM               = 1,
+        PATH_HOME
+    };
 
-class at_sap_puddle_325 : public AreaTriggerScript
-{
-public:
-    at_sap_puddle_325() : AreaTriggerScript("at_sap_puddle_325") {}
-
-    bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/)
+    struct npc_sikthik_amberwingAI : public ScriptedAI
     {
-        TC_LOG_FATAL("script", "Areatrigger at_sap_puddle_325");
+        npc_sikthik_amberwingAI(Creature * creature) : ScriptedAI(creature)
+        {
+            me->SetReactState(REACT_PASSIVE);
+            arrivalTimer = 0;
+            flyTimer = 0;
+        }
 
-        return false;
-    }
-};
+        void IsSummonedBy(Unit* )
+        {
+            DoCast(me, SPELL_GREEN_WINGS, true);
+            me->GetMotionMaster()->MoveSplinePath(PATH_PLATFORM, true, false, 10.0f);
+            arrivalTimer = me->GetSplineDuration() + 1000;
+        }
 
-class at_sap_puddle_359 : public AreaTriggerScript
-{
+        void SpellHitTarget(Unit* target, SpellInfo const* spell) override
+        {
+            if (spell->Id == SPELL_BOMBARD_DUMMY && target->HasAura(SPELL_BOMBARD_PROTECTION))
+                DoCast(target, SPELL_BOMBARD_PROTECTION, true);
+        }
+
+        void UpdateAI(uint32 const diff) override
+        {
+            if (arrivalTimer)
+            {
+                if (arrivalTimer <= diff)
+                {
+                    me->SetFacingTo(4.81f);
+                    DoCast(me, SPELL_BOMBARD, false);
+                    flyTimer = 16000;
+                    arrivalTimer = 0;
+                } else arrivalTimer -= diff;
+            }
+
+            if (flyTimer)
+            {
+                if (flyTimer <= diff)
+                {
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                    me->GetMotionMaster()->MoveSplinePath(PATH_HOME, true, false, 10.0f);
+                    flyTimer = 0;
+                } else flyTimer -= diff;
+            }
+        }
+
+
+    private:
+        uint32 arrivalTimer;
+        uint32 flyTimer;
+    };
+
 public:
-    at_sap_puddle_359() : AreaTriggerScript("at_sap_puddle_359") {}
+    npc_sikthik_amberwing() : CreatureScript("npc_sikthik_amberwing") {}
 
-    bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/)
+    CreatureAI * GetAI(Creature * creature) const override
     {
-        TC_LOG_FATAL("script", "Areatrigger at_sap_puddle_359");
-
-        return false;
+        return new npc_sikthik_amberwingAI(creature);
     }
 };
 
@@ -1209,7 +1469,5 @@ void AddSC_commander_vojak()
     new spell_grab_barrel();
     new npc_sap_puddle_vojak();
 
-    new at_sap_puddle_325();
-    new at_sap_puddle_349();
-    new at_sap_puddle_359();
+    new npc_sikthik_amberwing();
 }

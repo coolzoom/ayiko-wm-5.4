@@ -17,6 +17,13 @@
 #include "siege_of_niuzao_temple.h"
 
 
+DoorData const doorData[] =
+{
+    {GO_TEMPLE_INVIS_DOOR,          BOSS_PAVALAK,          DOOR_TYPE_PASSAGE,       BOUNDARY_NONE   },
+    {GO_WIND_WALL,                  BOSS_PAVALAK,          DOOR_TYPE_PASSAGE,       BOUNDARY_NONE   },
+    {GO_FIRE_WALL,                  BOSS_VOJAK,          DOOR_TYPE_PASSAGE,       BOUNDARY_NONE   },
+    {0,                                      0,                         DOOR_TYPE_ROOM,       BOUNDARY_NONE},// END
+};
 
 class instance_siege_of_niuzao_temple : public InstanceMapScript
 {
@@ -28,6 +35,39 @@ class instance_siege_of_niuzao_temple : public InstanceMapScript
         void Initialize()
         {
             SetBossNumber(TOTAL_ENCOUNTERS);
+            LoadDoorData(doorData);
+        }
+
+        void OnGameObjectCreate(GameObject* go)
+        {
+            switch (go->GetEntry())
+            {
+                case GO_TEMPLE_INVIS_DOOR:
+                case GO_WIND_WALL:
+                case GO_FIRE_WALL:
+                    AddDoor(go, true);
+                    break;
+                case GO_DOOR:
+                    vojakDoorGUID = go->GetGUID();
+                    break;
+                case GO_HARDENED_RESIN:
+                    jinbakDoorGUID = go->GetGUID();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void OnGameObjectRemove(GameObject *go) final
+        {
+            switch (go->GetEntry())
+            {
+                case GO_TEMPLE_INVIS_DOOR:
+                case GO_WIND_WALL:
+                case GO_FIRE_WALL:
+                    AddDoor(go, false);
+                    break;
+            }
         }
 
         bool SetBossState(uint32 id, EncounterState state)
@@ -37,11 +77,22 @@ class instance_siege_of_niuzao_temple : public InstanceMapScript
 
             switch (id)
             {
+                case BOSS_JINBAK:
+                    if (GameObject * go = instance->GetGameObject(jinbakDoorGUID))
+                        go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                    break;
                 default:
                     break;
             }
 
             return true;
+        }
+
+        void SetData(uint32 type, uint32 )
+        {
+            if (type == DATA_VOJAK_DOOR)
+                if (GameObject * go = instance->GetGameObject(vojakDoorGUID))
+                    go->UseDoorOrButton(DAY, false);
         }
 
         bool CheckRequiredBosses(uint32 bossId, Player const* player = NULL) const
@@ -98,6 +149,10 @@ class instance_siege_of_niuzao_temple : public InstanceMapScript
 
             OUT_LOAD_INST_DATA_COMPLETE;
         }
+    private:
+        uint64 vojakDoorGUID;
+        uint64 jinbakDoorGUID;
+
     };
 
 public:

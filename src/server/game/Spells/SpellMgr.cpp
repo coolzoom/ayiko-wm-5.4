@@ -5810,17 +5810,12 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(285); // 1s
                     break;
                 case 124277: // Blade Rush Summon forcecast
+                case 120561: // Bombard
                     spellInfo->MaxAffectedTargets = 1;
                     break;
                 case 121442: // Caustic Pitch
-                    spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DEST;
-                    spellInfo->Effects[EFFECT_0].TargetB = 0;
-                    spellInfo->ExplicitTargetMask = TARGET_FLAG_UNIT_MASK;
-                    break;
-                case 121441: // Caustic Pitch
-                    spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_TARGET_ANY;
-                    spellInfo->Effects[EFFECT_0].TargetB = 0;
-                    spellInfo->AttributesEx3 &= ~SPELL_ATTR3_ONLY_TARGET_PLAYERS;
+                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+                    spellInfo->ExplicitTargetMask = TARGET_FLAG_DEST_LOCATION;
                     break;
                 case 121448:
                     spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_APPLY_AURA;

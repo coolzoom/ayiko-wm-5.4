@@ -1280,6 +1280,7 @@ void Guardian::UpdateMaxHealth()
             stamina = 0.0f;
             break;
         case ENTRY_BLOODWORM:
+        case ENTRY_PSYFIEND:
             SetMaxHealth(GetCreateHealth());
             return;
         default:

@@ -105,6 +105,9 @@ enum CreatureFlagsExtra
 #define ENTRY_BLOODWORM         28017
 #define ENTRY_GARGOYLE          27829
 
+// Priest
+#define ENTRY_PSYFIEND          59190
+
 #define MAX_KILL_CREDIT 2
 #define CREATURE_REGEN_INTERVAL 2 * IN_MILLISECONDS
 

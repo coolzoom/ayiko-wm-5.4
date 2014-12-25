@@ -1229,6 +1229,11 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, 0.75f * GetOwner()->GetFloatValue(UNIT_FIELD_MAXDAMAGE));
                     break;
                 }
+                case ENTRY_PSYFIEND: // Psyfiends
+                {
+                    SetCreateHealth(GetOwner()->CountPctFromMaxHealth(2.5f));
+                    break;
+                }
                 default:
                     break;
             }

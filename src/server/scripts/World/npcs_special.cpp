@@ -4398,8 +4398,6 @@ class npc_psyfiend : public CreatureScript
                 if (owner && owner->GetTypeId() == TYPEID_PLAYER)
                 {
                     me->SetLevel(owner->getLevel());
-                    me->SetMaxHealth(owner->CountPctFromMaxHealth(2.5f));
-                    me->SetHealth(me->GetMaxHealth());
                     // Set no damage
                     me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, 0.0f);
                     me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, 0.0f);

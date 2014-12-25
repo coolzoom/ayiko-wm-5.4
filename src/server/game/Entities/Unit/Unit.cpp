@@ -12550,6 +12550,10 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
     for (AuraEffectList::const_iterator i = mHealingDonePct.begin(); i != mHealingDonePct.end(); ++i)
         AddPct(DoneTotalMod, (*i)->GetAmount());
 
+    // Mastery: Shield Discipline
+    if (GetTypeId() == TYPEID_PLAYER && HasAura(77484))
+        AddPct(DoneTotalMod, GetFloatValue(PLAYER_MASTERY) * 0.8f);
+
     // done scripted mod (take it from owner)
     Unit* owner = GetOwner() ? GetOwner() : this;
     AuraEffectList const& mOverrideClassScript= owner->GetAuraEffectsByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);

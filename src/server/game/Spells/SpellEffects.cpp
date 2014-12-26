@@ -4353,6 +4353,10 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
         }
     }
 
+    // Chimera Shot - was changed to base * 1.5 (2.65 -> 3.975)
+    if (m_spellInfo->Id == 53209)
+        weaponDamagePercentMod = 3.975f;
+
     // apply to non-weapon bonus weapon total pct effect, weapon total flat effect included in weapon damage
     if (fixed_bonus || spell_bonus)
     {

@@ -4135,7 +4135,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 132020: // Lightning Pool
                     spellInfo->Effects[0].TargetA = TARGET_DEST_DEST;
                     break;
-                case 8680:  // Wound Poison
                 case 3409:  // Crippling Poison
                 case 5760:  // Mind-numbing Poison
                     spellInfo->Attributes |= SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK;
@@ -5801,6 +5800,19 @@ void SpellMgr::LoadSpellCustomAttr()
                     break;
                 case 5487: // Bear Form - base armor increase is 120%
                     spellInfo->Effects[EFFECT_2].BasePoints = 120;
+                    break;
+                case 8680:  // Wound Poison
+                    spellInfo->Attributes |= SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK;
+                    spellInfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REDIRECTED;
+                    spellInfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REFLECTED;
+                    // Custom effect to fix tooltip
+                    ASSERT(spellInfo->Effects.size() == 2);
+                    spellInfo->Effects.emplace_back(spellInfo, nullptr, spellInfo->Effects.size());
+                    spellInfo->Effects.back().Effect = SPELL_EFFECT_APPLY_AURA;
+                    spellInfo->Effects.back().ApplyAuraName = SPELL_AURA_DUMMY;
+                    spellInfo->Effects.back().TargetA = TARGET_UNIT_TARGET_ENEMY;
+                    spellInfo->Effects.back().TargetB = 0;
+                    spellInfo->Effects.back().BasePoints = -25;
                     break;
                 default:
                     break;

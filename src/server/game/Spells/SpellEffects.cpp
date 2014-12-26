@@ -4289,33 +4289,6 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
 
             break;
         }
-        case SPELLFAMILY_HUNTER:
-        {
-            float shotMod = 0;
-            switch(m_spellInfo->Id)
-            {
-                case 56641: // Steady Shot
-                {
-                    // "A steady shot that causes % weapon damage plus RAP*0.021+280. Generates 9 Focus."
-                    // focus effect done in dummy
-                    shotMod = 0.021f;
-                    break;
-                }
-                case 53209: // Chimera Shot
-                {
-                    shotMod = 0.398f;
-                    break;
-                }
-                case 3044: // Arcane Shot
-                {
-                    shotMod = 0.0483f;
-                    break;
-                }
-
-                default: break;
-            }
-            spell_bonus += int32((shotMod*m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)));
-        }
         case SPELLFAMILY_DEATHKNIGHT:
         {
             switch (m_spellInfo->Id)

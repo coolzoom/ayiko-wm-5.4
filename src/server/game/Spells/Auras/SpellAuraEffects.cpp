@@ -1040,6 +1040,14 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
             if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_DRUID && GetSpellInfo()->SpellFamilyFlags[2] & 0x00000008)
                 amount = GetBase()->GetUnitOwner()->GetShapeshiftForm() == FORM_CAT ? amount : 0;
             break;
+        case SPELL_AURA_MOD_SPEED_ALWAYS:
+        {
+            // Stealth
+            if (GetId() == 1784 || GetId() == 115191)
+                if (auto elusiveness = GetBase()->GetUnitOwner()->GetAuraEffect(21009, EFFECT_0))
+                    amount = elusiveness->GetAmount();
+            break;
+        }
         case SPELL_AURA_MOUNTED:
             if (MountCapabilityEntry const* mountCapability = GetBase()->GetUnitOwner()->GetMountCapability(uint32(GetMiscValueB())))
             {

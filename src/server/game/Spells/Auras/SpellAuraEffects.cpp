@@ -2568,8 +2568,28 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
                break;
         }
 
-        // remove other shapeshift before applying a new one
-        target->RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT, 0, GetBase());
+        // We need to iterate over all shapeshift auras to prevent Shadow Dance removal by Stealth (both use SPELL_AURA_MOD_SHAPESHIFT)
+        auto shapeshiftList = target->GetAuraEffectsByType(SPELL_AURA_MOD_SHAPESHIFT);
+        for (auto iter = shapeshiftList.begin(); iter != shapeshiftList.end();)
+        {
+            Aura *aura = (*iter)->GetBase();
+            AuraApplication * shapeshiftAuraApp = aura->GetApplicationOfTarget(target->GetGUID());
+
+            if (!shapeshiftAuraApp)
+            {
+                printf("CRASH ALERT : Unit::RemoveAurasByType no AurApp pointer for Aura Id %u\n", aura->GetId());
+                ++iter;
+                continue;
+            }
+
+            if (aura == GetBase() || (aura->GetId() == 51713 && (GetId() == 1784 || GetId() == 115191)))
+            {
+                ++iter;
+                continue;
+            }
+            else
+                target->RemoveAura(shapeshiftAuraApp);
+        }
 
         // stop handling the effect if it was removed by linked event
         if (aurApp->GetRemoveMode())

@@ -59,7 +59,8 @@ class boss_wing_leader_neronok : public CreatureScript
         EVENT_GROUP_MOVEMENT        = 1,
         EVENT_GROUP_COMBAT          = 2,
 
-        ACTION_INTERRUPT            = 1
+        ACTION_INTERRUPT            = 1,
+        NPC_CHUM_KIU                = 64517
     };
 
     struct boss_wing_leader_neronokAI : public BossAI
@@ -158,6 +159,8 @@ class boss_wing_leader_neronok : public CreatureScript
             ClearDebuffs();
             Talk(SAY_DEATH);
             _JustDied();
+
+            me->SummonCreature(NPC_CHUM_KIU, 1851.226f, 5214.163f, 131.2519f, 4.03f);
         }
 
         void EnterCombat(Unit* ) override

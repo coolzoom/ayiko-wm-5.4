@@ -323,11 +323,6 @@ class npc_yang_ironclaw : public CreatureScript
 
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CARRYING_CAUSTIC_TAR);
 
-            if (Creature * loChu = me->FindNearestCreature(NPC_LO_CHU, 500.0f))
-                loChu->AI()->DoAction(ACTION_RESET_COMBAT);
-
-            if (Creature * liChu = me->FindNearestCreature(NPC_LI_CHU, 500.0f))
-                liChu->AI()->DoAction(ACTION_RESET_COMBAT);
 
             std::list<Creature*> cList;
             me->GetCreatureListWithEntryInGrid(cList, NPC_BARREL_TARGET, 500.0f);
@@ -338,7 +333,19 @@ class npc_yang_ironclaw : public CreatureScript
 
             me->GetCreatureListWithEntryInGrid(cList, NPC_MANTID_TAR_KEG, 500.0f);
             for (auto itr : cList)
-                itr->DealDamage(itr, itr->GetHealth());
+            {
+                itr->RemoveAllAuras();
+                itr->ExitVehicle();
+                itr->ForcedDespawn();
+            }
+
+            if (Creature * loChu = me->FindNearestCreature(NPC_LO_CHU, 500.0f))
+                loChu->AI()->DoAction(ACTION_RESET_COMBAT);
+
+            if (Creature * liChu = me->FindNearestCreature(NPC_LI_CHU, 500.0f))
+                liChu->AI()->DoAction(ACTION_RESET_COMBAT);
+
+            // Summon waves
 
             uint32 spawnCounter = 0;
 
@@ -424,7 +431,7 @@ class npc_yang_ironclaw : public CreatureScript
                 {
                     Talk(SAY_AGGRO_3);
                     DelayedTalk(me, SAY_AGGRO_4, 3000);
-                    DelayedTalk(me, SAY_AGGRO_5, 5000);
+                    DelayedTalk(me, SAY_AGGRO_5, 7000);
                 }
                 else if (id == POINT_BOMB)
                 {
@@ -458,7 +465,7 @@ class npc_yang_ironclaw : public CreatureScript
 
             Talk(SAY_AGGRO_1);
             DelayedTalk(me, SAY_AGGRO_2, 3000);
-            events.ScheduleEvent(EVENT_INTRO_MOVE, 3000);
+            events.ScheduleEvent(EVENT_INTRO_MOVE, 5000);
             events.ScheduleEvent(EVENT_AMBERWING, 30000);
 
             if (Creature * loChu = me->FindNearestCreature(NPC_LO_CHU, 500.0f))
@@ -1058,8 +1065,8 @@ class npc_chu_helper : public CreatureScript
                     barrelTargetGUID = 0;
                     break;
                 case ACTION_RESET_COMBAT:
-                    me->RemoveAllAuras();
-                    me->GetVehicleKit()->RemoveAllPassengers();
+                    //me->RemoveAllAuras();
+                    //me->GetVehicleKit()->RemoveAllPassengers();
                     events.Reset();
                     eventInProgress = false;
                     barrelTargetGUID = 0;

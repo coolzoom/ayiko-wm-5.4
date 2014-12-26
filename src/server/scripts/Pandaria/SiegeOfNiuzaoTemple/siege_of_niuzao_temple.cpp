@@ -865,6 +865,70 @@ public:
         return new ai_impl(creature);
     }
 };
+
+
+ // Shado-Master Chum Kiu - 64517
+class npc_chum_kiu : public CreatureScript
+{
+    enum Spells
+    {
+        SPELL_BESIEGE                       = 119347,
+        SPELL_WILL_OF_THE_EMPRESS           = 124172
+    };
+
+    struct ai_impl : public ScriptedAI
+    {
+        ai_impl(Creature * creature) : ScriptedAI(creature) {}
+
+        void Reset() override
+        {
+        }
+
+        void IsSummonedBy(Unit* summoner) override
+        {
+            me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER | UNIT_NPC_FLAG_GOSSIP);
+            me->GetMotionMaster()->MoveSplinePath(1, false, true, 3.0f, false, false, false);
+            unstealthTimer = me->GetSplineDuration() + 1000;
+        }
+
+        void UpdateAI(uint32 const diff) override
+        {
+            if (unstealthTimer)
+            {
+                if (unstealthTimer <= diff)
+                {
+                    me->SetFacingTo(0.4886922f);
+                    me->RemoveAllAuras();
+                    unstealthTimer = 0;
+                    arrivalTimer = 1000;
+                } else unstealthTimer -= diff;
+            }
+
+            if (arrivalTimer)
+            {
+                if (arrivalTimer <= diff)
+                {
+                    me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER | UNIT_NPC_FLAG_GOSSIP);
+                    if (Player * target = me->SelectNearestPlayer(50.0f))
+                        Talk(0, target->GetGUID());
+                    arrivalTimer = 0;
+                } else arrivalTimer -= diff;
+            }
+        }
+
+    private:
+        uint32 unstealthTimer;
+        uint32 arrivalTimer;
+    };
+
+public:
+    npc_chum_kiu() : CreatureScript("npc_chum_kiu") {}
+
+    CreatureAI * GetAI(Creature * creature) const override
+    {
+        return new ai_impl(creature);
+    }
+};
 void AddSC_siege_of_niuzao_temple()
 {
     // Hollowed Out Tree
@@ -880,4 +944,5 @@ void AddSC_siege_of_niuzao_temple()
     new npc_sikthik_engineer();
     new npc_sikthik_vanguard();
     new spell_resin_weaving();
+    new npc_chum_kiu();
 };

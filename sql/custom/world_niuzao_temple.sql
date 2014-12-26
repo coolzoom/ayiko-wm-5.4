@@ -19,6 +19,25 @@ Niuzao Temple (Map 1011)
 ******** TRASH MOBS ***********
 *******************************
 */
+-- Shado-Master Chum Kiu
+UPDATE creature_template SET ScriptName = 'npc_chum_kiu' WHERE entry = 64517;
+
+DELETE FROM creature_text WHERE entry = 64517;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(64517, 0, 0, '$p, over here near the end of the bridge.', 12, 0, 100, 1, 0, 0, 'Chum Kiu');
+
+DELETE FROM waypoint_spline_data WHERE c_entry = 64517;
+INSERT INTO waypoint_spline_data (c_entry, path_id, wp_id, position_x, position_y, position_z) VALUES
+(64517, 1, 1, 1851.932, 5214.889, 131.1686),
+(64517, 1, 2, 1851.155, 5214.26, 131.1686),
+(64517, 1, 3, 1847.3, 5209.292, 131.1686),
+(64517, 1, 4, 1848.576, 5203.101, 131.1689),
+(64517, 1, 5, 1855.802, 5199.653, 131.234),
+(64517, 1, 6, 1864, 5197.158, 131.234),
+(64517, 1, 7, 1872.958, 5188.564, 131.234),
+(64517, 1, 8, 1874.483, 5181.339, 131.234),
+(64517, 1, 9, 1870.899, 5172.175, 134.2948),
+(64517, 1, 10, 1870.899, 5172.175, 134.2948);
 
 -- First boss area
 
@@ -303,12 +322,12 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (61620, 16, 0, '|TInterfaceIconsinv_misc_blackironbomb.blp:20|t The |cFFdd7400Sik''thik Amberwing|r moves into position to |cFFFF0000|Hspell:120559|h[Bombard]|h|r the platform!', 41, 0, 100, 0, 0, 0, 'Yang Ironclaw - EMOTE_BOMBARD'),
 (61620, 17, 0, 'The Amberwing is flying in, watch out!', 14, 0, 100, 0, 0, 31503, 'Yang Ironclaw - SAY_AMBERWING'),
 -- Outro
-(61620, 18, 0, 'Well, that was fun, wasn''t it?', 14, 0, 100, 5, 0, 31497, 'Yang Ironclaw - SAY_OUTRO_1'),
-(61620, 19, 0, 'Li and Lo, go look after our friends down below.', 14, 0, 100, 0, 0, 31498, 'Yang Ironclaw - SAY_OUTRO_2'),
-(61620, 20, 0, 'Ah, this gate is locked, but I think I have something that''ll open it.', 14, 0, 100, 0, 0, 31499, 'Yang Ironclaw - SAY_GATE_1'),
-(61620, 21, 0, 'Let me see here... thirty second fuse...', 14, 0, 100, 0, 0, 31500, 'Yang Ironclaw - SAY_GATE_2'),
-(61620, 22, 0, 'Whoops, did I say thirty? I meant three.', 14, 0, 100, 0, 0, 31501, 'Yang Ironclaw - SAY_GATE_3'),
-(61620, 23, 0, 'Go, hurry! You must stop the siege!', 14, 0, 100, 0, 0, 31502, 'Yang Ironclaw - SAY_GATE_4'),
+(61620, 18, 0, 'Well, that was fun, wasn''t it?', 12, 0, 100, 5, 0, 31497, 'Yang Ironclaw - SAY_OUTRO_1'),
+(61620, 19, 0, 'Li and Lo, go look after our friends down below.', 12, 0, 100, 0, 0, 31498, 'Yang Ironclaw - SAY_OUTRO_2'),
+(61620, 20, 0, 'Ah, this gate is locked, but I think I have something that''ll open it.', 12, 0, 100, 0, 0, 31499, 'Yang Ironclaw - SAY_GATE_1'),
+(61620, 21, 0, 'Let me see here... thirty second fuse...', 12, 0, 100, 0, 0, 31500, 'Yang Ironclaw - SAY_GATE_2'),
+(61620, 22, 0, 'Whoops, did I say thirty? I meant three.', 12, 0, 100, 0, 0, 31501, 'Yang Ironclaw - SAY_GATE_3'),
+(61620, 23, 0, 'Go, hurry! You must stop the siege!', 12, 0, 100, 0, 0, 31502, 'Yang Ironclaw - SAY_GATE_4'),
 -- VOJAK
 (61634, 0, 0, 'Fools! Attacking the might of the mantid head on?  Your deaths will be swift.', 14, 0, 100, 0, 0, 30264, 'Commander Vo''jak - SAY_AGGRO'),
 (61634, 1, 0, 'Swarmers, attack!  Tear the flesh from their bones!', 14, 0, 100, 0, 0, 30265, 'Commander Vo''jak - SAY_WAVE_ONE'),
@@ -947,5 +966,5 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position
 (@CGUID+329, 62091, 1011, 3, 1, 1636.828, 5344.137, 213.9351, 5.827858, 86400, 5, 1), -- Sik'thik Flyer (Area: Forward Assault Camp) (Auras: 126320 - Mantid Wings, 132441 - Mantid Wings) (possible waypoints or random movement)
 (@CGUID+330, 62091, 1011, 3, 1, 1647.284, 5343.329, 210.7402, 5.735339, 86400, 5, 1), -- Sik'thik Flyer (Area: Forward Assault Camp) (Auras: 126320 - Mantid Wings, 132441 - Mantid Wings) (possible waypoints or random movement)
 (@CGUID+331, 62091, 1011, 3, 1, 1634.786, 5337.195, 213.935, 5.813205, 86400, 5, 1), -- Sik'thik Flyer (Area: Forward Assault Camp) (Auras: 126320 - Mantid Wings, 132441 - Mantid Wings) (possible waypoints or random movement)
-(@CGUID+332, 62091, 1011, 3, 1, 1643.158, 5347.613, 213.9361, 5.784093, 86400, 5, 1), -- Sik'thik Flyer (Area: Forward Assault Camp) (Auras: 126320 - Mantid Wings, 132441 - Mantid Wings) (possible waypoints or random movement)
-(@CGUID+333, 64517, 1011, 3, 1, 1851.226, 5214.163, 131.2519, 4.03415, 86400, 0, 0); -- Shado-Master Chum Kiu (Area: Forward Assault Camp)
+(@CGUID+332, 62091, 1011, 3, 1, 1643.158, 5347.613, 213.9361, 5.784093, 86400, 5, 1); -- Sik'thik Flyer (Area: Forward Assault Camp) (Auras: 126320 - Mantid Wings, 132441 - Mantid Wings) (possible waypoints or random movement)
+-- (@CGUID+333, 64517, 1011, 3, 1, 1851.226, 5214.163, 131.2519, 4.03415, 86400, 0, 0); -- Shado-Master Chum Kiu (Area: Forward Assault Camp)

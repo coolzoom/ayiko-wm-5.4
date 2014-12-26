@@ -2116,6 +2116,10 @@ bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /
     if (IsInCombat())
         return false;
 
+    // Sapped creature will no longer assist in combat
+    if (enemy && HasAura(6770, enemy->GetGUID()))
+        return false;
+
     // only free creature
     if (GetCharmerOrOwnerGUID())
         return false;

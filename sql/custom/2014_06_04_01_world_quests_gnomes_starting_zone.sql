@@ -229,7 +229,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@CGUID+0, @KILLCREDITBUNNY_SE, 0, 1, 1, 11686, 0, -6485.77, 503.768, 386.047, 6.21123, 30, 0, 0, 42, 0, 0, 0, 0, 0), -- Southeast
 (@CGUID+1, @KILLCREDITBUNNY_SW, 0, 1, 1, 11686, 0, -6508.45, 683.899, 387.274, 5.55935, 30, 0, 0, 42, 0, 0, 0, 0, 0), -- Southwest
 (@CGUID+2, @KILLCREDITBUNNY_W, 0, 1, 1, 11686, 0, -6392.86, 776.492, 386.213, 5.85937, 30, 0, 0, 42, 0, 0, 0, 0, 0); -- West
-UPDATE `creature_template` SET `flags_extra` = 0, `AIName`='SmartAI', `ScriptName`='' WHERE `entry` IN (@KILLCREDITBUNNY_SE,@KILLCREDITBUNNY_SW,@KILLCREDITBUNNY_W);
+UPDATE `creature_template` SET `InhabitType` = 7, `flags_extra` = 0, `AIName`='SmartAI', `ScriptName`='' WHERE `entry` IN (@KILLCREDITBUNNY_SE,@KILLCREDITBUNNY_SW,@KILLCREDITBUNNY_W);
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@KILLCREDITBUNNY_SE,@KILLCREDITBUNNY_SW,@KILLCREDITBUNNY_W) AND `source_type`=0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
 (@KILLCREDITBUNNY_SE,0,0,1,10,0,100,0,1,12,90000,90000,33,@KILLCREDITBUNNY_SE,0,0,0,0,0,7,0,0,0,0,0,0,0,"Nepenthe-Trolling for Information Kill Credit Bunny SE - On friendly player LoS - Kill Credit SE - q24489"),
@@ -331,36 +331,56 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (@NPC_RAM,0,1,0,61,0,100,0,0,0,0,0,41,2000,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Stolen Ram - Emote Receive 'Whistle' - Forced Despawn");
 DELETE FROM `creature_template_addon` WHERE `entry`=@NPC_FROSTMANERAIDER;
 
--- Quests - Entombed in Ice has been scripted (Feedback #542)
--- Icy Tomb
-SET @NPC_ITOMB := 41768;
-SET @NPC_FMOUNTAINEER := 41763;
-DELETE FROM `creature_template_addon` WHERE `entry`=@NPC_ITOMB;
-INSERT INTO `creature_template_addon` (`entry`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES
-(@NPC_ITOMB,0,0,1,0,16245); -- Freeze Anim
-UPDATE `creature_template` SET `AIName`='SmartAI', `ScriptName`='' WHERE `entry`=@NPC_ITOMB;
-DELETE FROM `smart_scripts` WHERE `entryorguid`=@NPC_ITOMB;
+-- [SQL] Quests - Entombed in Ice corrected (Fixes #542)
+SET @NPC_ICY_TOMB := 41768;
+SET @NPC_FROZEN_MOUNTAINEER := 41763;
+SET @SPELL_FREEZE_ANIM := 16245;
+SET @CGUID := 49822;
+UPDATE `creature` SET `spawntimesecs` = 90, `curhealth` = 141, `spawndist` = 0, `MovementType` = 0 WHERE `id` = @NPC_FROZEN_MOUNTAINEER;
+DELETE FROM `creature` WHERE `id` = @NPC_ICY_TOMB;
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`) VALUES
+(@CGUID+0, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5736.01, -2054.17, 396.456, 1.09956, 90, 0, 0, 141, 0),
+(@CGUID+1, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5655.28, -2087.21, 400.642, 1.37881, 90, 0, 0, 141, 0),
+(@CGUID+2, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5618.07, -2052.23, 396.456, 0.383972, 90, 0, 0, 141, 0),
+(@CGUID+3, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5666.14, -2033.83, 396.37, 4.43314, 90, 0, 0, 141, 0),
+(@CGUID+4, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5636.21, -2033.33, 396.281, 4.83456, 90, 0, 0, 141, 0),
+(@CGUID+5, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5598.48, -2018.34, 396.309, 5.2709, 90, 0, 0, 141, 0),
+(@CGUID+6, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5563.93, -2025.25, 396.456, 2.23402, 90, 0, 0, 141, 0),
+(@CGUID+7, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5604, -1969.36, 396.208, 5.37561, 90, 0, 0, 141, 0),
+(@CGUID+8, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5567.8, -1975.57, 396.456, 2.44346, 90, 0, 0, 141, 0),
+(@CGUID+9, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5654.29, -1995.44, 396.177, 2.70526, 90, 0, 0, 141, 0),
+(@CGUID+10, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5687.05, -1927.1, 396.456, 5.13127, 90, 0, 0, 141, 0),
+(@CGUID+11, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5664.72, -1957.09, 396.254, 1.51844, 90, 0, 0, 141, 0),
+(@CGUID+12, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5656.17, -1934.24, 396.194, 1.72788, 90, 0, 0, 141, 0),
+(@CGUID+13, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5659.23, -1885.82, 396.456, 4.18879, 90, 0, 0, 141, 0),
+(@CGUID+14, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5627.28, -1906.04, 396.456, 3.82227, 90, 0, 0, 141, 0),
+(@CGUID+15, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5700.1, -1999.36, 396.456, 2.21657, 90, 0, 0, 141, 0),
+(@CGUID+16, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5715.08, -1960.67, 396.456, 5.63741, 90, 0, 0, 141, 0),
+(@CGUID+17, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5744.9, -1994.26, 396.456, 0.20944, 90, 0, 0, 141, 0),
+(@CGUID+18, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5775.43, -1991.7, 400.771, 3.68265, 90, 0, 0, 141, 0),
+(@CGUID+19, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5564.92, -1930.33, 396.456, 3.68265, 90, 0, 0, 141, 0),
+(@CGUID+20, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5614.44, -1932.03, 396.29, 5.96903, 90, 0, 0, 141, 0);
+DELETE FROM `creature_template_aura` WHERE `entry` IN (@NPC_ICY_TOMB, @NPC_FROZEN_MOUNTAINEER);
+INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES
+(@NPC_ICY_TOMB, @SPELL_FREEZE_ANIM),  -- Freeze Anim
+(@NPC_FROZEN_MOUNTAINEER, @SPELL_FREEZE_ANIM);
+UPDATE `creature_template` SET `AIName`='SmartAI', `ScriptName`='' WHERE `entry` IN (@NPC_ICY_TOMB, @NPC_FROZEN_MOUNTAINEER);
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@NPC_ICY_TOMB,@NPC_FROZEN_MOUNTAINEER,@NPC_FROZEN_MOUNTAINEER*100);
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
-(@NPC_ITOMB,0,0,1,1,0,100,1,1000,1000,10000,10000,8,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Icy Tomb - Out of Combat - React State Passive"),
-(@NPC_ITOMB,0,1,2,61,0,100,1,0,0,0,0,21,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Icy Tomb - Out of Combat - Avoid Combat Movement"),
-(@NPC_ITOMB,0,2,0,61,0,100,1,0,0,0,0,20,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Icy Tomb - Out of Combat - Avoid Autoattack"),
-(@NPC_ITOMB,0,3,0,6,0,100,0,0,0,0,0,12,@NPC_FMOUNTAINEER,8,10000,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Icy Tomb - On Death - Summon Frozen Mountaineer");
--- Frozen Mountaineer
-DELETE FROM `creature_template_addon` WHERE `entry`=@NPC_FMOUNTAINEER;
-INSERT INTO `creature_template_addon` (`entry`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES
-(@NPC_FMOUNTAINEER,0,0,1,0,16245); -- Freeze Anim
-UPDATE `creature_template` SET `AIName`='SmartAI', `ScriptName`='' WHERE `entry`=@NPC_FMOUNTAINEER;
-DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@NPC_FMOUNTAINEER,@NPC_FMOUNTAINEER*100);
-INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
-(@NPC_FMOUNTAINEER,0,0,0,54,0,100,0,0,0,0,0,80,@NPC_FMOUNTAINEER*100,0,2,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Frozen Mountaineer - Just Summoned - Run Script"),
-(@NPC_FMOUNTAINEER*100,9,0,0,0,0,100,0,0,0,0,0,28,16245,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Frozen Mountaineer - On Script - Remove Aura Freeze Anim"),
-(@NPC_FMOUNTAINEER*100,9,1,0,0,0,100,0,1000,1000,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Frozen Mountaineer - On Script - Say Line 0"),
-(@NPC_FMOUNTAINEER*100,9,2,0,0,0,100,0,2000,2000,0,0,46,6,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Frozen Mountaineer - On Script - Move Forward"),
-(@NPC_FMOUNTAINEER*100,9,3,0,0,0,100,0,7000,7000,0,0,41,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Frozen Mountaineer - On Script - Forced Despawn");
--- Texts
-DELETE FROM `creature_text` WHERE `entry`=@NPC_FMOUNTAINEER;
+(@NPC_ICY_TOMB,0,0,1,1,0,100,1,1000,1000,10000,10000,8,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Icy Tomb - Out of Combat - React State Passive"),
+(@NPC_ICY_TOMB,0,1,2,61,0,100,1,0,0,0,0,21,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Icy Tomb - Out of Combat - Avoid Combat Movement"),
+(@NPC_ICY_TOMB,0,2,0,61,0,100,1,0,0,0,0,20,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Icy Tomb - Out of Combat - Avoid Autoattack"),
+(@NPC_ICY_TOMB,0,3,4,6,0,100,0,0,0,0,0,45,1,1,0,0,0,0,19,@NPC_FROZEN_MOUNTAINEER,8,0,0,0,0,0,"Nepenthe-Icy Tomb - On Death - Set Data Frozen Mountaineer"),
+(@NPC_ICY_TOMB,0,4,0,61,0,100,0,0,0,0,0,12,@NPC_FROZEN_MOUNTAINEER,8,10000,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Icy Tomb - On Death - Summon new Frozen Mountaineer"),
+(@NPC_FROZEN_MOUNTAINEER,0,0,0,38,0,100,0,1,1,0,0,41,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Frozen Mountaineer - On Data Set - Despawn default Frozen Mountaineer"),
+(@NPC_FROZEN_MOUNTAINEER,0,1,0,54,0,100,0,0,0,0,0,80,@NPC_FROZEN_MOUNTAINEER*100,0,2,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Frozen Mountaineer - Just Summoned - Run Script"),
+(@NPC_FROZEN_MOUNTAINEER*100,9,0,0,0,0,100,0,0,0,0,0,28,@SPELL_FREEZE_ANIM,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Frozen Mountaineer - On Script - Remove Aura Freeze Anim"),
+(@NPC_FROZEN_MOUNTAINEER*100,9,1,0,0,0,100,0,1000,1000,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Frozen Mountaineer - On Script - Say Line 0"),
+(@NPC_FROZEN_MOUNTAINEER*100,9,2,0,0,0,100,0,5000,5000,0,0,46,15,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Frozen Mountaineer - On Script - Move Forward"),
+(@NPC_FROZEN_MOUNTAINEER*100,9,3,0,0,0,100,0,5000,5000,0,0,41,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Frozen Mountaineer - On Script - Forced Despawn");
+DELETE FROM `creature_text` WHERE `entry`=@NPC_FROZEN_MOUNTAINEER;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
-(@NPC_FMOUNTAINEER,0,0,"%s gasps for air and shivers in the cold.",16,0,100,20,0,0,"Frozen Mountaineer"); -- ONESHOT_BEG
+(@NPC_FROZEN_MOUNTAINEER,0,0,"%s gasps for air and shivers in the cold.",16,0,100,20,0,0,"Frozen Mountaineer");  -- ONESHOT_BEG
 
 -- Quests - Aid for the Wounded has been scripted (Feedback #3165)
 -- Wounded Coldridge Mountaineer

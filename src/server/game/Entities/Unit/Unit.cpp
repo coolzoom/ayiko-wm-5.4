@@ -9976,8 +9976,9 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
             // Don't proc from following spells:
             switch (procSpell->Id)
             {
-                case 51723: // Fan of Knives
-                case 140308: // Shuriken Toss
+                case 51723:  // Fan of Knives
+                case 114014: // Shuriken Toss
+                case 140308:
                 case 140309:
                 case 121471: // Shadow Blades
                 case 121474:

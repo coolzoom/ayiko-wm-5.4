@@ -214,28 +214,35 @@ DELETE FROM `spell_target_position` WHERE `id` = @SPELL_TELEPORT;
 INSERT INTO `spell_target_position` (`id`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES 
 (@SPELL_TELEPORT,0,-5202.198242,477.385620,388.233032,5.491077);
 
--- [SQL] Quests - Trolling for Information has been scripted (Feedback #489)
+-- [SQL] Quests - Trolling for Information corrected (Fixes #489)
 SET @NPC_SHIKALA := 37108;
 SET @NPC_RIKKARI := 37173;
 SET @NPC_MIRIMKO := 37174;
 SET @KILLCREDITBUNNY_SE := 37109;
 SET @KILLCREDITBUNNY_SW := 37110;
 SET @KILLCREDITBUNNY_W := 37111;
+SET @QUEST_TROLLING_FOR_INFORMATION := 24489;
 SET @CGUID := 5013954; -- needs 3
+UPDATE `gameobject_template` SET `flags` = 4 WHERE `entry` IN (178085, 178084, 148499);
 DELETE FROM `creature` WHERE `id` IN (@KILLCREDITBUNNY_SE,@KILLCREDITBUNNY_SW,@KILLCREDITBUNNY_W);
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
-(@CGUID+0, @KILLCREDITBUNNY_SE, 0, 1, 1, 0, 0, -6485.77, 503.768, 386.047, 6.21123, 50, 0, 0, 42, 0, 0, 0, 0, 0), -- Southeast
-(@CGUID+1, @KILLCREDITBUNNY_SW, 0, 1, 1, 0, 0, -6508.45, 683.899, 387.274, 5.55935, 50, 0, 0, 42, 0, 0, 0, 0, 0), -- Southwest
-(@CGUID+2, @KILLCREDITBUNNY_W, 0, 1, 1, 0, 0, -6392.86, 776.492, 386.213, 5.85937, 50, 0, 0, 42, 0, 0, 0, 0, 0); -- West
-UPDATE `creature_template` SET `AIName`='SmartAI', `ScriptName`='' WHERE `entry` IN (@KILLCREDITBUNNY_SE,@KILLCREDITBUNNY_SW,@KILLCREDITBUNNY_W);
+(@CGUID+0, @KILLCREDITBUNNY_SE, 0, 1, 1, 11686, 0, -6485.77, 503.768, 386.047, 6.21123, 30, 0, 0, 42, 0, 0, 0, 0, 0), -- Southeast
+(@CGUID+1, @KILLCREDITBUNNY_SW, 0, 1, 1, 11686, 0, -6508.45, 683.899, 387.274, 5.55935, 30, 0, 0, 42, 0, 0, 0, 0, 0), -- Southwest
+(@CGUID+2, @KILLCREDITBUNNY_W, 0, 1, 1, 11686, 0, -6392.86, 776.492, 386.213, 5.85937, 30, 0, 0, 42, 0, 0, 0, 0, 0); -- West
+UPDATE `creature_template` SET `flags_extra` = 0, `AIName`='SmartAI', `ScriptName`='' WHERE `entry` IN (@KILLCREDITBUNNY_SE,@KILLCREDITBUNNY_SW,@KILLCREDITBUNNY_W);
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@KILLCREDITBUNNY_SE,@KILLCREDITBUNNY_SW,@KILLCREDITBUNNY_W) AND `source_type`=0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
-(@KILLCREDITBUNNY_SE,0,0,1,10,0,100,0,3,12,50000,50000,33,@KILLCREDITBUNNY_SE,0,0,0,0,0,7,0,0,0,0,0,0,0,"Nepenthe-Trolling for Information Kill Credit Bunny SE - On friendly player LoS - Kill Credit SE - q24489"),
+(@KILLCREDITBUNNY_SE,0,0,1,10,0,100,0,1,12,90000,90000,33,@KILLCREDITBUNNY_SE,0,0,0,0,0,7,0,0,0,0,0,0,0,"Nepenthe-Trolling for Information Kill Credit Bunny SE - On friendly player LoS - Kill Credit SE - q24489"),
 (@KILLCREDITBUNNY_SE,0,1,0,61,0,100,0,0,0,0,0,45,1,1,0,0,0,0,19,@NPC_SHIKALA,0,0,0,0,0,0,"Nepenthe-Trolling for Information Kill Credit Bunny SE - On LoS - Set Data Soothsayer Shi'kala - q24489"),
-(@KILLCREDITBUNNY_SW,0,0,1,10,0,100,0,3,12,50000,50000,33,@KILLCREDITBUNNY_SW,0,0,0,0,0,7,0,0,0,0,0,0,0,"Nepenthe-Trolling for Information Kill Credit Bunny SW - On friendly player LoS - Set Data Soothsayer Rikkari - q24489"),
+(@KILLCREDITBUNNY_SW,0,0,1,10,0,100,0,1,12,90000,90000,33,@KILLCREDITBUNNY_SW,0,0,0,0,0,7,0,0,0,0,0,0,0,"Nepenthe-Trolling for Information Kill Credit Bunny SW - On friendly player LoS - Set Data Soothsayer Rikkari - q24489"),
 (@KILLCREDITBUNNY_SW,0,1,0,61,0,100,0,0,0,0,0,45,1,1,0,0,0,0,19,@NPC_RIKKARI,0,0,0,0,0,0,"Nepenthe-Trolling for Information Kill Credit Bunny SW - On LoS - Kill Credit SW - q24489"),
-(@KILLCREDITBUNNY_W,0,0,1,10,0,100,0,3,12,50000,50000,33,@KILLCREDITBUNNY_W,0,0,0,0,0,7,0,0,0,0,0,0,0,"Nepenthe-Trolling for Information Kill Credit Bunny W - On friendly player LoS - Set Data Soothsayer Mirim'koa - q24489"),
+(@KILLCREDITBUNNY_W,0,0,1,10,0,100,0,1,12,90000,90000,33,@KILLCREDITBUNNY_W,0,0,0,0,0,7,0,0,0,0,0,0,0,"Nepenthe-Trolling for Information Kill Credit Bunny W - On friendly player LoS - Set Data Soothsayer Mirim'koa - q24489"),
 (@KILLCREDITBUNNY_W,0,1,0,61,0,100,0,0,0,0,0,45,1,1,0,0,0,0,19,@NPC_MIRIMKO,0,0,0,0,0,0,"Nepenthe-Trolling for Information Kill Credit Bunny W - On LoS - Kill Credit W - q24489");
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 22 AND `SourceEntry` IN (@KILLCREDITBUNNY_SE,@KILLCREDITBUNNY_SW,@KILLCREDITBUNNY_W);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(22, 0, @KILLCREDITBUNNY_SE, 0, 0, 9, 0, @QUEST_TROLLING_FOR_INFORMATION, 0, 0, 0, 0, 0, "", "SAI - Execute only if player in range have no quest"),
+(22, 0, @KILLCREDITBUNNY_SW, 0, 0, 9, 0, @QUEST_TROLLING_FOR_INFORMATION, 0, 0, 0, 0, 0, "", "SAI - Execute only if player in range have no quest"),
+(22, 0, @KILLCREDITBUNNY_W, 0, 0, 9, 0, @QUEST_TROLLING_FOR_INFORMATION, 0, 0, 0, 0, 0, "", "SAI - Execute only if player in range have no quest");
 -- Soothsayer Shi'kala
 UPDATE `creature_template` SET `AIName`='SmartAI', `ScriptName`='' WHERE `entry`=@NPC_SHIKALA;
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@NPC_SHIKALA,@NPC_SHIKALA*100);
@@ -1523,7 +1530,7 @@ UPDATE `creature_template` SET `unit_flags` = 32768, `mechanic_immune_mask` = 65
 UPDATE `creature` SET `modelid` = 23257, `spawndist` = 0, `curhealth` = 42, `MovementType` = 0 WHERE `id` = 42557;
 
 -- Quests - Scrounging for Parts: Spare Parts will only be selectable while on quest
-UPDATE `gameobject_template` SET `flags` = `flags`|4 WHERE `entry` IN (203968, 203443, 203965, 203966, 203967);
+UPDATE `gameobject_template` SET `flags` = `flags`|4 WHERE `entry` IN (203968, 203443, 203964, 203965, 203966, 203967);
 
 -- TODO
 /*-- [SQL] Quests - Pack Your Bags quest completion event scripted

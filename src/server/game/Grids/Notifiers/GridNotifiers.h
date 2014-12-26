@@ -1111,7 +1111,7 @@ namespace Trinity
     class NearestHostileUnitCheck
     {
         public:
-            explicit NearestHostileUnitCheck(Creature const* creature, float dist = 0) : me(creature)
+            explicit NearestHostileUnitCheck(Unit const* creature, float dist = 0) : me(creature)
             {
                 m_range = (dist == 0 ? 9999 : dist);
             }
@@ -1128,7 +1128,7 @@ namespace Trinity
             }
 
     private:
-            Creature const* me;
+            Unit const* me;
             float m_range;
             NearestHostileUnitCheck(NearestHostileUnitCheck const&);
     };

@@ -70,6 +70,7 @@ enum RogueSpells
     ROGUE_SPELL_NERVE_STRIKE_REDUCE_DAMAGE_DONE  = 112947,
     ROGUE_SPELL_COMBAT_READINESS                 = 74001,
     ROGUE_SPELL_COMBAT_INSIGHT                   = 74002,
+    ROGUE_SPELL_BLADE_FLURRY                     = 13877,
     ROGUE_SPELL_BLADE_FLURRY_DAMAGE              = 22482,
     ROGUE_SPELL_CHEAT_DEATH_REDUCE_DAMAGE        = 45182,
     ROGUE_SPELL_ENERGETIC_RECOVERY_AURA          = 79152,
@@ -1623,6 +1624,86 @@ public:
     }
 };
 
+class spell_rog_killing_spree : public SpellScriptLoader
+{
+public:
+    spell_rog_killing_spree() : SpellScriptLoader("spell_rog_killing_spree") { }
+
+    class spell_rog_killing_spree_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_killing_spree_SpellScript);
+
+        void HandleOnCast()
+        {
+            if (GetExplTargetUnit())
+                GetExplTargetUnit()->MonsterSay("Im expl target", 0, 0);
+        }
+
+        void Register()
+        {
+            OnCast += SpellCastFn(spell_rog_killing_spree_SpellScript::HandleOnCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_rog_killing_spree_SpellScript();
+    }
+
+    class script_impl : public AuraScript
+    {
+        PrepareAuraScript(script_impl);
+
+        void HandleEffectPeriodic(AuraEffect const * /*aurEff*/)
+        {
+            auto target = GetTarget();
+            if (!target)
+                return;
+
+            bool hasBladeFlurry = target->HasAura(ROGUE_SPELL_BLADE_FLURRY);
+            Unit* spellTarget = target->GetVictim();
+            if (hasBladeFlurry)
+            {
+                UnitList targets;
+                {
+                    // eff_radius == 0
+                    float radius = GetSpellInfo()->GetMaxRange(false);
+
+                    CellCoord p(Trinity::ComputeCellCoord(target->GetPositionX(), target->GetPositionY()));
+                    Cell cell(p);
+
+                    Trinity::AnyUnfriendlyAttackableVisibleUnitInObjectRangeCheck u_check(target, radius);
+                    Trinity::UnitListSearcher<Trinity::AnyUnfriendlyAttackableVisibleUnitInObjectRangeCheck> checker(target, targets, u_check);
+
+                    cell.Visit(p, Trinity::makeGridVisitor(checker), *GetOwner()->GetMap(), *target, radius);
+                    cell.Visit(p, Trinity::makeWorldVisitor(checker), *GetOwner()->GetMap(), *target, radius);
+                }
+
+                if (targets.empty())
+                    return;
+
+                spellTarget = Trinity::Containers::SelectRandomContainerElement(targets);
+            }
+
+            if (!spellTarget)
+                spellTarget = target->SelectNearestTarget(10.f);
+
+            target->CastSpell(spellTarget, 57840, true);
+            target->CastSpell(spellTarget, 57841, true);
+        }
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(script_impl::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new script_impl();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_glyph_of_expose_armor();
@@ -1657,4 +1738,5 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_smoke_bomb();
     new spell_rog_shuriken_toss();
     new spell_rog_fan_of_knives();
+    new spell_rog_killing_spree();
 }

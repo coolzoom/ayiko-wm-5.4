@@ -17362,6 +17362,29 @@ Unit* Unit::SelectNearbyAlly(Unit* exclude, float dist) const
     return Trinity::Containers::SelectRandomContainerElement(targets);
 }
 
+// select nearest hostile unit within the given distance (regardless of threat list).
+Unit* Unit::SelectNearestTarget(float dist) const
+{
+    CellCoord p(Trinity::ComputeCellCoord(GetPositionX(), GetPositionY()));
+    Cell cell(p);
+    cell.SetNoCreate();
+
+    Unit* target = NULL;
+
+    {
+        if (dist == 0.0f)
+            dist = MAX_VISIBILITY_DISTANCE;
+
+        Trinity::NearestHostileUnitCheck u_check(this, dist);
+        Trinity::UnitLastSearcher<Trinity::NearestHostileUnitCheck> searcher(this, target, u_check);
+
+        cell.Visit(p, Trinity::makeWorldVisitor(searcher), *GetMap(), *this, dist);
+        cell.Visit(p, Trinity::makeGridVisitor(searcher), *GetMap(), *this, dist);
+    }
+
+    return target;
+}
+
 void Unit::ApplyAttackTimePercentMod(WeaponAttackType att, float val, bool apply)
 {
     float remainingTimePct = (float)m_attackTimer[att] / (GetAttackTime(att) * m_modAttackSpeedPct[att]);

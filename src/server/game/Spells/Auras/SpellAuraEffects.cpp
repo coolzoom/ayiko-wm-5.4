@@ -7489,7 +7489,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
         caster->CastSpell(caster, 104317, true);
 
     int32 dmg = damage;
-    if (m_spellInfo->IsAffectedByResilience())
+    if (!m_spellInfo->HasCustomAttribute(SPELL_ATTR0_CU_TRIGGERED_IGNORE_RESILENCE))
         caster->ApplyResilience(target, &dmg);
 
     if (target != caster && target->GetTypeId() == TYPEID_PLAYER)
@@ -7569,7 +7569,8 @@ void AuraEffect::HandlePeriodicHealthLeechAuraTick(Unit* target, Unit* caster) c
     }
 
     int32 dmg = damage;
-    caster->ApplyResilience(target, &dmg);
+    if (!m_spellInfo->HasCustomAttribute(SPELL_ATTR0_CU_TRIGGERED_IGNORE_RESILENCE))
+        caster->ApplyResilience(target, &dmg);
 
     if (target != caster && target->GetTypeId() == TYPEID_PLAYER)
         dmg = target->CalcStaggerDamage(target->ToPlayer(), dmg);

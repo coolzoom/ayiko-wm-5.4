@@ -422,7 +422,7 @@ public:
 
         void JustDied(Unit* pKiller)
         {
-            DoCast(me, SPELL_SPLASH, TRUE);
+            DoCast(me, SPELL_SPLASH, true);
 
             if (Creature* pHozen = ObjectAccessor::GetCreature(*me, m_uiHozenGuid))
             {

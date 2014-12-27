@@ -2544,7 +2544,7 @@ public:
     }
 };
 
-// 17 - Power Word: Shield
+// 17 - Power Word: Shield, 123258 - Power Word : Shield (Divine Insight)
 class spell_pri_power_word_shield : public SpellScriptLoader
 {
     class script_impl : public AuraScript

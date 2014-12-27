@@ -1643,7 +1643,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     }
                 }
                 // Power Word: Shield
-                else if (m_spellInfo->Id == 17 && GetEffect(0))
+                else if ((m_spellInfo->Id == 17 || m_spellInfo->Id == 123258) && GetEffect(0))
                 {
                     // Glyph of Power Word: Shield
                     if (AuraEffect *glyph = caster->GetAuraEffect(55672, 0))

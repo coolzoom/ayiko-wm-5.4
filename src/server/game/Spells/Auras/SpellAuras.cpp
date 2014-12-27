@@ -2338,14 +2338,22 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 // Levitate effect
                 case 111758:
                 {
-                    if (apply && caster->HasAura(108939)) // Glyph of Levitate
+                    if (apply)
                     {
-                        caster->CastSpell(target, 111757, true);
+                        // Glyph of Levitate
+                        if (caster->HasAura(108939))
+                            caster->CastSpell(target, 111757, true);
+                        // Glyph of the Heavens
+                        if (caster == target && caster->HasAura(120581))
+                            caster->CastSpell(caster, 124433, true);
                     }
                     else if (!apply)
                     {
+                        // Remove Glyph of Levitate
                         if (Aura * const speedBonus = target->GetAura(111757))
                             speedBonus->SetDuration(10 * IN_MILLISECONDS);
+                        // Remove Glyph of the Heavens
+                        target->RemoveAurasDueToSpell(124433);
                     }
                     break;
                 }

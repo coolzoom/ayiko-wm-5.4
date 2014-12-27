@@ -17665,7 +17665,8 @@ bool Unit::HandleAuraRaidProcFromChargeWithValue(AuraEffect *triggeredByAura)
     // Glyph of Prayer of Mending - Add data about first charge
     if (Unit* caster = triggeredByAura->GetCaster())
         if (AuraEffect * const auraEff = caster->GetAuraEffect(55685, EFFECT_0))
-            if (static_cast<int32>(spellProto->ProcCharges) - 1 == jumps)
+            // Charges are lowered to 4 by glyph and jumps are lowered by 1 above
+            if (jumps >= 3)
                 auraEff->SetUserData(1);
 
     // heal

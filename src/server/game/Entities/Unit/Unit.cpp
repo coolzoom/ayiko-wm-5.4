@@ -12021,6 +12021,11 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
     // multiplicative bonus, for example Dispersion + Shadowform (0.10*0.85=0.085)
     TakenTotalMod *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, spellProto->GetSchoolMask());
 
+    // Glyph of Inner Sanctum
+    if (HasAura(588))
+    if (auto innerSanctum = GetAuraEffect(14771, EFFECT_0))
+        AddPct(TakenTotalMod, -innerSanctum->GetAmount());
+
     // From caster spells
     AuraEffectList const& mOwnerTaken = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_FROM_CASTER);
     for (AuraEffectList::const_iterator i = mOwnerTaken.begin(); i != mOwnerTaken.end(); ++i)
@@ -17665,7 +17670,8 @@ bool Unit::HandleAuraRaidProcFromChargeWithValue(AuraEffect *triggeredByAura)
     // Glyph of Prayer of Mending - Add data about first charge
     if (Unit* caster = triggeredByAura->GetCaster())
         if (AuraEffect * const auraEff = caster->GetAuraEffect(55685, EFFECT_0))
-            if (static_cast<int32>(spellProto->ProcCharges) - 1 == jumps)
+            // Charges are lowered to 4 by glyph and jumps are lowered by 1 above
+            if (jumps >= 3)
                 auraEff->SetUserData(1);
 
     // heal
@@ -17748,14 +17754,14 @@ void Unit::PlayOneShotAnimKit(uint32 id)
 void Unit::Kill(Unit* victim, bool durabilityLoss, SpellInfo const* spellProto)
 {
     // Prevent killing unit twice (and giving reward from kill twice)
-    if (!victim->GetHealth() || m_IsInKillingProcess)
+    if (!victim->GetHealth() || victim->IsInKillingProcess())
         return;
 
     // Spirit of Redemption can't be killed twice
     if (victim->HasAura(27827))
         return;
 
-    m_IsInKillingProcess = true;
+    victim->SetInKillingProcess(true);
 
     // find player: owner of controlled `this` or `this` itself maybe
     Player* player = GetCharmerOrOwnerPlayerOrPlayerItself();
@@ -18029,7 +18035,7 @@ void Unit::Kill(Unit* victim, bool durabilityLoss, SpellInfo const* spellProto)
             sScriptMgr->OnPlayerKilledByCreature(killerCre, killed);
     }
 
-    m_IsInKillingProcess = false;
+    victim->SetInKillingProcess(false);
 }
 
 void Unit::SetControlled(bool apply, UnitState state)

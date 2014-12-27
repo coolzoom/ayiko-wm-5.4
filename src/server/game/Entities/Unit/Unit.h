@@ -1603,6 +1603,9 @@ class Unit : public WorldObject
         void setSimulacrumTarget(uint64 guid) { simulacrumTargetGUID = guid; }
         void removeSimulacrumTarget() { simulacrumTargetGUID = 0; }
 
+        void SetInKillingProcess(bool killingPhase) { m_IsInKillingProcess = killingPhase; }
+        bool IsInKillingProcess() const { return m_IsInKillingProcess; }
+
     protected:
         explicit Unit(bool isWorldObject);
 

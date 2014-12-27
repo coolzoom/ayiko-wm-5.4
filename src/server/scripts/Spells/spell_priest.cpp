@@ -2544,7 +2544,7 @@ public:
     }
 };
 
-// 17 - Power Word: Shield
+// 17 - Power Word: Shield, 123258 - Power Word : Shield (Divine Insight)
 class spell_pri_power_word_shield : public SpellScriptLoader
 {
     class script_impl : public AuraScript
@@ -2991,6 +2991,50 @@ public:
     }
 };
 
+// Mind Blast - 8092
+class spell_pri_mind_blast : public SpellScriptLoader
+{
+    class script_impl : public SpellScript
+    {
+        PrepareSpellScript(script_impl)
+
+        enum
+        {
+            SPELL_DIVINE_INSIGHT_PROC = 124430,
+        };
+
+        void HandleAfterHit()
+        {
+            Unit * const caster = GetCaster();
+            if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            // Handle Divine Insight if it procced while casting current Mind Blast
+            Spell::UsedSpellMods const &mods = appliedSpellMods();
+            AuraEffect * const aurEff = caster->GetAuraEffect(SPELL_DIVINE_INSIGHT_PROC, EFFECT_0);
+
+            if (!aurEff || mods.find(aurEff->GetSpellModifier()) != mods.end())
+                return;
+
+            caster->ToPlayer()->RemoveSpellCooldown(GetSpellInfo()->Id, true);
+        }
+
+        void Register()
+        {
+            AfterHit += SpellHitFn(script_impl::HandleAfterHit);
+        }
+    };
+
+public:
+    spell_pri_mind_blast() : SpellScriptLoader("spell_pri_mind_blast")
+    { }
+
+    SpellScript * GetSpellScript() const
+    {
+        return new script_impl();
+    }
+};
+
 void AddSC_priest_spell_scripts()
 {
     new spell_pri_power_word_fortitude();
@@ -3052,4 +3096,5 @@ void AddSC_priest_spell_scripts()
     new spell_pri_mind_flay();
     new spell_pri_shadow_word_death_glyphed();
     new spell_pri_mass_dispel();
+    new spell_pri_mind_blast();
 }

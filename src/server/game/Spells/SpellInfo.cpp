@@ -3804,31 +3804,6 @@ bool SpellInfo::DoesIgnoreGlobalCooldown(Unit* caster) const
     return false;
 }
 
-bool SpellInfo::IsAffectedByResilience() const
-{
-    switch (Id)
-    {
-        case 22482: // Blade Flurry proc
-        case 12723: // Sweeping Strikes proc
-        case 32409: // Glyph of Shadow Word: Death (backfire)
-        case 33619: // Glyph of Reflective Shield
-        case 49016: // Unholy Frenzy
-        case 87023: // Cauterize
-        case 110914:// Dark Bargain (DoT)
-        case 124280:// Touch of Karma (DoT)
-        case 113344: // Bloodbath (DoT)
-        case 148022: // Icicles (damage)
-            return false;
-        default:
-            break;
-    }
-
-    if (HasCustomAttribute(SPELL_ATTR0_CU_TRIGGERED_IGNORE_RESILENCE))
-        return false;
-
-    return true;
-}
-
 bool SpellInfo::IsLethalPoison() const
 {
     switch (Id)

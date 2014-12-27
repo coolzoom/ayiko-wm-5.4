@@ -545,7 +545,6 @@ public:
     bool IsCustomCastCanceled(Unit* caster) const;
     bool IsWrongPrecastSpell(SpellInfo const* m_preCastSpell) const;
     bool IsPoisonOrBleedSpell() const;
-    bool IsAffectedByResilience() const;
     bool IsLethalPoison() const;
     bool CanTriggerHotStreak() const;
     bool IsCustomCalculated() const;

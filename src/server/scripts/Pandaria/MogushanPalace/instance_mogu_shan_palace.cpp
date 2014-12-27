@@ -512,6 +512,9 @@ public:
                     }
                     break;
                 case TYPE_SHUFFLE_ORDER:
+                    if (GetData(TYPE_SHUFFLE_ORDER) == DONE || data == DONE)
+                        return;
+
                     if (m_uiBossCount < 3)
                     {
                         SetData(m_auiBossNumber[m_uiBossCount], 0);
@@ -519,6 +522,7 @@ public:
                     }
                     else
                     {
+                        SetData(TYPE_SHUFFLE_ORDER, DONE);
                         SetBossState(DATA_TRIAL_OF_THE_KING, DONE);
 
                         if (GameObject* pGo = GetGameObjectFromStorage(GO_TRIAL_CHEST))

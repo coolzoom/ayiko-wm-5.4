@@ -54,6 +54,12 @@ REPLACE INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
 (7998, 'at_stormstout_intro'),
 (8366, 'at_uncle_gao');
 
+REPLACE INTO creature_template_emote (entry, emote) VALUES
+(56862, 438),
+(60276, 416),
+((SELECT difficulty_entry_2 FROM creature_template WHERE entry = 56862), 438),
+((SELECT difficulty_entry_2 FROM creature_template WHERE entry = 60276), 416);
+
 REPLACE INTO creature_template_aura (entry, aura) VALUES
 (59494, 116259),
 (59521, 114931),

@@ -331,7 +331,7 @@ public:
             ScriptedAI::MoveInLineOfSight(pWho);
         }
 
-        uint64 GetDoor()
+        uint64 GetDoor() const
         {
             GameObject* pDoor = GetClosestGameObjectWithEntry(me, GO_SLIDING_DOOR, 25.f);
 

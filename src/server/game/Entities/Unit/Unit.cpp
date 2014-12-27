@@ -12021,6 +12021,11 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
     // multiplicative bonus, for example Dispersion + Shadowform (0.10*0.85=0.085)
     TakenTotalMod *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, spellProto->GetSchoolMask());
 
+    // Glyph of Inner Sanctum
+    if (HasAura(588))
+    if (auto innerSanctum = GetAuraEffect(14771, EFFECT_0))
+        AddPct(TakenTotalMod, -innerSanctum->GetAmount());
+
     // From caster spells
     AuraEffectList const& mOwnerTaken = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_FROM_CASTER);
     for (AuraEffectList::const_iterator i = mOwnerTaken.begin(); i != mOwnerTaken.end(); ++i)

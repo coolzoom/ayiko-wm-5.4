@@ -6095,7 +6095,10 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
         {
             //if (!(mode & AURA_EFFECT_HANDLE_REAL))
             //break;
-            if (auto player = GetCaster()->ToPlayer())
+            if (!caster)
+                break;
+
+            if (auto player = caster->ToPlayer())
             {
                 switch (GetId())
                 {

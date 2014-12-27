@@ -6094,22 +6094,32 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
         case SPELLFAMILY_PRIEST:
         {
             //if (!(mode & AURA_EFFECT_HANDLE_REAL))
-                //break;
-            switch (GetId())
+            //break;
+            if (auto player = GetCaster()->ToPlayer())
             {
-                case 125045:
+                switch (GetId())
                 {
-                    if (auto player = GetCaster()->ToPlayer())
+                    // Glyp of Holy Nova
+                    case 125045:
                     {
                         if (apply)
                             player->learnSpell(132157, true);
                         else
                             player->removeSpell(132157);
+                        break;
                     }
-                    break;
+                    // Glyph of Confession
+                    case 126152:
+                    {
+                        if (apply)
+                            player->learnSpell(126123, true);
+                        else
+                            player->removeSpell(126123);
+                        break;
+                    }
+                    default:
+                        break;
                 }
-                default:
-                    break;
             }
             break;
         }

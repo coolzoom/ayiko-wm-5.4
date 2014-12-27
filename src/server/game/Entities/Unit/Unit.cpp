@@ -17749,14 +17749,14 @@ void Unit::PlayOneShotAnimKit(uint32 id)
 void Unit::Kill(Unit* victim, bool durabilityLoss, SpellInfo const* spellProto)
 {
     // Prevent killing unit twice (and giving reward from kill twice)
-    if (!victim->GetHealth() || m_IsInKillingProcess)
+    if (!victim->GetHealth() || victim->IsInKillingProcess())
         return;
 
     // Spirit of Redemption can't be killed twice
     if (victim->HasAura(27827))
         return;
 
-    m_IsInKillingProcess = true;
+    victim->SetInKillingProcess(true);
 
     // find player: owner of controlled `this` or `this` itself maybe
     Player* player = GetCharmerOrOwnerPlayerOrPlayerItself();
@@ -18030,7 +18030,7 @@ void Unit::Kill(Unit* victim, bool durabilityLoss, SpellInfo const* spellProto)
             sScriptMgr->OnPlayerKilledByCreature(killerCre, killed);
     }
 
-    m_IsInKillingProcess = false;
+    victim->SetInKillingProcess(false);
 }
 
 void Unit::SetControlled(bool apply, UnitState state)

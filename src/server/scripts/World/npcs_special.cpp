@@ -3257,7 +3257,7 @@ public:
 };
 
 /*######
-# npc_power_word_barrier
+# npc_power_word_barrier - 33248
 ######*/
 
 class npc_power_word_barrier : public CreatureScript
@@ -3271,26 +3271,15 @@ class npc_power_word_barrier : public CreatureScript
 
             npc_power_word_barrierAI(Creature* creature) : ScriptedAI(creature)
             {
-                Unit* owner = creature->GetOwner();
-
-                if (owner)
-                {
-                    creature->CastSpell(creature, 115725, true); // Barrier visual
+                if (Unit* owner = creature->GetOwner())
                     creature->CastSpell(creature, 81781, true);  // Periodic Trigger Spell
-                }
             }
 
             void UpdateAI(const uint32 /*diff*/)
             {
-                Unit* owner = me->GetOwner();
-
-                if (!owner)
-                    return;
-
-                if (!me->HasAura(115725))
-                    me->CastSpell(me, 115725, true);
-                if (!me->HasAura(81781))
-                    me->CastSpell(me, 81781, true);
+                if (Unit* owner = me->GetOwner())
+                    if (!me->HasAura(81781))
+                        me->CastSpell(me, 81781, true);
             }
         };
 

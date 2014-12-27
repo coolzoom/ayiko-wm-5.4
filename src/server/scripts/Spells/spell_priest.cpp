@@ -2458,7 +2458,7 @@ public:
         {
             PreventDefaultAction();
 
-            if (!eventInfo.GetActor() || !eventInfo.GetSpellInfo() || (eventInfo.GetSpellInfo()->Id != 596 && eventInfo.GetHitMask() & PROC_EX_NORMAL_HIT))
+            if (!eventInfo.GetActor() || !eventInfo.GetSpellInfo() || eventInfo.GetHitMask() & PROC_EX_NORMAL_HIT))
                 return;
 
             Unit * caster = GetTarget();

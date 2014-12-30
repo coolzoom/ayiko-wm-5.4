@@ -18363,6 +18363,9 @@ void Player::SendQuestReward(Quest const* quest, uint32 XP, Object* questGiver)
 
     if (quest->GetQuestCompleteScript() != 0)
         GetMap()->ScriptsStart(sQuestEndScripts, quest->GetQuestCompleteScript(), questGiver, this);
+
+    if (questGiver && questGiver->GetTypeId() == TYPEID_UNIT)
+        sScriptMgr->OnQuestComplete(this, questGiver->ToCreature(), quest);
 }
 
 void Player::SendQuestFailed(uint32 questId, InventoryResult reason)

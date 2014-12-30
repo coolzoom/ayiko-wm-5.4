@@ -2,6 +2,146 @@
 #include "ScriptMgr.h"
 #include "ScriptedGossip.h"
 #include "CreatureAI.h"
+#include "SpellScript.h"
+#include "Vehicle.h"
+
+/*
+Uldum Zone:
+Easy Money (27003) - npc_lady_hump_tanaris, npc_adarrah_easy_money
+Traitors! (27922) - go_neferset_frond
+*/
+
+
+/* Lady Hump - Starts event for Easy Money quest
+* Missing:
+* Caravan Escort and Cameras system
+*/
+class npc_lady_hump_tanaris : public CreatureScript
+{
+public:
+    npc_lady_hump_tanaris() : CreatureScript("npc_lady_hump_tanaris") { }
+
+    bool OnGossipHello(Player * player, Creature * creature)
+    {
+        if (player->GetQuestStatus(27003) == QUEST_STATUS_INCOMPLETE)
+        {
+            //player->SendCinematicStart(161);
+            player->CastSpell(player, 89404, true);
+            player->TeleportTo(player->GetMapId(), -10995.93f, -1254.66f, 13.25f, 4.67f);
+            player->KilledMonsterCredit(44833);
+        }
+        return true;
+    }
+};
+
+// Adarrah - Finish event for Easy Money quest
+class npc_adarrah_easy_money : public CreatureScript
+{
+public:
+    npc_adarrah_easy_money() : CreatureScript("npc_adarrah_easy_money") { }
+
+    bool OnQuestComplete(Player* player, Creature* creature, const Quest* quest) override
+    {
+        if (GameObject * go = GetClosestGameObjectWithEntry(player, 206951, 15.f))
+            go->UseDoorOrButton();
+
+        // TODO: Jailer should spawn after short text event
+        if (Creature * const jailer = player->SummonCreature(48029, -11025.f, -1280.f, 13.79f, 0.7f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 180000))
+        {
+            // TODO: Move to creature_text
+            creature->MonsterSay("Here comes the guard! Take him out!", 0, 0);
+            jailer->AI()->AttackStart(player);
+        }
+
+        return true;
+    }
+};
+
+/* Nefreset Frond object for Traitors! quest
+* Missing:
+* Some cosmetic changes done to nearby NPCs
+*/
+class go_neferset_frond : public GameObjectScript
+{
+public:
+    go_neferset_frond() : GameObjectScript("go_neferset_frond") { }
+
+    bool OnGossipHello(Player* player, GameObject* /*go*/) override
+    {
+        if (Creature * const camera = GetClosestCreatureWithEntry(player, 47473, 30.f))
+        {
+            if (!camera->GetVehicleKit()->IsVehicleInUse())
+            {
+                player->CastSpell(player, 88525, true);
+                player->EnterVehicle(camera);
+            }
+        }
+        return false;
+    }
+};
+
+class npc_uldum_camera_traitors_q : public CreatureScript
+{
+public:
+    npc_uldum_camera_traitors_q() : CreatureScript("npc_uldum_camera_traitors_q") { }
+
+    struct npc_uldum_camera_traitors_qAI : public ScriptedAI
+    {
+        npc_uldum_camera_traitors_qAI(Creature* creature) : ScriptedAI(creature) { }
+
+        bool eventStarted;
+        uint8 phase;
+        uint32 phaseTimer;
+
+        void Reset()
+        {
+            phase = 0;
+            phaseTimer = 5000;
+            eventStarted = false;
+        }
+
+        void UpdateAI(uint32 const diff)
+        {
+            if (eventStarted)
+            {
+                if (phaseTimer <= diff)
+                {
+                    if (phase < 2)
+                    {
+                        if (Creature const * const siamat = GetClosestCreatureWithEntry(me, 47451, 50.f))
+                        {
+                            siamat->AI()->Talk(phase);
+                            phaseTimer = 10000;
+                        }
+                    }
+                    else
+                    {
+                        if (Unit * const pas = me->GetVehicleKit()->GetPassenger(0))
+                            if (Player * const player = pas->ToPlayer())
+                                player->KilledMonsterCredit(47466);
+
+                        me->GetVehicleKit()->RemoveAllPassengers();
+                    }
+                    ++phase;
+                }
+                else phaseTimer -= diff;
+            }
+        }
+
+        void PassengerBoarded(Unit * who, int8 /*seat*/, bool enter) override
+        {
+            if (enter)
+                eventStarted = true;
+            else
+                Reset();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_uldum_camera_traitors_qAI(creature);
+    }
+};
 
 #define GOSSIP_CHOICE_1  "I'm ready, Doctor Jones !"
 
@@ -213,6 +353,12 @@ class mob_harrison_jones_2 : public CreatureScript
 
 void AddSC_uldum()
 {
+    new npc_lady_hump_tanaris();
+    new npc_adarrah_easy_money();
+
+    new go_neferset_frond();
+    new npc_uldum_camera_traitors_q();
+
     new mob_harrison_jones();
     new mob_harrison_jones_2();
 }

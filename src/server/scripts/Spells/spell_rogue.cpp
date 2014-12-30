@@ -1629,11 +1629,6 @@ class spell_rog_killing_spree : public SpellScriptLoader
 public:
     spell_rog_killing_spree() : SpellScriptLoader("spell_rog_killing_spree") { }
 
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_rog_killing_spree_SpellScript();
-    }
-
     class script_impl : public AuraScript
     {
         PrepareAuraScript(script_impl);

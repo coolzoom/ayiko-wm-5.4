@@ -2080,6 +2080,75 @@ class mob_collidus_the_warp_watcher : public CreatureScript
         };
 };
 
+/*#####
+# go_arcano_control_unit
+######*/
+
+enum FrankyItMakesNoSense
+{
+    QUEST_FRANKLY_IT_MAKES_NO_SENSE = 10672,
+    NPC_ARCANO_SCORP = 21909,
+    NPC_ARCANO_SCORP_CREDIT = 21924,
+    NPC_GREATER_FELFIRE_DIEMETRADON = 21462,
+    SPELL_CONTROL_ARCANO_SCORP = 37868,
+    SPELL_AURA_DIEMETRADON_TAG = 37851,
+};
+
+class go_arcano_control_unit : public GameObjectScript
+{
+public:
+    go_arcano_control_unit() : GameObjectScript("go_arcano_control_unit") { }
+
+    bool OnGossipHello(Player* player, GameObject* go) override
+    {
+        if (player->GetQuestStatus(QUEST_FRANKLY_IT_MAKES_NO_SENSE) != QUEST_STATUS_INCOMPLETE)
+            return false;
+
+        if (Creature* arcanoScorp = go->FindNearestCreature(NPC_ARCANO_SCORP, 20.0f))
+            player->CastSpell(arcanoScorp, SPELL_CONTROL_ARCANO_SCORP, true);
+
+        return true;
+    }
+};
+
+class spell_gen_tag_greater_felfire_diemetradon : public SpellScriptLoader
+{
+public:
+    spell_gen_tag_greater_felfire_diemetradon() : SpellScriptLoader("spell_gen_tag_greater_felfire_diemetradon") { }
+
+    class script_impl : public SpellScript
+    {
+        PrepareSpellScript(script_impl);
+
+        SpellCastResult CheckRequirement()
+        {
+            auto target = GetExplTargetUnit();
+            if (!target || target->GetEntry() != NPC_GREATER_FELFIRE_DIEMETRADON || target->HasAura(SPELL_AURA_DIEMETRADON_TAG))
+                return SPELL_FAILED_BAD_TARGETS;
+
+            return SPELL_CAST_OK;
+        }
+
+        void HandleDummy(SpellEffIndex effIndex)
+        {
+            if (GetCaster())
+            if (auto player = GetCaster()->GetCharmerOrOwnerPlayerOrPlayerItself())
+                player->KilledMonsterCredit(NPC_ARCANO_SCORP_CREDIT);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(script_impl::HandleDummy, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+            OnCheckCast += SpellCheckCastFn(script_impl::CheckRequirement);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new script_impl();
+    }
+};
+
 void AddSC_shadowmoon_valley()
 {
     new mob_mature_netherwing_drake();
@@ -2100,4 +2169,6 @@ void AddSC_shadowmoon_valley()
     new spell_unlocking_zuluheds_chains();
     new npc_shadowmoon_tuber_node();
     new mob_collidus_the_warp_watcher();
+    new go_arcano_control_unit();
+    new spell_gen_tag_greater_felfire_diemetradon();
 }

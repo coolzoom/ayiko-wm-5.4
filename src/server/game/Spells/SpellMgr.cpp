@@ -5122,12 +5122,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[EFFECT_2].Effect = 0;
                     spellInfo->Effects[EFFECT_2].ApplyAuraName = 0;
                     break;
-                // Burn Hay, Braizer Torch
-                case 88646:
-                    spellInfo->Effects[EFFECT_1].Effect = 0;
-                    spellInfo->Effects[EFFECT_1].TargetA = 0;
-                    spellInfo->Effects[EFFECT_1].TargetB = 0;
-                    break;
                 // Cauterizing Flame
                 case 99152:
                     spellInfo->AttributesEx |= SPELL_ATTR1_CANT_TARGET_SELF;

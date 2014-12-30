@@ -9,6 +9,7 @@
 Uldum Zone:
 Easy Money (27003) - npc_lady_hump_tanaris, npc_adarrah_easy_money
 Traitors! (27922) - go_neferset_frond
+Escape From the Lost City (28112) - npc_prince_nadun_lost_city
 */
 
 
@@ -140,6 +141,25 @@ public:
     CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_uldum_camera_traitors_qAI(creature);
+    }
+};
+
+/* Prince Naduun start event for Escape From the Lost City
+* Missing:
+* Escape Cinematic
+*/
+class npc_prince_nadun_lost_city : public CreatureScript
+{
+public:
+    npc_prince_nadun_lost_city() : CreatureScript("npc_prince_nadun_lost_city") { }
+
+    bool OnQuestAccept(Player* player, Creature* creature, const Quest* quest)
+    {
+        if (quest->GetQuestId() == 28112)
+        {
+            player->TeleportTo(player->GetMapId(), -9443.31f, -958.36f, 111.02f, 0.015f);
+        }
+        return true;
     }
 };
 
@@ -358,6 +378,9 @@ void AddSC_uldum()
 
     new go_neferset_frond();
     new npc_uldum_camera_traitors_q();
+
+    new npc_prince_nadun_lost_city();
+
 
     new mob_harrison_jones();
     new mob_harrison_jones_2();

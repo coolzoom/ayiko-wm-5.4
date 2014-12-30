@@ -107,3 +107,20 @@ INSERT INTO `creature` (`guid`, `id`, `map` `spawnMask`, `position_x`, `position
 UPDATE `creature_template` SET `ScriptName`='npc_harrison_jones_uldum' WHERE (`entry`='44860');
 -- Premature Explosionation
 UPDATE `gameobject_template` SET `ScriptName`='go_powder_keg' WHERE (`entry`='205394');
+
+-- On to Something
+UPDATE `creature_template` SET `ScriptName`='npc_harrison_jones_obelisk' WHERE (`entry`='45180');
+
+UPDATE `creature_template` SET `speed_run`='0.90', `ScriptName`='npc_harrison_jones_on_to_something' WHERE (`entry`='45238');
+DELETE FROM `creature_text` WHERE `entry` = '45238';
+INSERT INTO `creature_text` (`entry`, `groupid`, `text`, `type`, `probability`, `comment`) VALUES
+('45238', '0', 'Let\'s go, $N. Stay close.', '12', '100', 'Raufen - Harrison Jones talk'),
+('45238', '1', 'Stay alert, now. There\'s no telling what we might run into down here...', '12', '100', 'Raufen - Harrison Jones talk'),
+('45238', '2', 'Watch your step!', '12', '100', 'Raufen - Harrison Jones talk');
+
+-- The Thrill of Discovery
+DELETE FROM `areatrigger_scripts` WHERE `entry` IN('6284', '6288', '6289');
+INSERT INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
+('6284', 'at_chambers_of_the_star'),
+('6288', 'at_chambers_of_the_star'),
+('6289', 'at_chambers_of_the_star');

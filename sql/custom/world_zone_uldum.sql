@@ -61,5 +61,40 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `ConditionTy
 ('15', '12356', '9', '28134', 'Raufen - Show gossip menu with quest'),
 ('15', '12361', '9', '28134', 'Raufen - Show gossip menu with quest');
 
+-- Under the Choking Sands
+UPDATE `quest_template` SET `Method`='2' WHERE (`Id`='27519');
+DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`='18') AND (`SourceGroup`='45715') AND (`SourceEntry`='85372');
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`, `Comment`) VALUES ('18', '45715', '85372', '9', '27519', 'Raufen - require quest for spellclick');
+
+UPDATE `smart_scripts` SET `event_type`='8', `event_param1`='85372' WHERE (`entryorguid`='45715') AND (`source_type`='0') AND (`id`='0') AND (`link`='1');
+
 -- Return to the Lost City
 UPDATE `quest_template` SET `PrevQuestId`='28520' WHERE (`Id`='28870');
+
+-- The High Commander's Vote
+-- The Vizier's Vote
+UPDATE `quest_template` SET `PrevQuestId`='27628' WHERE (`Id`='27631');
+UPDATE `quest_template` SET `PrevQuestId`='27628' WHERE (`Id`='27629');
+DELETE FROM `creature_template_aura` WHERE (`entry`='47959') AND (`aura`='49414');
+
+-- Venomblood Antidote
+DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`='17') AND (`SourceGroup`='0') AND (`SourceEntry`='88882');
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+('17', '0', '88882', '0', '0', '31', '1', '3', '45859', '0', '0', '0', '0', '', 'Draining Venom - target Venomblood Scorpid'),
+('17', '0', '88882', '0', '0', '36', '1', '0', '0', '0', '1', '0', '0', '', 'Drain Venom - target corpse');
+
+-- Ploughshares to Swords
+DELETE FROM `smart_scripts` WHERE `entryorguid` = '46333' AND `source_type` = '0';
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+('46333', '0', '0', '1', '64', '0', '100', '0', '0', '0', '0', '0', '33', '46333', '0', '0', '0', '0', '0', '7', '0', '0', '0', '0', '0', '0', '0', 'Nepenthe-Ramkahen Laborer - On gossip hello credit for quest 28201'),
+('46333', '0', '1', '2', '61', '0', '100', '0', '0', '0', '0', '0', '41', '500', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', 'Nepenthe-Ramkahen Laborer - Despawn'),
+('46333', '0', '2', '0', '61', '0', '100', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '7', '0', '0', '0', '0', '0', '0', '0', 'Raufen - On Link (Gossip) - Talk');
+
+DELETE FROM `creature_text` WHERE `entry` = '46333';
+INSERT INTO `creature_text` (`entry`, `id`, `text`, `type`, `probability`, `comment`) VALUES
+('46333', '0', 'I heard of what you did in Orsis. I will be honored to fight along your side.', '12', '100', 'Raufen - On Gossip - Talk'),
+('46333', '1', 'I will defend Ramkahen with my bare hands if I have to!', '12', '100', 'Raufen - On Gossip - Talk'),
+('46333', '2', 'If the rumors about you are true, stranger, I will gladly join you in the fight against the Neferset!', '12', '100', 'Raufen - On Gossip - Talk'),
+('46333', '3', 'It\'s about time we started doing something.', '12', '100', 'Raufen - On Gossip - Talk'),
+('46333', '4', 'We will defend our lands!', '12', '100', 'Raufen - On Gossip - Talk'),
+('46333', '5', 'The $R that rescued Prince Nadun is the only worgen that I\'ll ever take orders from.', '12', '100', 'Raufen - On Gossip - Talk');

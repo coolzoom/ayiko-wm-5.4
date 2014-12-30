@@ -10,6 +10,8 @@ Uldum Zone:
 Easy Money (27003) - npc_lady_hump_tanaris, npc_adarrah_easy_money
 Traitors! (27922) - go_neferset_frond
 Escape From the Lost City (28112) - npc_prince_nadun_lost_city
+Take it to 'Em! (27993) - npc_harrison_jones_uldum
+Premature Explosionation (27141) - go_powder_keg
 */
 
 
@@ -160,6 +162,53 @@ public:
             player->TeleportTo(player->GetMapId(), -9443.31f, -958.36f, 111.02f, 0.015f);
         }
         return true;
+    }
+};
+
+// Harrison Jones for Take it to 'Em!
+class npc_harrison_jones_uldum : public CreatureScript
+{
+public:
+    npc_harrison_jones_uldum() : CreatureScript("npc_harrison_jones_uldum") { }
+
+    struct npc_harrison_jones_uldumAI : public ScriptedAI
+    {
+        npc_harrison_jones_uldumAI(Creature* creature) : ScriptedAI(creature) { }
+
+        void Reset() { }
+
+        void MoveInLineOfSight(Unit* who) override
+        {
+            if (Player * const player = who->ToPlayer())
+                if (player->GetQuestStatus(27993) == QUEST_STATUS_INCOMPLETE && me->GetDistance(who) < 20.f)
+                    player->KilledMonsterCredit(47318);
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_harrison_jones_uldumAI(creature);
+    }
+};
+
+/* Powder Keg for Premature Explosionation
+* Missing:
+* Cinematic event with explosion
+*/
+class go_powder_keg : public GameObjectScript
+{
+public:
+    go_powder_keg() : GameObjectScript("go_powder_keg") { }
+
+    bool OnGossipHello(Player* player, GameObject* /*go*/) override
+    {
+        if (player->GetQuestStatus(27141) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->CastSpell(player, 89404, true);
+            player->TeleportTo(player->GetMapId(), -9207.99f, -1560.32f, 65.46f, 0.82f);
+            player->KilledMonsterCredit(45143);
+        }
+        return false;
     }
 };
 
@@ -381,6 +430,8 @@ void AddSC_uldum()
 
     new npc_prince_nadun_lost_city();
 
+    new npc_harrison_jones_uldum();
+    new go_powder_keg();
 
     new mob_harrison_jones();
     new mob_harrison_jones_2();

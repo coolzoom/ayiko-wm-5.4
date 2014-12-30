@@ -98,3 +98,12 @@ INSERT INTO `creature_text` (`entry`, `id`, `text`, `type`, `probability`, `comm
 ('46333', '3', 'It\'s about time we started doing something.', '12', '100', 'Raufen - On Gossip - Talk'),
 ('46333', '4', 'We will defend our lands!', '12', '100', 'Raufen - On Gossip - Talk'),
 ('46333', '5', 'The $R that rescued Prince Nadun is the only worgen that I\'ll ever take orders from.', '12', '100', 'Raufen - On Gossip - Talk');
+
+-- Salhet for Salhet's Secret
+DELETE FROM `creature` WHERE `id` = '48022';
+INSERT INTO `creature` (`guid`, `id`, `map` `spawnMask`, `position_x`, `position_y`, `position_z`, `orientation`) VALUES ('5039', '48022', '1', '1', '-10357.5', '-817.342', '131.607', '4.496');
+
+-- Take it to 'Em!
+UPDATE `creature_template` SET `ScriptName`='npc_harrison_jones_uldum' WHERE (`entry`='44860');
+-- Premature Explosionation
+UPDATE `gameobject_template` SET `ScriptName`='go_powder_keg' WHERE (`entry`='205394');

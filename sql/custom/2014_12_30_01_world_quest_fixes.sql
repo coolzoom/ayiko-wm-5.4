@@ -38,3 +38,13 @@ DELETE FROM `creature_text` WHERE `entry` = @NPC_GOR_GRIMGUT;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
 (@NPC_GOR_GRIMGUT, 0, 0, "Hah! The Thunderspike is mine. Die!", 12, 0, 100, 0, 0, 0, "Gor Grimgut"),
 (@NPC_GOR_GRIMGUT, 1, 0, "%s goes into a frenzy!", 16, 0, 100, 0, 0, 0, "Gor Grimgut");
+
+-- On the Crab
+UPDATE `gameobject_template` SET `data3`='0', `ScriptName`='go_full_crab_pot' WHERE (`entry`='213508');
+DELETE FROM `gameobject` WHERE `id` = '213508' AND `guid` > '401308';
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `isActive`, `protect_anti_doublet`) VALUES
+(401408, 213508, 870, 0, 0, 1, 1, -1226.74, 3769.18, -48.0838, 3.48074, 0, 0, 0.985657, -0.168761, 120, 255, 1, 0, NULL),
+(401409, 213508, 870, 0, 0, 1, 1, -1400.51, 3789.07, -48.2446, 2.86812, 0, 0, 0.990666, 0.136309, 120, 255, 1, 0, NULL),
+(401410, 213508, 870, 0, 0, 1, 1, -1382.54, 3940.71, -48.0702, 0.4216, 0, 0, 0.209242, 0.977864, 120, 255, 1, 0, NULL),
+(401411, 213508, 870, 0, 0, 1, 1, -1343.29, 3868, -45.2067, 4.80255, 0, 0, 0.674523, -0.738254, 120, 255, 1, 0, NULL),
+(401412, 213508, 870, 0, 0, 1, 1, -1394.18, 3650.59, -59.7899, 2.60794, 0, 0, 0.964613, 0.26367, 120, 255, 1, 0, NULL);

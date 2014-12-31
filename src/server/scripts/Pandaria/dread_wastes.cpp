@@ -2190,6 +2190,32 @@ public:
     }
 };
 
+class go_full_crab_pot : public GameObjectScript
+{
+public:
+    go_full_crab_pot() : GameObjectScript("go_full_crab_pot") { }
+
+    bool OnGossipHello(Player* player, GameObject* go) override
+    {
+        if (player->GetQuestStatus(31187) == QUEST_STATUS_INCOMPLETE)
+        {
+            /*player->CastSpell(player, 89404, true);
+            player->TeleportTo(player->GetMapId(), -9207.99f, -1560.32f, 65.46f, 0.82f);*/
+            player->KilledMonsterCredit(64006);
+            Position pos;
+            go->GetPosition(&pos);
+            if (auto crabTrap = player->SummonCreature(64009, pos, TEMPSUMMON_TIMED_DESPAWN, 10000))
+            {
+                crabTrap->CastSpell(crabTrap, 124959, true);
+                pos.m_positionZ = pos.m_positionZ + 20;
+                crabTrap->GetMotionMaster()->MovePoint(1, pos);
+            }
+            go->SetRespawnTime(60);
+        }
+        return false;
+    }
+};
+
 void AddSC_dread_wastes()
 {
     //Rare Mobs
@@ -2223,4 +2249,5 @@ void AddSC_dread_wastes()
     new spell_zet_uk_sha_eruption_periodic_summon();
     //Quest scripts
     new AreaTrigger_at_q_wood_and_shade();
+    new go_full_crab_pot();
 }

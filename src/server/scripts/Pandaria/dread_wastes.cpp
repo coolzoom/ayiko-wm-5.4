@@ -2190,6 +2190,7 @@ public:
     }
 };
 
+// On the Crab quest
 class go_full_crab_pot : public GameObjectScript
 {
 public:
@@ -2213,6 +2214,43 @@ public:
             go->SetRespawnTime(60);
         }
         return false;
+    }
+};
+
+// Living Amber quest
+class spell_item_living_amber : public SpellScriptLoader
+{
+public:
+    spell_item_living_amber() : SpellScriptLoader("spell_item_living_amber") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            auto target = GetHitUnit();
+            if (!target || target->GetTypeId() != TYPEID_UNIT || GetCaster()->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            auto player = GetCaster()->ToPlayer();
+            if (player->GetQuestStatus(31021) == QUEST_STATUS_INCOMPLETE)
+            {
+                uint16 questProgress = player->GetQuestSlotCounter(player->FindQuestSlot(31021), 0);
+                target->ToCreature()->AI()->Talk(questProgress);
+                player->KilledMonsterCredit(63204);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_impl::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
     }
 };
 
@@ -2250,4 +2288,5 @@ void AddSC_dread_wastes()
     //Quest scripts
     new AreaTrigger_at_q_wood_and_shade();
     new go_full_crab_pot();
+    new spell_item_living_amber();
 }

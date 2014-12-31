@@ -48,3 +48,34 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, 
 (401410, 213508, 870, 0, 0, 1, 1, -1382.54, 3940.71, -48.0702, 0.4216, 0, 0, 0.209242, 0.977864, 120, 255, 1, 0, NULL),
 (401411, 213508, 870, 0, 0, 1, 1, -1343.29, 3868, -45.2067, 4.80255, 0, 0, 0.674523, -0.738254, 120, 255, 1, 0, NULL),
 (401412, 213508, 870, 0, 0, 1, 1, -1394.18, 3650.59, -59.7899, 2.60794, 0, 0, 0.964613, 0.26367, 120, 255, 1, 0, NULL);
+
+-- Living Amber
+DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`='13') AND (`SourceGroup`='3') AND (`SourceEntry`='123498');
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionValue1`, `ConditionValue2`, `Comment`) VALUES
+('13', '3', '123498', '0', '31', '3', '62180', 'Raufen - Select proper target'),
+('13', '3', '123498', '1', '31', '3', '62232', 'Raufen - Select proper target');
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '123498';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES ('123498', 'spell_item_living_amber');
+
+DELETE FROM `creature_text` WHERE `entry` IN('62180', '62232');
+INSERT INTO `creature_text` (`entry`, `groupid`, `text`, `type`, `probability`, `comment`) VALUES
+('62180', '0', 'Ah yes. One does not forget the taste of amber.', '12', '100', 'Raufen - Living Amber quest talk'),
+('62180', '1', 'Back when the world was still young, the first kypari trees bloomed.', '12', '100', 'Raufen - Living Amber quest talk'),
+('62180', '2', 'From the trees, the amber flowed and nurtured us. Kyparite, we called it, the lifeblood of the earth.', '12', '100', 'Raufen - Living Amber quest talk'),
+('62180', '3', 'It healed our wounds and made us bold. It tasted like sweetness and fire, and gave us strength to conquer all the lesser races.', '12', '100', 'Raufen - Living Amber quest talk'),
+('62180', '4', 'Many were the threats to our race after the usurpers remade the world. Narrow was the path ahead.', '12', '100', 'Raufen - Living Amber quest'),
+('62180', '5', 'It was I who suggested our greatest warriors be cast in amber to sleep, to be awakened at the swarm\'s greatest times of need.', '12', '100', 'Raufen - Living Amber quest talk'),
+('62180', '6', 'It was the sleep from which one could never awake. A great risk. A great sacrifice. But necessary.', '12', '100', 'Raufen - Living Amber quest talk'),
+('62180', '7', 'Thus, I was the first Paragon. This is why, I am the Prime.', '12', '100', 'Raufen - Living Amber quest talk'),
+('62180', '8', 'And now, the Klaxxi call us to battle. Now, I am awakened.', '12', '100', 'Raufen - Living Amber quest talk'),
+
+('62232', '0', 'Ah yes. One does not forget the taste of amber.', '12', '100', 'Raufen - Living Amber quest talk'),
+('62232', '1', 'Back when the world was still young, the first kypari trees bloomed.', '12', '100', 'Raufen - Living Amber quest talk'),
+('62232', '2', 'From the trees, the amber flowed and nurtured us. Kyparite, we called it, the lifeblood of the earth.', '12', '100', 'Raufen - Living Amber quest talk'),
+('62232', '3', 'It healed our wounds and made us bold. It tasted like sweetness and fire, and gave us strength to conquer all the lesser races.', '12', '100', 'Raufen - Living Amber quest talk'),
+('62232', '4', 'Many were the threats to our race after the usurpers remade the world. Narrow was the path ahead.', '12', '100', 'Raufen - Living Amber quest'),
+('62232', '5', 'It was I who suggested our greatest warriors be cast in amber to sleep, to be awakened at the swarm\'s greatest times of need.', '12', '100', 'Raufen - Living Amber quest talk'),
+('62232', '6', 'It was the sleep from which one could never awake. A great risk. A great sacrifice. But necessary.', '12', '100', 'Raufen - Living Amber quest talk'),
+('62232', '7', 'Thus, I was the first Paragon. This is why, I am the Prime.', '12', '100', 'Raufen - Living Amber quest talk'),
+('62232', '8', 'And now, the Klaxxi call us to battle. Now, I am awakened.', '12', '100', 'Raufen - Living Amber quest talk');

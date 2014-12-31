@@ -79,3 +79,24 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `text`, `type`, `probability`, 
 ('62232', '6', 'It was the sleep from which one could never awake. A great risk. A great sacrifice. But necessary.', '12', '100', 'Raufen - Living Amber quest talk'),
 ('62232', '7', 'Thus, I was the first Paragon. This is why, I am the Prime.', '12', '100', 'Raufen - Living Amber quest talk'),
 ('62232', '8', 'And now, the Klaxxi call us to battle. Now, I am awakened.', '12', '100', 'Raufen - Living Amber quest talk');
+
+-- Corruption Runs Deep
+UPDATE `creature_template` SET `ScriptName`='npc_hisek_the_swarmkeeper' WHERE (`entry`='64672');
+UPDATE `creature_template` SET `ScriptName`='npc_hisek_the_swarmkeeper_summon' WHERE (`entry`='64705');
+UPDATE `creature_template` SET `faction_A`='16', `faction_H`='16' WHERE (`entry`='64583');
+UPDATE `creature_template` SET `minlevel`='90', `maxlevel`='90' WHERE (`entry`='64813');
+UPDATE `quest_template` SET `PrevQuestId`='31441' WHERE (`Id`='31458');
+
+DELETE FROM `creature_text` WHERE `entry` IN('64705', '64813');
+INSERT INTO `creature_text` (`entry`, `groupid`, `text`, `type`, `probability`, `comment`) VALUES
+('64705', '0', 'Now you will see. Traitors hide within our ranks.', '12', '100', 'Raufen - Corruption Runs Deep'),
+('64705', '1', 'Kor\'ik! How long have you worked for the empress?!', '12', '100', 'Raufen - Corruption Runs Deep'),
+('64705', '2', 'The only madness here is your own, Kor\'ik! Did you really think you would go unnoticed forever?', '12', '100', 'Raufen - Corruption Runs Deep'),
+('64705', '3', 'You will not deceive us. We see you for who you truly are!', '12', '100', 'Raufen - Corruption Runs Deep');
+
+INSERT INTO `creature_text` (`entry`, `groupid`, `text`, `type`, `probability`, `comment`) VALUES
+('64813', '0', 'I see the paragon has been awakened.', '12', '100', 'Raufen - Corruption Runs Deep'),
+('64813', '1', 'The paragon does not speak truth, Wakener. His mind did not survive encasement.', '12', '100', 'Raufen - Corruption Runs Deep'),
+('64813', '2', 'He cannot allow him to live in this madness. The Klaxxi will want him put down.', '12', '100', 'Raufen - Corruption Runs Deep'),
+('64813', '3', 'You and the Klaxxi are fools! Your arrogance will be your end!', '12', '100', 'Raufen - Corruption Runs Deep'),
+('64813', '4', 'Empress She\'zeer knows your plans. Your treachery will be punished...', '14', '100', 'Raufen - Corruption Runs Deep');

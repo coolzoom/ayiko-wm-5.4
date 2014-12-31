@@ -100,3 +100,8 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `text`, `type`, `probability`, 
 ('64813', '2', 'He cannot allow him to live in this madness. The Klaxxi will want him put down.', '12', '100', 'Raufen - Corruption Runs Deep'),
 ('64813', '3', 'You and the Klaxxi are fools! Your arrogance will be your end!', '12', '100', 'Raufen - Corruption Runs Deep'),
 ('64813', '4', 'Empress She\'zeer knows your plans. Your treachery will be punished...', '14', '100', 'Raufen - Corruption Runs Deep');
+
+-- Dead Zone
+DELETE FROM `disables` WHERE (`sourceType`='0') AND (`entry`='121833');
+DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`='13') AND (`SourceGroup`='2') AND (`SourceEntry`='121833');
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`, `ConditionValue2`, `Comment`) VALUES ('13', '2', '121833', '31', '5', '213973', 'Raufen - Target Klaxxi Sonic Relay');

@@ -202,3 +202,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 (3562, 57457, 870, 0, 0, 1, 1, 0, 0, -359.067, -580.894, 113.685, 4.29265, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
 (3563, 57457, 870, 0, 0, 1, 1, 0, 0, -390.805, -650.508, 116.841, 0.0522734, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
 (3564, 57457, 870, 0, 0, 1, 1, 0, 0, -366.992, -641.205, 118.349, 3.15224, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL);
+
+-- Re-Reclaim
+UPDATE `gameobject_template` SET `castBarCaption`='Grabbing' WHERE (`entry`='210416');
+UPDATE `gameobject_template` SET `data1`='210416' WHERE `entry` IN('210417', '210418');
+UPDATE `gameobject_loot_template` SET `ChanceOrQuestChance`='-100' WHERE (`item`='79120');

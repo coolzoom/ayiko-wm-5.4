@@ -515,6 +515,13 @@ public:
         }
     };
 
+    bool OnGossipHello(Player * player, Creature * creature) override
+    {
+        creature->AI()->Talk(0);
+        player->KilledMonsterCredit(creature->GetEntry());
+        return false;
+    }
+
     CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_despondent_warden_of_zhuAI(creature);

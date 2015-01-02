@@ -207,3 +207,19 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 UPDATE `gameobject_template` SET `castBarCaption`='Grabbing' WHERE (`entry`='210416');
 UPDATE `gameobject_template` SET `data1`='210416' WHERE `entry` IN('210417', '210418');
 UPDATE `gameobject_loot_template` SET `ChanceOrQuestChance`='-100' WHERE (`item`='79120');
+
+-- What's Eating Zhu's Watch?
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE `entry` IN('57825', '57830', '57744');
+UPDATE creature_template SET npcflag = npcflag | 1 WHERE entry = 57457;
+
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` IN('57825', '57830', '57744');
+INSERT INTO `smart_scripts` (`entryorguid`, `id` `event_type`, `action_type`, `action_param1`, `target_type`, `comment`) VALUES
+('57830', '0', '64', '33', '57830', '7', 'Raufen - On Gossip Hello - Give KC'),
+('57825', '0', '64', '33', '57825', '7', 'Raufen - On Gossip Hello - Give KC'),
+('57744', '0', '64', '33', '57744', '7', 'Raufen - On Gossip Hello - Give KC'),
+('57830', '1', '64', '1', '0', '7', 'Raufen - On Gossip Hello - Talk'),
+('57825', '1', '64', '1', '0', '7', 'Raufen - On Gossip Hello - Talk');
+
+INSERT INTO `creature_text` (`entry`, `text`, `type`, `probability`, `comment`) VALUES
+('57830', 'Guess I\'ll just sleep for another day...', '12', '100', 'Raufen - On Gossip - Talk'),
+('57825', 'Oh great! Someone else has come to bother me.', '12', '100', 'Raufen - On Gossip - Talk');

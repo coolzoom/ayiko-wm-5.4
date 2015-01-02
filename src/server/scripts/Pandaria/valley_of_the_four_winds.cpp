@@ -425,6 +425,7 @@ public:
             {
                 if (!player->HasAura(106284))
                 {
+                    player->MonsterTextEmote("Mudmug's vial will slowly spill water while you are moving. Plan your path carefully!", player->GetGUID() , true);
                     player->CastSpell(player, 106284, true);
                 }
                 else

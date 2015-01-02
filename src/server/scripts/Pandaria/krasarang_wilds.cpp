@@ -444,6 +444,83 @@ class mob_go_kan : public CreatureScript
         };
 };
 
+class npc_despondent_warden_of_zhu : public CreatureScript
+{
+public:
+    npc_despondent_warden_of_zhu() : CreatureScript("npc_despondent_warden_of_zhu") {}
+
+    struct npc_despondent_warden_of_zhuAI : public ScriptedAI
+    {
+        npc_despondent_warden_of_zhuAI(Creature* creature) : ScriptedAI(creature) {}
+
+        uint64 playerGUID;
+        uint32 talkTimer;
+
+        void Reset()
+        {
+            me->CastSpell(me, 108450, true);
+            playerGUID = 0;
+            talkTimer = 0;
+        }
+
+        void MoveInLineOfSight(Unit * who)
+        {
+            if (me->GetDistance(who) > 5.f || talkTimer == 0)
+                return;
+
+            if (auto player = who->ToPlayer())
+            {
+                if (player->GetQuestStatus(30089) == QUEST_STATUS_INCOMPLETE)
+                {
+                    Talk(0);
+                    talkTimer = 20000;
+                }
+            }
+        }
+
+        void UpdateAI(uint32 const diff)
+        {
+            if (talkTimer != 0)
+            if (talkTimer <= diff)
+            {
+                talkTimer = 0;
+            }
+            else talkTimer -= diff;
+        }
+
+        void SpellHit(Unit * caster, const SpellInfo * spell) override
+        {
+            if (!me->HasAura(108450))
+                return;
+
+            if (spell->Id == 110169 && caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                Position pos;
+                me->GetPosition(&pos);
+                if (auto summon = me->SummonCreature(58312, pos, TEMPSUMMON_TIMED_DESPAWN, 120 * IN_MILLISECONDS))
+                    summon->AI()->AttackStart(caster);
+
+                playerGUID = caster->GetGUID();
+            }
+        }
+
+        void SummonedCreatureDies(Creature* summoned, Unit* /*killer*/) override
+        {
+            if (auto player = me->GetPlayer(*me, playerGUID))
+            {
+                player->KilledMonsterCredit(58238);
+                me->ForcedDespawn(5000);
+            }
+            Talk(1);
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_despondent_warden_of_zhuAI(creature);
+    }
+};
+
 void AddSC_krasarang_wilds()
 {
     new mob_gaarn_the_toxic();
@@ -451,4 +528,5 @@ void AddSC_krasarang_wilds()
     new mob_qu_nas();
     new mob_torik_ethis();
     new mob_go_kan();
+    new npc_despondent_warden_of_zhu();
 }

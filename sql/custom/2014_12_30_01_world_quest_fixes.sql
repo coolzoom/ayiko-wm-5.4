@@ -168,3 +168,37 @@ INSERT INTO `creature_text` (`entry`, `text`, `type`, `probability`, `comment`) 
 
 DELETE FROM `creature` WHERE `id` = '59058';
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `npcflag2`, `unit_flags`, `unit_flags2`, `dynamicflags`, `isActive`, `protec_anti_doublet`) VALUES ('3555', '59058', '870', '0', '0', '1', '1', '0', '0', '-129.583', '-2651.02', '1.22551', '2.60276', '300', '0', '0', '156000', '0', '0', '0', '0', '0', '2048', '0', '0', NULL);
+
+-- Apply Directly to the Forehead
+UPDATE `creature_template` SET `ScriptName`='npc_despondent_warden_of_zhu' WHERE (`entry`='57457');
+
+DELETE FROM `creature_text` WHERE `entry` = '57457';
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `probability`, `comment`) VALUES
+('57457', '0', '0', 'A little rain never hurt anybody... yet.', '12', '100', 'Raufen  - Apply Directly to the Forehead quest'),
+('57457', '0', '1', 'Don\'t bother me.', '12', '100', 'Raufen  - Apply Directly to the Forehead quest'),
+('57457', '0', '2', 'Go away.', '12', '100', 'Raufen  - Apply Directly to the Forehead quest'),
+('57457', '0', '3', 'How could this happen to me? I\'m sick of this life.', '12', '100', 'Raufen  - Apply Directly to the Forehead quest'),
+('57457', '0', '4', 'It\'s raining still. And freezing. At least we haven\'t had a typhoon lately.', '12', '100', 'Raufen  - Apply Directly to the Forehead quest'),
+('57457', '0', '5', 'Leave me alone.', '12', '100', 'Raufen  - Apply Directly to the Forehead quest'),
+('57457', '0', '6', 'What\'s the point anymore?', '12', '100', 'Raufen  - Apply Directly to the Forehead quest'),
+('57457', '0', '7', 'Oh, great. An adventurer. Just what I needed.', '12', '100', 'Raufen  - Apply Directly to the Forehead quest'),
+('57457', '0', '8', 'Stop crowding me, everybody\'s always crowding around in this village. There\'s no space.', '12', '100', 'Raufen  - Apply Directly to the Forehead quest'),
+('57457', '0', '9', 'What do you want?', '12', '100', 'Raufen  - Apply Directly to the Forehead quest'),
+
+('57457', '1', '0', 'Everything suddenly seems... brighter.', '12', '100', 'Raufen  - Apply Directly to the Forehead quest'),
+('57457', '1', '1', 'I... I feel... happy!', '12', '100', 'Raufen  - Apply Directly to the Forehead quest'),
+('57457', '1', '2', 'Ugh... what was that stuff? It went through me like bad tea.', '12', '100', 'Raufen  - Apply Directly to the Forehead quest'),
+('57457', '1', '3', 'Ugh... where am I?', '12', '100', 'Raufen  - Apply Directly to the Forehead quest'),
+('57457', '1', '4', 'What am I doing out here? I\'ve got work to do!', '12', '100', 'Raufen  - Apply Directly to the Forehead quest');
+
+DELETE FROM `creature` WHERE `id` = '57457';
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `npcflag2`, `unit_flags`, `unit_flags2`, `dynamicflags`, `isActive`, `protec_anti_doublet`) VALUES
+(3556, 57457, 870, 0, 0, 1, 1, 0, 0, -386.988, -634.431, 116.767, 5.95026, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
+(3557, 57457, 870, 0, 0, 1, 1, 0, 0, -355.917, -612.443, 117.586, 3.84383, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
+(3558, 57457, 870, 0, 0, 1, 1, 0, 0, -388.033, -673.533, 120.364, 2.5623, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
+(3559, 57457, 870, 0, 0, 1, 1, 0, 0, -362.399, -665.385, 122.1, 2.39108, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
+(3560, 57457, 870, 0, 0, 1, 1, 0, 0, -370.373, -618.346, 118.105, 5.06615, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
+(3561, 57457, 870, 0, 0, 1, 1, 0, 0, -388.17, -590.91, 114.597, 5.71422, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
+(3562, 57457, 870, 0, 0, 1, 1, 0, 0, -359.067, -580.894, 113.685, 4.29265, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
+(3563, 57457, 870, 0, 0, 1, 1, 0, 0, -390.805, -650.508, 116.841, 0.0522734, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
+(3564, 57457, 870, 0, 0, 1, 1, 0, 0, -366.992, -641.205, 118.349, 3.15224, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL);

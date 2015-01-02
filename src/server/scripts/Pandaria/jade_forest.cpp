@@ -1809,6 +1809,60 @@ public:
     }
 };
 
+class npc_the_pearlfin_situation_q : public CreatureScript
+{
+public:
+    npc_the_pearlfin_situation_q() : CreatureScript("npc_the_pearlfin_situation_q") { }
+
+    bool OnGossipHello(Player* player, Creature* creature) override
+    {
+        if (creature->IsQuestGiver())
+            player->PrepareQuestMenu(creature->GetGUID());
+
+        if (creature->IsVendor())
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
+
+        if (player->GetQuestStatus(29883) == QUEST_STATUS_INCOMPLETE)
+        {
+            std::string gossip = "";
+            switch (creature->GetEntry())
+            {
+            case 59058:
+                gossip = "Please allow us a chance to prove our friendship. We wish you no harm";
+                break;
+            case 56693:
+                gossip = "What are you doing?";
+                break;
+            case 56690:
+                gossip = "My friends and I come with peaceful intentions.";
+                break;
+            case 54960:
+                gossip = "I come from the Alliance. We wish to be allies, not enemies.";
+                break;
+            }
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, gossip, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        }
+
+        player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
+    {
+        player->PlayerTalkClass->ClearMenus();
+        if (action == GOSSIP_ACTION_INFO_DEF + 1)
+        {
+            creature->AI()->Talk(0);
+            player->KilledMonsterCredit(creature->GetEntry());
+            player->CLOSE_GOSSIP_MENU();
+        }
+        else if (action == GOSSIP_ACTION_TRADE)
+            player->GetSession()->SendListInventory(creature->GetGUID());
+
+        return false;
+    }
+};
+
 void AddSC_jade_forest()
 {
     //Rare mobs
@@ -1835,4 +1889,5 @@ void AddSC_jade_forest()
     new npc_windward_hatchling();
     new npc_windward_nest_trigger();
     new npc_instructor_skythorn();
+    new npc_the_pearlfin_situation_q();
 }

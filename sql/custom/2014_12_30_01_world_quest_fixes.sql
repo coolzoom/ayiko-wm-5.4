@@ -105,3 +105,54 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `text`, `type`, `probability`, 
 DELETE FROM `disables` WHERE (`sourceType`='0') AND (`entry`='121833');
 DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`='13') AND (`SourceGroup`='2') AND (`SourceEntry`='121833');
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`, `ConditionValue2`, `Comment`) VALUES ('13', '2', '121833', '31', '5', '213973', 'Raufen - Target Klaxxi Sonic Relay');
+
+-- Unbound
+UPDATE `creature` SET `spawndist`='0' WHERE `id` IN('54990', '61472');
+DELETE FROM `creature_template_aura` WHERE (`entry`='61472') AND (`aura`='102723');
+INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES ('61472', '102723');
+
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE `entry` IN('54990', '61472');
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` IN('54990', '61472');
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+('54990', '104080', '1'),
+('61472', '104080', '1');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '18' AND `SourceGroup` IN('54990', '61472');
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`, `Comment`) VALUES
+('18', '54990', '104080', '9', '29587', 'Raufen - Require quest for spellclick'),
+('18', '61472', '104080', '9', '29587', 'Raufen - Require quest for spellclick');
+
+DELETE FROM `creature_text` WHERE `entry` IN('54990', '61472');
+INSERT INTO `creature_text` (`entry`, `id`, `text`, `type`, `probability`, `comment`) VALUES
+('54990', '0', 'Ah, much better. Those bindings were so tight.', '12', '100', 'Raufen - Unbound quest talk'),
+('54990', '1', 'Free at last! I need a drink...', '12', '100', 'Raufen - Unbound quest talk'),
+('54990', '2', 'I hope the orchard is still intact...', '12', '100', 'Raufen - Unbound quest talk'),
+('54990', '3', 'I never thought something like this could happen to our little orchard.', '12', '100', 'Raufen - Unbound quest talk'),
+('54990', '4', 'I\'ll be fine, please help the others!', '12', '100', 'Raufen - Unbound quest talk'),
+('54990', '5', 'I\'m moving back to the capital after this.', '12', '100', 'Raufen - Unbound quest talk'),
+('54990', '6', 'Thank you so much!', '12', '100', 'Raufen - Unbound quest talk'),
+('54990', '7', 'Thank you, I don\'t even want to know what they were planning to do with us.', '12', '100', 'Raufen - Unbound quest talk'),
+
+('61472', '0', 'Ah, much better. Those bindings were so tight.', '12', '100', 'Raufen - Unbound quest talk'),
+('61472', '1', 'Free at last! I need a drink...', '12', '100', 'Raufen - Unbound quest talk'),
+('61472', '2', 'I hope the orchard is still intact...', '12', '100', 'Raufen - Unbound quest talk'),
+('61472', '3', 'I never thought something like this could happen to our little orchard.', '12', '100', 'Raufen - Unbound quest talk'),
+('61472', '4', 'I\'ll be fine, please help the others!', '12', '100', 'Raufen - Unbound quest talk'),
+('61472', '5', 'I\'m moving back to the capital after this.', '12', '100', 'Raufen - Unbound quest talk'),
+('61472', '6', 'Thank you so much!', '12', '100', 'Raufen - Unbound quest talk'),
+('61472', '7', 'Thank you, I don\'t even want to know what they were planning to do with us.', '12', '100', 'Raufen - Unbound quest talk');
+
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` IN('54990', '61472');
+INSERT INTO `smart_scripts` (`entryorguid`, `id`, `link`, `event_type`, `event_param1`, `action_type`, `action_param1`, `target_type`, `comment`) VALUES
+('54990', '0', '0', '8', '104080', '1', '0', '1', 'Raufen - Unbound quest'),
+('54990', '1', '0', '8', '104080', '33', '54996', '7', 'Raufen - Unbound quest'),
+('54990', '2', '0', '8', '104080', '28', '102723', '1', 'Raufen - Unbound quest'),
+('54990', '3', '0', '8', '104080', '41', '3000', '1', 'Raufen - Unbound quest'),
+('54990', '4', '0', '8', '104080', '83', '16777216', '1', 'Raufen - Unbound quest'),
+
+('61472', '0', '0', '8', '104080', '1', '0', '1', 'Raufen - Unbound quest'),
+('61472', '1', '0', '8', '104080', '33', '54996', '7', 'Raufen - Unbound quest'),
+('61472', '2', '0', '8', '104080', '28', '102723', '1', 'Raufen - Unbound quest'),
+('61472', '3', '0', '8', '104080', '41', '3000', '1', 'Raufen - Unbound quest'),
+('61472', '4', '0', '8', '104080', '83', '16777216', '1', 'Raufen - Unbound quest');

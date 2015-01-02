@@ -342,3 +342,10 @@ INSERT INTO `creature_text` (`entry`, `id`, `text`, `type`, `probability`, `comm
 
 DELETE FROM `smart_scripts` WHERE (`entryorguid`='59580') AND (`source_type`='0');
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_ordo_overseer' WHERE (`entry`='59580');
+
+-- Hit Medicine
+UPDATE `conditions` SET `ConditionTarget`='1' WHERE (`SourceTypeOrReferenceId`='17') AND (`SourceGroup`='0') AND (`SourceEntry`='113285');
+UPDATE `creature_template` SET `RegenHealth`='0' WHERE (`entry`='59143');
+UPDATE `smart_scripts` SET `link`='2' WHERE (`entryorguid`='59143') AND (`source_type`='0') AND (`id`='1') AND (`link`='0');
+DELETE FROM `smart_scripts` WHERE (`entryorguid`='59143') AND (`source_type`='0') AND (`id`='2') AND (`link`='0');
+INSERT INTO `smart_scripts` (`entryorguid`, `id`, `event_type`, `action_type`, `action_param1`, `target_type`, `comment`) VALUES ('59143', '2', '61', '41', '4000', '1', 'Raufen - Injured Binan - Respawn');

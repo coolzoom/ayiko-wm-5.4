@@ -660,6 +660,7 @@ public:
     }
 };
 
+// Farmhand Freedom quest
 class npc_ordo_overseer : public CreatureScript
 {
 public:
@@ -715,6 +716,30 @@ public:
     };
 };
 
+// Challenge Accepted quest
+class go_yaungol_banner : public GameObjectScript
+{
+public:
+    go_yaungol_banner() : GameObjectScript("go_yaungol_banner") { }
+
+    bool OnGossipHello(Player* player, GameObject* go) override
+    {
+        if (player->GetQuestStatus(30514) == QUEST_STATUS_INCOMPLETE)
+        {
+            if (GetClosestCreatureWithEntry(player, 59483, 30.f))
+                return false;
+
+            player->SummonGameObject(59483, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), 0, 0, 0, 0, 0, 60000);
+            if (auto urbataar = player->SummonCreature(59483, 2110.05f, 1182.91f, 476.32f, 0, TEMPSUMMON_TIMED_DESPAWN, 120000))
+            {
+                urbataar->MonsterYell("Fool! I will crush you!", 0, 0);
+                urbataar->AI()->AttackStart(player);
+            }
+        }
+        return true;
+    }
+};
+
 void AddSC_kun_lai_summit()
 {
     new mob_nessos_the_oracle();
@@ -725,4 +750,5 @@ void AddSC_kun_lai_summit()
     new mob_zai_the_outcast();
     new npc_waterspeaker_gorai();
     new npc_ordo_overseer();
+    new go_yaungol_banner();
 }

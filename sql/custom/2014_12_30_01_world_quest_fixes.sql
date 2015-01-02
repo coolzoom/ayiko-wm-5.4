@@ -349,3 +349,9 @@ UPDATE `creature_template` SET `RegenHealth`='0' WHERE (`entry`='59143');
 UPDATE `smart_scripts` SET `link`='2' WHERE (`entryorguid`='59143') AND (`source_type`='0') AND (`id`='1') AND (`link`='0');
 DELETE FROM `smart_scripts` WHERE (`entryorguid`='59143') AND (`source_type`='0') AND (`id`='2') AND (`link`='0');
 INSERT INTO `smart_scripts` (`entryorguid`, `id`, `event_type`, `action_type`, `action_param1`, `target_type`, `comment`) VALUES ('59143', '2', '61', '41', '4000', '1', 'Raufen - Injured Binan - Respawn');
+
+-- Challenge Accepted
+UPDATE `creature_template` SET `faction_A`='16', `faction_H`='16' WHERE (`entry`='59483');
+UPDATE `gameobject_template` SET `ScriptName`='go_yaungol_banner' WHERE (`entry`='210933');
+DELETE FROM `gameobject` WHERE `id` IN('210933', '211325');
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `isActive`, `protect_anti_doublet`) VALUES ('6604967', '210933', '870', '1', '65535', '2109.76', '1197.48', '476.76', '3.90766', '0', '0', '0.927535', '-0.373736', '300', '0', '1', '0', NULL);

@@ -404,6 +404,79 @@ public:
     }
 };
 
+// Muddy Water quest
+class spell_gen_gather_muddy_water : public SpellScriptLoader
+{
+public:
+    spell_gen_gather_muddy_water() : SpellScriptLoader("spell_gen_gather_muddy_water") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            auto target = GetHitUnit();
+            if (!target || target->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            auto player = GetCaster()->ToPlayer();
+            if (player->GetQuestStatus(29951) == QUEST_STATUS_INCOMPLETE)
+            {
+                if (!player->HasAura(106284))
+                {
+                    player->CastSpell(player, 106284, true);
+                }
+                else
+                    player->CastSpell(player, 106294, true);
+
+                if (player->GetPower(POWER_ALTERNATE_POWER) == 100)
+                {
+                    player->AddItem(76356, 1);
+                    player->RemoveAurasDueToSpell(106284);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_impl::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
+class spell_gen_gather_muddy_water_aura : public SpellScriptLoader
+{
+public:
+    spell_gen_gather_muddy_water_aura() : SpellScriptLoader("spell_gen_gather_muddy_water_aura") { }
+
+    class script_impl : public AuraScript
+    {
+        PrepareAuraScript(script_impl);
+
+        void HandlePeriodic(AuraEffect const * /*aurEff*/)
+        {
+            if (!GetTarget()->isMoving())
+                PreventDefaultAction();
+        }
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(script_impl::HandlePeriodic, EFFECT_1, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new script_impl();
+    }
+};
+
 void AddSC_valley_of_the_four_winds()
 {
     // Rare Mobs
@@ -416,4 +489,6 @@ void AddSC_valley_of_the_four_winds()
 
     // Quests
     new npc_hop_hunting_q();
+    new spell_gen_gather_muddy_water();
+    new spell_gen_gather_muddy_water_aura();
 }

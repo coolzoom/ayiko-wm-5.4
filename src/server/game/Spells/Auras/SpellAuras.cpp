@@ -1221,6 +1221,7 @@ bool Aura::CanBeSaved() const
         case 111757: // Glyph of Levitate Speed Bonus
         case 114232: // Sanctified Wrath bonus
         case 124458: // Healing Spheres tracker
+        case 106284: // Gathering Muddy Water
             return false;
         default:
             break;

@@ -220,6 +220,27 @@ INSERT INTO `smart_scripts` (`entryorguid`, `id` `event_type`, `action_type`, `a
 ('57830', '1', '64', '1', '0', '7', 'Raufen - On Gossip Hello - Talk'),
 ('57825', '1', '64', '1', '0', '7', 'Raufen - On Gossip Hello - Talk');
 
+DELETE FROM `creature_text` WHERE `entry` IN('57830', '57825');
 INSERT INTO `creature_text` (`entry`, `text`, `type`, `probability`, `comment`) VALUES
 ('57830', 'Guess I\'ll just sleep for another day...', '12', '100', 'Raufen - On Gossip - Talk'),
 ('57825', 'Oh great! Someone else has come to bother me.', '12', '100', 'Raufen - On Gossip - Talk');
+
+-- The Stoneplow Convoy
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE `entry` = '58955';
+DELETE FROM `creature_text` WHERE `entry` = '58955';
+INSERT INTO `creature_text` (`entry`, `id`, `text`, `type`, `probability`, `comment`) VALUES
+('58955', '0', 'I must get to Stoneplow! The mantid will attack soon.', '12', '100', 'Raufen - The Stoneplow Convoy quest talk'),
+('58955', '1', 'Thank you, hero.', '12', '100', 'Raufen - The Stoneplow Convoy quest talk'),
+('58955', '2', 'Thank you, stranger.', '12', '100', 'Raufen - The Stoneplow Convoy quest talk'),
+('58955', '3', 'The mogu ambushed us while we were trying to retreat from the mantid.', '12', '100', 'Raufen - The Stoneplow Convoy quest talk');
+
+DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` = '58955';
+INSERT INTO `smart_scripts` (`entryorguid`, `id`, `event_type`, `event_param1`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `target_type`, `comment`) VALUES
+('58955', '0', '8', '111446', '5000', '5000', '33', '58955', '7', 'Raufen - On Spell Hit - Give KC'),
+('58955', '1', '8', '111446', '5000', '5000', '41', '5000', '1', 'Raufen - On Spell Hit - Force Despawn'),
+('58955', '2', '8', '111446', '5000', '5000', '1', '0', '1', 'Raufen - On Spell Hit - Talk'),
+('58955', '3', '8', '111446', '5000', '5000', '28', '108806', '1', 'Raufen - On Spell Hit - Remove Feign Death');
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '108806';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES ('108806', 'spell_creature_permanent_feign_death');
+

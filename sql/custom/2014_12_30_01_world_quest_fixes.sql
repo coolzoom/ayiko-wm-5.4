@@ -291,3 +291,27 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, 
 
 -- The Fanciest Water
 UPDATE `creature_template` SET `faction_A`='7', `faction_H`='7' WHERE (`entry`='57673');
+
+-- The Ritual
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '13' AND `SourceEntry` = '119729';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionValue1`, `ConditionValue2`, `Comment`) VALUES
+('13', '1', '119729', '0', '31', '3', '61655', 'Raufen - The Ritual quest'),
+('13', '1', '119729', '1', '31', '3', '61656', 'Raufen - The Ritual quest'),
+('13', '1', '119729', '2', '31', '3', '61648', 'Raufen - The Ritual quest');
+
+UPDATE `creature_template` SET `ScriptName`='npc_waterspeaker_gorai' WHERE (`entry`='60973');
+UPDATE `creature_template` SET `faction_A`='16', `faction_H`='16' WHERE (`entry`='61530');
+
+DELETE FROM `creature_text` WHERE `entry` = '60973';
+INSERT INTO `creature_text` (`entry`, `groupid`, `text`, `type`, `probability`, `comment`) VALUES
+('60973', '0', 'I\'ve never performed this ritual. I don\'t know what will happen, exactly.', '12', '100', 'Raufen - The Ritual quest talk'),
+('60973', '1', 'It\'s been passed down from ancient times, but none of our people have needed to use it since then.', '12', '100', 'Raufen - The Ritual quest talk'),
+('60973', '2', 'Let us see if this is sufficient to cleanse the corruption from my people\'s souls.', '12', '100', 'Raufen - The Ritual quest talk'),
+('60973', '3', 'It worked! It wo-', '12', '100', 'Raufen - The Ritual quest talk'),
+('60973', '4', 'Wh... what is happening? Why is the ritual affecting her?', '12', '100', 'Raufen - The Ritual quest talk'),
+('60973', '5', 'What is that?', '12', '100', 'Raufen - The Ritual quest talk'),
+('60973', '6', 'A beast emerged from you when I began the ritual. $n slew it!', '12', '100', 'Raufen - The Ritual quest talk'),
+('60973', '7', 'That... thing must be what was controlling the villagers! I now know what we must do.', '12', '100', 'Raufen - The Ritual quest talk');
+
+DELETE FROM `creature_text` WHERE `entry` = '59273';
+INSERT INTO `creature_text` (`entry`, `groupid`, `text`, `type`, `probability`, `comment`) VALUES ('59273', '0', 'I feel so much calmer. What happened?', '12', '100', 'Raufen - The Ritual - quest talk');

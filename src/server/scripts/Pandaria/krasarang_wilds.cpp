@@ -528,6 +528,37 @@ public:
     }
 };
 
+class npc_zhus_watch_courier : public CreatureScript
+{
+public:
+    npc_zhus_watch_courier() : CreatureScript("npc_zhus_watch_courier") {}
+
+    struct npc_zhus_watch_courierAI : public ScriptedAI
+    {
+        npc_zhus_watch_courierAI(Creature* creature) : ScriptedAI(creature) {}
+
+        void Reset()
+        {
+            SetCanSeeEvenInPassiveMode(true);
+            me->ClearUnitState(UNIT_STATE_SIGHTLESS);
+        }
+
+        void MoveInLineOfSight(Unit * who) override
+        {
+            if (me->GetDistance(who) > 7.f)
+                return;
+
+            if (auto player = who->ToPlayer())
+                player->KilledMonsterCredit(me->GetEntry());
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_zhus_watch_courierAI(creature);
+    }
+};
+
 void AddSC_krasarang_wilds()
 {
     new mob_gaarn_the_toxic();
@@ -536,4 +567,5 @@ void AddSC_krasarang_wilds()
     new mob_torik_ethis();
     new mob_go_kan();
     new npc_despondent_warden_of_zhu();
+    new npc_zhus_watch_courier();
 }

@@ -244,3 +244,9 @@ INSERT INTO `smart_scripts` (`entryorguid`, `id`, `event_type`, `event_param1`, 
 DELETE FROM `spell_script_names` WHERE `spell_id` = '108806';
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES ('108806', 'spell_creature_permanent_feign_death');
 
+-- Into the Wilds
+UPDATE creature_template SET unit_flags = unit_flags & ~256, `AIName`='SmartAI' WHERE entry = 59151;
+UPDATE `creature_template` SET `ScriptName`='npc_zhus_watch_courier' WHERE (`entry`='59151');
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '113368';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES ('113368', 'spell_creature_permanent_feign_death');

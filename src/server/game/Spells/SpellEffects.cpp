@@ -681,11 +681,10 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         {
                             uint8 cp = player->GetComboPoints();
                             float ap = player->GetTotalAttackPowerValue(BASE_ATTACK);
-                            uint32 activeSpec = player->GetSpecializationId(player->GetActiveSpec());
-                            if (activeSpec == SPEC_ROGUE_ASSASSINATION || activeSpec == SPEC_ROGUE_COMBAT)
-                                m_damage += int32(ap * cp * 0.12f);
-                            else if (activeSpec == SPEC_ROGUE_SUBTLETY)
+                            if (player->GetSpecializationId(player->GetActiveSpec()) == SPEC_ROGUE_SUBTLETY)
                                 m_damage += int32(ap * cp * 0.149f);
+                            else
+                                m_damage += int32(ap * cp * 0.12f);
                         }
                         break;
                     }

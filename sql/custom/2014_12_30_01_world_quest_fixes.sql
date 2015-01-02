@@ -358,3 +358,7 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 
 -- Barrels of Fun
 UPDATE `creature_template` SET `ScriptName`='npc_explosives_barrel' WHERE (`entry`='60095');
+
+-- Contending With Bullies
+DELETE FROM `creature` WHERE `id` = '64757';
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `npcflag2`, `unit_flags`, `unit_flags2`, `dynamicflags`, `isActive`, `protec_anti_doublet`) VALUES ('3565', '64757', '870', '0', '0', '1', '1', '0', '0', '3292.45', '387.75', '458.355', '2.64991', '300', '0', '0', '1969705', '0', '0', '0', '0', '0', '2048', '0', '0', NULL);

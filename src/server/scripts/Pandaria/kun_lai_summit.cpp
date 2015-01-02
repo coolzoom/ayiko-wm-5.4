@@ -660,6 +660,61 @@ public:
     }
 };
 
+class npc_ordo_overseer : public CreatureScript
+{
+public:
+    npc_ordo_overseer() : CreatureScript("npc_ordo_overseer") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_ordo_overseerAI(creature);
+    }
+
+    struct npc_ordo_overseerAI : public ScriptedAI
+    {
+        npc_ordo_overseerAI(Creature* creature) : ScriptedAI(creature) { }
+
+        uint32 castTimer;
+
+        void Reset()
+        {
+            castTimer = urand(5000, 10000);
+        }
+
+        void JustDied(Unit * who) override
+        {
+            if (auto player = who->GetCharmerOrOwnerPlayerOrPlayerItself())
+                if (player->GetQuestStatus(30571) == QUEST_STATUS_INCOMPLETE)
+                {
+                    std::list<Creature*> clist;
+                    GetCreatureListWithEntryInGrid(clist, me, 59577, 10.f);
+                    for (auto slave : clist)
+                    {
+                        player->KilledMonsterCredit(slave->GetEntry());
+                        slave->AI()->Talk(0);
+                        Position pos;
+                        slave->GetRandomNearPosition(pos, 30.f);
+                        slave->GetMotionMaster()->MovePoint(1, pos);
+                        slave->ForcedDespawn(5000);
+                    }
+                }
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!me->GetVictim())
+                return;
+
+            if (castTimer <= diff)
+                DoCastVictim(58504);
+            else
+                castTimer -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
 void AddSC_kun_lai_summit()
 {
     new mob_nessos_the_oracle();
@@ -669,4 +724,5 @@ void AddSC_kun_lai_summit()
     new mob_quilen_stonemaw();
     new mob_zai_the_outcast();
     new npc_waterspeaker_gorai();
+    new npc_ordo_overseer();
 }

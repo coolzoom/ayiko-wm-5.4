@@ -328,3 +328,17 @@ DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '18' AND `SourceGroup
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`, `Comment`) VALUES
 ('18', '59408', '115012', '9', '30600', 'Raufen - Require quest for spellclick'),
 ('18', '59814', '115012', '9', '30600', 'Raufen - Require quest for spellclick');
+
+-- Farmhand Freedom
+DELETE FROM `creature_text` WHERE `entry` = '59577';
+INSERT INTO `creature_text` (`entry`, `id`, `text`, `type`, `probability`, `comment`) VALUES
+('59577', '0', 'Death to the yaungol!', '12', '50', 'Raufen - Farmhand Freedom quest talk'),
+('59577', '1', 'Good riddance.', '12', '50', 'Raufen - Farmhand Freedom quest talk'),
+('59577', '2', 'Let\'s go to Binan Village.', '12', '50', 'Raufen - Farmhand Freedom quest talk'),
+('59577', '3', 'Our hero!', '12', '50', 'Raufen - Farmhand Freedom quest talk'),
+('59577', '4', 'Quick, let\'s get out of here.', '12', '50', 'Raufen - Farmhand Freedom quest talk'),
+('59577', '5', 'We\'re free!', '12', '50', 'Raufen - Farmhand Freedom quest talk'),
+('59577', '6', 'We\'re saved!', '12', '50', 'Raufen - Farmhand Freedom quest talk');
+
+DELETE FROM `smart_scripts` WHERE (`entryorguid`='59580') AND (`source_type`='0');
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_ordo_overseer' WHERE (`entry`='59580');

@@ -353,6 +353,57 @@ class mob_ik_thik_warrior : public CreatureScript
         };
 };
 
+class npc_hop_hunting_q : public CreatureScript
+{
+public:
+    npc_hop_hunting_q() : CreatureScript("npc_hop_hunting_q") { }
+
+    bool OnGossipHello(Player* player, Creature* creature) override
+    {
+        if (creature->IsQuestGiver())
+            player->PrepareQuestMenu(creature->GetGUID());
+
+        if (creature->IsVendor())
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
+
+        if (player->GetQuestStatus(30053) == QUEST_STATUS_INCOMPLETE)
+        {
+            std::string gossip = "";
+            switch (creature->GetEntry())
+            {
+            case 62377:
+                gossip = "I'm helping a friend brew some beer, and we need hops. Do you have any to spare?";
+                break;
+            case 62385:
+                gossip = "Do you have any hops you can spare?";
+                break;
+            case 57385:
+                gossip = "Can I buy some hops from you?";
+                break;
+            }
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, gossip, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        }
+
+        player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
+    {
+        player->PlayerTalkClass->ClearMenus();
+        if (action == GOSSIP_ACTION_INFO_DEF + 1)
+        {
+            creature->AI()->Talk(0, player->GetGUID());
+            player->KilledMonsterCredit(creature->GetEntry());
+            player->CLOSE_GOSSIP_MENU();
+        }
+        else if (action == GOSSIP_ACTION_TRADE)
+            player->GetSession()->SendListInventory(creature->GetGUID());
+
+        return false;
+    }
+};
+
 void AddSC_valley_of_the_four_winds()
 {
     // Rare Mobs
@@ -362,4 +413,7 @@ void AddSC_valley_of_the_four_winds()
 
     // Standard Mobs
     new mob_ik_thik_warrior();
+
+    // Quests
+    new npc_hop_hunting_q();
 }

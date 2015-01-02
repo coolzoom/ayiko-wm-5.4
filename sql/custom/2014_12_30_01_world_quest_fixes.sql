@@ -250,3 +250,12 @@ UPDATE `creature_template` SET `ScriptName`='npc_zhus_watch_courier' WHERE (`ent
 
 DELETE FROM `spell_script_names` WHERE `spell_id` = '113368';
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES ('113368', 'spell_creature_permanent_feign_death');
+
+-- Hop Hunting
+UPDATE `creature_template` SET `ScriptName`='npc_hop_hunting_q' WHERE `entry` IN('57385', '62377', '62385');
+
+DELETE FROM `creature_text` WHERE `entry` IN('57385', '62377', '62385');
+INSERT INTO `creature_text` (`entry`, `text`, `type`, `probability`, `comment`) VALUES
+('62377', 'Nothing is free, $r. You want hops, you need to work.', '12', '100', 'Raufen - Hop Hunting quest talk'),
+('62385', 'You\'ll have to ask Mung-Mung about that. He maintains our foodstores.', '12', '100', 'Raufen - Hop Hunting quest talk'),
+('57385', 'Would that I could, $r, but I have a bit of a weed problem. Say... you wouldn\'t be willing to help out, would you?', '12', '100', 'Raufen - Hop Hunting quest talk');

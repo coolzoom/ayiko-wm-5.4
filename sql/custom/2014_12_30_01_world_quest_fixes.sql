@@ -355,3 +355,6 @@ UPDATE `creature_template` SET `faction_A`='16', `faction_H`='16' WHERE (`entry`
 UPDATE `gameobject_template` SET `ScriptName`='go_yaungol_banner' WHERE (`entry`='210933');
 DELETE FROM `gameobject` WHERE `id` IN('210933', '211325');
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `isActive`, `protect_anti_doublet`) VALUES ('6604967', '210933', '870', '1', '65535', '2109.76', '1197.48', '476.76', '3.90766', '0', '0', '0.927535', '-0.373736', '300', '0', '1', '0', NULL);
+
+-- Barrels of Fun
+UPDATE `creature_template` SET `ScriptName`='npc_explosives_barrel' WHERE (`entry`='60095');

@@ -740,6 +740,70 @@ public:
     }
 };
 
+// Barrels of Fun quest
+class npc_explosives_barrel : public CreatureScript
+{
+public:
+    npc_explosives_barrel() : CreatureScript("npc_explosives_barrel") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_explosives_barrelAI(creature);
+    }
+
+    struct npc_explosives_barrelAI : public ScriptedAI
+    {
+        npc_explosives_barrelAI(Creature* creature) : ScriptedAI(creature) { }
+
+        uint32 phase;
+        uint32 tickTimer;
+
+        void Reset()
+        {
+            phase = 4;
+            tickTimer = 1000;
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (tickTimer <= diff)
+            {
+                --phase;
+                std::string text = "";
+                if (phase == 3)
+                    text = "Three...";
+                else if (phase == 2)
+                    text = "Two...";
+                else if (phase == 1)
+                    text = "One...";
+                else if (phase == 0)
+                    text = "Boom";
+
+                if (auto owner = me->GetCharmerOrOwnerPlayerOrPlayerItself())
+                {
+                    owner->MonsterTextEmote(text, owner->GetGUID(), true);
+                    if (phase == 0)
+                    {
+                        for (int i = 0; i < 4; ++i)
+                        {
+                            if (auto oilRig = GetClosestCreatureWithEntry(me, 60096, 10.f))
+                            {
+                                me->CastSpell(me, 46419, true);
+                                owner->KilledMonsterCredit(oilRig->GetEntry());
+                                me->ForcedDespawn();
+                            }
+                        }
+                    }
+                }
+
+                tickTimer = 2000;
+            }
+            else
+                tickTimer -= diff;
+        }
+    };
+};
+
 void AddSC_kun_lai_summit()
 {
     new mob_nessos_the_oracle();
@@ -751,4 +815,5 @@ void AddSC_kun_lai_summit()
     new npc_waterspeaker_gorai();
     new npc_ordo_overseer();
     new go_yaungol_banner();
+    new npc_explosives_barrel();
 }

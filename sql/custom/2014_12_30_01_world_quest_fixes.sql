@@ -156,3 +156,15 @@ INSERT INTO `smart_scripts` (`entryorguid`, `id`, `link`, `event_type`, `event_p
 ('61472', '2', '0', '8', '104080', '28', '102723', '1', 'Raufen - Unbound quest'),
 ('61472', '3', '0', '8', '104080', '41', '3000', '1', 'Raufen - Unbound quest'),
 ('61472', '4', '0', '8', '104080', '83', '16777216', '1', 'Raufen - Unbound quest');
+
+-- The Pearlfin Situation
+UPDATE `creature_template` SET `ScriptName`='npc_the_pearlfin_situation_q' WHERE `entry` IN(59058, 56693, 56690, 54960);
+DELETE FROM `creature_text` WHERE `entry` IN(59058, 56693, 56690, 54960);
+INSERT INTO `creature_text` (`entry`, `text`, `type`, `probability`, `comment`) VALUES
+('59058', 'No harm? Pah! Many thousand years ago, the Pearlfin Tribe stood on the throne of all Pandaria. Now, this village is all that is left of our people, all because we trusted a tribe of outsiders... the hozen.', '12', '100', 'Raufen - The Pearlfin Situation quest'),
+('56693', 'Ah, you must be the outsider. Sadly, I am making weapons for war. Once, not long ago, I made instruments for prayer and celebration. It is this war that makes everyone stand on edge.', '12', '100', 'Raufen - The Pearlfin Situation quest'),
+('56690', 'Action speaks louder than intent, stranger. My warriors intend to seek retribution, but only practice will make it so. Now go away. We are busy.', '12', '100', 'Raufen - The Pearlfin Situation quest'),
+('54960', 'Stranger, have you ever seen a stone fall into a calm lake? Every action creates a ripple, even accepting a pledge of friendship. I shall think upon your request.', '12', '100', 'Raufen - The Pearlfin Situation quest');
+
+DELETE FROM `creature` WHERE `id` = '59058';
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `npcflag2`, `unit_flags`, `unit_flags2`, `dynamicflags`, `isActive`, `protec_anti_doublet`) VALUES ('3555', '59058', '870', '0', '0', '1', '1', '0', '0', '-129.583', '-2651.02', '1.22551', '2.60276', '300', '0', '0', '156000', '0', '0', '0', '0', '0', '2048', '0', '0', NULL);

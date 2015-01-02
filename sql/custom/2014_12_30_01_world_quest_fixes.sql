@@ -315,3 +315,16 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `text`, `type`, `probability`, 
 
 DELETE FROM `creature_text` WHERE `entry` = '59273';
 INSERT INTO `creature_text` (`entry`, `groupid`, `text`, `type`, `probability`, `comment`) VALUES ('59273', '0', 'I feel so much calmer. What happened?', '12', '100', 'Raufen - The Ritual - quest talk');
+
+-- No Pack Left Behind
+UPDATE `creature` SET `spawndist`='0' WHERE `id` IN('59408', '59814');
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` IN('59408', '59814');
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+('59408', '115012', '9'),
+('59814', '115012', '9');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '18' AND `SourceGroup` IN('59408', '59814');
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`, `Comment`) VALUES
+('18', '59408', '115012', '9', '30600', 'Raufen - Require quest for spellclick'),
+('18', '59814', '115012', '9', '30600', 'Raufen - Require quest for spellclick');

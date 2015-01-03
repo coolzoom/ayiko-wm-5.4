@@ -373,3 +373,21 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES ('118103', 's
 
 DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`='13') AND (`SourceGroup`='3') AND (`SourceEntry`='118103');
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES ('13', '3', '118103', '0', '0', '31', '0', '3', '60925', '0', '0', '0', '0', '', 'Raufen - Target Palewind Villager');
+
+-- Trap Setting
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '61426';
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES ('61426', '119349', '1');
+
+DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`='18') AND (`SourceGroup`='61426') AND (`SourceEntry`='119349');
+DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`='13') AND (`SourceGroup`='3') AND (`SourceEntry`='119349');
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`, `ConditionValue2`, `Comment`) VALUES ('13', '1', '119349', '31', '3', '61426', 'Raufen - Arm Trap target trap');
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES ('18', '61426', '119349', '0', '0', '9', '0', '30889', '0', '0', '0', '0', '0', '', 'Raufen - Require quest for spellclick');
+
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='61426');
+
+DELETE FROM `smart_scripts` WHERE `entryorguid` = '61426' AND `source_type` = '0';
+INSERT INTO `smart_scripts` (`entryorguid`, `id`, `event_type`, `event_param1`, `action_type`, `action_param1`, `target_type`, `comment`) VALUES
+('61426', '0', '8', '119349', '33', '61426', '7', 'Raufen - On Spell Hit - Give KC'),
+('61426', '1', '8', '119349', '11', '119348', '1', 'Raufen - On Spell Hit - Cast Trap Arm'),
+('61426', '2', '8', '119349', '83', '16777216', '1', 'Raufen - On Spell Hit - Remove spellclick flag'),
+('61426', '3', '8', '119349', '41', '6000', '1', 'Raufen - On Spell Hit - Force Despawn');

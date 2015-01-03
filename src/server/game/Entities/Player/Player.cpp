@@ -3880,33 +3880,6 @@ void Player::InitSpellForLevel()
             removeSpell(97709, false, false);
     }
 
-    // Mage players learn automatically Portal: Vale of Eternal Blossom and Teleport: Vale of Eternal Blossom at level 90
-    if (level == 90 && getClass() == CLASS_MAGE)
-    {
-        if (TeamForRace(getRace()) == ALLIANCE)
-        {
-            learnSpell(132627, false); // Teleport: Vale of Eternal Blossoms
-            learnSpell(132626, false); // Portal: Vale of Eternal Blossoms
-
-            // Only for horde
-            if (HasSpell(132621))
-                removeSpell(132621, false, false);
-            if (HasSpell(132620))
-                removeSpell(132620, false, false);
-        }
-        else
-        {
-            learnSpell(132621, false); // Teleport: Vale of Eternal Blossoms
-            learnSpell(132620, false); // Portal: Vale of Eternal Blossoms
-
-            // Only for alliance
-            if (HasSpell(132626))
-                removeSpell(132626, false, false);
-            if (HasSpell(132627))
-                removeSpell(132627, false, false);
-        }
-    }
-
     // Hack fix for Sparring - Not applied
     if (HasSpell(116023))
         CastSpell(this, 116023, true);

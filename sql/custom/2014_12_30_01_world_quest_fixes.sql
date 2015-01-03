@@ -398,3 +398,35 @@ DELETE FROM `creature_template_aura` WHERE `entry` = '60203';
 INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES ('60203', '116348');
 DELETE FROM `creature` WHERE `id` = '60203';
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `npcflag2`, `unit_flags`, `unit_flags2`, `dynamicflags`, `isActive`, `protec_anti_doublet`) VALUES ('7346031', '60203', '870', '0', '0', '1', '1', '0', '0', '-2718.58', '782.001', '-88.706', '0.0842473', '300', '0', '0', '310574', '0', '0', '0', '0', '0', '2048', '0', '0', NULL);
+
+-- Crouching Carrot, Hidden Turnip
+DELETE FROM `creature_text` WHERE `entry` = '56538';
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `probability`, `comment`) VALUES
+('56538', '0', '0', 'Carrot appeared!', '12', '100', 'Raufen - Crouching Carrot, Hidden Turnip ques talk'),
+('56538', '0', '1', 'Carrot grow right in front of us!', '12', '100', 'Raufen - Crouching Carrot, Hidden Turnip ques talk'),
+('56538', '0', '2', 'Carrot? For US?!?!', '12', '100', 'Raufen - Crouching Carrot, Hidden Turnip ques talk'),
+('56538', '0', '3', 'Carrots never bad!', '12', '100', 'Raufen - Crouching Carrot, Hidden Turnip ques talk'),
+('56538', '0', '4', 'Good things happen to us today.', '12', '100', 'Raufen - Crouching Carrot, Hidden Turnip ques talk'),
+('56538', '0', '5', 'I just notice funny-looking carrot!', '12', '100', 'Raufen - Crouching Carrot, Hidden Turnip ques talk'),
+('56538', '0', '6', 'I love it. I love this carrot.', '12', '100', 'Raufen - Crouching Carrot, Hidden Turnip ques talk'),
+('56538', '0', '7', 'I think we should eat it.', '12', '100', 'Raufen - Crouching Carrot, Hidden Turnip ques talk'),
+('56538', '0', '8', 'I trust it.', '12', '100', 'Raufen - Crouching Carrot, Hidden Turnip ques talk'),
+('56538', '0', '9', 'It... perfect', '12', '100', 'Raufen - Crouching Carrot, Hidden Turnip ques talk'),
+('56538', '0', '10', 'Seems legit.', '12', '100', 'Raufen - Crouching Carrot, Hidden Turnip ques talk'),
+('56538', '0', '11', 'Mmm... carrot!', '12', '100', 'Raufen - Crouching Carrot, Hidden Turnip ques talk'),
+('56538', '0', '12', 'Look, look! Weird, bumpy carrot!', '12', '100', 'Raufen - Crouching Carrot, Hidden Turnip ques talk'),
+('56538', '0', '13', 'It so juicy!', '12', '100', 'Raufen - Crouching Carrot, Hidden Turnip ques talk'),
+('56538', '1', '0', 'Ahh, turnip! Get out of here!', '12', '100', 'Raufen - Crouching Carrot, Hidden Turnip ques talk'),
+('56538', '1', '1', 'AIIIIEEEEEEE!', '12', '100', 'Raufen - Crouching Carrot, Hidden Turnip ques talk'),
+('56538', '1', '2', 'Carrot was turnip! Run!', '12', '100', 'Raufen - Crouching Carrot, Hidden Turnip ques talk'),
+('56538', '1', '3', 'False carrot alert! False carrot alert!', '12', '100', 'Raufen - Crouching Carrot, Hidden Turnip ques talk'),
+('56538', '1', '4', 'Get away from it!', '12', '100', 'Raufen - Crouching Carrot, Hidden Turnip ques talk'),
+('56538', '1', '5', 'Gross!', '12', '100', 'Raufen - Crouching Carrot, Hidden Turnip ques talk'),
+('56538', '1', '6', 'NO! It\'s TURNIP!', '12', '100', 'Raufen - Crouching Carrot, Hidden Turnip ques talk'),
+('56538', '1', '7', 'NO! Not turnip!!', '12', '100', 'Raufen - Crouching Carrot, Hidden Turnip ques talk'),
+('56538', '1', '8', 'No, we been tricked!', '12', '100', 'Raufen - Crouching Carrot, Hidden Turnip ques talk'),
+('56538', '1', '9', 'Run away! Run away!', '12', '100', 'Raufen - Crouching Carrot, Hidden Turnip ques talk'),
+('56538', '1', '10', 'Stay away! We no know what it can do!', '12', '100', 'Raufen - Crouching Carrot, Hidden Turnip ques talk'),
+('56538', '1', '11', 'Who would do this?!', '12', '100', 'Raufen - Crouching Carrot, Hidden Turnip ques talk');
+
+UPDATE `creature_template` SET `ScriptName`='npc_orange_painted_turnip' WHERE (`entry`='56539');

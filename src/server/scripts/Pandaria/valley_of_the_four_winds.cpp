@@ -478,6 +478,69 @@ public:
     }
 };
 
+// Crouching Carrot, Hidden Turnip quest
+class npc_orange_painted_turnip : public CreatureScript
+{
+public:
+    npc_orange_painted_turnip() : CreatureScript("npc_orange_painted_turnip") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_orange_painted_turnipAI(creature);
+    }
+
+    struct npc_orange_painted_turnipAI : public ScriptedAI
+    {
+        npc_orange_painted_turnipAI(Creature* creature) : ScriptedAI(creature)
+        {
+            creature->SetReactState(REACT_PASSIVE);
+            creature->setFaction(35);
+        }
+
+        uint32 timer;
+
+        void Reset()
+        {
+            timer = 8000;
+            std::list<Creature*> clist;
+            GetCreatureListWithEntryInGrid(clist, me, 56538, 10.f);
+            for (auto c : clist)
+            {
+                if (!me->IsWithinLOSInMap(c))
+                    continue;
+
+                float x, y, z;
+                me->GetClosePoint(x, y, z, 0.f, 0.f, c->GetAngle(me));
+                c->AI()->Talk(0);
+                c->GetMotionMaster()->MoveIdle();
+                c->GetMotionMaster()->MovePoint(1, x, y, z);
+            }
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (timer <= diff)
+            {
+                std::list<Creature*> clist;
+                GetCreatureListWithEntryInGrid(clist, me, 56538, 10.f);
+                for (auto c : clist)
+                {
+                    if (auto player = me->GetCharmerOrOwnerPlayerOrPlayerItself())
+                        player->KilledMonsterCredit(56544);
+
+                    c->AI()->Talk(1);
+                    c->GetMotionMaster()->MoveFleeing(me, 4000);
+                    c->ForcedDespawn(4000);
+                }
+                me->ForcedDespawn(5000);
+                timer = 10000;
+            }
+            else
+                timer -= diff;
+        }
+    };
+};
+
 void AddSC_valley_of_the_four_winds()
 {
     // Rare Mobs
@@ -492,4 +555,5 @@ void AddSC_valley_of_the_four_winds()
     new npc_hop_hunting_q();
     new spell_gen_gather_muddy_water();
     new spell_gen_gather_muddy_water_aura();
+    new npc_orange_painted_turnip();
 }

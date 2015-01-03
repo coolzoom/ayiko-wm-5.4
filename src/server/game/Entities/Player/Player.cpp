@@ -3891,7 +3891,7 @@ void Player::InitSpellForLevel()
         {
             learnSpell(3567, false); // Teleport: Orgrimmar
         }
-        if (getRace() == RACE_NIGHT_ELF || getRace() == RACE_WORGEN)
+        if (getRace() == RACE_BLOODELF || getRace() == RACE_WORGEN)
         {
             learnSpell(3565, false); // Teleport: Darnassus
         }
@@ -3903,14 +3903,15 @@ void Player::InitSpellForLevel()
         {
             learnSpell(3562, false); // Teleport: Ironforge
         }
-        if (getRace() == RACE_UNDEAD)
+        if (getRace() == RACE_UNDEAD_PLAYER)
         {
             learnSpell(3563, false); // Teleport: Undercity
         }
         if (getRace() == RACE_DRAENEI)
         {
             learnSpell(32271, false); // Teleport: Exodar
-        if (getRace() == RACE_BLOOD_ELF)
+        }
+        if (getRace() == RACE_BLOODELF)
         {
             learnSpell(32272, false); // Teleport: Silvermoon
         }
@@ -3927,7 +3928,7 @@ void Player::InitSpellForLevel()
         {
             learnSpell(11417, false); // Portal: Orgrimmar
         }
-        if (getRace() == RACE_NIGHT_ELF || getRace() == RACE_WORGEN)
+        if (getRace() == RACE_NIGHTELF || getRace() == RACE_WORGEN)
         {
             learnSpell(11419, false); // Portal: Darnassus
         }
@@ -3939,14 +3940,15 @@ void Player::InitSpellForLevel()
         {
             learnSpell(11416, false); // Portal: Ironforge
         }
-        if (getRace() == RACE_UNDEAD)
+        if (getRace() == RACE_UNDEAD_PLAYER)
         {
             learnSpell(11418, false); // Portal: Undercity
         }
         if (getRace() == RACE_DRAENEI)
         {
             learnSpell(32266, false); // Portal: Exodar
-        if (getRace() == RACE_BLOOD_ELF)
+        }
+        if (getRace() == RACE_BLOODELF)
         {
             learnSpell(32267, false); // Portal: Silvermoon
         }

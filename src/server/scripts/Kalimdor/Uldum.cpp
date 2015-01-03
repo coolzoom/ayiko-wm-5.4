@@ -14,6 +14,7 @@ Take it to 'Em! (27993) - npc_harrison_jones_uldum
 Premature Explosionation (27141) - go_powder_keg
 On to Something (27196) - npc_harrison_jones_obelisk, npc_harrison_jones_on_to_something
 The Thrill of Discovery (27511) - AreaTrigger_at_chambers_of_the_star
+Lessons From the Past (27541) - npc_schnottz_scout
 */
 
 
@@ -338,6 +339,46 @@ public:
     }
 };
 
+// Schnottz Scout for Lessons From the Past
+class npc_schnottz_scout : public CreatureScript
+{
+public:
+    npc_schnottz_scout() : CreatureScript("npc_schnottz_scout") { }
+
+    bool OnGossipHello(Player* player, Creature* creature) override
+    {
+        if (creature->IsQuestGiver())
+            player->PrepareQuestMenu(creature->GetGUID());
+
+        if (player->hasQuest(27541) && !player->HasItemCount(61930))
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Take the scout's Journal.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+
+        if (player->GetQuestStatus(27541) == QUEST_STATUS_INCOMPLETE && !player->HasItemCount(61929))
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Take the scout's spectacles.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+
+
+        player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
+    {
+        player->PlayerTalkClass->ClearMenus();
+        if (action == GOSSIP_ACTION_INFO_DEF + 1)
+        {
+            player->AddItem(61930, 1);
+            player->CLOSE_GOSSIP_MENU();
+        }
+        else if (action == GOSSIP_ACTION_INFO_DEF + 2)
+        {
+            player->AddItem(61929, 1);
+            player->CLOSE_GOSSIP_MENU();
+        }
+
+        return true;
+    }
+};
+
 void AddSC_uldum()
 {
     new npc_lady_hump_tanaris();
@@ -355,4 +396,6 @@ void AddSC_uldum()
     new npc_harrison_jones_on_to_something();
 
     new AreaTrigger_at_chambers_of_the_star();
+
+    new npc_schnottz_scout();
 }

@@ -124,3 +124,6 @@ INSERT INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
 ('6284', 'at_chambers_of_the_star'),
 ('6288', 'at_chambers_of_the_star'),
 ('6289', 'at_chambers_of_the_star');
+
+-- Lessons From the Past
+UPDATE `creature_template` SET `ScriptName`='npc_schnottz_scout' WHERE (`entry`='45874');

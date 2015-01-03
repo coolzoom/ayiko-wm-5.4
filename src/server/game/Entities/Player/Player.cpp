@@ -3917,7 +3917,7 @@ void Player::InitSpellForLevel()
     }
 
     // Mage players learn automatically their racial capital portal at level 42
-    if (level >= 17 && getClass() == CLASS_MAGE)
+    if (level >= 42 && getClass() == CLASS_MAGE)
     {
         if (getRace() == RACE_HUMAN || getRace() == RACE_PANDAREN_ALLI)
         {

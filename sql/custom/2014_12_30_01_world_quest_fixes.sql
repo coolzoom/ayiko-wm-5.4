@@ -430,3 +430,46 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `probabil
 ('56538', '1', '11', 'Who would do this?!', '12', '100', 'Raufen - Crouching Carrot, Hidden Turnip ques talk');
 
 UPDATE `creature_template` SET `ScriptName`='npc_orange_painted_turnip' WHERE (`entry`='56539');
+
+-- Barrels, Man
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '57662';
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES ('57662', '108817', '1');
+DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`='18') AND (`SourceGroup`='57662') AND (`SourceEntry`='108817');
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+('18', '57662', '108817', '0', '0', '9', '0', '30077', '0', '0', '0', '0', '0', '', 'Raufen - Require quest for spellclick');
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='57662');
+DELETE FROM `smart_scripts` WHERE `entryorguid` = '57662' AND `source_type` = '0';
+INSERT INTO `smart_scripts` (`entryorguid`, `id`, `event_type`, `event_param1`, `action_type`, `action_param1`, `target_type`, `comment`) VALUES
+('57662', '0', '8', '108816', '33', '57662', '7', 'Raufen - On Spell Hit - Give KC'),
+('57662', '1', '8', '108816', '12', '57681', '1', 'Raufen - On Spell Hit - Summon Creature'),
+('57662', '2', '8', '108816', '41', '0', '1', 'Raufen - On Spell Hit - Force Despawn');
+
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='57681');
+DELETE FROM `smart_scripts` WHERE `entryorguid` = '57681' AND `source_type` = '0';
+INSERT INTO `smart_scripts` (`entryorguid`, `id`, `event_type`, `event_flags`, `event_param1`, `event_param2`, `action_type`, `target_type`, `comment`) VALUES
+('57681', '0', '1', '1', '1000', '1000', '1', '1', 'Raufen - On Spawn - Talk');
+UPDATE `smart_scripts` SET `action_param2`='3', `action_param3`='5000' WHERE (`entryorguid`='57662') AND (`source_type`='0') AND (`id`='1') AND (`link`='0');
+
+DELETE FROM `creature_text` WHERE `entry` = '57681';
+INSERT INTO `creature_text` (`entry`, `id`, `text`, `type`, `probability`, `comment`) VALUES
+('57681', '0', 'I suppose there are worse fates than being stuck forever inside a beer barrel.', '12', '100', 'Raufen - Barrels, Man quest talk'),
+('57681', '1', 'Thanks!', '12', '100', 'Raufen - Barrels, Man quest talk'),
+('57681', '2', 'I need a beer.', '12', '100', 'Raufen - Barrels, Man quest talk');
+
+DELETE FROM `creature` WHERE `id` = '57662';
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `npcflag2`, `unit_flags`, `unit_flags2`, `dynamicflags`, `isActive`, `protec_anti_doublet`) VALUES
+(3566, 57662, 870, 0, 0, 1, 65535, 0, 0, -669.075, 1445.48, 135.558, 2.69962, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
+(3567, 57662, 870, 0, 0, 1, 65535, 0, 0, -665.041, 1409.63, 135.432, 3.97824, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
+(3568, 57662, 870, 0, 0, 1, 65535, 0, 0, -664.149, 1411.34, 135.418, 4.24999, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
+(3569, 57662, 870, 0, 0, 1, 65535, 0, 0, -663.441, 1375.65, 135.797, 3.31038, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
+(3570, 57662, 870, 0, 0, 1, 65535, 0, 0, -687.27, 1358.22, 136.58, 1.09712, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
+(3571, 57662, 870, 0, 0, 1, 65535, 0, 0, -692.383, 1384.12, 136.849, 0.189986, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
+(3572, 57662, 870, 0, 0, 1, 65535, 0, 0, -687.675, 1398.32, 136, 0.0800328, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
+(3573, 57662, 870, 0, 0, 1, 65535, 0, 0, -681.92, 1435.44, 136.124, 4.81992, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
+(3574, 57662, 870, 0, 0, 1, 65535, 0, 0, -660.337, 1289.31, 137.09, 5.64145, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
+(3575, 57662, 870, 0, 0, 1, 65535, 0, 0, -634.491, 1297.08, 136.019, 3.24285, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
+(3576, 57662, 870, 0, 0, 1, 65535, 0, 0, -651.785, 1271.42, 136.649, 0.855237, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
+(3577, 57662, 870, 0, 0, 1, 65535, 0, 0, -621.32, 1265.15, 136.002, 2.90355, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
+(3578, 57662, 870, 0, 0, 1, 65535, 0, 0, -600.002, 1222.33, 138.198, 0.162501, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
+(3579, 57662, 870, 0, 0, 1, 65535, 0, 0, -627.769, 1287.38, 136.07, 1.67047, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
+(3580, 57662, 870, 0, 0, 1, 65535, 0, 0, -631.418, 1308.1, 140.399, 5.88413, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL);

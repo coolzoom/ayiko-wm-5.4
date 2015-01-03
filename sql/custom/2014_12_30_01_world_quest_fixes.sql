@@ -391,3 +391,10 @@ INSERT INTO `smart_scripts` (`entryorguid`, `id`, `event_type`, `event_param1`, 
 ('61426', '1', '8', '119349', '11', '119348', '1', 'Raufen - On Spell Hit - Cast Trap Arm'),
 ('61426', '2', '8', '119349', '83', '16777216', '1', 'Raufen - On Spell Hit - Remove spellclick flag'),
 ('61426', '3', '8', '119349', '41', '6000', '1', 'Raufen - On Spell Hit - Force Despawn');
+
+-- Misery
+UPDATE `creature_template` SET `RegenHealth`='0' WHERE (`entry`='60203');
+DELETE FROM `creature_template_aura` WHERE `entry` = '60203';
+INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES ('60203', '116348');
+DELETE FROM `creature` WHERE `id` = '60203';
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `npcflag2`, `unit_flags`, `unit_flags2`, `dynamicflags`, `isActive`, `protec_anti_doublet`) VALUES ('7346031', '60203', '870', '0', '0', '1', '1', '0', '0', '-2718.58', '782.001', '-88.706', '0.0842473', '300', '0', '0', '310574', '0', '0', '0', '0', '0', '2048', '0', '0', NULL);

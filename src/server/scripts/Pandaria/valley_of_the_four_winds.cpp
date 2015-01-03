@@ -525,6 +525,9 @@ public:
                 GetCreatureListWithEntryInGrid(clist, me, 56538, 10.f);
                 for (auto c : clist)
                 {
+                    if (!me->IsWithinLOSInMap(c))
+                        continue;
+
                     if (auto player = me->GetCharmerOrOwnerPlayerOrPlayerItself())
                         player->KilledMonsterCredit(56544);
 

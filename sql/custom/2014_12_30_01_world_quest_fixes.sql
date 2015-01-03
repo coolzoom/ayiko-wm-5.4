@@ -362,3 +362,14 @@ UPDATE `creature_template` SET `ScriptName`='npc_explosives_barrel' WHERE (`entr
 -- Contending With Bullies
 DELETE FROM `creature` WHERE `id` = '64757';
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `npcflag2`, `unit_flags`, `unit_flags2`, `dynamicflags`, `isActive`, `protec_anti_doublet`) VALUES ('3565', '64757', '870', '0', '0', '1', '1', '0', '0', '3292.45', '387.75', '458.355', '2.64991', '300', '0', '0', '1969705', '0', '0', '0', '0', '0', '2048', '0', '0', NULL);
+
+-- Dust to Dust
+DELETE FROM `spell_script_names` WHERE `spell_id` = '119073';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES ('119073', 'spell_creature_permanent_feign_death');
+UPDATE creature c INNER JOIN creature_template_aura aura ON c.id = aura.entry SET c.spawndist = 0, c.MovementType = 0 WHERE aura.aura = 119073;
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '118103';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES ('118103', 'spell_item_shado_pan_torch');
+
+DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`='13') AND (`SourceGroup`='3') AND (`SourceEntry`='118103');
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES ('13', '3', '118103', '0', '0', '31', '0', '3', '60925', '0', '0', '0', '0', '', 'Raufen - Target Palewind Villager');

@@ -476,6 +476,7 @@ public:
     }
 };
 
+// Back on Their Feet quest
 class spell_item_cintron_infused_bandage : public SpellScriptLoader
 {
 public:
@@ -487,6 +488,9 @@ public:
 
         void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
+            if (!GetCaster())
+                return;
+
             if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
                 if (auto target = GetTarget()->ToCreature())
                     if (target->GetEntry() == 61692)
@@ -510,6 +514,55 @@ public:
     }
 };
 
+// Dust to Dust quest
+class spell_item_shado_pan_torch : public SpellScriptLoader
+{
+public:
+    spell_item_shado_pan_torch() : SpellScriptLoader("spell_item_shado_pan_torch") { }
+
+    class script_impl : public AuraScript
+    {
+        PrepareAuraScript(script_impl);
+
+        void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
+                if (auto target = GetTarget()->ToCreature())
+                    if (target->GetEntry() == 60925)
+                    {
+                        target->RemoveAurasDueToSpell(106246);
+                        target->ForcedDespawn();
+                    }
+        }
+
+        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            auto caster = GetCaster();
+            auto target = GetTarget();
+            if (!caster || !target)
+                return;
+
+            if (target->GetTypeId() == TYPEID_UNIT && target->GetEntry() == 60925 && !target->HasAura(106246))
+            {
+                if (auto player = caster->ToPlayer())
+                    player->KilledMonsterCredit(target->GetEntry());
+                target->CastSpell(target, 106246, true);
+            }
+        }
+
+        void Register()
+        {
+            AfterEffectRemove += AuraEffectRemoveFn(script_impl::OnRemove, EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
+            AfterEffectApply += AuraEffectApplyFn(script_impl::OnApply, EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new script_impl();
+    }
+};
+
 void AddSC_townlong_steppes()
 {
     //Rare mobs
@@ -522,4 +575,5 @@ void AddSC_townlong_steppes()
     //Quests
     new go_sikthik_cage();
     new spell_item_cintron_infused_bandage();
+    new spell_item_shado_pan_torch();
 }

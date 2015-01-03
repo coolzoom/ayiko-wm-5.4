@@ -3880,6 +3880,78 @@ void Player::InitSpellForLevel()
             removeSpell(97709, false, false);
     }
 
+    // Mage players learn automatically their racial capital teleport at level 17
+    if (level >= 17 && getClass() == CLASS_MAGE)
+    {
+        if (getRace() == RACE_HUMAN || getRace() == RACE_PANDAREN_ALLI)
+        {
+            learnSpell(3561, false); // Teleport: Stormwind
+        }
+        if (getRace() == RACE_ORC || getRace() == RACE_TROLL || getRace() == RACE_GOBLIN || getRace() == RACE_PANDAREN_HORDE)
+        {
+            learnSpell(3567, false); // Teleport: Orgrimmar
+        }
+        if (getRace() == RACE_NIGHT_ELF || getRace() == RACE_WORGEN)
+        {
+            learnSpell(3565, false); // Teleport: Darnassus
+        }
+        if (getRace() == RACE_TAUREN)
+        {
+            learnSpell(3566, false); // Teleport: Thunder Bluff
+        }
+        if (getRace() == RACE_DWARF || getRace() == RACE_GNOME)
+        {
+            learnSpell(3562, false); // Teleport: Ironforge
+        }
+        if (getRace() == RACE_UNDEAD)
+        {
+            learnSpell(3563, false); // Teleport: Undercity
+        }
+        if (getRace() == RACE_DRAENEI)
+        {
+            learnSpell(32271, false); // Teleport: Exodar
+        if (getRace() == RACE_BLOOD_ELF)
+        {
+            learnSpell(32272, false); // Teleport: Silvermoon
+        }
+    }
+
+    // Mage players learn automatically their racial capital portal at level 42
+    if (level >= 17 && getClass() == CLASS_MAGE)
+    {
+        if (getRace() == RACE_HUMAN || getRace() == RACE_PANDAREN_ALLI)
+        {
+            learnSpell(10059, false); // Portal: Stormwind
+        }
+        if (getRace() == RACE_ORC || getRace() == RACE_TROLL || getRace() == RACE_GOBLIN || getRace() == RACE_PANDAREN_HORDE)
+        {
+            learnSpell(11417, false); // Portal: Orgrimmar
+        }
+        if (getRace() == RACE_NIGHT_ELF || getRace() == RACE_WORGEN)
+        {
+            learnSpell(11419, false); // Portal: Darnassus
+        }
+        if (getRace() == RACE_TAUREN)
+        {
+            learnSpell(11420, false); // Portal: Thunder Bluff
+        }
+        if (getRace() == RACE_DWARF || getRace() == RACE_GNOME)
+        {
+            learnSpell(11416, false); // Portal: Ironforge
+        }
+        if (getRace() == RACE_UNDEAD)
+        {
+            learnSpell(11418, false); // Portal: Undercity
+        }
+        if (getRace() == RACE_DRAENEI)
+        {
+            learnSpell(32266, false); // Portal: Exodar
+        if (getRace() == RACE_BLOOD_ELF)
+        {
+            learnSpell(32267, false); // Portal: Silvermoon
+        }
+    }
+
     // Hack fix for Sparring - Not applied
     if (HasSpell(116023))
         CastSpell(this, 116023, true);

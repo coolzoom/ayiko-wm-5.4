@@ -213,7 +213,7 @@ UPDATE `creature_template` SET `AIName`='SmartAI' WHERE `entry` IN('57825', '578
 UPDATE creature_template SET npcflag = npcflag | 1 WHERE entry = 57457;
 
 DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` IN('57825', '57830', '57744');
-INSERT INTO `smart_scripts` (`entryorguid`, `id` `event_type`, `action_type`, `action_param1`, `target_type`, `comment`) VALUES
+INSERT INTO `smart_scripts` (`entryorguid`, `id`, `event_type`, `action_type`, `action_param1`, `target_type`, `comment`) VALUES
 ('57830', '0', '64', '33', '57830', '7', 'Raufen - On Gossip Hello - Give KC'),
 ('57825', '0', '64', '33', '57825', '7', 'Raufen - On Gossip Hello - Give KC'),
 ('57744', '0', '64', '33', '57744', '7', 'Raufen - On Gossip Hello - Give KC'),
@@ -379,7 +379,7 @@ DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '61426';
 INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES ('61426', '119349', '1');
 
 DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`='18') AND (`SourceGroup`='61426') AND (`SourceEntry`='119349');
-DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`='13') AND (`SourceGroup`='3') AND (`SourceEntry`='119349');
+DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`='13') AND (`SourceGroup`='1') AND (`SourceEntry`='119349');
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`, `ConditionValue2`, `Comment`) VALUES ('13', '1', '119349', '31', '3', '61426', 'Raufen - Arm Trap target trap');
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES ('18', '61426', '119349', '0', '0', '9', '0', '30889', '0', '0', '0', '0', '0', '', 'Raufen - Require quest for spellclick');
 

@@ -22,11 +22,11 @@
 
 enum LfgRoles : uint8
 {
-    ROLE_NONE                                    = 0x00,
-    ROLE_LEADER                                  = 0x01,
-    ROLE_TANK                                    = 0x02,
-    ROLE_HEALER                                  = 0x04,
-    ROLE_DAMAGE                                  = 0x08
+    PLAYER_ROLE_NONE                                    = 0x00,
+    PLAYER_ROLE_LEADER                                  = 0x01,
+    PLAYER_ROLE_TANK                                    = 0x02,
+    PLAYER_ROLE_HEALER                                  = 0x04,
+    PLAYER_ROLE_DAMAGE                                  = 0x08
 };
 
 enum LfgUpdateType : uint8

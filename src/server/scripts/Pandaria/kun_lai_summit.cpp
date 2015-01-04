@@ -804,6 +804,40 @@ public:
     };
 };
 
+// Free the Dissenters
+class npc_inkgill_dissenter : public CreatureScript
+{
+public:
+    npc_inkgill_dissenter() : CreatureScript("npc_inkgill_dissenter") { }
+
+    bool OnGossipHello(Player* player, Creature* creature) override
+    {
+        if (player->GetQuestStatus(30967) == QUEST_STATUS_INCOMPLETE)
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "There's still hope - Gorai is still alive, to the south. Go!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+
+        player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
+    {
+        player->PlayerTalkClass->ClearMenus();
+        if (action == GOSSIP_ACTION_INFO_DEF + 1)
+        {
+            player->KilledMonsterCredit(61481);
+            creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            creature->AI()->Talk(0);
+            creature->ForcedDespawn(3000);
+            float x, y, z;
+            creature->GetClosePoint(x, y, z, creature->GetObjectSize() / 3, 10.f);
+            creature->GetMotionMaster()->MovePoint(1, x, y, z);
+            player->CLOSE_GOSSIP_MENU();
+        }
+
+        return false;
+    }
+};
+
 void AddSC_kun_lai_summit()
 {
     new mob_nessos_the_oracle();
@@ -812,8 +846,10 @@ void AddSC_kun_lai_summit()
     new mob_mogujia_soul_caller();
     new mob_quilen_stonemaw();
     new mob_zai_the_outcast();
+    // Quest scripts
     new npc_waterspeaker_gorai();
     new npc_ordo_overseer();
     new go_yaungol_banner();
     new npc_explosives_barrel();
+    new npc_inkgill_dissenter();
 }

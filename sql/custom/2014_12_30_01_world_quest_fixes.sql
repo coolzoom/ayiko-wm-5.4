@@ -473,3 +473,11 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 (3578, 57662, 870, 0, 0, 1, 65535, 0, 0, -600.002, 1222.33, 138.198, 0.162501, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
 (3579, 57662, 870, 0, 0, 1, 65535, 0, 0, -627.769, 1287.38, 136.07, 1.67047, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
 (3580, 57662, 870, 0, 0, 1, 65535, 0, 0, -631.418, 1308.1, 140.399, 5.88413, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL);
+
+-- Free the Dissenters
+UPDATE `creature_template` SET `ScriptName`='npc_inkgill_dissenter' WHERE (`entry`='61566');
+DELETE FROM `creature_text` WHERE `entry` = '61566';
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `probability`, `comment`) VALUES
+('61566', '0', '0', 'Gorai lives? I will go find him. Thank you, friend!', '12', '100', 'Raufen - Free the Dissenters quest talk'),
+('61566', '0', '1', 'Thank you, friend... I\'ll make my way to the south!', '12', '100', 'Raufen - Free the Dissenters quest talk'),
+('61566', '0', '2', 'You are very brave... thank you!', '12', '100', 'Raufen - Free the Dissenters quest talk');

@@ -4,10 +4,178 @@
 SET @OGUID := 900000;
 -- Creatures - 334 GUIDs
 SET @CGUID := 900000;
+
+SET @HC_MOD := 300000;
+DROP FUNCTION IF EXISTS HC_ENTRY;
+CREATE FUNCTION HC_ENTRY(x INT) RETURNS INT
+	RETURN @HC_MOD + x;
+	-- RETURN (SELECT difficulty_entry_1 FROM creature_template WHERE entry = x); 
+	
 DELETE FROM creature WHERE map = 1011;
 DELETE FROM gameobject WHERE map = 1011;
 UPDATE instance_template SET script = 'instance_siege_of_niuzao_temple' WHERE map = 1011;
 UPDATE creature_template SET mechanic_immune_mask = 667893759 WHERE entry IN (61567, 61634, 61485, 62205);
+
+REPLACE INTO creature_template(entry, difficulty_entry_1, difficulty_entry_2, difficulty_entry_3, difficulty_entry_4, difficulty_entry_5, difficulty_entry_6, difficulty_entry_7, difficulty_entry_8, difficulty_entry_9, difficulty_entry_10, difficulty_entry_11, difficulty_entry_12, difficulty_entry_13, difficulty_entry_14, difficulty_entry_15, KillCredit1, KillCredit2, modelid1, modelid2, modelid3, modelid4, name, subname, IconName, gossip_menu_id, minlevel, maxlevel, exp, exp_unk, faction_A, faction_H, npcflag, npcflag2, speed_walk, speed_run, speed_fly, scale, rank, mindmg, maxdmg, dmgschool, attackpower, dmg_multiplier, baseattacktime, rangeattacktime, unit_class, unit_flags, unit_flags2, dynamicflags, family, trainer_type, trainer_spell, trainer_class, trainer_race, minrangedmg, maxrangedmg, rangedattackpower, type, type_flags, type_flags2, lootid, pickpocketloot, skinloot, resistance1, resistance2, resistance3, resistance4, resistance5, resistance6, spell1, spell2, spell3, spell4, spell5, spell6, spell7, spell8, PetSpellDataId, VehicleId, mingold, maxgold, AIName, MovementType, InhabitType, HoverHeight, Health_mod, Mana_mod, Mana_mod_extra, Armor_mod, RacialLeader, questItem1, questItem2, questItem3, questItem4, questItem5, questItem6, movementId, RegenHealth, equipment_id, mechanic_immune_mask, flags_extra, WDBVerified) VALUES
+(@HC_MOD + 61434, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43119, 0, 0, 0, 'Sik''thik Vanguard', '', '', 0, 90, 90, 4, 0, 16, 16, 0, 0, 1, 1.42857, 1.14286, 1, 1, 11321, 16657, 0, 48962, 3, 2000, 2000, 1, 32768, 4196352, 0, 0, 0, 0, 0, 0, 1, 2, 1, 7, 2097224, 0, 61434, 61434, 0, 0, 0, 0, 0, 0, 0, 119345, 119347, 0, 124172, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 4, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 61434, 0, 0, 16048), 
+(@HC_MOD + 61436, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43118, 0, 0, 0, 'Sik''thik Bladedancer', '', '', 0, 90, 90, 4, 0, 16, 16, 0, 0, 1, 1.42857, 1.14286, 1, 1, 11321, 16657, 0, 48962, 3, 2000, 2000, 1, 32768, 4196352, 0, 0, 0, 0, 0, 0, 1, 2, 1, 7, 2097224, 0, 61436, 61436, 0, 0, 0, 0, 0, 0, 0, 124253, 0, 119354, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 4, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 61436, 0, 0, 16048), 
+(@HC_MOD + 61448, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43121, 0, 0, 0, 'Sik''thik Soldier', '', '', 0, 90, 90, 4, 0, 14, 14, 0, 0, 1, 1.42857, 1.14286, 1, 1, 11839, 17339, 0, 1, 2, 2000, 2000, 1, 32768, 2048, 0, 0, 0, 0, 0, 0, 1, 2, 1, 7, 2097224, 0, 61448, 0, 0, 0, 0, 0, 0, 0, 0, 0, 119840, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 0.5, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 62348, 0, 64, 16048), 
+(@HC_MOD + 61485, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43120, 0, 0, 0, 'General Pa''valak', '', '', 0, 92, 92, 4, 0, 16, 16, 0, 0, 1.6, 1.57143, 1.14286, 1, 1, 12684, 19052, 0, 55538, 3, 2000, 2000, 1, 32832, 4196352, 0, 0, 0, 0, 0, 0, 1, 2, 1, 7, 270532680, 0, 61485, 61485, 0, 0, 0, 0, 0, 0, 0, 124317, 124283, 119476, 119875, 0, 0, 0, 0, 0, 0, 490000, 500000, '', 0, 3, 1, 65, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 159, 1, 61485, 667893759, 0, 16048), 
+(@HC_MOD + 61567, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43197, 0, 0, 0, 'Vizier Jin''bak', '', '', 0, 92, 92, 4, 0, 14, 14, 0, 0, 1, 1.42857, 1.14286, 1, 1, 12684, 19052, 0, 55538, 3, 1500, 2000, 2, 32832, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097256, 0, 61567, 0, 0, 0, 0, 0, 0, 0, 0, 120001, 120095, 0, 0, 0, 0, 0, 0, 0, 0, 490000, 500000, '', 0, 3, 1, 30, 6, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 0, 667893759, 0, 16048), 
+(@HC_MOD + 61634, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 42169, 0, 0, 0, 'Commander Vo''jak', '', '', 0, 92, 92, 4, 0, 16, 16, 0, 0, 1, 1.42857, 1.14286, 1, 1, 12684, 19052, 0, 55538, 3, 2500, 2000, 1, 33600, 2097152, 0, 0, 0, 0, 0, 0, 460, 552, 46, 7, 2097224, 0, 61634, 0, 0, 0, 0, 0, 0, 0, 0, 120778, 120800, 120789, 120758, 120760, 120759, 0, 0, 0, 0, 490000, 500000, '', 0, 3, 1, 30, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 61634, 667893759, 0, 16048), 
+(@HC_MOD + 61670, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 42875, 0, 0, 0, 'Sik''thik Demolisher', '', '', 0, 90, 90, 4, 0, 16, 16, 0, 0, 1.6, 1.71429, 1.14286, 1, 1, 450, 540, 0, 45, 2, 2000, 2000, 1, 768, 2097152, 0, 0, 0, 0, 0, 0, 450, 540, 45, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 120778, 121982, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 3, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 167, 1, 0, 0, 0, 16048), 
+(@HC_MOD + 61699, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43955, 43955, 0, 0, 'Sik''thik Amberwing', '', '', 0, 85, 85, 3, 0, 14, 14, 0, 0, 1, 0.5, 1.14286, 1, 0, 550, 950, 0, 36, 7, 2000, 2000, 1, 0, 0, 12, 0, 0, 0, 0, 0, 400, 600, 150, 10, 16778240, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 4, 1, 0.119048, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 78, 1, 0, 0, 0, 15595), 
+(@HC_MOD + 61701, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 42207, 0, 0, 0, 'Sik''thik Warrior', '', '', 0, 90, 90, 4, 0, 16, 16, 0, 0, 1, 0.992063, 1.14286, 1, 1, 450, 540, 0, 45, 2, 2000, 2000, 1, 768, 2097152, 0, 0, 0, 0, 0, 0, 450, 540, 45, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 120778, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 15, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 61701, 0, 0, 16048), 
+(@HC_MOD + 61910, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 33011, 0, 0, 0, 'Resin Flake', '', '', 0, 91, 91, 4, 0, 16, 16, 0, 0, 1, 1.42857, 1.14286, 1, 1, 11321, 16657, 0, 48962, 3, 2000, 2000, 1, 32768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 2097256, 0, 61910, 0, 0, 0, 0, 0, 0, 0, 0, 0, 120938, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 1, 1, 1.5, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 0, 0, 0, 16048), 
+(@HC_MOD + 61928, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43198, 0, 0, 0, 'Sik''thik Guardian', '', '', 0, 91, 91, 4, 0, 16, 16, 0, 0, 1.2, 1.42857, 1.14286, 1, 1, 11321, 16657, 0, 48962, 3, 2000, 2000, 1, 32768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097256, 0, 61928, 61928, 0, 0, 0, 0, 0, 0, 0, 0, 121421, 121422, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 3, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 147, 1, 61928, 0, 0, 16048), 
+(@HC_MOD + 61929, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43196, 0, 0, 0, 'Sik''thik Amber-Weaver', '', '', 0, 91, 91, 4, 0, 16, 16, 0, 0, 1.2, 1.42857, 1.14286, 1, 1, 11321, 16657, 0, 48962, 3, 2000, 2000, 1, 32768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097256, 0, 61929, 61929, 0, 0, 0, 0, 0, 0, 0, 121116, 0, 120946, 121114, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 3, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 147, 1, 61929, 0, 0, 16048), 
+(@HC_MOD + 61964, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10906, 38497, 0, 0, 'Sap Spray', '', '', 0, 90, 90, 4, 0, 14, 14, 0, 0, 1, 1.14286, 1.14286, 1, 0, 9838, 14331, 0, 42296, 1, 2000, 2000, 1, 33554432, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 16048), 
+(@HC_MOD + 62091, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43982, 0, 0, 0, 'Sik''thik Flyer', '', '', 0, 90, 90, 4, 0, 16, 16, 0, 0, 1, 5.71429, 1.14286, 1, 1, 9838, 14331, 0, 42296, 3, 2000, 2000, 1, 32768, 4196352, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 4, 1, 0.05, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 269, 1, 0, 0, 64, 16048), 
+(@HC_MOD + 62205, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43151, 0, 0, 0, 'Wing Leader Ner''onok', '', '', 0, 92, 92, 4, 0, 16, 16, 0, 0, 1.6, 1.71429, 1.14286, 1, 1, 11839, 17339, 0, 45299, 2, 2000, 2000, 1, 32832, 2097152, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2147483752, 0, 62205, 0, 0, 0, 0, 0, 0, 0, 0, 121442, 121443, 121282, 121284, 121762, 121447, 0, 0, 0, 0, 490000, 500000, '', 0, 3, 1, 30, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 167, 1, 0, 634339327, 0, 16048), 
+(@HC_MOD + 62348, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43121, 0, 0, 0, 'Sik''thik Soldier', '', '', 0, 90, 90, 4, 0, 14, 14, 0, 0, 1, 1.42857, 1.14286, 1, 1, 11839, 17339, 0, 45299, 2, 2000, 2000, 1, 32768, 4196352, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 62348, 62348, 0, 0, 0, 0, 0, 0, 0, 119840, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10000, 11000, '', 0, 3, 1, 0.5, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 62348, 0, 64, 16048), 
+(@HC_MOD + 62632, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43150, 0, 0, 0, 'Sik''thik Engineer', '', '', 0, 90, 90, 4, 0, 16, 16, 0, 0, 1, 1.42857, 1.14286, 1, 1, 11839, 17339, 0, 45299, 2, 2000, 2000, 1, 32768, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 62632, 62632, 0, 0, 0, 0, 0, 0, 0, 122259, 122244, 122246, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 4, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 62632, 0, 0, 16048), 
+(@HC_MOD + 62633, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43149, 0, 0, 0, 'Sik''thik Builder', '', '', 0, 90, 90, 4, 0, 16, 16, 0, 0, 1, 1.42857, 1.14286, 1, 1, 11839, 17339, 0, 45299, 2, 2000, 2000, 1, 32768, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 62633, 62633, 0, 0, 0, 0, 0, 0, 0, 121762, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 2.5, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 0, 0, 0, 16048), 
+(@HC_MOD + 62795, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 42193, 0, 0, 0, 'Sik''thik Warden', '', '', 0, 90, 90, 4, 0, 16, 16, 0, 0, 0.5, 0.496031, 1.14286, 1, 1, 9838, 14331, 0, 42296, 3, 2000, 2000, 1, 536870976, 35651584, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 4, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 16048), 
+(@HC_MOD + 63106, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43322, 0, 0, 0, 'Sik''thik Swarmer', '', '', 0, 90, 90, 4, 0, 16, 16, 0, 0, 1.6, 1.42857, 1.14286, 1, 1, 11839, 17339, 0, 45299, 2, 2000, 2000, 1, 768, 2097152, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 120778, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 4, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 150, 1, 63106, 0, 0, 16048), 
+(@HC_MOD + 63565, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43138, 0, 0, 0, 'Mantid Catapult', '', '', 0, 90, 90, 4, 0, 14, 14, 0, 0, 2.8, 2, 1.14286, 1, 1, 11839, 17339, 0, 45299, 2, 2000, 2000, 1, 33555200, 4196352, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1048576, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 16048), 
+(@HC_MOD + 64520, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 44773, 44774, 44775, 44776, 'Shado-Pan Prisoner', '', '', 0, 89, 90, 4, 0, 2482, 2482, 16777216, 0, 1, 1.14286, 1.14286, 1, 1, 11839, 17339, 0, 45299, 2, 2000, 2000, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 86603, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 3, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 16048), 
+(@HC_MOD + 67093, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 45766, 0, 0, 0, 'Sik''thik Battle-Mender', '', '', 0, 90, 90, 4, 0, 16, 16, 0, 0, 1, 1.42857, 1.14286, 1, 1, 11839, 17339, 0, 45299, 2, 2000, 2000, 8, 32768, 4196352, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 67093, 67093, 0, 0, 0, 0, 0, 0, 0, 0, 131968, 131972, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 3, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 67093, 0, 0, 16048);
+
+-- Normal mode hp
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 0.04999987 WHERE `entry` = 62091; -- Sik'thik Flyer
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 1 WHERE `entry` = 61817; -- Mantid Tar Keg
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 0.03086757 WHERE `entry` = 61629; -- Sappling Summon Dest
+UPDATE `creature_template` SET `minlevel` = 1, `maxlevel` = 1, `Health_mod` = 1 WHERE `entry` = 62684; -- Barrel Target
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 2.499999 WHERE `entry` = 61928; -- Sik'thik Guardian
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 2.499999 WHERE `entry` = 61929; -- Sik'thik Amber-Weaver
+UPDATE `creature_template` SET `minlevel` = 89, `maxlevel` = 89, `Health_mod` = 2.5 WHERE `entry` = 61670; -- Sik'thik Demolisher
+UPDATE `creature_template` SET `minlevel` = 91, `maxlevel` = 91, `Health_mod` = 25 WHERE `entry` = 61634; -- Commander Vo'jak
+UPDATE `creature_template` SET `minlevel` = 89, `maxlevel` = 89, `Health_mod` = 3 WHERE `entry` = 63106; -- Sik'thik Swarmer
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 1 WHERE `entry` = 61620; -- Yang Ironclaw
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 0.03086757 WHERE `entry` = 61964; -- Sap Spray
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 0.03086757 WHERE `entry` = 61965; -- Sap Puddle
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 0.03086757 WHERE `entry` = 61967; -- Resin Stalker
+UPDATE `creature_template` SET `minlevel` = 1, `maxlevel` = 1, `Health_mod` = 1 WHERE `entry` = 57478; -- Invisible Stalker
+UPDATE `creature_template` SET `minlevel` = 91, `maxlevel` = 91, `Health_mod` = 25 WHERE `entry` = 61567; -- Vizier Jin'bak
+UPDATE `creature_template` SET `minlevel` = 89, `maxlevel` = 89, `Health_mod` = 10 WHERE `entry` = 61699; -- Sik'thik Amberwing
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 1 WHERE `entry` = 62794; -- Lo Chu
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 1 WHERE `entry` = 61812; -- Li Chu
+UPDATE `creature_template` SET `minlevel` = 89, `maxlevel` = 89, `Health_mod` = 12 WHERE `entry` = 61701; -- Sik'thik Warrior
+UPDATE `creature_template` SET `minlevel` = 89, `maxlevel` = 89, `Health_mod` = 3 WHERE `entry` = 64520; -- Shado-Pan Prisoner
+UPDATE `creature_template` SET `minlevel` = 89, `maxlevel` = 89, `Health_mod` = 0.3999988 WHERE `entry` = 62348; -- Sik'thik Soldier
+UPDATE `creature_template` SET `minlevel` = 89, `maxlevel` = 89, `Health_mod` = 3.5 WHERE `entry` = 61436; -- Sik'thik Bladedancer
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 2.499998 WHERE `entry` = 67093; -- Sik'thik Battle-Mender
+UPDATE `creature_template` SET `minlevel` = 89, `maxlevel` = 89, `Health_mod` = 3.5 WHERE `entry` = 61434; -- Sik'thik Vanguard
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 1 WHERE `entry` = 63565; -- Mantid Catapult
+UPDATE `creature_template` SET `minlevel` = 91, `maxlevel` = 91, `Health_mod` = 55 WHERE `entry` = 61485; -- General Pa'valak
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 1 WHERE `entry` = 73400; -- Healing Ran Invisible Stalker DND
+UPDATE `creature_template` SET `minlevel` = 89, `maxlevel` = 89, `Health_mod` = 3.5 WHERE `entry` = 62632; -- Sik'thik Engineer
+UPDATE `creature_template` SET `minlevel` = 89, `maxlevel` = 89, `Health_mod` = 2 WHERE `entry` = 62633; -- Sik'thik Builder
+UPDATE `creature_template` SET `minlevel` = 93, `maxlevel` = 93, `Health_mod` = 15 WHERE `entry` = 61483; -- Reinforcements Summoner
+UPDATE `creature_template` SET `minlevel` = 91, `maxlevel` = 91, `Health_mod` = 25 WHERE `entry` = 62205; -- Wing Leader Ner'onok
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 3 WHERE `entry` = 64517; -- Shado-Master Chum Kiu
+-- HC mode
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 0.03086757 WHERE entry = @HC_MOD + 61965; -- Sap Puddle
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 0.03086757 WHERE entry = @HC_MOD + 61964; -- Sap Spray
+UPDATE `creature_template` SET `minlevel` = 91, `maxlevel` = 91, `Health_mod` = 3 WHERE entry = @HC_MOD + 61929; -- Sik'thik Amber-Weaver
+UPDATE `creature_template` SET `minlevel` = 91, `maxlevel` = 91, `Health_mod` = 3 WHERE entry = @HC_MOD + 61928; -- Sik'thik Guardian
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 0.03086757 WHERE entry = @HC_MOD + 61629; -- Sappling Summon Dest
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 0.03086757 WHERE entry = @HC_MOD + 61967; -- Resin Stalker
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 0.04999987 WHERE entry = @HC_MOD + 62091; -- Sik'thik Flyer
+UPDATE `creature_template` SET `minlevel` = 91, `maxlevel` = 91, `Health_mod` = 1.5 WHERE entry = @HC_MOD + 61910; -- Resin Flake
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 3 WHERE entry = @HC_MOD + 64517; -- Shado-Master Chum Kiu
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 0.03086757 WHERE entry = @HC_MOD + 61613; -- Sap Puddle
+UPDATE `creature_template` SET `minlevel` = 92, `maxlevel` = 92, `Health_mod` = 30 WHERE entry = @HC_MOD + 61567; -- Vizier Jin'bak
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 4 WHERE entry = @HC_MOD + 62795; -- Sik'thik Warden
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 1 WHERE entry = @HC_MOD + 61620; -- Yang Ironclaw
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 1 WHERE entry = @HC_MOD + 62794; -- Lo Chu
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 1 WHERE entry = @HC_MOD + 61812; -- Li Chu
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 1 WHERE entry = @HC_MOD + 61817; -- Mantid Tar Keg
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 3 WHERE entry = @HC_MOD + 61670; -- Sik'thik Demolisher
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 4 WHERE entry = @HC_MOD + 63106; -- Sik'thik Swarmer
+UPDATE `creature_template` SET `minlevel` = 60, `maxlevel` = 60, `Health_mod` = 1.225949 WHERE entry = @HC_MOD + 66699; -- Generic Invisible Stalker Controller NonImmune - IH
+UPDATE `creature_template` SET `minlevel` = 1, `maxlevel` = 1, `Health_mod` = 1 WHERE entry = @HC_MOD + 57478; -- Invisible Stalker
+UPDATE `creature_template` SET `minlevel` = 1, `maxlevel` = 1, `Health_mod` = 1 WHERE entry = @HC_MOD + 62684; -- Barrel Target
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 15 WHERE entry = @HC_MOD + 61701; -- Sik'thik Warrior
+UPDATE `creature_template` SET `minlevel` = 92, `maxlevel` = 92, `Health_mod` = 30 WHERE entry = @HC_MOD + 61634; -- Commander Vo'jak
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 13.5 WHERE entry = @HC_MOD + 61699; -- Sik'thik Amberwing
+UPDATE `creature_template` SET `minlevel` = 89, `maxlevel` = 89, `Health_mod` = 3 WHERE entry = @HC_MOD + 64520; -- Shado-Pan Prisoner
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 4 WHERE entry = @HC_MOD + 61434; -- Sik'thik Vanguard
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 0.4999987 WHERE entry = @HC_MOD + 62348; -- Sik'thik Soldier
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 4 WHERE entry = @HC_MOD + 61436; -- Sik'thik Bladedancer
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 1 WHERE entry = @HC_MOD + 63565; -- Mantid Catapult
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 3 WHERE entry = @HC_MOD + 67093; -- Sik'thik Battle-Mender
+UPDATE `creature_template` SET `minlevel` = 92, `maxlevel` = 92, `Health_mod` = 65 WHERE entry = @HC_MOD + 61485; -- General Pa'valak
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 2.499999 WHERE entry = @HC_MOD + 62633; -- Sik'thik Builder
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 4 WHERE entry = @HC_MOD + 62632; -- Sik'thik Engineer
+UPDATE `creature_template` SET `minlevel` = 93, `maxlevel` = 93, `Health_mod` = 15 WHERE entry = @HC_MOD + 61483; -- Reinforcements Summoner
+UPDATE `creature_template` SET `minlevel` = 92, `maxlevel` = 92, `Health_mod` = 30 WHERE entry = @HC_MOD + 62205; -- Wing Leader Ner'onok
+
+UPDATE creature_template SET difficulty_entry_1 = @HC_MOD + entry WHERE entry IN (61434, 61436, 61485, 61567, 61910, 61928, 61929, 61964, 62091, 62205, 62348, 62632, 62633, 62795, 63565, 64520, 67093, 61634, 61701, 61670, 63106, 61699, 61448);
+
+	
+	
+UPDATE creature_template SET lootId = entry WHERE entry IN (HC_ENTRY(61567), HC_ENTRY(61634), HC_ENTRY(61485), HC_ENTRY(62205));
+UPDATE creature_template SET lootId = entry WHERE entry IN (61567, 61634, 61485, 62205);
+DELETE FROM creature_loot_template WHERE entry IN (61567, 61634, 61485, 62205);
+INSERT INTO creature_loot_template (entry, item, ChanceOrQuestChance, lootmode, groupid, mincountOrRef, maxcount) VALUES
+-- Jin''Bak
+(61567, 81262, 100, 1, 1, 1, 1), -- Hood of Viridian Residue
+(61567, 81270, 100, 1, 1, 1, 1), -- Sap-Encrusted Legplates
+(61567, 81263, 100, 1, 1, 1, 1), -- Flashfrozen Resin Globule
+(61567, 81271, 100, 1, 1, 1, 1), -- Engraved Amber Pendant
+(61567, 81272, 100, 1, 1, 1, 1), -- Girdle of Soothing Detonation
+(HC_ENTRY(61567), 100952, 100, 1, 1, 1, 1), -- Hood of Viridian Residue
+(HC_ENTRY(61567), 100954, 100, 1, 1, 1, 1), -- Sap-Encrusted Legplates
+(HC_ENTRY(61567), 100950, 100, 1, 1, 1, 1), -- Engraved Amber Pendant
+(HC_ENTRY(61567), 100951, 100, 1, 1, 1, 1), -- Flashfrozen Resin Globule
+(HC_ENTRY(61567), 100953, 100, 1, 1, 1, 1), -- Girdle of Soothing Detonation
+-- Vo'Jak
+(61634, 81273, 100, 1, 1, 1, 1), -- Siege-Captain's Scimitar
+(61634, 81274, 100, 1, 1, 1, 1), -- Sightfinder Helm
+(61634, 81275, 100, 1, 1, 1, 1), -- Chestwrap of Arcing Flame
+(61634, 81276, 100, 1, 1, 1, 1), -- Bombardment Bracers
+(61634, 81277, 100, 1, 1, 1, 1), -- Archer's Precision Grips
+(HC_ENTRY(61634), 100955, 100, 1, 1, 1, 1), -- Siege-Captain's Scimitar
+(HC_ENTRY(61634), 100956, 100, 1, 1, 1, 1), -- Bombardment Bracers
+(HC_ENTRY(61634), 100957, 100, 1, 1, 1, 1), -- Chestwrap of Arcing Flame
+(HC_ENTRY(61634), 100958, 100, 1, 1, 1, 1), -- Archer's Precision Grips
+(HC_ENTRY(61634), 100959, 100, 1, 1, 1, 1), -- Sightfinder Helm
+-- Pa'valak
+(61485, 81264, 100, 1, 1, 1, 1), -- Vial of Ichorous Blood
+(61485, 81279, 100, 1, 1, 1, 1), -- Tempestuous Longbow
+(61485, 81280, 100, 1, 1, 1, 1), -- Siegeworn Bracers
+(61485, 81281, 100, 1, 1, 1, 1), -- Breezebinder Handwraps
+(61485, 81282, 100, 1, 1, 1, 1), -- Aerial Bombardment Cloak
+(HC_ENTRY(61485), 100960, 100, 1, 1, 1, 1), -- Tempestuous Longbow
+(HC_ENTRY(61485), 100961, 100, 1, 1, 1, 1), -- Aerial Bombardment Cloak
+(HC_ENTRY(61485), 100962, 100, 1, 1, 1, 1), -- Breezebinder Handwraps
+(HC_ENTRY(61485), 100963, 100, 1, 1, 1, 1), -- Vial of Ichorous Blood
+(HC_ENTRY(61485), 100964, 100, 1, 1, 1, 1), -- Siegeworn Bracers
+(HC_ENTRY(61485), 71715, 7, 1, 0, 1, 1), -- A Treatise on Strategy
+(HC_ENTRY(61485), 88162, 0.3, 1, 0, 1, 1), -- Illegible List of Rabble to Raze
+-- Ner'onok
+(62205, 81283, 100, 1, 1, 1, 1), -- Windblast Helm
+(62205, 81284, 100, 1, 1, 1, 1), -- Anchoring Sabatons
+(62205, 81285, 100, 1, 1, 1, 1), -- Galedodger Chestguard
+(62205, 81286, 100, 1, 1, 1, 1), -- Ner'onok's Razor Katar
+(62205, 81287, 100, 1, 1, 1, 1), -- Spaulders of Immovable Stone
+(62205, 81288, 100, 1, 2, 1, 1), -- Gustwalker Staff
+(62205, 81289, 100, 1, 2, 1, 1), -- Breezeswept Hood
+(62205, 81290, 100, 1, 2, 1, 1), -- Belt of Totemic Binding
+(62205, 81291, 100, 1, 2, 1, 1), -- Whisperwind Spaulders
+(62205, 81292, 100, 1, 2, 1, 1), -- Airbender Sandals
+(HC_ENTRY(62205), 87547, 0.5, 1, 0, 1, 1), -- Tolakesh, Horn of the Black Ox
+(HC_ENTRY(62205), 100965, 100, 1, 1, 1, 1), -- Ner'onok's Razor Katar
+(HC_ENTRY(62205), 100967, 100, 1, 1, 1, 1), -- Windblast Helm
+(HC_ENTRY(62205), 100968, 100, 1, 1, 1, 1), -- Galedodger Chestguard
+(HC_ENTRY(62205), 100969, 100, 1, 1, 1, 1), -- Anchoring Sabatons
+(HC_ENTRY(62205), 100970, 100, 1, 1, 1, 1), -- Spaulders of Immovable Stone
+(HC_ENTRY(62205), 100971, 100, 1, 2, 1, 1), -- Breezeswept Hood
+(HC_ENTRY(62205), 100972, 100, 1, 2, 1, 1), -- Whisperwind Spaulders
+(HC_ENTRY(62205), 100973, 100, 1, 2, 1, 1), -- Gustwalker Staff
+(HC_ENTRY(62205), 100974, 100, 1, 2, 1, 1), -- Belt of Totemic Binding
+(HC_ENTRY(62205), 100975, 100, 1, 2, 1, 1); -- Airbender Sandals
 
 /*
 Niuzao Temple (Map 1011)
@@ -968,3 +1136,5 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position
 (@CGUID+331, 62091, 1011, 3, 1, 1634.786, 5337.195, 213.935, 5.813205, 86400, 5, 1), -- Sik'thik Flyer (Area: Forward Assault Camp) (Auras: 126320 - Mantid Wings, 132441 - Mantid Wings) (possible waypoints or random movement)
 (@CGUID+332, 62091, 1011, 3, 1, 1643.158, 5347.613, 213.9361, 5.784093, 86400, 5, 1); -- Sik'thik Flyer (Area: Forward Assault Camp) (Auras: 126320 - Mantid Wings, 132441 - Mantid Wings) (possible waypoints or random movement)
 -- (@CGUID+333, 64517, 1011, 3, 1, 1851.226, 5214.163, 131.2519, 4.03415, 86400, 0, 0); -- Shado-Master Chum Kiu (Area: Forward Assault Camp)
+
+UPDATE creature SET spawnMask = 15 WHERE map = 1011;

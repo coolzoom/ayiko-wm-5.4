@@ -386,6 +386,8 @@ class npc_yang_ironclaw : public CreatureScript
 
             if (Creature * vojak = Creature::GetCreature(*me, vojakGUID))
                 return vojak;
+
+            return NULL;
         }
 
         void DelayedTalk(Creature * speaker, uint32 id, uint32 timer)
@@ -483,30 +485,44 @@ class npc_yang_ironclaw : public CreatureScript
                 switch (eventId)
                 {
                     case EVENT_CALL_FIRST_WAVE: // Swarmers
+                    {
                         Talk(EMOTE_WAVE_ONE);
                         DelayedTalk(GetVojak(), SAY_VOJAK_WAVE_ONE, 500);
                         DelayedTalk(me, SAY_WAVE_ONE, 6000);
-                        summons.DoAction((ACTION_ENGAGE_COMBAT << WAVE_ONE), EntryCheckPredicate(NPC_SIKTHIK_SWARMER));
+                        EntryCheckPredicate pred(NPC_SIKTHIK_SWARMER);
+                        summons.DoAction((ACTION_ENGAGE_COMBAT << WAVE_ONE), pred);
                         break;
+                    }
                     case EVENT_CALL_SECOND_WAVE: // Demolishers
+                    {
                         Talk(EMOTE_WAVE_TWO);
                         DelayedTalk(GetVojak(), SAY_VOJAK_WAVE_TWO, 500);
                         DelayedTalk(me, SAY_WAVE_TWO, 5000);
-                        summons.DoAction((ACTION_ENGAGE_COMBAT << WAVE_TWO), EntryCheckPredicate(NPC_SIKTHIK_DEMOLISHER));
+                        EntryCheckPredicate pred(NPC_SIKTHIK_DEMOLISHER);
+                        summons.DoAction((ACTION_ENGAGE_COMBAT << WAVE_TWO), pred);
                         break;
+                    }
                     case EVENT_CALL_THIRD_WAVE: // Swarmers + Warrior
+                    {
                         Talk(EMOTE_WAVE_THREE);
                         DelayedTalk(GetVojak(), SAY_VOJAK_WAVE_THREE, 500);
                         DelayedTalk(me, SAY_WAVE_THREE, 5000);
-                        summons.DoAction((ACTION_ENGAGE_COMBAT << WAVE_THREE), EntryCheckPredicate(NPC_SIKTHIK_WARRIOR));
-                        summons.DoAction((ACTION_ENGAGE_COMBAT << WAVE_THREE), EntryCheckPredicate(NPC_SIKTHIK_SWARMER));
+                        EntryCheckPredicate pred(NPC_SIKTHIK_WARRIOR);
+                        EntryCheckPredicate pred2(NPC_SIKTHIK_SWARMER);
+                        summons.DoAction((ACTION_ENGAGE_COMBAT << WAVE_THREE), pred);
+                        summons.DoAction((ACTION_ENGAGE_COMBAT << WAVE_THREE), pred2);
                         break;
+                    }
                     case EVENT_CALL_FOURTH_WAVE: // Demolishers + Warrior
+                    {
                         Talk(EMOTE_WAVE_FOUR);
                         DelayedTalk(GetVojak(), SAY_VOJAK_WAVE_FOUR, 500);
-                        summons.DoAction((ACTION_ENGAGE_COMBAT << WAVE_FOUR), EntryCheckPredicate(NPC_SIKTHIK_WARRIOR));
-                        summons.DoAction((ACTION_ENGAGE_COMBAT << WAVE_FOUR), EntryCheckPredicate(NPC_SIKTHIK_DEMOLISHER));
+                        EntryCheckPredicate pred(NPC_SIKTHIK_WARRIOR);
+                        EntryCheckPredicate pred2(NPC_SIKTHIK_DEMOLISHER);
+                        summons.DoAction((ACTION_ENGAGE_COMBAT << WAVE_FOUR), pred);
+                        summons.DoAction((ACTION_ENGAGE_COMBAT << WAVE_FOUR), pred2);
                         break;
+                    }
                     case EVENT_AMBERWING:
                         DelayedTalk(me, EMOTE_BOMBARD, 4000);
                         DelayedTalk(me, SAY_AMBERWING, 4500);
@@ -1172,10 +1188,15 @@ public:
 
         void FilterTargets(std::list<WorldObject*>& targets)
         {
+            if (targets.empty())
+                return;
+
             if (Unit * caster = GetCaster())
             {
-                targets.remove_if([](const WorldObject * unit) { return unit->ToCreature()->HasAura(SPELL_KEG_ACTIVE); });
-                Trinity::Containers::RandomResizeList(targets, 1);
+                targets.remove_if([](const WorldObject * unit) { return unit->GetTypeId() == TYPEID_UNIT && unit->ToCreature()->HasAura(SPELL_KEG_ACTIVE); });
+
+                if (!targets.empty() && targets.size() > 1)
+                    Trinity::Containers::RandomResizeList(targets, 1);
             }
         }
 

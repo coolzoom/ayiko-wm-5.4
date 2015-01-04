@@ -26,10 +26,10 @@ namespace Trinity
 {
     namespace Honor
     {
-        inline float hk_honor_at_level_f(uint8 level, float multiplier = 1.0f)
+        inline float hk_honor_at_level_f(float level, float multiplier = 1.0f)
         {
-            float honor = multiplier * level * 1.55f;
-            return honor * 2.4; // http://www.wowwiki.com/Honorable_kill#Honorable_kills 1 old points = 0.024 new points
+            // 1 point is 0.01 honor
+            return multiplier * level * 100.f;
         }
 
         inline uint32 hk_honor_at_level(uint8 level, float multiplier = 1.0f)

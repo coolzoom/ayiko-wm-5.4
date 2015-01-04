@@ -1040,6 +1040,14 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
             if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_DRUID && GetSpellInfo()->SpellFamilyFlags[2] & 0x00000008)
                 amount = GetBase()->GetUnitOwner()->GetShapeshiftForm() == FORM_CAT ? amount : 0;
             break;
+        case SPELL_AURA_MOD_SPEED_ALWAYS:
+        {
+            // Stealth
+            if (GetId() == 1784 || GetId() == 115191)
+                if (auto elusiveness = GetBase()->GetUnitOwner()->GetAuraEffect(21009, EFFECT_0))
+                    amount = elusiveness->GetAmount();
+            break;
+        }
         case SPELL_AURA_MOUNTED:
             if (MountCapabilityEntry const* mountCapability = GetBase()->GetUnitOwner()->GetMountCapability(uint32(GetMiscValueB())))
             {
@@ -2560,8 +2568,28 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
                break;
         }
 
-        // remove other shapeshift before applying a new one
-        target->RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT, 0, GetBase());
+        // We need to iterate over all shapeshift auras to prevent Shadow Dance removal by Stealth (both use SPELL_AURA_MOD_SHAPESHIFT)
+        auto shapeshiftList = target->GetAuraEffectsByType(SPELL_AURA_MOD_SHAPESHIFT);
+        for (auto iter = shapeshiftList.begin(); iter != shapeshiftList.end();)
+        {
+            Aura *aura = (*iter)->GetBase();
+            AuraApplication * shapeshiftAuraApp = aura->GetApplicationOfTarget(target->GetGUID());
+
+            if (!shapeshiftAuraApp)
+            {
+                printf("CRASH ALERT : Unit::RemoveAurasByType no AurApp pointer for Aura Id %u\n", aura->GetId());
+                ++iter;
+                continue;
+            }
+
+            if (aura == GetBase() || (aura->GetId() == 51713 && (GetId() == 1784 || GetId() == 115191)))
+            {
+                ++iter;
+                continue;
+            }
+            else
+                target->RemoveAura(shapeshiftAuraApp);
+        }
 
         // stop handling the effect if it was removed by linked event
         if (aurApp->GetRemoveMode())
@@ -6066,22 +6094,35 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
         case SPELLFAMILY_PRIEST:
         {
             //if (!(mode & AURA_EFFECT_HANDLE_REAL))
-                //break;
-            switch (GetId())
+            //break;
+            if (!caster)
+                break;
+
+            if (auto player = caster->ToPlayer())
             {
-                case 125045:
+                switch (GetId())
                 {
-                    if (auto player = GetCaster()->ToPlayer())
+                    // Glyp of Holy Nova
+                    case 125045:
                     {
                         if (apply)
                             player->learnSpell(132157, true);
                         else
                             player->removeSpell(132157);
+                        break;
                     }
-                    break;
+                    // Glyph of Confession
+                    case 126152:
+                    {
+                        if (apply)
+                            player->learnSpell(126123, true);
+                        else
+                            player->removeSpell(126123);
+                        break;
+                    }
+                    default:
+                        break;
                 }
-                default:
-                    break;
             }
             break;
         }
@@ -6707,34 +6748,6 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                     if (!target->HasAuraType(SPELL_AURA_MOD_STEALTH))
                         target->RemoveAurasDueToSpell(31665);
                     break;
-                // Killing Spree
-                case 51690:
-                {
-                    // TODO: this should use effect[1] of 51690
-                    UnitList targets;
-                    {
-                        // eff_radius == 0
-                        float radius = GetSpellInfo()->GetMaxRange(false);
-
-                        CellCoord p(Trinity::ComputeCellCoord(target->GetPositionX(), target->GetPositionY()));
-                        Cell cell(p);
-
-                        Trinity::AnyUnfriendlyAttackableVisibleUnitInObjectRangeCheck u_check(target, radius);
-                        Trinity::UnitListSearcher<Trinity::AnyUnfriendlyAttackableVisibleUnitInObjectRangeCheck> checker(target, targets, u_check);
-
-                        cell.Visit(p, Trinity::makeGridVisitor(checker), *GetBase()->GetOwner()->GetMap(), *target, radius);
-                        cell.Visit(p, Trinity::makeWorldVisitor(checker), *GetBase()->GetOwner()->GetMap(), *target, radius);
-                    }
-
-                    if (targets.empty())
-                        return;
-
-                    Unit* spellTarget = Trinity::Containers::SelectRandomContainerElement(targets);
-
-                    target->CastSpell(spellTarget, 57840, true);
-                    target->CastSpell(spellTarget, 57841, true);
-                    break;
-                }
                 // Overkill
                 case 58428:
                     if (!target->HasAuraType(SPELL_AURA_MOD_STEALTH))
@@ -7489,7 +7502,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
         caster->CastSpell(caster, 104317, true);
 
     int32 dmg = damage;
-    if (m_spellInfo->IsAffectedByResilience())
+    if (!m_spellInfo->HasCustomAttribute(SPELL_ATTR0_CU_TRIGGERED_IGNORE_RESILENCE))
         caster->ApplyResilience(target, &dmg);
 
     if (target != caster && target->GetTypeId() == TYPEID_PLAYER)
@@ -7569,7 +7582,8 @@ void AuraEffect::HandlePeriodicHealthLeechAuraTick(Unit* target, Unit* caster) c
     }
 
     int32 dmg = damage;
-    caster->ApplyResilience(target, &dmg);
+    if (!m_spellInfo->HasCustomAttribute(SPELL_ATTR0_CU_TRIGGERED_IGNORE_RESILENCE))
+        caster->ApplyResilience(target, &dmg);
 
     if (target != caster && target->GetTypeId() == TYPEID_PLAYER)
         dmg = target->CalcStaggerDamage(target->ToPlayer(), dmg);

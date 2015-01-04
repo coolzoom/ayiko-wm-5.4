@@ -3880,30 +3880,77 @@ void Player::InitSpellForLevel()
             removeSpell(97709, false, false);
     }
 
-    // Mage players learn automatically Portal: Vale of Eternal Blossom and Teleport: Vale of Eternal Blossom at level 90
-    if (level == 90 && getClass() == CLASS_MAGE)
+    // Mage players learn automatically their racial capital teleport at level 17
+    if (level >= 17 && getClass() == CLASS_MAGE)
     {
-        if (TeamForRace(getRace()) == ALLIANCE)
+        if (getRace() == RACE_HUMAN || getRace() == RACE_PANDAREN_ALLI)
         {
-            learnSpell(132627, false); // Teleport: Vale of Eternal Blossoms
-            learnSpell(132626, false); // Portal: Vale of Eternal Blossoms
-
-            // Only for horde
-            if (HasSpell(132621))
-                removeSpell(132621, false, false);
-            if (HasSpell(132620))
-                removeSpell(132620, false, false);
+            learnSpell(3561, false); // Teleport: Stormwind
         }
-        else
+        if (getRace() == RACE_ORC || getRace() == RACE_TROLL || getRace() == RACE_GOBLIN || getRace() == RACE_PANDAREN_HORDE)
         {
-            learnSpell(132621, false); // Teleport: Vale of Eternal Blossoms
-            learnSpell(132620, false); // Portal: Vale of Eternal Blossoms
+            learnSpell(3567, false); // Teleport: Orgrimmar
+        }
+        if (getRace() == RACE_BLOODELF || getRace() == RACE_WORGEN)
+        {
+            learnSpell(3565, false); // Teleport: Darnassus
+        }
+        if (getRace() == RACE_TAUREN)
+        {
+            learnSpell(3566, false); // Teleport: Thunder Bluff
+        }
+        if (getRace() == RACE_DWARF || getRace() == RACE_GNOME)
+        {
+            learnSpell(3562, false); // Teleport: Ironforge
+        }
+        if (getRace() == RACE_UNDEAD_PLAYER)
+        {
+            learnSpell(3563, false); // Teleport: Undercity
+        }
+        if (getRace() == RACE_DRAENEI)
+        {
+            learnSpell(32271, false); // Teleport: Exodar
+        }
+        if (getRace() == RACE_BLOODELF)
+        {
+            learnSpell(32272, false); // Teleport: Silvermoon
+        }
+    }
 
-            // Only for alliance
-            if (HasSpell(132626))
-                removeSpell(132626, false, false);
-            if (HasSpell(132627))
-                removeSpell(132627, false, false);
+    // Mage players learn automatically their racial capital portal at level 42
+    if (level >= 42 && getClass() == CLASS_MAGE)
+    {
+        if (getRace() == RACE_HUMAN || getRace() == RACE_PANDAREN_ALLI)
+        {
+            learnSpell(10059, false); // Portal: Stormwind
+        }
+        if (getRace() == RACE_ORC || getRace() == RACE_TROLL || getRace() == RACE_GOBLIN || getRace() == RACE_PANDAREN_HORDE)
+        {
+            learnSpell(11417, false); // Portal: Orgrimmar
+        }
+        if (getRace() == RACE_NIGHTELF || getRace() == RACE_WORGEN)
+        {
+            learnSpell(11419, false); // Portal: Darnassus
+        }
+        if (getRace() == RACE_TAUREN)
+        {
+            learnSpell(11420, false); // Portal: Thunder Bluff
+        }
+        if (getRace() == RACE_DWARF || getRace() == RACE_GNOME)
+        {
+            learnSpell(11416, false); // Portal: Ironforge
+        }
+        if (getRace() == RACE_UNDEAD_PLAYER)
+        {
+            learnSpell(11418, false); // Portal: Undercity
+        }
+        if (getRace() == RACE_DRAENEI)
+        {
+            learnSpell(32266, false); // Portal: Exodar
+        }
+        if (getRace() == RACE_BLOODELF)
+        {
+            learnSpell(32267, false); // Portal: Silvermoon
         }
     }
 
@@ -7909,7 +7956,8 @@ bool Player::RewardHonor(Unit* victim, uint32 groupsize, int32 honor, bool pvpto
             else
                 victim_guid = 0;                        // Don't show HK: <rank> message, only log.
 
-            honor_f = ceil(Trinity::Honor::hk_honor_at_level_f(k_level) * (v_level - k_grey) / (k_level - k_grey));
+            // Honor for the same level player is 9.9
+            honor_f = Trinity::Honor::hk_honor_at_level_f(10.01f * ((float)v_level / ((float)k_level + 1)));
 
             // count the number of playerkills in one day
             ApplyModUInt32Value(PLAYER_FIELD_KILLS, 1, true);
@@ -18362,6 +18410,9 @@ void Player::SendQuestReward(Quest const* quest, uint32 XP, Object* questGiver)
 
     if (quest->GetQuestCompleteScript() != 0)
         GetMap()->ScriptsStart(sQuestEndScripts, quest->GetQuestCompleteScript(), questGiver, this);
+
+    if (questGiver && questGiver->GetTypeId() == TYPEID_UNIT)
+        sScriptMgr->OnQuestComplete(this, questGiver->ToCreature(), quest);
 }
 
 void Player::SendQuestFailed(uint32 questId, InventoryResult reason)

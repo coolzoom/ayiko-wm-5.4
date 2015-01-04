@@ -331,8 +331,8 @@ public:
         {
             _EnterEvadeMode();
 
-            if (me->GetInstanceScript())
-                me->GetInstanceScript()->SetData(TYPE_WIPE_FIRST_BOSS, 0);
+            if (instance)
+                instance->SetData(TYPE_WIPE_FIRST_BOSS, 0);
 
             me->GetMotionMaster()->MovePoint(1, me->GetHomePosition());
 
@@ -353,6 +353,9 @@ public:
 
         void EnterCombat(Unit* /*unit*/)
         {
+            if (instance->GetData(TYPE_SHUFFLE_ORDER) == DONE)
+                return;
+
             me->CastSpell(me, SPELL_GUARDIAN_GRUNT, false);
             events.ScheduleEvent(EVENT_LIGHTNING_BOLT, 3000);
             events.ScheduleEvent(EVENT_WHIRLING_DERVISH, 10000);
@@ -393,8 +396,8 @@ public:
             me->CastStop();
             events.Reset();
             events.ScheduleEvent(EVENT_BOSS_RETIRE, 11000);
-            if (me->GetInstanceScript())
-                me->GetInstanceScript()->SetData(TYPE_MING_RETIRED, 0);
+            if (instance)
+                instance->SetData(TYPE_MING_RETIRED, 0);
 
             m_bIsMovingHome = true;
         }
@@ -443,8 +446,8 @@ public:
                         events.ScheduleEvent(EVENT_MAGNETIC_FIELD, 30000);
                         break;
                     case EVENT_BOSS_RETIRE:
-                        if (me->GetInstanceScript())
-                            me->GetInstanceScript()->SetData(TYPE_SHUFFLE_ORDER, 0);
+                        if (instance)
+                            instance->SetData(TYPE_SHUFFLE_ORDER, 0);
                         break;
                 }
             }
@@ -767,8 +770,8 @@ public:
         {
             _EnterEvadeMode();
 
-            if (me->GetInstanceScript())
-                me->GetInstanceScript()->SetData(TYPE_WIPE_FIRST_BOSS, 0);
+            if (instance)
+                instance->SetData(TYPE_WIPE_FIRST_BOSS, 0);
 
             me->GetMotionMaster()->MovePoint(1, me->GetHomePosition());
 
@@ -813,6 +816,9 @@ public:
 
         void EnterCombat(Unit* /*unit*/)
         {
+            if (instance->GetData(TYPE_SHUFFLE_ORDER) == DONE)
+                return;
+
             events.ScheduleEvent(EVENT_SHOCKWAVE, 3000);
 
             if (Creature* mu_shiba = me->GetMap()->GetCreature(pet_guid))
@@ -833,8 +839,8 @@ public:
             me->AttackStop();
             events.Reset();
             events.ScheduleEvent(EVENT_BOSS_RETIRE, 11000);
-            if (me->GetInstanceScript())
-                me->GetInstanceScript()->SetData(TYPE_KUAI_RETIRED, 0);
+            if (instance)
+                instance->SetData(TYPE_KUAI_RETIRED, 0);
 
             m_bIsMovingHome = true;
 
@@ -883,8 +889,8 @@ public:
                         events.ScheduleEvent(EVENT_SHOCKWAVE, 15000);
                         break;
                     case EVENT_BOSS_RETIRE:
-                        if (me->GetInstanceScript())
-                            me->GetInstanceScript()->SetData(TYPE_SHUFFLE_ORDER, 0);
+                        if (instance)
+                            instance->SetData(TYPE_SHUFFLE_ORDER, 0);
                         break;
                 }
             }
@@ -1043,6 +1049,9 @@ public:
 
         void EnterCombat(Unit* /*unit*/)
         {
+            if (instance->GetData(TYPE_SHUFFLE_ORDER) == DONE)
+                return;
+
             m_bIsMovingHome = false;
             events.ScheduleEvent(EVENT_TRAUMATIC_BLOW, 3000);
             events.ScheduleEvent(EVENT_CONFLAGRATE, 10000);
@@ -1053,8 +1062,8 @@ public:
         {
             _EnterEvadeMode();
 
-            if (me->GetInstanceScript())
-                me->GetInstanceScript()->SetData(TYPE_WIPE_FIRST_BOSS, 0);
+            if (instance)
+                instance->SetData(TYPE_WIPE_FIRST_BOSS, 0);
 
             me->GetMotionMaster()->MovePoint(1, me->GetHomePosition());
 
@@ -1105,8 +1114,8 @@ public:
             me->AttackStop();
             events.Reset();
             events.ScheduleEvent(EVENT_BOSS_RETIRE, 11000);
-            if (me->GetInstanceScript())
-                me->GetInstanceScript()->SetData(TYPE_HAIYAN_RETIRED, 0);
+            if (instance)
+                instance->SetData(TYPE_HAIYAN_RETIRED, 0);
 
             m_bIsMovingHome = true;
         }
@@ -1155,8 +1164,8 @@ public:
                         events.ScheduleEvent(EVENT_METEOR, urand(23000, 30000));
                         break;
                     case EVENT_BOSS_RETIRE:
-                        if (me->GetInstanceScript())
-                            me->GetInstanceScript()->SetData(TYPE_SHUFFLE_ORDER, 0);
+                        if (instance)
+                            instance->SetData(TYPE_SHUFFLE_ORDER, 0);
                         break;
                 }
             }

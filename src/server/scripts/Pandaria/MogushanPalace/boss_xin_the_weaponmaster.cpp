@@ -207,7 +207,7 @@ public:
                 return true;
             }
 
-            for (int n = 0; n < 2; ++n)
+            for (int n = 0; n < 2 && !m_lLaunchersList.empty(); ++n)
             {
                 if (Creature* pTrap = Trinity::Containers::SelectRandomContainerElement(m_lLaunchersList))
                 {

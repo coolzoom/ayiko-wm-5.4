@@ -4135,7 +4135,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 132020: // Lightning Pool
                     spellInfo->Effects[0].TargetA = TARGET_DEST_DEST;
                     break;
-                case 8680:  // Wound Poison
                 case 3409:  // Crippling Poison
                 case 5760:  // Mind-numbing Poison
                     spellInfo->Attributes |= SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK;
@@ -4442,6 +4441,7 @@ void SpellMgr::LoadSpellCustomAttr()
                     break;
                 case 49016: // Unholy Frenzy
                     spellInfo->AttributesEx4 |= SPELL_ATTR4_STACK_DOT_MODIFIER;
+                    spellInfo->AttributesCu |= SPELL_ATTR0_CU_TRIGGERED_IGNORE_RESILENCE;
                     break;
                 case 31935: // Avenger's Shield
                     spellInfo->DmgClass = SPELL_DAMAGE_CLASS_MAGIC;
@@ -4879,7 +4879,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[0].TargetA = TARGET_UNIT_TARGET_ENEMY;
                     break;
                 case 148023: // Icicle (periodic trigger)
-                case 148022: // Icicle (damage)
                 case 148017: // Icicle (visual)
                 case 148018:
                 case 148019:
@@ -4887,6 +4886,11 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 148021:
                     spellInfo->Effects[0].TargetA = TARGET_UNIT_TARGET_ANY;
                     spellInfo->AttributesEx6 &= ~SPELL_ATTR6_CANT_TARGET_CROWD_CONTROLLED;
+                    break;
+                case 148022: // Icicle (damage)
+                    spellInfo->Effects[0].TargetA = TARGET_UNIT_TARGET_ANY;
+                    spellInfo->AttributesEx6 &= ~SPELL_ATTR6_CANT_TARGET_CROWD_CONTROLLED;
+                    spellInfo->AttributesCu |= SPELL_ATTR0_CU_TRIGGERED_IGNORE_RESILENCE;
                     break;
                 case 106909:
                 {
@@ -5046,6 +5050,11 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 60206: // Ram
                     spellInfo->Effects[2].RadiusEntry = sSpellRadiusStore.LookupEntry(13);
                     break;
+                case 33619: // Glyph of Reflective Shield
+                case 87023: // Cauterize
+                case 110914:// Dark Bargain (DoT)
+                case 124280:// Touch of Karma (DoT)
+                case 113344: // Bloodbath (DoT)
                 case 70890: // Scourge Strike triggered part
                 case 96172: // Hand of Light
                 case 101085: // Wrath of Tarecgosa
@@ -5112,12 +5121,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[EFFECT_1].ApplyAuraName = 0;
                     spellInfo->Effects[EFFECT_2].Effect = 0;
                     spellInfo->Effects[EFFECT_2].ApplyAuraName = 0;
-                    break;
-                // Burn Hay, Braizer Torch
-                case 88646:
-                    spellInfo->Effects[EFFECT_1].Effect = 0;
-                    spellInfo->Effects[EFFECT_1].TargetA = 0;
-                    spellInfo->Effects[EFFECT_1].TargetB = 0;
                     break;
                 // Cauterizing Flame
                 case 99152:
@@ -5710,6 +5713,7 @@ void SpellMgr::LoadSpellCustomAttr()
                     break;
                 case 32409: // Glyph of Shadow Word: Death (backfire)
                     spellInfo->Effects[EFFECT_0].ScalingMultiplier = 0.0f;
+                    spellInfo->AttributesCu |= SPELL_ATTR0_CU_TRIGGERED_IGNORE_RESILENCE;
                     break;
                 case 116: // Frostbolt - It has unknown type 5 in DBC
                     spellInfo->PreventionType = SPELL_PREVENTION_TYPE_SILENCE;
@@ -5784,6 +5788,7 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[EFFECT_1].BasePoints = 365;
                     break;
                 case 22482: // Blade Flurry proc
+                    spellInfo->AttributesCu |= SPELL_ATTR0_CU_TRIGGERED_IGNORE_RESILENCE;
                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
                     spellInfo->Effects[EFFECT_0].ChainTarget = 0;
                     spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_TARGET_ENEMY;
@@ -5791,6 +5796,7 @@ void SpellMgr::LoadSpellCustomAttr()
                     break;
                 case 12723: // Sweeping Strike proc
                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
+                    spellInfo->AttributesCu |= SPELL_ATTR0_CU_TRIGGERED_IGNORE_RESILENCE;
                     break;
                 case 140308: // Shuriken Toss - it should no longer deal shadow damage
                 case 140309: // Shuriken Toss (Offhand)
@@ -5801,6 +5807,19 @@ void SpellMgr::LoadSpellCustomAttr()
                     break;
                 case 5487: // Bear Form - base armor increase is 120%
                     spellInfo->Effects[EFFECT_2].BasePoints = 120;
+                    break;
+                case 8680:  // Wound Poison
+                    spellInfo->Attributes |= SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK;
+                    spellInfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REDIRECTED;
+                    spellInfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REFLECTED;
+                    // Custom effect to fix tooltip
+                    ASSERT(spellInfo->Effects.size() == 2);
+                    spellInfo->Effects.emplace_back(spellInfo, nullptr, spellInfo->Effects.size());
+                    spellInfo->Effects.back().Effect = SPELL_EFFECT_APPLY_AURA;
+                    spellInfo->Effects.back().ApplyAuraName = SPELL_AURA_DUMMY;
+                    spellInfo->Effects.back().TargetA = TARGET_UNIT_TARGET_ENEMY;
+                    spellInfo->Effects.back().TargetB = 0;
+                    spellInfo->Effects.back().BasePoints = -25;
                     break;
                     // Siege of Niuzao Temple
                 case 119990: // Summon Sappling

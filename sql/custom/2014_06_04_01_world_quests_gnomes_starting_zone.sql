@@ -214,33 +214,40 @@ DELETE FROM `spell_target_position` WHERE `id` = @SPELL_TELEPORT;
 INSERT INTO `spell_target_position` (`id`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES 
 (@SPELL_TELEPORT,0,-5202.198242,477.385620,388.233032,5.491077);
 
--- [SQL] Quests - Trolling for Information has been scripted (Feedback #489)
+-- [SQL] Quests - Trolling for Information corrected (Fixes #489)
 SET @NPC_SHIKALA := 37108;
 SET @NPC_RIKKARI := 37173;
 SET @NPC_MIRIMKO := 37174;
 SET @KILLCREDITBUNNY_SE := 37109;
 SET @KILLCREDITBUNNY_SW := 37110;
 SET @KILLCREDITBUNNY_W := 37111;
+SET @QUEST_TROLLING_FOR_INFORMATION := 24489;
 SET @CGUID := 5013954; -- needs 3
+UPDATE `gameobject_template` SET `flags` = 4 WHERE `entry` IN (178085, 178084, 148499);
 DELETE FROM `creature` WHERE `id` IN (@KILLCREDITBUNNY_SE,@KILLCREDITBUNNY_SW,@KILLCREDITBUNNY_W);
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
-(@CGUID+0, @KILLCREDITBUNNY_SE, 0, 1, 1, 0, 0, -6485.77, 503.768, 386.047, 6.21123, 50, 0, 0, 42, 0, 0, 0, 0, 0), -- Southeast
-(@CGUID+1, @KILLCREDITBUNNY_SW, 0, 1, 1, 0, 0, -6508.45, 683.899, 387.274, 5.55935, 50, 0, 0, 42, 0, 0, 0, 0, 0), -- Southwest
-(@CGUID+2, @KILLCREDITBUNNY_W, 0, 1, 1, 0, 0, -6392.86, 776.492, 386.213, 5.85937, 50, 0, 0, 42, 0, 0, 0, 0, 0); -- West
-UPDATE `creature_template` SET `AIName`='SmartAI', `ScriptName`='' WHERE `entry` IN (@KILLCREDITBUNNY_SE,@KILLCREDITBUNNY_SW,@KILLCREDITBUNNY_W);
+(@CGUID+0, @KILLCREDITBUNNY_SE, 0, 1, 1, 11686, 0, -6485.77, 503.768, 386.047, 6.21123, 30, 0, 0, 42, 0, 0, 0, 0, 0), -- Southeast
+(@CGUID+1, @KILLCREDITBUNNY_SW, 0, 1, 1, 11686, 0, -6508.45, 683.899, 387.274, 5.55935, 30, 0, 0, 42, 0, 0, 0, 0, 0), -- Southwest
+(@CGUID+2, @KILLCREDITBUNNY_W, 0, 1, 1, 11686, 0, -6392.86, 776.492, 386.213, 5.85937, 30, 0, 0, 42, 0, 0, 0, 0, 0); -- West
+UPDATE `creature_template` SET `InhabitType` = 7, `flags_extra` = 0, `AIName`='SmartAI', `ScriptName`='' WHERE `entry` IN (@KILLCREDITBUNNY_SE,@KILLCREDITBUNNY_SW,@KILLCREDITBUNNY_W);
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@KILLCREDITBUNNY_SE,@KILLCREDITBUNNY_SW,@KILLCREDITBUNNY_W) AND `source_type`=0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
-(@KILLCREDITBUNNY_SE,0,0,1,10,0,100,0,3,12,50000,50000,33,@KILLCREDITBUNNY_SE,0,0,0,0,0,7,0,0,0,0,0,0,0,"Nepenthe-Trolling for Information Kill Credit Bunny SE - On friendly player LoS - Kill Credit SE - q24489"),
+(@KILLCREDITBUNNY_SE,0,0,1,10,0,100,0,1,12,90000,90000,33,@KILLCREDITBUNNY_SE,0,0,0,0,0,7,0,0,0,0,0,0,0,"Nepenthe-Trolling for Information Kill Credit Bunny SE - On friendly player LoS - Kill Credit SE - q24489"),
 (@KILLCREDITBUNNY_SE,0,1,0,61,0,100,0,0,0,0,0,45,1,1,0,0,0,0,19,@NPC_SHIKALA,0,0,0,0,0,0,"Nepenthe-Trolling for Information Kill Credit Bunny SE - On LoS - Set Data Soothsayer Shi'kala - q24489"),
-(@KILLCREDITBUNNY_SW,0,0,1,10,0,100,0,3,12,50000,50000,33,@KILLCREDITBUNNY_SW,0,0,0,0,0,7,0,0,0,0,0,0,0,"Nepenthe-Trolling for Information Kill Credit Bunny SW - On friendly player LoS - Set Data Soothsayer Rikkari - q24489"),
+(@KILLCREDITBUNNY_SW,0,0,1,10,0,100,0,1,12,90000,90000,33,@KILLCREDITBUNNY_SW,0,0,0,0,0,7,0,0,0,0,0,0,0,"Nepenthe-Trolling for Information Kill Credit Bunny SW - On friendly player LoS - Set Data Soothsayer Rikkari - q24489"),
 (@KILLCREDITBUNNY_SW,0,1,0,61,0,100,0,0,0,0,0,45,1,1,0,0,0,0,19,@NPC_RIKKARI,0,0,0,0,0,0,"Nepenthe-Trolling for Information Kill Credit Bunny SW - On LoS - Kill Credit SW - q24489"),
-(@KILLCREDITBUNNY_W,0,0,1,10,0,100,0,3,12,50000,50000,33,@KILLCREDITBUNNY_W,0,0,0,0,0,7,0,0,0,0,0,0,0,"Nepenthe-Trolling for Information Kill Credit Bunny W - On friendly player LoS - Set Data Soothsayer Mirim'koa - q24489"),
+(@KILLCREDITBUNNY_W,0,0,1,10,0,100,0,1,12,90000,90000,33,@KILLCREDITBUNNY_W,0,0,0,0,0,7,0,0,0,0,0,0,0,"Nepenthe-Trolling for Information Kill Credit Bunny W - On friendly player LoS - Set Data Soothsayer Mirim'koa - q24489"),
 (@KILLCREDITBUNNY_W,0,1,0,61,0,100,0,0,0,0,0,45,1,1,0,0,0,0,19,@NPC_MIRIMKO,0,0,0,0,0,0,"Nepenthe-Trolling for Information Kill Credit Bunny W - On LoS - Kill Credit W - q24489");
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 22 AND `SourceEntry` IN (@KILLCREDITBUNNY_SE,@KILLCREDITBUNNY_SW,@KILLCREDITBUNNY_W);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(22, 0, @KILLCREDITBUNNY_SE, 0, 0, 9, 0, @QUEST_TROLLING_FOR_INFORMATION, 0, 0, 0, 0, 0, "", "SAI - Execute only if player in range have no quest"),
+(22, 0, @KILLCREDITBUNNY_SW, 0, 0, 9, 0, @QUEST_TROLLING_FOR_INFORMATION, 0, 0, 0, 0, 0, "", "SAI - Execute only if player in range have no quest"),
+(22, 0, @KILLCREDITBUNNY_W, 0, 0, 9, 0, @QUEST_TROLLING_FOR_INFORMATION, 0, 0, 0, 0, 0, "", "SAI - Execute only if player in range have no quest");
 -- Soothsayer Shi'kala
 UPDATE `creature_template` SET `AIName`='SmartAI', `ScriptName`='' WHERE `entry`=@NPC_SHIKALA;
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@NPC_SHIKALA,@NPC_SHIKALA*100);
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
-(@NPC_SHIKALA,0,0,0,38,0,100,0,1,1,0,0,80,@NPC_SHIKALA*100,0,0,0,0,2,1,0,0,0,0,0,0,0,"Nepenthe-Soothsayer Shi'kala - On Data Set - Run Script - q24489"),
+(@NPC_SHIKALA,0,0,0,38,0,100,0,1,1,0,0,80,@NPC_SHIKALA*100,2,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Soothsayer Shi'kala - On Data Set - Run Script - q24489"),
 (@NPC_SHIKALA*100,9,0,0,0,0,100,0,0,0,0,0,22,1,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Soothsayer Shi'kala - On Script - Set Phase 1"),
 (@NPC_SHIKALA*100,9,1,0,0,0,100,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Soothsayer Shi'kala - On Script - Say Line 0"),
 (@NPC_SHIKALA*100,9,2,0,0,0,100,0,7000,7000,0,0,1,1,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Soothsayer Shi'kala - On Script - Say Line 1"),
@@ -250,7 +257,7 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 UPDATE `creature_template` SET `AIName`='SmartAI', `ScriptName`='' WHERE `entry`=@NPC_RIKKARI;
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@NPC_RIKKARI,@NPC_RIKKARI*100);
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
-(@NPC_RIKKARI,0,0,0,38,0,100,0,1,1,0,0,80,@NPC_RIKKARI*100,0,0,0,0,2,1,0,0,0,0,0,0,0,"Nepenthe-Soothsayer Rikkari - On Data Set - Run Script - q24489"),
+(@NPC_RIKKARI,0,0,0,38,0,100,0,1,1,0,0,80,@NPC_RIKKARI*100,2,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Soothsayer Rikkari - On Data Set - Run Script - q24489"),
 (@NPC_RIKKARI*100,9,0,0,0,0,100,0,0,0,0,0,22,1,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Soothsayer Rikkari - On Script - Set Phase 1"),
 (@NPC_RIKKARI*100,9,1,0,0,0,100,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Soothsayer Rikkari - On Script - Say Line 0"),
 (@NPC_RIKKARI*100,9,2,0,0,0,100,0,7000,7000,0,0,1,1,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Soothsayer Rikkari - On Script - Say Line 1"),
@@ -260,7 +267,7 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 UPDATE `creature_template` SET `AIName`='SmartAI', `ScriptName`='' WHERE `entry`=@NPC_MIRIMKO;
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@NPC_MIRIMKO,@NPC_MIRIMKO*100);
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
-(@NPC_MIRIMKO,0,0,0,38,0,100,0,1,1,0,0,80,@NPC_MIRIMKO*100,0,0,0,0,2,1,0,0,0,0,0,0,0,"Nepenthe-Soothsayer Mirim'koa - On Data Set - Run Script - q24489"),
+(@NPC_MIRIMKO,0,0,0,38,0,100,0,1,1,0,0,80,@NPC_MIRIMKO*100,2,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Soothsayer Mirim'koa - On Data Set - Run Script - q24489"),
 (@NPC_MIRIMKO*100,9,0,0,0,0,100,0,0,0,0,0,22,1,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Soothsayer Mirim'koa - On Script - Set Phase 1"),
 (@NPC_MIRIMKO*100,9,1,0,0,0,100,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Soothsayer Mirim'koa - On Script - Say Line 0"),
 (@NPC_MIRIMKO*100,9,2,0,0,0,100,0,7000,7000,0,0,1,1,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Soothsayer Mirim'koa - On Script - Say Line 1"),
@@ -324,36 +331,56 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (@NPC_RAM,0,1,0,61,0,100,0,0,0,0,0,41,2000,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Stolen Ram - Emote Receive 'Whistle' - Forced Despawn");
 DELETE FROM `creature_template_addon` WHERE `entry`=@NPC_FROSTMANERAIDER;
 
--- Quests - Entombed in Ice has been scripted (Feedback #542)
--- Icy Tomb
-SET @NPC_ITOMB := 41768;
-SET @NPC_FMOUNTAINEER := 41763;
-DELETE FROM `creature_template_addon` WHERE `entry`=@NPC_ITOMB;
-INSERT INTO `creature_template_addon` (`entry`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES
-(@NPC_ITOMB,0,0,1,0,16245); -- Freeze Anim
-UPDATE `creature_template` SET `AIName`='SmartAI', `ScriptName`='' WHERE `entry`=@NPC_ITOMB;
-DELETE FROM `smart_scripts` WHERE `entryorguid`=@NPC_ITOMB;
+-- [SQL] Quests - Entombed in Ice corrected (Fixes #542)
+SET @NPC_ICY_TOMB := 41768;
+SET @NPC_FROZEN_MOUNTAINEER := 41763;
+SET @SPELL_FREEZE_ANIM := 16245;
+SET @CGUID := 49822;
+UPDATE `creature` SET `spawntimesecs` = 90, `curhealth` = 141, `spawndist` = 0, `MovementType` = 0 WHERE `id` = @NPC_FROZEN_MOUNTAINEER;
+DELETE FROM `creature` WHERE `id` = @NPC_ICY_TOMB;
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`) VALUES
+(@CGUID+0, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5736.01, -2054.17, 396.456, 1.09956, 90, 0, 0, 141, 0),
+(@CGUID+1, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5655.28, -2087.21, 400.642, 1.37881, 90, 0, 0, 141, 0),
+(@CGUID+2, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5618.07, -2052.23, 396.456, 0.383972, 90, 0, 0, 141, 0),
+(@CGUID+3, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5666.14, -2033.83, 396.37, 4.43314, 90, 0, 0, 141, 0),
+(@CGUID+4, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5636.21, -2033.33, 396.281, 4.83456, 90, 0, 0, 141, 0),
+(@CGUID+5, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5598.48, -2018.34, 396.309, 5.2709, 90, 0, 0, 141, 0),
+(@CGUID+6, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5563.93, -2025.25, 396.456, 2.23402, 90, 0, 0, 141, 0),
+(@CGUID+7, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5604, -1969.36, 396.208, 5.37561, 90, 0, 0, 141, 0),
+(@CGUID+8, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5567.8, -1975.57, 396.456, 2.44346, 90, 0, 0, 141, 0),
+(@CGUID+9, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5654.29, -1995.44, 396.177, 2.70526, 90, 0, 0, 141, 0),
+(@CGUID+10, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5687.05, -1927.1, 396.456, 5.13127, 90, 0, 0, 141, 0),
+(@CGUID+11, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5664.72, -1957.09, 396.254, 1.51844, 90, 0, 0, 141, 0),
+(@CGUID+12, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5656.17, -1934.24, 396.194, 1.72788, 90, 0, 0, 141, 0),
+(@CGUID+13, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5659.23, -1885.82, 396.456, 4.18879, 90, 0, 0, 141, 0),
+(@CGUID+14, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5627.28, -1906.04, 396.456, 3.82227, 90, 0, 0, 141, 0),
+(@CGUID+15, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5700.1, -1999.36, 396.456, 2.21657, 90, 0, 0, 141, 0),
+(@CGUID+16, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5715.08, -1960.67, 396.456, 5.63741, 90, 0, 0, 141, 0),
+(@CGUID+17, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5744.9, -1994.26, 396.456, 0.20944, 90, 0, 0, 141, 0),
+(@CGUID+18, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5775.43, -1991.7, 400.771, 3.68265, 90, 0, 0, 141, 0),
+(@CGUID+19, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5564.92, -1930.33, 396.456, 3.68265, 90, 0, 0, 141, 0),
+(@CGUID+20, @NPC_ICY_TOMB, 0, 1, 1, 0, 0, -5614.44, -1932.03, 396.29, 5.96903, 90, 0, 0, 141, 0);
+DELETE FROM `creature_template_aura` WHERE `entry` IN (@NPC_ICY_TOMB, @NPC_FROZEN_MOUNTAINEER);
+INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES
+(@NPC_ICY_TOMB, @SPELL_FREEZE_ANIM),  -- Freeze Anim
+(@NPC_FROZEN_MOUNTAINEER, @SPELL_FREEZE_ANIM);
+UPDATE `creature_template` SET `AIName`='SmartAI', `ScriptName`='' WHERE `entry` IN (@NPC_ICY_TOMB, @NPC_FROZEN_MOUNTAINEER);
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@NPC_ICY_TOMB,@NPC_FROZEN_MOUNTAINEER,@NPC_FROZEN_MOUNTAINEER*100);
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
-(@NPC_ITOMB,0,0,1,1,0,100,1,1000,1000,10000,10000,8,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Icy Tomb - Out of Combat - React State Passive"),
-(@NPC_ITOMB,0,1,2,61,0,100,1,0,0,0,0,21,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Icy Tomb - Out of Combat - Avoid Combat Movement"),
-(@NPC_ITOMB,0,2,0,61,0,100,1,0,0,0,0,20,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Icy Tomb - Out of Combat - Avoid Autoattack"),
-(@NPC_ITOMB,0,3,0,6,0,100,0,0,0,0,0,12,@NPC_FMOUNTAINEER,8,10000,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Icy Tomb - On Death - Summon Frozen Mountaineer");
--- Frozen Mountaineer
-DELETE FROM `creature_template_addon` WHERE `entry`=@NPC_FMOUNTAINEER;
-INSERT INTO `creature_template_addon` (`entry`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES
-(@NPC_FMOUNTAINEER,0,0,1,0,16245); -- Freeze Anim
-UPDATE `creature_template` SET `AIName`='SmartAI', `ScriptName`='' WHERE `entry`=@NPC_FMOUNTAINEER;
-DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@NPC_FMOUNTAINEER,@NPC_FMOUNTAINEER*100);
-INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
-(@NPC_FMOUNTAINEER,0,0,0,54,0,100,0,0,0,0,0,80,@NPC_FMOUNTAINEER*100,0,2,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Frozen Mountaineer - Just Summoned - Run Script"),
-(@NPC_FMOUNTAINEER*100,9,0,0,0,0,100,0,0,0,0,0,28,16245,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Frozen Mountaineer - On Script - Remove Aura Freeze Anim"),
-(@NPC_FMOUNTAINEER*100,9,1,0,0,0,100,0,1000,1000,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Frozen Mountaineer - On Script - Say Line 0"),
-(@NPC_FMOUNTAINEER*100,9,2,0,0,0,100,0,2000,2000,0,0,46,6,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Frozen Mountaineer - On Script - Move Forward"),
-(@NPC_FMOUNTAINEER*100,9,3,0,0,0,100,0,7000,7000,0,0,41,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Frozen Mountaineer - On Script - Forced Despawn");
--- Texts
-DELETE FROM `creature_text` WHERE `entry`=@NPC_FMOUNTAINEER;
+(@NPC_ICY_TOMB,0,0,1,1,0,100,1,1000,1000,10000,10000,8,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Icy Tomb - Out of Combat - React State Passive"),
+(@NPC_ICY_TOMB,0,1,2,61,0,100,1,0,0,0,0,21,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Icy Tomb - Out of Combat - Avoid Combat Movement"),
+(@NPC_ICY_TOMB,0,2,0,61,0,100,1,0,0,0,0,20,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Icy Tomb - Out of Combat - Avoid Autoattack"),
+(@NPC_ICY_TOMB,0,3,4,6,0,100,0,0,0,0,0,45,1,1,0,0,0,0,19,@NPC_FROZEN_MOUNTAINEER,8,0,0,0,0,0,"Nepenthe-Icy Tomb - On Death - Set Data Frozen Mountaineer"),
+(@NPC_ICY_TOMB,0,4,0,61,0,100,0,0,0,0,0,12,@NPC_FROZEN_MOUNTAINEER,8,10000,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Icy Tomb - On Death - Summon new Frozen Mountaineer"),
+(@NPC_FROZEN_MOUNTAINEER,0,0,0,38,0,100,0,1,1,0,0,41,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Frozen Mountaineer - On Data Set - Despawn default Frozen Mountaineer"),
+(@NPC_FROZEN_MOUNTAINEER,0,1,0,54,0,100,0,0,0,0,0,80,@NPC_FROZEN_MOUNTAINEER*100,0,2,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Frozen Mountaineer - Just Summoned - Run Script"),
+(@NPC_FROZEN_MOUNTAINEER*100,9,0,0,0,0,100,0,0,0,0,0,28,@SPELL_FREEZE_ANIM,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Frozen Mountaineer - On Script - Remove Aura Freeze Anim"),
+(@NPC_FROZEN_MOUNTAINEER*100,9,1,0,0,0,100,0,1000,1000,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Frozen Mountaineer - On Script - Say Line 0"),
+(@NPC_FROZEN_MOUNTAINEER*100,9,2,0,0,0,100,0,5000,5000,0,0,46,15,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Frozen Mountaineer - On Script - Move Forward"),
+(@NPC_FROZEN_MOUNTAINEER*100,9,3,0,0,0,100,0,5000,5000,0,0,41,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Frozen Mountaineer - On Script - Forced Despawn");
+DELETE FROM `creature_text` WHERE `entry`=@NPC_FROZEN_MOUNTAINEER;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
-(@NPC_FMOUNTAINEER,0,0,"%s gasps for air and shivers in the cold.",16,0,100,20,0,0,"Frozen Mountaineer"); -- ONESHOT_BEG
+(@NPC_FROZEN_MOUNTAINEER,0,0,"%s gasps for air and shivers in the cold.",16,0,100,20,0,0,"Frozen Mountaineer");  -- ONESHOT_BEG
 
 -- Quests - Aid for the Wounded has been scripted (Feedback #3165)
 -- Wounded Coldridge Mountaineer
@@ -575,49 +602,53 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (@NPC_CAPTURED_DEMOLITIONIST,0,4,"Thanks. Now, let's blow up that cave!",12,0,100,0,0,0,"Captured Demolitionist"),
 (@NPC_CAPTURED_DEMOLITIONIST,0,5,"You have no idea how happy I am to see you!",12,0,100,0,0,0,"Captured Demolitionist");
 
--- Quests - Paint it Black has been scripted (Feedback #3171)
-SET @NPC := 42291;
+-- Quests - Paint it Black corrected (Fixes #3171)
+SET @NPC_CRUSHCOG_SENTRY_BOT := 42291;
+SET @KILL_CREDIT := 42796;
 SET @SPELL_BLIND_SENTRY := 79781;
 SET @SPELL_WAILING_SIREN := 84152;
-UPDATE `creature_template` SET `minlevel`=4,`maxlevel`=5,`mindmg` = 9, `maxdmg` = 15, `attackpower` = 36,`baseattacktime`=2000,`mingold`=1,`maxgold`=3,`AIName`='SmartAI', `ScriptName`='' WHERE `entry`=@NPC;
-DELETE FROM `smart_scripts` WHERE `entryorguid`=@NPC AND `source_type`=0;
+SET @QUEST_PAINT_IT_BLACK := 26342;
+UPDATE `quest_template` SET `RequiredNpcOrGo1` = @KILL_CREDIT WHERE `Id` = @QUEST_PAINT_IT_BLACK;
+UPDATE `creature_template` SET `minlevel`=4,`maxlevel`=5,`mindmg` = 9, `maxdmg` = 15, `attackpower` = 36,`baseattacktime`=2000,`mingold`=1,`maxgold`=3,`AIName`='SmartAI', `ScriptName`='' WHERE `entry`=@NPC_CRUSHCOG_SENTRY_BOT ;
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@NPC_CRUSHCOG_SENTRY_BOT, @NPC_CRUSHCOG_SENTRY_BOT*100);
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
-(@NPC,0,0,1,8,0,100,0,@SPELL_BLIND_SENTRY,0,0,0,33,@NPC,0,0,0,0,0,7,0,0,0,0,0,0,0,"Nepenthe-Crushcog Sentry-Bot - On Spellhit - Quest Credit"),
-(@NPC,0,1,2,61,0,100,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Crushcog Sentry-Bot - Out of Combat - Say Line 0"),
-(@NPC,0,2,3,61,0,100,0,0,0,0,0,20,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Crushcog Sentry-Bot - Out of Combat - Disable Autoattack"),
-(@NPC,0,3,4,61,0,100,0,0,0,0,0,25,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Crushcog Sentry-Bot - Out of Combat - Flee"),
-(@NPC,0,4,0,61,0,100,0,0,0,0,0,41,2000,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Crushcog Sentry-Bot - On Spellhit - Forced Despawn"),
-(@NPC,0,5,0,0,0,100,0,1000,5000,7000,1000,11,@SPELL_WAILING_SIREN,0,0,0,0,0,2,0,0,0,0,0,0,0,"Nepenthe-Crushcog Sentry-Bot - In Combat - Cast Wailing Siren");
-DELETE FROM `creature_text` WHERE `entry`=@NPC;
+(@NPC_CRUSHCOG_SENTRY_BOT,0,0,0,0,0,100,0,1000,5000,7000,10000,11,@SPELL_WAILING_SIREN,0,0,0,0,0,2,0,0,0,0,0,0,0,"Nepenthe-Crushcog Sentry-Bot - In Combat - Cast Wailing Siren"),
+(@NPC_CRUSHCOG_SENTRY_BOT,0,1,2,8,0,100,0,@SPELL_BLIND_SENTRY,0,10000,10000,33,@KILL_CREDIT,0,0,0,0,0,7,0,0,0,0,0,0,0,"Nepenthe-Crushcog Sentry-Bot - On Spellhit - KC"),
+(@NPC_CRUSHCOG_SENTRY_BOT,0,2,0,61,0,100,0,0,0,0,0,80,@NPC_CRUSHCOG_SENTRY_BOT*100,2,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Crushcog Sentry-Bot - On Spellhit - Run Script"),
+(@NPC_CRUSHCOG_SENTRY_BOT*100,9,0,0,0,0,100,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Crushcog Sentry-Bot - On Script - Say Line 0"),
+(@NPC_CRUSHCOG_SENTRY_BOT*100,9,1,0,0,0,100,0,0,0,0,0,20,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Crushcog Sentry-Bot - On Script - Disable Autoattack"),
+(@NPC_CRUSHCOG_SENTRY_BOT*100,9,2,0,0,0,100,0,0,0,0,0,46,20,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Crushcog Sentry-Bot - On Script - Move Forward 20 yards"),
+(@NPC_CRUSHCOG_SENTRY_BOT*100,9,3,0,0,0,100,0,4000,4000,0,0,37,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Nepenthe-Crushcog Sentry-Bot - On Script - Die");
+DELETE FROM `creature_text` WHERE `entry`=@NPC_CRUSHCOG_SENTRY_BOT;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
-(@NPC,0,0,"Optical sensor malfunction detected! Shutting down...",12,0,0,0,0,0,"Crushcog Sentry-Bot");
+(@NPC_CRUSHCOG_SENTRY_BOT,0,0,"Optical sensor malfunction detected! Shutting down...",12,0,0,0,0,0,"Crushcog Sentry-Bot");
 -- Spawns
-DELETE FROM `creature` WHERE `id`=@NPC;
+DELETE FROM `creature` WHERE `id`=@NPC_CRUSHCOG_SENTRY_BOT;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
-(6614473, @NPC, 0, 1, 1, 0, 0, -5316.32, 234.19, 386.112, 0.957587, 90, 0, 0, 42, 0, 0, 0, 0, 0),
-(6614472, @NPC, 0, 1, 1, 0, 0, -5228.3, 187.759, 386.111, 5.91737, 90, 0, 0, 42, 0, 0, 0, 0, 0),
-(6614471, @NPC, 0, 1, 1, 0, 0, -5251.91, 194.584, 386.111, 5.28906, 90, 0, 0, 42, 0, 0, 0, 0, 0),
-(6614470, @NPC, 0, 1, 1, 0, 0, -5269.05, 215.738, 386.111, 0.663061, 90, 0, 0, 42, 0, 0, 0, 0, 0),
-(6614469, @NPC, 0, 1, 1, 0, 0, -5295.98, 198.327, 386.111, 0.37639, 90, 0, 0, 42, 0, 0, 0, 0, 0),
-(6614468, @NPC, 0, 1, 1, 0, 0, -5318.46, 199.797, 386.111, 5.77601, 90, 0, 0, 42, 0, 0, 0, 0, 0),
-(6614467, @NPC, 0, 1, 1, 0, 0, -5342.27, 198.172, 386.111, 1.33458, 90, 0, 0, 42, 0, 0, 0, 0, 0),
-(6614466, @NPC, 0, 1, 1, 0, 0, -5374.45, 173.049, 386.111, 4.47617, 90, 0, 0, 42, 0, 0, 0, 0, 0),
-(6614465, @NPC, 0, 1, 1, 0, 0, -5371.08, 140.822, 386.111, 1.0754, 90, 0, 0, 42, 0, 0, 0, 0, 0),
-(6614464, @NPC, 0, 1, 1, 0, 0, -5378.02, 115.236, 386.113, 2.4145, 90, 0, 0, 42, 0, 0, 0, 0, 0),
-(6614463, @NPC, 0, 1, 1, 0, 0, -5345.24, 115.686, 386.112, 3.52192, 90, 0, 0, 42, 0, 0, 0, 0, 0),
-(6614462, @NPC, 0, 1, 1, 0, 0, -5342.84, 144.094, 386.189, 5.24586, 90, 0, 0, 42, 0, 0, 0, 0, 0),
-(6614461, @NPC, 0, 1, 1, 0, 0, -5335.63, 176.233, 386.203, 4.11097, 90, 0, 0, 42, 0, 0, 0, 0, 0),
-(6614460, @NPC, 0, 1, 1, 0, 0, -5293.91, 176.496, 386.126, 2.72081, 90, 0, 0, 42, 0, 0, 0, 0, 0),
-(6614459, @NPC, 0, 1, 1, 0, 0, -5265.34, 165.002, 386.112, 3.30593, 90, 0, 0, 42, 0, 0, 0, 0, 0),
-(6614458, @NPC, 0, 1, 1, 0, 0, -5231.91, 169.62, 386.114, 4.24056, 90, 0, 0, 42, 0, 0, 0, 0, 0),
-(6614457, @NPC, 0, 1, 1, 0, 0, -5216, 200.796, 386.112, 4.24056, 90, 0, 0, 42, 0, 0, 0, 0, 0),
-(6614456, @NPC, 0, 1, 1, 0, 0, -5225.32, 239.339, 386.111, 5.56002, 90, 0, 0, 42, 0, 0, 0, 0, 0),
-(6614455, @NPC, 0, 1, 1, 0, 0, -5389.52, 154.644, 386.115, 4.92385, 90, 0, 0, 42, 0, 0, 0, 0, 0),
-(6614454, @NPC, 0, 1, 1, 0, 0, -5250.73, 253.673, 386.112, 0.325341, 90, 0, 0, 42, 0, 0, 0, 0, 0),
-(6614453, @NPC, 0, 1, 1, 0, 0, -5391.38, 179.448, 386.111, 0.820142, 90, 0, 0, 42, 0, 0, 0, 0, 0),
-(6614452, @NPC, 0, 1, 1, 0, 0, -5381.47, 203.505, 386.122, 0.13685, 90, 0, 0, 42, 0, 0, 0, 0, 0),
-(6614451, @NPC, 0, 1, 1, 0, 0, -5285.56, 249.865, 386.112, 0.706259, 90, 0, 0, 42, 0, 0, 0, 0, 0),
-(6614450, @NPC, 0, 1, 1, 0, 0, -5347.89, 222.313, 386.111, 0.0111861, 90, 0, 0, 42, 0, 0, 0, 0, 0);
+(6614473, @NPC_CRUSHCOG_SENTRY_BOT, 0, 1, 1, 0, 0, -5316.32, 234.19, 386.112, 0.957587, 90, 8, 0, 42, 0, 1, 0, 0, 0),
+(6614472, @NPC_CRUSHCOG_SENTRY_BOT, 0, 1, 1, 0, 0, -5228.3, 187.759, 386.111, 5.91737, 90, 8, 0, 42, 0, 1, 0, 0, 0),
+(6614471, @NPC_CRUSHCOG_SENTRY_BOT, 0, 1, 1, 0, 0, -5251.91, 194.584, 386.111, 5.28906, 90, 8, 0, 42, 0, 1, 0, 0, 0),
+(6614470, @NPC_CRUSHCOG_SENTRY_BOT, 0, 1, 1, 0, 0, -5269.05, 215.738, 386.111, 0.663061, 90, 8, 0, 42, 0, 1, 0, 0, 0),
+(6614469, @NPC_CRUSHCOG_SENTRY_BOT, 0, 1, 1, 0, 0, -5295.98, 198.327, 386.111, 0.37639, 90, 8, 0, 42, 0, 1, 0, 0, 0),
+(6614468, @NPC_CRUSHCOG_SENTRY_BOT, 0, 1, 1, 0, 0, -5318.46, 199.797, 386.111, 5.77601, 90, 8, 0, 42, 0, 1, 0, 0, 0),
+(6614467, @NPC_CRUSHCOG_SENTRY_BOT, 0, 1, 1, 0, 0, -5342.27, 198.172, 386.111, 1.33458, 90, 8, 0, 42, 0, 1, 0, 0, 0),
+(6614466, @NPC_CRUSHCOG_SENTRY_BOT, 0, 1, 1, 0, 0, -5374.45, 173.049, 386.111, 4.47617, 90, 8, 0, 42, 0, 1, 0, 0, 0),
+(6614465, @NPC_CRUSHCOG_SENTRY_BOT, 0, 1, 1, 0, 0, -5371.08, 140.822, 386.111, 1.0754, 90, 8, 0, 42, 0, 1, 0, 0, 0),
+(6614464, @NPC_CRUSHCOG_SENTRY_BOT, 0, 1, 1, 0, 0, -5378.02, 115.236, 386.113, 2.4145, 90, 8, 0, 42, 0, 1, 0, 0, 0),
+(6614463, @NPC_CRUSHCOG_SENTRY_BOT, 0, 1, 1, 0, 0, -5345.24, 115.686, 386.112, 3.52192, 90, 8, 0, 42, 0, 1, 0, 0, 0),
+(6614462, @NPC_CRUSHCOG_SENTRY_BOT, 0, 1, 1, 0, 0, -5342.84, 144.094, 386.189, 5.24586, 90, 8, 0, 42, 0, 1, 0, 0, 0),
+(6614461, @NPC_CRUSHCOG_SENTRY_BOT, 0, 1, 1, 0, 0, -5335.63, 176.233, 386.203, 4.11097, 90, 8, 0, 42, 0, 1, 0, 0, 0),
+(6614460, @NPC_CRUSHCOG_SENTRY_BOT, 0, 1, 1, 0, 0, -5293.91, 176.496, 386.126, 2.72081, 90, 8, 0, 42, 0, 1, 0, 0, 0),
+(6614459, @NPC_CRUSHCOG_SENTRY_BOT, 0, 1, 1, 0, 0, -5265.34, 165.002, 386.112, 3.30593, 90, 8, 0, 42, 0, 1, 0, 0, 0),
+(6614458, @NPC_CRUSHCOG_SENTRY_BOT, 0, 1, 1, 0, 0, -5231.91, 169.62, 386.114, 4.24056, 90, 8, 0, 42, 0, 1, 0, 0, 0),
+(6614457, @NPC_CRUSHCOG_SENTRY_BOT, 0, 1, 1, 0, 0, -5216, 200.796, 386.112, 4.24056, 90, 8, 0, 42, 0, 1, 0, 0, 0),
+(6614456, @NPC_CRUSHCOG_SENTRY_BOT, 0, 1, 1, 0, 0, -5225.32, 239.339, 386.111, 5.56002, 90, 8, 0, 42, 0, 1, 0, 0, 0),
+(6614455, @NPC_CRUSHCOG_SENTRY_BOT, 0, 1, 1, 0, 0, -5389.52, 154.644, 386.115, 4.92385, 90, 8, 0, 42, 0, 1, 0, 0, 0),
+(6614454, @NPC_CRUSHCOG_SENTRY_BOT, 0, 1, 1, 0, 0, -5250.73, 253.673, 386.112, 0.325341, 90, 8, 0, 42, 0, 1, 0, 0, 0),
+(6614453, @NPC_CRUSHCOG_SENTRY_BOT, 0, 1, 1, 0, 0, -5391.38, 179.448, 386.111, 0.820142, 90, 8, 0, 42, 0, 1, 0, 0, 0),
+(6614452, @NPC_CRUSHCOG_SENTRY_BOT, 0, 1, 1, 0, 0, -5381.47, 203.505, 386.122, 0.13685, 90, 8, 0, 42, 0, 1, 0, 0, 0),
+(6614451, @NPC_CRUSHCOG_SENTRY_BOT, 0, 1, 1, 0, 0, -5285.56, 249.865, 386.112, 0.706259, 90, 8, 0, 42, 0, 1, 0, 0, 0),
+(6614450, @NPC_CRUSHCOG_SENTRY_BOT, 0, 1, 1, 0, 0, -5347.89, 222.313, 386.111, 0.0111861, 90, 8, 0, 42, 0, 1, 0, 0, 0);
 
 -- Quests - Forced To Watch from Afar has been scripted (Feedback #726)
 -- Note: no gossip conditions on retail
@@ -1523,7 +1554,7 @@ UPDATE `creature_template` SET `unit_flags` = 32768, `mechanic_immune_mask` = 65
 UPDATE `creature` SET `modelid` = 23257, `spawndist` = 0, `curhealth` = 42, `MovementType` = 0 WHERE `id` = 42557;
 
 -- Quests - Scrounging for Parts: Spare Parts will only be selectable while on quest
-UPDATE `gameobject_template` SET `flags` = `flags`|4 WHERE `entry` IN (203968, 203443, 203965, 203966, 203967);
+UPDATE `gameobject_template` SET `flags` = `flags`|4 WHERE `entry` IN (203968, 203443, 203964, 203965, 203966, 203967);
 
 -- TODO
 /*-- [SQL] Quests - Pack Your Bags quest completion event scripted

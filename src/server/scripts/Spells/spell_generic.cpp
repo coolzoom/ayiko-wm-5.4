@@ -501,12 +501,34 @@ class spell_creature_permanent_feign_death : public SpellScriptLoader
                 target->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
 
                 if (target->GetTypeId() == TYPEID_UNIT)
+                {
                     target->ToCreature()->SetReactState(REACT_PASSIVE);
+                    target->SetStandState(UNIT_STAND_STATE_DEAD);
+                }
+            }
+
+            void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                Unit* target = GetTarget();
+
+                if (!target)
+                    return;
+
+                target->RemoveFlag(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
+                target->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
+                target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+
+                if (target->GetTypeId() == TYPEID_UNIT)
+                {
+                    target->ToCreature()->SetReactState(REACT_AGGRESSIVE);
+                    target->RemoveFlag(UNIT_FIELD_BYTES_1, UNIT_STAND_STATE_DEAD);
+                }
             }
 
             void Register()
             {
                 OnEffectApply += AuraEffectApplyFn(spell_creature_permanent_feign_death_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+                OnEffectRemove += AuraEffectRemoveFn(spell_creature_permanent_feign_death_AuraScript::HandleEffectRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
             }
         };
 

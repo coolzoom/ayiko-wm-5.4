@@ -520,6 +520,290 @@ class mob_zai_the_outcast : public CreatureScript
         };
 };
 
+class npc_waterspeaker_gorai : public CreatureScript
+{
+public:
+    npc_waterspeaker_gorai() : CreatureScript("npc_waterspeaker_gorai") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_waterspeaker_goraiAI(creature);
+    }
+
+    struct npc_waterspeaker_goraiAI : public ScriptedAI
+    {
+        npc_waterspeaker_goraiAI(Creature* creature) : ScriptedAI(creature) { }
+
+        uint32 phase;
+        uint32 phaseTimer;
+        uint64 playerGUID;
+
+        void Reset()
+        {
+            phase = 0;
+            phaseTimer = 0;
+            playerGUID = 0;
+        }
+
+        void SummonedCreatureDies(Creature * creature, Unit * killer)
+        {
+            if (auto swordmistress = GetClosestCreatureWithEntry(me, 59273, 30.f))
+            {
+                swordmistress->AI()->Talk(0);
+                swordmistress->CastSpell(swordmistress, 120138, true);
+            }
+
+            phase = 7;
+            phaseTimer = 5000;
+        }
+
+        void SetGUID(uint64 guid, int32) override
+        {
+            playerGUID = guid;
+            phase = 1;
+            phaseTimer = 10000;
+            Talk(0);
+            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER | UNIT_NPC_FLAG_GOSSIP);
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!phase)
+                return;
+
+            if (phaseTimer <= diff)
+            {
+                if (!me->SelectNearestPlayer(40.f))
+                    Reset();
+
+                if (phase == 1)
+                {
+                    Talk(1);
+                    phaseTimer = 12000;
+                }
+                else if (phase == 2)
+                {
+                    me->CastSpell(me, 119729, true);
+                    Talk(2);
+                    phaseTimer = 7000;
+                }
+                else if (phase == 3)
+                {
+                    Talk(3);
+                    phaseTimer = 4000;
+                    if (auto player = me->GetPlayer(*me, playerGUID))
+                        player->KilledMonsterCredit(61654);
+                }
+                else if (phase == 4)
+                {
+                    Talk(4);
+                    phaseTimer = 5000;
+                    if (auto swordmistress = GetClosestCreatureWithEntry(me, 59273, 30.f))
+                        swordmistress->CastSpell(swordmistress, 119542, true);
+                }
+                else if (phase == 5)
+                {
+                    Talk(5);
+                    if (auto spawn = me->SummonCreature(61530, 1921.28f, 167.02f, 477.382f, 4.82f, TEMPSUMMON_DEAD_DESPAWN, 60000))
+                        if (auto player = me->GetPlayer(*me, playerGUID))
+                            spawn->AI()->AttackStart(player);
+                }
+                else if (phase == 6) // We return here - phase is finished when summon is killed
+                    return;
+                else if (phase == 7)
+                {
+                    Talk(6, playerGUID);
+                    phaseTimer = 6000;
+                }
+                else if (phase == 8)
+                {
+                    Talk(7);
+                    Reset();
+                }
+
+                ++phase;
+            }
+            else
+                phaseTimer -= diff;
+        }
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature) override
+    {
+        if (creature->IsQuestGiver())
+            player->PrepareQuestMenu(creature->GetGUID());
+
+        if (creature->IsVendor())
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
+
+        if (player->GetQuestStatus(30480) == QUEST_STATUS_INCOMPLETE)
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I'm ready. Begin the ritual.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+
+        player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
+    {
+        player->PlayerTalkClass->ClearMenus();
+        if (action == GOSSIP_ACTION_INFO_DEF + 1)
+        {
+            player->KilledMonsterCredit(creature->GetEntry());
+            creature->AI()->SetGUID(player->GetGUID(), 0);
+            creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER | UNIT_NPC_FLAG_GOSSIP);
+            player->CLOSE_GOSSIP_MENU();
+        }
+        else if (action == GOSSIP_ACTION_TRADE)
+            player->GetSession()->SendListInventory(creature->GetGUID());
+
+        return false;
+    }
+};
+
+// Farmhand Freedom quest
+class npc_ordo_overseer : public CreatureScript
+{
+public:
+    npc_ordo_overseer() : CreatureScript("npc_ordo_overseer") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_ordo_overseerAI(creature);
+    }
+
+    struct npc_ordo_overseerAI : public ScriptedAI
+    {
+        npc_ordo_overseerAI(Creature* creature) : ScriptedAI(creature) { }
+
+        uint32 castTimer;
+
+        void Reset()
+        {
+            castTimer = urand(5000, 10000);
+        }
+
+        void JustDied(Unit * who) override
+        {
+            if (auto player = who->GetCharmerOrOwnerPlayerOrPlayerItself())
+                if (player->GetQuestStatus(30571) == QUEST_STATUS_INCOMPLETE)
+                {
+                    std::list<Creature*> clist;
+                    GetCreatureListWithEntryInGrid(clist, me, 59577, 10.f);
+                    for (auto slave : clist)
+                    {
+                        player->KilledMonsterCredit(slave->GetEntry());
+                        slave->AI()->Talk(0);
+                        Position pos;
+                        slave->GetRandomNearPosition(pos, 30.f);
+                        slave->GetMotionMaster()->MovePoint(1, pos);
+                        slave->ForcedDespawn(5000);
+                    }
+                }
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!me->GetVictim())
+                return;
+
+            if (castTimer <= diff)
+                DoCastVictim(58504);
+            else
+                castTimer -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+// Challenge Accepted quest
+class go_yaungol_banner : public GameObjectScript
+{
+public:
+    go_yaungol_banner() : GameObjectScript("go_yaungol_banner") { }
+
+    bool OnGossipHello(Player* player, GameObject* go) override
+    {
+        if (player->GetQuestStatus(30514) == QUEST_STATUS_INCOMPLETE)
+        {
+            if (GetClosestCreatureWithEntry(player, 59483, 30.f))
+                return false;
+
+            player->SummonGameObject(59483, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), 0, 0, 0, 0, 0, 60000);
+            if (auto urbataar = player->SummonCreature(59483, 2110.05f, 1182.91f, 476.32f, 0, TEMPSUMMON_TIMED_DESPAWN, 120000))
+            {
+                urbataar->MonsterYell("Fool! I will crush you!", 0, 0);
+                urbataar->AI()->AttackStart(player);
+            }
+        }
+        return true;
+    }
+};
+
+// Barrels of Fun quest
+class npc_explosives_barrel : public CreatureScript
+{
+public:
+    npc_explosives_barrel() : CreatureScript("npc_explosives_barrel") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_explosives_barrelAI(creature);
+    }
+
+    struct npc_explosives_barrelAI : public ScriptedAI
+    {
+        npc_explosives_barrelAI(Creature* creature) : ScriptedAI(creature) { }
+
+        uint32 phase;
+        uint32 tickTimer;
+
+        void Reset()
+        {
+            phase = 4;
+            tickTimer = 1000;
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (tickTimer <= diff)
+            {
+                --phase;
+                std::string text = "";
+                if (phase == 3)
+                    text = "Three...";
+                else if (phase == 2)
+                    text = "Two...";
+                else if (phase == 1)
+                    text = "One...";
+                else if (phase == 0)
+                    text = "Boom";
+
+                if (auto owner = me->GetCharmerOrOwnerPlayerOrPlayerItself())
+                {
+                    owner->MonsterTextEmote(text, owner->GetGUID(), true);
+                    if (phase == 0)
+                    {
+                        for (int i = 0; i < 4; ++i)
+                        {
+                            if (auto oilRig = GetClosestCreatureWithEntry(me, 60096, 10.f))
+                            {
+                                me->CastSpell(me, 46419, true);
+                                owner->KilledMonsterCredit(oilRig->GetEntry());
+                                me->ForcedDespawn();
+                            }
+                        }
+                    }
+                }
+
+                tickTimer = 2000;
+            }
+            else
+                tickTimer -= diff;
+        }
+    };
+};
+
 void AddSC_kun_lai_summit()
 {
     new mob_nessos_the_oracle();
@@ -528,4 +812,8 @@ void AddSC_kun_lai_summit()
     new mob_mogujia_soul_caller();
     new mob_quilen_stonemaw();
     new mob_zai_the_outcast();
+    new npc_waterspeaker_gorai();
+    new npc_ordo_overseer();
+    new go_yaungol_banner();
+    new npc_explosives_barrel();
 }

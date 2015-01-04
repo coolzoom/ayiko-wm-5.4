@@ -353,6 +353,197 @@ class mob_ik_thik_warrior : public CreatureScript
         };
 };
 
+class npc_hop_hunting_q : public CreatureScript
+{
+public:
+    npc_hop_hunting_q() : CreatureScript("npc_hop_hunting_q") { }
+
+    bool OnGossipHello(Player* player, Creature* creature) override
+    {
+        if (creature->IsQuestGiver())
+            player->PrepareQuestMenu(creature->GetGUID());
+
+        if (creature->IsVendor())
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
+
+        if (player->GetQuestStatus(30053) == QUEST_STATUS_INCOMPLETE)
+        {
+            std::string gossip = "";
+            switch (creature->GetEntry())
+            {
+            case 62377:
+                gossip = "I'm helping a friend brew some beer, and we need hops. Do you have any to spare?";
+                break;
+            case 62385:
+                gossip = "Do you have any hops you can spare?";
+                break;
+            case 57385:
+                gossip = "Can I buy some hops from you?";
+                break;
+            }
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, gossip, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        }
+
+        player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
+    {
+        player->PlayerTalkClass->ClearMenus();
+        if (action == GOSSIP_ACTION_INFO_DEF + 1)
+        {
+            creature->AI()->Talk(0, player->GetGUID());
+            player->KilledMonsterCredit(creature->GetEntry());
+            player->CLOSE_GOSSIP_MENU();
+        }
+        else if (action == GOSSIP_ACTION_TRADE)
+            player->GetSession()->SendListInventory(creature->GetGUID());
+
+        return false;
+    }
+};
+
+// Muddy Water quest
+class spell_gen_gather_muddy_water : public SpellScriptLoader
+{
+public:
+    spell_gen_gather_muddy_water() : SpellScriptLoader("spell_gen_gather_muddy_water") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            auto target = GetHitUnit();
+            if (!target || target->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            auto player = GetCaster()->ToPlayer();
+            if (player->GetQuestStatus(29951) == QUEST_STATUS_INCOMPLETE)
+            {
+                if (!player->HasAura(106284))
+                {
+                    player->MonsterTextEmote("Mudmug's vial will slowly spill water while you are moving. Plan your path carefully!", player->GetGUID() , true);
+                    player->CastSpell(player, 106284, true);
+                }
+                else
+                    player->CastSpell(player, 106294, true);
+
+                if (player->GetPower(POWER_ALTERNATE_POWER) == 100)
+                {
+                    player->AddItem(76356, 1);
+                    player->RemoveAurasDueToSpell(106284);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_impl::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
+class spell_gen_gather_muddy_water_aura : public SpellScriptLoader
+{
+public:
+    spell_gen_gather_muddy_water_aura() : SpellScriptLoader("spell_gen_gather_muddy_water_aura") { }
+
+    class script_impl : public AuraScript
+    {
+        PrepareAuraScript(script_impl);
+
+        void HandlePeriodic(AuraEffect const * /*aurEff*/)
+        {
+            if (!GetTarget()->isMoving())
+                PreventDefaultAction();
+        }
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(script_impl::HandlePeriodic, EFFECT_1, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new script_impl();
+    }
+};
+
+// Crouching Carrot, Hidden Turnip quest
+class npc_orange_painted_turnip : public CreatureScript
+{
+public:
+    npc_orange_painted_turnip() : CreatureScript("npc_orange_painted_turnip") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_orange_painted_turnipAI(creature);
+    }
+
+    struct npc_orange_painted_turnipAI : public ScriptedAI
+    {
+        npc_orange_painted_turnipAI(Creature* creature) : ScriptedAI(creature)
+        {
+            creature->SetReactState(REACT_PASSIVE);
+            creature->setFaction(35);
+        }
+
+        uint32 timer;
+
+        void Reset()
+        {
+            timer = 8000;
+            std::list<Creature*> clist;
+            GetCreatureListWithEntryInGrid(clist, me, 56538, 10.f);
+            for (auto c : clist)
+            {
+                if (!me->IsWithinLOSInMap(c))
+                    continue;
+
+                float x, y, z;
+                me->GetClosePoint(x, y, z, 0.f, 0.f, c->GetAngle(me));
+                c->AI()->Talk(0);
+                c->GetMotionMaster()->MoveIdle();
+                c->GetMotionMaster()->MovePoint(1, x, y, z);
+            }
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (timer <= diff)
+            {
+                std::list<Creature*> clist;
+                GetCreatureListWithEntryInGrid(clist, me, 56538, 10.f);
+                for (auto c : clist)
+                {
+                    if (!me->IsWithinLOSInMap(c))
+                        continue;
+
+                    if (auto player = me->GetCharmerOrOwnerPlayerOrPlayerItself())
+                        player->KilledMonsterCredit(56544);
+
+                    c->AI()->Talk(1);
+                    c->GetMotionMaster()->MoveFleeing(me, 4000);
+                    c->ForcedDespawn(4000);
+                }
+                me->ForcedDespawn(5000);
+                timer = 10000;
+            }
+            else
+                timer -= diff;
+        }
+    };
+};
+
 void AddSC_valley_of_the_four_winds()
 {
     // Rare Mobs
@@ -362,4 +553,10 @@ void AddSC_valley_of_the_four_winds()
 
     // Standard Mobs
     new mob_ik_thik_warrior();
+
+    // Quests
+    new npc_hop_hunting_q();
+    new spell_gen_gather_muddy_water();
+    new spell_gen_gather_muddy_water_aura();
+    new npc_orange_painted_turnip();
 }

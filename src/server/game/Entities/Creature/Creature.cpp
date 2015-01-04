@@ -1955,29 +1955,6 @@ SpellInfo const* Creature::reachWithSpellCure(Unit* victim)
     return NULL;
 }
 
-// select nearest hostile unit within the given distance (regardless of threat list).
-Unit* Creature::SelectNearestTarget(float dist) const
-{
-    CellCoord p(Trinity::ComputeCellCoord(GetPositionX(), GetPositionY()));
-    Cell cell(p);
-    cell.SetNoCreate();
-
-    Unit* target = NULL;
-
-    {
-        if (dist == 0.0f)
-            dist = MAX_VISIBILITY_DISTANCE;
-
-        Trinity::NearestHostileUnitCheck u_check(this, dist);
-        Trinity::UnitLastSearcher<Trinity::NearestHostileUnitCheck> searcher(this, target, u_check);
-
-        cell.Visit(p, Trinity::makeWorldVisitor(searcher), *GetMap(), *this, dist);
-        cell.Visit(p, Trinity::makeGridVisitor(searcher), *GetMap(), *this, dist);
-    }
-
-    return target;
-}
-
 // select nearest hostile unit within the given distance and without cc on it (regardless of threat list).
 Unit* Creature::SelectNearestTargetNoCC(float dist) const
 {
@@ -2137,6 +2114,10 @@ bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /
 
     // skip fighting creature
     if (IsInCombat())
+        return false;
+
+    // Sapped creature will no longer assist in combat
+    if (enemy && HasAura(6770, enemy->GetGUID()))
         return false;
 
     // only free creature

@@ -9976,8 +9976,9 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
             // Don't proc from following spells:
             switch (procSpell->Id)
             {
-                case 51723: // Fan of Knives
-                case 140308: // Shuriken Toss
+                case 51723:  // Fan of Knives
+                case 114014: // Shuriken Toss
+                case 140308:
                 case 140309:
                 case 121471: // Shadow Blades
                 case 121474:
@@ -12019,6 +12020,11 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
     // from positive and negative SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN
     // multiplicative bonus, for example Dispersion + Shadowform (0.10*0.85=0.085)
     TakenTotalMod *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, spellProto->GetSchoolMask());
+
+    // Glyph of Inner Sanctum
+    if (HasAura(588))
+    if (auto innerSanctum = GetAuraEffect(14771, EFFECT_0))
+        AddPct(TakenTotalMod, -innerSanctum->GetAmount());
 
     // From caster spells
     AuraEffectList const& mOwnerTaken = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_FROM_CASTER);
@@ -17364,6 +17370,29 @@ Unit* Unit::SelectNearbyAlly(Unit* exclude, float dist) const
     return Trinity::Containers::SelectRandomContainerElement(targets);
 }
 
+// select nearest hostile unit within the given distance (regardless of threat list).
+Unit* Unit::SelectNearestTarget(float dist) const
+{
+    CellCoord p(Trinity::ComputeCellCoord(GetPositionX(), GetPositionY()));
+    Cell cell(p);
+    cell.SetNoCreate();
+
+    Unit* target = NULL;
+
+    {
+        if (dist == 0.0f)
+            dist = MAX_VISIBILITY_DISTANCE;
+
+        Trinity::NearestHostileUnitCheck u_check(this, dist);
+        Trinity::UnitLastSearcher<Trinity::NearestHostileUnitCheck> searcher(this, target, u_check);
+
+        cell.Visit(p, Trinity::makeWorldVisitor(searcher), *GetMap(), *this, dist);
+        cell.Visit(p, Trinity::makeGridVisitor(searcher), *GetMap(), *this, dist);
+    }
+
+    return target;
+}
+
 void Unit::ApplyAttackTimePercentMod(WeaponAttackType att, float val, bool apply)
 {
     float remainingTimePct = (float)m_attackTimer[att] / (GetAttackTime(att) * m_modAttackSpeedPct[att]);
@@ -17643,7 +17672,8 @@ bool Unit::HandleAuraRaidProcFromChargeWithValue(AuraEffect *triggeredByAura)
     // Glyph of Prayer of Mending - Add data about first charge
     if (Unit* caster = triggeredByAura->GetCaster())
         if (AuraEffect * const auraEff = caster->GetAuraEffect(55685, EFFECT_0))
-            if (static_cast<int32>(spellProto->ProcCharges) - 1 == jumps)
+            // Charges are lowered to 4 by glyph and jumps are lowered by 1 above
+            if (jumps >= 3)
                 auraEff->SetUserData(1);
 
     // heal
@@ -17726,14 +17756,14 @@ void Unit::PlayOneShotAnimKit(uint32 id)
 void Unit::Kill(Unit* victim, bool durabilityLoss, SpellInfo const* spellProto)
 {
     // Prevent killing unit twice (and giving reward from kill twice)
-    if (!victim->GetHealth() || m_IsInKillingProcess)
+    if (!victim->GetHealth() || victim->IsInKillingProcess())
         return;
 
     // Spirit of Redemption can't be killed twice
     if (victim->HasAura(27827))
         return;
 
-    m_IsInKillingProcess = true;
+    victim->SetInKillingProcess(true);
 
     // find player: owner of controlled `this` or `this` itself maybe
     Player* player = GetCharmerOrOwnerPlayerOrPlayerItself();
@@ -18007,7 +18037,7 @@ void Unit::Kill(Unit* victim, bool durabilityLoss, SpellInfo const* spellProto)
             sScriptMgr->OnPlayerKilledByCreature(killerCre, killed);
     }
 
-    m_IsInKillingProcess = false;
+    victim->SetInKillingProcess(false);
 }
 
 void Unit::SetControlled(bool apply, UnitState state)

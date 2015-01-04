@@ -681,11 +681,10 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         {
                             uint8 cp = player->GetComboPoints();
                             float ap = player->GetTotalAttackPowerValue(BASE_ATTACK);
-                            uint32 activeSpec = player->GetSpecializationId(player->GetActiveSpec());
-                            if (activeSpec == SPEC_ROGUE_ASSASSINATION || activeSpec == SPEC_ROGUE_COMBAT)
-                                m_damage += int32(ap * cp * 0.12f);
-                            else if (activeSpec == SPEC_ROGUE_SUBTLETY)
+                            if (player->GetSpecializationId(player->GetActiveSpec()) == SPEC_ROGUE_SUBTLETY)
                                 m_damage += int32(ap * cp * 0.149f);
+                            else
+                                m_damage += int32(ap * cp * 0.12f);
                         }
                         break;
                     }
@@ -732,17 +731,12 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     }
                     case 121411:// Crimson Tempest
                     {
-                        if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                        if (auto player = m_caster->ToPlayer())
                         {
-                            if (uint32 combo = ((Player*)m_caster)->GetComboPoints())
+                            if (uint32 combo = player->GetComboPoints())
                             {
                                 float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
-
-                                if (m_caster->ToPlayer()->GetSpecializationId(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_ROGUE_ASSASSINATION
-                                    || m_caster->ToPlayer()->GetSpecializationId(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_ROGUE_COMBAT)
-                                    damage += int32(ap * combo * 0.028f);
-                                else if (m_caster->ToPlayer()->GetSpecializationId(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_ROGUE_SUBTLETY)
-                                    damage += int32(ap * combo * 0.034f);
+                                damage += int32(ap * combo * 0.0275f);
                             }
                         }
 
@@ -4294,33 +4288,6 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
 
             break;
         }
-        case SPELLFAMILY_HUNTER:
-        {
-            float shotMod = 0;
-            switch(m_spellInfo->Id)
-            {
-                case 56641: // Steady Shot
-                {
-                    // "A steady shot that causes % weapon damage plus RAP*0.021+280. Generates 9 Focus."
-                    // focus effect done in dummy
-                    shotMod = 0.021f;
-                    break;
-                }
-                case 53209: // Chimera Shot
-                {
-                    shotMod = 0.398f;
-                    break;
-                }
-                case 3044: // Arcane Shot
-                {
-                    shotMod = 0.0483f;
-                    break;
-                }
-
-                default: break;
-            }
-            spell_bonus += int32((shotMod*m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)));
-        }
         case SPELLFAMILY_DEATHKNIGHT:
         {
             switch (m_spellInfo->Id)
@@ -4384,6 +4351,10 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
                 break;                                      // not weapon damage effect, just skip
         }
     }
+
+    // Chimera Shot - was changed to base * 1.5 (2.65 -> 3.975)
+    if (m_spellInfo->Id == 53209)
+        weaponDamagePercentMod = 3.975f;
 
     // apply to non-weapon bonus weapon total pct effect, weapon total flat effect included in weapon damage
     if (fixed_bonus || spell_bonus)

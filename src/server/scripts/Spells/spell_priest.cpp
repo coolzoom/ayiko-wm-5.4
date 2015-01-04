@@ -2458,7 +2458,7 @@ public:
         {
             PreventDefaultAction();
 
-            if (!eventInfo.GetActor() || !eventInfo.GetSpellInfo() || (eventInfo.GetSpellInfo()->Id != 596 && eventInfo.GetHitMask() & PROC_EX_NORMAL_HIT))
+            if (!eventInfo.GetActor() || !eventInfo.GetSpellInfo() || (eventInfo.GetHitMask() & PROC_EX_NORMAL_HIT))
                 return;
 
             Unit * caster = GetTarget();
@@ -2544,7 +2544,7 @@ public:
     }
 };
 
-// 17 - Power Word: Shield
+// 17 - Power Word: Shield, 123258 - Power Word : Shield (Divine Insight)
 class spell_pri_power_word_shield : public SpellScriptLoader
 {
     class script_impl : public AuraScript
@@ -2991,6 +2991,122 @@ public:
     }
 };
 
+// Mind Blast - 8092
+class spell_pri_mind_blast : public SpellScriptLoader
+{
+    class script_impl : public SpellScript
+    {
+        PrepareSpellScript(script_impl)
+
+        enum
+        {
+            SPELL_DIVINE_INSIGHT_PROC = 124430,
+        };
+
+        void HandleAfterHit()
+        {
+            Unit * const caster = GetCaster();
+            if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            // Handle Divine Insight if it procced while casting current Mind Blast
+            Spell::UsedSpellMods const &mods = appliedSpellMods();
+            AuraEffect * const aurEff = caster->GetAuraEffect(SPELL_DIVINE_INSIGHT_PROC, EFFECT_0);
+
+            if (!aurEff || mods.find(aurEff->GetSpellModifier()) != mods.end())
+                return;
+
+            caster->ToPlayer()->RemoveSpellCooldown(GetSpellInfo()->Id, true);
+        }
+
+        void Register()
+        {
+            AfterHit += SpellHitFn(script_impl::HandleAfterHit);
+        }
+    };
+
+public:
+    spell_pri_mind_blast() : SpellScriptLoader("spell_pri_mind_blast")
+    { }
+
+    SpellScript * GetSpellScript() const
+    {
+        return new script_impl();
+    }
+};
+
+// Confession - 126123
+class spell_pri_confession : public SpellScriptLoader
+{
+public:
+    spell_pri_confession() : SpellScriptLoader("spell_pri_confession") { }
+
+    class script_impl : public SpellScript
+    {
+        PrepareSpellScript(script_impl);
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            std::string confessions[40] =
+            {
+                "For a long time, I thought the plural of anecdote WAS data.",
+                "I always forget to gem my gear.",
+                "I always wanted to be a paladin.",
+                "I ask for the Light to give me strength, but I'm not sure it really does.",
+                "I asked a friend for gold to buy my first mount.",
+                "I dabble in archaeology, but I'm just not that interested in history.",
+                "I died to an elevator once.Maybe more than once.",
+                "I don't know if Milhouse is a good guy or not.",
+                "I don't really have a clue who the Sin'dorei are.",
+                "I don't really remember you in the mountains.",
+                "I don't treat all of my mounts equally.",
+                "I fell off of Dalaran.",
+                "I find all these names with so many apostrophes so confusing.",
+                "I forgot the Sunwell.",
+                "I go into dungeons not to make Azeroth a better place, but just for loot.",
+                "I have \"borrowed\" things from my guild bank.",
+                "I have stood in the fire.",
+                "I haven't been in a barber shop in months. Goblins with scissors. Shudder.",
+                "I know he's a jerk, but there's something about Garrosh...",
+                "I light things on fire and yell BY FIRE BE PURGED when nobody is looking.",
+                "I never use the lightwell.",
+                "I once punched a gnome.No reason.I was just having a bad day.",
+                "I once took a bow that a hunter wanted.",
+                "I outbid a friend on an auction for something I didn't really want.",
+                "I really wasn't prepared. Who knew?",
+                "I said I had been in the dungeon before, but i had no idea what I was doing.It was embarassing.",
+                "I saw a mage cast a spell once and my jaw really did drop at the damage.",
+                "I sometimes forget if Northrend is north or south of here.",
+                "I sometimes use my mount to travel really short distances.I mean REALLY short.",
+                "I sometimes wonder if tauren taste like... you know.",
+                "I spent six months chasing the Time - Lost Proto - Drake.",
+                "I thought pandaren were a type of furbolg.",
+                "I told my raid leader that I was ready, but I wasn't really ready.",
+                "I wasn't really at the opening of Ahn'Qiraj, I just read about it. (thanks Stonehearth)",
+                "I went into Alterac Valley and didn't help my team at all.",
+                "Oh, I took the candle.",
+                "Sometimes I ask for a warlock to summon me when I'm really not that far away.",
+                "Sometimes when I'm questing, I want to be alone, so I pretend I can't hear my friends.",
+                "This is just a setback.",
+                "Troll toes sort of creep me out."
+            };
+            auto target = GetHitUnit();
+            if (GetCaster() != target)
+                target->MonsterTextEmote(target->GetName() + " confesses: " + confessions[urand(0, 39)], 0);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(script_impl::HandleDummy, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new script_impl;
+    }
+};
+
 void AddSC_priest_spell_scripts()
 {
     new spell_pri_power_word_fortitude();
@@ -3052,4 +3168,6 @@ void AddSC_priest_spell_scripts()
     new spell_pri_mind_flay();
     new spell_pri_shadow_word_death_glyphed();
     new spell_pri_mass_dispel();
+    new spell_pri_mind_blast();
+    new spell_pri_confession();
 }

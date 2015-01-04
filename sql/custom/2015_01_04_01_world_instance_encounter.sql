@@ -748,3 +748,12 @@ INSERT INTO `instance_encounters` VALUES ('967', '4', '2', 'Hagara', '0', '55689
 INSERT INTO `instance_encounters` VALUES ('967', '5', '2', 'Ultraxion', '0', '55294', '0');
 INSERT INTO `instance_encounters` VALUES ('967', '6', '2', 'Warmaster Blackhorn', '0', '56427', '0');
 INSERT INTO `instance_encounters` VALUES ('967', '7', '2', 'Madness of Deathwing', '0', '56173', '417');
+
+DELETE FROM `instance_encounters` WHERE `map` = '994';
+INSERT INTO `instance_encounters` (`map`, `index`, `difficulty`, `name`, `entry`, `dungeon`) VALUES
+('994', '0', '1', 'Gekkan', '61243', '0'),
+('994', '1', '1', 'Trial of the King', '61243', '0'),
+('994', '2', '1', 'Xin the Weaponmaster', '61398', '467'),
+('994', '0', '2', 'Gekkan', '61243', '0'),
+('994', '1', '2', 'Trial of the King', '61243', '0'),
+('994', '2', '2', 'Xin the Weaponmaster', '61398', '468');

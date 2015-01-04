@@ -481,3 +481,27 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `probabil
 ('61566', '0', '0', 'Gorai lives? I will go find him. Thank you, friend!', '12', '100', 'Raufen - Free the Dissenters quest talk'),
 ('61566', '0', '1', 'Thank you, friend... I\'ll make my way to the south!', '12', '100', 'Raufen - Free the Dissenters quest talk'),
 ('61566', '0', '2', 'You are very brave... thank you!', '12', '100', 'Raufen - Free the Dissenters quest talk');
+
+-- Ranger Rescue
+UPDATE `gameobject_template` SET `data0`='0', `data1`='0', `ScriptName`='go_drywood_cage' WHERE `entry` IN('211511');
+DELETE FROM `creature` WHERE `id` IN('63668', '63669', '60763');
+UPDATE `creature` SET `spawndist`='0', `MovementType`='0', `unit_flags` ='33280' WHERE (`id`='60730');
+UPDATE `creature_template` SET `unit_flags`='33280' WHERE (`entry`='60730');
+UPDATE `creature_template` SET `ScriptName`='npc_lin_silentstrike' WHERE (`entry`='60899');
+DELETE FROM `creature_text` WHERE `entry` = '60730';
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `probability`, `comment`) VALUES
+('60730', '0', '0', 'Have you seen the yaungol fighting each other? It seems their troubles run deeper than we thought.', '12', '100', 'Raufen - Ranger Rescue quest talk'),
+('60730', '0', '1', 'I knew someone would come for us! Let me help you fight the yaungol.', '12', '100', 'Raufen - Ranger Rescue quest talk'),
+('60730', '0', '2', 'I\'m in your debt, stranger. Please let me help you.', '12', '100', 'Raufen - Ranger Rescue quest talk'),
+('60730', '0', '3', 'Just what I was waiting for! Time to introduce those yaungol to my fists!', '12', '100', 'Raufen - Ranger Rescue quest talk'),
+('60730', '0', '4', 'Thank you for freeing me, $gbrother:sister. I cannot let you fight alone.', '12', '100', 'Raufen - Ranger Rescue quest talk');
+
+DELETE FROM `creature_text` WHERE `entry` = '60901';
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `probability`, `comment`) VALUES
+('60901', '0', '0', 'NOOO!', '12', '100', 'Raufen - Ranger Rescue quest talk'),
+('60901', '0', '1', 'Lin, heart of my heart! No, please, NO! It cannot be!', '12', '100', 'Raufen - Ranger Rescue quest talk'),
+('60901', '0', '2', 'If only I had come sooner! If only Ban had listened to me!', '12', '100', 'Raufen - Ranger Rescue quest talk'),
+('60901', '0', '3', 'Shhhhhh, my sweet darling, sleep now and be at peace.', '12', '100', 'Raufen - Ranger Rescue quest talk');
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '96733';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES ('96733', 'spell_creature_permanent_feign_death');

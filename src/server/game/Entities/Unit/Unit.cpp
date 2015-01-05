@@ -16462,7 +16462,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
     }
 
     // Dematerialize
-    if (target && target != this && target->GetTypeId() == TYPEID_PLAYER && target->HasAura(122464) && procSpell && procSpell->GetAllEffectsMechanicMask() & (1 << MECHANIC_STUN))
+    if (target && target != this && !isVictim && target->GetTypeId() == TYPEID_PLAYER && target->HasAura(122464) && procSpell && procSpell->GetAllEffectsMechanicMask() & (1 << MECHANIC_STUN))
     {
         if (!target->ToPlayer()->HasSpellCooldown(122465))
         {

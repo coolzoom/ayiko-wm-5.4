@@ -7422,6 +7422,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                         case 82327: // Holy Radiance
                         case 85222: // Light of Dawn
                         case 130551: // Word of Glory
+                        case 114163: // Eternal Flame
                         {
                             float mastery = ToPlayer()->GetFloatValue(PLAYER_MASTERY) * 1.25f;
                             basepoints0 = int32(damage * float(mastery / 100.0f));

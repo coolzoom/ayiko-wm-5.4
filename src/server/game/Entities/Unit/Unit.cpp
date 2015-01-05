@@ -16982,6 +16982,11 @@ uint32 /*damage*/, uint32 /*absorb*/ /* = 0 */, SpellInfo const* /*procAura*/ /*
     if (procSpell && procSpell->Id == 86392 && spellInfo->Id == 1776)
         return true;
 
+    // Repentance and Blinding Light does not break Seal of Truth(Censure)
+    if (procSpell && procSpell->Id == 31803)
+        if (spellInfo->Id == 20066 || spellInfo->Id == 105421)
+            return true;
+
     return false;
 }
 

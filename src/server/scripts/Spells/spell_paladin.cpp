@@ -1859,6 +1859,49 @@ public:
     }
 };
 
+// Glyph of Double Jeopardy - 54922
+class spell_pal_glyph_of_double_jeopardy : public SpellScriptLoader
+{
+    class script_impl : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        enum
+        {
+            SPELL_DOUBLE_JEOPARDY_PROC = 121027,
+        };
+
+        bool CheckProc(ProcEventInfo &eventInfo)
+        {
+            Unit const * const caster = eventInfo.GetActor();
+            Unit const * const target = eventInfo.GetActionTarget();
+            return caster && target && !caster->HasAura(SPELL_DOUBLE_JEOPARDY_PROC);
+        }
+
+        void HandleProc(AuraEffect const *aurEff, ProcEventInfo &eventInfo)
+        {
+            if (auto auraEff = eventInfo.GetActor()->GetAuraEffect(SPELL_DOUBLE_JEOPARDY_PROC, EFFECT_0))
+                auraEff->SetUserData(eventInfo.GetActionTarget()->GetGUIDLow());
+        }
+
+        void Register()
+        {
+            DoCheckProc += AuraCheckProcFn(script_impl::CheckProc);
+            AfterEffectProc += AuraEffectProcFn(script_impl::HandleProc, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
+        }
+    };
+
+public:
+    spell_pal_glyph_of_double_jeopardy()
+        : SpellScriptLoader("spell_pal_glyph_of_double_jeopardy")
+    { }
+
+    AuraScript * GetAuraScript() const
+    {
+        return new script_impl;
+    }
+};
+
 void AddSC_paladin_spell_scripts()
 {
     new spell_pal_glyph_of_devotian_aura();
@@ -1904,4 +1947,5 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_hammer_of_wrath();
     new spell_pal_sanctified_wrath();
     new spell_pal_divine_plea();
+    new spell_pal_glyph_of_double_jeopardy();
 }

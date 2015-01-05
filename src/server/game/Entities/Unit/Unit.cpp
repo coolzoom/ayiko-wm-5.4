@@ -11682,6 +11682,19 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                 CastSpell(this, 44544, true);  // Fingers of frost proc
         }
 
+        // Judgement - Glyph of Double Jeopardy
+        if (spellProto->Id == 20271)
+        {
+            if (auto glyph = GetAuraEffect(121027, EFFECT_0))
+            {
+                // first target set in script, check second target
+                if (glyph->GetUserData() != victim->GetGUIDLow())
+                    AddPct(DoneTotalMod, glyph->GetAmount());
+
+                glyph->GetBase()->SetDuration(1);
+            }
+        }
+
         // Sword of Light - 53503
         // Increases damage of Hammer of Wrath and Judgement too
         if (HasAura(53503) && player->IsTwoHandUsed() && (spellProto->Id == 20271 || spellProto->Id == 24275))

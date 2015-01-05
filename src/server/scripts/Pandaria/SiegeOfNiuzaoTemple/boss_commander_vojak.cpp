@@ -334,9 +334,8 @@ class npc_yang_ironclaw : public CreatureScript
             me->GetCreatureListWithEntryInGrid(cList, NPC_MANTID_TAR_KEG, 500.0f);
             for (auto itr : cList)
             {
-                itr->RemoveAllAuras();
                 itr->ExitVehicle();
-                itr->ForcedDespawn();
+                itr->ForcedDespawn(200);
             }
 
             if (Creature * loChu = me->FindNearestCreature(NPC_LO_CHU, 500.0f))
@@ -1188,6 +1187,7 @@ public:
         void FilterTargets(std::list<WorldObject*>& targets)
         {
             targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_KEG_ACTIVE));
+            Trinity::Containers::RandomResizeList(targets, 1);
         }
 
         void Register()
@@ -1216,7 +1216,7 @@ public:
         {
             if (Unit * caster = GetCaster())
             {
-                targets.remove_if([](const WorldObject * unit) { return unit->ToCreature()->HasAura(SPELL_HAS_BARREL); });
+                targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_HAS_BARREL));
                 Trinity::Containers::RandomResizeList(targets, 1);
             }
         }
@@ -1251,7 +1251,7 @@ class npc_mantid_tar_keg : public CreatureScript
         {
             instance = creature->GetInstanceScript();
             me->SetCorpseDelay(1);
-            me->SetRespawnDelay(2);
+            me->SetRespawnDelay(5);
             jumptimer = 0;
         }
 
@@ -1270,6 +1270,9 @@ class npc_mantid_tar_keg : public CreatureScript
         void Reset() override
         {
             me->SetPosition(me->GetHomePosition());
+            if (me->m_movementInfo.t_guid)
+                me->m_movementInfo.t_guid = 0;
+            me->SendMovementFlagUpdate();
             targetGUID = 0;
             me->GetMotionMaster()->MoveIdle();
             me->SetReactState(REACT_PASSIVE);

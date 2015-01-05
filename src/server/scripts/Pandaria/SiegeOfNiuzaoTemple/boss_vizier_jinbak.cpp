@@ -352,6 +352,7 @@ class npc_sap_puddle : public CreatureScript
         void Reset() override
         {
             me->SetReactState(REACT_PASSIVE);
+            skipTick = 0;
         }
 
         void DoAction(int32 const action)
@@ -366,21 +367,34 @@ class npc_sap_puddle : public CreatureScript
                 }
 
                 if (growAura)
+                {
                     growAura->ModStackAmount(5); // TODO: find proper value
+                    skipTick = 1000;
+                }
             }
         }
 
         void SpellHitTarget(Unit* target, SpellInfo const* spell) override
         {
-            if (target->GetTypeId() == TYPEID_PLAYER && spell->Id == SPELL_RESIDUE_DOT)
+            if (!skipTick && target->GetTypeId() == TYPEID_PLAYER && spell->Id == SPELL_RESIDUE_DOT)
                 if (Aura * growAura = me->GetAura(SPELL_GROW))
                     growAura->ModStackAmount(-3); // 3 Per player each tick
         }
 
         void UpdateAI(uint32 const diff) override
         {
+            if (skipTick)
+            {
+                if (skipTick <= diff)
+                {
+                    skipTick = 0;
+                } else skipTick -= diff;
+            }
         }
+    private:
+        uint32 skipTick;
     };
+
 
 public:
     npc_sap_puddle() : CreatureScript("npc_sap_puddle") {}

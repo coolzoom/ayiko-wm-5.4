@@ -1175,7 +1175,6 @@ public:
     }
 };
 
-
 // 120405
 class spell_grab_barrel : public SpellScriptLoader
 {
@@ -1188,16 +1187,7 @@ public:
 
         void FilterTargets(std::list<WorldObject*>& targets)
         {
-            if (targets.empty())
-                return;
-
-            if (Unit * caster = GetCaster())
-            {
-                targets.remove_if([](const WorldObject * unit) { return unit->GetTypeId() == TYPEID_UNIT && unit->ToCreature()->HasAura(SPELL_KEG_ACTIVE); });
-
-                if (!targets.empty() && targets.size() > 1)
-                    Trinity::Containers::RandomResizeList(targets, 1);
-            }
+            targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_KEG_ACTIVE));
         }
 
         void Register()

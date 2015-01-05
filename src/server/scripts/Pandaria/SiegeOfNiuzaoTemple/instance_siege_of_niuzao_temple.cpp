@@ -21,8 +21,9 @@ DoorData const doorData[] =
 {
     {GO_TEMPLE_INVIS_DOOR,          BOSS_PAVALAK,          DOOR_TYPE_PASSAGE,       BOUNDARY_NONE   },
     {GO_WIND_WALL,                  BOSS_PAVALAK,          DOOR_TYPE_PASSAGE,       BOUNDARY_NONE   },
-    {GO_FIRE_WALL,                  BOSS_VOJAK,          DOOR_TYPE_PASSAGE,       BOUNDARY_NONE   },
-    {0,                                      0,                         DOOR_TYPE_ROOM,       BOUNDARY_NONE},// END
+    {GO_TIGER_TEMLE_WALL,           BOSS_PAVALAK,          DOOR_TYPE_PASSAGE,       BOUNDARY_NONE   },
+    {GO_FIRE_WALL,                  BOSS_VOJAK,            DOOR_TYPE_PASSAGE,       BOUNDARY_NONE   },
+    {0,                                      0,            DOOR_TYPE_ROOM,          BOUNDARY_NONE   },// END
 };
 
 class instance_siege_of_niuzao_temple : public InstanceMapScript

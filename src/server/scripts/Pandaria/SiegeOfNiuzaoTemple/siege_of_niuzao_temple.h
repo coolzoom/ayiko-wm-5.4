@@ -47,6 +47,7 @@ enum GameObjects
     GO_TEMPLE_INVIS_DOOR    = 213251, // before neronok bridge
     GO_WIND_WALL            = 214548, // before neronok bridge
     GO_FIRE_WALL            = 210097,
+    GO_TIGER_TEMLE_WALL     = 213251
 };
 
 enum WMOAreaEntries

@@ -165,6 +165,7 @@ class boss_wing_leader_neronok : public CreatureScript
 
         void EnterCombat(Unit* ) override
         {
+            Talk(SAY_AGGRO);
             events.ScheduleEvent(EVENT_HAUL_BRICK, 1000, EVENT_GROUP_COMBAT);
             events.ScheduleEvent(EVENT_CAUSTIC_PITCH, 3000, EVENT_GROUP_COMBAT);
             events.ScheduleEvent(EVENT_QUICK_DRY_RESIN, 8000, EVENT_GROUP_COMBAT);

@@ -2108,13 +2108,12 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
                 // Bastion of Glory : +10% of power per application if target is caster
                 if (unitTarget->GetGUID() == caster->GetGUID() && caster->HasAura(114637))
                 {
-                    Aura *bastionOfGlory = caster->GetAura(114637);
-                    if (!bastionOfGlory)
-                        break;
-
-                    AddPct(addhealth, (10 * bastionOfGlory->GetStackAmount()));
-
-                    caster->RemoveAurasDueToSpell(114637);
+                    if (auto bastionOfGlory = caster->GetAura(114637))
+                    {
+                        AddPct(addhealth, (10 * bastionOfGlory->GetStackAmount()));
+                        // Set duration to 1 to let aura amount calculation benefit from it too
+                        bastionOfGlory->SetDuration(1);
+                    }
                 }
                 break;
             }

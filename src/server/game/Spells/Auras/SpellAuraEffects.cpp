@@ -994,6 +994,17 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
 
                     amount *= holyPower;
 
+                    if (GetBase()->GetUnitOwner()->GetGUID() == caster->GetGUID() && caster->HasAura(114637))
+                    {
+                        if (auto bastionOfGlory = caster->GetAura(114637))
+                        {
+                            printf("\n ! bastion of glory found ! \n ");
+                            AddPct(amount, (10 * bastionOfGlory->GetStackAmount()));
+                            caster->RemoveAurasDueToSpell(114637);
+                        }
+                    }
+
+
                     if (!hasDivinePurpose)
                         caster->ModifyPower(POWER_HOLY_POWER, (holyPower > 1) ? (-(holyPower - 1)) : 0);
                     break;

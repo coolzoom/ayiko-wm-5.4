@@ -359,6 +359,7 @@ class npc_sap_puddle : public CreatureScript
         {
             if (action == 1)
             {
+                skipTick = 3000;
                 Aura * growAura = me->GetAura(SPELL_GROW);
                 if (!growAura)
                 {
@@ -369,8 +370,9 @@ class npc_sap_puddle : public CreatureScript
                 if (growAura)
                 {
                     growAura->ModStackAmount(5); // TODO: find proper value
-                    skipTick = 1000;
                 }
+                else
+                    me->MonsterYell("failed to create stack", 0, 0);
             }
         }
 
@@ -378,7 +380,10 @@ class npc_sap_puddle : public CreatureScript
         {
             if (!skipTick && target->GetTypeId() == TYPEID_PLAYER && spell->Id == SPELL_RESIDUE_DOT)
                 if (Aura * growAura = me->GetAura(SPELL_GROW))
-                    growAura->ModStackAmount(-3); // 3 Per player each tick
+                {
+                    int32 stackAmt = growAura->GetStackAmount();
+                    growAura->SetStackAmount(std::max(stackAmt - 3, 1));// 3 Per player each tick
+                }
         }
 
         void UpdateAI(uint32 const diff) override

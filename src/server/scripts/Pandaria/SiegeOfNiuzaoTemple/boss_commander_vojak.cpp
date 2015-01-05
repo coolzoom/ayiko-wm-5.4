@@ -773,6 +773,9 @@ struct npc_vojak_addAI : public ScriptedAI
             } else aggrotimer -= diff;
         }
 
+        if (me->HasReactState(REACT_PASSIVE))
+            return;
+
         if (!UpdateVictim())
             return;
 
@@ -1030,10 +1033,10 @@ class npc_chu_helper : public CreatureScript
             side = (me->GetEntry() == NPC_LO_CHU) ? SIDE_RIGHT : SIDE_LEFT;
         }
 
-        void Reset()
+        void Reset() override
         {
             me->SetReactState(REACT_PASSIVE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
             barrelTargetGUID = 0;
             barrelGUID = 0;
             eventInProgress = false;

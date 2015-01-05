@@ -341,12 +341,20 @@ UPDATE creature_template SET ScriptName = 'npc_sap_puddle_vojak' WHERE entry = 6
 DELETE FROM areatrigger_scripts WHERE entry IN (325, 349, 359);
 
 
-DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (127417, 127418, 122346);
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (119703, 120270, 121981, 121982, 127417, 127418, 122346, 120202, 120405);
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(13, 3, 119703, 0, 0, 31, 0, 4, 0, 0, 0, 0, 0, '', 'Detonate - Target players only'),
+(13, 3, 120270, 0, 0, 31, 0, 3, 63106, 0, 0, 0, 0, '', 'Drain Barrel - target Sik''Thik Swarmer'),
+(13, 3, 120270, 0, 1, 31, 0, 3, 61670, 0, 0, 0, 0, '', 'Drain Barrel - target Sik''Thik Demolisher'),
+(13, 3, 120270, 0, 2, 31, 0, 3, 61701, 0, 0, 0, 0, '', 'Drain Barrel - target Sik''Thik Warrior'),
+(13, 3, 121981, 0, 2, 31, 0, 4, 0, 0, 0, 0, 0, '', 'Unstable Blast - target Players'),
+(13, 3, 121982, 0, 2, 31, 0, 3, 61670, 0, 0, 0, 0, '', 'Unstable Blast - target Demolisher'),
 (13, 1, 127417, 0, 0, 31, 0, 3, 61620, 0, 0, 0, 0, '', 'Door Breach - target Yang'),
 (13, 1, 127417, 0, 1, 31, 0, 4, 0, 0, 0, 0, 0, '', 'Door Breach - target Players'),
 (13, 1, 127418, 0, 0, 31, 0, 3, 65168, 0, 0, 0, 0, '', 'Door Breach - target Stalkers'),
-(13, 1, 122346, 0, 0, 31, 0, 3, 62684, 0, 0, 0, 0, '', 'Barrel Assignment - target Barrel Target');
+(13, 1, 122346, 0, 0, 31, 0, 3, 62684, 0, 0, 0, 0, '', 'Barrel Assignment - target Barrel Target'),
+(13, 1, 120202, 0, 0, 31, 0, 4, 0, 0, 0, 0, 0, '', 'Bombard - target players'),
+(13, 1, 120405, 0, 0, 31, 0, 3, 61817, 0, 0, 0, 0, '', 'Grab Barrel - target Mantid Tar Keg');
 
 DELETE FROM spell_script_names WHERE spell_id IN (122346, 120405);
 INSERT INTO spell_script_names (spell_id, ScriptName) VALUES

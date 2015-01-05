@@ -202,29 +202,11 @@ class npc_resin_flake : public CreatureScript
     {
         npc_resin_flakeAI(Creature * creature) : ScriptedAI(creature) {}
 
-        void Reset() override
+        void DamageTaken(Unit* , uint32& damage) override
         {
-            residueTimer = 5000;
-        }
-
-        void UpdateAI(uint32 const diff) override
-        {
-            if (!UpdateVictim())
-                return;
-
-            if (me->HasUnitState(UNIT_STATE_CASTING))
-                return;
-
-            if (residueTimer <= diff)
-            {
+            if (damage >= me->GetHealth())
                 DoCast(me, SPELL_RESIDUE, true);
-                residueTimer = urand(5000, 6000);
-            } else residueTimer -= diff;
-
-            DoMeleeAttackIfReady();
         }
-    private:
-        uint32 residueTimer;
     };
 
 public:

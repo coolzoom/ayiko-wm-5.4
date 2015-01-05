@@ -21,7 +21,6 @@ DoorData const doorData[] =
 {
     {GO_TEMPLE_INVIS_DOOR,          BOSS_PAVALAK,          DOOR_TYPE_PASSAGE,       BOUNDARY_NONE   },
     {GO_WIND_WALL,                  BOSS_PAVALAK,          DOOR_TYPE_PASSAGE,       BOUNDARY_NONE   },
-    {GO_TIGER_TEMLE_WALL,           BOSS_PAVALAK,          DOOR_TYPE_PASSAGE,       BOUNDARY_NONE   },
     {GO_FIRE_WALL,                  BOSS_VOJAK,            DOOR_TYPE_PASSAGE,       BOUNDARY_NONE   },
     {0,                                      0,            DOOR_TYPE_ROOM,          BOUNDARY_NONE   },// END
 };
@@ -35,6 +34,10 @@ class instance_siege_of_niuzao_temple : public InstanceMapScript
 
         void Initialize()
         {
+            invisDoorGUID[0] = 0;
+            invisDoorGUID[1] = 0;
+            vojakDoorGUID = 0;
+            jinbakDoorGUID = 0;
             SetBossNumber(TOTAL_ENCOUNTERS);
             LoadDoorData(doorData);
         }
@@ -44,6 +47,8 @@ class instance_siege_of_niuzao_temple : public InstanceMapScript
             switch (go->GetEntry())
             {
                 case GO_TEMPLE_INVIS_DOOR:
+                    invisDoorGUID[invisDoorGUID[0] != 0] = go->GetGUID();
+                    break;
                 case GO_WIND_WALL:
                 case GO_FIRE_WALL:
                     AddDoor(go, true);
@@ -79,8 +84,15 @@ class instance_siege_of_niuzao_temple : public InstanceMapScript
             switch (id)
             {
                 case BOSS_JINBAK:
-                    if (GameObject * go = instance->GetGameObject(jinbakDoorGUID))
-                        go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                    if (state == DONE)
+                        if (GameObject * go = instance->GetGameObject(jinbakDoorGUID))
+                            go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                    break;
+                case BOSS_PAVALAK:
+                    if (state == DONE)
+                        for (int i = 0; i < 2; ++i)
+                            if (GameObject * go = instance->GetGameObject(invisDoorGUID[i]))
+                                go->Delete();
                     break;
                 default:
                     break;
@@ -109,7 +121,7 @@ class instance_siege_of_niuzao_temple : public InstanceMapScript
 
         }
 
-        std::string GetSaveData()
+        std::string GetSaveData() override
         {
             OUT_SAVE_INST_DATA;
 
@@ -120,7 +132,7 @@ class instance_siege_of_niuzao_temple : public InstanceMapScript
             return saveStream.str();
         }
 
-        void Load(const char* str)
+        void Load(const char* str) override
         {
             if (!str)
             {
@@ -153,6 +165,7 @@ class instance_siege_of_niuzao_temple : public InstanceMapScript
     private:
         uint64 vojakDoorGUID;
         uint64 jinbakDoorGUID;
+        uint64 invisDoorGUID[2];
 
     };
 

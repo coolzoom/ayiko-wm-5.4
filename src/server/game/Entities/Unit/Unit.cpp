@@ -3482,6 +3482,19 @@ Aura *Unit::_TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint3
 
         // find current aura from spell and change it's stackamount, or refresh it's duration
         Aura *foundAura = GetOwnedAura(newAura->Id, casterGUID, (newAura->AttributesCu & SPELL_ATTR0_CU_ENCHANT_STACK) ? castItemGUID : 0, 0);
+
+        // Allow auras applied by different casters to stack without creating a new aura
+        // TODO: Those spells might share a common attribute, need further investigation
+        switch(newAura->Id)
+        {
+            case 119840: // Serrated Blade
+            case 120938:
+                foundAura = GetAura(newAura->Id);
+            break;
+        default:
+            break;
+        }
+
         if (foundAura != NULL)
         {
             // effect masks do not match

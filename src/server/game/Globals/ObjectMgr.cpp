@@ -5054,57 +5054,59 @@ void ObjectMgr::LoadInstanceEncounters()
 {
     uint32 oldMSTime = getMSTime();
 
-    //                                                 0         1            2                3
-    QueryResult result = WorldDatabase.Query("SELECT entry, creditType, creditEntry, lastEncounterDungeon FROM instance_encounters");
+    //                                                0      1        2             3       4       5        6
+    QueryResult result = WorldDatabase.Query("SELECT `map`, `index`, `difficulty`, `name`, `type`, `entry`, `dungeon` FROM `instance_encounters`");
     if (!result)
     {
         TC_LOG_ERROR("server.loading", ">> Loaded 0 instance encounters, table is empty!");
-
         return;
     }
 
     uint32 count = 0;
-    std::map<uint32, DungeonEncounterEntry const*> dungeonLastBosses;
+    std::map<uint32, DungeonEncounter const*> dungeonLastBosses;
     do
     {
         Field* fields = result->Fetch();
-        uint32 entry = fields[0].GetUInt32();
-        uint8 creditType = fields[1].GetUInt8();
-        uint32 creditEntry = fields[2].GetUInt32();
-        uint32 lastEncounterDungeon = fields[3].GetUInt16();
-        DungeonEncounterEntry const* dungeonEncounter = sDungeonEncounterStore.LookupEntry(entry);
-        if (!dungeonEncounter)
+
+        std::unique_ptr<DungeonEncounter> dungeonEncounter(new DungeonEncounter);
+
+        dungeonEncounter->mapId = fields[0].GetUInt32();
+        dungeonEncounter->encounterIndex = fields[1].GetUInt32();
+        dungeonEncounter->difficulty = fields[2].GetInt32();
+        dungeonEncounter->encounterName = fields[3].GetCString();
+        dungeonEncounter->creditType = EncounterCreditType(fields[4].GetUInt8());
+        dungeonEncounter->creditEntry = fields[5].GetUInt32();
+        dungeonEncounter->dungeon = fields[6].GetUInt32();
+
+        if (dungeonEncounter->dungeon && !sLFGDungeonStore.LookupEntry(dungeonEncounter->dungeon))
         {
-            TC_LOG_ERROR("sql.sql", "Table `instance_encounters` has an invalid encounter id %u, skipped!", entry);
+            TC_LOG_ERROR("sql.sql", "Table `instance_encounters` has an encounter (%s Map: %u, difficulty %u) marked as final for invalid dungeon id %u, skipped!",
+                dungeonEncounter->encounterName.c_str(), dungeonEncounter->mapId, dungeonEncounter->difficulty, dungeonEncounter->dungeon);
             continue;
         }
 
-        if (lastEncounterDungeon && !sLFGDungeonStore.LookupEntry(lastEncounterDungeon))
-        {
-            TC_LOG_ERROR("sql.sql", "Table `instance_encounters` has an encounter %u (%s) marked as final for invalid dungeon id %u, skipped!", entry, dungeonEncounter->encounterName, lastEncounterDungeon);
-            continue;
-        }
-
-        std::map<uint32, DungeonEncounterEntry const*>::const_iterator itr = dungeonLastBosses.find(lastEncounterDungeon);
-        if (lastEncounterDungeon)
+        std::map<uint32, DungeonEncounter const*>::const_iterator itr = dungeonLastBosses.find(dungeonEncounter->dungeon);
+        if (dungeonEncounter->dungeon)
         {
             if (itr != dungeonLastBosses.end())
             {
-                TC_LOG_ERROR("sql.sql", "Table `instance_encounters` specified encounter %u (%s) as last encounter but %u (%s) is already marked as one, skipped!", entry, dungeonEncounter->encounterName, itr->second->id, itr->second->encounterName);
+                TC_LOG_ERROR("sql.sql", "Table `instance_encounters` specified encounter (%s Map: %u, difficulty %u) but %u (%s) is already marked as one, skipped!",
+                    dungeonEncounter->encounterName.c_str(), dungeonEncounter->mapId, dungeonEncounter->difficulty, dungeonEncounter->dungeon, itr->second->encounterName.c_str());
                 continue;
             }
 
-            dungeonLastBosses[lastEncounterDungeon] = dungeonEncounter;
+            dungeonLastBosses[dungeonEncounter->dungeon] = dungeonEncounter.get();
         }
 
-        switch (creditType)
+        switch (dungeonEncounter->creditType)
         {
             case ENCOUNTER_CREDIT_KILL_CREATURE:
             {
-                auto const creatureInfo = GetMutableCreatureTemplate(creditEntry);
+                CreatureTemplate *creatureInfo = GetMutableCreatureTemplate(dungeonEncounter->creditEntry);
                 if (!creatureInfo)
                 {
-                    TC_LOG_ERROR("sql.sql", "Table `instance_encounters` has an invalid creature (entry %u) linked to the encounter %u (%s), skipped!", creditEntry, entry, dungeonEncounter->encounterName);
+                    TC_LOG_ERROR("sql.sql", "Table `instance_encounters` has an invalid creature (entry %u) linked to the encounter (%s Map: %u, difficulty %u), skipped!",
+                        dungeonEncounter->creditEntry, dungeonEncounter->encounterName.c_str(), dungeonEncounter->mapId, dungeonEncounter->difficulty);
                     continue;
                 }
 
@@ -5116,24 +5118,26 @@ void ObjectMgr::LoadInstanceEncounters()
                 break;
             }
             case ENCOUNTER_CREDIT_CAST_SPELL:
-                if (!sSpellMgr->GetSpellInfo(creditEntry))
+                if (!sSpellMgr->GetSpellInfo(dungeonEncounter->creditEntry))
                 {
-                    TC_LOG_ERROR("sql.sql", "Table `instance_encounters` has an invalid spell (entry %u) linked to the encounter %u (%s), skipped!", creditEntry, entry, dungeonEncounter->encounterName);
+                    TC_LOG_ERROR("sql.sql", "Table `instance_encounters` has an invalid spell (entry %u) linked to the encounter (%s Map: %u, difficulty %u), skipped!",
+                        dungeonEncounter->creditEntry, dungeonEncounter->encounterName.c_str(), dungeonEncounter->mapId, dungeonEncounter->difficulty);
                     continue;
                 }
                 break;
             default:
-                TC_LOG_ERROR("sql.sql", "Table `instance_encounters` has an invalid credit type (%u) for encounter %u (%s), skipped!", creditType, entry, dungeonEncounter->encounterName);
+                TC_LOG_ERROR("sql.sql", "Table `instance_encounters` has an invalid credit type (%u) for encounter (%s Map: %u, difficulty %u), skipped!",
+                    dungeonEncounter->creditEntry, dungeonEncounter->encounterName.c_str(), dungeonEncounter->mapId, dungeonEncounter->difficulty);
                 continue;
         }
 
         DungeonEncounterList& encounters = _dungeonEncounterStore[MAKE_PAIR32(dungeonEncounter->mapId, dungeonEncounter->difficulty)];
-        encounters.push_back(new DungeonEncounter(dungeonEncounter, EncounterCreditType(creditType), creditEntry, lastEncounterDungeon));
+        encounters.push_back(dungeonEncounter.release());
         ++count;
-    }
-    while (result->NextRow());
+    } while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u instance encounters in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    TC_LOG_INFO("misc", ">> Loaded %u instance encounters in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+
 }
 
 GossipText const* ObjectMgr::GetGossipText(uint32 Text_ID) const

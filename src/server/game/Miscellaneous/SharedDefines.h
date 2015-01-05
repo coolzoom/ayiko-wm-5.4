@@ -1096,7 +1096,7 @@ enum SpellEffects
     SPELL_EFFECT_185                                = 185, // Scene related
     SPELL_EFFECT_186                                = 186, // Scene related
     SPELL_EFFECT_RANDOM_DIGSITE                     = 187, // 126957 only
-    SPELL_EFFECT_STAMPEDE                           = 188, // Stampede 121818
+    SPELL_EFFECT_STAMPEDE                           = 188, // Koz: WowHead-> Summon Multiple Hunter Pets
     SPELL_EFFECT_LOOT_BONUS                         = 189, // Boss loot bonus ?
     SPELL_EFFECT_190                                = 190, // internal spell
     SPELL_EFFECT_TELEPORT_TO_DIGSITE                = 191, // Teleport player to an random digsite (Archaeology)
@@ -1111,7 +1111,7 @@ enum SpellEffects
     SPELL_EFFECT_HEAL_BATTLEPET_PCT                 = 200, // Battle pet Healing  125439, 125801
     SPELL_EFFECT_BATTLE_PET                         = 201, // Battle pet first slot and track
     SPELL_EFFECT_202                                = 202, // Unk 5.4.0
-    SPELL_EFFECT_203                                = 203, // Unk 5.4.0
+    SPELL_EFFECT_203                                = 203, // Koz: WowHead-> Casts Additional spell
     SPELL_EFFECT_UPGRADE_BATTLEPET                  = 204, // BATTLEPET System 5.4.0
     SPELL_EFFECT_PVE_PVP_CHOICE                     = 205, // Unk use 5.4.0
     SPELL_EFFECT_ETERNITY_EMBRACE                   = 206, // used for TimelessIsle 5.4.0

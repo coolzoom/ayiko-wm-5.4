@@ -657,6 +657,8 @@ void WorldSession::SendLfgPlayerReward(uint32 rdungeonEntry, uint32 sdungeonEntr
             bytereward << uint32(qRew->RewardCurrencyCount[i]);
         }
     }
+
+    data.FlushBits();
     data.append(bytereward);
     SendPacket(&data);
 }

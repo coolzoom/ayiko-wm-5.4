@@ -500,23 +500,31 @@ void InstanceScript::UpdateEncounterState(EncounterCreditType type, uint32 credi
     if (!encounters)
         return;
 
+    uint32 dungeonId = 0;
+
     for (DungeonEncounterList::const_iterator itr = encounters->begin(); itr != encounters->end(); ++itr)
     {
-        if ((*itr)->creditType == type && (*itr)->creditEntry == creditEntry)
+        DungeonEncounter const* encounter = *itr;
+        if (encounter->creditType == type && encounter->creditEntry == creditEntry)
         {
-            completedEncounters |= 1 << (*itr)->dbcEntry->encounterIndex;
-            TC_LOG_DEBUG("scripts", "Instance %s (instanceId %u) completed encounter %s", instance->GetMapName(), instance->GetInstanceId(), (*itr)->dbcEntry->encounterName);
-            if (uint32 dungeonId = (*itr)->lastEncounterDungeon)
+            completedEncounters |= 1 << encounter->encounterIndex;
+            if (encounter->dungeon)
             {
-                Map::PlayerList const& players = instance->GetPlayers();
-                if (!players.isEmpty())
-                    for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
-                        if (Player* player = i->GetSource())
-                            if (!source || player->IsAtGroupRewardDistance(source))
-                                sLFGMgr->RewardDungeonDoneFor(dungeonId, player);
+                dungeonId = encounter->dungeon;
+                TC_LOG_DEBUG("lfg", "UpdateEncounterState: Instance %s (instanceId %u) completed encounter %s. Credit Dungeon: %u", instance->GetMapName(), instance->GetInstanceId(), encounter->encounterName.c_str(), dungeonId);
+                break;
             }
-            return;
         }
+    }
+
+    if (dungeonId)
+    {
+        Map::PlayerList const& players = instance->GetPlayers();
+        if (!players.isEmpty())
+            for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
+            if (Player* player = i->GetSource())
+                if (!source || player->IsAtGroupRewardDistance(source))
+                    sLFGMgr->RewardDungeonDoneFor(dungeonId, player);
     }
 }
 

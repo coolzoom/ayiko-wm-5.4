@@ -213,7 +213,7 @@ UPDATE `creature_template` SET `AIName`='SmartAI' WHERE `entry` IN('57825', '578
 UPDATE creature_template SET npcflag = npcflag | 1 WHERE entry = 57457;
 
 DELETE FROM `smart_scripts` WHERE `source_type` = '0' AND `entryorguid` IN('57825', '57830', '57744');
-INSERT INTO `smart_scripts` (`entryorguid`, `id` `event_type`, `action_type`, `action_param1`, `target_type`, `comment`) VALUES
+INSERT INTO `smart_scripts` (`entryorguid`, `id`, `event_type`, `action_type`, `action_param1`, `target_type`, `comment`) VALUES
 ('57830', '0', '64', '33', '57830', '7', 'Raufen - On Gossip Hello - Give KC'),
 ('57825', '0', '64', '33', '57825', '7', 'Raufen - On Gossip Hello - Give KC'),
 ('57744', '0', '64', '33', '57744', '7', 'Raufen - On Gossip Hello - Give KC'),
@@ -379,7 +379,7 @@ DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '61426';
 INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES ('61426', '119349', '1');
 
 DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`='18') AND (`SourceGroup`='61426') AND (`SourceEntry`='119349');
-DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`='13') AND (`SourceGroup`='3') AND (`SourceEntry`='119349');
+DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`='13') AND (`SourceGroup`='1') AND (`SourceEntry`='119349');
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`, `ConditionValue2`, `Comment`) VALUES ('13', '1', '119349', '31', '3', '61426', 'Raufen - Arm Trap target trap');
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES ('18', '61426', '119349', '0', '0', '9', '0', '30889', '0', '0', '0', '0', '0', '', 'Raufen - Require quest for spellclick');
 
@@ -473,3 +473,35 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 (3578, 57662, 870, 0, 0, 1, 65535, 0, 0, -600.002, 1222.33, 138.198, 0.162501, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
 (3579, 57662, 870, 0, 0, 1, 65535, 0, 0, -627.769, 1287.38, 136.07, 1.67047, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
 (3580, 57662, 870, 0, 0, 1, 65535, 0, 0, -631.418, 1308.1, 140.399, 5.88413, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0, NULL);
+
+-- Free the Dissenters
+UPDATE `creature_template` SET `ScriptName`='npc_inkgill_dissenter' WHERE (`entry`='61566');
+DELETE FROM `creature_text` WHERE `entry` = '61566';
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `probability`, `comment`) VALUES
+('61566', '0', '0', 'Gorai lives? I will go find him. Thank you, friend!', '12', '100', 'Raufen - Free the Dissenters quest talk'),
+('61566', '0', '1', 'Thank you, friend... I\'ll make my way to the south!', '12', '100', 'Raufen - Free the Dissenters quest talk'),
+('61566', '0', '2', 'You are very brave... thank you!', '12', '100', 'Raufen - Free the Dissenters quest talk');
+
+-- Ranger Rescue
+UPDATE `gameobject_template` SET `data0`='0', `data1`='0', `ScriptName`='go_drywood_cage' WHERE `entry` IN('211511');
+DELETE FROM `creature` WHERE `id` IN('63668', '63669', '60763');
+UPDATE `creature` SET `spawndist`='0', `MovementType`='0', `unit_flags` ='33280' WHERE (`id`='60730');
+UPDATE `creature_template` SET `unit_flags`='33280' WHERE (`entry`='60730');
+UPDATE `creature_template` SET `ScriptName`='npc_lin_silentstrike' WHERE (`entry`='60899');
+DELETE FROM `creature_text` WHERE `entry` = '60730';
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `probability`, `comment`) VALUES
+('60730', '0', '0', 'Have you seen the yaungol fighting each other? It seems their troubles run deeper than we thought.', '12', '100', 'Raufen - Ranger Rescue quest talk'),
+('60730', '0', '1', 'I knew someone would come for us! Let me help you fight the yaungol.', '12', '100', 'Raufen - Ranger Rescue quest talk'),
+('60730', '0', '2', 'I\'m in your debt, stranger. Please let me help you.', '12', '100', 'Raufen - Ranger Rescue quest talk'),
+('60730', '0', '3', 'Just what I was waiting for! Time to introduce those yaungol to my fists!', '12', '100', 'Raufen - Ranger Rescue quest talk'),
+('60730', '0', '4', 'Thank you for freeing me, $gbrother:sister. I cannot let you fight alone.', '12', '100', 'Raufen - Ranger Rescue quest talk');
+
+DELETE FROM `creature_text` WHERE `entry` = '60901';
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `probability`, `comment`) VALUES
+('60901', '0', '0', 'NOOO!', '12', '100', 'Raufen - Ranger Rescue quest talk'),
+('60901', '0', '1', 'Lin, heart of my heart! No, please, NO! It cannot be!', '12', '100', 'Raufen - Ranger Rescue quest talk'),
+('60901', '0', '2', 'If only I had come sooner! If only Ban had listened to me!', '12', '100', 'Raufen - Ranger Rescue quest talk'),
+('60901', '0', '3', 'Shhhhhh, my sweet darling, sleep now and be at peace.', '12', '100', 'Raufen - Ranger Rescue quest talk');
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '96733';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES ('96733', 'spell_creature_permanent_feign_death');

@@ -44,7 +44,7 @@ BattlegroundAV::~BattlegroundAV()
 
 uint16 BattlegroundAV::GetBonusHonor(uint8 kills) //TODO: move this function to Battleground.cpp (needs to find a way to get m_MaxLevel)
 {
-    float honorResult = 0.01f * ((float)m_MaxLevel / ((float)m_MaxLevel + 1));
+    float honorResult = (27.72f - ((float)m_MaxLevel - (float)m_MaxLevel)) / 2.8f;
     return Trinity::Honor::hk_honor_at_level(honorResult, kills);
 }
 

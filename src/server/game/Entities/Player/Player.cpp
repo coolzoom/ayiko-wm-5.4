@@ -7957,7 +7957,7 @@ bool Player::RewardHonor(Unit* victim, uint32 groupsize, int32 honor, bool pvpto
                 victim_guid = 0;                        // Don't show HK: <rank> message, only log.
 
             // Honor for the same level player is 9.9
-            honor_f = Trinity::Honor::hk_honor_at_level_f(10.01f * ((float)v_level / ((float)k_level + 1)));
+            honor_f = Trinity::Honor::hk_honor_at_level_f((27.72f - ((float)k_level - (float)v_level)) / 2.8f);
 
             // count the number of playerkills in one day
             ApplyModUInt32Value(PLAYER_FIELD_KILLS, 1, true);

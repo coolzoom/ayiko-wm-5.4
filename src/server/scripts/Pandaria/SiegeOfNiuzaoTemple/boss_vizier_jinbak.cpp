@@ -369,7 +369,7 @@ class npc_sap_puddle : public CreatureScript
 
                 if (growAura)
                 {
-                    growAura->ModStackAmount(5); // TODO: find proper value
+                    growAura->ModStackAmount(3); // TODO: find proper value
                 }
                 else
                     me->MonsterYell("failed to create stack", 0, 0);

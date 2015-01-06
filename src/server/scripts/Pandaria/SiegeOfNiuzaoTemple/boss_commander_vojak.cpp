@@ -272,10 +272,15 @@ class npc_yang_ironclaw : public CreatureScript
 
         void Reset() override
         {
-            //if (instance->GetBossState(BOSS_VOJAK) == NOT_STARTED)
-
+            
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+            if (instance->GetBossState(BOSS_VOJAK) == DONE)
+                me->DespawnOrUnsummon(500);
+            else
+            {
                 ResetEncounter();
                 events.Reset();
+            }
         }
 
         void SummonWaveNPC(uint32 entry, const Position  &spawnPos, uint8 waveId, uint8 addNumber, bool isLeftSide)
@@ -284,7 +289,6 @@ class npc_yang_ironclaw : public CreatureScript
             uint32 mask = (waveId << 0);
             mask |= (addNumber << 8);
             mask |= (isLeftSide << 16);
-
 
             if (Creature * creature = me->SummonCreature(entry, spawnPos))
                 creature->AI()->SetData(0, mask);
@@ -307,7 +311,7 @@ class npc_yang_ironclaw : public CreatureScript
         void DoAction(int32 const action) override
         {
             if (action == ACTION_START_EVENT)
-                //if (instance->GetBossState(BOSS_VOJAK) != DONE)
+                if (instance->GetBossState(BOSS_VOJAK) != DONE)
                     StartEncounter();
         }
 
@@ -372,6 +376,9 @@ class npc_yang_ironclaw : public CreatureScript
 
             // boss spawn
 
+            if (Creature * vojak = Creature::GetCreature(*me, vojakGUID))
+                vojak->DespawnOrUnsummon();
+
             if (Creature * creature = me->SummonCreature(NPC_VOJAK, 1509.67f, 5424.98f, 145.687f, 5.07204f))
             {
                 vojakGUID = creature->GetGUID();
@@ -401,7 +408,8 @@ class npc_yang_ironclaw : public CreatureScript
         void JustSummoned(Creature* summon) override
         {
             summon->setActive(true);
-            summons.Summon(summon);
+            if (summon->GetEntry() != NPC_VOJAK)
+                summons.Summon(summon);
         }
 
         void SummonedCreatureDies(Creature* victim, Unit* )
@@ -836,6 +844,10 @@ class boss_commander_vojak : public CreatureScript
         {
             if (action == ACTION_ENGAGE_COMBAT)
             {
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_UNK_6 | UNIT_FLAG_UNK_15);
+                me->SetReactState(REACT_PASSIVE);
+                DoZoneInCombat(me);
+
                 // move towards the upper platform
                 Movement::MoveSplineInit init(me);
                 for (auto itr : PATH_POINTS)
@@ -849,9 +861,6 @@ class boss_commander_vojak : public CreatureScript
                 init.SetUncompressed();
                 init.Launch();
 
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
-                me->SetReactState(REACT_PASSIVE);
-                DoZoneInCombat(me);
                 events.ScheduleEvent(EVENT_ENGAGE_COMBAT, me->GetSplineDuration());
             }
         }

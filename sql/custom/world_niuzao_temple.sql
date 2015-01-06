@@ -326,9 +326,12 @@ UPDATE creature_template SET InhabitType = 4 WHERE entry = 57478; -- Invisible S
 UPDATE creature_template SET flags_extra = 128 WHERE entry IN (66699, 61579); -- Gongable stalker
 UPDATE creature_template SET ScriptName = 'boss_commander_vojak' WHERE entry = 61634;
 
-UPDATE creature_template SET ScriptName = 'npc_sikthik_warrior' WHERE entry = 61701;
-UPDATE creature_template SET ScriptName = 'npc_sikthik_demolisher' WHERE entry = 61670;
-UPDATE creature_template SET ScriptName = 'npc_sikthik_swarmer' WHERE entry = 63106;
+UPDATE creature_template SET mindmg = 12684, maxdmg = 19052, dmg_multiplier = 3, attackpower = 55538, ScriptName = 'npc_sikthik_warrior' WHERE entry = 61701;
+UPDATE creature_template SET mindmg = 12684, maxdmg = 19052, dmg_multiplier = 5, attackpower = 55538 WHERE entry = 361701;
+UPDATE creature_template SET mindmg = 11321, maxdmg = 16657, dmg_multiplier = 3, attackpower = 48962, ScriptName = 'npc_sikthik_demolisher' WHERE entry = 61670;
+UPDATE creature_template SET mindmg = 11321, maxdmg = 16657, dmg_multiplier = 5, attackpower = 48962 WHERE entry = 361670;
+UPDATE creature_template SET mindmg = 11839, maxdmg = 17339, dmg_multiplier = 2, ScriptName = 'npc_sikthik_swarmer' WHERE entry = 63106;
+UPDATE creature_template SET mindmg = 11839, maxdmg = 17339, dmg_multiplier = 4 WHERE entry = 363106;
 UPDATE creature_template SET ScriptName = 'npc_yang_ironclaw' WHERE entry = 61620;
 UPDATE creature_template SET faction_A = 14, faction_H = 14,  modelid1 = 43955, modelid2 = 43955, InhabitType = 4, ScriptName = 'npc_sikthik_amberwing' WHERE entry = 61699;
 
@@ -336,7 +339,7 @@ UPDATE creature_template SET ScriptName = 'npc_mantid_tar_keg' WHERE entry = 618
 
 UPDATE creature_template SET ScriptName = 'npc_chu_helper' WHERE entry IN (62794, 61812);
 
-UPDATE creature_template SET ScriptName = 'npc_sap_puddle_vojak' WHERE entry = 61579;
+UPDATE creature_template SET minlevel = 93, maxlevel = 93, ScriptName = 'npc_sap_puddle_vojak' WHERE entry = 61579;
 
 DELETE FROM areatrigger_scripts WHERE entry IN (325, 349, 359);
 
@@ -347,8 +350,10 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 (13, 3, 120270, 0, 0, 31, 0, 3, 63106, 0, 0, 0, 0, '', 'Drain Barrel - target Sik''Thik Swarmer'),
 (13, 3, 120270, 0, 1, 31, 0, 3, 61670, 0, 0, 0, 0, '', 'Drain Barrel - target Sik''Thik Demolisher'),
 (13, 3, 120270, 0, 2, 31, 0, 3, 61701, 0, 0, 0, 0, '', 'Drain Barrel - target Sik''Thik Warrior'),
+(13, 3, 120270, 0, 3, 31, 0, 4, 0, 0, 0, 0, 0, '', 'Drain Barrel - target players'),
+(13, 3, 120270, 0, 4, 31, 0, 3, 61634, 0, 0, 0, 0, '', 'Drain Barrel - target Vo''Jak'),
 (13, 3, 121981, 0, 2, 31, 0, 4, 0, 0, 0, 0, 0, '', 'Unstable Blast - target Players'),
-(13, 3, 121982, 0, 2, 31, 0, 3, 61670, 0, 0, 0, 0, '', 'Unstable Blast - target Demolisher'),
+(13, 1, 121982, 0, 2, 31, 0, 3, 61670, 0, 0, 0, 0, '', 'Unstable Blast - target Demolisher'),
 (13, 1, 127417, 0, 0, 31, 0, 3, 61620, 0, 0, 0, 0, '', 'Door Breach - target Yang'),
 (13, 1, 127417, 0, 1, 31, 0, 4, 0, 0, 0, 0, 0, '', 'Door Breach - target Players'),
 (13, 1, 127418, 0, 0, 31, 0, 3, 65168, 0, 0, 0, 0, '', 'Door Breach - target Stalkers'),
@@ -1016,24 +1021,24 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position
 (@CGUID+175, 61817, 1011, 3, 1, 1491.158, 5296.043, 184.732, 2.179494, 86400, 0, 0), -- Mantid Tar Keg (Area: Hollowed Out Tree) (Auras: 123218 - Mantid Barrel Inactive)
 -- (@CGUID+176, 63106, 1011, 3, 1, 1492.309, 5381.318, 139.5228, 5.217566, 86400, 0, 0), -- Sik'thik Swarmer (Area: Hollowed Out Tree) (Auras: )
 (@CGUID+177, 61817, 1011, 3, 1, 1492.396, 5298.732, 184.732, 2.586187, 86400, 0, 0), -- Mantid Tar Keg (Area: Hollowed Out Tree) (Auras: 123218 - Mantid Barrel Inactive)
-(@CGUID+178, 61670, 1011, 3, 1, 1494.62, 5389.788, 139.3728, 5.217566, 86400, 0, 0), -- Sik'thik Demolisher (Area: Hollowed Out Tree) (Auras: 121986 - Carrying Explosives)
+-- (@CGUID+178, 61670, 1011, 3, 1, 1494.62, 5389.788, 139.3728, 5.217566, 86400, 0, 0), -- Sik'thik Demolisher (Area: Hollowed Out Tree) (Auras: 121986 - Carrying Explosives)
 (@CGUID+179, 61817, 1011, 3, 1, 1552.309, 5285.424, 184.8399, 2.79816, 86400, 0, 0), -- Mantid Tar Keg (Area: Hollowed Out Tree) (Auras: 123218 - Mantid Barrel Inactive)
 (@CGUID+180, 61817, 1011, 3, 1, 1492.151, 5296.934, 184.732, 2.34951, 86400, 0, 0), -- Mantid Tar Keg (Area: Hollowed Out Tree) (Auras: 123218 - Mantid Barrel Inactive)
 (@CGUID+181, 61817, 1011, 3, 1, 1552.092, 5286.59, 184.8318, 2.79816, 86400, 0, 0), -- Mantid Tar Keg (Area: Hollowed Out Tree) (Auras: 123218 - Mantid Barrel Inactive)
 (@CGUID+182, 61817, 1011, 3, 1, 1492.182, 5295.901, 184.732, 2.79816, 86400, 0, 0), -- Mantid Tar Keg (Area: Hollowed Out Tree) (Auras: 123218 - Mantid Barrel Inactive)
 (@CGUID+183, 61817, 1011, 3, 1, 1544.25, 5285.992, 184.8433, 0.7451652, 86400, 0, 0), -- Mantid Tar Keg (Area: Hollowed Out Tree) (Auras: 123218 - Mantid Barrel Inactive)
-(@CGUID+184, 61670, 1011, 3, 1, 1490.585, 5401.871, 142.3527, 5.056201, 86400, 0, 0), -- Sik'thik Demolisher (Area: Hollowed Out Tree) (Auras: 121986 - Carrying Explosives)
+-- (@CGUID+184, 61670, 1011, 3, 1, 1490.585, 5401.871, 142.3527, 5.056201, 86400, 0, 0), -- Sik'thik Demolisher (Area: Hollowed Out Tree) (Auras: 121986 - Carrying Explosives)
 (@CGUID+185, 62684, 1011, 3, 1, 1554.757, 5315.414, 184.7319, 1.584624, 86400, 0, 0), -- Barrel Target (Area: Hollowed Out Tree) (Auras: )
 (@CGUID+186, 62684, 1011, 3, 1, 1541.611, 5313.682, 185.2183, 1.732267, 86400, 0, 0), -- Barrel Target (Area: Hollowed Out Tree) (Auras: )
 (@CGUID+187, 62684, 1011, 3, 1, 1557.802, 5315.508, 184.7323, 1.732267, 86400, 0, 0), -- Barrel Target (Area: Hollowed Out Tree) (Auras: )
-(@CGUID+188, 61670, 1011, 3, 1, 1527.97, 5406.993, 140.1349, 4.664006, 86400, 0, 0), -- Sik'thik Demolisher (Area: Hollowed Out Tree) (Auras: 121986 - Carrying Explosives)
+-- (@CGUID+188, 61670, 1011, 3, 1, 1527.97, 5406.993, 140.1349, 4.664006, 86400, 0, 0), -- Sik'thik Demolisher (Area: Hollowed Out Tree) (Auras: 121986 - Carrying Explosives)
 (@CGUID+189, 62684, 1011, 3, 1, 1539.743, 5314.566, 185.2183, 1.732267, 86400, 0, 0), -- Barrel Target (Area: Hollowed Out Tree) (Auras: )
 (@CGUID+190, 57478, 1011, 3, 1, 1555.927, 5312.65, 184.7319, 1.732267, 86400, 0, 0), -- Invisible Stalker (Area: Hollowed Out Tree)
 (@CGUID+191, 62684, 1011, 3, 1, 1556.059, 5316.244, 184.7319, 1.732267, 86400, 0, 0), -- Barrel Target (Area: Hollowed Out Tree) (Auras: )
 (@CGUID+192, 62684, 1011, 3, 1, 1514.825, 5311.887, 184.7319, 1.732267, 86400, 0, 0), -- Barrel Target (Area: Hollowed Out Tree) (Auras: )
-(@CGUID+193, 61670, 1011, 3, 1, 1522.759, 5407.417, 140.269, 4.719938, 86400, 0, 0), -- Sik'thik Demolisher (Area: Hollowed Out Tree) (Auras: 121986 - Carrying Explosives)
+-- (@CGUID+193, 61670, 1011, 3, 1, 1522.759, 5407.417, 140.269, 4.719938, 86400, 0, 0), -- Sik'thik Demolisher (Area: Hollowed Out Tree) (Auras: 121986 - Carrying Explosives)
 (@CGUID+194, 57478, 1011, 3, 1, 1513.189, 5309.396, 184.7319, 1.732267, 86400, 0, 0), -- Invisible Stalker (Area: Hollowed Out Tree)
-(@CGUID+195, 61670, 1011, 3, 1, 1533.313, 5406.377, 139.8538, 4.527507, 86400, 0, 0), -- Sik'thik Demolisher (Area: Hollowed Out Tree) (Auras: 121986 - Carrying Explosives)
+-- (@CGUID+195, 61670, 1011, 3, 1, 1533.313, 5406.377, 139.8538, 4.527507, 86400, 0, 0), -- Sik'thik Demolisher (Area: Hollowed Out Tree) (Auras: 121986 - Carrying Explosives)
 (@CGUID+196, 57478, 1011, 3, 1, 1540.203, 5310.736, 184.7319, 1.687166, 86400, 0, 0), -- Invisible Stalker (Area: Hollowed Out Tree)
 (@CGUID+197, 62684, 1011, 3, 1, 1538.194, 5313.143, 184.7319, 1.732267, 86400, 0, 0), -- Barrel Target (Area: Hollowed Out Tree) (Auras: )
 -- (@CGUID+198, 61701, 1011, 3, 1, 1523.967, 5414.13, 141.6149, 4.911316, 86400, 0, 0), -- Sik'thik Warrior (Area: Hollowed Out Tree) (Auras: )

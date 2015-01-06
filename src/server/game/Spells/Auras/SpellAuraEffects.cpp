@@ -994,6 +994,17 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
 
                     amount *= holyPower;
 
+                    if (GetBase()->GetUnitOwner()->GetGUID() == caster->GetGUID() && caster->HasAura(114637))
+                    {
+                        if (auto bastionOfGlory = caster->GetAura(114637))
+                        {
+                            printf("\n ! bastion of glory found ! \n ");
+                            AddPct(amount, (10 * bastionOfGlory->GetStackAmount()));
+                            caster->RemoveAurasDueToSpell(114637);
+                        }
+                    }
+
+
                     if (!hasDivinePurpose)
                         caster->ModifyPower(POWER_HOLY_POWER, (holyPower > 1) ? (-(holyPower - 1)) : 0);
                     break;
@@ -5866,15 +5877,6 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
 
                                 target->CastSpell(target, spellId, true, NULL, this);
                             }
-                            break;
-                        }
-                        case 43681: // Inactive
-                        {
-                            if (target->GetTypeId() != TYPEID_PLAYER || aurApp->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE)
-                                return;
-
-                            if (target->GetMap()->IsBattleground())
-                                target->ToPlayer()->LeaveBattleground();
                             break;
                         }
                         case 42783: // Wrath of the Astromancer

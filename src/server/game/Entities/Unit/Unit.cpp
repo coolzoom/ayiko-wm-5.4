@@ -7435,6 +7435,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                         case 82327: // Holy Radiance
                         case 85222: // Light of Dawn
                         case 130551: // Word of Glory
+                        case 114163: // Eternal Flame
                         {
                             float mastery = ToPlayer()->GetFloatValue(PLAYER_MASTERY) * 1.25f;
                             basepoints0 = int32(damage * float(mastery / 100.0f));
@@ -11692,6 +11693,19 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
 
             if (chance && roll_chance_i(chance))
                 CastSpell(this, 44544, true);  // Fingers of frost proc
+        }
+
+        // Judgement - Glyph of Double Jeopardy
+        if (spellProto->Id == 20271)
+        {
+            if (auto glyph = GetAuraEffect(121027, EFFECT_0))
+            {
+                // first target set in script, check second target
+                if (glyph->GetUserData() != victim->GetGUIDLow())
+                    AddPct(DoneTotalMod, glyph->GetAmount());
+
+                glyph->GetBase()->SetDuration(1);
+            }
         }
 
         // Sword of Light - 53503
@@ -16475,7 +16489,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
     }
 
     // Dematerialize
-    if (target && target != this && target->GetTypeId() == TYPEID_PLAYER && target->HasAura(122464) && procSpell && procSpell->GetAllEffectsMechanicMask() & (1 << MECHANIC_STUN))
+    if (target && target != this && !isVictim && target->GetTypeId() == TYPEID_PLAYER && target->HasAura(122464) && procSpell && procSpell->GetAllEffectsMechanicMask() & (1 << MECHANIC_STUN))
     {
         if (!target->ToPlayer()->HasSpellCooldown(122465))
         {
@@ -16982,6 +16996,11 @@ uint32 /*damage*/, uint32 /*absorb*/ /* = 0 */, SpellInfo const* /*procAura*/ /*
     // Main Gauche & Gouge
     if (procSpell && procSpell->Id == 86392 && spellInfo->Id == 1776)
         return true;
+
+    // Repentance and Blinding Light does not break Seal of Truth(Censure)
+    if (procSpell && procSpell->Id == 31803)
+        if (spellInfo->Id == 20066 || spellInfo->Id == 105421)
+            return true;
 
     return false;
 }

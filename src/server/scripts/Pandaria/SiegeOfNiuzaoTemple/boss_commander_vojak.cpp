@@ -294,7 +294,7 @@ class npc_yang_ironclaw : public CreatureScript
                 creature->AI()->SetData(0, mask);
         }
 
-        void SpellHitTarget(Unit* target, SpellInfo const* spell)
+        void SpellHitTarget(Unit* target, SpellInfo const* spell) override
         {
             if (spell->Id == SPELL_BREACH_DOOR_TARGET)
             {
@@ -303,7 +303,7 @@ class npc_yang_ironclaw : public CreatureScript
             }
         }
 
-        void DamageTaken(Unit* , uint32& damage)
+        void DamageTaken(Unit* , uint32& damage) override
         {
             damage = 0;
         }
@@ -412,7 +412,7 @@ class npc_yang_ironclaw : public CreatureScript
                 summons.Summon(summon);
         }
 
-        void SummonedCreatureDies(Creature* victim, Unit* )
+        void SummonedCreatureDies(Creature* victim, Unit* ) override
         {
             if (victim->GetEntry() == NPC_VOJAK)
             {
@@ -432,7 +432,7 @@ class npc_yang_ironclaw : public CreatureScript
             }
         }
 
-        void MovementInform(uint32 type, uint32 id)
+        void MovementInform(uint32 type, uint32 id) override
         {
             if (type == POINT_MOTION_TYPE)
             {
@@ -484,7 +484,7 @@ class npc_yang_ironclaw : public CreatureScript
                 liChu->AI()->DoAction(ACTION_ENGAGE_COMBAT);
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(const uint32 diff) override
         {
             events.Update(diff);
             if (uint32 eventId = events.ExecuteEvent())
@@ -594,11 +594,6 @@ class npc_yang_ironclaw : public CreatureScript
                         break;
                 }
             }
-
-            if (!UpdateVictim())
-                return;
-
-            DoMeleeAttackIfReady();
         }
     private:
         uint8 bombCnt;
@@ -832,6 +827,7 @@ class boss_commander_vojak : public CreatureScript
     {
         boss_commander_vojakAI(Creature * creature) : ScriptedAI(creature)
         {
+            moving = true;
         }
 
         void Reset() override
@@ -844,6 +840,7 @@ class boss_commander_vojak : public CreatureScript
         {
             if (action == ACTION_ENGAGE_COMBAT)
             {
+                moving = true;
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_UNK_6 | UNIT_FLAG_UNK_15);
                 me->SetReactState(REACT_PASSIVE);
                 DoZoneInCombat(me);
@@ -867,8 +864,9 @@ class boss_commander_vojak : public CreatureScript
 
         void UpdateAI(uint32 diff) override
         {
-            if (!UpdateVictimWithGaze() || !UpdateVictim())
-                return;
+            if (!moving)
+                if (!UpdateVictimWithGaze() || !UpdateVictim())
+                    return;
 
             events.Update(diff);
 
@@ -880,6 +878,7 @@ class boss_commander_vojak : public CreatureScript
                 switch (eventId)
                 {
                     case EVENT_ENGAGE_COMBAT:
+                        moving = false;
                         me->SetReactState(REACT_AGGRESSIVE);
                         events.ScheduleEvent(EVENT_RISING_SPEED, 3000);
                         events.ScheduleEvent(EVENT_DASHING_STRIKE, 5000);
@@ -909,9 +908,11 @@ class boss_commander_vojak : public CreatureScript
                 }
             }
 
-            DoMeleeAttackIfReady();
+            if (!moving)
+                DoMeleeAttackIfReady();
         }
     private:
+        bool moving;
         EventMap events;
         uint64 dashingTargetGUID;
     };

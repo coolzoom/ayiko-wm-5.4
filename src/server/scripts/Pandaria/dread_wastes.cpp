@@ -2190,6 +2190,189 @@ public:
     }
 };
 
+// On the Crab quest
+class go_full_crab_pot : public GameObjectScript
+{
+public:
+    go_full_crab_pot() : GameObjectScript("go_full_crab_pot") { }
+
+    bool OnGossipHello(Player* player, GameObject* go) override
+    {
+        if (player->GetQuestStatus(31187) == QUEST_STATUS_INCOMPLETE)
+        {
+            /*player->CastSpell(player, 89404, true);
+            player->TeleportTo(player->GetMapId(), -9207.99f, -1560.32f, 65.46f, 0.82f);*/
+            player->KilledMonsterCredit(64006);
+            Position pos;
+            go->GetPosition(&pos);
+            if (auto crabTrap = player->SummonCreature(64009, pos, TEMPSUMMON_TIMED_DESPAWN, 10000))
+            {
+                crabTrap->CastSpell(crabTrap, 124959, true);
+                pos.m_positionZ = pos.m_positionZ + 20;
+                crabTrap->GetMotionMaster()->MovePoint(1, pos);
+            }
+            go->SetRespawnTime(60);
+        }
+        return false;
+    }
+};
+
+// Living Amber quest
+class spell_item_living_amber : public SpellScriptLoader
+{
+public:
+    spell_item_living_amber() : SpellScriptLoader("spell_item_living_amber") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            auto target = GetHitUnit();
+            if (!target || target->GetTypeId() != TYPEID_UNIT || GetCaster()->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            auto player = GetCaster()->ToPlayer();
+            if (player->GetQuestStatus(31021) == QUEST_STATUS_INCOMPLETE)
+            {
+                uint16 questProgress = player->GetQuestSlotCounter(player->FindQuestSlot(31021), 0);
+                target->ToCreature()->AI()->Talk(questProgress);
+                player->KilledMonsterCredit(63204);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_impl::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
+class npc_hisek_the_swarmkeeper : public CreatureScript
+{
+public:
+    npc_hisek_the_swarmkeeper() : CreatureScript("npc_hisek_the_swarmkeeper") { }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == 31441)
+        {
+            Position pos;
+            creature->GetPosition(&pos);
+            uint64 playerGUID = player->GetGUID();
+            if (auto qgiver = creature->SummonCreature(64705, pos))
+            {
+                qgiver->setExplicitSeerGuid(playerGUID);
+                qgiver->AI()->SetGUID(playerGUID);
+            }
+        }
+
+        return true;
+    }
+};
+
+class npc_hisek_the_swarmkeeper_summon : public CreatureScript
+{
+public:
+    npc_hisek_the_swarmkeeper_summon() : CreatureScript("npc_hisek_the_swarmkeeper_summon") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_hisek_the_swarmkeeper_summonAI(creature);
+    }
+
+    struct npc_hisek_the_swarmkeeper_summonAI : public ScriptedAI
+    {
+        npc_hisek_the_swarmkeeper_summonAI(Creature* creature) : ScriptedAI(creature) {}
+
+        uint8 phase;
+        uint32 phaseTimer;
+        uint64 playerGUID;
+        uint64 traitorGUID;
+
+        void Reset()
+        {
+            phase = 0;
+            phaseTimer = 500;
+            traitorGUID = 0;
+            playerGUID = 0;
+        }
+
+        void SetGUID(uint64 guid, int32 /*type*/) override
+        {
+            playerGUID = guid;
+        }
+
+        void UpdateAI(uint32 const diff)
+        {
+            if (playerGUID && phaseTimer <= diff)
+            {
+                if (phase == 0)
+                {
+                    Talk(0);
+                    phaseTimer = 2000;
+                }
+                else if (phase == 1)
+                {
+                    if (auto traitor = me->SummonCreature(64813, -572.95f, 3015.31f, 181.15f, 2.17f))
+                    {
+                        traitorGUID = traitor->GetGUID();
+                        me->GetMotionMaster()->MovePoint(1, -577.2f, 3021.62f, 183.7f);
+                        traitor->setExplicitSeerGuid(playerGUID);
+                        traitor->AI()->Talk(0);
+                    }
+                    phaseTimer = 4000;
+                }
+                else if (phase == 2)
+                {
+                    Talk(1);
+                    phaseTimer = 5000;
+                }
+                else if (phase == 3 || phase == 4)
+                {
+                    if (auto traitor = me->GetCreature(*me, traitorGUID))
+                        traitor->AI()->Talk(phase == 3 ? 1 : 2);
+                    phaseTimer = 6000;
+                }
+                else if (phase == 5 || phase == 6)
+                {
+                    Talk(phase == 5 ? 2 : 3);
+                    phaseTimer = 6000;
+                }
+                else if (phase == 7)
+                {
+                    if (auto traitor = me->GetCreature(*me, traitorGUID))
+                        traitor->AI()->Talk(3);
+                    phaseTimer = 4000;
+                }
+                else if (phase == 8)
+                {
+                    if (auto traitor = me->GetCreature(*me, traitorGUID))
+                    {
+                        traitor->AI()->Talk(4);
+                        traitor->UpdateEntry(64583);
+                        AttackStart(traitor);
+                        playerGUID = 0;
+                    }
+                }
+
+                phase++;
+            }
+            else
+                phaseTimer -= diff;
+
+            if (me->GetVictim())
+                DoMeleeAttackIfReady();
+        }
+    };
+};
+
 void AddSC_dread_wastes()
 {
     //Rare Mobs
@@ -2223,4 +2406,8 @@ void AddSC_dread_wastes()
     new spell_zet_uk_sha_eruption_periodic_summon();
     //Quest scripts
     new AreaTrigger_at_q_wood_and_shade();
+    new go_full_crab_pot();
+    new spell_item_living_amber();
+    new npc_hisek_the_swarmkeeper();
+    new npc_hisek_the_swarmkeeper_summon();
 }

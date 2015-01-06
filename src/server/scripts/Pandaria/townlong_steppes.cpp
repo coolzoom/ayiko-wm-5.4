@@ -476,6 +476,7 @@ public:
     }
 };
 
+// Back on Their Feet quest
 class spell_item_cintron_infused_bandage : public SpellScriptLoader
 {
 public:
@@ -487,6 +488,9 @@ public:
 
         void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
+            if (!GetCaster())
+                return;
+
             if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
                 if (auto target = GetTarget()->ToCreature())
                     if (target->GetEntry() == 61692)
@@ -510,6 +514,182 @@ public:
     }
 };
 
+// Dust to Dust quest
+class spell_item_shado_pan_torch : public SpellScriptLoader
+{
+public:
+    spell_item_shado_pan_torch() : SpellScriptLoader("spell_item_shado_pan_torch") { }
+
+    class script_impl : public AuraScript
+    {
+        PrepareAuraScript(script_impl);
+
+        void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
+                if (auto target = GetTarget()->ToCreature())
+                    if (target->GetEntry() == 60925)
+                    {
+                        target->RemoveAurasDueToSpell(106246);
+                        target->ForcedDespawn();
+                    }
+        }
+
+        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            auto caster = GetCaster();
+            auto target = GetTarget();
+            if (!caster || !target)
+                return;
+
+            if (target->GetTypeId() == TYPEID_UNIT && target->GetEntry() == 60925 && !target->HasAura(106246))
+            {
+                if (auto player = caster->ToPlayer())
+                    player->KilledMonsterCredit(target->GetEntry());
+                target->CastSpell(target, 106246, true);
+            }
+        }
+
+        void Register()
+        {
+            AfterEffectRemove += AuraEffectRemoveFn(script_impl::OnRemove, EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
+            AfterEffectApply += AuraEffectApplyFn(script_impl::OnApply, EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new script_impl();
+    }
+};
+
+class go_drywood_cage : public GameObjectScript
+{
+public:
+    go_drywood_cage() : GameObjectScript("go_drywood_cage") { }
+
+    bool OnGossipHello(Player* player, GameObject* go) override
+    {
+        if (player->GetQuestStatus(30774) == QUEST_STATUS_INCOMPLETE)
+        {
+            if (auto ranger = GetClosestCreatureWithEntry(player, 60730, 10.f))
+            {
+                ranger->AI()->Talk(0, player->GetGUID());
+                ranger->ForcedDespawn(1000);
+
+                auto aura = player->GetAura(117670);
+                if (!aura || aura->GetStackAmount() < 4)
+                    player->CastSpell(player, 117670, true);
+            }
+        }
+        return true;
+    }
+};
+
+class npc_lin_silentstrike : public CreatureScript
+{
+public:
+    npc_lin_silentstrike() : CreatureScript("npc_lin_silentstrike") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_lin_silentstrikeAI(creature);
+    }
+
+    struct npc_lin_silentstrikeAI : public ScriptedAI
+    {
+        npc_lin_silentstrikeAI(Creature* creature) : ScriptedAI(creature) { }
+
+        uint32 phase;
+        uint32 phaseTimer;
+        uint64 sunaGUID;
+
+        void Reset()
+        {
+            sunaGUID = 0;
+            phase = 0;
+            phaseTimer = 6000;
+        }
+
+        void SetGUID(uint64 guid, int32) override
+        {
+            if (!phase)
+                phase = 1;
+
+            if (auto suna = me->SummonCreature(60901, 2659.59f, 3268.618f, 425.33f, 5.56f, TEMPSUMMON_TIMED_DESPAWN, 41000))
+            {
+                sunaGUID = suna->GetGUID();
+                suna->AI()->Talk(0);
+                suna->GetMotionMaster()->MovePoint(1, 2674.21f, 3257.52f, 426.31f);
+            }
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!phase)
+                return;
+
+            if (phaseTimer <= diff)
+            {
+                auto suna = me->GetCreature(*me, sunaGUID);
+                if (!suna)
+                {
+                    Reset();
+                    return;
+                }
+
+                if (phase == 1)
+                {
+                    suna->SetStandState(UNIT_STAND_STATE_KNEEL);
+                    suna->AI()->Talk(1);
+                    phaseTimer = 10000;
+                }
+                else if (phase == 2)
+                {
+                    suna->AI()->Talk(2);
+                    phaseTimer = 10000;
+                }
+                else if (phase == 3)
+                {
+                    suna->AI()->Talk(3);
+                    phaseTimer = 10000;
+                }
+                else if (phase == 4)
+                {
+                    suna->SetStandState(UNIT_STAND_STATE_STAND);
+                    Reset();
+                    return;
+                }
+                ++phase;
+            }
+            else
+                phaseTimer -= diff;
+        }
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature) override
+    {
+        if (player->GetQuestStatus(30774) == QUEST_STATUS_INCOMPLETE)
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Examine the body.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+
+        player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
+    {
+        player->PlayerTalkClass->ClearMenus();
+        if (action == GOSSIP_ACTION_INFO_DEF + 1)
+        {
+            player->KilledMonsterCredit(creature->GetEntry());
+            creature->AI()->SetGUID(player->GetGUID(), 0);
+            player->CLOSE_GOSSIP_MENU();
+        }
+
+        return false;
+    }
+};
+
 void AddSC_townlong_steppes()
 {
     //Rare mobs
@@ -522,4 +702,7 @@ void AddSC_townlong_steppes()
     //Quests
     new go_sikthik_cage();
     new spell_item_cintron_infused_bandage();
+    new spell_item_shado_pan_torch();
+    new go_drywood_cage();
+    new npc_lin_silentstrike();
 }

@@ -189,7 +189,10 @@ public:
             SetData_trial_of_the_king(type, data);
             SetData_xin_the_weaponmaster(type, data);
 
-            m_auiEncounter[type] = data;
+            if (type == TYPE_SHUFFLE_ORDER && m_uiBossCount >= 3)
+                m_auiEncounter[type] = DONE;
+            else
+                m_auiEncounter[type] = data;
 
             if (data == DONE)
                 SaveToDB();
@@ -512,6 +515,9 @@ public:
                     }
                     break;
                 case TYPE_SHUFFLE_ORDER:
+                    if (GetData(TYPE_SHUFFLE_ORDER) == DONE)
+                        return;
+
                     if (m_uiBossCount < 3)
                     {
                         SetData(m_auiBossNumber[m_uiBossCount], 0);

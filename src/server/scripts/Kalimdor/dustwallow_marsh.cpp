@@ -405,6 +405,100 @@ public:
     };
 };
 
+/*######
+## npc_risen_husk_spirit
+######*/
+
+enum HauntingWitchHill
+{
+    // Quest
+    QUEST_WHATS_HAUNTING_WITCH_HILL = 27188,
+
+    // General spells
+    SPELL_SUMMON_RESTLESS_APPARITION = 42511,
+    SPELL_WITCH_HILL_INFORMATION_CREDIT = 42512,
+
+    // Risen Husk specific
+    SPELL_CONSUME_FLESH = 37933,
+    NPC_RISEN_HUSK = 23555,
+
+    // Risen Spirit specific
+    SPELL_INTANGIBLE_PRESENCE = 43127,
+    NPC_RISEN_SPIRIT = 23554,
+
+    // Events
+    EVENT_CONSUME_FLESH = 1,
+    EVENT_INTANGIBLE_PRESENCE = 2,
+};
+
+class npc_risen_husk_spirit : public CreatureScript
+{
+public:
+    npc_risen_husk_spirit() : CreatureScript("npc_risen_husk_spirit") { }
+
+    struct npc_risen_husk_spiritAI : public ScriptedAI
+    {
+        npc_risen_husk_spiritAI(Creature* creature) : ScriptedAI(creature) { }
+
+        void Reset()
+        {
+            events.Reset();
+            if (me->GetEntry() == NPC_RISEN_HUSK)
+                events.ScheduleEvent(EVENT_CONSUME_FLESH, 5000);
+            else if (me->GetEntry() == NPC_RISEN_SPIRIT)
+                events.ScheduleEvent(EVENT_INTANGIBLE_PRESENCE, 5000);
+        }
+
+        void JustDied(Unit* killer)
+        {
+            if (auto player = killer->GetCharmerOrOwnerPlayerOrPlayerItself())
+            {
+                if (player->GetQuestStatus(QUEST_WHATS_HAUNTING_WITCH_HILL) == QUEST_STATUS_INCOMPLETE)
+                {
+                    DoCast(me, SPELL_SUMMON_RESTLESS_APPARITION, true);
+                    player->KilledMonsterCredit(23861);
+                }
+            }
+        }
+
+        void UpdateAI(uint32 const diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_CONSUME_FLESH:
+                    Talk(0);
+                    DoCastVictim(SPELL_CONSUME_FLESH);
+                    events.ScheduleEvent(EVENT_CONSUME_FLESH, 15000);
+                    break;
+                case EVENT_INTANGIBLE_PRESENCE:
+                    DoCastVictim(SPELL_INTANGIBLE_PRESENCE);
+                    events.ScheduleEvent(EVENT_INTANGIBLE_PRESENCE, 15000);
+                    break;
+                default:
+                    break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+
+    private:
+        EventMap events;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_risen_husk_spiritAI(creature);
+    }
+};
+
 void AddSC_dustwallow_marsh()
 {
     new npc_stinky();
@@ -413,4 +507,5 @@ void AddSC_dustwallow_marsh()
     new spell_energize_aoe();
     new go_blackhoof_cage();
     new npc_zelfrax();
+    new npc_risen_husk_spirit();
 }

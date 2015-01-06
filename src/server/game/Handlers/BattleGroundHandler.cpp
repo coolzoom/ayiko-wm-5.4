@@ -76,11 +76,11 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recvData)
     recvData.ReadBitSeq<5, 1, 7, 3>(guid);
     joinAsGroup = recvData.ReadBit();
     recvData.ReadBitSeq<0, 6, 2, 4>(guid);
-    role = recvData.ReadBit() == 1 ? ROLE_DAMAGE : 0;
+    role = recvData.ReadBit() == 1 ? PLAYER_ROLE_DAMAGE : 0;
 
     recvData.ReadByteSeq<7, 2, 1, 5, 3, 0, 4, 6>(guid);
 
-    if (role != ROLE_DAMAGE)
+    if (role != PLAYER_ROLE_DAMAGE)
         recvData >> role;
 
     bgTypeId_ = GUID_LOPART(guid);

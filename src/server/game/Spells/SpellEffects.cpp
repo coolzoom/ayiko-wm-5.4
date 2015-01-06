@@ -681,11 +681,10 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         {
                             uint8 cp = player->GetComboPoints();
                             float ap = player->GetTotalAttackPowerValue(BASE_ATTACK);
-                            uint32 activeSpec = player->GetSpecializationId(player->GetActiveSpec());
-                            if (activeSpec == SPEC_ROGUE_ASSASSINATION || activeSpec == SPEC_ROGUE_COMBAT)
-                                m_damage += int32(ap * cp * 0.12f);
-                            else if (activeSpec == SPEC_ROGUE_SUBTLETY)
+                            if (player->GetSpecializationId(player->GetActiveSpec()) == SPEC_ROGUE_SUBTLETY)
                                 m_damage += int32(ap * cp * 0.149f);
+                            else
+                                m_damage += int32(ap * cp * 0.12f);
                         }
                         break;
                     }
@@ -2109,13 +2108,12 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
                 // Bastion of Glory : +10% of power per application if target is caster
                 if (unitTarget->GetGUID() == caster->GetGUID() && caster->HasAura(114637))
                 {
-                    Aura *bastionOfGlory = caster->GetAura(114637);
-                    if (!bastionOfGlory)
-                        break;
-
-                    AddPct(addhealth, (10 * bastionOfGlory->GetStackAmount()));
-
-                    caster->RemoveAurasDueToSpell(114637);
+                    if (auto bastionOfGlory = caster->GetAura(114637))
+                    {
+                        AddPct(addhealth, (10 * bastionOfGlory->GetStackAmount()));
+                        // Set duration to 1 to let aura amount calculation benefit from it too
+                        bastionOfGlory->SetDuration(1);
+                    }
                 }
                 break;
             }

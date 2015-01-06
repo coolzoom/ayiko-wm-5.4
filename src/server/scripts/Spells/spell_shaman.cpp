@@ -1956,6 +1956,37 @@ public:
     }
 };
 
+// Lava Burst (Mastery Proc) - 77451
+class spell_sha_lava_burst_mastery_proc : public SpellScriptLoader
+{
+    class script_impl : public SpellScript
+    {
+        PrepareSpellScript(script_impl)
+
+        enum
+        {
+            SPELL_FLAME_SHOCK = 8050,
+        };
+
+        void HandleOnHit(SpellEffIndex /*effIndex*/)
+        {
+            Unit * const target = GetHitUnit();
+            if (target && target->HasAura(SPELL_FLAME_SHOCK, GetCaster()->GetGUID()))
+                SetHitDamage(GetHitDamage() * 1.5f);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(script_impl::HandleOnHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+public:
+    spell_sha_lava_burst_mastery_proc() : SpellScriptLoader("spell_sha_lava_burst_mastery_proc") { }
+
+    SpellScript * GetSpellScript() const { return new script_impl(); }
+};
+
 // 108287 - Totemic Projection
 class spell_sha_totemic_projection : public SpellScriptLoader
 {
@@ -2043,5 +2074,6 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_lava_lash();
     new spell_sha_chain_heal();
     new spell_sha_lava_burst();
+    new spell_sha_lava_burst_mastery_proc();
     new spell_sha_totemic_projection();
 }

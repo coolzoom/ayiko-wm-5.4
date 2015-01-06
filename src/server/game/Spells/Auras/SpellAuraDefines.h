@@ -434,12 +434,12 @@ enum AuraType
     SPELL_AURA_REDUCE_FALL_DAMAGE_PERCENT                   = 374,  // SPELL_AURA_REDUCE_FALL_DAMAGE_PERCENT
     SPELL_AURA_375                                          = 375,  // 5.0.5 unk aura
     SPELL_AURA_376                                          = 376,  // 5.0.5 unk aura
-    SPELL_AURA_377                                          = 377,  // 5.0.5 unk aura
+    SPELL_AURA_377                                          = 377,  // Koz: WowHead-> Allows Movement while Casting
     SPELL_AURA_378                                          = 378,  // 5.0.5 unk aura
     SPELL_AURA_379                                          = 379,  // 5.0.5 unk aura
     SPELL_AURA_380                                          = 380,  // 5.0.5 unk aura
     SPELL_AURA_381                                          = 381,  // 5.0.5 unk aura
-    SPELL_AURA_382                                          = 382,  // 5.0.5 unk aura
+    SPELL_AURA_382                                          = 382,  // Koz: WowHead-> Mod Pet Damage %
     SPELL_AURA_ALLOW_CAST_WHILE_IN_COOLDOWN                 = 383,  // SPELL_AURA_ALLOW_CAST_WHILE_IN_COOLDOWN implemented in Spell::CheckCast
     SPELL_AURA_384                                          = 384,  // 5.0.5 unk aura
     SPELL_AURA_STRIKE_SELF                                  = 385,  // Give a chance to misfire attacks and hit self instead
@@ -452,8 +452,8 @@ enum AuraType
     SPELL_AURA_392                                          = 392,  // 5.0.5 unk aura
     SPELL_AURA_DEFLECT_FRONT_SPELLS                         = 393,  // SPELL_AURA_DEFLECT_FRONT_SPELLS
     SPELL_AURA_394                                          = 394,  // 5.0.5 unk aura
-    SPELL_AURA_395                                          = 395,  // 5.0.5 unk aura
-    SPELL_AURA_396                                          = 396,  // 5.0.5 unk aura
+    SPELL_AURA_395                                          = 395,  // Koz: WowHead-> Area Trigger
+    SPELL_AURA_396                                          = 396,  // Koz: WowHead-> Trigger Spell by Power Level
     SPELL_AURA_397                                          = 397,  // 5.0.5 unk aura
     SPELL_AURA_398                                          = 398,  // 5.0.5 unk aura
     SPELL_AURA_399                                          = 399,  // 5.0.5 unk aura
@@ -475,7 +475,7 @@ enum AuraType
     SPELL_AURA_415                                          = 415,  // 5.0.5 unk aura
     SPELL_AURA_SANCTITY_OF_BATTLE                           = 416,  // SPELL_AURA_SANCTITY_OF_BATTLE
     SPELL_AURA_417                                          = 417,  // 5.0.5 unk aura
-    SPELL_AURA_418                                          = 418,  // 5.0.5 unk aura
+    SPELL_AURA_418                                          = 418,  // Koz(Same as 419, but flat mod?): WowHead-> Modifies Max Power - Flat
     SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT_2                = 419,  // SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT_2
     SPELL_AURA_BATTLEPET_XP_INCRASE                         = 420,  // 5.4.0 +10% Battle Pet XP (134635)(NYI)
     SPELL_AURA_MOD_ABSORPTION_PCT                           = 421,  // 5.4.0 unk aura (NYI)
@@ -486,7 +486,7 @@ enum AuraType
     SPELL_AURA_426                                          = 426,  // 5.4.0 unk aura (NYI) Brawl queue
     SPELL_AURA_427                                          = 427,  // 5.4.0 unk aura (NYI) Spell 91318
     SPELL_AURA_428                                          = 428,  // 5.4.0 unk aura (NYI) used for cart in silvershard mines ?
-    SPELL_AURA_MOD_PET_DAMAGE_DONE                          = 429,  // 5.4.0 unk aura (NYI) see 144364
+    SPELL_AURA_MOD_PET_DAMAGE_DONE                          = 429,  // Koz: WowHead-> Mod Pet Damage %
     SPELL_AURA_430                                          = 430,  // 5.4.0 unk aura (NYI)
     SPELL_AURA_431                                          = 431,  // 5.4.0 unk aura (NYI) Contested Territory 142869
     SPELL_AURA_432                                          = 432,  // 5.4.0 unk aura (NYI)

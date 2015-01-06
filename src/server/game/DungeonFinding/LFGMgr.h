@@ -292,7 +292,7 @@ class LFGMgr
         void Leave(Player* player, Group* grp = NULL);
 
         // Role Check
-        void UpdateRoleCheck(uint64 gguid, uint64 guid = 0, uint8 roles = ROLE_NONE);
+        void UpdateRoleCheck(uint64 gguid, uint64 guid = 0, uint8 roles = PLAYER_ROLE_NONE);
 
         // Proposals
         void UpdateProposal(uint32 proposalId, uint64 guid, bool accept);

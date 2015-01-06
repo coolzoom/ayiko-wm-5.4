@@ -1629,27 +1629,6 @@ class spell_rog_killing_spree : public SpellScriptLoader
 public:
     spell_rog_killing_spree() : SpellScriptLoader("spell_rog_killing_spree") { }
 
-    class spell_rog_killing_spree_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_rog_killing_spree_SpellScript);
-
-        void HandleOnCast()
-        {
-            if (GetExplTargetUnit())
-                GetExplTargetUnit()->MonsterSay("Im expl target", 0, 0);
-        }
-
-        void Register()
-        {
-            OnCast += SpellCastFn(spell_rog_killing_spree_SpellScript::HandleOnCast);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_rog_killing_spree_SpellScript();
-    }
-
     class script_impl : public AuraScript
     {
         PrepareAuraScript(script_impl);

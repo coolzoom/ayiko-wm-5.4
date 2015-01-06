@@ -1221,6 +1221,7 @@ bool Aura::CanBeSaved() const
         case 111757: // Glyph of Levitate Speed Bonus
         case 114232: // Sanctified Wrath bonus
         case 124458: // Healing Spheres tracker
+        case 106284: // Gathering Muddy Water
             return false;
         default:
             break;
@@ -1902,6 +1903,15 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     case 115192: // Subterfuge - Remove Stealth aura
                         target->RemoveAurasDueToSpell(115191);
                         break;
+                    case 43681: // Inactive
+                    {
+                        if (target->GetTypeId() != TYPEID_PLAYER || aurApp->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE)
+                            return;
+
+                        if (target->GetMap()->IsBattleground())
+                            target->ToPlayer()->LeaveBattleground();
+                        break;
+                    }
                 }
                 break;
             case SPELLFAMILY_MAGE:

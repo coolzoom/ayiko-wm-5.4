@@ -341,13 +341,13 @@ enum EncounterCreditType
 
 struct DungeonEncounter
 {
-    DungeonEncounter(DungeonEncounterEntry const* _dbcEntry, EncounterCreditType _creditType, uint32 _creditEntry, uint32 _lastEncounterDungeon)
-        : dbcEntry(_dbcEntry), creditType(_creditType), creditEntry(_creditEntry), lastEncounterDungeon(_lastEncounterDungeon) { }
-
-    DungeonEncounterEntry const* dbcEntry;
+    uint32 mapId;
+    uint32 encounterIndex;
+    int32 difficulty;
+    std::string encounterName;
     EncounterCreditType creditType;
     uint32 creditEntry;
-    uint32 lastEncounterDungeon;
+    uint32 dungeon;
 };
 
 typedef std::list<DungeonEncounter const*> DungeonEncounterList;

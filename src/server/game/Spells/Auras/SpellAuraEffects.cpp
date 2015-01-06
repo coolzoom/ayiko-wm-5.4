@@ -994,6 +994,17 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
 
                     amount *= holyPower;
 
+                    if (GetBase()->GetUnitOwner()->GetGUID() == caster->GetGUID() && caster->HasAura(114637))
+                    {
+                        if (auto bastionOfGlory = caster->GetAura(114637))
+                        {
+                            printf("\n ! bastion of glory found ! \n ");
+                            AddPct(amount, (10 * bastionOfGlory->GetStackAmount()));
+                            caster->RemoveAurasDueToSpell(114637);
+                        }
+                    }
+
+
                     if (!hasDivinePurpose)
                         caster->ModifyPower(POWER_HOLY_POWER, (holyPower > 1) ? (-(holyPower - 1)) : 0);
                     break;
@@ -5868,15 +5879,6 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                             }
                             break;
                         }
-                        case 43681: // Inactive
-                        {
-                            if (target->GetTypeId() != TYPEID_PLAYER || aurApp->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE)
-                                return;
-
-                            if (target->GetMap()->IsBattleground())
-                                target->ToPlayer()->LeaveBattleground();
-                            break;
-                        }
                         case 42783: // Wrath of the Astromancer
                             target->CastSpell(target, GetAmount(), true, NULL, this);
                             break;
@@ -6094,22 +6096,35 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
         case SPELLFAMILY_PRIEST:
         {
             //if (!(mode & AURA_EFFECT_HANDLE_REAL))
-                //break;
-            switch (GetId())
+            //break;
+            if (!caster)
+                break;
+
+            if (auto player = caster->ToPlayer())
             {
-                case 125045:
+                switch (GetId())
                 {
-                    if (auto player = GetCaster()->ToPlayer())
+                    // Glyp of Holy Nova
+                    case 125045:
                     {
                         if (apply)
                             player->learnSpell(132157, true);
                         else
                             player->removeSpell(132157);
+                        break;
                     }
-                    break;
+                    // Glyph of Confession
+                    case 126152:
+                    {
+                        if (apply)
+                            player->learnSpell(126123, true);
+                        else
+                            player->removeSpell(126123);
+                        break;
+                    }
+                    default:
+                        break;
                 }
-                default:
-                    break;
             }
             break;
         }

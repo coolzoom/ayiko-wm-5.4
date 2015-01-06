@@ -1283,36 +1283,23 @@ class spell_mage_combustion : public SpellScriptLoader
 
             void HandleOnHit()
             {
-                if (Player* _player = GetCaster()->ToPlayer())
+                auto player = GetCaster()->ToPlayer();
+                auto target = GetHitUnit();
+                if (!player || !target)
+                    return;
+
+                player->CastSpell(target, SPELL_MAGE_COMBUSTION_IMPACT, true);
+
+                if (player->HasSpellCooldown(SPELL_MAGE_INFERNO_BLAST))
                 {
-                    if (Unit* target = GetHitUnit())
-                    {
-                        _player->CastSpell(target, SPELL_MAGE_COMBUSTION_IMPACT, true);
-
-                        if (_player->HasSpellCooldown(SPELL_MAGE_INFERNO_BLAST))
-                        {
-                            _player->RemoveSpellCooldown(SPELL_MAGE_INFERNO_BLAST, true);
-                            _player->RemoveSpellCooldown(SPELL_MAGE_INFERNO_BLAST_IMPACT, true);
-                        }
-
-                        int32 combustionBp = 0;
-
-                        Unit::AuraEffectList const& aurasPereodic = target->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
-                        for (Unit::AuraEffectList::const_iterator i = aurasPereodic.begin(); i !=  aurasPereodic.end(); ++i)
-                        {
-                            if ((*i)->GetCasterGUID() != _player->GetGUID() || (*i)->GetSpellInfo()->SchoolMask != SPELL_SCHOOL_MASK_FIRE)
-                                continue;
-
-                            if (!(*i)->GetAmplitude())
-                                continue;
-
-                            combustionBp += _player->SpellDamageBonusDone(target, (*i)->GetSpellInfo(), (*i)->GetEffIndex(), (*i)->GetAmount(), DOT) * 1000 / (*i)->GetAmplitude();
-                        }
-
-                        if (combustionBp)
-                            _player->CastCustomSpell(target, SPELL_MAGE_COMBUSTION_DOT, &combustionBp, NULL, NULL, true);
-                    }
+                    player->RemoveSpellCooldown(SPELL_MAGE_INFERNO_BLAST, true);
+                    player->RemoveSpellCooldown(SPELL_MAGE_INFERNO_BLAST_IMPACT, true);
                 }
+
+                // 20% of ignite tick damage
+                if (auto ignite = target->GetAuraEffect(SPELL_MAGE_IGNITE, EFFECT_0, player->GetGUID()))
+                    if (int32 combustionBp = CalculatePct(ignite->GetAmount(), GetSpellInfo()->Effects[EFFECT_0].BasePoints))
+                        player->CastCustomSpell(target, SPELL_MAGE_COMBUSTION_DOT, &combustionBp, NULL, NULL, true);
             }
 
             void Register()

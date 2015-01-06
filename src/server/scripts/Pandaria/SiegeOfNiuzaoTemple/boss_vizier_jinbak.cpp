@@ -465,7 +465,8 @@ class spell_jinbak_detonate : public SpellScriptLoader
             if (Unit * target = GetTarget())
             {
                 uint32 stackAmount = std::max<uint32>(1, target->GetAuraCount(SPELL_GROW));
-                int32 damage = 8500 * stackAmount;
+                bool isHeroic = target->GetMap()->GetDifficulty() != REGULAR_DIFFICULTY;
+                int32 damage = (isHeroic ? 25500 : 8500) * stackAmount;
                 target->CastCustomSpell(target, SPELL_DETONATE_DAMAGE, &damage, NULL, NULL, true);
                 target->RemoveAurasDueToSpell(SPELL_GROW);
             }

@@ -429,6 +429,14 @@ class npc_yang_ironclaw : public CreatureScript
                 DelayedTalk(me, SAY_OUTRO_1, 2000);
                 DelayedTalk(me, SAY_OUTRO_2, 5000);
                 events.ScheduleEvent(EVENT_OUTRO_MOVE, 6000);
+
+                std::list<Creature*> cList;
+                me->GetCreatureListWithEntryInGrid(cList, NPC_MANTID_TAR_KEG, 500.0f);
+                for (auto itr : cList)
+                {
+                    itr->SetRespawnDelay(DAY);
+                    itr->ForcedDespawn();
+                }
             }
         }
 

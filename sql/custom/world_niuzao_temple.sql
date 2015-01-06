@@ -104,14 +104,14 @@ UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 
 UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 0.03086757 WHERE entry = @HC_MOD + 61965; -- Sap Puddle
 UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 0.03086757 WHERE entry = @HC_MOD + 61964; -- Sap Spray
 UPDATE `creature_template` SET `minlevel` = 91, `maxlevel` = 91, `Health_mod` = 3 WHERE entry = @HC_MOD + 61929; -- Sik'thik Amber-Weaver
-UPDATE `creature_template` SET `minlevel` = 91, `maxlevel` = 91, `Health_mod` = 3 WHERE entry = @HC_MOD + 61928; -- Sik'thik Guardian
+UPDATE `creature_template` SET `minlevel` = 91, `maxlevel` = 91, dmg_multiplier = 5, `Health_mod` = 3 WHERE entry = @HC_MOD + 61928; -- Sik'thik Guardian
 UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 0.03086757 WHERE entry = @HC_MOD + 61629; -- Sappling Summon Dest
 UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 0.03086757 WHERE entry = @HC_MOD + 61967; -- Resin Stalker
 UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 0.04999987 WHERE entry = @HC_MOD + 62091; -- Sik'thik Flyer
 UPDATE `creature_template` SET `minlevel` = 91, `maxlevel` = 91, `Health_mod` = 1.5 WHERE entry = @HC_MOD + 61910; -- Resin Flake
 UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 3 WHERE entry = @HC_MOD + 64517; -- Shado-Master Chum Kiu
 UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 0.03086757 WHERE entry = @HC_MOD + 61613; -- Sap Puddle
-UPDATE `creature_template` SET `minlevel` = 92, `maxlevel` = 92, `Health_mod` = 30 WHERE entry = @HC_MOD + 61567; -- Vizier Jin'bak
+UPDATE `creature_template` SET `minlevel` = 92, `maxlevel` = 92, dmg_multiplier = 5, `Health_mod` = 30 WHERE entry = @HC_MOD + 61567; -- Vizier Jin'bak
 UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 4 WHERE entry = @HC_MOD + 62795; -- Sik'thik Warden
 UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 1 WHERE entry = @HC_MOD + 61620; -- Yang Ironclaw
 UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 1 WHERE entry = @HC_MOD + 62794; -- Lo Chu
@@ -122,20 +122,20 @@ UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 
 UPDATE `creature_template` SET `minlevel` = 60, `maxlevel` = 60, `Health_mod` = 1.225949 WHERE entry = @HC_MOD + 66699; -- Generic Invisible Stalker Controller NonImmune - IH
 UPDATE `creature_template` SET `minlevel` = 1, `maxlevel` = 1, `Health_mod` = 1 WHERE entry = @HC_MOD + 57478; -- Invisible Stalker
 UPDATE `creature_template` SET `minlevel` = 1, `maxlevel` = 1, `Health_mod` = 1 WHERE entry = @HC_MOD + 62684; -- Barrel Target
-UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 15 WHERE entry = @HC_MOD + 61701; -- Sik'thik Warrior
-UPDATE `creature_template` SET `minlevel` = 92, `maxlevel` = 92, `Health_mod` = 30 WHERE entry = @HC_MOD + 61634; -- Commander Vo'jak
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, dmg_multiplier = 4, `Health_mod` = 15 WHERE entry = @HC_MOD + 61701; -- Sik'thik Warrior
+UPDATE `creature_template` SET `minlevel` = 92, `maxlevel` = 92, dmg_multiplier = 5, `Health_mod` = 30 WHERE entry = @HC_MOD + 61634; -- Commander Vo'jak
 UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 13.5 WHERE entry = @HC_MOD + 61699; -- Sik'thik Amberwing
 UPDATE `creature_template` SET `minlevel` = 89, `maxlevel` = 89, `Health_mod` = 3 WHERE entry = @HC_MOD + 64520; -- Shado-Pan Prisoner
 UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 4 WHERE entry = @HC_MOD + 61434; -- Sik'thik Vanguard
-UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 0.4999987 WHERE entry = @HC_MOD + 62348; -- Sik'thik Soldier
-UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 4 WHERE entry = @HC_MOD + 61436; -- Sik'thik Bladedancer
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, dmg_multiplier = 4, `Health_mod` = 0.4999987 WHERE entry = @HC_MOD + 62348; -- Sik'thik Soldier
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, dmg_multiplier = 5, `Health_mod` = 4 WHERE entry = @HC_MOD + 61436; -- Sik'thik Bladedancer
 UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 1 WHERE entry = @HC_MOD + 63565; -- Mantid Catapult
 UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 3 WHERE entry = @HC_MOD + 67093; -- Sik'thik Battle-Mender
-UPDATE `creature_template` SET `minlevel` = 92, `maxlevel` = 92, `Health_mod` = 65 WHERE entry = @HC_MOD + 61485; -- General Pa'valak
-UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 2.499999 WHERE entry = @HC_MOD + 62633; -- Sik'thik Builder
-UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 4 WHERE entry = @HC_MOD + 62632; -- Sik'thik Engineer
+UPDATE `creature_template` SET `minlevel` = 92, `maxlevel` = 92, dmg_multiplier = 5, `Health_mod` = 65 WHERE entry = @HC_MOD + 61485; -- General Pa'valak
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, dmg_multiplier = 4, `Health_mod` = 2.499999 WHERE entry = @HC_MOD + 62633; -- Sik'thik Builder
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, dmg_multiplier = 4, `Health_mod` = 4 WHERE entry = @HC_MOD + 62632; -- Sik'thik Engineer
 UPDATE `creature_template` SET `minlevel` = 93, `maxlevel` = 93, `Health_mod` = 15 WHERE entry = @HC_MOD + 61483; -- Reinforcements Summoner
-UPDATE `creature_template` SET `minlevel` = 92, `maxlevel` = 92, `Health_mod` = 30 WHERE entry = @HC_MOD + 62205; -- Wing Leader Ner'onok
+UPDATE `creature_template` SET `minlevel` = 92, `maxlevel` = 92, dmg_multiplier = 4, `Health_mod` = 30 WHERE entry = @HC_MOD + 62205; -- Wing Leader Ner'onok
 
 UPDATE creature_template SET difficulty_entry_1 = @HC_MOD + entry WHERE entry IN (61434, 61436, 61485, 61567, 61910, 61928, 61929, 61964, 62091, 62205, 62348, 62632, 62633, 62795, 63565, 64520, 67093, 61634, 61701, 61670, 63106, 61699, 61448);
 
@@ -616,9 +616,10 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 UPDATE creature_template SET mechanic_immune_mask = mechanic_immune_mask &~ 0x2000000, ScriptName = 'boss_wing_leader_neronok' WHERE entry = 62205;
 
 
-DELETE FROM creature_template_aura WHERE entry IN (62205);
+DELETE FROM creature_template_aura WHERE entry IN (62205, 362205);
 INSERT INTO creature_template_aura (entry, aura) VALUES
-(62205, 126303); -- Neronok - Mantid Wings
+(62205, 126303), -- Neronok - Mantid Wings
+(362205, 126303); -- Neronok - Mantid Wings
 
 DELETE FROM spell_target_position WHERE id IN (125318, 121282, 121284);
 INSERT INTO spell_target_position (id, effIndex, target_map, target_position_x, target_position_y, target_position_z, target_orientation) VALUES
@@ -726,27 +727,19 @@ UPDATE `creature_template` SET `equipment_id` = `entry` WHERE `entry` IN (61634,
 
 -- Auras
 
-DELETE FROM `creature_template_aura` WHERE `entry` IN (61964, 62091, 64517, 61613, 61670, 66699, 61634);
+DELETE FROM `creature_template_aura` WHERE `entry` IN (61964, 62091, 64517, 61613, 61670, 66699, 61634, 362091, 364517, 361613, 361670, 366699, 361634);
 INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES
 (61964, 120586), -- Sap Spray - Sap Spray
--- (61579, 120473), -- Sap puddle - Sap Spray base
--- (61965, 120591), -- Sap Puddle - Sap Puddle
 (62091, 126320), -- Sik'thik Flyer - Mantid Wings
 (62091, 132441), -- Sik'thik Flyer - Mantid Wings
 (64517, 86603), -- Shado-Master Chum Kiu - Stealth
 (61613, 131628), -- Sap Puddle - Cosmetic Shield
 (61613, 119939), -- Sap Puddle - Sap Puddle
--- (62794, 122347), -- Lo Chu - Barrel Assignment
--- (61812, 122347), -- Li Chu - Barrel Assignment
--- (61817, 123218), -- Mantid Tar Keg - Mantid Barrel Inactive
 (61670, 121986), -- Sik'thik Demolisher - Carrying Explosives
 (66699, 131049), -- Generic Invisible Stalker Controller NonImmune - IH - Gongable
--- (63106, 120270), -- Sik'thik Swarmer - Slowed
-(61634, 120757); -- Commander Vo'jak - Frantic Fighter
--- (64520, 86603), -- Shado-Pan Prisoner - Stealth
--- (62348, 124067), -- Sik'thik Soldier - Catapult Channel
--- (61483, 119781), -- Reinforcements Summoner - Summon Mantid Soldier
--- (62205, 126303); -- Wing Leader Ner'onok - Mantid Wings
+(61634, 120757), -- Commander Vo'jak - Frantic Fighter
+(361670, 121986), -- Sik'thik Demolisher - Carrying Explosives
+(361634, 120757); -- Commander Vo'jak - Frantic Fighter
 
 -- Model Corrections
 
@@ -1179,3 +1172,4 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position
 -- (@CGUID+333, 64517, 1011, 3, 1, 1851.226, 5214.163, 131.2519, 4.03415, 86400, 0, 0); -- Shado-Master Chum Kiu (Area: Forward Assault Camp)
 
 UPDATE creature SET spawnMask = 15 WHERE map = 1011;
+UPDATE gameobject SET spawnMask = 15 WHERE map = 1011;

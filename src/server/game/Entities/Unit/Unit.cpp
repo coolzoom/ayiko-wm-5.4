@@ -3488,7 +3488,8 @@ Aura *Unit::_TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint3
         switch(newAura->Id)
         {
             case 119840: // Serrated Blade
-            case 120938:
+            case 120938: // Residue
+            case 119395: // Detonate
                 foundAura = GetAura(newAura->Id);
             break;
         default:

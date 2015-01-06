@@ -101,7 +101,7 @@ INSERT INTO `creature_text` (`entry`, `id`, `text`, `type`, `probability`, `comm
 
 -- Salhet for Salhet's Secret
 DELETE FROM `creature` WHERE `id` = '48022';
-INSERT INTO `creature` (`guid`, `id`, `map` `spawnMask`, `position_x`, `position_y`, `position_z`, `orientation`) VALUES ('5039', '48022', '1', '1', '-10357.5', '-817.342', '131.607', '4.496');
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `position_x`, `position_y`, `position_z`, `orientation`) VALUES ('5039', '48022', '1', '1', '-10357.5', '-817.342', '131.607', '4.496');
 
 -- Take it to 'Em!
 UPDATE `creature_template` SET `ScriptName`='npc_harrison_jones_uldum' WHERE (`entry`='44860');

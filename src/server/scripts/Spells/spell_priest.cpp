@@ -119,7 +119,6 @@ enum PriestSpells
     PRIEST_NPC_PSYFIEND                             = 59190,
     PRIEST_SPELL_SPECTRAL_GUISE_CHARGES             = 119030,
     PRIEST_SPELL_POWER_WORD_SHIELD                  = 17,
-    PRIEST_SPELL_POWER_WORD_FORTITUDE               = 21562,
     SPELL_PRIEST_DIVINE_AEGIS                       = 47753,
     SPELL_PRIEST_SHIELD_DISCIPLINE                  = 77484,
     SPELL_PRIEST_RAPID_RENEWAL                      = 95649,
@@ -132,37 +131,35 @@ class spell_pri_power_word_fortitude : public SpellScriptLoader
     public:
         spell_pri_power_word_fortitude() : SpellScriptLoader("spell_pri_power_word_fortitude") { }
 
-        class spell_pri_power_word_fortitude_SpellScript : public SpellScript
+        class script_impl : public SpellScript
         {
-            PrepareSpellScript(spell_pri_power_word_fortitude_SpellScript);
+            PrepareSpellScript(script_impl);
 
             void HandleOnHit()
             {
-                if (Player* _player = GetCaster()->ToPlayer())
+                auto caster = GetCaster();
+                if (auto target = GetHitUnit())
                 {
-                    if (Unit* target = GetHitUnit())
+                    if (target->IsInRaidWith(caster))
                     {
-                        if (target->IsInRaidWith(_player))
-                        {
-                            std::list<Unit*> playerList;
-                            _player->GetPartyMembers(playerList);
-
-                            for (auto itr : playerList)
-                                _player->AddAura(PRIEST_SPELL_POWER_WORD_FORTITUDE, itr);
-                        }
+                        std::list<Unit*> playerList;
+                        caster->GetPartyMembers(playerList);
+                        // AddAura required to prevent infinite script calls loop
+                        for (auto raidMember : playerList)
+                            caster->AddAura(GetSpellInfo()->Id, raidMember);
                     }
                 }
             }
 
             void Register()
             {
-                OnHit += SpellHitFn(spell_pri_power_word_fortitude_SpellScript::HandleOnHit);
+                OnHit += SpellHitFn(script_impl::HandleOnHit);
             }
         };
 
         SpellScript* GetSpellScript() const
         {
-            return new spell_pri_power_word_fortitude_SpellScript();
+            return new script_impl();
         }
 };
 

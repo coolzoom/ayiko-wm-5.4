@@ -1902,6 +1902,44 @@ public:
     }
 };
 
+// 19740 - Blessing of Might, 20217 - Blessing of Knight
+class spell_pal_blessing : public SpellScriptLoader
+{
+public:
+    spell_pal_blessing() : SpellScriptLoader("spell_pal_blessing") { }
+
+    class script_impl : public SpellScript
+    {
+        PrepareSpellScript(script_impl);
+
+        void HandleOnHit()
+        {
+            auto caster = GetCaster();
+            if (auto target = GetHitUnit())
+            {
+                if (target->IsInRaidWith(caster))
+                {
+                    std::list<Unit*> playerList;
+                    caster->GetPartyMembers(playerList);
+                    // AddAura required to prevent infinite script calls loop
+                    for (auto raidMember : playerList)
+                        caster->AddAura(GetSpellInfo()->Id, raidMember);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnHit += SpellHitFn(script_impl::HandleOnHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new script_impl();
+    }
+};
+
 void AddSC_paladin_spell_scripts()
 {
     new spell_pal_glyph_of_devotian_aura();
@@ -1948,4 +1986,5 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_sanctified_wrath();
     new spell_pal_divine_plea();
     new spell_pal_glyph_of_double_jeopardy();
+    new spell_pal_blessing();
 }

@@ -390,7 +390,8 @@ SET @NPC_LODESTONE_ELEMENTAL := 43258;
 SET @NPC_ENERGIZED_GEODE := 43254;
 SET @NPC_DEPLETED_TOTEM := 45088;
 UPDATE `creature_template` SET `minlevel` = 81, `InhabitType` = 3, `questItem1` = 52506, `flags_extra` = 0, `WDBVerified` = 15595, `AIName` = "", `ScriptName` = "npc_elemental_energy_quest" WHERE `entry` IN (@NPC_LODESTONE_ELEMENTAL, @NPC_ENERGIZED_GEODE);
-UPDATE `creature_template` SET `minlevel` = 85, `maxlevel` = 85, `AIName` = 'NullCreatureAI', `unit_flags` = 12 WHERE `entry` = @NPC_DEPLETED_TOTEM;
+UPDATE `creature_template` SET `minlevel` = 85, `maxlevel` = 85, `exp` = 3, `AIName` = 'NullCreatureAI', `unit_flags` = 12 WHERE `entry` = @NPC_DEPLETED_TOTEM;
+UPDATE `creature` SET `spawndist` = 8 WHERE `MovementType` = 1 AND `spawndist` < 5; -- 28993 row(s) affected
 
 -- [c++ and SQL] Quests - Pebble scripted (Feedback #7423)
 SET @NPC_KOR_THE_IMMOVABLE := 42469;

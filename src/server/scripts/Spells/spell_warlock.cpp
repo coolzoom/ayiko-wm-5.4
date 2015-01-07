@@ -1940,59 +1940,7 @@ class spell_warl_fel_flame : public SpellScriptLoader
             void HandleOnHit()
             {
                 if (Player* _player = GetCaster()->ToPlayer())
-                {
-                    if (Unit* target = GetHitUnit())
-                    {
-                        _player->EnergizeBySpell(_player, GetSpellInfo()->Id, 15, POWER_DEMONIC_FURY);
-
-                        // Increases the duration of Corruption and Unstable Affliction by 6s
-                        if (_player->GetSpecializationId(_player->GetActiveSpec()) == SPEC_WARLOCK_AFFLICTION)
-                        {
-                            if (Aura *unstableAffliction = target->GetAura(WARLOCK_UNSTABLE_AFFLICTION, _player->GetGUID()))
-                            {
-                                unstableAffliction->SetDuration(unstableAffliction->GetDuration() + 6000);
-                                unstableAffliction->SetNeedClientUpdateForTargets();
-                            }
-                            if (Aura *corruption = target->GetAura(WARLOCK_CORRUPTION, _player->GetGUID()))
-                            {
-                                corruption->SetDuration(corruption->GetDuration() + 6000);
-                                corruption->SetNeedClientUpdateForTargets();
-                            }
-                        }
-                        // Increases the duration of Corruption by 6s
-                        else if (_player->GetSpecializationId(_player->GetActiveSpec()) == SPEC_WARLOCK_DEMONOLOGY)
-                        {
-                            if (Aura *corruption = target->GetAura(WARLOCK_CORRUPTION, _player->GetGUID()))
-                            {
-                                corruption->SetDuration(corruption->GetDuration() + 6000);
-                                corruption->SetNeedClientUpdateForTargets();
-                            }
-                            else if (Aura *doom = target->GetAura(WARLOCK_DOOM, _player->GetGUID()))
-                            {
-                                doom->SetDuration(doom->GetDuration() + 6000);
-                                doom->SetNeedClientUpdateForTargets();
-                            }
-                        }
-                        // Increases the duration of Immolate by 6s
-                        else if (_player->GetSpecializationId(_player->GetActiveSpec()) == SPEC_WARLOCK_DESTRUCTION)
-                        {
-                            if (Aura *corruption = target->GetAura(WARLOCK_IMMOLATE, _player->GetGUID()))
-                            {
-                                corruption->SetDuration(corruption->GetDuration() + 6000);
-                                corruption->SetNeedClientUpdateForTargets();
-                            }
-                        }
-                        // Increases the duration of Corruption by 6s
-                        else
-                        {
-                            if (Aura *corruption = target->GetAura(WARLOCK_CORRUPTION, _player->GetGUID()))
-                            {
-                                corruption->SetDuration(corruption->GetDuration() + 6000);
-                                corruption->SetNeedClientUpdateForTargets();
-                            }
-                        }
-                    }
-                }
+                    _player->EnergizeBySpell(_player, GetSpellInfo()->Id, 15, POWER_DEMONIC_FURY);
             }
 
             void Register()

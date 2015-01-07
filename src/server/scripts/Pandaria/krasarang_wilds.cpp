@@ -455,17 +455,19 @@ public:
 
         uint64 playerGUID;
         uint32 talkTimer;
+        uint32 auraRecastTimer;
 
         void Reset()
         {
             me->CastSpell(me, 108450, true);
             playerGUID = 0;
             talkTimer = 0;
+            auraRecastTimer = 0;
         }
 
         void MoveInLineOfSight(Unit * who)
         {
-            if (me->GetDistance(who) > 5.f || talkTimer == 0)
+            if (me->GetDistance(who) > 5.f || talkTimer != 0)
                 return;
 
             if (auto player = who->ToPlayer())
@@ -481,16 +483,24 @@ public:
         void UpdateAI(uint32 const diff)
         {
             if (talkTimer != 0)
-            if (talkTimer <= diff)
-            {
-                talkTimer = 0;
-            }
-            else talkTimer -= diff;
+                if (talkTimer <= diff)
+                {
+                    talkTimer = 0;
+                }
+                else talkTimer -= diff;
+
+            if (auraRecastTimer != 0)
+                if (auraRecastTimer <= diff)
+                {
+                    me->CastSpell(me, 108450, true);
+                    auraRecastTimer = 0;
+                }
+                else auraRecastTimer -= diff;
         }
 
         void SpellHit(Unit * caster, const SpellInfo * spell) override
         {
-            if (!me->HasAura(108450))
+            if (auraRecastTimer)
                 return;
 
             if (spell->Id == 110169 && caster->GetTypeId() == TYPEID_PLAYER)
@@ -500,6 +510,7 @@ public:
                 if (auto summon = me->SummonCreature(58312, pos, TEMPSUMMON_TIMED_DESPAWN, 120 * IN_MILLISECONDS))
                     summon->AI()->AttackStart(caster);
 
+                auraRecastTimer = 10000;
                 playerGUID = caster->GetGUID();
             }
         }

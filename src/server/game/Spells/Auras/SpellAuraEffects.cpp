@@ -998,7 +998,6 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                     {
                         if (auto bastionOfGlory = caster->GetAura(114637))
                         {
-                            printf("\n ! bastion of glory found ! \n ");
                             AddPct(amount, (10 * bastionOfGlory->GetStackAmount()));
                             caster->RemoveAurasDueToSpell(114637);
                         }

@@ -3351,9 +3351,24 @@ class spell_dru_eclipse : public SpellScriptLoader
 
             void HandleAfterCast()
             {
-                if (Player* _plr = GetCaster()->ToPlayer())
-                    if (GetSpellInfo()->Id == SPELL_DRUID_STARSURGE)
-                        _plr->RemoveAura(SPELL_DRUID_SHOOTING_STARS);
+                if (GetSpellInfo()->Id == SPELL_DRUID_STARSURGE)
+                {
+                    Unit * const caster = GetCaster();
+                    if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    Spell::UsedSpellMods const &mods = appliedSpellMods();
+                    AuraEffect * const aurEff = caster->GetAuraEffect(SPELL_DRUID_SHOOTING_STARS, EFFECT_0);
+
+                    bool found = true;
+                    if (!aurEff || mods.find(aurEff->GetSpellModifier()) != mods.end())
+                        found = false;
+
+                    if (found)
+                        caster->ToPlayer()->RemoveSpellCooldown(GetSpellInfo()->Id, true);
+
+                    caster->RemoveAura(SPELL_DRUID_SHOOTING_STARS);
+                }
             }
 
             void HandleOnHit()
@@ -4037,47 +4052,6 @@ public:
     }
 };
 
-// 78674 - Starsurge
-class spell_dru_starsurge : public SpellScriptLoader
-{
-    class script_impl : public SpellScript
-    {
-        PrepareSpellScript(script_impl)
-
-        enum { SHOOTING_STARS_PROC = 93400 };
-
-        void HandleAfterHit()
-        {
-            Unit * const caster = GetCaster();
-            if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
-                return;
-
-            Spell::UsedSpellMods const &mods = appliedSpellMods();
-            AuraEffect * const aurEff = caster->GetAuraEffect(SHOOTING_STARS_PROC, EFFECT_0);
-
-            if (!aurEff || mods.find(aurEff->GetSpellModifier()) != mods.end())
-                return;
-
-            caster->ToPlayer()->RemoveSpellCooldown(GetSpellInfo()->Id, true);
-        }
-
-        void Register()
-        {
-            AfterHit += SpellHitFn(script_impl::HandleAfterHit);
-        }
-    };
-
-public:
-    spell_dru_starsurge()
-        : SpellScriptLoader("spell_dru_starsurge")
-    { }
-
-    SpellScript * GetSpellScript() const
-    {
-        return new script_impl;
-    }
-};
-
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_tooth_and_claw_absorb();
@@ -4153,5 +4127,4 @@ void AddSC_druid_spell_scripts()
     new spell_dru_wrath_dream_of_cenarius();
     new spell_dru_dream_of_cenarius_restoration();
     new spell_dru_heart_of_the_wild();
-    new spell_dru_starsurge();
 }

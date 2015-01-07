@@ -1,5 +1,6 @@
 -- [SQL] Mage - Portal Trainers redone
 -- [SQL] Mage - Portal and Teleport: Vale of Eternal Blossoms fixed (Fixes #4279, #4278)
+-- [SQL] Mage - All portal trainers will now have the training screen as intented (Fixes #8161)
 DELETE FROM `npc_trainer` WHERE `entry` IN (2485, 2489, 2492, 4165, 5957, 5958, 16654, 16755, 19340, 20791, 27703, 27705, 29156, 45139, 47253, 200200, 200201, 200202);
 DELETE FROM `npc_trainer` WHERE `spell` IN (3561, 3562, 3563, 3565, 3566, 3567, 32271, 32272, 49359, 49360, 32266, 32267, 10059, 11416, 11417, 11418, 11419, 11420, 49358, 49361, 35715, 33690, 33691, 35717, 53140, 53142, 88342, 88344, 88345, 88346, 132626, 132627, 132621, 132620);
 INSERT INTO `npc_trainer` (`entry`, `spell`, `spellcost`, `reqskill`, `reqskillvalue`, `reqlevel`) VALUES
@@ -39,7 +40,7 @@ INSERT INTO `npc_trainer` (`entry`, `spell`, `spellcost`, `reqskill`, `reqskillv
 (200200,	132627,	350000,	0,	0,	90);	--	H: Teleport: Vale of Eternal Blossoms	132627	90
 
 INSERT INTO `npc_trainer` SELECT `entry`, -200200, 0, 0, 0, 0 FROM `creature_template` WHERE `Subname` = 'Portal Trainer';
-UPDATE `creature_template` SET `npcflag` = `npcflag`|48 WHERE `entry` IN (SELECT `entry` FROM `npc_trainer` WHERE `spell` = -200200);
+UPDATE `creature_template` SET `npcflag` = `npcflag`|48, `trainer_class` = 8 WHERE `entry` IN (SELECT `entry` FROM `npc_trainer` WHERE `spell` = -200200);
 
 UPDATE `gameobject_template` SET `faction` = 1802, `data0` = 132622, `data1` = 0, `data2` = 1, `data3` = 1 WHERE `entry` = 216057;  --  Alliance
 UPDATE `gameobject_template` SET `faction` = 1801, `data0` = 132624, `data1` = 0, `data2` = 1, `data3` = 1 WHERE `entry` = 216058;  --  Horde

@@ -5821,6 +5821,10 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects.back().TargetB = 0;
                     spellInfo->Effects.back().BasePoints = -25;
                     break;
+                case 2944: // Devouring Plague - Multiple damage effect makes wrong scaling
+                    spellInfo->Effects[EFFECT_3].Effect = 0;
+                    spellInfo->Effects[EFFECT_4].Effect = 0;
+                    break;
                 default:
                     break;
             }

@@ -476,10 +476,10 @@ class boss_ancient_regail : public CreatureScript
                     return;
                 }
 
+                events.Update(diff);
+
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
-
-                events.Update(diff);
 
                 switch (events.ExecuteEvent())
                 {
@@ -497,7 +497,7 @@ class boss_ancient_regail : public CreatureScript
                             break;
 
                         Talk(TALK_LIGHTNING_STORM);
-                        me->CastSpell(me, SPELL_LIGHTNING_STORM, true);
+                        me->CastSpell(me, SPELL_LIGHTNING_STORM, false);
 
                         // Shorter CD in phase 3 (32s)
                         if (!secondSpecialEnabled)
@@ -762,10 +762,10 @@ class boss_ancient_asani : public CreatureScript
                     return;
                 }
 
+                events.Update(diff);
+
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
-
-                events.Update(diff);
 
                 switch (events.ExecuteEvent())
                 {
@@ -1047,10 +1047,10 @@ class boss_protector_kaolan : public CreatureScript
                     return;
                 }
 
+                events.Update(diff);
+
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
-
-                events.Update(diff);
 
                 switch (events.ExecuteEvent())
                 {
@@ -1151,6 +1151,7 @@ class mob_cleansing_water : public CreatureScript
 
             void Reset()
             {
+                me->SetCorpseDelay(0);
                 events.Reset();
                 events.ScheduleEvent(EVENT_REFRESH_CLEANSING_WATERS, 1000);
                 events.ScheduleEvent(EVENT_DESPAWN_CLEANSING_WATERS, 8000);

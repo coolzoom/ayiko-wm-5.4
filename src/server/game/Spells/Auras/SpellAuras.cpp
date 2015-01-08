@@ -1649,9 +1649,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     // Glyph of Power Word: Shield
                     if (AuraEffect *glyph = caster->GetAuraEffect(55672, 0))
                     {
+                        int32 amount = GetEffect(EFFECT_0)->GetAmount();
                         // instantly heal m_amount% of the absorb-value
-                        int32 heal = glyph->GetAmount() * GetEffect(0)->GetAmount()/100;
+                        int32 heal = CalculatePct(amount, glyph->GetAmount());
                         caster->CastCustomSpell(GetUnitOwner(), 56160, &heal, NULL, NULL, true, 0, GetEffect(0));
+                        // and reduce absorb amount
+                        amount = AddPct(amount, -glyph->GetAmount());
+                        GetEffect(EFFECT_0)->SetAmount(amount);
                     }
                 }
                 break;

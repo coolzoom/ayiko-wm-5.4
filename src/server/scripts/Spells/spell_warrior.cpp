@@ -1575,12 +1575,26 @@ public:
             auto caster = GetTarget();
             PreventDefaultAction();
 
+            bool bladeStormProc = false;
+            if (eventInfo.GetSpellInfo() && eventInfo.GetSpellInfo()->Id == 50622 && caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                if (caster->ToPlayer()->HasSpellCooldown(SPELL_SWEEPING_STRIKES_EXTRA_ATTACK))
+                    return;
+
+                bladeStormProc = true;
+            }
+
             // Glyph of Sweeping Strikes
             if (caster->HasAura(SPELL_GLYPH_OF_SWEEPING_STRIKES))
                 caster->CastSpell(caster, SPELL_GLYPH_OF_SWEEPING_STRIKES_PROC, true);
 
             int32 bp = CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), aurEff->GetAmount());
             caster->CastCustomSpell(_procTarget, SPELL_SWEEPING_STRIKES_EXTRA_ATTACK, &bp, NULL, NULL, true, NULL, aurEff);
+
+            // Bladestorm must tick once per rotation
+            if (bladeStormProc)
+                if (auto player = caster->ToPlayer())
+                    player->AddSpellCooldown(SPELL_SWEEPING_STRIKES_EXTRA_ATTACK, 0, 500);
 
             // Slam bonus
             if (eventInfo.GetSpellInfo() && eventInfo.GetSpellInfo()->Id == SPELL_SLAM)

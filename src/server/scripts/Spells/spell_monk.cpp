@@ -724,7 +724,8 @@ class spell_monk_guard final : public SpellScriptLoader
 
         enum
         {
-            GLYPH_OF_GUARD = 123401,
+            GLYPH_OF_GUARD      = 123401,
+            POWER_GUARD         = 118636,
         };
 
         void calculateAmount(AuraEffect const *, int32 &amount, bool &canBeRecalculated)
@@ -737,8 +738,16 @@ class spell_monk_guard final : public SpellScriptLoader
 
             amount += caster->GetTotalAttackPowerValue(BASE_ATTACK) * 1.971f;
 
+            // Glyph of Guard
             if (auto const eff = caster->GetAuraEffect(GLYPH_OF_GUARD, EFFECT_0))
                 AddPct(amount, eff->GetAmount());
+
+            // Power Guard
+            if (auto const eff = caster->GetAuraEffect(POWER_GUARD, EFFECT_0))
+            {
+                AddPct(amount, eff->GetAmount());
+                eff->GetBase()->Remove();
+            }
         }
 
         void Register()

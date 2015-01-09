@@ -2448,6 +2448,15 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         target->CastSpell(target, 122107, true);
                     break;
                 }
+                // Power Guard
+                case 118636:
+                {
+                    if (apply)
+                        target->CastSpell(target, 124899, true);
+                    else
+                        target->RemoveAurasDueToSpell(124899);
+                    break;
+                }
             }
         }
         case SPELLFAMILY_WARLOCK:

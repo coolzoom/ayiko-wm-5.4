@@ -10144,6 +10144,14 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
                     return false;
             break;
         }
+        // Power Guard
+        case 118636:
+        {
+            // Proc from Tiger Palm only
+            if (!procSpell || procSpell->Id != 100787)
+                return false;
+            break;
+        }
     }
 
     // try detect target manually if not set

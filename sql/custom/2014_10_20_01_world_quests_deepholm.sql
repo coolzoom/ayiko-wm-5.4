@@ -175,6 +175,47 @@ DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 13 AND `SourceEntry` 
 -- insert into `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) values
 -- ('13','7','79715','0','0','31','0','3','42731','0','0','0','0','','Quest');
 
+-- [SQL] Quests - Beneath the Surface scripted (Feedback #6452)
+SET @NPC_RUBY_GEMSTONE_CLUSTER := 48639;
+SET @NPC_ENORMOUS_GYREWORM := 48533;
+SET @SPELL_ENORMOUS_GYREWORM_TRANSFORM := 90629;
+SET @SPELL_ENORMOUS_GYREWORM_SPAWN_DEAD := 90627;
+SET @SPELL_ENORMOUS_GYREWORM_STATE := 90620;
+SET @SPELL_EARTH_SPIKE := 90625;
+SET @SPELL_DUMMY := 36177;
+UPDATE `gameobject_template` SET `flags` = 4 WHERE `entry` = 205195;
+UPDATE `creature_template` SET `faction_A` = 2232, `faction_H` = 2232, `unit_flags` = 0 WHERE `entry` = 42766;
+UPDATE `creature_template` SET `InhabitType` = 7, `flags_extra` = 130 WHERE `entry` = 48543;
+DELETE FROM `creature` WHERE `id` IN (@NPC_RUBY_GEMSTONE_CLUSTER, @NPC_ENORMOUS_GYREWORM);
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(799536, @NPC_RUBY_GEMSTONE_CLUSTER, 646, 1, 1, 36219, 0, 2065.6, -425.408, -135.756, 0.452736, 120, 0, 0, 80522, 0, 0, 0, 0, 0),
+(799540, @NPC_RUBY_GEMSTONE_CLUSTER, 646, 1, 1, 36219, 0, 1955.59, -369.305, -157.125, 0.733911, 120, 0, 0, 80522, 0, 0, 0, 0, 0),
+(799994, @NPC_RUBY_GEMSTONE_CLUSTER, 646, 1, 1, 36219, 0, 1839.27, -312.894, -166.699, 1.23264, 120, 0, 0, 80522, 0, 0, 0, 0, 0);
+UPDATE `creature_template` SET `lootid` = @NPC_ENORMOUS_GYREWORM WHERE `entry` = @NPC_ENORMOUS_GYREWORM;
+DELETE FROM `creature_loot_template` WHERE `entry` = @NPC_ENORMOUS_GYREWORM AND `item` = 64404;
+INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`) VALUES
+(@NPC_ENORMOUS_GYREWORM, 64404, -100);
+UPDATE `creature_template` SET `AIName` = "SmartAI", `ScriptName` = "", `npcflag` = 16777216, `unit_flags` = 768, `faction_A` = 7, `faction_H` = 7, `InhabitType` = 7 WHERE `entry` = @NPC_RUBY_GEMSTONE_CLUSTER;
+UPDATE `creature_template` SET `AIName` = "SmartAI", `ScriptName` = "", `unit_flags` = 512, `faction_A` = 14, `faction_H` = 14 WHERE `entry` = @NPC_ENORMOUS_GYREWORM;
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = @NPC_RUBY_GEMSTONE_CLUSTER;
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`, `user_type`) VALUES
+(@NPC_RUBY_GEMSTONE_CLUSTER, @SPELL_DUMMY, 1, 0);
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@NPC_ENORMOUS_GYREWORM, @NPC_RUBY_GEMSTONE_CLUSTER) AND `source_type` = 0;
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(@NPC_RUBY_GEMSTONE_CLUSTER, 0, 0, 1, 73, 0, 100, 0, 0, 0, 0, 0, 11, @SPELL_ENORMOUS_GYREWORM_TRANSFORM, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Ruby Gemstone Cluster - On Spellclick - Cast Enormous Gyreworm Transform"),
+(@NPC_RUBY_GEMSTONE_CLUSTER, 0, 1, 2, 61, 0, 100, 0, 0, 0, 0, 0, 12, @NPC_ENORMOUS_GYREWORM, 1, 120000, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Ruby Gemstone Cluster - On Spellclick - Summon Enormous Gyreworm"),
+(@NPC_RUBY_GEMSTONE_CLUSTER, 0, 2, 0, 61, 0, 100, 0, 0, 0, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Ruby Gemstone Cluster - On Spellclick - Despawn"),
+(@NPC_ENORMOUS_GYREWORM, 0, 0, 0, 0, 0, 100, 1, 2000, 2000, 0, 0, 11, @SPELL_ENORMOUS_GYREWORM_SPAWN_DEAD, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Enormous Gyreworm - IC - Cast Enormous Gyreworm SpawnDead"),
+(@NPC_ENORMOUS_GYREWORM, 0, 1, 0, 0, 0, 100, 1, 3000, 3000, 0, 0, 11, @SPELL_ENORMOUS_GYREWORM_STATE, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Enormous Gyreworm - IC - Cast Enormous Gyreworm State"),
+(@NPC_ENORMOUS_GYREWORM, 0, 2, 0, 4, 0, 100, 1, 0, 0, 0, 0, 22, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Enormous Gyreworm - On Aggro - Set Phase 1"),
+(@NPC_ENORMOUS_GYREWORM, 0, 3, 0, 4, 1, 100, 1, 0, 0, 0, 0, 11, @SPELL_EARTH_SPIKE, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Enormous Gyreworm - On Aggro - Cast Earth Spike"),
+(@NPC_ENORMOUS_GYREWORM, 0, 4, 0, 4, 1, 100, 1, 0, 0, 0, 0, 19, 512, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Enormous Gyreworm - On Aggro - Change Flag for attack"),
+(@NPC_ENORMOUS_GYREWORM, 0, 5, 0, 9, 1, 100, 0, 0, 50, 2100, 4500, 11, @SPELL_EARTH_SPIKE, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Enormous Gyreworm - IC - Cast Earth Spike"),
+(@NPC_ENORMOUS_GYREWORM, 0, 6, 0, 9, 1, 100, 0, 0, 50, 0, 0, 21, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Enormous Gyreworm - On Attack Range - Stop Moving"),
+(@NPC_ENORMOUS_GYREWORM, 0, 7, 0, 7, 1, 100, 1, 0, 0, 0, 0, 28, @SPELL_ENORMOUS_GYREWORM_STATE, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Enormous Gyreworm - On Evade - Remove Enormous Gyreworm State"),
+(@NPC_ENORMOUS_GYREWORM, 0, 8, 0, 7, 1, 100, 1, 0, 0, 0, 0, 18, 512, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Enormous Gyreworm - On Evade - Change Flag"),
+(@NPC_ENORMOUS_GYREWORM, 0, 9, 0, 6, 0, 100, 0, 0, 0, 0, 0, 11, @SPELL_ENORMOUS_GYREWORM_SPAWN_DEAD, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Enormous Gyreworm - On Death - Cast Enormous Gyreworm SpawnDead");
+
 -- [c++ and SQL] Quests - Underground Economy corrected (Fixes #3121)
 SET @NPC_RICKET_TICKER := 49823;
 SET @NPC_ALABASTER_BUNNY := 49824;
@@ -191,8 +232,6 @@ SET @OGUID := 216867;
 SET @SPELL_CRYSTAL_FORMATION_EXPLOSION := 92789;
 UPDATE `creature_template` SET `AIName` = "", `ScriptName` = "npc_ricket_ticker" WHERE `entry` = @NPC_RICKET_TICKER;
 UPDATE `creature_template` SET `AIName` = "SmartAI", `unit_flags` = 33555200 WHERE `entry` IN (@NPC_CELESTITE_BUNNY, @NPC_AMETHYST_BUNNY, @NPC_GARNET_BUNNY, @NPC_ALABASTER_BUNNY);
-UPDATE `creature_template` SET `faction_A` = 2232, `faction_H` = 2232, `unit_flags` = 0 WHERE `entry` = 42766;
-UPDATE `creature_template` SET `unit_flags` = 0 WHERE `entry` = 44257;
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@NPC_CELESTITE_BUNNY, @NPC_AMETHYST_BUNNY, @NPC_GARNET_BUNNY, @NPC_ALABASTER_BUNNY) AND `source_type` = 0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
 (@NPC_CELESTITE_BUNNY, 0, 0, 0, 8, 0, 100, 0, @SPELL_CRYSTAL_FORMATION_EXPLOSION, 0, 60000, 60000, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Celestite Bunny - On Spellhit - Despawn"),

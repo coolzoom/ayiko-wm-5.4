@@ -2013,6 +2013,9 @@ public:
                 {
                     uint32 spell_id = totem->GetUInt32Value(UNIT_CREATED_BY_SPELL);
                     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spell_id);
+                    if (!spellInfo)
+                        return;
+
                     auto effectInfo = spellInfo->Effects[EFFECT_0];
                     auto targetInfo = SpellImplicitTargetInfo(effectInfo.GetImplicitTargetType());
                     float angle = targetInfo.CalcDirectionAngle();
@@ -2021,7 +2024,8 @@ public:
                     if (dist < objSize)
                         dist = objSize;
 
-                    //player->GetFirstCollisionPosition(pos, dist, angle);
+                    totem->GetFirstCollisionPosition(pos, dist, angle);
+
                     totem->NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), totem->GetOrientation());
                 }
             }

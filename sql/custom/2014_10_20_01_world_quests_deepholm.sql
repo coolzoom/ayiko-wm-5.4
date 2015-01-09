@@ -453,7 +453,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@CGUID+0, @NPC_OPAL_STONETHROWER, 646, 1, 1, 0, 0, 2327.48, 470.661, 165.327, 2.10402, 120, 0, 0, 420, 0, 0, 0, 0, 0);
 
 -- [c++ and SQL] Quests - Sprout No More scripted
--- [c++ and SQL] Quests - Fungal Monstrosities scripted
+-- [c++ and SQL] Quests - Fungal Monstrosities corrected (Feedback #11072)
 SET @NPC_WAR_GUARDIAN_DEFAULT := 44126;
 SET @NPC_WAR_GUARDIAN := 44118;
 SET @NPC_GIANT_MUSHROOM := 44049;
@@ -471,7 +471,7 @@ INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`, `use
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 18 AND `SourceGroup` = @NPC_WAR_GUARDIAN_DEFAULT;
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ScriptName`, `Comment`) VALUES
 (18, @NPC_WAR_GUARDIAN_DEFAULT, @SPELL_SUMMON_WAR_GUARDIAN, 0, 0, 9, 0, @QUEST_SPROUT_NO_MORE, 0, 0, 0, "","Required quest active for spellclick"),
-(18, @NPC_WAR_GUARDIAN_DEFAULT, @SPELL_SUMMON_WAR_GUARDIAN, 0, 0, 9, 0, @QUEST_FULGAL_MONSTROSITIES, 0, 0, 0, "","Required quest active for spellclick");
+(18, @NPC_WAR_GUARDIAN_DEFAULT, @SPELL_SUMMON_WAR_GUARDIAN, 0, 1, 9, 0, @QUEST_FULGAL_MONSTROSITIES, 0, 0, 0, "","Required quest active for spellclick");
 DELETE FROM `creature` WHERE `id` = @NPC_WAR_GUARDIAN_DEFAULT;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@CGUID+0, @NPC_WAR_GUARDIAN_DEFAULT, 646, 1, 1, 0, 0, 1276.26, 1647.29, 174.011, 5.23412, 120, 0, 0, 278900, 0, 0, 0, 0, 0);

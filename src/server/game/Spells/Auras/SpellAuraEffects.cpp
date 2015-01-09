@@ -1269,7 +1269,7 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
 
     // Fixate damage for periodic damage auras
     // It's only for players now
-    if (caster && caster->GetTypeId() == TYPEID_PLAYER)
+    if (caster && caster->GetCharmerOrOwnerPlayerOrPlayerItself())
     {
         if (GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE ||
             GetAuraType() == SPELL_AURA_PERIODIC_LEECH ||

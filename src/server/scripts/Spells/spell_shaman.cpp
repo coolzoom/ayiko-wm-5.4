@@ -632,23 +632,24 @@ class spell_sha_stone_bulwark : public SpellScriptLoader
 
             void CalculateAmount(AuraEffect const *, int32 & amount, bool & )
             {
-                if (Unit* caster = GetCaster())
+                auto caster = GetCaster();
+                if (!caster)
+                    return;
+
+                if (auto owner = caster->GetOwner())
                 {
-                    if (Unit* owner = caster->GetOwner())
+                    if (!owner->HasAura(SPELL_SHA_STONE_BULWARK_ABSORB))
                     {
-                        if (owner->ToPlayer() && !owner->HasAura(SPELL_SHA_STONE_BULWARK_ABSORB))
-                        {
-                            int32 AP = owner->GetTotalAttackPowerValue(BASE_ATTACK);
-                            int32 spellPower = owner->ToPlayer()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_ALL);
-                            amount += (AP > spellPower) ? int32(1.641f * AP) : int32(2.625f * spellPower);
-                        }
-                        else if (owner->ToPlayer() && owner->HasAura(SPELL_SHA_STONE_BULWARK_ABSORB))
-                        {
-                            int32 AP = owner->GetTotalAttackPowerValue(BASE_ATTACK);
-                            int32 spellPower = owner->ToPlayer()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_ALL);
-                            amount += (AP > spellPower) ? int32(0.547f * AP) : int32(0.875f * spellPower);
-                            amount += owner->GetAura(SPELL_SHA_STONE_BULWARK_ABSORB)->GetEffect(0)->GetAmount();
-                        }
+                        int32 AP = owner->GetTotalAttackPowerValue(BASE_ATTACK);
+                        int32 spellPower = owner->ToPlayer()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_ALL);
+                        amount += (AP > spellPower) ? int32(2.5f * AP) : int32(3.5f * spellPower);
+                    }
+                    else if (owner->ToPlayer() && owner->HasAura(SPELL_SHA_STONE_BULWARK_ABSORB))
+                    {
+                        int32 AP = owner->GetTotalAttackPowerValue(BASE_ATTACK);
+                        int32 spellPower = owner->ToPlayer()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_ALL);
+                        amount += (AP > spellPower) ? int32(0.625f * AP) : int32(0.875f * spellPower);
+                        amount += owner->GetAura(SPELL_SHA_STONE_BULWARK_ABSORB)->GetEffect(0)->GetAmount();
                     }
                 }
             }

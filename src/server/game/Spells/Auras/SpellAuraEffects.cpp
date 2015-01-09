@@ -1003,7 +1003,6 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                         }
                     }
 
-
                     if (!hasDivinePurpose)
                         caster->ModifyPower(POWER_HOLY_POWER, (holyPower > 1) ? (-(holyPower - 1)) : 0);
                     break;
@@ -7264,6 +7263,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                         caster->CastCustomSpell(target, 124467, &bp, NULL, NULL, true);
                         break;
                     case 15407: // Mind Flay
+                    case 129197: // Mind Flay (Insanity)
                         caster->CastCustomSpell(target, 124468, &bp, NULL, NULL, true);
                         break;
                     case 34914: // Vampiric Touch
@@ -7445,8 +7445,8 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
             else
                 damage *= 0.44125f;
         }
-        // Mind Flay
-        if (GetId() == 15407)
+        // Mind Flay (Insanity)
+        if (GetId() == 129197)
         {
             // Solace and Insanity bonus
             auto player = caster->ToPlayer();

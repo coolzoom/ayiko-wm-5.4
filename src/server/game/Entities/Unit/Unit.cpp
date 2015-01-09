@@ -7752,7 +7752,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                             if (procFlag & PROC_FLAG_DONE_PERIODIC)
                             {
                                 // Mind Flay, Malefic Grasp and Drain Soul
-                                if (procSpell->Id != 15407 && procSpell->Id != 103103 && procSpell->Id != 1120)
+                                if (procSpell->Id != 15407 && procSpell->Id != 129197 && procSpell->Id != 103103 && procSpell->Id != 1120)
                                     return false;
                             }
 

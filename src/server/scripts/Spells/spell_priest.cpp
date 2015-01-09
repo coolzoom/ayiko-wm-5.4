@@ -2813,7 +2813,7 @@ public:
     }
 };
 
-// Mind Flay - 15407
+// Mind Flay - 15407, 129197
 class spell_pri_mind_flay final : public SpellScriptLoader
 {
     class script_impl final : public AuraScript
@@ -2822,7 +2822,6 @@ class spell_pri_mind_flay final : public SpellScriptLoader
 
         enum
         {
-            SPELL_DEVOURING_PLAGUE      = 2944,
             GLYPH_OF_MIND_FLAY          = 120585,
         };
 

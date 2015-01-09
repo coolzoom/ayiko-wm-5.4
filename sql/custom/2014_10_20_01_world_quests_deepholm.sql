@@ -609,31 +609,35 @@ INSERT INTO `gameobject` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`position_x`
 (@OGUID+42, @GO_CHALKY_CRYSTAL_FORMATION, 646, 1, 1, 1442.91, 1317.06, 30.6444, 0.575958, 0, 0, 0.284015, 0.95882, 300, 100, 1),
 (@OGUID+43, @GO_CHALKY_CRYSTAL_FORMATION, 646, 1, 1, 1339.74, 1389.88, 31.5323, 2.09439, 0, 0, 0.866025, 0.500001, 300, 100, 1);
 
--- [SQL] Quests - Rallying the Earthen Ring scripted (Feedback #7440)
+-- [SQL] Quests - Rallying the Earthen Ring corrected (Feedback #7440)
 SET @NPC_WINDSPEAKER_LORVARIUS := 43836;
 SET @NPC_THARM_WILDFIRE := 44631;
 SET @NPC_STORMCALLER_JALARA := 44633;
 SET @NPC_TAWN_WINTERBLUFF := 44634;
 SET @NPC_EARTHCALLER_YEVAA := 44646;
 SET @NPC_YULDRIS_SMOLDERFURY := 45034;
+SET @NPC_HARGOTH_DIMBLAZE := 44675;
 SET @GOSSIP := 11872;
 SET @KILL_CREDIT := 44133;
 SET @QUEST_RALLYING_THE_EARTHEN_RING := 26827;
 SET @CGUID := 45713;
-DELETE FROM `creature` WHERE `id` IN (@NPC_TAWN_WINTERBLUFF, @NPC_YULDRIS_SMOLDERFURY, @NPC_WINDSPEAKER_LORVARIUS, @NPC_STORMCALLER_JALARA);
+DELETE FROM `creature` WHERE `id` IN (@NPC_TAWN_WINTERBLUFF, @NPC_YULDRIS_SMOLDERFURY, @NPC_WINDSPEAKER_LORVARIUS, @NPC_STORMCALLER_JALARA, 45037, @NPC_HARGOTH_DIMBLAZE, @NPC_EARTHCALLER_YEVAA, 44676);
 INSERT INTO `creature` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`unit_flags`,`dynamicflags`) VALUES
 (@CGUID+0, @NPC_TAWN_WINTERBLUFF, 646, 1, 1, 0, 1, 1066.51, 635.141, -45.5443, 2.16421, 30, 0, 0, 464940, 53448, 0, 0, 0, 0),
 (@CGUID+1, @NPC_YULDRIS_SMOLDERFURY, 646, 1, 1, 0, 1, 1072.91, 609.425, -44.0159, 0.0872665, 30, 0, 0, 464940, 53448, 0, 0, 0, 0),
 (@CGUID+2, @NPC_WINDSPEAKER_LORVARIUS, 646, 1, 1, 0, 0, 1010.16, 629.299, -41.8607, 0.377984, 30, 0, 0, 536810, 42580, 0, 0, 0, 0),
-(@CGUID+3, @NPC_STORMCALLER_JALARA, 646, 1, 1, 0, 1, 1049.41, 420.536, -41.5265, 6.13208, 30, 0, 0, 464940, 53448, 0, 0, 0, 0);
+(@CGUID+3, @NPC_STORMCALLER_JALARA, 646, 1, 1, 0, 1, 1049.41, 420.536, -41.5265, 6.13208, 30, 0, 0, 464940, 53448, 0, 0, 0, 0),
+(@CGUID+4, @NPC_HARGOTH_DIMBLAZE, 646, 1, 1, 0, 0, 1086.98, 608.661, -44.8391, 5.0754, 30, 8, 0, 464940, 53448, 1, 0, 0, 0),
+(7218916, @NPC_EARTHCALLER_YEVAA, 646, 1, 1, 0, 1, 1040.33, 592.268, -44.245, 3.633, 30, 0, 0, 464940, 0, 0, 0, 0, 0),
+(7218917, 44676, 646, 1, 1, 0, 1, 1085.07, 435.387, -45.556, 3.497, 30, 0, 0, 464940, 0, 0, 0, 0, 0);
 UPDATE `creature_template` SET `ScriptName` = '' WHERE `entry` = 42573;
 UPDATE `creature` SET `spawntimesecs` = 30, `spawndist` = 0, `MovementType` = 0 WHERE `id` IN (@NPC_EARTHCALLER_YEVAA, @NPC_TAWN_WINTERBLUFF, @NPC_YULDRIS_SMOLDERFURY, @NPC_WINDSPEAKER_LORVARIUS, @NPC_THARM_WILDFIRE, @NPC_STORMCALLER_JALARA, 43837, 44666, 44676, 44669, 44362);
 DELETE FROM `gossip_menu_option` WHERE `menu_id` IN (@GOSSIP, 11873);
 INSERT INTO `gossip_menu_option` (`menu_id`, `id`, `option_icon`, `option_text`, `option_id`, `npc_option_npcflag`, `action_menu_id`, `action_poi_id`, `box_coded`, `box_money`, `box_text`) VALUES
 (@GOSSIP, 0, 0, "We are joining an assault on Lorthuna's Gate. You are needed.", 1, 1, 0, 0, 0, 0, ""),
 (11873, 0, 0, "We are joining an assault on Lorthuna's Gate. You are needed.", 1, 1, 0, 0, 0, 0, "");
-UPDATE `creature_template` SET `minlevel` = 85, `maxlevel` = 85, `faction_A` = 2290, `faction_H` = 2290, `KillCredit2` = 0, `exp` = 3, `mindmg` = 465, `maxdmg` = 697, `attackpower` = 174, `dmg_multiplier` = 37.7, `baseattacktime` = 2000, `unit_flags` = 32768, `gossip_menu_id` = @GOSSIP, `npcflag` = `npcflag`|1, `WDBVerified` = 15595, `AIName` = "SmartAI", `ScriptName` = "" WHERE `entry` IN (@NPC_EARTHCALLER_YEVAA, @NPC_TAWN_WINTERBLUFF, @NPC_YULDRIS_SMOLDERFURY, @NPC_WINDSPEAKER_LORVARIUS, @NPC_THARM_WILDFIRE, @NPC_STORMCALLER_JALARA);
-DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@NPC_EARTHCALLER_YEVAA, @NPC_TAWN_WINTERBLUFF, @NPC_YULDRIS_SMOLDERFURY, @NPC_WINDSPEAKER_LORVARIUS, @NPC_THARM_WILDFIRE, @NPC_STORMCALLER_JALARA) AND `source_type` = 0;
+UPDATE `creature_template` SET `minlevel` = 85, `maxlevel` = 85, `faction_A` = 2290, `faction_H` = 2290, `KillCredit2` = 0, `exp` = 3, `mindmg` = 465, `maxdmg` = 697, `attackpower` = 174, `dmg_multiplier` = 37.7, `baseattacktime` = 2000, `unit_flags` = 32768, `gossip_menu_id` = @GOSSIP, `npcflag` = `npcflag`|1, `WDBVerified` = 15595, `AIName` = "SmartAI", `ScriptName` = "" WHERE `entry` IN (@NPC_EARTHCALLER_YEVAA, @NPC_TAWN_WINTERBLUFF, @NPC_YULDRIS_SMOLDERFURY, @NPC_WINDSPEAKER_LORVARIUS, @NPC_THARM_WILDFIRE, @NPC_STORMCALLER_JALARA, @NPC_HARGOTH_DIMBLAZE);
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@NPC_EARTHCALLER_YEVAA, @NPC_TAWN_WINTERBLUFF, @NPC_YULDRIS_SMOLDERFURY, @NPC_WINDSPEAKER_LORVARIUS, @NPC_THARM_WILDFIRE, @NPC_STORMCALLER_JALARA, @NPC_HARGOTH_DIMBLAZE) AND `source_type` = 0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
 (@NPC_EARTHCALLER_YEVAA, 0, 0, 0, 62, 0, 100, 0, @GOSSIP, 0, 0, 0, 33, @KILL_CREDIT , 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Earthcaller Yevaa - On Gossip Select - KC"),
 (@NPC_EARTHCALLER_YEVAA, 0, 1, 0, 62, 0, 100, 0, @GOSSIP, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Earthcaller Yevaa - On Gossip Select - Close Gossip"),
@@ -664,8 +668,13 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (@NPC_STORMCALLER_JALARA, 0, 1, 0, 62, 0, 100, 0, @GOSSIP, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Stormcaller Jalara - On Gossip Select - Close Gossip"),
 (@NPC_STORMCALLER_JALARA, 0, 2, 3, 62, 0, 100, 0, @GOSSIP, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Stormcaller Jalara - On Gossip Select - Say Random Line 0"),
 (@NPC_STORMCALLER_JALARA, 0, 3, 4, 61, 0, 100, 0, 0, 0, 0, 0, 46, 15, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Stormcaller Jalara - On Gossip Select - Move Forward 15 yards"),
-(@NPC_STORMCALLER_JALARA, 0, 4, 0, 61, 0, 100, 0, 0, 0, 0, 0, 41, 3000, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Stormcaller Jalara - On Gossip Select - Despawn");
-DELETE FROM `creature_text` WHERE `entry` IN (@NPC_EARTHCALLER_YEVAA, @NPC_TAWN_WINTERBLUFF, @NPC_YULDRIS_SMOLDERFURY, @NPC_WINDSPEAKER_LORVARIUS, @NPC_THARM_WILDFIRE, @NPC_STORMCALLER_JALARA);
+(@NPC_STORMCALLER_JALARA, 0, 4, 0, 61, 0, 100, 0, 0, 0, 0, 0, 41, 3000, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Stormcaller Jalara - On Gossip Select - Despawn"),
+(@NPC_HARGOTH_DIMBLAZE, 0, 0, 0, 62, 0, 100, 0, @GOSSIP, 0, 0, 0, 33, @KILL_CREDIT , 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Hargoth Dimblaze - On Gossip Select - KC"),
+(@NPC_HARGOTH_DIMBLAZE, 0, 1, 0, 62, 0, 100, 0, @GOSSIP, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Hargoth Dimblaze - On Gossip Select - Close Gossip"),
+(@NPC_HARGOTH_DIMBLAZE, 0, 2, 3, 62, 0, 100, 0, @GOSSIP, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Hargoth Dimblaze - On Gossip Select - Say Random Line 0"),
+(@NPC_HARGOTH_DIMBLAZE, 0, 3, 4, 61, 0, 100, 0, 0, 0, 0, 0, 46, 15, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Hargoth Dimblaze - On Gossip Select - Move Forward 15 yards"),
+(@NPC_HARGOTH_DIMBLAZE, 0, 4, 0, 61, 0, 100, 0, 0, 0, 0, 0, 41, 3000, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Hargoth Dimblaze - On Gossip Select - Despawn");
+DELETE FROM `creature_text` WHERE `entry` IN (@NPC_EARTHCALLER_YEVAA, @NPC_TAWN_WINTERBLUFF, @NPC_YULDRIS_SMOLDERFURY, @NPC_WINDSPEAKER_LORVARIUS, @NPC_THARM_WILDFIRE, @NPC_STORMCALLER_JALARA, @NPC_HARGOTH_DIMBLAZE);
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
 (@NPC_EARTHCALLER_YEVAA, 0, 0, "Understood. I'll head there right away.", 12, 0, 100, 0, 0, 0, "Earthcaller Yevaa"),
 (@NPC_EARTHCALLER_YEVAA, 0, 1, "Some action. Glad to heart it.", 12, 0, 100, 0, 0, 0, "Earthcaller Yevaa"),
@@ -714,7 +723,15 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (@NPC_STORMCALLER_JALARA, 0, 4, "Elements be with us.", 12, 0, 100, 0, 0, 0, "Stormcaller Jalara"),
 (@NPC_STORMCALLER_JALARA, 0, 5, "Exactly what I wanted to hear. Let's go.", 12, 0, 100, 0, 0, 0, "Stormcaller Jalara"),
 (@NPC_STORMCALLER_JALARA, 0, 6, "I'm glad to hear we're fighting along side the Stonemother herself this time.", 12, 0, 100, 0, 0, 0, "Stormcaller Jalara"),
-(@NPC_STORMCALLER_JALARA, 0, 7, "That encampment has been begging for our attention. Let's get this done.", 12, 0, 100, 0, 0, 0, "Stormcaller Jalara");
+(@NPC_STORMCALLER_JALARA, 0, 7, "That encampment has been begging for our attention. Let's get this done.", 12, 0, 100, 0, 0, 0, "Stormcaller Jalara"),
+(@NPC_HARGOTH_DIMBLAZE, 0, 0, "Understood. I'll head there right away.", 12, 0, 100, 0, 0, 0, "Hargoth Dimblaze"),
+(@NPC_HARGOTH_DIMBLAZE, 0, 1, "Some action. Glad to heart it.", 12, 0, 100, 0, 0, 0, "Hargoth Dimblaze"),
+(@NPC_HARGOTH_DIMBLAZE, 0, 2, "Got it. I'll head there right away.", 12, 0, 100, 0, 0, 0, "Hargoth Dimblaze"),
+(@NPC_HARGOTH_DIMBLAZE, 0, 3, "I'm on my way.", 12, 0, 100, 0, 0, 0, "Hargoth Dimblaze"),
+(@NPC_HARGOTH_DIMBLAZE, 0, 4, "Elements be with us.", 12, 0, 100, 0, 0, 0, "Hargoth Dimblaze"),
+(@NPC_HARGOTH_DIMBLAZE, 0, 5, "Exactly what I wanted to hear. Let's go.", 12, 0, 100, 0, 0, 0, "Hargoth Dimblaze"),
+(@NPC_HARGOTH_DIMBLAZE, 0, 6, "I'm glad to hear we're fighting along side the Stonemother herself this time.", 12, 0, 100, 0, 0, 0, "Hargoth Dimblaze"),
+(@NPC_HARGOTH_DIMBLAZE, 0, 7, "That encampment has been begging for our attention. Let's get this done.", 12, 0, 100, 0, 0, 0, "Hargoth Dimblaze");
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 15 AND `SourceGroup` = @GOSSIP;
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ScriptName`, `Comment`) VALUES
 (15, @GOSSIP, 0, 0, 0, 9, 0, @QUEST_RALLYING_THE_EARTHEN_RING, 0, 0, 0, "", "Show gossip if on quest");

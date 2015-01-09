@@ -8132,13 +8132,20 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                 if (!flametongue)
                     return false;
 
-                float flametongueDamage = (float)(flametongue->Effects[1].CalcValue(this)) / 25.f + (0.088671f * GetTotalAttackPowerValue(BASE_ATTACK));
+                float flametongueBase = (float)(flametongue->Effects[1].CalcValue(this)) / 25.f;
+
+                auto player = ToPlayer();
 
                 // Enchant on Off-Hand and ready?
                 if (castItem->GetSlot() == EQUIPMENT_SLOT_OFFHAND && procFlag & PROC_FLAG_DONE_OFFHAND_ATTACK)
                 {
-                    float BaseWeaponSpeed = GetAttackTime(OFF_ATTACK) / 1000.0f;
-                    basepoints0 = int32(flametongueDamage * BaseWeaponSpeed / 4);
+                    Item const * const offItem = player->GetWeaponForAttack(OFF_ATTACK);
+                    auto const offProto = offItem ? offItem->GetTemplate() : nullptr;
+                    if (!offProto)
+                        return false;
+
+                    float BaseWeaponSpeed = 0.001f * offProto->Delay;
+                    basepoints0 = int32((flametongueBase + (0.0887f  * GetTotalAttackPowerValue(BASE_ATTACK)))*BaseWeaponSpeed / 4.f);
 
                     triggered_spell_id = 10444;
                 }
@@ -8146,8 +8153,13 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                 // Enchant on Main-Hand and ready?
                 else if (castItem->GetSlot() == EQUIPMENT_SLOT_MAINHAND && procFlag & PROC_FLAG_DONE_MAINHAND_ATTACK)
                 {
-                    float BaseWeaponSpeed = GetAttackTime(BASE_ATTACK) / 1000.0f;
-                    basepoints0 = int32(flametongueDamage * BaseWeaponSpeed / 4);
+                    Item const * const mainItem = player->GetWeaponForAttack(BASE_ATTACK);
+                    auto const mainProto = mainItem ? mainItem->GetTemplate() : nullptr;
+                    if (!mainProto)
+                        return false;
+
+                    float BaseWeaponSpeed = 0.001f * mainProto->Delay;
+                    basepoints0 = int32( (flametongueBase + (0.0887f  * GetTotalAttackPowerValue(BASE_ATTACK))) * BaseWeaponSpeed / 4.f);
 
                     triggered_spell_id = 10444;
                 }

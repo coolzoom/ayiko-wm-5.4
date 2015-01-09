@@ -729,7 +729,7 @@ public:
 // Ricket Ticker for Quest: Underground Ecomomy (27048)
 enum eRicketTicker
 {
-    SPELL_CRISTAL_FORMATION_EXPLOSION = 92789,
+    SPELL_CRYSTAL_FORMATION_EXPLOSION = 92789,
 
     NPC_DEEP_CELESTITE_BUNNY = 49865,
     NPC_DEEP_AMETHYST_BUNNY = 49866,
@@ -777,7 +777,7 @@ public:
 
             if (uiExplode <= diff)
             {
-                DoCastAOE(SPELL_CRISTAL_FORMATION_EXPLOSION, true);
+                DoCastAOE(SPELL_CRYSTAL_FORMATION_EXPLOSION, true);
 
                 // Checks weather a Deep Crystal is in Range
                 if (me->FindNearestCreature(NPC_DEEP_CELESTITE_BUNNY, 7.0f, true))

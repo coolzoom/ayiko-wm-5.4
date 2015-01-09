@@ -184,7 +184,7 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (@NPC_COLOSSAL_GYREWORM, 0, 0, 0, 4, 0, 100, 0, 0, 0, 0, 0, 11, @SPELL_CONSUMPTION, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Colossal Gyreworm - On Aggro - Cast Consumption"),
 (@NPC_COLOSSAL_GYREWORM, 0, 1, 0, 0, 0, 100, 0, 4000, 6000, 9000, 11000, 11, @SPELL_CONSUMPTION, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Colossal Gyreworm - IC - Cast Consumption");
 
--- [SQL] Quests - Beneath the Surface scripted (Feedback #6452)
+-- [SQL] Quests - Beneath the Surface scripted (Feedback #6452, #7464)
 SET @NPC_RUBY_GEMSTONE_CLUSTER := 48639;
 SET @NPC_ENORMOUS_GYREWORM := 48533;
 SET @SPELL_ENORMOUS_GYREWORM_TRANSFORM := 90629;

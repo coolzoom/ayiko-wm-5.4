@@ -2952,23 +2952,18 @@ class spell_pri_mass_dispel : public SpellScriptLoader
 
         void CheckAuras()
         {
-            // Glyph of Mass Dispel
+            // Check if Immunity aura is on target
             if (Unit* target = GetHitUnit())
-                if (GetCaster()->HasAura(55691))
-                    if (target->HasAuraWithMechanic(1 << MECHANIC_IMMUNE_SHIELD))
-                        _hasImmunity = true;
+                if (target->HasAuraWithMechanic(1 << MECHANIC_IMMUNE_SHIELD))
+                    _hasImmunity = true;
         }
 
         void HandleScript(SpellEffIndex effIndex)
         {
+            // Glyph of Mass Dispel - Prevent dispel effect when target has immunity and no glyph is applied
             if (_hasImmunity)
-            {
-                if (Unit* target = GetHitUnit())
-                {
-                    target->RemoveAurasWithMechanic(1 << MECHANIC_IMMUNE_SHIELD, AURA_REMOVE_BY_ENEMY_SPELL);
+                if (!GetCaster()->HasAura(55691))
                     PreventHitEffect(effIndex);
-                }
-            }
         }
 
         void Register()

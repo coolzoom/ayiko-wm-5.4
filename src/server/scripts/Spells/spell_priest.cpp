@@ -569,7 +569,7 @@ class spell_pri_power_word_solace : public SpellScriptLoader
             {
                 if (Player* player = GetCaster()->ToPlayer())
                     if (GetHitUnit())
-                        player->EnergizeBySpell(player, GetSpellInfo()->Id, int32(player->GetMaxPower(POWER_MANA) * 0.007f), POWER_MANA);
+                        player->CastSpell(player, 129253, true);
             }
 
             void Register()

@@ -11710,8 +11710,6 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                 // first target set in script, check second target
                 if (glyph->GetUserData() != victim->GetGUIDLow())
                     AddPct(DoneTotalMod, glyph->GetAmount());
-
-                glyph->GetBase()->SetDuration(1);
             }
         }
 

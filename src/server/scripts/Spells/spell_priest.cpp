@@ -1312,15 +1312,13 @@ class spell_pri_devouring_plague : public SpellScriptLoader
                 return true;
             }
 
-            void CalculatePeriodicDamage(AuraEffect const * /*auraEffect*/, int32& amount, bool& /*canBeRecalculated*/)
+            void CalculatePeriodicDamage(AuraEffect const * auraEffect, int32& amount, bool& /*canBeRecalculated*/)
             {
                 if (!GetCaster())
                     return;
 
                 // First orb is consumed in spell-cast
-                powerUsed = GetCaster()->GetPower(POWER_SHADOW_ORB) + 1;
-
-                amount *= powerUsed;
+                const_cast<AuraEffect*>(auraEffect)->SetUserData(GetCaster()->GetPower(POWER_SHADOW_ORB) + 1);
             }
 
             void CalculatePowerUsedAmount(AuraEffect const * /*auraEffect*/, int32& amount, bool& /*canBeRecalculated*/)

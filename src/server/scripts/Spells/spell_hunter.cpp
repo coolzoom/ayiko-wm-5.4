@@ -2263,6 +2263,55 @@ public:
     }
 };
 
+// 53301 - Explosive Shot
+class spell_hun_explosive_shot : public SpellScriptLoader
+{
+public:
+    spell_hun_explosive_shot() : SpellScriptLoader("spell_hun_explosive_shot") { }
+
+    class script_impl : public AuraScript
+    {
+        PrepareAuraScript(script_impl);
+
+        int32 oldAmount;
+
+        bool Load()
+        {
+            oldAmount = 0;
+            return true;
+        }
+
+        void OnApply(AuraEffect const * aurEff, AuraEffectHandleModes mode)
+        {
+            auto caster = GetCaster();
+            auto target = GetUnitOwner();
+            if (!caster || !target)
+                return;
+
+            // Change amounts
+            if (mode & AURA_EFFECT_HANDLE_REAPPLY)
+            {
+                const_cast<AuraEffect*>(aurEff)->SetAmount(aurEff->GetAmount() + oldAmount);
+                const_cast<AuraEffect*>(aurEff)->GetFixedDamageInfo().SetFixedDamage(aurEff->GetAmount());
+            }
+            else
+            {
+                oldAmount = aurEff->GetAmount();
+            }
+        }
+
+        void Register()
+        {
+            AfterEffectApply  += AuraEffectApplyFn(script_impl::OnApply, EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new script_impl();
+    }
+};
+
 void AddSC_hunter_spell_scripts()
 {
     new spell_hun_glyph_of_aspect_of_the_beast();
@@ -2307,4 +2356,5 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_pet_dust_cloud();
     new spell_hun_dire_beast_focus_driver();
     new spell_hun_explosive_trap();
+    new spell_hun_explosive_shot();
 }

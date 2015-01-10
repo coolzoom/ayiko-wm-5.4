@@ -990,20 +990,26 @@ void Aura::RefreshDuration(bool recalculate)
         RecalculateAmountOfEffects();
 }
 
-void Aura::RefreshTimers(bool recalculate)
+void Aura::RefreshTimers(bool recalculate, int32 oldPeriodicAmount)
 {
     m_maxDuration = CalcMaxDuration();
-    if (m_spellInfo->AttributesEx8 & SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER)
+    // In mop periodics continue to tick even on re-apply, extend duration by duration left to next tick
+    //if (m_spellInfo->AttributesEx8 & SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER)
     {
         int32 minAmplitude = m_maxDuration;
+        int32 tickTimer = minAmplitude;
         for (uint8 i = 0; i < GetSpellInfo()->Effects.size(); ++i)
             if (AuraEffect const *eff = GetEffect(i))
                 if (int32 ampl = eff->GetAmplitude())
-                    minAmplitude = std::min(ampl, minAmplitude);
+                {
+                    if (ampl <= minAmplitude)
+                    {
+                        minAmplitude = ampl;
+                        tickTimer = eff->GetPeriodicTimer();
+                    }
+                }
 
-        // If only one tick remaining, roll it over into new duration
-        if (GetDuration() <= minAmplitude)
-            m_maxDuration += GetDuration();
+        m_maxDuration += tickTimer;
     }
 
     RefreshDuration(recalculate);
@@ -1011,7 +1017,13 @@ void Aura::RefreshTimers(bool recalculate)
     Unit* caster = GetCaster();
     for (uint8 i = 0; i < GetSpellInfo()->Effects.size(); ++i)
         if (HasEffect(i))
-            GetEffect(i)->CalculatePeriodic(caster, false, false);
+        {
+            auto eff = GetEffect(i);
+            eff->CalculatePeriodic(caster, false, false);
+            // Tick rolled sets information that of last tick moved to new aura, it must store its damage
+            if (oldPeriodicAmount && eff->GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE)
+                eff->SetRolledTickAmount(oldPeriodicAmount);
+        }
 }
 
 void Aura::SetCharges(uint8 charges)
@@ -1112,13 +1124,21 @@ bool Aura::ModStackAmount(int32 num, AuraRemoveMode removeMode)
     if (m_spellInfo->Id == 980)
         refresh = false;
 
-    // Update stack amount
+    // Save old amount used for tick-rolling
+    int32 oldPeriodicAmount = 0;
+    for (auto &effectPtr : m_effects)
+        if (effectPtr && effectPtr->GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE)
+        {
+            oldPeriodicAmount = effectPtr->GetAmount();
+            break;
+        }
+
     SetStackAmount(stackAmount);
 
     if (refresh)
     {
         RefreshSpellMods();
-        RefreshTimers(false);
+        RefreshTimers(false, oldPeriodicAmount);
 
         auto charges = CalcMaxCharges();
         CallScriptRefreshChargesHandlers(charges);

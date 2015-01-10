@@ -568,7 +568,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
 AuraEffect::AuraEffect(Aura *base, uint8 effIndex, int32 *baseAmount, Unit* caster):
     m_base(base), m_spellInfo(base->GetSpellInfo()),
     m_baseAmount(baseAmount ? *baseAmount : m_spellInfo->Effects[effIndex].BasePoints),
-    m_periodicTimer(0), m_tickNumber(0), m_userData(0), m_effIndex(effIndex),
+    m_periodicTimer(0), m_tickNumber(0), m_userData(0), m_rolledTickAmount(0), m_effIndex(effIndex),
     m_canBeRecalculated(true), m_isPeriodic(false)
 {
     GetFixedDamageInfo().Clear();
@@ -7236,6 +7236,13 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
             damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount());
 
         damage = target->SpellDamageBonusTaken(caster, GetSpellInfo(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount());
+
+        // First tick from rolled from previously applied periodic
+        if (GetRolledTickAmount())
+        {
+            damage = GetRolledTickAmount();
+            const_cast<AuraEffect*>(this)->SetRolledTickAmount(0);
+        }
 
         // Calculate armor mitigation
         if (Unit::IsDamageReducedByArmor(GetSpellInfo()->GetSchoolMask(), GetSpellInfo(), GetEffIndex()))

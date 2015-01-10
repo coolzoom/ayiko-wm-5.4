@@ -177,12 +177,51 @@ DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 13 AND `SourceEntry` 
 
 -- [SQL] Npcs - Colossal Gyreworm fixed (Feedback #7446)
 SET @NPC_COLOSSAL_GYREWORM := 44258;
+SET @SPELL_CANCEL_CONSUMPTION := 95170;
 SET @SPELL_CONSUMPTION := 95169;
-UPDATE `creature_template` SET `AIName` = "SmartAI", `ScriptName` = "", `unit_flags` = 0 WHERE `entry` IN (44257, 44258);
+SET @SPELL_CSA_AREA_TRIGGER_DUMMY_TIMER_AURA := 88811;
+SET @SPELL_RIDE_VEHICLE := 83910;
+SET @SPELL_CANCEL_CONSUMPTION_RIDE := 83911;
+SET @CGUID := 798406;
+UPDATE `creature_template` SET `AIName` = "", `ScriptName` = "", `unit_flags` = 0 WHERE `entry` = 44257;
+UPDATE `creature_template` SET `AIName` = "SmartAI", `ScriptName` = "", `faction_A` = 2232, `faction_H` = 2232, `unit_flags` = 832, `VehicleId` = 1062, `InhabitType` = 7, `speed_walk` = 4, `speed_run` = 4 WHERE `entry` = @NPC_COLOSSAL_GYREWORM;
 DELETE FROM `smart_scripts` WHERE `entryorguid` = @NPC_COLOSSAL_GYREWORM AND `source_type` = 0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
-(@NPC_COLOSSAL_GYREWORM, 0, 0, 0, 4, 0, 100, 0, 0, 0, 0, 0, 11, @SPELL_CONSUMPTION, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Colossal Gyreworm - On Aggro - Cast Consumption"),
-(@NPC_COLOSSAL_GYREWORM, 0, 1, 0, 0, 0, 100, 0, 4000, 6000, 9000, 11000, 11, @SPELL_CONSUMPTION, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Colossal Gyreworm - IC - Cast Consumption");
+(@NPC_COLOSSAL_GYREWORM, 0, 0, 0, 1, 0, 100, 0, 3000, 3000, 3000, 3000, 11, @SPELL_CONSUMPTION, 3, 0, 0, 0, 0, 21, 10, 0, 0, 0, 0, 0, 0, "Nepenthe-Colossal Gyreworm - OOC - Cast Consumption"),
+(@NPC_COLOSSAL_GYREWORM, 0, 1, 0, 58, 0, 100, 0, 11, @CGUID, 0, 0, 11, @SPELL_CANCEL_CONSUMPTION, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Colossal Gyreworm - On WP End - Cast Cancel Consumption");
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger` IN (@SPELL_CONSUMPTION, @SPELL_CANCEL_CONSUMPTION, 46598);
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES
+(@SPELL_CONSUMPTION, @SPELL_RIDE_VEHICLE, 2, "Consumption adds aura Ride Vehicle"),
+(@SPELL_CANCEL_CONSUMPTION, @SPELL_CANCEL_CONSUMPTION_RIDE, 0, "Cancel Consumption casts Cancel Consumption Ride");
+DELETE FROM `creature` WHERE `id` = @NPC_COLOSSAL_GYREWORM;
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(@CGUID, @NPC_COLOSSAL_GYREWORM, 646, 1, 1, 33760, 0, 1850.17, -197.685, -172.415, 4.18152, 120, 0, 0, 774900, 0, 2, 0, 0, 0);
+DELETE FROM `creature_template_bytes` WHERE `entry` = @NPC_COLOSSAL_GYREWORM;
+DELETE FROM `creature_template_aura` WHERE `entry` = @NPC_COLOSSAL_GYREWORM;
+DELETE FROM `creature_template_path` WHERE `entry` = @NPC_COLOSSAL_GYREWORM;
+DELETE FROM `creature_bytes` WHERE `guid` = @CGUID;
+INSERT INTO `creature_bytes` (`guid`, `index`, `bytes`) VALUES
+(@CGUID, 0, 50331648),
+(@CGUID, 1, 1);
+DELETE FROM `creature_aura` WHERE `guid` = @CGUID;
+INSERT INTO `creature_aura` (`guid`, `aura`) VALUES
+(@CGUID, 83897);
+DELETE FROM `waypoint_data` WHERE `id` = @CGUID;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `orientation`, `delay`, `action`, `action_chance`, `wpguid`) VALUES
+(@CGUID, 1, 1873.72, -175.51, -171.297, 0, 0, 0, 100, 0),
+(@CGUID, 2, 1854.24, -191.767, -171.984, 0, 0, 0, 100, 0),
+(@CGUID, 3, 1844.53, -212.073, -173.118, 0, 0, 0, 100, 0),
+(@CGUID, 4, 1844.93, -234.88, -170.858, 0, 0, 0, 100, 0),
+(@CGUID, 5, 1857.19, -255.399, -168.036, 0, 0, 0, 100, 0),
+(@CGUID, 6, 1879.83, -268.13, -167.629, 0, 0, 0, 100, 0),
+(@CGUID, 7, 1904.45, -267.974, -167.733, 0, 0, 0, 100, 0),
+(@CGUID, 8, 1926.43, -253.898, -167.35, 0, 0, 0, 100, 0),
+(@CGUID, 9, 1938.9, -224.674, -169.8, 0, 0, 0, 100, 0),
+(@CGUID, 10, 1928.49, -191.538, -168.298, 0, 0, 0, 100, 0),
+(@CGUID, 11, 1900.46, -174.819, -163.853, 0, 0, 0, 100, 0);
+DELETE FROM `creature_path` WHERE `guid` = @CGUID;
+INSERT INTO `creature_path` (`guid`, `path`) VALUES
+(@CGUID, @CGUID);
 
 -- [SQL] Quests - Beneath the Surface scripted (Feedback #6452, #7464)
 SET @NPC_RUBY_GEMSTONE_CLUSTER := 48639;
@@ -445,7 +484,7 @@ SET @NPC_TERRATH_THE_STEADY := 42466;
 SET @NPC_OPALESCENT_GUARDIAN := 43591;
 SET @NPC_OPAL_STONETHROWER := 43586;
 SET @CGUID := 40215;
-UPDATE `creature_template` SET `mindmg` = 468, `maxdmg` = 702, `attackpower` = 175, `dmg_multiplier` = 35, `unit_class` = 1, `unit_flags` = 64, `VehicleId` = 1088, `WDBVerified` = 15595, `AIName` = "", `ScriptName` = "npc_terrath_the_steady" WHERE `entry` = @NPC_TERRATH_THE_STEADY;
+UPDATE `creature_template` SET `mindmg` = 468, `maxdmg` = 702, `attackpower` = 175, `dmg_multiplier` = 35, `unit_class` = 1, `exp` = 3, `unit_flags` = 64, `VehicleId` = 1088, `WDBVerified` = 15595, `npcflag` = `npcflag`|1, `AIName` = "", `ScriptName` = "npc_terrath_the_steady" WHERE `entry` = @NPC_TERRATH_THE_STEADY;
 UPDATE `creature_template` SET `minlevel` = 83, `maxlevel` = 83, `exp` = 3, `faction_A` = 35, `faction_H` = 35, `speed_walk` = 1.55556, `baseattacktime` = 2000, `unit_flags` = 264, `WDBVerified` = 15595, `AIName` = "", `ScriptName` = "npc_opalescent_guardian" WHERE `entry` = @NPC_OPALESCENT_GUARDIAN;
 UPDATE `creature_template` SET `minlevel` = 83, `maxlevel` = 83, `exp` = 3, `faction_A` = 2283, `faction_H` = 2283, `speed_walk` = 0.888888, `speed_run` = 1.5873, `mindmg` = 168, `maxdmg` = 702, `attackpower` = 175, `dmg_multiplier` = 35, `baseattacktime` = 2000, `unit_class` = 1, `unit_flags` = 64, `WDBVerified` = 15595 WHERE `entry` = @NPC_OPAL_STONETHROWER;
 DELETE FROM `creature` WHERE `id` = @NPC_OPAL_STONETHROWER;

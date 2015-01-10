@@ -8575,6 +8575,11 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
             if (!IsInCombat())
                 return false;
 
+            // Feral Druid's Vengeance should proc in Bear Form only
+            if (dummySpell->Id == 84840)
+                if (GetShapeshiftForm() != FORM_BEAR)
+                    return false;
+
             triggered_spell_id = 132365;
 
             if (procSpell)

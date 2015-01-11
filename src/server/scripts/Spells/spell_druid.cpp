@@ -697,8 +697,12 @@ class spell_dru_consecration : public SpellScriptLoader
 
             void OnTick(AuraEffect const * /*aurEff*/)
             {
-                if (DynamicObject* dynObj = GetCaster()->GetDynObject(SPELL_DRUID_CONSECRATION_DUMMY))
-                    GetCaster()->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), SPELL_DRUID_CONSECRATION_DAMAGE, true);
+                auto caster = GetCaster();
+                if (!caster)
+                    return;
+
+                if (DynamicObject* dynObj = caster->GetDynObject(SPELL_DRUID_CONSECRATION_DUMMY))
+                    caster->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), SPELL_DRUID_CONSECRATION_DAMAGE, true);
             }
 
             void Register()
@@ -2815,8 +2819,12 @@ class spell_dru_swiftmend : public SpellScriptLoader
 
             void OnTick(AuraEffect const * /*aurEff*/)
             {
-                if (DynamicObject* dynObj = GetCaster()->GetDynObject(SPELL_DRUID_SWIFTMEND))
-                    GetCaster()->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), SPELL_DRUID_SWIFTMEND_TICK, true);
+                auto caster = GetCaster();
+                if (!caster)
+                    return;
+
+                if (DynamicObject* dynObj = caster->GetDynObject(SPELL_DRUID_SWIFTMEND))
+                    caster->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), SPELL_DRUID_SWIFTMEND_TICK, true);
             }
 
             void Register()

@@ -928,8 +928,12 @@ class spell_pri_holy_word_sanctuary : public SpellScriptLoader
 
             void OnTick(AuraEffect const * /*aurEff*/)
             {
-                if (DynamicObject* dynObj = GetCaster()->GetDynObject(PRIEST_HOLY_WORD_SANCTUARY_AREA))
-                    GetCaster()->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), PRIEST_HOLY_WORD_SANCTUARY_HEAL, true);
+                auto const caster = GetCaster();
+                if (!caster)
+                    return;
+
+                if (DynamicObject* dynObj = caster->GetDynObject(PRIEST_HOLY_WORD_SANCTUARY_AREA))
+                    caster->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), PRIEST_HOLY_WORD_SANCTUARY_HEAL, true);
             }
 
             void Register()

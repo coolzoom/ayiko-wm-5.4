@@ -1009,7 +1009,8 @@ void Aura::RefreshTimers(bool recalculate, int32 oldPeriodicAmount)
                     }
                 }
 
-        m_maxDuration += tickTimer;
+        if (minAmplitude && minAmplitude < m_maxDuration)
+            m_maxDuration += tickTimer;
     }
 
     RefreshDuration(recalculate);

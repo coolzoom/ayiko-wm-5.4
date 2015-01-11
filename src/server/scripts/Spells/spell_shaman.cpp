@@ -2018,15 +2018,14 @@ public:
                         return;
 
                     auto effectInfo = spellInfo->Effects[EFFECT_0];
-                    auto targetInfo = SpellImplicitTargetInfo(effectInfo.GetImplicitTargetType());
+                    auto targetInfo = SpellImplicitTargetInfo(effectInfo.TargetA);
                     float angle = targetInfo.CalcDirectionAngle();
                     float objSize = player->GetObjectSize();
                     float dist = effectInfo.CalcRadius(player);
                     if (dist < objSize)
                         dist = objSize;
 
-                    totem->GetFirstCollisionPosition(pos, dist, angle);
-
+                    totem->MovePositionToFirstCollision(pos, dist, angle);
                     totem->NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), totem->GetOrientation());
                 }
             }

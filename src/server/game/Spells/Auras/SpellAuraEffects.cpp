@@ -754,26 +754,9 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                     // Power Word : Shield
                     if (GetSpellInfo()->Id == 17 || GetSpellInfo()->Id == 123258)
                     {
-                        if (Player* _plr = caster->ToPlayer())
-                        {
-                            switch (_plr->GetSpecializationId(_plr->GetActiveSpec()))
-                            {
-                                case SPEC_PRIEST_DISCIPLINE:
-                                    // +263.8% from sp bonus
-                                    DoneActualBenefit += caster->SpellBaseDamageBonusDone(m_spellInfo->GetSchoolMask()) * 2.638f;
-                                    break;
-                                case SPEC_PRIEST_HOLY:
-                                    // +233.9% from sp bonus
-                                    DoneActualBenefit += caster->SpellBaseDamageBonusDone(m_spellInfo->GetSchoolMask()) * 2.339f;
-                                    break;
-                                case SPEC_PRIEST_SHADOW:
-                                    // +187.1% from sp bonus
-                                    DoneActualBenefit += caster->SpellBaseDamageBonusDone(m_spellInfo->GetSchoolMask()) * 1.871f;
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
+                        // +187.1% from sp bonus
+                        DoneActualBenefit += caster->SpellBaseDamageBonusDone(m_spellInfo->GetSchoolMask()) * 1.871f;
+                        break;
                     }
                     break;
                 default:

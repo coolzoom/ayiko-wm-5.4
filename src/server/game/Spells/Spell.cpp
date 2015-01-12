@@ -3162,19 +3162,6 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
                         }
                     }
 
-                    // Pandemic
-                    if (refresh && m_originalCaster->HasAura(131973))
-                    {
-                        bool periodicDamage = false;
-                        for (uint8 i = 0; i < m_spellAura->GetSpellInfo()->Effects.size(); ++i)
-                            if (m_spellAura->GetEffect(i))
-                                if (m_spellAura->GetEffect(i)->GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE)
-                                    periodicDamage = true;
-
-                        if (periodicDamage)
-                            duration = std::min(duration + m_spellAura->GetDuration(), int32(m_spellAura->GetMaxDuration() * 1.5f));
-                    }
-
                     if (duration != m_spellAura->GetMaxDuration())
                     {
                         m_spellAura->SetMaxDuration(duration);

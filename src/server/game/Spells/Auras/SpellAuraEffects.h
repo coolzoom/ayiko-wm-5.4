@@ -70,6 +70,9 @@ class AuraEffect
         int32 GetUserData() const { return m_userData; }
         void SetUserData(int32 data) { m_userData = data; }
 
+        int32 GetRolledTickAmount() const { return m_rolledTickAmount;  }
+        void SetRolledTickAmount(int32 rolledTickAmount) { m_rolledTickAmount = rolledTickAmount; }
+
         int32 GetPeriodicTimer() const { return m_periodicTimer; }
         void SetPeriodicTimer(int32 periodicTimer) { m_periodicTimer = periodicTimer; }
 
@@ -154,6 +157,7 @@ class AuraEffect
 
         SpellModifier::Ptr m_spellmod;
 
+        int32 m_rolledTickAmount;
         int32 m_periodicTimer;
         int32 m_amplitude;
         uint32 m_tickNumber;

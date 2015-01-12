@@ -59,7 +59,6 @@ class spell_love_is_in_the_air_romantic_picnic : public SpellScriptLoader
             {
                 // Every 5 seconds
                 Unit* target = GetTarget();
-                Unit* caster = GetCaster();
 
                 // If our player is no longer sit, remove all auras
                 if (target->getStandState() != UNIT_STAND_STATE_SIT)
@@ -83,7 +82,7 @@ class spell_love_is_in_the_air_romantic_picnic : public SpellScriptLoader
                 {
                     if ((*itr) != target && (*itr)->HasAura(GetId())) // && (*itr)->getStandState() == UNIT_STAND_STATE_SIT)
                     {
-                        if (caster)
+                        if (Unit* caster = GetCaster())
                         {
                             caster->CastSpell(*itr, SPELL_ROMANTIC_PICNIC_ACHIEV, true);
                             caster->CastSpell(target, SPELL_ROMANTIC_PICNIC_ACHIEV, true);

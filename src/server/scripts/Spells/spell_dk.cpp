@@ -380,10 +380,10 @@ class spell_dk_desecrated_ground : public SpellScriptLoader
 
             void OnTick(AuraEffect const * /*aurEff*/)
             {
-                if (GetCaster())
-                    if (DynamicObject* dynObj = GetCaster()->GetDynObject(DK_SPELL_DESECRATED_GROUND))
-                        if (GetCaster()->GetDistance(dynObj) <= 8.0f)
-                            GetCaster()->CastSpell(GetCaster(), DK_SPELL_DESECRATED_GROUND_IMMUNE, true);
+                if (auto caster = GetCaster())
+                    if (DynamicObject* dynObj = caster->GetDynObject(DK_SPELL_DESECRATED_GROUND))
+                        if (caster->GetDistance(dynObj) <= 8.0f)
+                            caster->CastSpell(caster, DK_SPELL_DESECRATED_GROUND_IMMUNE, true);
             }
 
             void Register()

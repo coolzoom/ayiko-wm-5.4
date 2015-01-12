@@ -150,16 +150,17 @@ class spell_mastery_ignite : public SpellScriptLoader
                             {
                                 float value = caster->GetFloatValue(PLAYER_MASTERY) * 1.5f / 100.0f;
 
-                                int32 bp = GetHitDamage();
-                                bp = int32(bp * value / 2);
-
-                                if (target->HasAura(MASTERY_SPELL_IGNITE, caster->GetGUID()))
+                                int32 bp = int32(GetHitDamage() * value);
+                                // Add remaining value
+                                if (auto igniteEff = target->GetAuraEffect(MASTERY_SPELL_IGNITE, EFFECT_0, caster->GetGUID()))
                                 {
-                                    auto const remaining = target->GetRemainingPeriodicAmount(caster->GetGUID(), MASTERY_SPELL_IGNITE, SPELL_AURA_PERIODIC_DAMAGE);
-                                    bp += remaining.perTick();
-                                    bp = int32(bp * 0.66f);
+                                    int32 igniteTick = igniteEff->GetAmount();
+                                    if (!igniteEff->GetTickNumber())
+                                        igniteTick *= 2;
+                                    bp += igniteTick;
                                 }
 
+                                bp /= 2;
                                 caster->CastCustomSpell(target, MASTERY_SPELL_IGNITE, &bp, NULL, NULL, true);
                             }
                         }

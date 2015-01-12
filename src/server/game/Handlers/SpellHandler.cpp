@@ -961,14 +961,19 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     }
 
     // Custom MoP Script
-    // Power Word : Solace - 129250 and Power Word : Insanity - 129249
-    if (spellInfo->Id == 129250 && _player->GetShapeshiftForm() == FORM_SHADOW)
+    // Solace and Insanity - Switch Mind-flay casted if target has devouring plague
+    if (spellInfo->Id == 15407 && _player->GetShapeshiftForm() == FORM_SHADOW && _player->HasSpell(139139))
     {
-        SpellInfo const* newSpellInfo = sSpellMgr->GetSpellInfo(129249);
-        if (newSpellInfo)
+        if (auto unitTarget = targets.GetUnitTarget())
         {
-            spellInfo = newSpellInfo;
-            spellId = newSpellInfo->Id;
+            if (unitTarget->HasAura(2944, _player->GetGUID()))
+            {
+                if (SpellInfo const* newSpellInfo = sSpellMgr->GetSpellInfo(129197))
+                {
+                    spellInfo = newSpellInfo;
+                    spellId = newSpellInfo->Id;
+                }
+            }
         }
     }
     // Aimed Shot - 19434 and Aimed Shot (for Master Marksman) - 82928

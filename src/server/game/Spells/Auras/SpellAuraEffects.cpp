@@ -568,7 +568,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
 AuraEffect::AuraEffect(Aura *base, uint8 effIndex, int32 *baseAmount, Unit* caster):
     m_base(base), m_spellInfo(base->GetSpellInfo()),
     m_baseAmount(baseAmount ? *baseAmount : m_spellInfo->Effects[effIndex].BasePoints),
-    m_periodicTimer(0), m_tickNumber(0), m_userData(0), m_effIndex(effIndex),
+    m_periodicTimer(0), m_tickNumber(0), m_userData(0), m_rolledTickAmount(0), m_effIndex(effIndex),
     m_canBeRecalculated(true), m_isPeriodic(false)
 {
     GetFixedDamageInfo().Clear();
@@ -1003,7 +1003,6 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                         }
                     }
 
-
                     if (!hasDivinePurpose)
                         caster->ModifyPower(POWER_HOLY_POWER, (holyPower > 1) ? (-(holyPower - 1)) : 0);
                     break;
@@ -1270,7 +1269,7 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
 
     // Fixate damage for periodic damage auras
     // It's only for players now
-    if (caster && caster->GetTypeId() == TYPEID_PLAYER)
+    if (caster && caster->GetCharmerOrOwnerPlayerOrPlayerItself())
     {
         if (GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE ||
             GetAuraType() == SPELL_AURA_PERIODIC_LEECH ||
@@ -7238,6 +7237,13 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
 
         damage = target->SpellDamageBonusTaken(caster, GetSpellInfo(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount());
 
+        // First tick from rolled from previously applied periodic
+        if (GetRolledTickAmount())
+        {
+            damage = GetRolledTickAmount();
+            const_cast<AuraEffect*>(this)->SetRolledTickAmount(0);
+        }
+
         // Calculate armor mitigation
         if (Unit::IsDamageReducedByArmor(GetSpellInfo()->GetSchoolMask(), GetSpellInfo(), GetEffIndex()))
         {
@@ -7264,6 +7270,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                         caster->CastCustomSpell(target, 124467, &bp, NULL, NULL, true);
                         break;
                     case 15407: // Mind Flay
+                    case 129197: // Mind Flay (Insanity)
                         caster->CastCustomSpell(target, 124468, &bp, NULL, NULL, true);
                         break;
                     case 34914: // Vampiric Touch
@@ -7275,8 +7282,13 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
             }
         }
 
+        // Devouring Plague - increase damage per orb used (stored in data)
+        if (GetId() == 2944)
+        {
+            damage *= GetUserData();
+        }
         // Deep Wounds
-        if (GetSpellInfo()->Id == 115767)
+        else if (GetSpellInfo()->Id == 115767)
         {
             if (Player* _player = GetCaster()->ToPlayer())
             {
@@ -7286,16 +7298,14 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                     damage /= 2;
             }
         }
-
         // Nether Tempest and Living Bomb deal 85% of damage if used on player
-        if (GetSpellInfo()->Id == 44457 || GetSpellInfo()->Id == 114923)
+        else if (GetSpellInfo()->Id == 44457 || GetSpellInfo()->Id == 114923)
         {
             if (target->GetTypeId() == TYPEID_PLAYER)
                 damage *= 0.85f;
         }
-
         // Chaos Bolt with Grimoire
-        if (GetSpellInfo()->Id == 116858)
+        else if (GetSpellInfo()->Id == 116858)
         {
             if (Player* _player = GetCaster()->ToPlayer())
                 if (_player->GetSpecializationId(_player->GetActiveSpec()) == SPEC_WARLOCK_DESTRUCTION && _player->HasAura(108503))
@@ -7310,9 +7320,8 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                     damage = chaosBoltDamage;
                 }
         }
-
         // Curse of Agony damage-per-tick calculation
-        if (GetSpellInfo()->Id == 980)
+        else if (GetSpellInfo()->Id == 980)
         {
             uint32 stackAmount = GetBase()->GetStackAmount();
             // 1..4 ticks, 1/2 from normal tick damage
@@ -7323,7 +7332,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 damage *= 1.5;
         }
         // Malefic Grasp
-        if (GetSpellInfo()->Id == 103103)
+        else if (GetSpellInfo()->Id == 103103)
         {
             // Soul Leech
             if (caster->HasAura(108370) && caster->GetTypeId() == TYPEID_PLAYER)
@@ -7422,7 +7431,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
             }
         }
         // Execution Sentence damage-per-tick calculation
-        if (GetId() == 114916)
+        else if (GetId() == 114916)
         {
             if (m_tickNumber == 1)
                 damage *= 0.04115f;
@@ -7445,8 +7454,8 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
             else
                 damage *= 0.44125f;
         }
-        // Mind Flay
-        if (GetId() == 15407)
+        // Mind Flay (Insanity)
+        else if (GetId() == 129197)
         {
             // Solace and Insanity bonus
             auto player = caster->ToPlayer();

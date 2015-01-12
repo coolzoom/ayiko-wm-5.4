@@ -5825,6 +5825,9 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[EFFECT_3].Effect = 0;
                     spellInfo->Effects[EFFECT_4].Effect = 0;
                     break;
+                case 120267: // Vengeance (Monk)
+                    spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_APPLY_AURA;
+                    break;
                 default:
                     break;
             }

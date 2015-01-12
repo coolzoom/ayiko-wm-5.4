@@ -569,7 +569,7 @@ class spell_pri_power_word_solace : public SpellScriptLoader
             {
                 if (Player* player = GetCaster()->ToPlayer())
                     if (GetHitUnit())
-                        player->EnergizeBySpell(player, GetSpellInfo()->Id, int32(player->GetMaxPower(POWER_MANA) * 0.007f), POWER_MANA);
+                        player->CastSpell(player, 129253, true);
             }
 
             void Register()
@@ -928,8 +928,12 @@ class spell_pri_holy_word_sanctuary : public SpellScriptLoader
 
             void OnTick(AuraEffect const * /*aurEff*/)
             {
-                if (DynamicObject* dynObj = GetCaster()->GetDynObject(PRIEST_HOLY_WORD_SANCTUARY_AREA))
-                    GetCaster()->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), PRIEST_HOLY_WORD_SANCTUARY_HEAL, true);
+                auto const caster = GetCaster();
+                if (!caster)
+                    return;
+
+                if (DynamicObject* dynObj = caster->GetDynObject(PRIEST_HOLY_WORD_SANCTUARY_AREA))
+                    caster->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), PRIEST_HOLY_WORD_SANCTUARY_HEAL, true);
             }
 
             void Register()
@@ -1284,7 +1288,7 @@ class spell_pri_devouring_plague : public SpellScriptLoader
                     uint8 powerUsed = GetCaster()->GetPower(POWER_SHADOW_ORB) + 1;
                     player->SetPower(POWER_SHADOW_ORB, 0);
 
-                    damage = AddPct(damage, powerUsed * 20);
+                    damage *= powerUsed;
                     SetHitDamage(damage);
                 }
             }
@@ -1312,18 +1316,16 @@ class spell_pri_devouring_plague : public SpellScriptLoader
                 return true;
             }
 
-            void CalculateAmount(AuraEffect const * /*auraEffect*/, int32& amount, bool& /*canBeRecalculated*/)
+            void CalculatePeriodicDamage(AuraEffect const * auraEffect, int32& amount, bool& /*canBeRecalculated*/)
             {
                 if (!GetCaster())
                     return;
 
                 // First orb is consumed in spell-cast
-                powerUsed = GetCaster()->GetPower(POWER_SHADOW_ORB) + 1;
-
-                amount *= powerUsed;
+                const_cast<AuraEffect*>(auraEffect)->SetUserData(GetCaster()->GetPower(POWER_SHADOW_ORB) + 1);
             }
 
-            void CalculateSecondAmount(AuraEffect const * /*auraEffect*/, int32& amount, bool& /*canBeRecalculated*/)
+            void CalculatePowerUsedAmount(AuraEffect const * /*auraEffect*/, int32& amount, bool& /*canBeRecalculated*/)
             {
                 if (!GetCaster())
                     return;
@@ -1346,8 +1348,8 @@ class spell_pri_devouring_plague : public SpellScriptLoader
 
             void Register()
             {
-                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pri_devouring_plague_AuraScript::CalculateAmount, EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE);
-                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pri_devouring_plague_AuraScript::CalculateSecondAmount, EFFECT_2, SPELL_AURA_PERIODIC_DUMMY);
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pri_devouring_plague_AuraScript::CalculatePeriodicDamage, EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE);
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pri_devouring_plague_AuraScript::CalculatePowerUsedAmount, EFFECT_2, SPELL_AURA_PERIODIC_DUMMY);
                 OnEffectPeriodic += AuraEffectPeriodicFn(spell_pri_devouring_plague_AuraScript::OnTick, EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE);
             }
         };
@@ -2813,7 +2815,7 @@ public:
     }
 };
 
-// Mind Flay - 15407
+// Mind Flay - 15407, 129197
 class spell_pri_mind_flay final : public SpellScriptLoader
 {
     class script_impl final : public AuraScript
@@ -2822,7 +2824,6 @@ class spell_pri_mind_flay final : public SpellScriptLoader
 
         enum
         {
-            SPELL_DEVOURING_PLAGUE      = 2944,
             GLYPH_OF_MIND_FLAY          = 120585,
         };
 
@@ -2953,23 +2954,18 @@ class spell_pri_mass_dispel : public SpellScriptLoader
 
         void CheckAuras()
         {
-            // Glyph of Mass Dispel
+            // Check if Immunity aura is on target
             if (Unit* target = GetHitUnit())
-                if (GetCaster()->HasAura(55691))
-                    if (target->HasAuraWithMechanic(1 << MECHANIC_IMMUNE_SHIELD))
-                        _hasImmunity = true;
+                if (target->HasAuraWithMechanic(1 << MECHANIC_IMMUNE_SHIELD))
+                    _hasImmunity = true;
         }
 
         void HandleScript(SpellEffIndex effIndex)
         {
+            // Glyph of Mass Dispel - Prevent dispel effect when target has immunity and no glyph is applied
             if (_hasImmunity)
-            {
-                if (Unit* target = GetHitUnit())
-                {
-                    target->RemoveAurasWithMechanic(1 << MECHANIC_IMMUNE_SHIELD, AURA_REMOVE_BY_ENEMY_SPELL);
+                if (!GetCaster()->HasAura(55691))
                     PreventHitEffect(effIndex);
-                }
-            }
         }
 
         void Register()

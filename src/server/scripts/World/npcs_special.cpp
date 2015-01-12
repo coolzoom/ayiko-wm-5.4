@@ -4574,6 +4574,7 @@ class npc_shadowy_apparition : public CreatureScript
         };
 };
 
+// Doomguard - 11859
 class npc_warl_doomguard: public CreatureScript
 {
 public:
@@ -4585,17 +4586,28 @@ public:
 
         uint32 uiDoomboltTimer;
 
+        void AttackStart(Unit * victim) override
+        {
+            if (victim && me->Attack(victim, false))
+                me->GetMotionMaster()->MoveChase(victim, 30.f);
+        }
+
         void Reset()
         {
             if (!me->HasAura(45631))
                 me->CastSpell(me, 45631, true);
-            uiDoomboltTimer = 4000;
+            uiDoomboltTimer = 1000;
         }
 
         void UpdateAI(const uint32 diff)
         {
             if (!me->GetVictim())
-                return;
+            {
+                if (Unit * target = me->SelectVictim())
+                    AttackStart(target);
+                if (!me->GetVictim())
+                    return;
+            }
 
             if (uiDoomboltTimer <= diff)
             {

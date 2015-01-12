@@ -175,7 +175,96 @@ DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 13 AND `SourceEntry` 
 -- insert into `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) values
 -- ('13','7','79715','0','0','31','0','3','42731','0','0','0','0','','Quest');
 
--- [c++ and SQL] Quests - Underground Economy scripted (Feedback #3121)
+-- [SQL] Npcs - Colossal Gyreworm fixed (Feedback #7446)
+SET @NPC_COLOSSAL_GYREWORM := 44258;
+SET @SPELL_CANCEL_CONSUMPTION := 95170;
+SET @SPELL_CONSUMPTION := 95169;
+SET @SPELL_CSA_AREA_TRIGGER_DUMMY_TIMER_AURA := 88811;
+SET @SPELL_RIDE_VEHICLE := 83910;
+SET @SPELL_CANCEL_CONSUMPTION_RIDE := 83911;
+SET @CGUID := 798406;
+UPDATE `creature_template` SET `AIName` = "", `ScriptName` = "", `unit_flags` = 0 WHERE `entry` = 44257;
+UPDATE `creature_template` SET `AIName` = "SmartAI", `ScriptName` = "", `faction_A` = 2232, `faction_H` = 2232, `unit_flags` = 832, `VehicleId` = 1062, `InhabitType` = 7, `speed_walk` = 4, `speed_run` = 4 WHERE `entry` = @NPC_COLOSSAL_GYREWORM;
+DELETE FROM `smart_scripts` WHERE `entryorguid` = @NPC_COLOSSAL_GYREWORM AND `source_type` = 0;
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(@NPC_COLOSSAL_GYREWORM, 0, 0, 0, 1, 0, 100, 0, 3000, 3000, 3000, 3000, 11, @SPELL_CONSUMPTION, 3, 0, 0, 0, 0, 21, 10, 0, 0, 0, 0, 0, 0, "Nepenthe-Colossal Gyreworm - OOC - Cast Consumption"),
+(@NPC_COLOSSAL_GYREWORM, 0, 1, 0, 58, 0, 100, 0, 11, @CGUID, 0, 0, 11, @SPELL_CANCEL_CONSUMPTION, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Colossal Gyreworm - On WP End - Cast Cancel Consumption");
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger` IN (@SPELL_CONSUMPTION, @SPELL_CANCEL_CONSUMPTION, 46598);
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES
+(@SPELL_CONSUMPTION, @SPELL_RIDE_VEHICLE, 2, "Consumption adds aura Ride Vehicle"),
+(@SPELL_CANCEL_CONSUMPTION, @SPELL_CANCEL_CONSUMPTION_RIDE, 0, "Cancel Consumption casts Cancel Consumption Ride");
+DELETE FROM `creature` WHERE `id` = @NPC_COLOSSAL_GYREWORM;
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(@CGUID, @NPC_COLOSSAL_GYREWORM, 646, 1, 1, 33760, 0, 1850.17, -197.685, -172.415, 4.18152, 120, 0, 0, 774900, 0, 2, 0, 0, 0);
+DELETE FROM `creature_template_bytes` WHERE `entry` = @NPC_COLOSSAL_GYREWORM;
+DELETE FROM `creature_template_aura` WHERE `entry` = @NPC_COLOSSAL_GYREWORM;
+DELETE FROM `creature_template_path` WHERE `entry` = @NPC_COLOSSAL_GYREWORM;
+DELETE FROM `creature_bytes` WHERE `guid` = @CGUID;
+INSERT INTO `creature_bytes` (`guid`, `index`, `bytes`) VALUES
+(@CGUID, 0, 50331648),
+(@CGUID, 1, 1);
+DELETE FROM `creature_aura` WHERE `guid` = @CGUID;
+INSERT INTO `creature_aura` (`guid`, `aura`) VALUES
+(@CGUID, 83897);
+DELETE FROM `waypoint_data` WHERE `id` = @CGUID;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `orientation`, `delay`, `action`, `action_chance`, `wpguid`) VALUES
+(@CGUID, 1, 1873.72, -175.51, -171.297, 0, 0, 0, 100, 0),
+(@CGUID, 2, 1854.24, -191.767, -171.984, 0, 0, 0, 100, 0),
+(@CGUID, 3, 1844.53, -212.073, -173.118, 0, 0, 0, 100, 0),
+(@CGUID, 4, 1844.93, -234.88, -170.858, 0, 0, 0, 100, 0),
+(@CGUID, 5, 1857.19, -255.399, -168.036, 0, 0, 0, 100, 0),
+(@CGUID, 6, 1879.83, -268.13, -167.629, 0, 0, 0, 100, 0),
+(@CGUID, 7, 1904.45, -267.974, -167.733, 0, 0, 0, 100, 0),
+(@CGUID, 8, 1926.43, -253.898, -167.35, 0, 0, 0, 100, 0),
+(@CGUID, 9, 1938.9, -224.674, -169.8, 0, 0, 0, 100, 0),
+(@CGUID, 10, 1928.49, -191.538, -168.298, 0, 0, 0, 100, 0),
+(@CGUID, 11, 1900.46, -174.819, -163.853, 0, 0, 0, 100, 0);
+DELETE FROM `creature_path` WHERE `guid` = @CGUID;
+INSERT INTO `creature_path` (`guid`, `path`) VALUES
+(@CGUID, @CGUID);
+
+-- [SQL] Quests - Beneath the Surface scripted (Feedback #6452, #7464)
+SET @NPC_RUBY_GEMSTONE_CLUSTER := 48639;
+SET @NPC_ENORMOUS_GYREWORM := 48533;
+SET @SPELL_ENORMOUS_GYREWORM_TRANSFORM := 90629;
+SET @SPELL_ENORMOUS_GYREWORM_SPAWN_DEAD := 90627;
+SET @SPELL_ENORMOUS_GYREWORM_STATE := 90620;
+SET @SPELL_EARTH_SPIKE := 90625;
+SET @SPELL_DUMMY := 36177;
+UPDATE `gameobject_template` SET `flags` = 4 WHERE `entry` = 205195;
+UPDATE `creature_template` SET `faction_A` = 2232, `faction_H` = 2232, `unit_flags` = 0 WHERE `entry` = 42766;
+UPDATE `creature_template` SET `InhabitType` = 7, `flags_extra` = 130 WHERE `entry` = 48543;
+DELETE FROM `creature` WHERE `id` IN (@NPC_RUBY_GEMSTONE_CLUSTER, @NPC_ENORMOUS_GYREWORM);
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(799536, @NPC_RUBY_GEMSTONE_CLUSTER, 646, 1, 1, 36219, 0, 2065.6, -425.408, -135.756, 0.452736, 120, 0, 0, 80522, 0, 0, 0, 0, 0),
+(799540, @NPC_RUBY_GEMSTONE_CLUSTER, 646, 1, 1, 36219, 0, 1955.59, -369.305, -157.125, 0.733911, 120, 0, 0, 80522, 0, 0, 0, 0, 0),
+(799994, @NPC_RUBY_GEMSTONE_CLUSTER, 646, 1, 1, 36219, 0, 1839.27, -312.894, -166.699, 1.23264, 120, 0, 0, 80522, 0, 0, 0, 0, 0);
+UPDATE `creature_template` SET `lootid` = @NPC_ENORMOUS_GYREWORM WHERE `entry` = @NPC_ENORMOUS_GYREWORM;
+DELETE FROM `creature_loot_template` WHERE `entry` = @NPC_ENORMOUS_GYREWORM AND `item` = 64404;
+INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`) VALUES
+(@NPC_ENORMOUS_GYREWORM, 64404, -100);
+UPDATE `creature_template` SET `AIName` = "SmartAI", `ScriptName` = "", `npcflag` = 16777216, `unit_flags` = 768, `faction_A` = 7, `faction_H` = 7, `InhabitType` = 7 WHERE `entry` = @NPC_RUBY_GEMSTONE_CLUSTER;
+UPDATE `creature_template` SET `AIName` = "SmartAI", `ScriptName` = "", `unit_flags` = 512, `faction_A` = 14, `faction_H` = 14 WHERE `entry` = @NPC_ENORMOUS_GYREWORM;
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = @NPC_RUBY_GEMSTONE_CLUSTER;
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`, `user_type`) VALUES
+(@NPC_RUBY_GEMSTONE_CLUSTER, @SPELL_DUMMY, 1, 0);
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@NPC_ENORMOUS_GYREWORM, @NPC_RUBY_GEMSTONE_CLUSTER) AND `source_type` = 0;
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(@NPC_RUBY_GEMSTONE_CLUSTER, 0, 0, 1, 73, 0, 100, 0, 0, 0, 0, 0, 11, @SPELL_ENORMOUS_GYREWORM_TRANSFORM, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Ruby Gemstone Cluster - On Spellclick - Cast Enormous Gyreworm Transform"),
+(@NPC_RUBY_GEMSTONE_CLUSTER, 0, 1, 2, 61, 0, 100, 0, 0, 0, 0, 0, 12, @NPC_ENORMOUS_GYREWORM, 1, 120000, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Ruby Gemstone Cluster - On Spellclick - Summon Enormous Gyreworm"),
+(@NPC_RUBY_GEMSTONE_CLUSTER, 0, 2, 0, 61, 0, 100, 0, 0, 0, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Ruby Gemstone Cluster - On Spellclick - Despawn"),
+(@NPC_ENORMOUS_GYREWORM, 0, 0, 0, 0, 0, 100, 1, 2000, 2000, 0, 0, 11, @SPELL_ENORMOUS_GYREWORM_SPAWN_DEAD, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Enormous Gyreworm - IC - Cast Enormous Gyreworm SpawnDead"),
+(@NPC_ENORMOUS_GYREWORM, 0, 1, 0, 0, 0, 100, 1, 3000, 3000, 0, 0, 11, @SPELL_ENORMOUS_GYREWORM_STATE, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Enormous Gyreworm - IC - Cast Enormous Gyreworm State"),
+(@NPC_ENORMOUS_GYREWORM, 0, 2, 0, 4, 0, 100, 1, 0, 0, 0, 0, 22, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Enormous Gyreworm - On Aggro - Set Phase 1"),
+(@NPC_ENORMOUS_GYREWORM, 0, 3, 0, 4, 1, 100, 1, 0, 0, 0, 0, 11, @SPELL_EARTH_SPIKE, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Enormous Gyreworm - On Aggro - Cast Earth Spike"),
+(@NPC_ENORMOUS_GYREWORM, 0, 4, 0, 4, 1, 100, 1, 0, 0, 0, 0, 19, 512, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Enormous Gyreworm - On Aggro - Change Flag for attack"),
+(@NPC_ENORMOUS_GYREWORM, 0, 5, 0, 9, 1, 100, 0, 0, 50, 2100, 4500, 11, @SPELL_EARTH_SPIKE, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Enormous Gyreworm - IC - Cast Earth Spike"),
+(@NPC_ENORMOUS_GYREWORM, 0, 6, 0, 9, 1, 100, 0, 0, 50, 0, 0, 21, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Enormous Gyreworm - On Attack Range - Stop Moving"),
+(@NPC_ENORMOUS_GYREWORM, 0, 7, 0, 7, 1, 100, 1, 0, 0, 0, 0, 28, @SPELL_ENORMOUS_GYREWORM_STATE, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Enormous Gyreworm - On Evade - Remove Enormous Gyreworm State"),
+(@NPC_ENORMOUS_GYREWORM, 0, 8, 0, 7, 1, 100, 1, 0, 0, 0, 0, 18, 512, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Enormous Gyreworm - On Evade - Change Flag"),
+(@NPC_ENORMOUS_GYREWORM, 0, 9, 0, 6, 0, 100, 0, 0, 0, 0, 0, 11, @SPELL_ENORMOUS_GYREWORM_SPAWN_DEAD, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Enormous Gyreworm - On Death - Cast Enormous Gyreworm SpawnDead");
+
+-- [c++ and SQL] Quests - Underground Economy corrected (Fixes #3121)
 SET @NPC_RICKET_TICKER := 49823;
 SET @NPC_ALABASTER_BUNNY := 49824;
 SET @NPC_CELESTITE_BUNNY := 49865;
@@ -186,77 +275,119 @@ SET @GO_DEEP_CELESTITE_CRYSTAL_CHUNK := 207382;
 SET @GO_DEEP_AMETHYST_CRYSTAL_CHUNK := 207383;
 SET @GO_DEEP_GARNET_CRYSTAL_CHUNK := 207384;
 SET @GO_DEEP_QUARTZ_CRYSTAL_CHUNK := 207390;
-SET @CGUID := 40184;
+SET @CGUID := 408445;
 SET @OGUID := 216867;
+SET @SPELL_CRYSTAL_FORMATION_EXPLOSION := 92789;
 UPDATE `creature_template` SET `AIName` = "", `ScriptName` = "npc_ricket_ticker" WHERE `entry` = @NPC_RICKET_TICKER;
-UPDATE `creature_template` SET `unit_flags` = 33555200 WHERE `entry` IN (@NPC_CELESTITE_BUNNY, @NPC_AMETHYST_BUNNY, @NPC_GARNET_BUNNY, @NPC_ALABASTER_BUNNY);
+UPDATE `creature_template` SET `AIName` = "SmartAI", `unit_flags` = 33555200 WHERE `entry` IN (@NPC_CELESTITE_BUNNY, @NPC_AMETHYST_BUNNY, @NPC_GARNET_BUNNY, @NPC_ALABASTER_BUNNY);
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@NPC_CELESTITE_BUNNY, @NPC_AMETHYST_BUNNY, @NPC_GARNET_BUNNY, @NPC_ALABASTER_BUNNY) AND `source_type` = 0;
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(@NPC_CELESTITE_BUNNY, 0, 0, 0, 8, 0, 100, 0, @SPELL_CRYSTAL_FORMATION_EXPLOSION, 0, 60000, 60000, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Celestite Bunny - On Spellhit - Despawn"),
+(@NPC_AMETHYST_BUNNY, 0, 0, 0, 8, 0, 100, 0, @SPELL_CRYSTAL_FORMATION_EXPLOSION, 0, 60000, 60000, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Celestite Bunny - On Spellhit - Despawn"),
+(@NPC_GARNET_BUNNY, 0, 0, 0, 8, 0, 100, 0, @SPELL_CRYSTAL_FORMATION_EXPLOSION, 0, 60000, 60000, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Celestite Bunny - On Spellhit - Despawn"),
+(@NPC_ALABASTER_BUNNY, 0, 0, 0, 8, 0, 100, 0, @SPELL_CRYSTAL_FORMATION_EXPLOSION, 0, 60000, 60000, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Celestite Bunny - On Spellhit - Despawn");
 DELETE FROM `creature` WHERE `id` IN (@NPC_CELESTITE_BUNNY, @NPC_AMETHYST_BUNNY, @NPC_GARNET_BUNNY, @NPC_ALABASTER_BUNNY);
-INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
-(@CGUID+0, @NPC_CELESTITE_BUNNY, 646, 1, 1, 11686, 0, 2163.1, -123.099, -191, 5.01212, 120, 0, 0, 42, 0, 0, 0, 0, 0),
-(@CGUID+1, @NPC_CELESTITE_BUNNY, 646, 1, 1, 11686, 0, 2168.61, -80.9025, -191, 0.790603, 120, 0, 0, 42, 0, 0, 0, 0, 0),
-(@CGUID+2, @NPC_CELESTITE_BUNNY, 646, 1, 1, 11686, 0, 2156.55, -74.4644, -191, 0.861289, 120, 0, 0, 42, 0, 0, 0, 0, 0),
-(@CGUID+3, @NPC_CELESTITE_BUNNY, 646, 1, 1, 11686, 0, 2129.06, -71.7842, -191, 1.5171, 120, 0, 0, 42, 0, 0, 0, 0, 0),
-(@CGUID+4, @NPC_CELESTITE_BUNNY, 646, 1, 1, 11686, 0, 2116.21, -82.4102, -191, 2.11793, 120, 0, 0, 42, 0, 0, 0, 0, 0),
-(@CGUID+5, @NPC_CELESTITE_BUNNY, 646, 1, 1, 11686, 0, 2123.6, -128.573, -191, 0.954751, 120, 0, 0, 42, 0, 0, 0, 0, 0),
-(@CGUID+6, @NPC_CELESTITE_BUNNY, 646, 1, 1, 11686, 0, 2134.13, -130.112, -191, 1.75193, 120, 0, 0, 42, 0, 0, 0, 0, 0),
-(@CGUID+8, @NPC_AMETHYST_BUNNY, 646, 1, 1, 11686, 0, 2127.87, -226.48, -171, 6.25775, 120, 0, 0, 42, 0, 0, 0, 0, 0),
-(@CGUID+9, @NPC_AMETHYST_BUNNY, 646, 1, 1, 11686, 0, 2130.39, -216.492, -171, 3.35178, 120, 0, 0, 42, 0, 0, 0, 0, 0),
-(@CGUID+10, @NPC_AMETHYST_BUNNY, 646, 1, 1, 11686, 0, 2160.51, -204.847, -171, 0.722272, 120, 0, 0, 42, 0, 0, 0, 0, 0),
-(@CGUID+11, @NPC_AMETHYST_BUNNY, 646, 1, 1, 11686, 0, 2173.74, -210.314, -171, 3.21748, 120, 0, 0, 42, 0, 0, 0, 0, 0),
-(@CGUID+12, @NPC_AMETHYST_BUNNY, 646, 1, 1, 11686, 0, 2183.39, -250.714, -171, 4.94536, 120, 0, 0, 42, 0, 0, 0, 0, 0),
-(@CGUID+13, @NPC_AMETHYST_BUNNY, 646, 1, 1, 11686, 0, 2143.11, -262.961, -171, 4.25106, 120, 0, 0, 42, 0, 0, 0, 0, 0),
-(@CGUID+14, @NPC_GARNET_BUNNY, 646, 1, 1, 11686, 0, 2071.76, -370.857, -164, 4.06884, 120, 0, 0, 42, 0, 0, 0, 0, 0),
-(@CGUID+15, @NPC_GARNET_BUNNY, 646, 1, 1, 11686, 0, 2071.32, -321.664, -164, 1.87758, 120, 0, 0, 42, 0, 0, 0, 0, 0),
-(@CGUID+16, @NPC_GARNET_BUNNY, 646, 1, 1, 11686, 0, 2090.36, -317.444, -164, 1.31994, 120, 0, 0, 42, 0, 0, 0, 0, 0),
-(@CGUID+17, @NPC_GARNET_BUNNY, 646, 1, 1, 11686, 0, 2080.59, -320.728, -164, 1.72835, 120, 0, 0, 42, 0, 0, 0, 0, 0),
-(@CGUID+18, @NPC_GARNET_BUNNY, 646, 1, 1, 11686, 0, 2078.09, -319.358, -155.268, 1.11701, 120, 0, 0, 42, 0, 0, 0, 0, 0),
-(@CGUID+19, @NPC_GARNET_BUNNY, 646, 1, 1, 11686, 0, 2091.33, -314.694, -155.635, 1.67552, 120, 0, 0, 42, 0, 0, 0, 0, 0),
-(@CGUID+20, @NPC_GARNET_BUNNY, 646, 1, 1, 11686, 0, 2082.39, -318.819, -158.477, 1.79769, 120, 0, 0, 42, 0, 0, 0, 0, 0),
-(@CGUID+21, @NPC_GARNET_BUNNY, 646, 1, 1, 11686, 0, 2089.9, -308.635, -158.115, 5.044, 120, 0, 0, 42, 0, 0, 0, 0, 0),
-(@CGUID+22, @NPC_ALABASTER_BUNNY, 646, 1, 1, 11686, 0, 2015.66, -210.54, -180, 6.16664, 120, 0, 0, 42, 0, 0, 0, 0, 0),
-(@CGUID+23, @NPC_ALABASTER_BUNNY, 646, 1, 1, 11686, 0, 2073.93, -217.233, -180, 1.17308, 120, 0, 0, 42, 0, 0, 0, 0, 0),
-(@CGUID+24, @NPC_ALABASTER_BUNNY, 646, 1, 1, 11686, 0, 2024.88, -228.847, -180, 4.80163, 120, 0, 0, 42, 0, 0, 0, 0, 0),
-(@CGUID+25, @NPC_ALABASTER_BUNNY, 646, 1, 1, 11686, 0, 2022.96, -207.461, -180, 4.54638, 120, 0, 0, 42, 0, 0, 0, 0, 0),
-(@CGUID+26, @NPC_ALABASTER_BUNNY, 646, 1, 1, 11686, 0, 1954.05, -174.28, -180, 3.29366, 120, 0, 0, 42, 0, 0, 0, 0, 0),
-(@CGUID+27, @NPC_ALABASTER_BUNNY, 646, 1, 1, 11686, 0, 2022.94, -144.907, -180, 2.88525, 120, 0, 0, 42, 0, 0, 0, 0, 0),
-(@CGUID+28, @NPC_ALABASTER_BUNNY, 646, 1, 1, 11686, 0, 2051.54, -143.277, -180, 1.78962, 120, 0, 0, 42, 0, 0, 0, 0, 0),
-(@CGUID+29, @NPC_ALABASTER_BUNNY, 646, 1, 1, 11686, 0, 2074.93, -143.783, -180, 0.835363, 120, 0, 0, 42, 0, 0, 0, 0, 0),
-(@CGUID+30, @NPC_ALABASTER_BUNNY, 646, 1, 1, 11686, 0, 2064.79, -178.049, -180, 2.52397, 120, 0, 0, 42, 0, 0, 0, 0, 0);
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`) VALUES
+(@CGUID+0, 49824, 646, 1, 1, 11686, 0, 2054.99, -143.688, -173.445, 2.63545, 300, 0, 0, 5342, 0, 0),
+(@CGUID+1, 49824, 646, 1, 1, 11686, 0, 2077.98, -149.901, -170.925, 2.63545, 300, 0, 0, 5342, 0, 0),
+(@CGUID+2, 49824, 646, 1, 1, 11686, 0, 2064.85, -173.832, -174.544, 4.5204, 300, 0, 0, 5342, 0, 0),
+(@CGUID+3, 49824, 646, 1, 1, 11686, 0, 2031.58, -147.142, -171.229, 2.58309, 300, 0, 0, 5342, 0, 0),
+(@CGUID+4, 49824, 646, 1, 1, 11686, 0, 2021.07, -225.778, -169.509, 5.09636, 300, 0, 0, 5342, 0, 0),
+(@CGUID+5, 49824, 646, 1, 1, 11686, 0, 2059.3, -177.811, -172.232, 6.16101, 300, 0, 0, 5342, 0, 0),
+(@CGUID+6, 49824, 646, 1, 1, 11686, 0, 1950.03, -176.432, -172.663, 0.750492, 300, 0, 0, 5342, 0, 0),
+(@CGUID+8, 49824, 646, 1, 1, 11686, 0, 2013.74, -209.997, -172.681, 0.226893, 300, 0, 0, 5342, 0, 0),
+(@CGUID+9, 49824, 646, 1, 1, 11686, 0, 2058.48, -182.67, -173.28, 0.645772, 300, 0, 0, 5342, 0, 0),
+(@CGUID+10, 49824, 646, 1, 1, 11686, 0, 2052.49, -145.958, -170.384, 1.8675, 300, 0, 0, 5342, 0, 0),
+(@CGUID+11, 49824, 646, 1, 1, 11686, 0, 2023.08, -151.021, -172.316, 1.50098, 300, 0, 0, 5342, 0, 0),
+(@CGUID+12, 49824, 646, 1, 1, 11686, 0, 2018.68, -203.613, -173.803, 5.23599, 300, 0, 0, 5342, 0, 0),
+(@CGUID+13, 49824, 646, 1, 1, 11686, 0, 1952.9, -180.413, -171.227, 1.44862, 300, 0, 0, 5342, 0, 0),
+(@CGUID+14, 49824, 646, 1, 1, 11686, 0, 2069.54, -177.529, -172.173, 3.28122, 300, 0, 0, 5342, 0, 0),
+(@CGUID+15, 49824, 646, 1, 1, 11686, 0, 2025.84, -202.014, -174.114, 4.06662, 300, 0, 0, 5342, 0, 0),
+(@CGUID+16, 49824, 646, 1, 1, 11686, 0, 2025.92, -150.639, -174.431, 1.8326, 300, 0, 0, 5342, 0, 0),
+(@CGUID+17, 49824, 646, 1, 1, 11686, 0, 2027.73, -227.075, -170.355, 4.2586, 300, 0, 0, 5342, 0, 0),
+(@CGUID+18, 49824, 646, 1, 1, 11686, 0, 2067.02, -184.672, -174.347, 1.98968, 300, 0, 0, 5342, 0, 0),
+(@CGUID+19, 49824, 646, 1, 1, 11686, 0, 2017.28, -145.931, -172.609, 0.523599, 300, 0, 0, 5342, 0, 0),
+(@CGUID+20, 49824, 646, 1, 1, 11686, 0, 2070.04, -143.799, -170.946, 2.63545, 300, 0, 0, 5342, 0, 0),
+(@CGUID+21, 49824, 646, 1, 1, 11686, 0, 2046.64, -145.156, -173.848, 0.663225, 300, 0, 0, 5342, 0, 0),
+(@CGUID+22, 49824, 646, 1, 1, 11686, 0, 2028.8, -207.493, -170.845, 3.22886, 300, 0, 0, 5342, 0, 0),
+(@CGUID+23, 49824, 646, 1, 1, 11686, 0, 1959.09, -175.868, -173.95, 2.63545, 300, 0, 0, 5342, 0, 0),
+(@CGUID+24, 49824, 646, 1, 1, 11686, 0, 2024.84, -212.389, -172.786, 2.25148, 300, 0, 0, 5342, 0, 0),
+(@CGUID+25, 49824, 646, 1, 1, 11686, 0, 2018.73, -210.84, -172.296, 0.785398, 300, 0, 0, 5342, 0, 0),
+(@CGUID+26, 49824, 646, 1, 1, 11686, 0, 2071.45, -217.993, -168.99, 6.02139, 300, 0, 0, 5342, 0, 0),
+(@CGUID+27, 49865, 646, 1, 1, 11686, 0, 2134.16, -127.957, -185.983, 4.41568, 300, 0, 0, 5342, 0, 0),
+(@CGUID+28, 49865, 646, 1, 1, 11686, 0, 2113.33, -82.8299, -187.497, 1.06465, 300, 0, 0, 5342, 0, 0),
+(@CGUID+29, 49865, 646, 1, 1, 11686, 0, 2168.08, -85.875, -187.592, 1.29154, 300, 0, 0, 5342, 0, 0),
+(@CGUID+30, 49865, 646, 1, 1, 11686, 0, 2162.41, -82.1632, -185.553, 0.506145, 300, 0, 0, 5342, 0, 0),
+(@CGUID+31, 49865, 646, 1, 1, 11686, 0, 2120.55, -124.708, -186.542, 4.95674, 300, 0, 0, 5342, 0, 0),
+(@CGUID+32, 49865, 646, 1, 1, 11686, 0, 2119.08, -82.0208, -188.336, 3.05433, 300, 0, 0, 5342, 0, 0),
+(@CGUID+33, 49865, 646, 1, 1, 11686, 0, 2161.85, -127.762, -186.199, 5.8294, 300, 0, 0, 5342, 0, 0),
+(@CGUID+34, 49865, 646, 1, 1, 11686, 0, 2136.54, -129.717, -188.895, 4.06662, 300, 0, 0, 5342, 0, 0),
+(@CGUID+35, 49865, 646, 1, 1, 11686, 0, 2126.65, -124.941, -188.921, 4.18879, 300, 0, 0, 5342, 0, 0),
+(@CGUID+36, 49865, 646, 1, 1, 11686, 0, 2134.69, -72.1042, -188.736, 2.40855, 300, 0, 0, 5342, 0, 0),
+(@CGUID+37, 49865, 646, 1, 1, 11686, 0, 2156.13, -78.4063, -188.081, 1.5708, 300, 0, 0, 5342, 0, 0),
+(@CGUID+38, 49865, 646, 1, 1, 11686, 0, 2128.45, -76.3056, -186.404, 1.69297, 300, 0, 0, 5342, 0, 0),
+(@CGUID+39, 49865, 646, 1, 1, 11686, 0, 2171.22, -121.995, -184.343, 4.24115, 300, 0, 0, 5342, 0, 0),
+(@CGUID+40, 49865, 646, 1, 1, 11686, 0, 2165.46, -121.365, -187.831, 4.88692, 300, 0, 0, 5342, 0, 0),
+(@CGUID+41, 49865, 646, 1, 1, 11686, 0, 2152.39, -76.3247, -185.274, 0.750492, 300, 0, 0, 5342, 0, 0),
+(@CGUID+42, 49866, 646, 1, 1, 11686, 0, 2161.48, -204.286, -161.333, 6.21337, 300, 0, 0, 5342, 0, 0),
+(@CGUID+43, 49866, 646, 1, 1, 11686, 0, 2130.17, -216.49, -163.072, 3.63029, 300, 0, 0, 5342, 0, 0),
+(@CGUID+44, 49866, 646, 1, 1, 11686, 0, 2129.52, -223.972, -164.137, 2.19912, 300, 0, 0, 5342, 0, 0),
+(@CGUID+45, 49866, 646, 1, 1, 11686, 0, 2170.84, -210.785, -163.819, 1.51844, 300, 0, 0, 5342, 0, 0),
+(@CGUID+46, 49866, 646, 1, 1, 11686, 0, 2165.58, -209.014, -164.26, 0.628318, 300, 0, 0, 5342, 0, 0),
+(@CGUID+47, 49866, 646, 1, 1, 11686, 0, 2145.77, -264.49, -164.028, 3.49066, 300, 0, 0, 5342, 0, 0),
+(@CGUID+48, 49866, 646, 1, 1, 11686, 0, 2144.86, -269.373, -162.111, 2.80998, 300, 0, 0, 5342, 0, 0),
+(@CGUID+49, 49866, 646, 1, 1, 11686, 0, 2176.88, -212.589, -161.471, 2.21657, 300, 0, 0, 5342, 0, 0),
+(@CGUID+50, 49866, 646, 1, 1, 11686, 0, 2180.37, -256.887, -162.838, 0.488692, 300, 0, 0, 5342, 0, 0),
+(@CGUID+51, 49866, 646, 1, 1, 11686, 0, 2180.76, -249.512, -162.945, 5.79449, 300, 0, 0, 5342, 0, 0),
+(@CGUID+52, 49866, 646, 1, 1, 11686, 0, 2186.26, -247.481, -161.076, 4.92183, 300, 0, 0, 5342, 0, 0),
+(@CGUID+53, 49866, 646, 1, 1, 11686, 0, 2130.21, -213.021, -161.502, 4.04916, 300, 0, 0, 5342, 0, 0),
+(@CGUID+54, 49866, 646, 1, 1, 11686, 0, 2136.83, -264.132, -162.232, 5.20108, 300, 0, 0, 5342, 0, 0),
+(@CGUID+55, 49866, 646, 1, 1, 11686, 0, 2141.92, -259.832, -160.806, 4.27606, 300, 0, 0, 5342, 0, 0),
+(@CGUID+56, 49866, 646, 1, 1, 11686, 0, 2125.34, -227.281, -161.473, 1.51844, 300, 0, 0, 5342, 0, 0),
+(@CGUID+57, 49867, 646, 1, 1, 11686, 0, 2072.1, -319.092, -157.457, 1.85005, 300, 0, 0, 5342, 0, 0),
+(@CGUID+58, 49867, 646, 1, 1, 11686, 0, 2078.09, -319.358, -155.268, 1.11701, 300, 0, 0, 5342, 0, 0),
+(@CGUID+59, 49867, 646, 1, 1, 11686, 0, 2094.32, -311.2, -153.822, 3.28122, 300, 0, 0, 5342, 0, 0),
+(@CGUID+60, 49867, 646, 1, 1, 11686, 0, 2091.33, -314.694, -155.635, 1.67552, 300, 0, 0, 5342, 0, 0),
+(@CGUID+61, 49867, 646, 1, 1, 11686, 0, 2086.26, -317.819, -159.361, 2.40855, 300, 0, 0, 5342, 0, 0),
+(@CGUID+62, 49867, 646, 1, 1, 11686, 0, 2067.62, -317.208, -155.814, 0.750492, 300, 0, 0, 5342, 0, 0),
+(@CGUID+63, 49867, 646, 1, 1, 11686, 0, 2082.39, -318.819, -158.477, 1.79769, 300, 0, 0, 5342, 0, 0),
+(@CGUID+64, 49867, 646, 1, 1, 11686, 0, 2067.14, -363.477, -156.23, 5.23599, 300, 0, 0, 5342, 0, 0),
+(@CGUID+65, 49867, 646, 1, 1, 11686, 0, 2073.08, -368.095, -155.708, 2.82743, 300, 0, 0, 5342, 0, 0),
+(@CGUID+66, 49867, 646, 1, 1, 11686, 0, 2071.99, -364.649, -154.059, 3.78736, 300, 0, 0, 5342, 0, 0),
+(@CGUID+67, 49867, 646, 1, 1, 11686, 0, 2076.07, -312.156, -154.107, 6.23082, 300, 0, 0, 5342, 0, 0),
+(@CGUID+68, 49867, 646, 1, 1, 11686, 0, 2089.9, -308.635, -158.115, 5.044, 300, 0, 0, 5342, 0, 0),
+(@CGUID+69, 49824, 646, 1, 1, 11686, 0, 2076.23, -214.392, -169.663, 4.55531, 300, 0, 0, 5342, 0, 0);
 DELETE FROM `gameobject` WHERE `id` IN (@GO_DEEP_ALABASTER_CRYSTAL_CHUNK, @GO_DEEP_CELESTITE_CRYSTAL_CHUNK, @GO_DEEP_AMETHYST_CRYSTAL_CHUNK, @GO_DEEP_GARNET_CRYSTAL_CHUNK, @GO_DEEP_QUARTZ_CRYSTAL_CHUNK);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
-(@OGUID+0, @GO_DEEP_CELESTITE_CRYSTAL_CHUNK, 646, 1, 1, 2163.1, -123.099, -191, 5.01212, 0, 0, -0.615661, 0.788011, 120, 100, 1),
-(@OGUID+1, @GO_DEEP_CELESTITE_CRYSTAL_CHUNK, 646, 1, 1, 2168.61, -80.9025, -191, 0.790603, 0, 0, -0.615661, 0.788011, 120, 100, 1),
-(@OGUID+2, @GO_DEEP_CELESTITE_CRYSTAL_CHUNK, 646, 1, 1, 2156.55, -74.4644, -191, 0.861289, 0, 0, -0.615661, 0.788011, 120, 100, 1),
-(@OGUID+3, @GO_DEEP_CELESTITE_CRYSTAL_CHUNK, 646, 1, 1, 2129.06, -71.7842, -191, 1.5171, 0, 0, -0.615661, 0.788011, 120, 100, 1),
-(@OGUID+4, @GO_DEEP_CELESTITE_CRYSTAL_CHUNK, 646, 1, 1, 2116.21, -82.4102, -191, 2.11793, 0, 0, -0.615661, 0.788011, 120, 100, 1),
-(@OGUID+5, @GO_DEEP_CELESTITE_CRYSTAL_CHUNK, 646, 1, 1, 2123.6, -128.573, -191, 0.954751, 0, 0, -0.615661, 0.788011, 120, 100, 1),
-(@OGUID+6, @GO_DEEP_CELESTITE_CRYSTAL_CHUNK, 646, 1, 1, 2134.13, -130.112, -191, 1.75193, 0, 0, -0.615661, 0.788011, 120, 100, 1),
-(@OGUID+8, @GO_DEEP_AMETHYST_CRYSTAL_CHUNK, 646, 1, 1, 2127.87, -226.48, -171, 6.25775, 0, 0, -0.615661, 0.788011, 120, 100, 1),
-(@OGUID+9, @GO_DEEP_AMETHYST_CRYSTAL_CHUNK, 646, 1, 1, 2130.39, -216.492, -171, 3.35178, 0, 0, -0.615661, 0.788011, 120, 100, 1),
-(@OGUID+10, @GO_DEEP_AMETHYST_CRYSTAL_CHUNK, 646, 1, 1, 2160.51, -204.847, -171, 0.722272, 0, 0, -0.615661, 0.788011, 120, 100, 1),
-(@OGUID+11, @GO_DEEP_AMETHYST_CRYSTAL_CHUNK, 646, 1, 1, 2173.74, -210.314, -171, 3.21748, 0, 0, -0.615661, 0.788011, 120, 100, 1),
-(@OGUID+12, @GO_DEEP_AMETHYST_CRYSTAL_CHUNK, 646, 1, 1, 2183.39, -250.714, -171, 4.94536, 0, 0, -0.615661, 0.788011, 120, 100, 1),
-(@OGUID+13, @GO_DEEP_AMETHYST_CRYSTAL_CHUNK, 646, 1, 1, 2143.11, -262.961, -171, 4.25106, 0, 0, -0.615661, 0.788011, 120, 100, 1),
-(@OGUID+14, @GO_DEEP_GARNET_CRYSTAL_CHUNK, 646, 1, 1, 2071.76, -370.857, -164, 4.06884, 0, 0, -0.615661, 0.788011, 120, 100, 1),
-(@OGUID+15, @GO_DEEP_GARNET_CRYSTAL_CHUNK, 646, 1, 1, 2071.32, -321.664, -164, 1.87758, 0, 0, -0.615661, 0.788011, 120, 100, 1),
-(@OGUID+16, @GO_DEEP_GARNET_CRYSTAL_CHUNK, 646, 1, 1, 2090.36, -317.444, -164, 1.31994, 0, 0, -0.615661, 0.788011, 120, 100, 1),
-(@OGUID+17, @GO_DEEP_GARNET_CRYSTAL_CHUNK, 646, 1, 1, 2080.59, -320.728, -164, 1.72835, 0, 0, -0.615661, 0.788011, 120, 100, 1),
-(@OGUID+18, @GO_DEEP_GARNET_CRYSTAL_CHUNK, 646, 1, 1, 2078.09, -319.358, -155.268, 1.11701, 0, 0, -0.615661, 0.788011, 120, 100, 1),
-(@OGUID+19, @GO_DEEP_GARNET_CRYSTAL_CHUNK, 646, 1, 1, 2091.33, -314.694, -155.635, 1.67552, 0, 0, -0.615661, 0.788011, 120, 100, 1),
-(@OGUID+20, @GO_DEEP_GARNET_CRYSTAL_CHUNK, 646, 1, 1, 2082.39, -318.819, -158.477, 1.79769, 0, 0, -0.615661, 0.788011, 120, 100, 1),
-(@OGUID+21, @GO_DEEP_GARNET_CRYSTAL_CHUNK, 646, 1, 1, 2089.9, -308.635, -158.115, 5.044, 0, 0, -0.615661, 0.788011, 120, 100, 1),
-(@OGUID+22, @GO_DEEP_ALABASTER_CRYSTAL_CHUNK, 646, 1, 1, 2015.66, -210.54, -180, 6.16664, 0, 0, -0.997563, 0.0697663, 120, 100, 1),
-(@OGUID+23, @GO_DEEP_ALABASTER_CRYSTAL_CHUNK, 646, 1, 1, 2073.93, -217.233, -180, 1.17308, 0, 0, -0.997563, 0.0697663, 120, 100, 1),
-(@OGUID+24, @GO_DEEP_ALABASTER_CRYSTAL_CHUNK, 646, 1, 1, 2024.88, -228.847, -180, 4.80163, 0, 0, -0.997563, 0.0697663, 120, 100, 1),
-(@OGUID+25, @GO_DEEP_ALABASTER_CRYSTAL_CHUNK, 646, 1, 1, 2022.96, -207.461, -180, 4.54638, 0, 0, -0.997563, 0.0697663, 120, 100, 1),
-(@OGUID+26, @GO_DEEP_ALABASTER_CRYSTAL_CHUNK, 646, 1, 1, 1954.05, -174.28, -180, 3.29366, 0, 0, -0.997563, 0.0697663, 120, 100, 1),
-(@OGUID+27, @GO_DEEP_ALABASTER_CRYSTAL_CHUNK, 646, 1, 1, 2022.94, -144.907, -180, 2.88525, 0, 0, -0.997563, 0.0697663, 120, 100, 1),
-(@OGUID+28, @GO_DEEP_ALABASTER_CRYSTAL_CHUNK, 646, 1, 1, 2051.54, -143.277, -180, 1.78962, 0, 0, -0.997563, 0.0697663, 120, 100, 1),
-(@OGUID+29, @GO_DEEP_ALABASTER_CRYSTAL_CHUNK, 646, 1, 1, 2074.93, -143.783, -180, 0.835363, 0, 0, -0.997563, 0.0697663, 120, 100, 1),
-(@OGUID+30, @GO_DEEP_ALABASTER_CRYSTAL_CHUNK, 646, 1, 1, 2064.79, -178.049, -180, 2.52397, 0, 0, -0.997563, 0.0697663, 120, 100, 1),
-(@OGUID+31, @GO_DEEP_QUARTZ_CRYSTAL_CHUNK, 646, 1, 1, 1908.38, -82.0174, -175.32, 0.750491, 0, 0, 0.366501, 0.930418, 120, 255, 1),
-(@OGUID+32, @GO_DEEP_QUARTZ_CRYSTAL_CHUNK, 646, 1, 1, 1910.72, -83.3576, -174.952, -0.942477, 0, 0, -0.45399, 0.891007, 120, 255, 1),
-(@OGUID+33, @GO_DEEP_QUARTZ_CRYSTAL_CHUNK, 646, 1, 1, 1911.3, -76.4965, -175.293, 1.02974, 0, 0, 0.492423, 0.870356, 120, 255, 1);
+/*INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
+(216868, 207390, 646, 1, 1, 1908.38, -82.0174, -175.32, 0.750491, 0, 0, 0.366501, 0.930418, 300, 255, 1),
+(216869, 207390, 646, 1, 1, 1910.72, -83.3576, -174.952, -0.942477, 0, 0, -0.45399, 0.891007, 300, 255, 1),
+(216870, 207390, 646, 1, 1, 1911.3, -76.4965, -175.293, 1.02974, 0, 0, 0.492423, 0.870356, 300, 255, 1),
+(216871, 207381, 646, 1, 1, 2075.12, -179.101, -175.507, 3.28124, 0, 0, -0.997563, 0.0697663, 300, 100, 1),
+(216872, 207381, 646, 1, 1, 2074.12, -179.501, -175.592, 3.28124, 0, 0, -0.997563, 0.0697663, 300, 100, 1),
+(216873, 207381, 646, 1, 1, 2063.73, -171.156, -176.005, 4.52041, 0, 0, -0.771624, 0.636079, 300, 100, 1),
+(216874, 207381, 646, 1, 1, 2062.47, -169.212, -176.027, 4.52041, 0, 0, -0.771624, 0.636079, 300, 100, 1),
+(216875, 207382, 646, 1, 1, 2121.72, -118.17, -190.594, 4.95674, 0, 0, -0.615661, 0.788011, 300, 100, 1),
+(216876, 207382, 646, 1, 1, 2122.54, -118.911, -190.586, 4.95674, 0, 0, -0.615661, 0.788011, 300, 100, 1),
+(216877, 207382, 646, 1, 1, 2122.71, -117.183, -190.696, 4.95674, 0, 0, -0.615661, 0.788011, 300, 100, 1),
+(216878, 207382, 646, 1, 1, 2127.63, -118.03, -190.962, 4.18879, 0, 0, -0.866025, 0.500001, 300, 100, 1),
+(216879, 207382, 646, 1, 1, 2127.51, -119.512, -190.891, 4.18879, 0, 0, -0.866025, 0.500001, 300, 100, 1),
+(216880, 207382, 646, 1, 1, 2159.79, -87.9448, -191.073, 0.506145, 0, 0, 0.25038, 0.968148, 300, 100, 1),
+(216881, 207382, 646, 1, 1, 2161.52, -88.12, -190.99, 0.506145, 0, 0, 0.25038, 0.968148, 300, 100, 1),
+(216882, 207382, 646, 1, 1, 2150.52, -80.5954, -191.003, 1.5708, 0, 0, 0.707107, 0.707107, 300, 100, 1),
+(216883, 207382, 646, 1, 1, 2148.61, -78.6918, -190.858, 1.5708, 0, 0, 0.707107, 0.707107, 300, 100, 1),
+(216884, 207382, 646, 1, 1, 2166.64, -92.2388, -190.903, 1.29154, 0, 0, 0.601814, 0.798636, 300, 100, 1),
+(216885, 207382, 646, 1, 1, 2166.34, -90.9965, -190.879, 1.29154, 0, 0, 0.601814, 0.798636, 300, 100, 1),
+(216886, 207383, 646, 1, 1, 2166.69, -215.696, -166.553, 1.51844, 0, 0, 0.688354, 0.725375, 300, 100, 1),
+(216887, 207383, 646, 1, 1, 2178.51, -216.883, -164.368, 2.21656, 0, 0, 0.894934, 0.446199, 300, 100, 1),
+(216888, 207383, 646, 1, 1, 2177.94, -217.751, -164.615, 2.21656, 0, 0, 0.894934, 0.446199, 300, 100, 1),
+(216889, 207381, 646, 1, 1, 2035.51, -209.122, -174.536, 3.22886, 0, 0, -0.999048, 0.0436191, 300, 100, 1),
+(216890, 207381, 646, 1, 1, 2033.89, -208.782, -174.618, 3.22886, 0, 0, -0.999048, 0.0436191, 300, 100, 1),
+(216891, 207381, 646, 1, 1, 2028.2, -217.078, -173.632, 2.25147, 0, 0, 0.902585, 0.430512, 300, 100, 1),
+(216892, 207381, 646, 1, 1, 2026.72, -215.885, -173.867, 2.25147, 0, 0, 0.902585, 0.430512, 300, 100, 1),
+(216893, 207384, 646, 1, 1, 2060.79, -319.164, -157.755, 0.750491, 0, 0, 0.366501, 0.930418, 300, 100, 1),
+(216894, 207384, 646, 1, 1, 2060.35, -320.772, -158.147, 0.750491, 0, 0, 0.366501, 0.930418, 300, 100, 1),
+(216895, 207384, 646, 1, 1, 2073.49, -323.683, -159.473, 1.85005, 0, 0, 0.798635, 0.601815, 300, 100, 1),
+(216896, 207384, 646, 1, 1, 2072.49, -323.321, -159.39, 1.85005, 0, 0, 0.798635, 0.601815, 300, 100, 1);*/
 
 -- [SQL] Quests - A Head Full of Wind scripted (Feedback #7439)
 SET @NPC_LORVARIUS := 43395;
@@ -353,7 +484,7 @@ SET @NPC_TERRATH_THE_STEADY := 42466;
 SET @NPC_OPALESCENT_GUARDIAN := 43591;
 SET @NPC_OPAL_STONETHROWER := 43586;
 SET @CGUID := 40215;
-UPDATE `creature_template` SET `mindmg` = 468, `maxdmg` = 702, `attackpower` = 175, `dmg_multiplier` = 35, `unit_class` = 1, `unit_flags` = 64, `VehicleId` = 1088, `WDBVerified` = 15595, `AIName` = "", `ScriptName` = "npc_terrath_the_steady" WHERE `entry` = @NPC_TERRATH_THE_STEADY;
+UPDATE `creature_template` SET `mindmg` = 468, `maxdmg` = 702, `attackpower` = 175, `dmg_multiplier` = 35, `unit_class` = 1, `exp` = 3, `unit_flags` = 64, `VehicleId` = 1088, `WDBVerified` = 15595, `npcflag` = `npcflag`|1, `AIName` = "", `ScriptName` = "npc_terrath_the_steady" WHERE `entry` = @NPC_TERRATH_THE_STEADY;
 UPDATE `creature_template` SET `minlevel` = 83, `maxlevel` = 83, `exp` = 3, `faction_A` = 35, `faction_H` = 35, `speed_walk` = 1.55556, `baseattacktime` = 2000, `unit_flags` = 264, `WDBVerified` = 15595, `AIName` = "", `ScriptName` = "npc_opalescent_guardian" WHERE `entry` = @NPC_OPALESCENT_GUARDIAN;
 UPDATE `creature_template` SET `minlevel` = 83, `maxlevel` = 83, `exp` = 3, `faction_A` = 2283, `faction_H` = 2283, `speed_walk` = 0.888888, `speed_run` = 1.5873, `mindmg` = 168, `maxdmg` = 702, `attackpower` = 175, `dmg_multiplier` = 35, `baseattacktime` = 2000, `unit_class` = 1, `unit_flags` = 64, `WDBVerified` = 15595 WHERE `entry` = @NPC_OPAL_STONETHROWER;
 DELETE FROM `creature` WHERE `id` = @NPC_OPAL_STONETHROWER;
@@ -361,7 +492,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@CGUID+0, @NPC_OPAL_STONETHROWER, 646, 1, 1, 0, 0, 2327.48, 470.661, 165.327, 2.10402, 120, 0, 0, 420, 0, 0, 0, 0, 0);
 
 -- [c++ and SQL] Quests - Sprout No More scripted
--- [c++ and SQL] Quests - Fungal Monstrosities scripted
+-- [c++ and SQL] Quests - Fungal Monstrosities corrected (Feedback #11072)
 SET @NPC_WAR_GUARDIAN_DEFAULT := 44126;
 SET @NPC_WAR_GUARDIAN := 44118;
 SET @NPC_GIANT_MUSHROOM := 44049;
@@ -379,7 +510,7 @@ INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`, `use
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 18 AND `SourceGroup` = @NPC_WAR_GUARDIAN_DEFAULT;
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ScriptName`, `Comment`) VALUES
 (18, @NPC_WAR_GUARDIAN_DEFAULT, @SPELL_SUMMON_WAR_GUARDIAN, 0, 0, 9, 0, @QUEST_SPROUT_NO_MORE, 0, 0, 0, "","Required quest active for spellclick"),
-(18, @NPC_WAR_GUARDIAN_DEFAULT, @SPELL_SUMMON_WAR_GUARDIAN, 0, 0, 9, 0, @QUEST_FULGAL_MONSTROSITIES, 0, 0, 0, "","Required quest active for spellclick");
+(18, @NPC_WAR_GUARDIAN_DEFAULT, @SPELL_SUMMON_WAR_GUARDIAN, 0, 1, 9, 0, @QUEST_FULGAL_MONSTROSITIES, 0, 0, 0, "","Required quest active for spellclick");
 DELETE FROM `creature` WHERE `id` = @NPC_WAR_GUARDIAN_DEFAULT;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@CGUID+0, @NPC_WAR_GUARDIAN_DEFAULT, 646, 1, 1, 0, 0, 1276.26, 1647.29, 174.011, 5.23412, 120, 0, 0, 278900, 0, 0, 0, 0, 0);
@@ -517,31 +648,35 @@ INSERT INTO `gameobject` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`position_x`
 (@OGUID+42, @GO_CHALKY_CRYSTAL_FORMATION, 646, 1, 1, 1442.91, 1317.06, 30.6444, 0.575958, 0, 0, 0.284015, 0.95882, 300, 100, 1),
 (@OGUID+43, @GO_CHALKY_CRYSTAL_FORMATION, 646, 1, 1, 1339.74, 1389.88, 31.5323, 2.09439, 0, 0, 0.866025, 0.500001, 300, 100, 1);
 
--- [SQL] Quests - Rallying the Earthen Ring scripted (Feedback #7440)
+-- [SQL] Quests - Rallying the Earthen Ring corrected (Feedback #7440)
 SET @NPC_WINDSPEAKER_LORVARIUS := 43836;
 SET @NPC_THARM_WILDFIRE := 44631;
 SET @NPC_STORMCALLER_JALARA := 44633;
 SET @NPC_TAWN_WINTERBLUFF := 44634;
 SET @NPC_EARTHCALLER_YEVAA := 44646;
 SET @NPC_YULDRIS_SMOLDERFURY := 45034;
+SET @NPC_HARGOTH_DIMBLAZE := 44675;
 SET @GOSSIP := 11872;
 SET @KILL_CREDIT := 44133;
 SET @QUEST_RALLYING_THE_EARTHEN_RING := 26827;
 SET @CGUID := 45713;
-DELETE FROM `creature` WHERE `id` IN (@NPC_TAWN_WINTERBLUFF, @NPC_YULDRIS_SMOLDERFURY, @NPC_WINDSPEAKER_LORVARIUS, @NPC_STORMCALLER_JALARA);
+DELETE FROM `creature` WHERE `id` IN (@NPC_TAWN_WINTERBLUFF, @NPC_YULDRIS_SMOLDERFURY, @NPC_WINDSPEAKER_LORVARIUS, @NPC_STORMCALLER_JALARA, 45037, @NPC_HARGOTH_DIMBLAZE, @NPC_EARTHCALLER_YEVAA, 44676);
 INSERT INTO `creature` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`unit_flags`,`dynamicflags`) VALUES
 (@CGUID+0, @NPC_TAWN_WINTERBLUFF, 646, 1, 1, 0, 1, 1066.51, 635.141, -45.5443, 2.16421, 30, 0, 0, 464940, 53448, 0, 0, 0, 0),
 (@CGUID+1, @NPC_YULDRIS_SMOLDERFURY, 646, 1, 1, 0, 1, 1072.91, 609.425, -44.0159, 0.0872665, 30, 0, 0, 464940, 53448, 0, 0, 0, 0),
 (@CGUID+2, @NPC_WINDSPEAKER_LORVARIUS, 646, 1, 1, 0, 0, 1010.16, 629.299, -41.8607, 0.377984, 30, 0, 0, 536810, 42580, 0, 0, 0, 0),
-(@CGUID+3, @NPC_STORMCALLER_JALARA, 646, 1, 1, 0, 1, 1049.41, 420.536, -41.5265, 6.13208, 30, 0, 0, 464940, 53448, 0, 0, 0, 0);
+(@CGUID+3, @NPC_STORMCALLER_JALARA, 646, 1, 1, 0, 1, 1049.41, 420.536, -41.5265, 6.13208, 30, 0, 0, 464940, 53448, 0, 0, 0, 0),
+(@CGUID+4, @NPC_HARGOTH_DIMBLAZE, 646, 1, 1, 0, 0, 1086.98, 608.661, -44.8391, 5.0754, 30, 8, 0, 464940, 53448, 1, 0, 0, 0),
+(7218916, @NPC_EARTHCALLER_YEVAA, 646, 1, 1, 0, 1, 1040.33, 592.268, -44.245, 3.633, 30, 0, 0, 464940, 0, 0, 0, 0, 0),
+(7218917, 44676, 646, 1, 1, 0, 1, 1085.07, 435.387, -45.556, 3.497, 30, 0, 0, 464940, 0, 0, 0, 0, 0);
 UPDATE `creature_template` SET `ScriptName` = '' WHERE `entry` = 42573;
 UPDATE `creature` SET `spawntimesecs` = 30, `spawndist` = 0, `MovementType` = 0 WHERE `id` IN (@NPC_EARTHCALLER_YEVAA, @NPC_TAWN_WINTERBLUFF, @NPC_YULDRIS_SMOLDERFURY, @NPC_WINDSPEAKER_LORVARIUS, @NPC_THARM_WILDFIRE, @NPC_STORMCALLER_JALARA, 43837, 44666, 44676, 44669, 44362);
 DELETE FROM `gossip_menu_option` WHERE `menu_id` IN (@GOSSIP, 11873);
 INSERT INTO `gossip_menu_option` (`menu_id`, `id`, `option_icon`, `option_text`, `option_id`, `npc_option_npcflag`, `action_menu_id`, `action_poi_id`, `box_coded`, `box_money`, `box_text`) VALUES
 (@GOSSIP, 0, 0, "We are joining an assault on Lorthuna's Gate. You are needed.", 1, 1, 0, 0, 0, 0, ""),
 (11873, 0, 0, "We are joining an assault on Lorthuna's Gate. You are needed.", 1, 1, 0, 0, 0, 0, "");
-UPDATE `creature_template` SET `minlevel` = 85, `maxlevel` = 85, `faction_A` = 2290, `faction_H` = 2290, `KillCredit2` = 0, `exp` = 3, `mindmg` = 465, `maxdmg` = 697, `attackpower` = 174, `dmg_multiplier` = 37.7, `baseattacktime` = 2000, `unit_flags` = 32768, `gossip_menu_id` = @GOSSIP, `npcflag` = `npcflag`|1, `WDBVerified` = 15595, `AIName` = "SmartAI", `ScriptName` = "" WHERE `entry` IN (@NPC_EARTHCALLER_YEVAA, @NPC_TAWN_WINTERBLUFF, @NPC_YULDRIS_SMOLDERFURY, @NPC_WINDSPEAKER_LORVARIUS, @NPC_THARM_WILDFIRE, @NPC_STORMCALLER_JALARA);
-DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@NPC_EARTHCALLER_YEVAA, @NPC_TAWN_WINTERBLUFF, @NPC_YULDRIS_SMOLDERFURY, @NPC_WINDSPEAKER_LORVARIUS, @NPC_THARM_WILDFIRE, @NPC_STORMCALLER_JALARA) AND `source_type` = 0;
+UPDATE `creature_template` SET `minlevel` = 85, `maxlevel` = 85, `faction_A` = 2290, `faction_H` = 2290, `KillCredit2` = 0, `exp` = 3, `mindmg` = 465, `maxdmg` = 697, `attackpower` = 174, `dmg_multiplier` = 37.7, `baseattacktime` = 2000, `unit_flags` = 32768, `gossip_menu_id` = @GOSSIP, `npcflag` = `npcflag`|1, `WDBVerified` = 15595, `AIName` = "SmartAI", `ScriptName` = "" WHERE `entry` IN (@NPC_EARTHCALLER_YEVAA, @NPC_TAWN_WINTERBLUFF, @NPC_YULDRIS_SMOLDERFURY, @NPC_WINDSPEAKER_LORVARIUS, @NPC_THARM_WILDFIRE, @NPC_STORMCALLER_JALARA, @NPC_HARGOTH_DIMBLAZE);
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@NPC_EARTHCALLER_YEVAA, @NPC_TAWN_WINTERBLUFF, @NPC_YULDRIS_SMOLDERFURY, @NPC_WINDSPEAKER_LORVARIUS, @NPC_THARM_WILDFIRE, @NPC_STORMCALLER_JALARA, @NPC_HARGOTH_DIMBLAZE) AND `source_type` = 0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
 (@NPC_EARTHCALLER_YEVAA, 0, 0, 0, 62, 0, 100, 0, @GOSSIP, 0, 0, 0, 33, @KILL_CREDIT , 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Earthcaller Yevaa - On Gossip Select - KC"),
 (@NPC_EARTHCALLER_YEVAA, 0, 1, 0, 62, 0, 100, 0, @GOSSIP, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Earthcaller Yevaa - On Gossip Select - Close Gossip"),
@@ -572,8 +707,13 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (@NPC_STORMCALLER_JALARA, 0, 1, 0, 62, 0, 100, 0, @GOSSIP, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Stormcaller Jalara - On Gossip Select - Close Gossip"),
 (@NPC_STORMCALLER_JALARA, 0, 2, 3, 62, 0, 100, 0, @GOSSIP, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Stormcaller Jalara - On Gossip Select - Say Random Line 0"),
 (@NPC_STORMCALLER_JALARA, 0, 3, 4, 61, 0, 100, 0, 0, 0, 0, 0, 46, 15, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Stormcaller Jalara - On Gossip Select - Move Forward 15 yards"),
-(@NPC_STORMCALLER_JALARA, 0, 4, 0, 61, 0, 100, 0, 0, 0, 0, 0, 41, 3000, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Stormcaller Jalara - On Gossip Select - Despawn");
-DELETE FROM `creature_text` WHERE `entry` IN (@NPC_EARTHCALLER_YEVAA, @NPC_TAWN_WINTERBLUFF, @NPC_YULDRIS_SMOLDERFURY, @NPC_WINDSPEAKER_LORVARIUS, @NPC_THARM_WILDFIRE, @NPC_STORMCALLER_JALARA);
+(@NPC_STORMCALLER_JALARA, 0, 4, 0, 61, 0, 100, 0, 0, 0, 0, 0, 41, 3000, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Stormcaller Jalara - On Gossip Select - Despawn"),
+(@NPC_HARGOTH_DIMBLAZE, 0, 0, 0, 62, 0, 100, 0, @GOSSIP, 0, 0, 0, 33, @KILL_CREDIT , 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Hargoth Dimblaze - On Gossip Select - KC"),
+(@NPC_HARGOTH_DIMBLAZE, 0, 1, 0, 62, 0, 100, 0, @GOSSIP, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Hargoth Dimblaze - On Gossip Select - Close Gossip"),
+(@NPC_HARGOTH_DIMBLAZE, 0, 2, 3, 62, 0, 100, 0, @GOSSIP, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Hargoth Dimblaze - On Gossip Select - Say Random Line 0"),
+(@NPC_HARGOTH_DIMBLAZE, 0, 3, 4, 61, 0, 100, 0, 0, 0, 0, 0, 46, 15, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Hargoth Dimblaze - On Gossip Select - Move Forward 15 yards"),
+(@NPC_HARGOTH_DIMBLAZE, 0, 4, 0, 61, 0, 100, 0, 0, 0, 0, 0, 41, 3000, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Hargoth Dimblaze - On Gossip Select - Despawn");
+DELETE FROM `creature_text` WHERE `entry` IN (@NPC_EARTHCALLER_YEVAA, @NPC_TAWN_WINTERBLUFF, @NPC_YULDRIS_SMOLDERFURY, @NPC_WINDSPEAKER_LORVARIUS, @NPC_THARM_WILDFIRE, @NPC_STORMCALLER_JALARA, @NPC_HARGOTH_DIMBLAZE);
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
 (@NPC_EARTHCALLER_YEVAA, 0, 0, "Understood. I'll head there right away.", 12, 0, 100, 0, 0, 0, "Earthcaller Yevaa"),
 (@NPC_EARTHCALLER_YEVAA, 0, 1, "Some action. Glad to heart it.", 12, 0, 100, 0, 0, 0, "Earthcaller Yevaa"),
@@ -622,7 +762,15 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (@NPC_STORMCALLER_JALARA, 0, 4, "Elements be with us.", 12, 0, 100, 0, 0, 0, "Stormcaller Jalara"),
 (@NPC_STORMCALLER_JALARA, 0, 5, "Exactly what I wanted to hear. Let's go.", 12, 0, 100, 0, 0, 0, "Stormcaller Jalara"),
 (@NPC_STORMCALLER_JALARA, 0, 6, "I'm glad to hear we're fighting along side the Stonemother herself this time.", 12, 0, 100, 0, 0, 0, "Stormcaller Jalara"),
-(@NPC_STORMCALLER_JALARA, 0, 7, "That encampment has been begging for our attention. Let's get this done.", 12, 0, 100, 0, 0, 0, "Stormcaller Jalara");
+(@NPC_STORMCALLER_JALARA, 0, 7, "That encampment has been begging for our attention. Let's get this done.", 12, 0, 100, 0, 0, 0, "Stormcaller Jalara"),
+(@NPC_HARGOTH_DIMBLAZE, 0, 0, "Understood. I'll head there right away.", 12, 0, 100, 0, 0, 0, "Hargoth Dimblaze"),
+(@NPC_HARGOTH_DIMBLAZE, 0, 1, "Some action. Glad to heart it.", 12, 0, 100, 0, 0, 0, "Hargoth Dimblaze"),
+(@NPC_HARGOTH_DIMBLAZE, 0, 2, "Got it. I'll head there right away.", 12, 0, 100, 0, 0, 0, "Hargoth Dimblaze"),
+(@NPC_HARGOTH_DIMBLAZE, 0, 3, "I'm on my way.", 12, 0, 100, 0, 0, 0, "Hargoth Dimblaze"),
+(@NPC_HARGOTH_DIMBLAZE, 0, 4, "Elements be with us.", 12, 0, 100, 0, 0, 0, "Hargoth Dimblaze"),
+(@NPC_HARGOTH_DIMBLAZE, 0, 5, "Exactly what I wanted to hear. Let's go.", 12, 0, 100, 0, 0, 0, "Hargoth Dimblaze"),
+(@NPC_HARGOTH_DIMBLAZE, 0, 6, "I'm glad to hear we're fighting along side the Stonemother herself this time.", 12, 0, 100, 0, 0, 0, "Hargoth Dimblaze"),
+(@NPC_HARGOTH_DIMBLAZE, 0, 7, "That encampment has been begging for our attention. Let's get this done.", 12, 0, 100, 0, 0, 0, "Hargoth Dimblaze");
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 15 AND `SourceGroup` = @GOSSIP;
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ScriptName`, `Comment`) VALUES
 (15, @GOSSIP, 0, 0, 0, 9, 0, @QUEST_RALLYING_THE_EARTHEN_RING, 0, 0, 0, "", "Show gossip if on quest");

@@ -557,8 +557,10 @@ INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES
 (@NPC_PETRIFIED_STONE_BAT, @SPELL_PETRIFIED_BAT),
 (@NPC_PETRIFIED_STONE_BAT, @SPELL_CREATURE_SPARKLES_BIGGER);
 
--- [SQL] Quests - On Even Ground scripted (Feedback #7407)
-SET @NPC_SERVANT_OF_THERAZANE := 44131;
+-- [SQL] Quests - On Even Ground corrected (Fixes #7407)
+SET @NPC_SERVANT_OF_THERAZANE_1 := 44131;
+SET @NPC_SERVANT_OF_THERAZANE_2 := 42781;
+SET @NPC_SERVANT_OF_THERAZANE_3 := 42479;
 SET @KILL_CREDIT := 45083;
 SET @SPELL_ELEMENTIUM_GRAPPLE_LINE := 79688;
 SET @SPELL_GIANT_TRIPPED_TRIGGER := 79757;
@@ -568,29 +570,40 @@ SET @SPELL_ELEMENTIUM_GRAPPLE_LINE_BREAK := 84008;
 SET @QUEST_ON_EVEN_GROUND := 26314;
 SET @CGUID := 40412;
 UPDATE `quest_template` SET `RequiredNpcOrGo1` = @KILL_CREDIT, `RequiredSpellCast1` = 0, `Method` = 2, `WDBVerified` = 15595 WHERE `Id` = @QUEST_ON_EVEN_GROUND;
-UPDATE `creature_template` SET `minlevel` = 83, `maxlevel` = 83, `exp` = 3, `faction_A` = 2285, `faction_H` = 2285, `mindmg` = 468, `maxdmg` = 702, `attackpower` = 175, `dmg_multiplier` = 15, `baseattacktime` = 2000, `unit_class` = 1, `unit_flags` = 64, `speed_run` = 0.992063, `WDBVerified` = 15595, `AIName` = "SmartAI" WHERE `entry` = @NPC_SERVANT_OF_THERAZANE;
-DELETE FROM `smart_scripts` WHERE `entryorguid` = @NPC_SERVANT_OF_THERAZANE;
+UPDATE `creature_template` SET `minlevel` = 83, `maxlevel` = 83, `exp` = 3, `faction_A` = 2285, `faction_H` = 2285, `mindmg` = 468, `maxdmg` = 702, `attackpower` = 175, `dmg_multiplier` = 15, `baseattacktime` = 2000, `unit_class` = 1, `unit_flags` = 64, `speed_walk` = 0.802063, `speed_run` = 0.802063, `WDBVerified` = 15595, `AIName` = "SmartAI", `ScriptName` = "" WHERE `entry` = @NPC_SERVANT_OF_THERAZANE_1;
+UPDATE `creature_template` SET `minlevel` = 83, `maxlevel` = 83, `exp` = 3, `mindmg` = 468, `maxdmg` = 702, `attackpower` = 175, `dmg_multiplier` = 15, `baseattacktime` = 2000, `unit_class` = 1, `unit_flags` = 64, `speed_walk` = 0.802063, `speed_run` = 0.802063, `WDBVerified` = 15595, `AIName` = "SmartAI", `ScriptName` = "" WHERE `entry` IN (@NPC_SERVANT_OF_THERAZANE_1, @NPC_SERVANT_OF_THERAZANE_2, @NPC_SERVANT_OF_THERAZANE_3);
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@NPC_SERVANT_OF_THERAZANE_1, @NPC_SERVANT_OF_THERAZANE_2, @NPC_SERVANT_OF_THERAZANE_3) AND `source_type` = 0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
-(@NPC_SERVANT_OF_THERAZANE, 0, 0, 0, 8, 0, 100, 0, @SPELL_ELEMENTIUM_GRAPPLE_LINE, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Servant of Therazane - On Spellhit 1 - Boss Emote 0"),
-(@NPC_SERVANT_OF_THERAZANE, 0, 1, 2, 8, 0, 100, 0, @SPELL_GIANT_TRIPPED_TRIGGER, 0, 0, 0, 11, @SPELL_TRIPPED_GIANT, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Servant of Therazane - On Spellhit - Cast Tripped Giant"),
-(@NPC_SERVANT_OF_THERAZANE, 0, 2, 0, 61, 0, 100, 0, 0, 0, 0, 0, 41, 8000, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Servant of Therazane - On Spellhit - Despawn");
-DELETE FROM `creature_text` WHERE `entry` = @NPC_SERVANT_OF_THERAZANE;
+(@NPC_SERVANT_OF_THERAZANE_1, 0, 0, 0, 8, 0, 100, 0, @SPELL_ELEMENTIUM_GRAPPLE_LINE, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Servant of Therazane - On Spellhit 1 - Boss Emote 0"),
+(@NPC_SERVANT_OF_THERAZANE_1, 0, 1, 2, 8, 0, 100, 0, @SPELL_GIANT_TRIPPED_TRIGGER, 0, 0, 0, 11, @SPELL_TRIPPED_GIANT, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Servant of Therazane - On Spellhit - Cast Tripped Giant"),
+(@NPC_SERVANT_OF_THERAZANE_1, 0, 2, 0, 61, 0, 100, 0, 0, 0, 0, 0, 41, 8000, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Servant of Therazane - On Spellhit - Despawn"),
+(@NPC_SERVANT_OF_THERAZANE_2, 0, 0, 0, 8, 0, 100, 0, @SPELL_ELEMENTIUM_GRAPPLE_LINE, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Servant of Therazane - On Spellhit 1 - Boss Emote 0"),
+(@NPC_SERVANT_OF_THERAZANE_2, 0, 1, 2, 8, 0, 100, 0, @SPELL_GIANT_TRIPPED_TRIGGER, 0, 0, 0, 11, @SPELL_TRIPPED_GIANT, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Servant of Therazane - On Spellhit - Cast Tripped Giant"),
+(@NPC_SERVANT_OF_THERAZANE_2, 0, 2, 0, 61, 0, 100, 0, 0, 0, 0, 0, 41, 8000, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Servant of Therazane - On Spellhit - Despawn"),
+(@NPC_SERVANT_OF_THERAZANE_3, 0, 0, 0, 8, 0, 100, 0, @SPELL_ELEMENTIUM_GRAPPLE_LINE, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Servant of Therazane - On Spellhit 1 - Boss Emote 0"),
+(@NPC_SERVANT_OF_THERAZANE_3, 0, 1, 2, 8, 0, 100, 0, @SPELL_GIANT_TRIPPED_TRIGGER, 0, 0, 0, 11, @SPELL_TRIPPED_GIANT, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Servant of Therazane - On Spellhit - Cast Tripped Giant"),
+(@NPC_SERVANT_OF_THERAZANE_3, 0, 2, 0, 61, 0, 100, 0, 0, 0, 0, 0, 41, 8000, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Servant of Therazane - On Spellhit - Despawn");
+DELETE FROM `creature_text` WHERE `entry` IN (@NPC_SERVANT_OF_THERAZANE_1, @NPC_SERVANT_OF_THERAZANE_2, @NPC_SERVANT_OF_THERAZANE_3);
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
-(@NPC_SERVANT_OF_THERAZANE, 0, 0, "The line is secured to his ankle. Pull away to trip him!", 41, 0, 100, 0, 0, 0, "Servant of Therazane");
-DELETE FROM `creature` WHERE `id` = @NPC_SERVANT_OF_THERAZANE;
+(@NPC_SERVANT_OF_THERAZANE_1, 0, 0, "The line is secured to his ankle. Pull away to trip him!", 41, 0, 100, 0, 0, 0, "Servant of Therazane"),
+(@NPC_SERVANT_OF_THERAZANE_2, 0, 0, "The line is secured to his ankle. Pull away to trip him!", 41, 0, 100, 0, 0, 0, "Servant of Therazane"),
+(@NPC_SERVANT_OF_THERAZANE_3, 0, 0, "The line is secured to his ankle. Pull away to trip him!", 41, 0, 100, 0, 0, 0, "Servant of Therazane");
+DELETE FROM `creature` WHERE `id` = @NPC_SERVANT_OF_THERAZANE_1;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
-(@CGUID+0, @NPC_SERVANT_OF_THERAZANE, 646, 1, 1, 0, 0, 1905.44, -153.844, 24.7535, 3.80872, 120, 8, 0, 536810, 0, 1, 0, 0, 0),
-(@CGUID+1, @NPC_SERVANT_OF_THERAZANE, 646, 1, 1, 0, 0, 1912.26, -190.63, 24.7001, 3.13493, 120, 8, 0, 536810, 0, 1, 0, 0, 0),
-(@CGUID+2, @NPC_SERVANT_OF_THERAZANE, 646, 1, 1, 0, 0, 1897.72, -226.248, 24.3551, 2.51058, 120, 8, 0, 536810, 0, 1, 0, 0, 0),
-(@CGUID+3, @NPC_SERVANT_OF_THERAZANE, 646, 1, 1, 0, 0, 1919.06, -161.399, 25.0035, 3.11054, 120, 8, 0, 536810, 0, 1, 0, 0, 0),
-(@CGUID+4, @NPC_SERVANT_OF_THERAZANE, 646, 1, 1, 0, 0, 1759.92, -90.3733, 22.1033, 4.12328, 120, 8, 0, 536810, 0, 1, 0, 0, 0),
-(@CGUID+5, @NPC_SERVANT_OF_THERAZANE, 646, 1, 1, 0, 0, 1241.73, 827.42, -66.9339, 5.17885, 120, 8, 0, 536810, 0, 1, 0, 0, 0),
-(@CGUID+6, @NPC_SERVANT_OF_THERAZANE, 646, 1, 1, 0, 0, 1270.37, 719.667, -69.108, 3.49025, 120, 8, 0, 536810, 0, 1, 0, 0, 0),
-(@CGUID+7, @NPC_SERVANT_OF_THERAZANE, 646, 1, 1, 0, 0, 1323.41, 674.369, -70.6549, 3.0355, 120, 8, 0, 536810, 0, 1, 0, 0, 0),
-(@CGUID+8, @NPC_SERVANT_OF_THERAZANE, 646, 1, 1, 0, 0, 1346.01, 757.442, -67.3098, 3.98505, 120, 8, 0, 536810, 0, 1, 0, 0, 0);
+(@CGUID+0, @NPC_SERVANT_OF_THERAZANE_1, 646, 1, 1, 0, 0, 1905.44, -153.844, 24.7535, 3.80872, 120, 8, 0, 536810, 0, 1, 0, 0, 0),
+(@CGUID+1, @NPC_SERVANT_OF_THERAZANE_1, 646, 1, 1, 0, 0, 1912.26, -190.63, 24.7001, 3.13493, 120, 8, 0, 536810, 0, 1, 0, 0, 0),
+(@CGUID+2, @NPC_SERVANT_OF_THERAZANE_1, 646, 1, 1, 0, 0, 1897.72, -226.248, 24.3551, 2.51058, 120, 8, 0, 536810, 0, 1, 0, 0, 0),
+(@CGUID+3, @NPC_SERVANT_OF_THERAZANE_1, 646, 1, 1, 0, 0, 1919.06, -161.399, 25.0035, 3.11054, 120, 8, 0, 536810, 0, 1, 0, 0, 0),
+(@CGUID+4, @NPC_SERVANT_OF_THERAZANE_1, 646, 1, 1, 0, 0, 1759.92, -90.3733, 22.1033, 4.12328, 120, 8, 0, 536810, 0, 1, 0, 0, 0),
+(@CGUID+5, @NPC_SERVANT_OF_THERAZANE_1, 646, 1, 1, 0, 0, 1241.73, 827.42, -66.9339, 5.17885, 120, 8, 0, 536810, 0, 1, 0, 0, 0),
+(@CGUID+6, @NPC_SERVANT_OF_THERAZANE_1, 646, 1, 1, 0, 0, 1270.37, 719.667, -69.108, 3.49025, 120, 8, 0, 536810, 0, 1, 0, 0, 0),
+(@CGUID+7, @NPC_SERVANT_OF_THERAZANE_1, 646, 1, 1, 0, 0, 1323.41, 674.369, -70.6549, 3.0355, 120, 8, 0, 536810, 0, 1, 0, 0, 0),
+(@CGUID+8, @NPC_SERVANT_OF_THERAZANE_1, 646, 1, 1, 0, 0, 1346.01, 757.442, -67.3098, 3.98505, 120, 8, 0, 536810, 0, 1, 0, 0, 0);
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 17 AND `SourceEntry` IN (@SPELL_ELEMENTIUM_GRAPPLE_LINE, @SPELL_GIANT_TRIPPED_TRIGGER);
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ScriptName`, `Comment`) VALUES
-(17, 0, @SPELL_ELEMENTIUM_GRAPPLE_LINE, 0, 0, 31, 1, 3, @NPC_SERVANT_OF_THERAZANE, 0, 0, "", "Elementium Grapple Line targets Servant of Therazane");
+(17, 0, @SPELL_ELEMENTIUM_GRAPPLE_LINE, 0, 0, 31, 1, 3, @NPC_SERVANT_OF_THERAZANE_1, 0, 0, "", "Elementium Grapple Line targets Servant of Therazane"),
+(17, 0, @SPELL_ELEMENTIUM_GRAPPLE_LINE, 0, 1, 31, 1, 3, @NPC_SERVANT_OF_THERAZANE_2, 0, 0, "", "Elementium Grapple Line targets Servant of Therazane"),
+(17, 0, @SPELL_ELEMENTIUM_GRAPPLE_LINE, 0, 2, 31, 1, 3, @NPC_SERVANT_OF_THERAZANE_3, 0, 0, "", "Elementium Grapple Line targets Servant of Therazane");
 DELETE FROM `spell_linked_spell` WHERE `spell_trigger` IN (-@SPELL_ELEMENTIUM_GRAPPLE_LINE, @SPELL_ELEMENTIUM_GRAPPLE_LINE, @SPELL_GIANT_TRIPPED_TRIGGER, @SPELL_TRIPPED_GIANT);
 INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES
 (-@SPELL_ELEMENTIUM_GRAPPLE_LINE, @SPELL_GIANT_TRIPPED_TRIGGER, 0, "Elementium Grapple Line removed casts Giant Tripped Trigger"),

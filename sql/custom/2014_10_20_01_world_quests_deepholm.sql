@@ -813,9 +813,9 @@ INSERT INTO `spell_target_position` (`id`, `effIndex`, `target_map`, `target_pos
 (84505, 0, 0, -8208.25, 429.244, 118.11, 3.4775),
 (84506, 0, 1, 2049.2, -4376.8, 98.8446, 0.785398);*/
 
--- [SQL] Quests - Putting the Pieces Together scripted (Feedback #7420)
+-- [SQL] Quests - Putting the Pieces Together corrected (Fixes #7420)
 SET @NPC_DORMANT_STONEBOUND_ELEMENTAL := 43115;
-SET @NPC_FLAYER := 42521;
+SET @NPC_FLAYER := 42524;
 SET @SPELL_FEIGN_DEATH := 29266;
 SET @SPELL_GENERAL_TRIGGER := 43709;
 SET @SPELL_HARDENED := 82839;
@@ -823,24 +823,34 @@ SET @SPELL_VULNERABLE := 82840;
 SET @SPELL_ROCK_BASH := 82841;
 SET @KILL_CREDIT := @NPC_DORMANT_STONEBOUND_ELEMENTAL;
 SET @QUEST_PUTTING_THE_PIECES_TOGETHER := 26439;
-UPDATE `creature_template` SET `exp` = 3, `faction_A` = 2281, `faction_H` = 2281, `npcflag` = 16777216, `speed_walk` = 1.55556, `unit_flags` = 768, `WDBVerified` = 15595, `AIName` = "SmartAI", `ScriptName` = "" WHERE `entry` = @NPC_DORMANT_STONEBOUND_ELEMENTAL;
-UPDATE creature SET `spawntimesecs` = 30, `MovementType` = 0, `spawndist` = 0 WHERE `id` = @NPC_DORMANT_STONEBOUND_ELEMENTAL;
+UPDATE `creature_template` SET `exp` = 3, `faction_A` = 35, `faction_H` = 35, `npcflag` = 16777216, `speed_walk` = 1.55556, `unit_flags` = 512, `WDBVerified` = 15595, `AIName` = "SmartAI", `ScriptName` = "", `flags_extra` = 0 WHERE `entry` = @NPC_DORMANT_STONEBOUND_ELEMENTAL;
+UPDATE `creature` SET `spawntimesecs` = 30, `MovementType` = 0, `spawndist` = 0 WHERE `id` = @NPC_DORMANT_STONEBOUND_ELEMENTAL;
+DELETE FROM `creature_template_aura` WHERE `entry` = @NPC_DORMANT_STONEBOUND_ELEMENTAL;
+DELETE FROM `creature_aura` WHERE `guid` IN (SELECT `guid` FROM `creature` WHERE `id` = @NPC_DORMANT_STONEBOUND_ELEMENTAL);
+DELETE FROM `creature_template_bytes` WHERE `entry` = @NPC_DORMANT_STONEBOUND_ELEMENTAL;
+DELETE FROM `creature_bytes` WHERE `guid` IN (SELECT `guid` FROM `creature` WHERE `id` = @NPC_DORMANT_STONEBOUND_ELEMENTAL);
+DELETE FROM `creature_template_emote` WHERE `entry` = @NPC_DORMANT_STONEBOUND_ELEMENTAL;
+DELETE FROM `creature_emote` WHERE `guid` IN (SELECT `guid` FROM `creature` WHERE `id` = @NPC_DORMANT_STONEBOUND_ELEMENTAL);
 DELETE FROM `smart_scripts` WHERE `entryorguid` = @NPC_DORMANT_STONEBOUND_ELEMENTAL AND `source_type` = 0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
-(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 0, 0, 25, 0, 100, 0, 0, 0, 0, 0, 11, @SPELL_FEIGN_DEATH, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Spawn - Cast Feign Death"),
-(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 1, 2, 73, 0, 100, 0, 0, 0, 0, 0, 33, @KILL_CREDIT, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Spellclick - KC"),
-(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 2, 3, 61, 0, 100, 0, 0, 0, 0, 0, 83, 16777216, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Spellclick - Remove Spellclick NpcFlag"),
-(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 3, 4, 61, 0, 100, 0, 0, 0, 0, 0, 28, @SPELL_FEIGN_DEATH, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Spellclick - Remove Feign Death Aura"),
-(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 4, 5, 61, 0, 100, 0, 0, 0, 0, 0, 83, 768, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Spellclick - Remove Unit Flag"),
-(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 5, 6, 61, 0, 100, 0, 0, 0, 0, 0, 49, 0, 0, 0, 0, 0, 0, 11, @NPC_FLAYER, 40, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Spellclick - Attack nearby Flayer"),
-(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 6, 7, 61, 0, 100, 0, 0, 0, 0, 0, 89, 30, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Spellclick - Set Movement Random"),
-(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 7, 0, 1, 0, 100, 0, 50000, 50000, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - OOC - Despawn"),
-(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 8, 0, 4, 0, 100, 0, 0, 0, 0, 0, 11, @SPELL_HARDENED, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Aggro - Cast Hardened"),
-(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 9, 0, 0, 0, 100, 0, 5000, 7000, 12000, 14000, 11, @SPELL_ROCK_BASH, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - IC - Cast Rock Bash");
+(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 0, 1, 25, 0, 100, 0, 0, 0, 0, 0, 11, @SPELL_FEIGN_DEATH, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Reset - Cast Feign Death"),
+(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 1, 2, 61, 0, 100, 0, 0, 0, 0, 0, 2, 35, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Reset - Set Faction Friendly"),
+(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 2, 3, 61, 0, 100, 0, 0, 0, 0, 0, 82, 16777216, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Reset - Set Spellclick NpcFlag"),
+(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 3, 4, 61, 0, 100, 0, 0, 0, 0, 0, 28, 512, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Reset - Set Unit Flag"),
+(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 4, 0, 61, 0, 100, 0, 0, 0, 0, 0, 28, @SPELL_HARDENED, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Reset - Remove Hardened"),
+(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 5, 6, 73, 0, 100, 0, 0, 0, 0, 0, 33, @KILL_CREDIT, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Spellclick - KC"),
+(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 6, 7, 61, 0, 100, 0, 0, 0, 0, 0, 83, 16777216, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Spellclick - Remove Spellclick NpcFlag"),
+(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 7, 8, 61, 0, 100, 0, 0, 0, 0, 0, 28, @SPELL_FEIGN_DEATH, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Spellclick - Remove Feign Death Aura"),
+(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 8, 9, 61, 0, 100, 0, 0, 0, 0, 0, 19, 512, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Spellclick - Remove Unit Flag"),
+(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 9, 10, 61, 0, 100, 0, 0, 0, 0, 0, 2, 2283, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Spellclick - Set Faction Hostile"),
+(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 10, 11, 61, 0, 100, 0, 0, 0, 0, 0, 49, 0, 0, 0, 0, 0, 0, 19, 0, 40, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Spellclick - Attack nearby Flayer"),
+(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 11, 12, 61, 0, 100, 0, 0, 0, 0, 0, 89, 30, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Spellclick - Set Movement Random"),
+(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 12, 13, 61, 0, 100, 0, 0, 0, 0, 0, 41, 50000, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Spellclick - Delayed Despawn"),
+(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 13, 0, 4, 0, 100, 0, 0, 0, 0, 0, 11, @SPELL_HARDENED, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Aggro - Cast Hardened"),
+(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 14, 0, 0, 0, 100, 0, 5000, 7000, 12000, 14000, 11, @SPELL_ROCK_BASH, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - IC - Cast Rock Bash");
 DELETE FROM `spell_linked_spell` WHERE `spell_trigger` = -@SPELL_HARDENED;
 INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES
 (-@SPELL_HARDENED, @SPELL_VULNERABLE, 0, "Hardened removed casts Vulnerable");
-DELETE FROM `creature_template_aura` WHERE `entry` = @NPC_DORMANT_STONEBOUND_ELEMENTAL;
 DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = @NPC_DORMANT_STONEBOUND_ELEMENTAL;
 INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`, `user_type`) VALUES
 (@NPC_DORMANT_STONEBOUND_ELEMENTAL, @SPELL_GENERAL_TRIGGER, 1, 0);

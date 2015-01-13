@@ -389,39 +389,52 @@ DELETE FROM `gameobject` WHERE `id` IN (@GO_DEEP_ALABASTER_CRYSTAL_CHUNK, @GO_DE
 (216895, 207384, 646, 1, 1, 2073.49, -323.683, -159.473, 1.85005, 0, 0, 0.798635, 0.601815, 300, 100, 1),
 (216896, 207384, 646, 1, 1, 2072.49, -323.321, -159.39, 1.85005, 0, 0, 0.798635, 0.601815, 300, 100, 1);*/
 
--- [SQL] Quests - A Head Full of Wind scripted (Feedback #7439)
+-- [SQL] Quests - A Head Full of Wind script redone (Fixes #7439)
 SET @NPC_LORVARIUS := 43395;
-SET @NPC_RED_WIND_DEVIL := 47192;
-SET @NPC_RED_WIND_DEVIL_DESPAWNER := 43437;
+SET @NPC_WIND_DEVIL_CLEAN := 43437;
+SET @NPC_WIND_DEVIL_RED := 47192;
 SET @NPC_RED_MIST := 43370;
 SET @SPELL_RED_MIST_VISUAL := 77707;
 SET @SPELL_RED_MIST_DAMAGE := 81095;
 SET @SPELL_RED_MIST_DAMAGE_PLAYER := 81096;
-SET @SPELL_LORVARIUS_SUMMON_RED_WIND_DEVIL := 87941;
+SET @SPELL_LORVARIUS_SUMMONED_CLEAN := 81225;
+SET @SPELL_LORVARIUS_SUMMONED_RED := 87941;
 SET @SPELL_RED_MIST_KILL_CREDIT := 81223;
 SET @SPELL_RED_WIND_DEVIL_GUARDIAN_AURA := 81226;
 SET @SPELL_RED_MIST_RETURN_PING := 81359;
-SET @SPELL_LORVARIUS_CLEAN_SUMMON := 81225;
-SET @SPELL_LORVARIUS_CLEAN_KILL_CREDIT := 81222;
+SET @SPELL_LORVARIUS_WHIRLY_WIND_CLEAN := 81222;
+SET @SPELL_LORVARIUS_WHIRLY_WIND_RED := 81223;
 SET @SPELL_LORVARIUS_CLEAN_GUARDIAN_AURA := 87940;
 SET @QUEST_A_HEAD_FULL_OF_WIND := 26581;
 SET @CGUID := 319425;
-UPDATE `creature_template` SET `mindmg` = 435, `maxdmg` = 653, `attackpower` = 163, `dmg_multiplier` = 37.6, `unit_flags` = 32832, `AIName` = "", `WDBVerified` = 15595 WHERE `entry` = @NPC_LORVARIUS;
+UPDATE `creature_template` SET `Health_mod` = 10, `Mana_mod` = 5, `mindmg` = 435, `maxdmg` = 653, `attackpower` = 163, `dmg_multiplier` = 37.6, `unit_flags` = 32832, `AIName` = "SmartAI", `ScriptName` = "", `WDBVerified` = 15595 WHERE `entry` = @NPC_LORVARIUS;
 UPDATE `creature_template` SET `minlevel` = 85, `maxlevel` = 85, `exp` = 3, `faction_A` = 114, `faction_H` = 114, `speed_run` = 0.571429, `baseattacktime` = 4000, `unit_flags` = 33571328, `WDBVerified` = 15595, `InhabitType` = 4, `AIName` = "SmartAI", `ScriptName` = "" WHERE `entry` = @NPC_RED_MIST;
-UPDATE `creature_template` SET `minlevel` = 85, `maxlevel` = 85, `exp` = 3, `baseattacktime` = 2000, `unit_flags` = 776, `WDBVerified` = 15595, `AIName` = "" WHERE `entry` = @NPC_RED_WIND_DEVIL;
-UPDATE `creature_template` SET `minlevel` = 85, `maxlevel` = 85, `exp` = 3, `baseattacktime` = 2000, `unit_flags` = 776, `WDBVerified` = 15595, `AIName` = "SmartAI" WHERE `entry` = @NPC_RED_WIND_DEVIL_DESPAWNER;
-DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@NPC_LORVARIUS, @NPC_RED_WIND_DEVIL, @NPC_RED_WIND_DEVIL_DESPAWNER, @NPC_RED_MIST) AND `source_type` = 0;
+UPDATE `creature_template` SET `minlevel` = 85, `maxlevel` = 85, `exp` = 3, `baseattacktime` = 2000, `unit_flags` = 776, `flags_extra` = 0, `WDBVerified` = 15595, `AIName` = "SmartAI", `ScriptName` = "" WHERE `entry` = @NPC_WIND_DEVIL_CLEAN;
+UPDATE `creature_template` SET `minlevel` = 85, `maxlevel` = 85, `exp` = 3, `baseattacktime` = 2000, `unit_flags` = 776, `flags_extra` = 0, `WDBVerified` = 15595, `AIName` = "SmartAI", `ScriptName` = "" WHERE `entry` = @NPC_WIND_DEVIL_RED;
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@NPC_LORVARIUS, @NPC_WIND_DEVIL_CLEAN, @NPC_WIND_DEVIL_RED, @NPC_RED_MIST) AND `source_type` = 0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
-(@NPC_RED_WIND_DEVIL_DESPAWNER, 0, 0, 0, 54, 0, 100, 0, 0, 0, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Red Wind Devil Despawner - On Just Summoned - Despawn"),
+(@NPC_LORVARIUS, 0, 0, 0, 19, 0, 100, 0, @QUEST_A_HEAD_FULL_OF_WIND, 0, 0, 0, 11, @SPELL_LORVARIUS_SUMMONED_CLEAN, 3, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Windspeaker Lorvarius - On Quest Accept - Cast Summon Wind-Devil Clean"),
+(@NPC_LORVARIUS, 0, 1, 0, 19, 0, 100, 0, @QUEST_A_HEAD_FULL_OF_WIND, 0, 0, 0, 11, @SPELL_RED_WIND_DEVIL_GUARDIAN_AURA, 3, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Windspeaker Lorvarius - On Quest Accept - Cast Guardian Aura"),
+(@NPC_LORVARIUS, 0, 2, 0, 20, 0, 100, 0, @QUEST_A_HEAD_FULL_OF_WIND, 0, 0, 0, 11, @SPELL_LORVARIUS_CLEAN_GUARDIAN_AURA, 3, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Windspeaker Lorvarius - On Quest Reward - Cast Clean Guardian Aura"),
+(@NPC_LORVARIUS, 0, 3, 0, 20, 0, 100, 0, @QUEST_A_HEAD_FULL_OF_WIND, 0, 0, 0, 45, 1, 1, 0, 0, 0, 0, 19, @NPC_WIND_DEVIL_CLEAN, 100, 0, 0, 0, 0, 0, "Nepenthe-Windspeaker Lorvarius - On Quest Reward - Set data 1 1 Wind Devil Clean"),
+(@NPC_LORVARIUS, 0, 4, 0, 20, 0, 100, 0, @QUEST_A_HEAD_FULL_OF_WIND, 0, 0, 0, 45, 1, 1, 0, 0, 0, 0, 19, @NPC_WIND_DEVIL_RED, 100, 0, 0, 0, 0, 0, "Nepenthe-Windspeaker Lorvarius - On Quest Reward - Set data 1 1 Wind Devil Red"),
+(@NPC_WIND_DEVIL_CLEAN, 0, 0, 0, 1, 0, 100, 1, 120000, 120000, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Wind Devil Clean - OOC - Despawn"),
+(@NPC_WIND_DEVIL_CLEAN, 0, 1, 0, 38, 0, 100, 0, 1, 1, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Wind Devil Clean - On Data Set - Despawn"),
+(@NPC_WIND_DEVIL_RED, 0, 0, 0, 1, 0, 100, 1, 120000, 120000, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Wind Devil Red - OOC - Despawn"),
+(@NPC_WIND_DEVIL_RED, 0, 1, 0, 38, 0, 100, 0, 1, 1, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Wind Devil Red - On Data Set - Despawn"),
 (@NPC_RED_MIST, 0, 0, 1, 10, 0, 100, 0, 0, 6, 30000, 30000, 33, @NPC_RED_MIST, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Red Mist - On LoS - Give KC"),
-(@NPC_RED_MIST, 0, 1, 0, 61, 0, 100, 0, 0, 0, 0, 0, 11, @SPELL_RED_MIST_DAMAGE_PLAYER, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Red Mist - On LoS - Cast Red Mist damage");
--- UPDATE `quest_template` SET `Flags` = 0 WHERE `Id` = @QUEST_A_HEAD_FULL_OF_WIND;
-DELETE FROM `creature_template_aura` WHERE `entry` IN (@NPC_RED_MIST, @NPC_RED_WIND_DEVIL);
+(@NPC_RED_MIST, 0, 1, 2, 61, 0, 100, 0, 0, 0, 0, 0, 11, @SPELL_RED_MIST_DAMAGE_PLAYER, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Red Mist - On LoS - Cast Red Mist damage"),
+(@NPC_RED_MIST, 0, 2, 0, 61, 0, 100, 0, 0, 0, 0, 0, 45, 1, 1, 0, 0, 0, 0, 19, @NPC_WIND_DEVIL_CLEAN, 50, 0, 0, 0, 0, 0, "Nepenthe-Red Mist - On LoS - Set data 1 1 Wind Devil Clean");
+UPDATE `quest_template` SET `ObjectiveText2` = '' WHERE `Id` = @QUEST_A_HEAD_FULL_OF_WIND;
+DELETE FROM `creature_template_aura` WHERE `entry` IN (@NPC_RED_MIST, @NPC_WIND_DEVIL_RED, @NPC_WIND_DEVIL_CLEAN);
 INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES
 (@NPC_RED_MIST, @SPELL_RED_MIST_VISUAL),
-(@NPC_RED_WIND_DEVIL, @SPELL_RED_WIND_DEVIL_GUARDIAN_AURA);
-DELETE FROM `spell_linked_spell` WHERE `spell_trigger` IN (@SPELL_LORVARIUS_CLEAN_KILL_CREDIT, @SPELL_RED_MIST_KILL_CREDIT);
+(@NPC_WIND_DEVIL_CLEAN, @SPELL_LORVARIUS_WHIRLY_WIND_CLEAN),
+(@NPC_WIND_DEVIL_RED, @SPELL_LORVARIUS_WHIRLY_WIND_RED);
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 17 AND `SourceEntry` IN (@SPELL_RED_MIST_RETURN_PING, @SPELL_RED_MIST_DAMAGE_PLAYER);
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger` = @SPELL_RED_MIST_DAMAGE_PLAYER;
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES
+(@SPELL_RED_MIST_DAMAGE_PLAYER, @SPELL_LORVARIUS_SUMMONED_RED, 1, "Red Mist Damage casts Summon Lorvarius Whirly-Wind Red");
 DELETE FROM `creature` WHERE `id` = @NPC_RED_MIST;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) values
 (@CGUID+0, @NPC_RED_MIST, 646, 1, 1, 0, 0, 1370.55, -724.406, 279.196, 3.23403, 300, 0, 0, 42, 0, 0, 0, 0, 0),
@@ -479,11 +492,15 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@CGUID+52, @NPC_RED_MIST, 646, 1, 1, 0, 0, 1350.96, -817.254, 279.272, 3.78825, 300, 0, 0, 42, 0, 0, 0, 0, 0),
 (@CGUID+53, @NPC_RED_MIST, 646, 1, 1, 0, 0, 1341.93, -824.818, 279.157, 4.35217, 300, 0, 0, 42, 0, 0, 0, 0, 0);
 
--- [c++ and SQL] Quests - Don't. Stop. Moving. scripted (Feedback #7427)
+-- [c++ and SQL] Quests - Don't. Stop. Moving. corrected (Fixes #7427)
 SET @NPC_TERRATH_THE_STEADY := 42466;
 SET @NPC_OPALESCENT_GUARDIAN := 43591;
 SET @NPC_OPAL_STONETHROWER := 43586;
 SET @CGUID := 40215;
+UPDATE `creature` SET `phaseMask` = 65534 WHERE `id` = 42466 AND `guid` = 802799;
+UPDATE `creature_template` SET `InhabitType` = 7 WHERE `entry` = 42522;
+UPDATE `creature` SET `spawndist` = 20, `MovementType` = 1 WHERE `id` = 42522;
+UPDATE `creature_template` SET `faction_A` = 2283, `faction_H` = 2283, `KillCredit1` = 0, `KillCredit2` = 0 WHERE `entry` = 43545;
 UPDATE `creature_template` SET `mindmg` = 468, `maxdmg` = 702, `attackpower` = 175, `dmg_multiplier` = 35, `unit_class` = 1, `exp` = 3, `unit_flags` = 64, `VehicleId` = 1088, `WDBVerified` = 15595, `npcflag` = `npcflag`|1, `AIName` = "", `ScriptName` = "npc_terrath_the_steady" WHERE `entry` = @NPC_TERRATH_THE_STEADY;
 UPDATE `creature_template` SET `minlevel` = 83, `maxlevel` = 83, `exp` = 3, `faction_A` = 35, `faction_H` = 35, `speed_walk` = 1.55556, `baseattacktime` = 2000, `unit_flags` = 264, `WDBVerified` = 15595, `AIName` = "", `ScriptName` = "npc_opalescent_guardian" WHERE `entry` = @NPC_OPALESCENT_GUARDIAN;
 UPDATE `creature_template` SET `minlevel` = 83, `maxlevel` = 83, `exp` = 3, `faction_A` = 2283, `faction_H` = 2283, `speed_walk` = 0.888888, `speed_run` = 1.5873, `mindmg` = 168, `maxdmg` = 702, `attackpower` = 175, `dmg_multiplier` = 35, `baseattacktime` = 2000, `unit_class` = 1, `unit_flags` = 64, `WDBVerified` = 15595 WHERE `entry` = @NPC_OPAL_STONETHROWER;
@@ -557,8 +574,10 @@ INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES
 (@NPC_PETRIFIED_STONE_BAT, @SPELL_PETRIFIED_BAT),
 (@NPC_PETRIFIED_STONE_BAT, @SPELL_CREATURE_SPARKLES_BIGGER);
 
--- [SQL] Quests - On Even Ground scripted (Feedback #7407)
-SET @NPC_SERVANT_OF_THERAZANE := 44131;
+-- [SQL] Quests - On Even Ground corrected (Fixes #7407)
+SET @NPC_SERVANT_OF_THERAZANE_1 := 44131;
+SET @NPC_SERVANT_OF_THERAZANE_2 := 42781;
+SET @NPC_SERVANT_OF_THERAZANE_3 := 42479;
 SET @KILL_CREDIT := 45083;
 SET @SPELL_ELEMENTIUM_GRAPPLE_LINE := 79688;
 SET @SPELL_GIANT_TRIPPED_TRIGGER := 79757;
@@ -568,29 +587,40 @@ SET @SPELL_ELEMENTIUM_GRAPPLE_LINE_BREAK := 84008;
 SET @QUEST_ON_EVEN_GROUND := 26314;
 SET @CGUID := 40412;
 UPDATE `quest_template` SET `RequiredNpcOrGo1` = @KILL_CREDIT, `RequiredSpellCast1` = 0, `Method` = 2, `WDBVerified` = 15595 WHERE `Id` = @QUEST_ON_EVEN_GROUND;
-UPDATE `creature_template` SET `minlevel` = 83, `maxlevel` = 83, `exp` = 3, `faction_A` = 2285, `faction_H` = 2285, `mindmg` = 468, `maxdmg` = 702, `attackpower` = 175, `dmg_multiplier` = 15, `baseattacktime` = 2000, `unit_class` = 1, `unit_flags` = 64, `speed_run` = 0.992063, `WDBVerified` = 15595, `AIName` = "SmartAI" WHERE `entry` = @NPC_SERVANT_OF_THERAZANE;
-DELETE FROM `smart_scripts` WHERE `entryorguid` = @NPC_SERVANT_OF_THERAZANE;
+UPDATE `creature_template` SET `minlevel` = 83, `maxlevel` = 83, `exp` = 3, `faction_A` = 2285, `faction_H` = 2285, `mindmg` = 468, `maxdmg` = 702, `attackpower` = 175, `dmg_multiplier` = 15, `baseattacktime` = 2000, `unit_class` = 1, `unit_flags` = 64, `speed_walk` = 0.802063, `speed_run` = 0.802063, `WDBVerified` = 15595, `AIName` = "SmartAI", `ScriptName` = "" WHERE `entry` = @NPC_SERVANT_OF_THERAZANE_1;
+UPDATE `creature_template` SET `minlevel` = 83, `maxlevel` = 83, `exp` = 3, `mindmg` = 468, `maxdmg` = 702, `attackpower` = 175, `dmg_multiplier` = 15, `baseattacktime` = 2000, `unit_class` = 1, `unit_flags` = 64, `speed_walk` = 0.802063, `speed_run` = 0.802063, `WDBVerified` = 15595, `AIName` = "SmartAI", `ScriptName` = "" WHERE `entry` IN (@NPC_SERVANT_OF_THERAZANE_1, @NPC_SERVANT_OF_THERAZANE_2, @NPC_SERVANT_OF_THERAZANE_3);
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@NPC_SERVANT_OF_THERAZANE_1, @NPC_SERVANT_OF_THERAZANE_2, @NPC_SERVANT_OF_THERAZANE_3) AND `source_type` = 0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
-(@NPC_SERVANT_OF_THERAZANE, 0, 0, 0, 8, 0, 100, 0, @SPELL_ELEMENTIUM_GRAPPLE_LINE, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Servant of Therazane - On Spellhit 1 - Boss Emote 0"),
-(@NPC_SERVANT_OF_THERAZANE, 0, 1, 2, 8, 0, 100, 0, @SPELL_GIANT_TRIPPED_TRIGGER, 0, 0, 0, 11, @SPELL_TRIPPED_GIANT, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Servant of Therazane - On Spellhit - Cast Tripped Giant"),
-(@NPC_SERVANT_OF_THERAZANE, 0, 2, 0, 61, 0, 100, 0, 0, 0, 0, 0, 41, 8000, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Servant of Therazane - On Spellhit - Despawn");
-DELETE FROM `creature_text` WHERE `entry` = @NPC_SERVANT_OF_THERAZANE;
+(@NPC_SERVANT_OF_THERAZANE_1, 0, 0, 0, 8, 0, 100, 0, @SPELL_ELEMENTIUM_GRAPPLE_LINE, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Servant of Therazane - On Spellhit 1 - Boss Emote 0"),
+(@NPC_SERVANT_OF_THERAZANE_1, 0, 1, 2, 8, 0, 100, 0, @SPELL_GIANT_TRIPPED_TRIGGER, 0, 0, 0, 11, @SPELL_TRIPPED_GIANT, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Servant of Therazane - On Spellhit - Cast Tripped Giant"),
+(@NPC_SERVANT_OF_THERAZANE_1, 0, 2, 0, 61, 0, 100, 0, 0, 0, 0, 0, 41, 8000, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Servant of Therazane - On Spellhit - Despawn"),
+(@NPC_SERVANT_OF_THERAZANE_2, 0, 0, 0, 8, 0, 100, 0, @SPELL_ELEMENTIUM_GRAPPLE_LINE, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Servant of Therazane - On Spellhit 1 - Boss Emote 0"),
+(@NPC_SERVANT_OF_THERAZANE_2, 0, 1, 2, 8, 0, 100, 0, @SPELL_GIANT_TRIPPED_TRIGGER, 0, 0, 0, 11, @SPELL_TRIPPED_GIANT, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Servant of Therazane - On Spellhit - Cast Tripped Giant"),
+(@NPC_SERVANT_OF_THERAZANE_2, 0, 2, 0, 61, 0, 100, 0, 0, 0, 0, 0, 41, 8000, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Servant of Therazane - On Spellhit - Despawn"),
+(@NPC_SERVANT_OF_THERAZANE_3, 0, 0, 0, 8, 0, 100, 0, @SPELL_ELEMENTIUM_GRAPPLE_LINE, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Servant of Therazane - On Spellhit 1 - Boss Emote 0"),
+(@NPC_SERVANT_OF_THERAZANE_3, 0, 1, 2, 8, 0, 100, 0, @SPELL_GIANT_TRIPPED_TRIGGER, 0, 0, 0, 11, @SPELL_TRIPPED_GIANT, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Servant of Therazane - On Spellhit - Cast Tripped Giant"),
+(@NPC_SERVANT_OF_THERAZANE_3, 0, 2, 0, 61, 0, 100, 0, 0, 0, 0, 0, 41, 8000, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Servant of Therazane - On Spellhit - Despawn");
+DELETE FROM `creature_text` WHERE `entry` IN (@NPC_SERVANT_OF_THERAZANE_1, @NPC_SERVANT_OF_THERAZANE_2, @NPC_SERVANT_OF_THERAZANE_3);
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
-(@NPC_SERVANT_OF_THERAZANE, 0, 0, "The line is secured to his ankle. Pull away to trip him!", 41, 0, 100, 0, 0, 0, "Servant of Therazane");
-DELETE FROM `creature` WHERE `id` = @NPC_SERVANT_OF_THERAZANE;
+(@NPC_SERVANT_OF_THERAZANE_1, 0, 0, "The line is secured to his ankle. Pull away to trip him!", 41, 0, 100, 0, 0, 0, "Servant of Therazane"),
+(@NPC_SERVANT_OF_THERAZANE_2, 0, 0, "The line is secured to his ankle. Pull away to trip him!", 41, 0, 100, 0, 0, 0, "Servant of Therazane"),
+(@NPC_SERVANT_OF_THERAZANE_3, 0, 0, "The line is secured to his ankle. Pull away to trip him!", 41, 0, 100, 0, 0, 0, "Servant of Therazane");
+DELETE FROM `creature` WHERE `id` = @NPC_SERVANT_OF_THERAZANE_1;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
-(@CGUID+0, @NPC_SERVANT_OF_THERAZANE, 646, 1, 1, 0, 0, 1905.44, -153.844, 24.7535, 3.80872, 120, 8, 0, 536810, 0, 1, 0, 0, 0),
-(@CGUID+1, @NPC_SERVANT_OF_THERAZANE, 646, 1, 1, 0, 0, 1912.26, -190.63, 24.7001, 3.13493, 120, 8, 0, 536810, 0, 1, 0, 0, 0),
-(@CGUID+2, @NPC_SERVANT_OF_THERAZANE, 646, 1, 1, 0, 0, 1897.72, -226.248, 24.3551, 2.51058, 120, 8, 0, 536810, 0, 1, 0, 0, 0),
-(@CGUID+3, @NPC_SERVANT_OF_THERAZANE, 646, 1, 1, 0, 0, 1919.06, -161.399, 25.0035, 3.11054, 120, 8, 0, 536810, 0, 1, 0, 0, 0),
-(@CGUID+4, @NPC_SERVANT_OF_THERAZANE, 646, 1, 1, 0, 0, 1759.92, -90.3733, 22.1033, 4.12328, 120, 8, 0, 536810, 0, 1, 0, 0, 0),
-(@CGUID+5, @NPC_SERVANT_OF_THERAZANE, 646, 1, 1, 0, 0, 1241.73, 827.42, -66.9339, 5.17885, 120, 8, 0, 536810, 0, 1, 0, 0, 0),
-(@CGUID+6, @NPC_SERVANT_OF_THERAZANE, 646, 1, 1, 0, 0, 1270.37, 719.667, -69.108, 3.49025, 120, 8, 0, 536810, 0, 1, 0, 0, 0),
-(@CGUID+7, @NPC_SERVANT_OF_THERAZANE, 646, 1, 1, 0, 0, 1323.41, 674.369, -70.6549, 3.0355, 120, 8, 0, 536810, 0, 1, 0, 0, 0),
-(@CGUID+8, @NPC_SERVANT_OF_THERAZANE, 646, 1, 1, 0, 0, 1346.01, 757.442, -67.3098, 3.98505, 120, 8, 0, 536810, 0, 1, 0, 0, 0);
+(@CGUID+0, @NPC_SERVANT_OF_THERAZANE_1, 646, 1, 1, 0, 0, 1905.44, -153.844, 24.7535, 3.80872, 120, 8, 0, 536810, 0, 1, 0, 0, 0),
+(@CGUID+1, @NPC_SERVANT_OF_THERAZANE_1, 646, 1, 1, 0, 0, 1912.26, -190.63, 24.7001, 3.13493, 120, 8, 0, 536810, 0, 1, 0, 0, 0),
+(@CGUID+2, @NPC_SERVANT_OF_THERAZANE_1, 646, 1, 1, 0, 0, 1897.72, -226.248, 24.3551, 2.51058, 120, 8, 0, 536810, 0, 1, 0, 0, 0),
+(@CGUID+3, @NPC_SERVANT_OF_THERAZANE_1, 646, 1, 1, 0, 0, 1919.06, -161.399, 25.0035, 3.11054, 120, 8, 0, 536810, 0, 1, 0, 0, 0),
+(@CGUID+4, @NPC_SERVANT_OF_THERAZANE_1, 646, 1, 1, 0, 0, 1759.92, -90.3733, 22.1033, 4.12328, 120, 8, 0, 536810, 0, 1, 0, 0, 0),
+(@CGUID+5, @NPC_SERVANT_OF_THERAZANE_1, 646, 1, 1, 0, 0, 1241.73, 827.42, -66.9339, 5.17885, 120, 8, 0, 536810, 0, 1, 0, 0, 0),
+(@CGUID+6, @NPC_SERVANT_OF_THERAZANE_1, 646, 1, 1, 0, 0, 1270.37, 719.667, -69.108, 3.49025, 120, 8, 0, 536810, 0, 1, 0, 0, 0),
+(@CGUID+7, @NPC_SERVANT_OF_THERAZANE_1, 646, 1, 1, 0, 0, 1323.41, 674.369, -70.6549, 3.0355, 120, 8, 0, 536810, 0, 1, 0, 0, 0),
+(@CGUID+8, @NPC_SERVANT_OF_THERAZANE_1, 646, 1, 1, 0, 0, 1346.01, 757.442, -67.3098, 3.98505, 120, 8, 0, 536810, 0, 1, 0, 0, 0);
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 17 AND `SourceEntry` IN (@SPELL_ELEMENTIUM_GRAPPLE_LINE, @SPELL_GIANT_TRIPPED_TRIGGER);
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ScriptName`, `Comment`) VALUES
-(17, 0, @SPELL_ELEMENTIUM_GRAPPLE_LINE, 0, 0, 31, 1, 3, @NPC_SERVANT_OF_THERAZANE, 0, 0, "", "Elementium Grapple Line targets Servant of Therazane");
+(17, 0, @SPELL_ELEMENTIUM_GRAPPLE_LINE, 0, 0, 31, 1, 3, @NPC_SERVANT_OF_THERAZANE_1, 0, 0, "", "Elementium Grapple Line targets Servant of Therazane"),
+(17, 0, @SPELL_ELEMENTIUM_GRAPPLE_LINE, 0, 1, 31, 1, 3, @NPC_SERVANT_OF_THERAZANE_2, 0, 0, "", "Elementium Grapple Line targets Servant of Therazane"),
+(17, 0, @SPELL_ELEMENTIUM_GRAPPLE_LINE, 0, 2, 31, 1, 3, @NPC_SERVANT_OF_THERAZANE_3, 0, 0, "", "Elementium Grapple Line targets Servant of Therazane");
 DELETE FROM `spell_linked_spell` WHERE `spell_trigger` IN (-@SPELL_ELEMENTIUM_GRAPPLE_LINE, @SPELL_ELEMENTIUM_GRAPPLE_LINE, @SPELL_GIANT_TRIPPED_TRIGGER, @SPELL_TRIPPED_GIANT);
 INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES
 (-@SPELL_ELEMENTIUM_GRAPPLE_LINE, @SPELL_GIANT_TRIPPED_TRIGGER, 0, "Elementium Grapple Line removed casts Giant Tripped Trigger"),
@@ -800,9 +830,9 @@ INSERT INTO `spell_target_position` (`id`, `effIndex`, `target_map`, `target_pos
 (84505, 0, 0, -8208.25, 429.244, 118.11, 3.4775),
 (84506, 0, 1, 2049.2, -4376.8, 98.8446, 0.785398);*/
 
--- [SQL] Quests - Putting the Pieces Together scripted (Feedback #7420)
+-- [SQL] Quests - Putting the Pieces Together corrected (Fixes #7420)
 SET @NPC_DORMANT_STONEBOUND_ELEMENTAL := 43115;
-SET @NPC_FLAYER := 42521;
+SET @NPC_FLAYER := 42524;
 SET @SPELL_FEIGN_DEATH := 29266;
 SET @SPELL_GENERAL_TRIGGER := 43709;
 SET @SPELL_HARDENED := 82839;
@@ -810,24 +840,34 @@ SET @SPELL_VULNERABLE := 82840;
 SET @SPELL_ROCK_BASH := 82841;
 SET @KILL_CREDIT := @NPC_DORMANT_STONEBOUND_ELEMENTAL;
 SET @QUEST_PUTTING_THE_PIECES_TOGETHER := 26439;
-UPDATE `creature_template` SET `exp` = 3, `faction_A` = 2281, `faction_H` = 2281, `npcflag` = 16777216, `speed_walk` = 1.55556, `unit_flags` = 768, `WDBVerified` = 15595, `AIName` = "SmartAI", `ScriptName` = "" WHERE `entry` = @NPC_DORMANT_STONEBOUND_ELEMENTAL;
-UPDATE creature SET `spawntimesecs` = 30, `MovementType` = 0, `spawndist` = 0 WHERE `id` = @NPC_DORMANT_STONEBOUND_ELEMENTAL;
+UPDATE `creature_template` SET `exp` = 3, `faction_A` = 35, `faction_H` = 35, `npcflag` = 16777216, `speed_walk` = 1.55556, `unit_flags` = 512, `WDBVerified` = 15595, `AIName` = "SmartAI", `ScriptName` = "", `flags_extra` = 0 WHERE `entry` = @NPC_DORMANT_STONEBOUND_ELEMENTAL;
+UPDATE `creature` SET `spawntimesecs` = 30, `MovementType` = 0, `spawndist` = 0 WHERE `id` = @NPC_DORMANT_STONEBOUND_ELEMENTAL;
+DELETE FROM `creature_template_aura` WHERE `entry` = @NPC_DORMANT_STONEBOUND_ELEMENTAL;
+DELETE FROM `creature_aura` WHERE `guid` IN (SELECT `guid` FROM `creature` WHERE `id` = @NPC_DORMANT_STONEBOUND_ELEMENTAL);
+DELETE FROM `creature_template_bytes` WHERE `entry` = @NPC_DORMANT_STONEBOUND_ELEMENTAL;
+DELETE FROM `creature_bytes` WHERE `guid` IN (SELECT `guid` FROM `creature` WHERE `id` = @NPC_DORMANT_STONEBOUND_ELEMENTAL);
+DELETE FROM `creature_template_emote` WHERE `entry` = @NPC_DORMANT_STONEBOUND_ELEMENTAL;
+DELETE FROM `creature_emote` WHERE `guid` IN (SELECT `guid` FROM `creature` WHERE `id` = @NPC_DORMANT_STONEBOUND_ELEMENTAL);
 DELETE FROM `smart_scripts` WHERE `entryorguid` = @NPC_DORMANT_STONEBOUND_ELEMENTAL AND `source_type` = 0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
-(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 0, 0, 25, 0, 100, 0, 0, 0, 0, 0, 11, @SPELL_FEIGN_DEATH, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Spawn - Cast Feign Death"),
-(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 1, 2, 73, 0, 100, 0, 0, 0, 0, 0, 33, @KILL_CREDIT, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Spellclick - KC"),
-(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 2, 3, 61, 0, 100, 0, 0, 0, 0, 0, 83, 16777216, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Spellclick - Remove Spellclick NpcFlag"),
-(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 3, 4, 61, 0, 100, 0, 0, 0, 0, 0, 28, @SPELL_FEIGN_DEATH, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Spellclick - Remove Feign Death Aura"),
-(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 4, 5, 61, 0, 100, 0, 0, 0, 0, 0, 83, 768, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Spellclick - Remove Unit Flag"),
-(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 5, 6, 61, 0, 100, 0, 0, 0, 0, 0, 49, 0, 0, 0, 0, 0, 0, 11, @NPC_FLAYER, 40, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Spellclick - Attack nearby Flayer"),
-(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 6, 7, 61, 0, 100, 0, 0, 0, 0, 0, 89, 30, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Spellclick - Set Movement Random"),
-(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 7, 0, 1, 0, 100, 0, 50000, 50000, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - OOC - Despawn"),
-(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 8, 0, 4, 0, 100, 0, 0, 0, 0, 0, 11, @SPELL_HARDENED, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Aggro - Cast Hardened"),
-(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 9, 0, 0, 0, 100, 0, 5000, 7000, 12000, 14000, 11, @SPELL_ROCK_BASH, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - IC - Cast Rock Bash");
+(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 0, 1, 25, 0, 100, 0, 0, 0, 0, 0, 11, @SPELL_FEIGN_DEATH, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Reset - Cast Feign Death"),
+(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 1, 2, 61, 0, 100, 0, 0, 0, 0, 0, 2, 35, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Reset - Set Faction Friendly"),
+(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 2, 3, 61, 0, 100, 0, 0, 0, 0, 0, 82, 16777216, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Reset - Set Spellclick NpcFlag"),
+(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 3, 4, 61, 0, 100, 0, 0, 0, 0, 0, 28, 512, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Reset - Set Unit Flag"),
+(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 4, 0, 61, 0, 100, 0, 0, 0, 0, 0, 28, @SPELL_HARDENED, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Reset - Remove Hardened"),
+(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 5, 6, 73, 0, 100, 0, 0, 0, 0, 0, 33, @KILL_CREDIT, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Spellclick - KC"),
+(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 6, 7, 61, 0, 100, 0, 0, 0, 0, 0, 83, 16777216, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Spellclick - Remove Spellclick NpcFlag"),
+(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 7, 8, 61, 0, 100, 0, 0, 0, 0, 0, 28, @SPELL_FEIGN_DEATH, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Spellclick - Remove Feign Death Aura"),
+(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 8, 9, 61, 0, 100, 0, 0, 0, 0, 0, 19, 512, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Spellclick - Remove Unit Flag"),
+(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 9, 10, 61, 0, 100, 0, 0, 0, 0, 0, 2, 2283, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Spellclick - Set Faction Hostile"),
+(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 10, 11, 61, 0, 100, 0, 0, 0, 0, 0, 49, 0, 0, 0, 0, 0, 0, 19, 0, 40, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Spellclick - Attack nearby Flayer"),
+(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 11, 12, 61, 0, 100, 0, 0, 0, 0, 0, 89, 30, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Spellclick - Set Movement Random"),
+(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 12, 13, 61, 0, 100, 0, 0, 0, 0, 0, 41, 50000, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Spellclick - Delayed Despawn"),
+(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 13, 0, 4, 0, 100, 0, 0, 0, 0, 0, 11, @SPELL_HARDENED, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - On Aggro - Cast Hardened"),
+(@NPC_DORMANT_STONEBOUND_ELEMENTAL, 0, 14, 0, 0, 0, 100, 0, 5000, 7000, 12000, 14000, 11, @SPELL_ROCK_BASH, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Dormant Stonebound Elemental - IC - Cast Rock Bash");
 DELETE FROM `spell_linked_spell` WHERE `spell_trigger` = -@SPELL_HARDENED;
 INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES
 (-@SPELL_HARDENED, @SPELL_VULNERABLE, 0, "Hardened removed casts Vulnerable");
-DELETE FROM `creature_template_aura` WHERE `entry` = @NPC_DORMANT_STONEBOUND_ELEMENTAL;
 DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = @NPC_DORMANT_STONEBOUND_ELEMENTAL;
 INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`, `user_type`) VALUES
 (@NPC_DORMANT_STONEBOUND_ELEMENTAL, @SPELL_GENERAL_TRIGGER, 1, 0);

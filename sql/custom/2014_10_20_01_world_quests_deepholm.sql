@@ -479,11 +479,15 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@CGUID+52, @NPC_RED_MIST, 646, 1, 1, 0, 0, 1350.96, -817.254, 279.272, 3.78825, 300, 0, 0, 42, 0, 0, 0, 0, 0),
 (@CGUID+53, @NPC_RED_MIST, 646, 1, 1, 0, 0, 1341.93, -824.818, 279.157, 4.35217, 300, 0, 0, 42, 0, 0, 0, 0, 0);
 
--- [c++ and SQL] Quests - Don't. Stop. Moving. scripted (Feedback #7427)
+-- [c++ and SQL] Quests - Don't. Stop. Moving. corrected (Fixes #7427)
 SET @NPC_TERRATH_THE_STEADY := 42466;
 SET @NPC_OPALESCENT_GUARDIAN := 43591;
 SET @NPC_OPAL_STONETHROWER := 43586;
 SET @CGUID := 40215;
+UPDATE `creature` SET `phaseMask` = 65534 WHERE `id` = 42466 AND `guid` = 802799;
+UPDATE `creature_template` SET `InhabitType` = 7 WHERE `entry` = 42522;
+UPDATE `creature` SET `spawndist` = 20, `MovementType` = 1 WHERE `id` = 42522;
+UPDATE `creature_template` SET `faction_A` = 2283, `faction_H` = 2283, `KillCredit1` = 0, `KillCredit2` = 0 WHERE `entry` = 43545;
 UPDATE `creature_template` SET `mindmg` = 468, `maxdmg` = 702, `attackpower` = 175, `dmg_multiplier` = 35, `unit_class` = 1, `exp` = 3, `unit_flags` = 64, `VehicleId` = 1088, `WDBVerified` = 15595, `npcflag` = `npcflag`|1, `AIName` = "", `ScriptName` = "npc_terrath_the_steady" WHERE `entry` = @NPC_TERRATH_THE_STEADY;
 UPDATE `creature_template` SET `minlevel` = 83, `maxlevel` = 83, `exp` = 3, `faction_A` = 35, `faction_H` = 35, `speed_walk` = 1.55556, `baseattacktime` = 2000, `unit_flags` = 264, `WDBVerified` = 15595, `AIName` = "", `ScriptName` = "npc_opalescent_guardian" WHERE `entry` = @NPC_OPALESCENT_GUARDIAN;
 UPDATE `creature_template` SET `minlevel` = 83, `maxlevel` = 83, `exp` = 3, `faction_A` = 2283, `faction_H` = 2283, `speed_walk` = 0.888888, `speed_run` = 1.5873, `mindmg` = 168, `maxdmg` = 702, `attackpower` = 175, `dmg_multiplier` = 35, `baseattacktime` = 2000, `unit_class` = 1, `unit_flags` = 64, `WDBVerified` = 15595 WHERE `entry` = @NPC_OPAL_STONETHROWER;

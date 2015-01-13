@@ -389,39 +389,52 @@ DELETE FROM `gameobject` WHERE `id` IN (@GO_DEEP_ALABASTER_CRYSTAL_CHUNK, @GO_DE
 (216895, 207384, 646, 1, 1, 2073.49, -323.683, -159.473, 1.85005, 0, 0, 0.798635, 0.601815, 300, 100, 1),
 (216896, 207384, 646, 1, 1, 2072.49, -323.321, -159.39, 1.85005, 0, 0, 0.798635, 0.601815, 300, 100, 1);*/
 
--- [SQL] Quests - A Head Full of Wind scripted (Feedback #7439)
+-- [SQL] Quests - A Head Full of Wind script redone (Fixes #7439)
 SET @NPC_LORVARIUS := 43395;
-SET @NPC_RED_WIND_DEVIL := 47192;
-SET @NPC_RED_WIND_DEVIL_DESPAWNER := 43437;
+SET @NPC_WIND_DEVIL_CLEAN := 43437;
+SET @NPC_WIND_DEVIL_RED := 47192;
 SET @NPC_RED_MIST := 43370;
 SET @SPELL_RED_MIST_VISUAL := 77707;
 SET @SPELL_RED_MIST_DAMAGE := 81095;
 SET @SPELL_RED_MIST_DAMAGE_PLAYER := 81096;
-SET @SPELL_LORVARIUS_SUMMON_RED_WIND_DEVIL := 87941;
+SET @SPELL_LORVARIUS_SUMMONED_CLEAN := 81225;
+SET @SPELL_LORVARIUS_SUMMONED_RED := 87941;
 SET @SPELL_RED_MIST_KILL_CREDIT := 81223;
 SET @SPELL_RED_WIND_DEVIL_GUARDIAN_AURA := 81226;
 SET @SPELL_RED_MIST_RETURN_PING := 81359;
-SET @SPELL_LORVARIUS_CLEAN_SUMMON := 81225;
-SET @SPELL_LORVARIUS_CLEAN_KILL_CREDIT := 81222;
+SET @SPELL_LORVARIUS_WHIRLY_WIND_CLEAN := 81222;
+SET @SPELL_LORVARIUS_WHIRLY_WIND_RED := 81223;
 SET @SPELL_LORVARIUS_CLEAN_GUARDIAN_AURA := 87940;
 SET @QUEST_A_HEAD_FULL_OF_WIND := 26581;
 SET @CGUID := 319425;
-UPDATE `creature_template` SET `mindmg` = 435, `maxdmg` = 653, `attackpower` = 163, `dmg_multiplier` = 37.6, `unit_flags` = 32832, `AIName` = "", `WDBVerified` = 15595 WHERE `entry` = @NPC_LORVARIUS;
+UPDATE `creature_template` SET `Health_mod` = 10, `Mana_mod` = 5, `mindmg` = 435, `maxdmg` = 653, `attackpower` = 163, `dmg_multiplier` = 37.6, `unit_flags` = 32832, `AIName` = "SmartAI", `ScriptName` = "", `WDBVerified` = 15595 WHERE `entry` = @NPC_LORVARIUS;
 UPDATE `creature_template` SET `minlevel` = 85, `maxlevel` = 85, `exp` = 3, `faction_A` = 114, `faction_H` = 114, `speed_run` = 0.571429, `baseattacktime` = 4000, `unit_flags` = 33571328, `WDBVerified` = 15595, `InhabitType` = 4, `AIName` = "SmartAI", `ScriptName` = "" WHERE `entry` = @NPC_RED_MIST;
-UPDATE `creature_template` SET `minlevel` = 85, `maxlevel` = 85, `exp` = 3, `baseattacktime` = 2000, `unit_flags` = 776, `WDBVerified` = 15595, `AIName` = "" WHERE `entry` = @NPC_RED_WIND_DEVIL;
-UPDATE `creature_template` SET `minlevel` = 85, `maxlevel` = 85, `exp` = 3, `baseattacktime` = 2000, `unit_flags` = 776, `WDBVerified` = 15595, `AIName` = "SmartAI" WHERE `entry` = @NPC_RED_WIND_DEVIL_DESPAWNER;
-DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@NPC_LORVARIUS, @NPC_RED_WIND_DEVIL, @NPC_RED_WIND_DEVIL_DESPAWNER, @NPC_RED_MIST) AND `source_type` = 0;
+UPDATE `creature_template` SET `minlevel` = 85, `maxlevel` = 85, `exp` = 3, `baseattacktime` = 2000, `unit_flags` = 776, `flags_extra` = 0, `WDBVerified` = 15595, `AIName` = "SmartAI", `ScriptName` = "" WHERE `entry` = @NPC_WIND_DEVIL_CLEAN;
+UPDATE `creature_template` SET `minlevel` = 85, `maxlevel` = 85, `exp` = 3, `baseattacktime` = 2000, `unit_flags` = 776, `flags_extra` = 0, `WDBVerified` = 15595, `AIName` = "SmartAI", `ScriptName` = "" WHERE `entry` = @NPC_WIND_DEVIL_RED;
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@NPC_LORVARIUS, @NPC_WIND_DEVIL_CLEAN, @NPC_WIND_DEVIL_RED, @NPC_RED_MIST) AND `source_type` = 0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
-(@NPC_RED_WIND_DEVIL_DESPAWNER, 0, 0, 0, 54, 0, 100, 0, 0, 0, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Red Wind Devil Despawner - On Just Summoned - Despawn"),
+(@NPC_LORVARIUS, 0, 0, 0, 19, 0, 100, 0, @QUEST_A_HEAD_FULL_OF_WIND, 0, 0, 0, 11, @SPELL_LORVARIUS_SUMMONED_CLEAN, 3, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Windspeaker Lorvarius - On Quest Accept - Cast Summon Wind-Devil Clean"),
+(@NPC_LORVARIUS, 0, 1, 0, 19, 0, 100, 0, @QUEST_A_HEAD_FULL_OF_WIND, 0, 0, 0, 11, @SPELL_RED_WIND_DEVIL_GUARDIAN_AURA, 3, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Windspeaker Lorvarius - On Quest Accept - Cast Guardian Aura"),
+(@NPC_LORVARIUS, 0, 2, 0, 20, 0, 100, 0, @QUEST_A_HEAD_FULL_OF_WIND, 0, 0, 0, 11, @SPELL_LORVARIUS_CLEAN_GUARDIAN_AURA, 3, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Windspeaker Lorvarius - On Quest Reward - Cast Clean Guardian Aura"),
+(@NPC_LORVARIUS, 0, 3, 0, 20, 0, 100, 0, @QUEST_A_HEAD_FULL_OF_WIND, 0, 0, 0, 45, 1, 1, 0, 0, 0, 0, 19, @NPC_WIND_DEVIL_CLEAN, 100, 0, 0, 0, 0, 0, "Nepenthe-Windspeaker Lorvarius - On Quest Reward - Set data 1 1 Wind Devil Clean"),
+(@NPC_LORVARIUS, 0, 4, 0, 20, 0, 100, 0, @QUEST_A_HEAD_FULL_OF_WIND, 0, 0, 0, 45, 1, 1, 0, 0, 0, 0, 19, @NPC_WIND_DEVIL_RED, 100, 0, 0, 0, 0, 0, "Nepenthe-Windspeaker Lorvarius - On Quest Reward - Set data 1 1 Wind Devil Red"),
+(@NPC_WIND_DEVIL_CLEAN, 0, 0, 0, 1, 0, 100, 1, 120000, 120000, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Wind Devil Clean - OOC - Despawn"),
+(@NPC_WIND_DEVIL_CLEAN, 0, 1, 0, 38, 0, 100, 0, 1, 1, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Wind Devil Clean - On Data Set - Despawn"),
+(@NPC_WIND_DEVIL_RED, 0, 0, 0, 1, 0, 100, 1, 120000, 120000, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Wind Devil Red - OOC - Despawn"),
+(@NPC_WIND_DEVIL_RED, 0, 1, 0, 38, 0, 100, 0, 1, 1, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Wind Devil Red - On Data Set - Despawn"),
 (@NPC_RED_MIST, 0, 0, 1, 10, 0, 100, 0, 0, 6, 30000, 30000, 33, @NPC_RED_MIST, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Red Mist - On LoS - Give KC"),
-(@NPC_RED_MIST, 0, 1, 0, 61, 0, 100, 0, 0, 0, 0, 0, 11, @SPELL_RED_MIST_DAMAGE_PLAYER, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Red Mist - On LoS - Cast Red Mist damage");
--- UPDATE `quest_template` SET `Flags` = 0 WHERE `Id` = @QUEST_A_HEAD_FULL_OF_WIND;
-DELETE FROM `creature_template_aura` WHERE `entry` IN (@NPC_RED_MIST, @NPC_RED_WIND_DEVIL);
+(@NPC_RED_MIST, 0, 1, 2, 61, 0, 100, 0, 0, 0, 0, 0, 11, @SPELL_RED_MIST_DAMAGE_PLAYER, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Nepenthe-Red Mist - On LoS - Cast Red Mist damage"),
+(@NPC_RED_MIST, 0, 2, 0, 61, 0, 100, 0, 0, 0, 0, 0, 45, 1, 1, 0, 0, 0, 0, 19, @NPC_WIND_DEVIL_CLEAN, 50, 0, 0, 0, 0, 0, "Nepenthe-Red Mist - On LoS - Set data 1 1 Wind Devil Clean");
+UPDATE `quest_template` SET `ObjectiveText2` = '' WHERE `Id` = @QUEST_A_HEAD_FULL_OF_WIND;
+DELETE FROM `creature_template_aura` WHERE `entry` IN (@NPC_RED_MIST, @NPC_WIND_DEVIL_RED, @NPC_WIND_DEVIL_CLEAN);
 INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES
 (@NPC_RED_MIST, @SPELL_RED_MIST_VISUAL),
-(@NPC_RED_WIND_DEVIL, @SPELL_RED_WIND_DEVIL_GUARDIAN_AURA);
-DELETE FROM `spell_linked_spell` WHERE `spell_trigger` IN (@SPELL_LORVARIUS_CLEAN_KILL_CREDIT, @SPELL_RED_MIST_KILL_CREDIT);
+(@NPC_WIND_DEVIL_CLEAN, @SPELL_LORVARIUS_WHIRLY_WIND_CLEAN),
+(@NPC_WIND_DEVIL_RED, @SPELL_LORVARIUS_WHIRLY_WIND_RED);
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 17 AND `SourceEntry` IN (@SPELL_RED_MIST_RETURN_PING, @SPELL_RED_MIST_DAMAGE_PLAYER);
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger` = @SPELL_RED_MIST_DAMAGE_PLAYER;
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES
+(@SPELL_RED_MIST_DAMAGE_PLAYER, @SPELL_LORVARIUS_SUMMONED_RED, 1, "Red Mist Damage casts Summon Lorvarius Whirly-Wind Red");
 DELETE FROM `creature` WHERE `id` = @NPC_RED_MIST;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) values
 (@CGUID+0, @NPC_RED_MIST, 646, 1, 1, 0, 0, 1370.55, -724.406, 279.196, 3.23403, 300, 0, 0, 42, 0, 0, 0, 0, 0),

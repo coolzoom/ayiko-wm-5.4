@@ -6904,6 +6904,10 @@ void Spell::EffectStealBeneficialBuff(SpellEffIndex effIndex)
         unitTarget->RemoveAurasDueToSpellBySteal(itr->first, itr->second, m_caster);
     }
     m_caster->SendMessageToSet(&dataSuccess, true);
+
+    // Glyph of Spellsteal
+    if (m_spellInfo->Id == 30449 && m_caster->HasAura(115713))
+        m_caster->CastSpell(m_caster, 115714, true);
 }
 
 void Spell::EffectKillCreditPersonal(SpellEffIndex effIndex)

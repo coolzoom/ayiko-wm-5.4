@@ -1004,7 +1004,7 @@ void Aura::RefreshTimers(bool recalculate, int32 oldPeriodicAmount)
             if (AuraEffect const *eff = GetEffect(i))
             {
                 // Handle Pandemic
-                if (GetCaster()->HasAura(131973))
+                if (GetCaster() && GetCaster()->HasAura(131973))
                 {
                     if (eff->GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE)
                     {

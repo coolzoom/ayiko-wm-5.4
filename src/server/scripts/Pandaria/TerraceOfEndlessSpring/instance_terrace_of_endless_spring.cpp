@@ -136,7 +136,10 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
 
                 if (id == DATA_PROTECTORS && state == DONE)
                     if (Creature* c = instance->GetCreature(GetData64(NPC_TSULONG)))
+                    {
+                        instance->LoadGrid(c->GetPositionX(), c->GetPositionY());
                         c->AI()->DoAction(ACTION_START_TSULONG_WAYPOINT);
+                    }
 
                 return true;
             }

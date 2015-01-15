@@ -52,6 +52,45 @@ INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
 -- PROTECTORS OF THE ENDLESS END
 
 -- TSULONG
+UPDATE `creature_template` SET faction_A = 16, faction_H = 16, minlevel = 92, maxlevel = 92, Health_mod = 2, flags_extra = 128 WHERE `entry` = 62962; -- Unstable Sha Target
+UPDATE `creature_template` SET faction_A = 16, faction_H = 16, minlevel = 92, maxlevel = 92, Health_mod = 2.45, `Mana_mod`=2.45, ScriptName = 'npc_unstable_sha' WHERE `entry` = 62919; -- Unstable Sha
+UPDATE `creature_template` SET faction_A = 16, faction_H = 16, minlevel = 92, maxlevel = 92, Health_mod = 8.8, `Mana_mod`=8.8, ScriptName = 'npc_embodied_terror' WHERE `entry` = 62969; -- Embodied Terror
+UPDATE `creature_template` SET faction_A = 16, faction_H = 16, minlevel = 92, maxlevel = 92, Health_mod = 1.65, `Mana_mod`=1.65, ScriptName = 'npc_fright_spawn' WHERE `entry` = 62977; -- Fright Spawn
+
+DELETE FROM creature_text WHERE entry IN (62849, 62442);
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(62849, 0, 0, '%s fades.', 16, 0, 100, 0, 0, 0, 'Sunbeam'),
+(62442, 0, 0, '|TInterface\\Icons\\spell_holy_surgeoflight.blp:20|t%s casts |cFFFF0000|Hspell:122789|h[Sunbeam]|h|r!', 41, 0, 100, 0, 0, 29365, 'Tsulong - EMOTE_SUNBEAM'),
+(62442, 1, 0, '%s summons an |cFFFFFFFFEmbodied Terror|r!', 41, 0, 100, 0, 0, 0, 'Tsulong - EMOTE_TERROR'),
+(62442, 2, 0, '|TInterface\\Icons\\ability_warlock_everlastingaffliction.blp:20|t%s is affected by |cFFFF0000|Hspell:123011|h[Terrorize]|h|r! Dispel %s!', 41, 0, 100, 0, 0, 0, 'Tsulong - EMOTE_TERRORIZE'),
+(62442, 3, 0, 'No... the waters... I must... resist... I shall not... fear...', 14, 0, 100, 0, 0, 29359, 'Tsulong - SAY_INTRO'),
+(62442, 4, 0, 'You do not belong here! The waters must be protected... I will cast you out, or slay you!', 14, 0, 100, 0, 0, 29350, 'Tsulong - SAY_AGGRO'),
+(62442, 5, 0, 'Flee this place... or die!', 14, 0, 100, 0, 0, 29365, 'Tsulong - SAY_NIGHTMARES'),
+(62442, 5, 1, 'Overwhelming... fear!', 14, 0, 100, 0, 0, 29364, 'Tsulong - SAY_NIGHTMARES'),
+(62442, 6, 0, 'Night... becomes day!', 14, 0, 100, 0, 0, 29356, 'Tsulong - SAY_NIGHT_TO_DAY'),
+(62442, 6, 1, 'The sun... shines through...', 14, 0, 100, 0, 0, 29357, 'Tsulong - SAY_NIGHT_TO_DAY'),
+(62442, 6, 2, 'Once more... the dawn...', 14, 0, 100, 0, 0, 29358, 'Tsulong - SAY_NIGHT_TO_DAY'),
+(62442, 7, 0, 'Darkness grows...', 14, 0, 100, 0, 0, 29354, 'Tsulong - SAY_DAY_TO_NIGHT'),
+(62442, 7, 1, 'Day falls to night...', 14, 0, 100, 0, 0, 29353, 'Tsulong - SAY_DAY_TO_NIGHT'),
+(62442, 7, 2, 'Light fades...', 14, 0, 100, 0, 0, 29355, 'Tsulong - SAY_DAY_TO_NIGHT'),
+(62442, 8, 0, 'No...!', 14, 0, 100, 0, 0, 29362, 'Tsulong - SAY_SLAY_DAY'),
+(62442, 8, 1, 'Forgive me!', 14, 0, 100, 0, 0, 29363, 'Tsulong - SAY_SLAY_DAY'),
+(62442, 9, 0, 'Die in darkness.', 14, 0, 100, 0, 0, 29360, 'Tsulong - SAY_SLAY_NIGHT'),
+(62442, 9, 1, 'The night surrounds you...', 14, 0, 100, 0, 0, 29361, 'Tsulong - SAY_SLAY_NIGHT'),
+(62442, 10, 0, 'I thank you, strangers. I have been freed.', 14, 0, 100, 0, 0, 29352, 'Tsulong - SAY_DEATH'),
+(62442, 11, 0, 'Protect... the waters...', 14, 0, 100, 0, 0, 29352, 'Tsulong - SAY_WIPE');
+
+DELETE FROM spell_script_names WHERE spell_id IN (122438, 122453, 123018);
+INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
+(122438, 'spell_tsulong_sha_regen'),
+(122453, 'spell_tsulong_sha_regen'),
+(123018, 'spell_terrorize_periodic_player');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (122952, 123012, 122928);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(13, 1, 122952, 0, 0, 31, 0, 3, 62962, 0, 0, 0, 0, '', 'Summon Unstable Sha - target Trigger'),
+(13, 1, 123012, 0, 0, 31, 0, 3, 62442, 0, 0, 0, 0, '', 'Terrorize - target Tsulong'),
+(13, 1, 122928, 0, 0, 31, 0, 3, 62442, 0, 0, 0, 0, '', 'Instability - target Tsulong');
 
 UPDATE creature_template SET ScriptName = 'boss_tsulong' WHERE entry = 62442;
 UPDATE creature_template SET ScriptName = 'npc_sunbeam' WHERE entry = 62849;
@@ -61,6 +100,11 @@ INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
 (125843, 'spell_dread_shadows_damage'),
 (122768, 'spell_dread_shadows_malus'),
 (122789, 'spell_sunbeam');
+
+DELETE FROM creature_template_aura WHERE entry IN (62442);
+INSERT INTO creature_template_aura (entry, aura) VALUES
+(62442, 122452), -- Tsulong - Energy drain
+(62442, 64481); -- Tsulong - Reduce Critical Strike Chance -100%
 
 -- TSULONG END
 
@@ -149,7 +193,7 @@ UPDATE `creature_template` SET `minlevel`=93, `maxlevel`=93, `faction_A`=16, `fa
 UPDATE `creature_template` SET `speed_walk`=2 WHERE `entry`=62962; -- Unstable Sha Target
 UPDATE `creature_template` SET `speed_walk`=1.2 WHERE `entry`=61046; -- Jinlun Kun
 UPDATE `creature_template` SET `speed_walk`=1.2 WHERE `entry`=62983; -- Lei Shi
-UPDATE `creature_template` SET `unit_class`=4, `minlevel`=93, `maxlevel`=93, `faction_A`=1965, `faction_H`=1965, `speed_walk`=1.444444, `speed_run`=1.571429, `BaseAttackTime`=1500, `HoverHeight`=10, `VehicleId`=2270 WHERE `entry`=62442; -- Tsulong
+UPDATE `creature_template` SET `unit_class`=4, `minlevel`=93, `maxlevel`=93, `faction_A`=1965, `faction_H`=1965, `speed_walk`=1.444444, `speed_run`=1.571429, `BaseAttackTime`=1500, InhabitType = 4, `HoverHeight`=10, `VehicleId`=2270 WHERE `entry`=62442; -- Tsulong
 UPDATE `creature_template` SET `speed_walk`=2, `BaseAttackTime`=1500 WHERE `entry`=62995; -- Animated Protector
 UPDATE `creature_template` SET `speed_walk`=2 WHERE `entry`=65736; -- Return to the Terrace
 UPDATE `creature_template` SET `speed_walk`=2 WHERE `entry`=63275; -- Corrupted Protector
@@ -191,7 +235,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position
 (@CGUID+28, 62962, 996, 3, 1, -979.0972, -3006.896, 12.20953, 4.655136, 86400, 0, 0), -- Unstable Sha Target (Area: -Unknown-)
 (@CGUID+29, 62962, 996, 3, 1, -1047.639, -2999.571, 12.20952, 4.655136, 86400, 0, 0), -- Unstable Sha Target (Area: -Unknown-)
 (@CGUID+30, 64443, 996, 3, 1, -963.2674, -3072.51, 12.20953, 0, 86400, 0, 0), -- Enchanted Plant (Auras: )
-(@CGUID+31, 62442, 996, 3, 1, -1017.988, -3049.625, 12.90686, 4.581499, 86400, 0, 0), -- Tsulong (Auras: 122452 - Energy Drain & 50% HP)
+(@CGUID+31, 62442, 996, 3, 1, -1017.281, -2826.896, 81.23129, 4.581499, 86400, 0, 0), -- Tsulong (Auras: 122452 - Energy Drain & 50% HP)
 (@CGUID+32, 63275, 996, 3, 1, -1018.217, -2935.313, 19.43974, 4.706642, 86400, 0, 0), -- Corrupted Protector (Auras: )
 (@CGUID+33, 62995, 996, 3, 1, -1045.229, -2925.26, 19.17827, 1.960813, 86400, 0, 0), -- Animated Protector (Auras: 123493 - Protect)
 (@CGUID+34, 62995, 996, 3, 1, -1013.615, -2925.484, 19.70614, 1.112243, 86400, 0, 0), -- Animated Protector (Auras: 123493 - Protect)

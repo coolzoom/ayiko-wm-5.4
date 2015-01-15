@@ -5828,6 +5828,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 120267: // Vengeance (Monk)
                     spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_APPLY_AURA;
                     break;
+                case 122952: // Summon Unstable Sha
+                    spellInfo->MaxAffectedTargets = 2;
+                    break;
                 default:
                     break;
             }

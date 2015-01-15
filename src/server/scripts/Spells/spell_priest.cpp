@@ -1308,15 +1308,7 @@ class spell_pri_devouring_plague : public SpellScriptLoader
         {
             PrepareAuraScript(spell_pri_devouring_plague_AuraScript);
 
-            uint8 powerUsed;
-
-            bool Load()
-            {
-                powerUsed = 0;
-                return true;
-            }
-
-            void CalculatePeriodicDamage(AuraEffect const * auraEffect, int32& amount, bool& /*canBeRecalculated*/)
+            void CalculatePowerUsed(AuraEffect const * auraEffect, int32& amount, bool& /*canBeRecalculated*/)
             {
                 if (!GetCaster())
                     return;
@@ -1325,31 +1317,18 @@ class spell_pri_devouring_plague : public SpellScriptLoader
                 const_cast<AuraEffect*>(auraEffect)->SetUserData(GetCaster()->GetPower(POWER_SHADOW_ORB) + 1);
             }
 
-            void CalculatePowerUsedAmount(AuraEffect const * /*auraEffect*/, int32& amount, bool& /*canBeRecalculated*/)
-            {
-                if (!GetCaster())
-                    return;
-
-                amount = powerUsed;
-            }
-
             void OnTick(AuraEffect const *aurEff)
             {
                 if (!GetCaster())
                     return;
-
-                int32 bp = 1;
-
-                if (AuraEffect const *aurEff2 = aurEff->GetBase()->GetEffect(2))
-                    bp *= aurEff2->GetAmount();
-
+                // Power is saved in calculation of periodic
+                int32 bp = aurEff->GetUserData();
                 GetCaster()->CastCustomSpell(GetCaster(), PRIEST_DEVOURING_PLAGUE_HEAL, &bp, NULL, NULL, true);
             }
 
             void Register()
             {
-                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pri_devouring_plague_AuraScript::CalculatePeriodicDamage, EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE);
-                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pri_devouring_plague_AuraScript::CalculatePowerUsedAmount, EFFECT_2, SPELL_AURA_PERIODIC_DUMMY);
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pri_devouring_plague_AuraScript::CalculatePowerUsed, EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE);
                 OnEffectPeriodic += AuraEffectPeriodicFn(spell_pri_devouring_plague_AuraScript::OnTick, EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE);
             }
         };

@@ -996,8 +996,6 @@ void Aura::RefreshTimers(bool recalculate, int32 oldPeriodicAmount)
     // In mop periodics continue to tick even on re-apply, extend duration by duration left to next tick
     //if (m_spellInfo->AttributesEx8 & SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER)
     {
-        bool pandemicPeriodic = false; // Used for Pandemic aura duration calculation
-
         int32 minAmplitude = m_maxDuration;
         int32 tickTimer = minAmplitude;
         for (uint8 i = 0; i < GetSpellInfo()->Effects.size(); ++i)
@@ -1005,13 +1003,8 @@ void Aura::RefreshTimers(bool recalculate, int32 oldPeriodicAmount)
             {
                 // Handle Pandemic
                 if (GetCaster() && GetCaster()->HasAura(131973))
-                {
                     if (eff->GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE)
-                    {
-                        pandemicPeriodic = true;
                         m_maxDuration = std::min(m_duration + m_maxDuration, int32(m_maxDuration * 1.5f));
-                    }
-                }
 
                 // Save periodic info for tick-rolling handling
                 if (int32 ampl = eff->GetAmplitude())

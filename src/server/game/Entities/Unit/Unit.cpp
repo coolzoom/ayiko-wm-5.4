@@ -9998,7 +9998,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
                 case 114014: // Shuriken Toss
                 case 140308:
                 case 140309:
-                case 121471: // Shadow Blades
+                case 121473: // Shadow Blades
                 case 121474:
                     return false;
                 default:

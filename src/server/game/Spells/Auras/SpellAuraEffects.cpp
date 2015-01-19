@@ -1664,8 +1664,11 @@ void AuraEffect::Update(uint32 diff, Unit* caster)
             {
                 // Death and Decay
                 if (GetSpellInfo()->Id == 43265)
-                    if (auto const d_owner = GetCaster()->GetDynObject(GetSpellInfo()->Id))
-                        GetCaster()->CastSpell(d_owner->GetPositionX(), d_owner->GetPositionY(), d_owner->GetPositionZ(), 52212, true);
+                {
+                    if (auto caster = GetCaster())
+                        if (auto const d_owner = caster->GetDynObject(GetSpellInfo()->Id))
+                            caster->CastSpell(d_owner->GetPositionX(), d_owner->GetPositionY(), d_owner->GetPositionZ(), 52212, true);
+                }
             }
         }
     }

@@ -1252,6 +1252,7 @@ bool Aura::CanBeSaved() const
         case 114232: // Sanctified Wrath bonus
         case 124458: // Healing Spheres tracker
         case 106284: // Gathering Muddy Water
+        case 113901: // Demonic Gateway stacking aura
             return false;
         default:
             break;

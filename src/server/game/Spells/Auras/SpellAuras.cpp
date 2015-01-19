@@ -2268,7 +2268,12 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         if (owner->HasAura(34692))
                         {
                             if (apply)
+                            {
                                 owner->CastSpell(owner, 34471, true, 0, GetEffect(0));
+                                // Apply immunity, it was a bug on MoP but never fixed by Blizzard until WoD...
+                                owner->CastSpell(owner, 70029, true);
+                                target->CastSpell(target, 70029, true);
+                            }
                             else
                                 owner->RemoveAurasDueToSpell(34471);
                         }

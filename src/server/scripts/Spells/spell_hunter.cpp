@@ -739,34 +739,10 @@ class spell_hun_a_murder_of_crows : public SpellScriptLoader
                     if (!GetCaster())
                         return;
 
-                    if (aurEff->GetTickNumber() > 15)
-                        return;
-
-                    if (Player* _player = GetCaster()->ToPlayer())
-                    {
-                        _player->CastSpell(target, HUNTER_SPELL_A_MURDER_OF_CROWS_SUMMON, true);
-
-                        std::list<Creature*> tempList;
-                        std::list<Creature*> crowsList;
-
-                        _player->GetCreatureListWithEntryInGrid(tempList, HUNTER_NPC_MURDER_OF_CROWS, 100.0f);
-
-                        for (auto itr : tempList)
-                            crowsList.push_back(itr);
-
-                        // Remove other players Crows
-                        for (std::list<Creature*>::iterator i = tempList.begin(); i != tempList.end(); ++i)
-                        {
-                            Unit* owner = (*i)->GetOwner();
-                            if (owner && owner == _player && (*i)->IsSummon())
-                                continue;
-
-                            crowsList.remove((*i));
-                        }
-
-                        for (auto itr : crowsList)
-                            itr->AI()->AttackStart(target);
-                    }
+                    if (aurEff->GetTickNumber() % 2)
+                        target->CastSpell(target, urand(0, 1) ? 131951 : 131952, true);
+                    else
+                        target->CastSpell(target, 131900, true, nullptr, nullptr, GetCasterGUID());
                 }
             }
 

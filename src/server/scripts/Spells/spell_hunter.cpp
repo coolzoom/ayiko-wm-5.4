@@ -1472,8 +1472,16 @@ class spell_hun_kill_command : public SpellScriptLoader
                     return SPELL_FAILED_NO_PET;
 
                 // pet has a target and target is within 5 yards
-                if (!petTarget || !pet->IsWithinDist(petTarget, 25.0f, true))
+                if (!petTarget || !pet->IsWithinDist(petTarget, 10.0f, true))
                     return SPELL_FAILED_DONT_REPORT;
+
+                uint32 petUnitFlags = pet->GetUInt32Value(UNIT_FIELD_FLAGS);     // Get unit state
+                if (petUnitFlags & UNIT_FLAG_STUNNED)
+                    return SPELL_FAILED_STUNNED;
+                else if (petUnitFlags & UNIT_FLAG_CONFUSED)
+                    return SPELL_FAILED_CONFUSED;
+                else if (petUnitFlags & UNIT_FLAG_FLEEING)
+                    return SPELL_FAILED_FLEEING;
 
                 return SPELL_CAST_OK;
             }

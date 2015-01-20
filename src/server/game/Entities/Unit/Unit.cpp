@@ -11927,15 +11927,15 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                     DoneTotal += aurEff->GetAmount();
             break;
         case SPELLFAMILY_PALADIN:
+        {
+            if (spellProto->Id == 119072) // Glyph of Final Wrath
             {
-                if (spellProto->Id == 119072) // Glyph of Final Wrath
-                {
-                    if (AuraEffect const * const glyph = GetAuraEffect(54935, EFFECT_0))
-                        if (victim->HealthBelowPct(20))
-                            AddPct(DoneTotalMod, glyph->GetAmount());
-                }
-                break;
+                if (AuraEffect const * const glyph = GetAuraEffect(54935, EFFECT_0))
+                    if (victim->HealthBelowPct(20))
+                        AddPct(DoneTotalMod, glyph->GetAmount());
             }
+            break;
+        }
     }
 
     // Check for table values
@@ -12064,8 +12064,14 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
 
     // Glyph of Inner Sanctum
     if (HasAura(588))
-    if (auto innerSanctum = GetAuraEffect(14771, EFFECT_0))
-        AddPct(TakenTotalMod, -innerSanctum->GetAmount());
+        if (auto innerSanctum = GetAuraEffect(14771, EFFECT_0))
+            AddPct(TakenTotalMod, -innerSanctum->GetAmount());
+
+    // Hunter's Mark increases periodic damage from ranged attacks too
+    if (spellProto->IsRangedWeaponSpell() && spellProto->DmgClass == SPELL_DAMAGE_CLASS_RANGED && damagetype == DOT)
+        if (auto huntersMark = GetAuraEffect(1130, EFFECT_1))
+            AddPct(TakenTotalMod, huntersMark->GetAmount());
+
 
     // From caster spells
     AuraEffectList const& mOwnerTaken = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_FROM_CASTER);

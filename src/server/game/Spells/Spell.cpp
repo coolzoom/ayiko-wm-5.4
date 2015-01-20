@@ -4274,7 +4274,11 @@ void Spell::finish(bool ok)
 
     // Stop Attack for some spells
     if (m_spellInfo->Attributes & SPELL_ATTR0_STOP_ATTACK_TARGET)
+    {
         m_caster->AttackStop();
+        if (auto player = m_caster->ToPlayer())
+            player->SendAttackSwingCancelAttack();
+    }
 
     if (m_castItemGUID && m_caster->GetTypeId() == TYPEID_PLAYER)
         if (Item* item = m_caster->ToPlayer()->GetItemByGuid(m_castItemGUID))

@@ -5828,6 +5828,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 120267: // Vengeance (Monk)
                     spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_APPLY_AURA;
                     break;
+                case 19386: // Wyvern Sting
+                    spellInfo->Attributes |= SPELL_ATTR0_STOP_ATTACK_TARGET;
+                    break;
                 default:
                     break;
             }

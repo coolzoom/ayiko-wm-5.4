@@ -1693,35 +1693,6 @@ class spell_warl_drain_soul : public SpellScriptLoader
         }
 };
 
-// Demonic Gateway (periodic add charge) - 113901
-class spell_warl_demonic_gateway_charges : public SpellScriptLoader
-{
-    public:
-        spell_warl_demonic_gateway_charges() : SpellScriptLoader("spell_warl_demonic_gateway_charges") { }
-
-        class spell_warl_demonic_gateway_charges_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_warl_demonic_gateway_charges_AuraScript);
-
-            void OnTick(AuraEffect const * /*aurEff*/)
-            {
-                if (Unit* target = GetTarget())
-                    if (Aura *demonicGateway = target->GetAura(WARLOCK_DEMONIC_GATEWAY_PERIODIC_CHARGE))
-                        demonicGateway->ModCharges(1);
-            }
-
-            void Register()
-            {
-                OnEffectPeriodic += AuraEffectPeriodicFn(spell_warl_demonic_gateway_charges_AuraScript::OnTick, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_warl_demonic_gateway_charges_AuraScript();
-        }
-};
-
 // Demonic Gateway - 111771
 class spell_warl_demonic_gateway : public SpellScriptLoader
 {
@@ -1940,59 +1911,7 @@ class spell_warl_fel_flame : public SpellScriptLoader
             void HandleOnHit()
             {
                 if (Player* _player = GetCaster()->ToPlayer())
-                {
-                    if (Unit* target = GetHitUnit())
-                    {
-                        _player->EnergizeBySpell(_player, GetSpellInfo()->Id, 15, POWER_DEMONIC_FURY);
-
-                        // Increases the duration of Corruption and Unstable Affliction by 6s
-                        if (_player->GetSpecializationId(_player->GetActiveSpec()) == SPEC_WARLOCK_AFFLICTION)
-                        {
-                            if (Aura *unstableAffliction = target->GetAura(WARLOCK_UNSTABLE_AFFLICTION, _player->GetGUID()))
-                            {
-                                unstableAffliction->SetDuration(unstableAffliction->GetDuration() + 6000);
-                                unstableAffliction->SetNeedClientUpdateForTargets();
-                            }
-                            if (Aura *corruption = target->GetAura(WARLOCK_CORRUPTION, _player->GetGUID()))
-                            {
-                                corruption->SetDuration(corruption->GetDuration() + 6000);
-                                corruption->SetNeedClientUpdateForTargets();
-                            }
-                        }
-                        // Increases the duration of Corruption by 6s
-                        else if (_player->GetSpecializationId(_player->GetActiveSpec()) == SPEC_WARLOCK_DEMONOLOGY)
-                        {
-                            if (Aura *corruption = target->GetAura(WARLOCK_CORRUPTION, _player->GetGUID()))
-                            {
-                                corruption->SetDuration(corruption->GetDuration() + 6000);
-                                corruption->SetNeedClientUpdateForTargets();
-                            }
-                            else if (Aura *doom = target->GetAura(WARLOCK_DOOM, _player->GetGUID()))
-                            {
-                                doom->SetDuration(doom->GetDuration() + 6000);
-                                doom->SetNeedClientUpdateForTargets();
-                            }
-                        }
-                        // Increases the duration of Immolate by 6s
-                        else if (_player->GetSpecializationId(_player->GetActiveSpec()) == SPEC_WARLOCK_DESTRUCTION)
-                        {
-                            if (Aura *corruption = target->GetAura(WARLOCK_IMMOLATE, _player->GetGUID()))
-                            {
-                                corruption->SetDuration(corruption->GetDuration() + 6000);
-                                corruption->SetNeedClientUpdateForTargets();
-                            }
-                        }
-                        // Increases the duration of Corruption by 6s
-                        else
-                        {
-                            if (Aura *corruption = target->GetAura(WARLOCK_CORRUPTION, _player->GetGUID()))
-                            {
-                                corruption->SetDuration(corruption->GetDuration() + 6000);
-                                corruption->SetNeedClientUpdateForTargets();
-                            }
-                        }
-                    }
-                }
+                    _player->EnergizeBySpell(_player, GetSpellInfo()->Id, 15, POWER_DEMONIC_FURY);
             }
 
             void Register()
@@ -2916,7 +2835,6 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_soul_swap();
     new spell_warl_nightfall();
     new spell_warl_drain_soul();
-    new spell_warl_demonic_gateway_charges();
     new spell_warl_demonic_gateway();
     new spell_warl_rain_of_fire();
     new spell_warl_ember_tap();

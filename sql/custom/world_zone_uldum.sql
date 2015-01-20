@@ -13,7 +13,8 @@ UPDATE `creature_template` SET `VehicleId`='1267' WHERE (`entry`='47473');
 -- Camera Trigger
 DELETE FROM `creature` WHERE `id` = '47473';
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `AreaID`) VALUES ('5032', '47473', '1', '1', '1', '0', '0', '-10962.554', '-1378.438', '35.528', '5.437', '300', '0', '0', '42', '0', '0', '0', '0', '0', '0');
-UPDATE `creature_template` SET `faction_A`='35', `faction_H`='35', `unit_flags`='0', `flags_extra`='0', `ScriptName`='npc_uldum_camera_traitors_q' WHERE (`entry`='47473');
+UPDATE `creature_template` SET `faction_A`='35', `faction_H`='35', `unit_flags`='512', `flags_extra`='0', `ScriptName`='npc_uldum_camera_traitors_q' WHERE (`entry`='47473');
+UPDATE `creature` SET `spawndist`='0' WHERE (`id`='48263');
 
 -- Neferset Frond gameobject
 DELETE FROM `gameobject` WHERE `id` = '206579';

@@ -990,20 +990,36 @@ void Aura::RefreshDuration(bool recalculate)
         RecalculateAmountOfEffects();
 }
 
-void Aura::RefreshTimers(bool recalculate)
+void Aura::RefreshTimers(bool recalculate, int32 oldPeriodicAmount)
 {
     m_maxDuration = CalcMaxDuration();
-    if (m_spellInfo->AttributesEx8 & SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER)
+    // In mop periodics continue to tick even on re-apply, extend duration by duration left to next tick
+    //if (m_spellInfo->AttributesEx8 & SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER)
     {
         int32 minAmplitude = m_maxDuration;
+        int32 tickTimer = minAmplitude;
         for (uint8 i = 0; i < GetSpellInfo()->Effects.size(); ++i)
             if (AuraEffect const *eff = GetEffect(i))
-                if (int32 ampl = eff->GetAmplitude())
-                    minAmplitude = std::min(ampl, minAmplitude);
+            {
+                // Handle Pandemic
+                if (GetCaster() && GetCaster()->HasAura(131973))
+                    if (eff->GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE)
+                        m_maxDuration = std::min(m_duration + m_maxDuration, int32(m_maxDuration * 1.5f));
 
-        // If only one tick remaining, roll it over into new duration
-        if (GetDuration() <= minAmplitude)
-            m_maxDuration += GetDuration();
+                // Save periodic info for tick-rolling handling
+                if (int32 ampl = eff->GetAmplitude())
+                {
+                    if (ampl <= minAmplitude)
+                    {
+                        minAmplitude = ampl;
+                        tickTimer = eff->GetPeriodicTimer();
+                    }
+                }
+            }
+
+        // Expand duration for the amount left to next tick
+        if (minAmplitude && minAmplitude < m_maxDuration)
+            m_maxDuration += tickTimer;
     }
 
     RefreshDuration(recalculate);
@@ -1011,7 +1027,13 @@ void Aura::RefreshTimers(bool recalculate)
     Unit* caster = GetCaster();
     for (uint8 i = 0; i < GetSpellInfo()->Effects.size(); ++i)
         if (HasEffect(i))
-            GetEffect(i)->CalculatePeriodic(caster, false, false);
+        {
+            auto eff = GetEffect(i);
+            eff->CalculatePeriodic(caster, false, false);
+            // Tick rolled sets information that of last tick moved to new aura, it must store its damage
+            if (oldPeriodicAmount && eff->GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE)
+                eff->SetRolledTickAmount(oldPeriodicAmount);
+        }
 }
 
 void Aura::SetCharges(uint8 charges)
@@ -1112,13 +1134,21 @@ bool Aura::ModStackAmount(int32 num, AuraRemoveMode removeMode)
     if (m_spellInfo->Id == 980)
         refresh = false;
 
-    // Update stack amount
+    // Save old amount used for tick-rolling
+    int32 oldPeriodicAmount = 0;
+    for (auto &effectPtr : m_effects)
+        if (effectPtr && effectPtr->GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE)
+        {
+            oldPeriodicAmount = effectPtr->GetAmount();
+            break;
+        }
+
     SetStackAmount(stackAmount);
 
     if (refresh)
     {
         RefreshSpellMods();
-        RefreshTimers(false);
+        RefreshTimers(false, oldPeriodicAmount);
 
         auto charges = CalcMaxCharges();
         CallScriptRefreshChargesHandlers(charges);
@@ -1222,6 +1252,7 @@ bool Aura::CanBeSaved() const
         case 114232: // Sanctified Wrath bonus
         case 124458: // Healing Spheres tracker
         case 106284: // Gathering Muddy Water
+        case 113901: // Demonic Gateway stacking aura
             return false;
         default:
             break;
@@ -1649,9 +1680,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     // Glyph of Power Word: Shield
                     if (AuraEffect *glyph = caster->GetAuraEffect(55672, 0))
                     {
+                        int32 amount = GetEffect(EFFECT_0)->GetAmount();
                         // instantly heal m_amount% of the absorb-value
-                        int32 heal = glyph->GetAmount() * GetEffect(0)->GetAmount()/100;
+                        int32 heal = CalculatePct(amount, glyph->GetAmount());
                         caster->CastCustomSpell(GetUnitOwner(), 56160, &heal, NULL, NULL, true, 0, GetEffect(0));
+                        // and reduce absorb amount
+                        amount = AddPct(amount, -glyph->GetAmount());
+                        GetEffect(EFFECT_0)->SetAmount(amount);
                     }
                 }
                 break;
@@ -2233,7 +2268,12 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         if (owner->HasAura(34692))
                         {
                             if (apply)
+                            {
                                 owner->CastSpell(owner, 34471, true, 0, GetEffect(0));
+                                // Apply immunity, it was a bug on MoP but never fixed by Blizzard until WoD...
+                                owner->CastSpell(owner, 70029, true);
+                                target->CastSpell(target, 70029, true);
+                            }
                             else
                                 owner->RemoveAurasDueToSpell(34471);
                         }
@@ -2442,6 +2482,15 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         target->RemoveAurasDueToSpell(122107);
                     else if (apply && GetStackAmount() == 5)
                         target->CastSpell(target, 122107, true);
+                    break;
+                }
+                // Power Guard
+                case 118636:
+                {
+                    if (apply)
+                        target->CastSpell(target, 124899, true);
+                    else
+                        target->RemoveAurasDueToSpell(124899);
                     break;
                 }
             }

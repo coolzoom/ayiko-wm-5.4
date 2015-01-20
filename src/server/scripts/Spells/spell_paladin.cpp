@@ -1873,9 +1873,7 @@ class spell_pal_glyph_of_double_jeopardy : public SpellScriptLoader
 
         bool CheckProc(ProcEventInfo &eventInfo)
         {
-            Unit const * const caster = eventInfo.GetActor();
-            Unit const * const target = eventInfo.GetActionTarget();
-            return caster && target && !caster->HasAura(SPELL_DOUBLE_JEOPARDY_PROC);
+            return eventInfo.GetActor() && eventInfo.GetActionTarget();
         }
 
         void HandleProc(AuraEffect const *aurEff, ProcEventInfo &eventInfo)

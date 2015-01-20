@@ -865,6 +865,17 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
             damage = unitTarget->SpellDamageBonusTaken(m_originalCaster, m_spellInfo, effIndex, (uint32)damage, SPELL_DIRECT_DAMAGE);
         }
 
+        // Damage reduction against player-target
+        if (unitTarget->GetTypeId() == TYPEID_PLAYER)
+        {
+            if (m_spellInfo->Id == 113092) // Frost Bomb Explosion
+                damage *= 0.7f;
+            else if (m_spellInfo->Id == 44461) // Living Bomb Explosion
+                damage *= 0.85;
+            else if (m_spellInfo->Id == 116858) // Chaos Bolt
+                damage *= 0.75;
+        }
+
         // Holy Wrath - Need to be in this place as before SP scaling spell gets lowered to 0 and spell is not scaled
         if (m_spellInfo->Id == 119072)
         {
@@ -2051,7 +2062,6 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
             case 45064: // Vessel of the Naaru (Vial of the Sunwell trinket)
             {
                 // Amount of heal - depends from stacked Holy Energy
-                int damageAmount = 0;
                 if (AuraEffect const *aurEff = caster->GetAuraEffect(45062, 0))
                 {
                     addhealth += aurEff->GetAmount();
@@ -6904,6 +6914,10 @@ void Spell::EffectStealBeneficialBuff(SpellEffIndex effIndex)
         unitTarget->RemoveAurasDueToSpellBySteal(itr->first, itr->second, m_caster);
     }
     m_caster->SendMessageToSet(&dataSuccess, true);
+
+    // Glyph of Spellsteal
+    if (m_spellInfo->Id == 30449 && m_caster->HasAura(115713))
+        m_caster->CastSpell(m_caster, 115714, true);
 }
 
 void Spell::EffectKillCreditPersonal(SpellEffIndex effIndex)

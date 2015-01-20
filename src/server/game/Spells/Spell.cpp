@@ -3162,19 +3162,6 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
                         }
                     }
 
-                    // Pandemic
-                    if (refresh && m_originalCaster->HasAura(131973))
-                    {
-                        bool periodicDamage = false;
-                        for (uint8 i = 0; i < m_spellAura->GetSpellInfo()->Effects.size(); ++i)
-                            if (m_spellAura->GetEffect(i))
-                                if (m_spellAura->GetEffect(i)->GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE)
-                                    periodicDamage = true;
-
-                        if (periodicDamage)
-                            duration = std::min(duration + m_spellAura->GetDuration(), int32(m_spellAura->GetMaxDuration() * 1.5f));
-                    }
-
                     if (duration != m_spellAura->GetMaxDuration())
                     {
                         m_spellAura->SetMaxDuration(duration);
@@ -7610,7 +7597,11 @@ SpellCastResult Spell::CheckRange(bool strict)
     float min_range = m_caster->GetSpellMinRangeForTarget(target, m_spellInfo);
 
     if (Player* modOwner = m_caster->GetSpellModOwner())
-        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, max_range, this);
+    {
+        // Pet basic abilities must not apply mod-range from Blink Strikes when its on cooldown
+        if ((m_spellInfo->Id != 16827 && m_spellInfo->Id != 17253 && m_spellInfo->Id != 49966 && m_spellInfo->Id != 145625) || !modOwner->HasSpellCooldown(130393))
+            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, max_range, this);
+    }
 
     if (target && target != m_caster)
     {

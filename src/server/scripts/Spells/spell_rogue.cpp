@@ -1624,6 +1624,7 @@ public:
     }
 };
 
+// Killing Spree
 class spell_rog_killing_spree : public SpellScriptLoader
 {
 public:
@@ -1667,8 +1668,11 @@ public:
             if (!spellTarget)
                 spellTarget = target->SelectNearestTarget(10.f);
 
-            target->CastSpell(spellTarget, 57840, true);
-            target->CastSpell(spellTarget, 57841, true);
+            if (spellTarget)
+            {
+                target->CastSpell(spellTarget, 57840, true);
+                target->CastSpell(spellTarget, 57841, true);
+            }
         }
 
         void Register()

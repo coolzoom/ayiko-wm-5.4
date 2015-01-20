@@ -568,7 +568,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
 AuraEffect::AuraEffect(Aura *base, uint8 effIndex, int32 *baseAmount, Unit* caster):
     m_base(base), m_spellInfo(base->GetSpellInfo()),
     m_baseAmount(baseAmount ? *baseAmount : m_spellInfo->Effects[effIndex].BasePoints),
-    m_periodicTimer(0), m_tickNumber(0), m_userData(0), m_effIndex(effIndex),
+    m_periodicTimer(0), m_tickNumber(0), m_userData(0), m_rolledTickAmount(0), m_effIndex(effIndex),
     m_canBeRecalculated(true), m_isPeriodic(false)
 {
     GetFixedDamageInfo().Clear();
@@ -754,26 +754,9 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                     // Power Word : Shield
                     if (GetSpellInfo()->Id == 17 || GetSpellInfo()->Id == 123258)
                     {
-                        if (Player* _plr = caster->ToPlayer())
-                        {
-                            switch (_plr->GetSpecializationId(_plr->GetActiveSpec()))
-                            {
-                                case SPEC_PRIEST_DISCIPLINE:
-                                    // +263.8% from sp bonus
-                                    DoneActualBenefit += caster->SpellBaseDamageBonusDone(m_spellInfo->GetSchoolMask()) * 2.638f;
-                                    break;
-                                case SPEC_PRIEST_HOLY:
-                                    // +233.9% from sp bonus
-                                    DoneActualBenefit += caster->SpellBaseDamageBonusDone(m_spellInfo->GetSchoolMask()) * 2.339f;
-                                    break;
-                                case SPEC_PRIEST_SHADOW:
-                                    // +187.1% from sp bonus
-                                    DoneActualBenefit += caster->SpellBaseDamageBonusDone(m_spellInfo->GetSchoolMask()) * 1.871f;
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
+                        // +187.1% from sp bonus
+                        DoneActualBenefit += caster->SpellBaseDamageBonusDone(m_spellInfo->GetSchoolMask()) * 1.871f;
+                        break;
                     }
                     break;
                 default:
@@ -998,12 +981,10 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                     {
                         if (auto bastionOfGlory = caster->GetAura(114637))
                         {
-                            printf("\n ! bastion of glory found ! \n ");
                             AddPct(amount, (10 * bastionOfGlory->GetStackAmount()));
                             caster->RemoveAurasDueToSpell(114637);
                         }
                     }
-
 
                     if (!hasDivinePurpose)
                         caster->ModifyPower(POWER_HOLY_POWER, (holyPower > 1) ? (-(holyPower - 1)) : 0);
@@ -1271,7 +1252,7 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
 
     // Fixate damage for periodic damage auras
     // It's only for players now
-    if (caster && caster->GetTypeId() == TYPEID_PLAYER)
+    if (caster && caster->GetCharmerOrOwnerPlayerOrPlayerItself())
     {
         if (GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE ||
             GetAuraType() == SPELL_AURA_PERIODIC_LEECH ||
@@ -1683,8 +1664,11 @@ void AuraEffect::Update(uint32 diff, Unit* caster)
             {
                 // Death and Decay
                 if (GetSpellInfo()->Id == 43265)
-                    if (auto const d_owner = GetCaster()->GetDynObject(GetSpellInfo()->Id))
-                        GetCaster()->CastSpell(d_owner->GetPositionX(), d_owner->GetPositionY(), d_owner->GetPositionZ(), 52212, true);
+                {
+                    if (auto caster = GetCaster())
+                        if (auto const d_owner = caster->GetDynObject(GetSpellInfo()->Id))
+                            caster->CastSpell(d_owner->GetPositionX(), d_owner->GetPositionY(), d_owner->GetPositionZ(), 52212, true);
+                }
             }
         }
     }
@@ -7239,6 +7223,13 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
 
         damage = target->SpellDamageBonusTaken(caster, GetSpellInfo(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount());
 
+        // First tick from rolled from previously applied periodic
+        if (GetRolledTickAmount())
+        {
+            damage = GetRolledTickAmount();
+            const_cast<AuraEffect*>(this)->SetRolledTickAmount(0);
+        }
+
         // Calculate armor mitigation
         if (Unit::IsDamageReducedByArmor(GetSpellInfo()->GetSchoolMask(), GetSpellInfo(), GetEffIndex()))
         {
@@ -7265,6 +7256,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                         caster->CastCustomSpell(target, 124467, &bp, NULL, NULL, true);
                         break;
                     case 15407: // Mind Flay
+                    case 129197: // Mind Flay (Insanity)
                         caster->CastCustomSpell(target, 124468, &bp, NULL, NULL, true);
                         break;
                     case 34914: // Vampiric Touch
@@ -7276,8 +7268,13 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
             }
         }
 
+        // Devouring Plague - increase damage per orb used (stored in data)
+        if (GetId() == 2944)
+        {
+            damage *= GetUserData();
+        }
         // Deep Wounds
-        if (GetSpellInfo()->Id == 115767)
+        else if (GetSpellInfo()->Id == 115767)
         {
             if (Player* _player = GetCaster()->ToPlayer())
             {
@@ -7287,16 +7284,14 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                     damage /= 2;
             }
         }
-
         // Nether Tempest and Living Bomb deal 85% of damage if used on player
-        if (GetSpellInfo()->Id == 44457 || GetSpellInfo()->Id == 114923)
+        else if (GetSpellInfo()->Id == 44457 || GetSpellInfo()->Id == 114923)
         {
             if (target->GetTypeId() == TYPEID_PLAYER)
                 damage *= 0.85f;
         }
-
         // Chaos Bolt with Grimoire
-        if (GetSpellInfo()->Id == 116858)
+        else if (GetSpellInfo()->Id == 116858)
         {
             if (Player* _player = GetCaster()->ToPlayer())
                 if (_player->GetSpecializationId(_player->GetActiveSpec()) == SPEC_WARLOCK_DESTRUCTION && _player->HasAura(108503))
@@ -7311,9 +7306,8 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                     damage = chaosBoltDamage;
                 }
         }
-
         // Curse of Agony damage-per-tick calculation
-        if (GetSpellInfo()->Id == 980)
+        else if (GetSpellInfo()->Id == 980)
         {
             uint32 stackAmount = GetBase()->GetStackAmount();
             // 1..4 ticks, 1/2 from normal tick damage
@@ -7324,7 +7318,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 damage *= 1.5;
         }
         // Malefic Grasp
-        if (GetSpellInfo()->Id == 103103)
+        else if (GetSpellInfo()->Id == 103103)
         {
             // Soul Leech
             if (caster->HasAura(108370) && caster->GetTypeId() == TYPEID_PLAYER)
@@ -7344,12 +7338,14 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 if (eff->GetCasterGUID() != caster->GetGUID())
                     continue;
 
+                uint32 auraId = eff->GetId();
                 // Corruption, Unstable Affliction, Seed of Corruption, Agony
-                if (eff->GetId() == 146739 || eff->GetId() == 30108 || eff->GetId() == 27243 || eff->GetId() == 980)
+                if (auraId == 146739 || auraId == 30108 || auraId == 27243 || auraId == 980)
                 {
                     int32 afflictionDamage = eff->GetAmount();
+                    uint32 spellId = 0;
                     // Agony needs it's own handlng due to its damage chainging over stacks
-                    if (eff->GetId() == 980)
+                    if (auraId == 980)
                     {
                         uint32 stackAmount = eff->GetBase()->GetStackAmount();
                         // 1..4 ticks, 1/2 from normal tick damage
@@ -7358,11 +7354,18 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                         // 9..12 ticks, 3/2 from normal tick damage
                         else if (stackAmount > 9)
                             damage *= 1.5;
+                        spellId = 131737;
                     }
+                    else if (auraId == 146739) // Corruption
+                        spellId = 131740;
+                    else if (auraId == 30108) // Unstable Affliction
+                        spellId = 131736;
+                    else if (auraId == 27243) // Seed of Corruption
+                        spellId = 132566;
 
                     afflictionDamage = CalculatePct(afflictionDamage, GetSpellInfo()->Effects[2].BasePoints);
 
-                    caster->CastCustomSpell(target, 131740, &afflictionDamage, NULL, NULL, true);
+                    caster->CastCustomSpell(target, spellId, &afflictionDamage, NULL, NULL, true);
                 }
             }
         }
@@ -7385,28 +7388,39 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                     if (eff->GetCasterGUID() != caster->GetGUID())
                         continue;
 
+                    uint32 auraId = eff->GetId();
                     // Corruption, Unstable Affliction, Seed of Corruption, Agony
-                    if (eff->GetId() == 146739 || eff->GetId() == 30108 || eff->GetId() == 27243 || eff->GetId() == 980)
+                    if (auraId == 146739 || auraId == 30108 || auraId == 27243 || auraId == 980)
                     {
+                        uint32 spellId = 0;
                         int32 afflictionDamage = eff->GetAmount();
                         // Agony needs it's own handlng due to its damage chainging over stacks
-                        if (eff->GetId() == 980)
+                        if (auraId == 980)
                         {
                             uint32 stackAmount = eff->GetBase()->GetStackAmount();
+                            uint32 spellId = 0;
                             // 1..4 ticks, 1/2 from normal tick damage
                             if (stackAmount <= 5)
                                 damage /= 2;
                             // 9..12 ticks, 3/2 from normal tick damage
                             else if (stackAmount > 9)
                                 damage *= 1.5;
+
+                            spellId = 131737;
                         }
+                        else if (auraId == 146739) // Corruption
+                            spellId = 131740;
+                        else if (auraId == 30108) // Unstable Affliction
+                            spellId = 131736;
+                        else if (auraId == 27243) // Seed of Corruption
+                            spellId = 132566;
 
                         afflictionDamage = CalculatePct(afflictionDamage, 60);
 
                         if (grimoireOfSacrifice)
                             AddPct(afflictionDamage, 50);
 
-                        caster->CastCustomSpell(target, 131740, &afflictionDamage, NULL, NULL, true);
+                        caster->CastCustomSpell(target, spellId, &afflictionDamage, NULL, NULL, true);
                     }
                 }
             }
@@ -7423,7 +7437,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
             }
         }
         // Execution Sentence damage-per-tick calculation
-        if (GetId() == 114916)
+        else if (GetId() == 114916)
         {
             if (m_tickNumber == 1)
                 damage *= 0.04115f;
@@ -7446,16 +7460,16 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
             else
                 damage *= 0.44125f;
         }
-        // Mind Flay
-        if (GetId() == 15407)
+        // Mind Flay (Insanity)
+        else if (GetId() == 129197)
         {
             // Solace and Insanity bonus
             auto player = caster->ToPlayer();
             if (player && player->GetSpecializationId(player->GetActiveSpec()) == SPEC_PRIEST_SHADOW && player->HasSpell(139139))
             {
-                // Get dummy aura where consumed Shadow Orbs are stored
-                if (auto const devouringPlague = target->GetAuraEffect(2944, EFFECT_2, player->GetGUID()))
-                    AddPct(damage, 33.3f * devouringPlague->GetAmount());
+                // Get aura where consumed Shadow Orbs are stored
+                if (auto const devouringPlague = target->GetAuraEffect(2944, EFFECT_1, player->GetGUID()))
+                    AddPct(damage, 33.3f * devouringPlague->GetUserData());
             }
         }
 

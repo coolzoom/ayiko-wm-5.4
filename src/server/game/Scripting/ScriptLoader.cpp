@@ -1032,6 +1032,7 @@ void AddEasternKingdomsScripts()
     AddSC_boss_ozruk();
     AddSC_boss_azil();
 
+    AddSC_deepholm();
 #endif
 }
 

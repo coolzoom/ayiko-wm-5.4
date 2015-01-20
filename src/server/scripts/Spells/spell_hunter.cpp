@@ -466,8 +466,11 @@ class spell_hun_basic_attack_blink_strike : public SpellScriptLoader
                         {
                             if (Unit* target = GetHitUnit())
                             {
-                                GetCaster()->CastSpell(target, SPELL_BLINK_STRIKE_TELEPORT, true);
-                                owner->AddSpellCooldown(SPELL_BLINK_STRIKE_TELEPORT, 0, 20 * IN_MILLISECONDS);
+                                if (!caster->IsWithinMeleeRange(target, 5.0f))
+                                {
+                                    GetCaster()->CastSpell(target, SPELL_BLINK_STRIKE_TELEPORT, true);
+                                    owner->AddSpellCooldown(SPELL_BLINK_STRIKE_TELEPORT, 0, 20 * IN_MILLISECONDS);
+                                }
                             }
                         }
             }

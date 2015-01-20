@@ -7597,7 +7597,11 @@ SpellCastResult Spell::CheckRange(bool strict)
     float min_range = m_caster->GetSpellMinRangeForTarget(target, m_spellInfo);
 
     if (Player* modOwner = m_caster->GetSpellModOwner())
-        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, max_range, this);
+    {
+        // Pet basic abilities must not apply mod-range from Blink Strikes when its on cooldown
+        if ((m_spellInfo->Id != 16827 && m_spellInfo->Id != 17253 && m_spellInfo->Id != 49966 && m_spellInfo->Id != 145625) || !modOwner->HasSpellCooldown(130393))
+            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, max_range, this);
+    }
 
     if (target && target != m_caster)
     {

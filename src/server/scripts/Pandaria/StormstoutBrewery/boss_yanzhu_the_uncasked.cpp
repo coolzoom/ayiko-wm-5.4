@@ -1063,7 +1063,7 @@ public:
 
         void UpdateAI(const uint32 uiDiff)
         {
-            if (!UpdateVictim())
+            if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
             events.Update(uiDiff);
@@ -1880,7 +1880,7 @@ public:
             me->SetCanFly(true);
         }
 
-        void OnSpellClick(Unit* pClicker)
+        void OnSpellClick(Unit* pClicker, bool& result)
         {
             pClicker->AddAura(114459, pClicker);
 

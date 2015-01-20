@@ -633,7 +633,7 @@ public:
             me->AddAura(SPELL_HAMMER_VISUAL, me);
         }
 
-        void OnSpellClick(Unit* pClicker)
+        void OnSpellClick(Unit* pClicker, bool& result)
         {
             pClicker->AddAura(SPELL_SMASH_AURA, pClicker);
 

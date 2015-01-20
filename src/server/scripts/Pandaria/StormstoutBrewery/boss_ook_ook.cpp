@@ -4,6 +4,22 @@
 #include "stormstout_brewery.h"
 #include "Vehicle.h"
 
+enum eSpells
+{
+    SPELL_BARREL_EXPLOSION_HOSTILE = 106769,
+    SPELL_BARREL_EXPLOSION_PLAYER = 107016,
+
+    SPELL_FORCECAST_BARREL_DROP = 122385,
+    SPELL_CANCEL_BARREL_AURA = 94465,
+    SPELL_ROLLING_BARREL_COSMETIC = 106647,
+    SPELL_BARREL_TOSS = 106847,
+
+    SPELL_BARREL_PERIODIC_PLAYER = 115868,
+    SPELL_BARREL_PERIODIC_HOSTILE = 106768,
+
+    SPELL_BARREL_RIDE = 106614
+};
+
 static const Position pOokJumpPos = { -755.68f, 1351.83f, 146.92f, 1.82f };
 static const Position pBarrelPos[] =
 {
@@ -84,7 +100,13 @@ class boss_ook_ook : public CreatureScript
                     else
                         m_fOrientation = frand(2.45f, 4.63f);
 
-                    me->SummonCreature(NPC_ROLLING_BARREL, pBarrelPos[n].GetPositionX(), pBarrelPos[n].GetPositionY(), pBarrelPos[n].GetPositionZ(), m_fOrientation);
+                    if (Creature* pBarrel = me->SummonCreature(NPC_ROLLING_BARREL, pBarrelPos[n].GetPositionX(), pBarrelPos[n].GetPositionY(), pBarrelPos[n].GetPositionZ(), m_fOrientation))
+                    {
+                        pBarrel->AddAura(SPELL_BARREL_PERIODIC_PLAYER, pBarrel);
+                        pBarrel->AddAura(SPELL_BARREL_PERIODIC_HOSTILE, pBarrel);
+                        pBarrel->AddAura(SPELL_ROLLING_BARREL_COSMETIC, pBarrel);
+                        pBarrel->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FORCE_MOVEMENT);
+                    }
                 }
 
                 return DoSummonBarrels(n - 1);
@@ -215,7 +237,7 @@ class boss_ook_ook : public CreatureScript
                         events.ScheduleEvent(EVENT_GOING_BANANAS, 2000);
                         break;
                     case EVENT_GROUND_POUND:
-                        DoCast(me, SPELL_GROUND_POUND, true);
+                        DoCast(me, SPELL_GROUND_POUND, false);
                         Talk(TALK_SPELL);
                         events.ScheduleEvent(EVENT_GROUND_POUND, urand(10000, 14000));
                         break;
@@ -232,22 +254,6 @@ class boss_ook_ook : public CreatureScript
                 DoMeleeAttackIfReady();
             }
         };
-};
-
-enum eSpells
-{   
-    SPELL_BARREL_EXPLOSION_HOSTILE      = 106769,
-    SPELL_BARREL_EXPLOSION_PLAYER       = 107016,
-
-    SPELL_FORCECAST_BARREL_DROP         = 122385,
-    SPELL_CANCEL_BARREL_AURA            = 94465,
-    SPELL_ROLLING_BARREL_COSMETIC       = 106647,
-    SPELL_BARREL_TOSS                   = 106847,
-
-    SPELL_BARREL_PERIODIC_PLAYER        = 115868,
-    SPELL_BARREL_PERIODIC_HOSTILE       = 106768,
-
-    SPELL_BARREL_RIDE                   = 106614
 };
 
 class npc_barrel : public CreatureScript
@@ -268,13 +274,11 @@ class npc_barrel : public CreatureScript
 
         struct npc_barrel_AI : public ScriptedAI
         {
-            npc_barrel_AI(Creature* creature) : ScriptedAI(creature), pVehicle(creature->GetVehicleKit())
+            npc_barrel_AI(Creature* creature) : ScriptedAI(creature) 
             {
-                ASSERT(pVehicle);
                 me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
             }
 
-            Vehicle* pVehicle;
             uint64 m_playerGuid;
 
             void Reset()
@@ -284,37 +288,23 @@ class npc_barrel : public CreatureScript
 
             void Initialize()
             {
-                me->AddAura(SPELL_BARREL_PERIODIC_PLAYER, me);
-                me->AddAura(SPELL_BARREL_PERIODIC_HOSTILE, me);
                 me->AddAura(SPELL_ROLLING_BARREL_COSMETIC, me);
-                m_playerGuid = 0;
-
+                me->AddAura(SPELL_BARREL_PERIODIC_HOSTILE, me);
+                me->AddAura(SPELL_BARREL_PERIODIC_PLAYER, me);
                 Move();
             }
 
             // tempp disabled
-            void OnSpellClick(Unit* pClicker)
-            {
-                /*
+            void OnSpellClick(Unit* pClicker, bool& result)
+            {   
+                me->RemoveAurasDueToSpell(SPELL_BARREL_PERIODIC_PLAYER);
+                me->RemoveAurasDueToSpell(SPELL_BARREL_PERIODIC_HOSTILE);
                 pClicker->CastSpell(me, SPELL_BARREL_RIDE, true);
-                pClicker->AddAura(SPELL_ROLLING_BARREL_COSMETIC, pClicker);
-                me->GetMotionMaster()->MoveIdle();
-                events.Reset();
 
-                me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);*/
+                me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
                 return;
             }
-
-            void PassengerBoarded(Unit* pWho, int8 seatId, bool bApply)
-            {
-                if (pWho && bApply)
-                    m_playerGuid = pWho->GetGUID();
-                else
-                {
-                    Initialize();
-                }
-            }
-
+    
             void Move()
             {
                 float x = 0, y = 0;
@@ -336,22 +326,15 @@ class npc_barrel : public CreatureScript
                 return false;
             }
 
-            Unit* GetPassengerUnit() const
-            {
-                if (Unit* pUnit = ObjectAccessor::GetUnit(*me, m_playerGuid))
-                    return pUnit;
-
-                return nullptr;
-            }
-
             void DoExplode()
             {
+                /*
                 if (Unit* pPassenger = GetPassengerUnit())
                 {
                     pPassenger->CastSpell(pPassenger, SPELL_FORCECAST_BARREL_DROP, true);
                     pPassenger->RemoveAurasDueToSpell(SPELL_BARREL_PERIODIC_HOSTILE);
                     pPassenger->RemoveAurasDueToSpell(SPELL_ROLLING_BARREL_COSMETIC);
-                }
+                }*/
 
                 DoCast(SPELL_BARREL_EXPLOSION_HOSTILE);
                 DoCast(SPELL_BARREL_EXPLOSION_PLAYER);
@@ -361,8 +344,8 @@ class npc_barrel : public CreatureScript
 
             void UpdateAI(const uint32 uiDiff)
             {               
-                if (CheckIfAgainstUnit())
-                    DoExplode();
+                //if (CheckIfAgainstUnit())
+                  //  DoExplode();
 
                 events.Update(uiDiff);
                 
@@ -451,12 +434,12 @@ class spell_ook_ook_barrel_ride : public SpellScriptLoader
             {
                 if (Unit* barrelBase = GetTarget())
                 {
-                    barrelBase->GetMotionMaster()->MoveIdle();
-
                     if (GetCaster())
                     {
-                        GetCaster()->CastSpell(barrelBase, SPELL_CANCEL_BARREL_AURA, true);
                         //barrelBase->SetCharmedBy(GetCaster(), CHARM_TYPE_VEHICLE);
+                        GetCaster()->CastSpell(barrelBase, SPELL_CANCEL_BARREL_AURA, true);
+                        GetCaster()->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FORCE_MOVEMENT);
+                        GetCaster()->CastSpell(GetCaster(), SPELL_ROLLING_BARREL_COSMETIC, true);
                     }
                 }
             }
@@ -469,13 +452,15 @@ class spell_ook_ook_barrel_ride : public SpellScriptLoader
 
                 if (pCaster && pTarget)
                 {
-                    pTarget->RemoveCharmedBy(pCaster);
+                    pCaster->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FORCE_MOVEMENT);
+                    pCaster->RemoveAurasDueToSpell(SPELL_ROLLING_BARREL_COSMETIC);
                 }
             }
 
             void Register()
             {
-                OnEffectApply += AuraEffectApplyFn(spell_ook_ook_barrel_ride_AuraScript::OnApply, EFFECT_0, SPELL_AURA_CONTROL_VEHICLE, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+                OnEffectApply += AuraEffectApplyFn(spell_ook_ook_barrel_ride_AuraScript::OnApply, EFFECT_0, SPELL_AURA_CONTROL_VEHICLE, AURA_EFFECT_HANDLE_REAL);
+                OnEffectRemove += AuraEffectRemoveFn(spell_ook_ook_barrel_ride_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_CONTROL_VEHICLE, AURA_EFFECT_HANDLE_REAL);
             }
         };
 
@@ -503,105 +488,6 @@ public:
     }
 };
 
-class spell_ook_ook_barrel : public SpellScriptLoader
-{
-    public:
-        spell_ook_ook_barrel() :  SpellScriptLoader("spell_ook_ook_barrel") { }
-
-        class spell_ook_ook_barrel_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_ook_ook_barrel_SpellScript);
-
-            void SelectTargets_ook(std::list<WorldObject*>&targets)
-            {
-                targets.remove_if(OokOokPredicate());
-            }
-
-            void HandleEffectHit(SpellEffIndex idx)
-            {
-                if (Unit* pCaster = GetCaster())
-                {
-                    Unit* pBarrel = pCaster->GetVehicleBase();
-
-                    if (pBarrel)
-                    {
-                        pCaster->ExitVehicle();
-                        pBarrel->Kill(pBarrel);
-                    }
-
-                    pCaster->CastSpell(pCaster, SPELL_FORCECAST_BARREL_DROP);
-                    pCaster->RemoveAurasDueToSpell(SPELL_BARREL_PERIODIC_HOSTILE);
-                    pCaster->RemoveAurasDueToSpell(SPELL_ROLLING_BARREL_COSMETIC);
-                }
-            }
-
-            void Register()
-            {
-                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ook_ook_barrel_SpellScript::SelectTargets_ook, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
-                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ook_ook_barrel_SpellScript::SelectTargets_ook, EFFECT_1, TARGET_UNIT_SRC_AREA_ENTRY);
-                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ook_ook_barrel_SpellScript::SelectTargets_ook, EFFECT_2, TARGET_UNIT_SRC_AREA_ENTRY);
-                OnEffectHitTarget += SpellEffectFn(spell_ook_ook_barrel_SpellScript::HandleEffectHit, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_ook_ook_barrel_SpellScript();
-        }
-            
-};
-
-class spell_ook_ook_barrel2 : public SpellScriptLoader
-{
-public:
-    spell_ook_ook_barrel2() : SpellScriptLoader("spell_ook_ook_barrel2") { }
-
-    class spell_ook_ook_barrel2_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_ook_ook_barrel2_SpellScript);
-
-        void SelectTargets_hozu(std::list<WorldObject*>&targets)
-        {
-            targets.remove_if(HozuPredicate());         
-        }
-
-        void HandleEffectHit(SpellEffIndex idx)
-        {
-            if (Unit* pCaster = GetCaster())
-            {
-                Unit* pBarrel = pCaster->GetVehicleBase();
-
-                if (pBarrel)
-                {
-                    pCaster->ExitVehicle();
-                    pBarrel->Kill(pBarrel);
-
-                    // If the barrel is alone it should also die, hence do this in here
-                    pCaster->CastSpell(pCaster, SPELL_FORCECAST_BARREL_DROP);
-                    pCaster->RemoveAurasDueToSpell(SPELL_BARREL_PERIODIC_HOSTILE);
-                    pCaster->RemoveAurasDueToSpell(SPELL_ROLLING_BARREL_COSMETIC);
-                }
-                else if (pCaster->GetVehicleKit())
-                    pCaster->Kill(pCaster);
-            }
-        }
-
-        void Register()
-        {
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ook_ook_barrel2_SpellScript::SelectTargets_hozu, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ook_ook_barrel2_SpellScript::SelectTargets_hozu, EFFECT_1, TARGET_UNIT_SRC_AREA_ENTRY);
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ook_ook_barrel2_SpellScript::SelectTargets_hozu, EFFECT_2, TARGET_UNIT_SRC_AREA_ENTRY);
-            OnEffectHitTarget += SpellEffectFn(spell_ook_ook_barrel2_SpellScript::HandleEffectHit, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_ook_ook_barrel2_SpellScript();
-    }
-
-};
-
 class NotPlayerPredicate
 {
 public:
@@ -611,40 +497,104 @@ public:
     }
 };
 
-class spell_barrel_hostile : public SpellScriptLoader
+class spell_barrel_periodic : public SpellScriptLoader
 {
 public:
-    spell_barrel_hostile() : SpellScriptLoader("spell_barrel_hostile") {}
+    spell_barrel_periodic() : SpellScriptLoader("spell_barrel_periodic") {}
 
-    class spell_barrel_hostile_SpellScript : public SpellScript
+    class spell_barrel_periodic_SpellScript : public SpellScript
     {
-        PrepareSpellScript(spell_barrel_hostile_SpellScript);
+        PrepareSpellScript(spell_barrel_periodic_SpellScript);
+
+        bool foundTargets;
+
+        bool Load()
+        {
+            foundTargets = false;
+            return true;
+        }
 
         void SelectTargets(std::list<WorldObject*>&targets)
         {
-            targets.remove_if(NotPlayerPredicate());
+            if (Unit* pOwner = GetCaster())
+            {
+                if (!targets.empty())
+                    foundTargets = true;
+                else 
+                    switch (GetSpellInfo()->Id)
+                {
+                    case 107016:
+                        if (Unit* pPotential = pOwner->SelectNearbyTarget(nullptr, 2.2f))
+                        {
+                            if (pPotential->GetTypeId() == TYPEID_PLAYER)
+                                foundTargets = true;
+                        }
+                        else if (Unit* pPotential = pOwner->SelectNearbyAlly(nullptr, 3.f))
+                        {
+                            if (pPotential->GetTypeId() == TYPEID_PLAYER)
+                                foundTargets = true;
+                        }
+                        break;
+                    case 106769:
+                        if (pOwner->SelectNearbyTarget(nullptr, 3.f))
+                            foundTargets = true;
+                        else if (pOwner->SelectNearbyAlly(nullptr, 3.3f))
+                            foundTargets = true;
+                        break;
+                }
+
+                if (!foundTargets)
+                {
+                    if (Creature* pTrigger = GetClosestCreatureWithEntry(pOwner, 45979, 3.f))
+                        foundTargets = true;
+                }
+            }
         }
 
-        void HandleEffectHit(SpellEffIndex idx)
+        void HandleEffectHit(SpellEffIndex effIdx)
         {
-            if (Unit* pCaster = GetCaster())
+            if (!foundTargets)
+                PreventHitEffect(effIdx);
+
+        }
+
+        void HandleAfterHit()
+        {
+            if (foundTargets)
             {
-                pCaster->Kill(pCaster);
+                if (Unit* pCaster = GetCaster())
+                {
+                    if (pCaster->IsOnVehicle())
+                    {
+                        Creature* pBarrel = pCaster->GetVehicleCreatureBase();
+                        pCaster->RemoveAurasDueToSpell(SPELL_BARREL_RIDE);
+                        //pCaster->ExitVehicle();
+                        pCaster->GetMotionMaster()->MoveKnockbackFrom(pCaster->GetPositionX(), pCaster->GetPositionY(), 15.f, 15.f);
+                        pCaster->RemoveAurasDueToSpell(SPELL_BARREL_PERIODIC_HOSTILE);
+
+                        if (pBarrel)
+                            pBarrel->Kill(pBarrel);
+                    }
+                    else
+                    if (pCaster->GetTypeId() != TYPEID_PLAYER)
+                        pCaster->Kill(pCaster);
+                }
             }
         }
 
         void Register()
         {
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_barrel_hostile_SpellScript::SelectTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_barrel_hostile_SpellScript::SelectTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENTRY);
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_barrel_hostile_SpellScript::SelectTargets, EFFECT_2, TARGET_UNIT_SRC_AREA_ENTRY);
-            OnEffectHitTarget += SpellEffectFn(spell_barrel_hostile_SpellScript::HandleEffectHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_barrel_periodic_SpellScript::SelectTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_barrel_periodic_SpellScript::SelectTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENTRY);
+            OnEffectHit += SpellEffectFn(spell_barrel_periodic_SpellScript::HandleEffectHit, EFFECT_0, SPELL_EFFECT_TRIGGER_SPELL);
+            OnEffectHit += SpellEffectFn(spell_barrel_periodic_SpellScript::HandleEffectHit, EFFECT_1, SPELL_EFFECT_TRIGGER_SPELL);
+            AfterHit += SpellHitFn(spell_barrel_periodic_SpellScript::HandleAfterHit);
         }
     };
 
     SpellScript* GetSpellScript() const
     {
-        return new spell_barrel_hostile_SpellScript();
+        return new spell_barrel_periodic_SpellScript();
     }
 };
 
@@ -670,6 +620,15 @@ public:
             }
         }
 
+        void HandleOnPeriodic(AuraEffect const *aurEff)
+        {
+            if (Unit* pOwner = GetOwner()->ToUnit())
+            {
+                PreventDefaultAction();
+                pOwner->CastSpell(pOwner, 106808, true);
+            }
+        }
+
         void HandleOnRemove(const AuraEffect *  aurEff, AuraEffectHandleModes mode)
         {
             if (GetCaster())
@@ -682,6 +641,7 @@ public:
         {
             OnEffectApply += AuraEffectApplyFn(spell_ground_pound_AuraScript::HandleOnApply, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
             OnEffectRemove += AuraEffectRemoveFn(spell_ground_pound_AuraScript::HandleOnRemove, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+            //OnEffectPeriodic += AuraEffectPeriodicFn(spell_ground_pound_AuraScript::HandleOnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
         }
     };
 
@@ -696,9 +656,10 @@ void AddSC_boss_ook_ook()
     new boss_ook_ook();
     new npc_barrel();
     new npc_hozen_hollerer();
-    //new spell_ook_ook_barrel_ride();
-    new spell_ook_ook_barrel();
-    new spell_ook_ook_barrel2();
-    new spell_barrel_hostile();
+    new spell_ook_ook_barrel_ride();
+    //new spell_ook_ook_barrel();
+    //new spell_ook_ook_barrel2();
+    new spell_barrel_periodic();
+    //new spell_barrel_hostile();
     new spell_ground_pound();
 }

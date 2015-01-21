@@ -3289,6 +3289,7 @@ class npc_power_word_barrier : public CreatureScript
         }
 };
 
+// Warlock's Spell: Demonic Gateway
 class npc_demonic_gateway : public CreatureScript
 {
 public:
@@ -3402,7 +3403,7 @@ public:
                 return;
 
             // Players must be in same group
-            if (!clicker->IsInPartyWith(owner))
+            if (!clicker->IsInRaidWith(owner))
                 return;
 
             std::list< Creature* > creature_list;

@@ -27,7 +27,7 @@ enum BG_KT_NPC
 
 #define BG_KT_MAX_TEAM_SCORE        1600
 #define BG_KT_ORB_POINTS_MAX        1600
-#define BG_KT_POINTS_UPDATE_TIME    (8*IN_MILLISECONDS)
+#define BG_KT_POINTS_UPDATE_TIME    (5*IN_MILLISECONDS)
 #define BG_KT_TIME_LIMIT            (25*MINUTE*IN_MILLISECONDS)
 #define BG_KT_EVENT_START_BATTLE    8563
 
@@ -172,7 +172,7 @@ const uint32 BG_KT_ORBS_AURA[MAX_ORBS] =
 };
 
 //tick point according to which zone
-const uint32 BG_KT_TickPoints[3] = { 1, 3, 5 };
+const uint32 BG_KT_TickPoints[3] = { 3, 4, 5 };
 
 class BattlegroundKT : public Battleground
 {

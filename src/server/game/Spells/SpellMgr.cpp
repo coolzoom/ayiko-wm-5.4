@@ -3630,13 +3630,16 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[0].TargetB = 0;
                     break;
                 case 117866:// Champion of Light
-                    spellInfo->MaxAffectedTargets = 1;
-                    spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(65); // 1,5s
-                    spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(15); // 3 yards
+                    //spellInfo->MaxAffectedTargets = 1;
+                    //spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(65); // 1,5s
+                    //spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(15); // 3 yards
                     break;
                 case 126848:// Ritual of Purification
                     spellInfo->Effects[0].BasePoints = -10;
                     spellInfo->Effects[1].BasePoints = -10;
+                    break;
+                case 106808: // Ground Pound
+                    spellInfo->AttributesEx &= ~SPELL_ATTR1_CHANNELED_2;
                     break;
                 case 125713:// Channeling Corruption (triggered)
                     spellInfo->Effects[0].TargetA = TARGET_UNIT_TARGET_ANY;

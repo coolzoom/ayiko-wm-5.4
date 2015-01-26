@@ -258,7 +258,7 @@ class boss_tsulong : public CreatureScript
                 {
                     case PHASE_FLY:
                         me->RemoveAurasDueToSpell(SPELL_GOLD_ACTIVE);
-                        DoCast(me, SPELL_SHA_ACTIVE, true);
+                        me->RemoveAurasDueToSpell(SPELL_SHA_ACTIVE);
                         events.ScheduleEvent(EVENT_FLY, 5000, 0, PHASE_FLY);
                         break;
                     case PHASE_DAY:
@@ -266,11 +266,13 @@ class boss_tsulong : public CreatureScript
                             Talk(SAY_NIGHT_TO_DAY);
                         me->SetReactState(REACT_PASSIVE);
                         me->setFaction(FACTION_DAY);
+                        me->AttackStop();
                         me->StopMoving();
                         me->GetMotionMaster()->Clear();
                         me->GetMotionMaster()->MoveIdle();
                         me->RemoveAurasDueToSpell(SPELL_SHA_ACTIVE);
                         me->RemoveAurasDueToSpell(SPELL_DREAD_SHADOWS);
+                        
                         DoResetThreat();
                         DoCast(me, SPELL_GOLD_ACTIVE, true);
                         DoCast(me, SPELL_SUMMON_SHA_PERIODIC, true);
@@ -326,11 +328,13 @@ class boss_tsulong : public CreatureScript
                         switch (events.ExecuteEvent())
                         {
                             case EVENT_FLY:
+                                me->setActive(true);
+                                me->UpdateObjectVisibility(true);
                                 me->setFaction(FACTION_NIGHT);
                                 me->SetReactState(REACT_PASSIVE);
                                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                                 me->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
-                                //me->SetDisplayId(DISPLAY_TSULON_NIGHT);
+                                me->SetDisplayId(DISPLAY_TSULON_NIGHT);
                                 me->GetMotionMaster()->MovePoint(WAYPOINT_FIRST, -1018.10f, -2947.431f, 50.12f);
                                 inFly = true;
                                 break;
@@ -401,7 +405,7 @@ class boss_tsulong : public CreatureScript
                             events.ScheduleEvent(EVENT_SUMMON_TERROR, 30000, 0, PHASE_DAY);
                             break;
                         case EVENT_SUN_BREATH:
-                            DoCast(me, SPELL_SUN_BREATH, true);
+                            DoCast(me, SPELL_SUN_BREATH, false);
                             events.ScheduleEvent(EVENT_SUN_BREATH, 29000, 0, PHASE_DAY);
                             break;
                         case EVENT_SUMMON_SHA:
@@ -529,7 +533,6 @@ class spell_terrorize_periodic_player : public SpellScriptLoader
 
         void Register()
         {
-            // add dummy effect spell handler to Preparation
             OnEffectHitTarget += SpellEffectFn(spell_impl::HandleDummy, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
         }
     };
@@ -604,6 +607,7 @@ class npc_unstable_sha : public CreatureScript
         {
             summonerGUID = 0;
             riding = false;
+            cast = false;
         }
 
         void Reset() override
@@ -622,9 +626,13 @@ class npc_unstable_sha : public CreatureScript
 
         void SpellHitTarget(Unit* target, SpellInfo const* spell) override
         {
-            if (spell->Id == SPELL_INSTABILITY_TRANSFORM)
+            if (!cast && target == me && spell->Id == SPELL_INSTABILITY_TRANSFORM)
                 if (Unit * summoner = Unit::GetUnit(*me, summonerGUID))
+                {
                     DoCast(summoner, (summoner->getFaction() == FACTION_DAY) ? SPELL_INSTABILITY_DAMAGE : SPELL_INSTABILITY_HEAL);
+                    cast = true;
+                    me->DespawnOrUnsummon(500);
+                }
         }
 
         void UpdateAI(uint32 const /*diff*/) override
@@ -641,6 +649,7 @@ class npc_unstable_sha : public CreatureScript
         }
 
         bool riding;
+        bool cast;
         uint64 summonerGUID;
     };
 

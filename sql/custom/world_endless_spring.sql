@@ -56,11 +56,11 @@ UPDATE `creature_template` SET faction_A = 16, faction_H = 16, minlevel = 92, ma
 UPDATE `creature_template` SET faction_A = 16, faction_H = 16, minlevel = 92, maxlevel = 92, Health_mod = 2.45, `Mana_mod`=2.45, ScriptName = 'npc_unstable_sha' WHERE `entry` = 62919; -- Unstable Sha
 UPDATE `creature_template` SET faction_A = 16, faction_H = 16, minlevel = 92, maxlevel = 92, Health_mod = 8.8, `Mana_mod`=8.8, ScriptName = 'npc_embodied_terror' WHERE `entry` = 62969; -- Embodied Terror
 UPDATE `creature_template` SET faction_A = 16, faction_H = 16, minlevel = 92, maxlevel = 92, Health_mod = 1.65, `Mana_mod`=1.65, ScriptName = 'npc_fright_spawn' WHERE `entry` = 62977; -- Fright Spawn
+UPDATE creature_template SET flags_extra = 128 WHERE entry = 63420;
 
 DELETE FROM creature_text WHERE entry IN (62849, 62442);
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
 (62849, 0, 0, '%s fades.', 16, 0, 100, 0, 0, 0, 'Sunbeam'),
-(62442, 0, 0, '|TInterface\\Icons\\spell_holy_surgeoflight.blp:20|t%s casts |cFFFF0000|Hspell:122789|h[Sunbeam]|h|r!', 41, 0, 100, 0, 0, 29365, 'Tsulong - EMOTE_SUNBEAM'),
 (62442, 1, 0, '%s summons an |cFFFFFFFFEmbodied Terror|r!', 41, 0, 100, 0, 0, 0, 'Tsulong - EMOTE_TERROR'),
 (62442, 2, 0, '|TInterface\\Icons\\ability_warlock_everlastingaffliction.blp:20|t%s is affected by |cFFFF0000|Hspell:123011|h[Terrorize]|h|r! Dispel %s!', 41, 0, 100, 0, 0, 0, 'Tsulong - EMOTE_TERRORIZE'),
 (62442, 3, 0, 'No... the waters... I must... resist... I shall not... fear...', 14, 0, 100, 0, 0, 29359, 'Tsulong - SAY_INTRO'),
@@ -78,13 +78,18 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (62442, 9, 0, 'Die in darkness.', 14, 0, 100, 0, 0, 29360, 'Tsulong - SAY_SLAY_NIGHT'),
 (62442, 9, 1, 'The night surrounds you...', 14, 0, 100, 0, 0, 29361, 'Tsulong - SAY_SLAY_NIGHT'),
 (62442, 10, 0, 'I thank you, strangers. I have been freed.', 14, 0, 100, 0, 0, 29352, 'Tsulong - SAY_DEATH'),
-(62442, 11, 0, 'Protect... the waters...', 14, 0, 100, 0, 0, 29352, 'Tsulong - SAY_WIPE');
+(62442, 11, 0, 'Protect... the waters...', 14, 0, 100, 0, 0, 29352, 'Tsulong - SAY_WIPE'),
+(62442, 0, 0, '|TInterface\\Icons\\spell_holy_surgeoflight.blp:20|t%s casts |cFFFF0000|Hspell:122789|h[Sunbeam]|h|r!', 41, 0, 100, 0, 0, 29365, 'Tsulong - EMOTE_SUNBEAM');
 
 DELETE FROM spell_script_names WHERE spell_id IN (122438, 122453, 123018);
 INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
 (122438, 'spell_tsulong_sha_regen'),
 (122453, 'spell_tsulong_sha_regen'),
 (123018, 'spell_terrorize_periodic_player');
+
+DELETE FROM spell_linked_spell WHERE spell_trigger = 122855;
+INSERT INTO spell_linked_spell (spell_trigger, spell_effect, type, comment) VALUES
+(122855, 122858, 0, 'Sun Breath - Trigger Bathed in Light');
 
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (122952, 123012, 122928);
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
@@ -110,34 +115,70 @@ INSERT INTO creature_template_aura (entry, aura) VALUES
 
 -- LEI SHI
 
-UPDATE creature_template SET ScriptName = 'boss_lei_shi' WHERE entry = 62983;
+UPDATE creature_template SET unit_flags = 0, ScriptName = 'boss_lei_shi' WHERE entry = 62983;
 UPDATE creature_template SET ScriptName = 'mob_animated_protector' WHERE entry = 62995;
-UPDATE creature_template SET ScriptName = 'mob_lei_shi_hidden' WHERE entry = 63099;
+UPDATE creature_template SET minlevel = 93, maxlevel = 93, faction_A = 16, faction_H = 16, ScriptName = 'mob_lei_shi_hidden' WHERE entry = 63099;
 
-DELETE FROM spell_script_names WHERE spell_id IN (123461, 123244, 123233, 123705, 123712);
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (132363);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(13, 1, 132363, 0, 0, 31, 0, 3, 63099, 0, 0, 0, 0, '', 'Hide visual - target lei shi trigger');
+
+DELETE FROM spell_script_names WHERE spell_id IN (123461, 123467, 123244, 123233, 123705, 123712);
 INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
 (123461, 'spell_get_away'),
+(123467, 'spell_get_away_dmg'),
 (123244, 'spell_hide'),
 (123233, 'spell_hide_stacks'),
 (123705, 'spell_scary_fog_dot'),
 (123712, 'spell_scary_fog_stacks');
 
+DELETE FROM spell_target_position WHERE id = 123441;
+INSERT INTO spell_target_position (id, effIndex, target_map, target_position_x, target_position_y, target_position_z, target_orientation) VALUES
+(123441, 0, 996, -1017.96, -2911.15, 19.8185, 0);
+
 -- LEI SHI END
 
 -- SHA OF FEAR
 
-UPDATE creature_template SET ScriptName = 'boss_sha_of_fear' WHERE entry = 60999;
-UPDATE creature_template SET ScriptName = 'mob_pure_light_terrace' WHERE entry = 60788;
-UPDATE creature_template SET ScriptName = 'mob_return_to_the_terrace' WHERE entry = 65736;
-UPDATE creature_template SET ScriptName = 'mob_terror_spawn' WHERE entry = 61034;
+DELETE FROM creature_template_aura WHERE entry IN (65691);
+INSERT INTO creature_template_aura (entry, aura) VALUES
+(65691, 129187); -- Sha Globe
 
-DELETE FROM spell_script_names WHERE spell_id IN (117866, 125786, 119414, 119108, 129075);
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (117866);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(13, 1, 117866, 0, 0, 31, 0, 4, 0, 0, 0, 0, 0, '', 'wall of Light - target players');
+
+UPDATE creature_template SET ScriptName = 'boss_sha_of_fear' WHERE entry = 60999;
+UPDATE creature_template SET minlevel = 93, maxlevel = 93, flags_extra = 128, ScriptName = 'mob_pure_light_terrace' WHERE entry = 60788;
+UPDATE creature_template SET ScriptName = 'mob_return_to_the_terrace' WHERE entry = 65736;
+UPDATE creature_template SET minlevel = 92, maxlevel = 92, faction_A = 16, faction_H = 16, `Health_mod`=8.86, `Mana_mod`=8.86, ScriptName = 'mob_terror_spawn' WHERE entry = 61034;
+UPDATE creature_template SET ScriptName = 'npc_sha_of_fear_bowman' WHERE entry IN (61042, 61038, 61046);
+
+DELETE FROM spell_script_names WHERE spell_id IN (119593, 119692, 119693, 117866, 125786, 119414, 119108, 129075);
 INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
+(119983, 'spell_dread_spray_stackable'),
+(119593, 'spell_ominous_caclke_target'),
+(119692, 'spell_ominous_caclke_target'),
+(119693, 'spell_ominous_caclke_target'),
 (117866, 'spell_champion_of_light'),
 (119414, 'spell_breath_of_fear'),
 (125786, 'spell_breath_of_fear'),
 (119108, 'spell_conjure_terror_spawn'),
 (129075, 'spell_penetrating_bolt');
+
+-- Path to cackle for players
+DELETE FROM waypoint_spline_data WHERE c_entry = 0 AND path_id = 1; 
+INSERT INTO waypoint_spline_data (c_entry, path_id, wp_id, position_x, position_y, position_z) VALUES
+(0, 1, 1, -992.7743, -2742.906, 38.2826),
+(0, 1, 2, -994.6996, -2735.714, 39.55555),
+(0, 1, 3, -985.3177, -2715.012, 43.20165),
+(0, 1, 4, -972.0938, -2673.486, 45.49643),
+(0, 1, 5, -1003.747, -2614.983, 36.33533),
+(0, 1, 6, -1019.441, -2582.851, 28.73846),
+(0, 1, 7, -1040.951, -2551.144, 26.21547),
+(0, 1, 8, -1073.549, -2531.825, 24.00163),
+(0, 1, 9, -1078.92, -2552.918, 15.89196);
 
 -- SHA OF FEAR END
 
@@ -205,7 +246,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position
 (@CGUID+0, 66100, 996, 3, 1, -982.4202, -3066.155, 12.65248, 2.69789, 86400, 0, 0), -- Apparition of Terror (Auras: )
 (@CGUID+1, 60999, 996, 3, 1, -1017.885, -2758.34, 38.65445, 4.713077, 86400, 0, 0), -- Sha of Fear (Auras: 72242 - Zero Energy + Zero Regen)
 (@CGUID+2, 64846, 996, 3, 1, -1036.106, -3136.929, 27.33581, 5.415483, 86400, 0, 0), -- Springtender Ashani (Area: -Unknown-)
-(@CGUID+3, 63025, 996, 3, 1, -1018.432, -2784.434, 49.42927, 1.507317, 86400, 0, 0), -- Tsulong (Auras: 122452 - Energy Drain & 50% HP)
+-- (@CGUID+3, 63025, 996, 3, 1, -1018.432, -2784.434, 49.42927, 1.507317, 86400, 0, 0), -- Tsulong (Auras: 122452 - Energy Drain & 50% HP)
 (@CGUID+4, 60583, 996, 3, 1, -1017.872, -3058.726, 12.90685, 1.501029, 86400, 0, 0), -- Protector Kaolan (Auras: 118221 - Sha Mask, 93105 - Invisibility and Stealth Detection)
 (@CGUID+5, 36737, 996, 3, 1, -1012.141, -3137.469, 27.18475, 4.667953, 86400, 0, 0), -- Invisible Stalker (Area: -Unknown-)
 (@CGUID+6, 64368, 996, 3, 1, -1052.701, -3068.122, 12.65246, 0.5773664, 86400, 0, 0), -- Apparition of Fear (Auras: )
@@ -266,7 +307,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position
 (@CGUID+59, 62995, 996, 3, 1, -1044.986, -2901.198, 19.17827, 3.013757, 86400, 0, 0), -- Animated Protector (Auras: 123493 - Protect)
 (@CGUID+60, 62995, 996, 3, 1, -989.3629, -2902.622, 19.17827, 0.6423108, 86400, 0, 0), -- Animated Protector (Auras: 123493 - Protect)
 (@CGUID+61, 65736, 996, 3, 1, -1214.8, -2824.82, 41.24303, 3.507344, 86400, 0, 0), -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
-(@CGUID+62, 60788, 996, 3, 1, -1017.835, -2771.984, 38.65444, 1.578282, 86400, 0, 0), -- Pure Light Terrace (Auras: 117865 - Light Wall)
+(@CGUID+62, 60788, 996, 3, 1, -1017.835, -2771.984, 38.65444, 4.718282, 86400, 0, 0), -- Pure Light Terrace (Auras: 117865 - Light Wall)
 (@CGUID+63, 65736, 996, 3, 1, -832.0764, -2745.399, 31.67754, 0.1536942, 86400, 0, 0), -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
 (@CGUID+64, 61038, 996, 3, 1, -1214.795, -2824.823, 41.24303, 3.506719, 86400, 0, 0), -- Yang Guoshi (Auras: 120000 - Sha Corruption)
 (@CGUID+65, 65736, 996, 3, 1, -1214.8, -2824.82, 41.24303, 3.507344, 86400, 0, 0), -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
@@ -274,19 +315,19 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position
 (@CGUID+67, 65736, 996, 3, 1, -832.0764, -2745.399, 31.67754, 0.1536942, 86400, 0, 0), -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
 (@CGUID+68, 61046, 996, 3, 1, -832.0764, -2745.405, 31.67757, 0.1583484, 86400, 0, 0), -- Jinlun Kun (Auras: 120000 - Sha Corruption)
 (@CGUID+69, 65736, 996, 3, 1, -832.0764, -2745.399, 31.67754, 0.1536942, 86400, 0, 0), -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
-(@CGUID+70, 65736, 996, 3, 1, -1214.8, -2824.82, 41.24303, 3.507344, 86400, 0, 0), -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
-(@CGUID+71, 71095, 996, 3, 1, -1017.91, -2771.976, 38.65443, 4.709265, 86400, 0, 0); -- Reflection of Lei Shi (Auras: 141597 - Lei Shi Victory)
+(@CGUID+70, 65736, 996, 3, 1, -1214.8, -2824.82, 41.24303, 3.507344, 86400, 0, 0); -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
+-- (@CGUID+71, 71095, 996, 3, 1, -1017.91, -2771.976, 38.65443, 4.709265, 86400, 0, 0); -- Reflection of Lei Shi (Auras: 141597 - Lei Shi Victory)
 
 
 DELETE FROM `gameobject` WHERE `guid` BETWEEN @OGUID+0 AND @OGUID+8;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@OGUID+0, 214525, 996, 3, 1, -1021.247, -3157.253, 30.74737, 1.571902, 0, 0, 0, 1, 86400, 255, 1), -- Instance Portal (Raid 4 Difficulties) (Area: -Unknown-)
-(@OGUID+1, 214854, 996, 3, 1, -1017.841, -3049.008, 13.82509, 4.71239, 0, 0, -0.7071068, 0.7071068, 86400, 255, 1), -- Jinyu Council Vortex Wall (Area: -Unknown-)
-(@OGUID+2, 214853, 996, 3, 1, -1017.925, -3049.097, -6.989163, 4.71239, 0, 0, -0.7071068, 0.7071068, 86400, 255, 1), -- Jinyu Council Vortex (Area: -Unknown-)
-(@OGUID+3, 214852, 996, 3, 1, -1017.925, -2911.348, -0.4573183, 4.71239, 0, 0, -0.7071068, 0.7071068, 86400, 255, 1), -- Lei Shi Vortex (Area: -Unknown-)
-(@OGUID+4, 214851, 996, 3, 1, -1017.841, -2911.576, 20.35694, 4.71239, 0, 0, -0.7071068, 0.7071068, 86400, 255, 1), -- Lei Shi Vortex Wall (Area: -Unknown-)
-(@OGUID+5, 214850, 996, 3, 1, -1017.925, -2771.996, 23.1714, 4.71239, 0, 0, -0.7071068, 0.7071068, 86400, 255, 1), -- Sha of Fear Vortex (Area: -Unknown-)
-(@OGUID+6, 214849, 996, 3, 1, -1017.875, -2771.908, 39.1506, 4.71239, 0, 0, -0.7071068, 0.7071068, 86400, 255, 1), -- Sha of Fear Vortex Wall (Area: -Unknown-)
+-- (@OGUID+1, 214854, 996, 3, 1, -1017.841, -3049.008, 13.82509, 4.71239, 0, 0, -0.7071068, 0.7071068, 86400, 255, 1), -- Jinyu Council Vortex Wall (Area: -Unknown-)
+-- (@OGUID+2, 214853, 996, 3, 1, -1017.925, -3049.097, -6.989163, 4.71239, 0, 0, -0.7071068, 0.7071068, 86400, 255, 1), -- Jinyu Council Vortex (Area: -Unknown-)
+-- (@OGUID+3, 214852, 996, 3, 1, -1017.925, -2911.348, -0.4573183, 4.71239, 0, 0, -0.7071068, 0.7071068, 86400, 255, 1), -- Lei Shi Vortex (Area: -Unknown-)
+-- (@OGUID+4, 214851, 996, 3, 1, -1017.841, -2911.576, 20.35694, 4.71239, 0, 0, -0.7071068, 0.7071068, 86400, 255, 1), -- Lei Shi Vortex Wall (Area: -Unknown-)
+-- (@OGUID+5, 214850, 996, 3, 1, -1017.925, -2771.996, 23.1714, 4.71239, 0, 0, -0.7071068, 0.7071068, 86400, 255, 1), -- Sha of Fear Vortex (Area: -Unknown-)
+-- (@OGUID+6, 214849, 996, 3, 1, -1017.875, -2771.908, 39.1506, 4.71239, 0, 0, -0.7071068, 0.7071068, 86400, 255, 1), -- Sha of Fear Vortex Wall (Area: -Unknown-)
 (@OGUID+7, 214498, 996, 3, 1, -1214.692, -2824.766, 33.12907, 3.508117, 0, 0, 0.9832549, -0.1822356, 86400, 255, 1), -- Gazebo Vortices (Area: -Unknown-)
 (@OGUID+8, 214498, 996, 3, 1, -832.0063, -2745.444, 23.56371, 0.165805, 0, 0, 0.0828083, 0.9965655, 86400, 255, 1); -- Gazebo Vortices (Area: -Unknown-)
 

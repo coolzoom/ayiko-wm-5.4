@@ -6,20 +6,27 @@
 #include "Creature.h"
 #include "CreatureAIImpl.h"
 
-enum eData
+enum DataTypes : uint32
 {
-    DATA_ZORLOK         = 0,
-    DATA_TAYAK          = 1,
-    DATA_GARALON        = 2,
-    DATA_MELJARAK       = 3,
-    DATA_UNSOK          = 4,
-    DATA_SHEKZEER       = 5,
-    DATA_MAX_BOSS_DATA  = 6
+    DATA_VIZIER,
+    DATA_TAYAK,
+    DATA_GARALON,
+    DATA_MELJARAK,
+    DATA_UNSOK,
+    DATA_SHEKZEER,
+
+    DATA_MAX_BOSS_DATA,
+    // Cosmetic yell controllers
+    DATA_ADDS_A,
+    DATA_ADDS_B,
+    DATA_ADDS_C,
+    DATA_VIZIER_INTRO,
 };
 
 enum eSpells
 {
     // Imperial Vizier Zor'lok
+    /*
     SPELL_ATTENUATION           = 122440,
     SPELL_CONVERT               = 122740,
     SPELL_INHALE                = 122852,
@@ -33,7 +40,7 @@ enum eSpells
     SPELL_SONIC_RING_VISUAL     = 122334,
     SPELL_SONIC_RING_AURA       = 122336,
     SPELL_INHALE_PHEROMONES     = 124018,
-    SPELL_REINFORCE             = 123833,
+    SPELL_REINFORCE             = 123833,*/
 
     // --- Blade Lord Ta'yak ---
     SPELL_TEMPEST_SLASH         = 122842,

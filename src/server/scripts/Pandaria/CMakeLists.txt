@@ -85,6 +85,9 @@ set(scripts_STAT_SRCS
   Pandaria/TerraceOfEndlessSpring/boss_lei_shi.cpp
   Pandaria/TerraceOfEndlessSpring/boss_sha_of_fear.cpp
 
+  Pandaria/ThroneOfThunder/boss_jinrokh.cpp
+  Pandaria/ThroneOfThunder/throne_of_thunder.h
+
   Pandaria/SiegeOfOrgrimmar/instance_siege_of_orgrimmar.cpp
   Pandaria/SiegeOfOrgrimmar/siege_of_orgrimmar.cpp
   Pandaria/SiegeOfOrgrimmar/siege_of_orgrimmar.h

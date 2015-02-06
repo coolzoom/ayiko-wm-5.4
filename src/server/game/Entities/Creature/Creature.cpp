@@ -664,6 +664,9 @@ void Creature::RegenerateEnergy()
 
 void Creature::RegenerateMana()
 {
+    if (!isRegeneratingMana())
+        return;
+
     uint32 curValue = GetPower(POWER_MANA);
     uint32 maxValue = GetMaxPower(POWER_MANA);
 
@@ -873,6 +876,9 @@ bool Creature::Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, 
     }
 
     LastUsedScriptID = crTemplate->ScriptID;
+
+    if (uint32 scriptId = sObjectMgr->GetCreatureScriptNameId(guidlow))
+        LastUsedScriptID = scriptId;
 
     // TODO: Replace with spell, handle from DB
     if (IsSpiritHealer() || IsSpiritGuide())
@@ -1565,18 +1571,32 @@ bool Creature::IsAlwaysVisibleFor(WorldObject const* seer) const
     if (Unit::IsAlwaysVisibleFor(seer))
         return true;
 
-    // Always seen by seer player and by creatures who has same seer player
-    if (m_seerGUID)
+    return false;
+}
+
+void Creature::SetCustomVisibility(uint8 visibility, uint64 seerGUID)
+{
+    m_customVisibility = visibility;
+    m_seerGUID = seerGUID;
+    UpdateObjectVisibility();
+}
+
+bool Creature::IsCustomVisibleFor(WorldObject const* seer) const
+{
+    if (GetCustomVisibility() & CUSTOM_VISIBILITY_SEER)
     {
-        if (seer->GetGUID() == m_seerGUID)
+        if (seer->GetGUID() == GetSeerGUID())
             return true;
 
-        if (const Creature* _seer = seer->ToCreature())
-            if (_seer->GetSeerGUID() == m_seerGUID)
-                return true;
+        if (GetCustomVisibility() & CUSTOM_VISIBILITY_CREATURE)
+            return seer->GetTypeId() == TYPEID_UNIT;
+
+        if (GetCustomVisibility() & CUSTOM_VISIBILITY_SEER_CREATURE && seer->GetTypeId() == TYPEID_UNIT)
+            if (const Creature* creatureSeer = seer->ToCreature())
+                return creatureSeer->GetSeerGUID() == GetSeerGUID();
     }
 
-    return false;
+    return true;
 }
 
 bool Creature::canStartAttack(Unit const* who, bool force) const
@@ -2519,6 +2539,10 @@ std::string Creature::GetScriptName() const
 
 uint32 Creature::GetScriptId() const
 {
+    if (m_DBTableGuid)
+        if (uint32 scriptId = sObjectMgr->GetCreatureScriptNameId(m_DBTableGuid))
+            return scriptId;
+
     return sObjectMgr->GetCreatureTemplate(GetEntry())->ScriptID;
 }
 

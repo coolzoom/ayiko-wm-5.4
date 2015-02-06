@@ -1549,6 +1549,9 @@ class Unit : public WorldObject
         // Should only be called by AuraEffect::HandleAuraControlVehicle(AuraApplication const* auraApp, uint8 mode, bool apply) const;
         void _ExitVehicle(Position const* exitPosition = NULL);
         void _EnterVehicle(Vehicle* vehicle, int8 seatId, AuraApplication const* aurApp = NULL);
+        void setVehicleEjectPos(float x, float y, float z, float o) { m_vehicleEjectPos.Relocate(x, y, z, o); }
+        void setVehicleEjectPos(Position const* exitPosition) { m_vehicleEjectPos.Relocate(exitPosition); }
+        Position getVehicleEjectPos() const { return m_vehicleEjectPos; }
 
         void BuildMovementPacket(ByteBuffer *data) const;
 
@@ -1682,6 +1685,8 @@ class Unit : public WorldObject
         LiquidTypeEntry const* _lastLiquid;
 
         bool m_IsInKillingProcess;
+
+        Position m_vehicleEjectPos;
 
         bool IsAlwaysVisibleFor(WorldObject const* seer) const;
         bool IsAlwaysDetectableFor(WorldObject const* seer) const;

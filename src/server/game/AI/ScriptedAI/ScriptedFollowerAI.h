@@ -46,6 +46,12 @@ class FollowerAI : public ScriptedAI
         void SetFollowPaused(bool bPaused);                 //if special event require follow mode to hold/resume during the follow
         void SetFollowComplete(bool bWithEndEvent = false);
 
+        void SetFollowAngle(float angle) { m_followAngle = angle; }
+        void SetMaxFollowDist(float dist) { m_maxFollowDist = dist; }
+        void SetIngoreLeaderGroup(bool ignore) { ignorePlayerGroup = ignore; }
+
+        virtual void DespawnOnDistanceFail() { }
+
         bool HasFollowState(uint32 uiFollowState) { return (m_uiFollowState & uiFollowState); }
 
     protected:
@@ -60,6 +66,10 @@ class FollowerAI : public ScriptedAI
         uint64 m_uiLeaderGUID;
         uint32 m_uiUpdateFollowTimer;
         uint32 m_uiFollowState;
+
+        float m_followAngle;
+        float m_maxFollowDist;
+        bool ignorePlayerGroup;
 
         const Quest* m_pQuestForFollow;                     //normally we have a quest
 };

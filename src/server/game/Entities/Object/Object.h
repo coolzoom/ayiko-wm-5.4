@@ -436,6 +436,8 @@ struct Position
     float m_orientation;
 //public:
 
+    bool operator == (Position pos) const { return ((pos.GetPositionX() == GetPositionX()) && (pos.GetPositionY() == GetPositionY()) && (pos.GetPositionZ() == GetPositionZ())); }
+
     void Relocate(float x, float y)
         { m_positionX = x; m_positionY = y;}
     void Relocate(float x, float y, float z)

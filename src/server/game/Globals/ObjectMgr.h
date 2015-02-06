@@ -463,6 +463,7 @@ class ObjectMgr
         CreatureAddon const* GetCreatureTemplateAddon(uint32 entry);
         ItemTemplate const* GetItemTemplate(uint32 entry);
         ItemTemplateContainer const & GetItemTemplateStore() const { return _itemTemplateStore; }
+        uint32 const GetCreatureScriptNameId(uint32 lowguid) const;
 
         ObjectInvisibility const * gameObjectInvisibility(uint32 guid) const;
         ObjectInvisibility const * gameObjectTemplateInvisibility(uint32 entry) const;
@@ -673,6 +674,7 @@ class ObjectMgr
         void LoadLinkedRespawn();
         bool SetCreatureLinkedRespawn(uint32 guid, uint32 linkedGuid);
         void LoadCreatureAddons();
+        void LoadCreatureScriptNames();
         void LoadCreatureModelInfo();
         void loadCreatureInvisibility();
         void LoadEquipmentTemplates();
@@ -1161,6 +1163,7 @@ class ObjectMgr
 
         mutable MapObjectLock _mapObjectGuidsStoreLock;
 
+        CreatureScriptnameContainer _creatureScriptnameStore;
         CreatureDataContainer _creatureDataStore;
         CreatureTemplateContainer _creatureTemplateStore;
         CreatureModelContainer _creatureModelStore;

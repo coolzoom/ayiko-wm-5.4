@@ -323,6 +323,8 @@ struct CreatureAddon
     { }
 };
 
+typedef std::unordered_map<uint32, uint32> CreatureScriptnameContainer;
+
 typedef std::unordered_map<uint32, CreatureAddon> CreatureAddonContainer;
 
 struct CreatureModelInfo
@@ -489,6 +491,14 @@ private:
         _moveState = CREATURE_CELL_MOVE_ACTIVE;
         _newPosition.Relocate(x, y, z, o);
     }
+};
+
+enum CustomVisibility
+{
+    CUSTOM_VISIBILITY_DEFAULT       = 1,
+    CUSTOM_VISIBILITY_SEER          = 2,
+    CUSTOM_VISIBILITY_SEER_CREATURE = 4,
+    CUSTOM_VISIBILITY_CREATURE      = 8,
 };
 
 class Creature : public Unit, public GridObject<Creature>, public MapCreature
@@ -734,6 +744,8 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
 
         bool isRegeneratingHealth() { return m_regenHealth; }
         void setRegeneratingHealth(bool regenHealth) { m_regenHealth = regenHealth; }
+        bool isRegeneratingMana() const { return m_regenMana; }
+        void setRegeneratingMana(bool regenMana) { m_regenMana = regenMana; }
         virtual uint8 GetPetAutoSpellSize() const { return MAX_SPELL_CHARM; }
         virtual uint32 GetPetAutoSpellOnPos(uint8 pos) const
         {
@@ -790,14 +802,15 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
 
         bool m_isTempWorldObject; //true when possessed
 
-        void SetSeerGUID(uint64 guid) { m_seerGUID = guid; }
-
-        uint64 GetSeerGUID() const { return m_seerGUID; }
-
         void ForcedDespawn(uint32 timeMSToDespawn = 0);
 
         void SetLockAI(bool lock) { m_AI_locked = lock; }
 
+        // Custom visible system
+        bool IsCustomVisibleFor(WorldObject const* seer) const;
+        uint64 GetSeerGUID() const { return m_seerGUID; };
+        void SetCustomVisibility(uint8 visibility, uint64 seerGUID);
+        uint8 GetCustomVisibility() const { return m_customVisibility; }
     protected:
         bool CreateFromProto(uint32 guidlow, uint32 Entry, uint32 vehId, uint32 team, const CreatureData* data = NULL);
         bool InitEntry(uint32 entry, uint32 team=ALLIANCE, const CreatureData* data=NULL);
@@ -828,6 +841,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
         bool m_AlreadyCallAssistance;
         bool m_AlreadySearchedAssistance;
         bool m_regenHealth;
+        bool m_regenMana;
         bool m_AI_locked;
 
         SpellSchoolMask m_meleeDamageSchoolMask;
@@ -844,6 +858,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
         uint16 m_LootMode;                                  // bitmask, default LOOT_MODE_DEFAULT, determines what loot will be lootable
 
         uint64 m_seerGUID;
+        uint8 m_customVisibility;
         bool IsAlwaysVisibleFor(WorldObject const* seer) const;
 
         bool IsInvisibleDueToDespawn() const;

@@ -24,7 +24,10 @@ FollowerAI::FollowerAI(Creature* creature) : ScriptedAI(creature),
     m_uiLeaderGUID(0),
     m_uiUpdateFollowTimer(2500),
     m_uiFollowState(STATE_FOLLOW_NONE),
-    m_pQuestForFollow(NULL)
+    m_pQuestForFollow(NULL),
+    m_followAngle(PET_FOLLOW_ANGLE),
+    m_maxFollowDist(MAX_PLAYER_DISTANCE),
+    ignorePlayerGroup(false)
 {}
 
 void FollowerAI::AttackStart(Unit* who)

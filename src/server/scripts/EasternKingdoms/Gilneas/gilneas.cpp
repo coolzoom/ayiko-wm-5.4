@@ -2651,7 +2651,7 @@ class npc_saved_aranas final : public CreatureScript
 
             void IsSummonedBy(Unit* summoner) final
             {
-                me->SetSeerGUID(summoner->GetGUID());
+                me->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, summoner->GetGUID());
                 me->SetVisible(false);
 
                 if (Unit* horse = summoner->GetVehicleBase())
@@ -3113,7 +3113,7 @@ class npc_crowley_horse_first_round final : public CreatureScript
             {
                 if (Creature* crowley = summoner->SummonCreature(NPC_CROWLEY, *me))
                 {
-                    crowley->SetSeerGUID(summoner->GetGUID());
+                    crowley->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, summoner->GetGUID());
                     crowley->SetVisible(false);
                     crowley->EnterVehicle(me, 1);
                 }
@@ -3587,7 +3587,7 @@ class npc_krennan_aranas_last_stand final : public CreatureScript
 
             void IsSummonedBy(Unit* summoner) final
             {
-                me->SetSeerGUID(summoner->GetGUID());
+                me->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, summoner->GetGUID());
                 me->SetVisible(false);
                 events.ScheduleEvent(EVENT_CHECK_PLAYER_ONLINE, 500);
                 events.ScheduleEvent(EVENT_CHECK_PLAYER_MOVIE, 500);
@@ -3606,7 +3606,7 @@ class npc_krennan_aranas_last_stand final : public CreatureScript
                         break;
                 }
 
-                summoned->SetSeerGUID(me->ToTempSummon()->GetSummonerGUID());
+                summoned->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, me->ToTempSummon()->GetSummonerGUID());
                 summoned->SetVisible(false);
             }
 
@@ -5775,7 +5775,7 @@ class npc_stagecoach_harness_escort final : public CreatureScript
 
             void IsSummonedBy(Unit* summoner) final
             {
-                me->SetSeerGUID(summoner->GetGUID());
+                me->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, summoner->GetGUID());
                 me->SetVisible(false);
 
                 if (Player* player = summoner->ToPlayer())
@@ -5790,7 +5790,7 @@ class npc_stagecoach_harness_escort final : public CreatureScript
             void JustSummoned(Creature* summoned) final
             {
                 summons.Summon(summoned);
-                summoned->SetSeerGUID(me->ToTempSummon()->GetSummonerGUID());
+                summoned->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, me->ToTempSummon()->GetSummonerGUID());
                 summoned->SetPhaseMask(EXODUS_PHASE_MASK, true);
                 summoned->SetVisible(false);
                 summoned->setActive(true);
@@ -6281,7 +6281,7 @@ class npc_captain_asther_qiao final : public CreatureScript
 
             void IsSummonedBy(Unit* summoner) final
             {
-                me->SetSeerGUID(summoner->GetGUID());
+                me->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, summoner->GetGUID());
                 me->SetVisible(false);
                 StartEvent();
             }
@@ -6290,7 +6290,7 @@ class npc_captain_asther_qiao final : public CreatureScript
             {
                 summoned->SetReactState(REACT_PASSIVE);
                 summoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                summoned->SetSeerGUID(me->ToTempSummon()->GetSummonerGUID());
+                summoned->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, me->ToTempSummon()->GetSummonerGUID());
                 summoned->SetVisible(false);
                 summoned->setActive(true);
             }
@@ -6775,7 +6775,7 @@ class npc_tobias_mistmantle_qaod final : public CreatureScript
 
             void IsSummonedBy(Unit* summoner) final
             {
-                me->SetSeerGUID(summoner->GetGUID());
+                me->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, summoner->GetGUID());
                 me->SetVisible(false);
                 me->GetMotionMaster()->MoveSplinePath(1, false, false, 0.f, false, false);
                 events.ScheduleEvent(EVENT_SAY_FORSAKEN, me->GetSplineDuration());
@@ -7078,7 +7078,7 @@ class go_qnhnb_well final : public GameObjectScript
 
                 if (Creature* trigger = player->SummonCreature(NPC_TRIGGER, x, y, z, 0.0f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 15000))
                 {
-                    trigger->SetSeerGUID(player->GetGUID());
+                    trigger->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, player->GetGUID());
                     trigger->SetVisible(false);
                     trigger->AddAura(SPELL_TALDOREN_WELL, trigger);
                 }
@@ -7127,7 +7127,7 @@ class npc_lord_godfrey_qnhnb final : public CreatureScript
 
             void IsSummonedBy(Unit* summoner) final
             {
-                me->SetSeerGUID(summoner->GetGUID());
+                me->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, summoner->GetGUID());
                 me->SetVisible(false);
                 me->DespawnOrUnsummon(70000);
                 me->GetMotionMaster()->MoveSplinePath(1, false, true, 0.f, false, false);
@@ -7192,7 +7192,7 @@ class npc_lorna_crowley_qnhnb final : public CreatureScript
 
             void IsSummonedBy(Unit* summoner) final
             {
-                me->SetSeerGUID(summoner->GetGUID());
+                me->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, summoner->GetGUID());
                 me->SetVisible(false);
                 me->DespawnOrUnsummon(70000);
                 me->GetMotionMaster()->MoveSplinePath(1, false, false, 0.f, false, false);
@@ -7257,7 +7257,7 @@ class npc_king_genn_greymane_qnhnb final : public CreatureScript
 
             void IsSummonedBy(Unit* summoner) final
             {
-                me->SetSeerGUID(summoner->GetGUID());
+                me->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, summoner->GetGUID());
                 me->SetVisible(false);
                 me->DespawnOrUnsummon(70000);
                 me->GetMotionMaster()->MoveSplinePath(1, false, true, 0.f, false, false);
@@ -10182,7 +10182,7 @@ class npc_tobias_mistmantle_qthfs final : public CreatureScript
 
             void IsSummonedBy(Unit* summoner) final
             {
-                me->SetSeerGUID(summoner->GetGUID());
+                me->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, summoner->GetGUID());
                 me->SetVisible(false);
                 Talk(TOBIAS_SAY_LETS_GO, me->ToTempSummon()->GetSummonerGUID(), true);
                 events.ScheduleEvent(EVENT_START_HUNT, 5000);
@@ -10190,7 +10190,7 @@ class npc_tobias_mistmantle_qthfs final : public CreatureScript
 
             void JustSummoned(Creature* summoned) final
             {
-                summoned->SetSeerGUID(me->ToTempSummon()->GetSummonerGUID());
+                summoned->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, me->ToTempSummon()->GetSummonerGUID());
                 summoned->SetVisible(false);
             }
 
@@ -10765,7 +10765,7 @@ class npc_gilneas_funeral_camera final : public CreatureScript
 
             void IsSummonedBy(Unit* summoner) final
             {
-                me->SetSeerGUID(summoner->GetGUID());
+                me->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, summoner->GetGUID());
                 me->SetVisible(false);
                 me->SetPhaseMask(540672, true);
                 events.ScheduleEvent(EVENT_START_CAMERA, 2000);
@@ -10773,7 +10773,7 @@ class npc_gilneas_funeral_camera final : public CreatureScript
 
             void JustSummoned(Creature* summoned) final
             {
-                summoned->SetSeerGUID(me->ToTempSummon()->GetSummonerGUID());
+                summoned->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, me->ToTempSummon()->GetSummonerGUID());
                 summoned->SetVisible(false);
 
                 switch (summoned->GetEntry())

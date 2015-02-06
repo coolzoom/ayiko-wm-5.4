@@ -20173,12 +20173,17 @@ void Unit::_ExitVehicle(Position const* exitPosition)
 
     SetControlled(false, UNIT_STATE_ROOT);      // SMSG_MOVE_FORCE_UNROOT, ~MOVEMENTFLAG_ROOT
 
-    Position pos;
-    if (!exitPosition)                          // Exit position not specified
+    bool isFixedEjectPos = true;
+    Position pos = { 0.0f, 0.0f, 0.0f, 0.0f };
+    Position ejectPos = getVehicleEjectPos();
+    if (pos == ejectPos)                          // Exit position not specified
+    {
         vehicle->GetBase()->GetPosition(&pos);  // This should use passenger's current position, leaving it as it is now
-                                                // because we calculate positions incorrect (sometimes under map)
+        // because we calculate positions incorrect (sometimes under map)
+        isFixedEjectPos = false;
+    }
     else
-        pos = *exitPosition;
+        pos = ejectPos;
 
     AddUnitState(UNIT_STATE_MOVE);
 

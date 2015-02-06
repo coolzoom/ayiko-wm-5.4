@@ -1663,6 +1663,9 @@ void World::SetInitialWorldSettings()
     TC_LOG_INFO("server.loading", "Loading Creature template currencies...");
     sObjectMgr->LoadCreatureTemplateCurrency();
 
+    TC_LOG_INFO("server.loading", "Loading Creature Script Names currencies...");
+    sObjectMgr->LoadCreatureScriptNames();
+
     TC_LOG_INFO("server.loading", "Loading Reputation Reward Rates...");
     sObjectMgr->LoadReputationRewardRate();
 

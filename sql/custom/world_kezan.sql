@@ -1350,9 +1350,8 @@ INSERT INTO `conditions` (SourceTypeOrReferenceId,SourceGroup,SourceEntry,Source
 (18, 34830, 66306, 0, 0, 8, 0, 14069, 0, 0, 1, 0, '', 'Npc_spellclick_spells-QuestMustNOTBeCompleted'),
 (18, 34830, 66306, 0, 0, 9, 0, 14069, 0, 0, 0, 0, '', 'Npc_spellclick_spells-QuestMustBeAccepted');
 
-REPLACE INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(34830, 1, 2704, 0, 0),
-(34830, 2, 2202, 0, 0);
+REPLACE INTO `creature_equip_template` (`entry`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(34830, 2202, 0, 0);
 
 DELETE FROM `creature_template_aura` WHERE `entry` = 34830;
 INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES
@@ -4277,10 +4276,6 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`,`SourceGroup`,`SourceEntry`,
 (13, 1, 69043, 0, 31, 3, 36608, 0, 0, '', ''),
 (13, 1, 69086, 0, 31, 3, 36600, 0, 0, '', '');
 
-DELETE FROM `movie_scripts` WHERE `entry` = 22;
-INSERT INTO `movie_scripts` (`entry`, `ScriptName`) VALUES
-(22, 'movie_kezan_life_savings');
-
 DELETE FROM `spell_linked_spell` WHERE `spell_trigger` = 91847;
 
 DELETE FROM `creature_text` WHERE `entry` IN (35222,36608);
@@ -5064,12 +5059,8 @@ INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES
 (48925, 75098);
 
 DELETE FROM `spell_dbc` WHERE  `Id` IN (70467);
-INSERT INTO `spell_dbc` (`Id`, `castingTimeIndex`, `rangeIndex`, `durationIndex`, `spellIconId`, `attributesEx`, `attributesEx2`, `attributesEx3`, `attributesEx4`) VALUES
-(70467, 1, 1, 0, 1, 0x00000088, 0x00000005, 0x00040100, 0x00000080);
-
-DELETE FROM `spelleffect_dbc` WHERE `Id` IN (1070467);
-INSERT INTO `spelleffect_dbc` (`Id`, `effect`, `effectApplyAuraName`, `effectRadiusIndex`, `effectBasePoints`, `effectImplicitTargetA`, `effectImplicitTargetB`, `effectSpellId`, `effectIndex`) VALUES
-(1070467, 3, 0, 0, 0, 1, 0, 70467, 0);
+INSERT INTO `spell_dbc` (`Id`, `castingTimeIndex`, `rangeIndex`, `durationIndex`, `attributesEx`, `attributesEx2`, `attributesEx3`, `attributesEx4`, Comment, effect1, effectImplicitTargetA1) VALUES
+(70467, 1, 1, 0, 0x00000088, 0x00000005, 0x00040100, 0x00000080, '', 3, 1);
 
 DELETE FROM spell_script_names WHERE spell_id = 70467;
 INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
@@ -6356,8 +6347,8 @@ INSERT INTO `creature_emote` (`guid`,`emote`) VALUES
 (@GUID + 1, 375);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 35786;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(35786, 1, 50137, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(35786, 50137, 0, 0);
 
 DELETE FROM `creature_text` WHERE `entry` = 35786;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
@@ -6409,8 +6400,8 @@ INSERT INTO `creature_emote` (`guid`,`emote`) VALUES
 (@GUID + 8, 234);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 36179;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(36179, 1, 1902, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(36179, 1902, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -6420,8 +6411,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID+1, 36430, 648, 1, 14, 0, 1, 590.071, 3110.93, 2.97775, 0.593412, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 36430;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(36430, 1, 31824, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(36430, 31824, 0, 0);
 
 DELETE FROM `creature_emote` WHERE `guid` = @GUID + 1;
 INSERT INTO `creature_emote` (`guid`,`emote`) VALUES
@@ -6500,8 +6491,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID+1, 38432, 648, 1, 14, 0, 1, 588.769, 3092.32, 3.49376, 2.58309, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 38432;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(38432, 1, 50139, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(38432, 50139, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -6511,8 +6502,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID+1, 35806, 648, 1, 14, 0, 1, 585.811, 3089.42, 3.89896, 5.18363, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 35806;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(35806, 1, 50139, 50139, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(35806, 50139, 50139, 0);
 
 DELETE FROM `creature_emote` WHERE `guid` = @GUID + 1;
 INSERT INTO `creature_emote` (`guid`,`emote`) VALUES
@@ -6537,19 +6528,19 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTarget`, `SourceG
 (13, 0, 1, 68047, 0, 31, 3, 34699, 0, 0, '', '');
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 35778;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(35778, 1, 12937, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(35778, 12937, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 --  Coach Crosscheck
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
-(401698, 38738, 648, 1, 14, 0, 1, 639.549, 3129.05, 2.19402, 5.77704, 120, 0, 0, 1, 0, 0, 0, 0, 0);
+(@GUID+1, 38738, 648, 1, 14, 0, 1, 639.549, 3129.05, 2.19402, 5.77704, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 38738;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(38738, 1, 12742, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(38738, 12742, 0, 0);
 
 DELETE FROM `creature_text` WHERE `entry` = 38738;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
@@ -6563,8 +6554,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID+1, 35805, 648, 1, 14, 0, 1, 637.726, 3133.11, 1.67227, 5.61996, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 35805;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(35805, 1, 14706, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(35805, 14706, 0, 0);
 
 DELETE FROM `creature_emote` WHERE `guid` = @GUID + 1;
 INSERT INTO `creature_emote` (`guid`,`emote`) VALUES
@@ -6578,8 +6569,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID+1, 35780, 648, 1, 14, 0, 1, 646.3, 3132.26, 1.77744, 5.86431, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 35780;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(35780, 1, 19214, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(35780, 19214, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -6593,8 +6584,8 @@ INSERT INTO `creature_bytes` (`guid`, `index`, `bytes`)VALUES
 (@GUID + 1, 1, 2);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 35758;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(35758, 1, 50145, 0, 50150);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(35758, 50145, 0, 50150);
 
 DELETE FROM `creature_text` WHERE `entry` = 35758;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
@@ -7335,8 +7326,8 @@ INSERT INTO `creature_bytes` (`guid`, `index`, `bytes`)VALUES
 (@GUID + 8, 1, 2);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 35810;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(35810, 1, 1910, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(35810, 1910, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -7357,8 +7348,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID+12, 36344, 648, 1, 1028, 0, 0, 608.519, 2857.31, -7.04389, 4.71239, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 36344;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(36344, 1, 1910, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(36344, 1910, 0, 0);
 
 DELETE FROM `creature_template_emote` WHERE `entry` = 36344;
 INSERT INTO `creature_template_emote` (`entry`, `emote`) VALUES
@@ -7393,8 +7384,8 @@ INSERT INTO `creature_emote` (`guid`,`emote`) VALUES
 (@GUID+12, 233);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 35812;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(35812, 1, 0, 62052, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(35812, 0, 62052, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -7420,8 +7411,8 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (35838, 0, 1, 'Taronto bosch!', 14, 0, 100, 0, 0, 0, 'Pygmy Witchdoctor');
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 35838;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(35838, 1, 49423, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(35838, 49423, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -7442,8 +7433,8 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (68279, 'spell_ktc_snapflash_effect_qctu');
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 35769;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(35769, 1, 1910, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(35769, 1910, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -8161,8 +8152,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID+2, 35894, 648, 1, 2, 0, 0, 600.328, 2786.01, 88.6889, 0.754147, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 35894;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(35894, 1, 10611, 12452, 2552);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(35894, 10611, 12452, 2552);
 
 DELETE FROM `creature_bytes` WHERE `guid` BETWEEN @GUID + 1 AND @GUID + 2;
 INSERT INTO `creature_bytes` (`guid`, `index`, `bytes`)VALUES
@@ -8177,8 +8168,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID+1, 35893, 648, 1, 2, 0, 0, 602.054, 2783.78, 88.7381, 0.996638, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 35893;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(35893, 1, 12294, 0, 56170);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(35893, 12294, 0, 56170);
 
 DELETE FROM `creature_bytes` WHERE `guid` = @GUID + 1;
 INSERT INTO `creature_bytes` (`guid`, `index`, `bytes`)VALUES
@@ -8266,8 +8257,8 @@ INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES
 (36063, 76354);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 36063;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(36063, 1, 10611, 12452, 2552);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(36063, 10611, 12452, 2552);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -8286,8 +8277,8 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (35917, 1, 0, 'Ride Bastia! Find Brax!', 12, 0, 100, 25, 0, 0, 'Kilag Gorefang');
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 35917;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(35917, 1, 12294, 0, 56170);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(35917, 12294, 0, 56170);
 
 DELETE FROM `spell_script_names` WHERE `spell_id` = 68337;
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
@@ -8499,14 +8490,9 @@ INSERT INTO `creature_formations` (`leaderGUID`, `memberGUID`, `dist`, `angle`, 
 (@GUID + 24, @GUID + 24, 0, 0, 0),
 (@GUID + 24, @GUID + 25, 3, 90, 2);
 
-DELETE FROM `creature_formations_turn_points` WHERE `leaderGUID` = @GUID + 24;
-INSERT INTO `creature_formations_turn_points` VALUES
-(@GUID + 24, 0),
-(@GUID + 24, 3);
-
 DELETE FROM `creature_equip_template` WHERE `entry` = 36092;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(36092, 1, 10613, 10618, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(36092, 10613, 10618, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -8564,8 +8550,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID + 1, 36112, 648, 1, 8, 0, 0, 1079.87, 3241.81, 80.8397, 2.60054, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 36112;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(36112, 1, 11019, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(36112, 11019, 0, 0);
 
 DELETE FROM `creature_emote` WHERE `guid` = @GUID + 1;
 INSERT INTO `creature_emote` (`guid`,`emote`) VALUES
@@ -8611,8 +8597,8 @@ INSERT INTO `creature_emote` (`guid`,`emote`) VALUES
 (@GUID + 17, 375);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 36103;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(36103, 1, 3366, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(36103, 3366, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -8642,8 +8628,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID + 3, 36104, 648, 1, 8, 0, 1, 947.023, 3260.31, 21.4088, 3.06367, 300, 0, 0, 156, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 36104;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(36104, 1, 22596, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(36104, 22596, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -8653,8 +8639,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID + 1, 36115, 648, 1, 8, 0, 1, 947.013, 3272.46, 17.8094, 3.25767, 300, 0, 0, 198, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 36115;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(36115, 1, 14527, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(36115, 14527, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -8664,8 +8650,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID + 1, 36117, 648, 1, 8, 0, 1, 947.41, 3275.97, 17.6281, 3.1108, 300, 0, 0, 264, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 36117;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(36117, 1, 12294, 0, 56170);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(36117, 12294, 0, 56170);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -8675,8 +8661,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID + 1, 36464, 648, 1, 8, 0, 1, 947.684, 3279.21, 18, 2.89474, 300, 0, 0, 120, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 36464;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(36464, 1, 1903, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(36464, 1903, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -8746,8 +8732,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID + 54, 36149, 648, 1, 8, 0, 0, 1059.8, 3814.79, 8.38054, 2.47823, 120, 5, 0, 1, 0, 1, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 36149;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(36149, 1, 851, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(36149, 851, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -8757,8 +8743,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID + 1, 36621, 648, 1, 8, 0, 1, 991.351, 3848.52, 3.22957, 1.14216, 300, 0, 0, 126, 289, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 36621;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(36621, 1, 14837, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(36621, 14837, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -9022,8 +9008,8 @@ INSERT INTO `creature_aura` (`guid`,`aura`) VALUES
 (@GUID + 61, 31261);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 36176;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(36176, 1, 851, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(36176, 851, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -9112,8 +9098,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID + 1, 36418, 648, 1, 1024, 0, 0, 869.705, 2760.26, 119.228, 1.0472, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 36418;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(36418, 1, 14527, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(36418, 14527, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -9123,8 +9109,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID + 1, 38432, 648, 1, 1024, 0, 0, 847.91, 2773.87, 112.922, 4.93928, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 38432;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(38432, 1, 50139, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(38432, 50139, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -9152,8 +9138,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID + 1, 36520, 648, 1, 1024, 0, 0, 849.09, 2769.03, 114.114, 4.83456, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 36520;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(36520, 1, 19214, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(36520, 19214, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -9163,8 +9149,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID + 1, 38738, 648, 1, 1024, 0, 0, 850.411, 2761.42, 115.635, 5.35816, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 38738;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(38738, 1, 12742, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(38738, 12742, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -9181,8 +9167,8 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (-(@GUID + 2),0,0,0,1,0,100,0,1000,5000,2000,7000,5,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Orc Survivor emote talk");
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 36421;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(36421, 1, 12629, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(36421, 12629, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -9200,8 +9186,8 @@ INSERT INTO `creature_emote` (`guid`,`emote`) VALUES
 (@GUID + 3, 375);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 36423;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(36423, 1, 22596, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(36423, 22596, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -9225,8 +9211,8 @@ INSERT INTO `creature_bytes` (`guid`, `index`, `bytes`)VALUES
 (@GUID + 3, 1, 2);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 36422;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(36422, 1, 10611, 12452, 2552);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(36422, 10611, 12452, 2552);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -9236,8 +9222,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID + 1, 36465, 648, 1, 1024, 0, 0, 860.311, 2762.56, 117.146, 1.64061, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 36465;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(36465, 1, 1903, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(36465, 1903, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -9269,8 +9255,8 @@ INSERT INTO `creature_emote` (`guid`,`emote`) VALUES
 (@GUID + 2, 234);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 36426;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(36426, 1, 5292, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(36426, 5292, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -9305,8 +9291,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID + 1, 36467, 648, 1, 1024, 0, 0, 849.951, 2763.39, 115.266, 1.65806, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 36467;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(36467, 1, 31824, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(36467, 31824, 0, 0);
 
 DELETE FROM `smart_scripts` WHERE `source_type`=0 AND `entryorguid` = -(@GUID + 1);
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
@@ -9320,8 +9306,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID + 1, 36501, 648, 1, 1024, 0, 0, 851.116, 2760.08, 115.912, 5.55015, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 36501;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(36501, 1, 3362, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(36501, 3362, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -9353,8 +9339,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID + 1, 36521, 648, 1, 1024, 0, 0, 854.859, 2756.05, 117.41, 5.55015, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 36521;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(36521, 1, 50137, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(36521, 50137, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -9364,8 +9350,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID + 1, 36518, 648, 1, 1024, 0, 0, 856.221, 2754.8, 118.056, 5.53269, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 36518;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(36518, 1, 50145, 0, 50150);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(36518, 50145, 0, 50150);
 
 DELETE FROM `smart_scripts` WHERE `source_type`=0 AND `entryorguid` = -(@GUID + 1);
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
@@ -9379,8 +9365,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID + 1, 36524, 648, 1, 1024, 0, 0, 857.111, 2753.94, 118.417, 2.35619, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 36524;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(36524, 1, 50139, 50139, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(36524, 50139, 50139, 0);
 
 DELETE FROM `smart_scripts` WHERE `source_type`=0 AND `entryorguid` = -(@GUID + 1);
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
@@ -9398,8 +9384,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID + 1, 36523, 648, 1, 1024, 0, 0, 858.411, 2752.46, 118.95, 5.39307, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 36523;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(36523, 1, 14706, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(36523, 14706, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -9409,8 +9395,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID + 1, 36519, 648, 1, 1024, 0, 0, 860.04, 2750.59, 119.628, 6.03884, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 36519;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(36519, 1, 12937, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(36519, 12937, 0, 0);
 
 DELETE FROM `creature_text` WHERE `entry` = 36519;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
@@ -9743,8 +9729,8 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (36471, 0, 0, 'Hobart''s right behind you, $g sir : ma''am;.', 12, 0, 100, 25, 0, 0, 'Foreman Dampwick');
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 36471;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(36471, 1, 1910, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(36471, 1910, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -9768,8 +9754,8 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (38120, 3, 0, 'Shut it down, shut it down! The eggs are bad!!!', 14, 0, 100, 0, 0, 0, 'Hobart Grapplehammer');
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 38120;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(38120, 1, 4994, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(38120, 4994, 0, 0);
 
 DELETE FROM `creature_emote` WHERE `guid` = @GUID + 1;
 INSERT INTO `creature_emote` (`guid`,`emote`) VALUES
@@ -9793,8 +9779,8 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTarget`, `SourceG
 (13, 0, 1, 66726, 0, 31, 5, 201972, 0, 0, '', '');
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 38122;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(38122, 1, 50145, 0, 50150);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(38122, 50145, 0, 50150);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -9811,8 +9797,8 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (38124, 3, 0, '$N, get to the Mechashark X-Steam Controller. Rid us of the Hammer menace!', 12, 0, 100, 1, 0, 2304, 'Assistant Greely');
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 38124;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(38124, 1, 1910, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(38124, 1910, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -9822,8 +9808,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID + 1, 38387, 648, 1, 2048, 0, 0, 927.372, 2343.74, 5.80698, 4.03171, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 38387;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(38387, 1, 50141, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(38387, 50141, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -9856,8 +9842,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID + 1, 38511, 648, 1, 2048, 0, 0, 907.32, 2344.27, 5.39862, 5.67232, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 38511;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(38511, 1, 31824, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(38511, 31824, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -9867,8 +9853,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID + 1, 38513, 648, 1, 2048, 0, 0, 906.568, 2329.74, 5.11571, 0.785398, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 38513;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(38513, 1, 12937, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(38513, 12937, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -9878,8 +9864,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID + 1, 38514, 648, 1, 2048, 0, 0, 920.649, 2346.36, 4.86977, 4.08407, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 38514;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(38514, 1, 19214, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(38514, 19214, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -9889,8 +9875,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID + 1, 38515, 648, 1, 2048, 0, 0, 916.425, 2347.45, 4.88787, 4.57276, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 38515;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(38515, 1, 50137, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(38515, 50137, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -9900,8 +9886,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID + 1, 38517, 648, 1, 2048, 0, 0, 908.773, 2349.06, 5.63632, 5.41052, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 38517;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(38517, 1, 50139, 50139, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(38517, 50139, 50139, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -9948,8 +9934,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID + 1, 42473, 648, 1, 2048, 0, 0, 913.408, 2354.65, 5.44061, 4.13184, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 42473;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(42473, 1, 3362, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(42473, 3362, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -9980,12 +9966,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID + 1, 38224, 648, 1, 14336, 0, 0, 1165.46, 2368.82, 0.57454, 1.57541, 120, 5, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM `spell_dbc` WHERE  `Id` = 71395;
-INSERT INTO `spell_dbc` (`Id`, `castingTimeIndex`, `rangeIndex`, `durationIndex`, `Attributes`, `attributesEx`, `attributesEx2`, `attributesEx3`, `attributesEx4`, `spellIconId`) VALUES
-(71395, 1, 1, 0, 0x00000180, 0x00000400, 0x00000005, 0x10000000, 0x00000080, 0);
-
-DELETE FROM `spelleffect_dbc` WHERE `Id` = 7110395;
-INSERT INTO `spelleffect_dbc` (`Id`, `effect`, `effectApplyAuraName`, `effectRadiusIndex`, `effectBasePoints`, `effectImplicitTargetA`, `effectImplicitTargetB`, `effectSpellId`, `effectIndex`, `EffectMiscValue`) VALUES
-(7110395, 76, 0, 12, 0, 18, 0, 71395, 0, 201977);
+INSERT INTO `spell_dbc` (`Id`, `castingTimeIndex`, `rangeIndex`, `durationIndex`, `Attributes`, `attributesEx`, `attributesEx2`, `attributesEx3`, `attributesEx4`, Comment, effect1, effectRadiusIndex1, effectImplicitTargetA1, effectImplicitTargetB1, EffectMiscValue1) VALUES
+(71395, 1, 1, 0, 0x00000180, 0x00000400, 0x00000005, 0x10000000, 0x00000080, '', 76,12,18,0,201977);
 
 DELETE FROM `script_waypoint` WHERE `entry` = 38224;
 INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `location_z`, `waittime`, `point_comment`) VALUES
@@ -10789,8 +10771,8 @@ INSERT INTO `creature_emote` (`guid`,`emote`) VALUES
 (@GUID + 16, 375);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 38359;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(38359, 1, 50436, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(38359, 50436, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -10827,8 +10809,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID + 28, 38360, 648, 1, 15374, 0, 0, 517.786, 1967.48, 13.6013, 4.7822, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 38360;
-INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
-(38360, 1, 49935, 0, 0);
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(38360, 49935, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -16521,17 +16503,6 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 (@GUID + 34, 1731, 648, 1, 4294967295, 495.444, 1766.04, 3.47685, 0, 0, 0, 0, 1, 120, 255, 1),
 (@GUID + 35, 1731, 648, 1, 4294967295, 672.608, 1991.51, 42.5111, 0, 0, 0, 0, 1, 120, 255, 1),
 (@GUID + 36, 1731, 648, 1, 4294967295, 2093.77, 2848.22, 0.407805, 0, 0, 0, 0, 1, 120, 255, 1);
-
-DELETE FROM `quest_template_addon` WHERE `Id` IN
-(
-    14070,14113,14115,14120,14122,14153,24520,25473,14007,14008,14009,14010,14123,14011,14012,14013,
-    14069,14075,14124,14138,14071,14121,28349,14109,14110,26711,26712,14116,14126,14001,14014,14031,
-    14233,14474,14019,14021,14248,14473,14234,14303,14235,14236,14237,14238,14240,14241,14242,14326,
-    14243,14445,14244,14245,24945,14239,24488,24502,24503,24567,28414,14125,24671,24744,24817,24952,
-    24954,25214,27139,24741,24816,24946,25109,25110,25184,25200,25207,24859,24897,24901,24937,25058,
-    25066,25213,25243,25244,25251,24856,24858,24864,24868,25203,25100,24924,24925,24929,25202,24940,
-    24942,25201,24958,25204,25098,25265
-);
 
 DELETE FROM `quest_template` WHERE `Id` IN
 (

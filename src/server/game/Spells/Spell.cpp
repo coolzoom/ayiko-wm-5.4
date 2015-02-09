@@ -7420,6 +7420,10 @@ SpellCastResult Spell::CheckCasterAuras() const
                     if ((*i)->GetSpellInfo()->Id == 3355 && (m_spellInfo->Id == 33206 || m_spellInfo->Id == 47788))
                         continue;
 
+                    // Cold snap should be usable while in Ice block
+                    if ((*i)->GetSpellInfo()->Id == 45438 && m_spellInfo->Id == 11958)
+                        continue;
+
                     foundNotStun = true;
                     break;
                 }

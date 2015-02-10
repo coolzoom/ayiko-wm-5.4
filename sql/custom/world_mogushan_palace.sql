@@ -1233,3 +1233,5 @@ UPDATE `creature_template` SET `difficulty_entry_1` = 109027, `difficulty_entry_
 UPDATE `creature_template` SET `mechanic_immune_mask` = 650854399 WHERE `entry` IN (61444, 61442, 61445, 61243, 61398, 61453, 109023, 109022, 109024, 109010, 109019);
 
 DELETE FROM disables WHERE sourceType = 2 AND entry = 994;
+
+UPDATE `gameobject_template` SET `flags` = 48 WHERE `entry` = 213665;

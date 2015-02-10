@@ -904,13 +904,35 @@ void Player::UpdateManaRegen()
 
     // Mana regen from spirit
     float spirit_regen = OCTRegenMPPerSpirit();
+    float pctPerSec = 0.004f;
+    float netherBonus = 1.0f; 
+    float regenRate = 1.0f;
+    uint32 baseMana = GetCreateMana();
 
-    // CombatRegen = 5% of Base Mana
-    float base_regen = GetCreateMana() * 0.01f + GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_POWER_REGEN, POWER_MANA) / 5.0f;
+    // CombatRegen = 2-5% of Base Mana depending on class
+    // Warlock and Mage have 5% default regen
+    if (getClass() == CLASS_MAGE || getClass() == CLASS_WARLOCK)
+    {
+        pctPerSec = 0.01f;
+        
+        // According to reports by QA, Nether Attunement should give a 65% regen boost
+        if (HasAura(117957))
+            netherBonus = 1.13f;
+
+        // Additionally add haste to the mana regen for Warlocks and Mages
+        if (HasAuraType(SPELL_AURA_MOD_MANA_REGEN_BY_HASTE))
+            regenRate = GetFloatValue(UNIT_MOD_HASTE_REGEN);
+    }
+    // Druids should be calculated based off their mana pool after they gain Natural Insight
+    else if (getClass() == CLASS_DRUID && HasAura(112857))
+        baseMana *= 5;
+
+    float base_regen = baseMana * pctPerSec * netherBonus / regenRate + GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_POWER_REGEN, POWER_MANA) / 5.0f;
 
     // Set regen rate in cast state apply only on spirit based regen
     int32 modManaRegenInterrupt = GetTotalAuraModifier(SPELL_AURA_MOD_MANA_REGEN_INTERRUPT);
 
+    // Questionable
     base_regen *= GetTotalAuraMultiplierByMiscValue(SPELL_AURA_MOD_POWER_REGEN_PERCENT, POWER_MANA);
 
     SetStatFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER, base_regen + CalculatePct(spirit_regen, modManaRegenInterrupt));

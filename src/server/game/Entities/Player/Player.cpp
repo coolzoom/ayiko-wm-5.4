@@ -6789,7 +6789,8 @@ void Player::UpdateHasteAffectedPowerRegeneration(CombatRating cr, float value, 
     switch (cr)
     {
         case CR_HASTE_MELEE:
-            if (getClass() != CLASS_DRUID && getClass() != CLASS_ROGUE && getClass() != CLASS_DEATH_KNIGHT)
+            if (getClass() != CLASS_DRUID && getClass() != CLASS_ROGUE && 
+                getClass() != CLASS_DEATH_KNIGHT && getClass() != CLASS_MONK)
                 return;
             break;
         case CR_HASTE_RANGED:
@@ -6806,8 +6807,18 @@ void Player::UpdateHasteAffectedPowerRegeneration(CombatRating cr, float value, 
 
     ApplyPercentModFloatValue(UNIT_MOD_HASTE_REGEN, value, !apply);
 
-    if (getClass() == CLASS_DEATH_KNIGHT)
-        UpdateRuneRegen();
+    // We need to update mana/rune regen after changing items or modifiers
+    switch (getPowerType())
+    {
+        case POWER_MANA:
+            UpdateManaRegen();
+            break;
+        case POWER_RUNIC_POWER:
+            UpdateRuneRegen();
+            break;
+        default:
+            break;
+    }
 }
 
 void Player::SetRegularAttackTime()

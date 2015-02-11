@@ -4279,7 +4279,11 @@ void Spell::finish(bool ok)
 
     // Stop Attack for some spells
     if (m_spellInfo->Attributes & SPELL_ATTR0_STOP_ATTACK_TARGET)
+    {
         m_caster->AttackStop();
+        if (auto player = m_caster->ToPlayer())
+            player->SendAttackSwingCancelAttack();
+    }
 
     if (m_castItemGUID && m_caster->GetTypeId() == TYPEID_PLAYER)
         if (Item* item = m_caster->ToPlayer()->GetItemByGuid(m_castItemGUID))
@@ -7421,6 +7425,10 @@ SpellCastResult Spell::CheckCasterAuras() const
                     if ((*i)->GetSpellInfo()->Id == 3355 && (m_spellInfo->Id == 33206 || m_spellInfo->Id == 47788))
                         continue;
 
+                    // Cold snap should be usable while in Ice block
+                    if ((*i)->GetSpellInfo()->Id == 45438 && m_spellInfo->Id == 11958)
+                        continue;
+
                     foundNotStun = true;
                     break;
                 }
@@ -7602,7 +7610,11 @@ SpellCastResult Spell::CheckRange(bool strict)
     float min_range = m_caster->GetSpellMinRangeForTarget(target, m_spellInfo);
 
     if (Player* modOwner = m_caster->GetSpellModOwner())
-        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, max_range, this);
+    {
+        // Pet basic abilities must not apply mod-range from Blink Strikes when its on cooldown
+        if ((m_spellInfo->Id != 16827 && m_spellInfo->Id != 17253 && m_spellInfo->Id != 49966 && m_spellInfo->Id != 145625) || !modOwner->HasSpellCooldown(130393))
+            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, max_range, this);
+    }
 
     if (target && target != m_caster)
     {

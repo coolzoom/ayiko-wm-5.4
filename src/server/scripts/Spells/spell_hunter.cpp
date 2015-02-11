@@ -466,8 +466,11 @@ class spell_hun_basic_attack_blink_strike : public SpellScriptLoader
                         {
                             if (Unit* target = GetHitUnit())
                             {
-                                GetCaster()->CastSpell(target, SPELL_BLINK_STRIKE_TELEPORT, true);
-                                owner->AddSpellCooldown(SPELL_BLINK_STRIKE_TELEPORT, 0, 20 * IN_MILLISECONDS);
+                                if (!caster->IsWithinMeleeRange(target, 5.0f))
+                                {
+                                    GetCaster()->CastSpell(target, SPELL_BLINK_STRIKE_TELEPORT, true);
+                                    owner->AddSpellCooldown(SPELL_BLINK_STRIKE_TELEPORT, 0, 20 * IN_MILLISECONDS);
+                                }
                             }
                         }
             }
@@ -739,34 +742,10 @@ class spell_hun_a_murder_of_crows : public SpellScriptLoader
                     if (!GetCaster())
                         return;
 
-                    if (aurEff->GetTickNumber() > 15)
-                        return;
-
-                    if (Player* _player = GetCaster()->ToPlayer())
-                    {
-                        _player->CastSpell(target, HUNTER_SPELL_A_MURDER_OF_CROWS_SUMMON, true);
-
-                        std::list<Creature*> tempList;
-                        std::list<Creature*> crowsList;
-
-                        _player->GetCreatureListWithEntryInGrid(tempList, HUNTER_NPC_MURDER_OF_CROWS, 100.0f);
-
-                        for (auto itr : tempList)
-                            crowsList.push_back(itr);
-
-                        // Remove other players Crows
-                        for (std::list<Creature*>::iterator i = tempList.begin(); i != tempList.end(); ++i)
-                        {
-                            Unit* owner = (*i)->GetOwner();
-                            if (owner && owner == _player && (*i)->IsSummon())
-                                continue;
-
-                            crowsList.remove((*i));
-                        }
-
-                        for (auto itr : crowsList)
-                            itr->AI()->AttackStart(target);
-                    }
+                    if (aurEff->GetTickNumber() % 2)
+                        target->CastSpell(target, urand(0, 1) ? 131951 : 131952, true);
+                    else
+                        target->CastSpell(target, 131900, true, nullptr, nullptr, GetCasterGUID());
                 }
             }
 
@@ -1496,8 +1475,16 @@ class spell_hun_kill_command : public SpellScriptLoader
                     return SPELL_FAILED_NO_PET;
 
                 // pet has a target and target is within 5 yards
-                if (!petTarget || !pet->IsWithinDist(petTarget, 25.0f, true))
+                if (!petTarget || !pet->IsWithinDist(petTarget, 10.0f, true))
                     return SPELL_FAILED_DONT_REPORT;
+
+                uint32 petUnitFlags = pet->GetUInt32Value(UNIT_FIELD_FLAGS);     // Get unit state
+                if (petUnitFlags & UNIT_FLAG_STUNNED)
+                    return SPELL_FAILED_STUNNED;
+                else if (petUnitFlags & UNIT_FLAG_CONFUSED)
+                    return SPELL_FAILED_CONFUSED;
+                else if (petUnitFlags & UNIT_FLAG_FLEEING)
+                    return SPELL_FAILED_FLEEING;
 
                 return SPELL_CAST_OK;
             }

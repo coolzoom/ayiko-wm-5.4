@@ -1663,6 +1663,9 @@ void World::SetInitialWorldSettings()
     TC_LOG_INFO("server.loading", "Loading Creature template currencies...");
     sObjectMgr->LoadCreatureTemplateCurrency();
 
+    TC_LOG_INFO("server.loading", "Loading Creature Script Names currencies...");
+    sObjectMgr->LoadCreatureScriptNames();
+
     TC_LOG_INFO("server.loading", "Loading Reputation Reward Rates...");
     sObjectMgr->LoadReputationRewardRate();
 
@@ -1897,6 +1900,9 @@ void World::SetInitialWorldSettings()
     TC_LOG_INFO("server.loading", "Loading Phase definitions...");
     sObjectMgr->LoadPhaseDefinitions();
 
+    TC_LOG_INFO("server.loading", "Loading Defense brackets..");
+    sObjectMgr->LoadParryToPercentValues();
+    sObjectMgr->LoadDodgeToPercentValues();
 
     TC_LOG_INFO("server.loading", "Loading Conditions...");
     sConditionMgr->LoadConditions();

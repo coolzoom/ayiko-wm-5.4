@@ -116,6 +116,16 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recvData)
     if (!bg)
         return;
 
+    switch (_player->GetMapId())
+    {
+    case 609:
+    case 654:
+    case 860:
+    case 648:
+        ChatHandler(this).PSendSysMessage("You cannot queue for battlegrounds while in this zone.");
+        return;
+    }
+
     // expected bracket entry
     PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bg->GetMapId(), _player->getLevel());
     if (!bracketEntry)

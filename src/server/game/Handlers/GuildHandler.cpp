@@ -89,13 +89,7 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
 
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_GUILD_INVITE");
 
-    uint32 nameLength = recvPacket.ReadBits(8);
-    nameLength *= 2;
-
-    bool pair = recvPacket.ReadBit();
-
-    if (pair)
-        nameLength++;
+    uint32 nameLength = recvPacket.ReadBits(9);
 
     std::string invitedName = recvPacket.ReadString(nameLength);
 
@@ -205,13 +199,7 @@ void WorldSession::HandleGuildLeaderOpcode(WorldPacket& recvPacket)
 
     std::string name;
     std::string realName;
-    uint32 len = recvPacket.ReadBits(8);
-    len *= 2;
-
-    bool pair = recvPacket.ReadBit();
-    if (pair)
-        len++;
-
+    uint32 len = recvPacket.ReadBits(9);
     name = recvPacket.ReadString(len);
     realName.resize(name.size());
 
@@ -488,8 +476,8 @@ void WorldSession::HandleGuildBankSwapItems(WorldPacket& recvData)
     uint8 srcTabId = 0;
     uint8 dstTabId = 0;
     uint8 dstTabSlot = 0;
-    uint8 plrSlot = 0;
-    uint8 plrBag = 0;
+    uint8 plrSlot = NULL_SLOT;
+    uint8 plrBag = NULL_BAG;
     bool hasDstTab = false;
     bool bankToBank = false;
     bool hasSrcTabSlot = false;
@@ -553,10 +541,12 @@ void WorldSession::HandleGuildBankSwapItems(WorldPacket& recvData)
 
     if (bankToBank)
         guild->SwapItems(GetPlayer(), dstTabId, srcTabSlot, srcTabId, dstTabSlot, amountSplited);
-    else if (autostore)
-        guild->AutoStoreItemInInventory(GetPlayer(), srcTabId, dstTabSlot, autostoreCount);
     else
     {
+        // allows depositing of items in the first slot of a bag that isn't the backpack
+        if (!autostore && plrBag != 255 && plrSlot == NULL_SLOT)
+            plrSlot = 0;
+
         // Player <-> Bank
         // Allow to work with inventory only
         if (!Player::IsInventoryPos(plrBag, plrSlot) && !(plrBag == NULL_BAG && plrSlot == NULL_SLOT))
@@ -590,7 +580,6 @@ void WorldSession::HandleGuildBankUpdateTab(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received (CMSG_GUILD_BANK_UPDATE_TAB)");
 
-    bool pair;
     uint8 tabId;
     ObjectGuid goGuid;
     uint32 nameLen, iconLen;
@@ -600,13 +589,7 @@ void WorldSession::HandleGuildBankUpdateTab(WorldPacket& recvData)
     recvData >> tabId;
 
     nameLen = recvData.ReadBits(7);
-    iconLen = recvData.ReadBits(8);
-    iconLen *= 2;
-
-    pair = recvData.ReadBit();
-
-    if (pair)
-        iconLen++;
+    iconLen = recvData.ReadBits(9);
 
     recvData.ReadBitSeq<0, 2, 6, 7, 3, 4, 5, 1>(goGuid);
 
@@ -715,7 +698,7 @@ void WorldSession::HandleGuildSetRankPermissionsOpcode(WorldPacket& recvPacket)
     uint32 nameLength = recvPacket.ReadBits(7);
     std::string rankName = recvPacket.ReadString(nameLength);
 
-    guild->HandleSetRankInfo(this, rankId, rankName, newRights, moneyPerDay, rightsAndSlots);
+    guild->HandleSetRankInfo(this, rankId, rankName, newRights, moneyPerDay * GOLD, rightsAndSlots);
 }
 
 void WorldSession::HandleGuildRequestPartyState(WorldPacket& recvData)

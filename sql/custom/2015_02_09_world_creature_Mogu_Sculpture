@@ -1,0 +1,2 @@
+/* Raid-Mogu'shan Vaults - Cursed Mogu Sculpture Not Selectable Fix */
+UPDATE `creature` SET `unit_flags` = 0 WHERE `id` IN (61334,61989);

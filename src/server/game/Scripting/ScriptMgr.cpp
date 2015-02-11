@@ -556,6 +556,18 @@ void ScriptMgr::OnPlayerLeaveMap(Map* map, Player* player)
     SCR_MAP_END;
 }
 
+void ScriptMgr::OnPlayerEnterArea(Map* map, Player* player, uint32 oldArea, uint32 newArea)
+{
+    ASSERT(map);
+    ASSERT(player);
+
+    FOREACH_SCRIPT(PlayerScript)->OnMapChanged(player);
+
+    SCR_MAP_BGN(WorldMapScript, map, itr, end, entry, IsWorldMap);
+    itr->second->OnPlayerEnterArea(map, player, oldArea, newArea);
+    SCR_MAP_END;
+}
+
 #undef SCR_MAP_BGN
 #undef SCR_MAP_END
 

@@ -29,6 +29,7 @@
 #include "LFGGroupData.h"
 #include "LFGPlayerData.h"
 #include "RBAC.h"
+#include "Chat.h"
 
 #include "Group.h"
 #include "Player.h"
@@ -696,6 +697,18 @@ void LFGMgr::Join(Player* player, uint8 roles, const LfgDungeonSet& selectedDung
     uint32 rDungeonId = 0;
     bool isContinue = grp && grp->isLFGGroup() && GetState(gguid) != LFG_STATE_FINISHED_DUNGEON;
     LfgDungeonSet dungeons = selectedDungeons;
+
+    switch (player->GetMapId())
+    {
+    case 609:
+    case 654:
+    case 860:
+    case 648:
+        joinData.result = LFG_JOIN_INTERNAL_ERROR;
+        ChatHandler(player->GetSession()).PSendSysMessage("You cannot queue for dungeons while in this zone.");
+        player->GetSession()->SendLfgJoinResult(player->GetGUID(), joinData.result);
+        return;
+    }
 
     // Do not allow to change dungeon in the middle of a current dungeon
     if (isContinue)

@@ -478,6 +478,8 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
 
     data->WriteBit(false);                                 // HaveArenaData2
 
+    data->FlushBits();
+
     /*if (isArena)
     {
         ArenaTeam* at1 = sArenaTeamMgr->GetArenaTeamById(bg->GetArenaTeamIdByIndex(0));

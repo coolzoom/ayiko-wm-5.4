@@ -996,22 +996,15 @@ void Aura::RefreshTimers(bool recalculate, int32 oldPeriodicAmount)
     // In mop periodics continue to tick even on re-apply, extend duration by duration left to next tick
     //if (m_spellInfo->AttributesEx8 & SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER)
     {
-        bool pandemicPeriodic = false; // Used for Pandemic aura duration calculation
-
         int32 minAmplitude = m_maxDuration;
         int32 tickTimer = minAmplitude;
         for (uint8 i = 0; i < GetSpellInfo()->Effects.size(); ++i)
             if (AuraEffect const *eff = GetEffect(i))
             {
                 // Handle Pandemic
-                if (GetCaster()->HasAura(131973))
-                {
+                if (GetCaster() && GetCaster()->HasAura(131973))
                     if (eff->GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE)
-                    {
-                        pandemicPeriodic = true;
                         m_maxDuration = std::min(m_duration + m_maxDuration, int32(m_maxDuration * 1.5f));
-                    }
-                }
 
                 // Save periodic info for tick-rolling handling
                 if (int32 ampl = eff->GetAmplitude())
@@ -1259,6 +1252,7 @@ bool Aura::CanBeSaved() const
         case 114232: // Sanctified Wrath bonus
         case 124458: // Healing Spheres tracker
         case 106284: // Gathering Muddy Water
+        case 113901: // Demonic Gateway stacking aura
             return false;
         default:
             break;
@@ -2274,7 +2268,12 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         if (owner->HasAura(34692))
                         {
                             if (apply)
+                            {
                                 owner->CastSpell(owner, 34471, true, 0, GetEffect(0));
+                                // Apply immunity, it was a bug on MoP but never fixed by Blizzard until WoD...
+                                owner->CastSpell(owner, 70029, true);
+                                target->CastSpell(target, 70029, true);
+                            }
                             else
                                 owner->RemoveAurasDueToSpell(34471);
                         }
@@ -2656,7 +2655,9 @@ bool Aura::CanStackWith(Aura const *existingAura) const
     if (m_spellInfo->IsRankOf(existingSpellInfo))
     {
         // don't allow passive area auras to stack
-        if (m_spellInfo->IsMultiSlotAura() && !IsArea())
+        // This is ugly, maybe there is a better way but we need to avoid stacking of PvP power auras of two-handed weapons
+        // It is possible that checking for castitemguid differences here may be fine as well, but not 100% sure about possible negative implications
+        if (m_spellInfo->IsMultiSlotAura() && !IsArea() && !(existingSpellInfo->Id == 132586 && GetSpellInfo()->Id == 132586)) 
             return true;
 
         if (GetCastItemGUID() && existingAura->GetCastItemGUID())

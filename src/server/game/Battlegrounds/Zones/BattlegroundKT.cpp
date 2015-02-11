@@ -160,11 +160,11 @@ void BattlegroundKT::EventPlayerClickedOnOrb(Player* source, GameObject* target_
     if (Creature* aura = GetBGCreature(BG_KT_CREATURE_ORB_AURA_1 + index))
         aura->RemoveAllAuras();
 
-    SendMessageToAll(LANG_BG_KT_PICKEDUP, source->GetTeamId() == TEAM_ALLIANCE ? CHAT_MSG_BG_SYSTEM_ALLIANCE: CHAT_MSG_BG_SYSTEM_HORDE, source);
+    PSendMessageToAll(LANG_BG_KT_PICKEDUP, source->GetTeamId() == TEAM_ALLIANCE ? CHAT_MSG_BG_SYSTEM_ALLIANCE : CHAT_MSG_BG_SYSTEM_HORDE, source, target_obj->GetName().c_str());
     source->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
 }
 
-void BattlegroundKT::EventPlayerDroppedOrb(Player* source)
+void BattlegroundKT::EventPlayerDroppedOrb(Player* source, uint64 guid, uint32 team)
 {
     if (GetStatus() != STATUS_IN_PROGRESS)
         return;
@@ -176,14 +176,20 @@ void BattlegroundKT::EventPlayerDroppedOrb(Player* source)
         if (index == MAX_ORBS)
             return;
 
-        if (m_OrbKeepers[index] == source->GetGUID())
+        if (m_OrbKeepers[index] == (source ? source->GetGUID() : guid))
             break;
     }
 
-    PlaySoundToAll(source->GetTeamId() == TEAM_ALLIANCE ? BG_KT_SOUND_A_ORB_PICKED_UP: BG_KT_SOUND_H_ORB_PICKED_UP);
-    source->RemoveAurasDueToSpell(BG_KT_ORBS_SPELLS[index]);
-    source->RemoveAurasDueToSpell(BG_KT_ALLIANCE_INSIGNIA);
-    source->RemoveAurasDueToSpell(BG_KT_HORDE_INSIGNIA);
+    uint32 playerTeam = (source ? source->GetBGTeam() : team);
+
+    PlaySoundToAll(playerTeam == ALLIANCE ? BG_KT_SOUND_A_ORB_PICKED_UP : BG_KT_SOUND_H_ORB_PICKED_UP);
+
+    if (source)
+    {
+        source->RemoveAurasDueToSpell(BG_KT_ORBS_SPELLS[index]);
+        source->RemoveAurasDueToSpell(BG_KT_ALLIANCE_INSIGNIA);
+        source->RemoveAurasDueToSpell(BG_KT_HORDE_INSIGNIA);
+    }
 
     m_OrbKeepers[index] = 0;
     SpawnBGObject(BG_KT_OBJECT_ORB_1 + index, RESPAWN_IMMEDIATELY);
@@ -192,14 +198,17 @@ void BattlegroundKT::EventPlayerDroppedOrb(Player* source)
         aura->AddAura(BG_KT_ORBS_AURA[index], aura);
 
     UpdateWorldState(BG_KT_ICON_A, 0);
-    SendMessageToAll(LANG_BG_KT_DROPPED, source->GetTeamId() == TEAM_ALLIANCE ? CHAT_MSG_BG_SYSTEM_ALLIANCE: CHAT_MSG_BG_SYSTEM_HORDE, source);
-    source->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
+    GameObject * orb = GetBGObject(BG_KT_OBJECT_ORB_1 + index);
+    PSendMessageToAll(LANG_BG_KT_DROPPED, playerTeam == ALLIANCE ? CHAT_MSG_BG_SYSTEM_ALLIANCE : CHAT_MSG_BG_SYSTEM_HORDE, source, orb ? orb->GetName().c_str() : nullptr);
+
+    if (source)
+        source->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
 }
 
-void BattlegroundKT::RemovePlayer(Player* plr, uint64 /*guid*/, uint32)
+void BattlegroundKT::RemovePlayer(Player* player, uint64 guid, uint32 team)
 {
-    EventPlayerDroppedOrb(plr);
-    m_playersZone.erase(plr->GetGUID());
+    EventPlayerDroppedOrb(player, guid, team);
+    m_playersZone.erase(player ? player->GetGUID() : guid);
 }
 
 void BattlegroundKT::UpdateOrbState(Team team, uint32 value)
@@ -316,7 +325,8 @@ void BattlegroundKT::HandleKillPlayer(Player *player, Player *killer)
     if (GetStatus() != STATUS_IN_PROGRESS)
         return;
 
-    EventPlayerDroppedOrb(player);
+    EventPlayerDroppedOrb(player, player->GetGUID(), player->GetTeam());
+    AccumulateScore(player->GetTeam(), KT_KILLING_BLOW);
 
     Battleground::HandleKillPlayer(player, killer);
 }

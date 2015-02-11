@@ -3289,56 +3289,157 @@ class npc_power_word_barrier : public CreatureScript
         }
 };
 
-/*######
-# npc_demonic_gateway_purple
-######*/
-
-class npc_demonic_gateway_purple : public CreatureScript
+// Warlock's Spell: Demonic Gateway
+class npc_demonic_gateway : public CreatureScript
 {
-    public:
-        npc_demonic_gateway_purple() : CreatureScript("npc_demonic_gateway_purple") { }
+public:
+    npc_demonic_gateway() : CreatureScript("npc_demonic_gateway") { }
 
-        struct npc_demonic_gateway_purpleAI : public ScriptedAI
+    struct npc_demonic_gatewayAI : public ScriptedAI
+    {
+        npc_demonic_gatewayAI(Creature* creature) : ScriptedAI(creature)
         {
-            npc_demonic_gateway_purpleAI(Creature* creature) : ScriptedAI(creature)
-            {
-                Unit* owner = creature->GetOwner();
+            visual_buff_purple[0] = 113915;
+            visual_buff_purple[1] = 113916;
+            visual_buff_purple[2] = 113917;
+            visual_buff_purple[3] = 113918;
+            visual_buff_purple[4] = 113919;
 
-                if (owner)
-                    creature->CastSpell(creature, 113901, true); // Periodic add charge
-            }
-        };
+            visual_buff_green[0] = 113903;
+            visual_buff_green[1] = 113911;
+            visual_buff_green[2] = 113912;
+            visual_buff_green[3] = 113913;
+            visual_buff_green[4] = 113914;
 
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new npc_demonic_gateway_purpleAI(creature);
+            aura_update = 10000;
         }
-};
 
-/*######
-# new npc_demonic_gateway_green
-######*/
+        uint32 aura_update;
 
-class npc_demonic_gateway_green : public CreatureScript
-{
-    public:
-        npc_demonic_gateway_green() : CreatureScript("npc_demonic_gateway_green") { }
+        uint32 visual_buff_purple[5];
+        uint32 visual_buff_green[5];
 
-        struct npc_demonic_gateway_greenAI : public ScriptedAI
+        void IsSummonedBy(Unit * summoner) override
         {
-            npc_demonic_gateway_greenAI(Creature* creature) : ScriptedAI(creature)
+            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+            if (!summoner->HasAura(113901))
             {
-                Unit* owner = creature->GetOwner();
-
-                if (owner)
-                    creature->CastSpell(creature, 113901, true); // Periodic add charges
+                summoner->CastSpell(summoner, 113901, true);
+                if (auto aura = summoner->GetAura(113901))
+                    aura->SetCharges(0);
             }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new npc_demonic_gateway_greenAI(creature);
         }
+
+        void UpdateAI(uint32 const diff)
+        {
+            if (aura_update <= diff)
+            {
+                aura_update = 10000;
+                auto owner = me->GetOwner();
+                if (!owner)
+                {
+                    me->ForcedDespawn();
+                    return;
+                }
+
+                // Only one gate maintains charging up
+                if (me->GetEntry() == 59262)
+                    return;
+
+                // Get stacking aura
+                if (auto demonicGateway = owner->GetAura(113901))
+                {
+                    uint8 charges = demonicGateway->GetCharges() + 1;
+                    if (charges > 5)
+                        return;
+
+                    demonicGateway->SetCharges(charges);
+                    demonicGateway->GetEffect(EFFECT_0)->SetAmount(charges);
+
+                    std::list< Creature* > creature_list;
+                    me->GetCreatureListWithEntryInGrid(creature_list, 59262, 101);
+                    // Get second gateway
+                    Creature * target = NULL;
+                    for (auto itr : creature_list)
+                    {
+                        if (itr->GetOwnerGUID() == me->GetOwnerGUID())
+                        {
+                            target = itr;
+                            break;
+                        }
+                    }
+
+                    if (target)
+                    {
+                        me->CastSpell(me, visual_buff_purple[charges - 1]);
+                        target->CastSpell(target, visual_buff_green[charges - 1]);
+                    }
+                }
+            }
+            else
+                aura_update -= diff;
+        }
+
+        void OnSpellClick(Unit * clicker, bool &) override
+        {
+            if (clicker->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            // Cooldown on gateway use
+            if (clicker->HasAura(113942))
+                return;
+
+            auto owner = me->GetOwner();
+            if (!owner)
+                return;
+
+            // Get stacking aura
+            auto aura = owner->GetAura(113901);
+            if (!aura)
+                return;
+
+            uint8 charges = aura->GetCharges();
+            if (!charges)
+                return;
+
+            // Players must be in same group
+            if (!clicker->IsInRaidWith(owner))
+                return;
+
+            std::list< Creature* > creature_list;
+            me->GetCreatureListWithEntryInGrid(creature_list, (me->GetEntry() == 59262 ? 59271 : 59262), 101);
+            // Get second gateway
+            Creature * target = NULL;
+            for (auto itr : creature_list)
+            {
+                if (itr->GetOwnerGUID() == me->GetOwnerGUID())
+                {
+                    target = itr;
+                    break;
+                }
+            }
+
+            if (!target)
+                return;
+
+            aura->SetCharges(charges - 1);
+            aura->GetEffect(EFFECT_0)->SetAmount(charges - 1);
+
+            clicker->CastSpell(target, (me->GetEntry() == 59271 ? 120729 : 113896));
+
+            // Remove charge visual
+            if (auto demonicGateway = me->GetAura((me->GetEntry() == 59271 ? visual_buff_purple[charges - 1] : visual_buff_green[charges - 1])))
+                me->RemoveAura(demonicGateway);
+
+            if (auto demonicGateway = target->GetAura((target->GetEntry() == 59271 ? visual_buff_purple[charges - 1] : visual_buff_green[charges - 1])))
+                target->RemoveAura(demonicGateway);
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_demonic_gatewayAI(creature);
+    }
 };
 
 /*######
@@ -4662,8 +4763,7 @@ void AddSC_npcs_special()
     new npc_frozen_orb();
     new npc_guardian_of_ancient_kings();
     new npc_power_word_barrier();
-    new npc_demonic_gateway_purple();
-    new npc_demonic_gateway_green();
+    new npc_demonic_gateway();
     new npc_xuen_the_white_tiger();
     new npc_murder_of_crows();
     new npc_dire_beast();

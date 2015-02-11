@@ -410,6 +410,7 @@ struct CreatureCurrency final
 typedef std::unordered_multimap<uint32, CreatureCurrency> CreatureCurrencyContainer;
 
 typedef std::pair<CreatureCurrencyContainer::const_iterator, CreatureCurrencyContainer::const_iterator> CreatureCurrencyContainerRange;
+typedef std::unordered_map<uint32, float> DefenseToPercentMap;
 
 class ObjectMgr
 {
@@ -463,6 +464,7 @@ class ObjectMgr
         CreatureAddon const* GetCreatureTemplateAddon(uint32 entry);
         ItemTemplate const* GetItemTemplate(uint32 entry);
         ItemTemplateContainer const & GetItemTemplateStore() const { return _itemTemplateStore; }
+        uint32 const GetCreatureScriptNameId(uint32 lowguid) const;
 
         ObjectInvisibility const * gameObjectInvisibility(uint32 guid) const;
         ObjectInvisibility const * gameObjectTemplateInvisibility(uint32 entry) const;
@@ -673,6 +675,7 @@ class ObjectMgr
         void LoadLinkedRespawn();
         bool SetCreatureLinkedRespawn(uint32 guid, uint32 linkedGuid);
         void LoadCreatureAddons();
+        void LoadCreatureScriptNames();
         void LoadCreatureModelInfo();
         void loadCreatureInvisibility();
         void LoadEquipmentTemplates();
@@ -1031,6 +1034,11 @@ class ObjectMgr
             return _overwriteExtendedCosts;
         }
 
+        void LoadParryToPercentValues();
+        void LoadDodgeToPercentValues();
+        float GetParryCapForClassLevel(uint32 classLevel);
+        float GetDodgeCapForClassLevel(uint32 classLevel);
+
     private:
         // first free id for selected id type
         uint32 _auctionId;
@@ -1111,6 +1119,9 @@ class ObjectMgr
 
         CreatureCurrencyContainer _creatureCurrencyStore;
 
+        DefenseToPercentMap _parryToPercentStore;
+        DefenseToPercentMap _dodgeToPercentStore;
+
     private:
         // non-const version for internal use only
         CreatureTemplate * GetMutableCreatureTemplate(uint32 entry);
@@ -1161,6 +1172,7 @@ class ObjectMgr
 
         mutable MapObjectLock _mapObjectGuidsStoreLock;
 
+        CreatureScriptnameContainer _creatureScriptnameStore;
         CreatureDataContainer _creatureDataStore;
         CreatureTemplateContainer _creatureTemplateStore;
         CreatureModelContainer _creatureModelStore;

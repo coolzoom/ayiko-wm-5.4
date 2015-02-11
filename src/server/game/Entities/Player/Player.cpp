@@ -6522,44 +6522,10 @@ float Player::GetMeleeCritFromAgility()
     return crit*100.0f;
 }
 
-void Player::GetDodgeFromAgility(float &diminishing, float &nondiminishing)
-{
-    // Crit/agility to dodge/agility coefficient multipliers; 3.2.0 increased required agility by 15%
-    const float crit_to_dodge[MAX_CLASSES] =
-    {
-         0.85f/1.15f,    // Warrior
-         1.00f/1.15f,    // Paladin
-         1.11f/1.15f,    // Hunter
-         2.00f/1.15f,    // Rogue
-         1.00f/1.15f,    // Priest
-         0.85f/1.15f,    // DK
-         1.60f/1.15f,    // Shaman
-         1.00f/1.15f,    // Mage
-         0.97f/1.15f,    // Warlock (?)
-         2.00f/1.15f,    // Monk
-         2.00f/1.15f     // Druid
-    };
-
-    uint8 level = getLevel();
-    uint32 pclass = getClass();
-
-    if (level > GT_MAX_LEVEL)
-        level = GT_MAX_LEVEL;
-
-    // Dodge per agility is proportional to crit per agility, which is available from DBC files
-    GtChanceToMeleeCritEntry  const* dodgeRatio = sGtChanceToMeleeCritStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
-    GtChanceToMeleeCritBaseEntry const* critBase  = sGtChanceToMeleeCritBaseStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
-    if (dodgeRatio == NULL || pclass > MAX_CLASSES)
-        return;
-
-    // TODO: research if talents/effects that increase total agility by x% should increase non-diminishing part
-    float base_agility = GetCreateStat(STAT_AGILITY) * m_auraModifiersGroup[UNIT_MOD_STAT_START + STAT_AGILITY][BASE_PCT];
-    float bonus_agility = GetTotalStatValue(STAT_AGILITY) - base_agility;
-
-    // calculate diminishing (green in char screen) and non-diminishing (white) contribution
-    diminishing = 100.0f * (bonus_agility / (100.0f * dodgeRatio->ratio) * crit_to_dodge[pclass-1]);
-    nondiminishing = (((base_agility - 1) / (dodgeRatio->ratio * 100)) * crit_to_dodge[pclass-1] + critBase->base) * 100.0f;
-}
+// Moved this one to void Player::UpdateDodgePercentage()
+//void Player::GetDodgeFromAgility(float &diminishing, float &nondiminishing)
+//{
+//}
 
 float Player::GetSpellCritFromIntellect()
 {
@@ -6789,7 +6755,8 @@ void Player::UpdateHasteAffectedPowerRegeneration(CombatRating cr, float value, 
     switch (cr)
     {
         case CR_HASTE_MELEE:
-            if (getClass() != CLASS_DRUID && getClass() != CLASS_ROGUE && getClass() != CLASS_DEATH_KNIGHT)
+            if (getClass() != CLASS_DRUID && getClass() != CLASS_ROGUE && 
+                getClass() != CLASS_DEATH_KNIGHT && getClass() != CLASS_MONK)
                 return;
             break;
         case CR_HASTE_RANGED:
@@ -6806,8 +6773,18 @@ void Player::UpdateHasteAffectedPowerRegeneration(CombatRating cr, float value, 
 
     ApplyPercentModFloatValue(UNIT_MOD_HASTE_REGEN, value, !apply);
 
-    if (getClass() == CLASS_DEATH_KNIGHT)
-        UpdateRuneRegen();
+    // We need to update mana/rune regen after changing items or modifiers
+    switch (getPowerType())
+    {
+        case POWER_MANA:
+            UpdateManaRegen();
+            break;
+        case POWER_RUNIC_POWER:
+            UpdateRuneRegen();
+            break;
+        default:
+            break;
+    }
 }
 
 void Player::SetRegularAttackTime()

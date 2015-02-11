@@ -623,7 +623,7 @@ void Player::UpdateAllCritPercentages()
 const float m_diminishing_k[MAX_CLASSES] =
 {
     0.9560f,  // Warrior
-    0.9560f,  // Paladin
+    0.8860f,  // Paladin
     0.9880f,  // Hunter
     0.9880f,  // Rogue
     0.9830f,  // Priest
@@ -631,24 +631,40 @@ const float m_diminishing_k[MAX_CLASSES] =
     0.9880f,  // Shaman
     0.9830f,  // Mage
     0.9830f,  // Warlock
-    0.9880f,  // Monk
-    0.9720f   // Druid
+    1.4220f,  // Monk
+    1.2220f   // Druid
 };
 
 void Player::UpdateParryPercentage()
 {
+    // Table for base parry values
+    const int parry_base[MAX_CLASSES] =
+    {
+        3, // Warrior
+        3, // Paladin
+        0, // Hunter
+        3, // Rogue
+        0, // Priest
+        3, // DK
+        0, // Shaman
+        0, // Mage
+        0, // Warlock
+        3, // Monk
+        0  // Druid
+    };
+
     const float parry_cap[MAX_CLASSES] =
     {
-        65.631440f,     // Warrior
-        65.631440f,     // Paladin
-        145.560408f,    // Hunter
-        145.560408f,    // Rogue
+        237.186f,       // Warrior
+        237.186f,       // Paladin
+        0.0f,           // Hunter
+        90.6424f,       // Rogue
         0.0f,           // Priest
-        65.631440f,     // DK
-        145.560408f,    // Shaman
+        237.186f,       // DK
+        0.0f,           // Shaman
         0.0f,           // Mage
         0.0f,           // Warlock
-        145.560408f,    // Monk
+        90.6424f,       // Monk
         0.0f            // Druid
     };
 
@@ -657,13 +673,21 @@ void Player::UpdateParryPercentage()
     uint32 pclass = getClass()-1;
     if (CanParry() && parry_cap[pclass] > 0.0f)
     {
-        float nondiminishing  = 5.0f;
+        float nondiminishing = 5.0f;
         // Parry from rating
         float diminishing = GetRatingBonusValue(CR_PARRY);
+        // TODO: research if talents/effects that increase total parry by x% should increase non-diminishing part
+        float base_strength = GetCreateStat(STAT_STRENGTH) * m_auraModifiersGroup[UNIT_MOD_STAT_START + STAT_STRENGTH][BASE_PCT];
+        float bonus_strength = GetTotalStatValue(STAT_STRENGTH) - base_strength;
+        float perc_cap = sObjectMgr->GetParryCapForClassLevel(pclass * GT_MAX_LEVEL + getLevel() - 1);
+
+        // calculate diminishing (green in char screen) and non-diminishing (white) contribution
+        diminishing += (bonus_strength / perc_cap) / ((bonus_strength / perc_cap) / parry_cap[pclass] + m_diminishing_k[pclass]);
+        nondiminishing += parry_base[pclass] + base_strength / perc_cap;
         // Parry from SPELL_AURA_MOD_PARRY_PERCENT aura
         nondiminishing += GetTotalAuraModifier(SPELL_AURA_MOD_PARRY_PERCENT);
         // apply diminishing formula to diminishing parry chance
-        value = nondiminishing + diminishing * parry_cap[pclass] / (diminishing + parry_cap[pclass] * m_diminishing_k[pclass]);
+        value = nondiminishing + diminishing;
 
         if (sWorld->getBoolConfig(CONFIG_STATS_LIMITS_ENABLE))
             value = value > sWorld->getFloatConfig(CONFIG_STATS_LIMITS_PARRY) ? sWorld->getFloatConfig(CONFIG_STATS_LIMITS_PARRY) : value;
@@ -675,32 +699,60 @@ void Player::UpdateParryPercentage()
 
 void Player::UpdateDodgePercentage()
 {
+    // Table for base dodge values
+    const int dodge_base[MAX_CLASSES] =
+    {
+        3, // Warrior
+        3, // Paladin
+        3, // Hunter
+        3, // Rogue
+        3, // Priest
+        5, // DK
+        3, // Shaman
+        3, // Mage
+        3, // Warlock
+        3, // Monk
+        5  // Druid
+    };
+    // Table for dodge cap values
     const float dodge_cap[MAX_CLASSES] =
     {
-        65.631440f,     // Warrior
-        65.631440f,     // Paladin
+        90.6425f,       // Warrior
+        66.567f,        // Paladin
         145.560408f,    // Hunter
         145.560408f,    // Rogue
         150.375940f,    // Priest
-        65.631440f,     // DK
-        145.560408f,    // Shaman
+        90.6426f,       // DK
+        66.567f,        // Shaman
         150.375940f,    // Mage
         150.375940f,    // Warlock
-        145.560408f,    // Monk
-        116.890707f     // Druid
+        501.253f,       // Monk
+        150.375940f     // Druid
     };
 
     float diminishing = 0.0f, nondiminishing = 0.0f;
+    uint32 pclass = getClass() - 1;
     // Warriors, Death Knights and Paladins no longer gain dodge from agility
     if (getClass() != CLASS_WARRIOR && getClass() != CLASS_DEATH_KNIGHT && getClass() != CLASS_PALADIN)
-        GetDodgeFromAgility(diminishing, nondiminishing);
+    {
+        // TODO: research if talents/effects that increase total agility by x% should increase non-diminishing part
+        float base_agility = GetCreateStat(STAT_AGILITY) * m_auraModifiersGroup[UNIT_MOD_STAT_START + STAT_AGILITY][BASE_PCT];
+        float bonus_agility = GetTotalStatValue(STAT_AGILITY) - base_agility;
+        float perc_cap = sObjectMgr->GetDodgeCapForClassLevel(pclass * GT_MAX_LEVEL + getLevel() - 1);
+
+        // calculate diminishing (green in char screen) and non-diminishing (white) contribution
+        diminishing = (bonus_agility / perc_cap) / ((bonus_agility / perc_cap) / dodge_cap[pclass] + m_diminishing_k[pclass]);
+        nondiminishing = dodge_base[pclass] + base_agility / perc_cap;
+    }
+    else
+        nondiminishing = dodge_base[pclass];
+
     // Dodge from SPELL_AURA_MOD_DODGE_PERCENT aura
     nondiminishing += GetTotalAuraModifier(SPELL_AURA_MOD_DODGE_PERCENT);
     // Dodge from rating
     diminishing += GetRatingBonusValue(CR_DODGE);
     // apply diminishing formula to diminishing dodge chance
-    uint32 pclass = getClass()-1;
-    float value = nondiminishing + (diminishing * dodge_cap[pclass] / (diminishing + dodge_cap[pclass] * m_diminishing_k[pclass]));
+    float value = nondiminishing + diminishing;
 
     if (sWorld->getBoolConfig(CONFIG_STATS_LIMITS_ENABLE))
         value = value > sWorld->getFloatConfig(CONFIG_STATS_LIMITS_DODGE) ? sWorld->getFloatConfig(CONFIG_STATS_LIMITS_DODGE) : value;
@@ -904,13 +956,35 @@ void Player::UpdateManaRegen()
 
     // Mana regen from spirit
     float spirit_regen = OCTRegenMPPerSpirit();
+    float pctPerSec = 0.004f;
+    float netherBonus = 1.0f; 
+    float regenRate = 1.0f;
+    uint32 baseMana = GetCreateMana();
 
-    // CombatRegen = 5% of Base Mana
-    float base_regen = GetCreateMana() * 0.01f + GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_POWER_REGEN, POWER_MANA) / 5.0f;
+    // CombatRegen = 2-5% of Base Mana depending on class
+    // Warlock and Mage have 5% default regen
+    if (getClass() == CLASS_MAGE || getClass() == CLASS_WARLOCK)
+    {
+        pctPerSec = 0.01f;
+        
+        // According to reports by QA, Nether Attunement should give a 65% regen boost
+        if (HasAura(117957))
+            netherBonus = 1.13f;
+
+        // Additionally add haste to the mana regen for Warlocks and Mages
+        if (HasAuraType(SPELL_AURA_MOD_MANA_REGEN_BY_HASTE))
+            regenRate = GetFloatValue(UNIT_MOD_HASTE_REGEN);
+    }
+    // Druids should be calculated based off their mana pool after they gain Natural Insight
+    else if (getClass() == CLASS_DRUID && HasAura(112857))
+        baseMana *= 5;
+
+    float base_regen = baseMana * pctPerSec * netherBonus / regenRate + GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_POWER_REGEN, POWER_MANA) / 5.0f;
 
     // Set regen rate in cast state apply only on spirit based regen
     int32 modManaRegenInterrupt = GetTotalAuraModifier(SPELL_AURA_MOD_MANA_REGEN_INTERRUPT);
 
+    // Questionable
     base_regen *= GetTotalAuraMultiplierByMiscValue(SPELL_AURA_MOD_POWER_REGEN_PERCENT, POWER_MANA);
 
     SetStatFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER, base_regen + CalculatePct(spirit_regen, modManaRegenInterrupt));

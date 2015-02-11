@@ -823,6 +823,36 @@ void ObjectMgr::LoadCreatureAddons()
     TC_LOG_INFO("server.loading", ">> Loaded " UI64FMTD " creature addons in %u ms", _creatureAddonStore.size(), GetMSTimeDiffToNow(oldMSTime));
 }
 
+void ObjectMgr::LoadCreatureScriptNames()
+{
+    uint32 oldMSTime = getMSTime();
+    uint32 count = 0;
+
+    QueryResult result = WorldDatabase.Query("SELECT guid, ScriptName FROM creature_script_names");
+    if (result)
+    {
+        do
+        {
+            Field* fields = result->Fetch();
+            uint32 guid = fields[0].GetUInt32();
+
+            _creatureScriptnameStore[guid] = GetScriptId(fields[1].GetCString());
+            ++count;
+        } while (result->NextRow());
+    }
+
+    TC_LOG_INFO("server.loading", ">> Loaded %u creature script names in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
+uint32 const ObjectMgr::GetCreatureScriptNameId(uint32 lowguid) const
+{
+    CreatureScriptnameContainer::const_iterator itr = _creatureScriptnameStore.find(lowguid);
+    if (itr != _creatureScriptnameStore.end())
+        return itr->second;
+
+    return 0;
+}
+
 void ObjectMgr::loadCreatureTemplateInvisibility()
 {
     auto const start = getMSTime();
@@ -8430,7 +8460,9 @@ void ObjectMgr::LoadScriptNames()
       "UNION "
       "SELECT DISTINCT(ScriptName) FROM outdoorpvp_template WHERE ScriptName <> '' "
       "UNION "
-      "SELECT DISTINCT(script) FROM instance_template WHERE script <> ''");
+      "SELECT DISTINCT(script) FROM instance_template WHERE script <> ''"
+      "UNION "
+      "SELECT DISTINCT(ScriptName) FROM creature_script_names WHERE ScriptName <> ''");
 
     if (!result)
     {
@@ -9313,6 +9345,64 @@ void ObjectMgr::LoadCreatureTemplateCurrency()
     while (result->NextRow());
 
     TC_LOG_INFO("misc", ">> Loaded " SIZEFMTD " Creature Currencies", _creatureCurrencyStore.size());
+}
+
+void ObjectMgr::LoadParryToPercentValues()
+{
+    QueryResult result = WorldDatabase.Query("SELECT class_level, perc_cap FROM parry_to_percent");
+
+    if (!result)
+    {
+        TC_LOG_INFO("server.loading", "Loaded 0 parry conversions, parry_to_percent is empty");
+        return;
+    }
+
+    do
+    {
+        Field const * const fields = result->Fetch();
+
+        auto const classLevel = fields[0].GetUInt32();
+        auto const percCap = fields[1].GetUInt32();
+
+        _parryToPercentStore.insert(std::make_pair(classLevel, percCap));
+    } while (result->NextRow());
+}
+
+float ObjectMgr::GetParryCapForClassLevel(uint32 classLevel)
+{
+    if (_parryToPercentStore.empty() || _parryToPercentStore.size() < classLevel)
+        return 0.0f;
+
+    return _parryToPercentStore[classLevel];
+}
+
+void ObjectMgr::LoadDodgeToPercentValues()
+{
+    QueryResult result = WorldDatabase.Query("SELECT class_level, perc_cap FROM dodge_to_percent");
+
+    if (!result)
+    {
+        TC_LOG_INFO("server.loading", "Loaded 0 parry conversions, dodge_to_percent is empty");
+        return;
+    }
+
+    do
+    {
+        Field const * const fields = result->Fetch();
+
+        auto const classLevel = fields[0].GetUInt32();
+        auto const percCap = fields[1].GetUInt32();
+
+        _dodgeToPercentStore.insert(std::make_pair(classLevel, percCap));
+    } while (result->NextRow());
+}
+
+float ObjectMgr::GetDodgeCapForClassLevel(uint32 classLevel)
+{
+    if (_dodgeToPercentStore.empty() || _dodgeToPercentStore.size() < classLevel)
+        return 0.0f;
+
+    return _dodgeToPercentStore[classLevel];
 }
 
 // this allows calculating base reputations to offline players, just by race and class

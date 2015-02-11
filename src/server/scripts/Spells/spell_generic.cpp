@@ -4098,6 +4098,49 @@ public:
     }
 };
 
+// Orb of Power - 121164, 121175, 121176, 121177
+class spell_gen_orb_of_power final : public SpellScriptLoader
+{
+    class script_impl final : public AuraScript
+    {
+        PrepareAuraScript(script_impl)
+
+        void HandleEffectPeriodic(AuraEffect const* eff)
+        {
+            // Stack amount over time
+            if (auto eff0 = GetEffect(EFFECT_0))
+            {
+                // Limit stacking
+                if (eff->GetAmount() <= -100)
+                    return;
+
+                eff0->SetAmount(eff0->GetAmount() - 5);
+            }
+
+            if (auto eff1 = GetEffect(EFFECT_1))
+                eff1->SetAmount(eff1->GetAmount() + 30);
+
+            if (auto eff2 = GetEffect(EFFECT_2))
+                eff2->SetAmount(eff2->GetAmount() + 10);
+        }
+
+        void Register() final
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(script_impl::HandleEffectPeriodic, EFFECT_3, SPELL_AURA_PERIODIC_DUMMY);
+        }
+    };
+
+public:
+    spell_gen_orb_of_power()
+        : SpellScriptLoader("spell_gen_orb_of_power")
+    { }
+
+    AuraScript * GetAuraScript() const final
+    {
+        return new script_impl;
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -4188,4 +4231,5 @@ void AddSC_generic_spell_scripts()
     new spell_gen_ench_dancing_steel();
     new spell_gen_ench_jade_spirit();
     new spell_gen_ench_jade_spirit_eff();
+    new spell_gen_orb_of_power();
 }

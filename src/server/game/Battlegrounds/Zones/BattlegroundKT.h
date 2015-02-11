@@ -27,7 +27,7 @@ enum BG_KT_NPC
 
 #define BG_KT_MAX_TEAM_SCORE        1600
 #define BG_KT_ORB_POINTS_MAX        1600
-#define BG_KT_POINTS_UPDATE_TIME    (8*IN_MILLISECONDS)
+#define BG_KT_POINTS_UPDATE_TIME    (5*IN_MILLISECONDS)
 #define BG_KT_TIME_LIMIT            (25*MINUTE*IN_MILLISECONDS)
 #define BG_KT_EVENT_START_BATTLE    8563
 
@@ -75,15 +75,15 @@ enum BG_KT_Sound
 
 enum BG_KT_SpellId
 {
-    BG_KT_SPELL_ORB_PICKED_UP_1 = 121164,   // PURPLE
-    BG_KT_SPELL_ORB_PICKED_UP_2 = 121175,   // ORANGE
+    BG_KT_SPELL_ORB_PICKED_UP_1 = 121175,   // PURPLE
+    BG_KT_SPELL_ORB_PICKED_UP_2 = 121177,   // ORANGE
     BG_KT_SPELL_ORB_PICKED_UP_3 = 121176,   // GREEN
-    BG_KT_SPELL_ORB_PICKED_UP_4 = 121177,   // YELLOW
+    BG_KT_SPELL_ORB_PICKED_UP_4 = 121164,   // BLUE
 
     BG_KT_SPELL_ORB_AURA_1      = 121219,   // PURPLE
     BG_KT_SPELL_ORB_AURA_2      = 121221,   // ORANGE
     BG_KT_SPELL_ORB_AURA_3      = 121220,   // GREEN
-    BG_KT_SPELL_ORB_AURA_4      = 121217,   // YELLOW
+    BG_KT_SPELL_ORB_AURA_4      = 121217,   // BLUE
 
     BG_KT_ALLIANCE_INSIGNIA     = 131527,
     BG_KT_HORDE_INSIGNIA        = 131528
@@ -113,7 +113,8 @@ enum BG_KT_ZONE
     KT_ZONE_OUT                 = 0,
     KT_ZONE_IN                  = 1,
     KT_ZONE_MIDDLE              = 2,
-    KT_ZONE_MAX                 = 3
+    KT_KILLING_BLOW             = 3,
+    KT_ZONE_MAX                 = 4
 };
 
 
@@ -143,10 +144,10 @@ const float BG_KT_DoorPositions[2][4] =
 
 const float BG_KT_OrbPositions[MAX_ORBS][4] =
 {
-    {1716.78f, 1416.64f, 13.5709f, 1.57239f},
-    {1850.26f, 1416.77f, 13.5709f, 1.56061f},
-    {1850.29f, 1250.31f, 13.5708f, 4.70848f},
-    {1716.83f, 1249.93f, 13.5706f, 4.71397f}
+    {1850.26f, 1416.77f, 13.5709f, 1.56061f}, // Purple
+    {1850.29f, 1250.31f, 13.5708f, 4.70848f}, // Orange
+    {1716.78f, 1416.64f, 13.5709f, 1.57239f}, // Green
+    {1716.83f, 1249.93f, 13.5706f, 4.71397f} // Blue
 };
 
 const float BG_KT_SpiritPositions[MAX_ORBS][4] =
@@ -171,8 +172,8 @@ const uint32 BG_KT_ORBS_AURA[MAX_ORBS] =
     BG_KT_SPELL_ORB_AURA_4
 };
 
-//tick point according to which zone
-const uint32 BG_KT_TickPoints[3] = { 1, 3, 5 };
+//tick point according to which zone, last is for HK
+const uint32 BG_KT_TickPoints[4] = { 3, 4, 5, 10};
 
 class BattlegroundKT : public Battleground
 {
@@ -190,7 +191,7 @@ class BattlegroundKT : public Battleground
         virtual void StartingEventOpenDoors();
 
         /* Battleground Events */
-        virtual void EventPlayerDroppedOrb(Player* source);
+        virtual void EventPlayerDroppedOrb(Player* source, uint64 guid, uint32 team);
 
         virtual void EventPlayerClickedOnFlag(Player* source, GameObject* target_obj) { EventPlayerClickedOnOrb(source, target_obj); }
         void EventPlayerClickedOnOrb(Player* source, GameObject* target_obj);

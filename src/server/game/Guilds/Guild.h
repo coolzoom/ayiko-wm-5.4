@@ -808,7 +808,6 @@ class Guild
         // Bank
         void SwapItems(Player* player, uint8 tabId, uint8 slotId, uint8 destTabId, uint8 destSlotId, uint32 splitedAmount);
         void SwapItemsWithInventory(Player* player, bool toChar, uint8 tabId, uint8 slotId, uint8 playerBag, uint8 playerSlotId, uint32 splitedAmount);
-        void AutoStoreItemInInventory(Player* player, uint8 tabId, uint8 slotId, uint32 amount);
         uint64 GetBankMoney() const { return m_bankMoney; }
 
         // Bank tabs

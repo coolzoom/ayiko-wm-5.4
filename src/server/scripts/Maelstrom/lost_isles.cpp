@@ -537,7 +537,7 @@ public:
 
         void IsSummonedBy(Unit* summoner) override
         {
-            me->SetSeerGUID(summoner->GetGUID());
+            me->SetCustomVisibility(CUSTOM_VISIBILITY_SEER,summoner->GetGUID());
             me->SetVisible(false);
             me->setActive(true);
             me->SetReactState(REACT_PASSIVE);
@@ -4304,7 +4304,7 @@ public:
 
         void IsSummonedBy(Unit* summoner) override
         {
-            me->SetSeerGUID(summoner->GetGUID());
+            me->SetCustomVisibility(CUSTOM_VISIBILITY_SEER,summoner->GetGUID());
             me->SetVisible(false);
             me->CastSpell((Unit*)NULL, SPELL_SUMMON_NAGAS, false);
             me->CastSpell(me, SPELL_GOBLIN_BANNER, false);
@@ -4315,7 +4315,7 @@ public:
         void JustSummoned(Creature* summon)
         {
             summons.Summon(summon);
-            summon->SetSeerGUID(me->ToTempSummon()->GetSummonerGUID());
+            summon->SetCustomVisibility(CUSTOM_VISIBILITY_SEER,me->ToTempSummon()->GetSummonerGUID());
             summon->SetVisible(false);
         }
 
@@ -4417,7 +4417,7 @@ public:
 
         void IsSummonedBy(Unit* summoner) override
         {
-            me->SetSeerGUID(summoner->GetGUID());
+            me->SetCustomVisibility(CUSTOM_VISIBILITY_SEER,summoner->GetGUID());
             me->SetVisible(false);
             me->SetReactState(REACT_PASSIVE);
             me->SummonCreature(NPC_VOID_ZONE, 131.5642f, 1938.316f, 8.622858f, me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 14 * IN_MILLISECONDS);
@@ -6782,7 +6782,7 @@ public:
 
         void IsSummonedBy(Unit* summoner) override
         {
-            me->SetSeerGUID(summoner->GetGUID());
+            me->SetCustomVisibility(CUSTOM_VISIBILITY_SEER,summoner->GetGUID());
             me->SetVisible(false);
             me->SetReactState(REACT_PASSIVE);
             events.ScheduleEvent(EVENT_KAJA_COLA, 0.5 * IN_MILLISECONDS);
@@ -7332,7 +7332,7 @@ public:
 
         void IsSummonedBy(Unit* summoner) override
         {
-            me->SetSeerGUID(summoner->GetGUID());
+            me->SetCustomVisibility(CUSTOM_VISIBILITY_SEER,summoner->GetGUID());
             me->SetVisible(false);
             me->SetReactState(REACT_PASSIVE);
             me->CastSpell((Unit*)NULL, SPELL_EXPLOSION_1, false);

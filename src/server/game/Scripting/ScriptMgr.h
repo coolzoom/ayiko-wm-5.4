@@ -265,6 +265,9 @@ template<class TMap> class MapScript : public UpdatableScript<TMap>
 
         // Called when a player leaves the map.
         virtual void OnPlayerLeave(TMap* /*map*/, Player* /*player*/) { }
+
+        // Called when a player enters the map.
+        virtual void OnPlayerEnterArea(TMap* /*map*/, Player* /*player*/, uint32 /*oldArea*/, uint32 /*newArea*/) { }
 };
 
 class WorldMapScript : public ScriptObject, public MapScript<Map>
@@ -665,6 +668,9 @@ class PlayerScript : public ScriptObject
 
         // Called when a player switches to a new zone
         virtual void OnUpdateZone(Player* /*player*/, uint32 /*newZone*/, uint32 /*newArea*/) { }
+
+        // Called when a player changes to a new map (after moving to new map)
+        virtual void OnMapChanged(Player* /*player*/) { }
 };
 
 class GuildScript : public ScriptObject
@@ -786,6 +792,8 @@ class ScriptMgr
 
         void OnPlayerEnterMap(Map* map, Player* player);
         void OnPlayerLeaveMap(Map* map, Player* player);
+
+        void OnPlayerEnterArea(Map* map, Player* player, uint32 oldArea, uint32 newArea);
 
     public: /* InstanceMapScript */
 

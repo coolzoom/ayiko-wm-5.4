@@ -482,7 +482,8 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recvData)
         uint8 slotid = types[i];
         Loot* loot = NULL;
 
-        ASSERT(GUID_LOPART(guids[i]) == GUID_LOPART(lguid));
+        if (GUID_LOPART(guids[i]) != GUID_LOPART(lguid))
+            continue;
 
         if (IS_CRE_OR_VEH_GUID(lguid))
         {

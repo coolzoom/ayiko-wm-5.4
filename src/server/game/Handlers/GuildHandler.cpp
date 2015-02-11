@@ -488,8 +488,8 @@ void WorldSession::HandleGuildBankSwapItems(WorldPacket& recvData)
     uint8 srcTabId = 0;
     uint8 dstTabId = 0;
     uint8 dstTabSlot = 0;
-    uint8 plrSlot = 0;
-    uint8 plrBag = 0;
+    uint8 plrSlot = NULL_SLOT;
+    uint8 plrBag = NULL_BAG;
     bool hasDstTab = false;
     bool bankToBank = false;
     bool hasSrcTabSlot = false;
@@ -553,10 +553,12 @@ void WorldSession::HandleGuildBankSwapItems(WorldPacket& recvData)
 
     if (bankToBank)
         guild->SwapItems(GetPlayer(), dstTabId, srcTabSlot, srcTabId, dstTabSlot, amountSplited);
-    else if (autostore)
-        guild->AutoStoreItemInInventory(GetPlayer(), srcTabId, dstTabSlot, autostoreCount);
     else
     {
+        // allows depositing of items in the first slot of a bag that isn't the backpack
+        if (!autostore && plrBag != 255 && plrSlot == NULL_SLOT)
+            plrSlot = 0;
+
         // Player <-> Bank
         // Allow to work with inventory only
         if (!Player::IsInventoryPos(plrBag, plrSlot) && !(plrBag == NULL_BAG && plrSlot == NULL_SLOT))

@@ -1444,7 +1444,7 @@ void Guild::HandleGuildRanks(WorldSession* session) const
         if (!rankInfo)
             continue;
 
-        data << uint32(rankInfo->GetBankMoneyPerDay());
+        data << uint32(rankInfo->GetBankMoneyPerDay() / GOLD);
 
         for (uint8 j = 0; j < GUILD_BANK_MAX_TABS; ++j)
         {
@@ -2042,7 +2042,10 @@ bool Guild::HandleMemberWithdrawMoney(WorldSession* session, uint64 amount, bool
         return false;
 
     if (remainingMoney < amount)
+    {
+        this->SendCommandResult(player->GetSession(), GUILD_BANK, ERR_GUILD_WITHDRAW_LIMIT);
         return false;
+    }
 
     // Call script after validation and before money transfer.
     sScriptMgr->OnGuildMemberWitdrawMoney(this, player, amount, repair);

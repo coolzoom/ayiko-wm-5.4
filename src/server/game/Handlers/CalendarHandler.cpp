@@ -256,8 +256,8 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket &recvData)
 
     if (instancesBuffer.size() > 0)
         data.append(instancesBuffer);
-    if (raidsBuffer.size() > 0)
-        data.append(raidsBuffer);
+    /*if (raidsBuffer.size() > 0)
+        data.append(raidsBuffer);*/
     if (holidaysBuffer.size() > 0)
         data.append(holidaysBuffer);
     if (eventsBuffer.size() > 0)

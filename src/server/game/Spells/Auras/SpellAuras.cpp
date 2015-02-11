@@ -2655,7 +2655,9 @@ bool Aura::CanStackWith(Aura const *existingAura) const
     if (m_spellInfo->IsRankOf(existingSpellInfo))
     {
         // don't allow passive area auras to stack
-        if (m_spellInfo->IsMultiSlotAura() && !IsArea())
+        // This is ugly, maybe there is a better way but we need to avoid stacking of PvP power auras of two-handed weapons
+        // It is possible that checking for castitemguid differences here may be fine as well, but not 100% sure about possible negative implications
+        if (m_spellInfo->IsMultiSlotAura() && !IsArea() && !(existingSpellInfo->Id == 132586 && GetSpellInfo()->Id == 132586)) 
             return true;
 
         if (GetCastItemGUID() && existingAura->GetCastItemGUID())

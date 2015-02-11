@@ -89,13 +89,7 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
 
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_GUILD_INVITE");
 
-    uint32 nameLength = recvPacket.ReadBits(8);
-    nameLength *= 2;
-
-    bool pair = recvPacket.ReadBit();
-
-    if (pair)
-        nameLength++;
+    uint32 nameLength = recvPacket.ReadBits(9);
 
     std::string invitedName = recvPacket.ReadString(nameLength);
 
@@ -205,13 +199,7 @@ void WorldSession::HandleGuildLeaderOpcode(WorldPacket& recvPacket)
 
     std::string name;
     std::string realName;
-    uint32 len = recvPacket.ReadBits(8);
-    len *= 2;
-
-    bool pair = recvPacket.ReadBit();
-    if (pair)
-        len++;
-
+    uint32 len = recvPacket.ReadBits(9);
     name = recvPacket.ReadString(len);
     realName.resize(name.size());
 
@@ -592,7 +580,6 @@ void WorldSession::HandleGuildBankUpdateTab(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received (CMSG_GUILD_BANK_UPDATE_TAB)");
 
-    bool pair;
     uint8 tabId;
     ObjectGuid goGuid;
     uint32 nameLen, iconLen;
@@ -602,13 +589,7 @@ void WorldSession::HandleGuildBankUpdateTab(WorldPacket& recvData)
     recvData >> tabId;
 
     nameLen = recvData.ReadBits(7);
-    iconLen = recvData.ReadBits(8);
-    iconLen *= 2;
-
-    pair = recvData.ReadBit();
-
-    if (pair)
-        iconLen++;
+    iconLen = recvData.ReadBits(9);
 
     recvData.ReadBitSeq<0, 2, 6, 7, 3, 4, 5, 1>(goGuid);
 

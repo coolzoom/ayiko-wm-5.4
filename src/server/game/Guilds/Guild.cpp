@@ -825,6 +825,9 @@ bool Guild::PlayerMoveItemData::InitItem()
             m_pItem = NULL;
         }
     }
+    else
+        m_pPlayer->SendEquipError(EQUIP_ERR_INV_FULL, NULL);
+
     return (m_pItem != NULL);
 }
 
@@ -870,6 +873,9 @@ InventoryResult Guild::PlayerMoveItemData::CanStore(Item* pItem, bool swap)
 bool Guild::BankMoveItemData::InitItem()
 {
     m_pItem = m_pGuild->_GetItem(m_container, m_slotId);
+    if (!m_pItem)
+        m_pGuild->SendCommandResult(m_pPlayer->GetSession(), GUILD_BANK, ERR_GUILD_BANK_FULL);
+
     return (m_pItem != NULL);
 }
 
@@ -888,7 +894,12 @@ bool Guild::BankMoveItemData::HasWithdrawRights(MoveItemData* pOther) const
     // Do not check rights if item is being swapped within the same bank tab
     if (pOther->IsBank() && pOther->GetContainer() == m_container)
         return true;
-    return (m_pGuild->_GetMemberRemainingSlots(m_pPlayer->GetGUID(), m_container) != 0);
+
+    if (m_pGuild->_GetMemberRemainingSlots(m_pPlayer->GetGUID(), m_container) != 0)
+        return true;
+
+    m_pGuild->SendCommandResult(m_pPlayer->GetSession(), GUILD_BANK, ERR_GUILD_WITHDRAW_LIMIT);
+    return false;
 }
 
 void Guild::BankMoveItemData::RemoveItem(SQLTransaction& trans, MoveItemData* pOther, uint32 splitedAmount)
@@ -1433,7 +1444,7 @@ void Guild::HandleGuildRanks(WorldSession* session) const
         if (!rankInfo)
             continue;
 
-        data << uint32(rankInfo->GetBankMoneyPerDay());
+        data << uint32(rankInfo->GetBankMoneyPerDay() / GOLD);
 
         for (uint8 j = 0; j < GUILD_BANK_MAX_TABS; ++j)
         {
@@ -2031,7 +2042,10 @@ bool Guild::HandleMemberWithdrawMoney(WorldSession* session, uint64 amount, bool
         return false;
 
     if (remainingMoney < amount)
+    {
+        this->SendCommandResult(player->GetSession(), GUILD_BANK, ERR_GUILD_WITHDRAW_LIMIT);
         return false;
+    }
 
     // Call script after validation and before money transfer.
     sScriptMgr->OnGuildMemberWitdrawMoney(this, player, amount, repair);
@@ -2870,35 +2884,6 @@ void Guild::SwapItemsWithInventory(Player* player, bool toChar, uint8 tabId, uin
         _MoveItems(&bankData, &charData, splitedAmount);
     else
         _MoveItems(&charData, &bankData, splitedAmount);
-}
-
-void Guild::AutoStoreItemInInventory(Player* player, uint8 tabId, uint8 slotId, uint32 amount)
-{
-    if ((slotId >= GUILD_BANK_MAX_SLOTS && slotId != NULL_SLOT) || tabId >= GetPurchasedTabsSize())
-        return;
-
-    Item* item = _GetItem(tabId, slotId);
-    if (!item)
-    {
-        player->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL);
-        return;
-    }
-
-    ItemPosCountVec dest;
-    InventoryResult msg = player->CanStoreItem(NULL_BAG, NULL_SLOT, dest, item, false);
-    if (msg != EQUIP_ERR_OK)
-    {
-        player->SendEquipError(msg, item, NULL);
-        return;
-    }
-
-    SQLTransaction trans = CharacterDatabase.BeginTransaction();
-    _RemoveItem(trans, tabId, slotId);
-    _LogBankEvent(trans, GUILD_BANK_LOG_MOVE_ITEM, tabId, player->GetGUIDLow(), item->GetEntry(), amount, 0);
-    CharacterDatabase.CommitTransaction(trans);
-
-    player->StoreItem(dest, item, true);
-    SendBankList(player->GetSession(), tabId, true, true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

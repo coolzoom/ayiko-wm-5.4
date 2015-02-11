@@ -9347,6 +9347,64 @@ void ObjectMgr::LoadCreatureTemplateCurrency()
     TC_LOG_INFO("misc", ">> Loaded " SIZEFMTD " Creature Currencies", _creatureCurrencyStore.size());
 }
 
+void ObjectMgr::LoadParryToPercentValues()
+{
+    QueryResult result = WorldDatabase.Query("SELECT class_level, perc_cap FROM parry_to_percent");
+
+    if (!result)
+    {
+        TC_LOG_INFO("server.loading", "Loaded 0 parry conversions, parry_to_percent is empty");
+        return;
+    }
+
+    do
+    {
+        Field const * const fields = result->Fetch();
+
+        auto const classLevel = fields[0].GetUInt32();
+        auto const percCap = fields[1].GetUInt32();
+
+        _parryToPercentStore.insert(std::make_pair(classLevel, percCap));
+    } while (result->NextRow());
+}
+
+float ObjectMgr::GetParryCapForClassLevel(uint32 classLevel)
+{
+    if (_parryToPercentStore.empty() || _parryToPercentStore.size() < classLevel)
+        return 0.0f;
+
+    return _parryToPercentStore[classLevel];
+}
+
+void ObjectMgr::LoadDodgeToPercentValues()
+{
+    QueryResult result = WorldDatabase.Query("SELECT class_level, perc_cap FROM dodge_to_percent");
+
+    if (!result)
+    {
+        TC_LOG_INFO("server.loading", "Loaded 0 parry conversions, dodge_to_percent is empty");
+        return;
+    }
+
+    do
+    {
+        Field const * const fields = result->Fetch();
+
+        auto const classLevel = fields[0].GetUInt32();
+        auto const percCap = fields[1].GetUInt32();
+
+        _dodgeToPercentStore.insert(std::make_pair(classLevel, percCap));
+    } while (result->NextRow());
+}
+
+float ObjectMgr::GetDodgeCapForClassLevel(uint32 classLevel)
+{
+    if (_dodgeToPercentStore.empty() || _dodgeToPercentStore.size() < classLevel)
+        return 0.0f;
+
+    return _dodgeToPercentStore[classLevel];
+}
+
 // this allows calculating base reputations to offline players, just by race and class
 int32 ObjectMgr::GetBaseReputationOf(FactionEntry const* factionEntry, uint8 race, uint8 playerClass) const
 {

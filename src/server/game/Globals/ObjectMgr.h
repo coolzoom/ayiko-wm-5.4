@@ -410,6 +410,7 @@ struct CreatureCurrency final
 typedef std::unordered_multimap<uint32, CreatureCurrency> CreatureCurrencyContainer;
 
 typedef std::pair<CreatureCurrencyContainer::const_iterator, CreatureCurrencyContainer::const_iterator> CreatureCurrencyContainerRange;
+typedef std::unordered_map<uint32, float> DefenseToPercentMap;
 
 class ObjectMgr
 {
@@ -1033,6 +1034,11 @@ class ObjectMgr
             return _overwriteExtendedCosts;
         }
 
+        void LoadParryToPercentValues();
+        void LoadDodgeToPercentValues();
+        float GetParryCapForClassLevel(uint32 classLevel);
+        float GetDodgeCapForClassLevel(uint32 classLevel);
+
     private:
         // first free id for selected id type
         uint32 _auctionId;
@@ -1112,6 +1118,9 @@ class ObjectMgr
         ResearchLootVector _researchLoot;
 
         CreatureCurrencyContainer _creatureCurrencyStore;
+
+        DefenseToPercentMap _parryToPercentStore;
+        DefenseToPercentMap _dodgeToPercentStore;
 
     private:
         // non-const version for internal use only

@@ -5706,12 +5706,13 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
             {
                 do
                 {
-                    if (Player* pFriend = ObjectAccessor::FindPlayer(MAKE_NEW_GUID((*resultFriends)[0].GetUInt32(), 0, HIGHGUID_PLAYER)))
+                    uint64 fullGuid = MAKE_NEW_GUID((*resultFriends)[0].GetUInt32(), 0, HIGHGUID_PLAYER);
+                    if (Player* pFriend = ObjectAccessor::FindPlayer(fullGuid))
                     {
                         if (pFriend->IsInWorld())
                         {
                             pFriend->GetSocial()->RemoveFromSocialList(guid, false);
-                            sSocialMgr->SendFriendStatus(pFriend, FRIEND_REMOVED, guid, false);
+                            sSocialMgr->SendFriendStatus(pFriend, FRIEND_REMOVED, fullGuid, false);
                         }
                     }
                 }

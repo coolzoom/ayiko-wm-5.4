@@ -162,11 +162,12 @@ void PlayerSocial::SendSocialList(Player* player)
 
     for (PlayerSocialMap::iterator itr = m_playerSocialMap.begin(); itr != m_playerSocialMap.end(); ++itr)
     {
-        sSocialMgr->GetFriendInfo(player, itr->first, itr->second);
+        uint64 fullGuid = MAKE_NEW_GUID(itr->first, 0, HIGHGUID_PLAYER);
+        sSocialMgr->GetFriendInfo(player, fullGuid, itr->second);
 
-        data << uint64(MAKE_NEW_GUID(itr->first, 0, HIGHGUID_PLAYER));                         // player guid
+        data << uint64(fullGuid);                           // player guid
         data << uint32(realmID);
-        data << uint32(0);
+        data << uint32(0);                                  // virtual realm ID
         data << uint32(itr->second.Flags);                  // player flag (0x1 = Friend, 0x2 = Ignored, 0x4 = Muted)
         data << itr->second.Note;                           // string note
         if (itr->second.Flags & SOCIAL_FLAG_FRIEND)         // if IsFriend()
@@ -209,7 +210,7 @@ SocialMgr::~SocialMgr()
 {
 }
 
-void SocialMgr::GetFriendInfo(Player* player, uint32 friendGUID, FriendInfo &friendInfo)
+void SocialMgr::GetFriendInfo(Player* player, uint64 friendGUID, FriendInfo &friendInfo)
 {
     if (!player)
         return;
@@ -253,14 +254,14 @@ void SocialMgr::GetFriendInfo(Player* player, uint32 friendGUID, FriendInfo &fri
     }
 }
 
-void SocialMgr::MakeFriendStatusPacket(FriendsResult result, uint32 guid, WorldPacket* data)
+void SocialMgr::MakeFriendStatusPacket(FriendsResult result, uint64 guid, WorldPacket* data)
 {
-    data->Initialize(SMSG_FRIEND_STATUS, 5);
+    data->Initialize(SMSG_FRIEND_STATUS, 9);
     *data << uint8(result);
-    *data << uint64(MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER));
+    *data << uint64(guid);
 }
 
-void SocialMgr::SendFriendStatus(Player* player, FriendsResult result, uint32 friend_guid, bool broadcast)
+void SocialMgr::SendFriendStatus(Player* player, FriendsResult result, uint64 friend_guid, bool broadcast)
 {
     FriendInfo fi;
 

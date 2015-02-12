@@ -141,7 +141,7 @@ UPDATE creature_template SET difficulty_entry_1 = @HC_MOD + entry WHERE entry IN
 
 	
 	
-UPDATE creature_template SET lootId = entry WHERE entry IN @HC_MOD+(61567), @HC_MOD+(61634), @HC_MOD+(61485), @HC_MOD+(62205));
+UPDATE creature_template SET lootId = entry WHERE entry IN (@HC_MOD+61567, @HC_MOD+61634, @HC_MOD+61485, @HC_MOD+62205);
 UPDATE creature_template SET lootId = entry WHERE entry IN (61567, 61634, 61485, 62205);
 DELETE FROM creature_loot_template WHERE entry IN (61567, 61634, 61485, 62205, @HC_MOD+(61567), @HC_MOD+(61634), @HC_MOD+(61485), @HC_MOD+(62205));
 INSERT INTO creature_loot_template (entry, item, ChanceOrQuestChance, lootmode, groupid, mincountOrRef, maxcount) VALUES
@@ -447,7 +447,7 @@ INSERT INTO waypoint_spline_data (c_entry, path_id, wp_id, position_x, position_
 (61812, 1, 30, 1582.208, 5381.827, 140.1054);
 
 DELETE FROM waypoint_data WHERE id = 6162001; -- Add Path
-INSERT INTO waypoint_data (id, point, position_x, position_y, position_z, orientation, delay, move_flag, action, action_chance, wpguid) VALUES
+INSERT INTO waypoint_data (id, POINT, position_x, position_y, position_z, orientation, delay, move_flag, ACTION, action_chance, wpguid) VALUES
 (6162001, 1, 1511.885, 5378.232, 138.95970, 0, 1, 0, 0, 100, 0),
 (6162001, 2, 1512.162, 5372.485, 139.08124, 0, 1, 0, 0, 100, 0),
 (6162001, 3, 1512.879, 5359.946, 146.22418, 0, 1, 0, 0, 100, 0),
@@ -467,7 +467,7 @@ INSERT INTO npc_spellclick_spells (npc_entry, spell_id, cast_flags) VALUES
 (61817, 123032, 3); -- player casts on self
 
 DELETE FROM spell_linked_spell WHERE spell_trigger IN(120270, 122522, 120473, 123039);
-INSERT INTO spell_linked_spell (spell_trigger, spell_effect, type, comment) VALUES
+INSERT INTO spell_linked_spell (spell_trigger, spell_effect, TYPE, COMMENT) VALUES
 (120270, -120270, 2, 'Drain Barrel - Trigger Slow effect'),
 (120473, 120270, 2, 'Drain Barrel - Trigger Slow effect'),
 (123039, -123032, 0, 'Throw Keg - Remove override aura'),
@@ -498,7 +498,7 @@ INSERT INTO waypoint_spline_data (c_entry, path_id, wp_id, position_x, position_
 (61699, 2, 14, 1654.681, 5396.618, 153.9244);
 
 -- WIP ONLY
-UPDATE creature_template SEt modelid2 = 41224 WHERE entry = 62684; -- make barrel target visible
+UPDATE creature_template SET modelid2 = 41224 WHERE entry = 62684; -- make barrel target visible
 -- WIP ONLY END
 
 
@@ -582,7 +582,7 @@ INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
 (119512, 'spell_pavalak_bombardment');
 
 DELETE FROM spell_linked_spell WHERE spell_trigger IN(119393, 119476);
-INSERT INTO spell_linked_spell (spell_trigger, spell_effect, type, comment) VALUES
+INSERT INTO spell_linked_spell (spell_trigger, spell_effect, TYPE, COMMENT) VALUES
 (119393, -119388, 0, 'Bulwark - trigger Bombardment Effect'),
 (119476, 119512, 1, 'Bulwark - trigger Bombardment Effect'),
 (119476, 119798, 2, 'Bulwark - trigger Bombardment');
@@ -628,14 +628,14 @@ INSERT INTO spell_target_position (id, effIndex, target_map, target_position_x, 
 (121282, 1, 1011, 1841.55, 5220.97, 131.17, 2.39632),
 (121284, 1, 1011, 1841.55, 5220.97, 131.17, 5.53791);
 
-DELETE FROM spell_script_names WHERE spell_id In (121282, 121447);
+DELETE FROM spell_script_names WHERE spell_id IN (121282, 121447);
 INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
 (121447, 'spell_quick_dry_resin'),
 (121282, 'spell_neronok_gusting_winds');
 
 
 DELETE FROM spell_linked_spell WHERE spell_trigger IN(121448, -121447);
-INSERT INTO spell_linked_spell (spell_trigger, spell_effect, type, comment) VALUES
+INSERT INTO spell_linked_spell (spell_trigger, spell_effect, TYPE, COMMENT) VALUES
 (-121447, -122063, 1, 'Quick Dry Resin - Remove indicator');
 -- (121448, 121116, 2, 'Quick Dry Resin - Stun');
 

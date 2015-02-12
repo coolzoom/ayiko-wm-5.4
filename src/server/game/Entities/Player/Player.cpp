@@ -26305,11 +26305,11 @@ void Player::UpdateAreaDependentAuras(uint32 newArea)
                     StopMoving();
                     m_taxi.ClearTaxiDestinations();
 
-                    if (itr->second->spellId == 123072)
-                        TeleportTo(0, -8196.51f, 525.39f, 116.9f, 4.19f);
-                    else
-                        TeleportTo(1, 1570.94f, -4402.41f, 15.95f, 0.16f);
                 }
+                if (itr->second->spellId == 123072)
+                    TeleportTo(0, -8196.51f, 525.39f, 116.9f, 4.19f);
+                else if (itr->second->spellId == 123074)
+                    TeleportTo(1, 1570.94f, -4402.41f, 15.95f, 0.16f);
                 else
                     CastSpell(this, itr->second->spellId, true);
             }

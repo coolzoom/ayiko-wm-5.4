@@ -673,7 +673,7 @@ void Player::UpdateParryPercentage()
     uint32 pclass = getClass()-1;
     if (CanParry() && parry_cap[pclass] > 0.0f)
     {
-        float nondiminishing = 5.0f;
+        float nondiminishing = parry_base[pclass];
         // Parry from rating
         float diminishing = GetRatingBonusValue(CR_PARRY);
         // TODO: research if talents/effects that increase total parry by x% should increase non-diminishing part
@@ -683,7 +683,7 @@ void Player::UpdateParryPercentage()
 
         // calculate diminishing (green in char screen) and non-diminishing (white) contribution
         diminishing += (bonus_strength / perc_cap) / ((bonus_strength / perc_cap) / parry_cap[pclass] + m_diminishing_k[pclass]);
-        nondiminishing += parry_base[pclass] + base_strength / perc_cap;
+        nondiminishing += base_strength / perc_cap;
         // Parry from SPELL_AURA_MOD_PARRY_PERCENT aura
         nondiminishing += GetTotalAuraModifier(SPELL_AURA_MOD_PARRY_PERCENT);
         // apply diminishing formula to diminishing parry chance

@@ -26284,9 +26284,36 @@ void Player::UpdateAreaDependentAuras(uint32 newArea)
     // some auras applied at subzone enter
     SpellAreaForAreaMapBounds saBounds = sSpellMgr->GetSpellAreaForAreaMapBounds(newArea);
     for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
+    {
         if (itr->second->autocast && itr->second->IsFitToRequirements(this, m_zoneUpdateId, newArea))
+        {
             if (!HasAura(itr->second->spellId))
-                CastSpell(this, itr->second->spellId, true);
+            {
+                // This is a hackfix to avoid players skipping the tele-out spell by using mechanics
+                // such as cast preventing spells or flight paths
+                if (GetMotionMaster()->GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE &&
+                    (itr->second->spellId == 123072 || itr->second->spellId == 123074))
+                {
+                    // This should already do the trick, but just in case we perform everything manually
+                    GetMotionMaster()->Clear();
+                    ClearUnitState(UNIT_STATE_IN_FLIGHT);
+
+                    Dismount();
+                    RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_TAXI_FLIGHT);
+                    getHostileRefManager().setOnlineOfflineState(true);
+                    StopMoving();
+                    m_taxi.ClearTaxiDestinations();
+
+                    if (itr->second->spellId == 123072)
+                        TeleportTo(0, -8196.51f, 525.39f, 116.9f, 4.19f);
+                    else
+                        TeleportTo(1, 1570.94f, -4402.41f, 15.95f, 0.16f);
+                }
+                else
+                    CastSpell(this, itr->second->spellId, true);
+            }
+        }
+    }
 
     if (newArea == 4273 && GetVehicle() && GetPositionX() > 400) // Ulduar
     {

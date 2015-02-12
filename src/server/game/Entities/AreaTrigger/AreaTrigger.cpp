@@ -470,6 +470,28 @@ void AreaTrigger::Update(uint32 p_time)
 
             break;
         }
+        case 121282: // Gusting Winds
+        //case 121284:
+        //case 125318:
+        {
+            float speed = -playerBaseMoveSpeed[MOVE_RUN];
+            const Map::PlayerList &players = this->GetMap()->GetPlayers();
+            if (players.isEmpty())
+                break;
+
+            for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+            {
+                if (Player * player = itr->GetSource())
+                {
+                    if (player->IsAlive() && !player->hasForcedMovement())
+                        player->SendApplyMovementForce(true, *m_caster, speed);
+                    else if (!player->IsAlive() && player->hasForcedMovement())
+                        player->SendApplyMovementForce(false, *m_caster);
+                }
+            }
+
+            break;
+        }
         case 123461:// Get Away!
         {
             std::list<Player*> playerList;
@@ -528,6 +550,26 @@ void AreaTrigger::Remove()
             case 115460: // Healing Sphere - remove tracker
                 m_caster->RemoveAuraFromStack(124458);
                 break;
+            case 121282: // Gusting Winds
+                //case 121284:
+                //case 125318:
+            {
+                float speed = -playerBaseMoveSpeed[MOVE_RUN];
+                const Map::PlayerList &players = this->GetMap()->GetPlayers();
+                if (players.isEmpty())
+                    break;
+
+                for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                {
+                    if (Player * player = itr->GetSource())
+                    {
+                       if (player->hasForcedMovement())
+                           player->SendApplyMovementForce(false, *m_caster);
+                    }
+                }
+
+                break;
+            }
             default:
                 break;
         }

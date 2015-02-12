@@ -1757,6 +1757,42 @@ class Unit : public WorldObject
 
 namespace Trinity
 {
+    class DelayedCastEvent final : public BasicEvent
+    {
+    public:
+        DelayedCastEvent(Unit * caster, const Unit * target, uint32 spellId, bool triggered) :
+            _caster(caster), _spellId(spellId), _triggered(triggered)
+        {
+            _unitTargetGUID = target->GetGUID();
+        }
+
+        DelayedCastEvent(Unit * caster, const Position * destPos, uint32 spellId, bool triggered) :
+            _caster(caster), _spellId(spellId), _triggered(triggered)
+        {
+            _unitTargetGUID = 0;
+            pos.Relocate(destPos);
+        }
+
+        bool Execute(uint64, uint32) final
+        {
+            bool destTarget = !_unitTargetGUID;
+
+            if (!_unitTargetGUID)
+                _caster->CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), _spellId, _triggered);
+            else if (Unit * target = Unit::GetUnit(*_caster, _unitTargetGUID))
+                _caster->CastSpell(target, _spellId, _triggered);
+            return true;
+        }
+
+    private:
+        Unit * _caster;
+        bool _triggered;
+        uint32 _spellId;
+        uint64 _unitTargetGUID;
+        Position pos;
+
+    };
+
     // Binary predicate for sorting Units based on percent value of a power
     class PowerPctOrderPred
     {

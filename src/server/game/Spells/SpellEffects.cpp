@@ -6201,7 +6201,7 @@ void Spell::EffectSkinning(SpellEffIndex /*effIndex*/)
     m_caster->ToPlayer()->UpdateGatherSkill(skill, skillValue, reqValue, creature->isElite() ? 2 : 1);
 }
 
-void Spell::EffectCharge(SpellEffIndex /*effIndex*/)
+void Spell::EffectCharge(SpellEffIndex effIndex)
 {
     if (effectHandleMode == SPELL_EFFECT_HANDLE_LAUNCH_TARGET)
     {
@@ -6215,6 +6215,7 @@ void Spell::EffectCharge(SpellEffIndex /*effIndex*/)
         unitTarget->GetFirstCollisionPosition(pos, unitTarget->GetObjectSize(), angle);
 
         m_caster->GetMotionMaster()->MoveCharge(pos.m_positionX, pos.m_positionY, pos.m_positionZ + unitTarget->GetObjectSize());
+        uint32 duration = m_caster->GetSplineDuration();
     }
 
     if (effectHandleMode == SPELL_EFFECT_HANDLE_HIT_TARGET)
@@ -6222,13 +6223,17 @@ void Spell::EffectCharge(SpellEffIndex /*effIndex*/)
         if (!unitTarget)
             return;
 
+        // Trigger the assigned spell when target dest is reached
+        if (uint32 triggerSpell = m_spellInfo->Effects[effIndex].TriggerSpell)
+            m_caster->m_Events.AddEvent(new Trinity::DelayedCastEvent(m_caster, unitTarget, triggerSpell, true), m_caster->m_Events.CalculateTime(m_caster->GetSplineDuration()));
+
         // not all charge effects used in negative spells
         if (!m_spellInfo->IsPositive() && m_caster->GetTypeId() == TYPEID_PLAYER)
             m_caster->Attack(unitTarget, true);
     }
 }
 
-void Spell::EffectChargeDest(SpellEffIndex /*effIndex*/)
+void Spell::EffectChargeDest(SpellEffIndex effIndex)
 {
     if (effectHandleMode != SPELL_EFFECT_HANDLE_LAUNCH)
         return;
@@ -6261,7 +6266,24 @@ void Spell::EffectChargeDest(SpellEffIndex /*effIndex*/)
             }
         }
 
-        m_caster->GetMotionMaster()->MoveCharge(pos.m_positionX, pos.m_positionY, pos.m_positionZ, 42.0f, m_spellValue.EffectBasePoints[0] > 0 ? m_spellInfo->Id : 1003);
+        m_caster->GetMotionMaster()->MoveCharge(pos.m_positionX, pos.m_positionY, pos.m_positionZ, 42.0f, m_spellValue.EffectBasePoints[0] > 0 ? m_spellInfo->Id : EVENT_CHARGE);
+
+        // Trigger the assigned spell when target dest is reached
+        if (uint32 triggerSpell = m_spellInfo->Effects[effIndex].TriggerSpell)
+        {
+            if (WorldObject * target = m_targets.GetObjectTarget())
+            {
+                Position targetPos;
+                target->GetPosition(&targetPos);
+                m_caster->m_Events.AddEvent(new Trinity::DelayedCastEvent(m_caster, &targetPos, triggerSpell, true), m_caster->m_Events.CalculateTime(m_caster->GetSplineDuration()+100));
+            }
+            else
+            {
+                Position targetPos;
+                destTarget->GetPosition(&targetPos);
+                m_caster->m_Events.AddEvent(new Trinity::DelayedCastEvent(m_caster, &targetPos, triggerSpell, true), m_caster->m_Events.CalculateTime(m_caster->GetSplineDuration()+100));
+            }
+        }
     }
 }
 

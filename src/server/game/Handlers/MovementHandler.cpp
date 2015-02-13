@@ -505,6 +505,12 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
 
     if (plrMover)                                            // nothing is charmed, or player charmed
     {
+        // trigger PROC_FLAG_JUMPING (25)
+        if (movementInfo.flags & MOVEMENTFLAG_FALLING 
+            && movementInfo.flags2 & MOVEMENTFLAG2_INTERPOLATED_PITCHING
+            && movementInfo.j_zspeed < 0.0f)
+            plrMover->ProcDamageAndSpell(NULL, PROC_FLAG_JUMPING, PROC_FLAG_NONE, PROC_EX_NONE, 0, 0, BASE_ATTACK, NULL);
+
         plrMover->UpdateFallInformationIfNeed(movementInfo, opcode);
 
         AreaTableEntry const* zone = GetAreaEntryByAreaID(plrMover->GetAreaId());

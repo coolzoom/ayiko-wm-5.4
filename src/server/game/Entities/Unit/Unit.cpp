@@ -3482,6 +3482,20 @@ Aura *Unit::_TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint3
 
         // find current aura from spell and change it's stackamount, or refresh it's duration
         Aura *foundAura = GetOwnedAura(newAura->Id, casterGUID, (newAura->AttributesCu & SPELL_ATTR0_CU_ENCHANT_STACK) ? castItemGUID : 0, 0);
+
+        // Allow auras applied by different casters to stack without creating a new aura
+        // TODO: Those spells might share a common attribute, need further investigation
+        switch(newAura->Id)
+        {
+            case 119840: // Serrated Blade
+            case 120938: // Residue
+            case 119395: // Detonate
+                foundAura = GetAura(newAura->Id);
+            break;
+        default:
+            break;
+        }
+
         if (foundAura != NULL)
         {
             // effect masks do not match
@@ -16382,6 +16396,7 @@ bool InitTriggerAuraData()
     isTriggerAura[SPELL_AURA_ABILITY_IGNORE_AURASTATE] = true;
     isTriggerAura[SPELL_AURA_PROC_TRIGGER_SPELL_COPY] = true;
     isTriggerAura[SPELL_AURA_MOD_POWER_REGEN_PERCENT] = true;
+    isTriggerAura[SPELL_AURA_ENABLE_ALT_POWER] = true;
 
     isNonTriggerAura[SPELL_AURA_MOD_POWER_REGEN] = true;
     isNonTriggerAura[SPELL_AURA_REDUCE_PUSHBACK] = true;
@@ -16828,6 +16843,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
                         takeCharges = true;
                         break;
                     }
+                    case SPELL_AURA_ENABLE_ALT_POWER:
                     case SPELL_AURA_MANA_SHIELD:
                     case SPELL_AURA_DUMMY:
                     case SPELL_AURA_MOD_DAMAGE_PERCENT_DONE:

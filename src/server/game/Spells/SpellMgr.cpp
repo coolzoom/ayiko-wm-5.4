@@ -1019,7 +1019,7 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const* spellPr
         active = true;
 
     // Always trigger for this
-    if (procFlags & (PROC_FLAG_KILLED | PROC_FLAG_KILL | PROC_FLAG_DEATH))
+    if (procFlags & (PROC_FLAG_KILLED | PROC_FLAG_KILL | PROC_FLAG_DEATH | PROC_FLAG_JUMPING))
         return true;
 
     if (spellProcEvent)     // Exist event data
@@ -1115,7 +1115,7 @@ bool SpellMgr::CanSpellTriggerProcOnEvent(SpellProcEntry const& procEntry, ProcE
                 return false;
 
     // always trigger for these types
-    if (eventInfo.GetTypeMask() & (PROC_FLAG_KILLED | PROC_FLAG_KILL | PROC_FLAG_DEATH))
+    if (eventInfo.GetTypeMask() & (PROC_FLAG_KILLED | PROC_FLAG_KILL | PROC_FLAG_DEATH | PROC_FLAG_JUMPING))
         return true;
 
     // check school mask (if set) for other trigger types
@@ -3712,6 +3712,51 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 84171:
                     spellInfo->AttributesEx6 |= SPELL_ATTR6_CASTABLE_WHILE_ON_VEHICLE | SPELL_ATTR6_CAN_TARGET_UNTARGETABLE | SPELL_ATTR6_CAN_TARGET_INVISIBLE | SPELL_ATTR6_IGNORE_CASTER_AURAS;
                     break;
+
+                    // Siege of Niuzao Temple
+                case 119990: // Summon Sappling
+                    spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_TARGET_ANY;
+                    spellInfo->Effects[EFFECT_0].TargetB = 0;
+                    break;
+                case 120095: // Detonate Visual
+                    spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
+                    break;
+                case 122376: // Barrel Drop
+                    spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_TARGET_ANY;
+                    break;
+                    //case 120473: // Drain Barrel (Base)
+                case 120270: // Drain Barrel (Top)
+                    //spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_PERSISTENT_AREA_AURA;
+                    //spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_DUMMY;
+                    //spellInfo->Effects[EFFECT_1].TargetA = SpellImplicitTargetInfo(TARGET_DEST_CASTER);
+                    //spellInfo->Effects[EFFECT_1].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_DEST_AREA_ENTRY);
+                    //spellInfo->ExplicitTargetMask = TARGET_FLAG_UNIT_MASK;
+                    ////spellInfo->Effects[EFFECT_1].BasePoints = 0;
+                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENTRY);
+                    spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(0);
+                    spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_10_YARDS);
+                    spellInfo->Effects[EFFECT_1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENTRY);
+                    spellInfo->Effects[EFFECT_1].TargetB = SpellImplicitTargetInfo(0);
+                    spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_10_YARDS);
+                    spellInfo->ExplicitTargetMask = TARGET_FLAG_UNIT_MASK;
+                    spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(285); // 1s
+                    break;
+                case 124277: // Blade Rush Summon forcecast
+                case 120561: // Bombard
+                    spellInfo->MaxAffectedTargets = 1;
+                    break;
+                case 121442: // Caustic Pitch
+                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+                    spellInfo->ExplicitTargetMask = TARGET_FLAG_DEST_LOCATION;
+                    break;
+                case 121448:
+                    spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_APPLY_AURA;
+                    spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_MOD_STUN;
+                    spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_CASTER;
+                    spellInfo->Effects[EFFECT_0].TargetB = 0;
+                    spellInfo->ExplicitTargetMask = TARGET_FLAG_UNIT_MASK;
+                    break;
+                    // Siege of Niuzao temple end
 #endif // Gilneas
                 case 98322: // Battle for Gilneas capturing spell
                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_SKIP_SPELLBOOCK_CHECK;

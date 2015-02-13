@@ -71,9 +71,15 @@ bool Player::UpdateStats(Stats stat)
 
     switch (stat)
     {
+        case STAT_STRENGTH:
+            UpdateParryPercentage();
+            UpdateAttackPowerAndDamage(false);
+            break;
         case STAT_AGILITY:
             UpdateAllCritPercentages();
             UpdateDodgePercentage();
+            UpdateAttackPowerAndDamage(false);
+            UpdateAttackPowerAndDamage(true);
             break;
         case STAT_STAMINA:
             UpdateMaxHealth();
@@ -87,14 +93,6 @@ bool Player::UpdateStats(Stats stat)
             break;
         default:
             break;
-    }
-
-    if (stat == STAT_STRENGTH)
-        UpdateAttackPowerAndDamage(false);
-    else if (stat == STAT_AGILITY)
-    {
-        UpdateAttackPowerAndDamage(false);
-        UpdateAttackPowerAndDamage(true);
     }
 
     UpdateSpellDamageAndHealingBonus();

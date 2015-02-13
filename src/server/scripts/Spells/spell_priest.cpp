@@ -2572,17 +2572,19 @@ class spell_pri_power_word_shield : public SpellScriptLoader
         void ReflectDamage(AuraEffect *aurEff, DamageInfo &dmgInfo, uint32 &absorbAmount)
         {
             Unit * const target = GetTarget();
-            if (dmgInfo.GetAttacker() == target)
+            Unit * const attacker = dmgInfo.GetAttacker();
+
+            if (!attacker || attacker == target)
                 return;
 
             Unit * const caster = GetCaster();
             if (!caster)
                 return;
 
-            if (AuraEffect const * const talentAurEff = caster->GetAuraEffect(GLYPH_OF_REFLECTIVE_SHIELD, EFFECT_0))
+            if (AuraEffect const * talentAurEff = caster->GetAuraEffect(GLYPH_OF_REFLECTIVE_SHIELD, EFFECT_0))
             {
                 int32 bp = CalculatePct(absorbAmount, talentAurEff->GetAmount());
-                target->CastCustomSpell(dmgInfo.GetAttacker(), REFLECTIVE_SHIELD_TRIGGERED, &bp, NULL, NULL, true, NULL, aurEff);
+                target->CastCustomSpell(attacker, REFLECTIVE_SHIELD_TRIGGERED, &bp, NULL, NULL, true, NULL, aurEff);
             }
         }
 

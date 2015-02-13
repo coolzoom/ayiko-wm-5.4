@@ -185,6 +185,25 @@ enum QuestSpecialFlags
     QUEST_SPECIAL_FLAGS_PLAYER_KILL          = 0x800,   // Internal flag computed only
 };
 
+enum QuestObjectiveType
+{
+    QUEST_OBJECTIVE_TYPE_NPC              = 0,
+    QUEST_OBJECTIVE_TYPE_ITEM             = 1,
+    QUEST_OBJECTIVE_TYPE_GO               = 2,
+    QUEST_OBJECTIVE_TYPE_NPC_INTERACT     = 3,
+    QUEST_OBJECTIVE_TYPE_CURRENCY         = 4,
+    QUEST_OBJECTIVE_TYPE_SPELL            = 5,
+    QUEST_OBJECTIVE_TYPE_FACTION_REP      = 6,
+    QUEST_OBJECTIVE_TYPE_FACTION_REP2     = 7,
+    QUEST_OBJECTIVE_TYPE_MONEY            = 8,
+    QUEST_OBJECTIVE_TYPE_PLAYER           = 9,
+    QUEST_OBJECTIVE_TYPE_DUMMY            = 10,
+    QUEST_OBJECTIVE_TYPE_PET_BATTLE_TAMER = 11,
+    QUEST_OBJECTIVE_TYPE_PET_BATTLE_ELITE = 12,
+    QUEST_OBJECTIVE_TYPE_PET_BATTLE_PVP   = 13,
+    QUEST_OBJECTIVE_TYPE_END
+};
+
 struct QuestLocale
 {
     QuestLocale() { ObjectiveText.resize(QUEST_OBJECTIVES_COUNT); }
@@ -203,6 +222,26 @@ struct QuestLocale
     StringVector QuestTurnTextWindow;
     StringVector QuestTurnTargetName;
 };
+
+typedef std::vector<uint32> VisualEffectVec;
+typedef std::vector<uint8> ObjectiveTypeCountVec;
+
+struct QuestObjective
+{
+    QuestObjective(uint32 id, uint8 index, uint8 type, uint32 objectId, int32 amount, uint32 flags, std::string description)
+        : Id(id), Index(index), Type(type), ObjectId(objectId), Amount(amount), Flags(flags), Description(description) { }
+
+    uint32 Id;
+    uint8 Index;
+    uint8 Type;
+    uint32 ObjectId;
+    int32 Amount;
+    uint32 Flags;
+    std::string Description;
+    VisualEffectVec VisualEffects;
+};
+
+typedef std::set<QuestObjective*> QuestObjectiveSet;
 
 // This Quest class provides a convenient way to access a few pretotaled (cached) quest details,
 // all base quest information, and any utility functions such as generating the amount of
@@ -346,6 +385,18 @@ class Quest
         typedef std::vector<uint32> PrevChainQuests;
         PrevChainQuests prevChainQuests;
 
+        QuestObjectiveSet m_questObjectives;
+
+        // lookup objective by ID (objective ID)
+        QuestObjective const* GetQuestObjective(uint32 objectiveId) const;
+        // lookup objective by index
+        QuestObjective const* GetQuestObjectiveXIndex(uint8 index) const;
+        // lookup objective by object ID (spell, npc, GO, item, faction, ect...)
+        QuestObjective const* GetQuestObjectiveXObjectId(uint32 objectId) const;
+
+        uint8 GetQuestObjectiveCount() const { return m_questObjectives.size(); }
+        uint8 GetQuestObjectiveCountType(uint8 type) const;
+
         // cached data
     private:
         uint32 m_reqItemsCount;
@@ -354,6 +405,7 @@ class Quest
         uint32 m_rewItemsCount;
         uint32 m_rewCurrencyCount;
         uint32 m_reqCurrencyCount;
+        ObjectiveTypeCountVec m_questObjecitveTypeCount;
 
         // table data
     protected:

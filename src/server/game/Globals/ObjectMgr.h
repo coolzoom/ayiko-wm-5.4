@@ -412,6 +412,8 @@ typedef std::unordered_multimap<uint32, CreatureCurrency> CreatureCurrencyContai
 typedef std::pair<CreatureCurrencyContainer::const_iterator, CreatureCurrencyContainer::const_iterator> CreatureCurrencyContainerRange;
 typedef std::unordered_map<uint32, float> DefenseToPercentMap;
 
+typedef std::map<uint32, QuestObjective*> QuestObjectiveMap;
+
 class ObjectMgr
 {
     friend class ACE_Singleton<ObjectMgr, ACE_Null_Mutex>;
@@ -614,6 +616,9 @@ class ObjectMgr
         }
 
         void LoadQuests();
+        void LoadQuestObjectives();
+        void LoadQuestObjectiveVisualEffects();
+
         void LoadQuestRelations();
         void LoadGameobjectQuestStarters();
         void LoadGameobjectQuestEnders();
@@ -1061,6 +1066,7 @@ class ObjectMgr
         uint32 _hiMoTransGuid;
 
         QuestMap _questTemplates;
+        QuestObjectiveMap m_questObjectives;
 
         typedef std::unordered_map<uint32, GossipText> GossipTextContainer;
         typedef std::unordered_map<uint32, uint32> QuestAreaTriggerContainer;

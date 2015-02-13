@@ -208,6 +208,7 @@ Quest::Quest(Field* questRecord)
         if (RequiredCurrencyId[i])
             ++m_reqCurrencyCount;
 
+    m_questObjecitveTypeCount.assign(QUEST_OBJECTIVE_TYPE_END, 0);
 }
 
 uint32 Quest::XPValue(Player* player) const
@@ -346,4 +347,39 @@ uint32 Quest::CalculateHonorGain(uint8 level) const
     uint32 honor = 0;
 
     return honor;
+}
+
+QuestObjective const* Quest::GetQuestObjective(uint32 objectiveId) const
+{
+    for (auto const &questObjective : m_questObjectives)
+        if (questObjective->Id == objectiveId)
+            return questObjective;
+
+    return nullptr;
+}
+
+QuestObjective const* Quest::GetQuestObjectiveXIndex(uint8 index) const
+{
+    for (auto const &questObjective : m_questObjectives)
+        if (questObjective->Index == index)
+            return questObjective;
+
+    return nullptr;
+}
+
+QuestObjective const* Quest::GetQuestObjectiveXObjectId(uint32 objectId) const
+{
+    for (auto const &questObjective : m_questObjectives)
+        if (questObjective->ObjectId == objectId)
+            return questObjective;
+
+    return nullptr;
+}
+
+uint8 Quest::GetQuestObjectiveCountType(uint8 type) const
+{
+    if (type >= QUEST_OBJECTIVE_TYPE_END)
+        return 0;
+
+    return m_questObjecitveTypeCount[type];
 }

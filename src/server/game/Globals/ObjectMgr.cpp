@@ -4309,6 +4309,199 @@ void ObjectMgr::LoadQuests()
     TC_LOG_INFO("server.loading", ">> Loaded %lu quests definitions in %u ms", (unsigned long)_questTemplates.size(), GetMSTimeDiffToNow(oldMSTime));
 }
 
+void ObjectMgr::LoadQuestObjectives()
+{
+    uint32 oldMSTime = getMSTime();
+
+    QueryResult result = WorldDatabase.Query("SELECT `questId`, `id`, `index`, `type`, `objectId`, `amount`, `flags`, `description` FROM `quest_objective` ORDER BY `questId` ASC");
+    if (!result)
+    {
+        TC_LOG_ERROR("server.loading", ">> Loaded 0 Quest Objectives. DB table `quest_objective` is empty.");
+        return;
+    }
+
+    uint32 count = 0;
+    do
+    {
+        Field* fields = result->Fetch();
+
+        uint32 questId          = fields[0].GetUInt32();
+        uint32 id               = fields[1].GetUInt32();
+        uint8 index             = fields[2].GetUInt8();
+        uint8 type              = fields[3].GetUInt8();
+        uint32 objectId         = fields[4].GetUInt32();
+        int32 amount            = fields[5].GetInt32();
+        uint32 flags            = fields[6].GetUInt32();
+        std::string description = fields[7].GetString();
+
+        if (!GetQuestTemplate(questId))
+        {
+            TC_LOG_ERROR("sql.sql", "Quest Objective %u has non existant Quest Id %u! Skipping.", id, questId);
+            continue;
+        }
+
+        if (DisableMgr::IsDisabledFor(DISABLE_TYPE_QUEST, questId, NULL))
+            continue;
+
+        if (type >= QUEST_OBJECTIVE_TYPE_END)
+        {
+            TC_LOG_ERROR("sql.sql", "Quest Objective %u has invalid type %u! Skipping.", id, type);
+            continue;
+        }
+
+        // quest existance was checked above, this shouldn't cause an issue
+        Quest* quest = _questTemplates.find(questId)->second;
+
+        switch (type)
+        {
+            case QUEST_OBJECTIVE_TYPE_NPC:
+            case QUEST_OBJECTIVE_TYPE_NPC_INTERACT:
+            {
+                if (!GetCreatureTemplate(objectId))
+                {
+                    TC_LOG_ERROR("sql.sql", "Quest Objective %u has non existant Creature Id %u! Skipping.", id, objectId);
+                    continue;
+                }
+
+                if (amount <= 0)
+                {
+                    TC_LOG_ERROR("sql.sql", "Quest Objective %u has valid Creature Id %u but amount %u is invalid! Skipping.", id, objectId, amount);
+                    continue;
+                }
+
+                break;
+            }
+            case QUEST_OBJECTIVE_TYPE_ITEM:
+            {
+                if (!GetItemTemplate(objectId))
+                {
+                    TC_LOG_ERROR("sql.sql", "Quest Objective %u has non existant Item Id %u! Skipping.", id, objectId);
+                    continue;
+                }
+
+                if (amount <= 0)
+                {
+                    TC_LOG_ERROR("sql.sql", "Quest Objective %u has valid Item Id %u but amount %u is invalid! Skipping.", id, objectId, amount);
+                    continue;
+                }
+
+                break;
+            }
+            case QUEST_OBJECTIVE_TYPE_GO:
+            {
+                if (!GetGameObjectTemplate(objectId))
+                {
+                    TC_LOG_ERROR("sql.sql", "Quest Objective %u has non existant GameObject Id %u! Skipping.", id, objectId);
+                    continue;
+                }
+
+                if (amount <= 0)
+                {
+                    TC_LOG_ERROR("sql.sql", "Quest Objective %u has valid GameObject Id %u but amount %u is invalid! Skipping.", id, objectId, amount);
+                    continue;
+                }
+
+                break;
+            }
+            case QUEST_OBJECTIVE_TYPE_CURRENCY:
+            {
+                if (!sCurrencyTypesStore.LookupEntry(objectId))
+                {
+                    TC_LOG_ERROR("sql.sql", "Quest Objective %u has non existant Currency Id %u! Skipping.", id, objectId);
+                    continue;
+                }
+
+                break;
+            }
+            case QUEST_OBJECTIVE_TYPE_SPELL:
+            {
+                if (sSpellMgr->GetSpellInfo(objectId))
+                {
+                    TC_LOG_ERROR("sql.sql", "Quest Objective %u has non existant Spell Id %u! Skipping.", id, objectId);
+                    continue;
+                }
+
+                if (amount <= 0)
+                {
+                    TC_LOG_ERROR("sql.sql", "Quest Objective %u has valid Spell Id %u but amount %u is invalid! Skipping.", id, objectId, amount);
+                    continue;
+                }
+
+                break;
+            }
+            case QUEST_OBJECTIVE_TYPE_FACTION_REP:
+            case QUEST_OBJECTIVE_TYPE_FACTION_REP2:
+            {
+                if (!sFactionStore.LookupEntry(objectId))
+                {
+                    TC_LOG_ERROR("sql.sql", "Quest Objective %u has non existant Faction Id %u! Skipping.", id, objectId);
+                    continue;
+                }
+
+                break;
+            }
+            case QUEST_OBJECTIVE_TYPE_MONEY:
+            {
+                if (quest->GetQuestObjectiveCountType(type) >= 1)
+                {
+                    TC_LOG_ERROR("sql.sql", "Quest Objective %u is invalid, Quest %u already has the max amount of Quest Objective type %u! Skipping.", id, questId, type);
+                    continue;
+                }
+
+                break;
+            }
+            default:
+                break;
+        }
+
+        QuestObjective* questObjective = new QuestObjective(id, index, type, objectId, amount, flags, description);
+        quest->m_questObjectives.insert(questObjective);
+        quest->m_questObjecitveTypeCount[type]++;
+
+        if (m_questObjectives.find(id) == m_questObjectives.end())
+            m_questObjectives.insert(std::make_pair(id, questObjective));
+
+        count++;
+
+    } while (result->NextRow());
+
+    TC_LOG_INFO("server.loading", ">> Loaded %u Quest Objectives in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
+void ObjectMgr::LoadQuestObjectiveVisualEffects()
+{
+    uint32 oldMSTime = getMSTime();
+
+    QueryResult result = WorldDatabase.Query("SELECT `objectiveId`, `visualEffect` FROM `quest_objective_effects` ORDER BY `objectiveId` ASC");
+    if (!result)
+    {
+        TC_LOG_ERROR("server.loading", ">> Loaded 0 Quest Objective visual effects. DB table `quest_objective_effects` is empty.");
+        return;
+    }
+
+    uint32 count = 0;
+    do
+    {
+        Field* fields = result->Fetch();
+
+        uint32 objectiveId  = fields[0].GetUInt32();
+        uint32 visualEffect = fields[1].GetUInt32();
+
+        auto itr = m_questObjectives.find(objectiveId);
+        if (itr == m_questObjectives.end())
+        {
+            TC_LOG_ERROR("sql.sql", "Visual effect %u has non existant Quest Objective Id %u! Skipping.", visualEffect, objectiveId);
+            continue;
+        }
+
+        itr->second->VisualEffects.push_back(visualEffect);
+        count++;
+
+    } while (result->NextRow());
+
+    TC_LOG_INFO("server.loading", ">> Loaded %u Quest Objective visual effects in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
 void ObjectMgr::LoadQuestRelations()
 {
     TC_LOG_INFO("server.loading", "Loading GO Start Quest Data...");

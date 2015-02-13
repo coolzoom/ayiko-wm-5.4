@@ -56,7 +56,7 @@ MovementStatusElements const * GetMovementStatusElementsSequence(Opcodes opcode)
 void WorldSession::checkMoveCheat(uint16 opcode, MovementInfo const &newMovementInfo)
 {
     // This packet may be spammed by the client under unknown circumstances
-    if (opcode == MSG_MOVE_SET_FACING)
+    if (opcode == MSG_MOVE_SET_FACING || !sWorld->getBoolConfig(CONFIG_ANTICHEAT_ENABLE))
         return;
 
     auto player = GetPlayer();

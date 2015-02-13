@@ -7634,6 +7634,13 @@ SpellCastResult Spell::CheckRange(bool strict)
             (m_spellInfo->FacingCasterFlags & SPELL_FACING_FLAG_INFRONT) && !m_caster->HasInArc(static_cast<float>(M_PI), target))
             return !(_triggeredCastFlags & TRIGGERED_DONT_REPORT_CAST_ERROR) ? SPELL_FAILED_UNIT_NOT_INFRONT : SPELL_FAILED_DONT_REPORT;
     }
+    else if (m_spellInfo->Id == 119996)
+    {
+        if (auto player = GetCaster()->ToPlayer())
+            if (auto pet = player->GetPet())
+                if (!m_caster->IsWithinDist3d(pet->GetPositionX(), pet->GetPositionY(), pet->GetPositionZ(), max_range))
+                    return SPELL_FAILED_OUT_OF_RANGE;
+    }
 
     if (m_targets.HasDst() && !m_targets.HasTraj())
     {

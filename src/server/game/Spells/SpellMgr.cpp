@@ -5963,13 +5963,10 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 120267: // Vengeance (Monk)
                     spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_APPLY_AURA;
                     break;
-<<<<<<< HEAD
                 case 122952: // Summon Unstable Sha
                     spellInfo->MaxAffectedTargets = 2;
-=======
                 case 19386: // Wyvern Sting
                     spellInfo->Attributes |= SPELL_ATTR0_STOP_ATTACK_TARGET;
->>>>>>> 85aaa0f004feb39198000c911393c740ddf3bb38
                     break;
                 default:
                     break;

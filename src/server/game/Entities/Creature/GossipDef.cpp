@@ -1013,6 +1013,13 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* quest, uint64 npcGUID, 
     std::string questTitle = quest->GetTitle();
     std::string requestItemsText = quest->GetRequestItemsText();
 
+    uint32 itemCount = quest->GetQuestObjectiveCountType(QUEST_OBJECTIVE_TYPE_ITEM);
+    if (!itemCount && canComplete)
+    {
+        SendQuestGiverOfferReward(quest, npcGUID, true);
+        return;
+    }
+
     int32 locale = _session->GetSessionDbLocaleIndex();
     if (locale >= 0)
     {
@@ -1023,86 +1030,73 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* quest, uint64 npcGUID, 
         }
     }
 
-    if (!quest->GetReqItemsCount() && canComplete)
+    uint32 requiredMoney = 0;
+    ByteBuffer currencyData, itemData;
+    for (const auto &questObjective : quest->m_questObjectives)
     {
-        SendQuestGiverOfferReward(quest, npcGUID, true);
-        return;
+        switch (questObjective->Type)
+        {
+            case QUEST_OBJECTIVE_TYPE_ITEM:
+            {
+                if (ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(questObjective->ObjectId))
+                    itemData << uint32(itemTemplate->DisplayInfoID);
+                else
+                    itemData << uint32(0);
+
+                itemData << uint32(questObjective->ObjectId);
+                itemData << uint32(questObjective->Amount);
+
+                break;
+            }
+            case QUEST_OBJECTIVE_TYPE_CURRENCY:
+            {
+                currencyData << uint32(questObjective->ObjectId);
+                currencyData << uint32(questObjective->Amount);
+
+                break;
+            }
+            case QUEST_OBJECTIVE_TYPE_MONEY:
+            {
+                requiredMoney = questObjective->Amount;
+                break;
+            }
+            default:
+                break;
+        }
     }
 
     ObjectGuid guid = npcGUID;
-    WorldPacket data(SMSG_QUESTGIVER_REQUEST_ITEMS, 50);    // guess size
+    uint32 currencyCount = quest->GetQuestObjectiveCountType(QUEST_OBJECTIVE_TYPE_CURRENCY);
+
+    WorldPacket data(SMSG_QUESTGIVER_REQUEST_ITEMS, 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 1 + 8 + 8 +
+        questTitle.size() + requestItemsText.size() + itemCount * (4 + 4 + 4) + currencyCount * (4 + 4));
+
     data << uint32(0);
-    data << uint32(0);
+    data << uint32(canComplete ? quest->GetCompleteEmote() : quest->GetIncompleteEmote());
     data << uint32(quest->GetFlags());
     data << uint32(quest->GetQuestId());
     data << uint32(GUID_ENPART(npcGUID));
+    data << uint32(requiredMoney);
     data << uint32(0);
+    data << uint32(canComplete ? 0x5F : 0x5B);              // status flags
     data << uint32(0);
-    data << uint32(95);
-    data << uint32(0);
+
     data.WriteBit(closeOnCancel);
     data.WriteBitSeq<5, 1, 0>(guid);
     data.WriteBits(requestItemsText.size(), 12);
     data.WriteBitSeq<4>(guid);
-
-    uint32 currencyCount = 0;
-    for (int i = 0; i < QUEST_REQUIRED_CURRENCY_COUNT; ++i)
-    {
-        if (!quest->RequiredCurrencyId[i])
-            continue;
-
-        currencyCount++;
-    }
-
     data.WriteBits(currencyCount, 21);
-
-    uint32 itemCount = 0;
-    for (int i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; ++i)
-    {
-        if (!quest->RequiredItemId[i])
-            continue;
-
-        itemCount++;
-    }
     data.WriteBits(itemCount, 20);
-
     data.WriteBitSeq<3, 2, 6, 7>(guid);
-
-    uint8 wrongLen = questTitle.size() % 2;
-    data.WriteBits(( questTitle.size() - wrongLen) / 2, 8);
-    data.WriteBit(wrongLen != 0);
+    data.WriteBits(questTitle.size(), 9);
+    data.FlushBits();
 
     data.WriteByteSeq<6>(guid);
-
-    for (int i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; ++i)
-    {
-        if (!quest->RequiredItemId[i])
-            continue;
-
-        if (ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(quest->RequiredItemId[i]))
-            data << uint32(itemTemplate->DisplayInfoID);
-        else
-            data << uint32(0);
-
-        data << uint32(quest->RequiredItemCount[i]);
-        data << uint32(quest->RequiredItemId[i]);
-    }
-
-    if (questTitle.size())
-        data.append(questTitle.c_str(), questTitle.size());
-
-    for (int i = 0; i < QUEST_REQUIRED_CURRENCY_COUNT; ++i)
-    {
-        if (!quest->RequiredCurrencyId[i])
-            continue;
-
-        data << uint32(quest->RequiredCurrencyId[i]);
-        data << uint32(quest->RequiredCurrencyCount[i]);
-    }
-
+    data.append(itemData);
+    data.WriteString(questTitle);
+    data.append(currencyData);
     data.WriteByteSeq<4>(guid);
-    if (requestItemsText.size())
-        data.append(requestItemsText.c_str(), requestItemsText.size());
+    data.WriteString(requestItemsText);
     data.WriteByteSeq<0, 7, 2, 5, 1, 3>(guid);
 
     _session->SendPacket(&data);

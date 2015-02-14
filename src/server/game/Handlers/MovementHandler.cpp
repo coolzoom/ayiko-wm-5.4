@@ -475,15 +475,26 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
     }
 
     // fall damage generation (ignore in flight case that can be triggered also at lags in moment teleportation to another map).
-    if (plrMover && plrMover->m_movementInfo.GetMovementFlags() & MOVEMENTFLAG_FALLING && (movementInfo.GetMovementFlags() & MOVEMENTFLAG_FALLING) == 0 && (movementInfo.GetMovementFlags() & MOVEMENTFLAG_SWIMMING) == 0 && !plrMover->isInFlight())
+    if (plrMover)
     {
-        plrMover->HandleFall(movementInfo);
-    }
+        if (plrMover->m_movementInfo.GetMovementFlags() & MOVEMENTFLAG_FALLING && (movementInfo.GetMovementFlags() & MOVEMENTFLAG_FALLING) == 0 && (movementInfo.GetMovementFlags() & MOVEMENTFLAG_SWIMMING) == 0 && !plrMover->isInFlight())
+            plrMover->HandleFall(movementInfo);
 
-    if (plrMover && ((movementInfo.flags & MOVEMENTFLAG_SWIMMING) != 0) != plrMover->IsInWater())
-    {
         // now client not include swimming flag in case jumping under water
-        plrMover->SetInWater(!plrMover->IsInWater() || plrMover->GetBaseMap()->IsUnderWater(movementInfo.pos.GetPositionX(), movementInfo.pos.GetPositionY(), movementInfo.pos.GetPositionZ()));
+        if (((movementInfo.flags & MOVEMENTFLAG_SWIMMING) != 0) != plrMover->IsInWater())
+            plrMover->SetInWater(!plrMover->IsInWater() || plrMover->GetBaseMap()->IsUnderWater(movementInfo.pos.GetPositionX(), movementInfo.pos.GetPositionY(), movementInfo.pos.GetPositionZ()));
+
+        // Anti flyhack
+        if (movementInfo.flags & (MOVEMENTFLAG_FLYING | MOVEMENTFLAG_CAN_FLY) && !plrMover->isGameMaster() && !plrMover->CanFly())
+        {
+            recvPacket.rpos(recvPacket.wpos());
+            plrMover->SetUnitMovementFlags(MOVEMENTFLAG_NONE);
+            plrMover->SendTeleportAckPacket();
+            WorldPacket cheatdata;
+            plrMover->BuildHeartBeatMsg(&cheatdata);
+            plrMover->SendMessageToSet(&cheatdata, true);
+            return;
+        }
     }
 
     /* process position-change */

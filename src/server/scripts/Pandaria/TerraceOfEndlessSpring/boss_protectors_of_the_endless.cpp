@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2008-2015 MoltenCore <http://www.molten-wow.com/>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "GameObjectAI.h"
 #include "GridNotifiers.h"
 #include "ScriptMgr.h"
@@ -5,6 +22,13 @@
 #include "terrace_of_endless_spring.h"
 
 #define ENTRANCE_ORIENTATION 4.723f
+
+enum eLootModes
+{
+    LOOT_PATTERNS         = 0x2,
+    LOOT_NORMAL           = 0x4,
+    LOOT_ELITE            = 0x8
+};
 
 enum eProtectorsSpells
 {
@@ -286,6 +310,7 @@ class boss_ancient_regail : public CreatureScript
 
                     RespawnProtectors(pInstance, me);
                 }
+                me->SetLootMode(LOOT_MODE_DEFAULT);
             }
 
             void JustReachedHome()
@@ -428,6 +453,7 @@ class boss_ancient_regail : public CreatureScript
                         me->SetFullHealth();
                         break;
                     case ACTION_SECOND_PROTECTOR_DIED:
+                        me->SetLootMode(LOOT_PATTERNS | LOOT_NORMAL);
                         secondSpecialEnabled = true;
                         events.ScheduleEvent(EVENT_OVERWHELMING_CORRUPTION, 5000);
                         me->SetFullHealth();
@@ -574,6 +600,7 @@ class boss_ancient_asani : public CreatureScript
 
                     RespawnProtectors(pInstance, me);
                 }
+                me->SetLootMode(LOOT_MODE_DEFAULT);
             }
 
             void JustReachedHome()
@@ -714,6 +741,7 @@ class boss_ancient_asani : public CreatureScript
                         me->SetFullHealth();
                         break;
                     case ACTION_SECOND_PROTECTOR_DIED:
+                        me->SetLootMode(LOOT_PATTERNS | LOOT_NORMAL);
                         secondSpecialEnabled = true;
                         events.ScheduleEvent(EVENT_OVERWHELMING_CORRUPTION, 5000);
                         me->SetFullHealth();
@@ -853,6 +881,7 @@ class boss_protector_kaolan : public CreatureScript
 
                     RespawnProtectors(pInstance, me);
                 }
+                me->SetLootMode(LOOT_MODE_DEFAULT);
             }
 
             void JustReachedHome()
@@ -999,6 +1028,7 @@ class boss_protector_kaolan : public CreatureScript
                         me->SetFullHealth();
                         break;
                     case ACTION_SECOND_PROTECTOR_DIED:
+                        me->SetLootMode(LOOT_PATTERNS | LOOT_ELITE);
                         secondSpecialEnabled = true;
                         events.ScheduleEvent(EVENT_EXPEL_CORRUPTION, urand(5000, 10000)); // 5-10s variation for first cast
                         me->SetFullHealth();

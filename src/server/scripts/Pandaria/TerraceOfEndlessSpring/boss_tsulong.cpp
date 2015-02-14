@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2008-2015 MoltenCore <http://www.molten-wow.com/>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "GameObjectAI.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
@@ -144,6 +161,7 @@ class boss_tsulong : public CreatureScript
 
             void Reset() override
             {
+                dayPhaseOri = 0.0f;
                 me->setActive(true);
                 _Reset();
                 events.Reset();
@@ -262,27 +280,35 @@ class boss_tsulong : public CreatureScript
                         events.ScheduleEvent(EVENT_FLY, 5000, 0, PHASE_FLY);
                         break;
                     case PHASE_DAY:
-                        if (phase == PHASE_NIGHT)
-                            Talk(SAY_NIGHT_TO_DAY);
+                    {
+                        Unit * victim = me->GetVictim();
                         me->SetReactState(REACT_PASSIVE);
                         me->setFaction(FACTION_DAY);
-                        me->AttackStop();
-                        me->StopMoving();
                         me->GetMotionMaster()->Clear();
                         me->GetMotionMaster()->MoveIdle();
+                        me->AttackStop();
+                        me->StopMoving();
+                        me->SetTarget(0);
+                        
+                        dayPhaseOri = victim ? me->GetAngle(victim) : 0.0f;
+                        me->SetFacingTo(dayPhaseOri);
                         me->RemoveAurasDueToSpell(SPELL_SHA_ACTIVE);
                         me->RemoveAurasDueToSpell(SPELL_DREAD_SHADOWS);
-                        
-                        DoResetThreat();
+
                         DoCast(me, SPELL_GOLD_ACTIVE, true);
                         DoCast(me, SPELL_SUMMON_SHA_PERIODIC, true);
                         events.Reset();
                         events.ScheduleEvent(EVENT_SUN_BREATH, 6000, 0, PHASE_DAY);
                         events.ScheduleEvent(EVENT_SUMMON_TERROR, 12000, 0, PHASE_DAY);
+
+                        if (oldPhase == PHASE_NIGHT)
+                        {
+                            Talk(SAY_NIGHT_TO_DAY);
+                            me->SetHealth(me->GetMaxHealth() - me->GetHealth());
+                        }
+                    }
                         break;
                     case PHASE_NIGHT:
-                        if (phase == PHASE_DAY)
-                            Talk(SAY_DAY_TO_NIGHT);
                         me->SetReactState(REACT_AGGRESSIVE);
                         me->RemoveAurasDueToSpell(SPELL_GOLD_ACTIVE);
                         me->RemoveAurasDueToSpell(SPELL_SUMMON_SHA_PERIODIC);
@@ -291,9 +317,16 @@ class boss_tsulong : public CreatureScript
                         me->setFaction(FACTION_NIGHT);
                         events.Reset();
                         events.ScheduleEvent(EVENT_SWITCH_TO_NIGHT_PHASE, 0, 0, PHASE_NIGHT);
-                        events.ScheduleEvent(EVENT_SPAWN_SUNBEAM, 2000, 0, PHASE_NIGHT);
                         events.ScheduleEvent(EVENT_SHADOW_BREATH, 10000, 0, PHASE_NIGHT);
                         events.ScheduleEvent(EVENT_NIGHTMARES, urand(15000, 16000), 0, PHASE_NIGHT);
+
+                        if (oldPhase == PHASE_DAY)
+                        {
+                            Talk(SAY_DAY_TO_NIGHT);
+                            me->SetHealth(me->GetMaxHealth() - me->GetHealth());
+                        }
+                        else
+                            events.ScheduleEvent(EVENT_SPAWN_SUNBEAM, 2000, 0, PHASE_NIGHT);
                         break;
                 }
 
@@ -405,6 +438,8 @@ class boss_tsulong : public CreatureScript
                             events.ScheduleEvent(EVENT_SUMMON_TERROR, 30000, 0, PHASE_DAY);
                             break;
                         case EVENT_SUN_BREATH:
+                            me->SetFacingTo(dayPhaseOri);
+                            me->SetOrientation(dayPhaseOri);
                             DoCast(me, SPELL_SUN_BREATH, false);
                             events.ScheduleEvent(EVENT_SUN_BREATH, 29000, 0, PHASE_DAY);
                             break;
@@ -415,6 +450,8 @@ class boss_tsulong : public CreatureScript
                 }
 
             }
+            private:
+                float dayPhaseOri;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -473,18 +510,30 @@ class npc_embodied_terror : public CreatureScript
         void Reset() override
         {
             terrorizeTimer = urand(3000, 6000);
+            died = false;
         }
 
         void DamageTaken(Unit* , uint32& damage) override
         {
+            if (died)
+            {
+                damage = 0;
+                return;
+            }
+
             if (me->GetHealth() <= damage)
-                DoCast(me, SPELL_SUMMON_TINY_TERROR, true);
+            {
+                died = true;
+                me->DespawnOrUnsummon(5000);
+                DoCast(me, SPELL_TINY_TERROR, true);
+            }
         }
 
         void SpellHit(Unit* , SpellInfo const* spell) override
         {
             if (spell->Id == SPELL_TINY_TERROR_EFF)
-                DoCast(me, SPELL_SUMMON_TINY_TERROR, true);
+                for (int i = 0; i < 5; ++i)
+                    DoCast(me, SPELL_SUMMON_TINY_TERROR, true);
         }
 
         void UpdateAI(uint32 const diff) override
@@ -507,6 +556,7 @@ class npc_embodied_terror : public CreatureScript
 
     private:
         uint32 terrorizeTimer;
+        bool died;
     };
 
 public:

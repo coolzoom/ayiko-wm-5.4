@@ -3762,6 +3762,10 @@ void SpellMgr::LoadSpellCustomAttr()
                     //spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(65); // 1,5s
                     //spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(15); // 3 yards
                     break;
+                case 119841: // Fearless
+                    spellInfo->Effects[0].TargetB = TARGET_DEST_DB;
+                    spellInfo->Effects[1].TargetB = TARGET_DEST_DB;
+                    break;
                 case 126848:// Ritual of Purification
                     spellInfo->Effects[0].BasePoints = -10;
                     spellInfo->Effects[1].BasePoints = -10;

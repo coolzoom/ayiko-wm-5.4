@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2008-2015 MoltenCore <http://www.molten-wow.com/>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "ScriptMgr.h"
 #include "InstanceScript.h"
 #include "VMapFactory.h"
@@ -47,6 +64,9 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
             uint64 wallOfLeiShisVortexGuid;
             uint64 leiShisVortexGuid;
 
+            uint64 tsulongChestGUID;
+            uint64 leishiChestsGUID;
+
             void Initialize()
             {
                 SetBossNumber(DATA_MAX_BOSS_DATA);
@@ -73,6 +93,9 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
 
                 wallOfLeiShisVortexGuid     = 0;
                 leiShisVortexGuid           = 0;
+
+                tsulongChestGUID = 0;
+                leishiChestsGUID = 0;
             }
 
             void OnCreatureCreate(Creature* creature)
@@ -124,6 +147,20 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                     case GOB_LEI_SHIS_VORTEX:
                         leiShisVortexGuid = go->GetGUID();
                         break;
+                    case 212922:
+                    case 212923:
+                    case 212924:
+                    case 212925:
+                    case 212926:
+                        tsulongChestGUID = go->GetGUID();
+                        break;
+                    case 213073:
+                    case 213074:
+                    case 213075:
+                    case 213076:
+                    case 213077:
+                        leishiChestsGUID = go->GetGUID();
+                        break;
                     default:
                         break;
                 }
@@ -140,6 +177,12 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                         instance->LoadGrid(c->GetPositionX(), c->GetPositionY());
                         c->AI()->DoAction(ACTION_START_TSULONG_WAYPOINT);
                     }
+
+                if (id == DATA_TSULONG && state == DONE)
+                    DoRespawnGameObject(tsulongChestGUID, DAY);
+
+                if (id == DATA_TSULONG && state == DONE)
+                    DoRespawnGameObject(leishiChestsGUID, DAY);
 
                 return true;
             }

@@ -1623,7 +1623,12 @@ void Spell::SelectImplicitCasterDestTargets(SpellEffIndex effIndex, SpellImplici
         case TARGET_DEST_CASTER_BACK_RIGHT:
         case TARGET_DEST_CASTER_FRONT_RIGHT:
         case TARGET_DEST_CASTER_FRONT:
-            m_caster->GetFirstCollisionPosition(pos, dist, angle);
+            if (m_caster->GetTypeId() == TYPEID_UNIT || m_caster->ToCreature()->isLosDisabled())
+            {
+                m_caster->GetPosition(&pos);
+                m_caster->MovePositionFixedXY(pos, dist, angle);
+            }else
+                m_caster->GetFirstCollisionPosition(pos, dist, angle);
             break;
         case TARGET_DEST_CASTER_SUMMON:
             m_caster->GetPosition(&pos);

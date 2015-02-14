@@ -1043,8 +1043,8 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* quest, uint64 npcGUID, 
                 else
                     itemData << uint32(0);
 
-                itemData << uint32(questObjective->ObjectId);
                 itemData << uint32(questObjective->Amount);
+                itemData << uint32(questObjective->ObjectId);
 
                 break;
             }

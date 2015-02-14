@@ -89,7 +89,8 @@ enum GoIds : uint32
 {
     GO_BREWERY_DOOR          = 209938,
     GO_INVIS_DOOR            = 207997,
-    GO_SLIDING_DOOR          = 211981
+    GO_SLIDING_DOOR          = 211981,
+    GO_OOK_DOOR              = 211127
 };
 
 #endif // STORMSTOUT_BREWERY_H_

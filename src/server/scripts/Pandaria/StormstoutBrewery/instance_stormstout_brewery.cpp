@@ -170,6 +170,15 @@ public:
             case GO_INVIS_DOOR:
                 m_mGoGuidStorage.insert(std::make_pair(pGo->GetEntry(), pGo->GetGUID()));
                 break;
+            case GO_OOK_DOOR:
+                m_mGoGuidStorage[GO_OOK_DOOR] = pGo->GetGUID();
+
+                if (GetData(DATA_OOK_OOK) == DONE)
+                    pGo->AddObjectToRemoveList();
+                break;
+            case GO_SLIDING_DOOR:
+                pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
+                break;
             }
         }
 
@@ -304,6 +313,7 @@ public:
             switch (uiType)
             {
                 case GO_BREWERY_DOOR:
+                case GO_OOK_DOOR:
                     return GetGoData(uiType);
                 case NPC_OOK_OOK:
                 case NPC_HOPTALLUS:
@@ -337,6 +347,12 @@ public:
                 m_auiEncounter[i] = NOT_STARTED;
 
             m_uiHozenSlain = m_auiEncounter[6];
+
+            if (m_auiEncounter[0] == DONE)
+            {
+                if (GameObject* pGo = instance->GetGameObject(GetData64(GO_OOK_DOOR)))
+                    pGo->AddObjectToRemoveList();
+            }
 
             OUT_LOAD_INST_DATA_COMPLETE;
         }

@@ -26,6 +26,9 @@ static const Position pBarrelPos[] =
     { -733.33f, 1372.51f, 146.73f, 4.66f },
     { -777.73f, 1357.66f, 147.79f, 1.64f }
 };
+
+static const Position aDoorPos = { -766.863f, 1391.67f, 146.739f, 0.298219f };
+
 // 4.98 6.28
 class boss_ook_ook : public CreatureScript
 {
@@ -77,6 +80,7 @@ class boss_ook_ook : public CreatureScript
 
             bool m_bIntroDone;
             bool m_bInitializedBarrels;
+            uint64 m_uiDoorGuid;
 
             void Initialize()
             {
@@ -84,6 +88,8 @@ class boss_ook_ook : public CreatureScript
                 m_bIntroDone = false;
                 m_bInitializedBarrels = false;
                 events.ScheduleEvent(EVENT_INTROCHECK, 3000);
+
+                HandleDoor(true);
             }
 
             bool DoSummonBarrels(int n)
@@ -135,6 +141,8 @@ class boss_ook_ook : public CreatureScript
                 events.ScheduleEvent(EVENT_BARREL_TOSS, 1000);
                 events.ScheduleEvent(EVENT_GOING_BANANAS, 2000);
                 events.ScheduleEvent(EVENT_GROUND_POUND, (8000, 14000));
+
+                HandleDoor(false);
             }
 
             void DoAction(const int32 iAction)
@@ -168,6 +176,8 @@ class boss_ook_ook : public CreatureScript
                     me->ClearUnitState(UNIT_STATE_CANNOT_TURN);
 
                 me->GetMotionMaster()->MovePoint(4, pOokJumpPos);
+
+                HandleDoor(true);
             }
 
             void MovementInform(uint32 uiType, uint32 uiPointId)
@@ -185,6 +195,8 @@ class boss_ook_ook : public CreatureScript
                     me->GetInstanceScript()->SetData(DATA_OOK_OOK, DONE);
 
                 _JustDied();
+
+                HandleDoor(true);
             }
 
             uint32 GetBarrelTimer() const
@@ -203,6 +215,27 @@ class boss_ook_ook : public CreatureScript
                 }
 
                 return urand(10000, 14000);
+            }
+
+            void HandleDoor(bool open)
+            {
+                if (me->GetInstanceScript())
+                {
+                    if (open)
+                    {
+                        if (GameObject* pGo = ObjectAccessor::GetGameObject(*me, me->GetInstanceScript()->GetData64(GO_OOK_DOOR)))
+                            pGo->AddObjectToRemoveList();
+                    }
+                    else
+                    {
+                        if (GameObject* pGo = me->SummonGameObject(GO_OOK_DOOR, aDoorPos.GetPositionX(), aDoorPos.GetPositionY(), aDoorPos.GetPositionZ(), aDoorPos.GetOrientation(), 0, 0, 0, 0, 14400))
+                        {
+                            pGo->SetGoState(GO_STATE_ACTIVE);
+                            pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
+                        }
+
+                    }
+                }
             }
 
             void MoveInLineOfSight(Unit* pWho)
@@ -275,7 +308,9 @@ class npc_barrel : public CreatureScript
         {
             npc_barrel_AI(Creature* creature) : ScriptedAI(creature) 
             {
-                me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+                if (me->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK))
+                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+                //me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
             }
 
             uint64 m_playerGuid;
@@ -296,11 +331,11 @@ class npc_barrel : public CreatureScript
             // tempp disabled
             void OnSpellClick(Unit* pClicker, bool& result)
             {   
-                me->RemoveAurasDueToSpell(SPELL_BARREL_PERIODIC_PLAYER);
+                /*me->RemoveAurasDueToSpell(SPELL_BARREL_PERIODIC_PLAYER);
                 me->RemoveAurasDueToSpell(SPELL_BARREL_PERIODIC_HOSTILE);
                 pClicker->CastSpell(me, SPELL_BARREL_RIDE, true);
 
-                me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+                me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);*/
                 return;
             }
     
@@ -319,6 +354,12 @@ class npc_barrel : public CreatureScript
                 if (Unit* pBunny = me->SelectNearbyTarget(nullptr, 3.f))
                 {                                       // General purpose bunny JMF
                     if (pBunny->ToCreature() && pBunny->ToCreature()->GetEntry() == 45979)
+                        return true;
+                }
+
+                if (Unit* pBunny = GetClosestCreatureWithEntry(me, 45979, 10.f))
+                {
+                    if (me->GetDistance(pBunny) < 3.3f)
                         return true;
                 }
 

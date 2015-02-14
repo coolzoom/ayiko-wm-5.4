@@ -6265,8 +6265,11 @@ void Spell::EffectChargeDest(SpellEffIndex effIndex)
                 m_caster->CastSpell((Unit*)NULL, 49444, false); // achievement counter
             }
         }
-
-        m_caster->GetMotionMaster()->MoveCharge(pos.m_positionX, pos.m_positionY, pos.m_positionZ, 42.0f, m_spellValue.EffectBasePoints[0] > 0 ? m_spellInfo->Id : EVENT_CHARGE);
+        
+        if (m_spellValue.EffectBasePoints[0] > 0)
+            m_caster->GetMotionMaster()->MoveCharge(pos.m_positionX, pos.m_positionY, pos.m_positionZ, 42.0f, m_spellInfo->Id);
+        else
+            m_caster->GetMotionMaster()->MoveCharge(pos.m_positionX, pos.m_positionY, pos.m_positionZ, 42.0f, EVENT_CHARGE);
 
         // Trigger the assigned spell when target dest is reached
         if (uint32 triggerSpell = m_spellInfo->Effects[effIndex].TriggerSpell)

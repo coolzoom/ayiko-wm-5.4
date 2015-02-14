@@ -3734,9 +3734,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 120095: // Detonate Visual
                     spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
                     break;
-                case 122376: // Barrel Drop
-                    spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_TARGET_ANY;
-                    break;
                     //case 120473: // Drain Barrel (Base)
                 case 120270: // Drain Barrel (Top)
                     //spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_PERSISTENT_AREA_AURA;

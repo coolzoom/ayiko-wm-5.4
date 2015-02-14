@@ -105,7 +105,6 @@ class boss_ook_ook : public CreatureScript
                         pBarrel->AddAura(SPELL_BARREL_PERIODIC_PLAYER, pBarrel);
                         pBarrel->AddAura(SPELL_BARREL_PERIODIC_HOSTILE, pBarrel);
                         pBarrel->AddAura(SPELL_ROLLING_BARREL_COSMETIC, pBarrel);
-                        pBarrel->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FORCE_MOVEMENT);
                     }
                 }
 
@@ -317,7 +316,7 @@ class npc_barrel : public CreatureScript
 
             bool CheckIfAgainstUnit()
             {
-                if (Unit* pBunny = me->SelectNearbyTarget(nullptr, 2.f))
+                if (Unit* pBunny = me->SelectNearbyTarget(nullptr, 3.f))
                 {                                       // General purpose bunny JMF
                     if (pBunny->ToCreature() && pBunny->ToCreature()->GetEntry() == 45979)
                         return true;
@@ -344,8 +343,8 @@ class npc_barrel : public CreatureScript
 
             void UpdateAI(const uint32 uiDiff)
             {               
-                //if (CheckIfAgainstUnit())
-                  //  DoExplode();
+                if (CheckIfAgainstUnit())
+                    DoExplode();
 
                 events.Update(uiDiff);
                 

@@ -3226,6 +3226,19 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Attributes |= SPELL_ATTR0_PASSIVE | SPELL_ATTR0_HIDDEN_CLIENTSIDE;
                     spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(21);
                     break;
+#if 1 // Stormstout Brewery
+                case 106614: // Brew Barrel Ride
+                    spellInfo->Effects[EFFECT_2].Effect = 0;
+                    break;
+                case 94465: // Brew Barrel Aura Canceller
+                case 122376: // Barrel Drop
+                case 106647: // Rolling Barrel Cosmetic
+                    spellInfo->AttributesEx6 |= SPELL_ATTR6_CASTABLE_WHILE_ON_VEHICLE;
+                    break;
+                case 106808: // Ground Pound
+                    spellInfo->AttributesEx &= ~SPELL_ATTR1_CHANNELED_2;
+                    break;
+#endif
 #if 1 // Deadmines
                 case 84225: // Vehicle - Switch to Seat 3
                     spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);

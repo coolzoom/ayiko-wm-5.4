@@ -112,6 +112,10 @@ bool CharLoginQueryHolder::Initialize()
     stmt->setUInt32(0, lowGuid);
     res &= SetPreparedQuery(CHAR_LOGIN_QUERY_LOAD_QUEST_STATUS, stmt);
 
+    stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHARACTER_QUEST_OBJECTIVE_STATUS);
+    stmt->setUInt32(0, lowGuid);
+    res &= SetPreparedQuery(CHAR_LOGIN_QUERY_LOAD_QUEST_OBJECTIVE_STATUS, stmt);
+
     stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHARACTER_DAILYQUESTSTATUS);
     stmt->setUInt32(0, lowGuid);
     res &= SetPreparedQuery(CHAR_LOGIN_QUERY_LOAD_DAILY_QUEST_STATUS, stmt);

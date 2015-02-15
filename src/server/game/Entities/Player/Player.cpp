@@ -19188,6 +19188,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *charHolder, SQLQueryHolder 
 
     // after spell load, learn rewarded spell if need also
     _LoadQuestStatus(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_QUEST_STATUS));
+    _LoadQuestObjectiveStatus(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_QUEST_OBJECTIVE_STATUS));
     _LoadQuestStatusRewarded(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_QUEST_STATUS_REW));
     _LoadDailyQuestStatus(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_DAILY_QUEST_STATUS));
     _LoadWeeklyQuestStatus(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_WEEKLY_QUEST_STATUS));
@@ -20101,6 +20102,38 @@ void Player::_LoadQuestStatus(PreparedQueryResult result)
     // clear quest log tail
     for (uint16 i = slot; i < MAX_QUEST_LOG_SIZE; ++i)
         SetQuestSlot(i, 0);
+}
+
+void Player::_LoadQuestObjectiveStatus(PreparedQueryResult result)
+{
+    if (!result)
+        return;
+
+    do
+    {
+        Field* fields = result->Fetch();
+        uint32 objectiveId = fields[0].GetUInt32();
+        uint32 amount      = fields[1].GetUInt32();
+
+        QuestObjective const* questObjective = sObjectMgr->GetQuestObjective(objectiveId);
+        if (!questObjective)
+        {
+            TC_LOG_ERROR("entities.player", "Player %s (%u) has invalid Quest Objective Id %u in Quest Objective status data! Skipping.", GetName().c_str(), GetGUIDLow(), objectiveId);
+            continue;
+        }
+
+        for (uint8 i = 0; i < MAX_QUEST_LOG_SIZE; ++i)
+        {
+            if (GetQuestSlotQuestId(i) != questObjective->ParentQuest)
+                continue;
+
+            SetQuestSlotCounter(i, questObjective->Index, amount);
+            m_questObjectiveStatus.insert(std::make_pair(objectiveId, amount));
+
+            break;
+        }
+
+    } while (result->NextRow());
 }
 
 void Player::_LoadQuestStatusRewarded(PreparedQueryResult result)
@@ -21037,6 +21070,7 @@ void Player::SaveToDB(bool create /*=false*/)
     _SaveInventory(charTrans);
     _SaveVoidStorage(charTrans);
     _SaveQuestStatus(charTrans);
+    _SaveQuestObjectiveStatus(charTrans);
     _SaveDailyQuestStatus(charTrans);
     _SaveWeeklyQuestStatus(charTrans);
     _SaveSeasonalQuestStatus(charTrans);
@@ -21481,8 +21515,6 @@ void Player::_SaveQuestStatus(SQLTransaction& trans)
         }
     }
 
-    m_QuestStatusSave.clear();
-
     for (saveItr = m_RewardedQuestsSave.begin(); saveItr != m_RewardedQuestsSave.end(); ++saveItr)
     {
         if (saveItr->second)
@@ -21503,6 +21535,39 @@ void Player::_SaveQuestStatus(SQLTransaction& trans)
     }
 
     m_RewardedQuestsSave.clear();
+}
+
+void Player::_SaveQuestObjectiveStatus(SQLTransaction& trans)
+{
+    for (auto const &objectiveStatus : m_questObjectiveStatus)
+    {
+        QuestObjective const* questObjective = sObjectMgr->GetQuestObjective(objectiveStatus.first);
+        if (!questObjective)
+            continue;
+
+        QuestStatusSaveMap::const_iterator questSave = m_QuestStatusSave.find(questObjective->ParentQuest);
+        if (questSave == m_QuestStatusSave.end())
+            continue;
+
+        if (questSave->second)
+        {
+            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_CHAR_QUESTSTATUS_OBJECTIVE);
+            stmt->setUInt32(0, GetGUIDLow());
+            stmt->setUInt32(1, objectiveStatus.first);
+            stmt->setUInt32(2, objectiveStatus.second);
+            trans->Append(stmt);
+        }
+        else
+        {
+            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_QUESTSTATUS_OBJECTIVE);
+            stmt->setUInt32(0, GetGUIDLow());
+            stmt->setUInt32(1, objectiveStatus.first);
+            trans->Append(stmt);
+        }
+    }
+
+    m_questObjectiveStatus.clear();
+    m_QuestStatus.clear();
 }
 
 void Player::_SaveDailyQuestStatus(SQLTransaction& trans)

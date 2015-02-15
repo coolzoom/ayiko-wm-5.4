@@ -512,6 +512,8 @@ class ObjectMgr
 
         QuestMap const& GetQuestTemplates() const { return _questTemplates; }
 
+        QuestObjective const* GetQuestObjective(uint32 objectiveId) const;
+
         uint32 GetQuestForAreaTrigger(uint32 Trigger_ID) const
         {
             QuestAreaTriggerContainer::const_iterator itr = _questAreaTriggerStore.find(Trigger_ID);

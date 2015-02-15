@@ -246,8 +246,8 @@ typedef std::vector<uint8> ObjectiveTypeCountVec;
 
 struct QuestObjective
 {
-    QuestObjective(uint32 id, uint8 index, uint8 type, uint32 objectId, int32 amount, uint32 flags, std::string description)
-        : Id(id), Index(index), Type(type), ObjectId(objectId), Amount(amount), Flags(flags), Description(description) { }
+    QuestObjective(uint32 id, uint8 index, uint8 type, uint32 objectId, int32 amount, uint32 flags, std::string description, uint32 parentQuest)
+        : Id(id), Index(index), Type(type), ObjectId(objectId), Amount(amount), Flags(flags), Description(description), ParentQuest(parentQuest) { }
 
     uint32 Id;
     uint8 Index;
@@ -257,6 +257,7 @@ struct QuestObjective
     uint32 Flags;
     std::string Description;
     VisualEffectVec VisualEffects;
+    uint32 ParentQuest;
 };
 
 typedef std::set<QuestObjective*> QuestObjectiveSet;

@@ -488,6 +488,7 @@ enum AtLoginFlags
 };
 
 typedef std::unordered_map<uint32, QuestStatusData> QuestStatusMap;
+typedef std::map<uint32, uint32> QuestObjectiveStatusMap;
 typedef std::set<uint32> RewardedQuestSet;
 
 //               quest,  keep
@@ -776,6 +777,7 @@ enum CharLoginQueryIndex
     CHAR_LOGIN_QUERY_LOAD_KNOWN_TITLES,
     CHAR_LOGIN_QUERY_LOAD_CP_WEEK_CAP,
     CHAR_LOGIN_QUERY_LOAD_RATED_BG_STATS,
+    CHAR_LOGIN_QUERY_LOAD_QUEST_OBJECTIVE_STATUS,
 
     MAX_CHAR_LOGIN_QUERY
 };
@@ -2859,6 +2861,7 @@ class Player final : public Unit, public GridObject<Player>
         void _LoadMail();
         void _LoadMailedItems(Mail* mail);
         void _LoadQuestStatus(PreparedQueryResult result);
+        void _LoadQuestObjectiveStatus(PreparedQueryResult result);
         void _LoadQuestStatusRewarded(PreparedQueryResult result);
         void _LoadDailyQuestStatus(PreparedQueryResult result);
         void _LoadWeeklyQuestStatus(PreparedQueryResult result);
@@ -2891,6 +2894,7 @@ class Player final : public Unit, public GridObject<Player>
         void _SaveVoidStorage(SQLTransaction& trans);
         void _SaveMail(SQLTransaction& trans);
         void _SaveQuestStatus(SQLTransaction& trans);
+        void _SaveQuestObjectiveStatus(SQLTransaction& trans);
         void _SaveDailyQuestStatus(SQLTransaction& trans);
         void _SaveWeeklyQuestStatus(SQLTransaction& trans);
         void _SaveMonthlyQuestStatus(SQLTransaction& trans);
@@ -2978,6 +2982,7 @@ class Player final : public Unit, public GridObject<Player>
         int8 m_comboPoints;
 
         QuestStatusMap m_QuestStatus;
+        QuestObjectiveStatusMap m_questObjectiveStatus;
         QuestStatusSaveMap m_QuestStatusSave;
 
         RewardedQuestSet m_RewardedQuests;

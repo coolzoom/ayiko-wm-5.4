@@ -4454,7 +4454,7 @@ void ObjectMgr::LoadQuestObjectives()
                 break;
         }
 
-        QuestObjective* questObjective = new QuestObjective(id, index, type, objectId, amount, flags, description);
+        QuestObjective* questObjective = new QuestObjective(id, index, type, objectId, amount, flags, description, quest->GetQuestId());
         quest->m_questObjectives.insert(questObjective);
         quest->m_questObjecitveTypeCount[type]++;
 
@@ -9617,4 +9617,13 @@ int32 ObjectMgr::GetBaseReputationOf(FactionEntry const* factionEntry, uint8 rac
     }
 
     return 0;
+}
+
+QuestObjective const* ObjectMgr::GetQuestObjective(uint32 objectiveId) const
+{
+    auto citr = m_questObjectives.find(objectiveId);
+    if (citr == m_questObjectives.end())
+        return nullptr;
+
+    return citr->second;
 }

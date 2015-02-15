@@ -4415,7 +4415,7 @@ void ObjectMgr::LoadQuestObjectives()
             }
             case QUEST_OBJECTIVE_TYPE_SPELL:
             {
-                if (sSpellMgr->GetSpellInfo(objectId))
+                if (!sSpellMgr->GetSpellInfo(objectId))
                 {
                     TC_LOG_ERROR("sql.sql", "Quest Objective %u has non existant Spell Id %u! Skipping.", id, objectId);
                     continue;

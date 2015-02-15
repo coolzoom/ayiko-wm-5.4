@@ -344,37 +344,14 @@ void QuestMenu::ClearMenu()
 void PlayerMenu::SendQuestGiverQuestList(QEmote eEmote, const std::string& Title, uint64 npcGUID)
 {
     ObjectGuid guid = npcGUID;
+    ByteBuffer byteData;
+
     WorldPacket data(SMSG_QUESTGIVER_QUEST_LIST, 100);    // guess size
     data.WriteBits(Title.size(), 11);
     data.WriteBitSeq<2, 7>(guid);
     data.WriteBits(_questMenu.GetMenuItemCount(), 19);
 
     uint32 count = 0;
-    for (; count < _questMenu.GetMenuItemCount(); ++count)
-    {
-        QuestMenuItem const& qmi = _questMenu.GetItem(count);
-
-        uint32 questID = qmi.QuestId;
-
-        if (Quest const* quest = sObjectMgr->GetQuestTemplate(questID))
-        {
-            std::string title = quest->GetTitle();
-
-            int loc_idx = _session->GetSessionDbLocaleIndex();
-            if (loc_idx >= 0)
-                if (QuestLocale const* ql = sObjectMgr->GetQuestLocale(questID))
-                    ObjectMgr::GetLocaleString(ql->Title, loc_idx, title);
-
-            uint8 wrongLen = title.size() % 2;
-            data.WriteBits((title.size() - wrongLen) / 2, 8);
-            data.WriteBit(wrongLen != 0);
-            data.WriteBit(quest->IsRepeatable());
-        }
-    }
-
-    data.WriteBitSeq<5, 6, 3, 1, 0, 4>(guid);
-
-    count = 0;
     for (; count < _questMenu.GetMenuItemCount(); ++count)
     {
         QuestMenuItem const& qmi = _questMenu.GetItem(count);
@@ -391,35 +368,32 @@ void PlayerMenu::SendQuestGiverQuestList(QEmote eEmote, const std::string& Title
                 if (QuestLocale const* ql = sObjectMgr->GetQuestLocale(questID))
                     ObjectMgr::GetLocaleString(ql->Title, loc_idx, title);
 
-
             uint32 questStat = plr ? plr->GetQuestStatus(questID) : 0;
 
             if (questStat == QUEST_STATUS_COMPLETE || questStat == QUEST_STATUS_INCOMPLETE)
-            {
-                if (quest->IsRepeatable())
-                    questStat = 0;
-                else
-                    questStat = 4;
-            }
+                questStat = quest->IsRepeatable() ? 0 : 4;
             else if (questStat == QUEST_STATE_NONE)
                 questStat = 2;
 
-            data << uint32(questStat);                      // quest icon
-            data << uint32(quest->GetFlags());              // quest flags
-            data << uint32(questID);
-            data << uint32(0);                              // quest flags 2
-            data << int32(quest->GetQuestLevel());          // quest level
-            if (title.size())
-                data.append(title.c_str(), title.size());       // quest title
+            data.WriteBits(title.size(), 9);
+            data.WriteBit(quest->IsRepeatable());
+
+            byteData << uint32(questStat);                      // quest icon
+            byteData << uint32(quest->GetFlags());              // quest flags
+            byteData << uint32(questID);
+            byteData << uint32(0);                              // quest flags 2
+            byteData << int32(quest->GetQuestLevel());          // quest level
+            byteData.WriteString(title);                        // quest title
         }
     }
 
+    data.WriteBitSeq<5, 6, 3, 1, 0, 4>(guid);
+    data.FlushBits();
+
+    data.append(byteData);
     data << uint32(eEmote._Delay);                         // player emote
     data.WriteByteSeq<5, 7, 2, 6, 1>(guid);
-
-    if (Title.size())
-        data.append(Title.c_str(), Title.size());
-
+    data.WriteString(Title);
     data.WriteByteSeq<3, 4>(guid);
     data << uint32(eEmote._Emote);                         // NPC emote
     data.WriteByteSeq<0>(guid);

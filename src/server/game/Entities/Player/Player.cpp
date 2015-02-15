@@ -18497,6 +18497,27 @@ void Player::SendQuestUpdateAddCreatureOrGo(Quest const* quest, uint64 objGuid, 
         SetQuestSlotCounter(log_slot, creatureOrGO_idx, GetQuestSlotCounter(log_slot, creatureOrGO_idx)+add_count);
 }
 
+void Player::SendQuestUpdateAddCredit(Quest const* quest, QuestObjective const* objective, ObjectGuid guid, uint16 oldCount, uint16 addCount)
+{
+    WorldPacket data(SMSG_QUESTUPDATE_ADD_CREDIT, 1 + 8 + 2 + 1 + 4 + 4 + 2);
+    data.WriteBitSeq<7, 3, 6, 5, 0, 1, 4, 2>(guid);
+
+    data << uint16(objective->Amount);
+    data << uint8(objective->Type);
+    data.WriteByteSeq<2, 6, 5>(guid);
+    data << uint32(objective->ObjectId);
+    data << uint32(quest->GetQuestId());
+    data.WriteByteSeq<3, 1, 4, 7, 0>(guid);
+    data << uint16(oldCount + addCount);
+
+    GetSession()->SendPacket(&data);
+    TC_LOG_DEBUG("network", "WORLD: Sent SMSG_QUESTUPDATE_ADD_CREDIT");
+
+    uint16 logSlot = FindQuestSlot(quest->GetQuestId());
+    if (logSlot < MAX_QUEST_LOG_SIZE)
+        SetQuestSlotCounter(logSlot, objective->Index, GetQuestSlotCounter(logSlot, objective->Index) + addCount);
+}
+
 void Player::SendQuestUpdateAddPlayer(Quest const* quest, uint16 old_count, uint16 add_count)
 {
     ASSERT(old_count + add_count < 65536 && "player count store in 16 bits");

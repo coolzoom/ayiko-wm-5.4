@@ -16716,26 +16716,67 @@ void Player::FullfillQuestRequirements(Quest const *quest)
     if (!quest || GetQuestStatus(quest) == QUEST_STATUS_NONE)
         return;
 
-    // Add quest items for quests that require items
-    for (uint8 x = 0; x < QUEST_ITEM_OBJECTIVES_COUNT; ++x)
+    for (auto const &questObjective : quest->m_questObjectives)
     {
-        uint32 id = quest->RequiredItemId[x];
-        uint32 count = quest->RequiredItemCount[x];
-        if (!id || !count)
-            continue;
-
-        uint32 curItemCount = GetItemCount(id, true);
-        if (curItemCount >= count)
-            continue;
-
-        ItemPosCountVec dest;
-        uint8 msg = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, id, count-curItemCount);
-        if (msg == EQUIP_ERR_OK)
+        uint32 objectiveAmount = uint32(questObjective->Amount);
+        switch (questObjective->Type)
         {
-            Item* item = StoreNewItem(dest, id, true);
-            SendNewItem(item, count-curItemCount, true, false);
+            case QUEST_OBJECTIVE_TYPE_NPC:
+            {
+                for (uint32 i = 0; i < objectiveAmount; i++)
+                    QuestObjectiveSatisfy(questObjective->ObjectId, 1, QUEST_OBJECTIVE_TYPE_NPC, 0);
+                break;
+            }
+            case QUEST_OBJECTIVE_TYPE_ITEM:
+            {
+                uint32 curItemCount = GetItemCount(questObjective->ObjectId, true);
+                if (curItemCount >= objectiveAmount)
+                    continue;
+
+                ItemPosCountVec dest;
+                if (CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, questObjective->ObjectId, objectiveAmount - curItemCount) == EQUIP_ERR_OK)
+                {
+                    Item* item = StoreNewItem(dest, questObjective->ObjectId, true);
+                    SendNewItem(item, objectiveAmount - curItemCount, true, false);
+                }
+
+                break;
+            }
+            case QUEST_OBJECTIVE_TYPE_GO:
+            {
+                for (uint32 i = 0; i < objectiveAmount; i++)
+                    QuestObjectiveSatisfy(questObjective->ObjectId, 1, QUEST_OBJECTIVE_TYPE_GO, 0);
+                break;
+            }
+            case QUEST_OBJECTIVE_TYPE_CURRENCY:
+            {
+                ModifyCurrency(questObjective->ObjectId, questObjective->Amount);
+                break;
+            }
+            case QUEST_OBJECTIVE_TYPE_SPELL:
+            {
+                if (HasSpell(questObjective->ObjectId))
+                    learnSpell(questObjective->ObjectId, false);
+                break;
+            }
+            case QUEST_OBJECTIVE_TYPE_FACTION_REP:
+            case QUEST_OBJECTIVE_TYPE_FACTION_REP2:
+            {
+                if (GetReputationMgr().GetReputation(questObjective->ObjectId) < questObjective->Amount)
+                    if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(questObjective->ObjectId))
+                        GetReputationMgr().SetReputation(factionEntry, questObjective->Amount);
+                break;
+            }
+            case QUEST_OBJECTIVE_TYPE_MONEY:
+            {
+                ModifyMoney(questObjective->Amount);
+                break;
+            }
+            default:
+                break;
         }
     }
+
 
     // All creature/GO slain/casted (not required, but otherwise it will display "Creature slain 0/10")
     for (uint8 i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
@@ -16763,31 +16804,6 @@ void Player::FullfillQuestRequirements(Quest const *quest)
                 CastedCreatureOrGO(creature, 0, 0);
         }
     }
-
-    // If the quest requires reputation to complete
-    if (uint32 repFaction = quest->GetRepObjectiveFaction())
-    {
-        uint32 repValue = quest->GetRepObjectiveValue();
-        uint32 curRep = GetReputationMgr().GetReputation(repFaction);
-        if (curRep < repValue)
-            if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(repFaction))
-                GetReputationMgr().SetReputation(factionEntry, repValue);
-    }
-
-    // If the quest requires a SECOND reputation to complete
-    if (uint32 repFaction = quest->GetRepObjectiveFaction2())
-    {
-        uint32 repValue2 = quest->GetRepObjectiveValue2();
-        uint32 curRep = GetReputationMgr().GetReputation(repFaction);
-        if (curRep < repValue2)
-            if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(repFaction))
-                GetReputationMgr().SetReputation(factionEntry, repValue2);
-    }
-
-    // If the quest requires money
-    int32 ReqOrRewMoney = quest->GetRewOrReqMoney();
-    if (ReqOrRewMoney < 0)
-        ModifyMoney(-ReqOrRewMoney);
 }
 
 void Player::CompleteQuest(uint32 quest_id)
@@ -18272,6 +18288,47 @@ void Player::ReputationChanged2(FactionEntry const* factionEntry)
                             IncompleteQuest(questid);
                     }
                 }
+            }
+        }
+    }
+}
+
+void Player::QuestObjectiveSatisfy(uint32 objectId, uint32 amount, uint8 type, uint64 guid)
+{
+    for (uint8 i = 0; i < MAX_QUEST_LOG_SIZE; i++)
+    {
+        uint32 questId = GetQuestSlotQuestId(i);
+        if (!questId)
+            continue;
+
+        Quest const* quest = sObjectMgr->GetQuestTemplate(questId);
+        if (!quest)
+            continue;
+
+        QuestStatusData& questStatus = m_QuestStatus[questId];
+        if (questStatus.Status != QUEST_STATUS_INCOMPLETE)
+            continue;
+
+        if (!quest->GetQuestObjectiveCountType(type))
+            continue;
+
+        for (const auto &questObjective : quest->m_questObjectives)
+        {
+            if (questObjective->ObjectId == objectId)
+            {
+                uint32 curCount = GetQuestObjectiveCounter(questObjective->Id);
+                uint32 reqCount = uint32(questObjective->Amount);
+                uint32 addCount = curCount + amount > reqCount ? reqCount - curCount : amount;
+
+                m_questObjectiveStatus[questObjective->Id] = addCount;
+                m_QuestStatusSave[questId] = true;
+
+                SendQuestUpdateAddCredit(quest, questObjective, ObjectGuid(guid), curCount, amount);
+
+                if (CanCompleteQuest(questId))
+                    CompleteQuest(questId);
+
+                break;
             }
         }
     }

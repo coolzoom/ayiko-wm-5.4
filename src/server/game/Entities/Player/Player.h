@@ -2758,6 +2758,7 @@ class Player final : public Unit, public GridObject<Player>
 
         void SendCUFProfiles();
 
+        uint32 GetQuestObjectiveCounter(uint32 objectiveId) const;
 
         /*********************************************************/
         /***              BATTLE PET SYSTEM                    ***/

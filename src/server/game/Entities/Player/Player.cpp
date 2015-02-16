@@ -18036,9 +18036,9 @@ void Player::QuestObjectiveSatisfy(uint32 objectId, uint32 amount, uint8 type, u
                 m_questObjectiveStatus[questObjective->Id] += addCount;
                 m_QuestStatusSave[questId] = true;
 
-                /*if (type == QUEST_OBJECTIVE_TYPE_PLAYER)
+                if (type == QUEST_OBJECTIVE_TYPE_PLAYER)
                     SendQuestUpdateAddPlayer(quest, questObjective, curCount, amount);
-                else*/
+                else
                     SendQuestUpdateAddCredit(quest, questObjective, ObjectGuid(guid), curCount, amount);
 
                 if (CanCompleteQuest(questId))
@@ -18295,20 +18295,19 @@ void Player::SendQuestUpdateAddCredit(Quest const* quest, QuestObjective const* 
         SetQuestSlotCounter(logSlot, objective->Index, GetQuestSlotCounter(logSlot, objective->Index) + addCount);
 }
 
-void Player::SendQuestUpdateAddPlayer(Quest const* quest, uint16 old_count, uint16 add_count)
+void Player::SendQuestUpdateAddPlayer(Quest const* quest, QuestObjective const* objective, uint16 oldCount, uint16 addCount)
 {
-    ASSERT(old_count + add_count < 65536 && "player count store in 16 bits");
-
-    WorldPacket data(SMSG_QUESTUPDATE_ADD_PVP_KILL, (2*4) + 1);
-    TC_LOG_DEBUG("network", "WORLD: Sent SMSG_QUESTUPDATE_ADD_PVP_KILL");
-    data << uint8(old_count + add_count);
-    data << uint32(quest->GetPlayersSlain());
+    WorldPacket data(SMSG_QUESTUPDATE_ADD_PVP_KILL, 2 + 4 + 4);
+    data << uint8(oldCount + addCount);
+    data << uint32(objective->Amount);
     data << uint32(quest->GetQuestId());
-    GetSession()->SendPacket(&data);
 
-    uint16 log_slot = FindQuestSlot(quest->GetQuestId());
-    if (log_slot < MAX_QUEST_LOG_SIZE)
-        SetQuestSlotCounter(log_slot, QUEST_PVP_KILL_SLOT, GetQuestSlotCounter(log_slot, QUEST_PVP_KILL_SLOT) + add_count);
+    GetSession()->SendPacket(&data);
+    TC_LOG_DEBUG("network", "WORLD: Sent SMSG_QUESTUPDATE_ADD_PVP_KILL");
+
+    uint16 logSlot = FindQuestSlot(quest->GetQuestId());
+    if (logSlot < MAX_QUEST_LOG_SIZE)
+        SetQuestSlotCounter(logSlot, objective->Index, GetQuestSlotCounter(logSlot, objective->Index) + addCount);
 }
 
 /*********************************************************/

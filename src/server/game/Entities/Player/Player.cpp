@@ -18244,36 +18244,6 @@ void Player::SendPushToPartyResponse(Player const *player, uint32 msg)
     TC_LOG_DEBUG("network", "WORLD: Sent SMSG_QUEST_PUSH_RESULT");
 }
 
-void Player::SendQuestUpdateAddCreatureOrGo(Quest const* quest, uint64 objGuid, uint32 creatureOrGO_idx, uint16 old_count, uint16 add_count)
-{
-    ASSERT(old_count + add_count < 65536 && "mob/GO count store in 16 bits 2^16 = 65536 (0..65536)");
-
-    int32 entry = quest->RequiredNpcOrGo[ creatureOrGO_idx ];
-    if (entry < 0)
-        // client expected gameobject template id in form (id|0x80000000)
-        entry = (-entry) | 0x80000000;
-
-    uint8 unk1 = 0;
-    ObjectGuid guid = objGuid;
-
-    WorldPacket data(SMSG_QUESTUPDATE_ADD_KILL, (4*4+8));
-    data.WriteBitSeq<7, 3, 6, 5, 0, 1, 4, 2>(guid);
-    data << uint16(quest->RequiredNpcOrGoCount[ creatureOrGO_idx ]);
-    data << uint8(unk1);
-    data.WriteByteSeq<2, 6, 5>(guid);
-    data << uint32(entry);
-    data << uint32(quest->GetQuestId());
-    data.WriteByteSeq<3, 1, 4, 7, 0>(guid);
-    data << uint16(old_count + add_count);
-
-    GetSession()->SendPacket(&data);
-    TC_LOG_DEBUG("network", "WORLD: Sent SMSG_QUESTUPDATE_ADD_KILL");
-
-    uint16 log_slot = FindQuestSlot(quest->GetQuestId());
-    if (log_slot < MAX_QUEST_LOG_SIZE)
-        SetQuestSlotCounter(log_slot, creatureOrGO_idx, GetQuestSlotCounter(log_slot, creatureOrGO_idx)+add_count);
-}
-
 void Player::SendQuestUpdateAddCredit(Quest const* quest, QuestObjective const* objective, ObjectGuid guid, uint16 oldCount, uint16 addCount)
 {
     WorldPacket data(SMSG_QUESTUPDATE_ADD_CREDIT, 1 + 8 + 2 + 1 + 4 + 4 + 2);

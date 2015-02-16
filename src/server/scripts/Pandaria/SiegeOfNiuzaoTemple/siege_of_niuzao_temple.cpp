@@ -202,11 +202,15 @@ class npc_resin_flake : public CreatureScript
     {
         npc_resin_flakeAI(Creature * creature) : ScriptedAI(creature) {}
 
+        /*
         void DamageTaken(Unit* , uint32& damage) override
         {
+            
             if (damage >= me->GetHealth())
                 DoCast(me, SPELL_RESIDUE, true);
+            
         }
+        */
     };
 
 public:

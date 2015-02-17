@@ -1,0 +1,3 @@
+/* Kor'thik didn't react fix */
+UPDATE `creature` SET `unit_flags` = 0, `dynamicflags` = 0 WHERE `id` IN (62756,62757,62758);
+DELETE FROM `creature_template_aura` WHERE `entry` IN (62756,62757,62758) AND `aura` = 119073;

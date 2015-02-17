@@ -17060,10 +17060,11 @@ void Player::FailQuest(uint32 questId)
             SendQuestFailed(questId);
 
         // Destroy quest items on quest failure.
-        for (uint8 i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
-            if (quest->RequiredItemId[i] > 0 && quest->RequiredItemCount[i] > 0)
-                // Destroy items received on starting the quest.
-                DestroyItemCount(quest->RequiredItemId[i], quest->RequiredItemCount[i], true, true);
+        if (quest->GetQuestObjectiveCountType(QUEST_OBJECTIVE_TYPE_ITEM))
+            for (auto const &questObjective : quest->m_questObjectives)
+                if (questObjective->Type == QUEST_OBJECTIVE_TYPE_ITEM)
+                    DestroyItemCount(questObjective->ObjectId, questObjective->Amount, true, true);
+
         for (uint8 i = 0; i < QUEST_SOURCE_ITEM_IDS_COUNT; ++i)
             if (quest->RequiredSourceItemId[i] > 0 && quest->RequiredSourceItemCount[i] > 0)
                 // Destroy items received during the quest.
@@ -17700,9 +17701,10 @@ uint16 Player::GetReqKillOrCastCurrentCount(uint32 quest_id, int32 entry)
     if (!qInfo)
         return 0;
 
-    for (uint8 j = 0; j < QUEST_OBJECTIVES_COUNT; ++j)
-        if (qInfo->RequiredNpcOrGo[j] == entry)
-            return m_QuestStatus[quest_id].CreatureOrGOCount[j];
+    if (qInfo->GetQuestObjectiveCountType(QUEST_OBJECTIVE_TYPE_ITEM))
+        for (auto const &questObjective : qInfo->m_questObjectives)
+            if (questObjective->Type == QUEST_OBJECTIVE_TYPE_NPC && questObjective->ObjectId == entry)
+                return GetQuestObjectiveCounter(questObjective->Id);
 
     return 0;
 }
@@ -19851,13 +19853,6 @@ void Player::_LoadQuestStatus(PreparedQueryResult result)
                         SetQuestSlotState(slot, QUEST_STATE_COMPLETE);
                     else if (questStatusData.Status == QUEST_STATUS_FAILED)
                         SetQuestSlotState(slot, QUEST_STATE_FAIL);
-
-                    for (uint8 idx = 0; idx < QUEST_OBJECTIVES_COUNT; ++idx)
-                        if (questStatusData.CreatureOrGOCount[idx])
-                            SetQuestSlotCounter(slot, idx, questStatusData.CreatureOrGOCount[idx]);
-
-                    if (questStatusData.PlayerCount)
-                        SetQuestSlotCounter(slot, QUEST_PVP_KILL_SLOT, questStatusData.PlayerCount);
 
                     ++slot;
                 }
@@ -25619,14 +25614,13 @@ bool Player::HasQuestForGO(int32 GOId) const
             if (GetGroup() && GetGroup()->isRaidGroup() && !qinfo->IsAllowedInRaid())
                 continue;
 
-            for (uint8 j = 0; j < QUEST_OBJECTIVES_COUNT; ++j)
-            {
-                if (qinfo->RequiredNpcOrGo[j] >= 0)       //skip non GO case
-                    continue;
+            if (!qinfo->GetQuestObjectiveCountType(QUEST_OBJECTIVE_TYPE_GO))
+                continue;
 
-                if ((-1)*GOId == qinfo->RequiredNpcOrGo[j] && qs.CreatureOrGOCount[j] < qinfo->RequiredNpcOrGoCount[j])
-                    return true;
-            }
+            for (auto const &questObjective : qinfo->m_questObjectives)
+                if (questObjective->Type == QUEST_OBJECTIVE_TYPE_GO)
+                    if (questObjective->ObjectId == GOId && GetQuestObjectiveCounter(questObjective->Id) < uint32(questObjective->Amount))
+                        return true;
         }
     }
     return false;

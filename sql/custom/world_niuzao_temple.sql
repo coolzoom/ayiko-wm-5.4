@@ -283,6 +283,11 @@ DELETE FROM npc_spellclick_spells WHERE npc_entry = 64520; -- Prisoner
 INSERT INTO npc_spellclick_spells (npc_entry, spell_id, cast_flags) VALUES
 (64520, 125993, 1);
 
+UPDATE `creature_template` SET `ScriptName` = 'npc_niuzao_shado_pan_prisoner' WHERE `entry` = 364520; -- HC Prisoner
+DELETE FROM npc_spellclick_spells WHERE npc_entry = 364520;
+INSERT INTO npc_spellclick_spells (npc_entry, spell_id, cast_flags) VALUES
+(364520, 125993, 1);
+
 -- Cosmetic Catapults in rear staging area
 UPDATE creature_template SET ScriptName = 'npc_mantid_soldier_catapult' WHERE entry IN (62348, 61448);
 UPDATE creature_template SET ScriptName = 'npc_mantid_catapult' WHERE entry = 63565;

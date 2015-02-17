@@ -133,6 +133,7 @@ INSERT INTO `creature_template_currency` VALUES
 UPDATE `creature_template` SET `lootid` = 110001 WHERE `entry` = 110001;
 UPDATE `creature_template` SET `lootid` = 110002 WHERE `entry` = 110002;
 UPDATE `creature_template` SET `lootid` = 110029 WHERE `entry` = 110029;
+UPDATE `creature_loot_template` SET `lootmode` = 1 WHERE `entry` IN (110001,110002,110029);
 
 DELETE FROM creature_loot_template WHERE entry IN (110029, 59479, 110001, 56637, 110002, 56717);
 INSERT INTO creature_loot_template

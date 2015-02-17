@@ -63,3 +63,11 @@ INSERT INTO `creature` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMa
 (@GUID + 8, 63944, 870, 0, 0, 1, 65535, 0, 0, -1391.74, 3610.54, -36.6107, 4.33817, 90, 5, 0, 393941, 0, 1, 0, 0, 0, 2048, 0, 0, null),
 (@GUID + 9, 63944, 870, 0, 0, 1, 65535, 0, 0, -1270.16, 3585.67, -33.7722, 0.575325, 90, 5, 0, 393941, 0, 1, 0, 0, 0, 2048, 0, 0, null),
 (@GUID + 10, 63944, 870, 0, 0, 1, 65535, 0, 0, -1168.95, 3604.91, -15.1146, 1.83746, 90, 5, 0, 393941, 0, 1, 0, 0, 0, 2048, 0, 0, null);
+
+/* Vor'thik Fear-Shaper wrong auras and flags fix */
+UPDATE `creature` SET `unit_flags` = 32768 WHERE `id` = 62814;
+DELETE FROM `creature_template_aura` WHERE `entry` = 62814 AND `aura` = 96733;
+
+/* Krol the Blade spawntime offylike-arrangement */
+DELETE FROM `creature` WHERE (`guid`=628177);
+UPDATE `creature` SET `spawntimesecs` = 14400 WHERE `guid` = 624715;

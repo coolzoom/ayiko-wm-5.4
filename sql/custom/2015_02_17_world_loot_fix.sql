@@ -9,10 +9,13 @@ UPDATE `creature_template` SET `lootid` = 61485 WHERE `entry` = 361485;
 UPDATE `creature_template` SET `lootid` = 362205 WHERE `entry` = 62205;
 UPDATE `creature_template` SET `lootid` = 62205 WHERE `entry` = 362205;
 DELETE FROM `creature_loot_template` WHERE `entry`=362205 AND `item`=87547;
-INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES (62205, 87547, 0.5, 1, 3, 1, 1);
+DELETE FROM `creature_loot_template` WHERE `entry`=62205 AND `item`=87547;
+INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES 
+(62205, 87547, 0.5, 1, 3, 1, 1);
 
 /* Stormstout Brewery - Quest Family Secrets fix */
 UPDATE `gameobject_template` SET `flags` = 4 WHERE `entry` = 213795;
+DELETE FROM `gameobject_loot_template` WHERE `entry`= 42921;
 INSERT INTO `gameobject_loot_template` VALUES 
 (42921, 86431, -100, 1, 0, 1, 1);
 

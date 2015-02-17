@@ -1,3 +1,5 @@
+SET FOREIGN_KEY_CHECKS = 0;
+
 DELETE FROM creature_template WHERE entry IN (65392, 64361, 56637, 56746, 56748, 56849, 59522, 56865, 59519, 56924, 56927, 57097, 59074, 59494,
 59479, 59461, 59460, 59459, 59458, 59426, 59075, 59518, 56867, 59520, 59521, 56863, 56862, 59605, 59684, 59704, 59822, 56718,
 60276, 56717, 56631, 65522, 56682);
@@ -129,6 +131,10 @@ INSERT INTO `creature_template_currency` VALUES
 (110029, 395, 100),
 (110002, 395, 100),
 (110001, 395, 100);
+
+UPDATE `creature_template` SET `lootid` = 110001 WHERE `entry` = 110001;
+UPDATE `creature_template` SET `lootid` = 110002 WHERE `entry` = 110002;
+UPDATE `creature_template` SET `lootid` = 110029 WHERE `entry` = 110029;
 
 DELETE FROM creature_loot_template WHERE entry IN (110029, 59479, 110001, 56637, 110002, 56717);
 INSERT INTO creature_loot_template
@@ -851,6 +857,8 @@ REPLACE INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `languag
 (56849, 1, 0, 'You know what dat mean...', 12, 0, 100, 1, 0, 0,'Hozen Bouncer to Player'),
 (56849, 2, 0, 'You da new Ook!', 12, 0, 100, 1, 0, 0,'Hozen Bouncer to Player'),
 (56849, 3, 0, 'Get da party started for da new Ook!', 12, 0, 100, 1, 0, 0, 'Hozen Bouncer to Player');
+
+SET FOREIGN_KEY_CHECKS = 1;
 /*
 (59075, X, X, 'I liked that last group!', 12, 0, 100, 6, 0, 28002,'Ancestral Brewmaster'),
 (59075, X, X, 'I thought it was the last group!', 12, 0, 100, 1, 0, 28003, 'Ancestral Brewmaster'),

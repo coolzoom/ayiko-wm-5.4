@@ -57,9 +57,11 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@GUID + 54, 66790, 870, 1, 65535, 0, 0, 47.8453, 3805.97, 199.88, 2.06086, 90, 0, 0, 393941, 0, 0, 0, 0, 0, 0),
 (@GUID + 55, 66790, 870, 1, 65535, 0, 0, 55.0014, 3793.09, 200.913, 1.53936, 90, 0, 0, 393941, 0, 0, 0, 0, 0, 0);
 
+UPDATE `creature` SET `spawntimesecs` = 300 WHERE `id` IN (66784,66785);
+
 UPDATE `creature_template` SET `dmg_multiplier` = 40, `mechanic_immune_mask` = 2096, `AIName` = 'SmartAI' WHERE `entry` = 66783;
 UPDATE `creature_template` SET `dmg_multiplier` = 8, `mechanic_immune_mask` = 2096 WHERE `entry` IN (66784,66785);
-UPDATE `creature_template` SET `faction_A` = 14, `faction_H` = 14, `dmg_multiplier` = 3 WHERE `entry` IN (66788,66789,66790);
+UPDATE `creature_template` SET `faction_A` = 14, `faction_H` = 14, `dmg_multiplier` = 1 WHERE `entry` IN (66788,66789,66790);
 
 DELETE FROM `smart_scripts` WHERE (`entryorguid`= 66783 AND `source_type` = 0 );
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 

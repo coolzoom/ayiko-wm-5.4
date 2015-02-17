@@ -69,7 +69,7 @@ REPLACE INTO creature_template(entry, difficulty_entry_1, difficulty_entry_2, di
 
 -- Normal mode hp
 UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 0.04999987 WHERE `entry` = 62091; -- Sik'thik Flyer
-UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 1 WHERE `entry` = 61817; -- Mantid Tar Keg
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 1,`type_flags` = 0 WHERE `entry` = 61817; -- Mantid Tar Keg
 UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 0.03086757 WHERE `entry` = 61629; -- Sappling Summon Dest
 UPDATE `creature_template` SET `minlevel` = 1, `maxlevel` = 1, `Health_mod` = 1 WHERE `entry` = 62684; -- Barrel Target
 UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 2.499999 WHERE `entry` = 61928; -- Sik'thik Guardian
@@ -282,6 +282,11 @@ UPDATE creature_template SET ScriptName = 'npc_niuzao_shado_pan_prisoner' WHERE 
 DELETE FROM npc_spellclick_spells WHERE npc_entry = 64520; -- Prisoner
 INSERT INTO npc_spellclick_spells (npc_entry, spell_id, cast_flags) VALUES
 (64520, 125993, 1);
+
+UPDATE `creature_template` SET `ScriptName` = 'npc_niuzao_shado_pan_prisoner' WHERE `entry` = 364520; -- HC Prisoner
+DELETE FROM npc_spellclick_spells WHERE npc_entry = 364520;
+INSERT INTO npc_spellclick_spells (npc_entry, spell_id, cast_flags) VALUES
+(364520, 125993, 1);
 
 -- Cosmetic Catapults in rear staging area
 UPDATE creature_template SET ScriptName = 'npc_mantid_soldier_catapult' WHERE entry IN (62348, 61448);

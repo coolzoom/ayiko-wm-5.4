@@ -16460,9 +16460,9 @@ bool Player::CanCompleteRepeatableQuest(Quest const* quest)
     if (!CanTakeQuest(quest, false))
         return false;
 
-    if (quest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_DELIVER))
-        for (uint8 i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; i++)
-            if (quest->RequiredItemId[i] && quest->RequiredItemCount[i] && !HasItemCount(quest->RequiredItemId[i], quest->RequiredItemCount[i]))
+    for (auto const &questObjective : quest->m_questObjectives)
+        if (questObjective->Type == QUEST_OBJECTIVE_TYPE_ITEM)
+            if (!HasItemCount(questObjective->ObjectId, questObjective->Amount))
                 return false;
 
     if (!CanRewardQuest(quest, false))
@@ -16488,28 +16488,37 @@ bool Player::CanRewardQuest(Quest const* quest, bool msg)
     if (!SatisfyQuestSkill(quest, msg))
         return false;
 
-    // prevent receive reward with quest items in bank
-    if (quest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_DELIVER))
+    for (auto const &questObjective : quest->m_questObjectives)
     {
-        for (uint8 i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; i++)
+        switch (questObjective->Type)
         {
-            if (quest->RequiredItemCount[i]!= 0 &&
-                GetItemCount(quest->RequiredItemId[i]) < quest->RequiredItemCount[i])
+            case QUEST_OBJECTIVE_TYPE_ITEM:
             {
-                if (msg)
-                    SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL, quest->RequiredItemId[i]);
-                return false;
+                if (GetItemCount(questObjective->ObjectId) < uint32(questObjective->Amount))
+                {
+                    if (msg)
+                        SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL, questObjective->ObjectId);
+                    return false;
+                }
+
+                break;
             }
+            case QUEST_OBJECTIVE_TYPE_CURRENCY:
+            {
+                if (!HasCurrency(questObjective->ObjectId, questObjective->Amount))
+                    return false;
+                break;
+            }
+            case QUEST_OBJECTIVE_TYPE_MONEY:
+            {
+                if (!HasEnoughMoney(uint64(questObjective->Amount)))
+                    return false;
+                break;
+            }
+            default:
+                break;
         }
     }
-
-    for (uint8 i = 0; i < QUEST_REQUIRED_CURRENCY_COUNT; i++)
-        if (quest->RequiredCurrencyId[i] && !HasCurrency(quest->RequiredCurrencyId[i], quest->RequiredCurrencyCount[i]))
-            return false;
-
-    // prevent receive reward with low money and GetRewOrReqMoney() < 0
-    if (quest->GetRewOrReqMoney() < 0 && !HasEnoughMoney(-int64(quest->GetRewOrReqMoney())))
-        return false;
 
     return true;
 }
@@ -16542,14 +16551,9 @@ void Player::AddQuestAndCheckCompletion(Quest const* quest, Object* questGiver)
 
             // destroy not required for quest finish quest starting item
             bool destroyItem = true;
-            for (int i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; ++i)
-            {
-                if (quest->RequiredItemId[i] == item->GetEntry() && item->GetTemplate()->MaxCount > 0)
-                {
+            for (auto const &questObjective : quest->m_questObjectives)
+                if (questObjective->ObjectId == item->GetEntry() && item->GetTemplate()->MaxCount > 0)
                     destroyItem = false;
-                    break;
-                }
-            }
 
             if (destroyItem)
                 DestroyItem(item->GetBagSlot(), item->GetSlot(), true);
@@ -16818,32 +16822,34 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
 
     uint32 quest_id = quest->GetQuestId();
 
-    for (uint8 i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; ++i)
-        if (quest->RequiredItemId[i])
-            DestroyItemCount(quest->RequiredItemId[i], quest->RequiredItemCount[i], true);
-
-    for (uint8 i = 0; i < QUEST_SOURCE_ITEM_IDS_COUNT; ++i)
+    for (auto const &questObjective : quest->m_questObjectives)
     {
-        if (quest->RequiredSourceItemId[i])
+        switch (questObjective->Type)
         {
-            uint32 count = quest->RequiredSourceItemCount[i];
-            DestroyItemCount(quest->RequiredSourceItemId[i], count ? count : 9999, true);
-        }
-    }
-
-    for (uint8 i = 0; i < QUEST_REQUIRED_CURRENCY_COUNT; ++i)
-    {
-        if (int32 reqCurrencyId = quest->RequiredCurrencyId[i])
-        {
-            CurrencyTypesEntry const* reqCurrency = sCurrencyTypesStore.LookupEntry(reqCurrencyId);
-            if (int32 reqCountCurrency = quest->RequiredCurrencyCount[i])
+            case QUEST_OBJECTIVE_TYPE_ITEM:
             {
-                if (reqCurrency->Flags & CURRENCY_FLAG_HIGH_PRECISION)
-                    reqCountCurrency *= 100;
-                ModifyCurrency(reqCurrencyId, -reqCountCurrency);
+                DestroyItemCount(questObjective->ObjectId, questObjective->Amount, true);
+                break;
             }
+            case QUEST_OBJECTIVE_TYPE_CURRENCY:
+            {
+                int32 reqCountCurrency = questObjective->Amount;
+                if (sCurrencyTypesStore.LookupEntry(questObjective->ObjectId)->Flags & CURRENCY_FLAG_HIGH_PRECISION)
+                    reqCountCurrency *= 100;
+
+                ModifyCurrency(questObjective->ObjectId, -reqCountCurrency);
+                break;
+            }
+            case QUEST_OBJECTIVE_TYPE_MONEY:
+            {
+                ModifyMoney(-int64(questObjective->Amount));
+                break;
+            }
+            default:
+                break;
         }
     }
+
     RemoveTimedQuest(quest_id);
 
     {
@@ -17539,8 +17545,8 @@ bool Player::TakeQuestSourceItem(uint32 questId, bool msg)
             }
 
             bool destroyItem = true;
-            for (uint8 n = 0; n < QUEST_ITEM_OBJECTIVES_COUNT; ++n)
-                if (item->StartQuest == questId && srcItemId == quest->RequiredItemId[n])
+            for (auto const &questObjective : quest->m_questObjectives)
+                if (item->StartQuest == questId && srcItemId == questObjective->ObjectId)
                     destroyItem = false;
 
             if (destroyItem)
@@ -17703,18 +17709,15 @@ uint16 Player::GetReqKillOrCastCurrentCount(uint32 quest_id, int32 entry)
 
 void Player::AdjustQuestReqItemCount(Quest const* quest, QuestStatusData& questStatusData)
 {
-    if (quest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_DELIVER))
-    {
-        for (uint8 i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; ++i)
-        {
-            uint32 reqitemcount = quest->RequiredItemCount[i];
-            if (reqitemcount != 0)
-            {
-                uint32 curitemcount = GetItemCount(quest->RequiredItemId[i], true);
+    if (!quest->GetQuestObjectiveCountType(QUEST_OBJECTIVE_TYPE_ITEM))
+        return;
 
-                questStatusData.ItemCount[i] = std::min(curitemcount, reqitemcount);
-                m_QuestStatusSave[quest->GetQuestId()] = true;
-            }
+    for (auto const &questObjective : quest->m_questObjectives)
+    {
+        if (questObjective->Type == QUEST_OBJECTIVE_TYPE_ITEM)
+        {
+            m_questObjectiveStatus[questObjective->Id] = std::min(GetItemCount(questObjective->ObjectId, true), uint32(questObjective->Amount));
+            m_QuestStatusSave[quest->GetQuestId()] = true;
         }
     }
 }
@@ -17776,38 +17779,34 @@ void Player::ItemRemovedQuestCheck(uint32 entry, uint32 count)
 {
     for (uint8 i = 0; i < MAX_QUEST_LOG_SIZE; ++i)
     {
-        uint32 questid = GetQuestSlotQuestId(i);
-        if (!questid)
-            continue;
-        Quest const* qInfo = sObjectMgr->GetQuestTemplate(questid);
-        if (!qInfo)
-            continue;
-        if (!qInfo->HasSpecialFlag(QUEST_SPECIAL_FLAGS_DELIVER))
+        uint32 questId = GetQuestSlotQuestId(i);
+        if (!questId)
             continue;
 
-        for (uint8 j = 0; j < QUEST_ITEM_OBJECTIVES_COUNT; ++j)
+        Quest const* quest = sObjectMgr->GetQuestTemplate(questId);
+        if (!quest)
+            continue;
+
+        if (!quest->GetQuestObjectiveCountType(QUEST_OBJECTIVE_TYPE_ITEM))
+            continue;
+
+        QuestStatusData& questStatus = m_QuestStatus[questId];
+        for (auto const &questObjective : quest->m_questObjectives)
         {
-            uint32 reqitem = qInfo->RequiredItemId[j];
-            if (reqitem == entry)
+            if (questObjective->Type != QUEST_OBJECTIVE_TYPE_ITEM && questObjective->ObjectId != entry)
+                continue;
+
+            uint32 curCount = questStatus.Status != QUEST_STATUS_COMPLETE ? GetQuestObjectiveCounter(questObjective->Id) : GetItemCount(entry, true);
+            uint32 reqCount = uint32(questObjective->Amount);
+
+            if (curCount < reqCount)
             {
-                QuestStatusData& q_status = m_QuestStatus[questid];
+                uint16 remainingItems = curCount <= reqCount ? count : count + reqCount - curCount;
 
-                uint32 reqitemcount = qInfo->RequiredItemCount[j];
-                uint16 curitemcount;
-                if (q_status.Status != QUEST_STATUS_COMPLETE)
-                    curitemcount = q_status.ItemCount[j];
-                else
-                    curitemcount = GetItemCount(entry, true);
-                if (curitemcount < reqitemcount + count)
-                {
-                    uint16 remitemcount = curitemcount <= reqitemcount ? count : count + reqitemcount - curitemcount;
-                    q_status.ItemCount[j] = (curitemcount <= remitemcount) ? 0 : curitemcount - remitemcount;
+                m_questObjectiveStatus[questObjective->Id] = (curCount <= remainingItems) ? 0 : curCount - remainingItems;
+                m_QuestStatusSave[questId] = true;
 
-                    m_QuestStatusSave[questid] = true;
-
-                    IncompleteQuest(questid);
-                }
-                return;
+                IncompleteQuest(questId);
             }
         }
     }
@@ -18077,11 +18076,14 @@ bool Player::HasQuestForItem(uint32 itemid) const
 
             // There should be no mixed ReqItem/ReqSource drop
             // This part for ReqItem drop
-            for (uint8 j = 0; j < QUEST_ITEM_OBJECTIVES_COUNT; ++j)
-            {
-                if (itemid == qinfo->RequiredItemId[j] && q_status.ItemCount[j] < qinfo->RequiredItemCount[j])
-                    return true;
-            }
+            if (!qinfo->GetQuestObjectiveCountType(QUEST_OBJECTIVE_TYPE_ITEM))
+                continue;
+
+            for (auto const &questObjective : qinfo->m_questObjectives)
+                if (questObjective->Type == QUEST_OBJECTIVE_TYPE_ITEM)
+                    if (itemid == questObjective->ObjectId && GetQuestObjectiveCounter(questObjective->Id) < uint32(questObjective->Amount))
+                        return true;
+
             // This part - for ReqSource
             for (uint8 j = 0; j < QUEST_SOURCE_ITEM_IDS_COUNT; ++j)
             {

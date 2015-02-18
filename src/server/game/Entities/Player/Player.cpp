@@ -18052,6 +18052,9 @@ void Player::QuestObjectiveSatisfy(uint32 objectId, uint8 type, uint32 amount, u
                 uint32 reqCount = uint32(questObjective->Amount);
                 uint32 addCount = curCount + amount > reqCount ? reqCount - curCount : amount;
 
+                if (!addCount)
+                    continue;
+
                 m_questObjectiveStatus[questObjective->Id] += addCount;
                 m_QuestStatusSave[questId] = true;
 

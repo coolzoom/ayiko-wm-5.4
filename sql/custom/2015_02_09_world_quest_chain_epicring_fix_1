@@ -1,5 +1,6 @@
 /* Quest-Dread Wastes - The Wrath of Shek'zeer */
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
+DELETE FROM `creature` WHERE `id` IN (66783,66788,66789,66790);
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `dynamicflags`) VALUES
 (@GUID + 1, 66783, 870, 1, 65535, 0, 0, 184.677, 3750.62, 244.197, 2.08218, 300, 0, 0, 5909115, 0, 0, 0, 0, 0, 0),
 (@GUID + 2, 66788, 870, 1, 65535, 0, 0, 446.372, 3811.84, 218.686, 5.46504, 90, 0, 0, 393941, 0, 0, 0, 0, 0, 0),
@@ -143,6 +144,7 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 UPDATE `gameobject_template` SET `data2` = 6000 WHERE `entry` = 215893;
 
 SET @GUID = (SELECT MAX(guid) FROM `creature`);
+DELETE FROM `creature` WHERE `id` = 70387;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `dynamicflags`) VALUES 
 (@GUID + 1, 70387, 870, 1, 1, 0, 0, 224.331, 3125.38, 213.933, 3.0778, 300, 0, 0, 393941, 0, 0, 0, 0, 0, 0);
 UPDATE `creature_template` SET `npcflag` = 1, `AIName` = 'SmartAI' WHERE `entry` = 70387;

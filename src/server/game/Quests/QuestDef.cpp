@@ -110,8 +110,6 @@ Quest::Quest(Field* questRecord)
     for (int i = 0; i < QUEST_SOURCE_ITEM_IDS_COUNT; ++i)
         RequiredSourceItemCount[i] = questRecord[index++].GetUInt16();
 
-    RequiredSpell           = questRecord[index++].GetUInt32();
-
     for (int i = 0; i < QUEST_REWARD_CURRENCY_COUNT; ++i)
         RewardCurrencyId[i] = questRecord[index++].GetUInt16();
 

@@ -4023,24 +4023,6 @@ void ObjectMgr::LoadQuests()
             }
         }
 
-        if (qinfo->RequiredSpell > 0)
-        {
-            SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(qinfo->RequiredSpell);
-
-            if (!spellInfo)
-            {
-                TC_LOG_ERROR("sql.sql", "Quest %u has `RequiredSpell` = %u but spell %u does not exist, quest will not require a spell.",
-                    qinfo->GetQuestId(), qinfo->RequiredSpell, qinfo->RequiredSpell);
-                qinfo->RequiredSpell = 0;                      // No spell will be required
-            }
-            else if (!sSpellMgr->IsSpellValid(spellInfo))
-            {
-                TC_LOG_ERROR("sql.sql", "Quest %u has `RequiredSpell` = %u but spell %u is broken, quest will not require a spell.",
-                    qinfo->GetQuestId(), qinfo->RequiredSpell, qinfo->RequiredSpell);
-                qinfo->RequiredSpell = 0;                      // No spell will be required
-            }
-        }
-
         if (qinfo->RewardSkillId)
         {
             if (!sSkillLineStore.LookupEntry(qinfo->RewardSkillId))

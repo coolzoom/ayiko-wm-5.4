@@ -319,7 +319,6 @@ class Quest
         float  GetPointX() const { return PointX; }
         float  GetPointY() const { return PointY; }
         uint32 GetPointOpt() const { return PointOption; }
-        uint32 GetRequiredSpell() const { return RequiredSpell; }
         uint32 GetSoundAccept() const { return SoundAccept; }
         uint32 GetSoundTurnIn() const { return SoundTurnIn; }
         uint32 GetIncompleteEmote() const { return EmoteOnIncomplete; }
@@ -455,7 +454,6 @@ class Quest
         uint32 RewardReputationMask;
         uint32 QuestGiverPortrait;
         uint32 QuestTurnInPortrait;
-        uint32 RequiredSpell;
         std::string QuestGiverTextWindow;
         std::string QuestGiverTargetName;
         std::string QuestTurnTextWindow;

@@ -71,3 +71,13 @@ DELETE FROM `creature_template_aura` WHERE `entry` = 62814 AND `aura` = 96733;
 /* Krol the Blade spawntime offylike-arrangement */
 DELETE FROM `creature` WHERE (`guid`=628177);
 UPDATE `creature` SET `spawntimesecs` = 14400 WHERE `guid` = 624715;
+
+/* Wrong Model_ID */
+UPDATE `creature_template` SET `modelid1` = 47698, `modelid2` = 0 WHERE `entry` = 69593;
+
+/* Wrong Respawntime - Wrong Spawn */
+DELETE FROM `creature` WHERE `guid`=991877;
+UPDATE `creature` SET `spawntimesecs` = 600 WHERE `id` IN (57389,60546,62522,62559,62844,63684,63685,63686,63693,63694,69946);
+UPDATE `creature` SET `spawntimesecs` = 43200 WHERE `id` IN (35189,50051,54318,54319,54320);
+UPDATE `creature` SET `spawntimesecs` = 36000 WHERE `id` = 38453;
+UPDATE `creature` SET `spawntimesecs` = 21600 WHERE `id` = 50138;

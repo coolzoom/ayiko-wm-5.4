@@ -742,7 +742,7 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* quest) const
     data << uint32(quest->GetSuggestedPlayers());
     data << uint32(quest->GetPointMapId());
     data << uint32(quest->GetRewMoneyMaxLevel());
-    data << uint32(quest->GetPlayersSlain());
+    data << uint32(0);
     data << uint32(0);                                              // 2961
     data << uint32(rewChoiceItemDisplayId[5]);
     data << uint32(quest->GetZoneOrSort());

@@ -17314,12 +17314,17 @@ bool Player::SatisfyQuestReputation(Quest const* qInfo, bool msg)
 
     // ReputationObjective2 does not seem to be an objective requirement but a requirement
     // to be able to accept the quest
-    uint32 fIdObj = qInfo->GetRepObjectiveFaction2();
-    if (fIdObj && GetReputationMgr().GetReputation(fIdObj) >= qInfo->GetRepObjectiveValue2())
+    if (!qInfo->GetQuestObjectiveCountType(QUEST_OBJECTIVE_TYPE_FACTION_REP2))
+        return true;
+
+    for (auto const &questObjective : qInfo->m_questObjectives)
     {
-        if (msg)
-            SendCanTakeQuestResponse(INVALIDREASON_DONT_HAVE_REQ);
-        return false;
+        if (questObjective->Type == QUEST_OBJECTIVE_TYPE_FACTION_REP2 && GetReputationMgr().GetReputation(questObjective->ObjectId) >= questObjective->Amount)
+        {
+            if (msg)
+                SendCanTakeQuestResponse(INVALIDREASON_DONT_HAVE_REQ);
+            return false;
+        }
     }
 
     return true;
@@ -19834,16 +19839,6 @@ void Player::_LoadQuestStatus(PreparedQueryResult result)
                 else
                     quest_time = 0;
 
-                questStatusData.CreatureOrGOCount[0] = fields[4].GetUInt16();
-                questStatusData.CreatureOrGOCount[1] = fields[5].GetUInt16();
-                questStatusData.CreatureOrGOCount[2] = fields[6].GetUInt16();
-                questStatusData.CreatureOrGOCount[3] = fields[7].GetUInt16();
-                questStatusData.ItemCount[0] = fields[8].GetUInt16();
-                questStatusData.ItemCount[1] = fields[9].GetUInt16();
-                questStatusData.ItemCount[2] = fields[10].GetUInt16();
-                questStatusData.ItemCount[3] = fields[11].GetUInt16();
-                questStatusData.PlayerCount = fields[12].GetUInt16();
-
                 // add to quest log
                 if (slot < MAX_QUEST_LOG_SIZE && questStatusData.Status != QUEST_STATUS_NONE)
                 {
@@ -21260,13 +21255,6 @@ void Player::_SaveQuestStatus(SQLTransaction& trans)
                 stmt->setBool(index++, statusItr->second.Explored);
                 stmt->setUInt32(index++, uint32(statusItr->second.Timer / IN_MILLISECONDS+ sWorld->GetGameTime()));
 
-                for (uint8 i = 0; i < 4; i++)
-                    stmt->setUInt16(index++, statusItr->second.CreatureOrGOCount[i]);
-
-                for (uint8 i = 0; i < 4; i++)
-                    stmt->setUInt16(index++, statusItr->second.ItemCount[i]);
-
-                stmt->setUInt16(index, statusItr->second.PlayerCount);
                 trans->Append(stmt);
             }
         }

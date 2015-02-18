@@ -1296,7 +1296,7 @@ void GameObject::Use(Unit* user)
                 if (Battleground* bg = player->GetBattleground())
                     bg->EventPlayerUsedGO(player, this);
 
-                player->QuestObjectiveSatisfy(info->entry, 1, QUEST_OBJECTIVE_TYPE_GO, GetGUID());
+                player->QuestObjectiveSatisfy(info->entry, QUEST_OBJECTIVE_TYPE_GO, 1, GetGUID());
 
                 GetMap()->ScriptsStart(sGameObjectScripts, GetDBTableGUIDLow(), player, this);
             }

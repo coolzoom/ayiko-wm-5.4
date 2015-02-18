@@ -559,7 +559,7 @@ void KillRewarder::_RewardPlayer(Player* player, bool isDungeon)
         _RewardHonor(player);
         // 4.1.1 Send player killcredit for quests with PlayerSlain
         if (_victim->GetTypeId() == TYPEID_PLAYER)
-            player->QuestObjectiveSatisfy(0, 1, QUEST_OBJECTIVE_TYPE_PLAYER, _victim->GetGUID(), true, false);
+            player->QuestObjectiveSatisfy(0, QUEST_OBJECTIVE_TYPE_PLAYER, 1, 0, true, false);
     }
 
     if (auto const creature = _victim->ToCreature())
@@ -16728,7 +16728,7 @@ void Player::FullfillQuestRequirements(Quest const *quest)
             case QUEST_OBJECTIVE_TYPE_NPC:
             {
                 for (uint32 i = 0; i < objectiveAmount; i++)
-                    QuestObjectiveSatisfy(questObjective->ObjectId, 1, QUEST_OBJECTIVE_TYPE_NPC, 0);
+                    QuestObjectiveSatisfy(questObjective->ObjectId, QUEST_OBJECTIVE_TYPE_NPC, 1, 0);
                 break;
             }
             case QUEST_OBJECTIVE_TYPE_ITEM:
@@ -16749,7 +16749,7 @@ void Player::FullfillQuestRequirements(Quest const *quest)
             case QUEST_OBJECTIVE_TYPE_GO:
             {
                 for (uint32 i = 0; i < objectiveAmount; i++)
-                    QuestObjectiveSatisfy(questObjective->ObjectId, 1, QUEST_OBJECTIVE_TYPE_GO, 0);
+                    QuestObjectiveSatisfy(questObjective->ObjectId, QUEST_OBJECTIVE_TYPE_GO, 1);
                 break;
             }
             case QUEST_OBJECTIVE_TYPE_CURRENCY:
@@ -17782,7 +17782,7 @@ void Player::GroupEventHappens(uint32 questId, WorldObject const* pEventObject)
 
 void Player::ItemAddedQuestCheck(uint32 entry, uint32 count)
 {
-    QuestObjectiveSatisfy(entry, count, QUEST_OBJECTIVE_TYPE_ITEM);
+    QuestObjectiveSatisfy(entry, QUEST_OBJECTIVE_TYPE_ITEM, count);
     UpdateForQuestWorldObjects();
 }
 
@@ -17846,7 +17846,7 @@ void Player::KilledMonsterCredit(uint32 entry, uint64 guid)
     GetAchievementMgr().StartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_CREATURE, entry);   // MUST BE CALLED FIRST
     UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, entry, 1, 0, guid ? GetMap()->GetCreature(guid) : NULL);
 
-    QuestObjectiveSatisfy(entry, 1, QUEST_OBJECTIVE_TYPE_NPC, 0, true);
+    QuestObjectiveSatisfy(entry, QUEST_OBJECTIVE_TYPE_NPC, 1, 0, true);
 }
 
 void Player::CastedCreatureOrGO(uint32 entry, uint64 guid, uint32 spell_id)
@@ -17930,7 +17930,7 @@ void Player::CastedCreatureOrGO(uint32 entry, uint64 guid, uint32 spell_id)
 
 void Player::TalkedToCreature(uint32 entry, uint64 guid)
 {
-    QuestObjectiveSatisfy(entry, 1, QUEST_OBJECTIVE_TYPE_NPC, guid);
+    QuestObjectiveSatisfy(entry, QUEST_OBJECTIVE_TYPE_NPC, 1, guid);
 }
 
 void Player::MoneyChanged(uint64 count)
@@ -18006,7 +18006,16 @@ void Player::ReputationChanged(FactionEntry const* factionEntry)
     }
 }
 
-void Player::QuestObjectiveSatisfy(uint32 objectId, uint32 amount, uint8 type, uint64 guid, bool groupCheck, bool objectIdCheck)
+void Player::QuestObjectiveSatisfy(uint32 objectiveId, uint32 amount)
+{
+    QuestObjective const* questObjective = sObjectMgr->GetQuestObjective(objectiveId);
+    if (!questObjective)
+        return;
+
+    QuestObjectiveSatisfy(questObjective->ObjectId, questObjective->Type, amount);
+}
+
+void Player::QuestObjectiveSatisfy(uint32 objectId, uint8 type, uint32 amount, uint64 guid, bool groupCheck, bool objectIdCheck)
 {
     for (uint8 i = 0; i < MAX_QUEST_LOG_SIZE; i++)
     {

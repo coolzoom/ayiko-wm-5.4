@@ -1554,7 +1554,6 @@ class Player final : public Unit, public GridObject<Player>
         bool HasQuestForGO(int32 GOId) const;
         void UpdateForQuestWorldObjects();
         bool CanShareQuest(uint32 quest_id) const;
-        void QuestObjectiveSatisfy(uint32 objectId, uint32 amount, uint8 type = 0u, uint64 guid = 0u, bool groupCheck = false, bool objectIdCheck = true);
 
         void SendQuestComplete(Quest const* quest);
         void SendQuestReward(Quest const* quest, uint32 XP, Object* questGiver);
@@ -2754,6 +2753,10 @@ class Player final : public Unit, public GridObject<Player>
         bool HasSpellCharge(uint32 spellId, SpellCategoryEntry const &category) const;
 
         void SendCUFProfiles();
+
+        // Quest Objectives
+        void QuestObjectiveSatisfy(uint32 objectiveId, uint32 amount);
+        void QuestObjectiveSatisfy(uint32 objectId, uint8 type, uint32 amount, uint64 guid = 0, bool groupCheck = false, bool objectIdCheck = true);
 
         uint32 GetQuestObjectiveCounter(uint32 objectiveId) const;
 

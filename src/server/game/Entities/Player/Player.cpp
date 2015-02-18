@@ -17679,14 +17679,18 @@ void Player::SetQuestStatus(uint32 questId, QuestStatus newStatus)
     UpdateForQuestWorldObjects();
 }
 
-void Player::RemoveActiveQuest(uint32 quest_id)
+void Player::RemoveActiveQuest(uint32 questId)
 {
-    QuestStatusMap::iterator itr = m_QuestStatus.find(quest_id);
+    QuestStatusMap::iterator itr = m_QuestStatus.find(questId);
     if (itr == m_QuestStatus.end())
         return;
 
+    if (Quest const* quest = sObjectMgr->GetQuestTemplate(questId))
+        for (auto const &questObjective : quest->m_questObjectives)
+            m_questObjectiveStatus.erase(questObjective->Id);
+
     m_QuestStatus.erase(itr);
-    m_QuestStatusSave[quest_id] = false;
+    m_QuestStatusSave[questId] = false;
 }
 
 void Player::RemoveRewardedQuest(uint32 quest_id)

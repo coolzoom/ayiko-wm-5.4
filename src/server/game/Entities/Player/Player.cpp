@@ -16679,7 +16679,8 @@ void Player::AddQuest(Quest const* quest, Object* questGiver)
             continue;
 
         // other types are tracked and stored
-        m_questObjectiveStatus.insert(std::make_pair(questObjective->Id, uint32(0)));
+        m_questObjectiveStatus.insert(std::make_pair(questObjective->Id, 0));
+        m_questObjectiveStatusSave.insert(std::make_pair(questObjective->Id, true));
     }
 
     GiveQuestSourceItem(quest);
@@ -17012,6 +17013,7 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
     // (to prevent rewarding this quest another time while rewards were already given out)
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
     _SaveQuestStatus(trans);
+    _SaveQuestObjectiveStatus(trans);
     SaveInventoryAndGoldToDB(trans);
     CharacterDatabase.CommitTransaction(trans);
 
@@ -17687,7 +17689,7 @@ void Player::RemoveActiveQuest(uint32 questId)
 
     if (Quest const* quest = sObjectMgr->GetQuestTemplate(questId))
         for (auto const &questObjective : quest->m_questObjectives)
-            m_questObjectiveStatus.erase(questObjective->Id);
+            m_questObjectiveStatusSave[questObjective->Id] = false;
 
     m_QuestStatus.erase(itr);
     m_QuestStatusSave[questId] = false;
@@ -18056,6 +18058,8 @@ void Player::QuestObjectiveSatisfy(uint32 objectId, uint8 type, uint32 amount, u
                     continue;
 
                 m_questObjectiveStatus[questObjective->Id] += addCount;
+
+                m_questObjectiveStatusSave[questObjective->Id] = true;
                 m_QuestStatusSave[questId] = true;
 
                 if (type == QUEST_OBJECTIVE_TYPE_PLAYER)
@@ -21283,6 +21287,8 @@ void Player::_SaveQuestStatus(SQLTransaction& trans)
         }
     }
 
+    m_QuestStatusSave.clear();
+
     for (saveItr = m_RewardedQuestsSave.begin(); saveItr != m_RewardedQuestsSave.end(); ++saveItr)
     {
         if (saveItr->second)
@@ -21307,35 +21313,28 @@ void Player::_SaveQuestStatus(SQLTransaction& trans)
 
 void Player::_SaveQuestObjectiveStatus(SQLTransaction& trans)
 {
-    for (auto const &objectiveStatus : m_questObjectiveStatus)
+    for (auto const &objectiveSaveStatus : m_questObjectiveStatusSave)
     {
-        QuestObjective const* questObjective = sObjectMgr->GetQuestObjective(objectiveStatus.first);
-        if (!questObjective)
-            continue;
-
-        QuestStatusSaveMap::const_iterator questSave = m_QuestStatusSave.find(questObjective->ParentQuest);
-        if (questSave == m_QuestStatusSave.end())
-            continue;
-
-        if (questSave->second)
+        if (objectiveSaveStatus.second)
         {
             PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_CHAR_QUESTSTATUS_OBJECTIVE);
             stmt->setUInt32(0, GetGUIDLow());
-            stmt->setUInt32(1, objectiveStatus.first);
-            stmt->setUInt32(2, objectiveStatus.second);
+            stmt->setUInt32(1, objectiveSaveStatus.first);
+            stmt->setUInt32(2, GetQuestObjectiveCounter(objectiveSaveStatus.first));
             trans->Append(stmt);
         }
         else
         {
             PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_QUESTSTATUS_OBJECTIVE);
             stmt->setUInt32(0, GetGUIDLow());
-            stmt->setUInt32(1, objectiveStatus.first);
+            stmt->setUInt32(1, objectiveSaveStatus.first);
             trans->Append(stmt);
+
+            m_questObjectiveStatus.erase(objectiveSaveStatus.first);
         }
     }
 
-    m_questObjectiveStatus.clear();
-    m_QuestStatus.clear();
+    m_questObjectiveStatusSave.clear();
 }
 
 void Player::_SaveDailyQuestStatus(SQLTransaction& trans)

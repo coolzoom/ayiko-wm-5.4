@@ -471,11 +471,12 @@ public:
 
 enum utils
 {
-    NPC_HEMET   = 27986,
-    NPC_HADRIUS = 28047,
-    NPC_TAMARA  = 28568,
-    SPELL_OFFER = 51962,
-    QUEST_ENTRY = 12645,
+    NPC_HEMET                  = 27986,
+    NPC_HADRIUS                = 28047,
+    NPC_TAMARA                 = 28568,
+    SPELL_OFFER                = 51962,
+    QUEST_ENTRY                = 12645,
+    QUEST_OBJECTIVE_TASTE_TEST = 264615
 };
 
 class npc_jungle_punch_target : public CreatureScript
@@ -552,7 +553,8 @@ public:
             if (!proto || proto->Id != SPELL_OFFER)
                 return;
 
-            if (!caster->ToPlayer())
+            Player* player = caster->ToPlayer();
+            if (!player)
                 return;
 
             QuestStatusMap::const_iterator itr = caster->ToPlayer()->getQuestStatusMap().find(QUEST_ENTRY);
@@ -580,11 +582,11 @@ public:
                            break;
                 }
 
-                if (itr->second.CreatureOrGOCount[i] != 0)
+                if (player->GetQuestObjectiveCounter(QUEST_OBJECTIVE_TASTE_TEST + i))
                     continue;
 
-                caster->ToPlayer()->KilledMonsterCredit(me->GetEntry(), 0);
-                caster->ToPlayer()->Say(SAY_OFFER, LANG_UNIVERSAL);
+                player->QuestObjectiveSatisfy(QUEST_OBJECTIVE_TASTE_TEST + i, 1);
+                player->Say(SAY_OFFER, LANG_UNIVERSAL);
                 sayStep = 0;
                 break;
             }

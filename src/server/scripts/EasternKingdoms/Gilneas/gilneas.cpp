@@ -7061,16 +7061,17 @@ class go_qnhnb_well final : public GameObjectScript
         {
             enum
             {
-                DRUID_TEXT_ID       = 1,
-                SPELL_TALDOREN_WELL = 71200,
-                NPC_TRIGGER         = 35374,
+                DRUID_TEXT_ID                    = 1,
+                SPELL_TALDOREN_WELL              = 71200,
+                NPC_TRIGGER                      = 35374,
+                QUEST_OBJECTIVE_USE_WELL_OF_FURY = 266553,
             };
 
             if (player->GetQuestStatus(QUEST_NEITHER_HUMAN_NOR_BEAST) == QUEST_STATUS_INCOMPLETE)
             {
                 QuestStatusMap::iterator itr = player->getQuestStatusMap().find(QUEST_NEITHER_HUMAN_NOR_BEAST);
 
-                if (itr == player->getQuestStatusMap().end() || itr->second.CreatureOrGOCount[_goId] > 0)
+                if (itr == player->getQuestStatusMap().end() || player->GetQuestObjectiveCounter(QUEST_OBJECTIVE_USE_WELL_OF_FURY + _goId) > 0)
                     return true;
 
                 float x, y, z;

@@ -488,10 +488,12 @@ enum AtLoginFlags
 };
 
 typedef std::unordered_map<uint32, QuestStatusData> QuestStatusMap;
+typedef std::map<uint32, uint32> QuestObjectiveStatusMap;
 typedef std::set<uint32> RewardedQuestSet;
 
 //               quest,  keep
 typedef std::unordered_map<uint32, bool> QuestStatusSaveMap;
+typedef std::unordered_map<uint32, bool> QuestObjectiveStatusSaveMap;
 
 enum QuestSlotOffsets
 {
@@ -776,6 +778,7 @@ enum CharLoginQueryIndex
     CHAR_LOGIN_QUERY_LOAD_KNOWN_TITLES,
     CHAR_LOGIN_QUERY_LOAD_CP_WEEK_CAP,
     CHAR_LOGIN_QUERY_LOAD_RATED_BG_STATS,
+    CHAR_LOGIN_QUERY_LOAD_QUEST_OBJECTIVE_STATUS,
 
     MAX_CHAR_LOGIN_QUERY
 };
@@ -1466,7 +1469,7 @@ class Player final : public Unit, public GridObject<Player>
         void AddQuest(Quest const* quest, Object* questGiver);
         void AddQuestAndCheckCompletion(Quest const* quest, Object* questGiver);
         void FullfillQuestRequirements(Quest const *quest);
-        void CompleteQuest(uint32 quest_id);
+        void CompleteQuest(uint32 quest_id, bool msg = true);
         void IncompleteQuest(uint32 quest_id);
         void RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, bool announce = true);
         void FailQuest(uint32 quest_id);
@@ -1544,13 +1547,10 @@ class Player final : public Unit, public GridObject<Player>
         void ItemRemovedQuestCheck(uint32 entry, uint32 count);
         void KilledMonster(CreatureTemplate const* cInfo, uint64 guid);
         void KilledMonsterCredit(uint32 entry, uint64 guid = 0);
-        void KilledPlayerCredit();
         void CastedCreatureOrGO(uint32 entry, uint64 guid, uint32 spell_id);
-        void CastedCreatureOrGOForQuest(uint32 entry, bool isCreature, uint32 spell_id);
         void TalkedToCreature(uint32 entry, uint64 guid);
         void MoneyChanged(uint64 value);
         void ReputationChanged(FactionEntry const* factionEntry);
-        void ReputationChanged2(FactionEntry const* factionEntry);
         bool HasQuestForItem(uint32 itemid) const;
         bool HasQuestForGO(int32 GOId) const;
         void UpdateForQuestWorldObjects();
@@ -1563,8 +1563,8 @@ class Player final : public Unit, public GridObject<Player>
         void SendCanTakeQuestResponse(uint32 msg) const;
         void SendQuestConfirmAccept(Quest const* quest, Player* pReceiver);
         void SendPushToPartyResponse(Player const *player, uint32 msg);
-        void SendQuestUpdateAddCreatureOrGo(Quest const* quest, uint64 guid, uint32 creatureOrGO_idx, uint16 old_count, uint16 add_count);
-        void SendQuestUpdateAddPlayer(Quest const* quest, uint16 old_count, uint16 add_count);
+        void SendQuestUpdateAddCredit(Quest const* quest, QuestObjective const* objective, ObjectGuid guid, uint16 oldCount, uint16 addCount);
+        void SendQuestUpdateAddPlayer(Quest const* quest, QuestObjective const* objective, uint16 oldCount, uint16 addCount);
 
         uint64 GetDivider() { return m_divider; }
         void SetDivider(uint64 guid) { m_divider = guid; }
@@ -2755,6 +2755,11 @@ class Player final : public Unit, public GridObject<Player>
 
         void SendCUFProfiles();
 
+        // Quest Objectives
+        void QuestObjectiveSatisfy(uint32 objectiveId, uint32 amount);
+        void QuestObjectiveSatisfy(uint32 objectId, uint8 type, uint32 amount, uint64 guid = 0, bool groupCheck = false, bool objectIdCheck = true);
+
+        uint32 GetQuestObjectiveCounter(uint32 objectiveId) const;
 
         /*********************************************************/
         /***              BATTLE PET SYSTEM                    ***/
@@ -2859,6 +2864,7 @@ class Player final : public Unit, public GridObject<Player>
         void _LoadMail();
         void _LoadMailedItems(Mail* mail);
         void _LoadQuestStatus(PreparedQueryResult result);
+        void _LoadQuestObjectiveStatus(PreparedQueryResult result);
         void _LoadQuestStatusRewarded(PreparedQueryResult result);
         void _LoadDailyQuestStatus(PreparedQueryResult result);
         void _LoadWeeklyQuestStatus(PreparedQueryResult result);
@@ -2891,6 +2897,7 @@ class Player final : public Unit, public GridObject<Player>
         void _SaveVoidStorage(SQLTransaction& trans);
         void _SaveMail(SQLTransaction& trans);
         void _SaveQuestStatus(SQLTransaction& trans);
+        void _SaveQuestObjectiveStatus(SQLTransaction& trans);
         void _SaveDailyQuestStatus(SQLTransaction& trans);
         void _SaveWeeklyQuestStatus(SQLTransaction& trans);
         void _SaveMonthlyQuestStatus(SQLTransaction& trans);
@@ -2978,7 +2985,9 @@ class Player final : public Unit, public GridObject<Player>
         int8 m_comboPoints;
 
         QuestStatusMap m_QuestStatus;
+        QuestObjectiveStatusMap m_questObjectiveStatus;
         QuestStatusSaveMap m_QuestStatusSave;
+        QuestObjectiveStatusSaveMap m_questObjectiveStatusSave;
 
         RewardedQuestSet m_RewardedQuests;
         QuestStatusSaveMap m_RewardedQuestsSave;

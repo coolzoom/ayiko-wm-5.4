@@ -267,7 +267,7 @@ public:
 enum homelessStormwindCitizen
 {
     QUEST_MURDER_WAS_THE_CASE_THAT_THEY_GAVE_ME  = 26209,
-    QUEST_CREDIT_ENTRY                      = 42414,
+    QUEST_OBJECTIVE_CLUE_OBTAINED                = 265754,
 };
 
 class npc_homeless_stormwind_citizen : public CreatureScript
@@ -342,12 +342,12 @@ public:
 
                     for (uint32 i = 0; i < 4; ++i)
                     {
-                        if (itr->second.CreatureOrGOCount[i] == 0)
+                        if (player->GetQuestObjectiveCounter(QUEST_OBJECTIVE_CLUE_OBTAINED + i) == 0)
                         {
                             creature->AI()->Talk(i);
                             creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                             creature->ForcedDespawn(10000);
-                            player->KilledMonsterCredit(QUEST_CREDIT_ENTRY + i);
+                            player->QuestObjectiveSatisfy(QUEST_OBJECTIVE_CLUE_OBTAINED + i, 1);
                             break;
                         }
                     }

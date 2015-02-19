@@ -307,7 +307,7 @@ class Quest
         std::string GetQuestGiverTargetName() const { return QuestGiverTargetName; }
         std::string GetQuestTurnTextWindow() const { return QuestTurnTextWindow; }
         std::string GetQuestTurnTargetName() const { return QuestTurnTargetName; }
-        int32  GetRewOrReqMoney() const;
+        uint32 GetRewardMoney() const;
         uint32 GetRewHonorAddition() const { return RewardHonor; }
         float  GetRewHonorMultiplier() const { return RewardHonorMultiplier; }
         uint32 GetRewMoneyMaxLevel() const { return RewardMoneyMaxLevel; } // use in XP calculation at client
@@ -433,7 +433,7 @@ class Quest
         std::string CompletedText;
         uint32 RewardHonor;
         float  RewardHonorMultiplier;
-        int32  RewardOrRequiredMoney;
+        uint32 RewardMoney;
         uint32 RewardMoneyMaxLevel;
         uint32 RewardSpell;
         int32  RewardSpellCast;

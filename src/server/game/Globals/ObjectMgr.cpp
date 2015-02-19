@@ -3503,8 +3503,8 @@ void ObjectMgr::LoadQuests()
     QueryResult result = WorldDatabase.Query("SELECT "
         //0     1      2        3        4           5       6            7             8           9              10              11             12                 13
         "Id, Method, Level, MinLevel, MaxLevel, ZoneOrSort, Type, SuggestedPlayers, LimitTime, RequiredTeam, RequiredClasses, RequiredRaces, RequiredSkillId, RequiredSkillPoints, "
-        //         14                    15                    16                   17               18            19            20               21             22               23                     24
-        "RequiredMinRepFaction, RequiredMaxRepFaction, RequiredMinRepValue, RequiredMaxRepValue, PrevQuestId, NextQuestId, ExclusiveGroup, NextQuestIdChain, RewardXPId, RewardOrRequiredMoney, RewardMoneyMaxLevel, "
+        //         14                    15                    16                   17               18            19            20               21             22           23               24
+        "RequiredMinRepFaction, RequiredMaxRepFaction, RequiredMinRepValue, RequiredMaxRepValue, PrevQuestId, NextQuestId, ExclusiveGroup, NextQuestIdChain, RewardXPId, RewardMoney, RewardMoneyMaxLevel, "
         //    25             26             27                28                    29                  20             30             31               32        33         34               35              26             27             28
         "RewardSpell, RewardSpellCast, RewardHonor, RewardHonorMultiplier, RewardMailTemplateId, RewardMailDelay, SourceItemId, SourceItemCount, SourceSpellId, Flags, SpecialFlags, MinimapTargetMark, RewardTitleId, RewardTalents, RewardPackage, "
         //      29            30                    31                    32                  33               34             35              36             37                38                39                40               41

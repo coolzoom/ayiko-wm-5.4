@@ -48,7 +48,7 @@ Quest::Quest(Field* questRecord)
     ExclusiveGroup          = questRecord[index++].GetInt32();
     NextQuestIdChain        = questRecord[index++].GetUInt32();
     RewardXPId              = questRecord[index++].GetUInt8();
-    RewardOrRequiredMoney   = questRecord[index++].GetInt32();
+    RewardMoney             = questRecord[index++].GetUInt32();
     RewardMoneyMaxLevel     = questRecord[index++].GetUInt32();
     RewardSpell             = questRecord[index++].GetUInt32();
     RewardSpellCast         = questRecord[index++].GetInt32();
@@ -196,12 +196,12 @@ uint32 Quest::XPValue(Player* player) const
     return 0;
 }
 
-int32 Quest::GetRewOrReqMoney() const
+uint32 Quest::GetRewardMoney() const
 {
-    if (RewardOrRequiredMoney <= 0)
-        return RewardOrRequiredMoney;
+    if (RewardMoney <= 0)
+        return RewardMoney;
 
-    return int32(RewardOrRequiredMoney * sWorld->getRate(RATE_DROP_MONEY));
+    return int32(RewardMoney * sWorld->getRate(RATE_DROP_MONEY));
 }
 
 bool Quest::IsAutoAccept() const

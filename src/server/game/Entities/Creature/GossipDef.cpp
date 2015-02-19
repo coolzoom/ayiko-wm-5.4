@@ -757,7 +757,7 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* quest) const
     data << uint32(quest->GetRewHonorAddition());
     data << uint32(quest->GetCharTitleId());
     data.WriteString(questGiverTextWindow);
-    data << uint32(quest->GetRewOrReqMoney());
+    data << uint32(quest->GetRewardMoney());
     data << uint32(quest->GetType());
     data.WriteString(questObjectives);
     data << uint32(quest->GetRewSpell());
@@ -875,7 +875,7 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* quest, uint64 npcGUID, b
     data << uint32(quest->GetSuggestedPlayers());
     data << uint32(quest->RewardChoiceItemId[2]);
     data << uint32(quest->RewardChoiceItemId[1]);
-    data << uint32(quest->GetRewOrReqMoney());
+    data << uint32(quest->GetRewardMoney());
     data << uint32(quest->RewardChoiceItemId[0]);
     data << uint32(quest->RewardItemId[0]);
     data << uint32(0);                                      // 80

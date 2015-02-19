@@ -16943,26 +16943,20 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
     for (Unit::AuraEffectList::const_iterator i = ModXPPctAuras.begin(); i != ModXPPctAuras.end(); ++i)
         AddPct(XP, (*i)->GetAmount());
 
-    int32 moneyRew = 0;
+    uint32 moneyRew = 0;
     if (getLevel() < sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
         GiveXP(XP, NULL);
     else
-        moneyRew = int32(quest->GetRewMoneyMaxLevel() * sWorld->getRate(RATE_DROP_MONEY));
+        moneyRew = uint32(quest->GetRewMoneyMaxLevel() * sWorld->getRate(RATE_DROP_MONEY));
 
     if (Guild* guild = sGuildMgr->GetGuildById(GetGuildId()))
         guild->GiveXP(uint32(quest->XPValue(this) * sWorld->getRate(RATE_XP_QUEST) * sWorld->getRate(RATE_XP_GUILD_MODIFIER)), this);
 
-    // Give player extra money if GetRewOrReqMoney > 0 and get ReqMoney if negative
-    if (quest->GetRewOrReqMoney())
-        moneyRew += quest->GetRewOrReqMoney();
+    moneyRew += quest->GetRewardMoney();
+    ModifyMoney(moneyRew);
 
-    if (moneyRew)
-    {
-        ModifyMoney(moneyRew);
-
-        if (moneyRew > 0)
-            UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_MONEY_FROM_QUEST_REWARD, uint32(moneyRew));
-    }
+    if (moneyRew > 0)
+        UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_MONEY_FROM_QUEST_REWARD, moneyRew);
 
     // honor reward
     if (uint32 honor = quest->CalculateHonorGain(getLevel()))
@@ -18161,12 +18155,12 @@ void Player::SendQuestReward(Quest const* quest, uint32 XP, Object* questGiver)
     if (getLevel() < sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
     {
         xp = XP;
-        moneyReward = quest->GetRewOrReqMoney();
+        moneyReward = quest->GetRewardMoney();
     }
     else // At max level, increase gold reward
     {
         xp = 0;
-        moneyReward = uint32(quest->GetRewOrReqMoney() + int32(quest->GetRewMoneyMaxLevel() * sWorld->getRate(RATE_DROP_MONEY)));
+        moneyReward = uint32(quest->GetRewardMoney() + int32(quest->GetRewMoneyMaxLevel() * sWorld->getRate(RATE_DROP_MONEY)));
     }
 
     WorldPacket data(SMSG_QUESTGIVER_QUEST_COMPLETE, (4 + 4 + 4 + 4 + 4));

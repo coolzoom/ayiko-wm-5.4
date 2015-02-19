@@ -928,7 +928,9 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* quest, uint64 npcGUID, 
     std::string requestItemsText = quest->GetRequestItemsText();
 
     uint32 itemCount = quest->GetQuestObjectiveCountType(QUEST_OBJECTIVE_TYPE_ITEM);
-    if (!itemCount && canComplete)
+    uint32 currencyCount = quest->GetQuestObjectiveCountType(QUEST_OBJECTIVE_TYPE_CURRENCY);
+    uint32 moneyCount = quest->GetQuestObjectiveCountType(QUEST_OBJECTIVE_TYPE_MONEY);
+    if (!itemCount && !currencyCount && !moneyCount && canComplete)
     {
         SendQuestGiverOfferReward(quest, npcGUID, true);
         return;
@@ -964,8 +966,8 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* quest, uint64 npcGUID, 
             }
             case QUEST_OBJECTIVE_TYPE_CURRENCY:
             {
-                currencyData << uint32(questObjective->ObjectId);
                 currencyData << uint32(questObjective->Amount);
+                currencyData << uint32(questObjective->ObjectId);
 
                 break;
             }
@@ -980,7 +982,6 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* quest, uint64 npcGUID, 
     }
 
     ObjectGuid guid = npcGUID;
-    uint32 currencyCount = quest->GetQuestObjectiveCountType(QUEST_OBJECTIVE_TYPE_CURRENCY);
 
     WorldPacket data(SMSG_QUESTGIVER_REQUEST_ITEMS, 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 1 + 8 + 8 +
         questTitle.size() + requestItemsText.size() + itemCount * (4 + 4 + 4) + currencyCount * (4 + 4));

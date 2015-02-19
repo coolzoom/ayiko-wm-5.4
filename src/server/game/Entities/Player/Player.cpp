@@ -16530,8 +16530,12 @@ void Player::AddQuestAndCheckCompletion(Quest const* quest, Object* questGiver)
     if (CanCompleteQuest(quest->GetQuestId()))
     {
         if (quest->IsAutoComplete())
+        {
             FullfillQuestRequirements(quest);
-        CompleteQuest(quest->GetQuestId());
+            CompleteQuest(quest->GetQuestId(), quest->GetQuestObjectiveCountType(QUEST_OBJECTIVE_TYPE_MONEY) ? false : true);
+        }
+        else
+            CompleteQuest(quest->GetQuestId());
     }
 
     if (!questGiver)
@@ -16774,7 +16778,9 @@ void Player::FullfillQuestRequirements(Quest const *quest)
             }
             case QUEST_OBJECTIVE_TYPE_MONEY:
             {
-                ModifyMoney(questObjective->Amount);
+                // stops quest that require money and are autocomplete giving the player money
+                if (!quest->IsAutoComplete())
+                    ModifyMoney(questObjective->Amount);
                 break;
             }
             default:
@@ -16783,7 +16789,7 @@ void Player::FullfillQuestRequirements(Quest const *quest)
     }
 }
 
-void Player::CompleteQuest(uint32 quest_id)
+void Player::CompleteQuest(uint32 quest_id, bool msg)
 {
     if (quest_id)
     {
@@ -16797,7 +16803,7 @@ void Player::CompleteQuest(uint32 quest_id)
         {
             if (qInfo->HasFlag(QUEST_FLAGS_TRACKING))
                 RewardQuest(qInfo, 0, this, false);
-            else
+            else if (msg)
                 SendQuestComplete(qInfo);
         }
     }

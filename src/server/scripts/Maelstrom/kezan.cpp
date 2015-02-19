@@ -43,6 +43,13 @@ enum Quests
     QUEST_DONT_GO_INTO_THE_LIGHT                = 14239,
 };
 
+enum QuestObjectives
+{
+    QUEST_OBJECTIVE_IZZY_PICKED_UP              = 265516,
+    QUEST_OBJECTIVE_BRUNO_BEATEN_DOWN           = 265427,
+    QUEST_OBJECTIVE_OVERLOAD_DEFECTIVE_GEN      = 266731,
+};
+
 enum Spells
 {
     SPELL_QUEST_INVISIBILITY_DETECTION_1        = 60922,
@@ -179,7 +186,7 @@ namespace Kezan
 
         if (questStatus.Status == QUEST_STATUS_INCOMPLETE)
             for (uint8 index = 0; index < 3; ++index)
-                if (questStatus.CreatureOrGOCount[index + 1] > 0)
+                if (player->GetQuestObjectiveCounter(QUEST_OBJECTIVE_IZZY_PICKED_UP + index))
                     homiesMask |= HomiesType[index];
 
         return homiesMask;
@@ -384,7 +391,7 @@ class zone_kezan : public WorldMapScript
                     uint8 markMask = 0;
 
                     for (uint8 index = 0; index < 4; ++index)
-                        if (questStatus.CreatureOrGOCount[index] == 0)
+                        if (player->GetQuestObjectiveCounter(QUEST_OBJECTIVE_BRUNO_BEATEN_DOWN + index) == 0)
                             markMask |= MarkMask[index];
 
                     //player->SetByteFlag(PLAYER_FIELD_BYTES2, 3, markMask);
@@ -5321,7 +5328,7 @@ class spell_kezan_447_aicast_gasbot_master : public SpellScriptLoader
 
                     if (q_status.Status == QUEST_STATUS_INCOMPLETE)
                         for (int i = 0; i < 3; ++i)
-                            if (q_status.CreatureOrGOCount[i] == 0)
+                            if (player->GetQuestObjectiveCounter(QUEST_OBJECTIVE_OVERLOAD_DEFECTIVE_GEN + i) == 0)
                                 return;
 
                     player->CastSpell(player, 70254, false);

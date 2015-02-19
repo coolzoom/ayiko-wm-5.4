@@ -154,6 +154,7 @@ public:
 enum Stillpine
 {
     QUEST_SAVING_PRINCESS_STILLPINE               = 9667,
+    QUEST_OBJECTIVE_SAVE_PRINCESS_STILLPINE       = 261128,
     NPC_PRINCESS_STILLPINE                        = 17682,
     GO_PRINCESS_STILLPINES_CAGE                   = 181928,
     SPELL_OPENING_PRINCESS_STILLPINE_CREDIT       = 31003,
@@ -171,7 +172,7 @@ public:
         {
             go->SetGoState(GO_STATE_ACTIVE);
             stillpine->GetMotionMaster()->MovePoint(1, go->GetPositionX(), go->GetPositionY()-15, go->GetPositionZ());
-            player->CastedCreatureOrGO(NPC_PRINCESS_STILLPINE, 0, SPELL_OPENING_PRINCESS_STILLPINE_CREDIT);
+            player->QuestObjectiveSatisfy(QUEST_OBJECTIVE_SAVE_PRINCESS_STILLPINE, 1);
         }
         return true;
     }

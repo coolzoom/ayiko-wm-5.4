@@ -18024,9 +18024,6 @@ bool Player::HasQuestForItem(uint32 itemid) const
 
             // There should be no mixed ReqItem/ReqSource drop
             // This part for ReqItem drop
-            if (!qinfo->GetQuestObjectiveCountType(QUEST_OBJECTIVE_TYPE_ITEM))
-                continue;
-
             for (auto const &questObjective : qinfo->m_questObjectives)
                 if (questObjective->Type == QUEST_OBJECTIVE_TYPE_ITEM)
                     if (itemid == questObjective->ObjectId && GetQuestObjectiveCounter(questObjective->Id) < uint32(questObjective->Amount))

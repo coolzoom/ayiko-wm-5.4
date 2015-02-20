@@ -32,6 +32,16 @@ enum eData
     DATA_MAX_BOSS_DATA
 };
 
+enum eTypes
+{
+    TYPE_PROTECTORS,
+    TYPE_TSULONG,
+    TYPE_LEI_SHI,
+    TYPE_SHA,
+    MAX_TYPES,
+    INTRO_DONE,
+};
+
 enum eSpells
 {
     SPELL_RITUAL_OF_PURIFICATION = 126848
@@ -56,6 +66,7 @@ enum eCreatures
 
     // Tsulong
     NPC_TSULONG                     = 62442,
+    NPC_EMBODIED_TERROR             = 62969,
 
     // Lei Shi
     NPC_LEI_SHI                     = 62983,
@@ -95,11 +106,6 @@ enum eWeapons
 
 enum eEvents
 {
-};
-
-enum eTypes
-{
-    INTRO_DONE
 };
 
 enum eTimers

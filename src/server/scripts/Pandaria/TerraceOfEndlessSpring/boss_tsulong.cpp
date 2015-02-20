@@ -39,6 +39,7 @@ enum eTsulongEvents
     EVENT_SUMMON_TERROR,
     EVENT_SUMMON_SHA,
     EVENT_SUN_BREATH,
+    EVENT_EVADE_CHECK,
 };
 
 enum eTsulongSpells
@@ -133,12 +134,15 @@ class boss_tsulong : public CreatureScript
 
         struct boss_tsulongAI : public BossAI
         {
-            boss_tsulongAI(Creature* creature) : BossAI(creature, DATA_TSULONG) {}
+            boss_tsulongAI(Creature* creature) : BossAI(creature, DATA_TSULONG) { hasBeenDefeated = false; }
+
+            EventMap m_oocEvents;
 
             uint8 phase;
             bool firstSpecialEnabled;
             bool secondSpecialEnabled;
             bool inFly;
+            bool hasBeenDefeated;
 
             void SpellHitTarget(Unit* target, SpellInfo const* spell) override
             {
@@ -159,31 +163,45 @@ class boss_tsulong : public CreatureScript
                     Talk(EMOTE_TERRORIZE);
             }
 
+            void JustSummoned(Creature* pSummoned) override
+            {
+                summons.Summon(pSummoned);
+
+                if (pSummoned->GetEntry() == NPC_EMBODIED_TERROR)
+                {
+                    if (pSummoned->AI())
+                        pSummoned->AI()->DoZoneInCombat();
+                }
+            }
+
             void Reset() override
             {
+                m_oocEvents.RescheduleEvent(1, 2000);
+
                 dayPhaseOri = 0.0f;
-                me->setActive(true);
                 _Reset();
                 events.Reset();
                 summons.DespawnAll();
 
                 inFly = false;
+                hasBeenDefeated = false;
 
                 me->SetDisableGravity(true);
                 me->SetCanFly(true);
                 me->RemoveAurasDueToSpell(SPELL_DREAD_SHADOWS);
                 me->SetPower(POWER_ENERGY, 0);
 
+                
                 if (instance)
                 {
-                    if (instance->GetBossState(DATA_PROTECTORS) == DONE)
+                    if (instance->GetData(DATA_PROTECTORS) == DONE)
                     {
                         phase = PHASE_NIGHT;
                         me->SetDisplayId(DISPLAY_TSULON_NIGHT);
                         me->setFaction(14);
                         me->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
-                        me->SetHomePosition(-1017.841f, -3049.621f, 12.823f, 4.72f);
-                        me->GetMotionMaster()->MoveTargetedHome();
+                        //me->SetHomePosition(-1017.841f, -3049.621f, 12.823f, 4.72f);
+                        //me->GetMotionMaster()->MoveTargetedHome();
                     }
                     else
                     {
@@ -199,10 +217,14 @@ class boss_tsulong : public CreatureScript
             {
                 _JustReachedHome();
 
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 instance->SetBossState(DATA_TSULONG, FAIL);
+
+                Talk(SAY_WIPE);
+                summons.DespawnAll();
             }
 
-            void EnterCombat(Unit* /*attacker*/) override
+            void EnterCombat(Unit* pWho) override
             {
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                 DoZoneInCombat();
@@ -210,8 +232,6 @@ class boss_tsulong : public CreatureScript
                 Talk(SAY_AGGRO);
                 me->SetPower(POWER_ENERGY, 0);
                 SetPhase(PHASE_NIGHT);
-
-                _EnterCombat();
             }
 
             void KilledUnit(Unit* who) override
@@ -222,26 +242,32 @@ class boss_tsulong : public CreatureScript
 
             void DamageTaken(Unit* , uint32& damage) override
             {
-                if (me->GetHealth() <= damage)
+                if (phase == PHASE_DAY)
                 {
-                    if (phase == PHASE_DAY)
+                    if (me->GetHealth() <= damage)
                     {
                         damage = 0;
+                        summons.DespawnAll();
                         EnterEvadeMode();
+                    }
+                }
+                else if (phase == PHASE_NIGHT)
+                {
+                    if (me->GetHealthPct() < 1.1f || me->GetHealth() <= damage)
+                    {
+                        damage = 0;
+                        HandleDefeat();
                     }
                 }
             }
 
-            void HealReceived(Unit* , uint32& heal) override
+            void HealReceived(Unit*, uint32& heal) override
             {
                 // victory if healed during the day phase
                 if (me->HealthAbovePctHealed(99, heal))
                     if (phase == PHASE_DAY)
                     {
-                        events.Reset();
-                        me->RemoveAllAuras();
-                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                        instance->SetBossState(DATA_TSULONG, DONE);
+                        HandleDefeat();
                     }
             }
 
@@ -255,7 +281,11 @@ class boss_tsulong : public CreatureScript
             void DoAction(const int32 action) override
             {
                 if (action == ACTION_START_TSULONG_WAYPOINT)
+                {
                     SetPhase(PHASE_FLY);
+
+                    Talk(SAY_INTRO);
+                }
 
                 if (action == ACTION_SPAWN_SUNBEAM)
                     events.ScheduleEvent(EVENT_SPAWN_SUNBEAM, 0, 0, PHASE_NIGHT);
@@ -269,6 +299,7 @@ class boss_tsulong : public CreatureScript
 
             void SetPhase(uint8 newPhase)
             {
+
                 uint8 oldPhase = phase;
                 phase = newPhase;
                 events.SetPhase(newPhase);
@@ -300,6 +331,7 @@ class boss_tsulong : public CreatureScript
                         events.Reset();
                         events.ScheduleEvent(EVENT_SUN_BREATH, 6000, 0, PHASE_DAY);
                         events.ScheduleEvent(EVENT_SUMMON_TERROR, 12000, 0, PHASE_DAY);
+                        events.ScheduleEvent(EVENT_EVADE_CHECK, 2000, 0, PHASE_DAY);
 
                         if (oldPhase == PHASE_NIGHT)
                         {
@@ -350,8 +382,101 @@ class boss_tsulong : public CreatureScript
                 }
             }
 
+            /*
+            void MoveInLineOfSight(Unit* pWho) override
+            {
+
+                if (hasBeenDefeated || inFly || me->IsInEvadeMode())
+                    return;
+
+                CreatureAI::MoveInLineOfSight(pWho);
+            }*/
+
+            void HandleDefeat()
+            {
+                if (hasBeenDefeated)
+                    return;
+
+                hasBeenDefeated = true;
+
+                Talk(SAY_DEATH);
+                
+                me->SetReactState(REACT_PASSIVE);
+                me->setFaction(FACTION_DAY);
+                me->GetMotionMaster()->Clear();
+                me->GetMotionMaster()->MoveIdle();
+                me->AttackStop();
+                me->StopMoving();
+                me->SetTarget(0);
+
+                events.Reset();
+
+                me->CombatStop(true);
+                me->setRegeneratingHealth(false);
+                me->setRegeneratingMana(false);
+
+                DoCast(me, SPELL_GOLD_ACTIVE, true);
+                me->RemoveAllAuras();
+                me->SetDisplayId(DISPLAY_TSULON_DAY);
+
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                instance->SetBossState(DATA_TSULONG, DONE);
+
+                events.Reset();
+
+                summons.DespawnAll();
+            }
+
+            void HandleEvadeDuringDay()
+            {
+                if (me->IsInEvadeMode())
+                    return;
+
+                Map::PlayerList const& lPlayers = me->GetMap()->GetPlayers();
+
+                for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+                {
+                    if (Player* pPlayer = itr->GetSource())
+                    {
+                        if (pPlayer->IsAlive() && pPlayer->IsWithinDist(me, 40.f))
+                            return;
+                    }
+                }
+
+                summons.DespawnAll();
+
+                EnterEvadeMode();
+            }
+
+            void EnterEvadeMode() override
+            {
+                if (hasBeenDefeated)
+                    return;
+
+                CreatureAI::EnterEvadeMode();
+
+                me->GetMotionMaster()->Clear();
+                me->GetMotionMaster()->MoveTargetedHome();
+            }
+
             void UpdateAI(const uint32 diff) override
             {
+                if (!me->IsVisible() && !me->IsInEvadeMode())
+                {
+                    m_oocEvents.Update(diff);
+
+                    while (uint32 eventId = m_oocEvents.ExecuteEvent())
+                    {
+                        if (eventId == 1)
+                        {
+                            summons.DespawnAll();
+                            m_oocEvents.ScheduleEvent(1, 5000);
+
+                            me->SetVisible(true);
+                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
+                        }
+                    }
+                }
                 events.Update(diff);
 
                 //if (inFly)
@@ -372,7 +497,6 @@ class boss_tsulong : public CreatureScript
                                 inFly = true;
                                 break;
                             case EVENT_WAYPOINT_FIRST:
-                                Talk(SAY_INTRO);
                                 me->GetMotionMaster()->Clear();
                                 me->GetMotionMaster()->MovePoint(WAYPOINT_SECOND, -1017.841f, -3049.621f, 12.823f);
                                 break;
@@ -446,6 +570,10 @@ class boss_tsulong : public CreatureScript
                         case EVENT_SUMMON_SHA:
                             //events.ScheduleEvent(EVENT_SUN_BREATH, 30000, 0, PHASE_DAY);
                             break;
+                        case EVENT_EVADE_CHECK:
+                            HandleEvadeDuringDay();
+                            events.ScheduleEvent(EVENT_EVADE_CHECK, 2000, 0, PHASE_DAY);
+                            break;
                     }
                 }
 
@@ -489,6 +617,7 @@ class npc_sunbeam : public CreatureScript
                             tsulong->AI()->DoAction(ACTION_SPAWN_SUNBEAM);
                     }
 
+                    Talk(0);
                     me->DespawnOrUnsummon();
                 }
             }
@@ -651,9 +780,9 @@ class npc_unstable_sha : public CreatureScript
         SPELL_INSTABILITY_HEAL          = 130078
     };
 
-    struct npc_unstable_shaAI : public CreatureAI
+    struct npc_unstable_shaAI : public ScriptedAI
     {
-        npc_unstable_shaAI(Creature* creature) : CreatureAI(creature)
+        npc_unstable_shaAI(Creature* creature) : ScriptedAI(creature)
         {
             summonerGUID = 0;
             riding = false;
@@ -662,7 +791,7 @@ class npc_unstable_sha : public CreatureScript
 
         void Reset() override
         {
-
+            events.ScheduleEvent(1, urand(2000, 6000));
         }
 
         void IsSummonedBy(Unit* summoner) override

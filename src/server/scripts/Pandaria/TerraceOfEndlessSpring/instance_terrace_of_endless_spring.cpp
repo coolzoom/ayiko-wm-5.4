@@ -34,6 +34,10 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
         {
             instance_terrace_of_endless_spring_InstanceMapScript(Map* map) : InstanceScript(map) { }
 
+            EventMap m_mEvents;
+            uint32 m_auiEncounter[MAX_TYPES];
+            std::string strSaveData;
+
             bool ritualOfPurification;
             bool introDone;
 
@@ -96,6 +100,8 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
 
                 tsulongChestGUID = 0;
                 leishiChestsGUID = 0;
+
+                memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
             }
 
             void OnCreatureCreate(Creature* creature)
@@ -184,40 +190,120 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                 if (id == DATA_TSULONG && state == DONE)
                     DoRespawnGameObject(leishiChestsGUID, DAY);
 
+                if (id < MAX_TYPES)
+                    SetData(id, (uint32)state);
+
                 return true;
+            }
+
+            void Update(uint32 uiDiff)
+            {
+                m_mEvents.Update(uiDiff);
+
+                while (uint32 eventId = m_mEvents.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                    case 1:
+                        if (Creature* c = instance->GetCreature(GetData64(NPC_TSULONG)))
+                        {
+                            instance->LoadGrid(c->GetPositionX(), c->GetPositionY());
+                            c->AI()->DoAction(ACTION_START_TSULONG_WAYPOINT);
+                        }
+                        break;
+                    }
+                }
             }
 
             void SetData(uint32 type, uint32 data)
             {
-                switch (type)
+                if (type >= MAX_TYPES)
                 {
+                    switch (type)
+                    {
                     case SPELL_RITUAL_OF_PURIFICATION:
                         ritualOfPurification = data;
                         break;
                     case INTRO_DONE:
                     {
-                        if (data > 0)
-                        {
-                            Creature* asani = instance->GetCreature(ancientAsaniGuid);
-                            if (asani)
-                                asani->AI()->DoAction(ACTION_INTRO_FINISHED);
+                                       if (data > 0)
+                                       {
+                                           Creature* asani = instance->GetCreature(ancientAsaniGuid);
+                                           if (asani)
+                                               asani->AI()->DoAction(ACTION_INTRO_FINISHED);
 
-                            Creature* regail = instance->GetCreature(ancientRegailGuid);
-                            if (regail)
-                                regail->AI()->DoAction(ACTION_INTRO_FINISHED);
+                                           Creature* regail = instance->GetCreature(ancientRegailGuid);
+                                           if (regail)
+                                               regail->AI()->DoAction(ACTION_INTRO_FINISHED);
 
-                            Creature* kaolan = instance->GetCreature(protectorKaolanGuid);
-                            if (kaolan)
-                                kaolan->AI()->DoAction(ACTION_INTRO_FINISHED);
-                        }
+                                           Creature* kaolan = instance->GetCreature(protectorKaolanGuid);
+                                           if (kaolan)
+                                               kaolan->AI()->DoAction(ACTION_INTRO_FINISHED);
+                                       }
 
-                        introDone = data > 0;
+                                       introDone = data > 0;
 
-                        break;
+                                       break;
                     }
                     default:
                         break;
+                    }
                 }
+                else
+                {
+                    switch (type)
+                    {
+                    case TYPE_PROTECTORS:
+                    case TYPE_TSULONG:
+                    case TYPE_LEI_SHI:
+                    case TYPE_SHA:
+                        m_auiEncounter[type] = data;
+                        break;
+                    }
+
+                    if (data >= DONE)
+                    {
+                        OUT_SAVE_INST_DATA;
+
+                        std::ostringstream saveStream;
+                        saveStream << m_auiEncounter[0] << ' ' << m_auiEncounter[1] << ' ' << m_auiEncounter[2] << ' '
+                            << m_auiEncounter[3];
+
+                        strSaveData = saveStream.str();
+
+                        SaveToDB();
+                        OUT_SAVE_INST_DATA_COMPLETE;
+                    }
+                }
+            }
+
+            void Load(const char* chrIn)
+            {
+                if (!chrIn)
+                {
+                    OUT_LOAD_INST_DATA_FAIL;
+                    return;
+                }
+
+                OUT_LOAD_INST_DATA(chrIn);
+                std::istringstream loadStream(chrIn);
+
+                loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3];
+                for (uint8 i = 0; i < MAX_TYPES; ++i)
+                if (m_auiEncounter[i] == IN_PROGRESS)                // Do not load an encounter as "In Progress" - reset it instead.
+                    m_auiEncounter[i] = NOT_STARTED;
+
+                if (m_auiEncounter[TYPE_PROTECTORS] == DONE && m_auiEncounter[TYPE_TSULONG] != DONE)
+                {
+                    m_mEvents.ScheduleEvent(1, 2000);
+                }
+
+                OUT_LOAD_INST_DATA_COMPLETE;
+            }
+
+            std::string GetSaveData()
+            {
+                return strSaveData;
             }
 
             uint32 GetData(uint32 type)
@@ -228,6 +314,11 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                         return ritualOfPurification;
                     case INTRO_DONE:
                         return introDone;
+                    case TYPE_PROTECTORS:
+                    case TYPE_TSULONG:
+                    case TYPE_LEI_SHI:
+                    case TYPE_SHA:
+                        return m_auiEncounter[type];
                     default:
                         return 0;
                 }

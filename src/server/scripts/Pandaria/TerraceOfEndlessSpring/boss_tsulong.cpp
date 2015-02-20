@@ -461,7 +461,7 @@ class boss_tsulong : public CreatureScript
 
             void UpdateAI(const uint32 diff) override
             {
-                if (!me->IsVisible() && !me->IsInEvadeMode())
+                if (!me->IsInEvadeMode())
                 {
                     m_oocEvents.Update(diff);
 

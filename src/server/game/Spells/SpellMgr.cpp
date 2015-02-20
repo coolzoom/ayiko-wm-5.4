@@ -3825,9 +3825,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[0].BasePoints = -10;
                     spellInfo->Effects[1].BasePoints = -10;
                     break;
-                case 106808: // Ground Pound
-                    spellInfo->AttributesEx &= ~SPELL_ATTR1_CHANNELED_2;
-                    break;
                 case 125713:// Channeling Corruption (triggered)
                     spellInfo->Effects[0].TargetA = TARGET_UNIT_TARGET_ANY;
                     break;

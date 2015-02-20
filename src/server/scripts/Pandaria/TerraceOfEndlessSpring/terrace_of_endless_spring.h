@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2008-2015 MoltenCore <http://www.molten-wow.com/>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef TERRACE_OF_ENDLESS_SPRING_H_
 #define TERRACE_OF_ENDLESS_SPRING_H_
 
@@ -13,6 +30,16 @@ enum eData
     DATA_LEI_SHI,
     DATA_SHA_OF_FEAR,
     DATA_MAX_BOSS_DATA
+};
+
+enum eTypes
+{
+    TYPE_PROTECTORS,
+    TYPE_TSULONG,
+    TYPE_LEI_SHI,
+    TYPE_SHA,
+    MAX_TYPES,
+    INTRO_DONE,
 };
 
 enum eSpells
@@ -39,6 +66,7 @@ enum eCreatures
 
     // Tsulong
     NPC_TSULONG                     = 62442,
+    NPC_EMBODIED_TERROR             = 62969,
 
     // Lei Shi
     NPC_LEI_SHI                     = 62983,
@@ -78,11 +106,6 @@ enum eWeapons
 
 enum eEvents
 {
-};
-
-enum eTypes
-{
-    INTRO_DONE
 };
 
 enum eTimers

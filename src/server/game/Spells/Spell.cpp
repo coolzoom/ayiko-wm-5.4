@@ -1056,7 +1056,8 @@ void Spell::SelectImplicitConeTargets(SpellEffIndex effIndex, SpellImplicitTarge
     float coneAngle = M_PI/2;
 
     if (m_spellInfo->Effects[effIndex].TargetA.GetTarget() == TARGET_UNIT_CONE_ENEMY_110 ||
-        m_spellInfo->Effects[effIndex].TargetA.GetTarget() == TARGET_UNIT_CONE_ENEMY_129)
+        m_spellInfo->Effects[effIndex].TargetA.GetTarget() == TARGET_UNIT_CONE_ENEMY_129 ||
+        m_spellInfo->Effects[effIndex].TargetA.GetTarget() == TARGET_UNIT_CONE_ALLY_136)
         coneAngle = M_PI/6;
 
     switch (m_spellInfo->Id)
@@ -1264,6 +1265,10 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
                         }
                         maxSize = 10;
                         power = POWER_MANA;
+                        break;
+                    case 107145: // Light Wall Active
+                        m_targets.AddExtraTarget(0, WorldLocation(996, -989.4236f, -2821.757f, 38.25466f, 0.0f));
+                        m_targets.AddExtraTarget(0, WorldLocation(996, -1045.602f, -2822.323f, 38.25466f, 0.0f));
                         break;
                     default:
                         break;
@@ -1627,7 +1632,12 @@ void Spell::SelectImplicitCasterDestTargets(SpellEffIndex effIndex, SpellImplici
         case TARGET_DEST_CASTER_BACK_RIGHT:
         case TARGET_DEST_CASTER_FRONT_RIGHT:
         case TARGET_DEST_CASTER_FRONT:
-            m_caster->GetFirstCollisionPosition(pos, dist, angle);
+            if (m_caster->GetTypeId() == TYPEID_UNIT || m_caster->ToCreature()->isLosDisabled())
+            {
+                m_caster->GetPosition(&pos);
+                m_caster->MovePositionFixedXY(pos, dist, angle);
+            }else
+                m_caster->GetFirstCollisionPosition(pos, dist, angle);
             break;
         case TARGET_DEST_CASTER_SUMMON:
             m_caster->GetPosition(&pos);

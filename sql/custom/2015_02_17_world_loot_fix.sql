@@ -20,8 +20,8 @@ INSERT INTO `gameobject_loot_template` VALUES
 (42921, 86431, -100, 1, 0, 1, 1);
 
 /* Gobj loot bug on MSP */
-UPDATE `gameobject` SET `spawnMask` = 2 WHERE `guid` = 6608910;
-UPDATE `gameobject` SET `spawnMask` = 4 WHERE `guid` = 6608919;
+UPDATE `gameobject` SET `spawnMask` = 2 WHERE `id` = 214520;
+UPDATE `gameobject` SET `spawnMask` = 4 WHERE `id` = 214795;
 UPDATE `gameobject_template` SET `data11` = 1, `data12` = 0 WHERE `entry` = 214521;
 DELETE FROM `gameobject` WHERE `id`=214521;
 INSERT INTO `gameobject` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`spawntimesecs`,`animprogress`,`state`,`isActive`,`protect_anti_doublet`) VALUES

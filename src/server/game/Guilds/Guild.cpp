@@ -1540,7 +1540,7 @@ void Guild::HandleSetEmblem(WorldSession* session, const EmblemInfo& emblemInfo)
     }
 }
 
-void Guild::HandleSetLeader(WorldSession* session, const std::string& name)
+void Guild::HandleSetLeader(WorldSession* session, const std::string& newLeaderName)
 {
     Player* player = session->GetPlayer();
     // Only leader can assign new leader
@@ -1550,11 +1550,53 @@ void Guild::HandleSetLeader(WorldSession* session, const std::string& name)
     else if (Member* pOldLeader = GetMember(player->GetGUID()))
     {
         // New leader must be a member of guild
-        if (Member* pNewLeader = GetMember(session, name))
+        if (Member* pNewLeader = GetMember(session, newLeaderName))
         {
             _SetLeaderGUID(pNewLeader);
             pOldLeader->ChangeRank(GR_OFFICER);
-            _BroadcastEvent(GE_LEADER_CHANGED, 0, player->GetName().c_str(), name.c_str());
+
+            std::string oldLeaderName = player->GetName();
+
+            ObjectGuid oldLeaderGuid = player->GetGUID();
+            ObjectGuid newLeaderGuid = pNewLeader->GetGUID();
+
+            WorldPacket data(SMSG_GUILD_EVENT_NEW_LEADER, 1 + 8 + 1 + 8 + 4 + 4 + 2 + newLeaderName.size() + oldLeaderName.size());
+            data.WriteBitSeq<6>(oldLeaderGuid);
+            data.WriteBitSeq<6>(newLeaderGuid);
+            data.WriteBitSeq<2, 4>(oldLeaderGuid);
+            data.WriteBitSeq<2>(newLeaderGuid);
+            data.WriteBitSeq<0>(oldLeaderGuid);
+            data.WriteBits(oldLeaderName.size(), 6);
+            data.WriteBitSeq<1>(oldLeaderGuid);
+            data.WriteBitSeq<0>(newLeaderGuid);
+            data.WriteBits(newLeaderName.size(), 6);
+            data.WriteBitSeq<3>(newLeaderGuid);
+            data.WriteBitSeq<3>(oldLeaderGuid);
+            data.WriteBit(0);                           // SelfPromoted
+            data.WriteBitSeq<7>(oldLeaderGuid);
+            data.WriteBitSeq<1, 7>(newLeaderGuid);
+            data.WriteBitSeq<5>(oldLeaderGuid);
+            data.WriteBitSeq<5, 4>(newLeaderGuid);
+            data.FlushBits();
+
+            data.WriteByteSeq<4>(oldLeaderGuid);
+            data << uint32(realmID);                    // NewLeaderVirtualRealmAddress
+            data.WriteString(oldLeaderName);
+            data.WriteByteSeq<5>(oldLeaderGuid);
+            data.WriteString(newLeaderName);
+            data.WriteByteSeq<1>(oldLeaderGuid);
+            data.WriteByteSeq<7, 5, 4>(newLeaderGuid);
+            data.WriteByteSeq<3>(oldLeaderGuid);
+            data.WriteByteSeq<3>(newLeaderGuid);
+            data << uint32(realmID);                    // OldLeaderVirtualRealmAddress
+            data.WriteByteSeq<2>(newLeaderGuid);
+            data.WriteByteSeq<2>(oldLeaderGuid);
+            data.WriteByteSeq<0>(newLeaderGuid);
+            data.WriteByteSeq<6, 0>(oldLeaderGuid);
+            data.WriteByteSeq<6, 1>(newLeaderGuid);
+            data.WriteByteSeq<7>(oldLeaderGuid);
+
+            BroadcastPacket(&data);
         }
     }
     else

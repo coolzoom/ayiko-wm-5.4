@@ -2109,6 +2109,7 @@ public:
 enum eNotSoBig
 {
     QUEST_YOU_RE_NOT_SO_BIG_NOW                   = 11653,
+    QUEST_OBJECTIVE_CRAFTYS_BLASTER_TESTED        = 263809,
     SPELL_AURA_NOTSOBIG_1                         = 45672,
     SPELL_AURA_NOTSOBIG_2                         = 45673,
     SPELL_AURA_NOTSOBIG_3                         = 45677,
@@ -2136,7 +2137,7 @@ public:
             {
                 Quest const* qInfo = sObjectMgr->GetQuestTemplate(QUEST_YOU_RE_NOT_SO_BIG_NOW);
                 if (qInfo)
-                    player->KilledMonsterCredit(qInfo->RequiredNpcOrGo[0], 0);
+                    player->KilledMonsterCredit(qInfo->GetQuestObjective(QUEST_OBJECTIVE_CRAFTYS_BLASTER_TESTED)->ObjectId, 0);
             }
         }
     };

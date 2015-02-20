@@ -995,6 +995,7 @@ class go_soulwell : public GameObjectScript
 enum PrisonersOfWyrmskull
 {
     QUEST_PRISONERS_OF_WYRMSKULL                  = 11255,
+    QUEST_OBJECTIVE_VALGARDE_PRISONER_RESCUED     = 252112,
     NPC_PRISONER_PRIEST                           = 24086,
     NPC_PRISONER_MAGE                             = 24088,
     NPC_PRISONER_WARRIOR                          = 24089,
@@ -1030,7 +1031,7 @@ public:
         if (qInfo)
         {
             //TODO: prisoner should help player for a short period of time
-            player->KilledMonsterCredit(qInfo->RequiredNpcOrGo[0], 0);
+            player->QuestObjectiveSatisfy(QUEST_OBJECTIVE_VALGARDE_PRISONER_RESCUED, 1);
             pPrisoner->DisappearAndDie();
         }
         return true;

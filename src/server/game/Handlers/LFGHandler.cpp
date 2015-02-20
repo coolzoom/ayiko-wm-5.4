@@ -332,7 +332,7 @@ void WorldSession::HandleLfgLockInfoRequestOpcode(WorldPacket& recvData)
             data << uint32(0); // 0 in sniff
             data << uint32(0); // 0 in sniff
             data << uint32(0); // 0 in sniff
-            data << uint32(qRew->GetRewOrReqMoney());
+            data << uint32(qRew->GetRewardMoney());
 
             /*
             data << uint32(qRew->GetRewOrReqMoney());
@@ -620,7 +620,7 @@ void WorldSession::SendLfgPlayerReward(uint32 rdungeonEntry, uint32 sdungeonEntr
     WorldPacket data(SMSG_LFG_PLAYER_REWARD, 4 + 4 + 1 + 4 + 4 + 4 + 4 + 4 + 1 + itemNum * (4 + 4 + 4));
     data << uint32(rdungeonEntry);                         // Random Dungeon Finished
     data << uint32(sdungeonEntry);                         // Dungeon Finished
-    data << uint32(qRew->GetRewOrReqMoney());
+    data << uint32(qRew->GetRewardMoney());
     data << uint32(qRew->XPValue(GetPlayer()));
     data.WriteBits(itemNum, 20);
 

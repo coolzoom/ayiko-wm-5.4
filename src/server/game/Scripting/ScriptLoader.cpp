@@ -642,6 +642,8 @@ void AddSC_boss_sha_of_doubt();
 void AddSC_instance_stormstout_brewery();           // The Stormstout Brewery
 void AddSC_stormstout_brewery();
 void AddSC_boss_ook_ook();
+void AddSC_boss_hoptallus();
+void AddSC_boss_yanzhu();
 void AddSC_instance_gate_of_the_setting_sun();             // Gate of the Setting Sun
 void AddSC_gate_of_the_setting_sun();
 void AddSC_boss_saboteur_kiptilak();
@@ -667,9 +669,14 @@ void AddSC_boss_gu_cloudstrike();
 void AddSC_boss_master_snowdrift();
 void AddSC_boss_sha_of_violence();
 void AddSC_boss_taran_zhu();
+
 void AddSC_instance_siege_of_niuzao_temple();       // Siege of Niuzao Temple
 void AddSC_siege_of_niuzao_temple();
-void AddSC_boss_jinbak();
+void AddSC_vizier_jinbak();
+void AddSC_commander_vojak();
+void AddSC_general_pavalak();
+void AddSC_wing_leader_neronok();
+
 void AddSC_instance_mogu_shan_vault();              // Mogu'Shan Vault
 void AddSC_mogu_shan_vault();
 void AddSC_boss_stone_guard();
@@ -1402,6 +1409,8 @@ void AddPandariaScripts()
     AddSC_instance_stormstout_brewery();            // The Stormstout Brewery
     AddSC_stormstout_brewery();
     AddSC_boss_ook_ook();
+    AddSC_boss_hoptallus();
+    AddSC_boss_yanzhu();
     AddSC_instance_mogu_shan_palace();              // The Mogu'Shan Palace
     AddSC_boss_trial_of_the_king();
     AddSC_boss_gekkan();
@@ -1427,9 +1436,14 @@ void AddPandariaScripts()
     AddSC_boss_master_snowdrift();
     AddSC_boss_sha_of_violence();
     AddSC_boss_taran_zhu();
-    AddSC_instance_siege_of_niuzao_temple();    // Siege of Niuzao Temple
+
+    AddSC_instance_siege_of_niuzao_temple();       // Siege of Niuzao Temple
     AddSC_siege_of_niuzao_temple();
-    AddSC_boss_jinbak();
+    AddSC_vizier_jinbak();
+    AddSC_commander_vojak();
+    AddSC_general_pavalak();
+    AddSC_wing_leader_neronok();
+
     AddSC_instance_mogu_shan_vault();               // Mogu'Shan Vault
     AddSC_mogu_shan_vault();
     AddSC_boss_stone_guard();

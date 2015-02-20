@@ -1019,7 +1019,7 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const* spellPr
         active = true;
 
     // Always trigger for this
-    if (procFlags & (PROC_FLAG_KILLED | PROC_FLAG_KILL | PROC_FLAG_DEATH))
+    if (procFlags & (PROC_FLAG_KILLED | PROC_FLAG_KILL | PROC_FLAG_DEATH | PROC_FLAG_JUMPING))
         return true;
 
     if (spellProcEvent)     // Exist event data
@@ -1115,7 +1115,7 @@ bool SpellMgr::CanSpellTriggerProcOnEvent(SpellProcEntry const& procEntry, ProcE
                 return false;
 
     // always trigger for these types
-    if (eventInfo.GetTypeMask() & (PROC_FLAG_KILLED | PROC_FLAG_KILL | PROC_FLAG_DEATH))
+    if (eventInfo.GetTypeMask() & (PROC_FLAG_KILLED | PROC_FLAG_KILL | PROC_FLAG_DEATH | PROC_FLAG_JUMPING))
         return true;
 
     // check school mask (if set) for other trigger types
@@ -3226,6 +3226,19 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Attributes |= SPELL_ATTR0_PASSIVE | SPELL_ATTR0_HIDDEN_CLIENTSIDE;
                     spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(21);
                     break;
+#if 1 // Stormstout Brewery
+                case 106614: // Brew Barrel Ride
+                    spellInfo->Effects[EFFECT_2].Effect = 0;
+                    break;
+                case 94465: // Brew Barrel Aura Canceller
+                case 122376: // Barrel Drop
+                case 106647: // Rolling Barrel Cosmetic
+                    spellInfo->AttributesEx6 |= SPELL_ATTR6_CASTABLE_WHILE_ON_VEHICLE;
+                    break;
+                case 106808: // Ground Pound
+                    spellInfo->AttributesEx &= ~SPELL_ATTR1_CHANNELED_2;
+                    break;
+#endif
 #if 1 // Deadmines
                 case 84225: // Vehicle - Switch to Seat 3
                     spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
@@ -3712,6 +3725,48 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 84171:
                     spellInfo->AttributesEx6 |= SPELL_ATTR6_CASTABLE_WHILE_ON_VEHICLE | SPELL_ATTR6_CAN_TARGET_UNTARGETABLE | SPELL_ATTR6_CAN_TARGET_INVISIBLE | SPELL_ATTR6_IGNORE_CASTER_AURAS;
                     break;
+
+                    // Siege of Niuzao Temple
+                case 119990: // Summon Sappling
+                    spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_TARGET_ANY;
+                    spellInfo->Effects[EFFECT_0].TargetB = 0;
+                    break;
+                case 120095: // Detonate Visual
+                    spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
+                    break;
+                    //case 120473: // Drain Barrel (Base)
+                case 120270: // Drain Barrel (Top)
+                    //spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_PERSISTENT_AREA_AURA;
+                    //spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_DUMMY;
+                    //spellInfo->Effects[EFFECT_1].TargetA = SpellImplicitTargetInfo(TARGET_DEST_CASTER);
+                    //spellInfo->Effects[EFFECT_1].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_DEST_AREA_ENTRY);
+                    //spellInfo->ExplicitTargetMask = TARGET_FLAG_UNIT_MASK;
+                    ////spellInfo->Effects[EFFECT_1].BasePoints = 0;
+                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENTRY);
+                    spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(0);
+                    spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_10_YARDS);
+                    spellInfo->Effects[EFFECT_1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENTRY);
+                    spellInfo->Effects[EFFECT_1].TargetB = SpellImplicitTargetInfo(0);
+                    spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_10_YARDS);
+                    spellInfo->ExplicitTargetMask = TARGET_FLAG_UNIT_MASK;
+                    spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(285); // 1s
+                    break;
+                case 124277: // Blade Rush Summon forcecast
+                case 120561: // Bombard
+                    spellInfo->MaxAffectedTargets = 1;
+                    break;
+                case 121442: // Caustic Pitch
+                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+                    spellInfo->ExplicitTargetMask = TARGET_FLAG_DEST_LOCATION;
+                    break;
+                case 121448:
+                    spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_APPLY_AURA;
+                    spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_MOD_STUN;
+                    spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_CASTER;
+                    spellInfo->Effects[EFFECT_0].TargetB = 0;
+                    spellInfo->ExplicitTargetMask = TARGET_FLAG_UNIT_MASK;
+                    break;
+                    // Siege of Niuzao temple end
 #endif // Gilneas
                 case 98322: // Battle for Gilneas capturing spell
                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_SKIP_SPELLBOOCK_CHECK;
@@ -5787,8 +5842,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 49576:
                     spellInfo->SchoolMask = SPELL_SCHOOL_MASK_SHADOW;
                     spellInfo->DmgClass = SPELL_DAMAGE_CLASS_MAGIC;
-                    spellInfo->Mechanic = MECHANIC_NONE;
-                    spellInfo->Effects[0].Mechanic = MECHANIC_NONE;
                     break;
                 // Circle of Healing
                 case 34861:

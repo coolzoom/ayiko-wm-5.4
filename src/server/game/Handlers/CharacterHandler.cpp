@@ -112,6 +112,10 @@ bool CharLoginQueryHolder::Initialize()
     stmt->setUInt32(0, lowGuid);
     res &= SetPreparedQuery(CHAR_LOGIN_QUERY_LOAD_QUEST_STATUS, stmt);
 
+    stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHARACTER_QUEST_OBJECTIVE_STATUS);
+    stmt->setUInt32(0, lowGuid);
+    res &= SetPreparedQuery(CHAR_LOGIN_QUERY_LOAD_QUEST_OBJECTIVE_STATUS, stmt);
+
     stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHARACTER_DAILYQUESTSTATUS);
     stmt->setUInt32(0, lowGuid);
     res &= SetPreparedQuery(CHAR_LOGIN_QUERY_LOAD_DAILY_QUEST_STATUS, stmt);
@@ -938,44 +942,42 @@ void WorldSession::HandlePlayerLogin(CharLoginQueryHolder *charHolder, AuthLogin
     LoadAccountData(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_ACCOUNT_DATA), PER_CHARACTER_CACHE_MASK);
     SendAccountDataTimes(PER_CHARACTER_CACHE_MASK);
 
+    bool battlePayEnabled = true;
     bool sessionTimeAlert = false;
-    bool travelPass = true;
-    bool webTicketFeature = false;
-    bool ingameStoreFeature = true;
-    bool itemRestorationFeature = false;
+    bool europaStatus = true;
 
-    data.Initialize(SMSG_FEATURE_SYSTEM_STATUS, 35);
+    data.Initialize(SMSG_FEATURE_SYSTEM_STATUS, 47);
 
-    data << uint32(1);                  // SoR remaining ?
-    data << uint32(realmID);
-    data << uint8(2);                   // Complain System Status ?
-    data << uint32(43);                 // Unk
-    data << uint32(1);                  // SoR per day ?
+    data << uint32(0);                  // ScrollOfResurrectionMaxRequestsPerDay
+    data << uint32(realmID);            // CfgRealmID
+    data << uint8(2);                   // ComplaintStatus
+    data << uint32(0);                  // CfgRealmRecID
+    data << uint32(0);                  // ScrollOfResurrectionRequestsRemaining
 
-    data.WriteBit(0);                   // Unk
-    data.WriteBit(1);                   // Is Voice Chat allowed ?
-    data.WriteBit(ingameStoreFeature);
-    data.WriteBit(sessionTimeAlert);
-    data.WriteBit(1);                   // Europa Ticket System Enabled ?
-    data.WriteBit(travelPass);          // Has Travel Pass
-    data.WriteBit(1);                   // Unk
-    data.WriteBit(itemRestorationFeature);
-    data.WriteBit(webTicketFeature);
+    data.WriteBit(0);                   // BpayStoreAvailable
+    data.WriteBit(0);                   // CharUndeleteEnabled
+    data.WriteBit(battlePayEnabled);    // BpayStoreEnabled
+    data.WriteBit(sessionTimeAlert);    // SessionAlert
+    data.WriteBit(0);                   // ScrollOfResurrectionEnabled
+    data.WriteBit(europaStatus);        // EuropaTicketSystemStatus
+    data.WriteBit(0);                   // VoiceEnabled
+    data.WriteBit(0);                   // ItemRestorationButtonEnabled
+    data.WriteBit(0);                   // BrowserEnabled
     data.FlushBits();
 
     if (sessionTimeAlert)
     {
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);
+        data << uint32(0);              // Delay
+        data << uint32(0);              // Period
+        data << uint32(0);              // DisplayTime
     }
 
-    if (travelPass)
+    if (europaStatus)
     {
-        data << uint32(60000);
-        data << uint32(10);
-        data << uint32(114194674);
-        data << uint32(1);
+        data << uint32(60000);          // PerMilliseconds
+        data << uint32(10);             // MaxTries
+        data << uint32(0);              // LastResetTimeBeforeNow
+        data << uint32(0);              // TryCount
     }
 
     SendPacket(&data);
@@ -1191,7 +1193,7 @@ void WorldSession::HandlePlayerLogin(CharLoginQueryHolder *charHolder, AuthLogin
     }
 
     // friend status
-    sSocialMgr->SendFriendStatus(pCurrChar, FRIEND_ONLINE, pCurrChar->GetGUIDLow(), true);
+    sSocialMgr->SendFriendStatus(pCurrChar, FRIEND_ONLINE, pCurrChar->GetGUID(), true);
 
     // Place character in world (and load zone) before some object loading
     pCurrChar->LoadCorpse();

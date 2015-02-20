@@ -994,7 +994,8 @@ UPDATE `creature_template` SET `faction_h` = 1339, `faction_a` = 1339 WHERE entr
 UPDATE `creature_template` SET `faction_h` = 1338, `faction_a` = 1338 WHERE entry IN (61549, 61447);
 UPDATE `creature_template` SET `faction_h` = 1340, `faction_a` = 1340 WHERE entry IN (61551, 61450);
 
-REPLACE INTO `creature_template_currency` (`entry`, `currencyId`, `currencyCount`) VALUES
+DELETE FROM `creature_template_currency` WHERE `entry` IN (109019, 109010);
+INSERT INTO `creature_template_currency` (`entry`, `currencyId`, `currencyCount`) VALUES
 (109019, 395, 100),
 (109010, 395, 100);
 
@@ -1123,23 +1124,23 @@ INSERT INTO gameobject_loot_template (`entry`, `item`, `ChanceOrQuestChance`, `l
 (42826, 85182, 0, 1, 1, 1, 1),
 (42826, 85183, 0, 1, 1, 1, 1),
 (42826, 85184, 0, 1, 1, 1, 1),
-(42826, 81245, 0, 2, 1, 1, 1),
-(42826, 81244, 0, 2, 1, 1, 1),
-(42826, 81242, 0, 2, 1, 1, 1),
-(42826, 81246, 0, 2, 1, 1, 1),
-(42826, 81243, 0, 2, 1, 1, 1),
-(42825, 81237, 20.5528, 2, 0, 1, 1),
-(42825, 81238, 20.8161, 2, 0, 1, 1),
-(42825, 81239, 21.3426, 2, 0, 1, 1),
-(42825, 81240, 18.9733, 2, 0, 1, 1),
-(42825, 81241, 0, 2, 0, 1, 1),
-(42825, 85175, 0, 1, 0, 1, 1),
-(42825, 85176, 19.0297, 1, 0, 1, 1),
-(42825, 85177, 20.1392, 1, 0, 1, 1),
-(42825, 85178, 20.3648, 1, 0, 1, 1),
-(42825, 85179, 22.3768, 1, 0, 1, 1);
+(42826, 81245, 0, 7, 1, 1, 1),
+(42826, 81244, 0, 7, 1, 1, 1),
+(42826, 81242, 0, 7, 1, 1, 1),
+(42826, 81246, 0, 7, 1, 1, 1),
+(42826, 81243, 0, 7, 1, 1, 1),
+(42825, 81237, 0, 7, 1, 1, 1),
+(42825, 81238, 0, 7, 1, 1, 1),
+(42825, 81239, 0, 7, 1, 1, 1),
+(42825, 81240, 0, 7, 1, 1, 1),
+(42825, 81241, 0, 7, 1, 1, 1),
+(42825, 85175, 0, 1, 1, 1, 1),
+(42825, 85176, 0, 1, 1, 1, 1),
+(42825, 85177, 0, 1, 1, 1, 1),
+(42825, 85178, 0, 1, 1, 1, 1),
+(42825, 85179, 0, 1, 1, 1, 1);
 
-UPDATE `creature_template` set `ScriptName` = 'mob_glintrok_ironhide' WHERE `entry` = 61242;
+UPDATE `creature_template` SET `ScriptName` = 'mob_glintrok_ironhide' WHERE `entry` = 61242;
 
 UPDATE creature_template SET lootid = 0 WHERE entry = 61243;
 DELETE FROM creature_loot_template WHERE entry = 61243;
@@ -1157,17 +1158,17 @@ INSERT INTO creature_loot_template (`entry`, `item`, `ChanceOrQuestChance`, `loo
 (61398, 85194, 0, 1, 2, 1, 1),
 (61398, 85192, 0, 1, 2, 1, 1),
 (61398, 85186, 0, 1, 2, 1, 1),
-(109019, 81248, 0, 2, 1, 1, 1),
-(109019, 81254, 0, 2, 1, 1, 1),
-(109019, 81251, 0, 2, 1, 1, 1),
-(109019, 81252, 0, 2, 1, 1, 1),
-(109019, 81257, 0, 2, 1, 1, 1),
-(109019, 81253, 0, 2, 2, 1, 1),
-(109019, 81247, 0, 2, 2, 1, 1),
-(109019, 81256, 0, 2, 2, 1, 1),
-(109019, 81255, 0, 2, 2, 1, 1),
-(109019, 81249, 0, 2, 2, 1, 1),
-(109019, 87542, 1, 2, 0, 1, 1);
+(109019, 81248, 0, 7, 1, 1, 1),
+(109019, 81254, 0, 7, 1, 1, 1),
+(109019, 81251, 0, 7, 1, 1, 1),
+(109019, 81252, 0, 7, 1, 1, 1),
+(109019, 81257, 0, 7, 1, 1, 1),
+(109019, 81253, 0, 7, 2, 1, 1),
+(109019, 81247, 0, 7, 2, 1, 1),
+(109019, 81256, 0, 7, 2, 1, 1),
+(109019, 81255, 0, 7, 2, 1, 1),
+(109019, 81249, 0, 7, 2, 1, 1),
+(109019, 87542, 1, 7, 0, 1, 1);
 
 REPLACE INTO `creature_template`
    (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `difficulty_entry_4`, `difficulty_entry_5`, `difficulty_entry_6`, `difficulty_entry_7`, `difficulty_entry_8`, `difficulty_entry_9`, `difficulty_entry_10`, `difficulty_entry_11`, `difficulty_entry_12`, `difficulty_entry_13`, `difficulty_entry_14`, `difficulty_entry_15`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `exp_unk`, `faction_A`, `faction_H`, `npcflag`, `npcflag2`, `speed_walk`, `speed_run`, `speed_fly`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `type_flags2`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `Health_mod`, `Mana_mod`, `Mana_mod_extra`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`)

@@ -326,8 +326,8 @@ bool Vehicle::CheckCustomCanEnter()
 {
     switch (GetCreatureEntry())
     {
+        case 65522:  // Bubble shield, Stormstout Brewery
         case 56682: // Keg in Stormstout Brewery
-            return true;
         case 46185: // Sanitron
             return true;
     }

@@ -1852,7 +1852,7 @@ enum Targets
     TARGET_UNK_122                     = 122,
     TARGET_UNK_123                     = 123,
     TARGET_UNK_124                     = 124,
-    TARGET_UNK_125                     = 125,
+    TARGET_DEST_CASTER_GROUND          = 125, // Many Meteor-Like spells, Z position = ground
     TARGET_UNK_126                     = 126,
     TARGET_UNK_127                     = 127,
     TARGET_UNK_128                     = 128,

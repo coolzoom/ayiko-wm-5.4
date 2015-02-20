@@ -1596,6 +1596,15 @@ void Spell::SelectImplicitCasterDestTargets(SpellEffIndex effIndex, SpellImplici
             m_targets.SetDst(x, y, liquidLevel, m_caster->GetOrientation());
             return;
         }
+        case TARGET_DEST_CASTER_GROUND:
+        {
+            if (Map * map = m_caster->GetMap())
+            {
+                float groundZ = map->GetHeight(m_caster->GetPhaseMask(), m_caster->GetPositionX(), m_caster->GetPositionY(), MAX_HEIGHT);
+                m_targets.SetDst(m_caster->GetPositionX(), m_caster->GetPositionY(), groundZ, m_caster->GetOrientation(), map->GetId());
+            }
+            return;
+        }
         default:
             break;
     }
@@ -2918,16 +2927,8 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     {
         //AI functions
         if (spellHitTarget->GetTypeId() == TYPEID_UNIT)
-        {
             if (spellHitTarget->ToCreature()->IsAIEnabled)
                 spellHitTarget->ToCreature()->AI()->SpellHit(m_caster, m_spellInfo);
-
-            // cast at creature (or GO) quest objectives update at successful cast finished (+channel finished)
-            // ignore pets or autorepeat/melee casts for speed (not exist quest for spells (hm...)
-            if (m_originalCaster && m_originalCaster->IsControlledByPlayer() && !spellHitTarget->ToCreature()->isPet() && !IsAutoRepeat() && !IsNextMeleeSwingSpell() && !IsChannelActive())
-                if (Player* p = m_originalCaster->GetCharmerOrOwnerPlayerOrPlayerItself())
-                    p->CastedCreatureOrGO(spellHitTarget->GetEntry(), spellHitTarget->GetGUID(), m_spellInfo->Id);
-        }
 
         if (m_caster->GetTypeId() == TYPEID_UNIT && m_caster->ToCreature()->IsAIEnabled)
             m_caster->ToCreature()->AI()->SpellHitTarget(spellHitTarget, m_spellInfo);
@@ -3290,12 +3291,6 @@ void Spell::DoAllEffectOnTarget(GOTargetInfo* target)
             HandleEffects(NULL, NULL, go, i, SPELL_EFFECT_HANDLE_HIT_TARGET);
 
     CallScriptOnHitHandlers();
-
-    // cast at creature (or GO) quest objectives update at successful cast finished (+channel finished)
-    // ignore autorepeat/melee casts for speed (not exist quest for spells (hm...)
-    if (m_originalCaster && m_originalCaster->IsControlledByPlayer() && !IsAutoRepeat() && !IsNextMeleeSwingSpell() && !IsChannelActive())
-        if (Player* p = m_originalCaster->GetCharmerOrOwnerPlayerOrPlayerItself())
-            p->CastedCreatureOrGO(go->GetEntry(), go->GetGUID(), m_spellInfo->Id);
     CallScriptAfterHitHandlers();
 }
 
@@ -4159,40 +4154,6 @@ void Spell::update(uint32 difftime)
             if (m_timer == 0)
             {
                 SendChannelUpdate(0);
-
-                // channeled spell processed independently for quest targeting
-                // cast at creature (or GO) quest objectives update at successful cast channel finished
-                // ignore autorepeat/melee casts for speed (not exist quest for spells (hm...)
-                if (!IsAutoRepeat() && !IsNextMeleeSwingSpell())
-                {
-                    if (Player* p = m_caster->GetCharmerOrOwnerPlayerOrPlayerItself())
-                    {
-                        for (std::list<TargetInfo>::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
-                        {
-                            TargetInfo* target = &*ihit;
-                            if (!IS_CRE_OR_VEH_GUID(target->targetGUID))
-                                continue;
-
-                            Unit* unit = m_caster->GetGUID() == target->targetGUID ? m_caster : ObjectAccessor::GetUnit(*m_caster, target->targetGUID);
-                            if (unit == NULL)
-                                continue;
-
-                            p->CastedCreatureOrGO(unit->GetEntry(), unit->GetGUID(), m_spellInfo->Id);
-                        }
-
-                        for (std::list<GOTargetInfo>::iterator ihit = m_UniqueGOTargetInfo.begin(); ihit != m_UniqueGOTargetInfo.end(); ++ihit)
-                        {
-                            GOTargetInfo* target = &*ihit;
-
-                            GameObject* go = m_caster->GetMap()->GetGameObject(target->targetGUID);
-                            if (!go)
-                                continue;
-
-                            p->CastedCreatureOrGO(go->GetEntry(), go->GetGUID(), m_spellInfo->Id);
-                        }
-                    }
-                }
-
                 finish();
             }
             break;
@@ -7643,6 +7604,13 @@ SpellCastResult Spell::CheckRange(bool strict)
         if (m_caster->GetTypeId() == TYPEID_PLAYER &&
             (m_spellInfo->FacingCasterFlags & SPELL_FACING_FLAG_INFRONT) && !m_caster->HasInArc(static_cast<float>(M_PI), target))
             return !(_triggeredCastFlags & TRIGGERED_DONT_REPORT_CAST_ERROR) ? SPELL_FAILED_UNIT_NOT_INFRONT : SPELL_FAILED_DONT_REPORT;
+    }
+    else if (m_spellInfo->Id == 119996)
+    {
+        if (auto player = GetCaster()->ToPlayer())
+            if (auto pet = player->GetPet())
+                if (!m_caster->IsWithinDist3d(pet->GetPositionX(), pet->GetPositionY(), pet->GetPositionZ(), max_range))
+                    return SPELL_FAILED_OUT_OF_RANGE;
     }
 
     if (m_targets.HasDst() && !m_targets.HasTraj())

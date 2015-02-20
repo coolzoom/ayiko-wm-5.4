@@ -525,9 +525,12 @@ void WorldSession::HandleQuestgiverCompleteQuest(WorldPacket& recvData)
     }
     else
     {
-        if (quest->GetReqItemsCount())                  // some items required
+        // quest requires items, money or currency to complete
+        if (quest->GetQuestObjectiveCountType(QUEST_OBJECTIVE_TYPE_ITEM)
+            || quest->GetQuestObjectiveCountType(QUEST_OBJECTIVE_TYPE_MONEY)
+            || quest->GetQuestObjectiveCountType(QUEST_OBJECTIVE_TYPE_CURRENCY))
             _player->PlayerTalkClass->SendQuestGiverRequestItems(quest, playerGuid, _player->CanRewardQuest(quest, false), false);
-        else                                            // no items required
+        else
             _player->PlayerTalkClass->SendQuestGiverOfferReward(quest, playerGuid, !autoCompleteMode);
     }
 }

@@ -132,6 +132,7 @@ public:
             switch (go->GetEntry())
             {
                 case GO_TRIAL_CHEST:
+                case GO_TRIAL_CHEST_HC:
                     m_mGoEntryGuidMap.insert(std::make_pair(go->GetEntry(), go->GetGUID()));
                     break;
                 case GO_DOOR_BEFORE_TRIAL:
@@ -540,7 +541,7 @@ public:
                     }
                     break;
                 case TYPE_TRIAL_CHEST:
-                    if (GameObject* pGo = GetGameObjectFromStorage(GO_TRIAL_CHEST))
+                    if (GameObject* pGo = GetGameObjectFromStorage(instance->GetDifficulty() == HEROIC_DIFFICULTY ? GO_TRIAL_CHEST_HC : GO_TRIAL_CHEST))
                         DoRespawnGameObject(pGo->GetGUID(), 7 * DAY);
                     if (Creature* pBeacon = instance->GetCreature(m_uiBeaconGuid))
                         pBeacon->SetPhaseMask(1, true);

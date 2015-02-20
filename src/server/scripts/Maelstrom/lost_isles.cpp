@@ -8129,18 +8129,19 @@ public:
 
     enum eSpells
     {
-        SPELL_ACE_CONTROLLER    = 73633,
-        SPELL_IZZY_CONTROLLER   = 73635,
-        SPELL_GOBBER_CONTROLLER = 73637,
-        SPELL_RESUMMON_ACE      = 73601,
-        SPELL_RESUMMON_IZZY     = 73609,
-        SPELL_RESUMMON_GOBBER   = 73611,
+        SPELL_ACE_CONTROLLER       = 73633,
+        SPELL_IZZY_CONTROLLER      = 73635,
+        SPELL_GOBBER_CONTROLLER    = 73637,
+        SPELL_RESUMMON_ACE         = 73601,
+        SPELL_RESUMMON_IZZY        = 73609,
+        SPELL_RESUMMON_GOBBER      = 73611,
 
-        NPC_ACE                 = 39198,
-        NPC_IZZY                = 39200,
-        NPC_GOBBER              = 39201,
+        NPC_ACE                    = 39198,
+        NPC_IZZY                   = 39200,
+        NPC_GOBBER                 = 39201,
 
-        QUEST_MORALE_BOOST      = 25122,
+        QUEST_MORALE_BOOST         = 25122,
+        QUEST_OBJECTIVE_MIND_FREED = 264649,
     };
 
     class spell_morale_boost_controllers_lost_isles_AuraScript : public AuraScript
@@ -8165,21 +8166,21 @@ public:
                 switch (aurEff->GetSpellInfo()->Id)
                 {
                     case SPELL_ACE_CONTROLLER:
-                        if (itr->second.CreatureOrGOCount[0] > 0)
+                        if (owner->GetQuestObjectiveCounter(QUEST_OBJECTIVE_MIND_FREED) > 0)
                         {
                             if (!owner->FindNearestCreature(NPC_ACE, 20.0f))
                                 owner->CastSpell(owner, SPELL_RESUMMON_ACE, false);
                         }
                         break;
                     case SPELL_IZZY_CONTROLLER:
-                        if (itr->second.CreatureOrGOCount[1] > 0)
+                        if (owner->GetQuestObjectiveCounter(QUEST_OBJECTIVE_MIND_FREED + 1) > 0)
                         {
                             if (!owner->FindNearestCreature(NPC_IZZY, 20.0f))
                                 owner->CastSpell(owner, SPELL_RESUMMON_IZZY, false);
                         }
                         break;
                     case SPELL_GOBBER_CONTROLLER:
-                        if (itr->second.CreatureOrGOCount[2] > 0)
+                        if (owner->GetQuestObjectiveCounter(QUEST_OBJECTIVE_MIND_FREED + 2) > 0)
                         {
                             if (!owner->FindNearestCreature(NPC_GOBBER, 20.0f))
                                 owner->CastSpell(owner, SPELL_RESUMMON_GOBBER, false);

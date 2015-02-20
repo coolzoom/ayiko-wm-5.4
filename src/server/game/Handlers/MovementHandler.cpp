@@ -56,7 +56,7 @@ MovementStatusElements const * GetMovementStatusElementsSequence(Opcodes opcode)
 void WorldSession::checkMoveCheat(uint16 opcode, MovementInfo const &newMovementInfo)
 {
     // This packet may be spammed by the client under unknown circumstances
-    if (opcode == MSG_MOVE_SET_FACING)
+    if (opcode == MSG_MOVE_SET_FACING || !sWorld->getBoolConfig(CONFIG_ANTICHEAT_ENABLE))
         return;
 
     auto player = GetPlayer();
@@ -505,6 +505,12 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
 
     if (plrMover)                                            // nothing is charmed, or player charmed
     {
+        // trigger PROC_FLAG_JUMPING (25)
+        if (movementInfo.flags & MOVEMENTFLAG_FALLING 
+            && movementInfo.flags2 & MOVEMENTFLAG2_INTERPOLATED_PITCHING
+            && movementInfo.j_zspeed < 0.0f)
+            plrMover->ProcDamageAndSpell(NULL, PROC_FLAG_JUMPING, PROC_FLAG_NONE, PROC_EX_NONE, 0, 0, BASE_ATTACK, NULL);
+
         plrMover->UpdateFallInformationIfNeed(movementInfo, opcode);
 
         AreaTableEntry const* zone = GetAreaEntryByAreaID(plrMover->GetAreaId());
@@ -580,12 +586,6 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recvData)
             TC_LOG_ERROR("network", "%sSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value",
                 move_type_name[move_type], _player->GetName().c_str(), _player->GetSpeed(move_type), newspeed);
             _player->SetSpeed(move_type, _player->GetSpeedRate(move_type), true);
-        }
-        else                                                // must be lesser - cheating
-        {
-            TC_LOG_DEBUG("misc", "Player %s from account id %u kicked for incorrect speed (must be %f instead %f)",
-                _player->GetName().c_str(), _player->GetSession()->GetAccountId(), _player->GetSpeed(move_type), newspeed);
-            _player->GetSession()->KickPlayer();
         }
     }
 }

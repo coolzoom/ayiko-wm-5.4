@@ -1661,8 +1661,9 @@ void Guild::HandleSetRankInfo(WorldSession* session, uint32 rankId, const std::s
         for (GuildBankRightsAndSlotsVec::const_iterator itr = rightsAndSlots.begin(); itr != rightsAndSlots.end(); ++itr)
             _SetRankBankTabRightsAndSlots(rankId, tabId++, *itr);
 
-        HandleQuery(session);
-        HandleRoster();                                     // Broadcast for tab rights update
+        WorldPacket data(SMSG_GUILD_EVENT_RANK_CHANGED, 4);
+        data << uint32(rankId);
+        BroadcastPacket(&data);
     }
 }
 

@@ -187,7 +187,7 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                 if (id == DATA_TSULONG && state == DONE)
                     DoRespawnGameObject(tsulongChestGUID, DAY);
 
-                if (id == DATA_TSULONG && state == DONE)
+                if (id == DATA_LEI_SHI && state == DONE)
                     DoRespawnGameObject(leishiChestsGUID, DAY);
 
                 if (id < MAX_TYPES)

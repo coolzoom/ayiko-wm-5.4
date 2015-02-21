@@ -7808,8 +7808,10 @@ Expansion Player::GetExpByLevel()
 
 void Player::RewardGuildReputation(Quest const* quest)
 {
-    uint32 rep = 0;
+    if (!GetGuild())
+        return;
 
+    uint32 rep = 0;
     switch (GetExpByLevel())
     {
         case EXP_VANILLA:   rep = 25;  break;

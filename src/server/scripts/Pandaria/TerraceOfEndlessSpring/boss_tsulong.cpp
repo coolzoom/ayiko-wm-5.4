@@ -200,8 +200,8 @@ class boss_tsulong : public CreatureScript
                         me->SetDisplayId(DISPLAY_TSULON_NIGHT);
                         me->setFaction(14);
                         me->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
-                        //me->SetHomePosition(-1017.841f, -3049.621f, 12.823f, 4.72f);
-                        //me->GetMotionMaster()->MoveTargetedHome();
+                        me->SetHomePosition(-1017.841f, -3049.621f, 12.823f, 4.72f);
+                        me->GetMotionMaster()->MoveTargetedHome();
                     }
                     else
                     {
@@ -412,6 +412,7 @@ class boss_tsulong : public CreatureScript
                 events.Reset();
 
                 me->CombatStop(true);
+                me->ClearInCombat();
                 me->setRegeneratingHealth(false);
                 me->setRegeneratingMana(false);
 
@@ -425,6 +426,17 @@ class boss_tsulong : public CreatureScript
                 events.Reset();
 
                 summons.DespawnAll();
+
+                Map::PlayerList const& lPlayers = me->GetMap()->GetPlayers();
+
+                for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+                {
+                    if (auto const pPlayer = itr->GetSource())
+                    {
+                        pPlayer->ClearInCombat();
+                        pPlayer->CombatStop();
+                    }
+                }
             }
 
             void HandleEvadeDuringDay()
@@ -461,7 +473,7 @@ class boss_tsulong : public CreatureScript
 
             void UpdateAI(const uint32 diff) override
             {
-                if (!me->IsInEvadeMode())
+                if (!me->IsInEvadeMode() && !me->IsInCombat() && !inFly && !hasBeenDefeated)
                 {
                     m_oocEvents.Update(diff);
 
@@ -472,8 +484,6 @@ class boss_tsulong : public CreatureScript
                             summons.DespawnAll();
                             m_oocEvents.ScheduleEvent(1, 5000);
 
-                            me->SetVisible(true);
-                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
                         }
                     }
                 }

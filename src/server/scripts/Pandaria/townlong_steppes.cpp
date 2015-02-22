@@ -568,6 +568,7 @@ public:
 // --------------------------------------------------------------
 enum RangerRescue
 {
+    QUEST_RANGER_RESCUE                     = 30774,
     QUEST_OBJECTIVE_LONGYIN_RANGER_RESCUED  = 263418,
     QUEST_OBJECTIVE_FREE_LIN_SILENTSTRIKE   = 263419,
 
@@ -591,7 +592,8 @@ public:
 
     bool OnGossipHello(Player* player, GameObject* go) override
     {
-        if (player->GetQuestObjectiveCounter(QUEST_OBJECTIVE_LONGYIN_RANGER_RESCUED) < 4)
+        if (player->GetQuestStatus(QUEST_RANGER_RESCUE) == QUEST_STATUS_INCOMPLETE
+            && player->GetQuestObjectiveCounter(QUEST_OBJECTIVE_LONGYIN_RANGER_RESCUED) < 4)
         {
             if (auto ranger = GetClosestCreatureWithEntry(player, NPC_LONGYING_RANGER, 10.f))
             {
@@ -717,7 +719,8 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature) override
     {
-        if (!player->GetQuestObjectiveCounter(QUEST_OBJECTIVE_FREE_LIN_SILENTSTRIKE))
+        if (player->GetQuestStatus(QUEST_RANGER_RESCUE) == QUEST_STATUS_INCOMPLETE
+            && !player->GetQuestObjectiveCounter(QUEST_OBJECTIVE_FREE_LIN_SILENTSTRIKE))
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Examine the body.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
 
         player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());

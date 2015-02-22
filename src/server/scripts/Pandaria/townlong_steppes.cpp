@@ -563,6 +563,27 @@ public:
     }
 };
 
+// --------------------------------------------------------------
+// Quest: Ranger Rescue (30774)
+// --------------------------------------------------------------
+enum RangerRescue
+{
+    QUEST_OBJECTIVE_LONGYIN_RANGER_RESCUED  = 263418,
+    QUEST_OBJECTIVE_FREE_LIN_SILENTSTRIKE   = 263419,
+
+    GO_DRYWOOD_CAGE                         = 211511,
+    NPC_LONGYING_RANGER                     = 60730,
+    NPC_LONGYING_RANGER_HELPER              = 60763,
+    NPC_SUNA_SILENTSTRIKE                   = 60901,
+
+    SPELL_SUMMON_LONGYING_RANGER            = 117670,
+
+    EVENT_SUNA_KNEEL_TALK                   = 1,
+    EVENT_SUNA_TALK                         = 2,
+    EVENT_SUNA_TALK_2                       = 3,
+    EVENT_SUNA_STAND                        = 4
+};
+
 class go_drywood_cage : public GameObjectScript
 {
 public:
@@ -570,20 +591,46 @@ public:
 
     bool OnGossipHello(Player* player, GameObject* go) override
     {
-        if (player->GetQuestStatus(30774) == QUEST_STATUS_INCOMPLETE)
+        if (player->GetQuestObjectiveCounter(QUEST_OBJECTIVE_LONGYIN_RANGER_RESCUED) < 4)
         {
-            if (auto ranger = GetClosestCreatureWithEntry(player, 60730, 10.f))
+            if (auto ranger = GetClosestCreatureWithEntry(player, NPC_LONGYING_RANGER, 10.f))
             {
-                ranger->AI()->Talk(0, player->GetGUID());
-                ranger->ForcedDespawn(1000);
+                go->SetGoState(GO_STATE_ACTIVE);
 
-                auto aura = player->GetAura(117670);
-                if (!aura || aura->GetStackAmount() < 4)
-                    player->CastSpell(player, 117670, true);
+                player->QuestObjectiveSatisfy(QUEST_OBJECTIVE_LONGYIN_RANGER_RESCUED, 1);
+                player->CastSpell(player, SPELL_SUMMON_LONGYING_RANGER, true);
+
+                if (auto rangerHelper = GetClosestCreatureWithEntry(player, NPC_LONGYING_RANGER_HELPER, 10.f))
+                    rangerHelper->AI()->Talk(0, player->GetGUID());
+
+                ranger->DisappearAndDie();
             }
         }
+
         return true;
     }
+};
+
+class npc_longying_ranger : public CreatureScript
+{
+public:
+    npc_longying_ranger() : CreatureScript("npc_longying_ranger") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_longying_ranger_AI(creature);
+    }
+
+    struct npc_longying_ranger_AI : public ScriptedAI
+    {
+        npc_longying_ranger_AI(Creature* creature) : ScriptedAI(creature) { }
+
+        void JustRespawned()
+        {
+            if (GameObject* cage = GetClosestGameObjectWithEntry(me, GO_DRYWOOD_CAGE, 10.f))
+                cage->SetGoState(GO_STATE_READY);
+        }
+    };
 };
 
 class npc_lin_silentstrike : public CreatureScript
@@ -600,25 +647,25 @@ public:
     {
         npc_lin_silentstrikeAI(Creature* creature) : ScriptedAI(creature) { }
 
-        uint32 phase;
-        uint32 phaseTimer;
         uint64 sunaGUID;
 
         void Reset()
         {
             sunaGUID = 0;
-            phase = 0;
-            phaseTimer = 6000;
+
+            events.Reset();
+            events.ScheduleEvent(EVENT_SUNA_KNEEL_TALK, 5000);
+            events.ScheduleEvent(EVENT_SUNA_TALK, 13000);
+            events.ScheduleEvent(EVENT_SUNA_TALK_2, 21000);
+            events.ScheduleEvent(EVENT_SUNA_STAND, 29000);
         }
 
         void SetGUID(uint64 guid, int32) override
         {
-            if (!phase)
-                phase = 1;
-
-            if (auto suna = me->SummonCreature(60901, 2659.59f, 3268.618f, 425.33f, 5.56f, TEMPSUMMON_TIMED_DESPAWN, 41000))
+            if (auto suna = me->SummonCreature(NPC_SUNA_SILENTSTRIKE, 2659.59f, 3268.618f, 425.33f, 5.56f, TEMPSUMMON_TIMED_DESPAWN, 34000))
             {
                 sunaGUID = suna->GetGUID();
+
                 suna->AI()->Talk(0);
                 suna->GetMotionMaster()->MovePoint(1, 2674.21f, 3257.52f, 426.31f);
             }
@@ -626,50 +673,51 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if (!phase)
-                return;
+            events.Update(diff);
 
-            if (phaseTimer <= diff)
+            while (uint32 eventId = events.ExecuteEvent())
             {
-                auto suna = me->GetCreature(*me, sunaGUID);
+                Creature* suna = me->GetCreature(*me, sunaGUID);
                 if (!suna)
                 {
                     Reset();
                     return;
                 }
 
-                if (phase == 1)
+                switch (eventId)
                 {
-                    suna->SetStandState(UNIT_STAND_STATE_KNEEL);
-                    suna->AI()->Talk(1);
-                    phaseTimer = 10000;
+                    case EVENT_SUNA_KNEEL_TALK:
+                    {
+                        suna->SetStandState(UNIT_STAND_STATE_KNEEL);
+                        suna->AI()->Talk(1);
+                        break;
+                    }
+                    case EVENT_SUNA_TALK:
+                    {
+                        suna->AI()->Talk(2);
+                        break;
+                    }
+                    case EVENT_SUNA_TALK_2:
+                    {
+                        suna->AI()->Talk(3);
+                        break;
+                    }
+                    case EVENT_SUNA_STAND:
+                    {
+                        suna->SetStandState(UNIT_STAND_STATE_STAND);
+                        Reset();
+                        break;
+                    }
+                    default:
+                        break;
                 }
-                else if (phase == 2)
-                {
-                    suna->AI()->Talk(2);
-                    phaseTimer = 10000;
-                }
-                else if (phase == 3)
-                {
-                    suna->AI()->Talk(3);
-                    phaseTimer = 10000;
-                }
-                else if (phase == 4)
-                {
-                    suna->SetStandState(UNIT_STAND_STATE_STAND);
-                    Reset();
-                    return;
-                }
-                ++phase;
             }
-            else
-                phaseTimer -= diff;
         }
     };
 
     bool OnGossipHello(Player* player, Creature* creature) override
     {
-        if (player->GetQuestStatus(30774) == QUEST_STATUS_INCOMPLETE)
+        if (!player->GetQuestObjectiveCounter(QUEST_OBJECTIVE_FREE_LIN_SILENTSTRIKE))
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Examine the body.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
 
         player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
@@ -681,7 +729,7 @@ public:
         player->PlayerTalkClass->ClearMenus();
         if (action == GOSSIP_ACTION_INFO_DEF + 1)
         {
-            player->KilledMonsterCredit(creature->GetEntry());
+            player->QuestObjectiveSatisfy(QUEST_OBJECTIVE_FREE_LIN_SILENTSTRIKE, 1);
             creature->AI()->SetGUID(player->GetGUID(), 0);
             player->CLOSE_GOSSIP_MENU();
         }
@@ -704,5 +752,6 @@ void AddSC_townlong_steppes()
     new spell_item_cintron_infused_bandage();
     new spell_item_shado_pan_torch();
     new go_drywood_cage();
+    new npc_longying_ranger();
     new npc_lin_silentstrike();
 }

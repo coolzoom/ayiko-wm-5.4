@@ -75,7 +75,8 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
             {
                 SetBossNumber(DATA_MAX_BOSS_DATA);
 
-                ritualOfPurification        = true;
+                // 5.2
+                ritualOfPurification        = false;
                 introDone                   = false;
 
                 ancientRegailGuid           = 0;

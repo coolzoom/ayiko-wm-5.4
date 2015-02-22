@@ -81,3 +81,6 @@ UPDATE `creature` SET `spawntimesecs` = 600 WHERE `id` IN (57389,60546,62522,625
 UPDATE `creature` SET `spawntimesecs` = 43200 WHERE `id` IN (35189,50051,54318,54319,54320);
 UPDATE `creature` SET `spawntimesecs` = 36000 WHERE `id` = 38453;
 UPDATE `creature` SET `spawntimesecs` = 21600 WHERE `id` = 50138;
+
+/* Delete duplicate spawn */
+DELETE FROM `creature` WHERE `guid` = 997503;

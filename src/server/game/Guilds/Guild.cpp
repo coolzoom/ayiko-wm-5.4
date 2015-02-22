@@ -1625,7 +1625,16 @@ void Guild::HandleSetBankTabInfo(WorldSession* session, uint8 tabId, const std::
     if (BankTab* pTab = GetBankTab(tabId))
     {
         pTab->SetInfo(name, icon);
-        SendBankList(session, tabId, true, true);
+
+        WorldPacket data(SMSG_GUILD_EVENT_TAB_MODIFIED, 4 + 2 + name.size() + icon.size());
+        data << uint32(tabId);
+
+        data.WriteBits(name.size(), 7);
+        data.WriteBits(icon.size(), 9);
+        data.WriteString(icon);
+        data.WriteString(name);
+
+        BroadcastPacket(&data);
     }
 }
 
@@ -2049,9 +2058,7 @@ void Guild::HandleMemberDepositMoney(WorldSession* session, uint64 amount, bool 
     }
 
     CharacterDatabase.CommitTransaction(trans);
-
-    if (!cashFlow)
-        SendBankList(session, 0, false, false);
+    SendBankMoneyChanged();
 
     if (player->GetSession()->HasPermission(rbac::RBAC_PERM_LOG_GM_TRADE))
     {
@@ -2111,8 +2118,8 @@ bool Guild::HandleMemberWithdrawMoney(WorldSession* session, uint64 amount, bool
     CharacterDatabase.CommitTransaction(trans);
 
     SendMoneyInfo(session);
-    if (!repair)
-        SendBankList(session, 0, false, false);
+    SendBankMoneyChanged();
+
     return true;
 }
 
@@ -2484,6 +2491,13 @@ void Guild::SendMemberLeave(WorldSession* session, ObjectGuid playerGuid, bool k
 
         BroadcastPacket(&data);
     }
+}
+
+void Guild::SendBankMoneyChanged() const
+{
+    WorldPacket data(SMSG_GUILD_EVENT_BANK_MONEY_CHANGED, 8);
+    data << uint64(m_bankMoney);
+    BroadcastPacket(&data);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

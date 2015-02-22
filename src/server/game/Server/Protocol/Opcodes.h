@@ -992,9 +992,11 @@ enum Opcodes
     SMSG_GUILD_CRITERIA_DELETED                       = 0x000,  // 5.0.5 16048
     SMSG_GUILD_DECLINE                                = 0x000,  // 5.0.5 16048
     SMSG_GUILD_EVENT                                  = 0x000,  // obsolete, remove once all guild event opcode and strutures are RE'ed
+    SMSG_GUILD_EVENT_BANK_MONEY_CHANGED               = 0x543,  // 5.4.0 17399
+    SMSG_GUILD_EVENT_LOG_QUERY_RESULT                 = 0x46B,  // 5.4.0 17399
     SMSG_GUILD_EVENT_NEW_LEADER                       = 0x45A,  // 5.4.0 17399
     SMSG_GUILD_EVENT_RANK_CHANGED                     = 0xC42,  // 5.4.0 17399
-    SMSG_GUILD_EVENT_LOG_QUERY_RESULT                 = 0x46B,  // 5.4.0 17399
+    SMSG_GUILD_EVENT_TAB_MODIFIED                     = 0x443,  // 5.4.0 17399
     SMSG_GUILD_FLAGGED_FOR_RENAME                     = 0x000,  // 5.0.5 16048
     SMSG_GUILD_INVITE                                 = 0xC66,  // 5.4.0 17399
     SMSG_GUILD_INVITE_CANCEL                          = 0x000,  // 5.0.5 16048

@@ -298,7 +298,6 @@ class boss_tsulong : public CreatureScript
 
             void SetPhase(uint8 newPhase)
             {
-
                 uint8 oldPhase = phase;
                 phase = newPhase;
                 events.SetPhase(newPhase);

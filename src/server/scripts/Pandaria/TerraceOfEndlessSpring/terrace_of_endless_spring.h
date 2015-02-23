@@ -38,13 +38,15 @@ enum eTypes
     TYPE_TSULONG,
     TYPE_LEI_SHI,
     TYPE_SHA,
+    TYPE_LEIS_HOPE,
     MAX_TYPES,
     INTRO_DONE,
 };
 
 enum eSpells
 {
-    SPELL_RITUAL_OF_PURIFICATION = 126848
+    SPELL_RITUAL_OF_PURIFICATION    = 126848,
+    SPELL_LEIS_HOPE                 = 129368,
 };
 
 enum eActions

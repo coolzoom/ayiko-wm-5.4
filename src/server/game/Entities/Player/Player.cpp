@@ -7808,8 +7808,10 @@ Expansion Player::GetExpByLevel()
 
 void Player::RewardGuildReputation(Quest const* quest)
 {
-    uint32 rep = 0;
+    if (!GetGuild())
+        return;
 
+    uint32 rep = 0;
     switch (GetExpByLevel())
     {
         case EXP_VANILLA:   rep = 25;  break;
@@ -23775,7 +23777,7 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
     }
 
     float discountMod = GetReputationPriceDiscount(creature);
-    discountMod -= GetTotalAuraModifier(SPELL_AURA_MOD_VENDOR_ITEMS_PRICES) / 100.0f;
+    discountMod -= GetMaxPositiveAuraModifier(SPELL_AURA_MOD_VENDOR_ITEMS_PRICES) / 100.0f;
 
     int64 const price = int64(crItem->IsGoldRequired(pProto)
             ? discountMod * pProto->BuyPrice * count / pProto->BuyCount

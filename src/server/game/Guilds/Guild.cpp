@@ -1540,7 +1540,7 @@ void Guild::HandleSetEmblem(WorldSession* session, const EmblemInfo& emblemInfo)
     }
 }
 
-void Guild::HandleSetLeader(WorldSession* session, const std::string& name)
+void Guild::HandleSetLeader(WorldSession* session, const std::string& newLeaderName)
 {
     Player* player = session->GetPlayer();
     // Only leader can assign new leader
@@ -1550,11 +1550,53 @@ void Guild::HandleSetLeader(WorldSession* session, const std::string& name)
     else if (Member* pOldLeader = GetMember(player->GetGUID()))
     {
         // New leader must be a member of guild
-        if (Member* pNewLeader = GetMember(session, name))
+        if (Member* pNewLeader = GetMember(session, newLeaderName))
         {
             _SetLeaderGUID(pNewLeader);
             pOldLeader->ChangeRank(GR_OFFICER);
-            _BroadcastEvent(GE_LEADER_CHANGED, 0, player->GetName().c_str(), name.c_str());
+
+            std::string oldLeaderName = player->GetName();
+
+            ObjectGuid oldLeaderGuid = player->GetGUID();
+            ObjectGuid newLeaderGuid = pNewLeader->GetGUID();
+
+            WorldPacket data(SMSG_GUILD_EVENT_NEW_LEADER, 1 + 8 + 1 + 8 + 4 + 4 + 2 + newLeaderName.size() + oldLeaderName.size());
+            data.WriteBitSeq<6>(oldLeaderGuid);
+            data.WriteBitSeq<6>(newLeaderGuid);
+            data.WriteBitSeq<2, 4>(oldLeaderGuid);
+            data.WriteBitSeq<2>(newLeaderGuid);
+            data.WriteBitSeq<0>(oldLeaderGuid);
+            data.WriteBits(oldLeaderName.size(), 6);
+            data.WriteBitSeq<1>(oldLeaderGuid);
+            data.WriteBitSeq<0>(newLeaderGuid);
+            data.WriteBits(newLeaderName.size(), 6);
+            data.WriteBitSeq<3>(newLeaderGuid);
+            data.WriteBitSeq<3>(oldLeaderGuid);
+            data.WriteBit(0);                           // SelfPromoted
+            data.WriteBitSeq<7>(oldLeaderGuid);
+            data.WriteBitSeq<1, 7>(newLeaderGuid);
+            data.WriteBitSeq<5>(oldLeaderGuid);
+            data.WriteBitSeq<5, 4>(newLeaderGuid);
+            data.FlushBits();
+
+            data.WriteByteSeq<4>(oldLeaderGuid);
+            data << uint32(realmID);                    // NewLeaderVirtualRealmAddress
+            data.WriteString(oldLeaderName);
+            data.WriteByteSeq<5>(oldLeaderGuid);
+            data.WriteString(newLeaderName);
+            data.WriteByteSeq<1>(oldLeaderGuid);
+            data.WriteByteSeq<7, 5, 4>(newLeaderGuid);
+            data.WriteByteSeq<3>(oldLeaderGuid);
+            data.WriteByteSeq<3>(newLeaderGuid);
+            data << uint32(realmID);                    // OldLeaderVirtualRealmAddress
+            data.WriteByteSeq<2>(newLeaderGuid);
+            data.WriteByteSeq<2>(oldLeaderGuid);
+            data.WriteByteSeq<0>(newLeaderGuid);
+            data.WriteByteSeq<6, 0>(oldLeaderGuid);
+            data.WriteByteSeq<6, 1>(newLeaderGuid);
+            data.WriteByteSeq<7>(oldLeaderGuid);
+
+            BroadcastPacket(&data);
         }
     }
     else
@@ -1583,7 +1625,16 @@ void Guild::HandleSetBankTabInfo(WorldSession* session, uint8 tabId, const std::
     if (BankTab* pTab = GetBankTab(tabId))
     {
         pTab->SetInfo(name, icon);
-        SendBankList(session, tabId, true, true);
+
+        WorldPacket data(SMSG_GUILD_EVENT_TAB_MODIFIED, 4 + 2 + name.size() + icon.size());
+        data << uint32(tabId);
+
+        data.WriteBits(name.size(), 7);
+        data.WriteBits(icon.size(), 9);
+        data.WriteString(icon);
+        data.WriteString(name);
+
+        BroadcastPacket(&data);
     }
 }
 
@@ -1619,8 +1670,9 @@ void Guild::HandleSetRankInfo(WorldSession* session, uint32 rankId, const std::s
         for (GuildBankRightsAndSlotsVec::const_iterator itr = rightsAndSlots.begin(); itr != rightsAndSlots.end(); ++itr)
             _SetRankBankTabRightsAndSlots(rankId, tabId++, *itr);
 
-        HandleQuery(session);
-        HandleRoster();                                     // Broadcast for tab rights update
+        WorldPacket data(SMSG_GUILD_EVENT_RANK_CHANGED, 4);
+        data << uint32(rankId);
+        BroadcastPacket(&data);
     }
 }
 
@@ -2006,9 +2058,7 @@ void Guild::HandleMemberDepositMoney(WorldSession* session, uint64 amount, bool 
     }
 
     CharacterDatabase.CommitTransaction(trans);
-
-    if (!cashFlow)
-        SendBankList(session, 0, false, false);
+    SendBankMoneyChanged();
 
     if (player->GetSession()->HasPermission(rbac::RBAC_PERM_LOG_GM_TRADE))
     {
@@ -2068,8 +2118,8 @@ bool Guild::HandleMemberWithdrawMoney(WorldSession* session, uint64 amount, bool
     CharacterDatabase.CommitTransaction(trans);
 
     SendMoneyInfo(session);
-    if (!repair)
-        SendBankList(session, 0, false, false);
+    SendBankMoneyChanged();
+
     return true;
 }
 
@@ -2441,6 +2491,13 @@ void Guild::SendMemberLeave(WorldSession* session, ObjectGuid playerGuid, bool k
 
         BroadcastPacket(&data);
     }
+}
+
+void Guild::SendBankMoneyChanged() const
+{
+    WorldPacket data(SMSG_GUILD_EVENT_BANK_MONEY_CHANGED, 8);
+    data << uint64(m_bankMoney);
+    BroadcastPacket(&data);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

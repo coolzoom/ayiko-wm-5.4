@@ -220,7 +220,6 @@ class boss_tsulong : public CreatureScript
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 instance->SetBossState(DATA_TSULONG, FAIL);
 
-                Talk(SAY_WIPE);
                 summons.DespawnAll();
             }
 
@@ -433,7 +432,6 @@ class boss_tsulong : public CreatureScript
                 {
                     if (auto const pPlayer = itr->GetSource())
                     {
-                        pPlayer->ClearInCombat();
                         pPlayer->CombatStop();
                     }
                 }

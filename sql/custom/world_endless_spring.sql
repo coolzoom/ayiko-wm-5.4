@@ -669,8 +669,8 @@ UPDATE creature_template SET dmg_multiplier = 8, Health_Mod = 26000000 / @HP_MOD
 UPDATE creature_template SET dmg_multiplier = 4, Health_Mod = 11600000 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25R + 63275; -- Corrupted Protector
 
 -- Sha of Fear
-UPDATE creature_template SET lootId = entry, dmg_multiplier = 10, Health_Mod = 138000000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 60999; -- Sha of Fear
-UPDATE creature_template SET lootId = entry, dmg_multiplier = 13, Health_Mod = 544000000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_10H + 60999; -- Sha of Fear
+UPDATE creature_template SET lootId = entry, dmg_multiplier = 10, Health_Mod = 184704016 / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 60999; -- Sha of Fear
+UPDATE creature_template SET lootId = entry, dmg_multiplier = 13, Health_Mod = 489633568 / @HP_MOD_93 WHERE entry = @RAID_DIFF_10H + 60999; -- Sha of Fear
 UPDATE creature_template SET lootId = entry, dmg_multiplier = 10, Health_Mod = 554000000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25N + 60999; -- Sha of Fear
 UPDATE creature_template SET lootId = entry, dmg_multiplier = 13, Health_Mod = 1600000000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 60999; -- Sha of Fear
 UPDATE creature_template SET lootId = entry, dmg_multiplier = 7,  Health_Mod = 343000000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 60999; -- Sha of Fear

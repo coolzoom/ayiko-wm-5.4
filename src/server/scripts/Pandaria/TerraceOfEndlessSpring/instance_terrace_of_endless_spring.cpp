@@ -212,6 +212,26 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                             c->AI()->DoAction(ACTION_START_TSULONG_WAYPOINT);
                         }
                         break;
+                    case 2:
+                        Map::PlayerList const& lPlayers = instance->GetPlayers();
+
+                        for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+                        {
+                            if (Player* pPlayer = itr->GetSource())
+                            {
+                                if (!pPlayer->HasAura(SPELL_LEIS_HOPE))
+                                {
+                                    if (Aura* pAura = pPlayer->AddAura(SPELL_LEIS_HOPE, pPlayer))
+                                    {
+                                        pAura->SetMaxDuration(3 * HOUR);
+                                        pAura->SetDuration(3 * HOUR);
+                                    }
+                                }
+                            }
+                        }
+
+                        m_mEvents.ScheduleEvent(2, 40000);
+                        break;
                     }
                 }
             }
@@ -260,6 +280,11 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                     case TYPE_SHA:
                         m_auiEncounter[type] = data;
                         break;
+                    case TYPE_LEIS_HOPE:
+                        if (data == DONE)
+                            m_mEvents.ScheduleEvent(2, 200);
+                        m_auiEncounter[type] = data;
+                        break;
                     }
 
                     if (data >= DONE)
@@ -268,7 +293,7 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
 
                         std::ostringstream saveStream;
                         saveStream << m_auiEncounter[0] << ' ' << m_auiEncounter[1] << ' ' << m_auiEncounter[2] << ' '
-                            << m_auiEncounter[3];
+                            << m_auiEncounter[3] << m_auiEncounter[4];
 
                         strSaveData = saveStream.str();
 
@@ -289,14 +314,19 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                 OUT_LOAD_INST_DATA(chrIn);
                 std::istringstream loadStream(chrIn);
 
-                loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3];
+                loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3] >> m_auiEncounter[4];
                 for (uint8 i = 0; i < MAX_TYPES; ++i)
                 if (m_auiEncounter[i] == IN_PROGRESS)                // Do not load an encounter as "In Progress" - reset it instead.
                     m_auiEncounter[i] = NOT_STARTED;
 
                 if (m_auiEncounter[TYPE_PROTECTORS] == DONE && m_auiEncounter[TYPE_TSULONG] != DONE)
                 {
-                    m_mEvents.ScheduleEvent(1, 2000);
+                    m_mEvents.ScheduleEvent(1, 200);
+                }
+
+                if (m_auiEncounter[TYPE_LEIS_HOPE] == DONE && instance->IsHeroic())
+                {
+                    m_mEvents.ScheduleEvent(2, 200);
                 }
 
                 OUT_LOAD_INST_DATA_COMPLETE;
@@ -319,6 +349,7 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                     case TYPE_TSULONG:
                     case TYPE_LEI_SHI:
                     case TYPE_SHA:
+                    case TYPE_LEIS_HOPE:
                         return m_auiEncounter[type];
                     default:
                         return 0;

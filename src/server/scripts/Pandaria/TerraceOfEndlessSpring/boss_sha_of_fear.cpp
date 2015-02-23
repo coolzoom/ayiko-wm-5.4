@@ -36,6 +36,22 @@ enum eShaOfFearSpells
     SPELL_CONJURE_TERROR_SPAWN_03   = 119371,
     SPELL_CONJURE_TERROR_SPAWN_04   = 119372,
 
+    //Heroic
+    SPELL_NAKED_AND_AFRAID          = 120669,
+    SPELL_FADING_LIGHT              = 129378,
+    SPELL_IMPLACABLE_STRIKE         = 120672,
+    SPELL_DREAD_THRASH              = 132007,
+    SPELL_SUBMERGE                  = 120455,
+    SPELL_EMERGE                    = 120458,
+    SPELL_EMERGE_STUN               = 120475,
+    SPELL_HUDDLE_IN_TERROR          = 120629,
+    SPELL_WATERSPOUT                = 120519,
+    SPELL_CHAMPION_OF_THE_LIGHT     = 120268,
+    SPELL_TRANSFER_LIGHT            = 120285,
+    SPELL_DREAD_EXPANSE             = 120289,
+    SPELL_ETERNAL_DARKNESS          = 120394,
+
+
     // Other mobs
     SPELL_LIGHT_WALL                = 117865,
     SPELL_CHAMPION_OF_LIGHT         = 117866,
@@ -124,6 +140,12 @@ static const Position spawnTerrorPos[4] =
     { -1046.274f, -2772.215f, 38.303f, 0.0f }
 };
 
+enum ePhases
+{
+    PHASE_TERRACE,
+    PHASE_DREAD_EXPANSE
+};
+
 static const Position lightPos = { -1017.835f, -2771.984f, 38.65444f, 4.718282f };
 
 class boss_sha_of_fear : public CreatureScript
@@ -144,6 +166,8 @@ class boss_sha_of_fear : public CreatureScript
 
             uint8 attacksCounter;
             uint8 terrorCounter;
+
+            uint32 m_uiPhase;
 
             void Reset() override
             {
@@ -176,6 +200,14 @@ class boss_sha_of_fear : public CreatureScript
                     if (pInstance->GetData(SPELL_RITUAL_OF_PURIFICATION))
                         me->AddAura(SPELL_RITUAL_OF_PURIFICATION, me);
                 }
+
+                SetPhase(PHASE_TERRACE);
+            }
+
+            void SetPhase(uint8 m_phase)
+            {
+                m_uiPhase = m_phase;
+                events.SetPhase(m_phase);
             }
 
             void JustReachedHome() override
@@ -213,10 +245,10 @@ class boss_sha_of_fear : public CreatureScript
                 me->SummonCreature(NPC_JINLUN_KUN, -832.0764f, -2745.405f, 31.67757f, 0.1583484f);
 
                 events.ScheduleEvent(EVENT_CHECK_MELEE, 1000);
-                events.ScheduleEvent(EVENT_EERIE_SKULL, 5000);
+                events.ScheduleEvent(EVENT_EERIE_SKULL, 5000, 0, PHASE_TERRACE);
                 events.ScheduleEvent(EVENT_CHECK_ENERGY, 1000);
-                events.ScheduleEvent(EVENT_FIRST_TERRORS, 30000);
-                events.ScheduleEvent(EVENT_OMINOUS_CACKLE, 35000);
+                events.ScheduleEvent(EVENT_FIRST_TERRORS, 30000, 0, PHASE_TERRACE);
+                events.ScheduleEvent(EVENT_OMINOUS_CACKLE, 35000, 0, PHASE_TERRACE);
             }
 
             void JustDied(Unit* /*killer*/) override
@@ -310,20 +342,33 @@ class boss_sha_of_fear : public CreatureScript
             {
                 if (damageType == DIRECT_DAMAGE)
                 {
-                    if (attacksCounter >= 3 && !me->m_extraAttacks)
+                    if (m_uiPhase == PHASE_TERRACE)
                     {
-                        me->CastSpell(me, SPELL_THRASH_EXTRA_ATTACKS, true);
-                        attacksCounter = 0;
+                        if (attacksCounter >= 3 && !me->m_extraAttacks)
+                        {
+                            me->CastSpell(me, SPELL_THRASH_EXTRA_ATTACKS, true);
+                            attacksCounter = 0;
+                        }
+                        else if (attacksCounter >= 2 && !me->m_extraAttacks)
+                        {
+                            me->CastSpell(me, SPELL_THRASH_AURA, true);
+                            ++attacksCounter;
+                        }
+                        else if (!me->m_extraAttacks)
+                        {
+                            me->RemoveAura(SPELL_THRASH_AURA);
+                            ++attacksCounter;
+                        }
                     }
-                    else if (attacksCounter >= 2 && !me->m_extraAttacks)
+                    else
                     {
-                        me->CastSpell(me, SPELL_THRASH_AURA, true);
-                        ++attacksCounter;
-                    }
-                    else if (!me->m_extraAttacks)
-                    {
-                        me->RemoveAura(SPELL_THRASH_AURA);
-                        ++attacksCounter;
+                        if (attacksCounter > 3 && !me->m_extraAttacks)
+                        {
+                            DoCast(me, SPELL_DREAD_THRASH, true);
+                            attacksCounter = 0;
+                        }
+                        else
+                            ++attacksCounter;
                     }
                 }
             }
@@ -355,6 +400,23 @@ class boss_sha_of_fear : public CreatureScript
                     val += value;
 
                 me->SetInt32Value(UNIT_FIELD_POWER1, val);
+            }
+
+            void DamageTaken(Unit* /*dealer*/, uint32& uiDamage)
+            {
+                if (me->GetMap()->IsHeroic())
+                {
+                    if (me->HealthBelowPctDamaged(66, uiDamage))
+                    {
+                        if (auto const pInstance = me->GetInstanceScript())
+                        {
+                            if (pInstance->GetData(TYPE_LEIS_HOPE) != DONE)
+                                pInstance->SetData(TYPE_LEIS_HOPE, DONE);
+                        }
+
+                        SetPhase(PHASE_DREAD_EXPANSE);
+                    }
+                }
             }
 
             void UpdateAI(const uint32 diff) override
@@ -397,7 +459,7 @@ class boss_sha_of_fear : public CreatureScript
                     case EVENT_EERIE_SKULL:
                     {
                         DoCast(SELECT_TARGET_RANDOM, SPELL_EERIE_SKULL, false, 1, 80.0f);
-                        events.ScheduleEvent(EVENT_EERIE_SKULL, 5000);
+                        events.ScheduleEvent(EVENT_EERIE_SKULL, 5000, 0, PHASE_TERRACE);
                         break;
                     }
                     case EVENT_CHECK_ENERGY:
@@ -410,9 +472,16 @@ class boss_sha_of_fear : public CreatureScript
 
                         if (me->GetPower(POWER_ENERGY) >= me->GetMaxPower(POWER_ENERGY))
                         {
-                            if (Creature* pureLight = Creature::GetCreature(*me, pInstance->GetData64(NPC_PURE_LIGHT_TERRACE)))
-                                me->CastSpell(pureLight, SPELL_BREATH_OF_FEAR, false);
-                            Talk(SAY_BREATH_OF_FEAR);
+                            if (m_uiPhase == PHASE_TERRACE)
+                            {
+                                if (Creature* pureLight = Creature::GetCreature(*me, pInstance->GetData64(NPC_PURE_LIGHT_TERRACE)))
+                                    me->CastSpell(pureLight, SPELL_BREATH_OF_FEAR, false);
+                                Talk(SAY_BREATH_OF_FEAR);
+                            }
+                            else
+                            {
+                                DoCast(SPELL_SUBMERGE);
+                            }
                             me->SetPower(POWER_ENERGY, 0);
                             me->SetInt32Value(UNIT_FIELD_POWER1, 0);
                         }
@@ -437,7 +506,7 @@ class boss_sha_of_fear : public CreatureScript
                                 break;
                             }
                         }
-                        events.ScheduleEvent(EVENT_OMINOUS_CACKLE, 150000);
+                        events.ScheduleEvent(EVENT_OMINOUS_CACKLE, 150000, 0, PHASE_TERRACE);
                         break;
                     }
                     default:
@@ -581,7 +650,9 @@ class mob_return_to_the_terrace : public CreatureScript
 
             void Reset()
             {
-                me->setFaction(35);
+               me->setFaction(35);
+               if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                   me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 // Sniffed values
                me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
                me->SetFlag(UNIT_FIELD_INTERACT_SPELL_ID, 118977);

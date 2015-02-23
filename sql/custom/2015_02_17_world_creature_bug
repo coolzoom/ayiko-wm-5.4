@@ -84,3 +84,6 @@ UPDATE `creature` SET `spawntimesecs` = 21600 WHERE `id` = 50138;
 
 /* Delete duplicate spawn */
 DELETE FROM `creature` WHERE `guid` = 997503;
+
+/* Leyara Attackable on Molten Front */
+UPDATE `creature_template` SET `unit_flags` = 32768 WHERE `entry` = 53366;

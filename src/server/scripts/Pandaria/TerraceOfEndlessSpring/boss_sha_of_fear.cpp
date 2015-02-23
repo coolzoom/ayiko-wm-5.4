@@ -140,7 +140,7 @@ static const Position spawnTerrorPos[4] =
     { -1046.274f, -2772.215f, 38.303f, 0.0f }
 };
 
-enum ePhases
+enum eShaPhases
 {
     PHASE_TERRACE,
     PHASE_DREAD_EXPANSE

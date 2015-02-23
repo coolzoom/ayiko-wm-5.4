@@ -239,8 +239,8 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (62442, 9, 0, 'Die in darkness.', 14, 0, 100, 0, 0, 29360, 'Tsulong - SAY_SLAY_NIGHT'),
 (62442, 9, 1, 'The night surrounds you...', 14, 0, 100, 0, 0, 29361, 'Tsulong - SAY_SLAY_NIGHT'),
 (62442, 10, 0, 'I thank you, strangers. I have been freed.', 14, 0, 100, 0, 0, 29352, 'Tsulong - SAY_DEATH'),
-(62442, 11, 0, 'Protect... the waters...', 14, 0, 100, 0, 0, 29352, 'Tsulong - SAY_WIPE'),
-(62442, 12, 0, '|TInterface\\Icons\\spell_holy_surgeoflight.blp:20|t%s casts |cFFFF0000|Hspell:122789|h[Sunbeam]|h|r!', 41, 0, 100, 0, 0, 29365, 'Tsulong - EMOTE_SUNBEAM');
+(62442, 11, 0, 'Protect... the waters...', 14, 0, 100, 0, 0, 29351, 'Tsulong - SAY_WIPE'),
+(62442, 12, 0, '|TInterface\\Icons\\spell_holy_surgeoflight.blp:20|t%s casts |cFFFF0000|Hspell:122789|h[Sunbeam]|h|r!', 41, 0, 100, 0, 0, 0, 'Tsulong - EMOTE_SUNBEAM');
 
 DELETE FROM spell_script_names WHERE spell_id IN (122438, 122453, 123018);
 INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
@@ -477,6 +477,7 @@ UPDATE `creature_template` SET `speed_walk`=2, `BaseAttackTime`=1500 WHERE `entr
 UPDATE `creature_template` SET `speed_walk`=2 WHERE `entry`=65736; -- Return to the Terrace
 UPDATE `creature_template` SET `speed_walk`=2 WHERE `entry`=63275; -- Corrupted Protector
 UPDATE `creature_template` SET `speed_walk`=1.2 WHERE `entry`=71095; -- Reflection of Lei Shi
+UPDATE `creature_template` SET `unit_class`=4, `minlevel`=90, `maxlevel`=90, `speed_walk`=1.444444, `speed_run`=1.571429, `BaseAttackTime`=1500, faction_A = 16, faction_H = 16 WHERE entry = 64393;
 
 
 DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+71;

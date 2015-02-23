@@ -203,6 +203,10 @@ class boss_lei_shi : public CreatureScript
                 if (pInstance)
                 {
                     me->CastSpell(me, SPELL_AFRAID, true);
+
+                    if (auto const afraid = me->GetAuraEffect(SPELL_AFRAID, EFFECT_0))
+                        afraid->ChangeAmount(0);
+
                     pInstance->SetBossState(DATA_LEI_SHI, IN_PROGRESS);
                     pInstance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                     DoZoneInCombat();
@@ -277,10 +281,11 @@ class boss_lei_shi : public CreatureScript
 
                     pInstance->SetBossState(DATA_LEI_SHI, DONE);
 
+                    /*
                     if (me->GetMap()->IsHeroic())
                         me->SummonGameObject(GOB_LEI_SHI_CHEST_HEROIC, leiShiPos.GetPositionX(), leiShiPos.GetPositionY(), leiShiPos.GetPositionZ(), 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0);
                     else
-                        me->SummonGameObject(GOB_LEI_SHI_CHEST_NORMAL, leiShiPos.GetPositionX(), leiShiPos.GetPositionY(), leiShiPos.GetPositionZ(), 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0);
+                        me->SummonGameObject(GOB_LEI_SHI_CHEST_NORMAL, leiShiPos.GetPositionX(), leiShiPos.GetPositionY(), leiShiPos.GetPositionZ(), 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0); */
                 }
             }
 

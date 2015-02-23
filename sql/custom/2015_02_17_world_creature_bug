@@ -93,3 +93,6 @@ SET @ADHERENTGUID = (SELECT MAX(guid) FROM `creature`);
 DELETE FROM `creature` WHERE `id`=69334;
 INSERT INTO `creature` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`,`protec_anti_doublet`) VALUES
 (@ADHERENTGUID +1, 69334, 0, 0, 0, 1, 65535, 0, 0, -8192.51, 541.891, 117.647, 4.8336, 300, 0, 0, 393941, 0, 0, 0, 0, 0, 2048, 0, 0, null);
+
+/* Sorcerer Mogu in MSV was not visible and not attackable */
+UPDATE `creature_template` SET `faction_A` = 14, `faction_H` = 14, `ScriptName` = '' WHERE `entry` = 61250;

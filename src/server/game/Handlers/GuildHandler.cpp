@@ -592,15 +592,10 @@ void WorldSession::HandleGuildBankUpdateTab(WorldPacket& recvData)
     iconLen = recvData.ReadBits(9);
 
     recvData.ReadBitSeq<0, 2, 6, 7, 3, 4, 5, 1>(goGuid);
-
     recvData.ReadByteSeq<6, 4>(goGuid);
-
     icon = recvData.ReadString(iconLen);
-
     recvData.ReadByteSeq<5, 0, 7, 1>(goGuid);
-
     name = recvData.ReadString(nameLen);
-
     recvData.ReadByteSeq<2, 3>(goGuid);
 
     if (!name.empty() && !icon.empty())

@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2008-2015 MoltenCore <http://www.molten-wow.com/>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "GameObjectAI.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
@@ -97,6 +114,7 @@ class boss_lei_shi : public CreatureScript
             bool getAwayPhase;
             bool protectScheduled;
             bool leiShiFreed;
+            bool nextSpecial;
 
             float getAwayHealthPct;
 
@@ -110,6 +128,7 @@ class boss_lei_shi : public CreatureScript
                 getAwayPhase        = false;
                 shielded            = false;
                 protectScheduled    = false;
+                nextSpecial         = (bool)urand(0, 1);
 
                 nextAfraidPct       = 90;
                 nextProtectPct      = 80;
@@ -129,10 +148,7 @@ class boss_lei_shi : public CreatureScript
 
                 events.ScheduleEvent(EVENT_SPRAY, 400);
 
-                if (urand(0, 1))
-                    events.ScheduleEvent(EVENT_GET_AWAY,    32000);
-                else
-                    events.ScheduleEvent(EVENT_HIDE,        32000);
+                ScheduleSpecialSpell();
 
                 if (GameObject* vortex = me->GetMap()->GetGameObject(pInstance->GetData64(GOB_LEI_SHIS_VORTEX)))
                     vortex->SetGoState(GO_STATE_ACTIVE);
@@ -168,6 +184,12 @@ class boss_lei_shi : public CreatureScript
                     me->CastSpell(me, SPELL_LEI_SHI_TRANSFORM, true);
             }
 
+            void ScheduleSpecialSpell()
+            {
+                events.ScheduleEvent(nextSpecial ? EVENT_GET_AWAY : EVENT_HIDE, 32000);
+                nextSpecial = !nextSpecial;
+            }
+
             void JustReachedHome()
             {
                 _JustReachedHome();
@@ -181,6 +203,10 @@ class boss_lei_shi : public CreatureScript
                 if (pInstance)
                 {
                     me->CastSpell(me, SPELL_AFRAID, true);
+
+                    if (auto const afraid = me->GetAuraEffect(SPELL_AFRAID, EFFECT_0))
+                        afraid->ChangeAmount(0);
+
                     pInstance->SetBossState(DATA_LEI_SHI, IN_PROGRESS);
                     pInstance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                     DoZoneInCombat();
@@ -190,16 +216,6 @@ class boss_lei_shi : public CreatureScript
 
                     Talk(TALK_AGGRO);
                 }
-            }
-
-            void JustSummoned(Creature* summon)
-            {
-                summons.Summon(summon);
-            }
-
-            void SummonedCreatureDespawn(Creature* summon)
-            {
-                summons.Despawn(summon);
             }
 
             void KilledUnit(Unit* who)
@@ -265,10 +281,11 @@ class boss_lei_shi : public CreatureScript
 
                     pInstance->SetBossState(DATA_LEI_SHI, DONE);
 
+                    /*
                     if (me->GetMap()->IsHeroic())
                         me->SummonGameObject(GOB_LEI_SHI_CHEST_HEROIC, leiShiPos.GetPositionX(), leiShiPos.GetPositionY(), leiShiPos.GetPositionZ(), 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0);
                     else
-                        me->SummonGameObject(GOB_LEI_SHI_CHEST_NORMAL, leiShiPos.GetPositionX(), leiShiPos.GetPositionY(), leiShiPos.GetPositionZ(), 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0);
+                        me->SummonGameObject(GOB_LEI_SHI_CHEST_NORMAL, leiShiPos.GetPositionX(), leiShiPos.GetPositionY(), leiShiPos.GetPositionZ(), 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0); */
                 }
             }
 
@@ -353,6 +370,7 @@ class boss_lei_shi : public CreatureScript
 
                             if (Creature* protector = me->GetMap()->GetCreature(itr))
                             {
+                                protector->SetHealth(protector->GetMaxHealth());
                                 protector->RemoveAura(SPELL_PROTECT_RESPAWN);
                                 protector->CastSpell(protector, SPELL_PROTECT_VISUAL, true);
                                 protector->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_IMMUNE_TO_PC);
@@ -371,10 +389,7 @@ class boss_lei_shi : public CreatureScript
                         getAwayPhase = false;
                         me->RemoveAllAreasTrigger();
 
-                        if (urand(0, 1))
-                            events.ScheduleEvent(EVENT_HIDE, 32000);
-                        else
-                            events.ScheduleEvent(EVENT_GET_AWAY, 32000);
+                        ScheduleSpecialSpell();
                         break;
                     }
                     case ACTION_TERMINATE_HIDE_PHASE:
@@ -391,10 +406,7 @@ class boss_lei_shi : public CreatureScript
                         // Only have Lei Shi (hidden) in summons
                         summons.DespawnAll();
 
-                        if (urand(0, 1))
-                            events.ScheduleEvent(EVENT_HIDE, 32000);
-                        else
-                            events.ScheduleEvent(EVENT_GET_AWAY, 32000);
+                        ScheduleSpecialSpell();
                         break;
                     }
                     default:
@@ -464,16 +476,6 @@ class boss_lei_shi : public CreatureScript
                     }
                     case EVENT_GET_AWAY_CAST:
                     {
-                        // Wait the real teleportation before cast
-                        if (getAwayPhase && (me->GetPositionX() != leiShiPos.GetPositionX() ||
-                                             me->GetPositionY() != leiShiPos.GetPositionY() ||
-                                             me->GetPositionZ() != leiShiPos.GetPositionZ()))
-                        {
-                            me->CastSpell(me, SPELL_GET_AWAY_TELEPORT, true);
-                            events.ScheduleEvent(EVENT_GET_AWAY_CAST, 100);
-                            break;
-                        }
-
                         me->CastSpell(me, SPELL_GET_AWAY, false);
                         break;
                     }
@@ -481,7 +483,7 @@ class boss_lei_shi : public CreatureScript
                     {
                         if (getAwayPhase || me->HasUnitState(UNIT_STATE_CASTING))
                         {
-                            events.ScheduleEvent(EVENT_PROTECT, 0);
+                            events.RescheduleEvent(EVENT_PROTECT, 0);
                             break;
                         }
 
@@ -490,9 +492,9 @@ class boss_lei_shi : public CreatureScript
                     }
                     case EVENT_HIDE:
                     {
-                        if (me->HasUnitState(UNIT_STATE_CASTING))
+                        if (me->HasUnitState(UNIT_STATE_CASTING) || shielded)
                         {
-                            events.ScheduleEvent(EVENT_HIDE, 0);
+                            events.RescheduleEvent(EVENT_HIDE, 0);
                             break;
                         }
 
@@ -506,6 +508,7 @@ class boss_lei_shi : public CreatureScript
                         break;
                 }
             }
+
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -550,6 +553,12 @@ class mob_animated_protector : public CreatureScript
 // Lei Shi (hidden) - 63099
 class mob_lei_shi_hidden : public CreatureScript
 {
+    enum
+    {
+        SPELL_HIDE_VISUAL       = 132363,
+        SPELL_HIDE_PROC         = 123233,
+        SPELL_HIDE_TRIGGER      = 132362,
+    };
     public:
         mob_lei_shi_hidden() : CreatureScript("mob_lei_shi_hidden") { }
 
@@ -562,6 +571,12 @@ class mob_lei_shi_hidden : public CreatureScript
 
             InstanceScript* pInstance;
             EventMap events;
+
+            void SpellHitTarget(Unit* caster, SpellInfo const* spell) override
+            {
+                if (spell->Id == SPELL_HIDE_TRIGGER)
+                    caster->CastSpell(caster, SPELL_HIDE_VISUAL, true);
+            }
 
             void Reset()
             {
@@ -591,6 +606,8 @@ class mob_lei_shi_hidden : public CreatureScript
                         }
                     }
                 }
+
+                DoCast(me, SPELL_HIDE_PROC, true);
             }
 
             void UpdateAI(const uint32 diff)
@@ -638,7 +655,7 @@ class spell_get_away : public SpellScriptLoader
         {
             PrepareAuraScript(spell_get_away_AuraScript);
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* caster = GetCaster())
                     if (caster->ToCreature())
@@ -668,12 +685,10 @@ class spell_hide : public SpellScriptLoader
         {
             PrepareAuraScript(spell_hide_AuraScript);
 
-            void OnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* caster = GetCaster())
                 {
-                    caster->CastSpell(caster, SPELL_HIDE_STACKS, true);
-                    caster->CastSpell(caster, SPELL_HIDE_SUMMON, true);
 
                     uint8 pos = urand(0, 3);
 
@@ -682,12 +697,15 @@ class spell_hide : public SpellScriptLoader
                                            hidePositions[pos].GetPositionZ(),
                                            hidePositions[pos].GetOrientation());
 
+                    caster->CastSpell(caster, SPELL_HIDE_STACKS, true);
+                    caster->CastSpell(caster, SPELL_HIDE_SUMMON, true);
+
                     caster->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                     caster->SetDisplayId(11686);
                 }
             }
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* caster = GetCaster())
                 {
@@ -710,6 +728,41 @@ class spell_hide : public SpellScriptLoader
         }
 };
 
+// Get Away damage - 123467
+class spell_get_away_dmg : public SpellScriptLoader
+{
+public:
+    spell_get_away_dmg() : SpellScriptLoader("spell_get_away_dmg") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void ModifyDamage(SpellEffIndex effIndex)
+        {
+            Unit * caster = GetCaster();
+            Player * victim = GetHitPlayer();
+
+            if (!caster || !victim)
+                return;
+
+            if (victim->isMoving() && !victim->m_movementInfo.HasMovementFlag(MOVEMENTFLAG_BACKWARD) && victim->isInFront(caster))
+                SetHitDamage(GetHitDamage() / 2);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_impl::ModifyDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript *GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
+
 // Hide (stacks) - 123233
 class spell_hide_stacks : public SpellScriptLoader
 {
@@ -720,7 +773,7 @@ class spell_hide_stacks : public SpellScriptLoader
         {
             PrepareAuraScript(spell_hide_stacks_AuraScript);
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* caster = GetCaster())
                     if (caster->ToCreature())
@@ -789,7 +842,7 @@ class spell_scary_fog_dot : public SpellScriptLoader
         {
             PrepareAuraScript(spell_scary_fog_dot_AuraScript);
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (Unit* target = GetTarget())
                     target->CastSpell(target, SPELL_SCARY_FOG_STACKS, true);
@@ -854,6 +907,7 @@ void AddSC_boss_lei_shi()
     new mob_animated_protector();
     new mob_lei_shi_hidden();
     new spell_get_away();
+    new spell_get_away_dmg();
     new spell_hide();
     new spell_hide_stacks();
     new spell_scary_fog_dot();

@@ -1875,8 +1875,9 @@ public:
 
 enum ZuluhedChains
 {
-    QUEST_ZULUHED   = 10866,
-    NPC_KARYNAKU    = 22112,
+    QUEST_ZULUHED                  = 10866,
+    QUEST_OBJECTIVE_KARYNAKU_FREED = 262037,
+    NPC_KARYNAKU                   = 22112,
 };
 
 class spell_unlocking_zuluheds_chains : public SpellScriptLoader
@@ -1892,7 +1893,7 @@ public:
         {
             if (GetCaster()->GetTypeId() == TYPEID_PLAYER)
                 if (Creature* karynaku = GetCaster()->FindNearestCreature(NPC_KARYNAKU, 15.0f))
-                    GetCaster()->ToPlayer()->CastedCreatureOrGO(NPC_KARYNAKU, karynaku->GetGUID(), GetSpellInfo()->Id);
+                    GetCaster()->ToPlayer()->QuestObjectiveSatisfy(QUEST_OBJECTIVE_KARYNAKU_FREED, 1);
         }
 
         void Register()

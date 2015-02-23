@@ -48,33 +48,34 @@ SMSG_CALENDAR_EVENT_INVITE_STATUS_ALERT [ Structure unkown ]
 
 void WorldSession::HandleCalendarGetCalendar(WorldPacket &recvData)
 {
+    uint64 guid = _player->GetGUID();
+    TC_LOG_DEBUG("network", "CMSG_CALENDAR_GET_CALENDAR [" UI64FMTD "]", guid);
+
     if (!HasPermission(rbac::RBAC_PERM_USE_CALENDAR))
     {
         recvData.rfinish();
         return;
     }
 
-    uint64 guid = _player->GetGUID();
-    TC_LOG_DEBUG("network", "CMSG_CALENDAR_GET_CALENDAR [" UI64FMTD "]", guid);
-
-    time_t cur_time = time_t(time(NULL));
-
-    TC_LOG_DEBUG("network", "SMSG_CALENDAR_SEND_CALENDAR [" UI64FMTD "]", guid);
+    time_t curTime = time_t(time(NULL));
 
     ByteBuffer eventsBuffer;
     ByteBuffer invitesBuffer;
     ByteBuffer holidaysBuffer;
-    ByteBuffer instancesBuffer;
-    ByteBuffer raidsBuffer;
+    ByteBuffer raidLockoutBuffer;
+    ByteBuffer raidResetBuffer;
+
     WorldPacket data(SMSG_CALENDAR_SEND_CALENDAR);
 
     CalendarEventIdList const& events = sCalendarMgr->GetPlayerEvents(guid);
 
-    data.WriteBits(events.size(), 19);
+    uint32 eventCount = 0;
+    size_t eventCountPos = data.bitwpos();
+    data.WriteBits(eventCount, 19);
 
-    for (CalendarEventIdList::const_iterator it = events.begin(); it != events.end(); ++it)
+    for (auto const &calendarEventId : events)
     {
-        if (CalendarEvent* calendarEvent = sCalendarMgr->GetEvent(*it))
+        if (CalendarEvent* calendarEvent = sCalendarMgr->GetEvent(calendarEventId))
         {
             ObjectGuid creatorGuid = calendarEvent->GetCreatorGUID();
             ObjectGuid guildGuid = MAKE_NEW_GUID(calendarEvent->GetGuildId(), 0, calendarEvent->GetGuildId() ? uint32(HIGHGUID_GUILD) : 0);
@@ -100,54 +101,24 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket &recvData)
             eventsBuffer.WriteByteSeq<5>(creatorGuid);
             eventsBuffer.WriteByteSeq<4>(guildGuid);
             eventsBuffer.WriteByteSeq<3, 0>(creatorGuid);
-
-            if (calendarEvent->GetTitle().size() > 0)
-                eventsBuffer.append(calendarEvent->GetTitle().c_str(), calendarEvent->GetTitle().size());
-
+            eventsBuffer.WriteString(calendarEvent->GetTitle());
             eventsBuffer.WriteByteSeq<2>(creatorGuid);
             eventsBuffer << uint32(calendarEvent->GetFlags());
             eventsBuffer << uint8(calendarEvent->GetType());
-        }
-        else
-        {
-            TC_LOG_ERROR("network", "SMSG_CALENDAR_SEND_CALENDAR: No Event found with id [" UI64FMTD "]", *it);
 
-            data.WriteBits(0, 8);
-            data.WriteBit(0);
-            data.WriteBit(0);
-            data.WriteBit(0);
-            data.WriteBit(0);
-            data.WriteBit(0);
-            data.WriteBit(0);
-            data.WriteBit(0);
-            data.WriteBit(0);
-            data.WriteBit(0);
-            data.WriteBit(0);
-            data.WriteBit(0);
-            data.WriteBit(0);
-            data.WriteBit(0);
-            data.WriteBit(0);
-            data.WriteBit(0);
-            data.WriteBit(0);
-
-            eventsBuffer << uint32(calendarEvent->GetTime());
-            eventsBuffer << uint32(calendarEvent->GetDungeonId());
-            eventsBuffer << uint64(calendarEvent->GetEventId());
-            eventsBuffer << uint32(calendarEvent->GetFlags());
-            eventsBuffer << uint8(calendarEvent->GetType());
+            eventCount++;
         }
     }
 
-    eventsBuffer << uint32(1135753200);                            // Unk Constant date (28.12.2005 07:00)
-    eventsBuffer << uint32(secsToTimeBitFields(cur_time));         // server time
-
     CalendarInviteIdList const& invites = sCalendarMgr->GetPlayerInvites(guid);
 
-    data.WriteBits(invites.size(), 19);
+    uint32 inviteCount = 0;
+    size_t inviteCountPos = data.bitwpos();
+    data.WriteBits(inviteCount, 19);
 
-    for (CalendarInviteIdList::const_iterator it = invites.begin(); it != invites.end(); ++it)
+    for (auto const &calendarInviteId : invites)
     {
-        CalendarInvite* invite = sCalendarMgr->GetInvite(*it);
+        CalendarInvite* invite = sCalendarMgr->GetInvite(calendarInviteId);
         CalendarEvent* calendarEvent = invite ? sCalendarMgr->GetEvent(invite->GetEventId()) : NULL;
 
         if (calendarEvent)
@@ -165,107 +136,91 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket &recvData)
             invitesBuffer << uint8(calendarEvent ? calendarEvent->GetGuildId() : 0);
             invitesBuffer.WriteByteSeq<4, 0>(creatorGuid);
             invitesBuffer << uint64(invite->GetInviteId());
-        }
-        else
-        {
-            TC_LOG_ERROR("network", "SMSG_CALENDAR_SEND_CALENDAR: No Invite found with id [" UI64FMTD "]", *it);
 
-            ObjectGuid creatorGuid = invite->GetSenderGUID();
-
-            data.WriteBitSeq<1, 6, 2, 3, 5, 7, 4, 0>(creatorGuid);
-
-            invitesBuffer << uint8(invite->GetStatus());
-            invitesBuffer << uint8(invite->GetRank());
-            invitesBuffer << uint64(invite->GetEventId());
-            invitesBuffer << uint8(0);
-            invitesBuffer << uint64(invite->GetInviteId());
+            inviteCount++;
         }
     }
 
-    invitesBuffer << uint32(time(NULL));
+    uint32 raidResetCount = 0;
+    size_t raidResetCountPos = data.bitwpos();
+    data.WriteBits(raidResetCount, 20);
 
-    uint16 raidCounter = 0;
-
-    ResetTimeByMapDifficultyMap const& raidResets = sInstanceSaveMgr->GetResetTimeMap();
-    for (ResetTimeByMapDifficultyMap::const_iterator itr = raidResets.begin(); itr != raidResets.end(); ++itr)
-    {
-        uint32 mapId = PAIR32_LOPART(itr->first);
-
-        MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
-        if (!mapEntry || !mapEntry->IsRaid())
-            continue;
-
-        ++raidCounter;
-    }
-
-    data.WriteBits(raidCounter, 20);
-    data.WriteBits(/*sHolidaysStore.GetNumRows()*/ 0, 16);
-
-    for (uint32 i = 0; i < sHolidaysStore.GetNumRows(); i++)
+    data.WriteBits(0 /*sHolidaysStore.GetNumRows()*/, 16);
+    /*for (uint32 i = 0; i < sHolidaysStore.GetNumRows(); i++)
     {
         data.WriteBits(0, 6);   // Name length
 
         for (uint8 j = 0; j < 51; j++)
             holidaysBuffer << uint32(0);
-    }
+    }*/
 
-    uint32 instancesCounter = 0;
+    uint32 raidLockoutCount = 0;
+    size_t raidLockoutCountPos = data.bitwpos();
+    data.WriteBits(raidLockoutCount, 20);
 
-    for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
-        for (Player::BoundInstancesMap::const_iterator itr = _player->m_boundInstances[i].begin(); itr != _player->m_boundInstances[i].end(); ++itr)
-            if (itr->second.perm)
-                ++instancesCounter;
-
-    data.WriteBits(instancesCounter, 20);
-
-    for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
+    for (uint8 i = 0; i < MAX_DIFFICULTY; i++)
     {
-        for (Player::BoundInstancesMap::const_iterator itr = _player->m_boundInstances[i].begin(); itr != _player->m_boundInstances[i].end(); ++itr)
+        for (auto const &raidLockout : _player->m_boundInstances[i])
         {
-            if (itr->second.perm)
+            if (raidLockout.second.perm)
             {
-                InstanceSave* save = itr->second.save;
-                ObjectGuid instanceGUID = MAKE_NEW_GUID(save->GetInstanceId(), 0, HIGHGUID_INSTANCE_SAVE);
+                InstanceSave* save = raidLockout.second.save;
+                ObjectGuid instanceGuid = MAKE_NEW_GUID(save->GetInstanceId(), 0, HIGHGUID_INSTANCE_SAVE);
 
-                data.WriteBitSeq<2, 7, 1, 6, 3, 5, 4, 0>(instanceGUID);
+                data.WriteBitSeq<2, 7, 1, 6, 3, 5, 4, 0>(instanceGuid);
 
-                instancesBuffer << uint32(save->GetMapId());
-                instancesBuffer.WriteByteSeq<1>(instanceGUID);
-                instancesBuffer << uint32(save->GetDifficulty());
-                instancesBuffer.WriteByteSeq<4, 3, 7>(instanceGUID);
-                instancesBuffer << uint32(save->GetResetTime());
-                instancesBuffer.WriteByteSeq<6, 5, 0, 2>(instanceGUID);
+                raidLockoutBuffer << uint32(save->GetDifficulty());
+                raidLockoutBuffer.WriteByteSeq<1>(instanceGuid);
+                raidLockoutBuffer << uint32(save->GetMapId());
+                raidLockoutBuffer.WriteByteSeq<4, 3, 7>(instanceGuid);
+                raidLockoutBuffer << uint32(save->GetResetTime());
+                raidLockoutBuffer.WriteByteSeq<6, 5, 0, 2>(instanceGuid);
+
+                raidLockoutCount++;
             }
         }
     }
 
-    for (ResetTimeByMapDifficultyMap::const_iterator itr = raidResets.begin(); itr != raidResets.end(); ++itr)
+    std::set<uint32> raidCheck;
+    for (auto const &raidReset : sInstanceSaveMgr->GetResetTimeMap())
     {
-        uint32 mapId = PAIR32_LOPART(itr->first);
+        uint32 mapId = PAIR32_LOPART(raidReset.first);
 
         MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
         if (!mapEntry || !mapEntry->IsRaid())
             continue;
 
-        raidsBuffer << uint32(mapId);
-        raidsBuffer << uint32(0);           // Unk Time
-        raidsBuffer << uint32(itr->second); // Time Left
+        if (raidCheck.find(mapId) != raidCheck.end())
+            continue;
+
+        raidResetBuffer << uint32(mapId);
+        raidResetBuffer << uint32(raidReset.second - 1800);
+        raidResetBuffer << uint32(7 * DAY);
+
+        raidCheck.insert(mapId);
+        raidResetCount++;
     }
 
     data.FlushBits();
 
-    if (instancesBuffer.size() > 0)
-        data.append(instancesBuffer);
-    /*if (raidsBuffer.size() > 0)
-        data.append(raidsBuffer);*/
-    if (holidaysBuffer.size() > 0)
-        data.append(holidaysBuffer);
-    if (eventsBuffer.size() > 0)
-        data.append(eventsBuffer);
-    if (invitesBuffer.size() > 0)
-        data.append(invitesBuffer);
+    data.PutBits(eventCountPos, eventCount, 19);
+    data.PutBits(inviteCountPos, inviteCount, 19);
+    data.PutBits(raidResetCountPos, raidResetCount, 20);
+    data.PutBits(raidLockoutCountPos, raidLockoutCount, 20);
+    data.PutBits(eventCountPos, eventCount, 19);
+
+    data.append(raidLockoutBuffer);
+    data.append(raidResetBuffer);
+    data.append(holidaysBuffer);
+    data.append(eventsBuffer);
+    data << uint32(1135753200);                             // RaidOrigin
+    data << uint32(secsToTimeBitFields(curTime));           // ServerTime
+    data.append(invitesBuffer);
+    data << uint32(time(NULL));                             // ServerNow
 
     SendPacket(&data);
+
+    TC_LOG_DEBUG("network", "SMSG_CALENDAR_SEND_CALENDAR [" UI64FMTD "]", guid);
 }
 
 void WorldSession::HandleCalendarGetEvent(WorldPacket& recvData)

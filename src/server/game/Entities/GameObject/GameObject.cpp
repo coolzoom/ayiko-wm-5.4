@@ -35,6 +35,7 @@
 #include "SpellAuraEffects.h"
 #include "UpdateFieldFlags.h"
 #include "ObjectVisitors.hpp"
+#include "QuestDef.h"
 
 GameObject::GameObject() : WorldObject(false), m_model(NULL), m_goValue(), m_AI(NULL)
 {
@@ -1295,7 +1296,7 @@ void GameObject::Use(Unit* user)
                 if (Battleground* bg = player->GetBattleground())
                     bg->EventPlayerUsedGO(player, this);
 
-                player->CastedCreatureOrGO(info->entry, GetGUID(), 0);
+                player->QuestObjectiveSatisfy(info->entry, QUEST_OBJECTIVE_TYPE_GO, 1, GetGUID());
 
                 GetMap()->ScriptsStart(sGameObjectScripts, GetDBTableGUIDLow(), player, this);
             }

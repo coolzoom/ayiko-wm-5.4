@@ -3113,7 +3113,7 @@ class npc_crowley_horse_first_round final : public CreatureScript
             {
                 if (Creature* crowley = summoner->SummonCreature(NPC_CROWLEY, *me))
                 {
-                    crowley->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, summoner->GetGUID());
+                    crowley->SetCustomVisibility(CUSTOM_VISIBILITY_SEER | CUSTOM_VISIBILITY_CREATURE, summoner->GetGUID());
                     crowley->SetVisible(false);
                     crowley->EnterVehicle(me, 1);
                 }
@@ -3146,7 +3146,7 @@ class npc_crowley_horse_first_round final : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_BEGIN:
-                            me->GetMotionMaster()->MovePoint(0, JumpPoints[0]);
+                           me->GetMotionMaster()->MovePoint(0, JumpPoints[0]);
                             events.ScheduleEvent(EVENT_JUMP_1, me->GetSplineDuration());
                             break;
                         case EVENT_JUMP_1:
@@ -3587,8 +3587,7 @@ class npc_krennan_aranas_last_stand final : public CreatureScript
 
             void IsSummonedBy(Unit* summoner) final
             {
-                me->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, summoner->GetGUID());
-                me->SetVisible(false);
+                me->SetCustomVisibility(CUSTOM_VISIBILITY_SEER | CUSTOM_VISIBILITY_SEER_CREATURE, summoner->GetGUID());
                 events.ScheduleEvent(EVENT_CHECK_PLAYER_ONLINE, 500);
                 events.ScheduleEvent(EVENT_CHECK_PLAYER_MOVIE, 500);
             }
@@ -3606,8 +3605,7 @@ class npc_krennan_aranas_last_stand final : public CreatureScript
                         break;
                 }
 
-                summoned->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, me->ToTempSummon()->GetSummonerGUID());
-                summoned->SetVisible(false);
+                summoned->SetCustomVisibility(CUSTOM_VISIBILITY_SEER | CUSTOM_VISIBILITY_SEER_CREATURE, me->ToTempSummon()->GetSummonerGUID());
             }
 
             void UpdateAI(uint32 const diff) final
@@ -5775,8 +5773,7 @@ class npc_stagecoach_harness_escort final : public CreatureScript
 
             void IsSummonedBy(Unit* summoner) final
             {
-                me->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, summoner->GetGUID());
-                me->SetVisible(false);
+                me->SetCustomVisibility(CUSTOM_VISIBILITY_SEER | CUSTOM_VISIBILITY_CREATURE, summoner->GetGUID());
 
                 if (Player* player = summoner->ToPlayer())
                     player->CompleteQuest(QUEST_EXODUS);
@@ -5790,9 +5787,8 @@ class npc_stagecoach_harness_escort final : public CreatureScript
             void JustSummoned(Creature* summoned) final
             {
                 summons.Summon(summoned);
-                summoned->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, me->ToTempSummon()->GetSummonerGUID());
                 summoned->SetPhaseMask(EXODUS_PHASE_MASK, true);
-                summoned->SetVisible(false);
+                summoned->SetCustomVisibility(CUSTOM_VISIBILITY_SEER | CUSTOM_VISIBILITY_CREATURE, me->ToTempSummon()->GetSummonerGUID());
                 summoned->setActive(true);
 
                 if (summoned->GetEntry() == 51409)
@@ -6281,17 +6277,15 @@ class npc_captain_asther_qiao final : public CreatureScript
 
             void IsSummonedBy(Unit* summoner) final
             {
-                me->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, summoner->GetGUID());
-                me->SetVisible(false);
+                me->SetCustomVisibility(CUSTOM_VISIBILITY_SEER | CUSTOM_VISIBILITY_SEER_CREATURE, summoner->GetGUID());
                 StartEvent();
             }
 
             void JustSummoned(Creature* summoned) final
             {
                 summoned->SetReactState(REACT_PASSIVE);
-                summoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                summoned->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, me->ToTempSummon()->GetSummonerGUID());
-                summoned->SetVisible(false);
+                summoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE); 
+                summoned->SetCustomVisibility(CUSTOM_VISIBILITY_SEER | CUSTOM_VISIBILITY_SEER_CREATURE, me->ToTempSummon()->GetSummonerGUID());
                 summoned->setActive(true);
             }
 
@@ -6776,7 +6770,6 @@ class npc_tobias_mistmantle_qaod final : public CreatureScript
             void IsSummonedBy(Unit* summoner) final
             {
                 me->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, summoner->GetGUID());
-                me->SetVisible(false);
                 me->GetMotionMaster()->MoveSplinePath(1, false, false, 0.f, false, false);
                 events.ScheduleEvent(EVENT_SAY_FORSAKEN, me->GetSplineDuration());
             }
@@ -7061,16 +7054,17 @@ class go_qnhnb_well final : public GameObjectScript
         {
             enum
             {
-                DRUID_TEXT_ID       = 1,
-                SPELL_TALDOREN_WELL = 71200,
-                NPC_TRIGGER         = 35374,
+                DRUID_TEXT_ID                    = 1,
+                SPELL_TALDOREN_WELL              = 71200,
+                NPC_TRIGGER                      = 35374,
+                QUEST_OBJECTIVE_USE_WELL_OF_FURY = 266553,
             };
 
             if (player->GetQuestStatus(QUEST_NEITHER_HUMAN_NOR_BEAST) == QUEST_STATUS_INCOMPLETE)
             {
                 QuestStatusMap::iterator itr = player->getQuestStatusMap().find(QUEST_NEITHER_HUMAN_NOR_BEAST);
 
-                if (itr == player->getQuestStatusMap().end() || itr->second.CreatureOrGOCount[_goId] > 0)
+                if (itr == player->getQuestStatusMap().end() || player->GetQuestObjectiveCounter(QUEST_OBJECTIVE_USE_WELL_OF_FURY + _goId) > 0)
                     return true;
 
                 float x, y, z;
@@ -7079,7 +7073,6 @@ class go_qnhnb_well final : public GameObjectScript
                 if (Creature* trigger = player->SummonCreature(NPC_TRIGGER, x, y, z, 0.0f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 15000))
                 {
                     trigger->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, player->GetGUID());
-                    trigger->SetVisible(false);
                     trigger->AddAura(SPELL_TALDOREN_WELL, trigger);
                 }
 
@@ -7127,8 +7120,7 @@ class npc_lord_godfrey_qnhnb final : public CreatureScript
 
             void IsSummonedBy(Unit* summoner) final
             {
-                me->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, summoner->GetGUID());
-                me->SetVisible(false);
+                me->SetCustomVisibility(CUSTOM_VISIBILITY_SEER | CUSTOM_VISIBILITY_CREATURE, summoner->GetGUID());
                 me->DespawnOrUnsummon(70000);
                 me->GetMotionMaster()->MoveSplinePath(1, false, true, 0.f, false, false);
                 me->m_Events.AddEvent(new DelayEventDoAction(me, ACTION_FACING), me->m_Events.CalculateTime(me->GetSplineDuration() + 1000));
@@ -7192,8 +7184,7 @@ class npc_lorna_crowley_qnhnb final : public CreatureScript
 
             void IsSummonedBy(Unit* summoner) final
             {
-                me->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, summoner->GetGUID());
-                me->SetVisible(false);
+                me->SetCustomVisibility(CUSTOM_VISIBILITY_SEER | CUSTOM_VISIBILITY_CREATURE, summoner->GetGUID());
                 me->DespawnOrUnsummon(70000);
                 me->GetMotionMaster()->MoveSplinePath(1, false, false, 0.f, false, false);
                 me->m_Events.AddEvent(new DelayEventDoAction(me, ACTION_TALK), me->m_Events.CalculateTime(me->GetSplineDuration()));
@@ -7257,8 +7248,7 @@ class npc_king_genn_greymane_qnhnb final : public CreatureScript
 
             void IsSummonedBy(Unit* summoner) final
             {
-                me->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, summoner->GetGUID());
-                me->SetVisible(false);
+                me->SetCustomVisibility(CUSTOM_VISIBILITY_SEER | CUSTOM_VISIBILITY_CREATURE, summoner->GetGUID());
                 me->DespawnOrUnsummon(70000);
                 me->GetMotionMaster()->MoveSplinePath(1, false, true, 0.f, false, false);
                 me->m_Events.AddEvent(new DelayEventDoAction(me, ACTION_FACING), me->m_Events.CalculateTime(me->GetSplineDuration() + 1000));
@@ -10182,16 +10172,14 @@ class npc_tobias_mistmantle_qthfs final : public CreatureScript
 
             void IsSummonedBy(Unit* summoner) final
             {
-                me->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, summoner->GetGUID());
-                me->SetVisible(false);
+                me->SetCustomVisibility(CUSTOM_VISIBILITY_SEER | CUSTOM_VISIBILITY_CREATURE, summoner->GetGUID());
                 Talk(TOBIAS_SAY_LETS_GO, me->ToTempSummon()->GetSummonerGUID(), true);
                 events.ScheduleEvent(EVENT_START_HUNT, 5000);
             }
 
             void JustSummoned(Creature* summoned) final
             {
-                summoned->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, me->ToTempSummon()->GetSummonerGUID());
-                summoned->SetVisible(false);
+                summoned->SetCustomVisibility(CUSTOM_VISIBILITY_SEER | CUSTOM_VISIBILITY_CREATURE, me->ToTempSummon()->GetSummonerGUID());
             }
 
             void UpdateAI(uint32 const diff) final
@@ -10765,16 +10753,14 @@ class npc_gilneas_funeral_camera final : public CreatureScript
 
             void IsSummonedBy(Unit* summoner) final
             {
-                me->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, summoner->GetGUID());
-                me->SetVisible(false);
+                me->SetCustomVisibility(CUSTOM_VISIBILITY_SEER | CUSTOM_VISIBILITY_CREATURE, summoner->GetGUID());
                 me->SetPhaseMask(540672, true);
                 events.ScheduleEvent(EVENT_START_CAMERA, 2000);
             }
 
             void JustSummoned(Creature* summoned) final
             {
-                summoned->SetCustomVisibility(CUSTOM_VISIBILITY_SEER, me->ToTempSummon()->GetSummonerGUID());
-                summoned->SetVisible(false);
+                summoned->SetCustomVisibility(CUSTOM_VISIBILITY_SEER | CUSTOM_VISIBILITY_CREATURE, me->ToTempSummon()->GetSummonerGUID());
 
                 switch (summoned->GetEntry())
                 {

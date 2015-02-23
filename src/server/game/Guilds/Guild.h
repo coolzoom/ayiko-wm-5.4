@@ -767,6 +767,7 @@ class Guild
         void SendGuildXP(WorldSession* session) const;
         void SendGuildRecipes(WorldSession* session) const;
         void SendMemberLeave(WorldSession* session, ObjectGuid playerGuid, bool kicked);
+        void SendBankMoneyChanged() const;
 
         // Load from DB
         bool LoadFromDB(Field* fields);

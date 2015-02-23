@@ -3813,9 +3813,13 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[0].TargetB = 0;
                     break;
                 case 117866:// Champion of Light
-                    spellInfo->MaxAffectedTargets = 1;
-                    spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(65); // 1,5s
-                    spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(15); // 3 yards
+                    //spellInfo->MaxAffectedTargets = 1;
+                    //spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(65); // 1,5s
+                    //spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(15); // 3 yards
+                    break;
+                case 119841: // Fearless
+                    spellInfo->Effects[0].TargetB = TARGET_DEST_DB;
+                    spellInfo->Effects[1].TargetB = TARGET_DEST_DB;
                     break;
                 case 126848:// Ritual of Purification
                     spellInfo->Effects[0].BasePoints = -10;
@@ -6009,6 +6013,8 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 120267: // Vengeance (Monk)
                     spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_APPLY_AURA;
                     break;
+                case 122952: // Summon Unstable Sha
+                    spellInfo->MaxAffectedTargets = 2;
                 case 19386: // Wyvern Sting
                     spellInfo->Attributes |= SPELL_ATTR0_STOP_ATTACK_TARGET;
                     break;

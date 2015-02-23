@@ -70,7 +70,6 @@ bool WDTFile::init(char* /*map_id*/, unsigned int mapID)
 
         if (!strcmp(fourcc,"MAIN"))
         {
-            WDT.read(adt_list, sizeof(adt_list));
         }
         if (!strcmp(fourcc,"MWMO"))
         {
@@ -122,7 +121,7 @@ WDTFile::~WDTFile(void)
     WDT.close();
 }
 
-ADTFile* WDTFile::GetMap_obj0(int x, int z)
+ADTFile* WDTFile::GetMap(int x, int z)
 {
     if(!(x >= 0 && z >= 0 && x < 64 && z < 64))
         return NULL;
@@ -133,13 +132,3 @@ ADTFile* WDTFile::GetMap_obj0(int x, int z)
     return new ADTFile(name);
 }
 
-ADTFile* WDTFile::GetMap_obj1(int x, int z)
-{
-    if(!(x >= 0 && z >= 0 && x < 64 && z < 64))
-        return NULL;
-
-    char name[512];
-
-    sprintf(name,"World\\Maps\\%s\\%s_%d_%d_obj1.adt", filename.c_str(), filename.c_str(), x, z);
-    return new ADTFile(name);
-}

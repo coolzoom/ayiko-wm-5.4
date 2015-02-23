@@ -94,7 +94,7 @@ float CONF_float_to_int16_limit = 2048.0f;   // Max accuracy = val/65536
 float CONF_flat_height_delta_limit = 0.005f; // If max - min less this value - surface is flat
 float CONF_flat_liquid_delta_limit = 0.001f; // If max - min less this value - liquid surface is flat
 
-uint32 CONF_TargetBuild = 17399;              // 5.4.0 17399
+uint32 CONF_TargetBuild = 17688;              // 5.4.2 17688
 
 // List MPQ for extract maps from
 char const* CONF_mpq_list[] =

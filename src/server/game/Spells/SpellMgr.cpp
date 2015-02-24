@@ -3858,6 +3858,13 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[0].TargetA = TARGET_UNIT_CONE_ENEMY_54;
                     spellInfo->Effects[0].TargetB = 0;
                     break;
+                case 123620: // Clouded Reflection
+                    spellInfo->Effects[0].Effect = SPELL_EFFECT_DUMMY;
+                    break;
+                case 118312: // Water Bolt(Terrace of Endless Spring)
+                case 117187: // Lightning Bolt(Terrace of Endless Spring)
+                    spellInfo->InterruptFlags |= SPELL_INTERRUPT_FLAG_INTERRUPT;
+                    break;
                 case 45257: // Using Steam Tonk Controller
                 case 45440: // Steam Tonk Controller
                 case 49352: // Crashin' Thrashin' Racer Controller

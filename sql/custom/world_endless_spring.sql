@@ -1,8 +1,7 @@
-
 DELETE FROM creature WHERE map = 996;
 DELETE FROM gameobject WHERE map = 996;
 -- GUID RANGES
--- Gameobjects - 35 GUIDs
+-- Gameobjects - 36 GUIDs
 SET @OGUID := (SELECT MAX(guid) FROM gameobject) + 1;
 -- Creatures - 334 GUIDs
 SET @CGUID := (SELECT MAX(guid) FROM creature) + 1;
@@ -765,303 +764,314 @@ REPLACE INTO creature_loot_template (entry, item, ChanceOrQuestChance, lootmode,
 -- 10N
 -- Protectors - LM: generic - 2, normal - 3, heroic - 4
 -- 10N
-(@ENTRY_KAOLAN, 86238, 100, 2, 1, 1, 1), -- Pattern: Chestguard of Nemeses
-(@ENTRY_KAOLAN, 86272, 100, 2, 1, 1, 1), -- Pattern: Fists of Lightning
-(@ENTRY_KAOLAN, 86380, 100, 2, 1, 1, 1), -- Pattern: Imperial Silk Gloves
-(@ENTRY_KAOLAN, 86381, 100, 2, 1, 1, 1), -- Pattern: Legacy of the Emperor
-(@ENTRY_KAOLAN, 86279, 100, 2, 1, 1, 1), -- Pattern: Liferuned Leather Gloves
-(@ENTRY_KAOLAN, 86280, 100, 2, 1, 1, 1), -- Pattern: Murderer's Gloves
-(@ENTRY_KAOLAN, 86281, 100, 2, 1, 1, 1), -- Pattern: Nightfire Robe
-(@ENTRY_KAOLAN, 86283, 100, 2, 1, 1, 1), -- Pattern: Raiment of Blood and Bone
-(@ENTRY_KAOLAN, 86284, 100, 2, 1, 1, 1), -- Pattern: Raven Lord's Gloves
-(@ENTRY_KAOLAN, 86297, 100, 2, 1, 1, 1), -- Pattern: Stormbreaker Chestguard
-(@ENTRY_KAOLAN, 87411, 100, 2, 1, 1, 1), -- Plans: Bloodforged Warfists
-(@ENTRY_KAOLAN, 87412, 100, 2, 1, 1, 1), -- Plans: Chestplate of Limitless Faith
-(@ENTRY_KAOLAN, 87409, 100, 2, 1, 1, 1), -- Plans: Gauntlets of Battle Command
-(@ENTRY_KAOLAN, 87413, 100, 2, 1, 1, 1), -- Plans: Gauntlets of Unbound Devotion
-(@ENTRY_KAOLAN, 87408, 100, 2, 1, 1, 1), -- Plans: Unyielding Bloodplate
-(@ENTRY_KAOLAN, 86379, 100, 2, 1, 1, 1), -- Pattern: Robe of Eternal Rule
-(@ENTRY_KAOLAN, 86382, 100, 2, 1, 1, 1), -- Pattern: Touch of the Light
-(@ENTRY_KAOLAN, 87410, 100, 2, 1, 1, 1), -- Plans: Ornate Battleplate of the Master
-(@ENTRY_KAOLAN, 71716, 100, 2, 0, 1, 1), -- Soothsayer's Runes
+(@RAID_DIFF_10N + 60583, 86238, 0, 2, 1, 1, 1), -- Pattern: Chestguard of Nemeses
+(@RAID_DIFF_10N + 60583, 86272, 0, 2, 1, 1, 1), -- Pattern: Fists of Lightning
+(@RAID_DIFF_10N + 60583, 86380, 0, 2, 1, 1, 1), -- Pattern: Imperial Silk Gloves
+(@RAID_DIFF_10N + 60583, 86381, 0, 2, 1, 1, 1), -- Pattern: Legacy of the Emperor
+(@RAID_DIFF_10N + 60583, 86279, 0, 2, 1, 1, 1), -- Pattern: Liferuned Leather Gloves
+(@RAID_DIFF_10N + 60583, 86280, 0, 2, 1, 1, 1), -- Pattern: Murderer's Gloves
+(@RAID_DIFF_10N + 60583, 86281, 0, 2, 1, 1, 1), -- Pattern: Nightfire Robe
+(@RAID_DIFF_10N + 60583, 86283, 0, 2, 1, 1, 1), -- Pattern: Raiment of Blood and Bone
+(@RAID_DIFF_10N + 60583, 86284, 0, 2, 1, 1, 1), -- Pattern: Raven Lord's Gloves
+(@RAID_DIFF_10N + 60583, 86297, 0, 2, 1, 1, 1), -- Pattern: Stormbreaker Chestguard
+(@RAID_DIFF_10N + 60583, 87411, 0, 2, 1, 1, 1), -- Plans: Bloodforged Warfists
+(@RAID_DIFF_10N + 60583, 87412, 0, 2, 1, 1, 1), -- Plans: Chestplate of Limitless Faith
+(@RAID_DIFF_10N + 60583, 87409, 0, 2, 1, 1, 1), -- Plans: Gauntlets of Battle Command
+(@RAID_DIFF_10N + 60583, 87413, 0, 2, 1, 1, 1), -- Plans: Gauntlets of Unbound Devotion
+(@RAID_DIFF_10N + 60583, 87408, 0, 2, 1, 1, 1), -- Plans: Unyielding Bloodplate
+(@RAID_DIFF_10N + 60583, 86379, 0, 2, 1, 1, 1), -- Pattern: Robe of Eternal Rule
+(@RAID_DIFF_10N + 60583, 86382, 0, 2, 1, 1, 1), -- Pattern: Touch of the Light
+(@RAID_DIFF_10N + 60583, 87410, 0, 2, 1, 1, 1), -- Plans: Ornate Battleplate of the Master
+(@RAID_DIFF_10N + 60583, 71716, 0, 2, 0, 1, 1), -- Soothsayer's Runes
 
-(@ENTRY_KAOLAN, 86320, 100, 3, 2, 1, 1), -- Asani's Uncleansed Sandals
-(@ENTRY_KAOLAN, 86230, 100, 3, 2, 1, 1), -- Bracers of Defiled Earth
-(@ENTRY_KAOLAN, 86318, 100, 3, 2, 1, 1), -- Casque of Expelled Corruption
-(@ENTRY_KAOLAN, 86316, 100, 3, 2, 1, 1), -- Cloak of Overwhelming Corruption
-(@ENTRY_KAOLAN, 86317, 100, 3, 2, 1, 1), -- Cuffs of the Corrupted Waters
-(@ENTRY_KAOLAN, 86232, 100, 3, 2, 1, 1), -- Deepwater Greatboots
-(@ENTRY_KAOLAN, 86234, 100, 3, 2, 1, 1), -- Kaolan's Withering Necklace
-(@ENTRY_KAOLAN, 89841, 100, 3, 3, 1, 1), -- Legguards of Failing Purification
-(@ENTRY_KAOLAN, 86319, 100, 3, 3, 1, 1), -- Lightning Prisoner's Boots
-(@ENTRY_KAOLAN, 86231, 100, 3, 3, 1, 1), -- Regail's Band of the Endless
-(@ENTRY_KAOLAN, 86390, 100, 3, 3, 1, 1), -- Regail's Crackling Dagger
-(@ENTRY_KAOLAN, 86233, 100, 3, 3, 1, 1), -- Shackle of Eversparks
-(@ENTRY_KAOLAN, 89885, 100, 3, 3, 1, 1), -- Waterborne Shoulderguards
-(@ENTRY_KAOLAN, 86315, 100, 3, 3, 1, 1), -- Watersoul Signet
+(@RAID_DIFF_10N + 60583, 86420, 0, 4, 2, 1, 1), -- Asani's Uncleansed Sandals
+(@RAID_DIFF_10N + 60583, 86240, 0, 4, 2, 1, 1), -- Bracers of Defiled Earth
+(@RAID_DIFF_10N + 60583, 86418, 0, 4, 2, 1, 1), -- Casque of Expelled Corruption
+(@RAID_DIFF_10N + 60583, 86416, 0, 4, 3, 1, 1), -- Cloak of Overwhelming Corruption
+(@RAID_DIFF_10N + 60583, 86417, 0, 4, 2, 1, 1), -- Cuffs of the Corrupted Waters
+(@RAID_DIFF_10N + 60583, 86242, 0, 4, 2, 1, 1), -- Deepwater Greatboots
+(@RAID_DIFF_10N + 60583, 86244, 0, 4, 3, 1, 1), -- Kaolan's Withering Necklace
+(@RAID_DIFF_10N + 60583, 89841, 0, 4, 2, 1, 1), -- Legguards of Failing Purification
+(@RAID_DIFF_10N + 60583, 86419, 0, 4, 2, 1, 1), -- Lightning Prisoner's Boots
+(@RAID_DIFF_10N + 60583, 86241, 0, 4, 3, 1, 1), -- Regail's Band of the Endless
+(@RAID_DIFF_10N + 60583, 86490, 0, 4, 3, 1, 1), -- Regail's Crackling Dagger
+(@RAID_DIFF_10N + 60583, 86244, 0, 4, 3, 1, 1), -- Shackle of Eversparks
+(@RAID_DIFF_10N + 60583, 89885, 0, 4, 2, 1, 1), -- Waterborne Shoulderguards
+(@RAID_DIFF_10N + 60583, 86415, 0, 4, 3, 1, 1), -- Watersoul Signet
 
-(@ENTRY_KAOLAN, 90528, 0, 4, 2, 1, 1), -- ELITE Asani's Uncleansed Sandals
-(@ENTRY_KAOLAN, 90520, 0, 4, 2, 1, 1), -- ELITE Bracers of Defiled Earth
-(@ENTRY_KAOLAN, 90530, 0, 4, 2, 1, 1), -- ELITE Casque of Expelled Corruption
-(@ENTRY_KAOLAN, 90526, 0, 4, 2, 1, 1), -- ELITE Cloak of Overwhelming Corruption
-(@ENTRY_KAOLAN, 90524, 0, 4, 2, 1, 1), -- ELITE Cuffs of the Corrupted Waters
-(@ENTRY_KAOLAN, 90521, 0, 4, 2, 1, 1), -- ELITE Deepwater Greatboots
-(@ENTRY_KAOLAN, 90523, 0, 4, 2, 1, 1), -- ELITE Kaolan's Withering Necklace
-(@ENTRY_KAOLAN, 90518, 0, 4, 3, 1, 1), -- ELITE Legguards of Failing Purification
-(@ENTRY_KAOLAN, 90529, 0, 4, 3, 1, 1), -- ELITE Lightning Prisoner's Boots
-(@ENTRY_KAOLAN, 90517, 0, 4, 3, 1, 1), -- ELITE Regail's Band of the Endless
-(@ENTRY_KAOLAN, 90527, 0, 4, 3, 1, 1), -- ELITE Regail's Crackling Dagger
-(@ENTRY_KAOLAN, 90522, 0, 4, 3, 1, 1), -- ELITE Shackle of Eversparks
-(@ENTRY_KAOLAN, 90519, 0, 4, 3, 1, 1), -- ELITE Waterborne Shoulderguards
-(@ENTRY_KAOLAN, 90525, 0, 4, 3, 1, 1), -- ELITE Watersoul Signet
+(@RAID_DIFF_10N + 60583, 90528, 0, 8, 2, 1, 1), -- ELITE Asani's Uncleansed Sandals
+(@RAID_DIFF_10N + 60583, 90520, 0, 8, 2, 1, 1), -- ELITE Bracers of Defiled Earth
+(@RAID_DIFF_10N + 60583, 90530, 0, 8, 2, 1, 1), -- ELITE Casque of Expelled Corruption
+(@RAID_DIFF_10N + 60583, 90526, 0, 8, 3, 1, 1), -- ELITE Cloak of Overwhelming Corruption
+(@RAID_DIFF_10N + 60583, 90528, 0, 8, 2, 1, 1), -- ELITE Cuffs of the Corrupted Waters
+(@RAID_DIFF_10N + 60583, 90521, 0, 8, 2, 1, 1), -- ELITE Deepwater Greatboots
+(@RAID_DIFF_10N + 60583, 90523, 0, 8, 3, 1, 1), -- ELITE Kaolan's Withering Necklace
+(@RAID_DIFF_10N + 60583, 90518, 0, 8, 2, 1, 1), -- ELITE Legguards of Failing Purification
+(@RAID_DIFF_10N + 60583, 90529, 0, 8, 2, 1, 1), -- ELITE Lightning Prisoner's Boots
+(@RAID_DIFF_10N + 60583, 90517, 0, 8, 3, 1, 1), -- ELITE Regail's Band of the Endless
+(@RAID_DIFF_10N + 60583, 90527, 0, 8, 3, 1, 1), -- ELITE Regail's Crackling Dagger
+(@RAID_DIFF_10N + 60583, 90522, 0, 8, 3, 1, 1), -- ELITE Shackle of Eversparks
+(@RAID_DIFF_10N + 60583, 90519, 0, 8, 2, 1, 1), -- ELITE Waterborne Shoulderguards
+(@RAID_DIFF_10N + 60583, 90525, 0, 8, 3, 1, 1), -- ELITE Watersoul Signet
 
 -- 25N
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 86238, 0, 2, 1, 1, 1), -- Pattern: Chestguard of Nemeses
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 86272, 0, 2, 1, 1, 1), -- Pattern: Fists of Lightning
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 86380, 0, 2, 1, 1, 1), -- Pattern: Imperial Silk Gloves
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 86381, 0, 2, 1, 1, 1), -- Pattern: Legacy of the Emperor
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 86279, 0, 2, 1, 1, 1), -- Pattern: Liferuned Leather Gloves
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 86280, 0, 2, 1, 1, 1), -- Pattern: Murderer's Gloves
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 86281, 0, 2, 1, 1, 1), -- Pattern: Nightfire Robe
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 86283, 0, 2, 1, 1, 1), -- Pattern: Raiment of Blood and Bone
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 86284, 0, 2, 1, 1, 1), -- Pattern: Raven Lord's Gloves
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 86297, 0, 2, 1, 1, 1), -- Pattern: Stormbreaker Chestguard
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 87411, 0, 2, 1, 1, 1), -- Plans: Bloodforged Warfists
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 87412, 0, 2, 1, 1, 1), -- Plans: Chestplate of Limitless Faith
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 87409, 0, 2, 1, 1, 1), -- Plans: Gauntlets of Battle Command
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 87413, 0, 2, 1, 1, 1), -- Plans: Gauntlets of Unbound Devotion
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 87408, 0, 2, 1, 1, 1), -- Plans: Unyielding Bloodplate
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 86379, 0, 2, 1, 1, 1), -- Pattern: Robe of Eternal Rule
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 86382, 0, 2, 1, 1, 1), -- Pattern: Touch of the Light
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 87410, 0, 2, 1, 1, 1), -- Plans: Ornate Battleplate of the Master
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 71716, 100, 2, 0, 1, 1), -- Soothsayer's Runes
+(@RAID_DIFF_25N + 60583, 86238, 0, 2, 1, 1, 1), -- Pattern: Chestguard of Nemeses
+(@RAID_DIFF_25N + 60583, 86272, 0, 2, 1, 1, 1), -- Pattern: Fists of Lightning
+(@RAID_DIFF_25N + 60583, 86380, 0, 2, 1, 1, 1), -- Pattern: Imperial Silk Gloves
+(@RAID_DIFF_25N + 60583, 86381, 0, 2, 1, 1, 1), -- Pattern: Legacy of the Emperor
+(@RAID_DIFF_25N + 60583, 86279, 0, 2, 1, 1, 1), -- Pattern: Liferuned Leather Gloves
+(@RAID_DIFF_25N + 60583, 86280, 0, 2, 1, 1, 1), -- Pattern: Murderer's Gloves
+(@RAID_DIFF_25N + 60583, 86281, 0, 2, 1, 1, 1), -- Pattern: Nightfire Robe
+(@RAID_DIFF_25N + 60583, 86283, 0, 2, 1, 1, 1), -- Pattern: Raiment of Blood and Bone
+(@RAID_DIFF_25N + 60583, 86284, 0, 2, 1, 1, 1), -- Pattern: Raven Lord's Gloves
+(@RAID_DIFF_25N + 60583, 86297, 0, 2, 1, 1, 1), -- Pattern: Stormbreaker Chestguard
+(@RAID_DIFF_25N + 60583, 87411, 0, 2, 1, 1, 1), -- Plans: Bloodforged Warfists
+(@RAID_DIFF_25N + 60583, 87412, 0, 2, 1, 1, 1), -- Plans: Chestplate of Limitless Faith
+(@RAID_DIFF_25N + 60583, 87409, 0, 2, 1, 1, 1), -- Plans: Gauntlets of Battle Command
+(@RAID_DIFF_25N + 60583, 87413, 0, 2, 1, 1, 1), -- Plans: Gauntlets of Unbound Devotion
+(@RAID_DIFF_25N + 60583, 87408, 0, 2, 1, 1, 1), -- Plans: Unyielding Bloodplate
+(@RAID_DIFF_25N + 60583, 86379, 0, 2, 1, 1, 1), -- Pattern: Robe of Eternal Rule
+(@RAID_DIFF_25N + 60583, 86382, 0, 2, 1, 1, 1), -- Pattern: Touch of the Light
+(@RAID_DIFF_25N + 60583, 87410, 0, 2, 1, 1, 1), -- Plans: Ornate Battleplate of the Master
+(@RAID_DIFF_25N + 60583, 71716, 100, 2, 0, 1, 1), -- Soothsayer's Runes
 
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 86320, 0, 4, 2, 1, 1), -- Asani's Uncleansed Sandals
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 86230, 0, 4, 2, 1, 1), -- Bracers of Defiled Earth
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 86318, 0, 4, 2, 1, 1), -- Casque of Expelled Corruption
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 86316, 0, 4, 3, 1, 1), -- Cloak of Overwhelming Corruption
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 86317, 0, 4, 3, 1, 1), -- Cuffs of the Corrupted Waters
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 86232, 0, 4, 3, 1, 1), -- Deepwater Greatboots
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 86234, 0, 4, 4, 1, 1), -- Kaolan's Withering Necklace
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 89841, 0, 4, 4, 1, 1), -- Legguards of Failing Purification
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 86319, 0, 4, 4, 1, 1), -- Lightning Prisoner's Boots
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 86231, 0, 4, 5, 1, 1), -- Regail's Band of the Endless
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 86390, 0, 4, 5, 1, 1), -- Regail's Crackling Dagger
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 86233, 0, 4, 5, 1, 1), -- Shackle of Eversparks
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 89885, 0, 4, 6, 1, 1), -- Waterborne Shoulderguards
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 86315, 0, 4, 6, 1, 1), -- Watersoul Signet
+(@RAID_DIFF_25N + 60583, 86320, 0, 4, 2, 1, 1), -- Asani's Uncleansed Sandals
+(@RAID_DIFF_25N + 60583, 86230, 0, 4, 2, 1, 1), -- Bracers of Defiled Earth
+(@RAID_DIFF_25N + 60583, 86318, 0, 4, 2, 1, 1), -- Casque of Expelled Corruption
+(@RAID_DIFF_25N + 60583, 86316, 0, 4, 3, 1, 1), -- Cloak of Overwhelming Corruption
+(@RAID_DIFF_25N + 60583, 86317, 0, 4, 3, 1, 1), -- Cuffs of the Corrupted Waters
+(@RAID_DIFF_25N + 60583, 86232, 0, 4, 3, 1, 1), -- Deepwater Greatboots
+(@RAID_DIFF_25N + 60583, 86234, 0, 4, 4, 1, 1), -- Kaolan's Withering Necklace
+(@RAID_DIFF_25N + 60583, 89841, 0, 4, 4, 1, 1), -- Legguards of Failing Purification
+(@RAID_DIFF_25N + 60583, 86319, 0, 4, 4, 1, 1), -- Lightning Prisoner's Boots
+(@RAID_DIFF_25N + 60583, 86231, 0, 4, 5, 1, 1), -- Regail's Band of the Endless
+(@RAID_DIFF_25N + 60583, 86390, 0, 4, 5, 1, 1), -- Regail's Crackling Dagger
+(@RAID_DIFF_25N + 60583, 86233, 0, 4, 5, 1, 1), -- Shackle of Eversparks
+(@RAID_DIFF_25N + 60583, 89885, 0, 4, 6, 1, 1), -- Waterborne Shoulderguards
+(@RAID_DIFF_25N + 60583, 86315, 0, 4, 6, 1, 1), -- Watersoul Signet
 
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 90528, 0, 8, 2, 1, 1), -- ELITE Asani's Uncleansed Sandals
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 90520, 0, 8, 2, 1, 1), -- ELITE Bracers of Defiled Earth
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 90530, 0, 8, 2, 1, 1), -- ELITE Casque of Expelled Corruption
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 90526, 0, 8, 3, 1, 1), -- ELITE Cloak of Overwhelming Corruption
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 90524, 0, 8, 3, 1, 1), -- ELITE Cuffs of the Corrupted Waters
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 90521, 0, 8, 3, 1, 1), -- ELITE Deepwater Greatboots
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 90523, 0, 8, 4, 1, 1), -- ELITE Kaolan's Withering Necklace
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 90518, 0, 8, 4, 1, 1), -- ELITE Legguards of Failing Purification
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 90529, 0, 8, 4, 1, 1), -- ELITE Lightning Prisoner's Boots
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 90517, 0, 8, 5, 1, 1), -- ELITE Regail's Band of the Endless
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 90527, 0, 8, 5, 1, 1), -- ELITE Regail's Crackling Dagger
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 90522, 0, 8, 5, 1, 1), -- ELITE Shackle of Eversparks
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 90519, 0, 8, 6, 1, 1), -- ELITE Waterborne Shoulderguards
-(@RAID_DIFF_25N + @ENTRY_KAOLAN, 90525, 0, 8, 6, 1, 1), -- ELITE Watersoul Signet
+(@RAID_DIFF_25N + 60583, 90528, 0, 8, 2, 1, 1), -- ELITE Asani's Uncleansed Sandals
+(@RAID_DIFF_25N + 60583, 90520, 0, 8, 2, 1, 1), -- ELITE Bracers of Defiled Earth
+(@RAID_DIFF_25N + 60583, 90530, 0, 8, 2, 1, 1), -- ELITE Casque of Expelled Corruption
+(@RAID_DIFF_25N + 60583, 90526, 0, 8, 3, 1, 1), -- ELITE Cloak of Overwhelming Corruption
+(@RAID_DIFF_25N + 60583, 90524, 0, 8, 3, 1, 1), -- ELITE Cuffs of the Corrupted Waters
+(@RAID_DIFF_25N + 60583, 90521, 0, 8, 3, 1, 1), -- ELITE Deepwater Greatboots
+(@RAID_DIFF_25N + 60583, 90523, 0, 8, 4, 1, 1), -- ELITE Kaolan's Withering Necklace
+(@RAID_DIFF_25N + 60583, 90518, 0, 8, 4, 1, 1), -- ELITE Legguards of Failing Purification
+(@RAID_DIFF_25N + 60583, 90529, 0, 8, 4, 1, 1), -- ELITE Lightning Prisoner's Boots
+(@RAID_DIFF_25N + 60583, 90517, 0, 8, 5, 1, 1), -- ELITE Regail's Band of the Endless
+(@RAID_DIFF_25N + 60583, 90527, 0, 8, 5, 1, 1), -- ELITE Regail's Crackling Dagger
+(@RAID_DIFF_25N + 60583, 90522, 0, 8, 5, 1, 1), -- ELITE Shackle of Eversparks
+(@RAID_DIFF_25N + 60583, 90519, 0, 8, 6, 1, 1), -- ELITE Waterborne Shoulderguards
+(@RAID_DIFF_25N + 60583, 90525, 0, 8, 6, 1, 1), -- ELITE Watersoul Signet
 
 -- 10HC
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 86238, 0, 2, 1, 1, 1), -- Pattern: Chestguard of Nemeses
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 86272, 0, 2, 1, 1, 1), -- Pattern: Fists of Lightning
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 86380, 0, 2, 1, 1, 1), -- Pattern: Imperial Silk Gloves
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 86381, 0, 2, 1, 1, 1), -- Pattern: Legacy of the Emperor
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 86279, 0, 2, 1, 1, 1), -- Pattern: Liferuned Leather Gloves
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 86280, 0, 2, 1, 1, 1), -- Pattern: Murderer's Gloves
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 86281, 0, 2, 1, 1, 1), -- Pattern: Nightfire Robe
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 86283, 0, 2, 1, 1, 1), -- Pattern: Raiment of Blood and Bone
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 86284, 0, 2, 1, 1, 1), -- Pattern: Raven Lord's Gloves
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 86297, 0, 2, 1, 1, 1), -- Pattern: Stormbreaker Chestguard
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 87411, 0, 2, 1, 1, 1), -- Plans: Bloodforged Warfists
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 87412, 0, 2, 1, 1, 1), -- Plans: Chestplate of Limitless Faith
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 87409, 0, 2, 1, 1, 1), -- Plans: Gauntlets of Battle Command
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 87413, 0, 2, 1, 1, 1), -- Plans: Gauntlets of Unbound Devotion
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 87408, 0, 2, 1, 1, 1), -- Plans: Unyielding Bloodplate
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 86379, 0, 2, 1, 1, 1), -- Pattern: Robe of Eternal Rule
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 86382, 0, 2, 1, 1, 1), -- Pattern: Touch of the Light
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 87410, 0, 2, 1, 1, 1), -- Plans: Ornate Battleplate of the Master
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 71716, 100, 2, 0, 1, 1), -- Soothsayer's Runes
+(@RAID_DIFF_10H + 60583, 86238, 0, 2, 1, 1, 1), -- Pattern: Chestguard of Nemeses
+(@RAID_DIFF_10H + 60583, 86272, 0, 2, 1, 1, 1), -- Pattern: Fists of Lightning
+(@RAID_DIFF_10H + 60583, 86380, 0, 2, 1, 1, 1), -- Pattern: Imperial Silk Gloves
+(@RAID_DIFF_10H + 60583, 86381, 0, 2, 1, 1, 1), -- Pattern: Legacy of the Emperor
+(@RAID_DIFF_10H + 60583, 86279, 0, 2, 1, 1, 1), -- Pattern: Liferuned Leather Gloves
+(@RAID_DIFF_10H + 60583, 86280, 0, 2, 1, 1, 1), -- Pattern: Murderer's Gloves
+(@RAID_DIFF_10H + 60583, 86281, 0, 2, 1, 1, 1), -- Pattern: Nightfire Robe
+(@RAID_DIFF_10H + 60583, 86283, 0, 2, 1, 1, 1), -- Pattern: Raiment of Blood and Bone
+(@RAID_DIFF_10H + 60583, 86284, 0, 2, 1, 1, 1), -- Pattern: Raven Lord's Gloves
+(@RAID_DIFF_10H + 60583, 86297, 0, 2, 1, 1, 1), -- Pattern: Stormbreaker Chestguard
+(@RAID_DIFF_10H + 60583, 87411, 0, 2, 1, 1, 1), -- Plans: Bloodforged Warfists
+(@RAID_DIFF_10H + 60583, 87412, 0, 2, 1, 1, 1), -- Plans: Chestplate of Limitless Faith
+(@RAID_DIFF_10H + 60583, 87409, 0, 2, 1, 1, 1), -- Plans: Gauntlets of Battle Command
+(@RAID_DIFF_10H + 60583, 87413, 0, 2, 1, 1, 1), -- Plans: Gauntlets of Unbound Devotion
+(@RAID_DIFF_10H + 60583, 87408, 0, 2, 1, 1, 1), -- Plans: Unyielding Bloodplate
+(@RAID_DIFF_10H + 60583, 86379, 0, 2, 1, 1, 1), -- Pattern: Robe of Eternal Rule
+(@RAID_DIFF_10H + 60583, 86382, 0, 2, 1, 1, 1), -- Pattern: Touch of the Light
+(@RAID_DIFF_10H + 60583, 87410, 0, 2, 1, 1, 1), -- Plans: Ornate Battleplate of the Master
+(@RAID_DIFF_10H + 60583, 71716, 100, 2, 0, 1, 1), -- Soothsayer's Runes
 
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 87153, 0, 4, 2, 1, 1), -- Asani's Uncleansed Sandals
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 87145, 0, 4, 2, 1, 1), -- Bracers of Defiled Earth
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 87155, 0, 4, 2, 1, 1), -- Casque of Expelled Corruption
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 87150, 0, 4, 3, 1, 1), -- Cloak of Overwhelming Corruption
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 87149, 0, 4, 3, 1, 1), -- Cuffs of the Corrupted Waters
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 87146, 0, 4, 3, 1, 1), -- Deepwater Greatboots
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 87148, 0, 4, 4, 1, 1), -- Kaolan's Withering Necklace
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 89943, 0, 4, 4, 1, 1), -- Legguards of Failing Purification
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 87154, 0, 4, 4, 1, 1), -- Lightning Prisoner's Boots
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 87144, 0, 4, 5, 1, 1), -- Regail's Band of the Endless
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 87152, 0, 4, 5, 1, 1), -- Regail's Crackling Dagger
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 87147, 0, 4, 5, 1, 1), -- Shackle of Eversparks
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 89944, 0, 4, 6, 1, 1), -- Waterborne Shoulderguards
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 87151, 0, 4, 6, 1, 1), -- Watersoul Signet
+(@RAID_DIFF_10H + 60583, 87153, 0, 4, 2, 1, 1), -- Asani's Uncleansed Sandals
+(@RAID_DIFF_10H + 60583, 87145, 0, 4, 2, 1, 1), -- Bracers of Defiled Earth
+(@RAID_DIFF_10H + 60583, 87155, 0, 4, 2, 1, 1), -- Casque of Expelled Corruption
+(@RAID_DIFF_10H + 60583, 87150, 0, 4, 3, 1, 1), -- Cloak of Overwhelming Corruption
+(@RAID_DIFF_10H + 60583, 87149, 0, 4, 2, 1, 1), -- Cuffs of the Corrupted Waters
+(@RAID_DIFF_10H + 60583, 87146, 0, 4, 2, 1, 1), -- Deepwater Greatboots
+(@RAID_DIFF_10H + 60583, 87148, 0, 4, 3, 1, 1), -- Kaolan's Withering Necklace
+(@RAID_DIFF_10H + 60583, 89943, 0, 4, 2, 1, 1), -- Legguards of Failing Purification
+(@RAID_DIFF_10H + 60583, 87154, 0, 4, 2, 1, 1), -- Lightning Prisoner's Boots
+(@RAID_DIFF_10H + 60583, 87144, 0, 4, 3, 1, 1), -- Regail's Band of the Endless
+(@RAID_DIFF_10H + 60583, 87152, 0, 4, 3, 1, 1), -- Regail's Crackling Dagger
+(@RAID_DIFF_10H + 60583, 87147, 0, 4, 3, 1, 1), -- Shackle of Eversparks
+(@RAID_DIFF_10H + 60583, 89944, 0, 4, 2, 1, 1), -- Waterborne Shoulderguards
+(@RAID_DIFF_10H + 60583, 87151, 0, 4, 3, 1, 1), -- Watersoul Signet
 
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 90514, 0, 8, 2, 1, 1), -- ELITE Asani's Uncleansed Sandals
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 90506, 0, 8, 2, 1, 1), -- ELITE Bracers of Defiled Earth
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 90516, 0, 8, 2, 1, 1), -- ELITE Casque of Expelled Corruption
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 90512, 0, 8, 3, 1, 1), -- ELITE Cloak of Overwhelming Corruption
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 90510, 0, 8, 3, 1, 1), -- ELITE Cuffs of the Corrupted Waters
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 90507, 0, 8, 3, 1, 1), -- ELITE Deepwater Greatboots
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 90509, 0, 8, 4, 1, 1), -- ELITE Kaolan's Withering Necklace
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 90504, 0, 8, 4, 1, 1), -- ELITE Legguards of Failing Purification
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 90515, 0, 8, 4, 1, 1), -- ELITE Lightning Prisoner's Boots
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 90503, 0, 8, 5, 1, 1), -- ELITE Regail's Band of the Endless
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 90513, 0, 8, 5, 1, 1), -- ELITE Regail's Crackling Dagger
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 90508, 0, 8, 5, 1, 1), -- ELITE Shackle of Eversparks
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 90505, 0, 8, 6, 1, 1), -- ELITE Waterborne Shoulderguards
-(@RAID_DIFF_10H + @ENTRY_KAOLAN, 90511, 0, 8, 6, 1, 1), -- ELITE Watersoul Signet
+(@RAID_DIFF_10H + 60583, 90514, 0, 8, 2, 1, 1), -- ELITE Asani's Uncleansed Sandals
+(@RAID_DIFF_10H + 60583, 90506, 0, 8, 2, 1, 1), -- ELITE Bracers of Defiled Earth
+(@RAID_DIFF_10H + 60583, 90516, 0, 8, 2, 1, 1), -- ELITE Casque of Expelled Corruption
+(@RAID_DIFF_10H + 60583, 90512, 0, 8, 3, 1, 1), -- ELITE Cloak of Overwhelming Corruption
+(@RAID_DIFF_10H + 60583, 90510, 0, 8, 2, 1, 1), -- ELITE Cuffs of the Corrupted Waters
+(@RAID_DIFF_10H + 60583, 90507, 0, 8, 2, 1, 1), -- ELITE Deepwater Greatboots
+(@RAID_DIFF_10H + 60583, 90509, 0, 8, 3, 1, 1), -- ELITE Kaolan's Withering Necklace
+(@RAID_DIFF_10H + 60583, 90504, 0, 8, 2, 1, 1), -- ELITE Legguards of Failing Purification
+(@RAID_DIFF_10H + 60583, 90515, 0, 8, 2, 1, 1), -- ELITE Lightning Prisoner's Boots
+(@RAID_DIFF_10H + 60583, 90503, 0, 8, 3, 1, 1), -- ELITE Regail's Band of the Endless
+(@RAID_DIFF_10H + 60583, 90513, 0, 8, 3, 1, 1), -- ELITE Regail's Crackling Dagger
+(@RAID_DIFF_10H + 60583, 90508, 0, 8, 3, 1, 1), -- ELITE Shackle of Eversparks
+(@RAID_DIFF_10H + 60583, 90505, 0, 8, 2, 1, 1), -- ELITE Waterborne Shoulderguards
+(@RAID_DIFF_10H + 60583, 90511, 0, 8, 3, 1, 1), -- ELITE Watersoul Signet
 
 -- 25HC
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 86238, 0, 2, 1, 1, 1), -- Pattern: Chestguard of Nemeses
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 86272, 0, 2, 1, 1, 1), -- Pattern: Fists of Lightning
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 86380, 0, 2, 1, 1, 1), -- Pattern: Imperial Silk Gloves
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 86381, 0, 2, 1, 1, 1), -- Pattern: Legacy of the Emperor
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 86279, 0, 2, 1, 1, 1), -- Pattern: Liferuned Leather Gloves
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 86280, 0, 2, 1, 1, 1), -- Pattern: Murderer's Gloves
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 86281, 0, 2, 1, 1, 1), -- Pattern: Nightfire Robe
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 86283, 0, 2, 1, 1, 1), -- Pattern: Raiment of Blood and Bone
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 86284, 0, 2, 1, 1, 1), -- Pattern: Raven Lord's Gloves
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 86297, 0, 2, 1, 1, 1), -- Pattern: Stormbreaker Chestguard
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 87411, 0, 2, 1, 1, 1), -- Plans: Bloodforged Warfists
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 87412, 0, 2, 1, 1, 1), -- Plans: Chestplate of Limitless Faith
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 87409, 0, 2, 1, 1, 1), -- Plans: Gauntlets of Battle Command
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 87413, 0, 2, 1, 1, 1), -- Plans: Gauntlets of Unbound Devotion
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 87408, 0, 2, 1, 1, 1), -- Plans: Unyielding Bloodplate
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 86379, 0, 2, 1, 1, 1), -- Pattern: Robe of Eternal Rule
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 86382, 0, 2, 1, 1, 1), -- Pattern: Touch of the Light
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 87410, 0, 2, 1, 1, 1), -- Plans: Ornate Battleplate of the Master
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 71716, 100, 2, 0, 1, 1), -- Soothsayer's Runes
+(@RAID_DIFF_25H + 60583, 86238, 0, 2, 1, 1, 1), -- Pattern: Chestguard of Nemeses
+(@RAID_DIFF_25H + 60583, 86272, 0, 2, 1, 1, 1), -- Pattern: Fists of Lightning
+(@RAID_DIFF_25H + 60583, 86380, 0, 2, 1, 1, 1), -- Pattern: Imperial Silk Gloves
+(@RAID_DIFF_25H + 60583, 86381, 0, 2, 1, 1, 1), -- Pattern: Legacy of the Emperor
+(@RAID_DIFF_25H + 60583, 86279, 0, 2, 1, 1, 1), -- Pattern: Liferuned Leather Gloves
+(@RAID_DIFF_25H + 60583, 86280, 0, 2, 1, 1, 1), -- Pattern: Murderer's Gloves
+(@RAID_DIFF_25H + 60583, 86281, 0, 2, 1, 1, 1), -- Pattern: Nightfire Robe
+(@RAID_DIFF_25H + 60583, 86283, 0, 2, 1, 1, 1), -- Pattern: Raiment of Blood and Bone
+(@RAID_DIFF_25H + 60583, 86284, 0, 2, 1, 1, 1), -- Pattern: Raven Lord's Gloves
+(@RAID_DIFF_25H + 60583, 86297, 0, 2, 1, 1, 1), -- Pattern: Stormbreaker Chestguard
+(@RAID_DIFF_25H + 60583, 87411, 0, 2, 1, 1, 1), -- Plans: Bloodforged Warfists
+(@RAID_DIFF_25H + 60583, 87412, 0, 2, 1, 1, 1), -- Plans: Chestplate of Limitless Faith
+(@RAID_DIFF_25H + 60583, 87409, 0, 2, 1, 1, 1), -- Plans: Gauntlets of Battle Command
+(@RAID_DIFF_25H + 60583, 87413, 0, 2, 1, 1, 1), -- Plans: Gauntlets of Unbound Devotion
+(@RAID_DIFF_25H + 60583, 87408, 0, 2, 1, 1, 1), -- Plans: Unyielding Bloodplate
+(@RAID_DIFF_25H + 60583, 86379, 0, 2, 1, 1, 1), -- Pattern: Robe of Eternal Rule
+(@RAID_DIFF_25H + 60583, 86382, 0, 2, 1, 1, 1), -- Pattern: Touch of the Light
+(@RAID_DIFF_25H + 60583, 87410, 0, 2, 1, 1, 1), -- Plans: Ornate Battleplate of the Master
+(@RAID_DIFF_25H + 60583, 71716, 100, 2, 0, 1, 1), -- Soothsayer's Runes
 
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 87153, 0, 4, 2, 1, 1), -- Asani's Uncleansed Sandals
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 87145, 0, 4, 2, 1, 1), -- Bracers of Defiled Earth
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 87155, 0, 4, 2, 1, 1), -- Casque of Expelled Corruption
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 87150, 0, 4, 3, 1, 1), -- Cloak of Overwhelming Corruption
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 87149, 0, 4, 3, 1, 1), -- Cuffs of the Corrupted Waters
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 87146, 0, 4, 3, 1, 1), -- Deepwater Greatboots
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 87148, 0, 4, 4, 1, 1), -- Kaolan's Withering Necklace
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 89943, 0, 4, 4, 1, 1), -- Legguards of Failing Purification
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 87154, 0, 4, 4, 1, 1), -- Lightning Prisoner's Boots
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 87144, 0, 4, 5, 1, 1), -- Regail's Band of the Endless
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 87152, 0, 4, 5, 1, 1), -- Regail's Crackling Dagger
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 87147, 0, 4, 5, 1, 1), -- Shackle of Eversparks
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 89944, 0, 4, 6, 1, 1), -- Waterborne Shoulderguards
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 87151, 0, 4, 6, 1, 1), -- Watersoul Signet
+(@RAID_DIFF_25H + 60583, 87153, 0, 4, 2, 1, 1), -- Asani's Uncleansed Sandals
+(@RAID_DIFF_25H + 60583, 87145, 0, 4, 2, 1, 1), -- Bracers of Defiled Earth
+(@RAID_DIFF_25H + 60583, 87155, 0, 4, 2, 1, 1), -- Casque of Expelled Corruption
+(@RAID_DIFF_25H + 60583, 87150, 0, 4, 3, 1, 1), -- Cloak of Overwhelming Corruption
+(@RAID_DIFF_25H + 60583, 87149, 0, 4, 3, 1, 1), -- Cuffs of the Corrupted Waters
+(@RAID_DIFF_25H + 60583, 87146, 0, 4, 3, 1, 1), -- Deepwater Greatboots
+(@RAID_DIFF_25H + 60583, 87148, 0, 4, 4, 1, 1), -- Kaolan's Withering Necklace
+(@RAID_DIFF_25H + 60583, 89943, 0, 4, 4, 1, 1), -- Legguards of Failing Purification
+(@RAID_DIFF_25H + 60583, 87154, 0, 4, 4, 1, 1), -- Lightning Prisoner's Boots
+(@RAID_DIFF_25H + 60583, 87144, 0, 4, 5, 1, 1), -- Regail's Band of the Endless
+(@RAID_DIFF_25H + 60583, 87152, 0, 4, 5, 1, 1), -- Regail's Crackling Dagger
+(@RAID_DIFF_25H + 60583, 87147, 0, 4, 5, 1, 1), -- Shackle of Eversparks
+(@RAID_DIFF_25H + 60583, 89944, 0, 4, 6, 1, 1), -- Waterborne Shoulderguards
+(@RAID_DIFF_25H + 60583, 87151, 0, 4, 6, 1, 1), -- Watersoul Signet
 
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 90514, 0, 8, 2, 1, 1), -- ELITE Asani's Uncleansed Sandals
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 90506, 0, 8, 2, 1, 1), -- ELITE Bracers of Defiled Earth
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 90516, 0, 8, 2, 1, 1), -- ELITE Casque of Expelled Corruption
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 90512, 0, 8, 3, 1, 1), -- ELITE Cloak of Overwhelming Corruption
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 90510, 0, 8, 3, 1, 1), -- ELITE Cuffs of the Corrupted Waters
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 90507, 0, 8, 3, 1, 1), -- ELITE Deepwater Greatboots
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 90509, 0, 8, 4, 1, 1), -- ELITE Kaolan's Withering Necklace
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 90504, 0, 8, 4, 1, 1), -- ELITE Legguards of Failing Purification
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 90515, 0, 8, 4, 1, 1), -- ELITE Lightning Prisoner's Boots
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 90503, 0, 8, 5, 1, 1), -- ELITE Regail's Band of the Endless
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 90513, 0, 8, 5, 1, 1), -- ELITE Regail's Crackling Dagger
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 90508, 0, 8, 5, 1, 1), -- ELITE Shackle of Eversparks
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 90505, 0, 8, 6, 1, 1), -- ELITE Waterborne Shoulderguards
-(@RAID_DIFF_25H + @ENTRY_KAOLAN, 90511, 0, 8, 6, 1, 1), -- ELITE Watersoul Signet
+(@RAID_DIFF_25H + 60583, 90514, 0, 8, 2, 1, 1), -- ELITE Asani's Uncleansed Sandals
+(@RAID_DIFF_25H + 60583, 90506, 0, 8, 2, 1, 1), -- ELITE Bracers of Defiled Earth
+(@RAID_DIFF_25H + 60583, 90516, 0, 8, 2, 1, 1), -- ELITE Casque of Expelled Corruption
+(@RAID_DIFF_25H + 60583, 90512, 0, 8, 3, 1, 1), -- ELITE Cloak of Overwhelming Corruption
+(@RAID_DIFF_25H + 60583, 90510, 0, 8, 3, 1, 1), -- ELITE Cuffs of the Corrupted Waters
+(@RAID_DIFF_25H + 60583, 90507, 0, 8, 3, 1, 1), -- ELITE Deepwater Greatboots
+(@RAID_DIFF_25H + 60583, 90509, 0, 8, 4, 1, 1), -- ELITE Kaolan's Withering Necklace
+(@RAID_DIFF_25H + 60583, 90504, 0, 8, 4, 1, 1), -- ELITE Legguards of Failing Purification
+(@RAID_DIFF_25H + 60583, 90515, 0, 8, 4, 1, 1), -- ELITE Lightning Prisoner's Boots
+(@RAID_DIFF_25H + 60583, 90503, 0, 8, 5, 1, 1), -- ELITE Regail's Band of the Endless
+(@RAID_DIFF_25H + 60583, 90513, 0, 8, 5, 1, 1), -- ELITE Regail's Crackling Dagger
+(@RAID_DIFF_25H + 60583, 90508, 0, 8, 5, 1, 1), -- ELITE Shackle of Eversparks
+(@RAID_DIFF_25H + 60583, 90505, 0, 8, 6, 1, 1), -- ELITE Waterborne Shoulderguards
+(@RAID_DIFF_25H + 60583, 90511, 0, 8, 6, 1, 1), -- ELITE Watersoul Signet
+
 -- LFR
-(@RAID_DIFF_25R + @ENTRY_KAOLAN, 86878, 0, 4, 2, 1, 1), -- Asani's Uncleansed Sandals
-(@RAID_DIFF_25R + @ENTRY_KAOLAN, 86868, 0, 4, 2, 1, 1), -- Bracers of Defiled Earth
-(@RAID_DIFF_25R + @ENTRY_KAOLAN, 86876, 0, 4, 2, 1, 1), -- Casque of Expelled Corruption
-(@RAID_DIFF_25R + @ENTRY_KAOLAN, 86874, 0, 4, 3, 1, 1), -- Cloak of Overwhelming Corruption
-(@RAID_DIFF_25R + @ENTRY_KAOLAN, 86875, 0, 4, 3, 1, 1), -- Cuffs of the Corrupted Waters
-(@RAID_DIFF_25R + @ENTRY_KAOLAN, 86870, 0, 4, 3, 1, 1), -- Deepwater Greatboots
-(@RAID_DIFF_25R + @ENTRY_KAOLAN, 86872, 0, 4, 4, 1, 1), -- Kaolan's Withering Necklace
-(@RAID_DIFF_25R + @ENTRY_KAOLAN, 89978, 0, 4, 4, 1, 1), -- Legguards of Failing Purification
-(@RAID_DIFF_25R + @ENTRY_KAOLAN, 86877, 0, 4, 4, 1, 1), -- Lightning Prisoner's Boots
-(@RAID_DIFF_25R + @ENTRY_KAOLAN, 86869, 0, 4, 5, 1, 1), -- Regail's Band of the Endless
-(@RAID_DIFF_25R + @ENTRY_KAOLAN, 86909, 0, 4, 5, 1, 1), -- Regail's Crackling Dagger
-(@RAID_DIFF_25R + @ENTRY_KAOLAN, 86871, 0, 4, 5, 1, 1), -- Shackle of Eversparks
-(@RAID_DIFF_25R + @ENTRY_KAOLAN, 89979, 0, 4, 6, 1, 1), -- Waterborne Shoulderguards
-(@RAID_DIFF_25R + @ENTRY_KAOLAN, 86873, 0, 4, 6, 1, 1), -- Watersoul Signet
-(@RAID_DIFF_25R + @ENTRY_KAOLAN, 95617, 0, 4, 0, 1, 1), -- Dividends of the Everlasting Spring
+(@RAID_DIFF_25R + 60583, 86878, 0, 4, 2, 1, 1), -- Asani's Uncleansed Sandals
+(@RAID_DIFF_25R + 60583, 86868, 0, 4, 2, 1, 1), -- Bracers of Defiled Earth
+(@RAID_DIFF_25R + 60583, 86876, 0, 4, 2, 1, 1), -- Casque of Expelled Corruption
+(@RAID_DIFF_25R + 60583, 86874, 0, 4, 3, 1, 1), -- Cloak of Overwhelming Corruption
+(@RAID_DIFF_25R + 60583, 86875, 0, 4, 2, 1, 1), -- Cuffs of the Corrupted Waters
+(@RAID_DIFF_25R + 60583, 86870, 0, 4, 2, 1, 1), -- Deepwater Greatboots
+(@RAID_DIFF_25R + 60583, 86872, 0, 4, 3, 1, 1), -- Kaolan's Withering Necklace
+(@RAID_DIFF_25R + 60583, 89978, 0, 4, 2, 1, 1), -- Legguards of Failing Purification
+(@RAID_DIFF_25R + 60583, 86877, 0, 4, 2, 1, 1), -- Lightning Prisoner's Boots
+(@RAID_DIFF_25R + 60583, 86869, 0, 4, 3, 1, 1), -- Regail's Band of the Endless
+(@RAID_DIFF_25R + 60583, 86909, 0, 4, 3, 1, 1), -- Regail's Crackling Dagger
+(@RAID_DIFF_25R + 60583, 86871, 0, 4, 3, 1, 1), -- Shackle of Eversparks
+(@RAID_DIFF_25R + 60583, 89979, 0, 4, 2, 1, 1), -- Waterborne Shoulderguards
+(@RAID_DIFF_25R + 60583, 86873, 0, 4, 3, 1, 1), -- Watersoul Signet
+(@RAID_DIFF_25R + 60583, 95617, 0, 4, 0, 1, 1), -- Dividends of the Everlasting Spring
 
 
 -- Sha of Fear
 
 -- 10N
 
-(@RAID_DIFF_10N + 60999, 86272, 100, 1, 1, 1, 1), -- Pattern: Fists of Lightning
-(@RAID_DIFF_10N + 60999, 86280, 100, 1, 1, 1, 1), -- Pattern: Murderer's Gloves
-(@RAID_DIFF_10N + 60999, 86297, 100, 1, 1, 1, 1), -- Pattern: Stormbreaker Chestguard
-(@RAID_DIFF_10N + 60999, 87412, 100, 1, 1, 1, 1), -- Plans: Chestplate of Limitless Faith
-(@RAID_DIFF_10N + 60999, 87408, 100, 1, 1, 1, 1), -- Plans: Unyielding Bloodplate
-(@RAID_DIFF_10N + 60999, 86389, 100, 1, 2, 1, 1), -- Dreadwoven Leggings of Failure
-(@RAID_DIFF_10N + 60999, 86388, 100, 1, 2, 1, 1), -- Essence of Terror
-(@RAID_DIFF_10N + 60999, 89235, 100, 1, 2, 1, 1), -- Helm of the Shadowy Conqueror
-(@RAID_DIFF_10N + 60999, 89236, 100, 1, 2, 1, 1), -- Helm of the Shadowy Protector
-(@RAID_DIFF_10N + 60999, 89234, 100, 1, 2, 1, 1), -- Helm of the Shadowy Vanquisher
-(@RAID_DIFF_10N + 60999, 86387, 100, 1, 3, 1, 1), -- Kilrak, Jaws of Terror
-(@RAID_DIFF_10N + 60999, 89887, 100, 1, 3, 1, 1), -- Robes of Pinioned Eyes
-(@RAID_DIFF_10N + 60999, 89839, 100, 1, 3, 1, 1), -- Shadowgrip Girdle
-(@RAID_DIFF_10N + 60999, 86386, 100, 1, 3, 1, 1), -- Shin'ka, Execution of Dominion
-(@RAID_DIFF_10N + 60999, 89886, 100, 1, 3, 1, 1), -- Wrap of Instant Petrification
+(@RAID_DIFF_10N + 60999, 86272, 0, 1, 1, 1, 1), -- Pattern: Fists of Lightning
+(@RAID_DIFF_10N + 60999, 86280, 0, 1, 1, 1, 1), -- Pattern: Murderer's Gloves
+(@RAID_DIFF_10N + 60999, 86297, 0, 1, 1, 1, 1), -- Pattern: Stormbreaker Chestguard
+(@RAID_DIFF_10N + 60999, 87412, 0, 1, 1, 1, 1), -- Plans: Chestplate of Limitless Faith
+(@RAID_DIFF_10N + 60999, 87408, 0, 1, 1, 1, 1), -- Plans: Unyielding Bloodplate
+(@RAID_DIFF_10N + 60999, 86389, 0, 1, 3, 1, 1), -- Dreadwoven Leggings of Failure
+(@RAID_DIFF_10N + 60999, 86388, 0, 1, 3, 1, 1), -- Essence of Terror
+(@RAID_DIFF_10N + 60999, 89235, 0, 1, 2, 1, 1), -- Helm of the Shadowy Conqueror
+(@RAID_DIFF_10N + 60999, 89236, 0, 1, 2, 1, 1), -- Helm of the Shadowy Protector
+(@RAID_DIFF_10N + 60999, 89234, 0, 1, 2, 1, 1), -- Helm of the Shadowy Vanquisher
+(@RAID_DIFF_10N + 60999, 86387, 0, 1, 3, 1, 1), -- Kilrak, Jaws of Terror
+(@RAID_DIFF_10N + 60999, 89887, 0, 1, 3, 1, 1), -- Robes of Pinioned Eyes
+(@RAID_DIFF_10N + 60999, 89839, 0, 1, 3, 1, 1), -- Shadowgrip Girdle
+(@RAID_DIFF_10N + 60999, 86386, 0, 1, 3, 1, 1), -- Shin'ka, Execution of Dominion
+(@RAID_DIFF_10N + 60999, 89886, 0, 1, 3, 1, 1), -- Wrap of Instant Petrification
 
 -- 25N
 
-(@RAID_DIFF_25N + 60999, 86272, 100, 1, 1, 1, 1), -- Pattern: Fists of Lightning
-(@RAID_DIFF_25N + 60999, 86280, 100, 1, 1, 1, 1), -- Pattern: Murderer's Gloves
-(@RAID_DIFF_25N + 60999, 86297, 100, 1, 1, 1, 1), -- Pattern: Stormbreaker Chestguard
-(@RAID_DIFF_25N + 60999, 87412, 100, 1, 1, 1, 1), -- Plans: Chestplate of Limitless Faith
-(@RAID_DIFF_25N + 60999, 87408, 100, 1, 1, 1, 1), -- Plans: Unyielding Bloodplate
-(@RAID_DIFF_25N + 60999, 86389, 100, 1, 2, 1, 1), -- Dreadwoven Leggings of Failure
-(@RAID_DIFF_25N + 60999, 86388, 100, 1, 2, 1, 1), -- Essence of Terror
-(@RAID_DIFF_25N + 60999, 89235, 100, 1, 3, 1, 1), -- Helm of the Shadowy Conqueror
-(@RAID_DIFF_25N + 60999, 89236, 100, 1, 3, 1, 1), -- Helm of the Shadowy Protector
-(@RAID_DIFF_25N + 60999, 89234, 100, 1, 4, 1, 1), -- Helm of the Shadowy Vanquisher
-(@RAID_DIFF_25N + 60999, 86387, 100, 1, 4, 1, 1), -- Kilrak, Jaws of Terror
-(@RAID_DIFF_25N + 60999, 89887, 100, 1, 4, 1, 1), -- Robes of Pinioned Eyes
-(@RAID_DIFF_25N + 60999, 89839, 100, 1, 5, 1, 1), -- Shadowgrip Girdle
-(@RAID_DIFF_25N + 60999, 86386, 100, 1, 5, 1, 1), -- Shin'ka, Execution of Dominion
-(@RAID_DIFF_25N + 60999, 89886, 100, 1, 5, 1, 1), -- Wrap of Instant Petrification
+(@RAID_DIFF_25N + 60999, 86272, 0, 1, 1, 1, 1), -- Pattern: Fists of Lightning
+(@RAID_DIFF_25N + 60999, 86280, 0, 1, 1, 1, 1), -- Pattern: Murderer's Gloves
+(@RAID_DIFF_25N + 60999, 86297, 0, 1, 1, 1, 1), -- Pattern: Stormbreaker Chestguard
+(@RAID_DIFF_25N + 60999, 87412, 0, 1, 1, 1, 1), -- Plans: Chestplate of Limitless Faith
+(@RAID_DIFF_25N + 60999, 87408, 0, 1, 1, 1, 1), -- Plans: Unyielding Bloodplate
+(@RAID_DIFF_25N + 60999, 86389, 0, 1, 5, 1, 1), -- Dreadwoven Leggings of Failure
+(@RAID_DIFF_25N + 60999, 86388, 0, 1, 2, 1, 1), -- Essence of Terror
+(@RAID_DIFF_25N + 60999, 89235, 0, 1, 2, 1, 1), -- Helm of the Shadowy Conqueror
+(@RAID_DIFF_25N + 60999, 89236, 0, 1, 3, 1, 1), -- Helm of the Shadowy Protector
+(@RAID_DIFF_25N + 60999, 89234, 0, 1, 4, 1, 1), -- Helm of the Shadowy Vanquisher
+(@RAID_DIFF_25N + 60999, 86387, 0, 1, 3, 1, 1), -- Kilrak, Jaws of Terror
+(@RAID_DIFF_25N + 60999, 89887, 0, 1, 5, 1, 1), -- Robes of Pinioned Eyes
+(@RAID_DIFF_25N + 60999, 89839, 0, 1, 5, 1, 1), -- Shadowgrip Girdle
+(@RAID_DIFF_25N + 60999, 86386, 0, 1, 4, 1, 1), -- Shin'ka, Execution of Dominion
+(@RAID_DIFF_25N + 60999, 89886, 0, 1, 5, 1, 1), -- Wrap of Instant Petrification
 
 -- 10HC
 
-(@RAID_DIFF_10H + 60999, 87174, 100, 1, 1, 1, 1), -- Dreadwoven Leggings of Failure
-(@RAID_DIFF_10H + 60999, 87175, 100, 1, 1, 1, 1), -- Essence of Terror
-(@RAID_DIFF_10H + 60999, 89259, 100, 1, 1, 1, 1), -- Helm of the Shadowy Conqueror
-(@RAID_DIFF_10H + 60999, 89260, 100, 1, 1, 1, 1), -- Helm of the Shadowy Protector
-(@RAID_DIFF_10H + 60999, 89258, 100, 1, 1, 1, 1), -- Helm of the Shadowy Vanquisher
-(@RAID_DIFF_10H + 60999, 87173, 100, 1, 2, 1, 1), -- Kilrak, Jaws of Terror
-(@RAID_DIFF_10H + 60999, 89949, 100, 1, 2, 1, 1), -- Robes of Pinioned Eyes
-(@RAID_DIFF_10H + 60999, 89951, 100, 1, 2, 1, 1), -- Shadowgrip Girdle
-(@RAID_DIFF_10H + 60999, 87176, 100, 1, 2, 1, 1), -- Shin'ka, Execution of Dominion
-(@RAID_DIFF_10H + 60999, 89950, 100, 1, 2, 1, 1), -- Wrap of Instant Petrification
+(@RAID_DIFF_10H + 60999, 86272, 0, 1, 0, 1, 1), -- Pattern: Fists of Lightning
+(@RAID_DIFF_10H + 60999, 86280, 0, 1, 0, 1, 1), -- Pattern: Murderer's Gloves
+(@RAID_DIFF_10H + 60999, 86297, 0, 1, 0, 1, 1), -- Pattern: Stormbreaker Chestguard
+(@RAID_DIFF_10H + 60999, 87412, 0, 1, 0, 1, 1), -- Plans: Chestplate of Limitless Faith
+(@RAID_DIFF_10H + 60999, 87408, 0, 1, 0, 1, 1), -- Plans: Unyielding Bloodplate
+(@RAID_DIFF_10H + 60999, 87174, 0, 1, 2, 1, 1), -- Dreadwoven Leggings of Failure
+(@RAID_DIFF_10H + 60999, 87175, 0, 1, 2, 1, 1), -- Essence of Terror
+(@RAID_DIFF_10H + 60999, 89259, 0, 1, 1, 1, 1), -- Helm of the Shadowy Conqueror
+(@RAID_DIFF_10H + 60999, 89260, 0, 1, 1, 1, 1), -- Helm of the Shadowy Protector
+(@RAID_DIFF_10H + 60999, 89258, 0, 1, 1, 1, 1), -- Helm of the Shadowy Vanquisher
+(@RAID_DIFF_10H + 60999, 87173, 0, 1, 2, 1, 1), -- Kilrak, Jaws of Terror
+(@RAID_DIFF_10H + 60999, 89949, 0, 1, 2, 1, 1), -- Robes of Pinioned Eyes
+(@RAID_DIFF_10H + 60999, 89951, 0, 1, 2, 1, 1), -- Shadowgrip Girdle
+(@RAID_DIFF_10H + 60999, 87176, 0, 1, 2, 1, 1), -- Shin'ka, Execution of Dominion
+(@RAID_DIFF_10H + 60999, 89950, 0, 1, 2, 1, 1), -- Wrap of Instant Petrification
 
 -- 25HC
 
-(@RAID_DIFF_25H + 60999, 87174, 100, 1, 1, 1, 1), -- Dreadwoven Leggings of Failure
-(@RAID_DIFF_25H + 60999, 87175, 100, 1, 1, 1, 1), -- Essence of Terror
-(@RAID_DIFF_25H + 60999, 89259, 100, 1, 1, 1, 1), -- Helm of the Shadowy Conqueror
-(@RAID_DIFF_25H + 60999, 89260, 100, 1, 2, 1, 1), -- Helm of the Shadowy Protector
-(@RAID_DIFF_25H + 60999, 89258, 100, 1, 2, 1, 1), -- Helm of the Shadowy Vanquisher
-(@RAID_DIFF_25H + 60999, 87173, 100, 1, 2, 1, 1), -- Kilrak, Jaws of Terror
-(@RAID_DIFF_25H + 60999, 89949, 100, 1, 3, 1, 1), -- Robes of Pinioned Eyes
-(@RAID_DIFF_25H + 60999, 89951, 100, 1, 3, 1, 1), -- Shadowgrip Girdle
-(@RAID_DIFF_25H + 60999, 87176, 100, 1, 4, 1, 1), -- Shin'ka, Execution of Dominion
-(@RAID_DIFF_25H + 60999, 89950, 100, 1, 4, 1, 1), -- Wrap of Instant Petrification
+(@RAID_DIFF_25H + 60999, 86272, 0, 1, 1, 1, 1), -- Pattern: Fists of Lightning
+(@RAID_DIFF_25H + 60999, 86280, 0, 1, 1, 1, 1), -- Pattern: Murderer's Gloves
+(@RAID_DIFF_25H + 60999, 86297, 0, 1, 1, 1, 1), -- Pattern: Stormbreaker Chestguard
+(@RAID_DIFF_25H + 60999, 87412, 0, 1, 1, 1, 1), -- Plans: Chestplate of Limitless Faith
+(@RAID_DIFF_25H + 60999, 87408, 0, 1, 1, 1, 1), -- Plans: Unyielding Bloodplate
+(@RAID_DIFF_25H + 60999, 87174, 0, 1, 5, 1, 1), -- Dreadwoven Leggings of Failure
+(@RAID_DIFF_25H + 60999, 87175, 0, 1, 2, 1, 1), -- Essence of Terror
+(@RAID_DIFF_25H + 60999, 89259, 0, 1, 2, 1, 1), -- Helm of the Shadowy Conqueror
+(@RAID_DIFF_25H + 60999, 89260, 0, 1, 3, 1, 1), -- Helm of the Shadowy Protector
+(@RAID_DIFF_25H + 60999, 89258, 0, 1, 4, 1, 1), -- Helm of the Shadowy Vanquisher
+(@RAID_DIFF_25H + 60999, 87173, 0, 1, 3, 1, 1), -- Kilrak, Jaws of Terror
+(@RAID_DIFF_25H + 60999, 89949, 0, 1, 5, 1, 1), -- Robes of Pinioned Eyes
+(@RAID_DIFF_25H + 60999, 89951, 0, 1, 5, 1, 1), -- Shadowgrip Girdle
+(@RAID_DIFF_25H + 60999, 87176, 0, 1, 4, 1, 1), -- Shin'ka, Execution of Dominion
+(@RAID_DIFF_25H + 60999, 89950, 0, 1, 5, 1, 1), -- Wrap of Instant Petrification
 
 -- LFR
 
-(@RAID_DIFF_25R + 60999, 95617, 100, 1, 1, 1, 1), -- Dividends of the Everlasting Spring
-(@RAID_DIFF_25R + 60999, 86908, 100, 1, 2, 1, 1), -- Dreadwoven Leggings of Failure
-(@RAID_DIFF_25R + 60999, 86907, 100, 1, 2, 1, 1), -- Essence of Terror
-(@RAID_DIFF_25R + 60999, 89274, 100, 1, 2, 1, 1), -- Helm of the Shadowy Conqueror
-(@RAID_DIFF_25R + 60999, 89275, 100, 1, 2, 1, 1), -- Helm of the Shadowy Protector
-(@RAID_DIFF_25R + 60999, 89273, 100, 1, 2, 1, 1), -- Helm of the Shadowy Vanquisher
-(@RAID_DIFF_25R + 60999, 86906, 100, 1, 3, 1, 1), -- Kilrak, Jaws of Terror
-(@RAID_DIFF_25R + 60999, 89984, 100, 1, 3, 1, 1), -- Robes of Pinioned Eyes
-(@RAID_DIFF_25R + 60999, 89986, 100, 1, 3, 1, 1), -- Shadowgrip Girdle
-(@RAID_DIFF_25R + 60999, 86905, 100, 1, 3, 1, 1), -- Shin'ka, Execution of Dominion
-(@RAID_DIFF_25R + 60999, 89985, 100, 1, 3, 1, 1); -- Wrap of Instant Petrification
+(@RAID_DIFF_25R + 60999, 95617, 0, 1, 1, 1, 1), -- Dividends of the Everlasting Spring
+(@RAID_DIFF_25R + 60999, 86908, 0, 1, 1, 1, 1), -- Dreadwoven Leggings of Failure
+(@RAID_DIFF_25R + 60999, 86907, 0, 1, 1, 1, 1), -- Essence of Terror
+(@RAID_DIFF_25R + 60999, 89274, 0, 1, 2, 1, 1), -- Helm of the Shadowy Conqueror
+(@RAID_DIFF_25R + 60999, 89275, 0, 1, 2, 1, 1), -- Helm of the Shadowy Protector
+(@RAID_DIFF_25R + 60999, 89273, 0, 1, 2, 1, 1), -- Helm of the Shadowy Vanquisher
+(@RAID_DIFF_25R + 60999, 86906, 0, 1, 1, 1, 1), -- Kilrak, Jaws of Terror
+(@RAID_DIFF_25R + 60999, 89984, 0, 1, 3, 1, 1), -- Robes of Pinioned Eyes
+(@RAID_DIFF_25R + 60999, 89986, 0, 1, 3, 1, 1), -- Shadowgrip Girdle
+(@RAID_DIFF_25R + 60999, 86905, 0, 1, 3, 1, 1), -- Shin'ka, Execution of Dominion
+(@RAID_DIFF_25R + 60999, 89985, 0, 1, 3, 1, 1); -- Wrap of Instant Petrification
 
 
 -- TSULONG
@@ -1069,325 +1079,406 @@ REPLACE INTO creature_loot_template (entry, item, ChanceOrQuestChance, lootmode,
 -- 10N
 
 REPLACE INTO gameobject_loot_template (entry, item, ChanceOrQuestChance, lootmode, groupid, mincountOrRef, maxcount) VALUES
-(@RAID_DIFF_10N + 62442, 87413, 100, 1, 1, 1, 1), -- Plans: Gauntlets of Unbound Devotion
-(@RAID_DIFF_10N + 62442, 87411, 100, 1, 1, 1, 1), -- Plans: Bloodforged Warfists
-(@RAID_DIFF_10N + 62442, 87410, 100, 1, 1, 1, 1), -- Plans: Ornate Battleplate of the Master
-(@RAID_DIFF_10N + 62442, 87409, 100, 1, 1, 1, 1), -- Plans: Gauntlets of Battle Command
-(@RAID_DIFF_10N + 62442, 86382, 100, 1, 1, 1, 1), -- Pattern: Touch of the Light
-(@RAID_DIFF_10N + 62442, 86381, 100, 1, 1, 1, 1), -- Pattern: Legacy of the Emperor
-(@RAID_DIFF_10N + 62442, 86380, 100, 1, 1, 1, 1), -- Pattern: Imperial Silk Gloves
-(@RAID_DIFF_10N + 62442, 86379, 100, 1, 1, 1, 1), -- Pattern: Robe of Eternal Rule
-(@RAID_DIFF_10N + 62442, 86297, 100, 1, 1, 1, 1), -- Pattern: Stormbreaker Chestguard
-(@RAID_DIFF_10N + 62442, 86284, 100, 1, 1, 1, 1), -- Pattern: Raven Lord's Gloves
-(@RAID_DIFF_10N + 62442, 86281, 100, 1, 1, 1, 1), -- Pattern: Nightfire Robe
-(@RAID_DIFF_10N + 62442, 86279, 100, 1, 1, 1, 1), -- Pattern: Liferuned Leather Gloves
-(@RAID_DIFF_10N + 62442, 86272, 100, 1, 1, 1, 1), -- Pattern: Fists of Lightning
-(@RAID_DIFF_10N + 62442, 86238, 100, 1, 1, 1, 1), -- Pattern: Chestguard of Nemeses
-(@RAID_DIFF_10N + 62442, 86283, 100, 1, 1, 1, 1), -- Pattern: Raiment of Blood and Bone
-(@RAID_DIFF_10N + 62442, 87412, 100, 1, 1, 1, 1), -- Plans: Chestplate of Limitless Faith
-(@RAID_DIFF_10N + 62442, 87408, 100, 1, 1, 1, 1), -- Plans: Unyielding Bloodplate
-(@RAID_DIFF_10N + 62442, 86280, 100, 1, 1, 1, 1), -- Pattern: Murderer's Gloves
-(@RAID_DIFF_10N + 62442, 89884, 100, 1, 3, 1, 1), -- Fear-Blackened Leggings
-(@RAID_DIFF_10N + 62442, 89883, 100, 1, 3, 1, 1), -- Shoulderpads of Twisted Fate
-(@RAID_DIFF_10N + 62442, 89843, 100, 1, 3, 1, 1), -- Grasps of Serpentine Might
-(@RAID_DIFF_10N + 62442, 89842, 100, 1, 3, 1, 1), -- Gauntlets of the Shadow's Caress
-(@RAID_DIFF_10N + 62442, 86385, 100, 1, 3, 1, 1), -- Patroller's Girdle of Endless Spring
-(@RAID_DIFF_10N + 62442, 86384, 100, 1, 3, 1, 1), -- Protector's Girdle of Endless Spring
-(@RAID_DIFF_10N + 62442, 86383, 100, 1, 3, 1, 1), -- Mender's Girdle of Endless Spring
-(@RAID_DIFF_10N + 62442, 86343, 100, 1, 3, 1, 1), -- Ranger's Chain of Unending Summer
-(@RAID_DIFF_10N + 62442, 86342, 100, 1, 3, 1, 1), -- Binder's Chain of Unending Summer
-(@RAID_DIFF_10N + 62442, 86341, 100, 1, 3, 1, 1), -- Stalker's Cord of Eternal Autumn
-(@RAID_DIFF_10N + 62442, 86340, 100, 1, 3, 1, 1), -- Weaver's Cord of Eternal Autumn
-(@RAID_DIFF_10N + 62442, 86339, 100, 1, 3, 1, 1), -- Sorcerer's Belt of Final Winter
-(@RAID_DIFF_10N + 62442, 86338, 100, 1, 2, 1, 1), -- Invoker's Belt of Final Winter
-(@RAID_DIFF_10N + 62442, 86337, 100, 1, 2, 1, 1), -- Healer's Belt of Final Winter
-(@RAID_DIFF_10N + 62442, 86330, 100, 1, 2, 1, 1), -- Sandals of the Blackest Night
-(@RAID_DIFF_10N + 62442, 86329, 100, 1, 2, 1, 1), -- Sollerets of Instability
-(@RAID_DIFF_10N + 62442, 86328, 100, 1, 2, 1, 1), -- Loshan, Terror Incarnate
-(@RAID_DIFF_10N + 62442, 86327, 100, 1, 2, 1, 1), -- Spirits of the Sun
-(@RAID_DIFF_10N + 62442, 86326, 100, 1, 2, 1, 1), -- Belt of Embodied Terror
-(@RAID_DIFF_10N + 62442, 86325, 100, 1, 2, 1, 1), -- Daybreak Drape
-(@RAID_DIFF_10N + 62442, 86324, 100, 1, 2, 1, 1), -- Sunwrought Mail Hauberk
-(@RAID_DIFF_10N + 62442, 86323, 100, 1, 2, 1, 1), -- Stuff of Nightmares
-(@RAID_DIFF_10N + 62442, 86322, 100, 1, 2, 1, 1), -- Dread Shadow Ring
-(@RAID_DIFF_10N + 62442, 86321, 100, 1, 2, 1, 1), -- Gao-Rei, Staff of the Legendary Protector
+(@RAID_DIFF_10N + 62442, 87413, 0, 1, 1, 1, 1), -- Plans: Gauntlets of Unbound Devotion
+(@RAID_DIFF_10N + 62442, 87411, 0, 1, 1, 1, 1), -- Plans: Bloodforged Warfists
+(@RAID_DIFF_10N + 62442, 87410, 0, 1, 1, 1, 1), -- Plans: Ornate Battleplate of the Master
+(@RAID_DIFF_10N + 62442, 87409, 0, 1, 1, 1, 1), -- Plans: Gauntlets of Battle Command
+(@RAID_DIFF_10N + 62442, 86382, 0, 1, 1, 1, 1), -- Pattern: Touch of the Light
+(@RAID_DIFF_10N + 62442, 86381, 0, 1, 1, 1, 1), -- Pattern: Legacy of the Emperor
+(@RAID_DIFF_10N + 62442, 86380, 0, 1, 1, 1, 1), -- Pattern: Imperial Silk Gloves
+(@RAID_DIFF_10N + 62442, 86379, 0, 1, 1, 1, 1), -- Pattern: Robe of Eternal Rule
+(@RAID_DIFF_10N + 62442, 86297, 0, 1, 1, 1, 1), -- Pattern: Stormbreaker Chestguard
+(@RAID_DIFF_10N + 62442, 86284, 0, 1, 1, 1, 1), -- Pattern: Raven Lord's Gloves
+(@RAID_DIFF_10N + 62442, 86281, 0, 1, 1, 1, 1), -- Pattern: Nightfire Robe
+(@RAID_DIFF_10N + 62442, 86279, 0, 1, 1, 1, 1), -- Pattern: Liferuned Leather Gloves
+(@RAID_DIFF_10N + 62442, 86272, 0, 1, 1, 1, 1), -- Pattern: Fists of Lightning
+(@RAID_DIFF_10N + 62442, 86238, 0, 1, 1, 1, 1), -- Pattern: Chestguard of Nemeses
+(@RAID_DIFF_10N + 62442, 86283, 0, 1, 1, 1, 1), -- Pattern: Raiment of Blood and Bone
+(@RAID_DIFF_10N + 62442, 87412, 0, 1, 1, 1, 1), -- Plans: Chestplate of Limitless Faith
+(@RAID_DIFF_10N + 62442, 87408, 0, 1, 1, 1, 1), -- Plans: Unyielding Bloodplate
+(@RAID_DIFF_10N + 62442, 86280, 0, 1, 1, 1, 1), -- Pattern: Murderer's Gloves
+(@RAID_DIFF_10N + 62442, 89884, 0, 1, 3, 1, 1), -- Fear-Blackened Leggings
+(@RAID_DIFF_10N + 62442, 89883, 0, 1, 3, 1, 1), -- Shoulderpads of Twisted Fate
+(@RAID_DIFF_10N + 62442, 89843, 0, 1, 3, 1, 1), -- Grasps of Serpentine Might
+(@RAID_DIFF_10N + 62442, 89842, 0, 1, 3, 1, 1), -- Gauntlets of the Shadow's Caress
+(@RAID_DIFF_10N + 62442, 86385, 0, 1, 3, 1, 1), -- Patroller's Girdle of Endless Spring
+(@RAID_DIFF_10N + 62442, 86384, 0, 1, 3, 1, 1), -- Protector's Girdle of Endless Spring
+(@RAID_DIFF_10N + 62442, 86383, 0, 1, 3, 1, 1), -- Mender's Girdle of Endless Spring
+(@RAID_DIFF_10N + 62442, 86343, 0, 1, 3, 1, 1), -- Ranger's Chain of Unending Summer
+(@RAID_DIFF_10N + 62442, 86342, 0, 1, 3, 1, 1), -- Binder's Chain of Unending Summer
+(@RAID_DIFF_10N + 62442, 86341, 0, 1, 3, 1, 1), -- Stalker's Cord of Eternal Autumn
+(@RAID_DIFF_10N + 62442, 86340, 0, 1, 3, 1, 1), -- Weaver's Cord of Eternal Autumn
+(@RAID_DIFF_10N + 62442, 86339, 0, 1, 3, 1, 1), -- Sorcerer's Belt of Final Winter
+(@RAID_DIFF_10N + 62442, 86338, 0, 1, 2, 1, 1), -- Invoker's Belt of Final Winter
+(@RAID_DIFF_10N + 62442, 86337, 0, 1, 2, 1, 1), -- Healer's Belt of Final Winter
+(@RAID_DIFF_10N + 62442, 86330, 0, 1, 2, 1, 1), -- Sandals of the Blackest Night
+(@RAID_DIFF_10N + 62442, 86329, 0, 1, 2, 1, 1), -- Sollerets of Instability
+(@RAID_DIFF_10N + 62442, 86328, 0, 1, 2, 1, 1), -- Loshan, Terror Incarnate
+(@RAID_DIFF_10N + 62442, 86327, 0, 1, 2, 1, 1), -- Spirits of the Sun
+(@RAID_DIFF_10N + 62442, 86326, 0, 1, 2, 1, 1), -- Belt of Embodied Terror
+(@RAID_DIFF_10N + 62442, 86325, 0, 1, 2, 1, 1), -- Daybreak Drape
+(@RAID_DIFF_10N + 62442, 86324, 0, 1, 2, 1, 1), -- Sunwrought Mail Hauberk
+(@RAID_DIFF_10N + 62442, 86323, 0, 1, 2, 1, 1), -- Stuff of Nightmares
+(@RAID_DIFF_10N + 62442, 86322, 0, 1, 2, 1, 1), -- Dread Shadow Ring
+(@RAID_DIFF_10N + 62442, 86321, 0, 1, 2, 1, 1), -- Gao-Rei, Staff of the Legendary Protector
 
 -- 25N
 
-(@RAID_DIFF_25N + 62442, 87413, 100, 1, 1, 1, 1), -- Plans: Gauntlets of Unbound Devotion
-(@RAID_DIFF_25N + 62442, 87411, 100, 1, 1, 1, 1), -- Plans: Bloodforged Warfists
-(@RAID_DIFF_25N + 62442, 87410, 100, 1, 1, 1, 1), -- Plans: Ornate Battleplate of the Master
-(@RAID_DIFF_25N + 62442, 87409, 100, 1, 1, 1, 1), -- Plans: Gauntlets of Battle Command
-(@RAID_DIFF_25N + 62442, 86382, 100, 1, 1, 1, 1), -- Pattern: Touch of the Light
-(@RAID_DIFF_25N + 62442, 86381, 100, 1, 1, 1, 1), -- Pattern: Legacy of the Emperor
-(@RAID_DIFF_25N + 62442, 86380, 100, 1, 1, 1, 1), -- Pattern: Imperial Silk Gloves
-(@RAID_DIFF_25N + 62442, 86379, 100, 1, 1, 1, 1), -- Pattern: Robe of Eternal Rule
-(@RAID_DIFF_25N + 62442, 86297, 100, 1, 1, 1, 1), -- Pattern: Stormbreaker Chestguard
-(@RAID_DIFF_25N + 62442, 86284, 100, 1, 1, 1, 1), -- Pattern: Raven Lord's Gloves
-(@RAID_DIFF_25N + 62442, 86281, 100, 1, 1, 1, 1), -- Pattern: Nightfire Robe
-(@RAID_DIFF_25N + 62442, 86279, 100, 1, 1, 1, 1), -- Pattern: Liferuned Leather Gloves
-(@RAID_DIFF_25N + 62442, 86272, 100, 1, 1, 1, 1), -- Pattern: Fists of Lightning
-(@RAID_DIFF_25N + 62442, 86238, 100, 1, 1, 1, 1), -- Pattern: Chestguard of Nemeses
-(@RAID_DIFF_25N + 62442, 86283, 100, 1, 1, 1, 1), -- Pattern: Raiment of Blood and Bone
-(@RAID_DIFF_25N + 62442, 87412, 100, 1, 1, 1, 1), -- Plans: Chestplate of Limitless Faith
-(@RAID_DIFF_25N + 62442, 87408, 100, 1, 1, 1, 1), -- Plans: Unyielding Bloodplate
-(@RAID_DIFF_25N + 62442, 86280, 100, 1, 1, 1, 1), -- Pattern: Murderer's Gloves
-(@RAID_DIFF_25N + 62442, 89884, 100, 1, 2, 1, 1), -- Fear-Blackened Leggings
-(@RAID_DIFF_25N + 62442, 89883, 100, 1, 2, 1, 1), -- Shoulderpads of Twisted Fate
-(@RAID_DIFF_25N + 62442, 89843, 100, 1, 2, 1, 1), -- Grasps of Serpentine Might
-(@RAID_DIFF_25N + 62442, 89842, 100, 1, 2, 1, 1), -- Gauntlets of the Shadow's Caress
-(@RAID_DIFF_25N + 62442, 86385, 100, 1, 2, 1, 1), -- Patroller's Girdle of Endless Spring
-(@RAID_DIFF_25N + 62442, 86384, 100, 1, 2, 1, 1), -- Protector's Girdle of Endless Spring
-(@RAID_DIFF_25N + 62442, 86383, 100, 1, 3, 1, 1), -- Mender's Girdle of Endless Spring
-(@RAID_DIFF_25N + 62442, 86343, 100, 1, 3, 1, 1), -- Ranger's Chain of Unending Summer
-(@RAID_DIFF_25N + 62442, 86342, 100, 1, 3, 1, 1), -- Binder's Chain of Unending Summer
-(@RAID_DIFF_25N + 62442, 86341, 100, 1, 3, 1, 1), -- Stalker's Cord of Eternal Autumn
-(@RAID_DIFF_25N + 62442, 86340, 100, 1, 3, 1, 1), -- Weaver's Cord of Eternal Autumn
-(@RAID_DIFF_25N + 62442, 86339, 100, 1, 3, 1, 1), -- Sorcerer's Belt of Final Winter
-(@RAID_DIFF_25N + 62442, 86338, 100, 1, 4, 1, 1), -- Invoker's Belt of Final Winter
-(@RAID_DIFF_25N + 62442, 86337, 100, 1, 4, 1, 1), -- Healer's Belt of Final Winter
-(@RAID_DIFF_25N + 62442, 86330, 100, 1, 4, 1, 1), -- Sandals of the Blackest Night
-(@RAID_DIFF_25N + 62442, 86329, 100, 1, 4, 1, 1), -- Sollerets of Instability
-(@RAID_DIFF_25N + 62442, 86328, 100, 1, 4, 1, 1), -- Loshan, Terror Incarnate
-(@RAID_DIFF_25N + 62442, 86327, 100, 1, 4, 1, 1), -- Spirits of the Sun
-(@RAID_DIFF_25N + 62442, 86326, 100, 1, 5, 1, 1), -- Belt of Embodied Terror
-(@RAID_DIFF_25N + 62442, 86325, 100, 1, 5, 1, 1), -- Daybreak Drape
-(@RAID_DIFF_25N + 62442, 86324, 100, 1, 5, 1, 1), -- Sunwrought Mail Hauberk
-(@RAID_DIFF_25N + 62442, 86323, 100, 1, 5, 1, 1), -- Stuff of Nightmares
-(@RAID_DIFF_25N + 62442, 86322, 100, 1, 5, 1, 1), -- Dread Shadow Ring
-(@RAID_DIFF_25N + 62442, 86321, 100, 1, 5, 1, 1), -- Gao-Rei, Staff of the Legendary Protector
+(@RAID_DIFF_25N + 62442, 87413, 0, 1, 1, 1, 1), -- Plans: Gauntlets of Unbound Devotion
+(@RAID_DIFF_25N + 62442, 87411, 0, 1, 1, 1, 1), -- Plans: Bloodforged Warfists
+(@RAID_DIFF_25N + 62442, 87410, 0, 1, 1, 1, 1), -- Plans: Ornate Battleplate of the Master
+(@RAID_DIFF_25N + 62442, 87409, 0, 1, 1, 1, 1), -- Plans: Gauntlets of Battle Command
+(@RAID_DIFF_25N + 62442, 86382, 0, 1, 1, 1, 1), -- Pattern: Touch of the Light
+(@RAID_DIFF_25N + 62442, 86381, 0, 1, 1, 1, 1), -- Pattern: Legacy of the Emperor
+(@RAID_DIFF_25N + 62442, 86380, 0, 1, 1, 1, 1), -- Pattern: Imperial Silk Gloves
+(@RAID_DIFF_25N + 62442, 86379, 0, 1, 1, 1, 1), -- Pattern: Robe of Eternal Rule
+(@RAID_DIFF_25N + 62442, 86297, 0, 1, 1, 1, 1), -- Pattern: Stormbreaker Chestguard
+(@RAID_DIFF_25N + 62442, 86284, 0, 1, 1, 1, 1), -- Pattern: Raven Lord's Gloves
+(@RAID_DIFF_25N + 62442, 86281, 0, 1, 1, 1, 1), -- Pattern: Nightfire Robe
+(@RAID_DIFF_25N + 62442, 86279, 0, 1, 1, 1, 1), -- Pattern: Liferuned Leather Gloves
+(@RAID_DIFF_25N + 62442, 86272, 0, 1, 1, 1, 1), -- Pattern: Fists of Lightning
+(@RAID_DIFF_25N + 62442, 86238, 0, 1, 1, 1, 1), -- Pattern: Chestguard of Nemeses
+(@RAID_DIFF_25N + 62442, 86283, 0, 1, 1, 1, 1), -- Pattern: Raiment of Blood and Bone
+(@RAID_DIFF_25N + 62442, 87412, 0, 1, 1, 1, 1), -- Plans: Chestplate of Limitless Faith
+(@RAID_DIFF_25N + 62442, 87408, 0, 1, 1, 1, 1), -- Plans: Unyielding Bloodplate
+(@RAID_DIFF_25N + 62442, 86280, 0, 1, 1, 1, 1), -- Pattern: Murderer's Gloves
+(@RAID_DIFF_25N + 62442, 89884, 0, 1, 2, 1, 1), -- Fear-Blackened Leggings
+(@RAID_DIFF_25N + 62442, 89883, 0, 1, 2, 1, 1), -- Shoulderpads of Twisted Fate
+(@RAID_DIFF_25N + 62442, 89843, 0, 1, 2, 1, 1), -- Grasps of Serpentine Might
+(@RAID_DIFF_25N + 62442, 89842, 0, 1, 2, 1, 1), -- Gauntlets of the Shadow's Caress
+(@RAID_DIFF_25N + 62442, 86385, 0, 1, 2, 1, 1), -- Patroller's Girdle of Endless Spring
+(@RAID_DIFF_25N + 62442, 86384, 0, 1, 2, 1, 1), -- Protector's Girdle of Endless Spring
+(@RAID_DIFF_25N + 62442, 86383, 0, 1, 3, 1, 1), -- Mender's Girdle of Endless Spring
+(@RAID_DIFF_25N + 62442, 86343, 0, 1, 3, 1, 1), -- Ranger's Chain of Unending Summer
+(@RAID_DIFF_25N + 62442, 86342, 0, 1, 3, 1, 1), -- Binder's Chain of Unending Summer
+(@RAID_DIFF_25N + 62442, 86341, 0, 1, 3, 1, 1), -- Stalker's Cord of Eternal Autumn
+(@RAID_DIFF_25N + 62442, 86340, 0, 1, 3, 1, 1), -- Weaver's Cord of Eternal Autumn
+(@RAID_DIFF_25N + 62442, 86339, 0, 1, 3, 1, 1), -- Sorcerer's Belt of Final Winter
+(@RAID_DIFF_25N + 62442, 86338, 0, 1, 4, 1, 1), -- Invoker's Belt of Final Winter
+(@RAID_DIFF_25N + 62442, 86337, 0, 1, 4, 1, 1), -- Healer's Belt of Final Winter
+(@RAID_DIFF_25N + 62442, 86330, 0, 1, 4, 1, 1), -- Sandals of the Blackest Night
+(@RAID_DIFF_25N + 62442, 86329, 0, 1, 4, 1, 1), -- Sollerets of Instability
+(@RAID_DIFF_25N + 62442, 86328, 0, 1, 4, 1, 1), -- Loshan, Terror Incarnate
+(@RAID_DIFF_25N + 62442, 86327, 0, 1, 4, 1, 1), -- Spirits of the Sun
+(@RAID_DIFF_25N + 62442, 86326, 0, 1, 5, 1, 1), -- Belt of Embodied Terror
+(@RAID_DIFF_25N + 62442, 86325, 0, 1, 5, 1, 1), -- Daybreak Drape
+(@RAID_DIFF_25N + 62442, 86324, 0, 1, 5, 1, 1), -- Sunwrought Mail Hauberk
+(@RAID_DIFF_25N + 62442, 86323, 0, 1, 5, 1, 1), -- Stuff of Nightmares
+(@RAID_DIFF_25N + 62442, 86322, 0, 1, 5, 1, 1), -- Dread Shadow Ring
+(@RAID_DIFF_25N + 62442, 86321, 0, 1, 5, 1, 1), -- Gao-Rei, Staff of the Legendary Protector
 
 -- 10HC 
 
-(@RAID_DIFF_10H + 62442, 87413, 100, 1, 1, 1, 1), -- Plans: Gauntlets of Unbound Devotion
-(@RAID_DIFF_10H + 62442, 87411, 100, 1, 1, 1, 1), -- Plans: Bloodforged Warfists
-(@RAID_DIFF_10H + 62442, 87410, 100, 1, 1, 1, 1), -- Plans: Ornate Battleplate of the Master
-(@RAID_DIFF_10H + 62442, 87409, 100, 1, 1, 1, 1), -- Plans: Gauntlets of Battle Command
-(@RAID_DIFF_10H + 62442, 86382, 100, 1, 1, 1, 1), -- Pattern: Touch of the Light
-(@RAID_DIFF_10H + 62442, 86381, 100, 1, 1, 1, 1), -- Pattern: Legacy of the Emperor
-(@RAID_DIFF_10H + 62442, 86380, 100, 1, 1, 1, 1), -- Pattern: Imperial Silk Gloves
-(@RAID_DIFF_10H + 62442, 86379, 100, 1, 1, 1, 1), -- Pattern: Robe of Eternal Rule
-(@RAID_DIFF_10H + 62442, 86297, 100, 1, 1, 1, 1), -- Pattern: Stormbreaker Chestguard
-(@RAID_DIFF_10H + 62442, 86284, 100, 1, 1, 1, 1), -- Pattern: Raven Lord's Gloves
-(@RAID_DIFF_10H + 62442, 86281, 100, 1, 1, 1, 1), -- Pattern: Nightfire Robe
-(@RAID_DIFF_10H + 62442, 86279, 100, 1, 1, 1, 1), -- Pattern: Liferuned Leather Gloves
-(@RAID_DIFF_10H + 62442, 86272, 100, 1, 1, 1, 1), -- Pattern: Fists of Lightning
-(@RAID_DIFF_10H + 62442, 86238, 100, 1, 1, 1, 1), -- Pattern: Chestguard of Nemeses
-(@RAID_DIFF_10H + 62442, 86283, 100, 1, 1, 1, 1), -- Pattern: Raiment of Blood and Bone
-(@RAID_DIFF_10H + 62442, 87412, 100, 1, 1, 1, 1), -- Plans: Chestplate of Limitless Faith
-(@RAID_DIFF_10H + 62442, 87408, 100, 1, 1, 1, 1), -- Plans: Unyielding Bloodplate
-(@RAID_DIFF_10H + 62442, 86280, 100, 1, 1, 1, 1), -- Pattern: Murderer's Gloves
-(@RAID_DIFF_10H + 62442, 89948, 100, 1, 2, 1, 1), -- Fear-Blackened Leggings
-(@RAID_DIFF_10H + 62442, 89947, 100, 1, 2, 1, 1), -- Shoulderpads of Twisted Fate
-(@RAID_DIFF_10H + 62442, 89946, 100, 1, 2, 1, 1), -- Grasps of Serpentine Might
-(@RAID_DIFF_10H + 62442, 89945, 100, 1, 2, 1, 1), -- Gauntlets of the Shadow's Caress
-(@RAID_DIFF_10H + 62442, 87186, 100, 1, 2, 1, 1), -- Patroller's Girdle of Endless Spring
-(@RAID_DIFF_10H + 62442, 87185, 100, 1, 2, 1, 1), -- Protector's Girdle of Endless Spring
-(@RAID_DIFF_10H + 62442, 87184, 100, 1, 2, 1, 1), -- Mender's Girdle of Endless Spring
-(@RAID_DIFF_10H + 62442, 87183, 100, 1, 2, 1, 1), -- Binder's Chain of Unending Summer
-(@RAID_DIFF_10H + 62442, 87182, 100, 1, 3, 1, 1), -- Ranger's Chain of Unending Summer
-(@RAID_DIFF_10H + 62442, 87181, 100, 1, 3, 1, 1), -- Weaver's Cord of Eternal Autumn
-(@RAID_DIFF_10H + 62442, 87180, 100, 1, 3, 1, 1), -- Stalker's Cord of Eternal Autumn
-(@RAID_DIFF_10H + 62442, 87179, 100, 1, 3, 1, 1), -- Sorcerer's Belt of Final Winter
-(@RAID_DIFF_10H + 62442, 87178, 100, 1, 3, 1, 1), -- Healer's Belt of Final Winter
-(@RAID_DIFF_10H + 62442, 87177, 100, 1, 3, 1, 1), -- Invoker's Belt of Final Winter
-(@RAID_DIFF_10H + 62442, 87165, 100, 1, 3, 1, 1), -- Sollerets of Instability
-(@RAID_DIFF_10H + 62442, 87164, 100, 1, 3, 1, 1), -- Loshan, Terror Incarnate
-(@RAID_DIFF_10H + 62442, 87163, 100, 1, 4, 1, 1), -- Spirits of the Sun
-(@RAID_DIFF_10H + 62442, 87162, 100, 1, 4, 1, 1), -- Sandals of the Blackest Night
-(@RAID_DIFF_10H + 62442, 87161, 100, 1, 4, 1, 1), -- Belt of Embodied Terror
-(@RAID_DIFF_10H + 62442, 87160, 100, 1, 4, 1, 1), -- Stuff of Nightmares
-(@RAID_DIFF_10H + 62442, 87159, 100, 1, 4, 1, 1), -- Daybreak Drape
-(@RAID_DIFF_10H + 62442, 87158, 100, 1, 4, 1, 1), -- Dread Shadow Ring
-(@RAID_DIFF_10H + 62442, 87157, 100, 1, 4, 1, 1), -- Sunwrought Mail Hauberk
-(@RAID_DIFF_10H + 62442, 87156, 100, 1, 4, 1, 1), -- Gao-Rei, Staff of the Legendary Protector
+(@RAID_DIFF_10H + 62442, 87413, 0, 1, 1, 1, 1), -- Plans: Gauntlets of Unbound Devotion
+(@RAID_DIFF_10H + 62442, 87411, 0, 1, 1, 1, 1), -- Plans: Bloodforged Warfists
+(@RAID_DIFF_10H + 62442, 87410, 0, 1, 1, 1, 1), -- Plans: Ornate Battleplate of the Master
+(@RAID_DIFF_10H + 62442, 87409, 0, 1, 1, 1, 1), -- Plans: Gauntlets of Battle Command
+(@RAID_DIFF_10H + 62442, 86382, 0, 1, 1, 1, 1), -- Pattern: Touch of the Light
+(@RAID_DIFF_10H + 62442, 86381, 0, 1, 1, 1, 1), -- Pattern: Legacy of the Emperor
+(@RAID_DIFF_10H + 62442, 86380, 0, 1, 1, 1, 1), -- Pattern: Imperial Silk Gloves
+(@RAID_DIFF_10H + 62442, 86379, 0, 1, 1, 1, 1), -- Pattern: Robe of Eternal Rule
+(@RAID_DIFF_10H + 62442, 86297, 0, 1, 1, 1, 1), -- Pattern: Stormbreaker Chestguard
+(@RAID_DIFF_10H + 62442, 86284, 0, 1, 1, 1, 1), -- Pattern: Raven Lord's Gloves
+(@RAID_DIFF_10H + 62442, 86281, 0, 1, 1, 1, 1), -- Pattern: Nightfire Robe
+(@RAID_DIFF_10H + 62442, 86279, 0, 1, 1, 1, 1), -- Pattern: Liferuned Leather Gloves
+(@RAID_DIFF_10H + 62442, 86272, 0, 1, 1, 1, 1), -- Pattern: Fists of Lightning
+(@RAID_DIFF_10H + 62442, 86238, 0, 1, 1, 1, 1), -- Pattern: Chestguard of Nemeses
+(@RAID_DIFF_10H + 62442, 86283, 0, 1, 1, 1, 1), -- Pattern: Raiment of Blood and Bone
+(@RAID_DIFF_10H + 62442, 87412, 0, 1, 1, 1, 1), -- Plans: Chestplate of Limitless Faith
+(@RAID_DIFF_10H + 62442, 87408, 0, 1, 1, 1, 1), -- Plans: Unyielding Bloodplate
+(@RAID_DIFF_10H + 62442, 86280, 0, 1, 1, 1, 1), -- Pattern: Murderer's Gloves
+(@RAID_DIFF_10H + 62442, 89948, 0, 1, 2, 1, 1), -- Fear-Blackened Leggings
+(@RAID_DIFF_10H + 62442, 89947, 0, 1, 2, 1, 1), -- Shoulderpads of Twisted Fate
+(@RAID_DIFF_10H + 62442, 89946, 0, 1, 2, 1, 1), -- Grasps of Serpentine Might
+(@RAID_DIFF_10H + 62442, 89945, 0, 1, 2, 1, 1), -- Gauntlets of the Shadow's Caress
+(@RAID_DIFF_10H + 62442, 87186, 0, 1, 2, 1, 1), -- Patroller's Girdle of Endless Spring
+(@RAID_DIFF_10H + 62442, 87185, 0, 1, 2, 1, 1), -- Protector's Girdle of Endless Spring
+(@RAID_DIFF_10H + 62442, 87184, 0, 1, 2, 1, 1), -- Mender's Girdle of Endless Spring
+(@RAID_DIFF_10H + 62442, 87183, 0, 1, 2, 1, 1), -- Binder's Chain of Unending Summer
+(@RAID_DIFF_10H + 62442, 87182, 0, 1, 3, 1, 1), -- Ranger's Chain of Unending Summer
+(@RAID_DIFF_10H + 62442, 87181, 0, 1, 3, 1, 1), -- Weaver's Cord of Eternal Autumn
+(@RAID_DIFF_10H + 62442, 87180, 0, 1, 3, 1, 1), -- Stalker's Cord of Eternal Autumn
+(@RAID_DIFF_10H + 62442, 87179, 0, 1, 3, 1, 1), -- Sorcerer's Belt of Final Winter
+(@RAID_DIFF_10H + 62442, 87178, 0, 1, 3, 1, 1), -- Healer's Belt of Final Winter
+(@RAID_DIFF_10H + 62442, 87177, 0, 1, 3, 1, 1), -- Invoker's Belt of Final Winter
+(@RAID_DIFF_10H + 62442, 87165, 0, 1, 3, 1, 1), -- Sollerets of Instability
+(@RAID_DIFF_10H + 62442, 87164, 0, 1, 3, 1, 1), -- Loshan, Terror Incarnate
+(@RAID_DIFF_10H + 62442, 87163, 0, 1, 4, 1, 1), -- Spirits of the Sun
+(@RAID_DIFF_10H + 62442, 87162, 0, 1, 4, 1, 1), -- Sandals of the Blackest Night
+(@RAID_DIFF_10H + 62442, 87161, 0, 1, 4, 1, 1), -- Belt of Embodied Terror
+(@RAID_DIFF_10H + 62442, 87160, 0, 1, 4, 1, 1), -- Stuff of Nightmares
+(@RAID_DIFF_10H + 62442, 87159, 0, 1, 4, 1, 1), -- Daybreak Drape
+(@RAID_DIFF_10H + 62442, 87158, 0, 1, 4, 1, 1), -- Dread Shadow Ring
+(@RAID_DIFF_10H + 62442, 87157, 0, 1, 4, 1, 1), -- Sunwrought Mail Hauberk
+(@RAID_DIFF_10H + 62442, 87156, 0, 1, 4, 1, 1), -- Gao-Rei, Staff of the Legendary Protector
 
 -- 25HC
 
-(@RAID_DIFF_25H + 62442, 87413, 100, 1, 1, 1, 1), -- Plans: Gauntlets of Unbound Devotion
-(@RAID_DIFF_25H + 62442, 87411, 100, 1, 1, 1, 1), -- Plans: Bloodforged Warfists
-(@RAID_DIFF_25H + 62442, 87410, 100, 1, 1, 1, 1), -- Plans: Ornate Battleplate of the Master
-(@RAID_DIFF_25H + 62442, 87409, 100, 1, 1, 1, 1), -- Plans: Gauntlets of Battle Command
-(@RAID_DIFF_25H + 62442, 86382, 100, 1, 1, 1, 1), -- Pattern: Touch of the Light
-(@RAID_DIFF_25H + 62442, 86381, 100, 1, 1, 1, 1), -- Pattern: Legacy of the Emperor
-(@RAID_DIFF_25H + 62442, 86380, 100, 1, 1, 1, 1), -- Pattern: Imperial Silk Gloves
-(@RAID_DIFF_25H + 62442, 86379, 100, 1, 1, 1, 1), -- Pattern: Robe of Eternal Rule
-(@RAID_DIFF_25H + 62442, 86297, 100, 1, 1, 1, 1), -- Pattern: Stormbreaker Chestguard
-(@RAID_DIFF_25H + 62442, 86284, 100, 1, 1, 1, 1), -- Pattern: Raven Lord's Gloves
-(@RAID_DIFF_25H + 62442, 86281, 100, 1, 1, 1, 1), -- Pattern: Nightfire Robe
-(@RAID_DIFF_25H + 62442, 86279, 100, 1, 1, 1, 1), -- Pattern: Liferuned Leather Gloves
-(@RAID_DIFF_25H + 62442, 86272, 100, 1, 1, 1, 1), -- Pattern: Fists of Lightning
-(@RAID_DIFF_25H + 62442, 86238, 100, 1, 1, 1, 1), -- Pattern: Chestguard of Nemeses
-(@RAID_DIFF_25H + 62442, 86283, 100, 1, 1, 1, 1), -- Pattern: Raiment of Blood and Bone
-(@RAID_DIFF_25H + 62442, 87412, 100, 1, 1, 1, 1), -- Plans: Chestplate of Limitless Faith
-(@RAID_DIFF_25H + 62442, 87408, 100, 1, 1, 1, 1), -- Plans: Unyielding Bloodplate
-(@RAID_DIFF_25H + 62442, 86280, 100, 1, 1, 1, 1), -- Pattern: Murderer's Gloves
-(@RAID_DIFF_25H + 62442, 89948, 100, 1, 2, 1, 1), -- Fear-Blackened Leggings
-(@RAID_DIFF_25H + 62442, 89947, 100, 1, 2, 1, 1), -- Shoulderpads of Twisted Fate
-(@RAID_DIFF_25H + 62442, 89946, 100, 1, 2, 1, 1), -- Grasps of Serpentine Might
-(@RAID_DIFF_25H + 62442, 89945, 100, 1, 2, 1, 1), -- Gauntlets of the Shadow's Caress
-(@RAID_DIFF_25H + 62442, 87186, 100, 1, 2, 1, 1), -- Patroller's Girdle of Endless Spring
-(@RAID_DIFF_25H + 62442, 87185, 100, 1, 2, 1, 1), -- Protector's Girdle of Endless Spring
-(@RAID_DIFF_25H + 62442, 87184, 100, 1, 3, 1, 1), -- Mender's Girdle of Endless Spring
-(@RAID_DIFF_25H + 62442, 87183, 100, 1, 3, 1, 1), -- Binder's Chain of Unending Summer
-(@RAID_DIFF_25H + 62442, 87182, 100, 1, 3, 1, 1), -- Ranger's Chain of Unending Summer
-(@RAID_DIFF_25H + 62442, 87181, 100, 1, 3, 1, 1), -- Weaver's Cord of Eternal Autumn
-(@RAID_DIFF_25H + 62442, 87180, 100, 1, 3, 1, 1), -- Stalker's Cord of Eternal Autumn
-(@RAID_DIFF_25H + 62442, 87179, 100, 1, 3, 1, 1), -- Sorcerer's Belt of Final Winter
-(@RAID_DIFF_25H + 62442, 87178, 100, 1, 4, 1, 1), -- Healer's Belt of Final Winter
-(@RAID_DIFF_25H + 62442, 87177, 100, 1, 4, 1, 1), -- Invoker's Belt of Final Winter
-(@RAID_DIFF_25H + 62442, 87165, 100, 1, 4, 1, 1), -- Sollerets of Instability
-(@RAID_DIFF_25H + 62442, 87164, 100, 1, 4, 1, 1), -- Loshan, Terror Incarnate
-(@RAID_DIFF_25H + 62442, 87163, 100, 1, 4, 1, 1), -- Spirits of the Sun
-(@RAID_DIFF_25H + 62442, 87162, 100, 1, 4, 1, 1), -- Sandals of the Blackest Night
-(@RAID_DIFF_25H + 62442, 87161, 100, 1, 5, 1, 1), -- Belt of Embodied Terror
-(@RAID_DIFF_25H + 62442, 87160, 100, 1, 5, 1, 1), -- Stuff of Nightmares
-(@RAID_DIFF_25H + 62442, 87159, 100, 1, 5, 1, 1), -- Daybreak Drape
-(@RAID_DIFF_25H + 62442, 87158, 100, 1, 5, 1, 1), -- Dread Shadow Ring
-(@RAID_DIFF_25H + 62442, 87157, 100, 1, 5, 1, 1), -- Sunwrought Mail Hauberk
-(@RAID_DIFF_25H + 62442, 87156, 100, 1, 5, 1, 1), -- Gao-Rei, Staff of the Legendary Protector
+(@RAID_DIFF_25H + 62442, 87413, 0, 1, 1, 1, 1), -- Plans: Gauntlets of Unbound Devotion
+(@RAID_DIFF_25H + 62442, 87411, 0, 1, 1, 1, 1), -- Plans: Bloodforged Warfists
+(@RAID_DIFF_25H + 62442, 87410, 0, 1, 1, 1, 1), -- Plans: Ornate Battleplate of the Master
+(@RAID_DIFF_25H + 62442, 87409, 0, 1, 1, 1, 1), -- Plans: Gauntlets of Battle Command
+(@RAID_DIFF_25H + 62442, 86382, 0, 1, 1, 1, 1), -- Pattern: Touch of the Light
+(@RAID_DIFF_25H + 62442, 86381, 0, 1, 1, 1, 1), -- Pattern: Legacy of the Emperor
+(@RAID_DIFF_25H + 62442, 86380, 0, 1, 1, 1, 1), -- Pattern: Imperial Silk Gloves
+(@RAID_DIFF_25H + 62442, 86379, 0, 1, 1, 1, 1), -- Pattern: Robe of Eternal Rule
+(@RAID_DIFF_25H + 62442, 86297, 0, 1, 1, 1, 1), -- Pattern: Stormbreaker Chestguard
+(@RAID_DIFF_25H + 62442, 86284, 0, 1, 1, 1, 1), -- Pattern: Raven Lord's Gloves
+(@RAID_DIFF_25H + 62442, 86281, 0, 1, 1, 1, 1), -- Pattern: Nightfire Robe
+(@RAID_DIFF_25H + 62442, 86279, 0, 1, 1, 1, 1), -- Pattern: Liferuned Leather Gloves
+(@RAID_DIFF_25H + 62442, 86272, 0, 1, 1, 1, 1), -- Pattern: Fists of Lightning
+(@RAID_DIFF_25H + 62442, 86238, 0, 1, 1, 1, 1), -- Pattern: Chestguard of Nemeses
+(@RAID_DIFF_25H + 62442, 86283, 0, 1, 1, 1, 1), -- Pattern: Raiment of Blood and Bone
+(@RAID_DIFF_25H + 62442, 87412, 0, 1, 1, 1, 1), -- Plans: Chestplate of Limitless Faith
+(@RAID_DIFF_25H + 62442, 87408, 0, 1, 1, 1, 1), -- Plans: Unyielding Bloodplate
+(@RAID_DIFF_25H + 62442, 86280, 0, 1, 1, 1, 1), -- Pattern: Murderer's Gloves
+(@RAID_DIFF_25H + 62442, 89948, 0, 1, 2, 1, 1), -- Fear-Blackened Leggings
+(@RAID_DIFF_25H + 62442, 89947, 0, 1, 2, 1, 1), -- Shoulderpads of Twisted Fate
+(@RAID_DIFF_25H + 62442, 89946, 0, 1, 2, 1, 1), -- Grasps of Serpentine Might
+(@RAID_DIFF_25H + 62442, 89945, 0, 1, 2, 1, 1), -- Gauntlets of the Shadow's Caress
+(@RAID_DIFF_25H + 62442, 87186, 0, 1, 2, 1, 1), -- Patroller's Girdle of Endless Spring
+(@RAID_DIFF_25H + 62442, 87185, 0, 1, 2, 1, 1), -- Protector's Girdle of Endless Spring
+(@RAID_DIFF_25H + 62442, 87184, 0, 1, 3, 1, 1), -- Mender's Girdle of Endless Spring
+(@RAID_DIFF_25H + 62442, 87183, 0, 1, 3, 1, 1), -- Binder's Chain of Unending Summer
+(@RAID_DIFF_25H + 62442, 87182, 0, 1, 3, 1, 1), -- Ranger's Chain of Unending Summer
+(@RAID_DIFF_25H + 62442, 87181, 0, 1, 3, 1, 1), -- Weaver's Cord of Eternal Autumn
+(@RAID_DIFF_25H + 62442, 87180, 0, 1, 3, 1, 1), -- Stalker's Cord of Eternal Autumn
+(@RAID_DIFF_25H + 62442, 87179, 0, 1, 3, 1, 1), -- Sorcerer's Belt of Final Winter
+(@RAID_DIFF_25H + 62442, 87178, 0, 1, 4, 1, 1), -- Healer's Belt of Final Winter
+(@RAID_DIFF_25H + 62442, 87177, 0, 1, 4, 1, 1), -- Invoker's Belt of Final Winter
+(@RAID_DIFF_25H + 62442, 87165, 0, 1, 4, 1, 1), -- Sollerets of Instability
+(@RAID_DIFF_25H + 62442, 87164, 0, 1, 4, 1, 1), -- Loshan, Terror Incarnate
+(@RAID_DIFF_25H + 62442, 87163, 0, 1, 4, 1, 1), -- Spirits of the Sun
+(@RAID_DIFF_25H + 62442, 87162, 0, 1, 4, 1, 1), -- Sandals of the Blackest Night
+(@RAID_DIFF_25H + 62442, 87161, 0, 1, 5, 1, 1), -- Belt of Embodied Terror
+(@RAID_DIFF_25H + 62442, 87160, 0, 1, 5, 1, 1), -- Stuff of Nightmares
+(@RAID_DIFF_25H + 62442, 87159, 0, 1, 5, 1, 1), -- Daybreak Drape
+(@RAID_DIFF_25H + 62442, 87158, 0, 1, 5, 1, 1), -- Dread Shadow Ring
+(@RAID_DIFF_25H + 62442, 87157, 0, 1, 5, 1, 1), -- Sunwrought Mail Hauberk
+(@RAID_DIFF_25H + 62442, 87156, 0, 1, 5, 1, 1), -- Gao-Rei, Staff of the Legendary Protector
 
 -- LFG
 
-(@RAID_DIFF_25R + 62442, 95617, 100, 1, 0, 1, 1), -- Dividends of the Everlasting Spring
-(@RAID_DIFF_25R + 62442, 89983, 100, 1, 1, 1, 1), -- Fear-Blackened Leggings
-(@RAID_DIFF_25R + 62442, 89982, 100, 1, 1, 1, 1), -- Shoulderpads of Twisted Fate
-(@RAID_DIFF_25R + 62442, 89981, 100, 1, 1, 1, 1), -- Grasps of Serpentine Might
-(@RAID_DIFF_25R + 62442, 89980, 100, 1, 1, 1, 1), -- Gauntlets of the Shadow's Caress
-(@RAID_DIFF_25R + 62442, 86904, 100, 1, 1, 1, 1), -- Patroller's Girdle of Endless Spring
-(@RAID_DIFF_25R + 62442, 86903, 100, 1, 1, 1, 1), -- Protector's Girdle of Endless Spring
-(@RAID_DIFF_25R + 62442, 86902, 100, 1, 1, 1, 1), -- Mender's Girdle of Endless Spring
-(@RAID_DIFF_25R + 62442, 86901, 100, 1, 1, 1, 1), -- Ranger's Chain of Unending Summer
-(@RAID_DIFF_25R + 62442, 86900, 100, 1, 1, 1, 1), -- Binder's Chain of Unending Summer
-(@RAID_DIFF_25R + 62442, 86899, 100, 1, 1, 1, 1), -- Stalker's Cord of Eternal Autumn
-(@RAID_DIFF_25R + 62442, 86898, 100, 1, 1, 1, 1), -- Weaver's Cord of Eternal Autumn
-(@RAID_DIFF_25R + 62442, 86897, 100, 1, 1, 1, 1), -- Sorcerer's Belt of Final Winter
-(@RAID_DIFF_25R + 62442, 86896, 100, 1, 1, 1, 1), -- Invoker's Belt of Final Winter
-(@RAID_DIFF_25R + 62442, 86895, 100, 1, 2, 1, 1), -- Healer's Belt of Final Winter
-(@RAID_DIFF_25R + 62442, 86888, 100, 1, 2, 1, 1), -- Sandals of the Blackest Night
-(@RAID_DIFF_25R + 62442, 86887, 100, 1, 2, 1, 1), -- Sollerets of Instability
-(@RAID_DIFF_25R + 62442, 86886, 100, 1, 2, 1, 1), -- Loshan, Terror Incarnate
-(@RAID_DIFF_25R + 62442, 86885, 100, 1, 2, 1, 1), -- Spirits of the Sun
-(@RAID_DIFF_25R + 62442, 86884, 100, 1, 2, 1, 1), -- Belt of Embodied Terror
-(@RAID_DIFF_25R + 62442, 86883, 100, 1, 2, 1, 1), -- Daybreak Drape
-(@RAID_DIFF_25R + 62442, 86882, 100, 1, 2, 1, 1), -- Sunwrought Mail Hauberk
-(@RAID_DIFF_25R + 62442, 86881, 100, 1, 2, 1, 1), -- Stuff of Nightmares
-(@RAID_DIFF_25R + 62442, 86880, 100, 1, 2, 1, 1), -- Dread Shadow Ring
-(@RAID_DIFF_25R + 62442, 86879, 100, 1, 2, 1, 1), -- Gao-Rei, Staff of the Legendary Protector
+(@RAID_DIFF_25R + 62442, 95617, 0, 1, 0, 1, 1), -- Dividends of the Everlasting Spring
+(@RAID_DIFF_25R + 62442, 89983, 0, 1, 1, 1, 1), -- Fear-Blackened Leggings
+(@RAID_DIFF_25R + 62442, 89982, 0, 1, 1, 1, 1), -- Shoulderpads of Twisted Fate
+(@RAID_DIFF_25R + 62442, 89981, 0, 1, 1, 1, 1), -- Grasps of Serpentine Might
+(@RAID_DIFF_25R + 62442, 89980, 0, 1, 1, 1, 1), -- Gauntlets of the Shadow's Caress
+(@RAID_DIFF_25R + 62442, 86904, 0, 1, 1, 1, 1), -- Patroller's Girdle of Endless Spring
+(@RAID_DIFF_25R + 62442, 86903, 0, 1, 1, 1, 1), -- Protector's Girdle of Endless Spring
+(@RAID_DIFF_25R + 62442, 86902, 0, 1, 1, 1, 1), -- Mender's Girdle of Endless Spring
+(@RAID_DIFF_25R + 62442, 86901, 0, 1, 1, 1, 1), -- Ranger's Chain of Unending Summer
+(@RAID_DIFF_25R + 62442, 86900, 0, 1, 1, 1, 1), -- Binder's Chain of Unending Summer
+(@RAID_DIFF_25R + 62442, 86899, 0, 1, 1, 1, 1), -- Stalker's Cord of Eternal Autumn
+(@RAID_DIFF_25R + 62442, 86898, 0, 1, 1, 1, 1), -- Weaver's Cord of Eternal Autumn
+(@RAID_DIFF_25R + 62442, 86897, 0, 1, 1, 1, 1), -- Sorcerer's Belt of Final Winter
+(@RAID_DIFF_25R + 62442, 86896, 0, 1, 1, 1, 1), -- Invoker's Belt of Final Winter
+(@RAID_DIFF_25R + 62442, 86895, 0, 1, 2, 1, 1), -- Healer's Belt of Final Winter
+(@RAID_DIFF_25R + 62442, 86888, 0, 1, 2, 1, 1), -- Sandals of the Blackest Night
+(@RAID_DIFF_25R + 62442, 86887, 0, 1, 2, 1, 1), -- Sollerets of Instability
+(@RAID_DIFF_25R + 62442, 86886, 0, 1, 2, 1, 1), -- Loshan, Terror Incarnate
+(@RAID_DIFF_25R + 62442, 86885, 0, 1, 2, 1, 1), -- Spirits of the Sun
+(@RAID_DIFF_25R + 62442, 86884, 0, 1, 2, 1, 1), -- Belt of Embodied Terror
+(@RAID_DIFF_25R + 62442, 86883, 0, 1, 2, 1, 1), -- Daybreak Drape
+(@RAID_DIFF_25R + 62442, 86882, 0, 1, 2, 1, 1), -- Sunwrought Mail Hauberk
+(@RAID_DIFF_25R + 62442, 86881, 0, 1, 2, 1, 1), -- Stuff of Nightmares
+(@RAID_DIFF_25R + 62442, 86880, 0, 1, 2, 1, 1), -- Dread Shadow Ring
+(@RAID_DIFF_25R + 62442, 86879, 0, 1, 2, 1, 1), -- Gao-Rei, Staff of the Legendary Protector
 
  -- Lei Shi
  -- 10N
-(@RAID_DIFF_10N + 62983, 86342, 100, 1, 1, 1, 1), -- Binder's Chain of Unending Summer
-(@RAID_DIFF_10N + 62983, 86333, 100, 1, 1, 1, 1), -- Cuirass of the Animated Protector
-(@RAID_DIFF_10N + 62983, 86336, 100, 1, 1, 1, 1), -- Darkmist Vortex
-(@RAID_DIFF_10N + 62983, 86337, 100, 1, 1, 1, 1), -- Healer's Belt of Final Winter
-(@RAID_DIFF_10N + 62983, 86338, 100, 1, 1, 1, 1), -- Invoker's Belt of Final Winter
-(@RAID_DIFF_10N + 62983, 86335, 100, 1, 1, 1, 1), -- Jin'ya, Orb of the Waterspeaker
-(@RAID_DIFF_10N + 62983, 86383, 100, 1, 1, 1, 1), -- Mender's Girdle of Endless Spring
-(@RAID_DIFF_10N + 62983, 86385, 100, 1, 1, 1, 1), -- Patroller's Girdle of Endless Spring
-(@RAID_DIFF_10N + 62983, 86384, 100, 1, 1, 1, 1), -- Protector's Girdle of Endless Spring
-(@RAID_DIFF_10N + 62983, 86343, 100, 1, 1, 1, 1), -- Ranger's Chain of Unending Summer
-(@RAID_DIFF_10N + 62983, 86334, 100, 1, 2, 1, 1), -- Robes of the Unknown Fear
-(@RAID_DIFF_10N + 62983, 89246, 100, 1, 2, 1, 1), -- Shoulders of the Shadowy Conqueror
-(@RAID_DIFF_10N + 62983, 89247, 100, 1, 2, 1, 1), -- Shoulders of the Shadowy Protector
-(@RAID_DIFF_10N + 62983, 89248, 100, 1, 2, 1, 1), -- Shoulders of the Shadowy Vanquisher
-(@RAID_DIFF_10N + 62983, 86339, 100, 1, 2, 1, 1), -- Sorcerer's Belt of Final Winter
-(@RAID_DIFF_10N + 62983, 86391, 100, 1, 2, 1, 1), -- Spiritsever
-(@RAID_DIFF_10N + 62983, 86341, 100, 1, 2, 1, 1), -- Stalker's Cord of Eternal Autumn
-(@RAID_DIFF_10N + 62983, 86331, 100, 1, 2, 1, 1), -- Taoren, the Soul Burner
-(@RAID_DIFF_10N + 62983, 86332, 100, 1, 2, 1, 1), -- Terror in the Mists
-(@RAID_DIFF_10N + 62983, 86340, 100, 1, 2, 1, 1), -- Weaver's Cord of Eternal Autumn
+(@RAID_DIFF_10N + 62983, 87413, 0, 1, 0, 1, 1), -- Plans: Gauntlets of Unbound Devotion
+(@RAID_DIFF_10N + 62983, 87411, 0, 1, 0, 1, 1), -- Plans: Bloodforged Warfists
+(@RAID_DIFF_10N + 62983, 87410, 0, 1, 0, 1, 1), -- Plans: Ornate Battleplate of the Master
+(@RAID_DIFF_10N + 62983, 87409, 0, 1, 0, 1, 1), -- Plans: Gauntlets of Battle Command
+(@RAID_DIFF_10N + 62983, 86382, 0, 1, 0, 1, 1), -- Pattern: Touch of the Light
+(@RAID_DIFF_10N + 62983, 86381, 0, 1, 0, 1, 1), -- Pattern: Legacy of the Emperor
+(@RAID_DIFF_10N + 62983, 86380, 0, 1, 0, 1, 1), -- Pattern: Imperial Silk Gloves
+(@RAID_DIFF_10N + 62983, 86379, 0, 1, 0, 1, 1), -- Pattern: Robe of Eternal Rule
+(@RAID_DIFF_10N + 62983, 86297, 0, 1, 0, 1, 1), -- Pattern: Stormbreaker Chestguard
+(@RAID_DIFF_10N + 62983, 86284, 0, 1, 0, 1, 1), -- Pattern: Raven Lord's Gloves
+(@RAID_DIFF_10N + 62983, 86281, 0, 1, 0, 1, 1), -- Pattern: Nightfire Robe
+(@RAID_DIFF_10N + 62983, 86279, 0, 1, 0, 1, 1), -- Pattern: Liferuned Leather Gloves
+(@RAID_DIFF_10N + 62983, 86272, 0, 1, 0, 1, 1), -- Pattern: Fists of Lightning
+(@RAID_DIFF_10N + 62983, 86238, 0, 1, 0, 1, 1), -- Pattern: Chestguard of Nemeses
+(@RAID_DIFF_10N + 62983, 86283, 0, 1, 0, 1, 1), -- Pattern: Raiment of Blood and Bone
+(@RAID_DIFF_10N + 62983, 87412, 0, 1, 0, 1, 1), -- Plans: Chestplate of Limitless Faith
+(@RAID_DIFF_10N + 62983, 87408, 0, 1, 0, 1, 1), -- Plans: Unyielding Bloodplate
+(@RAID_DIFF_10N + 62983, 86280, 0, 1, 0, 1, 1), -- Pattern: Murderer's Gloves
+(@RAID_DIFF_10N + 62983, 86342, 0, 1, 1, 1, 1), -- Binder's Chain of Unending Summer
+(@RAID_DIFF_10N + 62983, 86333, 0, 1, 1, 1, 1), -- Cuirass of the Animated Protector
+(@RAID_DIFF_10N + 62983, 86336, 0, 1, 1, 1, 1), -- Darkmist Vortex
+(@RAID_DIFF_10N + 62983, 86337, 0, 1, 1, 1, 1), -- Healer's Belt of Final Winter
+(@RAID_DIFF_10N + 62983, 86338, 0, 1, 1, 1, 1), -- Invoker's Belt of Final Winter
+(@RAID_DIFF_10N + 62983, 86335, 0, 1, 1, 1, 1), -- Jin'ya, Orb of the Waterspeaker
+(@RAID_DIFF_10N + 62983, 86383, 0, 1, 1, 1, 1), -- Mender's Girdle of Endless Spring
+(@RAID_DIFF_10N + 62983, 86385, 0, 1, 1, 1, 1), -- Patroller's Girdle of Endless Spring
+(@RAID_DIFF_10N + 62983, 86384, 0, 1, 1, 1, 1), -- Protector's Girdle of Endless Spring
+(@RAID_DIFF_10N + 62983, 86343, 0, 1, 1, 1, 1), -- Ranger's Chain of Unending Summer
+(@RAID_DIFF_10N + 62983, 86334, 0, 1, 1, 1, 1), -- Robes of the Unknown Fear
+(@RAID_DIFF_10N + 62983, 89246, 0, 1, 2, 1, 1), -- Shoulders of the Shadowy Conqueror
+(@RAID_DIFF_10N + 62983, 89247, 0, 1, 2, 1, 1), -- Shoulders of the Shadowy Protector
+(@RAID_DIFF_10N + 62983, 89248, 0, 1, 2, 1, 1), -- Shoulders of the Shadowy Vanquisher
+(@RAID_DIFF_10N + 62983, 86339, 0, 1, 1, 1, 1), -- Sorcerer's Belt of Final Winter
+(@RAID_DIFF_10N + 62983, 86391, 0, 1, 1, 1, 1), -- Spiritsever
+(@RAID_DIFF_10N + 62983, 86341, 0, 1, 1, 1, 1), -- Stalker's Cord of Eternal Autumn
+(@RAID_DIFF_10N + 62983, 86331, 0, 1, 1, 1, 1), -- Taoren, the Soul Burner
+(@RAID_DIFF_10N + 62983, 86332, 0, 1, 1, 1, 1), -- Terror in the Mists
+(@RAID_DIFF_10N + 62983, 86340, 0, 1, 1, 1, 1), -- Weaver's Cord of Eternal Autumn
 
 -- 25N
-
-(@RAID_DIFF_25N + 62983, 86342, 100, 1, 1, 1, 1), -- Binder's Chain of Unending Summer
-(@RAID_DIFF_25N + 62983, 86333, 100, 1, 1, 1, 1), -- Cuirass of the Animated Protector
-(@RAID_DIFF_25N + 62983, 86336, 100, 1, 1, 1, 1), -- Darkmist Vortex
-(@RAID_DIFF_25N + 62983, 86337, 100, 1, 1, 1, 1), -- Healer's Belt of Final Winter
-(@RAID_DIFF_25N + 62983, 86338, 100, 1, 1, 1, 1), -- Invoker's Belt of Final Winter
-(@RAID_DIFF_25N + 62983, 86335, 100, 1, 2, 1, 1), -- Jin'ya, Orb of the Waterspeaker
-(@RAID_DIFF_25N + 62983, 86383, 100, 1, 2, 1, 1), -- Mender's Girdle of Endless Spring
-(@RAID_DIFF_25N + 62983, 86385, 100, 1, 2, 1, 1), -- Patroller's Girdle of Endless Spring
-(@RAID_DIFF_25N + 62983, 86384, 100, 1, 2, 1, 1), -- Protector's Girdle of Endless Spring
-(@RAID_DIFF_25N + 62983, 86343, 100, 1, 2, 1, 1), -- Ranger's Chain of Unending Summer
-(@RAID_DIFF_25N + 62983, 86334, 100, 1, 3, 1, 1), -- Robes of the Unknown Fear
-(@RAID_DIFF_25N + 62983, 89246, 100, 1, 3, 1, 1), -- Shoulders of the Shadowy Conqueror
-(@RAID_DIFF_25N + 62983, 89247, 100, 1, 3, 1, 1), -- Shoulders of the Shadowy Protector
-(@RAID_DIFF_25N + 62983, 89248, 100, 1, 3, 1, 1), -- Shoulders of the Shadowy Vanquisher
-(@RAID_DIFF_25N + 62983, 86339, 100, 1, 3, 1, 1), -- Sorcerer's Belt of Final Winter
-(@RAID_DIFF_25N + 62983, 86391, 100, 1, 4, 1, 1), -- Spiritsever
-(@RAID_DIFF_25N + 62983, 86341, 100, 1, 4, 1, 1), -- Stalker's Cord of Eternal Autumn
-(@RAID_DIFF_25N + 62983, 86331, 100, 1, 4, 1, 1), -- Taoren, the Soul Burner
-(@RAID_DIFF_25N + 62983, 86332, 100, 1, 4, 1, 1), -- Terror in the Mists
-(@RAID_DIFF_25N + 62983, 86340, 100, 1, 4, 1, 1), -- Weaver's Cord of Eternal Autumn
+(@RAID_DIFF_25N + 62983, 87413, 0, 1, 0, 1, 1), -- Plans: Gauntlets of Unbound Devotion
+(@RAID_DIFF_25N + 62983, 87411, 0, 1, 0, 1, 1), -- Plans: Bloodforged Warfists
+(@RAID_DIFF_25N + 62983, 87410, 0, 1, 0, 1, 1), -- Plans: Ornate Battleplate of the Master
+(@RAID_DIFF_25N + 62983, 87409, 0, 1, 0, 1, 1), -- Plans: Gauntlets of Battle Command
+(@RAID_DIFF_25N + 62983, 86382, 0, 1, 0, 1, 1), -- Pattern: Touch of the Light
+(@RAID_DIFF_25N + 62983, 86381, 0, 1, 0, 1, 1), -- Pattern: Legacy of the Emperor
+(@RAID_DIFF_25N + 62983, 86380, 0, 1, 0, 1, 1), -- Pattern: Imperial Silk Gloves
+(@RAID_DIFF_25N + 62983, 86379, 0, 1, 0, 1, 1), -- Pattern: Robe of Eternal Rule
+(@RAID_DIFF_25N + 62983, 86297, 0, 1, 0, 1, 1), -- Pattern: Stormbreaker Chestguard
+(@RAID_DIFF_25N + 62983, 86284, 0, 1, 0, 1, 1), -- Pattern: Raven Lord's Gloves
+(@RAID_DIFF_25N + 62983, 86281, 0, 1, 0, 1, 1), -- Pattern: Nightfire Robe
+(@RAID_DIFF_25N + 62983, 86279, 0, 1, 0, 1, 1), -- Pattern: Liferuned Leather Gloves
+(@RAID_DIFF_25N + 62983, 86272, 0, 1, 0, 1, 1), -- Pattern: Fists of Lightning
+(@RAID_DIFF_25N + 62983, 86238, 0, 1, 0, 1, 1), -- Pattern: Chestguard of Nemeses
+(@RAID_DIFF_25N + 62983, 86283, 0, 1, 0, 1, 1), -- Pattern: Raiment of Blood and Bone
+(@RAID_DIFF_25N + 62983, 87412, 0, 1, 0, 1, 1), -- Plans: Chestplate of Limitless Faith
+(@RAID_DIFF_25N + 62983, 87408, 0, 1, 0, 1, 1), -- Plans: Unyielding Bloodplate
+(@RAID_DIFF_25N + 62983, 86280, 0, 1, 0, 1, 1), -- Pattern: Murderer's Gloves
+(@RAID_DIFF_25N + 62983, 86342, 0, 1, 1, 1, 1), -- Binder's Chain of Unending Summer
+(@RAID_DIFF_25N + 62983, 86333, 0, 1, 1, 1, 1), -- Cuirass of the Animated Protector
+(@RAID_DIFF_25N + 62983, 86336, 0, 1, 1, 1, 1), -- Darkmist Vortex
+(@RAID_DIFF_25N + 62983, 86337, 0, 1, 1, 1, 1), -- Healer's Belt of Final Winter
+(@RAID_DIFF_25N + 62983, 86338, 0, 1, 1, 1, 1), -- Invoker's Belt of Final Winter
+(@RAID_DIFF_25N + 62983, 86335, 0, 1, 2, 1, 1), -- Jin'ya, Orb of the Waterspeaker
+(@RAID_DIFF_25N + 62983, 86383, 0, 1, 2, 1, 1), -- Mender's Girdle of Endless Spring
+(@RAID_DIFF_25N + 62983, 86385, 0, 1, 2, 1, 1), -- Patroller's Girdle of Endless Spring
+(@RAID_DIFF_25N + 62983, 86384, 0, 1, 2, 1, 1), -- Protector's Girdle of Endless Spring
+(@RAID_DIFF_25N + 62983, 86343, 0, 1, 2, 1, 1), -- Ranger's Chain of Unending Summer
+(@RAID_DIFF_25N + 62983, 86334, 0, 1, 2, 1, 1), -- Robes of the Unknown Fear
+(@RAID_DIFF_25N + 62983, 89246, 0, 1, 3, 1, 1), -- Shoulders of the Shadowy Conqueror
+(@RAID_DIFF_25N + 62983, 89247, 0, 1, 3, 1, 1), -- Shoulders of the Shadowy Protector
+(@RAID_DIFF_25N + 62983, 89248, 0, 1, 3, 1, 1), -- Shoulders of the Shadowy Vanquisher
+(@RAID_DIFF_25N + 62983, 86339, 0, 1, 4, 1, 1), -- Sorcerer's Belt of Final Winter
+(@RAID_DIFF_25N + 62983, 86391, 0, 1, 4, 1, 1), -- Spiritsever
+(@RAID_DIFF_25N + 62983, 86341, 0, 1, 4, 1, 1), -- Stalker's Cord of Eternal Autumn
+(@RAID_DIFF_25N + 62983, 86331, 0, 1, 4, 1, 1), -- Taoren, the Soul Burner
+(@RAID_DIFF_25N + 62983, 86332, 0, 1, 4, 1, 1), -- Terror in the Mists
+(@RAID_DIFF_25N + 62983, 86340, 0, 1, 4, 1, 1), -- Weaver's Cord of Eternal Autumn
 
 -- 10HC
-
-(@RAID_DIFF_10H + 62983, 87183, 100, 1, 1, 1, 1), -- Binder's Chain of Unending Summer
-(@RAID_DIFF_10H + 62983, 87171, 100, 1, 1, 1, 1), -- Cuirass of the Animated Protector
-(@RAID_DIFF_10H + 62983, 87172, 100, 1, 1, 1, 1), -- Darkmist Vortex
-(@RAID_DIFF_10H + 62983, 87178, 100, 1, 1, 1, 1), -- Healer's Belt of Final Winter
-(@RAID_DIFF_10H + 62983, 87177, 100, 1, 1, 1, 1), -- Invoker's Belt of Final Winter
-(@RAID_DIFF_10H + 62983, 87170, 100, 1, 1, 1, 1), -- Jin'ya, Orb of the Waterspeaker
-(@RAID_DIFF_10H + 62983, 87184, 100, 1, 1, 1, 1), -- Mender's Girdle of Endless Spring
-(@RAID_DIFF_10H + 62983, 87186, 100, 1, 1, 1, 1), -- Patroller's Girdle of Endless Spring
-(@RAID_DIFF_10H + 62983, 87185, 100, 1, 1, 1, 1), -- Protector's Girdle of Endless Spring
-(@RAID_DIFF_10H + 62983, 87182, 100, 1, 1, 1, 1), -- Ranger's Chain of Unending Summer
-(@RAID_DIFF_10H + 62983, 87169, 100, 1, 2, 1, 1), -- Robes of the Unknown Fear
-(@RAID_DIFF_10H + 62983, 89262, 100, 1, 2, 1, 1), -- Shoulders of the Shadowy Conqueror
-(@RAID_DIFF_10H + 62983, 89263, 100, 1, 2, 1, 1), -- Shoulders of the Shadowy Protector
-(@RAID_DIFF_10H + 62983, 89261, 100, 1, 2, 1, 1), -- Shoulders of the Shadowy Vanquisher
-(@RAID_DIFF_10H + 62983, 87179, 100, 1, 2, 1, 1), -- Sorcerer's Belt of Final Winter
-(@RAID_DIFF_10H + 62983, 87166, 100, 1, 2, 1, 1), -- Spiritsever
-(@RAID_DIFF_10H + 62983, 87180, 100, 1, 2, 1, 1), -- Stalker's Cord of Eternal Autumn
-(@RAID_DIFF_10H + 62983, 87168, 100, 1, 2, 1, 1), -- Taoren, the Soul Burner
-(@RAID_DIFF_10H + 62983, 87167, 100, 1, 2, 1, 1), -- Terror in the Mists
-(@RAID_DIFF_10H + 62983, 87181, 100, 1, 2, 1, 1), -- Weaver's Cord of Eternal Autumn
+(@RAID_DIFF_10H + 62983, 87413, 0, 1, 0, 1, 1), -- Plans: Gauntlets of Unbound Devotion
+(@RAID_DIFF_10H + 62983, 87411, 0, 1, 0, 1, 1), -- Plans: Bloodforged Warfists
+(@RAID_DIFF_10H + 62983, 87410, 0, 1, 0, 1, 1), -- Plans: Ornate Battleplate of the Master
+(@RAID_DIFF_10H + 62983, 87409, 0, 1, 0, 1, 1), -- Plans: Gauntlets of Battle Command
+(@RAID_DIFF_10H + 62983, 86382, 0, 1, 0, 1, 1), -- Pattern: Touch of the Light
+(@RAID_DIFF_10H + 62983, 86381, 0, 1, 0, 1, 1), -- Pattern: Legacy of the Emperor
+(@RAID_DIFF_10H + 62983, 86380, 0, 1, 0, 1, 1), -- Pattern: Imperial Silk Gloves
+(@RAID_DIFF_10H + 62983, 86379, 0, 1, 0, 1, 1), -- Pattern: Robe of Eternal Rule
+(@RAID_DIFF_10H + 62983, 86297, 0, 1, 0, 1, 1), -- Pattern: Stormbreaker Chestguard
+(@RAID_DIFF_10H + 62983, 86284, 0, 1, 0, 1, 1), -- Pattern: Raven Lord's Gloves
+(@RAID_DIFF_10H + 62983, 86281, 0, 1, 0, 1, 1), -- Pattern: Nightfire Robe
+(@RAID_DIFF_10H + 62983, 86279, 0, 1, 0, 1, 1), -- Pattern: Liferuned Leather Gloves
+(@RAID_DIFF_10H + 62983, 86272, 0, 1, 0, 1, 1), -- Pattern: Fists of Lightning
+(@RAID_DIFF_10H + 62983, 86238, 0, 1, 0, 1, 1), -- Pattern: Chestguard of Nemeses
+(@RAID_DIFF_10H + 62983, 86283, 0, 1, 0, 1, 1), -- Pattern: Raiment of Blood and Bone
+(@RAID_DIFF_10H + 62983, 87412, 0, 1, 0, 1, 1), -- Plans: Chestplate of Limitless Faith
+(@RAID_DIFF_10H + 62983, 87408, 0, 1, 0, 1, 1), -- Plans: Unyielding Bloodplate
+(@RAID_DIFF_10H + 62983, 86280, 0, 1, 0, 1, 1), -- Pattern: Murderer's Gloves
+(@RAID_DIFF_10H + 62983, 87183, 0, 1, 1, 1, 1), -- Binder's Chain of Unending Summer
+(@RAID_DIFF_10H + 62983, 87171, 0, 1, 1, 1, 1), -- Cuirass of the Animated Protector
+(@RAID_DIFF_10H + 62983, 87172, 0, 1, 1, 1, 1), -- Darkmist Vortex
+(@RAID_DIFF_10H + 62983, 87178, 0, 1, 1, 1, 1), -- Healer's Belt of Final Winter
+(@RAID_DIFF_10H + 62983, 87177, 0, 1, 1, 1, 1), -- Invoker's Belt of Final Winter
+(@RAID_DIFF_10H + 62983, 87170, 0, 1, 1, 1, 1), -- Jin'ya, Orb of the Waterspeaker
+(@RAID_DIFF_10H + 62983, 87184, 0, 1, 1, 1, 1), -- Mender's Girdle of Endless Spring
+(@RAID_DIFF_10H + 62983, 87186, 0, 1, 1, 1, 1), -- Patroller's Girdle of Endless Spring
+(@RAID_DIFF_10H + 62983, 87185, 0, 1, 1, 1, 1), -- Protector's Girdle of Endless Spring
+(@RAID_DIFF_10H + 62983, 87182, 0, 1, 1, 1, 1), -- Ranger's Chain of Unending Summer
+(@RAID_DIFF_10H + 62983, 87169, 0, 1, 1, 1, 1), -- Robes of the Unknown Fear
+(@RAID_DIFF_10H + 62983, 89262, 0, 1, 2, 1, 1), -- Shoulders of the Shadowy Conqueror
+(@RAID_DIFF_10H + 62983, 89263, 0, 1, 2, 1, 1), -- Shoulders of the Shadowy Protector
+(@RAID_DIFF_10H + 62983, 89261, 0, 1, 2, 1, 1), -- Shoulders of the Shadowy Vanquisher
+(@RAID_DIFF_10H + 62983, 87179, 0, 1, 1, 1, 1), -- Sorcerer's Belt of Final Winter
+(@RAID_DIFF_10H + 62983, 87166, 0, 1, 1, 1, 1), -- Spiritsever
+(@RAID_DIFF_10H + 62983, 87180, 0, 1, 1, 1, 1), -- Stalker's Cord of Eternal Autumn
+(@RAID_DIFF_10H + 62983, 87168, 0, 1, 1, 1, 1), -- Taoren, the Soul Burner
+(@RAID_DIFF_10H + 62983, 87167, 0, 1, 1, 1, 1), -- Terror in the Mists
+(@RAID_DIFF_10H + 62983, 87181, 0, 1, 1, 1, 1), -- Weaver's Cord of Eternal Autumn
 
 -- 25HC
-
-(@RAID_DIFF_25H + 62983, 87183, 100, 1, 1, 1, 1), -- Binder's Chain of Unending Summer
-(@RAID_DIFF_25H + 62983, 87171, 100, 1, 1, 1, 1), -- Cuirass of the Animated Protector
-(@RAID_DIFF_25H + 62983, 87172, 100, 1, 1, 1, 1), -- Darkmist Vortex
-(@RAID_DIFF_25H + 62983, 87178, 100, 1, 1, 1, 1), -- Healer's Belt of Final Winter
-(@RAID_DIFF_25H + 62983, 87177, 100, 1, 1, 1, 1), -- Invoker's Belt of Final Winter
-(@RAID_DIFF_25H + 62983, 87170, 100, 1, 2, 1, 1), -- Jin'ya, Orb of the Waterspeaker
-(@RAID_DIFF_25H + 62983, 87184, 100, 1, 2, 1, 1), -- Mender's Girdle of Endless Spring
-(@RAID_DIFF_25H + 62983, 87186, 100, 1, 2, 1, 1), -- Patroller's Girdle of Endless Spring
-(@RAID_DIFF_25H + 62983, 87185, 100, 1, 2, 1, 1), -- Protector's Girdle of Endless Spring
-(@RAID_DIFF_25H + 62983, 87182, 100, 1, 2, 1, 1), -- Ranger's Chain of Unending Summer
-(@RAID_DIFF_25H + 62983, 87169, 100, 1, 3, 1, 1), -- Robes of the Unknown Fear
-(@RAID_DIFF_25H + 62983, 89262, 100, 1, 3, 1, 1), -- Shoulders of the Shadowy Conqueror
-(@RAID_DIFF_25H + 62983, 89263, 100, 1, 3, 1, 1), -- Shoulders of the Shadowy Protector
-(@RAID_DIFF_25H + 62983, 89261, 100, 1, 3, 1, 1), -- Shoulders of the Shadowy Vanquisher
-(@RAID_DIFF_25H + 62983, 87179, 100, 1, 3, 1, 1), -- Sorcerer's Belt of Final Winter
-(@RAID_DIFF_25H + 62983, 87166, 100, 1, 4, 1, 1), -- Spiritsever
-(@RAID_DIFF_25H + 62983, 87180, 100, 1, 4, 1, 1), -- Stalker's Cord of Eternal Autumn
-(@RAID_DIFF_25H + 62983, 87168, 100, 1, 4, 1, 1), -- Taoren, the Soul Burner
-(@RAID_DIFF_25H + 62983, 87167, 100, 1, 4, 1, 1), -- Terror in the Mists
-(@RAID_DIFF_25H + 62983, 87181, 100, 1, 4, 1, 1), -- Weaver's Cord of Eternal Autumn
+(@RAID_DIFF_25H + 62983, 87413, 0, 1, 0, 1, 1), -- Plans: Gauntlets of Unbound Devotion
+(@RAID_DIFF_25H + 62983, 87411, 0, 1, 0, 1, 1), -- Plans: Bloodforged Warfists
+(@RAID_DIFF_25H + 62983, 87410, 0, 1, 0, 1, 1), -- Plans: Ornate Battleplate of the Master
+(@RAID_DIFF_25H + 62983, 87409, 0, 1, 0, 1, 1), -- Plans: Gauntlets of Battle Command
+(@RAID_DIFF_25H + 62983, 86382, 0, 1, 0, 1, 1), -- Pattern: Touch of the Light
+(@RAID_DIFF_25H + 62983, 86381, 0, 1, 0, 1, 1), -- Pattern: Legacy of the Emperor
+(@RAID_DIFF_25H + 62983, 86380, 0, 1, 0, 1, 1), -- Pattern: Imperial Silk Gloves
+(@RAID_DIFF_25H + 62983, 86379, 0, 1, 0, 1, 1), -- Pattern: Robe of Eternal Rule
+(@RAID_DIFF_25H + 62983, 86297, 0, 1, 0, 1, 1), -- Pattern: Stormbreaker Chestguard
+(@RAID_DIFF_25H + 62983, 86284, 0, 1, 0, 1, 1), -- Pattern: Raven Lord's Gloves
+(@RAID_DIFF_25H + 62983, 86281, 0, 1, 0, 1, 1), -- Pattern: Nightfire Robe
+(@RAID_DIFF_25H + 62983, 86279, 0, 1, 0, 1, 1), -- Pattern: Liferuned Leather Gloves
+(@RAID_DIFF_25H + 62983, 86272, 0, 1, 0, 1, 1), -- Pattern: Fists of Lightning
+(@RAID_DIFF_25H + 62983, 86238, 0, 1, 0, 1, 1), -- Pattern: Chestguard of Nemeses
+(@RAID_DIFF_25H + 62983, 86283, 0, 1, 0, 1, 1), -- Pattern: Raiment of Blood and Bone
+(@RAID_DIFF_25H + 62983, 87412, 0, 1, 0, 1, 1), -- Plans: Chestplate of Limitless Faith
+(@RAID_DIFF_25H + 62983, 87408, 0, 1, 0, 1, 1), -- Plans: Unyielding Bloodplate
+(@RAID_DIFF_25H + 62983, 86280, 0, 1, 0, 1, 1), -- Pattern: Murderer's Gloves
+(@RAID_DIFF_25H + 62983, 87183, 0, 1, 1, 1, 1), -- Binder's Chain of Unending Summer
+(@RAID_DIFF_25H + 62983, 87171, 0, 1, 1, 1, 1), -- Cuirass of the Animated Protector
+(@RAID_DIFF_25H + 62983, 87172, 0, 1, 1, 1, 1), -- Darkmist Vortex
+(@RAID_DIFF_25H + 62983, 87178, 0, 1, 1, 1, 1), -- Healer's Belt of Final Winter
+(@RAID_DIFF_25H + 62983, 87177, 0, 1, 1, 1, 1), -- Invoker's Belt of Final Winter
+(@RAID_DIFF_25H + 62983, 87170, 0, 1, 2, 1, 1), -- Jin'ya, Orb of the Waterspeaker
+(@RAID_DIFF_25H + 62983, 87184, 0, 1, 2, 1, 1), -- Mender's Girdle of Endless Spring
+(@RAID_DIFF_25H + 62983, 87186, 0, 1, 2, 1, 1), -- Patroller's Girdle of Endless Spring
+(@RAID_DIFF_25H + 62983, 87185, 0, 1, 2, 1, 1), -- Protector's Girdle of Endless Spring
+(@RAID_DIFF_25H + 62983, 87182, 0, 1, 2, 1, 1), -- Ranger's Chain of Unending Summer
+(@RAID_DIFF_25H + 62983, 87169, 0, 1, 2, 1, 1), -- Robes of the Unknown Fear
+(@RAID_DIFF_25H + 62983, 89262, 0, 1, 3, 1, 1), -- Shoulders of the Shadowy Conqueror
+(@RAID_DIFF_25H + 62983, 89263, 0, 1, 3, 1, 1), -- Shoulders of the Shadowy Protector
+(@RAID_DIFF_25H + 62983, 89261, 0, 1, 3, 1, 1), -- Shoulders of the Shadowy Vanquisher
+(@RAID_DIFF_25H + 62983, 87179, 0, 1, 4, 1, 1), -- Sorcerer's Belt of Final Winter
+(@RAID_DIFF_25H + 62983, 87166, 0, 1, 4, 1, 1), -- Spiritsever
+(@RAID_DIFF_25H + 62983, 87180, 0, 1, 4, 1, 1), -- Stalker's Cord of Eternal Autumn
+(@RAID_DIFF_25H + 62983, 87168, 0, 1, 4, 1, 1), -- Taoren, the Soul Burner
+(@RAID_DIFF_25H + 62983, 87167, 0, 1, 4, 1, 1), -- Terror in the Mists
+(@RAID_DIFF_25H + 62983, 87181, 0, 1, 4, 1, 1), -- Weaver's Cord of Eternal Autumn
                   
 -- LFR
 
-(@RAID_DIFF_25R + 62983, 95617, 100, 1, 1, 1, 1), -- Dividends of the Everlasting Spring
-(@RAID_DIFF_25R + 62983, 86900, 100, 1, 2, 1, 1), -- Binder's Chain of Unending Summer
-(@RAID_DIFF_25R + 62983, 86891, 100, 1, 2, 1, 1), -- Cuirass of the Animated Protector
-(@RAID_DIFF_25R + 62983, 86894, 100, 1, 2, 1, 1), -- Darkmist Vortex
-(@RAID_DIFF_25R + 62983, 86895, 100, 1, 2, 1, 1), -- Healer's Belt of Final Winter
-(@RAID_DIFF_25R + 62983, 86896, 100, 1, 2, 1, 1), -- Invoker's Belt of Final Winter
-(@RAID_DIFF_25R + 62983, 86893, 100, 1, 2, 1, 1), -- Jin'ya, Orb of the Waterspeaker
-(@RAID_DIFF_25R + 62983, 86902, 100, 1, 2, 1, 1), -- Mender's Girdle of Endless Spring
-(@RAID_DIFF_25R + 62983, 86904, 100, 1, 2, 1, 1), -- Patroller's Girdle of Endless Spring
-(@RAID_DIFF_25R + 62983, 86903, 100, 1, 2, 1, 1), -- Protector's Girdle of Endless Spring
-(@RAID_DIFF_25R + 62983, 86901, 100, 1, 2, 1, 1), -- Ranger's Chain of Unending Summer
-(@RAID_DIFF_25R + 62983, 86892, 100, 1, 3, 1, 1), -- Robes of the Unknown Fear
-(@RAID_DIFF_25R + 62983, 89277, 100, 1, 3, 1, 1), -- Shoulders of the Shadowy Conqueror
-(@RAID_DIFF_25R + 62983, 89278, 100, 1, 3, 1, 1), -- Shoulders of the Shadowy Protector
-(@RAID_DIFF_25R + 62983, 89276, 100, 1, 3, 1, 1), -- Shoulders of the Shadowy Vanquisher
-(@RAID_DIFF_25R + 62983, 86897, 100, 1, 3, 1, 1), -- Sorcerer's Belt of Final Winter
-(@RAID_DIFF_25R + 62983, 86910, 100, 1, 3, 1, 1), -- Spiritsever
-(@RAID_DIFF_25R + 62983, 86899, 100, 1, 3, 1, 1), -- Stalker's Cord of Eternal Autumn
-(@RAID_DIFF_25R + 62983, 86889, 100, 1, 3, 1, 1), -- Taoren, the Soul Burner
-(@RAID_DIFF_25R + 62983, 86890, 100, 1, 3, 1, 1), -- Terror in the Mists
-(@RAID_DIFF_25R + 62983, 86898, 100, 1, 3, 1, 1); -- Weaver's Cord of Eternal Autumn
+(@RAID_DIFF_25R + 62983, 95617, 0, 1, 1, 1, 1), -- Dividends of the Everlasting Spring
+(@RAID_DIFF_25R + 62983, 86900, 0, 1, 1, 1, 1), -- Binder's Chain of Unending Summer
+(@RAID_DIFF_25R + 62983, 86891, 0, 1, 1, 1, 1), -- Cuirass of the Animated Protector
+(@RAID_DIFF_25R + 62983, 86894, 0, 1, 1, 1, 1), -- Darkmist Vortex
+(@RAID_DIFF_25R + 62983, 86895, 0, 1, 1, 1, 1), -- Healer's Belt of Final Winter
+(@RAID_DIFF_25R + 62983, 86896, 0, 1, 1, 1, 1), -- Invoker's Belt of Final Winter
+(@RAID_DIFF_25R + 62983, 86893, 0, 1, 1, 1, 1), -- Jin'ya, Orb of the Waterspeaker
+(@RAID_DIFF_25R + 62983, 86902, 0, 1, 1, 1, 1), -- Mender's Girdle of Endless Spring
+(@RAID_DIFF_25R + 62983, 86904, 0, 1, 1, 1, 1), -- Patroller's Girdle of Endless Spring
+(@RAID_DIFF_25R + 62983, 86903, 0, 1, 2, 1, 1), -- Protector's Girdle of Endless Spring
+(@RAID_DIFF_25R + 62983, 86901, 0, 1, 2, 1, 1), -- Ranger's Chain of Unending Summer
+(@RAID_DIFF_25R + 62983, 86892, 0, 1, 2, 1, 1), -- Robes of the Unknown Fear
+(@RAID_DIFF_25R + 62983, 89277, 0, 1, 3, 1, 1), -- Shoulders of the Shadowy Conqueror
+(@RAID_DIFF_25R + 62983, 89278, 0, 1, 3, 1, 1), -- Shoulders of the Shadowy Protector
+(@RAID_DIFF_25R + 62983, 89276, 0, 1, 3, 1, 1), -- Shoulders of the Shadowy Vanquisher
+(@RAID_DIFF_25R + 62983, 86897, 0, 1, 2, 1, 1), -- Sorcerer's Belt of Final Winter
+(@RAID_DIFF_25R + 62983, 86910, 0, 1, 2, 1, 1), -- Spiritsever
+(@RAID_DIFF_25R + 62983, 86899, 0, 1, 2, 1, 1), -- Stalker's Cord of Eternal Autumn
+(@RAID_DIFF_25R + 62983, 86889, 0, 1, 2, 1, 1), -- Taoren, the Soul Burner
+(@RAID_DIFF_25R + 62983, 86890, 0, 1, 2, 1, 1), -- Terror in the Mists
+(@RAID_DIFF_25R + 62983, 86898, 0, 1, 2, 1, 1); -- Weaver's Cord of Eternal Autumn
 
+-- Releasing zone fixed
+DELETE FROM `game_graveyard_zone` WHERE `id` = 4149 AND `ghost_zone` IN (6006,6067);
+INSERT INTO `game_graveyard_zone` VALUES
+(4149,6006,0),
+(4149,6067,0);
+
+-- Instance Raid Portal In&Out
+SET @OGUID = (SELECT MAX(guid) FROM `gameobject`);
+DELETE FROM `gameobject` WHERE `id`=214525;
+INSERT INTO `gameobject` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`spawntimesecs`,`animprogress`,`state`,`isActive`,`protect_anti_doublet`) VALUES
+(6609460, 214525, 996, 0, 0, 120, 1, -1021.25, -3157.25, 30.7474, 1.5719, 0, 0, 0, 1, 86400, 255, 1, 0, null),
+(@OGUID +20, 214525, 870, 0, 0, 1, 1, 957.689, -52.7766, 514.299, 4.088, 0, 0, 0.890113, -0.45574, 86400, 255, 1, 0, null);

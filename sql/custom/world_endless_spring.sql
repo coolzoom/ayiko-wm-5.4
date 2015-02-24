@@ -1,7 +1,7 @@
 DELETE FROM creature WHERE map = 996;
 DELETE FROM gameobject WHERE map = 996;
 -- GUID RANGES
--- Gameobjects - 35 GUIDs
+-- Gameobjects - 36 GUIDs
 SET @OGUID := (SELECT MAX(guid) FROM gameobject) + 1;
 -- Creatures - 334 GUIDs
 SET @CGUID := (SELECT MAX(guid) FROM creature) + 1;
@@ -1475,3 +1475,10 @@ DELETE FROM `game_graveyard_zone` WHERE `id` = 4149 AND `ghost_zone` IN (6006,60
 INSERT INTO `game_graveyard_zone` VALUES
 (4149,6006,0),
 (4149,6067,0);
+
+-- Instance Raid Portal In&Out
+SET @OGUID = (SELECT MAX(guid) FROM `gameobject`);
+DELETE FROM `gameobject` WHERE `id`=214525;
+INSERT INTO `gameobject` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`spawntimesecs`,`animprogress`,`state`,`isActive`,`protect_anti_doublet`) VALUES
+(6609460, 214525, 996, 0, 0, 120, 1, -1021.25, -3157.25, 30.7474, 1.5719, 0, 0, 0, 1, 86400, 255, 1, 0, null),
+(@OGUID +20, 214525, 870, 0, 0, 1, 1, 957.689, -52.7766, 514.299, 4.088, 0, 0, 0.890113, -0.45574, 86400, 255, 1, 0, null);

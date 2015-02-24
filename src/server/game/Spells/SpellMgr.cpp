@@ -4984,9 +4984,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 131116:// Allow to use Raging Blow
                     spellInfo->ProcCharges = 2;
                     break;
-                case 44544: // Fingers of Frost
-                    spellInfo->StackAmount = 2;
-                    break;
                 case 85222: // Light of Dawn
                     spellInfo->MaxAffectedTargets = 6;
                     break;

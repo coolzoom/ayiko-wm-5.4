@@ -3834,6 +3834,44 @@ void Spell::cast(bool skipCheck)
                 m_caster->CastSpell(m_targets.GetUnitTarget() ? m_targets.GetUnitTarget() : m_caster, *i, true);
     }
 
+    Unit::AuraEffectList procFromSpell = m_caster->GetAuraEffectsByType(SPELL_AURA_PROC_FROM_SPELL);
+    for (Unit::AuraEffectList::iterator j = procFromSpell.begin(); j != procFromSpell.end();)
+    {
+        Aura* base = (*j)->GetBase();
+
+        if (!base || base->GetSpellInfo()->ProcFlags || base->GetDuration() == base->GetMaxDuration())
+        {
+            j++;
+            continue;
+        }
+
+        // Still needs better handling
+        int32 consumeStacks = 0;
+        if (m_spellInfo->Id == (*j)->GetSpellInfo()->Effects[(*j)->GetEffIndex()].TriggerSpell)
+        {
+            j++;
+            base->ModStackAmount(-1);
+        }
+        else
+            j++;
+    }
+
+    Unit::AuraEffectList const& stateAuras = m_caster->GetAuraEffectsByType(SPELL_AURA_ABILITY_IGNORE_AURASTATE);
+    for (Unit::AuraEffectList::const_iterator j = stateAuras.begin(); j != stateAuras.end();)
+    {
+        if ((*j)->IsAffectingSpell(m_spellInfo))
+        {
+            Aura* base = (*j)->GetBase();
+            if (base->GetSpellInfo()->StackAmount)
+            {
+                j++;
+                base->ModStackAmount(-1);
+                continue;
+            }
+        }
+        j++;
+    }
+
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
         m_caster->ToPlayer()->SetSpellModTakingSpell(this, false);

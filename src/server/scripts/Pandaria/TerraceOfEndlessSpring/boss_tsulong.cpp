@@ -30,6 +30,7 @@ enum eTsulongEvents
     EVENT_WAYPOINT_FIRST,
     EVENT_WAYPOINT_SECOND,
     EVENT_SWITCH_TO_NIGHT_PHASE,
+    EVENT_BERSERK,
     // night phase
     EVENT_SPAWN_SUNBEAM,
     EVENT_SHADOW_BREATH,
@@ -61,6 +62,7 @@ enum eTsulongSpells
     SPELL_SUMMON_SHA_PERIODIC           = 122946,
     SPELL_SUMMON_SHA_PERIODIC_EFF       = 122952,
     SPELL_SUMMON_SHA_MISSILE            = 122953, // 62919
+    SPELL_UNLEASHED_SHA_EXPLOSION       = 130008,
 
 };
 
@@ -184,17 +186,18 @@ class boss_tsulong : public CreatureScript
                 summons.DespawnAll();
 
                 inFly = false;
-                hasBeenDefeated = false;
 
                 me->SetDisableGravity(true);
                 me->SetCanFly(true);
                 me->RemoveAurasDueToSpell(SPELL_DREAD_SHADOWS);
                 me->SetPower(POWER_ENERGY, 0);
-
                 
+                if (hasBeenDefeated)
+                    return;
+
                 if (instance)
                 {
-                    if (instance->GetData(DATA_PROTECTORS) == DONE)
+                    if (instance->GetData(DATA_PROTECTORS) == DONE && instance->GetData(DATA_TSULONG) != DONE)
                     {
                         phase = PHASE_NIGHT;
                         me->SetDisplayId(DISPLAY_TSULON_NIGHT);
@@ -231,6 +234,8 @@ class boss_tsulong : public CreatureScript
                 Talk(SAY_AGGRO);
                 me->SetPower(POWER_ENERGY, 0);
                 SetPhase(PHASE_NIGHT);
+
+                events.ScheduleEvent(EVENT_BERSERK, 8 * MINUTE*IN_MILLISECONDS + 10000);
             }
 
             void KilledUnit(Unit* who) override
@@ -245,6 +250,7 @@ class boss_tsulong : public CreatureScript
                 {
                     if (me->GetHealth() <= damage)
                     {
+                        DoCast(me, SPELL_UNLEASHED_SHA_EXPLOSION, true);
                         damage = 0;
                         summons.DespawnAll();
                         EnterEvadeMode();
@@ -380,16 +386,6 @@ class boss_tsulong : public CreatureScript
                 }
             }
 
-            /*
-            void MoveInLineOfSight(Unit* pWho) override
-            {
-
-                if (hasBeenDefeated || inFly || me->IsInEvadeMode())
-                    return;
-
-                CreatureAI::MoveInLineOfSight(pWho);
-            }*/
-
             void HandleDefeat()
             {
                 if (hasBeenDefeated)
@@ -397,29 +393,28 @@ class boss_tsulong : public CreatureScript
 
                 hasBeenDefeated = true;
 
+                EnterEvadeMode();
+
                 Talk(SAY_DEATH);
                 
                 me->SetReactState(REACT_PASSIVE);
                 me->setFaction(FACTION_DAY);
+                me->RemoveAllAuras();
+
                 me->GetMotionMaster()->Clear();
                 me->GetMotionMaster()->MoveIdle();
-                me->AttackStop();
-                me->StopMoving();
-                me->SetTarget(0);
 
                 events.Reset();
 
-                me->CombatStop(true);
-                me->ClearInCombat();
                 me->setRegeneratingHealth(false);
                 me->setRegeneratingMana(false);
 
                 DoCast(me, SPELL_GOLD_ACTIVE, true);
-                me->RemoveAllAuras();
                 me->SetDisplayId(DISPLAY_TSULON_DAY);
 
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 instance->SetBossState(DATA_TSULONG, DONE);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
 
                 events.Reset();
 
@@ -459,13 +454,16 @@ class boss_tsulong : public CreatureScript
 
             void EnterEvadeMode() override
             {
-                if (hasBeenDefeated)
-                    return;
-
                 CreatureAI::EnterEvadeMode();
 
                 me->GetMotionMaster()->Clear();
-                me->GetMotionMaster()->MoveTargetedHome();
+                me->GetMotionMaster()->MoveIdle();
+
+                if (!hasBeenDefeated)
+                {
+                    me->GetMotionMaster()->MoveTargetedHome();
+                    Talk(SAY_WIPE);
+                }
             }
 
             void UpdateAI(const uint32 diff) override
@@ -486,38 +484,42 @@ class boss_tsulong : public CreatureScript
                 }
                 events.Update(diff);
 
-                //if (inFly)
+                switch (events.ExecuteEvent())
                 {
-                    if (phase == PHASE_FLY)
+                case EVENT_BERSERK:
+                    DoCast(me, SPELL_BERSERK, true);
+                    break;
+                }
+
+                if (phase == PHASE_FLY)
+                {
+                    switch (events.ExecuteEvent())
                     {
-                        switch (events.ExecuteEvent())
-                        {
-                            case EVENT_FLY:
-                                me->setActive(true);
-                                me->UpdateObjectVisibility(true);
-                                me->setFaction(FACTION_NIGHT);
-                                me->SetReactState(REACT_PASSIVE);
-                                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
-                                me->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
-                                me->SetDisplayId(DISPLAY_TSULON_NIGHT);
-                                me->GetMotionMaster()->MovePoint(WAYPOINT_FIRST, -1018.10f, -2947.431f, 50.12f);
-                                inFly = true;
-                                break;
-                            case EVENT_WAYPOINT_FIRST:
-                                me->GetMotionMaster()->Clear();
-                                me->GetMotionMaster()->MovePoint(WAYPOINT_SECOND, -1017.841f, -3049.621f, 12.823f);
-                                break;
-                            case EVENT_WAYPOINT_SECOND:
-                                me->SetHomePosition(-1017.841f, -3049.621f, 12.823f, 4.72f);
-                                me->SetReactState(REACT_AGGRESSIVE);
-                                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
-                                inFly = false;
-                                events.SetPhase(PHASE_NONE);
-                                phase = PHASE_NONE;
-                                break;
-                            default:
-                                break;
-                        }
+                    case EVENT_FLY:
+                        me->setActive(true);
+                        me->UpdateObjectVisibility(true);
+                        me->setFaction(FACTION_NIGHT);
+                        me->SetReactState(REACT_PASSIVE);
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                        me->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
+                        me->SetDisplayId(DISPLAY_TSULON_NIGHT);
+                        me->GetMotionMaster()->MovePoint(WAYPOINT_FIRST, -1018.10f, -2947.431f, 50.12f);
+                        inFly = true;
+                        break;
+                    case EVENT_WAYPOINT_FIRST:
+                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovePoint(WAYPOINT_SECOND, -1017.841f, -3049.621f, 12.823f);
+                        break;
+                    case EVENT_WAYPOINT_SECOND:
+                        me->SetHomePosition(-1017.841f, -3049.621f, 12.823f, 4.72f);
+                        me->SetReactState(REACT_AGGRESSIVE);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                        inFly = false;
+                        events.SetPhase(PHASE_NONE);
+                        phase = PHASE_NONE;
+                        break;
+                    default:
+                        break;
                     }
                 }
 
@@ -784,7 +786,8 @@ class npc_unstable_sha : public CreatureScript
         SPELL_INSTABILITY_RIDE          = 122928,
         SPELL_INSTABILITY_TRANSFORM     = 122930,
         SPELL_INSTABILITY_DAMAGE        = 123697,
-        SPELL_INSTABILITY_HEAL          = 130078
+        SPELL_INSTABILITY_HEAL          = 130078,
+        SPELL_UNSTABLE_BOLT             = 122881
     };
 
     struct npc_unstable_shaAI : public ScriptedAI
@@ -806,6 +809,7 @@ class npc_unstable_sha : public CreatureScript
             //me->GetMotionMaster()->MoveChase(summoner);
             //me->SetReactState(REACT_PASSIVE);
             me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+            DoZoneInCombat();
             SetGazeOn(summoner);
             summonerGUID = summoner->GetGUID();
         }
@@ -821,17 +825,35 @@ class npc_unstable_sha : public CreatureScript
                 }
         }
 
-        void UpdateAI(uint32 const /*diff*/) override
+        void UpdateAI(uint32 const uiDiff) override
         {
             if (!UpdateVictimWithGaze() || riding)
                 return;
 
             if (Unit * summoner = Unit::GetUnit(*me, summonerGUID))
+            {
                 if (me->IsWithinMeleeRange(summoner))
                 {
                     riding = true;
                     DoCast(summoner, SPELL_INSTABILITY_RIDE);
                 }
+            }
+
+            events.Update(uiDiff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case 1:
+                    if (Unit* pUnit = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, 0))
+                    {
+                        DoCast(pUnit, SPELL_UNSTABLE_BOLT);
+                        events.ScheduleEvent(1, 4000);
+                    }
+                    break;
+                }
+            }
         }
 
         bool riding;

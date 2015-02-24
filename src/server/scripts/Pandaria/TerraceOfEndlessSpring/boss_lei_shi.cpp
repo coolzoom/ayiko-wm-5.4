@@ -21,6 +21,12 @@
 #include "terrace_of_endless_spring.h"
 #include "GridNotifiers.h"
 
+static const Position aLeiWps[] =
+{
+    { -1017.7f, -2864.0f, 30.4f, 4.71f },
+    { -1017.8f, -2771.9f, 38.6f, 4.71f },
+};
+
 enum eLeiShiSpells
 {
     SPELL_AFRAID            = 123181,
@@ -33,6 +39,7 @@ enum eLeiShiSpells
     SPELL_PROTECT           = 123250,
     SPELL_PROTECT_RESPAWN   = 123493,
     SPELL_PROTECT_VISUAL    = 123505,
+    SPELL_CLOUDED_REFLECTION= 123620,
 
     // This is for Heroic Mode
     SPELL_SCARY_FOG_CIRCLE  = 123797,
@@ -53,7 +60,13 @@ enum eLeiShiEvents
     EVENT_HIDE          = 6,
 
     // Lei Shi (hidden)
-    EVENT_HIDDEN_SPRAY  = 7
+    EVENT_HIDDEN_SPRAY  = 7,
+    EVENT_BERSERK       = 8,
+
+    // OOC
+    EVENT_WP_1          = 9,
+    EVENT_WP_2          = 10,
+    EVENT_WP_3          = 11
 };
 
 enum eLeiShiActions
@@ -66,11 +79,21 @@ enum eLeiShiActions
 
 enum eLeiShiSays
 {
-    TALK_AGGRO,
+    TALK_AGGRO  = 1,
     TALK_HIDE,
     TALK_GET_AWAY,
     TALK_SLAY,
-    TALK_DEFEATED
+    TALK_INTRO,
+    TALK_DEFEATED,
+    TALK_OUTRO_1,
+    TALK_OUTRO_2
+};
+
+enum eReflectionSays
+{
+    EMOTE_RIPPLE,
+    EMOTE_RIPPLE_2,
+    EMOTE_APPEAR
 };
 
 Position leiShiPos = { -1017.93f, -2911.3f, 19.902f, 4.74f };
@@ -97,10 +120,12 @@ class boss_lei_shi : public CreatureScript
             {
                 pInstance = creature->GetInstanceScript();
                 leiShiFreed = false;
+                me->SetReactState(REACT_PASSIVE);
             }
 
             InstanceScript* pInstance;
             EventMap events;
+            EventMap m_mEvents;
 
             uint8 nextAfraidPct;
             uint8 nextProtectPct;
@@ -150,12 +175,6 @@ class boss_lei_shi : public CreatureScript
 
                 ScheduleSpecialSpell();
 
-                if (GameObject* vortex = me->GetMap()->GetGameObject(pInstance->GetData64(GOB_LEI_SHIS_VORTEX)))
-                    vortex->SetGoState(GO_STATE_ACTIVE);
-
-                if (GameObject* wall = me->GetMap()->GetGameObject(pInstance->GetData64(GOB_WALL_OF_LEI_SHI)))
-                    wall->SetGoState(GO_STATE_ACTIVE);
-
                 if (pInstance)
                 {
                     pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
@@ -198,6 +217,28 @@ class boss_lei_shi : public CreatureScript
                     pInstance->SetBossState(DATA_LEI_SHI, FAIL);
             }
 
+            void MovementInform(uint32 uiType, uint32 uiPointId)
+            {
+                if (uiType != POINT_MOTION_TYPE)
+                    return;
+
+                if (uiPointId == 45)
+                {
+                    me->SetFacingTo(4.71f);
+                    m_mEvents.ScheduleEvent(EVENT_WP_2, 500);
+                }
+
+                if (uiPointId == 46)
+                {
+                    if (Creature* pSha = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_SHA_OF_FEAR)))
+                    {
+                        if (pSha->AI())
+                            pSha->AI()->DoAction(ACTION_SHA_INTRO);
+                        me->SetPhaseMask(128, true);
+                    }
+                }
+            }
+
             void EnterCombat(Unit* /*attacker*/)
             {
                 if (pInstance)
@@ -215,6 +256,8 @@ class boss_lei_shi : public CreatureScript
                         me->CastSpell(me, SPELL_SCARY_FOG_CIRCLE, true);
 
                     Talk(TALK_AGGRO);
+
+                    events.ScheduleEvent(EVENT_BERSERK, 7 * MINUTE*IN_MILLISECONDS);
                 }
             }
 
@@ -265,10 +308,13 @@ class boss_lei_shi : public CreatureScript
                     me->RemoveAura(SPELL_SCARY_FOG_CIRCLE);
                     me->RemoveAura(SPELL_SCARY_FOG_DOT);
                     me->RemoveAura(SPELL_SCARY_FOG_STACKS);
+                    me->RemoveAura(SPELL_BERSERK);
                     me->RemoveAllAreasTrigger();
 
                     leiShiFreed = true;
                     Talk(TALK_DEFEATED);
+
+                    m_mEvents.ScheduleEvent(EVENT_WP_1, 15000);
 
                     if (pInstance)
                     {
@@ -280,12 +326,6 @@ class boss_lei_shi : public CreatureScript
                     }
 
                     pInstance->SetBossState(DATA_LEI_SHI, DONE);
-
-                    /*
-                    if (me->GetMap()->IsHeroic())
-                        me->SummonGameObject(GOB_LEI_SHI_CHEST_HEROIC, leiShiPos.GetPositionX(), leiShiPos.GetPositionY(), leiShiPos.GetPositionZ(), 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0);
-                    else
-                        me->SummonGameObject(GOB_LEI_SHI_CHEST_NORMAL, leiShiPos.GetPositionX(), leiShiPos.GetPositionY(), leiShiPos.GetPositionZ(), 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0); */
                 }
             }
 
@@ -409,6 +449,23 @@ class boss_lei_shi : public CreatureScript
                         ScheduleSpecialSpell();
                         break;
                     }
+                    case ACTION_LEISHI_INTRO:
+                        me->SetPhaseMask(1, true);
+                        me->SetReactState(REACT_AGGRESSIVE);
+                        Talk(TALK_INTRO);
+                        
+                        if (Creature* pReflection = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_REFLECTION_OF_LEI_SHI)))
+                        {
+                            pReflection->SetPhaseMask(128, true);
+                        }
+
+                        if (GameObject* pVortex = ObjectAccessor::GetGameObject(*me, instance->GetData64(GOB_LEI_SHIS_VORTEX)))
+                            pVortex->SetGoState(GO_STATE_ACTIVE);
+
+                        if (GameObject* pVortexWall = ObjectAccessor::GetGameObject(*me, instance->GetData64(GOB_WALL_OF_LEI_SHI)))
+                            pVortexWall->SetGoState(GO_STATE_ACTIVE);
+
+                        break;
                     default:
                         break;
                 }
@@ -416,10 +473,32 @@ class boss_lei_shi : public CreatureScript
 
             void UpdateAI(const uint32 diff)
             {
+                m_mEvents.Update(diff);
+
+                switch (m_mEvents.ExecuteEvent())
+                {
+                case EVENT_WP_1:
+                    Talk(TALK_OUTRO_1);
+                    
+                    me->SetWalk(true);
+                    me->GetMotionMaster()->Clear();
+                    me->GetMotionMaster()->MovePoint(45, aLeiWps[0]);
+                    break;
+                case EVENT_WP_2:
+                    Talk(TALK_OUTRO_2);
+                    m_mEvents.ScheduleEvent(EVENT_WP_3, 8000);
+                    break;
+                case EVENT_WP_3:
+                    me->SetWalk(false);
+                    me->GetMotionMaster()->MovePoint(46, aLeiWps[1]);
+                    break;
+                }
+
                 if (!UpdateVictim())
                 {
+                    /*
                     if (pInstance && pInstance->GetData(SPELL_RITUAL_OF_PURIFICATION) == false)
-                        me->RemoveAura(SPELL_RITUAL_OF_PURIFICATION);
+                        me->RemoveAura(SPELL_RITUAL_OF_PURIFICATION);*/
 
                     std::list<Creature*> protectors;
                     me->GetCreatureListWithEntryInGrid(protectors, NPC_ANIMATED_PROTECTOR, 100.0f);
@@ -445,6 +524,9 @@ class boss_lei_shi : public CreatureScript
 
                 switch (events.ExecuteEvent())
                 {
+                    case EVENT_BERSERK:
+                        DoCast(me, SPELL_BERSERK, true);
+                        break;
                     case EVENT_SPRAY:
                     {
                         if (getAwayPhase || me->HasUnitState(UNIT_STATE_CASTING))
@@ -643,6 +725,69 @@ class mob_lei_shi_hidden : public CreatureScript
         {
             return new mob_lei_shi_hiddenAI(creature);
         }
+};
+
+class npc_lei_shi_reflection : public CreatureScript
+{
+    enum eEvents : uint32
+    {
+        EVENT_NONE,
+        EVENT_RIPPLE_1,
+        EVENT_RIPPLE_2,
+        EVENT_APPEAR
+    };
+public:
+    npc_lei_shi_reflection() : CreatureScript("npc_lei_shi_reflection") {}
+
+    struct npc_lei_shi_reflectionAI : public ScriptedAI
+    {
+        npc_lei_shi_reflectionAI(Creature* pCreature) : ScriptedAI(pCreature) {}
+
+        void DoAction(const int32 iAction)
+        {
+            if (iAction == ACTION_LEISHI_INTRO)
+            {
+                events.ScheduleEvent(EVENT_RIPPLE_1, 2000);
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff)
+        {
+            events.Update(uiDiff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_RIPPLE_1:
+                    Talk(EMOTE_RIPPLE);
+                    events.ScheduleEvent(EVENT_RIPPLE_2, 14000);
+                    break;
+                case EVENT_RIPPLE_2:
+                    Talk(EMOTE_RIPPLE_2);
+                    events.ScheduleEvent(EVENT_APPEAR, 10000);
+                    break;
+                case EVENT_APPEAR:
+                    if (me->GetInstanceScript())
+                    {
+                        if (Creature* pLeiShi = ObjectAccessor::GetCreature(*me, me->GetInstanceScript()->GetData64(NPC_LEI_SHI)))
+                        {
+                            Talk(EMOTE_APPEAR);
+
+                            if (pLeiShi->AI())
+                                pLeiShi->AI()->DoAction(ACTION_LEISHI_INTRO);
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_lei_shi_reflectionAI(pCreature);
+    }
 };
 
 // Get Away ! - 123461
@@ -906,6 +1051,7 @@ void AddSC_boss_lei_shi()
     new boss_lei_shi();
     new mob_animated_protector();
     new mob_lei_shi_hidden();
+    new npc_lei_shi_reflection();
     new spell_get_away();
     new spell_get_away_dmg();
     new spell_hide();

@@ -288,9 +288,13 @@ INSERT INTO creature_template_aura (entry, aura) VALUES
 -- LEI SHI
 
 UPDATE creature_template SET unit_flags = 0, ScriptName = 'boss_lei_shi' WHERE entry = 62983;
+UPDATE `creature_template` SET `ScriptName` = 'npc_lei_shi_reflection' WHERE `entry` = 71095;
 UPDATE creature_template SET ScriptName = 'mob_animated_protector' WHERE entry = 62995;
 UPDATE creature_template SET minlevel = 93, maxlevel = 93, faction_A = 16, faction_H = 16, ScriptName = 'mob_lei_shi_hidden' WHERE entry = 63099;
 
+DELETE FROM creature_template_aura WHERE entry = 71095;
+INSERT INTO creature_template_aura (entry, aura) VALUES
+(71095, 123620);
 
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (132363);
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
@@ -312,6 +316,23 @@ INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
 DELETE FROM spell_target_position WHERE id = 123441;
 INSERT INTO spell_target_position (id, effIndex, target_map, target_position_x, target_position_y, target_position_z, target_orientation) VALUES
 (123441, 0, 996, -1017.96, -2911.15, 19.8185, 0);
+
+DELETE FROM `creature_text` WHERE `entry` IN (62983, 71095);
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(62983, 1, 0, 'I did not want to have to do this!', 14, 0, 100, 0, 0, 29324, 'Lei Shi - AGGRO'),
+(62983, 2, 0, 'I''m  hiding until you leave!', 14, 0, 100, 0, 0, 29333, 'Lei Shi - HIDE'),
+(62983, 2, 1, 'I don''t want to see you anymore!', 14, 0, 100, 0, 0, 29334, 'Lei Shi - HIDE'),
+(62983, 3, 0, 'Get away!', 14, 0, 100, 0, 0, 29331, 'Lei Shi - GET AWAY'),
+(62983, 3, 1, 'Stay away from me!', 14, 0, 100, 0, 0, 29332, 'Lei Shi - GET AWAY'),
+(62983, 4, 0, 'Ugh... Sorry...', 14, 0, 100, 0, 0, 29329, 'Lei Shi - SLAY'),
+(62983, 4, 1, 'It''s your fault it happened...', 14, 0, 100, 0, 0, 29330, 'Lei Shi - SLAY'),
+(62983, 5, 0, 'Wh-what are you doing here?! G-go away!', 14, 0, 100, 0, 0, 29328, 'Lei Shi - INTRO'),
+(62983, 6, 0, 'I... ah... oh! Did I...? Was I...? It was... so... cloudy.', 14, 0, 100, 0, 0, 29325, 'Lei Shi - DEFEAT'),
+(62983, 7, 0, 'I have to go now.', 14, 0, 100, 0, 0, 29326, 'Lei Shi - OUTRO_1'),
+(62983, 8, 0, 'I have to make the water not cloudy anymore. Will... will you help?', 14, 0, 100, 0, 0, 29327, 'Lei Shi - OUTRO_2'),
+(71095, 0, 0, 'Lei Shi''s reflection ripples ominously.', 41, 0, 100, 0, 0, 0, 'Lei Shi - EMOTE_1'),
+(71095, 1, 0, 'Her reflection ripples a second time.', 41, 0, 100, 0, 0, 0, 'Lei Shi - EMOTE_2'),
+(71095, 2, 0, 'Lei Shi appears!', 41, 0, 100, 0, 0, 0, 'Lei Shi - EMOTE_3');
 
 -- LEI SHI END
 
@@ -550,7 +571,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position
 (@CGUID+59, 62995, 996, 3, 1, -1044.986, -2901.198, 19.17827, 3.013757, 604800, 0, 0), -- Animated Protector (Auras: 123493 - Protect)
 (@CGUID+60, 62995, 996, 3, 1, -989.3629, -2902.622, 19.17827, 0.6423108, 604800, 0, 0), -- Animated Protector (Auras: 123493 - Protect)
 -- (@CGUID+61, 65736, 996, 3, 1, -1214.8, -2824.82, 41.24303, 3.507344, 86400, 0, 0), -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
-(@CGUID+62, 60788, 996, 3, 1, -1017.835, -2771.984, 38.65444, 4.718282, 604800, 0, 0); -- Pure Light Terrace (Auras: 117865 - Light Wall)
+(@CGUID+61, 60788, 996, 3, 1, -1017.835, -2771.984, 38.65444, 4.718282, 604800, 0, 0), -- Pure Light Terrace (Auras: 117865 - Light Wall)
 -- (@CGUID+63, 65736, 996, 3, 1, -832.0764, -2745.399, 31.67754, 0.1536942, 86400, 0, 0); -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
 -- (@CGUID+64, 61038, 996, 3, 1, -1214.795, -2824.823, 41.24303, 3.506719, 86400, 0, 0), -- Yang Guoshi (Auras: 120000 - Sha Corruption)
 -- (@CGUID+65, 65736, 996, 3, 1, -1214.8, -2824.82, 41.24303, 3.507344, 86400, 0, 0), -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
@@ -559,7 +580,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position
 -- (@CGUID+68, 61046, 996, 3, 1, -832.0764, -2745.405, 31.67757, 0.1583484, 86400, 0, 0), -- Jinlun Kun (Auras: 120000 - Sha Corruption)
 -- (@CGUID+69, 65736, 996, 3, 1, -832.0764, -2745.399, 31.67754, 0.1536942, 86400, 0, 0), -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
 -- (@CGUID+70, 65736, 996, 3, 1, -1214.8, -2824.82, 41.24303, 3.507344, 86400, 0, 0); -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
--- (@CGUID+71, 71095, 996, 3, 1, -1017.91, -2771.976, 38.65443, 4.709265, 86400, 0, 0); -- Reflection of Lei Shi (Auras: 141597 - Lei Shi Victory)
+(@CGUID+62, 71095, 996, 3, 1, -1017.93, -2911.302, 19.9015, 4.643414, 86400, 0, 0); -- Reflection of Lei Shi (Auras: 141597 - Lei Shi Victory)
 -- 1074791424
 -- 69208064
 
@@ -589,16 +610,20 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 (@OGUID+7, 213074, 996, 16, 1, -1018.169, -2885.495, 19.63248, 4.688, 0, 0, 0, 1, -604800, 255, 1), -- Box of Fancy Stuff
 (@OGUID+8, 213075, 996, 32, 1, -1018.169, -2885.495, 19.63248, 4.688, 0, 0, 0, 1, -604800, 255, 1), -- Box of Fancy Stuff
 (@OGUID+9, 213076, 996, 64, 1, -1018.169, -2885.495, 19.63248, 4.688, 0, 0, 0, 1, -604800, 255, 1), -- Box of Fancy Stuff
-(@OGUID+10,213077, 996, 128, 1, -1018.169, -2885.495, 19.63248, 4.688, 0, 0, 0, 1, -604800, 255, 1); -- Box of Fancy Stuff
--- (@OGUID+1, 214854, 996, 3, 1, -1017.841, -3049.008, 13.82509, 4.71239, 0, 0, -0.7071068, 0.7071068, 86400, 255, 1), -- Jinyu Council Vortex Wall (Area: -Unknown-)
--- (@OGUID+2, 214853, 996, 3, 1, -1017.925, -3049.097, -6.989163, 4.71239, 0, 0, -0.7071068, 0.7071068, 86400, 255, 1), -- Jinyu Council Vortex (Area: -Unknown-)
--- (@OGUID+3, 214852, 996, 3, 1, -1017.925, -2911.348, -0.4573183, 4.71239, 0, 0, -0.7071068, 0.7071068, 86400, 255, 1), -- Lei Shi Vortex (Area: -Unknown-)
--- (@OGUID+4, 214851, 996, 3, 1, -1017.841, -2911.576, 20.35694, 4.71239, 0, 0, -0.7071068, 0.7071068, 86400, 255, 1), -- Lei Shi Vortex Wall (Area: -Unknown-)
--- (@OGUID+5, 214850, 996, 3, 1, -1017.925, -2771.996, 23.1714, 4.71239, 0, 0, -0.7071068, 0.7071068, 86400, 255, 1), -- Sha of Fear Vortex (Area: -Unknown-)
--- (@OGUID+6, 214849, 996, 3, 1, -1017.875, -2771.908, 39.1506, 4.71239, 0, 0, -0.7071068, 0.7071068, 86400, 255, 1), -- Sha of Fear Vortex Wall (Area: -Unknown-)
--- (@OGUID+6, 214498, 996, 3, 1, -1075.198, -2577.711, 15.828019, 1.725, 0, 0, 0.9832549, -0.1822356, 86400, 255, 1), -- Gazebo Vortices (Area: -Unknown-)
--- (@OGUID+7, 214498, 996, 3, 1, -1214.692, -2824.766, 33.12907, 3.508117, 0, 0, 0.9832549, -0.1822356, 86400, 255, 1), -- Gazebo Vortices (Area: -Unknown-)
--- (@OGUID+8, 214498, 996, 3, 1, -832.0063, -2745.444, 23.56371, 0.165805, 0, 0, 0.0828083, 0.9965655, 86400, 255, 1); -- Gazebo Vortices (Area: -Unknown-)
+(@OGUID+10,213077, 996, 128, 1, -1018.169, -2885.495, 19.63248, 4.688, 0, 0, 0, 1, -604800, 255, 1), -- Box of Fancy Stuff
+(@OGUID+11, 214854, 996, 120, 1, -1017.841, -3049.008, 13.82509, 4.71239, 0, 0, -0.7071068, 0.7071068, 86400, 255, 1), -- Jinyu Council Vortex Wall (Area: -Unknown-)
+(@OGUID+12, 214853, 996, 120, 1, -1017.925, -3049.097, -6.989163, 4.71239, 0, 0, -0.7071068, 0.7071068, 86400, 255, 1), -- Jinyu Council Vortex (Area: -Unknown-)
+(@OGUID+13, 214852, 996, 120, 1, -1017.925, -2911.348, -0.4573183, 4.71239, 0, 0, -0.7071068, 0.7071068, 86400, 255, 1), -- Lei Shi Vortex (Area: -Unknown-)
+(@OGUID+14, 214851, 996, 120, 1, -1017.841, -2911.576, 20.35694, 4.71239, 0, 0, -0.7071068, 0.7071068, 86400, 255, 1), -- Lei Shi Vortex Wall (Area: -Unknown-)
+(@OGUID+15, 214850, 996, 120, 1, -1017.925, -2771.996, 23.1714, 4.71239, 0, 0, -0.7071068, 0.7071068, 86400, 255, 1), -- Sha of Fear Vortex (Area: -Unknown-)
+(@OGUID+16, 214849, 996, 120, 1, -1017.875, -2771.908, 39.1506, 4.71239, 0, 0, -0.7071068, 0.7071068, 86400, 255, 1), -- Sha of Fear Vortex Wall (Area: -Unknown-)
+(@OGUID+17, 214498, 996, 120, 1, -1075.198, -2577.711, 15.828019, 1.725, 0, 0, 0.9832549, -0.1822356, 86400, 255, 1), -- Gazebo Vortices (Area: -Unknown-)
+(@OGUID+18, 214498, 996, 120, 1, -1214.692, -2824.766, 33.12907, 3.508117, 0, 0, 0.9832549, -0.1822356, 86400, 255, 1), -- Gazebo Vortices (Area: -Unknown-)
+(@OGUID+19, 214498, 996, 120, 1, -832.0063, -2745.444, 23.56371, 0.165805, 0, 0, 0.0828083, 0.9965655, 86400, 255, 1); -- Gazebo Vortices (Area: -Unknown-)
+
+
+UPDATE gameobject_template SET flags = flags | 4 WHERE entry BETWEEN 214849 AND 214854;
+UPDATE gameobject_template SET flags = flags | 4 WHERE entry = 214498;
 
 UPDATE creature SET spawnMask = 8 | 16 | 32 | 64 | 128  WHERE map = 996;
 -- UPDATE gameobject SET spawnMask = 8 | 16 | 32 | 64 | 128 WHERE map = 996;

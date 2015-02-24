@@ -219,7 +219,7 @@ bool IntroDone(InstanceScript* instance, Creature* me)
     if (!instance || !me)
         return false;
 
-    if (instance->GetData(INTRO_DONE) > 0)
+    if (instance->GetData(INTRO_DONE) == DONE)
         return true;
 
     std::list<Creature*> fear;
@@ -248,7 +248,7 @@ bool IntroDone(InstanceScript* instance, Creature* me)
 
     if (done && instance)
     {
-        instance->SetData(INTRO_DONE, 1);
+        instance->SetData(INTRO_DONE, DONE);
         return true;
     }
 
@@ -1494,7 +1494,7 @@ class spell_lightning_storm_aura : public SpellScriptLoader
         {
             PrepareAuraScript(spell_lightning_storm_aura_AuraScript);
 
-            void OnApply(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (GetSpellInfo()->Id != SPELL_LIGHTNING_STORM)
                     return;
@@ -1503,7 +1503,7 @@ class spell_lightning_storm_aura : public SpellScriptLoader
                     caster->CastSpell(caster, SPELL_LIGHTNING_STORM_FIRST, true);
             }
 
-            void OnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* caster = GetCaster())
                 {
@@ -1644,7 +1644,7 @@ class spell_corrupted_essence : public SpellScriptLoader
         {
             PrepareAuraScript(spell_corrupted_essence_AuraScript);
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const* /*aurEff*/)
             {
                 if (Unit* target = GetTarget())
                 {
@@ -1719,7 +1719,7 @@ class spell_superior_corrupted_essence : public SpellScriptLoader
         {
             PrepareAuraScript(spell_superior_corrupted_essence_AuraScript);
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const* /*aurEff*/)
             {
                 if (Unit* target = GetTarget())
                 {

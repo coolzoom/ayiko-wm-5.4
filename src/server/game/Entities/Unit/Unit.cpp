@@ -12177,8 +12177,8 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask)
         if (((*i)->GetMiscValue() & schoolMask) != 0 &&
         (*i)->GetSpellInfo()->EquippedItemClass == -1 &&
                                                             // -1 == any item class (not wand then)
-        (*i)->GetSpellInfo()->EquippedItemInventoryTypeMask == 0)
-                                                            // 0 == any inventory type (not wand then)
+        (*i)->GetSpellInfo()->EquippedItemInventoryTypeMask == -1)
+                                                            // -1 == any inventory type (not wand then)
             DoneAdvertisedBenefit += (*i)->GetAmount();
 
     if (GetTypeId() == TYPEID_PLAYER)
@@ -16624,13 +16624,6 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
         // Fix Drop charge for Blindsight
         if (HasAura(121152) && getClass() == CLASS_ROGUE && procSpell && procSpell->Id == 111240)
             RemoveAura(121153);
-
-        // Fix Drop charge for Fingers of Frost
-        if (getClass() == CLASS_MAGE && procSpell && (procSpell->Id == 30455 || procSpell->Id == 44572))
-        {
-            if (Aura *fingersOfFrost = GetAura(44544, GetGUID()))
-                fingersOfFrost->ModStackAmount(-1);
-        }
 
         // Cast Shadowy Apparitions when Shadow Word : Pain is crit
         if (procSpell && procSpell->Id == 589 && HasAura(78203) && procExtra & PROC_EX_CRITICAL_HIT)

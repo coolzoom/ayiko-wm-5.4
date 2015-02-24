@@ -298,6 +298,9 @@ class boss_lei_shi : public CreatureScript
                 if (me->HealthBelowPctDamaged(endCombatPct, damage))
                 {
                     damage = 0;
+
+                    EnterEvadeMode();
+
                     me->setFaction(35);
                     me->CastSpell(me, SPELL_LEI_SHI_TRANSFORM, true);
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -310,6 +313,7 @@ class boss_lei_shi : public CreatureScript
                     me->RemoveAura(SPELL_SCARY_FOG_STACKS);
                     me->RemoveAura(SPELL_BERSERK);
                     me->RemoveAllAreasTrigger();
+                    me->setRegeneratingHealth(false);
 
                     leiShiFreed = true;
                     Talk(TALK_DEFEATED);
@@ -743,7 +747,7 @@ public:
     {
         npc_lei_shi_reflectionAI(Creature* pCreature) : ScriptedAI(pCreature) {}
 
-        void DoAction(const int32 iAction)
+        void DoAction(const int32 iAction) override
         {
             if (iAction == ACTION_LEISHI_INTRO)
             {
@@ -751,7 +755,7 @@ public:
             }
         }
 
-        void UpdateAI(const uint32 uiDiff)
+        void UpdateAI(const uint32 uiDiff) override
         {
             events.Update(uiDiff);
 

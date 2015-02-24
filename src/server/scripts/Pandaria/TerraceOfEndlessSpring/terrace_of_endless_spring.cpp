@@ -118,7 +118,7 @@ class npc_apparition_of_fear : public CreatureScript
                 summons.DespawnAll();
 
                 if (pInstance)
-                    pInstance->SetData(INTRO_DONE, 0);
+                    pInstance->SetData(INTRO_DONE, NOT_STARTED);
             }
 
             void EnterCombat(Unit* /*attacker*/)
@@ -269,7 +269,7 @@ class npc_apparition_of_terror : public CreatureScript
                 summons.DespawnAll();
 
                 if (pInstance)
-                    pInstance->SetData(INTRO_DONE, 0);
+                    pInstance->SetData(INTRO_DONE, NOT_STARTED);
             }
 
             void EnterCombat(Unit* /*attacker*/)

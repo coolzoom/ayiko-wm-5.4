@@ -167,7 +167,7 @@ class npc_apparition_of_fear : public CreatureScript
                 }
 
                 if (done && pInstance)
-                    pInstance->SetData(INTRO_DONE, 1);
+                    pInstance->SetData(INTRO_DONE, DONE);
             }
 
             void UpdateAI(const uint32 diff)
@@ -317,7 +317,7 @@ class npc_apparition_of_terror : public CreatureScript
                 }
 
                 if (done && pInstance)
-                    pInstance->SetData(INTRO_DONE, 1);
+                    pInstance->SetData(INTRO_DONE, DONE);
             }
 
             void UpdateAI(const uint32 diff)
@@ -518,7 +518,7 @@ class spell_night_terrors_periodic : public SpellScriptLoader
         {
             PrepareAuraScript(spell_night_terrors_periodic_AuraScript);
 
-            void OnTick(AuraEffect const */*aurEff*/)
+            void OnTick(AuraEffect const* /*aurEff*/)
             {
                 if (Unit* caster = GetCaster())
                 {

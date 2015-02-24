@@ -39,20 +39,24 @@ enum eTypes
     TYPE_LEI_SHI,
     TYPE_SHA,
     TYPE_LEIS_HOPE,
-    MAX_TYPES,
+    TYPE_LEI_INTRO,
     INTRO_DONE,
+    MAX_TYPES,
 };
 
 enum eSpells
 {
     SPELL_RITUAL_OF_PURIFICATION    = 126848,
     SPELL_LEIS_HOPE                 = 129368,
+    SPELL_BERSERK                   = 26662,
 };
 
 enum eActions
 {
-    ACTION_START_TSULONG_WAYPOINT = 1,
-    ACTION_INTRO_FINISHED = 2
+    ACTION_START_TSULONG_WAYPOINT   = 1,
+    ACTION_INTRO_FINISHED           = 2,
+    ACTION_LEISHI_INTRO             = 4,
+    ACTION_SHA_INTRO                = 8
 };
 
 enum eCreatures
@@ -74,6 +78,7 @@ enum eCreatures
     NPC_LEI_SHI                     = 62983,
     NPC_ANIMATED_PROTECTOR          = 62995,
     NPC_LEI_SHI_HIDDEN              = 63099,
+    NPC_REFLECTION_OF_LEI_SHI       = 71095,
 
     // Sha of Fear
     NPC_SHA_OF_FEAR                 = 60999,
@@ -84,7 +89,8 @@ enum eCreatures
     NPC_APPARITION_OF_FEAR          = 64368,
     NPC_APPARITION_OF_TERROR        = 66100,
     NPC_NIGHT_TERRORS               = 64390,
-    NPC_NIGHT_TERROR_SUMMON         = 64393
+    NPC_NIGHT_TERROR_SUMMON         = 64393,
+    NPC_CORRUPTED_PROTECTOR         = 63275,
 };
 
 enum eGameObjects
@@ -94,8 +100,12 @@ enum eGameObjects
 
     GOB_WALL_OF_LEI_SHI         = 214852,
     GOB_LEI_SHIS_VORTEX         = 214851,
+
     GOB_LEI_SHI_CHEST_NORMAL    = 213076,
-    GOB_LEI_SHI_CHEST_HEROIC    = 213075
+    GOB_LEI_SHI_CHEST_HEROIC    = 213075,
+
+    GO_SHA_VORTEX               = 214850,
+    GO_SHA_VORTEX_WALL          = 214849
 };
 
 enum ePhases

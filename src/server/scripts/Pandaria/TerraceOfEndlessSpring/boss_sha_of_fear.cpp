@@ -333,6 +333,15 @@ class boss_sha_of_fear : public CreatureScript
 
                         break;
                     }
+                    case ACTION_SHA_INTRO:
+                        Talk(SAY_INTRO);
+
+                        if (GameObject* pVortex = ObjectAccessor::GetGameObject(*me, instance->GetData64(GO_SHA_VORTEX)))
+                            pVortex->SetGoState(GO_STATE_ACTIVE);
+
+                        if (GameObject* pVortexWall = ObjectAccessor::GetGameObject(*me, instance->GetData64(GO_SHA_VORTEX_WALL)))
+                            pVortexWall->SetGoState(GO_STATE_ACTIVE);
+                        break;
                     default:
                         break;
                 }

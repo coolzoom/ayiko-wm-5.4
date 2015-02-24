@@ -20,6 +20,15 @@
 #include "VMapFactory.h"
 #include "terrace_of_endless_spring.h"
 
+class isProtectorDeadPredicate
+{
+public:
+    bool operator()(Unit* target) const
+    {
+        return target && !target->IsAlive();
+    }
+};
+
 class instance_terrace_of_endless_spring : public InstanceMapScript
 {
     public:
@@ -38,6 +47,9 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
             uint32 m_auiEncounter[MAX_TYPES];
             std::string strSaveData;
 
+            std::list<Unit*> protectorList;
+            std::vector<Unit*> animatedList;
+
             bool ritualOfPurification;
             bool introDone;
 
@@ -52,13 +64,14 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
 
             // Lei Shi
             uint64 leiShiGuid;
+            uint64 leiShiReflectionGuid;
 
             // Sha of Fear
             uint64 shaOfFearGuid;
             uint64 pureLightTerraceGuid;
 
-            // Timers, old school style!
-            uint32 tsulongEventTimer;
+            uint64 shaVortexGuid;
+            uint64 shaVortexWallGuid;
 
             // Council's Vortex
             uint64 wallOfCouncilsVortexGuid;
@@ -87,11 +100,10 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                 tsulongGuid                 = 0;
 
                 leiShiGuid                  = 0;
+                leiShiReflectionGuid        = 0;
 
                 shaOfFearGuid               = 0;
                 pureLightTerraceGuid        = 0;
-
-                tsulongEventTimer           = 0;
 
                 wallOfCouncilsVortexGuid    = 0;
                 councilsVortexGuid          = 0;
@@ -126,12 +138,20 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                         break;
                     case NPC_LEI_SHI:
                         leiShiGuid = creature->GetGUID();
+                        instance->LoadGrid(creature->GetPositionX(), creature->GetPositionY());
                         break;
                     case NPC_SHA_OF_FEAR:
                         shaOfFearGuid = creature->GetGUID();
                         break;
                     case NPC_PURE_LIGHT_TERRACE:
                         pureLightTerraceGuid = creature->GetGUID();
+                        break;
+                    case NPC_CORRUPTED_PROTECTOR:
+                        if (creature->IsAlive())
+                            protectorList.push_back(creature);
+                        break;
+                    case NPC_ANIMATED_PROTECTOR:
+                        animatedList.push_back(creature);
                         break;
                     default:
                         break;
@@ -153,6 +173,12 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                         break;
                     case GOB_LEI_SHIS_VORTEX:
                         leiShisVortexGuid = go->GetGUID();
+                        break;
+                    case GO_SHA_VORTEX:
+                        shaVortexGuid = go->GetGUID();
+                        break;
+                    case GO_SHA_VORTEX_WALL:
+                        shaVortexWallGuid = go->GetGUID();
                         break;
                     case 212922:
                     case 212923:
@@ -205,12 +231,69 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                 {
                     switch (eventId)
                     {
-                    case 1:
+                    case 1: // Start Tsulong Movement
                         if (Creature* c = instance->GetCreature(GetData64(NPC_TSULONG)))
                         {
                             instance->LoadGrid(c->GetPositionX(), c->GetPositionY());
                             c->AI()->DoAction(ACTION_START_TSULONG_WAYPOINT);
                         }
+                        break;
+                    case 3: // Set Tsulong Invisible
+                        if (Creature* c = instance->GetCreature(GetData64(NPC_TSULONG)))
+                        {
+                            instance->LoadGrid(c->GetPositionX(), c->GetPositionY());
+                            c->SetPhaseMask(128, true);
+                        }
+                        break;
+                    case 4: // Make Lei Shi accessible
+                        if (Creature* c = instance->GetCreature(GetData64(NPC_LEI_SHI)))
+                        {
+                            instance->LoadGrid(c->GetPositionX(), c->GetPositionY());
+                            c->AI()->DoAction(ACTION_LEISHI_INTRO);
+                        }
+                        break;
+                    case 5: // 
+                        if (GameObject* pVortexWall = instance->GetGameObject(GOB_WALL_OF_COUNCILS_VORTEX))
+                        {
+                            pVortexWall->SetGoState(GO_STATE_ACTIVE);
+                        }
+                        if (GameObject* pVortex = instance->GetGameObject(GOB_COUNCILS_VORTEX))
+                        {
+                            pVortex->SetGoState(GO_STATE_ACTIVE);
+                        }
+                        break;
+                    case 6:
+                        if (Creature* asani = instance->GetCreature(ancientAsaniGuid))
+                            asani->AI()->DoAction(ACTION_INTRO_FINISHED);
+
+                        if (Creature* regail = instance->GetCreature(ancientRegailGuid))
+                            regail->AI()->DoAction(ACTION_INTRO_FINISHED);
+
+                        if (Creature* kaolan = instance->GetCreature(protectorKaolanGuid))
+                            kaolan->AI()->DoAction(ACTION_INTRO_FINISHED);
+                        break;
+                    case 7:
+                        if (Creature* c = instance->GetCreature(GetData64(NPC_SHA_OF_FEAR)))
+                        {
+                            instance->LoadGrid(c->GetPositionX(), c->GetPositionY());
+                            c->AI()->DoAction(ACTION_SHA_INTRO);
+
+                            for (auto const pUnit : animatedList)
+                                pUnit->AddObjectToRemoveList();
+                        }
+                        break;
+                    case 8:
+                        if (Creature* pLeiShi = instance->GetCreature(GetData64(NPC_LEI_SHI)))
+                        {
+                            instance->LoadGrid(pLeiShi->GetPositionX(), pLeiShi->GetPositionY());
+
+                            if (pLeiShi->GetPhaseMask() != 128)
+                                pLeiShi->SetPhaseMask(128, true);
+                        }
+                        protectorList.remove_if(isProtectorDeadPredicate());
+                        if (protectorList.empty())
+                            SetData(TYPE_LEI_INTRO, DONE);
+                        m_mEvents.ScheduleEvent(8, 10000);
                         break;
                     case 2:
                         Map::PlayerList const& lPlayers = instance->GetPlayers();
@@ -247,7 +330,7 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                         break;
                     case INTRO_DONE:
                     {
-                                       if (data > 0)
+                                       if (data == DONE)
                                        {
                                            Creature* asani = instance->GetCreature(ancientAsaniGuid);
                                            if (asani)
@@ -285,6 +368,20 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                             m_mEvents.ScheduleEvent(2, 200);
                         m_auiEncounter[type] = data;
                         break;
+                    case TYPE_LEI_INTRO:
+                        if (m_auiEncounter[type] == data)
+                            return;
+
+                        if (data == DONE)
+                        {
+                            if (Creature* pReflection = instance->GetCreature(leiShiReflectionGuid))
+                            {
+                                if (pReflection->AI())
+                                    pReflection->AI()->DoAction(ACTION_LEISHI_INTRO);
+                            }
+                        }
+                        m_auiEncounter[type] = data;
+                        break;
                     }
 
                     if (data >= DONE)
@@ -293,7 +390,7 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
 
                         std::ostringstream saveStream;
                         saveStream << m_auiEncounter[0] << ' ' << m_auiEncounter[1] << ' ' << m_auiEncounter[2] << ' '
-                            << m_auiEncounter[3] << m_auiEncounter[4];
+                            << m_auiEncounter[3] << ' ' << m_auiEncounter[4] << ' ' << m_auiEncounter[5] << ' ' << m_auiEncounter[6];
 
                         strSaveData = saveStream.str();
 
@@ -314,20 +411,45 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                 OUT_LOAD_INST_DATA(chrIn);
                 std::istringstream loadStream(chrIn);
 
-                loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3] >> m_auiEncounter[4];
+                loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3] >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6];
                 for (uint8 i = 0; i < MAX_TYPES; ++i)
                 if (m_auiEncounter[i] == IN_PROGRESS)                // Do not load an encounter as "In Progress" - reset it instead.
                     m_auiEncounter[i] = NOT_STARTED;
 
-                if (m_auiEncounter[TYPE_PROTECTORS] == DONE && m_auiEncounter[TYPE_TSULONG] != DONE)
+                if (m_auiEncounter[TYPE_PROTECTORS] == DONE)
                 {
-                    m_mEvents.ScheduleEvent(1, 200);
+                    if (m_auiEncounter[TYPE_TSULONG] == DONE)
+                        m_mEvents.ScheduleEvent(3, 200); // Set Tsulong Invisible
+                    else
+                        m_mEvents.ScheduleEvent(1, 200); // Reactivate Tsulong
                 }
 
                 if (m_auiEncounter[TYPE_LEIS_HOPE] == DONE && instance->IsHeroic())
                 {
-                    m_mEvents.ScheduleEvent(2, 200);
+                    m_mEvents.ScheduleEvent(2, 200); // Reapply Lei's Hope
                 }
+
+                if (m_auiEncounter[TYPE_LEI_INTRO] == DONE && m_auiEncounter[TYPE_LEI_SHI] != DONE)
+                {
+                    m_mEvents.ScheduleEvent(4, 200); // Activate Lei Shi
+                }
+
+                if (m_auiEncounter[INTRO_DONE] == DONE)
+                {
+                    m_mEvents.ScheduleEvent(5, 200); // Deactivate Protectors Vortex
+
+                    if (m_auiEncounter[TYPE_PROTECTORS] != DONE)
+                        m_mEvents.ScheduleEvent(6, 200); // Activate Protectors
+                }
+
+                if (m_auiEncounter[TYPE_LEI_SHI] == DONE)
+                {
+                    m_mEvents.ScheduleEvent(7, 200); // Deactivate Sha of Fear Vortex
+                }
+                else
+                
+                if (m_auiEncounter[TYPE_LEI_INTRO] != DONE)
+                    m_mEvents.ScheduleEvent(8, 100); // Check Lei Shi Protectors
 
                 OUT_LOAD_INST_DATA_COMPLETE;
             }
@@ -372,6 +494,8 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                         return tsulongGuid;
                     case NPC_LEI_SHI:
                         return leiShiGuid;
+                    case NPC_REFLECTION_OF_LEI_SHI:
+                        return leiShiReflectionGuid;
                     case NPC_SHA_OF_FEAR:
                         return shaOfFearGuid;
                     case NPC_PURE_LIGHT_TERRACE:
@@ -384,6 +508,10 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                         return wallOfLeiShisVortexGuid;
                     case GOB_LEI_SHIS_VORTEX:
                         return leiShisVortexGuid;
+                    case GO_SHA_VORTEX:
+                        return shaVortexGuid;
+                    case GO_SHA_VORTEX_WALL:
+                        return shaVortexWallGuid;
                     default:
                         break;
                 }

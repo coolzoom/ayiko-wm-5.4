@@ -1469,3 +1469,9 @@ REPLACE INTO gameobject_loot_template (entry, item, ChanceOrQuestChance, lootmod
 (@RAID_DIFF_25R + 62983, 86889, 0, 1, 2, 1, 1), -- Taoren, the Soul Burner
 (@RAID_DIFF_25R + 62983, 86890, 0, 1, 2, 1, 1), -- Terror in the Mists
 (@RAID_DIFF_25R + 62983, 86898, 0, 1, 2, 1, 1); -- Weaver's Cord of Eternal Autumn
+
+-- Releasing zone fixed
+DELETE FROM `game_graveyard_zone` WHERE `id` = 4149 AND `ghost_zone` IN (6006,6067);
+INSERT INTO `game_graveyard_zone` VALUES
+(4149,6006,0),
+(4149,6067,0);

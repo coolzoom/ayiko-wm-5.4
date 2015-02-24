@@ -15857,6 +15857,14 @@ uint32 Unit::GetPowerIndex(uint32 powerType) const
     if (GetTypeId() != TYPEID_PLAYER && powerType == POWER_ENERGY && getClass() == CLASS_ROGUE)
         return 0;
 
+    switch (GetEntry())
+    {
+        case 60849:// Jade Serpent Statue
+            if (powerType == POWER_MANA)
+                return 0;
+            break;
+    }
+
     return GetPowerIndexByClass(powerType, getClass());
 }
 

@@ -30,6 +30,7 @@ set(scripts_STAT_SRCS
   Pandaria/TempleOfTheJadeSerpent/boss_lorewalker_stonestep.cpp
   Pandaria/TempleOfTheJadeSerpent/boss_liu_flameheart.cpp
   Pandaria/TempleOfTheJadeSerpent/boss_sha_of_doubt.cpp
+  Pandaria/TempleOfTheJadeSerpent/temple_of_the_jade_serpent.h
 
   Pandaria/StormstoutBrewery/instance_stormstout_brewery.cpp
   Pandaria/StormstoutBrewery/stormstout_brewery.cpp

@@ -431,84 +431,91 @@ void WorldSession::SendLfgRoleChosen(ObjectGuid guid, uint8 roles)
 void WorldSession::SendLfgRoleCheckUpdate(const LfgRoleCheck* pRoleCheck)
 {
     ASSERT(pRoleCheck);
+
     LfgDungeonSet dungeons;
     if (pRoleCheck->rDungeonId)
         dungeons.insert(pRoleCheck->rDungeonId);
     else
         dungeons = pRoleCheck->dungeons;
 
-    ObjectGuid unkGuid = 0;
+    // calculate if role check initiated message needs to be displayed
+    bool isBeginning = pRoleCheck->state == LFG_ROLECHECK_INITIALITING ? true : false;
+    for (auto const &memberRole : pRoleCheck->roles)
+        if (memberRole.first != pRoleCheck->leader)
+            if (memberRole.second)
+            {
+                isBeginning = false;
+                break;
+            }
 
-    TC_LOG_DEBUG("network", "SMSG_LFG_ROLE_CHECK_UPDATE [" UI64FMTD "]", GetPlayer()->GetGUID());
-    WorldPacket data(SMSG_LFG_ROLE_CHECK_UPDATE, 4 + 1 + 1 + dungeons.size() * 4 + 1 + pRoleCheck->roles.size() * (8 + 1 + 4 + 1));
+    ObjectGuid bgQueueId = 0;           // name dumped from client
     ByteBuffer dataBuffer;
 
-    data.WriteBit(pRoleCheck->state == LFG_ROLECHECK_INITIALITING);
-    data.WriteBitSeq<5, 3, 6, 4>(unkGuid);
+    WorldPacket data(SMSG_LFG_ROLE_CHECK_UPDATE, 1 + 8 + 6 + 1 + 1 + dungeons.size() * 4 + 1 + pRoleCheck->roles.size() * (8 + 1 + 4 + 1));
+    data.WriteBit(isBeginning);
+    data.WriteBitSeq<5, 3, 6, 4>(bgQueueId);
     data.WriteBits(dungeons.size(), 22);
-    data.WriteBitSeq<0, 1>(unkGuid);
+    data.WriteBitSeq<0, 1>(bgQueueId);
     data.WriteBits(pRoleCheck->roles.size(), 21);
 
     if (!pRoleCheck->roles.empty())
     {
-        ObjectGuid guid = pRoleCheck->leader;
-        uint8 roles = pRoleCheck->roles.find(guid)->second;
-        Player* player = ObjectAccessor::FindPlayer(guid);
+        ObjectGuid leaderGuid = pRoleCheck->leader;
+        uint8 leaderRoleFlags = pRoleCheck->roles.find(leaderGuid)->second;
+        Player* leader = ObjectAccessor::FindPlayer(leaderGuid);
 
-        data.WriteBitSeq<7, 6>(guid);
-        data.WriteBit(roles > 0);
-        data.WriteBitSeq<4, 3, 1, 0, 2, 5>(guid);
+        data.WriteBitSeq<7, 6>(leaderGuid);
+        data.WriteBit(leaderRoleFlags);
+        data.WriteBitSeq<4, 3, 1, 0, 2, 5>(leaderGuid);
 
-        dataBuffer << uint32(roles);                                   // Roles
-        dataBuffer.WriteByteSeq<1>(guid);
-        dataBuffer << uint8(player ? player->getLevel() : 0);          // Level
-        dataBuffer.WriteByteSeq<3, 7, 4, 0, 5, 2, 6>(guid);
+        dataBuffer << uint32(leaderRoleFlags);
+        dataBuffer.WriteByteSeq<1>(leaderGuid);
+        dataBuffer << uint8(leader ? leader->getLevel() : 0);
+        dataBuffer.WriteByteSeq<3, 7, 4, 0, 5, 2, 6>(leaderGuid);
 
         for (LfgRolesMap::const_reverse_iterator it = pRoleCheck->roles.rbegin(); it != pRoleCheck->roles.rend(); ++it)
         {
             if (it->first == pRoleCheck->leader)
                 continue;
 
-            guid = it->first;
-            roles = it->second;
-            player = ObjectAccessor::FindPlayer(guid);
+            ObjectGuid memeberGuid = it->first;
+            uint8 memeberRoleFlags = it->second;
+            Player* memeber = ObjectAccessor::FindPlayer(memeberGuid);
 
-            data.WriteBitSeq<7, 6>(guid);
-            data.WriteBit(roles > 0);
-            data.WriteBitSeq<4, 3, 1, 0, 2, 5>(guid);
+            data.WriteBitSeq<7, 6>(memeberGuid);
+            data.WriteBit(memeberRoleFlags);
+            data.WriteBitSeq<4, 3, 1, 0, 2, 5>(memeberGuid);
 
-            dataBuffer << uint32(roles);                                   // Roles
-            dataBuffer.WriteByteSeq<1>(guid);
-            dataBuffer << uint8(player ? player->getLevel() : 0);          // Level
-            dataBuffer.WriteByteSeq<3, 7, 4, 0, 5, 2, 6>(guid);
+            dataBuffer << uint32(memeberRoleFlags);
+            dataBuffer.WriteByteSeq<1>(memeberGuid);
+            dataBuffer << uint8(memeber ? memeber->getLevel() : 0);
+            dataBuffer.WriteByteSeq<3, 7, 4, 0, 5, 2, 6>(memeberGuid);
         }
     }
 
-    data.WriteBitSeq<7, 2>(unkGuid);
+    data.WriteBitSeq<7, 2>(bgQueueId);
     data.FlushBits();
-    data.WriteByteSeq<1>(unkGuid);
 
+    data.WriteByteSeq<1>(bgQueueId);
     data.append(dataBuffer);
     data << uint8(1);
-
-    data.WriteByteSeq<3, 4, 0, 5, 6>(unkGuid);
-
+    data.WriteByteSeq<3, 4, 0, 5, 6>(bgQueueId);
     data << uint8(pRoleCheck->state);
-
-    data.WriteByteSeq<7>(unkGuid);
+    data.WriteByteSeq<7>(bgQueueId);
 
     if (!dungeons.empty())
     {
-        for (LfgDungeonSet::iterator it = dungeons.begin(); it != dungeons.end(); ++it)
+        for (auto dungeon : dungeons)
         {
-            LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(*it);
-            data << uint32(dungeon ? dungeon->Entry() : 0); // Dungeon
+            LFGDungeonEntry const* dungeonEntry = sLFGDungeonStore.LookupEntry(dungeon);
+            data << uint32(dungeonEntry ? dungeonEntry->Entry() : 0);
         }
     }
 
-    data.WriteByteSeq<2>(unkGuid);
-
+    data.WriteByteSeq<2>(bgQueueId);
     SendPacket(&data);
+
+    TC_LOG_DEBUG("network", "SMSG_LFG_ROLE_CHECK_UPDATE [" UI64FMTD "]", GetPlayer()->GetGUID());
 }
 
 void WorldSession::SendLfgJoinResult(uint64 guid_, const LfgJoinResultData& joinData)

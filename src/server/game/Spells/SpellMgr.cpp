@@ -6022,6 +6022,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 19386: // Wyvern Sting
                     spellInfo->Attributes |= SPELL_ATTR0_STOP_ATTACK_TARGET;
                     break;
+                case 122470: // Touch of Karma
+                    spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
+                    break;
                 default:
                     break;
             }

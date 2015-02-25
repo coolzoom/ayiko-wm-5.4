@@ -7460,6 +7460,15 @@ SpellCastResult Spell::CheckCasterAuras() const
         m_spellInfo->Id == 1850) && m_spellInfo->Id != 781) // THIS ... IS ... HACKYYYY !
         prevented_reason = SPELL_FAILED_PACIFIED;
 
+    // SPELL_PREVENTION_TYPE_UNK3 aka Prevention_type_silence_and_pacify?
+    if (m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_UNK3)
+    {
+        if (unitflag & UNIT_FLAG_SILENCED)
+            prevented_reason = SPELL_FAILED_SILENCED;
+        else if (unitflag & UNIT_FLAG_PACIFIED)
+            prevented_reason = SPELL_FAILED_PACIFIED;
+    }
+
     // Barkskin & Hex hotfix 4.3 patch http://eu.battle.net/wow/ru/blog/10037151
     if (m_spellInfo->Id == 22812 && m_caster->HasAura(51514))
         prevented_reason = SPELL_FAILED_PACIFIED;

@@ -23211,7 +23211,7 @@ void Player::ProhibitSpellSchool(SpellSchoolMask prohibitSchoolMask, uint32 cool
         if (spellInfo->Attributes & SPELL_ATTR0_DISABLED_WHILE_ACTIVE)
             continue;
 
-        if (spellInfo->PreventionType != SPELL_PREVENTION_TYPE_SILENCE)
+        if (spellInfo->PreventionType != SPELL_PREVENTION_TYPE_SILENCE && spellInfo->PreventionType != SPELL_PREVENTION_TYPE_UNK3)
             continue;
 
         SpellSchoolMask const spellSchoolMask = spellInfo->GetSchoolMask();

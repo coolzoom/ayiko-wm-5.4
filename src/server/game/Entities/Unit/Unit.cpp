@@ -6348,16 +6348,13 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                 }
                 case 44448: // Improved Hot Streak
                 {
-                    if (effIndex != 0 || !procSpell)
+                    if (!procSpell)
                         return false;
 
-                    if (!damage && !(procEx & PROC_EX_ABSORB))
+                    if (procSpell->IsAffectingArea() || procSpell->IsTargetingArea())
                         return false;
 
-                    if (procEx & PROC_EX_INTERNAL_DOT)
-                        return false;
-
-                    if (!procSpell->CanTriggerHotStreak())
+                    if (!(procSpell->GetSchoolMask() & SPELL_SCHOOL_MASK_FIRE))
                         return false;
 
                     if (procEx & PROC_EX_CRITICAL_HIT)
@@ -17615,16 +17612,7 @@ bool Unit::IsTriggeredAtSpellProcEvent(Unit* victim, Aura *aura, SpellInfo const
 
     // Check spellProcEvent data requirements
     if (!sSpellMgr->IsSpellProcEventCanTriggeredBy(spellProcEvent, EventProcFlag, procSpell, procFlag, procExtra, active))
-    {
-        // Hack Fix Backdraft can be triggered if damage are absorbed
-        if (spellProto && spellProto->Id == 117896 && procSpell && procSpell->Id == 17962 && procExtra && (procExtra & PROC_EX_ABSORB))
-            return true;
-        else if (spellProto && spellProto->Id == 44448 && procSpell &&
-            (procSpell->Id == 108853 || procSpell->Id == 11366 || procSpell->Id == 11129)) // Inferno Blast, Combustion and Pyroblast can Trigger Pyroblast!
-            return true;
-        else
-            return false;
-    }
+        return false;
 
     // In most cases req get honor or XP from kill
     if (EventProcFlag & PROC_FLAG_KILL && GetTypeId() == TYPEID_PLAYER)

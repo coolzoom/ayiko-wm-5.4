@@ -3830,26 +3830,6 @@ bool SpellInfo::IsLethalPoison() const
     return false;
 }
 
-bool SpellInfo::CanTriggerHotStreak() const
-{
-    switch (Id)
-    {
-        case 133:   // Fireball
-        case 2136:  // Fire Blast
-        case 2948:  // Scorch
-        case 11129: // Combustion
-        case 11366: // Pyroblast
-        case 30455: // Ice Lance
-        case 44614: // Frostfire Bolt
-        case 108853:// Inferno Blast
-            return true;
-        default:
-            break;
-    }
-
-    return false;
-}
-
 bool SpellInfo::IsCustomCalculated() const
 {
     switch (Id)

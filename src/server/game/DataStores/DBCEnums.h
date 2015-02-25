@@ -585,16 +585,13 @@ enum VehicleSeatFlagsB
 // CurrencyTypes.dbc
 enum CurrencyTypes
 {
-    CURRENCY_CATEGORY_MISCELLANEOUS         = 1,
-    CURRENCY_CATEGORY_PVP                   = 2,
-    CURRENCY_CATEGORY_UNUSED                = 3,
-    CURRENCY_CATEGORY_CLASSIC               = 4,
-    CURRENCY_CATEGORY_WOTLK                 = 21,
-    CURRENCY_CATEGORY_DUNGEON_AND_RAID      = 22,
-    CURRENCY_CATEGORY_BURNING_CRUSADE       = 23,
-    CURRENCY_CATEGORY_TEST                  = 41,
-    CURRENCY_CATEGORY_CATACLYSM             = 81,
-    CURRENCY_CATEGORY_ARCHAEOLOGY           = 82
+    CURRENCY_TYPE_CONQUEST_POINTS           = 390,
+    CURRENCY_TYPE_HONOR_POINTS              = 392,
+    CURRENCY_TYPE_JUSTICE_POINTS            = 395,
+    CURRENCY_TYPE_VALOR_POINTS              = 396,
+    CURRENCY_TYPE_CONQUEST_META_ARENA       = 483,
+    CURRENCY_TYPE_CONQUEST_META_RATED_BG    = 484,
+    CURRENCY_TYPE_CONQUEST_META_RANDOM_BG   = 692,
 };
 
 enum CurrencyCategories

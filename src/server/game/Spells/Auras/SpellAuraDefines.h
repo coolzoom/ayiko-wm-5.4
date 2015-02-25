@@ -465,7 +465,7 @@ enum AuraType
     SPELL_AURA_MOD_RATING_PCT                               = 405,  // SPELL_AURA_MOD_RATING_PCT
     SPELL_AURA_406                                          = 406,  // 5.0.5 unk aura
     SPELL_AURA_MOD_FEAR_2                                   = 407,  // SPELL_AURA_MOD_FEAR_2
-    SPELL_AURA_408                                          = 408,  // 5.0.5 unk aura
+    SPELL_AURA_PROC_FROM_SPELL                              = 408,  // 5.0.5 unk aura
     SPELL_AURA_409                                          = 409,  // 5.0.5 unk aura
     SPELL_AURA_410                                          = 410,  // 5.0.5 unk aura
     SPELL_AURA_MOD_CHARGES                                  = 411,  // SPELL_AURA_MOD_CHARGES

@@ -4362,6 +4362,8 @@ class npc_transcendence_spirit : public CreatureScript
                         break;
                 }
             }
+
+            void EnterEvadeMode() {}
         };
 
         CreatureAI* GetAI(Creature *creature) const

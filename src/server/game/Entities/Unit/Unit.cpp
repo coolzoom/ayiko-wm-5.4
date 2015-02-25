@@ -6337,6 +6337,18 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
         {
             switch (dummySpell->Id)
             {
+                case 12846: // Ignite
+                {
+                     if (!procSpell || !victim || effIndex != 0)
+                         return false;
+
+                     triggered_spell_id = 12654;
+                     SpellInfo const* igniteDot = sSpellMgr->GetSpellInfo(triggered_spell_id);
+                     basepoints0 = int32(CalculatePct(damage, triggerAmount));
+                     basepoints0 += victim->GetRemainingPeriodicAmount(GetGUID(), triggered_spell_id, SPELL_AURA_PERIODIC_DAMAGE).total();
+                     basepoints0 /= igniteDot->GetMaxTicks();
+                     break;
+                }
                 case 37424: // Incanter's Regalia set (add trigger chance to Mana Shield)
                 {
                     if (GetTypeId() != TYPEID_PLAYER)

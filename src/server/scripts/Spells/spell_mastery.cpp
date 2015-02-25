@@ -126,60 +126,6 @@ class spell_mastery_blood_shield : public SpellScriptLoader
         }
 };
 
-// Called by 133 - Fireball, 44614 - Frostfire Bolt, 108853 - Inferno Blast, 2948 - Scorch and 11366 - Pyroblast
-// 12846 - Mastery : Ignite
-class spell_mastery_ignite : public SpellScriptLoader
-{
-    public:
-        spell_mastery_ignite() : SpellScriptLoader("spell_mastery_ignite") { }
-
-        class spell_mastery_ignite_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_mastery_ignite_SpellScript);
-
-            void HandleAfterHit()
-            {
-                if (Unit* caster = GetCaster())
-                {
-                    if (Unit* target = GetHitUnit())
-                    {
-                        if (caster->GetTypeId() == TYPEID_PLAYER && caster->HasAura(12846) && caster->getLevel() >= 80)
-                        {
-                            uint32 procSpellId = GetSpellInfo()->Id ? GetSpellInfo()->Id : 0;
-                            if (procSpellId != MASTERY_SPELL_IGNITE)
-                            {
-                                float value = caster->GetFloatValue(PLAYER_MASTERY) * 1.5f / 100.0f;
-
-                                int32 bp = int32(GetHitDamage() * value);
-                                // Add remaining value
-                                if (auto igniteEff = target->GetAuraEffect(MASTERY_SPELL_IGNITE, EFFECT_0, caster->GetGUID()))
-                                {
-                                    int32 igniteTick = igniteEff->GetAmount();
-                                    if (!igniteEff->GetTickNumber())
-                                        igniteTick *= 2;
-                                    bp += igniteTick;
-                                }
-
-                                bp /= 2;
-                                caster->CastCustomSpell(target, MASTERY_SPELL_IGNITE, &bp, NULL, NULL, true);
-                            }
-                        }
-                    }
-                }
-            }
-
-            void Register()
-            {
-                AfterHit += SpellHitFn(spell_mastery_ignite_SpellScript::HandleAfterHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_mastery_ignite_SpellScript();
-        }
-};
-
 // Called by 35395 - Crusader Strike, 53595 - Hammer of the Righteous, 24275 - Hammer of Wrath, 85256 - Templar's Verdict and 53385 - Divine Storm
 // 76672 - Mastery : Hand of Light
 class spell_mastery_hand_of_light : public SpellScriptLoader
@@ -326,7 +272,6 @@ void AddSC_mastery_spell_scripts()
 {
     new spell_mastery_shield_discipline();
     new spell_mastery_blood_shield();
-    new spell_mastery_ignite();
     new spell_mastery_hand_of_light();
     new spell_mastery_elemental_overload();
 }

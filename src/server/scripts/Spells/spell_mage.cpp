@@ -2048,6 +2048,50 @@ public:
     }
 };
 
+// Frozen orb target filter
+class spell_mage_orb_filter : public SpellScriptLoader
+{
+public:
+    spell_mage_orb_filter() : SpellScriptLoader("spell_mage_orb_filter") { }
+
+    class spell_mage_orb_filter_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_mage_orb_filter_SpellScript);
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            Unit* caster = GetCaster();
+            Unit* owner = caster->GetOwner();
+            if (!owner)
+                return;
+
+            if (Unit* target = GetHitUnit())
+            {
+                caster->CastSpell(target, 84721, true, NULL, NULL, owner->GetGUID());
+                // After hitting a target periodc timer has to be changed to 1 second
+                if (AuraEffect* aura = GetCaster()->GetAuraEffect(84717, EFFECT_0))
+                    aura->SetPeriodicTimer(GetSpellInfo()->Effects[EFFECT_0].BasePoints);
+
+                if (!caster->HasAura(82736))
+                    caster->CastSpell(caster, 82736);
+
+                if (roll_chance_i(15))
+                    owner->CastSpell(owner, 44544, true);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_mage_orb_filter_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_mage_orb_filter_SpellScript();
+    }
+};
+
 
 void AddSC_mage_spell_scripts()
 {
@@ -2092,4 +2136,5 @@ void AddSC_mage_spell_scripts()
     new spell_mastery_icicles_trigger();
     new spell_mastery_icicles_periodic();
     new spell_mage_blizzard();
+    new spell_mage_orb_filter();
 }

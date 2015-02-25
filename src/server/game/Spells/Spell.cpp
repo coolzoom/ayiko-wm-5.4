@@ -3874,6 +3874,10 @@ void Spell::cast(bool skipCheck)
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
+        // Remove spell mods after cast
+        if ((m_spellInfo->Speed || m_delayMoment) && !m_spellInfo->IsChanneled())
+            m_caster->ToPlayer()->RemoveSpellMods(*this);
+
         m_caster->ToPlayer()->SetSpellModTakingSpell(this, false);
         //Clear spell cooldowns after every spell is cast if .cheat cooldown is enabled.
         if (m_caster->ToPlayer()->GetCommandStatus(CHEAT_COOLDOWN))

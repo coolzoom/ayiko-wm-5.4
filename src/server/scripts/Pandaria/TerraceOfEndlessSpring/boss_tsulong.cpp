@@ -195,9 +195,10 @@ class boss_tsulong : public CreatureScript
                 if (hasBeenDefeated)
                     return;
 
+                
                 if (instance)
                 {
-                    if (instance->GetData(DATA_PROTECTORS) == DONE && instance->GetData(DATA_TSULONG) != DONE)
+                    if (instance->GetData(TYPE_PROTECTORS) == DONE)
                     {
                         phase = PHASE_NIGHT;
                         me->SetDisplayId(DISPLAY_TSULON_NIGHT);
@@ -457,7 +458,6 @@ class boss_tsulong : public CreatureScript
                 CreatureAI::EnterEvadeMode();
 
                 me->GetMotionMaster()->Clear();
-                me->GetMotionMaster()->MoveIdle();
 
                 if (!hasBeenDefeated)
                 {
@@ -482,44 +482,40 @@ class boss_tsulong : public CreatureScript
                         }
                     }
                 }
+
                 events.Update(diff);
 
-                switch (events.ExecuteEvent())
                 {
-                case EVENT_BERSERK:
-                    DoCast(me, SPELL_BERSERK, true);
-                    break;
-                }
-
-                if (phase == PHASE_FLY)
-                {
-                    switch (events.ExecuteEvent())
+                    if (phase == PHASE_FLY)
                     {
-                    case EVENT_FLY:
-                        me->setActive(true);
-                        me->UpdateObjectVisibility(true);
-                        me->setFaction(FACTION_NIGHT);
-                        me->SetReactState(REACT_PASSIVE);
-                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
-                        me->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
-                        me->SetDisplayId(DISPLAY_TSULON_NIGHT);
-                        me->GetMotionMaster()->MovePoint(WAYPOINT_FIRST, -1018.10f, -2947.431f, 50.12f);
-                        inFly = true;
-                        break;
-                    case EVENT_WAYPOINT_FIRST:
-                        me->GetMotionMaster()->Clear();
-                        me->GetMotionMaster()->MovePoint(WAYPOINT_SECOND, -1017.841f, -3049.621f, 12.823f);
-                        break;
-                    case EVENT_WAYPOINT_SECOND:
-                        me->SetHomePosition(-1017.841f, -3049.621f, 12.823f, 4.72f);
-                        me->SetReactState(REACT_AGGRESSIVE);
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
-                        inFly = false;
-                        events.SetPhase(PHASE_NONE);
-                        phase = PHASE_NONE;
-                        break;
-                    default:
-                        break;
+                        switch (events.ExecuteEvent())
+                        {
+                        case EVENT_FLY:
+                            me->setActive(true);
+                            me->UpdateObjectVisibility(true);
+                            me->setFaction(FACTION_NIGHT);
+                            me->SetReactState(REACT_PASSIVE);
+                            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                            me->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
+                            me->SetDisplayId(DISPLAY_TSULON_NIGHT);
+                            me->GetMotionMaster()->MovePoint(WAYPOINT_FIRST, -1018.10f, -2947.431f, 50.12f);
+                            inFly = true;
+                            break;
+                        case EVENT_WAYPOINT_FIRST:
+                            me->GetMotionMaster()->Clear();
+                            me->GetMotionMaster()->MovePoint(WAYPOINT_SECOND, -1017.841f, -3049.621f, 12.823f);
+                            break;
+                        case EVENT_WAYPOINT_SECOND:
+                            me->SetHomePosition(-1017.841f, -3049.621f, 12.823f, 4.72f);
+                            me->SetReactState(REACT_AGGRESSIVE);
+                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                            inFly = false;
+                            events.SetPhase(PHASE_NONE);
+                            phase = PHASE_NONE;
+                            break;
+                        default:
+                            break;
+                        }
                     }
                 }
 
@@ -533,6 +529,9 @@ class boss_tsulong : public CreatureScript
 
                     switch (events.ExecuteEvent())
                     {
+                        case EVENT_BERSERK:
+                            DoCast(me, SPELL_BERSERK, true);
+                            break;
                         case EVENT_SWITCH_TO_NIGHT_PHASE:
                             //me->SetDisplayId(DISPLAY_TSULON_NIGHT);
                             me->setFaction(FACTION_NIGHT);

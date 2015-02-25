@@ -619,7 +619,29 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
             castItem = caster->ToPlayer()->GetItemByGuid(GetBase()->GetCastItemGUID());
         }
 
-        amount = m_spellInfo->Effects[m_effIndex].CalcValue(caster, &m_baseAmount, GetBase()->GetOwner()->ToUnit(), castItem);
+        if (m_spellInfo->AttributesEx8 & SPELL_ATTR8_MASTERY_SPECIALIZATION && !G3D::fuzzyEq(GetSpellEffectInfo().BonusMultiplier, 0.f))
+        {
+            if (caster && caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                int32 baseMastery = 0;
+                Unit::AuraEffectList const& masteriesAuras = caster->GetAuraEffectsByType(SPELL_AURA_MASTERY);
+                for (Unit::AuraEffectList::const_iterator i = masteriesAuras.begin(); i != masteriesAuras.end(); ++i)
+                    baseMastery += (*i)->GetAmount();
+
+                //now we need the points earned by the player itself (caster)
+                float points = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+
+                //Compute the whole data and set it
+                float masteryTotal = (float(baseMastery) + points) * GetSpellEffectInfo().BonusMultiplier;
+                amount = (int32)masteryTotal;
+
+                // Update the player visual (round it to upper decimal)
+                if (GetSpellEffectInfo().BonusMultiplier)
+                    caster->ToPlayer()->SetFloatValue(PLAYER_MASTERY, masteryTotal / GetSpellEffectInfo().BonusMultiplier);
+            }
+        }
+        else
+            amount = m_spellInfo->Effects[m_effIndex].CalcValue(caster, &m_baseAmount, GetBase()->GetOwner()->ToUnit(), castItem);
     }
 
     // check item enchant aura cast

@@ -325,6 +325,7 @@ class boss_ancient_regail : public CreatureScript
             {
                 if (pInstance)
                 {
+
                     StartProtectors(pInstance, me, attacker);
                     pInstance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                     DoZoneInCombat();
@@ -333,6 +334,7 @@ class boss_ancient_regail : public CreatureScript
                     if (me->GetMap()->IsHeroic())
                         if (Creature* minionController = pInstance->instance->GetCreature(pInstance->GetData64(NPC_MINION_OF_FEAR_CONTROLLER)))
                             minionController->AI()->DoAction(ACTION_INIT_MINION_CONTROLLER);
+
                 }
             }
 

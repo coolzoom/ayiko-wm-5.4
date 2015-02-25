@@ -1416,7 +1416,7 @@ void LFGMgr::UpdateRoleCheck(uint64 gguid, uint64 guid /* = 0 */, uint8 roles /*
         }
 
         team = uint8(plrg->GetTeam());
-        if (!sendRoleChosen)
+        if (sendRoleChosen)
             plrg->GetSession()->SendLfgRoleChosen(guid, roles);
 
         plrg->GetSession()->SendLfgRoleCheckUpdate(roleCheck);

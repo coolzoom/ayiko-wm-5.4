@@ -248,7 +248,7 @@ bool IntroDone(InstanceScript* instance, Creature* me)
 
     if (done && instance)
     {
-        instance->SetData(INTRO_DONE, DONE);
+        //instance->SetData(INTRO_DONE, DONE);
         return true;
     }
 
@@ -484,7 +484,7 @@ class boss_ancient_regail : public CreatureScript
                 if (!IntroDone(pInstance, me))
                 {
                     me->SetReactState(REACT_PASSIVE);
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_LOOTING);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_LOOTING);
 
                     if (GameObject* vortex = pInstance->instance->GetGameObject(pInstance->GetData64(GOB_COUNCILS_VORTEX)))
                     {
@@ -772,7 +772,7 @@ class boss_ancient_asani : public CreatureScript
                 if (!IntroDone(pInstance, me))
                 {
                     me->SetReactState(REACT_PASSIVE);
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_LOOTING);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_LOOTING);
 
                     if (GameObject* vortex = pInstance->instance->GetGameObject(pInstance->GetData64(GOB_COUNCILS_VORTEX)))
                     {
@@ -914,6 +914,7 @@ class boss_protector_kaolan : public CreatureScript
                 summons.Despawn(summon);
             }
 
+            /*
             void MoveInLineOfSight(Unit* who)
             {
                 if (IntroDone(pInstance, me) && !introDone && who->GetTypeId() == TYPEID_PLAYER)
@@ -921,7 +922,7 @@ class boss_protector_kaolan : public CreatureScript
                     Talk(TALK_INTRO);
                     introDone = true;
                 }
-            }
+            }*/
 
             void KilledUnit(Unit* who)
             {
@@ -1059,7 +1060,7 @@ class boss_protector_kaolan : public CreatureScript
                 if (!IntroDone(pInstance, me))
                 {
                     me->SetReactState(REACT_PASSIVE);
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_LOOTING);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_LOOTING);
 
                     if (GameObject* vortex = pInstance->instance->GetGameObject(pInstance->GetData64(GOB_COUNCILS_VORTEX)))
                     {

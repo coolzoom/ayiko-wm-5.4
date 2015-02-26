@@ -6337,6 +6337,18 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
         {
             switch (dummySpell->Id)
             {
+                case 12846: // Ignite
+                {
+                     if (!procSpell || !victim || effIndex != 0)
+                         return false;
+
+                     triggered_spell_id = 12654;
+                     SpellInfo const* igniteDot = sSpellMgr->GetSpellInfo(triggered_spell_id);
+                     basepoints0 = int32(CalculatePct(damage, triggerAmount));
+                     basepoints0 += victim->GetRemainingPeriodicAmount(GetGUID(), triggered_spell_id, SPELL_AURA_PERIODIC_DAMAGE).total();
+                     basepoints0 /= igniteDot->GetMaxTicks();
+                     break;
+                }
                 case 37424: // Incanter's Regalia set (add trigger chance to Mana Shield)
                 {
                     if (GetTypeId() != TYPEID_PLAYER)
@@ -6348,16 +6360,13 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                 }
                 case 44448: // Improved Hot Streak
                 {
-                    if (effIndex != 0 || !procSpell)
+                    if (!procSpell)
                         return false;
 
-                    if (!damage && !(procEx & PROC_EX_ABSORB))
+                    if (procSpell->IsAffectingArea() || procSpell->IsTargetingArea())
                         return false;
 
-                    if (procEx & PROC_EX_INTERNAL_DOT)
-                        return false;
-
-                    if (!procSpell->CanTriggerHotStreak())
+                    if (!(procSpell->GetSchoolMask() & SPELL_SCHOOL_MASK_FIRE))
                         return false;
 
                     if (procEx & PROC_EX_CRITICAL_HIT)
@@ -11759,9 +11768,6 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
         AuraEffectList const& mModDamagePercentDone = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
         for (AuraEffectList::const_iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
         {
-            if (spellProto->EquippedItemClass == -1 && (*i)->GetSpellInfo()->EquippedItemClass != -1)    //prevent apply mods from weapon specific case to non weapon specific spells (Example: thunder clap and two-handed weapon specialization)
-                continue;
-
             if ((*i)->GetMiscValue() & spellProto->GetSchoolMask())
             {
                 // Incarnation : Chosen of Elune
@@ -12180,8 +12186,8 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask)
         if (((*i)->GetMiscValue() & schoolMask) != 0 &&
         (*i)->GetSpellInfo()->EquippedItemClass == -1 &&
                                                             // -1 == any item class (not wand then)
-        (*i)->GetSpellInfo()->EquippedItemInventoryTypeMask == 0)
-                                                            // 0 == any inventory type (not wand then)
+        (*i)->GetSpellInfo()->EquippedItemInventoryTypeMask == -1)
+                                                            // -1 == any inventory type (not wand then)
             DoneAdvertisedBenefit += (*i)->GetAmount();
 
     if (GetTypeId() == TYPEID_PLAYER)
@@ -15860,6 +15866,14 @@ uint32 Unit::GetPowerIndex(uint32 powerType) const
     if (GetTypeId() != TYPEID_PLAYER && powerType == POWER_ENERGY && getClass() == CLASS_ROGUE)
         return 0;
 
+    switch (GetEntry())
+    {
+        case 60849:// Jade Serpent Statue
+            if (powerType == POWER_MANA)
+                return 0;
+            break;
+    }
+
     return GetPowerIndexByClass(powerType, getClass());
 }
 
@@ -16619,13 +16633,6 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
         // Fix Drop charge for Blindsight
         if (HasAura(121152) && getClass() == CLASS_ROGUE && procSpell && procSpell->Id == 111240)
             RemoveAura(121153);
-
-        // Fix Drop charge for Fingers of Frost
-        if (getClass() == CLASS_MAGE && procSpell && (procSpell->Id == 30455 || procSpell->Id == 44572))
-        {
-            if (Aura *fingersOfFrost = GetAura(44544, GetGUID()))
-                fingersOfFrost->ModStackAmount(-1);
-        }
 
         // Cast Shadowy Apparitions when Shadow Word : Pain is crit
         if (procSpell && procSpell->Id == 589 && HasAura(78203) && procExtra & PROC_EX_CRITICAL_HIT)
@@ -17617,16 +17624,7 @@ bool Unit::IsTriggeredAtSpellProcEvent(Unit* victim, Aura *aura, SpellInfo const
 
     // Check spellProcEvent data requirements
     if (!sSpellMgr->IsSpellProcEventCanTriggeredBy(spellProcEvent, EventProcFlag, procSpell, procFlag, procExtra, active))
-    {
-        // Hack Fix Backdraft can be triggered if damage are absorbed
-        if (spellProto && spellProto->Id == 117896 && procSpell && procSpell->Id == 17962 && procExtra && (procExtra & PROC_EX_ABSORB))
-            return true;
-        else if (spellProto && spellProto->Id == 44448 && procSpell &&
-            (procSpell->Id == 108853 || procSpell->Id == 11366 || procSpell->Id == 11129)) // Inferno Blast, Combustion and Pyroblast can Trigger Pyroblast!
-            return true;
-        else
-            return false;
-    }
+        return false;
 
     // In most cases req get honor or XP from kill
     if (EventProcFlag & PROC_FLAG_KILL && GetTypeId() == TYPEID_PLAYER)

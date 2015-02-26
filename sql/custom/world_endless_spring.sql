@@ -1482,3 +1482,6 @@ DELETE FROM `gameobject` WHERE `id`=214525;
 INSERT INTO `gameobject` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`spawntimesecs`,`animprogress`,`state`,`isActive`,`protect_anti_doublet`) VALUES
 (6609460, 214525, 996, 0, 0, 120, 1, -1021.25, -3157.25, 30.7474, 1.5719, 0, 0, 0, 1, 86400, 255, 1, 0, null),
 (@OGUID +20, 214525, 870, 0, 0, 1, 1, 957.689, -52.7766, 514.299, 4.088, 0, 0, 0.890113, -0.45574, 86400, 255, 1, 0, null);
+
+-- 10/25 Heroic Raid Closed
+UPDATE `access_requirement` SET `level_min` = 91 WHERE `mapId` = 996 AND `difficulty` IN (5,6);

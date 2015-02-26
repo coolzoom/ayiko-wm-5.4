@@ -19,6 +19,7 @@
 #include "InstanceScript.h"
 #include "VMapFactory.h"
 #include "terrace_of_endless_spring.h"
+#include "Log.h"
 
 class isProtectorDeadPredicate
 {
@@ -201,23 +202,45 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                 }
             }
 
+            void RewardCurrencyForPlayers()
+            {
+                Map::PlayerList const &lPlayers = instance->GetPlayers();
+                for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+                {
+                    if (Player * const player = itr->GetSource())
+                    {
+                        int32 const gain = player->ModifyCurrency(CURRENCY_TYPE_VALOR_POINTS, 400);
+                    }
+                }
+            }
+
             bool SetBossState(uint32 id, EncounterState state)
             {
                 if (!InstanceScript::SetBossState(id, state))
                     return false;
 
                 if (id == DATA_PROTECTORS && state == DONE)
+                {
                     if (Creature* c = instance->GetCreature(GetData64(NPC_TSULONG)))
                     {
                         instance->LoadGrid(c->GetPositionX(), c->GetPositionY());
                         c->AI()->DoAction(ACTION_START_TSULONG_WAYPOINT);
                     }
 
+                    RewardCurrencyForPlayers();
+                }
+
                 if (id == DATA_TSULONG && state == DONE)
+                {
                     DoRespawnGameObject(tsulongChestGUID, DAY);
+                    RewardCurrencyForPlayers();
+                }
 
                 if (id == DATA_LEI_SHI && state == DONE)
+                {
                     DoRespawnGameObject(leishiChestsGUID, DAY);
+                    RewardCurrencyForPlayers();
+                }
 
                 if (id < MAX_TYPES && state == DONE)
                     SetData(id, (uint32)state);
@@ -248,7 +271,7 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                         }
                         break;
                     case 4: // Make Lei Shi accessible
-                        if (Creature* c = instance->GetCreature(GetData64(NPC_LEI_SHI)))
+                        if (Creature* c = instance->GetCreature(GetData64(leiShiGuid)))
                         {
                             instance->LoadGrid(c->GetPositionX(), c->GetPositionY());
                             c->AI()->DoAction(ACTION_LEISHI_INTRO);
@@ -275,23 +298,38 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                             kaolan->AI()->DoAction(ACTION_INTRO_FINISHED);
                         break;
                     case 7:
+                        for (auto const pUnit : animatedList)
+                            pUnit->AddObjectToRemoveList();
+
+                        if (Creature* leiShi = instance->GetCreature(leiShiGuid))
+                        {
+                            leiShi->setFaction(35);
+                            leiShi->SetVisible(false);
+
+                            if (Creature* leiShiReflection = instance->GetCreature(leiShiReflectionGuid))
+                            {
+                                leiShiReflection->SetVisible(false);
+                            }
+
+                            if (GameObject* pVortex = instance->GetGameObject(leiShisVortexGuid))
+                                pVortex->SetGoState(GO_STATE_ACTIVE);
+
+                            if (GameObject* pVortexWall = instance->GetGameObject(wallOfLeiShisVortexGuid))
+                                pVortexWall->SetGoState(GO_STATE_ACTIVE);
+                        }
+
                         if (Creature* c = instance->GetCreature(shaOfFearGuid))
                         {
                             instance->LoadGrid(c->GetPositionX(), c->GetPositionY());
                             c->AI()->DoAction(ACTION_SHA_INTRO);
 
-                            for (auto const pUnit : animatedList)
-                                pUnit->AddObjectToRemoveList();
                         }
                         break;
                     case 8:
                         m_mEvents.ScheduleEvent(8, 4000);
-                        if (Creature* pLeiShi = instance->GetCreature(GetData64(NPC_LEI_SHI)))
+                        if (Creature* pLeiShi = instance->GetCreature(leiShiGuid))
                         {
-                            instance->LoadGrid(pLeiShi->GetPositionX(), pLeiShi->GetPositionY());
-
-                            if (pLeiShi->GetPhaseMask() != 128)
-                                pLeiShi->SetPhaseMask(128, true);
+                            pLeiShi->SetPhaseMask(128, true);
                         }
                         if (protectorList.empty())
                             SetData(TYPE_LEI_INTRO, DONE);
@@ -325,6 +363,8 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
 
             void SetData(uint32 type, uint32 data)
             {
+                printf("SetData Called, type %u, data %u", type, data);
+
                 if (type >= MAX_TYPES)
                 {
                     switch (type)
@@ -382,7 +422,7 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                                 kaolan->AI()->DoAction(ACTION_INTRO_FINISHED);
                         }
 
-                        introDone = data > 0;
+                        introDone = data == DONE;
                         m_auiEncounter[type] = data;
                         break;
                     }
@@ -430,16 +470,19 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                 if (m_auiEncounter[TYPE_LEIS_HOPE] == DONE && instance->IsHeroic())
                 {
                     m_mEvents.ScheduleEvent(2, 200); // Reapply Lei's Hope
+                    printf("Scheduled event 2 Reapply Lei's Hope \n");
                 }
 
                 if (m_auiEncounter[TYPE_LEI_INTRO] == DONE && m_auiEncounter[TYPE_LEI_SHI] != DONE)
                 {
                     m_mEvents.ScheduleEvent(4, 200); // Activate Lei Shi
+                    printf("Scheduled event 4 Activate Lei Shi \n");
                 }
 
                 if (m_auiEncounter[INTRO_DONE] == DONE)
                 {
                     m_mEvents.ScheduleEvent(5, 200); // Deactivate Protectors Vortex
+                    printf("Scheduled event 5 Deactivate Protectors vortex \n");
 
                     if (m_auiEncounter[TYPE_PROTECTORS] != DONE)
                         m_mEvents.ScheduleEvent(6, 200); // Activate Protectors
@@ -448,10 +491,14 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                 if (m_auiEncounter[TYPE_LEI_SHI] == DONE)
                 {
                     m_mEvents.ScheduleEvent(7, 200); // Deactivate Sha of Fear Vortex
+                    printf("Scheduled event 7 Deactivate Sha Vortex \n");
                 }
                 
                 if (m_auiEncounter[TYPE_LEI_INTRO] != DONE)
+                {
                     m_mEvents.ScheduleEvent(8, 100); // Check Lei Shi Protectors
+                    printf("Scheduled event 8 Check Lei Shi Protectors \n");
+                }
 
                 OUT_LOAD_INST_DATA_COMPLETE;
             }

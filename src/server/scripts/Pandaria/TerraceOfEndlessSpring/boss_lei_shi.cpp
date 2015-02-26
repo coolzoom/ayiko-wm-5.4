@@ -235,6 +235,8 @@ class boss_lei_shi : public CreatureScript
                         if (pSha->AI())
                             pSha->AI()->DoAction(ACTION_SHA_INTRO);
                         me->SetPhaseMask(128, true);
+                        events.Reset();
+                        me->GetMotionMaster()->MoveIdle();
                     }
                 }
             }
@@ -419,8 +421,8 @@ class boss_lei_shi : public CreatureScript
                                 protector->CastSpell(protector, SPELL_PROTECT_VISUAL, true);
                                 protector->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_IMMUNE_TO_PC);
 
-                                if (Unit* target = protector->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f))
-                                    protector->AI()->AttackStart(target);
+                                if (protector->AI())
+                                    protector->AI()->DoZoneInCombat();
 
                                 ++protectorsActivated;
                             }
@@ -751,6 +753,7 @@ public:
         {
             if (iAction == ACTION_LEISHI_INTRO)
             {
+                me->ClearUnitState(UNIT_STATE_STUNNED);
                 events.ScheduleEvent(EVENT_RIPPLE_1, 2000);
             }
         }

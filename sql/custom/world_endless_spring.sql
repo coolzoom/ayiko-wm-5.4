@@ -344,8 +344,9 @@ INSERT INTO spell_target_position (id, effIndex, target_map, target_position_x, 
 
 UPDATE creature_template SET modelid1 = 37285, flags_extra = 0 WHERE entry = 65736;
 
-DELETE FROM creature_template_aura WHERE entry IN (65691, 65736);
+DELETE FROM creature_template_aura WHERE entry IN (65691, 65736, 60999);
 INSERT INTO creature_template_aura (entry, aura) VALUES
+(60999, 122452), -- Energy Drain
 (65691, 129187), -- Sha Globe
 (65736, 120216); -- Return to the Terrace
 
@@ -354,9 +355,9 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 (13, 1, 117866, 0, 0, 31, 0, 4, 0, 0, 0, 0, 0, '', 'wall of Light - target players'),
 (13, 3, 119841, 0, 0, 31, 0, 3, 60788, 0, 0, 0, 0, '', 'fearless - target Light');
 
-UPDATE creature_template SET mindmg = 11839, maxdmg = 17339, attackpower = 45299, ScriptName = 'boss_sha_of_fear' WHERE entry = 60999;
+UPDATE creature_template SET mindmg = 11839, maxdmg = 17339, attackpower = 45299, VehicleId = 2270, ScriptName = 'boss_sha_of_fear' WHERE entry = 60999;
 UPDATE creature_template SET minlevel = 93, maxlevel = 93, flags_extra = 128, ScriptName = 'mob_pure_light_terrace' WHERE entry = 60788;
-UPDATE creature_template SET ScriptName = 'mob_return_to_the_terrace' WHERE entry = 65736;
+UPDATE creature_template SET ScriptName = '', unit_flags2 = 0 WHERE entry = 65736;
 UPDATE creature_template SET minlevel = 92, maxlevel = 92, faction_A = 16, faction_H = 16, `Health_mod`=8.86, `Mana_mod`=8.86, ScriptName = 'mob_terror_spawn' WHERE entry = 61034;
 UPDATE creature_template SET mindmg = 11839, maxdmg = 17339, attackpower = 45299, minrangedmg = 11839, maxrangedmg = 17339, rangedattackpower = 45299, dmg_multiplier = 1, flags_extra = flags_extra | 0x20000000, mechanic_immune_mask = 667893759, ScriptName = 'npc_sha_of_fear_bowman' WHERE entry IN (61042, 61038, 61046);
 UPDATE creature_template SET minlevel = 91, maxlevel = 91, faction_A = 14, faction_H = 14, flags_extra = 128, ScriptName = 'npc_sha_globe' WHERE entry = 65691;
@@ -507,7 +508,7 @@ UPDATE `creature_template` SET `unit_class`=4, `minlevel`=90, `maxlevel`=90, `sp
 DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+71;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `MovementType`) VALUES
 (@CGUID+0, 66100, 996, 3, 1, -982.4202, -3066.155, 12.65248, 2.69789, 604800, 0, 0), -- Apparition of Terror (Auras: )
-(@CGUID+1, 60999, 996, 3, 1, -1017.885, -2758.34, 38.65445, 4.713077, 604800, 0, 0), -- Sha of Fear (Auras: 72242 - Zero Energy + Zero Regen)
+-- (@CGUID+1, 60999, 996, 3, 1, -1017.885, -2758.34, 38.65445, 4.713077, 604800, 0, 0), -- Sha of Fear (Auras: 72242 - Zero Energy + Zero Regen)
 (@CGUID+2, 64846, 996, 3, 1, -1036.106, -3136.929, 27.33581, 5.415483, 604800, 0, 0), -- Springtender Ashani (Area: -Unknown-)
 -- (@CGUID+3, 63025, 996, 3, 1, -1018.432, -2784.434, 49.42927, 1.507317, 86400, 0, 0), -- Tsulong (Auras: 122452 - Energy Drain & 50% HP)
 (@CGUID+4, 60583, 996, 3, 1, -1017.872, -3058.726, 12.90685, 1.501029, 604800, 0, 0), -- Protector Kaolan (Auras: 118221 - Sha Mask, 93105 - Invisibility and Stealth Detection)
@@ -565,21 +566,21 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position
 (@CGUID+54, 62995, 996, 3, 1, -1027.068, -2899.241, 19.70614, 1.261874, 604800, 0, 0), -- Animated Protector (Auras: 123493 - Protect)
 (@CGUID+55, 63275, 996, 3, 1, -998.4861, -2914.141, 19.70614, 4.712246, 604800, 0, 0), -- Corrupted Protector (Auras: )
 (@CGUID+56, 63275, 996, 3, 1, -1038.613, -2916.74, 19.70614, 4.694122, 604800, 0, 0), -- Corrupted Protector (Auras: )
-(@CGUID+57, 62983, 996, 3, 1, -1017.93, -2911.302, 19.9015, 4.70965, 604800, 5, 1), -- Lei Shi (Auras: 123620 - Clouded Reflection) (possible waypoints or random movement)
+(@CGUID+57, 62983, 996, 3, 1, -1017.93, -2911.302, 19.9015, 4.70965, 604800, 0, 0), -- Lei Shi (Auras: 123620 - Clouded Reflection) (possible waypoints or random movement)
 (@CGUID+58, 62995, 996, 3, 1, -1008.399, -2900.63, 19.70614, 4.643414, 604800, 0, 0), -- Animated Protector (Auras: 123493 - Protect)
 (@CGUID+59, 62995, 996, 3, 1, -1044.986, -2901.198, 19.17827, 3.013757, 604800, 0, 0), -- Animated Protector (Auras: 123493 - Protect)
 (@CGUID+60, 62995, 996, 3, 1, -989.3629, -2902.622, 19.17827, 0.6423108, 604800, 0, 0), -- Animated Protector (Auras: 123493 - Protect)
--- (@CGUID+61, 65736, 996, 3, 1, -1214.8, -2824.82, 41.24303, 3.507344, 86400, 0, 0), -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
-(@CGUID+61, 60788, 996, 3, 1, -1017.835, -2771.984, 38.65444, 4.718282, 604800, 0, 0), -- Pure Light Terrace (Auras: 117865 - Light Wall)
+(@CGUID+61, 65736, 996, 3, 1, -1214.8, -2824.82, 41.24303, 3.507344, 86400, 0, 0), -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
+(@CGUID+62, 60788, 996, 3, 1, -1017.835, -2771.984, 38.65444, 4.718282, 604800, 0, 0), -- Pure Light Terrace (Auras: 117865 - Light Wall)
 -- (@CGUID+63, 65736, 996, 3, 1, -832.0764, -2745.399, 31.67754, 0.1536942, 86400, 0, 0); -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
 -- (@CGUID+64, 61038, 996, 3, 1, -1214.795, -2824.823, 41.24303, 3.506719, 86400, 0, 0), -- Yang Guoshi (Auras: 120000 - Sha Corruption)
--- (@CGUID+65, 65736, 996, 3, 1, -1214.8, -2824.82, 41.24303, 3.507344, 86400, 0, 0), -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
+(@CGUID+63, 65736, 996, 3, 1, -1214.8, -2824.82, 41.24303, 3.507344, 86400, 0, 0), -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
 -- (@CGUID+66, 61046, 996, 3, 1, -832.0764, -2745.405, 31.67757, 0.1583484, 86400, 0, 0), -- Jinlun Kun (Auras: 120000 - Sha Corruption)
--- (@CGUID+67, 65736, 996, 3, 1, -832.0764, -2745.399, 31.67754, 0.1536942, 86400, 0, 0), -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
+(@CGUID+64, 65736, 996, 3, 1, -832.0764, -2745.399, 31.67754, 0.1536942, 86400, 0, 0), -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
 -- (@CGUID+68, 61046, 996, 3, 1, -832.0764, -2745.405, 31.67757, 0.1583484, 86400, 0, 0), -- Jinlun Kun (Auras: 120000 - Sha Corruption)
 -- (@CGUID+69, 65736, 996, 3, 1, -832.0764, -2745.399, 31.67754, 0.1536942, 86400, 0, 0), -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
 -- (@CGUID+70, 65736, 996, 3, 1, -1214.8, -2824.82, 41.24303, 3.507344, 86400, 0, 0); -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
-(@CGUID+62, 71095, 996, 3, 1, -1017.93, -2911.302, 19.9015, 4.643414, 86400, 0, 0); -- Reflection of Lei Shi (Auras: 141597 - Lei Shi Victory)
+(@CGUID+65, 71095, 996, 3, 1, -1017.93, -2911.302, 19.9015, 4.643414, 86400, 0, 0); -- Reflection of Lei Shi (Auras: 141597 - Lei Shi Victory)
 -- 1074791424
 -- 69208064
 

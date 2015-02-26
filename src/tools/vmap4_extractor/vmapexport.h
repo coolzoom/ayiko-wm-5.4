@@ -38,6 +38,6 @@ void strToLower(char* str);
 bool ExtractSingleWmo(std::string& fname);
 bool ExtractSingleModel(std::string& fname);
 
-void ExtractGameobjectModels();
+void ExtractGameobjectModels(char* input_path);
 
 #endif

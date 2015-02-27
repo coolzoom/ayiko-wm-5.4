@@ -40,6 +40,7 @@ enum eLeiShiSpells
     SPELL_PROTECT_RESPAWN   = 123493,
     SPELL_PROTECT_VISUAL    = 123505,
     SPELL_CLOUDED_REFLECTION= 123620,
+    SPELL_CLOUDED_IMPACT    = 123625,
 
     // This is for Heroic Mode
     SPELL_SCARY_FOG_CIRCLE  = 123797,
@@ -768,10 +769,12 @@ public:
                 switch (eventId)
                 {
                 case EVENT_RIPPLE_1:
+                    DoCast(SPELL_CLOUDED_IMPACT);
                     Talk(EMOTE_RIPPLE);
                     events.ScheduleEvent(EVENT_RIPPLE_2, 14000);
                     break;
                 case EVENT_RIPPLE_2:
+                    DoCast(SPELL_CLOUDED_IMPACT);
                     Talk(EMOTE_RIPPLE_2);
                     events.ScheduleEvent(EVENT_APPEAR, 10000);
                     break;

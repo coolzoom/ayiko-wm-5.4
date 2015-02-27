@@ -1471,7 +1471,7 @@ class spell_expelled_corruption : public SpellScriptLoader
 
                 float distance = caster->GetExactDist2d(target);
 
-                if (distance >= 0.0f && distance <= 30.0f)
+                if (distance >= 0.0f && distance <= (30.f + caster->GetFloatValue(UNIT_FIELD_BOUNDINGRADIUS)))
                     SetHitDamage(GetHitDamage() * (1 - (distance / 30.0f)));
             }
 
@@ -1571,19 +1571,19 @@ class spell_lightning_storm_damage : public SpellScriptLoader
                 {
                     case SPELL_LIGHTNING_STORM_SECOND_DMG:
                         MinDist = 10.0f;
-                        MaxDist = 20.0f;
+                        MaxDist = 22.0f;
                         break;
                     case SPELL_LIGHTNING_STORM_THIRD_DMG:
                         MinDist = 30.0f;
-                        MaxDist = 40.0f;
+                        MaxDist = 42.0f;
                         break;
                     case SPELL_LIGHTNING_STORM_FOURTH_DMG:
                         MinDist = 50.0f;
-                        MaxDist = 60.0f;
+                        MaxDist = 62.0f;
                         break;
                     case SPELL_LIGHTNING_STORM_FIFTH_DMG:
                         MinDist = 70.0f;
-                        MaxDist = 80.0f;
+                        MaxDist = 82.0f;
                         break;
                     default:
                         break;

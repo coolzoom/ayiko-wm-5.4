@@ -35,6 +35,7 @@ enum eShaOfFearSpells
     SPELL_CONJURE_TERROR_SPAWN_02   = 119370,
     SPELL_CONJURE_TERROR_SPAWN_03   = 119371,
     SPELL_CONJURE_TERROR_SPAWN_04   = 119372,
+    SPELL_CUSTOM_ENERGY_REGEN       = 119417,
 
     //Heroic
     SPELL_NAKED_AND_AFRAID          = 120669,
@@ -151,22 +152,18 @@ class DpsSelectPredicate
 public:
     bool operator()(WorldObject* target) const
     {
-        return target && target->ToPlayer() && target->ToPlayer()->GetRoleForGroup(target->ToPlayer()->GetActiveSpec()) != ROLES_DPS;
+        return target && target->ToPlayer() && target->ToPlayer()->GetRoleForGroup(target->ToPlayer()->GetSpecializationId(target->ToPlayer()->GetActiveSpec())) != ROLES_DPS;
     }
 };
 
 class notValidTargetPredicate
 {
 public:
-    notValidTargetPredicate(Unit* caster) : _caster(caster) {}
 
     bool operator()(WorldObject* target) const
     {
-        return target && target->ToPlayer() && (target->ToPlayer()->HasAura(SPELL_CHAMPION_OF_LIGHT) || !target->IsWithinDist2d(_caster, 60.f));
+        return target && target->ToPlayer() && target->ToPlayer()->HasAura(SPELL_CHAMPION_OF_LIGHT);
     }
-
-private:
-    Unit* _caster;
 };
 
 static const Position lightPos = { -1017.835f, -2771.984f, 38.65444f, 4.718282f };
@@ -196,10 +193,10 @@ class boss_sha_of_fear : public CreatureScript
             {
                 _Reset();
 
-                me->AddAura(122452, me);
+                me->AddAura(72242, me);
                 me->SetReactState(REACT_DEFENSIVE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-                me->SetPower(POWER_ENERGY, 0);
+                //me->SetPower(POWER_ENERGY, 0);
                 //me->SetInt32Value(UNIT_FIELD_POWER1, 0);
                 //me->SetMaxPower(POWER_ENERGY, 100);
                 //me->SetInt32Value(UNIT_FIELD_MAXPOWER1, 100);
@@ -244,6 +241,8 @@ class boss_sha_of_fear : public CreatureScript
             void EnterCombat(Unit* /*attacker*/) override
             {
                 me->SetPower(POWER_ENERGY, 0);
+
+                DoCast(me, SPELL_CUSTOM_ENERGY_REGEN, true);
 
                 if (pInstance)
                 {
@@ -399,30 +398,6 @@ class boss_sha_of_fear : public CreatureScript
             {
                 fThreat = 0;
                 return;
-            }
-
-            
-            void RegeneratePower(Powers power, int32& value) override
-            {
-                if (power != POWER_ENERGY)
-                    return;
-
-                if (!me->IsInCombat())
-                {
-                    value = 0;
-                    return;
-                }
-
-                // Sha of Fear regenerates 6 energy every 2s (15 energy for 5s)
-                value = 1;
-
-                int32 val = me->GetPower(POWER_ENERGY);
-                if (val + value > 100)
-                    val = 100;
-                else
-                    val += value;
-
-                me->SetInt32Value(UNIT_FIELD_POWER1, val);
             }
 
             void DamageTaken(Unit* /*dealer*/, uint32& uiDamage)
@@ -954,7 +929,9 @@ public:
 
             if (Unit* caster = GetCaster())
             {
-                targets.remove_if(notValidTargetPredicate(caster));
+                printf("list size %u \n", targets.size());
+
+                targets.remove_if(notValidTargetPredicate());
 
                 for (auto const pTarget : targets)
                 {
@@ -969,7 +946,11 @@ public:
                     }
                 }
 
+                printf("list size %u \n", targets.size());
+
                 targets.remove_if(DpsSelectPredicate());
+
+                printf("list size %u \n", targets.size());
 
                 if (targets.size() > 3)
                     targets.resize(3);
@@ -987,7 +968,7 @@ public:
                 if (itr2 != vHealers.end())
                     targets.insert(targets.begin(), *itr2);
 
-                printf("list size %u", targets.size());
+                printf("list size %u \n", targets.size());
             }
 
         }

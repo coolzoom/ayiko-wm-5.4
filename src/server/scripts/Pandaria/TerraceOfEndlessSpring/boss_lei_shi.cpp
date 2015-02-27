@@ -234,10 +234,11 @@ class boss_lei_shi : public CreatureScript
                     {
                         if (pSha->AI())
                             pSha->AI()->DoAction(ACTION_SHA_INTRO);
-                        me->SetPhaseMask(128, true);
-                        events.Reset();
-                        me->GetMotionMaster()->MoveIdle();
                     }
+
+                    me->SetPhaseMask(128, true);
+                    events.Reset();
+                    me->GetMotionMaster()->MoveIdle();
                 }
             }
 

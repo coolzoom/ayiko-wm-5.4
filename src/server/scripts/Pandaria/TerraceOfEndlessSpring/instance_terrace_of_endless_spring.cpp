@@ -116,6 +116,9 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                 leishiChestsGUID = 0;
 
                 memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+
+                m_mEvents.ScheduleEvent(8, 100);
+                //printf("Scheduled event 8 Check Lei Shi Protectors \n");
             }
 
             void OnCreatureCreate(Creature* creature)
@@ -209,7 +212,7 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                 {
                     if (Player * const player = itr->GetSource())
                     {
-                        int32 const gain = player->ModifyCurrency(CURRENCY_TYPE_VALOR_POINTS, 400);
+                        int32 const gain = player->ModifyCurrency(CURRENCY_TYPE_VALOR_POINTS, 4000);
                     }
                 }
             }
@@ -234,6 +237,8 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                 {
                     DoRespawnGameObject(tsulongChestGUID, DAY);
                     RewardCurrencyForPlayers();
+
+                    m_mEvents.ScheduleEvent(8, 200);
                 }
 
                 if (id == DATA_LEI_SHI && state == DONE)
@@ -326,6 +331,11 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                         }
                         break;
                     case 8:
+                        if (GetData(TYPE_LEI_INTRO) == DONE)
+                        {
+                            //printf("Lei intro tried to double call data. Aborting.");
+                            return;
+                        }
                         m_mEvents.ScheduleEvent(8, 4000);
                         if (Creature* pLeiShi = instance->GetCreature(leiShiGuid))
                         {
@@ -334,7 +344,7 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                         if (protectorList.empty())
                             SetData(TYPE_LEI_INTRO, DONE);
 
-                        printf("Size of list is %u", protectorList.size());
+                        //printf("Size of list is %u", protectorList.size());
                         protectorList.remove_if(isProtectorDeadPredicate());
                         break;
                     case 2:
@@ -363,7 +373,7 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
 
             void SetData(uint32 type, uint32 data)
             {
-                printf("SetData Called, type %u, data %u", type, data);
+                //printf("SetData Called, type %u, data %u \n", type, data);
 
                 if (type >= MAX_TYPES)
                 {
@@ -392,7 +402,7 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                         m_auiEncounter[type] = data;
                         break;
                     case TYPE_LEI_INTRO:
-                        if (m_auiEncounter[type] == data)
+                        if (GetData(TYPE_LEI_INTRO) == DONE)
                             return;
 
                         if (data == DONE)
@@ -470,19 +480,19 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                 if (m_auiEncounter[TYPE_LEIS_HOPE] == DONE && instance->IsHeroic())
                 {
                     m_mEvents.ScheduleEvent(2, 200); // Reapply Lei's Hope
-                    printf("Scheduled event 2 Reapply Lei's Hope \n");
+                    //printf("Scheduled event 2 Reapply Lei's Hope \n");
                 }
 
                 if (m_auiEncounter[TYPE_LEI_INTRO] == DONE && m_auiEncounter[TYPE_LEI_SHI] != DONE)
                 {
                     m_mEvents.ScheduleEvent(4, 200); // Activate Lei Shi
-                    printf("Scheduled event 4 Activate Lei Shi \n");
+                    //printf("Scheduled event 4 Activate Lei Shi \n");
                 }
 
                 if (m_auiEncounter[INTRO_DONE] == DONE)
                 {
                     m_mEvents.ScheduleEvent(5, 200); // Deactivate Protectors Vortex
-                    printf("Scheduled event 5 Deactivate Protectors vortex \n");
+                    //printf("Scheduled event 5 Deactivate Protectors vortex \n");
 
                     if (m_auiEncounter[TYPE_PROTECTORS] != DONE)
                         m_mEvents.ScheduleEvent(6, 200); // Activate Protectors
@@ -491,15 +501,9 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                 if (m_auiEncounter[TYPE_LEI_SHI] == DONE)
                 {
                     m_mEvents.ScheduleEvent(7, 200); // Deactivate Sha of Fear Vortex
-                    printf("Scheduled event 7 Deactivate Sha Vortex \n");
+                    //printf("Scheduled event 7 Deactivate Sha Vortex \n");
                 }
                 
-                if (m_auiEncounter[TYPE_LEI_INTRO] != DONE)
-                {
-                    m_mEvents.ScheduleEvent(8, 100); // Check Lei Shi Protectors
-                    printf("Scheduled event 8 Check Lei Shi Protectors \n");
-                }
-
                 OUT_LOAD_INST_DATA_COMPLETE;
             }
 
@@ -521,6 +525,7 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                     case TYPE_LEI_SHI:
                     case TYPE_SHA:
                     case TYPE_LEIS_HOPE:
+                    case TYPE_LEI_INTRO:
                         return m_auiEncounter[type];
                     default:
                         return 0;

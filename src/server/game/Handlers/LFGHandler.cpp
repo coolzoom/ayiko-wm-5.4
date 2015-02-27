@@ -223,159 +223,120 @@ void WorldSession::HandleLfgLockInfoRequestOpcode(WorldPacket& recvData)
     // Get player locked Dungeons
     LfgLockMap const &lock = sLFGMgr->GetLockedDungeons(guid);
 
-    uint32 rsize = uint32(randomDungeons.size());
-    uint32 lsize = uint32(lock.size());
+    ByteBuffer dataBuffer;
+    WorldPacket data(SMSG_LFG_PLAYER_INFO, 1 + randomDungeons.size() * (4 + 1 + 4 + 4 + 4 + 4 + 1 + 4 + 4 + 4)
+        + 4 + lock.size() * (1 + 4 + 4 + 4 + 4 + 1 + 4 + 4 + 4));
 
-    TC_LOG_DEBUG("network", "SMSG_LFG_PLAYER_INFO [" UI64FMTD "]", uint64(guid));
-    WorldPacket data(SMSG_LFG_PLAYER_INFO, 1 + rsize * (4 + 1 + 4 + 4 + 4 + 4 + 1 + 4 + 4 + 4) + 4 + lsize * (1 + 4 + 4 + 4 + 4 + 1 + 4 + 4 + 4));
-
-    bool hasGuid = true;
-    data.WriteBit(hasGuid);
-    if (hasGuid)
-        data.WriteBitSeq<7, 2, 1, 6, 3, 5, 0, 4>(guid);
-
+    data.WriteBit(1);                                                               // PlayerGUID
+    data.WriteBitSeq<7, 2, 1, 6, 3, 5, 0, 4>(guid);
     data.WriteBits(randomDungeons.size(), 17);
 
-    for (LfgDungeonSet::const_iterator it = randomDungeons.begin(); it != randomDungeons.end(); ++it)
+    for (auto const &randomDungeon : randomDungeons)
     {
-        LfgReward const* reward = sLFGMgr->GetRandomDungeonReward(*it, level);
-        Quest const* qRew = NULL;
+        Quest const* rewardQuest = nullptr;
+        bool firstReward = false;
 
-        bool done = 0;
-        if (reward)
+        if (LfgReward const* reward = sLFGMgr->GetRandomDungeonReward(randomDungeon, level))
         {
-            qRew = sObjectMgr->GetQuestTemplate(reward->reward[0].questId);
-            if (qRew)
+            rewardQuest = sObjectMgr->GetQuestTemplate(reward->reward[0].questId);
+            if (rewardQuest)
             {
-                done = !GetPlayer()->CanRewardQuest(qRew, false);
-                if (done)
-                    qRew = sObjectMgr->GetQuestTemplate(reward->reward[1].questId);
+                firstReward = !GetPlayer()->CanRewardQuest(rewardQuest, false);
+                if (firstReward)
+                    rewardQuest = sObjectMgr->GetQuestTemplate(reward->reward[1].questId);
             }
         }
 
-        data.WriteBits(0, 21); // Unk count
-        data.WriteBits(qRew ? qRew->GetRewCurrencyCount() : 0, 21);
-        data.WriteBits(0, 19); // Unk count 2 - related to call to Arms
+        data.WriteBits(0, 21);                                                      // BonusCurrency
+        data.WriteBits(rewardQuest ? rewardQuest->GetRewCurrencyCount() : 0, 21);
+        data.WriteBits(0, 19);                                                      // ShortageReward
+        data.WriteBit(!firstReward);
+        data.WriteBits(rewardQuest ? rewardQuest->GetRewItemsCount(): 0, 20);
+        data.WriteBit(0);                                                           // ShortageEligible
 
-        data.WriteBit(!done);
-        data.WriteBits(qRew ? qRew->GetRewItemsCount() : 0, 20);
-        data.WriteBit(0);
+        /*
+         *  Values that are missing and need to named:
+         *      Mask, CompletedMask, CompletionQuantity, CompletionLimit, CompletionCurrencyID
+         *      SpecificQuantity, SpecificLimit, OverallQuantity, OverallLimit, PurseWeeklyQuantity
+         *      PurseWeeklyLimit, PurseQuantity, PurseLimit, Quantity
+         */
+
+        dataBuffer << uint32(0);
+        dataBuffer << uint32(0);
+
+        if (rewardQuest)
+        {
+            for (uint8 i = 0; i < QUEST_REWARDS_COUNT; ++i)
+            {
+                if (!rewardQuest->RewardCurrencyId[i])
+                    continue;
+
+                dataBuffer << uint32(rewardQuest->RewardCurrencyCount[i]);
+                dataBuffer << uint32(rewardQuest->RewardCurrencyId[i]);
+            }
+        }
+
+        dataBuffer << uint32(0);
+
+        if (rewardQuest)
+        {
+            for (uint8 i = 0; i < QUEST_REWARDS_COUNT; ++i)
+            {
+                if (!rewardQuest->RewardItemId[i])
+                    continue;
+
+                ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(rewardQuest->RewardItemId[i]);
+
+                dataBuffer << uint32(itemTemplate ? itemTemplate->DisplayInfoID : 0);
+                dataBuffer << uint32(rewardQuest->RewardItemId[i]);
+                dataBuffer << uint32(rewardQuest->RewardItemIdCount[i]);
+            }
+        }
+
+        dataBuffer << uint32(0);
+        dataBuffer << uint32(0);
+
+        /*for (uint32 i = 0; i < shortageRewardCount; i++)
+        {
+        }*/
+
+        dataBuffer << uint32(0);
+        dataBuffer << uint32(0);
+        dataBuffer << uint32(randomDungeon);
+        dataBuffer << uint32(0);
+        dataBuffer << uint32(0);
+        dataBuffer << uint32(0);
+        dataBuffer << uint32(0);
+
+        /*for (uint32 i = 0; i < bonusCurrencyCount; i++)
+        {
+        }*/
+
+        dataBuffer << uint32(rewardQuest ? rewardQuest->XPValue(GetPlayer()) : 0);
+        dataBuffer << uint32(0);
+        dataBuffer << uint32(0);
+        dataBuffer << uint32(0);
+        dataBuffer << uint32(rewardQuest ? rewardQuest->GetRewardMoney() : 0);
     }
 
     data.WriteBits(lock.size(), 20);
+    data.FlushBits();
+    data.append(dataBuffer);
 
-    for (LfgDungeonSet::const_iterator it = randomDungeons.begin(); it != randomDungeons.end(); ++it)
+    for (auto const& lfgLock : lock)
     {
-        LfgReward const* reward = sLFGMgr->GetRandomDungeonReward(*it, level);
-        Quest const* qRew = NULL;
-        uint8 done = 0;
-        if (reward)
-        {
-            qRew = sObjectMgr->GetQuestTemplate(reward->reward[0].questId);
-            if (qRew)
-            {
-                done = !GetPlayer()->CanRewardQuest(qRew, false);
-                if (done)
-                    qRew = sObjectMgr->GetQuestTemplate(reward->reward[1].questId);
-            }
-        }
+        auto lockData = lfgLock.second;
 
-        data << uint32(0);
-        data << uint32(1);
-
-        if (qRew)
-        {
-            if (qRew->GetRewCurrencyCount())
-            {
-                for (uint8 i = 0; i < QUEST_REWARDS_COUNT; ++i)
-                {
-                    if (!qRew->RewardCurrencyId[i])
-                        continue;
-
-                    data << uint32(qRew->RewardCurrencyCount[i]);
-                    data << uint32(qRew->RewardCurrencyId[i]);
-                }
-            }
-
-            data << uint32(0);
-
-            if (qRew->GetRewItemsCount())
-            {
-                ItemTemplate const* iProto = NULL;
-                for (uint8 i = 0; i < QUEST_REWARDS_COUNT; ++i)
-                {
-                    if (!qRew->RewardItemId[i])
-                        continue;
-
-                    iProto = sObjectMgr->GetItemTemplate(qRew->RewardItemId[i]);
-
-                    data << uint32(iProto ? iProto->DisplayInfoID : 0);
-                    data << uint32(qRew->RewardItemId[i]);
-                    data << uint32(qRew->RewardItemIdCount[i]);
-                }
-            }
-
-            data << uint32(1); // 1 in sniff
-            data << uint32(1); // 1 in sniff
-
-            /*for (int j = 0; j < info.Count3; ++j)*/
-
-            data << uint32(0); // 0 in sniff
-            data << uint32(0); // related to encounter - encounter progress
-            data << uint32(*it); // Dungeon Entry (id + type) - progress
-            data << uint32(1); // 0 in sniff
-            data << uint32(1); // 0 in sniff
-            data << uint32(0); // 0 in sniff
-            data << uint32(0); // 0 in sniff
-
-            data << uint32(qRew->XPValue(GetPlayer()));
-            data << uint32(0); // 0 in sniff
-            data << uint32(0); // 0 in sniff
-            data << uint32(0); // 0 in sniff
-            data << uint32(qRew->GetRewardMoney());
-
-            /*
-            data << uint32(qRew->GetRewOrReqMoney());
-            data << uint32(qRew->XPValue(GetPlayer()));
-            data << uint32(reward->reward[done].variableMoney);
-            data << uint32(reward->reward[done].variableXP);*/
-        }
-        else
-        {
-            data << uint32(16);
-
-            data << uint32(1); // 1 in sniff unk4
-            data << uint32(1); // 1 in sniff unk5
-
-            data << uint32(0); // 0 in sniff unk6
-            data << uint32(0); //related to encounter - encounter progress
-            data << uint32(*it);
-            data << uint32(1); // 0 in sniff unk9
-            data << uint32(1); // 0 in sniff unk10
-            data << uint32(0); // 0 in sniff unk11
-            data << uint32(0); // 0 in sniff unk12
-
-            data << uint32(333); // 0 in sniff unk13 // xp
-            data << uint32(0); // 0 in sniff unk14
-            data << uint32(0); // 0 in sniff unk15
-            data << uint32(0); // 0 in sniff unk16
-            data << uint32(666); // money
-        }
-    }
-
-    for (LfgLockMap::const_iterator it = lock.begin(); it != lock.end(); ++it)
-    {
-        auto lockData = it->second;
         data << uint32(lockData.itemLevel);
-        data << uint32(it->first);                         // Dungeon entry (id + type)
-        data << uint32(lockData.lockstatus);              // Lock status
+        data << uint32(lfgLock.first);
+        data << uint32(lockData.lockstatus);
         data << uint32(GetPlayer()->GetAverageItemLevel());
     }
 
-    if (hasGuid)
-        data.WriteByteSeq<3, 1, 2, 6, 4, 7, 0, 5>(guid);
+    data.WriteByteSeq<3, 1, 2, 6, 4, 7, 0, 5>(guid);
 
     SendPacket(&data);
+    TC_LOG_DEBUG("network", "SMSG_LFG_PLAYER_INFO [" UI64FMTD "]", uint64(guid));
 }
 
 void WorldSession::HandleLfrSearchOpcode(WorldPacket& recvData)

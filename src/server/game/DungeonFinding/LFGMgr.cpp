@@ -656,18 +656,12 @@ void LFGMgr::InitializeLockedDungeons(Player* player)
             locktype = LFG_LOCKSTATUS_ATTUNEMENT_TOO_LOW_LEVEL;
             locktype = LFG_LOCKSTATUS_ATTUNEMENT_TOO_HIGH_LEVEL;
         */
+
         if (dungeon->type != TYPEID_RANDOM_DUNGEON)
-        {
             if (dungeon->map > 0)
-            {
-                LfgEntrancePositionMap::const_iterator itr = m_entrancePositions.find(dungeon->ID);
-                if (itr == m_entrancePositions.end() && !sObjectMgr->GetMapEntranceTrigger(dungeon->map))
-                {
-                    lockData.itemLevel = 999;
-                    lockData.lockstatus = LFG_LOCKSTATUS_TOO_LOW_GEAR_SCORE;
-                }
-            }
-        }
+                if (m_entrancePositions.find(dungeon->ID) == m_entrancePositions.end() && !sObjectMgr->GetMapEntranceTrigger(dungeon->map))
+                    lockData.lockstatus = LFG_LOCKSTATUS_TEMPORARILY_DISABLED;
+
         if (lockData.lockstatus != LFG_LOCKSTATUS_OK)
             lock[dungeon->Entry()] = lockData;
     }

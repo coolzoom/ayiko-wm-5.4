@@ -159,11 +159,14 @@ public:
 class notValidTargetPredicate
 {
 public:
+    notValidTargetPredicate(Unit* _caster) : caster(_caster) {}
 
     bool operator()(WorldObject* target) const
     {
-        return target && target->ToPlayer() && target->ToPlayer()->HasAura(SPELL_CHAMPION_OF_LIGHT);
+        return target && target->ToPlayer() && (target->ToPlayer()->HasAura(SPELL_CHAMPION_OF_LIGHT) || target->ToPlayer()->GetExactDist2d(caster) > 70.f);
     }
+private:
+    Unit* caster;
 };
 
 static const Position lightPos = { -1017.835f, -2771.984f, 38.65444f, 4.718282f };
@@ -929,15 +932,13 @@ public:
 
             if (Unit* caster = GetCaster())
             {
-                printf("list size %u \n", targets.size());
-
-                targets.remove_if(notValidTargetPredicate());
+                targets.remove_if(notValidTargetPredicate(caster));
 
                 for (auto const pTarget : targets)
                 {
                     if (Player* pPlayer = pTarget->ToPlayer())
                     {
-                        uint32 m_role = pPlayer->GetRoleForGroup(pPlayer->GetActiveSpec());
+                        uint32 m_role = pPlayer->GetRoleForGroup(pPlayer->GetSpecializationId(pPlayer->GetActiveSpec()));
 
                         if (m_role == ROLES_TANK)
                             vTanks.push_back(pPlayer);
@@ -946,11 +947,7 @@ public:
                     }
                 }
 
-                printf("list size %u \n", targets.size());
-
                 targets.remove_if(DpsSelectPredicate());
-
-                printf("list size %u \n", targets.size());
 
                 if (targets.size() > 3)
                     targets.resize(3);
@@ -968,7 +965,6 @@ public:
                 if (itr2 != vHealers.end())
                     targets.insert(targets.begin(), *itr2);
 
-                printf("list size %u \n", targets.size());
             }
 
         }

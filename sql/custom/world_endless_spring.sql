@@ -263,8 +263,9 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 UPDATE creature_template SET ScriptName = 'boss_tsulong' WHERE entry = 62442;
 UPDATE creature_template SET ScriptName = 'npc_sunbeam' WHERE entry = 62849;
 
-DELETE FROM spell_script_names WHERE spell_id IN (125843, 122768, 122789);
+DELETE FROM spell_script_names WHERE spell_id IN (122775, 125843, 122768, 122789);
 INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
+(122775, 'spell_tsulong_nightmares'),
 (125843, 'spell_dread_shadows_damage'),
 (122768, 'spell_dread_shadows_malus'),
 (122789, 'spell_sunbeam');

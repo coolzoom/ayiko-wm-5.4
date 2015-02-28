@@ -28,13 +28,11 @@
 
 void WorldSession::HandleLfgJoinOpcode(WorldPacket& recvData)
 {
-    uint32 numDungeons;
-    uint32 dungeon;
-    uint32 roles;
-    uint8 length = 0;
-    uint8 unk8 = 0;
+    uint32 roles, dungeon, numDungeons;
+    uint8 partyIndex, commentLength;
+    bool queueAsGroup;
 
-    recvData >> unk8;
+    recvData >> partyIndex;
 
     for (int i = 0; i < 3; ++i)
         recvData.read_skip<uint32>();
@@ -42,8 +40,8 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recvData)
     recvData >> roles;
 
     numDungeons = recvData.ReadBits(22);
-    recvData.ReadBit();
-    length = recvData.ReadBits(8);
+    queueAsGroup = recvData.ReadBit();
+    commentLength = recvData.ReadBits(8);
 
     if (!numDungeons)
     {
@@ -60,19 +58,9 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recvData)
         newDungeons.insert(dungeon);       // remove the type from the dungeon entry
     }
 
-    std::string comment = recvData.ReadString(length);
+    std::string comment = recvData.ReadString(commentLength);
 
-    const LFGDungeonEntry* entry = sLFGDungeonStore.LookupEntry(*newDungeons.begin() & 0xFFFFFF);
-    uint8 type = TYPEID_DUNGEON;
-    uint8 maxGroupSize = 5;
-    if (entry != NULL)
-        type = entry->type;
-
-    if (type == LFG_SUBTYPEID_RAID)
-        maxGroupSize = 25;
-    if (type == LFG_SUBTYPEID_SCENARIO)
-        maxGroupSize = 3;
-
+    uint8 maxGroupSize = sLFGMgr->GetGroupSizeFromEntry(sLFGDungeonStore.LookupEntry(*newDungeons.begin() & 0xFFFFFF));
     if (!sWorld->getBoolConfig(CONFIG_DUNGEON_FINDER_ENABLE) ||
         (GetPlayer()->GetGroup() && GetPlayer()->GetGroup()->GetLeaderGUID() != GetPlayer()->GetGUID() &&
         (GetPlayer()->GetGroup()->GetMembersCount() == maxGroupSize || !GetPlayer()->GetGroup()->isLFGGroup())))

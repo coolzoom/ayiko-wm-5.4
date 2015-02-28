@@ -329,6 +329,8 @@ class LFGMgr
         void SetSelectedDungeons(uint64 guid, const LfgDungeonSet& dungeons);
         LfgUpdateData GetLfgStatus(uint64 guid);
 
+        uint8 GetGroupSizeFromEntry(const LFGDungeonEntry* entry) const;
+
         void SendUpdateStatus(Player*, const LfgUpdateData& updateData);
 
         LfgQueueInfo* GetLfgQueueInfo(uint64 guid) const

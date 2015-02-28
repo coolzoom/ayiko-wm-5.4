@@ -136,6 +136,14 @@ bool EffectMovementGenerator::Update(Unit *unit, uint32)
 
 void EffectMovementGenerator::Finalize(Unit *unit)
 {
+    // Crash fix:
+    // Creatures with this movement generator when being deleted will call this function, if said creature has a script
+    // that adds an aura on its self on MovementInform (e.g. boss_azil), an assert will trigger due to !m_cleanupDone
+    // m_inWorld is set to false prior to this being called when a creature is being deleted, preventing this crash.
+    // Stack trace: https://gist.github.com/anonymous/6d637ee83db173d92d4d
+    if (!unit->IsInWorld())
+        return;
+
     MovementInform(unit);
 }
 

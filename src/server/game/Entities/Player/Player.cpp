@@ -11783,11 +11783,7 @@ InventoryResult Player::CanTakeMoreSimilarItems(uint32 entry, uint32 count, Item
     {
         ItemLimitCategoryEntry const* limitEntry = sItemLimitCategoryStore.LookupEntry(pProto->ItemLimitCategory);
         if (!limitEntry)
-        {
-            if (no_space_count)
-                *no_space_count = count;
-            return EQUIP_ERR_NOT_EQUIPPABLE;
-        }
+            return EQUIP_ERR_OK;
 
         if (limitEntry->mode == ITEM_LIMIT_CATEGORY_MODE_HAVE)
         {
@@ -27269,7 +27265,13 @@ InventoryResult Player::CanEquipUniqueItem(ItemTemplate const* itemProto, uint8 
     {
         ItemLimitCategoryEntry const* limitEntry = sItemLimitCategoryStore.LookupEntry(itemProto->ItemLimitCategory);
         if (!limitEntry)
-            return EQUIP_ERR_NOT_EQUIPPABLE;
+        {
+            // if no limit entry is found, fallback on hardcoded item limit of 1
+            ItemLimitCategoryEntry newLimitEntry;
+            newLimitEntry.maxCount = 1;
+
+            limitEntry = &newLimitEntry;
+        }
 
         // NOTE: limitEntry->mode not checked because if item have have-limit then it applied and to equip case
 

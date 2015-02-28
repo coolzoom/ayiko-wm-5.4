@@ -64,6 +64,14 @@ enum eTsulongSpells
     SPELL_SUMMON_SHA_MISSILE            = 122953, // 62919
     SPELL_UNLEASHED_SHA_EXPLOSION       = 130008,
 
+    // Heroic mode
+    SPELL_THE_DARK_OF_NIGHT             = 123739,
+    SPELL_DARK_FIXATE_AURA              = 123740,
+    SPELL_DARK_EXPLOSION                = 123794,
+
+    SPELL_LIGHT_OF_DAY_BUFF             = 123716,
+    SPELL_LIGHT_OF_DAY_AURA             = 123816
+
 };
 
 enum eTsulongTimers
@@ -333,6 +341,10 @@ class boss_tsulong : public CreatureScript
 
                         DoCast(me, SPELL_GOLD_ACTIVE, true);
                         DoCast(me, SPELL_SUMMON_SHA_PERIODIC, true);
+                        
+                        if (IsHeroic())
+                            DoCast(me, SPELL_LIGHT_OF_DAY_AURA, true);
+
                         events.Reset();
                         events.ScheduleEvent(EVENT_SUN_BREATH, 6000, 0, PHASE_DAY);
                         events.ScheduleEvent(EVENT_SUMMON_TERROR, 12000, 0, PHASE_DAY);
@@ -356,6 +368,12 @@ class boss_tsulong : public CreatureScript
                         events.ScheduleEvent(EVENT_SWITCH_TO_NIGHT_PHASE, 0, 0, PHASE_NIGHT);
                         events.ScheduleEvent(EVENT_SHADOW_BREATH, 10000, 0, PHASE_NIGHT);
                         events.ScheduleEvent(EVENT_NIGHTMARES, urand(15000, 16000), 0, PHASE_NIGHT);
+
+                        if (IsHeroic())
+                        {
+                            events.ScheduleEvent(EVENT_DARK_OF_NIGHT, 10000, 0, PHASE_NIGHT);
+                            me->RemoveAurasDueToSpell(SPELL_LIGHT_OF_DAY_AURA);
+                        }
 
                         if (oldPhase == PHASE_DAY)
                         {
@@ -1052,6 +1070,95 @@ public:
     }
 };
 
+class spell_tsulong_nightmares : public SpellScriptLoader
+{
+public:
+    spell_tsulong_nightmares() : SpellScriptLoader("spell_tsulong_nightmares") {}
+
+    class script_impl : public SpellScript
+    {
+        PrepareSpellScript(script_impl);
+
+        bool Validate()
+        {
+            return true;
+        }
+
+        void SelectTargets(std::list<WorldObject*>&targets)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                // Melee targets should be low priority
+                targets.sort(Trinity::ObjectDistanceOrderPred(caster, false));
+
+                uint32 m_maxTargets = (caster->GetMap()->GetDifficulty() == MAN25_DIFFICULTY || caster->GetMap()->GetDifficulty() == MAN25_HEROIC_DIFFICULTY) ? 3 : 1;
+
+                if (targets.size() > m_maxTargets)
+                {
+                    targets.resize(m_maxTargets);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(script_impl::SelectTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new script_impl();
+    }
+};
+
+class spell_dark_of_night_fixate : public SpellScriptLoader
+{
+public:
+    spell_dark_of_night_fixate() : SpellScriptLoader("spell_dark_of_night_fixate") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void SelectTargets(std::list<WorldObject*>&targets)
+        {
+            if (targets.size() > 1)
+            {
+                if (Unit* caster = GetCaster())
+                    targets.sort(Trinity::ObjectDistanceOrderPred(caster));
+
+                targets.resize(1);
+            }
+        }
+
+        void HandleOnHit()
+        {
+            Unit* pBeam = GetHitUnit();
+            Unit* pCaster = GetCaster();
+
+            if (!pBeam || !pCaster)
+                return;
+
+            if (pCaster->GetExactDist2d(pBeam) < pBeam->GetFloatValue(OBJECT_FIELD_SCALE_X))
+            {
+                pCaster->CastSpell(pBeam, SPELL_DARK_EXPLOSION, true);
+            }
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_impl::SelectTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+            OnHit += SpellHitFn(spell_impl::HandleOnHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
 void AddSC_boss_tsulong()
 {
     new boss_tsulong();
@@ -1061,6 +1168,8 @@ void AddSC_boss_tsulong()
     new spell_sunbeam();
     new spell_tsulong_sha_regen();
     new spell_terrorize_periodic_player();
+    new spell_tsulong_nightmares();
+    new spell_dark_of_night_fixate();
     new npc_embodied_terror();
     new npc_fright_spawn();
     new npc_unstable_sha();

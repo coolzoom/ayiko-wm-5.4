@@ -1052,6 +1052,48 @@ public:
     }
 };
 
+class spell_tsulong_nightmares : public SpellScriptLoader
+{
+public:
+    spell_tsulong_nightmares() : SpellScriptLoader("spell_tsulong_nightmares") {}
+
+    class script_impl : public SpellScript
+    {
+        PrepareSpellScript(script_impl);
+
+        bool Validate()
+        {
+            return true;
+        }
+
+        void SelectTargets(std::list<WorldObject*>&targets)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                // Melee targets should be low priority
+                targets.sort(Trinity::ObjectDistanceOrderPred(caster, false));
+
+                uint32 m_maxTargets = (caster->GetMap()->GetDifficulty() == MAN25_DIFFICULTY || caster->GetMap()->GetDifficulty() == MAN25_HEROIC_DIFFICULTY) ? 3 : 1;
+
+                if (targets.size() > m_maxTargets)
+                {
+                    targets.resize(m_maxTargets);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(script_impl::SelectTargets, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new script_impl();
+    }
+};
+
 void AddSC_boss_tsulong()
 {
     new boss_tsulong();
@@ -1061,6 +1103,7 @@ void AddSC_boss_tsulong()
     new spell_sunbeam();
     new spell_tsulong_sha_regen();
     new spell_terrorize_periodic_player();
+    new spell_tsulong_nightmares();
     new npc_embodied_terror();
     new npc_fright_spawn();
     new npc_unstable_sha();

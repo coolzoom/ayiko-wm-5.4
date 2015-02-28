@@ -47,6 +47,7 @@ class AuraEffect
         SpellModifier::Ptr const & GetSpellModifier() const { return m_spellmod; }
 
         SpellInfo const* GetSpellInfo() const { return m_spellInfo; }
+        SpellEffectInfo GetSpellEffectInfo() const { return m_spellInfo->Effects[m_effIndex]; }
         uint32 GetId() const { return m_spellInfo->Id; }
         uint32 GetEffIndex() const { return m_effIndex; }
         int32 GetBaseAmount() const { return m_baseAmount; }

@@ -1,3 +1,5 @@
+SET FOREIGN_KEY_CHECKS = 0;
+
 DELETE FROM creature WHERE map = 996;
 DELETE FROM gameobject WHERE map = 996;
 -- GUID RANGES
@@ -261,8 +263,9 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 UPDATE creature_template SET ScriptName = 'boss_tsulong' WHERE entry = 62442;
 UPDATE creature_template SET ScriptName = 'npc_sunbeam' WHERE entry = 62849;
 
-DELETE FROM spell_script_names WHERE spell_id IN (125843, 122768, 122789);
+DELETE FROM spell_script_names WHERE spell_id IN (122775, 125843, 122768, 122789);
 INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
+(122775, 'spell_tsulong_nightmares'),
 (125843, 'spell_dread_shadows_damage'),
 (122768, 'spell_dread_shadows_malus'),
 (122789, 'spell_sunbeam');
@@ -344,8 +347,9 @@ INSERT INTO spell_target_position (id, effIndex, target_map, target_position_x, 
 
 UPDATE creature_template SET modelid1 = 37285, flags_extra = 0 WHERE entry = 65736;
 
-DELETE FROM creature_template_aura WHERE entry IN (65691, 65736);
+DELETE FROM creature_template_aura WHERE entry IN (65691, 65736, 60999);
 INSERT INTO creature_template_aura (entry, aura) VALUES
+(60999, 72242), -- Energy Drain
 (65691, 129187), -- Sha Globe
 (65736, 120216); -- Return to the Terrace
 
@@ -354,11 +358,11 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 (13, 1, 117866, 0, 0, 31, 0, 4, 0, 0, 0, 0, 0, '', 'wall of Light - target players'),
 (13, 3, 119841, 0, 0, 31, 0, 3, 60788, 0, 0, 0, 0, '', 'fearless - target Light');
 
-UPDATE creature_template SET mindmg = 11839, maxdmg = 17339, attackpower = 45299, ScriptName = 'boss_sha_of_fear' WHERE entry = 60999;
+UPDATE creature_template SET mindmg = 11839, maxdmg = 17339, attackpower = 45299, VehicleId = 2270, ScriptName = 'boss_sha_of_fear', unit_flags = 64 WHERE entry = 60999;
 UPDATE creature_template SET minlevel = 93, maxlevel = 93, flags_extra = 128, ScriptName = 'mob_pure_light_terrace' WHERE entry = 60788;
-UPDATE creature_template SET ScriptName = 'mob_return_to_the_terrace' WHERE entry = 65736;
+UPDATE creature_template SET ScriptName = '', unit_flags2 = 0 WHERE entry = 65736;
 UPDATE creature_template SET minlevel = 92, maxlevel = 92, faction_A = 16, faction_H = 16, `Health_mod`=8.86, `Mana_mod`=8.86, ScriptName = 'mob_terror_spawn' WHERE entry = 61034;
-UPDATE creature_template SET mindmg = 11839, maxdmg = 17339, attackpower = 45299, minrangedmg = 11839, maxrangedmg = 17339, rangedattackpower = 45299, dmg_multiplier = 1, flags_extra = flags_extra | 0x20000000, mechanic_immune_mask = 667893759, ScriptName = 'npc_sha_of_fear_bowman' WHERE entry IN (61042, 61038, 61046);
+UPDATE creature_template SET mindmg = 11839, maxdmg = 17339, attackpower = 45299, minrangedmg = 11839, maxrangedmg = 17339, rangedattackpower = 45299, dmg_multiplier = 8, flags_extra = 0, unit_flags = 0, unit_flags2 = 0, type_flags = 0, mechanic_immune_mask = 667893759, ScriptName = 'npc_sha_of_fear_bowman' WHERE entry IN (61042, 61038, 61046);
 UPDATE creature_template SET minlevel = 91, maxlevel = 91, faction_A = 14, faction_H = 14, flags_extra = 128, ScriptName = 'npc_sha_globe' WHERE entry = 65691;
 
 DELETE FROM spell_script_names WHERE spell_id IN (119887, 129189, 120047, 119983, 119593, 119692, 119693, 117866, 125786, 119414, 119108, 129075);
@@ -565,21 +569,21 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position
 (@CGUID+54, 62995, 996, 3, 1, -1027.068, -2899.241, 19.70614, 1.261874, 604800, 0, 0), -- Animated Protector (Auras: 123493 - Protect)
 (@CGUID+55, 63275, 996, 3, 1, -998.4861, -2914.141, 19.70614, 4.712246, 604800, 0, 0), -- Corrupted Protector (Auras: )
 (@CGUID+56, 63275, 996, 3, 1, -1038.613, -2916.74, 19.70614, 4.694122, 604800, 0, 0), -- Corrupted Protector (Auras: )
-(@CGUID+57, 62983, 996, 3, 1, -1017.93, -2911.302, 19.9015, 4.70965, 604800, 5, 1), -- Lei Shi (Auras: 123620 - Clouded Reflection) (possible waypoints or random movement)
+(@CGUID+57, 62983, 996, 3, 1, -1017.93, -2911.302, 19.9015, 4.70965, 604800, 0, 0), -- Lei Shi (Auras: 123620 - Clouded Reflection) (possible waypoints or random movement)
 (@CGUID+58, 62995, 996, 3, 1, -1008.399, -2900.63, 19.70614, 4.643414, 604800, 0, 0), -- Animated Protector (Auras: 123493 - Protect)
 (@CGUID+59, 62995, 996, 3, 1, -1044.986, -2901.198, 19.17827, 3.013757, 604800, 0, 0), -- Animated Protector (Auras: 123493 - Protect)
 (@CGUID+60, 62995, 996, 3, 1, -989.3629, -2902.622, 19.17827, 0.6423108, 604800, 0, 0), -- Animated Protector (Auras: 123493 - Protect)
--- (@CGUID+61, 65736, 996, 3, 1, -1214.8, -2824.82, 41.24303, 3.507344, 86400, 0, 0), -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
-(@CGUID+61, 60788, 996, 3, 1, -1017.835, -2771.984, 38.65444, 4.718282, 604800, 0, 0), -- Pure Light Terrace (Auras: 117865 - Light Wall)
+(@CGUID+61, 65736, 996, 3, 1, -1075.198, -2577.711, 15.828019, 1.725, 86400, 0, 0), -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
+(@CGUID+62, 60788, 996, 3, 1, -1017.835, -2771.984, 38.65444, 4.718282, 604800, 0, 0), -- Pure Light Terrace (Auras: 117865 - Light Wall)
 -- (@CGUID+63, 65736, 996, 3, 1, -832.0764, -2745.399, 31.67754, 0.1536942, 86400, 0, 0); -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
 -- (@CGUID+64, 61038, 996, 3, 1, -1214.795, -2824.823, 41.24303, 3.506719, 86400, 0, 0), -- Yang Guoshi (Auras: 120000 - Sha Corruption)
--- (@CGUID+65, 65736, 996, 3, 1, -1214.8, -2824.82, 41.24303, 3.507344, 86400, 0, 0), -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
+(@CGUID+63, 65736, 996, 3, 1, -1214.795, -2824.823, 41.24303, 3.506719, 86400, 0, 0), -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
 -- (@CGUID+66, 61046, 996, 3, 1, -832.0764, -2745.405, 31.67757, 0.1583484, 86400, 0, 0), -- Jinlun Kun (Auras: 120000 - Sha Corruption)
--- (@CGUID+67, 65736, 996, 3, 1, -832.0764, -2745.399, 31.67754, 0.1536942, 86400, 0, 0), -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
+(@CGUID+64, 65736, 996, 3, 1, -832.0764, -2745.399, 31.67754, 0.1536942, 86400, 0, 0), -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
 -- (@CGUID+68, 61046, 996, 3, 1, -832.0764, -2745.405, 31.67757, 0.1583484, 86400, 0, 0), -- Jinlun Kun (Auras: 120000 - Sha Corruption)
 -- (@CGUID+69, 65736, 996, 3, 1, -832.0764, -2745.399, 31.67754, 0.1536942, 86400, 0, 0), -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
 -- (@CGUID+70, 65736, 996, 3, 1, -1214.8, -2824.82, 41.24303, 3.507344, 86400, 0, 0); -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
-(@CGUID+62, 71095, 996, 3, 1, -1017.93, -2911.302, 19.9015, 4.643414, 86400, 0, 0); -- Reflection of Lei Shi (Auras: 141597 - Lei Shi Victory)
+(@CGUID+65, 71095, 996, 3, 1, -1017.93, -2911.302, 19.9015, 4.643414, 86400, 0, 0); -- Reflection of Lei Shi (Auras: 141597 - Lei Shi Victory)
 -- 1074791424
 -- 69208064
 
@@ -1480,5 +1484,18 @@ INSERT INTO `game_graveyard_zone` VALUES
 SET @OGUID = (SELECT MAX(guid) FROM `gameobject`);
 DELETE FROM `gameobject` WHERE `id`=214525;
 INSERT INTO `gameobject` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`spawntimesecs`,`animprogress`,`state`,`isActive`,`protect_anti_doublet`) VALUES
-(6609460, 214525, 996, 0, 0, 120, 1, -1021.25, -3157.25, 30.7474, 1.5719, 0, 0, 0, 1, 86400, 255, 1, 0, null),
-(@OGUID +20, 214525, 870, 0, 0, 1, 1, 957.689, -52.7766, 514.299, 4.088, 0, 0, 0.890113, -0.45574, 86400, 255, 1, 0, null);
+(@OGUID +20, 214525, 996, 0, 0, 120, 1, -1021.25, -3157.25, 30.7474, 1.5719, 0, 0, 0, 1, 86400, 255, 1, 0, NULL),
+(@OGUID +21, 214525, 870, 0, 0, 1, 1, 957.689, -52.7766, 514.299, 4.088, 0, 0, 0.890113, -0.45574, 86400, 255, 1, 0, NULL);
+
+-- 10/25 Heroic Raid Closed
+UPDATE `access_requirement` SET `level_min` = 91 WHERE `mapId` = 996 AND `difficulty` IN (5,6,7);
+
+-- Valor Points for Sha of Fear
+DELETE FROM `creature_template_currency` WHERE `entry` IN (3160999,3260999,3360999,3460999);
+INSERT INTO `creature_template_currency` VALUES
+(3160999, 396, 40), -- Sha of Fear 	10N
+(3260999, 396, 40), -- Sha of Fear 	10H
+(3360999, 396, 40), -- Sha of Fear 	25N
+(3460999, 396, 40); -- Sha of Fear 	25H
+
+SET FOREIGN_KEY_CHECKS = 1;

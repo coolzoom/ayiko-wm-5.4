@@ -11783,11 +11783,7 @@ InventoryResult Player::CanTakeMoreSimilarItems(uint32 entry, uint32 count, Item
     {
         ItemLimitCategoryEntry const* limitEntry = sItemLimitCategoryStore.LookupEntry(pProto->ItemLimitCategory);
         if (!limitEntry)
-        {
-            if (no_space_count)
-                *no_space_count = count;
-            return EQUIP_ERR_NOT_EQUIPPABLE;
-        }
+            return EQUIP_ERR_OK;
 
         if (limitEntry->mode == ITEM_LIMIT_CATEGORY_MODE_HAVE)
         {
@@ -18917,6 +18913,17 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *charHolder, SQLQueryHolder 
     InitSpellForLevel();
     learnDefaultSpells();
 
+    // TODO@ Rewrite all of spell learning / mastery handling
+    // This is here temporarily because of currently spell load order which needs to be rewritten
+    Unit::AuraApplicationMap& appliedAuras = GetAppliedAuras();
+    for (Unit::AuraApplicationMap::iterator iter = appliedAuras.begin(); iter != appliedAuras.end(); ++iter)
+    {
+        Aura* aura = iter->second->GetBase();
+
+        if (aura->GetSpellInfo()->AttributesEx8 & SPELL_ATTR8_MASTERY_SPECIALIZATION)
+            aura->RecalculateAmountOfEffects();
+    }
+
     // must be before inventory (some items required reputation check)
     m_reputationMgr.LoadFromDB(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_REPUTATION));
 
@@ -23211,7 +23218,7 @@ void Player::ProhibitSpellSchool(SpellSchoolMask prohibitSchoolMask, uint32 cool
         if (spellInfo->Attributes & SPELL_ATTR0_DISABLED_WHILE_ACTIVE)
             continue;
 
-        if (spellInfo->PreventionType != SPELL_PREVENTION_TYPE_SILENCE)
+        if (spellInfo->PreventionType != SPELL_PREVENTION_TYPE_SILENCE && spellInfo->PreventionType != SPELL_PREVENTION_TYPE_UNK3)
             continue;
 
         SpellSchoolMask const spellSchoolMask = spellInfo->GetSchoolMask();
@@ -27257,7 +27264,13 @@ InventoryResult Player::CanEquipUniqueItem(ItemTemplate const* itemProto, uint8 
     {
         ItemLimitCategoryEntry const* limitEntry = sItemLimitCategoryStore.LookupEntry(itemProto->ItemLimitCategory);
         if (!limitEntry)
-            return EQUIP_ERR_NOT_EQUIPPABLE;
+        {
+            // if no limit entry is found, fallback on hardcoded item limit of 1
+            ItemLimitCategoryEntry newLimitEntry;
+            newLimitEntry.maxCount = 1;
+
+            limitEntry = &newLimitEntry;
+        }
 
         // NOTE: limitEntry->mode not checked because if item have have-limit then it applied and to equip case
 

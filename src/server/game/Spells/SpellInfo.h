@@ -546,7 +546,6 @@ public:
     bool IsWrongPrecastSpell(SpellInfo const* m_preCastSpell) const;
     bool IsPoisonOrBleedSpell() const;
     bool IsLethalPoison() const;
-    bool CanTriggerHotStreak() const;
     bool IsCustomCalculated() const;
     bool IsInterruptSpell() const;
     bool CannotBeAddedToCharm() const;

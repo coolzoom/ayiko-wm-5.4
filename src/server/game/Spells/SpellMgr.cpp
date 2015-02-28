@@ -4984,9 +4984,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 131116:// Allow to use Raging Blow
                     spellInfo->ProcCharges = 2;
                     break;
-                case 44544: // Fingers of Frost
-                    spellInfo->StackAmount = 2;
-                    break;
                 case 85222: // Light of Dawn
                     spellInfo->MaxAffectedTargets = 6;
                     break;
@@ -6024,6 +6021,9 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->MaxAffectedTargets = 2;
                 case 19386: // Wyvern Sting
                     spellInfo->Attributes |= SPELL_ATTR0_STOP_ATTACK_TARGET;
+                    break;
+                case 122470: // Touch of Karma
+                    spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
                     break;
                 default:
                     break;

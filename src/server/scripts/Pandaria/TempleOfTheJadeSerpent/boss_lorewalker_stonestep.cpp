@@ -1,969 +1,1013 @@
 /*
-    Dungeon : Template of the Jade Serpent 85-87
-    Wise mari second boss
+* Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
+* Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+*
+* This program is free software; you can redistribute it and/or modify it
+* under the terms of the GNU General Public License as published by the
+* Free Software Foundation; either version 2 of the License, or (at your
+* option) any later version.
+*
+* This program is distributed in the hope that it will be useful, but WITHOUT
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+* more details.
+*
+* You should have received a copy of the GNU General Public License along
+* with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
-#include "CreatureTextMgr.h"
-
-#define TYPE_SET_SUNS_SELECTABLE 2
-#define TYPE_NUMBER_SUN_DEFEATED 1
-#define TYPE_ZAO_ENTER_COMBAT    1
-#define TYPE_ZAO_TALK            2
-#define TYPE_LOREWALKTER_STONESTEP 0
-#define TYPE_LOREWALKER_STONESTEP_TALK_AFTER_ZAO 3
-#define TIMER_INTENSITY 2000
-#define TIMER_DISSIPATION TIMER_INTENSITY
-#define TYPE_GET_EVENT_LOREWALKER_STONESTEP 5
-
-
-enum eBoss
-{
-    BOSS_LOREWALKER_STONESTEP = 1,
-    BOSS_SUN = 2,
-    BOSS_ZAO_SUNSEEKER = 3,
-
-    BOSS_STRIFE = 4,
-    BOSS_PERIL = 5,
-};
-
-enum eSpells
-{
-    SPELL_MEDITATION            = 122715,
-    SPELL_ROOT_SELF             = 106822,
-    SPELL_SUNFIRE_RAYS          = 107223, //09 26 28 - 09 46 29 - 10 06 46
-    SPELL_SUN                   = 107349,
-    SPELL_GROW_LOW              = 104921,
-    SPELL_EXTRACT_SHA_3         = 111807,
-    SPELL_EXTRACT_SHA_4         = 111768,
-    SPELL_SHOOT_SUN             = 112084, //10 52 00 - 11 26 50 - 11 52 35
-    SPELL_HELLFIRE_ARROW        = 113017,
-    SPELL_SHA_CORRUPTION_2      = 120000,
-    SPELL_EXTRACT_SHA           = 111764,
-
-    SPELL_AGONY                 = 114571,
-    SPELL_DISSIPATION           = 113379,
-    SPELL_INTENSITY             = 113315,
-    SPELL_ULTIMATE_POWER        = 113309,
-};
-
-enum eEvents
-{
-    EVENT_INTRO_0 = 1,
-    EVENT_INTRO_1 = 2,
-    EVENT_INTRO_2 = 3,
-    EVENT_INTRO_3 = 4,
-
-    EVENT_SUN_0 = 5,
-    EVENT_SUN_1 = 6,
-    EVENT_SUN_2 = 7,
-    EVENT_SUN_3 = 8,
-    EVENT_SUN_4 = 9,
-
-    EVENT_ZAO_ENTER_COMBAT_1 = 10,
-    EVENT_ZAO_ENTER_COMBAT_2 = 11,
-    EVENT_ZAO_ATTACK         = 12,
-
-    EVENT_TALK_LOREWALKER_DESPAWN = 13,
-
-    EVENT_STRIFE_0 = 14,
-    EVENT_STRIFE_1 = 15,
-    EVENT_STRIFE_2 = 16,
-    EVENT_STRIFE_3 = 17,
-    EVENT_STRIFE_4 = 18,
-};
-
-enum eTexts
-{
-    EVENT_TALK_INTRO_0 = 0,
-    EVENT_TALK_INTRO_1 = 1,
-    EVENT_TALK_INTRO_2 = 2,
-    EVENT_TALK_INTRO_3 = 3,
-
-    EVENT_TALK_ZAO_APPEARS_0 = 4,
-    EVENT_TALK_ZAO_APPEARS_1 = 5,
-    EVENT_TALK_ZAO_APPEARS_2 = 6,
-    EVENT_TALK_ZAO_APPEARS_3 = 7,
-    EVENT_TALK_ZAO_APPEARS_4 = 8,
-
-    EVENT_TALK_ZAO_ENTERS_COMBAT_0 = 9,
-
-    EVENT_TALK_STRIFE_0 = 10,
-    EVENT_TALK_STRIFE_1 = 11,
-    EVENT_TALK_STRIFE_2 = 12,
-    EVENT_TALK_STRIFE_3 = 13,
-    EVENT_TALK_STRIFE_4 = 14,
-};
-
-enum eCreatures
-{
-    CREATURE_SCROLL                 = 57080,
-    CREATURE_ZAO_SUNSEEKER          = 58826,
-    CREATURE_HAUNTING_SHA_1         = 58865,
-    CREATURE_HAUNTING_SHA_2         = 58856,
-    CREATURE_SUN                    = 56915,
-    CREATURE_OSONG                  = 56872,
-};
+#include "temple_of_the_jade_serpent.h"
 
 class boss_lorewalker_stonestep : public CreatureScript
 {
-    public:
-        boss_lorewalker_stonestep() : CreatureScript("boss_lorewalker_stonestep") { }
+public:
+    boss_lorewalker_stonestep() : CreatureScript("boss_lorewalker_stonestep") { }
 
-        CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new boss_lorewalker_stonestep_AI(creature);
+    }
+
+    enum eEvents
+    {
+        EVENT_INTRO_0    = 1,
+        EVENT_INTRO_1    = 2,
+        EVENT_INTRO_2    = 3,
+        EVENT_INTRO_3    = 4,
+        EVENT_SUN_0      = 5,
+        EVENT_SUN_1      = 6,
+        EVENT_SUN_2      = 7,
+        EVENT_SUN_3      = 8,
+        EVENT_SUN_4      = 9,
+        EVENT_STRIFE_0   = 10,
+        EVENT_STRIFE_1   = 11,
+        EVENT_STRIFE_2   = 12,
+        EVENT_STRIFE_3   = 13,
+        EVENT_STRIFE_4   = 14,
+        EVENT_CHECK_WIPE = 15
+    };
+
+    enum eSpells
+    {
+        SPELL_MEDITATION = 122715,
+        SPELL_ROOT_SELF  = 106822
+    };
+
+    enum eTalks
+    {
+        EVENT_TALK_INTRO_0             = 0,
+        EVENT_TALK_INTRO_1             = 1,
+        EVENT_TALK_INTRO_2             = 2,
+        EVENT_TALK_INTRO_3             = 3,
+        EVENT_TALK_ZAO_APPEARS_0       = 4,
+        EVENT_TALK_ZAO_APPEARS_1       = 5,
+        EVENT_TALK_ZAO_APPEARS_2       = 6,
+        EVENT_TALK_ZAO_APPEARS_4       = 7,
+        EVENT_TALK_ZAO_ENTERS_COMBAT_0 = 8,
+        EVENT_TALK_STRIFE_0            = 9,
+        EVENT_TALK_STRIFE_1            = 10,
+        EVENT_TALK_STRIFE_2            = 11,
+        EVENT_TALK_STRIFE_3            = 12,
+        EVENT_TALK_STRIFE_4            = 13
+    };
+
+    enum eActions
+    {
+        ACTION_ZAO   = 0,
+        ACTION_TRIAL = 1,
+        ACTION_RESET = 2
+    };
+
+    struct boss_lorewalker_stonestep_AI : public BossAI
+    {
+        boss_lorewalker_stonestep_AI(Creature* creature) : BossAI(creature, DATA_LOREWALKER) {}
+
+        bool event;
+
+        void InitializeAI() override
         {
-            return new boss_lorewalker_stonestep_AI(creature);
+            if(instance->GetBossState(DATA_LOREWALKER) == DONE)
+            {
+                event = true;
+                me->CastSpell(me, SPELL_MEDITATION, false);
+                me->SetReactState(REACT_PASSIVE);
+            }
+            else
+            {
+                _Reset();
+                event = false;
+                me->GetMotionMaster()->MoveTargetedHome();
+            }
         }
 
-        struct boss_lorewalker_stonestep_AI : public BossAI
+        void DoAction(const int32 action) override
         {
-            boss_lorewalker_stonestep_AI(Creature* creature) : BossAI(creature, BOSS_LOREWALKER_STONESTEP)
+            switch(action)
             {
-                event_go = false;
+                case ACTION_ZAO:
+                    events.ScheduleEvent(EVENT_SUN_0, 0.5 * IN_MILLISECONDS);
+                    break;
+                case ACTION_TRIAL:
+                    events.ScheduleEvent(EVENT_STRIFE_0, 0.5 * IN_MILLISECONDS);                   
+                    break;
+                case ACTION_RESET:
+                    events.Reset();
+                    break;
             }
+        }
 
-            bool event_go;
-            uint64 scrollGUID;
-
-            void Reset()
+        void MoveInLineOfSight(Unit* who) override
+        {
+            if(!event && who->GetTypeId() == TYPEID_PLAYER)
             {
-                event_go = false;
-                me->GetMotionMaster()->MoveTargetedHome();
-                _Reset();
+                event = true;
+                events.ScheduleEvent(EVENT_INTRO_0, 500);
             }
+        }
 
-            void DoAction(const int32 action)
+        void UpdateAI(const uint32 diff) override
+        {
+            events.Update(diff);
+
+            if(uint32 eventId = events.ExecuteEvent())
             {
-                switch (action)
+                switch(eventId)
                 {
-                case TYPE_GET_EVENT_LOREWALKER_STONESTEP:
-                    events.ScheduleEvent(EVENT_STRIFE_0, 500);
-                    break;
-                case 2://STATUS_LOREWALKER_STONESTEP_SPAWN_SUNS
-                    events.ScheduleEvent(EVENT_SUN_0, 500);
-                    break;
-                case TYPE_LOREWALKER_STONESTEP_TALK_AFTER_ZAO:
-                    Talk(EVENT_TALK_ZAO_ENTERS_COMBAT_0);
-                    break;
+                    case EVENT_CHECK_WIPE:
+                        if(instance)
+                        {
+                            if(instance->IsWipe())
+                                instance->SetData(DATA_LOREWALKER, FAIL);
+                        }
+                        events.ScheduleEvent(EVENT_CHECK_WIPE, 1 * IN_MILLISECONDS);
+                        break;
+                    case EVENT_INTRO_0:
+                        Talk(EVENT_TALK_INTRO_0);
+                        events.ScheduleEvent(EVENT_INTRO_1, 8019);
+                        break;
+                    case EVENT_INTRO_1:
+                        Talk(EVENT_TALK_INTRO_1);
+                        events.ScheduleEvent(EVENT_INTRO_2, 16162);
+                        break;
+                    case EVENT_INTRO_2:
+                        Talk(EVENT_TALK_INTRO_2); 
+                        events.ScheduleEvent(EVENT_INTRO_3, 9578);
+                        break;
+                    case EVENT_INTRO_3:
+                        Talk(EVENT_TALK_INTRO_3);
+                        break;
+                    case EVENT_SUN_0:
+                        me->RemoveAura(SPELL_ROOT_SELF);
+                        Talk(EVENT_TALK_ZAO_APPEARS_0);
+                        events.ScheduleEvent(EVENT_SUN_1, 9641);
+                        break;
+                    case EVENT_SUN_1:
+                        Talk(EVENT_TALK_ZAO_APPEARS_1);
+                        me->GetMotionMaster()->MovePoint(0, 838.033f, -2480.518f, 176.744f);
+                        events.ScheduleEvent(EVENT_SUN_2, 12220);
+                        break;
+                    case EVENT_SUN_2:
+                        Talk(EVENT_TALK_ZAO_APPEARS_2);
+                        me->GetMotionMaster()->MovePoint(0, 834.643f, -2490.361f, 179.897f);
+                        events.ScheduleEvent(EVENT_SUN_3, 8280);
+                        break;
+                    case EVENT_SUN_3:
+                        me->SetFacingTo(1.239f);
+                        if(instance)
+                        {
+                            instance->SetData(DATA_SUN, DONE);
+                            if(Creature* zao = Unit::GetCreature(*me, instance->GetData64(DATA_ZAO)))
+                               if(zao->IsAIEnabled)
+                                  zao->AI()->DoAction(1);
+                        }
+                        events.ScheduleEvent(EVENT_SUN_4, 4214);
+                        break;
+                    case EVENT_SUN_4:
+                        me->CastSpell(me, SPELL_MEDITATION, false);
+                        Talk(EVENT_TALK_ZAO_APPEARS_4);
+                        events.ScheduleEvent(EVENT_CHECK_WIPE, 1 * IN_MILLISECONDS);
+                        break;
+                    case EVENT_STRIFE_0:
+                        me->RemoveAura(SPELL_ROOT_SELF);
+                        Talk(EVENT_TALK_STRIFE_0);
+                        events.ScheduleEvent(EVENT_STRIFE_1, 8790);
+                        break;
+                    case EVENT_STRIFE_1:
+                        Talk(EVENT_TALK_STRIFE_1);
+                        me->GetMotionMaster()->MovePoint(0, 838.033f, -2480.518f, 176.744f);
+                        events.ScheduleEvent(EVENT_STRIFE_2, 10780);
+                        break;
+                    case EVENT_STRIFE_2:
+                        Talk(EVENT_TALK_STRIFE_2);
+                        me->GetMotionMaster()->MovePoint(0, 834.643f, -2490.361f, 179.897f);
+                        events.ScheduleEvent(EVENT_STRIFE_3, 9790);
+                        break;
+                    case EVENT_STRIFE_3:
+                       {
+                           Talk(EVENT_TALK_STRIFE_3);
+                           me->SetFacingTo(1.239f);
+                           events.ScheduleEvent(EVENT_STRIFE_4, 6480);
+
+                          if(Creature* peril = me->FindNearestCreature(59726, 60.0f))
+                          {
+                              peril->SetReactState(REACT_AGGRESSIVE);
+                              peril->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NON_ATTACKABLE);
+
+                             if(instance)
+                                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, peril);
+
+                             if(Creature* osong = me->SummonCreature(NPC_OSONG, 842.752f, -2468.911f, 174.959f))
+                                osong->AI()->AttackStart(peril);
+                          }
+
+                          if(Creature* strife = me->FindNearestCreature(59051, 60.0f))
+                          {
+                             strife->SetReactState(REACT_AGGRESSIVE);
+                             strife->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NON_ATTACKABLE);
+
+                             if(instance)
+                                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, strife);
+                           }
+                        }
+                        break;
+                    case EVENT_STRIFE_4:
+                        me->CastSpell(me, SPELL_MEDITATION, false);
+                        Talk(EVENT_TALK_STRIFE_4);
+                        events.ScheduleEvent(EVENT_CHECK_WIPE, 1 * IN_MILLISECONDS);
+                        break;
                 }
             }
-
-            void KilledUnit(Unit* /*victim*/)
-            {
-            }
-
-            void JustDied(Unit* /*killer*/)
-            {
-                _JustDied();
-            }
-
-            void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
-            {
-            }
-
-            void MoveInLineOfSight(Unit* who)
-            {
-                // If Lorewalker stonestep sees a player, launch the speech.
-                if (!event_go && who->GetTypeId() == TYPEID_PLAYER)
-                {
-                    event_go = true;
-                    events.ScheduleEvent(EVENT_INTRO_0, 500);
-                    instance->SetData(TYPE_LOREWALKTER_STONESTEP, 1);
-                }
-            }
-
-            void UpdateAI(const uint32 diff)
-            {
-                events.Update(diff);
-
-                while (uint32 eventId = events.ExecuteEvent())
-                {
-                    switch (eventId)
-                    {
-                        case EVENT_TALK_LOREWALKER_DESPAWN:
-                            me->ForcedDespawn();
-                            break;
-                        // This is the first speech when Lorewalker stonestep sees you for the first time.
-                        case EVENT_INTRO_0:
-                            Talk(EVENT_TALK_INTRO_0); //419621722
-                            events.ScheduleEvent(EVENT_INTRO_1, 8019);
-                            break;
-                        case EVENT_INTRO_1:
-                            Talk(EVENT_TALK_INTRO_1); //419629741
-                            events.ScheduleEvent(EVENT_INTRO_2, 16162);
-                            break;
-                        case EVENT_INTRO_2:
-                            Talk(EVENT_TALK_INTRO_2); //419645903
-                            events.ScheduleEvent(EVENT_INTRO_3, 9578);
-                            break;
-                        case EVENT_INTRO_3:
-                            Talk(EVENT_TALK_INTRO_3); //419655481
-                            break;
-                        // End of the first speech.
-
-                        // TRIAL: Speech when the scroll is destroyed.
-                        case EVENT_SUN_0:
-                            me->RemoveAura(SPELL_ROOT_SELF);
-                            Talk(EVENT_TALK_ZAO_APPEARS_0); //419667540
-                            events.ScheduleEvent(EVENT_SUN_1, 9641);
-                            break;
-                        case EVENT_SUN_1:
-                            Talk(EVENT_TALK_ZAO_APPEARS_1); //419677181
-                            me->GetMotionMaster()->MovePoint(0, 838.033f, -2480.518f, 176.744f);
-                            events.ScheduleEvent(EVENT_SUN_2, 811);
-                            break;
-                        case EVENT_SUN_2:
-                            Talk(EVENT_TALK_ZAO_APPEARS_2); //419677992
-                            me->GetMotionMaster()->MovePoint(0, 834.643f, -2490.361f, 179.897f);
-                            events.ScheduleEvent(EVENT_SUN_3, 2792);
-                            break;
-                        case EVENT_SUN_3:
-                            Talk(EVENT_TALK_ZAO_APPEARS_3); //419680784
-                            me->SetFacingTo(1.239f);
-                            instance->SetData(TYPE_SET_SUNS_SELECTABLE, 0);
-                            events.ScheduleEvent(EVENT_SUN_4, 4214);
-                            break;
-                        case EVENT_SUN_4:
-                            me->CastSpell(me, SPELL_MEDITATION, false);
-                            Talk(EVENT_TALK_ZAO_APPEARS_4); //419722998
-                            break;
-                        // TRIAL: End of speech for destroyed scroll.
-
-                        // ZAO: Speech when the scroll is destroyed.
-                        case EVENT_STRIFE_0:
-                            me->RemoveAura(SPELL_ROOT_SELF);
-                            Talk(EVENT_TALK_STRIFE_0); //419667540
-                            events.ScheduleEvent(EVENT_STRIFE_1, 9641);
-                            break;
-                        case EVENT_STRIFE_1:
-                            Talk(EVENT_TALK_STRIFE_1); //419677181
-                            me->GetMotionMaster()->MovePoint(0, 838.033f, -2480.518f, 176.744f);
-                            events.ScheduleEvent(EVENT_STRIFE_2, 8011);
-                            break;
-                        case EVENT_STRIFE_2:
-                            Talk(EVENT_TALK_STRIFE_2); //419677992
-                            me->GetMotionMaster()->MovePoint(0, 834.643f, -2490.361f, 179.897f);
-                            events.ScheduleEvent(EVENT_STRIFE_3, 5092);
-                            break;
-                        case EVENT_STRIFE_3:
-                            {
-                                Talk(EVENT_TALK_STRIFE_3); //419680784
-                                me->SetFacingTo(1.239f);
-                                events.ScheduleEvent(EVENT_STRIFE_4, 6014);
-                                TempSummon* temp = me->SummonCreature(CREATURE_OSONG, 842.752f, -2468.911f, 174.959f);
-                                if (!temp)
-                                    break;
-                                temp->setFaction(14);
-                                temp->Attack(SelectTarget(SELECT_TARGET_RANDOM), true);
-                                temp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                                temp->SetFacingTo(1.239f);
-                                sCreatureTextMgr->SendChat(temp, 0, 0);
-                            }
-                            break;
-                        case EVENT_STRIFE_4:
-                            me->CastSpell(me, SPELL_MEDITATION, false);
-                            Talk(EVENT_TALK_STRIFE_4); //419722998
-                            events.ScheduleEvent(EVENT_TALK_LOREWALKER_DESPAWN, 3000);
-                            break;
-                        // ZAO: End of speech for destroyed scroll.
-                    }
-                }
-
-            }
-        };
+        }
+    };
 };
 
 class mob_sun : public CreatureScript
 {
-    public:
-        mob_sun() : CreatureScript("mob_sun") { }
+public:
+    mob_sun() : CreatureScript("mob_sun") { }
 
-        CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new mob_sun_AI(creature);
+    }
+
+    enum eEvents
+    {
+        EVENT_SUNFIRE_RAYS = 1
+    };
+
+    enum eSpells
+    {
+        SPELL_SUNFIRE_RAYS = 107223,
+        SPELL_SUN          = 107349,
+        SPELL_GROW_LOW     = 104921,
+    };
+
+    enum eActions
+    {
+        ACTION_SELECTABLE = 0
+    };
+
+    struct mob_sun_AI : public ScriptedAI
+    {
+        mob_sun_AI(Creature* creature) : ScriptedAI(creature) {}
+
+        InstanceScript* instance;
+
+        void InitializeAI() override
         {
-            return new mob_sun_AI(creature);
+            instance = me->GetInstanceScript();
+            me->CastSpell(me, SPELL_SUN, false);
+            me->CastSpell(me, SPELL_GROW_LOW, false);
+            me->AddUnitState(UNIT_STATE_ROOT);
+            me->SetDisableGravity(true);
+            me->SetOrientation(1.239f);
         }
 
-        struct mob_sun_AI : public BossAI
+        void DoAction(const int32 action) override
         {
-            mob_sun_AI(Creature* creature) : BossAI(creature, BOSS_SUN)
+            switch(action)
             {
-                me->CastSpell(me, SPELL_SUN, false);
-                me->CastSpell(me, SPELL_GROW_LOW, false);
-                me->AddUnitState(UNIT_STATE_ROOT);
-                me->SetDisableGravity(true);
-                me->SetOrientation(1.239f);
-            }
-
-            void DoAction(const int32 action)
-            {
-                switch (action)
-                {
-                case TYPE_SET_SUNS_SELECTABLE:
-                    events.ScheduleEvent(1, 2000);
+                case ACTION_SELECTABLE:
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    events.ScheduleEvent(EVENT_SUNFIRE_RAYS, 2 * IN_MILLISECONDS);
                     break;
-                }
             }
+        }
 
-            void JustDied(Unit* /*killer*/)
+        void JustDied(Unit* killer) override
+        {
+            if(instance)
+                me->GetInstanceScript()->SetData(DATA_SUN_STATE, 1);
+        }
+
+        void UpdateAI(const uint32 diff) override
+        {
+            events.Update(diff);
+
+            if(events.ExecuteEvent() == EVENT_SUNFIRE_RAYS)
             {
-                me->GetInstanceScript()->SetData(TYPE_NUMBER_SUN_DEFEATED, 1);
-            }
+                if(Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
+                    me->CastSpell(target, SPELL_SUNFIRE_RAYS, true);
 
-            void UpdateAI(const uint32 diff)
-            {
-                events.Update(diff);
-
-                while (uint32 eventId = events.ExecuteEvent())
-                {
-                    switch (eventId)
-                    {
-                    case 1:
-                        Unit* target = SelectTarget(SELECT_TARGET_RANDOM);
-                        if (target != nullptr)
-                            me->CastSpell(target, SPELL_SUNFIRE_RAYS, true);
-                        events.ScheduleEvent(1, 5000);
-                        break;
-                    }
-                }
+                events.ScheduleEvent(EVENT_SUNFIRE_RAYS, urand(2,5) * IN_MILLISECONDS);
             }
-        };
+        }
+    };
 };
 
 class mob_zao : public CreatureScript
 {
-    public:
-        mob_zao() : CreatureScript("mob_zao") { }
+public:
+    mob_zao() : CreatureScript("mob_zao") { }
 
-        CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new mob_zao_AI(creature);
+    }
+
+    enum eEvents
+    {
+        EVENT_ZAO_ENTER_COMBAT_1 = 1,
+        EVENT_ZAO_ATTACK         = 2,
+        EVENT_ZAO_ENTERS_COMBAT  = 3
+    };
+
+    enum eSpells
+    {
+        SPELL_SHOOT_SUN         = 112084,
+        SPELL_HELLFIRE_ARROW    = 113017,
+        SPELL_SHA_CORRUPTION    = 120000
+    };
+
+    enum eTalks
+    {
+        TALK_INTRO = 0,
+        TALK_AGGRO = 1
+    };
+
+    enum eActions
+    {
+        ACTION_TALK   = 1,
+        ACTION_COMBAT = 2
+    };
+
+    struct mob_zao_AI : public ScriptedAI
+    {
+        mob_zao_AI(Creature* creature) : ScriptedAI(creature) {}
+
+        InstanceScript* instance;
+        bool isCorrupted;
+
+        void InitializeAI() override
         {
-            return new mob_zao_AI(creature);
+            instance = me->GetInstanceScript();
+            isCorrupted = false;
+            me->AddUnitState(UNIT_STATE_ROOT);
         }
 
-        struct mob_zao_AI : public BossAI
+        void DamageTaken(Unit* attacker, uint32&) override
         {
-            mob_zao_AI(Creature* creature) : BossAI(creature, BOSS_ZAO_SUNSEEKER)
+            if(attacker->ToCreature() && (attacker->ToCreature()->GetEntry() == NPC_HAUNTING_SHA_2 || attacker->ToCreature()->GetEntry() == NPC_HAUNTING_SHA))
             {
-                isCorrupted = false;
-                me->AddUnitState(UNIT_STATE_ROOT);
+                attacker->ToCreature()->DespawnOrUnsummon();
+                isCorrupted = true;
+                me->setFaction(14);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                me->CastSpell(me, SPELL_SHA_CORRUPTION, false);
+
+                if(instance)
+                    instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             }
-            std::list<uint64> suns;
+        }
 
-            bool isCorrupted;
-
-            void DamageTaken(Unit* attacker, uint32&)
+        void JustDied(Unit* u) override
+        {
+            if(instance)
             {
-                if (attacker->ToCreature()
-                    && (attacker->ToCreature()->GetEntry() == CREATURE_HAUNTING_SHA_1
-                    || attacker->ToCreature()->GetEntry() == CREATURE_HAUNTING_SHA_2))
-                {
-                    attacker->ToCreature()->ForcedDespawn();
-                    isCorrupted = true;
-                    me->setFaction(14);
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                    me->CastSpell(me, SPELL_SHA_CORRUPTION_2, false);
-                }
+                instance->SetData(DATA_ZAO, DONE);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             }
+        }
 
-            void DoAction(const int32 action)
+        void DoAction(const int32 action) override
+        {
+            switch(action)
             {
-                switch (action)
-                {
-                case TYPE_ZAO_ENTER_COMBAT:
-                    events.ScheduleEvent(EVENT_ZAO_ATTACK, 1000);
-                    break;
-                case TYPE_ZAO_TALK:
+                case ACTION_COMBAT:
                     events.Reset();
-                    events.ScheduleEvent(EVENT_ZAO_ENTER_COMBAT_1, 1000);
+                    events.ScheduleEvent(EVENT_ZAO_ENTER_COMBAT_1, 1 * IN_MILLISECONDS);
                     break;
-                }
+                case ACTION_TALK:                   
+                    Talk(TALK_INTRO);
+                    events.ScheduleEvent(EVENT_ZAO_ATTACK, 1 * IN_MILLISECONDS);                  
+                    break;
             }
+        }
 
-            void UpdateAI(const uint32 diff)
+        void UpdateAI(const uint32 diff) override
+        {
+            events.Update(diff);
+
+            if(uint32 eventId = events.ExecuteEvent())
             {
-                if (suns.empty())
+                switch(eventId)
                 {
-                    std::list<Creature*> searcher;
-                    GetCreatureListWithEntryInGrid(searcher, me, CREATURE_SUN, 50.0f);
-                    for (auto itr : searcher)
-                    {
-                        if (!itr)
-                            continue;
-                        suns.push_back(itr->GetGUID());
-                    }
-                    events.ScheduleEvent(EVENT_ZAO_ATTACK, 15000);
-                }
-
-                events.Update(diff);
-
-                while (uint32 eventId = events.ExecuteEvent())
-                {
-                    switch (eventId)
-                    {
-                    // Speech of Zao entering combat
-                    case EVENT_ZAO_ENTER_COMBAT_1: //419729036
-                        Talk(EVENT_TALK_INTRO_0);
-                        events.ScheduleEvent(EVENT_ZAO_ENTER_COMBAT_2, 32635);
+                    case EVENT_ZAO_ENTER_COMBAT_1:
+                        events.ScheduleEvent(EVENT_ZAO_ENTERS_COMBAT, 5.5 * IN_MILLISECONDS);
                         break;
-                    case EVENT_ZAO_ENTER_COMBAT_2: //419761671
-                        me->GetInstanceScript()->SetData(TYPE_LOREWALKER_STONESTEP_TALK_AFTER_ZAO, 0);
-                        events.ScheduleEvent(EVENT_ZAO_ATTACK, 1000);
+                    case EVENT_ZAO_ENTERS_COMBAT:
+                        Talk(TALK_AGGRO);
+                        events.ScheduleEvent(EVENT_ZAO_ATTACK, 5 * IN_MILLISECONDS);
                         break;
-                    // End of speech of Zao entering combat
                     case EVENT_ZAO_ATTACK:
-                        if (isCorrupted)
-                        {
-                            Unit* target = SelectTarget(SELECT_TARGET_RANDOM);
-                            if (target != nullptr)
+                        if(isCorrupted)
+                        {                          
+                            if(Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
                                 me->CastSpell(target, SPELL_HELLFIRE_ARROW, true);
+
                             events.ScheduleEvent(EVENT_ZAO_ATTACK, 3000);
                         }
                         else
                         {
-                            if (!suns.empty())
+                            std::list<Creature*> suns;
+                            me->GetCreatureListWithEntryInGrid(suns, NPC_ZAO_SUN, 100.0f);
+                            if(!suns.empty())
                             {
-                                uint32 rand = urand(0, suns.size());
-                                uint64 guid_target = 0;
-                                Creature* target = nullptr;
-                                for (auto guid : suns)
+                                for(auto creature : suns)
                                 {
-                                    if (rand == 0)
-                                    {
-                                        guid_target = guid;
-                                        break;
-                                    }
-                                    --rand;
+                                    if(Unit* target = Trinity::Containers::SelectRandomContainerElement(suns))
+                                        me->CastSpell(target, SPELL_SHOOT_SUN, false);
                                 }
-                                target = me->GetInstanceScript()->instance->GetCreature(guid_target);
-                                if (target != nullptr)
-                                    me->CastSpell(target, SPELL_SHOOT_SUN, false);
-                                else
-                                    suns.remove(guid_target);
-                                events.ScheduleEvent(EVENT_ZAO_ATTACK, 3000);
                             }
+                            events.ScheduleEvent(EVENT_ZAO_ATTACK, 3 * IN_MILLISECONDS);
                         }
                         break;
-                    }
                 }
             }
-        };
+            DoMeleeAttackIfReady();
+        }
+    };
 };
 
 class mob_haunting_sha : public CreatureScript
 {
-    public:
-        mob_haunting_sha() : CreatureScript("mob_haunting_sha") { }
+public:
+    mob_haunting_sha() : CreatureScript("mob_haunting_sha") { }
 
-        CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new mob_haunting_sha_AI(creature);
+    }
+
+    enum eEvents
+    {
+        EVENT_HAUNTING_GAZE = 1
+    };
+
+    enum eSpells
+    {
+        SPELL_HAUNTING_GAZE = 114646
+    };
+
+    struct mob_haunting_sha_AI : public ScriptedAI
+    {
+        mob_haunting_sha_AI(Creature* creature) : ScriptedAI(creature) {}
+
+        InstanceScript* instance;
+
+        void InitializeAI() override
         {
-            return new mob_haunting_sha_AI(creature);
+            instance = me->GetInstanceScript();
         }
 
-        struct mob_haunting_sha_AI : public BossAI
+        void EnterCombat(Unit* unit) override
         {
-            mob_haunting_sha_AI(Creature* creature) : BossAI(creature, BOSS_ZAO_SUNSEEKER)
-            {
-                me->setFaction(14);
-                me->CastSpell(me, SPELL_EXTRACT_SHA, false);
-            }
+            events.ScheduleEvent(EVENT_HAUNTING_GAZE, 1 * IN_MILLISECONDS);
+        }
 
-            void EnterCombat(Unit* /*unit*/)
+        void DoAction(const int32 action) override
+        {
+            if(action == 0)
             {
-                events.ScheduleEvent(1, 1000);
-            }
-
-            void DoAction(const int32 action)
-            {
-                if (action != 0)
-                    return;
-
-                uint64 guid = me->GetInstanceScript()->GetData64(CREATURE_ZAO_SUNSEEKER);
-                if (guid != 0)
+                if(instance)
                 {
-                    Creature* zao = me->GetMap()->GetCreature(guid);
-                    if (!zao)
-                        return;
-
-                    me->getThreatManager().addThreat(zao, 1000000.f);
-                    me->AI()->AttackStart(zao);
+                    if(Creature* zao = Unit::GetCreature(*me, instance->GetData64(DATA_ZAO)))
+                    {
+                        me->getThreatManager().addThreat(zao, 1000000.f);
+                        me->AI()->AttackStart(zao);
+                    }
                 }
             }
+        }
 
-            void UpdateAI(const uint32 diff)
+        void UpdateAI(const uint32 diff) override
+        {
+            if(!me->GetVictim())
             {
-                if (!me->GetVictim())
+                if(instance)
                 {
                     Map::PlayerList const& PlayerList = me->GetInstanceScript()->instance->GetPlayers();
 
-                    if (!PlayerList.isEmpty())
+                    if(!PlayerList.isEmpty())
                     {
-                        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                        for(Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                         {
-                            Player* plr = i->GetSource();
-                            if (!plr)
-                                continue;
-                            me->getThreatManager().addThreat(plr, 1.0f);
+                            if(Player* plr = i->GetSource())
+                                me->getThreatManager().addThreat(plr, 1.0f);
                         }
                     }
-                    me->AI()->AttackStart(SelectTarget(SELECT_TARGET_RANDOM));
                 }
 
-                events.Update(diff);
-
-                while (uint32 eventId = events.ExecuteEvent())
-                {
-                    switch (eventId)
-                    {
-                    case 1:
-                        if (!me->GetVictim())
-                            return;
-                        me->CastSpell(me->GetVictim(), 114646, false);
-                        events.ScheduleEvent(1, 2000);
-                        break;
-                    }
-                }
-
-                DoMeleeAttackIfReady();
+                AttackStart(SelectTarget(SELECT_TARGET_RANDOM));
             }
-        };
+
+            events.Update(diff);
+
+            if(events.ExecuteEvent() == EVENT_HAUNTING_GAZE)
+            {
+                me->CastSpell(me->GetVictim(), SPELL_HAUNTING_GAZE, false);
+                events.ScheduleEvent(EVENT_HAUNTING_GAZE, 2 * IN_MILLISECONDS);
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
 };
 
-class mob_strife : public CreatureScript
+class mob_strife_peril : public CreatureScript
 {
-    public:
-        mob_strife() : CreatureScript("mob_strife") { }
+public:
+    mob_strife_peril() : CreatureScript("mob_strife_peril") { }
 
-        CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new mob_strife_peril_AI(creature);
+    }
+
+    enum eEvents
+    {
+        EVENT_AGONY       = 1
+    };
+
+    enum eSpells
+    {
+        SPELL_AGONY          = 114571,
+        SPELL_DISSIPATION    = 113379,
+        SPELL_INTENSITY      = 113315,
+        SPELL_ULTIMATE_POWER = 113309
+    };
+
+    struct mob_strife_peril_AI : public ScriptedAI
+    {
+        mob_strife_peril_AI(Creature* creature) : ScriptedAI(creature) {}
+
+        uint32 countIntensity, timerIntensity, timerDissipation;
+        bool hasBeenHit, dissipation;
+
+        InstanceScript* instance;
+
+        void InitializeAI() override
         {
-            return new mob_strife_AI(creature);
+            instance = me->GetInstanceScript();
+            me->setFaction(14);
+            countIntensity = 0;
+            timerIntensity = 2000;
+            timerDissipation = 2000;
+            hasBeenHit = false;
         }
 
-        struct mob_strife_AI : public BossAI
+        void DamageTaken(Unit* attacker, uint32& damage) override
         {
-            mob_strife_AI(Creature* creature) : BossAI(creature, BOSS_STRIFE)
+            if(attacker->GetTypeId() == TYPEID_UNIT && !attacker->ToCreature()->isPet())
             {
-                me->setFaction(14);
-                timer_intensity = TIMER_INTENSITY;
-                timer_dissipation = TIMER_DISSIPATION;
-                countIntensity = 0;
-                hasBeenHit = false;
+                if(me->GetHealth() < me->GetMaxHealth() || me->GetHealth() <= damage)
+                    damage = 0;
             }
-            uint32 timer_dissipation;
-            uint32 timer_intensity;
-            int32 countIntensity;
-            bool hasBeenHit;
-
-            void DamageTaken(Unit* /*unit*/, uint32&)
+            else
             {
-                timer_dissipation = TIMER_DISSIPATION;
+                timerDissipation = 2000;
                 hasBeenHit = true;
             }
-
-            void EnterCombat(Unit* /*unit*/)
-            {
-                events.ScheduleEvent(1, 1000);
-            }
-
-            void UpdateAI(const uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                if (timer_dissipation <= diff)
-                {
-                    me->RemoveAuraFromStack(SPELL_INTENSITY);
-                    if (!me->HasAura(SPELL_INTENSITY))
-                        me->AddAura(SPELL_DISSIPATION, me);
-                    timer_dissipation = TIMER_DISSIPATION;
-                    --countIntensity;
-                    if (countIntensity == -10)
-                        countIntensity = -10;
-                }
-                else
-                    timer_dissipation -= diff;
-
-                if (timer_intensity <= diff)
-                {
-                    if (hasBeenHit)
-                    {
-                        me->RemoveAuraFromStack(SPELL_DISSIPATION);
-                        if (!me->HasAura(SPELL_DISSIPATION))
-                            me->AddAura(SPELL_INTENSITY, me);
-                        ++countIntensity;
-
-                        if (countIntensity == 10)
-                        {
-                            me->CastSpell(me, SPELL_ULTIMATE_POWER, false);
-                            me->RemoveAura(SPELL_INTENSITY);
-                        }
-                        if (countIntensity > 10)
-                            countIntensity = 10;
-                    }
-                    hasBeenHit = false;
-                    timer_intensity = TIMER_INTENSITY;
-                }
-                else
-                    timer_intensity -= diff;
-
-                while (uint32 eventId = events.ExecuteEvent())
-                {
-                    switch (eventId)
-                    {
-                    case 1:
-                        if (!me->GetVictim())
-                            return;
-                        me->CastSpell(me->GetVictim(), SPELL_AGONY, false);
-                        events.ScheduleEvent(1, 2000);
-                        break;
-                    }
-                }
-
-                DoMeleeAttackIfReady();
-            }
-        };
-};
-
-class mob_peril : public CreatureScript
-{
-    public:
-        mob_peril() : CreatureScript("mob_peril") { }
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new mob_peril_AI(creature);
         }
 
-        struct mob_peril_AI : public BossAI
+        void EnterCombat(Unit* unit) override
         {
-            mob_peril_AI(Creature* creature) : BossAI(creature, BOSS_PERIL)
+            events.ScheduleEvent(EVENT_AGONY, 1 * IN_MILLISECONDS);
+        }
+
+        void JustDied(Unit* u) override
+        {
+            if(instance)
             {
-                me->setFaction(14);
-                timer_intensity = TIMER_INTENSITY;
-                timer_dissipation = TIMER_DISSIPATION;
-                countIntensity = 0;
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                instance->SetData(DATA_TRIAL, DONE);
+            }
+        }
+
+        void UpdateAI(const uint32 diff) override
+        {
+            if(!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            if(timerDissipation <= diff)
+            {
+                me->RemoveAuraFromStack(SPELL_INTENSITY);
+                if(!me->HasAura(SPELL_INTENSITY))
+                    me->AddAura(SPELL_DISSIPATION, me);
+
+                timerDissipation = 2000;
+
+                --countIntensity;
+                if(countIntensity == -10)
+                    countIntensity = -10;
+            }
+            else
+                timerDissipation -= diff;
+
+            if(timerIntensity <= diff)
+            {
+                if(hasBeenHit)
+                {
+                    me->RemoveAuraFromStack(SPELL_DISSIPATION);
+                    if(!me->HasAura(SPELL_DISSIPATION))
+                        me->AddAura(SPELL_INTENSITY, me);
+
+                    ++countIntensity;
+                    if(countIntensity == 10)
+                    {
+                        me->CastSpell(me, SPELL_ULTIMATE_POWER, false);
+                        me->RemoveAura(SPELL_INTENSITY);
+                    }
+
+                    if(countIntensity > 10)
+                        countIntensity = 10;
+                }
                 hasBeenHit = false;
+                timerIntensity = 2000;
             }
-            uint32 timer_dissipation;
-            uint32 timer_intensity;
-            int32 countIntensity;
-            bool hasBeenHit;
+            else
+                timerIntensity -= diff;
 
-            void DamageTaken(Unit* /*unit*/, uint32&)
+            if(events.ExecuteEvent() == EVENT_AGONY)
             {
-                timer_dissipation = TIMER_DISSIPATION;
-                hasBeenHit = true;
+                me->CastSpell(me->GetVictim(), SPELL_AGONY, false);
+                events.ScheduleEvent(EVENT_AGONY, 2000);
             }
 
-            void EnterCombat(Unit* /*unit*/)
-            {
-                events.ScheduleEvent(1, 1000);
-            }
-
-            void UpdateAI(const uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                if (timer_dissipation <= diff)
-                {
-                    me->RemoveAuraFromStack(SPELL_INTENSITY);
-                    if (!me->HasAura(SPELL_INTENSITY))
-                        me->AddAura(SPELL_DISSIPATION, me);
-                    timer_dissipation = TIMER_DISSIPATION;
-                    --countIntensity;
-                    if (countIntensity == -10)
-                        countIntensity = -10;
-                }
-                else
-                    timer_dissipation -= diff;
-
-                if (timer_intensity <= diff)
-                {
-                    if (hasBeenHit)
-                    {
-                        me->RemoveAuraFromStack(SPELL_DISSIPATION);
-                        if (!me->HasAura(SPELL_DISSIPATION))
-                            me->AddAura(SPELL_INTENSITY, me);
-                        ++countIntensity;
-
-                        if (countIntensity == 10)
-                        {
-                            me->CastSpell(me, SPELL_ULTIMATE_POWER, false);
-                            me->RemoveAura(SPELL_INTENSITY);
-                        }
-                        if (countIntensity > 10)
-                            countIntensity = 10;
-                    }
-                    hasBeenHit = false;
-                    timer_intensity = TIMER_INTENSITY;
-                }
-                else
-                    timer_intensity -= diff;
-
-                while (uint32 eventId = events.ExecuteEvent())
-                {
-                    switch (eventId)
-                    {
-                    case 1:
-                        if (!me->GetVictim())
-                            return;
-                        me->CastSpell(me->GetVictim(), SPELL_AGONY, false);
-                        events.ScheduleEvent(1, 2000);
-                        break;
-                    }
-                }
-
-                DoMeleeAttackIfReady();
-            }
-        };
+            DoMeleeAttackIfReady();
+        }
+    };
 };
 
-class mob_nodding_tiger: public CreatureScript
+class mob_nodding_tiger : public CreatureScript
 {
-    public:
-        mob_nodding_tiger() : CreatureScript("mob_nodding_tiger") { }
+public:
+    mob_nodding_tiger() : CreatureScript("mob_nodding_tiger") { }
 
-        CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new mob_nodding_tiger_AI(creature);
+    }
+
+    enum eEvents
+    {
+        EVENT_CLAW = 1
+    };
+
+    enum eSpells
+    {
+        SPELL_CLAW = 31289
+    };
+
+    struct mob_nodding_tiger_AI : public ScriptedAI
+    {
+        mob_nodding_tiger_AI(Creature* creature) : ScriptedAI(creature) {}
+
+        EventMap events;
+
+        void EnterCombat(Unit* unit) override
         {
-            return new mob_nodding_tiger_AI(creature);
+            events.ScheduleEvent(EVENT_CLAW, 2 * IN_MILLISECONDS);
         }
 
-        struct mob_nodding_tiger_AI : public ScriptedAI
+        void UpdateAI(const uint32 diff) override
         {
-            mob_nodding_tiger_AI(Creature* creature) : ScriptedAI(creature)
+            if(!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            if(events.ExecuteEvent() == EVENT_CLAW)
             {
-            }
-            EventMap events;
-
-            void EnterCombat(Unit* /*unit*/)
-            {
-                events.ScheduleEvent(1, 2000);
+                me->CastSpell((Unit*)NULL, SPELL_CLAW, false);
+                events.ScheduleEvent(EVENT_CLAW, 3 * IN_MILLISECONDS);
             }
 
-            void UpdateAI(const uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                while (uint32 eventId = events.ExecuteEvent())
-                {
-                    switch (eventId)
-                    {
-                    case 1:
-                        me->CastSpell(me->GetVictim(), 31289, false);
-                        events.ScheduleEvent(1, 3000);
-                        break;
-                    }
-                }
-                DoMeleeAttackIfReady();
-            }
-        };
+            DoMeleeAttackIfReady();
+        }
+    };
 };
 
-class mob_golden_beetle: public CreatureScript
+class mob_golden_beetle : public CreatureScript
 {
-    public:
-        mob_golden_beetle() : CreatureScript("mob_golden_beetle") { }
+public:
+    mob_golden_beetle() : CreatureScript("mob_golden_beetle") { }
 
-        CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new mob_golden_beetle_AI(creature);
+    }
+
+    enum eEvents
+    {
+        EVENT_SERRATED_SLASH = 1,
+        EVENT_SHROUD_OF_GOLD = 2,
+        EVENT_SLOW           = 3
+    };
+
+    enum eSpells
+    {
+        SPELL_SERRATED_SLASH = 128051,
+        SPELL_SHROUD_OF_GOLD = 88023,
+        SPELL_SLOW           = 31589
+    };
+
+    struct mob_golden_beetle_AI : public ScriptedAI
+    {
+        mob_golden_beetle_AI(Creature* creature) : ScriptedAI(creature) {}
+
+        EventMap events;
+
+        void EnterCombat(Unit* unit) override
         {
-            return new mob_golden_beetle_AI(creature);
+            events.ScheduleEvent(EVENT_SERRATED_SLASH, 2 * IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_SHROUD_OF_GOLD, 4 * IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_SLOW, 6 * IN_MILLISECONDS);
         }
 
-        struct mob_golden_beetle_AI : public ScriptedAI
+        void UpdateAI(const uint32 diff) override
         {
-            mob_golden_beetle_AI(Creature* creature) : ScriptedAI(creature)
+            if(!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            if(uint32 eventId = events.ExecuteEvent())
             {
-            }
-            EventMap events;
-
-            void EnterCombat(Unit* /*unit*/)
-            {
-                events.ScheduleEvent(1, 2000);
-                events.ScheduleEvent(2, 4000);
-                events.ScheduleEvent(3, 6000);
-            }
-
-            void UpdateAI(const uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                while (uint32 eventId = events.ExecuteEvent())
+                switch(eventId)
                 {
-                    switch (eventId)
-                    {
-                    case 1:
-                        me->CastSpell(me->GetVictim(), 128051, false);
-                        events.ScheduleEvent(1, 10000);
+                    case EVENT_SERRATED_SLASH:
+                        me->CastSpell(me->GetVictim(), SPELL_SERRATED_SLASH, false);
+                        events.ScheduleEvent(EVENT_SERRATED_SLASH, 10 * IN_MILLISECONDS);
                         break;
-                    case 2:
-                        me->CastSpell(me->GetVictim(), 88023, false);
-                        events.ScheduleEvent(2, 5000);
+                    case EVENT_SHROUD_OF_GOLD:
+                        me->CastSpell(me->GetVictim(), SPELL_SHROUD_OF_GOLD, false);
+                        events.ScheduleEvent(EVENT_SHROUD_OF_GOLD, 5 * IN_MILLISECONDS);
                         break;
-                    case 3:
-                        me->CastSpell(me->GetVictim(), 31589, false);
-                        events.ScheduleEvent(3, 15000);
+                    case EVENT_SLOW:
+                        me->CastSpell(me->GetVictim(), SPELL_SLOW, false);
+                        events.ScheduleEvent(EVENT_SLOW, 15 * IN_MILLISECONDS);
                         break;
-                    }
                 }
-                DoMeleeAttackIfReady();
             }
-        };
+            DoMeleeAttackIfReady();
+        }
+    };
 };
 
-class mob_jiang_xiang: public CreatureScript
+class mob_jiang_xiang : public CreatureScript
 {
-    public:
-        mob_jiang_xiang() : CreatureScript("mob_jiang_xiang") { }
+public:
+    mob_jiang_xiang() : CreatureScript("mob_jiang_xiang") { }
 
-        CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new mob_jiang_xiang_AI(creature);
+    }
+
+    enum eEvents
+    {
+        EVENT_AERIALISTS_KICK = 1,
+        EVENT_THROW_TORCH     = 2
+    };
+
+    enum eSpells
+    {
+        SPELL_AERIALISTS_KICK = 114805,
+        SPELL_THROW_TORCH     = 114803
+    };
+
+    struct mob_jiang_xiang_AI : public ScriptedAI
+    {
+        mob_jiang_xiang_AI(Creature* creature) : ScriptedAI(creature) {}
+
+        EventMap events;
+
+        void EnterCombat(Unit* unit) override
         {
-            return new mob_jiang_xiang_AI(creature);
+            events.ScheduleEvent(EVENT_AERIALISTS_KICK, 2 * IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_THROW_TORCH, 4 * IN_MILLISECONDS);
         }
 
-        struct mob_jiang_xiang_AI : public ScriptedAI
+        void UpdateAI(const uint32 diff) override
         {
-            mob_jiang_xiang_AI(Creature* creature) : ScriptedAI(creature)
+            if(!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            if(uint32 eventId = events.ExecuteEvent())
             {
-            }
-            EventMap events;
-
-            void EnterCombat(Unit* /*unit*/)
-            {
-                events.ScheduleEvent(1, 2000);
-                events.ScheduleEvent(2, 4000);
-            }
-
-            void UpdateAI(const uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                while (uint32 eventId = events.ExecuteEvent())
+                switch(eventId)
                 {
-                    switch (eventId)
-                    {
-                    case 1:
-                        me->CastSpell(me->GetVictim(), 114805, false);
-                        events.ScheduleEvent(1, 10000);
+                    case EVENT_AERIALISTS_KICK:
+                        me->CastSpell(me->GetVictim(), SPELL_AERIALISTS_KICK, false);
+                        events.ScheduleEvent(EVENT_AERIALISTS_KICK, 10 * IN_MILLISECONDS);
                         break;
-                    case 2:
-                        me->CastSpell(me->GetVictim(), 114803, false);
-                        events.ScheduleEvent(2, 5000);
+                    case EVENT_THROW_TORCH:
+                        me->CastSpell(me->GetVictim(), SPELL_THROW_TORCH, false);
+                        events.ScheduleEvent(EVENT_THROW_TORCH, 5 * IN_MILLISECONDS);
                         break;
-                    }
                 }
-                DoMeleeAttackIfReady();
             }
-        };
+            DoMeleeAttackIfReady();
+        }
+    };
 };
 
-class mob_songbird_queen: public CreatureScript
+class mob_songbird_queen : public CreatureScript
 {
-    public:
-        mob_songbird_queen() : CreatureScript("mob_songbird_queen") { }
+public:
+    mob_songbird_queen() : CreatureScript("mob_songbird_queen") { }
 
-        CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new mob_songbird_queen_AI(creature);
+    }
+
+    enum eSpells
+    {
+        SPELL_SONGBIRD_SERENADE = 114826
+    };
+
+    enum eEvents
+    {
+        EVENT_SONGBIRD_SERENADE = 1
+    };
+
+    struct mob_songbird_queen_AI : public ScriptedAI
+    {
+        mob_songbird_queen_AI(Creature* creature) : ScriptedAI(creature) {}
+
+        EventMap events;
+
+        void EnterCombat(Unit* unit) override
         {
-            return new mob_songbird_queen_AI(creature);
+            events.ScheduleEvent(EVENT_SONGBIRD_SERENADE, 2 * IN_MILLISECONDS);
         }
 
-        struct mob_songbird_queen_AI : public ScriptedAI
+        void UpdateAI(const uint32 diff) override
         {
-            mob_songbird_queen_AI(Creature* creature) : ScriptedAI(creature)
+            if(!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            if(events.ExecuteEvent() == EVENT_SONGBIRD_SERENADE)
             {
-            }
-            EventMap events;
-
-            void EnterCombat(Unit* /*unit*/)
-            {
-                events.ScheduleEvent(1, 2000);
+                me->CastSpell(me->GetVictim(), SPELL_SONGBIRD_SERENADE, false);
+                events.ScheduleEvent(EVENT_SONGBIRD_SERENADE, 10 * IN_MILLISECONDS);
             }
 
-            void UpdateAI(const uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                while (uint32 eventId = events.ExecuteEvent())
-                {
-                    switch (eventId)
-                    {
-                    case 1:
-                        me->CastSpell(me->GetVictim(), 114826, false);
-                        events.ScheduleEvent(1, 10000);
-                        break;
-                    }
-                }
-                DoMeleeAttackIfReady();
-            }
-        };
+            DoMeleeAttackIfReady();
+        }
+    };
 };
 
-class mob_talking_fish: public CreatureScript
+class mob_corrupted_scroll : public CreatureScript
 {
-    public:
-        mob_talking_fish() : CreatureScript("mob_talking_fish") { }
+public:
+    mob_corrupted_scroll() : CreatureScript("mob_corrupted_scroll") { }
 
-        CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new mob_corrupted_scrollAI(creature);
+    }
+
+    enum eSpells
+    {
+        SPELL_SCROLL_FLOOR = 107350,
+        SPELL_JADE_ENERGY_2 = 111452,
+        SPELL_GROW_LOW = 104921,
+
+        SPELL_SHA_BURNING = 111588,
+        SPELL_SHA_EXPLOSION = 111579,
+        SPELL_DEATH = 98391
+    };
+
+    struct mob_corrupted_scrollAI : public ScriptedAI
+    {
+        mob_corrupted_scrollAI(Creature* creature) : ScriptedAI(creature) {}
+
+        void Reset() override
         {
-            return new mob_talking_fish_AI(creature);
+            me->SetReactState(REACT_PASSIVE);
+            me->setRegeneratingHealth(false);
+            me->CastSpell(me, SPELL_SCROLL_FLOOR, false);
+            me->CastSpell(me, SPELL_JADE_ENERGY_2, false);
+            me->CastSpell(me, SPELL_GROW_LOW, false);
         }
 
-        enum eTalks
+        void JustDied(Unit* /*killer*/) override
         {
-            TALK_0,
-            TALK_1,
-            TALK_2,
-            TALK_3,
-        };
+            me->RemoveAllAuras();
+            me->CastSpell(me, SPELL_SHA_BURNING, false);
+            me->CastSpell(me, SPELL_SHA_EXPLOSION, false);
+            me->CastSpell(me, SPELL_DEATH, false);
+        }
+    };
+};
 
-        struct mob_talking_fish_AI : public ScriptedAI
+class mob_talking_fish : public CreatureScript
+{
+public:
+    mob_talking_fish() : CreatureScript("mob_talking_fish") { }
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new mob_talking_fish_AI(creature);
+    }
+
+    enum eTalks
+    {
+        TALK_0 = 0,
+        TALK_1 = 1,
+        TALK_2 = 2,
+        TALK_3 = 3,
+    };
+
+    enum eEvents
+    {
+        EVENT_BUBBLE_SPRAY = 1,
+        EVENT_TALK_2 = 2,
+        EVENT_TALK_3 = 3,
+        EVENT_TALK_4 = 4
+    };
+
+    enum eSpells
+    {
+        SPELL_BUBBLE_SPRAY = 114811
+    };
+
+    struct mob_talking_fish_AI : public ScriptedAI
+    {
+        mob_talking_fish_AI(Creature* creature) : ScriptedAI(creature) {}
+
+        EventMap events;
+
+        void EnterCombat(Unit* unit) override
         {
-            mob_talking_fish_AI(Creature* creature) : ScriptedAI(creature)
+            Talk(TALK_0);
+            events.ScheduleEvent(EVENT_BUBBLE_SPRAY, 2000);
+            events.ScheduleEvent(EVENT_TALK_2, 3 * IN_MILLISECONDS);
+        }
+
+        void UpdateAI(const uint32 diff) override
+        {
+            if(!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            if(uint32 eventId = events.ExecuteEvent())
             {
-            }
-            EventMap events;
-
-            void EnterCombat(Unit* /*unit*/)
-            {
-                Talk(TALK_0 + urand(0, 3));
-                events.ScheduleEvent(1, 2000);
-            }
-
-            void UpdateAI(const uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                while (uint32 eventId = events.ExecuteEvent())
+                switch(eventId)
                 {
-                    switch (eventId)
-                    {
-                    case 1:
-                        me->CastSpell(me->GetVictim(), 114811, false);
-                        events.ScheduleEvent(1, 10000);
+                    case EVENT_BUBBLE_SPRAY:
+                        me->CastSpell(me->GetVictim(), SPELL_BUBBLE_SPRAY, false);
+                        events.ScheduleEvent(EVENT_BUBBLE_SPRAY, 10000);
                         break;
-                    }
+                    case EVENT_TALK_2:
+                        Talk(TALK_1);
+                        events.ScheduleEvent(EVENT_TALK_3, 3.5 * IN_MILLISECONDS);
+                        break;
+                    case EVENT_TALK_3:
+                        Talk(TALK_2);
+                        events.ScheduleEvent(EVENT_TALK_4, 3 * IN_MILLISECONDS);
+                        break;
+                    case EVENT_TALK_4:
+                        Talk(TALK_3);
+                        break;
                 }
-                DoMeleeAttackIfReady();
             }
-        };
+            DoMeleeAttackIfReady();
+        }
+    };
 };
 
 void AddSC_boss_lorewalker_stonestep()
@@ -972,9 +1016,9 @@ void AddSC_boss_lorewalker_stonestep()
     new mob_sun();
     new mob_zao();
     new mob_haunting_sha();
-    new mob_peril();
-    new mob_strife();
-    //Trashes
+    new mob_strife_peril();
+
+    new mob_corrupted_scroll();
     new mob_nodding_tiger();
     new mob_golden_beetle();
     new mob_jiang_xiang();

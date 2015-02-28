@@ -248,7 +248,7 @@ bool IntroDone(InstanceScript* instance, Creature* me)
 
     if (done && instance)
     {
-        instance->SetData(INTRO_DONE, DONE);
+        //instance->SetData(INTRO_DONE, DONE);
         return true;
     }
 
@@ -484,7 +484,7 @@ class boss_ancient_regail : public CreatureScript
                 if (!IntroDone(pInstance, me))
                 {
                     me->SetReactState(REACT_PASSIVE);
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_LOOTING);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_LOOTING);
 
                     if (GameObject* vortex = pInstance->instance->GetGameObject(pInstance->GetData64(GOB_COUNCILS_VORTEX)))
                     {
@@ -772,7 +772,7 @@ class boss_ancient_asani : public CreatureScript
                 if (!IntroDone(pInstance, me))
                 {
                     me->SetReactState(REACT_PASSIVE);
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_LOOTING);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_LOOTING);
 
                     if (GameObject* vortex = pInstance->instance->GetGameObject(pInstance->GetData64(GOB_COUNCILS_VORTEX)))
                     {
@@ -914,6 +914,7 @@ class boss_protector_kaolan : public CreatureScript
                 summons.Despawn(summon);
             }
 
+            /*
             void MoveInLineOfSight(Unit* who)
             {
                 if (IntroDone(pInstance, me) && !introDone && who->GetTypeId() == TYPEID_PLAYER)
@@ -921,7 +922,7 @@ class boss_protector_kaolan : public CreatureScript
                     Talk(TALK_INTRO);
                     introDone = true;
                 }
-            }
+            }*/
 
             void KilledUnit(Unit* who)
             {
@@ -1059,7 +1060,7 @@ class boss_protector_kaolan : public CreatureScript
                 if (!IntroDone(pInstance, me))
                 {
                     me->SetReactState(REACT_PASSIVE);
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_LOOTING);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_LOOTING);
 
                     if (GameObject* vortex = pInstance->instance->GetGameObject(pInstance->GetData64(GOB_COUNCILS_VORTEX)))
                     {
@@ -1470,7 +1471,7 @@ class spell_expelled_corruption : public SpellScriptLoader
 
                 float distance = caster->GetExactDist2d(target);
 
-                if (distance >= 0.0f && distance <= 30.0f)
+                if (distance >= 0.0f && distance <= (30.f + caster->GetFloatValue(UNIT_FIELD_BOUNDINGRADIUS)))
                     SetHitDamage(GetHitDamage() * (1 - (distance / 30.0f)));
             }
 
@@ -1570,19 +1571,19 @@ class spell_lightning_storm_damage : public SpellScriptLoader
                 {
                     case SPELL_LIGHTNING_STORM_SECOND_DMG:
                         MinDist = 10.0f;
-                        MaxDist = 20.0f;
+                        MaxDist = 22.0f;
                         break;
                     case SPELL_LIGHTNING_STORM_THIRD_DMG:
                         MinDist = 30.0f;
-                        MaxDist = 40.0f;
+                        MaxDist = 42.0f;
                         break;
                     case SPELL_LIGHTNING_STORM_FOURTH_DMG:
                         MinDist = 50.0f;
-                        MaxDist = 60.0f;
+                        MaxDist = 62.0f;
                         break;
                     case SPELL_LIGHTNING_STORM_FIFTH_DMG:
                         MinDist = 70.0f;
-                        MaxDist = 80.0f;
+                        MaxDist = 82.0f;
                         break;
                     default:
                         break;

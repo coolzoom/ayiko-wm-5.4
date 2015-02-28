@@ -35,6 +35,7 @@ enum eShaOfFearSpells
     SPELL_CONJURE_TERROR_SPAWN_02   = 119370,
     SPELL_CONJURE_TERROR_SPAWN_03   = 119371,
     SPELL_CONJURE_TERROR_SPAWN_04   = 119372,
+    SPELL_CUSTOM_ENERGY_REGEN       = 119417,
 
     //Heroic
     SPELL_NAKED_AND_AFRAID          = 120669,
@@ -146,6 +147,28 @@ enum eShaPhases
     PHASE_DREAD_EXPANSE
 };
 
+class DpsSelectPredicate
+{
+public:
+    bool operator()(WorldObject* target) const
+    {
+        return target && target->ToPlayer() && target->ToPlayer()->GetRoleForGroup(target->ToPlayer()->GetSpecializationId(target->ToPlayer()->GetActiveSpec())) != ROLES_DPS;
+    }
+};
+
+class notValidTargetPredicate
+{
+public:
+    notValidTargetPredicate(Unit* _caster) : caster(_caster) {}
+
+    bool operator()(WorldObject* target) const
+    {
+        return target && target->ToPlayer() && (target->ToPlayer()->HasAura(SPELL_CHAMPION_OF_LIGHT) || target->ToPlayer()->GetExactDist2d(caster) > 70.f);
+    }
+private:
+    Unit* caster;
+};
+
 static const Position lightPos = { -1017.835f, -2771.984f, 38.65444f, 4.718282f };
 
 class boss_sha_of_fear : public CreatureScript
@@ -173,14 +196,14 @@ class boss_sha_of_fear : public CreatureScript
             {
                 _Reset();
 
+                me->AddAura(72242, me);
                 me->SetReactState(REACT_DEFENSIVE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-                me->SetPower(POWER_ENERGY, 0);
-                me->SetInt32Value(UNIT_FIELD_POWER1, 0);
-                me->SetMaxPower(POWER_ENERGY, 100);
-                me->SetInt32Value(UNIT_FIELD_MAXPOWER1, 100);
-                me->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_REGENERATE_POWER);
-                me->CastSpell(me, SPELL_ENERGY_TO_ZERO, true);
+                //me->SetPower(POWER_ENERGY, 0);
+                //me->SetInt32Value(UNIT_FIELD_POWER1, 0);
+                //me->SetMaxPower(POWER_ENERGY, 100);
+                //me->SetInt32Value(UNIT_FIELD_MAXPOWER1, 100);
+                //me->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_REGENERATE_POWER);
 
                 summons.DespawnAll();
 
@@ -218,19 +241,12 @@ class boss_sha_of_fear : public CreatureScript
                     pInstance->SetBossState(DATA_SHA_OF_FEAR, FAIL);
             }
 
-            void MoveInLineOfSight(Unit* entity) override
-            {
-                if (!introDone && entity->GetTypeId() == TYPEID_PLAYER
-                    && entity->IsWithinDist2d(me, 50.0f))
-                {
-                    introDone = true;
-                    Talk(SAY_INTRO);
-                }
-                BossAI::MoveInLineOfSight(entity);
-            }
-
             void EnterCombat(Unit* /*attacker*/) override
             {
+                me->SetPower(POWER_ENERGY, 0);
+
+                DoCast(me, SPELL_CUSTOM_ENERGY_REGEN, true);
+
                 if (pInstance)
                 {
                     pInstance->SetBossState(DATA_SHA_OF_FEAR, IN_PROGRESS);
@@ -295,7 +311,6 @@ class boss_sha_of_fear : public CreatureScript
                         return;
                 }
 
-                me->SummonCreature(NPC_RETURN_TO_TERRACE, summon->GetHomePosition());
                 events.RescheduleEvent(EVENT_OMINOUS_CACKLE, 30000);
             }
 
@@ -388,29 +403,6 @@ class boss_sha_of_fear : public CreatureScript
                 return;
             }
 
-            void RegeneratePower(Powers power, int32& value) override
-            {
-                if (power != POWER_ENERGY)
-                    return;
-
-                if (!me->IsInCombat())
-                {
-                    value = 0;
-                    return;
-                }
-
-                // Sha of Fear regenerates 6 energy every 2s (15 energy for 5s)
-                value = 6;
-
-                int32 val = me->GetPower(POWER_ENERGY);
-                if (val + value > 100)
-                    val = 100;
-                else
-                    val += value;
-
-                me->SetInt32Value(UNIT_FIELD_POWER1, val);
-            }
-
             void DamageTaken(Unit* /*dealer*/, uint32& uiDamage)
             {
                 if (me->GetMap()->IsHeroic())
@@ -432,8 +424,8 @@ class boss_sha_of_fear : public CreatureScript
             {
                 if (!UpdateVictim())
                 {
-                    if (pInstance && pInstance->GetData(SPELL_RITUAL_OF_PURIFICATION) == false)
-                        me->RemoveAura(SPELL_RITUAL_OF_PURIFICATION);
+                    //if (pInstance && pInstance->GetData(SPELL_RITUAL_OF_PURIFICATION) == false)
+                        //me->RemoveAura(SPELL_RITUAL_OF_PURIFICATION);
 
                     return;
                 }
@@ -639,40 +631,6 @@ class mob_pure_light_terrace : public CreatureScript
         CreatureAI* GetAI(Creature* creature) const
         {
             return new mob_pure_light_terraceAI(creature);
-        }
-};
-
-// Return to the Terrace - 65736
-class mob_return_to_the_terrace : public CreatureScript
-{
-    public:
-        mob_return_to_the_terrace() : CreatureScript("mob_return_to_the_terrace") { }
-
-        struct mob_return_to_the_terraceAI : public ScriptedAI
-        {
-            mob_return_to_the_terraceAI(Creature* creature) : ScriptedAI(creature)
-            {
-                pInstance = creature->GetInstanceScript();
-            }
-
-            InstanceScript* pInstance;
-
-            void Reset()
-            {
-               me->setFaction(35);
-               if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
-                   me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                // Sniffed values
-               me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
-               me->SetFlag(UNIT_FIELD_INTERACT_SPELL_ID, 118977);
-            }
-
-            void UpdateAI(const uint32 /*diff*/) { }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new mob_return_to_the_terraceAI(creature);
         }
 };
 
@@ -969,69 +927,45 @@ public:
 
         void FilterTargets(std::list<WorldObject*>& targets)
         {
-            std::list<WorldObject *> assembledGroup;
+            std::list<WorldObject*> vTanks;
+            std::list<WorldObject*> vHealers;
 
-            uint8 tankCnt = 1;
-            uint8 dpsCnt = 3;
-            uint8 healerCnt = 1;
-            Unit * caster = GetCaster();
-
-            for (std::list<WorldObject*>::iterator itr = targets.begin(); itr != targets.end(); )
+            if (Unit* caster = GetCaster())
             {
-                Player * player = (*itr)->ToPlayer();
-                bool skip = true;
+                targets.remove_if(notValidTargetPredicate(caster));
 
-                if (player->HasAura(SPELL_CHAMPION_OF_LIGHT) || !player->IsWithinDist2d(caster, 70.0f))
-                    skip = false;
-                else
+                for (auto const pTarget : targets)
                 {
-                    switch (player->GetRoleForGroup(player->GetActiveSpec()))
+                    if (Player* pPlayer = pTarget->ToPlayer())
                     {
-                        case ROLES_TANK:
-                            if (tankCnt)
-                            {
-                                assembledGroup.push_back(*itr);
-                                skip = false;
-                                tankCnt--;
-                            }
-                            break;
-                        case ROLES_HEALER:
-                            if (healerCnt)
-                            {
-                                assembledGroup.push_back(*itr);
-                                skip = false;
-                                healerCnt--;
-                            }
-                            break;
-                        case ROLES_DPS:
-                            if (dpsCnt)
-                            {
-                                assembledGroup.push_back(*itr);
-                                skip = false;
-                                dpsCnt--;
-                            }
-                            break;
-                        default:
-                            break;
+                        uint32 m_role = pPlayer->GetRoleForGroup(pPlayer->GetSpecializationId(pPlayer->GetActiveSpec()));
+
+                        if (m_role == ROLES_TANK)
+                            vTanks.push_back(pPlayer);
+                        else if (m_role == ROLES_HEALER)
+                            vHealers.push_back(pPlayer);
                     }
                 }
 
-                if (skip)
-                    ++itr;
-                else
-                    itr = targets.erase(itr);
+                targets.remove_if(DpsSelectPredicate());
+
+                if (targets.size() > 3)
+                    targets.resize(3);
+
+                std::list<WorldObject*>::iterator itr = vTanks.begin();
+                std::list<WorldObject*>::iterator itr2 = vHealers.begin();
+
+                std::advance(itr, urand(0, vTanks.size() - 1));
+
+                if (itr != vTanks.end())
+                    targets.insert(targets.begin(), *itr);
+                
+                std::advance(itr2, urand(0, vHealers.size() - 1));
+
+                if (itr2 != vHealers.end())
+                    targets.insert(targets.begin(), *itr2);
+
             }
-
-            if (assembledGroup.empty())
-                return;
-
-            if (assembledGroup.size() < 5)
-                Trinity::Containers::RandomResizeList(targets, 5 - assembledGroup.size());
-            else
-                targets.clear();
-
-            targets.insert(targets.end(), assembledGroup.begin(), assembledGroup.end());
-
 
         }
 
@@ -1127,6 +1061,13 @@ class npc_sha_of_fear_bowman : public CreatureScript
         void JustDied(Unit* ) override
         {
             Talk(SAY_DEATH);
+
+            if (Creature* pTerrace = GetClosestCreatureWithEntry(me, NPC_RETURN_TO_TERRACE, 30.f))
+            {
+                pTerrace->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                pTerrace->UpdateObjectVisibility();
+                pTerrace->AddAura(120216, pTerrace);
+            }
         }
 
         void DoAction(const int32 action) override
@@ -1136,6 +1077,12 @@ class npc_sha_of_fear_bowman : public CreatureScript
                 me->SetReactState(REACT_AGGRESSIVE);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 me->setActive(true);
+                
+                if (Creature* pTerrace = GetClosestCreatureWithEntry(me, NPC_RETURN_TO_TERRACE, 30.f))
+                {
+                    pTerrace->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    pTerrace->RemoveAura(120216);
+                }
             }
         }
 
@@ -1432,7 +1379,6 @@ void AddSC_boss_sha_of_fear()
 {
     new boss_sha_of_fear();
     new mob_pure_light_terrace();
-    new mob_return_to_the_terrace();
     new mob_terror_spawn();
     new spell_champion_of_light();
     new spell_breath_of_fear();

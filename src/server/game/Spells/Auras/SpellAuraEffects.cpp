@@ -619,7 +619,29 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
             castItem = caster->ToPlayer()->GetItemByGuid(GetBase()->GetCastItemGUID());
         }
 
-        amount = m_spellInfo->Effects[m_effIndex].CalcValue(caster, &m_baseAmount, GetBase()->GetOwner()->ToUnit(), castItem);
+        if (m_spellInfo->AttributesEx8 & SPELL_ATTR8_MASTERY_SPECIALIZATION && !G3D::fuzzyEq(GetSpellEffectInfo().BonusMultiplier, 0.f))
+        {
+            if (caster && caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                int32 baseMastery = 0;
+                Unit::AuraEffectList const& masteriesAuras = caster->GetAuraEffectsByType(SPELL_AURA_MASTERY);
+                for (Unit::AuraEffectList::const_iterator i = masteriesAuras.begin(); i != masteriesAuras.end(); ++i)
+                    baseMastery += (*i)->GetAmount();
+
+                //now we need the points earned by the player itself (caster)
+                float points = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+
+                //Compute the whole data and set it
+                float masteryTotal = (float(baseMastery) + points) * GetSpellEffectInfo().BonusMultiplier;
+                amount = (int32)masteryTotal;
+
+                // Update the player visual (round it to upper decimal)
+                if (GetSpellEffectInfo().BonusMultiplier)
+                    caster->ToPlayer()->SetFloatValue(PLAYER_MASTERY, masteryTotal / GetSpellEffectInfo().BonusMultiplier);
+            }
+        }
+        else
+            amount = m_spellInfo->Effects[m_effIndex].CalcValue(caster, &m_baseAmount, GetBase()->GetOwner()->ToUnit(), castItem);
     }
 
     // check item enchant aura cast
@@ -3164,7 +3186,7 @@ void AuraEffect::HandleAuraModSilence(AuraApplication const* aurApp, uint8 mode,
         // Stop cast only spells vs PreventionType == SPELL_PREVENTION_TYPE_SILENCE
         for (uint32 i = CURRENT_MELEE_SPELL; i < CURRENT_MAX_SPELL; ++i)
             if (Spell* spell = target->GetCurrentSpell(CurrentSpellTypes(i)))
-                if (spell->m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE)
+                if (spell->m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE || spell->m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_UNK3)
                 {
                     // Stop spells on prepare or casting state
                     target->InterruptSpell(CurrentSpellTypes(i), false);
@@ -5512,7 +5534,7 @@ void AuraEffect::HandleModDamageDone(AuraApplication const* aurApp, uint8 mode, 
     if ((GetMiscValue() & SPELL_SCHOOL_MASK_MAGIC) == 0)
         return;
 
-    if (GetSpellInfo()->EquippedItemClass != -1 || (GetSpellInfo()->EquippedItemInventoryTypeMask != 0 && GetSpellInfo()->EquippedItemInventoryTypeMask != -1))
+    if (GetSpellInfo()->EquippedItemClass != -1 || (GetSpellInfo()->EquippedItemInventoryTypeMask != -1 && GetSpellInfo()->EquippedItemInventoryTypeMask != -1))
     {
         // wand magic case (skip generic to all item spell bonuses)
         // done in Player::_ApplyWeaponDependentAuraMods

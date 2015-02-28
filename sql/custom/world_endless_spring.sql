@@ -1487,7 +1487,7 @@ INSERT INTO `gameobject` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phase
 (@OGUID +21, 214525, 870, 0, 0, 1, 1, 957.689, -52.7766, 514.299, 4.088, 0, 0, 0.890113, -0.45574, 86400, 255, 1, 0, NULL);
 
 -- 10/25 Heroic Raid Closed
-UPDATE `access_requirement` SET `level_min` = 91 WHERE `mapId` = 996 AND `difficulty` IN (5,6);
+UPDATE `access_requirement` SET `level_min` = 91 WHERE `mapId` = 996 AND `difficulty` IN (5,6,7);
 
 -- Valor Points for Sha of Fear
 DELETE FROM `creature_template_currency` WHERE `entry` IN (3160999,3260999,3360999,3460999);

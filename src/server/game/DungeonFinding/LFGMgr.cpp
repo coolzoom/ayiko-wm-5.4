@@ -1724,10 +1724,9 @@ void LFGMgr::UpdateProposal(uint32 proposalId, uint64 guid, bool accept)
             grp->SetLfgRoles(player->GetGUID(), playerData->role);
 
             // Add the cooldown spell if queued for a random dungeon
-            if (playerData->accept)
+            if (playerData->accept && dungeon->difficulty != RAID_TOOL_DIFFICULTY)
                 player->CastSpell(player, LFG_SPELL_DUNGEON_COOLDOWN, false);
         }
-
 
         if (dungeon->difficulty == RAID_TOOL_DIFFICULTY)
             grp->SetRaidDifficulty((Difficulty)dungeon->difficulty);

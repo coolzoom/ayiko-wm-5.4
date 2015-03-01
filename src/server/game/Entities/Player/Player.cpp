@@ -26882,6 +26882,7 @@ void Player::InitRunes()
         return;
 
     m_runes.runeState = 0;
+    m_runes.lastUsedRuneMask = 0;
 
     for (uint8 i = 0; i < MAX_RUNES; ++i)
     {

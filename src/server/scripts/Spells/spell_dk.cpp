@@ -957,48 +957,6 @@ class spell_dk_death_strike : public SpellScriptLoader
         {
             PrepareSpellScript(script_impl);
 
-            void HandleOnHit()
-            {
-                auto player = GetCaster()->ToPlayer();
-                if (!player)
-                    return;
-
-                // Apply Blood Rites effects
-                if (player->HasAura(DK_SPELL_BLOOD_RITES))
-                {
-                    SetHitDamage(int32(GetHitDamage() * 1.4f));
-
-                    bool runeFrost = false;
-                    bool runeUnholy = false;
-
-                    for (uint8 i = 0; i < MAX_RUNES; ++i)
-                    {
-                        if (player->GetCurrentRune(i) == RUNE_DEATH
-                            || player->GetCurrentRune(i) == RUNE_BLOOD
-                            || player->GetBaseRune(i) == RUNE_BLOOD)
-                        {
-                            continue;
-                        }
-
-                        if (runeUnholy && player->GetCurrentRune(i) == RUNE_UNHOLY)
-                            continue;
-
-                        if (runeFrost && player->GetCurrentRune(i) == RUNE_FROST)
-                            continue;
-
-                        if (player->GetRuneCooldown(i))
-                        {
-                            if (player->GetCurrentRune(i) == RUNE_FROST)
-                                runeFrost = true;
-                            else
-                                runeUnholy = true;
-
-                            player->ConvertRune(i, RUNE_DEATH);
-                        }
-                    }
-                }
-            }
-
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
                 int32 bp = 0;
@@ -1023,7 +981,6 @@ class spell_dk_death_strike : public SpellScriptLoader
 
             void Register()
             {
-                OnHit += SpellHitFn(script_impl::HandleOnHit);
                 OnEffectHit += SpellEffectFn(script_impl::HandleDummy, EFFECT_2, SPELL_EFFECT_DUMMY);
             }
         };

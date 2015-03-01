@@ -1713,7 +1713,12 @@ void LFGMgr::UpdateProposal(uint32 proposalId, uint64 guid, bool accept)
             if (!grp)
             {
                 grp = new Group();
-                grp->ConvertToLFG();
+
+                if (dungeon->difficulty == RAID_TOOL_DIFFICULTY)
+                    grp->ConvertToLFR();
+                else
+                    grp->ConvertToLFG();
+
                 grp->Create(player);
                 uint64 gguid = grp->GetGUID();
                 SetState(gguid, LFG_STATE_PROPOSAL);
@@ -1729,7 +1734,10 @@ void LFGMgr::UpdateProposal(uint32 proposalId, uint64 guid, bool accept)
         }
 
         if (dungeon->difficulty == RAID_TOOL_DIFFICULTY)
+        {
             grp->SetRaidDifficulty((Difficulty)dungeon->difficulty);
+            grp->SetLootMethod(NEED_BEFORE_GREED);
+        }
         else
             grp->SetDungeonDifficulty((Difficulty)dungeon->difficulty);
 

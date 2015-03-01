@@ -3490,6 +3490,7 @@ Aura *Unit::_TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint3
             case 119840: // Serrated Blade
             case 120938: // Residue
             case 119395: // Detonate
+            case 118091: // Defiled Ground
                 foundAura = GetAura(newAura->Id);
             break;
         default:

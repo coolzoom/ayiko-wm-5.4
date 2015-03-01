@@ -42,7 +42,7 @@ enum SpellModOp
     SPELLMOD_RESIST_DISPEL_CHANCE       = 28,
     // spellmod 29
     SPELLMOD_SPELL_COST_REFUND_ON_FAIL  = 30,
-    SPELLMOD_UNK31                      = 31, // 55673 and 146962, increase charges
+    SPELLMOD_STACKS                     = 31, // 55673 and 146962, increase charges
     SPELLMOD_EFFECT4                    = 32,
     SPELLMOD_EFFECT5                    = 33,
     SPELLMOD_UNK34                      = 34, // something cost-related

@@ -235,6 +235,11 @@ class boss_tsulong : public CreatureScript
                 summons.DespawnAll();
             }
 
+            void MoveInLineOfSight(Unit* pWho) override
+            {
+                CreatureAI::MoveInLineOfSight(pWho);
+            }
+
             void EnterCombat(Unit* pWho) override
             {
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
@@ -255,6 +260,9 @@ class boss_tsulong : public CreatureScript
 
             void DamageTaken(Unit* attacker, uint32& damage) override
             {
+                if (me->IsInEvadeMode())
+                    damage = 0;
+                else
                 if (phase == PHASE_DAY)
                 {
                     if (me->GetHealth() <= damage)

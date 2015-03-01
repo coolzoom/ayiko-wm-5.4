@@ -3494,8 +3494,9 @@ void ObjectMgr::LoadQuests()
     uint32 oldMSTime = getMSTime();
 
     // For reload case
-    for (QuestMap::const_iterator itr=_questTemplates.begin(); itr != _questTemplates.end(); ++itr)
-        delete itr->second;
+    for (auto &questTemplate : _questTemplates)
+        delete questTemplate.second;
+
     _questTemplates.clear();
 
     mExclusiveQuestGroups.clear();
@@ -4115,6 +4116,12 @@ void ObjectMgr::LoadQuests()
 void ObjectMgr::LoadQuestObjectives()
 {
     uint32 oldMSTime = getMSTime();
+
+    // reload case
+    for (auto &questObjective : m_questObjectives)
+        delete questObjective.second;
+
+    m_questObjectives.clear();
 
     QueryResult result = WorldDatabase.Query("SELECT `questId`, `id`, `index`, `type`, `objectId`, `amount`, `flags`, `description` FROM `quest_objective` ORDER BY `questId` ASC");
     if (!result)

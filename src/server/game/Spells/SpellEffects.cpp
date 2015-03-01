@@ -2043,6 +2043,11 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
 
         switch (m_spellInfo->Id)
         {
+            case 81280: // Blood Burst
+            {
+                addHealth = caster->CountPctFromMaxHealth(damage);
+                break;
+            }
             // Selfless Healer
             case 19750: // Flash of Light
             case 82326: // Divine Light (Holy Spec)

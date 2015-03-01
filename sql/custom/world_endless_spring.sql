@@ -254,17 +254,19 @@ INSERT INTO spell_linked_spell (spell_trigger, spell_effect, TYPE, COMMENT) VALU
 (122855, 122858, 0, 'Sun Breath - Trigger Bathed in Light');
 -- (123026, 123508, 0, 'Sun Breath - Trigger Bathed in Light');
 
-DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (122952, 123012, 122928);
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (122952, 123012, 122928, 123740);
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 (13, 1, 122952, 0, 0, 31, 0, 3, 62962, 0, 0, 0, 0, '', 'Summon Unstable Sha - target Trigger'),
+(13, 1, 123740, 0, 0, 31, 0, 3, 62849, 0, 0, 0, 0, '', 'The Dark of Night - target Sunbeam'),
 (13, 1, 123012, 0, 0, 31, 0, 3, 62442, 0, 0, 0, 0, '', 'Terrorize - target Tsulong'),
 (13, 1, 122928, 0, 0, 31, 0, 3, 62442, 0, 0, 0, 0, '', 'Instability - target Tsulong');
 
 UPDATE creature_template SET ScriptName = 'boss_tsulong' WHERE entry = 62442;
 UPDATE creature_template SET ScriptName = 'npc_sunbeam' WHERE entry = 62849;
 
-DELETE FROM spell_script_names WHERE spell_id IN (122775, 125843, 122768, 122789);
+DELETE FROM spell_script_names WHERE spell_id IN (122775, 125843, 122768, 122789, 123011);
 INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
+(123011, 'spell_tsulong_terrorize'),
 (122775, 'spell_tsulong_nightmares'),
 (125843, 'spell_dread_shadows_damage'),
 (122768, 'spell_dread_shadows_malus'),

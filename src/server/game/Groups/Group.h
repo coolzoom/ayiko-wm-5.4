@@ -313,6 +313,8 @@ class Group
         void BroadcastReadyCheck(WorldPacket* packet);
         void OfflineReadyCheck();
 
+        void SendPartyUpdate(Player* player, MemberSlot* slot, uint8 position);
+
         /*********************************************************/
         /***                  ARENA SYSTEM                     ***/
         /*********************************************************/

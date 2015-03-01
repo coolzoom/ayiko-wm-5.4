@@ -2045,7 +2045,7 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
         {
             case 81280: // Blood Burst
             {
-                addHealth = caster->CountPctFromMaxHealth(damage);
+                addhealth = caster->CountPctFromMaxHealth(damage);
                 break;
             }
             // Selfless Healer

@@ -4147,7 +4147,7 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->AttributesCu &= ~SPELL_ATTR0_CU_NEGATIVE;
                     break;
                 case 80240: // Havoc
-                    spellInfo->ProcCharges = 3;
+                    spellInfo->Effects[EFFECT_1].BasePoints = 1;
                     break;
                 case 129020:// Avatar
                     spellInfo->AttributesEx &= SPELL_ATTR1_DISPEL_AURAS_ON_IMMUNITY;

@@ -656,18 +656,12 @@ void LFGMgr::InitializeLockedDungeons(Player* player)
             locktype = LFG_LOCKSTATUS_ATTUNEMENT_TOO_LOW_LEVEL;
             locktype = LFG_LOCKSTATUS_ATTUNEMENT_TOO_HIGH_LEVEL;
         */
+
         if (dungeon->type != TYPEID_RANDOM_DUNGEON)
-        {
             if (dungeon->map > 0)
-            {
-                LfgEntrancePositionMap::const_iterator itr = m_entrancePositions.find(dungeon->ID);
-                if (itr == m_entrancePositions.end() && !sObjectMgr->GetMapEntranceTrigger(dungeon->map))
-                {
-                    lockData.itemLevel = 999;
-                    lockData.lockstatus = LFG_LOCKSTATUS_TOO_LOW_GEAR_SCORE;
-                }
-            }
-        }
+                if (m_entrancePositions.find(dungeon->ID) == m_entrancePositions.end() && !sObjectMgr->GetMapEntranceTrigger(dungeon->map))
+                    lockData.lockstatus = LFG_LOCKSTATUS_TEMPORARILY_DISABLED;
+
         if (lockData.lockstatus != LFG_LOCKSTATUS_OK)
             lock[dungeon->Entry()] = lockData;
     }
@@ -744,15 +738,6 @@ void LFGMgr::Join(Player* player, uint8 roles, const LfgDungeonSet& selectedDung
             RemoveFromQueue(gguid);
         }
     }
-    const LFGDungeonEntry* entry = sLFGDungeonStore.LookupEntry(*dungeons.begin() & 0xFFFFFF);
-    uint8 type = TYPEID_DUNGEON;
-    uint8 maxGroupSize = 5;
-    if (entry != NULL)
-        type = entry->type;
-    if (type == LFG_SUBTYPEID_RAID)
-        maxGroupSize = 25;
-    if (type == LFG_SUBTYPEID_SCENARIO)
-        maxGroupSize = 3;
 
     // Check player or group member restrictions
     if (player->InBattleground() || player->InArena() || player->InBattlegroundQueue())
@@ -765,7 +750,7 @@ void LFGMgr::Join(Player* player, uint8 roles, const LfgDungeonSet& selectedDung
         joinData.result = LFG_JOIN_NOT_MEET_REQS;
     else if (grp)
     {
-        if (grp->GetMembersCount() > maxGroupSize)
+        if (grp->GetMembersCount() > GetGroupSizeFromEntry(sLFGDungeonStore.LookupEntry(*dungeons.begin() & 0xFFFFFF)))
             joinData.result = LFG_JOIN_TOO_MUCH_MEMBERS;
         else
         {
@@ -1416,7 +1401,7 @@ void LFGMgr::UpdateRoleCheck(uint64 gguid, uint64 guid /* = 0 */, uint8 roles /*
         }
 
         team = uint8(plrg->GetTeam());
-        if (!sendRoleChosen)
+        if (sendRoleChosen)
             plrg->GetSession()->SendLfgRoleChosen(guid, roles);
 
         plrg->GetSession()->SendLfgRoleCheckUpdate(roleCheck);
@@ -2666,6 +2651,38 @@ void LFGMgr::RemoveGroupData(uint64 guid)
     LfgGroupDataMap::iterator it = m_Groups.find(guid);
     if (it != m_Groups.end())
         m_Groups.erase(it);
+}
+
+uint8 LFGMgr::GetGroupSizeFromEntry(LFGDungeonEntry const* entry) const
+{
+    if (!entry)
+        return 5;
+
+    switch (entry->type)
+    {
+        case LFG_SUBTYPEID_DUNGEON:
+        case LFG_SUBTYPEID_HEROIC:
+            return 5;
+        case LFG_SUBTYPEID_RAID:
+            return 25;
+        case LFG_SUBTYPEID_SCENARIO:
+            return 3;
+        case TYPEID_RANDOM_DUNGEON:
+        {
+            // only dungeons and scenarios can be random
+            switch (entry->difficulty)
+            {
+                case REGULAR_DIFFICULTY:
+                case HEROIC_DIFFICULTY:
+                    return 5;
+                case SCENARIO_DIFFICULTY:
+                case SCENARIO_HEROIC_DIFFICULTY:
+                    return 3;
+            }
+        }
+    }
+
+    return 5;
 }
 
 LfgUpdateData LFGMgr::GetLfgStatus(uint64 guid)

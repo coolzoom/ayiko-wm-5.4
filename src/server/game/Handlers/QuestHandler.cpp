@@ -419,6 +419,10 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recvData)
             _player->SetQuestStatus(questId, QUEST_STATUS_NONE);
             _player->GetAchievementMgr().RemoveTimedAchievement(ACHIEVEMENT_TIMED_TYPE_QUEST, questId);
 
+            for (auto &objectiveSaveStatus : _player->m_questObjectiveStatusSave)
+                if (!objectiveSaveStatus.second)
+                    _player->m_questObjectiveStatus.erase(objectiveSaveStatus.first);
+
             TC_LOG_INFO("network", "Player %u abandoned quest %u", _player->GetGUIDLow(), questId);
         }
 

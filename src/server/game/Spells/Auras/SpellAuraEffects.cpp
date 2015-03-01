@@ -608,7 +608,7 @@ Unit::AuraApplicationList AuraEffect::GetApplicationList() const
 
 int32 AuraEffect::CalculateAmount(Unit* caster)
 {
-    int32 amount;
+    int32 amount = 0;
 
     {
         Item const *castItem = nullptr;

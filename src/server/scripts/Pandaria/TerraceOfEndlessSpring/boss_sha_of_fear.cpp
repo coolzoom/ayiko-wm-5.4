@@ -955,12 +955,14 @@ public:
                 std::list<WorldObject*>::iterator itr = vTanks.begin();
                 std::list<WorldObject*>::iterator itr2 = vHealers.begin();
 
-                std::advance(itr, urand(0, vTanks.size() - 1));
+                if (vTanks.size() > 1)
+                    std::advance(itr, urand(0, vTanks.size() - 1));
 
                 if (itr != vTanks.end())
                     targets.insert(targets.begin(), *itr);
                 
-                std::advance(itr2, urand(0, vHealers.size() - 1));
+                if (vHealers.size() > 1)
+                    std::advance(itr2, urand(0, vHealers.size() - 1));
 
                 if (itr2 != vHealers.end())
                     targets.insert(targets.begin(), *itr2);

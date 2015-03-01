@@ -365,6 +365,30 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
             delete targets;
             break;
         }
+        case SMART_ACTION_SATISFY_QUEST_OBJECTIVE:
+        {
+            ObjectList* targets = GetTargets(e, unit);
+            if (!targets)
+                break;
+
+            for (auto const &target : *targets)
+            {
+                if (IsPlayer(target))
+                {
+                    QuestObjective const* objective = sObjectMgr->GetQuestObjective(e.action.questObjective.objectiveId);
+                    if (!objective)
+                        continue;
+
+                    target->ToPlayer()->QuestObjectiveSatisfy(e.action.questObjective.objectiveId, e.action.questObjective.count);
+
+                    TC_LOG_DEBUG("scripts.ai", "SmartScript::ProcessAction:: SMART_ACTION_SATISFY_QUEST_OBJECTIVE: Player guidLow %u satisfied quest objective %u, count %u",
+                        target->GetGUIDLow(), e.action.questObjective.objectiveId, e.action.questObjective.count);
+                }
+            }
+
+            delete targets;
+            break;
+        }
         case SMART_ACTION_SET_REACT_STATE:
         {
             if (!me)

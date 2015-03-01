@@ -1055,6 +1055,22 @@ struct DestructibleModelDataEntry
     //uint32  Unk8;                                         // 23
 };
 
+struct DifficultyEntry
+{
+    uint32 id;                                              // 0
+    //uint32 fallbackDifficultyID;                          // 1
+    uint32 instanceType;                                    // 2
+    uint32 minPlayers;                                      // 3
+    uint32 maxPlayers;                                      // 4
+    //uint32 oldEnumValue;                                  // 5
+    //uint32 flags;                                         // 6
+    //uint32 toggleDifficultyID;                            // 7
+    //uint32 groupSizeHealthCurveID;                        // 8
+    //uint32 groupSizeDmgCurveID;                           // 9
+    //uint32 groupSizeSpellPointsCurveID;                   // 10
+    //char*  name;                                          // 11
+};
+
 // @author Selenium: 5.4 valid
 struct DungeonEncounterEntry
 {

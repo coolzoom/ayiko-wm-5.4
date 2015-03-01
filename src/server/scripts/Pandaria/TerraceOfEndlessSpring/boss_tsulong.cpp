@@ -253,7 +253,7 @@ class boss_tsulong : public CreatureScript
                     Talk((phase == PHASE_DAY) ? SAY_SLAY_DAY : SAY_SLAY_NIGHT);
             }
 
-            void DamageTaken(Unit* , uint32& damage) override
+            void DamageTaken(Unit* attacker, uint32& damage) override
             {
                 if (phase == PHASE_DAY)
                 {
@@ -270,18 +270,18 @@ class boss_tsulong : public CreatureScript
                     if (me->GetHealthPct() < 1.1f || me->GetHealth() <= damage)
                     {
                         damage = 0;
-                        HandleDefeat();
+                        HandleDefeat(attacker);
                     }
                 }
             }
 
-            void HealReceived(Unit*, uint32& heal) override
+            void HealReceived(Unit* healer, uint32& heal) override
             {
                 // victory if healed during the day phase
                 if (me->HealthAbovePctHealed(99, heal))
                     if (phase == PHASE_DAY)
                     {
-                        HandleDefeat();
+                        HandleDefeat(healer);
                     }
             }
 
@@ -405,7 +405,7 @@ class boss_tsulong : public CreatureScript
                 }
             }
 
-            void HandleDefeat()
+            void HandleDefeat(Unit* attacker)
             {
                 if (hasBeenDefeated)
                     return;
@@ -432,6 +432,13 @@ class boss_tsulong : public CreatureScript
                 me->SetDisplayId(DISPLAY_TSULON_DAY);
 
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+
+                if (attacker && attacker->GetTypeId() == TYPEID_PLAYER)
+                    me->GetMap()->ToInstanceMap()->PermBindAllPlayers(attacker->ToPlayer());
+                else if (attacker && attacker->GetTypeId() == TYPEID_UNIT && attacker->GetOwner() && attacker->GetOwner()->ToPlayer())
+                    me->GetMap()->ToInstanceMap()->PermBindAllPlayers(attacker->GetOwner()->ToPlayer());
+
                 instance->SetBossState(DATA_TSULONG, DONE);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
 
@@ -486,7 +493,7 @@ class boss_tsulong : public CreatureScript
 
             void UpdateAI(const uint32 diff) override
             {
-                if (!me->IsInEvadeMode() && !me->IsInCombat() && !inFly && !hasBeenDefeated)
+                if (!me->IsInEvadeMode() && !me->IsInCombat() && !inFly)
                 {
                     m_oocEvents.Update(diff);
 
@@ -495,7 +502,7 @@ class boss_tsulong : public CreatureScript
                         if (eventId == 1)
                         {
                             summons.DespawnAll();
-                            m_oocEvents.ScheduleEvent(1, 5000);
+                            m_oocEvents.ScheduleEvent(1, 1500);
 
                         }
                     }
@@ -664,7 +671,12 @@ class npc_embodied_terror : public CreatureScript
 
         void Reset() override
         {
-            terrorizeTimer = urand(3000, 6000);
+            if (me->GetInstanceScript())
+            {
+                if (me->GetInstanceScript()->GetData(TYPE_TSULONG) != DONE)
+                    terrorizeTimer = urand(3000, 6000);
+            }
+
             died = false;
         }
 
@@ -703,7 +715,8 @@ class npc_embodied_terror : public CreatureScript
                     DoCast(me, SPELL_TERRORIZE, true);
                     DoCast(me, SPELL_TERRORIZE_TSULONG, true);
                     terrorizeTimer = 0;
-                } else terrorizeTimer -= diff;
+                } 
+                else terrorizeTimer -= diff;
             }
 
             DoMeleeAttackIfReady();
@@ -1159,6 +1172,40 @@ public:
     }
 };
 
+class spell_tsulong_terrorize : public SpellScriptLoader
+{
+public:
+    spell_tsulong_terrorize() : SpellScriptLoader("spell_tsulong_terrorize") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void SelectTargets(std::list<WorldObject*>&targets)
+        {
+            if (Unit* pCaster = GetCaster())
+            {
+                uint32 m_maxTargets = (pCaster->GetMap()->GetDifficulty() == MAN25_DIFFICULTY || pCaster->GetMap()->GetDifficulty() == MAN25_HEROIC_DIFFICULTY) ? 5 : 2;
+  
+                if (targets.size() > m_maxTargets)
+                {
+                    targets.resize(m_maxTargets);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_impl::SelectTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
 void AddSC_boss_tsulong()
 {
     new boss_tsulong();
@@ -1168,6 +1215,7 @@ void AddSC_boss_tsulong()
     new spell_sunbeam();
     new spell_tsulong_sha_regen();
     new spell_terrorize_periodic_player();
+    new spell_tsulong_terrorize();
     new spell_tsulong_nightmares();
     new spell_dark_of_night_fixate();
     new npc_embodied_terror();

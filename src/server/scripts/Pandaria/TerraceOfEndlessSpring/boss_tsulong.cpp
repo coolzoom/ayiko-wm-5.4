@@ -243,6 +243,7 @@ class boss_tsulong : public CreatureScript
             void EnterCombat(Unit* pWho) override
             {
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+                instance->SetData(TYPE_TSULONG, IN_PROGRESS);
                 DoZoneInCombat();
 
                 Talk(SAY_AGGRO);
@@ -495,6 +496,7 @@ class boss_tsulong : public CreatureScript
 
                 if (!hasBeenDefeated)
                 {
+                    instance->SetData(TYPE_TSULONG, FAIL);
                     me->GetMotionMaster()->MoveTargetedHome();
                     Talk(SAY_WIPE);
                 }
@@ -680,14 +682,18 @@ class npc_embodied_terror : public CreatureScript
 
         void Reset() override
         {
-            if (me->GetInstanceScript())
+            pInstance = me->GetInstanceScript();
+
+            if (pInstance)
             {
-                if (me->GetInstanceScript()->GetData(TYPE_TSULONG) != DONE)
+                if (pInstance->GetData(TYPE_TSULONG) != DONE)
                     terrorizeTimer = urand(3000, 6000);
             }
 
             died = false;
         }
+
+        InstanceScript* pInstance;
 
         void DamageTaken(Unit* , uint32& damage) override
         {
@@ -714,7 +720,7 @@ class npc_embodied_terror : public CreatureScript
 
         void UpdateAI(uint32 const diff) override
         {
-            if (!UpdateVictim())
+            if (!UpdateVictim() || !pInstance)
                 return;
 
             if (terrorizeTimer)
@@ -725,7 +731,9 @@ class npc_embodied_terror : public CreatureScript
                     DoCast(me, SPELL_TERRORIZE_TSULONG, true);
                     terrorizeTimer = 0;
                 } 
-                else terrorizeTimer -= diff;
+                else
+                if (pInstance->GetData(TYPE_TSULONG) < FAIL)
+                    terrorizeTimer -= diff;
             }
 
             DoMeleeAttackIfReady();

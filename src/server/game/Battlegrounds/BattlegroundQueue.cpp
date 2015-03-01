@@ -969,12 +969,9 @@ void BattlegroundQueue::update(BattlegroundTypeId bgTypeId, BattlegroundBracketI
         else if (!front1 && !front2)
             return; // queues are empty
     }
-
-    if (bg_template->isRated())
-    {
-        if (bg_template->isBattleground())
-            updateRatedBgQueue(bgTypeId, bracketEntry, arenaRating);
-        else if (bg_template->isArena())
-            updateRatedArenaQueue(bgTypeId, bracketEntry, arenaType, arenaRating);
-    }
+    
+    if (bg_template->isRated() && bg_template->isBattleground())
+        updateRatedBgQueue(bgTypeId, bracketEntry, arenaRating);
+    else if (bg_template->isArena())
+        updateRatedArenaQueue(bgTypeId, bracketEntry, arenaType, arenaRating);
 }

@@ -6092,6 +6092,7 @@ void Spell::TakeRunePower(bool didHit)
     m_runesState = player->GetRunesState();                 // store previous state
 
     int32 runeCost[NUM_RUNE_TYPES];                         // blood, frost, unholy, death
+    player->ClearLastUsedRuneMask();
     SpellSchools school = GetFirstSchoolInMask(m_spellSchoolMask);
 
     for (uint32 i = 0; i < RUNE_DEATH; ++i)
@@ -6123,21 +6124,7 @@ void Spell::TakeRunePower(bool didHit)
 
         player->SetRuneCooldown(i, cooldown);
         player->SetDeathRuneUsed(i, false);
-
-        switch (m_spellInfo->Id)
-        {
-            case 45477: // Icy Touch
-            case 45902: // Blood Strike
-            case 48721: // Blood Boil
-            case 50842: // Pestilence
-            case 85948: // Festering Strike
-            {
-                // Reaping
-                if (player->HasAura(56835))
-                    player->AddRuneBySpell(i, RUNE_DEATH, 56835);
-                break;
-            }
-        }
+        player->SetLastUsedRuneIndex(i);
 
         runeCost[rune]--;
         gain_runic = true;
@@ -6153,6 +6140,7 @@ void Spell::TakeRunePower(bool didHit)
             if (!player->GetRuneCooldown(i) && rune == RUNE_DEATH)
             {
                 player->SetRuneCooldown(i, cooldown);
+                player->SetLastUsedRuneIndex(i);
                 runeCost[rune]--;
 
                 gain_runic = true;
@@ -6169,19 +6157,6 @@ void Spell::TakeRunePower(bool didHit)
                 {
                     player->RestoreBaseRune(i);
                     player->SetDeathRuneUsed(i, true);
-                }
-
-                switch (m_spellInfo->Id)
-                {
-                    case 49998: // Death Strike
-                    {
-                        // Blood Rites
-                        if (player->HasAura(50034))
-                            player->AddRuneBySpell(i, RUNE_DEATH, 50034);
-                        break;
-                    }
-                    default:
-                        break;
                 }
 
                 if (runeCost[RUNE_DEATH] == 0)

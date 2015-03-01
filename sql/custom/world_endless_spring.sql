@@ -302,9 +302,10 @@ DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 (13, 1, 132363, 0, 0, 31, 0, 3, 63099, 0, 0, 0, 0, '', 'Hide visual - target lei shi trigger');
 
-DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=17 AND `SourceGroup`=0 AND `SourceEntry` IN (117866,129368);
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=17 AND `SourceGroup`=0 AND `SourceEntry` IN (117866,117999,129368);
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES 
 (17, 0, 117866, 0, 0, 22, 0, 996, 0, 0, 0, 0, "0", "Champion of the Light - Active only in Terrace of Endless Spring"),
+(17, 0, 117999, 0, 0, 22, 0, 996, 0, 0, 0, 0, "0", "Wall of Light - Active only in Terrace of Endless Spring"),
 (17, 0, 129368, 0, 0, 22, 0, 996, 0, 0, 0, 0, "0", "Lei\'s Hope - Active only in Terrace of Endless Spring");
 
 DELETE FROM spell_script_names WHERE spell_id IN (123461, 123467, 123244, 123233, 123705, 123712);

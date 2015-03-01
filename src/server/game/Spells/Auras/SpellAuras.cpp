@@ -1067,6 +1067,17 @@ uint8 Aura::CalcMaxCharges(Unit* caster) const
     return uint8(maxProcCharges);
 }
 
+uint8 Aura::CalcMaxStacks(Unit* caster) const
+{
+    uint32 maxStacks = m_spellInfo->StackAmount;
+
+    if (caster)
+        if (Player* modOwner = caster->GetSpellModOwner())
+            modOwner->ApplySpellMod(GetId(), SPELLMOD_STACKS, maxStacks);
+
+    return uint8(maxStacks);
+}
+
 bool Aura::ModCharges(int32 num, AuraRemoveMode removeMode)
 {
     if (IsUsingCharges())

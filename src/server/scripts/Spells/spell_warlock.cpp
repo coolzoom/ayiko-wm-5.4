@@ -764,8 +764,17 @@ class spell_warl_grimoire_of_sacrifice : public SpellScriptLoader
                     player->RemoveAura(WARLOCK_SUPPLANT_DEMONIC_COMMAND);
             }
 
+            void CalculateAmount(const AuraEffect* , int32 & amount, bool & )
+            {
+                if (Unit* caster = GetCaster())
+                    // Need soul link
+                    if (!caster->HasSpell(108415))
+                        amount = 0;
+            }
+
             void Register()
             {
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_warl_grimoire_of_sacrifice_AuraScript::CalculateAmount, EFFECT_6, SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT);
                 OnEffectRemove += AuraEffectApplyFn(spell_warl_grimoire_of_sacrifice_AuraScript::HandleRemove, EFFECT_1, SPELL_AURA_OBS_MOD_HEALTH, AURA_EFFECT_HANDLE_REAL);
             }
         };

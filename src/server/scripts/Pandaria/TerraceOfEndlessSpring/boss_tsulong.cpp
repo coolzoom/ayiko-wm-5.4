@@ -247,6 +247,7 @@ class boss_tsulong : public CreatureScript
 
                 Talk(SAY_AGGRO);
                 me->SetPower(POWER_ENERGY, 0);
+                me->SetHealth(me->GetMaxHealth());
                 SetPhase(PHASE_NIGHT);
 
                 events.ScheduleEvent(EVENT_BERSERK, 8 * MINUTE*IN_MILLISECONDS + 10000);

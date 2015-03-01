@@ -214,8 +214,8 @@ struct LfgQueueInfo
     uint8 dps;                                             ///< Dps needed
     LfgDungeonSet dungeons;                                ///< Selected Player/Group Dungeon/s
     LfgRolesMap roles;                                     ///< Selected Player Role/s
-    uint8 type;
     uint8 category;
+    uint8 difficulty;
 };
 
 /// Stores player data related to proposal to join
@@ -267,6 +267,13 @@ struct LfgPlayerBoot
     uint64 victim;                                         ///< Player guid to be kicked (can't vote)
     uint8 votedNeeded;                                     ///< Votes needed to kick the player
     std::string reason;                                    ///< kick reason
+};
+
+struct LfgRolesRequired
+{
+    uint8 dpsNeeded;
+    uint8 healersNeeded;
+    uint8 tanksNeeded;
 };
 
 class LFGMgr
@@ -330,6 +337,8 @@ class LFGMgr
         LfgUpdateData GetLfgStatus(uint64 guid);
 
         uint8 GetGroupSizeFromEntry(const LFGDungeonEntry* entry) const;
+        uint8 GetMaxGroupSizeFromDifficulty(uint32 difficulty) const;
+        LfgRolesRequired* GetRolesRequired(uint32 difficulty) const;
 
         void SendUpdateStatus(Player*, const LfgUpdateData& updateData);
 
@@ -359,9 +368,9 @@ class LFGMgr
         void RemoveProposal(LfgProposalMap::iterator itProposal, LfgUpdateType type);
 
         // Group Matching
-        LfgProposal* FindNewGroups(LfgGuidList& check, LfgGuidList& all, LfgType type);
-        bool CheckGroupRoles(LfgRolesMap &groles, LfgType type, bool removeLeaderFlag = true);
-        bool CheckCompatibility(LfgGuidList check, LfgProposal*& pProposal, LfgType type);
+        LfgProposal* FindNewGroups(LfgGuidList& check, LfgGuidList& all, Difficulty searchDifficulty);
+        bool CheckGroupRoles(LfgRolesMap &groles, Difficulty difficulty, bool removeLeaderFlag = true);
+        bool CheckCompatibility(LfgGuidList check, LfgProposal*& pProposal, Difficulty searchDifficulty);
         void GetCompatibleDungeons(LfgDungeonSet& dungeons, const PlayerSet& players, LfgLockPartyMap& lockMap);
         void SetCompatibles(std::string concatenatedGuids, bool compatibles);
         LfgAnswer GetCompatibles(std::string concatenatedGuids);

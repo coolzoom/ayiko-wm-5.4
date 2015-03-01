@@ -184,8 +184,8 @@ class boss_lei_shi : public CreatureScript
                     pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SCARY_FOG_STACKS);
                     pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SPRAY);
 
-                    if (pInstance->GetData(SPELL_RITUAL_OF_PURIFICATION))
-                        me->AddAura(SPELL_RITUAL_OF_PURIFICATION, me);
+                   /* if (pInstance->GetData(SPELL_RITUAL_OF_PURIFICATION))
+                        me->AddAura(SPELL_RITUAL_OF_PURIFICATION, me);*/
 
                     std::list<Creature*> protectors;
                     me->GetCreatureListWithEntryInGrid(protectors, NPC_ANIMATED_PROTECTOR, 100.0f);
@@ -271,7 +271,7 @@ class boss_lei_shi : public CreatureScript
                     Talk(TALK_SLAY);
             }
 
-            void DamageTaken(Unit* /*attacker*/, uint32& damage)
+            void DamageTaken(Unit* attacker, uint32& damage)
             {
                 if (!pInstance)
                     return;
@@ -303,6 +303,9 @@ class boss_lei_shi : public CreatureScript
                 {
                     damage = 0;
 
+                    summons.DespawnAll();
+                    events.Reset();
+
                     EnterEvadeMode();
 
                     me->CombatStop();
@@ -320,6 +323,11 @@ class boss_lei_shi : public CreatureScript
                     me->RemoveAura(SPELL_BERSERK);
                     me->RemoveAllAreasTrigger();
                     me->setRegeneratingHealth(false);
+
+                    if (attacker && attacker->GetTypeId() == TYPEID_PLAYER)
+                        me->GetMap()->ToInstanceMap()->PermBindAllPlayers(attacker->ToPlayer());
+                    else if (attacker && attacker->GetTypeId() == TYPEID_UNIT && attacker->GetOwner() && attacker->GetOwner()->ToPlayer())
+                        me->GetMap()->ToInstanceMap()->PermBindAllPlayers(attacker->GetOwner()->ToPlayer());
 
                     leiShiFreed = true;
                     Talk(TALK_DEFEATED);

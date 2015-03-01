@@ -1427,6 +1427,7 @@ class spell_monk_mana_tea_stacks : public SpellScriptLoader
 
             void SetData(uint32 /*type*/, uint32 data)
             {
+                Unit* caster = GetCaster();
                 while ((chiConsumed += data) >= 4)
                 {
                     chiConsumed = 0;
@@ -1434,8 +1435,14 @@ class spell_monk_mana_tea_stacks : public SpellScriptLoader
 
                     if (GetCaster())
                     {
-                        GetCaster()->CastSpell(GetCaster(), SPELL_MONK_MANA_TEA_STACKS, true);
-                        GetCaster()->CastSpell(GetCaster(), SPELL_MONK_PLUS_ONE_MANA_TEA, true);
+                        SpellInfo const* triggerInfo = sSpellMgr->GetSpellInfo(SPELL_MONK_MANA_TEA_STACKS);
+                        float critChance = caster->GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + GetFirstSchoolInMask(SpellSchoolMask(triggerInfo->SchoolMask)));
+                        uint8 stacks = 1;
+                        if (roll_chance_f(critChance))
+                            stacks++;
+
+                        caster->CastCustomSpell(SPELL_MONK_MANA_TEA_STACKS, SPELLVALUE_AURA_STACK, stacks, caster, true);
+                        caster->CastSpell(caster, SPELL_MONK_PLUS_ONE_MANA_TEA, true);
                     }
                 }
             }

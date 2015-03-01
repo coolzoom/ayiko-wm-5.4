@@ -599,6 +599,9 @@ void WorldSession::HandleLootMethodOpcode(WorldPacket & recvData)
     /** error handling **/
     if (!group->IsLeader(GetPlayer()->GetGUID()))
         return;
+
+    if (group->IsLFRGroup())
+        return;
     /********************/
 
     // everything's fine, do it
@@ -735,6 +738,9 @@ void WorldSession::HandleGroupRaidConvertOpcode(WorldPacket& recvData)
 
     Group* group = GetPlayer()->GetGroup();
     if (!group)
+        return;
+
+    if (group->IsLFRGroup())
         return;
 
     if (_player->InBattleground())

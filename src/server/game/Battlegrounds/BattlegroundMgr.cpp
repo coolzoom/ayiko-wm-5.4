@@ -38,6 +38,8 @@
 #include "BattlegroundBFG.h"
 #include "BattlegroundKT.h"
 #include "BattlegroundSSM.h"
+#include "BattlegroundTTP.h"
+#include "BattlegroundTA.h"
 #include "Chat.h"
 #include "Map.h"
 #include "MapInstanced.h"
@@ -894,6 +896,12 @@ Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId original
         case BATTLEGROUND_NA:
             bg = new BattlegroundNA(*(BattlegroundNA*)bg_template);
             break;
+        case BATTLEGROUND_TA:
+            bg = new BattlegroundTA(*(BattlegroundTA*)bg_template);
+            break;
+        case BATTLEGROUND_TTP:
+            bg = new BattlegroundTTP(*(BattlegroundTTP*)bg_template);
+            break;
         case BATTLEGROUND_BE:
             bg = new BattlegroundBE(*(BattlegroundBE*)bg_template);
             break;
@@ -990,6 +998,12 @@ bool BattlegroundMgr::CreateBattleground(CreateBattlegroundData& data)
             break;
         case BATTLEGROUND_NA:
             bg = new BattlegroundNA;
+            break;
+        case BATTLEGROUND_TA:
+            bg = new BattlegroundTA;
+            break;
+        case BATTLEGROUND_TTP:
+            bg = new BattlegroundTTP;
             break;
         case BATTLEGROUND_BE:
             bg = new BattlegroundBE;
@@ -1281,12 +1295,14 @@ void BattlegroundMgr::SendAreaSpiritHealerQueryOpcode(Player* player, Battlegrou
 
 bool BattlegroundMgr::IsArenaType(BattlegroundTypeId bgTypeId)
 {
-    return (bgTypeId == BATTLEGROUND_AA ||
-        bgTypeId == BATTLEGROUND_BE ||
-        bgTypeId == BATTLEGROUND_NA ||
-        bgTypeId == BATTLEGROUND_DS ||
-        bgTypeId == BATTLEGROUND_RV ||
-        bgTypeId == BATTLEGROUND_RL);
+    return bgTypeId == BATTLEGROUND_AA
+            || bgTypeId == BATTLEGROUND_BE
+            || bgTypeId == BATTLEGROUND_NA
+            || bgTypeId == BATTLEGROUND_DS
+            || bgTypeId == BATTLEGROUND_RV
+            || bgTypeId == BATTLEGROUND_RL
+            || bgTypeId == BATTLEGROUND_TA
+            || bgTypeId == BATTLEGROUND_TTP;
 }
 
 BattlegroundQueueTypeId BattlegroundMgr::BGQueueTypeId(BattlegroundTypeId bgTypeId, uint8 arenaType)
@@ -1317,14 +1333,14 @@ BattlegroundQueueTypeId BattlegroundMgr::BGQueueTypeId(BattlegroundTypeId bgType
             return BATTLEGROUND_QUEUE_CTF3;
         case BATTLEGROUND_SSM:
             return BATTLEGROUND_QUEUE_SSM;
-        case BATTLEGROUND_TV:
-            return BATTLEGROUND_QUEUE_TV;
         case BATTLEGROUND_AA:
         case BATTLEGROUND_NA:
         case BATTLEGROUND_RL:
         case BATTLEGROUND_BE:
         case BATTLEGROUND_DS:
         case BATTLEGROUND_RV:
+        case BATTLEGROUND_TA:
+        case BATTLEGROUND_TTP:
             switch (arenaType)
             {
                 case ARENA_TYPE_2v2:
@@ -1371,8 +1387,6 @@ BattlegroundTypeId BattlegroundMgr::BGTemplateId(BattlegroundQueueTypeId bgQueue
             return BATTLEGROUND_CTF3;
         case BATTLEGROUND_QUEUE_SSM:
             return BATTLEGROUND_SSM;
-        case BATTLEGROUND_QUEUE_TV:
-            return BATTLEGROUND_TV;
         case BATTLEGROUND_QUEUE_2v2:
         case BATTLEGROUND_QUEUE_3v3:
         case BATTLEGROUND_QUEUE_5v5:

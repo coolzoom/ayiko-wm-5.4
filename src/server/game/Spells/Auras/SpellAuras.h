@@ -40,6 +40,16 @@ class ProcInfo;
 // update aura target map every 500 ms instead of every update - reduce amount of grid searcher calls
 #define UPDATE_TARGET_MAP_INTERVAL 500
 
+struct EssentialAuraInfo
+{
+    uint32 spellId;
+    uint8 effectMask;
+    int32 duration;
+    int32 maxDuration;
+    int32 amount[MAX_SPELL_EFFECTS];
+    uint32 stackAmount;
+};
+
 class AuraApplication
 {
     friend void Unit::_ApplyAura(AuraApplication * aurApp, uint32 effMask);
@@ -272,6 +282,9 @@ class Aura
         void CallScriptAfterProcHandlers(AuraApplication const* aurApp, ProcEventInfo& eventInfo);
         bool CallScriptEffectProcHandlers(AuraEffect const *aurEff, AuraApplication const* aurApp, ProcEventInfo& eventInfo);
         void CallScriptAfterEffectProcHandlers(AuraEffect const *aurEff, AuraApplication const* aurApp, ProcEventInfo& eventInfo);
+
+
+        AuraScript* GetScriptByName(std::string const& scriptName) const;
 
         std::list<AuraScript*> m_loadedScripts;
     private:

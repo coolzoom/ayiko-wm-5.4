@@ -60,8 +60,12 @@ enum WarlockSpells
     WARLOCK_DEMONIC_GATEWAY_TELEPORT_PURPLE = 120729,
     WARLOCK_DEMONIC_GATEWAY_PERIODIC_CHARGE = 113901,
     WARLOCK_NIGHTFALL                       = 108558,
-    WARLOCK_SOUL_SWAP_AURA                  = 86211,
-    WARLOCK_SOUL_SWAP_VISUAL                = 92795,
+    SPELL_WARLOCK_SOUL_SWAP_AURA            = 86211,
+    SPELL_WARLOCK_SOUL_SWAP_CD_MARKER       = 94229,
+    SPELL_WARLOCK_SOUL_SWAP_DOT_MARKER      = 92795,
+    SPELL_WARLOCK_SOUL_SWAP_MOD_COST        = 92794,
+    SPELL_WARLOCK_SOUL_SWAP_OVERRIDE        = 86211,
+    SPELL_WARLOCK_SOUL_SWAP_VISUAL          = 92795,
     WARLOCK_GRIMOIRE_OF_SACRIFICE           = 108503,
     WARLOCK_METAMORPHOSIS                   = 103958,
     WARLOCK_DEMONIC_LEAP_JUMP               = 54785,
@@ -1578,51 +1582,245 @@ class spell_warl_soul_swap_soulburn : public SpellScriptLoader
         }
 };
 
+// 86211 - Soul Swap Override - Also acts as a dot container
+class spell_warl_soul_swap_override : public SpellScriptLoader
+{
+    public:
+        spell_warl_soul_swap_override() : SpellScriptLoader("spell_warl_soul_swap_override") { }
+
+        class spell_warl_soul_swap_override_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_warl_soul_swap_override_AuraScript);
+
+            bool Load() override
+            {
+                _swapCaster = 0;
+                return true;
+            }
+
+            //! Forced to, pure virtual functions must have a body when linking
+            void Register() override { }
+
+        public:
+            void AddDot(Aura* aur)
+            {
+                EssentialAuraInfo eAura;
+                for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
+                    if (aur->HasEffect(i))
+                        eAura.amount[i] = aur->GetEffect(i)->GetAmount();
+
+                eAura.duration = aur->GetDuration();
+                eAura.maxDuration = aur->GetMaxDuration();
+                eAura.effectMask = aur->GetEffectMask();
+                eAura.spellId = aur->GetId();
+                eAura.stackAmount = aur->GetStackAmount();
+                _dotList.push_back(eAura);
+            }
+            std::list<EssentialAuraInfo> const GetDotList() const       { return _dotList; }
+            uint64 GetOriginalSwapSource() const                        { return _swapCaster; }
+            void SetOriginalSwapSource(uint64 victimGuid)               { _swapCaster = victimGuid; }
+
+        private:
+            std::list<EssentialAuraInfo> _dotList;
+            uint64 _swapCaster;
+        };
+
+        AuraScript* GetAuraScript() const override
+        {
+            return new spell_warl_soul_swap_override_AuraScript();
+        }
+};
+
+typedef spell_warl_soul_swap_override::spell_warl_soul_swap_override_AuraScript SoulSwapOverrideAuraScript;
+
+
 // Soul Swap - 86121 or Soul Swap : Exhale - 86213
 class spell_warl_soul_swap : public SpellScriptLoader
 {
-    public:
-        spell_warl_soul_swap() : SpellScriptLoader("spell_warl_soul_swap") { }
+public:
+    spell_warl_soul_swap() : SpellScriptLoader("spell_warl_soul_swap") { }
 
-        class spell_warl_soul_swap_SpellScript : public SpellScript
+    class spell_warl_soul_swap_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warl_soul_swap_SpellScript);
+
+        SpellCastResult CheckCast()
         {
-            PrepareSpellScript(spell_warl_soul_swap_SpellScript);
-
-            void HandleOnHit()
+            if (Unit* currentTarget = GetExplTargetUnit())
             {
-                if (Unit* caster = GetCaster())
+                bool hasDots = false;
+                SpellInfo const* flagInfo = sSpellMgr->GetSpellInfo(SPELL_WARLOCK_SOUL_SWAP_DOT_MARKER);
+                for (Unit::AuraApplicationMap::const_iterator itr = currentTarget->GetAppliedAuras().begin(); itr != currentTarget->GetAppliedAuras().end(); ++itr)
                 {
-                    if (Unit* target = GetHitUnit())
-                    {
-                        if (GetSpellInfo()->Id == 86121)
+                    SpellInfo const* spellProto = itr->second->GetBase()->GetSpellInfo();
+                    if (itr->second->GetBase()->GetCaster() == GetCaster())
+                        if (spellProto->SpellFamilyName == SPELLFAMILY_WARLOCK && (spellProto->SpellFamilyFlags & flagInfo->Effects[0].SpellClassMask))
                         {
-                            // Soul Swap override spell
-                            caster->CastSpell(caster, WARLOCK_SOUL_SWAP_AURA, true);
-                            caster->RemoveSoulSwapDOT(target);
+                            hasDots = true;
+                            break;
                         }
-                        else if (GetSpellInfo()->Id == 86213)
-                        {
-                            caster->CastSpell(target, WARLOCK_SOUL_SWAP_VISUAL, true);
-                            caster->ApplySoulSwapDOT(target);
-                            caster->RemoveAurasDueToSpell(WARLOCK_SOUL_SWAP_AURA);
+                }
 
-                            if (caster->HasAura(56226) && caster->ToPlayer()) // Glyph of Soul Swap
-                                caster->ToPlayer()->AddSpellCooldown(86121, 0, 30 * IN_MILLISECONDS);
-                        }
-                    }
+                if (!hasDots)
+                    return SPELL_FAILED_BAD_TARGETS;
+            }
+
+            return SPELL_CAST_OK;
+        }
+
+        void HandleOnHit()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Unit* target = GetHitUnit())
+                {
+                    // Soul Swap override spell
+                    caster->CastSpell(caster, SPELL_WARLOCK_SOUL_SWAP_AURA, true);
+                    target->CastSpell(caster, SPELL_WARLOCK_SOUL_SWAP_DOT_MARKER, true);
+
+                    if (Aura* swapOverrideAura = caster->GetAura(SPELL_WARLOCK_SOUL_SWAP_OVERRIDE))
+                        if (SoulSwapOverrideAuraScript* swapScript = dynamic_cast<SoulSwapOverrideAuraScript*>(swapOverrideAura->GetScriptByName("spell_warl_soul_swap_override")))
+                            swapScript->SetOriginalSwapSource(target->GetGUID());
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_warl_soul_swap_SpellScript::CheckCast);
+            OnHit += SpellHitFn(spell_warl_soul_swap_SpellScript::HandleOnHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_warl_soul_swap_SpellScript();
+    }
+};
+
+//! Soul Swap Copy Spells - 92795 - Simply copies spell IDs.
+class spell_warl_soul_swap_dot_marker : public SpellScriptLoader
+{
+    public:
+        spell_warl_soul_swap_dot_marker() : SpellScriptLoader("spell_warl_soul_swap_dot_marker") { }
+
+        class spell_warl_soul_swap_dot_marker_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_warl_soul_swap_dot_marker_SpellScript);
+
+            void HandleAfterCast()
+            {
+                Unit* swapVictim = GetCaster();
+                Unit* warlock    = GetExplTargetUnit();
+                if (!warlock || !swapVictim)
+                    return;
+
+                Trinity::Flag128 classMask = GetSpellInfo()->Effects[EFFECT_0].SpellClassMask;
+                Unit::AuraApplicationMap const& appliedAuras = swapVictim->GetAppliedAuras();
+                SoulSwapOverrideAuraScript* swapSpellScript = NULL;
+                if (Aura* swapOverrideAura = warlock->GetAura(SPELL_WARLOCK_SOUL_SWAP_OVERRIDE))
+                    swapSpellScript = dynamic_cast<SoulSwapOverrideAuraScript*>(swapOverrideAura->GetScriptByName("spell_warl_soul_swap_override"));
+
+                if (swapSpellScript == NULL)
+                    return;
+
+                for (Unit::AuraApplicationMap::const_iterator itr = appliedAuras.begin(); itr != appliedAuras.end(); ++itr)
+                {
+                    SpellInfo const* spellProto = itr->second->GetBase()->GetSpellInfo();
+                    if (itr->second->GetBase()->GetCaster() == warlock)
+                        if (spellProto->SpellFamilyName == SPELLFAMILY_WARLOCK && (spellProto->SpellFamilyFlags & classMask))
+                            swapSpellScript->AddDot(itr->second->GetBase());
                 }
             }
 
-            void Register()
+            void Register() override
             {
-                OnHit += SpellHitFn(spell_warl_soul_swap_SpellScript::HandleOnHit);
+                AfterCast += SpellCastFn(spell_warl_soul_swap_dot_marker_SpellScript::HandleAfterCast);
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const override
         {
-            return new spell_warl_soul_swap_SpellScript();
+            return new spell_warl_soul_swap_dot_marker_SpellScript();
         }
+};
+
+// 86213 - Soul Swap Exhale
+class spell_warl_soul_swap_exhale : public SpellScriptLoader
+{
+public:
+    spell_warl_soul_swap_exhale() : SpellScriptLoader("spell_warl_soul_swap_exhale") { }
+
+    class spell_warl_soul_swap_exhale_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warl_soul_swap_exhale_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_SOUL_SWAP_MOD_COST) ||
+                !sSpellMgr->GetSpellInfo(SPELL_WARLOCK_SOUL_SWAP_OVERRIDE))
+                return false;
+            return true;
+        }
+
+        SpellCastResult CheckCast()
+        {
+            Unit* currentTarget = GetExplTargetUnit();
+            uint64 swapTargetGuid = 0;
+            if (Aura const* swapOverride = GetCaster()->GetAura(SPELL_WARLOCK_SOUL_SWAP_OVERRIDE))
+                if (SoulSwapOverrideAuraScript* swapScript = dynamic_cast<SoulSwapOverrideAuraScript*>(swapOverride->GetScriptByName("spell_warl_soul_swap_override")))
+                    swapTargetGuid = swapScript->GetOriginalSwapSource();
+
+            // Soul Swap Exhale can't be cast on the same target than Soul Swap
+            if (swapTargetGuid && currentTarget && swapTargetGuid == currentTarget->GetGUID())
+                return SPELL_FAILED_BAD_TARGETS;
+
+            return SPELL_CAST_OK;
+        }
+
+        void OnEffectHit(SpellEffIndex /*effIndex*/)
+        {
+            GetCaster()->CastSpell(GetCaster(), SPELL_WARLOCK_SOUL_SWAP_MOD_COST, true);
+            std::list<EssentialAuraInfo> dotList;
+            if (Aura const* swapOverride = GetCaster()->GetAura(SPELL_WARLOCK_SOUL_SWAP_OVERRIDE))
+            {
+                SoulSwapOverrideAuraScript* swapScript = dynamic_cast<SoulSwapOverrideAuraScript*>(swapOverride->GetScriptByName("spell_warl_soul_swap_override"));
+                if (!swapScript)
+                    return;
+                dotList = swapScript->GetDotList();
+            }
+
+            if (dotList.empty())
+                return;
+
+            for (std::list<EssentialAuraInfo>::const_iterator itr = dotList.begin(); itr != dotList.end(); ++itr)
+            {
+                if (Aura* newAura = GetCaster()->AddAura(sSpellMgr->GetSpellInfo(itr->spellId), itr->effectMask, GetHitUnit()))
+                {
+                    newAura->SetMaxDuration(itr->duration);
+                    newAura->SetDuration(itr->duration);
+                    newAura->SetStackAmount(itr->stackAmount);
+                    for (int i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                        if (itr->effectMask & (1 << i) && newAura->GetEffectMask() & (1 << i))
+                            newAura->GetEffect(i)->SetAmount(itr->amount[i]);
+                }
+            }
+
+            // Remove Soul Swap Exhale buff
+            GetCaster()->RemoveAurasDueToSpell(SPELL_WARLOCK_SOUL_SWAP_OVERRIDE);
+        }
+
+        void Register() override
+        {
+            OnCheckCast += SpellCheckCastFn(spell_warl_soul_swap_exhale_SpellScript::CheckCast);
+            OnEffectLaunchTarget += SpellEffectFn(spell_warl_soul_swap_exhale_SpellScript::OnEffectHit, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_warl_soul_swap_exhale_SpellScript();
+    }
 };
 
 // Called by Corruption - 172
@@ -2831,8 +3029,11 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_demonic_leap_jump();
     new spell_warl_demonic_leap();
     new spell_warl_burning_rush();
-    new spell_warl_soul_swap_soulburn();
     new spell_warl_soul_swap();
+    new spell_warl_soul_swap_dot_marker();
+    new spell_warl_soul_swap_exhale();
+    new spell_warl_soul_swap_override();
+    new spell_warl_soul_swap_soulburn();
     new spell_warl_nightfall();
     new spell_warl_drain_soul();
     new spell_warl_demonic_gateway();

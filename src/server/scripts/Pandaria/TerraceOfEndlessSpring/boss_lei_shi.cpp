@@ -303,7 +303,11 @@ class boss_lei_shi : public CreatureScript
                 {
                     damage = 0;
 
+                    if (leiShiFreed)
+                        return;
+
                     summons.DespawnAll();
+                    pInstance->SetBossState(DATA_LEI_SHI, DONE);
                     events.Reset();
 
                     EnterEvadeMode();
@@ -342,8 +346,6 @@ class boss_lei_shi : public CreatureScript
                         pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SCARY_FOG_STACKS);
                         pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SPRAY);
                     }
-
-                    pInstance->SetBossState(DATA_LEI_SHI, DONE);
                 }
             }
 

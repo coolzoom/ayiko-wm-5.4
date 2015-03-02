@@ -1725,6 +1725,9 @@ class spell_mage_alter_time : public SpellScriptLoader
                     if (removeMode == AURA_REMOVE_BY_DEATH)
                         return;
 
+                    if (removeMode == AURA_REMOVE_BY_CANCEL || removeMode == AURA_REMOVE_BY_ENEMY_SPELL)
+                        return;
+
                     std::list<Creature*> mirrorList;
                     _player->GetCreatureListWithEntryInGrid(mirrorList, NPC_PAST_SELF, 50.0f);
 

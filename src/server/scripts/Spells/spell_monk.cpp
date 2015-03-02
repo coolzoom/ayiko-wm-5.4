@@ -2725,6 +2725,15 @@ class spell_monk_roll : public SpellScriptLoader
                 return true;
             }
 
+            SpellCastResult CheckCast()
+            {
+                if (Player* player = GetCaster()->ToPlayer())
+                    if (player->HasUnitState(UNIT_STATE_ROOT))
+                        return SPELL_FAILED_ROOTED;
+
+                return SPELL_CAST_OK;
+            }
+
             void HandleBeforeCast()
             {
                 Aura *aur = GetCaster()->AddAura(SPELL_MONK_ROLL_TRIGGER, GetCaster());
@@ -2752,6 +2761,7 @@ class spell_monk_roll : public SpellScriptLoader
 
             void Register()
             {
+                OnCheckCast += SpellCheckCastFn(spell_monk_roll_SpellScript::CheckCast);
                 BeforeCast += SpellCastFn(spell_monk_roll_SpellScript::HandleBeforeCast);
                 AfterCast += SpellCastFn(spell_monk_roll_SpellScript::HandleAfterCast);
             }

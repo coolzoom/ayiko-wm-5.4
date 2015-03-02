@@ -153,14 +153,14 @@ class spell_monk_expel_harm : public SpellScriptLoader
             {
                 if (auto caster = GetCaster())
                 {
-                    int32 bp = CalculatePct((-GetHitDamage()), 50);
+                    int32 bp = CalculatePct(GetHitHeal(), 50);
                     caster->CastCustomSpell(caster, 115129, &bp, NULL, NULL, true);
                 }
             }
 
             void Register()
             {
-                OnHit += SpellHitFn(spell_monk_expel_harm_SpellScript::HandleOnHit);
+                AfterHit += SpellHitFn(spell_monk_expel_harm_SpellScript::HandleOnHit);
             }
         };
 

@@ -24858,15 +24858,28 @@ void Player::SendInitialPacketsBeforeAddToMap()
     data << uint32(curBitTime);                                 // local hour
     GetSession()->SendPacket(&data);
 
-    data.Initialize(SMSG_WORLD_SERVER_INFO, 4 * 5);
+    uint32 mapDifficulty = GetMap()->GetDifficulty();
+
+    data.Initialize(SMSG_WORLD_SERVER_INFO, 4 + 4 + 1 + 1 + 4);
     data << uint32(GetMap()->GetDifficulty());
     data << uint32(sWorld->GetNextWeeklyQuestsResetTime() - WEEK);
-    data << uint8(0);
-    data.WriteBit(false);
-    data.WriteBit(false);
-    data.WriteBit(false);
-    data.WriteBit(false);
+    data << uint8(0);                                                   // IsTournamentRealm
+
+    data.WriteBit(mapDifficulty);                                       // InstanceGroupSize
+    data.WriteBit(false);                                               // RestrictedAccountMaxLevel
+    data.WriteBit(false);                                               // RestrictedAccountMaxMoney
+    data.WriteBit(false);                                               // IneligibleForLootMask
     data.FlushBits();
+
+    if (mapDifficulty)
+        data << uint32(sDifficultyStore.LookupEntry(mapDifficulty)->maxPlayers);
+    /*if (restrictedAccountMaxLevel)
+        data << uint32(0);
+    if (restrictedAccountMaxMoney)
+        data << uint32(0);
+    if (ineligibleForLootMask)
+        data << uint32(0);*/
+
     GetSession()->SendPacket(&data);
 
     data.Initialize(SMSG_INITIAL_SETUP, sizeof(initialSetupDataBlob));

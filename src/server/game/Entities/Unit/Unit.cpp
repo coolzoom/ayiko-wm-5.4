@@ -20217,17 +20217,12 @@ void Unit::_ExitVehicle(Position const* exitPosition)
 
     SetControlled(false, UNIT_STATE_ROOT);      // SMSG_MOVE_FORCE_UNROOT, ~MOVEMENTFLAG_ROOT
 
-    bool isFixedEjectPos = true;
-    Position pos = { 0.0f, 0.0f, 0.0f, 0.0f };
-    Position ejectPos = getVehicleEjectPos();
-    if (pos == ejectPos)                          // Exit position not specified
-    {
-        vehicle->GetBase()->GetPosition(&pos);  // This should use passenger's current position, leaving it as it is now
-        // because we calculate positions incorrect (sometimes under map)
-        isFixedEjectPos = false;
-    }
+    Position pos;
+    if (!exitPosition)                          // Exit position not specified
+        pos = vehicle->GetBase()->GetPosition();  // This should use passenger's current position, leaving it as it is now
+    // because we calculate positions incorrect (sometimes under map)
     else
-        pos = ejectPos;
+        pos = *exitPosition;
 
     AddUnitState(UNIT_STATE_MOVE);
 
@@ -20248,9 +20243,9 @@ void Unit::_ExitVehicle(Position const* exitPosition)
     Movement::MoveSplineInit init(this);
 
     // Creatures without inhabit type air should begin falling after exiting the vehicle
-    if(GetTypeId() == TYPEID_UNIT && !CanFly() && height > GetMap()->GetWaterOrGroundLevel(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), &height) + 0.1f)
+    if (GetTypeId() == TYPEID_UNIT && !CanFly() && height > GetMap()->GetWaterOrGroundLevel(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), &height) + 0.1f)
         init.SetFall();
-    
+
     init.MoveTo(pos.GetPositionX(), pos.GetPositionY(), height);
     init.SetFacing(GetOrientation());
     init.SetTransportExit();
@@ -20263,9 +20258,9 @@ void Unit::_ExitVehicle(Position const* exitPosition)
 
     SendMovementFlagUpdate();
 
-    if(vehicle->GetBase()->HasUnitTypeMask(UNIT_MASK_MINION) && vehicle->GetBase()->GetTypeId() == TYPEID_UNIT)
-        if (((Minion*)vehicle->GetBase())->GetOwner() == this)
-            vehicle->GetBase()->ToCreature()->DespawnOrUnsummon(1);
+    if (vehicle->GetBase()->HasUnitTypeMask(UNIT_MASK_MINION) && vehicle->GetBase()->GetTypeId() == TYPEID_UNIT)
+    if (((Minion*)vehicle->GetBase())->GetOwner() == this)
+        vehicle->GetBase()->ToCreature()->DespawnOrUnsummon(1);
 
     if (HasUnitTypeMask(UNIT_MASK_ACCESSORY))
     {

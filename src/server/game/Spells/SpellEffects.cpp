@@ -2043,6 +2043,11 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
 
         switch (m_spellInfo->Id)
         {
+            case 81280: // Blood Burst
+            {
+                addhealth = caster->CountPctFromMaxHealth(damage);
+                break;
+            }
             // Selfless Healer
             case 19750: // Flash of Light
             case 82326: // Divine Light (Holy Spec)
@@ -7245,7 +7250,16 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const* 
     {
         Position pos;
         if (count == 0)
-            pos = *destTarget;
+        {
+            // Longying Ranger from Ranger Rescue quest
+            if (Creature* creature = caster->FindNearestCreature(60730, 10.f))
+            {
+                pos.Relocate(creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation());
+                duration = 45000;
+            }
+            else
+                pos = *destTarget;
+        }
         else
             // randomize position for multiple summons
             m_caster->GetRandomPoint(*destTarget, radius, pos);

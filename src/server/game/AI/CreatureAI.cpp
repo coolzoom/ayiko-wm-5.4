@@ -147,7 +147,8 @@ void CreatureAI::MoveInLineOfSight_Safe(Unit* who)
 
 void CreatureAI::MoveInLineOfSight(Unit* who)
 {
-    if (me->GetVictim())
+    // We shouldn't be able to aggro anything while in evade mode
+    if (me->GetVictim() || me->IsInEvadeMode())
         return;
 
     if (me->GetCreatureType() == CREATURE_TYPE_NON_COMBAT_PET) // non-combat pets should just stand there and look good;)

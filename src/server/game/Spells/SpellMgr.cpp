@@ -4147,7 +4147,7 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->AttributesCu &= ~SPELL_ATTR0_CU_NEGATIVE;
                     break;
                 case 80240: // Havoc
-                    spellInfo->ProcCharges = 3;
+                    spellInfo->Effects[EFFECT_1].BasePoints = 1;
                     break;
                 case 129020:// Avatar
                     spellInfo->AttributesEx &= SPELL_ATTR1_DISPEL_AURAS_ON_IMMUNITY;
@@ -4908,7 +4908,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[0].BasePoints = 0;
                     break;
                 case 34299: // Leader of the pack - healing
-                case 81280: // Blood Burst
                     spellInfo->Effects[0].Effect = SPELL_EFFECT_HEAL_PCT;
                     spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_DONE_BONUS;
                     break;

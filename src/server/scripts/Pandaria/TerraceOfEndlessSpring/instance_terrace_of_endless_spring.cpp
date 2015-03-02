@@ -392,8 +392,12 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                     {
                     case TYPE_PROTECTORS:
                     case TYPE_TSULONG:
-                    case TYPE_LEI_SHI:
                     case TYPE_SHA:
+                        m_auiEncounter[type] = data;
+                        break;
+                    case TYPE_LEI_SHI:
+                        for (auto const pUnit : animatedList)
+                            pUnit->AddObjectToRemoveList();
                         m_auiEncounter[type] = data;
                         break;
                     case TYPE_LEIS_HOPE:

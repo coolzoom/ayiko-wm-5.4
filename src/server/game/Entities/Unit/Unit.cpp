@@ -3490,6 +3490,7 @@ Aura *Unit::_TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint3
             case 119840: // Serrated Blade
             case 120938: // Residue
             case 119395: // Detonate
+            case 118091: // Defiled Ground
                 foundAura = GetAura(newAura->Id);
             break;
         default:
@@ -8766,6 +8767,35 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 /*damage*/, Aura *triggeredByAura
         {
             switch (dummySpell->Id)
             {
+                case 56835: // Reaping
+                case 50034: // Blood Rites
+                {
+                    *handled = true;
+                    // Convert recently used Blood Rune to Death Rune
+                    if (Player* player = ToPlayer())
+                    {
+                        if (player->getClass() != CLASS_DEATH_KNIGHT)
+                            return false;
+
+                        AuraEffect* aurEff = triggeredByAura->GetEffect(EFFECT_0);
+                        if (!aurEff)
+                            return false;
+
+                        // Reset amplitude - set death rune remove timer to 30s
+                        aurEff->ResetPeriodic(true);
+
+                        for (uint8 i = 0; i < MAX_RUNES; ++i)
+                        {
+                            if (!(ToPlayer()->GetLastUsedRuneMask() & (1 << i)))
+                                continue;
+
+                            // Mark aura as used
+                            player->AddRuneBySpell(i, RUNE_DEATH, dummySpell->Id);
+                        }
+                        return true;
+                    }
+                    return false;
+                }
                 // Bone Shield cooldown
                 case 49222:
                 {

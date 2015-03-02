@@ -254,17 +254,19 @@ INSERT INTO spell_linked_spell (spell_trigger, spell_effect, TYPE, COMMENT) VALU
 (122855, 122858, 0, 'Sun Breath - Trigger Bathed in Light');
 -- (123026, 123508, 0, 'Sun Breath - Trigger Bathed in Light');
 
-DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (122952, 123012, 122928);
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (122952, 123012, 122928, 123740);
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 (13, 1, 122952, 0, 0, 31, 0, 3, 62962, 0, 0, 0, 0, '', 'Summon Unstable Sha - target Trigger'),
+(13, 1, 123740, 0, 0, 31, 0, 3, 62849, 0, 0, 0, 0, '', 'The Dark of Night - target Sunbeam'),
 (13, 1, 123012, 0, 0, 31, 0, 3, 62442, 0, 0, 0, 0, '', 'Terrorize - target Tsulong'),
 (13, 1, 122928, 0, 0, 31, 0, 3, 62442, 0, 0, 0, 0, '', 'Instability - target Tsulong');
 
 UPDATE creature_template SET ScriptName = 'boss_tsulong' WHERE entry = 62442;
 UPDATE creature_template SET ScriptName = 'npc_sunbeam' WHERE entry = 62849;
 
-DELETE FROM spell_script_names WHERE spell_id IN (122775, 125843, 122768, 122789);
+DELETE FROM spell_script_names WHERE spell_id IN (122775, 125843, 122768, 122789, 123011);
 INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
+(123011, 'spell_tsulong_terrorize'),
 (122775, 'spell_tsulong_nightmares'),
 (125843, 'spell_dread_shadows_damage'),
 (122768, 'spell_dread_shadows_malus'),
@@ -302,8 +304,10 @@ DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 (13, 1, 132363, 0, 0, 31, 0, 3, 63099, 0, 0, 0, 0, '', 'Hide visual - target lei shi trigger');
 
-DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`=17 AND `SourceGroup`=0 AND `SourceEntry`=129368);
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=17 AND `SourceGroup`=0 AND `SourceEntry` IN (117866,117999,129368);
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES 
+(17, 0, 117866, 0, 0, 22, 0, 996, 0, 0, 0, 0, "0", "Champion of the Light - Active only in Terrace of Endless Spring"),
+(17, 0, 117999, 0, 0, 22, 0, 996, 0, 0, 0, 0, "0", "Wall of Light - Active only in Terrace of Endless Spring"),
 (17, 0, 129368, 0, 0, 22, 0, 996, 0, 0, 0, 0, "0", "Lei\'s Hope - Active only in Terrace of Endless Spring");
 
 DELETE FROM spell_script_names WHERE spell_id IN (123461, 123467, 123244, 123233, 123705, 123712);
@@ -362,7 +366,7 @@ UPDATE creature_template SET mindmg = 11839, maxdmg = 17339, attackpower = 45299
 UPDATE creature_template SET minlevel = 93, maxlevel = 93, flags_extra = 128, ScriptName = 'mob_pure_light_terrace' WHERE entry = 60788;
 UPDATE creature_template SET ScriptName = '', unit_flags2 = 0 WHERE entry = 65736;
 UPDATE creature_template SET minlevel = 92, maxlevel = 92, faction_A = 16, faction_H = 16, `Health_mod`=8.86, `Mana_mod`=8.86, ScriptName = 'mob_terror_spawn' WHERE entry = 61034;
-UPDATE creature_template SET mindmg = 11839, maxdmg = 17339, attackpower = 45299, minrangedmg = 11839, maxrangedmg = 17339, rangedattackpower = 45299, dmg_multiplier = 8, flags_extra = 0, unit_flags = 0, unit_flags2 = 0, type_flags = 0, mechanic_immune_mask = 667893759, ScriptName = 'npc_sha_of_fear_bowman' WHERE entry IN (61042, 61038, 61046);
+UPDATE creature_template SET mindmg = 13314, maxdmg = 15211, attackpower = 45299, minrangedmg = 11839, maxrangedmg = 17339, rangedattackpower = 45299, dmg_multiplier = 8, flags_extra = 0, unit_flags = 0, unit_flags2 = 0, type_flags = 0, mechanic_immune_mask = 667893759, ScriptName = 'npc_sha_of_fear_bowman' WHERE entry IN (61042, 61038, 61046);
 UPDATE creature_template SET minlevel = 91, maxlevel = 91, faction_A = 14, faction_H = 14, flags_extra = 128, ScriptName = 'npc_sha_globe' WHERE entry = 65691;
 
 DELETE FROM spell_script_names WHERE spell_id IN (119887, 129189, 120047, 119983, 119593, 119692, 119693, 117866, 125786, 119414, 119108, 129075);
@@ -707,23 +711,23 @@ UPDATE creature_template SET lootId = entry, dmg_multiplier = 10, Health_Mod = 5
 UPDATE creature_template SET lootId = entry, dmg_multiplier = 13, Health_Mod = 1600000000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 60999; -- Sha of Fear
 UPDATE creature_template SET lootId = entry, dmg_multiplier = 7,  Health_Mod = 343000000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 60999; -- Sha of Fear
 
-UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 61038; -- Yang Guoshi
-UPDATE creature_template SET Health_Mod = 23600000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_10H + 61038; -- Yang Guoshi
-UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25N + 61038; -- Yang Guoshi
-UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 61038; -- Yang Guoshi
-UPDATE creature_template SET Health_Mod = 3000000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 61038; -- Yang Guoshi
+UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 14 WHERE entry = @RAID_DIFF_10N + 61038; -- Yang Guoshi
+UPDATE creature_template SET Health_Mod = 23600000 / @HP_MOD_93, dmg_multiplier = 20 WHERE entry = @RAID_DIFF_10H + 61038; -- Yang Guoshi
+UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 14 WHERE entry = @RAID_DIFF_25N + 61038; -- Yang Guoshi
+UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 20 WHERE entry = @RAID_DIFF_25H + 61038; -- Yang Guoshi
+UPDATE creature_template SET Health_Mod = 3000000 / @HP_MOD_93, dmg_multiplier = 11 WHERE entry = @RAID_DIFF_25R + 61038; -- Yang Guoshi
 
-UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 61042; -- Cheng Kang
-UPDATE creature_template SET Health_Mod = 23600000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_10H + 61042; -- Cheng Kang
-UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25N + 61042; -- Cheng Kang
-UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 61042; -- Cheng Kang
-UPDATE creature_template SET Health_Mod = 3000000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 61042; -- Cheng Kang
+UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 14 WHERE entry = @RAID_DIFF_10N + 61042; -- Cheng Kang
+UPDATE creature_template SET Health_Mod = 23600000 / @HP_MOD_93, dmg_multiplier = 20 WHERE entry = @RAID_DIFF_10H + 61042; -- Cheng Kang
+UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 14 WHERE entry = @RAID_DIFF_25N + 61042; -- Cheng Kang
+UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 20 WHERE entry = @RAID_DIFF_25H + 61042; -- Cheng Kang
+UPDATE creature_template SET Health_Mod = 3000000 / @HP_MOD_93, dmg_multiplier = 11 WHERE entry = @RAID_DIFF_25R + 61042; -- Cheng Kang
 
-UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 61046; -- Jinlun Kun
-UPDATE creature_template SET Health_Mod = 23600000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_10H + 61046; -- Jinlun Kun
-UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25N + 61046; -- Jinlun Kun
-UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 61046; -- Jinlun Kun
-UPDATE creature_template SET Health_Mod = 3000000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 61046; -- Jinlun Kun
+UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 14 WHERE entry = @RAID_DIFF_10N + 61046; -- Jinlun Kun
+UPDATE creature_template SET Health_Mod = 23600000 / @HP_MOD_93, dmg_multiplier = 20 WHERE entry = @RAID_DIFF_10H + 61046; -- Jinlun Kun
+UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 14 WHERE entry = @RAID_DIFF_25N + 61046; -- Jinlun Kun
+UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 20 WHERE entry = @RAID_DIFF_25H + 61046; -- Jinlun Kun
+UPDATE creature_template SET Health_Mod = 3000000 / @HP_MOD_93, dmg_multiplier = 11 WHERE entry = @RAID_DIFF_25R + 61046; -- Jinlun Kun
 
 UPDATE creature_template SET Health_Mod = 4000000 / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 61034; -- Terror Spawn
 UPDATE creature_template SET Health_Mod = 6100000 / @HP_MOD_92 WHERE entry = @RAID_DIFF_10H + 61034; -- Terror Spawn

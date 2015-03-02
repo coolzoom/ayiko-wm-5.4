@@ -1055,6 +1055,22 @@ struct DestructibleModelDataEntry
     //uint32  Unk8;                                         // 23
 };
 
+struct DifficultyEntry
+{
+    uint32 id;                                              // 0
+    //uint32 fallbackDifficultyID;                          // 1
+    uint32 instanceType;                                    // 2
+    uint32 minPlayers;                                      // 3
+    uint32 maxPlayers;                                      // 4
+    //uint32 oldEnumValue;                                  // 5
+    //uint32 flags;                                         // 6
+    //uint32 toggleDifficultyID;                            // 7
+    //uint32 groupSizeHealthCurveID;                        // 8
+    //uint32 groupSizeDmgCurveID;                           // 9
+    //uint32 groupSizeSpellPointsCurveID;                   // 10
+    //char*  name;                                          // 11
+};
+
 // @author Selenium: 5.4 valid
 struct DungeonEncounterEntry
 {
@@ -1662,38 +1678,38 @@ struct ItemSpecOverrideEntry final
     uint32 Spec;
 };
 
-// @author Selenium: 5.4 valid
 struct LFGDungeonEntry
 {
     uint32  ID;                                             // 0
-    //char*   name;                                         // 1
+    //char*   name;                                         // 1  NameLang
     uint32  minlevel;                                       // 2
     uint32  maxlevel;                                       // 3
     uint32  reclevel;                                       // 4
     uint32  recminlevel;                                    // 5
     uint32  recmaxlevel;                                    // 6
-    int32  map;                                             // 7
+    int32   map;                                            // 7
     uint32  difficulty;                                     // 8
     uint32  flags;                                          // 9
     uint32  type;                                           // 10
-    //int32  unk_1;                                         // 11
-    //char*   namelite;                                     // 12 Name lite
+    //int32   faction;                                      // 11
+    //char*   textureFilename;                              // 12
     uint32  expansion;                                      // 13
-    //uint32  unk_2;                                        // 14
+    //uint32  orderIndex;                                   // 14
     uint32 grouptype;                                       // 15
-    //char* descr                                           // 16 Description
-    uint32 flags2;                                          // 17
-    uint32 tankNeeded;                                      // 18
-    uint32 healerNeeded;                                    // 19
-    uint32 dpsNeeded;                                       // 20
-    //uint32 unk_3;                                         // 21 only 0/1
-    //uint32 unk_4;                                         // 22
-    //uint32 unk_5;                                         // 23
-    //uint32 unk_6;                                         // 24 only 0
-    uint32 category;                                        // 25 only for categories
-    //uint32 unk_8;                                         // 26 only 0
-    //uint32 unk_9;                                         // 27
-    //uint32 unk_10;                                        // 28
+    //char* descr                                           // 16 DescriptionLang
+    uint32  flags2;                                         // 17 RandomId
+    uint32  tankNeeded;                                     // 18
+    uint32  healerNeeded;                                   // 19
+    uint32  dpsNeeded;                                      // 20
+    //uint32  minCountTank;                                 // 21
+    //uint32  minCountHealer;                               // 22
+    //uint32  minCountDamage;                               // 23
+    //uint32  scenarioId;                                   // 24
+    uint32  category;                                       // 25
+    uint32  bonusReputationAmount;                          // 26
+    //uint32  mentorCharLevel;                              // 27
+    //uint32  mentorCharLevel;                              // 28
+
     // Helpers
     uint32 Entry() const { return ID + (type << 24); }
     // 1 = LFG_TYPE_DUNGEON

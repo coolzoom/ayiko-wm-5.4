@@ -862,7 +862,7 @@ void Battleground::EndBattleground(uint32 winner)
         //if (!team) team = player->GetTeam();
 
         // per player calculation
-        if (isArena() && isRated() && winner_arena_team && loser_arena_team && winner_arena_team != loser_arena_team)
+        if (isArena() && winner_arena_team && loser_arena_team && winner_arena_team != loser_arena_team)
         {
             uint8 slot = Arena::GetSlotByType(GetArenaType());
             if (team == winner)
@@ -1637,6 +1637,17 @@ void Battleground::DoorClose(uint32 type)
     else
         TC_LOG_ERROR("bg.battleground", "Battleground::DoorClose: door gameobject (type: %u, GUID: %u) not found for BG (map: %u, instance id: %u)!",
             type, GUID_LOPART(BgObjects[type]), m_MapId, m_InstanceID);
+}
+
+void Battleground::DoorDespawn(uint32 type)
+{
+    if (GameObject* obj = GetBgMap()->GetGameObject(BgObjects[type]))
+    {
+        DelObject(type);
+    }
+    else
+        TC_LOG_ERROR("bg.battleground", "Battleground::DoorDespawn: door gameobject (type : %u, GUID: %u) not found for BG (map: %u, instance id: %u)!",
+        type, GUID_LOPART(BgObjects[type]), m_MapId, m_InstanceID);
 }
 
 void Battleground::DoorOpen(uint32 type)

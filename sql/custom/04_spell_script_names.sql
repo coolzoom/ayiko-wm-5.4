@@ -1,0 +1,1 @@
+INSERT INTO `spell_script_names` VALUES ('84718', 'spell_mage_orb_filter');

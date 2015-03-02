@@ -4328,7 +4328,7 @@ enum BattlegroundTypeId
     BATTLEGROUND_KT                 = 699,  // Kotmogu's Temple
     BATTLEGROUND_CTF3               = 706,  // CTF3 not implemented on MoP
     BATTLEGROUND_SSM                = 708,  // Silver shard Mine
-    BATTLEGROUND_TV                 = 719,  // Tol'viron Arena
+    BATTLEGROUND_TA                 = 719,  // Tol'viron Arena
     BATTLEGROUND_DG                 = 754,  // Deepwind Gorge   @todo NYI
     BATTLEGROUND_TTP                = 757   // The Tiger's Peak @todo NYI
 };

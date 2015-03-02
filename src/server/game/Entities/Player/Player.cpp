@@ -10738,6 +10738,26 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
                 data << uint32(0xa11) << uint32(0x0);           // 9 show
             }
             break;
+        case 6296:
+            if (bg && bg->GetTypeID(true) == BATTLEGROUND_TA)
+                bg->FillInitialWorldStates(data);
+            else
+            {
+                data << uint32(3600) << uint32(0);           // 7 gold
+                data << uint32(3601) << uint32(0);           // 8 green
+                data << uint32(3610) << uint32(0);           // 9 show
+            }
+            break;
+        case 6732:
+            if (bg && bg->GetTypeID(true) == BATTLEGROUND_TTP)
+                bg->FillInitialWorldStates(data);
+            else
+            {
+                data << uint32(3600) << uint32(0);           // 7 gold
+                data << uint32(3601) << uint32(0);           // 8 green
+                data << uint32(3610) << uint32(0);           // 9 show
+            }
+            break;
         case 3702:                                          // Blade's Edge Arena
             if (bg && bg->GetTypeID(true) == BATTLEGROUND_BE)
                 bg->FillInitialWorldStates(data);
@@ -26882,6 +26902,7 @@ void Player::InitRunes()
         return;
 
     m_runes.runeState = 0;
+    m_runes.lastUsedRuneMask = 0;
 
     for (uint8 i = 0; i < MAX_RUNES; ++i)
     {

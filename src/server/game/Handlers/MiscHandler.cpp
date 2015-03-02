@@ -1910,7 +1910,7 @@ void WorldSession::HandleSetDungeonDifficultyOpcode(WorldPacket & recvData)
     {
         if (group->IsLeader(_player->GetGUID()))
         {
-            if (group->IsLFRGroup())
+            if (group->IsLFGRestricted())
                 return;
 
             for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
@@ -1975,7 +1975,7 @@ void WorldSession::HandleSetRaidDifficultyOpcode(WorldPacket& recvData)
     {
         if (group->IsLeader(_player->GetGUID()))
         {
-            if (group->IsLFRGroup())
+            if (group->IsLFGRestricted())
                 return;
 
             for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())

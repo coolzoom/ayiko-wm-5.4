@@ -600,7 +600,7 @@ void WorldSession::HandleLootMethodOpcode(WorldPacket & recvData)
     if (!group->IsLeader(GetPlayer()->GetGUID()))
         return;
 
-    if (group->IsLFRGroup())
+    if (group->IsLFGRestricted())
         return;
     /********************/
 
@@ -740,7 +740,7 @@ void WorldSession::HandleGroupRaidConvertOpcode(WorldPacket& recvData)
     if (!group)
         return;
 
-    if (group->IsLFRGroup())
+    if (group->IsLFGRestricted())
         return;
 
     if (_player->InBattleground())

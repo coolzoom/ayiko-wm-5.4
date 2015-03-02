@@ -68,7 +68,7 @@ enum WarlockSpells
     SPELL_WARLOCK_SOUL_SWAP_VISUAL          = 92795,
     WARLOCK_GRIMOIRE_OF_SACRIFICE           = 108503,
     WARLOCK_METAMORPHOSIS                   = 103958,
-    WARLOCK_DEMONIC_LEAP_JUMP               = 54785,
+    WARLOCK_DEMONIC_LEAP_JUMP               = 109163,
     WARLOCK_ITEM_S12_TIER_4                 = 131632,
     WARLOCK_TWILIGHT_WARD_S12               = 131623,
     WARLOCK_TWILIGHT_WARD_METAMORPHOSIS_S12 = 131624,
@@ -1456,20 +1456,7 @@ class spell_warl_demonic_leap_jump : public SpellScriptLoader
                 if (!caster)
                     return SPELL_FAILED_DONT_REPORT;
 
-                Position pos;
-                caster->GetFirstCollisionPosition(pos, GetSpellInfo()->Effects[0].CalcRadius(caster), 0.0f);
-
-                if (pos.GetPositionX() > caster->GetPositionZ() + 5.0f)
-                {
-                    caster->RemoveAura(WARLOCK_METAMORPHOSIS);
-                    return SPELL_FAILED_NOPATH;
-                }
-                else if (!caster->IsWithinLOS(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ()))
-                {
-                    caster->RemoveAura(WARLOCK_METAMORPHOSIS);
-                    return SPELL_FAILED_NOPATH;
-                }
-                else if (caster->HasAuraType(SPELL_AURA_MOD_ROOT))
+                if (caster->HasAuraType(SPELL_AURA_MOD_ROOT))
                 {
                     caster->RemoveAura(WARLOCK_METAMORPHOSIS);
                     return SPELL_FAILED_ROOTED;

@@ -12977,8 +12977,13 @@ bool Unit::IsImmunedToDamage(SpellInfo const* spellInfo)
         // If m_immuneToSchool type contain this school type, IMMUNE damage.
         SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
         for (SpellImmuneList::const_iterator itr = schoolList.begin(); itr != schoolList.end(); ++itr)
-            if (itr->type & shoolMask && !spellInfo->CanPierceImmuneAura(sSpellMgr->GetSpellInfo(itr->spellId)))
+        {
+            SpellInfo const* itrInfo = sSpellMgr->GetSpellInfo(itr->spellId);
+            if (itr->type & shoolMask
+                && !(itrInfo->IsPositive() && spellInfo->IsPositive())
+                && !spellInfo->CanPierceImmuneAura(sSpellMgr->GetSpellInfo(itr->spellId)))
                 return true;
+        }
     }
 
     // If m_immuneToDamage type contain magic, IMMUNE damage.
@@ -13062,6 +13067,9 @@ bool Unit::IsImmunedToSpell(SpellInfo const* spellInfo)
 bool Unit::IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) const
 {
     if (!spellInfo || !spellInfo->Effects[index].IsEffect())
+        return false;
+
+    if (spellInfo->Attributes & SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY)
         return false;
 
     // If m_immuneToEffect type contain this effect type, IMMUNE effect.

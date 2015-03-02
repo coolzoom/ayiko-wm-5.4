@@ -4277,7 +4277,9 @@ void Spell::finish(bool ok)
 
         // Take mods after trigger spell (needed for 14177 to affect 48664)
         // mods are taken only on succesfull cast and independantly from targets of the spell
-        player->RemoveSpellMods(*this);
+        if (!m_spellInfo->Speed || m_spellInfo->IsChanneled())
+            player->RemoveSpellMods(*this);
+
         player->SetSpellModTakingSpell(this, false);
     }
 

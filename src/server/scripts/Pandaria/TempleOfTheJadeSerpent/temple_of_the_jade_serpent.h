@@ -145,6 +145,14 @@ Position const SunsSummonPosition[5] =
     {850.361f, -2474.320f, 178.196f, 0.0f}
 };
 
+Position const FountainTriggerSummonPosition[4] =
+{
+    {1059.94f, -2581.65f, 176.14f, 0.0f },
+    {1023.31f, -2569.7f, 176.034f, 0.0f },
+    {1022.74f, -2544.29f, 173.776f, 0.0f},
+    {1075.23f, -2561.33f, 173.876f, 0.0f}
+};
+
 Position const TriggerSunsSummonPosition[5] =
 {
     {830.067f, -2466.660f, 176.320f, 0.0f},

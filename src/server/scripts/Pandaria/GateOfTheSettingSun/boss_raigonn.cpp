@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -21,20 +21,18 @@
 #include "gate_of_the_setting_sun.h"
 #include "Vehicle.h"
 #include "Spline.h"
+#include "MoveSplineInit.h"
 
 enum eSpells
 {
     // Raigonn
-    SPELL_IMPERVIOUS_CARAPACE       = 107118,
-
+    SPELL_IMPERVIOUS_CARAPACE       = 107118,   
     SPELL_BATTERING_HEADBUTT_EMOTE  = 118685,
-    SPELL_BATTERING_HEADBUTT        = 111668,
-    SPELL_BATTERING_STUN            = 130772,
-
+    SPELL_BATTERING_HEADBUTT        = 111671,
     SPELL_BROKEN_CARAPACE           = 111742,
     SPELL_BROKEN_CARAPACE_DAMAGE    = 107146,
-    SPELL_FIXATE                    = 78617,
-    SPELL_STOMP                     = 34716,
+    SPELL_FIXATE                    = 111723,
+    SPELL_STOMP                     = 111728,
 
     // Protectorat
     SPELL_HIVE_MIND                 = 107314,
@@ -59,23 +57,25 @@ enum eActions
 
 enum eEvents
 {
-    EVENT_CHECK_WIPE            = 1,
-    EVENT_RAIGONN_CHARGE        = 2,
-
-    EVENT_SUMMON_PROTECTORAT    = 3,
-    EVENT_SUMMON_ENGULFER       = 4,
-    EVENT_SUMMON_SWARM_BRINGER  = 5,
-
-    EVENT_FIXATE                = 6,
-    EVENT_FIXATE_STOP           = 7,
-
-    EVENT_STOMP                 = 8
+    EVENT_RAIGONN_CHARGE           = 1,
+    EVENT_RAIGON_MOVE_BACK         = 2,
+    EVENT_SUMMON_PROTECTORAT       = 3,
+    EVENT_SUMMON_ENGULFER          = 4,
+    EVENT_SUMMON_SWARM_BRINGER     = 5,
+    EVENT_FIXATE                   = 6,
+    EVENT_FIXATE_STOP              = 7,
+    EVENT_STOMP                    = 8,
+    EVENT_BATTERING_HEADBUTT_EMOTE = 9,
+    EVENT_BATTERING_HEADBUTT       = 10,
+    EVENT_INITIALIZE               = 11
 };
 
-enum eMovements
+enum eTalks
 {
-    POINT_MAIN_DOOR     = 1,
-    POINT_HERSE         = 2
+    TALK_WEAK_POINT = 0,
+    TALK_SWARM      = 1,
+    TALK_ENGULFER   = 2,
+    TALK_PROTECT    = 3
 };
 
 Position chargePos[4] =
@@ -93,158 +93,133 @@ class boss_raigonn : public CreatureScript
 
         struct boss_raigonnAI : public BossAI
         {
-            boss_raigonnAI(Creature* creature) : BossAI(creature, DATA_RAIGONN)
-            {
-                pInstance = creature->GetInstanceScript();
-            }
+            boss_raigonnAI(Creature* creature) : BossAI(creature, DATA_RAIGONN), vehicle(creature->GetVehicleKit()) {}
 
-            InstanceScript* pInstance;
-
-            uint8  eventChargeProgress;
-            uint32 eventChargeTimer;
-
+            Vehicle* vehicle;
+            bool isInFight;
             uint8 Phase;
+            EventMap events;
+            EventMap chargeEvents;
 
-            bool inFight;
-
-            void Reset()
+            void Reset() override
             {
                 _Reset();
 
+                isInFight = false;
                 me->SetReactState(REACT_PASSIVE);
                 me->AddAura(SPELL_IMPERVIOUS_CARAPACE, me);
-                me->CombatStop();
-                SetCanSeeEvenInPassiveMode(true);
+                me->SetFullHealth();
 
                 Phase = PHASE_WEAK_SPOT;
-
-                inFight = false;
-
-                eventChargeProgress = 0;
-                events.ScheduleEvent(EVENT_RAIGONN_CHARGE, 1000, PHASE_WEAK_SPOT);
-
-                me->RemoveAurasDueToSpell(SPELL_BROKEN_CARAPACE);
-                me->RemoveAurasDueToSpell(SPELL_BROKEN_CARAPACE_DAMAGE);
-
-                if (Vehicle* meVehicle = me->GetVehicleKit())
+                events.Reset();
+                chargeEvents.Reset();
+                chargeEvents.ScheduleEvent(EVENT_RAIGONN_CHARGE, 1 * IN_MILLISECONDS);
+                chargeEvents.ScheduleEvent(EVENT_INITIALIZE, 1 * IN_MILLISECONDS);
+            }
+            
+            void AIDidInitialize()
+            {
+                if(vehicle)
                 {
-                    if (Unit* passenger = meVehicle->GetPassenger(1)) // Check if weak_spot already spawned
+                    if(Unit* passenger = vehicle->GetPassenger(1)) // Check if weak_spot already spawned
                     {
                         passenger->setFaction(35);
                         passenger->SetFullHealth();
                         passenger->AddUnitState(UNIT_STATE_UNATTACKABLE);
-                        pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, passenger);
-                        return;
+                        passenger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                     }
-
-                    if (Creature* weakSpot = me->SummonCreature(NPC_WEAK_SPOT, 0, 0, 0))
+                    else
                     {
-                        weakSpot->_EnterVehicle(meVehicle, 1);
+                        if(Creature* weakSpot = me->SummonCreature(NPC_WEAK_SPOT, *me))
+                        {
+                            weakSpot->EnterVehicle(me, 1);
 
-                        if (pInstance)
-                            pInstance->SetData64(NPC_WEAK_SPOT, weakSpot->GetGUID());
+                            if(instance)
+                                instance->SetData64(NPC_WEAK_SPOT, weakSpot->GetGUID());
+                        }
                     }
                 }
             }
 
-            void MoveInLineOfSight(Unit* who)
+            void DamageTaken(Unit* attacker, uint32& damage) override
             {
-                if (inFight)
-                    return;
-
-                if (me->GetDistance(who) > 30.0f)
-                    return;
-
-                if (pInstance)
-                    if (pInstance->GetBossState(DATA_RIMOK) != DONE)
-                        return;
-
-                Player* whoPlayer = who->ToPlayer();
-
-                if (!whoPlayer)
-                    return;
-
-                if (whoPlayer->isGameMaster())
-                    return;
-
-                inFight = true;
-                DoZoneInCombat();
-                events.CancelEventGroup(PHASE_VULNERABILITY);
-                events.ScheduleEvent(EVENT_SUMMON_PROTECTORAT, urand(15000, 30000));
-                events.ScheduleEvent(EVENT_SUMMON_ENGULFER, urand(15000, 30000));
-                events.ScheduleEvent(EVENT_SUMMON_SWARM_BRINGER, urand(15000, 30000));
-                events.ScheduleEvent(EVENT_CHECK_WIPE, 1000);
-
-                pInstance->SetBossState(DATA_RAIGONN, IN_PROGRESS);
-
-                if (Creature* weakPoint = pInstance->instance->GetCreature(pInstance->GetData64(NPC_WEAK_SPOT)))
+                if (instance->GetBossState(DATA_RIMOK) == DONE)
                 {
-                    instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, weakPoint);
-                    weakPoint->setFaction(16);
-                    weakPoint->ClearUnitState(UNIT_STATE_UNATTACKABLE);
-                    weakPoint->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    if (!isInFight)
+                    {
+                        isInFight = true;
+                        _EnterCombat();
+                        Talk(TALK_WEAK_POINT);
+                        me->setRegeneratingHealth(false);
+                        instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+                        events.ScheduleEvent(EVENT_SUMMON_PROTECTORAT, urand(15, 30) * IN_MILLISECONDS);
+                        events.ScheduleEvent(EVENT_SUMMON_ENGULFER, urand(15, 30) * IN_MILLISECONDS);
+                        events.ScheduleEvent(EVENT_SUMMON_SWARM_BRINGER, urand(15, 30) * IN_MILLISECONDS);
+
+                        if (Creature* weakPoint = instance->instance->GetCreature(instance->GetData64(NPC_WEAK_SPOT)))
+                        {
+                            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, weakPoint);
+                            weakPoint->setFaction(16);
+                            weakPoint->ClearUnitState(UNIT_STATE_UNATTACKABLE);
+                            weakPoint->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                        }
+                    }
                 }
+                else
+                    damage = 0;
             }
 
-            void EnterCombat(Unit* /*who*/)
+            void EnterEvadeMode() override
             {
-                if (Phase != PHASE_VULNERABILITY)
-                    return;
-
-                _EnterCombat();
-            }
-
-            void MovementInform(uint32 type, uint32 pointId)
-            {
-                if (type != POINT_MOTION_TYPE && type != EFFECT_MOTION_TYPE)
-                    return;
-
-                switch (pointId)
+                BossAI::EnterEvadeMode();
+                if (instance)
                 {
-                    case POINT_MAIN_DOOR:
-                    case POINT_HERSE:
-                        DoEventCharge();
-                        break;
+                    instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                    instance->SetBossState(DATA_RAIGONN, FAIL);
+
+                    if (Creature* weakPoint = instance->instance->GetCreature(instance->GetData64(NPC_WEAK_SPOT)))
+                        instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, weakPoint);
                 }
+                me->RemoveAurasDueToSpell(SPELL_BROKEN_CARAPACE);
+                me->RemoveAurasDueToSpell(SPELL_BROKEN_CARAPACE_DAMAGE);
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_FIXATE);
+                summons.DespawnEntry(NPC_KRIKTHIK_PROTECTORAT);
+                summons.DespawnEntry(NPC_KRIKTHIK_ENGULFER);
+                summons.DespawnEntry(NPC_KRIKTHIK_SWARM_BRINGER);
             }
 
-            void DoAction(int32 const action)
+            void DoAction(int32 const action) override
             {
                 if (action == ACTION_WEAK_SPOT_DEAD)
                 {
-                    Phase = PHASE_VULNERABILITY;
+                    me->CastStop();
+                    me->StopMoving();
                     me->SetReactState(REACT_AGGRESSIVE);
                     me->SetSpeed(MOVE_RUN, 1.1f, true);
+                    
+                    chargeEvents.Reset();
+                    events.Reset();
+                    Phase = PHASE_VULNERABILITY;
+                    events.ScheduleEvent(EVENT_FIXATE, 30 * IN_MILLISECONDS);
+                    events.ScheduleEvent(EVENT_STOMP, 16 * IN_MILLISECONDS);
 
-                    me->CastStop();
                     me->RemoveAurasDueToSpell(SPELL_IMPERVIOUS_CARAPACE);
                     me->CastSpell(me, SPELL_BROKEN_CARAPACE, true);
                     me->CastSpell(me, SPELL_BROKEN_CARAPACE_DAMAGE, true);
 
-                    events.CancelEventGroup(PHASE_WEAK_SPOT);
-                    events.ScheduleEvent(EVENT_FIXATE, 30000, PHASE_VULNERABILITY);
-                    events.ScheduleEvent(EVENT_STOMP, 16000, PHASE_VULNERABILITY);
-
-                    DoZoneInCombat();
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
                         AttackStart(target);
                 }
             }
 
-            void JustReachedHome()
-            {
-                instance->SetBossState(DATA_RAIGONN, FAIL);
-                summons.DespawnAll();
-            }
-
-            void JustSummoned(Creature* summoned)
+            void JustSummoned(Creature* summoned) override
             {
                 summons.Summon(summoned);
             }
 
             void RemoveWeakSpotPassengers()
             {
-                if (Creature* weakPoint = pInstance->instance->GetCreature(pInstance->GetData64(NPC_WEAK_SPOT)))
+                if (Creature* weakPoint = instance->instance->GetCreature(instance->GetData64(NPC_WEAK_SPOT)))
                 {
                     if (Vehicle* weakVehicle = weakPoint->GetVehicleKit())
                     {
@@ -263,162 +238,125 @@ class boss_raigonn : public CreatureScript
                 }
             }
 
-            void DoEventCharge()
+            void UpdateAI(const uint32 diff) override
             {
-                if (!pInstance)
-                    return;
-
-                if (Phase != PHASE_WEAK_SPOT)
-                    return;
-
-                uint32 eventBrasierProgress = pInstance->GetData(DATA_BRASIER_CLICKED);
-                uint8 baseMovement = eventBrasierProgress != DONE ? 0: 2;
-
-                switch (eventChargeProgress)
+                if (uint32 eventId = chargeEvents.ExecuteEvent())
                 {
-                    case 0:
-                        me->CastSpell(me, SPELL_BATTERING_HEADBUTT_EMOTE, false);
-                        events.ScheduleEvent(EVENT_RAIGONN_CHARGE, 1750, PHASE_WEAK_SPOT);
-                        ++eventChargeProgress;
-                        break;
-                    case 1:
-                        // SPELL_BATTERING_HEADBUTT_EMOTE have an effect but is used here only for it's emote, we don't let him time to do his effects
-                        me->CastStop();
+                    switch (eventId)
+                    {
+                        case EVENT_RAIGON_MOVE_BACK:
+                            {
+                                 uint32 eventBrasierProgress = instance->GetBossState(DATA_RIMOK);
+                                 uint8 baseMovement = eventBrasierProgress != DONE ? 0 : 2;
+                                 Movement::MoveSplineInit init(me);
+                                 init.MoveTo(chargePos[baseMovement + 1].GetPositionX(), chargePos[baseMovement + 1].GetPositionY(), chargePos[baseMovement + 1].GetPositionZ());
+                                 init.SetVelocity(5.0f);
+                                 init.SetOrientationInversed();
+                                 init.Launch();
 
-                        me->GetMotionMaster()->MoveCharge(chargePos[baseMovement].GetPositionX(), chargePos[baseMovement].GetPositionY(), chargePos[baseMovement].GetPositionZ(), 84.0f, POINT_HERSE);
-                        ++eventChargeProgress;
-                        break;
-                    case 2:
-                        if (eventBrasierProgress == DONE)
+                                 chargeEvents.ScheduleEvent(EVENT_BATTERING_HEADBUTT_EMOTE, me->GetSplineDuration());
+                                 chargeEvents.ScheduleEvent(EVENT_RAIGONN_CHARGE, me->GetSplineDuration() + 2);
+                            }
+                            break;
+                        case EVENT_BATTERING_HEADBUTT_EMOTE:
+                            me->CastSpell(me, SPELL_BATTERING_HEADBUTT_EMOTE, false);
+                            break;
+                        case EVENT_RAIGONN_CHARGE:
+                            {
+                                 me->CastStop();
+                                 uint32 eventBrasierProgress = instance->GetBossState(DATA_RIMOK);
+                                 uint8 baseMovement = eventBrasierProgress != DONE ? 0 : 2;
+                                 Movement::MoveSplineInit init(me);
+                                 init.MoveTo(chargePos[baseMovement].GetPositionX(), chargePos[baseMovement].GetPositionY(), chargePos[baseMovement].GetPositionZ());
+                                 init.SetVelocity(37.0f);
+                                 init.Launch();
+
+                                 chargeEvents.ScheduleEvent(EVENT_BATTERING_HEADBUTT, me->GetSplineDuration());
+                            }
+                            break;
+                        case EVENT_BATTERING_HEADBUTT:
                             RemoveWeakSpotPassengers();
-
-                        me->CastSpell(me, SPELL_BATTERING_HEADBUTT, true);
-                        events.ScheduleEvent(EVENT_RAIGONN_CHARGE, 3000, PHASE_WEAK_SPOT);
-                        ++eventChargeProgress;
-                        break;
-                    case 3:
-                    default:
-                        // We are going back to main door, restart
-                        eventChargeProgress = 0;
-                        me->SetSpeed(MOVE_RUN, 0.5f, true);
-                        me->GetMotionMaster()->MoveBackward(POINT_MAIN_DOOR, chargePos[baseMovement + 1].GetPositionX(), chargePos[baseMovement + 1].GetPositionY(), chargePos[baseMovement + 1].GetPositionZ(), 1.0f);
-                        break;
+                            me->CastSpell(me, SPELL_BATTERING_HEADBUTT, false);
+                            chargeEvents.ScheduleEvent(EVENT_RAIGON_MOVE_BACK, 3 * IN_MILLISECONDS);
+                            break;
+                        case EVENT_INITIALIZE:
+                            AIDidInitialize();
+                            break;
+                    }
                 }
-            }
 
-            bool checkStartBattle()
-            {
-                if (inFight)
-                    return false;
-
-                if (!me->SelectNearestPlayerNotGM(25.0f))
-                    return false;
-
-                if (pInstance)
-                    if (pInstance->GetData(DATA_RIMOK) != DONE)
-                        return false;
-
-                inFight = true;
-                return true;
-            }
-
-            void UpdateAI(const uint32 diff)
-            {
-                if (!pInstance)
-                    return;
-
+                chargeEvents.Update(diff);
                 events.Update(diff);
 
-                switch(events.ExecuteEvent())
+                if (!UpdateVictim())
+                    return;
+
+                if(me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+                if (uint32 eventId = events.ExecuteEvent())
                 {
-                    case EVENT_CHECK_WIPE:
-                        if (pInstance->IsWipe())
-                            Reset();
-                        else
-                            events.ScheduleEvent(EVENT_CHECK_WIPE, 1000);
-                        break;
-                    case EVENT_RAIGONN_CHARGE:
-                        DoEventCharge();
-                        break;
-                    case EVENT_SUMMON_PROTECTORAT:
+                    switch (eventId)
                     {
-                        for (uint8 i = 0; i < 8; ++i)
-                            if (Creature* summon = me->SummonCreature(NPC_KRIKTHIK_PROTECTORAT, frand(941.0f, 974.0f), 2374.85f, 296.67f, 4.73f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000))
+                        case EVENT_SUMMON_PROTECTORAT:
+                            Talk(TALK_PROTECT);
+                            for (uint8 i = 0; i < 8; ++i)
+                                 if (Creature* summon = me->SummonCreature(NPC_KRIKTHIK_PROTECTORAT, frand(941.0f, 974.0f), 2374.85f, 296.67f, 4.73f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000))
+                                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
+                                         if (summon->IsAIEnabled)
+                                             summon->AI()->AttackStart(target);
+
+                            events.ScheduleEvent(EVENT_SUMMON_PROTECTORAT, urand(30, 45) * IN_MILLISECONDS);
+                            break;
+                        case EVENT_SUMMON_ENGULFER:
+                            Talk(TALK_ENGULFER);
+                            for (uint8 i = 0; i < 3; ++i)
+                                me->SummonCreature(NPC_KRIKTHIK_ENGULFER, frand(941.0f, 974.0f), me->GetPositionY(), me->GetPositionZ() + 30.0f, 4.73f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000);
+
+                            events.ScheduleEvent(EVENT_SUMMON_ENGULFER, urand(95, 105) * IN_MILLISECONDS);
+                            break;
+                        case EVENT_SUMMON_SWARM_BRINGER:
+                            Talk(TALK_SWARM);
+                            if (Creature* summon = me->SummonCreature(NPC_KRIKTHIK_SWARM_BRINGER, frand(941.0f, 974.0f), 2374.85f, 296.67f, 4.73f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000))
                                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
-                                    if (summon->IsAIEnabled)
-                                        summon->AI()->AttackStart(target);
+                                   if (summon->IsAIEnabled)
+                                       summon->AI()->AttackStart(target);
 
-                        events.ScheduleEvent(EVENT_SUMMON_PROTECTORAT, urand(30000, 45000), PHASE_WEAK_SPOT);
-                        break;
-                    }
-                    case EVENT_SUMMON_ENGULFER:
-                    {
-                        for (uint8 i = 0; i < 3; ++i)
-                            me->SummonCreature(NPC_KRIKTHIK_ENGULFER, frand(941.0f, 974.0f), me->GetPositionY(), me->GetPositionZ() + 30.0f, 4.73f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000);
-
-                        events.ScheduleEvent(EVENT_SUMMON_ENGULFER, urand(95000, 105000), PHASE_WEAK_SPOT);
-                        break;
-                    }
-                    case EVENT_SUMMON_SWARM_BRINGER:
-                    {
-                        if (Creature* summon = me->SummonCreature(NPC_KRIKTHIK_SWARM_BRINGER, frand(941.0f, 974.0f), 2374.85f, 296.67f, 4.73f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000))
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
-                                if (summon->AI())
-                                    summon->AI()->AttackStart(target);
-
-                        events.ScheduleEvent(EVENT_SUMMON_ENGULFER, urand(35000, 50000), PHASE_WEAK_SPOT);
-                        break;
-                    }
-                    case EVENT_FIXATE:
-                    {
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
-                        {
-                            me->CastSpell(target, SPELL_FIXATE, true);
-
-                            me->SetReactState(REACT_PASSIVE);
-                            me->GetMotionMaster()->MoveChase(target);
-
-                        }
-                        events.ScheduleEvent(EVENT_FIXATE_STOP, 15000, PHASE_VULNERABILITY);
-                        break;
-                    }
-                    case EVENT_FIXATE_STOP:
-                    {
-                        me->SetReactState(REACT_AGGRESSIVE);
-                        me->GetMotionMaster()->Clear();
-
-                        if (Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO))
-                            AttackStart(target);
-
-                        events.ScheduleEvent(EVENT_FIXATE, 30000, PHASE_VULNERABILITY);
-                        break;
-                    }
-                    case EVENT_STOMP:
-                    {
-                        me->CastSpell(me, SPELL_STOMP, false);
-                        events.ScheduleEvent(EVENT_STOMP, 30000, PHASE_VULNERABILITY);
-                        break;
-                    }
-                    default:
-                        break;
+                            events.ScheduleEvent(EVENT_SUMMON_ENGULFER, urand(35, 50) * IN_MILLISECONDS);
+                            break;
+                        case EVENT_FIXATE:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                                me->CastSpell(target, SPELL_FIXATE, false);                            
+                            events.ScheduleEvent(EVENT_FIXATE_STOP, 17 * IN_MILLISECONDS);
+                            break;
+                        case EVENT_FIXATE_STOP:
+                            events.Reset();
+                            events.ScheduleEvent(EVENT_FIXATE, 30 * IN_MILLISECONDS);
+                            events.ScheduleEvent(EVENT_STOMP, urand(14, 20) * IN_MILLISECONDS);
+                            break;
+                        case EVENT_STOMP:
+                            me->CastSpell(me, SPELL_STOMP, false);
+                            break;
+                    }  
                 }
 
-                if (Phase == PHASE_VULNERABILITY)
+                if(Phase == PHASE_VULNERABILITY)
                     DoMeleeAttackIfReady();
             }
 
-            void JustDied(Unit* /*killer*/)
+            void JustDied(Unit* /*killer*/) override
             {
-                events.Reset();
+                _JustDied();
                 if (instance)
                 {
+                    instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                     instance->SetBossState(DATA_RAIGONN, DONE);
-                    instance->SaveToDB();
                 }
+                summons.DespawnAll();
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new boss_raigonnAI(creature);
         }
@@ -438,23 +376,24 @@ class npc_raigonn_weak_spot : public CreatureScript
 
             InstanceScript* pInstance;
 
-            void Reset()
+            void Reset() override
             {
                 me->SetReactState(REACT_PASSIVE);
+                me->setRegeneratingHealth(false);
             }
 
-            void DamageTaken(Unit* /*attacker*/, uint32& damage)
+            void JustDied(Unit* /*killer*/) override
             {
-                if (damage >= me->GetHealth())
-                    if (pInstance)
-                        if (Creature* Raigonn = pInstance->instance->GetCreature(pInstance->GetData64(NPC_RAIGONN)))
-                            if (Raigonn->AI())
-                                Raigonn->AI()->DoAction(ACTION_WEAK_SPOT_DEAD);
+                pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                if (pInstance)
+                    if (Creature* raigonn = Unit::GetCreature(*me, pInstance->GetData64(DATA_RAIGONN)))
+                        if(raigonn->IsAIEnabled)
+                            raigonn->AI()->DoAction(ACTION_WEAK_SPOT_DEAD);
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const
-        {
+        CreatureAI* GetAI(Creature* creature) const override
+        { 
             return new npc_raigonn_weak_spotAI(creature);
         }
 };
@@ -474,19 +413,23 @@ class npc_krikthik_protectorat : public CreatureScript
             InstanceScript* pInstance;
             bool hasCastHiveMind;
 
-            void Reset()
+            void Reset() override
             {
+                DoZoneInCombat();
                 hasCastHiveMind = false;
             }
 
-            void DamageTaken(Unit* /*attacker*/, uint32& damage)
+            void DamageTaken(Unit* /*attacker*/, uint32& damage) override
             {
                 if (!hasCastHiveMind && me->HealthBelowPctDamaged(20, damage))
+                {
+                    hasCastHiveMind = true;
                     me->CastSpell(me, SPELL_HIVE_MIND, true);
+                }
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_krikthik_protectoratAI(creature);
         }
@@ -497,39 +440,39 @@ class npc_krikthik_engulfer : public CreatureScript
     public:
         npc_krikthik_engulfer() :  CreatureScript("npc_krikthik_engulfer") { }
 
+        enum eEvents
+        {
+            EVENT_ENGULFING_WINDS = 1
+        };
+
         struct npc_krikthik_engulferAI : public ScriptedAI
         {
-            npc_krikthik_engulferAI(Creature* creature) : ScriptedAI(creature)
-            {
-                pInstance = creature->GetInstanceScript();
-            }
+            npc_krikthik_engulferAI(Creature* creature) : ScriptedAI(creature) {}
 
-            InstanceScript* pInstance;
-            uint32 engulfingTimer;
+            EventMap events;
 
-            void Reset()
+            void Reset() override
             {
                 me->SetReactState(REACT_PASSIVE);
                 me->GetMotionMaster()->MoveRandom(25.0f);
                 DoZoneInCombat();
-
-                engulfingTimer = 10000;
+                events.ScheduleEvent(EVENT_ENGULFING_WINDS, urand(7.5, 12.5) * IN_MILLISECONDS);
             }
 
-            void UpdateAI(const uint32 diff)
+            void UpdateAI(const uint32 diff) override
             {
-                if (engulfingTimer <= diff)
-                {
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
-                        me->CastSpell(target, SPELL_ENGULFING_WINDS, false);
+                events.Update(diff);
 
-                    engulfingTimer = urand(7500, 12500);
+                if (events.ExecuteEvent() == EVENT_ENGULFING_WINDS)
+                {
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 70.0f, true))
+                        me->CastSpell(target, SPELL_ENGULFING_WINDS, false);
+                    events.ScheduleEvent(EVENT_ENGULFING_WINDS, urand(7.5, 12.5) * IN_MILLISECONDS);
                 }
-                else engulfingTimer -= diff;
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_krikthik_engulferAI(creature);
         }
@@ -540,38 +483,39 @@ class npc_krikthik_swarm_bringer : public CreatureScript
     public:
         npc_krikthik_swarm_bringer() :  CreatureScript("npc_krikthik_swarm_bringer") { }
 
+        enum eEvents
+        {
+            EVENT_SCREECHING_SWARM = 1
+        };
+
         struct npc_krikthik_swarm_bringerAI : public ScriptedAI
         {
-            npc_krikthik_swarm_bringerAI(Creature* creature) : ScriptedAI(creature)
-            {
-                pInstance = creature->GetInstanceScript();
-            }
+            npc_krikthik_swarm_bringerAI(Creature* creature) : ScriptedAI(creature) {}
 
-            InstanceScript* pInstance;
-            uint32 swarmTimer;
+            EventMap events;
 
-            void Reset()
+            void Reset() override
             {
                 DoZoneInCombat();
-                swarmTimer = 10000;
+                events.ScheduleEvent(EVENT_SCREECHING_SWARM, urand(17.5, 22.5) * IN_MILLISECONDS);
             }
 
-            void UpdateAI(const uint32 diff)
+            void UpdateAI(const uint32 diff) override
             {
-                if (swarmTimer <= diff)
-                {
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
-                        me->CastSpell(target, SPELL_SCREECHING_SWARM, false);
+                events.Update(diff);
 
-                    swarmTimer = urand(17500, 22500);
+                if (events.ExecuteEvent() == EVENT_SCREECHING_SWARM)
+                {
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 70.0f, true))
+                        me->CastSpell(target, SPELL_SCREECHING_SWARM, false);
+                    events.ScheduleEvent(EVENT_SCREECHING_SWARM, urand(17.5, 22.5) * IN_MILLISECONDS);
                 }
-                else swarmTimer -= diff;
 
                 DoMeleeAttackIfReady();
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_krikthik_swarm_bringerAI(creature);
         }
@@ -579,75 +523,157 @@ class npc_krikthik_swarm_bringer : public CreatureScript
 
 class vehicle_artillery : public VehicleScript
 {
-    public:
-        vehicle_artillery() : VehicleScript("vehicle_artillery") {}
+public:
+    vehicle_artillery() : VehicleScript("vehicle_artillery") {}
 
-        void OnAddPassenger(Vehicle* veh, Unit* /*passenger*/, int8 /*seatId*/)
+    void OnAddPassenger(Vehicle* veh, Unit* /*passenger*/, int8 /*seatId*/)
+    {
+        if (veh->GetBase())
+           if (veh->GetBase()->ToCreature())
+              if (veh->GetBase()->ToCreature()->AI())
+                  veh->GetBase()->ToCreature()->AI()->DoAction(0);
+    }
+
+    enum eEvents
+    {
+        EVENT_LAUNCH = 1
+    };
+
+    struct vehicle_artilleryAI : public ScriptedAI
+    {
+        vehicle_artilleryAI(Creature* creature) : ScriptedAI(creature)
         {
-            if (veh->GetBase())
-                if (veh->GetBase()->ToCreature())
-                    if (veh->GetBase()->ToCreature()->AI())
-                        veh->GetBase()->ToCreature()->AI()->DoAction(0);
+            pInstance = creature->GetInstanceScript();
         }
 
-        struct vehicle_artilleryAI : public ScriptedAI
+        InstanceScript* pInstance;
+        EventMap events;
+
+        void DoAction(int32 const action) override
         {
-            vehicle_artilleryAI(Creature* creature) : ScriptedAI(creature)
+            events.ScheduleEvent(EVENT_LAUNCH, 1.5 * IN_MILLISECONDS);
+        }
+
+        void UpdateAI(const uint32 diff) override
+        {
+            events.Update(diff);
+
+            if (events.ExecuteEvent() == EVENT_LAUNCH)
             {
-               pInstance = creature->GetInstanceScript();
-            }
-
-            InstanceScript* pInstance;
-            uint32 launchEventTimer;
-
-            void Reset()
-            {
-                launchEventTimer = 0;
-            }
-
-            void DoAction(int32 const /*action*/)
-            {
-                launchEventTimer = 2500;
-            }
-
-            void UpdateAI(const uint32 diff)
-            {
-                if (!launchEventTimer)
-                    return;
-
-                if (launchEventTimer <= diff)
+                if (Creature* weakSpot = pInstance->instance->GetCreature(pInstance->GetData64(NPC_WEAK_SPOT)))
                 {
-                    if (Creature* weakSpot = pInstance->instance->GetCreature(pInstance->GetData64(NPC_WEAK_SPOT)))
+                    if (weakSpot->GetVehicleKit())
                     {
-                        if (weakSpot->GetVehicleKit())
+                        if (me->GetVehicleKit())
                         {
-                            if (me->GetVehicleKit())
+                            if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
                             {
-                                if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
-                                {
-                                    passenger->ExitVehicle();
+                                passenger->ExitVehicle();
 
-                                    const uint32 maxSeatCount = 2;
-                                    uint32 availableSeatCount = weakSpot->GetVehicleKit()->GetAvailableSeatCount();
-                                    passenger->EnterVehicle(weakSpot,  maxSeatCount - availableSeatCount);
-                                }
+                                const uint32 maxSeatCount = 2;
+                                uint32 availableSeatCount = weakSpot->GetVehicleKit()->GetAvailableSeatCount();
+                                passenger->EnterVehicle(weakSpot, maxSeatCount - availableSeatCount);
                             }
                         }
                     }
-
-                    launchEventTimer = 0;
                 }
-                else launchEventTimer -= diff;
             }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new vehicle_artilleryAI(creature);
         }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new vehicle_artilleryAI(creature);
+    }
 };
 
+class npc_engulfing_winds : public CreatureScript
+{
+public:
+    npc_engulfing_winds() : CreatureScript("npc_engulfing_winds") { }
 
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_engulfing_windsAI(creature);
+    }
+
+    enum eEvents
+    {
+        EVENT_RANDOM_MOVEMENT = 1
+    };
+
+    enum eSpells
+    {
+        SPELL_ENGULFING_WINDS = 107278
+    };
+
+    struct npc_engulfing_windsAI : public ScriptedAI
+    {
+        npc_engulfing_windsAI(Creature* creature) : ScriptedAI(creature) {}
+
+        EventMap events;
+
+        void InitializeAI() override
+        {
+            me->setActive(true);
+            me->SetReactState(REACT_PASSIVE);
+            me->CastSpell(me, SPELL_ENGULFING_WINDS, false);
+            events.ScheduleEvent(EVENT_RANDOM_MOVEMENT, 2 * IN_MILLISECONDS);
+        }
+
+        void UpdateAI(const uint32 diff) override
+        {
+            events.Update(diff);
+
+            if (events.ExecuteEvent() == EVENT_RANDOM_MOVEMENT)
+            {
+                me->GetMotionMaster()->MoveRandom(frand(13.f, 18.f));
+                events.ScheduleEvent(EVENT_RANDOM_MOVEMENT, urand(2, 4) * IN_MILLISECONDS);
+            }
+        }
+    };
+};
+
+class StompTargetSelector
+{
+public:
+    StompTargetSelector() { }
+
+    bool operator()(WorldObject* object)
+    {
+        if (Creature* cre = object->ToCreature())
+            if (cre->GetEntry() == 59820 || cre->GetEntry() == 58844 || cre->GetEntry() == 58824)
+                return false;
+
+        return true;
+    }
+};
+
+class spell_raigonn_stomp : public SpellScriptLoader
+{
+public:
+    spell_raigonn_stomp() : SpellScriptLoader("spell_raigonn_stomp") { }
+
+    class spell_raigonn_stomp_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_raigonn_stomp_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targetList)
+        {
+            targetList.remove_if(StompTargetSelector());
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_raigonn_stomp_SpellScript::FilterTargets, EFFECT_2, TARGET_UNIT_SRC_AREA_ENTRY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_raigonn_stomp_SpellScript();
+    }
+};
 
 void AddSC_boss_raigonn()
 {
@@ -657,4 +683,6 @@ void AddSC_boss_raigonn()
     new npc_krikthik_engulfer();
     new npc_krikthik_swarm_bringer();
     new vehicle_artillery();
+    new npc_engulfing_winds();
+    new spell_raigonn_stomp();
 }

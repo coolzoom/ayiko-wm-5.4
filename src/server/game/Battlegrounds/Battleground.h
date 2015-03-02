@@ -586,6 +586,7 @@ class Battleground
 
         void DoorOpen(uint32 type);
         void DoorClose(uint32 type);
+        void DoorDespawn(uint32 type);
         //to be removed
         const char* GetTrinityString(int32 entry);
 

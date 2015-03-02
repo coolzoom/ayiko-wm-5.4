@@ -90,6 +90,7 @@ enum GroupType
     GROUPTYPE_BGRAID = GROUPTYPE_BG | GROUPTYPE_RAID,       // mask
     GROUPTYPE_UNK1   = 0x04,
     GROUPTYPE_LFG    = 0x08,
+    GROUPTYPE_LFR    = GROUPTYPE_LFG | GROUPTYPE_RAID,
     GROUPTYPE_EVERYONE_IS_ASSISTANT = 0x40,
     // 0x10, leave/change group?, I saw this flag when leaving group and after leaving BG while in group
 };
@@ -234,6 +235,7 @@ class Group
         // properties accessories
         bool IsFull() const;
         bool isLFGGroup()  const;
+        bool IsLFRGroup()  const;
         bool isRaidGroup() const;
         bool isBGGroup()   const;
         bool isBFGroup()   const;
@@ -275,6 +277,7 @@ class Group
 
         void ChangeFlagEveryoneAssistant(bool apply);
         void ConvertToLFG();
+        void ConvertToLFR();
         void ConvertToRaid();
         void ConvertToGroup();
 

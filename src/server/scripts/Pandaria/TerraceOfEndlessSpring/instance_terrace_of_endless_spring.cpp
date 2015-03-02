@@ -304,7 +304,10 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                         break;
                     case 7:
                         for (auto const pUnit : animatedList)
-                            pUnit->AddObjectToRemoveList();
+                        {
+                            if (pUnit->IsInWorld())
+                                pUnit->AddObjectToRemoveList();
+                        }
 
                         if (Creature* leiShi = instance->GetCreature(leiShiGuid))
                         {
@@ -396,8 +399,14 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                         m_auiEncounter[type] = data;
                         break;
                     case TYPE_LEI_SHI:
+                        if (m_auiEncounter[type] == data)
+                            return;
+
                         for (auto const pUnit : animatedList)
-                            pUnit->AddObjectToRemoveList();
+                        {
+                            if (pUnit->IsInWorld())
+                                pUnit->AddObjectToRemoveList();
+                        }
                         m_auiEncounter[type] = data;
                         break;
                     case TYPE_LEIS_HOPE:

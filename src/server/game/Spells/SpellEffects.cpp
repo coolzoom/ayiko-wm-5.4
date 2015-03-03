@@ -2132,22 +2132,6 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
                 }
                 break;
             }
-            case 121129:// Daybreak
-            {
-                uint32 count = 0;
-                for (std::list<TargetInfo>::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
-                    if (ihit->effectMask & (1 << effIndex))
-                        ++count;
-
-                count--; // Remove main target
-
-                if (count > 0)
-                    addhealth /= count;
-
-                addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
-
-                break;
-            }
             // Glyph of Prayer of Mending
             case 33110:
             {

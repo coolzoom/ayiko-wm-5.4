@@ -7342,6 +7342,12 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
         {
             switch (dummySpell->Id)
             {
+                case 88819: // Daybreak
+                {
+                    int32 bp1 = (triggerAmount / 100.0f) * damage;
+                    CastCustomSpell(121129, SPELLVALUE_BASE_POINT1, damage, victim, true);
+                    return true;
+                }
                 case 96887: // Variable Pulse Lightning Capacitor
                 case 97119: // Variable Pulse Lightning Capacitor (Heroic)
                 {

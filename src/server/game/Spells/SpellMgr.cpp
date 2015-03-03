@@ -4152,9 +4152,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 129020:// Avatar
                     spellInfo->AttributesEx &= SPELL_ATTR1_DISPEL_AURAS_ON_IMMUNITY;
                     break;
-                case 121129:// Daybreak (heal)
-                    spellInfo->AttributesEx |= SPELL_ATTR1_CANT_TARGET_SELF;
-                    break;
                 case 73981: // Redirect
                 case 110730:// Redirect
                 case 51699: // Honor Among Thieves (triggered)

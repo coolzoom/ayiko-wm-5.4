@@ -674,7 +674,7 @@ int32 SpellEffectInfo::CalcValue(Unit const* caster, int32 const* bp, Unit const
     float comboDamage = PointsPerComboPoint;
 
     // base amount modification based on spell lvl vs caster lvl
-    if (ScalingMultiplier != 0.0f)
+    if (ScalingMultiplier != 0.0f && !(bp && *bp != BasePoints))
     {
         if (!_spellInfo->IsCustomCalculated())
         {

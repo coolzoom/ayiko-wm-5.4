@@ -4728,9 +4728,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[1].ApplyAuraName = SPELL_AURA_DUMMY;
                     break;
                 case 115073:// Spinning Fire Blossom
-                    spellInfo->Effects[0].TargetA = 0;
-                    spellInfo->Effects[0].Effect = 0;
-                    spellInfo->Effects[0].BasePoints = 0;
                     spellInfo->OverrideSpellList.push_back(123408); // Add Spinning Fire Blossom (Overrided by Glyph) to override spell list of Spinning Fire Blossom
                     break;
                 case 86698: // Guardian of Ancient Kings

@@ -1133,49 +1133,50 @@ class spell_monk_spinning_fire_blossom : public SpellScriptLoader
 
         class spell_monk_spinning_fire_blossom_SpellScript : public SpellScript
         {
-            PrepareSpellScript(spell_monk_spinning_fire_blossom_SpellScript)
+            PrepareSpellScript(spell_monk_spinning_fire_blossom_SpellScript);
 
-            void HandleAfterCast()
+            bool bonusDamage;
+            bool Load()
             {
-                if (Player* _player = GetCaster()->ToPlayer())
+                bonusDamage = false;
+                return true;
+            }
+
+            void FilterTargets(std::list<WorldObject*>& unitList)
+            {
+                Unit* caster = GetCaster();
+                float dist = 50.0f;
+                WorldObject* closestTarget = NULL;
+                for (auto itr : unitList)
                 {
-                    std::list<Unit*> tempList;
-                    std::list<Unit*> targetList;
-
-                    _player->GetAttackableUnitListInRange(tempList, 50.0f);
-
-                    for (auto itr : tempList)
+                    if (itr->GetDistance(caster) < dist)
                     {
-                        if (!_player->IsValidAttackTarget(itr))
-                            continue;
-
-                        if (!_player->isInFront(itr))
-                            continue;
-
-                        if (!itr->IsWithinLOSInMap(_player))
-                            continue;
-
-                        if (itr->GetGUID() == _player->GetGUID())
-                            continue;
-
-                        targetList.push_back(itr);
+                        dist = itr->GetDistance(caster);
+                        closestTarget = itr;
                     }
+                }
 
-                    if (!targetList.empty())
-                    {
-                        Trinity::Containers::RandomResizeList(targetList, 1);
+                unitList.clear();
+                unitList.push_back(closestTarget);
 
-                        for (auto itr : targetList)
-                            _player->CastSpell(itr, SPELL_MONK_SPINNING_FIRE_BLOSSOM_DAMAGE, true);
-                    }
-                    else
-                        _player->CastSpell(_player, SPELL_MONK_SPINNING_FIRE_BLOSSOM_MISSILE, true);
+                if (closestTarget->GetDistance(caster) > 10.0f)
+                    bonusDamage = true;
+            }
+
+            void HandleOnHit()
+            {
+                // If Spinning Fire Blossom travels further than 10 yards, the damage is increased by 50%
+                if (bonusDamage)
+                {
+                    SetHitDamage(GetHitDamage() * 1.5f);
+                    GetCaster()->CastSpell(GetHitUnit(), 123407, true);
                 }
             }
 
             void Register()
             {
-                AfterCast += SpellCastFn(spell_monk_spinning_fire_blossom_SpellScript::HandleAfterCast);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_monk_spinning_fire_blossom_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_CONE_ENEMY_129);
+                OnHit += SpellHitFn(spell_monk_spinning_fire_blossom_SpellScript::HandleOnHit);
             }
         };
 

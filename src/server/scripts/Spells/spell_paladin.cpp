@@ -1838,13 +1838,18 @@ public:
 
         void CalculateAmount(AuraEffect const *aurEff, int32 & amount, bool &)
         {
-            Unit * caster = GetCaster();
-
+            Unit* caster = GetCaster();
             if (!caster)
                 return;
 
-            int32 minMana = CalculatePct(caster->GetMaxPower(POWER_MANA), GetSpellInfo()->Effects[EFFECT_1].CalcValue(caster));
-            amount = std::max(CalculatePct((int32)caster->GetTotalStatValue(STAT_SPIRIT), (aurEff->GetBaseAmount() / 3)), minMana);
+            // @TODO: (excluding short-duration Spirit bonuses)
+            float spiritPct = CalculatePct(caster->GetStat(STAT_SPIRIT), GetSpellInfo()->Effects[EFFECT_0].BasePoints);
+            uint32 tmpAmount = spiritPct / aurEff->GetTotalTicks();
+
+            float manaPct = CalculatePct(caster->GetMaxPower(POWER_MANA), GetSpellInfo()->Effects[EFFECT_1].BasePoints);
+            uint32 minAmount = manaPct / aurEff->GetTotalTicks();
+
+            amount = std::max(tmpAmount, minAmount);
         }
 
         void Register()

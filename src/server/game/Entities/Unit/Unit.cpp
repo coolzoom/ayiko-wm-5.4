@@ -17441,7 +17441,8 @@ Unit* Unit::SelectNearbyTarget(Unit* exclude, float dist) const
     // remove not LoS targets
     for (std::list<Unit*>::iterator tIter = targets.begin(); tIter != targets.end();)
     {
-        if (!IsWithinLOSInMap(*tIter) || (*tIter)->isTotem() || (*tIter)->isSpiritService() || (*tIter)->GetCreatureType() == CREATURE_TYPE_CRITTER || !IsValidAttackTarget(*tIter))
+        // Add another distance check because the AnyUnfriendlyUnit check includes target size
+        if (GetExactDist(*tIter) > dist || !IsWithinLOSInMap(*tIter) || (*tIter)->isTotem() || (*tIter)->isSpiritService() || (*tIter)->GetCreatureType() == CREATURE_TYPE_CRITTER || !IsValidAttackTarget(*tIter))
             targets.erase(tIter++);
         else
             ++tIter;

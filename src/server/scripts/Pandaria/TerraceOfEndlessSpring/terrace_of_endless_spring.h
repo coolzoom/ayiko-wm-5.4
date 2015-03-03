@@ -84,6 +84,7 @@ enum eCreatures
     NPC_SHA_OF_FEAR                 = 60999,
     NPC_PURE_LIGHT_TERRACE          = 60788,
     NPC_TERROR_SPAWN                = 61034,
+    NPC_RETURN_TO_TERRACE           = 65736,
 
     // Thrashs
     NPC_APPARITION_OF_FEAR          = 64368,

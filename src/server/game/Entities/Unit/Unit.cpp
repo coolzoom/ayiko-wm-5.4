@@ -11974,11 +11974,17 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                 if (uint8 count = victim->GetDoTsByCaster(GetOwnerGUID()))
                     AddPct(DoneTotalMod, 30 * count);
             }
-            // Doom Bolt (Doomguard)
-            else if (spellProto->Id == 85692)
+
+            switch (spellProto->Id)
             {
-                if (Player * player = GetCharmerOrOwnerPlayerOrPlayerItself())
-                    DoneTotal += (player->SpellBaseDamageBonusDone(spellProto->GetSchoolMask()) * 0.9f);
+                case 85692: // Doom Bolt (Doomguard)
+                    if (Player * player = GetCharmerOrOwnerPlayerOrPlayerItself())
+                        DoneTotal += (player->SpellBaseDamageBonusDone(spellProto->GetSchoolMask()) * 0.9f);
+                    break;
+                case 42223: // Rain of Fire
+                    if (victim->HasAura(348, GetGUID()))
+                        AddPct(DoneTotalMod, 50);
+                    break;
             }
             break;
         case SPELLFAMILY_DEATHKNIGHT:

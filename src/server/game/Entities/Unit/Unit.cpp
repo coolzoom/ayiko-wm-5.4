@@ -11910,10 +11910,17 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
             break;
         }
         case SPELLFAMILY_MAGE:
-            // Ice Lance
-            if (spellProto->SpellIconID == 186)
-                if (victim->HasAuraState(AURA_STATE_FROZEN, spellProto, this))
-                    DoneTotalMod *= 4.0f;
+
+            switch (spellProto->Id)
+            {
+                // Ice lance
+                case 30455:
+                    if (victim->HasAuraState(AURA_STATE_FROZEN, spellProto, this))
+                        DoneTotalMod *= 4.0f;
+                    if (AuraEffect* fingers = GetAuraEffect(44544, EFFECT_1))
+                        AddPct(DoneTotalMod, fingers->GetAmount());
+                    break;
+            }
 
             // Torment the weak
             if (spellProto->GetSchoolMask() & SPELL_SCHOOL_MASK_ARCANE)

@@ -554,29 +554,29 @@ public:
 
     enum eSpells
     {
-        SPELL_AGONY          = 114571,
-        SPELL_DISSIPATION    = 113379,
-        SPELL_INTENSITY      = 113315,
-        SPELL_ULTIMATE_POWER = 113309
+        SPELL_AGONY              = 114571,
+        SPELL_SHA_CORRUPTION_SP  = 115086,
+        SPELL_INTENSITY          = 113316
+    };
+
+    enum eActions
+    {
+        ACTION_IN_COMBAT = 1
     };
 
     struct mob_strife_peril_AI : public ScriptedAI
     {
         mob_strife_peril_AI(Creature* creature) : ScriptedAI(creature) {}
 
-        uint32 countIntensity, timerIntensity, timerDissipation;
-        bool hasBeenHit, dissipation;
-
+        bool isInfight;
         InstanceScript* instance;
 
         void InitializeAI() override
         {
-            instance = me->GetInstanceScript();
+            isInfight = false;
             me->setFaction(14);
-            countIntensity = 0;
-            timerIntensity = 2000;
-            timerDissipation = 2000;
-            hasBeenHit = false;
+            instance = me->GetInstanceScript();  
+            me->CastSpell(me, SPELL_SHA_CORRUPTION_SP, false);
         }
 
         void DamageTaken(Unit* attacker, uint32& damage) override
@@ -588,8 +588,36 @@ public:
             }
             else
             {
-                timerDissipation = 2000;
-                hasBeenHit = true;
+                if(!me->HasAura(SPELL_INTENSITY) && !isInfight)
+                {
+                    isInfight = true;
+                    me->CastSpell(me, SPELL_INTENSITY, false);
+
+                    if(me->GetEntry() == NPC_STRIFE)
+                    {
+                        if(Creature* peril = me->FindNearestCreature(NPC_PERIL, 50.0f))
+                            if(peril->IsAIEnabled)
+                                peril->AI()->DoAction(ACTION_IN_COMBAT);
+                    }
+                    else
+                    {
+                        if(Creature* strife = me->FindNearestCreature(NPC_STRIFE, 50.0f))
+                            if(strife->IsAIEnabled)
+                                strife->AI()->DoAction(ACTION_IN_COMBAT);
+                    };
+                }      
+            }
+        }
+
+        void DoAction(const int32 action) override
+        {
+            if(action == ACTION_IN_COMBAT)
+            {
+                if(!me->HasAura(SPELL_INTENSITY) && !isInfight)
+                {
+                    isInfight = true;
+                    me->CastSpell(me, SPELL_INTENSITY, false);
+                }
             }
         }
 
@@ -598,8 +626,9 @@ public:
             events.ScheduleEvent(EVENT_AGONY, 1 * IN_MILLISECONDS);
         }
 
-        void JustDied(Unit* u) override
+        void JustDied(Unit* unit) override
         {
+            me->RemoveAura(SPELL_INTENSITY);
             if(instance)
             {
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
@@ -614,49 +643,10 @@ public:
 
             events.Update(diff);
 
-            if(timerDissipation <= diff)
-            {
-                me->RemoveAuraFromStack(SPELL_INTENSITY);
-                if(!me->HasAura(SPELL_INTENSITY))
-                    me->AddAura(SPELL_DISSIPATION, me);
-
-                timerDissipation = 2000;
-
-                --countIntensity;
-                if(countIntensity == -10)
-                    countIntensity = -10;
-            }
-            else
-                timerDissipation -= diff;
-
-            if(timerIntensity <= diff)
-            {
-                if(hasBeenHit)
-                {
-                    me->RemoveAuraFromStack(SPELL_DISSIPATION);
-                    if(!me->HasAura(SPELL_DISSIPATION))
-                        me->AddAura(SPELL_INTENSITY, me);
-
-                    ++countIntensity;
-                    if(countIntensity == 10)
-                    {
-                        me->CastSpell(me, SPELL_ULTIMATE_POWER, false);
-                        me->RemoveAura(SPELL_INTENSITY);
-                    }
-
-                    if(countIntensity > 10)
-                        countIntensity = 10;
-                }
-                hasBeenHit = false;
-                timerIntensity = 2000;
-            }
-            else
-                timerIntensity -= diff;
-
             if(events.ExecuteEvent() == EVENT_AGONY)
             {
                 me->CastSpell(me->GetVictim(), SPELL_AGONY, false);
-                events.ScheduleEvent(EVENT_AGONY, 2000);
+                events.ScheduleEvent(EVENT_AGONY, 2 * IN_MILLISECONDS);
             }
 
             DoMeleeAttackIfReady();
@@ -1010,6 +1000,137 @@ public:
     };
 };
 
+class spell_tjs_intensity : public SpellScriptLoader
+{
+public:
+    spell_tjs_intensity() : SpellScriptLoader("spell_tjs_intensity") { }
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_tjs_intensity_AuraScript();
+    }
+
+    enum eSpells
+    {
+        SPELL_ULTIMATE_POWER = 113309,
+        SPELL_INTENSITY      = 113315,
+        SPELL_DISSIPATION    = 113379 
+    };
+
+    class spell_tjs_intensity_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_tjs_intensity_AuraScript);
+
+        bool canProc;
+        uint8 intensityStack, prevIntensityStack;
+
+        bool Load()
+        {
+            if(Unit* owner = GetOwner()->ToUnit())
+            {
+                if(Aura *aura = owner->GetAura(SPELL_INTENSITY))
+                    intensityStack = aura->GetStackAmount();
+            }
+            prevIntensityStack = 0;
+            return true;
+        }
+
+        bool HandleCheckProc(ProcEventInfo &eventInfo)
+        {
+            if(!canProc)
+                return false;
+
+            auto const caster = eventInfo.GetActionTarget();
+            if(caster && caster->HasAura(SPELL_ULTIMATE_POWER))
+                return false;
+
+            auto const target = eventInfo.GetActor();
+            if(!target || target->GetTypeId() != TYPEID_PLAYER)
+                return false;
+
+            return true;
+        }
+
+        void HanleOnProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+        {
+            if(Unit* owner = GetOwner()->ToUnit())
+            {
+                if(Aura *aura = owner->GetAura(SPELL_INTENSITY))
+                {
+                    intensityStack = aura->GetStackAmount();
+                    if(aura->GetStackAmount() == 10)
+                    {                      
+                        owner->RemoveAura(SPELL_INTENSITY);
+                        owner->CastSpell(owner, SPELL_ULTIMATE_POWER, false);                       
+                    }
+                }
+
+                if(owner->HasAura(SPELL_DISSIPATION))
+                    owner->RemoveAura(SPELL_DISSIPATION);
+            }
+
+            canProc = false;
+        }
+
+        void OnPeriodic(AuraEffect const * /*aurEff*/)
+        {
+            PreventDefaultAction();
+
+            if(canProc)
+            {
+                if(Unit* owner = GetOwner()->ToUnit())
+                {
+                    if(owner->HasAura(SPELL_INTENSITY))
+                    {
+                        if(Aura *aura = owner->GetAura(SPELL_INTENSITY))
+                        {
+                            if(intensityStack <= prevIntensityStack)
+                            {
+                                aura->ModStackAmount(-1);
+                                intensityStack--;
+                                prevIntensityStack--;
+                            }
+                            else
+                                prevIntensityStack = aura->GetStackAmount();
+                        }
+                    }
+                    else
+                    {
+                        if(!owner->HasAura(SPELL_ULTIMATE_POWER))
+                            owner->CastSpell(owner, SPELL_DISSIPATION, false);
+                    }
+                }
+            }
+
+            if(!canProc)
+                canProc = true;
+        }
+
+        void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if(Unit* owner = GetOwner()->ToUnit())
+            {
+                if(owner->HasAura(SPELL_INTENSITY))
+                    owner->RemoveAura(SPELL_INTENSITY);
+
+                if(owner->HasAura(SPELL_DISSIPATION))
+                    owner->RemoveAura(SPELL_DISSIPATION);
+
+                if(owner->HasAura(SPELL_ULTIMATE_POWER))
+                    owner->RemoveAura(SPELL_ULTIMATE_POWER);
+            }
+        }
+
+        void Register()
+        {
+            DoCheckProc += AuraCheckProcFn(spell_tjs_intensity_AuraScript::HandleCheckProc);
+            OnEffectProc += AuraEffectProcFn(spell_tjs_intensity_AuraScript::HanleOnProc, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_tjs_intensity_AuraScript::OnPeriodic, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
+            AfterEffectRemove += AuraEffectRemoveFn(spell_tjs_intensity_AuraScript::OnRemove, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+};
+
 void AddSC_boss_lorewalker_stonestep()
 {
     new boss_lorewalker_stonestep();
@@ -1024,4 +1145,5 @@ void AddSC_boss_lorewalker_stonestep()
     new mob_jiang_xiang();
     new mob_songbird_queen();
     new mob_talking_fish();
+    new spell_tjs_intensity();
 }

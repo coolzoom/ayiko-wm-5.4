@@ -49,7 +49,8 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
             std::string strSaveData;
 
             std::list<Unit*> protectorList;
-            std::vector<Unit*> animatedList;
+            std::vector<uint64> animatedList;
+            std::vector<uint64> returnTerraceList;
 
             bool ritualOfPurification;
             bool introDone;
@@ -125,6 +126,9 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
             {
                 switch (creature->GetEntry())
                 {
+                    case NPC_RETURN_TO_TERRACE:
+                        returnTerraceList.push_back(creature->GetGUID());
+                        break;
                     case NPC_ANCIENT_ASANI:
                         ancientAsaniGuid = creature->GetGUID();
                         break;
@@ -155,7 +159,7 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                             protectorList.push_back(creature);
                         break;
                     case NPC_ANIMATED_PROTECTOR:
-                        animatedList.push_back(creature);
+                        animatedList.push_back(creature->GetGUID());
                         break;
                     case NPC_REFLECTION_OF_LEI_SHI:
                         leiShiReflectionGuid = creature->GetGUID();
@@ -303,8 +307,14 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                             kaolan->AI()->DoAction(ACTION_INTRO_FINISHED);
                         break;
                     case 7:
-                        for (auto const pUnit : animatedList)
-                            pUnit->AddObjectToRemoveList();
+                        for (auto const pGuid : animatedList)
+                        {
+                            if (Creature* pCreature = instance->GetCreature(pGuid))
+                            {
+                                if (pCreature->IsInWorld())
+                                    pCreature->AddObjectToRemoveList();
+                            }
+                        }
 
                         if (Creature* leiShi = instance->GetCreature(leiShiGuid))
                         {
@@ -346,6 +356,17 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
 
                         //printf("Size of list is %u", protectorList.size());
                         protectorList.remove_if(isProtectorDeadPredicate());
+                        break;
+                    case 9:
+                        for (auto const pGuid : returnTerraceList)
+                        {
+                            if (Creature* pCreature = instance->GetCreature(pGuid))
+                            {
+                                pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                pCreature->UpdateObjectVisibility();
+                                pCreature->AddAura(120216, pCreature);
+                            }
+                        }
                         break;
                     case 2:
                         Map::PlayerList const& lPlayers = instance->GetPlayers();
@@ -392,12 +413,32 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                     {
                     case TYPE_PROTECTORS:
                     case TYPE_TSULONG:
+                        m_auiEncounter[type] = data;
+                        break;
                     case TYPE_SHA:
+                        for (auto const pGuid : returnTerraceList)
+                        {
+                            if (Creature* pCreature = instance->GetCreature(pGuid))
+                            {
+                                pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                pCreature->UpdateObjectVisibility();
+                                pCreature->AddAura(120216, pCreature);
+                            }
+                        }
                         m_auiEncounter[type] = data;
                         break;
                     case TYPE_LEI_SHI:
-                        for (auto const pUnit : animatedList)
-                            pUnit->AddObjectToRemoveList();
+                        if (m_auiEncounter[type] == data)
+                            return;
+
+                        for (auto const pGuid : animatedList)
+                        {
+                            if (Creature* pCreature = instance->GetCreature(pGuid))
+                            {
+                                if (pCreature->IsInWorld())
+                                    pCreature->AddObjectToRemoveList();
+                            }
+                        }
                         m_auiEncounter[type] = data;
                         break;
                     case TYPE_LEIS_HOPE:
@@ -506,6 +547,11 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                 {
                     m_mEvents.ScheduleEvent(7, 200); // Deactivate Sha of Fear Vortex
                     //printf("Scheduled event 7 Deactivate Sha Vortex \n");
+                }
+
+                if (m_auiEncounter[TYPE_SHA] == DONE)
+                {
+                    m_mEvents.ScheduleEvent(9, 200); // Activate return to terrace;
                 }
                 
                 OUT_LOAD_INST_DATA_COMPLETE;

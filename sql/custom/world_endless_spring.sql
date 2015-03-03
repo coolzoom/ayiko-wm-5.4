@@ -344,10 +344,12 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 
 -- SHA OF FEAR
 
-DELETE FROM spell_target_position WHERE id = 119841;
+DELETE FROM spell_target_position WHERE id IN (120192, 119841, 120191);
 INSERT INTO spell_target_position (id, effIndex, target_map, target_position_x, target_position_y, target_position_z, target_orientation) VALUES
 (119841, 0, 996, -1017.882, -2839.356, 38.03172, 1.589),
-(119841, 1, 996, -1017.882, -2839.356, 38.03172, 1.589);
+(119841, 1, 996, -1017.882, -2839.356, 38.03172, 1.589),
+(120192, 0, 996, -1659.156, -3783.510, -279.502, 3.546),
+(120191, 0, 996, -1730.417, -3839.899, -279.502, 6.144);
 
 UPDATE creature_template SET modelid1 = 37285, flags_extra = 0 WHERE entry = 65736;
 
@@ -369,7 +371,7 @@ UPDATE creature_template SET minlevel = 92, maxlevel = 92, faction_A = 16, facti
 UPDATE creature_template SET mindmg = 13314, maxdmg = 15211, attackpower = 45299, minrangedmg = 11839, maxrangedmg = 17339, rangedattackpower = 45299, dmg_multiplier = 8, flags_extra = 0, unit_flags = 0, unit_flags2 = 0, type_flags = 0, mechanic_immune_mask = 667893759, ScriptName = 'npc_sha_of_fear_bowman' WHERE entry IN (61042, 61038, 61046);
 UPDATE creature_template SET minlevel = 91, maxlevel = 91, faction_A = 14, faction_H = 14, flags_extra = 128, ScriptName = 'npc_sha_globe' WHERE entry = 65691;
 
-DELETE FROM spell_script_names WHERE spell_id IN (119887, 129189, 120047, 119983, 119593, 119692, 119693, 117866, 125786, 119414, 119108, 129075);
+DELETE FROM spell_script_names WHERE spell_id IN (119887, 129189, 120047, 119983, 119593, 119692, 119693, 117866, 125786, 119414, 119108, 129075, 120221);
 INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
 (119887, 'spell_death_blossom'),
 (129189, 'spell_sha_globe_regen'),
@@ -382,7 +384,8 @@ INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
 (119414, 'spell_breath_of_fear'),
 (125786, 'spell_breath_of_fear_fear'),
 (119108, 'spell_conjure_terror_spawn'),
-(129075, 'spell_penetrating_bolt');
+(129075, 'spell_penetrating_bolt'),
+(120221, 'spell_dread_expanse_tp');
 
 -- Path to cackle for players
 DELETE FROM waypoint_spline_data WHERE c_entry = 0 AND path_id IN (1, 2, 3); 
@@ -424,9 +427,10 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (60999, 1, 0, 'You will know fear!', 14, 0, 100, 0, 0, 28398, 'Sha of Fear - SAY_AGGRO'),
 (60999, 2, 0, 'Fleeeee!', 14, 0, 100, 0, 0, 28404, 'Sha of Fear - SAY_BREATH_OF_FEAR'),
 (60999, 3, 0, 'Drown in terror.', 14, 0, 100, 0, 0, 28403, 'Sha of Fear - SAY_SLAY'),
-(60999, 4, 0, 'You think it is so easy to vanquish your fears?', 14, 0, 100, 0, 0, 28400, 'Sha of Fear - SAY_SLAY_HEROIC'),
+(60999, 4, 0, 'You think it is so easy to vanquish your fears?', 14, 0, 100, 0, 0, 28400, 'Sha of Fear - SAY_PHASE_2'),
 (60999, 5, 0, 'Dread rises! It seeks the light. It hungers.', 14, 0, 100, 0, 0, 28401, 'Sha of Fear - SAY_SUBMERGE'),
 (60999, 6, 0, 'Huddle in terror!', 14, 0, 100, 0, 0, 28405, 'Sha of Fear - SAY_HUDDLE'),
+(60999, 7, 0, 'The Sha of Fear retreats to the Dread Expanse!', 41, 0, 100, 0, 0, 0, 'Sha of Fear - EMOTE_PHASE_2'),
 (61042, 0, 0, 'The fear clouds my mind. I... cannot resist.', 14, 0, 100, 0, 0, 0, 'Cheng Kang - SAY_AGGRO'),
 (61038, 0, 0, 'No one can stand against the fear. You will perish.', 14, 0, 100, 0, 0, 0, 'Jinlun Kun - SAY_AGGRO'),
 (61046, 0, 0, 'Its power is so strong. It forces me to destroy you.', 14, 0, 100, 0, 0, 0, 'Yang Guoshi - SAY_AGGRO'),
@@ -711,22 +715,22 @@ UPDATE creature_template SET lootId = entry, dmg_multiplier = 10, Health_Mod = 5
 UPDATE creature_template SET lootId = entry, dmg_multiplier = 13, Health_Mod = 1600000000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 60999; -- Sha of Fear
 UPDATE creature_template SET lootId = entry, dmg_multiplier = 7,  Health_Mod = 343000000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 60999; -- Sha of Fear
 
-UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 14 WHERE entry = @RAID_DIFF_10N + 61038; -- Yang Guoshi
-UPDATE creature_template SET Health_Mod = 23600000 / @HP_MOD_93, dmg_multiplier = 20 WHERE entry = @RAID_DIFF_10H + 61038; -- Yang Guoshi
-UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 14 WHERE entry = @RAID_DIFF_25N + 61038; -- Yang Guoshi
-UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 20 WHERE entry = @RAID_DIFF_25H + 61038; -- Yang Guoshi
+UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 11 WHERE entry = @RAID_DIFF_10N + 61038; -- Yang Guoshi
+UPDATE creature_template SET Health_Mod = 23600000 / @HP_MOD_93, dmg_multiplier = 18 WHERE entry = @RAID_DIFF_10H + 61038; -- Yang Guoshi
+UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 11 WHERE entry = @RAID_DIFF_25N + 61038; -- Yang Guoshi
+UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 18 WHERE entry = @RAID_DIFF_25H + 61038; -- Yang Guoshi
 UPDATE creature_template SET Health_Mod = 3000000 / @HP_MOD_93, dmg_multiplier = 11 WHERE entry = @RAID_DIFF_25R + 61038; -- Yang Guoshi
 
-UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 14 WHERE entry = @RAID_DIFF_10N + 61042; -- Cheng Kang
-UPDATE creature_template SET Health_Mod = 23600000 / @HP_MOD_93, dmg_multiplier = 20 WHERE entry = @RAID_DIFF_10H + 61042; -- Cheng Kang
-UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 14 WHERE entry = @RAID_DIFF_25N + 61042; -- Cheng Kang
-UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 20 WHERE entry = @RAID_DIFF_25H + 61042; -- Cheng Kang
+UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 11 WHERE entry = @RAID_DIFF_10N + 61042; -- Cheng Kang
+UPDATE creature_template SET Health_Mod = 23600000 / @HP_MOD_93, dmg_multiplier = 18 WHERE entry = @RAID_DIFF_10H + 61042; -- Cheng Kang
+UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 11 WHERE entry = @RAID_DIFF_25N + 61042; -- Cheng Kang
+UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 18 WHERE entry = @RAID_DIFF_25H + 61042; -- Cheng Kang
 UPDATE creature_template SET Health_Mod = 3000000 / @HP_MOD_93, dmg_multiplier = 11 WHERE entry = @RAID_DIFF_25R + 61042; -- Cheng Kang
 
-UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 14 WHERE entry = @RAID_DIFF_10N + 61046; -- Jinlun Kun
-UPDATE creature_template SET Health_Mod = 23600000 / @HP_MOD_93, dmg_multiplier = 20 WHERE entry = @RAID_DIFF_10H + 61046; -- Jinlun Kun
-UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 14 WHERE entry = @RAID_DIFF_25N + 61046; -- Jinlun Kun
-UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 20 WHERE entry = @RAID_DIFF_25H + 61046; -- Jinlun Kun
+UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 11 WHERE entry = @RAID_DIFF_10N + 61046; -- Jinlun Kun
+UPDATE creature_template SET Health_Mod = 23600000 / @HP_MOD_93, dmg_multiplier = 18 WHERE entry = @RAID_DIFF_10H + 61046; -- Jinlun Kun
+UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 11 WHERE entry = @RAID_DIFF_25N + 61046; -- Jinlun Kun
+UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 18 WHERE entry = @RAID_DIFF_25H + 61046; -- Jinlun Kun
 UPDATE creature_template SET Health_Mod = 3000000 / @HP_MOD_93, dmg_multiplier = 11 WHERE entry = @RAID_DIFF_25R + 61046; -- Jinlun Kun
 
 UPDATE creature_template SET Health_Mod = 4000000 / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 61034; -- Terror Spawn

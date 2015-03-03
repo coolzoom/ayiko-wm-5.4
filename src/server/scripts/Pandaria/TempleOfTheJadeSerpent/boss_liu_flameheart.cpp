@@ -411,7 +411,7 @@ public:
                 {
                     case EVENT_JADE_FIRE:
                         me->CastSpell(SelectTarget(SELECT_TARGET_RANDOM), SPELL_JADE_FIRE, false);
-                        events.ScheduleEvent(EVENT_JADE_FIRE, 1.7 * IN_MILLISECONDS);
+                        events.ScheduleEvent(EVENT_JADE_FIRE, urand(4,6) * IN_MILLISECONDS);
                         break;
                     case EVENT_BREATH:
                         if(Creature* liu = Unit::GetCreature(*me, instance->GetData64(DATA_LIU)))

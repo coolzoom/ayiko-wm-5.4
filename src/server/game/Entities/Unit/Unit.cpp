@@ -20213,7 +20213,7 @@ void Unit::ExitVehicle(Position const* exitPosition)
         return;
 
     GetVehicleBase()->RemoveAurasByType(SPELL_AURA_CONTROL_VEHICLE, GetGUID());
-    _ExitVehicle(exitPosition);
+    //_ExitVehicle(exitPosition);
 }
 
 void Unit::_ExitVehicle(Position const* exitPosition)
@@ -20237,17 +20237,12 @@ void Unit::_ExitVehicle(Position const* exitPosition)
 
     SetControlled(false, UNIT_STATE_ROOT);      // SMSG_MOVE_FORCE_UNROOT, ~MOVEMENTFLAG_ROOT
 
-    bool isFixedEjectPos = true;
-    Position pos = { 0.0f, 0.0f, 0.0f, 0.0f };
-    Position ejectPos = getVehicleEjectPos();
-    if (pos == ejectPos)                          // Exit position not specified
-    {
-        vehicle->GetBase()->GetPosition(&pos);  // This should use passenger's current position, leaving it as it is now
-        // because we calculate positions incorrect (sometimes under map)
-        isFixedEjectPos = false;
-    }
+    Position pos;
+    if (!exitPosition)                          // Exit position not specified
+        pos = vehicle->GetBase()->GetPosition();  // This should use passenger's current position, leaving it as it is now
+    // because we calculate positions incorrect (sometimes under map)
     else
-        pos = ejectPos;
+        pos = *exitPosition;
 
     AddUnitState(UNIT_STATE_MOVE);
 
@@ -20264,22 +20259,28 @@ void Unit::_ExitVehicle(Position const* exitPosition)
         SendMessageToSet(&data, false);
     }
 
+    float height = pos.GetPositionZ();
     Movement::MoveSplineInit init(this);
-    init.MoveTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
+
+    // Creatures without inhabit type air should begin falling after exiting the vehicle
+    if (GetTypeId() == TYPEID_UNIT && !CanFly() && height > GetMap()->GetWaterOrGroundLevel(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), &height) + 0.1f)
+        init.SetFall();
+
+    init.MoveTo(pos.GetPositionX(), pos.GetPositionY(), height);
     init.SetFacing(GetOrientation());
     init.SetTransportExit();
     init.Launch();
 
-    //GetMotionMaster()->MoveFall();            // Enable this once passenger positions are calculater properly (see above)
+    DisableSpline();
 
     if (player)
         player->ResummonPetTemporaryUnSummonedIfAny();
 
     SendMovementFlagUpdate();
 
-    if (vehicle->GetBase()->HasUnitTypeMask(UNIT_MASK_MINION))
-        if (((Minion*)vehicle->GetBase())->GetOwner() == this)
-            vehicle->Dismiss();
+    if (vehicle->GetBase()->HasUnitTypeMask(UNIT_MASK_MINION) && vehicle->GetBase()->GetTypeId() == TYPEID_UNIT)
+    if (((Minion*)vehicle->GetBase())->GetOwner() == this)
+        vehicle->GetBase()->ToCreature()->DespawnOrUnsummon(1);
 
     if (HasUnitTypeMask(UNIT_MASK_ACCESSORY))
     {

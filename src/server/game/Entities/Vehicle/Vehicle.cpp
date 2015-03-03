@@ -469,22 +469,14 @@ void Vehicle::RemovePassenger(Unit* unit)
     TC_LOG_DEBUG("entities.vehicle", "Unit %s exit vehicle entry %u id %u dbguid %u seat %d",
                  unit->GetName().c_str(), _me->GetEntry(), _vehicleInfo->m_ID, _me->GetGUIDLow(), (int32)seat->first);
 
-    seat->second.Passenger = 0;
-    if (seat->second.SeatInfo->CanEnterOrExit())
-    {
-        if (!_usableSeatNum)
-        {
-            if (_me->GetTypeId() == TYPEID_PLAYER)
-                _me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PLAYER_VEHICLE);
-            else
-                _me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
-        }
-        ++_usableSeatNum;
-    }
+    if(seat->second.SeatInfo->CanEnterOrExit() && ++_usableSeatNum)
+        _me->SetFlag(UNIT_NPC_FLAGS, (_me->GetTypeId() == TYPEID_PLAYER ? UNIT_NPC_FLAG_PLAYER_VEHICLE : UNIT_NPC_FLAG_SPELLCLICK));
 
     // Remove UNIT_FLAG_NOT_SELECTABLE if passenger did not have it before entering vehicle
     if (seat->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_PASSENGER_NOT_SELECTABLE /*&& !seat->second.Passenger.IsUnselectable*/)
         unit->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+
+    seat->second.Passenger = 0;
 
     if (_me->GetTypeId() == TYPEID_UNIT && unit->GetTypeId() == TYPEID_PLAYER && seat->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_CAN_CONTROL)
         _me->RemoveCharmedBy(unit);
@@ -492,8 +484,8 @@ void Vehicle::RemovePassenger(Unit* unit)
     if (_me->IsInWorld())
     {
         unit->m_movementInfo.t_pos.Relocate(0, 0, 0, 0);
+        unit->m_movementInfo.t_seat = -1;
         unit->m_movementInfo.t_time = 0;
-        unit->m_movementInfo.t_seat = 0;
     }
 
     // only for flyable vehicles

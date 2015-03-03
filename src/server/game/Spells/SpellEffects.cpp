@@ -831,7 +831,10 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         m_caster->CastSpell(unitTarget, 130320, true);
                         break;
                     case 100784:// Blackout Kick
-                        damage = CalculateMonkMeleeAttacks(m_caster, 7.12f);
+                        if (unitTarget != m_targets.GetUnitTarget())
+                            damage = CalculateMonkMeleeAttacks(m_caster, 3.56f);
+                        else
+                            damage = CalculateMonkMeleeAttacks(m_caster, 7.12f);
                         break;
                     case 124335:// Swift Reflexes
                         damage = CalculateMonkMeleeAttacks(m_caster, 0.3f);

@@ -11273,14 +11273,12 @@ Unit* Unit::GetMeleeHitRedirectTarget(Unit* victim, SpellInfo const* spellInfo)
     for (AuraEffectList::const_iterator i = hitTriggerAuras.begin(); i != hitTriggerAuras.end(); ++i)
     {
         if (Unit* magnet = (*i)->GetBase()->GetCaster())
-            if (_IsValidAttackTarget(magnet, spellInfo) && magnet->IsWithinLOSInMap(this)
-                && (!spellInfo || (spellInfo->CheckExplicitTarget(this, magnet) == SPELL_CAST_OK
-                && spellInfo->CheckTarget(this, magnet, false) == SPELL_CAST_OK)))
-                if (roll_chance_i((*i)->GetAmount()))
-                {
-                    (*i)->GetBase()->DropCharge(AURA_REMOVE_BY_EXPIRE);
-                    return magnet;
-                }
+            if (_IsValidAttackTarget(magnet, spellInfo)
+                && IsInRange(magnet, 0.0f, (*i)->GetSpellInfo()->Effects[(*i)->GetEffIndex()].CalcRadius()))
+            {
+                (*i)->GetBase()->DropCharge(AURA_REMOVE_BY_EXPIRE);
+                return magnet;
+            }
     }
     return victim;
 }

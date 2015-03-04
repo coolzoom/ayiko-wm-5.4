@@ -2919,8 +2919,6 @@ SpellMissInfo Unit::SpellHitResult(Unit* victim, SpellInfo const* spell, bool Ca
             if (victim->HasAura(89523))
                 victim->RemoveAura(89523);
 
-            // Start triggers for remove charges if need (trigger only for victim, and mark as active spell)
-            ProcDamageAndSpell(victim, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, 0, BASE_ATTACK, spell);
             return SPELL_MISS_REFLECT;
         }
     }

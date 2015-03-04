@@ -3799,6 +3799,14 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 104232:// Rain of Fire (Aftermath)
                     spellInfo->Effects[0].TargetB = 0;
                     break;
+                case 123461://Get Away!
+                    spellInfo->Effects[2].Effect = SPELL_EFFECT_APPLY_AURA;
+                    spellInfo->Effects[2].ApplyAuraName = SPELL_AURA_MECHANIC_IMMUNITY_MASK;
+                    spellInfo->Effects[2].MiscValue = 1614;
+                    spellInfo->Effects[2].MiscValueB = 0;
+                    spellInfo->Effects[2].TargetA = TARGET_UNIT_CASTER;
+                    spellInfo->Effects[2].TargetB = 0;
+                    break;
                 case 119414:// Breath of Fear
                     spellInfo->Effects[2].Effect = 0;
                     break;
@@ -5121,6 +5129,9 @@ void SpellMgr::LoadSpellCustomAttr()
                     // Wise Mari Hydrolance damage
                 case 106267:
                     //spellInfo->Effects[0].TargetB = TARGET_UNIT_TARGET_ENEMY;
+                    break;
+                case 106762:
+                    spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
                     break;
                 case 106334:// Wash Away
                     spellInfo->AttributesEx3 &= ~ SPELL_ATTR3_ONLY_TARGET_PLAYERS;

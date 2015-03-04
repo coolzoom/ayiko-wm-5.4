@@ -501,6 +501,8 @@ enum CustomVisibility
     CUSTOM_VISIBILITY_CREATURE      = 8,
 };
 
+typedef std::map<uint64, Loot> UnitLFRPlayerLootList;
+
 class Creature : public Unit, public GridObject<Creature>, public MapCreature
 {
     public:
@@ -665,6 +667,8 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
                                                             // overriden in Pet
         virtual void SaveToDB(uint32 mapid, uint32 spawnMask, uint32 phaseMask);
         virtual void DeleteFromDB();                        // overriden in Pet
+
+        UnitLFRPlayerLootList m_lfrLoot;
 
         Loot loot;
         bool lootForPickPocketed;

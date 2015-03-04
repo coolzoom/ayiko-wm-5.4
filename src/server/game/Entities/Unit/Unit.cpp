@@ -17851,6 +17851,8 @@ void Unit::Kill(Unit* victim, bool durabilityLoss, SpellInfo const* spellProto)
     // call kill spell proc event (before real die and combat stop to triggering auras removed at death/combat stop)
     if (isRewardAllowed && player && player != victim)
     {
+        player->SetLastKilledCreature(creature->GetEntry());
+
         ObjectGuid guid = player->GetGUID();
 
         WorldPacket data(SMSG_PARTY_KILL_LOG);
@@ -17904,15 +17906,75 @@ void Unit::Kill(Unit* victim, bool durabilityLoss, SpellInfo const* spellProto)
 
         if (creature)
         {
-            Loot* loot = &creature->loot;
-            if (creature->lootForPickPocketed)
-                creature->lootForPickPocketed = false;
+            // handle LFR loot for unit
+            if (GetMap()->GetDifficulty() == RAID_TOOL_DIFFICULTY)
+            {
+                auto group = player->GetGroup();
 
-            loot->clear();
-            if (uint32 lootid = creature->GetCreatureTemplate()->lootid)
-                loot->FillLoot(lootid, LootTemplates_Creature, looter, false, false, creature->GetLootMode());
+                // check if player is in a LFR group
+                if (group && group->isRaidGroup() && group->IsLFGRestricted())
+                {
+                    // find and store all raid members currently online and eligible loot
+                    std::set<Player*> raidMembers;
+                    for (auto &memberSlot : group->GetMemberSlots())
+                    {
+                        Player* member = ObjectAccessor::FindPlayer(memberSlot.guid);
+                        if (!member)
+                            continue;
 
-            loot->generateMoneyLoot(creature->GetCreatureTemplate()->mingold, creature->GetCreatureTemplate()->maxgold);
+                        // check if raid member is within range to get loot
+                        if (!member->IsWithinDistInMap(creature, DEFAULT_VISIBILITY_INSTANCE))
+                            continue;
+
+                        // LFR TODO: check if player if locked for this creature
+                        // ...
+
+                        raidMembers.insert(member);
+                    }
+
+                    // between 3 and 6 raid members minimum must win item loot
+                    uint32 itemWinCount = urand(3, 6);
+                    uint32 itemWinCounter = 0;
+
+                    uint32 memberCounter = 0;
+                    for (auto member : raidMembers)
+                    {
+                        bool wonItem = false;
+
+                        // loot quota is not being met, automatically give raid member loot
+                        if ((raidMembers.size() - memberCounter) < (itemWinCount - itemWinCounter))
+                            wonItem = true;
+                        // otherwise raid member has 25-30% chance to win loot
+                        if (urand(0, 100) <= urand(25, 30))
+                            wonItem = true;
+
+                        if (wonItem)
+                            itemWinCounter++;
+
+                        Loot* loot = &creature->m_lfrLoot[member->GetGUID()];
+                        loot->clear();
+
+                        if (uint32 lootId = creature->GetCreatureTemplate()->lootid)
+                            if (wonItem)
+                                loot->FillLFRLoot(lootId, LootTemplates_Creature, member);
+
+                        loot->FillLFRMoney(creature->GetCreatureTemplate()->mingold, creature->GetCreatureTemplate()->maxgold, group->GetMembersCount(), wonItem);
+                        memberCounter++;
+                    }
+                }
+            }
+            else
+            {
+                Loot* loot = &creature->loot;
+                if (creature->lootForPickPocketed)
+                    creature->lootForPickPocketed = false;
+
+                loot->clear();
+                if (uint32 lootid = creature->GetCreatureTemplate()->lootid)
+                    loot->FillLoot(lootid, LootTemplates_Creature, looter, false, false, creature->GetLootMode());
+
+                loot->generateMoneyLoot(creature->GetCreatureTemplate()->mingold, creature->GetCreatureTemplate()->maxgold);
+            }
         }
 
         player->RewardPlayerAndGroupAtKill(victim, false);

@@ -2601,6 +2601,50 @@ void ObjectMgr::LoadItemTemplates()
     TC_LOG_INFO("server.loading", ">> Loaded %u item templates from Item-sparse.db2 and %u from database in %u ms", sparseCount, dbCount, GetMSTimeDiffToNow(oldMSTime));
 }
 
+void ObjectMgr::LoadItemSpecialisation()
+{
+    uint32 oldMSTime = getMSTime();
+    uint32 count = 0;
+
+    QueryResult result = WorldDatabase.Query("SELECT id, specialisation FROM item_specialisation");
+    if (result)
+    {
+        do
+        {
+            Field* fields = result->Fetch();
+            uint32 itemId           = fields[0].GetUInt32();
+            uint32 specialisationId = fields[1].GetUInt32();
+
+            if (!GetItemTemplate(itemId))
+            {
+                TC_LOG_ERROR("sql.sql", "Item %u specified in `item_specialisation` does not exist, skipped.", itemId);
+                continue;
+            }
+
+            auto specialisation = sChrSpecializationsStore.LookupEntry(specialisationId);
+            if (!specialisation)
+            {
+                TC_LOG_ERROR("sql.sql", "Class specialisation %u specified in `item_specialisation` does not exist, skipped.", specialisationId);
+                continue;
+            }
+
+            auto itemSpecialisation = new ItemSpecialisation();
+            itemSpecialisation->Class          = specialisation->classId;
+            itemSpecialisation->Specialisation = specialisationId;
+
+            auto itemSpecialisationEntry = m_itemSpecialisation.find(itemId);
+            if (itemSpecialisationEntry == m_itemSpecialisation.end())
+            {
+                m_itemSpecialisation.insert(std::make_pair(itemId, ItemSpecialisationSet()));
+                itemSpecialisationEntry = m_itemSpecialisation.find(itemId);
+            }
+
+            itemSpecialisationEntry->second.insert(itemSpecialisation);
+        }
+        while (result->NextRow());
+    }
+}
+
 void ObjectMgr::LoadItemTemplateAddon()
 {
     uint32 oldMSTime = getMSTime();

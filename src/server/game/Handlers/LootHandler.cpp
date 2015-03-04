@@ -68,6 +68,10 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket & recvData)
             }
 
             loot = &go->loot;
+
+            // use personal loot in LFR
+            if (player->GetMap()->GetDifficulty() == RAID_TOOL_DIFFICULTY)
+                loot = &go->m_lfrLoot[player->GetGUID()];
         }
         else if (IS_ITEM_GUID(lguid))
         {
@@ -105,6 +109,10 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket & recvData)
             }
 
             loot = &creature->loot;
+
+            // use personal loot in LFR
+            if (player->GetMap()->GetDifficulty() == RAID_TOOL_DIFFICULTY)
+                loot = &creature->m_lfrLoot[player->GetGUID()];
         }
 
         player->StoreLootItem(lootSlot, loot);
@@ -135,7 +143,13 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recvData*/)
 
             // do not check distance for GO if player is the owner of it (ex. fishing bobber)
             if (go && ((go->GetOwnerGUID() == player->GetGUID() || go->IsWithinDistInMap(player, INTERACTION_DISTANCE))))
+            {
                 loot = &go->loot;
+
+                // use personal loot in LFR
+                if (player->GetMap()->GetDifficulty() == RAID_TOOL_DIFFICULTY)
+                    loot = &go->m_lfrLoot[player->GetGUID()];
+            }
 
             break;
         }
@@ -167,6 +181,11 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recvData*/)
             if (lootAllowed && creature->IsWithinDistInMap(player, INTERACTION_DISTANCE))
             {
                 loot = &creature->loot;
+
+                // use personal loot in LFR
+                if (player->GetMap()->GetDifficulty() == RAID_TOOL_DIFFICULTY)
+                    loot = &creature->m_lfrLoot[player->GetGUID()];
+
                 lootFlags |= MONEY_LOOT_FLAG_FROM_ENEMY;
             }
             break;
@@ -177,7 +196,7 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recvData*/)
 
     if (loot)
     {
-        if (!IS_ITEM_GUID(guid) && player->GetGroup())      //item can be looted only single player
+        if (!IS_ITEM_GUID(guid) && player->GetGroup() && player->GetMap()->GetDifficulty() != RAID_TOOL_DIFFICULTY)      //item can be looted only single player
             player->LootMoneyInGroup(loot->gold, lootFlags);
         else
             player->LootMoney(loot->gold, lootFlags | MONEY_LOOT_FLAG_SOLO);
@@ -254,6 +273,10 @@ void WorldSession::DoLootRelease(uint64 lguid)
 
         loot = &go->loot;
 
+        // use personal loot for LFR
+        if (player->GetMap()->GetDifficulty() == RAID_TOOL_DIFFICULTY)
+            loot = &go->m_lfrLoot[player->GetGUID()];
+
         if (go->GetGoType() == GAMEOBJECT_TYPE_DOOR)
         {
             // locked doors are opened with spelleffect openlock, prevent remove its as looted
@@ -270,7 +293,26 @@ void WorldSession::DoLootRelease(uint64 lguid)
                     go->SetLootState(GO_READY);
             }
             else
-                go->SetLootState(GO_JUST_DEACTIVATED);
+            {
+                // check if all players have looted their personal loot before despawning
+                if (player->GetMap()->GetDifficulty() == RAID_TOOL_DIFFICULTY)
+                {
+                    if (Group* group = player->GetGroup())
+                    {
+                        uint8 lootedCounter = 0;
+                        for (auto &memberSlot : group->GetMemberSlots())
+                        {
+                            Loot* memberLoot = &go->m_lfrLoot[memberSlot.guid];
+                            if (memberLoot->isLooted())
+                                lootedCounter++;
+                        }
+
+                        // if everyone has remove their loot, despawn
+                        if (lootedCounter == group->GetMembersCount())
+                            go->SetLootState(GO_JUST_DEACTIVATED);
+                    }
+                }
+            }
 
             loot->clear();
         }
@@ -344,13 +386,38 @@ void WorldSession::DoLootRelease(uint64 lguid)
             return;
 
         loot = &creature->loot;
+
+        // use personal loot for LFR
+        if (player->GetMap()->GetDifficulty() == RAID_TOOL_DIFFICULTY)
+            loot = &creature->m_lfrLoot[player->GetGUID()];
+
         if (loot->isLooted())
         {
             // skip pickpocketing loot for speed, skinning timer reduction is no-op in fact
             if (!creature->IsAlive())
                 creature->AllLootRemovedFromCorpse();
 
-            creature->RemoveFlag(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+            // check if all players have looted their personal loot before removing loot flag
+            if (player->GetMap()->GetDifficulty() == RAID_TOOL_DIFFICULTY)
+            {
+                if (Group* group = player->GetGroup())
+                {
+                    uint8 lootedCounter = 0;
+                    for (auto &memberSlot : group->GetMemberSlots())
+                    {
+                        Loot* memberLoot = &creature->m_lfrLoot[memberSlot.guid];
+                        if (memberLoot->isLooted())
+                            lootedCounter++;
+                    }
+
+                    // if everyone has remove their loot, remove flag
+                    if (lootedCounter == group->GetMembersCount())
+                        creature->RemoveFlag(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+                }
+            }
+            else
+                creature->RemoveFlag(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+
             loot->clear();
         }
         else

@@ -1,421 +1,665 @@
 /*
-    Dungeon : Template of the Jade Serpent 85-87
-    Wise mari
+* Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
+* Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+*
+* This program is free software; you can redistribute it and/or modify it
+* under the terms of the GNU General Public License as published by the
+* Free Software Foundation; either version 2 of the License, or (at your
+* option) any later version.
+*
+* This program is distributed in the hope that it will be useful, but WITHOUT
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+* more details.
+*
+* You should have received a copy of the GNU General Public License along
+* with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "temple_of_the_jade_serpent.h"
 
-enum eBoss
+static const float fountainTriggerPos[4][3] =
 {
-    BOSS_WASE_MARI = 1,
-};
-
-enum eSpells
-{
-    SPELL_WATER_BUBBLE              = 106062,
-    SPELL_CALL_WATER                = 106526,
-    SPELL_CORRUPTED_FOUTAIN         = 106518,
-    SPELL_SHA_RESIDUE               = 106653,
-    SPELL_HYDROLANCE_PRECAST        = 115220,
-    SPELL_HYDROLANCE_DMG_BOTTOM     = 106267,
-    SPELL_HYDROLANCE_VISUAL         = 106055,
-    SPELL_HYDROLANCE_DMG            = 106105,
-    SPELL_WASH_AWAY                 = 106331,
-};
-
-enum eTexts
-{
-    TEXT_INTRO            = 0,
-    TEXT_AGGRO            = 1,
-    TEXT_BOSS_EMOTE_AGGRO = 2,
-    TEXT_CALL_WATER       = 3,
-    TEXT_PHASE_SWITCH     = 4,
-    TEXT_DEATH            = 5,
-    TEXT_KILL_PLAYER      = 6,
-};
-
-enum eEvents
-{
-    EVENT_CALL_WATER        = 1,
-    EVENT_HYDROLANCE        = 2,
-    EVENT_HYDROLANCE_START  = 3,
-    EVENT_SWITCH_PHASE_TWO  = 4,
-    EVENT_WASH_AWAY         = 5,
-};
-
-enum eCreatures
-{
-    CREATURE_FOUTAIN_TRIGGER            = 56586,
-    CREATURE_CORRUPT_DROPLET            = 62358,
-    CREATURE_HYDROLANCE_BOTTOM_TRIGGER  = 56542,
-};
-
-enum eTimers
-{
-    TIMER_CALL_WATTER           = 29000,
-    TIMER_HYDROLANCE_START      = 10000,
-    TIMER_HYDROLANCE            =  5500,
-    TIMER_SWITCH_PHASE_TWO      = 15000,
-    TIMER_WASH_AWAY             =   125,
-};
-
-enum hydrolancePhase
-{
-    HYDROLANCE_BOTTOM   = 1,
-    HYDROLANCE_LEFT     = 2,
-    HYDROLANCE_RIGHT    = 3,
+    { 1022.743f, -2544.295f, 173.7757f },
+    { 1023.314f, -2569.695f, 176.0339f },
+    { 1059.943f, -2581.648f, 176.1427f },
+    { 1075.231f, -2561.335f, 173.8758f },
 };
 
 static const float hydrolanceLeftTrigger[5][3] =
 {
-    {1061.411f, -2570.721f, 174.2403f},
-    {1058.921f, -2573.487f, 174.2403f},
-    {1055.910f, -2575.674f, 174.2403f},
-    {1052.511f, -2577.188f, 174.2403f},
-    {1048.871f, -2577.961f, 174.2403f},
+    { 1061.411f, -2570.721f, 174.2403f },
+    { 1058.921f, -2573.487f, 174.2403f },
+    { 1055.910f, -2575.674f, 174.2403f },
+    { 1052.511f, -2577.188f, 174.2403f },
+    { 1048.871f, -2577.961f, 174.2403f },
 };
 
 static const float hydrolanceRightTrigger[5][3] =
 {
-    {1035.333f, -2573.693f, 174.2403f},
-    {1032.795f, -2570.971f, 174.2403f},
-    {1030.878f, -2567.781f, 174.2403f},
-    {1029.667f, -2564.263f, 174.2403f},
-    {1029.213f, -2560.569f, 174.2403f},
+    { 1035.333f, -2573.693f, 174.2403f },
+    { 1032.795f, -2570.971f, 174.2403f },
+    { 1030.878f, -2567.781f, 174.2403f },
+    { 1029.667f, -2564.263f, 174.2403f },
+    { 1029.213f, -2560.569f, 174.2403f },
 };
 
 class boss_wase_mari : public CreatureScript
 {
-    public:
-        boss_wase_mari() : CreatureScript("boss_wase_mari") { }
+public:
+    boss_wase_mari() : CreatureScript("boss_wase_mari") { }
 
-        CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new boss_wise_mari_AI(creature);
+    }
+
+    enum eTexts
+    {
+        TALK_BOSS_EMOTE_AGGRO   = 0,
+        TALK_AGGRO              = 1,
+        TALK_CALL_WATER         = 2,
+        TALK_PHASE_SWITCH       = 3,
+        TALK_PHASE_SWITCH_EMOTE = 4,
+        TALK_DEATH_1            = 5,
+        TALK_DEATH_2            = 6,
+        TALK_DEATH_3            = 7,
+        TALK_KILL_PLAYER        = 8
+    };
+
+    enum eEvents
+    {
+        EVENT_CALL_WATER        = 1,
+        EVENT_HYDROLANCE        = 2,
+        EVENT_HYDROLANCE_START  = 3,
+        EVENT_SWITCH_PHASE_TWO  = 4,
+        EVENT_WASH_AWAY         = 5,
+        EVENT_DONE              = 6,
+        EVENT_TALK_DEATH_1      = 7,
+        EVENT_TALK_DEATH_2      = 8,
+        EVENT_TALK_DEATH_3      = 9,
+        EVENT_SUMMON_TRIGGERS   = 10,
+        EVENT_BUBBLE_BRUST      = 11
+    };
+
+    enum eSpells
+    {
+        SPELL_WATER_BUBBLE_WISE       = 106062,
+        SPELL_CALL_WATER              = 106526,
+        SPELL_CORRUPTED_FOUTAIN       = 106518,
+        SPELL_HYDROLANCE_PRECAST      = 115220,
+        SPELL_HYDROLANCE_DMG_BOTTOM   = 106267,
+        SPELL_HYDROLANCE_VISUAL       = 106055,
+        SPELL_HYDROLANCE_DMG          = 106105,
+        SPELL_WASH_AWAY               = 106331,
+        SPELL_RELEASED_FROM_SHA       = 106770,
+        SPELL_CLEANSING_WATERS        = 106771,
+        SPELL_CLAIMING_WATERS         = 115622,
+        SPELL_QUIET_SUICIDE           = 115372,
+        SPELL_BLESSING_OF_WATERSPEKER = 121483,
+        SPELL_KNEEL                   = 115368,
+        SPELL_WASH_AWAY_COSMETIC      = 115575,
+        SPELL_BUBBLE_BRUST            = 106612
+    };
+
+    enum eTimers
+    {
+        TIMER_CALL_WATTER       = 29000,
+        TIMER_HYDROLANCE_START  = 10000,
+        TIMER_HYDROLANCE        = 5500,
+        TIMER_SWITCH_PHASE_TWO  = 15000,
+        TIMER_WASH_AWAY         = 125
+    };
+
+    enum hydrolancePhase
+    {
+        HYDROLANCE_BOTTOM = 1,
+        HYDROLANCE_LEFT   = 2,
+        HYDROLANCE_RIGHT  = 3
+    };
+
+    enum eActions
+    {
+        ACTION_LIVING_WATER_DEAD = 0,
+        ACTION_HYDROLANCE        = 1,
+        ACTION_WASH_AWAY         = 2
+    };
+
+    struct boss_wise_mari_AI : public BossAI
+    {
+        boss_wise_mari_AI(Creature* creature) : BossAI(creature, DATA_WISE_MARI) {}
+
+        bool fightWon, canDead;
+        uint8 phase, foutainCount;
+        uint32 hydrolancePhase;
+        uint64 foutainTrigger[4];
+        
+        EventMap events;
+        EventMap cosmeticEvents;
+
+        void InitializeAI() override
         {
-            return new boss_wise_mari_AI(creature);
+            canDead = false;
+            fightWon = false;
+            me->setActive(true);
+            me->AddUnitState(UNIT_STATE_ROOT | UNIT_STATE_CANNOT_TURN);
+
+            Reset();
         }
 
-        struct boss_wise_mari_AI : public BossAI
+        void Reset() override
         {
-            boss_wise_mari_AI(Creature* creature) : BossAI(creature, BOSS_WASE_MARI)
+            hydrolancePhase = 0;
+            foutainCount    = 0;
+            phase           = 0;
+
+            _Reset();
+            events.Reset();
+            cosmeticEvents.ScheduleEvent(EVENT_SUMMON_TRIGGERS, 0.5 * IN_MILLISECONDS);
+            me->RemoveAurasDueToSpell(SPELL_WATER_BUBBLE_WISE);
+            if(instance)
+                instance->SetData(DATA_WISE_MARI, NOT_STARTED);
+        }
+
+        void EnterCombat(Unit* who) override
+        {        
+            phase = 1;
+            hydrolancePhase = HYDROLANCE_BOTTOM;
+            _EnterCombat();
+            Talk(TALK_AGGRO);
+            Talk(TALK_BOSS_EMOTE_AGGRO);
+            me->SetInCombatWithZone();
+            me->CastSpell(me, SPELL_WATER_BUBBLE_WISE, true);
+            events.ScheduleEvent(EVENT_CALL_WATER, 8 * IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_HYDROLANCE_START, TIMER_HYDROLANCE_START);
+
+            if(instance)
             {
-                creature->AddUnitState(UNIT_STATE_ROOT | UNIT_STATE_CANNOT_TURN);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+                instance->SetData(DATA_WISE_MARI, IN_PROGRESS);
             }
+        }
 
-            bool ennemyInArea;
-            bool intro;
-            uint8 phase;
-            uint8 foutainCount;
-            uint64 foutainTrigger[4];
-            uint32 hydrolancePhase;
+        void KilledUnit(Unit* victim) override
+        {
+            if (victim->GetTypeId() == TYPEID_PLAYER)
+                Talk(TALK_KILL_PLAYER);
+        }
 
-            void Reset()
+        void DamageTaken(Unit* attacker, uint32 &damage) override
+        {
+            if (me->GetHealth() <= damage)
             {
-                for (uint8 i = 0; i < 4; i++)
-                    foutainTrigger[i] = 0;
+                if (!fightWon)
+                    damage = 0;
 
-                std::list<Creature*> searcher;
-                GetCreatureListWithEntryInGrid(searcher, me, CREATURE_FOUTAIN_TRIGGER, 50.0f);
-                for (auto itr : searcher)
+                if (!canDead)
                 {
-                    if (!itr)
-                        continue;
-
-                    itr->RemoveAllAuras();
-                }
-
-                hydrolancePhase = 0;
-                foutainCount = 0;
-                phase = 0;
-                ennemyInArea= false;
-                intro = false;
-                me->RemoveAurasDueToSpell(SPELL_WATER_BUBBLE);
-
-                _Reset();
-            }
-
-            void EnterCombat(Unit* /*who*/)
-            {
-                std::list<Creature*> searcher;
-                GetCreatureListWithEntryInGrid(searcher, me, CREATURE_FOUTAIN_TRIGGER, 50.0f);
-                uint8 tab = 0;
-                for (auto itr : searcher)
-                {
-                    if (!itr)
-                        continue;
-
-                    itr->RemoveAllAuras();
-
-                    foutainTrigger[++tab] = itr->GetGUID();
-                }
-
-                searcher.clear();
-                GetCreatureListWithEntryInGrid(searcher, me, CREATURE_CORRUPT_DROPLET, 50.0f);
-                for (auto itr : searcher)
-                {
-                    if (!itr)
-                        continue;
-
-                    if (itr->IsSummon())
-                        itr->ForcedDespawn();
-                }
-
-                me->SetInCombatWithZone();
-                me->CastSpell(me, SPELL_WATER_BUBBLE, true);
-                Talk(TEXT_AGGRO);
-                Talk(TEXT_BOSS_EMOTE_AGGRO);
-                intro = true;
-                phase = 1;
-                hydrolancePhase = HYDROLANCE_BOTTOM;
-                events.ScheduleEvent(EVENT_CALL_WATER, 8000);
-                events.ScheduleEvent(EVENT_HYDROLANCE_START, TIMER_HYDROLANCE_START);
-
-                _EnterCombat();
-            }
-
-            void DoAction(const int32 /*action*/)
-            {
-            }
-
-            void KilledUnit(Unit* /*victim*/)
-            {
-                Talk(TEXT_KILL_PLAYER);
-            }
-
-            void JustDied(Unit* /*killer*/)
-            {
-                Talk(TEXT_DEATH);
-                _JustDied();
-            }
-
-            void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
-            {
-
-            }
-
-            void MoveInLineOfSight(Unit* who)
-            {
-                if (who->GetTypeId() != TYPEID_PLAYER)
-                    return;
-
-                if (intro)
-                    return;
-
-                if (!ennemyInArea)
-                {
-                    Talk(TEXT_INTRO);
-                    ennemyInArea = true;
-                    return;
-                }
-            }
-
-            void UpdateAI(const uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                // Wise Mari don't rotate
-                if (me->GetUInt32Value(UNIT_FIELD_TARGET))
-                    me->SetUInt32Value(UNIT_FIELD_TARGET, 0);
-
-                if (me->HasUnitState(UNIT_STATE_CASTING) && phase != 2)
-                    return;
-
-                while (uint32 eventId = events.ExecuteEvent())
-                {
-                    switch (eventId)
+                    canDead = true;
+                    _JustDied();
+                    if (instance)
                     {
-                        case EVENT_CALL_WATER:
+                        instance->SetData(DATA_WISE_MARI, DONE);
+                        instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                    }
+                    events.CancelEvent(EVENT_WASH_AWAY);                   
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
+                    me->SetFacingTo(me->GetAngle(1049.362f, -2552.748f));
+                    me->RemoveAura(SPELL_WASH_AWAY);
+                    me->CastSpell(me, SPELL_KNEEL, false);
+                    me->CastSpell(me, SPELL_RELEASED_FROM_SHA, false);
+                    me->CastSpell(me, SPELL_CLEANSING_WATERS, false);
+                    me->CastSpell(me, SPELL_CLAIMING_WATERS, false);
+                    cosmeticEvents.ScheduleEvent(EVENT_TALK_DEATH_1, 1 * IN_MILLISECONDS);                   
+                }
+            }
+        }
+
+        void EnterEvadeMode() override
+        {
+            BossAI::EnterEvadeMode();
+            if (instance)
+            {
+                instance->SetData(DATA_WISE_MARI, FAIL);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            }
+
+            std::list<Creature*> dropletList;
+            GetCreatureListWithEntryInGrid(dropletList, me, NPC_CORRUPT_DROPLET, 100.0f);
+            if(!dropletList.empty())
+            {
+                for(auto itr : dropletList)
+                {
+                    if(itr->IsSummon())
+                        itr->DespawnOrUnsummon();
+                }
+            }
+        }
+
+        void DoAction(const int32 action) override
+        {
+            switch(action)
+            {
+                case ACTION_LIVING_WATER_DEAD:
+                    ++foutainCount;
+
+                    if(foutainCount == 4)
+                        cosmeticEvents.ScheduleEvent(EVENT_BUBBLE_BRUST, urand(4, 6) * IN_MILLISECONDS);
+                    else
+                        events.ScheduleEvent(EVENT_CALL_WATER, urand(12, 16) * IN_MILLISECONDS);
+                    break;
+                case ACTION_HYDROLANCE:
+                    events.ScheduleEvent(EVENT_HYDROLANCE, 0.25 * IN_MILLISECONDS);
+                    events.ScheduleEvent(EVENT_HYDROLANCE_START, urand(8, 12) * IN_MILLISECONDS);
+                    break;
+                case ACTION_WASH_AWAY:
+                    phase = 2;
+                    events.Reset();
+                    events.ScheduleEvent(EVENT_SWITCH_PHASE_TWO, 0.5 * IN_MILLISECONDS);
+                    break;
+            }
+        }
+
+        void UpdateAI(const uint32 diff) override
+        {
+            if (uint32 eventId = cosmeticEvents.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_DONE:
+                        fightWon = true;
+
+                        if (InstanceScript* instance = me->GetInstanceScript())
+                            instance->DoCastSpellOnPlayers(SPELL_BLESSING_OF_WATERSPEKER);
+
+                        if (Player* originalCaster = me->GetLootRecipient())
+                            me->CastSpell(me, SPELL_QUIET_SUICIDE, false, NULL, NULL, originalCaster->GetGUID());
+                        break;
+                    case EVENT_TALK_DEATH_1:
+                        Talk(TALK_DEATH_1);
+                        cosmeticEvents.ScheduleEvent(EVENT_TALK_DEATH_2, 5 * IN_MILLISECONDS);
+                        break;
+                    case EVENT_TALK_DEATH_2:
+                        Talk(TALK_DEATH_2);
+                        cosmeticEvents.ScheduleEvent(EVENT_TALK_DEATH_3, 9 * IN_MILLISECONDS);
+                        break;
+                    case EVENT_TALK_DEATH_3:
+                        Talk(TALK_DEATH_3);
+                        cosmeticEvents.ScheduleEvent(EVENT_DONE, 5 * IN_MILLISECONDS);
+                        break;
+                    case EVENT_SUMMON_TRIGGERS:
+                        for(int i = 0; i < 4; i++)
                         {
-                            if (phase != 1)
-                                break;
+                            if(Creature* trigger = me->SummonCreature(NPC_FOUNTAIN_TRIGGER, FountainTriggerSummonPosition[i]))
+                                foutainTrigger[i] = trigger->GetGUID();
+                        }
+                        break;
+                    case EVENT_BUBBLE_BRUST:
+                        me->CastSpell(me, SPELL_BUBBLE_BRUST, false);
+                        break;
+                }
+            }
 
-                            Talk(TEXT_CALL_WATER);
+            events.Update(diff);
+            cosmeticEvents.Update(diff);
 
-                            Creature* trigger = me->GetCreature(*me, foutainTrigger[++foutainCount]);
-                            if (trigger)
+            if (!UpdateVictim())
+                return;
+
+            if (me->GetUInt32Value(UNIT_FIELD_TARGET))
+                me->SetUInt32Value(UNIT_FIELD_TARGET, 0);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING) && phase != 2)
+                return;
+
+            if (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CALL_WATER:
+                        {
+                            Talk(TALK_CALL_WATER);
+                            if(Creature* trigger = Unit::GetCreature(*me, foutainTrigger[foutainCount]))
                             {
                                 me->CastSpell(trigger, SPELL_CALL_WATER, true);
                                 trigger->AddAura(SPELL_CORRUPTED_FOUTAIN, trigger);
                             }
-
-                            if (foutainCount == 4)
-                            {
-                                phase = 2;
-                                events.ScheduleEvent(EVENT_SWITCH_PHASE_TWO, TIMER_SWITCH_PHASE_TWO);
-                                break;
-                            }
-                            events.ScheduleEvent(EVENT_CALL_WATER, TIMER_CALL_WATTER + rand() % 6000);
-                            break;
                         }
-
-                        case EVENT_HYDROLANCE_START:
+                        break;
+                    case EVENT_HYDROLANCE_START:
                         {
-                            if (phase != 1)
-                                break;
-
                             float facing = 0.00f;
-                            events.ScheduleEvent(EVENT_HYDROLANCE, TIMER_HYDROLANCE);
-                            switch (hydrolancePhase)
+                            switch(hydrolancePhase)
                             {
                                 case HYDROLANCE_BOTTOM:
                                     {
                                         std::list<Creature*> trigger;
-                                        me->GetCreatureListWithEntryInGrid(trigger,CREATURE_HYDROLANCE_BOTTOM_TRIGGER, 50.0f);
-                                        for (auto itr : trigger)
-                                            itr->CastSpell(itr, SPELL_HYDROLANCE_PRECAST, true);
+                                        me->GetCreatureListWithEntryInGrid(trigger, NPC_HYDROCALINE_TRIGGER, 50.0f);
+                                        if(!trigger.empty())
+                                        {
+                                            for(auto itr : trigger)
+                                                itr->CastSpell(itr, SPELL_HYDROLANCE_PRECAST, true);
+                                        }
+
                                         facing = 1.23f;
-                                        break;
                                     }
+                                    break;
                                 case HYDROLANCE_RIGHT:
-                                    for (int i = 0; i < 5; i++)
-                                        me->CastSpell(hydrolanceRightTrigger[i][0], hydrolanceRightTrigger[i][1], hydrolanceRightTrigger[i][2], SPELL_HYDROLANCE_PRECAST, true);
-                                    facing = 3.55f;
+                                    {
+                                       for(int i = 0; i < 5; i++)
+                                            me->CastSpell(hydrolanceRightTrigger[i][0], hydrolanceRightTrigger[i][1], hydrolanceRightTrigger[i][2], SPELL_HYDROLANCE_PRECAST, true);
+
+                                       facing = 3.55f;
+                                    }
                                     break;
                                 case HYDROLANCE_LEFT:
-                                    for (int i = 0; i < 5; i++)
-                                        me->CastSpell(hydrolanceLeftTrigger[i][0], hydrolanceLeftTrigger[i][1], hydrolanceLeftTrigger[i][2], SPELL_HYDROLANCE_PRECAST, true);
-                                    facing = 5.25f;
+                                    {
+                                        for(int i = 0; i < 5; i++)
+                                             me->CastSpell(hydrolanceLeftTrigger[i][0], hydrolanceLeftTrigger[i][1], hydrolanceLeftTrigger[i][2], SPELL_HYDROLANCE_PRECAST, true);
+
+                                        facing = 5.25f;
+                                    }
                                     break;
-                            }
+                              }
+
                             me->CastSpell(me, SPELL_HYDROLANCE_VISUAL, false);
                             me->UpdatePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), facing);
                             me->SetFacingTo(facing);
-                            break;
                         }
-
-                        case EVENT_HYDROLANCE:
+                        break;
+                    case EVENT_HYDROLANCE:
                         {
-                            if (phase != 1)
-                                break;
-                            switch (hydrolancePhase)
-                            {
-                                case HYDROLANCE_BOTTOM:
-                                {
-                                    std::list<Creature*> trigger;
-                                    me->GetCreatureListWithEntryInGrid(trigger,CREATURE_HYDROLANCE_BOTTOM_TRIGGER, 50.0f);
-                                    for (auto itr : trigger)
-                                        itr->CastSpell(itr->GetPositionX(), itr->GetPositionY(), itr->GetPositionZ(), SPELL_HYDROLANCE_DMG_BOTTOM, true);
-                                    break;
-                                }
-                                case HYDROLANCE_RIGHT:
-                                    for (int i = 0; i < 5; i++)
-                                        me->CastSpell(hydrolanceRightTrigger[i][0], hydrolanceRightTrigger[i][1], hydrolanceRightTrigger[i][2], SPELL_HYDROLANCE_DMG, true);
-                                    break;
-                                case HYDROLANCE_LEFT:
-                                    for (int i = 0; i < 5; i++)
-                                        me->CastSpell(hydrolanceLeftTrigger[i][0], hydrolanceLeftTrigger[i][1], hydrolanceLeftTrigger[i][2], SPELL_HYDROLANCE_DMG, true);
-                                    break;
+                           switch(hydrolancePhase)
+                           {
+                              case HYDROLANCE_BOTTOM:
+                                  {
+                                      std::list<Creature*> trigger;
+                                      me->GetCreatureListWithEntryInGrid(trigger, NPC_HYDROCALINE_TRIGGER, 50.0f);
+                                      if(!trigger.empty())
+                                      {
+                                          for(auto itr : trigger)
+                                              itr->CastSpell(itr->GetPositionX(), itr->GetPositionY(), itr->GetPositionZ(), SPELL_HYDROLANCE_DMG_BOTTOM, true);
+                                      }
+                                  }
+                                  break;
+                              case HYDROLANCE_RIGHT:
+                                  for(int i = 0; i < 5; i++)
+                                       me->CastSpell(hydrolanceRightTrigger[i][0], hydrolanceRightTrigger[i][1], hydrolanceRightTrigger[i][2], SPELL_HYDROLANCE_DMG, true);
+                                  break;
+                             case HYDROLANCE_LEFT:
+                                 for(int i = 0; i < 5; i++)
+                                      me->CastSpell(hydrolanceLeftTrigger[i][0], hydrolanceLeftTrigger[i][1], hydrolanceLeftTrigger[i][2], SPELL_HYDROLANCE_DMG, true);
+                                 break;
                             }
 
-                            if (hydrolancePhase == HYDROLANCE_RIGHT)
+                            if(hydrolancePhase == HYDROLANCE_RIGHT)
                                 hydrolancePhase = HYDROLANCE_BOTTOM;
-                            else
+                             else
                                 hydrolancePhase++;
-
-                            events.ScheduleEvent(EVENT_HYDROLANCE_START, TIMER_HYDROLANCE_START);
-                            break;
-
                         }
+                        break;
+                    case EVENT_SWITCH_PHASE_TWO:
+                       Talk(TALK_PHASE_SWITCH);
+                       Talk(TALK_PHASE_SWITCH_EMOTE);
+                       me->RemoveAurasDueToSpell(SPELL_WATER_BUBBLE_WISE);
+                       if(float facing = me->GetOrientation())
+                       {
+                           facing += M_PI / 48;
 
-                        case EVENT_SWITCH_PHASE_TWO:
+                           if(facing > M_PI * 2)
+                               facing -= M_PI * 2;
+
+                           me->SetOrientation(facing);
+                           me->SetFacingTo(facing);
+                       }
+                       me->CastSpell(me, SPELL_WASH_AWAY, true);
+                       me->CastSpell(me, SPELL_WASH_AWAY_COSMETIC, false);
+                       events.ScheduleEvent(EVENT_WASH_AWAY, TIMER_WASH_AWAY);
+                       break;
+                    case EVENT_WASH_AWAY:
+                        if(float facing = me->GetOrientation())
                         {
-                            if (phase !=2)
-                                break;
+                            facing += M_PI / 48;
 
-                            Talk(TEXT_PHASE_SWITCH);
-
-                            me->RemoveAurasDueToSpell(SPELL_WATER_BUBBLE);
-                            float facing = me->GetOrientation();
-                            facing += M_PI/48;
-
-                            if (facing > M_PI*2)
-                                facing -= M_PI*2;
-
-                            //me->UpdatePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), facing);
-                            me->SetOrientation(facing);
-                            me->SetFacingTo(facing);
-                            me->CastSpell(me, SPELL_WASH_AWAY, true);
-                            events.ScheduleEvent(EVENT_WASH_AWAY, TIMER_WASH_AWAY);
-                            break;
-                        }
-
-                        case EVENT_WASH_AWAY:
-                        {
-                            if (phase !=2)
-                                break;
-
-                            float facing = me->GetOrientation();
-                            facing += M_PI/48;
-
-                            if (facing > M_PI*2)
-                                facing -= M_PI*2;
+                            if(facing > M_PI * 2)
+                                facing -= M_PI * 2;
 
                             me->SetOrientation(facing);
                             me->SetFacingTo(facing);
-
-                            events.ScheduleEvent(EVENT_WASH_AWAY, TIMER_WASH_AWAY);
-                            break;
                         }
-                    }
+                        events.ScheduleEvent(EVENT_WASH_AWAY, TIMER_WASH_AWAY);
+                        break;
                 }
-
             }
-        };
+        }
+    };
 };
 
 class mob_corrupt_living_water : public CreatureScript
 {
-    public:
-        mob_corrupt_living_water() : CreatureScript("mob_corrupt_living_water") { }
+public:
+    mob_corrupt_living_water() : CreatureScript("mob_corrupt_living_water") { }
 
-        CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new mob_corrupt_living_water_AI(creature);
+    }
+
+    enum eSpells
+    {
+        SPELL_SUMMON_CORRUPT_DROPLET = 106762,
+        SPELL_SHA_RESIDUE            = 106653
+    };
+
+    enum eTalks
+    {
+        TALK_RISE = 0
+    };
+
+    enum eActions
+    {
+        ACTION_LIVING_WATER_DEAD = 0
+    };
+
+    struct mob_corrupt_living_water_AI : public ScriptedAI
+    {
+        mob_corrupt_living_water_AI(Creature* creature) : ScriptedAI(creature) {}
+
+        InstanceScript* instance;
+        bool canDead;
+
+        void InitializeAI() override
         {
-            return new mob_corrupt_living_water_AI(creature);
+            instance = me->GetInstanceScript();
+            canDead = false;
+
+            if(me->GetEntry() == 56511)
+                Talk(TALK_RISE);
         }
 
-        struct mob_corrupt_living_water_AI : public ScriptedAI
+        void JustDied(Unit* /*unit*/) override
         {
-            mob_corrupt_living_water_AI(Creature* creature) : ScriptedAI(creature)
-            {
-            }
+            if(Creature* wise = Unit::GetCreature(*me, instance->GetData64(DATA_WISE_MARI)))
+                if(wise->IsAIEnabled)
+                    wise->AI()->DoAction(ACTION_LIVING_WATER_DEAD);
+        }
 
+        void JustSummoned(Creature* summoned)
+        {
+            summoned->SetInCombatWithZone();
+        }
 
-            void Reset()
+        void DamageTaken(Unit* attacker, uint32 &damage) override
+        {
+            if (me->GetHealth() <= damage)
             {
-            }
-
-            void JustDied(Unit* /*killer*/)
-            {
-                for (int i = 0; i < 4; i++)
+                damage = 0;
+                if (!canDead)
                 {
-                    Position pos;
-                    me->GetRandomNearPosition(pos, 4.0f);
-                    Creature* droplet = me->SummonCreature(CREATURE_CORRUPT_DROPLET, pos);
-                    if (!droplet)
-                        continue;
+                    canDead = true;
+                    for (int i = 0; i < 3; i++)
+                        me->CastSpell((Unit*)NULL, SPELL_SUMMON_CORRUPT_DROPLET, false);
 
-                    if (Unit* unit = SelectTarget(SELECT_TARGET_RANDOM))
-                        droplet->Attack(unit, true);
+                    me->CastSpell((Unit*)NULL, SPELL_SHA_RESIDUE, false);
+                    attacker->Kill(me);
                 }
-
-                me->CastSpell(me, SPELL_SHA_RESIDUE, true);
             }
+        }
+    };
+};
 
-            void UpdateAI(const uint32 /*diff*/)
+class spell_wise_hydrolance_pulse : public SpellScriptLoader
+{
+public:
+    spell_wise_hydrolance_pulse() : SpellScriptLoader("spell_wise_hydrolance_pulse") { }
+
+    enum eSpells
+    {
+        SPELL_HYDROLANCE_PULSE = 106104,
+        SPELL_HL_PULSE_2       = 106105
+    };
+
+    enum eActions
+    {
+        ACTION_HYDROLANCE = 1
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_wise_hydrolance_pulse_AuraScript();
+    }
+
+    class spell_wise_hydrolance_pulse_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_wise_hydrolance_pulse_AuraScript);
+
+        uint8 tickCnt;
+
+        bool Load()
+        {
+            tickCnt = 0;
+            return true;
+        }
+
+        void HandlePeriodic(AuraEffect const * /*aurEff*/)
+        {
+            PreventDefaultAction();
+            Unit* owner = GetCaster();
+
+            if(!owner)
+                return;
+
+            float x, y, z;
+            z = owner->GetPositionZ();
+            switch(tickCnt)
             {
-                if (!UpdateVictim())
-                    return;
-
-                DoMeleeAttackIfReady();
+                case 0:
+                    owner->GetNearPoint2D(x, y, 0.0f, owner->GetOrientation());
+                    owner->CastSpell(x, y, z, SPELL_HYDROLANCE_PULSE, false);
+                    break;
+                case 6:
+                case 7:
+                    owner->GetNearPoint2D(x, y, tickCnt + 1, owner->GetOrientation());
+                    owner->CastSpell(x, y, z, SPELL_HL_PULSE_2, false);
+                    break;
+                default:
+                    owner->GetNearPoint2D(x, y, tickCnt + 1, owner->GetOrientation());
+                    owner->CastSpell(x, y, z, SPELL_HYDROLANCE_PULSE, false);
+                    break;
             }
-        };
+            ++tickCnt;
+        }
+
+        void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            Creature* owner = GetOwner()->ToCreature();
+            if(!owner)
+                return;
+
+            if(owner->IsAIEnabled)
+                owner->AI()->DoAction(ACTION_HYDROLANCE);
+        }
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_wise_hydrolance_pulse_AuraScript::HandlePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+            OnEffectRemove += AuraEffectRemoveFn(spell_wise_hydrolance_pulse_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+};
+
+class spell_wise_hydrolance: public SpellScriptLoader
+{
+public:
+    spell_wise_hydrolance() : SpellScriptLoader("spell_wise_hydrolance") { }
+
+    enum eSpells
+    {
+        SPELL_HYDROLANCE_PULSE = 106098
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_wise_hydrolance_SpellScript();
+    }
+
+    class spell_wise_hydrolance_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_wise_hydrolance_SpellScript);
+
+        void HandleAfterCast()
+        {
+            if(Unit* caster = GetCaster())
+                caster->CastSpell(caster, SPELL_HYDROLANCE_PULSE, false);
+        }
+
+        void Register() override
+        {
+            AfterCast += SpellCastFn(spell_wise_hydrolance_SpellScript::HandleAfterCast);
+        }
+    };
+};
+
+class spell_wise_bubble_brust : public SpellScriptLoader
+{
+public:
+    spell_wise_bubble_brust() : SpellScriptLoader("spell_wise_bubble_brust") { }
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_wise_bubble_brust_SpellScript();
+    }
+
+    enum eActions
+    {
+        ACTION_WASH_AWAY = 2
+    };
+
+    class spell_wise_bubble_brust_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_wise_bubble_brust_SpellScript);
+
+        void HandleAfterCast()
+        {
+            if(Unit* caster = GetCaster())
+                if(caster->IsAIEnabled)
+                    caster->GetAI()->DoAction(ACTION_WASH_AWAY);
+        }
+
+        void Register() override
+        {
+            AfterCast += SpellCastFn(spell_wise_bubble_brust_SpellScript::HandleAfterCast);
+        }
+    };
 };
 
 void AddSC_boss_wise_mari()
 {
     new boss_wase_mari();
     new mob_corrupt_living_water();
+    new spell_wise_hydrolance_pulse();
+    new spell_wise_hydrolance();
+    new spell_wise_bubble_brust();
 }

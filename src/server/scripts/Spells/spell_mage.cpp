@@ -1466,34 +1466,6 @@ class spell_mage_arcane_brilliance : public SpellScriptLoader
         }
 };
 
-// Replenish Mana - 5405
-class spell_mage_replenish_mana : public SpellScriptLoader
-{
-    public:
-        spell_mage_replenish_mana() : SpellScriptLoader("spell_mage_replenish_mana") { }
-
-        class spell_mage_replenish_mana_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_mage_replenish_mana_SpellScript);
-
-            void HandleOnHit()
-            {
-                if (Player* _player = GetCaster()->ToPlayer())
-                    _player->CastSpell(_player, 10052, true);
-            }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_mage_replenish_mana_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_mage_replenish_mana_SpellScript();
-        }
-};
-
 // Evocation - 12051
 class spell_mage_evocation : public SpellScriptLoader
 {
@@ -1723,6 +1695,9 @@ class spell_mage_alter_time : public SpellScriptLoader
                 {
                     AuraRemoveMode removeMode = GetTargetApplication()->GetRemoveMode();
                     if (removeMode == AURA_REMOVE_BY_DEATH)
+                        return;
+
+                    if (removeMode == AURA_REMOVE_BY_CANCEL || removeMode == AURA_REMOVE_BY_ENEMY_SPELL)
                         return;
 
                     std::list<Creature*> mirrorList;
@@ -2048,6 +2023,50 @@ public:
     }
 };
 
+// Frozen orb target filter
+class spell_mage_orb_filter : public SpellScriptLoader
+{
+public:
+    spell_mage_orb_filter() : SpellScriptLoader("spell_mage_orb_filter") { }
+
+    class spell_mage_orb_filter_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_mage_orb_filter_SpellScript);
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            Unit* caster = GetCaster();
+            Unit* owner = caster->GetOwner();
+            if (!owner)
+                return;
+
+            if (Unit* target = GetHitUnit())
+            {
+                caster->CastSpell(target, 84721, true, NULL, NULL, owner->GetGUID());
+                // After hitting a target periodc timer has to be changed to 1 second
+                if (AuraEffect* aura = GetCaster()->GetAuraEffect(84717, EFFECT_0))
+                    aura->SetPeriodicTimer(GetSpellInfo()->Effects[EFFECT_0].BasePoints);
+
+                if (!caster->HasAura(82736))
+                    caster->CastSpell(caster, 82736);
+
+                if (roll_chance_i(15))
+                    owner->CastSpell(owner, 44544, true);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_mage_orb_filter_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_mage_orb_filter_SpellScript();
+    }
+};
+
 
 void AddSC_mage_spell_scripts()
 {
@@ -2075,7 +2094,6 @@ void AddSC_mage_spell_scripts()
     new spell_mage_combustion();
     new spell_mage_inferno_blast();
     new spell_mage_arcane_brilliance();
-    new spell_mage_replenish_mana();
     new spell_mage_evocation();
     new spell_mage_conjure_refreshment();
     new spell_mage_ritual_of_refreshment();
@@ -2092,4 +2110,5 @@ void AddSC_mage_spell_scripts()
     new spell_mastery_icicles_trigger();
     new spell_mastery_icicles_periodic();
     new spell_mage_blizzard();
+    new spell_mage_orb_filter();
 }

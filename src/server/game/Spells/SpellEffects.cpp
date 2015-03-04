@@ -831,7 +831,10 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         m_caster->CastSpell(unitTarget, 130320, true);
                         break;
                     case 100784:// Blackout Kick
-                        damage = CalculateMonkMeleeAttacks(m_caster, 7.12f);
+                        if (unitTarget != m_targets.GetUnitTarget())
+                            damage = CalculateMonkMeleeAttacks(m_caster, 3.56f);
+                        else
+                            damage = CalculateMonkMeleeAttacks(m_caster, 7.12f);
                         break;
                     case 124335:// Swift Reflexes
                         damage = CalculateMonkMeleeAttacks(m_caster, 0.3f);
@@ -2043,6 +2046,11 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
 
         switch (m_spellInfo->Id)
         {
+            case 81280: // Blood Burst
+            {
+                addhealth = caster->CountPctFromMaxHealth(damage);
+                break;
+            }
             // Selfless Healer
             case 19750: // Flash of Light
             case 82326: // Divine Light (Holy Spec)
@@ -2127,22 +2135,6 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
                 }
                 break;
             }
-            case 121129:// Daybreak
-            {
-                uint32 count = 0;
-                for (std::list<TargetInfo>::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
-                    if (ihit->effectMask & (1 << effIndex))
-                        ++count;
-
-                count--; // Remove main target
-
-                if (count > 0)
-                    addhealth /= count;
-
-                addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
-
-                break;
-            }
             // Glyph of Prayer of Mending
             case 33110:
             {
@@ -2201,17 +2193,6 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
                     addhealth *= 1 + bonus;
                 }
             }
-        }
-        // 77485 - Mastery : Echo of Light
-        if (caster->getClass() == CLASS_PRIEST && caster->HasAura(77485) && caster->getLevel() >= 80 && addhealth)
-        {
-            float Mastery = caster->GetFloatValue(PLAYER_MASTERY) * 1.25f / 100.0f;
-            int32 bp = (Mastery * addhealth) / 6;
-
-            auto const remaining = unitTarget->GetRemainingPeriodicAmount(caster->GetGUID(), 77489, SPELL_AURA_PERIODIC_HEAL);
-            bp += remaining.perTick();
-
-            m_caster->CastCustomSpell(unitTarget, 77489, &bp, NULL, NULL, true);
         }
         // Chakra : Serenity - 81208
         if (addhealth && caster->HasAura(81208) && m_spellInfo->Effects[0].TargetA.GetTarget() == TARGET_UNIT_TARGET_ALLY) // Single heal target
@@ -4512,7 +4493,8 @@ void Spell::EffectInterruptCast(SpellEffIndex effIndex)
             // check if we can interrupt spell
             if ((spell->getState() == SPELL_STATE_CASTING
                 || (spell->getState() == SPELL_STATE_PREPARING && spell->GetCastTime() > 0.0f))
-                && (curSpellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE || curSpellInfo->PreventionType == SPELL_PREVENTION_TYPE_UNK1)
+                && (curSpellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE || curSpellInfo->PreventionType == SPELL_PREVENTION_TYPE_UNK1
+                || curSpellInfo->PreventionType == SPELL_PREVENTION_TYPE_UNK3)
                 && ((i == CURRENT_GENERIC_SPELL && curSpellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_INTERRUPT)
                 || (i == CURRENT_CHANNELED_SPELL && curSpellInfo->ChannelInterruptFlags & CHANNEL_INTERRUPT_FLAG_INTERRUPT)))
             {
@@ -7255,7 +7237,16 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const* 
     {
         Position pos;
         if (count == 0)
-            pos = *destTarget;
+        {
+            // Longying Ranger from Ranger Rescue quest
+            if (Creature* creature = caster->FindNearestCreature(60730, 10.f))
+            {
+                pos.Relocate(creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation());
+                duration = 45000;
+            }
+            else
+                pos = *destTarget;
+        }
         else
             // randomize position for multiple summons
             m_caster->GetRandomPoint(*destTarget, radius, pos);

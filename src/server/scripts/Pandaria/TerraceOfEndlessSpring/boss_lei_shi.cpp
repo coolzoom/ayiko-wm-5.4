@@ -40,6 +40,7 @@ enum eLeiShiSpells
     SPELL_PROTECT_RESPAWN   = 123493,
     SPELL_PROTECT_VISUAL    = 123505,
     SPELL_CLOUDED_REFLECTION= 123620,
+    SPELL_CLOUDED_IMPACT    = 123625,
 
     // This is for Heroic Mode
     SPELL_SCARY_FOG_CIRCLE  = 123797,
@@ -183,8 +184,8 @@ class boss_lei_shi : public CreatureScript
                     pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SCARY_FOG_STACKS);
                     pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SPRAY);
 
-                    if (pInstance->GetData(SPELL_RITUAL_OF_PURIFICATION))
-                        me->AddAura(SPELL_RITUAL_OF_PURIFICATION, me);
+                   /* if (pInstance->GetData(SPELL_RITUAL_OF_PURIFICATION))
+                        me->AddAura(SPELL_RITUAL_OF_PURIFICATION, me);*/
 
                     std::list<Creature*> protectors;
                     me->GetCreatureListWithEntryInGrid(protectors, NPC_ANIMATED_PROTECTOR, 100.0f);
@@ -234,8 +235,11 @@ class boss_lei_shi : public CreatureScript
                     {
                         if (pSha->AI())
                             pSha->AI()->DoAction(ACTION_SHA_INTRO);
-                        me->SetPhaseMask(128, true);
                     }
+
+                    me->SetPhaseMask(128, true);
+                    events.Reset();
+                    me->GetMotionMaster()->MoveIdle();
                 }
             }
 
@@ -267,7 +271,7 @@ class boss_lei_shi : public CreatureScript
                     Talk(TALK_SLAY);
             }
 
-            void DamageTaken(Unit* /*attacker*/, uint32& damage)
+            void DamageTaken(Unit* attacker, uint32& damage)
             {
                 if (!pInstance)
                     return;
@@ -299,8 +303,17 @@ class boss_lei_shi : public CreatureScript
                 {
                     damage = 0;
 
+                    if (leiShiFreed)
+                        return;
+
+                    summons.DespawnAll();
+                    pInstance->SetBossState(DATA_LEI_SHI, DONE);
+                    events.Reset();
+
                     EnterEvadeMode();
 
+                    me->CombatStop();
+                    me->DeleteThreatList();
                     me->setFaction(35);
                     me->CastSpell(me, SPELL_LEI_SHI_TRANSFORM, true);
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -315,6 +328,11 @@ class boss_lei_shi : public CreatureScript
                     me->RemoveAllAreasTrigger();
                     me->setRegeneratingHealth(false);
 
+                    if (attacker && attacker->GetTypeId() == TYPEID_PLAYER)
+                        me->GetMap()->ToInstanceMap()->PermBindAllPlayers(attacker->ToPlayer());
+                    else if (attacker && attacker->GetTypeId() == TYPEID_UNIT && attacker->GetOwner() && attacker->GetOwner()->ToPlayer())
+                        me->GetMap()->ToInstanceMap()->PermBindAllPlayers(attacker->GetOwner()->ToPlayer());
+
                     leiShiFreed = true;
                     Talk(TALK_DEFEATED);
 
@@ -328,8 +346,6 @@ class boss_lei_shi : public CreatureScript
                         pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SCARY_FOG_STACKS);
                         pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SPRAY);
                     }
-
-                    pInstance->SetBossState(DATA_LEI_SHI, DONE);
                 }
             }
 
@@ -419,8 +435,8 @@ class boss_lei_shi : public CreatureScript
                                 protector->CastSpell(protector, SPELL_PROTECT_VISUAL, true);
                                 protector->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_IMMUNE_TO_PC);
 
-                                if (Unit* target = protector->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f))
-                                    protector->AI()->AttackStart(target);
+                                if (protector->AI())
+                                    protector->AI()->DoZoneInCombat();
 
                                 ++protectorsActivated;
                             }
@@ -751,6 +767,7 @@ public:
         {
             if (iAction == ACTION_LEISHI_INTRO)
             {
+                me->ClearUnitState(UNIT_STATE_STUNNED);
                 events.ScheduleEvent(EVENT_RIPPLE_1, 2000);
             }
         }
@@ -764,10 +781,12 @@ public:
                 switch (eventId)
                 {
                 case EVENT_RIPPLE_1:
+                    DoCast(SPELL_CLOUDED_IMPACT);
                     Talk(EMOTE_RIPPLE);
                     events.ScheduleEvent(EVENT_RIPPLE_2, 14000);
                     break;
                 case EVENT_RIPPLE_2:
+                    DoCast(SPELL_CLOUDED_IMPACT);
                     Talk(EMOTE_RIPPLE_2);
                     events.ScheduleEvent(EVENT_APPEAR, 10000);
                     break;

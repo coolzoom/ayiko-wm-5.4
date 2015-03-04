@@ -630,6 +630,16 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
             if (!e.action.quest.quest || !IsQuestValid(e, e.action.quest.quest))
                 return false;
             break;
+        case SMART_ACTION_SATISFY_QUEST_OBJECTIVE:
+            {
+                if (!e.action.questObjective.count)
+                    return false;
+
+                if (!IsQuestObjectiveValid(e, e.action.questObjective.objectiveId))
+                    return false;
+
+                break;
+            }
         case SMART_ACTION_ACTIVATE_TAXI:
             {
                 if (!sTaxiPathStore.LookupEntry(e.action.taxi.id))

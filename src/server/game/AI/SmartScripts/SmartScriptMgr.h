@@ -397,7 +397,7 @@ enum SMART_ACTION
     SMART_ACTION_THREAT_SINGLE_PCT                  = 13,     // Threat%
     SMART_ACTION_THREAT_ALL_PCT                     = 14,     // Threat%
     SMART_ACTION_CALL_AREAEXPLOREDOREVENTHAPPENS    = 15,     // QuestID
-    SMART_ACTION_UNUSED_16                          = 16,
+    SMART_ACTION_SATISFY_QUEST_OBJECTIVE            = 16,     // Objective ID, Count
     SMART_ACTION_SET_EMOTE_STATE                    = 17,     // emoteID
     SMART_ACTION_SET_UNIT_FLAG                      = 18,     // Flags (may be more than one field OR'd together), Target
     SMART_ACTION_REMOVE_UNIT_FLAG                   = 19,     // Flags (may be more than one field OR'd together), Target
@@ -497,6 +497,12 @@ struct SmartAction
 
     union
     {
+        struct
+        {
+            uint32 objectiveId;
+            uint8 count;
+        } questObjective;
+
         struct
         {
             uint32 textGroupID;
@@ -1374,6 +1380,16 @@ class SmartAIMgr
             if (!sObjectMgr->GetQuestTemplate(entry))
             {
                 TC_LOG_ERROR("sql.sql", "SmartAIMgr: Entry %d SourceType %u Event %u Action %u uses non-existent Quest entry %u, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), entry);
+                return false;
+            }
+            return true;
+        }
+
+        bool IsQuestObjectiveValid(SmartScriptHolder const& e, uint32 entry)
+        {
+            if (!sObjectMgr->GetQuestObjective(entry))
+            {
+                TC_LOG_ERROR("sql.sql", "SmartAIMgr: Entry %d SourceType %u Event %u Action %u uses non-existent Quest Objective entry %u, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), entry);
                 return false;
             }
             return true;

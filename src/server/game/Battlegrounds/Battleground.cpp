@@ -862,7 +862,7 @@ void Battleground::EndBattleground(uint32 winner)
         //if (!team) team = player->GetTeam();
 
         // per player calculation
-        if (isArena() && isRated() && winner_arena_team && loser_arena_team && winner_arena_team != loser_arena_team)
+        if (isArena() && winner_arena_team && loser_arena_team && winner_arena_team != loser_arena_team)
         {
             uint8 slot = Arena::GetSlotByType(GetArenaType());
             if (team == winner)
@@ -896,47 +896,51 @@ void Battleground::EndBattleground(uint32 winner)
         player->RemoveAura(SPELL_HONORABLE_DEFENDER_25Y);
         player->RemoveAura(SPELL_HONORABLE_DEFENDER_60Y);
 
-        // Reward winner team
-        if (team == winner)
-        {
-            if (isRated())
-            {
-                player->wonRatedBg(loser_matchmaker_rating, winner_change);
-            }
-            else if (IsRandom() || BattlegroundMgr::IsBGWeekend(GetTypeID()))
-            {
-                if (!player->GetRandomWinner())
-                {
-                    UpdatePlayerScore(player, SCORE_BONUS_HONOR, BG_REWARD_WINNER_HONOR_FIRST);
-                    player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_META_RANDOM_BG, BG_REWARD_WINNER_CONQUEST_FIRST);
-                    player->SetRandomWinner(true);
-                }
-                else
-                {
-                    UpdatePlayerScore(player, SCORE_BONUS_HONOR, BG_REWARD_WINNER_HONOR_LAST);
-                    player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_META_RANDOM_BG, BG_REWARD_WINNER_CONQUEST_LAST);
-                }
-            }
 
-            player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_BG, 1);
-            if (!guildAwarded)
-            {
-                guildAwarded = true;
-                if (uint32 guildId = GetBgMap()->GetOwnerGuildId(player->GetTeam()))
-                    if (Guild* guild = sGuildMgr->GetGuildById(guildId))
-                    {
-                        guild->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_BG, 1, 0, 0, NULL, player);
-                        if (isArena() && isRated() && winner_arena_team && loser_arena_team && winner_arena_team != loser_arena_team)
-                            guild->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA, std::max<uint32>(winner_arena_team->GetRating(Arena::GetSlotByType(GetArenaType())), 1), 0, 0, NULL, player);
-                    }
-            }
-        }
-        else
+        if (!isArena())
         {
-            if (isRated())
-                player->lostRatedBg(winner_matchmaker_rating, loser_change);
-            else if (IsRandom() || BattlegroundMgr::IsBGWeekend(GetTypeID()))
-                UpdatePlayerScore(player, SCORE_BONUS_HONOR, BG_REWARD_LOSER_HONOR);
+            // Reward winner team
+            if (team == winner)
+            {
+                if (isRated())
+                {
+                    player->wonRatedBg(loser_matchmaker_rating, winner_change);
+                }
+                else if (IsRandom() || BattlegroundMgr::IsBGWeekend(GetTypeID()))
+                {
+                    if (!player->GetRandomWinner())
+                    {
+                        UpdatePlayerScore(player, SCORE_BONUS_HONOR, BG_REWARD_WINNER_HONOR_FIRST);
+                        player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_META_RANDOM_BG, BG_REWARD_WINNER_CONQUEST_FIRST);
+                        player->SetRandomWinner(true);
+                    }
+                    else
+                    {
+                        UpdatePlayerScore(player, SCORE_BONUS_HONOR, BG_REWARD_WINNER_HONOR_LAST);
+                        player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_META_RANDOM_BG, BG_REWARD_WINNER_CONQUEST_LAST);
+                    }
+                }
+
+                player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_BG, 1);
+                if (!guildAwarded)
+                {
+                    guildAwarded = true;
+                    if (uint32 guildId = GetBgMap()->GetOwnerGuildId(player->GetTeam()))
+                        if (Guild* guild = sGuildMgr->GetGuildById(guildId))
+                        {
+                            guild->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_BG, 1, 0, 0, NULL, player);
+                            if (isArena() && isRated() && winner_arena_team && loser_arena_team && winner_arena_team != loser_arena_team)
+                                guild->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA, std::max<uint32>(winner_arena_team->GetRating(Arena::GetSlotByType(GetArenaType())), 1), 0, 0, NULL, player);
+                        }
+                }
+            }
+            else
+            {
+                if (isRated())
+                    player->lostRatedBg(winner_matchmaker_rating, loser_change);
+                else if (IsRandom() || BattlegroundMgr::IsBGWeekend(GetTypeID()))
+                    UpdatePlayerScore(player, SCORE_BONUS_HONOR, BG_REWARD_LOSER_HONOR);
+            }
         }
 
         player->ResetAllPowers();
@@ -1637,6 +1641,17 @@ void Battleground::DoorClose(uint32 type)
     else
         TC_LOG_ERROR("bg.battleground", "Battleground::DoorClose: door gameobject (type: %u, GUID: %u) not found for BG (map: %u, instance id: %u)!",
             type, GUID_LOPART(BgObjects[type]), m_MapId, m_InstanceID);
+}
+
+void Battleground::DoorDespawn(uint32 type)
+{
+    if (GameObject* obj = GetBgMap()->GetGameObject(BgObjects[type]))
+    {
+        DelObject(type);
+    }
+    else
+        TC_LOG_ERROR("bg.battleground", "Battleground::DoorDespawn: door gameobject (type : %u, GUID: %u) not found for BG (map: %u, instance id: %u)!",
+        type, GUID_LOPART(BgObjects[type]), m_MapId, m_InstanceID);
 }
 
 void Battleground::DoorOpen(uint32 type)

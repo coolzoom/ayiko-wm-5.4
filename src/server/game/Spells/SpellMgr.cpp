@@ -4147,13 +4147,10 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->AttributesCu &= ~SPELL_ATTR0_CU_NEGATIVE;
                     break;
                 case 80240: // Havoc
-                    spellInfo->ProcCharges = 3;
+                    spellInfo->Effects[EFFECT_1].BasePoints = 1;
                     break;
                 case 129020:// Avatar
                     spellInfo->AttributesEx &= SPELL_ATTR1_DISPEL_AURAS_ON_IMMUNITY;
-                    break;
-                case 121129:// Daybreak (heal)
-                    spellInfo->AttributesEx |= SPELL_ATTR1_CANT_TARGET_SELF;
                     break;
                 case 73981: // Redirect
                 case 110730:// Redirect
@@ -4728,9 +4725,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[1].ApplyAuraName = SPELL_AURA_DUMMY;
                     break;
                 case 115073:// Spinning Fire Blossom
-                    spellInfo->Effects[0].TargetA = 0;
-                    spellInfo->Effects[0].Effect = 0;
-                    spellInfo->Effects[0].BasePoints = 0;
                     spellInfo->OverrideSpellList.push_back(123408); // Add Spinning Fire Blossom (Overrided by Glyph) to override spell list of Spinning Fire Blossom
                     break;
                 case 86698: // Guardian of Ancient Kings
@@ -4908,7 +4902,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[0].BasePoints = 0;
                     break;
                 case 34299: // Leader of the pack - healing
-                case 81280: // Blood Burst
                     spellInfo->Effects[0].Effect = SPELL_EFFECT_HEAL_PCT;
                     spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_DONE_BONUS;
                     break;
@@ -4983,9 +4976,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     break;
                 case 131116:// Allow to use Raging Blow
                     spellInfo->ProcCharges = 2;
-                    break;
-                case 44544: // Fingers of Frost
-                    spellInfo->StackAmount = 2;
                     break;
                 case 85222: // Light of Dawn
                     spellInfo->MaxAffectedTargets = 6;
@@ -6024,6 +6014,9 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->MaxAffectedTargets = 2;
                 case 19386: // Wyvern Sting
                     spellInfo->Attributes |= SPELL_ATTR0_STOP_ATTACK_TARGET;
+                    break;
+                case 122470: // Touch of Karma
+                    spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
                     break;
                 default:
                     break;

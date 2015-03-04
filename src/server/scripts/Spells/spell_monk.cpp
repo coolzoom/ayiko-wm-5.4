@@ -153,14 +153,14 @@ class spell_monk_expel_harm : public SpellScriptLoader
             {
                 if (auto caster = GetCaster())
                 {
-                    int32 bp = CalculatePct((-GetHitDamage()), 50);
+                    int32 bp = CalculatePct(GetHitHeal(), 50);
                     caster->CastCustomSpell(caster, 115129, &bp, NULL, NULL, true);
                 }
             }
 
             void Register()
             {
-                OnHit += SpellHitFn(spell_monk_expel_harm_SpellScript::HandleOnHit);
+                AfterHit += SpellHitFn(spell_monk_expel_harm_SpellScript::HandleOnHit);
             }
         };
 
@@ -1133,49 +1133,50 @@ class spell_monk_spinning_fire_blossom : public SpellScriptLoader
 
         class spell_monk_spinning_fire_blossom_SpellScript : public SpellScript
         {
-            PrepareSpellScript(spell_monk_spinning_fire_blossom_SpellScript)
+            PrepareSpellScript(spell_monk_spinning_fire_blossom_SpellScript);
 
-            void HandleAfterCast()
+            bool bonusDamage;
+            bool Load()
             {
-                if (Player* _player = GetCaster()->ToPlayer())
+                bonusDamage = false;
+                return true;
+            }
+
+            void FilterTargets(std::list<WorldObject*>& unitList)
+            {
+                Unit* caster = GetCaster();
+                float dist = 50.0f;
+                WorldObject* closestTarget = NULL;
+                for (auto itr : unitList)
                 {
-                    std::list<Unit*> tempList;
-                    std::list<Unit*> targetList;
-
-                    _player->GetAttackableUnitListInRange(tempList, 50.0f);
-
-                    for (auto itr : tempList)
+                    if (itr->GetDistance(caster) < dist)
                     {
-                        if (!_player->IsValidAttackTarget(itr))
-                            continue;
-
-                        if (!_player->isInFront(itr))
-                            continue;
-
-                        if (!itr->IsWithinLOSInMap(_player))
-                            continue;
-
-                        if (itr->GetGUID() == _player->GetGUID())
-                            continue;
-
-                        targetList.push_back(itr);
+                        dist = itr->GetDistance(caster);
+                        closestTarget = itr;
                     }
+                }
 
-                    if (!targetList.empty())
-                    {
-                        Trinity::Containers::RandomResizeList(targetList, 1);
+                unitList.clear();
+                unitList.push_back(closestTarget);
 
-                        for (auto itr : targetList)
-                            _player->CastSpell(itr, SPELL_MONK_SPINNING_FIRE_BLOSSOM_DAMAGE, true);
-                    }
-                    else
-                        _player->CastSpell(_player, SPELL_MONK_SPINNING_FIRE_BLOSSOM_MISSILE, true);
+                if (closestTarget->GetDistance(caster) > 10.0f)
+                    bonusDamage = true;
+            }
+
+            void HandleOnHit()
+            {
+                // If Spinning Fire Blossom travels further than 10 yards, the damage is increased by 50%
+                if (bonusDamage)
+                {
+                    SetHitDamage(GetHitDamage() * 1.5f);
+                    GetCaster()->CastSpell(GetHitUnit(), 123407, true);
                 }
             }
 
             void Register()
             {
-                AfterCast += SpellCastFn(spell_monk_spinning_fire_blossom_SpellScript::HandleAfterCast);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_monk_spinning_fire_blossom_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_CONE_ENEMY_129);
+                OnHit += SpellHitFn(spell_monk_spinning_fire_blossom_SpellScript::HandleOnHit);
             }
         };
 
@@ -1311,6 +1312,8 @@ class spell_monk_jade_serpent_statue : public SpellScriptLoader
                     summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, GetSpellInfo()->Id);
                     summon->SetMaxHealth(player->CountPctFromMaxHealth(50));
                     summon->SetHealth(summon->GetMaxHealth());
+                    summon->SetMaxPower(POWER_MANA, player->GetMaxPower(POWER_MANA));
+                    summon->SetPower(POWER_MANA, player->GetMaxPower(POWER_MANA));
                 }
             }
 
@@ -1425,6 +1428,7 @@ class spell_monk_mana_tea_stacks : public SpellScriptLoader
 
             void SetData(uint32 /*type*/, uint32 data)
             {
+                Unit* caster = GetCaster();
                 while ((chiConsumed += data) >= 4)
                 {
                     chiConsumed = 0;
@@ -1432,8 +1436,14 @@ class spell_monk_mana_tea_stacks : public SpellScriptLoader
 
                     if (GetCaster())
                     {
-                        GetCaster()->CastSpell(GetCaster(), SPELL_MONK_MANA_TEA_STACKS, true);
-                        GetCaster()->CastSpell(GetCaster(), SPELL_MONK_PLUS_ONE_MANA_TEA, true);
+                        SpellInfo const* triggerInfo = sSpellMgr->GetSpellInfo(SPELL_MONK_MANA_TEA_STACKS);
+                        float critChance = caster->GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + GetFirstSchoolInMask(SpellSchoolMask(triggerInfo->SchoolMask)));
+                        uint8 stacks = 1;
+                        if (roll_chance_f(critChance))
+                            stacks++;
+
+                        caster->CastCustomSpell(SPELL_MONK_MANA_TEA_STACKS, SPELLVALUE_AURA_STACK, stacks, caster, true);
+                        caster->CastSpell(caster, SPELL_MONK_PLUS_ONE_MANA_TEA, true);
                     }
                 }
             }
@@ -2716,6 +2726,15 @@ class spell_monk_roll : public SpellScriptLoader
                 return true;
             }
 
+            SpellCastResult CheckCast()
+            {
+                if (Player* player = GetCaster()->ToPlayer())
+                    if (player->HasUnitState(UNIT_STATE_ROOT))
+                        return SPELL_FAILED_ROOTED;
+
+                return SPELL_CAST_OK;
+            }
+
             void HandleBeforeCast()
             {
                 Aura *aur = GetCaster()->AddAura(SPELL_MONK_ROLL_TRIGGER, GetCaster());
@@ -2743,6 +2762,7 @@ class spell_monk_roll : public SpellScriptLoader
 
             void Register()
             {
+                OnCheckCast += SpellCheckCastFn(spell_monk_roll_SpellScript::CheckCast);
                 BeforeCast += SpellCastFn(spell_monk_roll_SpellScript::HandleBeforeCast);
                 AfterCast += SpellCastFn(spell_monk_roll_SpellScript::HandleAfterCast);
             }

@@ -224,6 +224,47 @@ class spell_pal_daybreak : public SpellScriptLoader
         }
 };
 
+class spell_pal_daybreak_heal : public SpellScriptLoader
+{
+    public:
+        spell_pal_daybreak_heal() : SpellScriptLoader("spell_pal_daybreak_heal") { }
+
+        class spell_pal_daybreak_heal_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pal_daybreak_heal_SpellScript);
+
+            bool Load()
+            {
+                _targets = 0;
+                return true;
+            }
+
+            void HandleHeal(SpellEffIndex /*effIndex*/)
+            {
+                SetHitHeal(GetHitHeal() / _targets);
+            }
+
+            void FilterTargets(std::list<WorldObject*>& unitList)
+            {
+                unitList.remove(GetExplTargetUnit());
+                _targets = unitList.size();
+            }
+
+            void Register()
+            {
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pal_daybreak_heal_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_DEST_AREA_ALLY);
+                OnEffectHitTarget += SpellEffectFn(spell_pal_daybreak_heal_SpellScript::HandleHeal, EFFECT_1, SPELL_EFFECT_HEAL);
+            }
+
+            uint32 _targets;
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_pal_daybreak_heal_SpellScript();
+        }
+};
+
 // Hand of Purity - 114039
 class spell_pal_hand_of_purity : public SpellScriptLoader
 {
@@ -1355,42 +1396,6 @@ class spell_pal_blessing_of_faith : public SpellScriptLoader
         }
 };
 
-// Holy Shock (heal) - 25914
-class spell_pal_holy_shock_heal : public SpellScriptLoader
-{
-    public:
-        spell_pal_holy_shock_heal() : SpellScriptLoader("spell_pal_holy_shock_heal") { }
-
-        class spell_pal_holy_shock_heal_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_pal_holy_shock_heal_SpellScript);
-
-            void HandleOnHit()
-            {
-                if (Player* caster = GetCaster()->ToPlayer())
-                {
-                    if (Unit* unitTarget = GetHitUnit())
-                    {
-                        int32 damage = -GetHitDamage();
-
-                        if (caster->HasAura(PALADIN_SPELL_DAYBREAK_PROC))
-                            unitTarget->CastCustomSpell(unitTarget, PALADIN_SPELL_DAYBREAK_HEAL, &damage, NULL, NULL, true, NULL, NULL, caster->GetGUID());
-                    }
-                }
-            }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_pal_holy_shock_heal_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_pal_holy_shock_heal_SpellScript();
-        }
-};
-
 // Holy Shock - 20473
 class spell_pal_holy_shock : public SpellScriptLoader
 {
@@ -1838,13 +1843,18 @@ public:
 
         void CalculateAmount(AuraEffect const *aurEff, int32 & amount, bool &)
         {
-            Unit * caster = GetCaster();
-
+            Unit* caster = GetCaster();
             if (!caster)
                 return;
 
-            int32 minMana = CalculatePct(caster->GetMaxPower(POWER_MANA), GetSpellInfo()->Effects[EFFECT_1].CalcValue(caster));
-            amount = std::max(CalculatePct((int32)caster->GetTotalStatValue(STAT_SPIRIT), (aurEff->GetBaseAmount() / 3)), minMana);
+            // @TODO: (excluding short-duration Spirit bonuses)
+            float spiritPct = CalculatePct(caster->GetStat(STAT_SPIRIT), GetSpellInfo()->Effects[EFFECT_0].BasePoints);
+            uint32 tmpAmount = spiritPct / aurEff->GetTotalTicks();
+
+            float manaPct = CalculatePct(caster->GetMaxPower(POWER_MANA), GetSpellInfo()->Effects[EFFECT_1].BasePoints);
+            uint32 minAmount = manaPct / aurEff->GetTotalTicks();
+
+            amount = std::max(tmpAmount, minAmount);
         }
 
         void Register()
@@ -1971,7 +1981,6 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_judgment();
     new spell_pal_ardent_defender();
     new spell_pal_blessing_of_faith();
-    new spell_pal_holy_shock_heal();
     new spell_pal_holy_shock();
     new spell_pal_divine_storm();
     new spell_pal_lay_on_hands();
@@ -1985,4 +1994,5 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_divine_plea();
     new spell_pal_glyph_of_double_jeopardy();
     new spell_pal_blessing();
+    new spell_pal_daybreak_heal();
 }

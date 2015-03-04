@@ -588,7 +588,7 @@ Spell::Spell(Unit* caster, SpellInfo const* info, TriggerCastFlags triggerFlags,
     // Patch 1.2 notes: Spell Reflection no longer reflects abilities
     m_canReflect = m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && !(m_spellInfo->Attributes & SPELL_ATTR0_ABILITY)
         && !(m_spellInfo->AttributesEx & SPELL_ATTR1_CANT_BE_REFLECTED) && !(m_spellInfo->Attributes & SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY)
-        && !m_spellInfo->IsPassive() && !m_spellInfo->IsPositive();
+        && !m_spellInfo->IsPassive() && !m_spellInfo->IsPositive() && !m_spellInfo->IsTargetingArea();
 
     CleanupTargetList();
     m_effectExecuteData.clear();
@@ -1632,7 +1632,7 @@ void Spell::SelectImplicitCasterDestTargets(SpellEffIndex effIndex, SpellImplici
         case TARGET_DEST_CASTER_BACK_RIGHT:
         case TARGET_DEST_CASTER_FRONT_RIGHT:
         case TARGET_DEST_CASTER_FRONT:
-            if (m_caster->GetTypeId() == TYPEID_UNIT || m_caster->ToCreature()->isLosDisabled())
+            if (m_caster->GetTypeId() == TYPEID_UNIT && !m_caster->ToCreature()->isLosDisabled())
             {
                 m_caster->GetPosition(&pos);
                 m_caster->MovePositionFixedXY(pos, dist, angle);
@@ -1793,52 +1793,6 @@ void Spell::SelectImplicitChainTargets(SpellEffIndex effIndex, SpellImplicitTarg
     uint32 maxTargets = m_spellInfo->Effects[effIndex].ChainTarget;
     if (Player* modOwner = m_caster->GetSpellModOwner())
         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_JUMP_TARGETS, maxTargets, this);
-
-    // Havoc
-    if (Aura *havoc = m_caster->GetAura(80240))
-    {
-        if (havoc->GetCharges() > 0 && target->ToUnit() && !target->ToUnit()->HasAura(80240) && effIndex == EFFECT_0)
-        {
-            std::list<Unit*> targets;
-            Unit* secondTarget = NULL;
-            m_caster->GetAttackableUnitListInRange(targets, 60.0f);
-
-            if (target->ToUnit())
-                targets.remove(target->ToUnit());
-            targets.remove(m_caster);
-
-            for (auto itr : targets)
-            {
-                if (itr->IsWithinLOSInMap(m_caster) && itr->IsWithinDist(m_caster, 60.0f)
-                    && target->GetGUID() != itr->GetGUID() && itr->HasAura(80240, m_caster->GetGUID()))
-                {
-                    secondTarget = itr;
-                    break;
-                }
-            }
-
-            if (secondTarget && target->GetGUID() != secondTarget->GetGUID())
-            {
-                // Allow only one Chaos Bolt to be duplicated ...
-                if (m_spellInfo->Id == 116858 && havoc->GetCharges() >= 3)
-                {
-                    m_caster->RemoveAura(80240);
-                    secondTarget->RemoveAura(80240);
-                    m_caster->CastSpell(secondTarget, m_spellInfo->Id, true);
-                }
-                // ... or allow three next single target spells to be duplicated
-                else if (targetType.GetTarget() == TARGET_UNIT_TARGET_ENEMY && havoc->GetCharges() > 0)
-                {
-                    havoc->DropCharge();
-
-                    if (Aura *secondHavoc = secondTarget->GetAura(80240, m_caster->GetGUID()))
-                        secondHavoc->DropCharge();
-
-                    m_caster->CastSpell(secondTarget, m_spellInfo->Id, true);
-                }
-            }
-        }
-    }
 
     if (maxTargets > 1)
     {
@@ -2204,6 +2158,25 @@ void Spell::SearchChainTargets(std::list<WorldObject*>& targets, uint32 chainTar
     if (auto const modOwner = m_caster->GetSpellModOwner())
         modOwner->ApplySpellMod(GetSpellInfo()->Id, SPELLMOD_JUMP_DISTANCE, jumpRadius, this);
 
+    bool isHavoc = false;
+    switch (m_spellInfo->SpellFamilyName)
+    {
+        case SPELLFAMILY_WARLOCK:
+        {
+            // Havoc
+            if (AuraEffect* aurEff = m_caster->GetAuraEffect(80240, EFFECT_1))
+                if (aurEff->GetSpellEffectInfo().SpellClassMask & m_spellInfo->SpellFamilyFlags)
+                {
+                    if (m_spellInfo->Id == 116858 && aurEff->GetBase()->GetStackAmount() < 3)
+                        return;
+
+                    jumpRadius = 50.0f;
+                    chainTargets = 1;
+                    isHavoc = true;
+                }
+        }
+    }
+
     // chain lightning/heal spells and similar - allow to jump at larger distance and go out of los
     bool isBouncingFar = (m_spellInfo->AttributesEx4 & SPELL_ATTR4_AREA_TARGET_CHAIN
         || m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE
@@ -2254,15 +2227,38 @@ void Spell::SearchChainTargets(std::list<WorldObject*>& targets, uint32 chainTar
         // get closest object
         else
         {
-            for (std::list<WorldObject*>::iterator itr = tempTargets.begin(); itr != tempTargets.end(); ++itr)
+            // @TODO add script hook
+            if (isHavoc)
             {
-                if (foundItr == tempTargets.end())
+                for (std::list<WorldObject*>::iterator itr = tempTargets.begin(); itr != tempTargets.end(); ++itr)
                 {
-                    if ((!isBouncingFar || target->IsWithinDist(*itr, jumpRadius)) && target->IsWithinLOSInMap(*itr))
+                    if (foundItr == tempTargets.end())
+                        if (Unit* found = (*itr)->ToUnit())
+                            if (target->IsWithinDist(*itr, jumpRadius) && target->IsWithinLOSInMap(*itr) && found->HasAura(80240))
+                            {
+                                foundItr = itr;
+                                break;
+                            }
+                }
+
+                // Drop charges
+                if (foundItr != tempTargets.end())
+                    if (Aura* havoc = m_caster->GetAura(80240))
+                        havoc->ModStackAmount(m_spellInfo->Id == 116858 ? -3 : -1);
+
+            }
+            else
+            {
+                for (std::list<WorldObject*>::iterator itr = tempTargets.begin(); itr != tempTargets.end(); ++itr)
+                {
+                    if (foundItr == tempTargets.end())
+                    {
+                        if ((!isBouncingFar || target->IsWithinDist(*itr, jumpRadius)) && target->IsWithinLOSInMap(*itr))
+                            foundItr = itr;
+                    }
+                    else if (target->GetDistanceOrder(*itr, *foundItr) && target->IsWithinLOSInMap(*itr))
                         foundItr = itr;
                 }
-                else if (target->GetDistanceOrder(*itr, *foundItr) && target->IsWithinLOSInMap(*itr))
-                    foundItr = itr;
             }
         }
         // not found any valid target - chain ends
@@ -3834,8 +3830,50 @@ void Spell::cast(bool skipCheck)
                 m_caster->CastSpell(m_targets.GetUnitTarget() ? m_targets.GetUnitTarget() : m_caster, *i, true);
     }
 
+    Unit::AuraEffectList procFromSpell = m_caster->GetAuraEffectsByType(SPELL_AURA_PROC_FROM_SPELL);
+    for (Unit::AuraEffectList::iterator j = procFromSpell.begin(); j != procFromSpell.end();)
+    {
+        Aura* base = (*j)->GetBase();
+
+        if (!base || base->GetSpellInfo()->ProcFlags || base->GetDuration() == base->GetMaxDuration())
+        {
+            j++;
+            continue;
+        }
+
+        // Still needs better handling
+        int32 consumeStacks = 0;
+        if (m_spellInfo->Id == (*j)->GetSpellInfo()->Effects[(*j)->GetEffIndex()].TriggerSpell)
+        {
+            j++;
+            base->ModStackAmount(-1);
+        }
+        else
+            j++;
+    }
+
+    Unit::AuraEffectList const& stateAuras = m_caster->GetAuraEffectsByType(SPELL_AURA_ABILITY_IGNORE_AURASTATE);
+    for (Unit::AuraEffectList::const_iterator j = stateAuras.begin(); j != stateAuras.end();)
+    {
+        if ((*j)->IsAffectingSpell(m_spellInfo))
+        {
+            Aura* base = (*j)->GetBase();
+            if (base->GetSpellInfo()->StackAmount)
+            {
+                j++;
+                base->ModStackAmount(-1);
+                continue;
+            }
+        }
+        j++;
+    }
+
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
+        // Remove spell mods after cast
+        if ((m_spellInfo->Speed || m_delayMoment) && !m_spellInfo->IsChanneled())
+            m_caster->ToPlayer()->RemoveSpellMods(*this);
+
         m_caster->ToPlayer()->SetSpellModTakingSpell(this, false);
         //Clear spell cooldowns after every spell is cast if .cheat cooldown is enabled.
         if (m_caster->ToPlayer()->GetCommandStatus(CHEAT_COOLDOWN))
@@ -4239,7 +4277,9 @@ void Spell::finish(bool ok)
 
         // Take mods after trigger spell (needed for 14177 to affect 48664)
         // mods are taken only on succesfull cast and independantly from targets of the spell
-        player->RemoveSpellMods(*this);
+        if (!m_spellInfo->Speed || m_spellInfo->IsChanneled())
+            player->RemoveSpellMods(*this);
+
         player->SetSpellModTakingSpell(this, false);
     }
 
@@ -6050,6 +6090,7 @@ void Spell::TakeRunePower(bool didHit)
     m_runesState = player->GetRunesState();                 // store previous state
 
     int32 runeCost[NUM_RUNE_TYPES];                         // blood, frost, unholy, death
+    player->ClearLastUsedRuneMask();
     SpellSchools school = GetFirstSchoolInMask(m_spellSchoolMask);
 
     for (uint32 i = 0; i < RUNE_DEATH; ++i)
@@ -6081,21 +6122,7 @@ void Spell::TakeRunePower(bool didHit)
 
         player->SetRuneCooldown(i, cooldown);
         player->SetDeathRuneUsed(i, false);
-
-        switch (m_spellInfo->Id)
-        {
-            case 45477: // Icy Touch
-            case 45902: // Blood Strike
-            case 48721: // Blood Boil
-            case 50842: // Pestilence
-            case 85948: // Festering Strike
-            {
-                // Reaping
-                if (player->HasAura(56835))
-                    player->AddRuneBySpell(i, RUNE_DEATH, 56835);
-                break;
-            }
-        }
+        player->SetLastUsedRuneIndex(i);
 
         runeCost[rune]--;
         gain_runic = true;
@@ -6111,6 +6138,7 @@ void Spell::TakeRunePower(bool didHit)
             if (!player->GetRuneCooldown(i) && rune == RUNE_DEATH)
             {
                 player->SetRuneCooldown(i, cooldown);
+                player->SetLastUsedRuneIndex(i);
                 runeCost[rune]--;
 
                 gain_runic = true;
@@ -6127,19 +6155,6 @@ void Spell::TakeRunePower(bool didHit)
                 {
                     player->RestoreBaseRune(i);
                     player->SetDeathRuneUsed(i, true);
-                }
-
-                switch (m_spellInfo->Id)
-                {
-                    case 49998: // Death Strike
-                    {
-                        // Blood Rites
-                        if (player->HasAura(50034))
-                            player->AddRuneBySpell(i, RUNE_DEATH, 50034);
-                        break;
-                    }
-                    default:
-                        break;
                 }
 
                 if (runeCost[RUNE_DEATH] == 0)
@@ -7417,6 +7432,15 @@ SpellCastResult Spell::CheckCasterAuras() const
         (m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_UNK2 ||
         m_spellInfo->Id == 1850) && m_spellInfo->Id != 781) // THIS ... IS ... HACKYYYY !
         prevented_reason = SPELL_FAILED_PACIFIED;
+
+    // SPELL_PREVENTION_TYPE_UNK3 aka Prevention_type_silence_and_pacify?
+    if (m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_UNK3)
+    {
+        if (unitflag & UNIT_FLAG_SILENCED)
+            prevented_reason = SPELL_FAILED_SILENCED;
+        else if (unitflag & UNIT_FLAG_PACIFIED)
+            prevented_reason = SPELL_FAILED_PACIFIED;
+    }
 
     // Barkskin & Hex hotfix 4.3 patch http://eu.battle.net/wow/ru/blog/10037151
     if (m_spellInfo->Id == 22812 && m_caster->HasAura(51514))

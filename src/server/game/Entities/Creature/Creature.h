@@ -801,7 +801,9 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
 
         static float _GetDamageMod(int32 Rank);
 
-        float m_SightDistance, m_CombatDistance, m_ReactDistance;
+        float m_SightDistance;
+        float m_CombatDistance;
+        float m_ReactDistance;
 
         void FarTeleportTo(Map* map, float X, float Y, float Z, float O);
 

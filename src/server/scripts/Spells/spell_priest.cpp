@@ -123,6 +123,7 @@ enum PriestSpells
     SPELL_PRIEST_SHIELD_DISCIPLINE                  = 77484,
     SPELL_PRIEST_RAPID_RENEWAL                      = 95649,
     SPELL_PRIEST_RAPID_RENEWAL_HEAL                 = 63544,
+    SPELL_PRIEST_ECHO_OF_LIGHT_HEAL                 = 77489,
 };
 
 // Power Word : Fortitude - 21562
@@ -3081,6 +3082,50 @@ public:
     }
 };
 
+class spell_pri_echo_of_light : public SpellScriptLoader
+{
+    public:
+        spell_pri_echo_of_light() : SpellScriptLoader("spell_pri_echo_of_light") { }
+
+
+        class spell_pri_echo_of_light_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_pri_echo_of_light_AuraScript);
+
+            void HandleProc(ProcEventInfo& eventInfo)
+            {
+                Unit* target = eventInfo.GetActionTarget();
+                Unit* caster = GetCaster();
+                int32 heal = eventInfo.GetHealInfo()->GetHeal();
+                if (!caster || !target || !heal)
+                    return;
+                
+                
+                if (Aura* aur = GetAura())
+                {
+                    if (AuraEffect* eff = aur->GetEffect(0))
+                    {
+                        int32 amount = heal * eff->GetAmount() / 100;
+                        amount /= 7; // tick count
+                        if (amount)
+                            caster->CastCustomSpell(target, SPELL_PRIEST_ECHO_OF_LIGHT_HEAL, &amount, NULL, NULL, true);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnProc += AuraProcFn(spell_pri_echo_of_light_AuraScript::HandleProc);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_pri_echo_of_light_AuraScript();
+        }
+};
+
+
 void AddSC_priest_spell_scripts()
 {
     new spell_pri_power_word_fortitude();
@@ -3144,4 +3189,5 @@ void AddSC_priest_spell_scripts()
     new spell_pri_mass_dispel();
     new spell_pri_mind_blast();
     new spell_pri_confession();
+    new spell_pri_echo_of_light();
 }

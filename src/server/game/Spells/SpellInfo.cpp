@@ -674,7 +674,7 @@ int32 SpellEffectInfo::CalcValue(Unit const* caster, int32 const* bp, Unit const
     float comboDamage = PointsPerComboPoint;
 
     // base amount modification based on spell lvl vs caster lvl
-    if (ScalingMultiplier != 0.0f)
+    if (ScalingMultiplier != 0.0f && !(bp && *bp != BasePoints))
     {
         if (!_spellInfo->IsCustomCalculated())
         {
@@ -1416,10 +1416,7 @@ bool SpellInfo::CanPierceImmuneAura(SpellInfo const* aura) const
             return false;
     }
 
-    // these spells (Cyclone for example) can pierce all...
-    if ((AttributesEx & SPELL_ATTR1_UNAFFECTED_BY_SCHOOL_IMMUNE)
-        // ...but not these (Divine shield for example)
-        && !(aura && (aura->Mechanic == MECHANIC_IMMUNE_SHIELD || aura->Mechanic == MECHANIC_INVULNERABILITY || aura->Id == 48707)))
+    if (!IsPositive() && HasAura(SPELL_AURA_INTERFERE_TARGETTING))
         return true;
 
     return false;
@@ -1563,7 +1560,6 @@ bool SpellInfo::IsAuraExclusiveBySpecificPerCasterWith(SpellInfo const* spellInf
         case SPELL_SPECIFIC_BANE:
         case SPELL_SPECIFIC_ASPECT:
         case SPELL_SPECIFIC_JUDGEMENT:
-        case SPELL_SPECIFIC_WARLOCK_CORRUPTION:
             return spellSpec == spellInfo->GetSpellSpecific();
         default:
             return false;
@@ -2263,10 +2259,6 @@ SpellSpecificType SpellInfo::GetSpellSpecific() const
             // Warlock (Demon Armor | Fel Armor)
             if (SpellFamilyFlags[1] & 0x20000020)
                 return SPELL_SPECIFIC_WARLOCK_ARMOR;
-
-            //seed of corruption and corruption
-            if (SpellFamilyFlags[1] & 0x10 || SpellFamilyFlags[0] & 0x2)
-                return SPELL_SPECIFIC_WARLOCK_CORRUPTION;
 
             break;
         }
@@ -3827,26 +3819,6 @@ bool SpellInfo::IsLethalPoison() const
         case 5760:  // Mind-Numbling Poison
         case 112961:// Leeching Poison
         case 113952:// Paralytic Poison
-            return true;
-        default:
-            break;
-    }
-
-    return false;
-}
-
-bool SpellInfo::CanTriggerHotStreak() const
-{
-    switch (Id)
-    {
-        case 133:   // Fireball
-        case 2136:  // Fire Blast
-        case 2948:  // Scorch
-        case 11129: // Combustion
-        case 11366: // Pyroblast
-        case 30455: // Ice Lance
-        case 44614: // Frostfire Bolt
-        case 108853:// Inferno Blast
             return true;
         default:
             break;

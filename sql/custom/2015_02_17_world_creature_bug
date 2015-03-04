@@ -96,3 +96,12 @@ INSERT INTO `creature` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMa
 
 /* Sorcerer Mogu in MSV was not attackable */
 UPDATE `creature_template` SET `faction_A` = 14, `faction_H` = 14, `ScriptName` = 'mob_sorcerer_mogu' WHERE `entry` = 61250;
+
+/* Infernal Attack with wrong modelid now is targetable */
+UPDATE `creature_template` SET `modelid2` = 0 WHERE `entry` IN (21419,21786);
+
+/* Veneratus the Many wrong faction now is attackable */
+UPDATE `creature_template` SET `faction_A` = 1813, `faction_H` = 1813 WHERE `entry` = 20427;
+
+/* Keeper of the Cistern wrong spawntime was too high */
+UPDATE `creature` SET `spawntimesecs` = 120 WHERE `id` = 20795;

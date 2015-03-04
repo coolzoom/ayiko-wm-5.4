@@ -1,3 +1,5 @@
+SET FOREIGN_KEY_CHECKS = 0;
+
 DELETE FROM creature WHERE map = 996;
 DELETE FROM gameobject WHERE map = 996;
 -- GUID RANGES
@@ -252,17 +254,20 @@ INSERT INTO spell_linked_spell (spell_trigger, spell_effect, TYPE, COMMENT) VALU
 (122855, 122858, 0, 'Sun Breath - Trigger Bathed in Light');
 -- (123026, 123508, 0, 'Sun Breath - Trigger Bathed in Light');
 
-DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (122952, 123012, 122928);
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (122952, 123012, 122928, 123740);
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 (13, 1, 122952, 0, 0, 31, 0, 3, 62962, 0, 0, 0, 0, '', 'Summon Unstable Sha - target Trigger'),
+(13, 1, 123740, 0, 0, 31, 0, 3, 62849, 0, 0, 0, 0, '', 'The Dark of Night - target Sunbeam'),
 (13, 1, 123012, 0, 0, 31, 0, 3, 62442, 0, 0, 0, 0, '', 'Terrorize - target Tsulong'),
 (13, 1, 122928, 0, 0, 31, 0, 3, 62442, 0, 0, 0, 0, '', 'Instability - target Tsulong');
 
 UPDATE creature_template SET ScriptName = 'boss_tsulong' WHERE entry = 62442;
 UPDATE creature_template SET ScriptName = 'npc_sunbeam' WHERE entry = 62849;
 
-DELETE FROM spell_script_names WHERE spell_id IN (125843, 122768, 122789);
+DELETE FROM spell_script_names WHERE spell_id IN (122775, 125843, 122768, 122789, 123011);
 INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
+(123011, 'spell_tsulong_terrorize'),
+(122775, 'spell_tsulong_nightmares'),
 (125843, 'spell_dread_shadows_damage'),
 (122768, 'spell_dread_shadows_malus'),
 (122789, 'spell_sunbeam');
@@ -299,8 +304,10 @@ DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 (13, 1, 132363, 0, 0, 31, 0, 3, 63099, 0, 0, 0, 0, '', 'Hide visual - target lei shi trigger');
 
-DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`=17 AND `SourceGroup`=0 AND `SourceEntry`=129368);
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=17 AND `SourceGroup`=0 AND `SourceEntry` IN (117866,117999,129368);
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES 
+(17, 0, 117866, 0, 0, 22, 0, 996, 0, 0, 0, 0, "0", "Champion of the Light - Active only in Terrace of Endless Spring"),
+(17, 0, 117999, 0, 0, 22, 0, 996, 0, 0, 0, 0, "0", "Wall of Light - Active only in Terrace of Endless Spring"),
 (17, 0, 129368, 0, 0, 22, 0, 996, 0, 0, 0, 0, "0", "Lei\'s Hope - Active only in Terrace of Endless Spring");
 
 DELETE FROM spell_script_names WHERE spell_id IN (123461, 123467, 123244, 123233, 123705, 123712);
@@ -337,15 +344,18 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 
 -- SHA OF FEAR
 
-DELETE FROM spell_target_position WHERE id = 119841;
+DELETE FROM spell_target_position WHERE id IN (120192, 119841, 120191);
 INSERT INTO spell_target_position (id, effIndex, target_map, target_position_x, target_position_y, target_position_z, target_orientation) VALUES
 (119841, 0, 996, -1017.882, -2839.356, 38.03172, 1.589),
-(119841, 1, 996, -1017.882, -2839.356, 38.03172, 1.589);
+(119841, 1, 996, -1017.882, -2839.356, 38.03172, 1.589),
+(120192, 0, 996, -1659.156, -3783.510, -279.502, 3.546),
+(120191, 0, 996, -1730.417, -3839.899, -279.502, 6.144);
 
 UPDATE creature_template SET modelid1 = 37285, flags_extra = 0 WHERE entry = 65736;
 
-DELETE FROM creature_template_aura WHERE entry IN (65691, 65736);
+DELETE FROM creature_template_aura WHERE entry IN (65691, 65736, 60999);
 INSERT INTO creature_template_aura (entry, aura) VALUES
+(60999, 72242), -- Energy Drain
 (65691, 129187), -- Sha Globe
 (65736, 120216); -- Return to the Terrace
 
@@ -354,14 +364,14 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 (13, 1, 117866, 0, 0, 31, 0, 4, 0, 0, 0, 0, 0, '', 'wall of Light - target players'),
 (13, 3, 119841, 0, 0, 31, 0, 3, 60788, 0, 0, 0, 0, '', 'fearless - target Light');
 
-UPDATE creature_template SET mindmg = 11839, maxdmg = 17339, attackpower = 45299, ScriptName = 'boss_sha_of_fear' WHERE entry = 60999;
+UPDATE creature_template SET mindmg = 11839, maxdmg = 17339, attackpower = 45299, VehicleId = 2270, ScriptName = 'boss_sha_of_fear', unit_flags = 64 WHERE entry = 60999;
 UPDATE creature_template SET minlevel = 93, maxlevel = 93, flags_extra = 128, ScriptName = 'mob_pure_light_terrace' WHERE entry = 60788;
-UPDATE creature_template SET ScriptName = 'mob_return_to_the_terrace' WHERE entry = 65736;
+UPDATE creature_template SET ScriptName = '', unit_flags2 = 0 WHERE entry = 65736;
 UPDATE creature_template SET minlevel = 92, maxlevel = 92, faction_A = 16, faction_H = 16, `Health_mod`=8.86, `Mana_mod`=8.86, ScriptName = 'mob_terror_spawn' WHERE entry = 61034;
-UPDATE creature_template SET mindmg = 11839, maxdmg = 17339, attackpower = 45299, minrangedmg = 11839, maxrangedmg = 17339, rangedattackpower = 45299, dmg_multiplier = 1, flags_extra = flags_extra | 0x20000000, mechanic_immune_mask = 667893759, ScriptName = 'npc_sha_of_fear_bowman' WHERE entry IN (61042, 61038, 61046);
+UPDATE creature_template SET mindmg = 13314, maxdmg = 15211, attackpower = 45299, minrangedmg = 11839, maxrangedmg = 17339, rangedattackpower = 45299, dmg_multiplier = 8, flags_extra = 0, unit_flags = 0, unit_flags2 = 0, type_flags = 0, mechanic_immune_mask = 667893759, ScriptName = 'npc_sha_of_fear_bowman' WHERE entry IN (61042, 61038, 61046);
 UPDATE creature_template SET minlevel = 91, maxlevel = 91, faction_A = 14, faction_H = 14, flags_extra = 128, ScriptName = 'npc_sha_globe' WHERE entry = 65691;
 
-DELETE FROM spell_script_names WHERE spell_id IN (119887, 129189, 120047, 119983, 119593, 119692, 119693, 117866, 125786, 119414, 119108, 129075);
+DELETE FROM spell_script_names WHERE spell_id IN (119887, 129189, 120047, 119983, 119593, 119692, 119693, 117866, 125786, 119414, 119108, 129075, 120221);
 INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
 (119887, 'spell_death_blossom'),
 (129189, 'spell_sha_globe_regen'),
@@ -374,7 +384,8 @@ INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
 (119414, 'spell_breath_of_fear'),
 (125786, 'spell_breath_of_fear_fear'),
 (119108, 'spell_conjure_terror_spawn'),
-(129075, 'spell_penetrating_bolt');
+(129075, 'spell_penetrating_bolt'),
+(120221, 'spell_dread_expanse_tp');
 
 -- Path to cackle for players
 DELETE FROM waypoint_spline_data WHERE c_entry = 0 AND path_id IN (1, 2, 3); 
@@ -416,9 +427,10 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (60999, 1, 0, 'You will know fear!', 14, 0, 100, 0, 0, 28398, 'Sha of Fear - SAY_AGGRO'),
 (60999, 2, 0, 'Fleeeee!', 14, 0, 100, 0, 0, 28404, 'Sha of Fear - SAY_BREATH_OF_FEAR'),
 (60999, 3, 0, 'Drown in terror.', 14, 0, 100, 0, 0, 28403, 'Sha of Fear - SAY_SLAY'),
-(60999, 4, 0, 'You think it is so easy to vanquish your fears?', 14, 0, 100, 0, 0, 28400, 'Sha of Fear - SAY_SLAY_HEROIC'),
+(60999, 4, 0, 'You think it is so easy to vanquish your fears?', 14, 0, 100, 0, 0, 28400, 'Sha of Fear - SAY_PHASE_2'),
 (60999, 5, 0, 'Dread rises! It seeks the light. It hungers.', 14, 0, 100, 0, 0, 28401, 'Sha of Fear - SAY_SUBMERGE'),
 (60999, 6, 0, 'Huddle in terror!', 14, 0, 100, 0, 0, 28405, 'Sha of Fear - SAY_HUDDLE'),
+(60999, 7, 0, 'The Sha of Fear retreats to the Dread Expanse!', 41, 0, 100, 0, 0, 0, 'Sha of Fear - EMOTE_PHASE_2'),
 (61042, 0, 0, 'The fear clouds my mind. I... cannot resist.', 14, 0, 100, 0, 0, 0, 'Cheng Kang - SAY_AGGRO'),
 (61038, 0, 0, 'No one can stand against the fear. You will perish.', 14, 0, 100, 0, 0, 0, 'Jinlun Kun - SAY_AGGRO'),
 (61046, 0, 0, 'Its power is so strong. It forces me to destroy you.', 14, 0, 100, 0, 0, 0, 'Yang Guoshi - SAY_AGGRO'),
@@ -565,21 +577,21 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position
 (@CGUID+54, 62995, 996, 3, 1, -1027.068, -2899.241, 19.70614, 1.261874, 604800, 0, 0), -- Animated Protector (Auras: 123493 - Protect)
 (@CGUID+55, 63275, 996, 3, 1, -998.4861, -2914.141, 19.70614, 4.712246, 604800, 0, 0), -- Corrupted Protector (Auras: )
 (@CGUID+56, 63275, 996, 3, 1, -1038.613, -2916.74, 19.70614, 4.694122, 604800, 0, 0), -- Corrupted Protector (Auras: )
-(@CGUID+57, 62983, 996, 3, 1, -1017.93, -2911.302, 19.9015, 4.70965, 604800, 5, 1), -- Lei Shi (Auras: 123620 - Clouded Reflection) (possible waypoints or random movement)
+(@CGUID+57, 62983, 996, 3, 1, -1017.93, -2911.302, 19.9015, 4.70965, 604800, 0, 0), -- Lei Shi (Auras: 123620 - Clouded Reflection) (possible waypoints or random movement)
 (@CGUID+58, 62995, 996, 3, 1, -1008.399, -2900.63, 19.70614, 4.643414, 604800, 0, 0), -- Animated Protector (Auras: 123493 - Protect)
 (@CGUID+59, 62995, 996, 3, 1, -1044.986, -2901.198, 19.17827, 3.013757, 604800, 0, 0), -- Animated Protector (Auras: 123493 - Protect)
 (@CGUID+60, 62995, 996, 3, 1, -989.3629, -2902.622, 19.17827, 0.6423108, 604800, 0, 0), -- Animated Protector (Auras: 123493 - Protect)
--- (@CGUID+61, 65736, 996, 3, 1, -1214.8, -2824.82, 41.24303, 3.507344, 86400, 0, 0), -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
-(@CGUID+61, 60788, 996, 3, 1, -1017.835, -2771.984, 38.65444, 4.718282, 604800, 0, 0), -- Pure Light Terrace (Auras: 117865 - Light Wall)
+(@CGUID+61, 65736, 996, 3, 1, -1075.198, -2577.711, 15.828019, 1.725, 86400, 0, 0), -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
+(@CGUID+62, 60788, 996, 3, 1, -1017.835, -2771.984, 38.65444, 4.718282, 604800, 0, 0), -- Pure Light Terrace (Auras: 117865 - Light Wall)
 -- (@CGUID+63, 65736, 996, 3, 1, -832.0764, -2745.399, 31.67754, 0.1536942, 86400, 0, 0); -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
 -- (@CGUID+64, 61038, 996, 3, 1, -1214.795, -2824.823, 41.24303, 3.506719, 86400, 0, 0), -- Yang Guoshi (Auras: 120000 - Sha Corruption)
--- (@CGUID+65, 65736, 996, 3, 1, -1214.8, -2824.82, 41.24303, 3.507344, 86400, 0, 0), -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
+(@CGUID+63, 65736, 996, 3, 1, -1214.795, -2824.823, 41.24303, 3.506719, 86400, 0, 0), -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
 -- (@CGUID+66, 61046, 996, 3, 1, -832.0764, -2745.405, 31.67757, 0.1583484, 86400, 0, 0), -- Jinlun Kun (Auras: 120000 - Sha Corruption)
--- (@CGUID+67, 65736, 996, 3, 1, -832.0764, -2745.399, 31.67754, 0.1536942, 86400, 0, 0), -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
+(@CGUID+64, 65736, 996, 3, 1, -832.0764, -2745.399, 31.67754, 0.1536942, 86400, 0, 0), -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
 -- (@CGUID+68, 61046, 996, 3, 1, -832.0764, -2745.405, 31.67757, 0.1583484, 86400, 0, 0), -- Jinlun Kun (Auras: 120000 - Sha Corruption)
 -- (@CGUID+69, 65736, 996, 3, 1, -832.0764, -2745.399, 31.67754, 0.1536942, 86400, 0, 0), -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
 -- (@CGUID+70, 65736, 996, 3, 1, -1214.8, -2824.82, 41.24303, 3.507344, 86400, 0, 0); -- Return to the Terrace (Auras: 120216 - Pure Light Visual)
-(@CGUID+62, 71095, 996, 3, 1, -1017.93, -2911.302, 19.9015, 4.643414, 86400, 0, 0); -- Reflection of Lei Shi (Auras: 141597 - Lei Shi Victory)
+(@CGUID+65, 71095, 996, 3, 1, -1017.93, -2911.302, 19.9015, 4.643414, 86400, 0, 0); -- Reflection of Lei Shi (Auras: 141597 - Lei Shi Victory)
 -- 1074791424
 -- 69208064
 
@@ -703,23 +715,23 @@ UPDATE creature_template SET lootId = entry, dmg_multiplier = 10, Health_Mod = 5
 UPDATE creature_template SET lootId = entry, dmg_multiplier = 13, Health_Mod = 1600000000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 60999; -- Sha of Fear
 UPDATE creature_template SET lootId = entry, dmg_multiplier = 7,  Health_Mod = 343000000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 60999; -- Sha of Fear
 
-UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 61038; -- Yang Guoshi
-UPDATE creature_template SET Health_Mod = 23600000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_10H + 61038; -- Yang Guoshi
-UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25N + 61038; -- Yang Guoshi
-UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 61038; -- Yang Guoshi
-UPDATE creature_template SET Health_Mod = 3000000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 61038; -- Yang Guoshi
+UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 11 WHERE entry = @RAID_DIFF_10N + 61038; -- Yang Guoshi
+UPDATE creature_template SET Health_Mod = 23600000 / @HP_MOD_93, dmg_multiplier = 18 WHERE entry = @RAID_DIFF_10H + 61038; -- Yang Guoshi
+UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 11 WHERE entry = @RAID_DIFF_25N + 61038; -- Yang Guoshi
+UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 18 WHERE entry = @RAID_DIFF_25H + 61038; -- Yang Guoshi
+UPDATE creature_template SET Health_Mod = 3000000 / @HP_MOD_93, dmg_multiplier = 11 WHERE entry = @RAID_DIFF_25R + 61038; -- Yang Guoshi
 
-UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 61042; -- Cheng Kang
-UPDATE creature_template SET Health_Mod = 23600000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_10H + 61042; -- Cheng Kang
-UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25N + 61042; -- Cheng Kang
-UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 61042; -- Cheng Kang
-UPDATE creature_template SET Health_Mod = 3000000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 61042; -- Cheng Kang
+UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 11 WHERE entry = @RAID_DIFF_10N + 61042; -- Cheng Kang
+UPDATE creature_template SET Health_Mod = 23600000 / @HP_MOD_93, dmg_multiplier = 18 WHERE entry = @RAID_DIFF_10H + 61042; -- Cheng Kang
+UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 11 WHERE entry = @RAID_DIFF_25N + 61042; -- Cheng Kang
+UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 18 WHERE entry = @RAID_DIFF_25H + 61042; -- Cheng Kang
+UPDATE creature_template SET Health_Mod = 3000000 / @HP_MOD_93, dmg_multiplier = 11 WHERE entry = @RAID_DIFF_25R + 61042; -- Cheng Kang
 
-UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 61046; -- Jinlun Kun
-UPDATE creature_template SET Health_Mod = 23600000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_10H + 61046; -- Jinlun Kun
-UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25N + 61046; -- Jinlun Kun
-UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 61046; -- Jinlun Kun
-UPDATE creature_template SET Health_Mod = 3000000 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 61046; -- Jinlun Kun
+UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 11 WHERE entry = @RAID_DIFF_10N + 61046; -- Jinlun Kun
+UPDATE creature_template SET Health_Mod = 23600000 / @HP_MOD_93, dmg_multiplier = 18 WHERE entry = @RAID_DIFF_10H + 61046; -- Jinlun Kun
+UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 11 WHERE entry = @RAID_DIFF_25N + 61046; -- Jinlun Kun
+UPDATE creature_template SET Health_Mod = 14400000 / @HP_MOD_93, dmg_multiplier = 18 WHERE entry = @RAID_DIFF_25H + 61046; -- Jinlun Kun
+UPDATE creature_template SET Health_Mod = 3000000 / @HP_MOD_93, dmg_multiplier = 11 WHERE entry = @RAID_DIFF_25R + 61046; -- Jinlun Kun
 
 UPDATE creature_template SET Health_Mod = 4000000 / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 61034; -- Terror Spawn
 UPDATE creature_template SET Health_Mod = 6100000 / @HP_MOD_92 WHERE entry = @RAID_DIFF_10H + 61034; -- Terror Spawn
@@ -1480,5 +1492,18 @@ INSERT INTO `game_graveyard_zone` VALUES
 SET @OGUID = (SELECT MAX(guid) FROM `gameobject`);
 DELETE FROM `gameobject` WHERE `id`=214525;
 INSERT INTO `gameobject` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`spawntimesecs`,`animprogress`,`state`,`isActive`,`protect_anti_doublet`) VALUES
-(6609460, 214525, 996, 0, 0, 120, 1, -1021.25, -3157.25, 30.7474, 1.5719, 0, 0, 0, 1, 86400, 255, 1, 0, null),
-(@OGUID +20, 214525, 870, 0, 0, 1, 1, 957.689, -52.7766, 514.299, 4.088, 0, 0, 0.890113, -0.45574, 86400, 255, 1, 0, null);
+(@OGUID +20, 214525, 996, 0, 0, 120, 1, -1021.25, -3157.25, 30.7474, 1.5719, 0, 0, 0, 1, 86400, 255, 1, 0, NULL),
+(@OGUID +21, 214525, 870, 0, 0, 1, 1, 957.689, -52.7766, 514.299, 4.088, 0, 0, 0.890113, -0.45574, 86400, 255, 1, 0, NULL);
+
+-- 10/25 Heroic Raid Closed
+UPDATE `access_requirement` SET `level_min` = 91 WHERE `mapId` = 996 AND `difficulty` IN (5,6,7);
+
+-- Valor Points for Sha of Fear
+DELETE FROM `creature_template_currency` WHERE `entry` IN (3160999,3260999,3360999,3460999);
+INSERT INTO `creature_template_currency` VALUES
+(3160999, 396, 40), -- Sha of Fear 	10N
+(3260999, 396, 40), -- Sha of Fear 	10H
+(3360999, 396, 40), -- Sha of Fear 	25N
+(3460999, 396, 40); -- Sha of Fear 	25H
+
+SET FOREIGN_KEY_CHECKS = 1;

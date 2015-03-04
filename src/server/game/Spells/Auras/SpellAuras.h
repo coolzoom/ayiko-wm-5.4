@@ -40,6 +40,16 @@ class ProcInfo;
 // update aura target map every 500 ms instead of every update - reduce amount of grid searcher calls
 #define UPDATE_TARGET_MAP_INTERVAL 500
 
+struct EssentialAuraInfo
+{
+    uint32 spellId;
+    uint8 effectMask;
+    int32 duration;
+    int32 maxDuration;
+    int32 amount[MAX_SPELL_EFFECTS];
+    uint32 stackAmount;
+};
+
 class AuraApplication
 {
     friend void Unit::_ApplyAura(AuraApplication * aurApp, uint32 effMask);
@@ -162,6 +172,7 @@ class Aura
         void SetCharges(uint8 charges);
         uint8 CalcMaxCharges(Unit* caster) const;
         uint8 CalcMaxCharges() const { return CalcMaxCharges(GetCaster()); }
+        uint8 CalcMaxStacks(Unit* caster) const;
         bool ModCharges(int32 num, AuraRemoveMode removeMode = AURA_REMOVE_BY_DEFAULT);
         bool DropCharge(AuraRemoveMode removeMode = AURA_REMOVE_BY_DEFAULT) { return ModCharges(-1, removeMode); }
 
@@ -170,6 +181,7 @@ class Aura
         bool ModStackAmount(int32 num, AuraRemoveMode removeMode = AURA_REMOVE_BY_DEFAULT);
 
         void RefreshSpellMods();
+        void ResyncSpellmodCharges();
 
         uint8 GetCasterLevel() const { return m_casterLevel; }
 
@@ -272,6 +284,9 @@ class Aura
         void CallScriptAfterProcHandlers(AuraApplication const* aurApp, ProcEventInfo& eventInfo);
         bool CallScriptEffectProcHandlers(AuraEffect const *aurEff, AuraApplication const* aurApp, ProcEventInfo& eventInfo);
         void CallScriptAfterEffectProcHandlers(AuraEffect const *aurEff, AuraApplication const* aurApp, ProcEventInfo& eventInfo);
+
+
+        AuraScript* GetScriptByName(std::string const& scriptName) const;
 
         std::list<AuraScript*> m_loadedScripts;
     private:

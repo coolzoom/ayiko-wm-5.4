@@ -3120,68 +3120,6 @@ class npc_spirit_link_totem : public CreatureScript
 # npc_frozen_orb
 ######*/
 
-enum frozenOrbSpells
-{
-    SPELL_FINGERS_OF_FROST          = 44544,
-    SPELL_SELF_SNARE_90             = 82736,
-    SPELL_SNARE_DAMAGE              = 84721,
-};
-
-class npc_frozen_orb : public CreatureScript
-{
-    public:
-        npc_frozen_orb() : CreatureScript("npc_frozen_orb") { }
-
-        struct npc_frozen_orbAI : public ScriptedAI
-        {
-            npc_frozen_orbAI(Creature* creature) : ScriptedAI(creature)
-            {
-                frozenOrbTimer = 0;
-            }
-
-            uint32 frozenOrbTimer;
-
-            void IsSummonedBy(Unit* owner)
-            {
-                if (owner && owner->GetTypeId() == TYPEID_PLAYER)
-                {
-                    owner->CastSpell(me, SPELL_SNARE_DAMAGE, true);
-                    owner->CastSpell(owner, SPELL_FINGERS_OF_FROST, true);
-                    me->AddAura(SPELL_SELF_SNARE_90, me);
-
-                    frozenOrbTimer = 1000;
-                }
-                else
-                    me->DespawnOrUnsummon();
-            }
-
-            void UpdateAI(const uint32 diff)
-            {
-                Unit* owner = me->GetOwner();
-
-                if (!owner)
-                    return;
-
-                if (frozenOrbTimer <= diff)
-                {
-                    if (owner && owner->ToPlayer())
-                        if (owner->ToPlayer()->HasSpellCooldown(SPELL_SNARE_DAMAGE))
-                            owner->ToPlayer()->RemoveSpellCooldown(SPELL_SNARE_DAMAGE);
-
-                    owner->CastSpell(me, SPELL_SNARE_DAMAGE, true);
-                    frozenOrbTimer = 1000;
-                }
-                else
-                    frozenOrbTimer -= diff;
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new npc_frozen_orbAI(creature);
-        }
-};
-
 /*######
 # npc_guardian_of_ancient_kings
 ######*/
@@ -4362,6 +4300,8 @@ class npc_transcendence_spirit : public CreatureScript
                         break;
                 }
             }
+
+            void EnterEvadeMode() {}
         };
 
         CreatureAI* GetAI(Creature *creature) const
@@ -4726,6 +4666,59 @@ public:
     }
 };
 
+class npc_mage_orb : public CreatureScript
+{
+public:
+    npc_mage_orb() : CreatureScript("npc_mage_orb") {}
+
+    struct npc_mage_orbAI : public ScriptedAI
+    {
+        float newx, newy, newz;
+        bool engagedInCombat;
+
+        npc_mage_orbAI(Creature* creature) : ScriptedAI(creature)
+        {
+            newz = me->GetOwner()->GetPositionZ() + 2.0f;
+            float angle = me->GetOwner()->GetAngle(me);
+            newx = me->GetPositionX() + 60 * cos(angle);
+            newy = me->GetPositionY() + 60 * sin(angle);
+            engagedInCombat = false;
+        }
+
+        void Reset()
+        {
+            me->CastSpell(me, 123605, true);
+            me->CastSpell(me, 84717, true);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+            me->SetReactState(REACT_PASSIVE);
+            me->GetMotionMaster()->MovePoint(0, newx, newy, newz);
+        }
+
+        void SpellHitTarget(Unit* target, SpellInfo const* spell)
+        {
+            if (spell->Id == 84721)
+            {
+                if (!engagedInCombat)
+                {
+                    if (Unit* owner = me->GetOwner())
+                        owner->CastSpell(owner, 44544, true);
+                    engagedInCombat = true;
+                }
+            }
+        }
+
+        void UpdateAI(uint32 diff) {}
+        void EnterCombat(Unit* /*who*/) {}
+        void AttackStart(Unit* /*who*/) {}
+        void EnterEvadeMode() {}
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_mage_orbAI(creature);
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -4760,7 +4753,6 @@ void AddSC_npcs_special()
     new npc_capacitor_totem();
     new npc_feral_spirit();
     new npc_spirit_link_totem();
-    new npc_frozen_orb();
     new npc_guardian_of_ancient_kings();
     new npc_power_word_barrier();
     new npc_demonic_gateway();
@@ -4783,4 +4775,5 @@ void AddSC_npcs_special()
     new npc_spectral_guise();
     new npc_shadowy_apparition();
     new npc_warl_doomguard();
+    new npc_mage_orb();
 }

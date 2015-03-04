@@ -559,6 +559,10 @@ class spell_sha_echo_of_the_elements : public SpellScriptLoader
                 if (player->GetSpecializationId(player->GetActiveSpec()) == SPEC_SHAMAN_ENHANCEMENT && procSpell->Id != SPELL_SHA_ELEMENTAL_BLAST)
                     chance = 30;
 
+                // Chain lightnings individual hits have a reduced chance to proc
+                if (procSpell->Id == 421)
+                    chance /= 3;
+
                 if (!(eventInfo.GetDamageInfo()->GetDamage()) && !(eventInfo.GetHealInfo()->GetHeal()))
                     return;
 

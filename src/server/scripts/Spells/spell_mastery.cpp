@@ -227,7 +227,8 @@ class spell_mastery_elemental_overload : public SpellScriptLoader
                                     // Chain Lightning
                                     case 421:
                                     {
-                                        float Mastery = caster->GetFloatValue(PLAYER_MASTERY) * 2.0f;
+                                        // Chain lightnings individual hits have a reduced chance to proc
+                                        float Mastery = (caster->GetFloatValue(PLAYER_MASTERY) * 2.0f)  / 3.0f;
 
                                         if (roll_chance_f(Mastery))
                                             caster->CastSpell(unitTarget, MASTERY_SPELL_CHAIN_LIGHTNING, true);

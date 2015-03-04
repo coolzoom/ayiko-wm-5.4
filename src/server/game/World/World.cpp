@@ -2121,7 +2121,7 @@ void World::SetInitialWorldSettings()
     sSpellMgr->InitializeItemUpgradeDatas();
 
     TC_LOG_INFO("server.loading", "Caching taxi nodes for levelup...");
-    //Trinity::PlayerTaxi::CacheLevelupNodes();
+    Trinity::PlayerTaxi::CacheLevelupNodes();
 
     {
         TC_LOG_INFO("server.loading", "Starting web auction broker agent...");

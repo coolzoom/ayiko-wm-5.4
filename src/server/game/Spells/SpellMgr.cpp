@@ -4160,9 +4160,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 129020:// Avatar
                     spellInfo->AttributesEx &= SPELL_ATTR1_DISPEL_AURAS_ON_IMMUNITY;
                     break;
-                case 121129:// Daybreak (heal)
-                    spellInfo->AttributesEx |= SPELL_ATTR1_CANT_TARGET_SELF;
-                    break;
                 case 73981: // Redirect
                 case 110730:// Redirect
                 case 51699: // Honor Among Thieves (triggered)
@@ -4736,9 +4733,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[1].ApplyAuraName = SPELL_AURA_DUMMY;
                     break;
                 case 115073:// Spinning Fire Blossom
-                    spellInfo->Effects[0].TargetA = 0;
-                    spellInfo->Effects[0].Effect = 0;
-                    spellInfo->Effects[0].BasePoints = 0;
                     spellInfo->OverrideSpellList.push_back(123408); // Add Spinning Fire Blossom (Overrided by Glyph) to override spell list of Spinning Fire Blossom
                     break;
                 case 86698: // Guardian of Ancient Kings

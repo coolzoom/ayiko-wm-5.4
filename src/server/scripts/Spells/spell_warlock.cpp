@@ -68,7 +68,7 @@ enum WarlockSpells
     SPELL_WARLOCK_SOUL_SWAP_VISUAL          = 92795,
     WARLOCK_GRIMOIRE_OF_SACRIFICE           = 108503,
     WARLOCK_METAMORPHOSIS                   = 103958,
-    WARLOCK_DEMONIC_LEAP_JUMP               = 54785,
+    WARLOCK_DEMONIC_LEAP_JUMP               = 109163,
     WARLOCK_ITEM_S12_TIER_4                 = 131632,
     WARLOCK_TWILIGHT_WARD_S12               = 131623,
     WARLOCK_TWILIGHT_WARD_METAMORPHOSIS_S12 = 131624,
@@ -1204,6 +1204,65 @@ class spell_warl_dark_bargain_on_absorb : public SpellScriptLoader
         }
 };
 
+
+// Metamorphosis overrides
+class spell_warl_metamorphosis_overrides : public SpellScriptLoader
+{
+    public:
+        spell_warl_metamorphosis_overrides() : SpellScriptLoader("spell_warl_metamorphosis_overrides") { }
+
+        class spell_warl_metamorphosis_overrides_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_warl_metamorphosis_overrides_AuraScript);
+
+            void CheckTouchOfChaos(AuraEffect const * /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (!caster->HasSpell(112089))
+                        amount = 0;
+                }
+            }
+            void CheckChaosWave(AuraEffect const * /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (!caster->HasSpell(124917))
+                        amount = 0;
+                }
+            }
+            void CheckCursedAuras(AuraEffect const * /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (!caster->HasSpell(116208))
+                        amount = 0;
+                }
+            }
+            void CheckSleep(AuraEffect const * /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (!caster->HasAura(114168))
+                        amount = 0;
+                }
+            }
+
+            void Register()
+            {
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_warl_metamorphosis_overrides_AuraScript::CheckTouchOfChaos, EFFECT_0, SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS);
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_warl_metamorphosis_overrides_AuraScript::CheckChaosWave, EFFECT_3, SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS);
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_warl_metamorphosis_overrides_AuraScript::CheckCursedAuras, EFFECT_6, SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS);
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_warl_metamorphosis_overrides_AuraScript::CheckSleep, EFFECT_7, SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_warl_metamorphosis_overrides_AuraScript();
+        }
+};
+
 // Dark Regeneration - 108359
 class spell_warl_dark_regeneration : public SpellScriptLoader
 {
@@ -1456,20 +1515,7 @@ class spell_warl_demonic_leap_jump : public SpellScriptLoader
                 if (!caster)
                     return SPELL_FAILED_DONT_REPORT;
 
-                Position pos;
-                caster->GetFirstCollisionPosition(pos, GetSpellInfo()->Effects[0].CalcRadius(caster), 0.0f);
-
-                if (pos.GetPositionX() > caster->GetPositionZ() + 5.0f)
-                {
-                    caster->RemoveAura(WARLOCK_METAMORPHOSIS);
-                    return SPELL_FAILED_NOPATH;
-                }
-                else if (!caster->IsWithinLOS(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ()))
-                {
-                    caster->RemoveAura(WARLOCK_METAMORPHOSIS);
-                    return SPELL_FAILED_NOPATH;
-                }
-                else if (caster->HasAuraType(SPELL_AURA_MOD_ROOT))
+                if (caster->HasAuraType(SPELL_AURA_MOD_ROOT))
                 {
                     caster->RemoveAura(WARLOCK_METAMORPHOSIS);
                     return SPELL_FAILED_ROOTED;
@@ -3098,4 +3144,5 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_glyph_of_siphon_life();
     new spell_warl_demonic_fury();
     new spell_warl_havoc();
+    new spell_warl_metamorphosis_overrides();
 }

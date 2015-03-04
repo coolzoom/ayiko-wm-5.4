@@ -1108,6 +1108,14 @@ bool Aura::ModCharges(int32 num, AuraRemoveMode removeMode)
 void Aura::SetStackAmount(uint8 stackAmount)
 {
     m_stackAmount = stackAmount;
+    // Will add this because i couldn't figure out a proper rule yet
+    switch (m_spellInfo->Id)
+    {
+        case 88819:
+            SetCharges(stackAmount);
+            ResyncSpellmodCharges();
+            break;
+    }
     Unit* caster = GetCaster();
 
     auto const applications = GetApplicationList();
@@ -1148,6 +1156,7 @@ bool Aura::ModStackAmount(int32 num, AuraRemoveMode removeMode)
     }
 
     bool refresh = stackAmount >= GetStackAmount();
+    bool resetCharges = true;
 
     // Agony doesn't refresh itself every tick
     if (m_spellInfo->Id == 980)
@@ -1164,6 +1173,14 @@ bool Aura::ModStackAmount(int32 num, AuraRemoveMode removeMode)
 
     SetStackAmount(stackAmount);
 
+    // Will add this because i couldn't figure out a proper rule yet
+    switch (m_spellInfo->Id)
+    {
+        case 88819:
+            resetCharges = false;
+            break;
+    }
+
     if (refresh)
     {
         RefreshSpellMods();
@@ -1171,16 +1188,22 @@ bool Aura::ModStackAmount(int32 num, AuraRemoveMode removeMode)
 
         auto charges = CalcMaxCharges();
         CallScriptRefreshChargesHandlers(charges);
-        SetCharges(charges);
-
-        // FIXME: not a best way to synchronize charges, but works
-        for (auto &eff : m_effects)
-            if (eff && (eff->GetAuraType() == SPELL_AURA_ADD_FLAT_MODIFIER || eff->GetAuraType() == SPELL_AURA_ADD_PCT_MODIFIER))
-                if (auto &mod = eff->GetSpellModifier())
-                    mod->charges = GetCharges();
+        if (resetCharges)
+        {
+            SetCharges(charges);
+            ResyncSpellmodCharges();
+        }
     }
     SetNeedClientUpdateForTargets();
     return false;
+}
+
+void Aura::ResyncSpellmodCharges()
+{
+    for (auto &eff : m_effects)
+        if (eff && (eff->GetAuraType() == SPELL_AURA_ADD_FLAT_MODIFIER || eff->GetAuraType() == SPELL_AURA_ADD_PCT_MODIFIER))
+            if (auto &mod = eff->GetSpellModifier())
+                mod->charges = GetCharges();
 }
 
 void Aura::RefreshSpellMods()

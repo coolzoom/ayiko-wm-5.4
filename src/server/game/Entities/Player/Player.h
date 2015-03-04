@@ -1438,6 +1438,9 @@ class Player final : public Unit, public GridObject<Player>
 
         bool AddItem(uint32 itemId, uint32 count, uint32* noSpaceForCount = NULL);
 
+        bool FitArmorSpecializationRequirement(SpellEquippedItemsEntry const *info) const;
+        void UpdateArmorSpecializationAuras() const;
+
         /*********************************************************/
         /***                    GOSSIP SYSTEM                  ***/
         /*********************************************************/

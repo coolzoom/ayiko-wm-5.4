@@ -6337,7 +6337,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
             {
                 case 12846: // Ignite
                 {
-                     if (!procSpell || !victim || effIndex != 0)
+                     if (!procSpell || !victim || effIndex != 0 || !damage)
                          return false;
 
                      triggered_spell_id = 12654;
@@ -18707,6 +18707,24 @@ Aura *Unit::AddAura(SpellInfo const* spellInfo, uint32 effMask, Unit* target)
     {
         aura->ApplyForTargets();
         return aura;
+    }
+    return NULL;
+}
+
+Aura* Unit::AddAuraForTarget(Aura* aura, Unit* target)
+{
+    if (!target)
+        return NULL;
+
+    if (Aura* newAura = AddAura(aura->GetSpellInfo(), aura->GetEffectMask(), target))
+    {
+        newAura->SetMaxDuration(aura->GetDuration());
+        newAura->SetDuration(aura->GetDuration());
+        for (int i = 0; i < MAX_SPELL_EFFECTS; ++i)
+            if (aura->GetEffectMask() & (1 << i) && newAura->GetEffectMask() & (1 << i))
+                newAura->GetEffect(i)->SetAmount(aura->GetEffect(i)->GetAmount());
+
+        return newAura;
     }
     return NULL;
 }

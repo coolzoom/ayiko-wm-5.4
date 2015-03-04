@@ -1347,7 +1347,6 @@ class CheckInfernoBlastImpactPredicate
         Unit* _mainTarget;
 };
 
-// Inferno Blast - 108853
 class spell_mage_inferno_blast : public SpellScriptLoader
 {
     public:
@@ -1359,62 +1358,11 @@ class spell_mage_inferno_blast : public SpellScriptLoader
 
             void HandleOnHit()
             {
-                if (Player* player = GetCaster()->ToPlayer())
+                if (Player* caster = GetCaster()->ToPlayer())
                 {
+                    caster->RemoveSpellCooldown(118280);
                     if (Unit* target = GetHitUnit())
-                    {
-                        std::list<Unit*> targetList;
-                        int32 combustionBp = 0;
-
-                        player->CastSpell(target, SPELL_MAGE_INFERNO_BLAST_IMPACT, true);
-
-                        // Spreads any Pyroblast, Ignite, and Combustion effects to up to 2 nearby enemy targets within 10 yards
-
-                        target->GetAttackableUnitListInRange(targetList, 10.0f);
-
-                        targetList.remove_if(CheckInfernoBlastImpactPredicate(player, target));
-
-                        if (targetList.size() > 2)
-                            Trinity::Containers::RandomResizeList(targetList, 2);
-
-                        for (auto itr : targetList)
-                        {
-                            // 1 : Ignite
-                            if (target->HasAura(SPELL_MAGE_IGNITE, player->GetGUID()))
-                            {
-                                float value = player->GetFloatValue(PLAYER_MASTERY) * 1.5f / 100.0f;
-
-                                int32 igniteBp = 0;
-
-                                auto const remaining = itr->GetRemainingPeriodicAmount(player->GetGUID(), SPELL_MAGE_IGNITE, SPELL_AURA_PERIODIC_DAMAGE);
-                                igniteBp += remaining.perTick();
-
-                                igniteBp += int32(GetHitDamage() * value / 2);
-
-                                player->CastCustomSpell(itr, SPELL_MAGE_IGNITE, &igniteBp, NULL, NULL, true);
-                            }
-
-                            // 2 : Pyroblast
-                            if (target->HasAura(SPELL_MAGE_PYROBLAST, player->GetGUID()))
-                                player->AddAura(SPELL_MAGE_PYROBLAST, itr);
-
-                            // 3 : Combustion
-                            if (target->HasAura(SPELL_MAGE_COMBUSTION_DOT, player->GetGUID()))
-                            {
-                                if (itr->HasAura(SPELL_MAGE_PYROBLAST, player->GetGUID()))
-                                {
-                                    combustionBp += player->CalculateSpellDamage(target, sSpellMgr->GetSpellInfo(SPELL_MAGE_PYROBLAST), EFFECT_1);
-                                    combustionBp = player->SpellDamageBonusDone(target, sSpellMgr->GetSpellInfo(SPELL_MAGE_PYROBLAST), EFFECT_1, combustionBp, DOT);
-                                }
-
-                                auto const remaining = itr->GetRemainingPeriodicAmount(player->GetGUID(), SPELL_MAGE_IGNITE, SPELL_AURA_PERIODIC_DAMAGE);
-                                combustionBp += remaining.perTick();
-
-                                if (combustionBp)
-                                    player->CastCustomSpell(itr, SPELL_MAGE_COMBUSTION_DOT, &combustionBp, NULL, NULL, true);
-                            }
-                        }
-                    }
+                        caster->CastSpell(target, SPELL_MAGE_INFERNO_BLAST_IMPACT, true);
                 }
             }
 
@@ -1427,6 +1375,56 @@ class spell_mage_inferno_blast : public SpellScriptLoader
         SpellScript* GetSpellScript() const
         {
             return new spell_mage_inferno_blast_SpellScript();
+        }
+};
+
+class spell_mage_inferno_blast_spread : public SpellScriptLoader
+{
+    public:
+        spell_mage_inferno_blast_spread() : SpellScriptLoader("spell_mage_inferno_blast_spread") { }
+
+        class spell_mage_inferno_blast_spread_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_mage_inferno_blast_spread_SpellScript);
+
+            void FilterTargets(std::list<WorldObject*>& targets)
+            {
+                if (GetExplTargetUnit())
+                    targets.remove(GetExplTargetUnit());
+
+                if (targets.size() > 3)
+                    Trinity::Containers::RandomResizeList(targets, 3);
+            }
+
+            void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+            {
+                Unit* caster = GetCaster();
+                if (Unit* unitTarget = GetExplTargetUnit())
+                {
+                    Unit::AuraEffectList const & aurasA = unitTarget->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
+                    for (Unit::AuraEffectList::const_iterator itr = aurasA.begin(); itr != aurasA.end(); ++itr)
+                    {
+                        if (((*itr)->GetCasterGUID() != caster->GetGUID()) 
+                            || ((*itr)->GetSpellInfo()->Id != 12654
+                            && (*itr)->GetSpellInfo()->Id != 11366
+                            && (*itr)->GetSpellInfo()->Id != 83853))
+                            continue;
+                        
+                        caster->AddAuraForTarget((*itr)->GetBase(), GetHitUnit());
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_mage_inferno_blast_spread_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+                OnEffectHitTarget += SpellEffectFn(spell_mage_inferno_blast_spread_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_mage_inferno_blast_spread_SpellScript();
         }
 };
 
@@ -2111,4 +2109,5 @@ void AddSC_mage_spell_scripts()
     new spell_mastery_icicles_periodic();
     new spell_mage_blizzard();
     new spell_mage_orb_filter();
+    new spell_mage_inferno_blast_spread();
 }

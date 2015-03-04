@@ -24,7 +24,6 @@
 
 DoorData const doorData[] =
 {
-    { GAMEOBJECT_DOOR_SHA_OF_DOUBT,         DATA_SHA_OF_DOUBT, DOOR_TYPE_ROOM,    BOUNDARY_NONE },
     { GAMEOBJECT_DOOR_LOREWALKER_STONSTEP,  DATA_LOREWALKER,   DOOR_TYPE_PASSAGE, BOUNDARY_NONE },
     { GAMEOBJECT_DOOR_WISE_MARI,            DATA_WISE_MARI,    DOOR_TYPE_PASSAGE, BOUNDARY_NONE },
     { 0,                                    0,                 DOOR_TYPE_ROOM,    BOUNDARY_NONE }, // END
@@ -105,7 +104,6 @@ public:
                     break;
                 case GAMEOBJECT_DOOR_SHA_OF_DOUBT:
                     shaDoorGUID = go->GetGUID();
-                    AddDoor(go, true);
                     break;
                 case GAMEOBJECT_DOOR_WISE_MARI:
                 case GAMEOBJECT_DOOR_LOREWALKER_STONSTEP:
@@ -265,8 +263,7 @@ public:
                 switch(unit->GetEntry())
                 {
                     case NPC_ZAO_SUN:
-                        for(int i = 0; i < 2; i++)
-                            unit->CastSpell(unit, SPELL_EXTRACT_SHA, false);
+                        unit->CastSpell(unit, SPELL_EXTRACT_SHA, false);
                         break;
                     case NPC_SCROLL:
                         eventChoosen = urand(EVENT_LOREWALKER_STONESTEP_SUNS, EVENT_LOREWALKER_STONESTEP_TRIAL);
@@ -611,6 +608,21 @@ public:
                                     plr->CastSpell(plr, SPELL_LOREWALKER_ALACRITY, false);
                             }
                         }
+                    }
+                    break;
+                case DATA_SHA_OF_DOUBT:
+                    switch(data)
+                    {
+                        case NOT_STARTED:
+                        case FAIL:
+                        case DONE:
+                            if(GameObject* go = instance->GetGameObject(shaDoorGUID))
+                                go->SetGoState(GO_STATE_ACTIVE);
+                            break;
+                        case IN_PROGRESS:
+                            if(GameObject* go = instance->GetGameObject(shaDoorGUID))
+                                go->SetGoState(GO_STATE_READY);
+                            break;
                     }
                     break;
                 default:

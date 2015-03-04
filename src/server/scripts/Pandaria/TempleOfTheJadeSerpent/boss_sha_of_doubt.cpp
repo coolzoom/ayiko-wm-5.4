@@ -45,7 +45,8 @@ public:
         EVENT_WITHER_WILL          = 1,
         EVENT_TOUCH_OF_NOTHINGNESS = 2,
         EVENT_BOUNDS_OF_REALITY    = 3,
-        EVENT_CLOSE_DOOR           = 4
+        EVENT_CLOSE_DOOR           = 4,
+        EVENT_OPEN_DOOR            = 5
     };
 
     enum eActions
@@ -74,11 +75,13 @@ public:
         void InitializeAI() override
         {
             me->CastSpell(me, SPELL_INVISIBILITY_DETECTION, false);
-
+            
             if(instance)
             {
+                instance->SetData(DATA_SHA_OF_DOUBT, NOT_STARTED);
                 if(instance->GetBossState(DATA_LIU) == DONE)
                 {
+                    nonCombatEvents.ScheduleEvent(EVENT_OPEN_DOOR, 1 * IN_MILLISECONDS);
                     for(int i = 0; i < 2; i++)
                     {
                         if(Creature* sha = me->SummonCreature(NPC_MINION_OF_DOUBTS, ShaSummonPosition[i]))
@@ -97,7 +100,7 @@ public:
                 }
                 else
                 {
-                    nonCombatEvents.ScheduleEvent(EVENT_CLOSE_DOOR, 2 * IN_MILLISECONDS);
+                    nonCombatEvents.ScheduleEvent(EVENT_CLOSE_DOOR, 1 * IN_MILLISECONDS);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                 }
             }
@@ -124,7 +127,6 @@ public:
                     figmentsCount = 0;
                     me->RemoveAura(SPELL_BOUNDS_OF_REALITY);
                 }
-
             }
         }
 
@@ -174,10 +176,19 @@ public:
 
         void UpdateAI(const uint32 diff) override
         {
-            if(nonCombatEvents.ExecuteEvent() == EVENT_CLOSE_DOOR)
+            if(uint32 eventId = nonCombatEvents.ExecuteEvent())
             {
-                if(GameObject* door = me->FindNearestGameObject(GAMEOBJECT_DOOR_SHA_OF_DOUBT, 70.0f))
-                    door->SetGoState(GO_STATE_READY);
+                switch(eventId)
+                {
+                    case EVENT_CLOSE_DOOR:
+                        if(GameObject* door = me->FindNearestGameObject(GAMEOBJECT_DOOR_SHA_OF_DOUBT, 70.0f))
+                            door->SetGoState(GO_STATE_READY);
+                        break;
+                    case EVENT_OPEN_DOOR:
+                        if(GameObject* door = me->FindNearestGameObject(GAMEOBJECT_DOOR_SHA_OF_DOUBT, 70.0f))
+                            door->SetGoState(GO_STATE_ACTIVE);
+                        break;
+                }
             }
 
             events.Update(diff);
@@ -421,7 +432,10 @@ public:
 
     bool operator()(WorldObject* object)
     {
-        return object && object->ToPlayer();
+        if(object->GetTypeId() == TYPEID_PLAYER)
+            return false;
+
+        return true;
     }
 };
 
@@ -462,7 +476,7 @@ public:
         void Register() override
         {
             OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_sod_release_doubt_SpellScript::FilterPlayerTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_sod_release_doubt_SpellScript::FilterPlayerTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENTRY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_sod_release_doubt_SpellScript::FilterSha, EFFECT_1, TARGET_UNIT_SRC_AREA_ENTRY);
         }
     };
 

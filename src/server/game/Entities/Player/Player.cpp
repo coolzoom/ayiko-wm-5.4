@@ -9821,6 +9821,8 @@ void Player::_ApplyAllItemMods()
         }
     }
 
+    UpdateArmorSpecializationAuras();
+
     TC_LOG_DEBUG("entities.player.items", "_ApplyAllItemMods complete.");
 }
 
@@ -13443,6 +13445,8 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
         }
     }
 
+    UpdateArmorSpecializationAuras();
+
     return pItem;
 }
 
@@ -13578,6 +13582,8 @@ void Player::RemoveItem(uint8 bag, uint8 slot, bool update)
         if (IsInWorld() && update)
             pItem->SendUpdateToPlayer(this);
     }
+
+    UpdateArmorSpecializationAuras();
 }
 
 // Common operation need to remove item from inventory without delete in trade, auction, guild bank, mail....
@@ -14554,6 +14560,7 @@ void Player::SwapItem(uint16 src, uint16 dst)
     }
 
     AutoUnequipOffhandIfNeed();
+    UpdateArmorSpecializationAuras();
 }
 
 void Player::AddItemToBuyBackSlot(Item* pItem)
@@ -29584,4 +29591,40 @@ uint32 Player::GetQuestObjectiveCounter(uint32 objectiveId) const
         return objectiveStatus->second;
 
     return 0;
+}
+
+bool Player::FitArmorSpecializationRequirement(SpellEquippedItemsEntry const *info) const
+{
+    if (!info)
+        return true;
+
+    uint8 count = 0;
+    for (uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_FINGER1; ++i)
+    {
+        Item* item = GetItemByPos(INVENTORY_SLOT_BAG_0, i);
+        if (!item)
+            continue;
+
+        if (item->GetTemplate()->Class == info->EquippedItemClass 
+            && (!(1 << item->GetTemplate()->InventoryType) & info->EquippedItemInventoryTypeMask) || !(1 << item->GetTemplate()->SubClass & info->EquippedItemSubClassMask))
+            continue;
+
+        count++;
+    }
+
+    return count >= 8;
+}
+
+void Player::UpdateArmorSpecializationAuras() const
+{
+    AuraApplicationMap appliedAuras = GetAppliedAuras();
+    for (AuraApplicationMap::iterator iter = appliedAuras.begin(); iter != appliedAuras.end(); ++iter)
+    {
+        Aura * aura = iter->second->GetBase();
+
+        if (!(aura->GetSpellInfo()->AttributesEx8 & SPELL_ATTR8_ARMOR_SPECIALIZATION))
+            continue;
+
+        aura->RecalculateAmountOfEffects();
+    }
 }

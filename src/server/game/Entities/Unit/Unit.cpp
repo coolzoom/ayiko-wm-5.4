@@ -2906,7 +2906,7 @@ SpellMissInfo Unit::SpellHitResult(Unit* victim, SpellInfo const* spell, bool Ca
         return SPELL_MISS_EVADE;
 
     // Try victim reflect spell
-    if (CanReflect)
+    if (CanReflect && !(isPet() || isGuardian()))
     {
         int32 reflectchance = victim->GetTotalAuraModifier(SPELL_AURA_REFLECT_SPELLS);
         Unit::AuraEffectList const& mReflectSpellsSchool = victim->GetAuraEffectsByType(SPELL_AURA_REFLECT_SPELLS_SCHOOL);
@@ -7342,6 +7342,12 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
         {
             switch (dummySpell->Id)
             {
+                case 88819: // Daybreak
+                {
+                    int32 bp1 = (triggerAmount / 100.0f) * damage;
+                    CastCustomSpell(121129, SPELLVALUE_BASE_POINT1, damage, victim, true);
+                    return true;
+                }
                 case 96887: // Variable Pulse Lightning Capacitor
                 case 97119: // Variable Pulse Lightning Capacitor (Heroic)
                 {
@@ -11273,14 +11279,12 @@ Unit* Unit::GetMeleeHitRedirectTarget(Unit* victim, SpellInfo const* spellInfo)
     for (AuraEffectList::const_iterator i = hitTriggerAuras.begin(); i != hitTriggerAuras.end(); ++i)
     {
         if (Unit* magnet = (*i)->GetBase()->GetCaster())
-            if (_IsValidAttackTarget(magnet, spellInfo) && magnet->IsWithinLOSInMap(this)
-                && (!spellInfo || (spellInfo->CheckExplicitTarget(this, magnet) == SPELL_CAST_OK
-                && spellInfo->CheckTarget(this, magnet, false) == SPELL_CAST_OK)))
-                if (roll_chance_i((*i)->GetAmount()))
-                {
-                    (*i)->GetBase()->DropCharge(AURA_REMOVE_BY_EXPIRE);
-                    return magnet;
-                }
+            if (_IsValidAttackTarget(magnet, spellInfo)
+                && IsInRange(magnet, 0.0f, (*i)->GetSpellInfo()->Effects[(*i)->GetEffIndex()].CalcRadius()))
+            {
+                (*i)->GetBase()->DropCharge(AURA_REMOVE_BY_EXPIRE);
+                return magnet;
+            }
     }
     return victim;
 }
@@ -11912,10 +11916,17 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
             break;
         }
         case SPELLFAMILY_MAGE:
-            // Ice Lance
-            if (spellProto->SpellIconID == 186)
-                if (victim->HasAuraState(AURA_STATE_FROZEN, spellProto, this))
-                    DoneTotalMod *= 4.0f;
+
+            switch (spellProto->Id)
+            {
+                // Ice lance
+                case 30455:
+                    if (victim->HasAuraState(AURA_STATE_FROZEN, spellProto, this))
+                        DoneTotalMod *= 4.0f;
+                    if (AuraEffect* fingers = GetAuraEffect(44544, EFFECT_1))
+                        AddPct(DoneTotalMod, fingers->GetAmount());
+                    break;
+            }
 
             // Torment the weak
             if (spellProto->GetSchoolMask() & SPELL_SCHOOL_MASK_ARCANE)
@@ -11963,11 +11974,17 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                 if (uint8 count = victim->GetDoTsByCaster(GetOwnerGUID()))
                     AddPct(DoneTotalMod, 30 * count);
             }
-            // Doom Bolt (Doomguard)
-            else if (spellProto->Id == 85692)
+
+            switch (spellProto->Id)
             {
-                if (Player * player = GetCharmerOrOwnerPlayerOrPlayerItself())
-                    DoneTotal += (player->SpellBaseDamageBonusDone(spellProto->GetSchoolMask()) * 0.9f);
+                case 85692: // Doom Bolt (Doomguard)
+                    if (Player * player = GetCharmerOrOwnerPlayerOrPlayerItself())
+                        DoneTotal += (player->SpellBaseDamageBonusDone(spellProto->GetSchoolMask()) * 0.9f);
+                    break;
+                case 42223: // Rain of Fire
+                    if (victim->HasAura(348, GetGUID()))
+                        AddPct(DoneTotalMod, 50);
+                    break;
             }
             break;
         case SPELLFAMILY_DEATHKNIGHT:
@@ -12977,8 +12994,13 @@ bool Unit::IsImmunedToDamage(SpellInfo const* spellInfo)
         // If m_immuneToSchool type contain this school type, IMMUNE damage.
         SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
         for (SpellImmuneList::const_iterator itr = schoolList.begin(); itr != schoolList.end(); ++itr)
-            if (itr->type & shoolMask && !spellInfo->CanPierceImmuneAura(sSpellMgr->GetSpellInfo(itr->spellId)))
+        {
+            SpellInfo const* itrInfo = sSpellMgr->GetSpellInfo(itr->spellId);
+            if (itr->type & shoolMask
+                && !(itrInfo->IsPositive() && spellInfo->IsPositive())
+                && !spellInfo->CanPierceImmuneAura(sSpellMgr->GetSpellInfo(itr->spellId)))
                 return true;
+        }
     }
 
     // If m_immuneToDamage type contain magic, IMMUNE damage.
@@ -13062,6 +13084,9 @@ bool Unit::IsImmunedToSpell(SpellInfo const* spellInfo)
 bool Unit::IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) const
 {
     if (!spellInfo || !spellInfo->Effects[index].IsEffect())
+        return false;
+
+    if (spellInfo->Attributes & SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY)
         return false;
 
     // If m_immuneToEffect type contain this effect type, IMMUNE effect.
@@ -17433,7 +17458,8 @@ Unit* Unit::SelectNearbyTarget(Unit* exclude, float dist) const
     // remove not LoS targets
     for (std::list<Unit*>::iterator tIter = targets.begin(); tIter != targets.end();)
     {
-        if (!IsWithinLOSInMap(*tIter) || (*tIter)->isTotem() || (*tIter)->isSpiritService() || (*tIter)->GetCreatureType() == CREATURE_TYPE_CRITTER || !IsValidAttackTarget(*tIter))
+        // Add another distance check because the AnyUnfriendlyUnit check includes target size
+        if (GetExactDist(*tIter) > dist || !IsWithinLOSInMap(*tIter) || (*tIter)->isTotem() || (*tIter)->isSpiritService() || (*tIter)->GetCreatureType() == CREATURE_TYPE_CRITTER || !IsValidAttackTarget(*tIter))
             targets.erase(tIter++);
         else
             ++tIter;
@@ -20193,7 +20219,7 @@ void Unit::ExitVehicle(Position const* exitPosition)
         return;
 
     GetVehicleBase()->RemoveAurasByType(SPELL_AURA_CONTROL_VEHICLE, GetGUID());
-    _ExitVehicle(exitPosition);
+    //_ExitVehicle(exitPosition);
 }
 
 void Unit::_ExitVehicle(Position const* exitPosition)
@@ -20217,17 +20243,12 @@ void Unit::_ExitVehicle(Position const* exitPosition)
 
     SetControlled(false, UNIT_STATE_ROOT);      // SMSG_MOVE_FORCE_UNROOT, ~MOVEMENTFLAG_ROOT
 
-    bool isFixedEjectPos = true;
-    Position pos = { 0.0f, 0.0f, 0.0f, 0.0f };
-    Position ejectPos = getVehicleEjectPos();
-    if (pos == ejectPos)                          // Exit position not specified
-    {
-        vehicle->GetBase()->GetPosition(&pos);  // This should use passenger's current position, leaving it as it is now
-        // because we calculate positions incorrect (sometimes under map)
-        isFixedEjectPos = false;
-    }
+    Position pos;
+    if (!exitPosition)                          // Exit position not specified
+        pos = vehicle->GetBase()->GetPosition();  // This should use passenger's current position, leaving it as it is now
+    // because we calculate positions incorrect (sometimes under map)
     else
-        pos = ejectPos;
+        pos = *exitPosition;
 
     AddUnitState(UNIT_STATE_MOVE);
 
@@ -20244,22 +20265,28 @@ void Unit::_ExitVehicle(Position const* exitPosition)
         SendMessageToSet(&data, false);
     }
 
+    float height = pos.GetPositionZ();
     Movement::MoveSplineInit init(this);
-    init.MoveTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
+
+    // Creatures without inhabit type air should begin falling after exiting the vehicle
+    if (GetTypeId() == TYPEID_UNIT && !CanFly() && height > GetMap()->GetWaterOrGroundLevel(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), &height) + 0.1f)
+        init.SetFall();
+
+    init.MoveTo(pos.GetPositionX(), pos.GetPositionY(), height);
     init.SetFacing(GetOrientation());
     init.SetTransportExit();
     init.Launch();
 
-    //GetMotionMaster()->MoveFall();            // Enable this once passenger positions are calculater properly (see above)
+    DisableSpline();
 
     if (player)
         player->ResummonPetTemporaryUnSummonedIfAny();
 
     SendMovementFlagUpdate();
 
-    if (vehicle->GetBase()->HasUnitTypeMask(UNIT_MASK_MINION))
-        if (((Minion*)vehicle->GetBase())->GetOwner() == this)
-            vehicle->Dismiss();
+    if (vehicle->GetBase()->HasUnitTypeMask(UNIT_MASK_MINION) && vehicle->GetBase()->GetTypeId() == TYPEID_UNIT)
+    if (((Minion*)vehicle->GetBase())->GetOwner() == this)
+        vehicle->GetBase()->ToCreature()->DespawnOrUnsummon(1);
 
     if (HasUnitTypeMask(UNIT_MASK_ACCESSORY))
     {

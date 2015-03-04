@@ -442,7 +442,7 @@ class boss_tsulong : public CreatureScript
                 me->SetDisplayId(DISPLAY_TSULON_DAY);
 
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_PACIFIED);
 
                 if (attacker && attacker->GetTypeId() == TYPEID_PLAYER)
                     me->GetMap()->ToInstanceMap()->PermBindAllPlayers(attacker->ToPlayer());

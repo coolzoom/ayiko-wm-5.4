@@ -2559,7 +2559,7 @@ class spell_pri_power_word_shield : public SpellScriptLoader
             Unit * const target = GetTarget();
             Unit * const attacker = dmgInfo.GetAttacker();
 
-            if (!attacker || attacker == target)
+            if (!attacker || attacker == target || (dmgInfo.GetSpellInfo() && dmgInfo.GetSpellInfo()->Id == REFLECTIVE_SHIELD_TRIGGERED))
                 return;
 
             Unit * const caster = GetCaster();

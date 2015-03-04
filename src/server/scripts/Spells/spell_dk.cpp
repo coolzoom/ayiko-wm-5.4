@@ -1692,13 +1692,24 @@ class spell_dk_blood_boil : public SpellScriptLoader
         {
             PrepareSpellScript(spell_dk_blood_boil_SpellScript);
 
+            bool runicGranted;
+            bool Load()
+            {
+                runicGranted = false;
+                return true;
+            }
+
             void HandleOnHit()
             {
                 if (Player* player = GetCaster()->ToPlayer())
                 {
                     if (Unit* target = GetHitUnit())
                     {
-                        GetCaster()->CastSpell(GetCaster(), DK_SPELL_BLOOD_BOIL_TRIGGERED, true);
+                        if (!runicGranted)
+                        {
+                            GetCaster()->CastSpell(GetCaster(), DK_SPELL_BLOOD_BOIL_TRIGGERED, true);
+                            runicGranted = true;
+                        }
 
                         if (player->HasAura(DK_SPELL_SCARLET_FEVER))
                         {

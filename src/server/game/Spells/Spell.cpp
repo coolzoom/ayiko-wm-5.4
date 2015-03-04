@@ -588,7 +588,7 @@ Spell::Spell(Unit* caster, SpellInfo const* info, TriggerCastFlags triggerFlags,
     // Patch 1.2 notes: Spell Reflection no longer reflects abilities
     m_canReflect = m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && !(m_spellInfo->Attributes & SPELL_ATTR0_ABILITY)
         && !(m_spellInfo->AttributesEx & SPELL_ATTR1_CANT_BE_REFLECTED) && !(m_spellInfo->Attributes & SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY)
-        && !m_spellInfo->IsPassive() && !m_spellInfo->IsPositive();
+        && !m_spellInfo->IsPassive() && !m_spellInfo->IsPositive() && !m_spellInfo->IsTargetingArea();
 
     CleanupTargetList();
     m_effectExecuteData.clear();
@@ -4277,7 +4277,9 @@ void Spell::finish(bool ok)
 
         // Take mods after trigger spell (needed for 14177 to affect 48664)
         // mods are taken only on succesfull cast and independantly from targets of the spell
-        player->RemoveSpellMods(*this);
+        if (!m_spellInfo->Speed || m_spellInfo->IsChanneled())
+            player->RemoveSpellMods(*this);
+
         player->SetSpellModTakingSpell(this, false);
     }
 

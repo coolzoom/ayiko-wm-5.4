@@ -831,7 +831,10 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         m_caster->CastSpell(unitTarget, 130320, true);
                         break;
                     case 100784:// Blackout Kick
-                        damage = CalculateMonkMeleeAttacks(m_caster, 7.12f);
+                        if (unitTarget != m_targets.GetUnitTarget())
+                            damage = CalculateMonkMeleeAttacks(m_caster, 3.56f);
+                        else
+                            damage = CalculateMonkMeleeAttacks(m_caster, 7.12f);
                         break;
                     case 124335:// Swift Reflexes
                         damage = CalculateMonkMeleeAttacks(m_caster, 0.3f);
@@ -2130,22 +2133,6 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
                         bastionOfGlory->SetDuration(1);
                     }
                 }
-                break;
-            }
-            case 121129:// Daybreak
-            {
-                uint32 count = 0;
-                for (std::list<TargetInfo>::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
-                    if (ihit->effectMask & (1 << effIndex))
-                        ++count;
-
-                count--; // Remove main target
-
-                if (count > 0)
-                    addhealth /= count;
-
-                addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
-
                 break;
             }
             // Glyph of Prayer of Mending

@@ -975,21 +975,28 @@ class spell_scary_fog_dot : public SpellScriptLoader
             {
                 targets.clear();
 
-                Map::PlayerList const& players = GetCaster()->GetMap()->GetPlayers();
-                if (!players.isEmpty())
+                if (Unit* pCaster = GetCaster())
+                {
+                    Map::PlayerList const& players = pCaster->GetMap()->GetPlayers();
+
                     for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                    {
                         if (Player* player = itr->GetSource())
+                        {
                             if (player->GetExactDist2d(GetCaster()->GetPositionX(), GetCaster()->GetPositionY()) >= HEROIC_DIST_TO_VORTEX)
                                 targets.push_back(player);
+                        }
+                    }
 
-                for (auto itr : targets)
-                {
-                    if (itr->ToUnit())
+                    for (auto itr : targets)
                     {
-                        if (auto const scaryFog = GetCaster()->AddAura(SPELL_SCARY_FOG_STACKS, itr->ToUnit()))
+                        if (itr->ToUnit())
                         {
-                            scaryFog->SetDuration(35000);
-                            scaryFog->SetMaxDuration(35000);
+                            if (auto const scaryFog = pCaster->AddAura(SPELL_SCARY_FOG_STACKS, itr->ToUnit()))
+                            {
+                                scaryFog->SetDuration(35000);
+                                scaryFog->SetMaxDuration(35000);
+                            }
                         }
                     }
                 }
@@ -1044,12 +1051,15 @@ class spell_scary_fog_stacks : public SpellScriptLoader
                 {
                     if (itr->ToUnit() && itr->ToUnit()->GetEntry() != NPC_LEI_SHI_HIDDEN)
                     {
-                        if (auto const scary = GetCaster()->GetAura(SPELL_SCARY_FOG_STACKS))
+                        if (Unit* pCaster = GetCaster())
                         {
-                            if (auto const scaryTarget = itr->ToUnit()->GetAura(SPELL_SCARY_FOG_STACKS))
-                                scaryTarget->SetStackAmount(scary->GetStackAmount());
-                            else if (auto const scaryTarget = GetCaster()->AddAura(SPELL_SCARY_FOG_STACKS, itr->ToUnit()))
-                                scaryTarget->SetStackAmount(scary->GetStackAmount());
+                            if (auto const scary = pCaster->GetAura(SPELL_SCARY_FOG_STACKS))
+                            {
+                                if (auto const scaryTarget = itr->ToUnit()->GetAura(SPELL_SCARY_FOG_STACKS))
+                                    scaryTarget->SetStackAmount(scary->GetStackAmount());
+                                else if (auto const scaryTarget = pCaster->AddAura(SPELL_SCARY_FOG_STACKS, itr->ToUnit()))
+                                    scaryTarget->SetStackAmount(scary->GetStackAmount());
+                            }
                         }
                     }
                 }

@@ -2261,7 +2261,7 @@ void AuraEffect::HandleModInvisibility(AuraApplication const* aurApp, uint8 mode
     }
     else
     {
-        if (!target->HasAuraType(SPELL_AURA_MOD_INVISIBILITY))
+        if (!target->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_INVISIBILITY, GetMiscValue()))
         {
             // if not have different invisibility auras.
             // remove glow vision
@@ -2379,7 +2379,7 @@ void AuraEffect::HandleModStealth(AuraApplication const* aurApp, uint8 mode, boo
     {
         target->m_stealth.AddValue(type, -GetAmount());
 
-        if (!target->HasAuraType(SPELL_AURA_MOD_STEALTH)) // if last SPELL_AURA_MOD_STEALTH
+        if (!target->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_STEALTH, GetMiscValue())) // if last SPELL_AURA_MOD_STEALTH
         {
             target->m_stealth.DelFlag(type);
 

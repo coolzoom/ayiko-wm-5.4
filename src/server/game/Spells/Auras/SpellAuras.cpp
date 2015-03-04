@@ -1295,6 +1295,7 @@ bool Aura::CanBeSaved() const
         case 124458: // Healing Spheres tracker
         case 106284: // Gathering Muddy Water
         case 113901: // Demonic Gateway stacking aura
+        case 108446: // Soul link
             return false;
         default:
             break;
@@ -3284,43 +3285,50 @@ void UnitAura::FillTargetMap(std::map<Unit*, uint32> & targets, Unit* caster)
         {
             float radius = GetSpellInfo()->Effects[effIndex].CalcRadius(caster);
 
-            if (!GetUnitOwner()->HasUnitState(UNIT_STATE_ISOLATED))
+            bool isolated = GetUnitOwner()->HasUnitState(UNIT_STATE_ISOLATED);
+            switch (GetSpellInfo()->Effects[effIndex].Effect)
             {
-                switch (GetSpellInfo()->Effects[effIndex].Effect)
+                case SPELL_EFFECT_APPLY_AREA_AURA_PARTY:
+                case SPELL_EFFECT_APPLY_AREA_AURA_RAID:
                 {
-                    case SPELL_EFFECT_APPLY_AREA_AURA_PARTY:
-                    case SPELL_EFFECT_APPLY_AREA_AURA_RAID:
+                    if (!GetUnitOwner()->IsAlive())
+                        break;
+
+                    targetList.push_back(GetUnitOwner());
+                    if (!isolated)
                     {
-                        targetList.push_back(GetUnitOwner());
                         Trinity::AnyGroupedUnitInObjectRangeCheck u_check(GetUnitOwner(), GetUnitOwner(), radius, GetSpellInfo()->Effects[effIndex].Effect == SPELL_EFFECT_APPLY_AREA_AURA_RAID);
                         Trinity::UnitListSearcher<Trinity::AnyGroupedUnitInObjectRangeCheck> searcher(GetUnitOwner(), targetList, u_check);
                         Trinity::VisitNearbyObject(GetOwner(), radius, searcher);
-                        break;
                     }
-                    case SPELL_EFFECT_APPLY_AREA_AURA_FRIEND:
+                    break;
+                }
+                case SPELL_EFFECT_APPLY_AREA_AURA_FRIEND:
+                {
+                    targetList.push_back(GetUnitOwner());
+                    if (!isolated)
                     {
-                        targetList.push_back(GetUnitOwner());
                         Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(GetUnitOwner(), GetUnitOwner(), radius);
                         Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(GetUnitOwner(), targetList, u_check);
                         Trinity::VisitNearbyObject(GetOwner(), radius, searcher);
-                        break;
                     }
-                    case SPELL_EFFECT_APPLY_AREA_AURA_ENEMY:
-                    {
-                        Trinity::AnyAoETargetUnitInObjectRangeCheck u_check(GetUnitOwner(), GetUnitOwner(), radius); // No GetCharmer in searcher
-                        Trinity::UnitListSearcher<Trinity::AnyAoETargetUnitInObjectRangeCheck> searcher(GetUnitOwner(), targetList, u_check);
-                        Trinity::VisitNearbyObject(GetOwner(), radius, searcher);
-                        break;
-                    }
-                    case SPELL_EFFECT_APPLY_AREA_AURA_PET:
-                        targetList.push_back(GetUnitOwner());
-                    case SPELL_EFFECT_APPLY_AREA_AURA_OWNER:
-                    {
-                        if (Unit* owner = GetUnitOwner()->GetCharmerOrOwner())
-                            if (GetUnitOwner()->IsWithinDistInMap(owner, radius))
-                                targetList.push_back(owner);
-                        break;
-                    }
+                    break;
+                }
+                case SPELL_EFFECT_APPLY_AREA_AURA_ENEMY:
+                {
+                    Trinity::AnyAoETargetUnitInObjectRangeCheck u_check(GetUnitOwner(), GetUnitOwner(), radius); // No GetCharmer in searcher
+                    Trinity::UnitListSearcher<Trinity::AnyAoETargetUnitInObjectRangeCheck> searcher(GetUnitOwner(), targetList, u_check);
+                    Trinity::VisitNearbyObject(GetOwner(), radius, searcher);
+                    break;
+                }
+                case SPELL_EFFECT_APPLY_AREA_AURA_PET:
+                case SPELL_EFFECT_APPLY_AREA_AURA_OWNER:
+                {
+                    targetList.push_back(GetUnitOwner());
+                    if (Unit* owner = GetUnitOwner()->GetCharmerOrOwner())
+                        if (!isolated && GetUnitOwner()->IsWithinDistInMap(owner, radius))
+                            targetList.push_back(owner);
+                    break;
                 }
             }
         }

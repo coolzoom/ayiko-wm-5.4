@@ -5943,10 +5943,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->AttributesEx4 = 0;
                     spellInfo->SetDurationIndex(39);
                     break;
-                case 108415: // Soul Link
-                    spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_DUMMY;
-                    spellInfo->Effects[0].Effect = SPELL_EFFECT_APPLY_AURA;
-                    break;
                 case 104242: // Unending Breath (from Soulburn)
                     spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_TAKE_DAMAGE;
                     break;

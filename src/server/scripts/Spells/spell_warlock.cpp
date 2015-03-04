@@ -883,47 +883,6 @@ class spell_warl_flames_of_xoroth : public SpellScriptLoader
         }
 };
 
-// Soul Link - 108446
-class spell_warl_soul_link_dummy : public SpellScriptLoader
-{
-    public:
-        spell_warl_soul_link_dummy() : SpellScriptLoader("spell_warl_soul_link_dummy") { }
-
-        class spell_warl_soul_link_dummy_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_warl_soul_link_dummy_AuraScript);
-
-            void HandleRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
-            {
-                if (!GetCaster() || !GetTarget())
-                    return;
-
-                if (Player* player = GetCaster()->ToPlayer())
-                {
-                    if (GetTarget()->GetGUID() == player->GetGUID())
-                        if (Pet* pet = player->GetPet())
-                            pet->RemoveAura(WARLOCK_SOUL_LINK_DUMMY_AURA);
-
-                    player->RemoveAura(WARLOCK_SOUL_LINK_DUMMY_AURA);
-
-                    if (Aura *grimoireOfSacrifice = player->GetAura(WARLOCK_GRIMOIRE_OF_SACRIFICE))
-                        if (grimoireOfSacrifice->GetEffect(EFFECT_6))
-                                grimoireOfSacrifice->GetEffect(EFFECT_6)->SetAmount(0);
-                }
-            }
-
-            void Register()
-            {
-                OnEffectRemove += AuraEffectApplyFn(spell_warl_soul_link_dummy_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_warl_soul_link_dummy_AuraScript();
-        }
-};
-
 // Called by Shadowflame - 47960
 // Molten Core - 122351
 class spell_warl_molten_core_dot : public SpellScriptLoader
@@ -3077,6 +3036,37 @@ class spell_warl_havoc : public SpellScriptLoader
         }
 };
 
+class spell_warl_soul_link : public SpellScriptLoader
+{
+    public:
+        spell_warl_soul_link() : SpellScriptLoader("spell_warl_soul_link") { }
+
+        class spell_warl_soul_link_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_warl_soul_link_SpellScript);
+
+            void HandleOnHit()
+            {
+                Unit* caster = GetCaster();
+                if (caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                if (Pet* pet = caster->ToPlayer()->GetPet())
+                    pet->CastSpell(pet, 108446, true);
+            }
+
+            void Register()
+            {
+                OnHit += SpellHitFn(spell_warl_soul_link_SpellScript::HandleOnHit);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_warl_soul_link_SpellScript();
+        }
+};
+
 void AddSC_warlock_spell_scripts()
 {
     new spell_warl_health_funnel();
@@ -3093,7 +3083,7 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_agony();
     new spell_warl_grimoire_of_sacrifice();
     new spell_warl_flames_of_xoroth();
-    new spell_warl_soul_link_dummy();
+    new spell_warl_soul_link();
     new spell_warl_molten_core_dot();
     new spell_warl_decimate();
     new spell_warl_demonic_call();

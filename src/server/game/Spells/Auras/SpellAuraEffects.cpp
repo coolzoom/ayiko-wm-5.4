@@ -6910,6 +6910,15 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                     }
                     break;
                 }
+                case 108446: // Soul link
+                    if (target->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    int32 amount = GetAmount();
+                    target->CastCustomSpell(target, 108447, &amount, &amount, NULL, true);
+                    if (AuraEffect* aurEff = target->GetAuraEffect(GetId(), GetEffIndex()))
+                        aurEff->SetAmount(0);
+                    break;
             }
             break;
         default:

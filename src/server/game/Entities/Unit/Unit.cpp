@@ -6652,12 +6652,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                     target->RemoveAurasByType(SPELL_AURA_PERIODIC_LEECH);
                     return true;
                 }
-                case 108446: // Soul Link (heal)
-                {
-                    int32 bp = CalculatePct(damage, triggerAmount);
-                    CastCustomSpell(this, 108447, &bp, &bp, NULL, true);
-                    return true;
-                }
                 default:
                     break;
             }
@@ -8676,7 +8670,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
 
 // Used in case when access to whole aura is needed
 // All procs should be handled like this...
-bool Unit::HandleAuraProc(Unit* victim, uint32 /*damage*/, Aura *triggeredByAura, SpellInfo const* procSpell, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 cooldown, bool * handled)
+bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura *triggeredByAura, SpellInfo const* procSpell, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 cooldown, bool * handled)
 {
     SpellInfo const* dummySpell = triggeredByAura->GetSpellInfo();
     uint32 const fakeCooldownId = std::numeric_limits<uint32>::max() - dummySpell->Id;
@@ -8749,6 +8743,26 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 /*damage*/, Aura *triggeredByAura
                 break;
             }
             break;
+        }
+        case SPELLFAMILY_WARLOCK:
+        {
+            switch (dummySpell->Id)
+            {
+                case 108446: // Soul link
+                {
+                    *handled = true;
+                    if (GetTypeId() != TYPEID_PLAYER)
+                        return false;
+
+                    if (AuraEffect* dummy = triggeredByAura->GetEffect(EFFECT_1))
+                    {
+                        int32 amount = dummy->GetAmount() + damage;
+                        amount = CalculatePct(amount, dummy->GetBaseAmount());
+                        dummy->SetAmount(amount);
+                        break;
+                    }
+                }
+            }
         }
         case SPELLFAMILY_MAGE:
         {
@@ -16469,6 +16483,7 @@ bool InitTriggerAuraData()
     isTriggerAura[SPELL_AURA_PROC_TRIGGER_SPELL_COPY] = true;
     isTriggerAura[SPELL_AURA_MOD_POWER_REGEN_PERCENT] = true;
     isTriggerAura[SPELL_AURA_ENABLE_ALT_POWER] = true;
+    isTriggerAura[SPELL_AURA_PERIODIC_DUMMY] = true;
 
     isNonTriggerAura[SPELL_AURA_MOD_POWER_REGEN] = true;
     isNonTriggerAura[SPELL_AURA_REDUCE_PUSHBACK] = true;

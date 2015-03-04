@@ -77,6 +77,7 @@ enum eShaOfFearEvents
     EVENT_PENETRATING_BOLT  = 5,
     EVENT_OMINOUS_CACKLE    = 6,
     EVENT_EVADE             = 7,
+    EVENT_BERSERK           = 8,
     EVENT_SET_EVADE_TRUE    = 10,
     EVENT_HUDDLE_IN_TERROR  = 11,
     EVENT_WATERSPOUT        = 12,
@@ -125,9 +126,10 @@ struct BowmanData
     float y;
     float z;
     float o;
+    bool active;
 };
 
-static const BowmanData bowmenData[] = // DNC
+static BowmanData bowmenData[] = // DNC
 {
     { NPC_YANG_GUOSHI, 119593, -1214.795f, -2824.823f, 41.24303f, 3.506719f },
     { NPC_CHENG_KANG, 119693, -1075.198f, -2577.711f, 15.828019f, 1.725f },
@@ -158,7 +160,7 @@ static const Position spawnTerrorPos[4] =
 
 enum eShaPhases
 {
-    PHASE_TERRACE,
+    PHASE_TERRACE       = 1,
     PHASE_DREAD_EXPANSE
 };
 
@@ -197,26 +199,48 @@ class boss_sha_of_fear : public CreatureScript
             {
                 pInstance = creature->GetInstanceScript();
                 introDone = false;
+                isDuringP2Transition = false;
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+
+                for (int i = 0; i < 3; ++i)
+                {
+                    BowmanData* data = new BowmanData();
+                    data->entry = bowmenData[i].entry;
+                    data->spellId = bowmenData[i].spellId;
+                    data->x = bowmenData[i].x;
+                    data->y = bowmenData[i].y;
+                    data->z = bowmenData[i].z;
+                    data->o = bowmenData[i].o;
+                    data->active = false;
+
+                    pandaMap.insert(std::make_pair(data, data->entry));
+                }
             }
 
             InstanceScript* pInstance;
-            EventMap events;
             EventMap m_mEvents;
 
             uint8 attacksCounter;
             uint8 terrorCounter;
 
-            uint32 m_uiPhase;
+            uint8 m_uiPhase;
 
             bool m_canEvade;
+            bool isDuringP2Transition;
             bool isSecondEvent;
+
+            std::unordered_map<BowmanData*, uint32> pandaMap;
 
             void Reset() override
             {
                 _Reset();
 
+
+                if (isDuringP2Transition)
+                    return;
+
                 m_canEvade = true;
+                isDuringP2Transition = false;
 
                 me->AddAura(72242, me);
                 me->SetReactState(REACT_DEFENSIVE);
@@ -224,39 +248,43 @@ class boss_sha_of_fear : public CreatureScript
 
                 summons.DespawnAll();
 
-                events.Reset();
+                SetPhase(0);
 
                 attacksCounter = 0;
                 terrorCounter  = 0;
 
-                bowmenStatus[0] = false;
-                bowmenStatus[1] = false;
-                bowmenStatus[2] = false;
+                for (std::unordered_map<BowmanData*, uint32>::iterator itr = pandaMap.begin(); itr != pandaMap.end(); ++itr)
+                {
+                    itr->first->active = false;
+                }
 
                 isSecondEvent = false;
 
                 if (pInstance)
                 {
                     pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-
-                    if (pInstance->GetData(SPELL_RITUAL_OF_PURIFICATION))
-                        me->AddAura(SPELL_RITUAL_OF_PURIFICATION, me);
                 }
-
-                SetPhase(PHASE_TERRACE);
             }
 
             void SetPhase(uint8 m_phase)
             {
-                m_uiPhase = m_phase;
-                events.SetPhase(m_phase);
+                events.Reset();
 
                 switch (m_phase)
                 {
+                case PHASE_TERRACE:
+                    events.ScheduleEvent(EVENT_CHECK_MELEE, 1000);
+                    events.ScheduleEvent(EVENT_EERIE_SKULL, 5000);
+                    events.ScheduleEvent(EVENT_CHECK_ENERGY, 1000);
+                    events.ScheduleEvent(EVENT_FIRST_TERRORS, 30000);
+                    events.ScheduleEvent(EVENT_OMINOUS_CACKLE, 35000);
+                    break;
                 case PHASE_DREAD_EXPANSE:
                     summons.DespawnAll();
-                    events.Reset();
                     me->SetVisible(false);
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                    SetCombatMovement(true);
                     events.ScheduleEvent(EVENT_SET_EVADE_TRUE, 2000);
                     m_canEvade = false;
                     Talk(SAY_PHASE_2);
@@ -274,7 +302,77 @@ class boss_sha_of_fear : public CreatureScript
 
                     events.ScheduleEvent(EVENT_CHECK_ENERGY, 1000);
 
-                    me->SetHealth(me->GetMaxHealth() / 66.6f * 100);
+                    me->SetHealth((me->GetMaxHealth() / 66.6f) * 100);
+                    break;
+                }
+
+                m_uiPhase = m_phase;
+                //events.SetPhase(m_phase);
+            }
+
+            void GetAvailablePandaAndSummon()
+            {
+                std::unordered_map<BowmanData*, uint32> newPandaMap;
+                newPandaMap.reserve(sizeof(pandaMap));
+                std::copy(pandaMap.begin(), pandaMap.end(), std::inserter(newPandaMap, newPandaMap.begin()));
+
+                TC_LOG_ERROR("scripts", "Map size of PandaMap is %u, newPandaMap %u", pandaMap.size(), newPandaMap.size());
+
+                std::unordered_map<BowmanData*, uint32>::iterator itr = newPandaMap.begin();
+
+                for (;  itr != newPandaMap.end();)
+                {
+                    if (itr->first->active)
+                    {
+                        TC_LOG_ERROR("scripts", "erased itr because npc is already active (%u)", itr->first->entry);
+                        itr = newPandaMap.erase(itr);
+                    }
+                    else
+                        ++itr;
+                }
+
+                itr = newPandaMap.begin();
+
+                TC_LOG_ERROR("scripts", "size of newPandaMap is now (%u)", newPandaMap.size());
+
+                if (!newPandaMap.empty())
+                {
+                    if (newPandaMap.size() > 1)
+                        std::advance(itr, std::rand() % (newPandaMap.size() - 1));
+                    
+                    if (itr != newPandaMap.cend())
+                    {
+                        for (std::unordered_map<BowmanData*, uint32>::const_iterator finder = pandaMap.begin(); finder != pandaMap.end(); ++finder)
+                        {
+                            if (finder->first->entry == itr->second)
+                            {
+                                TC_LOG_ERROR("scripts", "summon propagated for entry %u", finder->first->entry);
+                                PropagateSummon(finder);
+                                return;
+                            }
+                        }
+                    }
+                }
+
+                itr = pandaMap.begin();
+
+                std::advance(itr, std::rand() % (pandaMap.size() - 1));
+
+                if (itr != pandaMap.cend())
+                    DoCast(me, itr->first->spellId);
+
+                TC_LOG_ERROR("scripts", "iterator set to pandaMap.begin(); because no inactive panda could be found. advanced to position %u", itr->first->entry);
+            }
+
+            void PropagateSummon(std::unordered_map<BowmanData*, uint32>::const_iterator &itr)
+            {
+                if (Creature* pBowman = me->SummonCreature(itr->first->entry, itr->first->x, itr->first->y, itr->first->z, itr->first->o))
+                {
+                    DoCast(me, itr->first->spellId);
+                    itr->first->active = true;
+
+                    if (pBowman->AI())
+                        pBowman->AI()->DoAction(ACTION_BOWMAN_AGGRESSIVE);
                 }
             }
 
@@ -295,12 +393,16 @@ class boss_sha_of_fear : public CreatureScript
 
                 for (uint8 i = 0; i < 3; ++i)
                 {
-                    events.ScheduleEvent(mEvents[i], urand(12000, 17000) + i*(urand(15000, 19000)), 0, PHASE_DREAD_EXPANSE);
+                    events.ScheduleEvent(mEvents[i], urand(12000, 17000) + i*(urand(15000, 19000)));
                 }
             }
 
             void EnterCombat(Unit* /*attacker*/) override
             {
+
+                if (isDuringP2Transition)
+                    return;
+
                 me->SetPower(POWER_ENERGY, 0);
 
                 DoCast(me, SPELL_CUSTOM_ENERGY_REGEN, true);
@@ -312,12 +414,6 @@ class boss_sha_of_fear : public CreatureScript
                     DoZoneInCombat();
                     Talk(SAY_AGGRO);
                 }
-
-                events.ScheduleEvent(EVENT_CHECK_MELEE, 1000, 0, PHASE_TERRACE);
-                events.ScheduleEvent(EVENT_EERIE_SKULL, 5000, 0, PHASE_TERRACE);
-                events.ScheduleEvent(EVENT_CHECK_ENERGY, 1000);
-                events.ScheduleEvent(EVENT_FIRST_TERRORS, 30000, 0, PHASE_TERRACE);
-                events.ScheduleEvent(EVENT_OMINOUS_CACKLE, 35000, 0, PHASE_TERRACE);
 
                 SetPhase(PHASE_TERRACE);
             }
@@ -355,6 +451,7 @@ class boss_sha_of_fear : public CreatureScript
                             if (pPlayer->HasAura(SPELL_CHAMPION_OF_THE_LIGHT))
                                 pPlayer->RemoveAurasDueToSpell(SPELL_CHAMPION_OF_THE_LIGHT);
 
+                            pPlayer->RemoveAurasDueToSpell(SPELL_DREAD_EXPANSE);
                             pPlayer->RemoveAurasDueToSpell(SPELL_FEARLESS);
                         }
                     }
@@ -399,20 +496,19 @@ class boss_sha_of_fear : public CreatureScript
                 switch (summon->GetEntry())
                 {
                     case NPC_YANG_GUOSHI:
-                        bowmenStatus[0] = true;
-                        break;
                     case NPC_CHENG_KANG:
-                        bowmenStatus[1] = true;
-                        break;
-                    case NPC_JINLUN_KUN:
-                        for (int i = 0; i < 3; ++i)
-                            bowmenStatus[i] = false;
+                    case NPC_JINLUN_KUN:               
+                        for (std::unordered_map<BowmanData*, uint32>::iterator itr = pandaMap.begin(); itr != pandaMap.end(); ++itr)
+                        {
+                            if (itr->first->entry == summon->GetEntry())
+                                itr->first->active = false;
+                        }
+                        if (events.GetNextEventTime(EVENT_OMINOUS_CACKLE) > 30000)
+                            events.RescheduleEvent(EVENT_OMINOUS_CACKLE, 30000);
                         break;
                     default:
                         return;
                 }
-
-                events.RescheduleEvent(EVENT_OMINOUS_CACKLE, 30000);
             }
 
             void KilledUnit(Unit* who) override
@@ -547,36 +643,11 @@ class boss_sha_of_fear : public CreatureScript
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
-                switch (events.ExecuteEvent())
+                while (uint32 eventId = events.ExecuteEvent())
                 {
-                    case EVENT_CHECK_MELEE:
+                    switch (eventId)
                     {
-                        if (Player* target = GetChampionOfLight(me))
-                            if (me->GetVictim() && me->GetVictim()->GetGUID() != target->GetGUID())
-                            {
-                                me->TauntFadeOut(me->GetVictim());
-                                DoResetThreat();
-                                AttackStart(target);
-                                me->TauntApply(target);
-                                me->AddThreat(target, 5000000.0f);
-                            }
-
-                        if (!me->IsWithinMeleeRange(me->GetVictim(), 2.0f))
-                        {
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 80.0f))
-                                me->CastSpell(target, SPELL_REACHING_ATTACK, false);
-                        }
-                        events.ScheduleEvent(EVENT_CHECK_MELEE, 1000);
-                        break;
-                    }
-                    case EVENT_EERIE_SKULL:
-                    {
-                        DoCast(SELECT_TARGET_RANDOM, SPELL_EERIE_SKULL, false, 1, 80.0f);
-                        events.ScheduleEvent(EVENT_EERIE_SKULL, 5000, 0, PHASE_TERRACE);
-                        break;
-                    }
                     case EVENT_CHECK_ENERGY:
-                    {
                         if (!pInstance)
                         {
                             events.ScheduleEvent(EVENT_CHECK_ENERGY, 1000);
@@ -603,31 +674,38 @@ class boss_sha_of_fear : public CreatureScript
 
                         events.ScheduleEvent(EVENT_CHECK_ENERGY, 1000);
                         break;
-                    }
-                    case EVENT_FIRST_TERRORS:
-                    {
-                        me->CastSpell(me, SPELL_CONJURE_TERROR_SPAWN_TICK, true);
-                        break;
-                    }
-                    case EVENT_OMINOUS_CACKLE:
-                    {
-                        for (int i = 0; i < 3; ++i)
+                    case EVENT_CHECK_MELEE:
+                        if (Player* target = GetChampionOfLight(me))
                         {
-                            if (!bowmenStatus[i])
+                            if (me->GetVictim() && me->GetVictim()->GetGUID() != target->GetGUID())
                             {
-                                if (Creature* pBowman = me->SummonCreature(bowmenData[i].entry, bowmenData[i].x, bowmenData[i].y, bowmenData[i].z, bowmenData[i].o))
-                                {
-                                    DoCast(me, bowmenData[i].spellId);
-
-                                    if (pBowman->AI())
-                                        pBowman->AI()->DoAction(ACTION_BOWMAN_AGGRESSIVE);
-                                }
-                                break;
+                                me->TauntFadeOut(me->GetVictim());
+                                DoResetThreat();
+                                AttackStart(target);
+                                me->TauntApply(target);
+                                me->AddThreat(target, 5000000.0f);
                             }
                         }
-                        events.ScheduleEvent(EVENT_OMINOUS_CACKLE, (me->GetMap()->GetDifficulty() == MAN10_HEROIC_DIFFICULTY || me->GetMap()->GetDifficulty() == MAN10_DIFFICULTY) ? 90000 : 45000, 0, PHASE_TERRACE);
+
+                        if (!me->IsWithinMeleeRange(me->GetVictim(), 2.0f))
+                        {
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 80.0f))
+                                me->CastSpell(target, SPELL_REACHING_ATTACK, false);
+                        }
+                        events.ScheduleEvent(EVENT_CHECK_MELEE, 1000);
                         break;
-                    }
+                    case EVENT_EERIE_SKULL:
+                        DoCast(SELECT_TARGET_RANDOM, SPELL_EERIE_SKULL, false, 1, 80.0f);
+                        events.ScheduleEvent(EVENT_EERIE_SKULL, 5000);
+                        break;
+                    case EVENT_FIRST_TERRORS:
+                        me->CastSpell(me, SPELL_CONJURE_TERROR_SPAWN_TICK, true);
+                        break;
+                    case EVENT_OMINOUS_CACKLE:
+                        GetAvailablePandaAndSummon();
+                        events.ScheduleEvent(EVENT_OMINOUS_CACKLE, (me->GetMap()->GetDifficulty() == MAN10_HEROIC_DIFFICULTY || me->GetMap()->GetDifficulty() == MAN10_DIFFICULTY) ? 90000 : 45000);
+                        TC_LOG_ERROR("scripts", "scheduled new ominous cackle event");
+                        break;
                     case EVENT_WATERSPOUT:
                         break;
                     case EVENT_IMPLACABLE_STRIKE:
@@ -640,9 +718,11 @@ class boss_sha_of_fear : public CreatureScript
                         DoCast(SPELL_HUDDLE_IN_TERROR);
                         break;
                     case EVENT_SET_EVADE_TRUE:
+                        isDuringP2Transition = false;
                         me->SetVisible(true);
                         me->UpdateObjectVisibility();
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                        SetCombatMovement(true);
                         DoZoneInCombat();
 
                         if (me->GetVictim())
@@ -653,6 +733,7 @@ class boss_sha_of_fear : public CreatureScript
                         break;
                     default:
                         break;
+                    }
                 }
 
                 DoMeleeAttackIfReady();
@@ -1204,9 +1285,13 @@ class npc_sha_of_fear_bowman : public CreatureScript
         void EnterCombat(Unit* ) override
         {
             Talk(SAY_AGGRO);
-            m_mLowEvents.ScheduleEvent(EVENT_DEATH_BLOSSOM, 5000);
+            events.ScheduleEvent(EVENT_DEATH_BLOSSOM, 5000);
             events.ScheduleEvent(EVENT_SHOOT, 500);
             events.ScheduleEvent(EVENT_DREAD_SPRAY, 8000);
+        }
+
+        void EnterEvadeMode()
+        {
         }
 
         void JustDied(Unit* ) override
@@ -1258,9 +1343,6 @@ class npc_sha_of_fear_bowman : public CreatureScript
 
             events.Update(diff);
 
-            if (me->GetHealthPct() < 25.f)
-                m_mLowEvents.Update(diff);
-
             if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
@@ -1281,17 +1363,17 @@ class npc_sha_of_fear_bowman : public CreatureScript
                     DoCastVictim(SPELL_SHOOT, false);
                     events.ScheduleEvent(EVENT_SHOOT, 1000);
                     break;
+                case EVENT_DEATH_BLOSSOM:
+                    if (me->GetHealthPct() < 25.1f)
+                    {
+                        Talk(SAY_UNK);
+                        DoCast(me, SPELL_DEATH_BLOSSOM, false);
+                        events.ScheduleEvent(EVENT_DEATH_BLOSSOM, 13000);
+                    }
+                    else
+                        events.ScheduleEvent(EVENT_DEATH_BLOSSOM, 5000);
                 default:
                     break;
-            }
-
-            switch (m_mLowEvents.ExecuteEvent())
-            {
-            case EVENT_DEATH_BLOSSOM:
-                Talk(SAY_UNK);
-                DoCast(me, SPELL_DEATH_BLOSSOM, false);
-                events.ScheduleEvent(EVENT_DEATH_BLOSSOM, 13000);
-                break;
             }
 
             DoMeleeAttackIfReady();
@@ -1560,6 +1642,8 @@ public:
 
                 if (pUnit->IsAlive())
                     pUnit->CastSpell(pUnit, SPELL_FADING_LIGHT, true);
+
+                pUnit->CastSpell(pUnit, SPELL_DREAD_EXPANSE, true);
             }
         }
 

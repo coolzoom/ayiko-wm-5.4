@@ -73,7 +73,8 @@ enum eCreaturesInstance
     NPC_SWIRLING_SUNFIRE      = 58815,
     NPC_FOUNTAIN_TRIGGER      = 56586,
     NPC_CORRUPT_DROPLET       = 62358,
-    NPC_HYDROCALINE_TRIGGER   = 56542
+    NPC_HYDROCALINE_TRIGGER   = 56542,
+    NPC_CORRUPT_WATER_WISE    = 56511
 };
 
 enum eGameobjectsInstance

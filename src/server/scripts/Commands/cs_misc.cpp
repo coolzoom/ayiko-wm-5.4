@@ -2409,6 +2409,7 @@ public:
         data.WriteBitSeq<6, 7, 5, 2, 1, 4, 0, 3>(guid);
         data.WriteByteSeq<7, 0, 5, 4, 3, 1, 2, 6>(guid);
         data << uint32(soundId);
+        sWorld->SendGlobalMessage(&data);
 
         handler->PSendSysMessage(LANG_COMMAND_PLAYED_TO_ALL, soundId);
         return true;

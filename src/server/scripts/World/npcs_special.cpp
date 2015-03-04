@@ -4678,8 +4678,12 @@ public:
 
         npc_mage_orbAI(Creature* creature) : ScriptedAI(creature)
         {
-            newz = me->GetOwner()->GetPositionZ() + 2.0f;
-            float angle = me->GetOwner()->GetAngle(me);
+            Unit* owner = me->GetOwner();
+            if (!owner)
+                return;
+
+            newz = owner->GetPositionZ() + 2.0f;
+            float angle = owner->GetAngle(me);
             newx = me->GetPositionX() + 60 * cos(angle);
             newy = me->GetPositionY() + 60 * sin(angle);
             engagedInCombat = false;
@@ -4687,6 +4691,10 @@ public:
 
         void Reset()
         {
+            Unit* owner = me->GetOwner();
+            if (!owner)
+                return;
+
             me->CastSpell(me, 123605, true);
             me->CastSpell(me, 84717, true);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
@@ -4696,12 +4704,15 @@ public:
 
         void SpellHitTarget(Unit* target, SpellInfo const* spell)
         {
+            Unit* owner = me->GetOwner();
+            if (!owner)
+                return;
+
             if (spell->Id == 84721)
             {
                 if (!engagedInCombat)
                 {
-                    if (Unit* owner = me->GetOwner())
-                        owner->CastSpell(owner, 44544, true);
+                    owner->CastSpell(owner, 44544, true);
                     engagedInCombat = true;
                 }
             }

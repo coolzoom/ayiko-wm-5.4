@@ -58,15 +58,7 @@ class AuraEffect
         int32 GetMiscValue() const { return m_spellInfo->Effects[m_effIndex].MiscValue; }
         AuraType GetAuraType() const { return (AuraType)m_spellInfo->Effects[m_effIndex].ApplyAuraName; }
         int32 GetAmount() const { return m_amount; }
-        void SetAmount(int32 amount)
-        {
-            if (m_amount != amount)
-            {
-                m_amount = amount;
-                GetBase()->SetNeedClientUpdateForTargets();
-            }
-            m_canBeRecalculated = false;
-        }
+        void SetAmount(int32 amount);
 
         int32 GetUserData() const { return m_userData; }
         void SetUserData(int32 data) { m_userData = data; }

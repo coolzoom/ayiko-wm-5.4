@@ -1476,6 +1476,16 @@ void AuraEffect::CalculateSpellMod()
     GetBase()->CallScriptEffectCalcSpellModHandlers(this);
 }
 
+void AuraEffect::SetAmount(int32 amount)
+{
+    if (m_amount != amount)
+    {
+        m_amount = amount;
+        GetBase()->SetNeedClientUpdateForTargets();
+    }
+    m_canBeRecalculated = false;
+}
+
 void AuraEffect::ChangeAmount(int32 newAmount, bool mark, bool onStackOrReapply)
 {
     // Reapply if amount change

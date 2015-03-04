@@ -8835,6 +8835,23 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura *triggeredByAura, Sp
             }
             break;
         }
+        case SPELLFAMILY_MONK:
+        {
+            switch (dummySpell->Id)
+            {
+                // Healing elixirs
+                case 122280:
+                {
+                    *handled = true;
+                    if (HasAura(134563) && HealthBelowPctDamaged(35, damage))
+                    {
+                        CastSpell(this ,122281, true);
+                        RemoveAurasDueToSpell(134563);
+                    }
+                    break;
+                }
+            }
+        }
         case SPELLFAMILY_WARRIOR:
         {
             switch (dummySpell->Id)
@@ -9246,6 +9263,12 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
     // Custom triggered spells
     switch (auraSpellInfo->Id)
     {
+        case 134563: // Healing Elixirs
+        {
+            if (!procSpell || procSpell->GetSpellSpecific() != SPELL_SPECIFIC_BREW)
+                return false;
+            break;
+        }
         // Item - Death Knight T12 Blood 2P Bonus (wrong spellname, that's warrior item set)
         case 105907:
             if (!procSpell)
@@ -9800,7 +9823,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
         case 108942:// Phantasm
         case 113043:// Omen of Clarity (new)
         case 122464:// Dematerialize
-        case 122280:// Healing Elixirs
         case 54927: // Glyph of Avenging Wrath
         case 124487:// Zen Focus
         case 88764: // Rolling Thunder
@@ -16484,6 +16506,7 @@ bool InitTriggerAuraData()
     isTriggerAura[SPELL_AURA_MOD_POWER_REGEN_PERCENT] = true;
     isTriggerAura[SPELL_AURA_ENABLE_ALT_POWER] = true;
     isTriggerAura[SPELL_AURA_PERIODIC_DUMMY] = true;
+    isTriggerAura[SPELL_AURA_PERIODIC_TRIGGER_SPELL] = true;
 
     isNonTriggerAura[SPELL_AURA_MOD_POWER_REGEN] = true;
     isNonTriggerAura[SPELL_AURA_REDUCE_PUSHBACK] = true;

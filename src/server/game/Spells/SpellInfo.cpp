@@ -2296,6 +2296,21 @@ SpellSpecificType SpellInfo::GetSpellSpecific() const
 
             break;
         }
+        case SPELLFAMILY_MONK:
+        {
+            switch (Id)
+            {
+                case 115203:
+                case 115288:
+                case 115294:
+                case 115308:
+                case 115399:
+                case 119582:
+                case 137562:
+                    return SPELL_SPECIFIC_BREW;
+            }
+
+        }
         case SPELLFAMILY_PALADIN:
         {
             if (SpellFamilyFlags[0] & 0x01000002)

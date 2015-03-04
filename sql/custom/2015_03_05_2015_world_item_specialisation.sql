@@ -3,7 +3,7 @@
 -- --------------------------------------------- --
 
 -- Contains required class specialisations to obtain loot for items
-DROP TABLE `item_specialisation` IF EXISTS
+DROP TABLE IF EXISTS `item_specialisation`;
 CREATE TABLE `item_specialisation` (
     `id` INT(11) NOT NULL DEFAULT '0',
     `specialisation` INT(11) NOT NULL DEFAULT '0',

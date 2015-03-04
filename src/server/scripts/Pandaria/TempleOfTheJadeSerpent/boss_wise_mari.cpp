@@ -106,10 +106,7 @@ public:
 
     enum eTimers
     {
-        TIMER_CALL_WATTER       = 29000,
         TIMER_HYDROLANCE_START  = 10000,
-        TIMER_HYDROLANCE        = 5500,
-        TIMER_SWITCH_PHASE_TWO  = 15000,
         TIMER_WASH_AWAY         = 125
     };
 
@@ -159,6 +156,7 @@ public:
             events.Reset();
             cosmeticEvents.ScheduleEvent(EVENT_SUMMON_TRIGGERS, 0.5 * IN_MILLISECONDS);
             me->RemoveAurasDueToSpell(SPELL_WATER_BUBBLE_WISE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
             if(instance)
                 instance->SetData(DATA_WISE_MARI, NOT_STARTED);
         }
@@ -475,15 +473,18 @@ public:
             instance = me->GetInstanceScript();
             canDead = false;
 
-            if(me->GetEntry() == 56511)
+            if(me->GetEntry() == NPC_CORRUPT_WATER_WISE)
                 Talk(TALK_RISE);
         }
 
         void JustDied(Unit* /*unit*/) override
         {
-            if(Creature* wise = Unit::GetCreature(*me, instance->GetData64(DATA_WISE_MARI)))
-                if(wise->IsAIEnabled)
-                    wise->AI()->DoAction(ACTION_LIVING_WATER_DEAD);
+            if(me->GetEntry() == NPC_CORRUPT_WATER_WISE)
+            {
+                if(Creature* wise = Unit::GetCreature(*me, instance->GetData64(DATA_WISE_MARI)))
+                   if(wise->IsAIEnabled)
+                       wise->AI()->DoAction(ACTION_LIVING_WATER_DEAD);
+            }
         }
 
         void JustSummoned(Creature* summoned)

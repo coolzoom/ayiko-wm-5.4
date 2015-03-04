@@ -5136,6 +5136,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 106267:
                     //spellInfo->Effects[0].TargetB = TARGET_UNIT_TARGET_ENEMY;
                     break;
+                case 106762:
+                    spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+                    break;
                 case 106334:// Wash Away
                     spellInfo->AttributesEx3 &= ~ SPELL_ATTR3_ONLY_TARGET_PLAYERS;
                     break;

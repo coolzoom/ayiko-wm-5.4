@@ -659,6 +659,7 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
             case SPELL_AURA_MOD_AUTOATTACK_DAMAGE:
             case SPELL_AURA_ADD_PCT_MODIFIER:
             case SPELL_AURA_MOD_EXPERTISE:
+            case SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT:
             {
                 if (Player* player = caster->ToPlayer())
                 {
@@ -779,7 +780,7 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                     if (GetSpellInfo()->Id == 116849)
                     {
                         // +1100% from sp bonus
-                        DoneActualBenefit += caster->SpellBaseDamageBonusDone(m_spellInfo->GetSchoolMask()) * 11.0f;
+                        amount += caster->SpellBaseDamageBonusDone(m_spellInfo->GetSchoolMask()) * 11.0f;
                     }
                     break;
                 case SPELLFAMILY_MAGE:
@@ -787,13 +788,13 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                     if (GetSpellInfo()->Id == 11426)
                     {
                         // +330% from sp bonus
-                        DoneActualBenefit += caster->SpellBaseDamageBonusDone(m_spellInfo->GetSchoolMask()) * 3.3f;
+                        amount += caster->SpellBaseDamageBonusDone(m_spellInfo->GetSchoolMask()) * 3.3f;
                     }
                     // Mage Ward
                     else if (GetSpellInfo()->SpellFamilyFlags[0] & 0x8 && GetSpellInfo()->SpellFamilyFlags[2] & 0x8)
                     {
                         // +80.68% from sp bonus
-                        DoneActualBenefit += caster->SpellBaseDamageBonusDone(m_spellInfo->GetSchoolMask()) * 0.8068f;
+                        amount += caster->SpellBaseDamageBonusDone(m_spellInfo->GetSchoolMask()) * 0.8068f;
                     }
                     break;
                 case SPELLFAMILY_WARLOCK:
@@ -801,7 +802,7 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                     if (m_spellInfo->Id == 6229 || m_spellInfo->Id == 104048 || m_spellInfo->Id == 131623 || m_spellInfo->Id == 131624)
                     {
                         // +300% from sp bonus
-                        DoneActualBenefit += caster->SpellBaseDamageBonusDone(m_spellInfo->GetSchoolMask()) * 3.0f;
+                        amount += caster->SpellBaseDamageBonusDone(m_spellInfo->GetSchoolMask()) * 3.0f;
                     }
                     break;
                 case SPELLFAMILY_PRIEST:
@@ -809,8 +810,20 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                     if (GetSpellInfo()->Id == 17 || GetSpellInfo()->Id == 123258)
                     {
                         // +187.1% from sp bonus
-                        DoneActualBenefit += caster->SpellBaseDamageBonusDone(m_spellInfo->GetSchoolMask()) * 1.871f;
+                        amount += caster->SpellBaseDamageBonusDone(m_spellInfo->GetSchoolMask()) * 1.871f;
                         break;
+                    }
+
+                    switch (GetSpellInfo()->Id)
+                    {
+                        case 17: // Power Word: Shield
+                        case 47753: // Divine Aegis
+                        case 114908: // Spirit Shell
+                        case 152118: // Clarity of Will
+                            // Shield Discipline
+                            if (AuraEffect* aurEff = caster->GetAuraEffect(77484, EFFECT_0))
+                                AddPct(amount, aurEff->GetAmount());
+                            break;
                     }
                     break;
                 default:
@@ -922,23 +935,6 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
         {
             switch (m_spellInfo->Id)
             {
-                case 5171:  // Slice and Dice
-                {
-                    if (!caster)
-                        break;
-
-                    Player* plr = caster->ToPlayer();
-                    if (!plr)
-                        break;
-
-                    if (!plr->HasAura(76808))
-                        break;
-
-                    float MasteryPCT = 1.0f + plr->GetFloatValue(PLAYER_MASTERY) * 3.0f;
-                    AddPct(amount, MasteryPCT);
-
-                    break;
-                }
                 case 57669: // Replenishment (0.2% from max)
                     amount = CalculatePct(GetBase()->GetUnitOwner()->GetMaxPower(POWER_MANA), amount);
                     break;
@@ -1214,33 +1210,6 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                     if (Unit* target = GetBase()->GetUnitOwner())
                         if (target->HasAura(116186))
                             amount = 0;
-                    break;
-                }
-                default:
-                    break;
-            }
-
-            break;
-        }
-        case SPELL_AURA_MOD_MELEE_HASTE_3:
-        {
-            switch (GetId())
-            {
-                case 5171:  // Slice and Dice
-                {
-                    if (!caster)
-                        break;
-
-                    Player* plr = caster->ToPlayer();
-                    if (!plr)
-                        break;
-
-                    if (!plr->HasAura(76808))
-                        break;
-
-                    float MasteryPCT = 1.0f + plr->GetFloatValue(PLAYER_MASTERY) * 3.0f;
-                    AddPct(amount, MasteryPCT);
-
                     break;
                 }
                 default:
@@ -7306,31 +7275,32 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
         }
 
         // 77486 - Mastery : Shadowy Recall
-        if (GetSpellInfo()->SchoolMask == SPELL_SCHOOL_MASK_SHADOW && caster->HasAura(77486))
+        if (AuraEffect* mastery = caster->GetAuraEffect(77486, EFFECT_0))
         {
-            float Mastery = caster->ToPlayer()->GetFloatValue(PLAYER_MASTERY) * 1.8f;
-
-            if (roll_chance_f(Mastery))
+            if (mastery->GetSpellEffectInfo().SpellClassMask & m_spellInfo->SpellFamilyFlags)
             {
-                int32 bp = damage;
-
-                switch (GetSpellInfo()->Id)
+                if (roll_chance_i(mastery->GetAmount()))
                 {
-                    case 589:   // Shadow Word: Pain
-                        caster->CastCustomSpell(target, 124464, &bp, NULL, NULL, true);
-                        break;
-                    case 2944:  // Devouring Plague
-                        caster->CastCustomSpell(target, 124467, &bp, NULL, NULL, true);
-                        break;
-                    case 15407: // Mind Flay
-                    case 129197: // Mind Flay (Insanity)
-                        caster->CastCustomSpell(target, 124468, &bp, NULL, NULL, true);
-                        break;
-                    case 34914: // Vampiric Touch
-                        caster->CastCustomSpell(target, 124465, &bp, NULL, NULL, true);
-                        break;
-                    default:
-                        break;
+                    int32 bp = damage;
+
+                    switch (GetSpellInfo()->Id)
+                    {
+                        case 589:   // Shadow Word: Pain
+                            caster->CastCustomSpell(target, 124464, &bp, NULL, NULL, true);
+                            break;
+                        case 2944:  // Devouring Plague
+                            caster->CastCustomSpell(target, 124467, &bp, NULL, NULL, true);
+                            break;
+                        case 15407: // Mind Flay
+                        case 129197: // Mind Flay (Insanity)
+                            caster->CastCustomSpell(target, 124468, &bp, NULL, NULL, true);
+                            break;
+                        case 34914: // Vampiric Touch
+                            caster->CastCustomSpell(target, 124465, &bp, NULL, NULL, true);
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
         }

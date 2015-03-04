@@ -361,33 +361,13 @@ class spell_pal_shield_of_the_righteous : public SpellScriptLoader
 
             void HandleOnHit()
             {
-                if (Player* const player = GetCaster()->ToPlayer())
+                if (Player* _player = GetCaster()->ToPlayer())
                 {
-                    if (GetHitUnit())
+                    if (Unit* unitTarget = GetHitUnit())
                     {
-                        if (auto spell = sSpellStore.LookupEntry(PALADIN_SPELL_SHIELD_OF_THE_RIGHTEOUS_PROC))
-                        {
-                            int32 bp0 = spell->GetSpellEffect(EFFECT_0, 0)->EffectBasePoints;
-                            bp0 = AddPct(bp0, player->GetFloatValue(PLAYER_MASTERY));
-                            if (auto proc = player->GetAura(PALADIN_SPELL_SHIELD_OF_THE_RIGHTEOUS_PROC, player->GetGUID()))
-                            {
-                                auto duration = proc->GetDuration();
-                                proc->SetDuration(duration + 3 * IN_MILLISECONDS);
-                                proc->SetMaxDuration(duration + 3 * IN_MILLISECONDS);
-                            }
-                            else
-                                player->CastCustomSpell(player, PALADIN_SPELL_SHIELD_OF_THE_RIGHTEOUS_PROC, &bp0, NULL, NULL, true);
-                        }
-
-                        if (auto spell = sSpellStore.LookupEntry(PALADIN_SPELL_BASTION_OF_GLORY))
-                        {
-                            int32 bp0 = spell->GetSpellEffect(EFFECT_0, 0)->EffectBasePoints;
-                            int32 bp1 = spell->GetSpellEffect(EFFECT_2, 0)->EffectBasePoints;
-                            bp0 = AddPct(bp0, player->GetFloatValue(PLAYER_MASTERY));
-                            bp1 = AddPct(bp1, player->GetFloatValue(PLAYER_MASTERY));
-
-                            player->CastCustomSpell(player, PALADIN_SPELL_BASTION_OF_GLORY, &bp0, NULL, &bp1, true);
-                        }
+                        // -30% damage taken for 3s
+                        _player->CastSpell(_player, PALADIN_SPELL_SHIELD_OF_THE_RIGHTEOUS_PROC, true);
+                        _player->CastSpell(_player, PALADIN_SPELL_BASTION_OF_GLORY, true);
                     }
                 }
             }

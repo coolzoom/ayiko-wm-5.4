@@ -1962,51 +1962,6 @@ class spell_warl_rain_of_fire : public SpellScriptLoader
         }
 };
 
-// Ember Tap - 114635
-class spell_warl_ember_tap : public SpellScriptLoader
-{
-    public:
-        spell_warl_ember_tap() : SpellScriptLoader("spell_warl_ember_tap") { }
-
-        class spell_warl_ember_tap_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_warl_ember_tap_SpellScript);
-
-            void HandleOnHit()
-            {
-                if (Player* player = GetCaster()->ToPlayer())
-                {
-                    if (GetHitUnit())
-                    {
-                        int32 healAmount;
-                        float pct;
-                        float Mastery;
-
-                        Mastery = 3.0f * player->GetFloatValue(PLAYER_MASTERY) / 100.0f;
-
-                        pct = 0.15f * (1 + Mastery);
-
-                        healAmount = int32(player->GetMaxHealth() * pct);
-                        healAmount = player->SpellHealingBonusDone(player, GetSpellInfo(), EFFECT_0, healAmount, HEAL);
-                        healAmount = player->SpellHealingBonusTaken(player, GetSpellInfo(), EFFECT_0, healAmount, HEAL);
-
-                        SetHitHeal(healAmount);
-                    }
-                }
-            }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_warl_ember_tap_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_warl_ember_tap_SpellScript();
-        }
-};
-
 // Called By : Incinerate (Fire and Brimstone) - 114654, Conflagrate (Fire and Brimstone) - 108685
 // Curse of the Elements (Fire and Brimstone) - 104225, Curse of Enfeeblement (Fire and Brimstone) - 109468
 // Immolate (Fire and Brimstone) - 108686
@@ -3110,7 +3065,6 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_drain_soul();
     new spell_warl_demonic_gateway();
     new spell_warl_rain_of_fire();
-    new spell_warl_ember_tap();
     new spell_warl_fire_and_brimstone();
     new spell_warl_conflagrate_aura();
     new spell_warl_shadowburn();

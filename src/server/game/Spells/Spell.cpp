@@ -2921,6 +2921,20 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
                 unit->SetStandState(UNIT_STAND_STATE_STAND);
     }
 
+    switch (m_caster->getClass())
+    {
+        case CLASS_DRUID:
+            if (AuraEffect* mastery = m_caster->GetAuraEffect(77495, EFFECT_0))
+            {
+                if (mastery->GetBase()->GetEffect(EFFECT_0)->GetSpellEffectInfo().SpellClassMask & m_spellInfo->SpellFamilyFlags)
+                {
+                    int32 bp = mastery->GetAmount();
+                    m_caster->CastCustomSpell(m_caster, 100977, &bp, &bp, NULL, true);
+                }
+            }
+            break;
+    }
+
     if (spellHitTarget)
     {
         //AI functions

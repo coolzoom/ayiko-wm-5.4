@@ -650,6 +650,32 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                 if (!player->FitArmorSpecializationRequirement(m_spellInfo->GetSpellEquippedItems()))
                     amount = 0;
 
+    if (caster && m_spellInfo->IsPassive() && m_spellInfo->EquippedItemClass == ITEM_CLASS_WEAPON)
+    {
+        switch (GetAuraType())
+        {
+            case SPELL_AURA_MOD_MELEE_HASTE_3:
+            case SPELL_AURA_MOD_INCREASE_ENERGY:
+            case SPELL_AURA_MOD_AUTOATTACK_DAMAGE:
+            case SPELL_AURA_ADD_PCT_MODIFIER:
+            case SPELL_AURA_MOD_EXPERTISE:
+            {
+                if (Player* player = caster->ToPlayer())
+                {
+                    Item* mainItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+                    Item* offItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+                    if (!mainItem && !offItem)
+                        amount = 0;
+
+                    if ((mainItem && mainItem->IsFitToSpellRequirements(GetSpellInfo())) || (offItem && offItem->IsFitToSpellRequirements(GetSpellInfo())))
+                        break;
+
+                    amount = 0;
+                }
+            }
+        }
+    }
+
     // check item enchant aura cast
     if (!amount && caster)
         if (uint64 itemGUID = GetBase()->GetCastItemGUID())

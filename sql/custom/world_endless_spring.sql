@@ -175,7 +175,6 @@ UPDATE creature_template SET flags_extra = flags_extra | 1, mechanic_immune_mask
 
 -- PROTECTORS OF THE ENDLESS
 
-
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` = 117230;
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 (13, 1, 117230, 0, 0, 31, 0, 3, 60585, 0, 0, 0, 0, '', 'Empowered - target Boss'),
@@ -210,6 +209,45 @@ INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
 (118191, 'spell_corrupted_essence'),
 (117905, 'spell_superior_corrupted_essence'),
 (117283, 'spell_cleansing_waters_regen');
+
+-- Protectors of Endless phrases
+DELETE FROM creature_text WHERE entry IN (60583, 60585, 60586);
+INSERT INTO `creature_text` VALUES 
+-- Intro
+('60583', '0', '0', 'The terrace was not meant for your kind.', '14', '0', '100', '0', '0', '28369', 'Protector Kaolan - TALK_INTRO'),
+
+-- Aggro
+('60585', '0', '0', 'A storm approaches.', '14', '0', '100', '0', '0', '28391', 'Elder Regail - TALK_REGAIL_AGGRO'),
+('60586', '0', '0', 'The endless waters will cleanse you from this place.', '14', '0', '100', '0', '0', '28380', 'Elder Asani - TALK_ASANI_AGGRO'),
+
+-- Protector Kaolan or Elder Asani or Elder Regail dies first
+('60583', '1', '0', 'My strength grows!', '14', '0', '100', '0', '0', '28371', 'Protector Kaolan - TALK_KAOLAN_DIES_FIRST_ASANI - TALK_KAOLAN_DIES_FIRST_REGAIL'),
+('60585', '1', '0', 'I command the elements, to destroy you!', '14', '0', '100', '0', '0', '28394', 'Elder Regail - TALK_REGAIL_DIES_FIRST_KAOLAN - TALK_REGAIL_DIES_FIRST_ASANI'),
+('60586', '1', '0', 'The tide cannot be stopped!', '14', '0', '100', '0', '0', '28383', 'Elder Asani - TALK_ASANI_DIES_FIRST_KAOLAN - TALK_ASANI_DIES_FIRST_REGAIL'),
+
+-- Expel Corruption or Lightning Storm or Corrupted Waters
+('60583', '2', '0', 'I will not be controlled!', '14', '0', '100', '0', '0', '28372', 'Protector Kaolan - TALK_EXPEL_CORRUPTION'),
+('60585', '2', '0', 'You cannot escape the storm!', '14', '0', '100', '0', '0', '28395', 'Elder Regail - TALK_LIGHTNING_STORM'),
+('60586', '2', '0', 'The waters will consume you!', '14', '0', '100', '0', '0', '28382', 'Elder Asani - TALK_CORRUPTED_WATERS'),
+
+-- Protector Kaolan or Elder Asani or Elder Regail dies second
+('60583', '3', '0', 'None can match my strength!', '14', '0', '100', '0', '0', '28373', 'Protector Kaolan - TALK_KAOLAN_DIES_SECOND_ASANI - TALK_KAOLAN_DIES_SECOND_REGAIL'),
+('60585', '3', '0', 'Your fear will consume you!', '14', '0', '100', '0', '0', '28393', 'Elder Regail - TALK_REGAIL_DIES_SECOND_ASANI - TALK_REGAIL_DIES_SECOND_KAOLAN'),
+('60586', '3', '0', 'Drown in your fear!', '14', '0', '100', '0', '0', '28384', 'Elder Asani - TALK_ASANI_DIES_SECOND_KAOLAN - TALK_ASANI_DIES_SECOND_REGAIL'), -- Version 1
+('60586', '3', '1', 'Drown in fear!', '14', '0', '100', '0', '0', '28487', 'Elder Asani - TALK_ASANI_DIES_SECOND_KAOLAN - TALK_ASANI_DIES_SECOND_REGAIL'), -- Version 2
+
+-- Killing a player/Slay
+('60583', '4', '0', 'Weakling!', '14', '0', '100', '0', '0', '28374', 'Protector Kaolan - TALK_KAOLAN_SLAY'), -- Version 1
+('60583', '4', '1', 'Begone!', '14', '0', '100', '0', '0', '28375', 'Protector Kaolan - TALK_KAOLAN_SLAY'), -- Version 2
+('60585', '4', '0', 'How dare you trespass here!', '14', '0', '100', '0', '0', '28396', 'Elder Regail - TALK_REGAIL_SLAY'), -- Version 1
+('60585', '4', '1', 'Shocking.', '14', '0', '100', '0', '0', '28397', 'Elder Regail - TALK_REGAIL_SLAY'), -- Version 2
+('60586', '4', '0', 'You are unfit to stand before me!', '14', '0', '100', '0', '0', '28385', 'Elder Asani - TALK_ASANI_SLAY'), -- Version 1
+('60586', '4', '1', 'Flee, child!', '14', '0', '100', '0', '0', '28386', 'Elder Asani - TALK_ASANI_SLAY'), -- Version 2
+
+-- Death
+('60583', '5', '0', 'We...are endless...', '14', '0', '100', '0', '0', '28370', 'Protector Kaolan - TALK_KAOLAN_DEATH'),
+('60585', '5', '0', 'The Terrace... must not... fall...', '14', '0', '100', '0', '0', '28392', 'Elder Regail - TALK_REGAIL_DEATH'),
+('60586', '5', '0', 'The Sha...must be...stopped.', '14', '0', '100', '0', '0', '28381', 'Elder Asani - TALK_ASANI_DEATH');
 
 -- PROTECTORS OF THE ENDLESS END
 
@@ -326,8 +364,8 @@ INSERT INTO spell_target_position (id, effIndex, target_map, target_position_x, 
 DELETE FROM `creature_text` WHERE `entry` IN (62983, 71095);
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
 (62983, 1, 0, 'I did not want to have to do this!', 14, 0, 100, 0, 0, 29324, 'Lei Shi - AGGRO'),
-(62983, 2, 0, 'I''m  hiding until you leave!', 14, 0, 100, 0, 0, 29333, 'Lei Shi - HIDE'),
-(62983, 2, 1, 'I don''t want to see you anymore!', 14, 0, 100, 0, 0, 29334, 'Lei Shi - HIDE'),
+(62983, 2, 0, 'I''m  hiding until you leave!', 41, 0, 100, 0, 0, 29333, 'Lei Shi - HIDE'),
+(62983, 2, 1, 'I don''t want to see you anymore!', 41, 0, 100, 0, 0, 29334, 'Lei Shi - HIDE'),
 (62983, 3, 0, 'Get away!', 14, 0, 100, 0, 0, 29331, 'Lei Shi - GET AWAY'),
 (62983, 3, 1, 'Stay away from me!', 14, 0, 100, 0, 0, 29332, 'Lei Shi - GET AWAY'),
 (62983, 4, 0, 'Ugh... Sorry...', 14, 0, 100, 0, 0, 29329, 'Lei Shi - SLAY'),

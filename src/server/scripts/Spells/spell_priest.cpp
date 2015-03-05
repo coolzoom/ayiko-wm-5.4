@@ -214,61 +214,120 @@ class spell_pri_spectral_guise_charges : public SpellScriptLoader
         }
 };
 
-// Psyfiend Hit Me Driver - 114164
-class spell_pri_psyfiend_hit_me_driver : public SpellScriptLoader
-{
-    public:
-        spell_pri_psyfiend_hit_me_driver() : SpellScriptLoader("spell_pri_psyfiend_hit_me_driver") { }
-
-        class spell_pri_psyfiend_hit_me_driver_AuraScript : public AuraScript
+class spell_pri_psychic_terror : public SpellScriptLoader {
+public:
+    spell_pri_psychic_terror() : SpellScriptLoader("spell_pri_psychic_terror") { }
+    
+    class spell_pri_psychic_terror_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_pri_psychic_terror_SpellScript);
+        
+        void SelectTarget(std::list<WorldObject*>& targets)
         {
-            PrepareAuraScript(spell_pri_psyfiend_hit_me_driver_AuraScript);
-
-            void OnProc(AuraEffect const * /*aurEff*/, ProcEventInfo& eventInfo)
-            {
-                auto caster = GetCaster();
-                auto attacker = eventInfo.GetActor();
-
-                if (!caster || !attacker)
-                    return;
-
-                PreventDefaultAction();
-
-                std::list<Creature*> psyfiendList;
+            // 1. Clear all the targets : we only chose one
+            std::list<WorldObject*> preClearTargets = targets;
+            targets.clear();
+            
+            // The caster is a mob, whom we need to check the owner
+            Unit* caster = GetCaster();
+            if (!caster)
+                return;
+            Unit* owner = caster->GetOwner();
+            if (!owner)
+                return;
+            
+            // 2. First check for a victim
+            if (AuraEffect* driver = owner->GetAuraEffect(114164, EFFECT_0))
+            { 
+                if (Unit* target = sObjectAccessor->GetUnit(*owner, driver->GetAmount()))
                 {
-                    caster->GetCreatureListWithEntryInGrid(psyfiendList, PRIEST_NPC_PSYFIEND, 100.0f);
-
-                    if (psyfiendList.empty())
-                        return;
-
-                    for (auto i = psyfiendList.begin(); i != psyfiendList.end();)
+                    if (!target->HasAura(113792))
                     {
-                        Unit* owner = (*i)->GetOwner();
-                        if (owner && owner == caster && (*i)->IsAlive())
-                            ++i;
-                        else
-                            i = psyfiendList.erase(i);
+                        driver->SetAmount(0);
+                        targets.push_back(target); 
+                        return;
                     }
-
-                    if (psyfiendList.size() > 1)
-                        Trinity::Containers::RandomResizeList(psyfiendList, 1);
-
-                    for (auto itr : psyfiendList)
-                        if (itr->AI())
-                            itr->AI()->SetGUID(attacker->GetGUID());
                 }
             }
-
-            void Register()
+            
+            // 3. Loop over the threat list : it is supposed to be ordered by threat level
+            if (caster) 
             {
-                OnEffectProc += AuraEffectProcFn(spell_pri_psyfiend_hit_me_driver_AuraScript::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
+                std::list<HostileReference*> const& threatList = caster->getThreatManager().getThreatList();
+                for (std::list<HostileReference*>::const_iterator iter = threatList.begin(); iter != threatList.end(); ++iter)
+                {
+                    if (HostileReference *ref = (*iter))
+                    {
+                        if (Unit *target = ref->getTarget())
+                        {
+                            if (!target->HasAura(113792))
+                            {
+                                targets.push_back(target);
+                                return;
+                            }
+                        }
+                    }
+                }
+                // 4. No target found with threat list : select a random inside it, instead of starting a new fight
+                if (!threatList.empty())
+                {
+                    HostileReference* ref = Trinity::Containers::SelectRandomContainerElement(threatList);
+                    targets.push_back(ref->getTarget());
+                }
+                else if (!preClearTargets.empty())
+                {
+                    for (std::list<WorldObject*>::iterator itr = preClearTargets.begin(); itr != preClearTargets.end(); itr++)
+                        if (Unit* target = (*itr)->ToUnit())
+                            if (!target->HasAura(113792))
+                            {
+                                targets.push_back(target);
+                                return;
+                            }
+                }
             }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_pri_psyfiend_hit_me_driver_AuraScript();
         }
+
+
+        void HandleOnHit()
+        {
+            if (!GetHitUnit())
+                return;
+
+            bool glyph = GetCaster()->HasAura(55676);
+            if (Aura* debuff = GetHitAura())
+            {
+                if (debuff->GetApplicationOfTarget(GetHitUnit()->GetGUID()))
+                {
+                    // Remove fear aspect
+                    if (AuraEffect* fear = debuff->GetEffect(EFFECT_0))
+                    {
+                        if (glyph)
+                            fear->HandleEffect(GetHitUnit(), AURA_REMOVE_BY_DEFAULT, false);
+                    }
+
+                    // Remove root aspect
+                    if (AuraEffect* root = debuff->GetEffect(EFFECT_2))
+                    {
+                        if (!glyph)
+                            root->HandleEffect(GetHitUnit(), AURA_REMOVE_BY_DEFAULT, false);
+                    }
+                }
+            }
+        }
+        
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pri_psychic_terror_SpellScript::SelectTarget, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pri_psychic_terror_SpellScript::SelectTarget, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pri_psychic_terror_SpellScript::SelectTarget, EFFECT_2, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnHit += SpellHitFn(spell_pri_psychic_terror_SpellScript::HandleOnHit);
+        }
+    };
+    
+    SpellScript *GetSpellScript() const
+    {
+        return new spell_pri_psychic_terror_SpellScript();
+    }
 };
 
 // Void Tendrils - 108920
@@ -3042,7 +3101,6 @@ void AddSC_priest_spell_scripts()
 {
     new spell_pri_power_word_fortitude();
     new spell_pri_spectral_guise_charges();
-    new spell_pri_psyfiend_hit_me_driver();
     new spell_pri_void_tendrils();
     new spell_pri_phantasm_proc();
     new spell_pri_spirit_of_redemption_form();
@@ -3101,4 +3159,5 @@ void AddSC_priest_spell_scripts()
     new spell_pri_mind_blast();
     new spell_pri_confession();
     new spell_pri_echo_of_light();
+    new spell_pri_psychic_terror();
 }

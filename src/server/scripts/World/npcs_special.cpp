@@ -4390,99 +4390,49 @@ class npc_void_tendrils : public CreatureScript
 enum PsyfiendSpells
 {
     SPELL_PSYCHIC_HORROR    = 113792,
+    PSYCHIC_TERROR_TIMER    = 2000
 };
 
-class npc_psyfiend : public CreatureScript
-{
+class npc_psyfiend : public CreatureScript {
+public:
+    npc_psyfiend() : CreatureScript("npc_psyfiend") { }
+    
+    class npc_psyfiend_ScriptedAI : public ScriptedAI 
+    {
     public:
-        npc_psyfiend() : CreatureScript("npc_psyfiend") { }
-
-        struct npc_psyfiendAI : public Scripted_NoMovementAI
-        {
-            npc_psyfiendAI(Creature* c) : Scripted_NoMovementAI(c)
-            {
-                me->SetReactState(REACT_AGGRESSIVE);
-                oldTarget = 0;
-                targetGUID = 0;
-            }
-
-            uint64 oldTarget;
-            uint64 targetGUID;
-            uint32 psychicHorrorTimer;
-
-            void Reset()
-            {
-                if (!me->HasAura(SPELL_ROOT_FOR_EVER))
-                    me->AddAura(SPELL_ROOT_FOR_EVER, me);
-
-                psychicHorrorTimer = 1500;
-            }
-
-            void SetGUID(uint64 guid, int32)
-            {
-                targetGUID = guid;
-            }
-
-            void IsSummonedBy(Unit* owner)
-            {
-                if (owner && owner->GetTypeId() == TYPEID_PLAYER)
-                {
-                    me->SetLevel(owner->getLevel());
-                    // Set no damage
-                    me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, 0.0f);
-                    me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, 0.0f);
-
-                    me->AddAura(SPELL_ROOT_FOR_EVER, me);
-                }
-                else
-                    me->DespawnOrUnsummon();
-            }
-
-            void UpdateAI(uint32 const diff)
-            {
-                if (psychicHorrorTimer)
-                {
-                    if (psychicHorrorTimer <= diff)
-                    {
-                        // If target did not change, select random target
-                        if (!targetGUID || oldTarget == targetGUID)
-                        {
-                            std::list<Unit*> targets;
-                            Trinity::AllWorldObjectsInRange objects(me, 20.0f);
-                            Trinity::UnitListSearcher<Trinity::AllWorldObjectsInRange> searcher(me, targets, objects);
-                            Trinity::VisitNearbyObject(me, 20.0f, searcher);
-                            Unit * psyfiend = me;
-                            uint64 oldTargetGUID = oldTarget;
-                            // Remove invalid targets and old target to prevent casting twice on same
-                            targets.remove_if([psyfiend, oldTargetGUID](Unit * obj)
-                            {
-                                return obj->isTotem() || !psyfiend->IsValidAttackTarget(obj) || obj->GetGUID() == oldTargetGUID;
-                            });
-
-                            if (!targets.empty())
-                            {
-                                me->CastSpell(*targets.front(), SPELL_PSYCHIC_HORROR, false);
-                                oldTarget = (*targets.front()).GetGUID();
-                            }
-                        }
-                        else if (Unit* m_target = ObjectAccessor::FindUnit(targetGUID))
-                        {
-                            me->CastSpell(m_target, SPELL_PSYCHIC_HORROR, false);
-                            oldTarget = targetGUID;
-                        }
-
-                        psychicHorrorTimer = 2500;
-                    }
-                    else
-                        psychicHorrorTimer -= diff;
-                }
-            }
-        };
-
-        CreatureAI* GetAI(Creature *creature) const
-        {
-            return new npc_psyfiendAI(creature);
+        npc_psyfiend_ScriptedAI(Creature *creature) : ScriptedAI(creature)
+        { 
+            _uiPsychicTerrorTimer = PSYCHIC_TERROR_TIMER;
+            creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
         }
+        
+        void UpdateAI(uint32 diff)
+        {
+            Unit* owner = me->GetOwner();
+            if (!owner || !owner->IsAlive())
+            {
+                me->DisappearAndDie();
+                return;
+            }
+            
+            if (_uiPsychicTerrorTimer <= diff)
+            {
+                DoCastAOE(SPELL_PSYCHIC_HORROR);
+                _uiPsychicTerrorTimer = PSYCHIC_TERROR_TIMER;
+            }
+            else
+                _uiPsychicTerrorTimer -= diff;
+        }
+        
+    private:
+        ///< Timer before next Psychic Terror cast
+        uint32 _uiPsychicTerrorTimer;
+    };
+    
+    CreatureAI *GetAI(Creature *creature) const
+    {
+        return new npc_psyfiend_ScriptedAI(creature);
+    }
 };
 
 /*######

@@ -1107,6 +1107,11 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
 
                     break;
                 }
+                case 59190: // Psyfiend
+                {
+                    SetCreateHealth(m_owner->CountPctFromMaxHealth(10));
+                    break;
+                }
                 case 65282: // Void Tendrils
                 {
                     SetCreateHealth(m_owner->CountPctFromMaxHealth(20));
@@ -1236,11 +1241,6 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
 
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, 0.75f * GetOwner()->GetFloatValue(UNIT_FIELD_MINDAMAGE));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, 0.75f * GetOwner()->GetFloatValue(UNIT_FIELD_MAXDAMAGE));
-                    break;
-                }
-                case ENTRY_PSYFIEND: // Psyfiends
-                {
-                    SetCreateHealth(GetOwner()->CountPctFromMaxHealth(2.5f));
                     break;
                 }
                 default:

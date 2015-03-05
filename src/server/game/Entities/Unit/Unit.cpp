@@ -6684,6 +6684,12 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
             }
             switch (dummySpell->Id)
             {
+                case 114164: // Psyfiend Hit me driver
+                {
+                    if (victim)
+                        triggeredByAura->SetAmount(victim->GetGUIDLow());
+                    break;
+                }
                 // Shadowflame, Item - Priest T12 Shadow 2P Bonus
                 case 99155:
                 {

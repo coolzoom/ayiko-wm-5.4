@@ -623,6 +623,8 @@ enum LootState
 // 5 sec for bobber catch
 #define FISHING_BOBBER_READY_TIME 5
 
+typedef std::map<uint64, Loot> GOLFRPlayerLootList;
+
 class GameObject : public WorldObject, public GridObject<GameObject>
 {
     public:
@@ -760,6 +762,7 @@ class GameObject : public WorldObject, public GridObject<GameObject>
         void SaveRespawnTime();
 
         Loot        loot;
+        GOLFRPlayerLootList m_lfrLoot;
 
         Player* GetLootRecipient() const;
         Group* GetLootRecipientGroup() const;

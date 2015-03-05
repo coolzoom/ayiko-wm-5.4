@@ -228,8 +228,11 @@ class LootTemplate
         void AddEntry(LootStoreItem const &item);
         // Rolls for every item in the template and adds the rolled items the the loot
         void Process(Loot& loot, bool rate, uint16 lootMode, uint8 groupId = 0) const;
+        void ProcessLFRItem(Loot& loot, uint32 specialisation) const;
         void CopyConditions(ConditionList const &conditions);
         void CopyConditions(LootItem *li) const;
+
+        bool IsEligibleForLFRLootItem(uint32 itemId, uint32 specialisation);
 
         // True if template includes at least 1 quest drop entry
         bool HasQuestDrop(LootTemplateMap const& store, uint8 groupId = 0) const;
@@ -287,6 +290,7 @@ struct Loot
     QuestItemMap const& GetPlayerNonQuestNonFFAConditionalItems() const { return PlayerNonQuestNonFFAConditionalItems; }
 
     std::vector<LootItem> items;
+    std::vector<bool> isBonusItem;
     std::vector<LootItem> quest_items;
     uint32 gold;
     uint8 unlootedCount;
@@ -339,6 +343,7 @@ struct Loot
 
         PlayersLooting.clear();
         items.clear();
+        isBonusItem.clear();
         quest_items.clear();
         gold = 0;
         unlootedCount = 0;
@@ -360,6 +365,9 @@ struct Loot
 
     void generateMoneyLoot(uint32 minAmount, uint32 maxAmount);
     bool FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bool personal, bool noEmptyError = false, uint16 lootMode = LOOT_MODE_DEFAULT);
+
+    void FillLFRLoot(uint32 lootId, LootStore const& store, Player* member);
+    void FillLFRMoney(uint32 maxGold, uint32 minGold, uint32 groupSize, bool wonItem);
 
     // Inserts the item into the loot (called by LootTemplate processors)
     void AddItem(LootStoreItem const & item);

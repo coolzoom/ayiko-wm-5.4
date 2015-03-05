@@ -2215,8 +2215,32 @@ void WorldSession::HandleUpgradeItemOpcode(WorldPacket& recvData)
     player->ModifyCurrency(itemUpEntry->currencyId, -int32(itemUpEntry->currencyCost), flags);
 }
 
-void WorldSession::HandleSetLootSpecialization(WorldPacket& /*recvData*/)
+void WorldSession::HandleSetLootSpecialization(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_SET_LOOT_SPECIALIZATION");
-    // GetPlayer()->SetLootSpecId(recvData.read<uint32>());
+
+    uint32 lootSpecialisation;
+    recvData >> lootSpecialisation;
+
+    // client sends 0 when setting to current specialisation
+    if (!lootSpecialisation)
+    {
+        GetPlayer()->SetLootSpecialisation(lootSpecialisation);
+        return;
+    }
+
+    auto specialisationEntry = sChrSpecializationsStore.LookupEntry(lootSpecialisation);
+    if (!specialisationEntry)
+    {
+        TC_LOG_DEBUG("network", "Player tried to set their loot specialisation to %u which doesn't exist!", lootSpecialisation);
+        return;
+    }
+
+    if (GetPlayer()->getClass() != specialisationEntry->classId)
+    {
+        TC_LOG_DEBUG("network", "Player tried to set their loot specialisation to %u which isn't valid for their class!", lootSpecialisation);
+        return;
+    }
+
+    GetPlayer()->SetLootSpecialisation(lootSpecialisation);
 }

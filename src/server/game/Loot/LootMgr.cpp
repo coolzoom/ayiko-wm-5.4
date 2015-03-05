@@ -85,6 +85,9 @@ class LootTemplate::LootGroup                               // A set of loot def
         float RawTotalChance() const;                       // Overall chance for the group (without equal chanced items)
         float TotalChance() const;                          // Overall chance for the group
 
+        void GetCompatableLFRItems(LootStoreItemList &compatableItems, uint32 specialisation) const;
+        bool IsEligibleForLFRLootItem(LootStoreItem const &item, uint32 specialisation) const;
+
         void Verify(LootStore const& lootstore, uint32 id, uint8 group_id) const;
         void CollectLootIds(LootIdSet& set) const;
         void CheckLootRefs(LootTemplateMap const& store, LootIdSet* ref_set) const;
@@ -420,6 +423,45 @@ void Loot::AddItem(LootStoreItem const & item)
                 ++unlootedCount;
         }
     }
+}
+
+// fill LFR item for a single raid memeber
+void Loot::FillLFRLoot(uint32 lootId, LootStore const& store, Player* member)
+{
+    if (!member)
+        return;
+
+    auto lootTemplate = store.GetLootFor(lootId);
+    if (!lootTemplate)
+        return;
+
+    items.reserve(MAX_NR_LOOT_ITEMS);
+    lootTemplate->ProcessLFRItem(*this, member->GetLootSpecOrClassSpec());
+}
+
+// fill LFR gold for a single raid member
+void Loot::FillLFRMoney(uint32 maxGold, uint32 minGold, uint32 groupSize, bool wonItem)
+{
+    uint32 rewardGold = 0;
+    if (maxGold > 0)
+    {
+        // calculate base gold amount
+        if (maxGold <= minGold)
+            rewardGold = uint32(maxGold * sWorld->getRate(RATE_DROP_MONEY));
+        else if ((maxGold - minGold) < 32700)
+            rewardGold = uint32(urand(minGold, maxGold) * sWorld->getRate(RATE_DROP_MONEY));
+        else
+            rewardGold = uint32(urand(minGold >> 8, maxGold >> 8) * sWorld->getRate(RATE_DROP_MONEY)) << 8;
+
+        // split by amount of raid members in the group
+        rewardGold /= groupSize;
+
+        // if no item was awarded, give bonus gold amount
+        if (!wonItem)
+            rewardGold += urand(rewardGold * 0.05f, rewardGold * 0.10f);
+    }
+
+    gold = rewardGold;
 }
 
 // Calls processor of corresponding LootTemplate (which handles everything including references)
@@ -1214,6 +1256,32 @@ void LootTemplate::LootGroup::CopyConditions(ConditionList /*conditions*/)
     }
 }
 
+void LootTemplate::LootGroup::GetCompatableLFRItems(LootStoreItemList &compatableItems, uint32 specialisation) const
+{
+    // find items that are compatable with the class specialisation
+    for (auto const lootItem : EqualChanced)
+    {
+        if (IsEligibleForLFRLootItem(lootItem, specialisation))
+            compatableItems.push_back(lootItem);
+    }
+}
+
+// check if a particular item is allowed to be dropped for a class specialisation
+bool LootTemplate::LootGroup::IsEligibleForLFRLootItem(LootStoreItem const &item, uint32 specialisation) const
+{
+    auto itemList = sObjectMgr->GetItemSpecialisations();
+
+    auto itemSpecialisationContainer = itemList.find(item.itemid);
+    if (itemSpecialisationContainer == itemList.end())
+        return false;
+
+    for (auto const &itemSpecialisation : itemSpecialisationContainer->second)
+        if (itemSpecialisation->Specialisation == specialisation)
+            return true;
+
+    return false;
+}
+
 // Rolls an item from the group (if any takes its chance) and adds the item to the loot
 void LootTemplate::LootGroup::Process(Loot& loot, uint16 lootMode) const
 {
@@ -1399,6 +1467,26 @@ void LootTemplate::CopyConditions(LootItem* li) const
 
         li->conditions = itr->conditions;
         break;
+    }
+}
+
+void LootTemplate::ProcessLFRItem(Loot& loot, uint32 specialisation) const
+{
+    if (!specialisation)
+        return;
+
+    // find all compatable items from loot table for the class specialisation
+    LootStoreItemList compatableItems;
+    for (auto const &lootGroup : Groups)
+        lootGroup.GetCompatableLFRItems(compatableItems, specialisation);
+
+    if (compatableItems.size())
+    {
+        // select a random item that can be used by the class specialisation
+        uint32 itemIndex = urand(0, compatableItems.size() - 1);
+
+        loot.AddItem(compatableItems[itemIndex]);
+        loot.isBonusItem.push_back(false);
     }
 }
 

@@ -72,6 +72,15 @@ typedef std::map<uint32, PageText> PageTextContainer;
 // Benchmarked: Faster than std::map (insert/find)
 typedef std::unordered_map<uint16, InstanceTemplate> InstanceTemplateContainer;
 
+struct ItemSpecialisation
+{
+    uint8 Class;
+    uint32 Specialisation;
+};
+
+typedef std::set<ItemSpecialisation*> ItemSpecialisationSet;
+typedef std::map<uint32, ItemSpecialisationSet> ItemSpecialisationContainer;
+
 struct GameTele
 {
     float  position_x;
@@ -514,6 +523,8 @@ class ObjectMgr
 
         QuestObjective const* GetQuestObjective(uint32 objectiveId) const;
 
+        ItemSpecialisationContainer const& GetItemSpecialisations() { return m_itemSpecialisation; }
+
         uint32 GetQuestForAreaTrigger(uint32 Trigger_ID) const
         {
             QuestAreaTriggerContainer::const_iterator itr = _questAreaTriggerStore.find(Trigger_ID);
@@ -691,6 +702,7 @@ class ObjectMgr
         void loadGameObjectTemplateInvisibility();
         void loadGameObjectInvisibility();
         void LoadItemTemplates();
+        void LoadItemSpecialisation();
         void LoadItemTemplateAddon();
         void LoadItemScriptNames();
         void LoadItemLocales();
@@ -1069,6 +1081,8 @@ class ObjectMgr
 
         QuestMap _questTemplates;
         QuestObjectiveMap m_questObjectives;
+
+        ItemSpecialisationContainer m_itemSpecialisation;
 
         typedef std::unordered_map<uint32, GossipText> GossipTextContainer;
         typedef std::unordered_map<uint32, uint32> QuestAreaTriggerContainer;

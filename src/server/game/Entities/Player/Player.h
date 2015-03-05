@@ -1977,6 +1977,10 @@ class Player final : public Unit, public GridObject<Player>
         void SetRaidDifficulty(Difficulty raid_difficulty) { m_raidDifficulty = raid_difficulty; }
         void StoreRaidMapDifficulty() { m_raidMapDifficulty = GetMap()->GetDifficulty(); }
 
+        void SetLootSpecialisation(uint32 specialisation);
+        uint32 GetLootSpecialisation() const { return GetUInt32Value(PLAYER_FIELD_LOOT_SPEC_ID); }
+        uint32 GetLootSpecOrClassSpec() const;
+
         bool UpdateSkill(uint32 skill_id, uint32 step);
         bool UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step);
 
@@ -2091,6 +2095,9 @@ class Player final : public Unit, public GridObject<Player>
         void BuildPlayerRepop();
         void RepopAtGraveyard();
         void SendCemeteryList(bool onMap);
+
+        uint32 GetLastKilledCreature() { return m_lastKileldCreatureId; }
+        void SetLastKilledCreature(uint32 entry) { m_lastKileldCreatureId = entry;}
 
         uint32 GetCurrentMovieId() const { return m_currentMovie; }
         void SetCurrentMovieId(uint32 movieID) { m_currentMovie = movieID; }
@@ -3210,6 +3217,8 @@ class Player final : public Unit, public GridObject<Player>
         ArchaeologyMgr m_archaeologyMgr;
 
         uint8 m_bgRoles;
+
+        uint32 m_lastKileldCreatureId;
 
         // Arena
         uint32 m_ArenaPersonalRating[MAX_ARENA_SLOT];

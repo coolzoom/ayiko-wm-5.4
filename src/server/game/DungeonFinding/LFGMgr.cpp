@@ -1651,6 +1651,8 @@ void LFGMgr::UpdateProposal(uint32 proposalId, uint64 guid, bool accept)
 
         // Create a new group (if needed)
         LfgUpdateData updateData = LfgUpdateData(LFG_UPDATETYPE_GROUP_FOUND);
+        updateData.dungeons.insert(pProposal->dungeonId);
+
         for (LfgPlayerList::const_iterator it = players.begin(); it != players.end(); ++it)
         {
             Player* player = (*it);

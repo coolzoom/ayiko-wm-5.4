@@ -1238,19 +1238,6 @@ void Guardian::UpdateArmor()
     SetArmor(int32(value));
 }
 
-void Guardian::UpdateHitChance()
-{
-    if (!IsHunterPet())
-        return;
-
-    if (Player* owner = GetOwner()->ToPlayer())
-    {
-        float bonus = owner->GetRatingBonusValue(CR_HIT_MELEE) * 0.5f + owner->GetRatingBonusValue(CR_EXPERTISE) * 0.5f;
-        m_modMeleeHitChance = bonus;
-        m_modExpertise = bonus;
-    }
-}
-
 void Guardian::UpdateMaxHealth()
 {
     UnitMods unitMod = UNIT_MOD_HEALTH;

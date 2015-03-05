@@ -159,6 +159,17 @@ void Totem::InitSummon()
 {
     if (m_type == TOTEM_PASSIVE && GetSpell())
     {
+        switch (GetSpell())
+        {
+            case 8178: // Grounding Totem
+                if (m_owner->HasAura(55441))
+                {
+                    m_spells[0] = 89523;
+                    CastSpell(this, 89523, true);
+                    return;
+                }
+                break;
+        }
         CastSpell(this, GetSpell(), true);
     }
 

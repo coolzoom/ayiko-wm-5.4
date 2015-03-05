@@ -3280,7 +3280,7 @@ T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T &basevalue, Spell* spel
             if (mod->op == SPELLMOD_CASTING_TIME && basevalue >= T(10000) && mod->value <= -100)
                 continue;
 
-            totalmul += CalculatePct(1.0f, mod->value);
+            ApplyPercentModFloatVar(totalmul, mod->value, true);
         }
 
         if (takeMods)

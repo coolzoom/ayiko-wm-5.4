@@ -4039,7 +4039,6 @@ void Player::InitStatsForLevel(bool reapplyMods)
 
     // Set new PCT MoP field to 1.0f to get correct client tooltip
     SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT, 1.0f);
-    SetFloatValue(PLAYER_FIELD_WEAPON_DMG_MULTIPLIERS, 1.0f);
     SetFloatValue(PLAYER_FIELD_MOD_HEALING_DONE_PCT, 1.0f);
     SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT, 1.0f);
 
@@ -4059,6 +4058,9 @@ void Player::InitStatsForLevel(bool reapplyMods)
     SetFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER, 0.0f);
     SetInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER,     0);
     SetFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER, 0.0f);
+
+    for (uint8 i = 0; i < 3; i++)
+        SetFloatValue(PLAYER_FIELD_WEAPON_DMG_MULTIPLIERS + i, 1.0f);
 
     // Base crit values (will be recalculated in UpdateAllStats() at loading and in _ApplyAllStatBonuses() at reset
     SetFloatValue(PLAYER_CRIT_PERCENTAGE, 0.0f);
@@ -22636,9 +22638,20 @@ bool Player::AddSpellMod(SpellModifier::Ptr const &mod, bool apply)
                 val = 1;
                 for (auto const &other : spellModSet)
                     if (other->type == mod->type && other->mask & mask)
-                        val += float(other->value)/100;
+                    {
+                        if (apply)
+                            val *= (100.0f + other->value) / 100.0f;
+                        else
+                            ApplyPercentModFloatVar(val, other->value, true);
+                    }
                 if (mod->value)
-                    val += apply ? float(mod->value)/100 : -(float((mod->value))/100);
+                {
+                    if (apply)
+                        val *= (100.0f + mod->value) / 100.0f;
+                    else
+                        ApplyPercentModFloatVar(val, mod->value, apply);
+                    // val *= apply ? (1.0f + mod->value / 100.0f) : (1.0f / (1.0f + mod->value / 100.0f));
+                }
             }
             else
             {

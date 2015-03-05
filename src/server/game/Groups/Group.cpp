@@ -728,7 +728,7 @@ void Group::SendPartyUpdate(Player* player, MemberSlot* slot, uint8 position)
             data.WriteBitSeq<3, 0, 4, 7, 6, 1, 5, 2>(memberGuid);
 
             Player* member = ObjectAccessor::FindPlayer(memberSlot.guid);
-            uint8 onlineState = (member) ? MEMBER_STATUS_ONLINE : MEMBER_STATUS_OFFLINE;
+            uint8 onlineState = (member && !member->GetSession()->PlayerLogout()) ? MEMBER_STATUS_ONLINE : MEMBER_STATUS_OFFLINE;
             onlineState = onlineState | ((isBGGroup() || isBFGroup()) ? MEMBER_STATUS_PVP : 0);
 
             memberData.WriteByteSeq<5>(memberGuid);

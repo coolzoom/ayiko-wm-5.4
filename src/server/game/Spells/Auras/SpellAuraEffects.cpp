@@ -49,6 +49,12 @@ bool AbsorbAuraOrderPred::operator()(AuraEffect const *aurEffA, AuraEffect const
     SpellInfo const* spellProtoA = aurEffA->GetSpellInfo();
     SpellInfo const* spellProtoB = aurEffB->GetSpellInfo();
 
+    // Incanter's ward
+    if (spellProtoA->Id == 1463)
+        return true;
+    if (spellProtoB->Id == 1463)
+        return false;
+
     // Flameglow
     if (spellProtoA->Id == 140468)
         return true;
@@ -92,6 +98,18 @@ bool AbsorbAuraOrderPred::operator()(AuraEffect const *aurEffA, AuraEffect const
         return true;
     if (spellProtoB->SpellFamilyName == SPELLFAMILY_WARLOCK && spellProtoB->SpellIconID == 693)
         return false;
+
+    // Cheat Death
+    if (spellProtoA->Id == 31230)
+        return false;
+    if (spellProtoB->Id == 31230)
+        return true;
+
+    // Spirit of redemption
+    if (spellProtoA->Id == 20711)
+        return false;
+    if (spellProtoB->Id == 20711)
+        return true;
 
     return false;
 }

@@ -1853,7 +1853,15 @@ class spell_mage_living_bomb : public SpellScriptLoader
                 if (Unit* caster = GetCaster())
                 {
                     caster->CastSpell(GetTarget(), SPELL_MAGE_LIVING_BOMB_TRIGGERED, true);
+                    handleBrainFreeze();
+                }
+            }
 
+            void HandleApply(AuraEffect const* aurEff, AuraEffectHandleModes mode)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    caster->CastSpell(GetTarget(), SPELL_MAGE_LIVING_BOMB_TRIGGERED, true);
                     handleBrainFreeze();
                 }
             }
@@ -1879,6 +1887,7 @@ class spell_mage_living_bomb : public SpellScriptLoader
 
             void Register()
             {
+                OnEffectApply += AuraEffectApplyFn(script_impl::HandleApply, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAPPLY);
                 AfterEffectRemove += AuraEffectRemoveFn(script_impl::AfterRemove, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
                 OnEffectPeriodic += AuraEffectPeriodicFn(script_impl::OnTick, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
             }

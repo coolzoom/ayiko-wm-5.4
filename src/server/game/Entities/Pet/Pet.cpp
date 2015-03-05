@@ -833,16 +833,24 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
     PetLevelInfo const* pInfo = sObjectMgr->GetPetLevelInfo(creature_ID, petlevel);
     if (pInfo)                                      // exist in DB
     {
-        if (creature_ID != 510)
-            SetCreateHealth(pInfo->health);
-        if (petType != HUNTER_PET && GetOwner() && GetOwner()->getClass() != CLASS_WARLOCK && creature_ID != 510) // hunter's pets use focus and Warlock's pets use energy
-            SetCreateMana(pInfo->mana);
+        if (petType == HUNTER_PET)
+        {
+            SetCreateHealth(CalculatePct(m_owner->GetCreateHealth(), 70));
+            SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, 0);
+        }
+        else
+        {
+            if (creature_ID != 510)
+                SetCreateHealth(pInfo->health);
+            if (petType != HUNTER_PET && GetOwner() && GetOwner()->getClass() != CLASS_WARLOCK && creature_ID != 510) // hunter's pets use focus and Warlock's pets use energy
+                SetCreateMana(pInfo->mana);
 
-        if (pInfo->armor > 0)
-            SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(pInfo->armor));
+            if (pInfo->armor > 0)
+                SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(pInfo->armor));
 
-        for (uint8 stat = 0; stat < MAX_STATS; ++stat)
-            SetCreateStat(Stats(stat), float(pInfo->stats[stat]));
+            for (uint8 stat = 0; stat < MAX_STATS; ++stat)
+                SetCreateStat(Stats(stat), float(pInfo->stats[stat]));
+        }
     }
     else                                            // not exist in DB, use some default fake data
     {

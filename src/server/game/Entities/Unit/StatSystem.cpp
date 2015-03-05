@@ -1131,19 +1131,7 @@ bool Guardian::UpdateStats(Stats stat)
             else if (owner->getClass() == CLASS_MAGE && isPet())
                 mod = 0.75f;
             else
-            {
-                mod = 0.45f;
-
-                if (isPet())
-                {
-                    switch (ToPet()->GetSpecializationId())
-                    {
-                        case SPEC_PET_FEROCITY: mod = 0.67f; break;
-                        case SPEC_PET_TENACITY: mod = 0.78f; break;
-                        case SPEC_PET_CUNNING: mod = 0.725f; break;
-                    }
-                }
-            }
+                mod = 0.7f;
 
             ownersBonus = float(owner->GetStat(stat)) * mod;
             ownersBonus *= GetModifierValue(UNIT_MOD_STAT_STAMINA, TOTAL_PCT);
@@ -1241,15 +1229,26 @@ void Guardian::UpdateResistances(uint32 school)
 
 void Guardian::UpdateArmor()
 {
-    float value = 0.0f;
+    float value = GetTotalAuraModValue(UNIT_MOD_ARMOR);
     UnitMods unitMod = UNIT_MOD_ARMOR;
 
     // All pets gain 100% of owner's armor value
-    value = m_owner->GetArmor();
-    value *= GetModifierValue(unitMod, BASE_PCT);
-    value *= GetModifierValue(unitMod, TOTAL_PCT);
+    value += float(CalculatePct(m_owner->GetArmor(), 70));
 
     SetArmor(int32(value));
+}
+
+void Guardian::UpdateHitChance()
+{
+    if (!IsHunterPet())
+        return;
+
+    if (Player* owner = GetOwner()->ToPlayer())
+    {
+        float bonus = owner->GetRatingBonusValue(CR_HIT_MELEE) * 0.5f + owner->GetRatingBonusValue(CR_EXPERTISE) * 0.5f;
+        m_modMeleeHitChance = bonus;
+        m_modExpertise = bonus;
+    }
 }
 
 void Guardian::UpdateMaxHealth()
@@ -1288,6 +1287,12 @@ void Guardian::UpdateMaxHealth()
         default:
             multiplicator = 10.0f;
             break;
+    }
+
+     if (isHunterPet())
+    {
+        if (gtOCTHpPerStaminaEntry const* hpBase = sGtOCTHpPerStaminaStore.LookupEntry(getLevel()))
+            multiplicator = hpBase->ratio;
     }
 
     float value = GetModifierValue(unitMod, BASE_VALUE) + GetCreateHealth();
@@ -1353,7 +1358,7 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
     {
         if (isHunterPet())
         {
-            bonusAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK); // Hunter pets gain 100% of owner's AP
+            bonusAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.7f; // Hunter pets gain 70% of owner's AP
             SetBonusDamage(int32(owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.5f)); // Bonus damage is equal to 50% of owner's AP
         }
         else if (IsPetGhoul()) // ghouls benefit from deathknight's attack power (may be summon pet or not)

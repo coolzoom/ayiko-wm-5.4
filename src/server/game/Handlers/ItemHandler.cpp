@@ -1558,6 +1558,11 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recvData)
     for (int i = 0; i < MAX_GEM_SOCKETS; ++i)
         GemProps[i] = (Gems[i]) ? sGemPropertiesStore.LookupEntry(Gems[i]->GetTemplate()->GemProperties) : NULL;
 
+    // Find first prismatic socket
+    int32 firstPrismatic = 0;
+    while (firstPrismatic < MAX_GEM_SOCKETS && itemProto->Socket[firstPrismatic].Color)
+        ++firstPrismatic;
+
     // Check for hack maybe
     for (int i = 0; i < MAX_GEM_SOCKETS; ++i)
     {
@@ -1571,11 +1576,8 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recvData)
             if (!itemTarget->GetEnchantmentId(PRISMATIC_ENCHANTMENT_SLOT))
                 return;
 
-            // Not first not-colored (not normaly used) socket
-            if (i != 0 && !itemProto->Socket[i-1].Color && (i+1 >= MAX_GEM_SOCKETS || itemProto->Socket[i+1].Color))
+            if (i != firstPrismatic)
                 return;
-
-            // Ok, this is first not colored socket for item with prismatic socket
         }
 
         // Tried to put normal gem in meta socket

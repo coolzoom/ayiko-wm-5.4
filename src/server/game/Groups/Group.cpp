@@ -264,7 +264,7 @@ void Group::ChangeFlagEveryoneAssistant(bool apply)
 
 void Group::ConvertToLFG()
 {
-    m_groupType = GroupType(m_groupType | GROUPTYPE_LFG | GROUPTYPE_UNK1);
+    m_groupType = GroupType(m_groupType | GROUPTYPE_LFG | GROUPTYPE_LFG_RESTRICTIED);
     m_lootMethod = NEED_BEFORE_GREED;
     if (!isBGGroup() && !isBFGroup())
     {
@@ -281,7 +281,7 @@ void Group::ConvertToLFG()
 
 void Group::ConvertToLFR()
 {
-    m_groupType = GroupType(m_groupType | GROUPTYPE_LFR | GROUPTYPE_UNK1);
+    m_groupType = GroupType(m_groupType | GROUPTYPE_LFR | GROUPTYPE_LFG_RESTRICTIED);
     m_lootMethod = NEED_BEFORE_GREED;
     if (!isBGGroup() && !isBFGroup())
     {
@@ -2631,9 +2631,9 @@ bool Group::isLFGGroup() const
     return m_groupType & GROUPTYPE_LFG;
 }
 
-bool Group::IsLFRGroup() const
+bool Group::IsLFGRestricted() const
 {
-    return m_groupType & GROUPTYPE_LFR;
+    return m_groupType & GROUPTYPE_LFG_RESTRICTIED;
 }
 
 bool Group::isRaidGroup() const

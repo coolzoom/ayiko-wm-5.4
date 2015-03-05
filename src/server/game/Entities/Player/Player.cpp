@@ -2529,6 +2529,9 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             //remove auras before removing from map...
             RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_CHANGE_MAP | AURA_INTERRUPT_FLAG_MOVE | AURA_INTERRUPT_FLAG_TURNING);
 
+            // reset last killed creature before transfering
+            SetLastKilledCreature(0);
+
             if (!GetSession()->PlayerLogout())
             {
                 // send transfer packets
@@ -9926,6 +9929,10 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
 
         loot = &go->loot;
 
+        // use personal loot for LFR
+        if (GetMap()->GetDifficulty() == RAID_TOOL_DIFFICULTY)
+            loot = &go->m_lfrLoot[GetGUID()];
+
         if (go->getLootState() == GO_READY)
         {
             uint32 lootid = go->GetGOInfo()->GetLootId();
@@ -9938,34 +9945,96 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
 
             if (lootid)
             {
-                GameObjectTemplate const* goTemp = go->GetGOInfo();
-                loot->clear();
-
-                Group* group = GetGroup();
-                bool groupRules = (group && goTemp->type == GAMEOBJECT_TYPE_CHEST && goTemp->chest.groupLootRules);
-
-                // check current RR player and get next if necessary
-                if (groupRules)
-                    group->UpdateLooterGuid(go, true);
-
-                loot->FillLoot(lootid, LootTemplates_Gameobject, this, !groupRules, false, go->GetLootMode());
-
-                if (goTemp->currencyId)
+                // handle LFR loot for GO
+                if (GetMap()->GetDifficulty() == RAID_TOOL_DIFFICULTY)
                 {
-                    loot->currencyId = goTemp->currencyId;
-                    auto const archaeologyBonus = std::max<uint32>(goTemp->currencyCnt * 10, GetTotalAuraModifier(SPELL_AURA_CURRENCY_BONUS));
-                    loot->currencyCnt = urand(archaeologyBonus, archaeologyBonus * 2) / 10;
-                }
+                    auto group = GetGroup();
 
-                // get next RR player (for next loot)
-                if (groupRules)
-                    group->UpdateLooterGuid(go);
+                    // check if player is in a LFR group
+                    if (group && group->isRaidGroup() && group->IsLFGRestricted())
+                    {
+                        // this is flawed, better way to do this?
+                        auto cretureTemplate = sObjectMgr->GetCreatureTemplate(GetLastKilledCreature());
+
+                        // find and store all raid members currently online and eligible loot
+                        std::set<Player*> raidMembers;
+                        for (auto &memberSlot : group->GetMemberSlots())
+                        {
+                            Player* member = ObjectAccessor::FindPlayer(memberSlot.guid);
+                            if (!member)
+                                continue;
+
+                            // check if raid member is within range to get loot
+                            if (!member->IsWithinDistInMap(go, DEFAULT_VISIBILITY_INSTANCE))
+                                continue;
+
+                            raidMembers.insert(member);
+                        }
+
+                        // between 3 and 6 raid members minimum must win item loot
+                        uint32 itemWinCount = urand(3, 6);
+                        uint32 itemWinCounter = 0;
+
+                        uint32 memberCounter = 0;
+                        for (auto member : raidMembers)
+                        {
+                            bool wonItem = false;
+
+                            // loot quota is not being met, automatically give raid member loot
+                            if ((raidMembers.size() - memberCounter) < (itemWinCount - itemWinCounter))
+                                wonItem = true;
+                            // otherwise raid member has 25-30% chance to win loot
+                            if (urand(0, 100) <= urand(25, 30))
+                                wonItem = true;
+
+                            Loot* loot = &go->m_lfrLoot[member->GetGUID()];
+                            loot->clear();
+
+                            if (wonItem)
+                            {
+                                // reward item to player
+                                loot->FillLFRLoot(lootid, LootTemplates_Gameobject, member);
+                                itemWinCounter++;
+                            }
+
+                            if (cretureTemplate)
+                                loot->FillLFRMoney(cretureTemplate->mingold, cretureTemplate->maxgold, group->GetMembersCount(), wonItem);
+
+                            memberCounter++;
+                        }
+                    }
+                }
+                else
+                {
+                    GameObjectTemplate const* goTemp = go->GetGOInfo();
+                    loot->clear();
+
+                    Group* group = GetGroup();
+                    bool groupRules = (group && goTemp->type == GAMEOBJECT_TYPE_CHEST && goTemp->chest.groupLootRules);
+
+                    // check current RR player and get next if necessary
+                    if (groupRules)
+                        group->UpdateLooterGuid(go, true);
+
+                    loot->FillLoot(lootid, LootTemplates_Gameobject, this, !groupRules, false, go->GetLootMode());
+
+                    if (goTemp->currencyId)
+                    {
+                        loot->currencyId = goTemp->currencyId;
+                        auto const archaeologyBonus = std::max<uint32>(goTemp->currencyCnt * 10, GetTotalAuraModifier(SPELL_AURA_CURRENCY_BONUS));
+                        loot->currencyCnt = urand(archaeologyBonus, archaeologyBonus * 2) / 10;
+                    }
+
+                    // get next RR player (for next loot)
+                    if (groupRules)
+                        group->UpdateLooterGuid(go);
+                }
             }
 
             if (loot_type == LOOT_FISHING)
                 go->getFishLoot(loot, this);
 
-            if (go->GetGOInfo()->type == GAMEOBJECT_TYPE_CHEST && go->GetGOInfo()->chest.groupLootRules)
+            if (go->GetGOInfo()->type == GAMEOBJECT_TYPE_CHEST && GetMap()->GetDifficulty() != RAID_TOOL_DIFFICULTY && go->GetGOInfo()->chest.groupLootRules)
             {
                 if (Group* group = GetGroup())
                 {
@@ -10113,6 +10182,10 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
 
         loot = &creature->loot;
 
+        // use personal loot for LFR
+        if (GetMap()->GetDifficulty() == RAID_TOOL_DIFFICULTY)
+            loot = &creature->m_lfrLoot[GetGUID()];
+
         if (loot_type == LOOT_PICKPOCKETING)
         {
             if (!creature->lootForPickPocketed)
@@ -10130,7 +10203,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                 permission = OWNER_PERMISSION;
             }
         }
-        else
+        else if (GetMap()->GetDifficulty() != RAID_TOOL_DIFFICULTY)
         {
             // the player whose group may loot the corpse
             Player* recipient = creature->GetLootRecipient();
@@ -10236,7 +10309,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
 
 void Player::SendNotifyLootMoneyRemoved()
 {
-    WorldPacket data(SMSG_COIN_REMOVED);
+    WorldPacket data(SMSG_COIN_REMOVED, 1 + 8);
     ObjectGuid guid = MAKE_NEW_GUID(GUID_LOPART(GetLootGUID()), 0, HIGHGUID_LOOT);
 
     data.WriteBitSeq<1, 3, 4, 0, 5, 6, 2, 7>(guid);
@@ -19103,8 +19176,20 @@ bool Player::isAllowedToLoot(const Creature* creature) const
         return false;
 
     const Loot* loot = &creature->loot;
+
+    // use personal loot for LFR
+    if (GetMap()->GetDifficulty() == RAID_TOOL_DIFFICULTY)
+    {
+        loot = &creature->m_lfrLoot.at(GetGUID());
+        if (!loot)
+            return false;
+    }
+
     if (loot->isLooted()) // nothing to loot or everything looted.
         return false;
+
+    if (GetMap()->GetDifficulty() == RAID_TOOL_DIFFICULTY)
+        return true;
 
     Group const * const thisGroup = GetGroup();
     if (!thisGroup)
@@ -24892,15 +24977,28 @@ void Player::SendInitialPacketsBeforeAddToMap()
     data << uint32(curBitTime);                                 // local hour
     GetSession()->SendPacket(&data);
 
-    data.Initialize(SMSG_WORLD_SERVER_INFO, 4 * 5);
+    uint32 mapDifficulty = GetMap()->GetDifficulty();
+
+    data.Initialize(SMSG_WORLD_SERVER_INFO, 4 + 4 + 1 + 1 + 4);
     data << uint32(GetMap()->GetDifficulty());
     data << uint32(sWorld->GetNextWeeklyQuestsResetTime() - WEEK);
-    data << uint8(0);
-    data.WriteBit(false);
-    data.WriteBit(false);
-    data.WriteBit(false);
-    data.WriteBit(false);
+    data << uint8(0);                                                   // IsTournamentRealm
+
+    data.WriteBit(mapDifficulty);                                       // InstanceGroupSize
+    data.WriteBit(false);                                               // RestrictedAccountMaxLevel
+    data.WriteBit(false);                                               // RestrictedAccountMaxMoney
+    data.WriteBit(false);                                               // IneligibleForLootMask
     data.FlushBits();
+
+    if (mapDifficulty)
+        data << uint32(sDifficultyStore.LookupEntry(mapDifficulty)->maxPlayers);
+    /*if (restrictedAccountMaxLevel)
+        data << uint32(0);
+    if (restrictedAccountMaxMoney)
+        data << uint32(0);
+    if (ineligibleForLootMask)
+        data << uint32(0);*/
+
     GetSession()->SendPacket(&data);
 
     data.Initialize(SMSG_INITIAL_SETUP, sizeof(initialSetupDataBlob));
@@ -29627,4 +29725,21 @@ void Player::UpdateArmorSpecializationAuras() const
 
         aura->RecalculateAmountOfEffects();
     }
+}
+
+void Player::SetLootSpecialisation(uint32 specialisation)
+{
+    if (GetLootSpecialisation() == specialisation)
+        return;
+
+    SetUInt32Value(PLAYER_FIELD_LOOT_SPEC_ID, specialisation);
+}
+
+uint32 Player::GetLootSpecOrClassSpec() const
+{
+    uint32 specialisation = GetLootSpecialisation();
+    if (!specialisation)
+        return GetSpecializationId(GetActiveSpec());
+
+    return specialisation;
 }

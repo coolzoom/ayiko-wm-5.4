@@ -3338,10 +3338,6 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
 
             break;
         }
-        case 475: // Remove Curse
-            if (m_caster->HasAura(115700))
-                m_caster->AddAura(115701, m_caster);
-            break;
         default:
             break;
     }
@@ -3476,6 +3472,10 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
                 int32 bp = int32(unitTarget->CountPctFromMaxHealth(aurEff->GetAmount()));
                 m_caster->CastCustomSpell(unitTarget, 86961, &bp, 0, 0, true);
             }
+            break;
+        case 475: // Remove Curse
+            if (m_caster->HasAura(115700))
+                m_caster->AddAura(115701, m_caster);
             break;
         default:
             break;

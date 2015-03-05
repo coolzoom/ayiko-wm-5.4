@@ -1,0 +1,1 @@
+UPDATE creature_template SET unit_flags=12, AIName="PassiveAI", ScriptName="npc_void_tendril" WHERE entry=65282;

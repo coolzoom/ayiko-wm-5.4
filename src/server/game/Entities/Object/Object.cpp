@@ -2389,7 +2389,7 @@ TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropert
                         mask = UNIT_MASK_MINION;
                         break;
                     default:
-                        if (properties->Flags & 512 || properties->Flags == 0x4800)
+                        if (properties->Flags & 512 || properties->Flags == 0x4800 || properties->Flags & 2)
                             mask = UNIT_MASK_GUARDIAN;
                         break;
                 }

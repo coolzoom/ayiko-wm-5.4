@@ -284,25 +284,8 @@ class spell_pri_void_tendrils : public SpellScriptLoader
             void HandleOnHit()
             {
                 if (Player* _player = GetCaster()->ToPlayer())
-                {
                     if (Unit* target = GetHitUnit())
-                    {
                         _player->CastSpell(target, PRIEST_SPELL_VOID_TENDRILS_SUMMON, true);
-
-                        if (Creature* voidTendrils = target->FindNearestCreature(PRIEST_NPC_VOID_TENDRILS, 10.0f))
-                            if (voidTendrils->AI())
-                                voidTendrils->AI()->SetGUID(target->GetGUID());
-
-                        if (Aura *voidTendrils = target->GetAura(GetSpellInfo()->Id, _player->GetGUID()))
-                        {
-                            if (target->GetTypeId() == TYPEID_PLAYER)
-                                voidTendrils->SetMaxDuration(8000);
-                            else
-                                voidTendrils->SetMaxDuration(20000);
-                            voidTendrils->SetDuration(voidTendrils->GetMaxDuration());
-                        }
-                    }
-                }
             }
 
             void Register()

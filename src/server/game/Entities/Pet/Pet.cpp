@@ -1107,6 +1107,11 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
 
                     break;
                 }
+                case 65282: // Void Tendrils
+                {
+                    SetCreateHealth(m_owner->CountPctFromMaxHealth(20));
+                    break;
+                }
                 case 62982: // Mindbender
                 case 67236: // Mindbender (Sha)
                 {

@@ -3200,6 +3200,10 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
                     }
 
                     m_spellAura->_RegisterForTargets();
+
+                    if (m_spellInfo->IsChanneled())
+                        if (!m_spellInfo->IsPositive() && m_spellInfo->HasEffect(SPELL_EFFECT_APPLY_AURA))
+                            SendChannelStart(duration);
                 }
             }
         }
@@ -3921,7 +3925,8 @@ void Spell::handle_immediate()
 
             m_spellState = SPELL_STATE_CASTING;
             m_caster->AddInterruptMask(m_spellInfo->ChannelInterruptFlags);
-            SendChannelStart(duration);
+            if (m_spellInfo->IsPositive() || !m_spellInfo->HasEffect(SPELL_EFFECT_APPLY_AURA))
+                SendChannelStart(duration);
         }
         else if (duration == -1)
         {

@@ -4615,6 +4615,36 @@ class npc_shadowy_apparition : public CreatureScript
         };
 };
 
+class npc_void_tendril : public CreatureScript
+{
+    public:       
+        npc_void_tendril() : CreatureScript("npc_void_tendril"){ }
+
+        struct npc_void_tendrilAI : public PassiveAI
+        {
+            npc_void_tendrilAI(Creature* creature) : PassiveAI(creature)
+            {
+            }
+
+            void UpdateAI(uint32 diff) override
+            {
+                if (!me->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
+                    me->DespawnOrUnsummon();
+                else
+                    PassiveAI::UpdateAI(diff);
+            }
+
+            void EnterEvadeMode() override
+            {
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_void_tendrilAI(creature);
+        }
+};
+
 // Doomguard - 11859
 class npc_warl_doomguard: public CreatureScript
 {
@@ -4787,4 +4817,5 @@ void AddSC_npcs_special()
     new npc_shadowy_apparition();
     new npc_warl_doomguard();
     new npc_mage_orb();
+    new npc_void_tendril();
 }

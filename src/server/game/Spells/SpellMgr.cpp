@@ -392,6 +392,7 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
                 case 605:    // Dominate Mind
                     return DIMINISHING_DOMINATE_MIND;
                 case 88625:  // Holy Word: Chastise
+                case 108920: // Void tendrils
                     return DIMINISHING_NONE;
             }
 
@@ -3800,12 +3801,12 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[0].TargetB = 0;
                     break;
                 case 123461://Get Away!
-                    spellInfo->Effects[2].Effect = SPELL_EFFECT_APPLY_AURA;
+                    /*spellInfo->Effects[2].Effect = SPELL_EFFECT_APPLY_AURA;
                     spellInfo->Effects[2].ApplyAuraName = SPELL_AURA_MECHANIC_IMMUNITY_MASK;
                     spellInfo->Effects[2].MiscValue = 1614;
                     spellInfo->Effects[2].MiscValueB = 0;
                     spellInfo->Effects[2].TargetA = TARGET_UNIT_CASTER;
-                    spellInfo->Effects[2].TargetB = 0;
+                    spellInfo->Effects[2].TargetB = 0;*/
                     break;
                 case 119414:// Breath of Fear
                     spellInfo->Effects[2].Effect = 0;

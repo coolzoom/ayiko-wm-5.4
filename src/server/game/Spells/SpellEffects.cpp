@@ -3189,6 +3189,12 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                 }
                 default:
                 {
+                    if (properties->Flags & 2)
+                    {
+                        SummonGuardian(effIndex, entry, properties, numSummons);
+                        break;
+                    }
+
                     float radius = m_spellInfo->Effects[effIndex].CalcRadius();
 
                     TempSummonType summonType = (duration == 0) ? TEMPSUMMON_DEAD_DESPAWN : TEMPSUMMON_TIMED_DESPAWN;
@@ -7239,15 +7245,21 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const* 
         if (summon->HasUnitTypeMask(UNIT_MASK_MINION) && m_targets.HasDst())
             ((Minion*)summon)->SetFollowAngle(m_caster->GetAngle(summon));
 
-        if (summon->GetEntry() == 27893)
+        switch (summon->GetEntry())
         {
-            if (uint32 weapon = m_caster->GetUInt32Value(PLAYER_VISIBLE_ITEM_16_ENTRYID))
-            {
-                summon->SetDisplayId(11686);
-                summon->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID, weapon);
-            }
-            else
-                summon->SetDisplayId(1126);
+            case 27893:
+                if (uint32 weapon = m_caster->GetUInt32Value(PLAYER_VISIBLE_ITEM_16_ENTRYID))
+                {
+                    summon->SetDisplayId(11686);
+                    summon->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID, weapon);
+                }
+                else
+                    summon->SetDisplayId(1126);
+                break;
+            case 65282: // Void Tendrils
+                if (m_targets.GetUnitTarget())
+                    summon->CastSpell(m_targets.GetUnitTarget(), 114404);
+                break;
         }
 
         summon->AI()->EnterEvadeMode();

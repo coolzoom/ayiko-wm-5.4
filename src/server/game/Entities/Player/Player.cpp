@@ -13392,6 +13392,15 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
 
         else if (slot == EQUIPMENT_SLOT_OFFHAND)
             UpdateExpertise(OFF_ATTACK);
+
+        // Update passive spells
+        for (AuraMap::iterator itr = m_ownedAuras.begin(); itr != m_ownedAuras.end(); itr++)
+        {
+            Aura* aura = itr->second;
+            SpellInfo const* spellInfo = aura->GetSpellInfo();
+            if (aura->IsPassive() && spellInfo->EquippedItemClass == ITEM_CLASS_WEAPON && pItem->GetTemplate()->Class == ITEM_CLASS_WEAPON)
+                aura->RecalculateAmountOfEffects();
+        }
     }
     else
     {
@@ -13471,52 +13480,6 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
             RemoveAura(115696); // D/W Swords
         }
     }
-    // Way of the Monk - 120277
-    if (GetTypeId() == TYPEID_PLAYER)
-    {
-        if (getClass() == CLASS_MONK && HasAura(120277))
-        {
-            RemoveAurasDueToSpell(120275);
-            RemoveAurasDueToSpell(108977);
-
-            uint32 trigger = 0;
-            if (IsTwoHandUsed())
-            {
-                trigger = 120275;
-            }
-            else
-            {
-                Item* mainItem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-                Item* offItem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
-                if (mainItem && mainItem->GetTemplate()->Class == ITEM_CLASS_WEAPON && offItem && offItem->GetTemplate()->Class == ITEM_CLASS_WEAPON)
-                    trigger = 108977;
-            }
-
-            if (trigger)
-                CastSpell(this, trigger, true);
-
-            ToPlayer()->UpdateRating(CR_HASTE_MELEE);
-        }
-    }
-    // Assassin's Resolve - 84601
-    if (GetTypeId() == TYPEID_PLAYER)
-    {
-        if (getClass() == CLASS_ROGUE && ToPlayer()->GetSpecializationId(ToPlayer()->GetActiveSpec()) == SPEC_ROGUE_ASSASSINATION)
-        {
-            Item* mainItem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-            Item* offItem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
-
-            if (((mainItem && mainItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER) || (offItem && offItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER)))
-            {
-                if (HasAura(84601))
-                    RemoveAura(84601);
-
-                CastSpell(this, 84601, true);
-            }
-            else
-                RemoveAura(84601);
-        }
-    }
 
     UpdateArmorSpecializationAuras();
 
@@ -13541,6 +13504,15 @@ void Player::QuickEquipItem(uint16 pos, Item* pItem)
 
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_ITEM, pItem->GetEntry());
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_EPIC_ITEM, pItem->GetEntry(), slot);
+
+        // Update passive spells
+        for (AuraMap::iterator itr = m_ownedAuras.begin(); itr != m_ownedAuras.end(); itr++)
+        {
+            Aura* aura = itr->second;
+            SpellInfo const* spellInfo = aura->GetSpellInfo();
+            if (aura->IsPassive() && spellInfo->EquippedItemClass == ITEM_CLASS_WEAPON && pItem->GetTemplate()->Class == ITEM_CLASS_WEAPON)
+                aura->RecalculateAmountOfEffects();
+        }
     }
 }
 
@@ -13654,6 +13626,15 @@ void Player::RemoveItem(uint8 bag, uint8 slot, bool update)
 
         if (IsInWorld() && update)
             pItem->SendUpdateToPlayer(this);
+
+        // Update passive spells
+        for (AuraMap::iterator itr = m_ownedAuras.begin(); itr != m_ownedAuras.end(); itr++)
+        {
+            Aura* aura = itr->second;
+            SpellInfo const* spellInfo = aura->GetSpellInfo();
+            if (aura->IsPassive() && spellInfo->EquippedItemClass == ITEM_CLASS_WEAPON && pItem->GetTemplate()->Class == ITEM_CLASS_WEAPON)
+                aura->RecalculateAmountOfEffects();
+        }
     }
 
     UpdateArmorSpecializationAuras();
@@ -14357,53 +14338,6 @@ void Player::SwapItem(uint16 src, uint16 dst)
                 RemoveAura(115696); // D/W Swords
             }
         }
-        // Way of the Monk - 120277
-        if (GetTypeId() == TYPEID_PLAYER)
-        {
-            if (getClass() == CLASS_MONK && HasAura(120277))
-            {
-                RemoveAurasDueToSpell(120275);
-                RemoveAurasDueToSpell(108977);
-
-                uint32 trigger = 0;
-                if (IsTwoHandUsed())
-                {
-                    trigger = 120275;
-                }
-                else
-                {
-                    Item* mainItem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-                    Item* offItem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
-                    if (mainItem && mainItem->GetTemplate()->Class == ITEM_CLASS_WEAPON && offItem && offItem->GetTemplate()->Class == ITEM_CLASS_WEAPON)
-                        trigger = 108977;
-                }
-
-                if (trigger)
-                    CastSpell(this, trigger, true);
-
-                ToPlayer()->UpdateRating(CR_HASTE_MELEE);
-            }
-        }
-        // Assassin's Resolve - 84601
-        if (GetTypeId() == TYPEID_PLAYER)
-        {
-            if (getClass() == CLASS_ROGUE && ToPlayer()->GetSpecializationId(ToPlayer()->GetActiveSpec()) == SPEC_ROGUE_ASSASSINATION)
-            {
-                Item* mainItem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-                Item* offItem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
-
-                if (((mainItem && mainItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER) || (offItem && offItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER)))
-                {
-                    if (HasAura(84601))
-                        RemoveAura(84601);
-
-                    CastSpell(this, 84601, true);
-                }
-                else
-                    RemoveAura(84601);
-            }
-        }
-
         return;
     }
 

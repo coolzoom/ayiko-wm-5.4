@@ -559,6 +559,10 @@ class spell_sha_echo_of_the_elements : public SpellScriptLoader
                 if (player->GetSpecializationId(player->GetActiveSpec()) == SPEC_SHAMAN_ENHANCEMENT && procSpell->Id != SPELL_SHA_ELEMENTAL_BLAST)
                     chance = 30;
 
+                // Chain lightnings individual hits have a reduced chance to proc
+                if (procSpell->Id == 421)
+                    chance /= 3;
+
                 if (!(eventInfo.GetDamageInfo()->GetDamage()) && !(eventInfo.GetHealInfo()->GetHeal()))
                     return;
 
@@ -636,20 +640,17 @@ class spell_sha_stone_bulwark : public SpellScriptLoader
                 if (!caster)
                     return;
 
-                if (auto owner = caster->GetOwner())
+                if (Unit* owner = caster->GetOwner())
                 {
-                    if (!owner->HasAura(SPELL_SHA_STONE_BULWARK_ABSORB))
+                    if (AuraEffect* triggerEffect = caster->GetAuraEffect(114889, EFFECT_0))
                     {
-                        int32 AP = owner->GetTotalAttackPowerValue(BASE_ATTACK);
-                        int32 spellPower = owner->ToPlayer()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_ALL);
-                        amount += (AP > spellPower) ? int32(2.5f * AP) : int32(3.5f * spellPower);
-                    }
-                    else if (owner->ToPlayer() && owner->HasAura(SPELL_SHA_STONE_BULWARK_ABSORB))
-                    {
-                        int32 AP = owner->GetTotalAttackPowerValue(BASE_ATTACK);
-                        int32 spellPower = owner->ToPlayer()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_ALL);
-                        amount += (AP > spellPower) ? int32(0.625f * AP) : int32(0.875f * spellPower);
-                        amount += owner->GetAura(SPELL_SHA_STONE_BULWARK_ABSORB)->GetEffect(0)->GetAmount();
+                        bool bonus = triggerEffect->GetTickNumber() < 2;
+                        float AP = owner->GetTotalAttackPowerValue(BASE_ATTACK);
+                        float SP = owner->SpellBaseDamageBonusDone(GetSpellInfo()->GetSchoolMask());
+                        float coeff = 0.875f * (bonus ? 4.0f : 1.0f);
+                        amount = AP > SP ? (AP * coeff * 0.625f) : (SP * coeff);
+                        if (AuraEffect* previous = owner->GetAuraEffect(114893, EFFECT_0))
+                            amount += previous->GetAmount();
                     }
                 }
             }

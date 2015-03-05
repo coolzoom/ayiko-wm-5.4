@@ -966,6 +966,10 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
 
                     SetMaxPower(POWER_ENERGY, GetCreatePowers(POWER_ENERGY));
                     SetPower(POWER_ENERGY, GetCreatePowers(POWER_ENERGY));
+
+                    // Soul link
+                    if (GetOwner()->HasSpell(108415))
+                        GetOwner()->CastSpell(GetOwner(), 108415, true);
                     break;
                 }
                 case ENTRY_TREANT_GUARDIAN:

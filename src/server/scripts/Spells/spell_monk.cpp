@@ -1627,48 +1627,6 @@ class spell_monk_renewing_mist : public SpellScriptLoader
         }
 };
 
-// Called by : Fortifying Brew - 115203, Chi Brew - 115399, Elusive Brew - 115308, Tigereye Brew - 116740
-// Purifying Brew - 119582, Mana Tea - 115294, Thunder Focus Tea - 116680 and Energizing Brew - 115288
-// Healing Elixirs - 122280
-class spell_monk_healing_elixirs : public SpellScriptLoader
-{
-    public:
-        spell_monk_healing_elixirs() : SpellScriptLoader("spell_monk_healing_elixirs") { }
-
-        class spell_monk_healing_elixirs_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_monk_healing_elixirs_SpellScript);
-
-            void HandleOnHit()
-            {
-                if (Player* player = GetCaster()->ToPlayer())
-                {
-                    if (player->HasAura(SPELL_MONK_HEALING_ELIXIRS_AURA))
-                    {
-                        int32 bp = 10;
-
-                        if (!player->HasSpellCooldown(SPELL_MONK_HEALING_ELIXIRS_RESTORE_HEALTH))
-                        {
-                            player->CastCustomSpell(player, SPELL_MONK_HEALING_ELIXIRS_RESTORE_HEALTH, &bp, NULL, NULL, true);
-                            // This effect cannot occur more than once per 18s
-                            player->AddSpellCooldown(SPELL_MONK_HEALING_ELIXIRS_RESTORE_HEALTH, 0, 18 * IN_MILLISECONDS);
-                        }
-                    }
-                }
-            }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_monk_healing_elixirs_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_monk_healing_elixirs_SpellScript();
-        }
-};
-
 // Zen Sphere - 124081
 class spell_monk_zen_sphere : public SpellScriptLoader
 {
@@ -2805,7 +2763,7 @@ class spell_monk_tigereye_brew_stacks : public SpellScriptLoader
                     caster->CastSpell(caster, SPELL_MONK_TIGEREYE_BREW_STACKS, true);
                     // Mastery: Bottled Fury
                     if (AuraEffect * const mastery = caster->GetAuraEffect(115636, EFFECT_0))
-                        if (roll_chance_f(caster->GetFloatValue(PLAYER_MASTERY) * 2.5f))
+                        if (roll_chance_f(mastery->GetAmount()))
                             caster->CastSpell(GetCaster(), SPELL_MONK_TIGEREYE_BREW_STACKS, true);
                 }
             }
@@ -3096,7 +3054,6 @@ void AddSC_monk_spell_scripts()
     new spell_monk_enveloping_mist();
     new spell_monk_surging_mist();
     new spell_monk_renewing_mist();
-    new spell_monk_healing_elixirs();
     new spell_monk_zen_sphere();
     new spell_monk_zen_sphere_hot();
     new spell_monk_chi_burst();

@@ -86,30 +86,24 @@ class spell_mastery_blood_shield : public SpellScriptLoader
 
             void HandleAfterHit()
             {
-                if (Player* _plr = GetCaster()->ToPlayer())
+                Unit* caster = GetCaster();
+                Unit* target = GetHitUnit();
+                if (caster && target)
                 {
-                    if (Unit* target = GetHitUnit())
+                    AuraEffect* aurEff = caster->GetAuraEffect(77513, EFFECT_0);
+                    if (caster->GetTypeId() == TYPEID_PLAYER && aurEff && caster->HasAura(48263)) // Check the Mastery aura while in Blood presence
                     {
-                        if (_plr->GetTypeId() == TYPEID_PLAYER && _plr->HasAura(77513) && _plr->getLevel() >= 80)
-                        {
-                            // Check the Mastery aura while in Blood presence
-                            if (_plr->HasAura(48263))
-                            {
-                                float Mastery = _plr->GetFloatValue(PLAYER_MASTERY) * 6.25f / 100.0f;
+                        int32 bp = -int32(GetHitDamage() * aurEff->GetAmount() / 100);
 
-                                int32 bp = -int32(GetHitDamage() * Mastery);
+                        if (Aura* scentOfBlood = caster->GetAura(SPELL_DK_SCENT_OF_BLOOD))
+                            AddPct(bp, (scentOfBlood->GetStackAmount() * 20));
 
-                                if (Aura *scentOfBlood = _plr->GetAura(SPELL_DK_SCENT_OF_BLOOD))
-                                    AddPct(bp, (scentOfBlood->GetStackAmount() * 20));
+                        if (AuraEffect* bloodShield = target->GetAuraEffect(MASTERY_SPELL_BLOOD_SHIELD, EFFECT_0))
+                            bp += bloodShield->GetAmount();
 
-                                if (AuraEffect *bloodShield = target->GetAuraEffect(MASTERY_SPELL_BLOOD_SHIELD, EFFECT_0))
-                                    bp += bloodShield->GetAmount();
+                        bp = std::min(uint32(bp), target->GetMaxHealth());
 
-                                bp = std::min(uint32(bp), target->GetMaxHealth());
-
-                                _plr->CastCustomSpell(target, MASTERY_SPELL_BLOOD_SHIELD, &bp, NULL, NULL, true);
-                            }
-                        }
+                        caster->CastCustomSpell(target, MASTERY_SPELL_BLOOD_SHIELD, &bp, NULL, NULL, true);
                     }
                 }
             }
@@ -126,152 +120,8 @@ class spell_mastery_blood_shield : public SpellScriptLoader
         }
 };
 
-// Called by 35395 - Crusader Strike, 53595 - Hammer of the Righteous, 24275 - Hammer of Wrath, 85256 - Templar's Verdict and 53385 - Divine Storm
-// 76672 - Mastery : Hand of Light
-class spell_mastery_hand_of_light : public SpellScriptLoader
-{
-    public:
-        spell_mastery_hand_of_light() : SpellScriptLoader("spell_mastery_hand_of_light") { }
-
-        class spell_mastery_hand_of_light_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_mastery_hand_of_light_SpellScript);
-
-            void HandleAfterHit()
-            {
-                if (Unit* caster = GetCaster())
-                {
-                    if (Unit* target = GetHitUnit())
-                    {
-                        if (caster->GetTypeId() == TYPEID_PLAYER && caster->HasAura(76672) && caster->getLevel() >= 80)
-                        {
-                            uint32 procSpellId = GetSpellInfo()->Id ? GetSpellInfo()->Id : 0;
-                            if (procSpellId != MASTERY_SPELL_HAND_OF_LIGHT)
-                            {
-                                float value = caster->GetFloatValue(PLAYER_MASTERY) * 1.85f;
-
-                                int32 bp = int32(GetHitDamage() * value / 100);
-
-                                caster->CastCustomSpell(target, MASTERY_SPELL_HAND_OF_LIGHT, &bp, NULL, NULL, true);
-                            }
-                        }
-                    }
-                }
-            }
-
-            void Register()
-            {
-                AfterHit += SpellHitFn(spell_mastery_hand_of_light_SpellScript::HandleAfterHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_mastery_hand_of_light_SpellScript();
-        }
-};
-
-// Called by 403 - Lightning Bolt, 421 - Chain Lightning, 51505 - Lava Burst and 117014 - Elemental Blast
-// 77222 - Mastery : Elemental Overload
-class spell_mastery_elemental_overload : public SpellScriptLoader
-{
-    public:
-        spell_mastery_elemental_overload() : SpellScriptLoader("spell_mastery_elemental_overload") { }
-
-        class spell_mastery_elemental_overload_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_mastery_elemental_overload_SpellScript);
-
-            bool Validate(SpellInfo const* /*spellEntry*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(403) || !sSpellMgr->GetSpellInfo(421) || !sSpellMgr->GetSpellInfo(51505) || !sSpellMgr->GetSpellInfo(117014))
-                    return false;
-                return true;
-            }
-
-            void HandleOnHit()
-            {
-                SpellInfo const* procSpell = GetSpellInfo();
-
-                if (procSpell)
-                {
-                    if (Unit* caster = GetCaster())
-                    {
-                        if (Unit* unitTarget = GetHitUnit())
-                        {
-                            if (caster->GetTypeId() == TYPEID_PLAYER && caster->HasAura(77222))
-                            {
-                                // Every Lightning Bolt, Chain Lightning and Lava Burst spells have duplicate vs 75% damage and no cost
-                                switch (procSpell->Id)
-                                {
-                                    // Lava Burst
-                                    case 51505:
-                                    {
-                                        float Mastery = caster->GetFloatValue(PLAYER_MASTERY) * 2.0f;
-
-                                        if (roll_chance_f(Mastery))
-                                            caster->CastSpell(unitTarget, MASTERY_SPELL_LAVA_BURST, true);
-
-                                        break;
-                                    }
-                                    // Lightning Bolt
-                                    case 403:
-                                    {
-                                        float Mastery = caster->GetFloatValue(PLAYER_MASTERY) * 2.0f;
-
-                                        if (roll_chance_f(Mastery))
-                                            caster->CastSpell(unitTarget, MASTERY_SPELL_LIGHTNING_BOLT, true);
-
-                                        break;
-                                    }
-                                    // Chain Lightning
-                                    case 421:
-                                    {
-                                        float Mastery = caster->GetFloatValue(PLAYER_MASTERY) * 2.0f;
-
-                                        if (roll_chance_f(Mastery))
-                                            caster->CastSpell(unitTarget, MASTERY_SPELL_CHAIN_LIGHTNING, true);
-
-                                        break;
-                                    }
-                                    // Elemental Blast
-                                    case 117014:
-                                    {
-                                        float Mastery = caster->GetFloatValue(PLAYER_MASTERY) * 2.0f;
-
-                                        if (roll_chance_f(Mastery))
-                                        {
-                                            caster->CastSpell(unitTarget, MASTERY_SPELL_ELEMENTAL_BLAST, true);
-                                            caster->CastSpell(unitTarget, 118517, true); // Nature visual
-                                            caster->CastSpell(unitTarget, 118515, true); // Frost visual
-                                        }
-
-                                        break;
-                                    }
-                                    default: break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_mastery_elemental_overload_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_mastery_elemental_overload_SpellScript();
-        }
-};
-
 void AddSC_mastery_spell_scripts()
 {
     new spell_mastery_shield_discipline();
     new spell_mastery_blood_shield();
-    new spell_mastery_hand_of_light();
-    new spell_mastery_elemental_overload();
 }

@@ -1015,8 +1015,6 @@ void Battleground::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
         }
     }
 
-    RemovePlayer(player, guid, team);                           // BG subclass specific code
-
     BattlegroundTypeId bgTypeId = GetTypeID();
     BattlegroundQueueTypeId bgQueueTypeId = BattlegroundMgr::BGQueueTypeId(GetTypeID(), GetArenaType());
 
@@ -1038,7 +1036,7 @@ void Battleground::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
                 player->RemovePet(PET_REMOVE_DISMISS);
                 player->ResummonPetTemporaryUnSummonedIfAny();
 
-                if (isRated() && GetStatus() == STATUS_IN_PROGRESS)
+                if (isRated() && GetStatus() != STATUS_WAIT_LEAVE)
                 {
                     //left a rated match while the encounter was in progress, consider as loser
                     Group* winner_group = GetBgRaid(GetOtherTeam(team));
@@ -1082,7 +1080,7 @@ void Battleground::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
         }
         else // removing offline participant
         {
-            if (isRated() && GetStatus() == STATUS_IN_PROGRESS)
+            if (isRated() && GetStatus() != STATUS_WAIT_LEAVE)
             {
                 if (isArena())
                 {
@@ -1123,6 +1121,8 @@ void Battleground::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
         sBattlegroundMgr->BuildPlayerLeftBattlegroundPacket(&data, guid);
         SendPacketToTeam(team, &data, player, false);
     }
+
+    RemovePlayer(player, guid, team);                           // BG subclass specific code
 
     if (player)
     {

@@ -2729,6 +2729,8 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         if (target->reflectResult == SPELL_MISS_NONE)       // If reflected spell hit caster -> do all effect on him
         {
             spellHitTarget = m_caster;
+            // Start triggers for remove charges if need (trigger only for victim, and mark as active spell)
+            m_caster->ProcDamageAndSpell(unit, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, 0, BASE_ATTACK, m_spellInfo);
             if (m_caster->GetTypeId() == TYPEID_UNIT)
                 m_caster->ToCreature()->LowerPlayerDamageReq(target->damage);
         }
@@ -2917,6 +2919,20 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         if (m_spellInfo->AttributesCu & SPELL_ATTR0_CU_AURA_CC)
             if (!unit->IsStandState())
                 unit->SetStandState(UNIT_STAND_STATE_STAND);
+    }
+
+    switch (m_caster->getClass())
+    {
+        case CLASS_DRUID:
+            if (AuraEffect* mastery = m_caster->GetAuraEffect(77495, EFFECT_0))
+            {
+                if (mastery->GetBase()->GetEffect(EFFECT_0)->GetSpellEffectInfo().SpellClassMask & m_spellInfo->SpellFamilyFlags)
+                {
+                    int32 bp = mastery->GetAmount();
+                    m_caster->CastCustomSpell(m_caster, 100977, &bp, &bp, NULL, true);
+                }
+            }
+            break;
     }
 
     if (spellHitTarget)
@@ -3328,6 +3344,9 @@ bool Spell::UpdateChanneledTargetList()
         range = m_spellInfo->GetMaxRange(m_spellInfo->IsPositive());
         if (Player* modOwner = m_caster->GetSpellModOwner())
             modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, range, this);
+
+        // Blizzard adds an extra ~ 10 yards to channel range
+        range += 10.0f;
     }
 
     for (std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)

@@ -2156,44 +2156,6 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
         if (unitTarget->HasAura(48920) && (unitTarget->GetHealth() + addhealth >= unitTarget->GetMaxHealth()))
             unitTarget->RemoveAura(48920);
 
-        // Custom MoP Script
-        // 77495 - Mastery : Harmony
-        if (caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_DRUID)
-        {
-            if (caster->HasAura(77495))
-            {
-                if (addhealth)
-                {
-                    float Mastery = caster->GetFloatValue(PLAYER_MASTERY) * 1.25 / 100.0f;
-
-                    if (m_spellInfo->HasEffect(SPELL_EFFECT_HEAL))
-                    {
-                        addhealth *= (1 + Mastery);
-
-                        int32 bp = int32(100.0f * Mastery);
-
-                        caster->CastCustomSpell(caster, 100977, &bp, NULL, NULL, true);
-                    }
-                }
-            }
-        }
-        // 77226 - Mastery : Deep Healing
-        if (caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_SHAMAN)
-        {
-            if (caster->HasAura(77226))
-            {
-                if (addhealth)
-                {
-                    float Mastery = caster->GetFloatValue(PLAYER_MASTERY) * 3.0f / 100.0f;
-                    float healthpct = unitTarget->GetHealthPct();
-
-                    float bonus = 0;
-                    bonus = CalculatePct((1 + (100.0f - healthpct)), Mastery);
-
-                    addhealth *= 1 + bonus;
-                }
-            }
-        }
         // Chakra : Serenity - 81208
         if (addhealth && caster->HasAura(81208) && m_spellInfo->Effects[0].TargetA.GetTarget() == TARGET_UNIT_TARGET_ALLY) // Single heal target
             if (Aura *renew = unitTarget->GetAura(139, caster->GetGUID()))
@@ -2246,6 +2208,10 @@ void Spell::EffectHealPct(SpellEffIndex effIndex)
 
     switch (m_spellInfo->Id)
     {
+        case 114635:
+            if (AuraEffect* emberstorm = m_caster->GetAuraEffect(77220, EFFECT_0))
+                AddPct(damage, emberstorm->GetAmount());
+            break;
         case 6262:  // Healthstone
             if (m_caster->HasAura(56224)) // Glyph of Healthstone
                 return;

@@ -1179,14 +1179,6 @@ class spell_pri_spirit_shell : public SpellScriptLoader
 
                             SetHitHeal(0);
 
-                            // Mastery must be handled here to prevent double absorb bonus
-                            // TODO: Rewrite Mastery to have proper amount stored in aura instead of hardcoding calculated formulas
-                            if (_player->HasAura(SPELL_PRIEST_SHIELD_DISCIPLINE) && _player->getLevel() >= 80)
-                            {
-                                float Mastery = 1 + (_player->GetFloatValue(PLAYER_MASTERY) * 2.5f / 100.0f);
-                                absorb = int32(absorb * Mastery);
-                            }
-
                             // Multiple effects stack, so let's try to find this aura.
                             if (AuraEffect const* const shell = target->GetAuraEffect(PRIEST_SPIRIT_SHELL_ABSORPTION, EFFECT_0, _player->GetGUID()))
                                 absorb += shell->GetAmount();
@@ -2444,14 +2436,6 @@ public:
 
             int32 absorb = CalculatePct(int32(eventInfo.GetHealInfo()->GetHeal()), aurEff->GetAmount());
 
-            // Mastery must be handled here to prevent double absorb bonus
-            // TODO: Rewrite Mastery to have proper amount stored in aura instead of hardcoding calculated formulas
-            if (caster->HasAura(SPELL_PRIEST_SHIELD_DISCIPLINE) && caster->getLevel() >= 80)
-            {
-                float Mastery = 1 + (caster->GetFloatValue(PLAYER_MASTERY) * 2.5f / 100.0f);
-                absorb = int32(absorb * Mastery);
-            }
-
             // Multiple effects stack, so let's try to find this aura.
             if (AuraEffect const* aegis = eventInfo.GetProcTarget()->GetAuraEffect(SPELL_PRIEST_DIVINE_AEGIS, EFFECT_0, eventInfo.GetActor()->GetGUID()))
                 absorb += aegis->GetAmount();
@@ -2575,7 +2559,7 @@ class spell_pri_power_word_shield : public SpellScriptLoader
             Unit * const target = GetTarget();
             Unit * const attacker = dmgInfo.GetAttacker();
 
-            if (!attacker || attacker == target)
+            if (!attacker || attacker == target || (dmgInfo.GetSpellInfo() && dmgInfo.GetSpellInfo()->Id == REFLECTIVE_SHIELD_TRIGGERED))
                 return;
 
             Unit * const caster = GetCaster();
@@ -2597,11 +2581,6 @@ class spell_pri_power_word_shield : public SpellScriptLoader
 
             if (Player const * const player = caster->ToPlayer())
             {
-                if (player->HasAura(MASTERY_SPELL_DISCIPLINE_SHIELD) && player->getLevel() >= 80)
-                {
-                    float Mastery = 1 + (player->GetFloatValue(PLAYER_MASTERY) * 1.6f / 100.0f);
-                    amount = int32(amount * Mastery);
-                }
                 // Divine Aegis
                 if (AuraEffect const * const aegis = player->GetAuraEffect(47515, EFFECT_0))
                     if (roll_chance_f(player->GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + GetFirstSchoolInMask(GetSpellInfo()->GetSchoolMask()))))

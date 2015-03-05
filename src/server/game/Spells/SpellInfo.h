@@ -174,6 +174,7 @@ enum SpellSpecificType
     SPELL_SPECIFIC_PHASE                         = 29,
     SPELL_SPECIFIC_BANE                          = 30,
     SPELL_SPECIFIC_CHAKRA                        = 31,
+    SPELL_SPECIFIC_BREW                          = 32
 };
 
 enum SpellCustomAttributes

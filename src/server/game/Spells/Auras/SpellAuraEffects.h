@@ -373,7 +373,29 @@ namespace Trinity
     // Binary predicate for sorting the priority of absorption aura effects
     struct AbsorbAuraOrderPred
     {
-        bool operator()(AuraEffect const *aurEffA, AuraEffect const *aurEffB) const;
+        bool operator()(AuraEffect const *aurEffA, AuraEffect const *aurEffB) const
+        {
+            SpellInfo const* spellProtoA = aurEffA->GetSpellInfo();
+            SpellInfo const* spellProtoB = aurEffB->GetSpellInfo();
+
+            // Incanter's ward
+            if (spellProtoA->Id == 1463)
+                return true;
+            if (spellProtoB->Id == 1463)
+                return false;
+
+            // Cheat Death
+            if (spellProtoA->Id == 31230)
+                return false;
+            if (spellProtoB->Id == 31230)
+                return true;
+
+            // Spirit of redemption
+            if (spellProtoA->Id == 20711)
+                return false;
+            if (spellProtoB->Id == 20711)
+                return true;
+        }
     };
 
     class DurationOrderPred

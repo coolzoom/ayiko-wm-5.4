@@ -581,6 +581,7 @@ Spell::Spell(Unit* caster, SpellInfo const* info, TriggerCastFlags triggerFlags,
     m_periodicDamageModifier = 0.0f;
 
     m_channelTargetEffectMask = 0;
+    m_hasDispelled = false;
 
     m_redirected = false;
 
@@ -4308,6 +4309,21 @@ void Spell::finish(bool ok)
         m_caster->AttackStop();
         if (auto player = m_caster->ToPlayer())
             player->SendAttackSwingCancelAttack();
+    }
+
+    // Dispel cd reset if nothing was dispelled
+    if (m_spellInfo->IsPositive() && !m_hasDispelled && m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->GetRecoveryTime() < 30 * IN_MILLISECONDS)
+    {
+        bool canResetCooldown = true;
+        for (uint8 i = 0; i < m_spellInfo->Effects.size(); ++i)
+            if (m_spellInfo->Effects[i].Effect != SPELL_EFFECT_DISPEL)
+                canResetCooldown = false;
+
+        if (canResetCooldown)
+        {
+            if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                m_caster->ToPlayer()->RemoveSpellCooldown(m_spellInfo->Id, true);
+        }
     }
 
     if (m_castItemGUID && m_caster->GetTypeId() == TYPEID_PLAYER)

@@ -769,6 +769,9 @@ class Spell
         bool m_skipCheck;
         uint32 m_auraScaleMask;
 
+        // It seems blizzard no longer uses effect masks for dispels. This will only be true if a spell attempts to dispel something
+        bool m_hasDispelled;
+
         typedef std::unordered_map<uint32, SpellLogHelper> LogHelperMap;
         LogHelperMap m_effectExecuteData;
         SpellPowerEntry const* m_spellPowerData;

@@ -27,6 +27,17 @@
 
 class ADTFile;
 
+class wdt_MAIN{
+    union{
+        uint32 fcc;
+        char   fcc_txt[4];
+    };
+public:
+    uint32 size;
+
+    bool   prepareLoadedData();
+};
+
 class WDTFile
 {
 private:
@@ -37,10 +48,16 @@ public:
     ~WDTFile(void);
     bool init(char* map_id, unsigned int mapID);
 
+    struct adtData{
+        uint32 flag;
+        uint32 data1;
+    } adt_list[64][64];
+
     string* gWmoInstansName;
     int gnWMO;
 
-    ADTFile* GetMap(int x, int z);
+    ADTFile* GetMap_obj0(int x, int z);
+    ADTFile* GetMap_obj1(int x, int z);
 };
 
 #endif

@@ -169,11 +169,15 @@ bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY)
                 WmoInstanceNames = new std::string[size];
                 while (p < buf + size)
                 {
+                    std::string path(p);
+
                     char* s = GetPlainName(p);
                     FixNameCase(s, strlen(s));
                     FixNameSpaces(s, strlen(s));
 
                     WmoInstanceNames[q++] = s;
+
+                    ExtractSingleWmo(path);
 
                     p += strlen(p) + 1;
                 }

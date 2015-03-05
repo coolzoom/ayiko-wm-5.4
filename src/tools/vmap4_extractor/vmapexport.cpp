@@ -61,7 +61,7 @@
 HANDLE WorldMpq = NULL;
 HANDLE LocaleMpq = NULL;
 
-uint32 CONF_TargetBuild = 17688;              // 5.4.2 17688
+uint32 CONF_TargetBuild = 17399;              // 5.4.0.17399
 
 // List MPQ for extract maps from
 char const* CONF_mpq_list[]=
@@ -75,8 +75,7 @@ char const* CONF_mpq_list[]=
     "expansion4.MPQ", // added in 5.x.x
 };
 
-uint32 const Builds[] = { 16016, 16048, 16057, 16309, 16357, 16516, 16650, 16844, 16965, 17116, 17266, 17325, 17345, 17538, 17645, 17688, 17898, 18273, 0 };
-
+uint32 const Builds[] = {16016, 16048, 16057, 16309, 16357, 16516, 16650, 16844, 16965, 17116, 17266, 17345, 17538, 0};
 #define LAST_DBC_IN_DATA_BUILD 15595    // after this build mpqs with dbc are back to locale folder
 #define NEW_BASE_SET_BUILD 16016 // 15211
 
@@ -199,7 +198,6 @@ void LoadCommonMPQFiles(uint32 build)
             _tprintf(_T("Loaded %s\n"), filename);
     }
 
-    char const* prefix = NULL;
     for (int i = 0; Builds[i] && Builds[i] <= CONF_TargetBuild; ++i)
     {
         // Do not attempt to read older MPQ patch archives past this build, they were merged with base
@@ -208,18 +206,9 @@ void LoadCommonMPQFiles(uint32 build)
             continue;
 
         memset(filename, 0, sizeof(filename));
-        if (Builds[i] > LAST_DBC_IN_DATA_BUILD)
-        {
-            prefix = "";
-            _stprintf(filename, _T("%swow-update-base-%u.MPQ"), input_path, Builds[i]);
-        }
-        else
-        {
-            prefix = "base";
-            _stprintf(filename, _T("%swow-update-%u.MPQ"), input_path, Builds[i]);
-        }
-
-        if (!SFileOpenPatchArchive(WorldMpq, filename, prefix, 0))
+        _stprintf(filename, _T("%swow-update-base-%u.MPQ"), input_path, Builds[i]);
+ 
+        if (!SFileOpenPatchArchive(WorldMpq, filename, "", 0))
         {
             if (GetLastError() != ERROR_PATH_NOT_FOUND)
                 _tprintf(_T("Cannot open patch archive %s\n"), filename);
@@ -360,7 +349,7 @@ bool ExtractSingleWmo(std::string& fname)
         return true;
 
     bool file_ok = true;
-    std::cout << "Extracting " << fname << std::endl;
+    //std::cout << "Extracting " << fname << std::endl;
     WMORoot froot(fname);
     if(!froot.open())
     {
@@ -427,7 +416,15 @@ void ParsMapFiles()
             {
                 for (int y = 0; y < 64; ++y)
                 {
-                    if (ADTFile *ADT = WDT.GetMap(x, y))
+                    //if (!(WDT.adt_list[x][y].flag & 0x1))
+                    //    continue;
+
+                    if (ADTFile *ADT = WDT.GetMap_obj0(x,y))
+                    {
+                        ADT->init(map_ids[i].id, x, y);
+                        delete ADT;
+                    }
+                    if (ADTFile *ADT = WDT.GetMap_obj1(x,y))
                     {
                         ADT->init(map_ids[i].id, x, y);
                         delete ADT;
@@ -577,8 +574,8 @@ int main(int argc, char ** argv)
     ReadLiquidTypeTableDBC();
 
     // extract data
-    if (success)
-        success = ExtractWmo();
+    //if (success)
+    //    success = ExtractWmo();
 
     //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     //map.dbc
@@ -605,7 +602,7 @@ int main(int argc, char ** argv)
         delete [] map_ids;
         //nError = ERROR_SUCCESS;
         // Extract models, listed in GameObjectDisplayInfo.dbc
-        ExtractGameobjectModels();
+        ExtractGameobjectModels(&input_path[0]);
     }
 
     SFileCloseArchive(LocaleMpq);

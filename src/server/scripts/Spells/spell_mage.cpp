@@ -437,6 +437,7 @@ class spell_mage_incanters_ward : public SpellScriptLoader
                     if (dmgInfo.GetAttacker())
                     {
                         absorbTotal += float(dmgInfo.GetDamage());
+                        absorbTotal = std::min(absorbTotal, absorbtionAmount);
 
                         int32 pct = aurEff->GetSpellInfo()->Effects[EFFECT_1].CalcValue(GetCaster());
                         int32 manaGain = CalculatePct(caster->GetMaxPower(POWER_MANA), CalculatePct(((float(dmgInfo.GetDamage()) / absorbtionAmount) * 100.0f), pct));
@@ -453,12 +454,10 @@ class spell_mage_incanters_ward : public SpellScriptLoader
             {
                 if (Unit* caster = GetCaster())
                 {
-                    int32 damageGain = CalculatePct(sSpellMgr->GetSpellInfo(SPELL_MAGE_INCANTERS_ABSORBTION)->Effects[0].BasePoints, ((absorbTotal / absorbtionAmount) * 100.0f));
+                    int32 cap = sSpellMgr->GetSpellInfo(SPELL_MAGE_INCANTERS_ABSORBTION)->Effects[EFFECT_0].BasePoints;
+                    int32 damageGain = CalculatePct(cap, ((absorbTotal / absorbtionAmount) * 100.0f));
                     if (!damageGain)
                         return;
-
-                    if (damageGain > 30)
-                        damageGain = 30;
 
                     caster->CastCustomSpell(caster, SPELL_MAGE_INCANTERS_ABSORBTION, &damageGain, NULL, NULL, true);
                 }

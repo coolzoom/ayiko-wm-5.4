@@ -55,25 +55,11 @@ bool ExtractSingleModel(std::string& fname)
 
 extern HANDLE LocaleMpq;
 
-void ExtractGameobjectModels(char* input_path)
+void ExtractGameobjectModels()
 {
-    HANDLE localeFile;
-    char localMPQ[512];
-
-    sprintf(localMPQ, "%smisc.MPQ", input_path);
-    if (FileExists(localMPQ)==false)
-    {   // Use misc.mpq
-        printf(localMPQ, "%s/Data/%s/locale-%s.MPQ", input_path);
-    }
-        
-    if (!SFileOpenArchive(localMPQ, 0, MPQ_OPEN_READ_ONLY, &localeFile))
-    {
-        exit(1);
-    }
-
     printf("Extracting GameObject models...");
-    DBCFile dbc(localeFile, "DBFilesClient\\GameObjectDisplayInfo.dbc");
-    if(!dbc.open())
+    DBCFile dbc(LocaleMpq, "DBFilesClient\\GameObjectDisplayInfo.dbc");
+    if (!dbc.open())
     {
         printf("Fatal error: Invalid GameObjectDisplayInfo.dbc file format!\n");
         exit(1);

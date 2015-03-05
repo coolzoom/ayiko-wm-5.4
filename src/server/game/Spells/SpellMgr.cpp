@@ -4400,9 +4400,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_DUMMY;
                     spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(85);
                     break;
-                case 89523: // Glyph of Grounding Totem
-                    spellInfo->SpellFamilyName = SPELLFAMILY_SHAMAN;
-                    break;
                 case 1856:  // Vanish
                     spellInfo->Effects[1].TriggerSpell = 131368;
                     spellInfo->Effects[0].Effect = SPELL_EFFECT_SANCTUARY;

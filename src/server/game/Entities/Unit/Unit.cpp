@@ -2912,13 +2912,7 @@ SpellMissInfo Unit::SpellHitResult(Unit* victim, SpellInfo const* spell, bool Ca
             if ((*i)->GetMiscValue() & spell->GetSchoolMask())
                 reflectchance += (*i)->GetAmount();
         if (reflectchance > 0 && roll_chance_i(reflectchance))
-        {
-            // Hack fix for Glyph of Grounding Totem - Remove aura
-            if (victim->HasAura(89523))
-                victim->RemoveAura(89523);
-
             return SPELL_MISS_REFLECT;
-        }
     }
 
     // Taunt-like spells can't miss since 4.0.1
@@ -3744,7 +3738,8 @@ void Unit::_UnapplyAura(AuraApplicationMap::iterator &i, AuraRemoveMode removeMo
     ASSERT(!aurApp->GetEffectMask());
 
     // Remove totem at next update if totem loses its aura
-    if (aurApp->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE && GetTypeId() == TYPEID_UNIT && ToCreature()->isTotem()&& ToTotem()->GetSummonerGUID() == aura->GetCasterGUID())
+    if ((aurApp->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE || aurApp->GetRemoveMode() == AURA_REMOVE_BY_DEFAULT)
+        && GetTypeId() == TYPEID_UNIT && ToCreature()->isTotem() && ToTotem()->GetGUID() == aura->GetCasterGUID())
     {
         if (ToTotem()->GetSpell() == aura->GetId() && ToTotem()->GetTotemType() == TOTEM_PASSIVE)
             ToTotem()->setDeathState(JUST_DIED);
@@ -11362,15 +11357,8 @@ Unit* Unit::GetMagicHitRedirectTarget(Unit* victim, SpellInfo const* spellInfo)
 
     Unit::AuraEffectList const& magnetAuras = victim->GetAuraEffectsByType(SPELL_AURA_SPELL_MAGNET);
     for (Unit::AuraEffectList::const_iterator itr = magnetAuras.begin(); itr != magnetAuras.end(); ++itr)
-    {
         if (Unit* magnet = (*itr)->GetBase()->GetCaster())
-            if (spellInfo->CheckExplicitTarget(this, magnet) == SPELL_CAST_OK
-                && (IsWithinLOSInMap(magnet)
-                || magnet->isTotem()))
-            {
-                return magnet;
-            }
-    }
+            return magnet;
     return victim;
 }
 
@@ -16700,6 +16688,21 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
 
                 switch (triggeredByAura->GetAuraType())
                 {
+                    case SPELL_AURA_SPELL_MAGNET:
+                    {
+                        if (procSpell && procSpell->DmgClass == SPELL_DAMAGE_CLASS_MAGIC)
+                        {
+                            // Patch 1.2 notes: Spell Reflection no longer reflects abilities
+                            bool cantTrigger = procSpell->Attributes & SPELL_ATTR0_ABILITY || procSpell->AttributesEx & SPELL_ATTR1_CANT_BE_REDIRECTED
+                                || procSpell->Attributes & SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
+
+                            if (!cantTrigger)
+                                if (Unit* magnet = triggeredByAura->GetBase()->GetUnitOwner())
+                                    if (magnet->GetGUID() == GetGUID())
+                                        takeCharges = magnet->IsAlive();
+                        }
+                        break;
+                    }
                     case SPELL_AURA_PROC_TRIGGER_SPELL:
                     case SPELL_AURA_PROC_TRIGGER_SPELL_2:
                     {
@@ -16779,11 +16782,6 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
                     case SPELL_AURA_REFLECT_SPELLS_SCHOOL:
                         // Skip Melee hits and spells ws wrong school
                         if (procSpell && (triggeredByAura->GetMiscValue() & procSpell->SchoolMask))         // School check
-                            takeCharges = true;
-                        break;
-                    case SPELL_AURA_SPELL_MAGNET:
-                        // Skip Melee hits and targets with magnet aura
-                        if (procSpell && (triggeredByAura->GetBase()->GetUnitOwner()->ToUnit() == ToUnit()))         // Magnet
                             takeCharges = true;
                         break;
                     case SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT:
@@ -18745,11 +18743,6 @@ Aura *Unit::AddAura(uint32 spellId, Unit* target)
 
     if (!target->IsAlive() && !(spellInfo->Attributes & SPELL_ATTR0_PASSIVE) && !(spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_DEAD))
         return NULL;
-
-    // Glyph of Grounding Totem
-    if (target->isTotem() && target->ToTempSummon() && target->ToTempSummon()->GetSummoner() && spellId == 8178)
-        if (target->ToTempSummon()->GetSummoner()->HasAura(55441))
-            return NULL;
 
     return AddAura(spellInfo, MAX_EFFECT_MASK, target);
 }

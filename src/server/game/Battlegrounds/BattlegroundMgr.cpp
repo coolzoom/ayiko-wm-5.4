@@ -293,7 +293,7 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket* data, Battlegro
             data->WriteByteSeq<4, 3, 1>(bg_guid);
             *data << uint32(GLOBAL_QUEUE_TYPE_ARENA);                   // GlobalQueueType
             data->WriteByteSeq<3, 4>(requesterGuid);
-            *data << uint32(time1);                                     // Timestamp (Timeout)
+            *data << uint32(0);
             data->WriteByteSeq<2>(bg_guid);
             data->WriteByteSeq<5>(requesterGuid);
             data->WriteByteSeq<6>(bg_guid);

@@ -24095,6 +24095,19 @@ void Player::AddSpellAndCategoryCooldowns(SpellInfo const* spellInfo, uint32 ite
             }
         }
 
+        AuraEffectList const& auras = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_COOLDOWN_BY_HASTE);
+        for (AuraEffectList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+        {
+            if ((*itr)->IsAffectingSpell(spellInfo))
+            {
+                if (rec > 0)
+                    rec *= GetFloatValue(UNIT_MOD_HASTE);
+
+                if (catrec > 0)
+                    catrec *= GetFloatValue(UNIT_MOD_CAST_SPEED);
+            }
+        }
+
         rec = std::max(rec, 0);
         catrec = std::max(catrec, 0);
 

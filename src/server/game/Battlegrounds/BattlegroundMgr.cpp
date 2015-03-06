@@ -147,74 +147,80 @@ void BattlegroundMgr::Update(uint32 diff)
         m_nextRatingUpdate -= diff;
 }
 
-void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket* data, Battleground* bg, Player * player, uint8 queueSlot, uint8 statusId, uint32 time1, uint32 time2, uint8 arenaType)
+void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket* data, Battleground* bg, Player * player, uint8 queueSlot, uint8 statusId, uint32 time1, uint32 time2, uint8 /*globalQueueType*/)
 {
     // we can be in 2 queues in same time...
     if (!bg)
         statusId = STATUS_NONE;
 
-    ObjectGuid player_guid = player->GetGUID();
+    ObjectGuid requesterGuid = player->GetGUID();
     ObjectGuid bg_guid = bg ? bg->GetGUID() : 0;
 
+    // GlobalQueueType is hard coded to 5 (GLOBAL_QUEUE_TYPE_ARENA) are there other values for BG's ect?
     switch (statusId)
     {
         case STATUS_NONE:
         {
-            data->Initialize(SMSG_BATTLEFIELD_STATUS);
+            data->Initialize(SMSG_BATTLEFIELD_STATUS, 4 + 4 + 4 + 1 + 8);
 
-            *data << uint32(arenaType ? arenaType : 1);
-            *data << uint32(queueSlot);                 // Queue slot
-            *data << uint32(time1);                     // Join Time
+            // --- CliRideTicket ---
+            *data << uint32(GLOBAL_QUEUE_TYPE_ARENA);                   // GlobalQueueType
+            *data << uint32(queueSlot);                                 // ID
+            *data << uint32(time1);                                     // Timestamp (Join Time)
 
-            data->WriteBitSeq<1, 2, 4, 6, 5, 7, 0, 3>(player_guid);
-            data->WriteByteSeq<7, 6, 4, 3, 0, 1, 2, 5>(player_guid);
+            data->WriteBitSeq<1, 2, 4, 6, 5, 7, 0, 3>(requesterGuid);
+            data->WriteByteSeq<7, 6, 4, 3, 0, 1, 2, 5>(requesterGuid);
+            // ---------------------
+
             break;
         }
         case STATUS_WAIT_QUEUE:
         {
-            data->Initialize(SMSG_BATTLEFIELD_STATUS_QUEUED);
+            data->Initialize(SMSG_BATTLEFIELD_STATUS_QUEUED, 1 + 8 + 1 + 8 + 1 + 4
+                + 1 + 4 + 4 + 4 + 1 + 1 + 4 + 4 + 4);
 
             data->WriteBitSeq<7>(bg_guid);
-            data->WriteBitSeq<6>(player_guid);
-            data->WriteBit(1);   // Eligible In Queue
+            data->WriteBitSeq<6>(requesterGuid);
+            data->WriteBit(1);                                          // EligibleForMatchmaking
             data->WriteBitSeq<0>(bg_guid);
-            data->WriteBit(bg->isRated());   // byte38
-            data->WriteBit(0);   // byte4C
-            data->WriteBitSeq<5, 1, 3>(player_guid);
+            data->WriteBit(bg->isRated());                              // TournamentRules
+            data->WriteBit(0);                                          // AsGroup
+            data->WriteBitSeq<5, 1, 3>(requesterGuid);
             data->WriteBitSeq<6>(bg_guid);
-            data->WriteBitSeq<4, 0>(player_guid);
+            data->WriteBitSeq<4, 0>(requesterGuid);
             data->WriteBitSeq<4>(bg_guid);
-            data->WriteBit(0);   // byte44
+            data->WriteBit(0);                                          // SuspendedQueue
             data->WriteBitSeq<5>(bg_guid);
-            data->WriteBitSeq<7>(player_guid);
+            data->WriteBitSeq<7>(requesterGuid);
             data->WriteBitSeq<1, 2>(bg_guid);
-            data->WriteBitSeq<2>(player_guid);
+            data->WriteBitSeq<2>(requesterGuid);
             data->WriteBitSeq<3>(bg_guid);
             data->FlushBits();
 
             data->WriteByteSeq<1>(bg_guid);
-            *data << uint32(time1);                     // Estimated Wait Time
-            *data << uint8(0); // byte32
-            *data << uint32(time2);                     //Time of the join
+            *data << uint32(time1);                                     // Timestamp (Estimated Wait Time)
+            *data << uint8(0);                                          // RangeMax
+            *data << uint32(time2);                                     // Timestamp2 (Join Time)
             *data << uint32(GetMSTimeDiffToNow(time2));
-            data->WriteByteSeq<2, 3>(player_guid);
+            data->WriteByteSeq<2, 3>(requesterGuid);
             data->WriteByteSeq<5, 3>(bg_guid);
-            data->WriteByteSeq<5>(player_guid);
-            *data << uint8(bg->GetMinLevel()); //BG Min level
-            *data << uint8(0); // byte30
+            data->WriteByteSeq<5>(requesterGuid);
+            *data << uint8(bg->GetMinLevel());
+            *data << uint8(0);                                          // RangeMin
             data->WriteByteSeq<4>(bg_guid);
             *data << uint32(queueSlot);
-            *data << uint32(bg->isArena() ? bg->GetMaxPlayersPerTeam() : 1);
+            *data << uint32(GLOBAL_QUEUE_TYPE_ARENA);                   // GlobalQueueType
             data->WriteByteSeq<2>(bg_guid);
-            *data << uint32(bg->GetClientInstanceID()); // Client Instance ID
-            data->WriteByteSeq<1, 0, 4>(player_guid);
+            *data << uint32(bg->GetClientInstanceID());                 // InstanceID
+            data->WriteByteSeq<1, 0, 4>(requesterGuid);
             data->WriteByteSeq<0, 6, 7>(bg_guid);
-            data->WriteByteSeq<6, 7>(player_guid);
+            data->WriteByteSeq<6, 7>(requesterGuid);
             break;
         }
         case STATUS_WAIT_JOIN:
         {
-            data->Initialize(SMSG_BATTLEFIELD_STATUS_NEED_CONFIRMATION, 44);
+            data->Initialize(SMSG_BATTLEFIELD_STATUS_NEED_CONFIRMATION, 1 + 8 + 1 + 8
+                + 1 + 1 + 4 + 1 + 4 + 4 + 1 + 4 + 1 + 4 + 4);
 
             // FIXME: the queue system must be similar to LFG, but passed roles
             // are unused now.
@@ -226,15 +232,14 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket* data, Battlegro
                 role = player->getClass() != CLASS_PRIEST ? SPEC_ROLE_DAMAGE : SPEC_ROLE_HEALING;
 
             data->WriteBitSeq<4, 6, 1, 3>(bg_guid);
-            data->WriteBitSeq<2, 3>(player_guid);
+            data->WriteBitSeq<2, 3>(requesterGuid);
             data->WriteBitSeq<2>(bg_guid);
-            data->WriteBitSeq<5>(player_guid);
+            data->WriteBitSeq<5>(requesterGuid);
             data->WriteBit(role == SPEC_ROLE_DAMAGE);
             data->WriteBitSeq<0, 7, 5>(bg_guid);
-            data->WriteBitSeq<7, 0, 6>(player_guid);
-            data->WriteBit(bg->isRated()); // byte38
-            data->WriteBitSeq<1, 4>(player_guid);
-
+            data->WriteBitSeq<7, 0, 6>(requesterGuid);
+            data->WriteBit(bg->isRated());                              // TournamentRules
+            data->WriteBitSeq<1, 4>(requesterGuid);
             data->FlushBits();
 
             if (role != SPEC_ROLE_DAMAGE)
@@ -242,19 +247,19 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket* data, Battlegro
 
             *data << uint32(bg->GetClientInstanceID());
             data->WriteByteSeq<5>(bg_guid);
-            *data << uint8(0); // byte32
-            *data << uint32(bg->isArena() ? bg->GetMaxPlayersPerTeam() : 1);
-            data->WriteByteSeq<0, 6>(player_guid);
-            *data << uint32(time2);                     // Time until closed
+            *data << uint8(0);                                          // RangeMax
+            *data << uint32(GLOBAL_QUEUE_TYPE_ARENA);                   // GlobalQueueType
+            data->WriteByteSeq<0, 6>(requesterGuid);
+            *data << uint32(time2);                                     // Timestamp2 (Timeout)
             *data << uint8(bg->GetMinLevel());
-            data->WriteByteSeq<1, 5, 2>(player_guid);
+            data->WriteByteSeq<1, 5, 2>(requesterGuid);
             data->WriteByteSeq<4>(bg_guid);
-            data->WriteByteSeq<7>(player_guid);
+            data->WriteByteSeq<7>(requesterGuid);
             data->WriteByteSeq<1, 7, 0>(bg_guid);
              *data << uint32(time1);
             data->WriteByteSeq<6, 2>(bg_guid);
-            *data << uint8(0); // byte30
-            data->WriteByteSeq<3, 4>(player_guid);
+            *data << uint8(0);                                          // RangeMin
+            data->WriteByteSeq<3, 4>(requesterGuid);
             *data << uint32(bg->GetMapId());
             *data << uint32(queueSlot);
             data->WriteByteSeq<3>(bg_guid);
@@ -262,40 +267,41 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket* data, Battlegro
         }
         case STATUS_IN_PROGRESS:
         {
-            data->Initialize(SMSG_BATTLEFIELD_STATUS_ACTIVE, 49);
+            data->Initialize(SMSG_BATTLEFIELD_STATUS_ACTIVE, 1 + 8 + 1 + 8 + 1 + 1
+                + 1 + 1 + 4 + 4 + 4 + 4 + 4 + 4 + 4);
 
-            data->WriteBit(player->GetBGTeam() == HORDE ? 0 : 1);     // Battlefield Faction ( 0 horde, 1 alliance )
+            data->WriteBit(player->GetBGTeam() == HORDE ? 0 : 1);       // Battlefield Faction ( 0 horde, 1 alliance )
             data->WriteBitSeq<1, 7>(bg_guid);
-            data->WriteBitSeq<0, 5, 3>(player_guid);
+            data->WriteBitSeq<0, 5, 3>(requesterGuid);
             data->WriteBitSeq<0>(bg_guid);
-            data->WriteBitSeq<2, 7>(player_guid);
+            data->WriteBitSeq<2, 7>(requesterGuid);
             data->WriteBitSeq<4>(bg_guid);
-            data->WriteBit(bg->isRated()); // byte38
-            data->WriteBitSeq<6>(player_guid);
+            data->WriteBit(bg->isRated());                              // byte38
+            data->WriteBitSeq<6>(requesterGuid);
             data->WriteBitSeq<2, 5, 6, 3>(bg_guid);
-            data->WriteBitSeq<4, 1>(player_guid);
+            data->WriteBitSeq<4, 1>(requesterGuid);
             data->FlushBits();
 
-            *data << uint8(0); // byte30
-            *data << uint8(bg->GetMinLevel());          // Min Level
-            *data << uint8(0); // byte32
-            data->WriteByteSeq<7, 0, 1, 2>(player_guid);
+            *data << uint8(0);                                          // RangeMin
+            *data << uint8(bg->GetMinLevel());
+            *data << uint8(0);                                          // RangeMax
+            data->WriteByteSeq<7, 0, 1, 2>(requesterGuid);
             data->WriteByteSeq<7>(bg_guid);
-            *data << uint32(time2); // Elapsed Time
-            *data << uint32(bg->GetClientInstanceID()); // Client Instance ID
-            *data << uint32(bg->GetMapId());            // Map Id
+            *data << uint32(time2);                                     // Timestamp (Elapsed Time)
+            *data << uint32(bg->GetClientInstanceID());
+            *data << uint32(bg->GetMapId());
             data->WriteByteSeq<4, 3, 1>(bg_guid);
-            *data << uint32(bg->isArena() ? bg->GetMaxPlayersPerTeam() : 1);                 // Queue slot
-            data->WriteByteSeq<3, 4>(player_guid);
-            *data << uint32(time1); // Time to Close
+            *data << uint32(GLOBAL_QUEUE_TYPE_ARENA);                   // GlobalQueueType
+            data->WriteByteSeq<3, 4>(requesterGuid);
+            *data << uint32(time1);                                     // Timestamp (Timeout)
             data->WriteByteSeq<2>(bg_guid);
-            data->WriteByteSeq<5>(player_guid);
+            data->WriteByteSeq<5>(requesterGuid);
             data->WriteByteSeq<6>(bg_guid);
             *data << uint32(GetMSTimeDiffToNow(time2));
             data->WriteByteSeq<5>(bg_guid);
             *data << uint32(queueSlot);
             data->WriteByteSeq<0>(bg_guid);
-            data->WriteByteSeq<6>(player_guid);
+            data->WriteByteSeq<6>(requesterGuid);
             break;
         }
         case STATUS_WAIT_LEAVE:

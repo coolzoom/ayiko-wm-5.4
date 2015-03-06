@@ -2563,11 +2563,19 @@ void LFGMgr::RemoveGroupData(uint64 guid)
 
 uint8 LFGMgr::GetGroupSizeFromEntry(LFGDungeonEntry const* entry) const
 {
+    // TEMP: FOR TESTING PURPOSES REMOVE THIS BEFORE LIVE RELEASE
+    if (entry->difficulty == RAID_TOOL_DIFFICULTY)
+        return 4;
+
     return entry ? GetMaxGroupSizeFromDifficulty(entry->difficulty) : 5;
 }
 
 uint8 LFGMgr::GetMaxGroupSizeFromDifficulty(uint32 difficulty) const
 {
+    // TEMP: FOR TESTING PURPOSES REMOVE THIS BEFORE LIVE RELEASE
+    if (difficulty == RAID_TOOL_DIFFICULTY)
+        return 4;
+
     auto difficultyEntry = sDifficultyStore.LookupEntry(difficulty);
     return difficultyEntry ? difficultyEntry->maxPlayers : 5;
 }
@@ -2584,11 +2592,17 @@ LfgRolesRequired* LFGMgr::GetRolesRequired(uint32 difficulty) const
             rolesRequired->healersNeeded = 1;
             rolesRequired->tanksNeeded = 1;
             break;
+        // TEMP: FOR TESTING PURPOSES REMOVE THIS BEFORE LIVE RELEASE
         case RAID_TOOL_DIFFICULTY:
+            rolesRequired->dpsNeeded = 2;
+            rolesRequired->healersNeeded = 1;
+            rolesRequired->tanksNeeded = 1;
+            break;
+        /*case RAID_TOOL_DIFFICULTY:
             rolesRequired->dpsNeeded = 17;
             rolesRequired->healersNeeded = 6;
             rolesRequired->tanksNeeded = 2;
-            break;
+            break;*/
         case SCENARIO_HEROIC_DIFFICULTY:
         case SCENARIO_DIFFICULTY:
             rolesRequired->dpsNeeded = 3;

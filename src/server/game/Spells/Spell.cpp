@@ -1713,7 +1713,7 @@ void Spell::SelectImplicitDestDestTargets(SpellEffIndex effIndex, SpellImplicitT
         dist *= (float)rand_norm();
 
     Position pos = *m_targets.GetDstPos();
-    m_caster->MovePositionFixedXY(pos, dist, angle);
+    m_caster->MovePositionToFirstCollision(pos, dist, angle);
     pos.SetOrientation(m_caster->GetOrientation() + angle);
     m_targets.ModDst(pos);
 }

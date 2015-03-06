@@ -432,57 +432,6 @@ class spell_dk_necrotic_strike : public SpellScriptLoader
         {
             return new spell_dk_necrotic_strike_AuraScript();
         }
-
-        class spell_dk_necrotic_strike_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_dk_necrotic_strike_SpellScript);
-
-            void HandleAfterHit()
-            {
-                if (Player* player = GetCaster()->ToPlayer())
-                {
-                    if (GetHitUnit())
-                    {
-                        uint32 const cooldown = player->GetRuneBaseCooldown();
-
-                        for (uint32 i = 0; i < MAX_RUNES; ++i)
-                        {
-                            RuneType rune = player->GetCurrentRune(i);
-
-                            if (!player->GetRuneCooldown(i) && rune == RUNE_DEATH)
-                            {
-                                player->SetRuneCooldown(i, cooldown);
-
-                                bool takePower = true;
-                                if (uint32 spell = player->GetRuneConvertSpell(i))
-                                    takePower = spell != 54637;
-
-                                if (player->IsRunePermanentlyConverted(i))
-                                    takePower = false;
-
-                                // keep Death Rune type if player has Blood of the North
-                                if (takePower)
-                                {
-                                    player->RestoreBaseRune(i);
-                                    player->SetDeathRuneUsed(i, true);
-                                }
-
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-            void Register()
-            {
-                AfterHit += SpellHitFn(spell_dk_necrotic_strike_SpellScript::HandleAfterHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_dk_necrotic_strike_SpellScript();
-        }
 };
 
 // Festering Strike - 85948

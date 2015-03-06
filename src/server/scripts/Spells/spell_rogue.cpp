@@ -1599,6 +1599,9 @@ class spell_rog_fan_of_knives final : public SpellScriptLoader
             if (auto player = GetCaster()->ToPlayer())
             {
                 auto comboTarget = player->GetComboTarget();
+                if (!comboTarget)
+                    return;
+
                 targets.remove_if([comboTarget](WorldObject * obj)
                 {
                     return obj->GetGUID() != comboTarget;

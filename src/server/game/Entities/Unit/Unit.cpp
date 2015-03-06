@@ -6842,6 +6842,29 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
         {
             switch (dummySpell->Id)
             {
+                case 17007: // Leader of the pack
+                {
+                    if (GetTypeId() != TYPEID_PLAYER || (GetShapeshiftForm() != FORM_CAT && GetShapeshiftForm() != FORM_BEAR))
+                        return false;
+
+                    // custom cooldown processing case
+                    if (cooldown && ToPlayer()->HasSpellCooldown(dummySpell->Id))
+                        return false;
+
+                    // Regenerate 8% mana
+                    basepoints0 = GetMaxPower(POWER_MANA) * (triggerAmount / 100.0f);
+                    CastCustomSpell(this, 68285, &basepoints0, NULL, NULL, true);
+                    // Regenerate 4% health
+                    if (AuraEffect* aurEff = GetAuraEffect(24932, EFFECT_1, GetGUID()))
+                    {
+                        basepoints0 = CountPctFromMaxHealth(aurEff->GetAmount());
+                        CastCustomSpell(this, 34299, &basepoints0, NULL, NULL, true);
+                    }
+                    // apply cooldown
+                    if (cooldown)
+                        ToPlayer()->AddSpellCooldown(dummySpell->Id, 0, cooldown);
+                    return true;
+                }
                 // Item - Shaman T12 Enhancement 4P Bonus
                 case 99213:
                     triggered_spell_id = 99212;
@@ -7142,6 +7165,47 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
 
                     triggered_spell_id = 86392;
                     break;
+                }
+                // Bandit's Guile
+                case 84654:
+                {
+                    insightCount++;
+                    // it takes a total of 4 strikes to get a proc, or a level up
+                    if (insightCount >= 4)
+                    {
+                        insightCount = 0;
+
+                        // it takes 4 strikes to get Shallow insight
+                        // than 4 strikes to get Moderate insight
+                        // and than 4 strikes to get Deep Insight
+
+                        // Shallow Insight
+                        if (HasAura(84745))
+                        {
+                            RemoveAura(84745);
+                            CastSpell(this, 84746, true); // Moderate Insight
+                        }
+                        else if (HasAura(84746))
+                        {
+                            RemoveAura(84746);
+                            CastSpell(this, 84747, true); // Deep Insight
+                        }
+                        // the cycle will begin
+                        else if (!HasAura(84747))
+                            CastSpell(this, 84745, true); // Shallow Insight
+                    }
+                    else
+                    {
+                        // Each strike refreshes the duration of shallow insight or Moderate insight
+                        // but you can't refresh Deep Insight without starting from shallow insight.
+                        // Shallow Insight
+                        if (Aura* shallowInsight = GetAura(84745))
+                            shallowInsight->RefreshDuration();
+                        // Moderate Insight
+                        else if (Aura* moderateInsight = GetAura(84746))
+                            moderateInsight->RefreshDuration();
+                    }
+                    return true;
                 }
                 case 51701: // Honor Among Thieves
                 {
@@ -8954,6 +9018,20 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura *triggeredByAura, Sp
             }
             break;
         }
+        case SPELLFAMILY_ROGUE:
+        {
+            switch (dummySpell->Id)
+            {
+                case 84617:
+                {
+                    *handled = true;
+                    if (Unit* caster = triggeredByAura->GetCaster())
+                        caster->CastSpell(this, 115238, true);
+                    return true;
+                }
+                break;
+            }
+        }
     }
 
     if (!*handled)
@@ -9349,6 +9427,13 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
     // Custom triggered spells
     switch (auraSpellInfo->Id)
     {
+        // Dematerialize
+        case 122464:
+        {
+            if (!procSpell || !(procSpell->GetAllEffectsMechanicMask() & (1 << MECHANIC_STUN)))
+                return false;
+            break;
+        }
         case 134563: // Healing Elixirs
         {
             if (!procSpell || procSpell->GetSpellSpecific() != SPELL_SPECIFIC_BREW)
@@ -9905,10 +9990,8 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
         case 76857: // Mastery : Critical Block
         case 58410: // Master Poisoner
         case 79147: // Sanguinary Vein
-        case 91023: // Find Weakness
         case 108942:// Phantasm
         case 113043:// Omen of Clarity (new)
-        case 122464:// Dematerialize
         case 54927: // Glyph of Avenging Wrath
         case 124487:// Zen Focus
         case 88764: // Rolling Thunder
@@ -16399,16 +16482,6 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
         }
     }
 
-    // Dematerialize
-    if (target && target != this && !isVictim && target->GetTypeId() == TYPEID_PLAYER && target->HasAura(122464) && procSpell && procSpell->GetAllEffectsMechanicMask() & (1 << MECHANIC_STUN))
-    {
-        if (!target->ToPlayer()->HasSpellCooldown(122465))
-        {
-            target->CastSpell(target, 122465, true);
-            target->ToPlayer()->AddSpellCooldown(122465, 0, 10 * IN_MILLISECONDS);
-        }
-    }
-
     // Hack Fix for Invigoration
     if (GetTypeId() == TYPEID_UNIT && GetOwner() && GetOwner()->ToPlayer() && GetOwner()->HasAura(53253) &&
         damage > 0 && ToPet() && ToPet()->IsPermanentPetFor(GetOwner()->ToPlayer()))
@@ -16417,75 +16490,12 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
 
     if (GetTypeId() == TYPEID_PLAYER)
     {
-        // Leader of the Pack
-        if (target && (procExtra & PROC_EX_CRITICAL_HIT) && HasAura(17007) && (attType == BASE_ATTACK || (procSpell && procSpell->GetSchoolMask() == SPELL_SCHOOL_MASK_NORMAL)))
-        {
-            if (!ToPlayer()->HasSpellCooldown(34299))
-            {
-                CastSpell(this, 34299, true); // Heal
-                EnergizeBySpell(this, 68285, CountPctFromMaxMana(8), POWER_MANA);
-                ToPlayer()->AddSpellCooldown(34299, 0, 6 * IN_MILLISECONDS); // 6s ICD
-            }
-        }
-
         // Hack Fix Ice Floes - Drop charges
         if (procSpell && procSpell->Id != 108839 && !(procFlag & PROC_FLAG_DONE_PERIODIC))
         {
             if (auto auraEff = GetAuraEffect(108839, EFFECT_0))
                 if (auraEff->IsAffectingSpell(procSpell))
                     auraEff->GetBase()->ModStackAmount(-1);
-        }
-
-        // Find Weakness - 91023
-        if (HasAura(91023) && !(procFlag & PROC_FLAG_DONE_PERIODIC) && procSpell && (procSpell->Id == 8676 || procSpell->Id == 703 || procSpell->Id == 1833))
-            CastSpell(target, 91021, true);
-
-        // Revealing Strike - 84617
-        if (target && target->HasAura(84617, GetGUID()) && procSpell && procSpell->Id == 1752)
-            if (roll_chance_i(20))
-                ToPlayer()->AddComboPoints(target, 1);
-
-        // Bandit's Guile - 84654
-        // Your Sinister Strike and Revealing Strike abilities increase your damage dealt by up to 30%
-        if (HasAura(84654) && procSpell && (procSpell->Id == 84617 || procSpell->Id == 1752))
-        {
-            insightCount++;
-
-            // it takes a total of 4 strikes to get a proc, or a level up
-            if (insightCount >= 4)
-            {
-                insightCount = 0;
-
-                // it takes 4 strikes to get Shallow insight
-                // than 4 strikes to get Moderate insight
-                // and than 4 strikes to get Deep Insight
-
-                // Shallow Insight
-                if (HasAura(84745))
-                {
-                    RemoveAura(84745);
-                    CastSpell(this, 84746, true); // Moderate Insight
-                }
-                else if (HasAura(84746))
-                {
-                    RemoveAura(84746);
-                    CastSpell(this, 84747, true); // Deep Insight
-                }
-                // the cycle will begin
-                else if (!HasAura(84747))
-                    CastSpell(this, 84745, true); // Shallow Insight
-            }
-            else
-            {
-                // Each strike refreshes the duration of shallow insight or Moderate insight
-                // but you can't refresh Deep Insight without starting from shallow insight.
-                // Shallow Insight
-                if (Aura *shallowInsight = GetAura(84745))
-                    shallowInsight->RefreshDuration();
-                // Moderate Insight
-                else if (Aura *moderateInsight = GetAura(84746))
-                    moderateInsight->RefreshDuration();
-            }
         }
 
         // Fix Drop charge for Killing Machine

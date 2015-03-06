@@ -346,20 +346,16 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recvData)
     TC_LOG_DEBUG("network", "WORLD: Recvd CMSG_BATTLEFIELD_PORT Message");
 
     uint32 time;
-    uint32 queueSlot;                                            // guessed
-    uint32 unk;                                       // type id from dbc
-    uint8 action;                                           // enter battle 0x1, leave queue 0x0
-    ObjectGuid guid;
+    uint32 queueSlot;
+    uint32 globalQueueType;
+    bool acceptedInvite;
+    ObjectGuid requesterGuid;
 
-    // Data is sent in ReadBit-compatible format
-    action = recvData.read<uint8>() != 0 ? 1 : 0;
+    acceptedInvite = recvData.ReadBit();
+    recvData >> queueSlot >> time >> globalQueueType;
 
-    recvData >> queueSlot;
-    recvData >> time;
-    recvData >> unk;
-
-    recvData.ReadBitSeq<7, 0, 4, 2, 1, 6, 5, 3>(guid);
-    recvData.ReadByteSeq<0, 7, 2, 6, 3, 5, 1, 4>(guid);
+    recvData.ReadBitSeq<7, 0, 4, 2, 1, 6, 5, 3>(requesterGuid);
+    recvData.ReadByteSeq<0, 7, 2, 6, 3, 5, 1, 4>(requesterGuid);
 
     if (!_player->InBattlegroundQueue())
     {
@@ -397,7 +393,7 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recvData)
         return;
     }
     // if action == 1, then instanceId is required
-    if (!ginfo.IsInvitedToBGInstanceGUID && action == 1)
+    if (!ginfo.IsInvitedToBGInstanceGUID && acceptedInvite)
     {
         TC_LOG_ERROR("network", "BattlegroundHandler: instance not found.");
         return;
@@ -409,7 +405,7 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recvData)
     Battleground* bg = sBattlegroundMgr->GetBattleground(ginfo.IsInvitedToBGInstanceGUID, bgTypeId == BATTLEGROUND_AA ? BATTLEGROUND_TYPE_NONE : bgTypeId);
 
     // bg template might and must be used in case of leaving queue, when instance is not created yet
-    if (!bg && action == 0)
+    if (!bg && !acceptedInvite)
         bg = sBattlegroundMgr->GetBattlegroundTemplate(bgTypeId);
     if (!bg)
     {
@@ -426,7 +422,7 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recvData)
         return;
 
     //some checks if player isn't cheating - it is not exactly cheating, but we cannot allow it
-    if (action == 1 && ginfo.ArenaType == 0)
+    if (acceptedInvite && ginfo.ArenaType == 0)
     {
         //if player is trying to enter battleground (not arena!) and he has deserter debuff, we must just remove him from queue
         if (!_player->CanJoinToBattleground(bg))
@@ -435,7 +431,7 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recvData)
             WorldPacket data2;
             sBattlegroundMgr->BuildStatusFailedPacket(&data2, bg, _player, 0, ERR_GROUP_JOIN_BATTLEGROUND_DESERTERS);
             _player->GetSession()->SendPacket(&data2);
-            action = 0;
+            acceptedInvite = false;
 
             TC_LOG_DEBUG("bg.battleground", "Battleground: player %s (%u) has a deserter debuff, do not port him to battleground!",
                          _player->GetName().c_str(), _player->GetGUIDLow());
@@ -445,12 +441,12 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recvData)
         {
             TC_LOG_ERROR("network", "Battleground: Player %s (%u) has level (%u) higher than maxlevel (%u) of battleground (%u)! Do not port him to battleground!",
                          _player->GetName().c_str(), _player->GetGUIDLow(), _player->getLevel(), bg->GetMaxLevel(), bg->GetTypeID());
-            action = 0;
+            acceptedInvite = false;
         }
     }
 
     WorldPacket data;
-    if (action)
+    if (acceptedInvite)
     {
         if (!_player->IsInvitedForBattlegroundQueueType(bgQueueTypeId))
             return;                                 // cheating?

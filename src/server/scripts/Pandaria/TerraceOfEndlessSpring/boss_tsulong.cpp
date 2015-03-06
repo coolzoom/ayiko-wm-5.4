@@ -243,7 +243,7 @@ class boss_tsulong : public CreatureScript
             void EnterCombat(Unit* pWho) override
             {
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
-                instance->SetData(TYPE_TSULONG, IN_PROGRESS);
+                instance->SetBossState(DATA_TSULONG, IN_PROGRESS);
                 DoZoneInCombat();
 
                 Talk(SAY_AGGRO);

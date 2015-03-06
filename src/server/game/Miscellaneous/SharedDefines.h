@@ -4620,4 +4620,11 @@ enum SpecRole
 
 #define CURRENCY_PRECISION 100
 
+// Skybro: Part of CliRideTicket, are there more values? Needs more reasearch.
+enum GlobalQueueType
+{
+    GLOBAL_QUEUE_TYPE_LFG       = 3,
+    GLOBAL_QUEUE_TYPE_ARENA     = 5,
+};
+
 #endif

@@ -2469,6 +2469,8 @@ class spell_monk_provoke : public SpellScriptLoader
                     return SPELL_FAILED_BAD_TARGETS;
                 else if (!target->IsWithinLOSInMap(GetCaster()))
                     return SPELL_FAILED_LINE_OF_SIGHT;
+                else if (GetCaster()->IsFriendlyTo(target))
+                    return SPELL_FAILED_BAD_TARGETS;
                 return SPELL_CAST_OK;
             }
 

@@ -2206,6 +2206,7 @@ void Spell::EffectHealPct(SpellEffIndex effIndex)
     if (!m_originalCaster)
         return;
 
+    uint32 cap = 0;
     switch (m_spellInfo->Id)
     {
         case 114635:
@@ -2225,8 +2226,11 @@ void Spell::EffectHealPct(SpellEffIndex effIndex)
                 damage += 2;
             break;
         case 115450: // Detox
-            if (!m_caster->HasAura(146954))
+            if (!m_hasDispelled || !m_caster->HasAura(146954))
                 return;
+            // Cap health gain on npcs to 20%
+            if (unitTarget->GetTypeId() != TYPEID_PLAYER)
+                cap = m_caster->CountPctFromMaxHealth(20);
             break;
         case 118340:// Impending Victory - Heal
             // Victorious State causes your next Impending Victory to heal for 20% of your maximum health.
@@ -2248,7 +2252,11 @@ void Spell::EffectHealPct(SpellEffIndex effIndex)
             break;
     }
 
-    uint32 heal = m_originalCaster->SpellHealingBonusDone(unitTarget, m_spellInfo, effIndex, unitTarget->CountPctFromMaxHealth(damage), HEAL);
+    uint32 heal = unitTarget->CountPctFromMaxHealth(damage);
+    if (cap && heal > cap)
+        heal = cap;
+
+    heal = m_originalCaster->SpellHealingBonusDone(unitTarget, m_spellInfo, effIndex, heal, HEAL);
     heal = unitTarget->SpellHealingBonusTaken(m_originalCaster, m_spellInfo, effIndex, heal, HEAL);
 
     m_healing += heal;

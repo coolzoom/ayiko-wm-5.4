@@ -3805,93 +3805,6 @@ class npc_healing_tide_totem : public CreatureScript
 };
 
 /*######
-## npc_ring_of_frost
-######*/
-
-class npc_ring_of_frost : public CreatureScript
-{
-    public:
-        npc_ring_of_frost() : CreatureScript("npc_ring_of_frost") { }
-
-        struct npc_ring_of_frostAI : public Scripted_NoMovementAI
-        {
-            uint8 targetsFrozen;
-
-            npc_ring_of_frostAI(Creature *c) : Scripted_NoMovementAI(c)
-            {
-                me->SetReactState(REACT_PASSIVE);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            }
-
-            void Reset()
-            {
-                targetsFrozen = 0;
-                me->SetReactState(REACT_PASSIVE);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            }
-
-            void InitializeAI()
-            {
-                ScriptedAI::InitializeAI();
-                Unit * owner = me->GetOwner();
-                if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
-                    return;
-
-                me->SetReactState(REACT_PASSIVE);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-
-                std::list<Creature*> templist;
-                me->GetCreatureListWithEntryInGrid(templist, me->GetEntry(), 200.0f);
-                if (!templist.empty())
-                    for (std::list<Creature*>::const_iterator itr = templist.begin(); itr != templist.end(); ++itr)
-                        if ((*itr)->GetOwner() == me->GetOwner() && *itr != me)
-                            (*itr)->DisappearAndDie();
-            }
-
-            void CheckIfMoveInRing(Unit *who)
-            {
-                if (who->IsAlive() && me->IsWithinLOSInMap(who) && targetsFrozen < 10)
-                {
-                    float distance = who->GetDistance2d(me->GetPositionX(), me->GetPositionY());
-                    if (distance > 3.1f || distance < 2.0f)
-                        return;
-
-                    if (!who->HasAura(82691))
-                    {
-                        if (!who->HasAura(91264))
-                        {
-                            ++targetsFrozen;
-                            me->CastSpell(who, 82691, true);
-                            me->CastSpell(who, 91264, true);
-                        }
-                    }
-                    else me->CastSpell(who, 91264, true);
-                }
-            }
-
-            void UpdateAI(const uint32 /*diff*/)
-            {
-                // Find all the enemies
-                std::list<Unit*> targets;
-                Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(me, me, 10.0f);
-                Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(me, targets, u_check);
-                Trinity::VisitNearbyObject(me, 10.0f, searcher);
-                for (std::list<Unit*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
-                    if (!(*iter)->isTotem())
-                        CheckIfMoveInRing(*iter);
-            }
-        };
-
-        CreatureAI* GetAI(Creature* pCreature) const
-        {
-            return new npc_ring_of_frostAI(pCreature);
-        }
-};
-
-/*######
 # npc_wild_mushroom
 ######*/
 
@@ -4755,7 +4668,6 @@ void AddSC_npcs_special()
     new npc_earthgrab_totem();
     new npc_windwalk_totem();
     new npc_healing_tide_totem();
-    new npc_ring_of_frost();
     new npc_wild_mushroom();
     new npc_fungal_growth();
     new npc_bloodworm();

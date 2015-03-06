@@ -3043,33 +3043,6 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
                 return SPELL_MISS_RESIST;
     }
 
-    // Get Data Needed for Diminishing Returns, some effects may have multiple auras, so this must be done on spell hit, not aura add
-    m_diminishGroup = GetDiminishingReturnsGroupForSpell(m_spellInfo, m_triggeredByAuraSpell);
-    if (m_diminishGroup)
-    {
-        m_diminishLevel = DIMINISHING_LEVEL_1;
-        // Special handling for Deep Freeze & Ring of Frost diminishing
-        // Ring of Frost
-        if (m_spellInfo->Id == 82691)
-        {
-            m_diminishLevel = unit->GetDiminishing(DIMINISHING_DEEP_FREEZE);
-            if (unit->GetCharmerOrOwnerPlayerOrPlayerItself())
-                unit->IncrDiminishing(DIMINISHING_RING_OF_FROST);
-        }
-        // Deep Freze
-        else if (m_spellInfo->Id == 44572)
-        {
-            m_diminishLevel = unit->GetDiminishing(DIMINISHING_RING_OF_FROST);
-            if (unit->GetCharmerOrOwnerPlayerOrPlayerItself())
-                unit->IncrDiminishing(DIMINISHING_DEEP_FREEZE);
-        }
-        m_diminishLevel = unit->GetDiminishing(m_diminishGroup);
-        DiminishingReturnsType type = GetDiminishingReturnsGroupType(m_diminishGroup);
-        // Increase Diminishing on unit, current informations for actually casts will use values above
-        if ((type == DRTYPE_PLAYER && (unit->GetCharmerOrOwnerPlayerOrPlayerItself() || (unit->GetTypeId() == TYPEID_UNIT && unit->ToCreature()->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_ALL_DIMINISH))) || type == DRTYPE_ALL)
-            unit->IncrDiminishing(m_diminishGroup);
-    }
-
     uint32 aura_effmask = 0;
     for (uint8 i = 0; i < m_spellInfo->Effects.size(); ++i)
         if (effectMask & (1 << i) && m_spellInfo->Effects[i].IsUnitOwnedAuraEffect())
@@ -3077,6 +3050,18 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
 
     if (aura_effmask)
     {
+        // Get Data Needed for Diminishing Returns, some effects may have multiple auras, so this must be done on spell hit, not aura add
+        m_diminishGroup = GetDiminishingReturnsGroupForSpell(m_spellInfo, m_triggeredByAuraSpell);
+        if (m_diminishGroup)
+        {
+            m_diminishLevel = DIMINISHING_LEVEL_1;
+            m_diminishLevel = unit->GetDiminishing(m_diminishGroup);
+            DiminishingReturnsType type = GetDiminishingReturnsGroupType(m_diminishGroup);
+            // Increase Diminishing on unit, current informations for actually casts will use values above
+            if ((type == DRTYPE_PLAYER && (unit->GetCharmerOrOwnerPlayerOrPlayerItself() || (unit->GetTypeId() == TYPEID_UNIT && unit->ToCreature()->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_ALL_DIMINISH))) || type == DRTYPE_ALL)
+                unit->IncrDiminishing(m_diminishGroup);
+        }
+
         // Select rank for aura with level requirements only in specific cases
         // Unit has to be target only of aura effect, both caster and target have to be players, target has to be other than unit target
         SpellInfo const* scaledSpellInfo = m_spellInfo;

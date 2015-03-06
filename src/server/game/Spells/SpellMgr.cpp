@@ -4522,12 +4522,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[0].Effect = SPELL_EFFECT_ACTIVATE_RUNE;
                     spellInfo->Effects[0].MiscValueB = 3;
                     break;
-                case 82691: // Ring of Frost
-                    spellInfo->Effects[0].TargetA = TARGET_UNIT_TARGET_ENEMY;
-                    spellInfo->Effects[0].TargetB = 0;
-                    spellInfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REFLECTED;
-                    spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(13);
-                    break;
                 case 76577: // Smoke Bomb
                     spellInfo->SpellVisual[1] = 20733;
                     break;
@@ -4806,6 +4800,7 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(35); // 4s
                     break;
                 case 102359:// Mass Entanglement
+                case 82691: // Ring of Frost
                     spellInfo->AttributesEx5 &= ~SPELL_ATTR5_SINGLE_TARGET_SPELL;
                     break;
                 case 33763: // Lifebloom

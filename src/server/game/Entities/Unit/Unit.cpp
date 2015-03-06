@@ -17736,8 +17736,6 @@ void Unit::Kill(Unit* victim, bool durabilityLoss, SpellInfo const* spellProto)
     // call kill spell proc event (before real die and combat stop to triggering auras removed at death/combat stop)
     if (isRewardAllowed && player && player != victim)
     {
-        player->SetLastKilledCreature(creature->GetEntry());
-
         ObjectGuid guid = player->GetGUID();
 
         WorldPacket data(SMSG_PARTY_KILL_LOG);
@@ -17791,6 +17789,8 @@ void Unit::Kill(Unit* victim, bool durabilityLoss, SpellInfo const* spellProto)
 
         if (creature)
         {
+            player->SetLastKilledCreature(creature->GetEntry());
+
             // handle LFR loot for unit
             if (GetMap()->GetDifficulty() == RAID_TOOL_DIFFICULTY)
             {

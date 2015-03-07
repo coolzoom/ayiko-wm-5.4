@@ -27,7 +27,7 @@ INSERT INTO `spell_area` VALUES
 (55164,5840,0,0,8326,1783,2,1,0,0), -- (Pandaria) Vale of Eternal Blossoms
 (55164,5841,0,0,8326,1783,2,1,0,0), -- (Pandaria) Kun-Lai Summit
 (55164,5842,0,0,8326,1783,2,1,0,0), -- (Pandaria) Towlong Steppes
-(55164,6006,0,0,8326,8,2,1,0,0),    -- (Pandaria) The Veiled Stair
+(55164,6006,0,0,8326,1783,2,1,0,0), -- (Pandaria) The Veiled Stair
 (55164,6134,0,0,8326,1783,2,1,0,0), -- (Pandaria) Krasarang Wilds
 (55164,6138,0,0,8326,1783,2,1,0,0), -- (Pandaria) Dread Wastes
 

@@ -6893,6 +6893,9 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
         case SPELLFAMILY_WARLOCK:
             switch (GetId())
             {
+                case 104025: // Immolation aura
+                    caster->CastSpell(caster, 5857, true);
+                    break;
                 // Curse of Elements - Jinx
                 case 1490:
                 {

@@ -369,13 +369,8 @@ void PetAI::OwnerAttacked(Unit* target)
         return;
 
     // Passive pets don't do anything
-    if (me->HasReactState(REACT_PASSIVE))
+    if (!me->HasReactState(REACT_ASSIST))
         return;
-
-    // Prevent pet from disengaging from current target
-    if (!me->HasReactState(REACT_HELPER))
-        if (me->GetVictim() && me->GetVictim()->IsAlive())
-            return;
 
     // Continue to evaluate and attack if necessary
     AttackStart(target);
@@ -557,7 +552,7 @@ bool PetAI::CanAttack(Unit* target)
     if (me->GetCharmInfo()->HasCommandState(COMMAND_STAY))
         return (me->IsWithinMeleeRange(target) || me->GetCharmInfo()->IsCommandAttack());
 
-    if (me->HasReactState(REACT_HELPER))
+    if (me->HasReactState(REACT_ASSIST))
     {
         Unit* ownerTarget = NULL;
         if (Player* owner = me->GetCharmerOrOwner()->ToPlayer())

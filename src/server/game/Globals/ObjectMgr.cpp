@@ -7847,7 +7847,7 @@ void ObjectMgr::LoadGameTele()
         gt.mapId          = fields[5].GetUInt16();
         gt.name           = fields[6].GetString();
 
-        if (!MapManager::IsValidMapCoord(gt.mapId, gt.position_x, gt.position_y, gt.position_z, gt.orientation))
+        if (!MapManager::IsValidMAP(gt.mapId, true) || !Trinity::IsValidMapCoord(gt.position_x, gt.position_y, gt.position_z, gt.orientation))
         {
             TC_LOG_ERROR("sql.sql", "Wrong position for id %u (name: %s) in `game_tele` table, ignoring.", id, gt.name.c_str());
             continue;

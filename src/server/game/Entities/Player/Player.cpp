@@ -5956,6 +5956,8 @@ void Player::KillPlayer()
 {
     if (IsFlying() && !GetTransport())
         i_motionMaster.MoveFall();
+    else
+        StopMoving();
 
     SetRooted(true);
 

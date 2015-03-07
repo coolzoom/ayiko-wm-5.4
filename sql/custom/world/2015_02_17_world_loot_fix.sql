@@ -13,6 +13,9 @@ DELETE FROM `creature_loot_template` WHERE `entry`=62205 AND `item`=87547;
 INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES 
 (62205, 87547, 0.5, 1, 3, 1, 1);
 
+UPDATE `creature_loot_template` SET `ChanceOrQuestChance` = 0 WHERE `entry` IN (61485,61567,61634,361567,361634,362205);
+UPDATE `creature_loot_template` SET `ChanceOrQuestChance` = 0 WHERE `groupid` IN (1,2) AND `entry` IN (62205,361485);
+
 /* Stormstout Brewery - Quest Family Secrets fix */
 UPDATE `gameobject_template` SET `flags` = 4 WHERE `entry` = 213795;
 DELETE FROM `gameobject_loot_template` WHERE `entry`= 42921;

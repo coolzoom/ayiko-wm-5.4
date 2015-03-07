@@ -456,8 +456,8 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bo
         weapon_maxdamage += ammo * att_speed;
     }*/
 
-    min_damage = ((base_value + weapon_mindamage) * base_pct + total_value) * total_pct;
-    max_damage = ((base_value + weapon_maxdamage) * base_pct + total_value) * total_pct;
+    min_damage = round(((base_value + weapon_mindamage) * base_pct + total_value) * total_pct);
+    max_damage = round(((base_value + weapon_maxdamage) * base_pct + total_value) * total_pct);
 }
 
 void Player::UpdateDamagePhysical(WeaponAttackType attType)
@@ -816,7 +816,9 @@ void Player::UpdateMeleeHitChances()
 void Player::UpdateRangedHitChances()
 {
     m_modRangedHitChance = (float)GetTotalAuraModifier(SPELL_AURA_MOD_HIT_CHANCE);
+    SetFloatValue(PLAYER_FIELD_UI_HIT_MODIFIER, m_modRangedHitChance);
     m_modRangedHitChance += GetRatingBonusValue(CR_HIT_RANGED);
+    
 
     if (Pet* pet = GetPet())
         pet->m_modRangedHitChance = m_modRangedHitChance;
@@ -825,7 +827,9 @@ void Player::UpdateRangedHitChances()
 void Player::UpdateSpellHitChances()
 {
     m_modSpellHitChance = (float)GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HIT_CHANCE);
+    SetFloatValue(PLAYER_FIELD_UI_HIT_MODIFIER, m_modSpellHitChance);
     m_modSpellHitChance += GetRatingBonusValue(CR_HIT_SPELL);
+    
 
     if (Pet* pet = GetPet())
         pet->m_modSpellHitChance = m_modSpellHitChance;

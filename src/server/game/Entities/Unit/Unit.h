@@ -911,6 +911,7 @@ class Unit : public WorldObject
         Aura* AddAuraForTarget(Aura* aura, Unit* target);
         void SetAuraStack(uint32 spellId, Unit* target, uint32 stack);
         void SendPlaySpellVisualKit(uint32 id, uint32 unkParam);
+        void SendPlaySpellVisual(ObjectGuid source, ObjectGuid target, uint32 spellVisual, float speed);
 
         void DeMorph();
 

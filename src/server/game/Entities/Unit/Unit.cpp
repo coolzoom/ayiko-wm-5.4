@@ -6683,6 +6683,15 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
             }
             switch (dummySpell->Id)
             {
+                case 78203: // Shadowy Apparition
+                {
+                    if (!victim || !victim->IsAlive())
+                        return false;
+                    
+                    triggered_spell_id = 148859;
+                    SendPlaySpellVisual(GetGUID(), victim->GetGUID(), 33573, 6.0f);
+                    break;
+                }
                 case 114164: // Psyfiend Hit me driver
                 {
                     if (victim)
@@ -6794,49 +6803,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                         if (!blessHealing)
                             return false;
                         basepoints0 = int32(CalculatePct(damage, triggerAmount) / (blessHealing->GetMaxDuration() / blessHealing->Effects[0].Amplitude));
-                    }
-                    break;
-                // Shadowy Apparition
-                case 78203:
-                    if (auto const aur = GetAura(dummySpell->Id))
-                    {
-                        int32 chance = aur->GetEffect(0)->GetAmount();
-                        if (isMoving())
-                            chance *= 5;
-                        if (effIndex !=0 || !procSpell || !roll_chance_i(chance))
-                            return false;
-
-                        std::list<Creature*> summons;
-                        GetAllMinionsByEntry(summons, 46954);
-                        if (summons.size() > 3)
-                            return false;
-
-                        int32 bp0 = 1;
-                        CastCustomSpell(this, 87426, &bp0, NULL, NULL, true);
-
-                        std::list<Creature*> new_summons;
-                        GetAllMinionsByEntry(new_summons, 46954);
-
-                        Unit* summon = NULL;
-                        for (std::list<Creature*>::iterator new_itr = new_summons.begin(); new_itr != new_summons.end(); ++new_itr)
-                        {
-                            summon = NULL;
-                            for (std::list<Creature*>::iterator itr = summons.begin(); itr != summons.end(); ++itr)
-                                if ((*new_itr)->GetGUID() == (*itr)->GetGUID())
-                                    summon = *new_itr;
-                            if (!summon)
-                            {
-                                summon = *new_itr;
-                                break;
-                            }
-                        }
-                        if (summon)
-                        {
-                            //summon->m_FollowingRefManager.clearReferences();
-                            CastSpell(summon, 87213, true);
-                            summon->CastSpell(summon, 87427, true);
-                            summon->GetAI()->AttackStart(victim);
-                        }
                     }
                     break;
             }
@@ -16501,10 +16467,6 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
         if (HasAura(121152) && getClass() == CLASS_ROGUE && procSpell && procSpell->Id == 111240)
             RemoveAura(121153);
 
-        // Cast Shadowy Apparitions when Shadow Word : Pain is crit
-        if (procSpell && procSpell->Id == 589 && HasAura(78203) && procExtra & PROC_EX_CRITICAL_HIT)
-            CastSpell(target, 147193, true);
-
         // Howl of Terror - Reduce cooldown by 1 sec on damage taken
         if (procFlag & PROC_FLAG_TAKEN_DAMAGE && !(procFlag & PROC_FLAG_TAKEN_PERIODIC))
         {
@@ -18818,6 +18780,15 @@ void Unit::SendPlaySpellVisualKit(uint32 id, uint32 unkParam)
     data << uint32(0);
 
     SendMessageToSet(&data, false);
+}
+
+void Unit::SendPlaySpellVisual(ObjectGuid source, ObjectGuid target, uint32 spellVisual, float speed)
+{
+    // @TODO: Add opcode structure for SMSG_PLAY_SPELL_VISUAL
+
+    // WorldPacket data(SMSG_PLAY_SPELL_VISUAL);
+
+    // SendMessageToSet(&data, true);
 }
 
 void Unit::ApplyResilience(Unit const* victim, int32* damage) const

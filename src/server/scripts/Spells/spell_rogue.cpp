@@ -1683,9 +1683,41 @@ public:
         }
     };
 
+    class script_impl_spell : public SpellScript
+    {
+        PrepareSpellScript(script_impl_spell);
+
+        SpellCastResult CheckCast()
+        {
+            Unit* caster = GetCaster();
+            if (caster->GetTypeId() != TYPEID_PLAYER)
+                return SPELL_FAILED_DONT_REPORT;
+
+            if (Unit* target = caster->ToPlayer()->GetSelectedUnit())
+            {
+                if (target->IsFriendlyTo(caster))
+                    return SPELL_FAILED_BAD_TARGETS;
+            }
+            else
+                return SPELL_FAILED_BAD_TARGETS;
+
+            return SPELL_CAST_OK;
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(script_impl_spell::CheckCast);
+        }
+    };
+
     AuraScript* GetAuraScript() const
     {
         return new script_impl();
+    }
+
+    SpellScript* GetSpellScript() const
+    {
+        return new script_impl_spell();
     }
 };
 

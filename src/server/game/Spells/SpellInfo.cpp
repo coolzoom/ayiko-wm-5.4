@@ -2156,6 +2156,8 @@ AuraStateType SpellInfo::GetAuraState() const
         case 71465: // Divine Surge
         case 50241: // Evasive Charges
             return AURA_STATE_UNKNOWN22;
+        case 32727:  // Arena prep
+            return AURA_STATE_UNKNOWN20;
         default:
             break;
     }

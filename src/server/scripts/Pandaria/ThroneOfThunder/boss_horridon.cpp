@@ -766,7 +766,7 @@ public:
 
     CreatureAI *GetAI(Creature *pCreature) const
     {
-        return new boss_horridon(pCreature);
+        return new boss_horridon_AI(pCreature);
     }
 };
 

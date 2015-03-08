@@ -654,34 +654,8 @@ class spell_mage_arcane_barrage : public SpellScriptLoader
             void HandleAfterHit()
             {
                 if (Player* _player = GetCaster()->ToPlayer())
-                {
-                    if (Unit* target = GetHitUnit())
-                    {
-                        uint8 chargeCount = 0;
-                        int32 bp = 0;
-
-                        if (Aura *arcaneCharge = _player->GetAura(SPELL_MAGE_ARCANE_CHARGE))
-                        {
-                            chargeCount = arcaneCharge->GetStackAmount();
-                            _player->RemoveAura(SPELL_MAGE_ARCANE_CHARGE);
-                        }
-
-                        if (chargeCount)
-                        {
-                            bp = GetHitDamage() / 2;
-
-                            std::list<Unit*> targetList;
-
-                            target->GetAttackableUnitListInRange(targetList, 10.0f);
-                            targetList.remove_if(CheckArcaneBarrageImpactPredicate(_player, target));
-
-                            Trinity::Containers::RandomResizeList(targetList, chargeCount);
-
-                            for (auto itr : targetList)
-                                target->CastCustomSpell(itr, SPELL_MAGE_ARCANE_BARRAGE_TRIGGERED, &bp, NULL, NULL, true, 0, NULL, _player->GetGUID());
-                        }
-                    }
-                }
+                    if (Aura *arcaneCharge = _player->GetAura(SPELL_MAGE_ARCANE_CHARGE))
+                        _player->RemoveAura(SPELL_MAGE_ARCANE_CHARGE);
             }
 
             void Register()

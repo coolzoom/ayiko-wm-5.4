@@ -6893,6 +6893,9 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
         case SPELLFAMILY_WARLOCK:
             switch (GetId())
             {
+                case 104025: // Immolation aura
+                    caster->CastSpell(caster, 5857, true);
+                    break;
                 // Curse of Elements - Jinx
                 case 1490:
                 {
@@ -7583,7 +7586,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
         caster->CastSpell(caster, 104317, true);
 
     int32 dmg = damage;
-    if (!m_spellInfo->HasCustomAttribute(SPELL_ATTR0_CU_TRIGGERED_IGNORE_RESILENCE))
+    if (!m_spellInfo->HasCustomAttribute(SPELL_ATTR0_CU_TRIGGERED_IGNORE_RESILENCE) && !(m_spellInfo->AttributesEx4 & SPELL_ATTR4_STACK_DOT_MODIFIER))
         caster->ApplyResilience(target, &dmg);
 
     if (target != caster && target->GetTypeId() == TYPEID_PLAYER)

@@ -4634,6 +4634,9 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->AttributesEx4 |= SPELL_ATTR4_STACK_DOT_MODIFIER;
                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_TRIGGERED_IGNORE_RESILENCE;
                     break;
+                case 128531: // Blackout Kick
+                    spellInfo->AttributesEx4 |= SPELL_ATTR4_STACK_DOT_MODIFIER;
+                    break;
                 case 31935: // Avenger's Shield
                     spellInfo->DmgClass = SPELL_DAMAGE_CLASS_MAGIC;
                     break;

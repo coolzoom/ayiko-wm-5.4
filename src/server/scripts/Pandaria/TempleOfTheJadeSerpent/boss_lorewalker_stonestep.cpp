@@ -297,12 +297,6 @@ public:
             }
         }
 
-        void JustDied(Unit* killer) override
-        {
-            if(instance)
-                me->GetInstanceScript()->SetData(DATA_SUN_STATE, 1);
-        }
-
         void UpdateAI(const uint32 diff) override
         {
             events.Update(diff);
@@ -501,6 +495,12 @@ public:
                     }
                 }
             }
+        }
+
+        void JustDied(Unit* killer) override
+        {
+            if(instance)
+                me->GetInstanceScript()->SetData(DATA_SUN_STATE, 1);
         }
 
         void UpdateAI(const uint32 diff) override

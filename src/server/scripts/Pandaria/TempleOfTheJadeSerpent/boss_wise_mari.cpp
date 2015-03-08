@@ -178,6 +178,10 @@ public:
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                 instance->SetData(DATA_WISE_MARI, IN_PROGRESS);
             }
+
+            if(Creature* stalker = me->FindNearestCreature(NPC_WISE_STALKER, 100.0f))
+                if(stalker->IsAIEnabled)
+                    stalker->AI()->DoAction(1);
         }
 
         void KilledUnit(Unit* victim) override
@@ -210,7 +214,11 @@ public:
                     me->CastSpell(me, SPELL_RELEASED_FROM_SHA, false);
                     me->CastSpell(me, SPELL_CLEANSING_WATERS, false);
                     me->CastSpell(me, SPELL_CLAIMING_WATERS, false);
-                    cosmeticEvents.ScheduleEvent(EVENT_TALK_DEATH_1, 1 * IN_MILLISECONDS);                   
+                    cosmeticEvents.ScheduleEvent(EVENT_TALK_DEATH_1, 1 * IN_MILLISECONDS);     
+
+                    if(Creature* stalker = me->FindNearestCreature(NPC_WISE_STALKER, 100.0f))
+                       if(stalker->IsAIEnabled)
+                           stalker->AI()->DoAction(2);
                 }
             }
         }
@@ -234,6 +242,10 @@ public:
                         itr->DespawnOrUnsummon();
                 }
             }
+
+            if(Creature* stalker = me->FindNearestCreature(NPC_WISE_STALKER, 100.0f))
+                if(stalker->IsAIEnabled)
+                    stalker->AI()->DoAction(2);
         }
 
         void DoAction(const int32 action) override
@@ -321,7 +333,7 @@ public:
                             Talk(TALK_CALL_WATER);
                             if(Creature* trigger = Unit::GetCreature(*me, foutainTrigger[foutainCount]))
                             {
-                                me->CastSpell(trigger, SPELL_CALL_WATER, true);
+                                me->CastSpell(trigger, SPELL_CALL_WATER, false);
                                 trigger->AddAura(SPELL_CORRUPTED_FOUTAIN, trigger);
                             }
                         }
@@ -511,6 +523,46 @@ public:
     };
 };
 
+class mob_wise_stalker : public CreatureScript
+{
+public:
+    mob_wise_stalker() : CreatureScript("mob_wise_stalker") { }
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new mob_wise_stalker_AI(creature);
+    }
+
+    enum eActions
+    {
+        ACTION_START_COMBAT = 1,
+        ACTION_STOP_COMBAT  = 2
+    };
+
+    enum eSpells
+    {
+        SPELL_CORRUPTED_WATERS = 115165
+    };
+
+    struct mob_wise_stalker_AI : public ScriptedAI
+    {
+        mob_wise_stalker_AI(Creature* creature) : ScriptedAI(creature) {}
+
+        void DoAction(int32 const action) override
+        {
+            switch(action)
+            {
+                case ACTION_START_COMBAT:
+                    me->CastSpell(me, SPELL_CORRUPTED_WATERS, false);
+                    break;
+                case ACTION_STOP_COMBAT:
+                    me->RemoveAura(SPELL_CORRUPTED_WATERS);
+                    break;
+            }
+        }
+    };
+};
+
 class spell_wise_hydrolance_pulse : public SpellScriptLoader
 {
 public:
@@ -518,8 +570,7 @@ public:
 
     enum eSpells
     {
-        SPELL_HYDROLANCE_PULSE = 106104,
-        SPELL_HL_PULSE_2       = 106105
+        SPELL_HYDROLANCE_PULSE = 106104
     };
 
     enum eActions
@@ -560,13 +611,8 @@ public:
                     owner->GetNearPoint2D(x, y, 0.0f, owner->GetOrientation());
                     owner->CastSpell(x, y, z, SPELL_HYDROLANCE_PULSE, false);
                     break;
-                case 6:
-                case 7:
-                    owner->GetNearPoint2D(x, y, tickCnt + 1, owner->GetOrientation());
-                    owner->CastSpell(x, y, z, SPELL_HL_PULSE_2, false);
-                    break;
                 default:
-                    owner->GetNearPoint2D(x, y, tickCnt + 1, owner->GetOrientation());
+                    owner->GetNearPoint2D(x, y, tickCnt * 2, owner->GetOrientation());
                     owner->CastSpell(x, y, z, SPELL_HYDROLANCE_PULSE, false);
                     break;
             }
@@ -656,11 +702,97 @@ public:
     };
 };
 
+class CorruptedWatersTargetSelector
+{
+public:
+    CorruptedWatersTargetSelector() { }
+
+    bool operator()(WorldObject* object)
+    {
+        if(object->GetTypeId() == TYPEID_PLAYER)
+        {
+            if(Player* plr = object->ToPlayer())
+            {
+                Position pos;
+                plr->GetPosition(&pos);
+
+                if((plr->GetDistance(roomCenter) < 20.00f && roomCenter.HasInArc(M_PI, &pos)) || (!roomCenter.HasInArc(M_PI, &pos) && plr->GetDistance(roomCenter) < 14.00f))
+                {
+                    if(plr->GetPositionZ() > 174.05f && plr->GetPositionZ() < 174.23f)
+                        return false;
+                }
+
+                if(plr->GetDistance(roomCenter) < 30.00f && plr->GetPositionZ() > 170.19f && plr->GetPositionZ() < 170.215f)
+                    return false;
+            }
+
+            return true;
+        }
+
+        return true;
+    }
+};
+
+class spell_tjs_corrupted_waters_damage: public SpellScriptLoader
+{
+public:
+    spell_tjs_corrupted_waters_damage() : SpellScriptLoader("spell_tjs_corrupted_waters_damage") { }
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_tjs_corrupted_waters_damage_SpellScript();
+    }
+
+    class spell_tjs_corrupted_waters_damage_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_tjs_corrupted_waters_damage_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            targets.remove_if(CorruptedWatersTargetSelector());
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_tjs_corrupted_waters_damage_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+        }
+    };
+};
+
+class spell_tjs_sha_residue : public SpellScriptLoader
+{
+public:
+    spell_tjs_sha_residue() : SpellScriptLoader("spell_tjs_sha_residue") {}
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_tjs_sha_residue_AuraScript();
+    }
+
+    class spell_tjs_sha_residue_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_tjs_sha_residue_AuraScript)
+
+        void HandleEffectCalcPeriodic(AuraEffect const* /*aurEff*/, bool& isPeriodic, int32& amplitude)
+        {
+            amplitude = 1 * IN_MILLISECONDS;
+        }
+
+        void Register()
+        {
+            DoEffectCalcPeriodic += AuraEffectCalcPeriodicFn(spell_tjs_sha_residue_AuraScript::HandleEffectCalcPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+        }
+    };
+};
+
 void AddSC_boss_wise_mari()
 {
     new boss_wase_mari();
     new mob_corrupt_living_water();
+    new mob_wise_stalker();
     new spell_wise_hydrolance_pulse();
     new spell_wise_hydrolance();
     new spell_wise_bubble_brust();
+    new spell_tjs_sha_residue();
+    new spell_tjs_corrupted_waters_damage();
 }

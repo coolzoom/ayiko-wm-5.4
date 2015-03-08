@@ -43,7 +43,6 @@ public:
     {
         instance_temple_of_jade_serpent_InstanceMapScript(Map* map) : InstanceScript(map) {}
 
-        EventMap events;
         std::list<uint64> corruptedCreatures;
         std::list<uint64> sunfires;
         std::list<uint64> suns;
@@ -343,62 +342,11 @@ public:
                 }
             }
         }
-        
-        void Update(uint32 diff) 
-        {
-            events.Update(diff);
-
-            if(events.ExecuteEvent() == EVENT_CORRUPTION_DAMAGE)
-            {
-                Map::PlayerList const& playerList = instance->GetPlayers();
-                if(!playerList.isEmpty())
-                {
-                    for(Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
-                    {
-                        Player* plr = i->GetSource();
-                        if(!plr)
-                            continue;
-
-                        if(Unit* wiseMari = Unit::GetUnit(*plr, wiseMariGUID))
-                        {
-                            if(!wiseMari->IsAlive() || !wiseMari->IsInCombat())
-                                continue;
-                        }
-
-                        Position pos;
-                        plr->GetPosition(&pos);
-
-                        if((plr->GetDistance(roomCenter) < 20.00f && roomCenter.HasInArc(M_PI, &pos)) || (!roomCenter.HasInArc(M_PI, &pos) && plr->GetDistance(roomCenter) < 14.00f))
-                        {
-                            if(plr->GetPositionZ() > 174.05f && plr->GetPositionZ() < 174.23f)
-                                plr->CastSpell(plr, SPELL_CORRUPTED_WATERS, true);
-                        }
-
-                        if(plr->GetDistance(roomCenter) < 30.00f && plr->GetPositionZ() > 170.19f && plr->GetPositionZ() < 170.215f)
-                            plr->CastSpell(plr, SPELL_CORRUPTED_WATERS, true);
-                    }
-                }
-                events.ScheduleEvent(EVENT_CORRUPTION_DAMAGE, 0.25 * IN_MILLISECONDS);
-            }
-        }
 
         void SetData(uint32 type, uint32 data)
         {
             switch (type)
             {
-                case DATA_WISE_MARI:
-                    switch(data)
-                    {
-                        case IN_PROGRESS:
-                            events.ScheduleEvent(EVENT_CORRUPTION_DAMAGE, 1 * IN_MILLISECONDS);
-                            break;
-                        case NOT_STARTED:
-                        case FAIL:
-                        case DONE:
-                            events.Reset();
-                            break;
-                    }
-                    break;
                 case DATA_TWIN_DRAGONS_DOOR:
                     twinDragonsDoorState = data;
                     if(data == DONE)

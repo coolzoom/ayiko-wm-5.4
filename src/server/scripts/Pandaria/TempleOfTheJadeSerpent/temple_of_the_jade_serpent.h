@@ -74,7 +74,8 @@ enum eCreaturesInstance
     NPC_FOUNTAIN_TRIGGER      = 56586,
     NPC_CORRUPT_DROPLET       = 62358,
     NPC_HYDROCALINE_TRIGGER   = 56542,
-    NPC_CORRUPT_WATER_WISE    = 56511
+    NPC_CORRUPT_WATER_WISE    = 56511,
+    NPC_WISE_STALKER          = 65393
 };
 
 enum eGameobjectsInstance

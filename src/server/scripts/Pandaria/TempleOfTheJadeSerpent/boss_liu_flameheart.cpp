@@ -223,7 +223,7 @@ public:
                              {
                                  float x, y, z;
                                  z = me->GetPositionZ();
-                                 me->GetNearPoint2D(x, y, 5.0f, triggerAngles[i]);
+                                 me->GetNearPoint2D(x, y, 0.1f, triggerAngles[i]);
                                  if(Creature* trigger = me->SummonCreature(NPC_TRIGGER_WAVE, x, y, z, me->GetAngle(x, y)))
                                  {
                                     trigger->SetReactState(REACT_PASSIVE);
@@ -235,7 +235,7 @@ public:
                                     GetPositionWithDistInOrientation(trigger, 100.0f, trigger->GetOrientation(), dx, dy);
                                     Movement::MoveSplineInit init(trigger);
                                     init.MoveTo(dx, dy, me->GetPositionZ());
-                                    init.SetVelocity(8.7f);
+                                    init.SetVelocity(11.5f);
                                     init.Launch();
 
                                     trigger->DespawnOrUnsummon(trigger->GetSplineDuration());
@@ -265,7 +265,7 @@ public:
                              {
                                  float x, y, z;
                                  z = me->GetPositionZ();
-                                 me->GetNearPoint2D(x, y, 5.0f, triggerAngles[i]);
+                                 me->GetNearPoint2D(x, y, 0.1f, triggerAngles[i]);
                                  if(Creature* trigger = me->SummonCreature(NPC_TRIGGER_WAVE, x, y, z, me->GetAngle(x, y)))
                                  {
                                     trigger->SetReactState(REACT_PASSIVE);
@@ -280,7 +280,7 @@ public:
                                     GetPositionWithDistInOrientation(trigger, 100.0f, trigger->GetOrientation(), dx, dy);
                                     Movement::MoveSplineInit init(trigger);
                                     init.MoveTo(dx, dy, me->GetPositionZ());
-                                    init.SetVelocity(8.7f);
+                                    init.SetVelocity(11.5f);
                                     init.Launch();
 
                                     trigger->DespawnOrUnsummon(trigger->GetSplineDuration());

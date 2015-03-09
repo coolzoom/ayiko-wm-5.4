@@ -113,6 +113,12 @@ class boss_raigonn : public CreatureScript
                 chargeEvents.Reset();
                 chargeEvents.ScheduleEvent(EVENT_RAIGONN_CHARGE, 1 * IN_MILLISECONDS);
                 chargeEvents.ScheduleEvent(EVENT_INITIALIZE, 1 * IN_MILLISECONDS);
+
+                if(instance)
+                {
+                    instance->SetBossState(DATA_RAIGONN, NOT_STARTED);
+                    instance->SetData(DATA_RAIGONN, NOT_STARTED);
+                }
             }
 
             void DamageTaken(Unit* attacker, uint32& damage) override
@@ -130,12 +136,18 @@ class boss_raigonn : public CreatureScript
                         events.ScheduleEvent(EVENT_SUMMON_ENGULFER, urand(15, 30) * IN_MILLISECONDS);
                         events.ScheduleEvent(EVENT_SUMMON_SWARM_BRINGER, urand(15, 30) * IN_MILLISECONDS);
 
-                        if (Creature* weakPoint = instance->instance->GetCreature(instance->GetData64(NPC_WEAK_SPOT)))
+                        if (instance)
                         {
-                            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, weakPoint);
-                            weakPoint->setFaction(16);
-                            weakPoint->ClearUnitState(UNIT_STATE_UNATTACKABLE);
-                            weakPoint->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                            if(Creature* weakPoint = instance->instance->GetCreature(instance->GetData64(NPC_WEAK_SPOT)))
+                            {
+                                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, weakPoint);
+                                weakPoint->setFaction(16);
+                                weakPoint->ClearUnitState(UNIT_STATE_UNATTACKABLE);
+                                weakPoint->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                            }
+ 
+                            instance->SetBossState(DATA_RAIGONN, IN_PROGRESS);
+                            instance->SetData(DATA_RAIGONN, IN_PROGRESS);
                         }
                     }
                 }
@@ -307,7 +319,7 @@ class boss_raigonn : public CreatureScript
                             break;
                         case EVENT_FIXATE:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
-                                me->CastSpell(target, SPELL_FIXATE, false);                            
+                                me->CastSpell(target, SPELL_FIXATE, TRIGGERED_FULL_MASK);
                             events.ScheduleEvent(EVENT_FIXATE_STOP, 17 * IN_MILLISECONDS);
                             break;
                         case EVENT_FIXATE_STOP:

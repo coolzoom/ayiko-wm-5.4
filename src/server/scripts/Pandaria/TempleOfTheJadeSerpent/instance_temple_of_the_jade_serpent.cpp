@@ -472,6 +472,7 @@ public:
                     }
                     break;
                 case DATA_LOREWALKER:
+                    dataStorage[type] = data;
                     if (data == FAIL)
                     {
                         if(Creature* creature = instance->GetCreature(lorewalkerGUID))

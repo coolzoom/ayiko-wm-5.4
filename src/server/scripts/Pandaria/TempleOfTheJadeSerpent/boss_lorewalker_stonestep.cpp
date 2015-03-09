@@ -633,6 +633,19 @@ public:
             {
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 instance->SetData(DATA_TRIAL, DONE);
+
+                if(instance->GetData(DATA_LOREWALKER) != DONE)
+                    me->SetLootRecipient(NULL);
+                else
+                {
+                    std::list<Player*> playerList;
+                    GetPlayerListInGrid(playerList, me, 150.0f);
+                    if(!playerList.empty())
+                    {
+                        for(auto player : playerList)
+                            player->ModifyCurrency(395, player->GetMap()->IsHeroic() ? 100 * CURRENCY_PRECISION : 70 * CURRENCY_PRECISION);
+                    }
+                }
             }
         }
 

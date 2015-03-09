@@ -1437,7 +1437,7 @@ class spell_monk_mana_tea_stacks : public SpellScriptLoader
                     if (GetCaster())
                     {
                         SpellInfo const* triggerInfo = sSpellMgr->GetSpellInfo(SPELL_MONK_MANA_TEA_STACKS);
-                        float critChance = caster->GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + GetFirstSchoolInMask(SpellSchoolMask(triggerInfo->SchoolMask)));
+                        float critChance = caster->GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + SPELL_SCHOOL_HOLY);
                         uint8 stacks = 1;
                         if (roll_chance_f(critChance))
                             stacks++;

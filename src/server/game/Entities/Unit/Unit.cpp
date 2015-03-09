@@ -16461,10 +16461,6 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
                     auraEff->GetBase()->ModStackAmount(-1);
         }
 
-        // Fix Drop charge for Killing Machine
-        if (HasAura(51124) && getClass() == CLASS_DEATH_KNIGHT && procSpell && (procSpell->Id == 49020 || procSpell->Id == 49143))
-            RemoveAura(51124);
-
         // Fix Drop charge for Blindsight
         if (HasAura(121152) && getClass() == CLASS_ROGUE && procSpell && procSpell->Id == 111240)
             RemoveAura(121153);

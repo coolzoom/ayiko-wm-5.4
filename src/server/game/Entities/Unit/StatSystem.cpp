@@ -727,17 +727,16 @@ void Player::UpdateSpellCritChance(uint32 school)
 
 void Player::UpdateMasteryPercentage()
 {
-    // No mastery
-    float value = 0.0f;
-    if (CanMastery() && getLevel() >= 80)
+    Unit::AuraApplicationMap& appliedAuras = GetAppliedAuras();
+    for (Unit::AuraApplicationMap::iterator iter = appliedAuras.begin(); iter != appliedAuras.end();++iter)
     {
-        // Mastery from SPELL_AURA_MASTERY aura
-        value += GetTotalAuraModifier(SPELL_AURA_MASTERY);
-        // Mastery from rating
-        value += GetRatingBonusValue(CR_MASTERY);
-        value = value < 0.0f ? 0.0f : value;
+        Aura * aura = iter->second->GetBase();
+
+        if (!(aura->GetSpellInfo()->AttributesEx8 & SPELL_ATTR8_MASTERY_SPECIALIZATION))
+            continue; // this is not our mastery aura
+
+        aura->RecalculateAmountOfEffects();
     }
-    SetFloatValue(PLAYER_MASTERY, value);
 }
 
 void Player::UpdatePvPPowerPercentage()

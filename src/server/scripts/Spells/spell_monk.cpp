@@ -1157,10 +1157,13 @@ class spell_monk_spinning_fire_blossom : public SpellScriptLoader
                 }
 
                 unitList.clear();
-                unitList.push_back(closestTarget);
+                if (closestTarget)
+                {
+                    unitList.push_back(closestTarget);
 
-                if (closestTarget->GetDistance(caster) > 10.0f)
-                    bonusDamage = true;
+                    if (closestTarget->GetDistance(caster) > 10.0f)
+                        bonusDamage = true;
+                }
             }
 
             void HandleOnHit()

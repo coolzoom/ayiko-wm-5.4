@@ -12048,7 +12048,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
             modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_BONUS_MULTIPLIER, coeff);
             coeff /= 100.0f;
         }
-        DoneTotal += int32(DoneAdvertisedBenefit * coeff);
+        DoneTotal += int32(DoneAdvertisedBenefit * coeff * stack);
     }
 
     // Custom MoP Script

@@ -6893,8 +6893,16 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
         case SPELLFAMILY_WARLOCK:
             switch (GetId())
             {
+                case 146739: // Corruption
+                    if (caster)
+                    {
+                        SpellInfo const* info = sSpellMgr->GetSpellInfo(172);
+                        caster->EnergizeBySpell(caster, GetId(), info->Effects[EFFECT_1].BasePoints, POWER_DEMONIC_FURY);
+                    }
+                    break;
                 case 104025: // Immolation aura
-                    caster->CastSpell(caster, 5857, true);
+                    if (caster)
+                        caster->CastSpell(caster, 5857, true);
                     break;
                 // Curse of Elements - Jinx
                 case 1490:

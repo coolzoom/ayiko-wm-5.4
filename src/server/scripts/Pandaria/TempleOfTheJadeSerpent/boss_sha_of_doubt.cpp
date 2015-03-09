@@ -81,6 +81,7 @@ public:
                 instance->SetData(DATA_SHA_OF_DOUBT, NOT_STARTED);
                 if(instance->GetBossState(DATA_LIU) == DONE)
                 {
+                    me->SetReactState(REACT_DEFENSIVE);
                     nonCombatEvents.ScheduleEvent(EVENT_OPEN_DOOR, 1 * IN_MILLISECONDS);
                     for(int i = 0; i < 2; i++)
                     {

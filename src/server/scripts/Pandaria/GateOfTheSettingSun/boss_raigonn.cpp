@@ -103,8 +103,6 @@ class boss_raigonn : public CreatureScript
 
             void Reset() override
             {
-                _Reset();
-
                 isInFight = false;
                 me->SetReactState(REACT_PASSIVE);
                 me->AddAura(SPELL_IMPERVIOUS_CARAPACE, me);
@@ -115,30 +113,6 @@ class boss_raigonn : public CreatureScript
                 chargeEvents.Reset();
                 chargeEvents.ScheduleEvent(EVENT_RAIGONN_CHARGE, 1 * IN_MILLISECONDS);
                 chargeEvents.ScheduleEvent(EVENT_INITIALIZE, 1 * IN_MILLISECONDS);
-            }
-            
-            void AIDidInitialize()
-            {
-                if(vehicle)
-                {
-                    if(Unit* passenger = vehicle->GetPassenger(1)) // Check if weak_spot already spawned
-                    {
-                        passenger->setFaction(35);
-                        passenger->SetFullHealth();
-                        passenger->AddUnitState(UNIT_STATE_UNATTACKABLE);
-                        passenger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                    }
-                    else
-                    {
-                        if(Creature* weakSpot = me->SummonCreature(NPC_WEAK_SPOT, *me))
-                        {
-                            weakSpot->EnterVehicle(me, 1);
-
-                            if(instance)
-                                instance->SetData64(NPC_WEAK_SPOT, weakSpot->GetGUID());
-                        }
-                    }
-                }
             }
 
             void DamageTaken(Unit* attacker, uint32& damage) override
@@ -182,10 +156,8 @@ class boss_raigonn : public CreatureScript
                 }
                 me->RemoveAurasDueToSpell(SPELL_BROKEN_CARAPACE);
                 me->RemoveAurasDueToSpell(SPELL_BROKEN_CARAPACE_DAMAGE);
-                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_FIXATE);
-                summons.DespawnEntry(NPC_KRIKTHIK_PROTECTORAT);
-                summons.DespawnEntry(NPC_KRIKTHIK_ENGULFER);
-                summons.DespawnEntry(NPC_KRIKTHIK_SWARM_BRINGER);
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_FIXATE); 
+                summons.DespawnAll();
             }
 
             void DoAction(int32 const action) override
@@ -230,6 +202,7 @@ class boss_raigonn : public CreatureScript
                             passengerList[i] = weakVehicle->GetPassenger(i);
 
                         weakVehicle->RemoveAllPassengers();
+                        me->CastSpell(weakPoint->GetPositionX(), weakPoint->GetPositionY(), weakPoint->GetPositionZ(), SPELL_BATTERING_HEADBUTT, true);
 
                         for (uint8 i = 0; i < maxPassenger; ++i)
                             if (passengerList[i])
@@ -276,11 +249,19 @@ class boss_raigonn : public CreatureScript
                             break;
                         case EVENT_BATTERING_HEADBUTT:
                             RemoveWeakSpotPassengers();
-                            me->CastSpell(me, SPELL_BATTERING_HEADBUTT, false);
                             chargeEvents.ScheduleEvent(EVENT_RAIGON_MOVE_BACK, 3 * IN_MILLISECONDS);
                             break;
                         case EVENT_INITIALIZE:
-                            AIDidInitialize();
+                            if(vehicle)
+                            {
+                                if(Creature* weakSpot = me->SummonCreature(NPC_WEAK_SPOT, *me))
+                                {
+                                    weakSpot->EnterVehicle(me, 1);
+
+                                    if(instance)
+                                        instance->SetData64(NPC_WEAK_SPOT, weakSpot->GetGUID());
+                                }
+                            }
                             break;
                     }
                 }

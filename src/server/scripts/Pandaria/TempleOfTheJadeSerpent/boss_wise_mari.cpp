@@ -156,6 +156,7 @@ public:
             events.Reset();
             cosmeticEvents.ScheduleEvent(EVENT_SUMMON_TRIGGERS, 0.5 * IN_MILLISECONDS);
             me->RemoveAurasDueToSpell(SPELL_WATER_BUBBLE_WISE);
+            me->ClearUnitState(UNIT_STATE_UNATTACKABLE);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
             if(instance)
                 instance->SetData(DATA_WISE_MARI, NOT_STARTED);

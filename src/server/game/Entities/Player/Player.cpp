@@ -9910,6 +9910,10 @@ void Player::SendLootRelease(uint64 guid)
 // handle loot for entire LFR group
 void Player::HandleLFRLoot(WorldObject* object, uint32 lootId, bool lastKilled)
 {
+    auto lfrLootBind = sObjectMgr->GetLFRLootBind(object->GetEntry(), object->GetTypeId());
+    if (!lfrLootBind)
+        return;
+
     auto group = GetGroup();
 
     // check if player is in a LFR group
@@ -9928,8 +9932,26 @@ void Player::HandleLFRLoot(WorldObject* object, uint32 lootId, bool lastKilled)
             if (!member->IsWithinDistInMap(object, DEFAULT_VISIBILITY_INSTANCE))
                 continue;
 
-            // LFR TODO: check if player if locked for this object
-            // ...
+            // not eligible if player has current LFR bind for object
+            if (member->HasLFRLootBind(lfrLootBind->Id))
+                continue;
+
+            member->SetLFRLootBind(lfrLootBind->Id);
+
+            if (lfrLootBind->LinkedGroup)
+            {
+                auto lootLinkedBindSet = sObjectMgr->GetLFRLootBindLinked(lfrLootBind->LinkedGroup);
+
+                // check if raid member has all required loot links
+                uint8 linkCounter = 0;
+                for (auto const lootLinkedBind : lootLinkedBindSet)
+                    if (member->HasLFRLootBind(lootLinkedBind->Id))
+                        linkCounter++;
+
+                // more binds are required for this link set
+                if (linkCounter != lootLinkedBindSet.size())
+                    continue;
+            }
 
             raidMembers.insert(member);
         }
@@ -19116,6 +19138,8 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *charHolder, SQLQueryHolder 
 
     SetUInt32Value(PLAYER_FIELD_VIRTUAL_PLAYER_REALM, realmID);
 
+    _LoadLFRLootBinds(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_LFR_LOOT_BOUND));
+
     return true;
 }
 
@@ -20872,6 +20896,8 @@ void Player::SaveToDB(bool create /*=false*/)
     _SaveRatedBgStats(charTrans);
     _SaveKnownTitles(charTrans);
 
+    _SaveLFRLootBinds(charTrans);
+
     if (create)
     {
         CharacterDatabase.DirectCommitTransaction(charTrans);
@@ -21600,6 +21626,21 @@ void Player::_SaveStats(SQLTransaction& trans)
     stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_RESILIENCE_PLAYER_DAMAGE_TAKEN));
 
     trans->Append(stmt);
+}
+
+void Player::_SaveLFRLootBinds(SQLTransaction& trans)
+{
+    if (m_lfrLootBinds.empty())
+        return;
+
+    PreparedStatement* stmt = nullptr;
+    for (auto lootBind : m_lfrLootBinds)
+    {
+        stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_LFR_LOOT_BOUND);
+        stmt->setUInt32(0, GetGUIDLow());
+        stmt->setUInt32(1, lootBind);
+        trans->Append(stmt);
+    }
 }
 
 void Player::outDebugValues() const
@@ -25546,6 +25587,14 @@ void Player::ResetMonthlyQuestStatus()
     m_MonthlyQuestChanged = false;
 }
 
+void Player::ResetLFRLootLocks()
+{
+    if (m_lfrLootBinds.empty())
+        return;
+
+    m_lfrLootBinds.clear();
+}
+
 Battleground* Player::GetBattleground() const
 {
     if (GetBattlegroundId() == 0)
@@ -28738,6 +28787,29 @@ void Player::_LoadCUFProfiles(PreparedQueryResult result)
 
         profile.bits.reset();
         profile.bits |= decltype(profile.bits)(fields[12].GetUInt32());
+    }
+    while (result->NextRow());
+}
+
+void Player::_LoadLFRLootBinds(PreparedQueryResult result)
+{
+    if (!result)
+        return;
+
+    do
+    {
+        auto const fields = result->Fetch();
+        uint32 id = fields[0].GetUInt32();
+
+        if (!sObjectMgr->GetLFRLootBind(id))
+        {
+            TC_LOG_ERROR("entities.player", "Player %s (%u) has invalid LFR loot bind id %u! Skipping.", GetName().c_str(), GetGUIDLow(), id);
+            continue;
+        }
+
+        if (m_lfrLootBinds.find(id) == m_lfrLootBinds.end())
+            m_lfrLootBinds.insert(id);
+
     }
     while (result->NextRow());
 }

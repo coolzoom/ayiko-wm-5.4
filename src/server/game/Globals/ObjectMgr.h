@@ -362,6 +362,17 @@ struct DungeonEncounter
 typedef std::list<DungeonEncounter const*> DungeonEncounterList;
 typedef std::unordered_map<uint32, DungeonEncounterList> DungeonEncounterContainer;
 
+struct LFRLootBind
+{
+    uint32 Id;
+    uint8 Type;
+    uint32 Entry;
+    uint8 LinkedGroup;
+};
+
+typedef std::set<LFRLootBind*> LFRLootBindSet;
+typedef std::map<uint8, LFRLootBindSet> LFRLootBindLinkedMap;
+
 struct GuildChallengeReward
 {
     uint32 Experience;
@@ -484,6 +495,10 @@ class ObjectMgr
         ObjectInvisibility const * creatureTemplateInvisibility(uint32 entry) const;
 
         InstanceTemplate const* GetInstanceTemplate(uint32 mapId);
+
+        LFRLootBind const* GetLFRLootBind(uint32 id) const;
+        LFRLootBind const* GetLFRLootBind(uint32 entry, uint8 type) const;
+        LFRLootBindSet const& GetLFRLootBindLinked(uint8 linkGroup);
 
         PetLevelInfo const* GetPetLevelInfo(uint32 creature_id, uint8 level) const;
 
@@ -713,6 +728,9 @@ class ObjectMgr
         void LoadPointOfInterestLocales();
         void LoadInstanceTemplate();
         void LoadInstanceEncounters();
+
+        void LoadLFRLootBinds();
+
         void LoadMailLevelRewards();
         void LoadVehicleTemplateAccessories();
         void LoadVehicleAccessories();
@@ -1097,6 +1115,9 @@ class ObjectMgr
         AreaTriggerScriptContainer _areaTriggerScriptStore;
         AccessRequirementContainer _accessRequirementStore;
         DungeonEncounterContainer _dungeonEncounterStore;
+
+        LFRLootBindSet m_lfrLootBinds;
+        LFRLootBindLinkedMap m_lfrLootBindsLinked;
 
         RepRewardRateContainer _repRewardRateStore;
         RepOnKillContainer _repOnKillStore;

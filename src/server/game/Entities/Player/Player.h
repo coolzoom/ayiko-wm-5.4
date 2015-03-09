@@ -780,6 +780,7 @@ enum CharLoginQueryIndex
     CHAR_LOGIN_QUERY_LOAD_CP_WEEK_CAP,
     CHAR_LOGIN_QUERY_LOAD_RATED_BG_STATS,
     CHAR_LOGIN_QUERY_LOAD_QUEST_OBJECTIVE_STATUS,
+    CHAR_LOGIN_QUERY_LOAD_LFR_LOOT_BOUND,
 
     MAX_CHAR_LOGIN_QUERY
 };
@@ -907,6 +908,8 @@ struct auraEffectData
     int32 _amount;
     int32 _baseamount;
 };
+
+typedef std::set<uint32> LFRLootBinds;
 
 class Player;
 
@@ -1510,6 +1513,8 @@ class Player final : public Unit, public GridObject<Player>
         void ResetWeeklyQuestStatus();
         void ResetMonthlyQuestStatus();
         void ResetSeasonalQuestStatus(uint16 event_id);
+
+        void ResetLFRLootLocks();
 
         uint16 FindQuestSlot(uint32 quest_id) const;
         uint32 GetQuestSlotQuestId(uint16 slot) const { return GetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET + QUEST_ID_OFFSET); }
@@ -2547,6 +2552,9 @@ class Player final : public Unit, public GridObject<Player>
             return _instanceResetTimes.find(instanceId) != _instanceResetTimes.end();
         }
 
+        bool HasLFRLootBind(uint32 id) { return m_lfrLootBinds.find(id) != m_lfrLootBinds.end(); }
+        void SetLFRLootBind(uint32 id) { m_lfrLootBinds.insert(id); }
+
         // last used pet number
         uint32 GetCurrentPetId() const { return m_currentPetId; }
         void SetCurrentPetId(uint32 newPetId);
@@ -2901,6 +2909,7 @@ class Player final : public Unit, public GridObject<Player>
         void _LoadConquestPointsWeekCap(PreparedQueryResult result);
         void _LoadCurrency(PreparedQueryResult result);
         void _LoadKnownTitles(PreparedQueryResult result);
+        void _LoadLFRLootBinds(PreparedQueryResult result);
 
         /*********************************************************/
         /***                   SAVE SYSTEM                     ***/
@@ -2930,6 +2939,7 @@ class Player final : public Unit, public GridObject<Player>
         void _SaveCurrency(SQLTransaction& trans);
         void _SaveRatedBgStats(SQLTransaction& trans);
         void _SaveKnownTitles(SQLTransaction& trans);
+        void _SaveLFRLootBinds(SQLTransaction& trans);
 
         /*********************************************************/
         /***              ENVIRONMENTAL SYSTEM                 ***/
@@ -3205,6 +3215,8 @@ class Player final : public Unit, public GridObject<Player>
         InstanceTimeMap _instanceResetTimes;
         uint32 _pendingBindId;
         uint32 _pendingBindTimer;
+
+        LFRLootBinds m_lfrLootBinds;
 
         uint32 _activeCheats;
         uint32 _maxPersonalArenaRate;

@@ -809,6 +809,8 @@ class World
         void ResetRandomBG();
         void ResetProfessionCooldowns();
 
+        void ResetLFRLootLocks();
+
         bool m_stopEvent;
         uint8 m_ExitCode;
         uint32 m_ShutdownTimer;

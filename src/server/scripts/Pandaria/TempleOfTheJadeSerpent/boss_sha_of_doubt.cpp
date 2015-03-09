@@ -81,7 +81,6 @@ public:
                 instance->SetData(DATA_SHA_OF_DOUBT, NOT_STARTED);
                 if(instance->GetBossState(DATA_LIU) == DONE)
                 {
-                    me->SetReactState(REACT_DEFENSIVE);
                     nonCombatEvents.ScheduleEvent(EVENT_OPEN_DOOR, 1 * IN_MILLISECONDS);
                     for(int i = 0; i < 2; i++)
                     {
@@ -115,6 +114,7 @@ public:
             figmentsDie   = 0;
             events.Reset();
             Talk(TALK_RESET);
+            me->SetReactState(REACT_DEFENSIVE);
         }
 
         void DoAction(const int32 action) override

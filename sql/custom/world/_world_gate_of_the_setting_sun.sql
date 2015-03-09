@@ -1159,10 +1159,6 @@ DELETE FROM `creature_template_currency` WHERE `entry` = 56877;
 INSERT INTO `creature_template_currency` (`entry`, `currencyId`, `currencyCount`) VALUES
 (56877, 395, 70);
 
-DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 13 AND `SourceEntry` = 111671;
-INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTarget`, `SourceGroup`,`SourceEntry`,`ElseGroup`,`ConditionTypeOrReference`,`ConditionValue1`,`ConditionValue2`,`ConditionValue3`,`ErrorTextId`,`ScriptName`,`Comment`) VALUES
-(13, 0, 1, 111671, 0, 31, 3, 56877, 0, 0, '', '');
-
 DELETE FROM `creature_text` WHERE `entry` = 56877;
 INSERT INTO `creature_text` (`entry`, `groupid` , `id`, `text`, `type`, `language`, `emote`, `duration`, `sound`, `comment`) VALUES 
 (56877, 0, 0, '%s''s |cFFFF0000Weak Spot|r is exposed! Attack it to break his Impervious Carapace!', 41, 0, 0, 0, 0, 'boss_raigonn'),

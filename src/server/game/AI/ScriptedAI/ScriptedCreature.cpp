@@ -14,6 +14,7 @@
 #include "CellImpl.h"
 #include "ObjectMgr.h"
 #include "TemporarySummon.h"
+#include "Vehicle.h"
 #include "ObjectVisitors.hpp"
 
 // Spell summary for ScriptedAI::SelectSpell
@@ -455,6 +456,24 @@ void Scripted_NoMovementAI::AttackStart(Unit* target)
 }
 
 // BossAI - for instanced bosses
+class RespawnEvent : public BasicEvent
+{
+public:
+    RespawnEvent(Creature* creature) : me(creature) { }
+
+private:
+    bool Execute(uint64 /*time*/, uint32 /*diff*/)
+    {
+        me->SetVisible(true);
+        me->ClearUnitState(UNIT_STATE_EVADE);
+        me->LoadCreaturesAddon();
+        me->AI()->JustReachedHome();
+        return true;
+    }
+
+private:
+    Creature* me;
+};
 
 BossAI::BossAI(Creature* creature, uint32 bossId) : ScriptedAI(creature),
     instance(creature->GetInstanceScript()),
@@ -462,6 +481,33 @@ BossAI::BossAI(Creature* creature, uint32 bossId) : ScriptedAI(creature),
     _boundary(instance ? instance->GetBossBoundary(bossId) : NULL),
     _bossId(bossId)
 {
+}
+
+void BossAI::EnterEvadeMode()
+{
+    if(!_EnterEvadeMode())
+        return;
+
+    TC_LOG_DEBUG("entities.unit", "Boss %u enters evade mode.", me->GetEntry());
+
+    if(!me->GetVehicle()) // otherwise me will be in evade mode forever
+    {
+        me->AddUnitState(UNIT_STATE_EVADE);
+        me->StopMoving();
+        me->InterruptNonMeleeSpells(true);
+        me->SetVisible(false);
+        float x, y, z, o;
+        me->GetHomePosition(x, y, z, o);
+        me->NearTeleportTo(x, y, z, o);
+        me->m_Events.AddEvent(new RespawnEvent(me), me->m_Events.CalculateTime(5000));
+    }
+
+    Reset();
+
+    if(me->IsVehicle()) // use the same sequence of addtoworld, aireset may remove all summons!
+        me->GetVehicleKit()->Reset(true);
+
+    me->SetLastDamagedTime(0);
 }
 
 void BossAI::_Reset()

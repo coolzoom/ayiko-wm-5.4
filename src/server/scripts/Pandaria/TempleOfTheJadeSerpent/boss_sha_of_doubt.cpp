@@ -114,6 +114,7 @@ public:
             figmentsDie   = 0;
             events.Reset();
             Talk(TALK_RESET);
+            me->SetReactState(REACT_DEFENSIVE);
         }
 
         void DoAction(const int32 action) override

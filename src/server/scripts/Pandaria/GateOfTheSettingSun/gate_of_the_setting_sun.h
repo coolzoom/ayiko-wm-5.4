@@ -53,6 +53,7 @@ enum CreaturesIds
     NPC_KRITHIK_INFILTRATOR     = 58108,
     NPC_KRITHIK_WND_SHAPER      = 59801,
     NPC_KRITHIK_DEMOLISHER      = 56875,
+    NPC_KRITHIK_SHAPER          = 56876,
     NPC_ARCHER_TARGET_SPAWNER   = 59886,
     NPC_ROPE                    = 64710,
     NPC_CANNONEER               = 66905,

@@ -9907,6 +9907,76 @@ void Player::SendLootRelease(uint64 guid)
     SendDirectMessage(&data);
 }
 
+// handle loot for entire LFR group
+void Player::HandleLFRLoot(WorldObject* object, uint32 lootId, bool lastKilled)
+{
+    auto group = GetGroup();
+
+    // check if player is in a LFR group
+    if (group && group->isRaidGroup() && group->IsLFGRestricted())
+    {
+        // find and store all raid members currently online and eligible loot
+        std::set<Player*> raidMembers;
+        for (auto &memberSlot : group->GetMemberSlots())
+        {
+            // if player is offline they are not eligible for loot
+            Player* member = ObjectAccessor::FindPlayer(memberSlot.guid);
+            if (!member)
+                continue;
+
+            // check if raid member is within range to get loot
+            if (!member->IsWithinDistInMap(object, DEFAULT_VISIBILITY_INSTANCE))
+                continue;
+
+            // LFR TODO: check if player if locked for this object
+            // ...
+
+            raidMembers.insert(member);
+        }
+
+        // if looting LFR GO, WorldObject parameter will be the GO and not the boss killed, use last creature killed instead
+        auto creatureTemplate = lastKilled ? sObjectMgr->GetCreatureTemplate(GetLastKilledCreature()) : object->ToCreature()->GetCreatureTemplate();
+
+        auto gameObject = object->ToGameObject();
+        auto creature = object->ToCreature();
+
+        // between 3 and 6 raid members minimum must win item loot
+        uint32 itemWinCount = urand(3, 6);
+        uint32 itemWinCounter = 0;
+
+        // handle loot for each member
+        uint32 memberCounter = 0;
+        for (auto member : raidMembers)
+        {
+            bool wonItem = false;
+
+            // loot quota is not being met, automatically give raid member loot
+            if ((raidMembers.size() - memberCounter) < (itemWinCount - itemWinCounter))
+                wonItem = true;
+            // otherwise raid member has 25-30% chance to win loot
+            else if (urand(0, 100) <= urand(25, 30))
+                wonItem = true;
+
+            if (wonItem)
+                itemWinCounter++;
+
+            // initialise PL for member in the object
+            Loot* loot = lastKilled ? &gameObject->m_lfrLoot[member->GetGUID()] : &creature->m_lfrLoot[member->GetGUID()];
+            loot->clear();
+
+            // reward item to member
+            if (lootId && wonItem)
+                loot->FillLFRLoot(lootId, lastKilled ? LootTemplates_Gameobject : LootTemplates_Creature, member);
+
+            // reward money to member
+            if (creatureTemplate)
+                loot->FillLFRMoney(creatureTemplate->mingold, creatureTemplate->maxgold, group->GetMembersCount(), wonItem);
+
+            memberCounter++;
+        }
+    }
+}
+
 void Player::SendLoot(uint64 guid, LootType loot_type)
 {
     if (uint64 lguid = GetLootGUID())
@@ -9939,7 +10009,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
 
         if (go->getLootState() == GO_READY)
         {
-            uint32 lootid = go->GetGOInfo()->GetLootId();
+            uint32 lootId = go->GetGOInfo()->GetLootId();
             if (Battleground* bg = GetBattleground())
                 if (!bg->CanActivateGO(go->GetEntry(), GetTeam()))
                 {
@@ -9947,67 +10017,11 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                     return;
                 }
 
-            if (lootid)
+            if (lootId)
             {
                 // handle LFR loot for GO
                 if (GetMap()->GetDifficulty() == RAID_TOOL_DIFFICULTY)
-                {
-                    auto group = GetGroup();
-
-                    // check if player is in a LFR group
-                    if (group && group->isRaidGroup() && group->IsLFGRestricted())
-                    {
-                        // this is flawed, better way to do this?
-                        auto cretureTemplate = sObjectMgr->GetCreatureTemplate(GetLastKilledCreature());
-
-                        // find and store all raid members currently online and eligible loot
-                        std::set<Player*> raidMembers;
-                        for (auto &memberSlot : group->GetMemberSlots())
-                        {
-                            Player* member = ObjectAccessor::FindPlayer(memberSlot.guid);
-                            if (!member)
-                                continue;
-
-                            // check if raid member is within range to get loot
-                            if (!member->IsWithinDistInMap(go, DEFAULT_VISIBILITY_INSTANCE))
-                                continue;
-
-                            raidMembers.insert(member);
-                        }
-
-                        // between 3 and 6 raid members minimum must win item loot
-                        uint32 itemWinCount = urand(3, 6);
-                        uint32 itemWinCounter = 0;
-
-                        uint32 memberCounter = 0;
-                        for (auto member : raidMembers)
-                        {
-                            bool wonItem = false;
-
-                            // loot quota is not being met, automatically give raid member loot
-                            if ((raidMembers.size() - memberCounter) < (itemWinCount - itemWinCounter))
-                                wonItem = true;
-                            // otherwise raid member has 25-30% chance to win loot
-                            if (urand(0, 100) <= urand(25, 30))
-                                wonItem = true;
-
-                            Loot* loot = &go->m_lfrLoot[member->GetGUID()];
-                            loot->clear();
-
-                            if (wonItem)
-                            {
-                                // reward item to player
-                                loot->FillLFRLoot(lootid, LootTemplates_Gameobject, member);
-                                itemWinCounter++;
-                            }
-
-                            if (cretureTemplate)
-                                loot->FillLFRMoney(cretureTemplate->mingold, cretureTemplate->maxgold, group->GetMembersCount(), wonItem);
-
-                            memberCounter++;
-                        }
-                    }
-                }
+                    HandleLFRLoot(go, lootId, true);
                 else
                 {
                     GameObjectTemplate const* goTemp = go->GetGOInfo();
@@ -10020,7 +10034,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                     if (groupRules)
                         group->UpdateLooterGuid(go, true);
 
-                    loot->FillLoot(lootid, LootTemplates_Gameobject, this, !groupRules, false, go->GetLootMode());
+                    loot->FillLoot(lootId, LootTemplates_Gameobject, this, !groupRules, false, go->GetLootMode());
 
                     if (goTemp->currencyId)
                     {
@@ -19116,11 +19130,14 @@ bool Player::isAllowedToLoot(const Creature* creature) const
     const Loot* loot = &creature->loot;
 
     // use personal loot for LFR
+    auto lfrLoot = &creature->m_lfrLoot;
     if (GetMap()->GetDifficulty() == RAID_TOOL_DIFFICULTY)
     {
-        loot = &creature->m_lfrLoot.at(GetGUID());
-        if (!loot)
+        auto memberLoot = lfrLoot->find(GetGUID());
+        if (memberLoot == lfrLoot->end())
             return false;
+
+        loot = &memberLoot->second;
     }
 
     if (loot->isLooted()) // nothing to loot or everything looted.

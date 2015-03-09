@@ -2259,6 +2259,8 @@ class Player final : public Unit, public GridObject<Player>
         void SendNotifyLootItemRemoved(uint8 lootSlot);
         void SendNotifyLootMoneyRemoved();
 
+        void HandleLFRLoot(WorldObject* object, uint32 lootId, bool lastKilled);
+
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/
         /*********************************************************/

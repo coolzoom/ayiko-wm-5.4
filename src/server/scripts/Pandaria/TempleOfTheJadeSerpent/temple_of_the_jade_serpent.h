@@ -104,7 +104,6 @@ enum eActionsInstance
 
 enum eSpellsInstance
 {
-    SPELL_CORRUPTED_WATERS      = 115167,
     SPELL_SHA_CORRUPTION        = 107034,
     SPELL_SHA_CORRUPTION_2      = 120000,
     SPELL_ROOT_SELF             = 106822,

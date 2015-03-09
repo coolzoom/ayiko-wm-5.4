@@ -1599,6 +1599,7 @@ class Unit : public WorldObject
         uint32 GetNpcDamageTakenInPastSecs(uint32 secs) const;
         uint32 GetPlayerDamageTakenInPastSecs(uint32 secs) const;
         uint32 GetDamageTakenInPastSecs(uint32 secs) const;
+        uint32 GetTotalDamageTakenFromPlayer(uint64 guid) { return m_playerTotalDamage[guid]; }
 
         // Movement info
         Movement::MoveSpline *movespline;
@@ -1755,6 +1756,9 @@ class Unit : public WorldObject
 
         std::array<uint32, DAMAGE_TRACKING_PERIOD> playerDamageTaken_;
         std::array<uint32, DAMAGE_TRACKING_PERIOD> npcDamageTaken_;
+
+        // used to track total damage each player has made to the unit
+        std::map<uint64, uint32> m_playerTotalDamage;
 };
 
 namespace Trinity

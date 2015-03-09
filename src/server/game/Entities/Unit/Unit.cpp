@@ -254,6 +254,7 @@ Unit::Unit(bool isWorldObject): WorldObject(isWorldObject)
     , damageTrackingTimer_()
     , playerDamageTaken_()
     , npcDamageTaken_()
+    , m_playerTotalDamage()
 
 {
 #ifdef _MSC_VER
@@ -738,7 +739,10 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
     if (GetTypeId() != TYPEID_PLAYER)
         victim->npcDamageTaken_[0] += damage;
     else
+    {
         victim->playerDamageTaken_[0] += damage;
+        victim->m_playerTotalDamage[GetGUID()] += damage;
+    }
 
     if (victim->GetTypeId() == TYPEID_PLAYER)
     {
@@ -17742,7 +17746,25 @@ void Unit::Kill(Unit* victim, bool durabilityLoss, SpellInfo const* spellProto)
 
         if (creature)
         {
-            player->SetLastKilledCreature(creature->GetEntry());
+            // set last killed creature for all eligible group members
+            if (Group* group = player->GetGroup())
+            {
+                for (auto &memberSlot : group->GetMemberSlots())
+                {
+                    // not eligible if player is offline
+                    Player* member = ObjectAccessor::FindPlayer(memberSlot.guid);
+                    if (!member)
+                        continue;
+
+                    // not eligible if player did no damage to the creature
+                    if (!creature->GetTotalDamageTakenFromPlayer(memberSlot.guid))
+                        continue;
+
+                    member->SetLastKilledCreature(creature->GetEntry());
+                }
+            }
+            else
+                player->SetLastKilledCreature(creature->GetEntry());
 
             // handle LFR loot for unit
             if (GetMap()->GetDifficulty() == RAID_TOOL_DIFFICULTY)

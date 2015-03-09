@@ -3459,7 +3459,7 @@ void Unit::DeMorph()
 Aura *Unit::_TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint32 effMask, Unit* caster, int32* baseAmount /*= NULL*/, Item* castItem /*= NULL*/, uint64 casterGUID /*= 0*/)
 {
     ASSERT(casterGUID || caster);
-    if (!casterGUID)
+    if (!casterGUID && !newAura->IsStackableOnOneSlotWithDifferentCasters())
         casterGUID = caster->GetGUID();
 
     // passive and Incanter's Absorption and auras with different type can stack with themselves any number of times
@@ -13840,7 +13840,9 @@ bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell, Wo
         return false;
 
     // can't attack own vehicle or passenger
-    if (m_vehicle)
+    // FIXME: There is at least 1 vehicle (Weak Spot at Raigonn's encounter) that
+    // must be attackable.
+    if (m_vehicle && m_vehicle->GetVehicleInfo()->m_ID != 1913)
         if (IsOnVehicle(target) || (m_vehicle->GetBase() && m_vehicle->GetBase()->IsOnVehicle(target)))
             return false;
 

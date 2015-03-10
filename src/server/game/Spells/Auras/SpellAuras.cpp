@@ -2640,7 +2640,7 @@ bool Aura::CanStackWith(Aura const *existingAura) const
         if (existingSpellInfo->IsChanneled())
             return true;
 
-        if (m_spellInfo->AttributesEx3 & SPELL_ATTR3_STACK_FOR_DIFF_CASTERS)
+        if (m_spellInfo->AttributesEx3 & SPELL_ATTR3_STACK_FOR_DIFF_CASTERS || m_spellInfo->HasAura(SPELL_AURA_MOD_DAMAGE_FROM_CASTER))
             return true;
 
         // check same periodic auras

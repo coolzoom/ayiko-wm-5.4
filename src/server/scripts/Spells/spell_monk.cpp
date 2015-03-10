@@ -1157,10 +1157,13 @@ class spell_monk_spinning_fire_blossom : public SpellScriptLoader
                 }
 
                 unitList.clear();
-                unitList.push_back(closestTarget);
+                if (closestTarget)
+                {
+                    unitList.push_back(closestTarget);
 
-                if (closestTarget->GetDistance(caster) > 10.0f)
-                    bonusDamage = true;
+                    if (closestTarget->GetDistance(caster) > 10.0f)
+                        bonusDamage = true;
+                }
             }
 
             void HandleOnHit()
@@ -1437,7 +1440,7 @@ class spell_monk_mana_tea_stacks : public SpellScriptLoader
                     if (GetCaster())
                     {
                         SpellInfo const* triggerInfo = sSpellMgr->GetSpellInfo(SPELL_MONK_MANA_TEA_STACKS);
-                        float critChance = caster->GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + GetFirstSchoolInMask(SpellSchoolMask(triggerInfo->SchoolMask)));
+                        float critChance = caster->GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + SPELL_SCHOOL_HOLY);
                         uint8 stacks = 1;
                         if (roll_chance_f(critChance))
                             stacks++;

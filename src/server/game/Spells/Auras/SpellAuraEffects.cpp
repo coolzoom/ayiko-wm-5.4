@@ -1324,15 +1324,24 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
         }
         else if (GetAuraType() == SPELL_AURA_SCHOOL_ABSORB && GetBase()->GetType() == UNIT_AURA_TYPE)
         {
-            // Touch of Karma, probably more scripted absorbs must not be reduced...
-            if (GetId() == 122470)
-                return amount;
-            // Apply absorb-reduction auras
             auto target = GetBase()->GetUnitOwner();
+            int32 previousAmount = 0;
+            // Touch of Karma, probably more scripted absorbs must not be reduced...
+            switch (GetId())
+            {
+                case 122470:
+                    return amount;
+                case 114893: // Stone Bulwark Totem
+                    if (AuraEffect* previous = target->GetAuraEffect(114893, EFFECT_0))
+                        previousAmount += previous->GetAmount();
+                    break;
+            }
+
+            // Apply absorb-reduction auras
             float AbsorbMod = target->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_ABSORPTION_PCT) + target->GetMaxPositiveAuraModifier(SPELL_AURA_MOD_ABSORPTION_PCT);
             int32 currentValue = amount;
             AddPct(currentValue, AbsorbMod);
-            amount = currentValue;
+            amount = currentValue + previousAmount;
         }
     }
 
@@ -6893,8 +6902,16 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
         case SPELLFAMILY_WARLOCK:
             switch (GetId())
             {
+                case 146739: // Corruption
+                    if (caster)
+                    {
+                        SpellInfo const* info = sSpellMgr->GetSpellInfo(172);
+                        caster->EnergizeBySpell(caster, GetId(), info->Effects[EFFECT_1].BasePoints, POWER_DEMONIC_FURY);
+                    }
+                    break;
                 case 104025: // Immolation aura
-                    caster->CastSpell(caster, 5857, true);
+                    if (caster)
+                        caster->CastSpell(caster, 5857, true);
                     break;
                 // Curse of Elements - Jinx
                 case 1490:

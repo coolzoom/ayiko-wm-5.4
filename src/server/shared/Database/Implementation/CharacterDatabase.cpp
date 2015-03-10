@@ -438,6 +438,11 @@ void DoPrepareStatements(MySQLConnection &conn)
     conn.prepareStatement(CHAR_INS_LFG_DATA, "INSERT INTO lfg_data (guid, dungeon, state) VALUES (?, ?, ?)");
     conn.prepareStatement(CHAR_DEL_LFG_DATA, "DELETE FROM lfg_data WHERE guid = ?");
 
+    // LFR
+    conn.prepareStatement(CHAR_SEL_LFR_LOOT_BOUND, "SELECT id FROM character_lfr_loot_bound WHERE guid = ?");
+    conn.prepareStatement(CHAR_DEL_LFR_LOOT_BOUND, "DELETE FROM character_lfr_loot_bound");
+    conn.prepareStatement(CHAR_INS_LFR_LOOT_BOUND, "INSERT INTO character_lfr_loot_bound (guid, id) VALUES (?, ?)");
+
     // Player saving
     conn.prepareStatement(CHAR_INS_CHARACTER, "INSERT INTO characters (guid, account, name, race, class, gender, level, xp, money, playerBytes, playerBytes2, playerFlags,"
                           " map, instance_id, instance_mode_mask, position_x, position_y, position_z, orientation, taximask, cinematic, totaltime, leveltime, rest_bonus,"

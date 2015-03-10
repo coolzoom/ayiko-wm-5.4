@@ -256,6 +256,10 @@ bool CharLoginQueryHolder::Initialize()
     stmt->setUInt32(0, lowGuid);
     res &= SetPreparedQuery(CHAR_LOGIN_QUERY_LOAD_RATED_BG_STATS, stmt);
 
+    stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_LFR_LOOT_BOUND);
+    stmt->setUInt32(0, lowGuid);
+    res &= SetPreparedQuery(CHAR_LOGIN_QUERY_LOAD_LFR_LOOT_BOUND, stmt);
+
     return res;
 }
 

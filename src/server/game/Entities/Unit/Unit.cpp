@@ -254,6 +254,7 @@ Unit::Unit(bool isWorldObject): WorldObject(isWorldObject)
     , damageTrackingTimer_()
     , playerDamageTaken_()
     , npcDamageTaken_()
+    , m_playerTotalDamage()
 
 {
 #ifdef _MSC_VER
@@ -738,7 +739,10 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
     if (GetTypeId() != TYPEID_PLAYER)
         victim->npcDamageTaken_[0] += damage;
     else
+    {
         victim->playerDamageTaken_[0] += damage;
+        victim->m_playerTotalDamage[GetGUID()] += damage;
+    }
 
     if (victim->GetTypeId() == TYPEID_PLAYER)
     {
@@ -3459,7 +3463,7 @@ void Unit::DeMorph()
 Aura *Unit::_TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint32 effMask, Unit* caster, int32* baseAmount /*= NULL*/, Item* castItem /*= NULL*/, uint64 casterGUID /*= 0*/)
 {
     ASSERT(casterGUID || caster);
-    if (!casterGUID)
+    if (!casterGUID && !newAura->IsStackableOnOneSlotWithDifferentCasters())
         casterGUID = caster->GetGUID();
 
     // passive and Incanter's Absorption and auras with different type can stack with themselves any number of times
@@ -12048,7 +12052,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
             modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_BONUS_MULTIPLIER, coeff);
             coeff /= 100.0f;
         }
-        DoneTotal += int32(DoneAdvertisedBenefit * coeff);
+        DoneTotal += int32(DoneAdvertisedBenefit * coeff * stack);
     }
 
     // Custom MoP Script
@@ -13840,7 +13844,9 @@ bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell, Wo
         return false;
 
     // can't attack own vehicle or passenger
-    if (m_vehicle)
+    // FIXME: There is at least 1 vehicle (Weak Spot at Raigonn's encounter) that
+    // must be attackable.
+    if (m_vehicle && m_vehicle->GetVehicleInfo()->m_ID != 1913)
         if (IsOnVehicle(target) || (m_vehicle->GetBase() && m_vehicle->GetBase()->IsOnVehicle(target)))
             return false;
 
@@ -15779,6 +15785,12 @@ uint32 Unit::GetPowerIndex(uint32 powerType) const
     if (GetTypeId() != TYPEID_PLAYER && powerType == POWER_ENERGY && getClass() == CLASS_ROGUE)
         return 0;
 
+    if (Pet const* pet = ToPet())
+    {
+        if (pet->getPetType() == SUMMON_PET && powerType == POWER_ENERGY)
+            return 0;
+    }
+
     switch (GetEntry())
     {
         case 60849:// Jade Serpent Statue
@@ -16458,10 +16470,6 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
                 if (auraEff->IsAffectingSpell(procSpell))
                     auraEff->GetBase()->ModStackAmount(-1);
         }
-
-        // Fix Drop charge for Killing Machine
-        if (HasAura(51124) && getClass() == CLASS_DEATH_KNIGHT && procSpell && (procSpell->Id == 49020 || procSpell->Id == 49143))
-            RemoveAura(51124);
 
         // Fix Drop charge for Blindsight
         if (HasAura(121152) && getClass() == CLASS_ROGUE && procSpell && procSpell->Id == 111240)
@@ -17742,65 +17750,29 @@ void Unit::Kill(Unit* victim, bool durabilityLoss, SpellInfo const* spellProto)
 
         if (creature)
         {
-            player->SetLastKilledCreature(creature->GetEntry());
+            // set last killed creature for all eligible group members
+            if (Group* group = player->GetGroup())
+            {
+                for (auto &memberSlot : group->GetMemberSlots())
+                {
+                    // not eligible if player is offline
+                    Player* member = ObjectAccessor::FindPlayer(memberSlot.guid);
+                    if (!member)
+                        continue;
+
+                    // not eligible if player did no damage to the creature
+                    if (!creature->GetTotalDamageTakenFromPlayer(memberSlot.guid))
+                        continue;
+
+                    member->SetLastKilledCreature(creature->GetEntry());
+                }
+            }
+            else
+                player->SetLastKilledCreature(creature->GetEntry());
 
             // handle LFR loot for unit
             if (GetMap()->GetDifficulty() == RAID_TOOL_DIFFICULTY)
-            {
-                auto group = player->GetGroup();
-
-                // check if player is in a LFR group
-                if (group && group->isRaidGroup() && group->IsLFGRestricted())
-                {
-                    // find and store all raid members currently online and eligible loot
-                    std::set<Player*> raidMembers;
-                    for (auto &memberSlot : group->GetMemberSlots())
-                    {
-                        Player* member = ObjectAccessor::FindPlayer(memberSlot.guid);
-                        if (!member)
-                            continue;
-
-                        // check if raid member is within range to get loot
-                        if (!member->IsWithinDistInMap(creature, DEFAULT_VISIBILITY_INSTANCE))
-                            continue;
-
-                        // LFR TODO: check if player if locked for this creature
-                        // ...
-
-                        raidMembers.insert(member);
-                    }
-
-                    // between 3 and 6 raid members minimum must win item loot
-                    uint32 itemWinCount = urand(3, 6);
-                    uint32 itemWinCounter = 0;
-
-                    uint32 memberCounter = 0;
-                    for (auto member : raidMembers)
-                    {
-                        bool wonItem = false;
-
-                        // loot quota is not being met, automatically give raid member loot
-                        if ((raidMembers.size() - memberCounter) < (itemWinCount - itemWinCounter))
-                            wonItem = true;
-                        // otherwise raid member has 25-30% chance to win loot
-                        if (urand(0, 100) <= urand(25, 30))
-                            wonItem = true;
-
-                        if (wonItem)
-                            itemWinCounter++;
-
-                        Loot* loot = &creature->m_lfrLoot[member->GetGUID()];
-                        loot->clear();
-
-                        if (uint32 lootId = creature->GetCreatureTemplate()->lootid)
-                            if (wonItem)
-                                loot->FillLFRLoot(lootId, LootTemplates_Creature, member);
-
-                        loot->FillLFRMoney(creature->GetCreatureTemplate()->mingold, creature->GetCreatureTemplate()->maxgold, group->GetMembersCount(), wonItem);
-                        memberCounter++;
-                    }
-                }
-            }
+                player->HandleLFRLoot(creature, creature->GetCreatureTemplate()->lootid, false);
             else
             {
                 Loot* loot = &creature->loot;

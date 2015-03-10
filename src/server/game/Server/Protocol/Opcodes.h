@@ -1049,7 +1049,7 @@ enum Opcodes
     SMSG_INSPECT_RESULTS_UPDATE                       = 0x000,  // 5.0.5 16048
     SMSG_INSPECT_TALENT                               = 0x901,  // 5.4.0 17399
     SMSG_INSTANCE_DIFFICULTY                          = 0x000,  // 5.0.5 16048
-    SMSG_INSTANCE_LOCK_WARNING_QUERY                  = 0x000,  // 5.0.5 16048
+    SMSG_INSTANCE_LOCK_WARNING_QUERY                  = 0x895,  // 5.4.0 17399
     SMSG_INSTANCE_RESET                               = 0x5AF,  // 5.4.0 17399
     SMSG_INSTANCE_RESET_FAILED                        = 0x137,  // 5.4.0 17399
     SMSG_INSTANCE_SAVE_CREATED                        = 0x000,  // 5.0.5 16048

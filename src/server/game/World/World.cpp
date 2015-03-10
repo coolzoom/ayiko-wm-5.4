@@ -1759,6 +1759,9 @@ void World::SetInitialWorldSettings()
     TC_LOG_INFO("server.loading", "Loading Dungeon boss data...");
     sObjectMgr->LoadInstanceEncounters();
 
+    TC_LOG_INFO("server.loading", "Loading LFR loot binds...");                     // must be after LoadCreatureTemplates() and LoadGameObjectTemplate()
+    sObjectMgr->LoadLFRLootBinds();
+
     TC_LOG_INFO("server.loading", "Loading LFG rewards...");
     sLFGMgr->LoadRewards();
 
@@ -2270,6 +2273,7 @@ void World::Update(uint32 diff)
         {
             ResetWeeklyQuests();
             sGuildMgr->ResetReputationCaps();
+            ResetLFRLootLocks();
         }
 
     /// Handle monthly quests reset time
@@ -3342,6 +3346,16 @@ void World::ResetEventSeasonalQuests(uint16 event_id)
     for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
         if (itr->second->GetPlayer())
             itr->second->GetPlayer()->ResetSeasonalQuestStatus(event_id);
+}
+
+void World::ResetLFRLootLocks()
+{
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_LFR_LOOT_BOUND);
+    CharacterDatabase.Execute(stmt);
+
+    for (auto const &session : m_sessions)
+        if (session.second->GetPlayer())
+            session.second->GetPlayer()->ResetLFRLootLocks();
 }
 
 void World::ResetRandomBG()

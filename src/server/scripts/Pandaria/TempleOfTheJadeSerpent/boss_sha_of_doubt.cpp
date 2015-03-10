@@ -114,6 +114,7 @@ public:
             figmentsDie   = 0;
             events.Reset();
             Talk(TALK_RESET);
+            me->SetReactState(REACT_DEFENSIVE);
         }
 
         void DoAction(const int32 action) override
@@ -146,6 +147,14 @@ public:
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 instance->SetData(DATA_SHA_OF_DOUBT, DONE);
             }
+
+            std::list<Creature*> figments;
+            me->GetCreatureListWithEntryInGrid(figments, NPC_FIGMENT_OF_DOUBT, 100.0f);
+            if(!figments.empty())
+            {
+                for(auto creature : figments)
+                    creature->DespawnOrUnsummon();
+            }
         }
 
         void EnterCombat(Unit* /*unit*/) override
@@ -171,6 +180,14 @@ public:
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 instance->SetData(DATA_SHA_OF_DOUBT, FAIL);
                 instance->SetBossState(DATA_SHA_OF_DOUBT, FAIL);
+            }
+
+            std::list<Creature*> figments;
+            me->GetCreatureListWithEntryInGrid(figments, NPC_FIGMENT_OF_DOUBT, 100.0f);
+            if(!figments.empty())
+            {
+                for(auto creature : figments)
+                    creature->DespawnOrUnsummon();
             }
         }
 

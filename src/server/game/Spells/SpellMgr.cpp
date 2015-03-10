@@ -4940,6 +4940,7 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 114028:// Mass Spell Reflection
                 case 122510:// Ultimatum
                 case 115317:// Raging Wind
+                case 51124: // Killing Machine
                     spellInfo->ProcCharges = 1;
                     break;
                 case 110600:// Ice Trap (Symbiosis)
@@ -5120,15 +5121,22 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[0].TargetA = TARGET_UNIT_TARGET_ANY;
                     // Wise Mari Hydrolance damage
                 case 106267:
-                    //spellInfo->Effects[0].TargetB = TARGET_UNIT_TARGET_ENEMY;
+                    spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(16);
                     break;
                 case 106762:
+                case 113394:
                     spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
                     break;
                 case 106334:// Wash Away
+                    spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
                     spellInfo->AttributesEx3 &= ~ SPELL_ATTR3_ONLY_TARGET_PLAYERS;
                     break;
+                case 106959:
+                    spellInfo->Effects[0].Amplitude = 400;
+                    break;
                 case 120552:// Mantid Munition Explosion
+                case 106105:
+                case 106104:
                     spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(16);
                     break;
                 case 119684:// Ground Slam

@@ -18647,6 +18647,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *charHolder, SQLQueryHolder 
             AddBattlegroundQueueId(bgQueueTypeId);
 
             m_bgData.bgTypeID = currentBg->GetTypeID();
+            AddBattlegroundQueueJoinTime(currentBg->GetTypeID(), time(NULL));
 
             //join player to battleground group
             currentBg->EventPlayerLoggedIn(this);

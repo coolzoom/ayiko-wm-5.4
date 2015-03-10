@@ -6521,6 +6521,15 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
         {
             switch (dummySpell->Id)
             {
+                case 111397: // Blood horror
+                {
+                    if (!victim || victim->isPet() || victim->isGuardian() || !damage)
+                        return false;
+
+                    triggered_spell_id = 137143;
+                    target = victim;
+                    break;
+                }
                 case 56218: // Glyph of Siphon Life
                     if (!procSpell || procSpell->Effects[0].ApplyAuraName != SPELL_AURA_PERIODIC_DAMAGE)
                         return false;

@@ -2637,24 +2637,6 @@ class spell_warl_blood_horror : public SpellScriptLoader
         HEALTH_COST_PCT                 = 5
     };
 
-    class aura_impl : public AuraScript
-    {
-        PrepareAuraScript(aura_impl);
-
-        void OnProc(AuraEffect const *, ProcEventInfo & event)
-        {
-            PreventDefaultAction();
-            if (Unit * actor = event.GetActor())
-                GetCaster()->CastSpell(actor, SPELL_BLOOD_HORROR_EFFECT, true);
-        }
-
-
-        void Register()
-        {
-            OnEffectProc += AuraEffectProcFn(aura_impl::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
-        }
-    };
-
     class spell_impl : public SpellScript
     {
         PrepareSpellScript(spell_impl);
@@ -2685,11 +2667,6 @@ class spell_warl_blood_horror : public SpellScriptLoader
 
 public:
     spell_warl_blood_horror() : SpellScriptLoader("spell_warl_blood_horror") {}
-
-    AuraScript* GetAuraScript() const
-    {
-        return new aura_impl();
-    }
 
     SpellScript* GetSpellScript() const
     {

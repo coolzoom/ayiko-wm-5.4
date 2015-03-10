@@ -1413,6 +1413,14 @@ bool WorldObject::IsWithinLOSInMap(const WorldObject* obj) const
     if (!IsInMap(obj))
         return false;
 
+    if (const Creature* const _owner = ToCreature())
+        if (_owner->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_DISABLED_LOS)
+            return true;
+
+    if (const Creature* const _target = obj->ToCreature())
+        if (_target->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_DISABLED_LOS)
+            return true;
+
     float ox, oy, oz;
     obj->GetPosition(ox, oy, oz);
     return IsWithinLOS(ox, oy, oz);

@@ -9812,7 +9812,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
             if (!procSpell)
                 return false;
 
-            if (procSpell->Id != 47632)
+            if (procSpell->Id != 47632 && procSpell->Id != 47633)
                 return false;
 
             if (GetTypeId() != TYPEID_PLAYER)

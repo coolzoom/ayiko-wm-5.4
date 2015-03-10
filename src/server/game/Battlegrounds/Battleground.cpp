@@ -992,7 +992,7 @@ void Battleground::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
     }
 
     BattlegroundScoreMap::iterator itr2 = PlayerScores.find(guid);
-    if (itr2 != PlayerScores.end())
+    if (!isArena() && itr2 != PlayerScores.end())
     {
         delete itr2->second;                                // delete player's score
         PlayerScores.erase(itr2);

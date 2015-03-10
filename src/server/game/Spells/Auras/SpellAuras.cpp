@@ -1296,6 +1296,7 @@ bool Aura::CanBeSaved() const
         case 106284: // Gathering Muddy Water
         case 113901: // Demonic Gateway stacking aura
         case 108446: // Soul link
+        case 110310: // Dampening
             return false;
         default:
             break;

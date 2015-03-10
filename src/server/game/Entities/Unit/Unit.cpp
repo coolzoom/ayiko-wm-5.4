@@ -12761,6 +12761,10 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
             DoneTotal = int32(1.428f * ToPlayer()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY));
     }
 
+    // Dampening
+    if (AuraEffect* aurEff = GetAuraEffect(110310, EFFECT_0))
+        AddPct(DoneTotalMod, -aurEff->GetAmount());
+
     // use float as more appropriate for negative values and percent applying
     float heal = float(int32(healamount) + DoneTotal) * DoneTotalMod;
     // apply spellmod to Done amount

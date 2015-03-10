@@ -256,6 +256,22 @@ void Battleground::Update(uint32 diff)
             // after 20 minutes without one team losing, the arena closes with no winner and no rating change
             if (isArena())
             {
+                if (GetElapsedTime() >= 10 * MINUTE * IN_MILLISECONDS) // Dampening
+                {
+                    for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
+                    {
+                        if (Player* player = ObjectAccessor::FindPlayer(itr->first))
+                        {
+                            if (player->HasAura(110310))
+                                continue;
+
+                            player->CastSpell(player, 110310, true);
+                            if (AuraEffect* auraEff = player->GetAuraEffect(110310, EFFECT_0)) // Defaults to 0%, we need to add 1%
+                                auraEff->ChangeAmount(1);
+                        }
+                    }
+                }
+
                 if (GetElapsedTime() >= 20 *  MINUTE * IN_MILLISECONDS)
                 {
                     UpdateArenaWorldState();
@@ -1031,6 +1047,7 @@ void Battleground::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
             if (isArena())
             {
                 bgTypeId = BATTLEGROUND_AA;                   // set the bg type to all arenas (it will be used for queue refreshing)
+                player->RemoveAura(110310);
 
                 // unsummon current and summon old pet if there was one and there isn't a current pet
                 player->RemovePet(PET_REMOVE_DISMISS);

@@ -378,6 +378,7 @@ class boss_tsulong : public CreatureScript
                         events.ScheduleEvent(EVENT_SWITCH_TO_NIGHT_PHASE, 0, 0, PHASE_NIGHT);
                         events.ScheduleEvent(EVENT_SHADOW_BREATH, 10000, 0, PHASE_NIGHT);
                         events.ScheduleEvent(EVENT_NIGHTMARES, urand(15000, 16000), 0, PHASE_NIGHT);
+                        events.ScheduleEvent(EVENT_SPAWN_SUNBEAM, 2000, 0, PHASE_NIGHT);
 
                         if (IsHeroic())
                         {
@@ -390,8 +391,6 @@ class boss_tsulong : public CreatureScript
                             Talk(SAY_DAY_TO_NIGHT);
                             me->SetHealth(me->GetMaxHealth() - me->GetHealth());
                         }
-                        else
-                            events.ScheduleEvent(EVENT_SPAWN_SUNBEAM, 2000, 0, PHASE_NIGHT);
                         break;
                 }
 
@@ -574,13 +573,15 @@ class boss_tsulong : public CreatureScript
                             me->CastSpell(me, SPELL_DREAD_SHADOWS, true);
                             break;
                         case EVENT_SPAWN_SUNBEAM:
-                        {
+                            if (Creature* pSunbeam = GetClosestCreatureWithEntry(me, SUNBEAM_DUMMY_ENTRY, 200.0f))
+                                pSunbeam->DisappearAndDie();
+
                             Talk(EMOTE_SUNBEAM, me->GetGUID());
                             Position pos;
                             me->GetRandomNearPosition(pos, 30.0f);
                             me->SummonCreature(SUNBEAM_DUMMY_ENTRY, pos);
+                            events.ScheduleEvent(EVENT_SPAWN_SUNBEAM, 40000, 0, PHASE_NIGHT);
                             break;
-                        }
                         case EVENT_NIGHTMARES:
                             Talk(SAY_NIGHTMARES);
                             DoCast(me, SPELL_NIGHTMARES, true);
@@ -655,11 +656,12 @@ class npc_sunbeam : public CreatureScript
                 float scale = me->GetFloatValue(OBJECT_FIELD_SCALE_X);
                 if (scale <= 1.0f)
                 {
+                    /*
                     if (pInstance)
                     {
                         if (Creature* tsulong = pInstance->instance->GetCreature(pInstance->GetData64(NPC_TSULONG)))
                             tsulong->AI()->DoAction(ACTION_SPAWN_SUNBEAM);
-                    }
+                    }*/
 
                     Talk(0);
                     me->DespawnOrUnsummon();
@@ -1170,9 +1172,12 @@ public:
             if (!pBeam || !pCaster)
                 return;
 
+            pCaster->GetMotionMaster()->MoveFollow(pBeam, 0.f, 0.f);
+
             if (pCaster->GetExactDist2d(pBeam) < pBeam->GetFloatValue(OBJECT_FIELD_SCALE_X))
             {
                 pCaster->CastSpell(pBeam, SPELL_DARK_EXPLOSION, true);
+                pCaster->Kill(pCaster);
             }
         }
 
@@ -1223,6 +1228,26 @@ public:
     }
 };
 
+class npc_dark_of_night : public CreatureScript
+{
+public:
+    npc_dark_of_night() : CreatureScript("npc_dark_of_night") {}
+
+    struct npc_dark_of_nightAI : public ScriptedAI
+    {
+        npc_dark_of_nightAI(Creature* pCreature) : ScriptedAI(pCreature) 
+        { 
+            me->SetReactState(REACT_PASSIVE);
+            me->AddAura(SPELL_DARK_FIXATE_AURA, me);
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_dark_of_nightAI(pCreature);
+    }
+};
+
 void AddSC_boss_tsulong()
 {
     new boss_tsulong();
@@ -1238,4 +1263,5 @@ void AddSC_boss_tsulong()
     new npc_embodied_terror();
     new npc_fright_spawn();
     new npc_unstable_sha();
+    new npc_dark_of_night();
 }

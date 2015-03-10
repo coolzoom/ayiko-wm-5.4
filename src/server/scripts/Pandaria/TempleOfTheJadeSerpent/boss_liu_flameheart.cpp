@@ -630,7 +630,7 @@ public:
         void MoveInLineOfSight(Unit* who) override
         {
             if(who->GetTypeId() == TYPEID_PLAYER && me->IsWithinDistInMap(who, 15.0f))
-            if((me->IsInCombat() && me->GetVictim()->GetTypeId() != TYPEID_PLAYER) || !me->IsInCombat())
+            if((me->IsInCombat() && me->GetVictim() && me->GetVictim()->GetTypeId() != TYPEID_PLAYER) || !me->IsInCombat())
             {
                 me->getThreatManager().resetAllAggro();
                 me->getThreatManager().addThreat(who, 100.0f);

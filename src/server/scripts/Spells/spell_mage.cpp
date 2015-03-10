@@ -2155,6 +2155,51 @@ public:
     }
 };
 
+// Fingers of frost
+class spell_mage_fingers_of_frost : public SpellScriptLoader
+{
+public:
+    spell_mage_fingers_of_frost() : SpellScriptLoader("spell_mage_fingers_of_frost") { }
+
+    class spell_mage_fingers_of_frost_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_mage_fingers_of_frost_SpellScript);
+
+        void HandleOnHit()
+        {
+            Unit* caster = GetCaster();
+            uint32 chance = 0;
+            if (caster->HasSpell(112965))
+            {
+                SpellInfo const* info = sSpellMgr->GetSpellInfo(112965);
+                switch (GetSpellInfo()->Id)
+                {
+                    case 116:
+                    case 44614:
+                        chance = info->Effects[0].BasePoints;
+                        break;
+                    case 42208:
+                        chance = info->Effects[1].BasePoints;
+                        break;
+                }
+            }
+
+            if (roll_chance_i(chance))
+                caster->CastSpell(caster, 44544, true); // Main fingers of frost spell, also left side visual
+        }
+
+        void Register()
+        {
+            OnHit += SpellHitFn(spell_mage_fingers_of_frost_SpellScript::HandleOnHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_mage_fingers_of_frost_SpellScript();
+    }
+};
+
 void AddSC_mage_spell_scripts()
 {
     new spell_mage_flamestrike();
@@ -2200,5 +2245,6 @@ void AddSC_mage_spell_scripts()
     new spell_mage_orb_filter();
     new spell_mage_inferno_blast_spread();
     new spell_mage_ring_of_frost_freeze();
-    new spell_mage_ring_of_frost();  
+    new spell_mage_ring_of_frost();
+    new spell_mage_fingers_of_frost();
 }

@@ -1342,6 +1342,10 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
             int32 currentValue = amount;
             AddPct(currentValue, AbsorbMod);
             amount = currentValue + previousAmount;
+
+            // Dampening
+            if (AuraEffect* aurEff = caster->GetAuraEffect(110310, EFFECT_0))
+                AddPct(amount, -aurEff->GetAmount());
         }
     }
 
@@ -6704,6 +6708,16 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
         {
             switch (GetId())
             {
+                case 110310: // Dampening
+                {
+                    if (GetTickNumber() % 2 != 0)
+                        break;
+
+                    if (AuraEffect* eff = target->GetAuraEffect(110310, EFFECT_0))
+                        if (eff->GetAmount() < 100)
+                            eff->ChangeAmount(eff->GetAmount() + 1);
+                    break;
+                }
                 case 98971: // Smoldering Rune, Item - Death Knight T12 DPS 2P Bonus
                     GetCaster()->CastSpell(GetCaster(), 99055, true);
                     break;

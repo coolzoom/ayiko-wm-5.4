@@ -249,6 +249,17 @@ void Battleground::Update(uint32 diff)
             {
                 _ProcessJoin(diff);
                 _CheckSafePositions(diff);
+
+                // Toggle off the ability to change glyphs / talents
+                if (GetStartDelayTime() < 5 * IN_MILLISECONDS)
+                {
+                    for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
+                    {
+                        if (Player* player = ObjectAccessor::FindPlayer(itr->first))
+                            if (player->HasAuraState(AURA_STATE_UNKNOWN20))
+                                player->ModifyAuraState(AURA_STATE_UNKNOWN20, false);
+                    }
+                }
             }
             break;
         case STATUS_IN_PROGRESS:
@@ -256,6 +267,22 @@ void Battleground::Update(uint32 diff)
             // after 20 minutes without one team losing, the arena closes with no winner and no rating change
             if (isArena())
             {
+                if (GetElapsedTime() >= 10 * MINUTE * IN_MILLISECONDS) // Dampening
+                {
+                    for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
+                    {
+                        if (Player* player = ObjectAccessor::FindPlayer(itr->first))
+                        {
+                            if (player->HasAura(110310))
+                                continue;
+
+                            player->CastSpell(player, 110310, true);
+                            if (AuraEffect* auraEff = player->GetAuraEffect(110310, EFFECT_0)) // Defaults to 0%, we need to add 1%
+                                auraEff->ChangeAmount(1);
+                        }
+                    }
+                }
+
                 if (GetElapsedTime() >= 20 *  MINUTE * IN_MILLISECONDS)
                 {
                     UpdateArenaWorldState();
@@ -992,7 +1019,7 @@ void Battleground::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
     }
 
     BattlegroundScoreMap::iterator itr2 = PlayerScores.find(guid);
-    if (itr2 != PlayerScores.end())
+    if (!isArena() && itr2 != PlayerScores.end())
     {
         delete itr2->second;                                // delete player's score
         PlayerScores.erase(itr2);
@@ -1031,6 +1058,7 @@ void Battleground::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
             if (isArena())
             {
                 bgTypeId = BATTLEGROUND_AA;                   // set the bg type to all arenas (it will be used for queue refreshing)
+                player->RemoveAura(110310);
 
                 // unsummon current and summon old pet if there was one and there isn't a current pet
                 player->RemovePet(PET_REMOVE_DISMISS);
@@ -1297,6 +1325,7 @@ void Battleground::AddPlayer(Player* player)
         }
 
         player->DestroyConjuredItems(true);
+        player->ClearComboPoints();
         player->UnsummonPetTemporaryIfAny();
 
         if (GetStatus() == STATUS_WAIT_JOIN)                 // not started yet

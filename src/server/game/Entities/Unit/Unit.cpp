@@ -6521,6 +6521,15 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
         {
             switch (dummySpell->Id)
             {
+                case 111397: // Blood horror
+                {
+                    if (!victim || victim->isPet() || victim->isGuardian() || !damage)
+                        return false;
+
+                    triggered_spell_id = 137143;
+                    target = victim;
+                    break;
+                }
                 case 56218: // Glyph of Siphon Life
                     if (!procSpell || procSpell->Effects[0].ApplyAuraName != SPELL_AURA_PERIODIC_DAMAGE)
                         return false;
@@ -9803,7 +9812,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
             if (!procSpell)
                 return false;
 
-            if (procSpell->Id != 47632)
+            if (procSpell->Id != 47632 && procSpell->Id != 47633)
                 return false;
 
             if (GetTypeId() != TYPEID_PLAYER)
@@ -11722,21 +11731,6 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
         if (spellProto->Id == 11366 && damagetype == SPELL_DIRECT_DAMAGE && HasAura(48108))
             AddPct(DoneTotalMod, 25);
 
-        // Fingers of Frost - 112965
-        if (pdamage != 0 && player->GetSpecializationId(player->GetActiveSpec()) == SPEC_MAGE_FROST  && getLevel() >= 24)
-        {
-            uint32 chance = 0;
-            if (spellProto->Id == 116 || spellProto->Id == 44614 || spellProto->Id == 84721)
-                chance = 12;
-            else if (spellProto->Id == 42208)
-                chance = 4;
-            else if (spellProto->Id == 2948)
-                chance = 9;
-
-            if (chance && roll_chance_i(chance))
-                CastSpell(this, 44544, true);  // Fingers of frost proc
-        }
-
         // Judgement - Glyph of Double Jeopardy
         if (spellProto->Id == 20271)
         {
@@ -11893,7 +11887,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                     if (victim->HasAuraState(AURA_STATE_FROZEN, spellProto, this))
                         DoneTotalMod *= 4.0f;
                     if (AuraEffect* fingers = GetAuraEffect(44544, EFFECT_1))
-                        AddPct(DoneTotalMod, fingers->GetAmount());
+                        AddPct(DoneTotalMod, fingers->GetSpellEffectInfo().BasePoints);
                     break;
             }
 
@@ -12766,6 +12760,10 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
         else
             DoneTotal = int32(1.428f * ToPlayer()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY));
     }
+
+    // Dampening
+    if (AuraEffect* aurEff = GetAuraEffect(110310, EFFECT_0))
+        AddPct(DoneTotalMod, -aurEff->GetAmount());
 
     // use float as more appropriate for negative values and percent applying
     float heal = float(int32(healamount) + DoneTotal) * DoneTotalMod;

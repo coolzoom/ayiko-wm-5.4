@@ -3880,7 +3880,7 @@ void Spell::cast(bool skipCheck)
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
         // Remove spell mods after cast
-        if ((m_spellInfo->Speed || m_delayMoment) && !m_spellInfo->IsChanneled())
+        if (m_spellInfo->Speed && !m_spellInfo->IsChanneled())
             m_caster->ToPlayer()->RemoveSpellMods(*this);
 
         m_caster->ToPlayer()->SetSpellModTakingSpell(this, false);
@@ -6622,14 +6622,16 @@ SpellCastResult Spell::CheckCast(bool strict)
         if (!m_caster->ToPlayer()->InBattleground())
             return SPELL_FAILED_ONLY_BATTLEGROUNDS;
 
+    Player* player = m_caster->ToPlayer();
+    if (!player && m_caster->GetOwner())
+        player = m_caster->GetOwner()->ToPlayer();
     // do not allow spells to be cast in arenas or rated battlegrounds
-    if (Player * player = m_caster->ToPlayer())
-        if (player->InArena()/* || player->InRatedBattleGround() NYI*/)
-        {
-            SpellCastResult castResult = CheckArenaAndRatedBattlegroundCastRules();
-            if (castResult != SPELL_CAST_OK)
-                return castResult;
-        }
+    if (player && player->InArena())
+    {
+        SpellCastResult castResult = CheckArenaAndRatedBattlegroundCastRules();
+        if (castResult != SPELL_CAST_OK)
+            return castResult;
+    }
 
     // zone check
     if (m_caster->GetTypeId() == TYPEID_UNIT || !m_caster->ToPlayer()->isGameMaster())

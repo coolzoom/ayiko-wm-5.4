@@ -3573,16 +3573,22 @@ class spell_dru_starfall_dummy : public SpellScriptLoader
                 if (Unit * caster = GetCaster())
                 {
                     for (auto itr = targets.begin(); itr != targets.end();)
-                        if (Creature * creature = (*itr)->ToCreature())
-                        {
-                            if (creature->getThreatManager().getOnlineContainer().getReferenceByTarget(caster))
-                                ++itr;
-                            else
-                                itr = targets.erase(itr);
-                        }
+                    {
+                        if (!caster->canSeeOrDetect((*itr)))
+                            itr = targets.erase(itr);
                         else
-                            ++itr;
-
+                        {
+                            if (Creature * creature = (*itr)->ToCreature())
+                            {
+                                if (creature->getThreatManager().getOnlineContainer().getReferenceByTarget(caster))
+                                    ++itr;
+                                else
+                                    itr = targets.erase(itr);
+                            }
+                            else
+                                ++itr;
+                        }
+                    }
                 }
 
                 Trinity::Containers::RandomResizeList(targets, 2);

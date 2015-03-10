@@ -249,6 +249,17 @@ void Battleground::Update(uint32 diff)
             {
                 _ProcessJoin(diff);
                 _CheckSafePositions(diff);
+
+                // Toggle off the ability to change glyphs / talents
+                if (GetStartDelayTime() < 5 * IN_MILLISECONDS)
+                {
+                    for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
+                    {
+                        if (Player* player = ObjectAccessor::FindPlayer(itr->first))
+                            if (player->HasAuraState(AURA_STATE_UNKNOWN20))
+                                player->ModifyAuraState(AURA_STATE_UNKNOWN20, false);
+                    }
+                }
             }
             break;
         case STATUS_IN_PROGRESS:

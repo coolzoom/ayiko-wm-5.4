@@ -254,6 +254,7 @@ Unit::Unit(bool isWorldObject): WorldObject(isWorldObject)
     , damageTrackingTimer_()
     , playerDamageTaken_()
     , npcDamageTaken_()
+    , m_playerTotalDamage()
 
 {
 #ifdef _MSC_VER
@@ -738,7 +739,10 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
     if (GetTypeId() != TYPEID_PLAYER)
         victim->npcDamageTaken_[0] += damage;
     else
+    {
         victim->playerDamageTaken_[0] += damage;
+        victim->m_playerTotalDamage[GetGUID()] += damage;
+    }
 
     if (victim->GetTypeId() == TYPEID_PLAYER)
     {
@@ -3459,7 +3463,7 @@ void Unit::DeMorph()
 Aura *Unit::_TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint32 effMask, Unit* caster, int32* baseAmount /*= NULL*/, Item* castItem /*= NULL*/, uint64 casterGUID /*= 0*/)
 {
     ASSERT(casterGUID || caster);
-    if (!casterGUID)
+    if (!casterGUID && !newAura->IsStackableOnOneSlotWithDifferentCasters())
         casterGUID = caster->GetGUID();
 
     // passive and Incanter's Absorption and auras with different type can stack with themselves any number of times
@@ -6683,6 +6687,15 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
             }
             switch (dummySpell->Id)
             {
+                case 78203: // Shadowy Apparition
+                {
+                    if (!victim || !victim->IsAlive())
+                        return false;
+                    
+                    triggered_spell_id = 148859;
+                    SendPlaySpellVisual(GetGUID(), victim->GetGUID(), 33573, 6.0f);
+                    break;
+                }
                 case 114164: // Psyfiend Hit me driver
                 {
                     if (victim)
@@ -6794,49 +6807,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                         if (!blessHealing)
                             return false;
                         basepoints0 = int32(CalculatePct(damage, triggerAmount) / (blessHealing->GetMaxDuration() / blessHealing->Effects[0].Amplitude));
-                    }
-                    break;
-                // Shadowy Apparition
-                case 78203:
-                    if (auto const aur = GetAura(dummySpell->Id))
-                    {
-                        int32 chance = aur->GetEffect(0)->GetAmount();
-                        if (isMoving())
-                            chance *= 5;
-                        if (effIndex !=0 || !procSpell || !roll_chance_i(chance))
-                            return false;
-
-                        std::list<Creature*> summons;
-                        GetAllMinionsByEntry(summons, 46954);
-                        if (summons.size() > 3)
-                            return false;
-
-                        int32 bp0 = 1;
-                        CastCustomSpell(this, 87426, &bp0, NULL, NULL, true);
-
-                        std::list<Creature*> new_summons;
-                        GetAllMinionsByEntry(new_summons, 46954);
-
-                        Unit* summon = NULL;
-                        for (std::list<Creature*>::iterator new_itr = new_summons.begin(); new_itr != new_summons.end(); ++new_itr)
-                        {
-                            summon = NULL;
-                            for (std::list<Creature*>::iterator itr = summons.begin(); itr != summons.end(); ++itr)
-                                if ((*new_itr)->GetGUID() == (*itr)->GetGUID())
-                                    summon = *new_itr;
-                            if (!summon)
-                            {
-                                summon = *new_itr;
-                                break;
-                            }
-                        }
-                        if (summon)
-                        {
-                            //summon->m_FollowingRefManager.clearReferences();
-                            CastSpell(summon, 87213, true);
-                            summon->CastSpell(summon, 87427, true);
-                            summon->GetAI()->AttackStart(victim);
-                        }
                     }
                     break;
             }
@@ -12082,7 +12052,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
             modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_BONUS_MULTIPLIER, coeff);
             coeff /= 100.0f;
         }
-        DoneTotal += int32(DoneAdvertisedBenefit * coeff);
+        DoneTotal += int32(DoneAdvertisedBenefit * coeff * stack);
     }
 
     // Custom MoP Script
@@ -13874,7 +13844,9 @@ bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell, Wo
         return false;
 
     // can't attack own vehicle or passenger
-    if (m_vehicle)
+    // FIXME: There is at least 1 vehicle (Weak Spot at Raigonn's encounter) that
+    // must be attackable.
+    if (m_vehicle && m_vehicle->GetVehicleInfo()->m_ID != 1913)
         if (IsOnVehicle(target) || (m_vehicle->GetBase() && m_vehicle->GetBase()->IsOnVehicle(target)))
             return false;
 
@@ -15813,6 +15785,12 @@ uint32 Unit::GetPowerIndex(uint32 powerType) const
     if (GetTypeId() != TYPEID_PLAYER && powerType == POWER_ENERGY && getClass() == CLASS_ROGUE)
         return 0;
 
+    if (Pet const* pet = ToPet())
+    {
+        if (pet->getPetType() == SUMMON_PET && powerType == POWER_ENERGY)
+            return 0;
+    }
+
     switch (GetEntry())
     {
         case 60849:// Jade Serpent Statue
@@ -16055,27 +16033,18 @@ void CharmInfo::RestoreState()
 
 void CharmInfo::InitPetActionBar()
 {
-    // the first 3 SpellOrActions are attack, follow and move-to
-    for (uint32 i = 0; i < ACTION_BAR_INDEX_PET_SPELL_START - ACTION_BAR_INDEX_START; ++i)
-    {
-        if (i < 2)
-            SetActionBar(ACTION_BAR_INDEX_START + i, COMMAND_ATTACK - i, ACT_COMMAND);
-        else
-            SetActionBar(ACTION_BAR_INDEX_START + i, COMMAND_MOVE_TO, ACT_COMMAND);
-    }
+    SetActionBar(ACTION_BAR_INDEX_START, COMMAND_ATTACK, ACT_COMMAND);
+    SetActionBar(ACTION_BAR_INDEX_START + 1, COMMAND_FOLLOW, ACT_COMMAND);
+    SetActionBar(ACTION_BAR_INDEX_START + 2, COMMAND_MOVE_TO, ACT_COMMAND);
 
     // middle 4 SpellOrActions are spells/special attacks/abilities
     for (uint32 i = 0; i < ACTION_BAR_INDEX_PET_SPELL_END-ACTION_BAR_INDEX_PET_SPELL_START; ++i)
         SetActionBar(ACTION_BAR_INDEX_PET_SPELL_START + i, 0, ACT_PASSIVE);
 
     // last 3 SpellOrActions are reactions
-    for (uint32 i = 0; i < ACTION_BAR_INDEX_END - ACTION_BAR_INDEX_PET_SPELL_END; ++i)
-    {
-        if (i != 1)
-            SetActionBar(ACTION_BAR_INDEX_PET_SPELL_END + i, COMMAND_ATTACK - i, ACT_REACTION);
-        else
-            SetActionBar(ACTION_BAR_INDEX_PET_SPELL_END + i, REACT_HELPER, ACT_REACTION);
-    }
+    SetActionBar(ACTION_BAR_INDEX_PET_SPELL_END, REACT_ASSIST, ACT_REACTION);
+    SetActionBar(ACTION_BAR_INDEX_PET_SPELL_END + 1, REACT_DEFENSIVE, ACT_REACTION);
+    SetActionBar(ACTION_BAR_INDEX_PET_SPELL_END + 2, REACT_PASSIVE, ACT_REACTION);
 }
 
 void CharmInfo::InitEmptyActionBar(bool withAttack)
@@ -16502,17 +16471,9 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
                     auraEff->GetBase()->ModStackAmount(-1);
         }
 
-        // Fix Drop charge for Killing Machine
-        if (HasAura(51124) && getClass() == CLASS_DEATH_KNIGHT && procSpell && (procSpell->Id == 49020 || procSpell->Id == 49143))
-            RemoveAura(51124);
-
         // Fix Drop charge for Blindsight
         if (HasAura(121152) && getClass() == CLASS_ROGUE && procSpell && procSpell->Id == 111240)
             RemoveAura(121153);
-
-        // Cast Shadowy Apparitions when Shadow Word : Pain is crit
-        if (procSpell && procSpell->Id == 589 && HasAura(78203) && procExtra & PROC_EX_CRITICAL_HIT)
-            CastSpell(target, 147193, true);
 
         // Howl of Terror - Reduce cooldown by 1 sec on damage taken
         if (procFlag & PROC_FLAG_TAKEN_DAMAGE && !(procFlag & PROC_FLAG_TAKEN_PERIODIC))
@@ -17789,65 +17750,29 @@ void Unit::Kill(Unit* victim, bool durabilityLoss, SpellInfo const* spellProto)
 
         if (creature)
         {
-            player->SetLastKilledCreature(creature->GetEntry());
+            // set last killed creature for all eligible group members
+            if (Group* group = player->GetGroup())
+            {
+                for (auto &memberSlot : group->GetMemberSlots())
+                {
+                    // not eligible if player is offline
+                    Player* member = ObjectAccessor::FindPlayer(memberSlot.guid);
+                    if (!member)
+                        continue;
+
+                    // not eligible if player did no damage to the creature
+                    if (!creature->GetTotalDamageTakenFromPlayer(memberSlot.guid))
+                        continue;
+
+                    member->SetLastKilledCreature(creature->GetEntry());
+                }
+            }
+            else
+                player->SetLastKilledCreature(creature->GetEntry());
 
             // handle LFR loot for unit
             if (GetMap()->GetDifficulty() == RAID_TOOL_DIFFICULTY)
-            {
-                auto group = player->GetGroup();
-
-                // check if player is in a LFR group
-                if (group && group->isRaidGroup() && group->IsLFGRestricted())
-                {
-                    // find and store all raid members currently online and eligible loot
-                    std::set<Player*> raidMembers;
-                    for (auto &memberSlot : group->GetMemberSlots())
-                    {
-                        Player* member = ObjectAccessor::FindPlayer(memberSlot.guid);
-                        if (!member)
-                            continue;
-
-                        // check if raid member is within range to get loot
-                        if (!member->IsWithinDistInMap(creature, DEFAULT_VISIBILITY_INSTANCE))
-                            continue;
-
-                        // LFR TODO: check if player if locked for this creature
-                        // ...
-
-                        raidMembers.insert(member);
-                    }
-
-                    // between 3 and 6 raid members minimum must win item loot
-                    uint32 itemWinCount = urand(3, 6);
-                    uint32 itemWinCounter = 0;
-
-                    uint32 memberCounter = 0;
-                    for (auto member : raidMembers)
-                    {
-                        bool wonItem = false;
-
-                        // loot quota is not being met, automatically give raid member loot
-                        if ((raidMembers.size() - memberCounter) < (itemWinCount - itemWinCounter))
-                            wonItem = true;
-                        // otherwise raid member has 25-30% chance to win loot
-                        if (urand(0, 100) <= urand(25, 30))
-                            wonItem = true;
-
-                        if (wonItem)
-                            itemWinCounter++;
-
-                        Loot* loot = &creature->m_lfrLoot[member->GetGUID()];
-                        loot->clear();
-
-                        if (uint32 lootId = creature->GetCreatureTemplate()->lootid)
-                            if (wonItem)
-                                loot->FillLFRLoot(lootId, LootTemplates_Creature, member);
-
-                        loot->FillLFRMoney(creature->GetCreatureTemplate()->mingold, creature->GetCreatureTemplate()->maxgold, group->GetMembersCount(), wonItem);
-                        memberCounter++;
-                    }
-                }
-            }
+                player->HandleLFRLoot(creature, creature->GetCreatureTemplate()->lootid, false);
             else
             {
                 Loot* loot = &creature->loot;
@@ -18827,6 +18752,15 @@ void Unit::SendPlaySpellVisualKit(uint32 id, uint32 unkParam)
     data << uint32(0);
 
     SendMessageToSet(&data, false);
+}
+
+void Unit::SendPlaySpellVisual(ObjectGuid source, ObjectGuid target, uint32 spellVisual, float speed)
+{
+    // @TODO: Add opcode structure for SMSG_PLAY_SPELL_VISUAL
+
+    // WorldPacket data(SMSG_PLAY_SPELL_VISUAL);
+
+    // SendMessageToSet(&data, true);
 }
 
 void Unit::ApplyResilience(Unit const* victim, int32* damage) const

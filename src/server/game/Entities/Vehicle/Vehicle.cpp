@@ -400,25 +400,22 @@ bool Vehicle::AddPassenger(Unit* unit, int8 seatId)
 
     VehicleSeatEntry const* veSeat = seat->second.SeatInfo;
 
-    unit->m_movementInfo.t_pos.Relocate(veSeat->m_attachmentOffsetX, veSeat->m_attachmentOffsetY, veSeat->m_attachmentOffsetZ, 0);
-    unit->m_movementInfo.t_time = 0; // 1 for player
-    unit->m_movementInfo.t_seat = seat->first;
-    unit->m_movementInfo.t_guid = _me->GetGUID();
-
     Position enterPosition;
-    enterPosition.Relocate(veSeat->m_attachmentOffsetX, veSeat->m_attachmentOffsetY, veSeat->m_attachmentOffsetZ, 0);
 
     // Hackfix
     switch (veSeat->m_ID)
     {
         case 10882:
-            unit->m_movementInfo.t_pos.m_positionX = 15.0f;
-            unit->m_movementInfo.t_pos.m_positionY = 0.0f;
-            unit->m_movementInfo.t_pos.m_positionZ = 30.0f;
+            enterPosition.Relocate(15.0f, 0.0f, 30.0f, 0.0f);
             break;
         default:
+            enterPosition.Relocate(veSeat->m_attachmentOffsetX, veSeat->m_attachmentOffsetY, veSeat->m_attachmentOffsetZ, 0);
             break;
     }
+    unit->m_movementInfo.t_pos.Relocate(enterPosition);
+    unit->m_movementInfo.t_time = 0; // 1 for player
+    unit->m_movementInfo.t_seat = seat->first;
+    unit->m_movementInfo.t_guid = _me->GetGUID();
 
     if (Creature* creature = _me->ToCreature())
         if (creature->IsAIEnabled)

@@ -506,7 +506,7 @@ public:
 
             for(int i = 6; i < 8; ++i)
             {
-                if(Creature* krithik = instance->instance->SummonCreature(NPC_KRITHIK_DEMOLISHER, SummonPositionsRimok[i]))
+                if (Creature* krithik = instance->instance->SummonCreature(NPC_KRITHIK_SHAPER, SummonPositionsRimok[i]))
                     krithik->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY2H);
             }
         }
@@ -548,7 +548,7 @@ public:
 
                 for (int i = 6; i < 8; ++i)
                 {
-                    if (Creature* krithik = go->GetInstanceScript()->instance->SummonCreature(NPC_KRITHIK_DEMOLISHER, SummonPositionsRimok[i]))
+                    if (Creature* krithik = go->GetInstanceScript()->instance->SummonCreature(NPC_KRITHIK_SHAPER, SummonPositionsRimok[i]))
                         krithik->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY2H);
                 }
             }

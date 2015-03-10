@@ -648,9 +648,7 @@ class spell_sha_stone_bulwark : public SpellScriptLoader
                         float AP = owner->GetTotalAttackPowerValue(BASE_ATTACK);
                         float SP = owner->SpellBaseDamageBonusDone(GetSpellInfo()->GetSchoolMask());
                         float coeff = 0.875f * (bonus ? 4.0f : 1.0f);
-                        amount = AP > SP ? (AP * coeff * 0.625f) : (SP * coeff);
-                        if (AuraEffect* previous = owner->GetAuraEffect(114893, EFFECT_0))
-                            amount += previous->GetAmount();
+                        amount = std::max(0.625f * AP, SP) * coeff;
                     }
                 }
             }

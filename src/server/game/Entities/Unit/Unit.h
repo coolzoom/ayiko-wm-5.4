@@ -911,6 +911,7 @@ class Unit : public WorldObject
         Aura* AddAuraForTarget(Aura* aura, Unit* target);
         void SetAuraStack(uint32 spellId, Unit* target, uint32 stack);
         void SendPlaySpellVisualKit(uint32 id, uint32 unkParam);
+        void SendPlaySpellVisual(ObjectGuid source, ObjectGuid target, uint32 spellVisual, float speed);
 
         void DeMorph();
 
@@ -1598,6 +1599,7 @@ class Unit : public WorldObject
         uint32 GetNpcDamageTakenInPastSecs(uint32 secs) const;
         uint32 GetPlayerDamageTakenInPastSecs(uint32 secs) const;
         uint32 GetDamageTakenInPastSecs(uint32 secs) const;
+        uint32 GetTotalDamageTakenFromPlayer(uint64 guid) { return m_playerTotalDamage[guid]; }
 
         // Movement info
         Movement::MoveSpline *movespline;
@@ -1754,6 +1756,9 @@ class Unit : public WorldObject
 
         std::array<uint32, DAMAGE_TRACKING_PERIOD> playerDamageTaken_;
         std::array<uint32, DAMAGE_TRACKING_PERIOD> npcDamageTaken_;
+
+        // used to track total damage each player has made to the unit
+        std::map<uint64, uint32> m_playerTotalDamage;
 };
 
 namespace Trinity
@@ -1822,6 +1827,21 @@ namespace Trinity
                 return m_ascending ? rA < rB : rA > rB;
             }
         private:
+            const bool m_ascending;
+    };
+
+    // Binary predicate for sorting Units based on value of distance of an GameObject
+    class DistanceCompareOrderPred
+    {
+        public:
+            DistanceCompareOrderPred(const WorldObject* object, bool ascending = true) : m_object(object), m_ascending(ascending) {}
+            bool operator() (const Unit* a, const Unit* b) const
+            {
+                return m_ascending ? a->GetDistance(m_object) < b->GetDistance(m_object) :
+                    a->GetDistance(m_object) > b->GetDistance(m_object);
+            }
+        private:
+            const WorldObject* m_object;
             const bool m_ascending;
     };
 }

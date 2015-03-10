@@ -1773,8 +1773,7 @@ public:
                 return;
 
             // @TODO: (excluding short-duration Spirit bonuses)
-            float spiritPct = CalculatePct(caster->GetStat(STAT_SPIRIT), GetSpellInfo()->Effects[EFFECT_0].BasePoints);
-            uint32 tmpAmount = spiritPct / aurEff->GetTotalTicks();
+            uint32 tmpAmount = CalculatePct(caster->GetStat(STAT_SPIRIT), GetSpellInfo()->Effects[EFFECT_0].BasePoints);
 
             float manaPct = CalculatePct(caster->GetMaxPower(POWER_MANA), GetSpellInfo()->Effects[EFFECT_1].BasePoints);
             uint32 minAmount = manaPct / aurEff->GetTotalTicks();

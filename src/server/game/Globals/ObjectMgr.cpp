@@ -5213,6 +5213,74 @@ void ObjectMgr::LoadInstanceEncounters()
 
 }
 
+void ObjectMgr::LoadLFRLootBinds()
+{
+    uint32 oldMSTime = getMSTime();
+
+    QueryResult result = WorldDatabase.Query("SELECT `id`, `type`, `entry`, `linkGroup` FROM `lfr_loot_binds`");
+    if (!result)
+    {
+        TC_LOG_ERROR("server.loading", ">> Loaded 0 LFR loot binds, table is empty!");
+        return;
+    }
+
+    uint32 count = 0;
+    do
+    {
+        Field* fields = result->Fetch();
+        uint32 id       = fields[0].GetUInt32();
+        uint8 type      = fields[1].GetUInt8();
+        uint32 entry    = fields[2].GetUInt32();
+        uint8 linkGroup = fields[3].GetUInt8();
+
+        if (type > TYPEID_GAMEOBJECT)
+        {
+            TC_LOG_ERROR("sql.sql", "Table `lfr_loot_binds` has an invalid LFR loot bind type (type %u) for entry (entry %u), skipped!", type, entry);
+            continue;
+        }
+
+        switch (type)
+        {
+            case TYPEID_UNIT:
+            {
+                if (!GetCreatureTemplate(entry))
+                {
+                    TC_LOG_ERROR("sql.sql", "Table `lfr_loot_binds` has an invalid creature template (entry %u), skipped!", entry);
+                    continue;
+                }
+
+                break;
+            }
+            case TYPEID_GAMEOBJECT:
+            {
+                if (!GetGameObjectTemplate(entry))
+                {
+                    TC_LOG_ERROR("sql.sql", "Table `lfr_loot_binds` has an invalid gameobject template (entry %u), skipped!", entry);
+                    continue;
+                }
+
+                break;
+            }
+            default:
+                break;
+        }
+
+        auto lootBind = new LFRLootBind();
+        lootBind->Id = id;
+        lootBind->Entry = entry;
+        lootBind->Type = type;
+        lootBind->LinkedGroup = linkGroup;
+
+        m_lfrLootBinds.insert(lootBind);
+        if (linkGroup)
+            m_lfrLootBindsLinked[linkGroup].insert(lootBind);
+
+        count++;
+    } while (result->NextRow());
+
+    TC_LOG_INFO("misc", ">> Loaded %u LFR loot binds in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
 GossipText const* ObjectMgr::GetGossipText(uint32 Text_ID) const
 {
     GossipTextContainer::const_iterator itr = _gossipTextStore.find(Text_ID);
@@ -7847,7 +7915,7 @@ void ObjectMgr::LoadGameTele()
         gt.mapId          = fields[5].GetUInt16();
         gt.name           = fields[6].GetString();
 
-        if (!MapManager::IsValidMapCoord(gt.mapId, gt.position_x, gt.position_y, gt.position_z, gt.orientation))
+        if (!MapManager::IsValidMAP(gt.mapId, true) || !Trinity::IsValidMapCoord(gt.position_x, gt.position_y, gt.position_z, gt.orientation))
         {
             TC_LOG_ERROR("sql.sql", "Wrong position for id %u (name: %s) in `game_tele` table, ignoring.", id, gt.name.c_str());
             continue;
@@ -9476,4 +9544,27 @@ QuestObjective const* ObjectMgr::GetQuestObjective(uint32 objectiveId) const
         return nullptr;
 
     return citr->second;
+}
+
+LFRLootBind const* ObjectMgr::GetLFRLootBind(uint32 id) const
+{
+    for (auto const &lockEntry : m_lfrLootBinds)
+        if (lockEntry->Id == id)
+            return lockEntry;
+
+    return nullptr;
+}
+
+LFRLootBind const* ObjectMgr::GetLFRLootBind(uint32 entry, uint8 type) const
+{
+    for (auto const &lockEntry : m_lfrLootBinds)
+        if (lockEntry->Entry == entry && lockEntry->Type == type)
+            return lockEntry;
+
+    return nullptr;
+}
+
+LFRLootBindSet const& ObjectMgr::GetLFRLootBindLinked(uint8 linkGroup)
+{
+    return m_lfrLootBindsLinked[linkGroup];
 }

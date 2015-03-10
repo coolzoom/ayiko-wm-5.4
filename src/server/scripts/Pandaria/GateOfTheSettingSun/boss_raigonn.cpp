@@ -103,8 +103,6 @@ class boss_raigonn : public CreatureScript
 
             void Reset() override
             {
-                _Reset();
-
                 isInFight = false;
                 me->SetReactState(REACT_PASSIVE);
                 me->AddAura(SPELL_IMPERVIOUS_CARAPACE, me);
@@ -115,29 +113,11 @@ class boss_raigonn : public CreatureScript
                 chargeEvents.Reset();
                 chargeEvents.ScheduleEvent(EVENT_RAIGONN_CHARGE, 1 * IN_MILLISECONDS);
                 chargeEvents.ScheduleEvent(EVENT_INITIALIZE, 1 * IN_MILLISECONDS);
-            }
-            
-            void AIDidInitialize()
-            {
-                if(vehicle)
-                {
-                    if(Unit* passenger = vehicle->GetPassenger(1)) // Check if weak_spot already spawned
-                    {
-                        passenger->setFaction(35);
-                        passenger->SetFullHealth();
-                        passenger->AddUnitState(UNIT_STATE_UNATTACKABLE);
-                        passenger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                    }
-                    else
-                    {
-                        if(Creature* weakSpot = me->SummonCreature(NPC_WEAK_SPOT, *me))
-                        {
-                            weakSpot->EnterVehicle(me, 1);
 
-                            if(instance)
-                                instance->SetData64(NPC_WEAK_SPOT, weakSpot->GetGUID());
-                        }
-                    }
+                if(instance)
+                {
+                    instance->SetBossState(DATA_RAIGONN, NOT_STARTED);
+                    instance->SetData(DATA_RAIGONN, NOT_STARTED);
                 }
             }
 
@@ -156,12 +136,18 @@ class boss_raigonn : public CreatureScript
                         events.ScheduleEvent(EVENT_SUMMON_ENGULFER, urand(15, 30) * IN_MILLISECONDS);
                         events.ScheduleEvent(EVENT_SUMMON_SWARM_BRINGER, urand(15, 30) * IN_MILLISECONDS);
 
-                        if (Creature* weakPoint = instance->instance->GetCreature(instance->GetData64(NPC_WEAK_SPOT)))
+                        if (instance)
                         {
-                            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, weakPoint);
-                            weakPoint->setFaction(16);
-                            weakPoint->ClearUnitState(UNIT_STATE_UNATTACKABLE);
-                            weakPoint->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                            if(Creature* weakPoint = instance->instance->GetCreature(instance->GetData64(NPC_WEAK_SPOT)))
+                            {
+                                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, weakPoint);
+                                weakPoint->setFaction(16);
+                                weakPoint->ClearUnitState(UNIT_STATE_UNATTACKABLE);
+                                weakPoint->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                            }
+ 
+                            instance->SetBossState(DATA_RAIGONN, IN_PROGRESS);
+                            instance->SetData(DATA_RAIGONN, IN_PROGRESS);
                         }
                     }
                 }
@@ -182,10 +168,8 @@ class boss_raigonn : public CreatureScript
                 }
                 me->RemoveAurasDueToSpell(SPELL_BROKEN_CARAPACE);
                 me->RemoveAurasDueToSpell(SPELL_BROKEN_CARAPACE_DAMAGE);
-                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_FIXATE);
-                summons.DespawnEntry(NPC_KRIKTHIK_PROTECTORAT);
-                summons.DespawnEntry(NPC_KRIKTHIK_ENGULFER);
-                summons.DespawnEntry(NPC_KRIKTHIK_SWARM_BRINGER);
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_FIXATE); 
+                summons.DespawnAll();
             }
 
             void DoAction(int32 const action) override
@@ -230,6 +214,7 @@ class boss_raigonn : public CreatureScript
                             passengerList[i] = weakVehicle->GetPassenger(i);
 
                         weakVehicle->RemoveAllPassengers();
+                        me->CastSpell(weakPoint->GetPositionX(), weakPoint->GetPositionY(), weakPoint->GetPositionZ(), SPELL_BATTERING_HEADBUTT, true);
 
                         for (uint8 i = 0; i < maxPassenger; ++i)
                             if (passengerList[i])
@@ -276,11 +261,19 @@ class boss_raigonn : public CreatureScript
                             break;
                         case EVENT_BATTERING_HEADBUTT:
                             RemoveWeakSpotPassengers();
-                            me->CastSpell(me, SPELL_BATTERING_HEADBUTT, false);
                             chargeEvents.ScheduleEvent(EVENT_RAIGON_MOVE_BACK, 3 * IN_MILLISECONDS);
                             break;
                         case EVENT_INITIALIZE:
-                            AIDidInitialize();
+                            if(vehicle)
+                            {
+                                if(Creature* weakSpot = me->SummonCreature(NPC_WEAK_SPOT, *me))
+                                {
+                                    weakSpot->EnterVehicle(me, 1);
+
+                                    if(instance)
+                                        instance->SetData64(NPC_WEAK_SPOT, weakSpot->GetGUID());
+                                }
+                            }
                             break;
                     }
                 }
@@ -326,7 +319,7 @@ class boss_raigonn : public CreatureScript
                             break;
                         case EVENT_FIXATE:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
-                                me->CastSpell(target, SPELL_FIXATE, false);                            
+                                me->CastSpell(target, SPELL_FIXATE, TRIGGERED_FULL_MASK);
                             events.ScheduleEvent(EVENT_FIXATE_STOP, 17 * IN_MILLISECONDS);
                             break;
                         case EVENT_FIXATE_STOP:

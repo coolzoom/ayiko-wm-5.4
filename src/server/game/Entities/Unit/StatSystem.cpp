@@ -456,8 +456,8 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bo
         weapon_maxdamage += ammo * att_speed;
     }*/
 
-    min_damage = ((base_value + weapon_mindamage) * base_pct + total_value) * total_pct;
-    max_damage = ((base_value + weapon_maxdamage) * base_pct + total_value) * total_pct;
+    min_damage = round(((base_value + weapon_mindamage) * base_pct + total_value) * total_pct);
+    max_damage = round(((base_value + weapon_maxdamage) * base_pct + total_value) * total_pct);
 }
 
 void Player::UpdateDamagePhysical(WeaponAttackType attType)
@@ -727,17 +727,16 @@ void Player::UpdateSpellCritChance(uint32 school)
 
 void Player::UpdateMasteryPercentage()
 {
-    // No mastery
-    float value = 0.0f;
-    if (CanMastery() && getLevel() >= 80)
+    Unit::AuraApplicationMap& appliedAuras = GetAppliedAuras();
+    for (Unit::AuraApplicationMap::iterator iter = appliedAuras.begin(); iter != appliedAuras.end();++iter)
     {
-        // Mastery from SPELL_AURA_MASTERY aura
-        value += GetTotalAuraModifier(SPELL_AURA_MASTERY);
-        // Mastery from rating
-        value += GetRatingBonusValue(CR_MASTERY);
-        value = value < 0.0f ? 0.0f : value;
+        Aura * aura = iter->second->GetBase();
+
+        if (!(aura->GetSpellInfo()->AttributesEx8 & SPELL_ATTR8_MASTERY_SPECIALIZATION))
+            continue; // this is not our mastery aura
+
+        aura->RecalculateAmountOfEffects();
     }
-    SetFloatValue(PLAYER_MASTERY, value);
 }
 
 void Player::UpdatePvPPowerPercentage()
@@ -816,7 +815,9 @@ void Player::UpdateMeleeHitChances()
 void Player::UpdateRangedHitChances()
 {
     m_modRangedHitChance = (float)GetTotalAuraModifier(SPELL_AURA_MOD_HIT_CHANCE);
+    SetFloatValue(PLAYER_FIELD_UI_HIT_MODIFIER, m_modRangedHitChance);
     m_modRangedHitChance += GetRatingBonusValue(CR_HIT_RANGED);
+    
 
     if (Pet* pet = GetPet())
         pet->m_modRangedHitChance = m_modRangedHitChance;
@@ -825,7 +826,9 @@ void Player::UpdateRangedHitChances()
 void Player::UpdateSpellHitChances()
 {
     m_modSpellHitChance = (float)GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HIT_CHANCE);
+    SetFloatValue(PLAYER_FIELD_UI_HIT_MODIFIER, m_modSpellHitChance);
     m_modSpellHitChance += GetRatingBonusValue(CR_HIT_SPELL);
+    
 
     if (Pet* pet = GetPet())
         pet->m_modSpellHitChance = m_modSpellHitChance;

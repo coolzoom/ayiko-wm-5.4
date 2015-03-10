@@ -505,7 +505,8 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recvData)
     recvData.ReadBitSeq<6, 2, 5, 7, 3, 4, 0>(targetPlayerGuid);
 
     uint32 count = recvData.ReadBits(23);
-    if (count > 40)
+    // As long as AoE loot is not implemented, count must be equal to 1.
+    if (count > 1)
         return;
 
     std::vector<ObjectGuid> guids(count);
@@ -537,9 +538,6 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recvData)
         return;
 
     TC_LOG_DEBUG("network", "WorldSession::HandleLootMasterGiveOpcode (CMSG_LOOT_MASTER_GIVE, 0x02A3) Target = [%s].", target->GetName().c_str());
-
-    // As long as AoE loot is not implemented, count must be equal to 1.
-    ASSERT(count == 1);
 
     uint64 const lguid = GetPlayer()->GetLootGUID();
 

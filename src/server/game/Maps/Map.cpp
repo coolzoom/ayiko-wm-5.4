@@ -2460,11 +2460,14 @@ bool InstanceMap::AddPlayerToMap(Player* player)
                     // players also become permanently bound when they enter
                     if (groupBind->perm)
                     {
-                        WorldPacket data(SMSG_INSTANCE_LOCK_WARNING_QUERY, 10);
+                        WorldPacket data(SMSG_INSTANCE_LOCK_WARNING_QUERY, 4 + 4 + 1);
                         data << uint32(60000);
                         data << uint32(i_data ? i_data->GetCompletedEncounterMask() : 0);
-                        data << uint8(0);
-                        data << uint8(0); // events it throws:  1 : INSTANCE_LOCK_WARNING   0 : INSTANCE_LOCK_STOP / INSTANCE_LOCK_START
+
+                        data.WriteBit(0);               // WarningOnly
+                        data.WriteBit(0);               // Extending
+                        data.FlushBits();
+
                         player->GetSession()->SendPacket(&data);
                         player->SetPendingBind(mapSave->GetInstanceId(), 60000);
                     }
@@ -2649,8 +2652,10 @@ void InstanceMap::PermBindAllPlayers(Player* source)
         if (!bind || !bind->perm)
         {
             player->BindToInstance(save, true);
-            WorldPacket data(SMSG_INSTANCE_SAVE_CREATED, 4);
-            data << uint32(0);
+
+            WorldPacket data(SMSG_INSTANCE_SAVE_CREATED, 1);
+            data.WriteBit(0);               // GM
+            data.FlushBits();
             player->SendDirectMessage(&data);
 
             player->GetSession()->SendCalendarRaidLockout(save, true);

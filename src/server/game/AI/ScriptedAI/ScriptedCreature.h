@@ -298,6 +298,7 @@ class BossAI : public ScriptedAI
         void JustSummoned(Creature* summon);
         void SummonedCreatureDespawn(Creature* summon);
 
+        virtual void EnterEvadeMode();
         virtual void UpdateAI(uint32 const diff);
 
         // Hook used to execute events scheduled into EventMap without the need

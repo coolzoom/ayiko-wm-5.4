@@ -1052,7 +1052,7 @@ enum Opcodes
     SMSG_INSTANCE_LOCK_WARNING_QUERY                  = 0x895,  // 5.4.0 17399
     SMSG_INSTANCE_RESET                               = 0x5AF,  // 5.4.0 17399
     SMSG_INSTANCE_RESET_FAILED                        = 0x137,  // 5.4.0 17399
-    SMSG_INSTANCE_SAVE_CREATED                        = 0x000,  // 5.0.5 16048
+    SMSG_INSTANCE_SAVE_CREATED                        = 0x93A,  // 5.4.0 17399
     SMSG_INVALIDATE_DANCE                             = 0x000,  // 5.0.5 16048
     SMSG_INVALIDATE_PLAYER                            = 0x013,  // 5.4.0 17399 (JamList)
     SMSG_INVALID_PROMOTION_CODE                       = 0x934,  // 5.4.0 17399 (JamList)

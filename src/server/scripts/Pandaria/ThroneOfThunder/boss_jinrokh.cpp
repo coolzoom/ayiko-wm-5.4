@@ -4,39 +4,49 @@
 
 enum eSpells : uint32
 {
-    SPELL_CONDUCTIVE_WATER_SUMMON       = 137145,
-    SPELL_CONDUCTIVE_WATERFALL          = 137340,
-    SPELL_CONDUCTIVE_WATER_VISUAL       = 137277,
-    SPELL_ELECTRIFIED_WATER_VISUAL      = 137978,
+    SPELL_CONDUCTIVE_WATER_SUMMON           = 137145,
+    SPELL_CONDUCTIVE_WATERFALL              = 137340,
+    SPELL_CONDUCTIVE_WATER_VISUAL           = 137277,
+    SPELL_ELECTRIFIED_WATER_VISUAL          = 137978,
 
-    SPELL_LIGHTNING_FISSURE_SUMMON      = 137479,
-    SPELL_LIGHTNING_FISSURE_VISUAL      = 137480,
-    SPELL_LIGHTNING_FISSURE_CONDUCTION  = 138133,
-    SPELL_LIGHTNING_FISSURE_AURA        = 140031,
+    SPELL_LIGHTNING_FISSURE_SUMMON          = 137479,
+    SPELL_LIGHTNING_FISSURE_VISUAL          = 137480,
+    SPELL_LIGHTNING_FISSURE_CONDUCTION      = 138133,
+    SPELL_LIGHTNING_FISSURE_AURA            = 140031,
 
-    SPELL_FOCUSED_LIGHTNING             = 137399,
-    SPELL_FOCUSED_LIGHTNING_VISUAL      = 137425,
-    SPELL_FOCUSED_LIGHTNING_FIXATE      = 137422,
-    SPELL_FOCUSED_LIGHTNING_SPEED       = 137389,
-    SPELL_FOCUSED_LIGHTNING_AOE         = 137429,
-    SPELL_FOCUSED_LIGHTNING_DETONATION  = 137374,
-    SPELL_VIOLENT_LIGHTNING_DETONATION  = 138990,
-    SPELL_FOCUSED_LIGHTNING_DAMAGE      = 137423,
-    SPELL_FOCUSED_LIGHTNING_TARGET      = 137194,
-    SPELL_FOCUSED_LIGHTNING_CONDUCTION  = 137530,
+    SPELL_FOCUSED_LIGHTNING                 = 137399,
+    SPELL_FOCUSED_LIGHTNING_VISUAL          = 137425,
+    SPELL_FOCUSED_LIGHTNING_FIXATE          = 137422,
+    SPELL_FOCUSED_LIGHTNING_SPEED           = 137389,
+    SPELL_FOCUSED_LIGHTNING_AOE             = 137429,
+    SPELL_FOCUSED_LIGHTNING_DETONATION      = 137374,
+    SPELL_VIOLENT_LIGHTNING_DETONATION      = 138990,
+    SPELL_FOCUSED_LIGHTNING_DAMAGE          = 137423,
+    SPELL_FOCUSED_LIGHTNING_TARGET          = 137194,
+    SPELL_FOCUSED_LIGHTNING_CONDUCTION      = 137530,
 
-    SPELL_IMPLOSION                     = 137507,
+    SPELL_IMPLOSION                         = 137507,
 
-    SPELL_CONDUCTIVE_WATER_GROW_AURA    = 137694,
-    SPELL_ELECTRIFIED_WATERS            = 138006,
-    SPELL_FLUIDITY                      = 138002,
+    SPELL_CONDUCTIVE_WATER_GROW_AURA        = 137694,
+    SPELL_ELECTRIFIED_WATERS                = 138006,
+    SPELL_FLUIDITY                          = 138002,
 
-    SPELL_STATIC_BURST                  = 137162,
-    SPELL_STATIC_WOUND                  = 138349,
-    SPELL_STATIC_WOUND_DAMAGE           = 138389,
+    SPELL_STATIC_BURST                      = 137162,
+    SPELL_STATIC_WOUND                      = 138349,
+    SPELL_STATIC_WOUND_DAMAGE               = 138389,
 
-    SPELL_LIGHTNING_STORM               = 137313,
-    SPELL_LIGHTNING_STORM_VISUAL        = 138568,
+    SPELL_LIGHTNING_STORM                   = 137313,
+    SPELL_LIGHTNING_STORM_VISUAL            = 138568,
+
+        // Thundering Throw
+    SPELL_THUNDERING_THROW                  = 140597, // Need SpellScript to handle ScriptEffect
+    SPELL_THUNDERING_THROW_JUMP             = 137173, // Casted by player on a statue
+    SPELL_THUNDERING_THROW_SILENCE          = 137161, // Silence, visuals
+    SPELL_THUNDERING_TRHOW_FLY_VISUAL       = 140594, // Visual in flight
+    SPELL_THUNDERING_THROW_HIT_DAMAGE       = 137370, // Damage on hit statue
+    SPELL_THUNDERING_THROW_HIT_AOE_DAMAGE   = 137167, // AOE Damage on hit statue
+    SPELL_THUNDERING_THROW_STUN             = 137371, // Stun after aoe damage on hit statue
+    SPELL_THUNDERING_THROW_IMPACT_VISUAL    = 140606, // Visual of the impact on ground
 };
 
 enum eCreatures : uint32
@@ -280,7 +290,7 @@ public:
                     if (WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets))
                     {
                         GetCaster()->CastSpell(target->ToUnit(), SPELL_FOCUSED_LIGHTNING_FIXATE, true);
-                        GetCaster()->GetMotionMaster()->MoveFollow(target->ToUnit(), 0.2f, 0.0f);
+                        GetCaster()->GetMotionMaster()->MoveFollow(target->ToUnit(), 0.0f, 0.0f);
                     }
                 }
             }

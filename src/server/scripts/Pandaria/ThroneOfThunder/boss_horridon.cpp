@@ -2,6 +2,7 @@
 #include "GridNotifiers.h"
 #include "Vehicle.h"
 #include "GameObjectAI.h"
+#include "ObjectVisitors.hpp"
 
 enum eSpells
 {
@@ -424,8 +425,6 @@ static const Position middlePosition = { 5431.621094f, 5763.865723f, 129.606461f
 
 //=========================================================
 // Helper functions
-
-
 static Creature *GetHorridon(WorldObject *source)
 {
     return ObjectAccessor::GetCreature(*source, source->GetInstanceScript()->GetData64(BOSS_HORRIDON));
@@ -567,7 +566,6 @@ static uint32 GetControlSpellByPhase(eTrashPhases ePhase)
     }
 }
 
-
 static Position GetChargePositionByDoor(GameObject *pDoor)
 {
     switch (pDoor->GetEntry())
@@ -679,33 +677,33 @@ public:
             {
                 switch (uiEventId)
                 {
-                case EVENT_TRIPLE_PUNCTURE:
-                    if (Unit *pVictim = me->GetVictim())
-                        DoCast(pVictim, SPELL_TRIPLE_PUNCTURE);
-                    events.ScheduleEvent(EVENT_TRIPLE_PUNCTURE, urand(10, 15) * IN_MILLISECONDS);
-                    break;
+                    case EVENT_TRIPLE_PUNCTURE:
+                        if (Unit *pVictim = me->GetVictim())
+                            DoCast(pVictim, SPELL_TRIPLE_PUNCTURE);
+                        events.ScheduleEvent(EVENT_TRIPLE_PUNCTURE, urand(10, 15) * IN_MILLISECONDS);
+                        break;
 
-                case EVENT_DOUBLE_SWIPE:
-                    DoCastAOE(SPELL_DOUBLE_SWIPE);
-                    events.ScheduleEvent(EVENT_DOUBLE_SWIPE, urand(12, 18) * IN_MILLISECONDS);
-                    break;
+                    case EVENT_DOUBLE_SWIPE:
+                        DoCastAOE(SPELL_DOUBLE_SWIPE);
+                        events.ScheduleEvent(EVENT_DOUBLE_SWIPE, urand(12, 18) * IN_MILLISECONDS);
+                        break;
 
-                case EVENT_HORRIDON_CHARGE:
-                    if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1))
-                        DoCast(pTarget, SPELL_CHARGE);
-                    events.ScheduleEvent(EVENT_HORRIDON_CHARGE, urand(15, 25) * IN_MILLISECONDS);
-                    break;
+                    case EVENT_HORRIDON_CHARGE:
+                        if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1))
+                            DoCast(pTarget, SPELL_CHARGE);
+                        events.ScheduleEvent(EVENT_HORRIDON_CHARGE, urand(15, 25) * IN_MILLISECONDS);
+                        break;
 
-                case EVENT_DIRE_CALL:
-                    DoCastAOE(SPELL_DIRE_CALL);
-                    events.ScheduleEvent(EVENT_DIRE_CALL, urand(8, 15) * IN_MILLISECONDS);
-                    break;
+                    case EVENT_DIRE_CALL:
+                        DoCastAOE(SPELL_DIRE_CALL);
+                        events.ScheduleEvent(EVENT_DIRE_CALL, urand(8, 15) * IN_MILLISECONDS);
+                        break;
 
-                case EVENT_CHARGE_AT_DOOR:
-                    break;
+                    case EVENT_CHARGE_AT_DOOR:
+                        break;
 
-                default:
-                    break;
+                    default:
+                        break;
                 }
             }
 
@@ -769,6 +767,7 @@ public:
         return new boss_horridon_AI(pCreature);
     }
 };
+typedef boss_horridon::boss_horridon_AI HorridonAI;
 
 // Helper AI
 class npc_horridon_event_helper : public CreatureScript
@@ -1124,9 +1123,1060 @@ class npc_horridon_event_helper : public CreatureScript
             return new npc_horridon_event_helper_AI(pCreature);
         }
 };
+typedef npc_horridon_event_helper::npc_horridon_event_helper_AI HorridonHelperAI;
+
+// RP Event Helper AI
+class npc_horridon_rp_event_helper : public CreatureScript
+{
+public:
+    npc_horridon_rp_event_helper() : CreatureScript("npc_horridon_rp_event_helper") { }
+
+    class npc_horridon_rp_event_helper_AI : public ScriptedAI
+    {
+    public:
+        npc_horridon_rp_event_helper_AI(Creature *pCreature) :
+            ScriptedAI(pCreature), pInstance(pCreature->GetInstanceScript()), bIntroDone(false)
+        {
+            events.Reset();
+        }
+
+        void Reset()
+        {
+            bIntroDone = false;
+            events.Reset();
+            events.ScheduleEvent(EVENT_CHECK_PLAYERS, 500);
+        }
+
+        void UpdateAI(uint32 uiDiff)
+        {
+            if (bIntroDone)
+                return;
+
+            events.Update(uiDiff);
+
+            while (uint32 uiEventId = events.ExecuteEvent())
+            {
+                switch (uiEventId)
+                {
+                    case EVENT_CHECK_PLAYERS:
+                    {
+                        std::list<Player*> playerList;
+                        me->GetPlayerListInGrid(playerList, 25.0f);
+
+                        if (playerList.empty())
+                        {
+                            events.ScheduleEvent(EVENT_CHECK_PLAYERS, 500);
+                        }
+                        else
+                        {
+                            events.ScheduleEvent(EVENT_INTRO_PART_I, 1000);
+                            events.ScheduleEvent(EVENT_INTRO_PART_II, 7500);
+                            events.ScheduleEvent(EVENT_INTRO_PART_III, 27500);
+                            events.ScheduleEvent(EVENT_INTRO_PART_IV, 29500);
+                        }
+
+                        break;
+                    }
+
+                    case EVENT_INTRO_PART_I:
+                        if (Creature *pJalak = GetJalak(me))
+                            pJalak->AI()->Talk(TALK_INTRO_FIRST);
+                        break;
+
+                    case EVENT_INTRO_PART_II:
+                        if (Creature *pJalak = GetJalak(me))
+                            pJalak->AI()->Talk(TALK_INTRO_SECOND);
+                        break;
+
+                    case EVENT_INTRO_PART_III:
+                        if (Creature *pJalak = GetJalak(me))
+                            pJalak->AI()->Talk(TALK_INTRO_THIRD);
+
+                        // Horridon should break door?
+                        if (GameObject *pDoor = me->FindNearestGameObject(GOB_HORRIDON_PRISON_DOOR, 50000.0f))
+                            pDoor->SetGoState(GO_STATE_ACTIVE);
+                        break;
+
+                    case EVENT_INTRO_PART_IV:
+                        if (Creature *pHorridon = GetHorridon(me))
+                            pHorridon->AI()->DoAction(ACTION_INTRO);
+                        bIntroDone = true;
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+        }
+
+    private:
+        EventMap        events;
+        InstanceScript  *pInstance;
+
+        bool            bIntroDone;
+    };
+
+    CreatureAI *GetAI(Creature *pCreature) const
+    {
+        return new npc_horridon_rp_event_helper_AI(pCreature);
+    }
+};
+
+// Jalak AI
+class mob_war_god_jalak : public CreatureScript
+{
+public:
+    mob_war_god_jalak() : CreatureScript("mob_war_god_jalak") { }
+
+    class mob_war_god_jalak_AI : public ScriptedAI
+    {
+    public:
+        mob_war_god_jalak_AI(Creature *pCreature) :
+            ScriptedAI(pCreature), pInstance(pCreature->GetInstanceScript()), uiPhase(BOSS_PHASE_SUMMONS)
+        {
+
+        }
+
+        void Reset()
+        {
+            events.Reset();
+            uiPhase = BOSS_PHASE_SUMMONS;
+
+            if (Creature *pHorridonHelper = GetHorridonHelper(me))
+            {
+                if (CreatureAI* pHelperAI = pHorridonHelper->AI())
+                    pHelperAI->DoAction(ACTION_FIGHT_RESET);
+            }
+        }
+
+        void DoAction(int32 iAction)
+        {
+            switch (iAction)
+            {
+                case ACTION_ENTER_PHASE_TWO:
+                    if (uiPhase != BOSS_PHASE_JALAK)
+                    {
+                        Talk(TALK_ENTER_PHASE_2);
+                        uiPhase = BOSS_PHASE_JALAK;
+
+                        if (Creature* pHorridon = GetHorridon(me))
+                        {
+                            Position toRelocate = *pHorridon;
+                            Position relocater  = { frand(0.0f, 5.0f), frand(0.0f, 5.0f), 0.0f, 0.0f };
+                            toRelocate.RelocateOffset(relocater);
+                            me->GetMotionMaster()->MoveJump(toRelocate, 32.0f, 32.0f);
+                        }
+                    }
+                    break;
+            }
+        }
+
+        void MovementInform(uint32 uiMotionType, uint32 uiMovementId)
+        {
+            if (uiMotionType == EFFECT_MOTION_TYPE)
+            {
+                switch (uiMovementId)
+                {
+                    case EVENT_JUMP:
+                    {
+                        me->SetInCombatWithZone();
+                        std::list<Player*> playerList;
+
+                        me->GetPlayerListInGrid(playerList, 500.0f);
+                        playerList.sort([this] (Player const* first, Player const* second) -> bool
+                        {
+                            return first->GetExactDist2d(this->me) < second->GetExactDist2d(this->me);
+                        });
+
+                        if (!playerList.empty() && playerList.front())
+                        {
+                            Player *pFirst = playerList.front();
+                            me->AddThreat(pFirst, 100000.0f);
+                            ScriptedAI::AttackStart(pFirst);
+                        }
+
+                        break;
+                    }
+
+                    default:
+                        break;
+                }
+            }
+        }
+
+        void EnterCombat(Unit *pVictim)
+        {
+            events.ScheduleEvent(EVENT_BESTIAL_CRY, 10 * IN_MILLISECONDS);
+        }
+
+        void UpdateAI(uint32 uiDiff)
+        {
+            if (uiPhase == BOSS_PHASE_SUMMONS)
+                return;
+
+            if (!UpdateVictim())
+                return;
+
+            events.Update(uiDiff);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            while (uint32 uiEventId = events.ExecuteEvent())
+            {
+                switch (uiEventId)
+                {
+                case EVENT_BESTIAL_CRY:
+                    DoCastAOE(SPELL_BESTIAL_CRY);
+                    events.ScheduleEvent(EVENT_BESTIAL_CRY, urand(10, 20) * IN_MILLISECONDS);
+                    break;
+
+                default:
+                    break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+
+        void KilledUnit(Unit *pKilled)
+        {
+            Talk(TALK_ON_JALAK_KILLED_UNIT);
+        }
+
+        void JustDied(Unit *pKiller)
+        {
+            if (GetHorridon(me) && GetHorridon(me)->isDead())
+            {
+                pInstance->SetBossState(DATA_HORRIDON, DONE);
+                if (Creature *pController = GetHorridonHelper(me))
+                    pController->AI()->DoAction(ACTION_FIGHT_END);
+            }
+        }
+
+    private:
+        EventMap        events;
+        InstanceScript  *pInstance;
+        uint32          uiPhase;
+    };
+
+    CreatureAI *GetAI(Creature *pCreature) const
+    {
+        return new mob_war_god_jalak_AI(pCreature);
+    }
+};
+
+
+// Trashs AI (does not include summons of spells)
+class mob_horridon_trashs : public CreatureScript
+{
+public:
+    mob_horridon_trashs() : CreatureScript("mob_horridon_trashs") { }
+
+    class mob_horridon_trashs_AI : public ScriptedAI
+    {
+    public:
+        mob_horridon_trashs_AI(Creature *pCreature) :
+            ScriptedAI(pCreature), pInstance(pCreature->GetInstanceScript()),
+            pRendingChargeTarget(NULL), uiChainLightningCount(0)
+        {
+            events.Reset();
+        }
+
+        void Reset()
+        {
+            events.Reset();
+            pRendingChargeTarget = NULL;
+        }
+
+        void IsSummonedBy(Unit *pSummoner)
+        {
+            std::list<Player*> playerList;
+            me->GetPlayerListInGrid(playerList, 500.0f);
+            playerList.sort(Trinity::DistanceCompareOrderPred(me, true));
+
+            if (!playerList.empty() && playerList.front())
+            {
+                Player *pPlayer = playerList.front();
+                me->SetInCombatWith(pPlayer);
+                ScriptedAI::AttackStart(pPlayer);
+            }
+            else
+                me->DisappearAndDie();
+
+            // Schedule events
+            switch (me->GetEntry())
+            {
+                case MOB_SUL_LITHUZ_STONEGAZER:
+                    events.ScheduleEvent(EVENT_STONE_GAZE, 5 * IN_MILLISECONDS);
+                    break;
+
+                case MOB_GURUBASHI_BLOODLORD:
+                    events.ScheduleEvent(EVENT_RENDING_CHARGE, 5 * IN_MILLISECONDS);
+                    break;
+
+                case MOB_RISEN_DRAKKARI_CHAMPION:
+                case MOB_RISEN_DRAKKARI_WARRIOR:
+                    DoCast(me, SPELL_UNCONTROLLED_ABOMINATION);
+                    events.ScheduleEvent(EVENT_SWITCH_TARGET, 10 * IN_MILLISECONDS);
+                    break;
+
+                case MOB_AMANI_SHI_FLAME_CASTER:
+                    events.ScheduleEvent(EVENT_FIREBALL, 5 * IN_MILLISECONDS);
+                    break;
+
+                case MOB_AMANI_SHI_BEAST_SHAMAN:
+                    events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, 5 * IN_MILLISECONDS);
+                    events.ScheduleEvent(EVENT_HEX_OF_CONFUSION, 10 * IN_MILLISECONDS);
+                    events.ScheduleEvent(EVENT_SUMMON_LIGHTNING_NOVA_TOTEM, 15 * IN_MILLISECONDS);
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        void MovementInform(uint32 uiMotionType, uint32 uiMovementId)
+        {
+            if (uiMotionType == EFFECT_MOTION_TYPE)
+            {
+                switch (uiMovementId)
+                {
+                    case MOTION_MAJOR_JUMP:
+                        me->SetInCombatWithZone(); // Call it now to not bug the npcs around
+
+                    switch (me->GetEntry())
+                    {
+                        case MOB_FARRAKI_WASTEWALKER:
+                            events.ScheduleEvent(EVENT_BLAZING_LIGHT, 10 * IN_MILLISECONDS);
+                            events.ScheduleEvent(EVENT_SUMMON_SAND_TRAP, 15 * IN_MILLISECONDS);
+                            break;
+
+                        case MOB_GURUBASHI_VENOM_PRIEST:
+                            events.ScheduleEvent(EVENT_GURUBASHI_VENOM_BOLT_VOLLEY, 10 * IN_MILLISECONDS);
+                            events.ScheduleEvent(EVENT_SUMMON_VENOMOUS_EFFUSION, 15 * IN_MILLISECONDS);
+                            break;
+
+                        case MOB_DRAKKARI_FROZEN_WARLORD:
+                            events.ScheduleEvent(EVENT_MORTAL_STRIKE, 10 * IN_MILLISECONDS);
+                            events.ScheduleEvent(EVENT_SUMMON_FROZEN_ORB, 15 * IN_MILLISECONDS);
+                            break;
+
+                        case MOB_AMANI_WARBEAR:
+                            events.ScheduleEvent(EVENT_SWIPE, 10 * IN_MILLISECONDS);
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    // Select target and move towards it
+                    if (Creature *pHorridon = GetHorridon(me))
+                    {
+                        if (CreatureAI *pHorridonAI = pHorridon->AI())
+                        {
+                            if (Unit *pTarget = pHorridonAI->SelectTarget(SELECT_TARGET_RANDOM))
+                            {
+                                me->SetInCombatWith(pTarget);
+                                ScriptedAI::AttackStart(pTarget);
+                            }
+                        }
+                    }
+                    break;
+
+                case EVENT_CHARGE:
+                    DoCast(pRendingChargeTarget, SPELL_RENDING_CHARGE_DAMAGES);
+                    break;
+
+                default:
+                    break;
+                }
+            }
+        }
+
+        void UpdateAI(uint32 uiDiff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(uiDiff);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            while (uint32 uiEventId = events.ExecuteEvent())
+            {
+                switch (uiEventId)
+                {
+                    // Farraki
+                    case EVENT_STONE_GAZE:
+                        if (Unit *pVictim = me->GetVictim())
+                            DoCast(pVictim, SPELL_STONE_GAZE);
+
+                        if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -SPELL_STONE_GAZE))
+                            ScriptedAI::AttackStart(pTarget);
+
+                        events.ScheduleEvent(EVENT_STONE_GAZE, 10 * IN_MILLISECONDS);
+                        break;
+
+                    case EVENT_BLAZING_LIGHT:
+                        if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -SPELL_BLAZING_SUNLIGHT))
+                            DoCast(pTarget, SPELL_BLAZING_SUNLIGHT);
+                        events.ScheduleEvent(EVENT_BLAZING_LIGHT, 10 * IN_MILLISECONDS);
+                        break;
+
+                    case EVENT_SUMMON_SAND_TRAP:
+                        if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM))
+                            DoCast(pTarget, SPELL_SUMMON_SAND_TRAP);
+                        events.ScheduleEvent(EVENT_SUMMON_SAND_TRAP, 30 * IN_MILLISECONDS);
+                        break;
+
+                        // Gurubashi
+                    case EVENT_RENDING_CHARGE:
+                        if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1))
+                        {
+                            pRendingChargeTarget = pTarget;
+                            DoCast(pTarget, SPELL_RENDING_CHARGE);
+                        }
+                        events.ScheduleEvent(EVENT_RENDING_CHARGE, 10 * IN_MILLISECONDS);
+                        break;
+
+                    case EVENT_GURUBASHI_VENOM_BOLT_VOLLEY:
+                        DoCastAOE(SPELL_VENOM_BOLT_VOLLEY);
+                        events.ScheduleEvent(EVENT_GURUBASHI_VENOM_BOLT_VOLLEY, 10 * IN_MILLISECONDS);
+                        break;
+
+                    case EVENT_SUMMON_VENOMOUS_EFFUSION:
+                        DoCast(me, SPELL_SUMMON_VENOMOUS_EFFUSION);
+                        events.ScheduleEvent(EVENT_SUMMON_VENOMOUS_EFFUSION, 30 * IN_MILLISECONDS);
+                        break;
+
+                        // Drakkari
+                    case EVENT_SWITCH_TARGET:
+                        if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1))
+                        {
+                            DoResetThreat();
+                            me->AddThreat(pTarget, 100000.0f);
+                            ScriptedAI::AttackStart(pTarget);
+                        }
+                        events.ScheduleEvent(EVENT_SWITCH_TARGET, 7 * IN_MILLISECONDS);
+                        break;
+
+                    case EVENT_MORTAL_STRIKE:
+                        if (Unit *pVictim = me->GetVictim())
+                            DoCast(pVictim, SPELL_MORTAL_STRIKE);
+                        events.ScheduleEvent(EVENT_MORTAL_STRIKE, 10 * IN_MILLISECONDS);
+                        break;
+
+                    case EVENT_SUMMON_FROZEN_ORB:
+                        DoCast(me, SPELL_SUMMON_FROZEN_ORB);
+                        events.ScheduleEvent(EVENT_SUMMON_FROZEN_ORB, 30 * IN_MILLISECONDS);
+                        break;
+
+                        // Amani
+                    case EVENT_FIREBALL:
+                        if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM))
+                            DoCast(pTarget, SPELL_FIREBALL);
+                        events.ScheduleEvent(EVENT_FIREBALL, 10 * IN_MILLISECONDS);
+                        break;
+
+                    case EVENT_SWIPE:
+                        DoCastAOE(SPELL_SWIPE);
+                        events.ScheduleEvent(EVENT_SWIPE, 10 * IN_MILLISECONDS);
+                        break;
+
+                    case EVENT_CHAIN_LIGHTNING:
+                        if (Unit *pPrimaryTarget = SelectTarget(SELECT_TARGET_RANDOM))
+                            DoCast(pPrimaryTarget, SPELL_CHAIN_LIGHTNING);
+                        events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, 10 * IN_MILLISECONDS);
+                        break;
+
+                    case EVENT_HEX_OF_CONFUSION:
+                        if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -SPELL_HEX_OF_CONFUSION))
+                            DoCast(pTarget, SPELL_HEX_OF_CONFUSION);
+                        events.ScheduleEvent(EVENT_HEX_OF_CONFUSION, 10 * IN_MILLISECONDS);
+                        break;
+
+                    case EVENT_SUMMON_LIGHTNING_NOVA_TOTEM:
+                        DoCast(me, SPELL_SUMMON_LIGHTNING_NOVA_TOTEM);
+                        events.ScheduleEvent(EVENT_SUMMON_LIGHTNING_NOVA_TOTEM, 30 * IN_MILLISECONDS);
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+
+        void JustDied(Unit *pKiller)
+        {
+            if (me->GetEntry() == MOB_AMANI_WARBEAR)
+            {
+                if (Vehicle *pKit = me->GetVehicleKit())
+                    pKit->RemoveAllPassengers(); // Check this >_<
+                else
+                    me->SummonCreature(MOB_AMANI_SHI_BEAST_SHAMAN, *me);
+            }
+        }
+
+        uint32 GetData(uint32 uiIndex) const
+        {
+            if (uiIndex == DATA_AMANI_BEAST_SHAMAN_LIGHTNING_COUNT)
+                return uiChainLightningCount;
+
+            return 0;
+        }
+
+        void SetData(uint32 uiIndex, uint32 uiValue)
+        {
+            if (uiIndex == DATA_AMANI_BEAST_SHAMAN_LIGHTNING_COUNT)
+            {
+                if (++uiChainLightningCount == 3)
+                    uiChainLightningCount = 0;
+            }
+        }
+
+    private:
+        EventMap        events;
+        InstanceScript  *pInstance;
+        Unit            *pRendingChargeTarget;
+        uint32          uiChainLightningCount;
+    };
+
+    CreatureAI *GetAI(Creature *pCreature) const
+    {
+        return new mob_horridon_trashs_AI(pCreature);
+    }
+};
+
+
+// Summons AI
+class mob_horridon_summons : public CreatureScript
+{
+public:
+    mob_horridon_summons() : CreatureScript("mob_horridon_summons") { }
+
+    class mob_horridon_summons_AI : public ScriptedAI
+    {
+    public:
+        mob_horridon_summons_AI(Creature *pCreature) :
+            ScriptedAI(pCreature), pInstance(pCreature->GetInstanceScript())/*, fSandTrapRadius(0.0f) */
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+            // me->SetReactState(REACT_PASSIVE);
+            events.Reset();
+        }
+
+        void IsSummonedBy(Unit *pSummoner)
+        {
+            me->SetInCombatWithZone();
+            switch (me->GetEntry())
+            {
+                case MOB_SAND_TRAP:
+                    DoCast(me, SPELL_SAND_TRAP_PERIODIC);
+                    break;
+
+                case MOB_VENOMOUS_EFFUSION:
+                    DoCast(me, SPELL_SUMMON_LIVING_POISON);
+                    events.ScheduleEvent(EVENT_EFFUSION_VENOM_BOLT_VOLLEY, 10 * IN_MILLISECONDS);
+                    break;
+
+                case MOB_FROZEN_ORB:
+                    DoCast(me, SPELL_FROZEN_BOLT_PERIODIC);
+                    break;
+
+                case MOB_LIGHTNING_NOVA_TOTEM:
+                    DoCast(me, SPELL_LIGHTNING_NOVA_PERIODIC);
+                    break;
+
+                case MOB_LIVING_POISON:
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                    DoCast(me, SPELL_LIVING_POISON_PERIODIC);
+                    me->GetMotionMaster()->MovementExpired();
+                    me->GetMotionMaster()->MoveRandom(5.0f);
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 uiDiff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(uiDiff);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            while (uint32 uiEventId = events.ExecuteEvent())
+            {
+                switch (uiEventId)
+                {
+                    case EVENT_EFFUSION_VENOM_BOLT_VOLLEY:
+                        DoCastAOE(SPELL_VENOM_BOLT_VOLLEY);
+                        events.ScheduleEvent(EVENT_EFFUSION_VENOM_BOLT_VOLLEY, 5 * IN_MILLISECONDS);
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+        }
+
+    private:
+        EventMap        events;
+        InstanceScript  *pInstance;
+    };
+
+    CreatureAI *GetAI(Creature *pCreature) const
+    {
+        return new mob_horridon_summons_AI(pCreature);
+    }
+};
+typedef mob_horridon_summons::mob_horridon_summons_AI HorridonSummonsAI;
+
+
+// Zandalari Dinomancer AI
+class mob_zandalari_dinomancer : public CreatureScript
+{
+public:
+    mob_zandalari_dinomancer() : CreatureScript("mob_zandalari_dinomancer") { }
+
+    class mob_zandalari_dinomancer_AI : public ScriptedAI
+    {
+    public:
+        mob_zandalari_dinomancer_AI(Creature *pCreature) :
+            ScriptedAI(pCreature), pInstance(pCreature->GetInstanceScript()), bIsUnderFiftyPercent(false)
+        {
+            events.Reset();
+        }
+
+        void MovementInform(uint32 uiMotionType, uint32 uiMovementId)
+        {
+            if (uiMotionType == EFFECT_MOTION_TYPE && uiMovementId == MOTION_DINOMANCER_JUMP)
+            {
+                me->SetInCombatWithZone();
+                if (Creature *pHorridon = GetHorridon(me))
+                {
+                    // me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                    DoCast(pHorridon, SPELL_DINO_MENDING);
+                    events.ScheduleEvent(EVENT_DINO_MENDING, 30 * IN_MILLISECONDS);
+                }
+            }
+        }
+
+        void UpdateAI(uint32 uiDiff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(uiDiff);
+
+
+            if (HealthBelowPct(50) && !bIsUnderFiftyPercent)
+            {
+                bIsUnderFiftyPercent = true;
+
+                me->InterruptNonMeleeSpells(true);
+                me->InterruptSpell(CURRENT_CHANNELED_SPELL);
+                // me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+
+                if (Creature *pHelper = GetHorridonHelper(me))
+                {
+                    if (HorridonHelperAI* pHelperAI = dynamic_cast<HorridonHelperAI*>( pHelper->AI() ))
+                    {
+                        if (uint32 uiSummonSpellId = GetSummoningOrbSpellByPhase(pHelperAI->GetTrashPhase()))
+                            DoCast(me, uiSummonSpellId);
+                    }
+                }
+
+                events.CancelEvent(EVENT_DINO_MENDING);
+                DoCast(me, SPELL_DINO_FORM);
+            }
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            while (uint32 uiEventId = events.ExecuteEvent())
+            {
+                switch (uiEventId)
+                {
+                    case EVENT_DINO_MENDING:
+                        if (Creature *pHorridon = GetHorridon(me))
+                            DoCast(pHorridon, SPELL_DINO_MENDING);
+                        events.ScheduleEvent(EVENT_DINO_MENDING, 30 * IN_MILLISECONDS);
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+
+    private:
+        EventMap        events;
+        InstanceScript  *pInstance;
+        bool            bIsUnderFiftyPercent;
+    };
+
+    CreatureAI *GetAI(Creature *pCreature) const
+    {
+        return new mob_zandalari_dinomancer_AI(pCreature);
+    }
+};
+
+
+// Direhorn Spirit AI
+class mob_direhorn_spirit : public CreatureScript
+{
+public:
+    mob_direhorn_spirit() : CreatureScript("mob_direhorn_spirit") { }
+
+    class mob_direhorn_spirit_AI : public ScriptedAI
+    {
+    public:
+        mob_direhorn_spirit_AI(Creature *pCreature) :
+            ScriptedAI(pCreature), pTarget(NULL)
+        {
+
+        }
+
+        void IsSummonedBy(Unit *pSummoner)
+        {
+            if (pSummoner)
+            {
+                if (Player *pAsPlayer = pSummoner->ToPlayer())
+                {
+                    me->SetPhaseMask(2, true);
+                    pAsPlayer->SetPhaseMask(3, true);
+                    pTarget = pAsPlayer;
+
+                    DoCast(pTarget, SPELL_DIRE_FIXATION);
+                    DoCast(me, SPELL_WEAK_LINK);
+                }
+            }
+
+            if (!pTarget)
+                me->DisappearAndDie();
+        }
+
+        void JustDied(Unit *pKiller)
+        {
+            ASSERT(pKiller == pTarget);
+            pTarget->SetPhaseMask(1, true);
+        }
+
+    private:
+        Player *pTarget;
+    };
+
+    CreatureAI *GetAI(Creature *pCreature) const
+    {
+        return new mob_direhorn_spirit_AI(pCreature);
+    }
+};
+
+//////////////////////////////////////////////////////////////////////////
+// GameObject Scripts
+// Orb of Control AI
+class gob_horridon_orb_of_control : public GameObjectScript
+{
+public:
+    gob_horridon_orb_of_control() : GameObjectScript("gob_horridon_orb_of_control") { }
+
+    class gob_horridon_orb_of_control_AI : public GameObjectAI
+    {
+    public:
+        gob_horridon_orb_of_control_AI(GameObject *pGo) : GameObjectAI(pGo) { }
+
+        bool GossipHello(Player *pSource)
+        {
+            if (Creature *pHorridon = GetHorridon(go))
+            {
+                if (GameObject *pChargeDoor = GetDoorByOrb(go))
+                {
+                    // Visual spell
+                    if (uint32 uiSpellId = GetControlSpellByOrb(go))
+                    {
+                        if (pSource)
+                            pSource->CastSpell(pHorridon, uiSpellId, false);
+
+                        go->RemoveFromWorld();
+                    }
+                }
+            }
+
+            return true;
+        }
+    };
+
+    GameObjectAI *GetAI(GameObject *pGo) const
+    {
+        return new gob_horridon_orb_of_control_AI(pGo);
+    }
+};
+
+
+
+//////////////////////////////////////////////////////////////////////////
+// Spell Helpers
+// Helper for Double Swipe
+class DoubleSwipeTargetSelector
+{
+public:
+    DoubleSwipeTargetSelector(Unit *caster, bool front) :
+        pCaster(caster), bFront(front) { }
+
+    bool operator()(WorldObject const* object) const
+    {
+        if (object->GetTypeId() != TYPEID_PLAYER)
+            return false;
+
+        if (bFront)
+        {
+            return pCaster->HasInArc(45.0f, object);
+        }
+        else
+        {
+            bool bToReturn = false;
+
+            pCaster->SetOrientation(-pCaster->GetOrientation());
+            if (pCaster->HasInArc(45.0f, object))
+                bToReturn = true;
+            pCaster->SetOrientation(-pCaster->GetOrientation());
+
+            return bToReturn;
+        }
+    }
+
+private:
+    Unit *pCaster;
+    bool bFront;
+};
+
+
+// Target selection for Double Swipe
+class spell_horridon_double_swipe : public SpellScriptLoader
+{
+public:
+    spell_horridon_double_swipe() : SpellScriptLoader("spell_horridon_double_swipe") { }
+
+    class spell_horridon_double_swipe_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_horridon_double_swipe_SpellScript)
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (!GetCaster())
+                return;
+
+            targets.clear();
+
+            DoubleSwipeTargetSelector predi(GetCaster(), GetSpellInfo()->Id == SPELL_DOUBLE_SWIPE_FRONT);
+            Trinity::WorldObjectListSearcher<DoubleSwipeTargetSelector> u_search(GetCaster(), targets, predi);
+            Trinity::VisitNearbyObject(GetCaster(), 35.0f, u_search);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_horridon_double_swipe_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_CONE_ENEMY_104);
+        }
+    };
+
+    SpellScript *GetSpellScript() const
+    {
+        return new spell_horridon_double_swipe_SpellScript();
+    }
+};
+
+
+// Chain Lightning
+class spell_horridon_chain_lightning : public SpellScriptLoader
+{
+public:
+    spell_horridon_chain_lightning() : SpellScriptLoader("spell_horridon_chain_lightning") { }
+
+    class spell_horridon_chain_lightning_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_horridon_chain_lightning_SpellScript)
+
+            void HandleEffectHitTarget(SpellEffIndex effectIndex)
+        {
+            if (Unit *pHitUnit = GetHitUnit())
+            {
+                Unit *pCaster = GetOriginalCaster();
+                if (!pCaster)
+                    pCaster = GetCaster();
+
+                if (!pCaster)
+                    return;
+
+                if (UnitAI *pCasterAI = pCaster->GetAI())
+                {
+                    uint32 uiCount = pCasterAI->GetData(DATA_AMANI_BEAST_SHAMAN_LIGHTNING_COUNT);
+
+                    if (uiCount == 0 && pCaster == GetOriginalCaster())
+                        return;
+
+                    Unit *pNewTarget = NULL;
+                    uint32 uiLoopCount = 0; // Prevent infinite loop in case boss is being soloed
+
+                    do
+                    {
+                        pNewTarget = pCasterAI->SelectTarget(SELECT_TARGET_RANDOM);
+                        ++uiLoopCount;
+                    } while (pNewTarget == pHitUnit && uiLoopCount <= 10);
+
+                    if (!pNewTarget || pNewTarget == pHitUnit)
+                        return;
+
+                    pHitUnit->CastSpell(pNewTarget, SPELL_CHAIN_LIGHTNING, false, NULL, NULL, pCaster->GetGUID());
+
+                    pCasterAI->SetData(DATA_AMANI_BEAST_SHAMAN_LIGHTNING_COUNT, 0);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_horridon_chain_lightning_SpellScript::HandleEffectHitTarget, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript *GetSpellScript() const
+    {
+        return new spell_horridon_chain_lightning_SpellScript();
+    }
+};
+
+
+// Control Horridon Spells
+class spell_control_horridon : public SpellScriptLoader
+{
+public:
+    spell_control_horridon() : SpellScriptLoader("spell_control_horridon") { }
+
+    class spell_control_horridon_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_control_horridon_AuraScript)
+
+        void HandleRemove(AuraEffect const* pAuraEffect, AuraEffectHandleModes eMode)
+        {
+            if (AuraApplication const* pAuraApp = GetTargetApplication())
+            {
+                if (pAuraApp->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
+                {
+                    if (WorldObject *pOwner = GetOwner())
+                    {
+                        if (Creature *pHorridon = pOwner->ToCreature())
+                        {
+                            if (HorridonAI *pHorridonAI = dynamic_cast<HorridonAI*>( pHorridon->AI() ))
+                            {
+                                pHorridonAI->ChargeAtDoor(GetDoorBySpell(GetSpellInfo()->Id, pHorridon));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        void HandleApply(AuraEffect const* pAuraEffect, AuraEffectHandleModes eMode)
+        {
+            if (WorldObject *pOwner = GetOwner())
+            {
+                if (Creature *pHelper = GetHorridonHelper(pOwner))
+                    pHelper->AI()->DoAction(ACTION_PREPARE_TRANSITION);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectApply       += AuraEffectApplyFn(spell_control_horridon_AuraScript::HandleApply, EFFECT_0, SPELL_AURA_MOD_PACIFY_SILENCE, AURA_EFFECT_HANDLE_REAL);
+            OnEffectRemove      += AuraEffectRemoveFn(spell_control_horridon_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_MOD_PACIFY_SILENCE, AURA_EFFECT_HANDLE_REAL);
+        }
+
+        uint32 uiCount;
+    };
+
+    AuraScript *GetAuraScript() const
+    {
+       return new spell_control_horridon_AuraScript();
+    }
+};
+
+
+// Living Sand (radius calc)
+class spell_horridon_sand_trap : public SpellScriptLoader
+{
+public:
+    spell_horridon_sand_trap() : SpellScriptLoader("spell_horridon_sand_trap") {  }
+
+    class spell_horridon_sand_trap_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_horridon_sand_trap_SpellScript)
+
+            void HandleSelectTargets(std::list<WorldObject*>& targets)
+        {
+            if (!GetCaster())
+                return;
+
+            Creature *pCaster = GetCaster()->ToCreature();
+            float fRadius = 1.0f; // Basis
+
+            // Recalc radius according to stack amount
+            if (Aura *pGrow = pCaster->GetAura(GetSpellInfo()->Id))
+            {
+                uint8 uiCount = pGrow->GetStackAmount();
+                for (uint8 i = 0; i < uiCount; ++i)
+                    fRadius *= 1.1f;
+            }
+
+            // Remove target that are not in the radius
+            targets.remove_if([pCaster, fRadius] (WorldObject const* pTarget) -> bool
+            {
+                return pCaster->GetExactDist2d(pTarget) >= fRadius;
+            });
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_horridon_sand_trap_SpellScript::HandleSelectTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript *GetSpellScript() const
+    {
+        return new spell_horridon_sand_trap_SpellScript();
+    }
+};
 
 void AddSC_boss_horridon()
 {
+    // boss / helpers
     new boss_horridon();
     new npc_horridon_event_helper();
+    new npc_horridon_rp_event_helper();
+
+    // trash/mobs
+    new mob_horridon_trashs();
+    new mob_horridon_summons();
+    new mob_zandalari_dinomancer();
+    new mob_direhorn_spirit();
+    new mob_war_god_jalak();
+
+    // gameobject
+    new gob_horridon_orb_of_control();
+
+    // Spells
+    new spell_horridon_double_swipe();
+    new spell_horridon_chain_lightning();
+    new spell_control_horridon();
+    new spell_horridon_sand_trap();
 }

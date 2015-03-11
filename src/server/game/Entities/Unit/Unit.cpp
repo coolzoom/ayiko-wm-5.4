@@ -16340,6 +16340,7 @@ bool InitTriggerAuraData()
     isTriggerAura[SPELL_AURA_ENABLE_ALT_POWER] = true;
     isTriggerAura[SPELL_AURA_PERIODIC_DUMMY] = true;
     isTriggerAura[SPELL_AURA_PERIODIC_TRIGGER_SPELL] = true;
+    isTriggerAura[SPELL_AURA_HASTE_SPELLS] = true;
 
     isNonTriggerAura[SPELL_AURA_MOD_POWER_REGEN] = true;
     isNonTriggerAura[SPELL_AURA_REDUCE_PUSHBACK] = true;
@@ -16763,6 +16764,11 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
                     case SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK:
                         // Skip melee hits or instant cast spells
                         if (procSpell && procSpell->CalcCastTime() != 0)
+                            takeCharges = true;
+                        break;
+                    case SPELL_AURA_HASTE_SPELLS:
+                        // Skip melee hits or instant cast spells
+                        if (procSpell && procSpell->CalcCastTime() > 0)
                             takeCharges = true;
                         break;
                     case SPELL_AURA_REFLECT_SPELLS_SCHOOL:

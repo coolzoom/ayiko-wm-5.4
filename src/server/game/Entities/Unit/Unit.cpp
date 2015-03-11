@@ -6115,6 +6115,9 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                 // Living Seed
                 case 48504:
                 {
+                    if (IsFullHealth())
+                        return false;
+
                     triggered_spell_id = 48503;
                     basepoints0 = triggerAmount;
                     target = this;
@@ -7104,8 +7107,18 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
             // Living Seed
             if (dummySpell->SpellIconID == 2860)
             {
+                if (!victim)
+                    return false;
+
                 triggered_spell_id = 48504;
                 basepoints0 = CalculatePct(int32(damage), triggerAmount);
+                if (AuraEffect* aura = victim->GetAuraEffect(48504, EFFECT_0))
+                {
+                    int32 newAmount = std::min(int32(CountPctFromMaxHealth(50)), aura->GetAmount() + basepoints0);
+                    aura->SetAmount(newAmount);
+                    aura->GetBase()->RefreshDuration();
+                    return true;
+                }
                 break;
             }
             // King of the Jungle

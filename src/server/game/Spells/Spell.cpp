@@ -7402,6 +7402,16 @@ SpellCastResult Spell::CheckCasterAuras() const
         // immune movement impairment and loss of control
         if (m_spellInfo->IsRemoveLossControlEffects())
             mechanic_immune = IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK;
+
+        // Custom mechanic immunitys - TODO: Find a better way to handle this
+        // Tremor totem for example has USABLE_WHILE_FEARED - This should most likely include MECHANIC_FEAR, MECHANIC_SLEEP & MECHANIC_CHARM
+        switch (m_spellInfo->Id)
+        {
+            // Tremor Totem
+            case 8143:
+                mechanic_immune = (1 << MECHANIC_FEAR) | (1 << MECHANIC_SLEEP) | (1 << MECHANIC_CHARM);
+                break;
+        }
     }
 
     bool usableInStun = m_spellInfo->AttributesEx5 & SPELL_ATTR5_USABLE_WHILE_STUNNED;

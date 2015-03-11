@@ -60,7 +60,7 @@ Group::Group() :
     m_bgGroup(NULL), m_bfGroup(NULL), m_lootMethod(FREE_FOR_ALL),
     m_lootThreshold(ITEM_QUALITY_UNCOMMON), m_looterGuid(0),
     m_subGroupsCounts(NULL), m_guid(0), m_counter(0), m_maxEnchantingLevel(0),
-    m_readyCheckCount(0), m_readyCheck(false)
+    m_readyCheckCount(0), m_readyCheck(false), m_lfgDungeon(nullptr)
 {
     for (uint8 i = 0; i < TARGETICONCOUNT; ++i)
         m_targetIcons[i] = 0;
@@ -75,7 +75,7 @@ Group::Group(uint32 lowGuid) :
     m_bgGroup(NULL), m_bfGroup(NULL), m_lootMethod(FREE_FOR_ALL),
     m_lootThreshold(ITEM_QUALITY_UNCOMMON), m_looterGuid(0),
     m_subGroupsCounts(NULL), m_guid(0), m_counter(0), m_maxEnchantingLevel(0),
-    m_readyCheckCount(0), m_readyCheck(false)
+    m_readyCheckCount(0), m_readyCheck(false), m_lfgDungeon(nullptr)
 {
     for (uint8 i = 0; i < TARGETICONCOUNT; ++i)
         m_targetIcons[i] = 0;
@@ -590,8 +590,13 @@ bool Group::RemoveMember(uint64 guid, const RemoveMethod &method /*= GROUP_REMOV
         Player* player = ObjectAccessor::GetObjectInOrOutOfWorld(guid, (Player*)NULL);
         if (player)
         {
+            // LFR group
+            if (isRaidGroup() && IsLFGRestricted())
+                if (auto lfgDungeon = GetLFGDungeon())
+                    player->UnbindInstance(lfgDungeon->map, RAID_TOOL_DIFFICULTY);
+
             // Battleground group handling
-            if (isBGGroup() || isBFGroup())
+            else if (isBGGroup() || isBFGroup())
                 player->RemoveFromBattlegroundOrBattlefieldRaid();
             else
                 // Regular group
@@ -677,7 +682,8 @@ bool Group::RemoveMember(uint64 guid, const RemoveMethod &method /*= GROUP_REMOV
         if (isLFGGroup() && GetMembersCount() == 1)
         {
             Player* Leader = ObjectAccessor::FindPlayer(GetLeaderGUID());
-            LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(sLFGMgr->GetDungeon(GetGUID()));
+
+            auto dungeon = GetLFGDungeon();
             if ((Leader && dungeon && Leader->IsAlive() && Leader->GetMapId() != uint32(dungeon->map)) || !dungeon)
             {
                 Disband();
@@ -900,12 +906,24 @@ void Group::Disband(bool hideDestroy /* = false */)
 {
     sScriptMgr->OnGroupDisband(this);
 
-    Player* player;
+    // get LFG dungeon information
+    LFGDungeonEntry const* dungeon;
+    if (isLFGGroup())
+    {
+        dungeon = GetLFGDungeon();
+        if (!dungeon)
+            dungeon = sLFGDungeonStore.LookupEntry(sLFGMgr->GetDungeon(GetGUID(), true));
+    }
+
     for (member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
     {
-        player = ObjectAccessor::FindPlayer(citr->guid);
+        Player* player = ObjectAccessor::GetObjectInOrOutOfWorld(citr->guid, (Player*)nullptr);
         if (!player)
             continue;
+
+        // LFR group
+        if (dungeon && isRaidGroup() && IsLFGRestricted())
+            player->UnbindInstance(dungeon->map, RAID_TOOL_DIFFICULTY);
 
         //we cannot call _removeMember because it would invalidate member iterator
         //if we are removing player from battleground raid
@@ -2382,7 +2400,7 @@ bool Group::InCombatToInstance(uint32 instanceId)
 
 void Group::ResetInstances(uint8 method, bool isRaid, Player* SendMsgTo)
 {
-    if (isBGGroup() || isBFGroup())
+    if (isBGGroup() || isBFGroup() || (isRaidGroup() && IsLFGRestricted()))
         return;
 
     // method can be INSTANCE_RESET_ALL, INSTANCE_RESET_CHANGE_DIFFICULTY, INSTANCE_RESET_GROUP_DISBAND

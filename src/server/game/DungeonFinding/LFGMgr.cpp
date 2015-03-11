@@ -543,11 +543,8 @@ void LFGMgr::InitializeLockedDungeons(Player* player)
             lockData.lockstatus = LFG_LOCKSTATUS_INSUFFICIENT_EXPANSION;
         else if (DisableMgr::IsDisabledFor(DISABLE_TYPE_MAP, dungeon->map, player, Difficulty(dungeon->difficulty)))
             lockData.lockstatus = LFG_LOCKSTATUS_TEMPORARILY_DISABLED;
-        else if (dungeon->difficulty > REGULAR_DIFFICULTY && player->GetBoundInstance(dungeon->map, Difficulty(dungeon->difficulty)))
-        {
-            //if (!player->GetGroup() || !player->GetGroup()->isLFGGroup() || GetDungeon(player->GetGroup()->GetGUID(), true) != dungeon->ID || GetState(player->GetGroup()->GetGUID()) != LFG_STATE_DUNGEON)
-            lockData.lockstatus = LFG_LOCKSTATUS_RAID_LOCKED;
-        }
+        else if (dungeon->difficulty > REGULAR_DIFFICULTY && dungeon->difficulty != RAID_TOOL_DIFFICULTY && player->GetBoundInstance(dungeon->map, Difficulty(dungeon->difficulty)))
+                lockData.lockstatus = LFG_LOCKSTATUS_RAID_LOCKED;
         else if (dungeon->minlevel > level || LevelMin)
             lockData.lockstatus = LFG_LOCKSTATUS_TOO_LOW_LEVEL;
         else if (dungeon->maxlevel < level || LevelMax)
@@ -1722,8 +1719,9 @@ void LFGMgr::UpdateProposal(uint32 proposalId, uint64 guid, bool accept)
                     grp->ConvertToLFG();
 
                 grp->Create(player);
-                uint64 gguid = grp->GetGUID();
-                SetState(gguid, LFG_STATE_PROPOSAL);
+                grp->SetLFGDungeon(dungeon);
+
+                SetState(grp->GetGUID(), LFG_STATE_PROPOSAL);
             }
             else if (group != grp)
                 grp->AddMember(player);

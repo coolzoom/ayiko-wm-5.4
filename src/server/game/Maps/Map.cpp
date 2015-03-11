@@ -2613,7 +2613,11 @@ bool InstanceMap::Reset(uint8 method)
 
 void InstanceMap::PermBindAllPlayers(Player* source)
 {
-    if (!IsDungeon())
+    if (Group* group = source->GetGroup())
+        if (uint32 entry = source->GetLastKilledCreature())
+            group->SetLastBind(entry);
+
+    if (!IsDungeon() || IsLFR())
         return;
 
     InstanceSave* save = sInstanceSaveMgr->GetInstanceSave(GetInstanceId());

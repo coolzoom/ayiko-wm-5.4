@@ -2101,8 +2101,8 @@ class Player final : public Unit, public GridObject<Player>
         void RepopAtGraveyard();
         void SendCemeteryList(bool onMap);
 
-        uint32 GetLastKilledCreature() { return m_lastKileldCreatureId; }
-        void SetLastKilledCreature(uint32 entry) { m_lastKileldCreatureId = entry;}
+        uint32 GetLastKilledCreature() { return m_lastKilledCreatureId; }
+        void SetLastKilledCreature(Creature* creature);
 
         uint32 GetCurrentMovieId() const { return m_currentMovie; }
         void SetCurrentMovieId(uint32 movieID) { m_currentMovie = movieID; }
@@ -3232,7 +3232,7 @@ class Player final : public Unit, public GridObject<Player>
 
         uint8 m_bgRoles;
 
-        uint32 m_lastKileldCreatureId;
+        uint32 m_lastKilledCreatureId;
 
         // Arena
         uint32 m_ArenaPersonalRating[MAX_ARENA_SLOT];

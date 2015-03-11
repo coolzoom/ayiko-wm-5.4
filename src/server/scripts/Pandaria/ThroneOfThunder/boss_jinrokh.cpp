@@ -42,7 +42,7 @@ enum eSpells : uint32
     SPELL_LIGHTNING_STORM_VISUAL            = 138568,
 
         // Thundering Throw
-    SPELL_THUNDERING_THROW                  = 140597, // Need SpellScript to handle ScriptEffect
+    SPELL_THUNDERING_THROW                  = 137180, // Need SpellScript to handle ScriptEffect
     SPELL_THUNDERING_THROW_JUMP             = 137173, // Casted by player on a statue
     SPELL_THUNDERING_THROW_SILENCE          = 137161, // Silence, visuals
     SPELL_THUNDERING_THROW_FLY_VISUAL       = 140594, // Visual in flight
@@ -56,7 +56,6 @@ enum eCreatures : uint32
 {
     NPC_LIGHTNING_FISSURE               = 69609,
     NPC_CONDUCTIVE_WATER                = 69469,
-    NPC_JINROKH_STATUE                  = 69467
 };
 
 enum iActions : int32
@@ -99,7 +98,18 @@ class validStatuePredicate
 public:
     bool operator() (WorldObject* target) const
     {
-        return target && target->ToCreature() && ((target->ToCreature()->AI() && target->ToCreature()->AI()->GetData(DATA_STATUE_DESTROYED) == 1) || target->GetEntry() != NPC_JINROKH_STATUE);
+        if (target->ToCreature() && target->ToCreature()->AI())
+            TC_LOG_ERROR("scripts", "notinlospredicate returned %u", target->ToCreature()->AI()->GetData(DATA_STATUE_DESTROYED));
+        return target && target->ToPlayer() || ((target->ToCreature()->AI() && target->ToCreature()->AI()->GetData(DATA_STATUE_DESTROYED) == 1) || target->GetEntry() != NPC_JINROKH_STATUE);
+    }
+};
+
+class electrifiedPredicate
+{
+public:
+    bool operator()(Creature* target) const
+    {
+        return target && target->HasAura(SPELL_ELECTRIFIED_WATER_VISUAL);
     }
 };
 
@@ -110,6 +120,8 @@ static const Position aWaterPos[4] =
     { 5918.487f, 6236.848f, 124.03f, 2.36f },
     { 5865.241f, 6236.743f, 128.03f, 0.77f }
 };
+
+static const Position aCenterPos = { 5892.16f, 6263.58f, 124.1f, 0.0f };
 
 class boss_jinrokh : public CreatureScript
 {
@@ -124,6 +136,7 @@ public:
         EVENT_THUNDERING_THROW,
         EVENT_LIGHTNING_STORM,
         EVENT_IONIZATION,
+        EVENT_BERSERK
     };
 
     struct boss_jinrokhAI : public BossAI
@@ -148,6 +161,7 @@ public:
             events.ScheduleEvent(EVENT_FOCUSED_LIGHTNING, 10000);
             events.ScheduleEvent(EVENT_THUNDERING_THROW, 30000);
             events.ScheduleEvent(EVENT_LIGHTNING_STORM, 90000); // 1,5 minutes
+            events.ScheduleEvent(EVENT_BERSERK, 6 * MINUTE*IN_MILLISECONDS + 5000);
         }
 
         void DoCastBossSpell(Unit* target, uint32 spellId, bool trig, uint32 push = 0)
@@ -170,6 +184,28 @@ public:
             }
         }
 
+        void DoHandleLightningStorm()
+        {
+            std::list<Creature*>pWaters;
+            GetCreatureListWithEntryInGrid(pWaters, me, NPC_CONDUCTIVE_WATER, 200.f);
+
+            pWaters.remove_if(electrifiedPredicate());
+
+            for (Creature* pWater : pWaters)
+            {
+                if (pWater->AI())
+                    pWater->AI()->DoAction(ACTION_ELECTRIFY);
+            }
+        }
+
+        void MovementInform(uint32 uiType, uint32 uiPointId)
+        {
+            if (uiPointId == 1948)
+            {
+                DoCastBossSpell(me->GetVictim(), SPELL_LIGHTNING_STORM, false, 3000);
+            }
+        }
+
         void UpdateAI(const uint32 uiDiff)
         {
             if (!UpdateVictim())
@@ -185,16 +221,24 @@ public:
                 switch (eventId)
                 {
                 case EVENT_STATIC_BURST:
-                    DoCastBossSpell(me->GetVictim(), SPELL_STATIC_BURST, true, 1000);
-                    events.ScheduleEvent(EVENT_STATIC_BURST, urand(13000, 18000));
+                    DoCastBossSpell(me->GetVictim(), SPELL_STATIC_BURST, false, 1000);
+                    events.ScheduleEvent(EVENT_STATIC_BURST, urand(12000, 16000));
                     break;
                 case EVENT_FOCUSED_LIGHTNING:
                     DoCastBossSpell(me->GetVictim(), SPELL_FOCUSED_LIGHTNING, false, 2000);
                     events.ScheduleEvent(EVENT_FOCUSED_LIGHTNING, urand(12000, 15000));
                     break;
                 case EVENT_LIGHTNING_STORM:
-                    DoCastBossSpell(me->GetVictim(), SPELL_LIGHTNING_STORM, false, 3000);
+                    DoHandleLightningStorm();
+                    me->GetMotionMaster()->MoveJump(aCenterPos, 20.f, 20.f, 1948);
                     events.ScheduleEvent(EVENT_LIGHTNING_STORM, 90000);
+                    events.ScheduleEvent(EVENT_THUNDERING_THROW, 30000);
+                    break;
+                case EVENT_THUNDERING_THROW:
+                    DoCast(me->GetVictim(), SPELL_THUNDERING_THROW);
+                    break;
+                case EVENT_BERSERK:
+                    DoCast(me, SPELL_BERSERK, true);
                     break;
                 }
             }
@@ -580,7 +624,7 @@ public:
             if (m_timer <= uiDiff)
             {
                 m_timer = 3000;
-                ModStackAmount(GetStackAmount() - 1, AURA_REMOVE_BY_EXPIRE);
+                SetStackAmount(GetStackAmount() - 1);
             }
             else
                 m_timer -= uiDiff;
@@ -724,13 +768,15 @@ public:
 
         void SelectTargets(std::list<WorldObject*>&targets)
         {
+            TC_LOG_ERROR("scripts", "Size is %u", targets.size());
             targets.remove_if(validStatuePredicate());
+            TC_LOG_ERROR("scripts", "Size is %u", targets.size());
 
             if (targets.size() > 1)
             {
-                if (WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets))
+                //if (WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets))
                 {
-                    targets.emplace(targets.begin(), target);
+                    //targets.emplace(targets.begin(), target);
                     targets.resize(1);
                 }
             }
@@ -739,15 +785,15 @@ public:
         void HandleOnEffectHit(SpellEffIndex effIdx)
         {
             Unit* caster = GetCaster();
-            Unit* target = GetHitUnit();
+            Creature* target = GetHitCreature();
 
             if (!caster || !target)
                 return;
 
             caster->CastSpell(target, SPELL_THUNDERING_THROW_JUMP, true);
 
-            if (target->ToCreature()->AI())
-                target->ToCreature()->AI()->DoAction(ACTION_DESTROYED);
+            if (target->AI())
+                target->AI()->DoAction(ACTION_DESTROYED);
         }
 
         void Register()
@@ -790,7 +836,7 @@ public:
     }
 };
 
-static uint32 max_casts = 60;
+static uint32 max_casts = 66;
 
 class npc_jinrokh_statue : public CreatureScript
 {
@@ -799,6 +845,8 @@ class npc_jinrokh_statue : public CreatureScript
         EVENT_NONE,
         EVENT_WATER_BEAM,
         EVENT_SPAWN_WATER,
+        EVENT_TOSS_PLAYER,
+        EVENT_STUN_PLAYER
     };
 
 public:
@@ -806,9 +854,14 @@ public:
 
     struct npc_jinrokh_statueAI : public ScriptedAI
     {
-        npc_jinrokh_statueAI(Creature* pCreature) : ScriptedAI(pCreature) { statueData = 0; }
+        npc_jinrokh_statueAI(Creature* pCreature) : ScriptedAI(pCreature) 
+        { 
+            statueData = 0; 
+            playerGuid = 0;
+        }
 
         uint32 statueData;
+        uint64 playerGuid;
 
         void SetData(uint32 uiType, uint32 uiData) override
         {
@@ -828,9 +881,13 @@ public:
         {
             if (iAction == ACTION_DESTROYED)
             {
+                TC_LOG_ERROR("scripts", "Called");
+                events.ScheduleEvent(EVENT_TOSS_PLAYER, 2000);
                 events.ScheduleEvent(EVENT_WATER_BEAM, 4000);
                 events.ScheduleEvent(EVENT_SPAWN_WATER, 7000);
                 SetData(DATA_STATUE_DESTROYED, 1);
+
+                TC_LOG_ERROR("scripts", "Called %u", GetData(DATA_STATUE_DESTROYED));
             }
 
             if (iAction == ACTION_RESET)
@@ -863,6 +920,30 @@ public:
             return aWaterPos[dist];
         }
 
+        void DoTossPlayer()
+        {
+            std::list<Player*> players;
+            GetPlayerListInGrid(players, me, 5.f);
+
+            if (!players.empty())
+            {
+                if (players.size() > 1)
+                {
+                    players.sort(Trinity::ObjectDistanceOrderPred(me));
+                    players.resize(1);
+                }
+
+                std::list<Player*>::const_iterator itr = players.begin();
+                if (Player* pPlayer = *itr)
+                {
+                    playerGuid = pPlayer->GetGUID();
+                    pPlayer->CastSpell(DoSpawnWater(), SPELL_THUNDERING_THROW_JUMP, true);
+                    pPlayer->CastSpell(pPlayer, SPELL_THUNDERING_THROW_HIT_DAMAGE, true);
+                    events.ScheduleEvent(EVENT_STUN_PLAYER, 2100);
+                }
+            }
+        }
+
         void UpdateAI(const uint32 uiDiff) override
         {
             events.Update(uiDiff);
@@ -877,6 +958,20 @@ public:
                 {
                     if (pWater->AI())
                         pWater->AI()->DoAction(ACTION_RESET);
+                }
+                break;
+            case EVENT_TOSS_PLAYER:
+                DoTossPlayer();
+                break;
+            case EVENT_STUN_PLAYER:
+                if (playerGuid)
+                {
+                    if (Player* pPlayer = ObjectAccessor::GetPlayer(*me, playerGuid))
+                    {
+                        pPlayer->CastSpell(pPlayer, SPELL_THUNDERING_THROW_HIT_AOE_DAMAGE, true);
+                        pPlayer->CastSpell(pPlayer, SPELL_THUNDERING_THROW_STUN, true);
+                        pPlayer->RemoveAurasDueToSpell(SPELL_THUNDERING_THROW_SILENCE);
+                    }
                 }
                 break;
             }
@@ -906,10 +1001,13 @@ public:
     {
         npc_conductive_waterAI(Creature* pCreature) : ScriptedAI(pCreature) {}
 
+        uint32 m_size;
+
         void DoAction(const int32 iAction) override
         {
             if (iAction == ACTION_RESET)
             {
+                m_size = 0;
                 me->AddAura(SPELL_CONDUCTIVE_WATER_VISUAL, me);
                 events.ScheduleEvent(EVENT_GROW, 500);
             }
@@ -928,7 +1026,11 @@ public:
             {
             case EVENT_GROW:
                 events.ScheduleEvent(EVENT_GROW, 500);
-                DoCast(me, SPELL_CONDUCTIVE_WATER_GROW, true);
+                if (m_size < max_casts)
+                {
+                    DoCast(me, SPELL_CONDUCTIVE_WATER_GROW, true);
+                    ++m_size;
+                }
                 DoCast(me, SPELL_CONDUCTIVE_WATER_DUMMY, true);
                 break;
             case EVENT_ELECTRIFY:

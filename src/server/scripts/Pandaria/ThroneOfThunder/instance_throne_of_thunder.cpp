@@ -139,6 +139,11 @@ public:
                 case MOB_GARA_JAL:              m_uiGarajalGuid             = guid; break;
                 case NPC_COUNCIL_EVENT_HELPER:  m_uiCouncilEventHelperGuid  = guid; break;
                 case NPC_TWISTED_FATE_HELPER:   m_uiTwistedFateHelperGuid   = guid; break;
+                case NPC_JINROKH_STATUE:
+                    pCreature->SetCanFly(true);
+                    pCreature->SetHover(true);
+                    pCreature->AddUnitMovementFlag(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_DISABLE_GRAVITY);
+                    break;
                 default:
                     break;
             }

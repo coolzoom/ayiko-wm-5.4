@@ -66,6 +66,7 @@ enum CreaturesIds
     MOB_GARA_JALS_SOUL                      = 69182,
     NPC_COUNCIL_EVENT_HELPER                = 662203,
     NPC_TWISTED_FATE_HELPER                 = 662204,
+    NPC_JINROKH_STATUE                      = 69467
 };
 
 enum ObjectsIds

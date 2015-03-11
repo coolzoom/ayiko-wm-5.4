@@ -12735,7 +12735,7 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
             coeff /= 100.0f;
         }
 
-        DoneTotal += int32(DoneAdvertisedBenefit * coeff);
+        DoneTotal += int32(DoneAdvertisedBenefit * coeff * stack);
     }
 
     for (auto const &spellEffect : spellProto->Effects)

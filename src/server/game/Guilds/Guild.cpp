@@ -1939,18 +1939,27 @@ void Guild::HandleSetMemberRank(WorldSession* session, uint64 targetGuid, uint64
     Player* player = session->GetPlayer();
 
     // Promoted player must be a member of guild
-    if (Member* member = GetMember(targetGuid))
+    if (Member* targetMember = GetMember(targetGuid))
     {
-        if (!_HasRankRight(player, rank > member->GetRankId() ? GR_RIGHT_DEMOTE : GR_RIGHT_PROMOTE))
+        // check if player is trying to change their own rank
+        if (targetMember->IsSamePlayer(player->GetGUID()))
         {
             SendCommandResult(session, GUILD_INVITE_S, ERR_GUILD_PERMISSIONS);
             return;
         }
 
-        // Player cannot promote himself
-        if (member->IsSamePlayer(player->GetGUID()))
+        // check if you have the right to demote or premote members
+        if (!_HasRankRight(player, rank > targetMember->GetRankId() ? GR_RIGHT_DEMOTE : GR_RIGHT_PROMOTE))
         {
-            SendCommandResult(session, GUILD_INVITE_S, ERR_GUILD_NAME_INVALID);
+            SendCommandResult(session, GUILD_INVITE_S, ERR_GUILD_PERMISSIONS);
+            return;
+        }
+
+        // check if your rank is valid, less then the member you are trying to change
+        auto member = GetMember(player->GetGUID());
+        if (targetMember->GetRankId() <= GetMember(player->GetGUID())->GetRankId())
+        {
+            SendCommandResult(session, GUILD_INVITE_S, ERR_GUILD_PERMISSIONS);
             return;
         }
 

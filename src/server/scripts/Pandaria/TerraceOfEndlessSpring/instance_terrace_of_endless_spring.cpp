@@ -216,7 +216,17 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                 {
                     if (Player * const player = itr->GetSource())
                     {
-                        int32 const gain = player->ModifyCurrency(CURRENCY_TYPE_VALOR_POINTS, 4000);
+                        if (instance->GetDifficulty() == RAID_TOOL_DIFFICULTY)
+                        {
+                            uint32 gain = 0;
+                            if (GetBossState(DATA_SHA_OF_FEAR) == DONE)
+                            {
+                                gain = !player->HasLFRLootBind(LFR_LOOT_BIND_SHA_OF_FEAR) ? 9000 : 4000;
+                                player->ModifyCurrency(CURRENCY_TYPE_VALOR_POINTS, gain);
+                            }
+                        }
+                        else
+                            player->ModifyCurrency(CURRENCY_TYPE_VALOR_POINTS, 4000);
                     }
                 }
             }
@@ -250,6 +260,9 @@ class instance_terrace_of_endless_spring : public InstanceMapScript
                     DoRespawnGameObject(leishiChestsGUID, DAY);
                     RewardCurrencyForPlayers();
                 }
+
+                if (id == DATA_SHA_OF_FEAR && state == DONE)
+                    RewardCurrencyForPlayers();
 
                 if (id < MAX_TYPES && state == DONE)
                     SetData(id, (uint32)state);

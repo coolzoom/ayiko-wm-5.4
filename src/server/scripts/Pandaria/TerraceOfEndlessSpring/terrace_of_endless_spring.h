@@ -44,6 +44,11 @@ enum eTypes
     MAX_TYPES,
 };
 
+enum eLFRLootBind
+{
+    LFR_LOOT_BIND_SHA_OF_FEAR       = 6
+};
+
 enum eSpells
 {
     SPELL_RITUAL_OF_PURIFICATION    = 126848,

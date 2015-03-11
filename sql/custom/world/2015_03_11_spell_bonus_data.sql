@@ -1,1 +1,1 @@
-DELETE FROM spell_bonus_data WHERE entry=33763;
+DELETE FROM spell_bonus_data WHERE entry IN(33763, 8936);

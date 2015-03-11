@@ -26,6 +26,11 @@ enum DataTypes
     MAX_DATA
 };
 
+enum GlobalToTSpells : uint32
+{
+    SPELL_BERSERK       = 26662
+};
+
 enum CreaturesIds
 {
     /* Encounters */

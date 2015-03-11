@@ -7,6 +7,9 @@ enum eSpells : uint32
     SPELL_CONDUCTIVE_WATER_SUMMON           = 137145,
     SPELL_CONDUCTIVE_WATERFALL              = 137340,
     SPELL_CONDUCTIVE_WATER_VISUAL           = 137277,
+    SPELL_CONDUCTIVE_WATER_DUMMY            = 137168,
+    SPELL_CONDUCTIVE_WATER_GROW             = 137694,
+    SPELL_ELECTRIFY_WATERS                  = 138568,
     SPELL_ELECTRIFIED_WATER_VISUAL          = 137978,
 
     SPELL_LIGHTNING_FISSURE_SUMMON          = 137479,
@@ -42,7 +45,7 @@ enum eSpells : uint32
     SPELL_THUNDERING_THROW                  = 140597, // Need SpellScript to handle ScriptEffect
     SPELL_THUNDERING_THROW_JUMP             = 137173, // Casted by player on a statue
     SPELL_THUNDERING_THROW_SILENCE          = 137161, // Silence, visuals
-    SPELL_THUNDERING_TRHOW_FLY_VISUAL       = 140594, // Visual in flight
+    SPELL_THUNDERING_THROW_FLY_VISUAL       = 140594, // Visual in flight
     SPELL_THUNDERING_THROW_HIT_DAMAGE       = 137370, // Damage on hit statue
     SPELL_THUNDERING_THROW_HIT_AOE_DAMAGE   = 137167, // AOE Damage on hit statue
     SPELL_THUNDERING_THROW_STUN             = 137371, // Stun after aoe damage on hit statue
@@ -53,6 +56,20 @@ enum eCreatures : uint32
 {
     NPC_LIGHTNING_FISSURE               = 69609,
     NPC_CONDUCTIVE_WATER                = 69469,
+    NPC_JINROKH_STATUE                  = 69467
+};
+
+enum iActions : int32
+{
+    ACTION_NONE,
+    ACTION_DESTROYED,
+    ACTION_RESET,
+    ACTION_ELECTRIFY
+};
+
+enum eJDatas : uint32
+{
+    DATA_STATUE_DESTROYED,
 };
 
 class notPlayerPredicate
@@ -75,6 +92,23 @@ public:
 
 private:
     Unit* _caster;
+};
+
+class validStatuePredicate
+{
+public:
+    bool operator() (WorldObject* target) const
+    {
+        return target && target->ToCreature() && ((target->ToCreature()->AI() && target->ToCreature()->AI()->GetData(DATA_STATUE_DESTROYED) == 1) || target->GetEntry() != NPC_JINROKH_STATUE);
+    }
+};
+
+static const Position aWaterPos[4] = 
+{
+    { 5864.490f, 6290.628f, 124.03f, 5.51f },
+    { 5917.633f, 6289.476f, 124.03f, 3.93f },
+    { 5918.487f, 6236.848f, 124.03f, 2.36f },
+    { 5865.241f, 6236.743f, 128.03f, 0.77f }
 };
 
 class boss_jinrokh : public CreatureScript
@@ -100,11 +134,12 @@ public:
 
         uint32 m_uiPushTimer;
 
-        void EnterEvadeMode()
+        void Reset()
         {
-            events.Reset();
+            _Reset();
 
-            _EnterEvadeMode();
+            events.Reset();
+            ResetStatues();
         }
 
         void EnterCombat(Unit* pWho)
@@ -123,25 +158,27 @@ public:
                 m_uiPushTimer = push;
         }
 
+        void ResetStatues()
+        {
+            std::list<Creature*> pStatues;
+            GetCreatureListWithEntryInGrid(pStatues, me, NPC_JINROKH_STATUE, 200.f);
+
+            for (auto const pCreature : pStatues)
+            {
+                if (pCreature->AI())
+                    pCreature->AI()->DoAction(ACTION_RESET);
+            }
+        }
+
         void UpdateAI(const uint32 uiDiff)
         {
             if (!UpdateVictim())
                 return;
 
-            DoMeleeAttackIfReady();
-
-            if (m_uiPushTimer)
-            {
-                if (m_uiPushTimer <= uiDiff)
-                    m_uiPushTimer = 0;
-                else
-                {
-                    m_uiPushTimer -= uiDiff;
-                    return;
-                }
-            }
-
             events.Update(uiDiff);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
 
             while (uint32 eventId = events.ExecuteEvent())
             {
@@ -161,6 +198,8 @@ public:
                     break;
                 }
             }
+
+            DoMeleeAttackIfReady();
         }
 
     };
@@ -235,34 +274,6 @@ public:
     }
 };
 
-class npc_conductive_water : public CreatureScript
-{
-    npc_conductive_water() : CreatureScript("npc_conductive_water") {}
-
-    struct npc_conductive_waterAI : public ScriptedAI
-    {
-        npc_conductive_waterAI(Creature* pCreature) : ScriptedAI(pCreature)
-        {
-            Initialize();
-        }
-        
-        void Initialize()
-        {
-            me->AddAura(SPELL_CONDUCTIVE_WATER_VISUAL, me);
-            me->AddAura(SPELL_CONDUCTIVE_WATER_GROW_AURA, me);
-        }
-
-        void UpdateAI(const uint32 uiDiff)
-        {
-        }
-    };
-
-    CreatureAI* GetAI(Creature* pCreature) const
-    {
-        return new npc_conductive_waterAI(pCreature);
-    }
-};
-
 class spell_focused_lightning_targeting : public SpellScriptLoader
 {
 public:
@@ -281,23 +292,35 @@ public:
         {
             if (GetCaster())
             {
-
                 targets.remove_if(notPlayerPredicate());
                 targets.remove_if(notInLosPredicate(GetCaster()));
 
-                if (!targets.empty())
+                if (targets.size() > 1)
                 {
                     if (WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets))
                     {
-                        GetCaster()->CastSpell(target->ToUnit(), SPELL_FOCUSED_LIGHTNING_FIXATE, true);
-                        GetCaster()->GetMotionMaster()->MoveFollow(target->ToUnit(), 0.0f, 0.0f);
+                        targets.emplace(targets.begin(), target);
+                        targets.resize(1);
                     }
                 }
             }
         }
 
+        void HandleHit()
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetHitUnit();
+
+            if (!caster || !target)
+                return;
+
+            caster->CastSpell(target, SPELL_FOCUSED_LIGHTNING_FIXATE, true);
+            caster->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f);
+        }
+
         void Register()
         {
+            OnHit += SpellHitFn(spell_focused_lightning_targeting_SpellScript::HandleHit);
             OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_focused_lightning_targeting_SpellScript::SelectTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
         }
     };
@@ -516,6 +539,14 @@ public:
             return true;
         }
 
+        bool Load()
+        {
+            m_timer = 3000;
+            return true;
+        }
+
+        uint32 m_timer;
+
         void HandleOnApply(AuraEffect const *aurEff, AuraEffectHandleModes mode)
         {
             if (Aura* pAura = GetAura())
@@ -544,11 +575,23 @@ public:
             }
         }
 
+        void HandleOnUpdate(const uint32 uiDiff)
+        {
+            if (m_timer <= uiDiff)
+            {
+                m_timer = 3000;
+                ModStackAmount(GetStackAmount() - 1, AURA_REMOVE_BY_EXPIRE);
+            }
+            else
+                m_timer -= uiDiff;
+        }
+
         void Register()
         {
             OnEffectProc += AuraEffectProcFn(spell_static_wound_AuraScript::HandleOnProc, EFFECT_0, SPELL_AURA_DUMMY);
-            OnEffectApply += AuraEffectApplyFn(spell_static_wound_AuraScript::HandleOnApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-            OnEffectApply += AuraEffectApplyFn(spell_static_wound_AuraScript::HandleOnReApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAPPLY);
+            OnAuraUpdate += AuraUpdateFn(spell_static_wound_AuraScript::HandleOnUpdate);
+            //OnEffectApply += AuraEffectApplyFn(spell_static_wound_AuraScript::HandleOnApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            //OnEffectApply += AuraEffectApplyFn(spell_static_wound_AuraScript::HandleOnReApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAPPLY);
         }
     };
 
@@ -614,7 +657,12 @@ public:
         {
             if (Unit* pUnit = GetOwner()->ToUnit())
             {
-                pUnit->CastSpell(pUnit, SPELL_STATIC_WOUND, true);
+                if (Aura* pAura = pUnit->GetAura(SPELL_STATIC_WOUND))
+                {
+                    pAura->ModStackAmount(pAura->GetStackAmount() + 10 < 30 ? (pAura->GetStackAmount() + 10) : 30);
+                }
+                else if (Aura* pAura = pUnit->AddAura(SPELL_STATIC_WOUND, pUnit))
+                    pAura->SetStackAmount(10);
             }
         }
 
@@ -665,6 +713,241 @@ public:
     }
 };
 
+class spell_thundering_throw_silence : public SpellScriptLoader
+{
+public:
+    spell_thundering_throw_silence() : SpellScriptLoader("spell_thundering_throw_silence") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void SelectTargets(std::list<WorldObject*>&targets)
+        {
+            targets.remove_if(validStatuePredicate());
+
+            if (targets.size() > 1)
+            {
+                if (WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets))
+                {
+                    targets.emplace(targets.begin(), target);
+                    targets.resize(1);
+                }
+            }
+        }
+
+        void HandleOnEffectHit(SpellEffIndex effIdx)
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetHitUnit();
+
+            if (!caster || !target)
+                return;
+
+            caster->CastSpell(target, SPELL_THUNDERING_THROW_JUMP, true);
+
+            if (target->ToCreature()->AI())
+                target->ToCreature()->AI()->DoAction(ACTION_DESTROYED);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_impl::HandleOnEffectHit, EFFECT_4, SPELL_EFFECT_DUMMY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_impl::SelectTargets, EFFECT_4, TARGET_UNIT_SRC_AREA_ENTRY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
+class spell_thundering_throw : public SpellScriptLoader
+{
+public:
+    spell_thundering_throw() : SpellScriptLoader("spell_thundering_throw") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void HandleOnHit()
+        {
+            if (Unit* pUnit = GetHitUnit())
+                pUnit->CastSpell(pUnit, SPELL_THUNDERING_THROW_SILENCE);
+        }
+        
+        void Register()
+        {
+            OnHit += SpellHitFn(spell_impl::HandleOnHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
+static uint32 max_casts = 60;
+
+class npc_jinrokh_statue : public CreatureScript
+{
+    enum eEvents
+    {
+        EVENT_NONE,
+        EVENT_WATER_BEAM,
+        EVENT_SPAWN_WATER,
+    };
+
+public:
+    npc_jinrokh_statue() : CreatureScript("npc_jinrokh_statue") {}
+
+    struct npc_jinrokh_statueAI : public ScriptedAI
+    {
+        npc_jinrokh_statueAI(Creature* pCreature) : ScriptedAI(pCreature) { statueData = 0; }
+
+        uint32 statueData;
+
+        void SetData(uint32 uiType, uint32 uiData) override
+        {
+            if (uiType == DATA_STATUE_DESTROYED)
+                statueData = uiData;
+        }
+
+        uint32 GetData(uint32 uiType) override
+        {
+            if (uiType == DATA_STATUE_DESTROYED)
+                return statueData;
+
+            return 0;
+        }
+
+        void DoAction(const int32 iAction) override
+        {
+            if (iAction == ACTION_DESTROYED)
+            {
+                events.ScheduleEvent(EVENT_WATER_BEAM, 4000);
+                events.ScheduleEvent(EVENT_SPAWN_WATER, 7000);
+                SetData(DATA_STATUE_DESTROYED, 1);
+            }
+
+            if (iAction == ACTION_RESET)
+            {
+                me->RemoveAllAuras();
+                events.Reset();
+                SetData(DATA_STATUE_DESTROYED, 0);
+
+                if (Creature* pWaters = GetClosestCreatureWithEntry(me, NPC_CONDUCTIVE_WATER, 100.f))
+                    pWaters->DespawnOrUnsummon();
+            }
+        }
+
+        Position DoSpawnWater()
+        {
+            uint8 dist = 0;
+            float i_range = 1000.f;
+
+            for (uint8 i = 0; i < 4; ++i)
+            {
+                float new_dist = me->GetDistance(aWaterPos[i]);
+
+                if (new_dist < i_range)
+                {
+                    dist = i;
+                    i_range = new_dist;
+                }
+            }
+
+            return aWaterPos[dist];
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            events.Update(uiDiff);
+
+            switch (events.ExecuteEvent())
+            {
+            case EVENT_WATER_BEAM:
+                me->AddAura(SPELL_CONDUCTIVE_WATERFALL, me);
+                break;
+            case EVENT_SPAWN_WATER:
+                if (Creature* pWater = me->SummonCreature(NPC_CONDUCTIVE_WATER, DoSpawnWater()))
+                {
+                    if (pWater->AI())
+                        pWater->AI()->DoAction(ACTION_RESET);
+                }
+                break;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_jinrokh_statueAI(pCreature);
+    }
+};
+
+class npc_conductive_water : public CreatureScript
+{
+    enum eEvents
+    {
+        EVENT_NONE,
+        EVENT_GROW,
+        EVENT_ELECTRIFY,
+        EVENT_FINALIZE_ELECTRIFY
+    };
+
+public:
+    npc_conductive_water() : CreatureScript("npc_conductive_water") {}
+
+    struct npc_conductive_waterAI : public ScriptedAI
+    {
+        npc_conductive_waterAI(Creature* pCreature) : ScriptedAI(pCreature) {}
+
+        void DoAction(const int32 iAction) override
+        {
+            if (iAction == ACTION_RESET)
+            {
+                me->AddAura(SPELL_CONDUCTIVE_WATER_VISUAL, me);
+                events.ScheduleEvent(EVENT_GROW, 500);
+            }
+
+            if (iAction == ACTION_ELECTRIFY)
+            {
+                events.ScheduleEvent(EVENT_ELECTRIFY, 5000);
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            events.Update(uiDiff);
+
+            switch (events.ExecuteEvent())
+            {
+            case EVENT_GROW:
+                events.ScheduleEvent(EVENT_GROW, 500);
+                DoCast(me, SPELL_CONDUCTIVE_WATER_GROW, true);
+                DoCast(me, SPELL_CONDUCTIVE_WATER_DUMMY, true);
+                break;
+            case EVENT_ELECTRIFY:
+                events.ScheduleEvent(EVENT_FINALIZE_ELECTRIFY, 1500);
+                DoCast(me, SPELL_ELECTRIFY_WATERS, true);
+                break;
+            case EVENT_FINALIZE_ELECTRIFY:
+                DoCast(me, SPELL_ELECTRIFIED_WATER_VISUAL, true);
+                break;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_conductive_waterAI(pCreature);
+    }
+};
+
 void AddSC_boss_jinrokh()
 {
     new boss_jinrokh();
@@ -679,4 +962,8 @@ void AddSC_boss_jinrokh()
     new spell_static_wound_damage();
     new spell_static_burst();
     new spell_lightning_storm_visual();
+    new spell_thundering_throw_silence();
+    new spell_thundering_throw();
+    new npc_jinrokh_statue();
+    new npc_conductive_water();
 }

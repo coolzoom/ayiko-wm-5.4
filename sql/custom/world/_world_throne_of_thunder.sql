@@ -46,7 +46,7 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 (69390, 0, 0, 0, 0, 0, 47528, 0, 0, 0, 'Zandalari Storm-Caller', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 270532680, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10000, 11000, '', 0, 3, 1, 33, 1, 1, 0, 0, 0, 0, 0, 0, 0, 167, 1, 0, 0, '', 17614,0),
 (69455, 0, 0, 0, 0, 0, 47536, 0, 0, 0, 'Zandalari Water-Binder', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10000, 11000, '', 0, 3, 1, 23, 1, 1, 0, 0, 0, 0, 0, 0, 0, 167, 1, 0, 0, '', 17614,0),
 (69465, 0, 0, 0, 0, 0, 47552, 0, 0, 0, 'Jin\'rokh the Breaker', '', '', 0, 93, 93, 4, 14, 14, 0, 1, 1.14286, 1, 3, 17839, 24339, 0, 51299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097260, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2900000, 3000000, '', 0, 3, 1, 476, 0, 1, 0, 0, 0, 0, 0, 0, 0, 180, 1, 667893759, 1, 'boss_jinrokh', 17614,0),
-(69469, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Conductive Water', '', '', 0, 1, 1, 4, 35, 35, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 33554438, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 17826816, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 130, '', 17614,0),
+(69469, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Conductive Water', '', '', 0, 1, 1, 4, 35, 35, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 33554438, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 17826816, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 130, 'npc_conductive_water', 17614,0),
 (69593, 0, 0, 0, 0, 0, 47698, 0, 0, 0, 'Focused Lightning', '', '', 0, 1, 1, 4, 35, 35, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 17826816, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 94, 1, 0, 0, '', 17614,0),
 (69609, 0, 0, 0, 0, 0, 39633, 0, 0, 0, 'Lightning Fissure', '', '', 0, 1, 1, 4, 35, 35, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 33554438, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 17826816, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 130, '', 17614,0),
 (69676, 0, 0, 0, 0, 0, 39633, 0, 0, 0, 'Call Da Storm Stalker', '', '', 0, 1, 1, 4, 35, 35, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 17826816, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 17614,0),
@@ -248,7 +248,11 @@ INSERT INTO `creature` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMa
 (@CGUID+42, 70245, 1098, 0, 0, 120, 1, 0, 0, 5824.56, 6493.54, 118.107, 0.0295164, 300, 0, 0, 144628, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
 (@CGUID+43, 70245, 1098, 0, 0, 120, 1, 0, 0, 5824.91, 6486.64, 118.107, 0.0295164, 300, 0, 0, 144628, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
 (@CGUID+44, 70245, 1098, 0, 0, 120, 1, 0, 0, 5824.89, 6477.12, 118.107, 6.26951, 300, 0, 0, 144628, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
-(@CGUID+45, 70245, 1098, 0, 0, 120, 1, 0, 0, 5825.11, 6469.8, 118.107, 6.26558, 300, 0, 0, 144628, 0, 0, 0, 0, 0, 2048, 0, 0, NULL);
+(@CGUID+45, 70245, 1098, 0, 0, 120, 1, 0, 0, 5825.11, 6469.8, 118.107, 6.26558, 300, 0, 0, 144628, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
+(@CGUID+46, 69467, 1098, 0, 0, 120, 1, 0, 0, 5834.94, 6320.38, 158.822, 5.49425, 300, 0, 0, 84, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
+(@CGUID+47, 69467, 1098, 0, 0, 120, 1, 0, 0, 5949.51, 6322.59, 158.822, 3.93524, 300, 0, 0, 84, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
+(@CGUID+48, 69467, 1098, 0, 0, 120, 1, 0, 0, 5950.26, 6206.49, 158.822, 2.43905, 300, 0, 0, 84, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
+(@CGUID+49, 69467, 1098, 0, 0, 120, 1, 0, 0, 5835.62, 6206.6, 158.822, 0.821134, 300, 0, 0, 84, 0, 0, 0, 0, 0, 2048, 0, 0, NULL);
 
 -- Gameobjects templates
 REPLACE INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `faction`, `flags`, `size`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `data0`, `data1`, `data2`, `data3`, `data4`, `data5`, `data6`, `data7`, `data8`, `data9`, `data10`, `data11`, `data12`, `data13`, `data14`, `data15`, `data16`, `data17`, `data18`, `data19`, `data20`, `data21`, `data22`, `data23`, `AIName`, `ScriptName`, `WDBVerified`) VALUES
@@ -283,7 +287,7 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 
 -- Jin'rokh
 -- Spell Scripts
-DELETE FROM `spell_script_names` WHERE `spell_id` IN (137162,137194,137374,137389,137429,137507,138349,138389,138568,138990);
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (137162,137194,137374,137389,137429,137507,138349,138389,138568,138990, 137161, 137180);
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (137162, 'spell_static_burst'),
 (137194, 'spell_focused_lightning_targeting'),
@@ -294,15 +298,24 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (138349, 'spell_static_wound'),
 (138389, 'spell_static_wound_damage'),
 (138568, 'spell_lightning_storm_visual'),
-(138990, 'spell_focused_lightning_detonation');
+(138990, 'spell_focused_lightning_detonation'),
+(137161, 'spell_thundering_throw_silence'),
+(137180, 'spell_thundering_throw');
 
 -- Templates
 DELETE FROM creature_template WHERE entry = 69467;
 INSERT INTO creature_template
    (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `difficulty_entry_4`, `difficulty_entry_5`, `difficulty_entry_6`, `difficulty_entry_7`, `difficulty_entry_8`, `difficulty_entry_9`, `difficulty_entry_10`, `difficulty_entry_11`, `difficulty_entry_12`, `difficulty_entry_13`, `difficulty_entry_14`, `difficulty_entry_15`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `exp_unk`, `faction_A`, `faction_H`, `npcflag`, `npcflag2`, `speed_walk`, `speed_run`, `speed_fly`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `type_flags2`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `Health_mod`, `Mana_mod`, `Mana_mod_extra`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`)
 VALUES
-   (69467, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 169, 11686, 0, 0, 'Statue', '', '', 0, 1, 1, 4, 0, 35, 35, 0, 0, 1, 1.14286, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 17826816, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, '', 17614);
+   (69467, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 169, 11686, 0, 0, 'Statue', '', '', 0, 1, 1, 4, 0, 14, 14, 0, 0, 1, 1.14286, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 17826816, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'npc_jinrokh_statue', 17614);
 
+UPDATE creature_template SET minlevel = 93, maxlevel = 93, InhabitType = 7 WHERE entry = 69467;
+
+-- Conditions
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (137161);
+/*
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(13, 1, 137161, 0, 0, 31, 4, 3, 69467, 0, 0, 0, 0, '', 'Thundering Throw - Target Statue');*/
 -- Jin'rokh end
 
 

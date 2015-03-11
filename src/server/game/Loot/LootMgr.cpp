@@ -442,6 +442,12 @@ void Loot::FillLFRLoot(uint32 lootId, LootStore const& store, Player* member)
 // fill LFR gold for a single raid member
 void Loot::FillLFRMoney(uint32 maxGold, uint32 minGold, uint32 groupSize, bool wonItem)
 {
+    // gold fall back
+    if (!maxGold)
+        maxGold = 3300000;
+    if (!minGold)
+        minGold = 3200000;
+
     uint32 rewardGold = 0;
     if (maxGold > 0)
     {

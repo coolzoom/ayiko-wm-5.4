@@ -16456,11 +16456,6 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
                     if ((procExtra & PROC_EX_CRITICAL_HIT) != 0)
                         if (Player * const petOwner = ToPet()->GetCharmerOrOwnerPlayerOrPlayerItself())
                             petOwner->RemoveAuraFromStack(53257);
-
-                    // Hack Fix Frenzy
-                    if (GetOwner() && GetOwner()->GetTypeId() == TYPEID_PLAYER && GetOwner()->HasAura(19623) && ToPet()->IsPermanentPetFor(GetOwner()->ToPlayer()))
-                        if (roll_chance_i(40))
-                            CastSpell(this, 19615, true);
                     break;
                 }
             }

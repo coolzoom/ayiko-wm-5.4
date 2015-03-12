@@ -1400,7 +1400,6 @@ class spell_sha_elemental_blast : public SpellScriptLoader
             void Register()
             {
                 AfterCast += SpellCastFn(spell_sha_elemental_blast_SpellScript::HandleAfterCast);
-                OnHit += SpellHitFn(spell_sha_elemental_blast_SpellScript::HandleOnHit);
             }
         };
 

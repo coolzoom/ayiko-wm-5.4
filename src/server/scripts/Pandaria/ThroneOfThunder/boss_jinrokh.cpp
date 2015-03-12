@@ -218,7 +218,7 @@ public:
             if (uiPointId == 1948)
             {
                 DoCastBossSpell(me->GetVictim(), SPELL_LIGHTNING_STORM, false, 3000);
-                //DoCast(me, SPELL_LIGHTNING_STORM_VISUAL, true);
+                me->AddAura(SPELL_LIGHTNING_STORM_VISUAL, me);
             }
         }
 
@@ -1111,6 +1111,8 @@ public:
         {
             if (Aura* pAura = propagator->GetAura(SPELL_CONDUCTIVE_WATER_GROW))
             {
+                TC_LOG_ERROR("scripts", "%f size", pAura->GetStackAmount() / 2);
+
                 return pAura->GetStackAmount() / 2;
             }
 

@@ -1366,18 +1366,6 @@ class spell_sha_elemental_blast : public SpellScriptLoader
             {
                 if (Player* _player = GetCaster()->ToPlayer())
                 {
-                    if (Unit* target = GetExplTargetUnit())
-                    {
-                        _player->CastSpell(target, SPELL_SHA_ELEMENTAL_BLAST_FROST_VISUAL, true);
-                        _player->CastSpell(target, SPELL_SHA_ELEMENTAL_BLAST_NATURE_VISUAL, true);
-                    }
-                }
-            }
-
-            void HandleOnHit()
-            {
-                if (Player* const _player = GetCaster()->ToPlayer())
-                {
                     _player->CastSpell(_player, SPELL_SHA_ELEMENTAL_BLAST_RATING_BONUS, true);
 
                     if (Aura* const aura = _player->GetAura(SPELL_SHA_ELEMENTAL_BLAST_RATING_BONUS, _player->GetGUID()))
@@ -1399,6 +1387,12 @@ class spell_sha_elemental_blast : public SpellScriptLoader
                                 aura->GetEffect(i)->ChangeAmount(0);
                             }
                         }
+                    }
+
+                    if (Unit* target = GetExplTargetUnit())
+                    {
+                        _player->CastSpell(target, SPELL_SHA_ELEMENTAL_BLAST_FROST_VISUAL, true);
+                        _player->CastSpell(target, SPELL_SHA_ELEMENTAL_BLAST_NATURE_VISUAL, true);
                     }
                 }
             }

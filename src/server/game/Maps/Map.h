@@ -384,6 +384,7 @@ class Map
         bool IsRaidOrHeroicDungeon() const { return IsRaid() || (i_spawnMode == MAN25_DIFFICULTY || i_spawnMode == MAN25_HEROIC_DIFFICULTY || i_spawnMode == MAN10_DIFFICULTY || i_spawnMode == MAN10_HEROIC_DIFFICULTY || i_spawnMode == MAN40_DIFFICULTY || i_spawnMode == HEROIC_DIFFICULTY); }
         bool IsHeroic() const {return ( i_spawnMode == MAN25_HEROIC_DIFFICULTY || i_spawnMode == MAN10_HEROIC_DIFFICULTY || i_spawnMode == HEROIC_DIFFICULTY); }
         bool Is25ManRaid() const { return IsRaid() && (i_spawnMode == MAN25_DIFFICULTY || i_spawnMode == MAN25_HEROIC_DIFFICULTY); }   // since 25man difficulties are 1 and 3, we can check them like that
+        bool IsLFR() const { return i_spawnMode == RAID_TOOL_DIFFICULTY; }
         bool IsBattleground() const { return i_mapEntry && i_mapEntry->IsBattleground(); }
         bool IsBattleArena() const { return i_mapEntry && i_mapEntry->IsBattleArena(); }
         bool IsBattlegroundOrArena() const { return i_mapEntry && i_mapEntry->IsBattlegroundOrArena(); }

@@ -318,6 +318,12 @@ class Group
 
         void SendPartyUpdate(Player* player, MemberSlot* slot, uint8 position);
 
+        void SetLFGDungeon(LFGDungeonEntry const* lfgDungeonEntry) { m_lfgDungeon = lfgDungeonEntry; }
+        LFGDungeonEntry const* GetLFGDungeon() { return m_lfgDungeon; }
+
+        void SetLastBind(uint32 entry) { m_lastBind = entry; }
+        uint32 GetLastBind() { return m_lastBind; }
+
         /*********************************************************/
         /***                  ARENA SYSTEM                     ***/
         /*********************************************************/
@@ -402,5 +408,9 @@ class Group
         uint32              m_maxEnchantingLevel;
         uint8               m_readyCheckCount;
         bool                m_readyCheck;
+
+        // LFR
+        uint32                 m_lastBind;
+        LFGDungeonEntry const* m_lfgDungeon;
 };
 #endif

@@ -444,9 +444,15 @@ class boss_tsulong : public CreatureScript
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_PACIFIED);
 
                 if (attacker && attacker->GetTypeId() == TYPEID_PLAYER)
+                {
+                    attacker->ToPlayer()->SetLastKilledCreature(me);
                     me->GetMap()->ToInstanceMap()->PermBindAllPlayers(attacker->ToPlayer());
+                }
                 else if (attacker && attacker->GetTypeId() == TYPEID_UNIT && attacker->GetOwner() && attacker->GetOwner()->ToPlayer())
+                {
+                    attacker->GetOwner()->ToPlayer()->SetLastKilledCreature(me);
                     me->GetMap()->ToInstanceMap()->PermBindAllPlayers(attacker->GetOwner()->ToPlayer());
+                }
 
                 instance->SetBossState(DATA_TSULONG, DONE);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);

@@ -554,7 +554,7 @@ Spell::Spell(Unit* caster, SpellInfo const* info, TriggerCastFlags triggerFlags,
 
     m_spellState = SPELL_STATE_NULL;
     _triggeredCastFlags = triggerFlags;
-    if (!ignoreTriggeredAttribute && (info->AttributesEx4 & SPELL_ATTR4_TRIGGERED))
+    if (info->AttributesEx4 & SPELL_ATTR4_TRIGGERED)
         _triggeredCastFlags = TRIGGERED_FULL_MASK;
 
     m_CastItem = NULL;
@@ -4634,9 +4634,6 @@ void Spell::SendSpellStart()
 
     uint32 castFlags = CAST_FLAG_HAS_TRAJECTORY;
 
-    if ((IsTriggered() && !m_spellInfo->IsAutoRepeatRangedSpell()) || m_triggeredByAuraSpell)
-        castFlags |= CAST_FLAG_PENDING;
-
     if ((m_caster->GetTypeId() == TYPEID_PLAYER || (m_caster->GetTypeId() == TYPEID_UNIT && m_caster->ToCreature()->isPet()))
             && m_spellPowerData->powerType != POWER_HEALTH)
         castFlags |= CAST_FLAG_POWER_LEFT_SELF;
@@ -5009,10 +5006,6 @@ void Spell::SendSpellGo()
     //TC_LOG_DEBUG("spells", "Sending SMSG_SPELL_GO id=%u", m_spellInfo->Id);
 
     uint32 castFlags = CAST_FLAG_UNKNOWN_9;
-
-    // triggered spells with spell visual != 0
-    if ((IsTriggered() && !m_spellInfo->IsAutoRepeatRangedSpell()) || m_triggeredByAuraSpell)
-        castFlags |= CAST_FLAG_PENDING;
 
     if ((m_caster->GetTypeId() == TYPEID_PLAYER || (m_caster->GetTypeId() == TYPEID_UNIT && m_caster->ToCreature()->isPet()))
             && m_spellPowerData->powerType != POWER_HEALTH)
@@ -7402,6 +7395,16 @@ SpellCastResult Spell::CheckCasterAuras() const
         // immune movement impairment and loss of control
         if (m_spellInfo->IsRemoveLossControlEffects())
             mechanic_immune = IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK;
+
+        // Custom mechanic immunitys - TODO: Find a better way to handle this
+        // Tremor totem for example has USABLE_WHILE_FEARED - This should most likely include MECHANIC_FEAR, MECHANIC_SLEEP & MECHANIC_CHARM
+        switch (m_spellInfo->Id)
+        {
+            // Tremor Totem
+            case 8143:
+                mechanic_immune = (1 << MECHANIC_FEAR) | (1 << MECHANIC_SLEEP) | (1 << MECHANIC_CHARM);
+                break;
+        }
     }
 
     bool usableInStun = m_spellInfo->AttributesEx5 & SPELL_ATTR5_USABLE_WHILE_STUNNED;

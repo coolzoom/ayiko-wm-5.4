@@ -6115,6 +6115,9 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
                 // Living Seed
                 case 48504:
                 {
+                    if (IsFullHealth())
+                        return false;
+
                     triggered_spell_id = 48503;
                     basepoints0 = triggerAmount;
                     target = this;
@@ -7104,8 +7107,18 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect *triggere
             // Living Seed
             if (dummySpell->SpellIconID == 2860)
             {
+                if (!victim)
+                    return false;
+
                 triggered_spell_id = 48504;
                 basepoints0 = CalculatePct(int32(damage), triggerAmount);
+                if (AuraEffect* aura = victim->GetAuraEffect(48504, EFFECT_0))
+                {
+                    int32 newAmount = std::min(int32(CountPctFromMaxHealth(50)), aura->GetAmount() + basepoints0);
+                    aura->SetAmount(newAmount);
+                    aura->GetBase()->RefreshDuration();
+                    return true;
+                }
                 break;
             }
             // King of the Jungle
@@ -12735,7 +12748,7 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
             coeff /= 100.0f;
         }
 
-        DoneTotal += int32(DoneAdvertisedBenefit * coeff);
+        DoneTotal += int32(DoneAdvertisedBenefit * coeff * stack);
     }
 
     for (auto const &spellEffect : spellProto->Effects)
@@ -16327,6 +16340,7 @@ bool InitTriggerAuraData()
     isTriggerAura[SPELL_AURA_ENABLE_ALT_POWER] = true;
     isTriggerAura[SPELL_AURA_PERIODIC_DUMMY] = true;
     isTriggerAura[SPELL_AURA_PERIODIC_TRIGGER_SPELL] = true;
+    isTriggerAura[SPELL_AURA_HASTE_SPELLS] = true;
 
     isNonTriggerAura[SPELL_AURA_MOD_POWER_REGEN] = true;
     isNonTriggerAura[SPELL_AURA_REDUCE_PUSHBACK] = true;
@@ -16750,6 +16764,11 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
                     case SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK:
                         // Skip melee hits or instant cast spells
                         if (procSpell && procSpell->CalcCastTime() != 0)
+                            takeCharges = true;
+                        break;
+                    case SPELL_AURA_HASTE_SPELLS:
+                        // Skip melee hits or instant cast spells
+                        if (procSpell && procSpell->CalcCastTime() > 0)
                             takeCharges = true;
                         break;
                     case SPELL_AURA_REFLECT_SPELLS_SCHOOL:
@@ -17748,25 +17767,7 @@ void Unit::Kill(Unit* victim, bool durabilityLoss, SpellInfo const* spellProto)
 
         if (creature)
         {
-            // set last killed creature for all eligible group members
-            if (Group* group = player->GetGroup())
-            {
-                for (auto &memberSlot : group->GetMemberSlots())
-                {
-                    // not eligible if player is offline
-                    Player* member = ObjectAccessor::FindPlayer(memberSlot.guid);
-                    if (!member)
-                        continue;
-
-                    // not eligible if player did no damage to the creature
-                    if (!creature->GetTotalDamageTakenFromPlayer(memberSlot.guid))
-                        continue;
-
-                    member->SetLastKilledCreature(creature->GetEntry());
-                }
-            }
-            else
-                player->SetLastKilledCreature(creature->GetEntry());
+            player->SetLastKilledCreature(creature);
 
             // handle LFR loot for unit
             if (GetMap()->GetDifficulty() == RAID_TOOL_DIFFICULTY)

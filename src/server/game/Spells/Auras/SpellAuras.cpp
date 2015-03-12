@@ -1534,7 +1534,11 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     case 42292: // PvP Trinket
                     case 59752: // Every Man for Himself
                         if (target && target->GetTypeId() == TYPEID_PLAYER)
+                        {
                             target->CastSpell(target, (target->ToPlayer()->GetTeam() == ALLIANCE ? 97403 : 97404), true);
+                            if (Pet* pet = target->ToPlayer()->GetPet())
+                                pet->RemoveAurasWithMechanic(IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK, AURA_REMOVE_BY_DEFAULT, GetId());
+                        }
                         break;
                     // Magma, Echo of Baine
                     case 101619:

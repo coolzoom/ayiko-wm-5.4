@@ -2530,7 +2530,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_CHANGE_MAP | AURA_INTERRUPT_FLAG_MOVE | AURA_INTERRUPT_FLAG_TURNING);
 
             // reset last killed creature before transfering
-            SetLastKilledCreature(0);
+            SetLastKilledCreature(nullptr);
 
             if (!GetSession()->PlayerLogout())
             {
@@ -9956,8 +9956,8 @@ void Player::HandleLFRLoot(WorldObject* object, uint32 lootId, bool lastKilled)
             raidMembers.insert(member);
         }
 
-        // if looting LFR GO, WorldObject parameter will be the GO and not the boss killed, use last creature killed instead
-        auto creatureTemplate = lastKilled ? sObjectMgr->GetCreatureTemplate(GetLastKilledCreature()) : object->ToCreature()->GetCreatureTemplate();
+        // if looting LFR GO, WorldObject parameter will be the GO and not the boss killed, use last bind creature that the group killed instead
+        auto creatureTemplate = lastKilled ? sObjectMgr->GetCreatureTemplate(group->GetLastBind()) : object->ToCreature()->GetCreatureTemplate();
 
         auto gameObject = object->ToGameObject();
         auto creature = object->ToCreature();
@@ -29800,4 +29800,34 @@ uint32 Player::GetLootSpecOrClassSpec() const
         return GetSpecializationId(GetActiveSpec());
 
     return specialisation;
+}
+
+void Player::SetLastKilledCreature(Creature* creature)
+{
+    // reset case
+    if (!creature)
+    {
+        m_lastKilledCreatureId = 0;
+        return;
+    }
+
+    // set last killed creature for all eligible group members
+    if (Group* group = GetGroup())
+    {
+        for (auto &memberSlot : group->GetMemberSlots())
+        {
+            // not eligible if player is offline
+            Player* member = ObjectAccessor::FindPlayer(memberSlot.guid);
+            if (!member)
+                continue;
+
+            // not eligible if player did no damage to the creature
+            if (!creature->GetTotalDamageTakenFromPlayer(memberSlot.guid))
+                continue;
+
+            m_lastKilledCreatureId = creature->GetEntry();
+        }
+    }
+    else
+        m_lastKilledCreatureId = creature->GetEntry();
 }

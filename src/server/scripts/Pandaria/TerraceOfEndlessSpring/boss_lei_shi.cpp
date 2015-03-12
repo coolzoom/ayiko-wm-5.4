@@ -329,9 +329,15 @@ class boss_lei_shi : public CreatureScript
                     me->setRegeneratingHealth(false);
 
                     if (attacker && attacker->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        attacker->ToPlayer()->SetLastKilledCreature(me);
                         me->GetMap()->ToInstanceMap()->PermBindAllPlayers(attacker->ToPlayer());
+                    }
                     else if (attacker && attacker->GetTypeId() == TYPEID_UNIT && attacker->GetOwner() && attacker->GetOwner()->ToPlayer())
+                    {
+                        attacker->GetOwner()->ToPlayer()->SetLastKilledCreature(me);
                         me->GetMap()->ToInstanceMap()->PermBindAllPlayers(attacker->GetOwner()->ToPlayer());
+                    }
 
                     leiShiFreed = true;
                     Talk(TALK_DEFEATED);

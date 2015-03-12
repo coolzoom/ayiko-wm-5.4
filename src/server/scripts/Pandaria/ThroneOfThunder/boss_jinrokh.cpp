@@ -113,6 +113,21 @@ public:
     }
 };
 
+class scaleCheckPredicate
+{
+public:
+    scaleCheckPredicate(Unit* caster) : _caster(caster) {}
+
+    bool operator()(WorldObject* target) const
+    {
+        if (target && target->GetExactDist2d(_caster) > _caster->GetFloatValue(OBJECT_FIELD_SCALE_X))
+            return true;
+        return false;
+    }
+private:
+    Unit* _caster;
+};
+
 static const Position aWaterPos[4] = 
 {
     { 5864.490f, 6290.628f, 124.03f, 5.51f },
@@ -203,6 +218,7 @@ public:
             if (uiPointId == 1948)
             {
                 DoCastBossSpell(me->GetVictim(), SPELL_LIGHTNING_STORM, false, 3000);
+                //DoCast(me, SPELL_LIGHTNING_STORM_VISUAL, true);
             }
         }
 
@@ -230,7 +246,7 @@ public:
                     break;
                 case EVENT_LIGHTNING_STORM:
                     DoHandleLightningStorm();
-                    me->GetMotionMaster()->MoveJump(aCenterPos, 20.f, 20.f, 1948);
+                    me->GetMotionMaster()->MoveJump(aCenterPos, 50.f, 50.f, 1948);
                     events.ScheduleEvent(EVENT_LIGHTNING_STORM, 90000);
                     events.ScheduleEvent(EVENT_THUNDERING_THROW, 30000);
                     break;
@@ -881,6 +897,9 @@ public:
         {
             if (iAction == ACTION_DESTROYED)
             {
+                me->UpdateObjectVisibility();
+                //me->UpdatePosition(me->GetPosition);
+
                 TC_LOG_ERROR("scripts", "Called");
                 events.ScheduleEvent(EVENT_TOSS_PLAYER, 2000);
                 events.ScheduleEvent(EVENT_WATER_BEAM, 4000);
@@ -1050,6 +1069,104 @@ public:
     }
 };
 
+class spell_conductive_water_dummy : public SpellScriptLoader
+{
+public:
+    spell_conductive_water_dummy() : SpellScriptLoader("spell_conductive_water_dummy") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void SelectTargets(std::list<WorldObject*>&targets)
+        {
+            if (Unit* caster = GetCaster())
+                targets.remove_if(scaleCheckPredicate(caster));
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_impl::SelectTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+        }
+    };
+
+    class aura_impl : public AuraScript
+    {
+        PrepareAuraScript(aura_impl);
+
+        uint32 spellId() const
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->HasAura(SPELL_ELECTRIFIED_WATER_VISUAL))
+                    return SPELL_ELECTRIFIED_WATERS;
+
+                return SPELL_FLUIDITY;
+            }
+
+            return 0;
+        }
+
+        float GetSizeProp(Unit* propagator) const
+        {
+            if (Aura* pAura = propagator->GetAura(SPELL_CONDUCTIVE_WATER_GROW))
+            {
+                return pAura->GetStackAmount() / 2;
+            }
+
+            return 0;
+        }
+
+        void HandleOnApply(AuraEffect const *aurEff, AuraEffectHandleModes mode)
+        {
+            Unit* owner = GetTarget();
+            Unit* caster = GetCaster();
+
+            if (!owner || !caster)
+                return;
+
+            if (!owner->HasAura(spellId()))
+                caster->CastSpell(owner, spellId(), true);
+        }
+
+        void HandleOnRemove(AuraEffect const *aurEff, AuraEffectHandleModes mode)
+        {
+            Unit* owner = GetTarget();
+            Unit* caster = GetCaster();
+
+            if (!owner || !caster)
+                return;
+
+            if (Aura* pAura = owner->GetAura(SPELL_FLUIDITY, caster->GetGUID()))
+            {
+                if (owner->GetExactDist2d(caster) > GetSizeProp(caster))
+                    pAura->Remove(AURA_REMOVE_BY_EXPIRE);
+            }
+            else if (Aura* pAura = owner->GetAura(SPELL_ELECTRIFIED_WATERS, caster->GetGUID()))
+            {
+                if (owner->GetExactDist2d(caster) > GetSizeProp(caster))
+                    pAura->Remove(AURA_REMOVE_BY_EXPIRE);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(aura_impl::HandleOnApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            OnEffectRemove += AuraEffectRemoveFn(aura_impl::HandleOnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+
+    AuraScript* GetAuraScript() const
+    {
+        return new aura_impl();
+    }
+};
+
 void AddSC_boss_jinrokh()
 {
     new boss_jinrokh();
@@ -1068,4 +1185,5 @@ void AddSC_boss_jinrokh()
     new spell_thundering_throw();
     new npc_jinrokh_statue();
     new npc_conductive_water();
+    new spell_conductive_water_dummy();
 }

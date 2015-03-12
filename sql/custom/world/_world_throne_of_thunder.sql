@@ -287,7 +287,7 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 
 -- Jin'rokh
 -- Spell Scripts
-DELETE FROM `spell_script_names` WHERE `spell_id` IN (137162,137194,137374,137389,137429,137507,138349,138389,138568,138990, 137161, 137180);
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (137162,137194,137374,137389,137429,137507,138349,138389,138568,138990, 137161, 137180, 137168);
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (137162, 'spell_static_burst'),
 (137194, 'spell_focused_lightning_targeting'),
@@ -300,7 +300,8 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (138568, 'spell_lightning_storm_visual'),
 (138990, 'spell_focused_lightning_detonation'),
 (137161, 'spell_thundering_throw_silence'),
-(137180, 'spell_thundering_throw');
+(137180, 'spell_thundering_throw'),
+(137168, 'spell_conductive_water_dummy');
 
 -- Templates
 DELETE FROM creature_template WHERE entry = 69467;

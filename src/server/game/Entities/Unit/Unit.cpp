@@ -11979,6 +11979,16 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                 if (AuraEffect *aurEff = GetAuraEffect(64962, EFFECT_1))
                     DoneTotal += aurEff->GetAmount();
             break;
+        case SPELLFAMILY_SHAMAN:
+        {
+            switch (spellProto->Id)
+            {
+                case 77478: // Earthquake
+                    DoneTotal += SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_NATURE) * 0.11f;
+                    break;
+            }
+            break;
+        }
         case SPELLFAMILY_PALADIN:
         {
             if (spellProto->Id == 119072) // Glyph of Final Wrath

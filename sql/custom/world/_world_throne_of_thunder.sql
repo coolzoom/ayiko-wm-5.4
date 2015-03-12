@@ -307,7 +307,7 @@ REPLACE INTO `creature_model_info` (`modelid`, `bounding_radius`, `combat_reach`
 (48245, 0, 0, 2);
 
 -- Creature Auras & Bytes
-DELETE FROM `creature_template_aura` WHERE `entry` IN (32641,32642,54020,69135,69176,69184,69185,69909,69927,70056,70060,70246,70557,73400);
+DELETE FROM `creature_template_aura` WHERE `entry` IN (32641,32642,54020,69135,69176,69184,69185,69909,69927,70056,70060,70246,70445,70557,73400);
 INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES
 (32641,61424),
 (32642,61424),
@@ -322,6 +322,7 @@ INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES
 (70056,91218),
 (70060,138719),
 (70246,139364),
+(70445,139900),
 (70557,140115),
 (73400,147490);
 
@@ -401,35 +402,101 @@ INSERT INTO `creature` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMa
 (@CGUID+49, 69467, 1098, 0, 0, 248, 1, 0, 0, 5835.62, 6206.6, 158.822, 0.821134, 300, 0, 0, 84, 0, 0, 0, 0, 0, 2048, 0, 0, NULL);
 
 -- Creature Emote
-DELETE FROM `creature_emote` WHERE `guid` IN (@CGUID+6,@CGUID+10,@CGUID+19,@CGUID+20,@CGUID+21,@CGUID+22,@CGUID+23,@CGUID+24,@CGUID+26,@CGUID+28,@CGUID+29,@CGUID+30,@CGUID+31,@CGUID+32,@CGUID+33,@CGUID+34,@CGUID+35,@CGUID+36,@CGUID+37,@CGUID+38);
+DELETE FROM `creature_emote` WHERE `guid` IN (@CGUID+6,@CGUID+19,@CGUID+20,@CGUID+21,@CGUID+22,@CGUID+23,@CGUID+24,@CGUID+26,@CGUID+28,@CGUID+29,@CGUID+30,@CGUID+31,@CGUID+32,@CGUID+33,@CGUID+34,@CGUID+35,@CGUID+36,@CGUID+37,@CGUID+38);
 INSERT INTO `creature_emote` VALUES
 (@CGUID+6,36),
-(@CGUID+19,45),
-(@CGUID+20,45),
-(@CGUID+21,45),
-(@CGUID+22,45),
-(@CGUID+23,45),
-(@CGUID+24,45),
+(@CGUID+19,333),
+(@CGUID+20,333),
+(@CGUID+21,333),
+(@CGUID+22,333),
+(@CGUID+23,333),
+(@CGUID+24,333),
 (@CGUID+26,37),
 (@CGUID+28,37),
 (@CGUID+29,36),
 (@CGUID+30,36),
 (@CGUID+31,37),
-(@CGUID+32,45),
-(@CGUID+33,45),
-(@CGUID+34,45),
-(@CGUID+35,45),
-(@CGUID+36,45),
-(@CGUID+37,45),
-(@CGUID+38,45);
+(@CGUID+32,333),
+(@CGUID+33,333),
+(@CGUID+34,333),
+(@CGUID+35,333),
+(@CGUID+36,333),
+(@CGUID+37,333),
+(@CGUID+38,333);
 
 DELETE FROM `creature_bytes` WHERE `guid` IN (@CGUID+18);
 INSERT INTO `creature_bytes` VALUES
 (@CGUID+18,0,8);
 
 -- Creature Speeches
-DELETE FROM `creature_text` WHERE `entry` IN (69465);
+DELETE FROM `creature_text` WHERE `entry` IN (68036,69017,69078,69131,69132,69134,69374,69465,70056);
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(68036, 0,  0, 'Thousands of years ... without new playthings ... I will enjoy this.', 14, 0, 100, 0, 0, 35339, 'Durumu the Forgotten - Intro'),
+(68036, 1,  0, 'Behold the power of the void.', 14, 0, 100, 0, 0, 35336, 'Durumu the Forgotten - Aggro'),
+(68036, 2,  0, 'I\'m keeping an eye on you.', 14, 0, 100, 0, 0, 35344, 'Durumu the Forgotten - Lingering Gaze'),
+(68036, 3,  0, 'Observe your demise.', 14, 0, 100, 0, 0, 35345, 'Durumu the Forgotten - Hard Stare'),
+(68036, 4,  0, 'The mists hide many secrets ... if you know where to look.', 14, 0, 100, 0, 0, 35343, 'Durumu the Forgotten - Colorblind'),
+(68036, 5,  0, 'Watch your footing ... muhahaha!', 14, 0, 100, 0, 0, 35342, 'Durumu the Forgotten - Disintegration Beam'),
+(68036, 6,  0, 'I expected so much more. How ... disappointing.', 14, 0, 100, 0, 0, 35337, 'Durumu the Forgotten - Berserk'),
+(68036, 7,  0, 'Do you see what I did there?', 14, 0, 100, 0, 0, 35340, 'Durumu the Forgotten - Kill01'),
+(68036, 7,  1, 'Looks like you couldn\'t keep up ... pity.', 14, 0, 100, 0, 0, 35341, 'Durumu the Forgotten - Kill02'),
+(68036, 8,  0, 'I ... welcome ... the void\'s ... embrace.', 14, 0, 100, 0, 0, 35338, 'Durumu the Forgotten - Death'),
+
+(69017, 0,  0, 'So cold, so dark...', 12, 0, 100, 0, 0, 35744, 'Primordius - Intro01'),
+(69017, 1,  0, 'We will not be forgotten, no, no, no...', 12, 0, 100, 0, 0, 35745, 'Primordius - Intro02'),
+(69017, 2,  0, 'We are the perfect one, yes, yes, not a failure, no no, not a failure...', 12, 0, 100, 0, 0, 35746, 'Primordius - Intro03'),
+(69017, 3,  0, 'What is this? What do they want? To punish us? No, no...', 12, 0, 100, 0, 0, 35747, 'Primordius - Intro04'),
+(69017, 4,  0, 'Your flesh, yes yes, so perfect, GIVE IT TO US!', 14, 0, 100, 0, 0, 35742, 'Primordius - Aggro'),
+(69017, 5,  0, 'No no no, the pain returns!', 14, 0, 100, 0, 0, 35749, 'Primordius - Evolution01'),
+(69017, 5,  1, 'It tears at us from the inside!', 14, 0, 100, 0, 0, 36112, 'Primordius - Evolution02'),
+(69017, 6,  0, 'Who is perfect now? Yes, yes...', 14, 0, 100, 0, 0, 35748, 'Primordius - Kill'),
+(69017, 7,  0, 'Again...we are torn apart...again...to the cold darkness...', 14, 0, 100, 0, 0, 35743, 'Primordius - Death'),
+
+(69078, 0,  0, 'Da sands will consume everyting!', 14, 0, 100, 0, 0, 35812, 'Sul the Sandcrawler - Aggro'),
+(69078, 1,  0, 'I will bury ya all!', 14, 0, 100, 0, 0, 35813, 'Sul the Sandcrawler - On Possess'),
+(69078, 2,  0, 'Da storm approaches!', 14, 0, 100, 0, 0, 35818, 'Sul the Sandcrawler - Sandstorm'),
+(69078, 3,  0, 'Watch yer step!', 14, 0, 100, 0, 0, 35817, 'Sul the Sandcrawler - Quicksand'),
+(69078, 4,  0, 'Da sands are endless.', 14, 0, 100, 0, 0, '35815', 'Sul the Sandcrawler - Kill01'),
+(69078, 4,  1, 'Da first of many!', 14, 0, 100, 0, 0, '35816', 'Sul the Sandcrawler - Kill02'),
+(69078, 5,  0, 'I return... to... da... sands...', 14, 0, 100, 0, 0, '36454', 'Sul the Sandcrawler - On Death'),
+
+(69131, 0,  0, 'Ya have met your match, fools!', 14, 0, 100, 0, 0, 35387, 'Frost King Malakk - Aggro'),
+(69131, 1,  0, 'Winter is coming...', 14, 0, 100, 0, 0, 35389, 'Frost King Malakk - On Possess'),
+(69131, 2,  0, 'Getting cold?', 14, 0, 100, 0, 0, 35393, 'Frost King Malakk - Frostbite'),
+(69131, 2,  1, 'Freeze!', 14, 0, 100, 0, 0, 35394, 'Frost King Malakk - Frostbite'),
+(69131, 3,  0, 'Death\'s cold embrace.', 14, 0, 100, 0, 0, 35391, 'Frost King Malakk - Kill01'),
+(69131, 3,  1, 'Witness da Drakkari\'s might.', 14, 0, 100, 0, 0, 35392, 'Frost King Malakk - Kill02'),
+(69131, 4,  0, 'Da... empire... can\'t... fall...', 14, 0, 100, 0, 0, 35388, 'Frost King Malakk - On Death'),
+
+(69132, 0,  0, 'Death ta all who appose da empire!', 14, 0, 100, 0, 0, 35432, 'High Priestess Marli - On Aggro'),
+(69132, 1,  0, 'Da spiritbinder reveals yer soul ta me!', 14, 0, 100, 0, 0, 35434, 'High Priestess Marli - On Possess'),
+(69132, 2,  0, 'Succumb ta her venom!', 14, 0, 100, 0, 0, 35438, 'High Priestess Marli - Shadowed Loa Spirit'),
+(69132, 2,  1, 'Yer soul belongs ta me!', 14, 0, 100, 0, 0, 35439, 'High Priestess Marli - Shadowed Loa Spirit'),
+(69132, 2,  2, 'Embrace yer demise!', 14, 0, 100, 0, 0, 35440, 'High Priestess Marli - Shadowed Loa Spirit'),
+(69132, 3,  0, 'Another offering to da loa!', 14, 0, 100, 0, 0, 35436, 'High Priestess Marli - Kill01'),
+(69132, 3,  1, 'She will feast on yer soul!', 14, 0, 100, 0, 0, 35437, 'High Priestess Marli - Kill02'),
+(69132, 4,  0, 'Shadra... save... me...', 14, 0, 100, 0, 0, 35433, 'High Priestess Marli - On Death'),
+
+(69134, 0,  0, 'Dis is gonna hurt!', 14, 0, 100, 0, 0, 35566, 'Kazrajin - Aggro'),
+(69134, 1,  0, 'Lei Shen! Give us strenght!', 14, 0, 100, 0, 0, 35568, 'Kazrajin - On Possess'),
+(69134, 2,  0, 'Incoming!', 14, 0, 100, 0, 0, 35574, 'Kazrajin - Reckless Charge'),
+(69134, 2,  1, 'Out da way!', 14, 0, 100, 0, 0, 35573, 'Kazrajin - Reckless Charge'),
+(69134, 3,  0, 'Shocking!', 14, 0, 100, 0, 0, 35576, 'Kazrajin - Overload /Discharge'),
+(69134, 4,  0, 'Ya shouldn\'t be messin\' wit da Zandalari!', 14, 0, 100, 0, 0, 35571, 'Kazrajin - Kill01'),
+(69134, 4,  1, 'On ya knees!', 14, 0, 100, 0, 0, '35572', 'Kazrajin - Kill02'),
+(69134, 5,  0, 'Da thunder king... promised...', 14, 0, 100, 0, 0, 35567, 'Kazrajin - On Death'),
+
+(69374, 0, 0, 'Welcome, weaklings, to the rebirth of the Zandalari Empire!', 14, 0, 100, 0, 0, 36009, 'War-God Jalak INTRO 1'),
+(69374, 1, 0, 'The tribes have assembled - ye face not one force, but the combined might of all of the troll empire! The hand of Zul will span all the continents of Azeroth once again! An ye lesser races will know pain!', 14, 0, 100, 0, 0, 36010, 'War-God Jalak INTRO 2'),
+(69374, 2, 0, 'Now, witness the true might of the Beast Ward. D\'akala di\'chuka HORRIDON! Kalimaste!', 14, 0, 100, 0, 0, 36011, 'War-God Jalak INTRO 3'),
+(69374, 3, 0, 'Hahaha! Now it be my turn! Ye gonna see what it means to be a War-God!', 14, 0, 100, 0, 0, 36007, 'War-God Jalak aggro'),
+(69374, 4, 0, 'Drakkari tribe, show them the might of the frozen North!', 14, 0, 100, 0, 0, 36013, 'War-God Jalak SPELL 1'),
+(69374, 5, 0, 'Gurubashi tribe, send their bloated corpses down the river with ya jungle poisons.', 14, 0, 100, 0, 0, 36014, 'War-God Jalak SPELL 2'),
+(69374, 6, 0, 'Farraki tribe, flay their flesh wit the fury of the sands!', 14, 0, 100, 0, 0, 36015, 'War-God Jalak SPELL 3'),
+(69374, 7, 0, 'Amani tribe, avenge ye fallen warlords, in the name of Zul\'jin!', 14, 0, 100, 0, 0, 36016, 'War-God Jalak SPELL 4'),
+(69374, 8, 0, 'Ya skull gonna make a fine ornament for my tusks.', 14, 0, 100, 0, 0, 36012, 'War-God Jalak Kill'),
+(69374, 9, 0, 'Da\'kala koraste...Horridon...destroy them...', 14, 0, 100, 0, 0, 36008, 'War-God Jalak Death'),
+
 (69465, 0,  0, 'Da Thunder King give me power! Come, I show you!', 14, 0, 100, 0, 0, 35550,'Jin''rokh the Breaker - Intro'),
 (69465, 1,  0, 'I must break you.', 14, 0, 100, 0, 0, 35547,  'Jin''rokh the Breaker - Aggro'),
 (69465, 2,  0, 'Smash!', 14, 0, 100, 0, 0, 35553,  'Jin''rokh the Breaker - Static Burst'),
@@ -442,7 +509,21 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (69465, 9,  0, 'Weak.', 14, 0, 100, 0, 0, 35551,  'Jin''rokh the Breaker - Kill01'),
 (69465, 9,  1, 'So easy to break.', 14, 0, 100, 0, 0, 35552,  'Jin''rokh the Breaker - Kill02'),
 (69465, 10, 0, 'Bored. You die now.', 14, 0, 100, 0, 0, 35552,  'Jin''rokh the Breaker - Berserk'),
-(69465, 11, 0, 'How you beat me?', 14, 0, 100, 0, 0, 35549,  'Jin''rokh the Breaker Death');
+(69465, 11, 0, 'How you beat me?', 14, 0, 100, 0, 0, 35549,  'Jin''rokh the Breaker Death'),
+
+(70056, 0,  0, 'Let me share dis gift with ya!', 14, 0, 100, 11, 0, 35395, 'Gara\'jal the Spiritbinder- Event01'),
+(70056, 1,  0, 'Ya\' spirit is mine', 14, 0, 100, 11, 0, 35396, 'Gara\'jal the Spiritbinder- Event02'),
+(70056, 2,  0, 'De Thunder King will reward us for stoppin\' ya!', 14, 0, 100, 11, 0, 35397, 'Gara\'jal the Spiritbinder- Event03'),
+(70056, 3,  0, 'Witness the power of da spiritbinder!', 14, 0, 100, 11, 0, '35398', 'Gara\'jal the Spiritbinder- Event04'),
+(70056, 4,  0, 'Time to die!', 14, 0, 100, 0, 0, '35399', 'Gara\'jal the Spiritbinder- Event05'),
+(70056, 5,  0, 'Da Zandalari cannot be stopped!', 14, 0, 100, 53, 0, 35400, 'Gara\'jal the Spiritbinder- Event06'),
+(70056, 6,  0, 'Wit de Thunder King\'s power de Zandalari will be reborn!', 14, 0, 100, 53, 0, 35401, 'Gara\'jal the Spiritbinder- Event07'),
+(70056, 7,  0, 'Lei Shen\'s power makes us stronger', 14, 0, 100, 53, 0, 35402, 'Gara\'jal the Spiritbinder- Event08'),
+(70056, 8,  0, 'Ya\' soul will pay da price', 14, 0, 100, 0, 0, 35403, 'Gara\'jal the Spiritbinder- Event09'),
+(70056, 9,  0, 'Des fools thought they beat me once before. Dey only make me stronger. Now we show dem da true power of the Zandalari!', 14, 0, 100, 11, 0, 35404,  'Gara\'jal the Spiritbinder- Event10'),
+(70056, 10, 0, 'Lei Shen let us prove ta ya the might of the Zandalari. We will crush des intruders where dey stand!', 14, 0, 100, 0, 0, 35405, 'Gara\'jal the Spiritbinder- Event11'),
+(70056, 11, 0, 'We will never fail ya!', 14, 0, 100, 0, 0, 35406, 'Gara\'jal the Spiritbinder- Event12');
+
 
 -- Gameobjects templates
 REPLACE INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `faction`, `flags`, `size`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `data0`, `data1`, `data2`, `data3`, `data4`, `data5`, `data6`, `data7`, `data8`, `data9`, `data10`, `data11`, `data12`, `data13`, `data14`, `data15`, `data16`, `data17`, `data18`, `data19`, `data20`, `data21`, `data22`, `data23`, `AIName`, `ScriptName`, `WDBVerified`) VALUES

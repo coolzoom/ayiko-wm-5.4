@@ -11969,7 +11969,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                         DoneTotal += (player->SpellBaseDamageBonusDone(spellProto->GetSchoolMask()) * 0.9f);
                     break;
                 case 42223: // Rain of Fire
-                    if (victim->HasAura(348, GetGUID()))
+                    if (victim->HasAura(348, GetGUID()) || victim->HasAura(108686, GetGUID()))
                         AddPct(DoneTotalMod, 50);
                     break;
             }

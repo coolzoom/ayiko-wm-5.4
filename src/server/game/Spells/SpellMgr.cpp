@@ -3842,6 +3842,9 @@ void SpellMgr::LoadSpellCustomAttr()
                     break;
                 case 117230:// Overpowered
                     spellInfo->Effects[0].Effect = SPELL_EFFECT_APPLY_AURA;
+                    break;            
+                case 118787: // Resin Burst
+                    spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(13);
                     break;
                 case 117988:// Defiled Ground
                     spellInfo->Effects[0].Effect = 0;

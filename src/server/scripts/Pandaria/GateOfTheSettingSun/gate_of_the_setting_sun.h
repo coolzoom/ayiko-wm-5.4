@@ -33,6 +33,7 @@ enum DataTypes
     DATA_FALL_DEFENDERS         = 18,
     DATA_SIGNAL_FIRE            = 19,
     DATA_ROPE                   = 20,
+    DATA_ARTILLERY_STATE        = 21,
     MAX_DATA
 };
 
@@ -53,7 +54,7 @@ enum CreaturesIds
     NPC_KRITHIK_INFILTRATOR     = 58108,
     NPC_KRITHIK_WND_SHAPER      = 59801,
     NPC_KRITHIK_DEMOLISHER      = 56875,
-    NPC_KRITHIK_SHAPER          = 56876,
+	NPC_KRITHIK_SHAPER          = 56876,
     NPC_ARCHER_TARGET_SPAWNER   = 59886,
     NPC_ROPE                    = 64710,
     NPC_CANNONEER               = 66905,
@@ -94,7 +95,8 @@ enum CreaturesIds
     NPC_KRIKTHIK_ENGULFER       = 56912,
     NPC_KRIKTHIK_SWARM_BRINGER  = 56930,
 
-    NPC_ARTILLERY               = 59819
+    NPC_ARTILLERY               = 59819,
+    NPC_ARTILLERY_TO_WALL       = 66904
 };
 
 enum ObjectsIds
@@ -128,10 +130,10 @@ enum eSettingSun
 
 Position const SummonPositionsFallEvent[4] =
 {
-    { 857.320f, 2291.856f, 296.106f, 3.140f },
-    { 855.458f, 2301.396f, 296.106f, 3.140f },
-    { 854.624f, 2310.943f, 296.106f, 3.140f },
-    { 855.435f, 2320.992f, 296.106f, 3.140f }
+    { 857.320f, 2291.856f, 358.106f, 3.140f },
+    { 855.458f, 2301.396f, 358.106f, 3.140f },
+    { 854.624f, 2310.943f, 358.106f, 3.140f },
+    { 855.435f, 2320.992f, 358.106f, 3.140f }
 };
 
 const float JumpPositionsFallEvent[4][3] =

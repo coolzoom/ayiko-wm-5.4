@@ -16548,13 +16548,18 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
         if (procSpell && procSpell->Id == 123725 && itr->first == 123393)
             continue;
 
-        // Some spells can proc on absorb
-        if (triggerData.aura && triggerData.aura->GetSpellInfo() && (triggerData.aura->GetSpellInfo()->Id == 33757 ||
-            triggerData.aura->GetSpellInfo()->Id == 28305 || triggerData.aura->GetSpellInfo()->Id == 2823 ||
-            triggerData.aura->GetSpellInfo()->Id == 3408 || triggerData.aura->GetSpellInfo()->Id == 5761 ||
-            triggerData.aura->GetSpellInfo()->Id == 8679 || triggerData.aura->GetSpellInfo()->Id == 108211 ||
-            triggerData.aura->GetSpellInfo()->Id == 108215 || triggerData.aura->GetSpellInfo()->GetSpellSpecific() == SPELL_SPECIFIC_SEAL ||
-            triggerData.aura->GetSpellInfo()->HasAura(SPELL_AURA_MOD_STEALTH) || triggerData.aura->GetSpellInfo()->HasAura(SPELL_AURA_MOD_INVISIBILITY)))
+        // Some procflags that should be triggered when damage is absorbed
+        if (procExtra & PROC_EX_ABSORB && !isVictim)
+        {
+            if (spellProto->ProcFlags & (PROC_FLAG_DONE_MELEE_AUTO_ATTACK))
+                active = true;
+
+            // Dummy auras have to be handled individually
+            if (spellProto->HasAura(SPELL_AURA_DUMMY))
+                active = true;
+        }
+
+        if (spellProto->HasAura(SPELL_AURA_MOD_STEALTH) || spellProto->HasAura(SPELL_AURA_MOD_INVISIBILITY))
             active = true;
 
         if (!IsTriggeredAtSpellProcEvent(target, triggerData.aura, procSpell, procFlag, procExtra, attType, isVictim, active, triggerData.spellProcEvent))

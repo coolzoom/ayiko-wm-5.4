@@ -267,7 +267,7 @@ void Battleground::Update(uint32 diff)
             // after 20 minutes without one team losing, the arena closes with no winner and no rating change
             if (isArena())
             {
-                if (GetElapsedTime() >= 10 * MINUTE * IN_MILLISECONDS) // Dampening
+                if (GetElapsedTime() >= 5 * MINUTE * IN_MILLISECONDS) // Dampening
                 {
                     for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
                     {

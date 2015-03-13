@@ -5434,10 +5434,16 @@ void Unit::SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo)
     bool overheal = pInfo->overDamage && (aura->GetAuraType() == SPELL_AURA_PERIODIC_HEAL || aura->GetAuraType() == SPELL_AURA_OBS_MOD_HEALTH);
     bool overdamage = pInfo->overDamage && (aura->GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE || aura->GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
 
+    uint32 MaskOrPowerID = 0;
+    if (aura->GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE || aura->GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE_PERCENT)
+        MaskOrPowerID = aura->GetSpellInfo()->GetSchoolMask();
+    if (aura->GetAuraType() == SPELL_AURA_PERIODIC_HEAL || aura->GetAuraType() == SPELL_AURA_OBS_MOD_HEALTH ||aura->GetAuraType() == SPELL_AURA_PERIODIC_ENERGIZE)
+        MaskOrPowerID = aura->GetMiscValue();
+
     data.WriteBit(pInfo->critical);                         // IsCrit
     data.WriteBit(!overdamage);                             // Inversed, HasOverkill
     data.WriteBit(!(pInfo->absorb > 0));                    // Inversed, HasAbsorb
-    data.WriteBit(!aura->GetSpellInfo()->GetSchoolMask());  // Inversed, HasSchoolMask
+    data.WriteBit(!MaskOrPowerID);  // Inversed, HasSchoolMask
     data.WriteBit(!overheal);                               // Inversed, HasOverHeal
     data.WriteBitSeq<0>(casterGuid);
     data.WriteBitSeq<0, 7, 3, 6, 5>(targetGuid);
@@ -5458,8 +5464,8 @@ void Unit::SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo)
 
     data << uint32(pInfo->damage);
 
-    if (aura->GetSpellInfo()->GetSchoolMask())
-        data << uint32(aura->GetSpellInfo()->GetSchoolMask());
+    if (MaskOrPowerID)
+        data << uint32(MaskOrPowerID);
 
     data.WriteByteSeq<0, 4, 2>(targetGuid);
 

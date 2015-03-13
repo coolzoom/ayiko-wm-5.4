@@ -5071,6 +5071,8 @@ void Player::RemoveArenaSpellCooldowns(bool removeActivePetCooldowns)
         }
     }
 
+    spellChargesTracker_.RemoveArenaSpellChargesCooldown();
+
     // pet cooldowns
     if (removeActivePetCooldowns)
         if (Pet* pet = GetPet())

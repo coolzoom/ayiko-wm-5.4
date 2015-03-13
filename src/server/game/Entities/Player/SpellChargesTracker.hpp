@@ -22,6 +22,8 @@ public:
 
     void update(std::uint32_t diff);
 
+    void RemoveArenaSpellChargesCooldown();
+
 private:
     std::unordered_map<std::uint32_t, ChargeData> spellChargesMap_;
 };

@@ -31,6 +31,7 @@ enum eSpells : uint32
     SPELL_IMPLOSION                         = 137507,
 
     SPELL_CONDUCTIVE_WATER_GROW_AURA        = 137694,
+    SPELL_CONDUCTIVE_WATERS                 = 138470,
     SPELL_ELECTRIFIED_WATERS                = 138006,
     SPELL_FLUIDITY                          = 138002,
 
@@ -120,12 +121,31 @@ public:
 
     bool operator()(WorldObject* target) const
     {
-        if (target && target->GetExactDist2d(_caster) > _caster->GetFloatValue(OBJECT_FIELD_SCALE_X))
+        if (target && target->GetExactDist2d(_caster) > GetSizeProp(_caster))
             return true;
         return false;
     }
 private:
     Unit* _caster;
+
+    float GetSizeProp(Unit* propagator) const
+    {
+        if (Aura* pAura = propagator->GetAura(SPELL_CONDUCTIVE_WATER_GROW))
+        {
+            return ((float)0.5f * pAura->GetStackAmount()) + propagator->GetFloatValue(UNIT_FIELD_BOUNDINGRADIUS);
+        }
+
+        return 0;
+    }
+};
+
+class notPlayerOrPetPredicate
+{
+public:
+    bool operator()(WorldObject*target) const
+    {
+        return target && target->GetTypeId() != TYPEID_PLAYER;
+    }
 };
 
 static const Position aWaterPos[4] = 
@@ -218,7 +238,8 @@ public:
             if (uiPointId == 1948)
             {
                 DoCastBossSpell(me->GetVictim(), SPELL_LIGHTNING_STORM, false, 3000);
-                me->AddAura(SPELL_LIGHTNING_STORM_VISUAL, me);
+                if (Aura* pAura = me->AddAura(SPELL_LIGHTNING_STORM_VISUAL, me))
+                    pAura->SetDuration(15000);
             }
         }
 
@@ -288,8 +309,21 @@ public:
             Initialize();
         }
 
+        uint64 m_targetGuid;
+
+        void SetGUID(uint64 guid, int32)
+        {
+            m_targetGuid = guid;
+        }
+
+        uint64 GetGUID(int32)
+        {
+            return m_targetGuid;
+        }
+
         void Initialize()
         {
+            m_targetGuid = 0;
             me->AddAura(SPELL_FOCUSED_LIGHTNING_VISUAL, me);
             me->AddAura(SPELL_FOCUSED_LIGHTNING_SPEED, me);
 
@@ -626,7 +660,7 @@ public:
             if (const SpellInfo* pSpellInfo = sSpellMgr->GetSpellInfo(SPELL_STATIC_WOUND, GetOwner()->GetMap()->GetDifficulty()))
             {
                 int32 m_bp = pSpellInfo->Effects[0].BasePoints;
-                int32 final_dmg = (m_bp * m_stacks) / 3;
+                int32 final_dmg = (m_bp * m_stacks); /// 3;
 
                 if (Unit* pOwner = GetOwner()->ToUnit())
                 {
@@ -640,7 +674,8 @@ public:
             if (m_timer <= uiDiff)
             {
                 m_timer = 3000;
-                SetStackAmount(GetStackAmount() - 1);
+                //SetStackAmount(GetStackAmount() - 1);
+                ModStackAmount(-1);
             }
             else
                 m_timer -= uiDiff;
@@ -681,7 +716,7 @@ public:
             {
                 if (Unit* pHit = GetHitUnit())
                 {
-                    if (pCaster->GetGUID() == pHit->GetGUID())
+                    if (pCaster == pHit)
                         SetHitDamage(GetHitDamage() * 3);
                 }
             }
@@ -720,6 +755,7 @@ public:
                 if (Aura* pAura = pUnit->GetAura(SPELL_STATIC_WOUND))
                 {
                     pAura->ModStackAmount(pAura->GetStackAmount() + 10 < 30 ? (pAura->GetStackAmount() + 10) : 30);
+                    pAura->SetDuration(25000);
                 }
                 else if (Aura* pAura = pUnit->AddAura(SPELL_STATIC_WOUND, pUnit))
                     pAura->SetStackAmount(10);
@@ -809,7 +845,10 @@ public:
             caster->CastSpell(target, SPELL_THUNDERING_THROW_JUMP, true);
 
             if (target->AI())
+            {
                 target->AI()->DoAction(ACTION_DESTROYED);
+                target->AI()->SetGUID(caster->GetGUID());
+            }
         }
 
         void Register()
@@ -874,6 +913,7 @@ public:
         { 
             statueData = 0; 
             playerGuid = 0;
+            me->SetFloatValue(OBJECT_FIELD_SCALE_X, me->GetFloatValue(OBJECT_FIELD_SCALE_X) * 1.4f);
         }
 
         uint32 statueData;
@@ -893,11 +933,15 @@ public:
             return 0;
         }
 
+        void SetGUID(uint64 guid, int32 integer)
+        {
+            playerGuid = guid;
+        }
+
         void DoAction(const int32 iAction) override
         {
             if (iAction == ACTION_DESTROYED)
             {
-                me->UpdateObjectVisibility();
                 //me->UpdatePosition(me->GetPosition);
 
                 TC_LOG_ERROR("scripts", "Called");
@@ -911,6 +955,10 @@ public:
 
             if (iAction == ACTION_RESET)
             {
+                playerGuid = 0;
+                me->SetVisible(false);
+                me->SetVisible(true);
+                me->UpdateObjectVisibility();
                 me->RemoveAllAuras();
                 events.Reset();
                 SetData(DATA_STATUE_DESTROYED, 0);
@@ -941,25 +989,12 @@ public:
 
         void DoTossPlayer()
         {
-            std::list<Player*> players;
-            GetPlayerListInGrid(players, me, 5.f);
-
-            if (!players.empty())
+            if (Player* pPlayer = ObjectAccessor::GetPlayer(*me, playerGuid))//*itr)
             {
-                if (players.size() > 1)
-                {
-                    players.sort(Trinity::ObjectDistanceOrderPred(me));
-                    players.resize(1);
-                }
-
-                std::list<Player*>::const_iterator itr = players.begin();
-                if (Player* pPlayer = *itr)
-                {
-                    playerGuid = pPlayer->GetGUID();
-                    pPlayer->CastSpell(DoSpawnWater(), SPELL_THUNDERING_THROW_JUMP, true);
-                    pPlayer->CastSpell(pPlayer, SPELL_THUNDERING_THROW_HIT_DAMAGE, true);
-                    events.ScheduleEvent(EVENT_STUN_PLAYER, 2100);
-                }
+                playerGuid = pPlayer->GetGUID();
+                pPlayer->CastSpell(DoSpawnWater(), SPELL_THUNDERING_THROW_JUMP, true);
+                pPlayer->CastSpell(pPlayer, SPELL_THUNDERING_THROW_HIT_DAMAGE, true);
+                events.ScheduleEvent(EVENT_STUN_PLAYER, 2100);
             }
         }
 
@@ -975,6 +1010,7 @@ public:
             case EVENT_SPAWN_WATER:
                 if (Creature* pWater = me->SummonCreature(NPC_CONDUCTIVE_WATER, DoSpawnWater()))
                 {
+                    TC_LOG_ERROR("scripts", "Water summoned");
                     if (pWater->AI())
                         pWater->AI()->DoAction(ACTION_RESET);
                 }
@@ -1026,6 +1062,7 @@ public:
         {
             if (iAction == ACTION_RESET)
             {
+                TC_LOG_ERROR("scripts", "Water reset function called");
                 m_size = 0;
                 me->AddAura(SPELL_CONDUCTIVE_WATER_VISUAL, me);
                 events.ScheduleEvent(EVENT_GROW, 500);
@@ -1054,10 +1091,10 @@ public:
                 break;
             case EVENT_ELECTRIFY:
                 events.ScheduleEvent(EVENT_FINALIZE_ELECTRIFY, 1500);
-                DoCast(me, SPELL_ELECTRIFY_WATERS, true);
+                me->AddAura(SPELL_ELECTRIFY_WATERS, me);
                 break;
             case EVENT_FINALIZE_ELECTRIFY:
-                DoCast(me, SPELL_ELECTRIFIED_WATER_VISUAL, true);
+                me->AddAura(SPELL_ELECTRIFIED_WATER_VISUAL, me);
                 break;
             }
         }
@@ -1081,7 +1118,10 @@ public:
         void SelectTargets(std::list<WorldObject*>&targets)
         {
             if (Unit* caster = GetCaster())
+            {
+                targets.remove_if(notPlayerOrPetPredicate());
                 targets.remove_if(scaleCheckPredicate(caster));
+            }
         }
 
         void Register()
@@ -1093,6 +1133,17 @@ public:
     class aura_impl : public AuraScript
     {
         PrepareAuraScript(aura_impl);
+
+        float GetSizeProp(Unit* propagator) const
+        {
+            if (Aura* pAura = propagator->GetAura(SPELL_CONDUCTIVE_WATER_GROW))
+            {
+                TC_LOG_ERROR("scripts", "%f size", (0.5f*pAura->GetStackAmount() + propagator->GetFloatValue(UNIT_FIELD_BOUNDINGRADIUS)));
+                return ((float)0.5f * pAura->GetStackAmount()) + propagator->GetFloatValue(UNIT_FIELD_BOUNDINGRADIUS);
+            }
+
+            return 0;
+        }
 
         uint32 spellId() const
         {
@@ -1107,18 +1158,6 @@ public:
             return 0;
         }
 
-        float GetSizeProp(Unit* propagator) const
-        {
-            if (Aura* pAura = propagator->GetAura(SPELL_CONDUCTIVE_WATER_GROW))
-            {
-                TC_LOG_ERROR("scripts", "%f size", pAura->GetStackAmount() / 2);
-
-                return pAura->GetStackAmount() / 2;
-            }
-
-            return 0;
-        }
-
         void HandleOnApply(AuraEffect const *aurEff, AuraEffectHandleModes mode)
         {
             Unit* owner = GetTarget();
@@ -1127,8 +1166,13 @@ public:
             if (!owner || !caster)
                 return;
 
-            if (!owner->HasAura(spellId()))
-                caster->CastSpell(owner, spellId(), true);
+            //if (!owner->HasAura(spellId()))
+                //caster->AddAura(spellId(), owner);
+
+            if (Aura* pAura = owner->GetAura(spellId(), caster->GetGUID()))
+                pAura->RefreshDuration();
+            else
+                caster->AddAura(spellId(), owner);
         }
 
         void HandleOnRemove(AuraEffect const *aurEff, AuraEffectHandleModes mode)
@@ -1139,14 +1183,17 @@ public:
             if (!owner || !caster)
                 return;
 
+            float dist_ex = owner->GetExactDist2d(caster);
+            TC_LOG_ERROR("scripts", "Distance is DIST_EX %f", dist_ex);
+
             if (Aura* pAura = owner->GetAura(SPELL_FLUIDITY, caster->GetGUID()))
             {
-                if (owner->GetExactDist2d(caster) > GetSizeProp(caster))
+                if (dist_ex > GetSizeProp(caster))
                     pAura->Remove(AURA_REMOVE_BY_EXPIRE);
             }
             else if (Aura* pAura = owner->GetAura(SPELL_ELECTRIFIED_WATERS, caster->GetGUID()))
             {
-                if (owner->GetExactDist2d(caster) > GetSizeProp(caster))
+                if (dist_ex > GetSizeProp(caster))
                     pAura->Remove(AURA_REMOVE_BY_EXPIRE);
             }
         }
@@ -1154,7 +1201,7 @@ public:
         void Register()
         {
             OnEffectApply += AuraEffectApplyFn(aura_impl::HandleOnApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-            OnEffectRemove += AuraEffectRemoveFn(aura_impl::HandleOnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            //OnEffectRemove += AuraEffectRemoveFn(aura_impl::HandleOnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
@@ -1162,6 +1209,52 @@ public:
     {
         return new spell_impl();
     }
+
+    AuraScript* GetAuraScript() const
+    {
+        return new aura_impl();
+    }
+};
+
+class spell_water_auras : public SpellScriptLoader
+{
+public:
+    spell_water_auras() : SpellScriptLoader("spell_water_auras") {}
+
+    class aura_impl : public AuraScript
+    {
+        PrepareAuraScript(aura_impl);
+
+        void HandleOnApply(AuraEffect const* aurEff, AuraEffectHandleModes mode)
+        {
+            if (Unit* owner = GetOwner()->ToUnit())
+            {
+                if (Aura* pAura = owner->GetAura(SPELL_CONDUCTIVE_WATERS))
+                {
+                    pAura->RefreshDuration();
+                }
+                else if (Aura* pAura = owner->AddAura(SPELL_CONDUCTIVE_WATERS, owner))
+                {
+                    pAura->SetMaxDuration(GetMaxDuration());
+                    pAura->RefreshDuration();
+                }
+            }
+        }
+
+        void HandleOnRemove(AuraEffect const* aurEff, AuraEffectHandleModes mode)
+        {
+            if (Unit* owner = GetOwner()->ToUnit())
+                owner->RemoveAurasDueToSpell(SPELL_CONDUCTIVE_WATERS);
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(aura_impl::HandleOnApply, EFFECT_1, SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, AURA_EFFECT_HANDLE_REAL);
+            OnEffectApply += AuraEffectApplyFn(aura_impl::HandleOnApply, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
+            OnEffectRemove += AuraEffectRemoveFn(aura_impl::HandleOnRemove, EFFECT_1, SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, AURA_EFFECT_HANDLE_REAL);
+            OnEffectRemove += AuraEffectRemoveFn(aura_impl::HandleOnRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
 
     AuraScript* GetAuraScript() const
     {
@@ -1188,4 +1281,5 @@ void AddSC_boss_jinrokh()
     new npc_jinrokh_statue();
     new npc_conductive_water();
     new spell_conductive_water_dummy();
+    new spell_water_auras();
 }

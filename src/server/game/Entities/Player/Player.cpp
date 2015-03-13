@@ -3092,13 +3092,14 @@ void Player::RegenerateHealth()
 
     // polymorphed case
     if (IsPolymorphed())
-        addvalue = (float)GetMaxHealth()/3;
+        addvalue = (float)GetMaxHealth() / 5;
     // normal regen case (maybe partly in combat case)
     else if (!inFight || HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT))
     {
-        addvalue = 0.03f*((float)GetMaxHealth())*HealthIncreaseRate;
         if (getLevel() < 20)
-            addvalue *= 2;
+            addvalue = 0.20f * float(GetMaxHealth()) * HealthIncreaseRate / getLevel();
+        else
+            addvalue = 0.015f * float(GetMaxHealth()) * HealthIncreaseRate;
 
         AuraEffectList const& mModHealthRegenPct = GetAuraEffectsByType(SPELL_AURA_MOD_HEALTH_REGEN_PERCENT);
         for (AuraEffectList::const_iterator i = mModHealthRegenPct.begin(); i != mModHealthRegenPct.end(); ++i)
@@ -3110,7 +3111,7 @@ void Player::RegenerateHealth()
             ApplyPct(addvalue, GetTotalAuraModifier(SPELL_AURA_MOD_REGEN_DURING_COMBAT));
 
         if (!IsStandState())
-            addvalue *= 1.5f;
+            addvalue *= 1.33f;
     }
 
     // always regeneration bonus (including combat)

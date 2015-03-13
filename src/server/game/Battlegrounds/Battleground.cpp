@@ -803,15 +803,16 @@ void Battleground::EndBattleground(uint32 winner)
             loser_arena_team = GetBgRaid(GetOtherTeam(winner));
             winner_arena_team = GetBgRaid(winner);
 
-            if (winner_arena_team && loser_arena_team && winner_arena_team != loser_arena_team)
+            if (winner_arena_team != loser_arena_team)
             {
-
                 loser_matchmaker_rating = GetArenaMatchmakerRating(GetOtherTeam(winner));
                 winner_matchmaker_rating = GetArenaMatchmakerRating(winner);
 
                 auto const slot = Arena::GetSlotByType(GetArenaType());
-                winner_arena_team->WonAgainst(winner_matchmaker_rating, loser_matchmaker_rating, winner_change, slot);
-                loser_arena_team->LostAgainst(loser_matchmaker_rating, winner_matchmaker_rating, loser_change, slot);
+                if (winner_arena_team)
+                    winner_arena_team->WonAgainst(winner_matchmaker_rating, loser_matchmaker_rating, winner_change, slot);
+                if (loser_arena_team)
+                    loser_arena_team->LostAgainst(loser_matchmaker_rating, winner_matchmaker_rating, loser_change, slot);
 
                 SetArenaMatchmakerRating(winner, winner_matchmaker_rating + winner_matchmaker_change);
                 SetArenaMatchmakerRating(GetOtherTeam(winner), loser_matchmaker_rating + loser_matchmaker_change);

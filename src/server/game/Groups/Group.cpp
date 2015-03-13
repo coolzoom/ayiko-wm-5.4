@@ -907,7 +907,7 @@ void Group::Disband(bool hideDestroy /* = false */)
     sScriptMgr->OnGroupDisband(this);
 
     // get LFG dungeon information
-    LFGDungeonEntry const* dungeon;
+    LFGDungeonEntry const* dungeon = nullptr;
     if (isLFGGroup())
     {
         dungeon = GetLFGDungeon();

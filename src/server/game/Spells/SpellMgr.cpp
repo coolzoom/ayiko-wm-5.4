@@ -5145,10 +5145,10 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[1].TargetA = TARGET_UNIT_CONE_ENEMY_24;
                     spellInfo->Effects[1].TargetB = 0;
                     break;
-                case 106853:// Fists of Fury
+               /* case 106853:// Fists of Fury
                     spellInfo->Effects[0].TargetA = TARGET_UNIT_TARGET_ENEMY;
                     spellInfo->Effects[0].TargetB = 0;
-                    break;
+                    break; */
                 case 112060:// Apparitions
                     spellInfo->Effects[0].TargetB = 0;
                     break;

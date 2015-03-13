@@ -318,12 +318,15 @@ class boss_raigonn : public CreatureScript
                             events.ScheduleEvent(EVENT_SUMMON_ENGULFER, urand(35, 50) * IN_MILLISECONDS);
                             break;
                         case EVENT_FIXATE:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 150.0f, true))
                                 me->CastSpell(target, SPELL_FIXATE, TRIGGERED_FULL_MASK);
-                            events.ScheduleEvent(EVENT_FIXATE_STOP, 17 * IN_MILLISECONDS);
+                            
+                            me->SetReactState(REACT_PASSIVE);
+                            events.ScheduleEvent(EVENT_FIXATE_STOP, 15 * IN_MILLISECONDS);
                             break;
                         case EVENT_FIXATE_STOP:
                             events.Reset();
+                            me->SetReactState(REACT_AGGRESSIVE);
                             events.ScheduleEvent(EVENT_FIXATE, 30 * IN_MILLISECONDS);
                             events.ScheduleEvent(EVENT_STOMP, urand(14, 20) * IN_MILLISECONDS);
                             break;

@@ -17,6 +17,22 @@ enum spells
     SPELL_BOMB_AURA                 = 106875
 };
 
+class AggroEvent final : public BasicEvent
+{
+public:
+    AggroEvent(Creature* creature) : _creature(creature) { }
+private:
+    bool Execute(uint64 /*time*/, uint32 /*diff*/) final
+    {
+        if(!_creature->IsInCombat())
+            _creature->CastCustomSpell(43263, SPELLVALUE_MAX_TARGETS, 1);
+
+        return true;
+    }
+
+    Creature* _creature;
+};
+
 struct gss_trash_generic_baseAI : public ScriptedAI
 {
     gss_trash_generic_baseAI(Creature* creature) : ScriptedAI(creature), summons(me) {}
@@ -29,10 +45,14 @@ struct gss_trash_generic_baseAI : public ScriptedAI
     {
         randHealth = frand(92.f, 96.f);
         me->SetReactState(REACT_AGGRESSIVE);
-        me->SetInCombatState(false);
         me->setActive(true);
 
         Reset();
+    }
+
+    void Reset() override
+    {
+        me->m_Events.AddEvent(new AggroEvent(me), me->m_Events.CalculateTime(500));
     }
 
     void MoveInLineOfSight(Unit* who) override
@@ -41,17 +61,11 @@ struct gss_trash_generic_baseAI : public ScriptedAI
         {
             if ((me->GetVictim() && me->GetVictim()->GetTypeId() != TYPEID_PLAYER) || !me->IsInCombat())
             {
-                me->getThreatManager().resetAllAggro();
+                me->DeleteThreatList();
                 me->getThreatManager().addThreat(who, 100.0f);
                 AttackStart(who);
             }
         }
-
-        if (me->GetVictim())
-            return;
-
-        if (me->canStartAttack(who, false))
-            AttackStart(who);
     }
 
     void DamageTaken(Unit* attacker, uint32 &damage) override
@@ -467,51 +481,58 @@ public:
 
     bool OnGossipHello(Player* player, GameObject* go) override
     {
-        Map::PlayerList const& playerList = go->GetMap()->GetPlayers();
-        for(Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
-        {
-            if(Player* player = i->GetSource())
-            {
-                if(player->GetQuestStatus(QUEST_LIGHTNING_THE_WAY) == QUEST_STATUS_INCOMPLETE)
-                    player->KilledMonsterCredit(NPC_LTW_CREDIT);
-
-                player->SendCinematicStart(CINEMATIC_SETTING_SUN);
-                player->NearTeleportTo(1370.0f, 2283.6f, 402.328f, 2.70f);
-            }
-        }
-
-        go->SummonCreature(NPC_RIMOK, 1264.23f, 2304.49f, 381.428f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 604800);
-
         if(InstanceScript* instance = player->GetInstanceScript())
         {
-            if(Creature* rimok = Unit::GetCreature(*go, instance->GetData64(DATA_RIMOK)))
-                rimok->AI()->Talk(2);
-
-            if(GameObject* signalFire = ObjectAccessor::GetGameObject(*go, instance->GetData64(DATA_SIGNAL_FIRE)))
-                signalFire->SetGoState(GO_STATE_ACTIVE);
-
-            instance->SetData(DATA_BRASIER_CLICKED, DONE);
-
-            for(int i = 0; i < 4; ++i)
+            if(instance->GetData(DATA_BRASIER_CLICKED) != DONE && instance->GetBossState(DATA_GADOK) == DONE)
             {
-                if(Creature* krithik = instance->instance->SummonCreature(NPC_KRITHIK_INFILTRATOR, SummonPositionsRimok[i]))
-                    krithik->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY2H);
-            }
+                instance->SetData(DATA_BRASIER_CLICKED, DONE);
+                go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
 
-            for(int i = 4; i < 6; ++i)
-            {
-                if(Creature* krithik = instance->instance->SummonCreature(NPC_KRITHIK_WND_SHAPER, SummonPositionsRimok[i]))
-                    krithik->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY2H);
-            }
+                Map::PlayerList const& playerList = go->GetMap()->GetPlayers();
+                for(Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
+                {
+                    if(Player* player = i->GetSource())
+                    {
+                        if(player->GetQuestStatus(QUEST_LIGHTNING_THE_WAY) == QUEST_STATUS_INCOMPLETE)
+                            player->KilledMonsterCredit(NPC_LTW_CREDIT);
 
-            for(int i = 6; i < 8; ++i)
-            {
-                if (Creature* krithik = instance->instance->SummonCreature(NPC_KRITHIK_SHAPER, SummonPositionsRimok[i]))
-                    krithik->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY2H);
+                        player->SendCinematicStart(CINEMATIC_SETTING_SUN);
+                        player->NearTeleportTo(1370.0f, 2283.6f, 402.328f, 2.70f);
+                    }
+                }
+
+                if(Creature* rimok = Unit::GetCreature(*go, instance->GetData64(DATA_RIMOK)))
+                {
+                    rimok->SetPhaseMask(1, true);
+                    rimok->AI()->Talk(2);
+                }
+
+                if(GameObject* signalFire = ObjectAccessor::GetGameObject(*go, instance->GetData64(DATA_SIGNAL_FIRE)))
+                    signalFire->SetGoState(GO_STATE_ACTIVE);
+
+                for(int i = 0; i < 4; ++i)
+                {
+                    if(Creature* krithik = instance->instance->SummonCreature(NPC_KRITHIK_INFILTRATOR, SummonPositionsRimok[i]))
+                        krithik->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY2H);
+                }
+
+                for(int i = 4; i < 6; ++i)
+                {
+                    if(Creature* krithik = instance->instance->SummonCreature(NPC_KRITHIK_WND_SHAPER, SummonPositionsRimok[i]))
+                        krithik->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY2H);
+                }
+
+                for(int i = 6; i < 8; ++i)
+                {
+                    if(Creature* krithik = instance->instance->SummonCreature(NPC_KRITHIK_SHAPER, SummonPositionsRimok[i]))
+                        krithik->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY2H);
+                }
+
+                return false;
             }
         }
 
-        return false;
+        return true;
     }
 
     GameObjectAI* GetAI(GameObject* go) const
@@ -525,31 +546,38 @@ public:
         {
             go->setActive(true);
 
-            if (go->GetInstanceScript()->GetBossState(DATA_RIMOK) != DONE && go->GetInstanceScript()->GetBossState(DATA_GADOK) == DONE)
+            if(InstanceScript* instance = go->GetInstanceScript())
             {
-                go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
-
-                if (GameObject* signalFire = ObjectAccessor::GetGameObject(*go, go->GetInstanceScript()->GetData64(DATA_SIGNAL_FIRE)))
-                    signalFire->SetGoState(GO_STATE_ACTIVE);
-
-                go->SummonCreature(NPC_RIMOK, 1264.23f, 2304.49f, 381.428f, 0.0f);
-
-                for (int i = 0; i < 4; ++i)
+                if(instance->GetBossState(DATA_GADOK) == DONE && instance->GetData(DATA_BRASIER_CLICKED) == DONE)
                 {
-                    if (Creature* krithik = go->GetInstanceScript()->instance->SummonCreature(NPC_KRITHIK_INFILTRATOR, SummonPositionsRimok[i]))
-                        krithik->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY2H);
-                }
+                    go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
 
-                for (int i = 4; i < 6; ++i)
-                {
-                    if (Creature* krithik = go->GetInstanceScript()->instance->SummonCreature(NPC_KRITHIK_WND_SHAPER, SummonPositionsRimok[i]))
-                        krithik->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY2H);
-                }
+                    if(GameObject* signalFire = ObjectAccessor::GetGameObject(*go, instance->GetData64(DATA_SIGNAL_FIRE)))
+                        signalFire->SetGoState(GO_STATE_ACTIVE);
 
-                for (int i = 6; i < 8; ++i)
-                {
-                    if (Creature* krithik = go->GetInstanceScript()->instance->SummonCreature(NPC_KRITHIK_SHAPER, SummonPositionsRimok[i]))
-                        krithik->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY2H);
+                    if(Creature* rimok = Unit::GetCreature(*go, instance->GetData64(DATA_RIMOK)))
+                        rimok->SetPhaseMask(1, true);
+
+                    if(instance->GetBossState(DATA_RIMOK) != DONE)
+                    {
+                        for(int i = 0; i < 4; ++i)
+                        {
+                            if(Creature* krithik = instance->instance->SummonCreature(NPC_KRITHIK_INFILTRATOR, SummonPositionsRimok[i]))
+                                krithik->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY2H);
+                        }
+
+                        for(int i = 4; i < 6; ++i)
+                        {
+                            if(Creature* krithik = instance->instance->SummonCreature(NPC_KRITHIK_WND_SHAPER, SummonPositionsRimok[i]))
+                                krithik->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY2H);
+                        }
+
+                        for(int i = 6; i < 8; ++i)
+                        {
+                            if(Creature* krithik = instance->instance->SummonCreature(NPC_KRITHIK_SHAPER, SummonPositionsRimok[i]))
+                                krithik->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY2H);
+                        }
+                    }
                 }
             }
         }

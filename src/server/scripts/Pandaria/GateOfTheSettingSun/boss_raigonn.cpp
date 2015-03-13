@@ -118,9 +118,10 @@ class boss_raigonn : public CreatureScript
                 {
                     instance->SetBossState(DATA_RAIGONN, NOT_STARTED);
                     instance->SetData(DATA_RAIGONN, NOT_STARTED);
+                    instance->SetData(DATA_ARTILLERY_STATE, NOT_STARTED);
                 }
             }
-
+            
             void DamageTaken(Unit* attacker, uint32& damage) override
             {
                 if (instance->GetBossState(DATA_RIMOK) == DONE)
@@ -136,7 +137,7 @@ class boss_raigonn : public CreatureScript
                         events.ScheduleEvent(EVENT_SUMMON_ENGULFER, urand(15, 30) * IN_MILLISECONDS);
                         events.ScheduleEvent(EVENT_SUMMON_SWARM_BRINGER, urand(15, 30) * IN_MILLISECONDS);
 
-                        if (instance)
+                        if(instance)
                         {
                             if(Creature* weakPoint = instance->instance->GetCreature(instance->GetData64(NPC_WEAK_SPOT)))
                             {
@@ -145,9 +146,10 @@ class boss_raigonn : public CreatureScript
                                 weakPoint->ClearUnitState(UNIT_STATE_UNATTACKABLE);
                                 weakPoint->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                             }
- 
+
                             instance->SetBossState(DATA_RAIGONN, IN_PROGRESS);
                             instance->SetData(DATA_RAIGONN, IN_PROGRESS);
+                            instance->SetData(DATA_ARTILLERY_STATE, IN_PROGRESS);
                         }
                     }
                 }
@@ -162,13 +164,14 @@ class boss_raigonn : public CreatureScript
                 {
                     instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                     instance->SetBossState(DATA_RAIGONN, FAIL);
+                    instance->SetData(DATA_RAIGONN, FAIL);
 
                     if (Creature* weakPoint = instance->instance->GetCreature(instance->GetData64(NPC_WEAK_SPOT)))
                         instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, weakPoint);
                 }
                 me->RemoveAurasDueToSpell(SPELL_BROKEN_CARAPACE);
                 me->RemoveAurasDueToSpell(SPELL_BROKEN_CARAPACE_DAMAGE);
-                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_FIXATE); 
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_FIXATE);
                 summons.DespawnAll();
             }
 
@@ -179,10 +182,9 @@ class boss_raigonn : public CreatureScript
                     me->CastStop();
                     me->StopMoving();
                     me->SetReactState(REACT_AGGRESSIVE);
-                    me->SetSpeed(MOVE_RUN, 1.1f, true);
                     
-                    chargeEvents.Reset();
                     events.Reset();
+                    chargeEvents.Reset();
                     Phase = PHASE_VULNERABILITY;
                     events.ScheduleEvent(EVENT_FIXATE, 30 * IN_MILLISECONDS);
                     events.ScheduleEvent(EVENT_STOMP, 16 * IN_MILLISECONDS);
@@ -193,6 +195,9 @@ class boss_raigonn : public CreatureScript
 
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
                         AttackStart(target);
+
+                    if(instance)
+                        instance->SetData(DATA_ARTILLERY_STATE, SPECIAL);
                 }
             }
 
@@ -320,7 +325,7 @@ class boss_raigonn : public CreatureScript
                         case EVENT_FIXATE:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 150.0f, true))
                                 me->CastSpell(target, SPELL_FIXATE, TRIGGERED_FULL_MASK);
-                            
+
                             me->SetReactState(REACT_PASSIVE);
                             events.ScheduleEvent(EVENT_FIXATE_STOP, 15 * IN_MILLISECONDS);
                             break;

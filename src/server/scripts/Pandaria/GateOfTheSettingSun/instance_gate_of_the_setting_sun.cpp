@@ -39,6 +39,7 @@ public:
         uint32 cornerBstate;
         uint32 cornerCstate;
         uint32 firstDoorstate;
+        uint32 braiserState;
         uint64 kiptilakGuid;
         uint64 gadokGuid;
         uint64 rimokGuid;
@@ -67,6 +68,7 @@ public:
         std::list<uint64> mantidBombsGUIDs;
         std::list<uint64> rimokAddGenetarorsGUIDs;
         std::list<uint64> artilleryGUIDs;
+        std::list<uint64> artilleryToWallGUIDs;
         std::list<uint64> ropeGUIDs;
 
         instance_gate_setting_sun_InstanceMapScript(Map* map) : InstanceScript(map) {}
@@ -81,6 +83,7 @@ public:
             cornerBstate = NOT_STARTED;
             cornerCstate = NOT_STARTED;
             firstDoorstate = NOT_STARTED;
+            braiserState = NOT_STARTED;
             fallEvent = false;
             kiptilakGuid = 0;
             gadokGuid = 0;
@@ -107,6 +110,7 @@ public:
             mantidBombsGUIDs.clear();
             rimokAddGenetarorsGUIDs.clear();
             artilleryGUIDs.clear();
+            artilleryToWallGUIDs.clear();
             ropeGUIDs.clear();
         }
 
@@ -149,6 +153,9 @@ public:
                 break;
             case NPC_ARTILLERY:
                 artilleryGUIDs.push_back(creature->GetGUID());
+                break;
+            case NPC_ARTILLERY_TO_WALL:
+                artilleryToWallGUIDs.push_back(creature->GetGUID());
                 break;
             case NPC_EXPLOSION_TARGET_1:
                 explosionTarget1GUID = creature->GetGUID();
@@ -239,75 +246,62 @@ public:
 
             switch (id)
             {
-            case DATA_KIPTILAK:
-            {
-                if (state == DONE)
-                {
-                    for (auto itr : mantidBombsGUIDs)
-                        if (GameObject* bomb = instance->GetGameObject(itr))
-                            bomb->SetPhaseMask(32768, true); // Set Invisible
-                }
-                break;
-            }
-            case DATA_RIMOK:
-            {
-                uint8 generatorsCount = 0;
-
-                for (auto itr : rimokAddGenetarorsGUIDs)
-                {
-                    if (Creature* generator = instance->GetCreature(itr))
+                case DATA_KIPTILAK:
                     {
-                        if (generator->AI())
+                        if (state == DONE)
                         {
-                            // There is 7 add generators, the middle one spawn saboteur
-                            if (state == IN_PROGRESS && (++generatorsCount == 4))
-                                generator->AI()->DoAction(SPECIAL);
-                            else
-                                generator->AI()->DoAction(state);
+                           for (auto itr : mantidBombsGUIDs)
+                               if (GameObject* bomb = instance->GetGameObject(itr))
+                                    bomb->SetPhaseMask(32768, true); // Set Invisible
                         }
                     }
-                }
-
-                if (state == DONE)
-                {
-                    if (GameObject* go = instance->GetGameObject(wallCGuid))
-                        go->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);
-
-                    if(Creature* deffender = instance->GetCreature(defenderAGUID))
-                       if(deffender->IsAIEnabled)
-                           deffender->AI()->DoAction(2);
-
-                    for (auto ropeGUID: ropeGUIDs)
-                        if (Creature* rope = instance->GetCreature(ropeGUID))
-                            if(rope->IsAIEnabled)
-                               rope->AI()->DoAction(1);
-
-                    if (GameObject* go = instance->GetGameObject(greatDoorGUID))
-                        go->SetPhaseMask(2, true);
-
-                    if (GameObject* go = instance->GetGameObject(greatDoor2GUID))
-                        go->SetPhaseMask(1, true);
-                }
-
-                break;
-            }
-            case DATA_RAIGONN:
-            {
-                for (auto itr : artilleryGUIDs)
-                {
-                    if (Creature* artillery = instance->GetCreature(itr))
+                    break;
+                case DATA_RIMOK:
                     {
-                        artillery->ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE, state != IN_PROGRESS);
-                        artillery->ApplyModFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK, state == IN_PROGRESS);
+                        uint8 generatorsCount = 0;
+
+                        for (auto itr : rimokAddGenetarorsGUIDs)
+                        {
+                             if (Creature* generator = instance->GetCreature(itr))
+                             {
+                                 if (generator->AI())
+                                 {
+                                     // There is 7 add generators, the middle one spawn saboteur
+                                     if (state == IN_PROGRESS && (++generatorsCount == 4))
+                                        generator->AI()->DoAction(SPECIAL);
+                                     else
+                                      generator->AI()->DoAction(state);
+                                 }
+                             }
+                        }
+
+                        if (state == DONE)
+                        {
+                            if (GameObject* go = instance->GetGameObject(wallCGuid))
+                                 go->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);
+
+                            if(Creature* deffender = instance->GetCreature(defenderAGUID))
+                               if(deffender->IsAIEnabled)
+                                   deffender->AI()->DoAction(2);
+
+                            for (auto ropeGUID: ropeGUIDs)
+                                if (Creature* rope = instance->GetCreature(ropeGUID))
+                                     if(rope->IsAIEnabled)
+                                         rope->AI()->DoAction(1);
+
+                            if (GameObject* go = instance->GetGameObject(greatDoorGUID))
+                                 go->SetPhaseMask(2, true);
+
+                            if (GameObject* go = instance->GetGameObject(greatDoor2GUID))
+                                 go->SetPhaseMask(1, true);
+                         }
                     }
-                }
-                break;
-            }
-            default:
-                break;
+                    break;
+                default:
+                    break;
             }
 
-            return true;
+          return true;
         }
 
         void SetData(uint32 type, uint32 data)
@@ -383,18 +377,75 @@ public:
                         {
                             if (Creature* krithik = instance->SummonCreature(NPC_KRITHIK_INFILTRATOR, SummonPositionsFallEvent[i]))
                             {
-                                krithik->GetMotionMaster()->MoveJump(JumpPositionsFallEvent[i][0], JumpPositionsFallEvent[i][1], JumpPositionsFallEvent[i][2], 30.0f, 95.0f);
+                                krithik->GetMotionMaster()->MoveJump(JumpPositionsFallEvent[i][0], JumpPositionsFallEvent[i][1], JumpPositionsFallEvent[i][2], 60.0f, 41.0f);
                                 krithik->SetHomePosition(JumpPositionsFallEvent[i][0], JumpPositionsFallEvent[i][1], JumpPositionsFallEvent[i][2], krithik->GetOrientation());
                             }
                         }
 
                         if (Creature* krithik = instance->SummonCreature(NPC_KRITHIK_WND_SHAPER, SummonPositionsFallEvent[3]))
                         {
-                            krithik->GetMotionMaster()->MoveJump(JumpPositionsFallEvent[3][0], JumpPositionsFallEvent[3][1], JumpPositionsFallEvent[3][2], 30.0f, 95.0f);
+                            krithik->GetMotionMaster()->MoveJump(JumpPositionsFallEvent[3][0], JumpPositionsFallEvent[3][1], JumpPositionsFallEvent[3][2], 60.0f, 41.0f);
                             krithik->SetHomePosition(JumpPositionsFallEvent[3][0], JumpPositionsFallEvent[3][1], JumpPositionsFallEvent[3][2], krithik->GetOrientation());
                         }
                     }
                 }
+                break;
+            case DATA_ARTILLERY_STATE:
+                dataStorage[type] = data;
+                switch(data)
+                {
+                    case NOT_STARTED:
+                        for(auto itr : artilleryGUIDs)
+                        {
+                            if(Creature* artillery = instance->GetCreature(itr))
+                            {
+                                artillery->ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE, true);
+                                artillery->ApplyModFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK, false);
+                            }
+                        }
+
+                        for(auto itr : artilleryToWallGUIDs)
+                        {
+                            if(Creature* artillery = instance->GetCreature(itr))
+                            {
+                                artillery->ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE, false);
+                                artillery->ApplyModFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK, true);
+                            }
+                        }
+                        break;
+                    case SPECIAL:
+                        for(auto itr : artilleryGUIDs)
+                        {
+                            if(Creature* artillery = instance->GetCreature(itr))
+                            {
+                                artillery->ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE, true);
+                                artillery->ApplyModFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK, false);
+                            }
+                        }
+                        break;
+                    case IN_PROGRESS:
+                        for(auto itr : artilleryGUIDs)
+                        {
+                            if(Creature* artillery = instance->GetCreature(itr))
+                            {
+                                artillery->ApplyModFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK, true);
+                                artillery->ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE, false);
+                            }
+                        }
+
+                        for(auto itr : artilleryToWallGUIDs)
+                        {
+                            if(Creature* artillery = instance->GetCreature(itr))
+                            {
+                                artillery->ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE, true);
+                                artillery->ApplyModFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK, false);
+                            }
+                        }
+                        break;
+                }
+                break;
+            case DATA_BRASIER_CLICKED:
+                braiserState = data;
                 break;
             default:
                 if (type < MAX_DATA)
@@ -418,6 +469,8 @@ public:
                 return cornerBstate;
             case DATA_CORNER_C:
                 return cornerCstate;
+            case DATA_BRASIER_CLICKED:
+                return braiserState;
             default:
                 if (type < MAX_DATA)
                     return dataStorage[type];
@@ -484,7 +537,7 @@ public:
             OUT_SAVE_INST_DATA;
 
             std::ostringstream saveStream;
-            saveStream << "G S S " << GetBossSaveData() << firstDoorstate << " " << cornerAstate << " " << cornerBstate << " " << cornerCstate;
+            saveStream << "G S S " << GetBossSaveData() << firstDoorstate << " " << cornerAstate << " " << cornerBstate << " " << cornerCstate << " " << braiserState;
 
             OUT_SAVE_INST_DATA_COMPLETE;
             return saveStream.str();
@@ -529,6 +582,9 @@ public:
 
                 loadStream >> temp;
                 cornerCstate = temp ? DONE : NOT_STARTED;
+
+                loadStream >> temp;
+                braiserState = temp ? DONE : NOT_STARTED;
             }
             else OUT_LOAD_INST_DATA_FAIL;
 

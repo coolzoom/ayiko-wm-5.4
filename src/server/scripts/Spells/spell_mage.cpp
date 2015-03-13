@@ -2025,21 +2025,33 @@ public:
 
             if (Unit* target = GetHitUnit())
             {
-                caster->CastSpell(target, 84721, true, NULL, NULL, owner->GetGUID());
-                // After hitting a target periodc timer has to be changed to 1 second
-                if (AuraEffect* aura = GetCaster()->GetAuraEffect(84717, EFFECT_0))
-                    aura->SetPeriodicTimer(GetSpellInfo()->Effects[EFFECT_0].BasePoints);
-
                 if (!caster->HasAura(82736))
                     caster->CastSpell(caster, 82736);
-
                 if (roll_chance_i(15))
                     owner->CastSpell(owner, 44544, true);
+
+                // After hitting a target periodc timer has to be changed to 1 second
+                if (AuraEffect* aura = GetCaster()->GetAuraEffect(84717, EFFECT_0))
+                {
+                    aura->SetPeriodicTimer(GetSpellInfo()->Effects[EFFECT_0].BasePoints);
+                    aura->SetAmplitude(GetSpellInfo()->Effects[EFFECT_0].BasePoints);
+                }
             }
+        }
+
+        void HandleAfterCast()
+        {
+            Unit* caster = GetCaster();
+            Unit* owner = caster->GetOwner();
+            if (!owner)
+                return;
+
+            caster->CastSpell(caster, 84721, true, NULL, NULL, owner->GetGUID());
         }
 
         void Register()
         {
+            AfterCast += SpellCastFn(spell_mage_orb_filter_SpellScript::HandleAfterCast);
             OnEffectHitTarget += SpellEffectFn(spell_mage_orb_filter_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
         }
     };

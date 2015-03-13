@@ -267,16 +267,11 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 (@RAID_DIFF_25R + 70137, 0, 0, 0, 0, 0, 169, 11686, 0, 0, 'Gara\'jal\'s Trash Soul', '', '', 0, 90, 90, 4, 14, 14, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 17826816, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2664, 0, 0, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 17614,0),
 (@RAID_DIFF_25R + 70557, 0, 0, 0, 0, 0, 48121, 0, 0, 0, 'Zandalari Prophet', '', '', 0, 92, 92, 4, 16, 16, 0, 2.8, 1.71429, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 8, 32768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 171, 1, 0, 0, '', 17614,70557);
 
-UPDATE creature_template SET flags_extra = flags_extra | 1, mechanic_immune_mask = 667893759 WHERE entry IN 
-(69078,69131,69132,69134,69465);
-UPDATE creature_template SET difficulty_entry_3 = @RAID_DIFF_10N + entry, difficulty_entry_4 = @RAID_DIFF_25N + entry, difficulty_entry_5 = @RAID_DIFF_10H + entry, difficulty_entry_6 = @RAID_DIFF_25H + entry, difficulty_entry_7 = @RAID_DIFF_25R + entry WHERE entry IN 
-(69078,69131,69132,69134,69135,69167,69168,69169,69173,69176,69177,69182,69184,69185,69221,69388,69390,69455,69465,69899,69905,69906,69909,69910,69927,70056,70060,70137,70230,70236,70245,70246,70341,70441,70557);
-
 -- Update Immunity, difficulty entries and bind
 UPDATE creature_template SET flags_extra = flags_extra | 1, mechanic_immune_mask = 667893759 WHERE entry IN 
-(68476,69465);
-UPDATE `creature_template` SET `difficulty_entry_3` = @RAID_DIFF_10N + entry, `difficulty_entry_4` = @RAID_DIFF_25N + entry, `difficulty_entry_5` = @RAID_DIFF_10H + entry, `difficulty_entry_6` = @RAID_DIFF_25H + entry, `difficulty_entry_7` = @RAID_DIFF_25R + entry WHERE `entry` IN 
-(68476,69176,69177,69388,69390,69455,69465,70230,70236,70341,70441);
+(68476,69078,69131,69132,69134,69465);
+UPDATE creature_template SET difficulty_entry_3 = @RAID_DIFF_10N + entry, difficulty_entry_4 = @RAID_DIFF_25N + entry, difficulty_entry_5 = @RAID_DIFF_10H + entry, difficulty_entry_6 = @RAID_DIFF_25H + entry, difficulty_entry_7 = @RAID_DIFF_25R + entry WHERE entry IN 
+(68476,69078,69131,69132,69134,69135,69167,69168,69169,69173,69176,69177,69182,69184,69185,69221,69388,69390,69455,69465,69899,69905,69906,69909,69910,69927,70056,70060,70137,70230,70236,70341,70441,70557);
 
 -- Creature Trash Mobs Damage, HP, LootId
 -- Base HP Gamepedia Raid 25N

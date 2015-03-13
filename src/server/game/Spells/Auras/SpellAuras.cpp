@@ -1159,7 +1159,7 @@ bool Aura::ModStackAmount(int32 num, AuraRemoveMode removeMode)
     bool resetCharges = true;
 
     // Agony doesn't refresh itself every tick
-    if (m_spellInfo->Id == 980)
+    if (m_spellInfo->Id == 980 || m_spellInfo->Id == 138349)
         refresh = false;
 
     // Save old amount used for tick-rolling

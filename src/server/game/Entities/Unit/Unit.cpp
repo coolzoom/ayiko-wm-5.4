@@ -10738,7 +10738,7 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
     if (GetTypeId() == TYPEID_PLAYER && IsMounted())
         return false;
 
-    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
+    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED) && !(ToCreature() && ToCreature()->GetScriptName() == "npc_training_dummy"))
         return false;
 
     // nobody can attack GM in GM-mode
@@ -13743,8 +13743,8 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy, bool isControlled)
     if (!IsAlive())
         return;
 
-    if (PvP)
-        m_CombatTimer = 5000;
+    if (PvP || (enemy && enemy->ToCreature() && enemy->ToCreature()->GetScriptName() == "npc_training_dummy"))
+        m_CombatTimer = 5500;
 
     if (IsInCombat() || HasUnitState(UNIT_STATE_EVADE))
         return;
@@ -14770,6 +14770,10 @@ bool Unit::CanHaveThreatList() const
 
     // totems can not have threat list
     if (ToCreature()->isTotem())
+        return false;
+
+    // Dummys don't have threat lists
+    if (ToCreature()->GetScriptName() == "npc_training_dummy")
         return false;
 
     // vehicles can not have threat list

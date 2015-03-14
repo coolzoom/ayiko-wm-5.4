@@ -15,7 +15,7 @@ enum eSpells : uint32
     SPELL_LIGHTNING_FISSURE_SUMMON          = 137479,
     SPELL_LIGHTNING_FISSURE_VISUAL          = 137480,
     SPELL_LIGHTNING_FISSURE_CONDUCTION      = 138133,
-    SPELL_LIGHTNING_FISSURE_AURA            = 140031,
+    SPELL_LIGHTNING_FISSURE_AURA            = 137484,
 
     SPELL_FOCUSED_LIGHTNING                 = 137399,
     SPELL_FOCUSED_LIGHTNING_VISUAL          = 137425,
@@ -57,6 +57,7 @@ enum eCreatures : uint32
 {
     NPC_LIGHTNING_FISSURE               = 69609,
     NPC_CONDUCTIVE_WATER                = 69469,
+    NPC_FOCUSED_LIGHTNING               = 69593
 };
 
 enum iActions : int32
@@ -139,12 +140,57 @@ private:
     }
 };
 
+class conductionPredicate
+{
+public:
+    conductionPredicate(Creature* _waters) : waters(_waters) {}
+
+    bool operator()(WorldObject* target) const
+    {
+        if (target && target->ToUnit())
+        {
+            if (target->ToUnit()->HasAura(SPELL_FLUIDITY, waters->GetGUID()))
+                return false;
+            if (target->ToUnit()->HasAura(SPELL_ELECTRIFIED_WATERS, waters->GetGUID()))
+                return false;
+        }
+
+        return true;
+    }
+private:
+    Creature* waters;
+};
+
 class notPlayerOrPetPredicate
 {
 public:
     bool operator()(WorldObject*target) const
     {
         return target && target->GetTypeId() != TYPEID_PLAYER;
+    }
+};
+
+class focusedLightningPredicate
+{
+public:
+    bool operator()(WorldObject* target) const
+    {
+        if (target)
+        {
+            if (target->ToCreature())
+            {
+                if (target->ToCreature()->GetEntry() != NPC_LIGHTNING_FISSURE)
+                    return true;
+                else
+                    return false;
+            }
+
+            if (target->GetTypeId() == TYPEID_PLAYER)
+                return false;
+
+            return true;
+        }
+        return true;
     }
 };
 
@@ -157,6 +203,49 @@ static const Position aWaterPos[4] =
 };
 
 static const Position aCenterPos = { 5892.16f, 6263.58f, 124.1f, 0.0f };
+
+class FocusedLightningSelection : public std::unary_function<Unit*, bool>
+{
+public:
+    FocusedLightningSelection() { }
+
+    bool operator()(Unit const* pTarget) const
+    {
+        if (!pTarget->ToPlayer())
+            return false;
+
+        Player const* pPlayer = pTarget->ToPlayer();
+
+        switch (pPlayer->getClass())
+        {
+        case CLASS_WARRIOR:
+        case CLASS_ROGUE:
+        case CLASS_DEATH_KNIGHT:
+            return false;
+
+        case CLASS_PALADIN:
+            return pPlayer->GetSpecializationId(pPlayer->GetActiveSpec()) == SPEC_PALADIN_HOLY;
+
+        case CLASS_DRUID:
+            return pPlayer->GetSpecializationId(pPlayer->GetActiveSpec()) == SPEC_DRUID_BALANCE || pPlayer->GetSpecializationId(pPlayer->GetActiveSpec()) == SPEC_DRUID_RESTORATION;
+
+        case CLASS_MONK:
+            return pPlayer->GetSpecializationId(pPlayer->GetActiveSpec()) == SPEC_MONK_MISTWEAVER;
+
+        case CLASS_SHAMAN:
+            return pPlayer->GetSpecializationId(pPlayer->GetActiveSpec()) != SPEC_SHAMAN_ENHANCEMENT;
+
+        case CLASS_MAGE:
+        case CLASS_PRIEST:
+        case CLASS_WARLOCK:
+        case CLASS_HUNTER:
+            return true;
+
+        default:
+            return false;
+        }
+    }
+};
 
 class boss_jinrokh : public CreatureScript
 {
@@ -174,6 +263,22 @@ public:
         EVENT_BERSERK
     };
 
+    enum eTalks : uint32
+    {
+        TALK_INTRO,
+        TALK_AGGRO,
+        TALK_STATIC_BURST,
+        TALK_THUNDERING_THROW,
+        TALK_LIGHTNING_STORM,
+        TALK_FOCUSED_LIGHTNING,
+        EMOTE_THUNDERING_THROW,
+        EMOTE_LIGHTNING_STORM,
+        EMOTE_LIGHTNING_STORM_2,
+        TALK_SLAY,
+        TALK_BERSERK,
+        TALK_DEATH
+    };
+
     struct boss_jinrokhAI : public BossAI
     {
         boss_jinrokhAI(Creature* pCreature) : BossAI(pCreature, DATA_JINROKH)
@@ -187,7 +292,10 @@ public:
             _Reset();
 
             events.Reset();
+            summons.DespawnAll();
             ResetStatues();
+
+            instance->SetBossState(DATA_JINROKH, NOT_STARTED);
         }
 
         void EnterCombat(Unit* pWho)
@@ -197,6 +305,20 @@ public:
             events.ScheduleEvent(EVENT_THUNDERING_THROW, 30000);
             events.ScheduleEvent(EVENT_LIGHTNING_STORM, 90000); // 1,5 minutes
             events.ScheduleEvent(EVENT_BERSERK, 6 * MINUTE*IN_MILLISECONDS + 5000);
+
+            instance->SetBossState(DATA_JINROKH, IN_PROGRESS);
+
+            Talk(TALK_AGGRO);
+        }
+
+        void JustSummoned(Creature* pSummoned)
+        {
+            summons.Summon(pSummoned);
+        }
+
+        void SummonedCreatureDespawn(Creature* pSummoned)
+        {
+            summons.Despawn(pSummoned);
         }
 
         void DoCastBossSpell(Unit* target, uint32 spellId, bool trig, uint32 push = 0)
@@ -205,6 +327,19 @@ public:
 
             if (push)
                 m_uiPushTimer = push;
+        }
+
+        void JustDied(Unit* pKiller)
+        {
+            _JustDied();
+
+            Talk(TALK_DEATH);
+            instance->SetBossState(DATA_JINROKH, DONE);
+        }
+
+        void KilledUnit(Unit* pVictim) override
+        {
+            Talk(TALK_SLAY);
         }
 
         void ResetStatues()
@@ -216,6 +351,18 @@ public:
             {
                 if (pCreature->AI())
                     pCreature->AI()->DoAction(ACTION_RESET);
+            }
+        }
+
+        void SpellHitTarget(Unit* pHit, const SpellInfo* pSpellInfo) override
+        {
+            if (pHit)
+            {
+                if (pSpellInfo->Id == SPELL_THUNDERING_THROW)
+                {
+                    if (me->getThreatManager().getThreat(pHit))
+                        me->getThreatManager().modifyThreatPercent(pHit, -100);
+                }
             }
         }
 
@@ -258,23 +405,36 @@ public:
                 switch (eventId)
                 {
                 case EVENT_STATIC_BURST:
+                    Talk(TALK_STATIC_BURST);
                     DoCastBossSpell(me->GetVictim(), SPELL_STATIC_BURST, false, 1000);
                     events.ScheduleEvent(EVENT_STATIC_BURST, urand(12000, 16000));
                     break;
                 case EVENT_FOCUSED_LIGHTNING:
-                    DoCastBossSpell(me->GetVictim(), SPELL_FOCUSED_LIGHTNING, false, 2000);
+                    Talk(TALK_FOCUSED_LIGHTNING);
+                    if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, FocusedLightningSelection()))
+                        DoCast(pTarget, SPELL_FOCUSED_LIGHTNING);
+                    else if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                        DoCast(pTarget, SPELL_FOCUSED_LIGHTNING);
                     events.ScheduleEvent(EVENT_FOCUSED_LIGHTNING, urand(12000, 15000));
                     break;
                 case EVENT_LIGHTNING_STORM:
+                    Talk(TALK_LIGHTNING_STORM);
+                    Talk(EMOTE_LIGHTNING_STORM);
                     DoHandleLightningStorm();
-                    me->GetMotionMaster()->MoveJump(aCenterPos, 50.f, 50.f, 1948);
+                    DoCastBossSpell(me->GetVictim(), SPELL_LIGHTNING_STORM, false, 3000);
+                    if (Aura* pAura = me->AddAura(SPELL_LIGHTNING_STORM_VISUAL, me))
+                        pAura->SetDuration(15000);
+                    //me->GetMotionMaster()->MoveJump(aCenterPos, 50.f, 50.f, 1948);
                     events.ScheduleEvent(EVENT_LIGHTNING_STORM, 90000);
                     events.ScheduleEvent(EVENT_THUNDERING_THROW, 30000);
                     break;
                 case EVENT_THUNDERING_THROW:
                     DoCast(me->GetVictim(), SPELL_THUNDERING_THROW);
+                    Talk(TALK_THUNDERING_THROW);
+                    Talk(EMOTE_THUNDERING_THROW, me->GetVictim()->GetGUID());
                     break;
                 case EVENT_BERSERK:
+                    Talk(TALK_BERSERK);
                     DoCast(me, SPELL_BERSERK, true);
                     break;
                 }
@@ -310,28 +470,76 @@ public:
         }
 
         uint64 m_targetGuid;
+        EventMap m_mEvents;
 
-        void SetGUID(uint64 guid, int32)
+        void SetGUID(uint64 guid, int32) override
         {
             m_targetGuid = guid;
         }
 
-        uint64 GetGUID(int32)
+        uint64 GetGUID(int32) override
         {
             return m_targetGuid;
         }
 
         void Initialize()
         {
+            m_mEvents.ScheduleEvent(1, 1400);
             m_targetGuid = 0;
             me->AddAura(SPELL_FOCUSED_LIGHTNING_VISUAL, me);
             me->AddAura(SPELL_FOCUSED_LIGHTNING_SPEED, me);
 
             DoCast(SPELL_FOCUSED_LIGHTNING_TARGET);
         }
-
-        void UpdateAI(const uint32 uiDiff)
+        
+        void GetFixatedPlayerOrGetNewIfNeeded()
         {
+            std::list<Player*> players;
+            GetPlayerListInGrid(players, me, 200.f);
+
+            if (players.empty())
+            {
+                TC_LOG_ERROR("scripts", "Focused Lightning guid %u found no players in instance %u, possible exploit", me->GetGUID(), me->GetMap()->GetInstanceId());
+                return;
+            }
+
+            for (Player* pPlayer : players)
+            {
+                if (pPlayer->HasAura(SPELL_FOCUSED_LIGHTNING_FIXATE, me->GetGUID()))
+                {
+                    m_targetGuid = pPlayer->GetGUID();
+                    return;
+                }
+            }
+
+            if (Player* pPlayer = Trinity::Containers::SelectRandomContainerElement(players))
+            {
+                DoCast(pPlayer, SPELL_FOCUSED_LIGHTNING_FIXATE, true);
+                m_targetGuid = pPlayer->GetGUID();
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            m_mEvents.Update(uiDiff);
+
+            switch (m_mEvents.ExecuteEvent())
+            {
+            case 1:
+                if (Unit* pTarget = ObjectAccessor::GetPlayer(*me, m_targetGuid))
+                {
+                    TC_LOG_ERROR("scripts", "found target");
+                    me->GetMotionMaster()->MoveChase(pTarget);
+                }
+                else
+                {
+                    GetFixatedPlayerOrGetNewIfNeeded();
+                    me->GetMotionMaster()->MoveChase(pTarget);
+                }
+                //me->SetSpeed(MOVE_RUN, me->GetSpeed(MOVE_RUN) + 0.14f, true);
+                m_mEvents.ScheduleEvent(1, 400);
+                break;
+            }
         }
 
     };
@@ -355,10 +563,51 @@ public:
             Initialize();
         }
 
+        EventMap m_mEvents;
+
         void Initialize()
         {
             me->AddAura(SPELL_LIGHTNING_FISSURE_VISUAL, me);
             me->AddAura(SPELL_LIGHTNING_FISSURE_AURA, me);
+
+            m_mEvents.ScheduleEvent(1, 500);
+        }
+
+        float GetSizeProp(Unit* propagator) const
+        {
+            if (Aura* pAura = propagator->GetAura(SPELL_CONDUCTIVE_WATER_GROW))
+            {
+                return ((float)0.5f * pAura->GetStackAmount()) + propagator->GetFloatValue(UNIT_FIELD_BOUNDINGRADIUS);
+            }
+
+            return 0;
+        }
+
+        void DoCheckFissure()
+        {
+            if (Creature* pWaters = GetClosestCreatureWithEntry(me, NPC_CONDUCTIVE_WATER, 100.f))
+            {
+                if (me->GetExactDist2d(pWaters) < GetSizeProp(pWaters))
+                {
+                    DoCast(me, SPELL_LIGHTNING_FISSURE_CONDUCTION, true);
+                    me->DespawnOrUnsummon();
+                    return;
+                }
+            }
+
+            m_mEvents.ScheduleEvent(1, 500);
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            m_mEvents.Update(uiDiff);
+
+            switch (m_mEvents.ExecuteEvent())
+            {
+            case 1:
+                DoCheckFissure();
+                break;
+            }
         }
     };
 
@@ -409,7 +658,9 @@ public:
                 return;
 
             caster->CastSpell(target, SPELL_FOCUSED_LIGHTNING_FIXATE, true);
-            caster->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f);
+
+            if (caster->ToCreature() && caster->ToCreature()->AI())
+                caster->ToCreature()->AI()->SetGUID(target->GetGUID());
         }
 
         void Register()
@@ -441,15 +692,64 @@ public:
         
         void SelectTargets(std::list<WorldObject*>&targets)
         {
-            targets.remove_if(notPlayerPredicate());
+            targets.remove_if(focusedLightningPredicate());
         }
 
         void HandleEffectHitTarget(SpellEffIndex eff_idx)
         {
-            if (Unit* pUnit = GetHitUnit())
+            if (Unit* pCaster = GetCaster())
             {
-                if (Unit* pCaster = GetCaster())
+                if (Creature* pLightningFissure = GetHitCreature())
                 {
+                    if (!pLightningFissure->HasAura(SPELL_LIGHTNING_FISSURE_AURA))
+                        return;
+
+                    // implosion
+                    pLightningFissure->DisappearAndDie();
+                    pCaster->CastSpell(pCaster, SPELL_IMPLOSION, true);
+                    pCaster->Kill(pCaster);
+                    return;
+                }
+
+                if (Unit* pUnit = GetHitUnit())
+                {
+                    bool should_detonate = false;
+
+                    if (pCaster->ToCreature() && pCaster->ToCreature()->AI())
+                    {
+                        if (pUnit->HasAura(SPELL_FOCUSED_LIGHTNING_FIXATE, pCaster->GetGUID()))
+                            should_detonate = true;
+                    }
+
+                    if (should_detonate)
+                    {
+                        bool violent = false;
+                        bool should_conduct = false;
+
+                        if (pUnit->HasAura(SPELL_FLUIDITY))
+                        {
+                            pCaster->CastSpell(pUnit, SPELL_FOCUSED_LIGHTNING_CONDUCTION, true);
+                            should_conduct = true;
+                        }
+                        else if (pUnit->HasAura(SPELL_ELECTRIFIED_WATERS))
+                        {
+                            pCaster->CastSpell(pUnit, SPELL_FOCUSED_LIGHTNING_CONDUCTION, true);
+                            violent = true;
+                            should_conduct = true;
+                        }
+
+                        pCaster->CastSpell(pUnit, violent ? SPELL_VIOLENT_LIGHTNING_DETONATION : SPELL_FOCUSED_LIGHTNING_DETONATION, true);
+
+                        if (!should_conduct)
+                        {
+                            if (Unit* pBoss = GetClosestCreatureWithEntry(pCaster, BOSS_JINROKH, 250.f))
+                                pBoss->SummonCreature(NPC_LIGHTNING_FISSURE, pCaster->GetPosition());
+                        }
+
+                        pCaster->Kill(pCaster);
+                        return;
+                    }
+
                     pCaster->CastSpell(pUnit, SPELL_FOCUSED_LIGHTNING_DAMAGE, true);
                 }
             }
@@ -488,48 +788,6 @@ public:
             {
                 if (pOwner->ToUnit())
                 {
-                    Unit* ok = nullptr;
-
-                    Trinity::AnyUnitHavingBuffInObjectRangeCheck checker(pOwner, pOwner->ToUnit(), 3.f, SPELL_FOCUSED_LIGHTNING_FIXATE, false);
-
-                    Trinity::UnitSearcher<Trinity::AnyUnitHavingBuffInObjectRangeCheck> searcher(pOwner, ok, checker);
-                    Trinity::VisitNearbyWorldObject(pOwner, 3.f, searcher);
-
-                    // todo move this implementation to aoe spellscript
-                    if (ok)
-                    {
-
-                        if (ok->HasAura(SPELL_FLUIDITY))
-                        {
-                            ok->CastSpell(ok, SPELL_FOCUSED_LIGHTNING_CONDUCTION, true);
-                            pOwner->ToUnit()->Kill(pOwner->ToUnit());
-                            return;
-                        }
-                        else if (ok->HasAura(SPELL_ELECTRIFIED_WATERS))
-                        {
-                            ok->CastSpell(ok, SPELL_FOCUSED_LIGHTNING_CONDUCTION, true);
-                            pOwner->ToUnit()->CastSpell(ok, SPELL_VIOLENT_LIGHTNING_DETONATION, true);
-                            return;
-                        }
-
-                        pOwner->ToUnit()->CastSpell(ok, SPELL_LIGHTNING_FISSURE_SUMMON, true);
-                        pOwner->ToUnit()->CastSpell(ok, SPELL_FOCUSED_LIGHTNING_DETONATION, true);
-                        return;
-                    }
-
-                    Trinity::AnyUnitHavingBuffInObjectRangeCheck fissure_checker(pOwner, pOwner->ToUnit(), 5.f, SPELL_LIGHTNING_FISSURE_VISUAL, true);
-
-                    Trinity::UnitSearcher<Trinity::AnyUnitHavingBuffInObjectRangeCheck> fissure_searcher(pOwner, ok, fissure_checker);
-                    Trinity::VisitNearbyWorldObject(pOwner, 5.f, fissure_searcher);
-
-                    if (ok)
-                    {
-                        pOwner->ToUnit()->CastSpell(ok, SPELL_IMPLOSION, true);
-
-                        pOwner->ToUnit()->Kill(pOwner->ToUnit());
-                        return;
-                    }
-
                     pOwner->ToUnit()->CastSpell(pOwner->ToUnit(), SPELL_FOCUSED_LIGHTNING_AOE, true);
                 }
             }
@@ -826,6 +1084,9 @@ public:
 
             if (targets.size() > 1)
             {
+                if (GetCaster())
+                    targets.sort(Trinity::ObjectDistanceOrderPred(GetCaster()));
+
                 //if (WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets))
                 {
                     //targets.emplace(targets.begin(), target);
@@ -994,7 +1255,7 @@ public:
                 playerGuid = pPlayer->GetGUID();
                 pPlayer->CastSpell(DoSpawnWater(), SPELL_THUNDERING_THROW_JUMP, true);
                 pPlayer->CastSpell(pPlayer, SPELL_THUNDERING_THROW_HIT_DAMAGE, true);
-                events.ScheduleEvent(EVENT_STUN_PLAYER, 2100);
+                events.ScheduleEvent(EVENT_STUN_PLAYER, 2400);
             }
         }
 
@@ -1170,7 +1431,12 @@ public:
                 //caster->AddAura(spellId(), owner);
 
             if (Aura* pAura = owner->GetAura(spellId(), caster->GetGUID()))
+            {
                 pAura->RefreshDuration();
+
+                if (!owner->HasAura(SPELL_CONDUCTIVE_WATERS))
+                    owner->AddAura(SPELL_CONDUCTIVE_WATERS, owner);
+            }
             else
                 caster->AddAura(spellId(), owner);
         }
@@ -1262,6 +1528,132 @@ public:
     }
 };
 
+class spell_focused_lightning_conduction : public SpellScriptLoader
+{
+public:
+    spell_focused_lightning_conduction() : SpellScriptLoader("spell_focused_lightning_conduction") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void SelectTargets(std::list<WorldObject*>&targets)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Creature* pWaters = GetClosestCreatureWithEntry(caster, NPC_CONDUCTIVE_WATER, 100.f))
+                {
+                    targets.remove_if(conductionPredicate(pWaters));
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_impl::SelectTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ALLY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
+class spell_lightning_fissure_conduction : public SpellScriptLoader
+{
+public:
+    spell_lightning_fissure_conduction() : SpellScriptLoader("spell_lightning_fissure_conduction") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void SelectTargets(std::list<WorldObject*>&targets)
+        {
+            targets.remove_if(notPlayerPredicate());
+
+            if (Unit* caster = GetCaster())
+            {
+                if (Creature* pWaters = GetClosestCreatureWithEntry(caster, NPC_CONDUCTIVE_WATER, 100.f))
+                {
+                    targets.remove_if(conductionPredicate(pWaters));
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_impl::SelectTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENTRY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
+class spell_focused_lightning : public SpellScriptLoader
+{
+public:
+    spell_focused_lightning() : SpellScriptLoader("spell_focused_lightning") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void HandleOnHit()
+        {
+            Unit* pCaster = GetCaster();
+            Unit* pHit = GetHitUnit();
+
+            if (!pCaster || !pHit)
+                return;
+
+            Position pos;
+            pCaster->GetRandomNearPosition(pos, 10.f);
+            pCaster->SummonCreature(NPC_FOCUSED_LIGHTNING, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 2000);
+        }
+
+        void Register()
+        {
+            OnHit += SpellHitFn(spell_impl::HandleOnHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
+class spell_lightning_fissure_damage : public SpellScriptLoader
+{
+public:
+    spell_lightning_fissure_damage() : SpellScriptLoader("spell_lightning_fissure_damage") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void SelectTargets(std::list<WorldObject*>&targets)
+        {
+            targets.remove_if(notPlayerPredicate());
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_impl::SelectTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
 void AddSC_boss_jinrokh()
 {
     new boss_jinrokh();
@@ -1282,4 +1674,8 @@ void AddSC_boss_jinrokh()
     new npc_conductive_water();
     new spell_conductive_water_dummy();
     new spell_water_auras();
+    new spell_focused_lightning_conduction();
+    new spell_lightning_fissure_conduction();
+    new spell_focused_lightning();
+    new spell_lightning_fissure_damage();
 }

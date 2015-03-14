@@ -3220,340 +3220,354 @@ void SpellMgr::LoadSpellCustomAttr()
 
             switch (spellInfo->Id)
             {
-                case 114232: // Sanctified Wrath effect
-                    spellInfo->Attributes |= SPELL_ATTR0_PASSIVE | SPELL_ATTR0_HIDDEN_CLIENTSIDE;
-                    break;
-                case 137080: // "custom" anniversary sanctuary spell
-                    spellInfo->Attributes |= SPELL_ATTR0_PASSIVE | SPELL_ATTR0_HIDDEN_CLIENTSIDE;
-                    spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(21);
-                    break;
+            case 114232: // Sanctified Wrath effect
+                spellInfo->Attributes |= SPELL_ATTR0_PASSIVE | SPELL_ATTR0_HIDDEN_CLIENTSIDE;
+                break;
+            case 137080: // "custom" anniversary sanctuary spell
+                spellInfo->Attributes |= SPELL_ATTR0_PASSIVE | SPELL_ATTR0_HIDDEN_CLIENTSIDE;
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(21);
+                break;
 #if 1 // Stormstout Brewery
-                case 106614: // Brew Barrel Ride
-                    spellInfo->Effects[EFFECT_2].Effect = 0;
-                    break;
-                case 94465: // Brew Barrel Aura Canceller
-                case 122376: // Barrel Drop
-                case 106647: // Rolling Barrel Cosmetic
-                    spellInfo->AttributesEx6 |= SPELL_ATTR6_CASTABLE_WHILE_ON_VEHICLE;
-                    break;
-                case 106808: // Ground Pound
-                    spellInfo->AttributesEx &= ~SPELL_ATTR1_CHANNELED_2;
-                    break;
+            case 106614: // Brew Barrel Ride
+                spellInfo->Effects[EFFECT_2].Effect = 0;
+                break;
+            case 94465: // Brew Barrel Aura Canceller
+            case 122376: // Barrel Drop
+            case 106647: // Rolling Barrel Cosmetic
+                spellInfo->AttributesEx6 |= SPELL_ATTR6_CASTABLE_WHILE_ON_VEHICLE;
+                break;
+            case 106808: // Ground Pound
+                spellInfo->AttributesEx &= ~SPELL_ATTR1_CHANNELED_2;
+                break;
 #endif
 #if 1 // Deadmines
-                case 84225: // Vehicle - Switch to Seat 3
-                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
-                    break;
-                case 95495: // Cannonball N
-                case 95496: // Cannonball H
-                    spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
-                    spellInfo->RangeEntry = sSpellRangeStore.LookupEntry (13);
-                    break;
-                case 91398: // Fire Wall
-                    spellInfo->AttributesEx6 |= SPELL_ATTR6_CASTABLE_WHILE_ON_VEHICLE;
-                    break;
-                case 91397: // Fire Wall
-                    spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_1_YARD);
-                    spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
-                    break;
-                case 88140: // Blossom Targetting
-                    spellInfo->AttributesEx5 |= SPELL_ATTR5_USABLE_WHILE_STUNNED;
-                    spellInfo->MaxAffectedTargets = 1;
-                    break;
-                case 88177: // Frost Blossom N
-                case 91274: // Frost Blossom H
-                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
-                    spellInfo->Effects[EFFECT_1].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
-                    spellInfo->Effects[EFFECT_2].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
-                    spellInfo->ExplicitTargetMask = TARGET_FLAG_DEST_LOCATION;
-                    break;
-                case 88173: // Fire Blossom N
-                case 91275: // Fire Blossom H
-                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
-                    spellInfo->Effects[EFFECT_1].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
-                    spellInfo->ExplicitTargetMask = TARGET_FLAG_DEST_LOCATION;
-                    break;
-                case 91301: // Summon Fire Blossom
-                case 91302: // Summon Frost Blossom
-                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
-                    spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo();
-                    spellInfo->ExplicitTargetMask = TARGET_FLAG_DEST_LOCATION;
-                    break;
-                case 88349: // Ride Face Targetting
-                    spellInfo->MaxAffectedTargets = 1;
-                    break;
-                case 88337: // Helix Ride
-                case 88351: // Helix Ride Face Timer Aura
-                case 88353: // Force Cast Eject Passenger 1
-                case 88264: // Throw Bomb
-                case 88265: // Summon Bomb
-                    spellInfo->AttributesEx6 |= SPELL_ATTR6_CASTABLE_WHILE_ON_VEHICLE;
-                    break;
-                case 88268: // Throw Bomb Targetting
-                    spellInfo->MaxAffectedTargets = 1;
-                    spellInfo->AttributesEx6 |= SPELL_ATTR6_CASTABLE_WHILE_ON_VEHICLE;
-                    break;
-                case 88295: // Charge
-                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
-                    break;
-                case 62539: // Eject Passenger 2
-                    spellInfo->Effects[EFFECT_0].BasePoints = 1;
-                    break;
-                case 88289: // Oaf Grab Targetting
-                    spellInfo->MaxAffectedTargets = 1;
-                    spellInfo->ExcludeTargetAuraSpell = 88352;
-                    break;
-                case 90100: // Watch Targeting
-                    spellInfo->MaxAffectedTargets = 1;
-                    break;
-                case 87239:
-                    spellInfo->Effects[EFFECT_1].MiscValue = 3;
-                    break;
-                case 89198: // On-line
-                    spellInfo->AttributesEx6 |= SPELL_ATTR6_IGNORE_CASTER_AURAS;
-                    break;
-                case 88481: // Overdrive
-                    spellInfo->InterruptFlags = 0;
-                    break;
-                case 91841: // Summon Molten Slag
-                    spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
-                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
-                    spellInfo->ExplicitTargetMask = TARGET_FLAG_DEST_LOCATION;
-                    break;
-                case 88833: // Summon Vapor Targeting
-                case 88838: // Go For the Throat Targeting
-                    spellInfo->MaxAffectedTargets = 1;
-                    spellInfo->AttributesEx5 |= SPELL_ATTR5_USABLE_WHILE_STUNNED;
-                    spellInfo->AttributesEx6 |= SPELL_ATTR6_IGNORE_CASTER_AURAS;
-                    break;
-                case 88831: // Summon Vapor
-                case 88836: // Go For the Throat N
-                case 91863: // Go For the Throat H
-                    spellInfo->AttributesEx5 |= SPELL_ATTR5_USABLE_WHILE_STUNNED;
-                    spellInfo->AttributesEx6 |= SPELL_ATTR6_IGNORE_CASTER_AURAS;
-                    break;
-                case 89247: // Fog
-                    spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(63);
-                    break;
-                case 95647: // Ripsnarl Achievement Aura
-                    spellInfo->AttributesEx3 |= SPELL_ATTR3_ONLY_TARGET_PLAYERS;
-                    break;
-                case 89250: // Cookie's Cauldron
-                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
-                    spellInfo->ExplicitTargetMask = TARGET_FLAG_DEST_LOCATION;
-                    break;
-                case 89268: // Throw Food Targeting - Corn
-                case 89740: // Throw Food Targeting - Rotten Corn
-                case 90562: // Throw Food Targeting
-                case 90583: // Throw Food Targeting
-                case 90564: // Throw Food Targeting
-                case 90585: // Throw Food Targeting
-                case 90561: // Throw Food Targeting
-                case 90582: // Throw Food Targeting
-                case 90563: // Throw Food Targeting
-                case 90584: // Throw Food Targeting
-                case 90565: // Throw Food Targeting
-                case 90586: // Throw Food Targeting
-                case 90681: // Throw Food Targeting
-                    spellInfo->MaxAffectedTargets = 1;
-                    spellInfo->AttributesEx6 |= SPELL_ATTR6_CASTABLE_WHILE_ON_VEHICLE;
-                    spellInfo->AttributesEx2 = 0;
-                    break;
+            case 84225: // Vehicle - Switch to Seat 3
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
+                break;
+            case 95495: // Cannonball N
+            case 95496: // Cannonball H
+                spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+                spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(13);
+                break;
+            case 91398: // Fire Wall
+                spellInfo->AttributesEx6 |= SPELL_ATTR6_CASTABLE_WHILE_ON_VEHICLE;
+                break;
+            case 91397: // Fire Wall
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_1_YARD);
+                spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+                break;
+            case 88140: // Blossom Targetting
+                spellInfo->AttributesEx5 |= SPELL_ATTR5_USABLE_WHILE_STUNNED;
+                spellInfo->MaxAffectedTargets = 1;
+                break;
+            case 88177: // Frost Blossom N
+            case 91274: // Frost Blossom H
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+                spellInfo->Effects[EFFECT_1].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+                spellInfo->Effects[EFFECT_2].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+                spellInfo->ExplicitTargetMask = TARGET_FLAG_DEST_LOCATION;
+                break;
+            case 88173: // Fire Blossom N
+            case 91275: // Fire Blossom H
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+                spellInfo->Effects[EFFECT_1].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+                spellInfo->ExplicitTargetMask = TARGET_FLAG_DEST_LOCATION;
+                break;
+            case 91301: // Summon Fire Blossom
+            case 91302: // Summon Frost Blossom
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+                spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo();
+                spellInfo->ExplicitTargetMask = TARGET_FLAG_DEST_LOCATION;
+                break;
+            case 88349: // Ride Face Targetting
+                spellInfo->MaxAffectedTargets = 1;
+                break;
+            case 88337: // Helix Ride
+            case 88351: // Helix Ride Face Timer Aura
+            case 88353: // Force Cast Eject Passenger 1
+            case 88264: // Throw Bomb
+            case 88265: // Summon Bomb
+                spellInfo->AttributesEx6 |= SPELL_ATTR6_CASTABLE_WHILE_ON_VEHICLE;
+                break;
+            case 88268: // Throw Bomb Targetting
+                spellInfo->MaxAffectedTargets = 1;
+                spellInfo->AttributesEx6 |= SPELL_ATTR6_CASTABLE_WHILE_ON_VEHICLE;
+                break;
+            case 88295: // Charge
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
+                break;
+            case 62539: // Eject Passenger 2
+                spellInfo->Effects[EFFECT_0].BasePoints = 1;
+                break;
+            case 88289: // Oaf Grab Targetting
+                spellInfo->MaxAffectedTargets = 1;
+                spellInfo->ExcludeTargetAuraSpell = 88352;
+                break;
+            case 90100: // Watch Targeting
+                spellInfo->MaxAffectedTargets = 1;
+                break;
+            case 87239:
+                spellInfo->Effects[EFFECT_1].MiscValue = 3;
+                break;
+            case 89198: // On-line
+                spellInfo->AttributesEx6 |= SPELL_ATTR6_IGNORE_CASTER_AURAS;
+                break;
+            case 88481: // Overdrive
+                spellInfo->InterruptFlags = 0;
+                break;
+            case 91841: // Summon Molten Slag
+                spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+                spellInfo->ExplicitTargetMask = TARGET_FLAG_DEST_LOCATION;
+                break;
+            case 88833: // Summon Vapor Targeting
+            case 88838: // Go For the Throat Targeting
+                spellInfo->MaxAffectedTargets = 1;
+                spellInfo->AttributesEx5 |= SPELL_ATTR5_USABLE_WHILE_STUNNED;
+                spellInfo->AttributesEx6 |= SPELL_ATTR6_IGNORE_CASTER_AURAS;
+                break;
+            case 88831: // Summon Vapor
+            case 88836: // Go For the Throat N
+            case 91863: // Go For the Throat H
+                spellInfo->AttributesEx5 |= SPELL_ATTR5_USABLE_WHILE_STUNNED;
+                spellInfo->AttributesEx6 |= SPELL_ATTR6_IGNORE_CASTER_AURAS;
+                break;
+            case 89247: // Fog
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(63);
+                break;
+            case 95647: // Ripsnarl Achievement Aura
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_ONLY_TARGET_PLAYERS;
+                break;
+            case 89250: // Cookie's Cauldron
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
+                spellInfo->ExplicitTargetMask = TARGET_FLAG_DEST_LOCATION;
+                break;
+            case 89268: // Throw Food Targeting - Corn
+            case 89740: // Throw Food Targeting - Rotten Corn
+            case 90562: // Throw Food Targeting
+            case 90583: // Throw Food Targeting
+            case 90564: // Throw Food Targeting
+            case 90585: // Throw Food Targeting
+            case 90561: // Throw Food Targeting
+            case 90582: // Throw Food Targeting
+            case 90563: // Throw Food Targeting
+            case 90584: // Throw Food Targeting
+            case 90565: // Throw Food Targeting
+            case 90586: // Throw Food Targeting
+            case 90681: // Throw Food Targeting
+                spellInfo->MaxAffectedTargets = 1;
+                spellInfo->AttributesEx6 |= SPELL_ATTR6_CASTABLE_WHILE_ON_VEHICLE;
+                spellInfo->AttributesEx2 = 0;
+                break;
                 // Throw Food
-                case 92057: case 92058: case 92059: case 92060:
-                case 92062: case 92063: case 92838: case 92839:
-                case 92840: case 92841: case 92842: case 92843:
-                case 92844: case 90682: case 90587: case 90588:
-                case 90589: case 90590: case 90591: case 90566:
-                case 90567: case 90568: case 90569: case 90570:
-                case 89269: case 89738: case 89263: case 90556:
-                case 90557: case 90560: case 90559: case 90555:
-                case 89739: case 90604: case 90603: case 90602:
-                case 90680: case 90606: case 90605: case 89252:
-                case 89262: case 92752:
-                    spellInfo->AttributesEx6 |= SPELL_ATTR6_CASTABLE_WHILE_ON_VEHICLE;
-                    break;
-                case 92379: // Ride Magma Vehicle
-                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
-                    spellInfo->ExplicitTargetMask = TARGET_FLAG_UNIT;
-                    spellInfo->AttributesEx6 |= SPELL_ATTR6_IGNORE_CASTER_AURAS;
-                    break;
-                case 92438: // Magma Trap Throw To Location
-                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
-                    break;
-                case 92210: // Icicle Targeting
-                    spellInfo->MaxAffectedTargets = 1;
-                    break;
-                case 92202: // Icicle
-                    spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_UNTARGETABLE | SPELL_ATTR6_CAN_TARGET_INVISIBLE;
-                    break;
-                case 59304: // Spirit Strike
-                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
-                    spellInfo->Effects[EFFECT_1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
-                    spellInfo->AttributesEx6 |= SPELL_ATTR6_CASTABLE_WHILE_ON_VEHICLE;
-                    spellInfo->ExplicitTargetMask = TARGET_FLAG_UNIT;
-                    break;
-                case 92278: // Spark
-                    spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_0_YARDS);
-                    break;
-                case 92620: // Backslash Targeting
-                    spellInfo->MaxAffectedTargets = 1;
-                    break;
-                case 90951: // Sinister Strike N
-                case 90952: // Sinister Strike H
-                    spellInfo->PreventionType = SPELL_PREVENTION_TYPE_NONE;
-                    break;
-                case 92616: // Summon Enforcer
-                case 92617: // Summon Blood Wizard
-                case 92618: // Summon Shadowguard
-                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
-                    break;
-                case 90096: // Explode N
-                case 91062: // Explode H
-                case 89769: // Explode N
-                case 91063: // Explode H
-                    spellInfo->AttributesEx6 |= SPELL_ATTR6_IGNORE_CASTER_AURAS;
-                    break;
-                case 90962: // Whirling Blades N
-                case 90963: // Whirling Blades H
-                    spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
-                    spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
-                    break;
-                case 90047: // Renegade Strength N
-                case 91006: // Renegade Strength H
-                    spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(9);
-                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_NEARBY_ENTRY);
-                    spellInfo->AttributesEx |= SPELL_ATTR1_CANT_TARGET_SELF;
-                    break;
+            case 92057: case 92058: case 92059: case 92060:
+            case 92062: case 92063: case 92838: case 92839:
+            case 92840: case 92841: case 92842: case 92843:
+            case 92844: case 90682: case 90587: case 90588:
+            case 90589: case 90590: case 90591: case 90566:
+            case 90567: case 90568: case 90569: case 90570:
+            case 89269: case 89738: case 89263: case 90556:
+            case 90557: case 90560: case 90559: case 90555:
+            case 89739: case 90604: case 90603: case 90602:
+            case 90680: case 90606: case 90605: case 89252:
+            case 89262: case 92752:
+                spellInfo->AttributesEx6 |= SPELL_ATTR6_CASTABLE_WHILE_ON_VEHICLE;
+                break;
+            case 92379: // Ride Magma Vehicle
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
+                spellInfo->ExplicitTargetMask = TARGET_FLAG_UNIT;
+                spellInfo->AttributesEx6 |= SPELL_ATTR6_IGNORE_CASTER_AURAS;
+                break;
+            case 92438: // Magma Trap Throw To Location
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
+                break;
+            case 92210: // Icicle Targeting
+                spellInfo->MaxAffectedTargets = 1;
+                break;
+            case 92202: // Icicle
+                spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_UNTARGETABLE | SPELL_ATTR6_CAN_TARGET_INVISIBLE;
+                break;
+            case 59304: // Spirit Strike
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
+                spellInfo->Effects[EFFECT_1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
+                spellInfo->AttributesEx6 |= SPELL_ATTR6_CASTABLE_WHILE_ON_VEHICLE;
+                spellInfo->ExplicitTargetMask = TARGET_FLAG_UNIT;
+                break;
+            case 92278: // Spark
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_0_YARDS);
+                break;
+            case 92620: // Backslash Targeting
+                spellInfo->MaxAffectedTargets = 1;
+                break;
+            case 90951: // Sinister Strike N
+            case 90952: // Sinister Strike H
+                spellInfo->PreventionType = SPELL_PREVENTION_TYPE_NONE;
+                break;
+            case 92616: // Summon Enforcer
+            case 92617: // Summon Blood Wizard
+            case 92618: // Summon Shadowguard
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
+                break;
+            case 90096: // Explode N
+            case 91062: // Explode H
+            case 89769: // Explode N
+            case 91063: // Explode H
+                spellInfo->AttributesEx6 |= SPELL_ATTR6_IGNORE_CASTER_AURAS;
+                break;
+            case 90962: // Whirling Blades N
+            case 90963: // Whirling Blades H
+                spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
+                break;
+            case 90047: // Renegade Strength N
+            case 91006: // Renegade Strength H
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(9);
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_NEARBY_ENTRY);
+                spellInfo->AttributesEx |= SPELL_ATTR1_CANT_TARGET_SELF;
+                break;
 #endif // Deadmines
-                    // Kezan
-                case 69086:
-                    spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(13);
-                    break;
-                case 69018:
-                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
-                    break;
-                case 67502:
-                    spellInfo->ExplicitTargetMask = TARGET_FLAG_UNIT_PASSENGER;
-                    break;
-                case 69971:
-                case 69976:
-                case 69977:
-                case 69978:
-                case 69979:
-                case 69980:
-                case 69981:
-                case 69982:
-                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
-                    break;
-                case 66724:
-                    spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_LOGOUT;
-                    break;
-                case 70321:
-                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
-                    break;
-                case 70256:
-                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_SRC_CASTER);
-                    spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENTRY);
-                    spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_5_YARDS);
-                    break;
-                case 70198:
-                case 70241:
-                case 70249:
-                case 70252:
-                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
-                    break;
-                case 70197:
-                case 70245:
-                case 70238:
-                    spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(13);
-                    spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_100_YARDS);
-                    break;
-                case 66393:
-                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_CASTER_FRONT);
-                    spellInfo->Attributes |= SPELL_ATTR0_OUTDOORS_ONLY;
-                    break;
-                case 66392:
-                    spellInfo->AuraInterruptFlags = 0;
-                    break;
-                case 45595:
-                    spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
-                    break;
-                case 69630:
-                case 69626:
-                    spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
-                    spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_3_YARDS);
-                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_TARGET_ANY);
-                    spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(TARGET_DEST_DEST_RANDOM);
-                    break;
-                case 65977:
-                    spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
-                    spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_3_YARDS);
-                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_TARGET_ANY);
-                    break;
-                case 70472:
-                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
-                    break;
-                case 36628:
-                    spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_UNTARGETABLE;
-                    break;
-                case 66298:
-                    spellInfo->ExplicitTargetMask = TARGET_FLAG_NONE;
-                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_PASSENGER_0);
-                    break;
-                case 69993:
-                    spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_DEST_AREA_ENTRY);
-                    break;
-                case 70016:
-                    spellInfo->Effects[EFFECT_1].Effect = 0;
-                    break;
-                case 70075:
-                    spellInfo->Effects[EFFECT_0].BasePoints = 70065;
-                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_NEARBY_ENTRY);
-                    spellInfo->Effects[EFFECT_0].MiscValueB = 3090;
-                    break;
-                case 70065:
-                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
-                    break;
-                case 70052:
-                    spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_45_YARDS);
-                    spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_UNTARGETABLE;
-                    break;
-                case 66322:
-                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
-                    break;
-                case 90615:
-                    spellInfo->AttributesEx4 &= ~SPELL_ATTR4_TRIGGERED;
-                    break;
-                case 67020:
-                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_CASTER_FRONT);
-                    spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(TARGET_DEST_DEST_RANDOM);
-                    spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_15_YARDS);
-                    break;
-                case 67041:
-                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
-                    spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_UNTARGETABLE;
-                    break;
-                case 70097:
-                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
-                    spellInfo->ExplicitTargetMask = TARGET_FLAG_DEST_LOCATION;
-                    break;
-                case 67476:
-                    spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_INVISIBLE;
-                    break;
-                case 70251:
-                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
-                    break;
-                case 59073:
-                case 59074:
-                case 59087:
-                case 67789:
-                case 68480:
-                case 68481:
-                case 68482:
-                case 68483:
-                    spellInfo->AttributesEx6 |= SPELL_ATTR6_CASTABLE_WHILE_ON_VEHICLE;
-                    break;
+                // Kezan
+            case 69086:
+                spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(13);
+                break;
+            case 69018:
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
+                break;
+            case 67502:
+                spellInfo->ExplicitTargetMask = TARGET_FLAG_UNIT_PASSENGER;
+                break;
+            case 69971:
+            case 69976:
+            case 69977:
+            case 69978:
+            case 69979:
+            case 69980:
+            case 69981:
+            case 69982:
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
+                break;
+            case 66724:
+                spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_LOGOUT;
+                break;
+            case 70321:
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
+                break;
+            case 70256:
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_SRC_CASTER);
+                spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENTRY);
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_5_YARDS);
+                break;
+            case 70198:
+            case 70241:
+            case 70249:
+            case 70252:
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
+                break;
+            case 70197:
+            case 70245:
+            case 70238:
+                spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(13);
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_100_YARDS);
+                break;
+            case 66393:
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_CASTER_FRONT);
+                spellInfo->Attributes |= SPELL_ATTR0_OUTDOORS_ONLY;
+                break;
+            case 66392:
+                spellInfo->AuraInterruptFlags = 0;
+                break;
+            case 45595:
+                spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+                break;
+            case 69630:
+            case 69626:
+                spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_3_YARDS);
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_TARGET_ANY);
+                spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(TARGET_DEST_DEST_RANDOM);
+                break;
+            case 65977:
+                spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_3_YARDS);
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_TARGET_ANY);
+                break;
+            case 70472:
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
+                break;
+            case 36628:
+                spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_UNTARGETABLE;
+                break;
+            case 66298:
+                spellInfo->ExplicitTargetMask = TARGET_FLAG_NONE;
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_PASSENGER_0);
+                break;
+            case 69993:
+                spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_DEST_AREA_ENTRY);
+                break;
+            case 70016:
+                spellInfo->Effects[EFFECT_1].Effect = 0;
+                break;
+            case 70075:
+                spellInfo->Effects[EFFECT_0].BasePoints = 70065;
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_NEARBY_ENTRY);
+                spellInfo->Effects[EFFECT_0].MiscValueB = 3090;
+                break;
+            case 70065:
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
+                break;
+            case 70052:
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_45_YARDS);
+                spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_UNTARGETABLE;
+                break;
+            case 66322:
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
+                break;
+            case 90615:
+                spellInfo->AttributesEx4 &= ~SPELL_ATTR4_TRIGGERED;
+                break;
+            case 67020:
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_CASTER_FRONT);
+                spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(TARGET_DEST_DEST_RANDOM);
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_15_YARDS);
+                break;
+            case 67041:
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
+                spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_UNTARGETABLE;
+                break;
+            case 70097:
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+                spellInfo->ExplicitTargetMask = TARGET_FLAG_DEST_LOCATION;
+                break;
+            case 67476:
+                spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_INVISIBLE;
+                break;
+            case 70251:
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
+                break;
+            case 59073:
+            case 59074:
+            case 59087:
+            case 67789:
+            case 68480:
+            case 68481:
+            case 68482:
+            case 68483:
+                spellInfo->AttributesEx6 |= SPELL_ATTR6_CASTABLE_WHILE_ON_VEHICLE;
+                break;
+                // Throne of Thunder
+            case 137485:    // Lightning Fissure(damage)
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_SRC_CASTER);
+                spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENEMY);
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_5_YARDS);
+                break;
+            case 137261:    // Lightning Storm(damage)
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_SRC_CASTER);
+                spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENEMY);
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_200_YARDS);
+                break;
+            case 137162:    // Static Burst
+                spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(5); // 40 yds
+                break;
 #if 1 // Gilneas
                 case 68087:
                 case 80281:

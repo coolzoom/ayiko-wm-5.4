@@ -1952,6 +1952,15 @@ class spell_monk_chi_torpedo : public SpellScriptLoader
         {
             PrepareSpellScript(spell_monk_chi_torpedo_SpellScript);
 
+            SpellCastResult CheckCast()
+            {
+                if (Player* player = GetCaster()->ToPlayer())
+                    if (player->HasUnitState(UNIT_STATE_ROOT))
+                        return SPELL_FAILED_ROOTED;
+
+                return SPELL_CAST_OK;
+            }
+
             void HandleAfterCast()
             {
                 if (Unit* caster = GetCaster())
@@ -1978,6 +1987,7 @@ class spell_monk_chi_torpedo : public SpellScriptLoader
 
             void Register()
             {
+                OnCheckCast += SpellCheckCastFn(spell_monk_chi_torpedo_SpellScript::CheckCast);
                 AfterCast += SpellCastFn(spell_monk_chi_torpedo_SpellScript::HandleAfterCast);
             }
         };

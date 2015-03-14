@@ -106,9 +106,6 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 (@RAID_DIFF_25R + 69465, 0, 0, 0, 0, 0, 47552, 0, 0, 0, 'Jin\'rokh the Breaker', '', '', 0, 93, 93, 4, 14, 14, 0, 1, 1.14286, 1, 3, 17839, 24339, 0, 51299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097260, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2900000, 3000000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 180, 1, 667893759, 1, 'boss_jinrokh', 17614,0),
 (@RAID_DIFF_25R + 70230, 0, 0, 0, 0, 0, 47941, 47942, 47943, 47944, 'Zandalari Blade Initiate', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 184, 1, 0, 0, '', 17614,70230),
 (@RAID_DIFF_25R + 70236, 0, 0, 0, 0, 0, 47528, 0, 0, 0, 'Zandalari Storm-Caller', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 270532680, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 167, 1, 0, 0, '', 17614,70236);
-
-UPDATE creature_template SET ScriptName = 'npc_lightning_fissure' WHERE entry = 69609;
-UPDATE creature_template SET ScriptName = 'npc_focused_lightning', HoverHeight = 5 WHERE entry = 69593;
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -120,6 +117,16 @@ UPDATE creature_template SET ScriptName = 'npc_focused_lightning', HoverHeight =
 -- 10N (BASE HP: 25 = X : 10)
 -- 10H=(10N+25%)
 
+-- Script Names
+UPDATE creature_template SET ScriptName = 'npc_lightning_fissure' WHERE entry = 69609;
+UPDATE creature_template SET ScriptName = 'npc_focused_lightning', HoverHeight = 5 WHERE entry = 69593;
+
+-- Immunity and bind bosses
+UPDATE creature_template SET flags_extra = flags_extra | 1, mechanic_immune_mask = 667893759 WHERE entry = 69465;
+
+-- Difficulty entries bosses and Trash Mobs
+UPDATE creature_template SET difficulty_entry_3 = @RAID_DIFF_10N + entry, difficulty_entry_4 = @RAID_DIFF_25N + entry, difficulty_entry_5 = @RAID_DIFF_10H + entry, difficulty_entry_6 = @RAID_DIFF_25H + entry, difficulty_entry_7 = @RAID_DIFF_25R + entry WHERE entry IN 
+(69388,69390,69455,69465,70230,70236);
 
 -- Zandalari Spear-Shaper
 UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69388, dmg_multiplier = 5, Health_Mod = 14165200 / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69388;
@@ -436,6 +443,27 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 -- 10N (BASE HP: 25 = X : 10)
 -- 10H=(10N+25%)
 
+-- Script Names
+-- UPDATE creature_template SET ScriptName = "npc_council_event_helper" WHERE entry = 662203;
+UPDATE creature_template SET ScriptName = "boss_frost_king_malakk" WHERE entry = 69131;
+UPDATE creature_template SET ScriptName = "boss_kazrajin" WHERE entry = 69134;
+UPDATE creature_template SET ScriptName = "boss_sul_the_sandcrawler" WHERE entry = 69078;
+UPDATE creature_template SET ScriptName = "boss_high_priestess_marli" WHERE entry = 69132;
+UPDATE creature_template SET ScriptName = "mob_garajals_soul" WHERE entry = 69182;
+UPDATE creature_template SET ScriptName = "mob_quicksand_stalker" WHERE entry = 662205;
+UPDATE creature_template SET ScriptName = "mob_living_sand" WHERE entry = 69153;
+UPDATE creature_template SET ScriptName = "mob_blessed_loa_spirit" WHERE entry = 69480;
+UPDATE creature_template SET ScriptName = "mob_shadowed_loa_spirit" WHERE entry = 69548;
+-- UPDATE creature_template SET ScriptName = "mob_twisted_fate_helper" WHERE entry = 662204;
+UPDATE creature_template SET ScriptName = "mob_twisted_fate" WHERE entry IN (69740, 69746);
+
+-- Immunity and bind bosses
+UPDATE creature_template SET flags_extra = flags_extra | 1, mechanic_immune_mask = 667893759 WHERE entry IN 
+(69078,69131,69132,69134);
+
+-- Difficulty entries bosses and Trash Mobs
+UPDATE creature_template SET difficulty_entry_3 = @RAID_DIFF_10N + entry, difficulty_entry_4 = @RAID_DIFF_25N + entry, difficulty_entry_5 = @RAID_DIFF_10H + entry, difficulty_entry_6 = @RAID_DIFF_25H + entry, difficulty_entry_7 = @RAID_DIFF_25R + entry WHERE entry IN 
+(69078,69131,69132,69134,69899,69905,69906,69909,69910,69911,69916,69927,70557);
 
 -- Farraki Sand Conjurer
 UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69899, dmg_multiplier = 5, Health_Mod = 3237830  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69899;
@@ -508,38 +536,25 @@ UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69078, dmg_multiplier = 1
 UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69078, dmg_multiplier = 8, Health_Mod = 202149504 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 69078;
 
 -- Frost King Malakk
-UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69131, dmg_multiplier = 6, Health_Mod = 207601216 / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 69131;
-UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69131, dmg_multiplier = 7, Health_Mod = 317507744 / @HP_MOD_93 WHERE entry = @RAID_DIFF_10H + 69131;
-UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69131, dmg_multiplier = 9, Health_Mod = 622803648 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25N + 69131;
-UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69131, dmg_multiplier = 10,Health_Mod = 952523200 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 69131;
-UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69131, dmg_multiplier = 8, Health_Mod = 545171264 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 69131;
+UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69131, dmg_multiplier = 6, Health_Mod = 89844224  / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 69131;
+UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69131, dmg_multiplier = 7, Health_Mod = 112305280 / @HP_MOD_93 WHERE entry = @RAID_DIFF_10H + 69131;
+UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69131, dmg_multiplier = 9, Health_Mod = 224610560 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25N + 69131;
+UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69131, dmg_multiplier = 10,Health_Mod = 280763200 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 69131;
+UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69131, dmg_multiplier = 8, Health_Mod = 202149504 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 69131;
 
 -- High Priestess Mar'li
-UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69132, dmg_multiplier = 6, Health_Mod = 207601216 / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 69132;
-UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69132, dmg_multiplier = 7, Health_Mod = 317507744 / @HP_MOD_93 WHERE entry = @RAID_DIFF_10H + 69132;
-UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69132, dmg_multiplier = 9, Health_Mod = 622803648 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25N + 69132;
-UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69132, dmg_multiplier = 10,Health_Mod = 952523200 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 69132;
-UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69132, dmg_multiplier = 8, Health_Mod = 545171264 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 69132;
+UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69132, dmg_multiplier = 6, Health_Mod = 89844224  / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 69132;
+UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69132, dmg_multiplier = 7, Health_Mod = 112305280 / @HP_MOD_93 WHERE entry = @RAID_DIFF_10H + 69132;
+UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69132, dmg_multiplier = 9, Health_Mod = 224610560 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25N + 69132;
+UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69132, dmg_multiplier = 10,Health_Mod = 280763200 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 69132;
+UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69132, dmg_multiplier = 8, Health_Mod = 202149504 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 69132;
 
 -- Kazra'jin
-UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69134, dmg_multiplier = 6, Health_Mod = 207601216 / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 69134;
-UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69134, dmg_multiplier = 7, Health_Mod = 317507744 / @HP_MOD_93 WHERE entry = @RAID_DIFF_10H + 69134;
-UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69134, dmg_multiplier = 9, Health_Mod = 622803648 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25N + 69134;
-UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69134, dmg_multiplier = 10,Health_Mod = 952523200 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 69134;
-UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69134, dmg_multiplier = 8, Health_Mod = 545171264 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 69134;
-
--- UPDATE creature_template SET ScriptName = "npc_council_event_helper" WHERE entry = 662203;
-UPDATE creature_template SET ScriptName = "boss_frost_king_malakk" WHERE entry = 69131;
-UPDATE creature_template SET ScriptName = "boss_kazrajin" WHERE entry = 69134;
-UPDATE creature_template SET ScriptName = "boss_sul_the_sandcrawler" WHERE entry = 69078;
-UPDATE creature_template SET ScriptName = "boss_high_priestess_marli" WHERE entry = 69132;
-UPDATE creature_template SET ScriptName = "mob_garajals_soul" WHERE entry = 69182;
-UPDATE creature_template SET ScriptName = "mob_quicksand_stalker" WHERE entry = 662205;
-UPDATE creature_template SET ScriptName = "mob_living_sand" WHERE entry = 69153;
-UPDATE creature_template SET ScriptName = "mob_blessed_loa_spirit" WHERE entry = 69480;
-UPDATE creature_template SET ScriptName = "mob_shadowed_loa_spirit" WHERE entry = 69548;
--- UPDATE creature_template SET ScriptName = "mob_twisted_fate_helper" WHERE entry = 662204;
-UPDATE creature_template SET ScriptName = "mob_twisted_fate" WHERE entry IN (69740, 69746);
+UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69134, dmg_multiplier = 6, Health_Mod = 89844224  / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 69134;
+UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69134, dmg_multiplier = 7, Health_Mod = 112305280 / @HP_MOD_93 WHERE entry = @RAID_DIFF_10H + 69134;
+UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69134, dmg_multiplier = 9, Health_Mod = 224610560 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25N + 69134;
+UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69134, dmg_multiplier = 10,Health_Mod = 280763200 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 69134;
+UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69134, dmg_multiplier = 8, Health_Mod = 202149504 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 69134;
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -689,14 +704,6 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 
 /* Other Stuff */
 /*---------------------------------------------------------------------------------------------------------------*/
--- Immunity and bind bosses
-UPDATE creature_template SET flags_extra = flags_extra | 1, mechanic_immune_mask = 667893759 WHERE entry IN 
-(68476,69078,69131,69132,69134,69465);
-
--- Difficulty entries bosses and Trash Mobs
-UPDATE creature_template SET difficulty_entry_3 = @RAID_DIFF_10N + entry, difficulty_entry_4 = @RAID_DIFF_25N + entry, difficulty_entry_5 = @RAID_DIFF_10H + entry, difficulty_entry_6 = @RAID_DIFF_25H + entry, difficulty_entry_7 = @RAID_DIFF_25R + entry WHERE entry IN 
-(68476,69078,69131,69132,69134,69135,69167,69168,69169,69173,69176,69177,69182,69184,69185,69221,69388,69390,69455,69465,69899,69905,69906,69909,69910,69927,70056,70060,70137,70230,70236,70341,70441,70557);
-
 -- Creature Model
 REPLACE INTO `creature_model_info` (`modelid`, `bounding_radius`, `combat_reach`, `gender`) VALUES
 (169, 0.903, 2, 2),

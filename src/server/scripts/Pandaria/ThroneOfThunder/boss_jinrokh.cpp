@@ -68,6 +68,8 @@ enum iActions : int32
     ACTION_ELECTRIFY
 };
 
+static const float floorZ = 124.03f;
+
 enum eJDatas : uint32
 {
     DATA_STATUE_DESTROYED,
@@ -260,7 +262,8 @@ public:
         EVENT_THUNDERING_THROW,
         EVENT_LIGHTNING_STORM,
         EVENT_IONIZATION,
-        EVENT_BERSERK
+        EVENT_BERSERK,
+        EVENT_HEIGHT_CHECK
     };
 
     enum eTalks : uint32
@@ -305,6 +308,7 @@ public:
             events.ScheduleEvent(EVENT_THUNDERING_THROW, 30000);
             events.ScheduleEvent(EVENT_LIGHTNING_STORM, 90000); // 1,5 minutes
             events.ScheduleEvent(EVENT_BERSERK, 6 * MINUTE*IN_MILLISECONDS + 5000);
+            events.ScheduleEvent(EVENT_HEIGHT_CHECK, 2000);
 
             instance->SetBossState(DATA_JINROKH, IN_PROGRESS);
 
@@ -319,6 +323,14 @@ public:
         void SummonedCreatureDespawn(Creature* pSummoned)
         {
             summons.Despawn(pSummoned);
+        }
+
+        void CheckHeight()
+        {
+            if (me->GetPositionZ() > floorZ + 3.5f || me->GetPositionZ() < floorZ - 1.2f)
+                me->NearTeleportTo(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+
+            events.ScheduleEvent(EVENT_HEIGHT_CHECK, 2000);
         }
 
         void DoCastBossSpell(Unit* target, uint32 spellId, bool trig, uint32 push = 0)
@@ -437,6 +449,9 @@ public:
                     Talk(TALK_BERSERK);
                     DoCast(me, SPELL_BERSERK, true);
                     break;
+                case EVENT_HEIGHT_CHECK:
+                    CheckHeight();
+                    break;
                 }
             }
 
@@ -491,6 +506,12 @@ public:
 
             DoCast(SPELL_FOCUSED_LIGHTNING_TARGET);
         }
+
+        void CheckHeight()
+        {
+            if (me->GetPositionZ() > floorZ + 3.5f || me->GetPositionZ() < floorZ - 1.2f)
+                me->NearTeleportTo(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+        }
         
         void GetFixatedPlayerOrGetNewIfNeeded()
         {
@@ -508,6 +529,7 @@ public:
                 if (pPlayer->HasAura(SPELL_FOCUSED_LIGHTNING_FIXATE, me->GetGUID()))
                 {
                     m_targetGuid = pPlayer->GetGUID();
+                    Talk(0, m_targetGuid, true);
                     return;
                 }
             }
@@ -516,6 +538,7 @@ public:
             {
                 DoCast(pPlayer, SPELL_FOCUSED_LIGHTNING_FIXATE, true);
                 m_targetGuid = pPlayer->GetGUID();
+                Talk(0, m_targetGuid, true);
             }
         }
 
@@ -529,13 +552,14 @@ public:
                 if (Unit* pTarget = ObjectAccessor::GetPlayer(*me, m_targetGuid))
                 {
                     TC_LOG_ERROR("scripts", "found target");
-                    me->GetMotionMaster()->MoveChase(pTarget);
+                    me->GetMotionMaster()->MoveFollow(pTarget, 0.f, 0.f);
                 }
                 else
                 {
                     GetFixatedPlayerOrGetNewIfNeeded();
-                    me->GetMotionMaster()->MoveChase(pTarget);
+                    me->GetMotionMaster()->MoveFollow(pTarget, 0.f, 0.f);
                 }
+                CheckHeight();
                 //me->SetSpeed(MOVE_RUN, me->GetSpeed(MOVE_RUN) + 0.14f, true);
                 m_mEvents.ScheduleEvent(1, 400);
                 break;

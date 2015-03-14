@@ -102,8 +102,6 @@ class validStatuePredicate
 public:
     bool operator() (WorldObject* target) const
     {
-        if (target->ToCreature() && target->ToCreature()->AI())
-            TC_LOG_ERROR("scripts", "notinlospredicate returned %u", target->ToCreature()->AI()->GetData(DATA_STATUE_DESTROYED));
         return target && target->ToPlayer() || ((target->ToCreature()->AI() && target->ToCreature()->AI()->GetData(DATA_STATUE_DESTROYED) == 1) || target->GetEntry() != NPC_JINROKH_STATUE);
     }
 };
@@ -554,7 +552,6 @@ public:
             case 1:
                 if (Unit* pTarget = ObjectAccessor::GetPlayer(*me, m_targetGuid))
                 {
-                    TC_LOG_ERROR("scripts", "found target");
                     me->GetMotionMaster()->MoveFollow(pTarget, 0.f, 0.f);
                 }
                 else
@@ -1105,9 +1102,7 @@ public:
 
         void SelectTargets(std::list<WorldObject*>&targets)
         {
-            TC_LOG_ERROR("scripts", "Size is %u", targets.size());
             targets.remove_if(validStatuePredicate());
-            TC_LOG_ERROR("scripts", "Size is %u", targets.size());
 
             if (targets.size() > 1)
             {
@@ -1230,15 +1225,10 @@ public:
         {
             if (iAction == ACTION_DESTROYED)
             {
-                //me->UpdatePosition(me->GetPosition);
-
-                TC_LOG_ERROR("scripts", "Called");
                 events.ScheduleEvent(EVENT_TOSS_PLAYER, 2000);
                 events.ScheduleEvent(EVENT_WATER_BEAM, 4000);
                 events.ScheduleEvent(EVENT_SPAWN_WATER, 7000);
                 SetData(DATA_STATUE_DESTROYED, 1);
-
-                TC_LOG_ERROR("scripts", "Called %u", GetData(DATA_STATUE_DESTROYED));
             }
 
             if (iAction == ACTION_RESET)
@@ -1298,7 +1288,6 @@ public:
             case EVENT_SPAWN_WATER:
                 if (Creature* pWater = me->SummonCreature(NPC_CONDUCTIVE_WATER, DoSpawnWater()))
                 {
-                    TC_LOG_ERROR("scripts", "Water summoned");
                     if (pWater->AI())
                         pWater->AI()->DoAction(ACTION_RESET);
                 }
@@ -1350,7 +1339,6 @@ public:
         {
             if (iAction == ACTION_RESET)
             {
-                TC_LOG_ERROR("scripts", "Water reset function called");
                 m_size = 0;
                 me->AddAura(SPELL_CONDUCTIVE_WATER_VISUAL, me);
                 events.ScheduleEvent(EVENT_GROW, 500);
@@ -1426,7 +1414,6 @@ public:
         {
             if (Aura* pAura = propagator->GetAura(SPELL_CONDUCTIVE_WATER_GROW))
             {
-                TC_LOG_ERROR("scripts", "%f size", (0.5f*pAura->GetStackAmount() + propagator->GetFloatValue(UNIT_FIELD_BOUNDINGRADIUS)));
                 return ((float)0.5f * pAura->GetStackAmount()) + propagator->GetFloatValue(UNIT_FIELD_BOUNDINGRADIUS);
             }
 
@@ -1477,7 +1464,6 @@ public:
                 return;
 
             float dist_ex = owner->GetExactDist2d(caster);
-            TC_LOG_ERROR("scripts", "Distance is DIST_EX %f", dist_ex);
 
             if (Aura* pAura = owner->GetAura(SPELL_FLUIDITY, caster->GetGUID()))
             {

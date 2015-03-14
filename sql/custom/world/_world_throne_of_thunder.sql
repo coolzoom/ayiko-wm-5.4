@@ -28,6 +28,24 @@ SET @HP_MOD_91 := (SELECT basehp4 FROM creature_classlevelstats WHERE class = 1 
 SET @HP_MOD_90 := (SELECT basehp4 FROM creature_classlevelstats WHERE class = 1 AND LEVEL = 90);
 SET @HP_MOD_1  := (SELECT basehp0 FROM creature_classlevelstats WHERE class = 1 AND LEVEL = 0);
 
+SET @HP_MOD_93_M := (SELECT basehp4 FROM creature_classlevelstats WHERE class = 2 AND LEVEL = 93);
+SET @HP_MOD_92_M := (SELECT basehp4 FROM creature_classlevelstats WHERE class = 2 AND LEVEL = 92);
+SET @HP_MOD_91_M := (SELECT basehp4 FROM creature_classlevelstats WHERE class = 2 AND LEVEL = 91);
+SET @HP_MOD_90_M := (SELECT basehp4 FROM creature_classlevelstats WHERE class = 2 AND LEVEL = 90);
+SET @HP_MOD_1_M  := (SELECT basehp0 FROM creature_classlevelstats WHERE class = 2 AND LEVEL = 0);
+
+SET @HP_MOD_93_4 := (SELECT basehp4 FROM creature_classlevelstats WHERE class = 4 AND LEVEL = 93);
+SET @HP_MOD_92_4 := (SELECT basehp4 FROM creature_classlevelstats WHERE class = 4 AND LEVEL = 92);
+SET @HP_MOD_91_4 := (SELECT basehp4 FROM creature_classlevelstats WHERE class = 4 AND LEVEL = 91);
+SET @HP_MOD_90_4 := (SELECT basehp4 FROM creature_classlevelstats WHERE class = 4 AND LEVEL = 90);
+SET @HP_MOD_1_4  := (SELECT basehp0 FROM creature_classlevelstats WHERE class = 4 AND LEVEL = 0);
+
+SET @HP_MOD_93_8 := (SELECT basehp4 FROM creature_classlevelstats WHERE class = 8 AND LEVEL = 93);
+SET @HP_MOD_92_8 := (SELECT basehp4 FROM creature_classlevelstats WHERE class = 8 AND LEVEL = 92);
+SET @HP_MOD_91_8 := (SELECT basehp4 FROM creature_classlevelstats WHERE class = 8 AND LEVEL = 91);
+SET @HP_MOD_90_8 := (SELECT basehp4 FROM creature_classlevelstats WHERE class = 8 AND LEVEL = 90);
+SET @HP_MOD_1_8  := (SELECT basehp0 FROM creature_classlevelstats WHERE class = 8 AND LEVEL = 0);
+
 /* BEGIN Jin'rokh the Breaker */
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Spell Scripts
@@ -357,8 +375,8 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 (69906, 0, 0, 0, 0, 0, 47761, 47762, 0, 0, 'Zandalari High Priest', '', '', 0, 92, 92, 4, 16, 16, 0, 4.8, 1.71429, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 8, 32768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 174, 1, 0, 0, '', 17614,69906),
 (69909, 0, 0, 0, 0, 0, 22307, 22308, 47335, 47336, 'Amani\'shi Flame Chanter', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.71429, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 8, 32768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 174, 1, 0, 0, '', 17614,69909),
 (69910, 0, 0, 0, 0, 0, 47769, 47780, 47781, 0, 'Drakkari Frost Warden', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.71429, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 8, 32768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 174, 1, 0, 0, '', 17614,69910),
-(69911, 0, 0, 0, 0, 0, 47760, 0, 0, 0, 'Zandalari Warlord', '', '', 0, 92, 92, 0, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 42000, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 69911, 0, 0, 0, 0, 0, 0, 0, 0, 140414, 140422, 134856, 0, 0, 0, 0, 0, 0, 0, 11401, 11401, 'SmartAI', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 109125471, 0, '', 1,0),
-(69916, 0, 0, 0, 0, 0, 48181, 0, 0, 0, 'Gurubashi Berserker', '', '', 0, 92, 92, 0, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 42000, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 69916, 0, 0, 0, 0, 0, 0, 0, 0, 138540, 138427, 138693, 0, 0, 0, 0, 0, 0, 0, 11408, 11408, 'SmartAI', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 109133791, 0, '', 1,0),
+(69911, 0, 0, 0, 0, 0, 47760, 0, 0, 0, 'Zandalari Warlord', '', '', 0, 92, 92, 4, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 42000, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 69911, 0, 0, 0, 0, 0, 0, 0, 0, 140414, 140422, 134856, 0, 0, 0, 0, 0, 0, 0, 11401, 11401, 'SmartAI', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 109125471, 0, '', 1,0),
+(69916, 0, 0, 0, 0, 0, 48181, 0, 0, 0, 'Gurubashi Berserker', '', '', 0, 92, 92, 4, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 42000, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 69916, 0, 0, 0, 0, 0, 0, 0, 0, 138540, 138427, 138693, 0, 0, 0, 0, 0, 0, 0, 11408, 11408, 'SmartAI', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 109133791, 0, '', 1,0),
 (69927, 0, 0, 0, 0, 0, 47885, 0, 0, 0, 'Zandalari Prelate', '', '', 0, 92, 92, 4, 16, 16, 0, 2.8, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 1000, 2000, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 171, 1, 0, 0, '', 17614,69927),
 (70056, 0, 0, 0, 0, 0, 47230, 0, 0, 0, 'Gara\'jal the Spiritbinder', '', '', 0, 93, 93, 4, 16, 16, 0, 5.6, 2, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 8, 33587456, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097228, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 912, 1, 0, 0, '', 17614,0),
 (70137, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Gara\'jal\'s Trash Soul', '', '', 0, 90, 90, 4, 14, 14, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 17826816, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2664, 0, 0, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 17614,0),
@@ -373,8 +391,8 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 (@RAID_DIFF_10N + 69906, 0, 0, 0, 0, 0, 47761, 47762, 0, 0, 'Zandalari High Priest', '', '', 0, 92, 92, 4, 16, 16, 0, 4.8, 1.71429, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 8, 32768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 174, 1, 0, 0, '', 17614,69906),
 (@RAID_DIFF_10N + 69909, 0, 0, 0, 0, 0, 22307, 22308, 47335, 47336, 'Amani\'shi Flame Chanter', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.71429, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 8, 32768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 174, 1, 0, 0, '', 17614,69909),
 (@RAID_DIFF_10N + 69910, 0, 0, 0, 0, 0, 47769, 47780, 47781, 0, 'Drakkari Frost Warden', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.71429, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 8, 32768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 174, 1, 0, 0, '', 17614,69910),
-(@RAID_DIFF_10N + 69911, 0, 0, 0, 0, 0, 47760, 0, 0, 0, 'Zandalari Warlord', '', '', 0, 92, 92, 0, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 42000, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 69911, 0, 0, 0, 0, 0, 0, 0, 0, 140414, 140422, 134856, 0, 0, 0, 0, 0, 0, 0, 11401, 11401, 'SmartAI', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 109125471, 0, '', 1,0),
-(@RAID_DIFF_10N + 69916, 0, 0, 0, 0, 0, 48181, 0, 0, 0, 'Gurubashi Berserker', '', '', 0, 92, 92, 0, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 42000, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 69916, 0, 0, 0, 0, 0, 0, 0, 0, 138540, 138427, 138693, 0, 0, 0, 0, 0, 0, 0, 11408, 11408, 'SmartAI', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 109133791, 0, '', 1,0),
+(@RAID_DIFF_10N + 69911, 0, 0, 0, 0, 0, 47760, 0, 0, 0, 'Zandalari Warlord', '', '', 0, 92, 92, 4, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 42000, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 69911, 0, 0, 0, 0, 0, 0, 0, 0, 140414, 140422, 134856, 0, 0, 0, 0, 0, 0, 0, 11401, 11401, 'SmartAI', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 109125471, 0, '', 1,0),
+(@RAID_DIFF_10N + 69916, 0, 0, 0, 0, 0, 48181, 0, 0, 0, 'Gurubashi Berserker', '', '', 0, 92, 92, 4, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 42000, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 69916, 0, 0, 0, 0, 0, 0, 0, 0, 138540, 138427, 138693, 0, 0, 0, 0, 0, 0, 0, 11408, 11408, 'SmartAI', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 109133791, 0, '', 1,0),
 (@RAID_DIFF_10N + 69927, 0, 0, 0, 0, 0, 47885, 0, 0, 0, 'Zandalari Prelate', '', '', 0, 92, 92, 4, 16, 16, 0, 2.8, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 1000, 2000, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 171, 1, 0, 0, '', 17614,69927),
 (@RAID_DIFF_10N + 70557, 0, 0, 0, 0, 0, 48121, 0, 0, 0, 'Zandalari Prophet', '', '', 0, 92, 92, 4, 16, 16, 0, 2.8, 1.71429, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 8, 32768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 171, 1, 0, 0, '', 17614,70557),
 
@@ -387,8 +405,8 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 (@RAID_DIFF_25N + 69906, 0, 0, 0, 0, 0, 47761, 47762, 0, 0, 'Zandalari High Priest', '', '', 0, 92, 92, 4, 16, 16, 0, 4.8, 1.71429, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 8, 32768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 174, 1, 0, 0, '', 17614,69906),
 (@RAID_DIFF_25N + 69909, 0, 0, 0, 0, 0, 22307, 22308, 47335, 47336, 'Amani\'shi Flame Chanter', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.71429, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 8, 32768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 174, 1, 0, 0, '', 17614,69909),
 (@RAID_DIFF_25N + 69910, 0, 0, 0, 0, 0, 47769, 47780, 47781, 0, 'Drakkari Frost Warden', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.71429, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 8, 32768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 174, 1, 0, 0, '', 17614,69910),
-(@RAID_DIFF_25N + 69911, 0, 0, 0, 0, 0, 47760, 0, 0, 0, 'Zandalari Warlord', '', '', 0, 92, 92, 0, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 42000, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 69911, 0, 0, 0, 0, 0, 0, 0, 0, 140414, 140422, 134856, 0, 0, 0, 0, 0, 0, 0, 11401, 11401, 'SmartAI', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 109125471, 0, '', 1,0),
-(@RAID_DIFF_25N + 69916, 0, 0, 0, 0, 0, 48181, 0, 0, 0, 'Gurubashi Berserker', '', '', 0, 92, 92, 0, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 42000, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 69916, 0, 0, 0, 0, 0, 0, 0, 0, 138540, 138427, 138693, 0, 0, 0, 0, 0, 0, 0, 11408, 11408, 'SmartAI', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 109133791, 0, '', 1,0),
+(@RAID_DIFF_25N + 69911, 0, 0, 0, 0, 0, 47760, 0, 0, 0, 'Zandalari Warlord', '', '', 0, 92, 92, 4, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 42000, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 69911, 0, 0, 0, 0, 0, 0, 0, 0, 140414, 140422, 134856, 0, 0, 0, 0, 0, 0, 0, 11401, 11401, 'SmartAI', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 109125471, 0, '', 1,0),
+(@RAID_DIFF_25N + 69916, 0, 0, 0, 0, 0, 48181, 0, 0, 0, 'Gurubashi Berserker', '', '', 0, 92, 92, 4, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 42000, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 69916, 0, 0, 0, 0, 0, 0, 0, 0, 138540, 138427, 138693, 0, 0, 0, 0, 0, 0, 0, 11408, 11408, 'SmartAI', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 109133791, 0, '', 1,0),
 (@RAID_DIFF_25N + 69927, 0, 0, 0, 0, 0, 47885, 0, 0, 0, 'Zandalari Prelate', '', '', 0, 92, 92, 4, 16, 16, 0, 2.8, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 1000, 2000, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 171, 1, 0, 0, '', 17614,69927),
 (@RAID_DIFF_25N + 70557, 0, 0, 0, 0, 0, 48121, 0, 0, 0, 'Zandalari Prophet', '', '', 0, 92, 92, 4, 16, 16, 0, 2.8, 1.71429, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 8, 32768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 171, 1, 0, 0, '', 17614,70557),
 
@@ -401,8 +419,8 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 (@RAID_DIFF_10H + 69906, 0, 0, 0, 0, 0, 47761, 47762, 0, 0, 'Zandalari High Priest', '', '', 0, 92, 92, 4, 16, 16, 0, 4.8, 1.71429, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 8, 32768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 174, 1, 0, 0, '', 17614,69906),
 (@RAID_DIFF_10H + 69909, 0, 0, 0, 0, 0, 22307, 22308, 47335, 47336, 'Amani\'shi Flame Chanter', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.71429, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 8, 32768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 174, 1, 0, 0, '', 17614,69909),
 (@RAID_DIFF_10H + 69910, 0, 0, 0, 0, 0, 47769, 47780, 47781, 0, 'Drakkari Frost Warden', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.71429, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 8, 32768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 174, 1, 0, 0, '', 17614,69910),
-(@RAID_DIFF_10H + 69911, 0, 0, 0, 0, 0, 47760, 0, 0, 0, 'Zandalari Warlord', '', '', 0, 92, 92, 0, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 42000, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 69911, 0, 0, 0, 0, 0, 0, 0, 0, 140414, 140422, 134856, 0, 0, 0, 0, 0, 0, 0, 11401, 11401, 'SmartAI', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 109125471, 0, '', 1,0),
-(@RAID_DIFF_10H + 69916, 0, 0, 0, 0, 0, 48181, 0, 0, 0, 'Gurubashi Berserker', '', '', 0, 92, 92, 0, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 42000, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 69916, 0, 0, 0, 0, 0, 0, 0, 0, 138540, 138427, 138693, 0, 0, 0, 0, 0, 0, 0, 11408, 11408, 'SmartAI', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 109133791, 0, '', 1,0),
+(@RAID_DIFF_10H + 69911, 0, 0, 0, 0, 0, 47760, 0, 0, 0, 'Zandalari Warlord', '', '', 0, 92, 92, 4, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 42000, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 69911, 0, 0, 0, 0, 0, 0, 0, 0, 140414, 140422, 134856, 0, 0, 0, 0, 0, 0, 0, 11401, 11401, 'SmartAI', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 109125471, 0, '', 1,0),
+(@RAID_DIFF_10H + 69916, 0, 0, 0, 0, 0, 48181, 0, 0, 0, 'Gurubashi Berserker', '', '', 0, 92, 92, 4, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 42000, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 69916, 0, 0, 0, 0, 0, 0, 0, 0, 138540, 138427, 138693, 0, 0, 0, 0, 0, 0, 0, 11408, 11408, 'SmartAI', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 109133791, 0, '', 1,0),
 (@RAID_DIFF_10H + 69927, 0, 0, 0, 0, 0, 47885, 0, 0, 0, 'Zandalari Prelate', '', '', 0, 92, 92, 4, 16, 16, 0, 2.8, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 1000, 2000, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 171, 1, 0, 0, '', 17614,69927),
 (@RAID_DIFF_10H + 70557, 0, 0, 0, 0, 0, 48121, 0, 0, 0, 'Zandalari Prophet', '', '', 0, 92, 92, 4, 16, 16, 0, 2.8, 1.71429, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 8, 32768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 171, 1, 0, 0, '', 17614,70557),
 
@@ -415,8 +433,8 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 (@RAID_DIFF_25H + 69906, 0, 0, 0, 0, 0, 47761, 47762, 0, 0, 'Zandalari High Priest', '', '', 0, 92, 92, 4, 16, 16, 0, 4.8, 1.71429, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 8, 32768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 174, 1, 0, 0, '', 17614,69906),
 (@RAID_DIFF_25H + 69909, 0, 0, 0, 0, 0, 22307, 22308, 47335, 47336, 'Amani\'shi Flame Chanter', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.71429, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 8, 32768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 174, 1, 0, 0, '', 17614,69909),
 (@RAID_DIFF_25H + 69910, 0, 0, 0, 0, 0, 47769, 47780, 47781, 0, 'Drakkari Frost Warden', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.71429, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 8, 32768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 174, 1, 0, 0, '', 17614,69910),
-(@RAID_DIFF_25H + 69911, 0, 0, 0, 0, 0, 47760, 0, 0, 0, 'Zandalari Warlord', '', '', 0, 92, 92, 0, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 42000, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 69911, 0, 0, 0, 0, 0, 0, 0, 0, 140414, 140422, 134856, 0, 0, 0, 0, 0, 0, 0, 11401, 11401, 'SmartAI', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 109125471, 0, '', 1,0),
-(@RAID_DIFF_25H + 69916, 0, 0, 0, 0, 0, 48181, 0, 0, 0, 'Gurubashi Berserker', '', '', 0, 92, 92, 0, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 42000, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 69916, 0, 0, 0, 0, 0, 0, 0, 0, 138540, 138427, 138693, 0, 0, 0, 0, 0, 0, 0, 11408, 11408, 'SmartAI', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 109133791, 0, '', 1,0),
+(@RAID_DIFF_25H + 69911, 0, 0, 0, 0, 0, 47760, 0, 0, 0, 'Zandalari Warlord', '', '', 0, 92, 92, 4, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 42000, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 69911, 0, 0, 0, 0, 0, 0, 0, 0, 140414, 140422, 134856, 0, 0, 0, 0, 0, 0, 0, 11401, 11401, 'SmartAI', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 109125471, 0, '', 1,0),
+(@RAID_DIFF_25H + 69916, 0, 0, 0, 0, 0, 48181, 0, 0, 0, 'Gurubashi Berserker', '', '', 0, 92, 92, 4, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 42000, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 69916, 0, 0, 0, 0, 0, 0, 0, 0, 138540, 138427, 138693, 0, 0, 0, 0, 0, 0, 0, 11408, 11408, 'SmartAI', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 109133791, 0, '', 1,0),
 (@RAID_DIFF_25H + 69927, 0, 0, 0, 0, 0, 47885, 0, 0, 0, 'Zandalari Prelate', '', '', 0, 92, 92, 4, 16, 16, 0, 2.8, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 1000, 2000, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 171, 1, 0, 0, '', 17614,69927),
 (@RAID_DIFF_25H + 70557, 0, 0, 0, 0, 0, 48121, 0, 0, 0, 'Zandalari Prophet', '', '', 0, 92, 92, 4, 16, 16, 0, 2.8, 1.71429, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 8, 32768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 171, 1, 0, 0, '', 17614,70557),
 
@@ -429,8 +447,8 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 (@RAID_DIFF_25R + 69906, 0, 0, 0, 0, 0, 47761, 47762, 0, 0, 'Zandalari High Priest', '', '', 0, 92, 92, 4, 16, 16, 0, 4.8, 1.71429, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 8, 32768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 174, 1, 0, 0, '', 17614,69906),
 (@RAID_DIFF_25R + 69909, 0, 0, 0, 0, 0, 22307, 22308, 47335, 47336, 'Amani\'shi Flame Chanter', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.71429, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 8, 32768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 174, 1, 0, 0, '', 17614,69909),
 (@RAID_DIFF_25R + 69910, 0, 0, 0, 0, 0, 47769, 47780, 47781, 0, 'Drakkari Frost Warden', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.71429, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 8, 32768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 174, 1, 0, 0, '', 17614,69910),
-(@RAID_DIFF_25R + 69911, 0, 0, 0, 0, 0, 47760, 0, 0, 0, 'Zandalari Warlord', '', '', 0, 92, 92, 0, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 42000, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 69911, 0, 0, 0, 0, 0, 0, 0, 0, 140414, 140422, 134856, 0, 0, 0, 0, 0, 0, 0, 11401, 11401, 'SmartAI', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 109125471, 0, '', 1,0),
-(@RAID_DIFF_25R + 69916, 0, 0, 0, 0, 0, 48181, 0, 0, 0, 'Gurubashi Berserker', '', '', 0, 92, 92, 0, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 42000, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 69916, 0, 0, 0, 0, 0, 0, 0, 0, 138540, 138427, 138693, 0, 0, 0, 0, 0, 0, 0, 11408, 11408, 'SmartAI', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 109133791, 0, '', 1,0),
+(@RAID_DIFF_25R + 69911, 0, 0, 0, 0, 0, 47760, 0, 0, 0, 'Zandalari Warlord', '', '', 0, 92, 92, 4, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 42000, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 69911, 0, 0, 0, 0, 0, 0, 0, 0, 140414, 140422, 134856, 0, 0, 0, 0, 0, 0, 0, 11401, 11401, 'SmartAI', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 109125471, 0, '', 1,0),
+(@RAID_DIFF_25R + 69916, 0, 0, 0, 0, 0, 48181, 0, 0, 0, 'Gurubashi Berserker', '', '', 0, 92, 92, 4, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 42000, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 69916, 0, 0, 0, 0, 0, 0, 0, 0, 138540, 138427, 138693, 0, 0, 0, 0, 0, 0, 0, 11408, 11408, 'SmartAI', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 109133791, 0, '', 1,0),
 (@RAID_DIFF_25R + 69927, 0, 0, 0, 0, 0, 47885, 0, 0, 0, 'Zandalari Prelate', '', '', 0, 92, 92, 4, 16, 16, 0, 2.8, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 1000, 2000, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 171, 1, 0, 0, '', 17614,69927),
 (@RAID_DIFF_25R + 70557, 0, 0, 0, 0, 0, 48121, 0, 0, 0, 'Zandalari Prophet', '', '', 0, 92, 92, 4, 16, 16, 0, 2.8, 1.71429, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 8, 32768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 171, 1, 0, 0, '', 17614,70557);
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -467,11 +485,11 @@ UPDATE creature_template SET difficulty_entry_3 = @RAID_DIFF_10N + entry, diffic
 (69078,69131,69132,69134,69899,69905,69906,69909,69910,69911,69916,69927,70557);
 
 -- Farraki Sand Conjurer
-UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69899, dmg_multiplier = 5, Health_Mod = 3237830  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69899;
-UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69899, dmg_multiplier = 6, Health_Mod = 4047287  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10H + 69899;
-UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69899, dmg_multiplier = 8, Health_Mod = 8094576  / @HP_MOD_92 WHERE entry = @RAID_DIFF_25N + 69899;
-UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69899, dmg_multiplier = 9, Health_Mod = 10118220 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25H + 69899;
-UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69899, dmg_multiplier = 7, Health_Mod = 7285118  / @HP_MOD_92 WHERE entry = @RAID_DIFF_25R + 69899;
+UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69899, dmg_multiplier = 5, Health_Mod = 3237830  / @HP_MOD_92_8 WHERE entry = @RAID_DIFF_10N + 69899;
+UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69899, dmg_multiplier = 6, Health_Mod = 4047287  / @HP_MOD_92_8 WHERE entry = @RAID_DIFF_10H + 69899;
+UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69899, dmg_multiplier = 8, Health_Mod = 8094576  / @HP_MOD_92_8 WHERE entry = @RAID_DIFF_25N + 69899;
+UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69899, dmg_multiplier = 9, Health_Mod = 10118220 / @HP_MOD_92_8 WHERE entry = @RAID_DIFF_25H + 69899;
+UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69899, dmg_multiplier = 7, Health_Mod = 7285118  / @HP_MOD_92_8 WHERE entry = @RAID_DIFF_25R + 69899;
 
 -- Gurubashi Berserker
 UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69905, dmg_multiplier = 5, Health_Mod = 5059103  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69905;
@@ -481,25 +499,25 @@ UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69905, dmg_multiplier = 9
 UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69905, dmg_multiplier = 7, Health_Mod = 11382983 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25R + 69905;
 
 -- Zandalari High Priest
-UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69906, dmg_multiplier = 5, Health_Mod = 5059110  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69906;
-UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69906, dmg_multiplier = 6, Health_Mod = 6323887  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10H + 69906;
-UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69906, dmg_multiplier = 8, Health_Mod = 12647775 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25N + 69906;
-UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69906, dmg_multiplier = 9, Health_Mod = 15809718 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25H + 69906;
-UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69906, dmg_multiplier = 7, Health_Mod = 11382997 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25R + 69906;
+UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69906, dmg_multiplier = 5, Health_Mod = 5059110  / @HP_MOD_92_8 WHERE entry = @RAID_DIFF_10N + 69906;
+UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69906, dmg_multiplier = 6, Health_Mod = 6323887  / @HP_MOD_92_8 WHERE entry = @RAID_DIFF_10H + 69906;
+UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69906, dmg_multiplier = 8, Health_Mod = 12647775 / @HP_MOD_92_8 WHERE entry = @RAID_DIFF_25N + 69906;
+UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69906, dmg_multiplier = 9, Health_Mod = 15809718 / @HP_MOD_92_8 WHERE entry = @RAID_DIFF_25H + 69906;
+UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69906, dmg_multiplier = 7, Health_Mod = 11382997 / @HP_MOD_92_8 WHERE entry = @RAID_DIFF_25R + 69906;
 
 -- Amani'shi Flame Chanter
-UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69909, dmg_multiplier = 3, Health_Mod = 4047288  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69909;
-UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69909, dmg_multiplier = 4, Health_Mod = 5059110  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10H + 69909;
-UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69909, dmg_multiplier = 6, Health_Mod = 10118220 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25N + 69909;
-UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69909, dmg_multiplier = 7, Health_Mod = 12647775 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25H + 69909;
-UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69909, dmg_multiplier = 5, Health_Mod = 9106398  / @HP_MOD_92 WHERE entry = @RAID_DIFF_25R + 69909;
+UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69909, dmg_multiplier = 3, Health_Mod = 4047288  / @HP_MOD_92_8 WHERE entry = @RAID_DIFF_10N + 69909;
+UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69909, dmg_multiplier = 4, Health_Mod = 5059110  / @HP_MOD_92_8 WHERE entry = @RAID_DIFF_10H + 69909;
+UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69909, dmg_multiplier = 6, Health_Mod = 10118220 / @HP_MOD_92_8 WHERE entry = @RAID_DIFF_25N + 69909;
+UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69909, dmg_multiplier = 7, Health_Mod = 12647775 / @HP_MOD_92_8 WHERE entry = @RAID_DIFF_25H + 69909;
+UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69909, dmg_multiplier = 5, Health_Mod = 9106398  / @HP_MOD_92_8 WHERE entry = @RAID_DIFF_25R + 69909;
 
 -- Drakkari Frost Warden
-UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69910, dmg_multiplier = 5, Health_Mod = 3237830  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69910;
-UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69910, dmg_multiplier = 6, Health_Mod = 4047288  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10H + 69910;
-UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69910, dmg_multiplier = 8, Health_Mod = 8094576  / @HP_MOD_92 WHERE entry = @RAID_DIFF_25N + 69910;
-UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69910, dmg_multiplier = 9, Health_Mod = 10118220 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25H + 69910;
-UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69910, dmg_multiplier = 7, Health_Mod = 7285118  / @HP_MOD_92 WHERE entry = @RAID_DIFF_25R + 69910;
+UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69910, dmg_multiplier = 5, Health_Mod = 3237830  / @HP_MOD_92_8 WHERE entry = @RAID_DIFF_10N + 69910;
+UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69910, dmg_multiplier = 6, Health_Mod = 4047288  / @HP_MOD_92_8 WHERE entry = @RAID_DIFF_10H + 69910;
+UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69910, dmg_multiplier = 8, Health_Mod = 8094576  / @HP_MOD_92_8 WHERE entry = @RAID_DIFF_25N + 69910;
+UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69910, dmg_multiplier = 9, Health_Mod = 10118220 / @HP_MOD_92_8 WHERE entry = @RAID_DIFF_25H + 69910;
+UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69910, dmg_multiplier = 7, Health_Mod = 7285118  / @HP_MOD_92_8 WHERE entry = @RAID_DIFF_25R + 69910;
 
 -- Zandalari Warlord
 UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69911, dmg_multiplier = 5, Health_Mod = 11804400 / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69911;
@@ -516,46 +534,46 @@ UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69916, dmg_multiplier = 9
 UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69916, dmg_multiplier = 7, Health_Mod = 14105114 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25R + 69916;
 
 -- Zandalari Prelate
-UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69927, dmg_multiplier = 5, Health_Mod = 6745471  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69927;
-UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69927, dmg_multiplier = 6, Health_Mod = 8431839  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10H + 69927;
-UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69927, dmg_multiplier = 8, Health_Mod = 16863678 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25N + 69927;
-UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69927, dmg_multiplier = 9, Health_Mod = 21079597 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25H + 69927;
-UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69927, dmg_multiplier = 7, Health_Mod = 15177310 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25R + 69927;
+UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69927, dmg_multiplier = 5, Health_Mod = 6745471  / @HP_MOD_92_M WHERE entry = @RAID_DIFF_10N + 69927;
+UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69927, dmg_multiplier = 6, Health_Mod = 8431839  / @HP_MOD_92_M WHERE entry = @RAID_DIFF_10H + 69927;
+UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69927, dmg_multiplier = 8, Health_Mod = 16863678 / @HP_MOD_92_M WHERE entry = @RAID_DIFF_25N + 69927;
+UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69927, dmg_multiplier = 9, Health_Mod = 21079597 / @HP_MOD_92_M WHERE entry = @RAID_DIFF_25H + 69927;
+UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69927, dmg_multiplier = 7, Health_Mod = 15177310 / @HP_MOD_92_M WHERE entry = @RAID_DIFF_25R + 69927;
 
 -- Zandalari Prophet
-UPDATE creature_template SET LootId = @RAID_DIFF_10N + 70557, dmg_multiplier = 5, Health_Mod = 4856745  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 70557;
-UPDATE creature_template SET LootId = @RAID_DIFF_10H + 70557, dmg_multiplier = 6, Health_Mod = 6070931  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10H + 70557;
-UPDATE creature_template SET LootId = @RAID_DIFF_25N + 70557, dmg_multiplier = 8, Health_Mod = 12141863 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25N + 70557;
-UPDATE creature_template SET LootId = @RAID_DIFF_25H + 70557, dmg_multiplier = 9, Health_Mod = 15177328 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25H + 70557;
-UPDATE creature_template SET LootId = @RAID_DIFF_25R + 70557, dmg_multiplier = 7, Health_Mod = 10927676 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25R + 70557;
+UPDATE creature_template SET LootId = @RAID_DIFF_10N + 70557, dmg_multiplier = 5, Health_Mod = 4856745  / @HP_MOD_92_8 WHERE entry = @RAID_DIFF_10N + 70557;
+UPDATE creature_template SET LootId = @RAID_DIFF_10H + 70557, dmg_multiplier = 6, Health_Mod = 6070931  / @HP_MOD_92_8 WHERE entry = @RAID_DIFF_10H + 70557;
+UPDATE creature_template SET LootId = @RAID_DIFF_25N + 70557, dmg_multiplier = 8, Health_Mod = 12141863 / @HP_MOD_92_8 WHERE entry = @RAID_DIFF_25N + 70557;
+UPDATE creature_template SET LootId = @RAID_DIFF_25H + 70557, dmg_multiplier = 9, Health_Mod = 15177328 / @HP_MOD_92_8 WHERE entry = @RAID_DIFF_25H + 70557;
+UPDATE creature_template SET LootId = @RAID_DIFF_25R + 70557, dmg_multiplier = 7, Health_Mod = 10927676 / @HP_MOD_92_8 WHERE entry = @RAID_DIFF_25R + 70557;
 
 -- Sul the Sandcrawler
-UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69078, dmg_multiplier = 6, Health_Mod = 89844224  / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 69078;
-UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69078, dmg_multiplier = 7, Health_Mod = 112305280 / @HP_MOD_93 WHERE entry = @RAID_DIFF_10H + 69078;
-UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69078, dmg_multiplier = 9, Health_Mod = 224610560 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25N + 69078;
-UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69078, dmg_multiplier = 10,Health_Mod = 280763200 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 69078;
-UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69078, dmg_multiplier = 8, Health_Mod = 202149504 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 69078;
+UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69078, dmg_multiplier = 6, Health_Mod = 89844224  / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_10N + 69078;
+UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69078, dmg_multiplier = 7, Health_Mod = 112305280 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_10H + 69078;
+UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69078, dmg_multiplier = 9, Health_Mod = 224610560 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_25N + 69078;
+UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69078, dmg_multiplier = 10,Health_Mod = 280763200 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_25H + 69078;
+UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69078, dmg_multiplier = 8, Health_Mod = 202149504 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_25R + 69078;
 
 -- Frost King Malakk
-UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69131, dmg_multiplier = 6, Health_Mod = 89844224  / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 69131;
-UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69131, dmg_multiplier = 7, Health_Mod = 112305280 / @HP_MOD_93 WHERE entry = @RAID_DIFF_10H + 69131;
-UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69131, dmg_multiplier = 9, Health_Mod = 224610560 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25N + 69131;
-UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69131, dmg_multiplier = 10,Health_Mod = 280763200 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 69131;
-UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69131, dmg_multiplier = 8, Health_Mod = 202149504 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 69131;
+UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69131, dmg_multiplier = 6, Health_Mod = 89844224  / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_10N + 69131;
+UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69131, dmg_multiplier = 7, Health_Mod = 112305280 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_10H + 69131;
+UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69131, dmg_multiplier = 9, Health_Mod = 224610560 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_25N + 69131;
+UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69131, dmg_multiplier = 10,Health_Mod = 280763200 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_25H + 69131;
+UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69131, dmg_multiplier = 8, Health_Mod = 202149504 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_25R + 69131;
 
 -- High Priestess Mar'li
-UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69132, dmg_multiplier = 6, Health_Mod = 89844224  / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 69132;
-UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69132, dmg_multiplier = 7, Health_Mod = 112305280 / @HP_MOD_93 WHERE entry = @RAID_DIFF_10H + 69132;
-UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69132, dmg_multiplier = 9, Health_Mod = 224610560 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25N + 69132;
-UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69132, dmg_multiplier = 10,Health_Mod = 280763200 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 69132;
-UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69132, dmg_multiplier = 8, Health_Mod = 202149504 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 69132;
+UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69132, dmg_multiplier = 6, Health_Mod = 89844224  / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_10N + 69132;
+UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69132, dmg_multiplier = 7, Health_Mod = 112305280 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_10H + 69132;
+UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69132, dmg_multiplier = 9, Health_Mod = 224610560 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_25N + 69132;
+UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69132, dmg_multiplier = 10,Health_Mod = 280763200 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_25H + 69132;
+UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69132, dmg_multiplier = 8, Health_Mod = 202149504 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_25R + 69132;
 
 -- Kazra'jin
-UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69134, dmg_multiplier = 6, Health_Mod = 89844224  / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 69134;
-UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69134, dmg_multiplier = 7, Health_Mod = 112305280 / @HP_MOD_93 WHERE entry = @RAID_DIFF_10H + 69134;
-UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69134, dmg_multiplier = 9, Health_Mod = 224610560 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25N + 69134;
-UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69134, dmg_multiplier = 10,Health_Mod = 280763200 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 69134;
-UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69134, dmg_multiplier = 8, Health_Mod = 202149504 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 69134;
+UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69134, dmg_multiplier = 6, Health_Mod = 89844224  / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_10N + 69134;
+UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69134, dmg_multiplier = 7, Health_Mod = 112305280 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_10H + 69134;
+UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69134, dmg_multiplier = 9, Health_Mod = 224610560 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_25N + 69134;
+UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69134, dmg_multiplier = 10,Health_Mod = 280763200 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_25H + 69134;
+UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69134, dmg_multiplier = 8, Health_Mod = 202149504 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_25R + 69134;
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/

@@ -422,7 +422,7 @@ public:
                 case EVENT_STATIC_BURST:
                     Talk(TALK_STATIC_BURST);
                     DoCastBossSpell(me->GetVictim(), SPELL_STATIC_BURST, false, 1000);
-                    events.ScheduleEvent(EVENT_STATIC_BURST, urand(12000, 16000));
+                    events.ScheduleEvent(EVENT_STATIC_BURST, urand(14000, 19000));
                     break;
                 case EVENT_FOCUSED_LIGHTNING:
                     Talk(TALK_FOCUSED_LIGHTNING);
@@ -755,12 +755,12 @@ public:
 
                         if (pUnit->HasAura(SPELL_FLUIDITY))
                         {
-                            pCaster->CastSpell(pUnit, SPELL_FOCUSED_LIGHTNING_CONDUCTION, true);
+                            pUnit->CastSpell(pUnit, SPELL_FOCUSED_LIGHTNING_CONDUCTION, true);
                             should_conduct = true;
                         }
                         else if (pUnit->HasAura(SPELL_ELECTRIFIED_WATERS))
                         {
-                            pCaster->CastSpell(pUnit, SPELL_FOCUSED_LIGHTNING_CONDUCTION, true);
+                            pUnit->CastSpell(pUnit, SPELL_FOCUSED_LIGHTNING_CONDUCTION, true);
                             violent = true;
                             should_conduct = true;
                         }

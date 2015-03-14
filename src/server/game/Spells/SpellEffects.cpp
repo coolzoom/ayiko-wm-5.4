@@ -3371,9 +3371,6 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
     // Before dispel
     switch (m_spellInfo->Id)
     {
-        case 88423: // Nature's Cure
-            dispelMask = ((1<<DISPEL_MAGIC) | (1<<DISPEL_CURSE) | (1<<DISPEL_POISON));
-            break;
         case 115450:// Detox
         {
             if (effIndex > 1)

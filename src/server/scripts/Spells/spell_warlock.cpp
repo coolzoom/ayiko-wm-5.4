@@ -2537,43 +2537,18 @@ class spell_warl_unstable_affliction : public SpellScriptLoader
     public:
         spell_warl_unstable_affliction() : SpellScriptLoader("spell_warl_unstable_affliction") { }
 
-        class ExecuteSilenceEvent : public BasicEvent
-        {
-        public:
-            ExecuteSilenceEvent(Unit * const caster, uint64 targetGUID, int32 damage) : BasicEvent(), _caster(caster), _targetGUID(targetGUID), _damage(damage) { }
-
-            bool Execute(uint64 /*eventTime*/, uint32 /*diff*/)
-            {
-                if (auto target = Unit::GetUnit(*_caster, _targetGUID))
-                    _caster->CastCustomSpell(target, WARLOCK_UNSTABLE_AFFLICTION_DISPEL, &_damage, NULL, NULL, true);
-                return true;
-            }
-
-        private:
-            Unit * const _caster;
-            uint64 _targetGUID;
-            int32 _damage;
-        };
-
         class spell_warl_unstable_affliction_AuraScript : public AuraScript
         {
             PrepareAuraScript(spell_warl_unstable_affliction_AuraScript);
-
-            bool Validate(SpellInfo const* /*spell*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(WARLOCK_UNSTABLE_AFFLICTION_DISPEL))
-                    return false;
-                return true;
-            }
 
             void HandleDispel(DispelInfo* dispelInfo)
             {
                 if (Unit* caster = GetCaster())
                     if (AuraEffect const *aurEff = GetEffect(EFFECT_0))
                     {
-                        int32 damage = aurEff->GetAmount() * 7;
-                        // backfire damage and silence - handled in delayed event due to multiple dispel effects spells removing silence casted
-                        caster->m_Events.AddEvent(new ExecuteSilenceEvent(caster, dispelInfo->GetDispeller()->GetGUID(), damage), caster->m_Events.CalculateTime(1));
+                        int32 damage = aurEff->GetAmount() * 8;
+                        // backfire damage and silence
+                        caster->CastCustomSpell(dispelInfo->GetDispeller(), WARLOCK_UNSTABLE_AFFLICTION_DISPEL, &damage, NULL, NULL, true, NULL, aurEff);
                     }
             }
 

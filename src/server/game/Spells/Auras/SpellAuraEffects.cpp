@@ -1105,7 +1105,7 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
             // Stealth
             if (GetId() == 1784 || GetId() == 115191)
                 if (auto elusiveness = GetBase()->GetUnitOwner()->GetAuraEffect(21009, EFFECT_0))
-                    amount = elusiveness->GetAmount();
+                    amount += elusiveness->GetAmount();
             break;
         }
         case SPELL_AURA_MOUNTED:

@@ -7011,7 +7011,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                 case 28719: // Healing Touch (Dreamwalker Raiment set)
                 {
                     // mana back
-                    basepoints0 = int32(CalculatePct(procSpell->spellPower.manaCost, 30));
+                    basepoints0 = int32(CalculatePct(procSpell->spellPower.Cost, 30));
                     target = this;
                     triggered_spell_id = 28742;
                     break;
@@ -7465,10 +7465,10 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                 // Item - Collecting Mana, Tyrande's Favirite Doll
                 case 92272:
                 {
-                    if (procSpell && procSpell->spellPower.manaCostPercentage)
+                    if (procSpell && procSpell->spellPower.CostBasePercentage)
                     {
                         const int32 maxmana = 4200;
-                        int32 mana = int32(0.2f * CalculatePct(GetCreateMana(), procSpell->spellPower.manaCostPercentage));
+                        int32 mana = int32(0.2f * CalculatePct(GetCreateMana(), procSpell->spellPower.CostBasePercentage));
                         if (AuraEffect *aurEff = GetAuraEffect(92596, EFFECT_0))
                         {
                             int32 oldamount = aurEff->GetAmount();
@@ -9343,7 +9343,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
                     {
                         if (!procSpell)
                             return false;
-                        basepoints0 = int32(CalculatePct(procSpell->spellPower.manaCost, 35));
+                        basepoints0 = int32(CalculatePct(procSpell->spellPower.Cost, 35));
                         trigger_spell_id = 23571;
                         target = this;
                         break;
@@ -9594,7 +9594,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
                 return false;
 
             // ranged attack that costs Focus or Kill Command
-            if (procSpell->Id != 34026 && procSpell->spellPower.powerType != POWER_FOCUS && procSpell->DmgClass != SPELL_DAMAGE_CLASS_RANGED)
+            if (procSpell->Id != 34026 && procSpell->spellPower.PowerType != POWER_FOCUS && procSpell->DmgClass != SPELL_DAMAGE_CLASS_RANGED)
                 return false;
 
             trigger_spell_id = 34720;
@@ -9747,7 +9747,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
             if (!procSpell)
                 return false;
 
-            if (procSpell->spellPower.powerType != POWER_HOLY_POWER)
+            if (procSpell->spellPower.PowerType != POWER_HOLY_POWER)
                 return false;
 
             break;
@@ -9757,7 +9757,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
             if (!procSpell)
                 return false;
 
-            if (procSpell->spellPower.powerType != POWER_HOLY_POWER)
+            if (procSpell->spellPower.PowerType != POWER_HOLY_POWER)
                 return false;
 
             break;
@@ -10287,7 +10287,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
         // Enlightenment (trigger only from mana cost spells)
         case 35095:
         {
-            if (!procSpell || procSpell->spellPower.powerType != POWER_MANA || (procSpell->spellPower.manaCost == 0 && procSpell->spellPower.manaCostPercentage == 0))
+            if (!procSpell || procSpell->spellPower.PowerType != POWER_MANA || (procSpell->spellPower.Cost == 0 && procSpell->spellPower.CostBasePercentage == 0))
                 return false;
             break;
         }
@@ -16797,7 +16797,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
                     case SPELL_AURA_MOD_POWER_COST_SCHOOL:
                         // Skip melee hits and spells with wrong school or zero cost
                         if (procSpell
-                                && (procSpell->spellPower.manaCost != 0 || procSpell->spellPower.manaCostPercentage != 0)
+                                && (procSpell->spellPower.Cost != 0 || procSpell->spellPower.CostBasePercentage != 0)
                                 && (triggeredByAura->GetMiscValue() & procSpell->SchoolMask))
                             takeCharges = true;
                         break;

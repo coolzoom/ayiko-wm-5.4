@@ -87,7 +87,7 @@ void Vehicle::Install()
                     if (!spellInfo)
                         continue;
 
-                    if (spellInfo->spellPower.powerType == POWER_ENERGY)
+                    if (spellInfo->spellPower.PowerType == POWER_ENERGY)
                     {
                         _me->setPowerType(POWER_ENERGY);
                         _me->SetMaxPower(POWER_ENERGY, 100);

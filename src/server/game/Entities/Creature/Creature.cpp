@@ -1912,7 +1912,7 @@ SpellInfo const* Creature::reachWithSpellAttack(Unit* victim)
         if (bcontinue)
              continue;
 
-        if (spellInfo->spellPower.manaCost > (uint32)GetPower(POWER_MANA))
+        if (spellInfo->spellPower.Cost > (uint32)GetPower(POWER_MANA))
             continue;
         float range = spellInfo->GetMaxRange(false);
         float minrange = spellInfo->GetMinRange(false);
@@ -1957,7 +1957,7 @@ SpellInfo const* Creature::reachWithSpellCure(Unit* victim)
         if (bcontinue)
             continue;
 
-        if (spellInfo->spellPower.manaCost > (uint32)GetPower(POWER_MANA))
+        if (spellInfo->spellPower.Cost > (uint32)GetPower(POWER_MANA))
             continue;
 
         float range = spellInfo->GetMaxRange(true);

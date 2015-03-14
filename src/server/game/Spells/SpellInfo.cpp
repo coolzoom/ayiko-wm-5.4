@@ -1002,11 +1002,12 @@ SpellInfo::SpellInfo(SpellEntry const* spellEntry, uint32 difficulty)
     SpellLevel = _levels ? _levels->spellLevel : 0;
 
     // SpellPowerEntry
-    spellPower.manaCost = 0;
-    spellPower.manaCostPercentage = 0;
-    spellPower.manaPerSecond = 0;
+    spellPower.Cost = 0;
+    spellPower.CostBasePercentage = 0;
+    spellPower.CostPerSecondPercentage = 0.0f;
+    spellPower.CostPerSecond = 0;
     spellPower.SpellId = Id;
-    spellPower.powerType = POWER_MANA;
+    spellPower.PowerType = POWER_MANA;
 
     // SpellMiscEntry
     SpellMiscEntry const* _misc = GetSpellMisc();
@@ -1030,7 +1031,7 @@ SpellInfo::SpellInfo(SpellEntry const* spellEntry, uint32 difficulty)
 
     CastTimeEntry = sSpellCastTimesStore.LookupEntry(castingTimeIndex);
     DurationEntry = sSpellDurationStore.LookupEntry(durationIndex);
-    //PowerType = spellEntry->powerType; WTF
+    //PowerType = spellEntry->PowerType; WTF
     RangeEntry = sSpellRangeStore.LookupEntry(rangeIndex);
     Speed = _misc ? _misc->speed : 1.00f;
     for (uint8 i = 0; i < 2; ++i)
@@ -1295,7 +1296,7 @@ bool SpellInfo::IsStackableWithRanks() const
 {
     if (IsPassive())
         return false;
-    if (spellPower.powerType != POWER_MANA && spellPower.powerType != POWER_HEALTH)
+    if (spellPower.PowerType != POWER_MANA && spellPower.PowerType != POWER_HEALTH)
         return false;
     if (IsProfessionOrRiding())
         return false;
@@ -2514,40 +2515,40 @@ uint32 SpellInfo::CalcPowerCost(Unit const* caster, SpellSchoolMask schoolMask, 
     if (AttributesEx & SPELL_ATTR1_DRAIN_ALL_POWER)
     {
         // If power type - health drain all
-        if (spellPower->powerType == POWER_HEALTH)
+        if (spellPower->PowerType == POWER_HEALTH)
             return caster->GetHealth();
         // Else drain all power
-        if (spellPower->powerType < MAX_POWERS)
-            return caster->GetPower(Powers(spellPower->powerType));
-        TC_LOG_ERROR("spells", "SpellInfo::CalcPowerCost: Unknown power type '%d' in spell %d", spellPower->powerType, Id);
+        if (spellPower->PowerType < MAX_POWERS)
+            return caster->GetPower(Powers(spellPower->PowerType));
+        TC_LOG_ERROR("spells", "SpellInfo::CalcPowerCost: Unknown power type '%d' in spell %d", spellPower->PowerType, Id);
         return 0;
     }
 
     // Base powerCost
-    int32 powerCost = spellPower->manaCost;
+    int32 powerCost = spellPower->Cost;
     // PCT cost from total amount
-    if (spellPower->manaCostPercentage)
+    if (spellPower->CostBasePercentage)
     {
-        switch (spellPower->powerType)
+        switch (spellPower->PowerType)
         {
             // health as power used
             case POWER_HEALTH:
-                powerCost += int32(CalculatePct(caster->GetCreateHealth(), spellPower->manaCostPercentage));
+                powerCost += int32(CalculatePct(caster->GetCreateHealth(), spellPower->CostBasePercentage));
                 break;
             case POWER_MANA:
-                powerCost += int32(CalculatePct(caster->GetCreateMana(), spellPower->manaCostPercentage));
+                powerCost += int32(CalculatePct(caster->GetCreateMana(), spellPower->CostBasePercentage));
                 break;
             case POWER_RAGE:
             case POWER_FOCUS:
             case POWER_ENERGY:
-                powerCost += int32(CalculatePct(caster->GetMaxPower(Powers(spellPower->powerType)), spellPower->manaCostPercentage));
+                powerCost += int32(CalculatePct(caster->GetMaxPower(Powers(spellPower->PowerType)), spellPower->CostBasePercentage));
                 break;
             case POWER_RUNES:
             case POWER_RUNIC_POWER:
                 TC_LOG_DEBUG("spells", "CalculateManaCost: Not implemented yet!");
                 break;
             default:
-                TC_LOG_ERROR("spells", "CalculateManaCost: Unknown power type '%d' in spell %d", spellPower->powerType, Id);
+                TC_LOG_ERROR("spells", "CalculateManaCost: Unknown power type '%d' in spell %d", spellPower->PowerType, Id);
                 return 0;
         }
     }
@@ -3583,11 +3584,11 @@ bool SpellInfo::IsCanBeStolen() const
 {
     // some of the rules for those spells that can be stolen by Dark Simulacrum
     // spells should use mana
-    if (spellPower.powerType != POWER_MANA)
+    if (spellPower.PowerType != POWER_MANA)
         return false;
 
     // and should have mana cost
-    if (!spellPower.manaCost && !spellPower.manaCostPercentage)
+    if (!spellPower.Cost && !spellPower.CostBasePercentage)
         return false;
 
     // special rules

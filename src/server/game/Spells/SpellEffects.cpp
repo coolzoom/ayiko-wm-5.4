@@ -6493,7 +6493,7 @@ void Spell::EffectDestroyAllTotems(SpellEffIndex /*effIndex*/)
             SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spell_id);
             if (spellInfo)
             {
-                manaCostPercentage = spellInfo->spellPower.manaCostPercentage;
+                manaCostPercentage = spellInfo->spellPower.CostBasePercentage;
                 mana += m_caster->CountPctFromMaxMana(int32(manaCostPercentage));
             }
             totem->ToTotem()->UnSummon();

@@ -2391,17 +2391,16 @@ struct SpellPowerEntry
 {
     uint32    Id;                                           // 0        m_ID
     uint32    SpellId;                                      // 1
-    //uint32    unk_1;                                      // 2
-    uint32    powerType;                                    // 3
-    uint32    manaCost;                                     // 4
-    //uint32    unk_2;                                      // 5
-    //uint32    unk_3;                                      // 6
-    //uint32    unk_4;                                      // 7
-    //uint32    unk_5;                                      // 8
-    float manaCostPercentage;                               // 9
-    float manaPerSecond;                                    // 10
-    //uint32    requireShapeshift;                          // 11 Shapeshift required (spellID)
-    //float     unk_7;                                      // 12
+    uint32    Difficulty;                                   // 2 17128
+    uint32    PowerType;                                    // 3
+    uint32    Cost;                                         // 4
+    uint32    CostPerlevel;                                 // 5       m_manaCostPerLevel
+    uint32    CostPerSecond;                                // 6
+    uint32    PowerDisplayId[2];                            // 7-8       m_powerDisplayID - id from PowerDisplay.dbc, new in 3.1
+    float     CostBasePercentage;                           // 9       4.3.0
+    float     CostPerSecondPercentage;                      // 10 17128
+    uint32    RequiredAuraSpellId;                          // 11 17128
+    float     CostMaxPercentage;                            // 12 17128
 };
 
 // @author Selenium: 5.4 valid

@@ -2962,10 +2962,11 @@ void SpellMgr::LoadSpellInfoStore()
             if (!spell)
                 continue;
 
-            spell->spellPower.manaCost = spellPower->manaCost;
-            spell->spellPower.manaCostPercentage = spellPower->manaCostPercentage;
-            spell->spellPower.manaPerSecond = spellPower->manaPerSecond;
-            spell->spellPower.powerType = spellPower->powerType;
+            spell->spellPower.Cost = spellPower->Cost;
+            spell->spellPower.CostBasePercentage = spellPower->CostBasePercentage;
+            spell->spellPower.CostPerSecond = spellPower->CostPerSecond;
+            spell->spellPower.PowerType = spellPower->PowerType;
+            spell->spellPower.CostPerSecondPercentage = spellPower->CostPerSecondPercentage;
         }
 
         alreadySet.insert(spellPower->SpellId);
@@ -6161,7 +6162,7 @@ SpellPowerEntry const* SpellMgr::GetSpellPowerEntryByIdAndPower(uint32 spellId, 
     for (auto const &powerId : GetSpellPowerList(spellId))
     {
         auto const spellPower = sSpellPowerStore.LookupEntry(powerId);
-        if (spellPower && spellPower->powerType == power)
+        if (spellPower && spellPower->PowerType == power)
             return spellPower;
     }
 

@@ -144,6 +144,9 @@ void EffectMovementGenerator::Finalize(Unit *unit)
     if (!unit->IsInWorld())
         return;
 
+    if (unit->HasUnitState(UNIT_STATE_JUMPING))
+        unit->ClearUnitState(UNIT_STATE_JUMPING);
+
     MovementInform(unit);
 }
 

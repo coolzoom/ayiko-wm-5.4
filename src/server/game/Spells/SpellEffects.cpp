@@ -1663,6 +1663,8 @@ void Spell::EffectJumpDest(SpellEffIndex effIndex)
     float speedXY, speedZ;
     CalculateJumpSpeeds(effIndex, m_caster->GetExactDist2d(x, y), speedXY, speedZ);
 
+    m_caster->AddUnitState(UNIT_STATE_JUMPING);
+
     switch (m_spellInfo->Id)
     {
         case 49575: // Death Grip

@@ -299,6 +299,7 @@ public:
             ResetStatues();
 
             instance->SetBossState(DATA_JINROKH, NOT_STARTED);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
 
         void EnterCombat(Unit* pWho)
@@ -311,6 +312,7 @@ public:
             events.ScheduleEvent(EVENT_HEIGHT_CHECK, 2000);
 
             instance->SetBossState(DATA_JINROKH, IN_PROGRESS);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
 
             Talk(TALK_AGGRO);
         }
@@ -347,6 +349,7 @@ public:
 
             Talk(TALK_DEATH);
             instance->SetBossState(DATA_JINROKH, DONE);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
 
         void KilledUnit(Unit* pVictim) override

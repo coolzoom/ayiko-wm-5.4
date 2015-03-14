@@ -330,7 +330,7 @@ public:
         void CheckHeight()
         {
             if (me->GetPositionZ() > floorZ + 3.5f || me->GetPositionZ() < floorZ - 1.2f)
-                me->NearTeleportTo(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+                me->NearTeleportTo(me->GetPositionX(), me->GetPositionY(), floorZ + 0.2f, me->GetOrientation());
 
             events.ScheduleEvent(EVENT_HEIGHT_CHECK, 2000);
         }
@@ -513,7 +513,7 @@ public:
         void CheckHeight()
         {
             if (me->GetPositionZ() > floorZ + 3.5f || me->GetPositionZ() < floorZ - 1.2f)
-                me->NearTeleportTo(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+                me->NearTeleportTo(me->GetPositionX(), me->GetPositionY(), floorZ + 0.2f, me->GetOrientation());
         }
         
         void GetFixatedPlayerOrGetNewIfNeeded()

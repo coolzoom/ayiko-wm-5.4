@@ -4466,10 +4466,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 88767: // Fulmination (triggered)
                     spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_DONE_BONUS;
                     break;
-                case 51514: // Hex
-                case 130616:// Glyph of Fear effect
-                    spellInfo->Dispel = DISPEL_MAGIC;
-                    break;
                 case 113792:// Pyschic Horror - Psyfiend
                     spellInfo->MaxAffectedTargets = 1;
                     spellInfo->CastTimeEntry = sSpellCastTimesStore.LookupEntry(216); // 1.9s

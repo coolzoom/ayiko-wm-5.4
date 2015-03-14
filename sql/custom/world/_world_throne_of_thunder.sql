@@ -47,7 +47,11 @@ REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (137180, 'spell_thundering_throw'),
 (137168, 'spell_conductive_water_dummy'),
 (138002, 'spell_water_auras'),
-(138006, 'spell_water_auras');
+(138006, 'spell_water_auras'),
+(137399, 'spell_focused_lightning'),
+(137530, 'spell_focused_lightning_conduction'),
+(138133, 'spell_lightning_fissure_conduction');
+
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -157,6 +161,9 @@ UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69465, dmg_multiplier = 7
 UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69465, dmg_multiplier = 9, Health_Mod = 622803648 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25N + 69465;
 UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69465, dmg_multiplier = 10,Health_Mod = 952523200 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 69465;
 UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69465, dmg_multiplier = 8, Health_Mod = 545171264 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 69465;
+
+UPDATE creature_template SET ScriptName = 'npc_lightning_fissure' WHERE entry = 69609;
+UPDATE creature_template SET ScriptName = 'npc_focused_lightning', HoverHeight = 5 WHERE entry = 69593;
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/

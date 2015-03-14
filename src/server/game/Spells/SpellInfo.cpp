@@ -2559,6 +2559,14 @@ uint32 SpellInfo::CalcPowerCost(Unit const* caster, SpellSchoolMask schoolMask, 
     if (Player* modOwner = caster->GetSpellModOwner())
         modOwner->ApplySpellMod(Id, SPELLMOD_COST, powerCost, nullptr, takeMods);
 
+    // Hotfixes
+    switch (Id)
+    {
+        case 77799: // 5.4.0 Hotfix (2013-09-12): "Fel Flame's mana cost has been increased by 100%.
+            AddPct(powerCost, 100);
+            break;
+    }
+
     if (Attributes & SPELL_ATTR0_LEVEL_DAMAGE_CALCULATION)
         powerCost = int32(powerCost / (1.117f * SpellLevel / caster->getLevel() -0.1327f));
 

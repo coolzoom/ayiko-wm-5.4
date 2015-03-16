@@ -246,15 +246,8 @@ class spell_warr_storm_bolt : public SpellScriptLoader
             void HandleOnHit()
             {
                 if (Player* _player = GetCaster()->ToPlayer())
-                {
                     if (Unit* unitTarget = GetHitUnit())
-                    {
-                        if (unitTarget->IsImmunedToSpellEffect(sSpellMgr->GetSpellInfo(WARRIOR_SPELL_STORM_BOLT_STUN), 0))
-                            SetHitDamage(GetHitDamage() * 4);
-
                         _player->CastSpell(unitTarget, WARRIOR_SPELL_STORM_BOLT_STUN, true);
-                    }
-                }
             }
 
             void Register()
@@ -268,6 +261,36 @@ class spell_warr_storm_bolt : public SpellScriptLoader
             return new spell_warr_storm_bolt_SpellScript();
         }
 };
+
+// Storm Bolt damage (145585, 107570)
+class spell_warr_storm_bolt_damage : public SpellScriptLoader
+{
+    public:
+        spell_warr_storm_bolt_damage() : SpellScriptLoader("spell_warr_storm_bolt_damage") { }
+
+        class spell_warr_storm_bolt_damage_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_warr_storm_bolt_damage_SpellScript);
+
+            void HandleOnHit()
+            {
+                if (Unit* unitTarget = GetHitUnit())
+                    if (unitTarget->GetTypeId() != TYPEID_PLAYER && unitTarget->IsImmunedToSpellEffect(sSpellMgr->GetSpellInfo(WARRIOR_SPELL_STORM_BOLT_STUN), 0))
+                        SetHitDamage(GetHitDamage() * 4);
+            }
+
+            void Register()
+            {
+                OnHit += SpellHitFn(spell_warr_storm_bolt_damage_SpellScript::HandleOnHit);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_warr_storm_bolt_damage_SpellScript();
+        }
+};
+
 
 // Colossus Smash - 86346
 class spell_warr_colossus_smash : public SpellScriptLoader
@@ -1638,4 +1661,5 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_sudden_death();
     new spell_warr_sweeping_strikes();
     new spell_warr_unshackled_fury();
+    new spell_warr_storm_bolt_damage();
 }

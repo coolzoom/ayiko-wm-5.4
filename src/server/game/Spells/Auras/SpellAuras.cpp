@@ -557,7 +557,7 @@ m_isRemoved(false), m_isSingleTarget(false), m_isUsingCharges(false)
 {
     LoadScripts();
 
-    if (spellPowerData->manaPerSecond)
+    if (spellPowerData->CostPerSecond || spellPowerData->CostPerSecondPercentage)
         m_timeCla = 1 * IN_MILLISECONDS;
 
     m_maxDuration = CalcMaxDuration(caster);
@@ -908,11 +908,11 @@ void Aura::Update(uint32 diff, Unit* caster)
                 if (!m_spellPowerData)
                     return;
 
-                if (int32 manaPerSecond = m_spellPowerData->manaPerSecond)
+                if (int32 manaPerSecond = m_spellPowerData->CostPerSecond + int32(m_spellPowerData->CostPerSecondPercentage * caster->GetCreatePowers(Powers(m_spellPowerData->PowerType)) / 100))
                 {
                     m_timeCla += 1000 - diff;
 
-                    Powers powertype = Powers(m_spellPowerData->powerType);
+                    Powers powertype = Powers(m_spellPowerData->PowerType);
                     if (powertype == POWER_HEALTH)
                     {
                         if (caster->CountPctFromMaxHealth(manaPerSecond) < caster->GetHealth())
@@ -983,7 +983,7 @@ void Aura::RefreshDuration(bool recalculate)
 {
     SetDuration(GetMaxDuration());
 
-    if (m_spellPowerData->manaPerSecond)
+    if (m_spellPowerData->CostPerSecond || m_spellPowerData->CostPerSecondPercentage)
         m_timeCla = 1 * IN_MILLISECONDS;
 
     if (GetSpellInfo()->IsChanneled())

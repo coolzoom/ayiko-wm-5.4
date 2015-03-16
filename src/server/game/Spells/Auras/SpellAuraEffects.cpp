@@ -1105,7 +1105,7 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
             // Stealth
             if (GetId() == 1784 || GetId() == 115191)
                 if (auto elusiveness = GetBase()->GetUnitOwner()->GetAuraEffect(21009, EFFECT_0))
-                    amount = elusiveness->GetAmount();
+                    amount += elusiveness->GetAmount();
             break;
         }
         case SPELL_AURA_MOUNTED:
@@ -7900,7 +7900,7 @@ void AuraEffect::HandlePeriodicManaLeechAuraTick(Unit* target, Unit* caster) con
 
     // Special case: draining x% of mana (up to a maximum of 2*x% of the caster's maximum mana)
     // It's mana percent cost spells, m_amount is percent drain from target
-    if (m_base->GetSpellPowerData()->manaCostPercentage)
+    if (m_base->GetSpellPowerData()->CostBasePercentage)
     {
         // max value
         int32 maxmana = CalculatePct(caster->GetMaxPower(powerType), drainAmount * 2.0f);

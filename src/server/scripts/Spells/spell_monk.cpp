@@ -980,18 +980,8 @@ class spell_monk_crackling_jade_lightning : public SpellScriptLoader
             void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (Unit* caster = GetCaster())
-                {
                     if (roll_chance_i(30))
                         caster->CastSpell(caster, SPELL_MONK_JADE_LIGHTNING_ENERGIZE, true);
-                    // Hack fix to consume energy per tick while not in Stance of the Wise Serpent
-                    if (!caster->HasAura(115070))
-                    {
-                        if (caster->GetPower(POWER_ENERGY) >= 20)
-                            caster->EnergizeBySpell(caster, GetId(), -20, POWER_ENERGY);
-                        else
-                            SetDuration(0);
-                    }
-                }
             }
 
             void OnProc(AuraEffect const *aurEff, ProcEventInfo& eventInfo)
@@ -1952,6 +1942,15 @@ class spell_monk_chi_torpedo : public SpellScriptLoader
         {
             PrepareSpellScript(spell_monk_chi_torpedo_SpellScript);
 
+            SpellCastResult CheckCast()
+            {
+                if (Player* player = GetCaster()->ToPlayer())
+                    if (player->HasUnitState(UNIT_STATE_ROOT))
+                        return SPELL_FAILED_ROOTED;
+
+                return SPELL_CAST_OK;
+            }
+
             void HandleAfterCast()
             {
                 if (Unit* caster = GetCaster())
@@ -1978,6 +1977,7 @@ class spell_monk_chi_torpedo : public SpellScriptLoader
 
             void Register()
             {
+                OnCheckCast += SpellCheckCastFn(spell_monk_chi_torpedo_SpellScript::CheckCast);
                 AfterCast += SpellCastFn(spell_monk_chi_torpedo_SpellScript::HandleAfterCast);
             }
         };

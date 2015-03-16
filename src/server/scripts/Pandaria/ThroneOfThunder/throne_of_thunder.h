@@ -72,15 +72,16 @@ enum CreaturesIds
 enum ObjectsIds
 {
     GOB_JIN_ROKH_ENTRANCE                   = 218664,
-    GOB_JIN_ROKH_EXIT                       = 218663,
-    GOB_HORRIDON_ENTRANCE                   = 218667,
+    GOB_JIN_ROKH_EXIT                       = 218667,
+    GOB_HORRIDON_ENTRANCE                   = 218663,
     GOB_HORRIDON_EXIT                       = 218666,
-    GOB_COUNCIL_ENTRANCE                    = 218661,
+    GOB_COUNCIL_ENTRANCE1                   = 218655,
+    GOB_COUNCIL_ENTRANCE2                   = 218656,
     GOB_COUNCIL_EXIT                        = 218657,
-
-    GOB_TRIBAL_DOOR_FARRAKI                 = 218672,
+ 
     GOB_TRIBAL_DOOR_GURUBASHI               = 218670,
     GOB_TRIBAL_DOOR_DRAKKARI                = 218671,
+    GOB_TRIBAL_DOOR_FARRAKI                 = 218672,
     GOB_TRIBAL_DOOR_AMANI                   = 218673,
 };
 

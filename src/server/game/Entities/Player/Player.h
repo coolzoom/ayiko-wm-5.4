@@ -3301,7 +3301,7 @@ T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T &basevalue, Spell* spel
             DropModCharge(mod, spell);
     }
 
-    float diff = (float)basevalue * (totalmul - 1.0f) + (float)totalflat;
+    float diff = (float)totalflat + ((basevalue + totalflat) * (totalmul - 1.0f));
     basevalue = T((float)basevalue + diff);
     return T(diff);
 }

@@ -56,7 +56,7 @@ public:
             
             if (pSummoned->GetEntry() == NPC_SPEAR)
             {
-                pSummoned->AddAura(SPELL_SPEAR_PULSE_AOE, pSummoned);
+                //pSummoned->AddAura(SPELL_SPEAR_PULSE_AOE, pSummoned);
                 m_triggerGuid = pSummoned->GetGUID();
             }
         }
@@ -94,8 +94,10 @@ public:
                 if (Creature* pSpear = ObjectAccessor::GetCreature(*me, m_triggerGuid))
                     pSpear->DespawnOrUnsummon();
 
+                me->RemoveAurasDueToSpell(SPELL_SPEAR_DISARM);
+
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-                events.ScheduleEvent(EVENT_RE_SPIN, 2000);
+                events.ScheduleEvent(EVENT_RE_SPIN, 800);
             }
         }
 
@@ -106,7 +108,7 @@ public:
 
             events.Update(uiDiff);
 
-            if (me->HasUnitState(UNIT_STATE_CASTING))
+            if (me->HasUnitState(UNIT_STATE_CASTING) || me->HasAura(SPELL_SPEAR_SPIN))
                 return;
 
             while (uint32 eventId = events.ExecuteEvent())
@@ -118,15 +120,18 @@ public:
                     events.ScheduleEvent(EVENT_ZERK, 8000 + rand() % 5000);
                     break;
                 case EVENT_SPEAR_THROW:
-                    if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1))
+                    if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                    //if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1))
                         DoCast(pTarget, SPELL_THROW_SPEAR);
                     events.ScheduleEvent(EVENT_RETRIEVE_SPEAR, 5000);
+                    events.ScheduleEvent(EVENT_SPEAR_THROW, 25000 + rand() % 8000);
                     break;
                 case EVENT_RETRIEVE_SPEAR:
                     JumpToSpear();
                     break;
                 case EVENT_RE_SPIN:
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                    me->GetMotionMaster()->MoveChase(me->GetVictim());
                     DoCast(me, SPELL_SPEAR_SPIN, true);
                     break;
                 }

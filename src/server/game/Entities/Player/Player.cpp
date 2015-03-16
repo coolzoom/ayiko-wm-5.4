@@ -3965,6 +3965,9 @@ void Player::InitSpellForLevel()
     // Fix Pick Lock update at each level
     if (HasSpell(1804) && getLevel() > 20)
         SetSkill(921, GetSkillStep(921), (getLevel() * 5), (getLevel() * 5));
+
+    for (uint8 i = POWER_MANA; i < MAX_POWERS; ++i)
+        UpdateMaxPower(Powers(i));
 }
 
 void Player::RemoveSpecializationSpells()

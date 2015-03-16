@@ -1621,7 +1621,7 @@ class spell_warl_soul_swap_override : public SpellScriptLoader
                 EssentialAuraInfo eAura;
                 for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
                     if (aur->HasEffect(i))
-                        eAura.amount[i] = aur->GetEffect(i)->GetAmount();
+                        eAura.amount[i] = aur->GetEffect(i)->GetFixedDamageInfo().GetFixedDamage();
 
                 eAura.duration = aur->GetDuration();
                 eAura.maxDuration = aur->GetMaxDuration();
@@ -1816,7 +1816,7 @@ public:
                     newAura->SetStackAmount(itr->stackAmount);
                     for (int i = 0; i < MAX_SPELL_EFFECTS; ++i)
                         if (itr->effectMask & (1 << i) && newAura->GetEffectMask() & (1 << i))
-                            newAura->GetEffect(i)->SetAmount(itr->amount[i]);
+                            newAura->GetEffect(i)->GetFixedDamageInfo().SetFixedDamage(itr->amount[i]);
                 }
             }
 

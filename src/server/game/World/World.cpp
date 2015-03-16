@@ -1195,6 +1195,9 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_DECLINED_NAMES_USED] =
         (m_int_configs[CONFIG_REALM_ZONE] == REALM_ZONE_RUSSIAN) ? true : sConfigMgr->GetBoolDefault("DeclinedNames", false);
 
+    m_int_configs[CONFIG_SUMMONALERT_TIMEFRAME]           = sConfigMgr->GetIntDefault("SummonAlert.TimeFrame", 60);
+    m_int_configs[CONFIG_SUMMONALERT_COUNT]               = sConfigMgr->GetIntDefault("SummonAlert.Count", 50);
+
     m_float_configs[CONFIG_LISTEN_RANGE_SAY]       = sConfigMgr->GetFloatDefault("ListenRange.Say", 25.0f);
     m_float_configs[CONFIG_LISTEN_RANGE_TEXTEMOTE] = sConfigMgr->GetFloatDefault("ListenRange.TextEmote", 25.0f);
     m_float_configs[CONFIG_LISTEN_RANGE_YELL]      = sConfigMgr->GetFloatDefault("ListenRange.Yell", 300.0f);

@@ -2359,6 +2359,22 @@ void WorldObject::AddObjectToRemoveList()
 
 TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropertiesEntry const* properties /*= NULL*/, uint32 duration /*= 0*/, Unit* summoner /*= NULL*/, uint32 spellId /*= 0*/, uint32 vehId /*= 0*/)
 {
+    // Check for mass spawns
+    if (time(NULL) - _lastSummonTime > sWorld->getIntConfig(CONFIG_SUMMONALERT_TIMEFRAME))
+    {
+        _lastSummonTime = time(NULL);
+        _summonsInTimePeriod = 0;
+    }
+    else
+    {
+        _summonsInTimePeriod++;
+        if (_summonsInTimePeriod > sWorld->getIntConfig(CONFIG_SUMMONALERT_COUNT))
+        {
+            std::string name = summoner ? summoner->GetName().c_str() : "no summoner";
+            TC_LOG_ERROR("misc", "Mass spawning going on in map %u, Last creature entry spawned %u by %s [Guid %u]", GetId(), entry, name.c_str(), summoner ? summoner->GetGUIDLow() : 0);
+        }
+    }
+
     uint32 mask = UNIT_MASK_SUMMON;
     if (properties)
     {

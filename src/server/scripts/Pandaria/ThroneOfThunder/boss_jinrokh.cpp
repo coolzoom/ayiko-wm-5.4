@@ -18,8 +18,8 @@ enum eSpells : uint32
     SPELL_LIGHTNING_FISSURE_AURA            = 137484,
 
     SPELL_FOCUSED_LIGHTNING                 = 137399,
-    SPELL_FOCUSED_LIGHTNING_VISUAL          = 137425,
-    SPELL_FOCUSED_LIGHTNING_FIXATE          = 137422,
+//  SPELL_FOCUSED_LIGHTNING_VISUAL          = 137425,
+//  SPELL_FOCUSED_LIGHTNING_FIXATE          = 137422,
     SPELL_FOCUSED_LIGHTNING_SPEED           = 137389,
     SPELL_FOCUSED_LIGHTNING_AOE             = 137429,
     SPELL_FOCUSED_LIGHTNING_DETONATION      = 137374,
@@ -73,15 +73,6 @@ static const float floorZ = 124.03f;
 enum eJDatas : uint32
 {
     DATA_STATUE_DESTROYED,
-};
-
-class notPlayerPredicate
-{
-public:
-    bool operator()(WorldObject* target) const
-    {
-        return target && target->GetTypeId() != TYPEID_PLAYER;
-    }
 };
 
 class notInLosPredicate
@@ -506,7 +497,7 @@ public:
 
         void Initialize()
         {
-            m_mEvents.ScheduleEvent(1, 1400);
+            m_mEvents.ScheduleEvent(EVENT_FISSURE_CHECK, 1400);
             m_targetGuid = 0;
             me->AddAura(SPELL_FOCUSED_LIGHTNING_VISUAL, me);
             me->AddAura(SPELL_FOCUSED_LIGHTNING_SPEED, me);
@@ -555,7 +546,7 @@ public:
 
             switch (m_mEvents.ExecuteEvent())
             {
-            case 1:
+            case EVENT_FISSURE_CHECK:
                 if (Unit* pTarget = ObjectAccessor::GetPlayer(*me, m_targetGuid))
                 {
                     me->GetMotionMaster()->MoveFollow(pTarget, 0.f, 0.f);
@@ -566,8 +557,7 @@ public:
                     me->GetMotionMaster()->MoveFollow(pTarget, 0.f, 0.f);
                 }
                 CheckHeight();
-                //me->SetSpeed(MOVE_RUN, me->GetSpeed(MOVE_RUN) + 0.14f, true);
-                m_mEvents.ScheduleEvent(1, 400);
+                m_mEvents.ScheduleEvent(EVENT_FISSURE_CHECK, 400);
                 break;
             }
         }
@@ -743,15 +733,8 @@ public:
 
                 if (Unit* pUnit = GetHitUnit())
                 {
-                    bool should_detonate = false;
-
-                    if (pCaster->ToCreature() && pCaster->ToCreature()->AI())
-                    {
-                        if (pUnit->HasAura(SPELL_FOCUSED_LIGHTNING_FIXATE, pCaster->GetGUID()))
-                            should_detonate = true;
-                    }
-
-                    if (should_detonate)
+                    // Should we detonate?
+                    if (pUnit->HasAura(SPELL_FOCUSED_LIGHTNING_FIXATE, pCaster->GetGUID()))
                     {
                         bool violent = false;
                         bool should_conduct = false;
@@ -1153,6 +1136,33 @@ public:
     }
 };
 
+class spell_thundering_throw_damage : public SpellScriptLoader
+{
+public:
+    spell_thundering_throw_damage() : SpellScriptLoader("spell_thundering_throw_damage") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void HandleOnEffectHit(SpellEffIndex effIdx)
+        {
+            if (Unit* pUnit = GetHitUnit())
+                pUnit->CastSpell(pUnit, SPELL_THUNDERING_THROW_STUN, true);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_impl::HandleOnEffectHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
 class spell_thundering_throw : public SpellScriptLoader
 {
 public:
@@ -1307,7 +1317,6 @@ public:
                     if (Player* pPlayer = ObjectAccessor::GetPlayer(*me, playerGuid))
                     {
                         pPlayer->CastSpell(pPlayer, SPELL_THUNDERING_THROW_HIT_AOE_DAMAGE, true);
-                        pPlayer->CastSpell(pPlayer, SPELL_THUNDERING_THROW_STUN, true);
                         pPlayer->RemoveAurasDueToSpell(SPELL_THUNDERING_THROW_SILENCE);
                     }
                 }
@@ -1688,6 +1697,7 @@ void AddSC_boss_jinrokh()
     new spell_static_burst();
     new spell_lightning_storm_visual();
     new spell_thundering_throw_silence();
+    new spell_thundering_throw_damage();
     new spell_thundering_throw();
     new npc_jinrokh_statue();
     new npc_conductive_water();

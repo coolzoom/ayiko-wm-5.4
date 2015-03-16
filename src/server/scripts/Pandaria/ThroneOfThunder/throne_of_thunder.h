@@ -47,7 +47,18 @@ enum SaveData
 
 enum GlobalToTSpells : uint32
 {
-    SPELL_BERSERK       = 26662
+    SPELL_BERSERK                    = 26662,
+    SPELL_FOCUSED_LIGHTNING_FIXATE   = 137422,
+    SPELL_FOCUSED_LIGHTNING_VISUAL   = 137425,
+};
+
+class notPlayerPredicate
+{
+public:
+    bool operator()(WorldObject* target) const
+    {
+        return target && target->GetTypeId() != TYPEID_PLAYER;
+    }
 };
 
 enum CreaturesIds

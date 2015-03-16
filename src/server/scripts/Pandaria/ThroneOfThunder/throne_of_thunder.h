@@ -26,6 +26,25 @@ enum DataTypes
     MAX_DATA
 };
 
+enum SaveData
+{
+    TYPE_JINROKH,
+    TYPE_HORRIDON,
+    TYPE_COUNCIL,
+    TYPE_TORTOS,
+    TYPE_MEGAERA,
+    TYPE_JI_KUN,
+    TYPE_DURUMU,
+    TYPE_PRIMORDIUS,
+    TYPE_DARK_ANIMUS,
+    TYPE_IRON_QON,
+    TYPE_TWIN_CONSORTS,
+    TYPE_LEI_SHEN,
+    TYPE_RA_DEN,
+    TYPE_JINROKH_INTRO,
+    MAX_TYPES
+};
+
 enum GlobalToTSpells : uint32
 {
     SPELL_BERSERK       = 26662

@@ -46,6 +46,12 @@ SET @HP_MOD_91_8 := (SELECT basehp4 FROM creature_classlevelstats WHERE class = 
 SET @HP_MOD_90_8 := (SELECT basehp4 FROM creature_classlevelstats WHERE class = 8 AND LEVEL = 90);
 SET @HP_MOD_1_8  := (SELECT basehp0 FROM creature_classlevelstats WHERE class = 8 AND LEVEL = 0);
 
+-- Trash (fix these defines please Turk)
+DELETE FROM spell_linked_spell WHERE spell_trigger IN (136986, 137077);
+INSERT INTO spell_linked_spell VALUES
+(136986, 137066, 0, 'Spear Throw - Trigger Disarm'),
+(-137077, -137066, 0, 'Spear Spin - Remove Disarm');
+
 /* BEGIN Jin'rokh the Breaker */
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Spell Scripts
@@ -76,7 +82,7 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 (70245, 0, 0, 0, 0, 0, 27510, 0, 0, 0, 'Training Dummy', '', '', 0, 1, 1, 4, 14, 14, 0, 1, 1.14286, 1, 3, 17839, 24339, 0, 51299, 1, 2000, 2000, 1, 131076, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 900, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 'npc_training_dummy', 17614,0);
 
 REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`,`equipment_id`) VALUES
-(69388, 0, 0, 0, 0, 0, 47507, 0, 0, 0, 'Zandalari Spear-Shaper', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 184, 1, 0, 0, '', 17614,69388),
+(69388, 0, 0, 0, 0, 0, 47507, 0, 0, 0, 'Zandalari Spear-Shaper', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 184, 1, 0, 0, 'npc_zandalari_spearshaper', 17614,69388),
 (69390, 0, 0, 0, 0, 0, 47528, 0, 0, 0, 'Zandalari Storm-Caller', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 270532680, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10000, 11000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 167, 1, 0, 0, '', 17614,69390),
 (69438, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Thrown Spear', '', '', 0, 93, 93, 4, 14, 14, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 34078724, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 17826816, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 1,0),
 (69455, 0, 0, 0, 0, 0, 47536, 0, 0, 0, 'Zandalari Water-Binder', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10000, 11000, '', 0, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 167, 1, 0, 0, '', 17614,0),

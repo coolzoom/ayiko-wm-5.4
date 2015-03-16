@@ -1829,6 +1829,11 @@ SpellCastResult SpellInfo::CheckTarget(Unit const* caster, WorldObject const* ta
                          return SPELL_FAILED_TARGET_NO_POCKETS;
                 }
 
+                // Summons can no longer be buffed
+                if (unitTarget->IsSummon())
+                    if (AttributesEx7 & SPELL_ATTR7_CONSOLIDATED_RAID_BUFF && ((AttributesEx6 & SPELL_ATTR6_UNK26) || AttributesEx8 & SPELL_ATTR8_AFFECT_PARTY_AND_RAID))
+                        return SPELL_FAILED_TARGET_IS_PLAYER_CONTROLLED;
+
                 // Not allow disarm unarmed player
                 if (Mechanic == MECHANIC_DISARM)
                 {

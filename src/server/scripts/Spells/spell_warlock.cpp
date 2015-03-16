@@ -1946,8 +1946,15 @@ class spell_warl_rain_of_fire : public SpellScriptLoader
             void OnTick(AuraEffect const * /*aurEff*/)
             {
                 if (GetCaster())
-                    if (DynamicObject* dynObj = GetCaster()->GetDynObject(WARLOCK_RAIN_OF_FIRE))
+                {
+                    std::list<DynamicObject*> list;
+                    GetCaster()->GetDynObjectList(list, WARLOCK_RAIN_OF_FIRE);
+                    if (list.empty())
+                        return;
+
+                    for (auto const &dynObj : list)
                         GetCaster()->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), WARLOCK_RAIN_OF_FIRE_TRIGGERED, true);
+                }
             }
 
             void Register()

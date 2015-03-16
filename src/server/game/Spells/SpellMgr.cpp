@@ -3563,7 +3563,7 @@ void SpellMgr::LoadSpellCustomAttr()
             case 137261:    // Lightning Storm(damage)
                 spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_SRC_CASTER);
                 spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENEMY);
-                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_200_YARDS);
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_500_YARDS);
                 break;
             case 137162:    // Static Burst
                 spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(5); // 40 yds

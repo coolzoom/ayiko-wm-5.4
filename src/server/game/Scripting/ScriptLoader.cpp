@@ -700,6 +700,7 @@ void AddSC_boss_tsulong();
 void AddSC_boss_lei_shi();
 void AddSC_boss_sha_of_fear();
 void AddSC_instance_throne_of_thunder();         // Throne of Thunder
+void AddSC_throne_of_thunder();
 void AddSC_boss_jinrokh();
 void AddSC_boss_council_of_elders();
 void AddSC_instance_siege_of_orgrimmar();           // Siege of Orgrimmar
@@ -1468,6 +1469,7 @@ void AddPandariaScripts()
     AddSC_boss_lei_shi();
     AddSC_boss_sha_of_fear();
     AddSC_instance_throne_of_thunder();           // Throne of Thunder
+    AddSC_throne_of_thunder();
     AddSC_boss_jinrokh();
     AddSC_boss_council_of_elders();
     AddSC_instance_siege_of_orgrimmar();            // Siege of Orgrimmar

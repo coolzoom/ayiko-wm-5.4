@@ -95,6 +95,7 @@ set(scripts_STAT_SRCS
   Pandaria/ThroneOfThunder/boss_council_of_elders.cpp
   Pandaria/ThroneOfThunder/boss_horridon.cpp
   Pandaria/ThroneOfThunder/throne_of_thunder.h
+  Pandaria/ThroneOfThunder/throne_of_thunder.cpp
   Pandaria/ThroneOfThunder/instance_throne_of_thunder.cpp
 
   Pandaria/SiegeOfOrgrimmar/instance_siege_of_orgrimmar.cpp

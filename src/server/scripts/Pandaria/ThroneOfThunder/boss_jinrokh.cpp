@@ -202,7 +202,7 @@ static const Position aWaterPos[4] =
     { 5865.241f, 6236.743f, 128.03f, 0.77f }
 };
 
-static const Position aCenterPos = { 5892.16f, 6263.58f, 124.1f, 0.0f };
+static const Position aCenterPos = { 5892.16f, 6263.58f, 124.7f, 0.0f };
 
 class FocusedLightningSelection : public std::unary_function<Unit*, bool>
 {
@@ -348,6 +348,8 @@ public:
             Talk(TALK_DEATH);
             instance->SetBossState(DATA_JINROKH, DONE);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
+            ResetStatues();
         }
 
         void KilledUnit(Unit* pVictim) override
@@ -400,6 +402,9 @@ public:
                 DoCastBossSpell(me->GetVictim(), SPELL_LIGHTNING_STORM, false, 3000);
                 if (Aura* pAura = me->AddAura(SPELL_LIGHTNING_STORM_VISUAL, me))
                     pAura->SetDuration(15000);
+
+                me->UpdateObjectVisibility();
+                me->UpdatePosition(me->GetPosition());
             }
         }
 
@@ -434,10 +439,11 @@ public:
                     Talk(TALK_LIGHTNING_STORM);
                     Talk(EMOTE_LIGHTNING_STORM);
                     DoHandleLightningStorm();
+                    /*
                     DoCastBossSpell(me->GetVictim(), SPELL_LIGHTNING_STORM, false, 3000);
                     if (Aura* pAura = me->AddAura(SPELL_LIGHTNING_STORM_VISUAL, me))
-                        pAura->SetDuration(15000);
-                    //me->GetMotionMaster()->MoveJump(aCenterPos, 50.f, 50.f, 1948);
+                        pAura->SetDuration(15000);*/
+                    me->GetMotionMaster()->MoveJump(aCenterPos, 35.f, 35.f, 1948);
                     events.ScheduleEvent(EVENT_LIGHTNING_STORM, 90000);
                     events.ScheduleEvent(EVENT_THUNDERING_THROW, 30000);
                     break;

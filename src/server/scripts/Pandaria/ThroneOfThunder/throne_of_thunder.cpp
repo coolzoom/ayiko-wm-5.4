@@ -189,6 +189,14 @@ public:
                 me->UpdateEntry(NPC_ZANDALARI_STORMCALLER);
         }
 
+        /*
+        void JustReachedHome() override
+        {
+            const CreatureDisplayInfoEntry* pModel = sCreatureDisplayInfoStore.LookupEntry(me->GetDisplayId());
+            if (pModel)
+                me->SetObjectScale(pModel->scale);
+        }*/
+
         void EnterCombat(Unit* pWho) override
         {
             if (me->GetEntry() == NPC_ZANDALARI_STORMCALLER)
@@ -432,9 +440,6 @@ public:
             if (Creature* pCaster = GetCaster()->ToCreature())
             {
                 pCaster->UpdateEntry(NPC_ZANDALARI_STORMCALLER);
-
-                const CreatureDisplayInfoEntry* pModel = sCreatureDisplayInfoStore.LookupEntry(pCaster->GetDisplayId());
-                pCaster->SetObjectScale(pModel->scale);
             }
         }
 

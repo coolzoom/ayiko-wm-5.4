@@ -50,6 +50,7 @@ class Pet : public Guardian
         void AssignToSlot(uint8 slot, SQLTransaction trans = SQLTransaction());
 
         PetType getPetType() const { return m_petType; }
+        bool isWarlockPet() const { return m_isWarlockPet; }
         void setPetType(PetType type) { m_petType = type; }
         bool isControlled() const { return getPetType() == SUMMON_PET || getPetType() == HUNTER_PET; }
         bool isTemporarySummoned() const { return m_duration > 0; }
@@ -126,6 +127,7 @@ class Pet : public Guardian
 
         PetSpellMap     m_spells;
         AutoSpellList   m_autospells;
+        bool m_isWarlockPet;
 
         void InitPetCreateSpells();
 

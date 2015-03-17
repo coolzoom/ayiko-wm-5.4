@@ -42,6 +42,7 @@ Pet::Pet(Player* owner, PetType type)
     , m_loading(false)
     , m_specialization(0)
     , m_declinedname(NULL)
+    , m_isWarlockPet(false)
 {
     m_unitTypeMask |= UNIT_MASK_PET;
     if (type == HUNTER_PET)
@@ -195,6 +196,8 @@ bool Pet::LoadPetFromDB(PetLoadMode loadMode, uint32 value)
     }
 
     setPetType(petType);
+    if (owner->getClass() == CLASS_WARLOCK)
+        m_isWarlockPet = true;
     setFaction(owner->getFaction());
     SetUInt32Value(UNIT_CREATED_BY_SPELL, summonSpellId);
 

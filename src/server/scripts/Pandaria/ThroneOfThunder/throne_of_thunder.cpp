@@ -11,6 +11,12 @@ enum sSpells : uint32
     SPELL_FOCUSED_LIGHTNING_DETONATION  = 139211
 };
 
+enum eCreatures : uint32
+{
+    NPC_CRAZED_STORMCALLER          = 70491,
+    NPC_ZANDALARI_STORMCALLER       = 70236
+};
+
 class npc_zandalari_spearshaper : public CreatureScript
 {
     enum eSpells : uint32
@@ -140,6 +146,114 @@ public:
                     DoCast(me, SPELL_SPEAR_SPIN, true);
                     break;
                 }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new ai_impl(pCreature);
+    }
+};
+
+class npc_zandalari_stormcaller : public CreatureScript
+{
+    enum eEvents : uint32
+    {
+        EVENT_NONE,
+        EVENT_STUN,
+        EVENT_STORM_ENERGY
+    };
+
+    enum eSpells : uint32
+    {
+        SPELL_STORM_WEAPON      = 139319,
+        SPELL_STUN              = 35865,
+        SPELL_STORM_ENERGY      = 139559
+    };
+
+public:
+    npc_zandalari_stormcaller() : CreatureScript("npc_zandalari_stormcaller") {}
+
+    struct ai_impl : public ScriptedAI
+    {
+        ai_impl(Creature* pCreature) : ScriptedAI(pCreature) {}
+
+        void Reset() override
+        {
+            if (me->GetEntry() != NPC_ZANDALARI_STORMCALLER)
+                me->UpdateEntry(NPC_ZANDALARI_STORMCALLER);
+        }
+
+        void EnterCombat(Unit* pWho) override
+        {
+            DoCast(SPELL_STORM_WEAPON);
+            events.ScheduleEvent(EVENT_STUN, 5000);
+            events.ScheduleEvent(EVENT_STORM_ENERGY, 5000 + rand() % 4000);
+        }
+
+        void DoStun()
+        {
+            std::list<HostileReference*> threatList = me->getThreatManager().getThreatList();
+            std::list<Unit*> spellTargets;
+
+            for (auto ref : threatList)
+            {
+                if (Unit* pTarget = ObjectAccessor::GetUnit(*me, ref->getUnitGuid()))
+                    spellTargets.push_back(pTarget);
+            }
+
+            uint32 m_uiMaxTargets = me->GetMap()->Is25ManRaid() ? 4 : 1;
+
+            if (!spellTargets.empty())
+            {
+                uint32 m_size = spellTargets.size();
+
+                if (m_size > m_uiMaxTargets)
+                {
+                    std::list<Unit*>::iterator swap_1, swap_2;
+
+                    // dirty as fuck lol
+                    for (uint32 i = 0; i < m_size; ++i)
+                    {
+                        swap_1 = spellTargets.begin();
+                        swap_2 = spellTargets.begin();
+
+                        std::advance(swap_1, 0 + rand() % m_size - 1);
+                        std::advance(swap_2, 0 + rand() % m_size - 1);
+                        std::swap(swap_1, swap_2);
+                    }
+
+                    spellTargets.resize(m_uiMaxTargets);
+                }
+
+                for (auto const pUnit : spellTargets)
+                    pUnit->CastSpell(pUnit, SPELL_STUN, true, 0, 0, me->GetGUID());
+            }          
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(uiDiff);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            switch (events.ExecuteEvent())
+            {
+            case EVENT_STORM_ENERGY:
+                DoCast(SPELL_STORM_ENERGY);
+                events.ScheduleEvent(EVENT_STORM_ENERGY, 4000 + rand() % 2500);
+                break;
+            case EVENT_STUN:
+                DoStun();
+                events.ScheduleEvent(EVENT_STUN, 6000 + rand() % 3000);
+                break;
             }
 
             DoMeleeAttackIfReady();
@@ -305,9 +419,132 @@ public:
     }
 };
 
+class spell_storm_weapon : public SpellScriptLoader
+{
+public:
+    spell_storm_weapon() : SpellScriptLoader("spell_storm_weapon") {}
+
+    class aura_impl : public AuraScript
+    {
+        PrepareAuraScript(aura_impl);
+
+        void HandleOnApply(AuraEffect const* eff, AuraEffectHandleModes mode)
+        {
+            if (Creature* pCaster = GetCaster()->ToCreature())
+            {
+                pCaster->UpdateEntry(NPC_CRAZED_STORMCALLER);
+            }
+        }
+
+        void HandleOnRemove(AuraEffect const* eff, AuraEffectHandleModes mode)
+        {
+            if (Creature* pCaster = GetCaster()->ToCreature())
+            {
+                pCaster->UpdateEntry(NPC_ZANDALARI_STORMCALLER);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(aura_impl::HandleOnApply, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+            OnEffectRemove += AuraEffectApplyFn(aura_impl::HandleOnRemove, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new aura_impl();
+    }
+};
+
+class spell_storm_energy : public SpellScriptLoader
+{
+public:
+    spell_storm_energy() : SpellScriptLoader("spell_storm_energy") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        bool Validate()
+        {
+            return sSpellMgr->GetSpellInfo(139559);
+        }
+
+        void SelectTargets(std::list<WorldObject*>&targets)
+        {
+            targets.remove_if(notPlayerPredicate());
+
+            if (Unit* caster = GetCaster())
+            {
+                uint32 m_maxSize = caster->GetMap()->Is25ManRaid() ? 3 : 1;
+
+                if (targets.size() > m_maxSize)
+                    targets.resize(m_maxSize);
+            }
+        }
+
+        void HandleEffectHitTarget(SpellEffIndex eff_idx)
+        {
+            Unit* target = GetHitUnit();
+            Unit* caster = GetCaster();
+
+            if (!caster || !target)
+                return;
+
+            caster->AddAura(GetSpellInfo()->Effects[0].BasePoints, target);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_impl::SelectTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnEffectHitTarget += SpellEffectFn(spell_impl::HandleEffectHitTarget, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
+class spell_storm_weapon_proc : public SpellScriptLoader
+{
+public:
+    spell_storm_weapon_proc() : SpellScriptLoader("spell_storm_weapon_proc") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void SelectTarget(WorldObject*&target)
+        {
+            if (target && target->ToCreature())
+            {
+                if (Unit* pVictim = target->ToCreature()->GetVictim())
+                    target = pVictim;
+            }
+        }
+
+        void Register()
+        {
+            OnObjectTargetSelect += SpellObjectTargetSelectFn(spell_impl::SelectTarget, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
 void AddSC_throne_of_thunder()
 {
     new npc_zandalari_spearshaper();
+    new npc_zandalari_stormcaller();
     new npc_focused_lightning();
     new spell_focused_lightning_aoe();
+    new spell_storm_weapon();
+    new spell_storm_energy();
+    new spell_storm_weapon_proc();
 }

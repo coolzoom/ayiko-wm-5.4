@@ -252,7 +252,8 @@ public:
         EVENT_LIGHTNING_STORM,
         EVENT_IONIZATION,
         EVENT_BERSERK,
-        EVENT_HEIGHT_CHECK
+        EVENT_HEIGHT_CHECK,
+        EVENT_PROPAGATE_STORM
     };
 
     enum eTalks : uint32
@@ -390,13 +391,23 @@ public:
         {
             if (uiPointId == 1948)
             {
-                DoCastBossSpell(me->GetVictim(), SPELL_LIGHTNING_STORM, false, 3000);
-                if (Aura* pAura = me->AddAura(SPELL_LIGHTNING_STORM_VISUAL, me))
-                    pAura->SetDuration(15000);
+                DoHandleLightningStorm();
+
+                events.ScheduleEvent(EVENT_PROPAGATE_STORM, 200);
 
                 me->UpdateObjectVisibility();
                 me->UpdatePosition(me->GetPosition());
             }
+        }
+
+        void PropagateStorm()
+        {
+            Talk(TALK_LIGHTNING_STORM);
+            Talk(EMOTE_LIGHTNING_STORM);
+
+            DoCastBossSpell(me->GetVictim(), SPELL_LIGHTNING_STORM, false, 3000);
+            if (Aura* pAura = me->AddAura(SPELL_LIGHTNING_STORM_VISUAL, me))
+                pAura->SetDuration(15000);
         }
 
         void UpdateAI(const uint32 uiDiff)
@@ -427,16 +438,12 @@ public:
                     events.ScheduleEvent(EVENT_FOCUSED_LIGHTNING, urand(12000, 15000));
                     break;
                 case EVENT_LIGHTNING_STORM:
-                    Talk(TALK_LIGHTNING_STORM);
-                    Talk(EMOTE_LIGHTNING_STORM);
-                    DoHandleLightningStorm();
-                    /*
-                    DoCastBossSpell(me->GetVictim(), SPELL_LIGHTNING_STORM, false, 3000);
-                    if (Aura* pAura = me->AddAura(SPELL_LIGHTNING_STORM_VISUAL, me))
-                        pAura->SetDuration(15000);*/
                     me->GetMotionMaster()->MoveJump(aCenterPos, 35.f, 35.f, 1948);
                     events.ScheduleEvent(EVENT_LIGHTNING_STORM, 90000);
                     events.ScheduleEvent(EVENT_THUNDERING_THROW, 30000);
+                    break;
+                case EVENT_PROPAGATE_STORM:
+                    PropagateStorm();
                     break;
                 case EVENT_THUNDERING_THROW:
                     DoCast(me->GetVictim(), SPELL_THUNDERING_THROW);

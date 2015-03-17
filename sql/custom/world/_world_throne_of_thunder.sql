@@ -52,17 +52,12 @@ INSERT INTO spell_linked_spell VALUES
 (136986, 137066, 0, 'Spear Throw - Trigger Disarm'),
 (-137077, -137066, 0, 'Spear Spin - Remove Disarm');
 
-DELETE FROM `spell_script_names` WHERE `spell_id` IN (139319, 139559, 139218, 139319);
-INSERT INTO `spell_script_names` VALUES
-(139319, 'spell_storm_weapon'),
-(139559, 'spell_storm_energy'),
-(139218, 'spell_storm_weapon_aura'),
-(139319, 'spell_storm_weapon_aura');
+
 
 /* BEGIN Jin'rokh the Breaker */
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Spell Scripts
-DELETE FROM `spell_script_names` WHERE `spell_id` = 137370;
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (137370,139218,139319,139559);
 REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (137161, 'spell_thundering_throw_silence'),
 (137162, 'spell_static_burst'),
@@ -84,7 +79,11 @@ REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (138568, 'spell_lightning_storm_visual'),
 (138990, 'spell_focused_lightning_detonation'),
 (139203, 'spell_focused_lightning_targeting'),
-(139209, 'spell_focused_lightning_aoe_trash');
+(139209, 'spell_focused_lightning_aoe_trash'),
+(139218, 'spell_storm_weapon_aura'),
+(139319, 'spell_storm_weapon'),
+(139319, 'spell_storm_weapon_aura'),
+(139559, 'spell_storm_energy');
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -518,14 +517,14 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Spell Scripts
 REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(136480,'spell_horridon_chain_lightning'),
 (136723,'spell_horridon_sand_trap'),
 (136739,'spell_horridon_double_swipe'),
 (136740,'spell_horridon_double_swipe'),
 (137433,'spell_control_horridon'),
 (137442,'spell_control_horridon'),
 (137443,'spell_control_horridon'),
-(137444,'spell_control_horridon'),
-(136480,'spell_horridon_chain_lightning');
+(137444,'spell_control_horridon');
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -1169,18 +1168,18 @@ INSERT INTO `gameobject` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phase
 -- Spell Scripts
 REPLACE INTO spell_script_names VALUES
   (136442, "spell_garajal_possessed"),
+  (136857, "spell_quicksand_entrapped"),
+  (136860, "spell_quicksand_periodic"),
+  (136894, "spell_sul_sandstorm"),
   (136903, "spell_malakk_frigid_assault"),
   (136917, "spell_malakk_biting_cold"),
   (136922, "spell_malakk_frostbite_periodic"),
-  (136990, "spell_malakk_frostbite"),
   (136937, "spell_malakk_frostbite_allies"),
+  (136990, "spell_malakk_frostbite"),
   (137084, "spell_malakk_body_heat"),
   (137117, "spell_kazrajin_reckless_charge"),
   (137149, "spell_kazrajin_overload"),
   (137166, "spell_kazrajin_discharge"),
-  (136860, "spell_quicksand_periodic"),
-  (136857, "spell_quicksand_entrapped"),
-  (136894, "spell_sul_sandstorm"),
   (137203, "spell_marli_summon_blessed_loa_spirit"),
   (137350, "spell_marli_summon_shadowed_loa_spirit"),
   (137891, "spell_marli_twisted_fate_first"),

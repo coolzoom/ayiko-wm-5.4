@@ -213,20 +213,7 @@ public:
 
                 if (m_size > m_uiMaxTargets)
                 {
-                    std::list<Unit*>::iterator swap_1, swap_2;
-
-                    // dirty as fuck lol
-                    for (uint32 i = 0; i < m_size; ++i)
-                    {
-                        swap_1 = spellTargets.begin();
-                        swap_2 = spellTargets.begin();
-
-                        std::advance(swap_1, 0 + rand() % m_size - 1);
-                        std::advance(swap_2, 0 + rand() % m_size - 1);
-                        std::swap(swap_1, swap_2);
-                    }
-
-                    spellTargets.resize(m_uiMaxTargets);
+                    Trinity::Containers::RandomResizeList(spellTargets, m_uiMaxTargets);
                 }
 
                 for (auto const pUnit : spellTargets)
@@ -480,7 +467,7 @@ public:
                 uint32 m_maxSize = caster->GetMap()->Is25ManRaid() ? 3 : 1;
 
                 if (targets.size() > m_maxSize)
-                    targets.resize(m_maxSize);
+                    Trinity::Containers::RandomResizeList(targets, m_maxSize);
             }
         }
 

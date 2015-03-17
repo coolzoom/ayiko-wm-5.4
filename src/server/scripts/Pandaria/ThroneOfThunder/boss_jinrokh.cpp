@@ -667,11 +667,7 @@ public:
 
                 if (targets.size() > 1)
                 {
-                    if (WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets))
-                    {
-                        targets.emplace(targets.begin(), target);
-                        targets.resize(1);
-                    }
+                    Trinity::Containers::RandomResizeList(targets, 1);
                 }
             }
         }

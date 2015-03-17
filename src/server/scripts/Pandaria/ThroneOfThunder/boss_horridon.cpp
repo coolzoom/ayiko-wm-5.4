@@ -603,7 +603,7 @@ public:
 
         void Reset()
         {
-            pInstance->SetBossState(DATA_HORRIDON, NOT_STARTED);
+            instance->SetBossState(DATA_HORRIDON, NOT_STARTED);
 
             events.Reset();
             pChargeDoor = NULL;
@@ -622,8 +622,8 @@ public:
 
         void EnterCombat(Unit *pVictim)
         {
-            pInstance->SetBossState(DATA_HORRIDON, IN_PROGRESS);
-            pInstance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+            instance->SetBossState(DATA_HORRIDON, IN_PROGRESS);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
 
             events.ScheduleEvent(EVENT_TRIPLE_PUNCTURE, 10 * IN_MILLISECONDS);
             events.ScheduleEvent(EVENT_DOUBLE_SWIPE, 15 * IN_MILLISECONDS);
@@ -714,12 +714,12 @@ public:
         {
             if (GetJalak(me) && GetJalak(me)->isDead())
             {
-                pInstance->SetBossState(DATA_HORRIDON, DONE);
+                instance->SetBossState(DATA_HORRIDON, DONE);
                 if (Creature *pController = GetHorridonHelper(me))
                     pController->AI()->DoAction(ACTION_FIGHT_END);
             }
 
-            pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
 
         void MovementInform(uint32 uiMotionType, uint32 uiMovementId)
@@ -758,7 +758,6 @@ public:
     private:
         EventMap        events;
         GameObject      *pChargeDoor;
-        InstanceScript  *pInstance;
         bool            bJalakCalled;
     };
 
@@ -773,7 +772,7 @@ typedef boss_horridon::boss_horridon_AI HorridonAI;
 class npc_horridon_event_helper : public CreatureScript
 {
     public:
-        npc_horridon_event_helper() : CreatureScript("npc_horrion_event_helper") { }
+        npc_horridon_event_helper() : CreatureScript("npc_horridon_event_helper") { }
 
     struct npc_horridon_event_helper_AI : public ScriptedAI
     {   
@@ -795,7 +794,6 @@ class npc_horridon_event_helper : public CreatureScript
             }
             
             EventMap                events;
-            InstanceScript          *pInstance;
             const Position*         summonPositions;
             const Position*         jumpPositions;
             std::list<Creature*>    summons;
@@ -1135,7 +1133,7 @@ public:
     {
     public:
         npc_horridon_rp_event_helper_AI(Creature *pCreature) :
-            ScriptedAI(pCreature), pInstance(pCreature->GetInstanceScript()), bIntroDone(false)
+            ScriptedAI(pCreature), bIntroDone(false)
         {
             events.Reset();
         }
@@ -1211,8 +1209,6 @@ public:
 
     private:
         EventMap        events;
-        InstanceScript  *pInstance;
-
         bool            bIntroDone;
     };
 
@@ -1232,7 +1228,7 @@ public:
     {
     public:
         mob_war_god_jalak_AI(Creature *pCreature) :
-            ScriptedAI(pCreature), pInstance(pCreature->GetInstanceScript()), uiPhase(BOSS_PHASE_SUMMONS)
+            ScriptedAI(pCreature), uiPhase(BOSS_PHASE_SUMMONS)
         {
 
         }
@@ -1348,7 +1344,7 @@ public:
         {
             if (GetHorridon(me) && GetHorridon(me)->isDead())
             {
-                pInstance->SetBossState(DATA_HORRIDON, DONE);
+                //instance->SetBossState(DATA_HORRIDON, DONE);
                 if (Creature *pController = GetHorridonHelper(me))
                     pController->AI()->DoAction(ACTION_FIGHT_END);
             }
@@ -1356,7 +1352,6 @@ public:
 
     private:
         EventMap        events;
-        InstanceScript  *pInstance;
         uint32          uiPhase;
     };
 
@@ -1377,8 +1372,7 @@ public:
     {
     public:
         mob_horridon_trashs_AI(Creature *pCreature) :
-            ScriptedAI(pCreature), pInstance(pCreature->GetInstanceScript()),
-            pRendingChargeTarget(NULL), uiChainLightningCount(0)
+            ScriptedAI(pCreature), pRendingChargeTarget(NULL), uiChainLightningCount(0)
         {
             events.Reset();
         }
@@ -1640,7 +1634,6 @@ public:
 
     private:
         EventMap        events;
-        InstanceScript  *pInstance;
         Unit            *pRendingChargeTarget;
         uint32          uiChainLightningCount;
     };
@@ -1662,7 +1655,7 @@ public:
     {
     public:
         mob_horridon_summons_AI(Creature *pCreature) :
-            ScriptedAI(pCreature), pInstance(pCreature->GetInstanceScript())/*, fSandTrapRadius(0.0f) */
+            ScriptedAI(pCreature) /*, fSandTrapRadius(0.0f) */
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
             // me->SetReactState(REACT_PASSIVE);
@@ -1730,7 +1723,6 @@ public:
 
     private:
         EventMap        events;
-        InstanceScript  *pInstance;
     };
 
     CreatureAI *GetAI(Creature *pCreature) const
@@ -1751,7 +1743,7 @@ public:
     {
     public:
         mob_zandalari_dinomancer_AI(Creature *pCreature) :
-            ScriptedAI(pCreature), pInstance(pCreature->GetInstanceScript()), bIsUnderFiftyPercent(false)
+            ScriptedAI(pCreature), bIsUnderFiftyPercent(false)
         {
             events.Reset();
         }
@@ -1822,7 +1814,6 @@ public:
 
     private:
         EventMap        events;
-        InstanceScript  *pInstance;
         bool            bIsUnderFiftyPercent;
     };
 

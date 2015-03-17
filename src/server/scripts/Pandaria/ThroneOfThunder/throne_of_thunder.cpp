@@ -265,7 +265,7 @@ public:
     }
 };
 
-class npc_focused_lightning : public CreatureScript
+class npc_focused_lightning_trash : public CreatureScript
 {
     enum eEvents : uint32
     {
@@ -275,7 +275,7 @@ class npc_focused_lightning : public CreatureScript
     };
 
 public:
-    npc_focused_lightning() : CreatureScript("npc_focused_lightning_trash") {}
+    npc_focused_lightning_trash() : CreatureScript("npc_focused_lightning_trash") {}
 
     struct npc_focused_lightningAI : public ScriptedAI
     {
@@ -367,10 +367,10 @@ public:
     }
 };
 
-class spell_focused_lightning_aoe : public SpellScriptLoader
+class spell_focused_lightning_aoe_trash : public SpellScriptLoader
 {
 public:
-    spell_focused_lightning_aoe() : SpellScriptLoader("spell_focused_lightning_aoe_trash") {}
+    spell_focused_lightning_aoe_trash() : SpellScriptLoader("spell_focused_lightning_aoe_trash") {}
 
     class spell_focused_lightning_aoe_SpellScript : public SpellScript
     {
@@ -578,8 +578,8 @@ void AddSC_throne_of_thunder()
 {
     new npc_zandalari_spearshaper();
     new npc_zandalari_stormcaller();
-    new npc_focused_lightning();
-    new spell_focused_lightning_aoe();
+    new npc_focused_lightning_trash();
+    new spell_focused_lightning_aoe_trash();
     new spell_storm_weapon();
     new spell_storm_energy();
     //new spell_storm_weapon_proc();

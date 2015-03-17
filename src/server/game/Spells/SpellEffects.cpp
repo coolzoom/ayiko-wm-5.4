@@ -1689,9 +1689,12 @@ void Spell::EffectJumpDest(SpellEffIndex effIndex)
     float x, y, z;
     destTarget->GetPosition(x, y, z);
 
-    float speedXY, speedZ;
+    float speedXY, speedZ, orientation;
     CalculateJumpSpeeds(effIndex, m_caster->GetExactDist2d(x, y), speedXY, speedZ);
 
+    orientation = 0.0f;
+    if (m_targets.GetUnitTarget() && GetSpellInfo()->Effects[effIndex].TargetA.GetTarget() == TARGET_DEST_TARGET_BACK)
+        orientation = m_targets.GetUnitTarget()->GetOrientation();
     m_caster->AddUnitState(UNIT_STATE_JUMPING);
 
     switch (m_spellInfo->Id)
@@ -1701,10 +1704,10 @@ void Spell::EffectJumpDest(SpellEffIndex effIndex)
             m_caster->GetMotionMaster()->CustomJump(x, y, z, speedXY, speedZ);
             break;
         case 49376:
-            m_caster->GetMotionMaster()->MoveJump(x, y, z, speedXY, speedZ, destTarget->GetOrientation());
+            m_caster->GetMotionMaster()->MoveJump(x, y, z, speedXY, speedZ, 0, orientation);
             break;
         default:
-            m_caster->GetMotionMaster()->MoveJump(x, y, z, speedXY, speedZ);
+            m_caster->GetMotionMaster()->MoveJump(x, y, z, speedXY, speedZ, 0, orientation);
     }
 }
 

@@ -1794,8 +1794,11 @@ class spell_mage_living_bomb : public SpellScriptLoader
             {
                 if (Unit* caster = GetCaster())
                 {
-                    caster->CastSpell(GetTarget(), SPELL_MAGE_LIVING_BOMB_TRIGGERED, true);
-                    handleBrainFreeze();
+                    if (aurEff->GetTotalTicks() - aurEff->GetTickNumber() <= 1)
+                    {
+                        caster->CastSpell(GetTarget(), SPELL_MAGE_LIVING_BOMB_TRIGGERED, true);
+                        handleBrainFreeze();
+                    }
                 }
             }
 

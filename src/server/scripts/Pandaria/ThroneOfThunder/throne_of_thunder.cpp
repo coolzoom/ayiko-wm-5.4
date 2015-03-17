@@ -183,13 +183,17 @@ public:
 
         void Reset() override
         {
+            events.Reset();
+
             if (me->GetEntry() != NPC_ZANDALARI_STORMCALLER)
                 me->UpdateEntry(NPC_ZANDALARI_STORMCALLER);
         }
 
         void EnterCombat(Unit* pWho) override
         {
-            DoCast(SPELL_STORM_WEAPON);
+            if (me->GetEntry() == NPC_ZANDALARI_STORMCALLER)
+                DoCast(SPELL_STORM_WEAPON);
+
             events.ScheduleEvent(EVENT_STUN, 5000);
             events.ScheduleEvent(EVENT_STORM_ENERGY, 5000 + rand() % 4000);
         }
@@ -428,6 +432,9 @@ public:
             if (Creature* pCaster = GetCaster()->ToCreature())
             {
                 pCaster->UpdateEntry(NPC_ZANDALARI_STORMCALLER);
+
+                const CreatureDisplayInfoEntry* pModel = sCreatureDisplayInfoStore.LookupEntry(pCaster->GetDisplayId());
+                pCaster->SetObjectScale(pModel->scale);
             }
         }
 
@@ -506,10 +513,14 @@ public:
 
         void SelectTarget(WorldObject*&target)
         {
-            if (target && target->ToCreature())
+            Unit* caster = GetCaster();
+
+            if (caster && caster->ToCreature())
             {
-                if (Unit* pVictim = target->ToCreature()->GetVictim())
+                if (Unit* pVictim = caster->ToCreature()->GetVictim())
+                {
                     target = pVictim;
+                }
             }
         }
 
@@ -525,6 +536,39 @@ public:
     }
 };
 
+
+class spell_storm_weapon_aura : public SpellScriptLoader
+{
+public:
+    spell_storm_weapon_aura() : SpellScriptLoader("spell_storm_weapon_aura") {}
+
+    class aura_impl : public AuraScript
+    {
+        PrepareAuraScript(aura_impl);
+
+        void HandleOnProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+        {
+            PreventDefaultAction();
+
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->ToCreature() && caster->ToCreature()->GetVictim())
+                    caster->CastSpell(caster->ToCreature()->GetVictim(), 139220, true);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectProc += AuraEffectProcFn(aura_impl::HandleOnProc, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new aura_impl();
+    }
+};
+
 void AddSC_throne_of_thunder()
 {
     new npc_zandalari_spearshaper();
@@ -533,5 +577,6 @@ void AddSC_throne_of_thunder()
     new spell_focused_lightning_aoe();
     new spell_storm_weapon();
     new spell_storm_energy();
-    new spell_storm_weapon_proc();
+    //new spell_storm_weapon_proc();
+    new spell_storm_weapon_aura();
 }

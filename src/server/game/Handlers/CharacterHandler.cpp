@@ -2507,9 +2507,8 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
 
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHAR_REP_FACTION_CHANGE);
                 stmt->setUInt16(0, uint16(newReputation));
-                stmt->setInt32(1, newDBRep);
-                stmt->setUInt32(2, lowGuid);
-                stmt->setUInt16(3, uint16(oldReputation));
+                stmt->setUInt32(1, lowGuid);
+                stmt->setUInt16(2, uint16(oldReputation));
                 trans->Append(stmt);
             }
 
@@ -2587,7 +2586,7 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
         }
     }
 
-    CharacterDatabase.CommitTransaction(trans);
+    CharacterDatabase.DirectCommitTransaction(trans);
 
     std::string const &addr = GetRemoteAddress();
     TC_LOG_DEBUG("entities.player", "Account: %u (IP: %s), Character guid: %u changed race from %u to %u", GetAccountId(), addr.c_str(), lowGuid, oldRace, race);
@@ -2603,6 +2602,7 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
     data << uint8(facialHair);
     data << uint8(face);
     data << uint8(race);
+
     SendPacket(&data);
 }
 

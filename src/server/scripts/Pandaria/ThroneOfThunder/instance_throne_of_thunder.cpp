@@ -124,17 +124,9 @@ public:
         {
             if (!InstanceScript::SetBossState(uiId, eState))
                 return false;
-
-            switch (uiId)
-            {
-            case DATA_JINROKH:
-            case DATA_HORRIDON:
-            case DATA_COUNCIL_OF_ELDERS:
-                SetData(uiId, eState);
-                default:
-                    break;
-            }
-
+            /*
+            if (uiId < MAX_TYPES && eState == DONE)
+                SetData(uiId, (uint32)eState);*/
             return true;
         }
 

@@ -286,10 +286,10 @@ public:
 
             events.Reset();
             summons.DespawnAll();
-            ResetStatues();
+            //ResetStatues();
 
-            instance->SetBossState(DATA_JINROKH, NOT_STARTED);
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            //instance->SetBossState(DATA_JINROKH, NOT_STARTED);
+            //instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
 
         void EnterCombat(Unit* pWho)

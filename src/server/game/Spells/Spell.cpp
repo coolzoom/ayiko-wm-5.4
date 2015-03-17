@@ -7428,6 +7428,7 @@ SpellCastResult Spell::CheckCasterAuras() const
             {
                 if ((*i)->GetSpellInfo()->GetAllEffectsMechanicMask() && !((*i)->GetSpellInfo()->GetAllEffectsMechanicMask() & (1<<MECHANIC_STUN)))
                 {
+                    // @TODO: Fix this mess
                     // Sap & Hand of Freedom hack
                     if ((*i)->GetSpellInfo()->Id == 6770 && m_spellInfo->Id == 1044)
                         continue;
@@ -7438,6 +7439,10 @@ SpellCastResult Spell::CheckCasterAuras() const
 
                     // Cold snap should be usable while in Ice block
                     if ((*i)->GetSpellInfo()->Id == 45438 && m_spellInfo->Id == 11958)
+                        continue;
+
+                    // Unbound Will
+                    if (m_spellInfo->Id == 108482)
                         continue;
 
                     foundNotStun = true;

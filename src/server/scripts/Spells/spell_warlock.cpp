@@ -492,12 +492,7 @@ class spell_warl_unbound_will : public SpellScriptLoader
                 {
                     player->ModifyHealth(-int32(player->CountPctFromMaxHealth(20)));
                     player->RemoveMovementImpairingAuras();
-                    player->RemoveAurasByType(SPELL_AURA_MOD_CONFUSE);
-                    player->RemoveAurasByType(SPELL_AURA_MOD_FEAR);
-                    player->RemoveAurasByType(SPELL_AURA_MOD_FEAR_2);
-                    player->RemoveAurasByType(SPELL_AURA_MOD_STUN);
-                    player->RemoveAurasByType(SPELL_AURA_MOD_ROOT);
-                    player->RemoveAurasByType(SPELL_AURA_TRANSFORM);
+                    player->RemoveAurasWithMechanic(IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK, AURA_REMOVE_BY_DEFAULT, GetSpellInfo()->Id);
                 }
             }
 

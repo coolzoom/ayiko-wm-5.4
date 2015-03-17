@@ -12807,6 +12807,8 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
 uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, uint32 effIndex, uint32 healamount, DamageEffectType damagetype, uint32 stack)
 {
     float TakenTotalMod = 1.0f;
+    if (spellProto->AttributesEx3 & SPELL_ATTR3_NO_DONE_BONUS)
+        return healamount;
 
     // No bonus for:
     switch (spellProto->Id)

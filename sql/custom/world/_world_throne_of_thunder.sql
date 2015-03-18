@@ -1206,6 +1206,8 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 (70056, 0, 0, 0, 0, 0, 47230, 0, 0, 0, 'Gara\'jal the Spiritbinder', '', '', 0, 93, 93, 4, 16, 16, 0, 5.6, 2, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 8, 33587456, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097228, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 912, 1, 0, 0, '', 17614,0),
 (70137, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Gara\'jal\'s Trash Soul', '', '', 0, 90, 90, 4, 14, 14, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 17826816, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2664, 0, 0, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 17614,0),
 (70557, 0, 0, 0, 0, 0, 48121, 0, 0, 0, 'Zandalari Prophet', '', '', 0, 92, 92, 4, 16, 16, 0, 2.8, 1.71429, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 8, 32768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 171, 1, 0, 0, '', 17614,70557),
+(662204, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Twisted Fate Helper', '', '', 0, 1, 1, 4, 35, 35, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 33554438, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 17826816, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 130, 'mob_twisted_fate_helper', 17614,0),
+(666203, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Event Helper', '', '', 0, 1, 1, 4, 35, 35, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 33554438, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 17826816, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 130, 'npc_council_event_helper', 17614,0),
 
 (@RAID_DIFF_10N + 69078, 0, 0, 0, 0, 0, 47505, 0, 0, 0, 'Sul the Sandcrawler', '', '', 0, 93, 93, 4, 16, 16, 0, 2, 1.714286, 1, 3, 17839, 24339, 0, 51299, 1, 2000, 2000, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097228, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2670, 0, 0, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 169, 1, 0, 0, '', 17614,69078),
 (@RAID_DIFF_10N + 69131, 0, 0, 0, 0, 0, 47506, 0, 0, 0, 'Frost King Malakk', '', '', 0, 93, 93, 4, 16, 16, 0, 2, 1.714286, 1, 3, 17839, 24339, 0, 51299, 1, 2000, 2000, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097228, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2665, 0, 0, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 169, 1, 0, 0, '', 17614,69131),
@@ -1287,8 +1289,15 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 -- 10N (BASE HP: 25 = X : 10)
 -- 10H=(10N+25%)
 
+DELETE FROM creature_template WHERE entry = 69740;
+INSERT INTO creature_template
+   (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `difficulty_entry_4`, `difficulty_entry_5`, `difficulty_entry_6`, `difficulty_entry_7`, `difficulty_entry_8`, `difficulty_entry_9`, `difficulty_entry_10`, `difficulty_entry_11`, `difficulty_entry_12`, `difficulty_entry_13`, `difficulty_entry_14`, `difficulty_entry_15`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `exp_unk`, `faction_A`, `faction_H`, `npcflag`, `npcflag2`, `speed_walk`, `speed_run`, `speed_fly`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `type_flags2`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `Health_mod`, `Mana_mod`, `Mana_mod_extra`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`)
+VALUES
+   (69740, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 23767, 0, 0, 0, 'Twisted Fate', '', '', 0, 92, 92, 4, 0, 35, 35, 0, 0, 1, 1.14286, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 5, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 68, 1, 0, 0, 0, 'mob_twisted_fate', 17614);
+
+
 -- Script Names
--- UPDATE creature_template SET ScriptName = "npc_council_event_helper" WHERE entry = 662203;
+UPDATE creature_template SET ScriptName = "npc_council_event_helper" WHERE entry = 662203;
 UPDATE creature_template SET ScriptName = "boss_frost_king_malakk" WHERE entry = 69131;
 UPDATE creature_template SET ScriptName = "boss_kazrajin" WHERE entry = 69134;
 UPDATE creature_template SET ScriptName = "boss_sul_the_sandcrawler" WHERE entry = 69078;
@@ -1298,7 +1307,7 @@ UPDATE creature_template SET ScriptName = "mob_quicksand_stalker" WHERE entry = 
 UPDATE creature_template SET ScriptName = "mob_living_sand" WHERE entry = 69153;
 UPDATE creature_template SET ScriptName = "mob_blessed_loa_spirit" WHERE entry = 69480;
 UPDATE creature_template SET ScriptName = "mob_shadowed_loa_spirit" WHERE entry = 69548;
--- UPDATE creature_template SET ScriptName = "mob_twisted_fate_helper" WHERE entry = 662204;
+UPDATE creature_template SET ScriptName = "mob_twisted_fate_helper" WHERE entry = 662204;
 UPDATE creature_template SET ScriptName = "mob_twisted_fate" WHERE entry IN (69740, 69746);
 
 -- Immunity and bind bosses
@@ -1419,10 +1428,10 @@ REPLACE INTO `creature_equip_template` (`entry`, `itemEntry1`, `itemEntry2`, `it
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Creature Spawn
 INSERT INTO `creature` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`,`protec_anti_doublet`) VALUES
-(@CGUID+46, 69078, 1098, 0, 0, 248, 1, 0, 69078, 6068.75, 5396.01, 136.171, 2.32446, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
-(@CGUID+47, 69131, 1098, 0, 0, 248, 1, 0, 69131, 6025.24, 5393.14, 136.171, 0.699817, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
-(@CGUID+48, 69132, 1098, 0, 0, 248, 1, 0, 69132, 6035.9, 5385.33, 136.171, 1.17586, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
-(@CGUID+49, 69134, 1098, 0, 0, 248, 1, 0, 0, 6056.48, 5386.44, 136.171, 2.11191, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
+(@CGUID+46, 69078, 1098, 0, 0, 248, 1, 0, 69078, 6068.75, 5396.01, 136.171, 2.32446, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, NULL),
+(@CGUID+47, 69131, 1098, 0, 0, 248, 1, 0, 69131, 6025.24, 5393.14, 136.171, 0.699817, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, NULL),
+(@CGUID+48, 69132, 1098, 0, 0, 248, 1, 0, 69132, 6035.9, 5385.33, 136.171, 1.17586, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, NULL),
+(@CGUID+49, 69134, 1098, 0, 0, 248, 1, 0, 0, 6056.48, 5386.44, 136.171, 2.11191, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, NULL),
 
 (@CGUID+50, 69899, 1098, 0, 0, 248, 1, 0, 69899, 6017.28, 5743.1, 123.242, 0.152315, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
 (@CGUID+51, 69899, 1098, 0, 0, 248, 1, 0, 69899, 5873.9, 5754.04, 129.03, 3.14486, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
@@ -1473,7 +1482,10 @@ INSERT INTO `creature` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMa
 (@CGUID+88, 70557, 1098, 0, 0, 248, 1, 0, 0, 5987.32, 5538.04, 123.907, 4.02757, 86400, 5, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, NULL),
 (@CGUID+89, 70557, 1098, 0, 0, 248, 1, 0, 0, 5996.28, 5486.42, 134.6, 1.58102, 86400, 5, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, NULL),
 (@CGUID+90, 70557, 1098, 0, 0, 248, 1, 0, 0, 6096.42, 5500.65, 127.673, 1.54294, 86400, 5, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, NULL),
-(@CGUID+91, 70557, 1098, 0, 0, 248, 1, 0, 0, 6103.13, 5539.81, 123.907, 2.33145, 86400, 5, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, NULL);
+(@CGUID+91, 70557, 1098, 0, 0, 248, 1, 0, 0, 6103.13, 5539.81, 123.907, 2.33145, 86400, 5, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, NULL),
+
+(@CGUID+231, 662203, 1098, 0, 0, 248, 1, 0, 0, 6056.48, 5386.44, 136.171, 2.11191, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, NULL),
+(@CGUID+232, 662204, 1098, 0, 0, 248, 1, 0, 0, 6056.48, 5386.44, 136.171, 2.11191, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, NULL);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/

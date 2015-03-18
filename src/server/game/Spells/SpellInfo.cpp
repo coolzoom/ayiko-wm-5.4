@@ -2329,7 +2329,7 @@ SpellSpecificType SpellInfo::GetSpellSpecific() const
                 case 137562:
                     return SPELL_SPECIFIC_BREW;
             }
-
+            break;
         }
         case SPELLFAMILY_PALADIN:
         {

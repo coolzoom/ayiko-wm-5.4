@@ -52,12 +52,16 @@ INSERT INTO spell_linked_spell VALUES
 (136986, 137066, 0, 'Spear Throw - Trigger Disarm'),
 (-137077, -137066, 0, 'Spear Spin - Remove Disarm');
 
-
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (139319, 139559, 139218, 139319);
+INSERT INTO `spell_script_names` VALUES
+(139319, 'spell_storm_weapon'),
+(139559, 'spell_storm_energy'),
+(139218, 'spell_storm_weapon_aura');
 
 /* BEGIN Jin'rokh the Breaker */
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Spell Scripts
-DELETE FROM `spell_script_names` WHERE `spell_id` IN (137370,139218,139319,139559);
+DELETE FROM `spell_script_names` WHERE `spell_id` = 137370;
 REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (137161, 'spell_thundering_throw_silence'),
 (137162, 'spell_static_burst'),
@@ -79,11 +83,7 @@ REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (138568, 'spell_lightning_storm_visual'),
 (138990, 'spell_focused_lightning_detonation'),
 (139203, 'spell_focused_lightning_targeting'),
-(139209, 'spell_focused_lightning_aoe_trash'),
-(139218, 'spell_storm_weapon_aura'),
-(139319, 'spell_storm_weapon'),
-(139319, 'spell_storm_weapon_aura'),
-(139559, 'spell_storm_energy');
+(139209, 'spell_focused_lightning_aoe_trash');
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -395,10 +395,10 @@ INSERT INTO `creature` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMa
 
 (@CGUID+13, 69465, 1098, 0, 0, 248, 1, 0, 0, 5891.82, 6263.38, 124.034, 1.56886, 86400, 0, 0, 207601216, 0, 0, 0, 0, 0, 0, 0, 1, NULL),
 
-(@CGUID+14, 69467, 1098, 0, 0, 248, 1, 0, 0, 5834.94, 6320.38, 158.822, 5.49425, 86400, 0, 0, 84, 0, 0, 0, 0, 0, 0, 0, 1, NULL),
-(@CGUID+15, 69467, 1098, 0, 0, 248, 1, 0, 0, 5949.51, 6322.59, 158.822, 3.93524, 86400, 0, 0, 84, 0, 0, 0, 0, 0, 0, 0, 1, NULL),
-(@CGUID+16, 69467, 1098, 0, 0, 248, 1, 0, 0, 5950.26, 6206.49, 158.822, 2.43905, 86400, 0, 0, 84, 0, 0, 0, 0, 0, 0, 0, 1, NULL),
-(@CGUID+17, 69467, 1098, 0, 0, 248, 1, 0, 0, 5835.62, 6206.6, 158.822, 0.821134, 86400, 0, 0, 84, 0, 0, 0, 0, 0, 0, 0, 1, NULL),
+(@CGUID+14, 69467, 1098, 0, 0, 248, 1, 0, 0, 5839.32, 6316.74, 156.822, 5.49425, 7200, 0, 0, 84, 0, 0, 0, 0, 0, 0, 0, 1, NULL),
+(@CGUID+15, 69467, 1098, 0, 0, 248, 1, 0, 0, 5945.87, 6318.07, 156.822, 3.93524, 7201, 0, 0, 84, 0, 0, 0, 0, 0, 0, 0, 1, NULL),
+(@CGUID+16, 69467, 1098, 0, 0, 248, 1, 0, 0, 5943.92, 6210.56, 156.822, 2.43905, 7202, 0, 0, 84, 0, 0, 0, 0, 0, 0, 0, 1, NULL),
+(@CGUID+17, 69467, 1098, 0, 0, 248, 1, 0, 0, 5839.16, 6210.36, 156.822, 0.821134, 7203, 0, 0, 84, 0, 0, 0, 0, 0, 0, 0, 1, NULL),
 
 (@CGUID+18, 70230, 1098, 0, 0, 248, 1, 0, 70230, 5915.01, 6555.70, 112.262, 2.41254, 86400, 0, 0, 5059104, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
 (@CGUID+19, 70230, 1098, 0, 0, 248, 1, 0, 70230, 5929.73, 6543.16, 112.261, 3.72292, 86400, 0, 0, 5059104, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
@@ -479,7 +479,7 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (69465, 10, 0, 'Bored. You die now.', 14, 0, 100, 0, 0, 35552,  'Jin''rokh the Breaker - Berserk'),
 (69465, 11, 0, 'How you beat me?', 14, 0, 100, 0, 0, 35549,  'Jin''rokh the Breaker Death'),
 
-(69593, 12, 0, 'Jin''rokh the Breaker''s |cFFFF0000|Hspell:137422|h[Focused Lightning]|h|r fixates on you. Run!', 41, 0, 100, 0, 0, 0, 'Focused Lightning emote');
+(69593, 0, 0, 'Jin''rokh the Breaker''s |cFFFF0000|Hspell:137422|h[Focused Lightning]|h|r fixates on you. Run!', 41, 0, 100, 0, 0, 0, 'Focused Lightning emote');
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -502,10 +502,10 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 (@OGUID+2, 218664, 1098, 760, 1, 5891.77, 6349, 124.068, 4.71239, 0, 0, 1, -4.37114E-8, 86400, 255, 0),
 (@OGUID+3, 218665, 1098, 760, 1, 5891.77, 6410.01, 124.068, 4.71239, 0, 0, 1, -0.0000000437114, 86400, 255, 1),
 (@OGUID+4, 218667, 1098, 760, 1, 5806.350, 6263.49, 124.021, 3.13417, 0, 0, 0.999993, 0.00371344, 86400, 255, 1),
-(@OGUID+5, 218675, 1098, 760, 1, 5840.52, 6315.62, 125.112, 5.49779, 0, 0, 1, -4.37114E-8, 86400, 255, 1),
-(@OGUID+6, 218676, 1098, 760, 1, 5839.67, 6212.19, 125.112, 0.785397, 0, 0, 1, -4.37114E-8, 86400, 255, 1),
-(@OGUID+7, 218677, 1098, 760, 1, 5943.1, 6211.33, 125.112, 2.35619, 0, 0, 1, -4.37114E-8, 86400, 255, 1),
-(@OGUID+8, 218678, 1098, 760, 1, 5945.27, 6316.69, 125.194, 3.92699, 0, 0, 1, -4.37114E-8, 86400, 255, 1);
+(@OGUID+5, 218675, 1098, 760, 1, 5840.52, 6315.62, 125.112, 5.49779, 0, 0, 1, -4.37114E-8, 7200, 255, 1),
+(@OGUID+6, 218676, 1098, 760, 1, 5839.67, 6212.19, 125.112, 0.785397, 0, 0, 1, -4.37114E-8, 7203, 255, 1),
+(@OGUID+7, 218677, 1098, 760, 1, 5943.1, 6211.33, 125.112, 2.35619, 0, 0, 1, -4.37114E-8, 7202, 255, 1),
+(@OGUID+8, 218678, 1098, 760, 1, 5945.27, 6316.69, 125.194, 3.92699, 0, 0, 1, -4.37114E-8, 7201, 255, 1);
 /*---------------------------------------------------------------------------------------------------------------*/
 /* END Jin'rokh the Breaker */
 
@@ -517,14 +517,14 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Spell Scripts
 REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
-(136480,'spell_horridon_chain_lightning'),
 (136723,'spell_horridon_sand_trap'),
 (136739,'spell_horridon_double_swipe'),
 (136740,'spell_horridon_double_swipe'),
 (137433,'spell_control_horridon'),
 (137442,'spell_control_horridon'),
 (137443,'spell_control_horridon'),
-(137444,'spell_control_horridon');
+(137444,'spell_control_horridon'),
+(136480,'spell_horridon_chain_lightning');
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -1168,18 +1168,18 @@ INSERT INTO `gameobject` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phase
 -- Spell Scripts
 REPLACE INTO spell_script_names VALUES
   (136442, "spell_garajal_possessed"),
-  (136857, "spell_quicksand_entrapped"),
-  (136860, "spell_quicksand_periodic"),
-  (136894, "spell_sul_sandstorm"),
   (136903, "spell_malakk_frigid_assault"),
   (136917, "spell_malakk_biting_cold"),
   (136922, "spell_malakk_frostbite_periodic"),
-  (136937, "spell_malakk_frostbite_allies"),
   (136990, "spell_malakk_frostbite"),
+  (136937, "spell_malakk_frostbite_allies"),
   (137084, "spell_malakk_body_heat"),
   (137117, "spell_kazrajin_reckless_charge"),
   (137149, "spell_kazrajin_overload"),
   (137166, "spell_kazrajin_discharge"),
+  (136860, "spell_quicksand_periodic"),
+  (136857, "spell_quicksand_entrapped"),
+  (136894, "spell_sul_sandstorm"),
   (137203, "spell_marli_summon_blessed_loa_spirit"),
   (137350, "spell_marli_summon_shadowed_loa_spirit"),
   (137891, "spell_marli_twisted_fate_first"),

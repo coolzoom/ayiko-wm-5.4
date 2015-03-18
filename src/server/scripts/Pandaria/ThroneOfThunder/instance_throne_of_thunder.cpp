@@ -102,7 +102,14 @@ public:
                 case GOB_HORRIDON_EXIT:    
                 case GOB_COUNCIL_ENTRANCE1:
                 case GOB_COUNCIL_ENTRANCE2:
-                case GOB_COUNCIL_EXIT:       
+                case GOB_COUNCIL_EXIT:               
+                    m_mGoGuidStorage.insert(std::make_pair(pGo->GetEntry(), pGo->GetGUID()));
+                    break;    
+                case GOB_MOGU_STATUE_1:
+                case GOB_MOGU_STATUE_2:
+                case GOB_MOGU_STATUE_3:
+                case GOB_MOGU_STATUE_4:
+                    TC_LOG_ERROR("scripts", "Mogu statue guid is %u", pGo->GetGUID());
                     m_mGoGuidStorage.insert(std::make_pair(pGo->GetEntry(), pGo->GetGUID()));
                     break;
                 case GOB_TRIBAL_DOOR_FARRAKI:
@@ -235,10 +242,18 @@ public:
                 case GOB_TRIBAL_DOOR_GURUBASHI:
                 case GOB_TRIBAL_DOOR_DRAKKARI: 
                 case GOB_TRIBAL_DOOR_AMANI:
+                case GOB_MOGU_STATUE_1:
+                case GOB_MOGU_STATUE_2:
+                case GOB_MOGU_STATUE_3:
+                case GOB_MOGU_STATUE_4:
                 {
+                                          
                     EntryGuidMap::const_iterator find = m_mGoGuidStorage.find(uiType);
                     if (find != m_mGoGuidStorage.cend())
+                    {
+                        TC_LOG_ERROR("scripts", "GetData64 requested GO Data for uiType %u, returned guid %u", uiType, find->second);
                         return find->second;
+                    }
                     return 0;
                 }
                 default:

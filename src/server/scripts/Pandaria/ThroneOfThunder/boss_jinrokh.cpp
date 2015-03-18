@@ -282,11 +282,9 @@ public:
 
         void Reset()
         {
-            //_Reset();
-
             events.Reset();
-            //summons.DespawnAll();
-            //ResetStatues();
+            summons.DespawnAll();
+            ResetStatues();
 
             instance->SetBossState(DATA_JINROKH, NOT_STARTED);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
@@ -391,9 +389,12 @@ public:
         {
             if (uiPointId == 1948)
             {
+                me->NearTeleportTo(aCenterPos.GetPositionX(), aCenterPos.GetPositionY(), aCenterPos.GetPositionZ(), aCenterPos.GetOrientation());
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+
                 DoHandleLightningStorm();
 
-                events.ScheduleEvent(EVENT_PROPAGATE_STORM, 200);
+                events.ScheduleEvent(EVENT_PROPAGATE_STORM, 300);
 
                 me->UpdateObjectVisibility();
                 me->UpdatePosition(me->GetPosition());
@@ -402,6 +403,8 @@ public:
 
         void PropagateStorm()
         {
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+
             Talk(TALK_LIGHTNING_STORM);
             Talk(EMOTE_LIGHTNING_STORM);
 
@@ -492,7 +495,7 @@ public:
         uint64 m_targetGuid;
         EventMap m_mEvents;
 
-        void SetGUID(uint64 guid, int32) override
+        void SetGUID(uint64 guid, int32 integer)
         {
             m_targetGuid = guid;
         }
@@ -504,7 +507,8 @@ public:
 
         void Initialize()
         {
-            m_mEvents.ScheduleEvent(EVENT_FISSURE_CHECK, 1400);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+            m_mEvents.ScheduleEvent(EVENT_FISSURE_CHECK, 1000);
             m_targetGuid = 0;
             me->AddAura(SPELL_FOCUSED_LIGHTNING_VISUAL, me);
             me->AddAura(SPELL_FOCUSED_LIGHTNING_SPEED, me);
@@ -514,6 +518,9 @@ public:
 
         void CheckHeight()
         {
+            if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+
             if (me->GetPositionZ() > floorZ + 3.5f || me->GetPositionZ() < floorZ - 1.2f)
                 me->NearTeleportTo(me->GetPositionX(), me->GetPositionY(), floorZ + 0.2f, me->GetOrientation());
         }
@@ -554,6 +561,7 @@ public:
             switch (m_mEvents.ExecuteEvent())
             {
             case EVENT_FISSURE_CHECK:
+                CheckHeight();
                 if (Unit* pTarget = ObjectAccessor::GetPlayer(*me, m_targetGuid))
                 {
                     me->GetMotionMaster()->MoveFollow(pTarget, 0.f, 0.f);
@@ -563,7 +571,6 @@ public:
                     GetFixatedPlayerOrGetNewIfNeeded();
                     me->GetMotionMaster()->MoveFollow(pTarget, 0.f, 0.f);
                 }
-                CheckHeight();
                 m_mEvents.ScheduleEvent(EVENT_FISSURE_CHECK, 400);
                 break;
             }
@@ -683,7 +690,10 @@ public:
             caster->CastSpell(target, SPELL_FOCUSED_LIGHTNING_FIXATE, true);
 
             if (caster->ToCreature() && caster->ToCreature()->AI())
+            {
+                caster->ToCreature()->AI()->Talk(0, target->GetGUID(), true);
                 caster->ToCreature()->AI()->SetGUID(target->GetGUID());
+            }
         }
 
         void Register()
@@ -1202,8 +1212,6 @@ class npc_jinrokh_statue : public CreatureScript
         EVENT_NONE,
         EVENT_WATER_BEAM,
         EVENT_SPAWN_WATER,
-        EVENT_TOSS_PLAYER,
-        EVENT_STUN_PLAYER
     };
 
 public:
@@ -1212,14 +1220,46 @@ public:
     struct npc_jinrokh_statueAI : public ScriptedAI
     {
         npc_jinrokh_statueAI(Creature* pCreature) : ScriptedAI(pCreature) 
-        { 
-            statueData = 0; 
+        {
+            statueGuid = 0;
+            statueData = 0;
+            m_phase = 0;
             playerGuid = 0;
             me->SetFloatValue(OBJECT_FIELD_SCALE_X, me->GetFloatValue(OBJECT_FIELD_SCALE_X) * 1.4f);
+            InitializeStatue();
         }
 
         uint32 statueData;
+        uint32 m_phase;
         uint64 playerGuid;
+        uint64 statueGuid;
+        
+        void InitializeStatue()
+        {
+            statueGuid = 0;
+
+            if (InstanceScript* pInstance = me->GetInstanceScript())
+            {
+                for (uint32 i = 0; i < 4; ++i)
+                {
+                    if (GameObject* pGo = ObjectAccessor::GetGameObject(*me, pInstance->GetData64(GOB_MOGU_STATUE_1 + i)))
+                    {
+                        TC_LOG_ERROR("scripts", "printing spawntimes, %u, %u", pGo->GetRespawnDelay(), me->GetRespawnDelay());
+                        if (pGo->GetRespawnDelay() == me->GetRespawnDelay())
+                            statueGuid = pGo->GetGUID();
+                    }
+                }
+            }
+
+  
+            TC_LOG_ERROR("scripts", "statue guid is %u", statueGuid);
+        }
+        
+        void HandleStatue(bool active)
+        {
+            if (GameObject* pStatue = ObjectAccessor::GetGameObject(*me, statueGuid))
+                pStatue->SetGoState(active ? GO_STATE_ACTIVE : GO_STATE_READY);
+        }
 
         void SetData(uint32 uiType, uint32 uiData) override
         {
@@ -1244,7 +1284,7 @@ public:
         {
             if (iAction == ACTION_DESTROYED)
             {
-                events.ScheduleEvent(EVENT_TOSS_PLAYER, 2000);
+                m_phase = 1;
                 events.ScheduleEvent(EVENT_WATER_BEAM, 4000);
                 events.ScheduleEvent(EVENT_SPAWN_WATER, 7000);
                 SetData(DATA_STATUE_DESTROYED, 1);
@@ -1252,6 +1292,8 @@ public:
 
             if (iAction == ACTION_RESET)
             {
+                HandleStatue(false);
+                m_phase = 0;
                 playerGuid = 0;
                 me->SetVisible(false);
                 me->SetVisible(true);
@@ -1284,20 +1326,50 @@ public:
             return aWaterPos[dist];
         }
 
-        void DoTossPlayer()
+        void DoTossPlayer(Player* pPlayer)
         {
-            if (Player* pPlayer = ObjectAccessor::GetPlayer(*me, playerGuid))//*itr)
+            HandleStatue(true);
+            playerGuid = pPlayer->GetGUID();
+            pPlayer->CastSpell(DoSpawnWater(), SPELL_THUNDERING_THROW_JUMP, true);
+            pPlayer->CastSpell(pPlayer, SPELL_THUNDERING_THROW_HIT_DAMAGE, true);
+            m_phase = 2;
+        }
+
+        void CheckPlayerState()
+        {
+            if (m_phase == 1)
             {
-                playerGuid = pPlayer->GetGUID();
-                pPlayer->CastSpell(DoSpawnWater(), SPELL_THUNDERING_THROW_JUMP, true);
-                pPlayer->CastSpell(pPlayer, SPELL_THUNDERING_THROW_HIT_DAMAGE, true);
-                events.ScheduleEvent(EVENT_STUN_PLAYER, 2400);
+                if (Player* pPlayer = ObjectAccessor::GetPlayer(*me, playerGuid))
+                {
+                    if (!pPlayer->HasUnitState(UNIT_STATE_JUMPING))
+                        DoTossPlayer(pPlayer);
+                }
             }
+            else if (m_phase == 2)
+            {
+                if (Player* pPlayer = ObjectAccessor::GetPlayer(*me, playerGuid))
+                {
+                    if (!pPlayer->HasUnitState(UNIT_STATE_JUMPING))
+                        DoStunPlayer(pPlayer);
+                }
+            }
+        }
+
+        void DoStunPlayer(Player* pPlayer)
+        {
+            pPlayer->CastSpell(pPlayer, SPELL_THUNDERING_THROW_HIT_AOE_DAMAGE, true);
+            pPlayer->CastSpell(pPlayer, SPELL_THUNDERING_THROW_STUN, true);
+            pPlayer->RemoveAurasDueToSpell(SPELL_THUNDERING_THROW_SILENCE);
+
+            m_phase = 0;
+            playerGuid = 0;
         }
 
         void UpdateAI(const uint32 uiDiff) override
         {
             events.Update(uiDiff);
+
+            CheckPlayerState();
 
             switch (events.ExecuteEvent())
             {
@@ -1309,19 +1381,6 @@ public:
                 {
                     if (pWater->AI())
                         pWater->AI()->DoAction(ACTION_RESET);
-                }
-                break;
-            case EVENT_TOSS_PLAYER:
-                DoTossPlayer();
-                break;
-            case EVENT_STUN_PLAYER:
-                if (playerGuid)
-                {
-                    if (Player* pPlayer = ObjectAccessor::GetPlayer(*me, playerGuid))
-                    {
-                        pPlayer->CastSpell(pPlayer, SPELL_THUNDERING_THROW_HIT_AOE_DAMAGE, true);
-                        pPlayer->RemoveAurasDueToSpell(SPELL_THUNDERING_THROW_SILENCE);
-                    }
                 }
                 break;
             }
@@ -1458,9 +1517,6 @@ public:
 
             if (!owner || !caster)
                 return;
-
-            //if (!owner->HasAura(spellId()))
-                //caster->AddAura(spellId(), owner);
 
             if (Aura* pAura = owner->GetAura(spellId(), caster->GetGUID()))
             {

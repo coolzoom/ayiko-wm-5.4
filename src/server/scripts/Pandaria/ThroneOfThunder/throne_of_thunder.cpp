@@ -443,10 +443,23 @@ public:
             }
         }
 
+        void HandleOnProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+        {
+            PreventDefaultAction();
+
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->ToCreature() && caster->ToCreature()->GetVictim())
+                    caster->CastSpell(caster->ToCreature()->GetVictim(), 139220, true);
+            }
+        }
+
+
         void Register()
         {
             OnEffectApply += AuraEffectApplyFn(aura_impl::HandleOnApply, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
             OnEffectRemove += AuraEffectApplyFn(aura_impl::HandleOnRemove, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+            OnEffectProc += AuraEffectProcFn(aura_impl::HandleOnProc, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
         }
     };
 

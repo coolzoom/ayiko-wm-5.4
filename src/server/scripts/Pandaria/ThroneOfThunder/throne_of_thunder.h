@@ -113,6 +113,11 @@ enum ObjectsIds
     GOB_TRIBAL_DOOR_DRAKKARI                = 218671,
     GOB_TRIBAL_DOOR_FARRAKI                 = 218672,
     GOB_TRIBAL_DOOR_AMANI                   = 218673,
+
+    GOB_MOGU_STATUE_1                       = 218675,
+    GOB_MOGU_STATUE_2                       = 218676,
+    GOB_MOGU_STATUE_3                       = 218677,
+    GOB_MOGU_STATUE_4                       = 218678,
 };
 
 #endif

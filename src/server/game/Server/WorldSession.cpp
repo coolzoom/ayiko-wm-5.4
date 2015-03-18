@@ -186,7 +186,7 @@ void WorldSession::SendPacket(WorldPacket const* packet, bool forced /*= false*/
 
     if (packet->GetOpcode() == NULL_OPCODE && !forced)
     {
-        TC_LOG_ERROR("network.opcode", "Prevented sending of NULL_OPCODE to %s", GetPlayerName(false).c_str());
+        TC_LOG_DEBUG("network.opcode", "Prevented sending of NULL_OPCODE to %s", GetPlayerName(false).c_str());
         return;
     }
     else if (packet->GetOpcode() == UNKNOWN_OPCODE && !forced)

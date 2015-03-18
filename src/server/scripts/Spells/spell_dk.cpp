@@ -1876,6 +1876,39 @@ public:
     }
 };
 
+class spell_dk_asphyxiate : public SpellScriptLoader
+{
+public:
+    spell_dk_asphyxiate() : SpellScriptLoader("spell_dk_asphyxiate") { }
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void HandleOnHit()
+        {
+            Spell* spell = GetSpell();
+            Unit* target = GetHitUnit();
+            if (!spell || !target)
+                return;
+
+            if (spell->GetDiminishingLevel() == DIMINISHING_LEVEL_IMMUNE)
+                GetCaster()->CastSpell(target, 47476, true);
+        }
+
+        void Register()
+        {
+            OnHit += SpellHitFn(spell_impl::HandleOnHit);
+        }
+
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
 // Unholy Frenzy - 49016
 class spell_dk_unholy_frenzy final : public SpellScriptLoader
 {
@@ -1991,4 +2024,5 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_unholy_frenzy();
     new spell_dk_glyph_of_horn_of_winter();
     new spell_dk_soul_reaper_effect();
+    new spell_dk_asphyxiate();
 }

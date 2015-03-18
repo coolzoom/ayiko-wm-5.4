@@ -18744,7 +18744,7 @@ Aura* Unit::AddAuraForTarget(Aura* aura, Unit* target)
         newAura->SetDuration(aura->GetDuration());
         for (int i = 0; i < MAX_SPELL_EFFECTS; ++i)
             if (aura->GetEffectMask() & (1 << i) && newAura->GetEffectMask() & (1 << i))
-                newAura->GetEffect(i)->SetAmount(aura->GetEffect(i)->GetAmount());
+                newAura->GetEffect(i)->GetFixedDamageInfo().SetFixedDamage(aura->GetEffect(i)->GetFixedDamageInfo().GetFixedDamage());
 
         return newAura;
     }

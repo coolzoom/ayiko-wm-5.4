@@ -3976,7 +3976,7 @@ class spell_gen_ench_dancing_steel final : public SpellScriptLoader
     {
         PrepareAuraScript(script_impl)
 
-        void OnProc(AuraEffect const *, ProcEventInfo &eventInfo)
+        void OnProc(AuraEffect const * aurEff, ProcEventInfo &eventInfo)
         {
             PreventDefaultAction();
             auto const target = GetTarget();
@@ -3986,7 +3986,9 @@ class spell_gen_ench_dancing_steel final : public SpellScriptLoader
             if (target->GetStat(STAT_STRENGTH) > stat)
                 enchantmentProc = 118335;
 
-            GetTarget()->CastSpell(GetTarget(), enchantmentProc, true);
+            if (Player* player = GetTarget()->ToPlayer())
+                if (Item* castItem = player->GetItemByGuid(aurEff->GetBase()->GetCastItemGUID()))
+                    player->CastSpell(GetTarget(), enchantmentProc, true, castItem);
         }
 
         void Register() final

@@ -31,6 +31,10 @@ public:
         EntryGuidMap m_mGoGuidStorage;
         EventMap m_mEvents;
 
+        uint64 eventHelperGuid;
+        uint64 twistedFateHelperGuid;
+        uint64 horridonHelperGuid;
+
         uint32 m_auiEncounter[MAX_TYPES];
         std::string strSaveData;
 
@@ -46,11 +50,6 @@ public:
 
         void OnCreatureCreate(Creature* pCreature)
         {
-            if (!pCreature)
-                return;
-
-            uint64 guid = pCreature->GetGUID();
-
             switch (pCreature->GetEntry())
             {
                 case BOSS_JINROKH:
@@ -70,10 +69,7 @@ public:
                 case BOSS_SUEN:
                 case BOSS_LEI_SHEN:             
                 case BOSS_RA_DEN:              
-                case MOB_WAR_GOD_JALAK:        
-                case NPC_HORRIDON_EVENT_HELPER:             
-                case NPC_COUNCIL_EVENT_HELPER:  
-                case NPC_TWISTED_FATE_HELPER:
+                case MOB_WAR_GOD_JALAK:                    
                     m_mNpcGuidStorage.insert(std::make_pair(pCreature->GetEntry(), pCreature->GetGUID()));
                     break;
                 case NPC_JINROKH_STATUE:
@@ -85,6 +81,15 @@ public:
                     pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_15);
                     pCreature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_STAND_FLAGS_CREEP);
                     m_mNpcGuidStorage.insert(std::make_pair(pCreature->GetEntry(), pCreature->GetGUID()));
+                    break;
+                case NPC_HORRIDON_EVENT_HELPER:
+                    horridonHelperGuid = pCreature->GetGUID();
+                    break;
+                case NPC_TWISTED_FATE_HELPER:
+                    twistedFateHelperGuid = pCreature->GetGUID();
+                    break;
+                case NPC_COUNCIL_EVENT_HELPER:
+                    eventHelperGuid = pCreature->GetGUID();
                     break;
                 default:
                     break;
@@ -237,17 +242,21 @@ public:
                 case BOSS_LEI_SHEN:
                 case BOSS_RA_DEN:
                 case MOB_GARA_JAL:          
-                case MOB_GARA_JALS_SOUL:    
-                case NPC_COUNCIL_EVENT_HELPER:  
-                case NPC_TWISTED_FATE_HELPER:
+                case MOB_GARA_JALS_SOUL:      
                 case MOB_WAR_GOD_JALAK:
-                case NPC_HORRIDON_EVENT_HELPER:
                 {
                     EntryGuidMap::const_iterator find = m_mNpcGuidStorage.find(uiType);
                     if (find != m_mNpcGuidStorage.cend())
                         return find->second;
                     return 0;
                 }
+                case NPC_HORRIDON_EVENT_HELPER:
+                    return horridonHelperGuid;
+                case NPC_TWISTED_FATE_HELPER:
+                    return twistedFateHelperGuid;
+                case NPC_COUNCIL_EVENT_HELPER:
+                    TC_LOG_ERROR("scripts", "Event helper guid requested %u", eventHelperGuid);
+                    return eventHelperGuid;
                 // Gameobjects below here #####
                 // ############################
                 // ############################

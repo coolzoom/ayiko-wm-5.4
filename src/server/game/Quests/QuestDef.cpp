@@ -114,7 +114,7 @@ Quest::Quest(Field* questRecord)
         RewardCurrencyId[i] = questRecord[index++].GetUInt16();
 
     for (int i = 0; i < QUEST_REWARD_CURRENCY_COUNT; ++i)
-        RewardCurrencyCount[i] = questRecord[index++].GetUInt8();
+        RewardCurrencyCount[i] = questRecord[index++].GetUInt16();
 
     QuestGiverTextWindow    = questRecord[index++].GetString();
     QuestGiverTargetName    = questRecord[index++].GetString();

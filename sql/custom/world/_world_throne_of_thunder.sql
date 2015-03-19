@@ -100,6 +100,29 @@ REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (139218, 'spell_storm_weapon_aura'),
 (139319, 'spell_storm_weapon'),
 (139559, 'spell_storm_energy');
+
+/*---------------------------------------------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------------------------------------------*/
+-- Creature Speeches
+DELETE FROM `creature_text` WHERE `entry` IN (69465, 69593);
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(69465, 0,  0, 'Da Thunder King give me power! Come, I show you!', 14, 0, 100, 0, 0, 35550,'Jin''rokh the Breaker - Intro'),
+(69465, 1,  0, 'I must break you.', 14, 0, 100, 0, 0, 35547,  'Jin''rokh the Breaker - Aggro'),
+(69465, 2,  0, 'Smash!', 14, 0, 100, 0, 0, 35553,  'Jin''rokh the Breaker - Static Burst'),
+(69465, 3,  0, 'Crush your bones!', 14, 0, 100, 0, 0, 35554,  'Jin''rokh the Breaker - Thundering Throw'),
+(69465, 4,  0, 'I call da storm!', 14, 0, 100, 0, 0, 35555,  'Jin''rokh the Breaker - Lightning Storm'),
+(69465, 5,  0, 'Zap!', 14, 0, 100, 0, 0, 35556,  'Jin''rokh the Breaker - Focused Lightning'),
+(69465, 6,  0, '|TInterface\\Icons\\ability_warrior_throwdown:20|t%s grabs $n and readies his |cFFFF0000|Hspell:137175|h[Thundering Throw]|h|r!', 41, 0, 100, 0, 0, 0,  'Jin''rokh the Breaker'),
+(69465, 7,  0, '|TInterface\\Icons\\spell_shaman_thunderstorm:20|t%s begins to channel an intense |cFFFF0000|Hspell:137313|h[Lightning Storm]|h|r!', 41, 0, 100, 0, 0, 0,  'Jin''rokh the Breaker'),
+(69465, 8,  0, '|TInterface\\Icons\\spell_shaman_thunderstorm:20|t%s begins to channel an intense |cFFFF0000|Hspell:137313|h[Lightning Storm]|h|r!', 41, 0, 100, 0, 0, 0,  'Jin''rokh the Breaker'),
+(69465, 9,  0, 'Weak.', 14, 0, 100, 0, 0, 35551,  'Jin''rokh the Breaker - Kill01'),
+(69465, 9,  1, 'So easy to break.', 14, 0, 100, 0, 0, 35552,  'Jin''rokh the Breaker - Kill02'),
+(69465, 10, 0, 'Bored. You die now.', 14, 0, 100, 0, 0, 35552,  'Jin''rokh the Breaker - Berserk'),
+(69465, 11, 0, 'How you beat me?', 14, 0, 100, 0, 0, 35549,  'Jin''rokh the Breaker Death'),
+
+(69593, 0, 0, 'Jin''rokh the Breaker''s |cFFFF0000|Hspell:137422|h[Focused Lightning]|h|r fixates on you. Run!', 41, 0, 100, 0, 0, 0, 'Focused Lightning emote');
+
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -480,27 +503,6 @@ INSERT INTO `creature_emote` VALUES
 DELETE FROM `creature_bytes` WHERE `guid` IN (@CGUID+18);
 INSERT INTO `creature_bytes` VALUES
 (@CGUID+18,0,8);
-/*---------------------------------------------------------------------------------------------------------------*/
-
-/*---------------------------------------------------------------------------------------------------------------*/
--- Creature Speeches
-DELETE FROM `creature_text` WHERE `entry` IN (69465, 69593);
-INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
-(69465, 0,  0, 'Da Thunder King give me power! Come, I show you!', 14, 0, 100, 0, 0, 35550,'Jin''rokh the Breaker - Intro'),
-(69465, 1,  0, 'I must break you.', 14, 0, 100, 0, 0, 35547,  'Jin''rokh the Breaker - Aggro'),
-(69465, 2,  0, 'Smash!', 14, 0, 100, 0, 0, 35553,  'Jin''rokh the Breaker - Static Burst'),
-(69465, 3,  0, 'Crush your bones!', 14, 0, 100, 0, 0, 35554,  'Jin''rokh the Breaker - Thundering Throw'),
-(69465, 4,  0, 'I call da storm!', 14, 0, 100, 0, 0, 35555,  'Jin''rokh the Breaker - Lightning Storm'),
-(69465, 5,  0, 'Zap!', 14, 0, 100, 0, 0, 35556,  'Jin''rokh the Breaker - Focused Lightning'),
-(69465, 6,  0, '|TInterface\\Icons\\ability_warrior_throwdown:20|t%s grabs $n and readies his |cFFFF0000|Hspell:137175|h[Thundering Throw]|h|r!', 41, 0, 100, 0, 0, 0,  'Jin''rokh the Breaker'),
-(69465, 7,  0, '|TInterface\\Icons\\spell_shaman_thunderstorm:20|t%s begins to channel an intense |cFFFF0000|Hspell:137313|h[Lightning Storm]|h|r!', 41, 0, 100, 0, 0, 0,  'Jin''rokh the Breaker'),
-(69465, 8,  0, '|TInterface\\Icons\\spell_shaman_thunderstorm:20|t%s begins to channel an intense |cFFFF0000|Hspell:137313|h[Lightning Storm]|h|r!', 41, 0, 100, 0, 0, 0,  'Jin''rokh the Breaker'),
-(69465, 9,  0, 'Weak.', 14, 0, 100, 0, 0, 35551,  'Jin''rokh the Breaker - Kill01'),
-(69465, 9,  1, 'So easy to break.', 14, 0, 100, 0, 0, 35552,  'Jin''rokh the Breaker - Kill02'),
-(69465, 10, 0, 'Bored. You die now.', 14, 0, 100, 0, 0, 35552,  'Jin''rokh the Breaker - Berserk'),
-(69465, 11, 0, 'How you beat me?', 14, 0, 100, 0, 0, 35549,  'Jin''rokh the Breaker Death'),
-
-(69593, 0, 0, 'Jin''rokh the Breaker''s |cFFFF0000|Hspell:137422|h[Focused Lightning]|h|r fixates on you. Run!', 41, 0, 100, 0, 0, 0, 'Focused Lightning emote');
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/

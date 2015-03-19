@@ -44,6 +44,9 @@ void PointMovementGenerator<T>::DoInitialize(T *unit)
 template<class T>
 bool PointMovementGenerator<T>::DoUpdate(T *unit, uint32 /*diff*/)
 {
+    if (!unit)
+        return false;
+
     if (unit->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED))
     {
         unit->ClearUnitState(UNIT_STATE_ROAMING_MOVE);
@@ -147,7 +150,23 @@ void EffectMovementGenerator::Finalize(Unit *unit)
     if (unit->HasUnitState(UNIT_STATE_JUMPING))
         unit->ClearUnitState(UNIT_STATE_JUMPING);
 
-    MovementInform(unit);
+
+    if (unit->GetTypeId() != TYPEID_UNIT)
+        return;
+
+    // Need restore previous movement since we have no proper states system
+    if (unit->IsAlive() && !unit->HasUnitState(UNIT_STATE_CONFUSED | UNIT_STATE_FLEEING))
+    {
+        if (Unit* victim = unit->GetVictim())
+            unit->GetMotionMaster()->MoveChase(victim);
+        else
+            unit->GetMotionMaster()->Initialize();
+    }
+
+    if (unit->ToCreature()->AI())
+        unit->ToCreature()->AI()->MovementInform(EFFECT_MOTION_TYPE, m_Id);
+
+    //MovementInform(unit);
 }
 
 void EffectMovementGenerator::MovementInform(Unit *unit)

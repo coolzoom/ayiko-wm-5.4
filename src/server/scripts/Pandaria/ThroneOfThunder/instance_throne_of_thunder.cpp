@@ -71,8 +71,7 @@ public:
                 case BOSS_LEI_SHEN:             
                 case BOSS_RA_DEN:              
                 case MOB_WAR_GOD_JALAK:        
-                case NPC_HORRIDON_EVENT_HELPER:
-                case MOB_GARA_JAL:             
+                case NPC_HORRIDON_EVENT_HELPER:             
                 case NPC_COUNCIL_EVENT_HELPER:  
                 case NPC_TWISTED_FATE_HELPER:
                     m_mNpcGuidStorage.insert(std::make_pair(pCreature->GetEntry(), pCreature->GetGUID()));
@@ -81,6 +80,11 @@ public:
                     pCreature->SetCanFly(true);
                     pCreature->SetHover(true);
                     pCreature->AddUnitMovementFlag(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_DISABLE_GRAVITY);
+                    break;
+                case MOB_GARA_JAL:
+                    pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_15);
+                    pCreature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_STAND_FLAGS_CREEP);
+                    m_mNpcGuidStorage.insert(std::make_pair(pCreature->GetEntry(), pCreature->GetGUID()));
                     break;
                 default:
                     break;

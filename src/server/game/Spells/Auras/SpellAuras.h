@@ -125,6 +125,7 @@ class Aura
                 {
                     case SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS:
                     case SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2:
+                    case SPELL_AURA_MOD_CHARGES:
                         return true;
                 }
             }

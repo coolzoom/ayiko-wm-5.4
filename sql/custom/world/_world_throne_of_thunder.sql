@@ -1,14 +1,33 @@
 /* Throne of Thunder */
 SET FOREIGN_KEY_CHECKS = 0;
 
-DELETE FROM creature WHERE map = 1098;
-DELETE FROM gameobject WHERE map = 1098;
+DELETE FROM `creature` WHERE `map` = 1098;
+DELETE FROM `gameobject` WHERE `map` = 1098;
+DELETE FROM `gameobject` WHERE `id`=214539;
 
 -- GUID RANGES
 -- Gameobjects
 SET @OGUID := (SELECT MAX(guid) FROM gameobject) + 1;
 -- Creatures 
 SET @CGUID := (SELECT MAX(guid) FROM creature) + 1;
+
+
+-- Raid Portal
+INSERT INTO `gameobject` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`spawntimesecs`,`animprogress`,`state`,`isActive`,`protect_anti_doublet`) VALUES
+(@OGUID+26, 214539, 1064, 0, 0, 1, 1, 7260.45, 5019.11, 80.2229, 2.38534, 0, 0, 0.929358, 0.36918, 86400, 0, 1, 0, NULL);
+
+-- Isle of Thunder available
+DELETE FROM `spell_area` WHERE `area` = 6507;
+
+-- Throne of Thunder Ghost Zone fix
+DELETE FROM `game_graveyard_zone` WHERE `id` = 4490;
+INSERT INTO `game_graveyard_zone` (`id`, `ghost_zone`, `faction`) VALUES
+(4490,6622,0);
+
+DELETE FROM `spell_area` WHERE `spell` IN (55164,55173) AND `area` = 6507;
+INSERT INTO `spell_area` VALUES 
+(55164,6507,0,0,8326,1783,2,1,0,0), -- (Pandaria) Isle of Thunder
+(55173,6507,0,0,8326,8,2,1,0,0);    -- (Pandaria-NightElf) Isle of Thunder
 
 -- Instance Script
 DELETE FROM `instance_template` WHERE `map` = 1098;
@@ -553,8 +572,8 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 (70441, 0, 0, 0, 0, 0, 47693, 0, 0, 0, 'Lost Soul', '', '', 0, 91, 91, 4, 16, 16, 0, 1, 0.992063, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 768, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 4, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 8388624, 0, '', 1,0),
 (70445, 0, 0, 0, 0, 0, 48049, 0, 0, 0, 'Stormbringer Draz\'kil', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 70, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 650854271, 0, '', 17614,0),
 (70448, 0, 0, 0, 0, 0, 48052, 48051, 48050, 0, 'Ancient Python', '', '', 0, 90, 90, 4, 16, 16, 0, 1, 1.42857, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 2048, 0, 35, 0, 0, 0, 0, 0, 0, 0, 1, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 5, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 0, 0, '', 17614,0),
-(662202, 0, 0, 0, 0, 0, 1287, 0, 0, 0, 'stalker_horridon_event', '', '', 0, 1, 1, 0, 35, 35, 0, 1, 1.14286, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 4, 1, 1,1,1,0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 128, 'npc_horridon_event_helper', 1,0),
-(662206, 0, 0, 0, 0, 0, 1287, 0, 0, 0, 'stalker_horridon_intro', '', '', 0, 93, 93, 0, 35, 35, 0, 1, 1.14286, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 4, 1, 1, 1,1,0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 128, 'npc_horridon_rp_event_helper', 1,0),
+(662202, 0, 0, 0, 0, 0, 1287, 0, 0, 0, 'stalker_horridon_event', '', '', 0, 1, 1, 0, 35, 35, 0, 1, 1.14286, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 4, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 128, 'npc_horridon_event_helper', 1,0),
+(662206, 0, 0, 0, 0, 0, 1287, 0, 0, 0, 'stalker_horridon_intro', '', '', 0, 93, 93, 0, 35, 35, 0, 1, 1.14286, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 4, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 128, 'npc_horridon_rp_event_helper', 1,0),
 
 (@RAID_DIFF_10N + 69164, 0, 0, 0, 0, 0, 47378, 47263, 47379, 47264, 'Gurubashi Venom Priest', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 9.75, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 17614,0),
 (@RAID_DIFF_10N + 69167, 0, 0, 0, 0, 0, 47442, 47443, 47444, 47445, 'Gurubashi Bloodlord', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 17614,69167),
@@ -822,9 +841,11 @@ UPDATE creature_template SET LootId = @RAID_DIFF_25R + 68476, dmg_multiplier = 1
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Trash Mobs SAI
-UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` IN (70341,70448);
+UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` IN (70308,70341,70448);
 DELETE FROM `smart_scripts` WHERE `entryorguid`IN (70341,70448) AND `source_type`= 0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(70308, 0, 0, 0, 0, 0, 100, 0, 10000, 12000, 15000, 25000, 11, 139895, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Soul-Fed Construct - Cast Spiritfire Beam"),
+(70308, 0, 1, 0, 0, 0, 100, 0, 8000, 15000, 15000, 18000, 11, 33661, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Soul-Fed Construct - Cast Crush Armor"),
 (70341, 0, 0, 0, 0, 0, 100, 0, 3000, 10000, 7000, 10000, 11, 139550, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Tormented Spirit - Cast Torment"),
 (70448, 0, 0, 0, 1, 0, 100, 0, 1, 1, 1, 1, 11, 139885, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Ancient Python - Cast Stealth OOC"),
 (70448, 0, 1, 0, 0, 0, 100, 0, 3000, 13000, 6000, 20000, 11, 139888, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Ancient Python - Cast Ancient Venom");
@@ -1414,6 +1435,20 @@ UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69134, dmg_multiplier = 1
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
+-- Trash Mobs SAI
+UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` IN (69905,69910,70047);
+DELETE FROM `smart_scripts` WHERE `entryorguid`IN (69905,69910,70047) AND `source_type`= 0;
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(69905, 0, 0, 0, 1, 0, 100, 1, 1, 1, 0, 0, 28, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Gurubashi Berserker - Remove all auras when OOC"),
+(69905, 0, 1, 0, 0, 0, 100, 0, 10000, 12000, 15000, 20000, 11, 138693, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Gurubashi Berserker - Cast Bloodletting"),
+(69905, 0, 2, 0, 2, 0, 100, 1, 0, 50, 0, 0, 11, 138427, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Gurubashi Berserker - Cast Berserker Frenzy"),
+(69910, 0, 0, 0, 0, 0, 100, 0, 10000, 20000, 20000, 25000, 11, 138668, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Drakkari Frost Warden - Cast Frost Bulwark"),
+(69910, 0, 1, 0, 0, 0, 100, 0, 15000, 20000, 15000, 25000, 11, 138690, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, "Drakkari Frost Warden - Cast Glacial Freeze Totem"),
+(70047, 0, 0, 0, 10, 0, 100, 0, 0, 50, 0, 0, 38, 0, 0, 0, 0, 0, 0, 21, 50, 0, 0, 0, 0, 0, 0, "Glacial Freeze Totem - Cast Glacial Freeze"),
+(70047, 0, 1, 0, 0, 0, 100, 0, 1, 1, 4000, 7000, 11, 138678, 0, 0, 0, 0, 0, 21, 50, 0, 0, 0, 0, 0, 0, "Glacial Freeze Totem - Cast Glacial Freeze");
+/*---------------------------------------------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------------------------------------------*/
 -- Creature Equip
 REPLACE INTO `creature_equip_template` (`entry`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES 
 (69078, 93238, 0, 0),
@@ -1763,5 +1798,6 @@ INSERT INTO `reference_loot_template` VALUES
 (95877,95874,0,1,10,1,1),
 (95877,95873,0,1,10,1,1),
 (95877,95872,0,1,10,1,1);
+
 /*---------------------------------------------------------------------------------------------------------------*/
 SET FOREIGN_KEY_CHECKS = 1;

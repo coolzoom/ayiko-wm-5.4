@@ -417,7 +417,7 @@ public:
             ResetEvent();
         }
 
-        void DoAction(int32 iAction)
+        void DoAction(const int32 iAction) override
         {
             switch(iAction)
             {
@@ -579,12 +579,12 @@ public:
     }
 
     // Override EnterCombat to send the DoAction to the helper
-    void EnterCombat(Unit *pAttacker)
+    void EnterCombat(Unit *pAttacker) override
     {
         if(Creature *pHelper = GetCouncilEventHelper(me))
         {
-            if(CreatureAI *pHelperAI = pHelper->AI())
-                pHelperAI->DoAction(ACTION_FIGHT_BEGIN);
+            if(pHelper->AI())
+                pHelper->AI()->DoAction(ACTION_FIGHT_BEGIN);
         }
         
         switch(me->GetEntry())
@@ -994,8 +994,6 @@ public:
                     break;
                 }
             }
-
-            DoMeleeAttackIfReady();
         }
 
         void MovementInform(uint32 uiMotionType, uint32 uiMotionPointId)
@@ -1453,13 +1451,13 @@ public:
         mob_garajal_AI(Creature *pCreature) : 
             ScriptedAI(pCreature), pInstance(pCreature->GetInstanceScript())
         {
+            SetCombatMovement(false);
             events.Reset();
         }
         
         void Reset()
         {
             me->SetVisible(true);
-            DoCast(me, SPELL_GARAJAL_GHOST);
             events.Reset();
         }
         

@@ -933,13 +933,12 @@ public:
             if (!player->HasSpellCooldown(SPELL_MONK_POWER_STRIKES_TALENT))
             {
                 if (player->GetPower(POWER_CHI) < player->GetMaxPower(POWER_CHI))
-                {
                     player->EnergizeBySpell(player, GetSpellInfo()->Id, 1, POWER_CHI);
-                    player->AddSpellCooldown(SPELL_MONK_POWER_STRIKES_TALENT, 0, 20 * IN_MILLISECONDS);
-                    player->RemoveAurasDueToSpell(SPELL_MONK_POWER_STRIKES_BUFF);
-                }
                 else
                     player->CastSpell(player, SPELL_MONK_CREATE_CHI_SPHERE, true);
+
+                player->AddSpellCooldown(SPELL_MONK_POWER_STRIKES_TALENT, 0, 20 * IN_MILLISECONDS);
+                player->RemoveAurasDueToSpell(SPELL_MONK_POWER_STRIKES_BUFF);
             }
         }
 

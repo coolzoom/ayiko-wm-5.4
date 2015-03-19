@@ -2371,7 +2371,7 @@ TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropert
         if (_summonsInTimePeriod > sWorld->getIntConfig(CONFIG_SUMMONALERT_COUNT))
         {
             std::string name = summoner ? summoner->GetName().c_str() : "no summoner";
-            TC_LOG_ERROR("misc", "Mass spawning going on in map %u, Last creature entry spawned %u by %s [Guid %u]", GetId(), entry, name.c_str(), summoner ? summoner->GetGUIDLow() : 0);
+            TC_LOG_ERROR("misc", "Mass spawning going on in map %u (instId %u), Last creature entry spawned %u by %s [Guid %u]", GetId(), GetInstanceId(), entry, name.c_str(), summoner ? summoner->GetGUIDLow() : 0);
         }
     }
 

@@ -5403,15 +5403,16 @@ void Unit::SendSpellNonMeleeDamageLog(Unit* target, uint32 SpellID, uint32 Damag
     SendSpellNonMeleeDamageLog(&log);
 }
 
-void Unit::ProcDamageAndSpell(Unit* victim, uint32 procAttacker, uint32 procVictim, uint32 procExtra, uint32 amount, uint32 absorb, WeaponAttackType attType, SpellInfo const* procSpell, SpellInfo const* procAura)
+void Unit::ProcDamageAndSpell(Unit* victim, uint32 procAttacker, uint32 procVictim, uint32 procExtra, uint32 amount
+    , uint32 absorb, WeaponAttackType attType, SpellInfo const* procSpell, SpellInfo const* procAura, bool procSpellIsHeal)
 {
      // Not much to do if no flags are set.
     if (procAttacker)
-        ProcDamageAndSpellFor(false, victim, procAttacker, procExtra, attType, procSpell, amount, absorb, procAura);
+        ProcDamageAndSpellFor(false, victim, procAttacker, procExtra, attType, procSpell, amount, absorb, procAura, procSpellIsHeal);
     // Now go on with a victim's events'n'auras
     // Not much to do if no flags are set or there is no victim
     if (victim && victim->IsAlive() && procVictim)
-        victim->ProcDamageAndSpellFor(true, this, procVictim, procExtra, attType, procSpell, amount, absorb, procAura);
+        victim->ProcDamageAndSpellFor(true, this, procVictim, procExtra, attType, procSpell, amount, absorb, procAura, procSpellIsHeal);
 }
 
 void Unit::SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo)
@@ -9049,7 +9050,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura *triggeredByAura, Sp
     return true;
 }
 
-bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *triggeredByAura, SpellInfo const* procSpell, uint32 procFlags, uint32 procEx, uint32 cooldown)
+bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *triggeredByAura, SpellInfo const* procSpell, uint32 procFlags, uint32 procEx, uint32 cooldown, bool procSpellIsHeal)
 {
     // Get triggered aura spell info
     SpellInfo const* auraSpellInfo = triggeredByAura->GetSpellInfo();
@@ -9510,13 +9511,10 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
         }
         case 108945:// Angelic Bulwark
         {
-            if (GetTypeId() != TYPEID_PLAYER)
+            if (GetTypeId() != TYPEID_PLAYER || procSpellIsHeal)
                 return false;
 
-            if (!damage)
-                return false;
-
-            if ((GetHealth() - damage) >= CountPctFromMaxHealth(30))
+            if (!HealthBelowPctDamaged(triggerAmount, damage))
                 return false;
 
             basepoints0 = int32(CountPctFromMaxHealth(20));
@@ -16419,7 +16417,8 @@ uint32 createProcExtendMask(SpellNonMeleeDamage* damageInfo, SpellMissInfo missC
     return procEx;
 }
 
-void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, uint32 procExtra, WeaponAttackType attType, SpellInfo const* procSpell, uint32 damage, uint32 absorb, SpellInfo const* procAura)
+void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, uint32 procExtra, WeaponAttackType attType
+    , SpellInfo const* procSpell, uint32 damage, uint32 absorb, SpellInfo const* procAura, bool procSpellIsHeal)
 {
     // Player is loaded now - do not allow passive spell casts to proc
     if (GetTypeId() == TYPEID_PLAYER && ToPlayer()->GetSession()->PlayerLoading())
@@ -16717,7 +16716,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
                     case SPELL_AURA_PROC_TRIGGER_SPELL_2:
                     {
                         // Don`t drop charge or add cooldown for not started trigger
-                        if (HandleProcTriggerSpell(target, damage, triggeredByAura, procSpell, procFlag, procExtra, cooldown))
+                        if (HandleProcTriggerSpell(target, damage, triggeredByAura, procSpell, procFlag, procExtra, cooldown, procSpellIsHeal))
                             takeCharges = true;
                         break;
                     }
@@ -18744,7 +18743,7 @@ Aura* Unit::AddAuraForTarget(Aura* aura, Unit* target)
         newAura->SetDuration(aura->GetDuration());
         for (int i = 0; i < MAX_SPELL_EFFECTS; ++i)
             if (aura->GetEffectMask() & (1 << i) && newAura->GetEffectMask() & (1 << i))
-                newAura->GetEffect(i)->SetAmount(aura->GetEffect(i)->GetAmount());
+                newAura->GetEffect(i)->GetFixedDamageInfo().SetFixedDamage(aura->GetEffect(i)->GetFixedDamageInfo().GetFixedDamage());
 
         return newAura;
     }

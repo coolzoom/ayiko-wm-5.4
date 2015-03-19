@@ -2466,28 +2466,6 @@ void Spell::AddUnitTarget(Unit* target, uint32 effectMask, bool checkIfValid /*=
             targetInfo.timeDelay = 100LL;
             m_delayMoment = 100LL;
         }
-        if (m_spellInfo->IsPositive() && (!IsTriggered() || m_spellInfo->SpellIconID == 156) && m_spellInfo->Targets != 0x40 && m_spellInfo->Id != 64382)
-        {
-            switch (m_spellInfo->Effects[0].Effect)
-            {
-                case SPELL_EFFECT_SCHOOL_DAMAGE:
-                case SPELL_EFFECT_APPLY_AURA:
-                case SPELL_EFFECT_POWER_BURN:
-                case SPELL_EFFECT_DISPEL:
-                {
-                    targetInfo.timeDelay = 100LL;
-                    m_delayMoment = 100LL;
-                }
-                default:
-                    break;
-            }
-            // Shadowstep
-            if (m_spellInfo->Id == 36563)
-            {
-                targetInfo.timeDelay = 100LL;
-                m_delayMoment = 100LL;
-            }
-        }
         else if (m_spellInfo->Id == 24259) // Spell Lock - Silenced
         {
             targetInfo.timeDelay = 100LL;
@@ -2859,7 +2837,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 
         // Do triggers for unit (reflect triggers passed on hit phase for correct drop charge)
         if (canEffectTrigger && missInfo != SPELL_MISS_REFLECT)
-            caster->ProcDamageAndSpell(unitTarget, procAttacker, procVictim, procEx, addhealth, 0, m_attackType, m_spellInfo, m_triggeredByAuraSpell);
+            caster->ProcDamageAndSpell(unitTarget, procAttacker, procVictim, procEx, addhealth, 0, m_attackType, m_spellInfo, m_triggeredByAuraSpell, true);
     }
     // Do damage and triggers
     else if (m_damage > 0)

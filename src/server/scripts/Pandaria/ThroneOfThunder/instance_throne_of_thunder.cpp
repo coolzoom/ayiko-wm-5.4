@@ -140,7 +140,7 @@ public:
 
         bool SetBossState(uint32 uiId, EncounterState eState)
         {
-            if (!InstanceScript::SetBossState(uiId, eState))
+            if (!InstanceScript::SetBossState(uiId, eState) || uiId >= MAX_DATA)
                 return false;
 
             switch (uiId)
@@ -219,7 +219,7 @@ public:
             return 0;
         }
 
-        uint64 GetData64(uint32 uiType) const
+        uint64 GetData64(uint32 uiType) override
         {
             switch (uiType)
             {
@@ -247,7 +247,10 @@ public:
                 {
                     EntryGuidMap::const_iterator find = m_mNpcGuidStorage.find(uiType);
                     if (find != m_mNpcGuidStorage.cend())
+                    {
+                        TC_LOG_ERROR("scripts", "GetData64 requested Creature Data for uiType %u, returned guid %u", uiType, find->second);
                         return find->second;
+                    }
                     return 0;
                 }
                 case NPC_HORRIDON_EVENT_HELPER:

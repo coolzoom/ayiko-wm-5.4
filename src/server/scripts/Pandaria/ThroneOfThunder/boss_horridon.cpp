@@ -984,7 +984,7 @@ public:
                     case EVENT_CHECK_PLAYERS:
                     {
                         std::list<Player*> playerList;
-                        me->GetPlayerListInGrid(playerList, 25.0f);
+                        GetPlayerListInGrid(playerList, me, 25.f);
 
                         if (playerList.empty())
                         {

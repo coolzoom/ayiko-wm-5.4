@@ -6067,6 +6067,8 @@ SpellCastResult Spell::CheckRuneCost(uint32 runeCostID)
         if (runeCost[i] > 0)
             runeCost[RUNE_DEATH] += runeCost[i];
 
+    runeCost[RUNE_DEATH] += src->RuneCost[RUNE_DEATH];
+
     if (runeCost[RUNE_DEATH] > MAX_RUNES)
         return SPELL_FAILED_NO_POWER;                       // not sure if result code is correct
 
@@ -6125,6 +6127,8 @@ void Spell::TakeRunePower(bool didHit)
     }
 
     runeCost[RUNE_DEATH] = runeCost[RUNE_BLOOD] + runeCost[RUNE_UNHOLY] + runeCost[RUNE_FROST];
+    if (!runeCost[RUNE_DEATH])
+        runeCost[RUNE_DEATH] = runeCostData->RuneCost[RUNE_DEATH];
 
     if (runeCost[RUNE_DEATH] > 0)
     {

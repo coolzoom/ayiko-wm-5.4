@@ -1845,32 +1845,32 @@ public:
     {
         PrepareAuraScript(script_impl);
 
-        uint32 damageTaken;
-
-        bool Load()
+        void HandleProc(ProcEventInfo& eventInfo)
         {
-            damageTaken = 0;
-            return true;
+            Unit* caster = GetCaster();
+            if (!caster || !eventInfo.GetDamageInfo())
+                return;
+
+            uint32 damage = eventInfo.GetDamageInfo()->GetDamage();
+            if (!damage || eventInfo.GetActionTarget()->IsFriendlyTo(eventInfo.GetActor()))
+                return;
+
+            uint32 damagePercent = GetSpellInfo()->Effects[EFFECT_0].CalcValue(caster);
+            int32 amount = (int32)CalculatePct(damage, damagePercent);
+
+            SpellInfo const* hot = sSpellMgr->GetSpellInfo(115611);
+            amount += caster->GetRemainingPeriodicAmount(caster->GetGUID(), 115611, SPELL_AURA_PERIODIC_HEAL).total();
+            amount /= hot->GetMaxTicks();
+            // Temporary hack for wrong bp per level implementation?
+            amount -= caster->getLevel() - 1;
+
+            caster->CastCustomSpell(115611, SPELLVALUE_BASE_POINT0, amount, caster, true);
+            PreventDefaultAction();
         }
 
-        void OnProc(AuraEffect const * /*aurEff*/, ProcEventInfo& eventInfo)
+        void Register() override
         {
-            damageTaken += eventInfo.GetDamageInfo()->GetDamage();
-        }
-
-        void AfterRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
-        {
-            if (damageTaken)
-            {
-                int32 bp = damageTaken / 3;
-                GetTarget()->CastCustomSpell(GetTarget(), 115611, &bp, NULL, NULL, true);
-            }
-        }
-
-        void Register()
-        {
-            OnEffectProc += AuraEffectProcFn(script_impl::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
-            AfterEffectRemove += AuraEffectRemoveFn(script_impl::AfterRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            OnProc += AuraProcFn(script_impl::HandleProc);
         }
     };
 

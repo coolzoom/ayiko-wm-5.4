@@ -4095,7 +4095,8 @@ void Spell::SendSpellCooldown()
     }
 
     // have infinity cooldown but set at aura apply                  // do not set cooldown for triggered spells (needed by reincarnation)
-    if (m_spellInfo->Attributes & (SPELL_ATTR0_DISABLED_WHILE_ACTIVE | SPELL_ATTR0_PASSIVE) || (_triggeredCastFlags & TRIGGERED_IGNORE_SPELL_AND_CATEGORY_CD))
+    if (m_spellInfo->Attributes & (SPELL_ATTR0_DISABLED_WHILE_ACTIVE | SPELL_ATTR0_PASSIVE) 
+        || (_triggeredCastFlags & TRIGGERED_IGNORE_SPELL_AND_CATEGORY_CD) && !(m_spellInfo->AttributesEx4 & SPELL_ATTR4_TRIGGERED))
         return;
 
     if (m_caster->HasAuraTypeWithAffectMask(SPELL_AURA_ALLOW_CAST_WHILE_IN_COOLDOWN, m_spellInfo))
@@ -6067,6 +6068,8 @@ SpellCastResult Spell::CheckRuneCost(uint32 runeCostID)
         if (runeCost[i] > 0)
             runeCost[RUNE_DEATH] += runeCost[i];
 
+    runeCost[RUNE_DEATH] += src->RuneCost[RUNE_DEATH];
+
     if (runeCost[RUNE_DEATH] > MAX_RUNES)
         return SPELL_FAILED_NO_POWER;                       // not sure if result code is correct
 
@@ -6125,6 +6128,8 @@ void Spell::TakeRunePower(bool didHit)
     }
 
     runeCost[RUNE_DEATH] = runeCost[RUNE_BLOOD] + runeCost[RUNE_UNHOLY] + runeCost[RUNE_FROST];
+    if (!runeCost[RUNE_DEATH])
+        runeCost[RUNE_DEATH] = runeCostData->RuneCost[RUNE_DEATH];
 
     if (runeCost[RUNE_DEATH] > 0)
     {
@@ -6355,7 +6360,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 return SPELL_FAILED_SPELL_IN_PROGRESS;
         }
 
-        if (player->HasSpellCooldown(m_spellInfo->Id) && !player->HasAuraTypeWithAffectMask(SPELL_AURA_ALLOW_CAST_WHILE_IN_COOLDOWN, m_spellInfo) && !(_triggeredCastFlags & TRIGGERED_IGNORE_CURRENT_COOLDOWN))
+        if (player->HasSpellCooldown(m_spellInfo->Id) && !player->HasAuraTypeWithAffectMask(SPELL_AURA_ALLOW_CAST_WHILE_IN_COOLDOWN, m_spellInfo))
         {
             if (m_triggeredByAuraSpell)
                 return SPELL_FAILED_DONT_REPORT;

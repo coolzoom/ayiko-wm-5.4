@@ -1,0 +1,1 @@
+UPDATE `creature` SET spawnMask=1 WHERE id=6491 AND map=1064;

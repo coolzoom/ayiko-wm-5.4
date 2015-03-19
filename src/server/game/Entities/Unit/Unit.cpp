@@ -7342,18 +7342,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
         {
             switch (dummySpell->SpellIconID)
             {
-                case 76659: // Mastery: Wild Quiver
-                {
-                    if (effIndex != EFFECT_0 || !roll_chance_i(triggerAmount))
-                        return false;
-
-                    // Don't let it proc from itself
-                    if (procSpell && procSpell->Id == 76663)
-                        return false;
-
-                    triggered_spell_id = 76663;
-                    break;
-                }
                 // Improved Steady Shot
                 case 3409:
                 {
@@ -7416,6 +7404,25 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
 
             switch (dummySpell->Id)
             {
+                case 76659: // Mastery: Wild Quiver
+                {
+                    if (effIndex != EFFECT_0)
+                        return false;
+
+                    uint32 chance = triggerAmount;
+                    if (procSpell && procSpell->Id == 120361)
+                        chance /= 6;
+
+                    if (!roll_chance_i(chance))
+                        return false;
+
+                    // Don't let it proc from itself
+                    if (procSpell && procSpell->Id == 76663)
+                        return false;
+
+                    triggered_spell_id = 76663;
+                    break;
+                }
                 case 82661: // Aspect of the Fox
                 {
                     EnergizeBySpell(this, 82661, 2, POWER_FOCUS);

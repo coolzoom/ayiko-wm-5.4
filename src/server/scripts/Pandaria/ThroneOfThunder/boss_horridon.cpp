@@ -246,16 +246,16 @@ enum eMotions
 
 enum eTalks
 {
-    TALK_ENTER_PHASE_2                      = 0, // Hahaha, now it be my turn
-    TALK_ON_HORRIDON_KILLED_UNIT            = 1, // Da'kala koraste
-    TALK_INTRO_FIRST                        = 2, // Welcome weaklings
-    TALK_INTRO_SECOND                       = 3, // The tribes have assembled
-    TALK_INTRO_THIRD                        = 4, // Now, witness the true might
-    TALK_ON_JALAK_KILLED_UNIT               = 5, // Ya skull
-    TALK_DRAKKARI                           = 6, // Drakkari tribe
-    TALK_GURUBASHI                          = 7,
-    TALK_FARRAKI                            = 8,
-    TALK_AMANI                              = 9,
+    TALK_INTRO_FIRST                        = 0, // Welcome weaklings
+    TALK_INTRO_SECOND                       = 1, // The tribes have assembled
+    TALK_INTRO_THIRD                        = 2, // Now, witness the true might
+    TALK_ENTER_PHASE_2                      = 3, // Hahaha, now it be my turn
+    TALK_DRAKKARI                           = 4, // Drakkari tribe
+    TALK_GURUBASHI                          = 5,
+    TALK_FARRAKI                            = 6,
+    TALK_AMANI                              = 7,
+    TALK_ON_JALAK_KILLED_UNIT               = 8, // Ya skull
+    TALK_ON_HORRIDON_KILLED_UNIT            = 9, // Da'kala koraste
 };
 
 enum eGameObjects
@@ -587,24 +587,479 @@ static Position GetChargePositionByDoor(GameObject *pDoor)
     }
 }
 
-// Horridon AI
-class boss_horridon : public CreatureScript
+// Helper AI
+class npc_horridon_event_helper : public CreatureScript
 {
 public:
-    boss_horridon() : CreatureScript("boss_horridon") { }
+    npc_horridon_event_helper() : CreatureScript("npc_horridon_event_helper") { }
 
-    struct boss_horridon_AI : public BossAI
+    class npc_horridon_event_helper_AI : public ScriptedAI
     {
-        boss_horridon_AI(Creature *pCreature) : BossAI(pCreature, DATA_HORRIDON), bJalakCalled(false)
+    public:
+        npc_horridon_event_helper_AI(Creature *pCreature) : ScriptedAI(pCreature)
         {
-            pChargeDoor = NULL;
+            events.Reset();
+            summons.clear();
+            jumpers.clear();
+
+            uiTrashPhase    = MAX_TRASH_PHASE;
+            uiMinorTrashId  = 0;
+            memset(&uiMediumTrashId, 0, sizeof(uiMediumTrashId));
+            uiMajorTrashId  = 0;
+            uiMajorCycle    = MAJOR_CYCLE_FIRST;
+            uiDrakkariCycle = DRAKKARI_CYCLE_FIRST;
+
+            summonPositions = NULL;
+            jumpPositions   = NULL;
+        }
+
+        void DoAction(int32 iAction)
+        {
+            switch (iAction)
+            {
+            case ACTION_FIGHT_BEGIN:
+                FightBegin();
+                break;
+
+            case ACTION_ENTER_NEXT_TRASH_PHASE:
+                EnterNextPhase();
+                break;
+
+            case ACTION_FIGHT_RESET:
+                FightReset();
+                break;
+
+            case ACTION_FIGHT_END:
+                FightEnd();
+                break;
+
+            case ACTION_PREPARE_TRANSITION:
+                PrepareTransition();
+                break;
+
+            default:
+                break;
+            }
+        }
+
+        void UpdateAI(uint32 uiDiff)
+        {
+            if (uiTrashPhase == MAX_TRASH_PHASE)
+                return;
+
+            events.Update(uiDiff);
+
+            while (uint32 uiEventId = events.ExecuteEvent())
+            {
+                switch (uiEventId)
+                {
+                case EVENT_SUMMON_MINOR:
+                    if (summonPositions)
+                    {
+                        std::list<uint32> entries;
+
+                        if (uiMinorTrashId)
+                            entries.push_back(uiMinorTrashId);
+                        if (uiMediumTrashId[0])
+                            entries.push_back(uiMediumTrashId[0]);
+                        if (uiMediumTrashId[1])
+                            entries.push_back(uiMediumTrashId[1]);
+
+                        if (entries.empty()) // Entries is empty, no need to reschedule event
+                            break;
+
+                        for (uint8 i = 0; i < MAX_SUMMON_POSITIONS_BY_PHASE; ++i)
+                        {
+                            uint32 uiSummonEntry = Trinity::Containers::SelectRandomContainerElement(entries);
+                            me->SummonCreature(uiSummonEntry, summonPositions[urand(0, MAX_SUMMON_POSITIONS_BY_PHASE - 1)]);
+                        }
+
+                        if (GameObject *pDoor = GetDoorByPhase((eTrashPhases)uiTrashPhase, me))
+                            pDoor->Use(me);
+
+                        events.ScheduleEvent(EVENT_SUMMON_MINOR, urand(10, 20) * IN_MILLISECONDS);
+                    }
+                    break;
+
+                case EVENT_SUMMON_MAJOR:
+                    if (jumpPositions)
+                    {
+                        std::list<Creature*> majors;
+                        GetCreatureListWithEntryInGrid(majors, me, uiMajorTrashId, 50000.0f);
+
+                        if (!majors.empty())
+                        {
+                            if (uiMajorCycle == MAJOR_CYCLE_FIRST)
+                            {
+                                if (Creature *pCreature = Trinity::Containers::SelectRandomContainerElement(majors))
+                                {
+                                    pCreature->GetMotionMaster()->MoveJump(jumpPositions[urand(0, MAX_JUMP_POSITIONS_BY_PHASE - 1)], 20.0f, 42.0f, MOTION_MAJOR_JUMP);
+                                    jumpers.push_back(pCreature);
+                                }
+                            }
+                            else
+                            {
+                                for (Creature *pCreature : majors)
+                                {
+                                    if (!pCreature->IsInCombat())
+                                    {
+                                        pCreature->GetMotionMaster()->MoveJump(jumpPositions[urand(0, MAX_JUMP_POSITIONS_BY_PHASE - 1)], 20.0f, 42.0f, MOTION_MAJOR_JUMP);
+                                        jumpers.push_back(pCreature);
+                                    }
+                                }
+                            }
+                        }
+
+                        ++uiMajorCycle;
+                        events.ScheduleEvent(EVENT_SUMMON_MAJOR, 20 * IN_MILLISECONDS);
+                    }
+                    break;
+
+                case EVENT_SUMMON_ZANDALARI_DINOMANCER:
+                {
+                    Position const summonPosition = zandalariDinomancersSummonPositions[urand(0, 9)];
+                    if (Creature *pDinomancer = me->SummonCreature(MOB_ZANDALARI_DINOMANCER, summonPosition))
+                        pDinomancer->GetMotionMaster()->MoveJump(zandalariDinomancersJumpPositions[uiTrashPhase][urand(0, MAX_SUMMON_POSITIONS_BY_PHASE - 1)], 20.0f, 42.0f, MOTION_DINOMANCER_JUMP);
+                    events.ScheduleEvent(EVENT_SUMMON_ZANDALARI_DINOMANCER, MINUTE * IN_MILLISECONDS);
+                    break;
+                }
+
+                case EVENT_SUMMON_MINOR_DRAKKARI:
+                {
+                    switch (uiDrakkariCycle)
+                    {
+                    case DRAKKARI_CYCLE_FIRST:
+                        uiDrakkariCycle = DRAKKARI_CYCLE_SECOND;
+                        if (summonPositions)
+                        {
+                            me->SummonCreature(MOB_RISEN_DRAKKARI_CHAMPION, summonPositions[urand(0, MAX_SUMMON_POSITIONS_BY_PHASE - 1)]);
+                            me->SummonCreature(MOB_RISEN_DRAKKARI_WARRIOR, summonPositions[urand(0, MAX_SUMMON_POSITIONS_BY_PHASE - 1)]);
+                            events.ScheduleEvent(EVENT_SUMMON_MINOR_DRAKKARI, urand(6, 10) * IN_MILLISECONDS);
+                        }
+                        break;
+
+                    case DRAKKARI_CYCLE_SECOND:
+                        uiDrakkariCycle = DRAKKARI_CYCLE_FIRST;
+                        if (summonPositions)
+                        {
+                            me->SummonCreature(MOB_RISEN_DRAKKARI_CHAMPION, summonPositions[urand(0, MAX_SUMMON_POSITIONS_BY_PHASE - 1)]);
+                            events.ScheduleEvent(EVENT_SUMMON_MINOR_DRAKKARI, urand(8, 15) * IN_MILLISECONDS);
+                        }
+                        break;
+                    }
+
+                    if (GameObject *pDoor = GetDoorByPhase((eTrashPhases)uiTrashPhase, me))
+                        pDoor->Use(me);
+                    break;
+                }
+
+                case EVENT_TRANSITION:
+                    EnterNextPhase();
+                    break;
+
+                default:
+                    break;
+                }
+            }
+        }
+
+        void JustSummoned(Creature *pSummoned)
+        {
+            summons.push_back(pSummoned);
+        }
+
+        void SummonedCreatureDespawn(Creature *pSummoned)
+        {
+            summons.remove(pSummoned);
+        }
+
+        eTrashPhases GetTrashPhase() const
+        {
+            return (eTrashPhases)uiTrashPhase;
+        }
+
+    private:
+        EventMap                events;
+        const Position*         summonPositions;
+        const Position*         jumpPositions;
+        std::list<Creature*>    summons;
+        std::list<Creature*>    jumpers;
+        uint32                  uiTrashPhase;
+        uint32                  uiMinorTrashId;
+        uint32                  uiMediumTrashId[2];
+        uint32                  uiMajorTrashId;
+        uint32                  uiMajorCycle;
+        uint32                  uiDrakkariCycle;
+
+        void FightReset()
+        {
+            // Be sure that we have not already reset
+            if (uiTrashPhase == MAX_TRASH_PHASE && summonPositions == NULL && jumpPositions == NULL)
+                return;
+
+            // Respawn dead jumpers
+            for (Creature *pCreatureIter : jumpers)
+            {
+                if (pCreatureIter->isDead())
+                {
+                    pCreatureIter->Respawn();
+                    if (pCreatureIter->AI())
+                        pCreatureIter->AI()->EnterEvadeMode();
+                }
+
+                // Creature will automatically reset because it is registered in DB; no need to make them
+                // return to home position or Reset() them.
+            }
+
+            // Boss reset by themselves, but won't revive if dead
+            if (Creature *pHorridon = GetHorridon(me))
+            {
+                if (pHorridon->isDead())
+                    pHorridon->Respawn();
+            }
+
+            if (Creature *pWarGodJalak = GetJalak(me))
+            {
+                if (pWarGodJalak->isDead())
+                {
+                    pWarGodJalak->Respawn();
+                    pWarGodJalak->AI()->EnterEvadeMode();
+                }
+            }
+
+            events.Reset();
+            summons.clear();
+            jumpers.clear();
+
+            uiTrashPhase    = MAX_TRASH_PHASE;
+            uiMinorTrashId  = 0;
+            memset(&uiMediumTrashId, 0, sizeof(uiMediumTrashId));
+            uiMajorTrashId  = 0;
+            uiMajorCycle    = MAJOR_CYCLE_FIRST;
+            uiDrakkariCycle = DRAKKARI_CYCLE_FIRST;
+
+            summonPositions = NULL;
+            jumpPositions   = NULL;
+        }
+
+        void FightBegin()
+        {
+            uiTrashPhase        = TRASH_PHASE_FARRAKI;
+            uiMinorTrashId      = MOB_SUL_LITHUZ_STONEGAZER;
+            uiMediumTrashId[0]  = MOB_FARRAKI_SKIRMISHER;
+            uiMediumTrashId[1]  = 0;
+            uiMajorTrashId      = MOB_FARRAKI_WASTEWALKER;
+            summonPositions     = farrakiTrashSummonPositions;
+            jumpPositions       = farrakiWastewalkerJumpPositions;
+
+            if (Creature *pJalak = GetJalak(me))
+                pJalak->AI()->Talk(TALK_FARRAKI);
+
+            events.ScheduleEvent(EVENT_SUMMON_MINOR, 5 * IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_SUMMON_MAJOR, 20 * IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_SUMMON_ZANDALARI_DINOMANCER, MINUTE * IN_MILLISECONDS);
+        }
+
+        void FightEnd()
+        {
+            summons.clear();
+            jumpers.clear();
+            events.Reset();
+
+            uiTrashPhase = MAX_TRASH_PHASE;
+        }
+
+        void EnterNextPhase()
+        {
+            uiMajorCycle    = MAJOR_CYCLE_FIRST;
+            uiDrakkariCycle = DRAKKARI_CYCLE_FIRST;
+
+            ++uiTrashPhase;
+            if (Creature *pJalak = GetJalak(me))
+            {
+                switch (uiTrashPhase)
+                {
+                case TRASH_PHASE_FARRAKI:
+                    break;
+
+                case TRASH_PHASE_GURUBASHI:
+                    uiMinorTrashId      = MOB_GURUBASHI_BLOODLORD;
+                    uiMajorTrashId      = MOB_GURUBASHI_VENOM_PRIEST;
+                    memset(&uiMediumTrashId, 0, sizeof(uiMediumTrashId));
+                    summonPositions     = gurubashiTrashSummonPositions;
+                    jumpPositions       = gurubashiVenomPriestJumpPositions;
+                    pJalak->AI()->Talk(TALK_GURUBASHI);
+                    break;
+
+                case TRASH_PHASE_DRAKKARI:
+                    uiMajorTrashId      = MOB_DRAKKARI_FROZEN_WARLORD;
+                    summonPositions     = drakkariTrashSummonPositions;
+                    jumpPositions       = drakkariFrozenWarlordJumpPositions;
+                    pJalak->AI()->Talk(TALK_DRAKKARI);
+                    break;
+
+                case TRASH_PHASE_AMANI:
+                    uiMinorTrashId      = MOB_AMANI_SHI_PROTECTOR;
+                    uiMediumTrashId[0]  = MOB_AMANI_SHI_FLAME_CASTER;
+                    uiMediumTrashId[1]  = 0;
+                    uiMajorTrashId      = MOB_AMANI_WARBEAR;
+                    summonPositions     = amaniTrashSummonPositions;
+                    jumpPositions       = amaniWarbearJumpPositions;
+                    pJalak->AI()->Talk(TALK_AMANI);
+                    break;
+
+                case MAX_TRASH_PHASE:
+                    if (Creature *pJalak = GetJalak(me))
+                        pJalak->AI()->DoAction(ACTION_ENTER_PHASE_TWO);
+                    return;
+
+                default:
+                    return;
+                }
+
+                events.Reset();
+
+
+                if (uiTrashPhase != TRASH_PHASE_DRAKKARI)
+                {
+                    events.ScheduleEvent(EVENT_SUMMON_MINOR, 5 * IN_MILLISECONDS);
+                }
+                else
+                {
+                    events.ScheduleEvent(EVENT_SUMMON_MINOR_DRAKKARI, 5 * IN_MILLISECONDS);
+                }
+
+                events.ScheduleEvent(EVENT_SUMMON_MAJOR, 20 * IN_MILLISECONDS);
+                events.ScheduleEvent(EVENT_SUMMON_ZANDALARI_DINOMANCER, 30 * IN_MILLISECONDS);
+            }
+        }
+
+        void PrepareTransition()
+        {
+            events.Reset();
+            events.ScheduleEvent(EVENT_TRANSITION, 45 * IN_MILLISECONDS);
+        }
+    };
+
+    CreatureAI *GetAI(Creature *pCreature) const
+    {
+        return new npc_horridon_event_helper_AI(pCreature);
+    }
+};
+typedef npc_horridon_event_helper::npc_horridon_event_helper_AI HorridonHelperAI;
+
+// RP Event Helper AI
+class npc_horridon_rp_event_helper : public CreatureScript
+{
+public:
+    npc_horridon_rp_event_helper() : CreatureScript("npc_horridon_rp_event_helper") { }
+
+    class npc_horridon_rp_event_helper_AI : public ScriptedAI
+    {
+    public:
+        npc_horridon_rp_event_helper_AI(Creature *pCreature) :
+            ScriptedAI(pCreature), bIntroDone(false)
+        {
             events.Reset();
         }
 
         void Reset()
         {
-            instance->SetBossState(DATA_HORRIDON, NOT_STARTED);
+            bIntroDone = false;
+            events.Reset();
+            events.ScheduleEvent(EVENT_CHECK_PLAYERS, 500);
+        }
 
+        void UpdateAI(uint32 uiDiff)
+        {
+            if (bIntroDone)
+                return;
+
+            events.Update(uiDiff);
+
+            while (uint32 uiEventId = events.ExecuteEvent())
+            {
+                switch (uiEventId)
+                {
+                    case EVENT_CHECK_PLAYERS:
+                    {
+                        std::list<Player*> playerList;
+                        me->GetPlayerListInGrid(playerList, 25.0f);
+
+                        if (playerList.empty())
+                        {
+                            events.ScheduleEvent(EVENT_CHECK_PLAYERS, 500);
+                        }
+                        else
+                        {
+                            events.ScheduleEvent(EVENT_INTRO_PART_I, 1000);
+                            events.ScheduleEvent(EVENT_INTRO_PART_II, 7500);
+                            events.ScheduleEvent(EVENT_INTRO_PART_III, 27500);
+                            events.ScheduleEvent(EVENT_INTRO_PART_IV, 29500);
+                        }
+
+                        break;
+                    }
+
+                    case EVENT_INTRO_PART_I:
+                        if (Creature *pJalak = GetJalak(me))
+                            pJalak->AI()->Talk(TALK_INTRO_FIRST);
+                        break;
+
+                    case EVENT_INTRO_PART_II:
+                        if (Creature *pJalak = GetJalak(me))
+                            pJalak->AI()->Talk(TALK_INTRO_SECOND);
+                        break;
+
+                    case EVENT_INTRO_PART_III:
+                        if (Creature *pJalak = GetJalak(me))
+                            pJalak->AI()->Talk(TALK_INTRO_THIRD);
+
+                        // Horridon should break door?
+                        if (GameObject *pDoor = me->FindNearestGameObject(GOB_HORRIDON_PRISON_DOOR, 50000.0f))
+                            pDoor->SetGoState(GO_STATE_ACTIVE);
+                        break;
+
+                    case EVENT_INTRO_PART_IV:
+                        if (Creature *pHorridon = GetHorridon(me))
+                            pHorridon->AI()->DoAction(ACTION_INTRO);
+                        bIntroDone = true;
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+        }
+
+    private:
+        bool            bIntroDone;
+    };
+
+    CreatureAI *GetAI(Creature *pCreature) const
+    {
+        return new npc_horridon_rp_event_helper_AI(pCreature);
+    }
+};
+
+
+// Horridon AI
+class boss_horridon : public CreatureScript
+{
+public:
+    boss_horridon() : CreatureScript("boss_horridon") {}
+
+    struct boss_horridon_AI : public BossAI
+    {
+        boss_horridon_AI(Creature *pCreature) : BossAI(pCreature, DATA_HORRIDON), bJalakCalled(false)
+        {
+        }
+
+        GameObject      *pChargeDoor;
+        bool            bJalakCalled;
+
+        void Reset()
+        {      
             events.Reset();
             pChargeDoor = NULL;
             bJalakCalled = false;
@@ -612,6 +1067,9 @@ public:
             me->RemoveAurasDueToSpell(SPELL_HEADACHE);
             me->RemoveAurasDueToSpell(SPELL_CRACKED_SHELL);
             me->RemoveAurasDueToSpell(SPELL_RAMPAGE);
+            
+            instance->SetBossState(DATA_HORRIDON, NOT_STARTED);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
 
             if (Creature *pHorridonHelper = GetHorridonHelper(me))
             {
@@ -621,16 +1079,16 @@ public:
         }
 
         void EnterCombat(Unit *pVictim)
-        {
-            instance->SetBossState(DATA_HORRIDON, IN_PROGRESS);
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
-
+        {            
             events.ScheduleEvent(EVENT_TRIPLE_PUNCTURE, 10 * IN_MILLISECONDS);
             events.ScheduleEvent(EVENT_DOUBLE_SWIPE, 15 * IN_MILLISECONDS);
             events.ScheduleEvent(EVENT_HORRIDON_CHARGE, 13 * IN_MILLISECONDS);
 
             if (IsHeroic())
-                events.ScheduleEvent(EVENT_DIRE_CALL, 8 * IN_MILLISECONDS);
+                events.ScheduleEvent(EVENT_DIRE_CALL, 8 * IN_MILLISECONDS);   
+            
+            instance->SetBossState(DATA_HORRIDON, IN_PROGRESS);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
 
             if (Creature *pHorridonHelper = GetHorridonHelper(me))
             {
@@ -728,12 +1186,12 @@ public:
             {
                 switch (uiMovementId)
                 {
-                case EVENT_CHARGE:
-                    DoCastAOE(SPELL_DOUBLE_SWIPE);
-                    break;
+                    case EVENT_CHARGE:
+                        DoCastAOE(SPELL_DOUBLE_SWIPE);
+                        break;
 
-                default:
-                    break;
+                    default:
+                        break;
                 }
             }
         }
@@ -754,469 +1212,14 @@ public:
             me->GetMotionMaster()->MoveCharge(chargePosition.GetPositionX(), chargePosition.GetPositionY(), chargePosition.GetPositionZ(), 42.0f, MOTION_HORRIDON_DOOR_CHARGE);
             DoCast(me, SPELL_HEADACHE);
         }
-
-    private:
-        EventMap        events;
-        GameObject      *pChargeDoor;
-        bool            bJalakCalled;
     };
 
-    CreatureAI *GetAI(Creature *pCreature) const
+    CreatureAI* GetAI(Creature *pCreature) const
     {
         return new boss_horridon_AI(pCreature);
     }
 };
 typedef boss_horridon::boss_horridon_AI HorridonAI;
-
-// Helper AI
-class npc_horridon_event_helper : public CreatureScript
-{
-    public:
-        npc_horridon_event_helper() : CreatureScript("npc_horridon_event_helper") { }
-
-    struct npc_horridon_event_helper_AI : public ScriptedAI
-    {   
-            npc_horridon_event_helper_AI(Creature *pCreature) : ScriptedAI(pCreature)
-            {
-                events.Reset();
-                summons.clear();
-                jumpers.clear();
-
-                uiTrashPhase    = MAX_TRASH_PHASE;
-                uiMinorTrashId  = 0;
-                memset(&uiMediumTrashId, 0, sizeof(uiMediumTrashId));
-                uiMajorTrashId  = 0;
-                uiMajorCycle    = MAJOR_CYCLE_FIRST;
-                uiDrakkariCycle = DRAKKARI_CYCLE_FIRST;
-
-                summonPositions = NULL;
-                jumpPositions   = NULL;
-            }
-            
-            EventMap                events;
-            const Position*         summonPositions;
-            const Position*         jumpPositions;
-            std::list<Creature*>    summons;
-            std::list<Creature*>    jumpers;
-            uint32                  uiTrashPhase;
-            uint32                  uiMinorTrashId;
-            uint32                  uiMediumTrashId[2];
-            uint32                  uiMajorTrashId;
-            uint32                  uiMajorCycle;
-            uint32                  uiDrakkariCycle;
-
-            void DoAction(int32 iAction)
-            {
-                switch (iAction)
-                {
-                    case ACTION_FIGHT_BEGIN:
-                        FightBegin();
-                        break;
-
-                    case ACTION_ENTER_NEXT_TRASH_PHASE:
-                        EnterNextPhase();
-                        break;
-
-                    case ACTION_FIGHT_RESET:
-                        FightReset();
-                        break;
-
-                    case ACTION_FIGHT_END:
-                        FightEnd();
-                        break;
-
-                    case ACTION_PREPARE_TRANSITION:
-                        PrepareTransition();
-                        break;
-
-                    default:
-                        break;
-                }
-            }
-
-            void UpdateAI(uint32 uiDiff)
-            {
-                if (uiTrashPhase == MAX_TRASH_PHASE)
-                    return;
-
-                events.Update(uiDiff);
-
-                while (uint32 uiEventId = events.ExecuteEvent())
-                {
-                    switch (uiEventId)
-                    {
-                        case EVENT_SUMMON_MINOR:
-                            if (summonPositions)
-                            {
-                                std::list<uint32> entries;
-
-                                if (uiMinorTrashId)
-                                    entries.push_back(uiMinorTrashId);
-                                if (uiMediumTrashId[0])
-                                    entries.push_back(uiMediumTrashId[0]);
-                                if (uiMediumTrashId[1])
-                                    entries.push_back(uiMediumTrashId[1]);
-
-                                if (entries.empty()) // Entries is empty, no need to reschedule event
-                                    break;
-
-                                for (uint8 i = 0; i < MAX_SUMMON_POSITIONS_BY_PHASE; ++i)
-                                {
-                                    uint32 uiSummonEntry = Trinity::Containers::SelectRandomContainerElement(entries);
-                                    me->SummonCreature(uiSummonEntry, summonPositions[urand(0, MAX_SUMMON_POSITIONS_BY_PHASE - 1)]);
-                                }
-
-                                if (GameObject *pDoor = GetDoorByPhase((eTrashPhases)uiTrashPhase, me))
-                                    pDoor->Use(me);
-
-                                events.ScheduleEvent(EVENT_SUMMON_MINOR, urand(10, 20) * IN_MILLISECONDS);
-                            }
-                            break;
-
-                        case EVENT_SUMMON_MAJOR:
-                            if (jumpPositions)
-                            {
-                                std::list<Creature*> majors;
-                                GetCreatureListWithEntryInGrid(majors, me, uiMajorTrashId, 50000.0f);
-
-                                if (!majors.empty())
-                                {
-                                    if (uiMajorCycle == MAJOR_CYCLE_FIRST)
-                                    {
-                                        if (Creature *pCreature = Trinity::Containers::SelectRandomContainerElement(majors))
-                                        {
-                                            pCreature->GetMotionMaster()->MoveJump(jumpPositions[urand(0, MAX_JUMP_POSITIONS_BY_PHASE - 1)], 20.0f, 42.0f, MOTION_MAJOR_JUMP);
-                                            jumpers.push_back(pCreature);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        for (Creature *pCreature : majors)
-                                        {
-                                            if (!pCreature->IsInCombat())
-                                            {
-                                                pCreature->GetMotionMaster()->MoveJump(jumpPositions[urand(0, MAX_JUMP_POSITIONS_BY_PHASE - 1)], 20.0f, 42.0f, MOTION_MAJOR_JUMP);
-                                                jumpers.push_back(pCreature);
-                                            }
-                                        }
-                                    }
-                                }
-
-                                ++uiMajorCycle;
-                                events.ScheduleEvent(EVENT_SUMMON_MAJOR, 20 * IN_MILLISECONDS);
-                            }
-                            break;
-
-                        case EVENT_SUMMON_ZANDALARI_DINOMANCER:
-                        {
-                            Position const summonPosition = zandalariDinomancersSummonPositions[urand(0, 9)];
-                            if (Creature *pDinomancer = me->SummonCreature(MOB_ZANDALARI_DINOMANCER, summonPosition))
-                                pDinomancer->GetMotionMaster()->MoveJump(zandalariDinomancersJumpPositions[uiTrashPhase][urand(0, MAX_SUMMON_POSITIONS_BY_PHASE - 1)], 20.0f, 42.0f, MOTION_DINOMANCER_JUMP);
-                            events.ScheduleEvent(EVENT_SUMMON_ZANDALARI_DINOMANCER, MINUTE * IN_MILLISECONDS);
-                            break;
-                        }
-
-                        case EVENT_SUMMON_MINOR_DRAKKARI:
-                        {
-                            switch (uiDrakkariCycle)
-                            {
-                                case DRAKKARI_CYCLE_FIRST:
-                                    uiDrakkariCycle = DRAKKARI_CYCLE_SECOND;
-                                    if (summonPositions)
-                                    {
-                                        me->SummonCreature(MOB_RISEN_DRAKKARI_CHAMPION, summonPositions[urand(0, MAX_SUMMON_POSITIONS_BY_PHASE - 1)]);
-                                        me->SummonCreature(MOB_RISEN_DRAKKARI_WARRIOR, summonPositions[urand(0, MAX_SUMMON_POSITIONS_BY_PHASE - 1)]);
-                                        events.ScheduleEvent(EVENT_SUMMON_MINOR_DRAKKARI, urand(6, 10) * IN_MILLISECONDS);
-                                    }
-                                    break;
-
-                                case DRAKKARI_CYCLE_SECOND:
-                                    uiDrakkariCycle = DRAKKARI_CYCLE_FIRST;
-                                    if (summonPositions)
-                                    {
-                                        me->SummonCreature(MOB_RISEN_DRAKKARI_CHAMPION, summonPositions[urand(0, MAX_SUMMON_POSITIONS_BY_PHASE - 1)]);
-                                        events.ScheduleEvent(EVENT_SUMMON_MINOR_DRAKKARI, urand(8, 15) * IN_MILLISECONDS);
-                                    }
-                                    break;
-                                }
-
-                                if (GameObject *pDoor = GetDoorByPhase((eTrashPhases)uiTrashPhase, me))
-                                    pDoor->Use(me);
-                                break;
-                        }
-
-                        case EVENT_TRANSITION:
-                            EnterNextPhase();
-                            break;
-
-                        default:
-                            break;
-                    }
-                }
-            }
-
-            void JustSummoned(Creature *pSummoned)
-            {
-                summons.push_back(pSummoned);
-            }
-
-            void SummonedCreatureDespawn(Creature *pSummoned)
-            {
-                summons.remove(pSummoned);
-            }
-
-            eTrashPhases GetTrashPhase() const
-            {
-                return (eTrashPhases)uiTrashPhase;
-            }
-
-            void FightReset()
-            {
-                // Be sure that we have not already reset
-                if (uiTrashPhase == MAX_TRASH_PHASE && summonPositions == NULL && jumpPositions == NULL)
-                    return;
-
-                // Respawn dead jumpers
-                for (Creature *pCreatureIter : jumpers)
-                {
-                    if (pCreatureIter->isDead())
-                    {
-                        pCreatureIter->Respawn();
-                        if (pCreatureIter->AI())
-                            pCreatureIter->AI()->EnterEvadeMode();
-                    }
-                }
-
-                if (Creature *pHorridon = GetHorridon(me))
-                {
-                    if (pHorridon->isDead())
-                        pHorridon->Respawn();
-                }
-
-                if (Creature *pWarGodJalak = GetJalak(me))
-                {
-                    if (pWarGodJalak->isDead())
-                    {
-                        pWarGodJalak->Respawn();
-                        pWarGodJalak->AI()->EnterEvadeMode();
-                    }
-                }
-
-                events.Reset();
-                summons.clear();
-                jumpers.clear();
-
-                uiTrashPhase    = MAX_TRASH_PHASE;
-                uiMinorTrashId  = 0;
-                memset(&uiMediumTrashId, 0, sizeof(uiMediumTrashId));
-                uiMajorTrashId  = 0;
-                uiMajorCycle    = MAJOR_CYCLE_FIRST;
-                uiDrakkariCycle = DRAKKARI_CYCLE_FIRST;
-
-                summonPositions = NULL;
-                jumpPositions   = NULL;
-            }
-
-            void FightBegin()
-            {
-                uiTrashPhase        = TRASH_PHASE_FARRAKI;
-                uiMinorTrashId      = MOB_SUL_LITHUZ_STONEGAZER;
-                uiMediumTrashId[0]  = MOB_FARRAKI_SKIRMISHER;
-                uiMediumTrashId[1]  = 0;
-                uiMajorTrashId      = MOB_FARRAKI_WASTEWALKER;
-                summonPositions     = farrakiTrashSummonPositions;
-                jumpPositions       = farrakiWastewalkerJumpPositions;
-
-                if (Creature *pJalak = GetJalak(me))
-                    pJalak->AI()->Talk(TALK_FARRAKI);
-
-                events.ScheduleEvent(EVENT_SUMMON_MINOR, 5 * IN_MILLISECONDS);
-                events.ScheduleEvent(EVENT_SUMMON_MAJOR, 20 * IN_MILLISECONDS);
-                events.ScheduleEvent(EVENT_SUMMON_ZANDALARI_DINOMANCER, MINUTE * IN_MILLISECONDS);
-            }
-
-            void FightEnd()
-            {
-                summons.clear();
-                jumpers.clear();
-                events.Reset();
-
-                uiTrashPhase = MAX_TRASH_PHASE;
-            }
-
-            void EnterNextPhase()
-            {
-                uiMajorCycle    = MAJOR_CYCLE_FIRST;
-                uiDrakkariCycle = DRAKKARI_CYCLE_FIRST;
-
-                ++uiTrashPhase;
-                if (Creature *pJalak = GetJalak(me))
-                {
-                    switch (uiTrashPhase)
-                    {
-                        case TRASH_PHASE_FARRAKI:
-                            break;
-
-                        case TRASH_PHASE_GURUBASHI:
-                            uiMinorTrashId      = MOB_GURUBASHI_BLOODLORD;
-                            uiMajorTrashId      = MOB_GURUBASHI_VENOM_PRIEST;
-                            memset(&uiMediumTrashId, 0, sizeof(uiMediumTrashId));
-                            summonPositions     = gurubashiTrashSummonPositions;
-                            jumpPositions       = gurubashiVenomPriestJumpPositions;
-                            pJalak->AI()->Talk(TALK_GURUBASHI);
-                            break;
-
-                        case TRASH_PHASE_DRAKKARI:
-                            uiMajorTrashId      = MOB_DRAKKARI_FROZEN_WARLORD;
-                            summonPositions     = drakkariTrashSummonPositions;
-                            jumpPositions       = drakkariFrozenWarlordJumpPositions;
-                            pJalak->AI()->Talk(TALK_DRAKKARI);
-                            break;
-
-                        case TRASH_PHASE_AMANI:
-                            uiMinorTrashId      = MOB_AMANI_SHI_PROTECTOR;
-                            uiMediumTrashId[0]  = MOB_AMANI_SHI_FLAME_CASTER;
-                            uiMediumTrashId[1]  = 0;
-                            uiMajorTrashId      = MOB_AMANI_WARBEAR;
-                            summonPositions     = amaniTrashSummonPositions;
-                            jumpPositions       = amaniWarbearJumpPositions;
-                            pJalak->AI()->Talk(TALK_AMANI);
-                            break;
-
-                        case MAX_TRASH_PHASE:
-                            if (Creature *pJalak = GetJalak(me))
-                                pJalak->AI()->DoAction(ACTION_ENTER_PHASE_TWO);
-                            return;
-
-                        default:
-                            return;
-                    }
-
-                    events.Reset();
-
-
-                    if (uiTrashPhase != TRASH_PHASE_DRAKKARI)
-                    {
-                        events.ScheduleEvent(EVENT_SUMMON_MINOR, 5 * IN_MILLISECONDS);
-                    }
-                    else
-                    {
-                        events.ScheduleEvent(EVENT_SUMMON_MINOR_DRAKKARI, 5 * IN_MILLISECONDS);
-                    }
-
-                    events.ScheduleEvent(EVENT_SUMMON_MAJOR, 20 * IN_MILLISECONDS);
-                    events.ScheduleEvent(EVENT_SUMMON_ZANDALARI_DINOMANCER, 30 * IN_MILLISECONDS);
-                }
-            }
-
-            void PrepareTransition()
-            {
-                events.Reset();
-                events.ScheduleEvent(EVENT_TRANSITION, 45 * IN_MILLISECONDS);
-            }
-        };
-
-        CreatureAI *GetAI(Creature *pCreature) const
-        {
-            return new npc_horridon_event_helper_AI(pCreature);
-        }
-};
-typedef npc_horridon_event_helper::npc_horridon_event_helper_AI HorridonHelperAI;
-
-// RP Event Helper AI
-class npc_horridon_rp_event_helper : public CreatureScript
-{
-public:
-    npc_horridon_rp_event_helper() : CreatureScript("npc_horridon_rp_event_helper") { }
-
-    class npc_horridon_rp_event_helper_AI : public ScriptedAI
-    {
-    public:
-        npc_horridon_rp_event_helper_AI(Creature *pCreature) :
-            ScriptedAI(pCreature), bIntroDone(false)
-        {
-            events.Reset();
-        }
-
-        void Reset()
-        {
-            bIntroDone = false;
-            events.Reset();
-            events.ScheduleEvent(EVENT_CHECK_PLAYERS, 500);
-        }
-
-        void UpdateAI(uint32 uiDiff)
-        {
-            if (bIntroDone)
-                return;
-
-            events.Update(uiDiff);
-
-            while (uint32 uiEventId = events.ExecuteEvent())
-            {
-                switch (uiEventId)
-                {
-                    case EVENT_CHECK_PLAYERS:
-                    {
-                        std::list<Player*> playerList;
-                        me->GetPlayerListInGrid(playerList, 25.0f);
-
-                        if (playerList.empty())
-                        {
-                            events.ScheduleEvent(EVENT_CHECK_PLAYERS, 500);
-                        }
-                        else
-                        {
-                            events.ScheduleEvent(EVENT_INTRO_PART_I, 1000);
-                            events.ScheduleEvent(EVENT_INTRO_PART_II, 7500);
-                            events.ScheduleEvent(EVENT_INTRO_PART_III, 27500);
-                            events.ScheduleEvent(EVENT_INTRO_PART_IV, 29500);
-                        }
-
-                        break;
-                    }
-
-                    case EVENT_INTRO_PART_I:
-                        if (Creature *pJalak = GetJalak(me))
-                            pJalak->AI()->Talk(TALK_INTRO_FIRST);
-                        break;
-
-                    case EVENT_INTRO_PART_II:
-                        if (Creature *pJalak = GetJalak(me))
-                            pJalak->AI()->Talk(TALK_INTRO_SECOND);
-                        break;
-
-                    case EVENT_INTRO_PART_III:
-                        if (Creature *pJalak = GetJalak(me))
-                            pJalak->AI()->Talk(TALK_INTRO_THIRD);
-
-                        // Horridon should break door?
-                        if (GameObject *pDoor = me->FindNearestGameObject(GOB_HORRIDON_PRISON_DOOR, 50000.0f))
-                            pDoor->SetGoState(GO_STATE_ACTIVE);
-                        break;
-
-                    case EVENT_INTRO_PART_IV:
-                        if (Creature *pHorridon = GetHorridon(me))
-                            pHorridon->AI()->DoAction(ACTION_INTRO);
-                        bIntroDone = true;
-                        break;
-
-                    default:
-                        break;
-                }
-            }
-        }
-
-    private:
-        EventMap        events;
-        bool            bIntroDone;
-    };
-
-    CreatureAI *GetAI(Creature *pCreature) const
-    {
-        return new npc_horridon_rp_event_helper_AI(pCreature);
-    }
-};
 
 // Jalak AI
 class mob_war_god_jalak : public CreatureScript
@@ -1227,11 +1230,10 @@ public:
     class mob_war_god_jalak_AI : public ScriptedAI
     {
     public:
-        mob_war_god_jalak_AI(Creature *pCreature) :
-            ScriptedAI(pCreature), uiPhase(BOSS_PHASE_SUMMONS)
+        mob_war_god_jalak_AI(Creature *pCreature) : ScriptedAI(pCreature), uiPhase(BOSS_PHASE_SUMMONS)
         {
-
         }
+        uint32          uiPhase;
 
         void Reset()
         {
@@ -1349,13 +1351,9 @@ public:
                     pController->AI()->DoAction(ACTION_FIGHT_END);
             }
         }
-
-    private:
-        EventMap        events;
-        uint32          uiPhase;
     };
 
-    CreatureAI *GetAI(Creature *pCreature) const
+    CreatureAI* GetAI(Creature *pCreature) const
     {
         return new mob_war_god_jalak_AI(pCreature);
     }
@@ -1374,7 +1372,6 @@ public:
         mob_horridon_trashs_AI(Creature *pCreature) :
             ScriptedAI(pCreature), pRendingChargeTarget(NULL), uiChainLightningCount(0)
         {
-            events.Reset();
         }
 
         void Reset()
@@ -1633,12 +1630,11 @@ public:
         }
 
     private:
-        EventMap        events;
         Unit            *pRendingChargeTarget;
         uint32          uiChainLightningCount;
     };
 
-    CreatureAI *GetAI(Creature *pCreature) const
+    CreatureAI* GetAI(Creature *pCreature) const
     {
         return new mob_horridon_trashs_AI(pCreature);
     }
@@ -1720,12 +1716,9 @@ public:
                 }
             }
         }
-
-    private:
-        EventMap        events;
     };
 
-    CreatureAI *GetAI(Creature *pCreature) const
+    CreatureAI* GetAI(Creature *pCreature) const
     {
         return new mob_horridon_summons_AI(pCreature);
     }
@@ -1813,11 +1806,10 @@ public:
         }
 
     private:
-        EventMap        events;
         bool            bIsUnderFiftyPercent;
     };
 
-    CreatureAI *GetAI(Creature *pCreature) const
+    CreatureAI* GetAI(Creature *pCreature) const
     {
         return new mob_zandalari_dinomancer_AI(pCreature);
     }
@@ -1868,7 +1860,7 @@ public:
         Player *pTarget;
     };
 
-    CreatureAI *GetAI(Creature *pCreature) const
+    CreatureAI* GetAI(Creature *pCreature) const
     {
         return new mob_direhorn_spirit_AI(pCreature);
     }
@@ -2150,18 +2142,18 @@ public:
 
 void AddSC_boss_horridon()
 {
-    // boss / helpers
-    new boss_horridon();
+    // boss / helpers  
     new npc_horridon_event_helper();
     new npc_horridon_rp_event_helper();
+    new boss_horridon();
+    new mob_war_god_jalak();
 
     // trash/mobs
     new mob_horridon_trashs();
     new mob_horridon_summons();
     new mob_zandalari_dinomancer();
     new mob_direhorn_spirit();
-    new mob_war_god_jalak();
-
+   
     // gameobject
     new gob_horridon_orb_of_control();
 

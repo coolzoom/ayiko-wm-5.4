@@ -127,8 +127,9 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Templates 
-DELETE FROM creature_template_aura WHERE entry = 69438;
+DELETE FROM creature_template_aura WHERE entry IN (69395,69438);
 INSERT INTO creature_template_aura VALUES
+(69395, 137087),
 (69438, 137058);
 
 REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`,`equipment_id`) VALUES 
@@ -137,6 +138,7 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`,`equipment_id`) VALUES
 (69388, 0, 0, 0, 0, 0, 47507, 0, 0, 0, 'Zandalari Spear-Shaper', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 184, 1, 0, 0, 'npc_zandalari_spearshaper', 17614,69388),
 (69390, 0, 0, 0, 0, 0, 47528, 0, 0, 0, 'Zandalari Storm-Caller', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 270532680, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10000, 11000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 167, 1, 0, 0, '', 17614,69390),
+(69395, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Drawn Water', '', '', 0, 93, 93, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 33554436, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 17826816, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2, '', 17614,0),
 (69438, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Thrown Spear', '', '', 0, 93, 93, 4, 14, 14, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 33685572, 33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 17826816, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 1, 0),
 (69455, 0, 0, 0, 0, 0, 47536, 0, 0, 0, 'Zandalari Water-Binder', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10000, 11000, '', 0, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 167, 1, 0, 0, '', 17614,69455),
 (69459, 0, 0, 0, 0, 0, 525, 0, 0, 0, 'Bound Water Elemental', '', '', 0, 90, 90, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 200, 1, 0, 0, '', 17614,0),
@@ -275,8 +277,8 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (69390, 0, 1, 0, 0, 0, 100, 0, 6000, 12000, 20000, 25000, 11, 139218, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Zandalari Storm-Caller - Cast Storm Weapon"),
 (69390, 0, 2, 0, 0, 0, 100, 0, 9000, 12000, 20000, 30000, 11, 139251, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Zandalari Storm-Caller - Cast Water Bolt"),
 (69455, 0, 0, 0, 0, 0, 100, 0, 3000, 4000, 7000, 10000, 11, 136952, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Zandalari Water-Binder - Cast Frostbolt"),
-(69455, 0, 1, 0, 0, 0, 100, 0, 5000, 10000, 13000, 18000, 11, 137099, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Zandalari Water-Binder - Cast Bind Water"),
-(69455, 0, 2, 0, 0, 0, 100, 0, 9000, 15000, 17000, 26000, 11, 136881, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Zandalari Water-Binder - Cast Deluge"),
+(69455, 0, 1, 0, 0, 0, 70, 0, 5000, 10000, 13000, 18000, 11, 137099, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Zandalari Water-Binder - Cast Bind Water"),
+(69455, 0, 2, 0, 0, 0, 100, 0, 9000, 15000, 17000, 26000, 11, 136881, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, "Zandalari Water-Binder - Cast Deluge"),
 (69459, 0, 0, 0, 1, 0, 100, 0, 1, 1, 1000, 1000, 49, 0, 0, 0, 0, 0, 0, 21, 50, 0, 0, 0, 0, 0, 0, "Bound Water Elemental - Attack on spawn"),
 (70230, 0, 0, 0, 0, 0, 100, 0, 12000, 13000, 15000, 16000, 11, 140049, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Zandalari Blade Initiate - Cast Wounding Strike");
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -1163,29 +1165,29 @@ REPLACE INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconN
 (218375, 10, 7951, 'Orb of Control', '', '', '', 0, 0, 1, 0, 0, 0, 0, 0, 0, 86, 0, 0, 3000, 0, 1, 0, 0, 0, 0, 137443, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, '', 'gob_horridon_orb_of_control', 17658),
 (218376, 10, 7951, 'Orb of Control', '', '', '', 0, 0, 1, 0, 0, 0, 0, 0, 0, 86, 0, 0, 3000, 0, 1, 0, 0, 0, 0, 137444, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, '', 'gob_horridon_orb_of_control', 17658),
 (218663, 0, 13679, 'Wrought Iron Door', '', '', '', 1375, 32, 1.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 17658),
+(218666, 0, 13679, 'Wrought Iron Door', '', '', '', 1375, 48, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 17658),
+(218669, 0, 13679, 'Wrought Iron Door', '', '', '', 1375, 48, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 17658),
 (218670, 0, 13589, 'Gurubashi Tribal Door', '', '', '', 1375, 48, 1, 0, 0, 0, 0, 0, 0, 0, 77, 3000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 17658),
 (218671, 0, 13590, 'Drakkari Tribal Door', '', '', '', 1375, 48, 1, 0, 0, 0, 0, 0, 0, 0, 77, 3000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 17658),
 (218672, 0, 13591, 'Farraki Tribal Door', '', '', '', 1375, 48, 1, 0, 0, 0, 0, 0, 0, 0, 77, 3000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 17658),
 (218673, 0, 13592, 'Amani Tribal Door', '', '', '', 1375, 48, 1, 0, 0, 0, 0, 0, 0, 0, 77, 3000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 17658),
-(218674, 0, 13593, 'Big Gate', '', '', '', 114, 48, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 17658),
-(218666, 0, 13679, 'Wrought Iron Door', '', '', '', 1375, 48, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 17658),
-(218669, 0, 13679, 'Wrought Iron Door', '', '', '', 1375, 32, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 17658);
+(218674, 0, 13593, 'Big Gate', '', '', '', 114, 48, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 17658);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Gameobjects spawns
 INSERT INTO `gameobject` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`spawntimesecs`,`animprogress`,`state`,`isActive`,`protect_anti_doublet`) VALUES
-(@OGUID+15, 218663, 1098, 0, 0, 760, 1, 5745.38, 6263.5, 124.021, 3.12867, 0, 0, 0.999979, 0.00646237, 86400, 255, 1, 0, NULL),
+(@OGUID+15, 218663, 1098, 0, 0, 760, 1, 5745.38, 6263.5, 124.021, 3.12867, 0, 0, 0.999979, 0.00646237, 86400, 255, 0, 0, NULL),
 (@OGUID+16, 218663, 1098, 0, 0, 760, 1, 5431.65, 5863.2, 129.996, 4.71239, 0, 0, 1, -4.37114E-8, 86400, 255, 1, 0, NULL),
+
+(@OGUID+22, 218666, 1098, 0, 0, 760, 1, 5541.31, 5753.58, 129.996, 3.14159, 0, 0, 1, -4.37114E-8, 86400, 255, 1, 0, NULL),
+(@OGUID+23, 218669, 1098, 0, 0, 760, 1, 5431.65, 5949.82, 124.068, 4.71239, 0, 0, 1, -4.37114E-8, 86400, 255, 1, 0, NULL),
 
 (@OGUID+17, 218670, 1098, 0, 0, 760, 1, 5523.46, 5662.12, 127.363, 2.35619, 0, 0, 1, -4.37114E-8, 86400, 255, 1, 0, NULL),
 (@OGUID+18, 218671, 1098, 0, 0, 760, 1, 5340.14, 5661.82, 127.362, 0.785397, 0, 0, 1, -4.37114E-8, 86400, 255, 1, 0, NULL),
 (@OGUID+19, 218672, 1098, 0, 0, 760, 1, 5523.25, 5845.22, 127.363, 3.92699, 0, 0, 1, -4.37114E-8, 86400, 255, 1, 0, NULL),
 (@OGUID+20, 218673, 1098, 0, 0, 760, 1, 5339.94, 5845.09, 127.362, 5.49779, 0, 0, 1, -4.37114E-8, 86400, 255, 1, 0, NULL),
-(@OGUID+21, 218674, 1098, 0, 0, 760, 1, 5431.71, 5652.19, 126.755, 1.57079, 0, 0, 1, -4.37114E-8, 86400, 255, 1, 0, NULL),
-
-(@OGUID+22, 218666, 1098, 0, 0, 760, 1, 5541.31, 5753.58, 129.996, 3.14159, 0, 0, 1, -4.37114E-8, 86400, 255, 1, 0, NULL),
-(@OGUID+23, 218669, 1098, 0, 0, 760, 1, 5431.65, 5949.82, 124.068, 4.71239, 0, 0, 1, -4.37114E-8, 86400, 255, 1, 0, NULL);
+(@OGUID+21, 218674, 1098, 0, 0, 760, 1, 5431.71, 5652.19, 126.755, 1.57079, 0, 0, 1, -4.37114E-8, 86400, 255, 1, 0, NULL);
 /*---------------------------------------------------------------------------------------------------------------*/
 /* END Horridon */
 
@@ -1342,7 +1344,6 @@ DELETE FROM creature_template_aura WHERE entry = 69135 AND aura = 57764;
 INSERT INTO creature_template_aura VALUES
 (69135, 57764); -- Gara'jal Hover
 
-
 -- Immunity and bind bosses
 UPDATE creature_template SET flags_extra = flags_extra | 1, mechanic_immune_mask = 667893759 WHERE entry IN 
 (69078,69131,69132,69134);
@@ -1445,14 +1446,24 @@ UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69134, dmg_multiplier = 1
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Trash Mobs SAI
-UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` IN (69905,69910,70047);
-DELETE FROM `smart_scripts` WHERE `entryorguid`IN (69905,69910,70047) AND `source_type`= 0;
+UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` IN (69905,69909,69910,70047);
+DELETE FROM `smart_scripts` WHERE `entryorguid`IN (69905,69909,69910,70047) AND `source_type`= 0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
 (69905, 0, 0, 0, 1, 0, 100, 1, 1, 1, 0, 0, 28, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Gurubashi Berserker - Remove all auras when OOC"),
 (69905, 0, 1, 0, 0, 0, 100, 0, 10000, 12000, 15000, 20000, 11, 138693, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Gurubashi Berserker - Cast Bloodletting"),
 (69905, 0, 2, 0, 2, 0, 100, 1, 0, 50, 0, 0, 11, 138427, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Gurubashi Berserker - Cast Berserker Frenzy"),
+
+(69909, 0, 0, 0, 1, 0, 100, 1, 1, 1, 0, 0, 28, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Amani'shi Flame Chanter - Remove all aura OOC"),
+(69909, 0, 1, 0, 0, 0, 100, 0, 4000, 8000, 13000, 24000, 11, 138607, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Amani'shi Flame Chanter - Cast Call Flames"),
+(69909, 0, 2, 0, 0, 0, 100, 0, 6000, 10000, 10000, 20000, 11, 138652, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, "Amani'shi Flame Chanter - Cast Eruption"),
+(69909, 0, 3, 0, 31, 0, 100, 0, 138607, 0, 1000, 1000, 11, 138610, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Amani'shi Flame Chanter - Cast Fiery Core after Call Flames"),
+(69909, 0, 4, 0, 31, 0, 100, 0, 138652, 0, 1000, 1000, 11, 138610, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Amani'shi Flame Chanter - Cast Fiery Core after Eruption"),
+(69909, 0, 5, 6, 23, 0, 100, 0, 138610, 5, 1000, 1000, 11, 138651, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Amani'shi Flame Chanter - Cast Molten Barrage on Fiery Core's stacks x5"),
+(69909, 0, 6, 0, 61, 0, 100, 0, 0, 0, 0, 0, 28, 138610, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Amani'shi Flame Chanter - Remove Fiery Core's stacks after the Molten Barrage cast"),
+
 (69910, 0, 0, 0, 0, 0, 100, 0, 10000, 20000, 20000, 25000, 11, 138668, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Drakkari Frost Warden - Cast Frost Bulwark"),
 (69910, 0, 1, 0, 0, 0, 100, 0, 15000, 20000, 15000, 25000, 11, 138690, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, "Drakkari Frost Warden - Cast Glacial Freeze Totem"),
+
 (70047, 0, 0, 0, 10, 0, 100, 0, 0, 50, 0, 0, 38, 0, 0, 0, 0, 0, 0, 21, 50, 0, 0, 0, 0, 0, 0, "Glacial Freeze Totem - Cast Glacial Freeze"),
 (70047, 0, 1, 0, 0, 0, 100, 0, 1, 1, 4000, 7000, 11, 138678, 0, 0, 0, 0, 0, 21, 50, 0, 0, 0, 0, 0, 0, "Glacial Freeze Totem - Cast Glacial Freeze");
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -1586,7 +1597,6 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (70056, 9,  0, 'Des fools thought they beat me once before. Dey only make me stronger. Now we show dem da true power of the Zandalari!', 14, 0, 100, 11, 0, 35404,  'Gara\'jal the Spiritbinder- Event10'),
 (70056, 10, 0, 'Lei Shen let us prove ta ya the might of the Zandalari. We will crush des intruders where dey stand!', 14, 0, 100, 0, 0, 35405, 'Gara\'jal the Spiritbinder- Event11'),
 (70056, 11, 0, 'We will never fail ya!', 14, 0, 100, 0, 0, 35406, 'Gara\'jal the Spiritbinder- Event12');
-
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -1595,9 +1605,9 @@ REPLACE INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconN
 (218655, 0, 13679, 'Zandalari Council Entry - Left', '', '', '', 1375, 48, 1.1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 1),
 (218656, 0, 13679, 'Zandalari Council Entry - Right', '', '', '', 1375, 48, 1.1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 1),
 (218657, 0, 13679, 'Zandalari Council Exit - Inner', '', '', '', 1375, 48, 1.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 17658),
-(218658, 0, 13679, 'Zandalari Council Door', '', '', '', 1375, 32, 1.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 17658),
+(218658, 0, 13679, 'Zandalari Council Door', '', '', '', 0, 32, 1.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 17658),
 (218659, 0, 13679, 'Zandalari Council Trash Door One - Outer', '', '', '', 1375, 48, 1.1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 17658),
-(218660, 0, 13679, 'Zandalari Council Door', '', '', '', 1375, 32, 1.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 17658),
+(218660, 0, 13679, 'Zandalari Council Door', '', '', '', 0, 32, 1.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 17658),
 (218661, 0, 13679, 'Zandalari Council Trash Door Two - Outer', '', '', '', 1375, 48, 1.1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 17658),
 (218668, 0, 13679, 'Wrought Iron Door', '', '', '', 1375, 48, 1.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 17658);
 /*---------------------------------------------------------------------------------------------------------------*/

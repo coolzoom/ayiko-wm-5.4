@@ -165,24 +165,24 @@ public:
 
             switch (uiType)
             {
-            case TYPE_JINROKH:
-            case TYPE_HORRIDON:
-            case TYPE_COUNCIL:
-                m_auiEncounter[uiType] = uiData;
-                if (uiData >= DONE)
-                    SaveInstance();
-                break;
-            case TYPE_JINROKH_INTRO:
-                m_auiEncounter[uiType] = uiData;
-                if (uiData >= DONE)
-                    SaveInstance();
-                if (Creature* pJinRokh = instance->GetCreature(GetData64(BOSS_JINROKH)))
-                {
-                    if (pJinRokh->AI())
-                        pJinRokh->AI()->DoAction(ACTION_START_INTRO);
-                }
-                HandleGameObject(GetData64(GOB_JIN_ROKH_PREDOOR), true);
-                break;
+                case TYPE_JINROKH:
+                case TYPE_HORRIDON:
+                case TYPE_COUNCIL:
+                    m_auiEncounter[uiType] = uiData;
+                    if (uiData >= DONE)
+                        SaveInstance();
+                    break;
+                case TYPE_JINROKH_INTRO:
+                    m_auiEncounter[uiType] = uiData;
+                    if (uiData >= DONE)
+                        SaveInstance();
+                    if (Creature* pJinRokh = instance->GetCreature(GetData64(BOSS_JINROKH)))
+                    {
+                        if (pJinRokh->AI())
+                            pJinRokh->AI()->DoAction(ACTION_START_INTRO);
+                    }
+                    HandleGameObject(GetData64(GOB_JIN_ROKH_PREDOOR), true);
+                    break;
             }
         }
 
@@ -208,12 +208,12 @@ public:
 
             switch (uiType)
             {
-            case TYPE_JINROKH:
-            case TYPE_JINROKH_INTRO:
-                return m_auiEncounter[uiType];
-                break;
-            default:
-                return 0;
+                case TYPE_JINROKH:
+                case TYPE_JINROKH_INTRO:
+                    return m_auiEncounter[uiType];
+                    break;
+                default:
+                    return 0;
             }
 
             return 0;
@@ -276,8 +276,7 @@ public:
                 case GOB_MOGU_STATUE_2:
                 case GOB_MOGU_STATUE_3:
                 case GOB_MOGU_STATUE_4:
-                {
-                                          
+                {                                          
                     EntryGuidMap::const_iterator find = m_mGoGuidStorage.find(uiType);
                     if (find != m_mGoGuidStorage.cend())
                     {
@@ -306,9 +305,9 @@ public:
             {
                 switch (eventId)
                 {
-                case EVENT_JINROKH_DOOR:
-                    HandleGameObject(GetData64(GOB_JIN_ROKH_PREDOOR), true);
-                    break;
+                    case EVENT_JINROKH_DOOR:
+                        HandleGameObject(GetData64(GOB_JIN_ROKH_PREDOOR), true);
+                        break;
                 }
             }
         }

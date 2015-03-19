@@ -148,6 +148,10 @@ public:
 
         void SetData(uint32 uiType, uint32 uiData)
         {
+            // Don't set the same data twice.
+            if (m_auiEncounter[uiType] == uiData)
+                return;
+
             switch (uiType)
             {
             case TYPE_JINROKH:
@@ -299,8 +303,12 @@ public:
             loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3] >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6]
                 >> m_auiEncounter[7] >> m_auiEncounter[8] >> m_auiEncounter[9] >> m_auiEncounter[10] >> m_auiEncounter[11] >> m_auiEncounter[12] >> m_auiEncounter[13];
             for (uint8 i = 0; i < MAX_TYPES; ++i)
-            if (m_auiEncounter[i] == IN_PROGRESS)                // Do not load an encounter as "In Progress" - reset it instead.
-                m_auiEncounter[i] = NOT_STARTED;
+            {
+                if (m_auiEncounter[i] == IN_PROGRESS)                // Do not load an encounter as "In Progress" - reset it instead.
+                    m_auiEncounter[i] = NOT_STARTED;
+                else if (m_auiEncounter[i] == DONE)
+                    SetBossState(m_auiEncounter[i], DONE);
+            }
 
             OUT_LOAD_INST_DATA_COMPLETE;
         }

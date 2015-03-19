@@ -29,6 +29,7 @@ public:
     {
         EntryGuidMap m_mNpcGuidStorage;
         EntryGuidMap m_mGoGuidStorage;
+        EventMap m_mEvents;
 
         uint32 m_auiEncounter[MAX_TYPES];
         std::string strSaveData;
@@ -96,7 +97,8 @@ public:
 
             switch (pGo->GetEntry())
             {
-                case GOB_JIN_ROKH_ENTRANCE: 
+                case GOB_JIN_ROKH_ENTRANCE:
+                case GOB_JIN_ROKH_PREDOOR:
                 case GOB_JIN_ROKH_EXIT: 
                 case GOB_HORRIDON_ENTRANCE: 
                 case GOB_HORRIDON_EXIT:    
@@ -157,10 +159,20 @@ public:
             case TYPE_JINROKH:
             case TYPE_HORRIDON:
             case TYPE_COUNCIL:
+                m_auiEncounter[uiType] = uiData;
+                if (uiData >= DONE)
+                    SaveInstance();
+                break;
             case TYPE_JINROKH_INTRO:
                 m_auiEncounter[uiType] = uiData;
                 if (uiData >= DONE)
                     SaveInstance();
+                if (Creature* pJinRokh = instance->GetCreature(GetData64(BOSS_JINROKH)))
+                {
+                    if (pJinRokh->AI())
+                        pJinRokh->AI()->DoAction(ACTION_START_INTRO);
+                }
+                HandleGameObject(GetData64(GOB_JIN_ROKH_PREDOOR), true);
                 break;
             }
         }
@@ -236,6 +248,7 @@ public:
                 // ############################
                 // ############################
                 case GOB_JIN_ROKH_ENTRANCE:
+                case GOB_JIN_ROKH_PREDOOR:
                 case GOB_JIN_ROKH_EXIT:
                 case GOB_HORRIDON_ENTRANCE:
                 case GOB_HORRIDON_EXIT:
@@ -270,6 +283,21 @@ public:
         std::string GetSaveData() override
         {
             return strSaveData;
+        }
+
+        void Update(uint32 uiDiff) override
+        {
+            m_mEvents.Update(uiDiff);
+
+            while (uint32 eventId = m_mEvents.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_JINROKH_DOOR:
+                    HandleGameObject(GetData64(GOB_JIN_ROKH_PREDOOR), true);
+                    break;
+                }
+            }
         }
 
         void SaveInstance()
@@ -309,6 +337,9 @@ public:
                 else if (m_auiEncounter[i] == DONE)
                     SetBossState(m_auiEncounter[i], DONE);
             }
+
+            if (m_auiEncounter[TYPE_JINROKH_INTRO] == DONE)
+                m_mEvents.ScheduleEvent(EVENT_JINROKH_DOOR, 0);
 
             OUT_LOAD_INST_DATA_COMPLETE;
         }

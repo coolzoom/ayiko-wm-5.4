@@ -45,6 +45,12 @@ enum SaveData
     MAX_TYPES
 };
 
+enum InstanceEvents : uint32
+{
+    EVENT_NONE,
+    EVENT_JINROKH_DOOR
+};
+
 enum GlobalToTSpells : uint32
 {
     SPELL_BERSERK                    = 26662,
@@ -59,6 +65,11 @@ public:
     {
         return target && target->GetTypeId() != TYPEID_PLAYER;
     }
+};
+
+enum GlobalActions : int32
+{
+    ACTION_START_INTRO      = 16
 };
 
 enum CreaturesIds
@@ -102,6 +113,7 @@ enum CreaturesIds
 enum ObjectsIds
 {
     GOB_JIN_ROKH_ENTRANCE                   = 218664,
+    GOB_JIN_ROKH_PREDOOR                    = 218665,
     GOB_JIN_ROKH_EXIT                       = 218667,
     GOB_HORRIDON_ENTRANCE                   = 218663,
     GOB_HORRIDON_EXIT                       = 218666,

@@ -253,7 +253,8 @@ public:
         EVENT_IONIZATION,
         EVENT_BERSERK,
         EVENT_HEIGHT_CHECK,
-        EVENT_PROPAGATE_STORM
+        EVENT_PROPAGATE_STORM,
+        EVENT_INTRO_YELL
     };
 
     enum eTalks : uint32
@@ -279,6 +280,7 @@ public:
         }
 
         uint32 m_uiPushTimer;
+        EventMap m_mEvents;
 
         void Reset()
         {
@@ -345,6 +347,18 @@ public:
         void KilledUnit(Unit* pVictim) override
         {
             Talk(TALK_SLAY);
+        }
+
+        void DoAction(const int32 iAction) override
+        {
+            if (iAction == ACTION_START_INTRO)
+            {
+                if (Aura* pVisual = me->AddAura(SPELL_LIGHTNING_STORM_VISUAL, me))
+                    pVisual->SetDuration(15000);
+
+                me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_ATTACK1H);
+                m_mEvents.ScheduleEvent(EVENT_INTRO_YELL, 15000);
+            }
         }
 
         void ResetStatues()
@@ -415,6 +429,17 @@ public:
 
         void UpdateAI(const uint32 uiDiff)
         {
+            m_mEvents.Update(uiDiff);
+
+            switch (m_mEvents.ExecuteEvent())
+            {
+            case EVENT_INTRO_YELL:
+                Talk(TALK_INTRO);
+                me->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
+                me->HandleEmoteCommand(EMOTE_ONESHOT_ROAR);
+                break;
+            }
+
             if (!UpdateVictim())
                 return;
 

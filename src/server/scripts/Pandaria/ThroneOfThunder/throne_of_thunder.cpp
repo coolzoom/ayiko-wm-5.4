@@ -206,6 +206,12 @@ public:
             events.ScheduleEvent(EVENT_STORM_ENERGY, 5000 + rand() % 4000);
         }
 
+        void JustDied(Unit* pKiller) override
+        {
+            if (InstanceScript* pInstance = me->GetInstanceScript())
+                pInstance->SetData(TYPE_JINROKH_INTRO, DONE);
+        }
+
         void DoStun()
         {
             std::list<HostileReference*> threatList = me->getThreatManager().getThreatList();

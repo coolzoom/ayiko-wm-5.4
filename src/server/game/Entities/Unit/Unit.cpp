@@ -17392,6 +17392,28 @@ void Unit::ApplyAttackTimePercentMod(WeaponAttackType att, float val, bool apply
     }
 
     m_attackTimer[att] = uint32(GetAttackTime(att) * m_modAttackSpeedPct[att] * remainingTimePct);
+
+    const AuraEffectList &aList = GetAuraEffectsByType(SPELL_AURA_SANCTITY_OF_BATTLE_COOLDOWN);
+    if (!aList.empty())
+    {
+        for (AuraEffectList::const_iterator itr = aList.begin(); itr != aList.end(); ++itr)
+        {
+            (*itr)->ApplySpellMod((*itr)->GetBase()->GetUnitOwner(), false);
+            (*itr)->CalculateSpellMod();
+            (*itr)->ApplySpellMod((*itr)->GetBase()->GetUnitOwner(), true);
+        }
+    }
+
+    const AuraEffectList &bList = GetAuraEffectsByType(SPELL_AURA_SANCTITY_OF_BATTLE_GCD);
+    if (!bList.empty())
+    {
+        for (AuraEffectList::const_iterator itr = bList.begin(); itr != bList.end(); ++itr)
+        {
+            (*itr)->ApplySpellMod((*itr)->GetBase()->GetUnitOwner(), false);
+            (*itr)->CalculateSpellMod();
+            (*itr)->ApplySpellMod((*itr)->GetBase()->GetUnitOwner(), true);
+        }
+    }
 }
 
 void Unit::ApplyCastTimePercentMod(float val, bool apply)
@@ -17400,17 +17422,6 @@ void Unit::ApplyCastTimePercentMod(float val, bool apply)
         ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED, val, !apply);
     else
         ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED, -val, apply);
-
-    const AuraEffectList &aList = GetAuraEffectsByType(SPELL_AURA_SANCTITY_OF_BATTLE);
-    if(!aList.empty())
-    {
-        for(AuraEffectList::const_iterator itr = aList.begin(); itr != aList.end(); ++itr)
-        {
-            (*itr)->ApplySpellMod((*itr)->GetBase()->GetUnitOwner(), false);
-            (*itr)->CalculateSpellMod();
-            (*itr)->ApplySpellMod((*itr)->GetBase()->GetUnitOwner(), true);
-        }
-    }
 }
 
 void Unit::UpdateAuraForGroup(uint8 slot)

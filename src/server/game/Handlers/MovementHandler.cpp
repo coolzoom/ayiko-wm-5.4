@@ -24,6 +24,7 @@
 #include "Corpse.h"
 #include "Player.h"
 #include "SpellAuras.h"
+#include "SpellAuraEffects.h"
 #include "MapManager.h"
 #include "Transport.h"
 #include "Battleground.h"
@@ -295,6 +296,19 @@ void WorldSession::HandleMoveWorldportAckOpcode()
 
     //lets process all delayed operations on successful teleport
     GetPlayer()->ProcessDelayedOperations();
+
+    Unit::VisibleAuraMap const* visibleAuras = GetPlayer()->GetVisibleAuras();
+    for (Unit::VisibleAuraMap::const_iterator itr = visibleAuras->begin(); itr != visibleAuras->end(); ++itr)
+    {
+        for (uint8 i = 0; i < itr->second->GetBase()->GetSpellInfo()->Effects.size(); ++i)
+        {
+            if (AuraEffect* eff = itr->second->GetBase()->GetEffect(i))
+            {
+                eff->ApplySpellMod(GetPlayer(), false);
+                eff->ApplySpellMod(GetPlayer(), true);
+            }
+        }
+    }
 }
 
 void WorldSession::HandleMoveTeleportAck(WorldPacket& recvPacket)

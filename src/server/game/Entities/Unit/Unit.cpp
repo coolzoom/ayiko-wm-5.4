@@ -5802,6 +5802,26 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
         {
             switch (dummySpell->Id)
             {
+                case 138957: // Item - Proc Charges For Strength Transform
+                {
+                    if (GetTypeId() != TYPEID_PLAYER)
+                        return false;
+
+                    triggered_spell_id = 138958;
+                    if (Aura* aura = GetAura(138958))
+                    {
+                        if (aura->GetStackAmount() == aura->GetSpellInfo()->StackAmount - 1)
+                        {
+                            if (Item* item = ToPlayer()->GetItemByGuid(triggeredByAura->GetBase()->GetCastItemGUID()))
+                            {
+                                CastSpell(this, 138960, true, item);
+                                RemoveAurasDueToSpell(138958);
+                                return true;
+                            }
+                        }
+                    }
+                    break;
+                }
                 case 108007: // Indomitable, Indomitable Pride (normal)
                 case 109785: // Indomitable, Indomitable Pride (lfr)
                 case 109786: // Indomitable, Indomitable Pride (heroic)

@@ -12800,6 +12800,11 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
     if (AuraEffect* aurEff = GetAuraEffect(110310, EFFECT_0))
         AddPct(DoneTotalMod, -aurEff->GetAmount());
 
+    // Unleashed Fury - Earthliving
+    if (AuraEffect* aurEff = GetAuraEffect(118473, EFFECT_0))
+        if (!spellProto->IsAffectingArea())
+            AddPct(DoneTotalMod, aurEff->GetAmount());
+
     // use float as more appropriate for negative values and percent applying
     float heal = float(int32(healamount) + DoneTotal) * DoneTotalMod;
     // apply spellmod to Done amount
@@ -12855,18 +12860,6 @@ uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, u
             HasAura(8936, caster->GetGUID()) ||    // Regrowth
             HasAura(774, caster->GetGUID()))       // Rejuvenation
             AddPct(TakenTotalMod, 20);
-    }
-
-    // Unleashed Fury - Earthliving
-    if (HasAura(118473) && GetAura(118473)->GetCaster() && GetAura(118473)->GetCaster()->GetGUID() == caster->GetGUID())
-    {
-        bool singleTarget = false;
-        for (auto const &spellEffect : spellProto->Effects)
-            if (spellEffect.TargetA.GetTarget() == TARGET_UNIT_TARGET_ALLY && spellEffect.TargetB.GetTarget() == 0)
-                singleTarget = true;
-
-        if (singleTarget)
-            AddPct(TakenTotalMod, 50);
     }
 
     // Check for table values

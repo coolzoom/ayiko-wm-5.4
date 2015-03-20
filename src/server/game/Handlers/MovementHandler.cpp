@@ -527,24 +527,59 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
 
         plrMover->UpdateFallInformationIfNeed(movementInfo, opcode);
 
-        AreaTableEntry const* zone = GetAreaEntryByAreaID(plrMover->GetAreaId());
-        float depth = zone ? zone->MaxDepth : -500.0f;
-        if (movementInfo.pos.GetPositionZ() < depth)
+        float underMapValueZ, upperLimitValueZ;
+        bool check = false;
+        switch (plrMover->GetMapId())
         {
-            if (!(plrMover->GetBattleground() && plrMover->GetBattleground()->HandlePlayerUnderMap(_player)))
+            case 617: // Dalaran Arena
+                underMapValueZ = 3.0f;
+                upperLimitValueZ = 30.0f;
+                break;
+            case 562: // Blades Edge Arena
+                underMapValueZ = -1.0f;
+                upperLimitValueZ = 22.0f;
+                break;
+            case 559: // Nagrand Arena
+                underMapValueZ = -1.0f;
+                upperLimitValueZ = 21.0f;
+                break;
+            case 572: // Ruins of Lordaeron
+                underMapValueZ = -1.0f;
+                upperLimitValueZ = 45.0f;
+                break;
+            case 618: // Ring of Valor
+                underMapValueZ = 28.0f;
+                upperLimitValueZ = 60.0f;
+                break;
+            case 566: // Eye of the storm
+                underMapValueZ = 1000.0f;
+                upperLimitValueZ = MAX_HEIGHT;
+                break;
+            case 726: // Twin Peaks
+                underMapValueZ = -180.0f;
+                upperLimitValueZ = MAX_HEIGHT;
+                break;
+            default:
+                AreaTableEntry const* zone = GetAreaEntryByAreaID(plrMover->GetAreaId());
+                underMapValueZ = zone ? zone->MaxDepth : -500.0f;
+                upperLimitValueZ = MAX_HEIGHT;
+                break;
+        }
+
+        check = movementInfo.pos.GetPositionZ() < underMapValueZ || movementInfo.pos.GetPositionZ() > upperLimitValueZ;
+        if (check && !(plrMover->GetBattleground() && plrMover->GetBattleground()->HandlePlayerUnderMap(_player)))
+        {
+            // NOTE: this is actually called many times while falling
+            // even after the player has been teleported away
+            // TODO: discard movement packets after the player is rooted
+            if (plrMover->IsAlive())
             {
-                // NOTE: this is actually called many times while falling
-                // even after the player has been teleported away
-                // TODO: discard movement packets after the player is rooted
-                if (plrMover->IsAlive())
-                {
-                    plrMover->EnvironmentalDamage(DAMAGE_FALL_TO_VOID, GetPlayer()->GetMaxHealth());
-                    // player can be alive if GM/etc
-                    // change the death state to CORPSE to prevent the death timer from
-                    // starting in the next player update
-                    if (!plrMover->IsAlive())
-                        plrMover->KillPlayer();
-                }
+                plrMover->EnvironmentalDamage(DAMAGE_FALL_TO_VOID, GetPlayer()->GetMaxHealth());
+                // player can be alive if GM/etc
+                // change the death state to CORPSE to prevent the death timer from
+                // starting in the next player update
+                if (!plrMover->IsAlive())
+                    plrMover->KillPlayer();
             }
         }
     }

@@ -101,6 +101,9 @@ void BattlegroundTTP::HandleAreaTrigger(Player* player, uint32 trigger)
 
 bool BattlegroundTTP::HandlePlayerUnderMap(Player* player)
 {
+    if (GetStatus() == STATUS_WAIT_JOIN)
+        return true;
+
     player->TeleportTo(GetMapId(), 569.74f, 633.4f, 380.71f, 2.422f);
     return true;
 }

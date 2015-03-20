@@ -65,6 +65,9 @@ void BattlegroundTA::RemovePlayer(Player* /*player*/, uint64 /*guid*/, uint32 /*
 
 bool BattlegroundTA::HandlePlayerUnderMap(Player* player)
 {
+    if (GetStatus() == STATUS_WAIT_JOIN)
+        return true;
+
     player->TeleportTo(GetMapId(), -10721.909f, 428.273f, 24.5f, 2.422f);
     return true;
 }

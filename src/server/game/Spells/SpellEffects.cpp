@@ -3149,6 +3149,7 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
         case 2929: // Summon Unbound Flamesparks, Flameseer's Staff
         case 3097:// Force of Nature
         case 3245:
+        case 3409: // Death by Voodoo Gnome
             numSummons = (damage > 0) ? damage : 1;
             break;
         default:
@@ -3163,7 +3164,7 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
         case SUMMON_CATEGORY_UNK:
             // 0x4800 is used for Druid's Treants. May be 0x4000 is fine too, but
             // it requires additional tests - Searing Totem needs exception
-            if ((properties->Flags & 512 || properties->Flags == 0x4800) && m_spellInfo->Id != 3599)
+            if ((properties->Flags & 512 || properties->Flags == 0x4800 || properties->Flags == 0x1100) && m_spellInfo->Id != 3599)
             {
                 SummonGuardian(effIndex, entry, properties, numSummons);
                 break;

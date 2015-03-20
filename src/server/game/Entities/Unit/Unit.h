@@ -314,7 +314,7 @@ typedef std::unordered_map<uint32 /*category*/, GlobalCooldown> GlobalCooldownLi
 class GlobalCooldownMgr                                     // Shared by Player and CharmInfo
 {
 public:
-    bool HasGlobalCooldown(SpellInfo const* spellInfo) const;
+    bool HasGlobalCooldown(Unit* caster, SpellInfo const* spellInfo) const;
     void AddGlobalCooldown(SpellInfo const* spellInfo, uint32 gcd);
     void CancelGlobalCooldown(SpellInfo const* spellInfo);
 

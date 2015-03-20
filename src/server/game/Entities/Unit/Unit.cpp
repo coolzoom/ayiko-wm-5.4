@@ -361,9 +361,18 @@ Unit::Unit(bool isWorldObject): WorldObject(isWorldObject)
 
 ////////////////////////////////////////////////////////////
 // Methods of class GlobalCooldownMgr
-bool GlobalCooldownMgr::HasGlobalCooldown(SpellInfo const* spellInfo) const
+bool GlobalCooldownMgr::HasGlobalCooldown(Unit* caster, SpellInfo const* spellInfo) const
 {
     GlobalCooldownList::const_iterator itr = m_GlobalCooldowns.find(spellInfo->StartRecoveryCategory);
+    if (itr != m_GlobalCooldowns.end())
+    {
+        uint32 baseGcd = spellInfo->StartRecoveryTime;
+        if (caster->GetTypeId() == TYPEID_PLAYER)
+            caster->ToPlayer()->ApplySpellMod(spellInfo->Id, SPELLMOD_GLOBAL_COOLDOWN, baseGcd);
+        
+        if (!baseGcd)
+            return false;
+    }
     return itr != m_GlobalCooldowns.end() && itr->second.duration && getMSTimeDiff(itr->second.cast_time, getMSTime() + 120) < itr->second.duration;
 }
 

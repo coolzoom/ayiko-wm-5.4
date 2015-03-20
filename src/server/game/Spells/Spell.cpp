@@ -9061,9 +9061,9 @@ bool Spell::HasGlobalCooldown() const
 {
     // Only player or controlled units have global cooldown
     if (m_caster->GetCharmInfo())
-        return m_caster->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(m_spellInfo);
+        return m_caster->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(m_caster, m_spellInfo);
     else if (m_caster->GetTypeId() == TYPEID_PLAYER)
-        return m_caster->ToPlayer()->GetGlobalCooldownMgr().HasGlobalCooldown(m_spellInfo);
+        return m_caster->ToPlayer()->GetGlobalCooldownMgr().HasGlobalCooldown(m_caster, m_spellInfo);
     else
         return false;
 }

@@ -4112,6 +4112,62 @@ public:
     }
 };
 
+class spell_gen_zandalari_warding : public SpellScriptLoader
+{
+    public:
+        spell_gen_zandalari_warding() : SpellScriptLoader("spell_gen_zandalari_warding") { }
+
+        class spell_gen_zandalari_warding_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_gen_zandalari_warding_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                Unit* caster = GetCaster();
+                if (!caster->HasAura(138967))
+                    return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+
+                return SPELL_CAST_OK;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_gen_zandalari_warding_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_gen_zandalari_warding_SpellScript();
+        }
+
+        class spell_gen_zandalari_warding_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_gen_zandalari_warding_AuraScript);
+
+            void CalculateAmount(AuraEffect const * /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Aura* stackAura = caster->GetAura(138967))
+                        amount *= stackAura->GetStackAmount();
+
+                    caster->RemoveAurasDueToSpell(138967);
+                }
+            }
+
+            void Register()
+            {
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_gen_zandalari_warding_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_gen_zandalari_warding_AuraScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -4202,4 +4258,5 @@ void AddSC_generic_spell_scripts()
     new spell_gen_ench_jade_spirit();
     new spell_gen_ench_jade_spirit_eff();
     new spell_gen_orb_of_power();
+    new spell_gen_zandalari_warding();
 }

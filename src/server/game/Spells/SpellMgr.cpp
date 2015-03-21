@@ -3569,6 +3569,14 @@ void SpellMgr::LoadSpellCustomAttr()
             case 137162:    // Static Burst
                 spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(5); // 40 yds
                 break;
+            case 138652:    // Eruption
+                spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_DUMMY;
+                spellInfo->Effects[EFFECT_0].TriggerSpell = 0;
+                spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENEMY);
+                break;
+            case 138658:    // Eruption Damage
+                spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENEMY);
+                break;
 #if 1 // Gilneas
                 case 68087:
                 case 80281:

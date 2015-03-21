@@ -593,6 +593,54 @@ public:
     }
 };
 
+class spell_eruption : public SpellScriptLoader
+{
+    enum enums : uint32
+    {
+        NPC_ERUPTION        = 70029,
+        SPELL_ERUPTION      = 138655
+    };
+
+public:
+    spell_eruption() : SpellScriptLoader("spell_eruption") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void SelectTargets(std::list<WorldObject*>&targets)
+        {
+            targets.remove_if(notPlayerPredicate());
+
+            if (targets.size() > 1)
+                Trinity::Containers::RandomResizeList(targets, 1);
+        }
+
+        void HandleEffectHitTarget(SpellEffIndex eff_idx)
+        {
+            Unit* target = GetHitUnit();
+            Unit* caster = GetCaster();
+
+            if (!target || !caster)
+                return;
+
+            if (Creature* pEruption = caster->SummonCreature(NPC_ERUPTION, *target, TEMPSUMMON_TIMED_DESPAWN, 30000))
+                pEruption->AddAura(SPELL_ERUPTION, pEruption);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_impl::SelectTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY); // Changed in SpellMgr::138652
+            OnEffectHitTarget += SpellEffectFn(spell_impl::HandleEffectHitTarget, EFFECT_0, SPELL_EFFECT_DUMMY);    // Changed in SpellMgr::138652
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
 void AddSC_throne_of_thunder()
 {
     new npc_zandalari_spearshaper();
@@ -603,4 +651,5 @@ void AddSC_throne_of_thunder()
     new spell_storm_energy();
     //new spell_storm_weapon_proc();
     new spell_storm_weapon_aura();
+    new spell_eruption();
 }

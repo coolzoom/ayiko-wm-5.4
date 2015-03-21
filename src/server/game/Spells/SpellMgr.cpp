@@ -4536,9 +4536,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[0].Effect = SPELL_EFFECT_ACTIVATE_RUNE;
                     spellInfo->Effects[0].MiscValueB = 3;
                     break;
-                case 76577: // Smoke Bomb
-                    spellInfo->SpellVisual[1] = 20733;
-                    break;
                 case 118699:// Fear Effect
                     spellInfo->Dispel = DISPEL_MAGIC;
                     spellInfo->AttributesEx3 &= ~SPELL_ATTR3_IGNORE_HIT_RESULT;

@@ -98,6 +98,9 @@ void BattlegroundNA::HandleKillPlayer(Player* player, Player* killer)
 
 bool BattlegroundNA::HandlePlayerUnderMap(Player* player)
 {
+    if (GetStatus() == STATUS_WAIT_JOIN)
+        return true;
+
     player->TeleportTo(GetMapId(), 4055.504395f, 2919.660645f, 13.611241f, player->GetOrientation(), false);
     return true;
 }

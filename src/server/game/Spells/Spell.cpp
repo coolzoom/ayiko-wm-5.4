@@ -3817,6 +3817,20 @@ void Spell::cast(bool skipCheck)
                 m_caster->CastSpell(m_targets.GetUnitTarget() ? m_targets.GetUnitTarget() : m_caster, *i, true);
     }
 
+    Unit::AuraEffectList swaps = m_caster->GetAuraEffectsByType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS);
+    Unit::AuraEffectList const& swaps2 = m_caster->GetAuraEffectsByType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2);
+    if (!swaps2.empty())
+        swaps.insert(swaps.end(), swaps2.begin(), swaps2.end());
+
+    if (!swaps.empty())
+        for (Unit::AuraEffectList::const_iterator itr = swaps.begin(); itr != swaps.end(); ++itr)
+            if ((*itr)->GetAmount() == m_spellInfo->Id)
+                if (!(*itr)->GetSpellInfo()->IsPassive())
+                {
+                    if ((*itr)->GetBase()->IsUsingCharges())
+                        (*itr)->GetBase()->DropCharge();
+                }
+
     Unit::AuraEffectList procFromSpell = m_caster->GetAuraEffectsByType(SPELL_AURA_PROC_FROM_SPELL);
     for (Unit::AuraEffectList::iterator j = procFromSpell.begin(); j != procFromSpell.end();)
     {
@@ -9047,9 +9061,9 @@ bool Spell::HasGlobalCooldown() const
 {
     // Only player or controlled units have global cooldown
     if (m_caster->GetCharmInfo())
-        return m_caster->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(m_spellInfo);
+        return m_caster->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(m_caster, m_spellInfo);
     else if (m_caster->GetTypeId() == TYPEID_PLAYER)
-        return m_caster->ToPlayer()->GetGlobalCooldownMgr().HasGlobalCooldown(m_spellInfo);
+        return m_caster->ToPlayer()->GetGlobalCooldownMgr().HasGlobalCooldown(m_caster, m_spellInfo);
     else
         return false;
 }

@@ -473,8 +473,8 @@ enum AuraType
     SPELL_AURA_413                                          = 413,  // 5.0.5 unk aura
     SPELL_AURA_414                                          = 414,  // 5.0.5 unk aura
     SPELL_AURA_415                                          = 415,  // 5.0.5 unk aura
-    SPELL_AURA_SANCTITY_OF_BATTLE                           = 416,  // SPELL_AURA_SANCTITY_OF_BATTLE
-    SPELL_AURA_417                                          = 417,  // 5.0.5 unk aura
+    SPELL_AURA_SANCTITY_OF_BATTLE_COOLDOWN                  = 416,  // SPELL_AURA_SANCTITY_OF_BATTLE
+    SPELL_AURA_SANCTITY_OF_BATTLE_GCD                       = 417,  // 5.0.5 unk aura
     SPELL_AURA_418                                          = 418,  // Koz(Same as 419, but flat mod?): WowHead-> Modifies Max Power - Flat
     SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT_2                = 419,  // SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT_2
     SPELL_AURA_BATTLEPET_XP_INCRASE                         = 420,  // 5.4.0 +10% Battle Pet XP (134635)(NYI)

@@ -361,9 +361,18 @@ Unit::Unit(bool isWorldObject): WorldObject(isWorldObject)
 
 ////////////////////////////////////////////////////////////
 // Methods of class GlobalCooldownMgr
-bool GlobalCooldownMgr::HasGlobalCooldown(SpellInfo const* spellInfo) const
+bool GlobalCooldownMgr::HasGlobalCooldown(Unit* caster, SpellInfo const* spellInfo) const
 {
     GlobalCooldownList::const_iterator itr = m_GlobalCooldowns.find(spellInfo->StartRecoveryCategory);
+    if (itr != m_GlobalCooldowns.end())
+    {
+        uint32 baseGcd = spellInfo->StartRecoveryTime;
+        if (caster->GetTypeId() == TYPEID_PLAYER)
+            caster->ToPlayer()->ApplySpellMod(spellInfo->Id, SPELLMOD_GLOBAL_COOLDOWN, baseGcd);
+        
+        if (!baseGcd)
+            return false;
+    }
     return itr != m_GlobalCooldowns.end() && itr->second.duration && getMSTimeDiff(itr->second.cast_time, getMSTime() + 120) < itr->second.duration;
 }
 
@@ -1186,6 +1195,18 @@ void Unit::CastCustomSpell(Unit* target, uint32 spellId, int32 const* bp0, int32
     CastCustomSpell(spellId, values, target, triggered, castItem, triggeredByAura, originalCaster);
 }
 
+void Unit::CastCustomSpell(float x, float y, float z, uint32 spellId, int32 const* bp0, int32 const* bp1, int32 const* bp2, bool triggered, Item* castItem, AuraEffect const *triggeredByAura, uint64 originalCaster)
+{
+    CustomSpellValues values;
+    if (bp0)
+        values.AddSpellMod(SPELLVALUE_BASE_POINT0, *bp0);
+    if (bp1)
+        values.AddSpellMod(SPELLVALUE_BASE_POINT1, *bp1);
+    if (bp2)
+        values.AddSpellMod(SPELLVALUE_BASE_POINT2, *bp2);
+    CastCustomSpell(x, y, z, spellId, values, triggered, castItem, triggeredByAura, originalCaster);
+}
+
 void Unit::CastCustomSpell(Unit* target, uint32 spellId, int32 const* bp0, int32 const* bp1, int32 const* bp2, int32 const* bp3, int32 const* bp4, int32 const* bp5, bool triggered, Item* castItem, AuraEffect const *triggeredByAura, uint64 originalCaster)
 {
     CustomSpellValues values;
@@ -1219,6 +1240,18 @@ void Unit::CastCustomSpell(uint32 spellId, CustomSpellValues const& value, Unit*
 
     SpellCastTargets targets;
     targets.SetUnitTarget(victim);
+
+    CastSpell(targets, spellInfo, &value, triggered ? TRIGGERED_FULL_MASK : TRIGGERED_NONE, castItem, triggeredByAura, originalCaster);
+}
+
+void Unit::CastCustomSpell(float x, float y, float z, uint32 spellId, CustomSpellValues const& value, bool triggered, Item* castItem, AuraEffect const *triggeredByAura, uint64 originalCaster)
+{
+    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
+    if (!spellInfo)
+        return;
+
+    SpellCastTargets targets;
+    targets.SetDst(x, y, z, GetOrientation());
 
     CastSpell(targets, spellInfo, &value, triggered ? TRIGGERED_FULL_MASK : TRIGGERED_NONE, castItem, triggeredByAura, originalCaster);
 }
@@ -5778,6 +5811,26 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
         {
             switch (dummySpell->Id)
             {
+                case 138957: // Item - Proc Charges For Strength Transform
+                {
+                    if (GetTypeId() != TYPEID_PLAYER)
+                        return false;
+
+                    triggered_spell_id = 138958;
+                    if (Aura* aura = GetAura(138958))
+                    {
+                        if (aura->GetStackAmount() == aura->GetSpellInfo()->StackAmount - 1)
+                        {
+                            if (Item* item = ToPlayer()->GetItemByGuid(triggeredByAura->GetBase()->GetCastItemGUID()))
+                            {
+                                CastSpell(this, 138960, true, item);
+                                RemoveAurasDueToSpell(138958);
+                                return true;
+                            }
+                        }
+                    }
+                    break;
+                }
                 case 108007: // Indomitable, Indomitable Pride (normal)
                 case 109785: // Indomitable, Indomitable Pride (lfr)
                 case 109786: // Indomitable, Indomitable Pride (heroic)
@@ -12800,6 +12853,11 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
     if (AuraEffect* aurEff = GetAuraEffect(110310, EFFECT_0))
         AddPct(DoneTotalMod, -aurEff->GetAmount());
 
+    // Unleashed Fury - Earthliving
+    if (AuraEffect* aurEff = GetAuraEffect(118473, EFFECT_0))
+        if (!spellProto->IsAffectingArea())
+            AddPct(DoneTotalMod, aurEff->GetAmount());
+
     // use float as more appropriate for negative values and percent applying
     float heal = float(int32(healamount) + DoneTotal) * DoneTotalMod;
     // apply spellmod to Done amount
@@ -12855,18 +12913,6 @@ uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, u
             HasAura(8936, caster->GetGUID()) ||    // Regrowth
             HasAura(774, caster->GetGUID()))       // Rejuvenation
             AddPct(TakenTotalMod, 20);
-    }
-
-    // Unleashed Fury - Earthliving
-    if (HasAura(118473) && GetAura(118473)->GetCaster() && GetAura(118473)->GetCaster()->GetGUID() == caster->GetGUID())
-    {
-        bool singleTarget = false;
-        for (auto const &spellEffect : spellProto->Effects)
-            if (spellEffect.TargetA.GetTarget() == TARGET_UNIT_TARGET_ALLY && spellEffect.TargetB.GetTarget() == 0)
-                singleTarget = true;
-
-        if (singleTarget)
-            AddPct(TakenTotalMod, 50);
     }
 
     // Check for table values
@@ -17392,6 +17438,28 @@ void Unit::ApplyAttackTimePercentMod(WeaponAttackType att, float val, bool apply
     }
 
     m_attackTimer[att] = uint32(GetAttackTime(att) * m_modAttackSpeedPct[att] * remainingTimePct);
+
+    const AuraEffectList &aList = GetAuraEffectsByType(SPELL_AURA_SANCTITY_OF_BATTLE_COOLDOWN);
+    if (!aList.empty())
+    {
+        for (AuraEffectList::const_iterator itr = aList.begin(); itr != aList.end(); ++itr)
+        {
+            (*itr)->ApplySpellMod((*itr)->GetBase()->GetUnitOwner(), false);
+            (*itr)->CalculateSpellMod();
+            (*itr)->ApplySpellMod((*itr)->GetBase()->GetUnitOwner(), true);
+        }
+    }
+
+    const AuraEffectList &bList = GetAuraEffectsByType(SPELL_AURA_SANCTITY_OF_BATTLE_GCD);
+    if (!bList.empty())
+    {
+        for (AuraEffectList::const_iterator itr = bList.begin(); itr != bList.end(); ++itr)
+        {
+            (*itr)->ApplySpellMod((*itr)->GetBase()->GetUnitOwner(), false);
+            (*itr)->CalculateSpellMod();
+            (*itr)->ApplySpellMod((*itr)->GetBase()->GetUnitOwner(), true);
+        }
+    }
 }
 
 void Unit::ApplyCastTimePercentMod(float val, bool apply)
@@ -17400,17 +17468,6 @@ void Unit::ApplyCastTimePercentMod(float val, bool apply)
         ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED, val, !apply);
     else
         ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED, -val, apply);
-
-    const AuraEffectList &aList = GetAuraEffectsByType(SPELL_AURA_SANCTITY_OF_BATTLE);
-    if(!aList.empty())
-    {
-        for(AuraEffectList::const_iterator itr = aList.begin(); itr != aList.end(); ++itr)
-        {
-            (*itr)->ApplySpellMod((*itr)->GetBase()->GetUnitOwner(), false);
-            (*itr)->CalculateSpellMod();
-            (*itr)->ApplySpellMod((*itr)->GetBase()->GetUnitOwner(), true);
-        }
-    }
 }
 
 void Unit::UpdateAuraForGroup(uint8 slot)

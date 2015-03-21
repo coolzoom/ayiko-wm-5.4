@@ -1499,55 +1499,31 @@ public:
 // 76577 Smoke Bomb
 class spell_rog_smoke_bomb : public SpellScriptLoader
 {
-    enum
-    {
-        SPELL_SMOKE_BOMB_EFFECT = 88611
-    };
+    public:
+        spell_rog_smoke_bomb() : SpellScriptLoader("spell_rog_smoke_bomb") { }
 
-    class aura_impl : public AuraScript
-    {
-        PrepareAuraScript(aura_impl)
-
-        void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        class spell_rog_smoke_AuraScript : public AuraScript
         {
-            if (Unit * target = GetTarget())
-                target->RemoveAurasDueToSpell(SPELL_SMOKE_BOMB_EFFECT);
-        }
+            PrepareAuraScript(spell_rog_smoke_AuraScript);
 
-        void HandleEffectApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
-        {
-            Unit * target = GetTarget();
-            Unit * caster = GetCaster();
-            if (!target || !caster)
-                return;
+            bool Validate(SpellInfo const* /*spellInfo*/) { return true; }
 
-            if (!caster->IsFriendlyTo(target))
-                target->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
-
-            const SpellInfo * spell = sSpellMgr->GetSpellInfo(SPELL_SMOKE_BOMB_EFFECT);
-
-            if (Aura * const aur = Aura::TryCreate(spell, (1 << EFFECT_0), target, caster, &spell->spellPower))
+            void HandleEffectPeriodic(AuraEffect const* aurEff)
             {
-                int32 duration = aurEff->GetBase()->GetDuration();
-                aur->SetMaxDuration(duration);
-                aur->SetDuration(duration);
+                if (DynamicObject* dyn = GetTarget()->GetDynObject(aurEff->GetId()))
+                    GetTarget()->CastSpell(dyn->GetPositionX(), dyn->GetPositionY(), dyn->GetPositionZ(), 88611, true);
             }
-        }
 
-        void Register()
+            void Register()
+            {
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_rog_smoke_AuraScript::HandleEffectPeriodic, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
         {
-            OnEffectRemove += AuraEffectRemoveFn(aura_impl::HandleEffectRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-            OnEffectApply += AuraEffectApplyFn(aura_impl::HandleEffectApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            return new spell_rog_smoke_AuraScript();
         }
-    };
-
-public:
-    spell_rog_smoke_bomb() : SpellScriptLoader("spell_rog_smoke_bomb") { }
-
-    AuraScript* GetAuraScript() const
-    {
-        return new aura_impl();
-    }
 };
 
 // Shuriken Toss - 114014

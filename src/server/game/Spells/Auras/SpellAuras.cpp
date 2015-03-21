@@ -1328,7 +1328,11 @@ bool Aura::CanBeSentToClient() const
                 || spellEffect.ApplyAuraName == SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS
                 || spellEffect.ApplyAuraName == SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2
                 || spellEffect.ApplyAuraName == SPELL_AURA_MOD_IGNORE_SHAPESHIFT
-                || spellEffect.ApplyAuraName == SPELL_AURA_MOD_CHARGES)
+                || spellEffect.ApplyAuraName == SPELL_AURA_MOD_CHARGES
+                || spellEffect.ApplyAuraName == SPELL_AURA_ADD_FLAT_MODIFIER
+                || spellEffect.ApplyAuraName == SPELL_AURA_ADD_PCT_MODIFIER
+                || spellEffect.ApplyAuraName == SPELL_AURA_SANCTITY_OF_BATTLE_COOLDOWN
+                || spellEffect.ApplyAuraName == SPELL_AURA_SANCTITY_OF_BATTLE_GCD)
         {
             return true;
         }

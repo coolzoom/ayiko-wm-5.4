@@ -581,7 +581,10 @@ class spell_dru_soul_of_the_forest : public SpellScriptLoader
                 if (Unit* caster = GetCaster())
                 {
                     if (GetSpellInfo()->Id == 18562)
-                        caster->CastSpell(GetHitUnit(), SPELL_DRUID_SWIFTMEND, true);
+                    {
+                        int32 heal = GetHitHeal() * 0.12f;
+                        caster->CastCustomSpell(GetHitUnit(), SPELL_DRUID_SWIFTMEND, NULL, &heal, NULL, true);
+                    }
 
                     if (caster->HasAura(SPELL_DRUID_SOUL_OF_THE_FOREST))
                     {
@@ -2817,14 +2820,17 @@ class spell_dru_swiftmend : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_swiftmend_AuraScript);
 
-            void OnTick(AuraEffect const * /*aurEff*/)
+            void OnTick(AuraEffect const * aurEff)
             {
                 auto caster = GetCaster();
                 if (!caster)
                     return;
 
                 if (DynamicObject* dynObj = caster->GetDynObject(SPELL_DRUID_SWIFTMEND))
-                    caster->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), SPELL_DRUID_SWIFTMEND_TICK, true);
+                {
+                    int32 bp0 = aurEff->GetAmount();
+                    caster->CastCustomSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), SPELL_DRUID_SWIFTMEND_TICK, &bp0, NULL, NULL, true);
+                }
             }
 
             void Register()

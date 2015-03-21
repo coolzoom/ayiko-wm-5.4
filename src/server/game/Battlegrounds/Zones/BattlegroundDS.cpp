@@ -206,6 +206,9 @@ void BattlegroundDS::HandleAreaTrigger(Player* Source, uint32 Trigger)
 
 bool BattlegroundDS::HandlePlayerUnderMap(Player* player)
 {
+    if (GetStatus() == STATUS_WAIT_JOIN)
+        return true;
+
     player->TeleportTo(GetMapId(), 1299.046f, 784.825f, 9.338f, 2.422f, false);
     return true;
 }

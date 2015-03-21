@@ -164,14 +164,8 @@ public:
                 return;
 
             switch (uiType)
-            {
-                case TYPE_JINROKH:
-                case TYPE_HORRIDON:
-                case TYPE_COUNCIL:
-                    m_auiEncounter[uiType] = uiData;
-                    if (uiData >= DONE)
-                        SaveInstance();
-                    break;
+            {         
+                
                 case TYPE_JINROKH_INTRO:
                     m_auiEncounter[uiType] = uiData;
                     if (uiData >= DONE)
@@ -182,6 +176,27 @@ public:
                             pJinRokh->AI()->DoAction(ACTION_START_INTRO);
                     }
                     HandleGameObject(GetData64(GOB_JIN_ROKH_PREDOOR), true);
+                    break;
+                case TYPE_JINROKH:
+                    m_auiEncounter[uiType] = uiData;
+                    if (uiData >= DONE)
+                    {
+                        SaveInstance();
+                        HandleGameObject(GetData64(GOB_HORRIDON_PREDOOR), true);
+                    }
+                    break;
+                case TYPE_HORRIDON:
+                    m_auiEncounter[uiType] = uiData;
+                    if (uiData >= DONE)
+                    {
+                        SaveInstance();
+                        HandleGameObject(GetData64(GOB_HORRIDON_EXIT), true);
+                    }
+                    break;
+                case TYPE_COUNCIL:
+                    m_auiEncounter[uiType] = uiData;
+                    if (uiData >= DONE)
+                        SaveInstance();
                     break;
             }
         }

@@ -1489,17 +1489,45 @@ void AuraEffect::CalculateSpellMod()
 
             break;
         }
-        case SPELL_AURA_SANCTITY_OF_BATTLE:
+        case SPELL_AURA_SANCTITY_OF_BATTLE_COOLDOWN:
         {
-            if(!m_spellmod)
+            Unit* caster = GetCaster();
+            if (!m_spellmod)
             {
                 m_spellmod = SpellModifier::create(this);
                 m_spellmod->op = SPELLMOD_COOLDOWN;
                 m_spellmod->type = SPELLMOD_PCT;
                 m_spellmod->mask = m_spellInfo->Effects[m_effIndex].SpellClassMask;
             }
+            float haste = (1.0f / GetCaster()->GetFloatValue(UNIT_MOD_HASTE) * 100.0f) - 100.0f;
+            if (int32(haste) > 100)
+                haste = 100.0f;
 
-            m_spellmod->value = GetBase()->GetUnitOwner()->GetFloatValue(UNIT_MOD_CAST_SPEED) * GetAmount() - 100;
+            float newValue = -int32(haste);
+            if (newValue > 0)
+                newValue = 0;
+            m_spellmod->value = newValue;
+            break;
+        }
+        case SPELL_AURA_SANCTITY_OF_BATTLE_GCD:
+        {
+            Unit* caster = GetCaster();
+            if (!m_spellmod)
+            {
+                m_spellmod = SpellModifier::create(this);
+                m_spellmod->op = SPELLMOD_GLOBAL_COOLDOWN;
+                m_spellmod->type = SPELLMOD_PCT;
+                m_spellmod->mask = m_spellInfo->Effects[m_effIndex].SpellClassMask;
+            }
+            float haste = (1.0f / GetCaster()->GetFloatValue(UNIT_MOD_HASTE) * 100.0f) - 100.0f;
+            if (int32(haste) > 100)
+                haste = 100.0f;
+
+            float newValue = -int32(haste);
+            if (newValue > 0)
+                newValue = 0;
+            m_spellmod->value = newValue;
+            break;
         }
         default:
             break;

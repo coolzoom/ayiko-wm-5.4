@@ -98,6 +98,9 @@ void BattlegroundRL::HandleKillPlayer(Player* player, Player* killer)
 
 bool BattlegroundRL::HandlePlayerUnderMap(Player* player)
 {
+    if (GetStatus() == STATUS_WAIT_JOIN)
+        return true;
+
     player->TeleportTo(GetMapId(), 1285.810547f, 1667.896851f, 39.957642f, player->GetOrientation(), false);
     return true;
 }

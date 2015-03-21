@@ -2171,6 +2171,42 @@ public:
     }
 };
 
+class spell_mage_ring_of_frost_override : public SpellScriptLoader
+{
+public:
+    spell_mage_ring_of_frost_override() : SpellScriptLoader("spell_mage_ring_of_frost_override") { }
+
+    class spell_mage_ring_of_frost_override_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_mage_ring_of_frost_override_SpellScript);
+
+        void HandleDummy()
+        {
+            Unit* caster = GetCaster();
+            SpellInfo const* info = sSpellMgr->GetSpellInfo(140384);
+            SpellCastTargets targets;
+            targets.SetDst(GetExplTargetDest()->GetPositionX(), GetExplTargetDest()->GetPositionY(), GetExplTargetDest()->GetPositionZ(), GetExplTargetDest()->GetOrientation());
+            Spell* spell = new Spell(GetCaster(), info, TRIGGERED_FULL_MASK, caster->GetGUID());
+            spell->InitExplicitTargets(targets);
+            
+            spell->setState(SPELL_STATE_PREPARING);
+
+            SpellEvent* Event = new SpellEvent(spell);
+            caster->m_Events.AddEvent(Event, caster->m_Events.CalculateTime(2 * IN_MILLISECONDS));
+        }
+
+        void Register()
+        {
+            AfterCast += SpellCastFn(spell_mage_ring_of_frost_override_SpellScript::HandleDummy);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_mage_ring_of_frost_override_SpellScript();
+    }
+};
+
 void AddSC_mage_spell_scripts()
 {
     new spell_mage_flamestrike();
@@ -2217,4 +2253,5 @@ void AddSC_mage_spell_scripts()
     new spell_mage_ring_of_frost_freeze();
     new spell_mage_ring_of_frost();
     new spell_mage_fingers_of_frost();
+    new spell_mage_ring_of_frost_override();
 }

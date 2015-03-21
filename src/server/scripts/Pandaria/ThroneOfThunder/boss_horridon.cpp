@@ -613,36 +613,36 @@ public:
             jumpPositions   = NULL;
         }
 
-        void DoAction(int32 iAction)
+        void DoAction(const int32 iAction) override
         {
             switch (iAction)
             {
-            case ACTION_FIGHT_BEGIN:
-                FightBegin();
-                break;
+                case ACTION_FIGHT_BEGIN:
+                    FightBegin();
+                    break;
 
-            case ACTION_ENTER_NEXT_TRASH_PHASE:
-                EnterNextPhase();
-                break;
+                case ACTION_ENTER_NEXT_TRASH_PHASE:
+                    EnterNextPhase();
+                    break;
 
-            case ACTION_FIGHT_RESET:
-                FightReset();
-                break;
+                case ACTION_FIGHT_RESET:
+                    FightReset();
+                    break;
 
-            case ACTION_FIGHT_END:
-                FightEnd();
-                break;
+                case ACTION_FIGHT_END:
+                    FightEnd();
+                    break;
 
-            case ACTION_PREPARE_TRANSITION:
-                PrepareTransition();
-                break;
+                case ACTION_PREPARE_TRANSITION:
+                    PrepareTransition();
+                    break;
 
-            default:
-                break;
+                default:
+                    break;
             }
         }
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(const uint32 uiDiff)
         {
             if (uiTrashPhase == MAX_TRASH_PHASE)
                 return;
@@ -653,66 +653,66 @@ public:
             {
                 switch (uiEventId)
                 {
-                case EVENT_SUMMON_MINOR:
-                    if (summonPositions)
-                    {
-                        std::list<uint32> entries;
-
-                        if (uiMinorTrashId)
-                            entries.push_back(uiMinorTrashId);
-                        if (uiMediumTrashId[0])
-                            entries.push_back(uiMediumTrashId[0]);
-                        if (uiMediumTrashId[1])
-                            entries.push_back(uiMediumTrashId[1]);
-
-                        if (entries.empty()) // Entries is empty, no need to reschedule event
-                            break;
-
-                        for (uint8 i = 0; i < MAX_SUMMON_POSITIONS_BY_PHASE; ++i)
+                    case EVENT_SUMMON_MINOR:
+                        if (summonPositions)
                         {
-                            uint32 uiSummonEntry = Trinity::Containers::SelectRandomContainerElement(entries);
-                            me->SummonCreature(uiSummonEntry, summonPositions[urand(0, MAX_SUMMON_POSITIONS_BY_PHASE - 1)]);
+                            std::list<uint32> entries;
+
+                            if (uiMinorTrashId)
+                                entries.push_back(uiMinorTrashId);
+                            if (uiMediumTrashId[0])
+                                entries.push_back(uiMediumTrashId[0]);
+                            if (uiMediumTrashId[1])
+                                entries.push_back(uiMediumTrashId[1]);
+
+                            if (entries.empty()) // Entries is empty, no need to reschedule event
+                                break;
+
+                            for (uint8 i = 0; i < MAX_SUMMON_POSITIONS_BY_PHASE; ++i)
+                            {
+                                uint32 uiSummonEntry = Trinity::Containers::SelectRandomContainerElement(entries);
+                                me->SummonCreature(uiSummonEntry, summonPositions[urand(0, MAX_SUMMON_POSITIONS_BY_PHASE - 1)]);
+                            }
+
+                            if (GameObject *pDoor = GetDoorByPhase((eTrashPhases)uiTrashPhase, me))
+                                pDoor->Use(me);
+
+                            events.ScheduleEvent(EVENT_SUMMON_MINOR, urand(10, 20) * IN_MILLISECONDS);
                         }
-
-                        if (GameObject *pDoor = GetDoorByPhase((eTrashPhases)uiTrashPhase, me))
-                            pDoor->Use(me);
-
-                        events.ScheduleEvent(EVENT_SUMMON_MINOR, urand(10, 20) * IN_MILLISECONDS);
-                    }
                     break;
 
-                case EVENT_SUMMON_MAJOR:
-                    if (jumpPositions)
-                    {
-                        std::list<Creature*> majors;
-                        GetCreatureListWithEntryInGrid(majors, me, uiMajorTrashId, 50000.0f);
-
-                        if (!majors.empty())
+                    case EVENT_SUMMON_MAJOR:
+                        if (jumpPositions)
                         {
-                            if (uiMajorCycle == MAJOR_CYCLE_FIRST)
+                            std::list<Creature*> majors;
+                            GetCreatureListWithEntryInGrid(majors, me, uiMajorTrashId, 50000.0f);
+
+                            if (!majors.empty())
                             {
-                                if (Creature *pCreature = Trinity::Containers::SelectRandomContainerElement(majors))
+                                if (uiMajorCycle == MAJOR_CYCLE_FIRST)
                                 {
-                                    pCreature->GetMotionMaster()->MoveJump(jumpPositions[urand(0, MAX_JUMP_POSITIONS_BY_PHASE - 1)], 20.0f, 42.0f, MOTION_MAJOR_JUMP);
-                                    jumpers.push_back(pCreature);
-                                }
-                            }
-                            else
-                            {
-                                for (Creature *pCreature : majors)
-                                {
-                                    if (!pCreature->IsInCombat())
+                                    if (Creature *pCreature = Trinity::Containers::SelectRandomContainerElement(majors))
                                     {
                                         pCreature->GetMotionMaster()->MoveJump(jumpPositions[urand(0, MAX_JUMP_POSITIONS_BY_PHASE - 1)], 20.0f, 42.0f, MOTION_MAJOR_JUMP);
                                         jumpers.push_back(pCreature);
                                     }
                                 }
+                                else
+                                {
+                                    for (Creature *pCreature : majors)
+                                    {
+                                        if (!pCreature->IsInCombat())
+                                        {
+                                            pCreature->GetMotionMaster()->MoveJump(jumpPositions[urand(0, MAX_JUMP_POSITIONS_BY_PHASE - 1)], 20.0f, 42.0f, MOTION_MAJOR_JUMP);
+                                            jumpers.push_back(pCreature);
+                                        }
+                                    }
+                                }
                             }
-                        }
 
-                        ++uiMajorCycle;
-                        events.ScheduleEvent(EVENT_SUMMON_MAJOR, 20 * IN_MILLISECONDS);
-                    }
+                            ++uiMajorCycle;
+                            events.ScheduleEvent(EVENT_SUMMON_MAJOR, 20 * IN_MILLISECONDS);
+                        }
                     break;
 
                 case EVENT_SUMMON_ZANDALARI_DINOMANCER:
@@ -728,29 +728,29 @@ public:
                 {
                     switch (uiDrakkariCycle)
                     {
-                    case DRAKKARI_CYCLE_FIRST:
-                        uiDrakkariCycle = DRAKKARI_CYCLE_SECOND;
-                        if (summonPositions)
-                        {
-                            me->SummonCreature(MOB_RISEN_DRAKKARI_CHAMPION, summonPositions[urand(0, MAX_SUMMON_POSITIONS_BY_PHASE - 1)]);
-                            me->SummonCreature(MOB_RISEN_DRAKKARI_WARRIOR, summonPositions[urand(0, MAX_SUMMON_POSITIONS_BY_PHASE - 1)]);
-                            events.ScheduleEvent(EVENT_SUMMON_MINOR_DRAKKARI, urand(6, 10) * IN_MILLISECONDS);
-                        }
-                        break;
+                        case DRAKKARI_CYCLE_FIRST:
+                            uiDrakkariCycle = DRAKKARI_CYCLE_SECOND;
+                            if (summonPositions)
+                            {
+                                me->SummonCreature(MOB_RISEN_DRAKKARI_CHAMPION, summonPositions[urand(0, MAX_SUMMON_POSITIONS_BY_PHASE - 1)]);
+                                me->SummonCreature(MOB_RISEN_DRAKKARI_WARRIOR, summonPositions[urand(0, MAX_SUMMON_POSITIONS_BY_PHASE - 1)]);
+                                events.ScheduleEvent(EVENT_SUMMON_MINOR_DRAKKARI, urand(6, 10) * IN_MILLISECONDS);
+                            }
+                            break;
 
-                    case DRAKKARI_CYCLE_SECOND:
-                        uiDrakkariCycle = DRAKKARI_CYCLE_FIRST;
-                        if (summonPositions)
-                        {
-                            me->SummonCreature(MOB_RISEN_DRAKKARI_CHAMPION, summonPositions[urand(0, MAX_SUMMON_POSITIONS_BY_PHASE - 1)]);
-                            events.ScheduleEvent(EVENT_SUMMON_MINOR_DRAKKARI, urand(8, 15) * IN_MILLISECONDS);
+                        case DRAKKARI_CYCLE_SECOND:
+                            uiDrakkariCycle = DRAKKARI_CYCLE_FIRST;
+                            if (summonPositions)
+                            {
+                                me->SummonCreature(MOB_RISEN_DRAKKARI_CHAMPION, summonPositions[urand(0, MAX_SUMMON_POSITIONS_BY_PHASE - 1)]);
+                                events.ScheduleEvent(EVENT_SUMMON_MINOR_DRAKKARI, urand(8, 15) * IN_MILLISECONDS);
+                            }
+                            break;
                         }
-                        break;
-                    }
 
-                    if (GameObject *pDoor = GetDoorByPhase((eTrashPhases)uiTrashPhase, me))
-                        pDoor->Use(me);
-                    break;
+                        if (GameObject *pDoor = GetDoorByPhase((eTrashPhases)uiTrashPhase, me))
+                            pDoor->Use(me);
+                        break;
                 }
 
                 case EVENT_TRANSITION:
@@ -970,7 +970,7 @@ public:
             events.ScheduleEvent(EVENT_CHECK_PLAYERS, 500);
         }
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(const uint32 uiDiff)
         {
             if (bIntroDone)
                 return;
@@ -1053,13 +1053,21 @@ public:
     {
         boss_horridon_AI(Creature *pCreature) : BossAI(pCreature, DATA_HORRIDON), bJalakCalled(false)
         {
+            pChargeDoor = NULL;
+            events.Reset();
         }
 
         GameObject      *pChargeDoor;
         bool            bJalakCalled;
 
         void Reset()
-        {      
+        {   
+            if (Creature *pHorridonHelper = GetHorridonHelper(me))
+            {
+                if (CreatureAI* pHelperAI = pHorridonHelper->AI())
+                    pHelperAI->DoAction(ACTION_FIGHT_RESET);
+            } 
+
             events.Reset();
             pChargeDoor = NULL;
             bJalakCalled = false;
@@ -1067,15 +1075,12 @@ public:
             me->RemoveAurasDueToSpell(SPELL_HEADACHE);
             me->RemoveAurasDueToSpell(SPELL_CRACKED_SHELL);
             me->RemoveAurasDueToSpell(SPELL_RAMPAGE);
+
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
+            me->SetReactState(REACT_AGGRESSIVE);
             
             instance->SetBossState(DATA_HORRIDON, NOT_STARTED);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-
-            if (Creature *pHorridonHelper = GetHorridonHelper(me))
-            {
-                if (CreatureAI* pHelperAI = pHorridonHelper->AI())
-                    pHelperAI->DoAction(ACTION_FIGHT_RESET);
-            }
         }
 
         void EnterCombat(Unit *pVictim)
@@ -1097,7 +1102,7 @@ public:
             }
         }
 
-        void DoAction(int32 iAction)
+        void DoAction(const int32 iAction) override
         {
             switch (iAction)
             {
@@ -1111,7 +1116,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(const uint32 uiDiff)
         {
             if (!UpdateVictim())
                 return;
@@ -1182,6 +1187,8 @@ public:
 
         void MovementInform(uint32 uiMotionType, uint32 uiMovementId)
         {
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
+            me->SetReactState(REACT_AGGRESSIVE);
             if (uiMotionType == EFFECT_MOTION_TYPE)
             {
                 switch (uiMovementId)
@@ -1211,6 +1218,7 @@ public:
             Position chargePosition = GetChargePositionByDoor(pDoor);
             me->GetMotionMaster()->MoveCharge(chargePosition.GetPositionX(), chargePosition.GetPositionY(), chargePosition.GetPositionZ(), 42.0f, MOTION_HORRIDON_DOOR_CHARGE);
             DoCast(me, SPELL_HEADACHE);
+            DoCast(me, SPELL_CRACKED_SHELL);
         }
     };
 
@@ -1233,21 +1241,21 @@ public:
         mob_war_god_jalak_AI(Creature *pCreature) : ScriptedAI(pCreature), uiPhase(BOSS_PHASE_SUMMONS)
         {
         }
-        uint32          uiPhase;
+        uint32 uiPhase;
 
         void Reset()
-        {
-            events.Reset();
-            uiPhase = BOSS_PHASE_SUMMONS;
-
+        {   
             if (Creature *pHorridonHelper = GetHorridonHelper(me))
             {
                 if (CreatureAI* pHelperAI = pHorridonHelper->AI())
                     pHelperAI->DoAction(ACTION_FIGHT_RESET);
             }
+
+            events.Reset();
+            uiPhase = BOSS_PHASE_SUMMONS;
         }
 
-        void DoAction(int32 iAction)
+        void DoAction(const int32 iAction) override
         {
             switch (iAction)
             {
@@ -1280,7 +1288,7 @@ public:
                         me->SetInCombatWithZone();
                         std::list<Player*> playerList;
 
-                        me->GetPlayerListInGrid(playerList, 500.0f);
+                        GetPlayerListInGrid(playerList, me, 500.0f);
                         playerList.sort([this] (Player const* first, Player const* second) -> bool
                         {
                             return first->GetExactDist2d(this->me) < second->GetExactDist2d(this->me);
@@ -1307,7 +1315,7 @@ public:
             events.ScheduleEvent(EVENT_BESTIAL_CRY, 10 * IN_MILLISECONDS);
         }
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(const uint32 uiDiff)
         {
             if (uiPhase == BOSS_PHASE_SUMMONS)
                 return;
@@ -1485,7 +1493,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(const uint32 uiDiff)
         {
             if (!UpdateVictim())
                 return;
@@ -1692,7 +1700,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(const uint32 uiDiff)
         {
             if (!UpdateVictim())
                 return;
@@ -1755,13 +1763,12 @@ public:
             }
         }
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(const uint32 uiDiff)
         {
             if (!UpdateVictim())
                 return;
 
             events.Update(uiDiff);
-
 
             if (HealthBelowPct(50) && !bIsUnderFiftyPercent)
             {
@@ -1770,16 +1777,6 @@ public:
                 me->InterruptNonMeleeSpells(true);
                 me->InterruptSpell(CURRENT_CHANNELED_SPELL);
                 // me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-
-                if (Creature *pHelper = GetHorridonHelper(me))
-                {
-                    if (HorridonHelperAI* pHelperAI = dynamic_cast<HorridonHelperAI*>( pHelper->AI() ))
-                    {
-                        if (uint32 uiSummonSpellId = GetSummoningOrbSpellByPhase(pHelperAI->GetTrashPhase()))
-                            DoCast(me, uiSummonSpellId);
-                    }
-                }
-
                 events.CancelEvent(EVENT_DINO_MENDING);
                 DoCast(me, SPELL_DINO_FORM);
             }
@@ -1803,6 +1800,19 @@ public:
             }
 
             DoMeleeAttackIfReady();
+        }
+
+
+        void JustDied(Unit *pKiller)
+        {
+            if (Creature *pHelper = GetHorridonHelper(me))
+            {
+                if (HorridonHelperAI* pHelperAI = dynamic_cast<HorridonHelperAI*>( pHelper->AI() ))
+                {
+                    uint32 uiSummonSpellId = GetSummoningOrbSpellByPhase(pHelperAI->GetTrashPhase());
+                    DoCast(me, uiSummonSpellId);
+                }
+            }
         }
 
     private:
@@ -1895,7 +1905,6 @@ public:
                     }
                 }
             }
-
             return true;
         }
     };
@@ -1990,7 +1999,7 @@ public:
     {
         PrepareSpellScript(spell_horridon_chain_lightning_SpellScript)
 
-            void HandleEffectHitTarget(SpellEffIndex effectIndex)
+        void HandleEffectHitTarget(SpellEffIndex effectIndex)
         {
             if (Unit *pHitUnit = GetHitUnit())
             {
@@ -2105,7 +2114,7 @@ public:
     {
         PrepareSpellScript(spell_horridon_sand_trap_SpellScript)
 
-            void HandleSelectTargets(std::list<WorldObject*>& targets)
+        void HandleSelectTargets(std::list<WorldObject*>& targets)
         {
             if (!GetCaster())
                 return;

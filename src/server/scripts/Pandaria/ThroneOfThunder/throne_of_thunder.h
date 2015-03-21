@@ -116,6 +116,7 @@ enum ObjectsIds
     GOB_JIN_ROKH_PREDOOR                    = 218665,
     GOB_JIN_ROKH_EXIT                       = 218667,
     GOB_HORRIDON_ENTRANCE                   = 218663,
+    GOB_HORRIDON_PREDOOR                    = 218669,
     GOB_HORRIDON_EXIT                       = 218666,
     GOB_COUNCIL_ENTRANCE1                   = 218655,
     GOB_COUNCIL_ENTRANCE2                   = 218656,

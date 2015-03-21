@@ -8575,6 +8575,7 @@ REPLACE INTO spell_script_names VALUES
   (136937, "spell_malakk_frostbite_allies"),
   (136990, "spell_malakk_frostbite"),
   (137084, "spell_malakk_body_heat"),
+  (137107, "spell_kazrajin_reckless_charge_targeting"),
   (137117, "spell_kazrajin_reckless_charge"),
   (137149, "spell_kazrajin_overload"),
   (137166, "spell_kazrajin_discharge"),

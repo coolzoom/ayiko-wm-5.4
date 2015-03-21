@@ -248,7 +248,7 @@ public:
                     EntryGuidMap::const_iterator find = m_mNpcGuidStorage.find(uiType);
                     if (find != m_mNpcGuidStorage.cend())
                     {
-                        TC_LOG_ERROR("scripts", "GetData64 requested Creature Data for uiType %u, returned guid %u", uiType, find->second);
+                        //TC_LOG_ERROR("scripts", "GetData64 requested Creature Data for uiType %u, returned guid %u", uiType, find->second);
                         return find->second;
                     }
                     return 0;

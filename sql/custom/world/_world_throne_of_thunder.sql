@@ -1031,7 +1031,7 @@ INSERT INTO `creature` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMa
 (@CGUID+229, 70246, 1098, 0, 0, 248, 1, 0, 70246, 5405.78, 6263.1,  123.61, 1.433,   1, 0, @CGUID+229, 393941, 0, 2, 0, 0, 0, 2048, 0, 0, NULL),
 (@CGUID+230, 70246, 1098, 0, 0, 248, 1, 0, 70246, 5426.55, 6061.12, 117.79, 2.63834, 1, 0, @CGUID+230, 393941, 0, 2, 0, 0, 0, 2048, 0, 0, NULL),
 
-(@CGUID+233, 662202, 1098, 0, 0, 248, 1, 0, 0, 5432.21, 5866.93, 235.962, 4.64324, 86400, 0, 0, 84, 0, 0, 0, 0, 33554432, 0, 0, 0, NULL),
+(@CGUID+233, 662202, 1098, 0, 0, 248, 1, 0, 0, 5432.21, 5866.93, 235.962, 4.64324, 86400, 0, 0, 84, 0, 0, 0, 0, 33554432, 0, 0, 1, NULL),
 (@CGUID+234, 662206, 1098, 0, 0, 248, 1, 0, 0, 5431.36, 5812.71, 129.605, 1.56204, 86400, 0, 0, 436137, 0, 0, 0, 0, 33554432, 0, 0, 0, NULL);
 /*---------------------------------------------------------------------------------------------------------------*/
 
@@ -1326,12 +1326,12 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 -- 10H=(10N+25%)
 
 -- Script Names
-UPDATE creature_template SET ScriptName = "boss_sul_the_sandcrawler" WHERE entry = 69078;
-UPDATE creature_template SET ScriptName = "boss_frost_king_malakk" WHERE entry = 69131;
-UPDATE creature_template SET ScriptName = "boss_high_priestess_marli" WHERE entry = 69132;
-UPDATE creature_template SET ScriptName = "boss_kazrajin" WHERE entry = 69134;
+UPDATE creature_template SET ScriptName = "boss_sul_the_sandcrawler", VehicleId = 2670 WHERE entry = 69078;
+UPDATE creature_template SET ScriptName = "boss_frost_king_malakk", VehicleId = 2665 WHERE entry = 69131;
+UPDATE creature_template SET ScriptName = "boss_high_priestess_marli", VehicleId = 2668 WHERE entry = 69132;
+UPDATE creature_template SET ScriptName = "boss_kazrajin", VehicleId = 2669 WHERE entry = 69134;
 UPDATE creature_template SET ScriptName = "mob_living_sand" WHERE entry = 69153;
-UPDATE creature_template SET ScriptName = "mob_garajals_soul" WHERE entry = 69182;
+UPDATE creature_template SET ScriptName = "mob_garajals_soul", VehicleId = 2664 WHERE entry = 69182;
 UPDATE creature_template SET ScriptName = "mob_blessed_loa_spirit" WHERE entry = 69480;
 UPDATE creature_template SET ScriptName = "mob_shadowed_loa_spirit" WHERE entry = 69548;
 UPDATE creature_template SET ScriptName = "mob_twisted_fate" WHERE entry IN (69740, 69746);

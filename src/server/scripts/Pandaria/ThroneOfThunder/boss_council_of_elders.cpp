@@ -197,13 +197,11 @@ enum eActions
 {
     //===============================================
     // Gara'jal
-    ACTION_ENTER_COMBAT                     = 0, // Garajal + Garajal's soul
-    ACTION_EXIT_COUNCILLOR                  = 1, // Garajal's soul
-
-    //===============================================
-    // Council Event Helper
-    ACTION_FIGHT_RESET                      = 2,
-    ACTION_FIGHT_BEGIN                      = 3,
+    ACTION_ENTER_COMBAT         = 0, // Garajal + Garajal's soul
+    ACTION_EXIT_COUNCILLOR      = 1, // Garajal's soul
+    ACTION_FIGHT_RESET          = 2,
+    ACTION_FIGHT_BEGIN          = 3,
+    ACTION_COUNCILLOR_DIED      = 4,
 
     //===============================================
     // Councillors
@@ -333,6 +331,7 @@ enum eTalks
 
 static Creature *GetCouncilEventHelper(WorldObject *pSource)
 {
+    TC_LOG_ERROR("scripts", "Checked for council event helper");
     return ObjectAccessor::GetCreature(*pSource, pSource->GetInstanceScript()->GetData64(NPC_COUNCIL_EVENT_HELPER));
 }
 
@@ -396,154 +395,6 @@ static const std::array<uint32, 4> uiBossEntries = {BOSS_COUNCIL_FROST_KING_MALA
 //=========================================================
 // Creature Scripts
 
-
-// Council Event Helper AI
-class npc_council_event_helper : public CreatureScript
-{
-public:
-    npc_council_event_helper() : CreatureScript("npc_council_event_helper") { }
-
-    class npc_council_event_helper_AI : public ScriptedAI
-    {
-    public:
-        npc_council_event_helper_AI(Creature *pCreature) :
-            ScriptedAI(pCreature), pInstance(pCreature->GetInstanceScript()), eStatus(STATUS_RESET)
-        {
-            vDeadCouncillors.clear();
-        }
-
-        void Reset()
-        {
-            ResetEvent();
-        }
-
-        void DoAction(const int32 iAction) override
-        {
-            switch(iAction)
-            {
-            // Called from Reset() of every boss
-            case ACTION_FIGHT_RESET:
-                ResetEvent();
-                break;
-
-            // Called from EnterCombat() of every boss
-            case ACTION_FIGHT_BEGIN:
-                BeginEvent();
-                break;
-
-            default:
-                break;
-            }
-        }
-
-        // public to access with dynamic_cast
-        void CouncillorDeath(Creature *pCouncillor)
-        {
-            ASSERT(vDeadCouncillors.find(pCouncillor) == vDeadCouncillors.end());
-
-            vDeadCouncillors.insert(pCouncillor);
-
-            if(vDeadCouncillors.size() == 4)
-            {
-                pInstance->SetBossState(DATA_COUNCIL_OF_ELDERS, DONE);
-                eStatus = STATUS_DONE;
-
-                if(Creature *pTwistedFateHelper = ObjectAccessor::GetCreature(*me, pInstance->GetData64(NPC_TWISTED_FATE_HELPER)))
-                    pTwistedFateHelper->AI()->DoAction(ACTION_TWISTED_FATE_END_FIGHT);
-                    
-                std::list<Player*> playerList;
-                me->GetPlayerListInGrid(playerList, 500.0f);
-                
-                for(Player *pIter: playerList)
-                    pIter->RemoveAurasDueToSpell(SPELL_SHADOWED_SOUL);
-            }
-        }
-
-    private:
-        InstanceScript      *pInstance;
-        eHelperStatus       eStatus;
-        std::set<Creature*> vDeadCouncillors;
-
-        // Reset the event if not already reset. Send informations to InstanceScript,
-        // force dead councillor to respawn, and let Garajal EnterEvadeMode() (really
-        // important to call EnterEvadeMode() and not Reset(), Reset() is a subsequent
-        // call from EnterEvadeMode().
-        void ResetEvent()
-        {
-            // Return since we are already reset
-            if(eStatus == STATUS_RESET)
-                return;
-
-            pInstance->SetBossState(DATA_COUNCIL_OF_ELDERS, NOT_STARTED);
-
-            eStatus = STATUS_RESET;
-
-            for(Creature *pIter : vDeadCouncillors)
-                pIter->Respawn();
-
-            // Reset Garajal here, to be sure he won't reset four times
-            if(Creature *pGarajalSoul = GetGarajalsSoul(me))
-                pGarajalSoul->DisappearAndDie();
-                
-            if(Creature *pGarajal = GetGarajal(me))
-                pGarajal->AI()->Reset();
-
-            // Clean zone from summons
-            DespawnCreatures();
-        }
-
-        // Start the event if not already started: send informations to InstanceScript,
-        // put all the boss in combat with zone, and orders Garajal to possess Malakk.
-        void BeginEvent()
-        {
-            // Return if we are already in progress
-            if(eStatus == STATUS_PROGRESS)
-                return;
-
-            eStatus = STATUS_PROGRESS;
-
-            pInstance->SetBossState(DATA_COUNCIL_OF_ELDERS, IN_PROGRESS);
-
-            if(Creature *pGarajal = GetGarajal(me))
-                pGarajal->AI()->DoAction(ACTION_ENTER_COMBAT);
-
-            std::array<Creature*, 4> apCouncillors = {GetFrostKingMalakk(me), GetKazrajin(me), GetSulTheSandcrawler(me), GetHighPriestessMarli(me)};
-            for(Creature *pCouncillor: apCouncillors)
-            {
-                // Do not call DoAction if councillor is already in combat
-                if(pCouncillor && !pCouncillor->IsInCombat())
-                    pCouncillor->AI()->DoAction(ACTION_COUNCILLORS_ENTER_COMBAT);
-            }
-        }
-
-        inline void DespawnCreatures() const
-        {
-            DespawnCreaturesByEntry(NPC_QUICKSAND_STALKER);
-            DespawnCreaturesByEntry(MOB_LIVING_SAND);
-            DespawnCreaturesByEntry(MOB_BLESSED_LOA_SPIRIT);
-            DespawnCreaturesByEntry(MOB_SHADOWED_LOA_SPIRIT);
-            DespawnCreaturesByEntry(MOB_TWISTED_FATE_FIRST);
-            DespawnCreaturesByEntry(MOB_TWISTED_FATE_SECOND);
-        }
-
-        void DespawnCreaturesByEntry(uint32 uiEntry) const
-        {
-            std::list<Creature*> minionsList;
-            GetCreatureListWithEntryInGrid(minionsList, me, uiEntry, 500.0f);
-
-            for(Creature *pMinion: minionsList)
-                pMinion->DespawnOrUnsummon();
-        }
-    };
-
-    CreatureAI *GetAI(Creature *pCreature) const
-    {
-        return new npc_council_event_helper_AI(pCreature);
-    }
-};
-typedef npc_council_event_helper::npc_council_event_helper_AI HelperAI;
-
-
 // Base class for the councillor's AI (only override common functions)
 class boss_council_of_elders_base_AI : public ScriptedAI
 {
@@ -561,10 +412,10 @@ public:
     // other close creatures are still in combat.
     void Reset()
     {
-        if(Creature *pHelper = GetCouncilEventHelper(me))
+        if (Creature *pGarajal = GetGarajal(me))
         {
-            if(CreatureAI *pHelperAI = pHelper->AI())
-                pHelperAI->DoAction(ACTION_FIGHT_RESET);
+            if (pGarajal->AI())
+                pGarajal->AI()->DoAction(ACTION_FIGHT_RESET);
         }
 
         events.Reset();
@@ -579,12 +430,12 @@ public:
     }
 
     // Override EnterCombat to send the DoAction to the helper
-    void EnterCombat(Unit *pAttacker) override
+    void EnterCombat(Unit *pAttacker) 
     {
-        if(Creature *pHelper = GetCouncilEventHelper(me))
+        if (Creature* pGarajal = GetGarajal(me))
         {
-            if(pHelper->AI())
-                pHelper->AI()->DoAction(ACTION_FIGHT_BEGIN);
+            if (pGarajal->AI())
+                pGarajal->AI()->DoAction(ACTION_FIGHT_BEGIN);
         }
         
         switch(me->GetEntry())
@@ -613,7 +464,7 @@ public:
     }
 
     // Override DoAction for the generic actions
-    void DoAction(int32 iAction)
+    void DoAction(const int32 iAction)
     {
         switch(iAction)
         {
@@ -668,15 +519,19 @@ public:
 
     void DamageTaken(Unit *pAttacker, uint32 &ruiAmount)
     {
-        if(!me->HasAura(SPELL_POSSESSED))
+        if (!me->HasAura(SPELL_POSSESSED))
             return;
 
         uiDamageTakenPossessed += ruiAmount;
-        if((float)uiDamageTakenPossessed >= (float)((float)me->GetMaxHealth() * 0.25f))
+        TC_LOG_ERROR("scripts", "dmg amount is %u", uiDamageTakenPossessed);
+        if (uiDamageTakenPossessed >= (float)(me->GetMaxHealth() * 0.25f))
         {
             // No remove when no other councillor alive
-            if(IsACouncillorAlive())
-                DoCast(me, SPELL_LINGERING_PRESENCE);
+            if (IsACouncillorAlive())
+            {
+                if (Creature *pGarajal = GetGarajalsSoul(me))
+                    pGarajal->AI()->DoAction(ACTION_EXIT_COUNCILLOR);
+            }
             uiDamageTakenPossessed = 0; // Reset in both case to prevent chain call to IsACouncillorAlive
         }
     }
@@ -703,6 +558,12 @@ public:
             
         default:
             break;
+        }
+
+        if (Creature* pGarajal = GetGarajal(me))
+        {
+            if (pGarajal->AI())
+                pGarajal->AI()->DoAction(ACTION_COUNCILLOR_DIED);
         }
     }
     
@@ -1445,56 +1306,195 @@ class mob_garajal : public CreatureScript
 public:
     mob_garajal() : CreatureScript("mob_garajal") { }
     
-    class mob_garajal_AI : public ScriptedAI
+    struct mob_garajal_AI : public BossAI
     {
-    public:
-        mob_garajal_AI(Creature *pCreature) : 
-            ScriptedAI(pCreature), pInstance(pCreature->GetInstanceScript())
+        mob_garajal_AI(Creature *pCreature) : BossAI(pCreature, DATA_COUNCIL_OF_ELDERS)
         {
-            SetCombatMovement(false);
+            me->SetReactState(REACT_PASSIVE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
+            FillBossGuids();
             events.Reset();
         }
-        
-        void Reset()
+
+        std::list<uint64> m_lBossGuids;
+        uint32 m_uiDeadCouncillors;
+
+        void Reset() override
         {
+        }
+
+        void SetData(uint32 uiType, uint32 uiData) override
+        {
+            m_uiDeadCouncillors += uiData;
+        }
+
+        uint32 GetData(uint32 uiType) override
+        {
+            TC_LOG_ERROR("scripts", "m_uiDeadCouncillors %u", m_uiDeadCouncillors);
+            return m_uiDeadCouncillors;
+        }
+
+        void ResetFight()
+        {
+            if (instance->GetBossState(DATA_COUNCIL_OF_ELDERS) == NOT_STARTED)
+                return;
+
+            instance->SetBossState(DATA_COUNCIL_OF_ELDERS, NOT_STARTED);
+
+            m_uiDeadCouncillors = 0;
+
+            summons.DespawnAll();
+
             me->SetVisible(true);
             events.Reset();
+
+            for (auto const uiGuid : m_lBossGuids)
+            {
+                if (Creature* pBoss = ObjectAccessor::GetCreature(*me, uiGuid))
+                {
+                    if (pBoss->IsAlive())
+                    {
+                        if (pBoss->IsInCombat() && pBoss->AI())
+                            pBoss->AI()->EnterEvadeMode();
+                    }
+                    else
+                        pBoss->Respawn();
+                }
+            }
+
+            DespawnCreatures();
         }
-        
+
+        void FillBossGuids()
+        {
+            m_uiDeadCouncillors = 0;
+
+            m_lBossGuids.insert(m_lBossGuids.begin(), instance->GetData64(BOSS_COUNCIL_FROST_KING_MALAKK));
+            m_lBossGuids.insert(m_lBossGuids.begin(), instance->GetData64(BOSS_COUNCIL_HIGH_PRIESTESS_MARLI));
+            m_lBossGuids.insert(m_lBossGuids.begin(), instance->GetData64(BOSS_COUNCIL_SUL_THE_SANDCRAWLER));
+            m_lBossGuids.insert(m_lBossGuids.begin(), instance->GetData64(BOSS_COUNCIL_KAZRAJIN));
+
+            TC_LOG_ERROR("scripts", "boss guids filled, size %u", m_lBossGuids.size());
+        }
+
+        void FinishFight()
+        {
+            pInstance->SetBossState(DATA_COUNCIL_OF_ELDERS, DONE);
+
+            /*
+            if (IsHeroic())
+            {
+                if (Creature *pTwistedFateHelper = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_TWISTED_FATE_HELPER)))
+                    pTwistedFateHelper->AI()->DoAction(ACTION_TWISTED_FATE_END_FIGHT);
+            }
+            */
+
+            /*
+            std::list<Player*> playerList;
+            me->GetPlayerListInGrid(playerList, 500.0f);
+
+            for (Player *pIter : playerList)
+                pIter->RemoveAurasDueToSpell(SPELL_SHADOWED_SOUL); */
+
+            // Something for Gara'jal here I suppose
+        }
+
+        void BeginFight()
+        {
+            if (instance->GetBossState(DATA_COUNCIL_OF_ELDERS) == IN_PROGRESS)
+                return;
+
+            instance->SetBossState(DATA_COUNCIL_OF_ELDERS, IN_PROGRESS);
+
+            for (auto const uiGuid : m_lBossGuids)
+            {
+                if (Creature* pBoss = ObjectAccessor::GetCreature(*me, uiGuid))
+                {
+                    if (!pBoss->IsInCombat() && pBoss->AI())
+                    {
+                        pBoss->AI()->DoZoneInCombat();
+                        pBoss->AI()->DoAction(ACTION_COUNCILLORS_ENTER_COMBAT);
+                    }
+                }
+            }
+
+            Talk(SAY_GARAJAL_INTRO);
+            events.ScheduleEvent(EVENT_SUMMON_SOUL, 3 * IN_MILLISECONDS);
+        }
+
         void DoAction(int32 iAction)
         {
-            switch(iAction)
+            switch (iAction)
             {
-            case ACTION_ENTER_COMBAT:
-                Talk(SAY_GARAJAL_INTRO);
-                events.ScheduleEvent(EVENT_SUMMON_SOUL, 3 * IN_MILLISECONDS);
+            case ACTION_FIGHT_BEGIN:
+                BeginFight();
                 break;
-                
+            case ACTION_FIGHT_RESET:
+                ResetFight();
+                break;
+            case ACTION_COUNCILLOR_DIED:
+                ++m_uiDeadCouncillors;
+                if (m_uiDeadCouncillors > 3)
+                    FinishFight();
+                else
+                if (Creature* pSoul = ObjectAccessor::GetCreature(*me, instance->GetData64(MOB_GARA_JALS_SOUL)))
+                    pSoul->AI()->DoAction(ACTION_ENTER_COMBAT);
+                break;
             default:
                 break;
             }
         }
-        
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            summons.Summon(pSummoned);
+        }
+
+        void SummonedCreatureDespawn(Creature* pSummoned) override
+        {
+            summons.Despawn(pSummoned);
+        }
+
+        inline void DespawnCreatures() const
+        {
+            DespawnCreaturesByEntry(NPC_QUICKSAND_STALKER);
+            DespawnCreaturesByEntry(MOB_LIVING_SAND);
+            DespawnCreaturesByEntry(MOB_BLESSED_LOA_SPIRIT);
+            DespawnCreaturesByEntry(MOB_SHADOWED_LOA_SPIRIT);
+            DespawnCreaturesByEntry(MOB_TWISTED_FATE_FIRST);
+            DespawnCreaturesByEntry(MOB_TWISTED_FATE_SECOND);
+        }
+
+        void DespawnCreaturesByEntry(uint32 uiEntry) const
+        {
+            std::list<Creature*> minionsList;
+            GetCreatureListWithEntryInGrid(minionsList, me, uiEntry, 500.0f);
+
+            for (Creature *pMinion : minionsList)
+                pMinion->DespawnOrUnsummon();
+        }
+
         void UpdateAI(uint32 uiDiff)
         {
-            if(events.Empty())
+            if (events.Empty())
                 return;
-                
+
             events.Update(uiDiff);
-            
-            while(uint32 uiEventId = events.ExecuteEvent())
+
+            while (uint32 uiEventId = events.ExecuteEvent())
             {
-                switch(uiEventId)
+                switch (uiEventId)
                 {
                 case EVENT_SUMMON_SOUL:
                     me->SetVisible(false);
-                    if(Creature *pSoul = me->SummonCreature(MOB_GARA_JALS_SOUL, *me))
+                    if (Creature *pSoul = me->SummonCreature(MOB_GARA_JALS_SOUL, *me))
                     {
                         pSoul->AI()->DoAction(ACTION_ENTER_COMBAT);
-                        pInstance->SetData64(MOB_GARA_JALS_SOUL, pSoul->GetGUID());
+                        instance->SetData64(MOB_GARA_JALS_SOUL, pSoul->GetGUID());
                     }
                     break;
-                    
+
                 default:
                     break;
                 }
@@ -1511,10 +1511,31 @@ public:
     }
 };
 
+class guidVectorPredicate
+{
+public:
+    guidVectorPredicate(uint64 guid) : _guid(guid) {}
 
+    bool operator()(uint64 uiGuid) const
+    {
+        if (uiGuid == _guid)
+        {
+            TC_LOG_ERROR("scripts", "uiGuid removed by guidVectorPredicate %u", uiGuid);
+            return true;
+        }
+        return false;
+    }
+private:
+    uint64 _guid;
+};
 // Garajal's Soul
 class mob_garajals_soul : public CreatureScript
 {
+    enum eEvents : uint32
+    {
+        EVENT_NONE,
+        EVENT_POSSESS
+    };
 public:
     mob_garajals_soul() : CreatureScript("mob_garajals_soul") { }
 
@@ -1524,12 +1545,23 @@ public:
         mob_garajals_soul_AI(Creature *pCreature) :
             ScriptedAI(pCreature), pInstance(pCreature->GetInstanceScript()), uiCouncillorEntry(0)
         {
+            InitList(m_lBossGuids);
+        }
 
+        void InitList(std::list<uint64> &list)
+        {
+            list.push_back(pInstance->GetData64(BOSS_COUNCIL_FROST_KING_MALAKK));
+            list.push_back(pInstance->GetData64(BOSS_COUNCIL_HIGH_PRIESTESS_MARLI));
+            list.push_back(pInstance->GetData64(BOSS_COUNCIL_SUL_THE_SANDCRAWLER));
+            list.push_back(pInstance->GetData64(BOSS_COUNCIL_KAZRAJIN));
         }
         
         void Reset()
         {
-            DoCast(me, SPELL_GARA_JALS_SOUL);
+            uiCouncillorEntry = 0;
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+            me->AddAura(SPELL_GARA_JALS_SOUL, me);
         }
         
         void EnterEvadeMode() 
@@ -1539,41 +1571,56 @@ public:
             ScriptedAI::EnterEvadeMode();
         }
 
-        void DoAction(int32 iAction)
+        void Possess(Unit* pCreature)
+        {
+            DoCast(pCreature, SPELL_POSSESSED);
+            me->EnterVehicle(pCreature, 0, true);
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (me->IsOnVehicle())
+                return;
+
+            events.Update(uiDiff);
+
+            switch (events.ExecuteEvent())
+            {
+            case EVENT_POSSESS:
+                if (Creature *pNextCouncillor = GetNextCouncillor(uiCouncillorEntry))
+                {
+                    uiCouncillorEntry = pNextCouncillor->GetEntry();
+                    Possess(pNextCouncillor);
+                }
+            }
+        }
+
+        void DoAction(const int32 iAction) override
         {
             switch(iAction)
             {
             case ACTION_ENTER_COMBAT:
                 // Always possess Malakk first
-                if(Creature *pMalakk = GetFrostKingMalakk(me))
-                {
-                    uiCouncillorEntry = pMalakk->GetEntry();
-                    me->GetMotionMaster()->MoveFollow(pMalakk, 0.0f, 0.0f);
-                }
+                events.ScheduleEvent(EVENT_POSSESS, 3000);
                 break;
 
             case ACTION_EXIT_COUNCILLOR:
                 // Set Garajal visible again
-                me->SetVisible(true);
-                
+                DoCast(SPELL_LINGERING_PRESENCE);
+                me->ExitVehicle();
                 // DoAction may be called after EnterEvadeMode() because possessed boss can reset 
                 // after the call. Return to prevent following a new councillor.
-                if(!uiCouncillorEntry || CheckBossState())
+                if (!uiCouncillorEntry || CheckBossState())
                     return;
 
                 // In Heroic, each time Garajal is forced out of a councillor, he leaves
                 // a Soul Fragment behind. (In fact there is no npc summoned, just a spell
                 // cast).
-                if(IsHeroic())
+                if (IsHeroic())
                     DoCastAOE(SPELL_SOUL_FRAGMENT_SELECTOR);
 
                 // Select a new councillor
-                if(Creature *pNextCouncillor = GetNextCouncillor())
-                {                        
-                    uiCouncillorEntry = pNextCouncillor->GetEntry();
-                    me->GetMotionMaster()->MovementExpired(); // Reset movement to prevent fail
-                    me->GetMotionMaster()->MoveFollow(pNextCouncillor, 0.0f, 0.0f);
-                }
+                events.ScheduleEvent(EVENT_POSSESS, 3000);
                 break;
 
             default:
@@ -1581,53 +1628,76 @@ public:
             }
         }
         
-        void UpdateAI(uint32 uiDiff)
-        {
-            if(!me->IsVisible())
-                return;
-                    
-            if(Creature *pCouncillor = GetBossByEntry(uiCouncillorEntry, me))
-            {
-                if(me->GetExactDist2d(pCouncillor) <= 5.0f)
-                {
-                    DoCast(pCouncillor, SPELL_POSSESSED);
-                    me->SetVisible(false);
-                }
-            }
-        }
-        
         bool CheckBossState()
         {
-            std::array<Creature*, 4> aCouncillors = { GetFrostKingMalakk(me), GetKazrajin(me), GetSulTheSandcrawler(me), GetHighPriestessMarli(me) };
-            for(auto pCouncillor: aCouncillors)
+            for (uint64 councGuid : m_lBossGuids)
             {
-                if(!pCouncillor->IsInCombat() || pCouncillor->IsInEvadeMode())
+                Creature* pCouncillor = ObjectAccessor::GetCreature(*me, councGuid);
+
+                if (pCouncillor && (!pCouncillor->IsInCombat() || pCouncillor->IsInEvadeMode()))
                     return true;
             }
-            
+
             return false;
         }
 
     private:
         uint32          uiCouncillorEntry;
         InstanceScript  *pInstance;
+        std::list<uint64> m_lBossGuids;
 
         // Helper function to find the next boss to possess
         Creature *GetNextCouncillor(uint32 uiOriginalEntry = 0)
         {
-            // If original entry == councillor entry, then we looped without finding anybody, so stay in
-            if(uiOriginalEntry == uiCouncillorEntry)
-                return NULL;
+            uint32      uiNextEntry = 0;
+            float       fHealthNumber = 0.f;
+
+            if (Creature* pGarajal = GetGarajal(me))
+            {
+                // We're the only councillor alive, no need to perform this check
+                if (pGarajal->AI()->GetData(0) > 3)
+                {
+                    TC_LOG_ERROR("scripts", "3 councillors or more dead");
+                    return NULL;
+                }
+            }
 
             // This is the first call, init original entry with the current councillor entry
-            if(!uiOriginalEntry)
-                uiOriginalEntry = uiCouncillorEntry;
+            if (!uiOriginalEntry)
+            {
+                if (Creature* pMalakk = GetFrostKingMalakk(me))
+                {
+                    uiCouncillorEntry = BOSS_COUNCIL_FROST_KING_MALAKK;
+                    return pMalakk;
+                }
+            }
 
-            // Pointer to the function returning the next possible councillor
-            Accessor    pfCurrent = NULL;
-            // Entry of the next possible councillor
-            uint32      uiNextEntry = 0;
-            switch(uiCouncillorEntry)
+            std::list<uint64> tempList;
+            InitList(tempList);
+
+            tempList.remove_if(guidVectorPredicate(pInstance->GetData64(uiCouncillorEntry)));
+            TC_LOG_ERROR("scripts", "templist size %u", tempList.size());
+            for (auto const pGuid : tempList)
+            {
+                if (Creature* pCreature = ObjectAccessor::GetCreature(*me, pGuid))
+                {
+                    TC_LOG_ERROR("scripts", "GUID %u, Entry %u processed (name = %s)", pGuid, pCreature->GetEntry(), pCreature->GetName());
+                    if (fHealthNumber < pCreature->GetHealthPct())
+                    {
+                        fHealthNumber = pCreature->GetHealthPct();
+                        uiNextEntry = pCreature->GetEntry();
+                    }
+                }
+            }
+
+            if (Creature* pCreature = ObjectAccessor::GetCreature(*me, pInstance->GetData64(uiNextEntry)))
+                return pCreature;
+
+            events.ScheduleEvent(EVENT_POSSESS, 500);
+            TC_LOG_ERROR("scripts", "No councillor found in Council Script while trying to possess");
+            return NULL;
+            /*
+            switch (uiCouncillorEntry)
             {
             case BOSS_COUNCIL_FROST_KING_MALAKK:
                 pfCurrent = &GetKazrajin;
@@ -1651,9 +1721,9 @@ public:
 
             default:
                 return NULL;
-            }
-
-            if(pfCurrent(me) && pfCurrent(me)->IsAlive())
+            }*/
+            /*
+            if (pfCurrent(me) && pfCurrent(me)->IsAlive())
             {
                 return pfCurrent(me);
             }
@@ -1661,7 +1731,7 @@ public:
             {
                 uiCouncillorEntry = uiNextEntry;
                 return GetNextCouncillor(uiOriginalEntry);
-            }
+            }*/
         }
     };
     
@@ -1881,7 +1951,7 @@ public:
             me->SetReactState(REACT_PASSIVE);
             events.Reset();
         }
-        
+
         void Reset()
         {
             DoCast(me, SPELL_BLESSED_TRANSFORMATION);
@@ -1892,10 +1962,10 @@ public:
 
         void IsSummonedBy(Unit *pSummoner)
         {
-            if(pSummoner && pSummoner->GetAI())
+            if (pSummoner && pSummoner->GetAI())
             {
                 uiTargetGuid = pSummoner->GetAI()->GetGUID(DATA_BLESSED_LOA_SPIRIT_TARGET_GUID);
-                if(Creature *pCouncillor = ObjectAccessor::GetCreature(*me, uiTargetGuid))
+                if (Creature *pCouncillor = ObjectAccessor::GetCreature(*me, uiTargetGuid))
                     me->GetMotionMaster()->MovePoint(POINT_BLESSED_LOA_SPIRIT_COUNCILLOR, *pCouncillor);
 
                 events.ScheduleEvent(EVENT_BLESSED_GIFT, 20 * IN_MILLISECONDS);
@@ -1904,27 +1974,27 @@ public:
 
         void UpdateAI(uint32 uiDiff)
         {
-//            if(me->GetMotionMaster()->GetCurrentMovementGeneratorType() != POINT_MOTION_TYPE && me->GetMotionMaster()->GetCurrentMovementGeneratorType() != EFFECT_MOTION_TYPE)
-//            {
-//                /* If movement generator is not POINT_MOTION_TYPE, it might be CHASE_MOTION_TYPE
-//                 * Reset the threat list, and reset the Motion Master (since CHASE_MOTION_TYPE
-//                 * and POINT_MOTION_TYPE share the same slot, overriding one with another will
-//                 * result in an immediate change.
-//                 */
-//                me->getThreatManager().clearReferences();
-//                me->GetMotionMaster()->MovementExpired();
-//                if(Creature *pCouncillor = ObjectAccessor::GetCreature(*me, uiTargetGuid))
-//                    me->GetMotionMaster()->MovePoint(POINT_BLESSED_LOA_SPIRIT_COUNCILLOR, *pCouncillor);
-//            }
+            //            if(me->GetMotionMaster()->GetCurrentMovementGeneratorType() != POINT_MOTION_TYPE && me->GetMotionMaster()->GetCurrentMovementGeneratorType() != EFFECT_MOTION_TYPE)
+            //            {
+            //                /* If movement generator is not POINT_MOTION_TYPE, it might be CHASE_MOTION_TYPE
+            //                 * Reset the threat list, and reset the Motion Master (since CHASE_MOTION_TYPE
+            //                 * and POINT_MOTION_TYPE share the same slot, overriding one with another will
+            //                 * result in an immediate change.
+            //                 */
+            //                me->getThreatManager().clearReferences();
+            //                me->GetMotionMaster()->MovementExpired();
+            //                if(Creature *pCouncillor = ObjectAccessor::GetCreature(*me, uiTargetGuid))
+            //                    me->GetMotionMaster()->MovePoint(POINT_BLESSED_LOA_SPIRIT_COUNCILLOR, *pCouncillor);
+            //            }
 
             events.Update(uiDiff);
 
-            while(uint32 uiEventId = events.ExecuteEvent())
+            while (uint32 uiEventId = events.ExecuteEvent())
             {
-                switch(uiEventId)
+                switch (uiEventId)
                 {
                 case EVENT_BLESSED_GIFT:
-                    if(Creature *pCouncillor = ObjectAccessor::GetCreature(*me, uiTargetGuid))
+                    if (Creature *pCouncillor = ObjectAccessor::GetCreature(*me, uiTargetGuid))
                     {
                         DoCast(me, SPELL_BLESSED_TIME_OUT);
                         me->GetMotionMaster()->MovementExpired();
@@ -1940,14 +2010,14 @@ public:
 
         void MovementInform(uint32 uiMotionType, uint32 uiMotionPointId)
         {
-            switch(uiMotionType)
+            switch (uiMotionType)
             {
             case POINT_MOTION_TYPE:
-                if(uiMotionPointId == POINT_BLESSED_LOA_SPIRIT_COUNCILLOR)
+                if (uiMotionPointId == POINT_BLESSED_LOA_SPIRIT_COUNCILLOR)
                 {
-                    if(Creature *pCouncillor = ObjectAccessor::GetCreature(*me, uiTargetGuid))
+                    if (Creature *pCouncillor = ObjectAccessor::GetCreature(*me, uiTargetGuid))
                     {
-                        if(me->GetExactDist2d(pCouncillor) <= 3.0f)
+                        if (me->GetExactDist2d(pCouncillor) <= 3.0f)
                         {
                             DoCast(pCouncillor, SPELL_BLESSED_GIFT);
                             me->DisappearAndDie();
@@ -1959,9 +2029,9 @@ public:
                 break;
 
             case EFFECT_MOTION_TYPE:
-                if(uiMotionPointId == EVENT_JUMP)
+                if (uiMotionPointId == EVENT_JUMP)
                 {
-                    if(Creature *pCouncillor = ObjectAccessor::GetCreature(*me, uiTargetGuid))
+                    if (Creature *pCouncillor = ObjectAccessor::GetCreature(*me, uiTargetGuid))
                     {
                         DoCast(pCouncillor, SPELL_BLESSED_GIFT);
                         me->DisappearAndDie();
@@ -2359,12 +2429,9 @@ public:
         
         void HandleRemove(AuraEffect const* pAuraEffect, AuraEffectHandleModes eMode)
         {
-            if(GetOwner())
+            if (GetOwner())
             {
-                if(Creature *pGarajal = GetGarajalsSoul(GetOwner()))
-                    pGarajal->AI()->DoAction(ACTION_EXIT_COUNCILLOR);
-                    
-                if(GetOwner()->ToCreature())
+                if (GetOwner()->ToCreature())
                     GetOwner()->ToCreature()->AI()->DoAction(ACTION_SET_UNPOSSESSED);
             }
         }
@@ -3305,7 +3372,6 @@ public:
 
 void AddSC_boss_council_of_elders()
 {
-    new npc_council_event_helper();
     new boss_frost_king_malakk();
     new boss_kazrajin();
     new boss_sul_the_sandcrawler();

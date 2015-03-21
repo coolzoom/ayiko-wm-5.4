@@ -3222,9 +3222,6 @@ void SpellMgr::LoadSpellCustomAttr()
 
             switch (spellInfo->Id)
             {
-            case 114232: // Sanctified Wrath effect
-                spellInfo->Attributes |= SPELL_ATTR0_PASSIVE | SPELL_ATTR0_HIDDEN_CLIENTSIDE;
-                break;
             case 137080: // "custom" anniversary sanctuary spell
                 spellInfo->Attributes |= SPELL_ATTR0_PASSIVE | SPELL_ATTR0_HIDDEN_CLIENTSIDE;
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(21);

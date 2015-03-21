@@ -2751,6 +2751,12 @@ bool SpellInfo::_IsPositiveEffect(uint8 effIndex, bool deep) const
             // Ignite
             if (SpellIconID == 45)
                 return true;
+
+            switch (Id)
+            {
+                case 7268: // Arcane Missiles
+                    return false;
+            }
             break;
         case SPELLFAMILY_PRIEST:
             switch (Id)

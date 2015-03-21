@@ -395,6 +395,9 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
     MovementInfo movementInfo;
     ReadMovementInfo(recvPacket, &movementInfo);
 
+    if (plrMover && plrMover->HasUnitState(UNIT_STATE_FALLING) && !movementInfo.HasMovementFlag(MOVEMENTFLAG_FALLING))
+        plrMover->ClearUnitState(UNIT_STATE_FALLING);
+
     // prevent tampered movement data
     if (movementInfo.guid != mover->GetGUID())
     {

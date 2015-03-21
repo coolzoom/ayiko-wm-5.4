@@ -8867,8 +8867,8 @@ UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69153, dmg_multiplier = 1
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Trash Mobs SAI
-UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` IN (69899,69905,69906,69909,69910,69916,69927,69944,70047,70557);
-DELETE FROM `smart_scripts` WHERE `entryorguid`IN (69899,69905,69906,69909,69910,69916,69927,69944,70047,70557) AND `source_type`= 0;
+UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` IN (69899,69905,69906,69909,69910,69911,69916,69927,69944,70047,70557);
+DELETE FROM `smart_scripts` WHERE `entryorguid`IN (69899,69905,69906,69909,69910,69911,69916,69927,69944,70047,70557) AND `source_type`= 0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
 (69899, 0, 0, 0, 0, 0, 100, 0, 3000, 4000, 6000, 10000, 11, 138739, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Farraki Sand Conjurer - Cast Sand Bolt"),
 (69899, 0, 1, 3, 0, 0, 100, 0, 2000, 3000, 30000, 32000, 11, 140636, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Farraki Sand Conjurer - Cast Conjure Elementals"),
@@ -8890,8 +8890,8 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (69909, 0, 5, 0, 31, 0, 100, 0, 138652, 0, 1000, 1000, 11, 138610, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Amani'shi Flame Chanter - Cast Fiery Core after Eruption"),
 (69909, 0, 6, 7, 23, 0, 100, 0, 138610, 5, 1000, 1000, 11, 138651, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Amani'shi Flame Chanter - Cast Molten Barrage on Fiery Core's stacks x5"),
 (69909, 0, 7, 0, 61, 0, 100, 0, 0, 0, 0, 0, 28, 138610, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Amani'shi Flame Chanter - Remove Fiery Core's stacks after the Molten Barrage cast"),
-(69909, 0, 8, 0, 61, 0, 100, 1, 0, 0, 0, 0, 67, 1, 2500, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Amani'shi Flame Chanter - Create Eruption Event"),
-(69909, 0, 9, 0, 59, 0, 100, 0, 1, 0, 0, 0, 12, 70029, 3, 6000, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, "Amani'shi Flame Chanter -  Eruption Event!"),
+-- (69909, 0, 8, 0, 61, 0, 100, 1, 0, 0, 0, 0, 67, 1, 2500, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Amani'shi Flame Chanter - Create Eruption Event"),
+-- (69909, 0, 9, 0, 59, 0, 100, 0, 1, 0, 0, 0, 12, 70029, 3, 6000, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, "Amani'shi Flame Chanter -  Eruption Event!"),
 
 (69910, 0, 0, 0, 0, 0, 100, 0, 5000, 8000, 13000, 15000, 11, 138668, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Drakkari Frost Warden - Cast Frost Bulwark"),
 (69910, 0, 1, 0, 0, 0, 100, 0, 15000, 20000, 15000, 20000, 11, 138690, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, "Drakkari Frost Warden - Cast Glacial Freeze Totem"),
@@ -8913,8 +8913,11 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (70557, 0, 0, 0, 0, 0, 100, 0, 3000, 6000, 25000, 30000, 11, 140400, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Zandalari Prophet - Cast Mark of the Prophet"),
 (70557, 0, 1, 0, 0, 0, 100, 0, 10000, 12000, 35000, 40000, 11, 140115, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Zandalari Prophet - Cast Visions of Demise"),
 (70557, 0, 2, 0, 0, 0, 100, 0, 1000, 2000, 55000, 60000, 11, 139205, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Zandalari Prophet - Cast Visions of Grandeur");
-/*---------------------------------------------------------------------------------------------------------------*/
 
+/*---------------------------------------------------------------------------------------------------------------*/
+-- Trash Spellscripts
+REPLACE INTO spell_script_names VALUES
+(138652, 'spell_eruption');
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Creature Equip
 REPLACE INTO `creature_equip_template` (`entry`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES 
@@ -9002,9 +9005,10 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (69078, 1,  0, 'I will bury ya all!', 14, 0, 100, 0, 0, 35813, 'Sul the Sandcrawler - On Possess'),
 (69078, 2,  0, 'Da storm approaches!', 14, 0, 100, 0, 0, 35818, 'Sul the Sandcrawler - Sandstorm'),
 (69078, 3,  0, 'Watch yer step!', 14, 0, 100, 0, 0, 35817, 'Sul the Sandcrawler - Quicksand'),
-(69078, 4,  0, 'Da sands are endless.', 14, 0, 100, 0, 0, '35815', 'Sul the Sandcrawler - Kill01'),
-(69078, 4,  1, 'Da first of many!', 14, 0, 100, 0, 0, '35816', 'Sul the Sandcrawler - Kill02'),
-(69078, 5,  0, 'I return... to... da... sands...', 14, 0, 100, 0, 0, '36454', 'Sul the Sandcrawler - On Death'),
+(69078, 4,  0, 'Da sands are endless.', 14, 0, 100, 0, 0, 35815, 'Sul the Sandcrawler - Kill01'),
+(69078, 4,  1, 'Da first of many!', 14, 0, 100, 0, 0, 35816, 'Sul the Sandcrawler - Kill02'),
+(69078, 5,  0, 'I return... to... da... sands...', 14, 0, 100, 0, 0, 36454, 'Sul the Sandcrawler - On Death'),
+(69078, 6,  0, '|TInterface\\Icons\\achievement_moguraid_03:20|t%s is |cFFF00000|Hspell:136442|h[Possessed]|h|r by the spirit of Gara''jal!', 41, 0, 100, 0, 0, 0, 'Possess emote'),
 
 (69131, 0,  0, 'Ya have met your match, fools!', 14, 0, 100, 0, 0, 35387, 'Frost King Malakk - Aggro'),
 (69131, 1,  0, 'Winter is coming...', 14, 0, 100, 0, 0, 35389, 'Frost King Malakk - On Possess'),
@@ -9013,6 +9017,7 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (69131, 3,  0, 'Death\'s cold embrace.', 14, 0, 100, 0, 0, 35391, 'Frost King Malakk - Kill01'),
 (69131, 3,  1, 'Witness da Drakkari\'s might.', 14, 0, 100, 0, 0, 35392, 'Frost King Malakk - Kill02'),
 (69131, 4,  0, 'Da... empire... can\'t... fall...', 14, 0, 100, 0, 0, 35388, 'Frost King Malakk - On Death'),
+(69131, 6,  0, '|TInterface\\Icons\\achievement_moguraid_03:20|t%s is |cFFF00000|Hspell:136442|h[Possessed]|h|r by the spirit of Gara''jal!', 41, 0, 100, 0, 0, 0, 'Possess emote'),
 
 (69132, 0,  0, 'Death ta all who appose da empire!', 14, 0, 100, 0, 0, 35432, 'High Priestess Marli - On Aggro'),
 (69132, 1,  0, 'Da spiritbinder reveals yer soul ta me!', 14, 0, 100, 0, 0, 35434, 'High Priestess Marli - On Possess'),
@@ -9022,15 +9027,17 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (69132, 3,  0, 'Another offering to da loa!', 14, 0, 100, 0, 0, 35436, 'High Priestess Marli - Kill01'),
 (69132, 3,  1, 'She will feast on yer soul!', 14, 0, 100, 0, 0, 35437, 'High Priestess Marli - Kill02'),
 (69132, 4,  0, 'Shadra... save... me...', 14, 0, 100, 0, 0, 35433, 'High Priestess Marli - On Death'),
+(69132, 6,  0, '|TInterface\\Icons\\achievement_moguraid_03:20|t%s is |cFFF00000|Hspell:136442|h[Possessed]|h|r by the spirit of Gara''jal!', 41, 0, 100, 0, 0, 0, 'Possess emote'),
 
 (69134, 0,  0, 'Dis is gonna hurt!', 14, 0, 100, 0, 0, 35566, 'Kazrajin - Aggro'),
-(69134, 1,  0, 'Lei Shen! Give us strenght!', 14, 0, 100, 0, 0, 35568, 'Kazrajin - On Possess'),
-(69134, 2,  0, 'Incoming!', 14, 0, 100, 0, 0, 35574, 'Kazrajin - Reckless Charge'),
-(69134, 2,  1, 'Out da way!', 14, 0, 100, 0, 0, 35573, 'Kazrajin - Reckless Charge'),
-(69134, 3,  0, 'Shocking!', 14, 0, 100, 0, 0, 35576, 'Kazrajin - Overload /Discharge'),
+(69134, 1,  0, 'Lei Shen! Give us strength!', 14, 0, 100, 0, 0, 35568, 'Kazrajin - On Possess'),
+(69134, 2,  0, 'Shocking!', 14, 0, 100, 0, 0, 35576, 'Kazrajin - Overload /Discharge'),
+(69134, 3,  0, 'Incoming!', 14, 0, 100, 0, 0, 35574, 'Kazrajin - Reckless Charge'),
+(69134, 3,  1, 'Out da way!', 14, 0, 100, 0, 0, 35573, 'Kazrajin - Reckless Charge'),
 (69134, 4,  0, 'Ya shouldn\'t be messin\' wit da Zandalari!', 14, 0, 100, 0, 0, 35571, 'Kazrajin - Kill01'),
 (69134, 4,  1, 'On ya knees!', 14, 0, 100, 0, 0, '35572', 'Kazrajin - Kill02'),
 (69134, 5,  0, 'Da thunder king... promised...', 14, 0, 100, 0, 0, 35567, 'Kazrajin - On Death'),
+(69134, 6,  0, '|TInterface\\Icons\\achievement_moguraid_03:20|t%s is |cFFF00000|Hspell:136442|h[Possessed]|h|r by the spirit of Gara''jal!', 41, 0, 100, 0, 0, 0, 'Possess emote'),
 
 (70056, 0,  0, 'Let me share dis gift with ya!', 14, 0, 100, 11, 0, 35395, 'Gara\'jal the Spiritbinder- Event01'),
 (70056, 1,  0, 'Ya\' spirit is mine', 14, 0, 100, 11, 0, 35396, 'Gara\'jal the Spiritbinder- Event02'),
@@ -9044,6 +9051,7 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (70056, 9,  0, 'Des fools thought they beat me once before. Dey only make me stronger. Now we show dem da true power of the Zandalari!', 14, 0, 100, 11, 0, 35404,  'Gara\'jal the Spiritbinder- Event10'),
 (70056, 10, 0, 'Lei Shen let us prove ta ya the might of the Zandalari. We will crush des intruders where dey stand!', 14, 0, 100, 0, 0, 35405, 'Gara\'jal the Spiritbinder- Event11'),
 (70056, 11, 0, 'We will never fail ya!', 14, 0, 100, 0, 0, 35406, 'Gara\'jal the Spiritbinder- Event12');
+
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/

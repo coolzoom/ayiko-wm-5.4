@@ -317,6 +317,7 @@ public:
     bool HasGlobalCooldown(Unit* caster, SpellInfo const* spellInfo) const;
     void AddGlobalCooldown(SpellInfo const* spellInfo, uint32 gcd);
     void CancelGlobalCooldown(SpellInfo const* spellInfo);
+    int32 GetGlobalCooldown(Unit* caster, SpellInfo const* spellInfo);
 
 private:
     GlobalCooldownList m_GlobalCooldowns;

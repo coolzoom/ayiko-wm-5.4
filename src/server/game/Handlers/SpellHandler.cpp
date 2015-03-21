@@ -1124,10 +1124,11 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         return;
     }
 
+    uint32 gcd = _player->GetGlobalCooldownMgr().GetGlobalCooldown(caster, spellInfo);
     Spell* spell = new Spell(caster, spellInfo, TRIGGERED_NONE, 0, false, true);
     spell->m_cast_count = castCount;                       // set count of casts
     spell->m_glyphIndex = glyphIndex;
-    spell->prepare(&targets);
+    spell->prepare(&targets, NULL, gcd);
 }
 
 void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)

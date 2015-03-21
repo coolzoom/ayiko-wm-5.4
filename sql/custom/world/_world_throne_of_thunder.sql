@@ -8582,7 +8582,11 @@ REPLACE INTO spell_script_names VALUES
   (137350, "spell_marli_summon_shadowed_loa_spirit"),
   (137891, "spell_marli_twisted_fate_first"),
   (137962, "spell_marli_twisted_fate_second"),
-  (137986, "spell_marli_twisted_fate_damages");
+  (137986, "spell_marli_twisted_fate_damages"),
+  (136507, "spell_dark_power"),
+  (137645, "spell_soul_fragment_target_selector"),
+  (137643, "spell_soul_fragment_switcher"),
+  (137359, "spell_marked_soul");
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/

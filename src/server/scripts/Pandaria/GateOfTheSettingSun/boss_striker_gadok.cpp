@@ -676,9 +676,12 @@ public:
                 if(pInstance->GetBossState(DATA_GADOK) == IN_PROGRESS)
                 {
                     std::list<Player*> playerList;
-                    GetPlayerListInGrid(playerList, me, 200.0f);
-                    if(Player* player = Trinity::Containers::SelectRandomContainerElement(playerList))
-                        me->CastSpell(player, SPELL_BOMB, true);
+                    GetPlayerListInGrid(playerList, me, 200.0f); 
+                    if (!playerList.empty())
+                    {
+                        if (Player* player = Trinity::Containers::SelectRandomContainerElement(playerList))
+                            me->CastSpell(player, SPELL_BOMB, true);
+                    }
                 }
 
                 events.ScheduleEvent(EVENT_DISRUPTOR_BOMBARD, urand(5000, 20000));

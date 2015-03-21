@@ -60,6 +60,8 @@
 
 extern pEffect SpellEffects[TOTAL_SPELL_EFFECTS];
 
+#define MAX_SPELL_QUEUE_GCD 400
+
 SpellDestination::SpellDestination()
 {
     _position.Relocate(0, 0, 0, 0);
@@ -3352,7 +3354,7 @@ bool Spell::UpdateChanneledTargetList()
     return channelTargetEffectMask == 0;
 }
 
-void Spell::prepare(SpellCastTargets const* targets, AuraEffect const *triggeredByAura)
+void Spell::prepare(SpellCastTargets const* targets, AuraEffect const *triggeredByAura, uint32 gcdAtCast)
 {
     if (m_CastItem)
         m_castItemGUID = m_CastItem->GetGUID();
@@ -3389,7 +3391,20 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const *triggered
 
     // create and add update event for this spell
     SpellEvent* Event = new SpellEvent(this);
-    m_caster->m_Events.AddEvent(Event, m_caster->m_Events.CalculateTime(1));
+    if (gcdAtCast && gcdAtCast <= MAX_SPELL_QUEUE_GCD)
+    {
+        if (m_caster->ToPlayer()->m_queuedSpell)
+        {
+            m_caster->ToPlayer()->m_queuedSpell->SendCastResult(SPELL_FAILED_SPELL_IN_PROGRESS);
+            m_caster->ToPlayer()->m_queuedSpell->finish(false);
+        }
+        m_caster->m_Events.AddEvent(Event, m_caster->m_Events.CalculateTime(gcdAtCast));
+        m_spellState = SPELL_STATE_QUEUED;
+        m_caster->ToPlayer()->m_queuedSpell = this;
+        return;
+    }
+    else
+        m_caster->m_Events.AddEvent(Event, m_caster->m_Events.CalculateTime(1));
 
     //Prevent casting at cast another spell (ServerSide check) - Do not check for Autoshot as Steady Shot should be available to init cast of it
     if (m_spellInfo->Id != 108839 && m_spellInfo->Id != 75)
@@ -4127,29 +4142,46 @@ void Spell::SendSpellCooldown()
 
 void Spell::update(uint32 difftime)
 {
-    // update pointers based at it's GUIDs
-    UpdatePointers();
-
-    if (m_targets.GetUnitTargetGUID() && !m_targets.GetUnitTarget())
+    if (m_spellState != SPELL_STATE_QUEUED)
     {
-        cancel();
-        return;
-    }
+        // update pointers based at it's GUIDs
+        UpdatePointers();
 
-    // check if the player caster has moved before the spell finished
-    // with the exception of spells affected with SPELL_AURA_CAST_WHILE_WALKING effect
-    if ((m_caster->GetTypeId() == TYPEID_PLAYER && m_timer != 0) &&
-        m_caster->isMoving() && (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT) &&
-        (m_spellInfo->Effects[0].Effect != SPELL_EFFECT_STUCK || !m_caster->HasUnitMovementFlag(MOVEMENTFLAG_FALLING_FAR)) &&
-        !m_caster->HasAuraTypeWithAffectMask(SPELL_AURA_CAST_WHILE_WALKING, m_spellInfo))
-    {
-        // don't cancel for melee, autorepeat, triggered and instant spells
-        if (!IsNextMeleeSwingSpell() && !IsAutoRepeat() && !IsTriggered())
+        if (m_targets.GetUnitTargetGUID() && !m_targets.GetUnitTarget())
+        {
             cancel();
+            return;
+        }
+
+        // check if the player caster has moved before the spell finished
+        // with the exception of spells affected with SPELL_AURA_CAST_WHILE_WALKING effect
+        if ((m_caster->GetTypeId() == TYPEID_PLAYER && m_timer != 0) &&
+            m_caster->isMoving() && (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT) &&
+            (m_spellInfo->Effects[0].Effect != SPELL_EFFECT_STUCK || !m_caster->HasUnitMovementFlag(MOVEMENTFLAG_FALLING_FAR)) &&
+            !m_caster->HasAuraTypeWithAffectMask(SPELL_AURA_CAST_WHILE_WALKING, m_spellInfo))
+        {
+            // don't cancel for melee, autorepeat, triggered and instant spells
+            if (!IsNextMeleeSwingSpell() && !IsAutoRepeat() && !IsTriggered())
+                cancel();
+        }
     }
 
     switch (m_spellState)
     {
+        case SPELL_STATE_QUEUED:
+        {
+            m_caster->ToPlayer()->GetGlobalCooldownMgr().CancelGlobalCooldown(m_spellInfo);
+            m_caster->ToPlayer()->m_queuedSpell = NULL;
+            SpellCastTargets targets = m_targets;
+            Spell* spell = new Spell(m_caster, m_spellInfo, TRIGGERED_NONE, 0, false);
+            spell->m_cast_count = m_cast_count;                       // set count of casts
+            spell->m_glyphIndex = m_glyphIndex;
+            cancel();
+            uint64 guid = targets.GetUnitTargetGUID();
+            if (!guid || ObjectAccessor::FindUnit(guid))
+                spell->prepare(&targets);
+            break;
+        }
         case SPELL_STATE_PREPARING:
         {
             if (m_timer > 0)

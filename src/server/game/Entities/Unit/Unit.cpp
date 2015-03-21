@@ -376,6 +376,17 @@ bool GlobalCooldownMgr::HasGlobalCooldown(Unit* caster, SpellInfo const* spellIn
     return itr != m_GlobalCooldowns.end() && itr->second.duration && getMSTimeDiff(itr->second.cast_time, getMSTime() + 120) < itr->second.duration;
 }
 
+int32 GlobalCooldownMgr::GetGlobalCooldown(Unit* caster, SpellInfo const* spellInfo)
+{
+    if (HasGlobalCooldown(caster, spellInfo))
+    {
+        GlobalCooldownList::const_iterator itr = m_GlobalCooldowns.find(spellInfo->StartRecoveryCategory);
+        return itr->second.duration - getMSTimeDiff(itr->second.cast_time, getMSTime());
+    }
+
+    return 0;
+}
+
 void GlobalCooldownMgr::AddGlobalCooldown(SpellInfo const* spellInfo, uint32 gcd)
 {
     m_GlobalCooldowns[spellInfo->StartRecoveryCategory] = GlobalCooldown(gcd, getMSTime());
@@ -19035,6 +19046,7 @@ void Unit::KnockbackFrom(float x, float y, float speedXY, float speedZ)
         float vcos, vsin;
         GetSinCos(x, y, vsin, vcos);
         SendMoveKnockBack(player, speedXY, -speedZ, vcos, vsin);
+        AddUnitState(UNIT_STATE_FALLING);
     }
 }
 

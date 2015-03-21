@@ -730,6 +730,12 @@ public:
 
             me->DespawnOrUnsummon(me->GetSplineDuration());
         }
+
+        void JustDied(Unit* killer) override
+        {
+            me->StopMoving();
+            me->DespawnOrUnsummon();
+        }
     };
 };
 

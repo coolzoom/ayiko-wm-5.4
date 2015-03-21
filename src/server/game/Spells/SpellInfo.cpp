@@ -2729,6 +2729,9 @@ bool SpellInfo::_IsPositiveEffect(uint8 effIndex, bool deep) const
                 case 47310: // Direbrew's Disarm
                 case 128407: // Poisoned Barb
                 case 34709: // Shadow Sight
+                case 137359: // Marked Soul
+                case 136922: // Frostbite
+                case 136992: // Biting Cold
                     return false;
                 case 30877: // Tag Murloc
                 case 61716: // Rabbit Costume
@@ -2748,6 +2751,12 @@ bool SpellInfo::_IsPositiveEffect(uint8 effIndex, bool deep) const
             // Ignite
             if (SpellIconID == 45)
                 return true;
+
+            switch (Id)
+            {
+                case 7268: // Arcane Missiles
+                    return false;
+            }
             break;
         case SPELLFAMILY_PRIEST:
             switch (Id)

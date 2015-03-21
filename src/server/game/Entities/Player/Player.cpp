@@ -903,6 +903,8 @@ Player::Player(WorldSession* session)
     // Anti-Cheat
     m_numSpeedChecks = 0;
     m_averageSpeed = 0.0f;
+
+    m_queuedSpell = NULL;
 }
 
 Player::~Player()

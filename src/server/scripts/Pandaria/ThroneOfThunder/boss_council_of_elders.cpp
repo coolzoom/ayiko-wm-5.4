@@ -172,6 +172,7 @@ enum eEvents
     //===============================================
     // Blessed Loa Spirit
     EVENT_BLESSED_GIFT                      = 14,
+    EVENT_MOVE_COUNCILLOR                   = 21,
 
     //===============================================
     // Shadowed Loa Spiri
@@ -276,53 +277,30 @@ enum eDatas
 };
 
 
-enum eTalks
+enum eTalks : uint32
 {
-    //===============================================
-    // Malakk
-    SAY_MALAKK_POSSESSED                    = 0, // Winter is coming
-    SAY_MALAKK_DEATH                        = 1, // Da empire can't fail
-    SAY_MALAKK_FROSTBITE_1                  = 2, // Getting cold ?
-    SAY_MALAKK_FROSTBITE_2                  = 3, // Freeze
-    SAY_MALAKK_KILLED_UNIT_1                = 4, // Death's cold embrace
-    SAY_MALAKK_KILLED_UNIT_2                = 5, // Witness da Drakkari's might
-    SAY_MALAKK_AGGRO                        = 6, // Ya have met your match, fools (aggro ?)
-    
-    //===============================================
-    // Kazra'jin
-    SAY_KAZ_POSSESSED                       = 0, // ????
-    SAY_KAZ_DEATH                           = 1, // Da thunder king... promised
-    SAY_KAZ_RECKLESS_CHARGE_1               = 2, // Incoming !
-    SAY_KAZ_RECKLESS_CHARGE_2               = 3, // Out da way !
-    SAY_KAZ_AGGRO                           = 4, // This is gonna hurt
-    SAY_KAZ_KILLED_UNIT_1                   = 5, // Ya shouldn't be messin wit da zandalari
-    SAY_KAZ_KILLED_UNIT_2                   = 6, // On ya knees
-    SAY_KAZ_OVERLOAD_DISCHARGE              = 7, // Schoking !
-    
-    //===============================================
-    // Sul
-    SAY_SUL_POSSESSED                       = 0, // I will bury ya all
-    SAY_SUL_DEATH                           = 1, // I... return... to... da... sands
-    SAY_SUL_SAND_STORM                      = 2, // Da storms approaches
-    SAY_SUL_QUICKSAND                       = 3, // Watch yer steps
-    SAY_SUL_KILLED_UNIT_1                   = 4, // Da sands are endless
-    SAY_SUL_KILLED_UNIT_2                   = 5, // Da first of many
-    SAY_SUL_AGGRO                           = 6, // Da sands will consume everything
-    
-    //===============================================
-    // Mar'li
-    SAY_MARLI_POSSESSED                     = 0, // Da spritibinder reveals ya soul to me 
-    SAY_MARLI_DEATH                         = 1, // Shadra... save... me
-    SAY_MARLI_SHADOWED_LOA_SPIRIT_1         = 2, // Succumb to her venom
-    SAY_MARLI_SHADOWED_LOA_SPIRIT_2         = 3, // Yer soul belongs to me (Shadowed Loa Spirit ?)
-    SAY_MARLI_SHADOWED_LOA_SPIRIT_3         = 4, // Embrace yer desmise
-    SAY_MARLI_KILLED_UNIT_1                 = 5, // Another offering to da loa
-    SAY_MARLI_KILLED_UNIT_2                 = 6, // She will feast on yer soul
-    SAY_MARLI_AGGRO                         = 7, // Death to all who appose da empire 
-    
-    //===============================================
-    // Gara'jal
-    SAY_GARAJAL_INTRO                       = 0,
+    TALK_AGGRO                  = 0,
+    TALK_POSSESS                = 1,
+    TALK_SPECIAL                = 2,
+    EMOTE_POSSESS               = 6,
+
+    // sul
+    TALK_SUL_QUICKSAND          = 3,
+    TALK_SUL_SLAY               = 4,
+    TALK_SUL_DEATH              = 5,
+
+    // malakk
+    TALK_MALAKK_SLAY            = 3,
+    TALK_MALAKK_DEATH           = 4,
+
+    // marli
+    TALK_MARLI_SLAY             = 3,
+    TALK_MARLI_DEATH            = 4,
+
+    // kazra'jin
+    TALK_KAZRAJIN_CHARGE        = 3,
+    TALK_KAZRAJIN_SLAY          = 4,
+    TALK_KAZRAJIN_DEATH         = 5,
 };
 
 //=========================================================
@@ -437,28 +415,8 @@ public:
             if (pGarajal->AI())
                 pGarajal->AI()->DoAction(ACTION_FIGHT_BEGIN);
         }
-        
-        switch(me->GetEntry())
-        {
-        case BOSS_COUNCIL_FROST_KING_MALAKK:
-            Talk(SAY_MALAKK_AGGRO);
-            break;
-            
-        case BOSS_COUNCIL_KAZRAJIN:
-            Talk(SAY_KAZ_AGGRO);
-            break;
-            
-        case BOSS_COUNCIL_SUL_THE_SANDCRAWLER:
-            Talk(SAY_SUL_AGGRO);
-            break;
-            
-        case BOSS_COUNCIL_HIGH_PRIESTESS_MARLI:
-            Talk(SAY_MARLI_AGGRO);
-            break;
-            
-        default:
-            break;
-        }
+
+        Talk(TALK_AGGRO);
 
         InitStandartEvents();
     }
@@ -478,27 +436,8 @@ public:
             break;
 
         case ACTION_SET_POSSESSED:
-            switch(me->GetEntry())
-            {
-            case BOSS_COUNCIL_FROST_KING_MALAKK:
-                Talk(SAY_MALAKK_POSSESSED);
-                break;
-                
-            case BOSS_COUNCIL_KAZRAJIN:
-                Talk(SAY_KAZ_POSSESSED);
-                break;
-                
-            case BOSS_COUNCIL_SUL_THE_SANDCRAWLER:
-                Talk(SAY_SUL_POSSESSED);
-                break;
-                
-            case BOSS_COUNCIL_HIGH_PRIESTESS_MARLI:
-                Talk(SAY_MARLI_POSSESSED);
-                break;
-                
-            default:
-                break;
-            }
+            Talk(TALK_POSSESS);
+            Talk(EMOTE_POSSESS);
             InitPossessedEvents();
             events.ScheduleEvent(EVENT_INCREASE_POWER, GetPowerTimer());
             uiDarkPowerCount = 0;
@@ -519,6 +458,9 @@ public:
 
     void DamageTaken(Unit *pAttacker, uint32 &ruiAmount)
     {
+        // Heroic only shit..
+        // if (Aura* pAura = me->GetAura(SPELL_DISCHARGE))
+
         if (!me->HasAura(SPELL_POSSESSED))
             return;
 
@@ -541,19 +483,19 @@ public:
         switch(me->GetEntry())
         {
         case BOSS_COUNCIL_FROST_KING_MALAKK:
-            Talk(SAY_MALAKK_DEATH);
+            Talk(TALK_MALAKK_DEATH);
             break;
             
         case BOSS_COUNCIL_KAZRAJIN:
-            Talk(SAY_KAZ_DEATH);
+            Talk(TALK_KAZRAJIN_DEATH);
             break;
             
         case BOSS_COUNCIL_SUL_THE_SANDCRAWLER:
-            Talk(SAY_SUL_DEATH);
+            Talk(TALK_SUL_DEATH);
             break;
             
         case BOSS_COUNCIL_HIGH_PRIESTESS_MARLI:
-            Talk(SAY_MARLI_DEATH);
+            Talk(TALK_MARLI_DEATH);
             break;
             
         default:
@@ -572,19 +514,19 @@ public:
         switch(me->GetEntry())
         {
         case BOSS_COUNCIL_FROST_KING_MALAKK:
-            Talk(RAND<uint8>(SAY_MALAKK_KILLED_UNIT_1, SAY_MALAKK_KILLED_UNIT_2));
+            Talk(TALK_MALAKK_SLAY);
             break;
             
         case BOSS_COUNCIL_KAZRAJIN:
-            Talk(RAND<uint8>(SAY_KAZ_KILLED_UNIT_1, SAY_KAZ_KILLED_UNIT_2));
+            Talk(TALK_KAZRAJIN_SLAY);
             break;
             
         case BOSS_COUNCIL_SUL_THE_SANDCRAWLER:
-            Talk(RAND<uint8>(SAY_SUL_KILLED_UNIT_1, SAY_SUL_KILLED_UNIT_2));
+            Talk(TALK_SUL_SLAY);
             break;
             
         case BOSS_COUNCIL_HIGH_PRIESTESS_MARLI:
-            Talk(RAND<uint8>(SAY_MARLI_KILLED_UNIT_1, SAY_MARLI_KILLED_UNIT_2));
+            Talk(TALK_MARLI_SLAY);
             break;
             
         default:
@@ -715,7 +657,7 @@ public:
                     break;
 
                 case EVENT_FROSTBITE:
-                    Talk(RAND<uint8>(SAY_MALAKK_FROSTBITE_1, SAY_MALAKK_FROSTBITE_2));
+                    Talk(TALK_SPECIAL);
                     DoCastAOE(SPELL_FROSTBITE); // Handle target selection in SpellScript
                     events.ScheduleEvent(EVENT_FROSTBITE, urand(8, 16) * IN_MILLISECONDS);
                     break;
@@ -831,7 +773,7 @@ public:
 
                 case EVENT_RECKLESS_CHARGE:
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-                    Talk(RAND<uint8>(SAY_KAZ_RECKLESS_CHARGE_1, SAY_KAZ_RECKLESS_CHARGE_2));
+                    Talk(TALK_KAZRAJIN_CHARGE);
                     DoCast(me, SPELL_RECKLESS_CHARGE); // Launch everything
                     // Summon npcs for the visual of Reckless Charge while travelling ?
                     // Handle next part in MovementInform.
@@ -879,7 +821,7 @@ public:
 
                     if(me->HasAura(SPELL_POSSESSED))
                     {
-                        Talk(SAY_KAZ_OVERLOAD_DISCHARGE);
+                        Talk(TALK_SPECIAL);
                         if(IsHeroic())
                             DoCast(me, SPELL_DISCHARGE);
                         else
@@ -898,6 +840,7 @@ public:
         }
 
         // Override Damage Taken again to handle the Discharge aura.
+        /*
         void DamageTaken(Unit *pAttacker, uint32 &ruiAmount)
         {
             if(!me->HasAura(SPELL_POSSESSED))
@@ -917,9 +860,10 @@ public:
                     DoCast(me, SPELL_LINGERING_PRESENCE);
                 uiDamageTakenPossessed = 0; // Reset in both case to prevent chain call to IsACouncillorAlive
             }
-        }
+        }*/
 
         // Override DoAction again to handle the Discharge Aura.
+        /*
         void DoAction(int32 iAction)
         {
             switch(iAction)
@@ -933,15 +877,10 @@ public:
                 return;
             }
         }
-
+        */
         uint32 GetData(uint32 uiIndex) const
         {
-            if(uiIndex == DATA_DAMAGES_PAST_SEC)
-                return uiDamagesDoneInPastSecs;
-            else if(uiIndex == DATA_DARK_POWER_COUNT)
-                return uiDarkPowerCount;
-
-            return 0;
+            return uiDarkPowerCount;
         }
 
         uint64 GetGUID(int32 iIndex) const
@@ -1017,7 +956,7 @@ public:
 
                 case EVENT_QUICKSAND:
                 {
-                    Talk(SAY_SUL_QUICKSAND);
+                    Talk(TALK_SUL_QUICKSAND);
                     std::list<Player*> playerList;
                     me->GetPlayerListInGrid(playerList, 500.0f);
 
@@ -1038,7 +977,7 @@ public:
                 }
 
                 case EVENT_SANDSTORM:
-                    Talk(SAY_SUL_SAND_STORM);
+                    Talk(TALK_SPECIAL);
                     DoCastAOE(SPELL_SAND_STORM);
                     events.ScheduleEvent(EVENT_SANDSTORM, 40 * IN_MILLISECONDS);
                     break;
@@ -1169,7 +1108,7 @@ public:
 
                 case EVENT_SHADOWED_LOA_SPIRIT:
                 {
-                    Talk(RAND<uint8>(SAY_MARLI_SHADOWED_LOA_SPIRIT_1, SAY_MARLI_SHADOWED_LOA_SPIRIT_2, SAY_MARLI_SHADOWED_LOA_SPIRIT_3));
+                    Talk(TALK_SPECIAL);
                     std::list<Player*> playerList;
                     me->GetPlayerListInGrid(playerList, 500.0f);
 
@@ -1418,8 +1357,6 @@ public:
                     }
                 }
             }
-
-            Talk(SAY_GARAJAL_INTRO);
             events.ScheduleEvent(EVENT_SUMMON_SOUL, 3 * IN_MILLISECONDS);
         }
 
@@ -1696,42 +1633,6 @@ public:
             events.ScheduleEvent(EVENT_POSSESS, 500);
             TC_LOG_ERROR("scripts", "No councillor found in Council Script while trying to possess");
             return NULL;
-            /*
-            switch (uiCouncillorEntry)
-            {
-            case BOSS_COUNCIL_FROST_KING_MALAKK:
-                pfCurrent = &GetKazrajin;
-                uiNextEntry = BOSS_COUNCIL_KAZRAJIN;
-                break;
-
-            case BOSS_COUNCIL_KAZRAJIN:
-                pfCurrent = &GetSulTheSandcrawler;
-                uiNextEntry = BOSS_COUNCIL_SUL_THE_SANDCRAWLER;
-                break;
-
-            case BOSS_COUNCIL_SUL_THE_SANDCRAWLER:
-                pfCurrent = &GetHighPriestessMarli;
-                uiNextEntry = BOSS_COUNCIL_HIGH_PRIESTESS_MARLI;
-                break;
-
-            case BOSS_COUNCIL_HIGH_PRIESTESS_MARLI:
-                pfCurrent = &GetFrostKingMalakk;
-                uiNextEntry = BOSS_COUNCIL_FROST_KING_MALAKK;
-                break;
-
-            default:
-                return NULL;
-            }*/
-            /*
-            if (pfCurrent(me) && pfCurrent(me)->IsAlive())
-            {
-                return pfCurrent(me);
-            }
-            else
-            {
-                uiCouncillorEntry = uiNextEntry;
-                return GetNextCouncillor(uiOriginalEntry);
-            }*/
         }
     };
     
@@ -1907,7 +1808,13 @@ public:
         {
         }
 
-        void DoAction(int32 iAction)
+        void IsSummonedBy(Creature* pSummoner)
+        {
+            if (Creature* pQuickSand = GetClosestCreatureWithEntry(me, NPC_QUICKSAND_STALKER, 5.f))
+                pQuickSand->DespawnOrUnsummon();
+        }
+
+        void DoAction(const int32 iAction) override
         {
             switch(iAction)
             {
@@ -1920,9 +1827,10 @@ public:
             }
         }
 
-        void JustDied(Unit *pKiller)
+        void JustDied(Unit *pKiller) override
         {
-            me->SummonCreature(NPC_QUICKSAND_STALKER, *me);
+            if (Creature* pSul = GetSulTheSandcrawler(me))
+                pSul->SummonCreature(NPC_QUICKSAND_STALKER, *me);
         }
 
     private:
@@ -1952,6 +1860,14 @@ public:
             events.Reset();
         }
 
+        void InitList(std::list<uint64> &list)
+        {
+            list.push_back(pInstance->GetData64(BOSS_COUNCIL_FROST_KING_MALAKK));
+            list.push_back(pInstance->GetData64(BOSS_COUNCIL_HIGH_PRIESTESS_MARLI));
+            list.push_back(pInstance->GetData64(BOSS_COUNCIL_SUL_THE_SANDCRAWLER));
+            list.push_back(pInstance->GetData64(BOSS_COUNCIL_KAZRAJIN));
+        }
+
         void Reset()
         {
             DoCast(me, SPELL_BLESSED_TRANSFORMATION);
@@ -1962,37 +1878,53 @@ public:
 
         void IsSummonedBy(Unit *pSummoner)
         {
-            if (pSummoner && pSummoner->GetAI())
-            {
-                uiTargetGuid = pSummoner->GetAI()->GetGUID(DATA_BLESSED_LOA_SPIRIT_TARGET_GUID);
-                if (Creature *pCouncillor = ObjectAccessor::GetCreature(*me, uiTargetGuid))
-                    me->GetMotionMaster()->MovePoint(POINT_BLESSED_LOA_SPIRIT_COUNCILLOR, *pCouncillor);
+            HandleTargetSelection();
 
-                events.ScheduleEvent(EVENT_BLESSED_GIFT, 20 * IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_BLESSED_GIFT, 20 * IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_MOVE_COUNCILLOR, 500);
+        }
+
+        void Move()
+        {
+            if (Creature *pCouncillor = ObjectAccessor::GetCreature(*me, uiTargetGuid))
+                me->GetMotionMaster()->MovePoint(POINT_BLESSED_LOA_SPIRIT_COUNCILLOR, *pCouncillor);
+        }
+
+        void HandleTargetSelection()
+        {
+            float fHealthNumber = 100.f;
+            std::list<uint64> tempList;
+
+            InitList(tempList);
+
+            for (auto const pGuid : tempList)
+            {
+                if (Creature* pCreature = ObjectAccessor::GetCreature(*me, pGuid))
+                {
+                    if (!pCreature->IsAlive())
+                        continue;
+
+                    //TC_LOG_ERROR("scripts", "GUID %u, Entry %u processed (name = %s)", pGuid, pCreature->GetEntry(), pCreature->GetName());
+                    if (fHealthNumber > pCreature->GetHealthPct())
+                    {
+                        fHealthNumber = pCreature->GetHealthPct();
+                        uiTargetGuid = pGuid;
+                    }
+                }
             }
         }
 
         void UpdateAI(uint32 uiDiff)
         {
-            //            if(me->GetMotionMaster()->GetCurrentMovementGeneratorType() != POINT_MOTION_TYPE && me->GetMotionMaster()->GetCurrentMovementGeneratorType() != EFFECT_MOTION_TYPE)
-            //            {
-            //                /* If movement generator is not POINT_MOTION_TYPE, it might be CHASE_MOTION_TYPE
-            //                 * Reset the threat list, and reset the Motion Master (since CHASE_MOTION_TYPE
-            //                 * and POINT_MOTION_TYPE share the same slot, overriding one with another will
-            //                 * result in an immediate change.
-            //                 */
-            //                me->getThreatManager().clearReferences();
-            //                me->GetMotionMaster()->MovementExpired();
-            //                if(Creature *pCouncillor = ObjectAccessor::GetCreature(*me, uiTargetGuid))
-            //                    me->GetMotionMaster()->MovePoint(POINT_BLESSED_LOA_SPIRIT_COUNCILLOR, *pCouncillor);
-            //            }
-
             events.Update(uiDiff);
 
             while (uint32 uiEventId = events.ExecuteEvent())
             {
                 switch (uiEventId)
                 {
+                case EVENT_MOVE_COUNCILLOR:
+                    Move();
+                    break;
                 case EVENT_BLESSED_GIFT:
                     if (Creature *pCouncillor = ObjectAccessor::GetCreature(*me, uiTargetGuid))
                     {
@@ -2017,13 +1949,13 @@ public:
                 {
                     if (Creature *pCouncillor = ObjectAccessor::GetCreature(*me, uiTargetGuid))
                     {
-                        if (me->GetExactDist2d(pCouncillor) <= 3.0f)
+                        if (me->GetExactDist2d(pCouncillor) <= 5.f)
                         {
                             DoCast(pCouncillor, SPELL_BLESSED_GIFT);
                             me->DisappearAndDie();
                         }
                         else
-                            me->GetMotionMaster()->MovePoint(POINT_BLESSED_LOA_SPIRIT_COUNCILLOR, *pCouncillor);
+                            events.RescheduleEvent(EVENT_MOVE_COUNCILLOR, 0);
                     }
                 }
                 break;
@@ -2072,48 +2004,89 @@ public:
             me->SetReactState(REACT_PASSIVE);
             events.Reset();
         }
-        
+
         void Reset()
         {
-            DoCast(me, SPELL_SHADOWED_TRANSFORMATION);
+            DoCast(me, SPELL_BLESSED_TRANSFORMATION);
         }
+
+        // Override function to be sure there won't be any call to MoveChase (at least in AttackStart)
+        void AttackStart(Unit *pTarget) { }
 
         void IsSummonedBy(Unit *pSummoner)
         {
-            if(pSummoner && pSummoner->GetAI())
-            {
-                uiTargetGuid = pSummoner->GetAI()->GetGUID(DATA_SHADOWED_LOA_SPIRIT_TARGET_GUID);
-                if(Player *pPlayer = ObjectAccessor::GetPlayer(*me, uiTargetGuid))
-                {
-                    me->GetMotionMaster()->MoveFollow(pPlayer, 0.0f, 0.0f);
-                    DoCast(pPlayer, SPELL_MARKED_SOUL);
-                }
+            HandleTargetSelection();
+        }
 
-                events.ScheduleEvent(EVENT_SHADOWED_GIFT, 20 * IN_MILLISECONDS);
+        void Move()
+        {
+            if (Player *pTarget = GetFollowedPlayer())
+            {
+                if (pTarget->IsAlive())
+                    me->GetMotionMaster()->MovePoint(POINT_BLESSED_LOA_SPIRIT_COUNCILLOR, *pTarget);
+                else
+                {
+                    if (Aura* pAura = pTarget->GetAura(SPELL_MARKED_SOUL, me->GetGUID()))
+                        pAura->Remove(AURA_REMOVE_BY_DEATH);
+
+                    HandleTargetSelection();
+                }
             }
+            else
+                HandleTargetSelection();
+        }
+
+        Player* GetFollowedPlayer() 
+        {
+            if (Player* pPlayer = ObjectAccessor::GetPlayer(*me, uiTargetGuid))
+            {
+                if (pPlayer->IsAlive())
+                    return pPlayer;
+            }
+
+            HandleTargetSelection();
+        }
+
+        inline void HandleTargetSelection()
+        {
+            DoCast(SPELL_MARKED_SOUL);
+
+            std::list<Player*> players;
+            GetPlayerListInGrid(players, me, 300.f);
+
+            for (auto const pPlayer : players)
+            {
+                if (pPlayer->HasAura(SPELL_MARKED_SOUL, me->GetGUID()))
+                {
+                    uiTargetGuid = pPlayer->GetGUID();
+                    break;
+                }
+            }
+            
+            events.Reset();
+            events.ScheduleEvent(EVENT_MOVE_COUNCILLOR, 500);
+            events.ScheduleEvent(EVENT_BLESSED_GIFT, 20 * IN_MILLISECONDS);
         }
 
         void UpdateAI(uint32 uiDiff)
         {
-            Player *pPlayer = ObjectAccessor::GetPlayer(*me, uiTargetGuid);
-            if(pPlayer && me->GetExactDist2d(pPlayer) <= 6.0f)
-            {
-                DoCast(pPlayer, SPELL_SHADOWED_GIFT);
-                me->DisappearAndDie();
-            }
-
             events.Update(uiDiff);
 
-            while(uint32 uiEventId = events.ExecuteEvent())
+            while (uint32 uiEventId = events.ExecuteEvent())
             {
-                switch(uiEventId)
+                switch (uiEventId)
                 {
+                case EVENT_MOVE_COUNCILLOR:
+                    Move();
+                    break;
                 case EVENT_SHADOWED_GIFT:
-                    if(Player *pPlayer = ObjectAccessor::GetPlayer(*me, uiTargetGuid))
+                    if (Player* pTarget = GetFollowedPlayer())
                     {
                         DoCast(me, SPELL_SHADOWED_TIME_OUT);
-                        me->GetMotionMaster()->MoveJump(*pPlayer, 42.0f, 42.0f, EVENT_JUMP);
+                        me->GetMotionMaster()->MovementExpired();
+                        me->GetMotionMaster()->MoveJump(*pTarget, 42.0f, 42.0f, EVENT_JUMP);
                     }
+                    else
                     break;
 
                 default:
@@ -2124,27 +2097,52 @@ public:
 
         void MovementInform(uint32 uiMotionType, uint32 uiMotionPointId)
         {
-            if(uiMotionType == EFFECT_MOTION_TYPE && uiMotionPointId == EVENT_JUMP)
+            switch (uiMotionType)
             {
-                if(Player *pPlayer = ObjectAccessor::GetPlayer(*me, uiTargetGuid))
+            case POINT_MOTION_TYPE:
+                if (uiMotionPointId == POINT_BLESSED_LOA_SPIRIT_COUNCILLOR)
                 {
-                    DoCast(pPlayer, SPELL_SHADOWED_GIFT);
-                    me->DisappearAndDie();
+                    if (Player* pTarget = GetFollowedPlayer())
+                    {
+                        if (me->GetExactDist2d(pTarget) <= 5.f)
+                        {
+                            DoCast(pTarget, SPELL_SHADOWED_GIFT);
+                            me->DisappearAndDie();
+                        }
+                        else
+                            events.RescheduleEvent(EVENT_MOVE_COUNCILLOR, 0);
+                    }
                 }
+                break;
+
+            case EFFECT_MOTION_TYPE:
+                if (uiMotionPointId == EVENT_JUMP)
+                {
+                    if (Player* pPlayer = GetFollowedPlayer())
+                    {
+                        DoCast(pPlayer, SPELL_SHADOWED_GIFT);
+                        me->DisappearAndDie();
+                    }
+                }
+                break;
+
+            default:
+                break;
             }
         }
-        
+
         void JustDied(Unit *pKiller)
         {
-            if(Player *pPlayer = ObjectAccessor::GetPlayer(*me, uiTargetGuid))
+            if (Player *pPlayer = GetFollowedPlayer())
                 pPlayer->RemoveAurasDueToSpell(SPELL_MARKED_SOUL);
         }
 
     private:
         EventMap        events;
         InstanceScript  *pInstance;
-        uint64          uiTargetGuid;
+        uint64          uiTargetGuid; // GUID of the councillor we are moving toward
     };
+        
 
     CreatureAI *GetAI(Creature *pCreature) const
     {
@@ -3370,6 +3368,37 @@ public:
     }
 };
 
+class spell_marked_soul : public SpellScriptLoader
+{
+public:
+    spell_marked_soul() : SpellScriptLoader("spell_marked_soul") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void SelectTargets(std::list<WorldObject*>&targets)
+        {
+            targets.remove_if(notPlayerPredicate());
+
+            if (targets.size() > 1)
+            {
+                Trinity::Containers::RandomResizeList(targets, 1);
+            }       
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_impl::SelectTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
 void AddSC_boss_council_of_elders()
 {
     new boss_frost_king_malakk();
@@ -3405,4 +3434,5 @@ void AddSC_boss_council_of_elders()
     new spell_dark_power();
     new spell_soul_fragment_target_selector();
     new spell_soul_fragment_switcher();
+    new spell_marked_soul();
 }

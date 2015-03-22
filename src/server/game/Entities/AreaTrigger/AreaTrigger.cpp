@@ -26,7 +26,7 @@
 #include "AreaTrigger.h"
 #include "ObjectVisitors.hpp"
 
-AreaTrigger::AreaTrigger() : WorldObject(false), _duration(0), m_caster(NULL), m_visualRadius(0.0f)
+AreaTrigger::AreaTrigger() : WorldObject(false), _duration(0), m_caster(NULL), m_visualRadius(0.0f), m_timer(0)
 {
     m_objectType |= TYPEMASK_AREATRIGGER;
     m_objectTypeId = TYPEID_AREATRIGGER;
@@ -118,6 +118,9 @@ bool AreaTrigger::CreateAreaTrigger(uint32 guidlow, uint32 triggerEntry, Unit* c
             break;
         case 115460: // Healing Sphere - add tracker
             caster->CastSpell(caster, 124458, true);
+            break;
+        case 138026:
+            SetTimer(1000);
             break;
         default:
             break;
@@ -510,6 +513,30 @@ void AreaTrigger::Update(uint32 p_time)
                     player->SendApplyMovementForce(false, *this);
             }
 
+            break;
+        }
+        case 138026:// Reckless Charge
+        {
+            if (GetTimer() < (int32)p_time)
+            {
+                radius = 3.f;
+
+                std::list<Unit*> targets;
+
+                Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, caster, radius);
+                Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(this, targets, u_check);
+                Trinity::VisitNearbyObject(this, radius, searcher);
+
+                for (auto const pUnit : targets)
+                {
+                    if (pUnit->IsAlive())
+                        caster->CastSpell(pUnit, 137133, true);
+                }
+
+                SetTimer(1000);
+            }
+            else
+                SetTimer(m_timer -= (int32)p_time);
             break;
         }
         default:

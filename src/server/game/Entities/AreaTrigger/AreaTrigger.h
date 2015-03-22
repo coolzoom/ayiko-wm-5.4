@@ -38,6 +38,8 @@ class AreaTrigger : public WorldObject, public GridObject<AreaTrigger>
         void Remove();
         uint32 GetSpellId() const { return GetUInt32Value(AREATRIGGER_SPELLID); }
         int32 GetDuration() const { return _duration; }
+        uint32 GetTimer() const { return m_timer; }
+        void SetTimer(uint32 newTimer) { m_timer = newTimer; }
         void SetDuration(int32 newDuration) { _duration = newDuration; }
         void Delay(int32 delaytime) { SetDuration(GetDuration() - delaytime); }
         Unit* GetCaster() const { return m_caster; }
@@ -49,6 +51,7 @@ class AreaTrigger : public WorldObject, public GridObject<AreaTrigger>
         void SetVisualRadius(float radius) { m_visualRadius = radius; }
 
     protected:
+        uint32 m_timer;
         int32 _duration;
         Unit* m_caster;
         float m_visualRadius;

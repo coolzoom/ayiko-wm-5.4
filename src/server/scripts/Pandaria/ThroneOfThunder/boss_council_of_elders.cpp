@@ -4,7 +4,6 @@
 
 enum eCreatures
 {
-    NPC_QUICKSAND_STALKER                   = 662205, // Acts like an AT cause Blizzard messed everythin up in this fight...
     MOB_LIVING_SAND                         = 69153, // Summoned when Sandstorm hits a Quicksand
     MOB_BLESSED_LOA_SPIRIT                  = 69480, // Summoned by Mar'li, heals a councillor
     MOB_SHADOWED_LOA_SPIRIT                 = 69548, // Summoned by Mar'li, kills player
@@ -89,7 +88,8 @@ enum eSpells
     // Quicksand (fuckin AT)
     // Quicksand is an AT, but handling the spell with an AT is too complex... we'll use another mechanism,
     SPELL_QUICKSAND_PERIODIC_DAMAGES        = 136860, // Periodic damages to any target within 7 yards : we must handle apply / remove manually
-    SPELL_QUICKSAND_AT_VISUAL               = 137572, // Visual 
+    SPELL_QUICKSAND_AT_VISUAL               = 137572, // Visual
+    SPELL_QUICKSAND_AT_VISUAL_INIT          = 136851,
     SPELL_ENSNARED                          = 136878, // Slow player and stacks; when it reaches 5 stacks, player is Entrapped
     SPELL_ENTRAPPED                         = 136857, // Need to prevent second effect... so annoying
 
@@ -193,6 +193,7 @@ enum eEvents
     // Quicksand Stalker
     EVENT_QUICKSAND_PERIODIC                = 18, // This only handles apply of the Quicksand damages aura, which handle the rooting by itself
     EVENT_TRY_MERGE                         = 19, // Try merge event is used to merge Quicksand when they are summoend by others Quicksand (only scheduled once)
+    EVENT_ACTIVATE_SAND                     = 22,
     
     //===============================================
     // Garajal
@@ -958,12 +959,12 @@ public:
                     if (!playerList.empty())
                     {
                         if (Player *pPlayer = Trinity::Containers::SelectRandomContainerElement<std::list<Player*>>(playerList))
-                            me->SummonCreature(NPC_QUICKSAND_STALKER, *pPlayer);
+                            me->SummonCreature(MOB_LIVING_SAND, *pPlayer);
                     }
                     else if (!tempList.empty())
                     {
                         if (Player *pPlayer = Trinity::Containers::SelectRandomContainerElement<std::list<Player*>>(tempList))
-                            me->SummonCreature(NPC_QUICKSAND_STALKER, *pPlayer);
+                            me->SummonCreature(MOB_LIVING_SAND, *pPlayer);
                     }
 
                     events.ScheduleEvent(EVENT_QUICKSAND, urand(20, 25) * IN_MILLISECONDS);
@@ -1013,6 +1014,7 @@ public:
             events.Reset();
 
             events.ScheduleEvent(EVENT_SAND_BOLT, 5 * IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_QUICKSAND, 7 * IN_MILLISECONDS);
             events.ScheduleEvent(EVENT_SANDSTORM, 10 * IN_MILLISECONDS);
         }
     };
@@ -1414,7 +1416,6 @@ public:
 
         inline void DespawnCreatures() const
         {
-            DespawnCreaturesByEntry(NPC_QUICKSAND_STALKER);
             DespawnCreaturesByEntry(MOB_LIVING_SAND);
             DespawnCreaturesByEntry(MOB_BLESSED_LOA_SPIRIT);
             DespawnCreaturesByEntry(MOB_SHADOWED_LOA_SPIRIT);
@@ -1684,162 +1685,6 @@ public:
     }
 };
 
-
-// Quicksand stalker AI
-class mob_quicksand_stalker : public CreatureScript
-{
-public:
-    mob_quicksand_stalker() : CreatureScript("mob_quicksand_stalker") { }
-
-    class mob_quicksand_stalker_AI : public ScriptedAI
-    {
-    public:
-        mob_quicksand_stalker_AI(Creature *pCreature) :
-            ScriptedAI(pCreature), pInstance(pCreature->GetInstanceScript()), uiMergeCount(0)
-        {
-            events.Reset();
-            me->SetReactState(REACT_PASSIVE);
-        }
-
-        void IsSummonedBy(Unit *pSummoner)
-        {
-            DoCast(me, SPELL_QUICKSAND_AT_VISUAL);
-            if(IsHeroic())
-            {
-                if(me->FindNearestCreature(NPC_QUICKSAND_STALKER, 7.0f) == pSummoner) // Check 7.0f, because uiMergeCount has not been set yet
-                {
-                    // Schedule time must be less than quicksand periodic event timer,
-                    // otherwise we could root player before merging... quite annoying.
-                    events.ScheduleEvent(EVENT_TRY_MERGE, 300);
-                }
-                else
-                {
-                    // Try to merge first
-                    Merge();
-                }
-            }
-            events.ScheduleEvent(EVENT_QUICKSAND_PERIODIC, 500);
-        }
-
-        void DoAction(int32 iAction)
-        {
-            switch (iAction)
-            {
-            case ACTION_CREATE_LIVING_SAND:
-                if (Creature *pLivingSand = me->SummonCreature(MOB_LIVING_SAND, *me))
-                {
-                    me->RemoveAllAuras();
-                    me->DespawnOrUnsummon(2000);
-                    pLivingSand->SetInCombatWithZone();
-                }
-                break;
-
-            default:
-                break;
-            }
-        }
-
-        void UpdateAI(uint32 uiDiff)
-        {
-            events.Update(uiDiff);
-
-            while(uint32 uiEventId = events.ExecuteEvent())
-            {
-                switch(uiEventId)
-                {
-                case EVENT_QUICKSAND_PERIODIC:
-                {
-                    std::list<Player*> playerList;
-                    me->GetPlayerListInGrid(playerList, 7.0f + 7.0f * uiMergeCount);
-
-                    for(Player *pPlayer: playerList)
-                    {
-                        if(!pPlayer->HasAura(SPELL_QUICKSAND_PERIODIC_DAMAGES, me->GetGUID())) // Caster is relevant here I think cause aura cannot stack
-                            DoCast(pPlayer, SPELL_QUICKSAND_PERIODIC_DAMAGES); // Handle the root and cie in the AuraScript
-                    }
-
-                    events.ScheduleEvent(EVENT_QUICKSAND_PERIODIC, 500);
-                    break;
-                }
-
-                case EVENT_TRY_MERGE:
-                    Merge();
-                    break;
-
-                default:
-                    break;
-                }
-            }
-        }
-
-        uint32 GetData(uint32 uiIndex)
-        {
-            if(uiIndex == DATA_QUICKSAND_MERGE_COUNT)
-                return uiMergeCount;
-
-            return 0;
-        }
-
-    private:
-        EventMap        events;
-        InstanceScript  *pInstance;
-
-        uint32          uiMergeCount;
-
-        // Helper function to merge the Quicksands in Heroic
-        void Merge()
-        {
-            /* In Heroic mode, when two Quicksands are overlaping (the distance between
-             * the two stalkers is lower than 7 yards), they merge, resulting in a big
-             * Quicksand appearing. I don't know the formula Blizzard used to do this,
-             * and I never saw it appear on a video, so I will handle it this way :
-             *
-             * The summoning position is the middle between the two stalkers. We will summon
-             * a stalker and set it's uiMergeCount to the sum of the uiMergeCount of the two
-             * merging Quicksands. Then, we will increase it's scale by this number.
-             *
-             * Exemple: we have a Quicksand A with uiMergeCount = 1 (meaning it merged only once)
-             * and this (the this pointer, so this class) one is created let's sat 6 yards from
-             * A stalker. We compute the middle position and summon a new Quicksand, we set it's
-             * uiMergeCount to this->uiMergeCount (0) + A->uiMergeCount (1) + 1. And then we
-             * update the scale.
-             *
-             * Note: we will not handle multi merging. It would be too complicated, so we will
-             * merge with the closest quicksand.
-             */
-
-            Creature *pClosestQuicksand = me->FindNearestCreature(NPC_QUICKSAND_STALKER, 7.0f + 7.0f * uiMergeCount); // Use uiMergeCount to compute correct radius
-
-            if(pClosestQuicksand)
-            {
-                float fMiddleX = (me->GetPositionX() + pClosestQuicksand->GetPositionX()) / 2.0f;
-                float fMiddleY = (me->GetPositionY() + pClosestQuicksand->GetPositionY()) / 2.0f;
-                float fZ = me->GetPositionZ();
-
-                if(Creature *pNewQuicksand = me->SummonCreature(NPC_QUICKSAND_STALKER, fMiddleX, fMiddleY, fZ))
-                {
-                    if(mob_quicksand_stalker_AI* pNewQuicksandAI = dynamic_cast<mob_quicksand_stalker_AI*>(pNewQuicksand->AI()))
-                    {
-                        // We are manipulating an object of the same type, it allows access to the private scope
-                        pNewQuicksandAI->uiMergeCount = uiMergeCount + 1;
-                        pNewQuicksand->SetObjectScale(pNewQuicksand->GetFloatValue(OBJECT_FIELD_SCALE_X) * pNewQuicksandAI->uiMergeCount);
-
-                        // Remove self and other
-                        pClosestQuicksand->DisappearAndDie();
-                        me->DisappearAndDie();
-                    }
-                }
-            }
-        }
-    };
-
-    CreatureAI *GetAI(Creature *pCreature) const
-    {
-        return new mob_quicksand_stalker_AI(pCreature);
-    }
-};
-
-
 // Living Sand AI
 class mob_living_sand : public CreatureScript
 {
@@ -1854,23 +1699,112 @@ public:
         {
         }
 
+        void IsSummonedBy(Unit *pSummoner) override
+        {
+            me->AddAura(SPELL_QUICKSAND_AT_VISUAL_INIT, me);
+            Initialize();
+        }
+
+        void Reset() override
+        {
+        }
+
+        void EnterEvadeMode() override
+        {
+        }
+        
+        void Initialize()
+        {
+            me->RemoveAurasDueToSpell(SPELL_FORTIFIED);
+            me->SetHealth(me->GetMaxHealth());
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
+            me->GetMotionMaster()->MovementExpired();
+            me->GetMotionMaster()->MoveIdle();
+            events.ScheduleEvent(EVENT_QUICKSAND_PERIODIC, 500);
+        }
+
         void DoAction(const int32 iAction) override
         {
             switch(iAction)
             {
-            case ACTION_FORTIFY:
-                DoCast(me, SPELL_FORTIFIED);
+            case ACTION_CREATE_LIVING_SAND:
+                if (!me->HasAura(SPELL_QUICKSAND_AT_VISUAL) && !me->HasAura(SPELL_QUICKSAND_AT_VISUAL_INIT))
+                {
+                    DoCast(me, SPELL_FORTIFIED, true);
+                }
+                else
+                {
+                    me->RemoveAura(SPELL_QUICKSAND_AT_VISUAL_INIT, 0, 0, AURA_REMOVE_BY_EXPIRE);
+                    me->RemoveAura(SPELL_QUICKSAND_AT_VISUAL, 0, 0, AURA_REMOVE_BY_EXPIRE);
+                    me->RemoveAllAuras();
+                    events.ScheduleEvent(EVENT_ACTIVATE_SAND, 4000);
+                    events.CancelEvent(EVENT_QUICKSAND_PERIODIC);
+                }
                 break;
-
             default:
                 break;
             }
         }
 
-        void JustDied(Unit *pKiller) override
+        void UpdateAI(const uint32 uiDiff) override
         {
-            if (Creature* pSul = GetSulTheSandcrawler(me))
-                pSul->SummonCreature(NPC_QUICKSAND_STALKER, *me);
+            events.Update(uiDiff);
+
+            while (uint32 uiEventId = events.ExecuteEvent())
+            {
+                switch (uiEventId)
+                {
+                case EVENT_QUICKSAND_PERIODIC:
+                {
+                    std::list<Player*> playerList;
+                    me->GetPlayerListInGrid(playerList, 8.0f);
+
+                    for (Player *pPlayer : playerList)
+                    {
+                        if (Aura* pAura = pPlayer->GetAura(SPELL_QUICKSAND_PERIODIC_DAMAGES, me->GetGUID())) // Caster is relevant here I think cause aura cannot stack
+                            pAura->RefreshDuration();
+                        else
+                            DoCast(pPlayer, SPELL_QUICKSAND_PERIODIC_DAMAGES);
+                            // Handle the root and cie in the AuraScript
+                    }
+
+                    events.ScheduleEvent(EVENT_QUICKSAND_PERIODIC, 500);
+                }
+                    break;
+                case EVENT_ACTIVATE_SAND:
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
+                    if (!me->IsInCombat())
+                        DoZoneInCombat(me, 100.f);
+                    else if (me->GetVictim())
+                        me->GetMotionMaster()->MoveChase(me->GetVictim());
+                    else if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                        AttackStart(pTarget);
+                    break;
+                }
+            }
+
+            if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE) || !UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+        
+        void DamageTaken(Unit* pDealer, uint32& uiDamage)
+        {
+            if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
+            {
+                uiDamage = 0;
+                return;
+            }
+
+            if (uiDamage >= me->GetHealth())
+            {
+                uiDamage = 0;
+                DoCast(me, SPELL_QUICKSAND_AT_VISUAL, true);
+                Initialize();
+            }
         }
 
     private:
@@ -3091,30 +3025,35 @@ public:
 
         void HandlePeriodic(AuraEffect const* pAuraEffect)
         {
-            if(!GetOwner())
+            if (!GetOwner())
                 return;
 
             // Handle Entrapped / Ensnared with the periodic effect, it's quite easier
-            if(Player *pOwner = GetOwner()->ToPlayer())
+            if (Player *pOwner = GetOwner()->ToPlayer())
             {
                 std::list<Creature*> quicksandsList;
-                pOwner->GetCreatureListWithEntryInGrid(quicksandsList, NPC_QUICKSAND_STALKER, 400.0f);
+                pOwner->GetCreatureListWithEntryInGrid(quicksandsList, MOB_LIVING_SAND, 200.0f);
                 quicksandsList.sort(Trinity::DistanceCompareOrderPred(pOwner, true));
 
                 // Remove quicksands that are not so close
                 quicksandsList.remove_if([pOwner](Creature const* quicksand) -> bool
                 {
-                    if(CreatureAI *pAI = quicksand->AI())
+                    if (CreatureAI *pAI = quicksand->AI())
                     {
-                        float fRadius = pAI->GetData(DATA_QUICKSAND_MERGE_COUNT) * 7.0f + 7.0f;
+                        float fRadius = 8.0f;
                         return pOwner->GetExactDist2d(quicksand) >= fRadius;
                     }
 
                     return false;
                 });
 
+                quicksandsList.remove_if([pOwner](Creature const* quicksand) -> bool
+                {
+                    return (!quicksand->HasAura(SPELL_QUICKSAND_AT_VISUAL) && !quicksand->HasAura(SPELL_QUICKSAND_AT_VISUAL_INIT));
+                });
+
                 // If there are no quicksands near, remove aura and return (using Remove(AURA_REMOVE_BY_DEFAULT) to prevent crash, instead of pOwner->RemoveAura(GetId()))
-                if(quicksandsList.empty())
+                if (quicksandsList.empty())
                 {
                     Remove(AURA_REMOVE_BY_DEFAULT);
                     return;
@@ -3123,19 +3062,19 @@ public:
                 // Else, force player to cast spell on self, so aura won't stack in many instances
                 // (because target is TARGET_UNIT_CASTER, so annoying). Handle everything in here,
                 // because it is simpler, even if not really beautiful...
-                for(Creature *pQuicksand: quicksandsList)
+                for (Creature *pQuicksand : quicksandsList)
                 {
                     // Do not ensnare the player if it is already entrapped
-                    if(pOwner->HasAura(SPELL_ENTRAPPED))
+                    if (pOwner->HasAura(SPELL_ENTRAPPED))
                         return;
-                    
-                    if(Aura *pEnsnared = pOwner->GetAura(SPELL_ENSNARED))
+
+                    if (Aura *pEnsnared = pOwner->GetAura(SPELL_ENSNARED))
                     {
-                        if(pEnsnared->GetStackAmount() < 4)
+                        if (pEnsnared->GetStackAmount() < 4)
                         {
                             pOwner->CastSpell(pOwner, SPELL_ENSNARED, false);
                         }
-                        else if(pEnsnared->GetStackAmount() == 4)
+                        else if (pEnsnared->GetStackAmount() == 4)
                         {
                             pOwner->CastSpell(pOwner, SPELL_ENSNARED, false); // Five stack
                             pOwner->CastSpell(pOwner, SPELL_ENTRAPPED, false);
@@ -3192,6 +3131,10 @@ public:
 // Sandstorm
 class spell_sul_sandstorm : public SpellScriptLoader
 {
+    enum : uint32
+    {
+        SANDSTORM_VISUAL    = 136895
+    };
 public:
     spell_sul_sandstorm() : SpellScriptLoader("spell_sul_sandstorm") { }
 
@@ -3201,19 +3144,22 @@ public:
 
         void HandleAfterCast()
         {
-            if(Unit *pCaster = GetCaster())
+            if (Unit *pCaster = GetCaster())
             {
-                std::list<Creature*> quicksandsList;
+                pCaster->AddAura(SANDSTORM_VISUAL, pCaster);
+
+                //std::list<Creature*> quicksandsList;
                 std::list<Creature*> livingSandsList;
 
-                pCaster->GetCreatureListWithEntryInGrid(quicksandsList, NPC_QUICKSAND_STALKER, 500.0f);
+                //pCaster->GetCreatureListWithEntryInGrid(quicksandsList, NPC_QUICKSAND_STALKER, 500.0f);
                 pCaster->GetCreatureListWithEntryInGrid(livingSandsList, MOB_LIVING_SAND, 500.0f);
 
-                for(Creature *pQuicksand: quicksandsList)
-                    pQuicksand->AI()->DoAction(ACTION_CREATE_LIVING_SAND);
+                /*
+                for (Creature *pQuicksand : quicksandsList)
+                    pQuicksand->AI()->DoAction(ACTION_CREATE_LIVING_SAND);*/
 
-                for(Creature *pLivingSand : livingSandsList)
-                    pLivingSand->AI()->DoAction(ACTION_FORTIFY);
+                for (Creature *pLivingSand : livingSandsList)
+                    pLivingSand->AI()->DoAction(ACTION_CREATE_LIVING_SAND);
             }
         }
 
@@ -3643,7 +3589,6 @@ void AddSC_boss_council_of_elders()
     new boss_high_priestess_marli();
     new mob_garajal();
     new mob_garajals_soul();
-    new mob_quicksand_stalker();
     new mob_living_sand();
     new mob_blessed_loa_spirit();
     new mob_shadowed_loa_spirit();

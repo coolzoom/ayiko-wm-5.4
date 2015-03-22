@@ -1251,7 +1251,6 @@ public:
             m_phase = 0;
             playerGuid = 0;
             me->SetFloatValue(OBJECT_FIELD_SCALE_X, me->GetFloatValue(OBJECT_FIELD_SCALE_X) * 1.4f);
-            InitializeStatue();
         }
 
         uint32 statueData;
@@ -1269,15 +1268,12 @@ public:
                 {
                     if (GameObject* pGo = ObjectAccessor::GetGameObject(*me, pInstance->GetData64(GOB_MOGU_STATUE_1 + i)))
                     {
-                        TC_LOG_ERROR("scripts", "printing spawntimes, %u, %u", pGo->GetRespawnDelay(), me->GetRespawnDelay());
                         if (pGo->GetRespawnDelay() == me->GetRespawnDelay())
                             statueGuid = pGo->GetGUID();
                     }
                 }
             }
 
-  
-            TC_LOG_ERROR("scripts", "statue guid is %u", statueGuid);
         }
         
         void HandleStatue(bool active)
@@ -1309,6 +1305,7 @@ public:
         {
             if (iAction == ACTION_DESTROYED)
             {
+                InitializeStatue();
                 m_phase = 1;
                 events.ScheduleEvent(EVENT_WATER_BEAM, 4000);
                 events.ScheduleEvent(EVENT_SPAWN_WATER, 7000);

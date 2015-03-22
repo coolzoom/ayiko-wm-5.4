@@ -1894,7 +1894,6 @@ public:
 
         inline void HandleTargetSelection()
         {
-            TC_LOG_ERROR("scripts", "handleTargetSelection called for Blessed Loa Spirit.");
             float fHealthNumber = 100.f;
             std::list<uint64> tempList;
 
@@ -1907,7 +1906,6 @@ public:
                     if (!pCreature->IsAlive())
                         continue;
 
-                    //TC_LOG_ERROR("scripts", "GUID %u, Entry %u processed (name = %s)", pGuid, pCreature->GetEntry(), pCreature->GetName());
                     if (fHealthNumber >= pCreature->GetHealthPct())
                     {
                         fHealthNumber = pCreature->GetHealthPct();
@@ -2815,7 +2813,6 @@ public:
                     {
                         if (pPlayer->HasAura(SPELL_RECKLESS_CHARGE_FACE, pKazrajin->GetGUID()))
                         {
-                            TC_LOG_ERROR("scripts", "Reckless charge target has been found");
                             pPlayer->RemoveAurasDueToSpell(SPELL_RECKLESS_CHARGE_FACE);
                             // Compute position of landing
                             float fDist = pKazrajin->GetExactDist2d(pPlayer) - 3.f; // Remove 5 yards to continue rolling
@@ -2824,7 +2821,6 @@ public:
                             GetPositionWithDistInOrientation(pKazrajin, fDist, fAngle, fX, fY);
 
                             uint8 m_pointCount = ((uint8)fDist / 3) + 1;
-                            TC_LOG_ERROR("scripts", "pointCount %u on dist %f", m_pointCount, fDist);
 
                             for (uint8 i = 0; i < m_pointCount; ++i)
                             {
@@ -2835,7 +2831,6 @@ public:
 
                             if (pKazrajin->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
                                 pKazrajin->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-                            //pKazrajin->GetMotionMaster()->MoveJump(fX, fY, pPlayer->GetPositionZ()+0.2f, 22.0f, 9.0f, POINT_RECKLESS_CHARGE_LAND);
                             pKazrajin->GetMotionMaster()->MoveCharge(fX, fY, pPlayer->GetPositionZ(), 42.f, POINT_RECKLESS_CHARGE_LAND);
                         }
                     }
@@ -2904,7 +2899,6 @@ public:
             if (!caster || !target)
                 return;
 
-            TC_LOG_ERROR("scripts", "aura applied");
             caster->AddAura(SPELL_RECKLESS_CHARGE_FACE, target);
         }
 

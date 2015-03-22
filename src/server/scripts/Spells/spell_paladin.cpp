@@ -1710,49 +1710,69 @@ public:
     }
 };
 
-// Sanctified Wrath - 114232
-class spell_pal_sanctified_wrath final : public SpellScriptLoader
+// Avenging Wrath
+class spell_pal_avenging_wrath : public SpellScriptLoader
 {
-    class script_impl final : public AuraScript
-    {
-        PrepareAuraScript(script_impl)
+public:
+    spell_pal_avenging_wrath() : SpellScriptLoader("spell_pal_avenging_wrath") { }
 
-        void initEffects(uint32 &effectMask)
+    class spell_pal_avenging_wrath_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_pal_avenging_wrath_SpellScript);
+
+        void HandleOnHit()
         {
-            auto const caster = GetCaster();
+            Unit* caster = GetCaster();
             if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
                 return;
 
-            auto const player = caster->ToPlayer();
-
-            switch(player->GetSpecializationId(player->GetActiveSpec()))
+            Player* player = caster->ToPlayer();
+            if (caster->HasAura(53376)) // Sanctified Wrath
             {
-                case SPEC_PALADIN_HOLY:
-                    effectMask &= ~((1 << EFFECT_1) | (1 << EFFECT_2) | (1 << EFFECT_3));
-                    break;
-                case SPEC_PALADIN_PROTECTION:
-                    effectMask &= ~((1 << EFFECT_0) | (1 << EFFECT_2) | (1 << EFFECT_4));
-                    break;
-                case SPEC_PALADIN_RETRIBUTION:
-                    effectMask &= ~((1 << EFFECT_0) | (1 << EFFECT_1) | (1 << EFFECT_3) | (1 << EFFECT_4));
-                    break;
+                caster->CastSpell(caster, 114232, true);
+                if (Aura* aura = caster->GetAura(114232))
+                {
+                    std::list<uint32> effList;
+
+                    switch(player->GetSpecializationId(player->GetActiveSpec()))
+                    {
+                        case SPEC_PALADIN_HOLY:
+                            effList.push_back(EFFECT_0);
+                            effList.push_back(EFFECT_4);
+                            break;
+                        case SPEC_PALADIN_PROTECTION:
+                            effList.push_back(EFFECT_1);
+                            effList.push_back(EFFECT_3);
+                            break;
+                        case SPEC_PALADIN_RETRIBUTION:
+                            effList.push_back(EFFECT_2);
+                            break;
+                        default:
+                            break;
+                    }
+
+                    for (uint32 i = 0; i < aura->GetSpellInfo()->Effects.size(); ++i)
+                    {
+                        std::list<uint32>::iterator found = std::find(effList.begin(), effList.end(), i);
+                        if (found != effList.end())
+                            continue;
+
+                        if (AuraEffect* aurEff = aura->GetEffect(i))
+                            aurEff->ChangeAmount(0);
+                    }
+                }
             }
         }
 
-        void Register() final
+        void Register()
         {
-            OnInitEffects += AuraInitEffectsFn(script_impl::initEffects);
+            OnHit += SpellHitFn(spell_pal_avenging_wrath_SpellScript::HandleOnHit);
         }
     };
 
-public:
-    spell_pal_sanctified_wrath()
-        : SpellScriptLoader("spell_pal_sanctified_wrath")
-    { }
-
-    AuraScript * GetAuraScript() const final
+    SpellScript* GetSpellScript() const
     {
-        return new script_impl;
+        return new spell_pal_avenging_wrath_SpellScript();
     }
 };
 
@@ -1913,7 +1933,7 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_holy_wrath();
     new spell_pal_exorcism();
     new spell_pal_hammer_of_wrath();
-    new spell_pal_sanctified_wrath();
+    new spell_pal_avenging_wrath();
     new spell_pal_divine_plea();
     new spell_pal_glyph_of_double_jeopardy();
     new spell_pal_blessing();

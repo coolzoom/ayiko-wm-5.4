@@ -57,11 +57,17 @@ enum eSpells
     // Kazra'jin
 
     // Reckless Charge
-    SPELL_RECKLESS_CHARGE                   = 137117, // Visual on the boss while travelling (launch everything) ("They see me rollin ! FUCK YEAH !")
+    // SPELL_RECKLESS_CHARGE                   = 137117, // Visual on the boss while travelling (launch everything) ("They see me rollin ! FUCK YEAH !")
     SPELL_RECKLESS_CHARGE_GROUND_AT         = 138026, // Visual on the ground while boss is travelling (damage dealer ?)
     SPELL_RECKLESS_CHARGE_SHATTER_GROUND    = 137122, // Final damages + Knock back and visual of rocks appearing around
     SPELL_RECKLESS_CHARGE_UNIQUE_DAMAGES    = 137133, // Damage on unique target (AT ? Kazra'jin ?)
     SPELL_RECKLESS_CHARGE_PRE_PATH          = 000000, // TBF: Visual of dark pools on ground before charge
+
+    SPELL_RECKLESS_CHARGE                   = 137107,
+    SPELL_RECKLESS_CHARGE_VISUAL            = 137117,
+    SPELL_RECKLESS_CHARGE_FACE              = 137121, // Forces facing towards target
+    SPELL_RECKLESS_CHARGE_SOUND             = 137131,
+
     // Need black visual on ground before cast
 
     // Overload
@@ -722,15 +728,16 @@ public:
             CouncilBaseAI(pCreature), uiDamagesDoneInPastSecs(0)
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+            SetCombatMovement(false);
         }
 
         // Override reset to reset the amount of damages received, and the
         // movement flags.
         void Reset()
         {
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
             uiDamagesDoneInPastSecs = 0;
 
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
             CouncilBaseAI::Reset(); // Finalize Reset
         }
 
@@ -750,31 +757,19 @@ public:
                 {
                 case EVENT_RECKLESS_CHARGE_PRE_PATH:
                 {
-                    DoCast(me, SPELL_RECKLESS_CHARGE_PRE_PATH);
+                    //DoCast(me, SPELL_RECKLESS_CHARGE_PRE_PATH);
+                    DoCast(me, SPELL_RECKLESS_CHARGE);
 
-                    // Compute a random target
-                    std::list<Player*> playerList;
-                    me->GetPlayerListInGrid(playerList, 100.0f);
-                    // Target must be at a minimal range of 18 yards (not sure)
-                    playerList.remove_if([this](Player const* pPlayer) -> bool
-                    {
-                        return this->me->GetExactDist2d(pPlayer) < 18.0f;
-                    });
-
-                    if(!playerList.empty())
-                    {
-                        if(Player *pTarget = Trinity::Containers::SelectRandomContainerElement(playerList))
-                            uiRecklessChargeTargetGUID = pTarget->GetGUID();
-                    }
-
-                    events.ScheduleEvent(EVENT_RECKLESS_CHARGE, 5 * IN_MILLISECONDS);
+                    events.ScheduleEvent(EVENT_RECKLESS_CHARGE, 3 * IN_MILLISECONDS);
                     break;
                 }
 
                 case EVENT_RECKLESS_CHARGE:
+                    events.ScheduleEvent(EVENT_RECKLESS_CHARGE_PRE_PATH, 7 * IN_MILLISECONDS);
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-                    Talk(TALK_KAZRAJIN_CHARGE);
-                    DoCast(me, SPELL_RECKLESS_CHARGE); // Launch everything
+                    if (rand()%10>4)
+                        Talk(TALK_KAZRAJIN_CHARGE);
+                    DoCast(me, SPELL_RECKLESS_CHARGE_VISUAL); // Launch everything
                     // Summon npcs for the visual of Reckless Charge while travelling ?
                     // Handle next part in MovementInform.
                     break;
@@ -801,43 +796,27 @@ public:
 
         void MovementInform(uint32 uiMotionType, uint32 uiMotionPointId)
         {
-            switch(uiMotionType)
+            if (uiMotionPointId == POINT_RECKLESS_CHARGE_LAND)
             {
-            case EFFECT_MOTION_TYPE:
-                if(uiMotionPointId == POINT_RECKLESS_CHARGE_LAND)
+                me->RemoveAura(SPELL_RECKLESS_CHARGE_VISUAL);
+                DoCastAOE(SPELL_RECKLESS_CHARGE_SHATTER_GROUND);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+
+                if (me->HasAura(SPELL_POSSESSED))
                 {
-                    float fX, fY;
-                    GetPositionWithDistInOrientation(me, 8.0f, me->GetOrientation(), fX, fY);
-                    me->GetMotionMaster()->MovePoint(POINT_RECKLESS_CHARGE_PLAYER, fX, fY, me->GetPositionZ());
-                }
-                break;
-
-            case POINT_MOTION_TYPE:
-                if(uiMotionPointId == POINT_RECKLESS_CHARGE_PLAYER)
-                {
-                    me->RemoveAura(SPELL_RECKLESS_CHARGE);
-                    DoCastAOE(SPELL_RECKLESS_CHARGE_SHATTER_GROUND);
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-
-                    if(me->HasAura(SPELL_POSSESSED))
-                    {
-                        Talk(TALK_SPECIAL);
-                        if(IsHeroic())
-                            DoCast(me, SPELL_DISCHARGE);
-                        else
-                            DoCast(me, SPELL_OVERLOAD);
-
-                        events.ScheduleEvent(EVENT_RECKLESS_CHARGE_PRE_PATH, urand(23, 24) * IN_MILLISECONDS);
-                    }
+                    Talk(TALK_SPECIAL);
+                    if (IsHeroic())
+                        DoCast(me, SPELL_DISCHARGE);
                     else
-                        events.ScheduleEvent(EVENT_RECKLESS_CHARGE_PRE_PATH, urand(3, 4) * IN_MILLISECONDS);
-                }
-                break;
+                        DoCast(me, SPELL_OVERLOAD);
 
-            default:
-                break;
+                    events.RescheduleEvent(EVENT_RECKLESS_CHARGE_PRE_PATH, urand(23, 24) * IN_MILLISECONDS);
+                }
+                else
+                    events.RescheduleEvent(EVENT_RECKLESS_CHARGE_PRE_PATH, urand(3, 4) * IN_MILLISECONDS);
             }
         }
+    
 
         // Override Damage Taken again to handle the Discharge aura.
         /*
@@ -878,12 +857,12 @@ public:
             }
         }
         */
-        uint32 GetData(uint32 uiIndex) const
+        uint32 GetData(uint32 uiIndex) 
         {
             return uiDarkPowerCount;
         }
 
-        uint64 GetGUID(int32 iIndex) const
+        uint64 GetGUID(int32 iIndex) 
         {
             if(iIndex == DATA_RECKLESS_CHARGE_TARGET_GUID)
                 return uiRecklessChargeTargetGUID;
@@ -911,11 +890,13 @@ public:
             events.ScheduleEvent(EVENT_RECKLESS_CHARGE_PRE_PATH, urand(3, 4) * IN_MILLISECONDS);
         }
     };
+    
 
     CreatureAI *GetAI(Creature *pCreature) const
     {
         return new boss_kazrajin_AI(pCreature);
     }
+    
 };
 
 
@@ -931,7 +912,6 @@ public:
         boss_sul_the_sandcrawler_AI(Creature *pCreature) :
             CouncilBaseAI(pCreature)
         {
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
         }
 
         void UpdateAI(uint32 uiDiff)
@@ -951,7 +931,7 @@ public:
                 case EVENT_SAND_BOLT:
                     if(Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
                         DoCast(pTarget, SPELL_SAND_BOLT); 
-                    events.ScheduleEvent(EVENT_SAND_BOLT, urand(5, 15) * IN_MILLISECONDS);
+                    events.ScheduleEvent(EVENT_SAND_BOLT, 4000 + (rand()%30*100));
                     break;
 
                 case EVENT_QUICKSAND:
@@ -972,7 +952,7 @@ public:
                             me->SummonCreature(NPC_QUICKSAND_STALKER, *pPlayer);
                     }
 
-                    events.ScheduleEvent(EVENT_QUICKSAND, urand(20, 35) * IN_MILLISECONDS);
+                    events.ScheduleEvent(EVENT_QUICKSAND, 20000 + rand()%5000);
                     break;
                 }
 
@@ -1000,6 +980,8 @@ public:
                     break;
                 }
             }
+
+            DoMeleeAttackIfReady();
         }
 
     private:
@@ -1016,7 +998,7 @@ public:
             events.Reset();
 
             events.ScheduleEvent(EVENT_SAND_BOLT, 5 * IN_MILLISECONDS);
-            events.ScheduleEvent(EVENT_SANDSTORM, 40 * IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_SANDSTORM, 10 * IN_MILLISECONDS);
         }
     };
 
@@ -1165,7 +1147,8 @@ public:
                 }
             }
 
-            DoMeleeAttackIfReady();
+            if (!DoSpellAttackIfReady(me->HasAura(SPELL_POSSESSED) ? SPELL_WRATH_OF_THE_LOA_DARK : SPELL_WRATH_OF_THE_LOA))
+                DoMeleeAttackIfReady();
         }
 
         // Override function to return the GUIDs of the targets for the Loa Spirits.
@@ -1613,16 +1596,17 @@ public:
             InitList(tempList);
 
             tempList.remove_if(guidVectorPredicate(pInstance->GetData64(uiCouncillorEntry)));
-            TC_LOG_ERROR("scripts", "templist size %u", tempList.size());
             for (auto const pGuid : tempList)
             {
                 if (Creature* pCreature = ObjectAccessor::GetCreature(*me, pGuid))
                 {
-                    TC_LOG_ERROR("scripts", "GUID %u, Entry %u processed (name = %s)", pGuid, pCreature->GetEntry(), pCreature->GetName());
-                    if (fHealthNumber < pCreature->GetHealthPct())
+                    if (pCreature->IsAlive())
                     {
-                        fHealthNumber = pCreature->GetHealthPct();
-                        uiNextEntry = pCreature->GetEntry();
+                        if (fHealthNumber < pCreature->GetHealthPct())
+                        {
+                            fHealthNumber = pCreature->GetHealthPct();
+                            uiNextEntry = pCreature->GetEntry();
+                        }
                     }
                 }
             }
@@ -1631,7 +1615,6 @@ public:
                 return pCreature;
 
             events.ScheduleEvent(EVENT_POSSESS, 500);
-            TC_LOG_ERROR("scripts", "No councillor found in Council Script while trying to possess");
             return NULL;
         }
     };
@@ -1681,13 +1664,17 @@ public:
 
         void DoAction(int32 iAction)
         {
-            switch(iAction)
+            switch (iAction)
             {
             case ACTION_CREATE_LIVING_SAND:
-                if(Creature *pLivingSand = me->SummonCreature(MOB_LIVING_SAND, *me))
+                if (Creature *pLivingSand = me->SummonCreature(MOB_LIVING_SAND, *me))
+                {
+                    me->RemoveAllAuras();
+                    me->DespawnOrUnsummon(2000);
                     pLivingSand->SetInCombatWithZone();
+                }
                 break;
-                
+
             default:
                 break;
             }
@@ -1808,12 +1795,6 @@ public:
         {
         }
 
-        void IsSummonedBy(Creature* pSummoner)
-        {
-            if (Creature* pQuickSand = GetClosestCreatureWithEntry(me, NPC_QUICKSAND_STALKER, 5.f))
-                pQuickSand->DespawnOrUnsummon();
-        }
-
         void DoAction(const int32 iAction) override
         {
             switch(iAction)
@@ -1879,19 +1860,19 @@ public:
         void IsSummonedBy(Unit *pSummoner)
         {
             HandleTargetSelection();
-
-            events.ScheduleEvent(EVENT_BLESSED_GIFT, 20 * IN_MILLISECONDS);
-            events.ScheduleEvent(EVENT_MOVE_COUNCILLOR, 500);
         }
 
         void Move()
         {
             if (Creature *pCouncillor = ObjectAccessor::GetCreature(*me, uiTargetGuid))
                 me->GetMotionMaster()->MovePoint(POINT_BLESSED_LOA_SPIRIT_COUNCILLOR, *pCouncillor);
+            else
+                HandleTargetSelection();
         }
 
-        void HandleTargetSelection()
+        inline void HandleTargetSelection()
         {
+            TC_LOG_ERROR("scripts", "handleTargetSelection called for Blessed Loa Spirit.");
             float fHealthNumber = 100.f;
             std::list<uint64> tempList;
 
@@ -1905,13 +1886,16 @@ public:
                         continue;
 
                     //TC_LOG_ERROR("scripts", "GUID %u, Entry %u processed (name = %s)", pGuid, pCreature->GetEntry(), pCreature->GetName());
-                    if (fHealthNumber > pCreature->GetHealthPct())
+                    if (fHealthNumber >= pCreature->GetHealthPct())
                     {
                         fHealthNumber = pCreature->GetHealthPct();
                         uiTargetGuid = pGuid;
                     }
                 }
             }
+
+            events.RescheduleEvent(EVENT_BLESSED_GIFT, 20 * IN_MILLISECONDS);
+            events.RescheduleEvent(EVENT_MOVE_COUNCILLOR, 500);
         }
 
         void UpdateAI(uint32 uiDiff)
@@ -1955,7 +1939,7 @@ public:
                             me->DisappearAndDie();
                         }
                         else
-                            events.RescheduleEvent(EVENT_MOVE_COUNCILLOR, 0);
+                            events.RescheduleEvent(EVENT_MOVE_COUNCILLOR, 200);
                     }
                 }
                 break;
@@ -2007,7 +1991,7 @@ public:
 
         void Reset()
         {
-            DoCast(me, SPELL_BLESSED_TRANSFORMATION);
+            DoCast(me, SPELL_SHADOWED_TRANSFORMATION);
         }
 
         // Override function to be sure there won't be any call to MoveChase (at least in AttackStart)
@@ -2023,7 +2007,10 @@ public:
             if (Player *pTarget = GetFollowedPlayer())
             {
                 if (pTarget->IsAlive())
+                {
                     me->GetMotionMaster()->MovePoint(POINT_BLESSED_LOA_SPIRIT_COUNCILLOR, *pTarget);
+                    events.ScheduleEvent(EVENT_MOVE_COUNCILLOR, 500);
+                }
                 else
                 {
                     if (Aura* pAura = pTarget->GetAura(SPELL_MARKED_SOUL, me->GetGUID()))
@@ -2045,6 +2032,7 @@ public:
             }
 
             HandleTargetSelection();
+            return NULL;
         }
 
         inline void HandleTargetSelection()
@@ -2065,7 +2053,7 @@ public:
             
             events.Reset();
             events.ScheduleEvent(EVENT_MOVE_COUNCILLOR, 500);
-            events.ScheduleEvent(EVENT_BLESSED_GIFT, 20 * IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_SHADOWED_GIFT, 20 * IN_MILLISECONDS);
         }
 
         void UpdateAI(uint32 uiDiff)
@@ -2106,6 +2094,7 @@ public:
                     {
                         if (me->GetExactDist2d(pTarget) <= 5.f)
                         {
+                            pTarget->RemoveAurasDueToSpell(SPELL_MARKED_SOUL, me->GetGUID());
                             DoCast(pTarget, SPELL_SHADOWED_GIFT);
                             me->DisappearAndDie();
                         }
@@ -2120,6 +2109,7 @@ public:
                 {
                     if (Player* pPlayer = GetFollowedPlayer())
                     {
+                        pPlayer->RemoveAurasDueToSpell(SPELL_MARKED_SOUL, me->GetGUID());
                         DoCast(pPlayer, SPELL_SHADOWED_GIFT);
                         me->DisappearAndDie();
                     }
@@ -2766,21 +2756,32 @@ public:
     {
         PrepareSpellScript(spell_kazrajin_reckless_charge_SpellScript)
 
-        void HandleCast()
+        void HandleCast(SpellEffIndex eff_idx)
         {
-            if(Unit *pCaster = GetCaster())
+            if (Unit *pCaster = GetCaster())
             {
-                if(Creature *pKazrajin = pCaster->ToCreature())
+                if (Creature *pKazrajin = pCaster->ToCreature())
                 {
-                    if(Player *pChargeTarget = ObjectAccessor::GetPlayer(*pKazrajin, pKazrajin->AI()->GetGUID(DATA_RECKLESS_CHARGE_TARGET_GUID)))
+                    std::list<Player*> players;
+                    GetPlayerListInGrid(players, pKazrajin, 100.f);
+                    
+                    for (auto const pPlayer : players)
                     {
-                        // Compute position of landing
-                        float fDist = pKazrajin->GetExactDist2d(pChargeTarget) - 5.0f; // Remove 5 yards to continue rolling
-                        float fAngle = pKazrajin->GetOrientation();
-                        float fX, fY;
-                        GetPositionWithDistInOrientation(pKazrajin, fDist, fAngle, fX, fY);
+                        if (pPlayer->HasAura(SPELL_RECKLESS_CHARGE_FACE, pKazrajin->GetGUID()))
+                        {
+                            TC_LOG_ERROR("scripts", "Reckless charge target has been found");
+                            pPlayer->RemoveAurasDueToSpell(SPELL_RECKLESS_CHARGE_FACE);
+                            // Compute position of landing
+                            float fDist = pKazrajin->GetExactDist2d(pPlayer) - 3.f; // Remove 5 yards to continue rolling
+                            float fAngle = pKazrajin->GetAngle(pPlayer);
+                            float fX, fY;
+                            GetPositionWithDistInOrientation(pKazrajin, fDist, fAngle, fX, fY);
 
-                        pKazrajin->GetMotionMaster()->MoveJump(fX, fY, pChargeTarget->GetPositionZ(), 22.0f, 9.0f, POINT_RECKLESS_CHARGE_LAND);
+                            if (pKazrajin->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
+                                pKazrajin->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                            //pKazrajin->GetMotionMaster()->MoveJump(fX, fY, pPlayer->GetPositionZ()+0.2f, 22.0f, 9.0f, POINT_RECKLESS_CHARGE_LAND);
+                            pKazrajin->GetMotionMaster()->MoveCharge(fX, fY, pPlayer->GetPositionZ(), 42.f, POINT_RECKLESS_CHARGE_LAND);
+                        }
                     }
                 }
             }
@@ -2788,7 +2789,7 @@ public:
 
         void Register()
         {
-            AfterCast += SpellCastFn(spell_kazrajin_reckless_charge_SpellScript::HandleCast);
+            OnEffectHitTarget += SpellEffectFn(spell_kazrajin_reckless_charge_SpellScript::HandleCast, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
         }
     };
 
@@ -2798,6 +2799,71 @@ public:
     }
 };
 
+class withinRangePredicate
+{
+public:
+    withinRangePredicate(Unit* _caster) : caster(_caster) {}
+
+    bool operator()(WorldObject* target) const
+    {
+        if (target && target->GetExactDist2d(caster) < 9.f)
+            return true;
+        return false;
+    }
+
+private:
+    Unit* caster;
+};
+
+class spell_kazrajin_reckless_charge_targeting : public SpellScriptLoader
+{
+public:
+    spell_kazrajin_reckless_charge_targeting() : SpellScriptLoader("spell_kazrajin_reckless_charge_targeting") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void SelectTargets(std::list<WorldObject*>&targets)
+        {
+            std::list<WorldObject*>tempTargets;
+            std::copy(std::begin(targets), std::end(targets), std::inserter(tempTargets, tempTargets.begin()));
+
+            if (Unit* caster = GetCaster())
+            {
+                targets.remove_if(withinRangePredicate(caster));
+            }
+
+            if (targets.size() > 1)
+                Trinity::Containers::RandomResizeList(targets, 1);
+            else if (targets.empty())
+                std::copy(std::begin(tempTargets), std::end(tempTargets), std::inserter(targets, targets.begin()));
+        }
+
+        void HandleEffectHitTarget(SpellEffIndex eff_idx)
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetHitUnit();
+
+            if (!caster || !target)
+                return;
+
+            TC_LOG_ERROR("scripts", "aura applied");
+            caster->AddAura(SPELL_RECKLESS_CHARGE_FACE, target);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_impl::SelectTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnEffectHitTarget += SpellEffectFn(spell_impl::HandleEffectHitTarget, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
 
 // Overload
 class spell_kazrajin_overload : public SpellScriptLoader
@@ -3421,6 +3487,7 @@ void AddSC_boss_council_of_elders()
     new spell_malakk_frostbite_allies();
     new spell_malakk_body_heat();
     new spell_kazrajin_reckless_charge();
+    new spell_kazrajin_reckless_charge_targeting();
     new spell_kazrajin_overload();
     new spell_kazrajin_discharge();
     new spell_quicksand_periodic();

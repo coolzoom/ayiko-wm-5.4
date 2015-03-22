@@ -2367,12 +2367,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             target->RemoveAurasDueToSpell(71166);
                     }
                     break;
-                case 53376: //Sanctified Wrath
-                    if (apply)
-                        target->CastSpell(target, 114232, true);
-                    else
-                        target->RemoveAurasDueToSpell(114232);
-                    break;
             }
             break;
         }

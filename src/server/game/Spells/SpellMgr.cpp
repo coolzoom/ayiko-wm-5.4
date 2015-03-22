@@ -89,6 +89,7 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
                 case 32752:  // Summoning Disorientation
                 case 103587: // Silence, Asira Dawnslayer, Hour of Twilight
                 case 129889: // Solar Beam silence
+                case 136857: // Entrapped, Council of Elders, Throne of Thunder
                     return DIMINISHING_NONE;
                 case 95199:  // Glyph of Intimidating Shout
                     return DIMINISHING_LIMITONLY;
@@ -3221,9 +3222,6 @@ void SpellMgr::LoadSpellCustomAttr()
 
             switch (spellInfo->Id)
             {
-            case 114232: // Sanctified Wrath effect
-                spellInfo->Attributes |= SPELL_ATTR0_PASSIVE | SPELL_ATTR0_HIDDEN_CLIENTSIDE;
-                break;
             case 137080: // "custom" anniversary sanctuary spell
                 spellInfo->Attributes |= SPELL_ATTR0_PASSIVE | SPELL_ATTR0_HIDDEN_CLIENTSIDE;
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(21);
@@ -3569,10 +3567,17 @@ void SpellMgr::LoadSpellCustomAttr()
             case 137162:    // Static Burst
                 spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(5); // 40 yds
                 break;
+            case 137121:    // Reckless Charge(Facing)
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
+                break;
             case 138652:    // Eruption
                 spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_DUMMY;
                 spellInfo->Effects[EFFECT_0].TriggerSpell = 0;
                 spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENEMY);
+                break;
+            case 137107:    // Reckless Charge
+                spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_DUMMY;
+                spellInfo->Effects[EFFECT_0].TriggerSpell = 0;
                 break;
             case 138658:    // Eruption Damage
                 spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENEMY);

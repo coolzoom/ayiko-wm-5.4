@@ -9004,7 +9004,7 @@ INSERT INTO `creature` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMa
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Creature Speeches
-DELETE FROM `creature_text` WHERE `entry` IN (69078,69131,69132,69134,70056);
+DELETE FROM `creature_text` WHERE `entry` IN (69078,69131,69132,69134,69135,70056);
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
 (69078, 0,  0, 'Da sands will consume everyting!', 14, 0, 100, 0, 0, 35812, 'Sul the Sandcrawler - Aggro'),
 (69078, 1,  0, 'I will bury ya all!', 14, 0, 100, 0, 0, 35813, 'Sul the Sandcrawler - On Possess'),
@@ -9043,6 +9043,8 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (69134, 4,  1, 'On ya knees!', 14, 0, 100, 0, 0, '35572', 'Kazrajin - Kill02'),
 (69134, 5,  0, 'Da thunder king... promised...', 14, 0, 100, 0, 0, 35567, 'Kazrajin - On Death'),
 (69134, 6,  0, '|TInterface\\Icons\\achievement_moguraid_03:20|t%s is |cFFF00000|Hspell:136442|h[Possessed]|h|r by the spirit of Gara''jal!', 41, 0, 100, 0, 0, 0, 'Possess emote'),
+
+(69135, 0,  0, 'Let me share dis gift with ya!', 14, 0, 100, 11, 0, 35395, 'Gara\'jal the Spiritbinder- Event01'),
 
 (70056, 0,  0, 'Let me share dis gift with ya!', 14, 0, 100, 11, 0, 35395, 'Gara\'jal the Spiritbinder- Event01'),
 (70056, 1,  0, 'Ya\' spirit is mine', 14, 0, 100, 11, 0, 35396, 'Gara\'jal the Spiritbinder- Event02'),

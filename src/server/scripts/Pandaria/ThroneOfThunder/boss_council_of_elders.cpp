@@ -2542,9 +2542,9 @@ public:
         void HandleEffectHitTarget(SpellEffIndex effIndex)
         {
             // Since spell selects one random target, there is no way we can handle this another way
-            if(Unit *pHit = GetHitUnit())
+            if (Unit *pHit = GetHitUnit())
             {
-                if(Unit *pCaster = GetCaster())
+                if (Unit *pCaster = GetCaster())
                 {
                     pCaster->CastSpell(pHit, SPELL_BITING_COLD_PERIODIC_DAMAGES, true);
                     pCaster->CastSpell(pHit, SPELL_BITING_COLD_PERIODIC_DUMMY, true);

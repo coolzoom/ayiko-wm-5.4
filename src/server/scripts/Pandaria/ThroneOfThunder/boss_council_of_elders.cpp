@@ -312,13 +312,6 @@ enum eTalks : uint32
 //=========================================================
 // Helpers
 
-
-static Creature *GetCouncilEventHelper(WorldObject *pSource)
-{
-    TC_LOG_ERROR("scripts", "Checked for council event helper");
-    return ObjectAccessor::GetCreature(*pSource, pSource->GetInstanceScript()->GetData64(NPC_COUNCIL_EVENT_HELPER));
-}
-
 static Creature *GetGarajal(WorldObject *pSource)
 {
     return ObjectAccessor::GetCreature(*pSource, pSource->GetInstanceScript()->GetData64(MOB_GARA_JAL));
@@ -1304,8 +1297,6 @@ public:
             m_lBossGuids.insert(m_lBossGuids.begin(), instance->GetData64(BOSS_COUNCIL_HIGH_PRIESTESS_MARLI));
             m_lBossGuids.insert(m_lBossGuids.begin(), instance->GetData64(BOSS_COUNCIL_SUL_THE_SANDCRAWLER));
             m_lBossGuids.insert(m_lBossGuids.begin(), instance->GetData64(BOSS_COUNCIL_KAZRAJIN));
-
-            TC_LOG_ERROR("scripts", "boss guids filled, size %u", m_lBossGuids.size());
         }
 
         void FinishFight()
@@ -1451,12 +1442,7 @@ public:
 
     bool operator()(uint64 uiGuid) const
     {
-        if (uiGuid == _guid)
-        {
-            TC_LOG_ERROR("scripts", "uiGuid removed by guidVectorPredicate %u", uiGuid);
-            return true;
-        }
-        return false;
+        return uiGuid == _guid;
     }
 private:
     uint64 _guid;
@@ -1495,6 +1481,7 @@ public:
             me->SetReactState(REACT_PASSIVE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
             me->AddAura(SPELL_GARA_JALS_SOUL, me);
+            me->SetWalk(false);
         }
         
         void EnterEvadeMode() 
@@ -2127,10 +2114,10 @@ public:
                 {
                     if (Player* pTarget = GetFollowedPlayer())
                     {
-                        if (me->GetExactDist2d(pTarget) <= 5.f)
+                        if (me->GetExactDist2d(pTarget) <= 6.f)
                         {
+                            DoCast(pTarget, SPELL_SHADOWED_GIFT, true);
                             pTarget->RemoveAurasDueToSpell(SPELL_MARKED_SOUL, me->GetGUID());
-                            DoCast(pTarget, SPELL_SHADOWED_GIFT);
                             me->DisappearAndDie();
                         }
                         else
@@ -2144,8 +2131,8 @@ public:
                 {
                     if (Player* pPlayer = GetFollowedPlayer())
                     {
-                        pPlayer->RemoveAurasDueToSpell(SPELL_MARKED_SOUL, me->GetGUID());
                         DoCast(pPlayer, SPELL_SHADOWED_GIFT);
+                        pPlayer->RemoveAurasDueToSpell(SPELL_MARKED_SOUL, me->GetGUID());
                         me->DisappearAndDie();
                     }
                 }
@@ -2697,7 +2684,7 @@ public:
         {
             if (GetCaster())
             {
-                value = GetCaster()->GetMap()->IsHeroic() ? 60000 : 30000;
+                value = GetCaster()->GetMap()->IsHeroic() ? 60000 : 22000;
                 return true;
             }
             return false;
@@ -3534,6 +3521,52 @@ public:
     }
 };
 
+class correctGuidPredicate
+{
+private:
+    uint64 casterGuid;
+public:
+    correctGuidPredicate(uint64 guid) : casterGuid(guid) {}
+
+    bool operator()(WorldObject* target) const
+    {
+        if (target)
+        {
+            return !target->ToUnit()->HasAura(SPELL_MARKED_SOUL, casterGuid);
+        }
+        return false;
+    }
+};
+
+class spell_shadowed_gift : public SpellScriptLoader
+{
+public:
+    spell_shadowed_gift() : SpellScriptLoader("spell_shadowed_gift") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void SelectTargets(std::list<WorldObject*>&targets)
+        {
+            targets.remove_if(notPlayerPredicate());
+
+            if (Unit* caster = GetCaster())
+                targets.remove_if(correctGuidPredicate(caster->GetGUID()));
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_impl::SelectTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
 void AddSC_boss_council_of_elders()
 {
     new boss_frost_king_malakk();
@@ -3571,4 +3604,5 @@ void AddSC_boss_council_of_elders()
     new spell_soul_fragment_target_selector();
     new spell_soul_fragment_switcher();
     new spell_marked_soul();
+    new spell_shadowed_gift();
 }

@@ -938,7 +938,10 @@ public:
                 {
                     Talk(TALK_SUL_QUICKSAND);
                     std::list<Player*> playerList;
-                    me->GetPlayerListInGrid(playerList, 500.0f);
+                    std::list<Player*> tempList;
+                    me->GetPlayerListInGrid(playerList, 150.f);
+
+                    std::copy(std::begin(playerList), std::end(playerList), std::inserter(tempList, tempList.begin()));
 
                     playerList.remove_if([this](Player const* pPlayer) -> bool
                     {
@@ -946,13 +949,18 @@ public:
                     });
 
                     // Pick one of the players in the list if not empty
-                    if(!playerList.empty())
+                    if (!playerList.empty())
                     {
-                        if(Player *pPlayer = Trinity::Containers::SelectRandomContainerElement<std::list<Player*>>(playerList))
+                        if (Player *pPlayer = Trinity::Containers::SelectRandomContainerElement<std::list<Player*>>(playerList))
+                            me->SummonCreature(NPC_QUICKSAND_STALKER, *pPlayer);
+                    }
+                    else if (!tempList.empty())
+                    {
+                        if (Player *pPlayer = Trinity::Containers::SelectRandomContainerElement<std::list<Player*>>(tempList))
                             me->SummonCreature(NPC_QUICKSAND_STALKER, *pPlayer);
                     }
 
-                    events.ScheduleEvent(EVENT_QUICKSAND, 20000 + rand()%5000);
+                    events.ScheduleEvent(EVENT_QUICKSAND, urand(20, 25) * IN_MILLISECONDS);
                     break;
                 }
 
@@ -1071,7 +1079,7 @@ public:
 
                                 // Cast after having init the list to be sure the guid has been set
                                 DoCast(me, SPELL_BLESSED_LOA_SPIRIT);
-                                events.ScheduleEvent(EVENT_BLESSED_LOA_SPIRIT, urand(20, 35) * IN_MILLISECONDS);
+                                events.ScheduleEvent(EVENT_BLESSED_LOA_SPIRIT, urand(20, 28) * IN_MILLISECONDS);
 
 
                                 // Get out of the loop and break again; this way, we do not schedule
@@ -1302,7 +1310,8 @@ public:
 
         void FinishFight()
         {
-            pInstance->SetBossState(DATA_COUNCIL_OF_ELDERS, DONE);
+            if (instance->GetBossState(DATA_COUNCIL_OF_ELDERS) != DONE)
+                instance->SetBossState(DATA_COUNCIL_OF_ELDERS, DONE);
 
             /*
             if (IsHeroic())
@@ -1320,6 +1329,9 @@ public:
                 pIter->RemoveAurasDueToSpell(SPELL_SHADOWED_SOUL); */
 
             // Something for Gara'jal here I suppose
+
+            summons.DespawnAll();
+            DespawnCreatures();
         }
 
         void BeginFight()
@@ -1407,6 +1419,7 @@ public:
                 switch (uiEventId)
                 {
                 case EVENT_SUMMON_SOUL:
+                    Talk(0);
                     me->SetVisible(false);
                     if (Creature *pSoul = me->SummonCreature(MOB_GARA_JALS_SOUL, *me))
                     {
@@ -1499,6 +1512,21 @@ public:
             return me->IsOnVehicle();
         }
 
+        void MovementInform(uint32 uiType, uint32 uiPointId)
+        {
+            if (uiType != POINT_MOTION_TYPE)
+                return;
+
+            if (uiPointId == 1)
+            {
+                if (Creature* pNextCouncillor = ObjectAccessor::GetCreature(*me, pInstance->GetData64(uiCouncillorEntry)))
+                {
+                    if (!Possess(pNextCouncillor))
+                        events.ScheduleEvent(EVENT_POSSESS, 200);
+                }
+            }
+        }
+
         void UpdateAI(const uint32 uiDiff) override
         {
             if (me->IsOnVehicle())
@@ -1512,8 +1540,12 @@ public:
                 if (Creature *pNextCouncillor = GetNextCouncillor(uiCouncillorEntry))
                 {
                     uiCouncillorEntry = pNextCouncillor->GetEntry();
-                    if (!Possess(pNextCouncillor))
-                        events.ScheduleEvent(EVENT_POSSESS, 200);
+
+                    float fX, fY;
+                    GetPositionWithDistInOrientation(me, me->GetExactDist2d(pNextCouncillor) - 5.f, me->GetAngle(pNextCouncillor), fX, fY);
+
+                    me->GetMotionMaster()->Clear(false);
+                    me->GetMotionMaster()->MovePoint(1, fX, fY, me->GetMap()->GetHeight(fX, fY, pNextCouncillor->GetPositionZ()) + 0.8f);
                 }
             }
         }
@@ -2656,10 +2688,33 @@ public:
         
         void FilterTargets(std::list<WorldObject*>& targets)
         {
-            if(!GetCaster())
+            targets.remove_if(notPlayerPredicate());
+        }
+
+        int32 value;
+
+        bool Load()
+        {
+            if (GetCaster())
+            {
+                value = GetCaster()->GetMap()->IsHeroic() ? 60000 : 30000;
+                return true;
+            }
+            return false;
+        }
+
+        void HandleEffectHitTarget(SpellEffIndex eff_idx)
+        {
+            Unit* pTarget = GetHitUnit();
+            Unit* pCaster = GetCaster();
+
+            if (!pTarget || !pCaster)
                 return;
-                
-            targets.remove(GetCaster());
+
+            if (Aura* pAura = pCaster->GetAura(SPELL_FROSTBITE_PERIODIC_DAMAGES))
+            {
+                SetHitDamage(pAura->GetStackAmount() * value);
+            }
         }
         
         void HandleOnCast()
@@ -2675,6 +2730,7 @@ public:
         void Register()
         {
             OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_malakk_frostbite_allies_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+            OnEffectHitTarget += SpellEffectFn(spell_malakk_frostbite_allies_SpellScript::HandleEffectHitTarget, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
             OnCast += SpellCastFn(spell_malakk_frostbite_allies_SpellScript::HandleOnCast);
         }
     };

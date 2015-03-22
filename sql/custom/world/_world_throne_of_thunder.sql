@@ -267,11 +267,11 @@ UPDATE creature_template SET LootId = @RAID_DIFF_25H + 70491, dmg_multiplier = 9
 UPDATE creature_template SET LootId = @RAID_DIFF_25R + 70491, dmg_multiplier = 7, Health_Mod = 25191000 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25R + 70491;
 
 -- Jin'rokh the Breaker
-UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69465, dmg_multiplier = 13, Health_Mod = 207601216 / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 69465;
-UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69465, dmg_multiplier = 14, Health_Mod = 317507744 / @HP_MOD_93 WHERE entry = @RAID_DIFF_10H + 69465;
-UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69465, dmg_multiplier = 15, Health_Mod = 622803648 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25N + 69465;
-UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69465, dmg_multiplier = 16,Health_Mod = 952523200 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 69465;
-UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69465, dmg_multiplier = 12, Health_Mod = 545171264 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 69465;
+UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69465, dmg_multiplier = 13, Health_Mod = 207601216 / @HP_MOD_93, mechanic_immune_mask = 2147483647 WHERE entry = @RAID_DIFF_10N + 69465;
+UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69465, dmg_multiplier = 14, Health_Mod = 317507744 / @HP_MOD_93, mechanic_immune_mask = 2147483647 WHERE entry = @RAID_DIFF_10H + 69465;
+UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69465, dmg_multiplier = 15, Health_Mod = 622803648 / @HP_MOD_93, mechanic_immune_mask = 2147483647 WHERE entry = @RAID_DIFF_25N + 69465;
+UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69465, dmg_multiplier = 16,Health_Mod = 952523200 / @HP_MOD_93, mechanic_immune_mask = 2147483647 WHERE entry = @RAID_DIFF_25H + 69465;
+UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69465, dmg_multiplier = 12, Health_Mod = 545171264 / @HP_MOD_93, mechanic_immune_mask = 2147483647 WHERE entry = @RAID_DIFF_25R + 69465;
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -8202,11 +8202,11 @@ UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69374, dmg_multiplier = 1
 UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69374, dmg_multiplier = 12, Health_Mod = 47102796 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 69374;
 
 -- Horridon
-UPDATE creature_template SET LootId = @RAID_DIFF_10N + 68476, dmg_multiplier = 13, Health_Mod = 471027968  / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 68476;
-UPDATE creature_template SET LootId = @RAID_DIFF_10H + 68476, dmg_multiplier = 14, Health_Mod = 588784960  / @HP_MOD_93 WHERE entry = @RAID_DIFF_10H + 68476;
-UPDATE creature_template SET LootId = @RAID_DIFF_25N + 68476, dmg_multiplier = 15, Health_Mod = 1177569920 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25N + 68476;
-UPDATE creature_template SET LootId = @RAID_DIFF_25H + 68476, dmg_multiplier = 16, Health_Mod = 1471962400 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 68476;
-UPDATE creature_template SET LootId = @RAID_DIFF_25R + 68476, dmg_multiplier = 12, Health_Mod = 1059812928 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 68476;
+UPDATE creature_template SET LootId = @RAID_DIFF_10N + 68476, dmg_multiplier = 13, Health_Mod = 471027968  / @HP_MOD_93, mechanic_immune_mask = 2145370111 WHERE entry = @RAID_DIFF_10N + 68476;
+UPDATE creature_template SET LootId = @RAID_DIFF_10H + 68476, dmg_multiplier = 14, Health_Mod = 588784960  / @HP_MOD_93, mechanic_immune_mask = 2145370111 WHERE entry = @RAID_DIFF_10H + 68476;
+UPDATE creature_template SET LootId = @RAID_DIFF_25N + 68476, dmg_multiplier = 15, Health_Mod = 1177569920 / @HP_MOD_93, mechanic_immune_mask = 2145370111 WHERE entry = @RAID_DIFF_25N + 68476;
+UPDATE creature_template SET LootId = @RAID_DIFF_25H + 68476, dmg_multiplier = 16, Health_Mod = 1471962400 / @HP_MOD_93, mechanic_immune_mask = 2145370111 WHERE entry = @RAID_DIFF_25H + 68476;
+UPDATE creature_template SET LootId = @RAID_DIFF_25R + 68476, dmg_multiplier = 12, Health_Mod = 1059812928 / @HP_MOD_93, mechanic_immune_mask = 2145370111 WHERE entry = @RAID_DIFF_25R + 68476;
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -8821,32 +8821,32 @@ UPDATE creature_template SET LootId = @RAID_DIFF_25H + 70557, dmg_multiplier = 9
 UPDATE creature_template SET LootId = @RAID_DIFF_25R + 70557, dmg_multiplier = 7, Health_Mod = 10927676 / @HP_MOD_92_8 WHERE entry = @RAID_DIFF_25R + 70557;
 
 -- Sul the Sandcrawler
-UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69078, dmg_multiplier = 12, Health_Mod = 89844224  / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_10N + 69078;
-UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69078, dmg_multiplier = 13, Health_Mod = 112305280 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_10H + 69078;
-UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69078, dmg_multiplier = 14, Health_Mod = 224610560 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_25N + 69078;
-UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69078, dmg_multiplier = 15, Health_Mod = 280763200 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_25H + 69078;
-UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69078, dmg_multiplier = 11, Health_Mod = 202149504 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_25R + 69078;
+UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69078, dmg_multiplier = 12, Health_Mod = 89844224  / @HP_MOD_93_4, mechanic_immune_mask = 2145369855 WHERE entry = @RAID_DIFF_10N + 69078;
+UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69078, dmg_multiplier = 13, Health_Mod = 112305280 / @HP_MOD_93_4, mechanic_immune_mask = 2145369855 WHERE entry = @RAID_DIFF_10H + 69078;
+UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69078, dmg_multiplier = 14, Health_Mod = 224610560 / @HP_MOD_93_4, mechanic_immune_mask = 2145369855 WHERE entry = @RAID_DIFF_25N + 69078;
+UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69078, dmg_multiplier = 15, Health_Mod = 280763200 / @HP_MOD_93_4, mechanic_immune_mask = 2145369855 WHERE entry = @RAID_DIFF_25H + 69078;
+UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69078, dmg_multiplier = 11, Health_Mod = 202149504 / @HP_MOD_93_4, mechanic_immune_mask = 2145369855 WHERE entry = @RAID_DIFF_25R + 69078;
 
 -- Frost King Malakk
-UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69131, dmg_multiplier = 12, Health_Mod = 89844224  / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_10N + 69131;
-UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69131, dmg_multiplier = 13, Health_Mod = 112305280 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_10H + 69131;
-UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69131, dmg_multiplier = 14, Health_Mod = 224610560 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_25N + 69131;
-UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69131, dmg_multiplier = 15, Health_Mod = 280763200 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_25H + 69131;
-UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69131, dmg_multiplier = 11, Health_Mod = 202149504 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_25R + 69131;
+UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69131, dmg_multiplier = 12, Health_Mod = 89844224  / @HP_MOD_93_4, mechanic_immune_mask = 2145369855 WHERE entry = @RAID_DIFF_10N + 69131;
+UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69131, dmg_multiplier = 13, Health_Mod = 112305280 / @HP_MOD_93_4, mechanic_immune_mask = 2145369855 WHERE entry = @RAID_DIFF_10H + 69131;
+UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69131, dmg_multiplier = 14, Health_Mod = 224610560 / @HP_MOD_93_4, mechanic_immune_mask = 2145369855 WHERE entry = @RAID_DIFF_25N + 69131;
+UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69131, dmg_multiplier = 15, Health_Mod = 280763200 / @HP_MOD_93_4, mechanic_immune_mask = 2145369855 WHERE entry = @RAID_DIFF_25H + 69131;
+UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69131, dmg_multiplier = 11, Health_Mod = 202149504 / @HP_MOD_93_4, mechanic_immune_mask = 2145369855 WHERE entry = @RAID_DIFF_25R + 69131;
 
 -- High Priestess Mar'li
-UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69132, dmg_multiplier = 12, Health_Mod = 89844224  / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_10N + 69132;
-UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69132, dmg_multiplier = 13, Health_Mod = 112305280 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_10H + 69132;
-UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69132, dmg_multiplier = 14, Health_Mod = 224610560 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_25N + 69132;
-UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69132, dmg_multiplier = 15, Health_Mod = 280763200 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_25H + 69132;
-UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69132, dmg_multiplier = 11, Health_Mod = 202149504 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_25R + 69132;
+UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69132, dmg_multiplier = 12, Health_Mod = 89844224  / @HP_MOD_93_4, mechanic_immune_mask = 2145369855 WHERE entry = @RAID_DIFF_10N + 69132;
+UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69132, dmg_multiplier = 13, Health_Mod = 112305280 / @HP_MOD_93_4, mechanic_immune_mask = 2145369855 WHERE entry = @RAID_DIFF_10H + 69132;
+UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69132, dmg_multiplier = 14, Health_Mod = 224610560 / @HP_MOD_93_4, mechanic_immune_mask = 2145369855 WHERE entry = @RAID_DIFF_25N + 69132;
+UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69132, dmg_multiplier = 15, Health_Mod = 280763200 / @HP_MOD_93_4, mechanic_immune_mask = 2145369855 WHERE entry = @RAID_DIFF_25H + 69132;
+UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69132, dmg_multiplier = 11, Health_Mod = 202149504 / @HP_MOD_93_4, mechanic_immune_mask = 2145369855 WHERE entry = @RAID_DIFF_25R + 69132;
 
 -- Kazra'jin
-UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69134, dmg_multiplier = 12, Health_Mod = 89844224  / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_10N + 69134;
-UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69134, dmg_multiplier = 13, Health_Mod = 112305280 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_10H + 69134;
-UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69134, dmg_multiplier = 14, Health_Mod = 224610560 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_25N + 69134;
-UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69134, dmg_multiplier = 15, Health_Mod = 280763200 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_25H + 69134;
-UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69134, dmg_multiplier = 11, Health_Mod = 202149504 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_25R + 69134;
+UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69134, dmg_multiplier = 12, Health_Mod = 89844224  / @HP_MOD_93_4, mechanic_immune_mask = 2145369855 WHERE entry = @RAID_DIFF_10N + 69134;
+UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69134, dmg_multiplier = 13, Health_Mod = 112305280 / @HP_MOD_93_4, mechanic_immune_mask = 2145369855 WHERE entry = @RAID_DIFF_10H + 69134;
+UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69134, dmg_multiplier = 14, Health_Mod = 224610560 / @HP_MOD_93_4, mechanic_immune_mask = 2145369855 WHERE entry = @RAID_DIFF_25N + 69134;
+UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69134, dmg_multiplier = 15, Health_Mod = 280763200 / @HP_MOD_93_4, mechanic_immune_mask = 2145369855 WHERE entry = @RAID_DIFF_25H + 69134;
+UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69134, dmg_multiplier = 11, Health_Mod = 202149504 / @HP_MOD_93_4, mechanic_immune_mask = 2145369855 WHERE entry = @RAID_DIFF_25R + 69134;
 
 -- Blessed Loa Spirit
 UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69480, dmg_multiplier = 1, Health_Mod = 1390000  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69480;
@@ -8863,8 +8863,8 @@ UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69548, dmg_multiplier = 1
 UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69548, dmg_multiplier = 1, Health_Mod = 40593 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25R + 69548;
 
 -- Living Sand
-UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69153, dmg_multiplier = 1, Health_Mod = 25094  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69153;
-UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69153, dmg_multiplier = 1, Health_Mod = 49204 / @HP_MOD_92 WHERE entry = @RAID_DIFF_10H + 69153;
+UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69153, dmg_multiplier = 1, Health_Mod = 139000  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69153;
+UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69153, dmg_multiplier = 1, Health_Mod = 2320000 / @HP_MOD_92 WHERE entry = @RAID_DIFF_10H + 69153;
 UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69153, dmg_multiplier = 1, Health_Mod = 3225179 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25N + 69153;
 UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69153, dmg_multiplier = 1, Health_Mod = 6323880 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25H + 69153;
 UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69153, dmg_multiplier = 1, Health_Mod = 73806 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25R + 69153;

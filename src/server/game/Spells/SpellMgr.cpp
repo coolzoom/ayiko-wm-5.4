@@ -3582,6 +3582,9 @@ void SpellMgr::LoadSpellCustomAttr()
             case 138658:    // Eruption Damage
                 spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENEMY);
                 break;
+            case 137390:
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_100_YARDS);
+                break;
 #if 1 // Gilneas
                 case 68087:
                 case 80281:

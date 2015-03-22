@@ -8587,7 +8587,8 @@ REPLACE INTO spell_script_names VALUES
   (136507, "spell_dark_power"),
   (137645, "spell_soul_fragment_target_selector"),
   (137643, "spell_soul_fragment_switcher"),
-  (137359, "spell_marked_soul");
+  (137359, "spell_marked_soul"),
+  (137390, "spell_shadowed_gift");
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/

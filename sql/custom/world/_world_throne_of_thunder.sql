@@ -1115,6 +1115,7 @@ REPLACE INTO spell_script_names VALUES
   (137203, "spell_marli_summon_blessed_loa_spirit"),
   (137350, "spell_marli_summon_shadowed_loa_spirit"),
   (137359, 'spell_marked_soul')
+  (137390, "spell_shadowed_gift"),
   (137891, "spell_marli_twisted_fate_first"),
   (137962, "spell_marli_twisted_fate_second"),
   (137986, "spell_marli_twisted_fate_damages"),
@@ -1542,6 +1543,7 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (69078, 4,  1, 'Da first of many!', 14, 0, 100, 0, 0, 35816, 'Sul the Sandcrawler - Kill02'),
 (69078, 5,  0, 'I return... to... da... sands...', 14, 0, 100, 0, 0, 36454, 'Sul the Sandcrawler - On Death'),
 (69078, 6,  0, '|TInterface\\Icons\\achievement_moguraid_03:20|t%s is |cFFF00000|Hspell:136442|h[Possessed]|h|r by the spirit of Gara''jal!', 41, 0, 100, 0, 0, 0, 'Possess emote'),
+(69078, 7,  0, '|TInterface\\Icons\\spell_monk_envelopingmist:20|t%s summons a deadly |cFFF00000|Hspell:136894|h[Sandstorm]|h|r!', 41, 0, 100, 0, 0, 0, 'Possess emote'),
 
 (69131, 0,  0, 'Ya have met your match, fools!', 14, 0, 100, 0, 0, 35387, 'Frost King Malakk - Aggro'),
 (69131, 1,  0, 'Winter is coming...', 14, 0, 100, 0, 0, 35389, 'Frost King Malakk - On Possess'),
@@ -1560,7 +1562,9 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (69132, 3,  0, 'Another offering to da loa!', 14, 0, 100, 0, 0, 35436, 'High Priestess Marli - Kill01'),
 (69132, 3,  1, 'She will feast on yer soul!', 14, 0, 100, 0, 0, 35437, 'High Priestess Marli - Kill02'),
 (69132, 4,  0, 'Shadra... save... me...', 14, 0, 100, 0, 0, 35433, 'High Priestess Marli - On Death'),
+(69132, 5,  0, '|TInterface\\Icons\\spell_priest_divinestar:20|t%s summons a |cFFF00000|Hspell:137203|h[Blessed Loa Spirit]|h|r!', 41, 0, 100, 0, 0, 0, 'High Priestess Mar''li'),
 (69132, 6,  0, '|TInterface\\Icons\\achievement_moguraid_03:20|t%s is |cFFF00000|Hspell:136442|h[Possessed]|h|r by the spirit of Gara''jal!', 41, 0, 100, 0, 0, 0, 'Possess emote'),
+(69132, 7,  0, '|TInterface\\Icons\\spell_priest_divinestar_shadow2:20|t%s summons a |cFFF00000|Hspell:137350|h[Shadowed Loa Spirit]|h|r!', 41, 0, 100, 0, 0, 0, 'High Priestess Mar''li'),
 
 (69134, 0,  0, 'Dis is gonna hurt!', 14, 0, 100, 0, 0, 35566, 'Kazrajin - Aggro'),
 (69134, 1,  0, 'Lei Shen! Give us strength!', 14, 0, 100, 0, 0, 35568, 'Kazrajin - On Possess'),
@@ -1571,6 +1575,7 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (69134, 4,  1, 'On ya knees!', 14, 0, 100, 0, 0, '35572', 'Kazrajin - Kill02'),
 (69134, 5,  0, 'Da thunder king... promised...', 14, 0, 100, 0, 0, 35567, 'Kazrajin - On Death'),
 (69134, 6,  0, '|TInterface\\Icons\\achievement_moguraid_03:20|t%s is |cFFF00000|Hspell:136442|h[Possessed]|h|r by the spirit of Gara''jal!', 41, 0, 100, 0, 0, 0, 'Possess emote'),
+(69134, 7,  0, '|TInterface\\Icons\\spell_shaman_staticshock:20|t%s |cFFF00000|Hspell:137149|h[Overloads]|h|r!', 41, 0, 100, 0, 0, 0, 'Kazra''jin to Reckless Charge'),
 
 (69135, 0,  0, 'Let me share dis gift with ya!', 14, 0, 100, 11, 0, 35395, 'Gara\'jal the Spiritbinder- Event01'),
 

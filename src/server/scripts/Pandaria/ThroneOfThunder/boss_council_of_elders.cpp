@@ -294,19 +294,24 @@ enum eTalks : uint32
     TALK_SUL_QUICKSAND          = 3,
     TALK_SUL_SLAY               = 4,
     TALK_SUL_DEATH              = 5,
+    TALK_SUL_SANDSTORM          = 7,
 
     // malakk
     TALK_MALAKK_SLAY            = 3,
     TALK_MALAKK_DEATH           = 4,
+    TALK_MALAKK_FROSTBITE       = 5,
 
     // marli
     TALK_MARLI_SLAY             = 3,
     TALK_MARLI_DEATH            = 4,
+    TALK_MARLI_BLESSED          = 5,
+    TALK_MARLI_SHADOWED         = 7,
 
     // kazra'jin
     TALK_KAZRAJIN_CHARGE        = 3,
     TALK_KAZRAJIN_SLAY          = 4,
     TALK_KAZRAJIN_DEATH         = 5,
+    TALK_KAZRAJIN_OVERLOAD      = 7
 };
 
 //=========================================================
@@ -503,8 +508,13 @@ public:
 
         if (Creature* pGarajal = GetGarajal(me))
         {
-            if (pGarajal->AI())
-                pGarajal->AI()->DoAction(ACTION_COUNCILLOR_DIED);
+            if (CreatureAI* pAI = pGarajal->AI())
+            {
+                pAI->DoAction(ACTION_COUNCILLOR_DIED);
+
+                if (pAI->GetData(0) < 4)
+                    me->SetLootRecipient(nullptr);
+            }
         }
     }
     
@@ -801,7 +811,10 @@ public:
                     if (IsHeroic())
                         DoCast(me, SPELL_DISCHARGE);
                     else
+                    {
+                        Talk(TALK_KAZRAJIN_OVERLOAD);
                         DoCast(me, SPELL_OVERLOAD);
+                    }
 
                     events.RescheduleEvent(EVENT_RECKLESS_CHARGE_PRE_PATH, 1000+rand()%2000);
                 }
@@ -959,6 +972,7 @@ public:
 
                 case EVENT_SANDSTORM:
                     Talk(TALK_SPECIAL);
+                    Talk(TALK_SUL_SANDSTORM);
                     DoCastAOE(SPELL_SAND_STORM);
                     events.ScheduleEvent(EVENT_SANDSTORM, 40 * IN_MILLISECONDS);
                     break;
@@ -1236,7 +1250,6 @@ public:
             me->SetReactState(REACT_PASSIVE);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
-            FillBossGuids();
             events.Reset();
         }
 
@@ -1263,16 +1276,18 @@ public:
             if (instance->GetBossState(DATA_COUNCIL_OF_ELDERS) == NOT_STARTED)
                 return;
 
-            instance->SetBossState(DATA_COUNCIL_OF_ELDERS, NOT_STARTED);
+            //mutex.acquire();
 
-            m_uiDeadCouncillors = 0;
+            FillBossGuids(m_lBossGuids);
+
+            instance->SetBossState(DATA_COUNCIL_OF_ELDERS, NOT_STARTED);
 
             summons.DespawnAll();
 
             me->SetVisible(true);
             events.Reset();
 
-            for (auto const uiGuid : m_lBossGuids)
+            for (const uint64 uiGuid : m_lBossGuids)
             {
                 if (Creature* pBoss = ObjectAccessor::GetCreature(*me, uiGuid))
                 {
@@ -1282,21 +1297,31 @@ public:
                             pBoss->AI()->EnterEvadeMode();
                     }
                     else
+                    {
+                        float x, y, z, o;
+                        pBoss->GetHomePosition(x, y, z, o);
+                        pBoss->NearTeleportTo(x, y, z, o);
                         pBoss->Respawn();
+                        pBoss->SetFacingTo(o);
+                    }
                 }
             }
 
             DespawnCreatures();
+
+            //mutex.release();
         }
 
-        void FillBossGuids()
+        void FillBossGuids(std::list<uint64>&list)
         {
             m_uiDeadCouncillors = 0;
 
-            m_lBossGuids.insert(m_lBossGuids.begin(), instance->GetData64(BOSS_COUNCIL_FROST_KING_MALAKK));
-            m_lBossGuids.insert(m_lBossGuids.begin(), instance->GetData64(BOSS_COUNCIL_HIGH_PRIESTESS_MARLI));
-            m_lBossGuids.insert(m_lBossGuids.begin(), instance->GetData64(BOSS_COUNCIL_SUL_THE_SANDCRAWLER));
-            m_lBossGuids.insert(m_lBossGuids.begin(), instance->GetData64(BOSS_COUNCIL_KAZRAJIN));
+            list.clear();
+
+            list.push_back(instance->GetData64(BOSS_COUNCIL_FROST_KING_MALAKK));
+            list.push_back(instance->GetData64(BOSS_COUNCIL_HIGH_PRIESTESS_MARLI));
+            list.push_back(instance->GetData64(BOSS_COUNCIL_SUL_THE_SANDCRAWLER));
+            list.push_back(instance->GetData64(BOSS_COUNCIL_KAZRAJIN));
         }
 
         void FinishFight()
@@ -1330,15 +1355,23 @@ public:
             if (instance->GetBossState(DATA_COUNCIL_OF_ELDERS) == IN_PROGRESS)
                 return;
 
+            m_uiDeadCouncillors = 0;
+
             instance->SetBossState(DATA_COUNCIL_OF_ELDERS, IN_PROGRESS);
 
-            for (auto const uiGuid : m_lBossGuids)
+            FillBossGuids(m_lBossGuids);
+
+            for (const uint64 uiGuid : m_lBossGuids)
             {
                 if (Creature* pBoss = ObjectAccessor::GetCreature(*me, uiGuid))
                 {
+                    /*
+                    if (!pBoss->IsAlive())
+                        pBoss->Respawn();
+                    */
                     if (!pBoss->IsInCombat() && pBoss->AI())
                     {
-                        pBoss->AI()->DoZoneInCombat();
+                        DoZoneInCombat(pBoss, 150.f);
                         pBoss->AI()->DoAction(ACTION_COUNCILLORS_ENTER_COMBAT);
                     }
                 }
@@ -1427,6 +1460,9 @@ public:
     private:
         EventMap        events;
         InstanceScript  *pInstance;
+/*    protected:
+        ACE_Recursive_Thread_Mutex mutex;*/
+
     };
     
     CreatureAI *GetAI(Creature *pCreature) const
@@ -1534,6 +1570,8 @@ public:
                     me->GetMotionMaster()->Clear(false);
                     me->GetMotionMaster()->MovePoint(1, fX, fY, me->GetMap()->GetHeight(fX, fY, pNextCouncillor->GetPositionZ()) + 0.8f);
                 }
+                else
+                    events.ScheduleEvent(EVENT_POSSESS, 300);
             }
         }
 
@@ -1576,7 +1614,7 @@ public:
             {
                 Creature* pCouncillor = ObjectAccessor::GetCreature(*me, councGuid);
 
-                if (pCouncillor && (!pCouncillor->IsInCombat() || pCouncillor->IsInEvadeMode()))
+                if (pCouncillor && pCouncillor->IsAlive() && (!pCouncillor->IsInCombat() || pCouncillor->IsInEvadeMode()))
                     return true;
             }
 
@@ -1636,7 +1674,6 @@ public:
             if (Creature* pCreature = ObjectAccessor::GetCreature(*me, pInstance->GetData64(uiNextEntry)))
                 return pCreature;
 
-            events.ScheduleEvent(EVENT_POSSESS, 500);
             return NULL;
         }
     };
@@ -2644,6 +2681,9 @@ public:
                 {
                     pHit->CastSpell(pHit, SPELL_FROSTBITE_SCREEN_EFFECT, true);
                     pCaster->CastSpell(pHit, SPELL_FROSTBITE_PERIODIC_DAMAGES, true);
+
+                    if (pCaster->ToCreature()->AI())
+                        pCaster->ToCreature()->AI()->Talk(TALK_MALAKK_FROSTBITE, pHit->GetGUID());
                 }
             }
         }
@@ -3202,8 +3242,13 @@ public:
 
         void HandleDummy(SpellEffIndex eEffIndex)
         {
-            if(Unit *pCaster = GetCaster())
+            if (Unit *pCaster = GetCaster())
+            {
                 pCaster->CastSpell(pCaster, SPELL_SUMMON_BLESSED_LOA_SPIRIT, false);
+
+                if (pCaster->ToCreature()->AI())
+                    pCaster->ToCreature()->AI()->Talk(TALK_MARLI_BLESSED);
+            }
         }
 
         void Register()
@@ -3231,8 +3276,13 @@ public:
 
         void HandleDummy(SpellEffIndex eEffIndex)
         {
-            if(Unit *pCaster = GetCaster())
+            if (Unit *pCaster = GetCaster())
+            {
                 pCaster->CastSpell(pCaster, SPELL_SUMMON_SHADOWED_LOA_SPIRIT, false);
+
+                if (pCaster->ToCreature()->AI())
+                    pCaster->ToCreature()->AI()->Talk(TALK_MARLI_SHADOWED);
+            }
         }
 
         void Register()
@@ -3484,6 +3534,19 @@ public:
     }
 };
 
+class distancePredicate
+{
+private:
+    Unit* caster;
+public:
+    distancePredicate(Unit* _caster) : caster(_caster) {}
+
+    bool operator()(WorldObject* target) const
+    {
+        return target->GetExactDist2d(caster) < 15.f;
+    }
+};
+
 class spell_marked_soul : public SpellScriptLoader
 {
 public:
@@ -3495,12 +3558,23 @@ public:
 
         void SelectTargets(std::list<WorldObject*>&targets)
         {
+            std::list<WorldObject*> tempTargets;
             targets.remove_if(notPlayerPredicate());
+            std::copy(std::begin(targets), std::end(targets), std::inserter(tempTargets, tempTargets.begin()));
+            targets.remove_if(distancePredicate(GetCaster()));
 
-            if (targets.size() > 1)
+            if (!targets.empty())
             {
-                Trinity::Containers::RandomResizeList(targets, 1);
-            }       
+                if (targets.size() > 1)
+                    Trinity::Containers::RandomResizeList(targets, 1);
+            }
+            else
+            {
+                std::copy(std::begin(tempTargets), std::end(tempTargets), std::inserter(targets, targets.begin()));
+
+                if (targets.size() > 1)
+                    Trinity::Containers::RandomResizeList(targets, 1);
+            }
         }
 
         void Register()

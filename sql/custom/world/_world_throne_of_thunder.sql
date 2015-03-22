@@ -8734,7 +8734,8 @@ UPDATE creature_template SET ScriptName = "boss_frost_king_malakk", VehicleId = 
 UPDATE creature_template SET ScriptName = "boss_high_priestess_marli", VehicleId = 2668 WHERE entry = 69132;
 UPDATE creature_template SET ScriptName = "boss_kazrajin", VehicleId = 2669 WHERE entry = 69134;
 UPDATE creature_template SET ScriptName = "mob_living_sand" WHERE entry = 69153;
-UPDATE creature_template SET ScriptName = "mob_garajals_soul", VehicleId = 2664 WHERE entry = 69182;
+UPDATE creature_template SET ScriptName = "mob_garajals_soul", VehicleId = 2664, modelid1 = 11686, modelid2 = 0, speed_walk = 5, speed_run = 5,
+speed_fly = 5, difficulty_entry_3 = 0, difficulty_entry_4 = 0, difficulty_entry_5 = 0, difficulty_entry_6 = 0, difficulty_entry_7 = 0 WHERE entry = 69182;
 UPDATE creature_template SET ScriptName = "mob_blessed_loa_spirit" WHERE entry = 69480;
 UPDATE creature_template SET ScriptName = "mob_shadowed_loa_spirit" WHERE entry = 69548;
 UPDATE creature_template SET ScriptName = "mob_twisted_fate" WHERE entry IN (69740, 69746);
@@ -8942,7 +8943,7 @@ REPLACE INTO `creature_equip_template` (`entry`, `itemEntry1`, `itemEntry2`, `it
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Creature Spawn
 INSERT INTO `creature` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`,`protec_anti_doublet`) VALUES
-(@CGUID+46, 69078, 1098, 0, 0, 248, 1, 0, 69078, 6068.75, 5396.01, 136.171, 2.32446, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, NULL),
+(@CGUID+235, 69078, 1098, 0, 0, 248, 1, 0, 69078, 6068.75, 5396.01, 136.171, 2.32446, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, NULL),
 (@CGUID+47, 69131, 1098, 0, 0, 248, 1, 0, 69131, 6025.24, 5393.14, 136.171, 0.699817, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, NULL),
 (@CGUID+48, 69132, 1098, 0, 0, 248, 1, 0, 69132, 6035.9, 5385.33, 136.171, 1.17586, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, NULL),
 (@CGUID+49, 69134, 1098, 0, 0, 248, 1, 0, 0, 6056.48, 5386.44, 136.171, 2.11191, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, NULL),
@@ -9000,7 +9001,7 @@ INSERT INTO `creature` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMa
 
 (@CGUID+231, 662203, 1098, 0, 0, 248, 1, 0, 0, 6056.48, 5386.44, 136.171, 2.11191, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, NULL),
 (@CGUID+232, 662204, 1098, 0, 0, 248, 1, 0, 0, 6056.48, 5386.44, 136.171, 2.11191, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, NULL),
-(@CGUID+235, 69135, 1098, 0, 0, 248, 1, 0, 0, 6046.09, 5430.82, 137.088, 4.69324, 86400, 0, 0, 315153, 21262, 0, 0, 0, 0, 0, 0, 1, NULL);
+(@CGUID+46, 69135, 1098, 0, 0, 248, 1, 0, 0, 6046.09, 5430.82, 137.088, 4.69324, 86400, 0, 0, 315153, 21262, 0, 0, 0, 0, 0, 0, 1, NULL);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -9015,6 +9016,7 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (69078, 4,  1, 'Da first of many!', 14, 0, 100, 0, 0, 35816, 'Sul the Sandcrawler - Kill02'),
 (69078, 5,  0, 'I return... to... da... sands...', 14, 0, 100, 0, 0, 36454, 'Sul the Sandcrawler - On Death'),
 (69078, 6,  0, '|TInterface\\Icons\\achievement_moguraid_03:20|t%s is |cFFF00000|Hspell:136442|h[Possessed]|h|r by the spirit of Gara''jal!', 41, 0, 100, 0, 0, 0, 'Possess emote'),
+(69078, 7,  0, '|TInterface\\Icons\\spell_monk_envelopingmist:20|t%s summons a deadly |cFFF00000|Hspell:136894|h[Sandstorm]|h|r!', 41, 0, 100, 0, 0, 0, 'Possess emote'),
 
 (69131, 0,  0, 'Ya have met your match, fools!', 14, 0, 100, 0, 0, 35387, 'Frost King Malakk - Aggro'),
 (69131, 1,  0, 'Winter is coming...', 14, 0, 100, 0, 0, 35389, 'Frost King Malakk - On Possess'),
@@ -9023,6 +9025,7 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (69131, 3,  0, 'Death\'s cold embrace.', 14, 0, 100, 0, 0, 35391, 'Frost King Malakk - Kill01'),
 (69131, 3,  1, 'Witness da Drakkari\'s might.', 14, 0, 100, 0, 0, 35392, 'Frost King Malakk - Kill02'),
 (69131, 4,  0, 'Da... empire... can\'t... fall...', 14, 0, 100, 0, 0, 35388, 'Frost King Malakk - On Death'),
+(69131, 5,  0, '|TInterface\\Icons\\spell_mage_frostbomb:20|t$n is afflicted with |cFFF00000|Hspell:136922|h[Frostbite]|h|r!', 41, 0, 100, 0, 0, 0, 'Frost King Malakk to Player'),
 (69131, 6,  0, '|TInterface\\Icons\\achievement_moguraid_03:20|t%s is |cFFF00000|Hspell:136442|h[Possessed]|h|r by the spirit of Gara''jal!', 41, 0, 100, 0, 0, 0, 'Possess emote'),
 
 (69132, 0,  0, 'Death ta all who appose da empire!', 14, 0, 100, 0, 0, 35432, 'High Priestess Marli - On Aggro'),
@@ -9033,7 +9036,9 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (69132, 3,  0, 'Another offering to da loa!', 14, 0, 100, 0, 0, 35436, 'High Priestess Marli - Kill01'),
 (69132, 3,  1, 'She will feast on yer soul!', 14, 0, 100, 0, 0, 35437, 'High Priestess Marli - Kill02'),
 (69132, 4,  0, 'Shadra... save... me...', 14, 0, 100, 0, 0, 35433, 'High Priestess Marli - On Death'),
+(69132, 5,  0, '|TInterface\\Icons\\spell_priest_divinestar:20|t%s summons a |cFFF00000|Hspell:137203|h[Blessed Loa Spirit]|h|r!', 41, 0, 100, 0, 0, 0, 'High Priestess Mar''li'),
 (69132, 6,  0, '|TInterface\\Icons\\achievement_moguraid_03:20|t%s is |cFFF00000|Hspell:136442|h[Possessed]|h|r by the spirit of Gara''jal!', 41, 0, 100, 0, 0, 0, 'Possess emote'),
+(69132, 7,  0, '|TInterface\\Icons\\spell_priest_divinestar_shadow2:20|t%s summons a |cFFF00000|Hspell:137350|h[Shadowed Loa Spirit]|h|r!', 41, 0, 100, 0, 0, 0, 'High Priestess Mar''li'),
 
 (69134, 0,  0, 'Dis is gonna hurt!', 14, 0, 100, 0, 0, 35566, 'Kazrajin - Aggro'),
 (69134, 1,  0, 'Lei Shen! Give us strength!', 14, 0, 100, 0, 0, 35568, 'Kazrajin - On Possess'),
@@ -9044,6 +9049,7 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (69134, 4,  1, 'On ya knees!', 14, 0, 100, 0, 0, '35572', 'Kazrajin - Kill02'),
 (69134, 5,  0, 'Da thunder king... promised...', 14, 0, 100, 0, 0, 35567, 'Kazrajin - On Death'),
 (69134, 6,  0, '|TInterface\\Icons\\achievement_moguraid_03:20|t%s is |cFFF00000|Hspell:136442|h[Possessed]|h|r by the spirit of Gara''jal!', 41, 0, 100, 0, 0, 0, 'Possess emote'),
+(69134, 7,  0, '|TInterface\\Icons\\spell_shaman_staticshock:20|t%s |cFFF00000|Hspell:137149|h[Overloads]|h|r!', 41, 0, 100, 0, 0, 0, 'Kazra''jin to Reckless Charge'),
 
 (69135, 0,  0, 'Let me share dis gift with ya!', 14, 0, 100, 11, 0, 35395, 'Gara\'jal the Spiritbinder- Event01'),
 

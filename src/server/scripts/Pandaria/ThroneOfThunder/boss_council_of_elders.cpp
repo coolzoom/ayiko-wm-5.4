@@ -1599,12 +1599,10 @@ public:
             InitList(tempList);
 
             tempList.remove_if(guidVectorPredicate(pInstance->GetData64(uiCouncillorEntry)));
-            TC_LOG_ERROR("scripts", "templist size %u", tempList.size());
             for (auto const pGuid : tempList)
             {
                 if (Creature* pCreature = ObjectAccessor::GetCreature(*me, pGuid))
                 {
-                    TC_LOG_ERROR("scripts", "GUID %u, Entry %u processed (name = %s)", pGuid, pCreature->GetEntry(), pCreature->GetName());
                     if (pCreature->IsAlive())
                     {
                         if (fHealthNumber < pCreature->GetHealthPct())
@@ -1620,7 +1618,6 @@ public:
                 return pCreature;
 
             events.ScheduleEvent(EVENT_POSSESS, 500);
-            TC_LOG_ERROR("scripts", "No councillor found in Council Script while trying to possess");
             return NULL;
         }
     };

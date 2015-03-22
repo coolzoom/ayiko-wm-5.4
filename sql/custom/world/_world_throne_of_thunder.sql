@@ -8849,15 +8849,15 @@ UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69134, dmg_multiplier = 1
 UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69134, dmg_multiplier = 11, Health_Mod = 202149504 / @HP_MOD_93_4 WHERE entry = @RAID_DIFF_25R + 69134;
 
 -- Blessed Loa Spirit
-UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69480, dmg_multiplier = 1, Health_Mod = 32475  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69480;
-UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69480, dmg_multiplier = 1, Health_Mod = 54124 / @HP_MOD_92 WHERE entry = @RAID_DIFF_10H + 69480;
+UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69480, dmg_multiplier = 1, Health_Mod = 1390000  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69480;
+UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69480, dmg_multiplier = 1, Health_Mod = 2320000 / @HP_MOD_92 WHERE entry = @RAID_DIFF_10H + 69480;
 UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69480, dmg_multiplier = 1, Health_Mod = 3339008 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25N + 69480;
-UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69480, dmg_multiplier = 1, Health_Mod = 162373 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25H + 69480;
+UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69480, dmg_multiplier = 1, Health_Mod = 7000000 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25H + 69480;
 UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69480, dmg_multiplier = 1, Health_Mod = 40593 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25R + 69480;
 
 -- Shadowed Loa Spirit
-UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69548, dmg_multiplier = 1, Health_Mod = 43300  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69548;
-UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69548, dmg_multiplier = 1, Health_Mod = 43300 / @HP_MOD_92 WHERE entry = @RAID_DIFF_10H + 69548;
+UPDATE creature_template SET LootId = @RAID_DIFF_10N + 69548, dmg_multiplier = 1, Health_Mod = 1390000  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69548;
+UPDATE creature_template SET LootId = @RAID_DIFF_10H + 69548, dmg_multiplier = 1, Health_Mod = 2320000 / @HP_MOD_92 WHERE entry = @RAID_DIFF_10H + 69548;
 UPDATE creature_template SET LootId = @RAID_DIFF_25N + 69548, dmg_multiplier = 1, Health_Mod = 5565014 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25N + 69548;
 UPDATE creature_template SET LootId = @RAID_DIFF_25H + 69548, dmg_multiplier = 1, Health_Mod = 5565014 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25H + 69548;
 UPDATE creature_template SET LootId = @RAID_DIFF_25R + 69548, dmg_multiplier = 1, Health_Mod = 40593 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25R + 69548;

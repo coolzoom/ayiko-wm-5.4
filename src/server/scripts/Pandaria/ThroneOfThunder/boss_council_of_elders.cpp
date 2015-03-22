@@ -572,7 +572,7 @@ public:
         }
     }
     
-    uint32 GetData(uint32 uiIndex) const
+    uint32 GetData(uint32 uiIndex)
     {
         if(uiIndex == DATA_DARK_POWER_COUNT)
             return uiDarkPowerCount;
@@ -810,10 +810,10 @@ public:
                     else
                         DoCast(me, SPELL_OVERLOAD);
 
-                    events.RescheduleEvent(EVENT_RECKLESS_CHARGE_PRE_PATH, urand(23, 24) * IN_MILLISECONDS);
+                    events.RescheduleEvent(EVENT_RECKLESS_CHARGE_PRE_PATH, 1000+rand()%2000);
                 }
                 else
-                    events.RescheduleEvent(EVENT_RECKLESS_CHARGE_PRE_PATH, urand(3, 4) * IN_MILLISECONDS);
+                    events.RescheduleEvent(EVENT_RECKLESS_CHARGE_PRE_PATH, 1000+rand()%2000);
             }
         }
     
@@ -856,11 +856,11 @@ public:
                 return;
             }
         }
-        */
+        
         uint32 GetData(uint32 uiIndex) 
         {
             return uiDarkPowerCount;
-        }
+        }*/
 
         uint64 GetGUID(int32 iIndex) 
         {
@@ -1491,10 +1491,12 @@ public:
             ScriptedAI::EnterEvadeMode();
         }
 
-        void Possess(Unit* pCreature)
+        bool Possess(Unit* pCreature)
         {
             DoCast(pCreature, SPELL_POSSESSED);
             me->EnterVehicle(pCreature, 0, true);
+
+            return me->IsOnVehicle();
         }
 
         void UpdateAI(const uint32 uiDiff) override
@@ -1510,7 +1512,8 @@ public:
                 if (Creature *pNextCouncillor = GetNextCouncillor(uiCouncillorEntry))
                 {
                     uiCouncillorEntry = pNextCouncillor->GetEntry();
-                    Possess(pNextCouncillor);
+                    if (!Possess(pNextCouncillor))
+                        events.ScheduleEvent(EVENT_POSSESS, 200);
                 }
             }
         }
@@ -1716,7 +1719,7 @@ public:
             }
         }
 
-        uint32 GetData(uint32 uiIndex) const
+        uint32 GetData(uint32 uiIndex)
         {
             if(uiIndex == DATA_QUICKSAND_MERGE_COUNT)
                 return uiMergeCount;
@@ -2353,7 +2356,7 @@ public:
 
         }
 
-        uint32 GetData(uint32 uiIndex) const
+        uint32 GetData(uint32 uiIndex)
         {
             if(uiIndex == DATA_TWISTED_FATE_OTHER_DIED)
                 return (uint32)bOtherTwistedFateDied;
@@ -2779,6 +2782,16 @@ public:
                             float fAngle = pKazrajin->GetAngle(pPlayer);
                             float fX, fY;
                             GetPositionWithDistInOrientation(pKazrajin, fDist, fAngle, fX, fY);
+
+                            uint8 m_pointCount = ((uint8)fDist / 3) + 1;
+                            TC_LOG_ERROR("scripts", "pointCount %u on dist %f", m_pointCount, fDist);
+
+                            for (uint8 i = 0; i < m_pointCount; ++i)
+                            {
+                                float x, y;
+                                GetPositionWithDistInOrientation(pKazrajin, fDist - (i*3), fAngle, x, y);
+                                pKazrajin->CastSpell(x, y, pKazrajin->GetMap()->GetHeight(x, y, pKazrajin->GetPositionZ()+0.8f), SPELL_RECKLESS_CHARGE_GROUND_AT, true);
+                            }
 
                             if (pKazrajin->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
                                 pKazrajin->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);

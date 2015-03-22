@@ -797,6 +797,12 @@ public:
                                 pBoss->SummonCreature(NPC_LIGHTNING_FISSURE, pCaster->GetPosition());
                         }
 
+                        if (pCaster->ToCreature())
+                        {
+                            pCaster->ToCreature()->RemoveAllAuras();
+                            pCaster->ToCreature()->DespawnOrUnsummon(2000);
+                            return;
+                        }
                         pCaster->Kill(pCaster);
                         return;
                     }

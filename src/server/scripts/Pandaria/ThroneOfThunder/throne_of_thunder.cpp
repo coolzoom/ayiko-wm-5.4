@@ -624,7 +624,7 @@ public:
             if (!target || !caster)
                 return;
 
-            if (Creature* pEruption = caster->SummonCreature(NPC_ERUPTION, *target, TEMPSUMMON_TIMED_DESPAWN, 30000))
+            if (Creature* pEruption = caster->SummonCreature(NPC_ERUPTION, *target, TEMPSUMMON_TIMED_DESPAWN, 6000))
                 pEruption->AddAura(SPELL_ERUPTION, pEruption);
         }
 

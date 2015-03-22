@@ -2787,6 +2787,7 @@ public:
                     {
                         if (pPlayer->HasAura(SPELL_RECKLESS_CHARGE_FACE, pKazrajin->GetGUID()))
                         {
+                            pKazrajin->CastSpell(pKazrajin, SPELL_RECKLESS_CHARGE_SOUND, true);
                             pPlayer->RemoveAurasDueToSpell(SPELL_RECKLESS_CHARGE_FACE);
                             // Compute position of landing
                             float fDist = pKazrajin->GetExactDist2d(pPlayer) - 3.f; // Remove 5 yards to continue rolling

@@ -3554,6 +3554,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 spellInfo->AttributesEx6 |= SPELL_ATTR6_CASTABLE_WHILE_ON_VEHICLE;
                 break;
                 // Throne of Thunder
+            case 136992:    // Biting Cold
+                spellInfo->StackAmount = 1;
+                break;
             case 137485:    // Lightning Fissure(damage)
                 spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_SRC_CASTER);
                 spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENEMY);

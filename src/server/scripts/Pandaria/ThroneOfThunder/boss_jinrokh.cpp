@@ -1268,14 +1268,19 @@ public:
         {
             statueGuid = 0;
 
+            float fDist = 1000.f;
+
             if (InstanceScript* pInstance = me->GetInstanceScript())
             {
                 for (uint32 i = 0; i < 4; ++i)
                 {
                     if (GameObject* pGo = ObjectAccessor::GetGameObject(*me, pInstance->GetData64(GOB_MOGU_STATUE_1 + i)))
                     {
-                        if (pGo->GetRespawnDelay() == me->GetRespawnDelay())
+                        if (pGo->GetExactDist2d(me) < fDist)
+                        {
+                            fDist = pGo->GetExactDist2d(me);
                             statueGuid = pGo->GetGUID();
+                        }
                     }
                 }
             }

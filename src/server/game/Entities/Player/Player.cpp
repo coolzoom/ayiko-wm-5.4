@@ -22927,12 +22927,11 @@ void Player::RemoveSpellMods(Spell &spell)
 
 void Player::DropModCharge(SpellModifier::Ptr const &mod, Spell* spell)
 {
-#if 0
     // don't handle spells with proc_event entry defined
     // this is a temporary workaround, because all spellmods should be handled like that
     if (sSpellMgr->GetSpellProcEvent(mod->ownerEffect->GetId()))
         return;
-#endif
+
     if (spell && mod->charges > 0)
     {
         if (--mod->charges == 0)

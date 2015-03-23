@@ -9847,22 +9847,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
 
             break;
         }
-        case 85043: // Grand Crusader
-        {
-            if (!procSpell)
-                return false;
-
-            if (GetTypeId() != TYPEID_PLAYER)
-                return false;
-
-            if (procSpell->Id != 35395 && procSpell->Id != 53595)
-                return false;
-
-            if (!roll_chance_i(20))
-                return false;
-
-            break;
-        }
         case 68164:// Glyph of Thunder Strike
         {
             if (!procSpell)

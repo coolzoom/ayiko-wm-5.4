@@ -575,7 +575,10 @@ REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (137442,'spell_control_horridon'),
 (137443,'spell_control_horridon'),
 (137444,'spell_control_horridon'),
-(136480,'spell_horridon_chain_lightning');
+(136480,'spell_horridon_chain_lightning'),
+(137294,'spell_headache'),
+(136741,'spell_double_swipe_aura'),
+(136770,'spell_double_swipe_aura');
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/

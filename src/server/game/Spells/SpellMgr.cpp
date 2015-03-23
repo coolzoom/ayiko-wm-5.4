@@ -3585,8 +3585,21 @@ void SpellMgr::LoadSpellCustomAttr()
             case 138658:    // Eruption Damage
                 spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENEMY);
                 break;
-            case 137390:
+            case 137390:    // Shadowed Loa Spirit
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_100_YARDS);
+                break;
+            case 137433:    // Control Horridon
+            case 137442:
+            case 137443:
+            case 137444:
+            case 136797:    // Dino Mending
+                spellInfo->Effects[EFFECT_1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
+                break;
+            case 136739:
+            case 136740:
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_SRC_CASTER);
+                spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENEMY);
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_40_YARDS);
                 break;
 #if 1 // Gilneas
                 case 68087:

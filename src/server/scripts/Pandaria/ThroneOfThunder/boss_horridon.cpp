@@ -285,7 +285,6 @@ enum eBossPhases
 };
 #define MAX_BOSS_PHASE BOSS_PHASE_JALAK + 1
 
-
 enum eTrashPhases
 {
     TRASH_PHASE_FARRAKI                     = 0,
@@ -596,7 +595,7 @@ public:
     class npc_horridon_event_helper_AI : public ScriptedAI
     {
     public:
-        npc_horridon_event_helper_AI(Creature *pCreature) : ScriptedAI(pCreature)
+        npc_horridon_event_helper_AI(Creature *pCreature) : ScriptedAI(pCreature), pInstance(pCreature->GetInstanceScript())
         {
             events.Reset();
             summons.clear();
@@ -720,7 +719,8 @@ public:
                     Position const summonPosition = zandalariDinomancersSummonPositions[urand(0, 9)];
                     if (Creature *pDinomancer = me->SummonCreature(MOB_ZANDALARI_DINOMANCER, summonPosition))
                         pDinomancer->GetMotionMaster()->MoveJump(zandalariDinomancersJumpPositions[uiTrashPhase][urand(0, MAX_SUMMON_POSITIONS_BY_PHASE - 1)], 20.0f, 42.0f, MOTION_DINOMANCER_JUMP);
-                    events.ScheduleEvent(EVENT_SUMMON_ZANDALARI_DINOMANCER, MINUTE * IN_MILLISECONDS);
+                    //TODO: only one dinomancer per phase
+                    //events.CancelEvent(EVENT_SUMMON_ZANDALARI_DINOMANCER);
                     break;
                 }
 
@@ -780,6 +780,7 @@ public:
 
     private:
         EventMap                events;
+        InstanceScript          *pInstance;
         const Position*         summonPositions;
         const Position*         jumpPositions;
         std::list<Creature*>    summons;
@@ -798,19 +799,21 @@ public:
                 return;
 
             // Respawn dead jumpers
-            for (Creature *pCreatureIter : jumpers)
+            for (Creature *pJumpersIter : jumpers)
             {
-                if (pCreatureIter->isDead())
+                if (pJumpersIter->isDead())
                 {
-                    pCreatureIter->Respawn();
-                    if (pCreatureIter->AI())
-                        pCreatureIter->AI()->EnterEvadeMode();
+                    pJumpersIter->Respawn();
+                    if (pJumpersIter->AI())
+                        pJumpersIter->AI()->EnterEvadeMode();
                 }
 
                 // Creature will automatically reset because it is registered in DB; no need to make them
                 // return to home position or Reset() them.
             }
 
+            //TODO: despawn summoned creatures (summons)
+            
             // Boss reset by themselves, but won't revive if dead
             if (Creature *pHorridon = GetHorridon(me))
             {
@@ -879,42 +882,42 @@ public:
             {
                 switch (uiTrashPhase)
                 {
-                case TRASH_PHASE_FARRAKI:
-                    break;
+                    case TRASH_PHASE_FARRAKI:
+                        break;
 
-                case TRASH_PHASE_GURUBASHI:
-                    uiMinorTrashId      = MOB_GURUBASHI_BLOODLORD;
-                    uiMajorTrashId      = MOB_GURUBASHI_VENOM_PRIEST;
-                    memset(&uiMediumTrashId, 0, sizeof(uiMediumTrashId));
-                    summonPositions     = gurubashiTrashSummonPositions;
-                    jumpPositions       = gurubashiVenomPriestJumpPositions;
-                    pJalak->AI()->Talk(TALK_GURUBASHI);
-                    break;
+                    case TRASH_PHASE_GURUBASHI:
+                        uiMinorTrashId      = MOB_GURUBASHI_BLOODLORD;
+                        uiMajorTrashId      = MOB_GURUBASHI_VENOM_PRIEST;
+                        memset(&uiMediumTrashId, 0, sizeof(uiMediumTrashId));
+                        summonPositions     = gurubashiTrashSummonPositions;
+                        jumpPositions       = gurubashiVenomPriestJumpPositions;
+                        pJalak->AI()->Talk(TALK_GURUBASHI);
+                        break;
 
-                case TRASH_PHASE_DRAKKARI:
-                    uiMajorTrashId      = MOB_DRAKKARI_FROZEN_WARLORD;
-                    summonPositions     = drakkariTrashSummonPositions;
-                    jumpPositions       = drakkariFrozenWarlordJumpPositions;
-                    pJalak->AI()->Talk(TALK_DRAKKARI);
-                    break;
+                    case TRASH_PHASE_DRAKKARI:
+                        uiMajorTrashId      = MOB_DRAKKARI_FROZEN_WARLORD;
+                        summonPositions     = drakkariTrashSummonPositions;
+                        jumpPositions       = drakkariFrozenWarlordJumpPositions;
+                        pJalak->AI()->Talk(TALK_DRAKKARI);
+                        break;
 
-                case TRASH_PHASE_AMANI:
-                    uiMinorTrashId      = MOB_AMANI_SHI_PROTECTOR;
-                    uiMediumTrashId[0]  = MOB_AMANI_SHI_FLAME_CASTER;
-                    uiMediumTrashId[1]  = 0;
-                    uiMajorTrashId      = MOB_AMANI_WARBEAR;
-                    summonPositions     = amaniTrashSummonPositions;
-                    jumpPositions       = amaniWarbearJumpPositions;
-                    pJalak->AI()->Talk(TALK_AMANI);
-                    break;
+                    case TRASH_PHASE_AMANI:
+                        uiMinorTrashId      = MOB_AMANI_SHI_PROTECTOR;
+                        uiMediumTrashId[0]  = MOB_AMANI_SHI_FLAME_CASTER;
+                        uiMediumTrashId[1]  = 0;
+                        uiMajorTrashId      = MOB_AMANI_WARBEAR;
+                        summonPositions     = amaniTrashSummonPositions;
+                        jumpPositions       = amaniWarbearJumpPositions;
+                        pJalak->AI()->Talk(TALK_AMANI);
+                        break;
 
-                case MAX_TRASH_PHASE:
-                    if (Creature *pJalak = GetJalak(me))
-                        pJalak->AI()->DoAction(ACTION_ENTER_PHASE_TWO);
-                    return;
+                    case MAX_TRASH_PHASE:
+                        if (Creature *pJalak = GetJalak(me))
+                            pJalak->AI()->DoAction(ACTION_ENTER_PHASE_TWO);
+                        return;
 
-                default:
-                    return;
+                    default:
+                        return;
                 }
 
                 events.Reset();
@@ -930,7 +933,7 @@ public:
                 }
 
                 events.ScheduleEvent(EVENT_SUMMON_MAJOR, 20 * IN_MILLISECONDS);
-                events.ScheduleEvent(EVENT_SUMMON_ZANDALARI_DINOMANCER, 30 * IN_MILLISECONDS);
+                events.ScheduleEvent(EVENT_SUMMON_ZANDALARI_DINOMANCER, MINUTE * IN_MILLISECONDS);
             }
         }
 
@@ -958,7 +961,7 @@ public:
     {
     public:
         npc_horridon_rp_event_helper_AI(Creature *pCreature) :
-            ScriptedAI(pCreature), bIntroDone(false)
+            ScriptedAI(pCreature), pInstance(pCreature->GetInstanceScript()), bIntroDone(false)
         {
             events.Reset();
         }
@@ -1033,6 +1036,8 @@ public:
         }
 
     private:
+        EventMap        events;
+        InstanceScript  *pInstance;
         bool            bIntroDone;
     };
 
@@ -1049,25 +1054,16 @@ class boss_horridon : public CreatureScript
 public:
     boss_horridon() : CreatureScript("boss_horridon") {}
 
-    struct boss_horridon_AI : public BossAI
+    struct boss_horridon_AI : public ScriptedAI
     {
-        boss_horridon_AI(Creature *pCreature) : BossAI(pCreature, DATA_HORRIDON), bJalakCalled(false)
+        boss_horridon_AI(Creature *pCreature) : ScriptedAI(pCreature), pInstance(pCreature->GetInstanceScript()), bJalakCalled(false)
         {
             pChargeDoor = NULL;
             events.Reset();
         }
 
-        GameObject      *pChargeDoor;
-        bool            bJalakCalled;
-
         void Reset()
         {   
-            if (Creature *pHorridonHelper = GetHorridonHelper(me))
-            {
-                if (CreatureAI* pHelperAI = pHorridonHelper->AI())
-                    pHelperAI->DoAction(ACTION_FIGHT_RESET);
-            } 
-
             events.Reset();
             pChargeDoor = NULL;
             bJalakCalled = false;
@@ -1075,12 +1071,19 @@ public:
             me->RemoveAurasDueToSpell(SPELL_HEADACHE);
             me->RemoveAurasDueToSpell(SPELL_CRACKED_SHELL);
             me->RemoveAurasDueToSpell(SPELL_RAMPAGE);
+            me->SetHomePosition(middlePosition);   
+            
+            if (Creature *pHorridonHelper = GetHorridonHelper(me))
+            {
+                if (CreatureAI* pHelperAI = pHorridonHelper->AI())
+                    pHelperAI->DoAction(ACTION_FIGHT_RESET);
+            } 
 
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
             me->SetReactState(REACT_AGGRESSIVE);
             
-            instance->SetBossState(DATA_HORRIDON, NOT_STARTED);
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            pInstance->SetBossState(DATA_HORRIDON, NOT_STARTED);
+            pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
 
         void EnterCombat(Unit *pVictim)
@@ -1092,8 +1095,8 @@ public:
             if (IsHeroic())
                 events.ScheduleEvent(EVENT_DIRE_CALL, 8 * IN_MILLISECONDS);   
             
-            instance->SetBossState(DATA_HORRIDON, IN_PROGRESS);
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+            pInstance->SetBossState(DATA_HORRIDON, IN_PROGRESS);
+            pInstance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
 
             if (Creature *pHorridonHelper = GetHorridonHelper(me))
             {
@@ -1177,12 +1180,12 @@ public:
         {
             if (GetJalak(me) && GetJalak(me)->isDead())
             {
-                instance->SetBossState(DATA_HORRIDON, DONE);
+                pInstance->SetBossState(DATA_HORRIDON, DONE);
                 if (Creature *pController = GetHorridonHelper(me))
                     pController->AI()->DoAction(ACTION_FIGHT_END);
             }
 
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
 
         void MovementInform(uint32 uiMotionType, uint32 uiMovementId)
@@ -1218,8 +1221,13 @@ public:
             Position chargePosition = GetChargePositionByDoor(pDoor);
             me->GetMotionMaster()->MoveCharge(chargePosition.GetPositionX(), chargePosition.GetPositionY(), chargePosition.GetPositionZ(), 42.0f, MOTION_HORRIDON_DOOR_CHARGE);
             DoCast(me, SPELL_HEADACHE);
-            DoCast(me, SPELL_CRACKED_SHELL);
         }
+
+    private:
+        EventMap        events;
+        GameObject      *pChargeDoor;
+        InstanceScript  *pInstance;
+        bool            bJalakCalled;
     };
 
     CreatureAI* GetAI(Creature *pCreature) const
@@ -1238,21 +1246,20 @@ public:
     class mob_war_god_jalak_AI : public ScriptedAI
     {
     public:
-        mob_war_god_jalak_AI(Creature *pCreature) : ScriptedAI(pCreature), uiPhase(BOSS_PHASE_SUMMONS)
+        mob_war_god_jalak_AI(Creature *pCreature) : ScriptedAI(pCreature), pInstance(pCreature->GetInstanceScript()), uiPhase(BOSS_PHASE_SUMMONS)
         {
         }
-        uint32 uiPhase;
 
         void Reset()
         {   
+            events.Reset();
+            uiPhase = BOSS_PHASE_SUMMONS;    
+            
             if (Creature *pHorridonHelper = GetHorridonHelper(me))
             {
                 if (CreatureAI* pHelperAI = pHorridonHelper->AI())
                     pHelperAI->DoAction(ACTION_FIGHT_RESET);
             }
-
-            events.Reset();
-            uiPhase = BOSS_PHASE_SUMMONS;
         }
 
         void DoAction(const int32 iAction) override
@@ -1354,11 +1361,21 @@ public:
         {
             if (GetHorridon(me) && GetHorridon(me)->isDead())
             {
-                //instance->SetBossState(DATA_HORRIDON, DONE);
+                pInstance->SetBossState(DATA_HORRIDON, DONE);
                 if (Creature *pController = GetHorridonHelper(me))
                     pController->AI()->DoAction(ACTION_FIGHT_END);
             }
+            else 
+            {
+                if (Creature *pHorridon = GetHorridon(me))
+                    pHorridon->AddAura(SPELL_RAMPAGE, pHorridon);
+            }
         }
+
+    private:
+        EventMap        events;
+        InstanceScript  *pInstance;
+        uint32          uiPhase;
     };
 
     CreatureAI* GetAI(Creature *pCreature) const
@@ -1378,8 +1395,10 @@ public:
     {
     public:
         mob_horridon_trashs_AI(Creature *pCreature) :
-            ScriptedAI(pCreature), pRendingChargeTarget(NULL), uiChainLightningCount(0)
+            ScriptedAI(pCreature), pInstance(pCreature->GetInstanceScript()),
+            pRendingChargeTarget(NULL), uiChainLightningCount(0)
         {
+            events.Reset();
         }
 
         void Reset()
@@ -1638,6 +1657,8 @@ public:
         }
 
     private:
+        EventMap        events;
+        InstanceScript  *pInstance;
         Unit            *pRendingChargeTarget;
         uint32          uiChainLightningCount;
     };
@@ -1659,7 +1680,7 @@ public:
     {
     public:
         mob_horridon_summons_AI(Creature *pCreature) :
-            ScriptedAI(pCreature) /*, fSandTrapRadius(0.0f) */
+            ScriptedAI(pCreature), pInstance(pCreature->GetInstanceScript()) /*, fSandTrapRadius(0.0f) */
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
             // me->SetReactState(REACT_PASSIVE);
@@ -1724,6 +1745,11 @@ public:
                 }
             }
         }
+
+    private:
+        EventMap        events;
+        InstanceScript  *pInstance;
+        // float           fSandTrapRadius;
     };
 
     CreatureAI* GetAI(Creature *pCreature) const
@@ -1744,7 +1770,8 @@ public:
     {
     public:
         mob_zandalari_dinomancer_AI(Creature *pCreature) :
-            ScriptedAI(pCreature), bIsUnderFiftyPercent(false)
+            ScriptedAI(pCreature), pInstance(pCreature->GetInstanceScript()), 
+            bIsUnderFiftyPercent(false)
         {
             events.Reset();
         }
@@ -1776,7 +1803,16 @@ public:
 
                 me->InterruptNonMeleeSpells(true);
                 me->InterruptSpell(CURRENT_CHANNELED_SPELL);
-                // me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+
+                if (Creature *pHelper = GetHorridonHelper(me))
+                {
+                    if (HorridonHelperAI* pHelperAI = dynamic_cast<HorridonHelperAI*>( pHelper->AI() ))
+                    {
+                        uint32 uiSummonSpellId = GetSummoningOrbSpellByPhase(pHelperAI->GetTrashPhase());
+                        DoCast(me, uiSummonSpellId);
+                    }
+                }
+                
                 events.CancelEvent(EVENT_DINO_MENDING);
                 DoCast(me, SPELL_DINO_FORM);
             }
@@ -1802,20 +1838,9 @@ public:
             DoMeleeAttackIfReady();
         }
 
-
-        void JustDied(Unit *pKiller)
-        {
-            if (Creature *pHelper = GetHorridonHelper(me))
-            {
-                if (HorridonHelperAI* pHelperAI = dynamic_cast<HorridonHelperAI*>( pHelper->AI() ))
-                {
-                    uint32 uiSummonSpellId = GetSummoningOrbSpellByPhase(pHelperAI->GetTrashPhase());
-                    DoCast(me, uiSummonSpellId);
-                }
-            }
-        }
-
     private:
+        EventMap        events;
+        InstanceScript  *pInstance;
         bool            bIsUnderFiftyPercent;
     };
 
@@ -1915,8 +1940,6 @@ public:
     }
 };
 
-
-
 //////////////////////////////////////////////////////////////////////////
 // Spell Helpers
 // Helper for Double Swipe
@@ -1933,14 +1956,14 @@ public:
 
         if (bFront)
         {
-            return pCaster->HasInArc(45.0f, object);
+            return pCaster->HasInArc(35.0f, object);
         }
         else
         {
             bool bToReturn = false;
 
             pCaster->SetOrientation(-pCaster->GetOrientation());
-            if (pCaster->HasInArc(45.0f, object))
+            if (pCaster->HasInArc(35.0f, object))
                 bToReturn = true;
             pCaster->SetOrientation(-pCaster->GetOrientation());
 
@@ -1952,7 +1975,6 @@ private:
     Unit *pCaster;
     bool bFront;
 };
-
 
 // Target selection for Double Swipe
 class spell_horridon_double_swipe : public SpellScriptLoader
@@ -1971,6 +1993,7 @@ public:
 
             targets.clear();
 
+            //TODO: Verify that spell only hits within the arc and not beyond it. (bug with hitting people on the side)
             DoubleSwipeTargetSelector predi(GetCaster(), GetSpellInfo()->Id == SPELL_DOUBLE_SWIPE_FRONT);
             Trinity::WorldObjectListSearcher<DoubleSwipeTargetSelector> u_search(GetCaster(), targets, predi);
             Trinity::VisitNearbyObject(GetCaster(), 35.0f, u_search);
@@ -2060,14 +2083,14 @@ public:
         PrepareAuraScript(spell_control_horridon_AuraScript)
 
         void HandleRemove(AuraEffect const* pAuraEffect, AuraEffectHandleModes eMode)
-        {
+        {   
             if (AuraApplication const* pAuraApp = GetTargetApplication())
             {
                 if (pAuraApp->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
                 {
                     if (WorldObject *pOwner = GetOwner())
                     {
-                        if (Creature *pHorridon = pOwner->ToCreature())
+                        if (Creature *pHorridon = GetHorridon(pOwner))
                         {
                             if (HorridonAI *pHorridonAI = dynamic_cast<HorridonAI*>( pHorridon->AI() ))
                             {

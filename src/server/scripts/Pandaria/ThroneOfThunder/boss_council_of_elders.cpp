@@ -388,6 +388,8 @@ public:
         events.Reset();
     }
 
+    EventMap darkPowerEvents;
+
     // Override Reset to reset the EventMap in one place and force
     // reset of the fight by sending DoAction to the helper.
     // Note: if one boss reset, every other boss need to reset. Otherwise,
@@ -402,6 +404,7 @@ public:
         }
 
         events.Reset();
+        darkPowerEvents.Reset();
 
         me->setPowerType(POWER_ENERGY);
         me->SetMaxPower(POWER_ENERGY, 100);
@@ -606,7 +609,8 @@ protected:
     void InitDarkPower()
     {
         events.Reset();
-        events.ScheduleEvent(EVENT_DARK_POWER, 1 * IN_MILLISECONDS);
+        darkPowerEvents.Reset();
+        darkPowerEvents.ScheduleEvent(EVENT_DARK_POWER, 1000);
     }
     
     uint32 GetPowerTimer() const
@@ -647,7 +651,17 @@ public:
             if(!UpdateVictim())
                 return;
 
+            darkPowerEvents.Update(uiDiff);
             events.Update(uiDiff);
+
+            switch (darkPowerEvents.ExecuteEvent())
+            {
+            case EVENT_DARK_POWER:
+                DoCast(me, SPELL_DARK_POWER, true);
+                ++uiDarkPowerCount;
+                darkPowerEvents.ScheduleEvent(EVENT_DARK_POWER, 1 * IN_MILLISECONDS);
+                break;
+            }
 
             if(me->HasUnitState(UNIT_STATE_CASTING))
                 return;
@@ -670,12 +684,6 @@ public:
                     Talk(TALK_SPECIAL);
                     DoCastAOE(SPELL_FROSTBITE); // Handle target selection in SpellScript
                     events.ScheduleEvent(EVENT_FROSTBITE, urand(8, 16) * IN_MILLISECONDS);
-                    break;
-
-                case EVENT_DARK_POWER:
-                    DoCastAOE(SPELL_DARK_POWER);
-                    ++uiDarkPowerCount;
-                    events.ScheduleEvent(EVENT_DARK_POWER, 1 * IN_MILLISECONDS);
                     break;
                     
                 case EVENT_INCREASE_POWER:
@@ -750,7 +758,17 @@ public:
             if(!UpdateVictim())
                 return;
 
+            darkPowerEvents.Update(uiDiff);
             events.Update(uiDiff);
+
+            switch (darkPowerEvents.ExecuteEvent())
+            {
+            case EVENT_DARK_POWER:
+                DoCast(me, SPELL_DARK_POWER, true);
+                ++uiDarkPowerCount;
+                darkPowerEvents.ScheduleEvent(EVENT_DARK_POWER, 1 * IN_MILLISECONDS);
+                break;
+            }
 
             if(me->HasUnitState(UNIT_STATE_CASTING))
                 return;
@@ -776,12 +794,6 @@ public:
                     DoCast(me, SPELL_RECKLESS_CHARGE_VISUAL); // Launch everything
                     // Summon npcs for the visual of Reckless Charge while travelling ?
                     // Handle next part in MovementInform.
-                    break;
-
-                case EVENT_DARK_POWER:
-                    DoCastAOE(SPELL_DARK_POWER);
-                    ++uiDarkPowerCount;
-                    events.ScheduleEvent(EVENT_DARK_POWER, 1 * IN_MILLISECONDS);
                     break;
                     
                 case EVENT_INCREASE_POWER:
@@ -926,12 +938,22 @@ public:
             if(!UpdateVictim())
                 return;
 
+            darkPowerEvents.Update(uiDiff);
             events.Update(uiDiff);
 
-            if(me->HasUnitState(UNIT_STATE_CASTING))
+            switch (darkPowerEvents.ExecuteEvent())
+            {
+            case EVENT_DARK_POWER:
+                DoCast(me, SPELL_DARK_POWER, true);
+                ++uiDarkPowerCount;
+                darkPowerEvents.ScheduleEvent(EVENT_DARK_POWER, 1 * IN_MILLISECONDS);
+                break;
+            }
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
-            while(uint32 uiEventId = events.ExecuteEvent())
+            while (uint32 uiEventId = events.ExecuteEvent())
             {
                 switch(uiEventId)
                 {
@@ -976,12 +998,6 @@ public:
                     Talk(TALK_SUL_SANDSTORM);
                     DoCastAOE(SPELL_SAND_STORM);
                     events.ScheduleEvent(EVENT_SANDSTORM, 40 * IN_MILLISECONDS);
-                    break;
-
-                case EVENT_DARK_POWER:
-                    DoCastAOE(SPELL_DARK_POWER);
-                    ++uiDarkPowerCount;
-                    events.ScheduleEvent(EVENT_DARK_POWER, 1 * IN_MILLISECONDS);
                     break;
                     
                 case EVENT_INCREASE_POWER:
@@ -1052,17 +1068,27 @@ public:
 
         void UpdateAI(uint32 uiDiff)
         {
-            if(!UpdateVictim())
+            if (!UpdateVictim())
                 return;
 
+            darkPowerEvents.Update(uiDiff);
             events.Update(uiDiff);
 
-            if(me->HasUnitState(UNIT_STATE_CASTING))
+            switch (darkPowerEvents.ExecuteEvent())
+            {
+            case EVENT_DARK_POWER:
+                DoCast(me, SPELL_DARK_POWER, true);
+                ++uiDarkPowerCount;
+                darkPowerEvents.ScheduleEvent(EVENT_DARK_POWER, 1 * IN_MILLISECONDS);
+                break;
+            }
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
-            while(uint32 uiEventId = events.ExecuteEvent())
+            while (uint32 uiEventId = events.ExecuteEvent())
             {
-                switch(uiEventId)
+                switch (uiEventId)
                 {
                 case EVENT_WRATH_OF_THE_LOA:
                     if(Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM)) // Target is TARGET_UNIT_ENEMY
@@ -1072,18 +1098,18 @@ public:
 
                 case EVENT_BLESSED_LOA_SPIRIT:
                     // Check that we are not the only left councillor (otherwise it would be cheaty)
-                    for(uint8 i = 0; i < 3; ++i)
+                    for (uint8 i = 0; i < 3; ++i)
                     {
-                        if(Creature *pCouncillor = GetBossByEntry(uiBossEntries[i], me))
+                        if (Creature *pCouncillor = GetBossByEntry(uiBossEntries[i], me))
                         {
-                            if(pCouncillor->IsAlive())
+                            if (pCouncillor->IsAlive())
                             {
                                 // Select a target now
                                 std::list<Creature*> councillors = { GetFrostKingMalakk(me), GetKazrajin(me), GetSulTheSandcrawler(me) };
                                 councillors.remove_if([](Creature const* pCouncil) -> bool { return pCouncil->isDead(); });
-                                councillors.sort([](Creature const* first, Creature const* second) -> bool { return first->GetHealthPct() < second->GetHealthPct() ;});
+                                councillors.sort([](Creature const* first, Creature const* second) -> bool { return first->GetHealthPct() < second->GetHealthPct(); });
 
-                                if(councillors.front())
+                                if (councillors.front())
                                     uiBlessedLoaSpiritBossGUIDs.push_back(councillors.front()->GetGUID());
 
                                 // Cast after having init the list to be sure the guid has been set
@@ -1143,12 +1169,6 @@ public:
                 case EVENT_TWISTED_FATE:
                     DoCastAOE(SPELL_TWISTED_FATE); // Automatically handle target selection in the SpellScript
                     events.ScheduleEvent(EVENT_TWISTED_FATE, urand(10, 20) * IN_MILLISECONDS);
-                    break;
-
-                case EVENT_DARK_POWER:
-                    DoCastAOE(SPELL_DARK_POWER);
-                    ++uiDarkPowerCount;
-                    events.ScheduleEvent(EVENT_DARK_POWER, 1 * IN_MILLISECONDS);
                     break;
                     
                 case EVENT_INCREASE_POWER:
@@ -1758,14 +1778,21 @@ public:
                 case EVENT_QUICKSAND_PERIODIC:
                 {
                     std::list<Player*> playerList;
-                    me->GetPlayerListInGrid(playerList, 8.0f);
+                    me->GetPlayerListInGrid(playerList, 100.f);
 
                     for (Player *pPlayer : playerList)
                     {
-                        if (Aura* pAura = pPlayer->GetAura(SPELL_QUICKSAND_PERIODIC_DAMAGES, me->GetGUID())) // Caster is relevant here I think cause aura cannot stack
-                            pAura->RefreshDuration();
+                        if (pPlayer->GetExactDist2d(me) < (7.4f + me->GetFloatValue(UNIT_FIELD_BOUNDINGRADIUS)))
+                        {
+                            if (Aura* pAura = pPlayer->GetAura(SPELL_QUICKSAND_PERIODIC_DAMAGES, me->GetGUID()))
+                            {
+                                pAura->RefreshDuration(false);
+                            }
+                            else
+                                me->AddAura(SPELL_QUICKSAND_PERIODIC_DAMAGES, pPlayer);
+                        }
                         else
-                            DoCast(pPlayer, SPELL_QUICKSAND_PERIODIC_DAMAGES);
+                            pPlayer->RemoveAura(SPELL_QUICKSAND_PERIODIC_DAMAGES, me->GetGUID(), 0, AURA_REMOVE_BY_EXPIRE);
                             // Handle the root and cie in the AuraScript
                     }
 
@@ -3026,71 +3053,44 @@ public:
 
         void HandlePeriodic(AuraEffect const* pAuraEffect)
         {
-            if (!GetOwner())
+            Unit* caster = GetCaster();
+            Unit* pTarget = GetOwner()->ToUnit();
+
+            if (!caster || !pTarget)
                 return;
-
-            // Handle Entrapped / Ensnared with the periodic effect, it's quite easier
-            if (Player *pOwner = GetOwner()->ToPlayer())
+                
+            if (Aura* pAura = pTarget->GetAura(SPELL_ENSNARED))
             {
-                std::list<Creature*> quicksandsList;
-                pOwner->GetCreatureListWithEntryInGrid(quicksandsList, MOB_LIVING_SAND, 200.0f);
-                quicksandsList.sort(Trinity::DistanceCompareOrderPred(pOwner, true));
-
-                // Remove quicksands that are not so close
-                quicksandsList.remove_if([pOwner](Creature const* quicksand) -> bool
+                if (pAura->GetCasterGUID() == caster->GetGUID())
                 {
-                    if (CreatureAI *pAI = quicksand->AI())
+                    pAura->ModStackAmount(1);
+                    if (pAura->GetStackAmount() >= 5)
                     {
-                        float fRadius = 8.0f;
-                        return pOwner->GetExactDist2d(quicksand) >= fRadius;
+                        caster->AddAura(SPELL_ENTRAPPED, pTarget);
+                        pAura->Remove();
                     }
-
-                    return false;
-                });
-
-                quicksandsList.remove_if([pOwner](Creature const* quicksand) -> bool
-                {
-                    return (!quicksand->HasAura(SPELL_QUICKSAND_AT_VISUAL) && !quicksand->HasAura(SPELL_QUICKSAND_AT_VISUAL_INIT));
-                });
-
-                // If there are no quicksands near, remove aura and return (using Remove(AURA_REMOVE_BY_DEFAULT) to prevent crash, instead of pOwner->RemoveAura(GetId()))
-                if (quicksandsList.empty())
-                {
-                    Remove(AURA_REMOVE_BY_DEFAULT);
-                    return;
-                }
-
-                // Else, force player to cast spell on self, so aura won't stack in many instances
-                // (because target is TARGET_UNIT_CASTER, so annoying). Handle everything in here,
-                // because it is simpler, even if not really beautiful...
-                for (Creature *pQuicksand : quicksandsList)
-                {
-                    // Do not ensnare the player if it is already entrapped
-                    if (pOwner->HasAura(SPELL_ENTRAPPED))
-                        return;
-
-                    if (Aura *pEnsnared = pOwner->GetAura(SPELL_ENSNARED))
-                    {
-                        if (pEnsnared->GetStackAmount() < 4)
-                        {
-                            pOwner->CastSpell(pOwner, SPELL_ENSNARED, false);
-                        }
-                        else if (pEnsnared->GetStackAmount() == 4)
-                        {
-                            pOwner->CastSpell(pOwner, SPELL_ENSNARED, false); // Five stack
-                            pOwner->CastSpell(pOwner, SPELL_ENTRAPPED, false);
-                        }
-                        // No else, so we won't multi entrap the player
-                    }
-                    else
-                        pOwner->CastSpell(pOwner, SPELL_ENSNARED, true);
                 }
             }
+            else
+                caster->AddAura(SPELL_ENSNARED, pTarget);
+        }
+
+        void HandleOnRemove(AuraEffect const* aurEff, AuraEffectHandleModes mode)
+        {
+            Unit* caster = GetCaster();
+            Unit* pTarget = GetOwner()->ToUnit();
+
+            if (!caster || !pTarget)
+                return;
+
+            pTarget->RemoveAura(SPELL_ENSNARED, caster->GetGUID());
+
         }
 
         void Register()
         {
             OnEffectPeriodic += AuraEffectPeriodicFn(spell_quicksand_periodic_AuraScript::HandlePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+            OnEffectRemove += AuraEffectRemoveFn(spell_quicksand_periodic_AuraScript::HandleOnRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
         }
     };
 

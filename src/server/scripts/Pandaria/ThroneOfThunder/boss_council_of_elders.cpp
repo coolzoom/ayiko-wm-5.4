@@ -418,6 +418,8 @@ public:
     // Override EnterCombat to send the DoAction to the helper
     void EnterCombat(Unit *pAttacker) 
     {
+        pInstance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+
         if (Creature* pGarajal = GetGarajal(me))
         {
             if (pGarajal->AI())
@@ -439,7 +441,6 @@ public:
             // boss since they can't move, which will result in useless
             // call to MoveChase. Anyway, I do not want to recode this
             // function now.
-            DoZoneInCombat();
             InitStandartEvents();
             break;
 
@@ -488,6 +489,8 @@ public:
     
     void JustDied(Unit *pKiller)
     {
+        pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
         switch(me->GetEntry())
         {
         case BOSS_COUNCIL_FROST_KING_MALAKK:

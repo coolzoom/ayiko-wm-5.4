@@ -4437,13 +4437,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_DUMMY;
                     spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(85);
                     break;
-                case 1856:  // Vanish
-                    spellInfo->Effects[1].TriggerSpell = 131368;
-                    spellInfo->Effects[0].Effect = SPELL_EFFECT_SANCTUARY;
-                    break;
-                case 131369:// Vanish - Improved Stealth
-                    spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(27); // 3s
-                    break;
                 case 116784:// Wildfire Spark - Boss Feng
                     spellInfo->Effects[0].TargetA = TARGET_UNIT_TARGET_ENEMY;
                     spellInfo->Effects[0].TargetB = 0;

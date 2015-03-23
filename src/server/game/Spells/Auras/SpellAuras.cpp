@@ -2078,10 +2078,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             case SPELLFAMILY_ROGUE:
                 switch (GetId())
                 {
-                    // Remove Vanish on stealth remove
-                    case 1784:
-                    case 115191:
-                        target->RemoveAurasDueToSpell(131369, target->GetGUID());
+                    case 11327: // Cast Stealth on vanish removal
+                        if (removeMode == AURA_REMOVE_BY_EXPIRE)
+                            target->CastSpell(target, 1784, true);
                         break;
                     // Nerve Strike - Apply debuff on Kidney Shot and Cheap Shot
                     case 408:

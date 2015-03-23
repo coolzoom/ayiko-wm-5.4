@@ -397,6 +397,8 @@ public:
     // other close creatures are still in combat.
     void Reset()
     {
+        pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
         if (Creature *pGarajal = GetGarajal(me))
         {
             if (pGarajal->AI())

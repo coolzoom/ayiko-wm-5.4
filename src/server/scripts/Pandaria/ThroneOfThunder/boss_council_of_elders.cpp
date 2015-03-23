@@ -4,7 +4,6 @@
 
 enum eCreatures
 {
-    NPC_QUICKSAND_STALKER                   = 662205, // Acts like an AT cause Blizzard messed everythin up in this fight...
     MOB_LIVING_SAND                         = 69153, // Summoned when Sandstorm hits a Quicksand
     MOB_BLESSED_LOA_SPIRIT                  = 69480, // Summoned by Mar'li, heals a councillor
     MOB_SHADOWED_LOA_SPIRIT                 = 69548, // Summoned by Mar'li, kills player
@@ -89,7 +88,8 @@ enum eSpells
     // Quicksand (fuckin AT)
     // Quicksand is an AT, but handling the spell with an AT is too complex... we'll use another mechanism,
     SPELL_QUICKSAND_PERIODIC_DAMAGES        = 136860, // Periodic damages to any target within 7 yards : we must handle apply / remove manually
-    SPELL_QUICKSAND_AT_VISUAL               = 137572, // Visual 
+    SPELL_QUICKSAND_AT_VISUAL               = 137572, // Visual
+    SPELL_QUICKSAND_AT_VISUAL_INIT          = 136851,
     SPELL_ENSNARED                          = 136878, // Slow player and stacks; when it reaches 5 stacks, player is Entrapped
     SPELL_ENTRAPPED                         = 136857, // Need to prevent second effect... so annoying
 
@@ -193,6 +193,7 @@ enum eEvents
     // Quicksand Stalker
     EVENT_QUICKSAND_PERIODIC                = 18, // This only handles apply of the Quicksand damages aura, which handle the rooting by itself
     EVENT_TRY_MERGE                         = 19, // Try merge event is used to merge Quicksand when they are summoend by others Quicksand (only scheduled once)
+    EVENT_ACTIVATE_SAND                     = 22,
     
     //===============================================
     // Garajal
@@ -387,6 +388,8 @@ public:
         events.Reset();
     }
 
+    EventMap darkPowerEvents;
+
     // Override Reset to reset the EventMap in one place and force
     // reset of the fight by sending DoAction to the helper.
     // Note: if one boss reset, every other boss need to reset. Otherwise,
@@ -394,6 +397,8 @@ public:
     // other close creatures are still in combat.
     void Reset()
     {
+        pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
         if (Creature *pGarajal = GetGarajal(me))
         {
             if (pGarajal->AI())
@@ -401,6 +406,7 @@ public:
         }
 
         events.Reset();
+        darkPowerEvents.Reset();
 
         me->setPowerType(POWER_ENERGY);
         me->SetMaxPower(POWER_ENERGY, 100);
@@ -414,6 +420,8 @@ public:
     // Override EnterCombat to send the DoAction to the helper
     void EnterCombat(Unit *pAttacker) 
     {
+        pInstance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+
         if (Creature* pGarajal = GetGarajal(me))
         {
             if (pGarajal->AI())
@@ -435,7 +443,6 @@ public:
             // boss since they can't move, which will result in useless
             // call to MoveChase. Anyway, I do not want to recode this
             // function now.
-            DoZoneInCombat();
             InitStandartEvents();
             break;
 
@@ -484,6 +491,8 @@ public:
     
     void JustDied(Unit *pKiller)
     {
+        pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
         switch(me->GetEntry())
         {
         case BOSS_COUNCIL_FROST_KING_MALAKK:
@@ -605,7 +614,8 @@ protected:
     void InitDarkPower()
     {
         events.Reset();
-        events.ScheduleEvent(EVENT_DARK_POWER, 1 * IN_MILLISECONDS);
+        darkPowerEvents.Reset();
+        darkPowerEvents.ScheduleEvent(EVENT_DARK_POWER, 1000);
     }
     
     uint32 GetPowerTimer() const
@@ -641,19 +651,29 @@ public:
         // No need to override Reset since there is nothing to reset here
         // No need to override EnterCombat since there is nothing to do here
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(const uint32 uiDiff)
         {
-            if(!UpdateVictim())
+            if (!UpdateVictim())
                 return;
 
+            darkPowerEvents.Update(uiDiff);
             events.Update(uiDiff);
 
-            if(me->HasUnitState(UNIT_STATE_CASTING))
+            switch (darkPowerEvents.ExecuteEvent())
+            {
+            case EVENT_DARK_POWER:
+                DoCast(me, SPELL_DARK_POWER, true);
+                ++uiDarkPowerCount;
+                darkPowerEvents.ScheduleEvent(EVENT_DARK_POWER, 1 * IN_MILLISECONDS);
+                break;
+            }
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
-            while(uint32 uiEventId = events.ExecuteEvent())
+            while (uint32 uiEventId = events.ExecuteEvent())
             {
-                switch(uiEventId)
+                switch (uiEventId)
                 {
                 case EVENT_FRIGID_ASSAULT:
                     DoCast(me, SPELL_FRIGID_ASSAULT);
@@ -671,15 +691,9 @@ public:
                     events.ScheduleEvent(EVENT_FROSTBITE, urand(8, 16) * IN_MILLISECONDS);
                     break;
 
-                case EVENT_DARK_POWER:
-                    DoCastAOE(SPELL_DARK_POWER);
-                    ++uiDarkPowerCount;
-                    events.ScheduleEvent(EVENT_DARK_POWER, 1 * IN_MILLISECONDS);
-                    break;
-                    
                 case EVENT_INCREASE_POWER:
                     me->ModifyPower(POWER_ENERGY, 3);
-                    if(me->GetPower(POWER_ENERGY) < 100)
+                    if (me->GetPower(POWER_ENERGY) < 100)
                         events.ScheduleEvent(EVENT_INCREASE_POWER, GetPowerTimer());
                     else
                         DoAction(ACTION_DARK_POWER);
@@ -744,19 +758,29 @@ public:
             CouncilBaseAI::Reset(); // Finalize Reset
         }
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(const uint32 uiDiff)
         {
-            if(!UpdateVictim())
+            if (!UpdateVictim())
                 return;
 
+            darkPowerEvents.Update(uiDiff);
             events.Update(uiDiff);
 
-            if(me->HasUnitState(UNIT_STATE_CASTING))
+            switch (darkPowerEvents.ExecuteEvent())
+            {
+            case EVENT_DARK_POWER:
+                DoCast(me, SPELL_DARK_POWER, true);
+                ++uiDarkPowerCount;
+                darkPowerEvents.ScheduleEvent(EVENT_DARK_POWER, 1 * IN_MILLISECONDS);
+                break;
+            }
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
-            while(uint32 uiEventId = events.ExecuteEvent())
+            while (uint32 uiEventId = events.ExecuteEvent())
             {
-                switch(uiEventId)
+                switch (uiEventId)
                 {
                 case EVENT_RECKLESS_CHARGE_PRE_PATH:
                 {
@@ -777,15 +801,9 @@ public:
                     // Handle next part in MovementInform.
                     break;
 
-                case EVENT_DARK_POWER:
-                    DoCastAOE(SPELL_DARK_POWER);
-                    ++uiDarkPowerCount;
-                    events.ScheduleEvent(EVENT_DARK_POWER, 1 * IN_MILLISECONDS);
-                    break;
-                    
                 case EVENT_INCREASE_POWER:
                     me->ModifyPower(POWER_ENERGY, 3);
-                    if(me->GetPower(POWER_ENERGY) < 100)
+                    if (me->GetPower(POWER_ENERGY) < 100)
                         events.ScheduleEvent(EVENT_INCREASE_POWER, GetPowerTimer());
                     else
                         DoAction(ACTION_DARK_POWER);
@@ -920,17 +938,27 @@ public:
         {
         }
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(const uint32 uiDiff)
         {
             if(!UpdateVictim())
                 return;
 
+            darkPowerEvents.Update(uiDiff);
             events.Update(uiDiff);
 
-            if(me->HasUnitState(UNIT_STATE_CASTING))
+            switch (darkPowerEvents.ExecuteEvent())
+            {
+            case EVENT_DARK_POWER:
+                DoCast(me, SPELL_DARK_POWER, true);
+                ++uiDarkPowerCount;
+                darkPowerEvents.ScheduleEvent(EVENT_DARK_POWER, 1 * IN_MILLISECONDS);
+                break;
+            }
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
-            while(uint32 uiEventId = events.ExecuteEvent())
+            while (uint32 uiEventId = events.ExecuteEvent())
             {
                 switch(uiEventId)
                 {
@@ -958,12 +986,12 @@ public:
                     if (!playerList.empty())
                     {
                         if (Player *pPlayer = Trinity::Containers::SelectRandomContainerElement<std::list<Player*>>(playerList))
-                            me->SummonCreature(NPC_QUICKSAND_STALKER, *pPlayer);
+                            me->SummonCreature(MOB_LIVING_SAND, *pPlayer);
                     }
                     else if (!tempList.empty())
                     {
                         if (Player *pPlayer = Trinity::Containers::SelectRandomContainerElement<std::list<Player*>>(tempList))
-                            me->SummonCreature(NPC_QUICKSAND_STALKER, *pPlayer);
+                            me->SummonCreature(MOB_LIVING_SAND, *pPlayer);
                     }
 
                     events.ScheduleEvent(EVENT_QUICKSAND, urand(20, 25) * IN_MILLISECONDS);
@@ -975,12 +1003,6 @@ public:
                     Talk(TALK_SUL_SANDSTORM);
                     DoCastAOE(SPELL_SAND_STORM);
                     events.ScheduleEvent(EVENT_SANDSTORM, 40 * IN_MILLISECONDS);
-                    break;
-
-                case EVENT_DARK_POWER:
-                    DoCastAOE(SPELL_DARK_POWER);
-                    ++uiDarkPowerCount;
-                    events.ScheduleEvent(EVENT_DARK_POWER, 1 * IN_MILLISECONDS);
                     break;
                     
                 case EVENT_INCREASE_POWER:
@@ -1013,6 +1035,7 @@ public:
             events.Reset();
 
             events.ScheduleEvent(EVENT_SAND_BOLT, 5 * IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_QUICKSAND, 7 * IN_MILLISECONDS);
             events.ScheduleEvent(EVENT_SANDSTORM, 10 * IN_MILLISECONDS);
         }
     };
@@ -1048,19 +1071,29 @@ public:
             CouncilBaseAI::Reset();
         }
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(const uint32 uiDiff)
         {
-            if(!UpdateVictim())
+            if (!UpdateVictim())
                 return;
 
+            darkPowerEvents.Update(uiDiff);
             events.Update(uiDiff);
 
-            if(me->HasUnitState(UNIT_STATE_CASTING))
+            switch (darkPowerEvents.ExecuteEvent())
+            {
+            case EVENT_DARK_POWER:
+                DoCast(me, SPELL_DARK_POWER, true);
+                ++uiDarkPowerCount;
+                darkPowerEvents.ScheduleEvent(EVENT_DARK_POWER, 1 * IN_MILLISECONDS);
+                break;
+            }
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
-            while(uint32 uiEventId = events.ExecuteEvent())
+            while (uint32 uiEventId = events.ExecuteEvent())
             {
-                switch(uiEventId)
+                switch (uiEventId)
                 {
                 case EVENT_WRATH_OF_THE_LOA:
                     if(Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM)) // Target is TARGET_UNIT_ENEMY
@@ -1070,18 +1103,18 @@ public:
 
                 case EVENT_BLESSED_LOA_SPIRIT:
                     // Check that we are not the only left councillor (otherwise it would be cheaty)
-                    for(uint8 i = 0; i < 3; ++i)
+                    for (uint8 i = 0; i < 3; ++i)
                     {
-                        if(Creature *pCouncillor = GetBossByEntry(uiBossEntries[i], me))
+                        if (Creature *pCouncillor = GetBossByEntry(uiBossEntries[i], me))
                         {
-                            if(pCouncillor->IsAlive())
+                            if (pCouncillor->IsAlive())
                             {
                                 // Select a target now
                                 std::list<Creature*> councillors = { GetFrostKingMalakk(me), GetKazrajin(me), GetSulTheSandcrawler(me) };
                                 councillors.remove_if([](Creature const* pCouncil) -> bool { return pCouncil->isDead(); });
-                                councillors.sort([](Creature const* first, Creature const* second) -> bool { return first->GetHealthPct() < second->GetHealthPct() ;});
+                                councillors.sort([](Creature const* first, Creature const* second) -> bool { return first->GetHealthPct() < second->GetHealthPct(); });
 
-                                if(councillors.front())
+                                if (councillors.front())
                                     uiBlessedLoaSpiritBossGUIDs.push_back(councillors.front()->GetGUID());
 
                                 // Cast after having init the list to be sure the guid has been set
@@ -1141,12 +1174,6 @@ public:
                 case EVENT_TWISTED_FATE:
                     DoCastAOE(SPELL_TWISTED_FATE); // Automatically handle target selection in the SpellScript
                     events.ScheduleEvent(EVENT_TWISTED_FATE, urand(10, 20) * IN_MILLISECONDS);
-                    break;
-
-                case EVENT_DARK_POWER:
-                    DoCastAOE(SPELL_DARK_POWER);
-                    ++uiDarkPowerCount;
-                    events.ScheduleEvent(EVENT_DARK_POWER, 1 * IN_MILLISECONDS);
                     break;
                     
                 case EVENT_INCREASE_POWER:
@@ -1379,7 +1406,7 @@ public:
             events.ScheduleEvent(EVENT_SUMMON_SOUL, 3 * IN_MILLISECONDS);
         }
 
-        void DoAction(int32 iAction)
+        void DoAction(const int32 iAction)
         {
             switch (iAction)
             {
@@ -1414,7 +1441,6 @@ public:
 
         inline void DespawnCreatures() const
         {
-            DespawnCreaturesByEntry(NPC_QUICKSAND_STALKER);
             DespawnCreaturesByEntry(MOB_LIVING_SAND);
             DespawnCreaturesByEntry(MOB_BLESSED_LOA_SPIRIT);
             DespawnCreaturesByEntry(MOB_SHADOWED_LOA_SPIRIT);
@@ -1431,7 +1457,7 @@ public:
                 pMinion->DespawnOrUnsummon();
         }
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(const uint32 uiDiff)
         {
             if (events.Empty())
                 return;
@@ -1684,162 +1710,6 @@ public:
     }
 };
 
-
-// Quicksand stalker AI
-class mob_quicksand_stalker : public CreatureScript
-{
-public:
-    mob_quicksand_stalker() : CreatureScript("mob_quicksand_stalker") { }
-
-    class mob_quicksand_stalker_AI : public ScriptedAI
-    {
-    public:
-        mob_quicksand_stalker_AI(Creature *pCreature) :
-            ScriptedAI(pCreature), pInstance(pCreature->GetInstanceScript()), uiMergeCount(0)
-        {
-            events.Reset();
-            me->SetReactState(REACT_PASSIVE);
-        }
-
-        void IsSummonedBy(Unit *pSummoner)
-        {
-            DoCast(me, SPELL_QUICKSAND_AT_VISUAL);
-            if(IsHeroic())
-            {
-                if(me->FindNearestCreature(NPC_QUICKSAND_STALKER, 7.0f) == pSummoner) // Check 7.0f, because uiMergeCount has not been set yet
-                {
-                    // Schedule time must be less than quicksand periodic event timer,
-                    // otherwise we could root player before merging... quite annoying.
-                    events.ScheduleEvent(EVENT_TRY_MERGE, 300);
-                }
-                else
-                {
-                    // Try to merge first
-                    Merge();
-                }
-            }
-            events.ScheduleEvent(EVENT_QUICKSAND_PERIODIC, 500);
-        }
-
-        void DoAction(int32 iAction)
-        {
-            switch (iAction)
-            {
-            case ACTION_CREATE_LIVING_SAND:
-                if (Creature *pLivingSand = me->SummonCreature(MOB_LIVING_SAND, *me))
-                {
-                    me->RemoveAllAuras();
-                    me->DespawnOrUnsummon(2000);
-                    pLivingSand->SetInCombatWithZone();
-                }
-                break;
-
-            default:
-                break;
-            }
-        }
-
-        void UpdateAI(uint32 uiDiff)
-        {
-            events.Update(uiDiff);
-
-            while(uint32 uiEventId = events.ExecuteEvent())
-            {
-                switch(uiEventId)
-                {
-                case EVENT_QUICKSAND_PERIODIC:
-                {
-                    std::list<Player*> playerList;
-                    me->GetPlayerListInGrid(playerList, 7.0f + 7.0f * uiMergeCount);
-
-                    for(Player *pPlayer: playerList)
-                    {
-                        if(!pPlayer->HasAura(SPELL_QUICKSAND_PERIODIC_DAMAGES, me->GetGUID())) // Caster is relevant here I think cause aura cannot stack
-                            DoCast(pPlayer, SPELL_QUICKSAND_PERIODIC_DAMAGES); // Handle the root and cie in the AuraScript
-                    }
-
-                    events.ScheduleEvent(EVENT_QUICKSAND_PERIODIC, 500);
-                    break;
-                }
-
-                case EVENT_TRY_MERGE:
-                    Merge();
-                    break;
-
-                default:
-                    break;
-                }
-            }
-        }
-
-        uint32 GetData(uint32 uiIndex)
-        {
-            if(uiIndex == DATA_QUICKSAND_MERGE_COUNT)
-                return uiMergeCount;
-
-            return 0;
-        }
-
-    private:
-        EventMap        events;
-        InstanceScript  *pInstance;
-
-        uint32          uiMergeCount;
-
-        // Helper function to merge the Quicksands in Heroic
-        void Merge()
-        {
-            /* In Heroic mode, when two Quicksands are overlaping (the distance between
-             * the two stalkers is lower than 7 yards), they merge, resulting in a big
-             * Quicksand appearing. I don't know the formula Blizzard used to do this,
-             * and I never saw it appear on a video, so I will handle it this way :
-             *
-             * The summoning position is the middle between the two stalkers. We will summon
-             * a stalker and set it's uiMergeCount to the sum of the uiMergeCount of the two
-             * merging Quicksands. Then, we will increase it's scale by this number.
-             *
-             * Exemple: we have a Quicksand A with uiMergeCount = 1 (meaning it merged only once)
-             * and this (the this pointer, so this class) one is created let's sat 6 yards from
-             * A stalker. We compute the middle position and summon a new Quicksand, we set it's
-             * uiMergeCount to this->uiMergeCount (0) + A->uiMergeCount (1) + 1. And then we
-             * update the scale.
-             *
-             * Note: we will not handle multi merging. It would be too complicated, so we will
-             * merge with the closest quicksand.
-             */
-
-            Creature *pClosestQuicksand = me->FindNearestCreature(NPC_QUICKSAND_STALKER, 7.0f + 7.0f * uiMergeCount); // Use uiMergeCount to compute correct radius
-
-            if(pClosestQuicksand)
-            {
-                float fMiddleX = (me->GetPositionX() + pClosestQuicksand->GetPositionX()) / 2.0f;
-                float fMiddleY = (me->GetPositionY() + pClosestQuicksand->GetPositionY()) / 2.0f;
-                float fZ = me->GetPositionZ();
-
-                if(Creature *pNewQuicksand = me->SummonCreature(NPC_QUICKSAND_STALKER, fMiddleX, fMiddleY, fZ))
-                {
-                    if(mob_quicksand_stalker_AI* pNewQuicksandAI = dynamic_cast<mob_quicksand_stalker_AI*>(pNewQuicksand->AI()))
-                    {
-                        // We are manipulating an object of the same type, it allows access to the private scope
-                        pNewQuicksandAI->uiMergeCount = uiMergeCount + 1;
-                        pNewQuicksand->SetObjectScale(pNewQuicksand->GetFloatValue(OBJECT_FIELD_SCALE_X) * pNewQuicksandAI->uiMergeCount);
-
-                        // Remove self and other
-                        pClosestQuicksand->DisappearAndDie();
-                        me->DisappearAndDie();
-                    }
-                }
-            }
-        }
-    };
-
-    CreatureAI *GetAI(Creature *pCreature) const
-    {
-        return new mob_quicksand_stalker_AI(pCreature);
-    }
-};
-
-
 // Living Sand AI
 class mob_living_sand : public CreatureScript
 {
@@ -1854,23 +1724,119 @@ public:
         {
         }
 
+        void IsSummonedBy(Unit *pSummoner) override
+        {
+            me->AddAura(SPELL_QUICKSAND_AT_VISUAL_INIT, me);
+            Initialize();
+        }
+
+        void Reset() override
+        {
+        }
+
+        void EnterEvadeMode() override
+        {
+        }
+        
+        void Initialize()
+        {
+            me->RemoveAurasDueToSpell(SPELL_FORTIFIED);
+            me->SetHealth(me->GetMaxHealth());
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
+            me->GetMotionMaster()->MovementExpired();
+            me->GetMotionMaster()->MoveIdle();
+            events.ScheduleEvent(EVENT_QUICKSAND_PERIODIC, 500);
+        }
+
         void DoAction(const int32 iAction) override
         {
             switch(iAction)
             {
-            case ACTION_FORTIFY:
-                DoCast(me, SPELL_FORTIFIED);
+            case ACTION_CREATE_LIVING_SAND:
+                if (!me->HasAura(SPELL_QUICKSAND_AT_VISUAL) && !me->HasAura(SPELL_QUICKSAND_AT_VISUAL_INIT))
+                {
+                    DoCast(me, SPELL_FORTIFIED, true);
+                }
+                else
+                {
+                    me->RemoveAura(SPELL_QUICKSAND_AT_VISUAL_INIT, 0, 0, AURA_REMOVE_BY_EXPIRE);
+                    me->RemoveAura(SPELL_QUICKSAND_AT_VISUAL, 0, 0, AURA_REMOVE_BY_EXPIRE);
+                    me->RemoveAllAuras();
+                    events.ScheduleEvent(EVENT_ACTIVATE_SAND, 4000);
+                    events.CancelEvent(EVENT_QUICKSAND_PERIODIC);
+                }
                 break;
-
             default:
                 break;
             }
         }
 
-        void JustDied(Unit *pKiller) override
+        void UpdateAI(const uint32 uiDiff) override
         {
-            if (Creature* pSul = GetSulTheSandcrawler(me))
-                pSul->SummonCreature(NPC_QUICKSAND_STALKER, *me);
+            events.Update(uiDiff);
+
+            while (uint32 uiEventId = events.ExecuteEvent())
+            {
+                switch (uiEventId)
+                {
+                case EVENT_QUICKSAND_PERIODIC:
+                {
+                    std::list<Player*> playerList;
+                    me->GetPlayerListInGrid(playerList, 100.f);
+
+                    for (Player *pPlayer : playerList)
+                    {
+                        if (pPlayer->GetExactDist2d(me) < (7.4f + me->GetFloatValue(UNIT_FIELD_BOUNDINGRADIUS)))
+                        {
+                            if (Aura* pAura = pPlayer->GetAura(SPELL_QUICKSAND_PERIODIC_DAMAGES, me->GetGUID()))
+                            {
+                                pAura->RefreshDuration(false);
+                            }
+                            else
+                                me->AddAura(SPELL_QUICKSAND_PERIODIC_DAMAGES, pPlayer);
+                        }
+                        else
+                            pPlayer->RemoveAura(SPELL_QUICKSAND_PERIODIC_DAMAGES, me->GetGUID(), 0, AURA_REMOVE_BY_EXPIRE);
+                            // Handle the root and cie in the AuraScript
+                    }
+
+                    events.ScheduleEvent(EVENT_QUICKSAND_PERIODIC, 500);
+                }
+                    break;
+                case EVENT_ACTIVATE_SAND:
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
+                    if (!me->IsInCombat())
+                        DoZoneInCombat(me, 100.f);
+                    else if (me->GetVictim())
+                        me->GetMotionMaster()->MoveChase(me->GetVictim());
+                    else if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                        AttackStart(pTarget);
+                    break;
+                }
+            }
+
+            if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE) || !UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+        
+        void DamageTaken(Unit* pDealer, uint32& uiDamage)
+        {
+            if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
+            {
+                uiDamage = 0;
+                return;
+            }
+
+            if (uiDamage >= me->GetHealth())
+            {
+                uiDamage = 0;
+                DoCast(me, SPELL_QUICKSAND_AT_VISUAL, true);
+                Initialize();
+            }
         }
 
     private:
@@ -2342,7 +2308,7 @@ public:
     class mob_twisted_fate_AI : public ScriptedAI
     {
     public:
-        mob_twisted_fate_AI(Creature *pCreature):
+        mob_twisted_fate_AI(Creature *pCreature) :
             ScriptedAI(pCreature), pInstance(pCreature->GetInstanceScript())
         {
             me->SetReactState(REACT_PASSIVE);
@@ -2352,28 +2318,28 @@ public:
         void IsSummonedBy(Unit *pSummoner)
         {
             Creature *pHelper = ObjectAccessor::GetCreature(*me, pInstance->GetData64(NPC_TWISTED_FATE_HELPER));
-            if(!pHelper)
+            if (!pHelper)
             {
                 me->DisappearAndDie();
                 return;
             }
 
             TwistedFateHelperAI *pHelperAI = dynamic_cast<TwistedFateHelperAI*>(pHelper->AI());
-            if(!pHelperAI)
+            if (!pHelperAI)
             {
                 me->DisappearAndDie();
                 return;
             }
 
-            switch(me->GetEntry())
+            switch (me->GetEntry())
             {
-            // Create a new TwistedFate_t
+                // Create a new TwistedFate_t
             case MOB_TWISTED_FATE_FIRST:
                 pHelperAI->AddTwistedFate(new TwistedFate_t(pSummoner ? pSummoner->GetGUID() : uint64(0), me->GetGUID()));
                 DoCastAOE(SPELL_TWISTED_FATE_FORCE_SUMMON_SECOND); // Force the most distant player to summon the second twisted fate
                 break;
 
-            // Finalize it with the second npc and launch everything
+                // Finalize it with the second npc and launch everything
             case MOB_TWISTED_FATE_SECOND:
                 pHelperAI->Link(pSummoner ? pSummoner->GetGUID() : uint64(0), me->GetGUID());
                 break;
@@ -2382,7 +2348,7 @@ public:
 
         void SetGUID(uint64 uiGuid, int32 uiIndex)
         {
-            if(uiIndex == DATA_TWISTED_FATE_GUID)
+            if (uiIndex == DATA_TWISTED_FATE_GUID)
                 uiOtherTwistedFateGuid = uiGuid;
         }
 
@@ -2390,18 +2356,18 @@ public:
         {
             // Do not do something wierd when the other is dead => free memory
             // of the helper.
-            if(bOtherTwistedFateDied)
+            if (bOtherTwistedFateDied)
             {
-                if(Creature *pHelper = ObjectAccessor::GetCreature(*me, pInstance->GetData64(NPC_TWISTED_FATE_HELPER)))
+                if (Creature *pHelper = ObjectAccessor::GetCreature(*me, pInstance->GetData64(NPC_TWISTED_FATE_HELPER)))
                 {
-                    if(TwistedFateHelperAI *pHelperAI = dynamic_cast<TwistedFateHelperAI*>(pHelper->AI()))
+                    if (TwistedFateHelperAI *pHelperAI = dynamic_cast<TwistedFateHelperAI*>(pHelper->AI()))
                         pHelperAI->Unlink(me->GetGUID());
                 }
             }
             else
             {
                 // When a Twisted Fate dies, the other stops and then begins to cast an AOE every 3 seconds
-                if(Creature *pOther = ObjectAccessor::GetCreature(*me, uiOtherTwistedFateGuid))
+                if (Creature *pOther = ObjectAccessor::GetCreature(*me, uiOtherTwistedFateGuid))
                     pOther->AI()->DoAction(ACTION_OTHER_TWISTED_FATE_DIED);
             }
 
@@ -2409,18 +2375,18 @@ public:
 
         uint32 GetData(uint32 uiIndex)
         {
-            if(uiIndex == DATA_TWISTED_FATE_OTHER_DIED)
+            if (uiIndex == DATA_TWISTED_FATE_OTHER_DIED)
                 return (uint32)bOtherTwistedFateDied;
 
             return 0;
         }
 
-        void DoAction(int32 iAction)
+        void DoAction(const int32 iAction)
         {
-            switch(iAction)
+            switch (iAction)
             {
-            // Stop moving and set bOtherTwistedFateDied to true so the aura script will be able
-            // to compute the amount of damages correctly.
+                // Stop moving and set bOtherTwistedFateDied to true so the aura script will be able
+                // to compute the amount of damages correctly.
             case ACTION_OTHER_TWISTED_FATE_DIED:
                 me->StopMoving();
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
@@ -2458,20 +2424,20 @@ class spell_garajal_possessed : public SpellScriptLoader
 {
 public:
     spell_garajal_possessed() : SpellScriptLoader("spell_garajal_possessed") { }
-    
+
     class spell_garajal_possessed_AuraScript : public AuraScript
     {
         PrepareAuraScript(spell_garajal_possessed_AuraScript)
-        
+
         void HandleApply(AuraEffect const* pAuraEffect, AuraEffectHandleModes eMode)
         {
-            if(GetOwner() && GetOwner()->ToCreature())
+            if (GetOwner() && GetOwner()->ToCreature())
             {
                 Creature *pOwner = GetOwner()->ToCreature();
                 pOwner->AI()->DoAction(ACTION_SET_POSSESSED);
             }
         }
-        
+
         void HandleRemove(AuraEffect const* pAuraEffect, AuraEffectHandleModes eMode)
         {
             if (GetOwner())
@@ -2480,7 +2446,7 @@ public:
                     GetOwner()->ToCreature()->AI()->DoAction(ACTION_SET_UNPOSSESSED);
             }
         }
-        
+
         /*void HandlePeriodic(AuraEffect const* pAuraEffect)
         {
             if(!GetOwner())
@@ -2498,12 +2464,12 @@ public:
         
         void Register()
         {
-            OnEffectApply       += AuraEffectApplyFn(spell_garajal_possessed_AuraScript::HandleApply, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
-            OnEffectRemove      += AuraEffectRemoveFn(spell_garajal_possessed_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            OnEffectApply += AuraEffectApplyFn(spell_garajal_possessed_AuraScript::HandleApply, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            OnEffectRemove += AuraEffectRemoveFn(spell_garajal_possessed_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
             // OnEffectPeriodic    += AuraEffectPeriodicFn(spell_garajal_possessed_AuraScript::HandlePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
         }
     };
-    
+
     AuraScript *GetAuraScript() const
     {
         return new spell_garajal_possessed_AuraScript();
@@ -2524,11 +2490,11 @@ public:
         void HandleEffectApply(AuraEffect const* pAuraEffect, AuraEffectHandleModes eMode)
         {
             Player *pOwner;
-            if(GetOwner() && GetOwner()->ToPlayer())
+            if (GetOwner() && GetOwner()->ToPlayer())
             {
                 pOwner = GetOwner()->ToPlayer();
                 // Stun when stacks reach 15
-                if(GetStackAmount() == 15)
+                if (GetStackAmount() == 15)
                 {
                     pOwner->CastSpell(pOwner, SPELL_FRIGID_ASSAULT_STUN, true);
                     Remove(AURA_REMOVE_BY_DEFAULT);
@@ -2599,11 +2565,11 @@ public:
 
         void HandlePeriodic(AuraEffect const* pAuraEffect)
         {
-            if(!GetOwner())
+            if (!GetOwner())
                 return;
 
             // Stack amount can be reduced when players are standing close to the owner
-            if(Player *pOwner = GetOwner()->ToPlayer())
+            if (Player *pOwner = GetOwner()->ToPlayer())
             {
                 std::list<Player*> playerList;
                 pOwner->GetPlayerListInGrid(playerList, 4.0f);
@@ -2613,15 +2579,15 @@ public:
 
                 uint32 uiReduceAmount = 0;
 
-                switch(pOwner->GetMap()->GetDifficulty())
+                switch (pOwner->GetMap()->GetDifficulty())
                 {
-                // In 25-man raid, the amount is 1 * number of players within 4 yards
+                    // In 25-man raid, the amount is 1 * number of players within 4 yards
                 case MAN25_HEROIC_DIFFICULTY:
                 case MAN25_DIFFICULTY:
                     uiReduceAmount = playerList.size() > 4 ? 4 : playerList.size();
                     break;
 
-                // Otherwise it is 2 * number of players within 4 yards
+                    // Otherwise it is 2 * number of players within 4 yards
                 default:
                     uiReduceAmount = playerList.size() > 2 ? 4 : playerList.size() * 2;
                     break;
@@ -2662,22 +2628,22 @@ public:
         void SelectTarget(std::list<WorldObject*>& targets)
         {
             targets.clear();
-            if(Unit *pCaster = GetCaster())
+            if (Unit *pCaster = GetCaster())
             {
                 std::list<Player*> playerList;
                 pCaster->GetPlayerListInGrid(playerList, 500.0f);
-                
-                if(!playerList.empty())
+
+                if (!playerList.empty())
                     targets.push_back(Trinity::Containers::SelectRandomContainerElement(playerList));
             }
         }
-        
+
         // Handler to apply the visual
         void HandleOnHit(SpellEffIndex eEffIndex)
         {
-            if(Unit *pHit = GetHitUnit())
+            if (Unit *pHit = GetHitUnit())
             {
-                if(Unit *pCaster = GetCaster())
+                if (Unit *pCaster = GetCaster())
                 {
                     pHit->CastSpell(pHit, SPELL_FROSTBITE_SCREEN_EFFECT, true);
                     pCaster->CastSpell(pHit, SPELL_FROSTBITE_PERIODIC_DAMAGES, true);
@@ -2690,8 +2656,8 @@ public:
 
         void Register()
         {
-            OnObjectAreaTargetSelect    += SpellObjectAreaTargetSelectFn(spell_malakk_frostbite_SpellScript::SelectTarget, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
-            OnEffectHitTarget           += SpellEffectFn(spell_malakk_frostbite_SpellScript::HandleOnHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_malakk_frostbite_SpellScript::SelectTarget, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+            OnEffectHitTarget += SpellEffectFn(spell_malakk_frostbite_SpellScript::HandleOnHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
         }
     };
 
@@ -2741,13 +2707,13 @@ public:
                 SetHitDamage(pAura->GetStackAmount() * value);
             }
         }
-        
+
         void HandleOnCast()
         {
             // Cast Body Heat on heroic
-            if(Unit *pCaster = GetCaster())
+            if (Unit *pCaster = GetCaster())
             {
-                if(pCaster->GetMap()->IsHeroic())
+                if (pCaster->GetMap()->IsHeroic())
                     pCaster->CastSpell(pCaster, SPELL_BODY_HEAT, true);
             }
         }
@@ -2780,15 +2746,15 @@ public:
         void SelectTargets(std::list<WorldObject*>& targets)
         {
             std::list<Player*> playerList;
-            if(GetCaster())
+            if (GetCaster())
                 GetCaster()->GetPlayerListInGrid(playerList, 4.0f);
 
-            if(!playerList.empty() && playerList.size() > 1)
+            if (!playerList.empty() && playerList.size() > 1)
             {
                 targets.clear();
                 playerList.remove(GetCaster()->ToPlayer());
 
-                for(Player* iter : playerList)
+                for (Player* iter : playerList)
                     targets.push_back(iter);
             }
         }
@@ -2810,10 +2776,10 @@ public:
 
         void HandleEffectRemove(AuraEffect const* pAuraEffect, AuraEffectHandleModes eMode)
         {
-            if(!GetOwner())
+            if (!GetOwner())
                 return;
 
-            if(Player *pOwner = GetOwner()->ToPlayer())
+            if (Player *pOwner = GetOwner()->ToPlayer())
                 pOwner->CastSpell(pOwner, SPELL_CHILLED_TO_THE_BONE, true);
         }
 
@@ -2848,11 +2814,12 @@ public:
                 {
                     std::list<Player*> players;
                     GetPlayerListInGrid(players, pKazrajin, 100.f);
-                    
+
                     for (auto const pPlayer : players)
                     {
                         if (pPlayer->HasAura(SPELL_RECKLESS_CHARGE_FACE, pKazrajin->GetGUID()))
                         {
+                            pKazrajin->CastSpell(pKazrajin, SPELL_RECKLESS_CHARGE_SOUND, true);
                             pPlayer->RemoveAurasDueToSpell(SPELL_RECKLESS_CHARGE_FACE);
                             // Compute position of landing
                             float fDist = pKazrajin->GetExactDist2d(pPlayer) - 3.f; // Remove 5 yards to continue rolling
@@ -2865,8 +2832,8 @@ public:
                             for (uint8 i = 0; i < m_pointCount; ++i)
                             {
                                 float x, y;
-                                GetPositionWithDistInOrientation(pKazrajin, fDist - (i*3), fAngle, x, y);
-                                pKazrajin->CastSpell(x, y, pKazrajin->GetMap()->GetHeight(x, y, pKazrajin->GetPositionZ()+0.8f), SPELL_RECKLESS_CHARGE_GROUND_AT, true);
+                                GetPositionWithDistInOrientation(pKazrajin, fDist - (i * 3), fAngle, x, y);
+                                pKazrajin->CastSpell(x, y, pKazrajin->GetMap()->GetHeight(x, y, pKazrajin->GetPositionZ() + 0.8f), SPELL_RECKLESS_CHARGE_GROUND_AT, true);
                             }
 
                             if (pKazrajin->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
@@ -2967,24 +2934,24 @@ public:
 
         void HandleEffectApply(AuraEffect const* pAuraEffect, AuraEffectHandleModes eMode)
         {
-            if(!GetOwner())
+            if (!GetOwner())
                 return;
 
             // Stunned on aura apply
-            if(Creature *pOwner = GetOwner()->ToCreature())
+            if (Creature *pOwner = GetOwner()->ToCreature())
                 pOwner->SetControlled(true, UNIT_STATE_STUNNED);
         }
 
         void HandleOnProc(ProcEventInfo& rProcInfo)
         {
-            if(Unit *pCaster = rProcInfo.GetActor())
+            if (Unit *pCaster = rProcInfo.GetActor())
             {
-                if(!rProcInfo.GetDamageInfo())
+                if (!rProcInfo.GetDamageInfo())
                     return;
 
                 int32 uiDamages = rProcInfo.GetDamageInfo()->GetDamage() * 0.4f; // 40% of damages returned to the player
 
-                if(Unit *pVictim = rProcInfo.GetActionTarget())
+                if (Unit *pVictim = rProcInfo.GetActionTarget())
                 {
                     pVictim->CastCustomSpell(pCaster, SPELL_OVERLOAD_DAMAGES, &uiDamages, NULL, NULL, NULL, NULL, NULL, true);
                     pVictim->CastSpell(pCaster, SPELL_OVERLOAD_VISUAL, true);
@@ -2994,11 +2961,11 @@ public:
 
         void HandleEffectRemove(AuraEffect const* pAuraEffect, AuraEffectHandleModes eMode)
         {
-            if(!GetOwner())
+            if (!GetOwner())
                 return;
 
             // Unstunned on aura remove
-            if(Creature *pOwner = GetOwner()->ToCreature())
+            if (Creature *pOwner = GetOwner()->ToCreature())
                 pOwner->SetControlled(false, UNIT_STATE_STUNNED);
         }
 
@@ -3006,9 +2973,9 @@ public:
         {
             // Note: there is no stunning spell, I'm quite sure of that... even if
             // it is really wierd.
-            OnEffectApply   += AuraEffectApplyFn(spell_kazrajin_overload_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-            OnProc          += AuraProcFn(spell_kazrajin_overload_AuraScript::HandleOnProc);
-            OnEffectRemove  += AuraEffectRemoveFn(spell_kazrajin_overload_AuraScript::HandleEffectRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            OnEffectApply += AuraEffectApplyFn(spell_kazrajin_overload_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            OnProc += AuraProcFn(spell_kazrajin_overload_AuraScript::HandleOnProc);
+            OnEffectRemove += AuraEffectRemoveFn(spell_kazrajin_overload_AuraScript::HandleEffectRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
@@ -3031,20 +2998,20 @@ public:
 
         void HandleEffectApply(AuraEffect const* pAuraEffect, AuraEffectHandleModes eMode)
         {
-            if(!GetOwner())
+            if (!GetOwner())
                 return;
 
             // Stunned on aura apply
-            if(Creature *pOwner = GetOwner()->ToCreature())
+            if (Creature *pOwner = GetOwner()->ToCreature())
                 pOwner->SetControlled(true, UNIT_STATE_STUNNED);
         }
 
         void HandlePeriodic(AuraEffect const* pAuraEffect)
         {
-            if(!GetOwner())
+            if (!GetOwner())
                 return;
 
-            if(Creature *pOwner = GetOwner()->ToCreature())
+            if (Creature *pOwner = GetOwner()->ToCreature())
             {
                 int32 uiDamagesInPastSecs = (int32)pOwner->AI()->GetData(DATA_DAMAGES_PAST_SEC) * 0.05f; // 5% of damages taken in past sec
                 pOwner->AI()->DoAction(ACTION_RESET_DAMAGES);
@@ -3056,19 +3023,19 @@ public:
 
         void HandleEffectRemove(AuraEffect const* pAuraEffect, AuraEffectHandleModes eMode)
         {
-            if(!GetOwner())
+            if (!GetOwner())
                 return;
 
             // Unstunned on aura remove
-            if(Creature *pOwner = GetOwner()->ToCreature())
+            if (Creature *pOwner = GetOwner()->ToCreature())
                 pOwner->SetControlled(false, UNIT_STATE_STUNNED);
         }
 
         void Register()
         {
-            OnEffectApply       += AuraEffectApplyFn(spell_kazrajin_discharge_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
-            OnEffectPeriodic    += AuraEffectPeriodicFn(spell_kazrajin_discharge_AuraScript::HandlePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
-            OnEffectRemove      += AuraEffectRemoveFn(spell_kazrajin_discharge_AuraScript::HandleEffectRemove, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            OnEffectApply += AuraEffectApplyFn(spell_kazrajin_discharge_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_kazrajin_discharge_AuraScript::HandlePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+            OnEffectRemove += AuraEffectRemoveFn(spell_kazrajin_discharge_AuraScript::HandleEffectRemove, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
@@ -3091,66 +3058,44 @@ public:
 
         void HandlePeriodic(AuraEffect const* pAuraEffect)
         {
-            if(!GetOwner())
+            Unit* caster = GetCaster();
+            Unit* pTarget = GetOwner()->ToUnit();
+
+            if (!caster || !pTarget)
                 return;
 
-            // Handle Entrapped / Ensnared with the periodic effect, it's quite easier
-            if(Player *pOwner = GetOwner()->ToPlayer())
+            if (Aura* pAura = pTarget->GetAura(SPELL_ENSNARED))
             {
-                std::list<Creature*> quicksandsList;
-                pOwner->GetCreatureListWithEntryInGrid(quicksandsList, NPC_QUICKSAND_STALKER, 400.0f);
-                quicksandsList.sort(Trinity::DistanceCompareOrderPred(pOwner, true));
-
-                // Remove quicksands that are not so close
-                quicksandsList.remove_if([pOwner](Creature const* quicksand) -> bool
+                if (pAura->GetCasterGUID() == caster->GetGUID())
                 {
-                    if(CreatureAI *pAI = quicksand->AI())
+                    pAura->ModStackAmount(1);
+                    if (pAura->GetStackAmount() >= 5)
                     {
-                        float fRadius = pAI->GetData(DATA_QUICKSAND_MERGE_COUNT) * 7.0f + 7.0f;
-                        return pOwner->GetExactDist2d(quicksand) >= fRadius;
+                        caster->AddAura(SPELL_ENTRAPPED, pTarget);
+                        pAura->Remove();
                     }
-
-                    return false;
-                });
-
-                // If there are no quicksands near, remove aura and return (using Remove(AURA_REMOVE_BY_DEFAULT) to prevent crash, instead of pOwner->RemoveAura(GetId()))
-                if(quicksandsList.empty())
-                {
-                    Remove(AURA_REMOVE_BY_DEFAULT);
-                    return;
-                }
-
-                // Else, force player to cast spell on self, so aura won't stack in many instances
-                // (because target is TARGET_UNIT_CASTER, so annoying). Handle everything in here,
-                // because it is simpler, even if not really beautiful...
-                for(Creature *pQuicksand: quicksandsList)
-                {
-                    // Do not ensnare the player if it is already entrapped
-                    if(pOwner->HasAura(SPELL_ENTRAPPED))
-                        return;
-                    
-                    if(Aura *pEnsnared = pOwner->GetAura(SPELL_ENSNARED))
-                    {
-                        if(pEnsnared->GetStackAmount() < 4)
-                        {
-                            pOwner->CastSpell(pOwner, SPELL_ENSNARED, false);
-                        }
-                        else if(pEnsnared->GetStackAmount() == 4)
-                        {
-                            pOwner->CastSpell(pOwner, SPELL_ENSNARED, false); // Five stack
-                            pOwner->CastSpell(pOwner, SPELL_ENTRAPPED, false);
-                        }
-                        // No else, so we won't multi entrap the player
-                    }
-                    else
-                        pOwner->CastSpell(pOwner, SPELL_ENSNARED, true);
                 }
             }
+            else if (!pTarget->HasAura(SPELL_ENTRAPPED))
+                caster->AddAura(SPELL_ENSNARED, pTarget);
+        }
+
+        void HandleOnRemove(AuraEffect const* aurEff, AuraEffectHandleModes mode)
+        {
+            Unit* caster = GetCaster();
+            Unit* pTarget = GetOwner()->ToUnit();
+
+            if (!caster || !pTarget)
+                return;
+
+            pTarget->RemoveAura(SPELL_ENSNARED, caster->GetGUID());
+
         }
 
         void Register()
         {
             OnEffectPeriodic += AuraEffectPeriodicFn(spell_quicksand_periodic_AuraScript::HandlePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+            OnEffectRemove += AuraEffectRemoveFn(spell_quicksand_periodic_AuraScript::HandleOnRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
@@ -3192,6 +3137,10 @@ public:
 // Sandstorm
 class spell_sul_sandstorm : public SpellScriptLoader
 {
+    enum : uint32
+    {
+        SANDSTORM_VISUAL    = 136895
+    };
 public:
     spell_sul_sandstorm() : SpellScriptLoader("spell_sul_sandstorm") { }
 
@@ -3201,19 +3150,22 @@ public:
 
         void HandleAfterCast()
         {
-            if(Unit *pCaster = GetCaster())
+            if (Unit *pCaster = GetCaster())
             {
-                std::list<Creature*> quicksandsList;
+                pCaster->AddAura(SANDSTORM_VISUAL, pCaster);
+
+                //std::list<Creature*> quicksandsList;
                 std::list<Creature*> livingSandsList;
 
-                pCaster->GetCreatureListWithEntryInGrid(quicksandsList, NPC_QUICKSAND_STALKER, 500.0f);
+                //pCaster->GetCreatureListWithEntryInGrid(quicksandsList, NPC_QUICKSAND_STALKER, 500.0f);
                 pCaster->GetCreatureListWithEntryInGrid(livingSandsList, MOB_LIVING_SAND, 500.0f);
 
-                for(Creature *pQuicksand: quicksandsList)
-                    pQuicksand->AI()->DoAction(ACTION_CREATE_LIVING_SAND);
+                /*
+                for (Creature *pQuicksand : quicksandsList)
+                pQuicksand->AI()->DoAction(ACTION_CREATE_LIVING_SAND);*/
 
-                for(Creature *pLivingSand : livingSandsList)
-                    pLivingSand->AI()->DoAction(ACTION_FORTIFY);
+                for (Creature *pLivingSand : livingSandsList)
+                    pLivingSand->AI()->DoAction(ACTION_CREATE_LIVING_SAND);
             }
         }
 
@@ -3310,13 +3262,13 @@ public:
 
         void SelectTarget(std::list<WorldObject*>& targets)
         {
-            if(!GetCaster())
+            if (!GetCaster())
                 return;
 
             // Select one random player...
             std::list<Player*> playerList;
             GetCaster()->GetPlayerListInGrid(playerList, 500.0f);
-            if(!playerList.empty())
+            if (!playerList.empty())
             {
                 targets.clear();
                 targets.push_back(Trinity::Containers::SelectRandomContainerElement(playerList));
@@ -3348,7 +3300,7 @@ public:
 
         void SelectTarget(std::list<WorldObject*>& targets)
         {
-            if(!GetCaster())
+            if (!GetCaster())
                 return;
 
             // Find the fathest player
@@ -3356,7 +3308,7 @@ public:
             GetCaster()->GetPlayerListInGrid(playerList, 500.0f);
             playerList.sort(Trinity::DistanceCompareOrderPred(GetCaster(), false));
 
-            if(!playerList.empty() && playerList.front())
+            if (!playerList.empty() && playerList.front())
             {
                 targets.clear();
                 targets.push_back(playerList.front());
@@ -3381,21 +3333,21 @@ class spell_marli_twisted_fate_damages : public SpellScriptLoader
 {
 public:
     spell_marli_twisted_fate_damages() : SpellScriptLoader("spell_marli_twisted_fate_damages") { }
-    
+
     class spell_marli_twisted_fate_damages_AuraScript : public AuraScript
     {
         PrepareAuraScript(spell_marli_twisted_fate_damages_AuraScript)
-        
+
         void CalculateAmount(AuraEffect const* pAuraEffect, int32 &ruiAmount, bool &rbCanBeRecalculated)
         {
-            if(!GetOwner())
+            if (!GetOwner())
                 return;
-            
-            if(Creature *pOwner = GetOwner()->ToCreature())
+
+            if (Creature *pOwner = GetOwner()->ToCreature())
             {
-                if(Creature *pTwistedFateTarget = ObjectAccessor::GetCreature(*pOwner, pOwner->AI()->GetGUID(DATA_TWISTED_FATE_GUID)))
+                if (Creature *pTwistedFateTarget = ObjectAccessor::GetCreature(*pOwner, pOwner->AI()->GetGUID(DATA_TWISTED_FATE_GUID)))
                 {
-                    if(pTwistedFateTarget->IsAlive())
+                    if (pTwistedFateTarget->IsAlive())
                     {
                         // The max amount is 250000, but it reduces the father the twisted fates are from
                         // each other. Let's say the maximum dist between them is 55 yards. If we want this
@@ -3407,13 +3359,13 @@ public:
                 }
             }
         }
-        
+
         void Register()
         {
             DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_marli_twisted_fate_damages_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE);
         }
     };
-    
+
     AuraScript *GetAuraScript() const
     {
         return new spell_marli_twisted_fate_damages_AuraScript();
@@ -3435,23 +3387,23 @@ public:
         {
             if(Unit *pUnit = GetCaster())
             {
-                if(Creature *pCaster = pUnit->ToCreature())
+                if (Creature *pCaster = pUnit->ToCreature())
                 {
-                    if(CreatureAI *pAI = pCaster->AI())
+                    if (CreatureAI *pAI = pCaster->AI())
                     {
-                        uint32 const uiDarkPowerCount   = pAI->GetData(DATA_DARK_POWER_COUNT);
-                        int32 iCustomValue              = GetSpellInfo()->Effects[(uint32)eEffectIndex].BasePoints;
-                        
+                        uint32 const uiDarkPowerCount = pAI->GetData(DATA_DARK_POWER_COUNT);
+                        int32 iCustomValue = GetSpellInfo()->Effects[(uint32)eEffectIndex].BasePoints;
+
                         // Add 10% for each stack of Dark Power
-                        for(uint32 i = 0; i < uiDarkPowerCount; ++i)
+                        for (uint32 i = 0; i < uiDarkPowerCount; ++i)
                             iCustomValue *= 1.1f;
-                            
+
                         SetHitDamage(iCustomValue);
                     }
                 }
             }
         }
-        
+
         void Register()
         {
             OnEffectHitTarget += SpellEffectFn(spell_dark_power_SpellScript::HandleHitTarget, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
@@ -3470,32 +3422,32 @@ class spell_soul_fragment_target_selector : public SpellScriptLoader
 {
 public:
     spell_soul_fragment_target_selector() : SpellScriptLoader("spell_soul_fragment_target_selector") { }
-    
+
     class spell_soul_fragment_target_selector_SpellScript : public SpellScript
     {
         PrepareSpellScript(spell_soul_fragment_target_selector_SpellScript)
-        
+
         void SelectTarget(std::list<WorldObject*>& targets)
         {
-            if(!GetCaster())
+            if (!GetCaster())
                 return;
-                
+
             std::list<Player*> playerList;
             GetCaster()->GetPlayerListInGrid(playerList, 500.0f);
-            
-            if(!playerList.empty())
+
+            if (!playerList.empty())
             {
                 targets.clear();
                 targets.push_back(Trinity::Containers::SelectRandomContainerElement(playerList));
             }
         }
-        
+
         void Register()
         {
             OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_soul_fragment_target_selector_SpellScript::SelectTarget, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
         }
     };
-    
+
     SpellScript *GetSpellScript() const
     {
         return new spell_soul_fragment_target_selector_SpellScript();
@@ -3508,26 +3460,26 @@ class spell_soul_fragment_switcher : public SpellScriptLoader
 {
 public:
     spell_soul_fragment_switcher() : SpellScriptLoader("spell_soul_fragment_switcher") { }
-    
+
     class spell_soul_fragment_switcher_SpellScript : public SpellScript
     {
         PrepareSpellScript(spell_soul_fragment_switcher_SpellScript)
-        
+
         void HandleHitTarget(SpellEffIndex eEffIndex)
         {
-            if(Unit *pCaster = GetCaster())
+            if (Unit *pCaster = GetCaster())
             {
-                if(Aura *pSoulFragment = pCaster->GetAura(SPELL_SOUL_FRAGMENT_PERIODIC))
+                if (Aura *pSoulFragment = pCaster->GetAura(SPELL_SOUL_FRAGMENT_PERIODIC))
                     pSoulFragment->Remove();
             }
         }
-        
+
         void Register()
         {
             OnEffectHitTarget += SpellEffectFn(spell_soul_fragment_switcher_SpellScript::HandleHitTarget, EFFECT_0, SPELL_EFFECT_FORCE_CAST);
         }
     };
-    
+
     SpellScript *GetSpellScript() const
     {
         return new spell_soul_fragment_switcher_SpellScript();
@@ -3643,7 +3595,6 @@ void AddSC_boss_council_of_elders()
     new boss_high_priestess_marli();
     new mob_garajal();
     new mob_garajals_soul();
-    new mob_quicksand_stalker();
     new mob_living_sand();
     new mob_blessed_loa_spirit();
     new mob_shadowed_loa_spirit();

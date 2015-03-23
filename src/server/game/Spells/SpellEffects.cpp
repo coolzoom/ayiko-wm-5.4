@@ -1386,10 +1386,12 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
         switch (triggered_spell_id)
         {
             // Vanish (not exist)
-            case 131369:
+            case 18461:
             {
                 unitTarget->RemoveMovementImpairingAuras();
                 unitTarget->RemoveAurasByType(SPELL_AURA_MOD_STALKED);
+                if (unitTarget->GetCombatTimer())
+                    unitTarget->CombatStop();
 
                 // If this spell is given to an NPC, it must handle the rest using its own AI
                 if (unitTarget->GetTypeId() != TYPEID_PLAYER)
@@ -1406,7 +1408,7 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
                     unitTarget->ToPlayer()->RemoveSpellCooldown(115191, true);
 
                 if (!unitTarget->HasAura(108208))
-                    unitTarget->CastSpell(unitTarget, 1784, true);
+                    unitTarget->CastSpell(unitTarget, 11327, true);
                 else
                     unitTarget->CastSpell(unitTarget, 115191, true);
                 return;
@@ -5354,16 +5356,7 @@ void Spell::EffectSanctuary(SpellEffIndex /*effIndex*/)
 
     unitTarget->CombatStop(false);
 
-    // Vanish allows to remove all threat and cast regular stealth so other spells can be used
-    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->Id == 131369)
-    {
-        m_caster->ToPlayer()->RemoveAurasByType(SPELL_AURA_MOD_ROOT);
-        // Overkill
-        if (m_caster->ToPlayer()->HasSpell(58426))
-           m_caster->CastSpell(m_caster, 58427, true);
-    }
-    else if (!IsTriggered())
-        unitTarget->m_lastSanctuaryTime = getMSTime();
+    unitTarget->m_lastSanctuaryTime = getMSTime();
 }
 
 void Spell::EffectAddComboPoints(SpellEffIndex /*effIndex*/)

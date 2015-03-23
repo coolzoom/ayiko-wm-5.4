@@ -582,6 +582,7 @@ bool IsDiminishingReturnsGroupDurationLimited(DiminishingGroup group)
         case DIMINISHING_SLEEP:
         case DIMINISHING_LIMITONLY:
         case DIMINISHING_DOMINATE_MIND:
+        case DIMINISHING_BIND_ELEMENTAL:
             return true;
         default:
             return false;
@@ -3585,8 +3586,21 @@ void SpellMgr::LoadSpellCustomAttr()
             case 138658:    // Eruption Damage
                 spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENEMY);
                 break;
-            case 137390:
+            case 137390:    // Shadowed Loa Spirit
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_100_YARDS);
+                break;
+            case 137433:    // Control Horridon
+            case 137442:
+            case 137443:
+            case 137444:
+            case 136797:    // Dino Mending
+                spellInfo->Effects[EFFECT_1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
+                break;
+            case 136739:
+            case 136740:
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_SRC_CASTER);
+                spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENEMY);
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_40_YARDS);
                 break;
 #if 1 // Gilneas
                 case 68087:
@@ -4436,13 +4450,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[0].Effect = SPELL_EFFECT_APPLY_AURA;
                     spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_DUMMY;
                     spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(85);
-                    break;
-                case 1856:  // Vanish
-                    spellInfo->Effects[1].TriggerSpell = 131368;
-                    spellInfo->Effects[0].Effect = SPELL_EFFECT_SANCTUARY;
-                    break;
-                case 131369:// Vanish - Improved Stealth
-                    spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(27); // 3s
                     break;
                 case 116784:// Wildfire Spark - Boss Feng
                     spellInfo->Effects[0].TargetA = TARGET_UNIT_TARGET_ENEMY;

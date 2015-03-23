@@ -797,6 +797,12 @@ public:
                                 pBoss->SummonCreature(NPC_LIGHTNING_FISSURE, pCaster->GetPosition());
                         }
 
+                        if (pCaster->ToCreature())
+                        {
+                            pCaster->ToCreature()->RemoveAllAuras();
+                            pCaster->ToCreature()->DespawnOrUnsummon(2000);
+                            return;
+                        }
                         pCaster->Kill(pCaster);
                         return;
                     }
@@ -1251,7 +1257,6 @@ public:
             m_phase = 0;
             playerGuid = 0;
             me->SetFloatValue(OBJECT_FIELD_SCALE_X, me->GetFloatValue(OBJECT_FIELD_SCALE_X) * 1.4f);
-            InitializeStatue();
         }
 
         uint32 statueData;
@@ -1263,21 +1268,23 @@ public:
         {
             statueGuid = 0;
 
+            float fDist = 1000.f;
+
             if (InstanceScript* pInstance = me->GetInstanceScript())
             {
                 for (uint32 i = 0; i < 4; ++i)
                 {
                     if (GameObject* pGo = ObjectAccessor::GetGameObject(*me, pInstance->GetData64(GOB_MOGU_STATUE_1 + i)))
                     {
-                        TC_LOG_ERROR("scripts", "printing spawntimes, %u, %u", pGo->GetRespawnDelay(), me->GetRespawnDelay());
-                        if (pGo->GetRespawnDelay() == me->GetRespawnDelay())
+                        if (pGo->GetExactDist2d(me) < fDist)
+                        {
+                            fDist = pGo->GetExactDist2d(me);
                             statueGuid = pGo->GetGUID();
+                        }
                     }
                 }
             }
 
-  
-            TC_LOG_ERROR("scripts", "statue guid is %u", statueGuid);
         }
         
         void HandleStatue(bool active)
@@ -1309,6 +1316,7 @@ public:
         {
             if (iAction == ACTION_DESTROYED)
             {
+                InitializeStatue();
                 m_phase = 1;
                 events.ScheduleEvent(EVENT_WATER_BEAM, 4000);
                 events.ScheduleEvent(EVENT_SPAWN_WATER, 7000);

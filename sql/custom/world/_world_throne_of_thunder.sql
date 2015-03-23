@@ -122,7 +122,7 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Templates 
 REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`,`equipment_id`) VALUES 
-(70245, 0, 0, 0, 0, 0, 27510, 0, 0, 0, 'Training Dummy', '', '', 0, 1, 1, 4, 14, 14, 0, 1, 1.14286, 1, 3, 17839, 24339, 0, 51299, 1, 2000, 2000, 1, 131076, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 900, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 'npc_training_dummy', 17614,0);
+(70245, 0, 0, 0, 0, 0, 27510, 0, 0, 0, 'Training Dummy', '', '', 0, 1, 1, 4, 14, 14, 0, 1, 1.14286, 1, 3, 17839, 24339, 0, 51299, 1, 2000, 2000, 1, 131076, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 65000000, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 'npc_training_dummy', 17614,0);
 
 REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`,`equipment_id`) VALUES
 (69388, 0, 0, 0, 0, 0, 47507, 0, 0, 0, 'Zandalari Spear-Shaper', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11000, 12000, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 184, 1, 0, 0, 'npc_zandalari_spearshaper', 17614,69388),
@@ -581,6 +581,7 @@ REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Templates
 REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`,`equipment_id`) VALUES 
+(54020, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'General Purpose Bunny JMF (Look 2 - Flying, Huge AOI)', '', '', 0, 1, 1, 4, 35, 35, 0, 1, 1.14286, 1, 0, 1, 2, 0, 0, 4, 2000, 2000, 1, 0, 37750784, 0, 0, 0, 0, 0, 0, 1, 2, 0, 10, 1024, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 4, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 128, '', 16048,0),
 (69164, 0, 0, 0, 0, 0, 47378, 47263, 47379, 47264, 'Gurubashi Venom Priest', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 9.75, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 17614,69164),
 (69167, 0, 0, 0, 0, 0, 47442, 47443, 47444, 47445, 'Gurubashi Bloodlord', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 17614,69167),
 (69168, 0, 0, 0, 0, 0, 22307, 22308, 47335, 47336, 'Amani\'shi Flame Caster', '', '', 0, 91, 91, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 17614,69168),
@@ -882,6 +883,13 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
+-- Creature Auras
+DELETE FROM creature_template_aura WHERE entry = 54020 AND aura = 137126;
+INSERT INTO creature_template_aura VALUES
+(54020, 137126);
+/*---------------------------------------------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------------------------------------------*/
 -- Creature Equip
 REPLACE INTO `creature_equip_template` (`entry`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES 
 (69164, 95647, 0, 0),
@@ -897,7 +905,7 @@ REPLACE INTO `creature_equip_template` (`entry`, `itemEntry1`, `itemEntry2`, `it
 (69221, 92358, 0, 0),
 (69374, 94758, 0, 0),
 (70246, 0, 93755, 0),
-(70445, 95809, 0, 0);
+(70445, 95815, 0, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -1208,7 +1216,24 @@ INSERT INTO `creature` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMa
 (@CGUID+230, 70246, 1098, 0, 0, 248, 1, 0, 70246, 5426.55, 6061.12, 117.79, 2.63834, 1, 0, @CGUID+230, 393941, 0, 2, 0, 0, 0, 2048, 0, 0, NULL),
 
 (@CGUID+233, 662202, 1098, 0, 0, 248, 1, 0, 0, 5432.21, 5866.93, 235.962, 4.64324, 86400, 0, 0, 84, 0, 0, 0, 0, 33554432, 0, 0, 1, NULL),
-(@CGUID+234, 662206, 1098, 0, 0, 248, 1, 0, 0, 5431.36, 5812.71, 129.605, 1.56204, 86400, 0, 0, 436137, 0, 0, 0, 0, 33554432, 0, 0, 0, NULL);
+(@CGUID+234, 662206, 1098, 0, 0, 248, 1, 0, 0, 5431.36, 5812.71, 129.605, 1.56204, 86400, 0, 0, 436137, 0, 0, 0, 0, 33554432, 0, 0, 0, NULL),
+
+(@CGUID+235, 54020, 1098, 0, 0, 248, 1, 0, 0, 5520.22, 5665.73, 130.096, 2.33106, 86400, 0, 0, 84, 0, 0, 0, 0, 33554432, 0, 0, 0, NULL),
+(@CGUID+236, 54020, 1098, 0, 0, 248, 1, 0, 0, 5515.29, 5646.11, 130.089, 2.39389, 86400, 0, 0, 84, 0, 0, 0, 0, 33554432, 0, 0, 0, NULL),
+(@CGUID+237, 54020, 1098, 0, 0, 248, 1, 0, 0, 5539.28, 5671.98, 130.085, 2.39389, 86400, 0, 0, 84, 0, 0, 0, 0, 33554432, 0, 0, 0, NULL),
+(@CGUID+238, 54020, 1098, 0, 0, 248, 1, 0, 0, 5523.58, 5661.83, 147.39, 2.48814, 86400, 0, 0, 84, 0, 0, 0, 0, 33554432, 0, 0, 0, NULL),
+(@CGUID+239, 54020, 1098, 0, 0, 248, 1, 0, 0, 5519.11, 5843.02, 130.098, 3.95449, 86400, 0, 0, 84, 0, 0, 0, 0, 33554432, 0, 0, 0, NULL),
+(@CGUID+240, 54020, 1098, 0, 0, 248, 1, 0, 0, 5534.8, 5830.16, 130.078, 3.95449, 86400, 0, 0, 84, 0, 0, 0, 0, 33554432, 0, 0, 0, NULL),
+(@CGUID+241, 54020, 1098, 0, 0, 248, 1, 0, 0, 5505.88, 5861.82, 130.064, 3.95449, 86400, 0, 0, 84, 0, 0, 0, 0, 33554432, 0, 0, 0, NULL),
+(@CGUID+242, 54020, 1098, 0, 0, 248, 1, 0, 0, 5523.31, 5845.21, 147.404, 3.95449, 86400, 0, 0, 84, 0, 0, 0, 0, 33554432, 0, 0, 0, NULL),
+(@CGUID+243, 54020, 1098, 0, 0, 248, 1, 0, 0, 5345.6, 5841.22, 130.092, 5.5025, 86400, 0, 0, 84, 0, 0, 0, 0, 33554432, 0, 0, 0, NULL),
+(@CGUID+244, 54020, 1098, 0, 0, 248, 1, 0, 0, 5347.09, 5857.35, 130.098, 5.68078, 86400, 0, 0, 84, 0, 0, 0, 0, 33554432, 0, 0, 0, NULL),
+(@CGUID+245, 54020, 1098, 0, 0, 248, 1, 0, 0, 5324.4, 5835.66, 130.086, 5.18127, 86400, 0, 0, 84, 0, 0, 0, 0, 33554432, 0, 0, 0, NULL),
+(@CGUID+246, 54020, 1098, 0, 0, 248, 1, 0, 0, 5337.1, 5847.97, 147.401, 5.29437, 86400, 0, 0, 84, 0, 0, 0, 0, 33554432, 0, 0, 0, NULL),
+(@CGUID+247, 54020, 1098, 0, 0, 248, 1, 0, 0, 5343.59, 5664.15, 130.096, 0.606325, 86400, 0, 0, 84, 0, 0, 0, 0, 33554432, 0, 0, 0, NULL),
+(@CGUID+248, 54020, 1098, 0, 0, 248, 1, 0, 0, 5323.5, 5670.26, 130.085, 0.757122, 86400, 0, 0, 84, 0, 0, 0, 0, 33554432, 0, 0, 0, NULL),
+(@CGUID+249, 54020, 1098, 0, 0, 248, 1, 0, 0, 5349.94, 5642.27, 130.075, 0.757122, 86400, 0, 0, 84, 0, 0, 0, 0, 33554432, 0, 0, 0, NULL),
+(@CGUID+250, 54020, 1098, 0, 0, 248, 1, 0, 0, 5334.87, 5656.93, 147.402, 0.757122, 86400, 0, 0, 84, 0, 0, 0, 0, 33554432, 0, 0, 0, NULL);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -1694,7 +1719,7 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (69905, 0, 1, 0, 0, 0, 100, 0, 10000, 12000, 15000, 20000, 11, 138693, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Gurubashi Berserker - Cast Bloodletting"),
 (69905, 0, 2, 0, 2, 0, 100, 1, 0, 50, 0, 0, 11, 138427, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Gurubashi Berserker - Cast Berserker Frenzy"),
 
-(69906, 0, 0, 0, 2, 0, 100, 0, 0, 90, 2500, 3000, 11, 139228, 0, 0, 0, 0, 0, 11, 0, 40, 0, 0, 0, 0, 0, "Zandalari High Priest - Cast Light of the Loa"),
+(69906, 0, 0, 0, 14, 0, 100, 0, 500000, 40, 12500, 18000, 11, 139228, 0, 0, 0, 0, 0, 11, 0, 40, 0, 0, 0, 0, 0, "Zandalari High Priest - Cast Light of the Loa"),
 
 (69909, 0, 0, 0, 1, 0, 100, 1, 1, 1, 0, 0, 28, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Amani'shi Flame Chanter - Remove all aura OOC"),
 (69909, 0, 1, 0, 1, 0, 100, 1, 2, 2, 0, 0, 11, 138432, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Amani'shi Flame Chanter - Aura"),
@@ -1715,6 +1740,10 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (69916, 0, 0, 0, 1, 0, 100, 1, 1, 1, 0, 0, 28, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Gurubashi Berserker - Remove all auras when OOC"),
 (69916, 0, 1, 0, 1, 0, 100, 1, 2, 2, 0, 0, 11, 138427, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Gurubashi Berserker - Cast Berserker Frenzy"),
 (69916, 0, 2, 0, 0, 0, 100, 0, 2000, 4000, 15000, 16000, 11, 138693, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Gurubashi Berserker - Cast Bloodletting"),
+
+(69927, 0, 0, 0, 0, 0, 100, 0, 2500, 3000, 3000, 4000, 11, 139213, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Zandalari Prelate - Mark of the Loa"),
+(69927, 0, 1, 0, 0, 0, 100, 0, 10000, 12000, 15000, 18000, 11, 139223, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Zandalari Prelate - Judgment of the Loa"),
+(69927, 0, 2, 0, 14, 0, 100, 0, 500000, 40, 35000, 40000, 11, 139228, 0, 0, 0, 0, 0, 11, 0, 40, 0, 0, 0, 0, 0, "Zandalari Prelate - Light of the Loa"),
 
 (69944, 0, 0, 0, 1, 0, 100, 0, 1, 1, 1000, 1000, 49, 0, 0, 0, 0, 0, 0, 21, 50, 0, 0, 0, 0, 0, 0, "Sand Elemental - Attack on spawn"),
 

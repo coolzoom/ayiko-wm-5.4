@@ -646,9 +646,9 @@ public:
         // No need to override Reset since there is nothing to reset here
         // No need to override EnterCombat since there is nothing to do here
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(const uint32 uiDiff)
         {
-            if(!UpdateVictim())
+            if (!UpdateVictim())
                 return;
 
             darkPowerEvents.Update(uiDiff);
@@ -663,12 +663,12 @@ public:
                 break;
             }
 
-            if(me->HasUnitState(UNIT_STATE_CASTING))
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
-            while(uint32 uiEventId = events.ExecuteEvent())
+            while (uint32 uiEventId = events.ExecuteEvent())
             {
-                switch(uiEventId)
+                switch (uiEventId)
                 {
                 case EVENT_FRIGID_ASSAULT:
                     DoCast(me, SPELL_FRIGID_ASSAULT);
@@ -685,10 +685,10 @@ public:
                     DoCastAOE(SPELL_FROSTBITE); // Handle target selection in SpellScript
                     events.ScheduleEvent(EVENT_FROSTBITE, urand(8, 16) * IN_MILLISECONDS);
                     break;
-                    
+
                 case EVENT_INCREASE_POWER:
                     me->ModifyPower(POWER_ENERGY, 3);
-                    if(me->GetPower(POWER_ENERGY) < 100)
+                    if (me->GetPower(POWER_ENERGY) < 100)
                         events.ScheduleEvent(EVENT_INCREASE_POWER, GetPowerTimer());
                     else
                         DoAction(ACTION_DARK_POWER);
@@ -753,9 +753,9 @@ public:
             CouncilBaseAI::Reset(); // Finalize Reset
         }
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(const uint32 uiDiff)
         {
-            if(!UpdateVictim())
+            if (!UpdateVictim())
                 return;
 
             darkPowerEvents.Update(uiDiff);
@@ -770,12 +770,12 @@ public:
                 break;
             }
 
-            if(me->HasUnitState(UNIT_STATE_CASTING))
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
-            while(uint32 uiEventId = events.ExecuteEvent())
+            while (uint32 uiEventId = events.ExecuteEvent())
             {
-                switch(uiEventId)
+                switch (uiEventId)
                 {
                 case EVENT_RECKLESS_CHARGE_PRE_PATH:
                 {
@@ -795,10 +795,10 @@ public:
                     // Summon npcs for the visual of Reckless Charge while travelling ?
                     // Handle next part in MovementInform.
                     break;
-                    
+
                 case EVENT_INCREASE_POWER:
                     me->ModifyPower(POWER_ENERGY, 3);
-                    if(me->GetPower(POWER_ENERGY) < 100)
+                    if (me->GetPower(POWER_ENERGY) < 100)
                         events.ScheduleEvent(EVENT_INCREASE_POWER, GetPowerTimer());
                     else
                         DoAction(ACTION_DARK_POWER);
@@ -933,7 +933,7 @@ public:
         {
         }
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(const uint32 uiDiff)
         {
             if(!UpdateVictim())
                 return;
@@ -1066,7 +1066,7 @@ public:
             CouncilBaseAI::Reset();
         }
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(const uint32 uiDiff)
         {
             if (!UpdateVictim())
                 return;
@@ -1401,7 +1401,7 @@ public:
             events.ScheduleEvent(EVENT_SUMMON_SOUL, 3 * IN_MILLISECONDS);
         }
 
-        void DoAction(int32 iAction)
+        void DoAction(const int32 iAction)
         {
             switch (iAction)
             {
@@ -1452,7 +1452,7 @@ public:
                 pMinion->DespawnOrUnsummon();
         }
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(const uint32 uiDiff)
         {
             if (events.Empty())
                 return;
@@ -2303,7 +2303,7 @@ public:
     class mob_twisted_fate_AI : public ScriptedAI
     {
     public:
-        mob_twisted_fate_AI(Creature *pCreature):
+        mob_twisted_fate_AI(Creature *pCreature) :
             ScriptedAI(pCreature), pInstance(pCreature->GetInstanceScript())
         {
             me->SetReactState(REACT_PASSIVE);
@@ -2313,28 +2313,28 @@ public:
         void IsSummonedBy(Unit *pSummoner)
         {
             Creature *pHelper = ObjectAccessor::GetCreature(*me, pInstance->GetData64(NPC_TWISTED_FATE_HELPER));
-            if(!pHelper)
+            if (!pHelper)
             {
                 me->DisappearAndDie();
                 return;
             }
 
             TwistedFateHelperAI *pHelperAI = dynamic_cast<TwistedFateHelperAI*>(pHelper->AI());
-            if(!pHelperAI)
+            if (!pHelperAI)
             {
                 me->DisappearAndDie();
                 return;
             }
 
-            switch(me->GetEntry())
+            switch (me->GetEntry())
             {
-            // Create a new TwistedFate_t
+                // Create a new TwistedFate_t
             case MOB_TWISTED_FATE_FIRST:
                 pHelperAI->AddTwistedFate(new TwistedFate_t(pSummoner ? pSummoner->GetGUID() : uint64(0), me->GetGUID()));
                 DoCastAOE(SPELL_TWISTED_FATE_FORCE_SUMMON_SECOND); // Force the most distant player to summon the second twisted fate
                 break;
 
-            // Finalize it with the second npc and launch everything
+                // Finalize it with the second npc and launch everything
             case MOB_TWISTED_FATE_SECOND:
                 pHelperAI->Link(pSummoner ? pSummoner->GetGUID() : uint64(0), me->GetGUID());
                 break;
@@ -2343,7 +2343,7 @@ public:
 
         void SetGUID(uint64 uiGuid, int32 uiIndex)
         {
-            if(uiIndex == DATA_TWISTED_FATE_GUID)
+            if (uiIndex == DATA_TWISTED_FATE_GUID)
                 uiOtherTwistedFateGuid = uiGuid;
         }
 
@@ -2351,18 +2351,18 @@ public:
         {
             // Do not do something wierd when the other is dead => free memory
             // of the helper.
-            if(bOtherTwistedFateDied)
+            if (bOtherTwistedFateDied)
             {
-                if(Creature *pHelper = ObjectAccessor::GetCreature(*me, pInstance->GetData64(NPC_TWISTED_FATE_HELPER)))
+                if (Creature *pHelper = ObjectAccessor::GetCreature(*me, pInstance->GetData64(NPC_TWISTED_FATE_HELPER)))
                 {
-                    if(TwistedFateHelperAI *pHelperAI = dynamic_cast<TwistedFateHelperAI*>(pHelper->AI()))
+                    if (TwistedFateHelperAI *pHelperAI = dynamic_cast<TwistedFateHelperAI*>(pHelper->AI()))
                         pHelperAI->Unlink(me->GetGUID());
                 }
             }
             else
             {
                 // When a Twisted Fate dies, the other stops and then begins to cast an AOE every 3 seconds
-                if(Creature *pOther = ObjectAccessor::GetCreature(*me, uiOtherTwistedFateGuid))
+                if (Creature *pOther = ObjectAccessor::GetCreature(*me, uiOtherTwistedFateGuid))
                     pOther->AI()->DoAction(ACTION_OTHER_TWISTED_FATE_DIED);
             }
 
@@ -2370,18 +2370,18 @@ public:
 
         uint32 GetData(uint32 uiIndex)
         {
-            if(uiIndex == DATA_TWISTED_FATE_OTHER_DIED)
+            if (uiIndex == DATA_TWISTED_FATE_OTHER_DIED)
                 return (uint32)bOtherTwistedFateDied;
 
             return 0;
         }
 
-        void DoAction(int32 iAction)
+        void DoAction(const int32 iAction)
         {
-            switch(iAction)
+            switch (iAction)
             {
-            // Stop moving and set bOtherTwistedFateDied to true so the aura script will be able
-            // to compute the amount of damages correctly.
+                // Stop moving and set bOtherTwistedFateDied to true so the aura script will be able
+                // to compute the amount of damages correctly.
             case ACTION_OTHER_TWISTED_FATE_DIED:
                 me->StopMoving();
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
@@ -2419,20 +2419,20 @@ class spell_garajal_possessed : public SpellScriptLoader
 {
 public:
     spell_garajal_possessed() : SpellScriptLoader("spell_garajal_possessed") { }
-    
+
     class spell_garajal_possessed_AuraScript : public AuraScript
     {
         PrepareAuraScript(spell_garajal_possessed_AuraScript)
-        
+
         void HandleApply(AuraEffect const* pAuraEffect, AuraEffectHandleModes eMode)
         {
-            if(GetOwner() && GetOwner()->ToCreature())
+            if (GetOwner() && GetOwner()->ToCreature())
             {
                 Creature *pOwner = GetOwner()->ToCreature();
                 pOwner->AI()->DoAction(ACTION_SET_POSSESSED);
             }
         }
-        
+
         void HandleRemove(AuraEffect const* pAuraEffect, AuraEffectHandleModes eMode)
         {
             if (GetOwner())
@@ -2441,7 +2441,7 @@ public:
                     GetOwner()->ToCreature()->AI()->DoAction(ACTION_SET_UNPOSSESSED);
             }
         }
-        
+
         /*void HandlePeriodic(AuraEffect const* pAuraEffect)
         {
             if(!GetOwner())
@@ -2459,12 +2459,12 @@ public:
         
         void Register()
         {
-            OnEffectApply       += AuraEffectApplyFn(spell_garajal_possessed_AuraScript::HandleApply, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
-            OnEffectRemove      += AuraEffectRemoveFn(spell_garajal_possessed_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            OnEffectApply += AuraEffectApplyFn(spell_garajal_possessed_AuraScript::HandleApply, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            OnEffectRemove += AuraEffectRemoveFn(spell_garajal_possessed_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
             // OnEffectPeriodic    += AuraEffectPeriodicFn(spell_garajal_possessed_AuraScript::HandlePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
         }
     };
-    
+
     AuraScript *GetAuraScript() const
     {
         return new spell_garajal_possessed_AuraScript();
@@ -2485,11 +2485,11 @@ public:
         void HandleEffectApply(AuraEffect const* pAuraEffect, AuraEffectHandleModes eMode)
         {
             Player *pOwner;
-            if(GetOwner() && GetOwner()->ToPlayer())
+            if (GetOwner() && GetOwner()->ToPlayer())
             {
                 pOwner = GetOwner()->ToPlayer();
                 // Stun when stacks reach 15
-                if(GetStackAmount() == 15)
+                if (GetStackAmount() == 15)
                 {
                     pOwner->CastSpell(pOwner, SPELL_FRIGID_ASSAULT_STUN, true);
                     Remove(AURA_REMOVE_BY_DEFAULT);
@@ -2560,11 +2560,11 @@ public:
 
         void HandlePeriodic(AuraEffect const* pAuraEffect)
         {
-            if(!GetOwner())
+            if (!GetOwner())
                 return;
 
             // Stack amount can be reduced when players are standing close to the owner
-            if(Player *pOwner = GetOwner()->ToPlayer())
+            if (Player *pOwner = GetOwner()->ToPlayer())
             {
                 std::list<Player*> playerList;
                 pOwner->GetPlayerListInGrid(playerList, 4.0f);
@@ -2574,15 +2574,15 @@ public:
 
                 uint32 uiReduceAmount = 0;
 
-                switch(pOwner->GetMap()->GetDifficulty())
+                switch (pOwner->GetMap()->GetDifficulty())
                 {
-                // In 25-man raid, the amount is 1 * number of players within 4 yards
+                    // In 25-man raid, the amount is 1 * number of players within 4 yards
                 case MAN25_HEROIC_DIFFICULTY:
                 case MAN25_DIFFICULTY:
                     uiReduceAmount = playerList.size() > 4 ? 4 : playerList.size();
                     break;
 
-                // Otherwise it is 2 * number of players within 4 yards
+                    // Otherwise it is 2 * number of players within 4 yards
                 default:
                     uiReduceAmount = playerList.size() > 2 ? 4 : playerList.size() * 2;
                     break;
@@ -2623,22 +2623,22 @@ public:
         void SelectTarget(std::list<WorldObject*>& targets)
         {
             targets.clear();
-            if(Unit *pCaster = GetCaster())
+            if (Unit *pCaster = GetCaster())
             {
                 std::list<Player*> playerList;
                 pCaster->GetPlayerListInGrid(playerList, 500.0f);
-                
-                if(!playerList.empty())
+
+                if (!playerList.empty())
                     targets.push_back(Trinity::Containers::SelectRandomContainerElement(playerList));
             }
         }
-        
+
         // Handler to apply the visual
         void HandleOnHit(SpellEffIndex eEffIndex)
         {
-            if(Unit *pHit = GetHitUnit())
+            if (Unit *pHit = GetHitUnit())
             {
-                if(Unit *pCaster = GetCaster())
+                if (Unit *pCaster = GetCaster())
                 {
                     pHit->CastSpell(pHit, SPELL_FROSTBITE_SCREEN_EFFECT, true);
                     pCaster->CastSpell(pHit, SPELL_FROSTBITE_PERIODIC_DAMAGES, true);
@@ -2651,8 +2651,8 @@ public:
 
         void Register()
         {
-            OnObjectAreaTargetSelect    += SpellObjectAreaTargetSelectFn(spell_malakk_frostbite_SpellScript::SelectTarget, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
-            OnEffectHitTarget           += SpellEffectFn(spell_malakk_frostbite_SpellScript::HandleOnHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_malakk_frostbite_SpellScript::SelectTarget, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+            OnEffectHitTarget += SpellEffectFn(spell_malakk_frostbite_SpellScript::HandleOnHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
         }
     };
 
@@ -2702,13 +2702,13 @@ public:
                 SetHitDamage(pAura->GetStackAmount() * value);
             }
         }
-        
+
         void HandleOnCast()
         {
             // Cast Body Heat on heroic
-            if(Unit *pCaster = GetCaster())
+            if (Unit *pCaster = GetCaster())
             {
-                if(pCaster->GetMap()->IsHeroic())
+                if (pCaster->GetMap()->IsHeroic())
                     pCaster->CastSpell(pCaster, SPELL_BODY_HEAT, true);
             }
         }
@@ -2741,15 +2741,15 @@ public:
         void SelectTargets(std::list<WorldObject*>& targets)
         {
             std::list<Player*> playerList;
-            if(GetCaster())
+            if (GetCaster())
                 GetCaster()->GetPlayerListInGrid(playerList, 4.0f);
 
-            if(!playerList.empty() && playerList.size() > 1)
+            if (!playerList.empty() && playerList.size() > 1)
             {
                 targets.clear();
                 playerList.remove(GetCaster()->ToPlayer());
 
-                for(Player* iter : playerList)
+                for (Player* iter : playerList)
                     targets.push_back(iter);
             }
         }
@@ -2771,10 +2771,10 @@ public:
 
         void HandleEffectRemove(AuraEffect const* pAuraEffect, AuraEffectHandleModes eMode)
         {
-            if(!GetOwner())
+            if (!GetOwner())
                 return;
 
-            if(Player *pOwner = GetOwner()->ToPlayer())
+            if (Player *pOwner = GetOwner()->ToPlayer())
                 pOwner->CastSpell(pOwner, SPELL_CHILLED_TO_THE_BONE, true);
         }
 
@@ -2809,7 +2809,7 @@ public:
                 {
                     std::list<Player*> players;
                     GetPlayerListInGrid(players, pKazrajin, 100.f);
-                    
+
                     for (auto const pPlayer : players)
                     {
                         if (pPlayer->HasAura(SPELL_RECKLESS_CHARGE_FACE, pKazrajin->GetGUID()))
@@ -2827,8 +2827,8 @@ public:
                             for (uint8 i = 0; i < m_pointCount; ++i)
                             {
                                 float x, y;
-                                GetPositionWithDistInOrientation(pKazrajin, fDist - (i*3), fAngle, x, y);
-                                pKazrajin->CastSpell(x, y, pKazrajin->GetMap()->GetHeight(x, y, pKazrajin->GetPositionZ()+0.8f), SPELL_RECKLESS_CHARGE_GROUND_AT, true);
+                                GetPositionWithDistInOrientation(pKazrajin, fDist - (i * 3), fAngle, x, y);
+                                pKazrajin->CastSpell(x, y, pKazrajin->GetMap()->GetHeight(x, y, pKazrajin->GetPositionZ() + 0.8f), SPELL_RECKLESS_CHARGE_GROUND_AT, true);
                             }
 
                             if (pKazrajin->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
@@ -2929,24 +2929,24 @@ public:
 
         void HandleEffectApply(AuraEffect const* pAuraEffect, AuraEffectHandleModes eMode)
         {
-            if(!GetOwner())
+            if (!GetOwner())
                 return;
 
             // Stunned on aura apply
-            if(Creature *pOwner = GetOwner()->ToCreature())
+            if (Creature *pOwner = GetOwner()->ToCreature())
                 pOwner->SetControlled(true, UNIT_STATE_STUNNED);
         }
 
         void HandleOnProc(ProcEventInfo& rProcInfo)
         {
-            if(Unit *pCaster = rProcInfo.GetActor())
+            if (Unit *pCaster = rProcInfo.GetActor())
             {
-                if(!rProcInfo.GetDamageInfo())
+                if (!rProcInfo.GetDamageInfo())
                     return;
 
                 int32 uiDamages = rProcInfo.GetDamageInfo()->GetDamage() * 0.4f; // 40% of damages returned to the player
 
-                if(Unit *pVictim = rProcInfo.GetActionTarget())
+                if (Unit *pVictim = rProcInfo.GetActionTarget())
                 {
                     pVictim->CastCustomSpell(pCaster, SPELL_OVERLOAD_DAMAGES, &uiDamages, NULL, NULL, NULL, NULL, NULL, true);
                     pVictim->CastSpell(pCaster, SPELL_OVERLOAD_VISUAL, true);
@@ -2956,11 +2956,11 @@ public:
 
         void HandleEffectRemove(AuraEffect const* pAuraEffect, AuraEffectHandleModes eMode)
         {
-            if(!GetOwner())
+            if (!GetOwner())
                 return;
 
             // Unstunned on aura remove
-            if(Creature *pOwner = GetOwner()->ToCreature())
+            if (Creature *pOwner = GetOwner()->ToCreature())
                 pOwner->SetControlled(false, UNIT_STATE_STUNNED);
         }
 
@@ -2968,9 +2968,9 @@ public:
         {
             // Note: there is no stunning spell, I'm quite sure of that... even if
             // it is really wierd.
-            OnEffectApply   += AuraEffectApplyFn(spell_kazrajin_overload_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-            OnProc          += AuraProcFn(spell_kazrajin_overload_AuraScript::HandleOnProc);
-            OnEffectRemove  += AuraEffectRemoveFn(spell_kazrajin_overload_AuraScript::HandleEffectRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            OnEffectApply += AuraEffectApplyFn(spell_kazrajin_overload_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            OnProc += AuraProcFn(spell_kazrajin_overload_AuraScript::HandleOnProc);
+            OnEffectRemove += AuraEffectRemoveFn(spell_kazrajin_overload_AuraScript::HandleEffectRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
@@ -2993,20 +2993,20 @@ public:
 
         void HandleEffectApply(AuraEffect const* pAuraEffect, AuraEffectHandleModes eMode)
         {
-            if(!GetOwner())
+            if (!GetOwner())
                 return;
 
             // Stunned on aura apply
-            if(Creature *pOwner = GetOwner()->ToCreature())
+            if (Creature *pOwner = GetOwner()->ToCreature())
                 pOwner->SetControlled(true, UNIT_STATE_STUNNED);
         }
 
         void HandlePeriodic(AuraEffect const* pAuraEffect)
         {
-            if(!GetOwner())
+            if (!GetOwner())
                 return;
 
-            if(Creature *pOwner = GetOwner()->ToCreature())
+            if (Creature *pOwner = GetOwner()->ToCreature())
             {
                 int32 uiDamagesInPastSecs = (int32)pOwner->AI()->GetData(DATA_DAMAGES_PAST_SEC) * 0.05f; // 5% of damages taken in past sec
                 pOwner->AI()->DoAction(ACTION_RESET_DAMAGES);
@@ -3018,19 +3018,19 @@ public:
 
         void HandleEffectRemove(AuraEffect const* pAuraEffect, AuraEffectHandleModes eMode)
         {
-            if(!GetOwner())
+            if (!GetOwner())
                 return;
 
             // Unstunned on aura remove
-            if(Creature *pOwner = GetOwner()->ToCreature())
+            if (Creature *pOwner = GetOwner()->ToCreature())
                 pOwner->SetControlled(false, UNIT_STATE_STUNNED);
         }
 
         void Register()
         {
-            OnEffectApply       += AuraEffectApplyFn(spell_kazrajin_discharge_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
-            OnEffectPeriodic    += AuraEffectPeriodicFn(spell_kazrajin_discharge_AuraScript::HandlePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
-            OnEffectRemove      += AuraEffectRemoveFn(spell_kazrajin_discharge_AuraScript::HandleEffectRemove, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            OnEffectApply += AuraEffectApplyFn(spell_kazrajin_discharge_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_kazrajin_discharge_AuraScript::HandlePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+            OnEffectRemove += AuraEffectRemoveFn(spell_kazrajin_discharge_AuraScript::HandleEffectRemove, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
@@ -3058,7 +3058,7 @@ public:
 
             if (!caster || !pTarget)
                 return;
-                
+
             if (Aura* pAura = pTarget->GetAura(SPELL_ENSNARED))
             {
                 if (pAura->GetCasterGUID() == caster->GetGUID())
@@ -3071,7 +3071,7 @@ public:
                     }
                 }
             }
-            else
+            else if (!pTarget->HasAura(SPELL_ENTRAPPED))
                 caster->AddAura(SPELL_ENSNARED, pTarget);
         }
 
@@ -3157,7 +3157,7 @@ public:
 
                 /*
                 for (Creature *pQuicksand : quicksandsList)
-                    pQuicksand->AI()->DoAction(ACTION_CREATE_LIVING_SAND);*/
+                pQuicksand->AI()->DoAction(ACTION_CREATE_LIVING_SAND);*/
 
                 for (Creature *pLivingSand : livingSandsList)
                     pLivingSand->AI()->DoAction(ACTION_CREATE_LIVING_SAND);
@@ -3257,13 +3257,13 @@ public:
 
         void SelectTarget(std::list<WorldObject*>& targets)
         {
-            if(!GetCaster())
+            if (!GetCaster())
                 return;
 
             // Select one random player...
             std::list<Player*> playerList;
             GetCaster()->GetPlayerListInGrid(playerList, 500.0f);
-            if(!playerList.empty())
+            if (!playerList.empty())
             {
                 targets.clear();
                 targets.push_back(Trinity::Containers::SelectRandomContainerElement(playerList));
@@ -3295,7 +3295,7 @@ public:
 
         void SelectTarget(std::list<WorldObject*>& targets)
         {
-            if(!GetCaster())
+            if (!GetCaster())
                 return;
 
             // Find the fathest player
@@ -3303,7 +3303,7 @@ public:
             GetCaster()->GetPlayerListInGrid(playerList, 500.0f);
             playerList.sort(Trinity::DistanceCompareOrderPred(GetCaster(), false));
 
-            if(!playerList.empty() && playerList.front())
+            if (!playerList.empty() && playerList.front())
             {
                 targets.clear();
                 targets.push_back(playerList.front());
@@ -3328,21 +3328,21 @@ class spell_marli_twisted_fate_damages : public SpellScriptLoader
 {
 public:
     spell_marli_twisted_fate_damages() : SpellScriptLoader("spell_marli_twisted_fate_damages") { }
-    
+
     class spell_marli_twisted_fate_damages_AuraScript : public AuraScript
     {
         PrepareAuraScript(spell_marli_twisted_fate_damages_AuraScript)
-        
+
         void CalculateAmount(AuraEffect const* pAuraEffect, int32 &ruiAmount, bool &rbCanBeRecalculated)
         {
-            if(!GetOwner())
+            if (!GetOwner())
                 return;
-            
-            if(Creature *pOwner = GetOwner()->ToCreature())
+
+            if (Creature *pOwner = GetOwner()->ToCreature())
             {
-                if(Creature *pTwistedFateTarget = ObjectAccessor::GetCreature(*pOwner, pOwner->AI()->GetGUID(DATA_TWISTED_FATE_GUID)))
+                if (Creature *pTwistedFateTarget = ObjectAccessor::GetCreature(*pOwner, pOwner->AI()->GetGUID(DATA_TWISTED_FATE_GUID)))
                 {
-                    if(pTwistedFateTarget->IsAlive())
+                    if (pTwistedFateTarget->IsAlive())
                     {
                         // The max amount is 250000, but it reduces the father the twisted fates are from
                         // each other. Let's say the maximum dist between them is 55 yards. If we want this
@@ -3354,13 +3354,13 @@ public:
                 }
             }
         }
-        
+
         void Register()
         {
             DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_marli_twisted_fate_damages_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE);
         }
     };
-    
+
     AuraScript *GetAuraScript() const
     {
         return new spell_marli_twisted_fate_damages_AuraScript();
@@ -3382,23 +3382,23 @@ public:
         {
             if(Unit *pUnit = GetCaster())
             {
-                if(Creature *pCaster = pUnit->ToCreature())
+                if (Creature *pCaster = pUnit->ToCreature())
                 {
-                    if(CreatureAI *pAI = pCaster->AI())
+                    if (CreatureAI *pAI = pCaster->AI())
                     {
-                        uint32 const uiDarkPowerCount   = pAI->GetData(DATA_DARK_POWER_COUNT);
-                        int32 iCustomValue              = GetSpellInfo()->Effects[(uint32)eEffectIndex].BasePoints;
-                        
+                        uint32 const uiDarkPowerCount = pAI->GetData(DATA_DARK_POWER_COUNT);
+                        int32 iCustomValue = GetSpellInfo()->Effects[(uint32)eEffectIndex].BasePoints;
+
                         // Add 10% for each stack of Dark Power
-                        for(uint32 i = 0; i < uiDarkPowerCount; ++i)
+                        for (uint32 i = 0; i < uiDarkPowerCount; ++i)
                             iCustomValue *= 1.1f;
-                            
+
                         SetHitDamage(iCustomValue);
                     }
                 }
             }
         }
-        
+
         void Register()
         {
             OnEffectHitTarget += SpellEffectFn(spell_dark_power_SpellScript::HandleHitTarget, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
@@ -3417,32 +3417,32 @@ class spell_soul_fragment_target_selector : public SpellScriptLoader
 {
 public:
     spell_soul_fragment_target_selector() : SpellScriptLoader("spell_soul_fragment_target_selector") { }
-    
+
     class spell_soul_fragment_target_selector_SpellScript : public SpellScript
     {
         PrepareSpellScript(spell_soul_fragment_target_selector_SpellScript)
-        
+
         void SelectTarget(std::list<WorldObject*>& targets)
         {
-            if(!GetCaster())
+            if (!GetCaster())
                 return;
-                
+
             std::list<Player*> playerList;
             GetCaster()->GetPlayerListInGrid(playerList, 500.0f);
-            
-            if(!playerList.empty())
+
+            if (!playerList.empty())
             {
                 targets.clear();
                 targets.push_back(Trinity::Containers::SelectRandomContainerElement(playerList));
             }
         }
-        
+
         void Register()
         {
             OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_soul_fragment_target_selector_SpellScript::SelectTarget, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
         }
     };
-    
+
     SpellScript *GetSpellScript() const
     {
         return new spell_soul_fragment_target_selector_SpellScript();
@@ -3455,26 +3455,26 @@ class spell_soul_fragment_switcher : public SpellScriptLoader
 {
 public:
     spell_soul_fragment_switcher() : SpellScriptLoader("spell_soul_fragment_switcher") { }
-    
+
     class spell_soul_fragment_switcher_SpellScript : public SpellScript
     {
         PrepareSpellScript(spell_soul_fragment_switcher_SpellScript)
-        
+
         void HandleHitTarget(SpellEffIndex eEffIndex)
         {
-            if(Unit *pCaster = GetCaster())
+            if (Unit *pCaster = GetCaster())
             {
-                if(Aura *pSoulFragment = pCaster->GetAura(SPELL_SOUL_FRAGMENT_PERIODIC))
+                if (Aura *pSoulFragment = pCaster->GetAura(SPELL_SOUL_FRAGMENT_PERIODIC))
                     pSoulFragment->Remove();
             }
         }
-        
+
         void Register()
         {
             OnEffectHitTarget += SpellEffectFn(spell_soul_fragment_switcher_SpellScript::HandleHitTarget, EFFECT_0, SPELL_EFFECT_FORCE_CAST);
         }
     };
-    
+
     SpellScript *GetSpellScript() const
     {
         return new spell_soul_fragment_switcher_SpellScript();

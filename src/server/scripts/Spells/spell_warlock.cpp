@@ -2559,6 +2559,33 @@ class spell_warl_unstable_affliction : public SpellScriptLoader
         }
 };
 
+class spell_warl_haunt : public SpellScriptLoader
+{
+    public:
+        spell_warl_haunt() : SpellScriptLoader("spell_warl_haunt") { }
+
+        class spell_warl_haunt_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_warl_haunt_AuraScript);
+
+            void HandleDispel(DispelInfo* dispelInfo)
+            {
+                if (Unit* caster = GetCaster())
+                    caster->CastSpell(caster, 145159, true);
+            }
+
+            void Register()
+            {
+                AfterDispel += AuraDispelFn(spell_warl_haunt_AuraScript::HandleDispel);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_warl_haunt_AuraScript();
+        }
+};
+
 // Backlash - 108563
 class spell_warl_backlash : public SpellScriptLoader
 {
@@ -3036,4 +3063,5 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_demonic_fury();
     new spell_warl_havoc();
     new spell_warl_metamorphosis_overrides();
+    new spell_warl_haunt();
 }

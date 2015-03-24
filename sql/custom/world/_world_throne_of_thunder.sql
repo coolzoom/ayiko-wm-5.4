@@ -735,6 +735,9 @@ UPDATE `creature_template` SET `ScriptName` = 'mob_horridon_trashs' WHERE `entry
 UPDATE `creature_template` SET `ScriptName` = 'mob_horridon_summons' WHERE `entry` IN 
 (69268,69313,69314,69346);
 
+UPDATE `creature_template` SET `ScriptName` = 'npc_living_poison' WHERE `entry` = 69313;
+UPDATE `creature_template` SET `ScriptName` = 'npc_venomous_effusion' WHERE `entry` = 69314;
+
 UPDATE `creature_template` SET `ScriptName` = 'mob_direhorn_spirit' WHERE `entry` = 70688;
 UPDATE `creature_template` SET `ScriptName` = 'mob_zandalari_dinomancer' WHERE `entry` = 69221;
 
@@ -1382,8 +1385,14 @@ INSERT INTO `waypoint_data` VALUES
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Creature Speeches
-DELETE FROM `creature_text` WHERE `entry` = 69374;
+DELETE FROM `creature_text` WHERE `entry` IN (68476, 69221,69374);
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(68476, 0, 0, 'Farraki forces pour from the Farraki Tribal Door!', 41, 0, 100, 0, 0, 0, 'War-God Jalak'),
+(68476, 1, 0, 'Gurubashi forces pour from the Gurubashi Tribal Door!', 41, 0, 100, 0, 0, 0, 'War-God Jalak'),
+(68476, 2, 0, 'Drakkari forces pour from the Drakkari Tribal Door!', 41, 0, 100, 0, 0, 0, 'War-God Jalak'),
+(68476, 3, 0, 'Amani forces pour from the Amani Tribal Door!', 41, 0, 100, 0, 0, 0, 'War-God Jalak'),
+(68476, 4, 0, 'Horridon sets his eyes on $n and stamps his tail!', 41, 0, 100, 0, 0, 0, 'Horridon to Player'),
+
 (69374, 0, 0, 'Welcome, weaklings, to the rebirth of the Zandalari Empire!', 14, 0, 100, 0, 0, 36009, 'War-God Jalak INTRO 1'),
 (69374, 1, 0, 'The tribes have assembled - ye face not one force, but the combined might of all of the troll empire! The hand of Zul will span all the continents of Azeroth once again! An ye lesser races will know pain!', 14, 0, 100, 0, 0, 36010, 'War-God Jalak INTRO 2'),
 (69374, 2, 0, 'Now, witness the true might of the Beast Ward. D\'akala di\'chuka HORRIDON! Kalimaste!', 14, 0, 100, 0, 0, 36011, 'War-God Jalak INTRO 3'),
@@ -1393,7 +1402,9 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (69374, 6, 0, 'Farraki tribe, flay their flesh wit the fury of the sands!', 14, 0, 100, 0, 0, 36015, 'War-God Jalak SPELL 3'),
 (69374, 7, 0, 'Amani tribe, avenge ye fallen warlords, in the name of Zul\'jin!', 14, 0, 100, 0, 0, 36016, 'War-God Jalak SPELL 4'),
 (69374, 8, 0, 'Ya skull gonna make a fine ornament for my tusks.', 14, 0, 100, 0, 0, 36012, 'War-God Jalak Kill'),
-(69374, 9, 0, 'Da\'kala koraste...Horridon...destroy them...', 14, 0, 100, 0, 0, 36008, 'War-God Jalak Death');
+(69374, 9, 0, 'Da\'kala koraste...Horridon...destroy them...', 14, 0, 100, 0, 0, 36008, 'War-God Jalak Death'),
+
+(69221, 0, 0, 'The Zandalari Dinomancer drops an Orb of Control!', 41, 0, 100, 0, 0, 0, 'Zandalari Dinomancer');
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/

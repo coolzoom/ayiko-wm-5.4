@@ -105,6 +105,7 @@ enum eEvents
     EVENT_DIRE_CALL                         = 4,
     EVENT_PREPARE_CHARGE                    = 5, // Pseudo hack
     EVENT_CHARGE_AT_DOOR                    = 6,
+    EVENT_BERSERK                           = 34,
 
     //===============================================
     // Farraki
@@ -260,6 +261,12 @@ enum eTalks
     TALK_AMANI                              = 7,
     TALK_ON_JALAK_KILLED_UNIT               = 8, // Ya skull
     TALK_ON_HORRIDON_KILLED_UNIT            = 9, // Da'kala koraste
+
+    EMOTE_FARRAKI                           = 0,
+    EMOTE_GURUBASHI                         = 1,
+    EMOTE_DRAKKARI                          = 2,
+    EMOTE_AMANI                             = 3,
+    EMOTE_CHARGE                            = 4
 };
 
 enum eGameObjects
@@ -654,6 +661,15 @@ public:
 
             events.Update(uiDiff);
 
+            // Handle gate timings a bit better at least
+            if (uiNextGateTimer)
+            {
+                if (uiNextGateTimer <= uiDiff)
+                    uiNextGateTimer = 0;
+                else
+                    uiNextGateTimer -= uiDiff;
+            }
+
             while (uint32 uiEventId = events.ExecuteEvent())
             {
                 switch (uiEventId)
@@ -661,6 +677,14 @@ public:
                     case EVENT_SUMMON_MINOR:
                         if (summonPositions)
                         {
+                            if (!bHasEmotedForGate)
+                            {
+                                if (Creature* pHorridon = GetHorridon(me))
+                                    pHorridon->AI()->Talk(uiTrashPhase);
+
+                                bHasEmotedForGate = true;
+                            }
+
                             std::list<uint32> entries;
 
                             if (uiMinorTrashId)
@@ -801,12 +825,16 @@ public:
         uint32                  uiMajorTrashId;
         uint32                  uiMajorCycle;
         uint32                  uiDrakkariCycle;
+        uint32                  uiNextGateTimer;
+        bool                    bHasEmotedForGate;
 
         void FightReset()
         {
             // Be sure that we have not already reset
             if (uiTrashPhase == MAX_TRASH_PHASE && summonPositions == NULL && jumpPositions == NULL)
                 return;
+
+            uiNextGateTimer = 0;
 
             for (uint8 i = 0; i < 4; ++i)
             {
@@ -877,6 +905,9 @@ public:
             events.ScheduleEvent(EVENT_SUMMON_MINOR, 5 * IN_MILLISECONDS);
             events.ScheduleEvent(EVENT_SUMMON_MAJOR, 20 * IN_MILLISECONDS);
             events.ScheduleEvent(EVENT_SUMMON_ZANDALARI_DINOMANCER, MINUTE * IN_MILLISECONDS);
+
+            bHasEmotedForGate = false;
+            uiNextGateTimer = 120000;
         }
 
         void FightEnd()
@@ -888,12 +919,25 @@ public:
             uiTrashPhase = MAX_TRASH_PHASE;
         }
 
+        void DemoralizeLivingPoison()
+        {
+            std::list<Creature*> poisonList;
+            GetCreatureListWithEntryInGrid(poisonList, me, MOB_LIVING_POISON, 400.f);
+
+            for (auto const pCreature : poisonList)
+            {
+                if (pCreature->AI())
+                    pCreature->AI()->DoAction(ACTION_LIVING_POISON_DESPAWN);
+            }
+        }
+
         void EnterNextPhase()
         {
             uiMajorCycle    = MAJOR_CYCLE_FIRST;
             uiDrakkariCycle = DRAKKARI_CYCLE_FIRST;
 
             ++uiTrashPhase;
+            bHasEmotedForGate = false;
             if (Creature *pJalak = GetJalak(me))
             {
                 switch (uiTrashPhase)
@@ -915,6 +959,7 @@ public:
                         summonPositions     = drakkariTrashSummonPositions;
                         jumpPositions       = drakkariFrozenWarlordJumpPositions;
                         pJalak->AI()->Talk(TALK_DRAKKARI);
+                        DemoralizeLivingPoison();
                         break;
 
                     case TRASH_PHASE_AMANI:
@@ -950,13 +995,15 @@ public:
 
                 events.ScheduleEvent(EVENT_SUMMON_MAJOR, 20 * IN_MILLISECONDS);
                 events.ScheduleEvent(EVENT_SUMMON_ZANDALARI_DINOMANCER, MINUTE * IN_MILLISECONDS);
+
+                uiNextGateTimer = 120000;
             }
         }
 
         void PrepareTransition()
         {
             events.Reset();
-            events.ScheduleEvent(EVENT_TRANSITION, 45 * IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_TRANSITION, uiNextGateTimer + 4000);
         }
     };
 
@@ -1080,8 +1127,11 @@ public:
             events.Reset();
         }
 
+        EventMap m_mBerserkEvents;
+
         void Reset()
         {   
+            m_mBerserkEvents.Reset();
             events.Reset();
             pChargeDoor = NULL;
             bJalakCalled = false;
@@ -1117,6 +1167,7 @@ public:
             events.ScheduleEvent(EVENT_TRIPLE_PUNCTURE, 10 * IN_MILLISECONDS);
             events.ScheduleEvent(EVENT_DOUBLE_SWIPE, 15 * IN_MILLISECONDS);
             events.ScheduleEvent(EVENT_HORRIDON_CHARGE, 13 * IN_MILLISECONDS);
+            m_mBerserkEvents.ScheduleEvent(EVENT_BERSERK, 12 * MINUTE * IN_MILLISECONDS);
 
             if (IsHeroic())
                 events.ScheduleEvent(EVENT_DIRE_CALL, 8 * IN_MILLISECONDS);   
@@ -1161,9 +1212,20 @@ public:
             }
 
             events.Update(uiDiff);
+            m_mBerserkEvents.Update(uiDiff);
+
+            switch (m_mBerserkEvents.ExecuteEvent())
+            {
+            case EVENT_BERSERK:
+                DoCast(me, SPELL_BERSERK, true);
+                break;
+            }
 
             if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
+
+            if (me->HasUnitState(UNIT_STATE_CANNOT_TURN) && !me->HasAura(SPELL_HEADACHE))
+                me->ClearUnitState(UNIT_STATE_CANNOT_TURN);
 
             while (uint32 uiEventId = events.ExecuteEvent())
             {
@@ -1182,7 +1244,10 @@ public:
 
                     case EVENT_HORRIDON_CHARGE:
                         if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1))
+                        {
                             DoCast(pTarget, SPELL_CHARGE);
+                            Talk(EMOTE_CHARGE, pTarget->GetGUID());
+                        }
                         events.ScheduleEvent(EVENT_HORRIDON_CHARGE, urand(15, 25) * IN_MILLISECONDS);
                         break;
 
@@ -1714,24 +1779,15 @@ public:
                     DoCast(me, SPELL_SAND_TRAP_PERIODIC);
                     break;
 
-                case MOB_VENOMOUS_EFFUSION:
-                    DoCast(me, SPELL_SUMMON_LIVING_POISON);
-                    events.ScheduleEvent(EVENT_EFFUSION_VENOM_BOLT_VOLLEY, 10 * IN_MILLISECONDS);
-                    break;
-
                 case MOB_FROZEN_ORB:
+                    me->SetReactState(REACT_PASSIVE);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                    me->GetMotionMaster()->MoveRandom(15.f);
                     DoCast(me, SPELL_FROZEN_BOLT_PERIODIC);
                     break;
 
                 case MOB_LIGHTNING_NOVA_TOTEM:
                     DoCast(me, SPELL_LIGHTNING_NOVA_PERIODIC);
-                    break;
-
-                case MOB_LIVING_POISON:
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-                    DoCast(me, SPELL_LIVING_POISON_PERIODIC);
-                    me->GetMotionMaster()->MovementExpired();
-                    me->GetMotionMaster()->MoveRandom(5.0f);
                     break;
 
                 default:
@@ -1828,6 +1884,7 @@ public:
                     {
                         uint32 uiSummonSpellId = GetSummoningOrbSpellByPhase(pHelperAI->GetTrashPhase());
                         DoCast(me, uiSummonSpellId);
+                        Talk(0);
                     }
                 }
                 
@@ -1924,7 +1981,6 @@ class npc_living_poison : public CreatureScript
     enum eEvents : uint32
     {
         EVENT_NONE,
-        EVENT_DESPAWN,
         EVENT_MOVE
     };
 
@@ -1945,7 +2001,11 @@ public:
         void DoAction(const int32 iAction) override
         {
             if (iAction == ACTION_LIVING_POISON_DESPAWN)
-                events.ScheduleEvent(EVENT_DESPAWN, 8000 + rand() % 7000);
+            {
+                events.CancelEvent(EVENT_MOVE);
+                me->GetMotionMaster()->MovementExpired();
+                me->GetMotionMaster()->MoveRandom(30.f);
+            }
         }
 
         void Move()
@@ -1985,13 +2045,69 @@ public:
                 case EVENT_MOVE:
                     Move();
                     break;
-                case EVENT_DESPAWN:
-                    me->DespawnOrUnsummon();
-                    break;
                 }
             }
         }
 
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new ai_impl(pCreature);
+    }
+};
+
+class npc_venomous_effusion : public CreatureScript
+{
+    enum eEvents : uint32
+    {
+        EVENT_NONE,
+        EVENT_VOLLEY,
+    };
+
+public:
+    npc_venomous_effusion() : CreatureScript("npc_venomous_effusion") {}
+
+    struct ai_impl : public ScriptedAI
+    {
+        ai_impl(Creature* pCreature) : ScriptedAI(pCreature) {}
+
+        void IsSummonedBy(Unit* pSummoner) override
+        {
+            events.ScheduleEvent(EVENT_VOLLEY, 3000 + rand() % 2000);
+
+            if (Creature* pHorridonHelper = GetHorridonHelper(me))
+            {
+                if (pHorridonHelper->AI())
+                    pHorridonHelper->AI()->JustSummoned(me);
+            }
+
+            DoZoneInCombat(me, 100.f);
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(uiDiff);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_VOLLEY:
+                    DoCast(SPELL_VENOM_BOLT_VOLLEY);
+                    events.ScheduleEvent(EVENT_VOLLEY, 4000 + rand() % 2000);
+                    break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
     };
 
     CreatureAI* GetAI(Creature* pCreature) const
@@ -2371,6 +2487,7 @@ void AddSC_boss_horridon()
     new mob_zandalari_dinomancer();
     new mob_direhorn_spirit();
     new npc_living_poison();
+    new npc_venomous_effusion();
    
     // gameobject
     new gob_horridon_orb_of_control();

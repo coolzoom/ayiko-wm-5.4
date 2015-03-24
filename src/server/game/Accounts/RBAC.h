@@ -731,7 +731,10 @@ enum RBACPermissions
     RBAC_PERM_LOG_PACKETS                                    = 1047,
     RBAC_PERM_COMMAND_RESET_SPEC                             = 1048,
     RBAC_PERM_COMMAND_NPC_SET_FLAG2                          = 1049,
-    RBAC_PERM_COMMAND_SELECT_FACTION                         = 1050
+    RBAC_PERM_COMMAND_SELECT_FACTION                         = 1050,
+    RBAC_PERM_BROADCAST_LOGON_CHANGE                         = 1051,
+    RBAC_PERM_COMMAND_CHALLENGE_CHALLENGE                    = 1052,
+    RBAC_PERM_COMMAND_CHALLENGE_CHALLENGE_PLAYERS            = 1053
 };
 
 enum RBACCommandResult

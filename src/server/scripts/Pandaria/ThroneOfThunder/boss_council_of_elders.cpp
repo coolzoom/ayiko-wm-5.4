@@ -488,6 +488,18 @@ public:
             uiDamageTakenPossessed = 0; // Reset in both case to prevent chain call to IsACouncillorAlive
         }
     }
+
+    void RewardCurrencyForPlayers()
+    {
+        Map::PlayerList const &lPlayers = me->GetMap()->GetPlayers();
+        for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+        {
+            if (Player * const player = itr->GetSource())
+            {
+                player->ModifyCurrency(CURRENCY_TYPE_VALOR_POINTS, 4000);
+            }
+        }
+    }
     
     void JustDied(Unit *pKiller)
     {
@@ -523,6 +535,8 @@ public:
 
                 if (pAI->GetData(0) < 4)
                     me->SetLootRecipient(nullptr);
+                else
+                    RewardCurrencyForPlayers();
             }
         }
     }

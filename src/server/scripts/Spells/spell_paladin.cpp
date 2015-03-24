@@ -1892,6 +1892,45 @@ public:
     }
 };
 
+// Guardian of ancient kings
+class spell_pal_guardian : public SpellScriptLoader
+{
+public:
+    spell_pal_guardian() : SpellScriptLoader("spell_pal_guardian") { }
+
+    class spell_pal_guardian_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_pal_guardian_SpellScript);
+
+        void HandleOnHit()
+        {
+            Player* caster = GetCaster()->ToPlayer();
+            if (!caster)
+                return;
+
+            // Choose which guardian to summon based on spec
+            switch (caster->GetSpecializationId(caster->GetActiveSpec()))
+            {
+                case SPEC_PALADIN_HOLY:
+                    caster->CastSpell(caster, 86674, true);
+                    break;
+                default:
+                    return;
+            }
+        }
+
+        void Register()
+        {
+            OnHit += SpellHitFn(spell_pal_guardian_SpellScript::HandleOnHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_pal_guardian_SpellScript();
+    }
+};
+
 void AddSC_paladin_spell_scripts()
 {
     new spell_pal_glyph_of_devotian_aura();
@@ -1938,4 +1977,5 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_glyph_of_double_jeopardy();
     new spell_pal_blessing();
     new spell_pal_daybreak_heal();
+    new spell_pal_guardian();
 }

@@ -1601,6 +1601,10 @@ class spell_dk_scourge_strike : public SpellScriptLoader
                     if (AuraEffect *aurEff = caster->GetAuraEffectOfRankedSpell(DK_SPELL_BLACK_ICE_R1, EFFECT_0))
                         AddPct(bp, aurEff->GetAmount());
 
+                    // Mastery: Dreadblade
+                    if (AuraEffect *aurEff = caster->GetAuraEffect(77515, EFFECT_0))
+                        AddPct(bp, aurEff->GetAmount());
+
                     caster->CastCustomSpell(unitTarget, DK_SPELL_SCOURGE_STRIKE_TRIGGERED, &bp, NULL, NULL, true);
                 }
             }

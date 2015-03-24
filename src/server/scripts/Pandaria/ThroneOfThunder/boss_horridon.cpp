@@ -1210,6 +1210,15 @@ public:
             if (me->HasUnitState(UNIT_STATE_CANNOT_TURN))
                 me->ClearUnitState(UNIT_STATE_CANNOT_TURN);
 
+            float x, y, z, o;
+
+            me->GetHomePosition(x, y, z, o);
+            me->NearTeleportTo(x, y, z, o);
+            me->SetFacingTo(o);
+
+            me->GetMotionMaster()->Clear(false);
+            me->GetMotionMaster()->MovePoint(5000, x, y, z);
+
             ScriptedAI::EnterEvadeMode();
         }
 
@@ -1307,6 +1316,7 @@ public:
                     case EVENT_DOUBLE_SWIPE:
                         DoCast(me->GetVictim(), SPELL_DOUBLE_SWIPE);
                         const_orientation = me->GetOrientation();
+                        me->SetFacingTo(const_orientation);
                         events.ScheduleEvent(EVENT_DOUBLE_SWIPE, urand(12, 18) * IN_MILLISECONDS);
                         break;
 
@@ -1360,6 +1370,11 @@ public:
             case MOTION_HORRIDON_CHARGE:
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
                 me->SetReactState(REACT_AGGRESSIVE);
+                break;
+            case EVENT_CHARGE:
+                DoCast(SPELL_DOUBLE_SWIPE);
+                const_orientation = me->GetOrientation();
+                me->SetFacingTo(const_orientation);
                 break;
 
             default:
@@ -1635,7 +1650,7 @@ public:
                 {
                 case MOB_FARRAKI_WASTEWALKER:
                     events.ScheduleEvent(EVENT_BLAZING_LIGHT, 10 * IN_MILLISECONDS);
-                    events.ScheduleEvent(EVENT_SUMMON_SAND_TRAP, 15 * IN_MILLISECONDS);
+                    events.ScheduleEvent(EVENT_SUMMON_SAND_TRAP, 5000 + rand() % 5000);
                     break;
 
                 case MOB_GURUBASHI_VENOM_PRIEST:
@@ -1720,7 +1735,7 @@ public:
                     case EVENT_SUMMON_SAND_TRAP:
                         if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM))
                             DoCast(pTarget, SPELL_SUMMON_SAND_TRAP);
-                        events.ScheduleEvent(EVENT_SUMMON_SAND_TRAP, 30 * IN_MILLISECONDS);
+                        events.ScheduleEvent(EVENT_SUMMON_SAND_TRAP, 15000 + rand() % 10000);
                         break;
 
                         // Gurubashi
@@ -2399,9 +2414,27 @@ public:
     {
         TC_LOG_ERROR("scripts", "spellId %u with const orientation %f", spellId, orientation);
         //if (spellId == SPELL_DOUBLE_SWIPE_FRONT)
-            return target && !caster->HasInArc(orientation*(M_PI / 5.1f), target);
+            //return target && !caster->HasInArc(orientation*(M_PI / 5.1f), target);
         //else
             //return target && !target->isInBack(caster, orientation*(M_PI / 5.1f));
+
+        float arc = caster->NormalizeOrientation(spellId == SPELL_DOUBLE_SWIPE_FRONT ? (M_PI / 5.1f) : ((2 * M_PI) - (M_PI / 5.1f)));
+
+        float angle = caster->GetAngle(target);
+        angle -= orientation;
+
+        // move angle to range -pi ... +pi
+        angle = caster->NormalizeOrientation(angle);
+        if (angle > M_PI)
+            angle -= 2.0f*M_PI;
+
+        float lborder = -1 * (arc / 2.0f);                        // in range -pi..0
+        float rborder = (arc / 2.0f);                             // in range 0..pi
+
+        if (spellId == SPELL_DOUBLE_SWIPE_FRONT)
+            return !((angle >= lborder) && (angle <= rborder));
+        else
+            return ((angle >= lborder) && (angle <= rborder));
     }
 };
 
@@ -2643,8 +2676,13 @@ public:
 
         void HandleOnApply(AuraEffect const* aurEff, AuraEffectHandleModes mode)
         {
-            if (Unit* owner = GetOwner()->ToUnit())
+            if (Creature* owner = GetOwner()->ToCreature())
             {
+                if (HorridonAI* pAI = dynamic_cast<HorridonAI*>(owner->AI()))
+                {
+                    owner->SetOrientation(pAI->GetPretdeterminedOrientation());
+                }
+                /*
                 std::list<Player*> potentials;
                 GetPlayerListInGrid(potentials, owner, 30.f);
 
@@ -2652,7 +2690,7 @@ public:
                 {
                     if (Player* pTarget = Trinity::Containers::SelectRandomContainerElement(potentials))
                         owner->SetOrientation(owner->GetAngle(pTarget));
-                }
+                }*/
 
                 owner->AddUnitState(UNIT_STATE_CANNOT_TURN);
             }

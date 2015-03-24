@@ -3219,6 +3219,8 @@ class npc_power_word_barrier : public CreatureScript
                     if (!me->HasAura(81781))
                         me->CastSpell(me, 81781, true);
             }
+
+            void EnterEvadeMode() {}
         };
 
         CreatureAI* GetAI(Creature* creature) const

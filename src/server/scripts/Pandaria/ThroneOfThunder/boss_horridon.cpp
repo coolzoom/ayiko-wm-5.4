@@ -106,6 +106,7 @@ enum eEvents
     EVENT_PREPARE_CHARGE                    = 5, // Pseudo hack
     EVENT_CHARGE_AT_DOOR                    = 6,
     EVENT_BERSERK                           = 34,
+    EVENT_EVADE_CHECK                       = 35,
 
     //===============================================
     // Farraki
@@ -1122,7 +1123,7 @@ public:
         boss_horridon_AI(Creature *pCreature) : BossAI(pCreature, DATA_HORRIDON), pInstance(pCreature->GetInstanceScript()), bJalakCalled(false)
         {
             me->SetReactState(REACT_PASSIVE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
             pChargeDoor = NULL;
             events.Reset();
         }
@@ -1145,10 +1146,7 @@ public:
             {
                 if (CreatureAI* pHelperAI = pHorridonHelper->AI())
                     pHelperAI->DoAction(ACTION_FIGHT_RESET);
-            } 
-
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
-            me->SetReactState(REACT_AGGRESSIVE);
+            }
             
             pInstance->SetBossState(DATA_HORRIDON, NOT_STARTED);
             pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
@@ -1167,6 +1165,7 @@ public:
             events.ScheduleEvent(EVENT_TRIPLE_PUNCTURE, 10 * IN_MILLISECONDS);
             events.ScheduleEvent(EVENT_DOUBLE_SWIPE, 15 * IN_MILLISECONDS);
             events.ScheduleEvent(EVENT_HORRIDON_CHARGE, 13 * IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_EVADE_CHECK, 2000);
             m_mBerserkEvents.ScheduleEvent(EVENT_BERSERK, 12 * MINUTE * IN_MILLISECONDS);
 
             if (IsHeroic())
@@ -1180,6 +1179,17 @@ public:
                 if (CreatureAI* pHelperAI = pHorridonHelper->AI())
                     pHelperAI->DoAction(ACTION_FIGHT_BEGIN);
             }
+        }
+
+        void EnterEvadeModeIfRequired()
+        {
+            if (me->GetExactDist2d(&me->GetHomePosition()) > 190.f)
+            {
+                EnterEvadeMode();
+                return;
+            }
+
+            events.ScheduleEvent(EVENT_EVADE_CHECK, 2000);
         }
 
         void DoAction(const int32 iAction) override
@@ -1231,6 +1241,10 @@ public:
             {
                 switch (uiEventId)
                 {
+                    case EVENT_EVADE_CHECK:
+                        EnterEvadeModeIfRequired();
+                        break;
+
                     case EVENT_TRIPLE_PUNCTURE:
                         if (Unit *pVictim = me->GetVictim())
                             DoCast(pVictim, SPELL_TRIPLE_PUNCTURE);
@@ -1502,13 +1516,24 @@ public:
             pRendingChargeTarget = NULL;
         }
 
-        void JustSummoned(Creature* pSummoned)
+        void JustSummoned(Creature* pSummoned) override
         {
             if (Creature* Helper = GetHorridonHelper(me))
             {
                 if (Helper->AI())
                     Helper->AI()->JustSummoned(pSummoned);
             }
+        }
+
+        void EnterEvadeMode() override
+        {
+            float x, y, z, o;
+
+            me->GetHomePosition(x, y, z, o);
+            me->NearTeleportTo(x, y, z, o);
+            me->SetFacingTo(o);
+
+            ScriptedAI::EnterEvadeMode();
         }
 
         void IsSummonedBy(Unit *pSummoner) override
@@ -2128,6 +2153,111 @@ public:
     }
 };
 
+class npc_amani_shi_warbear : public CreatureScript
+{
+public:
+    npc_amani_shi_warbear() : CreatureScript("npc_amani_shi_warbear") {}
+
+    struct ai_impl : public ScriptedAI
+    {
+        ai_impl(Creature* pCreature) : ScriptedAI(pCreature) 
+        {
+            m_shamanGuid = 0;
+        }
+
+        uint64 m_shamanGuid;
+
+        Creature* GetShaman() const
+        {
+            return ObjectAccessor::GetCreature(*me, m_shamanGuid);
+        }
+
+        void EnterEvadeMode() override
+        {
+            float x, y, z, o;
+
+            me->GetHomePosition(x, y, z, o);
+            me->NearTeleportTo(x, y, z, o);
+            me->SetFacingTo(o);
+
+            ScriptedAI::EnterEvadeMode();
+        }
+
+        void Reset() override
+        {
+            if (Creature* pShaman = GetShaman())
+            {
+                pShaman->DespawnOrUnsummon();
+                m_shamanGuid = 0;
+            }
+
+            if (Creature* pNewShaman = me->SummonCreature(MOB_AMANI_SHI_BEAST_SHAMAN, *me))
+            {
+                pNewShaman->EnterVehicle(me, 0, true);
+                pNewShaman->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
+                m_shamanGuid = pNewShaman->GetGUID();
+            }
+        }
+
+        void JustDied(Unit* pKiller) override
+        {
+            if (Creature* pShaman = GetShaman())
+            {
+                pShaman->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
+            }
+        }
+
+        void MovementInform(uint32 uiMotionType, uint32 uiMovementId) override
+        {
+            if (uiMovementId == MOTION_MAJOR_JUMP)
+            {
+                DoZoneInCombat(me, 100.f);
+                events.ScheduleEvent(EVENT_SWIPE, 6000 + rand() % 4000);
+
+                if (Creature *pHorridon = GetHorridon(me))
+                {
+                    if (CreatureAI *pHorridonAI = pHorridon->AI())
+                    {
+                        if (Unit *pTarget = pHorridonAI->SelectTarget(SELECT_TARGET_RANDOM))
+                        {
+                            AttackStart(pTarget);
+                            if (GetShaman() && GetShaman()->AI())
+                                GetShaman()->AI()->AttackStart(pTarget);
+                        }
+                    }
+                }
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(uiDiff);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            switch (events.ExecuteEvent())
+            {
+            case EVENT_SWIPE:
+                DoCastAOE(SPELL_SWIPE);
+                events.ScheduleEvent(EVENT_SWIPE, 10 * IN_MILLISECONDS);
+                break;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new ai_impl(pCreature);
+    }
+};
+
 //////////////////////////////////////////////////////////////////////////
 // GameObject Scripts
 // Orb of Control AI
@@ -2497,6 +2627,7 @@ void AddSC_boss_horridon()
     new mob_direhorn_spirit();
     new npc_living_poison();
     new npc_venomous_effusion();
+    new npc_amani_shi_warbear();
    
     // gameobject
     new gob_horridon_orb_of_control();

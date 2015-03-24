@@ -215,6 +215,7 @@ enum eActions
     ACTION_ENTER_NEXT_TRASH_PHASE           = 2,
     ACTION_FIGHT_END                        = 3,
     ACTION_PREPARE_TRANSITION               = 4,
+    ACTION_RESET_AFTER_CRASH                = 10,
 
     //===============================================
     // Jalak
@@ -228,7 +229,7 @@ enum eActions
 
     //===============================================
     //Living Poison
-    ACTION_LIVING_POISON_DESPAWN            = 9
+    ACTION_LIVING_POISON_DESPAWN            = 9,
 };
 
 
@@ -670,8 +671,28 @@ public:
                     PrepareTransition();
                     break;
 
+                case ACTION_RESET_AFTER_CRASH:
+                    ResetRequiredCreatures();
+                    break;
+
                 default:
                     break;
+            }
+        }
+
+        void ResetRequiredCreatures()
+        {
+            std::list<Creature*> resets;
+            GetCreatureListWithEntryInGrid(resets, me, MOB_DRAKKARI_FROZEN_WARLORD, 1000.f);
+            GetCreatureListWithEntryInGrid(resets, me, MOB_GURUBASHI_VENOM_PRIEST, 1000.f);
+            GetCreatureListWithEntryInGrid(resets, me, MOB_FARRAKI_WASTEWALKER, 1000.f);
+            GetCreatureListWithEntryInGrid(resets, me, MOB_AMANI_WARBEAR, 1000.f);
+            GetCreatureListWithEntryInGrid(resets, me, MOB_ZANDALARI_DINOMANCER, 1000.f);
+
+            for (Creature const* pCreature : resets)
+            {
+                if (!pCreature->IsAlive())
+                    pCreature->Respawn();
             }
         }
 
@@ -1079,6 +1100,11 @@ public:
                         }
                         else
                         {
+                            if (Creature* pHelper = GetHorridonHelper(me))
+                            {
+                                if (pHelper->AI())
+                                    pHelper->AI()->DoAction(ACTION_RESET_AFTER_CRASH);
+                            }
                             events.ScheduleEvent(EVENT_INTRO_PART_I, 1000);
                             events.ScheduleEvent(EVENT_INTRO_PART_II, 7500);
                             events.ScheduleEvent(EVENT_INTRO_PART_III, 27500);

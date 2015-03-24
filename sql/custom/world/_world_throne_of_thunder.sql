@@ -1396,7 +1396,7 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (68476, 6, 0, '$n forces Horridon to charge the Gurubashi door!', 41, 0, 100, 0, 0, 0, 'Horridon to Player'),
 (68476, 7, 0, '$n forces Horridon to charge the Drakkari door!', 41, 0, 100, 0, 0, 0, 'Horridon to Player'),
 (68476, 8, 0, '$n forces Horridon to charge the Amani door!', 41, 0, 100, 0, 0, 0, 'Horridon to Player'),
-(69221, 0, 0, 'The Zandalari Dinomancer drops an Orb of Control!', 41, 0, 100, 0, 0, 0, 'Zandalari Dinomancer');
+(69221, 0, 0, 'The Zandalari Dinomancer drops an Orb of Control!', 41, 0, 100, 0, 0, 0, 'Zandalari Dinomancer'),
 
 (69374, 0, 0, 'Welcome, weaklings, to the rebirth of the Zandalari Empire!', 14, 0, 100, 0, 0, 36009, 'War-God Jalak INTRO 1'),
 (69374, 1, 0, 'The tribes have assembled - ye face not one force, but the combined might of all of the troll empire! The hand of Zul will span all the continents of Azeroth once again! An ye lesser races will know pain!', 14, 0, 100, 0, 0, 36010, 'War-God Jalak INTRO 2'),

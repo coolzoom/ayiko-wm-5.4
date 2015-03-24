@@ -138,7 +138,9 @@ public:
         bool SetBossState(uint32 uiId, EncounterState eState) override
         {
             TC_LOG_ERROR("scripts", "SetBossState called %u %u %u", uiId, (uint32)eState, instance->GetInstanceId());
-            if (!InstanceScript::SetBossState(uiId, eState) || uiId >= MAX_DATA)
+            if (!InstanceScript::SetBossState(uiId, eState))
+                return false;
+            if (uiId >= MAX_DATA);
                 return false;
             TC_LOG_ERROR("scripts", "successfully");
             switch (uiId)
@@ -354,7 +356,7 @@ public:
                 if (m_auiEncounter[i] == IN_PROGRESS)                // Do not load an encounter as "In Progress" - reset it instead.
                     m_auiEncounter[i] = NOT_STARTED;
                 else if (m_auiEncounter[i] == DONE)
-                    SetBossState(m_auiEncounter[i], (EncounterState)DONE);
+                    SetBossState(i, (EncounterState)DONE);
             }
 
             if (m_auiEncounter[TYPE_JINROKH_INTRO] == DONE)

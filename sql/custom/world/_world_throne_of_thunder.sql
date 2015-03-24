@@ -903,9 +903,9 @@ UPDATE creature_template SET LootId = @RAID_DIFF_25R + 68476, dmg_multiplier = 1
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Trash Mobs SAI
-UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` IN (70308,70341,70448);
+UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` IN (70308,70341,70445,70448);
 UPDATE `creature_template` SET `AIName` = 'SmartAI', `ScriptName` = '' WHERE `entry` IN (69176,69215);
-DELETE FROM `smart_scripts` WHERE `entryorguid`IN (69176,69215,70341,70448, 70308) AND `source_type`= 0;
+DELETE FROM `smart_scripts` WHERE `entryorguid`IN (69176,69215,70308,70341,70445,70448) AND `source_type`= 0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
 (69176, 0, 0, 0, 9, 0, 100, 0, 7, 40, 2000, 3000, 11, 136480, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Amani'shi Beast Shaman - Cast Chain Lightning"),
 (69176, 0, 1, 0, 0, 0, 100, 0, 8000, 9000, 22000, 25000, 11, 136512, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, "Amani'shi Beast Shaman - Cast Hex of Confusion"),
@@ -917,6 +917,9 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (70308, 0, 0, 0, 0, 0, 100, 0, 10000, 12000, 15000, 25000, 11, 139895, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Soul-Fed Construct - Cast Spiritfire Beam"),
 (70308, 0, 1, 0, 0, 0, 100, 0, 8000, 15000, 15000, 18000, 11, 33661, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Soul-Fed Construct - Cast Crush Armor"),
 (70341, 0, 0, 0, 0, 0, 100, 0, 3000, 10000, 7000, 10000, 11, 139550, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Tormented Spirit - Cast Torment"),
+(70445, 0, 0, 0, 1, 0, 100, 1, 1, 1, 0, 0, 11, 139871, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Stormbringer Draz'kil - Cast Stormbringing OOC"),
+(70445, 0, 1, 0, 0, 0, 100, 0, 7000, 8000, 8000, 9000, 11, 139900, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, "Stormbringer Draz'kil - Cast Stormcloud on random players"),
+(70445, 0, 2, 0, 0, 0, 100, 0, 4000, 5000, 10000, 15000, 11, 139903, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Stormbringer Draz'kil - Cast Chain Lightning"),
 (70448, 0, 0, 0, 1, 0, 100, 0, 1, 1, 1, 1, 11, 139885, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Ancient Python - Cast Stealth OOC"),
 (70448, 0, 1, 0, 0, 0, 100, 0, 3000, 13000, 6000, 20000, 11, 139888, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Ancient Python - Cast Ancient Venom");
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -1406,7 +1409,7 @@ REPLACE INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconN
 (218376, 10, 7951, 'Orb of Control', '', '', '', 0, 0, 1, 0, 0, 0, 0, 0, 0, 86, 0, 0, 3000, 0, 1, 0, 0, 0, 0, 137444, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, '', 'gob_horridon_orb_of_control', 17658),
 (218663, 0, 13679, 'Wrought Iron Door', '', '', '', 1375, 32, 1.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 17658),
 (218666, 0, 13679, 'Wrought Iron Door', '', '', '', 1375, 32, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 17658),
-(218669, 0, 13679, 'Wrought Iron Door', '', '', '', 1375, 32, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 17658),
+(218669, 0, 13679, 'Wrought Iron Door', '', '', '', 0, 32, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 17658),
 (218670, 0, 13589, 'Gurubashi Tribal Door', '', '', '', 1375, 48, 1, 0, 0, 0, 0, 0, 0, 0, 77, 3000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 17658),
 (218671, 0, 13590, 'Drakkari Tribal Door', '', '', '', 1375, 48, 1, 0, 0, 0, 0, 0, 0, 0, 77, 3000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 17658),
 (218672, 0, 13591, 'Farraki Tribal Door', '', '', '', 1375, 48, 1, 0, 0, 0, 0, 0, 0, 0, 77, 3000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 17658),

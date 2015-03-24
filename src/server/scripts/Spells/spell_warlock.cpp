@@ -1973,7 +1973,7 @@ class spell_warl_fire_and_brimstone : public SpellScriptLoader
             void HandleOnHit()
             {
                 if (Player* player = GetCaster()->ToPlayer())
-                    if (GetHitUnit())
+                    if (GetHitUnit() && player->GetPower(POWER_BURNING_EMBERS) < 10)
                         player->RemoveAura(WARLOCK_FIRE_AND_BRIMSTONE);
             }
 

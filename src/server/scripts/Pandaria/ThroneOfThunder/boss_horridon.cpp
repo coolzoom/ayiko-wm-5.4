@@ -1595,6 +1595,11 @@ public:
                 DoCast(pRendingChargeTarget, SPELL_RENDING_CHARGE_DAMAGES);;
         }
 
+        bool HasAuraOfType(Unit* pUnit)
+        {
+            return (pUnit->HasAuraType(SPELL_AURA_MOD_PACIFY_SILENCE) || pUnit->HasAura(SPELL_STONE_GAZE));
+        }
+
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!UpdateVictim())
@@ -1612,12 +1617,19 @@ public:
                     // Farraki
                     case EVENT_STONE_GAZE:
                         if (Unit *pVictim = me->GetVictim())
-                            DoCast(pVictim, SPELL_STONE_GAZE);
+                        {
+                            if (!HasAuraOfType(pVictim))
+                            {
+                                DoCast(pVictim, SPELL_STONE_GAZE);
+                                events.ScheduleEvent(EVENT_STONE_GAZE, 10 * IN_MILLISECONDS);
 
-                        if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -SPELL_STONE_GAZE))
-                            ScriptedAI::AttackStart(pTarget);
+                                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -SPELL_STONE_GAZE))
+                                    ScriptedAI::AttackStart(pTarget);
 
-                        events.ScheduleEvent(EVENT_STONE_GAZE, 10 * IN_MILLISECONDS);
+                                return;
+                            }
+                            events.ScheduleEvent(EVENT_STONE_GAZE, 1000);
+                        }
                         break;
 
                     case EVENT_BLAZING_LIGHT:
@@ -2309,19 +2321,16 @@ public:
         PrepareAuraScript(spell_control_horridon_AuraScript)
 
         void HandleRemove(AuraEffect const* pAuraEffect, AuraEffectHandleModes eMode)
-        {   
+        {
             if (AuraApplication const* pAuraApp = GetTargetApplication())
             {
-                if (pAuraApp->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
+                if (WorldObject *pOwner = GetOwner())
                 {
-                    if (WorldObject *pOwner = GetOwner())
+                    if (Creature *pHorridon = GetHorridon(pOwner))
                     {
-                        if (Creature *pHorridon = GetHorridon(pOwner))
+                        if (HorridonAI *pHorridonAI = dynamic_cast<HorridonAI*>(pHorridon->AI()))
                         {
-                            if (HorridonAI *pHorridonAI = dynamic_cast<HorridonAI*>( pHorridon->AI() ))
-                            {
-                                pHorridonAI->ChargeAtDoor(GetDoorBySpell(GetSpellInfo()->Id, pHorridon));
-                            }
+                            pHorridonAI->ChargeAtDoor(GetDoorBySpell(GetSpellInfo()->Id, pHorridon));
                         }
                     }
                 }

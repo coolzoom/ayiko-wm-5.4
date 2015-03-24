@@ -3380,8 +3380,6 @@ class spell_dru_eclipse : public SpellScriptLoader
 
                     if (found)
                         caster->ToPlayer()->RemoveSpellCooldown(GetSpellInfo()->Id, true);
-
-                    caster->RemoveAura(SPELL_DRUID_SHOOTING_STARS);
                 }
             }
 

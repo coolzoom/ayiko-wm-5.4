@@ -4978,6 +4978,7 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 122510:// Ultimatum
                 case 115317:// Raging Wind
                 case 51124: // Killing Machine
+                case 93400: // Shooting Stars
                     spellInfo->ProcCharges = 1;
                     break;
                 case 110600:// Ice Trap (Symbiosis)

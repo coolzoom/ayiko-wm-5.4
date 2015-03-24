@@ -1777,7 +1777,7 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (69909, 0, 0, 0, 1, 0, 100, 1, 1, 1, 0, 0, 28, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Amani'shi Flame Chanter - Remove all aura OOC"),
 (69909, 0, 1, 0, 1, 0, 100, 1, 2, 2, 0, 0, 11, 138432, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Amani'shi Flame Chanter - Aura"),
 (69909, 0, 2, 0, 0, 0, 100, 0, 4000, 8000, 13000, 24000, 11, 138607, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Amani'shi Flame Chanter - Cast Call Flames"),
-(69909, 0, 3, 8, 0, 0, 100, 0, 6000, 10000, 10000, 20000, 11, 138652, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, "Amani'shi Flame Chanter - Cast Eruption"),
+(69909, 0, 3, 0, 0, 0, 100, 0, 6000, 10000, 10000, 20000, 11, 138652, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, "Amani'shi Flame Chanter - Cast Eruption"),
 (69909, 0, 4, 0, 31, 0, 100, 0, 138607, 0, 1000, 1000, 11, 138610, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Amani'shi Flame Chanter - Cast Fiery Core after Call Flames"),
 (69909, 0, 5, 0, 31, 0, 100, 0, 138652, 0, 1000, 1000, 11, 138610, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Amani'shi Flame Chanter - Cast Fiery Core after Eruption"),
 (69909, 0, 6, 7, 23, 0, 100, 0, 138610, 5, 1000, 1000, 11, 138651, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Amani'shi Flame Chanter - Cast Molten Barrage on Fiery Core's stacks x5"),

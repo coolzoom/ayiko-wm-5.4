@@ -729,22 +729,11 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 -- 10N (BASE HP: 25 = X : 10)
 -- 10H=(10N+25%)
 
-DELETE FROM `creature_text` WHERE `entry` IN (68476, 69221);
-INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
-(68476, 0, 0, 'Farraki forces pour from the Farraki Tribal Door!', 41, 0, 100, 0, 0, 0, 'War-God Jalak'),
-(68476, 1, 0, 'Gurubashi forces pour from the Gurubashi Tribal Door!', 41, 0, 100, 0, 0, 0, 'War-God Jalak'),
-(68476, 2, 0, 'Drakkari forces pour from the Drakkari Tribal Door!', 41, 0, 100, 0, 0, 0, 'War-God Jalak'),
-(68476, 3, 0, 'Amani forces pour from the Amani Tribal Door!', 41, 0, 100, 0, 0, 0, 'War-God Jalak'),
-(68476, 4, 0, 'Horridon sets his eyes on $n and stamps his tail!', 41, 0, 100, 0, 0, 0, 'Horridon to Player'),
-(69221, 0, 0, 'The Zandalari Dinomancer drops an Orb of Control!', 41, 0, 100, 0, 0, 0, 'Zandalari Dinomancer');
-
 UPDATE `creature_template` SET `ScriptName` = 'mob_horridon_trashs' WHERE `entry` IN 
 (69164,69167,69168,69169,69170,69172,69173,69175,69177,69178,69184,69185);
 
 UPDATE `creature_template` SET `ScriptName` = 'mob_horridon_summons' WHERE `entry` IN 
 (69268,69313,69314,69346);
-UPDATE `creature_template` SET `ScriptName` = 'npc_living_poison' WHERE `entry` = 69313;
-UPDATE `creature_template` SET `ScriptName` = 'npc_venomous_effusion' WHERE `entry` = 69314;
 
 UPDATE `creature_template` SET `ScriptName` = 'mob_direhorn_spirit' WHERE `entry` = 70688;
 UPDATE `creature_template` SET `ScriptName` = 'mob_zandalari_dinomancer' WHERE `entry` = 69221;
@@ -951,7 +940,7 @@ REPLACE INTO `creature_equip_template` (`entry`, `itemEntry1`, `itemEntry2`, `it
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
--- Horridon Loots
+-- Horridon Loots & Currency
 DELETE FROM `creature_loot_template` WHERE entry IN(3168476, 3268476, 3368476, 3468476, 3568476);
 INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
 -- Horridon 10 NM
@@ -1093,6 +1082,13 @@ INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `l
 (3568476, 95647, 0, 1, 5, 1, 1),
 (3568476, 95657, 0, 1, 5, 1, 1),
 (3568476, 95877, 5, 1, 10, -95877, 1);
+
+ DELETE FROM `creature_template_currency` WHERE `entry` IN(3168476,3268476,3368476,3468476);
+ INSERT INTO `creature_template_currency` VALUES
+(3168476, 396, 40),
+(3268476, 396, 40),
+(3368476, 396, 40),
+(3468476, 396, 40);
 /*----------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -1258,7 +1254,7 @@ INSERT INTO `creature` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMa
 (@CGUID+230, 70246, 1098, 0, 0, 248, 1, 0, 70246, 5426.55, 6061.12, 117.79, 2.63834, 1, 0, @CGUID+230, 393941, 0, 2, 0, 0, 0, 2048, 0, 0, NULL),
 
 (@CGUID+233, 662202, 1098, 0, 0, 248, 1, 0, 0, 5432.21, 5866.93, 235.962, 4.64324, 86400, 0, 0, 84, 0, 0, 0, 0, 33554432, 0, 0, 1, NULL),
-(@CGUID+234, 662206, 1098, 0, 0, 248, 1, 0, 0, 5431.36, 5812.71, 129.605, 1.56204, 86400, 0, 0, 436137, 0, 0, 0, 0, 33554432, 0, 0, 0, NULL),
+(@CGUID+234, 662206, 1098, 0, 0, 248, 1, 0, 0, 5428.32, 5742.16, 129.604, 1.56204, 86400, 0, 0, 436137, 0, 0, 0, 0, 33554432, 0, 0, 0, NULL),
 
 (@CGUID+236, 54020, 1098, 0, 0, 248, 1, 0, 0, 5515.29, 5646.11, 130.089, 2.39389, 86400, 0, 0, 84, 0, 0, 0, 0, 33554432, 0, 0, 0, NULL),
 (@CGUID+237, 54020, 1098, 0, 0, 248, 1, 0, 0, 5539.28, 5671.98, 130.085, 2.39389, 86400, 0, 0, 84, 0, 0, 0, 0, 33554432, 0, 0, 0, NULL),

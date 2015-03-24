@@ -4770,9 +4770,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 86698: // Guardian of Ancient Kings
                     spellInfo->Effects[0].TargetA = TARGET_CHECK_ENTRY;
                     break;
-                case 86674: // Ancient Healer
-                    spellInfo->ProcCharges = 5;
-                    break;
                 case 86657: // Ancient Guardian
                     spellInfo->Effects[0].TargetA = TARGET_UNIT_TARGET_ANY;
                     spellInfo->Effects[1].ApplyAuraName = SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN;

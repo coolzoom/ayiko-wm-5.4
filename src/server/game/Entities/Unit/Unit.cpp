@@ -7675,17 +7675,15 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                     if (GetTypeId() != TYPEID_PLAYER)
                         return false;
 
+                    if (effIndex != 1)
+                        return false;
+
                     // if caster has no guardian of ancient kings aura then remove dummy aura
                     if (!HasAura(86669))
                     {
                         RemoveAurasDueToSpell(86674);
                         return false;
                     }
-
-                    // check for single target spell (TARGET_SINGLE_FRIEND, NO_TARGET)
-                    if (!(procSpell->Effects[triggeredByAura->GetEffIndex()].TargetA.GetTarget() == TARGET_UNIT_TARGET_ALLY) &&
-                        (procSpell->Effects[triggeredByAura->GetEffIndex()].TargetB.GetTarget() == 0))
-                        return false;
 
                     std::list<Creature*> petlist;
                     GetCreatureListWithEntryInGrid(petlist, 46499, 100.0f);

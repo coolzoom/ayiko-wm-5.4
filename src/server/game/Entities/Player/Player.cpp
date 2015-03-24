@@ -905,6 +905,7 @@ Player::Player(WorldSession* session)
     m_averageSpeed = 0.0f;
 
     m_queuedSpell = NULL;
+    m_logonSendTimer = 60 * IN_MILLISECONDS;
 }
 
 Player::~Player()
@@ -1997,6 +1998,21 @@ void Player::Update(uint32 p_time)
     Pet* pet = GetPet();
     if (pet && !pet->isPossessed() && !pet->IsWithinDistInMap(this, GetMap()->GetVisibilityRange()))
         RemovePet(PET_REMOVE_DISMISS, PET_REMOVE_FLAG_RETURN_REAGENT | PET_REMOVE_FLAG_RESET_CURRENT);
+
+    if (m_logonSendTimer < p_time)
+    {
+        if (GetSession()->HasPermission(rbac::RBAC_PERM_BROADCAST_LOGON_CHANGE))
+        {
+            WorldPacket* data = new WorldPacket();
+            // Yes hardcoded ftw
+            const char* mess = "|cff99cc00Your game client is using our old realmlist to connect. Please update your realmlist to|r |cffffb100logon.warmane.com|r|cff99cc00. Tutorial on how to update your realmlist can be found at|r |cffffb100http://forum.warmane.com/showthread.php?t=290754|r|cff99cc00. Realmlist can be updated at any time and has no impact on your game progress.|r";
+            ChatHandler::FillMessageData(data, NULL, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, NULL, 0, mess, NULL);
+            SendDirectMessage(data);
+        }
+        m_logonSendTimer = 5 * 60 * IN_MILLISECONDS;
+    }
+    else
+        m_logonSendTimer -= p_time;
 
     //we should execute delayed teleports only for alive(!) players
     //because we don't want player's ghost teleported from graveyard

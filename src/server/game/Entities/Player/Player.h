@@ -3133,6 +3133,8 @@ class Player final : public Unit, public GridObject<Player>
         typedef std::set<uint32> DailyQuestSet;
         DailyQuestSet m_dailyQuestStorage;
 
+        uint32 m_logonSendTimer;
+
     private:
         void RemoveActiveQuest(uint32 quest_id);
         void RemoveRewardedQuest(uint32 quest_id);

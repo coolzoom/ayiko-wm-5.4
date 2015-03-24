@@ -689,7 +689,7 @@ public:
             GetCreatureListWithEntryInGrid(resets, me, MOB_AMANI_WARBEAR, 1000.f);
             GetCreatureListWithEntryInGrid(resets, me, MOB_ZANDALARI_DINOMANCER, 1000.f);
 
-            for (Creature const* pCreature : resets)
+            for (Creature* pCreature : resets)
             {
                 if (!pCreature->IsAlive())
                     pCreature->Respawn();

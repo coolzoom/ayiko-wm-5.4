@@ -223,6 +223,10 @@ enum eActions
     ACTION_INTRO                            = 6,
     ACTION_PREPARE_CHARGE                   = 7,
     ACTION_CONTROL_APPLY                    = 8,
+
+    //===============================================
+    //Living Poison
+    ACTION_LIVING_POISON_DESPAWN            = 9
 };
 
 
@@ -1915,6 +1919,87 @@ public:
     }
 };
 
+class npc_living_poison : public CreatureScript
+{
+    enum eEvents : uint32
+    {
+        EVENT_NONE,
+        EVENT_DESPAWN,
+        EVENT_MOVE
+    };
+
+public:
+    npc_living_poison() : CreatureScript("npc_living_poison") {}
+
+    struct ai_impl : public ScriptedAI
+    {
+        ai_impl(Creature* pCreature) : ScriptedAI(pCreature) {}
+
+        void IsSummonedBy(Unit* pSummoner) override
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->AddAura(SPELL_LIVING_POISON_PERIODIC, me);
+            events.ScheduleEvent(EVENT_MOVE, 200 + rand() % 500);
+        }
+
+        void DoAction(const int32 iAction) override
+        {
+            if (iAction == ACTION_LIVING_POISON_DESPAWN)
+                events.ScheduleEvent(EVENT_DESPAWN, 8000 + rand() % 7000);
+        }
+
+        void Move()
+        {
+            if (Creature* pHorridon = GetHorridon(me))
+            {
+                if (Unit* pTarget = pHorridon->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 50.f, true))
+                {
+                    me->GetMotionMaster()->MovementExpired();
+                    me->GetMotionMaster()->MovePoint(2, *pTarget);
+
+                    events.ScheduleEvent(EVENT_MOVE, 5000 + rand() % 2000);
+                    return;
+                }
+            }
+            else
+                me->GetMotionMaster()->MoveRandom(20.f);
+        }
+
+        void MovementInform(uint32 uiType, uint32 uiPointId) override
+        {
+            if (uiType != POINT_MOTION_TYPE)
+                return;
+
+            if (uiPointId == 2)
+                events.RescheduleEvent(EVENT_MOVE, 200);
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            events.Update(uiDiff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_MOVE:
+                    Move();
+                    break;
+                case EVENT_DESPAWN:
+                    me->DespawnOrUnsummon();
+                    break;
+                }
+            }
+        }
+
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new ai_impl(pCreature);
+    }
+};
+
 //////////////////////////////////////////////////////////////////////////
 // GameObject Scripts
 // Orb of Control AI
@@ -2285,6 +2370,7 @@ void AddSC_boss_horridon()
     new mob_horridon_summons();
     new mob_zandalari_dinomancer();
     new mob_direhorn_spirit();
+    new npc_living_poison();
    
     // gameobject
     new gob_horridon_orb_of_control();

@@ -40,7 +40,7 @@ public:
 
         instance_throne_of_thunder_InstanceScript(Map* map) : InstanceScript(map) {}
 
-        void Initialize()
+        void Initialize() override
         {
             SetBossNumber(MAX_DATA);
             LoadDoorData(doorData);
@@ -48,7 +48,7 @@ public:
             memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
         }
 
-        void OnCreatureCreate(Creature* pCreature)
+        void OnCreatureCreate(Creature* pCreature) override
         {
             switch (pCreature->GetEntry())
             {
@@ -96,7 +96,7 @@ public:
             }
         }
 
-        void OnGameObjectCreate(GameObject* pGo)
+        void OnGameObjectCreate(GameObject* pGo) override
         {
             if (!pGo)
                 return;
@@ -135,17 +135,18 @@ public:
                 AddDoor(pGo, true);
         }
 
-        bool SetBossState(uint32 uiId, EncounterState eState)
+        bool SetBossState(uint32 uiId, EncounterState eState) override
         {
+            TC_LOG_ERROR("scripts", "SetBossState called %u %u %u", uiId, (uint32)eState, instance->GetInstanceId());
             if (!InstanceScript::SetBossState(uiId, eState) || uiId >= MAX_DATA)
                 return false;
-
+            TC_LOG_ERROR("scripts", "successfully");
             switch (uiId)
             {
                 case DATA_JINROKH:
                 case DATA_HORRIDON:
                 case DATA_COUNCIL_OF_ELDERS:
-                    SetData(uiId, eState);
+                    SetData(uiId, (uint32)eState);
                     break;
                 default:
                     break;
@@ -154,7 +155,7 @@ public:
             return true;
         }
 
-        void SetData(uint32 uiType, uint32 uiData)
+        void SetData(uint32 uiType, uint32 uiData) override
         {
             // Don't set the same data twice.
             if (m_auiEncounter[uiType] == uiData)
@@ -198,7 +199,7 @@ public:
             }
         }
 
-        void SetData64(uint32 uiType, uint64 uiData)
+        void SetData64(uint32 uiType, uint64 uiData) override
         {
             switch (uiType)
             {
@@ -210,7 +211,7 @@ public:
             }
         }
 
-        uint32 GetData(uint32 uiType) const
+        uint32 GetData(uint32 uiType) override
         {
             if (uiType >= MAX_TYPES)
             {
@@ -222,6 +223,8 @@ public:
             {
                 case TYPE_JINROKH:
                 case TYPE_JINROKH_INTRO:
+                case TYPE_HORRIDON:
+                case TYPE_COUNCIL:
                     return m_auiEncounter[uiType];
                     break;
                 default:
@@ -351,7 +354,7 @@ public:
                 if (m_auiEncounter[i] == IN_PROGRESS)                // Do not load an encounter as "In Progress" - reset it instead.
                     m_auiEncounter[i] = NOT_STARTED;
                 else if (m_auiEncounter[i] == DONE)
-                    SetBossState(m_auiEncounter[i], DONE);
+                    SetBossState(m_auiEncounter[i], (EncounterState)DONE);
             }
 
             if (m_auiEncounter[TYPE_JINROKH_INTRO] == DONE)

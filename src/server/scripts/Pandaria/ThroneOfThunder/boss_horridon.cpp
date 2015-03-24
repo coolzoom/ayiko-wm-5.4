@@ -250,7 +250,7 @@ enum eMotions
 };
 
 
-enum eTalks
+enum eTalks : uint32
 {
     TALK_INTRO_FIRST                        = 0, // Welcome weaklings
     TALK_INTRO_SECOND                       = 1, // The tribes have assembled
@@ -267,7 +267,11 @@ enum eTalks
     EMOTE_GURUBASHI                         = 1,
     EMOTE_DRAKKARI                          = 2,
     EMOTE_AMANI                             = 3,
-    EMOTE_CHARGE                            = 4
+    EMOTE_CHARGE                            = 4,
+    EMOTE_FARAKKI_DOOR                      = 5,
+    EMOTE_GURUBASHI_DOOR                    = 6,
+    EMOTE_DRAKKARI_DOOR                     = 7,
+    EMOTE_AMANI_DOOR                        = 8,
 };
 
 enum eGameObjects
@@ -284,20 +288,20 @@ enum eGameObjects
     GOB_HORRIDON_PRISON_DOOR                = 218674,
 };
 
-enum eDatas
+enum eDatas : uint32
 {
     DATA_AMANI_BEAST_SHAMAN_LIGHTNING_COUNT = 0, // To know how many time we stroke
 };
 
 
-enum eBossPhases
+enum eBossPhases : uint32
 {
     BOSS_PHASE_SUMMONS                      = 0,
     BOSS_PHASE_JALAK                        = 1
 };
 #define MAX_BOSS_PHASE BOSS_PHASE_JALAK + 1
 
-enum eTrashPhases
+enum eTrashPhases : uint32
 {
     TRASH_PHASE_FARRAKI                     = 0,
     TRASH_PHASE_GURUBASHI                   = 1,
@@ -449,6 +453,22 @@ static Creature *GetJalak(WorldObject *source)
 static Creature *GetHorridonHelper(WorldObject *source)
 {
     return ObjectAccessor::GetCreature(*source, source->GetInstanceScript()->GetData64(NPC_HORRIDON_EVENT_HELPER));
+}
+
+static uint32 GetNewEmoteBySpell(uint32 spellId)
+{
+    switch (spellId)
+    {
+    case SPELL_CONTROL_HORRIDON_FARRAKI:
+        return EMOTE_FARAKKI_DOOR;
+    case SPELL_CONTROL_HORRIDON_GURUBASHI:
+        return EMOTE_GURUBASHI_DOOR;
+    case SPELL_CONTROL_HORRIDON_DRAKKARI:
+        return EMOTE_DRAKKARI_DOOR;
+    case SPELL_CONTROL_HORRIDON_AMANI:
+        return EMOTE_AMANI_DOOR;
+    }
+    return 0;
 }
 
 static GameObject *GetDoorByPhase(eTrashPhases phase, WorldObject *source)
@@ -1062,7 +1082,7 @@ public:
                             events.ScheduleEvent(EVENT_INTRO_PART_I, 1000);
                             events.ScheduleEvent(EVENT_INTRO_PART_II, 7500);
                             events.ScheduleEvent(EVENT_INTRO_PART_III, 27500);
-                            events.ScheduleEvent(EVENT_INTRO_PART_IV, 29500);
+                            events.ScheduleEvent(EVENT_INTRO_PART_IV, 30000);
                         }
 
                         break;
@@ -1122,8 +1142,8 @@ public:
     {
         boss_horridon_AI(Creature *pCreature) : BossAI(pCreature, DATA_HORRIDON), pInstance(pCreature->GetInstanceScript()), bJalakCalled(false)
         {
-            me->SetReactState(REACT_PASSIVE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
+            me->SetReactState(REACT_PASSIVE);
             pChargeDoor = NULL;
             events.Reset();
         }
@@ -1152,7 +1172,7 @@ public:
             pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
 
-        void EnterEvadeMode() override
+        void EnterEvadeMode()
         {
             if (me->HasUnitState(UNIT_STATE_CANNOT_TURN))
                 me->ClearUnitState(UNIT_STATE_CANNOT_TURN);
@@ -2194,7 +2214,7 @@ public:
             if (Creature* pNewShaman = me->SummonCreature(MOB_AMANI_SHI_BEAST_SHAMAN, *me))
             {
                 pNewShaman->EnterVehicle(me, 0, true);
-                pNewShaman->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
+                pNewShaman->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 m_shamanGuid = pNewShaman->GetGUID();
             }
         }
@@ -2343,9 +2363,9 @@ public:
     bool operator()(WorldObject* target) const
     {
         if (spellId == SPELL_DOUBLE_SWIPE_FRONT)
-            return target && !caster->HasInArc((caster->GetOrientation()*M_PI / 4), target);
+            return target && !caster->HasInArc((caster->GetOrientation()*M_PI / 5.1f), target);
         else
-            return target && !target->isInBack(caster, M_PI / 4);
+            return target && caster->HasInArc(2 * M_PI - (M_PI / 5.1f), target);
     }
 };
 
@@ -2429,7 +2449,7 @@ public:
 
         void Register()
         {
-            OnEffectHitTarget += SpellEffectFn(spell_horridon_chain_lightning_SpellScript::HandleEffectHitTarget, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            //OnEffectHitTarget += SpellEffectFn(spell_horridon_chain_lightning_SpellScript::HandleEffectHitTarget, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
         }
     };
 
@@ -2461,6 +2481,11 @@ public:
                         if (HorridonAI *pHorridonAI = dynamic_cast<HorridonAI*>(pHorridon->AI()))
                         {
                             pHorridonAI->ChargeAtDoor(GetDoorBySpell(GetSpellInfo()->Id, pHorridon));
+
+                            if (Unit* pCaster = GetCaster())
+                            {
+                                pHorridon->AI()->Talk(GetNewEmoteBySpell(GetSpellInfo()->Id), pCaster->GetGUID());
+                            }
                         }
                     }
                 }

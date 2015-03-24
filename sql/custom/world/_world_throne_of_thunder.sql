@@ -952,7 +952,7 @@ REPLACE INTO `creature_equip_template` (`entry`, `itemEntry1`, `itemEntry2`, `it
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
--- Horridon Loots
+-- Horridon Loots & Currency
 DELETE FROM `creature_loot_template` WHERE entry IN(3168476, 3268476, 3368476, 3468476, 3568476);
 INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
 -- Horridon 10 NM
@@ -1094,6 +1094,13 @@ INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `l
 (3568476, 95647, 0, 1, 5, 1, 1),
 (3568476, 95657, 0, 1, 5, 1, 1),
 (3568476, 95877, 5, 1, 10, -95877, 1);
+
+ DELETE FROM `creature_template_currency` WHERE `entry` IN(3168476,3268476,3368476,3468476);
+ INSERT INTO `creature_template_currency` VALUES
+(3168476, 396, 40),
+(3268476, 396, 40),
+(3368476, 396, 40),
+(3468476, 396, 40);
 /*----------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -1259,7 +1266,7 @@ INSERT INTO `creature` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMa
 (@CGUID+230, 70246, 1098, 0, 0, 248, 1, 0, 70246, 5426.55, 6061.12, 117.79, 2.63834, 1, 0, @CGUID+230, 393941, 0, 2, 0, 0, 0, 2048, 0, 0, NULL),
 
 (@CGUID+233, 662202, 1098, 0, 0, 248, 1, 0, 0, 5432.21, 5866.93, 235.962, 4.64324, 86400, 0, 0, 84, 0, 0, 0, 0, 33554432, 0, 0, 1, NULL),
-(@CGUID+234, 662206, 1098, 0, 0, 248, 1, 0, 0, 5431.36, 5812.71, 129.605, 1.56204, 86400, 0, 0, 436137, 0, 0, 0, 0, 33554432, 0, 0, 0, NULL),
+(@CGUID+234, 662206, 1098, 0, 0, 248, 1, 0, 0, 5428.32, 5742.16, 129.604, 1.56204, 86400, 0, 0, 436137, 0, 0, 0, 0, 33554432, 0, 0, 0, NULL),
 
 (@CGUID+236, 54020, 1098, 0, 0, 248, 1, 0, 0, 5515.29, 5646.11, 130.089, 2.39389, 86400, 0, 0, 84, 0, 0, 0, 0, 33554432, 0, 0, 0, NULL),
 (@CGUID+237, 54020, 1098, 0, 0, 248, 1, 0, 0, 5539.28, 5671.98, 130.085, 2.39389, 86400, 0, 0, 84, 0, 0, 0, 0, 33554432, 0, 0, 0, NULL),
@@ -1387,8 +1394,14 @@ INSERT INTO `waypoint_data` VALUES
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Creature Speeches
-DELETE FROM `creature_text` WHERE `entry` = 69374;
+DELETE FROM `creature_text` WHERE `entry` IN (68476, 69221,69374);
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(68476, 0, 0, 'Farraki forces pour from the Farraki Tribal Door!', 41, 0, 100, 0, 0, 0, 'War-God Jalak'),
+(68476, 1, 0, 'Gurubashi forces pour from the Gurubashi Tribal Door!', 41, 0, 100, 0, 0, 0, 'War-God Jalak'),
+(68476, 2, 0, 'Drakkari forces pour from the Drakkari Tribal Door!', 41, 0, 100, 0, 0, 0, 'War-God Jalak'),
+(68476, 3, 0, 'Amani forces pour from the Amani Tribal Door!', 41, 0, 100, 0, 0, 0, 'War-God Jalak'),
+(68476, 4, 0, 'Horridon sets his eyes on $n and stamps his tail!', 41, 0, 100, 0, 0, 0, 'Horridon to Player'),
+
 (69374, 0, 0, 'Welcome, weaklings, to the rebirth of the Zandalari Empire!', 14, 0, 100, 0, 0, 36009, 'War-God Jalak INTRO 1'),
 (69374, 1, 0, 'The tribes have assembled - ye face not one force, but the combined might of all of the troll empire! The hand of Zul will span all the continents of Azeroth once again! An ye lesser races will know pain!', 14, 0, 100, 0, 0, 36010, 'War-God Jalak INTRO 2'),
 (69374, 2, 0, 'Now, witness the true might of the Beast Ward. D\'akala di\'chuka HORRIDON! Kalimaste!', 14, 0, 100, 0, 0, 36011, 'War-God Jalak INTRO 3'),
@@ -1398,7 +1411,9 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (69374, 6, 0, 'Farraki tribe, flay their flesh wit the fury of the sands!', 14, 0, 100, 0, 0, 36015, 'War-God Jalak SPELL 3'),
 (69374, 7, 0, 'Amani tribe, avenge ye fallen warlords, in the name of Zul\'jin!', 14, 0, 100, 0, 0, 36016, 'War-God Jalak SPELL 4'),
 (69374, 8, 0, 'Ya skull gonna make a fine ornament for my tusks.', 14, 0, 100, 0, 0, 36012, 'War-God Jalak Kill'),
-(69374, 9, 0, 'Da\'kala koraste...Horridon...destroy them...', 14, 0, 100, 0, 0, 36008, 'War-God Jalak Death');
+(69374, 9, 0, 'Da\'kala koraste...Horridon...destroy them...', 14, 0, 100, 0, 0, 36008, 'War-God Jalak Death'),
+
+(69221, 0, 0, 'The Zandalari Dinomancer drops an Orb of Control!', 41, 0, 100, 0, 0, 0, 'Zandalari Dinomancer');
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/

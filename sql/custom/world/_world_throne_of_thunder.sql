@@ -597,7 +597,12 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 (69178, 0, 0, 0, 0, 0, 47447, 47448, 47449, 47450, 'Drakkari Frozen Warlord', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 16.2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 17614,69178),
 (69184, 0, 0, 0, 0, 0, 47446, 27056, 47558, 0, 'Risen Drakkari Warrior', '', '', 0, 91, 91, 4, 16, 16, 0, 1, 1.42857, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 0, 0, '', 17614,69184),
 (69185, 0, 0, 0, 0, 0, 47556, 47557, 0, 0, 'Risen Drakkari Champion', '', '', 0, 91, 91, 4, 16, 16, 0, 1, 1.42857, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 0, 0, '', 17614,69185),
+(69215, 0, 0, 0, 0, 0, 47354, 0, 0, 0, 'Lightning Nova Totem', '', '', 0, 93, 93, 4, 16, 16, 0, 0.01, 0.01, 1, 0, 9839, 14339, 0, 42299, 1, 2000, 2000, 1, 131076, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 3, 1, 5, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 17614,0),
 (69221, 0, 0, 0, 0, 0, 47494, 47495, 47496, 47497, 'Zandalari Dinomancer', '', '', 0, 92, 92, 4, 16, 16, 0, 0.666668, 2, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 180, 1, 0, 0, '', 17614,69221),
+(69268, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Frozen Orb', '', '', 0, 93, 93, 4, 14, 14, 0, 1, 1.14286, 1, 0, 9839, 14339, 0, 42299, 1, 2000, 2000, 1, 33554434, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1074791424, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'mob_horridon_summons', 17614,0),
+(69313, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Living Poison', '', '', 0, 93, 93, 4, 14, 14, 0, 1, 1.14286, 1, 0, 9839, 14339, 0, 42299, 1, 2000, 2000, 1, 33554434, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1074791424, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 94, 1, 0, 0, 'mob_horridon_summons', 17614,0),
+(69314, 0, 0, 0, 0, 0, 47378, 47263, 47379, 47264, 'Venomous Effusion', '', '', 0, 93, 93, 4, 14, 14, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'mob_horridon_summons', 17614,0),
+(69346, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Sand Trap', '', '', 0, 93, 93, 4, 14, 14, 0, 0.01, 0.01, 1, 0, 9839, 14339, 0, 42299, 1, 2000, 2000, 1, 33554438, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1091568640, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 169, 1, 0, 128, 'mob_horridon_summons', 17614,0),
 (69374, 0, 0, 0, 0, 0, 47502, 0, 0, 0, 'War-God Jalak', 'Ward of Beasts', '', 0, 93, 93, 4, 16, 16, 0, 1, 2, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097260, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 40, 1, 1, 0, 0, 0, 0, 0, 0, 0, 180, 1, 0, 0, '', 17614,69374),
 (68476, 0, 0, 0, 0, 0, 47325, 0, 0, 0, 'Horridon', '', '', 0, 93, 93, 4, 14, 14, 0, 1, 2, 1, 3, 17839, 24339, 0, 51299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2097260, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3000000, 3100000, '', 0, 3, 1, 820, 1, 1, 0, 0, 0, 0, 0, 0, 0, 180, 1, 667893759, 1, '', 17614,0),
 (70246, 0, 0, 0, 0, 0, 47951, 0, 0, 0, 'Spirit Flayer', '', '', 0, 90, 90, 4, 14, 14, 0, 0.5, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 131074, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 2, 4, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 17614,70246),
@@ -622,6 +627,7 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 (@RAID_DIFF_10N + 69184, 0, 0, 0, 0, 0, 47446, 27056, 47558, 0, 'Risen Drakkari Warrior', '', '', 0, 91, 91, 4, 16, 16, 0, 1, 1.42857, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 0, 0, '', 17614,69184),
 (@RAID_DIFF_10N + 69185, 0, 0, 0, 0, 0, 47556, 47557, 0, 0, 'Risen Drakkari Champion', '', '', 0, 91, 91, 4, 16, 16, 0, 1, 1.42857, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 0, 0, '', 17614,69185),
 (@RAID_DIFF_10N + 69221, 0, 0, 0, 0, 0, 47494, 47495, 47496, 47497, 'Zandalari Dinomancer', '', '', 0, 92, 92, 4, 16, 16, 0, 0.666668, 2, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 180, 1, 0, 0, '', 17614,69221),
+(@RAID_DIFF_10N + 69314, 0, 0, 0, 0, 0, 47378, 47263, 47379, 47264, 'Venomous Effusion', '', '', 0, 93, 93, 4, 14, 14, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'mob_horridon_summons', 17614,0),
 (@RAID_DIFF_10N + 69374, 0, 0, 0, 0, 0, 47502, 0, 0, 0, 'War-God Jalak', 'Ward of Beasts', '', 0, 93, 93, 4, 16, 16, 0, 1, 2, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097260, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 40, 1, 1, 0, 0, 0, 0, 0, 0, 0, 180, 1, 0, 0, '', 17614,69374),
 (@RAID_DIFF_10N + 68476, 0, 0, 0, 0, 0, 47325, 0, 0, 0, 'Horridon', '', '', 0, 93, 93, 4, 14, 14, 0, 1, 2, 1, 3, 17839, 24339, 0, 51299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2097260, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3000000, 3100000, '', 0, 3, 1, 820, 1, 1, 0, 0, 0, 0, 0, 0, 0, 180, 1, 667893759, 1, '', 17614,0),
 (@RAID_DIFF_10N + 70308, 0, 0, 0, 0, 0, 47998, 0, 0, 0, 'Soul-Fed Construct', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 80, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 650854271, 0, '', 17614,0),
@@ -642,6 +648,7 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 (@RAID_DIFF_25N + 69184, 0, 0, 0, 0, 0, 47446, 27056, 47558, 0, 'Risen Drakkari Warrior', '', '', 0, 91, 91, 4, 16, 16, 0, 1, 1.42857, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 0, 0, '', 17614,69184),
 (@RAID_DIFF_25N + 69185, 0, 0, 0, 0, 0, 47556, 47557, 0, 0, 'Risen Drakkari Champion', '', '', 0, 91, 91, 4, 16, 16, 0, 1, 1.42857, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 0, 0, '', 17614,69185),
 (@RAID_DIFF_25N + 69221, 0, 0, 0, 0, 0, 47494, 47495, 47496, 47497, 'Zandalari Dinomancer', '', '', 0, 92, 92, 4, 16, 16, 0, 0.666668, 2, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 180, 1, 0, 0, '', 17614,69221),
+(@RAID_DIFF_25N + 69314, 0, 0, 0, 0, 0, 47378, 47263, 47379, 47264, 'Venomous Effusion', '', '', 0, 93, 93, 4, 14, 14, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'mob_horridon_summons', 17614,0),
 (@RAID_DIFF_25N + 69374, 0, 0, 0, 0, 0, 47502, 0, 0, 0, 'War-God Jalak', 'Ward of Beasts', '', 0, 93, 93, 4, 16, 16, 0, 1, 2, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097260, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 40, 1, 1, 0, 0, 0, 0, 0, 0, 0, 180, 1, 0, 0, '', 17614,69374),
 (@RAID_DIFF_25N + 68476, 0, 0, 0, 0, 0, 47325, 0, 0, 0, 'Horridon', '', '', 0, 93, 93, 4, 14, 14, 0, 1, 2, 1, 3, 17839, 24339, 0, 51299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2097260, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3000000, 3100000, '', 0, 3, 1, 820, 1, 1, 0, 0, 0, 0, 0, 0, 0, 180, 1, 667893759, 1, '', 17614,0),
 (@RAID_DIFF_25N + 70308, 0, 0, 0, 0, 0, 47998, 0, 0, 0, 'Soul-Fed Construct', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 80, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 650854271, 0, '', 17614,0),
@@ -662,6 +669,7 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 (@RAID_DIFF_10H + 69184, 0, 0, 0, 0, 0, 47446, 27056, 47558, 0, 'Risen Drakkari Warrior', '', '', 0, 91, 91, 4, 16, 16, 0, 1, 1.42857, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 0, 0, '', 17614,69184),
 (@RAID_DIFF_10H + 69185, 0, 0, 0, 0, 0, 47556, 47557, 0, 0, 'Risen Drakkari Champion', '', '', 0, 91, 91, 4, 16, 16, 0, 1, 1.42857, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 0, 0, '', 17614,69185),
 (@RAID_DIFF_10H + 69221, 0, 0, 0, 0, 0, 47494, 47495, 47496, 47497, 'Zandalari Dinomancer', '', '', 0, 92, 92, 4, 16, 16, 0, 0.666668, 2, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 180, 1, 0, 0, '', 17614,69221),
+(@RAID_DIFF_10H + 69314, 0, 0, 0, 0, 0, 47378, 47263, 47379, 47264, 'Venomous Effusion', '', '', 0, 93, 93, 4, 14, 14, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'mob_horridon_summons', 17614,0),
 (@RAID_DIFF_10H + 69374, 0, 0, 0, 0, 0, 47502, 0, 0, 0, 'War-God Jalak', 'Ward of Beasts', '', 0, 93, 93, 4, 16, 16, 0, 1, 2, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097260, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 40, 1, 1, 0, 0, 0, 0, 0, 0, 0, 180, 1, 0, 0, '', 17614,69374),
 (@RAID_DIFF_10H + 68476, 0, 0, 0, 0, 0, 47325, 0, 0, 0, 'Horridon', '', '', 0, 93, 93, 4, 14, 14, 0, 1, 2, 1, 3, 17839, 24339, 0, 51299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2097260, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3000000, 3100000, '', 0, 3, 1, 820, 1, 1, 0, 0, 0, 0, 0, 0, 0, 180, 1, 667893759, 1, '', 17614,0),
 (@RAID_DIFF_10H + 70308, 0, 0, 0, 0, 0, 47998, 0, 0, 0, 'Soul-Fed Construct', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 80, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 650854271, 0, '', 17614,0),
@@ -682,6 +690,7 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 (@RAID_DIFF_25H + 69184, 0, 0, 0, 0, 0, 47446, 27056, 47558, 0, 'Risen Drakkari Warrior', '', '', 0, 91, 91, 4, 16, 16, 0, 1, 1.42857, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 0, 0, '', 17614,69184),
 (@RAID_DIFF_25H + 69185, 0, 0, 0, 0, 0, 47556, 47557, 0, 0, 'Risen Drakkari Champion', '', '', 0, 91, 91, 4, 16, 16, 0, 1, 1.42857, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 0, 0, '', 17614,69185),
 (@RAID_DIFF_25H + 69221, 0, 0, 0, 0, 0, 47494, 47495, 47496, 47497, 'Zandalari Dinomancer', '', '', 0, 92, 92, 4, 16, 16, 0, 0.666668, 2, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 180, 1, 0, 0, '', 17614,69221),
+(@RAID_DIFF_25H + 69314, 0, 0, 0, 0, 0, 47378, 47263, 47379, 47264, 'Venomous Effusion', '', '', 0, 93, 93, 4, 14, 14, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'mob_horridon_summons', 17614,0),
 (@RAID_DIFF_25H + 69374, 0, 0, 0, 0, 0, 47502, 0, 0, 0, 'War-God Jalak', 'Ward of Beasts', '', 0, 93, 93, 4, 16, 16, 0, 1, 2, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097260, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 40, 1, 1, 0, 0, 0, 0, 0, 0, 0, 180, 1, 0, 0, '', 17614,69374),
 (@RAID_DIFF_25H + 68476, 0, 0, 0, 0, 0, 47325, 0, 0, 0, 'Horridon', '', '', 0, 93, 93, 4, 14, 14, 0, 1, 2, 1, 3, 17839, 24339, 0, 51299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2097260, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3000000, 3100000, '', 0, 3, 1, 820, 1, 1, 0, 0, 0, 0, 0, 0, 0, 180, 1, 667893759, 1, '', 17614,0),
 (@RAID_DIFF_25H + 70308, 0, 0, 0, 0, 0, 47998, 0, 0, 0, 'Soul-Fed Construct', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 80, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 650854271, 0, '', 17614,0),
@@ -702,6 +711,7 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 (@RAID_DIFF_25R + 69184, 0, 0, 0, 0, 0, 47446, 27056, 47558, 0, 'Risen Drakkari Warrior', '', '', 0, 91, 91, 4, 16, 16, 0, 1, 1.42857, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 0, 0, '', 17614,69184),
 (@RAID_DIFF_25R + 69185, 0, 0, 0, 0, 0, 47556, 47557, 0, 0, 'Risen Drakkari Champion', '', '', 0, 91, 91, 4, 16, 16, 0, 1, 1.42857, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 0, 0, '', 17614,69185),
 (@RAID_DIFF_25R + 69221, 0, 0, 0, 0, 0, 47494, 47495, 47496, 47497, 'Zandalari Dinomancer', '', '', 0, 92, 92, 4, 16, 16, 0, 0.666668, 2, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 180, 1, 0, 0, '', 17614,69221),
+(@RAID_DIFF_25R + 69314, 0, 0, 0, 0, 0, 47378, 47263, 47379, 47264, 'Venomous Effusion', '', '', 0, 93, 93, 4, 14, 14, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'mob_horridon_summons', 17614,0),
 (@RAID_DIFF_25R + 69374, 0, 0, 0, 0, 0, 47502, 0, 0, 0, 'War-God Jalak', 'Ward of Beasts', '', 0, 93, 93, 4, 16, 16, 0, 1, 2, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097260, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 40, 1, 1, 0, 0, 0, 0, 0, 0, 0, 180, 1, 0, 0, '', 17614,69374),
 (@RAID_DIFF_25R + 68476, 0, 0, 0, 0, 0, 47325, 0, 0, 0, 'Horridon', '', '', 0, 93, 93, 4, 14, 14, 0, 1, 2, 1, 3, 17839, 24339, 0, 51299, 1, 2000, 2000, 1, 768, 2099200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2097260, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3000000, 3100000, '', 0, 3, 1, 820, 1, 1, 0, 0, 0, 0, 0, 0, 0, 180, 1, 667893759, 1, '', 17614,0),
 (@RAID_DIFF_25R + 70308, 0, 0, 0, 0, 0, 47998, 0, 0, 0, 'Soul-Fed Construct', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 80, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 650854271, 0, '', 17614,0),
@@ -720,10 +730,10 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 -- 10H=(10N+25%)
 
 UPDATE `creature_template` SET `ScriptName` = 'mob_horridon_trashs' WHERE `entry` IN 
-(69164,69167,69168,69169,69170,69172,69173,69175,69176,69177,69178,69184,69185);
+(69164,69167,69168,69169,69170,69172,69173,69175,69177,69178,69184,69185);
 
 UPDATE `creature_template` SET `ScriptName` = 'mob_horridon_summons' WHERE `entry` IN 
-(69215,69268,69313,69314,69346);
+(69268,69313,69314,69346);
 
 UPDATE `creature_template` SET `ScriptName` = 'mob_direhorn_spirit' WHERE `entry` = 70688;
 UPDATE `creature_template` SET `ScriptName` = 'mob_zandalari_dinomancer' WHERE `entry` = 69221;
@@ -737,98 +747,105 @@ UPDATE creature_template SET flags_extra = flags_extra | 1, mechanic_immune_mask
 
 -- Difficulty entries bosses and Trash Mobs
 UPDATE creature_template SET difficulty_entry_3 = @RAID_DIFF_10N + entry, difficulty_entry_4 = @RAID_DIFF_25N + entry, difficulty_entry_5 = @RAID_DIFF_10H + entry, difficulty_entry_6 = @RAID_DIFF_25H + entry, difficulty_entry_7 = @RAID_DIFF_25R + entry WHERE entry IN 
-(68476,69164,69167,69168,69169,69172,69173,69175,69176,69177,69178,69184,69185,69221,69374,70308,70341,70445,70448);
+(68476,69164,69167,69168,69169,69172,69173,69175,69176,69177,69178,69184,69185,69221,69314,69374,70308,70341,70445,70448);
 
 -- Gurubashi Venom Priest
-UPDATE creature_template SET LootId = 69388, dmg_multiplier = 4, Health_Mod = 5059104  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69164;
-UPDATE creature_template SET LootId = 6938801, dmg_multiplier = 5, Health_Mod = 6323880  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10H + 69164;
-UPDATE creature_template SET LootId = 69388, dmg_multiplier = 7, Health_Mod = 12647760 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25N + 69164;
-UPDATE creature_template SET LootId = 6938801, dmg_multiplier = 8, Health_Mod = 15809700 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25H + 69164;
-UPDATE creature_template SET LootId = 6938802, dmg_multiplier = 6, Health_Mod = 11382984 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25R + 69164;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 4, Health_Mod = 5059104  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69164;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 5, Health_Mod = 6323880  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10H + 69164;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 7, Health_Mod = 12647760 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25N + 69164;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 8, Health_Mod = 15809700 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25H + 69164;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 6, Health_Mod = 11382984 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25R + 69164;
 
 -- Gurubashi Bloodlord
-UPDATE creature_template SET LootId = 69388, dmg_multiplier = 4, Health_Mod = 5059104  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69167;
-UPDATE creature_template SET LootId = 6938801, dmg_multiplier = 5, Health_Mod = 6323880  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10H + 69167;
-UPDATE creature_template SET LootId = 69388, dmg_multiplier = 7, Health_Mod = 12647760 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25N + 69167;
-UPDATE creature_template SET LootId = 6938801, dmg_multiplier = 8, Health_Mod = 15809700 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25H + 69167;
-UPDATE creature_template SET LootId = 6938802, dmg_multiplier = 6, Health_Mod = 11382984 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25R + 69167;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 4, Health_Mod = 5059104  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69167;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 5, Health_Mod = 6323880  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10H + 69167;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 7, Health_Mod = 12647760 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25N + 69167;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 8, Health_Mod = 15809700 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25H + 69167;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 6, Health_Mod = 11382984 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25R + 69167;
 
 -- Amani'shi Flame Caster
-UPDATE creature_template SET LootId = 69388, dmg_multiplier = 5, Health_Mod = 1956154  / @HP_MOD_91 WHERE entry = @RAID_DIFF_10N + 69168;
-UPDATE creature_template SET LootId = 6938801, dmg_multiplier = 6, Health_Mod = 2445193  / @HP_MOD_91 WHERE entry = @RAID_DIFF_10H + 69168;
-UPDATE creature_template SET LootId = 69388, dmg_multiplier = 7, Health_Mod = 4890384  / @HP_MOD_91 WHERE entry = @RAID_DIFF_25N + 69168;
-UPDATE creature_template SET LootId = 6938801, dmg_multiplier = 8, Health_Mod = 6112980  / @HP_MOD_91 WHERE entry = @RAID_DIFF_25H + 69168;
-UPDATE creature_template SET LootId = 6938802, dmg_multiplier = 7, Health_Mod = 4401346  / @HP_MOD_91 WHERE entry = @RAID_DIFF_25R + 69168;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 5, Health_Mod = 1956154  / @HP_MOD_91 WHERE entry = @RAID_DIFF_10N + 69168;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 6, Health_Mod = 2445193  / @HP_MOD_91 WHERE entry = @RAID_DIFF_10H + 69168;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 7, Health_Mod = 4890384  / @HP_MOD_91 WHERE entry = @RAID_DIFF_25N + 69168;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 8, Health_Mod = 6112980  / @HP_MOD_91 WHERE entry = @RAID_DIFF_25H + 69168;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 7, Health_Mod = 4401346  / @HP_MOD_91 WHERE entry = @RAID_DIFF_25R + 69168;
 
 -- Amani'shi Protector
-UPDATE creature_template SET LootId = 69388, dmg_multiplier = 4, Health_Mod = 2500000  / @HP_MOD_91 WHERE entry = @RAID_DIFF_10N + 69169;
-UPDATE creature_template SET LootId = 6938801, dmg_multiplier = 5, Health_Mod = 3125000  / @HP_MOD_91 WHERE entry = @RAID_DIFF_10H + 69169;
-UPDATE creature_template SET LootId = 69388, dmg_multiplier = 7, Health_Mod = 6250000  / @HP_MOD_91 WHERE entry = @RAID_DIFF_25N + 69169;
-UPDATE creature_template SET LootId = 6938801, dmg_multiplier = 8, Health_Mod = 7812500  / @HP_MOD_91 WHERE entry = @RAID_DIFF_25H + 69169;
-UPDATE creature_template SET LootId = 6938802, dmg_multiplier = 6, Health_Mod = 5625000  / @HP_MOD_91 WHERE entry = @RAID_DIFF_25R + 69169;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 4, Health_Mod = 2500000  / @HP_MOD_91 WHERE entry = @RAID_DIFF_10N + 69169;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 5, Health_Mod = 3125000  / @HP_MOD_91 WHERE entry = @RAID_DIFF_10H + 69169;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 7, Health_Mod = 6250000  / @HP_MOD_91 WHERE entry = @RAID_DIFF_25N + 69169;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 8, Health_Mod = 7812500  / @HP_MOD_91 WHERE entry = @RAID_DIFF_25H + 69169;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 6, Health_Mod = 5625000  / @HP_MOD_91 WHERE entry = @RAID_DIFF_25R + 69169;
 
 -- Sul'lithuz Stonegazer
-UPDATE creature_template SET LootId = 69388, dmg_multiplier = 5, Health_Mod = 1304000  / @HP_MOD_91 WHERE entry = @RAID_DIFF_10N + 69172;
-UPDATE creature_template SET LootId = 6938801, dmg_multiplier = 6, Health_Mod = 1630000  / @HP_MOD_91 WHERE entry = @RAID_DIFF_10H + 69172;
-UPDATE creature_template SET LootId = 69388, dmg_multiplier = 8, Health_Mod = 3260000  / @HP_MOD_91 WHERE entry = @RAID_DIFF_25N + 69172;
-UPDATE creature_template SET LootId = 6938801, dmg_multiplier = 9, Health_Mod = 4075000  / @HP_MOD_91 WHERE entry = @RAID_DIFF_25H + 69172;
-UPDATE creature_template SET LootId = 6938802, dmg_multiplier = 7, Health_Mod = 2934000  / @HP_MOD_91 WHERE entry = @RAID_DIFF_25R + 69172;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 5, Health_Mod = 1304000  / @HP_MOD_91 WHERE entry = @RAID_DIFF_10N + 69172;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 6, Health_Mod = 1630000  / @HP_MOD_91 WHERE entry = @RAID_DIFF_10H + 69172;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 8, Health_Mod = 3260000  / @HP_MOD_91 WHERE entry = @RAID_DIFF_25N + 69172;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 9, Health_Mod = 4075000  / @HP_MOD_91 WHERE entry = @RAID_DIFF_25H + 69172;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 7, Health_Mod = 2934000  / @HP_MOD_91 WHERE entry = @RAID_DIFF_25R + 69172;
 
 -- Farraki Skirmisher
-UPDATE creature_template SET LootId = 69388, dmg_multiplier = 5, Health_Mod = 1630000  / @HP_MOD_91 WHERE entry = @RAID_DIFF_10N + 69173;
-UPDATE creature_template SET LootId = 6938801, dmg_multiplier = 6, Health_Mod = 2037500  / @HP_MOD_91 WHERE entry = @RAID_DIFF_10H + 69173;
-UPDATE creature_template SET LootId = 69388, dmg_multiplier = 8, Health_Mod = 4075000  / @HP_MOD_91 WHERE entry = @RAID_DIFF_25N + 69173;
-UPDATE creature_template SET LootId = 6938801, dmg_multiplier = 9, Health_Mod = 5093750  / @HP_MOD_91 WHERE entry = @RAID_DIFF_25H + 69173;
-UPDATE creature_template SET LootId = 6938802, dmg_multiplier = 7, Health_Mod = 3667500  / @HP_MOD_91 WHERE entry = @RAID_DIFF_25R + 69173;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 5, Health_Mod = 1630000  / @HP_MOD_91 WHERE entry = @RAID_DIFF_10N + 69173;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 6, Health_Mod = 2037500  / @HP_MOD_91 WHERE entry = @RAID_DIFF_10H + 69173;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 8, Health_Mod = 4075000  / @HP_MOD_91 WHERE entry = @RAID_DIFF_25N + 69173;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 9, Health_Mod = 5093750  / @HP_MOD_91 WHERE entry = @RAID_DIFF_25H + 69173;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 7, Health_Mod = 3667500  / @HP_MOD_91 WHERE entry = @RAID_DIFF_25R + 69173;
 
 -- Farraki Wastewalker
-UPDATE creature_template SET LootId = 69388, dmg_multiplier = 4, Health_Mod = 6745200  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69175;
-UPDATE creature_template SET LootId = 6938801, dmg_multiplier = 5, Health_Mod = 8431500  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10H + 69175;
-UPDATE creature_template SET LootId = 69388, dmg_multiplier = 7, Health_Mod = 16863000 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25N + 69175;
-UPDATE creature_template SET LootId = 6938801, dmg_multiplier = 8, Health_Mod = 21078750 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25H + 69175;
-UPDATE creature_template SET LootId = 6938802, dmg_multiplier = 6, Health_Mod = 15176700 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25R + 69175;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 4, Health_Mod = 6745200  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69175;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 5, Health_Mod = 8431500  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10H + 69175;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 7, Health_Mod = 16863000 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25N + 69175;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 8, Health_Mod = 21078750 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25H + 69175;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 6, Health_Mod = 15176700 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25R + 69175;
 
 -- Amani'shi Beast Shaman
-UPDATE creature_template SET LootId = 69388, dmg_multiplier = 5, Health_Mod = 2529200  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69176;
-UPDATE creature_template SET LootId = 6938801, dmg_multiplier = 6, Health_Mod = 3161500  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10H + 69176;
-UPDATE creature_template SET LootId = 69388, dmg_multiplier = 8, Health_Mod = 6323000  / @HP_MOD_92 WHERE entry = @RAID_DIFF_25N + 69176;
-UPDATE creature_template SET LootId = 6938801, dmg_multiplier = 9, Health_Mod = 7903750  / @HP_MOD_92 WHERE entry = @RAID_DIFF_25H + 69176;
-UPDATE creature_template SET LootId = 6938802, dmg_multiplier = 7, Health_Mod = 5690700  / @HP_MOD_92 WHERE entry = @RAID_DIFF_25R + 69176;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 5, Health_Mod = 2529200  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69176;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 6, Health_Mod = 3161500  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10H + 69176;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 8, Health_Mod = 6323000  / @HP_MOD_92 WHERE entry = @RAID_DIFF_25N + 69176;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 9, Health_Mod = 7903750  / @HP_MOD_92 WHERE entry = @RAID_DIFF_25H + 69176;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 7, Health_Mod = 5690700  / @HP_MOD_92 WHERE entry = @RAID_DIFF_25R + 69176;
 
 -- Amani Warbear
-UPDATE creature_template SET LootId = 69388, dmg_multiplier = 5, Health_Mod = 2529200  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69177;
-UPDATE creature_template SET LootId = 6938801, dmg_multiplier = 6, Health_Mod = 3161500  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10H + 69177;
-UPDATE creature_template SET LootId = 69388, dmg_multiplier = 8, Health_Mod = 6323000  / @HP_MOD_92 WHERE entry = @RAID_DIFF_25N + 69177;
-UPDATE creature_template SET LootId = 6938801, dmg_multiplier = 9, Health_Mod = 7903750  / @HP_MOD_92 WHERE entry = @RAID_DIFF_25H + 69177;
-UPDATE creature_template SET LootId = 6938802, dmg_multiplier = 7, Health_Mod = 5690700  / @HP_MOD_92 WHERE entry = @RAID_DIFF_25R + 69177;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 5, Health_Mod = 2529200  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69177;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 6, Health_Mod = 3161500  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10H + 69177;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 8, Health_Mod = 6323000  / @HP_MOD_92 WHERE entry = @RAID_DIFF_25N + 69177;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 9, Health_Mod = 7903750  / @HP_MOD_92 WHERE entry = @RAID_DIFF_25H + 69177;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 7, Health_Mod = 5690700  / @HP_MOD_92 WHERE entry = @RAID_DIFF_25R + 69177;
 
 -- Drakkari Frozen Warlord
-UPDATE creature_template SET LootId = 69388, dmg_multiplier = 4, Health_Mod = 8431600  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69178;
-UPDATE creature_template SET LootId = 6938801, dmg_multiplier = 5, Health_Mod = 10539500 / @HP_MOD_92 WHERE entry = @RAID_DIFF_10H + 69178;
-UPDATE creature_template SET LootId = 69388, dmg_multiplier = 7, Health_Mod = 21079000 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25N + 69178;
-UPDATE creature_template SET LootId = 6938801, dmg_multiplier = 8, Health_Mod = 26348750 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25H + 69178;
-UPDATE creature_template SET LootId = 6938802, dmg_multiplier = 6, Health_Mod = 18971100 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25R + 69178;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 4, Health_Mod = 8431600  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69178;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 5, Health_Mod = 10539500 / @HP_MOD_92 WHERE entry = @RAID_DIFF_10H + 69178;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 7, Health_Mod = 21079000 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25N + 69178;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 8, Health_Mod = 26348750 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25H + 69178;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 6, Health_Mod = 18971100 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25R + 69178;
 
 -- Risen Drakkari Warrior
-UPDATE creature_template SET LootId = 69388, dmg_multiplier = 5, Health_Mod = 652000   / @HP_MOD_91 WHERE entry = @RAID_DIFF_10N + 69184;
-UPDATE creature_template SET LootId = 6938801, dmg_multiplier = 6, Health_Mod = 815000   / @HP_MOD_91 WHERE entry = @RAID_DIFF_10H + 69184;
-UPDATE creature_template SET LootId = 69388, dmg_multiplier = 8, Health_Mod = 1630000  / @HP_MOD_91 WHERE entry = @RAID_DIFF_25N + 69184;
-UPDATE creature_template SET LootId = 6938801, dmg_multiplier = 9, Health_Mod = 2037500  / @HP_MOD_91 WHERE entry = @RAID_DIFF_25H + 69184;
-UPDATE creature_template SET LootId = 6938802, dmg_multiplier = 7, Health_Mod = 1467000  / @HP_MOD_91 WHERE entry = @RAID_DIFF_25R + 69184;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 5, Health_Mod = 652000   / @HP_MOD_91 WHERE entry = @RAID_DIFF_10N + 69184;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 6, Health_Mod = 815000   / @HP_MOD_91 WHERE entry = @RAID_DIFF_10H + 69184;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 8, Health_Mod = 1630000  / @HP_MOD_91 WHERE entry = @RAID_DIFF_25N + 69184;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 9, Health_Mod = 2037500  / @HP_MOD_91 WHERE entry = @RAID_DIFF_25H + 69184;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 7, Health_Mod = 1467000  / @HP_MOD_91 WHERE entry = @RAID_DIFF_25R + 69184;
 
 -- Risen Drakkari Champion
-UPDATE creature_template SET LootId = 69388, dmg_multiplier = 5, Health_Mod = 5059104  / @HP_MOD_91 WHERE entry = @RAID_DIFF_10N + 69185;
-UPDATE creature_template SET LootId = 6938801, dmg_multiplier = 6, Health_Mod = 6323880  / @HP_MOD_91 WHERE entry = @RAID_DIFF_10H + 69185;
-UPDATE creature_template SET LootId = 69388, dmg_multiplier = 8, Health_Mod = 12647760 / @HP_MOD_91 WHERE entry = @RAID_DIFF_25N + 69185;
-UPDATE creature_template SET LootId = 6938801, dmg_multiplier = 9, Health_Mod = 15809700 / @HP_MOD_91 WHERE entry = @RAID_DIFF_25H + 69185;
-UPDATE creature_template SET LootId = 6938802, dmg_multiplier = 7, Health_Mod = 11382984 / @HP_MOD_91 WHERE entry = @RAID_DIFF_25R + 69185;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 5, Health_Mod = 5059104  / @HP_MOD_91 WHERE entry = @RAID_DIFF_10N + 69185;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 6, Health_Mod = 6323880  / @HP_MOD_91 WHERE entry = @RAID_DIFF_10H + 69185;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 8, Health_Mod = 12647760 / @HP_MOD_91 WHERE entry = @RAID_DIFF_25N + 69185;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 9, Health_Mod = 15809700 / @HP_MOD_91 WHERE entry = @RAID_DIFF_25H + 69185;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 7, Health_Mod = 11382984 / @HP_MOD_91 WHERE entry = @RAID_DIFF_25R + 69185;
 
 -- Zandalari Dinomancer
-UPDATE creature_template SET LootId = 69388, dmg_multiplier = 5, Health_Mod = 5059104  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69221;
-UPDATE creature_template SET LootId = 6938801, dmg_multiplier = 6, Health_Mod = 6323880  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10H + 69221;
-UPDATE creature_template SET LootId = 69388, dmg_multiplier = 8, Health_Mod = 12647760 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25N + 69221;
-UPDATE creature_template SET LootId = 6938801, dmg_multiplier = 9, Health_Mod = 15809700 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25H + 69221;
-UPDATE creature_template SET LootId = 6938802, dmg_multiplier = 7, Health_Mod = 11382984 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25R + 69221;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 5, Health_Mod = 5059104  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69221;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 6, Health_Mod = 6323880  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10H + 69221;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 8, Health_Mod = 12647760 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25N + 69221;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 9, Health_Mod = 15809700 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25H + 69221;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 7, Health_Mod = 11382984 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25R + 69221;
+
+-- Venomous Effusion
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 5, Health_Mod = 1550000  / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 69314;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 6, Health_Mod = 1937500  / @HP_MOD_93 WHERE entry = @RAID_DIFF_10H + 69314;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 8, Health_Mod = 2842500  / @HP_MOD_93 WHERE entry = @RAID_DIFF_25N + 69314;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 9, Health_Mod = 3790000  / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 69314;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 7, Health_Mod = 2558250  / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 69314;
 
 -- Soul-Fed Construct
 UPDATE creature_template SET LootId = 69388, dmg_multiplier = 6,  Health_Mod = 40472832  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 70308;
@@ -876,8 +893,16 @@ UPDATE creature_template SET LootId = @RAID_DIFF_25R + 68476, dmg_multiplier = 1
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Trash Mobs SAI
 UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` IN (70308,70341,70448);
-DELETE FROM `smart_scripts` WHERE `entryorguid`IN (70341,70448, 70308) AND `source_type`= 0;
+UPDATE `creature_template` SET `AIName` = 'SmartAI', `ScriptName` = '' WHERE `entry` IN (69176,69215);
+DELETE FROM `smart_scripts` WHERE `entryorguid`IN (69176,69215,70341,70448, 70308) AND `source_type`= 0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(69176, 0, 0, 0, 9, 0, 100, 0, 7, 40, 2000, 3000, 11, 136480, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Amani'shi Beast Shaman - Cast Chain Lightning"),
+(69176, 0, 1, 0, 0, 0, 100, 0, 8000, 9000, 22000, 25000, 11, 136512, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, "Amani'shi Beast Shaman - Cast Hex of Confusion"),
+(69176, 0, 2, 0, 0, 0, 100, 0, 15000, 17000, 30000, 35000, 11, 136487, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Amani'shi Beast Shaman - Cast Lightning Nova Totem"),
+(69215, 0, 0, 0, 10, 0, 100, 0, 1, 50, 1000, 1000, 38, 0, 0, 0, 0, 0, 0, 21, 50, 0, 0, 0, 0, 0, 0, "Lightning Nova Totem - Cast enter in combat on spawn"),
+(69215, 0, 1, 2, 0, 0, 100, 1, 1, 1, 0, 0, 11, 136489, 0, 0, 0, 0, 0, 21, 50, 0, 0, 0, 0, 0, 0, "Lightning Nova Totem - Cast Lightning Nova"),
+(69215, 0, 2, 0, 61, 0, 100, 1, 0, 0, 0, 0, 67, 1, 25000, 25000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Lightning Nova Totem - Force Despawn after the cast"),
+(69215, 0, 3, 0, 59, 0, 100, 1, 1, 0, 0, 0, 41, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Lightning Nova Totem - Force Despawn after the cast"),
 (70308, 0, 0, 0, 0, 0, 100, 0, 10000, 12000, 15000, 25000, 11, 139895, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Soul-Fed Construct - Cast Spiritfire Beam"),
 (70308, 0, 1, 0, 0, 0, 100, 0, 8000, 15000, 15000, 18000, 11, 33661, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Soul-Fed Construct - Cast Crush Armor"),
 (70341, 0, 0, 0, 0, 0, 100, 0, 3000, 10000, 7000, 10000, 11, 139550, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Tormented Spirit - Cast Torment"),

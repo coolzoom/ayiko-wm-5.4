@@ -1175,9 +1175,16 @@ public:
         }
 
         EventMap m_mBerserkEvents;
+        float const_orientation;
+
+        float GetPretdeterminedOrientation() const
+        {
+            return const_orientation;
+        }
 
         void Reset()
-        {   
+        {
+            const_orientation = 0.0f;
             m_mBerserkEvents.Reset();
             events.Reset();
             pChargeDoor = NULL;
@@ -1298,7 +1305,8 @@ public:
                         break;
 
                     case EVENT_DOUBLE_SWIPE:
-                        DoCastAOE(SPELL_DOUBLE_SWIPE);
+                        DoCast(me->GetVictim(), SPELL_DOUBLE_SWIPE);
+                        const_orientation = me->GetOrientation();
                         events.ScheduleEvent(EVENT_DOUBLE_SWIPE, urand(12, 18) * IN_MILLISECONDS);
                         break;
 
@@ -2383,13 +2391,14 @@ class isValidDoubleStrikeTargetPredicate
 private:
     Unit* caster;
     uint32 spellId;
+    float orientation;
 public:
-    isValidDoubleStrikeTargetPredicate(Unit* _caster, uint32 _spellId) : caster(_caster), spellId(_spellId) {}
+    isValidDoubleStrikeTargetPredicate(Unit* _caster, uint32 _spellId, float _orientation) : caster(_caster), spellId(_spellId), orientation(_orientation) {}
 
     bool operator()(WorldObject* target) const
     {
         if (spellId == SPELL_DOUBLE_SWIPE_FRONT)
-            return target && !caster->HasInArc((caster->GetOrientation()*M_PI / 5.1f), target);
+            return target && !caster->HasInArc(orientation*M_PI / 5.1f, target);
         else
             return target && caster->HasInArc(2 * M_PI - (M_PI / 5.1f), target);
     }
@@ -2407,9 +2416,13 @@ public:
 
         void FilterTargets(std::list<WorldObject*>& targets)
         {
-            if (Unit* caster = GetCaster())
+            if (Creature* pHorridon = GetCaster()->ToCreature())
             {
-                targets.remove_if(isValidDoubleStrikeTargetPredicate(caster, GetSpellInfo()->Id));
+                if (HorridonAI* pAI = dynamic_cast<HorridonAI*>(pHorridon->AI()))
+                {
+                    float ori = pAI->GetPretdeterminedOrientation();
+                    targets.remove_if(isValidDoubleStrikeTargetPredicate(pHorridon, GetSpellInfo()->Id, ori));
+                }
             }
         }
 

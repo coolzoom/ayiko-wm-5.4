@@ -1913,7 +1913,7 @@ public:
                 HandleTargetSelection();
         }
 
-        inline void HandleTargetSelection()
+        void HandleTargetSelection()
         {
             float fHealthNumber = 100.f;
             std::list<uint64> tempList;
@@ -2073,10 +2073,10 @@ public:
             }
 
             HandleTargetSelection();
-            return NULL;
+            return nullptr;
         }
 
-        inline void HandleTargetSelection()
+        void HandleTargetSelection()
         {
             DoCast(SPELL_MARKED_SOUL);
 

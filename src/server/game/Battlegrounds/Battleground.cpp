@@ -890,7 +890,7 @@ void Battleground::EndBattleground(uint32 winner)
         //if (!team) team = player->GetTeam();
 
         // per player calculation
-        if (isArena() && winner_arena_team && loser_arena_team && winner_arena_team != loser_arena_team)
+        if (isArena() && isRated() && winner_arena_team && loser_arena_team && winner_arena_team != loser_arena_team)
         {
             uint8 slot = Arena::GetSlotByType(GetArenaType());
             if (team == winner)

@@ -94,6 +94,10 @@ set(scripts_STAT_SRCS
   Pandaria/ThroneOfThunder/boss_jinrokh.cpp
   Pandaria/ThroneOfThunder/boss_council_of_elders.cpp
   Pandaria/ThroneOfThunder/boss_horridon.cpp
+  Pandaria/ThroneOfThunder/boss_tortos.cpp
+  Pandaria/ThroneOfThunder/boss_megaera.cpp
+  Pandaria/ThroneOfThunder/boss_jikun.cpp
+  Pandaria/ThroneOfThunder/boss_durumu.cpp
   Pandaria/ThroneOfThunder/throne_of_thunder.h
   Pandaria/ThroneOfThunder/throne_of_thunder.cpp
   Pandaria/ThroneOfThunder/instance_throne_of_thunder.cpp

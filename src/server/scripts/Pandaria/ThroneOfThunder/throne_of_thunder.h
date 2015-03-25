@@ -131,6 +131,8 @@ enum ObjectsIds
     GOB_MOGU_STATUE_2                       = 218676,
     GOB_MOGU_STATUE_3                       = 218677,
     GOB_MOGU_STATUE_4                       = 218678,
+
+    GOB_JIKUN_FEATHER                       = 218543,
 };
 
 #endif

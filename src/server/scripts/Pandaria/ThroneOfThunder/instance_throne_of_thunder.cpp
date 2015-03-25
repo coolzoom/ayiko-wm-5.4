@@ -118,6 +118,7 @@ public:
                 case GOB_MOGU_STATUE_2:
                 case GOB_MOGU_STATUE_3:
                 case GOB_MOGU_STATUE_4:
+                case GOB_JIKUN_FEATHER:
                     m_mGoGuidStorage.insert(std::make_pair(pGo->GetEntry(), pGo->GetGUID()));
                     break;
                 case GOB_TRIBAL_DOOR_FARRAKI:
@@ -288,6 +289,7 @@ public:
                 case GOB_MOGU_STATUE_2:
                 case GOB_MOGU_STATUE_3:
                 case GOB_MOGU_STATUE_4:
+                case GOB_JIKUN_FEATHER:
                 {                                          
                     EntryGuidMap::const_iterator find = m_mGoGuidStorage.find(uiType);
                     if (find != m_mGoGuidStorage.cend())

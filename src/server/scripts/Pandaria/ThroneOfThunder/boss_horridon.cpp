@@ -1334,6 +1334,7 @@ public:
                     case EVENT_HORRIDON_CHARGE:
                         if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1))
                         {
+                            events.DelayEvents(2000);
                             DoCast(pTarget, SPELL_CHARGE);
                             Talk(EMOTE_CHARGE, pTarget->GetGUID());
                         }
@@ -1344,10 +1345,6 @@ public:
                         DoCastAOE(SPELL_DIRE_CALL);
                         events.ScheduleEvent(EVENT_DIRE_CALL, urand(8, 15) * IN_MILLISECONDS);
                         break;
-
-                    case EVENT_CHARGE_AT_DOOR:
-                        break;
-
                     default:
                         break;
                 }
@@ -1407,6 +1404,7 @@ public:
 
             pChargeDoor = pDoor;
             float fX, fY;
+            events.DelayEvents(3000);
             GetPositionWithDistInOrientation(me, me->GetDistance(pDoor)-5.f, me->GetAngle(pDoor), fX, fY);
             me->GetMotionMaster()->MovementExpired();
             me->GetMotionMaster()->MoveCharge(fX, fY, 130.8f, 42.0f, MOTION_HORRIDON_DOOR_CHARGE);

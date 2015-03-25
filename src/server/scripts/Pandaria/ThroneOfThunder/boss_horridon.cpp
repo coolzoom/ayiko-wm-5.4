@@ -1332,7 +1332,7 @@ public:
                         break;
 
                     case EVENT_HORRIDON_CHARGE:
-                        if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1))
+                        if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
                         {
                             events.DelayEvents(2000);
                             DoCast(pTarget, SPELL_CHARGE);

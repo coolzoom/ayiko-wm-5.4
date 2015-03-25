@@ -878,6 +878,16 @@ public:
 
             uiNextGateTimer = 0;
 
+            std::list<GameObject*> pOrbs;
+
+            GetGameObjectListWithEntryInGrid(pOrbs, me, GOB_ORB_OF_CONTROL_AMANI, 400.f);
+            GetGameObjectListWithEntryInGrid(pOrbs, me, GOB_ORB_OF_CONTROL_FARRAKI, 400.f);
+            GetGameObjectListWithEntryInGrid(pOrbs, me, GOB_ORB_OF_CONTROL_GURUBASHI, 400.f);
+            GetGameObjectListWithEntryInGrid(pOrbs, me, GOB_ORB_OF_CONTROL_DRAKKARI, 400.f);
+
+            for (GameObject* pOrb : pOrbs)
+                pOrb->AddObjectToRemoveList();
+
             for (uint8 i = 0; i < 4; ++i)
             {
                 if (GameObject* pDoor = ObjectAccessor::GetGameObject(*me, pInstance->GetData64(GOB_TRIBAL_DOOR_GURUBASHI + i)))

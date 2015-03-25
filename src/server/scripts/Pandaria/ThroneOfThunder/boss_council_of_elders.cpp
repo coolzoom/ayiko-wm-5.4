@@ -724,6 +724,7 @@ public:
     private:
         void InitStandartEvents()
         {
+            darkPowerEvents.Reset();
             events.Reset();
 
             events.ScheduleEvent(EVENT_FRIGID_ASSAULT, 10 * IN_MILLISECONDS);
@@ -916,6 +917,7 @@ public:
         uint64 uiRecklessChargeTargetGUID;
         void InitStandartEvents()
         {
+            darkPowerEvents.Reset();
             events.Reset();
 
             events.ScheduleEvent(EVENT_RECKLESS_CHARGE_PRE_PATH, urand(3, 4) * IN_MILLISECONDS);
@@ -1038,6 +1040,7 @@ public:
     private:
         void InitStandartEvents()
         {
+            darkPowerEvents.Reset();
             events.Reset();
 
             events.ScheduleEvent(EVENT_SAND_BOLT, 5 * IN_MILLISECONDS);
@@ -1253,6 +1256,7 @@ public:
 
         void InitStandartEvents()
         {
+            darkPowerEvents.Reset();
             events.Reset();
 
             events.ScheduleEvent(EVENT_WRATH_OF_THE_LOA, 5 * IN_MILLISECONDS);

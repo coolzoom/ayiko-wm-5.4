@@ -2083,12 +2083,15 @@ public:
             std::list<Player*> players;
             GetPlayerListInGrid(players, me, 300.f);
 
-            for (auto const pPlayer : players)
+            if (!players.empty())
             {
-                if (pPlayer->HasAura(SPELL_MARKED_SOUL, me->GetGUID()))
+                for (auto const pPlayer : players)
                 {
-                    uiTargetGuid = pPlayer->GetGUID();
-                    break;
+                    if (pPlayer->HasAura(SPELL_MARKED_SOUL, me->GetGUID()))
+                    {
+                        uiTargetGuid = pPlayer->GetGUID();
+                        break;
+                    }
                 }
             }
             

@@ -2957,7 +2957,10 @@ public:
 
             // Stunned on aura apply
             if (Creature *pOwner = GetOwner()->ToCreature())
+            {
+                pOwner->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                 pOwner->SetControlled(true, UNIT_STATE_STUNNED);
+            }
         }
 
         void HandleOnProc(ProcEventInfo& rProcInfo)

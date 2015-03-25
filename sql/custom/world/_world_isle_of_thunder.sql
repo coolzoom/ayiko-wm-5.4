@@ -1199,7 +1199,8 @@ REPLACE INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconN
 (217758, 10, 13584, 'Sunreaver Perimeter Ward', '', 'Destruction', '', 0, 0, 0.4, 0, 0, 0, 0, 0, 0, 0, 32634, 0, 0, 136610, 1, 0, 0, 24585, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 1),
 (217758, 10, 13584, 'Sunreaver Perimeter Ward', '', 'Destruction', '', 0, 0, 0.4, 0, 0, 0, 0, 0, 0, 0, 32634, 0, 0, 136610, 1, 0, 0, 24585, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 1);
 
-REPLACE INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `aura_spell`, `racemask`, `gender`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES 
+DELETE FROM `spell_area` WHERE spell IN(59073) AND area IN(5842);
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `aura_spell`, `racemask`, `gender`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES 
 (59073, 5842, 32680, 0, 0, 0, 2, 1, 66, 11),
 (59073, 5842, 32681, 0, 0, 0, 2, 1, 66, 11);
 
@@ -4342,6 +4343,11 @@ INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equip
 (69895, 1064, 1, 1, 0, 0, 6337.32, 5235.62, 53.336, 4.91243, 120, 0, NULL, 1, 0, 0, 0, 0, 0, 0),
 (70561, 1064, 1, 1, 0, 0, 7174.45, 6313.18, 13.8513, 5.96196, 300, 0, 0, 84, 0, 0, 0, 0, 0, 0);
 
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `curhealth`) VALUES 
+(350953, 67970, 870, 1, 3, 0, 0, 1928.21, 4220.26, 132.569, 1.20363, 120, 1),
+(350954, 67970, 870, 1, 3, 0, 0, 1929.4, 4223.82, 132.569, 4.47099, 120, 1);
+
+
 DELETE FROM `gameobject` WHERE map=1064;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
 (438896, 178646, 1064, 1, 1, 6197.19, 4974.81, 37.9577, 6.24197, 0, 0, 0, 0, 0, 0, 0),
@@ -5099,7 +5105,7 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 (4932768, 217758, 1064, 1, 1, 7003.6, 6197.88, 4.17437, 2.07755, 0, 0, 0, 1, 120, 255, 1);
 
 /******************************** QUEST TEMPLATE **************************************/
-REPLACE INTO  `quest_template` (`Id`, `Method`, `Level`, `MinLevel`, `MaxLevel`, `ZoneOrSort`, `Type`, `SuggestedPlayers`, `LimitTime`, `RequiredClasses`, `RequiredRaces`, `RequiredSkillId`, `RequiredSkillPoints`, `RequiredFactionId1`, `RequiredFactionId2`, `RequiredFactionValue1`, `RequiredFactionValue2`, `RequiredMinRepFaction`, `RequiredMaxRepFaction`, `RequiredMinRepValue`, `RequiredMaxRepValue`, `PrevQuestId`, `NextQuestId`, `ExclusiveGroup`, `NextQuestIdChain`, `RewardXPId`, `RewardOrRequiredMoney`, `RewardMoneyMaxLevel`, `RewardSpell`, `RewardSpellCast`, `RewardHonor`, `RewardHonorMultiplier`, `RewardMailTemplateId`, `RewardMailDelay`, `SourceItemId`, `SourceItemCount`, `SourceSpellId`, `Flags`, `SpecialFlags`, `MinimapTargetMark`, `RewardTitleId`, `RequiredPlayerKills`, `RewardTalents`, `RewardArenaPoints`, `RewardSkillId`, `RewardSkillPoints`, `RewardReputationMask`, `QuestGiverPortrait`, `QuestTurnInPortrait`, `RewardItemId1`, `RewardItemId2`, `RewardItemId3`, `RewardItemId4`, `RewardItemCount1`, `RewardItemCount2`, `RewardItemCount3`, `RewardItemCount4`, `RewardChoiceItemId1`, `RewardChoiceItemId2`, `RewardChoiceItemId3`, `RewardChoiceItemId4`, `RewardChoiceItemId5`, `RewardChoiceItemId6`, `RewardChoiceItemCount1`, `RewardChoiceItemCount2`, `RewardChoiceItemCount3`, `RewardChoiceItemCount4`, `RewardChoiceItemCount5`, `RewardChoiceItemCount6`, `RewardFactionId1`, `RewardFactionId2`, `RewardFactionId3`, `RewardFactionId4`, `RewardFactionId5`, `RewardFactionValueId1`, `RewardFactionValueId2`, `RewardFactionValueId3`, `RewardFactionValueId4`, `RewardFactionValueId5`, `RewardFactionValueIdOverride1`, `RewardFactionValueIdOverride2`, `RewardFactionValueIdOverride3`, `RewardFactionValueIdOverride4`, `RewardFactionValueIdOverride5`, `PointMapId`, `PointX`, `PointY`, `PointOption`, `Title`, `Objectives`, `Details`, `EndText`, `OfferRewardText`, `RequestItemsText`, `CompletedText`, `RequiredNpcOrGo1`, `RequiredNpcOrGo2`, `RequiredNpcOrGo3`, `RequiredNpcOrGo4`, `RequiredNpcOrGoCount1`, `RequiredNpcOrGoCount2`, `RequiredNpcOrGoCount3`, `RequiredNpcOrGoCount4`, `RequiredSourceItemId1`, `RequiredSourceItemId2`, `RequiredSourceItemId3`, `RequiredSourceItemId4`, `RequiredSourceItemCount1`, `RequiredSourceItemCount2`, `RequiredSourceItemCount3`, `RequiredSourceItemCount4`, `RequiredItemId1`, `RequiredItemId2`, `RequiredItemId3`, `RequiredItemId4`, `RequiredItemId5`, `RequiredItemId6`, `RequiredItemCount1`, `RequiredItemCount2`, `RequiredItemCount3`, `RequiredItemCount4`, `RequiredItemCount5`, `RequiredItemCount6`, `RequiredSpell`, `RequiredSpellCast1`, `RequiredSpellCast2`, `RequiredSpellCast3`, `RequiredSpellCast4`, `ObjectiveText1`, `ObjectiveText2`, `ObjectiveText3`, `ObjectiveText4`, `RewardCurrencyId1`, `RewardCurrencyId2`, `RewardCurrencyId3`, `RewardCurrencyId4`, `RewardCurrencyCount1`, `RewardCurrencyCount2`, `RewardCurrencyCount3`, `RewardCurrencyCount4`, `RequiredCurrencyId1`, `RequiredCurrencyId2`, `RequiredCurrencyId3`, `RequiredCurrencyId4`, `RequiredCurrencyCount1`, `RequiredCurrencyCount2`, `RequiredCurrencyCount3`, `RequiredCurrencyCount4`, `QuestGiverTextWindow`, `QuestGiverTargetName`, `QuestTurnTextWindow`, `QuestTurnTargetName`, `SoundAccept`, `SoundTurnIn`, `DetailsEmote1`, `DetailsEmote2`, `DetailsEmote3`, `DetailsEmote4`, `DetailsEmoteDelay1`, `DetailsEmoteDelay2`, `DetailsEmoteDelay3`, `DetailsEmoteDelay4`, `EmoteOnIncomplete`, `EmoteOnComplete`, `OfferRewardEmote1`, `OfferRewardEmote2`, `OfferRewardEmote3`, `OfferRewardEmote4`, `OfferRewardEmoteDelay1`, `OfferRewardEmoteDelay2`, `OfferRewardEmoteDelay3`, `OfferRewardEmoteDelay4`, `WDBVerified`) VALUES 
+REPLACE INTO  `quest_template` (`Id`, `Method`, `Level`, `MinLevel`, `MaxLevel`, `ZoneOrSort`, `Type`, `SuggestedPlayers`, `LimitTime`, `RequiredClasses`, `RequiredRaces`, `RequiredSkillId`, `RequiredSkillPoints`, `RequiredFactionId1`, `RequiredFactionId2`, `RequiredFactionValue1`, `RequiredFactionValue2`, `RequiredMinRepFaction`, `RequiredMaxRepFaction`, `RequiredMinRepValue`, `RequiredMaxRepValue`, `PrevQuestId`, `NextQuestId`, `ExclusiveGroup`, `NextQuestIdChain`, `RewardXPId`, `RewardMoney`, `RewardMoneyMaxLevel`, `RewardSpell`, `RewardSpellCast`, `RewardHonor`, `RewardHonorMultiplier`, `RewardMailTemplateId`, `RewardMailDelay`, `SourceItemId`, `SourceItemCount`, `SourceSpellId`, `Flags`, `SpecialFlags`, `MinimapTargetMark`, `RewardTitleId`, `RequiredPlayerKills`, `RewardTalents`, `RewardArenaPoints`, `RewardSkillId`, `RewardSkillPoints`, `RewardReputationMask`, `QuestGiverPortrait`, `QuestTurnInPortrait`, `RewardItemId1`, `RewardItemId2`, `RewardItemId3`, `RewardItemId4`, `RewardItemCount1`, `RewardItemCount2`, `RewardItemCount3`, `RewardItemCount4`, `RewardChoiceItemId1`, `RewardChoiceItemId2`, `RewardChoiceItemId3`, `RewardChoiceItemId4`, `RewardChoiceItemId5`, `RewardChoiceItemId6`, `RewardChoiceItemCount1`, `RewardChoiceItemCount2`, `RewardChoiceItemCount3`, `RewardChoiceItemCount4`, `RewardChoiceItemCount5`, `RewardChoiceItemCount6`, `RewardFactionId1`, `RewardFactionId2`, `RewardFactionId3`, `RewardFactionId4`, `RewardFactionId5`, `RewardFactionValueId1`, `RewardFactionValueId2`, `RewardFactionValueId3`, `RewardFactionValueId4`, `RewardFactionValueId5`, `RewardFactionValueIdOverride1`, `RewardFactionValueIdOverride2`, `RewardFactionValueIdOverride3`, `RewardFactionValueIdOverride4`, `RewardFactionValueIdOverride5`, `PointMapId`, `PointX`, `PointY`, `PointOption`, `Title`, `Objectives`, `Details`, `EndText`, `OfferRewardText`, `RequestItemsText`, `CompletedText`, `RequiredNpcOrGo1`, `RequiredNpcOrGo2`, `RequiredNpcOrGo3`, `RequiredNpcOrGo4`, `RequiredNpcOrGoCount1`, `RequiredNpcOrGoCount2`, `RequiredNpcOrGoCount3`, `RequiredNpcOrGoCount4`, `RequiredSourceItemId1`, `RequiredSourceItemId2`, `RequiredSourceItemId3`, `RequiredSourceItemId4`, `RequiredSourceItemCount1`, `RequiredSourceItemCount2`, `RequiredSourceItemCount3`, `RequiredSourceItemCount4`, `RequiredItemId1`, `RequiredItemId2`, `RequiredItemId3`, `RequiredItemId4`, `RequiredItemId5`, `RequiredItemId6`, `RequiredItemCount1`, `RequiredItemCount2`, `RequiredItemCount3`, `RequiredItemCount4`, `RequiredItemCount5`, `RequiredItemCount6`, `RequiredSpell`, `RequiredSpellCast1`, `RequiredSpellCast2`, `RequiredSpellCast3`, `RequiredSpellCast4`, `ObjectiveText1`, `ObjectiveText2`, `ObjectiveText3`, `ObjectiveText4`, `RewardCurrencyId1`, `RewardCurrencyId2`, `RewardCurrencyId3`, `RewardCurrencyId4`, `RewardCurrencyCount1`, `RewardCurrencyCount2`, `RewardCurrencyCount3`, `RewardCurrencyCount4`, `RequiredCurrencyId1`, `RequiredCurrencyId2`, `RequiredCurrencyId3`, `RequiredCurrencyId4`, `RequiredCurrencyCount1`, `RequiredCurrencyCount2`, `RequiredCurrencyCount3`, `RequiredCurrencyCount4`, `QuestGiverTextWindow`, `QuestGiverTargetName`, `QuestTurnTextWindow`, `QuestTurnTargetName`, `SoundAccept`, `SoundTurnIn`, `DetailsEmote1`, `DetailsEmote2`, `DetailsEmote3`, `DetailsEmote4`, `DetailsEmoteDelay1`, `DetailsEmoteDelay2`, `DetailsEmoteDelay3`, `DetailsEmoteDelay4`, `EmoteOnIncomplete`, `EmoteOnComplete`, `OfferRewardEmote1`, `OfferRewardEmote2`, `OfferRewardEmote3`, `OfferRewardEmote4`, `OfferRewardEmoteDelay1`, `OfferRewardEmoteDelay2`, `OfferRewardEmoteDelay3`, `OfferRewardEmoteDelay4`, `WDBVerified`) VALUES 
 (32200, 1, 90, 90, 0, 6507, 0, 0, 0, 0, 33555378, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32729, 0, 0, 0, 5, 198450, 198458, 0, 0, 0, 0, 0, 0, 0, 0, 0, 266376, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1388, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Dangers of Za\'Tual', 'Slay 12 Trolls in Za\'Tual.', '$N, what I ask of you is little short of genocide, but it is a task that must be done.', 'Return to Halduron Brightwing in Isle of Thunder.', 'Much blood was spilled this day. It is on my hands, $N, not yours.', NULL, '', 69065, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', '', '', 738, 396, 0, 0, 0.2000, 50.0000, 0.0000, 0.0000, 0, 0, 0, 0, 0, 0, 0, 0, '', '', '', '', 890, 878, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
 (32201, 1, 90, 90, 0, 6507, 0, 0, 0, 0, 33555378, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 198450, 198458, 0, 0, 0, 0, 0, 0, 0, 0, 0, 266376, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1388, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Grave Circumstances', 'Kill 10 Shan\'ze Gravekeepers, Shan\'ze Soulrippers, or Shan\'ze Thundercallers.', 'The Court of Bones crawls with mogu forces. Endlessly do they perform their rituals of lightning and thunder.$B$BIf our mission to take this island is to succeed, then we cannot allow them to hold such a strategic position.$B$BThey must be eliminated.', 'Return to Grand Magister Rommath in Isle of Thunder.', 'Excellent. You have dealt the mogu a blow that they shall not easily forget.', NULL, '', 69235, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Shan\'ze mogu slain at the Court of Bones', '', '', '', 738, 396, 0, 0, 0.2000, 50.0000, 0.0000, 0.0000, 0, 0, 0, 0, 0, 0, 0, 0, '', '', '', '', 890, 878, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
 (32202, 1, 90, 90, 0, 6507, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 198450, 198458, 0, 0, 0, 0, 0, 0, 0, 0, 0, 282760, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1388, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Kill Trolls', '', '', '', NULL, NULL, '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', '', '', 738, 396, 0, 0, 0.2000, 0.5000, 0.0000, 0.0000, 0, 0, 0, 0, 0, 0, 0, 0, '', '', '', '', 890, 878, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
@@ -6268,6 +6274,13 @@ INSERT IGNORE INTO `quest_poi_points` (`questId`, `id`, `idx`, `x`, `y`) VALUES
 (32732, 1, 0, 6091, 5350),
 (32733, 0, 0, 6301, 5922);
 
+DELETE FROM `quest_objective` WHERE questId IN(32681);
+INSERT INTO `quest_objective` (`questId`, `id`, `index`, `type`, `objectId`, `amount`, `flags`, `description`) VALUES 
+(32681, 270245, 1, 0, 70364, 1, 0, 'Isle of Thunder discovered'),
+(32681, 270303, 0, 0, 70360, 1, 0, 'Speak with Vereesa');
+
+
+
 /******************************** SMARTAI QUERIES ***********************************/
 REPLACE INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
 (58071, 0, 0, 0, 2, 0, 100, 0, 10, 50, 1, 2, 11, 8599, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Npc - Event - Action (phase) (dungeon difficulty)'),
@@ -6709,25 +6722,31 @@ REPLACE INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event
 (217165, 1, 0, 2, 70, 0, 100, 0, 2, 0, 0, 0, 33, 69186, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Garde-périmètre, réverbère mogu - On Gameobject State Changed - Quest Credit \'Bolstering the Defenses\''),
 (217165, 1, 1, 0, 1, 0, 100, 0, 0, 0, 30000, 30000, 104, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Garde-périmètre, réverbère mogu - Out of Combat - Set Gameobject Flag '),
 (217165, 1, 2, 0, 61, 0, 100, 0, 2, 0, 0, 0, 104, 16, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Garde-périmètre, réverbère mogu - On Gameobject State Changed - Set Gameobject Flag Not Selectable'),
-(70358, 0, 0, 10, 62, 0, 100, 0, 64940, 0, 0, 0, 75, 97936, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Scout Captain Elsia - On Gossip Option 0 Selected - Add Aura \'<Spell not found!>\''),
-(70358, 0, 1, 8, 62, 0, 100, 0, 64940, 0, 0, 0, 1, 0, 12000, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Scout Captain Elsia - On Gossip Option 0 Selected - Say Line 0'),
-(70358, 0, 2, 0, 52, 0, 100, 0, 0, 70358, 0, 0, 1, 1, 11000, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Scout Captain Elsia - On Text 0 Over - Say Line 1'),
-(70358, 0, 3, 0, 52, 0, 100, 0, 1, 70358, 0, 0, 1, 2, 9000, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Scout Captain Elsia - On Text 1 Over - Say Line 2'),
-(70358, 0, 4, 0, 52, 0, 100, 0, 2, 70358, 0, 0, 1, 3, 7000, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Scout Captain Elsia - On Text 2 Over - Say Line 3'),
-(70358, 0, 8, 0, 61, 0, 100, 0, 64940, 0, 0, 0, 33, 70358, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Scout Captain Elsia - On Gossip Option 0 Selected - Quest Credit \'The Storm Gathers\''),
-(70358, 0, 9, 0, 52, 0, 100, 0, 3, 70358, 0, 0, 28, 97936, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Scout Captain Elsia - On Text 3 Over - Remove Aura \'<Spell not found!>\''),
-(70358, 0, 10, 0, 61, 0, 100, 0, 64940, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Scout Captain Elsia - On Gossip Option 0 Selected - Close Gossip'),
+(70358, 0, 0, 10, 62, 0, 100, 0, 64940, 0, 0, 0, 75, 97936, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Scout Captain Elsia - On Gossip Option 0 Selected - Add Aura '<Spell not found!>'"),
+(70358, 0, 1, 8, 62, 0, 100, 0, 64940, 0, 0, 0, 1, 0, 12000, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Scout Captain Elsia - On Gossip Option 0 Selected - Say Line 0"),
+(70358, 0, 2, 0, 52, 0, 100, 0, 0, 70358, 0, 0, 1, 1, 11000, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Scout Captain Elsia - On Text 0 Over - Say Line 1"),
+(70358, 0, 3, 0, 52, 0, 100, 0, 1, 70358, 0, 0, 1, 2, 9000, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Scout Captain Elsia - On Text 1 Over - Say Line 2"),
+(70358, 0, 4, 0, 52, 0, 100, 0, 2, 70358, 0, 0, 1, 3, 7000, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Scout Captain Elsia - On Text 2 Over - Say Line 3"),
+(70358, 0, 8, 0, 61, 0, 100, 0, 64940, 0, 0, 0, 33, 70358, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Scout Captain Elsia - On Gossip Option 0 Selected - Quest Credit 'The Storm Gathers'"),
+(70358, 0, 9, 11, 52, 0, 100, 0, 3, 70358, 0, 0, 28, 97936, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Scout Captain Elsia - On Text 3 Over - Remove Aura '<Spell not found!>'"),
+(70358, 0, 10, 0, 61, 0, 100, 0, 64940, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Scout Captain Elsia - On Gossip Option 0 Selected - Close Gossip"),
+(70358, 0, 11, 12, 61, 0, 100, 0, 3, 70358, 0, 0, 33, 70365, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Scout Captain Elsia - On Text 3 Over - Quest Credit 'The Storm Gathers'"),
+(70358, 0, 12, 0, 61, 0, 100, 0, 3, 70358, 0, 0, 62, 1064, 0, 0, 0, 0, 0, 7, 0, 0, 0, 7219.5537, 6311.5512, 12.4713, 3.9034, "Scout Captain Elsia - On Text 3 Over - Teleport"),
 (70360, 0, 0, 1, 62, 0, 100, 0, 70360, 0, 0, 0, 75, 97936, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Vereesa Windrunner - On Gossip Option 0 Selected - Add Aura \'<Spell not found!>\''),
-(70360, 0, 1, 9, 61, 0, 100, 0, 70360, 0, 0, 0, 1, 0, 7000, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Vereesa Windrunner - On Gossip Option 0 Selected - Say Line 0'),
-(70360, 0, 2, 0, 52, 0, 100, 0, 0, 70360, 0, 0, 1, 1, 11000, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Vereesa Windrunner - On Text 0 Over - Say Line 1'),
-(70360, 0, 3, 0, 52, 0, 100, 0, 1, 70360, 0, 0, 1, 2, 8000, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Vereesa Windrunner - On Text 1 Over - Say Line 2'),
-(70360, 0, 4, 0, 52, 0, 100, 0, 2, 70360, 0, 0, 1, 3, 5000, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Vereesa Windrunner - On Text 2 Over - Say Line 3'),
-(70360, 0, 5, 0, 52, 0, 100, 0, 3, 0, 0, 0, 1, 4, 8000, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Vereesa Windrunner - On Text 3 Over - Say Line 4'),
-(70360, 0, 6, 0, 52, 0, 100, 0, 4, 70360, 0, 0, 1, 5, 3000, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Vereesa Windrunner - On Text 4 Over - Say Line 5'),
-(70360, 0, 7, 0, 52, 0, 100, 0, 5, 70360, 0, 0, 1, 6, 4000, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Vereesa Windrunner - On Text 5 Over - Say Line 6'),
-(70360, 0, 8, 0, 52, 0, 100, 0, 6, 70360, 0, 0, 28, 97936, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Vereesa Windrunner - On Text 6 Over - Remove Aura \'<Spell not found!>\''),
-(70360, 0, 9, 10, 61, 0, 100, 0, 70360, 0, 0, 0, 33, 70360, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Vereesa Windrunner - On Gossip Option 0 Selected - Quest Credit \'The Storm Gathers\''),
-(70360, 0, 10, 0, 61, 0, 100, 0, 70360, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Vereesa Windrunner - On Gossip Option 0 Selected - Close Gossip');
+(70360, 0, 0, 1, 62, 0, 100, 0, 70360, 0, 0, 0, 75, 97936, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Vereesa Windrunner - On Gossip Option 0 Selected - Add Aura '<Spell not found!>'"),
+(70360, 0, 1, 9, 61, 0, 100, 0, 70360, 0, 0, 0, 1, 0, 7000, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Vereesa Windrunner - On Gossip Option 0 Selected - Say Line 0"),
+(70360, 0, 2, 0, 52, 0, 100, 0, 0, 70360, 0, 0, 1, 1, 11000, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Vereesa Windrunner - On Text 0 Over - Say Line 1"),
+(70360, 0, 3, 0, 52, 0, 100, 0, 1, 70360, 0, 0, 1, 2, 8000, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Vereesa Windrunner - On Text 1 Over - Say Line 2"),
+(70360, 0, 4, 0, 52, 0, 100, 0, 2, 70360, 0, 0, 1, 3, 5000, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Vereesa Windrunner - On Text 2 Over - Say Line 3"),
+(70360, 0, 5, 0, 52, 0, 100, 0, 3, 0, 0, 0, 1, 4, 8000, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Vereesa Windrunner - On Text 3 Over - Say Line 4"),
+(70360, 0, 6, 0, 52, 0, 100, 0, 4, 70360, 0, 0, 1, 5, 3000, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Vereesa Windrunner - On Text 4 Over - Say Line 5"),
+(70360, 0, 7, 0, 52, 0, 100, 0, 5, 70360, 0, 0, 1, 6, 4000, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Vereesa Windrunner - On Text 5 Over - Say Line 6"),
+(70360, 0, 8, 11, 52, 0, 100, 0, 6, 70360, 0, 0, 28, 97936, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Vereesa Windrunner - On Text 6 Over - Remove Aura '<Spell not found!>'"),
+(70360, 0, 9, 10, 61, 0, 100, 0, 70360, 0, 0, 0, 33, 70360, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Vereesa Windrunner - On Gossip Option 0 Selected - Quest Credit 'The Storm Gathers'"),
+(70360, 0, 10, 0, 61, 0, 100, 0, 70360, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Vereesa Windrunner - On Gossip Option 0 Selected - Close Gossip"),
+(70360, 0, 12, 0, 52, 0, 100, 0, 6, 70360, 0, 0, 62, 1064, 0, 0, 0, 0, 0, 7, 0, 0, 0, 6157.92, 5020.59, 37, 1.537, "Vereesa Windrunner - On Text 6 Over - Teleport"),
+(70360, 0, 11, 0, 52, 0, 100, 0, 6, 70360, 0, 0, 33, 70360, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Vereesa Windrunner - On Text 6 Over - Quest Credit 'The Storm Gathers'");
+
 
 
 /******************************** UPDATE QUERIES ************************************/
@@ -6737,6 +6756,10 @@ UPDATE `creature_template` SET gossip_menu_id=70360 WHERE entry=70360;
 UPDATE `creature` SET phaseMask=3 WHERE zoneId=5842 AND phaseMask IN(1, 65535);
 UPDATE `gameobject` SET phaseMask=3 WHERE zoneId=5842 AND phaseMask IN(1, 65535);
 UPDATE `gameobject` SET phaseMask=2 WHERE id IN(218463, 218462);
+DELETE FROM `creature_questender` WHERE id=64566 AND quest=32678;
+UPDATE `gameobject` SET position_x=1928.39, position_y=4222.1, position_z=132.486, orientation=2.8239 WHERE id=218463;
+UPDATE `quest_template` SET prevQuestId=32679 WHERE Id=32681;
+UPDATE `quest_template` SET NextQuestId=32681, NextQuestIdChain=32681 WHERE id=32679;
 
 
 /******************************** OTHERS QUERIES ************************************/
@@ -7080,3 +7103,10 @@ DELETE FROM `spell_target_position` WHERE id IN(138815, 138818);
 INSERT INTO `spell_target_position` (`id`, `effIndex`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES 
 (138815, 0, 870, 1921.75, 4224.25, 132.41, 2.82),
 (138818, 0, 870, 1753.55, 4166.26, 159.5, 5.7);
+
+DELETE FROM `creature_aura` WHERE guid IN(993500, 993501, 350953, 350954);
+INSERT INTO `creature_aura` (`guid`, `aura`) VALUES
+(993500, 137503),
+(993501, 137503),
+(350953, 137503),
+(350954, 137503);

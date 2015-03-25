@@ -1391,12 +1391,6 @@ public:
 
         }
 
-        void KilledUnit(Unit *pKilled)
-        {
-            if (Creature *pJalak = GetJalak(me))
-                pJalak->AI()->Talk(TALK_ON_HORRIDON_KILLED_UNIT);
-        }
-
         void ChargeAtDoor(GameObject *pDoor)
         {
             if (!pDoor)
@@ -1557,6 +1551,8 @@ public:
                 if (Creature *pHorridon = GetHorridon(me))
                     pHorridon->AddAura(SPELL_RAMPAGE, pHorridon);
             }
+
+            Talk(TALK_ON_HORRIDON_KILLED_UNIT);
         }
 
     private:

@@ -2272,6 +2272,7 @@ class Player final : public Unit, public GridObject<Player>
         /***               BATTLEGROUND SYSTEM                 ***/
         /*********************************************************/
 
+        uint32 m_ChallengeCooldown;
         bool InBattleground()       const                { return m_bgData.bgInstanceID != 0; }
         bool InArena()              const;
         uint32 GetBattlegroundId()  const                { return m_bgData.bgInstanceID; }

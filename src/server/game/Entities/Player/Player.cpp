@@ -685,6 +685,7 @@ Player::Player(WorldSession* session)
     _dynamicTabCount = PLAYER_DYNAMIC_END;
 
     m_session = session;
+    m_ChallengeCooldown = 0;
 
     m_divider = 0;
 

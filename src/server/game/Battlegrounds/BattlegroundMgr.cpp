@@ -855,7 +855,7 @@ uint32 BattlegroundMgr::CreateClientVisibleInstanceId(BattlegroundTypeId bgTypeI
 }
 
 // create a new battleground that will really be used to play
-Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId originalBgTypeId, PvPDifficultyEntry const* bracketEntry, uint8 arenaType)
+Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId originalBgTypeId, PvPDifficultyEntry const* bracketEntry, uint8 arenaType, bool rated)
 {
     BattlegroundTypeId bgTypeId = originalBgTypeId;
     bool isRated = false;
@@ -870,7 +870,7 @@ Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId original
         case BATTLEGROUND_RA_BG:
             /// Intentional fallback, "All Arenas" is random too
         case BATTLEGROUND_AA:
-            isRated = true;
+            isRated = rated;
             bgTypeId = GetRandomBG(originalBgTypeId);
             break;
         default:

@@ -244,22 +244,22 @@ enum eMotions
 {
     //===============================================
     // Gara'jal
-    POINT_COUNCILLOR                        = 0,
+    POINT_COUNCILLOR                        = 4343,
 
     //===============================================
     // Kazra'jin
-    POINT_RECKLESS_CHARGE_LAND              = 1, // Position where Kazrajin lands after performing Reckless Charge
-    POINT_RECKLESS_CHARGE_PLAYER            = 2, // Position where Kazrajin rolls to after landing from Reckless Charge
+    POINT_RECKLESS_CHARGE_LAND              = 5000, // Position where Kazrajin lands after performing Reckless Charge
+    POINT_RECKLESS_CHARGE_PLAYER            = 6714, // Position where Kazrajin rolls to after landing from Reckless Charge
 
     //===============================================
     // Blessed Loa Spirit
-    POINT_BLESSED_LOA_SPIRIT_COUNCILLOR     = 3, // Point to identify the councillor the Blessed Loa Spirit is going toward
+    POINT_BLESSED_LOA_SPIRIT_COUNCILLOR     = 9413, // Point to identify the councillor the Blessed Loa Spirit is going toward
     // No need to do a point for the Shadowed Loa Spirit since it will not
     // reach the target but only go 6 yards away from him (so we can use MoveFollow)
 
     //===============================================
     // Twisted Fate (common)
-    POINT_MIDDLE                            = 4, // Point representing the middle point on the line formed by the two Twisted Fate
+    POINT_MIDDLE                            = 6653, // Point representing the middle point on the line formed by the two Twisted Fate
 };
 
 
@@ -1913,7 +1913,7 @@ public:
                 HandleTargetSelection();
         }
 
-        inline void HandleTargetSelection()
+        void HandleTargetSelection()
         {
             float fHealthNumber = 100.f;
             std::list<uint64> tempList;
@@ -2049,7 +2049,7 @@ public:
             {
                 if (pTarget->IsAlive())
                 {
-                    me->GetMotionMaster()->MovePoint(POINT_BLESSED_LOA_SPIRIT_COUNCILLOR, *pTarget);
+                    me->GetMotionMaster()->MovePoint(POINT_BLESSED_LOA_SPIRIT_COUNCILLOR, pTarget->GetPosition());
                     events.ScheduleEvent(EVENT_MOVE_COUNCILLOR, 500);
                 }
                 else
@@ -2073,22 +2073,25 @@ public:
             }
 
             HandleTargetSelection();
-            return NULL;
+            return nullptr;
         }
 
-        inline void HandleTargetSelection()
+        void HandleTargetSelection()
         {
             DoCast(SPELL_MARKED_SOUL);
 
             std::list<Player*> players;
             GetPlayerListInGrid(players, me, 300.f);
 
-            for (auto const pPlayer : players)
+            if (!players.empty())
             {
-                if (pPlayer->HasAura(SPELL_MARKED_SOUL, me->GetGUID()))
+                for (auto const pPlayer : players)
                 {
-                    uiTargetGuid = pPlayer->GetGUID();
-                    break;
+                    if (pPlayer->HasAura(SPELL_MARKED_SOUL, me->GetGUID()))
+                    {
+                        uiTargetGuid = pPlayer->GetGUID();
+                        break;
+                    }
                 }
             }
             
@@ -2113,7 +2116,7 @@ public:
                     {
                         DoCast(me, SPELL_SHADOWED_TIME_OUT);
                         me->GetMotionMaster()->MovementExpired();
-                        me->GetMotionMaster()->MoveJump(*pTarget, 42.0f, 42.0f, EVENT_JUMP);
+                        me->GetMotionMaster()->MoveJump(*pTarget, 42.0f, 42.0f, 5050);
                     }
                     else
                     break;
@@ -2126,40 +2129,31 @@ public:
 
         void MovementInform(uint32 uiMotionType, uint32 uiMotionPointId)
         {
-            switch (uiMotionType)
+            if (uiMotionPointId == POINT_BLESSED_LOA_SPIRIT_COUNCILLOR)
             {
-            case POINT_MOTION_TYPE:
-                if (uiMotionPointId == POINT_BLESSED_LOA_SPIRIT_COUNCILLOR)
+                if (Player* pTarget = GetFollowedPlayer())
                 {
-                    if (Player* pTarget = GetFollowedPlayer())
+                    if (me->GetExactDist2d(pTarget) <= 6.f)
                     {
-                        if (me->GetExactDist2d(pTarget) <= 6.f)
-                        {
-                            DoCast(pTarget, SPELL_SHADOWED_GIFT, true);
-                            pTarget->RemoveAurasDueToSpell(SPELL_MARKED_SOUL, me->GetGUID());
-                            me->DisappearAndDie();
-                        }
-                        else
-                            events.RescheduleEvent(EVENT_MOVE_COUNCILLOR, 0);
-                    }
-                }
-                break;
-
-            case EFFECT_MOTION_TYPE:
-                if (uiMotionPointId == EVENT_JUMP)
-                {
-                    if (Player* pPlayer = GetFollowedPlayer())
-                    {
-                        DoCast(pPlayer, SPELL_SHADOWED_GIFT);
-                        pPlayer->RemoveAurasDueToSpell(SPELL_MARKED_SOUL, me->GetGUID());
+                        DoCast(pTarget, SPELL_SHADOWED_GIFT, true);
+                        pTarget->RemoveAurasDueToSpell(SPELL_MARKED_SOUL, me->GetGUID());
                         me->DisappearAndDie();
                     }
+                    else
+                        events.RescheduleEvent(EVENT_MOVE_COUNCILLOR, 0);
                 }
-                break;
-
-            default:
-                break;
             }
+
+            if (uiMotionPointId == 5050)
+            {
+                if (Player* pPlayer = GetFollowedPlayer())
+                {
+                    DoCast(pPlayer, SPELL_SHADOWED_GIFT);
+                    pPlayer->RemoveAurasDueToSpell(SPELL_MARKED_SOUL, me->GetGUID());
+                    me->DisappearAndDie();
+                }
+            }
+
         }
 
         void JustDied(Unit *pKiller)
@@ -2957,7 +2951,10 @@ public:
 
             // Stunned on aura apply
             if (Creature *pOwner = GetOwner()->ToCreature())
+            {
+                pOwner->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                 pOwner->SetControlled(true, UNIT_STATE_STUNNED);
+            }
         }
 
         void HandleOnProc(ProcEventInfo& rProcInfo)

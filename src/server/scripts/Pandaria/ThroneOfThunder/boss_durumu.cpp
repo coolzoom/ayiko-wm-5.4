@@ -174,9 +174,9 @@ uint64 SelecGUIDtRandomPlayerInRage(Creature*me,float range,bool lingering_gaze 
     std::list<Player*> PlayerList;
     GetPlayerListInGrid(PlayerList, me, range);
     if (lingering_gaze)
-        PlayerList.remove_if(JadeCore::UnitAuraCheck(true, SPELL_LINGERING_GAZE_MARKER));
+        PlayerList.remove_if(Trinity::UnitAuraCheck(true, SPELL_LINGERING_GAZE_MARKER));
     if (!PlayerList.empty())
-        if (Player *target = JadeCore::Containers::SelectRandomContainerElement(PlayerList))
+    if (Player *target = Trinity::Containers::SelectRandomContainerElement(PlayerList))
             return target->GetGUID();
 
     return 0;
@@ -219,7 +219,7 @@ class npc_roaming_fog : public CreatureScript
                 switch (events.ExecuteEvent())
                 {
                     case EVENT_MOVE_RANDOM:
-                        if (!me->isInCombat())
+                        if (!me->IsInCombat())
                         {
                             Position position;
                             me->GetRandomPoint(CenterDurumu,40.0f,position);
@@ -253,7 +253,7 @@ class boss_durumu : public CreatureScript
 
         struct boss_durumuAI : public BossAI
         {
-            boss_durumuAI(Creature* creature) : BossAI(creature, DATA_DURUMU_THE_FORGOTTEN_EVENT)
+            boss_durumuAI(Creature* creature) : BossAI(creature, DATA_DURUMU_THE_FORGOTTEN)
             {
                 instance = creature->GetInstanceScript();
                 RoamingKilled = 0;
@@ -289,7 +289,7 @@ class boss_durumu : public CreatureScript
                 _JustReachedHome();
 
                 if (instance)
-                    instance->SetBossState(DATA_DURUMU_THE_FORGOTTEN_EVENT, FAIL);
+                    instance->SetBossState(DATA_DURUMU_THE_FORGOTTEN, FAIL);
             }
 
             void Reset()
@@ -326,7 +326,7 @@ class boss_durumu : public CreatureScript
 
                 if (instance)
                 {
-                   instance->SetBossState(DATA_DURUMU_THE_FORGOTTEN_EVENT, DONE);
+                    instance->SetBossState(DATA_DURUMU_THE_FORGOTTEN, DONE);
                    instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me); // Remove.
                    instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_RED_BEAM);
                    instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_RED_BEAM_DMG);
@@ -356,7 +356,7 @@ class boss_durumu : public CreatureScript
 
                 if (instance)
                 {
-                    instance->SetBossState(DATA_DURUMU_THE_FORGOTTEN_EVENT, IN_PROGRESS);
+                    instance->SetBossState(DATA_DURUMU_THE_FORGOTTEN, IN_PROGRESS);
                     instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                 }
             }
@@ -383,7 +383,7 @@ class boss_durumu : public CreatureScript
 
                 if (!PlayerList.empty())
                     if (Creature * eyeDontMover = me->SummonCreature(RED_EYE,me->GetPositionX(), me->GetPositionY(),me->GetPositionZ()))
-                        if (Player *target = JadeCore::Containers::SelectRandomContainerElement(PlayerList))
+                        if (Player *target = Trinity::Containers::SelectRandomContainerElement(PlayerList))
                         {
                             eyeDontMover->CastSpell(target, SPELL_RED_BEAM, true);
                             PlayerList.remove(target);
@@ -391,7 +391,7 @@ class boss_durumu : public CreatureScript
                         
                 if (!PlayerList.empty()) // Check again coz we change player list before
                     if (Creature * eyeDontMover = me->SummonCreature(BLUE_EYE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()))
-                        if (Player *target = JadeCore::Containers::SelectRandomContainerElement(PlayerList))
+                        if (Player *target = Trinity::Containers::SelectRandomContainerElement(PlayerList))
                             eyeDontMover->CastSpell(target, SPELL_BLUE_BEAM, true);
             }
 
@@ -447,10 +447,10 @@ class boss_durumu : public CreatureScript
                 switch (events.ExecuteEvent())
                 {
                     case EVENT_HARD_STARE:
-                        if (me->getVictim())
+                        if (me->GetVictim())
                         {
                             DoPlaySoundToSet(me, 35334); // wound
-                            DoCast(me->getVictim(),SPELL_HARD_STARE);
+                            DoCast(me->GetVictim(),SPELL_HARD_STARE);
                         }
                         events.ScheduleEvent(EVENT_HARD_STARE, 13000);
                         break;
@@ -1008,7 +1008,7 @@ class spell_arterial_cut : public SpellScriptLoader
         {
             PrepareAuraScript(spell_arterial_cut_AuraScript);
 
-            void OnTick(constAuraEffectPtr aurEff)
+            void OnTick(AuraEffect const* aurEff)
             {
                 if (GetTarget())
                     if (GetTarget()->GetHealth() >= GetTarget()->GetMaxHealth())
@@ -1079,7 +1079,7 @@ class spell_force_of_will : public SpellScriptLoader
         {
             PrepareAuraScript(spell_force_of_will_AuraScript);
 
-            void OnRemove(constAuraEffectPtr /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (!GetCaster())
                     return;
@@ -1109,7 +1109,7 @@ class spell_lingering_gaze : public SpellScriptLoader
         {
             PrepareAuraScript(spell_lingering_gaze_AuraScript);
 
-            void OnRemove(constAuraEffectPtr /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (!GetTarget() || !GetCaster())
                     return;

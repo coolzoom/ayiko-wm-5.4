@@ -3542,8 +3542,7 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const *triggered
         if (!(_triggeredCastFlags & TRIGGERED_IGNORE_GCD) && result == SPELL_CAST_OK)
             TriggerGlobalCooldown();
 
-        //item: first cast may destroy item and second cast causes crash
-        if (!m_casttime && !m_spellInfo->StartRecoveryTime && !m_castItemGUID && GetCurrentContainer() == CURRENT_GENERIC_SPELL)
+        if (!m_casttime && GetCurrentContainer() == CURRENT_GENERIC_SPELL)
             cast(true);
     }
 }

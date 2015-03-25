@@ -67,8 +67,6 @@ enum Spells
     SPELL_MEGAERAS_RAGE_POISON  = 139818, // Venomous Head.
     SPELL_MEGAERAS_RAGE_ARCANE  = 139820, // Arcane Head - Heroic only!.
 
-    SPELL_BERSERK               = 144369, // Berserk, Enrage, Bye - Bye or, simply put, a wipe. :)
-
     // Flaming Head
     SPELL_CINDERS               = 139822, // When in Concealing Fog. Melts Icy Ground. Pool NPC summoned when removed / every 3 seconds on Heroic.
     SPELL_CINDERS_SUMMON        = 139834, // Summons NPC_CINDERS.

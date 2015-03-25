@@ -1245,7 +1245,8 @@ public:
 
         void EnterEvadeModeIfRequired()
         {
-            if (me->GetExactDist2d(&me->GetHomePosition()) > 190.f)
+            Position pos = me->GetHomePosition();
+            if (me->GetExactDist2d(&pos) > 190.f)
             {
                 EnterEvadeMode();
                 return;

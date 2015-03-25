@@ -730,7 +730,7 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 -- 10H=(10N+25%)
 
 UPDATE `creature_template` SET `ScriptName` = 'mob_horridon_trashs' WHERE `entry` IN 
-(69164,69167,69168,69169,69170,69172,69173,69175,69177,69178,69184,69185);
+(69164,69167,69168,69169,69172,69173,69175,69177,69178,69184,69185);
 
 UPDATE `creature_template` SET `ScriptName` = 'mob_horridon_summons' WHERE `entry` IN 
 (69268,69313,69314,69346);

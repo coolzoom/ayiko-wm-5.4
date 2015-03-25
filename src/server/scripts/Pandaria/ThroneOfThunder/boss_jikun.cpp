@@ -966,7 +966,7 @@ class spell_hatchling_eated : public SpellScriptLoader
         {
             PrepareAuraScript(spell_hatchling_eated_AuraScript);
 
-            void OnRemove(constAuraEffectPtr /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const*  /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (GetTarget())
                 {
@@ -999,7 +999,7 @@ class pool_of_feed_dmg_aura : public SpellScriptLoader
         {
             PrepareAuraScript(pool_of_feed_dmg_aura_AuraScript);
 
-            void OnPeriodic(constAuraEffectPtr aurEff)
+            void OnPeriodic(AuraEffect const* aurEff)
             {
                 if (!GetTarget() || !aurEff || GetId() == 134256)
                     return;
@@ -1028,7 +1028,7 @@ class pool_of_feed_dmg_aura : public SpellScriptLoader
                         GetTarget()->RemoveAura(138319);
             }
 
-            void OnRemove(constAuraEffectPtr /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const*  /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (GetTarget())
                     GetTarget()->CastSpell(GetTarget(),SPELL_SLIMED_DMG_INCREASE,true);
@@ -1058,7 +1058,7 @@ class remove_stack_wings : public SpellScriptLoader
         {
             PrepareAuraScript(remove_stack_wings_AuraScript);
 
-            void OnApply(constAuraEffectPtr /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const*  /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (!GetTarget())
                     return;
@@ -1175,7 +1175,7 @@ class spell_feed_summon : public SpellScriptLoader
         {
             PrepareAuraScript(spell_feed_summon_AuraScript);
 
-            void OnTick(constAuraEffectPtr aurEff)
+            void OnTick(AuraEffect const*  aurEff)
             {
                 if (!GetCaster())
                     return;

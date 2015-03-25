@@ -205,12 +205,12 @@ UPDATE `creature_template` SET `ScriptName` = 'npc_focused_lightning', `HoverHei
 UPDATE `creature_template` SET `ScriptName` = 'npc_lightning_fissure' WHERE `entry` = 69609;
 UPDATE `creature_template` SET `ScriptName` = 'npc_zandalari_stormcaller' WHERE `entry` = 70236;
 
--- Immunity and bind bosses
-UPDATE creature_template SET flags_extra = flags_extra | 1, mechanic_immune_mask = 667893759 WHERE entry IN (69465,3169465,3269465,3369465,3469465,3569465);
-
 -- Difficulty entries bosses and Trash Mobs
 UPDATE creature_template SET difficulty_entry_3 = @RAID_DIFF_10N + entry, difficulty_entry_4 = @RAID_DIFF_25N + entry, difficulty_entry_5 = @RAID_DIFF_10H + entry, difficulty_entry_6 = @RAID_DIFF_25H + entry, difficulty_entry_7 = @RAID_DIFF_25R + entry WHERE entry IN 
 (69388,69390,69455,69465,70230,70236,70491);
+
+-- Immunity and bind bosses
+UPDATE creature_template SET flags_extra = flags_extra | 1, mechanic_immune_mask = 667893759 WHERE entry IN (69465,3169465,3269465,3369465,3469465,3569465);
 
 -- Zandalari Spear-Shaper
 UPDATE creature_template SET LootId = 69388, dmg_multiplier = 4, Health_Mod = 14165200 / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69388;
@@ -744,13 +744,13 @@ UPDATE `creature_template` SET `ScriptName` = 'mob_zandalari_dinomancer' WHERE `
 UPDATE `creature_template` SET `ScriptName` = 'boss_horridon' WHERE `entry` = 68476;
 UPDATE `creature_template` SET `ScriptName` = 'mob_war_god_jalak' WHERE `entry` = 69374;
 
--- Immunity and bind bosses
-UPDATE creature_template SET flags_extra = flags_extra | 1, mechanic_immune_mask = 667893759 WHERE entry IN 
-(68476,69374);
-
 -- Difficulty entries bosses and Trash Mobs
 UPDATE creature_template SET difficulty_entry_3 = @RAID_DIFF_10N + entry, difficulty_entry_4 = @RAID_DIFF_25N + entry, difficulty_entry_5 = @RAID_DIFF_10H + entry, difficulty_entry_6 = @RAID_DIFF_25H + entry, difficulty_entry_7 = @RAID_DIFF_25R + entry WHERE entry IN 
 (68476,69164,69167,69168,69169,69172,69173,69175,69176,69177,69178,69184,69185,69221,69314,69374,70308,70341,70445,70448);
+
+-- Immunity and bind bosses
+UPDATE creature_template SET flags_extra = flags_extra | 1, mechanic_immune_mask = 667893759 WHERE entry IN 
+(68476,3168476,3268476,3368476,3468476,3568476,69374,3169374,3269374,3369374,3469374,3569374);
 
 -- Gurubashi Venom Priest
 UPDATE creature_template SET LootId = 0, dmg_multiplier = 4, Health_Mod = 5059104  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69164;
@@ -1630,13 +1630,13 @@ UPDATE creature_template SET ScriptName = "mob_twisted_fate_helper" WHERE entry 
 UPDATE creature_template SET ScriptName = "mob_quicksand_stalker" WHERE entry = 662205;
 UPDATE creature_template SET ScriptName = 'mob_garajal', HoverHeight = 2 WHERE entry = 69135;
 
--- Immunity and bind bosses
-UPDATE creature_template SET flags_extra = flags_extra | 1, mechanic_immune_mask = 667893759 WHERE entry IN 
-(69078,69131,69132,69134);
-
 -- Difficulty entries bosses and Trash Mobs
 UPDATE creature_template SET difficulty_entry_3 = @RAID_DIFF_10N + entry, difficulty_entry_4 = @RAID_DIFF_25N + entry, difficulty_entry_5 = @RAID_DIFF_10H + entry, difficulty_entry_6 = @RAID_DIFF_25H + entry, difficulty_entry_7 = @RAID_DIFF_25R + entry WHERE entry IN 
 (69078,69131,69132,69134,69153,69480,69548,69899,69905,69906,69909,69910,69911,69916,69927,70060,70557);
+
+-- Immunity and bind bosses
+UPDATE creature_template SET flags_extra = flags_extra | 1, mechanic_immune_mask = 667893759 WHERE entry IN 
+(69078,3169078,3269078,3369078,3469078,3569078,69131,3169131,3269131,3369131,3469131,3569131,69132,3169132,3269132,3369132,3469132,3569132,69134,3169134,3269134,3369134,3469134,3569134);
 
 -- Living Sand
 UPDATE creature_template SET LootId = 0, dmg_multiplier = 2, Health_Mod = 1290071 / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69153;
@@ -2506,11 +2506,11 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 -- 10H=(10N+25%)
 
 -- Immunity and bind bosses
-UPDATE creature_template SET flags_extra = flags_extra | 1, mechanic_immune_mask = 667893759 WHERE entry = 67977;
 
 -- Difficulty entries bosses and Trash Mobs
 UPDATE creature_template SET difficulty_entry_3 = @RAID_DIFF_10N + entry, difficulty_entry_4 = @RAID_DIFF_25N + entry, difficulty_entry_5 = @RAID_DIFF_10H + entry, difficulty_entry_6 = @RAID_DIFF_25H + entry, difficulty_entry_7 = @RAID_DIFF_25R + entry WHERE entry IN 
 (67966,67977,68497,69351,69352);
+UPDATE creature_template SET flags_extra = flags_extra | 1, mechanic_immune_mask = 667893759 WHERE entry IN (67977,3167977,3267977,3367977,3467977,3567977);
 
 -- Whirl Turtle
 UPDATE creature_template SET LootId = 0, dmg_multiplier = 5, Health_Mod = 4199999  / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 67966;

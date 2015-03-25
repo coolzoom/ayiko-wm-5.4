@@ -51,8 +51,6 @@ enum Spells
 
     SPELL_SUMMON_BATS           = 136686, // Summons 8 Vampiric Cave Bats.
 
-    SPELL_BERSERK               = 144369, // Berserk, Enrage, Bye - Bye or, simply put, a wipe. :)
-
     // Adds
 
     // Whirl Turtle

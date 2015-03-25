@@ -237,16 +237,16 @@ enum eMotions
 {
     //===============================================
     // Majors
-    MOTION_MAJOR_JUMP                       = 0,
+    MOTION_MAJOR_JUMP                       = 6845,
 
     //===============================================
     // Zandalari Dinomancers
-    MOTION_DINOMANCER_JUMP                  = 1,
+    MOTION_DINOMANCER_JUMP                  = 7849,
 
     //===============================================
     // Horridon
-    MOTION_HORRIDON_CHARGE                  = 2,
-    MOTION_HORRIDON_DOOR_CHARGE             = 3,
+    MOTION_HORRIDON_CHARGE                  = 4551,
+    MOTION_HORRIDON_DOOR_CHARGE             = 3205,
 
 };
 

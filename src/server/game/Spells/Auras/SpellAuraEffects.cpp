@@ -2669,7 +2669,7 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
                 continue;
             }
 
-            if (aura == GetBase() || (aura->GetId() == 51713 && (GetId() == 1784 || GetId() == 115191)))
+            if (aura == GetBase() || (aura->GetId() == 51713 && (GetId() == 1784 || GetId() == 11327)))
             {
                 ++iter;
                 continue;

@@ -2417,13 +2417,7 @@ public:
 
     bool operator()(WorldObject* target) const
     {
-        TC_LOG_ERROR("scripts", "spellId %u with const orientation %f", spellId, orientation);
-        //if (spellId == SPELL_DOUBLE_SWIPE_FRONT)
-            //return target && !caster->HasInArc(orientation*(M_PI / 5.1f), target);
-        //else
-            //return target && !target->isInBack(caster, orientation*(M_PI / 5.1f));
-
-        float arc = caster->NormalizeOrientation(spellId == SPELL_DOUBLE_SWIPE_FRONT ? (M_PI / 5.1f) : ((2 * M_PI) - (M_PI / 5.1f)));
+        float arc = caster->NormalizeOrientation(spellId == SPELL_DOUBLE_SWIPE_FRONT ? (M_PI / 4.9f) : ((2 * M_PI) - (M_PI / 4.9f)));
 
         float angle = caster->GetAngle(target);
         angle -= orientation;
@@ -2707,19 +2701,10 @@ public:
                 owner->ClearUnitState(UNIT_STATE_CANNOT_TURN);
         }
 
-        void HandleOnUpdate(uint32 uiDiff)
-        {
-            if (GetCaster())
-            {
-                TC_LOG_ERROR("scripts", "ori %f", GetCaster()->GetOrientation());
-            }
-        }
-
         void Register()
         {
             OnEffectApply += AuraEffectApplyFn(aura_impl::HandleOnApply, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
             OnEffectRemove += AuraEffectRemoveFn(aura_impl::HandleOnApply, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
-            OnAuraUpdate += AuraUpdateFn(aura_impl::HandleOnUpdate);
         }
     };
 

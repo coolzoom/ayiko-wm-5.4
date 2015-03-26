@@ -1621,7 +1621,7 @@ UPDATE creature_template SET ScriptName = "boss_high_priestess_marli", VehicleId
 UPDATE creature_template SET ScriptName = "boss_kazrajin", VehicleId = 2669 WHERE entry = 69134;
 UPDATE creature_template SET ScriptName = "mob_living_sand" WHERE entry = 69153;
 UPDATE creature_template SET ScriptName = "mob_garajals_soul", VehicleId = 2664, modelid1 = 11686, modelid2 = 0, speed_walk = 5, speed_run = 5,
-+speed_fly = 5, difficulty_entry_3 = 0, difficulty_entry_4 = 0, difficulty_entry_5 = 0, difficulty_entry_6 = 0, difficulty_entry_7 = 0 WHERE entry = 69182;
+speed_fly = 5, difficulty_entry_3 = 0, difficulty_entry_4 = 0, difficulty_entry_5 = 0, difficulty_entry_6 = 0, difficulty_entry_7 = 0 WHERE entry = 69182;
 UPDATE creature_template SET ScriptName = "mob_blessed_loa_spirit" WHERE entry = 69480;
 UPDATE creature_template SET ScriptName = "mob_shadowed_loa_spirit" WHERE entry = 69548;
 UPDATE creature_template SET ScriptName = "mob_twisted_fate" WHERE entry IN (69740, 69746);
@@ -2463,6 +2463,7 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 (69351, 0, 0, 0, 0, 0, 48248, 0, 0, 0, 'Greater Cave Bat', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 4, 1, 30, 1, 1, 0, 0, 0, 0, 0, 0, 0, 130, 1, 0, 0, '', 17614),
 (69352, 0, 0, 0, 0, 0, 46824, 0, 0, 0, 'Vampiric Cave Bat', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 4, 1, 4.13, 1, 1, 0, 0, 0, 0, 0, 0, 0, 133, 1, 0, 0, '', 17614),
 (70147, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Waterspout', '', '', 0, 93, 93, 4, 35, 35, 0, 1, 1.14286, 1, 0, 9839, 14339, 0, 42299, 1, 2000, 2000, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 128, '', 17614),
+(70437, 0, 0, 0, 0, 0, 46770, 0, 0, 0, 'Lei Shen', 'The Thunder King', '', 0, 93, 93, 4, 16, 16, 0, 1, 1.14286, 1.14286, 3, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2097260, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 600, 100, 1, 0, 0, 0, 0, 0, 0, 0, 164, 1, 0, 0, 'npc_lei_shen_tortos', 17614),
 
 (@RAID_DIFF_10N + 67966, 0, 0, 0, 0, 0, 47499, 0, 0, 0, 'Whirl Turtle', '', '', 0, 93, 93, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 7.22, 1, 1, 0, 0, 0, 0, 0, 0, 0, 164, 1, 0, 0, '', 17614),
 (@RAID_DIFF_10N + 67977, 0, 0, 0, 0, 0, 46559, 0, 0, 0, 'Tortos', '', '', 0, 93, 93, 4, 16, 16, 0, 1, 1.14286, 1, 3, 64839, 78339, 0, 31299, 2, 2000, 2000, 4, 0, 0, 0, 21, 0, 0, 0, 0, 0, 0, 0, 1, 76, 67977, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2115, 3100000, 3500000, '', 0, 3, 1, 330.17, 100, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 652165119, 1, 'boss_tortos', 17614),
@@ -2738,10 +2739,13 @@ INSERT INTO `creature` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMa
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Creature Speeches
-DELETE FROM `creature_text` WHERE `entry` = 67977;
+DELETE FROM `creature_text` WHERE `entry` IN (67977, 70437);
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
-(67977, 0,  0, 'Tortos lets out a booming call, attracting nearby turtles.', 41, 0, 100, 0, 0, 0, 'Tortos - Call of Tortos'),
-(67977, 0,  1, 'Tortos prepares to unleash a [Furious Stone Breath]', 41, 0, 100, 0, 0, 0, 'Tortos - Furious Stone Breath');
+(67977, 0, 0, '%s lets out a booming call, attracting nearby turtles.', 41, 0, 100, 0, 0, 0, 'Tortos'),
+(67977, 1, 0, '%s prepares to unleash a |cFFFF0000|Hspell:133939|h[Furious Stone Breath]|h|r!', 41, 0, 100, 0, 0, 0, 'Tortos'),
+
+(70437, 0, 0, 'You have swept the filth from my doorstep. Perhaps, you are worthy of my attention.', 14, 0, 100, 0, 0, 35587, 'Lei shen event 1'),
+(70437, 1, 0, 'But...your trespass ends here. None may enter my forbidden stronghold. I shall rebuild this bridge with your bones for bricks.', 14, 0, 100, 0, 0, 35588, 'Lei Shen event 2');
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/

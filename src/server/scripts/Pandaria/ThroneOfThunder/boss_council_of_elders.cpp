@@ -1892,7 +1892,7 @@ public:
             list.push_back(pInstance->GetData64(BOSS_COUNCIL_KAZRAJIN));
         }
 
-        void Reset()
+        void Reset() override
         {
             DoCast(me, SPELL_BLESSED_TRANSFORMATION);
         }
@@ -1900,7 +1900,7 @@ public:
         // Override function to be sure there won't be any call to MoveChase (at least in AttackStart)
         void AttackStart(Unit *pTarget) { }
 
-        void IsSummonedBy(Unit *pSummoner)
+        void IsSummonedBy(Unit *pSummoner) override
         {
             HandleTargetSelection();
         }
@@ -1939,7 +1939,7 @@ public:
             events.RescheduleEvent(EVENT_MOVE_COUNCILLOR, 500);
         }
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(const uint32 uiDiff) override
         {
             events.Update(uiDiff);
 
@@ -1965,7 +1965,7 @@ public:
             }
         }
 
-        void MovementInform(uint32 uiMotionType, uint32 uiMotionPointId)
+        void MovementInform(uint32 uiMotionType, uint32 uiMotionPointId) override
         {
             switch (uiMotionType)
             {
@@ -2030,15 +2030,15 @@ public:
             events.Reset();
         }
 
-        void Reset()
+        void Reset() override
         {
             DoCast(me, SPELL_SHADOWED_TRANSFORMATION);
         }
 
         // Override function to be sure there won't be any call to MoveChase (at least in AttackStart)
-        void AttackStart(Unit *pTarget) { }
+        void AttackStart(Unit *pTarget) { } 
 
-        void IsSummonedBy(Unit *pSummoner)
+        void IsSummonedBy(Unit *pSummoner) override
         {
             HandleTargetSelection();
         }
@@ -2100,7 +2100,7 @@ public:
             events.ScheduleEvent(EVENT_SHADOWED_GIFT, 20 * IN_MILLISECONDS);
         }
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(const uint32 uiDiff) override
         {
             events.Update(uiDiff);
 
@@ -2118,7 +2118,6 @@ public:
                         me->GetMotionMaster()->MovementExpired();
                         me->GetMotionMaster()->MoveJump(*pTarget, 42.0f, 42.0f, 5050);
                     }
-                    else
                     break;
 
                 default:
@@ -2127,7 +2126,7 @@ public:
             }
         }
 
-        void MovementInform(uint32 uiMotionType, uint32 uiMotionPointId)
+        void MovementInform(uint32 uiMotionType, uint32 uiMotionPointId) override
         {
             if (uiMotionPointId == POINT_BLESSED_LOA_SPIRIT_COUNCILLOR)
             {
@@ -2156,7 +2155,7 @@ public:
 
         }
 
-        void JustDied(Unit *pKiller)
+        void JustDied(Unit *pKiller) override
         {
             if (Player *pPlayer = GetFollowedPlayer())
                 pPlayer->RemoveAurasDueToSpell(SPELL_MARKED_SOUL);
@@ -2207,7 +2206,7 @@ public:
             twistedFatesList.clear();
         }
     
-        void Reset()
+        void Reset() override
         {
             twistedFatesList.clear();
         }
@@ -2281,7 +2280,7 @@ public:
             }
         }
 
-        void DoAction(int32 iAction)
+        void DoAction(const int32 iAction) override
         {
             switch(iAction)
             {
@@ -2327,7 +2326,7 @@ public:
         }
 
         // Add a new TwistedFate_t to the helper
-        void IsSummonedBy(Unit *pSummoner)
+        void IsSummonedBy(Unit *pSummoner) override
         {
             Creature *pHelper = ObjectAccessor::GetCreature(*me, pInstance->GetData64(NPC_TWISTED_FATE_HELPER));
             if (!pHelper)
@@ -2358,13 +2357,13 @@ public:
             }
         }
 
-        void SetGUID(uint64 uiGuid, int32 uiIndex)
+        void SetGUID(uint64 uiGuid, int32 uiIndex) override
         {
             if (uiIndex == DATA_TWISTED_FATE_GUID)
                 uiOtherTwistedFateGuid = uiGuid;
         }
 
-        void JustDied(Unit *pKiller)
+        void JustDied(Unit *pKiller) override
         {
             // Do not do something wierd when the other is dead => free memory
             // of the helper.
@@ -2385,7 +2384,7 @@ public:
 
         }
 
-        uint32 GetData(uint32 uiIndex)
+        uint32 GetData(uint32 uiIndex) override
         {
             if (uiIndex == DATA_TWISTED_FATE_OTHER_DIED)
                 return (uint32)bOtherTwistedFateDied;
@@ -2393,7 +2392,7 @@ public:
             return 0;
         }
 
-        void DoAction(const int32 iAction)
+        void DoAction(const int32 iAction) override
         {
             switch (iAction)
             {

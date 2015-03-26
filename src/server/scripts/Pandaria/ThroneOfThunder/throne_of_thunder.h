@@ -42,6 +42,7 @@ enum SaveData
     TYPE_LEI_SHEN,
     TYPE_RA_DEN,
     TYPE_JINROKH_INTRO,
+    TYPE_TORTOS_INTRO,
     MAX_TYPES
 };
 

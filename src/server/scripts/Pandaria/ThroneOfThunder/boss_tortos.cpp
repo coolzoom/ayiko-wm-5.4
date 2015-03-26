@@ -131,7 +131,7 @@ enum Timers
     TIMER_CALL_BATS_S           = 50000,
 
     TIMER_GROWING_FURY          = 6000,
-    TIMER_REGEN_FURY_POWER      = 1000,
+    TIMER_REGEN_FURY_POWER      = 450,
 
     TIMER_BERSERK_H             = 600000, // 10 minutes (Heroic).
     TIMER_BERSERK               = 780000  // 13 minutes.
@@ -154,11 +154,13 @@ class boss_tortos : public CreatureScript
             Vehicle* vehicle;
             SummonList summons;
             EventMap events;
+            EventMap energyRegen;
             bool breathScheduled;
 
-            void Reset()
+            void Reset() override
             {
                 events.Reset();
+                energyRegen.Reset();
                 summons.DespawnAll();
 
                 me->setPowerType(POWER_ENERGY);
@@ -176,7 +178,7 @@ class boss_tortos : public CreatureScript
                 _Reset();
             }
 
-            void EnterCombat(Unit* who)
+            void EnterCombat(Unit* who) override
             {
                 me->AddAura(SPELL_KICK_SHELL_A, me);
                 me->AddAura(SPELL_ROCKFALL_AURA, me);
@@ -187,8 +189,8 @@ class boss_tortos : public CreatureScript
 				events.ScheduleEvent(EVENT_SUMMON_BATS, TIMER_CALL_BATS_F);
 
                 events.ScheduleEvent(EVENT_GROWING_FURY, TIMER_GROWING_FURY);
-                events.ScheduleEvent(EVENT_REGEN_FURY_POWER, TIMER_REGEN_FURY_POWER);
-				events.ScheduleEvent(EVENT_BERSERK, TIMER_BERSERK);
+                energyRegen.ScheduleEvent(EVENT_REGEN_FURY_POWER, TIMER_REGEN_FURY_POWER);
+				energyRegen.ScheduleEvent(EVENT_BERSERK, TIMER_BERSERK);
 
                 if (instance)
                 {
@@ -219,7 +221,7 @@ class boss_tortos : public CreatureScript
                 _EnterEvadeMode();
             }
 
-            void JustReachedHome()
+            void JustReachedHome() override
             {
                 me->ClearUnitState(UNIT_STATE_EVADE);
                 DoCast(me, SPELL_ZERO_POWER);
@@ -228,7 +230,7 @@ class boss_tortos : public CreatureScript
                 _JustReachedHome();
             }
 
-            void JustSummoned(Creature* summon)
+            void JustSummoned(Creature* summon) override
             {
                 summons.Summon(summon);
 				summon->setActive(true);
@@ -237,7 +239,7 @@ class boss_tortos : public CreatureScript
 					summon->SetInCombatWithZone();
             }
 
-            void JustDied(Unit* killer)
+            void JustDied(Unit* killer) override
             {
                 summons.DespawnAll();
 
@@ -250,9 +252,9 @@ class boss_tortos : public CreatureScript
                 _JustDied();
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(const uint32 diff) override
             {
-                if (!UpdateVictim() || !CheckInRoom() || me->HasUnitState(UNIT_STATE_CASTING))
+                if (!UpdateVictim() || !CheckInRoom())
                     return;
 
                 if (instance && instance->IsWipe())
@@ -260,6 +262,22 @@ class boss_tortos : public CreatureScript
                     EnterEvadeMode();
                     return;
                 }
+                
+                energyRegen.Update(diff);
+
+                switch (energyRegen.ExecuteEvent())
+                {
+                case EVENT_REGEN_FURY_POWER:
+                    me->SetPower(POWER_ENERGY, me->GetPower(POWER_ENERGY) + 1);
+                    events.ScheduleEvent(EVENT_REGEN_FURY_POWER, TIMER_REGEN_FURY_POWER);
+                    break;
+                case EVENT_BERSERK:
+                    DoCast(me, SPELL_BERSERK);
+                    break;
+                }
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
 
                 if (me->GetPower(POWER_ENERGY) == 100 && !breathScheduled)
                 {
@@ -309,15 +327,6 @@ class boss_tortos : public CreatureScript
                             if (!me->IsWithinDistInMap(me->GetVictim(), me->GetAttackDistance(me->GetVictim())))
 				                DoCast(me, SPELL_GROWING_FURY);
                             events.ScheduleEvent(EVENT_GROWING_FURY, TIMER_GROWING_FURY);
-                            break;
-
-                        case EVENT_REGEN_FURY_POWER:
-                            me->SetPower(POWER_ENERGY, me->GetPower(POWER_ENERGY) + 2);
-                            events.ScheduleEvent(EVENT_REGEN_FURY_POWER, TIMER_REGEN_FURY_POWER);
-                            break;
-
-                        case EVENT_BERSERK:
-				            DoCast(me, SPELL_BERSERK);
                             break;
 
                         default: break;
@@ -579,13 +588,17 @@ class spell_spinning_shell : public SpellScriptLoader
                 if (!caster)
                     return;
 
-                Map::PlayerList const &PlayerList = caster->GetMap()->GetPlayers();
-                if (!PlayerList.isEmpty())
-                    for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                        if (Player* player = i->GetSource())
-                            if (player->IsWithinDistInMap(caster, 5.0f))
-                                if (Unit* plr = player->ToUnit())
-                                    plr->CastSpell(plr, SPELL_SPINNING_SHELL_DMG, true);
+                std::list<Unit*> TargetList;
+
+                Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(caster, caster, 5.1f);
+                Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(caster, TargetList, u_check);
+                Trinity::VisitNearbyObject(caster, 5.1f, searcher);
+
+                if (!TargetList.empty())
+                {
+                    for (Unit* pUnit : TargetList)
+                        caster->CastSpell(pUnit, SPELL_SPINNING_SHELL_DMG, true);
+                }
             }
 
             void Register()
@@ -805,6 +818,8 @@ class npc_lei_shen_tortos : public CreatureScript
             {
                 if (!introDone && me->IsWithinDistInMap(who, 140.0f, true) && who->GetTypeId() == TYPEID_PLAYER)
                 {
+                    if (me->GetInstanceScript())
+                        me->GetInstanceScript()->SetData(TYPE_TORTOS_INTRO, DONE);
                     me->SetReactState(REACT_PASSIVE);
                     events.ScheduleEvent(EVENT_LEI_SHEN_SEND_CINEMATIC, 100);
                     introDone = true;

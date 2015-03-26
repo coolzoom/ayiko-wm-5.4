@@ -494,7 +494,7 @@ void Player::UpdateBlockPercentage()
         // Base value
         value = 5.0f;
         // Increase from SPELL_AURA_MOD_BLOCK_PERCENT aura
-        value += GetTotalAuraModifier(SPELL_AURA_MOD_BLOCK_PERCENT);
+        value += GetTotalFloatAuraModifier(SPELL_AURA_MOD_BLOCK_PERCENT);
 
         // Increase from rating
         value += GetRatingBonusValue(CR_BLOCK);

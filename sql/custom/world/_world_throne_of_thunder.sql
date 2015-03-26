@@ -1621,7 +1621,7 @@ UPDATE creature_template SET ScriptName = "boss_high_priestess_marli", VehicleId
 UPDATE creature_template SET ScriptName = "boss_kazrajin", VehicleId = 2669 WHERE entry = 69134;
 UPDATE creature_template SET ScriptName = "mob_living_sand" WHERE entry = 69153;
 UPDATE creature_template SET ScriptName = "mob_garajals_soul", VehicleId = 2664, modelid1 = 11686, modelid2 = 0, speed_walk = 5, speed_run = 5,
-+speed_fly = 5, difficulty_entry_3 = 0, difficulty_entry_4 = 0, difficulty_entry_5 = 0, difficulty_entry_6 = 0, difficulty_entry_7 = 0 WHERE entry = 69182;
+speed_fly = 5, difficulty_entry_3 = 0, difficulty_entry_4 = 0, difficulty_entry_5 = 0, difficulty_entry_6 = 0, difficulty_entry_7 = 0 WHERE entry = 69182;
 UPDATE creature_template SET ScriptName = "mob_blessed_loa_spirit" WHERE entry = 69480;
 UPDATE creature_template SET ScriptName = "mob_shadowed_loa_spirit" WHERE entry = 69548;
 UPDATE creature_template SET ScriptName = "mob_twisted_fate" WHERE entry IN (69740, 69746);

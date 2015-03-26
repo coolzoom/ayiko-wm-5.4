@@ -2738,10 +2738,13 @@ INSERT INTO `creature` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMa
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Creature Speeches
-DELETE FROM `creature_text` WHERE `entry` = 67977;
+DELETE FROM `creature_text` WHERE `entry` IN (67977, 70437);
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
 (67977, 0, 0, '%s lets out a booming call, attracting nearby turtles.', 41, 0, 100, 0, 0, 0, 'Tortos'),
-(67977, 1, 0, '%s prepares to unleash a |cFFFF0000|Hspell:133939|h[Furious Stone Breath]|h|r!', 41, 0, 100, 0, 0, 0, 'Tortos');
+(67977, 1, 0, '%s prepares to unleash a |cFFFF0000|Hspell:133939|h[Furious Stone Breath]|h|r!', 41, 0, 100, 0, 0, 0, 'Tortos'),
+
+(70437, 0, 0, 'You have swept the filth from my doorstep. Perhaps, you are worthy of my attention.', 14, 0, 100, 0, 0, 35587, 'Lei shen event 1'),
+(70437, 1, 0, 'But...your trespass ends here. None may enter my forbidden stronghold. I shall rebuild this bridge with your bones for bricks.', 14, 0, 100, 0, 0, 35588, 'Lei Shen event 2');
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/

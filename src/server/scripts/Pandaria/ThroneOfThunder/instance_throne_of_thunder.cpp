@@ -98,42 +98,33 @@ public:
 
         void OnGameObjectCreate(GameObject* pGo) override
         {
-            if (!pGo)
-                return;
-
-            uint64  guid = pGo->GetGUID();
-            bool    bAdd = true;
-
             switch (pGo->GetEntry())
             {
                 case GOB_JIN_ROKH_ENTRANCE:
-                case GOB_JIN_ROKH_PREDOOR:
                 case GOB_JIN_ROKH_EXIT: 
                 case GOB_HORRIDON_ENTRANCE: 
                 case GOB_HORRIDON_EXIT:    
                 case GOB_COUNCIL_ENTRANCE1:
                 case GOB_COUNCIL_ENTRANCE2:
-                case GOB_COUNCIL_EXIT:                 
-                case GOB_MOGU_STATUE_1:
-                case GOB_MOGU_STATUE_2:
-                case GOB_MOGU_STATUE_3:
-                case GOB_MOGU_STATUE_4:
-                case GOB_JIKUN_FEATHER:
+                case GOB_COUNCIL_EXIT:
+                    AddDoor(pGo, true);
                     m_mGoGuidStorage.insert(std::make_pair(pGo->GetEntry(), pGo->GetGUID()));
                     break;
                 case GOB_TRIBAL_DOOR_FARRAKI:
                 case GOB_TRIBAL_DOOR_GURUBASHI:
                 case GOB_TRIBAL_DOOR_DRAKKARI: 
                 case GOB_TRIBAL_DOOR_AMANI:
-                    bAdd = false;
+                case GOB_MOGU_STATUE_1:
+                case GOB_MOGU_STATUE_2:
+                case GOB_MOGU_STATUE_3:
+                case GOB_MOGU_STATUE_4:
+                case GOB_JIKUN_FEATHER:
+                case GOB_JIN_ROKH_PREDOOR:
                     m_mGoGuidStorage.insert(std::make_pair(pGo->GetEntry(), pGo->GetGUID()));
                     break;
                 default:
                     break;
             }
-
-            if (bAdd)
-                AddDoor(pGo, true);
         }
 
         bool SetBossState(uint32 uiId, EncounterState eState) override
@@ -141,8 +132,10 @@ public:
             TC_LOG_ERROR("scripts", "SetBossState called %u %u %u", uiId, (uint32)eState, instance->GetInstanceId());
             if (!InstanceScript::SetBossState(uiId, eState))
                 return false;
-            if (uiId >= MAX_DATA);
+
+            if (uiId >= MAX_DATA)
                 return false;
+
             TC_LOG_ERROR("scripts", "successfully");
             switch (uiId)
             {
@@ -237,7 +230,6 @@ public:
                 case TYPE_HORRIDON:
                 case TYPE_COUNCIL:
                     return m_auiEncounter[uiType];
-                    break;
                 default:
                     return 0;
             }
@@ -325,6 +317,7 @@ public:
                 switch (eventId)
                 {
                     case EVENT_JINROKH_DOOR:
+                        TC_LOG_ERROR("scripts", "ran jinrokh door event");
                         HandleGameObject(GetData64(GOB_JIN_ROKH_PREDOOR), true);
                         break;
                 }
@@ -362,16 +355,24 @@ public:
             loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3] >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6]
                 >> m_auiEncounter[7] >> m_auiEncounter[8] >> m_auiEncounter[9] >> m_auiEncounter[10] >> m_auiEncounter[11] >> m_auiEncounter[12] >> m_auiEncounter[13]
                 >> m_auiEncounter[14];
-            for (uint8 i = 0; i < MAX_TYPES; ++i)
+            for (int i = 0; i < MAX_TYPES; ++i)
             {
                 if (m_auiEncounter[i] == IN_PROGRESS)                // Do not load an encounter as "In Progress" - reset it instead.
                     m_auiEncounter[i] = NOT_STARTED;
-                else if (m_auiEncounter[i] == DONE)
-                    SetBossState(i, (EncounterState)DONE);
-            }
 
-            if (m_auiEncounter[TYPE_JINROKH_INTRO] == DONE)
-                m_mEvents.ScheduleEvent(EVENT_JINROKH_DOOR, 0);
+                if (m_auiEncounter[i] == DONE)
+                {
+                    if (i < MAX_DATA)
+                        SetBossState(i, (EncounterState)DONE);
+
+                    switch (i)
+                    {
+                    case TYPE_JINROKH_INTRO:
+                        m_mEvents.ScheduleEvent(EVENT_JINROKH_DOOR, 100);
+                        break;
+                    }
+                }
+            }
 
             OUT_LOAD_INST_DATA_COMPLETE;
         }

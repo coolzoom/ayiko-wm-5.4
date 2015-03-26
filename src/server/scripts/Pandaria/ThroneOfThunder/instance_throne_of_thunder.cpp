@@ -149,6 +149,15 @@ public:
                 case DATA_JINROKH:
                 case DATA_HORRIDON:
                 case DATA_COUNCIL_OF_ELDERS:
+                case DATA_TORTOS:
+                case DATA_MEGAERA:
+                case DATA_JI_KUN:
+                case DATA_DURUMU_THE_FORGOTTEN:
+                case DATA_PRIMORDIUS:
+                case DATA_DARK_ANIMUS:
+                case DATA_IRON_QON:
+                case DATA_TWIN_CONSORTS:
+                case DATA_LEI_SHEN:
                     SetData(uiId, (uint32)eState);
                     break;
                 default:
@@ -165,8 +174,7 @@ public:
                 return;
 
             switch (uiType)
-            {         
-                
+            {             
                 case TYPE_JINROKH_INTRO:
                     m_auiEncounter[uiType] = uiData;
                     if (uiData >= DONE)

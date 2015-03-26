@@ -9003,6 +9003,38 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura *triggeredByAura, Sp
                 }
             }
         }
+        case SPELLFAMILY_DRUID:
+        {
+            switch (dummySpell->Id)
+            {
+                case 138611:
+                {
+                    *handled = true;
+                    // Only overheal counts
+                    if (GetHealth() != GetMaxHealth())
+                        return false;
+
+                    std::list<Creature*> MinionList;
+                    GetAllMinionsByEntry(MinionList, 47649);
+                    if (MinionList.empty())
+                        return false;
+
+                    Creature* shroom = MinionList.front();
+                    int32 heal = damage * (dummySpell->Effects[EFFECT_0].BasePoints / 100.0f);
+                    int32 cap = GetMaxHealth() * (dummySpell->Effects[EFFECT_1].BasePoints / 100.0f);
+
+                    if (AuraEffect* counter = shroom->GetAuraEffect(138616, EFFECT_1))
+                    {
+                        counter->ChangeAmount(std::min(counter->GetAmount() + heal, cap));
+                        if (counter->GetAmount() == cap)
+                            CastSpell(this, 138664, true);
+                    }
+                    else
+                        shroom->CastCustomSpell(shroom, 138616, NULL, &heal, NULL, true);
+                    return true;
+                }
+            }
+        }
         case SPELLFAMILY_MAGE:
         {
             switch (dummySpell->Id)

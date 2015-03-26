@@ -3819,29 +3819,60 @@ class npc_wild_mushroom : public CreatureScript
 
         struct npc_wild_mushroomAI : public ScriptedAI
         {
-            uint32 CastTimer;
-            bool stealthed;
+            uint32 invisTimer;
 
             npc_wild_mushroomAI(Creature *creature) : ScriptedAI(creature)
             {
-                CastTimer = 6000;
-                stealthed = false;
-                me->SetReactState(REACT_PASSIVE);
+                invisTimer = 6000;
             }
 
-            void UpdateAI(const uint32 diff)
+            void Reset()
             {
-                if (CastTimer <= diff && !stealthed)
-                {
-                    DoCast(me, WILD_MUSHROOM_INVISIBILITY, true);
-                    stealthed = true;
-                }
-                else
-                {
-                    CastTimer -= diff;
+                Unit* owner = me->GetOwner();
+                if (!owner)
+                    return;
 
-                    if (!stealthed)
-                        me->RemoveAura(WILD_MUSHROOM_INVISIBILITY);
+                me->SetLevel(owner->getLevel());
+                me->SetMaxHealth(5);
+                me->setFaction(owner->getFaction());
+                me->CastSpell(me, 94081, true); // Wild Mushroom : Detonate Birth Visual
+            }
+
+            void IsSummonedBy(Unit* summoner)
+            {
+                if (!summoner)
+                    return;
+
+                if (Player* owner = summoner->ToPlayer())
+                {
+                    if (owner->HasAura(145529) && owner->GetSpecializationId(owner->GetActiveSpec()) == SPEC_DRUID_RESTORATION)
+                    {
+                        owner->RemoveDynObject(81262);
+                        owner->CastSpell(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 81262, true);
+                        if (DynamicObject* dynObj = owner->GetDynObject(81262))
+                            dynObj->SetDuration(-1);
+                        if (Aura* aura = owner->GetAura(81262))
+                        {
+                            aura->SetDuration(-1);
+                            aura->SetMaxDuration(-1);
+                        }
+                    }
+                }
+                
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+                if (invisTimer > 0)
+                {
+                    if (invisTimer > diff)
+                        invisTimer -= diff;
+                    else
+                    {
+                        invisTimer = 0;
+                        DoCast(me, 92661);
+                    }
+                    return;
                 }
             }
         };

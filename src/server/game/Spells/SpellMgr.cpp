@@ -994,14 +994,14 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const* spellPr
 
     if (procFlags & PROC_FLAG_DONE_PERIODIC)
     {
-        if (EventProcFlag & PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG)
+        if (EventProcFlag & PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG && !(EventProcFlag & PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS))
         {
             if (!(procExtra & PROC_EX_INTERNAL_DOT))
                 return false;
         }
         else if (procExtra & PROC_EX_INTERNAL_HOT)
             procExtra |= PROC_EX_INTERNAL_REQ_FAMILY;
-        else if (EventProcFlag & PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS)
+        else if (EventProcFlag & PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS && !(EventProcFlag & PROC_FLAG_DONE_PERIODIC))
             return false;
     }
 

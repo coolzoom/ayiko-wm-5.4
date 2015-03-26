@@ -317,7 +317,6 @@ public:
                 switch (eventId)
                 {
                     case EVENT_JINROKH_DOOR:
-                        TC_LOG_ERROR("scripts", "ran jinrokh door event");
                         HandleGameObject(GetData64(GOB_JIN_ROKH_PREDOOR), true);
                         break;
                 }

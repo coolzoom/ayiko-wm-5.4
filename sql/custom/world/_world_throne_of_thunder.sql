@@ -207,7 +207,7 @@ UPDATE `creature_template` SET `ScriptName` = 'npc_zandalari_stormcaller' WHERE 
 
 -- Difficulty entries bosses and Trash Mobs
 UPDATE creature_template SET difficulty_entry_3 = @RAID_DIFF_10N + entry, difficulty_entry_4 = @RAID_DIFF_25N + entry, difficulty_entry_5 = @RAID_DIFF_10H + entry, difficulty_entry_6 = @RAID_DIFF_25H + entry, difficulty_entry_7 = @RAID_DIFF_25R + entry WHERE entry IN 
-(69388,69390,6945570230,70236,70491);
+(69388,69390,69455,69465,70230,70236,70491);
 
 -- Immunity and bind bosses
 UPDATE creature_template SET flags_extra = flags_extra | 1, mechanic_immune_mask = 667893759 WHERE entry IN (69465,3169465,3269465,3369465,3469465,3569465);
@@ -1636,7 +1636,10 @@ UPDATE creature_template SET difficulty_entry_3 = @RAID_DIFF_10N + entry, diffic
 
 -- Immunity and bind bosses
 UPDATE creature_template SET flags_extra = flags_extra | 1, mechanic_immune_mask = 667893759 WHERE entry IN 
-(69078,3169078,3269078,3369078,3469078,3569078,69131,3169131,3269131,3369131,3469131,3569131,69132,3169132,3269132,3369132,3469132,3569132,69134,3169134,3269134,3369134,3469134,3569134);
+(69131,3169131,3269131,3369131,3469131,3569131,69134,3169134,3269134,3369134,3469134,3569134);
+
+UPDATE creature_template SET flags_extra = flags_extra | 1, mechanic_immune_mask = 634339327 WHERE entry IN 
+(69078,3169078,3269078,3369078,3469078,3569078,69132,3169132,3269132,3369132,3469132,3569132);
 
 -- Living Sand
 UPDATE creature_template SET LootId = 0, dmg_multiplier = 2, Health_Mod = 1290071 / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 69153;
@@ -2735,9 +2738,9 @@ INSERT INTO `creature` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMa
 (@CGUID+275, 69351, 1098, 0, 0, 248, 1, 0, 0, 6016.01, 4973.92, -48.6481, 2.14406, 86400, 0, 0, 12647760, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
 (@CGUID+276, 69351, 1098, 0, 0, 248, 1, 0, 0, 6066.52, 4964.4, -56.2341, 4.12029, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
 
-(@CGUID+277, 67977, 1098, 0, 0, 248, 1, 0, 0, 6040.5, 4919.05, -61.1904, 1.54503, 86400, 0, 0, 536137, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
+(@CGUID+277, 67977, 1098, 0, 0, 248, 1, 0, 0, 6040.5, 4919.05, -61.1904, 1.54503, 604800, 0, 0, 536137, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
 
-(@CGUID+278, 70437, 1098, 0, 0, 248, 1, 0, 0, 6045.95, 4988.01, 148.02, 1.58414, 300, 0, 0, 261682208, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
+(@CGUID+278, 70437, 1098, 0, 0, 248, 1, 0, 0, 6045.95, 4988.01, 148.02, 1.58414, 86400, 0, 0, 261682208, 0, 0, 0, 0, 0, 2048, 0, 0, NULL),
 
 (@CGUID+467, 70147, 1098, 0, 0, 248, 1, 0, 0, 6050.44, 5078.89, -43.7225, 4.72581, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
 (@CGUID+468, 70147, 1098, 0, 0, 248, 1, 0, 0, 6057.92, 5092.84, -42.132, 4.72581, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
@@ -2817,17 +2820,23 @@ INSERT INTO areatrigger_scripts VALUES
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Templates
 REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES 
-(70545, 0, 0, 0, 0, 0, 48183, 48184, 48185, 0, 'Mysterious Mushroom', '', '', 0, 91, 91, 4, 16, 16, 0, 0.1, 0.1, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 33685508, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1076887624, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 174, 1, 0, 0, '', 17614),
+(70153, 0, 0, 0, 0, 0, 28133, 0, 0, 0, 'Fungal Growth', '', '', 0, 92, 92, 4, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 70153, 0, 0, 0, 0, 0, 0, 0, 0, 140620, 140626, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 3, 1, 35, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 1),
+(70545, 0, 0, 0, 0, 0, 48183, 48184, 48185, 0, 'Mysterious Mushroom', '', '', 0, 91, 91, 4, 16, 16, 0, 0.1, 0.1, 1, 1, 0, 0, 0, 0, 1, 2000, 2000, 1, 33685508, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1076887624, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 174, 1, 0, 0, '', 17614),
 (70587, 0, 0, 0, 0, 0, 48160, 0, 0, 0, 'Shale Stalker', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 3, 1, 8, 1, 1, 0, 0, 0, 0, 0, 0, 0, 174, 1, 0, 0, '', 17614),
 
+(@RAID_DIFF_10N + 70153, 0, 0, 0, 0, 0, 28133, 0, 0, 0, 'Fungal Growth', '', '', 0, 92, 92, 4, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 70153, 0, 0, 0, 0, 0, 0, 0, 0, 140620, 140626, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 3, 1, 35, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 1),
 (@RAID_DIFF_10N + 70587, 0, 0, 0, 0, 0, 48160, 0, 0, 0, 'Shale Stalker', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 3, 1, 8, 1, 1, 0, 0, 0, 0, 0, 0, 0, 174, 1, 0, 0, '', 17614),
 
+(@RAID_DIFF_25N + 70153, 0, 0, 0, 0, 0, 28133, 0, 0, 0, 'Fungal Growth', '', '', 0, 92, 92, 4, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 70153, 0, 0, 0, 0, 0, 0, 0, 0, 140620, 140626, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 3, 1, 35, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 1),
 (@RAID_DIFF_25N + 70587, 0, 0, 0, 0, 0, 48160, 0, 0, 0, 'Shale Stalker', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 3, 1, 8, 1, 1, 0, 0, 0, 0, 0, 0, 0, 174, 1, 0, 0, '', 17614),
 
+(@RAID_DIFF_10H + 70153, 0, 0, 0, 0, 0, 28133, 0, 0, 0, 'Fungal Growth', '', '', 0, 92, 92, 4, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 70153, 0, 0, 0, 0, 0, 0, 0, 0, 140620, 140626, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 3, 1, 35, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 1),
 (@RAID_DIFF_10H + 70587, 0, 0, 0, 0, 0, 48160, 0, 0, 0, 'Shale Stalker', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 3, 1, 8, 1, 1, 0, 0, 0, 0, 0, 0, 0, 174, 1, 0, 0, '', 17614),
 
+(@RAID_DIFF_25H + 70153, 0, 0, 0, 0, 0, 28133, 0, 0, 0, 'Fungal Growth', '', '', 0, 92, 92, 4, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 70153, 0, 0, 0, 0, 0, 0, 0, 0, 140620, 140626, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 3, 1, 35, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 1),
 (@RAID_DIFF_25H + 70587, 0, 0, 0, 0, 0, 48160, 0, 0, 0, 'Shale Stalker', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 3, 1, 8, 1, 1, 0, 0, 0, 0, 0, 0, 0, 174, 1, 0, 0, '', 17614),
 
+(@RAID_DIFF_25R + 70153, 0, 0, 0, 0, 0, 28133, 0, 0, 0, 'Fungal Growth', '', '', 0, 92, 92, 4, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 70153, 0, 0, 0, 0, 0, 0, 0, 0, 140620, 140626, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 3, 1, 35, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 1),
 (@RAID_DIFF_25R + 70587, 0, 0, 0, 0, 0, 48160, 0, 0, 0, 'Shale Stalker', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 3, 1, 8, 1, 1, 0, 0, 0, 0, 0, 0, 0, 174, 1, 0, 0, '', 17614);
 /*---------------------------------------------------------------------------------------------------------------*/
 
@@ -2845,23 +2854,33 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 
 -- Difficulty entries bosses and Trash Mobs
 UPDATE creature_template SET difficulty_entry_3 = @RAID_DIFF_10N + entry, difficulty_entry_4 = @RAID_DIFF_25N + entry, difficulty_entry_5 = @RAID_DIFF_10H + entry, difficulty_entry_6 = @RAID_DIFF_25H + entry, difficulty_entry_7 = @RAID_DIFF_25R + entry WHERE entry IN 
-(70587);
+(70153,70587);
+
+-- Fungal Growth
+UPDATE creature_template SET LootId = 69388,   dmg_multiplier = 5, Health_Mod = 14755720 / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 70153;
+UPDATE creature_template SET LootId = 6938801, dmg_multiplier = 6, Health_Mod = 18444650 / @HP_MOD_92 WHERE entry = @RAID_DIFF_10H + 70153;
+UPDATE creature_template SET LootId = 69388,   dmg_multiplier = 8, Health_Mod = 36889300 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25N + 70153;
+UPDATE creature_template SET LootId = 6938801, dmg_multiplier = 9, Health_Mod = 46111625 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25H + 70153;
+UPDATE creature_template SET LootId = 6938802, dmg_multiplier = 7, Health_Mod = 33200370 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25R + 70153;
 
 -- Shale Stalker
-UPDATE creature_template SET LootId = 69388,   dmg_multiplier = 5, Health_Mod = 16863600 / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 70587;
-UPDATE creature_template SET LootId = 6938801, dmg_multiplier = 6, Health_Mod = 21079500 / @HP_MOD_92 WHERE entry = @RAID_DIFF_10H + 70587;
-UPDATE creature_template SET LootId = 69388,   dmg_multiplier = 8, Health_Mod = 42159000 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25N + 70587;
-UPDATE creature_template SET LootId = 6938801, dmg_multiplier = 9, Health_Mod = 52698750 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25H + 70587;
-UPDATE creature_template SET LootId = 6938802, dmg_multiplier = 7, Health_Mod = 37943100 / @HP_MOD_92 WHERE entry = @RAID_DIFF_25R + 70587;
+UPDATE creature_template SET LootId = 69388,   dmg_multiplier = 5, Health_Mod = 2023641  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 70587;
+UPDATE creature_template SET LootId = 6938801, dmg_multiplier = 6, Health_Mod = 2529552  / @HP_MOD_92 WHERE entry = @RAID_DIFF_10H + 70587;
+UPDATE creature_template SET LootId = 69388,   dmg_multiplier = 8, Health_Mod = 5059104  / @HP_MOD_92 WHERE entry = @RAID_DIFF_25N + 70587;
+UPDATE creature_template SET LootId = 6938801, dmg_multiplier = 9, Health_Mod = 6323880  / @HP_MOD_92 WHERE entry = @RAID_DIFF_25H + 70587;
+UPDATE creature_template SET LootId = 6938802, dmg_multiplier = 7, Health_Mod = 4553193  / @HP_MOD_92 WHERE entry = @RAID_DIFF_25R + 70587;
 
 -- Megaera
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Trash Mobs SAI
-UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` IN (70545,70587);
-DELETE FROM `smart_scripts` WHERE `entryorguid`IN (70545,70587) AND `source_type`= 0;
+UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` IN (70153,70545,70587);
+DELETE FROM `smart_scripts` WHERE `entryorguid`IN (70153,70545,70587) AND `source_type`= 0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(70153, 0, 0, 0, 0, 0, 100, 0, 10000, 12000, 20000, 21000, 11, 140620, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, "Fungal Growth - Cast Fungi Spores on a random target"),
+(70153, 0, 1, 0, 2, 0, 100, 1, 0, 60, 0, 0, 11, 140626, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Fungal Growth - Cast Grow"),
+
 (70545, 0, 0, 1, 10, 0, 100, 1, 0, 3, 0, 0, 11, 140598, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Mysterious Mushroom - Cast Fungal Explosion"),
 (70545, 0, 1, 0, 61, 0, 100, 1, 0, 0, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Mysterious Mushroom - Despawn after the explosion"),
 (70545, 0, 2, 0, 1, 0, 100, 1, 1, 1, 0, 0, 11, 123978, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Mysterious Mushroom - Mushrooms different sizes"),
@@ -3143,7 +3162,43 @@ INSERT INTO `creature` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMa
 (@CGUID+562, 70587, 1098, 0, 0, 248, 1, 0, 0, 6360.12, 4588.19, -209.177, 1.67542, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
 (@CGUID+563, 70587, 1098, 0, 0, 248, 1, 0, 0, 6361.33, 4573.01, -209.177, 2.79068, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
 (@CGUID+564, 70587, 1098, 0, 0, 248, 1, 0, 0, 6371.95, 4580.62, -209.177, 5.46908, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
-(@CGUID+565, 70587, 1098, 0, 0, 248, 1, 0, 0, 6347.49, 4566.96, -209.177, 0.441825, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
+(@CGUID+565, 70587, 1098, 0, 0, 248, 1, 0, 0, 6347.49, 4566.96, -209.177, 0.441825, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
+
+(@CGUID+566, 70153, 1098, 0, 0, 248, 1, 0, 0, 6170.83, 4871.85, -93.7686, 4.52646, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
+(@CGUID+567, 70153, 1098, 0, 0, 248, 1, 0, 0, 6141.45, 4715.5, -172.214, 0.940205, 86400, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, NULL),
+(@CGUID+568, 70153, 1098, 0, 0, 248, 1, 0, 0, 6203.21, 4752.33, -172.212, 0.0902003, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
+(@CGUID+569, 70153, 1098, 0, 0, 248, 1, 0, 0, 6299.86, 4799.72, -172.213, 3.31379, 86400, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, NULL),
+(@CGUID+570, 70153, 1098, 0, 0, 248, 1, 0, 0, 6381.07, 4895.02, -164.128, 0.594793, 86400, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, NULL),
+(@CGUID+571, 70153, 1098, 0, 0, 248, 1, 0, 0, 6239.28, 4722.95, -170.874, 2.53034, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
+(@CGUID+572, 70153, 1098, 0, 0, 248, 1, 0, 0, 6163.17, 4649.38, -172.213, 2.59461, 86400, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, NULL),
+(@CGUID+573, 70153, 1098, 0, 0, 248, 1, 0, 0, 6406.86, 4830.85, -172.102, 0.835624, 86400, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, NULL),
+(@CGUID+574, 70153, 1098, 0, 0, 248, 1, 0, 0, 6349.04, 4662.74, -203.517, 0.273601, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
+(@CGUID+575, 70153, 1098, 0, 0, 248, 1, 0, 0, 6436.2, 4728.92, -172.213, 0.371628, 86400, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, NULL),
+(@CGUID+576, 70153, 1098, 0, 0, 248, 1, 0, 0, 6286.96, 4557.95, -192.782, 1.14753, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
+/*---------------------------------------------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------------------------------------------*/
+-- Creature Path & Waypoints
+DELETE FROM `creature_path` WHERE `guid` IN (@CGUID+566);
+INSERT INTO `creature_path` VALUES
+(@CGUID+566,@CGUID+566);
+
+DELETE FROM `waypoint_data` WHERE `id`IN (@CGUID+566);
+INSERT INTO `waypoint_data` VALUES
+(@CGUID+566,  1,  6170.83, 4871.85, -93.7686, 0, 0, 0, 0, 100, 0),
+(@CGUID+566,  2,  6170.69, 4850.14, -101.017, 0, 0, 0, 0, 100, 0),
+(@CGUID+566,  3,  6176.6, 4837, -106.608, 0, 0, 0, 0, 100, 0),
+(@CGUID+566,  4,  6190.48, 4822.75, -115.202, 0, 0, 0, 0, 100, 0),
+(@CGUID+566,  5,  6211.69, 4815.95, -125.731, 0, 0, 0, 0, 100, 0),
+(@CGUID+566,  6,  6233.71, 4819.48, -134.481, 0, 0, 0, 0, 100, 0),
+(@CGUID+566,  7,  6257.94, 4830.83, -144.843, 0, 0, 0, 0, 100, 0),
+(@CGUID+566,  8,  6233.71, 4819.48, -134.481, 0, 0, 0, 0, 100, 0),
+(@CGUID+566,  9,  6211.69, 4815.95, -125.731, 0, 0, 0, 0, 100, 0),
+(@CGUID+566, 10,  6190.48, 4822.75, -115.202, 0, 0, 0, 0, 100, 0),
+(@CGUID+566, 11,  6176.6, 4837, -106.608, 0, 0, 0, 0, 100, 0),
+(@CGUID+566, 12,  6170.69, 4850.14, -101.017, 0, 0, 0, 0, 100, 0),
+(@CGUID+566, 13,  6170.83, 4871.85, -93.7686, 0, 0, 0, 0, 100, 0),
+(@CGUID+566, 14,  6177.05, 4894.25, -87.3037, 0, 0, 0, 0, 100, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/

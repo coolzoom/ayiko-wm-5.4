@@ -2862,8 +2862,6 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Megaera Loots
-DELETE FROM `creature_loot_template` WHERE entry IN(3167977, 3267977, 3367977, 3467977, 3567977);
-INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
 -- 10 Normal
 
 -- 10 Heroic

@@ -2510,6 +2510,8 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 -- 10H=(10N+25%)
 
 -- Immunity and bind bosses
+UPDATE creature_template SET flags_extra = flags_extra | 1, mechanic_immune_mask = 667893759 WHERE entry IN 
+(67977,3167977,3267977,3367977,3467977,3567977);
 
 -- Difficulty entries bosses and Trash Mobs
 UPDATE creature_template SET difficulty_entry_3 = @RAID_DIFF_10N + entry, difficulty_entry_4 = @RAID_DIFF_25N + entry, difficulty_entry_5 = @RAID_DIFF_10H + entry, difficulty_entry_6 = @RAID_DIFF_25H + entry, difficulty_entry_7 = @RAID_DIFF_25R + entry WHERE entry IN 
@@ -2888,6 +2890,8 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 -- 10H=(10N+25%)
 
 -- Immunity and bind bosses
+UPDATE creature_template SET flags_extra = flags_extra | 1, mechanic_immune_mask = 667893759 WHERE entry IN 
+(70212,3170212,3270212,3370212,3470212,3570212,70235,3170235,3270235,3370235,3470235,3570235,70247,3170247,3270247,3370247,3470247,3570247);
 
 -- Difficulty entries bosses and Trash Mobs
 UPDATE creature_template SET difficulty_entry_3 = @RAID_DIFF_10N + entry, difficulty_entry_4 = @RAID_DIFF_25N + entry, difficulty_entry_5 = @RAID_DIFF_10H + entry, difficulty_entry_6 = @RAID_DIFF_25H + entry, difficulty_entry_7 = @RAID_DIFF_25R + entry WHERE entry IN 
@@ -3451,10 +3455,10 @@ INSERT INTO `gameobject` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phase
 (@OGUID+32, 218723, 1098, 0, 0, 760, 1, 6496.56, 4740.43, -172.019, 0.0441186, 0, 0, 0, 1, 86400, 255, 1, 0, NULL),
 (@OGUID+33, 218721, 1098, 0, 0, 760, 1, 6270.81, 4602.14, -194.966, 0, 0, 0, 0, 1, 86400, 255, 1, 0, NULL),
 (@OGUID+34, 218746, 1098, 0, 0, 760, 1, 6229.31, 4481.72, -173.37, 3.97902, 0, 0, 1, -4.37114E-8, 86400, 0, 1, 0, NULL),
-(@OGUID+35, 218805, 1098, 0, 0, 8, 1, 6390.89, 4546.46, -209.102, 5.10657, 0, 0, 0.554954, -0.831881, -1, 0, 1, 0, NULL),
-(@OGUID+36, 218806, 1098, 0, 0, 35, 1, 6390.89, 4546.46, -209.102, 5.10657, 0, 0, 0.554954, -0.831881, -1, 0, 1, 0, NULL),
-(@OGUID+37, 218807, 1098, 0, 0, 16, 1, 6390.89, 4546.46, -209.102, 5.10657, 0, 0, 0.554954, -0.831881, -1, 0, 1, 0, NULL),
-(@OGUID+38, 218808, 1098, 0, 0, 64, 1, 6390.89, 4546.46, -209.102, 5.10657, 0, 0, 0.554954, -0.831881, -1, 0, 1, 0, NULL);
+(@OGUID+35, 218805, 1098, 0, 0, 8, 1, 6390.89, 4546.46, -209.102, 5.10657, 0, 0, 0.554954, -0.831881, -1, 0, 1, 1, NULL),
+(@OGUID+36, 218806, 1098, 0, 0, 35, 1, 6390.89, 4546.46, -209.102, 5.10657, 0, 0, 0.554954, -0.831881, -1, 0, 1, 1, NULL),
+(@OGUID+37, 218807, 1098, 0, 0, 16, 1, 6390.89, 4546.46, -209.102, 5.10657, 0, 0, 0.554954, -0.831881, -1, 0, 1, 1, NULL),
+(@OGUID+38, 218808, 1098, 0, 0, 64, 1, 6390.89, 4546.46, -209.102, 5.10657, 0, 0, 0.554954, -0.831881, -1, 0, 1, 1, NULL);
 /*---------------------------------------------------------------------------------------------------------------*/
 /* END Megaera */
 

@@ -2417,7 +2417,7 @@ public:
 
     bool operator()(WorldObject* target) const
     {
-        float arc = caster->NormalizeOrientation(spellId == SPELL_DOUBLE_SWIPE_FRONT ? (M_PI / 5.1f) : ((2 * M_PI) - (M_PI / 5.1f)));
+        float arc = caster->NormalizeOrientation(spellId == SPELL_DOUBLE_SWIPE_FRONT ? (M_PI / 4.9f) : ((2 * M_PI) - (M_PI / 4.9f)));
 
         float angle = caster->GetAngle(target);
         angle -= orientation;

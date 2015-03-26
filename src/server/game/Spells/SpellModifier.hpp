@@ -83,7 +83,7 @@ struct SpellModifier final
     SpellModOp op;
     SpellModType type;
     Trinity::Flag128 mask;
-    std::int32_t value;
+    std::float_t value;
     std::int16_t charges;
 };
 

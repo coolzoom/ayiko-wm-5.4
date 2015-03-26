@@ -4861,6 +4861,22 @@ int32 Unit::GetTotalAuraModifier(AuraType auratype) const
 
     return modifier;
 }
+ 
+float Unit::GetTotalFloatAuraModifier(AuraType auratype) const
+{
+    std::map<SpellGroup, int32> SameEffectSpellGroup;
+    float modifier = 0;
+
+    AuraEffectList const& mTotalAuraList = GetAuraEffectsByType(auratype);
+    for (AuraEffectList::const_iterator i = mTotalAuraList.begin(); i != mTotalAuraList.end(); ++i)
+         if (!sSpellMgr->AddSameEffectStackRuleSpellGroups((*i)->GetSpellInfo(), (*i)->GetAmount(), SameEffectSpellGroup))
+             modifier += (*i)->GetFloatAmount() ? (*i)->GetFloatAmount() : (*i)->GetAmount();
+
+    for (std::map<SpellGroup, int32>::const_iterator itr = SameEffectSpellGroup.begin(); itr != SameEffectSpellGroup.end(); ++itr)
+        modifier += itr->second;
+
+    return modifier;
+}
 
 float Unit::GetTotalAuraMultiplier(AuraType auratype) const
 {
@@ -6510,7 +6526,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
             {
                 case 76838:
                 {
-                    if (effIndex != EFFECT_0 || !roll_chance_i(triggerAmount))
+                    if (effIndex != EFFECT_0 || !roll_chance_f(triggeredByAura->GetFloatAmount()))
                         return false;
 
                     if (procSpell && (procSpell->Id == 12723 || procSpell->Id == 124333))
@@ -7186,7 +7202,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                 basepoints0 = CalculatePct(int32(damage), triggerAmount);
                 if (AuraEffect* aura = victim->GetAuraEffect(48504, EFFECT_0))
                 {
-                    int32 newAmount = std::min(int32(CountPctFromMaxHealth(50)), aura->GetAmount() + basepoints0);
+                    int32 newAmount = std::min(int32(CountPctFromMaxHealth(50)), int32(aura->GetFloatAmount()) + basepoints0);
                     aura->SetAmount(newAmount);
                     aura->GetBase()->RefreshDuration();
                     return true;
@@ -7225,7 +7241,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
             {
                 case 76806: // Mastery: Main Gauche
                 {
-                    if (effIndex != EFFECT_0 || procFlag & PROC_FLAG_DONE_OFFHAND_ATTACK || !roll_chance_i(triggerAmount))
+                    if (effIndex != EFFECT_0 || procFlag & PROC_FLAG_DONE_OFFHAND_ATTACK || !roll_chance_f(triggeredByAura->GetAmount()))
                         return false;
 
                     if (procSpell && procSpell->Id == 86392)
@@ -7473,11 +7489,11 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                     if (effIndex != EFFECT_0)
                         return false;
 
-                    uint32 chance = triggerAmount;
+                    float chance = triggeredByAura->GetFloatAmount();
                     if (procSpell && procSpell->Id == 120361)
-                        chance /= 6;
+                        chance /= 6.0f;
 
-                    if (!roll_chance_i(chance))
+                    if (!roll_chance_f(chance))
                         return false;
 
                     // Don't let it proc from itself
@@ -7629,7 +7645,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                         case 130551: // Word of Glory
                         case 114163: // Eternal Flame
                         {
-                            float mastery = triggerAmount;
+                            float mastery = triggeredByAura->GetFloatAmount();
                             basepoints0 = int32(damage * float(mastery / 100.0f));
                             triggered_spell_id = 86273;
 
@@ -7916,12 +7932,12 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                     if (!procSpell || effIndex != EFFECT_0)
                         return false;
 
-                    int32 chance = triggerAmount;
+                    float chance = triggeredByAura->GetFloatAmount();
                     // Chain lightnings individual hits have a reduced chance to proc
                     if (procSpell->Id == 421)
-                        chance /= 3;
+                        chance /= 3.0f;
 
-                    if (!roll_chance_i(chance) || !victim)
+                    if (!roll_chance_f(chance) || !victim)
                         return false;
 
                    switch (procSpell->Id)
@@ -8588,7 +8604,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                 {
                     if (!procSpell || procSpell->Id == 124041 || procSpell->Id == 117907)
                         return false;
-                    if (roll_chance_i(triggerAmount * procSpell->GetGiftOfTheSerpentScaling(this) / 100))
+                    if (roll_chance_f(triggeredByAura->GetFloatAmount() * procSpell->GetGiftOfTheSerpentScaling(this) / 100))
                     {
                         std::list<Unit*> targetList;
 
@@ -12005,7 +12021,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
             // Mastery : Master Demonologist
             if (AuraEffect* mastery = GetAuraEffect(77219, EFFECT_0))
             {
-                uint32 amount = mastery->GetAmount();
+                float amount = mastery->GetFloatAmount();
                 if (HasAura(103958))
                     amount *= 3.0f;
 
@@ -12722,7 +12738,7 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
     AuraEffectList const& mDamageDoneByPower = GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_DONE_FROM_PCT_HEALTH);
     for (AuraEffectList::const_iterator i = mDamageDoneByPower.begin(); i != mDamageDoneByPower.end(); ++i)
     {
-        int32 amount = (*i)->GetAmount() * (1.0f - (victim->GetHealthPct() / 100.0f));
+        float amount = (*i)->GetAmount() * (1.0f - (victim->GetHealthPct() / 100.0f));
         AddPct(DoneTotalMod, amount);
     }
 
@@ -13290,7 +13306,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
                 // Mastery : Master Demonologist
                 if (AuraEffect* mastery = GetAuraEffect(77219, EFFECT_0))
                 {
-                    uint32 amount = mastery->GetAmount();
+                    float amount = mastery->GetFloatAmount();
                     if (HasAura(103958))
                         amount *= 3.0f;
 

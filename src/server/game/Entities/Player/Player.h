@@ -3274,7 +3274,7 @@ T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T &basevalue, Spell* spel
         return 0;
 
     float totalmul = 1.0f;
-    int32 totalflat = 0;
+    float totalflat = 0;
 
     // Drop charges for triggering spells instead of triggered ones
     if (m_spellModTakingSpell)

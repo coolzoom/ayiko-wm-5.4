@@ -587,7 +587,7 @@ AuraEffect::AuraEffect(Aura *base, uint8 effIndex, int32 *baseAmount, Unit* cast
     m_base(base), m_spellInfo(base->GetSpellInfo()),
     m_baseAmount(baseAmount ? *baseAmount : m_spellInfo->Effects[effIndex].BasePoints),
     m_periodicTimer(0), m_tickNumber(0), m_userData(0), m_rolledTickAmount(0), m_effIndex(effIndex),
-    m_canBeRecalculated(true), m_isPeriodic(false)
+    m_canBeRecalculated(true), m_isPeriodic(false), m_floatAmount(0.0f)
 {
     GetFixedDamageInfo().Clear();
 
@@ -651,6 +651,7 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
 
                 //Compute the whole data and set it
                 float masteryTotal = (float(baseMastery) + points) * GetSpellEffectInfo().BonusMultiplier;
+                m_floatAmount = masteryTotal;
                 amount = (int32)masteryTotal;
 
                 // Update the player visual (round it to upper decimal)
@@ -684,12 +685,16 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                     Item* mainItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
                     Item* offItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
                     if (!mainItem && !offItem)
+                    {
+                        m_floatAmount = 0.0f;
                         amount = 0;
+                    }
 
                     if ((mainItem && mainItem->IsFitToSpellRequirements(GetSpellInfo())) || (offItem && offItem->IsFitToSpellRequirements(GetSpellInfo())))
                         break;
 
                     amount = 0;
+                    m_floatAmount = 0.0f;
                 }
             }
         }
@@ -1291,6 +1296,9 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
     GetBase()->CallScriptEffectCalcAmountHandlers(this, amount, m_canBeRecalculated);
     amount *= GetBase()->GetStackAmount();
 
+    if (!amount)
+        m_floatAmount = 0;
+
     // Fixate damage for periodic damage auras
     // It's only for players now
     if (caster && caster->GetCharmerOrOwnerPlayerOrPlayerItself())
@@ -1472,7 +1480,7 @@ void AuraEffect::CalculateSpellMod()
                 m_spellmod->mask = GetSpellInfo()->Effects[GetEffIndex()].SpellClassMask;
                 m_spellmod->charges = GetBase()->GetCharges();
             }
-            m_spellmod->value = GetAmount();
+            m_spellmod->value = GetFloatAmount() ? GetFloatAmount() : GetAmount();
 
             switch (GetId())
             {
@@ -5647,12 +5655,12 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
 
     if ((GetMiscValue() & SPELL_SCHOOL_MASK_NORMAL) && (GetSpellInfo()->EquippedItemClass == -1 || target->GetTypeId() != TYPEID_PLAYER))
     {
-        target->HandleStatModifier(UNIT_MOD_DAMAGE_MAINHAND,         TOTAL_PCT, float (GetAmount()), apply);
-        target->HandleStatModifier(UNIT_MOD_DAMAGE_OFFHAND,          TOTAL_PCT, float (GetAmount()), apply);
-        target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED,           TOTAL_PCT, float (GetAmount()), apply);
+        target->HandleStatModifier(UNIT_MOD_DAMAGE_MAINHAND,         TOTAL_PCT, float (GetFloatAmount() ? GetFloatAmount() : GetAmount()), apply);
+        target->HandleStatModifier(UNIT_MOD_DAMAGE_OFFHAND,          TOTAL_PCT, float (GetFloatAmount() ? GetFloatAmount() : GetAmount()), apply);
+        target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED,           TOTAL_PCT, float (GetFloatAmount() ? GetFloatAmount() : GetAmount()), apply);
 
         if (target->GetTypeId() == TYPEID_PLAYER)
-            target->ToPlayer()->ApplyPercentModFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT, float (GetAmount()), apply);
+            target->ToPlayer()->ApplyPercentModFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT, float (GetFloatAmount() ? GetFloatAmount() : GetAmount()), apply);
     }
     else
     {
@@ -7370,7 +7378,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
         {
             if (mastery->GetSpellEffectInfo().SpellClassMask & m_spellInfo->SpellFamilyFlags)
             {
-                if (roll_chance_i(mastery->GetAmount()))
+                if (roll_chance_f(mastery->GetAmount()))
                 {
                     int32 bp = damage;
 

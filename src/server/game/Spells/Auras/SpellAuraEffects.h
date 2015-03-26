@@ -58,6 +58,7 @@ class AuraEffect
         int32 GetMiscValue() const { return m_spellInfo->Effects[m_effIndex].MiscValue; }
         AuraType GetAuraType() const { return (AuraType)m_spellInfo->Effects[m_effIndex].ApplyAuraName; }
         int32 GetAmount() const { return m_amount; }
+        float GetFloatAmount() const { return m_floatAmount; }
         void SetAmount(int32 amount);
 
         int32 GetUserData() const { return m_userData; }
@@ -147,6 +148,7 @@ class AuraEffect
         int32 const m_baseAmount;
 
         int32 m_amount;
+        float m_floatAmount;
 
         SpellModifier::Ptr m_spellmod;
 

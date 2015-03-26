@@ -779,12 +779,12 @@ public:
 
                         if (pUnit->HasAura(SPELL_FLUIDITY))
                         {
-                            pUnit->CastSpell(pUnit, SPELL_FOCUSED_LIGHTNING_CONDUCTION, true);
+                            pUnit->CastSpell(pUnit, SPELL_FOCUSED_LIGHTNING_CONDUCTION, true, 0, 0, pCaster->GetGUID());
                             should_conduct = true;
                         }
                         else if (pUnit->HasAura(SPELL_ELECTRIFIED_WATERS))
                         {
-                            pUnit->CastSpell(pUnit, SPELL_FOCUSED_LIGHTNING_CONDUCTION, true);
+                            pUnit->CastSpell(pUnit, SPELL_FOCUSED_LIGHTNING_CONDUCTION, true, 0, 0, pCaster->GetGUID());
                             violent = true;
                             should_conduct = true;
                         }
@@ -879,7 +879,7 @@ public:
         void HandleAfterHit()
         {
             if (GetCaster())
-                GetCaster()->Kill(GetCaster());
+                GetCaster()->UpdateObjectVisibility();
         }
 
         void Register()

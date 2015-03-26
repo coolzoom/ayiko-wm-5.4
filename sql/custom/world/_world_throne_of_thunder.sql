@@ -2740,8 +2740,8 @@ INSERT INTO `creature` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMa
 -- Creature Speeches
 DELETE FROM `creature_text` WHERE `entry` = 67977;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
-(67977, 0,  0, 'Tortos lets out a booming call, attracting nearby turtles.', 41, 0, 100, 0, 0, 0, 'Tortos - Call of Tortos'),
-(67977, 0,  1, 'Tortos prepares to unleash a [Furious Stone Breath]', 41, 0, 100, 0, 0, 0, 'Tortos - Furious Stone Breath');
+(67977, 0, 0, '%s lets out a booming call, attracting nearby turtles.', 41, 0, 100, 0, 0, 0, 'Tortos'),
+(67977, 1, 0, '%s prepares to unleash a |cFFFF0000|Hspell:133939|h[Furious Stone Breath]|h|r!', 41, 0, 100, 0, 0, 0, 'Tortos');
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/

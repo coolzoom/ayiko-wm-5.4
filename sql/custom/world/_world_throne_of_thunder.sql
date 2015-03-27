@@ -1483,12 +1483,17 @@ REPLACE INTO spell_script_names VALUES
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Templates
-DELETE FROM creature_template_aura WHERE entry IN (69135,70029,70060);
+DELETE FROM creature_template_aura WHERE entry IN (69135,70029,70060,3170060,3270060,3370060,3470060,3570060);
 INSERT INTO creature_template_aura VALUES
 (69135, 57764), -- Gara'jal Hover
 (69135, 91218), -- Gara'jal Ghost Visual
 (70029, 138655), -- Eruption
-(70060, 138719); -- Shadowed Voodoo Spirit
+(70060, 138719), -- Shadowed Voodoo Spirit
+(3170060, 138719), -- Shadowed Voodoo Spirit 10N
+(3270060, 138719), -- Shadowed Voodoo Spirit 10H
+(3370060, 138719), -- Shadowed Voodoo Spirit 25N
+(3470060, 138719), -- Shadowed Voodoo Spirit 25H
+(3570060, 138719); -- Shadowed Voodoo Spirit 25LFR
 
 REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES 
 (69740, 0, 0, 0, 0, 0, 23767, 0, 0, 0, 'Twisted Fate', '', '', 0, 92, 92, 4, 35, 35, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 5, 1, 1, 0, 0, 0, 0, 0, 0, 0, 68, 1, 0, 0, 'mob_twisted_fate', 17614);
@@ -1828,13 +1833,6 @@ REPLACE INTO `creature_equip_template` (`entry`, `itemEntry1`, `itemEntry2`, `it
 (69911, 94758, 0, 0),
 (69927, 94122, 94193, 0),
 (70557, 94248, 0, 0);
-/*---------------------------------------------------------------------------------------------------------------*/
-
-/*---------------------------------------------------------------------------------------------------------------*/
--- Creature Auras
-DELETE FROM creature_template_aura WHERE entry = 69909 AND aura = 138432;
-INSERT INTO creature_template_aura VALUES
-(69909, 138432);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -2798,8 +2796,8 @@ REPLACE INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconN
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Gameobjects spawns
 INSERT INTO `gameobject` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`spawntimesecs`,`animprogress`,`state`,`isActive`,`protect_anti_doublet`) VALUES
-(@OGUID+27, 218980, 1098, 0, 0, 760, 1, 6021.38, 4878.19, -61.1892, 1.5708, 0, 0, 1, -4.37114E-8, 0, 255, 0, 0, NULL),
-(@OGUID+28, 218987, 1098, 0, 0, 760, 1, 6038.69, 4923.87, -61.1953, 1.51382, 0, 0, 0, 1, 86400, 255, 1, 0, NULL),
+(@OGUID+27, 218980, 1098, 0, 0, 760, 1, 6038.98, 4915.58, -61.1905, 1.53089, 0, 0, 1, -4.37114E-8, 86400, 255, 1, 0, NULL),
+(@OGUID+28, 218987, 1098, 0, 0, 760, 1, 6038.69, 4923.87, -61.1953, 1.51382, 0, 0, 0, 1, 86400, 255, 0, 0, NULL),
 (@OGUID+29, 218869, 1098, 0, 0, 760, 1, 6046, 5100.75, 72.8265, 3.14159, 2.25609E-43, 0, 0, 0, 86400, 255, 1, 0, NULL);
 /*---------------------------------------------------------------------------------------------------------------*/
 
@@ -2967,9 +2965,11 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (70545, 0, 1, 0, 61, 0, 100, 1, 0, 0, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Mysterious Mushroom - Despawn after the explosion"),
 (70545, 0, 2, 0, 1, 0, 100, 1, 1, 1, 0, 0, 11, 123978, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Mysterious Mushroom - Mushrooms different sizes"),
 
-(70586, 0, 0, 0, 0, 0, 100, 0, 10000, 11000, 10000, 11000, 11, 140629, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, "Eternal Guardian - Cast Eternal Prison"),
-(70586, 0, 1, 0, 0, 0, 100, 0, 14000, 15000, 25000, 26000, 11, 140628, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Eternal Guardian - Cast Lightning Nova"),
-(70586, 0, 2, 0, 0, 0, 100, 0, 6000, 8000, 15000, 18000, 11, 140630, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Eternal Guardian - Cast Siphon Life"),
+(70586, 0, 0, 0, 1, 0, 100, 1, 1, 1, 0, 0, 11, 141923, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Eternal Guardian - Meditate OOC"),
+(70586, 0, 1, 0, 0, 0, 100, 1, 1, 1, 0, 0, 28, 141923, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Eternal Guardian - Remove Meditate IC"),
+(70586, 0, 2, 0, 0, 0, 100, 0, 10000, 11000, 10000, 11000, 11, 140629, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, "Eternal Guardian - Cast Eternal Prison"),
+(70586, 0, 3, 0, 0, 0, 100, 0, 14000, 15000, 25000, 26000, 11, 140628, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Eternal Guardian - Cast Lightning Nova"),
+(70586, 0, 4, 0, 0, 0, 100, 0, 6000, 8000, 15000, 18000, 11, 140630, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Eternal Guardian - Cast Siphon Life"),
 
 (70587, 0, 0, 0, 0, 0, 80, 0, 4000, 8000, 12000, 13000, 11, 140616, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Shale Stalker - Cast Shale Shards"),
 (70587, 0, 1, 0, 8, 0, 100, 0, 140600, 0, 1000, 1000, 38, 0, 0, 0, 0, 0, 0, 17, 0, 45, 0, 0, 0, 0, 0, "Shale Stalker - Enter in combat when called"),
@@ -3398,14 +3398,23 @@ INSERT INTO `creature` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMa
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Creature Auras
-DELETE FROM creature_template_aura WHERE entry IN (67966,70147,70157,70586);
+DELETE FROM creature_template_aura WHERE entry IN (67966,3167966,3267966,3367966,3467966,3567966,70147,70157,70586,3170586,3270586,3370586,3470586,3570586);
 INSERT INTO creature_template_aura VALUES
 (67966,110470),
+(3167966,110470),
+(3267966,110470),
+(3367966,110470),
+(3467966,110470),
+(3567966,110470),
 (70147,140809),
 (70157,139157),
-(70586,140577);
+(70586,140577),
+(3170586,140577),
+(3270586,140577),
+(3370586,140577),
+(3470586,140577),
+(3570586,140577);
 /*---------------------------------------------------------------------------------------------------------------*/
-
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Creature Path & Waypoints

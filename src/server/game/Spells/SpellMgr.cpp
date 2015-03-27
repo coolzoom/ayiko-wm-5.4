@@ -6073,6 +6073,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 118335:
                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_ENCHANT_STACK;
                     break;
+                case 124081:
+                    spellInfo->AttributesEx5 &= ~SPELL_ATTR5_SINGLE_TARGET_SPELL;
+                    break;
                 default:
                     break;
             }

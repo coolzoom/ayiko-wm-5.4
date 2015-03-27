@@ -7620,11 +7620,13 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                 // Hand of Light
                 case 76672:
                 {
-                    if (!victim || effIndex != EFFECT_0)
+                    if (!victim || this == victim || effIndex != EFFECT_0)
                         return false;
 
                     triggered_spell_id = 96172;
                     basepoints0 = damage * triggeredByAura->GetAmount() / 100.0f;
+                    if (AuraEffect* inquisition = GetAuraEffect(84963, EFFECT_0))
+                        AddPct(basepoints0, inquisition->GetAmount());
                     break;
                 }
                 // Illuminated Healing

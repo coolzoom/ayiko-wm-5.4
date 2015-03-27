@@ -373,7 +373,7 @@ bool GlobalCooldownMgr::HasGlobalCooldown(Unit* caster, SpellInfo const* spellIn
         if (!baseGcd)
             return false;
     }
-    return itr != m_GlobalCooldowns.end() && itr->second.duration && getMSTimeDiff(itr->second.cast_time, getMSTime() + 120) < itr->second.duration;
+    return itr != m_GlobalCooldowns.end() && itr->second.duration && getMSTimeDiff(itr->second.cast_time, getMSTime()) < itr->second.duration;
 }
 
 int32 GlobalCooldownMgr::GetGlobalCooldown(Unit* caster, SpellInfo const* spellInfo)

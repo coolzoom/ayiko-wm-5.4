@@ -137,6 +137,11 @@ enum Timers
     TIMER_BERSERK               = 780000  // 13 minutes.
 };
 
+enum iActions : uint32
+{
+    ACTION_ACTIVATE_INTRO           = 1
+};
+
 class boss_tortos : public CreatureScript
 {
     public:
@@ -814,14 +819,14 @@ class npc_lei_shen_tortos : public CreatureScript
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
             }
 
-            void MoveInLineOfSight(Unit* who)
+            void DoAction(const int32 iAction) override
             {
-                if (!introDone && me->IsWithinDistInMap(who, 140.0f, true) && who->GetTypeId() == TYPEID_PLAYER)
+                if (!introDone && iAction == ACTION_ACTIVATE_INTRO)
                 {
                     if (me->GetInstanceScript())
                         me->GetInstanceScript()->SetData(TYPE_TORTOS_INTRO, DONE);
                     me->SetReactState(REACT_PASSIVE);
-                    events.ScheduleEvent(EVENT_LEI_SHEN_SEND_CINEMATIC, 100);
+                    events.ScheduleEvent(EVENT_LEI_SHEN_SEND_CINEMATIC, 1000);
                     introDone = true;
                 }
             }
@@ -933,6 +938,28 @@ class spell_lei_shen_tortos_bridge_call_lightning : public SpellScriptLoader
         }
 };
 
+class AreaTrigger_at_tortos_intro : public AreaTriggerScript
+{
+public:
+
+    AreaTrigger_at_tortos_intro()
+        : AreaTriggerScript("at_tortos_intro")
+    {
+    }
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/)
+    {
+        TC_LOG_ERROR("scripts", "AT_ TRIGGERED");
+        if (Creature* LeiShen = GetClosestCreatureWithEntry(player, NPC_LEI_SHEN_TRIGGER, 300.f))
+        {
+            if (LeiShen->AI())
+                LeiShen->AI()->DoAction(ACTION_ACTIVATE_INTRO);
+        }
+
+        return false;
+    }
+};
+
 void AddSC_boss_tortos()
 {
     new boss_tortos();
@@ -948,4 +975,5 @@ void AddSC_boss_tortos()
     new spell_tortos_quake_stomp();
     new npc_lei_shen_tortos();
     new spell_lei_shen_tortos_bridge_call_lightning();
+    new AreaTrigger_at_tortos_intro();
 }

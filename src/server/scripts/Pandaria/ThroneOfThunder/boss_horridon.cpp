@@ -739,7 +739,7 @@ public:
                             if (entries.empty()) // Entries is empty, no need to reschedule event
                                 break;
 
-                            for (uint8 i = 0; i < MAX_SUMMON_POSITIONS_BY_PHASE; ++i)
+                            for (uint8 i = 0; i < uiTrashPhase == TRASH_PHASE_GURUBASHI ? 2 : MAX_SUMMON_POSITIONS_BY_PHASE; ++i)
                             {
                                 uint32 uiSummonEntry = Trinity::Containers::SelectRandomContainerElement(entries);
                                 me->SummonCreature(uiSummonEntry, summonPositions[urand(0, MAX_SUMMON_POSITIONS_BY_PHASE - 1)]);

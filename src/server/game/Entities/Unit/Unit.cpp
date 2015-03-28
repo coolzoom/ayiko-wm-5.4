@@ -11892,11 +11892,11 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                     continue;
 
                 if ((*i)->GetSpellInfo()->EquippedItemClass == -1)
-                    AddPct(DoneTotalMod, (*i)->GetAmount());
+                    AddPct(DoneTotalMod, (*i)->GetFloatAmount() ? (*i)->GetFloatAmount() : (*i)->GetAmount());
                 else if (!((*i)->GetSpellInfo()->AttributesEx5 & SPELL_ATTR5_SPECIAL_ITEM_CLASS_CHECK) && ((*i)->GetSpellInfo()->EquippedItemSubClassMask == 0))
-                    AddPct(DoneTotalMod, (*i)->GetAmount());
+                    AddPct(DoneTotalMod, (*i)->GetFloatAmount() ? (*i)->GetFloatAmount() : (*i)->GetAmount());
                 else if (ToPlayer() && ToPlayer()->HasItemFitToSpellRequirements((*i)->GetSpellInfo()))
-                    AddPct(DoneTotalMod, (*i)->GetAmount());
+                    AddPct(DoneTotalMod, (*i)->GetFloatAmount() ? (*i)->GetFloatAmount() : (*i)->GetAmount());
             }
         }
     }
@@ -13328,11 +13328,11 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
                 if ((*i)->GetMiscValue() & spellProto->GetSchoolMask() && !(spellProto->GetSchoolMask() & SPELL_SCHOOL_MASK_NORMAL))
                 {
                     if ((*i)->GetSpellInfo()->EquippedItemClass == -1)
-                        AddPct(DoneTotalMod, (*i)->GetAmount());
+                        AddPct(DoneTotalMod, (*i)->GetFloatAmount() ? (*i)->GetFloatAmount() : (*i)->GetAmount());
                     else if (!((*i)->GetSpellInfo()->AttributesEx5 & SPELL_ATTR5_SPECIAL_ITEM_CLASS_CHECK) && ((*i)->GetSpellInfo()->EquippedItemSubClassMask == 0))
-                        AddPct(DoneTotalMod, (*i)->GetAmount());
+                        AddPct(DoneTotalMod, (*i)->GetFloatAmount() ? (*i)->GetFloatAmount() : (*i)->GetAmount());
                     else if (ToPlayer() && ToPlayer()->HasItemFitToSpellRequirements((*i)->GetSpellInfo()))
-                        AddPct(DoneTotalMod, (*i)->GetAmount());
+                        AddPct(DoneTotalMod, (*i)->GetFloatAmount() ? (*i)->GetFloatAmount() : (*i)->GetAmount());
                 }
             }
         }

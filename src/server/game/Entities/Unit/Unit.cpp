@@ -3162,6 +3162,11 @@ void Unit::_UpdateSpells(uint32 time)
         i_aura->UpdateOwner(time, this);
     }
 
+    // area triggers from aura
+    AuraAreaTriggerList auraAreaTriggerUpdateList(m_auraAreaTriggers);
+    for (AuraAreaTriggerList::iterator iter = auraAreaTriggerUpdateList.begin(); iter != auraAreaTriggerUpdateList.end(); ++iter)
+        (*iter)->OnUpdate(time);
+
     // remove expired auras - do that after updates(used in scripts?)
     for (AuraMap::iterator i = m_ownedAuras.begin(); i != m_ownedAuras.end();)
     {
@@ -7620,11 +7625,13 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                 // Hand of Light
                 case 76672:
                 {
-                    if (!victim || effIndex != EFFECT_0)
+                    if (!victim || this == victim || effIndex != EFFECT_0)
                         return false;
 
                     triggered_spell_id = 96172;
                     basepoints0 = damage * triggeredByAura->GetAmount() / 100.0f;
+                    if (AuraEffect* inquisition = GetAuraEffect(84963, EFFECT_0))
+                        AddPct(basepoints0, inquisition->GetAmount());
                     break;
                 }
                 // Illuminated Healing
@@ -21185,6 +21192,28 @@ Unit* Unit::GetSimulacrumTarget()
     }
     else
         return NULL;
+}
+
+void Unit::AddAuraAreaTrigger(IAreaTrigger* interface)
+{
+    m_auraAreaTriggers.push_back(interface);
+}
+
+IAreaTrigger* Unit::RemoveAuraAreaTrigger(AuraEffect const* auraEffect, AuraApplication const* auraApplication)
+{
+    if (!m_duringRemoveFromWorld)
+    {
+        for (AuraAreaTriggerList::iterator iter = m_auraAreaTriggers.begin(); iter != m_auraAreaTriggers.end(); ++iter)
+        {
+            if ((*iter)->GetAuraApplication() == auraApplication && (*iter)->GetAuraEffect() == auraEffect)
+            {
+                IAreaTrigger* result = *iter;
+                m_auraAreaTriggers.erase(iter);
+                return result;
+            }
+        }
+    }
+    return NULL;
 }
 
 void Unit::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* target) const

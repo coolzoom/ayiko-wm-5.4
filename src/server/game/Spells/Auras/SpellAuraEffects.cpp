@@ -538,7 +538,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNULL,                                      //392 SPELL_AURA_392
     &AuraEffect::HandleNoImmediateEffect,                         //393 SPELL_AURA_DEFLECT_FRONT_SPELLS
     &AuraEffect::HandleNULL,                                      //394 SPELL_AURA_394
-    &AuraEffect::HandleNULL,                                      //395 SPELL_AURA_395
+    &AuraEffect::HandleAreaTrigger,                               //395 SPELL_AURA_AREA_TRIGGER
     &AuraEffect::HandleNULL,                                      //396 SPELL_AURA_396
     &AuraEffect::HandleNULL,                                      //397 SPELL_AURA_397
     &AuraEffect::HandleNULL,                                      //398 SPELL_AURA_398
@@ -8435,6 +8435,32 @@ void AuraEffect::HandleAuraStrangulate(AuraApplication const* aurApp, uint8 mode
     // Asphyxiate
     if (m_spellInfo->Id == 108194)
         target->SetControlled(apply, UNIT_STATE_STUNNED);
+}
+
+void AuraEffect::HandleAreaTrigger(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & AURA_EFFECT_HANDLE_REAL))
+        return;
+
+    uint32 entry = (uint32)GetMiscValue();
+    if (apply)
+    {
+        if (IAreaTrigger* areaTrigger = sScriptMgr->CreateAreaTriggerInterface(entry))
+        {
+            areaTrigger->Initialize(this, aurApp);
+            aurApp->GetTarget()->AddAuraAreaTrigger(areaTrigger);
+        }
+    }
+    else
+    {
+        if (IAreaTrigger* areaTrigger = aurApp->GetTarget()->RemoveAuraAreaTrigger(this, aurApp))
+        {
+            if (aurApp->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
+                areaTrigger->OnExpire();
+
+            delete areaTrigger;
+        }
+    }
 }
 
 void AuraEffect::HandleChangeSpellVisualEffect(AuraApplication const* aurApp, uint8 mode, bool apply) const

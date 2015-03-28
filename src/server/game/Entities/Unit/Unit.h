@@ -36,6 +36,7 @@
 #include "Path.h"
 #include "Timer.h"
 #include "UnitDefines.hpp"
+#include "../AreaTrigger/AreaTrigger.h"
 
 #include <array>
 #include <list>
@@ -1359,6 +1360,9 @@ class Unit : public WorldObject
         void RemoveAreaTrigger(uint32 spellId);
         void RemoveAllAreasTrigger();
 
+        void AddAuraAreaTrigger(IAreaTrigger* interface);
+        IAreaTrigger* RemoveAuraAreaTrigger(AuraEffect const* auraEffect, AuraApplication const* auraApplication);
+
         GameObject* GetGameObject(uint32 spellId) const;
         void AddGameObject(GameObject* gameObj);
         void RemoveGameObject(GameObject* gameObj, bool del);
@@ -1646,6 +1650,9 @@ class Unit : public WorldObject
 
         typedef std::list<AreaTrigger*> AreaTriggerList;
         AreaTriggerList m_AreaTrigger;
+
+        typedef std::list<IAreaTrigger*> AuraAreaTriggerList;
+        AuraAreaTriggerList m_auraAreaTriggers;
 
         typedef std::list<GameObject*> GameObjectList;
         GameObjectList m_gameObj;

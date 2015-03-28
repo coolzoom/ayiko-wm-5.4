@@ -487,6 +487,7 @@ class ObjectMgr
         ItemTemplate const* GetItemTemplate(uint32 entry);
         ItemTemplateContainer const & GetItemTemplateStore() const { return _itemTemplateStore; }
         uint32 const GetCreatureScriptNameId(uint32 lowguid) const;
+        AreaTriggerTemplate const* GetAreaTriggerTemplate(uint32 entry) const;
 
         ObjectInvisibility const * gameObjectInvisibility(uint32 guid) const;
         ObjectInvisibility const * gameObjectTemplateInvisibility(uint32 entry) const;
@@ -734,6 +735,7 @@ class ObjectMgr
         void LoadMailLevelRewards();
         void LoadVehicleTemplateAccessories();
         void LoadVehicleAccessories();
+        void LoadSpellAreaTriggerTemplates();
 
         void LoadGossipText();
 
@@ -1246,6 +1248,7 @@ class ObjectMgr
         TrinityStringLocaleContainer _trinityStringLocaleStore;
         GossipMenuItemsLocaleContainer _gossipMenuItemsLocaleStore;
         PointOfInterestLocaleContainer _pointOfInterestLocaleStore;
+        AreaTriggerTemplateContainer _areaTriggerTemplateStore;
 
         CacheVendorItemContainer _cacheVendorItemStore;
         CacheTrainerSpellContainer _cacheTrainerSpellStore;

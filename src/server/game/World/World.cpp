@@ -1630,6 +1630,9 @@ void World::SetInitialWorldSettings()
     TC_LOG_INFO("server.loading", "Loading Spell Phase Dbc Info...");
     sObjectMgr->LoadSpellPhaseInfo();
 
+    TC_LOG_INFO("server.loading", "Loading Spell AreaTrigger templates...");
+    sObjectMgr->LoadSpellAreaTriggerTemplates();
+
     TC_LOG_INFO("server.loading", "Loading NPC Texts...");
     sObjectMgr->LoadGossipText();
 

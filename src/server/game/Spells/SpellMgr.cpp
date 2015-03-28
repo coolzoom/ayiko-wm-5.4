@@ -3596,14 +3596,20 @@ void SpellMgr::LoadSpellCustomAttr()
             case 136797:    // Dino Mending
                 spellInfo->Effects[EFFECT_1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
                 break;
-            case 136739:
+            case 136739:    // Double Swipe
             case 136740:
                 spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_SRC_CASTER);
                 spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENEMY);
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_40_YARDS);
                 break;
-            case 136769:
-                spellInfo->Effects[EFFECT_0].TriggerSpell = 0;
+            case 136769:    // Charge
+                spellInfo->Effects[EFFECT_0].TriggerSpell = 0;       
+                break;
+            case 139852:
+                spellInfo->Effects[EFFECT_2].Effect = SPELL_EFFECT_DUMMY;
+                spellInfo->Effects[EFFECT_2].TargetA = SpellImplicitTargetInfo(TARGET_SRC_CASTER);
+                spellInfo->Effects[EFFECT_2].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENTRY);
+                spellInfo->Effects[EFFECT_2].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_50000_YARDS);
                 break;
 #if 1 // Gilneas
                 case 68087:
@@ -6066,6 +6072,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 118334: // Dancing Steel
                 case 118335:
                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_ENCHANT_STACK;
+                    break;
+                case 124081:
+                    spellInfo->AttributesEx5 &= ~SPELL_ATTR5_SINGLE_TARGET_SPELL;
                     break;
                 default:
                     break;

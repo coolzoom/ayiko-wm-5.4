@@ -6441,7 +6441,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
 
                      triggered_spell_id = 12654;
                      SpellInfo const* igniteDot = sSpellMgr->GetSpellInfo(triggered_spell_id);
-                     basepoints0 = int32(CalculatePct(damage, triggerAmount));
+                     basepoints0 = int32(CalculatePct(damage, triggeredByAura->GetFloatAmount()));
                      basepoints0 += victim->GetRemainingPeriodicAmount(GetGUID(), triggered_spell_id, SPELL_AURA_PERIODIC_DAMAGE).total();
                      basepoints0 /= igniteDot->GetMaxTicks();
                      break;
@@ -7629,7 +7629,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                         return false;
 
                     triggered_spell_id = 96172;
-                    basepoints0 = damage * triggeredByAura->GetAmount() / 100.0f;
+                    basepoints0 = damage * triggeredByAura->GetFloatAmount() / 100.0f;
                     if (AuraEffect* inquisition = GetAuraEffect(84963, EFFECT_0))
                         AddPct(basepoints0, inquisition->GetAmount());
                     break;

@@ -3864,6 +3864,15 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[2].MiscValueB = 0;
                     spellInfo->Effects[2].TargetA = TARGET_UNIT_CASTER;
                     spellInfo->Effects[2].TargetB = 0;*/
+                    break;      
+                case 106332: // Tornado Slam
+                    spellInfo->Effects[1].TargetA = TARGET_UNIT_NEARBY_ENTRY;
+                    break;
+                case 128245: // Flip Out
+                    spellInfo->Effects[1].TargetA = TARGET_UNIT_CASTER;
+                    break;
+                case 106827:// Smoke blades
+                    spellInfo->Effects[1].ApplyAuraName = SPELL_AURA_DUMMY;
                     break;
                 case 119414:// Breath of Fear
                     spellInfo->Effects[2].Effect = 0;

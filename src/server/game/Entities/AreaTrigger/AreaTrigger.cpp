@@ -341,6 +341,27 @@ void AreaTrigger::Update(uint32 p_time)
 
             break;
         }
+        case 106979:// Fire Arrow
+        {
+            std::list<Unit*> targetList;
+            radius = 6.0f;
+
+            Trinity::AnyUnfriendlyUnitInObjectRangeCheck p_check(this, caster, radius);
+            Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(this, targetList, p_check);
+            VisitNearbyObject(this, radius, searcher);
+
+            if(!targetList.empty())
+            {
+                for(auto itr : targetList)
+                {
+                    if(itr->GetDistance(this) > 3.7f)
+                        itr->RemoveAura(131241);
+                    else
+                        itr->CastSpell(itr, 131241, false);
+                }
+             }
+             break;
+        }
         case 115460:// Healing Sphere
         {
             std::list<Unit*> targetList;

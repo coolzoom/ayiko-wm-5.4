@@ -12771,7 +12771,7 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
     // Healing done percent
     AuraEffectList const& mHealingDonePct = GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_DONE_PERCENT);
     for (AuraEffectList::const_iterator i = mHealingDonePct.begin(); i != mHealingDonePct.end(); ++i)
-        AddPct(DoneTotalMod, (*i)->GetAmount());
+        AddPct(DoneTotalMod, (*i)->GetFloatAmount() ? (*i)->GetFloatAmount() : (*i)->GetAmount());
 
     // Healing bonus based on targets hp
     AuraEffectList const& mDamageDoneByPower = GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_DONE_FROM_PCT_HEALTH);

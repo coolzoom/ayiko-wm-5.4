@@ -831,11 +831,8 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                 case SPELLFAMILY_PRIEST:
                     // Power Word : Shield
                     if (GetSpellInfo()->Id == 17 || GetSpellInfo()->Id == 123258)
-                    {
                         // +187.1% from sp bonus
                         amount += caster->SpellBaseDamageBonusDone(m_spellInfo->GetSchoolMask()) * 1.871f;
-                        break;
-                    }
 
                     switch (GetSpellInfo()->Id)
                     {
@@ -845,7 +842,7 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                         case 152118: // Clarity of Will
                             // Shield Discipline
                             if (AuraEffect* aurEff = caster->GetAuraEffect(77484, EFFECT_0))
-                                AddPct(amount, aurEff->GetAmount());
+                                AddPct(amount, aurEff->GetFloatAmount());
                             break;
                     }
                     break;

@@ -2930,7 +2930,7 @@ UPDATE creature_template SET flags_extra = flags_extra | 1, mechanic_immune_mask
 
 -- Difficulty entries bosses and Trash Mobs
 UPDATE creature_template SET difficulty_entry_3 = @RAID_DIFF_10N + entry, difficulty_entry_4 = @RAID_DIFF_25N + entry, difficulty_entry_5 = @RAID_DIFF_10H + entry, difficulty_entry_6 = @RAID_DIFF_25H + entry, difficulty_entry_7 = @RAID_DIFF_25R + entry WHERE entry IN 
-(70153,70212,70235,70247,70586,70587,70589,70594);
+(70153,70212,70235,70247,70252,70586,70587,70589,70594);
 
 -- Fungal Growth
 UPDATE creature_template SET LootId = 69388,   dmg_multiplier = 5, Health_Mod = 14755720 / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 70153;

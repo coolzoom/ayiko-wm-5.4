@@ -12777,7 +12777,7 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
     AuraEffectList const& mDamageDoneByPower = GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_DONE_FROM_PCT_HEALTH);
     for (AuraEffectList::const_iterator i = mDamageDoneByPower.begin(); i != mDamageDoneByPower.end(); ++i)
     {
-        float amount = (*i)->GetAmount() * (1.0f - (victim->GetHealthPct() / 100.0f));
+        float amount = ((*i)->GetFloatAmount() ? (*i)->GetFloatAmount() : (*i)->GetAmount()) * (1.0f - (victim->GetHealthPct() / 100.0f));
         AddPct(DoneTotalMod, amount);
     }
 

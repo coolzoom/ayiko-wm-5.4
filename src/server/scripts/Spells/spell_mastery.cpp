@@ -93,7 +93,7 @@ class spell_mastery_blood_shield : public SpellScriptLoader
                     AuraEffect* aurEff = caster->GetAuraEffect(77513, EFFECT_0);
                     if (caster->GetTypeId() == TYPEID_PLAYER && aurEff && caster->HasAura(48263)) // Check the Mastery aura while in Blood presence
                     {
-                        int32 bp = -int32(GetHitDamage() * aurEff->GetAmount() / 100);
+                        int32 bp = -int32(GetHitDamage() * aurEff->GetFloatAmount() / 100);
 
                         if (Aura* scentOfBlood = caster->GetAura(SPELL_DK_SCENT_OF_BLOOD))
                             AddPct(bp, (scentOfBlood->GetStackAmount() * 20));

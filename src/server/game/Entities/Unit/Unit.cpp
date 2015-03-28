@@ -1077,7 +1077,7 @@ uint32 Unit::CalcStaggerDamage(Player* victim, uint32 damage)
     float stagger = 0.80f;
     if (AuraEffect * aurEff = victim->GetAuraEffect(117906, EFFECT_0)) //Mastery
     {
-        stagger -= float(aurEff->GetAmount() / 100.f);
+        stagger -= float(aurEff->GetFloatAmount() / 100.f);
 
         // Brewmaster Training : Your Fortifying Brew also increase stagger amount by 20%
         if (victim->HasAura(115203) && victim->HasAura(117967))
@@ -3161,6 +3161,11 @@ void Unit::_UpdateSpells(uint32 time)
         ++m_auraUpdateIterator;                            // need shift to next for allow update if need into aura update
         i_aura->UpdateOwner(time, this);
     }
+
+    // area triggers from aura
+    AuraAreaTriggerList auraAreaTriggerUpdateList(m_auraAreaTriggers);
+    for (AuraAreaTriggerList::iterator iter = auraAreaTriggerUpdateList.begin(); iter != auraAreaTriggerUpdateList.end(); ++iter)
+        (*iter)->OnUpdate(time);
 
     // remove expired auras - do that after updates(used in scripts?)
     for (AuraMap::iterator i = m_ownedAuras.begin(); i != m_ownedAuras.end();)
@@ -6436,7 +6441,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
 
                      triggered_spell_id = 12654;
                      SpellInfo const* igniteDot = sSpellMgr->GetSpellInfo(triggered_spell_id);
-                     basepoints0 = int32(CalculatePct(damage, triggerAmount));
+                     basepoints0 = int32(CalculatePct(damage, triggeredByAura->GetFloatAmount()));
                      basepoints0 += victim->GetRemainingPeriodicAmount(GetGUID(), triggered_spell_id, SPELL_AURA_PERIODIC_DAMAGE).total();
                      basepoints0 /= igniteDot->GetMaxTicks();
                      break;
@@ -7624,7 +7629,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                         return false;
 
                     triggered_spell_id = 96172;
-                    basepoints0 = damage * triggeredByAura->GetAmount() / 100.0f;
+                    basepoints0 = damage * triggeredByAura->GetFloatAmount() / 100.0f;
                     if (AuraEffect* inquisition = GetAuraEffect(84963, EFFECT_0))
                         AddPct(basepoints0, inquisition->GetAmount());
                     break;
@@ -11887,11 +11892,11 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                     continue;
 
                 if ((*i)->GetSpellInfo()->EquippedItemClass == -1)
-                    AddPct(DoneTotalMod, (*i)->GetAmount());
+                    AddPct(DoneTotalMod, (*i)->GetFloatAmount() ? (*i)->GetFloatAmount() : (*i)->GetAmount());
                 else if (!((*i)->GetSpellInfo()->AttributesEx5 & SPELL_ATTR5_SPECIAL_ITEM_CLASS_CHECK) && ((*i)->GetSpellInfo()->EquippedItemSubClassMask == 0))
-                    AddPct(DoneTotalMod, (*i)->GetAmount());
+                    AddPct(DoneTotalMod, (*i)->GetFloatAmount() ? (*i)->GetFloatAmount() : (*i)->GetAmount());
                 else if (ToPlayer() && ToPlayer()->HasItemFitToSpellRequirements((*i)->GetSpellInfo()))
-                    AddPct(DoneTotalMod, (*i)->GetAmount());
+                    AddPct(DoneTotalMod, (*i)->GetFloatAmount() ? (*i)->GetFloatAmount() : (*i)->GetAmount());
             }
         }
     }
@@ -12766,13 +12771,13 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
     // Healing done percent
     AuraEffectList const& mHealingDonePct = GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_DONE_PERCENT);
     for (AuraEffectList::const_iterator i = mHealingDonePct.begin(); i != mHealingDonePct.end(); ++i)
-        AddPct(DoneTotalMod, (*i)->GetAmount());
+        AddPct(DoneTotalMod, (*i)->GetFloatAmount() ? (*i)->GetFloatAmount() : (*i)->GetAmount());
 
     // Healing bonus based on targets hp
     AuraEffectList const& mDamageDoneByPower = GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_DONE_FROM_PCT_HEALTH);
     for (AuraEffectList::const_iterator i = mDamageDoneByPower.begin(); i != mDamageDoneByPower.end(); ++i)
     {
-        float amount = (*i)->GetAmount() * (1.0f - (victim->GetHealthPct() / 100.0f));
+        float amount = ((*i)->GetFloatAmount() ? (*i)->GetFloatAmount() : (*i)->GetAmount()) * (1.0f - (victim->GetHealthPct() / 100.0f));
         AddPct(DoneTotalMod, amount);
     }
 
@@ -13323,11 +13328,11 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
                 if ((*i)->GetMiscValue() & spellProto->GetSchoolMask() && !(spellProto->GetSchoolMask() & SPELL_SCHOOL_MASK_NORMAL))
                 {
                     if ((*i)->GetSpellInfo()->EquippedItemClass == -1)
-                        AddPct(DoneTotalMod, (*i)->GetAmount());
+                        AddPct(DoneTotalMod, (*i)->GetFloatAmount() ? (*i)->GetFloatAmount() : (*i)->GetAmount());
                     else if (!((*i)->GetSpellInfo()->AttributesEx5 & SPELL_ATTR5_SPECIAL_ITEM_CLASS_CHECK) && ((*i)->GetSpellInfo()->EquippedItemSubClassMask == 0))
-                        AddPct(DoneTotalMod, (*i)->GetAmount());
+                        AddPct(DoneTotalMod, (*i)->GetFloatAmount() ? (*i)->GetFloatAmount() : (*i)->GetAmount());
                     else if (ToPlayer() && ToPlayer()->HasItemFitToSpellRequirements((*i)->GetSpellInfo()))
-                        AddPct(DoneTotalMod, (*i)->GetAmount());
+                        AddPct(DoneTotalMod, (*i)->GetFloatAmount() ? (*i)->GetFloatAmount() : (*i)->GetAmount());
                 }
             }
         }
@@ -21187,6 +21192,28 @@ Unit* Unit::GetSimulacrumTarget()
     }
     else
         return NULL;
+}
+
+void Unit::AddAuraAreaTrigger(IAreaTrigger* interface)
+{
+    m_auraAreaTriggers.push_back(interface);
+}
+
+IAreaTrigger* Unit::RemoveAuraAreaTrigger(AuraEffect const* auraEffect, AuraApplication const* auraApplication)
+{
+    if (!m_duringRemoveFromWorld)
+    {
+        for (AuraAreaTriggerList::iterator iter = m_auraAreaTriggers.begin(); iter != m_auraAreaTriggers.end(); ++iter)
+        {
+            if ((*iter)->GetAuraApplication() == auraApplication && (*iter)->GetAuraEffect() == auraEffect)
+            {
+                IAreaTrigger* result = *iter;
+                m_auraAreaTriggers.erase(iter);
+                return result;
+            }
+        }
+    }
+    return NULL;
 }
 
 void Unit::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* target) const

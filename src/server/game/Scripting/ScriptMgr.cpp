@@ -861,6 +861,18 @@ bool ScriptMgr::OnAreaTrigger(Player* player, AreaTriggerEntry const* trigger)
     return tmpscript->OnTrigger(player, trigger);
 }
 
+IAreaTrigger* ScriptMgr::CreateAreaTriggerInterface(uint32 entry)
+{
+    AreaTriggerTemplate const* atTemplate = sObjectMgr->GetAreaTriggerTemplate(entry);
+    if (!atTemplate)
+        return NULL;
+
+    GET_SCRIPT_RET(SpellAreaTriggerScript, atTemplate->ScriptId, tmpscript, NULL);
+    IAreaTrigger* result = tmpscript->GetInterface();
+    result->m_range = atTemplate->Radius;
+    return result;
+}
+
 Battleground* ScriptMgr::CreateBattleground(BattlegroundTypeId /*typeId*/)
 {
     // TODO: Implement script-side battlegrounds.
@@ -1347,6 +1359,12 @@ AreaTriggerScript::AreaTriggerScript(const char* name)
     : ScriptObject(name)
 {
     ScriptRegistry<AreaTriggerScript>::AddScript(this);
+}
+
+SpellAreaTriggerScript::SpellAreaTriggerScript(const char* name)
+    : ScriptObject(name)
+{
+    ScriptRegistry<SpellAreaTriggerScript>::AddScript(this);
 }
 
 BattlegroundScript::BattlegroundScript(const char* name)

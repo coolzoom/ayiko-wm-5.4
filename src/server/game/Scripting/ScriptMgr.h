@@ -423,6 +423,23 @@ class AreaTriggerScript : public ScriptObject
         virtual bool OnTrigger(Player* /*player*/, AreaTriggerEntry const* /*trigger*/) { return false; }
 };
 
+class SpellAreaTriggerScript : public ScriptObject
+{
+protected:
+    SpellAreaTriggerScript(const char* name);
+
+public:
+    bool IsDatabaseBound() const final { return true; }
+
+    // Called when the area trigger is created
+    virtual IAreaTrigger* GetInterface() const { return NULL; }
+    // Called when the area trigger is activated by a player.
+    virtual void OnEnter(AreaTrigger* /*areaTrigger*/, Unit* /*target*/) { return; }
+    // Called when the area trigger is activated by a player.
+    virtual void OnLeave(AreaTrigger* /*areaTrigger*/, Unit* /*target*/) { return; }
+
+};
+
 class BattlegroundScript : public ScriptObject
 {
     protected:
@@ -839,6 +856,12 @@ class ScriptMgr
     public: /* AreaTriggerScript */
 
         bool OnAreaTrigger(Player* player, AreaTriggerEntry const* trigger);
+
+    public: /* SpellAreaTriggerScript */
+
+        IAreaTrigger* CreateAreaTriggerInterface(uint32 entry);
+        void OnSpellAreaTriggerEnter(AreaTrigger* areaTrigger, Unit* Target);
+        void OnSpellAreaTriggerLeave(AreaTrigger* areaTrigger, Unit* Target);
 
     public: /* BattlegroundScript */
 

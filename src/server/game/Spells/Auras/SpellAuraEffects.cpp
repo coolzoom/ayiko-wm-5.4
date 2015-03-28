@@ -831,11 +831,8 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                 case SPELLFAMILY_PRIEST:
                     // Power Word : Shield
                     if (GetSpellInfo()->Id == 17 || GetSpellInfo()->Id == 123258)
-                    {
                         // +187.1% from sp bonus
                         amount += caster->SpellBaseDamageBonusDone(m_spellInfo->GetSchoolMask()) * 1.871f;
-                        break;
-                    }
 
                     switch (GetSpellInfo()->Id)
                     {
@@ -845,7 +842,7 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                         case 152118: // Clarity of Will
                             // Shield Discipline
                             if (AuraEffect* aurEff = caster->GetAuraEffect(77484, EFFECT_0))
-                                AddPct(amount, aurEff->GetAmount());
+                                AddPct(amount, aurEff->GetFloatAmount());
                             break;
                     }
                     break;
@@ -4685,11 +4682,11 @@ void AuraEffect::HandleModResistancePercent(AuraApplication const* aurApp, uint8
     {
         if (GetMiscValue() & int32(1<<i))
         {
-            target->HandleStatModifier(UnitMods(UNIT_MOD_RESISTANCE_START + i), TOTAL_PCT, float(GetAmount()), apply);
+            target->HandleStatModifier(UnitMods(UNIT_MOD_RESISTANCE_START + i), TOTAL_PCT, float(GetFloatAmount() ? GetFloatAmount() : GetAmount()), apply);
             if (target->GetTypeId() == TYPEID_PLAYER || target->ToCreature()->isPet())
             {
-                target->ApplyResistanceBuffModsPercentMod(SpellSchools(i), true, (float)GetAmount(), apply);
-                target->ApplyResistanceBuffModsPercentMod(SpellSchools(i), false, (float)GetAmount(), apply);
+                target->ApplyResistanceBuffModsPercentMod(SpellSchools(i), true, float(GetFloatAmount() ? GetFloatAmount() : GetAmount()), apply);
+                target->ApplyResistanceBuffModsPercentMod(SpellSchools(i), false, float(GetFloatAmount() ? GetFloatAmount() : GetAmount()), apply);
             }
         }
     }

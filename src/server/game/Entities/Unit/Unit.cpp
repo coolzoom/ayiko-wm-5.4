@@ -1077,7 +1077,7 @@ uint32 Unit::CalcStaggerDamage(Player* victim, uint32 damage)
     float stagger = 0.80f;
     if (AuraEffect * aurEff = victim->GetAuraEffect(117906, EFFECT_0)) //Mastery
     {
-        stagger -= float(aurEff->GetAmount() / 100.f);
+        stagger -= float(aurEff->GetFloatAmount() / 100.f);
 
         // Brewmaster Training : Your Fortifying Brew also increase stagger amount by 20%
         if (victim->HasAura(115203) && victim->HasAura(117967))

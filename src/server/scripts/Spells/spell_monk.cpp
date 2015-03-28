@@ -2767,7 +2767,7 @@ class spell_monk_tigereye_brew_stacks : public SpellScriptLoader
                     caster->CastSpell(caster, SPELL_MONK_TIGEREYE_BREW_STACKS, true);
                     // Mastery: Bottled Fury
                     if (AuraEffect * const mastery = caster->GetAuraEffect(115636, EFFECT_0))
-                        if (roll_chance_f(mastery->GetAmount()))
+                        if (roll_chance_f(mastery->GetFloatAmount()))
                             caster->CastSpell(GetCaster(), SPELL_MONK_TIGEREYE_BREW_STACKS, true);
                 }
             }

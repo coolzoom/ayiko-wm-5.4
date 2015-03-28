@@ -2443,13 +2443,6 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 
 
 
-
-
-
-
-
-
-
 /* BEGIN Tortos */
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Spell Scripts
@@ -2459,7 +2452,7 @@ UPDATE creature_template SET ScriptName = "boss_tortos" WHERE entry = 67977;
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Templates
 REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES 
-(66305, 0, 0, 0, 0, 0, 22903, 11686, 0, 0, 'Generic Bunny - PRK (Gigantic AOI)', '', '', 0, 60, 60, 4, 35, 35, 0, 1, 1.14286, 1, 0, 9839, 14339, 0, 42299, 1, 2000, 2000, 1, 33554688, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1048576, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 16048),
+(66305, 0, 0, 0, 0, 0, 22903, 11686, 0, 0, 'Generic Bunny - PRK (Gigantic AOI)', '', '', 0, 60, 60, 4, 35, 35, 0, 1, 1.14286, 1, 0, 9839, 14339, 0, 42299, 1, 2000, 2000, 1, 33554688, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1048576, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 128, '', 16048),
 (67966, 0, 0, 0, 0, 0, 47499, 0, 0, 0, 'Whirl Turtle', '', '', 0, 93, 93, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 7.22, 1, 1, 0, 0, 0, 0, 0, 0, 0, 164, 1, 0, 0, '', 17614),
 (67977, 0, 0, 0, 0, 0, 46559, 0, 0, 0, 'Tortos', '', '', 0, 93, 93, 4, 16, 16, 0, 1, 1.14286, 1, 3, 64839, 78339, 0, 31299, 2, 2000, 2000, 4, 0, 0, 0, 21, 0, 0, 0, 0, 0, 0, 0, 1, 76, 67977, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2115, 3100000, 3500000, '', 0, 3, 1, 330.17, 100, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 652165119, 1, 'boss_tortos', 17614),
 (68497, 0, 0, 0, 0, 0, 46824, 0, 0, 0, 'Vampiric Cave Bat', '', '', 0, 93, 93, 4, 0, 0, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 4, 1, 4.13, 1, 1, 0, 0, 0, 0, 0, 0, 0, 133, 1, 0, 0, '', 1),
@@ -2775,8 +2768,6 @@ INSERT INTO `creature` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMa
 (@CGUID+494, 67966, 1098, 0, 0, 248, 1, 0, 0, 6075.26, 4849.81, -61.1893, 3.54483, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
 (@CGUID+495, 67966, 1098, 0, 0, 248, 1, 0, 0, 6056.23, 4880.12, -61.1894, 4.31428, 86400, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
 
-(@CGUID+613, 66305, 1098, 0, 0, 248, 1, 0, 0, 6050.36, 5115.4, 153.698, 4.79206, 300, 0, 0, 4979, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
-(@CGUID+614, 66305, 1098, 0, 0, 248, 1, 0, 0, 6065.62, 5103.77, 153.908, 4.50539, 300, 0, 0, 4979, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
 (@CGUID+604, 66305, 1098, 0, 0, 248, 1, 0, 0, 6047.33, 5087.78, 153.908, 4.57215, 300, 0, 0, 4979, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
 (@CGUID+605, 66305, 1098, 0, 0, 248, 1, 0, 0, 6026.5, 5106.91, 153.804, 2.42827, 300, 0, 0, 4979, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
 (@CGUID+606, 66305, 1098, 0, 0, 248, 1, 0, 0, 6025.67, 5087.18, 153.356, 0.771854, 300, 0, 0, 4979, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
@@ -2785,9 +2776,9 @@ INSERT INTO `creature` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMa
 (@CGUID+609, 66305, 1098, 0, 0, 248, 1, 0, 0, 6070.26, 5091.01, 153.377, 1.50228, 300, 0, 0, 4979, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
 (@CGUID+610, 66305, 1098, 0, 0, 248, 1, 0, 0, 6044.54, 5143.17, 148.346, 0.0351406, 300, 0, 0, 4979, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
 (@CGUID+611, 66305, 1098, 0, 0, 248, 1, 0, 0, 6055.46, 5150.01, 148.127, 0.559787, 300, 0, 0, 4979, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
-(@CGUID+612, 66305, 1098, 0, 0, 248, 1, 0, 0, 6046.37, 5161.77, 148.22, 2.58847, 300, 0, 0, 4979, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
-
-
+(@CGUID+612, 66305, 1098, 0, 0, 248, 1, 0, 0, 6046.37, 5161.77, 148.22, 2.58847, 300, 0, 0, 4979, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
+(@CGUID+613, 66305, 1098, 0, 0, 248, 1, 0, 0, 6050.36, 5115.4, 153.698, 4.79206, 300, 0, 0, 4979, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
+(@CGUID+614, 66305, 1098, 0, 0, 248, 1, 0, 0, 6065.62, 5103.77, 153.908, 4.50539, 300, 0, 0, 4979, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -2841,6 +2832,7 @@ INSERT INTO areatrigger_scripts VALUES
 (8937,'at_tortos_intro');
 /*---------------------------------------------------------------------------------------------------------------*/
 /* END Tortos */
+
 
 
 
@@ -2923,7 +2915,6 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 (@RAID_DIFF_25R + 70594, 0, 0, 0, 0, 0, 44690, 0, 0, 0, 'Mist Lurker', '', '', 0, 92, 92, 4, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 45000, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 70594, 0, 0, 0, 0, 0, 0, 0, 0, 140682, 140684, 140686, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 3, 1, 35, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 1);
 /*---------------------------------------------------------------------------------------------------------------*/
 
-
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Updates
 -- Creature Trash Mobs Damage, HP, LootId
@@ -2935,11 +2926,11 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 
 -- Immunity and bind bosses
 UPDATE creature_template SET flags_extra = flags_extra | 1, mechanic_immune_mask = 667893759 WHERE entry IN 
-(70212,3170212,3270212,3370212,3470212,3570212,70235,3170235,3270235,3370235,3470235,3570235,70247,3170247,3270247,3370247,3470247,3570247);
+(70212,3170212,3270212,3370212,3470212,3570212,70235,3170235,3270235,3370235,3470235,3570235,70247,3170247,3270247,3370247,3470247,3570247,70252,3170252,3270252,3370252,3470252,3570252);
 
 -- Difficulty entries bosses and Trash Mobs
 UPDATE creature_template SET difficulty_entry_3 = @RAID_DIFF_10N + entry, difficulty_entry_4 = @RAID_DIFF_25N + entry, difficulty_entry_5 = @RAID_DIFF_10H + entry, difficulty_entry_6 = @RAID_DIFF_25H + entry, difficulty_entry_7 = @RAID_DIFF_25R + entry WHERE entry IN 
-(70153,70212,70235,70247,70586,70587,70589,70594);
+(70153,70212,70235,70247,70252,70586,70587,70589,70594);
 
 -- Fungal Growth
 UPDATE creature_template SET LootId = 69388,   dmg_multiplier = 5, Health_Mod = 14755720 / @HP_MOD_92 WHERE entry = @RAID_DIFF_10N + 70153;
@@ -2978,32 +2969,32 @@ UPDATE creature_template SET LootId = 6938802, dmg_multiplier = 7, Health_Mod = 
 
 -- Megaera
 -- Flaming Head
-UPDATE creature_template SET LootId = 0, dmg_multiplier = 11, Health_Mod = 37616816  / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 70212;
-UPDATE creature_template SET LootId = 0, dmg_multiplier = 12, Health_Mod = 48899680  / @HP_MOD_93 WHERE entry = @RAID_DIFF_10H + 70212;
-UPDATE creature_template SET LootId = 0, dmg_multiplier = 14, Health_Mod = 112850448 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25N + 70212;
-UPDATE creature_template SET LootId = 0, dmg_multiplier = 15, Health_Mod = 146703408 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 70212;
-UPDATE creature_template SET LootId = 0, dmg_multiplier = 13, Health_Mod = 78993128  / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 70212;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 10, Health_Mod = 37616816   / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 70212;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 11, Health_Mod = 48899680   / @HP_MOD_93 WHERE entry = @RAID_DIFF_10H + 70212;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 13, Health_Mod = 112850448 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25N + 70212;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 14, Health_Mod = 146703408 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 70212;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 12, Health_Mod = 78993128   / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 70212;
 
 -- Frozen Head
-UPDATE creature_template SET LootId = 0, dmg_multiplier = 11, Health_Mod = 37616816  / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 70235;
-UPDATE creature_template SET LootId = 0, dmg_multiplier = 12, Health_Mod = 48899680  / @HP_MOD_93 WHERE entry = @RAID_DIFF_10H + 70235;
-UPDATE creature_template SET LootId = 0, dmg_multiplier = 14, Health_Mod = 112850448 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25N + 70235;
-UPDATE creature_template SET LootId = 0, dmg_multiplier = 15, Health_Mod = 146703408 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 70235;
-UPDATE creature_template SET LootId = 0, dmg_multiplier = 13, Health_Mod = 78993128  / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 70235;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 10, Health_Mod = 37616816   / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 70235;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 11, Health_Mod = 48899680   / @HP_MOD_93 WHERE entry = @RAID_DIFF_10H + 70235;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 13, Health_Mod = 112850448 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25N + 70235;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 14, Health_Mod = 146703408 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 70235;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 12, Health_Mod = 78993128   / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 70235;
 
 -- Venomous Head
-UPDATE creature_template SET LootId = 0, dmg_multiplier = 11, Health_Mod = 37616816  / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 70247;
-UPDATE creature_template SET LootId = 0, dmg_multiplier = 12, Health_Mod = 48899680  / @HP_MOD_93 WHERE entry = @RAID_DIFF_10H + 70247;
-UPDATE creature_template SET LootId = 0, dmg_multiplier = 14, Health_Mod = 112850448 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25N + 70247;
-UPDATE creature_template SET LootId = 0, dmg_multiplier = 15, Health_Mod = 146703408 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 70247;
-UPDATE creature_template SET LootId = 0, dmg_multiplier = 13, Health_Mod = 78993128  / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 70247;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 10, Health_Mod = 37616816  / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 70247;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 11, Health_Mod = 48899680  / @HP_MOD_93 WHERE entry = @RAID_DIFF_10H + 70247;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 13, Health_Mod = 112850448 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25N + 70247;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 14, Health_Mod = 146703408 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 70247;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 12, Health_Mod = 78993128   / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 70247;
 
 -- Arcane Head
-UPDATE creature_template SET LootId = 0, dmg_multiplier = 11, Health_Mod = 37616816  / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 70252;
-UPDATE creature_template SET LootId = 0, dmg_multiplier = 12, Health_Mod = 48899680  / @HP_MOD_93 WHERE entry = @RAID_DIFF_10H + 70252;
-UPDATE creature_template SET LootId = 0, dmg_multiplier = 14, Health_Mod = 112850448 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25N + 70252;
-UPDATE creature_template SET LootId = 0, dmg_multiplier = 15, Health_Mod = 146703408 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 70252;
-UPDATE creature_template SET LootId = 0, dmg_multiplier = 13, Health_Mod = 78993128  / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 70252;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 10, Health_Mod = 37616816  / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 70252;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 11, Health_Mod = 48899680  / @HP_MOD_93 WHERE entry = @RAID_DIFF_10H + 70252;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 13, Health_Mod = 112850448 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25N + 70252;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 14, Health_Mod = 146703408 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 70252;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 12, Health_Mod = 78993128   / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 70252;
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -3530,6 +3521,115 @@ INSERT INTO `gameobject` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phase
 /*---------------------------------------------------------------------------------------------------------------*/
 /* END Megaera */
 
+
+
+
+
+/* BEGIN Ji-Kun */
+/*---------------------------------------------------------------------------------------------------------------*/
+-- Spell Scripts
+DELETE FROM `spell_script_names` WHERE  `spell_id` = 140094;
+INSERT INTO `spell_script_names` SET `spell_id` = 140094 ,`ScriptName` = 'spell_infected_talons';
+
+UPDATE `creature_template` SET `ScriptName` = "young_hatchling_jikun" WHERE `entry` = 68192;
+UPDATE `creature_template` SET `ScriptName` = "jikun_beam_target" WHERE `entry` = 68208;
+UPDATE `creature_template` SET `ScriptName` = "egg_of_jikun" WHERE `entry` IN (68194,68202,69628);
+UPDATE `creature_template` SET `ScriptName` = "boss_jikun" WHERE entry = 69712;
+UPDATE `creature_template` SET `ScriptName` = "npc_juvenile" WHERE `entry`= 70095;
+UPDATE `creature_template` SET `ScriptName` = "npc_jikun_feed" WHERE `entry` IN (68178,70130);
+UPDATE `creature_template` SET `ScriptName` = "pool_of_feed_dmg" WHERE `entry` IN (68188,70216);
+UPDATE `creature_template` SET `ScriptName` = "npc_jikun_teleport" WHERE `entry`= 70640;
+/*---------------------------------------------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------------------------------------------*/
+-- Templates
+REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES 
+(68178, 0, 0, 0, 0, 0, 48142, 0, 0, 0, 'Feed', '', '', 0, 1, 1, 4, 35, 35, 0, 1, 1.14286, 1, 0, 9839, 14339, 0, 42299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1074790416, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'npc_jikun_feed', 17614),
+(68188, 0, 0, 0, 0, 0, 46710, 42428, 0, 0, 'Feed Pool', '', '', 0, 1, 1, 4, 35, 35, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1074790400, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'pool_of_feed_dmg', 17614),
+(68192, 0, 0, 0, 0, 0, 46680, 0, 0, 0, 'Hatchling', '', '', 0, 92, 92, 4, 14, 14, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'young_hatchling_jikun', 17614),
+(68194, 0, 0, 0, 0, 0, 46683, 0, 0, 0, 'Young Egg of Ji-Kun', '', '', 0, 92, 92, 4, 14, 14, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'egg_of_jikun', 17614),
+(68202, 0, 0, 0, 0, 0, 47701, 0, 0, 0, 'Ji-Kun Fledgling\'s Egg', '', '', 0, 92, 92, 4, 14, 14, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 100, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'egg_of_jikun', 17614),
+(68208, 0, 0, 0, 0, 0, 46675, 0, 0, 0, 'Ji-Kun Dummy', '', '', 0, 1, 1, 4, 14, 14, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2097260, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 100, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 128, 'jikun_beam_target', 17614),
+(69628, 0, 0, 0, 0, 0, 47702, 0, 0, 0, 'Mature Egg of Ji-Kun', '', '', 0, 92, 92, 4, 14, 14, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'egg_of_jikun', 17614),
+(69712, 0, 0, 0, 0, 0, 46675, 0, 0, 0, 'Ji-Kun', '', '', 0, 93, 93, 4, 14, 14, 0, 1, 1.14286, 1, 3, 57000, 70000, 0, 120000, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2097260, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3000000, 3100000, '', 0, 3, 1, 560, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 667893759, 0, 'boss_jikun', 17614),
+(70095, 0, 0, 0, 0, 0, 47709, 0, 0, 0, 'Juvenile', '', '', 0, 92, 92, 4, 14, 14, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'npc_juvenile', 17614),
+(70130, 0, 0, 0, 0, 0, 48210, 0, 0, 0, 'Feed', '', '', 0, 1, 1, 4, 35, 35, 0, 1, 1.14286, 1, 0, 9839, 14339, 0, 42299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1074790400, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'npc_jikun_feed', 17614),
+(70216, 0, 0, 0, 0, 0, 46710, 0, 0, 0, 'Feed Pool', '', '', 0, 1, 1, 4, 35, 35, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1074790400, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'pool_of_feed_dmg', 17614),
+(70640, 0, 0, 0, 0, 0, 46675, 0, 0, 0, 'Ji-Kun Area Trigger Dummy [DNT]', '', '', 0, 1, 1, 4, 35, 35, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2097260, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 100, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 128, 'npc_jikun_teleport', 17614),
+
+(@RAID_DIFF_10N + 69712, 0, 0, 0, 0, 0, 46675, 0, 0, 0, 'Ji-Kun', '', '', 0, 93, 93, 4, 14, 14, 0, 1, 1.14286, 1, 3, 57000, 70000, 0, 120000, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2097260, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3000000, 3100000, '', 0, 3, 1, 560, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 667893759, 0, 'boss_jikun', 17614),
+
+(@RAID_DIFF_10H + 69712, 0, 0, 0, 0, 0, 46675, 0, 0, 0, 'Ji-Kun', '', '', 0, 93, 93, 4, 14, 14, 0, 1, 1.14286, 1, 3, 57000, 70000, 0, 120000, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2097260, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3000000, 3100000, '', 0, 3, 1, 560, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 667893759, 0, 'boss_jikun', 17614),
+
+(@RAID_DIFF_25N + 69712, 0, 0, 0, 0, 0, 46675, 0, 0, 0, 'Ji-Kun', '', '', 0, 93, 93, 4, 14, 14, 0, 1, 1.14286, 1, 3, 57000, 70000, 0, 120000, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2097260, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3000000, 3100000, '', 0, 3, 1, 560, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 667893759, 0, 'boss_jikun', 17614),
+
+(@RAID_DIFF_25H + 69712, 0, 0, 0, 0, 0, 46675, 0, 0, 0, 'Ji-Kun', '', '', 0, 93, 93, 4, 14, 14, 0, 1, 1.14286, 1, 3, 57000, 70000, 0, 120000, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2097260, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3000000, 3100000, '', 0, 3, 1, 560, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 667893759, 0, 'boss_jikun', 17614),
+
+(@RAID_DIFF_25R + 69712, 0, 0, 0, 0, 0, 46675, 0, 0, 0, 'Ji-Kun', '', '', 0, 93, 93, 4, 14, 14, 0, 1, 1.14286, 1, 3, 57000, 70000, 0, 120000, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2097260, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3000000, 3100000, '', 0, 3, 1, 560, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 667893759, 0, 'boss_jikun', 17614);
+/*---------------------------------------------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------------------------------------------*/
+-- Updates
+-- Creature Trash Mobs Damage, HP, LootId
+-- Base HP Gamepedia Raid 25N
+-- 25R -10%
+-- 25H +25%
+-- 10N (BASE HP: 25 = X : 10)
+-- 10H=(10N+25%)
+
+-- Immunity and bind bosses
+UPDATE creature_template SET flags_extra = flags_extra | 1, mechanic_immune_mask = 667893759 WHERE entry IN 
+(69712,3169712,3269712,3369712,3469712,3569712);
+
+-- Difficulty entries bosses and Trash Mobs
+UPDATE creature_template SET difficulty_entry_3 = @RAID_DIFF_10N + entry, difficulty_entry_4 = @RAID_DIFF_25N + entry, difficulty_entry_5 = @RAID_DIFF_10H + entry, difficulty_entry_6 = @RAID_DIFF_25H + entry, difficulty_entry_7 = @RAID_DIFF_25R + entry WHERE entry IN 
+(69712);
+
+-- Jin-Kun
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 11, Health_Mod = 244236720   / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 69712;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 12, Health_Mod = 366355072   / @HP_MOD_93 WHERE entry = @RAID_DIFF_10H + 69712;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 14, Health_Mod = 732710144   / @HP_MOD_93 WHERE entry = @RAID_DIFF_25N + 69712;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 15, Health_Mod = 1099065216 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 69712;
+UPDATE creature_template SET LootId = 0, dmg_multiplier = 13, Health_Mod = 402990592   / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 69712;
+/*---------------------------------------------------------------------------------------------------------------*
+/
+/*---------------------------------------------------------------------------------------------------------------*/
+-- Trash Mobs SAI
+/*---------------------------------------------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------------------------------------------*/
+-- Jin-Kun Loots
+-- 10 Normal
+-- 10 Heroic
+-- 25 Normal
+-- 25 Heroic
+-- 25 LFR
+/*---------------------------------------------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------------------------------------------*/
+-- Creature Spawn
+INSERT INTO `creature` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`,`protec_anti_doublet`) VALUES
+(@CGUID+615, 70640, 1098, 0, 0, 248, 1, 0, 0, 6099.37, 4236.19, -3.7873, 4.17527, 86400, 0, 0, 100, 0, 0, 0, 0, 33554432, 0, 0, 0, NULL),
+(@CGUID+616, 68202, 1098, 0, 0, 248, 1, 0, 0, 6147, 4318, -31.1, 1.08972, 86400, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
+(@CGUID+617, 69712, 1098, 0, 0, 248, 1, 0, 0, 6192.68, 4268.42, -70.5738, 1.08972, 604800, 0, 0, 244236720, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
+/*---------------------------------------------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------------------------------------------*/
+-- Creature Speeches
+/*---------------------------------------------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------------------------------------------*/
+-- Gameobjects templates
+REPLACE INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `faction`, `flags`, `size`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `data0`, `data1`, `data2`, `data3`, `data4`, `data5`, `data6`, `data7`, `data8`, `data9`, `data10`, `data11`, `data12`, `data13`, `data14`, `data15`, `data16`, `data17`, `data18`, `data19`, `data20`, `data21`, `data22`, `data23`, `AIName`, `ScriptName`, `WDBVerified`) VALUES 
+(218543, 22, 13599, 'Feather of Ji-Kun', '', '', '', 0, 0, 1, 0, 0, 0, 0, 0, 0, 140013, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 17658);
+/*---------------------------------------------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------------------------------------------*/
+-- Gameobjects spawns
+INSERT INTO `gameobject` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`spawntimesecs`,`animprogress`,`state`,`isActive`,`protect_anti_doublet`) VALUES
+(@OGUID+39, 218543, 1098, 0, 0, 248, 1, 6132.86, 4343.46, -31.863, 2.739, 0, 0, 0, 0, -604800, 0, 0, 0, NULL);
+/*---------------------------------------------------------------------------------------------------------------*/
+/* END Ji-Kun */
 
 
 

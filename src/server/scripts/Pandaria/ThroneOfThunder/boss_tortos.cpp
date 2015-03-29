@@ -306,6 +306,9 @@ class boss_tortos : public CreatureScript
                         case EVENT_FURIOUS_STONE_BREATH:
                             Talk(ANN_FURIOUS_BREATH);
 				            DoCast(me, SPELL_FURIOUS_STONE_BREATH);
+                            energyRegen.RescheduleEvent(EVENT_REGEN_FURY_POWER, 5000);
+                            DoCast(me, SPELL_ZERO_POWER, true);
+                            me->SetPower(POWER_ENERGY, 0);
                             break;
 
                         case EVENT_RESET_CAST:
@@ -351,6 +354,11 @@ class boss_tortos : public CreatureScript
 // Whirl Turtle 67966
 class npc_whirl_turtle : public CreatureScript
 {
+    enum events : uint32
+    {
+        EVENT_NONE,
+        EVENT_MOVE
+    };
     public:
         npc_whirl_turtle() : CreatureScript("npc_whirl_turtle") { }
 
@@ -364,7 +372,33 @@ class npc_whirl_turtle : public CreatureScript
             {
                 Reset();
                 me->SetReactState(REACT_PASSIVE);
-                me->GetMotionMaster()->MoveRandom(50.0f);
+                events.ScheduleEvent(EVENT_MOVE, 200 + rand() % 500);
+            }
+
+            void Move()
+            {
+                if (Creature* pTortos= ObjectAccessor::GetCreature(*me, me->GetInstanceScript()->GetData64(BOSS_TORTOS)))
+                {
+                    if (Unit* pTarget = pTortos->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 70.f, true))
+                    {
+                        me->GetMotionMaster()->MovementExpired();
+                        me->GetMotionMaster()->MovePoint(2, *pTarget);
+
+                        events.ScheduleEvent(EVENT_MOVE, 5000 + rand() % 2000);
+                        return;
+                    }
+                }
+                else
+                    me->GetMotionMaster()->MoveRandom(70.f);
+            }
+
+            void MovementInform(uint32 uiType, uint32 uiPointId) override
+            {
+                if (uiType != POINT_MOTION_TYPE)
+                    return;
+
+                if (uiPointId == 2)
+                    events.RescheduleEvent(EVENT_MOVE, 200);
             }
 
             void Reset()
@@ -383,7 +417,7 @@ class npc_whirl_turtle : public CreatureScript
 
                     float x, y, z;
                     caster->GetClosePoint(x, y, z, caster->GetObjectSize() / 3, 50.0f);
-                    me->GetMotionMaster()->MoveCharge(x, y, z, 20.0f);
+                    me->GetMotionMaster()->MoveCharge(x, y, z+2, 20.0f);
                     me->DespawnOrUnsummon(6000);
                 }
             }
@@ -397,6 +431,16 @@ class npc_whirl_turtle : public CreatureScript
 
                     me->AddAura(SPELL_SHELL_BLOCK, me);
                     shellBlocked = true;
+                    return;
+                }
+
+                events.Update(diff);
+
+                switch (events.ExecuteEvent())
+                {
+                case EVENT_MOVE:
+                    Move();
+                    break;
                 }
             }
         };
@@ -582,6 +626,63 @@ class spell_rockfall_trigger_tortos : public SpellScriptLoader
         }
 };
 
+class spell_rockfall_damage : public SpellScriptLoader
+{
+    enum eSpells : uint32
+    {
+        SPELL_ROCKFALL_LARGE_AOE        = 134476
+    };
+public:
+    spell_rockfall_damage() : SpellScriptLoader("spell_rockfall_damage") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void HandleOnCast()
+        {
+            if (Unit* caster = GetCaster())
+                caster->CastSpell(caster, SPELL_ROCKFALL_LARGE_AOE, true);
+        }
+
+        void Register()
+        {
+            OnCast += SpellCastFn(spell_impl::HandleOnCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
+class spell_rockfall_aoe_damage : public SpellScriptLoader
+{
+public:
+    spell_rockfall_aoe_damage() : SpellScriptLoader("spell_rockfall_aoe_damage") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void SelectTargets(std::list<WorldObject*>&targets)
+        {
+            targets.remove_if(notPlayerPredicate());
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_impl::SelectTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
 // Spinning Shell 140443
 class spell_spinning_shell : public SpellScriptLoader
 {
@@ -608,7 +709,7 @@ class spell_spinning_shell : public SpellScriptLoader
                 if (!TargetList.empty())
                 {
                     for (Unit* pUnit : TargetList)
-                        caster->CastSpell(pUnit, SPELL_SPINNING_SHELL_DMG, true);
+                        pUnit->CastSpell(pUnit, SPELL_SPINNING_SHELL_DMG, true);
                 }
             }
 
@@ -753,6 +854,8 @@ class spell_tortos_quake_stomp : public SpellScriptLoader
                 if (!caster || !target)
                     return;
 
+                uint32 maxHealth = target->GetMaxHealth();
+
                 SetHitDamage(target->CountPctFromMaxHealth(sSpellMgr->GetSpellInfo(SPELL_QUAKE_STOMP, caster->GetMap()->GetDifficulty())->Effects[0].BasePoints));
             }
 
@@ -809,6 +912,10 @@ static const Position pMidBridge = { 6046.22f, 5100.34f, 154.f };
 // Lei Shen - tortos intro 70437
 class npc_lei_shen_tortos : public CreatureScript
 {
+    enum eTimers : uint32
+    {
+        EVENT_DESTROY_BRIDGE        = 26
+    };
     public:
         npc_lei_shen_tortos() : CreatureScript("npc_lei_shen_tortos") { }
 
@@ -828,9 +935,7 @@ class npc_lei_shen_tortos : public CreatureScript
 
                 if (me->GetInstanceScript()->GetData(TYPE_TORTOS_INTRO) == DONE)
                 {
-                    if (GameObject* bridge = me->FindNearestGameObject(GO_TORTOS_BRIDGE, 300.0f))
-                        bridge->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);
-
+                    events.ScheduleEvent(EVENT_DESTROY_BRIDGE, 200);
                     me->SetReactState(REACT_PASSIVE);
                     me->SetVisible(false);
                 }
@@ -858,6 +963,11 @@ class npc_lei_shen_tortos : public CreatureScript
                 {
                     switch (eventId)
                     {
+                    case EVENT_DESTROY_BRIDGE:
+                        if (GameObject* bridge = me->FindNearestGameObject(GO_TORTOS_BRIDGE, 300.0f))
+                            bridge->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);
+                        me->setActive(false);
+                        break;
                     case EVENT_LEI_SHEN_SEND_CINEMATIC:
                         if (Creature* pCreature = me->SummonCreature(NPC_BRIDGE_TRIGGER, pMidBridge, TEMPSUMMON_TIMED_DESPAWN, 60000))
                         {
@@ -999,7 +1109,7 @@ public:
             if (Unit* Owner = GetOwner()->ToUnit())
             {
                 Owner->SetControlled(false, UNIT_STATE_STUNNED);
-                Owner->NearTeleportTo(6041.180f, 5100.50f, -42.059f, 4.752f);
+                Owner->NearTeleportTo(6041.22f, 5085.77f, -42.f, 4.81f);
 
                 Owner->RemoveAurasDueToSpell(130);
             }
@@ -1008,6 +1118,37 @@ public:
         void Register()
         {
             OnEffectRemove += AuraEffectRemoveFn(aura_impl::HandleAuraEffectRemove, EFFECT_1, SPELL_AURA_SCREEN_EFFECT, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new aura_impl();
+    }
+};
+
+class spell_waterspout_aura : public SpellScriptLoader
+{
+public:
+    spell_waterspout_aura() : SpellScriptLoader("spell_waterspout_aura") {}
+
+    class aura_impl : public AuraScript
+    {
+        PrepareAuraScript(aura_impl);
+
+        void HandleOnPeriodic(AuraEffect const* aurEff)
+        {
+            PreventDefaultAction();
+
+            if (Unit* pOwner = GetOwner()->ToUnit())
+            {
+                pOwner->CastSpell(pOwner, 139165, true);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(aura_impl::HandleOnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
         }
     };
 
@@ -1057,6 +1198,49 @@ public:
     }
 };
 
+class sat_waterspout : public SpellAreaTriggerScript
+{
+    enum eSpells : uint32
+    {
+        SPELL_WATERSPOUT_TRIGGER        = 139158,
+        SPELL_WATERSPOUT_SPOUT          = 139159,
+    };
+public:
+    sat_waterspout() : SpellAreaTriggerScript("sat_waterspout") {}
+
+    class sat_impl : public IAreaTriggerAura
+    {
+        bool CheckTriggering(WorldObject* triggering) override
+        {
+            Player* pPlayer = triggering->ToPlayer();
+
+            if (!pPlayer)
+                return false;
+            
+            if (pPlayer->HasAura(SPELL_WATERSPOUT_TRIGGER))
+                return false;
+
+            return pPlayer->IsAlive() && (m_target->GetExactDist2d(pPlayer) < m_range);
+        }
+
+        void OnTriggeringApply(WorldObject* triggering)
+        {
+            Unit* auraHolder = m_target->ToUnit();
+
+            if (!auraHolder)
+                return;
+
+            if (!auraHolder->HasAura(SPELL_WATERSPOUT_SPOUT))
+                auraHolder->AddAura(SPELL_WATERSPOUT_SPOUT, auraHolder);
+        }
+    };
+
+    IAreaTrigger* GetInterface() const override
+    {
+        return new sat_impl();
+    }
+};
+
 void AddSC_boss_tortos()
 {
     new boss_tortos();
@@ -1066,6 +1250,8 @@ void AddSC_boss_tortos()
     new npc_humming_crystal();
     new spell_call_of_tortos();
     new spell_rockfall_trigger_tortos();
+    new spell_rockfall_damage();
+    new spell_rockfall_aoe_damage();
     new spell_spinning_shell();
     new spell_drain_the_weak();
     new spell_crystal_shell_aura();
@@ -1073,5 +1259,7 @@ void AddSC_boss_tortos()
     new npc_lei_shen_tortos();
     new spell_lei_shen_tortos_bridge_call_lightning();
     new spell_teleport_all();
+    new spell_waterspout_aura();
     new AreaTrigger_at_tortos_intro();
+    new sat_waterspout();
 }

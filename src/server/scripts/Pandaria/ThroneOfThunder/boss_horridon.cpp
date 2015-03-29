@@ -645,6 +645,16 @@ public:
             jumpPositions   = NULL;
         }
 
+        bool IsWipe()
+        {
+            if (Creature* pHorridon = GetHorridon(me))
+            {
+                return (pHorridon->IsInCombat() && pHorridon->getThreatManager().isThreatListEmpty());
+            }
+
+            return true;
+        }
+
         void DoAction(const int32 iAction) override
         {
             switch (iAction)
@@ -680,6 +690,8 @@ public:
             }
         }
 
+        void ForceHorridonToEvade();
+
         void ResetRequiredCreatures()
         {
             std::list<Creature*> resets;
@@ -698,6 +710,9 @@ public:
 
         void UpdateAI(const uint32 uiDiff)
         {
+            if (IsWipe())
+                ForceHorridonToEvade();
+
             if (uiTrashPhase == MAX_TRASH_PHASE)
                 return;
 
@@ -1230,7 +1245,7 @@ public:
             me->GetMotionMaster()->Clear(false);
             me->GetMotionMaster()->MovePoint(5000, x, y, z);
 
-            ScriptedAI::EnterEvadeMode();
+            BossAI::EnterEvadeMode();
         }
 
         void EnterCombat(Unit *pVictim)
@@ -1417,8 +1432,17 @@ public:
         return new boss_horridon_AI(pCreature);
     }
 };
+
 typedef boss_horridon::boss_horridon_AI HorridonAI;
 
+void npc_horridon_event_helper::npc_horridon_event_helper_AI::ForceHorridonToEvade()
+{
+    if (Creature* pHorridon = GetHorridon(me))
+    {
+        if (HorridonAI* pAI = dynamic_cast<HorridonAI*>(pHorridon->AI()))
+            pAI->EnterEvadeMode();
+    }
+}
 // Jalak AI
 class mob_war_god_jalak : public CreatureScript
 {

@@ -3021,7 +3021,7 @@ class spell_pri_echo_of_light : public SpellScriptLoader
                     if (AuraEffect* eff = aur->GetEffect(0))
                     {
                         int32 amount = heal * eff->GetFloatAmount() / 100;
-                        amount /= 7; // tick count
+                        amount /= 6; // tick count
                         if (amount)
                             caster->CastCustomSpell(target, SPELL_PRIEST_ECHO_OF_LIGHT_HEAL, &amount, NULL, NULL, true);
                     }

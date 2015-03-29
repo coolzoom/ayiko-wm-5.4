@@ -2457,9 +2457,10 @@ UPDATE creature_template SET ScriptName = "boss_tortos" WHERE entry = 67977;
 -- Templates
 REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES 
 (66305, 0, 0, 0, 0, 0, 22903, 11686, 0, 0, 'Generic Bunny - PRK (Gigantic AOI)', '', '', 0, 60, 60, 4, 35, 35, 0, 1, 1.14286, 1, 0, 9839, 14339, 0, 42299, 1, 2000, 2000, 1, 33554688, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1048576, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 128, '', 16048),
-(67966, 0, 0, 0, 0, 0, 47499, 0, 0, 0, 'Whirl Turtle', '', '', 0, 93, 93, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 7.22, 1, 1, 0, 0, 0, 0, 0, 0, 0, 164, 1, 0, 0, '', 17614),
+(67966, 0, 0, 0, 0, 0, 47499, 0, 0, 0, 'Whirl Turtle', '', '', 0, 93, 93, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2097256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 7.22, 1, 1, 0, 0, 0, 0, 0, 0, 0, 164, 1, 0, 0, 'npc_whirl_turtle', 17614),
 (67977, 0, 0, 0, 0, 0, 46559, 0, 0, 0, 'Tortos', '', '', 0, 93, 93, 4, 16, 16, 0, 1, 1.14286, 1, 3, 64839, 78339, 0, 31299, 2, 2000, 2000, 4, 0, 0, 0, 21, 0, 0, 0, 0, 0, 0, 0, 1, 76, 67977, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2115, 3100000, 3500000, '', 0, 3, 1, 330.17, 100, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 652165119, 1, 'boss_tortos', 17614),
-(68497, 0, 0, 0, 0, 0, 46824, 0, 0, 0, 'Vampiric Cave Bat', '', '', 0, 93, 93, 4, 0, 0, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 4, 1, 4.13, 1, 1, 0, 0, 0, 0, 0, 0, 0, 133, 1, 0, 0, '', 1),
+(68219, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Rockfall', '', '', 0, 93, 93, 4, 16, 16, 0, 1, 1.14286, 1, 0, 9839, 14339, 0, 42299, 1, 2000, 2000, 1, 33554436, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 128, 'npc_rockfall_tortos', 17614),
+(68497, 0, 0, 0, 0, 0, 46824, 0, 0, 0, 'Vampiric Cave Bat', '', '', 0, 93, 93, 4, 0, 0, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 4, 1, 4.13, 1, 1, 0, 0, 0, 0, 0, 0, 0, 133, 1, 0, 0, 'npc_vampiric_cave_bat', 1),
 (69351, 0, 0, 0, 0, 0, 48248, 0, 0, 0, 'Greater Cave Bat', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 4, 1, 30, 1, 1, 0, 0, 0, 0, 0, 0, 0, 130, 1, 0, 0, '', 17614),
 (69352, 0, 0, 0, 0, 0, 46824, 0, 0, 0, 'Vampiric Cave Bat', '', '', 0, 92, 92, 4, 16, 16, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 4, 1, 4.13, 1, 1, 0, 0, 0, 0, 0, 0, 0, 133, 1, 0, 0, '', 17614),
 (70147, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Waterspout', '', '', 0, 93, 93, 4, 35, 35, 0, 1, 1.14286, 1, 0, 9839, 14339, 0, 42299, 1, 2000, 2000, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 128, '', 17614),
@@ -2790,7 +2791,14 @@ INSERT INTO `creature` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMa
 
 REPLACE INTO spell_script_names VALUES
 (139853, 'spell_lei_shen_tortos_bridge_call_lightning'),
-(139852, 'spell_teleport_all');
+(139852, 'spell_teleport_all'),
+(136294, 'spell_call_of_tortos'),
+(134364, 'spell_rockfall_trigger_tortos'),
+(140443, 'spell_spinning_shell'),
+(135103, 'spell_drain_the_weak'),
+(137633, 'spell_crystal_shell_aura'),
+(134920, 'spell_quake_stomp');
+
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -2822,7 +2830,7 @@ INSERT INTO `gameobject` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phase
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Tortos Conditions
-DELETE FROM `conditions` WHERE `SourceEntry` IN (134091, 136294, 136431, 137433, 137442, 137443, 137444);
+DELETE FROM conditions WHERE sourceentry IN (134091, 136431, 136294);
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES 
 ('13','1','134091','0','0','31','0','3','67977','0','0','0','','Tortos'),
 ('13','1','136431','0','0','31','0','3','67977','0','0','0','','Tortos'),

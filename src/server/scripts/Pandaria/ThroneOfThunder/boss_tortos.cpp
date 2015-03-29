@@ -550,18 +550,23 @@ class spell_rockfall_trigger_tortos : public SpellScriptLoader
         {
             PrepareSpellScript(spell_rockfall_trigger_tortos_SpellScript);
 
+            void SelectTargets(std::list<WorldObject*>&targets)
+            {
+                targets.remove_if(notPlayerPredicate());
+
+                if (targets.size() > 1)
+                    Trinity::Containers::RandomResizeList(targets, 1);
+            }
+
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
                 Unit* caster = GetCaster();
+                Unit* target = GetHitUnit();
 
-                if (!caster)
+                if (!caster || !target)
                     return;
 
-                if (!caster->ToCreature())
-                    return;
-
-                if (Unit* target = caster->ToCreature()->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 80.0f, true))
-                    caster->SummonCreature(NPC_ROCKFALL_TORTOS, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN);
+                caster->CastSpell(target, GetSpellInfo()->Effects[EFFECT_0].BasePoints, true);
             }
 
             void Register()

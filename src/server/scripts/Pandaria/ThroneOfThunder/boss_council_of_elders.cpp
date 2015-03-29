@@ -2139,7 +2139,7 @@ public:
                         me->DisappearAndDie();
                     }
                     else
-                        events.RescheduleEvent(EVENT_MOVE_COUNCILLOR, 0);
+                        events.RescheduleEvent(EVENT_MOVE_COUNCILLOR, 200);
                 }
             }
 

@@ -873,7 +873,7 @@ class npc_lei_shen_tortos : public CreatureScript
                                             slowfall->SetMaxDuration(3 * MINUTE*IN_MILLISECONDS);
                                             slowfall->SetDuration(3 * MINUTE*IN_MILLISECONDS);
                                         }
-                                        //player->SendCinematicStart(271);
+                                        player->SendCinematicStart(271);
                                     }
                                 }
                             }

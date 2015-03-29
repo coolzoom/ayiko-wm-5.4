@@ -3605,8 +3605,11 @@ void SpellMgr::LoadSpellCustomAttr()
             case 136769:    // Charge
                 spellInfo->Effects[EFFECT_0].TriggerSpell = 0;       
                 break;
-            case 139852:
+            case 139852:    // Teleport all to depths
                 spellInfo->Effects[EFFECT_2].Effect = 0;
+                break;
+            case 134920:    // Quake Stomp
+                spellInfo->Effects[EFFECT_2].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
                 break;
 #if 1 // Gilneas
                 case 68087:

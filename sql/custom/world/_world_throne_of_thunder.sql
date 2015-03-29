@@ -2794,6 +2794,7 @@ REPLACE INTO spell_script_names VALUES
 (139852, 'spell_teleport_all'),
 (136294, 'spell_call_of_tortos'),
 (134364, 'spell_rockfall_trigger_tortos'),
+(140431, 'spell_rockfall_trigger_tortos'),
 (140443, 'spell_spinning_shell'),
 (135103, 'spell_drain_the_weak'),
 (137633, 'spell_crystal_shell_aura'),

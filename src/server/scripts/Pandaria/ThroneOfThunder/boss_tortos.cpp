@@ -274,7 +274,7 @@ class boss_tortos : public CreatureScript
                 {
                 case EVENT_REGEN_FURY_POWER:
                     me->SetPower(POWER_ENERGY, me->GetPower(POWER_ENERGY) + 1);
-                    events.ScheduleEvent(EVENT_REGEN_FURY_POWER, TIMER_REGEN_FURY_POWER);
+                    energyRegen.ScheduleEvent(EVENT_REGEN_FURY_POWER, TIMER_REGEN_FURY_POWER);
                     break;
                 case EVENT_BERSERK:
                     DoCast(me, SPELL_BERSERK);
@@ -558,7 +558,7 @@ class spell_rockfall_trigger_tortos : public SpellScriptLoader
                     Trinity::Containers::RandomResizeList(targets, 1);
             }
 
-            void HandleDummy(SpellEffIndex /*effIndex*/)
+            void HandleDummy(SpellEffIndex effIndex)
             {
                 Unit* caster = GetCaster();
                 Unit* target = GetHitUnit();
@@ -571,6 +571,7 @@ class spell_rockfall_trigger_tortos : public SpellScriptLoader
 
             void Register()
             {
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_rockfall_trigger_tortos_SpellScript::SelectTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
                 OnEffectHitTarget += SpellEffectFn(spell_rockfall_trigger_tortos_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
@@ -999,6 +1000,8 @@ public:
             {
                 Owner->SetControlled(false, UNIT_STATE_STUNNED);
                 Owner->NearTeleportTo(6041.180f, 5100.50f, -42.059f, 4.752f);
+
+                Owner->RemoveAurasDueToSpell(130);
             }
         }
 

@@ -2517,11 +2517,11 @@ UPDATE creature_template SET difficulty_entry_3 = @RAID_DIFF_10N + entry, diffic
 UPDATE creature_template SET flags_extra = flags_extra | 1, mechanic_immune_mask = 667893759 WHERE entry IN (67977,3167977,3267977,3367977,3467977,3567977);
 
 -- Whirl Turtle
-UPDATE creature_template SET LootId = 0, dmg_multiplier = 5, Health_Mod = 4199999  / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 67966;
-UPDATE creature_template SET LootId = 0, dmg_multiplier = 6, Health_Mod = 5249999  / @HP_MOD_93 WHERE entry = @RAID_DIFF_10H + 67966;
-UPDATE creature_template SET LootId = 0, dmg_multiplier = 8, Health_Mod = 10499999 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25N + 67966;
-UPDATE creature_template SET LootId = 0, dmg_multiplier = 9, Health_Mod = 13124999 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 67966;
-UPDATE creature_template SET LootId = 0, dmg_multiplier = 7, Health_Mod = 9449999  / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 67966;
+UPDATE creature_template SET InhabitType = 1, speed_walk = 1.5, speed_run = 1.5, LootId = 0, dmg_multiplier = 5, Health_Mod = 4199999  / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 67966;
+UPDATE creature_template SET InhabitType = 1, speed_walk = 1.5, speed_run = 1.5, LootId = 0, LootId = 0, dmg_multiplier = 6, Health_Mod = 5249999  / @HP_MOD_93 WHERE entry = @RAID_DIFF_10H + 67966;
+UPDATE creature_template SET InhabitType = 1, speed_walk = 1.5, speed_run = 1.5, LootId = 0, LootId = 0, dmg_multiplier = 8, Health_Mod = 10499999 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25N + 67966;
+UPDATE creature_template SET InhabitType = 1, speed_walk = 1.5, speed_run = 1.5, LootId = 0, LootId = 0, dmg_multiplier = 9, Health_Mod = 13124999 / @HP_MOD_93 WHERE entry = @RAID_DIFF_25H + 67966;
+UPDATE creature_template SET InhabitType = 1, speed_walk = 1.5, speed_run = 1.5, LootId = 0, dmg_multiplier = 7, Health_Mod = 9449999  / @HP_MOD_93 WHERE entry = @RAID_DIFF_25R + 67966;
 
 -- Vampiric Cave Bat
 UPDATE creature_template SET LootId = 0, dmg_multiplier = 5, Health_Mod = 3988400  / @HP_MOD_93 WHERE entry = @RAID_DIFF_10N + 68497;

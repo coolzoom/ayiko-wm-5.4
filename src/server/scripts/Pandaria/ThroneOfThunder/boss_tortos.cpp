@@ -122,7 +122,7 @@ enum Timers
     TIMER_QUAKE_STOMP_S         = 47000,
 
     TIMER_FURIOUS_STONE_BREATH  = 500,
-    TIMER_RESET_CAST            = 6500,
+    TIMER_RESET_CAST            = 6000,
 
     TIMER_SNAPPING_BITE_N       = 12000,
     TIMER_SNAPPING_BITE_H       = 8000,
@@ -279,6 +279,9 @@ class boss_tortos : public CreatureScript
                 case EVENT_BERSERK:
                     DoCast(me, SPELL_BERSERK);
                     break;
+                case EVENT_RESET_CAST:
+                    breathScheduled = false;
+                    break;
                 }
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
@@ -287,7 +290,6 @@ class boss_tortos : public CreatureScript
                 if (me->GetPower(POWER_ENERGY) == 100 && !breathScheduled)
                 {
 				    events.ScheduleEvent(EVENT_FURIOUS_STONE_BREATH, TIMER_FURIOUS_STONE_BREATH);
-				    events.ScheduleEvent(EVENT_RESET_CAST, TIMER_RESET_CAST);
 					breathScheduled = true;
                 }
 
@@ -307,12 +309,7 @@ class boss_tortos : public CreatureScript
                             Talk(ANN_FURIOUS_BREATH);
 				            DoCast(me, SPELL_FURIOUS_STONE_BREATH);
                             energyRegen.RescheduleEvent(EVENT_REGEN_FURY_POWER, 5000);
-                            DoCast(me, SPELL_ZERO_POWER, true);
-                            me->SetPower(POWER_ENERGY, 0);
-                            break;
-
-                        case EVENT_RESET_CAST:
-				            breathScheduled = false;
+                            energyRegen.ScheduleEvent(EVENT_RESET_CAST, TIMER_RESET_CAST);
                             break;
 
                         case EVENT_SNAPPING_BITE:
@@ -379,17 +376,23 @@ class npc_whirl_turtle : public CreatureScript
             {
                 if (Creature* pTortos= ObjectAccessor::GetCreature(*me, me->GetInstanceScript()->GetData64(BOSS_TORTOS)))
                 {
-                    if (Unit* pTarget = pTortos->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 70.f, true))
+                    std::list<HostileReference*> threatList = pTortos->getThreatManager().getThreatList();
+                    uint32 size = (pTortos->GetMap()->Is25ManRaid() ? 8 : 3);
+                    if (threatList.size() > size)
                     {
-                        me->GetMotionMaster()->MovementExpired();
-                        me->GetMotionMaster()->MovePoint(2, *pTarget);
+                        if (Unit* pTarget = pTortos->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 70.f, true))
+                        {
+                            me->GetMotionMaster()->MovementExpired();
+                            me->GetMotionMaster()->MovePoint(2, *pTarget);
 
-                        events.ScheduleEvent(EVENT_MOVE, 5000 + rand() % 2000);
-                        return;
+                            events.ScheduleEvent(EVENT_MOVE, 5000 + rand() % 2000);
+                            return;
+                        }
                     }
                 }
-                else
-                    me->GetMotionMaster()->MoveRandom(70.f);
+
+                me->SetWalk(false);
+                me->GetMotionMaster()->MoveRandom(40.f);
             }
 
             void MovementInform(uint32 uiType, uint32 uiPointId) override
@@ -683,6 +686,22 @@ public:
     }
 };
 
+class spinningShellPredicate
+{
+private:
+    Unit* caster;
+public:
+    spinningShellPredicate(Unit* _caster) : caster(_caster) {}
+
+    bool operator()(WorldObject* target) const
+    {
+        if (target->GetExactDist2d(caster) < 5.1f && target->GetPositionZ() <= (caster->GetPositionZ() + 1.f))
+            return false;
+
+        return true;
+    }
+};
+
 // Spinning Shell 140443
 class spell_spinning_shell : public SpellScriptLoader
 {
@@ -708,6 +727,8 @@ class spell_spinning_shell : public SpellScriptLoader
 
                 if (!TargetList.empty())
                 {
+                    TargetList.remove_if(spinningShellPredicate(caster));
+
                     for (Unit* pUnit : TargetList)
                         pUnit->CastSpell(pUnit, SPELL_SPINNING_SHELL_DMG, true);
                 }
@@ -871,6 +892,33 @@ class spell_tortos_quake_stomp : public SpellScriptLoader
         }
 };
 
+class spell_furious_stone_breath : public SpellScriptLoader
+{
+public:
+    spell_furious_stone_breath() : SpellScriptLoader("spell_furious_stone_breath") {}
+
+    class aura_impl : public AuraScript
+    {
+        PrepareAuraScript(aura_impl);
+
+        void HandleOnRemove(AuraEffect const* aurEff, AuraEffectHandleModes mode)
+        {
+            if (Creature* pCreature = GetCaster()->ToCreature())
+                pCreature->SetPower(POWER_ENERGY, 0);
+        }
+
+        void Register()
+        {
+            OnEffectRemove += AuraEffectRemoveFn(aura_impl::HandleOnRemove, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new aura_impl();
+    }
+};
+
 /*** INTRO ***/
 
 enum LeiShenIntroYells
@@ -950,7 +998,7 @@ class npc_lei_shen_tortos : public CreatureScript
                         introDone = true;
 
                         me->SetReactState(REACT_PASSIVE);
-                        events.ScheduleEvent(EVENT_LEI_SHEN_SEND_CINEMATIC, 1000);
+                        events.ScheduleEvent(EVENT_LEI_SHEN_SEND_CINEMATIC, 100);
                     }
                 }
             }
@@ -969,6 +1017,7 @@ class npc_lei_shen_tortos : public CreatureScript
                         me->setActive(false);
                         break;
                     case EVENT_LEI_SHEN_SEND_CINEMATIC:
+                        events.CancelEvent(EVENT_DESTROY_BRIDGE);
                         if (Creature* pCreature = me->SummonCreature(NPC_BRIDGE_TRIGGER, pMidBridge, TEMPSUMMON_TIMED_DESPAWN, 60000))
                         {
                             Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
@@ -1256,6 +1305,7 @@ void AddSC_boss_tortos()
     new spell_drain_the_weak();
     new spell_crystal_shell_aura();
     new spell_tortos_quake_stomp();
+    new spell_furious_stone_breath();
     new npc_lei_shen_tortos();
     new spell_lei_shen_tortos_bridge_call_lightning();
     new spell_teleport_all();

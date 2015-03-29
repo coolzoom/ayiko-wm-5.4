@@ -1218,14 +1218,15 @@ public:
         void EnterEvadeMode()
         {
             if (me->HasUnitState(UNIT_STATE_CANNOT_TURN))
-                me->ClearUnitState(UNIT_STATE_CANNOT_TURN);
+                me->SetControlled(false, UNIT_STATE_CANNOT_TURN);
 
             float x, y, z, o;
 
             me->GetHomePosition(x, y, z, o);
+            /*
             me->NearTeleportTo(x, y, z, o);
             me->SetFacingTo(o);
-
+            */
             me->GetMotionMaster()->Clear(false);
             me->GetMotionMaster()->MovePoint(5000, x, y, z);
 
@@ -1308,7 +1309,7 @@ public:
                 return;
 
             if (me->HasUnitState(UNIT_STATE_CANNOT_TURN) && !me->HasAura(SPELL_HEADACHE))
-                me->ClearUnitState(UNIT_STATE_CANNOT_TURN);
+                me->SetControlled(false, UNIT_STATE_CANNOT_TURN);
 
             while (uint32 uiEventId = events.ExecuteEvent())
             {
@@ -2691,14 +2692,14 @@ public:
                         owner->SetOrientation(owner->GetAngle(pTarget));
                 }*/
 
-                owner->AddUnitState(UNIT_STATE_CANNOT_TURN);
+                owner->SetControlled(true, UNIT_STATE_CANNOT_TURN);
             }
         }
 
         void HandleOnRemove(AuraEffect const* aurEff, AuraEffectHandleModes mode)
         {
             if (Unit* owner = GetOwner()->ToUnit())
-                owner->ClearUnitState(UNIT_STATE_CANNOT_TURN);
+                owner->SetControlled(false, UNIT_STATE_CANNOT_TURN);
         }
 
         void Register()

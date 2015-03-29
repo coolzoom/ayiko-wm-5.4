@@ -2090,9 +2090,7 @@ public:
 
         void SetTargetGuid(uint64 guid)
         {
-            mutex.acquire();
             uiTargetGuid = guid;
-            mutex.release();
         }
 
         void UpdateAI(const uint32 uiDiff) override
@@ -2165,7 +2163,6 @@ public:
         EventMap        events;
         InstanceScript  *pInstance;
         uint64          uiTargetGuid; // GUID of the councillor we are moving toward
-        ACE_Recursive_Thread_Mutex mutex;
     };
         
 

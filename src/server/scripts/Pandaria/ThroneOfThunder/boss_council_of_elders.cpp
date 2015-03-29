@@ -2045,7 +2045,7 @@ public:
 
         void Move()
         {
-            if (Player *pTarget = GetFollowedPlayer())
+            if (Player *pTarget = ObjectAccessor::GetPlayer(*me, uiTargetGuid))
             {
                 if (pTarget->IsAlive())
                 {
@@ -2064,18 +2064,6 @@ public:
                 HandleTargetSelection();
         }
 
-        Player* GetFollowedPlayer() 
-        {
-            if (Player* pPlayer = ObjectAccessor::GetPlayer(*me, uiTargetGuid))
-            {
-                if (pPlayer->IsAlive())
-                    return pPlayer;
-            }
-
-            HandleTargetSelection();
-            return nullptr;
-        }
-
         void HandleTargetSelection()
         {
             DoCast(SPELL_MARKED_SOUL);
@@ -2089,7 +2077,7 @@ public:
                 {
                     if (pPlayer->HasAura(SPELL_MARKED_SOUL, me->GetGUID()))
                     {
-                        uiTargetGuid = pPlayer->GetGUID();
+                        SetTargetGuid(pPlayer->GetGUID());
                         break;
                     }
                 }
@@ -2098,6 +2086,13 @@ public:
             events.Reset();
             events.ScheduleEvent(EVENT_MOVE_COUNCILLOR, 500);
             events.ScheduleEvent(EVENT_SHADOWED_GIFT, 20 * IN_MILLISECONDS);
+        }
+
+        void SetTargetGuid(uint64 guid)
+        {
+            mutex.acquire();
+            uiTargetGuid = guid;
+            mutex.release();
         }
 
         void UpdateAI(const uint32 uiDiff) override
@@ -2112,12 +2107,17 @@ public:
                     Move();
                     break;
                 case EVENT_SHADOWED_GIFT:
-                    if (Player* pTarget = GetFollowedPlayer())
+                    if (Player* pTarget = ObjectAccessor::GetPlayer(*me, uiTargetGuid))
                     {
-                        DoCast(me, SPELL_SHADOWED_TIME_OUT);
-                        me->GetMotionMaster()->MovementExpired();
-                        me->GetMotionMaster()->MoveJump(*pTarget, 42.0f, 42.0f, 5050);
+                        if (pTarget->IsAlive())
+                        {
+                            DoCast(me, SPELL_SHADOWED_TIME_OUT);
+                            me->GetMotionMaster()->MovementExpired();
+                            me->GetMotionMaster()->MoveJump(*pTarget, 42.0f, 42.0f, 5050);
+                            return;
+                        }
                     }
+                    HandleTargetSelection();
                     break;
 
                 default:
@@ -2130,9 +2130,9 @@ public:
         {
             if (uiMotionPointId == POINT_BLESSED_LOA_SPIRIT_COUNCILLOR)
             {
-                if (Player* pTarget = GetFollowedPlayer())
+                if (Player* pTarget = ObjectAccessor::GetPlayer(*me, uiTargetGuid))
                 {
-                    if (me->GetExactDist2d(pTarget) <= 6.f)
+                    if (me->GetExactDist2d(pTarget) <= 6.f && pTarget->IsAlive())
                     {
                         DoCast(pTarget, SPELL_SHADOWED_GIFT, true);
                         pTarget->RemoveAurasDueToSpell(SPELL_MARKED_SOUL, me->GetGUID());
@@ -2165,6 +2165,7 @@ public:
         EventMap        events;
         InstanceScript  *pInstance;
         uint64          uiTargetGuid; // GUID of the councillor we are moving toward
+        ACE_Recursive_Thread_Mutex mutex;
     };
         
 

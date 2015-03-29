@@ -1439,6 +1439,9 @@ void npc_horridon_event_helper::npc_horridon_event_helper_AI::ForceHorridonToEva
 {
     if (Creature* pHorridon = GetHorridon(me))
     {
+        pHorridon->SetControlled(false, UNIT_STATE_CANNOT_TURN);
+        pHorridon->SetControlled(false, UNIT_STATE_STUNNED);
+
         if (HorridonAI* pAI = dynamic_cast<HorridonAI*>(pHorridon->AI()))
             pAI->EnterEvadeMode();
     }

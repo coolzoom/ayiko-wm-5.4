@@ -64,7 +64,7 @@ class notPlayerPredicate
 public:
     bool operator()(WorldObject* target) const
     {
-        return target && target->GetTypeId() != TYPEID_PLAYER;
+        return target && (target->GetTypeId() != TYPEID_PLAYER || target->ToPlayer() && target->ToPlayer()->isGameMaster());
     }
 };
 

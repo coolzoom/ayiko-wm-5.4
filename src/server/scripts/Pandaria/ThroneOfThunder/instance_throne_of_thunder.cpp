@@ -195,6 +195,7 @@ public:
                         HandleGameObject(GetData64(GOB_HORRIDON_EXIT), true);
                     }
                     break;
+                case TYPE_TORTOS_INTRO:
                 case TYPE_COUNCIL:
                     m_auiEncounter[uiType] = uiData;
                     if (uiData >= DONE)
@@ -229,6 +230,7 @@ public:
                 case TYPE_JINROKH_INTRO:
                 case TYPE_HORRIDON:
                 case TYPE_COUNCIL:
+                case TYPE_TORTOS_INTRO:
                     return m_auiEncounter[uiType];
                 default:
                     return 0;

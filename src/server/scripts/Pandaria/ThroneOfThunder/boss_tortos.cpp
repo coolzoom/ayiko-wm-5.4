@@ -816,20 +816,31 @@ class npc_lei_shen_tortos : public CreatureScript
             EventMap events;
             bool introDone;
 
-            void Reset()
+            void Reset() override
             {
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
+
+                if (me->GetInstanceScript()->GetData(TYPE_TORTOS_INTRO) == DONE)
+                {
+                    if (GameObject* bridge = me->FindNearestGameObject(GO_TORTOS_BRIDGE, 300.0f))
+                        bridge->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);
+
+                    me->SetReactState(REACT_PASSIVE);
+                    me->SetVisible(false);
+                }
             }
 
             void DoAction(const int32 iAction) override
             {
-                if (!introDone && iAction == ACTION_ACTIVATE_INTRO)
+                if (!introDone)
                 {
-                    if (me->GetInstanceScript())
-                        me->GetInstanceScript()->SetData(TYPE_TORTOS_INTRO, DONE);
-                    me->SetReactState(REACT_PASSIVE);
-                    events.ScheduleEvent(EVENT_LEI_SHEN_SEND_CINEMATIC, 1000);
-                    introDone = true;
+                    if (iAction == ACTION_ACTIVATE_INTRO)
+                    {
+                        introDone = true;
+
+                        me->SetReactState(REACT_PASSIVE);
+                        events.ScheduleEvent(EVENT_LEI_SHEN_SEND_CINEMATIC, 1000);
+                    }
                 }
             }
 
@@ -851,18 +862,24 @@ class npc_lei_shen_tortos : public CreatureScript
                                 {
                                     if (Player* player = i->GetSource())
                                     {
-                                        player->SendCinematicStart(271);
-
                                         Position playerPos;
                                         pCreature->GetRandomNearPosition(playerPos, 16.f);
                                         playerPos.m_positionZ = 154.f;
 
                                         player->NearTeleportTo(playerPos.GetPositionX(), playerPos.GetPositionY(), playerPos.GetPositionZ(), player->GetAngle(me));
-                                        player->AddUnitState(UNIT_STATE_ROOT);
+
+                                        if (Aura* slowfall = player->AddAura(130, player))
+                                        {
+                                            slowfall->SetMaxDuration(3 * MINUTE*IN_MILLISECONDS);
+                                            slowfall->SetDuration(3 * MINUTE*IN_MILLISECONDS);
+                                        }
+                                        //player->SendCinematicStart(271);
                                     }
                                 }
                             }
                         }
+                        if (me->GetInstanceScript())
+                            me->GetInstanceScript()->SetData(TYPE_TORTOS_INTRO, DONE);
                         events.ScheduleEvent(EVENT_LEI_SHEN_I_1, 5900); // at 6 seconds.
                         break;
 
@@ -885,30 +902,15 @@ class npc_lei_shen_tortos : public CreatureScript
 
                         case EVENT_LEI_SHEN_DESTROY_BRIDGE:
                         {
-                            Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
-                            for (auto i : PlayerList)
-                            {
-                                if (Player* player = i.GetSource())
-                                {
-                                    // 1 min parachute.
-                                    player->AddAura(132228, player);
-                                }
-                            }
-
                             if (GameObject* bridge = me->FindNearestGameObject(GO_TORTOS_BRIDGE, 300.0f))
                                 bridge->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);
                             events.ScheduleEvent(EVENT_LEI_SHEN_TELEPORT_PLAYERS, 16000); // at 41 seconds.
-                            break;
                         }
-
+                        break;
                         case EVENT_LEI_SHEN_TELEPORT_PLAYERS:
                             me->GetMap()->LoadGrid(6041.180f, 5100.50f);
-                            if (Creature* trigger = me->SummonCreature(NPC_TORTOS_TRIGGER, 6041.180f, 5100.50f, -42.059f, 4.752f, TEMPSUMMON_MANUAL_DESPAWN))
-                            {
-                                trigger->CastSpell(trigger, SPELL_TELEPORT_DEPTH, true);
-                                trigger->DespawnOrUnsummon(10000);
-                            }
-                            me->DespawnOrUnsummon(1500);
+                            DoCast(SPELL_TELEPORT_DEPTH);
+                            me->SetVisible(false);
                             break;
 
                         default: break;
@@ -982,58 +984,28 @@ class spell_teleport_all : public SpellScriptLoader
 public:
     spell_teleport_all() : SpellScriptLoader("spell_teleport_all") {}
 
-    class spell_impl : public SpellScript
+    class aura_impl : public AuraScript
     {
-        PrepareSpellScript(spell_impl);
+        PrepareAuraScript(aura_impl);
 
-        void SelectTargets(std::list<WorldObject*>&targets)
+        void HandleAuraEffectRemove(AuraEffect const* aurEff, AuraEffectHandleModes mode)
         {
-            TC_LOG_ERROR("scripts", "function ran");
-            if (Unit* pCaster = GetCaster())
+            if (Unit* Owner = GetOwner()->ToUnit())
             {
-                targets.clear();
-
-                Map::PlayerList const& lPlayers = pCaster->GetMap()->GetPlayers();
-
-                for (auto itr : lPlayers)
-                {
-                    if (Player* pPlayer = itr.GetSource())
-                        targets.insert(targets.begin(), pPlayer);
-                }
-
-                TC_LOG_ERROR("scripts", "Player map size %u", targets.size());
+                Owner->SetControlled(false, UNIT_STATE_STUNNED);
+                Owner->NearTeleportTo(6041.180f, 5100.50f, -42.059f, 4.752f);
             }
-        }
-
-        void HandleEffectHitTarget(SpellEffIndex eff_idx)
-        {
-            Unit* caster = GetCaster();
-            Unit* pUnit = GetHitUnit();
-
-            if (!caster || !pUnit)
-                return;
-
-            Position pos;
-
-            if (pUnit->HasUnitState(UNIT_STATE_ROOT))
-                pUnit->ClearUnitState(UNIT_STATE_ROOT);
-
-            caster->GetRandomNearPosition(pos, 10.f);
-            pos.m_positionZ += 5.f;
-
-            pUnit->NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pUnit->GetOrientation());
         }
 
         void Register()
         {
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_impl::SelectTargets, EFFECT_2, TARGET_UNIT_SRC_AREA_ENTRY); // Changed in SpellMgr::139852
-            OnEffectHitTarget += SpellEffectFn(spell_impl::HandleEffectHitTarget, EFFECT_2, SPELL_EFFECT_DUMMY); // Changed in SpellMgr::139852
+            OnEffectRemove += AuraEffectRemoveFn(aura_impl::HandleAuraEffectRemove, EFFECT_1, SPELL_AURA_SCREEN_EFFECT, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
-    SpellScript* GetSpellScript() const
+    AuraScript* GetAuraScript() const
     {
-        return new spell_impl();
+        return new aura_impl();
     }
 };
 
@@ -1050,11 +1022,30 @@ public:
     {
         if (Creature* LeiShen = GetClosestCreatureWithEntry(player, NPC_LEI_SHEN_TRIGGER, 300.f))
         {
+            if (LeiShen->GetInstanceScript()->GetData(TYPE_TORTOS_INTRO) == DONE)
+            {
+                if (!player->HasAura(SPELL_TELEPORT_DEPTH))
+                    player->AddAura(SPELL_TELEPORT_DEPTH, player);
+                return true;
+            }
+        
             if (LeiShen->AI())
-                LeiShen->AI()->DoAction(ACTION_ACTIVATE_INTRO);
-        }
+            {
+                Map::PlayerList const& lPlayers = LeiShen->GetMap()->GetPlayers();
 
-        return false;
+                for (Map::PlayerList::const_iterator i = lPlayers.begin(); i != lPlayers.end(); ++i)
+                {
+                    if (Player* pPlayer = i->GetSource())
+                    {
+                        pPlayer->StopMoving();
+                        pPlayer->SetControlled(true, UNIT_STATE_STUNNED);
+                    }
+                }
+
+                LeiShen->AI()->DoAction(ACTION_ACTIVATE_INTRO);
+            }
+        }
+        return true;
     }
 };
 

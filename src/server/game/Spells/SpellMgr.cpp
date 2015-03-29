@@ -3606,10 +3606,7 @@ void SpellMgr::LoadSpellCustomAttr()
                 spellInfo->Effects[EFFECT_0].TriggerSpell = 0;       
                 break;
             case 139852:
-                spellInfo->Effects[EFFECT_2].Effect = SPELL_EFFECT_DUMMY;
-                spellInfo->Effects[EFFECT_2].TargetA = SpellImplicitTargetInfo(TARGET_SRC_CASTER);
-                spellInfo->Effects[EFFECT_2].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENTRY);
-                spellInfo->Effects[EFFECT_2].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_50000_YARDS);
+                spellInfo->Effects[EFFECT_2].Effect = 0;
                 break;
 #if 1 // Gilneas
                 case 68087:

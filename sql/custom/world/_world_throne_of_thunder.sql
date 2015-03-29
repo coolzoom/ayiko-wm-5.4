@@ -2802,6 +2802,7 @@ REPLACE INTO spell_script_names VALUES
 (135103, 'spell_drain_the_weak'),
 (137633, 'spell_crystal_shell_aura'),
 (134920, 'spell_quake_stomp'),
+(133939, 'spell_furious_stone_breath'),
 (139158, 'spell_waterspout_aura');
 
 REPLACE INTO spell_target_position VALUES

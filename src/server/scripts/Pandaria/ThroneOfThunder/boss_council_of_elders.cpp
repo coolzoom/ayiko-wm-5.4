@@ -2145,7 +2145,7 @@ public:
 
             if (uiMotionPointId == 5050)
             {
-                if (Player* pPlayer = GetFollowedPlayer())
+                if (Player* pPlayer = ObjectAccessor::GetPlayer(*me, uiTargetGuid))
                 {
                     DoCast(pPlayer, SPELL_SHADOWED_GIFT);
                     pPlayer->RemoveAurasDueToSpell(SPELL_MARKED_SOUL, me->GetGUID());
@@ -2157,7 +2157,7 @@ public:
 
         void JustDied(Unit *pKiller) override
         {
-            if (Player *pPlayer = GetFollowedPlayer())
+            if (Player *pPlayer = ObjectAccessor::GetPlayer(*me, uiTargetGuid))
                 pPlayer->RemoveAurasDueToSpell(SPELL_MARKED_SOUL);
         }
 

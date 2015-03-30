@@ -3611,6 +3611,40 @@ void SpellMgr::LoadSpellCustomAttr()
             case 134920:    // Quake Stomp
                 spellInfo->Effects[EFFECT_2].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
                 break;
+            case 139433:    // Rampage Fire Cast.
+                spellInfo->Effects[0].Effect = SPELL_EFFECT_TRIGGER_MISSILE;
+                spellInfo->Effects[0].TargetA = TARGET_DEST_TARGET_ENEMY;
+                spellInfo->Effects[0].TriggerSpell = 139548;
+                spellInfo->MaxAffectedTargets = 1;
+                break;
+            case 139440:    // Rampage Frost Cast.
+                spellInfo->Effects[0].Effect = SPELL_EFFECT_TRIGGER_MISSILE;
+                spellInfo->Effects[0].TargetA = TARGET_DEST_TARGET_ENEMY;
+                spellInfo->Effects[0].TriggerSpell = 139549;
+                spellInfo->MaxAffectedTargets = 1;
+                break;
+            case 139504:    // Rampage Poison Cast.
+                spellInfo->Effects[0].Effect = SPELL_EFFECT_TRIGGER_MISSILE;
+                spellInfo->Effects[0].TargetA = TARGET_DEST_TARGET_ENEMY;
+                spellInfo->Effects[0].TriggerSpell = 139551;
+                spellInfo->MaxAffectedTargets = 1;
+                break;
+            case 139513:    // Rampage Arcane Cast.
+                spellInfo->Effects[0].Effect = SPELL_EFFECT_TRIGGER_MISSILE;
+                spellInfo->Effects[0].TargetA = TARGET_DEST_TARGET_ENEMY;
+                spellInfo->Effects[0].TriggerSpell = 139552;
+                spellInfo->MaxAffectedTargets = 1;
+                break;
+            case 139548:    // Rampage Fire.
+            case 139549:    // Rampage Frost.
+            case 139551:    // Rampage Poison.
+            case 139552:    // Rampage Arcane.
+                spellInfo->Effects[0].TargetB = TARGET_UNIT_SRC_AREA_ENEMY;
+                break;
+            case 139866:    // Torrent of Ice.
+                spellInfo->Effects[0].TargetA = TARGET_UNIT_TARGET_ANY;
+                break;
+                // Throne of Thunder end
 #if 1 // Gilneas
                 case 68087:
                 case 80281:

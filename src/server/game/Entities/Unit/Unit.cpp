@@ -7628,6 +7628,8 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                     if (!victim || this == victim || effIndex != EFFECT_0)
                         return false;
 
+                    damage += absorb;
+
                     triggered_spell_id = 96172;
                     basepoints0 = damage * triggeredByAura->GetFloatAmount() / 100.0f;
                     if (AuraEffect* inquisition = GetAuraEffect(84963, EFFECT_0))
@@ -14363,9 +14365,8 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
         case MOVE_FLIGHT_BACK:
         case MOVE_RUN_BACK:
         case MOVE_SWIM_BACK:
-            break;
         case MOVE_WALK:
-            return;
+            break;
         case MOVE_RUN:
         {
             if (IsMounted()) // Use on mount auras

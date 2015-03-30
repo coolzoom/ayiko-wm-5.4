@@ -6119,6 +6119,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 124081:
                     spellInfo->AttributesEx5 &= ~SPELL_ATTR5_SINGLE_TARGET_SPELL;
                     break;
+				case 115141:
+					spellInfo->Effects[0].Amplitude = 25000;
+					break;
                 default:
                     break;
             }

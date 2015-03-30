@@ -3990,6 +3990,7 @@ void AuraEffect::HandleAuraModIncreaseSpeed(AuraApplication const* aurApp, uint8
     }
 
     target->UpdateSpeed(MOVE_RUN, true);
+    target->UpdateSpeed(MOVE_WALK, true);
 
     if (GetAuraType() == SPELL_AURA_MOD_MINIMUM_SPEED)
     {
@@ -4068,6 +4069,7 @@ void AuraEffect::HandleAuraModDecreaseSpeed(AuraApplication const* aurApp, uint8
 
     Unit* target = aurApp->GetTarget();
 
+    target->UpdateSpeed(MOVE_WALK, true);
     target->UpdateSpeed(MOVE_RUN, true);
     target->UpdateSpeed(MOVE_SWIM, true);
     target->UpdateSpeed(MOVE_FLIGHT, true);
@@ -4083,6 +4085,7 @@ void AuraEffect::HandleAuraModUseNormalSpeed(AuraApplication const* aurApp, uint
 
     Unit* target = aurApp->GetTarget();
 
+    target->UpdateSpeed(MOVE_WALK, true);
     target->UpdateSpeed(MOVE_RUN,  true);
     target->UpdateSpeed(MOVE_SWIM, true);
     target->UpdateSpeed(MOVE_FLIGHT,  true);

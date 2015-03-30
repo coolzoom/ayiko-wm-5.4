@@ -105,3 +105,15 @@ UPDATE `creature_template` SET `faction_A` = 1813, `faction_H` = 1813 WHERE `ent
 
 /* Keeper of the Cistern wrong spawntime was too high */
 UPDATE `creature` SET `spawntimesecs` = 120 WHERE `id` = 20795;
+
+/* Npc Korven the Prime (Quest Giver) wrong faction fix'd */
+UPDATE `creature_template` SET `faction_A` = 2552, `faction_H` = 2552 WHERE `entry` = 62180;
+
+/* NPCs wrong flags,models and other stuff */
+UPDATE `creature` SET `spawndist` = 0, `MovementType` = 0 WHERE `id` IN (62517,62518,62519,62521,65396,65397,65398,65753,67160);
+UPDATE `creature_template` SET `modelid1` = 11686, `modelid2` = 0, `InhabitType` = 4 WHERE `entry` = 65521;
+UPDATE `creature_template` SET `unit_flags` = 524298, `ScriptName` = 'guard_generic' WHERE `entry` = 67160;
+UPDATE `creature_template` SET `modelid1` = 11686, `modelid2` = 0 WHERE `entry` = 61982;
+
+/* Kill Sapfly give no XP (Exploit for exping) */
+UPDATE `creature_template` SET `flags_extra` = 64 WHERE `entry` = 62386;

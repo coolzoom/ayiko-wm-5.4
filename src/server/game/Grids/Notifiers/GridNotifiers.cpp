@@ -133,6 +133,7 @@ void VisibleChangesNotifier::Visit(DynamicObjectMapType &m)
 
 void AIRelocationNotifier::Visit(CreatureMapType &m)
 {
+    uint32 start = getMSTime();
     if (unit_->GetTypeId() == TYPEID_UNIT)
     {
         for (auto &creature : m)
@@ -150,6 +151,9 @@ void AIRelocationNotifier::Visit(CreatureMapType &m)
             if (shouldCallMoveInLineOfSight(creature, unit_))
                 movedInLos_.emplace_back(creature, false);
     }
+
+    uint32 diff = getMSTimeDiff(start, getMSTime());
+    sWorld->diffTimePerEntry[unit_->GetEntry()] = sWorld->diffTimePerEntry[unit_->GetEntry()] + diff;
 
     if (movedInLos_.empty())
         return;

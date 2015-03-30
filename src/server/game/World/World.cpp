@@ -242,6 +242,8 @@ World::World()
     m_visibilityAINotifyDelay = DEFAULT_VISIBILITY_NOTIFY_PERIOD;
 
     m_CleaningFlags = 0;
+
+    diffResetCounter = 30 * IN_MILLISECONDS;
 }
 
 /// World destructor
@@ -2451,6 +2453,14 @@ void World::Update(uint32 diff)
     ProcessCliCommands();
 
     sScriptMgr->OnWorldUpdate(diff);
+
+    if (diffResetCounter > diff)
+        diffResetCounter -= diff;
+    else
+    {
+        diffTimePerEntry.clear();
+        diffResetCounter = 30 * IN_MILLISECONDS;
+    }
 }
 
 void World::ForceGameEventUpdate()

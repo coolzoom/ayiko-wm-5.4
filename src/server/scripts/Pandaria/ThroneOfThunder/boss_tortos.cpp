@@ -122,7 +122,7 @@ enum Timers
     TIMER_QUAKE_STOMP_S         = 47000,
 
     TIMER_FURIOUS_STONE_BREATH  = 500,
-    TIMER_RESET_CAST            = 6500,
+    TIMER_RESET_CAST            = 6000,
 
     TIMER_SNAPPING_BITE_N       = 12000,
     TIMER_SNAPPING_BITE_H       = 8000,
@@ -135,6 +135,11 @@ enum Timers
 
     TIMER_BERSERK_H             = 600000, // 10 minutes (Heroic).
     TIMER_BERSERK               = 780000  // 13 minutes.
+};
+
+enum iActions : uint32
+{
+    ACTION_ACTIVATE_INTRO           = 1
 };
 
 class boss_tortos : public CreatureScript
@@ -269,10 +274,13 @@ class boss_tortos : public CreatureScript
                 {
                 case EVENT_REGEN_FURY_POWER:
                     me->SetPower(POWER_ENERGY, me->GetPower(POWER_ENERGY) + 1);
-                    events.ScheduleEvent(EVENT_REGEN_FURY_POWER, TIMER_REGEN_FURY_POWER);
+                    energyRegen.ScheduleEvent(EVENT_REGEN_FURY_POWER, TIMER_REGEN_FURY_POWER);
                     break;
                 case EVENT_BERSERK:
                     DoCast(me, SPELL_BERSERK);
+                    break;
+                case EVENT_RESET_CAST:
+                    breathScheduled = false;
                     break;
                 }
 
@@ -282,7 +290,6 @@ class boss_tortos : public CreatureScript
                 if (me->GetPower(POWER_ENERGY) == 100 && !breathScheduled)
                 {
 				    events.ScheduleEvent(EVENT_FURIOUS_STONE_BREATH, TIMER_FURIOUS_STONE_BREATH);
-				    events.ScheduleEvent(EVENT_RESET_CAST, TIMER_RESET_CAST);
 					breathScheduled = true;
                 }
 
@@ -301,10 +308,8 @@ class boss_tortos : public CreatureScript
                         case EVENT_FURIOUS_STONE_BREATH:
                             Talk(ANN_FURIOUS_BREATH);
 				            DoCast(me, SPELL_FURIOUS_STONE_BREATH);
-                            break;
-
-                        case EVENT_RESET_CAST:
-				            breathScheduled = false;
+                            energyRegen.RescheduleEvent(EVENT_REGEN_FURY_POWER, 5000);
+                            energyRegen.ScheduleEvent(EVENT_RESET_CAST, TIMER_RESET_CAST);
                             break;
 
                         case EVENT_SNAPPING_BITE:
@@ -346,6 +351,11 @@ class boss_tortos : public CreatureScript
 // Whirl Turtle 67966
 class npc_whirl_turtle : public CreatureScript
 {
+    enum events : uint32
+    {
+        EVENT_NONE,
+        EVENT_MOVE
+    };
     public:
         npc_whirl_turtle() : CreatureScript("npc_whirl_turtle") { }
 
@@ -359,7 +369,39 @@ class npc_whirl_turtle : public CreatureScript
             {
                 Reset();
                 me->SetReactState(REACT_PASSIVE);
-                me->GetMotionMaster()->MoveRandom(50.0f);
+                events.ScheduleEvent(EVENT_MOVE, 200 + rand() % 500);
+            }
+
+            void Move()
+            {
+                if (Creature* pTortos= ObjectAccessor::GetCreature(*me, me->GetInstanceScript()->GetData64(BOSS_TORTOS)))
+                {
+                    std::list<HostileReference*> threatList = pTortos->getThreatManager().getThreatList();
+                    uint32 size = (pTortos->GetMap()->Is25ManRaid() ? 8 : 3);
+                    if (threatList.size() > size)
+                    {
+                        if (Unit* pTarget = pTortos->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 70.f, true))
+                        {
+                            me->GetMotionMaster()->MovementExpired();
+                            me->GetMotionMaster()->MovePoint(2, *pTarget);
+
+                            events.ScheduleEvent(EVENT_MOVE, 5000 + rand() % 2000);
+                            return;
+                        }
+                    }
+                }
+
+                me->SetWalk(false);
+                me->GetMotionMaster()->MoveRandom(40.f);
+            }
+
+            void MovementInform(uint32 uiType, uint32 uiPointId) override
+            {
+                if (uiType != POINT_MOTION_TYPE)
+                    return;
+
+                if (uiPointId == 2)
+                    events.RescheduleEvent(EVENT_MOVE, 200);
             }
 
             void Reset()
@@ -378,7 +420,7 @@ class npc_whirl_turtle : public CreatureScript
 
                     float x, y, z;
                     caster->GetClosePoint(x, y, z, caster->GetObjectSize() / 3, 50.0f);
-                    me->GetMotionMaster()->MoveCharge(x, y, z, 20.0f);
+                    me->GetMotionMaster()->MoveCharge(x, y, z+2, 20.0f);
                     me->DespawnOrUnsummon(6000);
                 }
             }
@@ -392,6 +434,16 @@ class npc_whirl_turtle : public CreatureScript
 
                     me->AddAura(SPELL_SHELL_BLOCK, me);
                     shellBlocked = true;
+                    return;
+                }
+
+                events.Update(diff);
+
+                switch (events.ExecuteEvent())
+                {
+                case EVENT_MOVE:
+                    Move();
+                    break;
                 }
             }
         };
@@ -545,22 +597,28 @@ class spell_rockfall_trigger_tortos : public SpellScriptLoader
         {
             PrepareSpellScript(spell_rockfall_trigger_tortos_SpellScript);
 
-            void HandleDummy(SpellEffIndex /*effIndex*/)
+            void SelectTargets(std::list<WorldObject*>&targets)
+            {
+                targets.remove_if(notPlayerPredicate());
+
+                if (targets.size() > 1)
+                    Trinity::Containers::RandomResizeList(targets, 1);
+            }
+
+            void HandleDummy(SpellEffIndex effIndex)
             {
                 Unit* caster = GetCaster();
+                Unit* target = GetHitUnit();
 
-                if (!caster)
+                if (!caster || !target)
                     return;
 
-                if (!caster->ToCreature())
-                    return;
-
-                if (Unit* target = caster->ToCreature()->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 80.0f, true))
-                    caster->SummonCreature(NPC_ROCKFALL_TORTOS, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN);
+                caster->CastSpell(target, GetSpellInfo()->Effects[EFFECT_0].BasePoints, true);
             }
 
             void Register()
             {
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_rockfall_trigger_tortos_SpellScript::SelectTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
                 OnEffectHitTarget += SpellEffectFn(spell_rockfall_trigger_tortos_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
@@ -569,6 +627,79 @@ class spell_rockfall_trigger_tortos : public SpellScriptLoader
         {
             return new spell_rockfall_trigger_tortos_SpellScript();
         }
+};
+
+class spell_rockfall_damage : public SpellScriptLoader
+{
+    enum eSpells : uint32
+    {
+        SPELL_ROCKFALL_LARGE_AOE        = 134476
+    };
+public:
+    spell_rockfall_damage() : SpellScriptLoader("spell_rockfall_damage") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void HandleOnCast()
+        {
+            if (Unit* caster = GetCaster())
+                caster->CastSpell(caster, SPELL_ROCKFALL_LARGE_AOE, true);
+        }
+
+        void Register()
+        {
+            OnCast += SpellCastFn(spell_impl::HandleOnCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
+class spell_rockfall_aoe_damage : public SpellScriptLoader
+{
+public:
+    spell_rockfall_aoe_damage() : SpellScriptLoader("spell_rockfall_aoe_damage") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void SelectTargets(std::list<WorldObject*>&targets)
+        {
+            targets.remove_if(notPlayerPredicate());
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_impl::SelectTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
+class spinningShellPredicate
+{
+private:
+    Unit* caster;
+public:
+    spinningShellPredicate(Unit* _caster) : caster(_caster) {}
+
+    bool operator()(WorldObject* target) const
+    {
+        if (target->GetExactDist2d(caster) < 5.1f && target->GetPositionZ() <= (caster->GetPositionZ() + 1.f))
+            return false;
+
+        return true;
+    }
 };
 
 // Spinning Shell 140443
@@ -596,8 +727,10 @@ class spell_spinning_shell : public SpellScriptLoader
 
                 if (!TargetList.empty())
                 {
+                    TargetList.remove_if(spinningShellPredicate(caster));
+
                     for (Unit* pUnit : TargetList)
-                        caster->CastSpell(pUnit, SPELL_SPINNING_SHELL_DMG, true);
+                        pUnit->CastSpell(pUnit, SPELL_SPINNING_SHELL_DMG, true);
                 }
             }
 
@@ -742,6 +875,8 @@ class spell_tortos_quake_stomp : public SpellScriptLoader
                 if (!caster || !target)
                     return;
 
+                uint32 maxHealth = target->GetMaxHealth();
+
                 SetHitDamage(target->CountPctFromMaxHealth(sSpellMgr->GetSpellInfo(SPELL_QUAKE_STOMP, caster->GetMap()->GetDifficulty())->Effects[0].BasePoints));
             }
 
@@ -755,6 +890,33 @@ class spell_tortos_quake_stomp : public SpellScriptLoader
         {
             return new spell_tortos_quake_stomp_SpellScript();
         }
+};
+
+class spell_furious_stone_breath : public SpellScriptLoader
+{
+public:
+    spell_furious_stone_breath() : SpellScriptLoader("spell_furious_stone_breath") {}
+
+    class aura_impl : public AuraScript
+    {
+        PrepareAuraScript(aura_impl);
+
+        void HandleOnRemove(AuraEffect const* aurEff, AuraEffectHandleModes mode)
+        {
+            if (Creature* pCreature = GetCaster()->ToCreature())
+                pCreature->SetPower(POWER_ENERGY, 0);
+        }
+
+        void Register()
+        {
+            OnEffectRemove += AuraEffectRemoveFn(aura_impl::HandleOnRemove, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new aura_impl();
+    }
 };
 
 /*** INTRO ***/
@@ -793,9 +955,15 @@ enum LeiShenIntroGo
     GO_TORTOS_BRIDGE     = 218869
 };
 
+static const Position pMidBridge = { 6046.22f, 5100.34f, 154.f };
+
 // Lei Shen - tortos intro 70437
 class npc_lei_shen_tortos : public CreatureScript
 {
+    enum eTimers : uint32
+    {
+        EVENT_DESTROY_BRIDGE        = 26
+    };
     public:
         npc_lei_shen_tortos() : CreatureScript("npc_lei_shen_tortos") { }
 
@@ -809,20 +977,29 @@ class npc_lei_shen_tortos : public CreatureScript
             EventMap events;
             bool introDone;
 
-            void Reset()
+            void Reset() override
             {
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
+
+                if (me->GetInstanceScript()->GetData(TYPE_TORTOS_INTRO) == DONE)
+                {
+                    events.ScheduleEvent(EVENT_DESTROY_BRIDGE, 200);
+                    me->SetReactState(REACT_PASSIVE);
+                    me->SetVisible(false);
+                }
             }
 
-            void MoveInLineOfSight(Unit* who)
+            void DoAction(const int32 iAction) override
             {
-                if (!introDone && me->IsWithinDistInMap(who, 140.0f, true) && who->GetTypeId() == TYPEID_PLAYER)
+                if (!introDone)
                 {
-                    if (me->GetInstanceScript())
-                        me->GetInstanceScript()->SetData(TYPE_TORTOS_INTRO, DONE);
-                    me->SetReactState(REACT_PASSIVE);
-                    events.ScheduleEvent(EVENT_LEI_SHEN_SEND_CINEMATIC, 100);
-                    introDone = true;
+                    if (iAction == ACTION_ACTIVATE_INTRO)
+                    {
+                        introDone = true;
+
+                        me->SetReactState(REACT_PASSIVE);
+                        events.ScheduleEvent(EVENT_LEI_SHEN_SEND_CINEMATIC, 100);
+                    }
                 }
             }
 
@@ -834,16 +1011,42 @@ class npc_lei_shen_tortos : public CreatureScript
                 {
                     switch (eventId)
                     {
-                        case EVENT_LEI_SHEN_SEND_CINEMATIC:
+                    case EVENT_DESTROY_BRIDGE:
+                        if (GameObject* bridge = me->FindNearestGameObject(GO_TORTOS_BRIDGE, 300.0f))
+                            bridge->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);
+                        me->setActive(false);
+                        break;
+                    case EVENT_LEI_SHEN_SEND_CINEMATIC:
+                        events.CancelEvent(EVENT_DESTROY_BRIDGE);
+                        if (Creature* pCreature = me->SummonCreature(NPC_BRIDGE_TRIGGER, pMidBridge, TEMPSUMMON_TIMED_DESPAWN, 60000))
                         {
                             Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
                             if (!PlayerList.isEmpty())
+                            {
                                 for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                                {
                                     if (Player* player = i->GetSource())
+                                    {
+                                        Position playerPos;
+                                        pCreature->GetRandomNearPosition(playerPos, 16.f);
+                                        playerPos.m_positionZ = 154.f;
+
+                                        player->NearTeleportTo(playerPos.GetPositionX(), playerPos.GetPositionY(), playerPos.GetPositionZ(), player->GetAngle(me));
+
+                                        if (Aura* slowfall = player->AddAura(130, player))
+                                        {
+                                            slowfall->SetMaxDuration(3 * MINUTE*IN_MILLISECONDS);
+                                            slowfall->SetDuration(3 * MINUTE*IN_MILLISECONDS);
+                                        }
                                         player->SendCinematicStart(271);
-                            events.ScheduleEvent(EVENT_LEI_SHEN_I_1, 5900); // at 6 seconds.
-                            break;
+                                    }
+                                }
+                            }
                         }
+                        if (me->GetInstanceScript())
+                            me->GetInstanceScript()->SetData(TYPE_TORTOS_INTRO, DONE);
+                        events.ScheduleEvent(EVENT_LEI_SHEN_I_1, 5900); // at 6 seconds.
+                        break;
 
                         case EVENT_LEI_SHEN_I_1:
                             Talk(SAY_LEI_SHEN_INTRO_1);
@@ -854,35 +1057,25 @@ class npc_lei_shen_tortos : public CreatureScript
                         case EVENT_LEI_SHEN_I_2:
                             Talk(SAY_LEI_SHEN_INTRO_2);
                             me->HandleEmoteCommand(EMOTE_ONESHOT_EXCLAMATION);
-                            events.ScheduleEvent(EVENT_LEI_SHEN_VISUAL_CAST, 6000); // at 20 seconds.
+                            events.ScheduleEvent(EVENT_LEI_SHEN_VISUAL_CAST, 8000); // at 22 seconds.
                             break;
 
                         case EVENT_LEI_SHEN_VISUAL_CAST:
                             DoCast(me, SPELL_BRIDGE_VIS_S);
-                            events.ScheduleEvent(EVENT_LEI_SHEN_DESTROY_BRIDGE, 5000); // at 25 seconds.
+                            events.ScheduleEvent(EVENT_LEI_SHEN_DESTROY_BRIDGE, 4000); // at 26 seconds.
                             break;
 
                         case EVENT_LEI_SHEN_DESTROY_BRIDGE:
                         {
-                            Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
-                            if (!PlayerList.isEmpty())
-                                for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                                    if (Player* player = i->GetSource())
-                                        player->AddAura(132228, player); // 1 min parachute.
-
                             if (GameObject* bridge = me->FindNearestGameObject(GO_TORTOS_BRIDGE, 300.0f))
                                 bridge->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);
                             events.ScheduleEvent(EVENT_LEI_SHEN_TELEPORT_PLAYERS, 16000); // at 41 seconds.
-                            break;
                         }
-
+                        break;
                         case EVENT_LEI_SHEN_TELEPORT_PLAYERS:
-                            if (Creature* trigger = me->SummonCreature(NPC_TORTOS_TRIGGER, 6041.180f, 5100.50f, -42.059f, 4.752f, TEMPSUMMON_MANUAL_DESPAWN))
-                            {
-                                trigger->CastSpell(trigger, SPELL_TELEPORT_DEPTH, false);
-                                trigger->DespawnOrUnsummon(1000);
-                            }
-                            me->DespawnOrUnsummon(1500);
+                            me->GetMap()->LoadGrid(6041.180f, 5100.50f);
+                            DoCast(SPELL_TELEPORT_DEPTH);
+                            me->SetVisible(false);
                             break;
 
                         default: break;
@@ -907,6 +1100,14 @@ class spell_lei_shen_tortos_bridge_call_lightning : public SpellScriptLoader
         {
             PrepareAuraScript(spell_lei_shen_tortos_bridge_call_lightning_AuraScript)
 
+            float min_dist;
+
+            bool Load()
+            {
+                min_dist = 0.f;
+                return true;
+            }
+
             void OnPeriodic(AuraEffect const* aurEff)
             {
                 Unit* caster = GetCaster();
@@ -915,10 +1116,20 @@ class spell_lei_shen_tortos_bridge_call_lightning : public SpellScriptLoader
                     return;
 
                 std::list<Creature*> trigger;
-                GetCreatureListWithEntryInGrid(trigger, caster, NPC_BRIDGE_TRIGGER, 300.0f);
+                GetCreatureListWithEntryInGrid(trigger, caster, NPC_BRIDGE_TRIGGER, 600.0f);
                 if (!trigger.empty())
-                    for (std::list<Creature*>::iterator trig = trigger.begin(); trig != trigger.end(); trig++)
-                        (*trig)->CastSpell(*trig, SPELL_PLATFORM_DUMMY, false);
+                {
+                    trigger.sort(Trinity::ObjectDistanceOrderPred(caster));
+                    for (Creature* trig : trigger)
+                    {
+                        if (trig->GetExactDist2d(caster) > min_dist)
+                        {
+                            min_dist = trig->GetExactDist2d(caster);
+                            trig->CastSpell(trig, SPELL_PLATFORM_DUMMY, false);
+                            break;
+                        }
+                    }
+                }
             }
 
             void Register()
@@ -933,6 +1144,152 @@ class spell_lei_shen_tortos_bridge_call_lightning : public SpellScriptLoader
         }
 };
 
+class spell_teleport_all : public SpellScriptLoader
+{
+public:
+    spell_teleport_all() : SpellScriptLoader("spell_teleport_all") {}
+
+    class aura_impl : public AuraScript
+    {
+        PrepareAuraScript(aura_impl);
+
+        void HandleAuraEffectRemove(AuraEffect const* aurEff, AuraEffectHandleModes mode)
+        {
+            if (Unit* Owner = GetOwner()->ToUnit())
+            {
+                Owner->SetControlled(false, UNIT_STATE_STUNNED);
+                Owner->NearTeleportTo(6041.22f, 5085.77f, -42.f, 4.81f);
+
+                Owner->RemoveAurasDueToSpell(130);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectRemove += AuraEffectRemoveFn(aura_impl::HandleAuraEffectRemove, EFFECT_1, SPELL_AURA_SCREEN_EFFECT, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new aura_impl();
+    }
+};
+
+class spell_waterspout_aura : public SpellScriptLoader
+{
+public:
+    spell_waterspout_aura() : SpellScriptLoader("spell_waterspout_aura") {}
+
+    class aura_impl : public AuraScript
+    {
+        PrepareAuraScript(aura_impl);
+
+        void HandleOnPeriodic(AuraEffect const* aurEff)
+        {
+            PreventDefaultAction();
+
+            if (Unit* pOwner = GetOwner()->ToUnit())
+            {
+                pOwner->CastSpell(pOwner, 139165, true);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(aura_impl::HandleOnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new aura_impl();
+    }
+};
+
+class AreaTrigger_at_tortos_intro : public AreaTriggerScript
+{
+public:
+
+    AreaTrigger_at_tortos_intro()
+        : AreaTriggerScript("at_tortos_intro")
+    {
+    }
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/)
+    {
+        if (Creature* LeiShen = GetClosestCreatureWithEntry(player, NPC_LEI_SHEN_TRIGGER, 300.f))
+        {
+            if (LeiShen->GetInstanceScript()->GetData(TYPE_TORTOS_INTRO) == DONE)
+            {
+                if (!player->HasAura(SPELL_TELEPORT_DEPTH))
+                    player->AddAura(SPELL_TELEPORT_DEPTH, player);
+                return true;
+            }
+        
+            if (LeiShen->AI())
+            {
+                Map::PlayerList const& lPlayers = LeiShen->GetMap()->GetPlayers();
+
+                for (Map::PlayerList::const_iterator i = lPlayers.begin(); i != lPlayers.end(); ++i)
+                {
+                    if (Player* pPlayer = i->GetSource())
+                    {
+                        pPlayer->StopMoving();
+                        pPlayer->SetControlled(true, UNIT_STATE_STUNNED);
+                    }
+                }
+
+                LeiShen->AI()->DoAction(ACTION_ACTIVATE_INTRO);
+            }
+        }
+        return true;
+    }
+};
+
+class sat_waterspout : public SpellAreaTriggerScript
+{
+    enum eSpells : uint32
+    {
+        SPELL_WATERSPOUT_TRIGGER        = 139158,
+        SPELL_WATERSPOUT_SPOUT          = 139159,
+    };
+public:
+    sat_waterspout() : SpellAreaTriggerScript("sat_waterspout") {}
+
+    class sat_impl : public IAreaTriggerAura
+    {
+        bool CheckTriggering(WorldObject* triggering) override
+        {
+            Player* pPlayer = triggering->ToPlayer();
+
+            if (!pPlayer)
+                return false;
+            
+            if (pPlayer->HasAura(SPELL_WATERSPOUT_TRIGGER))
+                return false;
+
+            return pPlayer->IsAlive() && (m_target->GetExactDist2d(pPlayer) < m_range);
+        }
+
+        void OnTriggeringApply(WorldObject* triggering)
+        {
+            Unit* auraHolder = m_target->ToUnit();
+
+            if (!auraHolder)
+                return;
+
+            if (!auraHolder->HasAura(SPELL_WATERSPOUT_SPOUT))
+                auraHolder->AddAura(SPELL_WATERSPOUT_SPOUT, auraHolder);
+        }
+    };
+
+    IAreaTrigger* GetInterface() const override
+    {
+        return new sat_impl();
+    }
+};
+
 void AddSC_boss_tortos()
 {
     new boss_tortos();
@@ -942,10 +1299,17 @@ void AddSC_boss_tortos()
     new npc_humming_crystal();
     new spell_call_of_tortos();
     new spell_rockfall_trigger_tortos();
+    new spell_rockfall_damage();
+    new spell_rockfall_aoe_damage();
     new spell_spinning_shell();
     new spell_drain_the_weak();
     new spell_crystal_shell_aura();
     new spell_tortos_quake_stomp();
+    new spell_furious_stone_breath();
     new npc_lei_shen_tortos();
     new spell_lei_shen_tortos_bridge_call_lightning();
+    new spell_teleport_all();
+    new spell_waterspout_aura();
+    new AreaTrigger_at_tortos_intro();
+    new sat_waterspout();
 }

@@ -645,6 +645,16 @@ public:
             jumpPositions   = NULL;
         }
 
+        bool IsWipe()
+        {
+            if (Creature* pHorridon = GetHorridon(me))
+            {
+                return (pHorridon->IsInCombat() && pHorridon->getThreatManager().isThreatListEmpty());
+            }
+
+            return true;
+        }
+
         void DoAction(const int32 iAction) override
         {
             switch (iAction)
@@ -680,6 +690,8 @@ public:
             }
         }
 
+        void ForceHorridonToEvade();
+
         void ResetRequiredCreatures()
         {
             std::list<Creature*> resets;
@@ -698,6 +710,9 @@ public:
 
         void UpdateAI(const uint32 uiDiff)
         {
+            if (IsWipe())
+                ForceHorridonToEvade();
+
             if (uiTrashPhase == MAX_TRASH_PHASE)
                 return;
 
@@ -1218,18 +1233,19 @@ public:
         void EnterEvadeMode()
         {
             if (me->HasUnitState(UNIT_STATE_CANNOT_TURN))
-                me->ClearUnitState(UNIT_STATE_CANNOT_TURN);
+                me->SetControlled(false, UNIT_STATE_CANNOT_TURN);
 
             float x, y, z, o;
 
             me->GetHomePosition(x, y, z, o);
+            /*
             me->NearTeleportTo(x, y, z, o);
             me->SetFacingTo(o);
-
+            */
             me->GetMotionMaster()->Clear(false);
             me->GetMotionMaster()->MovePoint(5000, x, y, z);
 
-            ScriptedAI::EnterEvadeMode();
+            BossAI::EnterEvadeMode();
         }
 
         void EnterCombat(Unit *pVictim)
@@ -1308,7 +1324,7 @@ public:
                 return;
 
             if (me->HasUnitState(UNIT_STATE_CANNOT_TURN) && !me->HasAura(SPELL_HEADACHE))
-                me->ClearUnitState(UNIT_STATE_CANNOT_TURN);
+                me->SetControlled(false, UNIT_STATE_CANNOT_TURN);
 
             while (uint32 uiEventId = events.ExecuteEvent())
             {
@@ -1416,8 +1432,20 @@ public:
         return new boss_horridon_AI(pCreature);
     }
 };
+
 typedef boss_horridon::boss_horridon_AI HorridonAI;
 
+void npc_horridon_event_helper::npc_horridon_event_helper_AI::ForceHorridonToEvade()
+{
+    if (Creature* pHorridon = GetHorridon(me))
+    {
+        pHorridon->SetControlled(false, UNIT_STATE_CANNOT_TURN);
+        pHorridon->SetControlled(false, UNIT_STATE_STUNNED);
+
+        if (HorridonAI* pAI = dynamic_cast<HorridonAI*>(pHorridon->AI()))
+            pAI->EnterEvadeMode();
+    }
+}
 // Jalak AI
 class mob_war_god_jalak : public CreatureScript
 {
@@ -2691,14 +2719,14 @@ public:
                         owner->SetOrientation(owner->GetAngle(pTarget));
                 }*/
 
-                owner->AddUnitState(UNIT_STATE_CANNOT_TURN);
+                owner->SetControlled(true, UNIT_STATE_CANNOT_TURN);
             }
         }
 
         void HandleOnRemove(AuraEffect const* aurEff, AuraEffectHandleModes mode)
         {
             if (Unit* owner = GetOwner()->ToUnit())
-                owner->ClearUnitState(UNIT_STATE_CANNOT_TURN);
+                owner->SetControlled(false, UNIT_STATE_CANNOT_TURN);
         }
 
         void Register()

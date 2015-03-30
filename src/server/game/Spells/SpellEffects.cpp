@@ -2160,15 +2160,13 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
                 addhealth *= holyPower;
 
                 // Bastion of Glory : +10% of power per application if target is caster
-                if (unitTarget->GetGUID() == caster->GetGUID() && caster->HasAura(114637))
-                {
-                    if (auto bastionOfGlory = caster->GetAura(114637))
+                if (unitTarget->GetGUID() == caster->GetGUID())
+                    if (AuraEffect* bastion = caster->GetAuraEffect(114637, EFFECT_0))
                     {
-                        AddPct(addhealth, (10 * bastionOfGlory->GetStackAmount()));
+                        AddPct(addhealth, (bastion->GetBase()->GetStackAmount() * bastion->GetAmount()));
                         // Set duration to 1 to let aura amount calculation benefit from it too
-                        bastionOfGlory->SetDuration(1);
+                        bastion->GetBase()->SetDuration(1);
                     }
-                }
                 break;
             }
             // Glyph of Prayer of Mending
@@ -7221,6 +7219,7 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const* 
 
     float radius = 5.0f;
     int32 duration = m_spellInfo->GetDuration();
+    int32 shroomAmount = 0;
 
     switch (m_spellInfo->Id)
     {
@@ -7231,6 +7230,17 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const* 
             // 20% Parry
             m_originalCaster->CastSpell(m_originalCaster, 81256, true);
             break;
+        case 145205: // Resto Shroom
+        {
+            std::list<Creature*> MinionList;
+            caster->GetAllMinionsByEntry(MinionList, 47649);
+            if (MinionList.empty())
+                break;
+            Creature* shroom = MinionList.front();
+            if (AuraEffect* counter = shroom->GetAuraEffect(138616, EFFECT_1))
+                shroomAmount = counter->GetAmount();
+            break;
+        }
         default:
             break;
     }
@@ -7280,6 +7290,8 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const* 
         if (summon->HasUnitTypeMask(UNIT_MASK_MINION) && m_targets.HasDst())
             ((Minion*)summon)->SetFollowAngle(m_caster->GetAngle(summon));
 
+        summon->AI()->EnterEvadeMode();
+
         switch (summon->GetEntry())
         {
             case 27893:
@@ -7295,9 +7307,12 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const* 
                 if (m_targets.GetUnitTarget())
                     summon->CastSpell(m_targets.GetUnitTarget(), 114404);
                 break;
+            case 47649:
+            {
+                if (shroomAmount)
+                    summon->CastCustomSpell(summon, 138616, NULL, &shroomAmount, NULL, true);
+            }
         }
-
-        summon->AI()->EnterEvadeMode();
 
         ExecuteLogEffectSummonObject(i, summon);
     }

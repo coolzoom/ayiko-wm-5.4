@@ -393,7 +393,7 @@ class boss_jikun : public CreatureScript
 
                 _Reset();
 
-                SummonEggs();
+                //SummonEggs();
 
                 if (instance)
                     instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);

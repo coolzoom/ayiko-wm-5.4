@@ -538,7 +538,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNULL,                                      //392 SPELL_AURA_392
     &AuraEffect::HandleNoImmediateEffect,                         //393 SPELL_AURA_DEFLECT_FRONT_SPELLS
     &AuraEffect::HandleNULL,                                      //394 SPELL_AURA_394
-    &AuraEffect::HandleNULL,                                      //395 SPELL_AURA_395
+    &AuraEffect::HandleAreaTrigger,                               //395 SPELL_AURA_AREA_TRIGGER
     &AuraEffect::HandleNULL,                                      //396 SPELL_AURA_396
     &AuraEffect::HandleNULL,                                      //397 SPELL_AURA_397
     &AuraEffect::HandleNULL,                                      //398 SPELL_AURA_398
@@ -831,11 +831,8 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                 case SPELLFAMILY_PRIEST:
                     // Power Word : Shield
                     if (GetSpellInfo()->Id == 17 || GetSpellInfo()->Id == 123258)
-                    {
                         // +187.1% from sp bonus
                         amount += caster->SpellBaseDamageBonusDone(m_spellInfo->GetSchoolMask()) * 1.871f;
-                        break;
-                    }
 
                     switch (GetSpellInfo()->Id)
                     {
@@ -845,7 +842,7 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                         case 152118: // Clarity of Will
                             // Shield Discipline
                             if (AuraEffect* aurEff = caster->GetAuraEffect(77484, EFFECT_0))
-                                AddPct(amount, aurEff->GetAmount());
+                                AddPct(amount, aurEff->GetFloatAmount());
                             break;
                     }
                     break;
@@ -3993,6 +3990,7 @@ void AuraEffect::HandleAuraModIncreaseSpeed(AuraApplication const* aurApp, uint8
     }
 
     target->UpdateSpeed(MOVE_RUN, true);
+    target->UpdateSpeed(MOVE_WALK, true);
 
     if (GetAuraType() == SPELL_AURA_MOD_MINIMUM_SPEED)
     {
@@ -4071,6 +4069,7 @@ void AuraEffect::HandleAuraModDecreaseSpeed(AuraApplication const* aurApp, uint8
 
     Unit* target = aurApp->GetTarget();
 
+    target->UpdateSpeed(MOVE_WALK, true);
     target->UpdateSpeed(MOVE_RUN, true);
     target->UpdateSpeed(MOVE_SWIM, true);
     target->UpdateSpeed(MOVE_FLIGHT, true);
@@ -4086,6 +4085,7 @@ void AuraEffect::HandleAuraModUseNormalSpeed(AuraApplication const* aurApp, uint
 
     Unit* target = aurApp->GetTarget();
 
+    target->UpdateSpeed(MOVE_WALK, true);
     target->UpdateSpeed(MOVE_RUN,  true);
     target->UpdateSpeed(MOVE_SWIM, true);
     target->UpdateSpeed(MOVE_FLIGHT,  true);
@@ -4685,11 +4685,11 @@ void AuraEffect::HandleModResistancePercent(AuraApplication const* aurApp, uint8
     {
         if (GetMiscValue() & int32(1<<i))
         {
-            target->HandleStatModifier(UnitMods(UNIT_MOD_RESISTANCE_START + i), TOTAL_PCT, float(GetAmount()), apply);
+            target->HandleStatModifier(UnitMods(UNIT_MOD_RESISTANCE_START + i), TOTAL_PCT, float(GetFloatAmount() ? GetFloatAmount() : GetAmount()), apply);
             if (target->GetTypeId() == TYPEID_PLAYER || target->ToCreature()->isPet())
             {
-                target->ApplyResistanceBuffModsPercentMod(SpellSchools(i), true, (float)GetAmount(), apply);
-                target->ApplyResistanceBuffModsPercentMod(SpellSchools(i), false, (float)GetAmount(), apply);
+                target->ApplyResistanceBuffModsPercentMod(SpellSchools(i), true, float(GetFloatAmount() ? GetFloatAmount() : GetAmount()), apply);
+                target->ApplyResistanceBuffModsPercentMod(SpellSchools(i), false, float(GetFloatAmount() ? GetFloatAmount() : GetAmount()), apply);
             }
         }
     }
@@ -7409,17 +7409,6 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
         {
             damage *= GetUserData();
         }
-        // Deep Wounds
-        else if (GetSpellInfo()->Id == 115767)
-        {
-            if (Player* _player = GetCaster()->ToPlayer())
-            {
-                if (_player->GetSpecializationId(_player->GetActiveSpec()) == SPEC_WARRIOR_ARMS)
-                    damage *= 2;
-                else if (_player->GetSpecializationId(_player->GetActiveSpec()) == SPEC_WARRIOR_PROTECTION)
-                    damage /= 2;
-            }
-        }
         // Nether Tempest and Living Bomb deal 85% of damage if used on player
         else if (GetSpellInfo()->Id == 44457 || GetSpellInfo()->Id == 114923)
         {
@@ -8446,6 +8435,32 @@ void AuraEffect::HandleAuraStrangulate(AuraApplication const* aurApp, uint8 mode
     // Asphyxiate
     if (m_spellInfo->Id == 108194)
         target->SetControlled(apply, UNIT_STATE_STUNNED);
+}
+
+void AuraEffect::HandleAreaTrigger(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & AURA_EFFECT_HANDLE_REAL))
+        return;
+
+    uint32 entry = (uint32)GetMiscValue();
+    if (apply)
+    {
+        if (IAreaTrigger* areaTrigger = sScriptMgr->CreateAreaTriggerInterface(entry))
+        {
+            areaTrigger->Initialize(this, aurApp);
+            aurApp->GetTarget()->AddAuraAreaTrigger(areaTrigger);
+        }
+    }
+    else
+    {
+        if (IAreaTrigger* areaTrigger = aurApp->GetTarget()->RemoveAuraAreaTrigger(this, aurApp))
+        {
+            if (aurApp->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
+                areaTrigger->OnExpire();
+
+            delete areaTrigger;
+        }
+    }
 }
 
 void AuraEffect::HandleChangeSpellVisualEffect(AuraApplication const* aurApp, uint8 mode, bool apply) const

@@ -2645,6 +2645,33 @@ void ObjectMgr::LoadItemSpecialisation()
     }
 }
 
+void ObjectMgr::LoadSpellAreaTriggerTemplates()
+{
+    uint32 oldMSTime = getMSTime();
+    uint32 count = 0;
+
+    _areaTriggerTemplateStore.clear();
+    QueryResult result = WorldDatabase.Query("SELECT Entry, Flags, CollisionType, Radius, ScaleX, ScaleY, ScriptName FROM spell_areatrigger_template");
+    if (result)
+    {
+        do
+        {
+            Field* fields = result->Fetch();
+            AreaTriggerTemplate& atTemplate = _areaTriggerTemplateStore[fields[0].GetUInt32()];
+            atTemplate.Entry = fields[0].GetUInt32();
+            atTemplate.Flags = fields[1].GetUInt32();
+            atTemplate.CollisionType = fields[2].GetUInt32();
+            atTemplate.Radius = fields[3].GetFloat();
+            atTemplate.ScaleX = fields[4].GetFloat();
+            atTemplate.ScaleY = fields[5].GetFloat();
+            atTemplate.ScriptId = GetScriptId(fields[6].GetCString());
+            ++count;
+        }
+        while (result->NextRow());
+    }
+    TC_LOG_INFO("server.loading", ">> Loaded %u area trigger templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
 void ObjectMgr::LoadItemTemplateAddon()
 {
     uint32 oldMSTime = getMSTime();
@@ -8573,7 +8600,9 @@ void ObjectMgr::LoadScriptNames()
       "UNION "
       "SELECT DISTINCT(script) FROM instance_template WHERE script <> ''"
       "UNION "
-      "SELECT DISTINCT(ScriptName) FROM creature_script_names WHERE ScriptName <> ''");
+      "SELECT DISTINCT(ScriptName) FROM creature_script_names WHERE ScriptName <> ''"
+      "UNION "
+      "SELECT DISTINCT(ScriptName) FROM spell_areatrigger_template WHERE ScriptName <> ''");
 
     if (!result)
     {
@@ -9133,6 +9162,12 @@ CreatureTemplate const * ObjectMgr::GetCreatureTemplate(uint32 entry) const
         return &itr->second;
 
     return NULL;
+}
+
+AreaTriggerTemplate const* ObjectMgr::GetAreaTriggerTemplate(uint32 entry) const
+{
+    AreaTriggerTemplateContainer::const_iterator iter = _areaTriggerTemplateStore.find(entry);
+    return (iter != _areaTriggerTemplateStore.end()) ? &iter->second : NULL;
 }
 
 CreatureTemplate * ObjectMgr::GetMutableCreatureTemplate(uint32 entry)

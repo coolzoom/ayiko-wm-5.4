@@ -64,7 +64,7 @@ class notPlayerPredicate
 public:
     bool operator()(WorldObject* target) const
     {
-        return target && target->GetTypeId() != TYPEID_PLAYER;
+        return target && (target->GetTypeId() != TYPEID_PLAYER || target->ToPlayer() && target->ToPlayer()->isGameMaster());
     }
 };
 
@@ -108,7 +108,8 @@ enum CreaturesIds
     MOB_GARA_JALS_SOUL                      = 69182,
     NPC_COUNCIL_EVENT_HELPER                = 662203,
     NPC_TWISTED_FATE_HELPER                 = 662204,
-    NPC_JINROKH_STATUE                      = 69467
+    NPC_JINROKH_STATUE                      = 69467,
+    NPC_LEI_SHEN_TRIGGER                    = 70437
 };
 
 enum ObjectsIds

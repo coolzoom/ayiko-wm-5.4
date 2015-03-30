@@ -25,6 +25,141 @@
 #include "Log.h"
 #include "AreaTrigger.h"
 #include "ObjectVisitors.hpp"
+#include "SpellAuraEffects.h"
+#include "ScriptMgr.h"
+
+class IAreaTriggerOnceChecker
+{
+public:
+    IAreaTriggerOnceChecker(IAreaTriggerOnce* areaTrigger)
+        : m_areaTrigger(areaTrigger)
+    {
+    }
+
+    bool operator()(WorldObject* object)
+    {
+        return m_areaTrigger->CheckTriggering(object);
+    }
+
+private:
+    IAreaTriggerOnce* m_areaTrigger;
+};
+
+class IAreaTriggerAuraUpdater
+{
+public:
+    IAreaTriggerAuraUpdater(IAreaTriggerAura* areaTrigger)
+        : m_areaTrigger(areaTrigger)
+    {
+    }
+
+    void operator()(WorldObject* object) const
+    {
+        if (!m_areaTrigger->CheckTriggering(object))
+            return;
+
+        IAreaTriggerAura::TriggeringList::iterator iter;
+        for (iter = m_areaTrigger->m_triggerings.begin(); iter != m_areaTrigger->m_triggerings.end(); ++iter)
+        {
+            if (iter->Guid == object->GetGUID())
+            {
+                iter->UpdateNumber = m_areaTrigger->m_updateNumber;
+                m_areaTrigger->OnTriggeringUpdate(object);
+                return;
+            }
+        }
+
+        IAreaTriggerAura::Triggering triggering;
+        triggering.Guid = object->GetGUID();
+        triggering.UpdateNumber = m_areaTrigger->m_updateNumber;
+        m_areaTrigger->OnTriggeringApply(object);
+        m_areaTrigger->m_triggerings.push_back(triggering);
+    }
+
+private:
+    IAreaTriggerAura* m_areaTrigger;
+};
+
+void IAreaTrigger::Destroy()
+{
+    if (!m_target)
+        return;
+
+    if (AreaTrigger* areaTrigger = m_target->ToAreaTrigger())
+        areaTrigger->Remove();
+    else if (Unit* unit = m_target->ToUnit())
+        unit->RemoveAura(m_spellInfo->Id, m_caster->GetGUID());
+}
+
+void IAreaTrigger::Initialize(AuraEffect const* auraEffect, AuraApplication const* auraApplication)
+{
+    m_caster = auraEffect->GetCaster();
+    m_target = auraApplication->GetTarget();
+    m_spellInfo = auraEffect->GetSpellInfo();
+    m_location = m_target;
+    m_auraApplication = auraApplication;
+    m_auraEffectIndex = auraEffect->GetEffIndex();
+}
+
+AuraEffect const* IAreaTrigger::GetAuraEffect()
+{
+    return m_auraApplication ? m_auraApplication->GetBase()->GetEffect(m_auraEffectIndex) : NULL;
+}
+
+void IAreaTriggerOnce::OnUpdate(uint32)
+{
+    WorldObject* triggering = NULL;
+    IAreaTriggerOnceChecker checker(this);
+    Trinity::WorldObjectSearcher<IAreaTriggerOnceChecker> searcher(m_target, triggering, checker, m_mapTypeMask);
+    Trinity::VisitNearbyWorldObject(m_target, m_range, searcher);
+
+    if (triggering)
+    {
+        OnTrigger(triggering);
+        Destroy();
+    }
+}
+
+void IAreaTriggerAura::OnUpdate(uint32)
+{
+    ++m_updateNumber;
+
+    IAreaTriggerAuraUpdater updater(this);
+    Trinity::WorldObjectWorker<IAreaTriggerAuraUpdater> worker(m_target, updater, m_mapTypeMask);
+    Trinity::VisitNearbyWorldObject(m_target, m_range, worker);
+
+    for (TriggeringList::iterator iter = m_triggerings.begin(); iter != m_triggerings.end(); )
+    {
+        if (iter->UpdateNumber != m_updateNumber)
+        {
+            // remove
+            if (WorldObject* object = ObjectAccessor::GetWorldObject(*m_target, iter->Guid))
+                OnTriggeringRemove(object);
+
+            iter = m_triggerings.erase(iter);
+        }
+        else
+            ++iter;
+    }
+}
+
+void IAreaTriggerAura::OnDestroy()
+{
+    for (TriggeringList::iterator iter = m_triggerings.begin(); iter != m_triggerings.end(); ++iter)
+    {
+        if (WorldObject* object = ObjectAccessor::GetWorldObject(*m_target, iter->Guid))
+            OnTriggeringRemove(object);
+    }
+}
+
+IAreaTriggerAura::~IAreaTriggerAura()
+{
+    for (TriggeringList::iterator iter = m_triggerings.begin(); iter != m_triggerings.end(); ++iter)
+    {
+        if (WorldObject* object = ObjectAccessor::GetWorldObject(*m_target, iter->Guid))
+            OnTriggeringRemove(object);
+    }
+}
 
 AreaTrigger::AreaTrigger() : WorldObject(false), _duration(0), m_caster(NULL), m_visualRadius(0.0f), m_timer(0)
 {
@@ -34,6 +169,8 @@ AreaTrigger::AreaTrigger() : WorldObject(false), _duration(0), m_caster(NULL), m
     m_updateFlag = UPDATEFLAG_STATIONARY_POSITION;
 
     m_valuesCount = AREATRIGGER_END;
+
+    m_interface = NULL;
 }
 
 AreaTrigger::~AreaTrigger()
@@ -57,6 +194,12 @@ void AreaTrigger::RemoveFromWorld()
     ///- Remove the AreaTrigger from the accessor and from all lists of objects in world
     if (IsInWorld())
     {
+        if (m_interface)
+            m_interface->OnDestroy();
+
+        delete m_interface;
+        m_interface = NULL;
+
         UnbindFromCaster();
         WorldObject::RemoveFromWorld();
         sObjectAccessor->RemoveObject(this);
@@ -129,7 +272,19 @@ bool AreaTrigger::CreateAreaTrigger(uint32 guidlow, uint32 triggerEntry, Unit* c
     if (!GetMap()->AddToMap(this))
         return false;
 
+    m_interface = sScriptMgr->CreateAreaTriggerInterface(triggerEntry);
+    if (m_interface)
+        m_interface->Initialize(m_caster, this, spell);
+
     return true;
+}
+
+void AreaTrigger::Expire()
+{
+    if (m_interface)
+        m_interface->OnExpire();
+
+    Remove();
 }
 
 void AreaTrigger::Update(uint32 p_time)
@@ -137,9 +292,12 @@ void AreaTrigger::Update(uint32 p_time)
     if (GetDuration() > int32(p_time))
         _duration -= p_time;
     else
-        Remove(); // expired
+        Expire();
 
     WorldObject::Update(p_time);
+
+    if (m_interface)
+        m_interface->OnUpdate(p_time);
 
     auto caster = GetCaster();
     if (!caster)
@@ -182,6 +340,27 @@ void AreaTrigger::Update(uint32 p_time)
                         caster->CastSpell(itr, 127797, true);
 
             break;
+        }
+        case 106979:// Fire Arrow
+        {
+            std::list<Unit*> targetList;
+            radius = 6.0f;
+
+            Trinity::AnyUnfriendlyUnitInObjectRangeCheck p_check(this, caster, radius);
+            Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(this, targetList, p_check);
+            VisitNearbyObject(this, radius, searcher);
+
+            if(!targetList.empty())
+            {
+                for(auto itr : targetList)
+                {
+                    if(itr->GetDistance(this) > 3.7f)
+                        itr->RemoveAura(131241);
+                    else
+                        itr->CastSpell(itr, 131241, false);
+                }
+             }
+             break;
         }
         case 115460:// Healing Sphere
         {

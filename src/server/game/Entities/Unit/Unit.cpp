@@ -7628,6 +7628,8 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                     if (!victim || this == victim || effIndex != EFFECT_0)
                         return false;
 
+                    damage += absorb;
+
                     triggered_spell_id = 96172;
                     basepoints0 = damage * triggeredByAura->GetFloatAmount() / 100.0f;
                     if (AuraEffect* inquisition = GetAuraEffect(84963, EFFECT_0))

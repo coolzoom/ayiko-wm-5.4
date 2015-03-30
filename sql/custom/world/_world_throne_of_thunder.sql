@@ -2801,6 +2801,7 @@ REPLACE INTO spell_script_names VALUES
 (134476, 'spell_rockfall_aoe_damage'),
 (134539, 'spell_rockfall_damage'),
 (140443, 'spell_spinning_shell'),
+(136431, 'spell_shell_concussion'),
 (135103, 'spell_drain_the_weak'),
 (137633, 'spell_crystal_shell_aura'),
 (134920, 'spell_tortos_quake_stomp'),
@@ -2828,7 +2829,7 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 -- Gameobjects templates
 REPLACE INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `faction`, `flags`, `size`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `data0`, `data1`, `data2`, `data3`, `data4`, `data5`, `data6`, `data7`, `data8`, `data9`, `data10`, `data11`, `data12`, `data13`, `data14`, `data15`, `data16`, `data17`, `data18`, `data19`, `data20`, `data21`, `data22`, `data23`, `AIName`, `ScriptName`, `WDBVerified`) VALUES 
 (218869, 33, 13669, 'Lightning Span', '', '', '', 1375, 32, 1, 0, 0, 0, 0, 0, 0, 0, 0, 88, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 35752, 0, 0, 0, 161, 0, 0, 0, 0, 0, '', '', 17658),
-(218980, 0, 13603, 'Doodad_Thunderking_TurtleDoor001', '', '', '', 1375, 32, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 17658),
+(218980, 0, 13603, 'Doodad_Thunderking_TurtleDoor001', '', '', '', 1375, 32, 1.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 17658),
 (218987, 0, 13716, 'Tortos Death Collision', '', '', '', 1375, 48, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 1);
 /*---------------------------------------------------------------------------------------------------------------*/
 

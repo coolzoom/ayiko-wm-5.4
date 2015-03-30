@@ -35,7 +35,8 @@ public:
         SPELL_SHA_CORRUPTION   = 124337,
         SPELL_STEALTH_COSMETIC = 91194,
         SPELL_CRISE            = 128245,
-        SPELL_FLIP_OUT_AURA    = 128248 
+        SPELL_FLIP_OUT_AURA    = 128248,
+        SPELL_STEALTH          = 102921 
     };
 
     enum eEvents
@@ -51,16 +52,15 @@ public:
 
         void Reset() override
         {
-            me->SetReactState(REACT_AGGRESSIVE);
+            me->CastSpell(me, SPELL_STEALTH, false);
             me->CastSpell(me, SPELL_STEALTH_COSMETIC, false);
             me->CastSpell(me, SPELL_SHA_CORRUPTION, false);
-
-            if(me->HasAura(SPELL_FLIP_OUT_AURA))
-                me->RemoveAurasDueToSpell(SPELL_FLIP_OUT_AURA);
+            me->RemoveAurasDueToSpell(SPELL_FLIP_OUT_AURA);
         }
 
         void EnterCombat(Unit* who) override
         {
+            me->RemoveAura(SPELL_STEALTH);
             events.ScheduleEvent(EVENT_CRISE, urand(6, 8) * IN_MILLISECONDS);
         }
 
@@ -213,6 +213,13 @@ public:
             events.ScheduleEvent(EVENT_FOCUSING_COMBAT, urand(4, 8) * IN_MILLISECONDS);
         }
 
+        void JustDied(Unit* killer) override
+        {
+            if (auto const energy = me->FindNearestCreature(NPC_UNSTABLE_ENERGY, 10.0f))
+                if(energy->IsAIEnabled)
+                    energy->AI()->DoAction(0); // ACTION_STORMBRINGER_KILLED
+        }
+
         void SpellHitTarget(Unit* target, const SpellInfo* spell)
         {
             if(spell->Id == SPELL_FOCUSING_COMBAT)
@@ -302,6 +309,43 @@ public:
             }
 
             DoMeleeAttackIfReady();
+        }
+    };
+};
+
+class npc_shadopan_unstable_energy : public CreatureScript
+{
+public:
+    npc_shadopan_unstable_energy() : CreatureScript("npc_shadopan_unstable_energy") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_shadopan_unstable_energyAI(creature);
+    }
+
+    enum eActions
+    {
+        ACTION_STORMBRINGER_KILLED = 0
+    };
+
+    struct npc_shadopan_unstable_energyAI : public ScriptedAI
+    {
+        npc_shadopan_unstable_energyAI(Creature* creature) : ScriptedAI(creature) {}
+
+        uint8 stormbringerKilled;
+
+        void InitializeAI() override
+        {
+            stormbringerKilled = 0;
+        }
+
+        void DoAction(int32 const action) override
+        {
+            if (action == ACTION_STORMBRINGER_KILLED)
+            {
+                if (++stormbringerKilled == 6)
+                    me->DespawnOrUnsummon(2 * IN_MILLISECONDS);
+            }
         }
     };
 };
@@ -548,7 +592,7 @@ public:
                         break;
                     case EVENT_FIRE_ARROW:
                         me->CastSpell(me, SPELL_FIRE_ARROW, false);
-                        events.ScheduleEvent(EVENT_FIRE_ARROW, urand(8, 10) * IN_MILLISECONDS);
+                        events.ScheduleEvent(EVENT_FIRE_ARROW, urand(33, 36) * IN_MILLISECONDS);
                         break;
                 }
             }
@@ -1044,6 +1088,7 @@ void AddSC_shadopan_monastery()
     new npc_shadopan_warden();
     new npc_shadopan_stormbringer();
     new npc_shadopan_disciple();
+    new npc_shadopan_unstable_energy();
     new npc_ethereal_sha();
     new npc_consuming_sha();
     new npc_destroying_sha();

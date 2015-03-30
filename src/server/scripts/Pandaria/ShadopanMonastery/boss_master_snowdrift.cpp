@@ -125,7 +125,7 @@ public:
         EventMap events, nonCombatEvents;
         InstanceScript* instance;
         bool aggroDone, isBossSummoned, isFightWon, phaseTwo;
-        uint8 phase, hurlChiCnt;
+        uint8 phase;
         uint8 randIndex[3];
 
         void InitializeAI() override
@@ -176,7 +176,6 @@ public:
             aggroDone = false;
             phaseTwo = false;
             isBossSummoned = false;
-            hurlChiCnt = 0;
             phase = PHASE_FIGHT_1;
             events.Reset();
         }
@@ -240,9 +239,8 @@ public:
                     Talk(TALK_WAWE2_START);
                     break;
                 case ACTION_DISSAPEAR:
-                    ++hurlChiCnt;
                     isBossSummoned = false;
-                    if(hurlChiCnt < 3)
+                    if(me->GetHealthPct() > 50.0f)
                     {
                         me->SetVisible(false);
                         me->CastSpell(me, SPELL_SMOKE_BOMB, true);   
@@ -274,6 +272,8 @@ public:
                                     clone->AI()->DoAction(0); // ACTION_BALL_OF_FIRE
                             }
                         }
+
+                        clonesList.clear();
                     }
                     break;
             }
@@ -320,6 +320,8 @@ public:
                         for(auto player : playerList)
                             player->ModifyCurrency(395, player->GetMap()->IsHeroic() ? 100 * CURRENCY_PRECISION : 70 * CURRENCY_PRECISION);
                     }
+
+                    playerList.clear();
                 }
             }
         }
@@ -581,9 +583,10 @@ public:
 
     enum eEvents
     {
-        EVENT_INIT_EVENT = 1,
-        EVENT_CHECK_WIPE = 2,
-        EVENT_1_WAVE_END = 3
+        EVENT_INIT_EVENT   = 1,
+        EVENT_CHECK_WIPE   = 2,
+        EVENT_1_WAVE_END   = 3,
+        EVENT_SUMMON_NOVIE = 4
     };
 
     struct npc_spm_pandaren_refereeAI : public BossAI
@@ -592,14 +595,13 @@ public:
 
         InstanceScript* instance;
         EventMap events;
-        uint8 eventPhase, maxInitiateByWave, novoiceDefeated;
+        uint8 eventPhase, novoiceSummoned;
 
         void InitializeAI() override
         {
             instance = me->GetInstanceScript();
             eventPhase = 0;
-            novoiceDefeated = 0;
-            maxInitiateByWave = 5;
+            novoiceSummoned = 1;
         }
 
         void JustSummoned(Creature* summon) override
@@ -621,13 +623,15 @@ public:
                                  snowdrift->AI()->DoAction(5); //ACTION_TALK_WAVE_1_S
                        }
 
-                       for(uint8 i = 0; i < 5; i++)
-                            me->SummonCreature(NPC_NOVICE, InitiateSpawnPos[i].GetPositionX(), InitiateSpawnPos[i].GetPositionY(), InitiateSpawnPos[i].GetPositionZ());
-
+                       for (uint8 i = 0; i < 5; i++)
+                       {
+                           ++novoiceSummoned;
+                           me->SummonCreature(NPC_NOVICE, InitiateSpawnPos[i].GetPositionX(), InitiateSpawnPos[i].GetPositionY(), InitiateSpawnPos[i].GetPositionZ());
+                       }
                        events.ScheduleEvent(EVENT_CHECK_WIPE, 1 * IN_MILLISECONDS);
                     }
                     break;
-                case 6:
+                case 2:
                     if(instance)
                     {
                         if(auto const snowdrift = Unit::GetCreature(*me, instance->GetData64(DATA_MASTER_SNOWDRIFT)))
@@ -636,20 +640,6 @@ public:
                     }
                     me->SummonCreature(NPC_FLAGRANT_LOTUS, MinibossSpawnPos[0].GetPositionX(), MinibossSpawnPos[0].GetPositionY(), MinibossSpawnPos[0].GetPositionZ());
                     me->SummonCreature(NPC_FLYING_SNOW, MinibossSpawnPos[1].GetPositionX(), MinibossSpawnPos[1].GetPositionY(), MinibossSpawnPos[1].GetPositionZ());
-                    break;
-                default:
-                    {
-                        if(instance)
-                        {
-                            if(auto const snowdrift = Unit::GetCreature(*me, instance->GetData64(DATA_MASTER_SNOWDRIFT)))
-                               if(snowdrift->IsAIEnabled)
-                                   snowdrift->AI()->DoAction(1); //ACTION_NOVOCE_DEFEAT
-                        }
-
-                        maxInitiateByWave = eventPhase == 5 ? 4 : 5;
-                        for(uint8 i = 0; i < maxInitiateByWave; i++)
-                             me->SummonCreature(NPC_NOVICE, InitiateSpawnPos[i].GetPositionX(), InitiateSpawnPos[i].GetPositionY(), InitiateSpawnPos[i].GetPositionZ());
-                    }
                     break;
             }
         }
@@ -683,12 +673,20 @@ public:
                     }
                     break;
                 case ACTION_NOVICE_DEFEAT:
-                    if(++novoiceDefeated == maxInitiateByWave)
+                    if (novoiceSummoned <= MAX_NOVICE)
                     {
-                        if(eventPhase < 5)
+                        ++novoiceSummoned;
+                        events.ScheduleEvent(EVENT_SUMMON_NOVIE, urand(1, 3) * IN_MILLISECONDS);
+
+                        switch (novoiceSummoned)
                         {
-                            novoiceDefeated = 0;
-                            events.ScheduleEvent(EVENT_INIT_EVENT, 2 * IN_MILLISECONDS);
+                            case 10:
+                            case 15:
+                            case 20:
+                                if (auto const snowdrift = Unit::GetCreature(*me, instance->GetData64(DATA_MASTER_SNOWDRIFT)))
+                                    if (snowdrift->IsAIEnabled)
+                                         snowdrift->AI()->DoAction(1); //ACTION_NOVOCE_DEFEAT
+                            break;
                         }
                     }
                     break;
@@ -712,6 +710,7 @@ public:
                             if(instance->IsWipe())
                             {
                                 eventPhase = 0;
+                                novoiceSummoned = 1;
                                 events.Reset();
                                 summons.DespawnAll();
                                 instance->SetData(DATA_SNOWDRIFT_STATE, FAIL);
@@ -731,8 +730,13 @@ public:
                                 if(novice->IsAIEnabled)
                                     novice->AI()->DoAction(0);
                             }
+
+							noviceList.clear();
                         }
                         events.ScheduleEvent(EVENT_INIT_EVENT, 1 * IN_MILLISECONDS);
+                        break;
+                    case EVENT_SUMMON_NOVIE:
+                         me->SummonCreature(NPC_NOVICE, InitiateSpawnPos[irand(0, 4)].GetPositionX(), InitiateSpawnPos[irand(0, 4)].GetPositionY(), InitiateSpawnPos[irand(0, 4)].GetPositionZ());
                         break;
                 }
             }
@@ -1485,9 +1489,15 @@ public:
                 caster->CastSpell(target, parrySpell, TRIGGERED_FULL_MASK);
         }
 
+        void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            parrySpells.clear();
+        }
+
         void Register()
         {
             OnEffectProc += AuraEffectProcFn(spell_snowdrift_parry_stance_AuraScript::HanleOnProc, EFFECT_0, SPELL_AURA_DUMMY);
+            AfterEffectRemove += AuraEffectRemoveFn(spell_snowdrift_parry_stance_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
         }
     };
 };
@@ -1653,6 +1663,37 @@ public:
     };
 };
 
+class spell_spm_parry_stance : public SpellScriptLoader
+{
+public:
+    spell_spm_parry_stance() : SpellScriptLoader("spell_spm_parry_stance") { }
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_spm_parry_stance_AuraScript();
+    }
+
+    class spell_spm_parry_stance_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_spm_parry_stance_AuraScript);
+
+        void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            auto const owner = GetOwner()->ToCreature();
+            if (!owner)
+                return;
+
+            if (owner->IsAIEnabled)
+                owner->AI()->DoZoneInCombat();
+        }
+
+        void Register()
+        {
+            AfterEffectRemove += AuraEffectRemoveFn(spell_spm_parry_stance_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_MOD_PACIFY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+};
+
 void AddSC_boss_master_snowdrift()
 {
     new boss_master_snowdrift();
@@ -1671,5 +1712,6 @@ void AddSC_boss_master_snowdrift()
     new spell_snowdrift_copy_health();
     new spell_snowdrift_ball_of_fire_damage();
     new spell_snowdrift_fists_of_fury();
+    new spell_spm_parry_stance();
     new at_before_snowdrift();
 }

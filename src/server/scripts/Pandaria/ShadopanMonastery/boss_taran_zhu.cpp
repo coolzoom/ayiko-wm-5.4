@@ -175,6 +175,8 @@ public:
                         for(auto player : playerList)
                             player->ModifyCurrency(395, player->GetMap()->IsHeroic() ? 100 * CURRENCY_PRECISION : 70 * CURRENCY_PRECISION);
                     }
+
+                    playerList.clear();
                 }
             }
         }

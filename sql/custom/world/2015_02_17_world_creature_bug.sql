@@ -105,3 +105,6 @@ UPDATE `creature_template` SET `faction_A` = 1813, `faction_H` = 1813 WHERE `ent
 
 /* Keeper of the Cistern wrong spawntime was too high */
 UPDATE `creature` SET `spawntimesecs` = 120 WHERE `id` = 20795;
+
+/* Npc Korven the Prime (Quest Giver) wrong faction fix'd */
+UPDATE `creature_template` SET `faction_A` = 2552, `faction_H` = 2552 WHERE `entry` = 62180;

@@ -6167,10 +6167,10 @@ UPDATE `gameobject` SET phaseMask=3 WHERE zoneId=5842 AND phaseMask IN(1, 65535)
 UPDATE `gameobject` SET phaseMask=2 WHERE id IN(218463, 218462);
 DELETE FROM `creature_questender` WHERE id=64566 AND quest=32678;
 UPDATE `gameobject` SET position_x=1928.39, position_y=4222.1, position_z=132.486, orientation=2.8239 WHERE id=218463;
-UPDATE `quest_template` SET prevQuestId=32679 WHERE Id=32681;
-UPDATE `quest_template` SET NextQuestId=32681, NextQuestIdChain=32681 WHERE id=32679;
-UPDATE `quest_template` SET objectId=69265 WHERE questId=32526;
-UPDATE `quest_template` SET objectId=69894 WHERE questId=32533;
+UPDATE `quest_template` SET prevQuestId=0 WHERE Id=32681;
+UPDATE `quest_template` SET NextQuestId=0, NextQuestIdChain=0 WHERE id=32679;
+UPDATE `quest_objective` SET objectId=69265 WHERE questId=32526;
+UPDATE `quest_objective` SET objectId=69894 WHERE questId=32533;
 
 
 /******************************** OTHERS QUERIES ************************************/

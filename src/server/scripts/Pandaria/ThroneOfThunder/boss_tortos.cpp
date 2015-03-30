@@ -275,8 +275,27 @@ class boss_tortos : public CreatureScript
                     {
                         me->AttackerStateUpdate(victim);
                         me->resetAttackTimer();
+                        return;
                     }
-                    else if (!m_growingFuryCooldown)
+                    else
+                    {
+                        ThreatContainer::StorageType threatList = me->getThreatManager().getThreatList();
+
+                        for (ThreatContainer::StorageType::const_iterator itr = threatList.cbegin(); itr != threatList.cend(); ++itr)
+                        {
+                            if (Unit *target = (*itr)->getTarget())
+                            {
+                                if (me->IsWithinMeleeRange(target))
+                                {
+                                    me->AttackerStateUpdate(target);
+                                    me->resetAttackTimer();
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (!m_growingFuryCooldown)
                     {
                         events.ScheduleEvent(EVENT_GROWING_FURY, 1500);
                         m_growingFuryCooldown = 3000;
@@ -831,6 +850,35 @@ class spell_spinning_shell : public SpellScriptLoader
         {
             return new spell_spinning_shell_AuraScript();
         }
+};
+
+class spell_shell_concussion : public SpellScriptLoader
+{
+public:
+    spell_shell_concussion() : SpellScriptLoader("spell_shell_concussion") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void SelectTargets(std::list<WorldObject*>&targets)
+        {
+            targets.remove_if([this](WorldObject* target) -> bool
+            {
+                return target->ToUnit() && target->ToUnit()->HasAura(SPELL_SHELL_CONCUSSION_D_IN);
+            });
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_impl::SelectTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
 };
 
 // Drain the Weak 135103
@@ -1466,6 +1514,7 @@ void AddSC_boss_tortos()
     new spell_rockfall_damage();
     new spell_rockfall_aoe_damage();
     new spell_spinning_shell();
+    new spell_shell_concussion();
     new spell_drain_the_weak();
     new spell_drain_the_weak_damage();
     new spell_crystal_shell_aura();

@@ -123,6 +123,8 @@ enum ObjectsIds
     GOB_COUNCIL_ENTRANCE1                   = 218655,
     GOB_COUNCIL_ENTRANCE2                   = 218656,
     GOB_COUNCIL_EXIT                        = 218657,
+    GOB_TORTOS_DOOR                         = 218980,
+    GOB_TORTOS_COLLISION                    = 218987,
  
     GOB_TRIBAL_DOOR_GURUBASHI               = 218670,
     GOB_TRIBAL_DOOR_DRAKKARI                = 218671,

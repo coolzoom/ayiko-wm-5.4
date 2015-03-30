@@ -142,6 +142,23 @@ enum iActions : uint32
     ACTION_ACTIVATE_INTRO           = 1
 };
 
+static const Position aTurtlePos[3] = 
+{
+    { 6055.85f, 4861.87f, -60.4f },
+    { 6071.43f, 4866.66f, -60.4f },
+    { 6047.93f, 4859.66f, -60.4f }
+};
+
+static const Position aBatPos[4] =
+{
+    { 6043.39f, 5039.37f, -16.43f, 4.66f },
+    { 6040.19f, 4922.61f, -15.34f, 1.53f },
+    { 6092.45f, 4958.73f, -14.09f, 2.82f },
+    { 5996.11f, 4978.12f, -11.01f, 6.21f }
+};
+
+static const Position TurtleWp = { 6041.33f, 4940.45f, -61.f };
+
 class boss_tortos : public CreatureScript
 {
     public:
@@ -161,6 +178,8 @@ class boss_tortos : public CreatureScript
             EventMap events;
             EventMap energyRegen;
             bool breathScheduled;
+
+            uint32 m_growingFuryCooldown;
 
             void Reset() override
             {
@@ -193,9 +212,11 @@ class boss_tortos : public CreatureScript
 				events.ScheduleEvent(EVENT_QUAKE_STOMP, TIMER_QUAKE_STOMP_F);
 				events.ScheduleEvent(EVENT_SUMMON_BATS, TIMER_CALL_BATS_F);
 
-                events.ScheduleEvent(EVENT_GROWING_FURY, TIMER_GROWING_FURY);
+                //events.ScheduleEvent(EVENT_GROWING_FURY, TIMER_GROWING_FURY);
                 energyRegen.ScheduleEvent(EVENT_REGEN_FURY_POWER, TIMER_REGEN_FURY_POWER);
 				energyRegen.ScheduleEvent(EVENT_BERSERK, TIMER_BERSERK);
+
+                m_growingFuryCooldown = 8000;
 
                 if (instance)
                 {
@@ -244,6 +265,25 @@ class boss_tortos : public CreatureScript
 					summon->SetInCombatWithZone();
             }
 
+            void DoMeleeOrGrowingFury()
+            {
+                Unit* victim = me->GetVictim();
+                //Make sure our attack is ready and we aren't currently casting before checking distance
+                if (me->isAttackReady())
+                {
+                    if (me->IsWithinMeleeRange(victim))
+                    {
+                        me->AttackerStateUpdate(victim);
+                        me->resetAttackTimer();
+                    }
+                    else if (!m_growingFuryCooldown)
+                    {
+                        events.ScheduleEvent(EVENT_GROWING_FURY, 1500);
+                        m_growingFuryCooldown = 3000;
+                    }
+                }
+            }
+
             void JustDied(Unit* killer) override
             {
                 summons.DespawnAll();
@@ -282,6 +322,14 @@ class boss_tortos : public CreatureScript
                 case EVENT_RESET_CAST:
                     breathScheduled = false;
                     break;
+                }
+
+                if (m_growingFuryCooldown)
+                {
+                    if (m_growingFuryCooldown <= diff)
+                        m_growingFuryCooldown = 0;
+                    else
+                        m_growingFuryCooldown -= diff;
                 }
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
@@ -323,13 +371,12 @@ class boss_tortos : public CreatureScript
                             break;
 
                         case EVENT_SUMMON_BATS:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_FARTHEST, 0, 100.0f, true))
-				                me->CastSpell(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ() + 12.0f, SPELL_SUMMON_BATS, true);
+				            me->CastSpell(aBatPos[urand(0, 3)], SPELL_SUMMON_BATS, true);
 				            events.ScheduleEvent(EVENT_SUMMON_BATS, TIMER_CALL_BATS_S);
                             break;
 
                         case EVENT_GROWING_FURY:
-                            if (!me->IsWithinDistInMap(me->GetVictim(), me->GetAttackDistance(me->GetVictim())))
+                            if (!me->IsWithinMeleeRange(me->GetVictim()))
 				                DoCast(me, SPELL_GROWING_FURY);
                             events.ScheduleEvent(EVENT_GROWING_FURY, TIMER_GROWING_FURY);
                             break;
@@ -338,7 +385,7 @@ class boss_tortos : public CreatureScript
                     }
                 }
 
-                DoMeleeAttackIfReady();
+                DoMeleeOrGrowingFury();
             }
         };
 
@@ -354,7 +401,8 @@ class npc_whirl_turtle : public CreatureScript
     enum events : uint32
     {
         EVENT_NONE,
-        EVENT_MOVE
+        EVENT_MOVE,
+        EVENT_INIT_MOVE
     };
     public:
         npc_whirl_turtle() : CreatureScript("npc_whirl_turtle") { }
@@ -368,19 +416,52 @@ class npc_whirl_turtle : public CreatureScript
             void IsSummonedBy(Unit* /*summoner*/)
             {
                 Reset();
-                me->SetReactState(REACT_PASSIVE);
-                events.ScheduleEvent(EVENT_MOVE, 200 + rand() % 500);
+                shellBlocked = false;
+                me->SetWalk(false);
+                me->SetSpeed(MOVE_RUN, 2.4f, true);
+
+                events.ScheduleEvent(EVENT_INIT_MOVE, 1000 + rand() % 2000);
             }
 
             void Move()
             {
                 if (Creature* pTortos= ObjectAccessor::GetCreature(*me, me->GetInstanceScript()->GetData64(BOSS_TORTOS)))
                 {
+                    std::list<Unit*>targetList;
                     std::list<HostileReference*> threatList = pTortos->getThreatManager().getThreatList();
-                    uint32 size = (pTortos->GetMap()->Is25ManRaid() ? 8 : 3);
-                    if (threatList.size() > size)
+                    uint32 max_size = (pTortos->GetMap()->Is25ManRaid() ? 8 : 3);
+
+                    if (threatList.size() > max_size)
                     {
-                        if (Unit* pTarget = pTortos->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 70.f, true))
+
+                        for (auto itr = threatList.cbegin(); itr != threatList.cend(); ++itr)
+                        {
+                            if (Unit *target = (*itr)->getTarget())
+                            {
+                                if (target && target->ToPlayer() && target->GetExactDist2d(me) > 20.f && !target->HasAura(SPELL_SPINNING_SHELL_DUMMY))//(&DefaultTargetSelector(target, -20.f, true, -SPELL_SPINNING_SHELL_DUMMY)))
+                                    targetList.push_back(target);
+                            }
+                        }
+
+                        if (!targetList.empty())
+                        {
+                            std::list<Unit*>::iterator find = targetList.begin();
+                            std::advance(find, urand(0, targetList.size() - 1));
+
+                            if (Unit* pTarget = *find)
+                            {
+                                me->GetMotionMaster()->MovementExpired();
+                                me->GetMotionMaster()->MovePoint(2, *pTarget);
+
+                                events.ScheduleEvent(EVENT_MOVE, 5000 + rand() % 2000);
+                                return;
+                            }
+                        }
+                        
+                        std::list<HostileReference*>::iterator find = threatList.begin();
+                        std::advance(find, urand(0 /*1*/, threatList.size() - 1));
+
+                        if (Unit* pTarget = (*find)->getTarget())
                         {
                             me->GetMotionMaster()->MovementExpired();
                             me->GetMotionMaster()->MovePoint(2, *pTarget);
@@ -391,22 +472,28 @@ class npc_whirl_turtle : public CreatureScript
                     }
                 }
 
-                me->SetWalk(false);
-                me->GetMotionMaster()->MoveRandom(40.f);
+                Position pos;
+                me->GetRandomNearPosition(pos, 25.f);
+                me->GetMotionMaster()->MovePoint(2, pos);
             }
 
             void MovementInform(uint32 uiType, uint32 uiPointId) override
             {
-                if (uiType != POINT_MOTION_TYPE)
+                if (uiType != POINT_MOTION_TYPE || shellBlocked)
                     return;
 
+                if (uiPointId == 4)
+                {
+                    events.ScheduleEvent(EVENT_MOVE, 200 + rand() % 500);
+                    me->SetWalk(true);
+                }
                 if (uiPointId == 2)
                     events.RescheduleEvent(EVENT_MOVE, 200);
             }
 
             void Reset()
             {
-                shellBlocked = false;
+                me->SetReactState(REACT_PASSIVE);
                 // me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_SPINNING_SHELL_DMG, true);
                 me->AddAura(SPELL_SPINNING_SHELL_VISUAL, me);
                 me->AddAura(SPELL_SPINNING_SHELL_DUMMY, me);
@@ -420,7 +507,7 @@ class npc_whirl_turtle : public CreatureScript
 
                     float x, y, z;
                     caster->GetClosePoint(x, y, z, caster->GetObjectSize() / 3, 50.0f);
-                    me->GetMotionMaster()->MoveCharge(x, y, z+2, 20.0f);
+                    me->GetMotionMaster()->MoveCharge(x, y, z+2, 30.0f);
                     me->DespawnOrUnsummon(6000);
                 }
             }
@@ -433,9 +520,13 @@ class npc_whirl_turtle : public CreatureScript
                     me->RemoveAurasDueToSpell(SPELL_SPINNING_SHELL_DUMMY);
 
                     me->AddAura(SPELL_SHELL_BLOCK, me);
+                    me->GetMotionMaster()->MovementExpired();
                     shellBlocked = true;
                     return;
                 }
+
+                if (shellBlocked)
+                    return;
 
                 events.Update(diff);
 
@@ -443,6 +534,11 @@ class npc_whirl_turtle : public CreatureScript
                 {
                 case EVENT_MOVE:
                     Move();
+                    break;
+                case EVENT_INIT_MOVE:
+                    Position pos;
+                    me->GetRandomPoint(TurtleWp, 10.f, pos);
+                    me->GetMotionMaster()->MovePoint(4, pos);
                     break;
                 }
             }
@@ -467,7 +563,7 @@ class npc_vampiric_cave_bat : public CreatureScript
             void IsSummonedBy(Unit* /*summoner*/)
             {
                 Reset();
-                DoZoneInCombat(me, 100.0f);
+                DoZoneInCombat(me, 130.0f);
             }
 
             void Reset()
@@ -504,13 +600,12 @@ class npc_rockfall_tortos : public CreatureScript
             void IsSummonedBy(Unit* /*summoner*/)
             {
                 Reset();
-                me->AddAura(SPELL_ROCKFALL, me);
-                me->DespawnOrUnsummon(7000);
+                DoCast(me, SPELL_ROCKFALL, true);
+                me->DespawnOrUnsummon(10000);
             }
 
             void Reset()
             {
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
                 me->SetReactState(REACT_PASSIVE);
             }
 
@@ -572,7 +667,7 @@ class spell_call_of_tortos : public SpellScriptLoader
                     return;
 
                 for (uint8 i = 0; i < 3; i++)
-                    caster->SummonCreature(NPC_WHIRL_TURTLE, caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN);
+                    caster->SummonCreature(NPC_WHIRL_TURTLE, aTurtlePos[i], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000 + rand()%5000);
             }
 
             void Register()
@@ -719,18 +814,10 @@ class spell_spinning_shell : public SpellScriptLoader
                 if (!caster)
                     return;
 
-                std::list<Unit*> TargetList;
-
-                Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(caster, caster, 5.1f);
-                Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(caster, TargetList, u_check);
-                Trinity::VisitNearbyObject(caster, 5.1f, searcher);
-
-                if (!TargetList.empty())
+                if (!caster->HasUnitMovementFlag(MOVEMENTFLAG_FALLING))
                 {
-                    TargetList.remove_if(spinningShellPredicate(caster));
-
-                    for (Unit* pUnit : TargetList)
-                        pUnit->CastSpell(pUnit, SPELL_SPINNING_SHELL_DMG, true);
+                    PreventDefaultAction();
+                    Remove(AURA_REMOVE_BY_EXPIRE);
                 }
             }
 
@@ -761,12 +848,12 @@ class spell_drain_the_weak : public SpellScriptLoader
                 PreventDefaultAction();
 
                 Unit* caster = GetCaster();
-                Unit* target = GetTarget();
+                Unit* target = GetCaster()->GetVictim();
 
                 if (!caster || !target)
                     return;
 
-                if (target->GetHealth() < 350000)
+                if ((int32)target->GetHealth() < sSpellMgr->GetSpellInfo(135103, target->GetMap()->GetDifficulty())->Effects[0].BasePoints)
                     caster->CastSpell(target, SPELL_DRAIN_THE_WEAK_DMG, true);
             }
 
@@ -780,6 +867,45 @@ class spell_drain_the_weak : public SpellScriptLoader
         {
             return new spell_drain_the_weak_AuraScript();
         }
+};
+
+class spell_drain_the_weak_damage : public SpellScriptLoader
+{
+    enum eSpells : uint32
+    {
+        SPELL_DRAIN_THE_WEAK_HEAL           = 135102
+    };
+public:
+    spell_drain_the_weak_damage() : SpellScriptLoader("spell_drain_the_weak_damage") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void HandleEffectHitTarget(SpellEffIndex eff_idx)
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetHitUnit();
+
+            if (!caster || !target)
+                return;
+
+            int32 iHitDamage = GetHitDamage();
+            CustomSpellValues value;
+            value.AddSpellMod(SPELLVALUE_BASE_POINT0, sSpellMgr->GetSpellInfo(SPELL_DRAIN_THE_WEAK_HEAL, target->GetMap()->GetDifficulty())->Effects[0].BasePoints * iHitDamage);
+            caster->CastCustomSpell(SPELL_DRAIN_THE_WEAK_HEAL, value, caster);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_impl::HandleEffectHitTarget, EFFECT_0, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
 };
 
 // Crystal Shell 137633
@@ -877,7 +1003,9 @@ class spell_tortos_quake_stomp : public SpellScriptLoader
 
                 uint32 maxHealth = target->GetMaxHealth();
 
-                SetHitDamage(target->CountPctFromMaxHealth(sSpellMgr->GetSpellInfo(SPELL_QUAKE_STOMP, caster->GetMap()->GetDifficulty())->Effects[0].BasePoints));
+                float multiplier = (sSpellMgr->GetSpellInfo(SPELL_QUAKE_STOMP, caster->GetMap()->GetDifficulty())->Effects[0].BasePoints) * 0.01f;
+
+                SetHitDamage(maxHealth * multiplier);
             }
 
             void Register()
@@ -1290,6 +1418,42 @@ public:
     }
 };
 
+class sat_shell_spin : public SpellAreaTriggerScript
+{
+public:
+    sat_shell_spin() : SpellAreaTriggerScript("sat_shell_spin") {}
+
+    class sat_impl : public IAreaTriggerAura
+    {
+        bool CheckTriggering(WorldObject* triggering) override
+        {
+            Player* pPlayer = triggering->ToPlayer();
+
+            if (!pPlayer)
+                return false;
+
+            if (pPlayer->HasAura(SPELL_SPINNING_SHELL_DUMMY))
+                return false;
+
+            return pPlayer->IsAlive() && (m_target->GetExactDist2d(pPlayer) < m_range);
+        }
+
+        void OnTriggeringApply(WorldObject* triggering) override
+        {
+            if (Unit* pTarget = triggering->ToUnit())
+            {
+                pTarget->CastSpell(pTarget, SPELL_SPINNING_SHELL_DMG, true, 0, 0, m_caster->GetGUID());
+                pTarget->AddAura(SPELL_SPINNING_SHELL_DUMMY, pTarget);
+            }
+        }
+    };
+
+    IAreaTrigger* GetInterface() const override
+    {
+        return new sat_impl();
+    }
+};
+
 void AddSC_boss_tortos()
 {
     new boss_tortos();
@@ -1303,6 +1467,7 @@ void AddSC_boss_tortos()
     new spell_rockfall_aoe_damage();
     new spell_spinning_shell();
     new spell_drain_the_weak();
+    new spell_drain_the_weak_damage();
     new spell_crystal_shell_aura();
     new spell_tortos_quake_stomp();
     new spell_furious_stone_breath();
@@ -1312,4 +1477,5 @@ void AddSC_boss_tortos()
     new spell_waterspout_aura();
     new AreaTrigger_at_tortos_intro();
     new sat_waterspout();
+    new sat_shell_spin();
 }

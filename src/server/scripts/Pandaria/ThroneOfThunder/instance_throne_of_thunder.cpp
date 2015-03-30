@@ -11,6 +11,8 @@ DoorData const doorData[] =
     { GOB_COUNCIL_ENTRANCE1, DATA_COUNCIL_OF_ELDERS, DOOR_TYPE_ROOM, },
     { GOB_COUNCIL_ENTRANCE2, DATA_COUNCIL_OF_ELDERS, DOOR_TYPE_ROOM, },
     //{ GOB_COUNCIL_EXIT, DATA_COUNCIL_OF_ELDERS, DOOR_TYPE_PASSAGE, },
+    { GOB_TORTOS_DOOR, DATA_TORTOS, DOOR_TYPE_PASSAGE },
+    { GOB_TORTOS_COLLISION, DATA_TORTOS, DOOR_TYPE_ROOM },
 };
 
 typedef std::unordered_map<uint32, uint64> EntryGuidMap;
@@ -107,6 +109,7 @@ public:
                 case GOB_COUNCIL_ENTRANCE1:
                 case GOB_COUNCIL_ENTRANCE2:
                 case GOB_COUNCIL_EXIT:
+                case GOB_TORTOS_DOOR:
                     AddDoor(pGo, true);
                     m_mGoGuidStorage.insert(std::make_pair(pGo->GetEntry(), pGo->GetGUID()));
                     break;
@@ -197,6 +200,7 @@ public:
                     break;
                 case TYPE_TORTOS_INTRO:
                 case TYPE_COUNCIL:
+                case TYPE_TORTOS:
                     m_auiEncounter[uiType] = uiData;
                     if (uiData >= DONE)
                         SaveInstance();
@@ -283,6 +287,7 @@ public:
                 case GOB_COUNCIL_ENTRANCE1:
                 case GOB_COUNCIL_ENTRANCE2:
                 case GOB_COUNCIL_EXIT:
+                case GOB_TORTOS_DOOR:
                 case GOB_TRIBAL_DOOR_FARRAKI:
                 case GOB_TRIBAL_DOOR_GURUBASHI:
                 case GOB_TRIBAL_DOOR_DRAKKARI: 

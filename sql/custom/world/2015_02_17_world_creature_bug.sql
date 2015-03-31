@@ -122,3 +122,6 @@ UPDATE `creature_template` SET `flags_extra` = 64 WHERE `entry` = 62386;
 DELETE FROM `creature` WHERE `id`=50333;
 INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
 (50333, 870, 0, 0, 1, 1, 0, 50333, 2560.92, 3260.01, 421.604, 5.89204, 64800, 0, 0, 2026194, 0, 0, 0, 0, 0, 0, 0, 0);
+
+/* Wrong creature spawn */
+DELETE FROM `creature` WHERE `id`=62248;

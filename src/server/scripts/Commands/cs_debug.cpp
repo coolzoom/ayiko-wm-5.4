@@ -94,7 +94,7 @@ public:
             { "areatriggers",  rbac::RBAC_PERM_COMMAND_DEBUG_AREATRIGGERS,  false, &HandleDebugAreaTriggersCommand,     "", NULL },
             { "los",           rbac::RBAC_PERM_COMMAND_DEBUG_LOS,           false, &HandleDebugLoSCommand,              "", NULL },
             { "moveflags",     rbac::RBAC_PERM_COMMAND_DEBUG_MOVEFLAGS,     false, &HandleDebugMoveflagsCommand,        "", NULL },
-            { "relocation",    rbac::TBAC_PERM_COMMAND_DEBUG_RELOCATION,    false, &HandleDebugRelocationCommand,       "", NULL },
+            { "relocation",    rbac::RBAC_PERM_COMMAND_DEBUG_RELOCATION,    false, &HandleDebugRelocationCommand,       "", NULL },
             { NULL,            0,                                     false, NULL,                                "", NULL }
         };
         static ChatCommand commandTable[] =

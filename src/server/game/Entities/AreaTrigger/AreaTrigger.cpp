@@ -344,7 +344,7 @@ void AreaTrigger::Update(uint32 p_time)
         case 106979:// Fire Arrow
         {
             std::list<Unit*> targetList;
-            radius = 6.0f;
+            radius = 2.5f;
 
             Trinity::AnyUnfriendlyUnitInObjectRangeCheck p_check(this, caster, radius);
             Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(this, targetList, p_check);
@@ -354,7 +354,7 @@ void AreaTrigger::Update(uint32 p_time)
             {
                 for(auto itr : targetList)
                 {
-                    if(itr->GetDistance(this) > 3.7f)
+                    if(itr->GetDistance(this) > 1.7f)
                         itr->RemoveAura(131241);
                     else
                         itr->CastSpell(itr, 131241, false);
@@ -775,7 +775,18 @@ void AreaTrigger::Remove()
                 }
 
                 break;
-            }
+			}
+			case 106979:	// Fire Arrow
+			{
+				std::list<Player*> playerList;
+				GetPlayerListInGrid(playerList, 2.5f);
+
+				for (auto &player : playerList)
+					player->RemoveAura(131241);
+
+				playerList.clear();
+			}
+			break;
             default:
                 break;
         }

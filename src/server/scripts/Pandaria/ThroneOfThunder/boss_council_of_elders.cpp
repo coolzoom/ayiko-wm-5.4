@@ -476,7 +476,7 @@ public:
             return;
 
         uiDamageTakenPossessed += ruiAmount;
-        TC_LOG_ERROR("scripts", "dmg amount is %u", uiDamageTakenPossessed);
+
         if (uiDamageTakenPossessed >= (float)(me->GetMaxHealth() * 0.25f))
         {
             // No remove when no other councillor alive
@@ -1314,7 +1314,6 @@ public:
 
         uint32 GetData(uint32 uiType) override
         {
-            TC_LOG_ERROR("scripts", "m_uiDeadCouncillors %u", m_uiDeadCouncillors);
             return m_uiDeadCouncillors;
         }
 
@@ -1683,7 +1682,6 @@ public:
                 // We're the only councillor alive, no need to perform this check
                 if (pGarajal->AI()->GetData(0) > 3)
                 {
-                    TC_LOG_ERROR("scripts", "3 councillors or more dead");
                     return NULL;
                 }
             }

@@ -241,3 +241,8 @@ DELETE FROM `smart_scripts` WHERE (`entryorguid`=64528 AND `source_type`=0);
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
 (64528, 0, 0, 1, 64, 0, 100, 0, 0, 0, 0, 0, 33, 64528, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Xuen - Give credit on gossip"),
 (64528, 0, 1, 0, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Xuen - Close Gossip");
+
+/* Oil Rig and Explosives Barrel fix */
+UPDATE `creature` SET `spawndist` = 0 WHERE `id` IN (60096,60098,60099);
+UPDATE `creature_template` SET `modelid1` = 11686, `modelid2` = 0, `flags_extra` = 0 WHERE `entry` IN (60096,60098,60099);
+UPDATE `creature_template` SET `minlevel` = 93, `maxlevel` = 93, `unit_flags` = 33554432 WHERE `entry` = 60095;

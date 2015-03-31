@@ -792,18 +792,6 @@ public:
                                 owner->KilledMonsterCredit(oilRig->GetEntry());
                                 me->ForcedDespawn();
                             }
-                            else if (auto oilRig = GetClosestCreatureWithEntry(me, 60098, 10.f))
-                            {
-                                me->CastSpell(me, 46419, true);
-                                owner->KilledMonsterCredit(oilRig->GetEntry());
-                                me->ForcedDespawn();
-                            }
-                            else if (auto oilRig = GetClosestCreatureWithEntry(me, 60099, 10.f))
-                            {
-                                me->CastSpell(me, 46419, true);
-                                owner->KilledMonsterCredit(oilRig->GetEntry());
-                                me->ForcedDespawn();
-                            }
                         }
                     }
                 }

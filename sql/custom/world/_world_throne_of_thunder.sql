@@ -2960,6 +2960,17 @@ UPDATE creature_template SET ScriptName = "npc_flaming_head_megaera" WHERE entry
 UPDATE creature_template SET ScriptName = "npc_frozen_head_megaera" WHERE entry = 70235;
 UPDATE creature_template SET ScriptName = "npc_venomous_head_megaera" WHERE entry = 70247;
 UPDATE creature_template SET ScriptName = "npc_arcane_head_megaera" WHERE entry = 70252;
+
+REPLACE INTO spell_script_names VALUES
+(137973, 'spell_concealing_fog_megaera'),
+(139548, 'spell_rampage_flaming_head_megaera'),
+(139549, 'spell_rampage_frozen_head_megaera'),
+(139551, 'spell_rampage_venomous_head_megaera'),
+(139552, 'spell_rampage_arcane_head_megaera'),
+(139822, 'spell_cinders_megaera'),
+(139843, 'spell_arctic_freeze_megaera'),
+(134343, 'spell_acid_glob_megaera');
+
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/

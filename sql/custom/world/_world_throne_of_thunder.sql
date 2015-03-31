@@ -20,6 +20,71 @@ REPLACE INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconN
 INSERT INTO `gameobject` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`spawntimesecs`,`animprogress`,`state`,`isActive`,`protect_anti_doublet`) VALUES
 (@OGUID+26, 214539, 1064, 0, 0, 1, 1, 7260.45, 5019.11, 80.2229, 2.38534, 0, 0, 0.929358, 0.36918, 86400, 0, 1, 0, NULL);
 
+DELETE FROM `instance_encounters` WHERE `map` = 1098;
+INSERT INTO `instance_encounters` (`map`, `index`, `difficulty`, `name`, `type`, `entry`, `dungeon`) VALUES
+(1098, 9, 3, 'Jin''rokh the Breaker', 0, 69465, 0),
+(1098, 9, 4, 'Jin''rokh the Breaker', 0, 69465, 0),
+(1098, 9, 5, 'Jin''rokh the Breaker', 0, 69465, 0),
+(1098, 9, 6, 'Jin''rokh the Breaker', 0, 69465, 0),
+
+(1098, 7, 3, 'Horridon', 0, 68476, 0),
+(1098, 7, 4, 'Horridon', 0, 68476, 0),
+(1098, 7, 5, 'Horridon', 0, 68476, 0),
+(1098, 7, 6, 'Horridon', 0, 68476, 0),
+
+(1098, 3, 3, 'Council of Elders', 0, 69135, 0),
+(1098, 3, 4, 'Council of Elders', 0, 69135, 0),
+(1098, 3, 5, 'Council of Elders', 0, 69135, 0),
+(1098, 3, 6, 'Council of Elders', 0, 69135, 0),
+
+(1098, 2, 3, 'Tortos', 0, 67977, 0),
+(1098, 2, 4, 'Tortos', 0, 67977, 0),
+(1098, 2, 5, 'Tortos', 0, 67977, 0),
+(1098, 2, 6, 'Tortos', 0, 67977, 0),
+
+(1098, 10, 3, 'Megaera', 0, 68065, 0),
+(1098, 10, 4, 'Megaera', 0, 68065, 0),
+(1098, 10, 5, 'Megaera', 0, 68065, 0),
+(1098, 10, 6, 'Megaera', 0, 68065, 0),
+
+(1098, 5, 3, 'Ji-Kun', 0, 69712, 0),
+(1098, 5, 4, 'Ji-Kun', 0, 69712, 0),
+(1098, 5, 5, 'Ji-Kun', 0, 69712, 0),
+(1098, 5, 6, 'Ji-Kun', 0, 69712, 0),
+
+(1098, 4, 3, 'Durumu the Forgotten', 0, 68036, 0),
+(1098, 4, 4, 'Durumu the Forgotten', 0, 68036, 0),
+(1098, 4, 5, 'Durumu the Forgotten', 0, 68036, 0),
+(1098, 4, 6, 'Durumu the Forgotten', 0, 68036, 0),
+
+(1098, 6, 3, 'Primordius', 0, 69017, 0),
+(1098, 6, 4, 'Primordius', 0, 69017, 0),
+(1098, 6, 5, 'Primordius', 0, 69017, 0),
+(1098, 6, 6, 'Primordius', 0, 69017, 0),
+
+(1098, 8, 3, 'Dark Animus', 0, 69427, 0),
+(1098, 8, 4, 'Dark Animus', 0, 69427, 0),
+(1098, 8, 5, 'Dark Animus', 0, 69427, 0),
+(1098, 8, 6, 'Dark Animus', 0, 69427, 0),
+
+(1098, 0, 3, 'Iron Qon', 0, 68078, 0),
+(1098, 0, 4, 'Iron Qon', 0, 68078, 0),
+(1098, 0, 5, 'Iron Qon', 0, 68078, 0),
+(1098, 0, 6, 'Iron Qon', 0, 68078, 0),
+
+(1098, 1, 3, 'Twin Consorts', 0, 68905, 0),
+(1098, 1, 4, 'Twin Consorts', 0, 68905, 0),
+(1098, 1, 5, 'Twin Consorts', 0, 68905, 0),
+(1098, 1, 6, 'Twin Consorts', 0, 68905, 0),
+
+(1098, 11, 3, 'Lei Shen', 0, 68397, 0),
+(1098, 11, 4, 'Lei Shen', 0, 68397, 0),
+(1098, 11, 5, 'Lei Shen', 0, 68397, 0),
+(1098, 11, 6, 'Lei Shen', 0, 68397, 0),
+
+(1098, 12, 5, 'Ra-Den', 0, 69473, 0),
+(1098, 12, 6, 'Ra-Den', 0, 69473, 0);
+
 -- Isle of Thunder available
 DELETE FROM `spell_area` WHERE `area` = 6507;
 

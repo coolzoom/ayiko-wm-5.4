@@ -489,7 +489,7 @@ public:
         }
     }
 
-    void RewardCurrencyForPlayers()
+    void RewardCurrencyAndUpdateState()
     {
         Map::PlayerList const &lPlayers = me->GetMap()->GetPlayers();
         for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
@@ -499,6 +499,8 @@ public:
                 player->ModifyCurrency(CURRENCY_TYPE_VALOR_POINTS, 4000);
             }
         }
+
+        pInstance->UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, MOB_GARA_JAL, me);
     }
     
     void JustDied(Unit *pKiller)
@@ -536,7 +538,7 @@ public:
                 if (pAI->GetData(0) < 4)
                     me->SetLootRecipient(nullptr);
                 else
-                    RewardCurrencyForPlayers();
+                    RewardCurrencyAndUpdateState();
             }
         }
     }

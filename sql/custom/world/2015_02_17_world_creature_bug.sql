@@ -212,3 +212,8 @@ INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`mo
 (63840, 870, 0, 0, 1, 1, 0, 0, 1502.84, 2325.07, 352.083, 0.323459, 300, 0, 0, 407532, 0, 0, 0, 0, 0, 2048, 0, 0),
 (63840, 870, 0, 0, 1, 1, 0, 0, 1495.07, 2292.74, 351.996, 6.17625, 300, 0, 0, 407532, 0, 0, 0, 0, 0, 2048, 0, 0),
 (63840, 870, 0, 0, 1, 1, 0, 0, 1556.74, 2394.55, 334.397, 3.41557, 300, 0, 0, 393941, 0, 0, 0, 0, 0, 2048, 0, 0);
+
+/* Osul Fire-Warrior wrong aura and flags fixed */
+DELETE FROM `creature_template_aura` WHERE `entry` = 63576;
+UPDATE `creature` SET `unit_flags` = 0 WHERE `id` = 63576;
+UPDATE `creature_template` SET `unit_flags` = 0, `dynamicflags` = 0, `type_flags` = 0 WHERE `entry` = 63576;

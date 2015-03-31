@@ -20,6 +20,71 @@ REPLACE INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconN
 INSERT INTO `gameobject` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`spawntimesecs`,`animprogress`,`state`,`isActive`,`protect_anti_doublet`) VALUES
 (@OGUID+26, 214539, 1064, 0, 0, 1, 1, 7260.45, 5019.11, 80.2229, 2.38534, 0, 0, 0.929358, 0.36918, 86400, 0, 1, 0, NULL);
 
+DELETE FROM `instance_encounters` WHERE `map` = 1098;
+INSERT INTO `instance_encounters` (`map`, `index`, `difficulty`, `name`, `type`, `entry`, `dungeon`) VALUES
+(1098, 9, 3, 'Jin''rokh the Breaker', 0, 69465, 0),
+(1098, 9, 4, 'Jin''rokh the Breaker', 0, 69465, 0),
+(1098, 9, 5, 'Jin''rokh the Breaker', 0, 69465, 0),
+(1098, 9, 6, 'Jin''rokh the Breaker', 0, 69465, 0),
+
+(1098, 7, 3, 'Horridon', 0, 68476, 0),
+(1098, 7, 4, 'Horridon', 0, 68476, 0),
+(1098, 7, 5, 'Horridon', 0, 68476, 0),
+(1098, 7, 6, 'Horridon', 0, 68476, 0),
+
+(1098, 3, 3, 'Council of Elders', 0, 69135, 0),
+(1098, 3, 4, 'Council of Elders', 0, 69135, 0),
+(1098, 3, 5, 'Council of Elders', 0, 69135, 0),
+(1098, 3, 6, 'Council of Elders', 0, 69135, 0),
+
+(1098, 2, 3, 'Tortos', 0, 67977, 0),
+(1098, 2, 4, 'Tortos', 0, 67977, 0),
+(1098, 2, 5, 'Tortos', 0, 67977, 0),
+(1098, 2, 6, 'Tortos', 0, 67977, 0),
+
+(1098, 10, 3, 'Megaera', 0, 68065, 0),
+(1098, 10, 4, 'Megaera', 0, 68065, 0),
+(1098, 10, 5, 'Megaera', 0, 68065, 0),
+(1098, 10, 6, 'Megaera', 0, 68065, 0),
+
+(1098, 5, 3, 'Ji-Kun', 0, 69712, 0),
+(1098, 5, 4, 'Ji-Kun', 0, 69712, 0),
+(1098, 5, 5, 'Ji-Kun', 0, 69712, 0),
+(1098, 5, 6, 'Ji-Kun', 0, 69712, 0),
+
+(1098, 4, 3, 'Durumu the Forgotten', 0, 68036, 0),
+(1098, 4, 4, 'Durumu the Forgotten', 0, 68036, 0),
+(1098, 4, 5, 'Durumu the Forgotten', 0, 68036, 0),
+(1098, 4, 6, 'Durumu the Forgotten', 0, 68036, 0),
+
+(1098, 6, 3, 'Primordius', 0, 69017, 0),
+(1098, 6, 4, 'Primordius', 0, 69017, 0),
+(1098, 6, 5, 'Primordius', 0, 69017, 0),
+(1098, 6, 6, 'Primordius', 0, 69017, 0),
+
+(1098, 8, 3, 'Dark Animus', 0, 69427, 0),
+(1098, 8, 4, 'Dark Animus', 0, 69427, 0),
+(1098, 8, 5, 'Dark Animus', 0, 69427, 0),
+(1098, 8, 6, 'Dark Animus', 0, 69427, 0),
+
+(1098, 0, 3, 'Iron Qon', 0, 68078, 0),
+(1098, 0, 4, 'Iron Qon', 0, 68078, 0),
+(1098, 0, 5, 'Iron Qon', 0, 68078, 0),
+(1098, 0, 6, 'Iron Qon', 0, 68078, 0),
+
+(1098, 1, 3, 'Twin Consorts', 0, 68905, 0),
+(1098, 1, 4, 'Twin Consorts', 0, 68905, 0),
+(1098, 1, 5, 'Twin Consorts', 0, 68905, 0),
+(1098, 1, 6, 'Twin Consorts', 0, 68905, 0),
+
+(1098, 11, 3, 'Lei Shen', 0, 68397, 0),
+(1098, 11, 4, 'Lei Shen', 0, 68397, 0),
+(1098, 11, 5, 'Lei Shen', 0, 68397, 0),
+(1098, 11, 6, 'Lei Shen', 0, 68397, 0),
+
+(1098, 12, 5, 'Ra-Den', 0, 69473, 0),
+(1098, 12, 6, 'Ra-Den', 0, 69473, 0);
+
 -- Isle of Thunder available
 DELETE FROM `spell_area` WHERE `area` = 6507;
 
@@ -2895,6 +2960,17 @@ UPDATE creature_template SET ScriptName = "npc_flaming_head_megaera" WHERE entry
 UPDATE creature_template SET ScriptName = "npc_frozen_head_megaera" WHERE entry = 70235;
 UPDATE creature_template SET ScriptName = "npc_venomous_head_megaera" WHERE entry = 70247;
 UPDATE creature_template SET ScriptName = "npc_arcane_head_megaera" WHERE entry = 70252;
+
+REPLACE INTO spell_script_names VALUES
+(137973, 'spell_concealing_fog_megaera'),
+(139548, 'spell_rampage_flaming_head_megaera'),
+(139549, 'spell_rampage_frozen_head_megaera'),
+(139551, 'spell_rampage_venomous_head_megaera'),
+(139552, 'spell_rampage_arcane_head_megaera'),
+(139822, 'spell_cinders_megaera'),
+(139843, 'spell_arctic_freeze_megaera'),
+(134343, 'spell_acid_glob_megaera');
+
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -2914,6 +2990,8 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 (70587, 0, 0, 3170587, 0, 0, 48160, 0, 0, 0, 'Shale Stalker', '', '', 0, 92, 92, 4, 16, 16, 0, 4.8, 1.714286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2097224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 3, 1, 8, 1, 1, 0, 0, 0, 0, 0, 0, 0, 174, 1, 0, 0, '', 17614),
 (70589, 0, 0, 0, 0, 0, 48177, 0, 0, 0, 'Cavern Burrower', '', '', 0, 92, 92, 4, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 45000, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 70589, 0, 0, 0, 0, 0, 0, 0, 0, 140618, 140619, 140600, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 3, 1, 35, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 1),
 (70594, 0, 0, 0, 0, 0, 44690, 0, 0, 0, 'Mist Lurker', '', '', 0, 92, 92, 4, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 55000, 0, 45000, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 70594, 0, 0, 0, 0, 0, 0, 0, 0, 140682, 140684, 140686, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 3, 1, 35, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 1),
+(70446, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Icy Ground', '', '', 0, 93, 93, 4, 14, 14, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 17826816, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'npc_icy_ground_megaera', 17614),
+(70432, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Cinders', '', '', 0, 93, 93, 4, 14, 14, 0, 1, 1.14286, 1, 1, 11839, 17339, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 17826816, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'npc_cinders_megaera', 17614),
 
 (@RAID_DIFF_10N + 70153, 0, 0, 3170153, 0, 0, 28133, 0, 0, 0, 'Fungal Growth', '', '', 0, 92, 92, 4, 16, 16, 0, 2.4, 1.714286, 1, 1, 30000, 55000, 0, 45299, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 70153, 0, 0, 0, 0, 0, 0, 0, 0, 140620, 140626, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 3, 1, 35, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 1),
 (@RAID_DIFF_10N + 70212, 0, 0, 0, 0, 0, 47414, 48240, 48241, 0, 'Flaming Head', 'Head of Megaera', '', 0, 93, 93, 4, 16, 16, 0, 1, 1.14286, 1, 3, 37839, 51339, 0, 31299, 2, 2000, 2000, 1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 108, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 6, 1, 86.25, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 752828415, 0, 'npc_flaming_head_megaera', 17614),

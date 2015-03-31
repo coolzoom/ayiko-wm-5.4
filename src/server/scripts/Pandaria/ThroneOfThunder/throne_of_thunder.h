@@ -86,7 +86,7 @@ enum CreaturesIds
     BOSS_COUNCIL_HIGH_PRIESTESS_MARLI       = 69132,
 
     BOSS_TORTOS                             = 67977,
-    BOSS_MEGAERA                            = 70212,
+    BOSS_MEGAERA                            = 68065,
     BOSS_JI_KUN                             = 69712,
 
     BOSS_DURUMU_THE_FORGOTTEN               = 68036,

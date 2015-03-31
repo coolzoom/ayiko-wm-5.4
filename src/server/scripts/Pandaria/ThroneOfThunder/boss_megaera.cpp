@@ -589,7 +589,7 @@ class boss_megaera : public CreatureScript
                 _Reset();
 
                 // Select and spawn the 3 heads.
-                //SpawnStartingHeads();
+                SpawnStartingHeads();
             }
 
             void EnterCombat(Unit* who)

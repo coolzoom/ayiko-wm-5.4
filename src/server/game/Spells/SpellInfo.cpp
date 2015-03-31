@@ -2733,6 +2733,7 @@ bool SpellInfo::_IsPositiveEffect(uint8 effIndex, bool deep) const
                 case 136922: // Frostbite
                 case 136992: // Biting Cold
                 case 137162: // Static Burst
+                case 139857: // Torrent of Ice
                     return false;
                 case 30877: // Tag Murloc
                 case 61716: // Rabbit Costume

@@ -127,3 +127,9 @@ DELETE FROM `creature` WHERE `id`=62248;
 DELETE FROM `creature` WHERE `id`=62736;
 INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
 (62736, 870, 0, 0, 1, 1, 0, 0, 1365.83, 3584.46, 224.865, 4.57121, 10, 0, 0, 1680, 0, 0, 0, 0, 0, 2048, 0, 0);
+
+/* Tai Ho now is spawned for finish the quest */
+DELETE FROM `creature` WHERE `id`=61482;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(61482, 870, 5842, 6197, 1, 1, 0, 0, 1830.62, 4251.71, 148.873, 0.947268, 120, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+(61482, 870, 0, 0, 1, 65535, 0, 0, 2353.79, 4982.77, 68.2823, 1.88813, 300, 0, 0, 326966, 0, 0, 0, 0, 0, 2048, 0, 0);

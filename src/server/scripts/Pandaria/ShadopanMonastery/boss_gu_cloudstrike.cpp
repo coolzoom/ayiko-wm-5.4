@@ -568,6 +568,48 @@ public:
     };
 };
 
+class spell_spm_charging_soul : public SpellScriptLoader
+{
+public:
+    spell_spm_charging_soul() : SpellScriptLoader("spell_spm_charging_soul") { }
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_spm_charging_soul_AuraScript();
+    }
+
+    class spell_spm_charging_soul_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_spm_charging_soul_AuraScript);
+
+        void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            auto const owner = GetOwner()->ToCreature();
+            if (!owner)
+                return;
+
+            owner->ApplySpellImmune(0, IMMUNITY_SCHOOL, (SPELL_SCHOOL_MASK_NORMAL | SPELL_SCHOOL_MASK_HOLY), true);
+            owner->ApplySpellImmune(0, IMMUNITY_ID, 35395, true);
+        }
+
+        void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            auto const owner = GetOwner()->ToCreature();
+            if (!owner)
+                return;
+
+            owner->ApplySpellImmune(0, IMMUNITY_SCHOOL, (SPELL_SCHOOL_MASK_NORMAL | SPELL_SCHOOL_MASK_HOLY), false);
+            owner->ApplySpellImmune(0, IMMUNITY_ID, 35395, false);
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_spm_charging_soul_AuraScript::OnApply, EFFECT_0, SPELL_AURA_SCHOOL_IMMUNITY, AURA_EFFECT_HANDLE_REAL);
+            AfterEffectRemove += AuraEffectRemoveFn(spell_spm_charging_soul_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_SCHOOL_IMMUNITY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+};
+
 void AddSC_boss_gu_cloudstrike()
 {
     new boss_gu_cloudstrike();
@@ -576,4 +618,5 @@ void AddSC_boss_gu_cloudstrike()
     new spell_kill_guardians();
     new spell_spm_arc_lightning();
     new spell_spm_magnetic_shroud();
+    new spell_spm_charging_soul();
 }

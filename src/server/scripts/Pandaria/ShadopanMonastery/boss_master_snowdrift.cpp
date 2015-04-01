@@ -125,7 +125,7 @@ public:
         EventMap events, nonCombatEvents;
         InstanceScript* instance;
         bool aggroDone, isBossSummoned, isFightWon, phaseTwo;
-        uint8 phase;
+        uint8 phase, hurlChiCnt;
         uint8 randIndex[3];
 
         void InitializeAI() override
@@ -176,6 +176,7 @@ public:
             aggroDone = false;
             phaseTwo = false;
             isBossSummoned = false;
+            hurlChiCnt = 0;
             phase = PHASE_FIGHT_1;
             events.Reset();
         }
@@ -239,8 +240,9 @@ public:
                     Talk(TALK_WAWE2_START);
                     break;
                 case ACTION_DISSAPEAR:
+                    ++hurlChiCnt;
                     isBossSummoned = false;
-                    if(me->GetHealthPct() > 50.0f)
+                    if (hurlChiCnt < 3)
                     {
                         me->SetVisible(false);
                         me->CastSpell(me, SPELL_SMOKE_BOMB, true);   
@@ -281,11 +283,16 @@ public:
 
         void DamageTaken(Unit* /*attacker*/, uint32& damage) override
         {
-            if(me->HealthBelowPctDamaged(70, damage) && !phaseTwo)
+            if(me->HealthBelowPctDamaged(50, damage) && !phaseTwo)
             {   
                 phaseTwo = true;
                 Talk(TALK_PHASE_2);
-                nonCombatEvents.ScheduleEvent(EVENT_PHASE_2, 10 * IN_MILLISECONDS);
+                events.Reset();
+                me->StopMoving();
+                me->CombatStop(true);
+                me->setRegeneratingHealth(false);
+                me->SetReactState(REACT_PASSIVE);
+                nonCombatEvents.ScheduleEvent(EVENT_PHASE_2, 9 * IN_MILLISECONDS);
             }
 
             if(damage >= me->GetHealth() && phase == PHASE_FIGHT_3)
@@ -301,7 +308,8 @@ public:
                     me->StopMoving();
                     me->setFaction(35);
                     me->RemoveAllAuras();
-                    me->CombatStop(true);                   
+                    me->CombatStop(true);       
+                    me->DeleteThreatList();
                     me->SetReactState(REACT_PASSIVE);
                     me->SetUInt32Value(UNIT_FIELD_BYTES_1, UNIT_STAND_STATE_KNEEL);
                     events.Reset();
@@ -414,10 +422,6 @@ public:
                     case EVENT_PHASE_2:
                         phase = PHASE_FIGHT_2;
                         Talk(TALK_P_2_EMOTE);
-                        me->StopMoving();
-                        me->CombatStop(true);
-                        me->setRegeneratingHealth(false);
-                        me->SetReactState(REACT_PASSIVE);
                         me->CastSpell(me, SPELL_SMOKE_BOMB, true);
                         me->SetVisible(false);
                         events.Reset();
@@ -1316,22 +1320,51 @@ public:
     {
         PrepareAuraScript(spell_snowdrift_ball_of_fire_AuraScript);
 
-        uint32 angle;
-
         void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
             auto const owner = GetOwner()->ToCreature();
-            auto const caster = GetCaster();
-            if(!owner || !caster)
-                return;
 
-            owner->CastSpell(owner, SPELL_BALL_OF_FIRE, true);
-            caster->CastSpell(caster, SPELL_BALL_OF_FIRE, true);
+            if(owner)
+                owner->CastSpell(owner, SPELL_BALL_OF_FIRE, true);
         }
 
         void Register()
         {
             OnEffectApply += AuraEffectApplyFn(spell_snowdrift_ball_of_fire_AuraScript::OnApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+};
+
+class spell_snowdrift_ball_of_fire_aura : public SpellScriptLoader
+{
+public:
+    spell_snowdrift_ball_of_fire_aura() : SpellScriptLoader("spell_snowdrift_ball_of_fire_aura") { }
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_snowdrift_ball_of_fire_aura_AuraScript();
+    }
+
+    enum eSpells
+    {
+        SPELL_BALL_OF_FIRE = 113760
+    };
+
+    class spell_snowdrift_ball_of_fire_aura_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_snowdrift_ball_of_fire_aura_AuraScript);
+
+        void OnPeriodic(AuraEffect const * /*aurEff*/)
+        {
+            auto const owner = GetOwner()->ToCreature();
+
+            if (owner)
+                owner->CastSpell(owner, SPELL_BALL_OF_FIRE, true);
+        }
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_snowdrift_ball_of_fire_aura_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
         }
     };
 };
@@ -1705,6 +1738,7 @@ void AddSC_boss_master_snowdrift()
     new npc_snowdrift_fireball();
     new spell_spm_swirling_steel();
     new spell_snowdrift_ball_of_fire();
+    new spell_snowdrift_ball_of_fire_aura();
     new spell_snowdrift_hurl_chi();
     new spell_snowdrift_tornado_slam();
     new spell_snowdrift_tornado_slam_effect();

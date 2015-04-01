@@ -60,6 +60,11 @@ public:
         SPELL_KNEEL                  = 130491
     };
 
+    enum eCreature
+    {
+        NPC_SNOWDRIFT_QUESTENDER = 64387
+    };
+
     struct boss_taran_zhuAI : public BossAI
     {
         boss_taran_zhuAI(Creature* creature) : BossAI(creature, DATA_TARAN_ZHU) {}
@@ -85,6 +90,7 @@ public:
                     me->RemoveAllAuras();
                     me->SetReactState(REACT_PASSIVE);
                     me->SetUInt32Value(UNIT_FIELD_BYTES_1, UNIT_STAND_STATE_KNEEL);
+                    me->SummonCreature(NPC_SNOWDRIFT_QUESTENDER, 3855.144f, 2632.581f, 754.541f, 4.964f);
                     if(auto const cache = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_TARAN_ZHU_CACHE)))
                         cache->SetPhaseMask(1, true);
                 }
@@ -156,11 +162,14 @@ public:
                     _JustDied();
                     me->StopMoving();
                     me->setFaction(35);
-                    me->CombatStop(true);
                     me->RemoveAllAuras();
+                    me->CombatStop(true);
+                    me->DeleteThreatList();
+                    me->SetReactState(REACT_PASSIVE);
                     Talk(TALK_DEATH);
                     events.Reset();
                     nonCombatEvents.ScheduleEvent(EVENT_OUTRO, 3 * IN_MILLISECONDS);
+                    me->SummonCreature(NPC_SNOWDRIFT_QUESTENDER, 3855.144f, 2632.581f, 754.541f, 4.964f);
 
                     if(instance)
                     {

@@ -2411,6 +2411,8 @@ class spell_monk_blackout_kick : public SpellScriptLoader
                         if (caster->HasAura(SPELL_MONK_GLYPH_OF_BLACKOUT_KICK))
                         {
                             int32 bp = int32(damage * 0.2f) / 4;
+                            if (auto eff = target->HasAura(SPELL_MONK_BLACKOUT_KICK_DOT, caster->GetGUID()))
+                                bp += target->GetRemainingPeriodicAmount(caster->GetGUID(), SPELL_MONK_BLACKOUT_KICK_DOT, SPELL_AURA_PERIODIC_DAMAGE).perTick();
                             caster->CastCustomSpell(target, SPELL_MONK_BLACKOUT_KICK_DOT, &bp, NULL, NULL, true);
                         }
                         else
@@ -2419,6 +2421,8 @@ class spell_monk_blackout_kick : public SpellScriptLoader
                             if (target->isInBack(caster))
                             {
                                 int32 bp = int32(damage * 0.2f) / 4;
+                                if (auto eff = target->HasAura(SPELL_MONK_BLACKOUT_KICK_DOT, caster->GetGUID()))
+                                    bp += target->GetRemainingPeriodicAmount(caster->GetGUID(), SPELL_MONK_BLACKOUT_KICK_DOT, SPELL_AURA_PERIODIC_DAMAGE).perTick();
                                 caster->CastCustomSpell(target, SPELL_MONK_BLACKOUT_KICK_DOT, &bp, NULL, NULL, true);
                             }
                             // else : 20% damage on instant heal

@@ -12441,6 +12441,9 @@ float Unit::GetSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolM
 {
     float crit_chance = 0.0f;
 
+    if (spellProto->AttributesEx2 & SPELL_ATTR2_CANT_CRIT)
+        return crit_chance;
+
     // Pets have 100% of owner's crit_chance
     if (isPet() && GetOwner())
     {

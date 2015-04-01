@@ -865,7 +865,7 @@ class spell_mastery_icicles final : public SpellScriptLoader
 
             if (caster->getLevel() >= 80 && caster->HasAura(76613))
             {
-                int32 damage = GetHitDamage();
+                int32 damage = GetHitDamage() + GetAbsorbedDamage();
                 if (!damage)
                     return;
 

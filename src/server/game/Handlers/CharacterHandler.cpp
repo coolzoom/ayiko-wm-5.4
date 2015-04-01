@@ -1857,6 +1857,9 @@ void WorldSession::HandleEquipmentSetSave(WorldPacket& recvData)
     iconName = recvData.ReadString(iconNameLen);
     name = recvData.ReadString(setNameLen);
 
+    if (name.empty() || iconName.empty())
+        return;
+
     recvData.ReadByteSeq<5, 0, 1, 7, 6, 2>(setGuid);
 
     eqSet.Guid      = setGuid;

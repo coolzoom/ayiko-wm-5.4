@@ -486,6 +486,8 @@ enum AtLoginFlags
     AT_LOGIN_FIRST                  = 0x020,
     AT_LOGIN_CHANGE_FACTION         = 0x040,
     AT_LOGIN_CHANGE_RACE            = 0x080,
+	//0x100 - this one is warsong specific to clean talents on login
+    AT_LOGIN_NO_CHAR				= 0x200 // deleteme
 };
 
 typedef std::unordered_map<uint32, QuestStatusData> QuestStatusMap;
@@ -2827,7 +2829,10 @@ class Player final : public Unit, public GridObject<Player>
         {
             AuraTargetMap::const_iterator i = auraTargets_.find(spellId);
             return (i != auraTargets_.end()) ? &i->second : NULL;
-        }
+		}
+
+        uint32 m_forcedLogoutTime;
+        uint32 m_forcedLogoutEventStage;
 
     private:
         typedef std::unordered_set<uint32> DFQuestsDoneList;
@@ -3134,7 +3139,7 @@ class Player final : public Unit, public GridObject<Player>
         typedef std::set<uint32> DailyQuestSet;
         DailyQuestSet m_dailyQuestStorage;
 
-        uint32 m_logonSendTimer;
+        uint32 m_logonSendTimer;        
 
     private:
         void RemoveActiveQuest(uint32 quest_id);

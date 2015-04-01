@@ -1465,6 +1465,27 @@ void World::LoadConfigSettings(bool reload)
     m_float_configs[CONFIG_CHEAT_MOVING_MAX_SPEED_MULTIPLIER] = sConfigMgr->GetFloatDefault("CheatMoving.MaxSpeedMultiplier", 1.3f);
     m_int_configs[CONFIG_CHEAT_MOVING_MAX_FAILED_SPEED_CHECKS] = sConfigMgr->GetIntDefault("CheatMoving.MaxFailedSpeedChecks", 10);
 
+	// April 1st
+	m_bool_configs[CONFIG_APRIL_FOOLS_NO_FLYING] = sConfigMgr->GetBoolDefault("AprilFools.NoFlying", false);
+	m_bool_configs[CONFIG_APRIL_FOOLS_FFA] = sConfigMgr->GetBoolDefault("AprilFools.FFA", false);
+	m_bool_configs[CONFIG_APRIL_FOOLS_PERMA_DEATH] = sConfigMgr->GetBoolDefault("AprilFools.PermaDeath", false);
+
+	{
+		// This is thread safe, as messages are processed (sadly) in World loop
+		for (SessionMap::iterator itr = m_sessions.begin(); itr != m_sessions.end(); itr++)
+		{
+			if (Player* player = itr->second->GetPlayer())
+			{
+				uint32 newzone, newarea;
+				player->GetZoneAndAreaId(newzone, newarea);
+				player->UpdateZone(newzone, newarea);
+			}
+		}
+
+		if (!sWorld->getBoolConfig(CONFIG_APRIL_FOOLS_PERMA_DEATH))
+			CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login & ~ 512");
+	}
+
     if (reload)
         sScriptMgr->OnConfigLoad(reload);
 }

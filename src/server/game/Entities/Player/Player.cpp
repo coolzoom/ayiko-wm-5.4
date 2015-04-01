@@ -906,7 +906,10 @@ Player::Player(WorldSession* session)
     m_averageSpeed = 0.0f;
 
     m_queuedSpell = NULL;
-    m_logonSendTimer = 60 * IN_MILLISECONDS;
+	m_logonSendTimer = 60 * IN_MILLISECONDS;
+
+    m_forcedLogoutTime = 0;
+    m_forcedLogoutEventStage = 0;
 }
 
 Player::~Player()
@@ -2013,7 +2016,27 @@ void Player::Update(uint32 p_time)
         m_logonSendTimer = 30 * IN_MILLISECONDS;
     }
     else
-        m_logonSendTimer -= p_time;
+        m_logonSendTimer -= p_time; 
+	
+    if (m_forcedLogoutEventStage)
+    {
+        if (m_forcedLogoutTime > p_time)
+            m_forcedLogoutTime -= p_time;
+        else
+        {
+            std::stringstream ss;
+            ss << "You will be logged out in ";
+            ss << m_forcedLogoutEventStage;
+            ss << " seconds.";
+            ChatHandler(GetSession()).PSendSysMessage(ss.str().c_str());
+            
+            m_forcedLogoutEventStage -= 1; // Go down a stage
+            m_forcedLogoutTime = 1000; // Add another second to the timer
+            
+            if (!m_forcedLogoutEventStage) // We have hit stage 0, request immediate logout (thread safe, handled in next world tick)
+                GetSession()->LogoutRequest(time(NULL) - 25); // A little hack to trick the server
+        }
+    }
 
     //we should execute delayed teleports only for alive(!) players
     //because we don't want player's ghost teleported from graveyard
@@ -8718,7 +8741,7 @@ void Player::UpdateArea(uint32 newArea)
     // previously this was in UpdateZone (but after UpdateArea) so nothing will break
     pvpInfo.inNoPvPArea = false;
     if (HasAura(137080) || // "Custom" Anniversary sanctuary spell
-        (area && area->IsSanctuary()))    // in sanctuary
+        (area && area->IsSanctuary()) && !sWorld->getBoolConfig(CONFIG_APRIL_FOOLS_FFA))    // in sanctuary
     {
         SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY);
         pvpInfo.inNoPvPArea = true;
@@ -8726,6 +8749,20 @@ void Player::UpdateArea(uint32 newArea)
     }
     else
         RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY);
+
+    if (sWorld->getBoolConfig(CONFIG_APRIL_FOOLS_FFA))
+        pvpInfo.inFFAPvPArea = true;
+    
+    if (sWorld->getBoolConfig(CONFIG_APRIL_FOOLS_NO_FLYING) && IsFlying())
+    {
+        Dismount();
+        RemoveAurasByType(SPELL_AURA_FLY);
+        RemoveAurasByType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED);
+        RemoveAurasByType(SPELL_AURA_MOUNTED);
+        SetCanFly(false);
+        CastSpell(this, 45472, true);
+    }
+
 
     m_phaseMgr.RemoveUpdateFlag(PHASE_UPDATE_FLAG_AREA_UPDATE);
 }
@@ -8809,8 +8846,9 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
             SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
             SetRestType(REST_TYPE_IN_CITY);
             InnEnter(time(0), GetMapId(), 0, 0, 0);
-        }
-        pvpInfo.inNoPvPArea = true;
+		}
+        if (!sWorld->getBoolConfig(CONFIG_APRIL_FOOLS_FFA))
+            pvpInfo.inNoPvPArea = true;
     }
     else
     {
@@ -18539,6 +18577,10 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *charHolder, SQLQueryHolder 
         return false;
     }
 
+	m_atLoginFlags = fields[32].GetUInt16();
+	if (m_atLoginFlags & AT_LOGIN_NO_CHAR)
+		return false;
+
     // overwrite possible wrong/corrupted guid
     SetUInt64Value(OBJECT_FIELD_GUID, MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER));
 
@@ -18906,8 +18948,6 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *charHolder, SQLQueryHolder 
     m_taxi.LoadTaxiMask(fields[17].GetCString());
 
     uint32 extraflags = fields[31].GetUInt16();
-
-    m_atLoginFlags = fields[32].GetUInt16();
 
     // Honor system
     // Update Honor kills data

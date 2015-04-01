@@ -114,6 +114,8 @@ class CreatureAI : public UnitAI
         virtual void JustSummoned(Creature* /*summon*/) {}
         virtual void IsSummonedBy(Unit* /*summoner*/) {}
 
+        virtual void JustUnsummoned(Unit* /*summoner*/) {}
+
         virtual void SummonedCreatureDespawn(Creature* /*summon*/) {}
         virtual void SummonedCreatureDies(Creature* /*summon*/, Unit* /*killer*/) {}
 

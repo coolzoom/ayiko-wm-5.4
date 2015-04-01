@@ -11,3 +11,8 @@ REPLACE INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconN
 /* Reward fixed for Angler's daily quests */
 UPDATE `quest_template` SET RewardCurrencyId1 = 396, RewardCurrencyCount1 = 5, RewardCurrencyId2 = 738, RewardCurrencyCount2 = 1, RewardItemId1 = 0, RewardItemCount1 = 0 WHERE Id IN (30585,30586,30588,30598,30613,30658,30678,30698,30700,30701,30753,30754,30763,31443,31444,31446);
 UPDATE `quest_template` SET RewardCurrencyId1 = 396, RewardCurrencyCount1 = 5, RewardCurrencyId2 = 738, RewardCurrencyCount2 = 1, RewardItemId1 = 81175, RewardItemCount1 = 1, RewardItemId2 = 0, RewardItemCount2 = 0 WHERE Id = 30584;
+
+/* Tired Shushen <Waterspeaker> now is spawned for start and finish the quests */
+DELETE FROM `creature` WHERE `id`=58278;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(58278, 870, 0, 0, 1, 1, 0, 58278, -1331.8, 1556.96, 18.3711, 4.87478, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0);

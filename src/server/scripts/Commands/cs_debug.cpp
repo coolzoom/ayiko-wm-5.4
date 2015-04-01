@@ -94,6 +94,7 @@ public:
             { "areatriggers",  rbac::RBAC_PERM_COMMAND_DEBUG_AREATRIGGERS,  false, &HandleDebugAreaTriggersCommand,     "", NULL },
             { "los",           rbac::RBAC_PERM_COMMAND_DEBUG_LOS,           false, &HandleDebugLoSCommand,              "", NULL },
             { "moveflags",     rbac::RBAC_PERM_COMMAND_DEBUG_MOVEFLAGS,     false, &HandleDebugMoveflagsCommand,        "", NULL },
+            { "relocation",    rbac::RBAC_PERM_COMMAND_DEBUG_RELOCATION,    false, &HandleDebugRelocationCommand,       "", NULL },
             { NULL,            0,                                     false, NULL,                                "", NULL }
         };
         static ChatCommand commandTable[] =
@@ -1392,6 +1393,32 @@ public:
 
         return true;
     }
+
+     static bool HandleDebugRelocationCommand(ChatHandler* handler, char const* /*args*/)
+     {
+        Player* player = handler->GetSession()->GetPlayer();
+        uint32 highestEntry[5] = { 0 };
+        uint32 highestDiff[5] = { 0 };
+        for (std::map<uint32, uint32>::iterator itr = sWorld->diffTimePerEntry.begin(); itr != sWorld->diffTimePerEntry.end(); itr++)
+        {
+            for (uint8 i = 0; i < 5; i++)
+            {
+                if (itr->second > highestDiff[i])
+                {
+                    highestDiff[i] = itr->second;
+                    highestEntry[i] = itr->first;
+                    break;
+                }
+            }
+        }
+        handler->PSendSysMessage("Creature entrys that spend most time in AIReloaction notifies\n"
+            "1. Entry: %u - Time spent in last 30 seconds %u\n"
+            "2. Entry: %u - Time spent in last 30 seconds %u\n"
+            "3. Entry: %u - Time spent in last 30 seconds %u\n"
+            "4. Entry: %u - Time spent in last 30 seconds %u\n"
+            "5. Entry: %u - Time spent in last 30 seconds %u\n", highestEntry[0], highestDiff[0], highestEntry[1], highestDiff[1], highestEntry[2], highestDiff[2], highestEntry[3], highestDiff[3], highestEntry[4], highestDiff[4]);
+        return true;
+     }
 
     static bool HandleWPGPSCommand(ChatHandler* handler, char const* /*args*/)
     {

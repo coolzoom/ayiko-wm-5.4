@@ -11,6 +11,8 @@ DoorData const doorData[] =
     { GOB_COUNCIL_ENTRANCE1, DATA_COUNCIL_OF_ELDERS, DOOR_TYPE_ROOM, },
     { GOB_COUNCIL_ENTRANCE2, DATA_COUNCIL_OF_ELDERS, DOOR_TYPE_ROOM, },
     //{ GOB_COUNCIL_EXIT, DATA_COUNCIL_OF_ELDERS, DOOR_TYPE_PASSAGE, },
+    { GOB_TORTOS_DOOR, DATA_TORTOS, DOOR_TYPE_PASSAGE },
+    { GOB_TORTOS_COLLISION, DATA_TORTOS, DOOR_TYPE_SPAWN_HOLE },
 };
 
 typedef std::unordered_map<uint32, uint64> EntryGuidMap;
@@ -107,6 +109,8 @@ public:
                 case GOB_COUNCIL_ENTRANCE1:
                 case GOB_COUNCIL_ENTRANCE2:
                 case GOB_COUNCIL_EXIT:
+                case GOB_TORTOS_DOOR:
+                case GOB_TORTOS_COLLISION:
                     AddDoor(pGo, true);
                     m_mGoGuidStorage.insert(std::make_pair(pGo->GetEntry(), pGo->GetGUID()));
                     break;
@@ -136,7 +140,6 @@ public:
             if (uiId >= MAX_DATA)
                 return false;
 
-            TC_LOG_ERROR("scripts", "successfully");
             switch (uiId)
             {
                 case DATA_JINROKH:
@@ -183,6 +186,7 @@ public:
                     m_auiEncounter[uiType] = uiData;
                     if (uiData >= DONE)
                     {
+                        UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, BOSS_JINROKH, instance->GetCreature(GetData64(BOSS_JINROKH)));
                         SaveInstance();
                         HandleGameObject(GetData64(GOB_HORRIDON_PREDOOR), true);
                     }
@@ -191,10 +195,85 @@ public:
                     m_auiEncounter[uiType] = uiData;
                     if (uiData >= DONE)
                     {
+                        UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, BOSS_HORRIDON, instance->GetCreature(GetData64(BOSS_HORRIDON)));
                         SaveInstance();
-                        HandleGameObject(GetData64(GOB_HORRIDON_EXIT), true);
                     }
                     break;
+                case TYPE_TORTOS:
+                    m_auiEncounter[uiType] = uiData;
+                    if (uiData >= DONE)
+                    {
+                        UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, BOSS_TORTOS, instance->GetCreature(GetData64(BOSS_TORTOS)));
+                        SaveInstance();
+                    }
+                    break;
+                case TYPE_MEGAERA:
+                    m_auiEncounter[uiType] = uiData;
+                    if (uiData >= DONE)
+                    {
+                        UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, BOSS_MEGAERA, instance->GetCreature(GetData64(BOSS_MEGAERA)));
+                        SaveInstance();
+                    }
+                    break;
+                case TYPE_DURUMU:
+                    m_auiEncounter[uiType] = uiData;
+                    if (uiData >= DONE)
+                    {
+                        UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, BOSS_DURUMU_THE_FORGOTTEN, instance->GetCreature(GetData64(BOSS_DURUMU_THE_FORGOTTEN)));
+                        SaveInstance();
+                    }
+                    break;
+                case TYPE_JI_KUN:
+                    m_auiEncounter[uiType] = uiData;
+                    if (uiData >= DONE)
+                    {
+                        UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, BOSS_JI_KUN, instance->GetCreature(GetData64(BOSS_JI_KUN)));
+                        SaveInstance();
+                    }
+                    break;
+                case TYPE_PRIMORDIUS:
+                    m_auiEncounter[uiType] = uiData;
+                    if (uiData >= DONE)
+                    {
+                        UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, BOSS_PRIMORDIUS, instance->GetCreature(GetData64(BOSS_PRIMORDIUS)));
+                        SaveInstance();
+                    }
+                    break;
+                case TYPE_DARK_ANIMUS:
+                    m_auiEncounter[uiType] = uiData;
+                    if (uiData >= DONE)
+                    {
+                        UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, BOSS_DARK_ANIMUS, instance->GetCreature(GetData64(BOSS_DARK_ANIMUS)));
+                        SaveInstance();
+                    }
+                    break;
+                case TYPE_IRON_QON:
+                    m_auiEncounter[uiType] = uiData;
+                    if (uiData >= DONE)
+                    {
+                        UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, BOSS_IRON_QON, instance->GetCreature(GetData64(BOSS_IRON_QON)));
+                        SaveInstance();
+                    }
+                    break;
+                case TYPE_LEI_SHEN:
+                    m_auiEncounter[uiType] = uiData;
+                    if (uiData >= DONE)
+                    {
+                        UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, BOSS_LEI_SHEN, instance->GetCreature(GetData64(BOSS_LEI_SHEN)));
+                        SaveInstance();
+                    }
+                    break;
+                case TYPE_RA_DEN:
+                    m_auiEncounter[uiType] = uiData;
+                    if (uiData >= DONE)
+                    {
+                        UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, BOSS_RA_DEN, instance->GetCreature(GetData64(BOSS_RA_DEN)));
+                        SaveInstance();
+                    }
+                    break;
+                case TYPE_TORTOS_INTRO:
+                    // Council and Twin Consorts are handled in scripts
+                case TYPE_TWIN_CONSORTS:
                 case TYPE_COUNCIL:
                     m_auiEncounter[uiType] = uiData;
                     if (uiData >= DONE)
@@ -223,18 +302,32 @@ public:
                 return 0;
             }
 
+            return m_auiEncounter[uiType];
+            /*
             switch (uiType)
             {
                 case TYPE_JINROKH:
                 case TYPE_JINROKH_INTRO:
                 case TYPE_HORRIDON:
                 case TYPE_COUNCIL:
+                case TYPE_TORTOS_INTRO:
+                case TYPE_TORTOS:
+                case TYPE_MEGAERA:
+                case TYPE_DURUMU:
+                case TYPE_JI_KUN:
+                case TYPE_PRIMORDIUS:
+                case TYPE_DARK_ANIMUS:
+                case TYPE_IRON_QON:
+                case TYPE_LEI_SHEN:
+                case TYPE_TWIN_CONSORTS:
+                case TYPE_RA_DEN:
                     return m_auiEncounter[uiType];
                 default:
                     return 0;
             }
 
             return 0;
+            */
         }
 
         uint64 GetData64(uint32 uiType) override
@@ -281,6 +374,8 @@ public:
                 case GOB_COUNCIL_ENTRANCE1:
                 case GOB_COUNCIL_ENTRANCE2:
                 case GOB_COUNCIL_EXIT:
+                case GOB_TORTOS_DOOR:
+                case GOB_TORTOS_COLLISION:
                 case GOB_TRIBAL_DOOR_FARRAKI:
                 case GOB_TRIBAL_DOOR_GURUBASHI:
                 case GOB_TRIBAL_DOOR_DRAKKARI: 

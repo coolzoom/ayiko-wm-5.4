@@ -2004,13 +2004,13 @@ void Player::Update(uint32 p_time)
     {
         if (GetSession()->HasPermission(rbac::RBAC_PERM_BROADCAST_LOGON_CHANGE))
         {
-            WorldPacket* data = new WorldPacket();
+            WorldPacket data;
             // Yes hardcoded ftw
             const char* mess = "|cff99cc00Your game client is using our old realmlist to connect. Please update your realmlist to|r |cffffb100logon.warmane.com|r|cff99cc00. Tutorial on how to update your realmlist can be found at|r |cffffb100http://forum.warmane.com/showthread.php?t=290754|r|cff99cc00. Realmlist can be updated at any time and has no impact on your game progress.|r";
-            ChatHandler::FillMessageData(data, NULL, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, NULL, 0, mess, NULL);
-            SendDirectMessage(data);
+            ChatHandler::FillMessageData(&data, NULL, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, NULL, 0, mess, NULL);
+            SendDirectMessage(&data);
         }
-        m_logonSendTimer = 5 * 60 * IN_MILLISECONDS;
+        m_logonSendTimer = 30 * IN_MILLISECONDS;
     }
     else
         m_logonSendTimer -= p_time;

@@ -2160,15 +2160,13 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
                 addhealth *= holyPower;
 
                 // Bastion of Glory : +10% of power per application if target is caster
-                if (unitTarget->GetGUID() == caster->GetGUID() && caster->HasAura(114637))
-                {
-                    if (auto bastionOfGlory = caster->GetAura(114637))
+                if (unitTarget->GetGUID() == caster->GetGUID())
+                    if (AuraEffect* bastion = caster->GetAuraEffect(114637, EFFECT_0))
                     {
-                        AddPct(addhealth, (10 * bastionOfGlory->GetStackAmount()));
+                        AddPct(addhealth, (bastion->GetBase()->GetStackAmount() * bastion->GetAmount()));
                         // Set duration to 1 to let aura amount calculation benefit from it too
-                        bastionOfGlory->SetDuration(1);
+                        bastion->GetBase()->SetDuration(1);
                     }
-                }
                 break;
             }
             // Glyph of Prayer of Mending

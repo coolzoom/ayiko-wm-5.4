@@ -476,7 +476,7 @@ public:
             return;
 
         uiDamageTakenPossessed += ruiAmount;
-        TC_LOG_ERROR("scripts", "dmg amount is %u", uiDamageTakenPossessed);
+
         if (uiDamageTakenPossessed >= (float)(me->GetMaxHealth() * 0.25f))
         {
             // No remove when no other councillor alive
@@ -489,7 +489,7 @@ public:
         }
     }
 
-    void RewardCurrencyForPlayers()
+    void RewardCurrencyAndUpdateState()
     {
         Map::PlayerList const &lPlayers = me->GetMap()->GetPlayers();
         for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
@@ -499,6 +499,8 @@ public:
                 player->ModifyCurrency(CURRENCY_TYPE_VALOR_POINTS, 4000);
             }
         }
+
+        pInstance->UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, MOB_GARA_JAL, me);
     }
     
     void JustDied(Unit *pKiller)
@@ -536,7 +538,7 @@ public:
                 if (pAI->GetData(0) < 4)
                     me->SetLootRecipient(nullptr);
                 else
-                    RewardCurrencyForPlayers();
+                    RewardCurrencyAndUpdateState();
             }
         }
     }
@@ -1312,7 +1314,6 @@ public:
 
         uint32 GetData(uint32 uiType) override
         {
-            TC_LOG_ERROR("scripts", "m_uiDeadCouncillors %u", m_uiDeadCouncillors);
             return m_uiDeadCouncillors;
         }
 
@@ -1681,7 +1682,6 @@ public:
                 // We're the only councillor alive, no need to perform this check
                 if (pGarajal->AI()->GetData(0) > 3)
                 {
-                    TC_LOG_ERROR("scripts", "3 councillors or more dead");
                     return NULL;
                 }
             }
@@ -2045,7 +2045,7 @@ public:
 
         void Move()
         {
-            if (Player *pTarget = GetFollowedPlayer())
+            if (Player *pTarget = ObjectAccessor::GetPlayer(*me, uiTargetGuid))
             {
                 if (pTarget->IsAlive())
                 {
@@ -2064,18 +2064,6 @@ public:
                 HandleTargetSelection();
         }
 
-        Player* GetFollowedPlayer() 
-        {
-            if (Player* pPlayer = ObjectAccessor::GetPlayer(*me, uiTargetGuid))
-            {
-                if (pPlayer->IsAlive())
-                    return pPlayer;
-            }
-
-            HandleTargetSelection();
-            return nullptr;
-        }
-
         void HandleTargetSelection()
         {
             DoCast(SPELL_MARKED_SOUL);
@@ -2089,7 +2077,7 @@ public:
                 {
                     if (pPlayer->HasAura(SPELL_MARKED_SOUL, me->GetGUID()))
                     {
-                        uiTargetGuid = pPlayer->GetGUID();
+                        SetTargetGuid(pPlayer->GetGUID());
                         break;
                     }
                 }
@@ -2098,6 +2086,11 @@ public:
             events.Reset();
             events.ScheduleEvent(EVENT_MOVE_COUNCILLOR, 500);
             events.ScheduleEvent(EVENT_SHADOWED_GIFT, 20 * IN_MILLISECONDS);
+        }
+
+        void SetTargetGuid(uint64 guid)
+        {
+            uiTargetGuid = guid;
         }
 
         void UpdateAI(const uint32 uiDiff) override
@@ -2112,12 +2105,17 @@ public:
                     Move();
                     break;
                 case EVENT_SHADOWED_GIFT:
-                    if (Player* pTarget = GetFollowedPlayer())
+                    if (Player* pTarget = ObjectAccessor::GetPlayer(*me, uiTargetGuid))
                     {
-                        DoCast(me, SPELL_SHADOWED_TIME_OUT);
-                        me->GetMotionMaster()->MovementExpired();
-                        me->GetMotionMaster()->MoveJump(*pTarget, 42.0f, 42.0f, 5050);
+                        if (pTarget->IsAlive())
+                        {
+                            DoCast(me, SPELL_SHADOWED_TIME_OUT);
+                            me->GetMotionMaster()->MovementExpired();
+                            me->GetMotionMaster()->MoveJump(*pTarget, 42.0f, 42.0f, 5050);
+                            return;
+                        }
                     }
+                    HandleTargetSelection();
                     break;
 
                 default:
@@ -2130,22 +2128,22 @@ public:
         {
             if (uiMotionPointId == POINT_BLESSED_LOA_SPIRIT_COUNCILLOR)
             {
-                if (Player* pTarget = GetFollowedPlayer())
+                if (Player* pTarget = ObjectAccessor::GetPlayer(*me, uiTargetGuid))
                 {
-                    if (me->GetExactDist2d(pTarget) <= 6.f)
+                    if (me->GetExactDist2d(pTarget) <= 6.f && pTarget->IsAlive())
                     {
                         DoCast(pTarget, SPELL_SHADOWED_GIFT, true);
                         pTarget->RemoveAurasDueToSpell(SPELL_MARKED_SOUL, me->GetGUID());
                         me->DisappearAndDie();
                     }
                     else
-                        events.RescheduleEvent(EVENT_MOVE_COUNCILLOR, 0);
+                        events.RescheduleEvent(EVENT_MOVE_COUNCILLOR, 200);
                 }
             }
 
             if (uiMotionPointId == 5050)
             {
-                if (Player* pPlayer = GetFollowedPlayer())
+                if (Player* pPlayer = ObjectAccessor::GetPlayer(*me, uiTargetGuid))
                 {
                     DoCast(pPlayer, SPELL_SHADOWED_GIFT);
                     pPlayer->RemoveAurasDueToSpell(SPELL_MARKED_SOUL, me->GetGUID());
@@ -2157,7 +2155,7 @@ public:
 
         void JustDied(Unit *pKiller) override
         {
-            if (Player *pPlayer = GetFollowedPlayer())
+            if (Player *pPlayer = ObjectAccessor::GetPlayer(*me, uiTargetGuid))
                 pPlayer->RemoveAurasDueToSpell(SPELL_MARKED_SOUL);
         }
 

@@ -4014,10 +4014,13 @@ enum PastSelfSpells
 
 struct auraData
 {
-    auraData(uint32 id, int32 duration, uint8 stacks) : m_id(id), m_duration(duration), m_stacks(stacks) {}
     uint32 m_id;
     int32 m_duration;
+    int32 m_maxDuration;
     uint8 m_stacks;
+    int32 m_damage[MAX_SPELL_EFFECTS];
+    int32 m_fixedAmount[MAX_SPELL_EFFECTS];
+    uint8 Charges;
 };
 
 #define ACTION_ALTER_TIME   1
@@ -4042,7 +4045,7 @@ class npc_past_self : public CreatureScript
 
             int32 mana;
             int32 health;
-            std::set<auraData*> auras;
+            std::list<auraData> auras;
 
             void Reset()
             {
@@ -4069,7 +4072,28 @@ class npc_past_self : public CreatureScript
                             if (auraInfo->IsPassive())
                                 continue;
 
-                            auras.insert(new auraData(auraInfo->Id, aura->GetDuration(), aura->GetStackAmount()));
+                            auraData aData;
+                            aData.Charges = aura->GetCharges();
+                            aData.m_stacks = aura->GetStackAmount();
+                            aData.m_maxDuration = aura->GetMaxDuration();
+                            aData.m_duration = aura->GetDuration();
+                            aData.m_id = auraInfo->Id;
+
+                            for (uint8 i = 0; i < auraInfo->Effects.size(); ++i)
+                            {
+                                if (AuraEffect const* effect = aura->GetEffect(i))
+                                {
+                                    aData.m_damage[i] = effect->GetAmount();
+                                    aData.m_fixedAmount[i] = effect->GetFixedDamageInfo().GetFixedDamage();
+                                }
+                                else
+                                {
+                                    aData.m_damage[i] = 0;
+                                    aData.m_fixedAmount[i] = 0;
+                                }
+                            }
+   
+                            auras.push_back(aData);
                         }
                     }
 
@@ -4098,17 +4122,26 @@ class npc_past_self : public CreatureScript
 
                                 m_owner->RemoveNonPassivesAuras();
 
-                                for (std::set<auraData*>::iterator itr = auras.begin(); itr != auras.end(); ++itr)
+                                for (std::list<auraData>::iterator itr = auras.begin(); itr != auras.end(); ++itr)
                                 {
-                                    Aura *aura = !m_owner->HasAura((*itr)->m_id) ? m_owner->AddAura((*itr)->m_id, m_owner) : m_owner->GetAura((*itr)->m_id);
+                                    Aura *aura = !m_owner->HasAura((itr)->m_id) ? m_owner->AddAura((itr)->m_id, m_owner) : m_owner->GetAura((itr)->m_id);
                                     if (aura)
                                     {
-                                        aura->SetStackAmount((*itr)->m_stacks);
-                                        aura->SetDuration((*itr)->m_duration);
+                                        aura->SetStackAmount((itr)->m_stacks);
+                                        aura->SetMaxDuration((itr)->m_maxDuration);
+                                        aura->SetDuration((itr)->m_duration);
                                         aura->SetNeedClientUpdateForTargets();
-                                    }
+                                        aura->SetCharges((itr)->Charges);
 
-                                    delete (*itr);
+                                        for (uint8 i = 0; i < aura->GetSpellInfo()->Effects.size(); ++i)
+                                            if (AuraEffect * effect = aura->GetEffect(i))
+                                            {
+                                                effect->SetAmount((itr)->m_damage[i]);
+
+                                                if ((itr)->m_fixedAmount[i])
+                                                    effect->GetFixedDamageInfo().SetFixedDamage((itr)->m_fixedAmount[i]);
+                                            }
+                                    }
                                 }
 
                                 auras.clear();

@@ -793,6 +793,9 @@ class World
 
         void ResetCurrencyWeekCap();
 
+        std::map<uint32, uint32> diffTimePerEntry;
+        uint32 diffResetCounter;
+
     private:
         void _UpdateGameTime();
         // callback for UpdateRealmCharacters

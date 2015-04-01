@@ -64,7 +64,7 @@ class notPlayerPredicate
 public:
     bool operator()(WorldObject* target) const
     {
-        return target && target->GetTypeId() != TYPEID_PLAYER;
+        return target && (target->GetTypeId() != TYPEID_PLAYER || target->ToPlayer() && target->ToPlayer()->isGameMaster());
     }
 };
 
@@ -86,7 +86,7 @@ enum CreaturesIds
     BOSS_COUNCIL_HIGH_PRIESTESS_MARLI       = 69132,
 
     BOSS_TORTOS                             = 67977,
-    BOSS_MEGAERA                            = 70212,
+    BOSS_MEGAERA                            = 68065,
     BOSS_JI_KUN                             = 69712,
 
     BOSS_DURUMU_THE_FORGOTTEN               = 68036,
@@ -123,6 +123,8 @@ enum ObjectsIds
     GOB_COUNCIL_ENTRANCE1                   = 218655,
     GOB_COUNCIL_ENTRANCE2                   = 218656,
     GOB_COUNCIL_EXIT                        = 218657,
+    GOB_TORTOS_DOOR                         = 218980,
+    GOB_TORTOS_COLLISION                    = 218987,
  
     GOB_TRIBAL_DOOR_GURUBASHI               = 218670,
     GOB_TRIBAL_DOOR_DRAKKARI                = 218671,

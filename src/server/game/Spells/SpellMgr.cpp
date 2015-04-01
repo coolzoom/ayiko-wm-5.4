@@ -3605,12 +3605,46 @@ void SpellMgr::LoadSpellCustomAttr()
             case 136769:    // Charge
                 spellInfo->Effects[EFFECT_0].TriggerSpell = 0;       
                 break;
-            case 139852:
-                spellInfo->Effects[EFFECT_2].Effect = SPELL_EFFECT_DUMMY;
-                spellInfo->Effects[EFFECT_2].TargetA = SpellImplicitTargetInfo(TARGET_SRC_CASTER);
-                spellInfo->Effects[EFFECT_2].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENTRY);
-                spellInfo->Effects[EFFECT_2].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_50000_YARDS);
+            case 139852:    // Teleport all to depths
+                spellInfo->Effects[EFFECT_2].Effect = 0;
                 break;
+            case 134920:    // Quake Stomp
+                spellInfo->Effects[EFFECT_2].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+                break;
+            case 139433:    // Rampage Fire Cast.
+                spellInfo->Effects[0].Effect = SPELL_EFFECT_TRIGGER_MISSILE;
+                spellInfo->Effects[0].TargetA = TARGET_DEST_TARGET_ENEMY;
+                spellInfo->Effects[0].TriggerSpell = 139548;
+                spellInfo->MaxAffectedTargets = 1;
+                break;
+            case 139440:    // Rampage Frost Cast.
+                spellInfo->Effects[0].Effect = SPELL_EFFECT_TRIGGER_MISSILE;
+                spellInfo->Effects[0].TargetA = TARGET_DEST_TARGET_ENEMY;
+                spellInfo->Effects[0].TriggerSpell = 139549;
+                spellInfo->MaxAffectedTargets = 1;
+                break;
+            case 139504:    // Rampage Poison Cast.
+                spellInfo->Effects[0].Effect = SPELL_EFFECT_TRIGGER_MISSILE;
+                spellInfo->Effects[0].TargetA = TARGET_DEST_TARGET_ENEMY;
+                spellInfo->Effects[0].TriggerSpell = 139551;
+                spellInfo->MaxAffectedTargets = 1;
+                break;
+            case 139513:    // Rampage Arcane Cast.
+                spellInfo->Effects[0].Effect = SPELL_EFFECT_TRIGGER_MISSILE;
+                spellInfo->Effects[0].TargetA = TARGET_DEST_TARGET_ENEMY;
+                spellInfo->Effects[0].TriggerSpell = 139552;
+                spellInfo->MaxAffectedTargets = 1;
+                break;
+            case 139548:    // Rampage Fire.
+            case 139549:    // Rampage Frost.
+            case 139551:    // Rampage Poison.
+            case 139552:    // Rampage Arcane.
+                spellInfo->Effects[0].TargetB = TARGET_UNIT_SRC_AREA_ENEMY;
+                break;
+            case 139866:    // Torrent of Ice.
+                spellInfo->Effects[0].TargetA = TARGET_UNIT_TARGET_ANY;
+                break;
+                // Throne of Thunder end
 #if 1 // Gilneas
                 case 68087:
                 case 80281:
@@ -3864,6 +3898,15 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[2].MiscValueB = 0;
                     spellInfo->Effects[2].TargetA = TARGET_UNIT_CASTER;
                     spellInfo->Effects[2].TargetB = 0;*/
+                    break;      
+                case 106332: // Tornado Slam
+                    spellInfo->Effects[1].TargetA = TARGET_UNIT_NEARBY_ENTRY;
+                    break;
+                case 128245: // Flip Out
+                    spellInfo->Effects[1].TargetA = TARGET_UNIT_CASTER;
+                    break;
+                case 106827:// Smoke blades
+                    spellInfo->Effects[1].ApplyAuraName = SPELL_AURA_DUMMY;
                     break;
                 case 119414:// Breath of Fear
                     spellInfo->Effects[2].Effect = 0;
@@ -6076,6 +6119,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 124081:
                     spellInfo->AttributesEx5 &= ~SPELL_ATTR5_SINGLE_TARGET_SPELL;
                     break;
+				case 115141:
+					spellInfo->Effects[0].Amplitude = 25000;
+					break;
                 default:
                     break;
             }

@@ -734,7 +734,10 @@ enum RBACPermissions
     RBAC_PERM_COMMAND_SELECT_FACTION                         = 1050,
     RBAC_PERM_BROADCAST_LOGON_CHANGE                         = 1051,
     RBAC_PERM_COMMAND_CHALLENGE_CHALLENGE                    = 1052,
-    RBAC_PERM_COMMAND_CHALLENGE_CHALLENGE_PLAYERS            = 1053
+    RBAC_PERM_COMMAND_CHALLENGE_CHALLENGE_PLAYERS            = 1053,
+    RBAC_PERM_ARENA_SPECTATOR_RIGHTS                         = 1054,
+    RBAC_PERM_COMMAND_DEBUG_GETSPEED                         = 1055,
+    RBAC_PERM_COMMAND_DEBUG_RELOCATION                       = 1056
 };
 
 enum RBACCommandResult

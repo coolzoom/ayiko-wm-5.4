@@ -534,12 +534,14 @@ struct npc_krikthik : public ScriptedAI
     npc_krikthik(Creature* creature) : ScriptedAI(creature) {}
 
     uint32 nextMovementTimer;
+    uint32 updateCheckTimer;
     float actualAngle;
     float myPositionZ;
     bool direction;
 
     void Reset() override
     {
+        updateCheckTimer = 500;
         nextMovementTimer = 0;
         actualAngle = me->GetAngle(CenterPos.GetPositionX(), CenterPos.GetPositionY());
         direction = urand(0, 1);
@@ -577,6 +579,21 @@ struct npc_krikthik : public ScriptedAI
 
     void UpdateAI(const uint32 diff) override
     {
+        if (updateCheckTimer <= diff)
+        {
+            Map::PlayerList const& lPlayers = me->GetMap()->GetPlayers();
+
+            if (lPlayers.isEmpty())
+            {
+                me->DespawnOrUnsummon();
+                return;
+            }
+
+            updateCheckTimer = 5000;
+        }
+        else
+            updateCheckTimer -= diff;
+
         if (nextMovementTimer)
         {
             if (nextMovementTimer <= diff)

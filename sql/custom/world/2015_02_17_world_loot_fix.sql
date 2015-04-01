@@ -225,7 +225,12 @@ INSERT INTO `creature_loot_template` VALUES
 (3360583,90529,0,8,4,1,1),
 (3360583,90530,0,8,2,1,1);
 
-
 -- Loot random fixed for all the bosses in ToES --
 UPDATE `creature_loot_template` SET `ChanceOrQuestChance` = 0 WHERE `entry` IN (3160999,3260999,3360999,3460999,3560999);
 UPDATE `gameobject_loot_template` SET `ChanceOrQuestChance` = 0 WHERE `entry` IN (3162442,3162983,3262442,3262983,3362442,3362983,3462442,3462983,3562442,3562983);
+
+/* Zhing missing loot fixed */
+UPDATE `creature_template` SET `lootid` = 66464 WHERE `entry` = 66464;
+DELETE FROM `creature_loot_template` WHERE (`entry`=66464);
+INSERT INTO `creature_loot_template` VALUES 
+(66464, 89697, 99, 1, 0, 1, 1);

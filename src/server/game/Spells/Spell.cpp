@@ -3856,15 +3856,22 @@ void Spell::cast(bool skipCheck)
             continue;
         }
 
-        // Still needs better handling
-        int32 consumeStacks = 0;
-        if (m_spellInfo->Id == (*j)->GetSpellInfo()->Effects[(*j)->GetEffIndex()].TriggerSpell)
+        switch ((*j)->GetSpellInfo()->Id)
         {
-            j++;
-            base->ModStackAmount(-1);
+            case 125195: // Tigereye brew, handled in script
+                j++;
+                break;
+            default:
+                // Still needs better handling
+                int32 consumeStacks = 0;
+                if (m_spellInfo->Id == (*j)->GetSpellInfo()->Effects[(*j)->GetEffIndex()].TriggerSpell)
+                {
+                    j++;
+                    base->ModStackAmount(-1);
+                }
+                else
+                    j++;
         }
-        else
-            j++;
     }
 
     Unit::AuraEffectList const& stateAuras = m_caster->GetAuraEffectsByType(SPELL_AURA_ABILITY_IGNORE_AURASTATE);

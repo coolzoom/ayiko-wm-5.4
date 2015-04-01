@@ -74,9 +74,18 @@ bool RotateMovementGenerator::Update(Unit* owner, uint32 diff)
 
 void RotateMovementGenerator::Finalize(Unit *unit)
 {
-    unit->ClearUnitState(UNIT_STATE_ROTATING);
+	unit->ClearUnitState(UNIT_STATE_ROTATING);
+
+	// Crash fix:
+	// Creatures with this movement generator when being deleted will call this function, if said creature has a script
+	// that adds an aura on its self on MovementInform (e.g. boss_azil), an assert will trigger due to !m_cleanupDone
+	// m_inWorld is set to false prior to this being called when a creature is being deleted, preventing this crash.
+	// Stack trace: https://gist.github.com/anonymous/6d637ee83db173d92d4d
+	if (!unit->IsInWorld())
+		return;
+
     if (unit->GetTypeId() == TYPEID_UNIT)
-      unit->ToCreature()->AI()->MovementInform(ROTATE_MOTION_TYPE, 0);
+		unit->ToCreature()->AI()->MovementInform(ROTATE_MOTION_TYPE, 0);
 }
 
 void DistractMovementGenerator::Initialize(Unit* owner)

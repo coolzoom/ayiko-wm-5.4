@@ -62,6 +62,7 @@
 #include "SpellAuraEffects.h"
 #include "ScriptMgr.h"
 #include "ObjectVisitors.hpp"
+#include "Chat.h"
 
 #include <numeric>
 
@@ -18091,6 +18092,15 @@ void Unit::Kill(Unit* victim, bool durabilityLoss, SpellInfo const* spellProto)
         else if (GetTypeId() == TYPEID_PLAYER && victim != this)
             victim->ToPlayer()->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILLED_BY_PLAYER, 1, ToPlayer()->GetTeam());
     }
+
+	// April fools
+	if (victim->GetTypeId() == TYPEID_PLAYER && sWorld->getBoolConfig(CONFIG_APRIL_FOOLS_PERMA_DEATH))
+	{
+		ChatHandler(victim->ToPlayer()->GetSession()).PSendSysMessage("You have died. Your character has been deleted.");
+		victim->ToPlayer()->SetAtLoginFlag(AT_LOGIN_NO_CHAR);
+		victim->ToPlayer()->m_forcedLogoutTime = 1000; // In one second, start stage count down
+		victim->ToPlayer()->m_forcedLogoutEventStage = 10; // We start at 10, and count down
+	}
 
     // Hook for OnPVPKill Event
     if (Player* killerPlr = ToPlayer())

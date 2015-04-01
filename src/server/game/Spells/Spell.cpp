@@ -7217,6 +7217,9 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (area && (area->flags & AREA_FLAG_NO_FLY_ZONE) != 0)
                         return failReason;
 
+					if (sWorld->getBoolConfig(CONFIG_APRIL_FOOLS_NO_FLYING))
+						return failReason;
+
                     Battlefield const * const battleField = sBattlefieldMgr->GetBattlefieldToZoneId(m_originalCaster->GetZoneId());
                     if (battleField && !battleField->CanFlyIn())
                         return failReason;

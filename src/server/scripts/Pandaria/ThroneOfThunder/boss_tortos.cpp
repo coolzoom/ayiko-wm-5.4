@@ -202,6 +202,15 @@ class boss_tortos : public CreatureScript
                 _Reset();
             }
 
+            void SpellHit(Unit* pCaster, SpellInfo const* pSpell) override
+            {
+                if (pSpell->Id == SPELL_SHELL_CONCUSSION_INT)
+                {
+                    if (breathScheduled)
+                        me->SetPower(POWER_ENERGY, 0);
+                }
+            }
+
             void EnterCombat(Unit* who) override
             {
                 me->AddAura(SPELL_KICK_SHELL_A, me);
@@ -354,7 +363,7 @@ class boss_tortos : public CreatureScript
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
-                if (me->GetPower(POWER_ENERGY) == 100 && !breathScheduled)
+                if (me->GetPower(POWER_ENERGY) == 100 && !breathScheduled && !me->IsNonMeleeSpellCasted(true))
                 {
 				    events.ScheduleEvent(EVENT_FURIOUS_STONE_BREATH, TIMER_FURIOUS_STONE_BREATH);
 					breathScheduled = true;
@@ -376,7 +385,7 @@ class boss_tortos : public CreatureScript
                             Talk(ANN_FURIOUS_BREATH);
 				            DoCast(me, SPELL_FURIOUS_STONE_BREATH);
                             energyRegen.RescheduleEvent(EVENT_REGEN_FURY_POWER, 5000);
-                            energyRegen.ScheduleEvent(EVENT_RESET_CAST, TIMER_RESET_CAST);
+                            energyRegen.ScheduleEvent(EVENT_RESET_CAST, 500);
                             break;
 
                         case EVENT_SNAPPING_BITE:
@@ -540,6 +549,7 @@ class npc_whirl_turtle : public CreatureScript
 
                     me->AddAura(SPELL_SHELL_BLOCK, me);
                     me->GetMotionMaster()->MovementExpired();
+                    me->GetMotionMaster()->Clear();
                     shellBlocked = true;
                     return;
                 }

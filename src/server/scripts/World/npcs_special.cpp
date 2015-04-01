@@ -3861,6 +3861,12 @@ class npc_wild_mushroom : public CreatureScript
                 
             }
 
+            void JustUnsummoned(Unit* owner)
+            {
+                if (DynamicObject* dynObj = owner->GetDynObject(81262))
+                    dynObj->Remove();
+            }
+
             void UpdateAI(uint32 diff)
             {
                 if (invisTimer > 0)

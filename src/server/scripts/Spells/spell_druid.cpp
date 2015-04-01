@@ -580,7 +580,7 @@ class spell_dru_soul_of_the_forest : public SpellScriptLoader
             {
                 if (Unit* caster = GetCaster())
                 {
-                    if (GetSpellInfo()->Id == 18562)
+                    if (GetSpellInfo()->Id == 18562 && !caster->HasAura(145529))
                     {
                         int32 heal = GetHitHeal() * 0.12f;
                         caster->CastCustomSpell(GetHitUnit(), SPELL_DRUID_SWIFTMEND, NULL, &heal, NULL, true);

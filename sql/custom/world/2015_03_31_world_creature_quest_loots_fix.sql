@@ -19,3 +19,9 @@ INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`mo
 
 /* Both Ana Wu and her raft don't sink more to the bottom of the sea when you approach them */
 UPDATE `creature_template` SET `InhabitType` = 6 WHERE `entry` = 60139;
+
+/* Kang Bramblestaff missing spawn added */
+DELETE FROM `creature` WHERE `id`=56114;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(56114, 870, 0, 0, 1, 1, 0, 56114, -1172.34, 1749.73, 19.8029, 1.14607, 120, 0, 0, 156000, 0, 0, 0, 0, 0, 0, 0, 0),
+(56114, 870, 0, 0, 1, 1, 0, 56114, -1131.17, -213.763, 31.3674, 1.6071, 120, 0, 0, 156000, 0, 0, 0, 0, 0, 0, 0, 0);

@@ -16,3 +16,6 @@ UPDATE `quest_template` SET RewardCurrencyId1 = 396, RewardCurrencyCount1 = 5, R
 DELETE FROM `creature` WHERE `id`=58278;
 INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
 (58278, 870, 0, 0, 1, 1, 0, 58278, -1331.8, 1556.96, 18.3711, 4.87478, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0);
+
+/* Both Ana Wu and her raft don't sink more to the bottom of the sea when you approach them */
+UPDATE `creature_template` SET `InhabitType` = 6 WHERE `entry` = 60139;

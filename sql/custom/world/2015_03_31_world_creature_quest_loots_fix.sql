@@ -25,3 +25,10 @@ DELETE FROM `creature` WHERE `id`=56114;
 INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
 (56114, 870, 0, 0, 1, 1, 0, 56114, -1172.34, 1749.73, 19.8029, 1.14607, 120, 0, 0, 156000, 0, 0, 0, 0, 0, 0, 0, 0),
 (56114, 870, 0, 0, 1, 1, 0, 56114, -1131.17, -213.763, 31.3674, 1.6071, 120, 0, 0, 156000, 0, 0, 0, 0, 0, 0, 0, 0);
+
+/* Needlebeak passive react fix */
+UPDATE `creature_template` SET `VehicleId` = 0, `AIName` = 'SmartAI' WHERE `entry` = 63796;
+DELETE FROM `smart_scripts` WHERE (`entryorguid`=63796 AND `source_type`=0);
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(63796, 0, 0, 0, 0, 0, 100, 0, 5000, 7000, 15000, 20000, 11, 124515, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Needlebeak - Cast Beak Barrage"),
+(63796, 0, 1, 0, 0, 0, 100, 0, 1, 2500, 15000, 30000, 11, 124517, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Needlebeak - Cast Needle Torpedo");

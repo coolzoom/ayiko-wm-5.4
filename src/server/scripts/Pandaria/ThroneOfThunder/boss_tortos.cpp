@@ -549,7 +549,7 @@ class npc_whirl_turtle : public CreatureScript
 
                     me->AddAura(SPELL_SHELL_BLOCK, me);
                     me->GetMotionMaster()->MovementExpired();
-                    me->GetMotionMaster()->Clear();
+                    me->GetMotionMaster()->MoveIdle();
                     shellBlocked = true;
                     return;
                 }

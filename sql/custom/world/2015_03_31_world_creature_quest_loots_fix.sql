@@ -42,3 +42,6 @@ UPDATE `creature_template` SET `modelid1` = 46125 WHERE `entry` = 58376;
 
 /* Tony Tuna wrong faction fix */
 UPDATE `creature_template` SET `faction_A` = 35, `faction_H` = 35, `unit_flags` = 32776 WHERE `entry` = 60182;
+
+/* Narjon the Gulper respawn time fix */
+UPDATE `creature` SET `spawntimesecs` = 300 WHERE `id` = 59689;

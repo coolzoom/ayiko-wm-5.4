@@ -39,3 +39,6 @@ INSERT INTO `creature_template_aura` VALUES (58376,108450);
 DELETE FROM `creature_template_emote` WHERE `entry` = 58376;
 INSERT INTO `creature_template_emote` VALUES (58376,455);
 UPDATE `creature_template` SET `modelid1` = 46125 WHERE `entry` = 58376;
+
+/* Tony Tuna wrong faction fix */
+UPDATE `creature_template` SET `faction_A` = 35, `faction_H` = 35, `unit_flags` = 32776 WHERE `entry` = 60182;

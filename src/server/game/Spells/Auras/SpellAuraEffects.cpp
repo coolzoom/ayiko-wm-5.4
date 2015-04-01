@@ -1714,6 +1714,55 @@ void AuraEffect::ApplySpellMod(Unit* target, bool apply)
                     }
                 }
             }
+            if (Player * player = target->ToPlayer())
+            {
+                if (Pet* pet = player->GetPet())
+                {
+                    Unit::AuraApplicationMap & auras = pet->GetAppliedAuras();
+                    for (Unit::AuraApplicationMap::iterator iter = auras.begin(); iter != auras.end(); ++iter)
+                    {
+                        Aura* aura = iter->second->GetBase();
+                        // only passive and permament auras-active auras should have amount set on spellcast and not be affected
+                        // if aura is casted by others, it will not be affected
+                        if ((aura->IsPassive() || aura->IsPermanent()) && m_spellmod->isAffectingSpell(aura->GetSpellInfo()))
+                        {
+                            if (GetMiscValue() == SPELLMOD_ALL_EFFECTS)
+                            {
+                                for (uint8 i = 0; i < aura->GetSpellInfo()->Effects.size(); ++i)
+                                {
+                                    if (AuraEffect *aurEff = aura->GetEffect(i))
+                                        aurEff->RecalculateAmount();
+                                }
+                            }
+                            else if (GetMiscValue() == SPELLMOD_EFFECT1)
+                            {
+                                if (AuraEffect *aurEff = aura->GetEffect(0))
+                                    aurEff->RecalculateAmount();
+                            }
+                            else if (GetMiscValue() == SPELLMOD_EFFECT2)
+                            {
+                                if (aura->HasEffect(1))
+                                    aura->GetEffect(1)->RecalculateAmount();
+                            }
+                            else if (GetMiscValue() == SPELLMOD_EFFECT3)
+                            {
+                                if (aura->HasEffect(2))
+                                    aura->GetEffect(2)->RecalculateAmount();
+                            }
+                            else if (GetMiscValue() == SPELLMOD_EFFECT4)
+                            {
+                                if (aura->HasEffect(3))
+                                    aura->GetEffect(3)->RecalculateAmount();
+                            }
+                            else if (GetMiscValue() == SPELLMOD_EFFECT5)
+                            {
+                                if (aura->HasEffect(4))
+                                    aura->GetEffect(4)->RecalculateAmount();
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

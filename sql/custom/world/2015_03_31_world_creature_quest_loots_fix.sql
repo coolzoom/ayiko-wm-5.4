@@ -97,3 +97,6 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 
 (58173, 0, 0, 1, 8, 0, 100, 0, 110027, 0, 15000, 15000, 12, 58065, 3, 15000, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Green Beacon Bunny - Spawn Flames"),
 (58173, 0, 1, 0, 61, 0, 100, 0, 0, 0, 0, 0, 33, 58173, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Green Beacon Bunny - Give Credit");
+
+/* Portal to Shattrath Wrong spawn deleted */
+DELETE FROM `gameobject` WHERE `guid`=173904;

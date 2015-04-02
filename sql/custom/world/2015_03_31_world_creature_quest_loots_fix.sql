@@ -205,3 +205,9 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (50822, 0, 0, 0, 9, 0, 100, 0, 15, 50, 1500, 1500, 11, 125817, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, "Ai-Ran the Shifting Cloud - Cast Chi Burst"),
 (50822, 0, 1, 0, 2, 0, 100, 0, 0, 50, 35000, 40000, 11, 125802, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Ai-Ran the Shifting Cloud - Cast Healing Mists"),
 (50822, 0, 2, 0, 0, 0, 100, 0, 30000, 35000, 30000, 35000, 11, 125799, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Ai-Ran the Shifting Cloud - Cast Spinning Crane Kick");
+
+/* Salyin Warscout missing Spawn added */
+UPDATE `creature_template` SET `faction_A` = 14, `faction_H` = 14, `mindmg` = 43000, `maxdmg` = 51600, `attackpower` = 43000, `minrangedmg` = 0, `maxrangedmg` = 0, `Health_mod` = 15 WHERE `entry` = 50783;
+DELETE FROM `creature` WHERE `id`=50783;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(50783, 870, 0, 0, 1, 1, 0, 0, -378,894, -78,2022, 142,363, 5,81295, 28800, 10, 0, 1493235, 0, 0, 0, 0, 0, 0, 0, 0);

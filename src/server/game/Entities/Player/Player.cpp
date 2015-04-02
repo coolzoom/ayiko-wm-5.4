@@ -9741,6 +9741,8 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8
     // use triggered flag only for items with many spell casts and for not first cast
     uint8 count = 0;
 
+    std::vector<Spell*> SpellContainer;
+
     // item spells casted at use
     for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
     {
@@ -9765,7 +9767,7 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8
         spell->m_CastItem = item;
         spell->m_cast_count = cast_count;                   // set count of casts
         spell->m_glyphIndex = glyphIndex;                   // glyph index
-        spell->prepare(&targets);
+        spell->prepare(&targets, NULL, 0, true);
 
         ++count;
     }
@@ -9796,11 +9798,20 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8
             spell->m_CastItem = item;
             spell->m_cast_count = cast_count;               // set count of casts
             spell->m_glyphIndex = glyphIndex;               // glyph index
-            spell->prepare(&targets);
+            spell->prepare(&targets, NULL, 0, true);
+
+            SpellContainer.push_back(spell);
 
             ++count;
         }
     }
+
+    // Finally, clean up items. It is important that items are casted
+    // immediately and NOT deleted in the above spell handlers.
+    for (std::vector<Spell*>::iterator itr = SpellContainer.begin(); itr != SpellContainer.end(); itr++)
+        (*itr)->TakeCastItem();
+
+    SpellContainer.clear();
 }
 
 void Player::_RemoveAllItemMods()

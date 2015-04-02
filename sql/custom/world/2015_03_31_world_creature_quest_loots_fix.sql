@@ -223,3 +223,6 @@ INSERT INTO `npc_vendor` VALUES
 (64319, 0, 81407, 0, 0, 0, 1),
 (64319, 0, 81414, 0, 0, 0, 1),
 (64319, 0, 81415, 0, 0, 0, 1);
+
+/* Twitchheel Sleepyhead HP fixed */
+UPDATE `creature_template` SET `Health_mod` = 0.899919 WHERE `entry` = 66655;

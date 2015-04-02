@@ -211,3 +211,6 @@ UPDATE `creature_template` SET `faction_A` = 14, `faction_H` = 14, `mindmg` = 43
 DELETE FROM `creature` WHERE `id`=50783;
 INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
 (50783, 870, 0, 0, 1, 1, 0, 0, -378.894, -78.2022, 142.363, 5.81295, 28800, 10, 0, 1493235, 0, 1, 0, 0, 0, 0, 0,0);
+
+/* Merchant Greenfield now sell his goods */
+UPDATE `creature_template` SET `npcflag` = 131 WHERE `entry` = 58718;

@@ -123,3 +123,85 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (50749, 0, 0, 0, 0, 0, 100, 0, 8000, 10000, 20000, 25000, 11, 125370, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Kal'tik the Blight - Cast Blade Flurry"),
 (50749, 0, 1, 0, 0, 0, 100, 0, 16000, 22000, 25000, 30000, 11, 125398, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, "Kal'tik the Blight - Cast Tornado on a random target"),
 (50749, 0, 2, 0, 2, 0, 100, 0, 0, 70, 10000, 15000, 11, 125373, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Kal'tik the Blight - Cast Windsong");
+
+/* Vale of eternal blossoms rares loots and SAI Fixed */
+-- Loots
+UPDATE `creature_template` SET `lootid` = 50349 WHERE `entry` = 50349;
+DELETE FROM `creature_loot_template` WHERE `entry` IN (50349,50359,50749,50780,50806,50822);
+-- Moldo One-Eye
+INSERT INTO `creature_loot_template` VALUES 
+(50806, 86586, 15, 1, 0, 1, 1),
+(50806, 87217, 20, 1, 0, 1, 1),
+(50806, 87636, 0, 1, 1, 1, 1),
+(50806, 87637, 0, 1, 1, 1, 1),
+(50806, 87638, 0, 1, 1, 1, 1),
+(50806, 87639, 0, 1, 1, 1, 1),
+(50806, 87640, 0, 1, 1, 1, 1),
+-- Kang the Soul Thief
+(50349, 86571, 19.85, 1, 0, 1, 1),
+(50349, 87217, 20, 1, 0, 1, 1),
+(50349, 93194, 1.3, 1, 0, 1, 1),
+(50349, 87637, 0, 1, 1, 1, 1),
+(50349, 87639, 0, 1, 1, 1, 1),
+(50349, 87636, 0, 1, 1, 1, 1),
+(50349, 87638, 0, 1, 1, 1, 1),
+(50349, 87640, 0, 1, 1, 1, 1),
+-- Kal'tik the Blight
+(50749, 86579, 19, 1, 0, 1, 1),
+(50749, 87217, 20, 1, 0, 1, 1),
+(50749, 87636, 0, 1, 1, 1, 1),
+(50749, 87637, 0, 1, 1, 1, 1),
+(50749, 87638, 0, 1, 1, 1, 1),
+(50749, 87639, 0, 1, 1, 1, 1),
+(50749, 87640, 0, 1, 1, 1, 1),
+-- Urgolax
+(50359, 86575, 20, 1, 0, 1, 1),
+(50359, 87217, 19, 1, 0, 1, 1),
+(50359, 87636, 0, 1, 1, 1, 1),
+(50359, 87637, 0, 1, 1, 1, 1),
+(50359, 87638, 0, 1, 1, 1, 1),
+(50359, 87639, 0, 1, 1, 1, 1),
+(50359, 87640, 0, 1, 1, 1, 1),
+-- Ai-Ran the Shifting Cloud
+(50822, 86590, 20, 1, 0, 1, 1),
+(50822, 87217, 20, 1, 0, 1, 1),
+(50822, 87636, 0, 1, 1, 1, 1),
+(50822, 87637, 0, 1, 1, 1, 1),
+(50822, 87638, 0, 1, 1, 1, 1),
+(50822, 87639, 0, 1, 1, 1, 1),
+(50822, 87640, 0, 1, 1, 1, 1),
+-- Sahn Tidehunter
+(50780, 86582, 10, 1, 0, 1, 1),
+(50780, 87217, 20, 1, 0, 1, 1),
+(50780, 87636, 0, 1, 1, 1, 1),
+(50780, 87637, 0, 1, 1, 1, 1),
+(50780, 87638, 0, 1, 1, 1, 1),
+(50780, 87639, 0, 1, 1, 1, 1),
+(50780, 87640, 0, 1, 1, 1, 1);
+
+-- SAIs
+UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` IN (50349,50359,50749,50780,50806,50822);
+UPDATE `creature_template` SET `AIName` = 'SmartAI', `ScriptName` = '' WHERE `entry` = 64014;
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (50349,50359,50749,50780,50806,50822,64014) AND `source_type`= 0;
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+-- Moldo One-Eye
+(50806, 0, 0, 0, 9, 0, 100, 0, 20, 60, 7000, 9000, 11, 125623, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Moldo One-Eye - Cast Grappling Hook"),
+(50806, 0, 1, 2, 0, 0, 100, 0, 30000, 35000, 60000, 65000, 28, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Moldo One-Eye - Remove all aura from himself"),
+(50806, 0, 2, 3, 61, 0, 100, 0, 0, 0, 0, 0, 11, 125632, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Moldo One-Eye - Cast Vanish"),
+(50806, 0, 3, 4, 61, 0, 100, 0, 0, 0, 0, 0, 13, 0, 1000000, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Moldo One-Eye - Change Target"),
+(50806, 0, 4, 0, 61, 0, 100, 0, 0, 0, 0, 0, 13, 100, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, "Moldo One-Eye - Change Target"),
+(50806, 0, 5, 0, 0, 0, 100, 0, 3000, 5000, 20000, 25000, 11, 125624, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Moldo One-Eye - Cast Vicious Rend"),
+-- Kang the Soul Thief
+(50349, 0, 0, 0, 0, 0, 100, 0, 15000, 18000, 15000, 18000, 11, 125241, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, "Kang the Soul Thief - Cast Voidcloud"),
+(50349, 0, 1, 0, 0, 0, 100, 0, 1, 2, 5000, 6000, 11, 125212, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Kang the Soul Thief - Cast Shadowbolt"),
+-- Urgolax
+(50359, 0, 0, 0, 0, 0, 100, 0, 15000, 18000, 15000, 18000, 11, 124946, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Urgolax - Cast Devastating Arc"),
+(50359, 0, 1, 0, 2, 0, 100, 0, 0, 80, 3000, 4000, 11, 124976, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Urgolax - Cast Titanic Strenght"),
+(50359, 0, 2, 0, 0, 0, 100, 0, 28000, 30000, 60000, 65000, 11, 124980, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Urgolax - Cast Summon Quilen"),
+-- Urgolax Summon Quilen
+(64014, 0, 0, 0, 1, 0, 100, 1, 1, 1, 0, 0, 49, 0, 0, 0, 0, 0, 0, 17, 0, 20, 0, 0, 0, 0, 0, "Quilen Stonemaw - Cast Enter In Combat On Spawn"),
+(64014, 0, 1, 0, 0, 0, 100, 0, 3000, 4000, 5000, 6000, 11, 125096, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Quilen Stonemaw - Cast Monstrous Bite"),
+-- Ai-Ran the Shifting Cloud
+(50822, 0, 0, 0, 9, 0, 100, 0, 15, 50, 1500, 1500, 11, 125817, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, "Ai-Ran the Shifting Cloud - Cast Chi Burst"),
+(50822, 0, 1, 0, 2, 0, 100, 0, 0, 50, 35000, 40000, 11, 125802, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Ai-Ran the Shifting Cloud - Cast Healing Mists"),
+(50822, 0, 2, 0, 0, 0, 100, 0, 30000, 35000, 30000, 35000, 11, 125799, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Ai-Ran the Shifting Cloud - Cast Spinning Crane Kick");

@@ -290,3 +290,6 @@ DELETE FROM `creature` WHERE `id`=56111;
 INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
 (56111, 870, 0, 0, 1, 1, 0, 0, 284.549, 1970.24, 164.925, 6.10865, 120, 0, 0, 1, 0, 0, 2, 0, 32768, 0, 0, 0),
 (56111, 870, 0, 0, 1, 1, 0, 0,-395.245, 1898.96, 132.827, 2.76835, 120, 0, 0, 1, 0, 0, 2, 0, 32768, 0, 0, 0);
+
+/* Longfang Howler passive react fix */
+UPDATE `creature_template` SET `VehicleId` = 0 WHERE `entry` = 56524;

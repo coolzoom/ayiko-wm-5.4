@@ -837,6 +837,7 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                     switch (GetSpellInfo()->Id)
                     {
                         case 17: // Power Word: Shield
+                        case 123258: // Power Word: Shield
                         case 47753: // Divine Aegis
                         case 114908: // Spirit Shell
                         case 152118: // Clarity of Will

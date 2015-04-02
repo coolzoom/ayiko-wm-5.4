@@ -226,3 +226,6 @@ INSERT INTO `npc_vendor` VALUES
 
 /* Twitchheel Sleepyhead HP fixed */
 UPDATE `creature_template` SET `Health_mod` = 0.899919 WHERE `entry` = 66655;
+
+/* Gorge Stalker passive react fix */
+UPDATE `creature_template` SET `VehicleId` = 0 WHERE `entry` = 58432;

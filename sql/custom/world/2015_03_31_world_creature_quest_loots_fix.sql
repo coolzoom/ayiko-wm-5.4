@@ -293,3 +293,6 @@ INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`mo
 
 /* Longfang Howler passive react fix */
 UPDATE `creature_template` SET `VehicleId` = 0 WHERE `entry` = 56524;
+
+/* Thieving Plainshawk passive react fix */
+UPDATE `creature_template` SET `VehicleId` = 0 WHERE `entry` = 56034;

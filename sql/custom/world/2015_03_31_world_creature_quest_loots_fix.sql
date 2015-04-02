@@ -108,3 +108,18 @@ UPDATE `creature_template` SET `unit_flags2` = 2048, `InhabitType` = 4 WHERE `en
 DELETE FROM `creature` WHERE `id` = 67834;
 INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `dynamicflags`) VALUES 
 (67834, 870, 1, 65535, 0, 0, 1688,96, 1949,87, 475,749, 0,43826, 300, 0, 0, 393941, 0, 0, 0, 0, 2048, 0);
+
+/* Kal'tik the Blight & Tornado fixed */
+UPDATE `creature_template` SET `dmg_multiplier` = 3, `AIName` = 'SmartAI' WHERE `entry` = 50749;
+UPDATE `creature_template` SET `modelid2` = 0, `minlevel` = 90, `maxlevel` = 93 WHERE `entry` = 64267;
+
+DELETE FROM creature_template_aura WHERE entry = 64267 AND aura IN (124986,142391);
+INSERT INTO creature_template_aura VALUES
+(64267,124986),
+(64267,142391);
+
+DELETE FROM `smart_scripts` WHERE (`entryorguid`=50749 AND `source_type`=0);
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(50749, 0, 0, 0, 0, 0, 100, 0, 8000, 10000, 20000, 25000, 11, 125370, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Kal'tik the Blight - Cast Blade Flurry"),
+(50749, 0, 1, 0, 0, 0, 100, 0, 16000, 22000, 25000, 30000, 11, 125398, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, "Kal'tik the Blight - Cast Tornado on a random target"),
+(50749, 0, 2, 0, 2, 0, 100, 0, 0, 70, 10000, 15000, 11, 125373, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Kal'tik the Blight - Cast Windsong");

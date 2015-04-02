@@ -214,3 +214,12 @@ INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`mo
 
 /* Merchant Greenfield now sell his goods */
 UPDATE `creature_template` SET `npcflag` = 131 WHERE `entry` = 58718;
+
+/* Den Den now sell his goods */
+DELETE FROM `npc_vendor` WHERE `entry` = 64319;
+INSERT INTO `npc_vendor` VALUES 
+(64319, 0, 74636, 0, 0, 0, 1),
+(64319, 0, 81406, 0, 0, 0, 1),
+(64319, 0, 81407, 0, 0, 0, 1),
+(64319, 0, 81414, 0, 0, 0, 1),
+(64319, 0, 81415, 0, 0, 0, 1);

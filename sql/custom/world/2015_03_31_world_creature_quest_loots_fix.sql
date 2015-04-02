@@ -296,3 +296,6 @@ UPDATE `creature_template` SET `VehicleId` = 0 WHERE `entry` = 56524;
 
 /* Thieving Plainshawk passive react fix */
 UPDATE `creature_template` SET `VehicleId` = 0 WHERE `entry` = 56034;
+
+/* Thieving Wolf passive react fix */
+UPDATE `creature_template` SET `VehicleId` = 0 WHERE `entry` = 56106;

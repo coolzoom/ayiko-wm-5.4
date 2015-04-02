@@ -284,3 +284,9 @@ INSERT INTO `creature_loot_template` VALUES
 (62346, 90455, 0, 1, 5, 1, 1),
 (62346, 90456, 0, 1, 5, 1, 1),
 (62346, 90840, 0, 1, 5, 1, 1);
+
+/* Lin Tenderpaw correct spawns fixed */
+DELETE FROM `creature` WHERE `id`=56111;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(56111, 870, 0, 0, 1, 1, 0, 0, 284.549, 1970.24, 164.925, 6.10865, 120, 0, 0, 1, 0, 0, 2, 0, 32768, 0, 0, 0),
+(56111, 870, 0, 0, 1, 1, 0, 0,-395.245, 1898.96, 132.827, 2.76835, 120, 0, 0, 1, 0, 0, 2, 0, 32768, 0, 0, 0);

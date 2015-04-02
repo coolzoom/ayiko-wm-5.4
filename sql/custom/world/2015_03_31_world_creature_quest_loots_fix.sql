@@ -305,3 +305,6 @@ DELETE FROM `creature` WHERE `id`=57408;
 INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
 (57408, 870, 0, 0, 1, 1, 0, 0, 95.0085, 1063.73, 171.523,5.64526, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0),
 (57408, 870, 0, 0, 1, 1, 0, 0, 195.072, 905.416, 179.57, 3.52705, 300, 0, 0, 184350, 0, 0, 0, 0, 0, 2048, 0, 0);
+
+/* Mischievous Virmens now are hostile */
+UPDATE `creature_template` SET `faction_A` = 14, `faction_H` = 14 WHERE `entry` = 57671;

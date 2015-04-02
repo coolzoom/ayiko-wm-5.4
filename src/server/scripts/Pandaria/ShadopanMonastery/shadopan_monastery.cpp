@@ -374,12 +374,14 @@ public:
 
     enum eSpells
     {
-        SPELL_SHA_BLAST = 110117
+        SPELL_SHA_BLAST              = 110117,
+        SPELL_REACH_THROUGH_THE_VOID = 128339
     };
 
     enum eEvents
     {
-        EVENT_SHA_BLAST = 1
+        EVENT_SHA_BLAST              = 1,
+        EVENT_REACH_THROUGH_THE_VOID = 2
     };
 
     struct npc_ethereal_shaAI : public ScriptedAI
@@ -391,6 +393,7 @@ public:
         void EnterCombat(Unit* who) override
         {
             events.ScheduleEvent(EVENT_SHA_BLAST, urand(4, 8) * IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_REACH_THROUGH_THE_VOID, urand(11, 13) * IN_MILLISECONDS);
         }
 
         void UpdateAI(const uint32 diff) override
@@ -400,10 +403,77 @@ public:
 
             events.Update(diff);
 
-            if(events.ExecuteEvent() == EVENT_SHA_BLAST)
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            if (uint32 eventId = events.ExecuteEvent())
             {
-                me->CastSpell(me->GetVictim(), SPELL_SHA_BLAST, false);
-                events.ScheduleEvent(EVENT_SHA_BLAST, urand(12,14) * IN_MILLISECONDS);
+                switch (eventId)
+                {
+                    case EVENT_SHA_BLAST:
+                        me->CastSpell(me->GetVictim(), SPELL_SHA_BLAST, false);
+                        events.ScheduleEvent(EVENT_SHA_BLAST, urand(12, 14) * IN_MILLISECONDS);
+                        break;
+                    case EVENT_REACH_THROUGH_THE_VOID:
+                        me->CastSpell(me, SPELL_REACH_THROUGH_THE_VOID, false);
+                        events.ScheduleEvent(EVENT_REACH_THROUGH_THE_VOID, urand(18, 23) * IN_MILLISECONDS);
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+class npc_spm_void_sha : public CreatureScript
+{
+public:
+    npc_spm_void_sha() : CreatureScript("npc_spm_void_sha") {}
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_spm_void_shaI(creature);
+    }
+
+    EventMap events;
+
+    enum eSpells
+    {
+        SPELL_ON_SPAWN    = 128342,
+        SPELL_VOID_ENERGY = 128343
+    };
+
+    enum eEvents
+    {
+        EVENT_VOID_ENERGY = 1
+    };
+
+    struct npc_spm_void_shaI : public ScriptedAI
+    {
+        npc_spm_void_shaI(Creature* creature) : ScriptedAI(creature) {}
+
+        void InitializeAI() override
+        {
+            me->CastSpell(me, SPELL_ON_SPAWN, false);
+            DoZoneInCombat();
+        }
+
+        void EnterCombat(Unit* who) override
+        {
+            events.ScheduleEvent(EVENT_VOID_ENERGY, 5 * IN_MILLISECONDS);
+        }
+
+        void UpdateAI(const uint32 diff) override
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            if (events.ExecuteEvent() == EVENT_VOID_ENERGY)
+            {
+                me->CastSpell((Unit*)NULL, SPELL_VOID_ENERGY, false);
             }
 
             DoMeleeAttackIfReady();
@@ -754,7 +824,7 @@ public:
                         break;
                     case EVENT_DEATH_GRIP:
                         if(me->GetVictim() && !me->IsWithinMeleeRange(me->GetVictim()))
-                            me->GetVictim()->CastSpell(me, SPELL_DEATH_GRIP, true);
+                            me->CastSpell(me->GetVictim(), SPELL_DEATH_GRIP, false);
                         events.ScheduleEvent(EVENT_DEATH_GRIP, urand(7, 10) * IN_MILLISECONDS);
                         break;
                 }
@@ -1155,6 +1225,34 @@ public:
     }
 };
 
+class spell_spm_death_grip : public SpellScriptLoader
+{
+public:
+    spell_spm_death_grip() : SpellScriptLoader("spell_spm_death_grip") {}
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_spm_death_grip_SpellScript();
+    }
+
+    class spell_spm_death_grip_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_spm_death_grip_SpellScript);
+
+        void HandleScriptEffect(SpellEffIndex effIndex)
+        {
+            if (auto const caster = GetCaster())
+                if (auto const target = GetHitUnit())
+                     target->CastSpell(caster, GetSpellInfo()->Effects[effIndex].BasePoints, true);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_spm_death_grip_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+};
+
 void AddSC_shadopan_monastery()
 {
     new npc_shadopan_ambusher();
@@ -1163,6 +1261,7 @@ void AddSC_shadopan_monastery()
     new npc_shadopan_disciple();
     new npc_shadopan_unstable_energy();
     new npc_ethereal_sha();
+    new npc_spm_void_sha();
     new npc_consuming_sha();
     new npc_destroying_sha();
     new npc_shadopan_novice();
@@ -1177,5 +1276,6 @@ void AddSC_shadopan_monastery()
     new spell_spm_fire_arrow();
     new spell_spm_flip_out();
     new spell_spm_shadows_of_destruction();
+    new spell_spm_death_grip();
     new areatrigger_at_shadopan_archery();
 }

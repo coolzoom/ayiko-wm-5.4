@@ -219,24 +219,27 @@ public:
             if(me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
-            switch(events.ExecuteEvent())
+            if (uint32 eventId = events.ExecuteEvent())
             {
-                case EVENT_RISING_HATE:
-                    me->CastSpell(me, SPELL_RISING_HATE, false);
-                    events.ScheduleEvent(EVENT_RISING_HATE, urand(10, 15) * IN_MILLISECONDS);
-                    break;
-                case EVENT_RING_OF_MALICE:
-                    me->CastSpell(me, SPELL_RING_OF_MALICE, true);
-                    events.ScheduleEvent(EVENT_RING_OF_MALICE, urand(28, 33) * IN_MILLISECONDS);
-                    break;
-                case EVENT_SHA_BLAST:
-                    me->CastSpell((Unit*)NULL, SPELL_SHA_BLAST, false);
-                    events.ScheduleEvent(EVENT_SHA_BLAST, urand(4, 6) * IN_MILLISECONDS);
-                    break;
-                case EVENT_SUMMON_GRIPPING_HATRED:
-                    me->CastSpell(me, SPELL_SUMMON_GRIPPING_HATRED, false);
-                    events.ScheduleEvent(EVENT_SUMMON_GRIPPING_HATRED, urand(20, 30) * IN_MILLISECONDS);
-                    break;
+                switch (eventId)
+                {
+                    case EVENT_RISING_HATE:
+                        me->CastSpell(me, SPELL_RISING_HATE, false);
+                        events.ScheduleEvent(EVENT_RISING_HATE, urand(10, 15) * IN_MILLISECONDS);
+                        break;
+                    case EVENT_RING_OF_MALICE:
+                        me->CastSpell(me, SPELL_RING_OF_MALICE, true);
+                        events.ScheduleEvent(EVENT_RING_OF_MALICE, urand(28, 33) * IN_MILLISECONDS);
+                        break;
+                    case EVENT_SHA_BLAST:
+                        me->CastSpell((Unit*)NULL, SPELL_SHA_BLAST, false);
+                        events.ScheduleEvent(EVENT_SHA_BLAST, urand(4, 6) * IN_MILLISECONDS);
+                        break;
+                    case EVENT_SUMMON_GRIPPING_HATRED:
+                        me->CastSpell(me, SPELL_SUMMON_GRIPPING_HATRED, false);
+                        events.ScheduleEvent(EVENT_SUMMON_GRIPPING_HATRED, urand(20, 30) * IN_MILLISECONDS);
+                        break;
+                }
             }
 
             DoMeleeAttackIfReady();
@@ -377,6 +380,48 @@ public:
     };
 };
 
+class RingOfMaliceTargetSelector
+{
+public:
+    explicit RingOfMaliceTargetSelector(Unit* _caster) : caster(_caster) {}
+
+    bool operator() (WorldObject* unit) const
+    {
+        if (caster->GetExactDist2d(unit) <= 8.5f)
+            return true;
+
+        return false;
+    }
+private:
+    Unit* caster;
+};
+
+class spell_taran_zhu_ring_of_malice : public SpellScriptLoader
+{
+public:
+    spell_taran_zhu_ring_of_malice() : SpellScriptLoader("spell_taran_zhu_ring_of_malice") {}
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_taran_zhu_ring_of_malice_SpellScript();
+    }
+
+    class spell_taran_zhu_ring_of_malice_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_taran_zhu_ring_of_malice_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            targets.remove_if(RingOfMaliceTargetSelector(GetCaster()));
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_taran_zhu_ring_of_malice_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+};
+
 void AddSC_boss_taran_zhu()
 {
     new boss_taran_zhu();
@@ -384,4 +429,5 @@ void AddSC_boss_taran_zhu()
     new spell_taran_zhu_hate();
     new spell_taran_zhu_meditation();
     new spell_taran_zhu_grip_of_hate();
+    new spell_taran_zhu_ring_of_malice();
 }

@@ -100,3 +100,6 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 
 /* Portal to Shattrath Wrong spawn deleted */
 DELETE FROM `gameobject` WHERE `guid`=173904;
+
+/* Subjugated Serpent flags and InhabitType fix now appears alive and fly good */
+UPDATE `creature_template` SET `unit_flags2` = 2048, `InhabitType` = 4 WHERE `entry` = 59158;

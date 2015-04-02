@@ -103,3 +103,8 @@ DELETE FROM `gameobject` WHERE `guid`=173904;
 
 /* Subjugated Serpent flags and InhabitType fix now appears alive and fly good */
 UPDATE `creature_template` SET `unit_flags2` = 2048, `InhabitType` = 4 WHERE `entry` = 59158;
+
+/* Fanlyr Silverthorn spawn missing fixed */
+DELETE FROM `creature` WHERE `id` = 67834;
+INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `dynamicflags`) VALUES 
+(67834, 870, 1, 65535, 0, 0, 1688,96, 1949,87, 475,749, 0,43826, 300, 0, 0, 393941, 0, 0, 0, 0, 2048, 0);

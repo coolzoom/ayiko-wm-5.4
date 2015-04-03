@@ -84,7 +84,7 @@ void BattlegroundKT::PostUpdateImpl(uint32 diff)
                         if (Player* player = ObjectAccessor::FindPlayer(guid))
                         {
                             AccumulateScore(player->GetTeamId(), m_playersZone[guid]);
-                            UpdatePlayerScore(player, SCORE_ORB_SCORE, m_playersZone[guid]);
+                            UpdatePlayerScore(player, SCORE_ORB_SCORE, BG_KT_TickPoints[m_playersZone[guid] ]);
                         }
 
             m_UpdatePointsTimer = BG_KT_POINTS_UPDATE_TIME;

@@ -146,10 +146,7 @@ public:
 
                 }
                 else if(instance->GetBossState(DATA_MASTER_SNOWDRIFT != DONE))
-                {
                     me->SetReactState(REACT_AGGRESSIVE);
-                    me->setRegeneratingHealth(true);
-                }
 
                 if(instance->GetBossState(DATA_MASTER_SNOWDRIFT) == DONE)
                 {
@@ -173,12 +170,16 @@ public:
                     _Reset();
             }
 
-            aggroDone = false;
-            phaseTwo = false;
-            isBossSummoned = false;
-            hurlChiCnt = 0;
-            phase = PHASE_FIGHT_1;
             events.Reset();
+            nonCombatEvents.Reset();
+            me->setRegeneratingHealth(true);
+            me->SetHealth(me->GetMaxHealth());
+            me->SetReactState(REACT_AGGRESSIVE);
+            phase = PHASE_FIGHT_1;
+            isBossSummoned = false;
+            aggroDone = false;
+            phaseTwo = false;           
+            hurlChiCnt = 0;     
         }
 
         void EnterCombat(Unit* /*who*/) override
@@ -292,7 +293,7 @@ public:
                 me->CombatStop(true);
                 me->setRegeneratingHealth(false);
                 me->SetReactState(REACT_PASSIVE);
-                nonCombatEvents.ScheduleEvent(EVENT_PHASE_2, 9 * IN_MILLISECONDS);
+                nonCombatEvents.ScheduleEvent(EVENT_PHASE_2, 7 * IN_MILLISECONDS);
             }
 
             if(damage >= me->GetHealth() && phase == PHASE_FIGHT_3)
@@ -1492,25 +1493,6 @@ public:
     {
         PrepareAuraScript(spell_snowdrift_parry_stance_AuraScript);
 
-        std::list<uint32> parrySpells;
-
-        bool Load()
-        {
-            for(int i = 0; i < 2; ++i)
-            {
-                switch(i)
-                {
-                    case 0:
-                        parrySpells.push_back(SPELL_FLYING_KICK);
-                        break;
-                    case 1:
-                        parrySpells.push_back(SPELL_QUIVERING_PALM);
-                        break;
-                }
-            }
-            return true;
-        }
-
         void HanleOnProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
         {
             auto const caster = eventInfo.GetActionTarget();
@@ -1518,19 +1500,18 @@ public:
             if(!caster || !target)
                 return;
 
-            if(auto const parrySpell = Trinity::Containers::SelectRandomContainerElement(parrySpells))
-                caster->CastSpell(target, parrySpell, TRIGGERED_FULL_MASK);
-        }
-
-        void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
-        {
-            parrySpells.clear();
+            if (auto const aura = caster->GetAura(aurEff->GetId()))
+            {
+                if (aura->GetDuration() > 1.5 * IN_MILLISECONDS)
+                    caster->CastSpell(target, SPELL_QUIVERING_PALM, true);
+                else
+                    caster->CastSpell(target, SPELL_FLYING_KICK, true);
+            }
         }
 
         void Register()
         {
             OnEffectProc += AuraEffectProcFn(spell_snowdrift_parry_stance_AuraScript::HanleOnProc, EFFECT_0, SPELL_AURA_DUMMY);
-            AfterEffectRemove += AuraEffectRemoveFn(spell_snowdrift_parry_stance_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
         }
     };
 };

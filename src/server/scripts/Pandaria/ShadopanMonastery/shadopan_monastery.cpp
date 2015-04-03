@@ -54,6 +54,7 @@ public:
 
         void Reset() override
         {
+            events.Reset();
             me->CastSpell(me, SPELL_STEALTH, false);
             me->CastSpell(me, SPELL_STEALTH_COSMETIC, false);
             me->CastSpell(me, SPELL_SHA_CORRUPTION, false);
@@ -143,8 +144,15 @@ public:
             }
 
             aggroTalked = false;
+
+            Reset();
         }
 
+        void Reset() override
+        {
+            events.Reset();
+        }
+ 
         void EnterCombat(Unit* who) override
         {
             if(!aggroTalked)
@@ -215,6 +223,7 @@ public:
 
         void Reset() override
         {
+            events.Reset();
             if(auto const energy = me->FindNearestCreature(NPC_UNSTABLE_ENERGY, 10.0f))
                 if(energy->HasAura(SPELL_FOCUSING_COMBAT))
                     energy->RemoveAura(SPELL_FOCUSING_COMBAT);
@@ -291,6 +300,11 @@ public:
         npc_shadopan_discipleAI(Creature* creature) : ScriptedAI(creature) {}
 
         EventMap events;
+
+        void Reset() override
+        {
+            events.Reset();
+        }
 
         void EnterCombat(Unit* who) override
         {
@@ -390,6 +404,11 @@ public:
 
         EventMap events;
 
+        void Reset() override
+        {
+            events.Reset();
+        }
+
         void EnterCombat(Unit* who) override
         {
             events.ScheduleEvent(EVENT_SHA_BLAST, urand(4, 8) * IN_MILLISECONDS);
@@ -455,7 +474,14 @@ public:
 
         void InitializeAI() override
         {
+            me->SetReactState(REACT_AGGRESSIVE);
             me->CastSpell(me, SPELL_ON_SPAWN, false);
+
+            Reset();
+        }
+
+        void Reset() override
+        {
             DoZoneInCombat();
         }
 
@@ -466,9 +492,6 @@ public:
 
         void UpdateAI(const uint32 diff) override
         {
-            if (!UpdateVictim())
-                return;
-
             events.Update(diff);
 
             if (events.ExecuteEvent() == EVENT_VOID_ENERGY)
@@ -508,6 +531,11 @@ public:
         npc_consuming_shaAI(Creature* creature) : ScriptedAI(creature) {}
 
         EventMap events;
+
+        void Reset() override
+        {
+            events.Reset();
+        }
 
         void EnterCombat(Unit* who) override
         {
@@ -570,6 +598,11 @@ public:
         npc_destroying_shaAI(Creature* creature) : ScriptedAI(creature) {}
 
         EventMap events;
+
+        void Reset() override
+        {
+            events.Reset();
+        }
 
         void EnterCombat(Unit* who) override
         {

@@ -339,3 +339,8 @@ INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`mo
 
 /* Sha-Infested Prowler level fixed now have the correct HPs */
 UPDATE `creature_template` SET `minlevel` = 84, `maxlevel` = 84 WHERE `entry` = 66668;
+
+/* Chief Gukgut spawn missing fixed now players can finish the quest */
+DELETE FROM `creature` WHERE `id`=54868;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(54868, 870, 0, 0, 1, 65535, 0, 0, -71.8308, -2371.52, 27.9908, 2.12051, 300, 0, 0, 1560000, 0, 0, 0, 0, 0, 2048, 0, 0);

@@ -1,0 +1,1 @@
+UPDATE `battleground_template` SET `AllianceStartO`='1.61', `HordeStartO`='4.73' WHERE (`id`='699');

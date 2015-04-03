@@ -778,3 +778,16 @@ INSERT INTO `npc_vendor` VALUES
 ('70535', '0', '96738', '0', '0', '4620', '1'),
 ('70535', '0', '96739', '0', '0', '4623', '1'),
 ('70535', '0', '97131', '0', '0', '0', '1');
+
+/* Zandalari Warbringer missing loot fix */
+UPDATE `creature_template` SET `lootid` = 69841 WHERE `entry` = 69841;
+DELETE FROM `creature_loot_template` WHERE `entry`= 69841;
+INSERT INTO `creature_loot_template` VALUES 
+(69841, 94159, 98, 1, 0, 1, 1),
+(69841, 94225, 50, 1, 0, 1, 3),
+(69841, 94226, 50, 1, 0, 1, 3),
+(69841, 94223, 50, 1, 0, 1, 3),
+(69841, 94227, 50, 1, 0, 1, 3),
+(69841, 94158, 30, 1, 0, 1, 1),
+(69841, 94230, 5, 1, 0, 1, 1),
+(69841, 93194, 3, 1, 0, 1, 1);

@@ -869,26 +869,11 @@ WorldSafeLocsEntry const* BattlegroundTP::GetClosestGraveYard(Player* player)
     {
         if (GetStatus() == STATUS_IN_PROGRESS)
         {
-            WorldSafeLocsEntry const* ret;
-            WorldSafeLocsEntry const* closest;
-            float dist, nearest;
-            float x, y, z;
-
-            player->GetPosition(x, y, z);
-
-            closest = sWorldSafeLocsStore.LookupEntry(TP_GRAVEYARD_MIDDLE_ALLIANCE);
-            nearest = sqrt((closest->x - x)*(closest->x - x) + (closest->y - y)*(closest->y - y)+(closest->z - z)*(closest->z - z));
-
-            ret = sWorldSafeLocsStore.LookupEntry(TP_GRAVEYARD_START_ALLIANCE);
-            dist = sqrt((ret->x - x)*(ret->x - x) + (ret->y - y)*(ret->y - y)+(ret->z - z)*(ret->z - z));
-
-            if (dist < nearest)
-            {
-                closest = ret;
-                nearest = dist;
-            }
-
-            return closest;
+            // Enemy Flagroom & area around it should make you spawn at start graveyard
+            if (player->GetAreaId() == 5775 || player->GetAreaId() == 5681)
+                return sWorldSafeLocsStore.LookupEntry(TP_GRAVEYARD_START_ALLIANCE);
+            else
+                return sWorldSafeLocsStore.LookupEntry(TP_GRAVEYARD_MIDDLE_ALLIANCE);
         }
         else
             return sWorldSafeLocsStore.LookupEntry(TP_GRAVEYARD_FLAGROOM_ALLIANCE);
@@ -896,7 +881,13 @@ WorldSafeLocsEntry const* BattlegroundTP::GetClosestGraveYard(Player* player)
     else
     {
         if (GetStatus() == STATUS_IN_PROGRESS)
-            return sWorldSafeLocsStore.LookupEntry(TP_GRAVEYARD_MIDDLE_HORDE);
+        {
+            // Enemy Flagroom & area around it should make you spawn at start graveyard
+            if (player->GetAreaId() == 5776 || player->GetAreaId() == 5680)
+                return sWorldSafeLocsStore.LookupEntry(TP_GRAVEYARD_START_HORDE);
+            else
+                return sWorldSafeLocsStore.LookupEntry(TP_GRAVEYARD_MIDDLE_HORDE);
+        }
         else
             return sWorldSafeLocsStore.LookupEntry(TP_GRAVEYARD_FLAGROOM_HORDE);
     }

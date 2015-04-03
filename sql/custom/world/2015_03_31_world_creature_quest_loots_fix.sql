@@ -910,3 +910,19 @@ INSERT INTO `creature_loot_template` VALUES
 DELETE FROM `creature` WHERE `id`=50839;
 INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
 (50839, 0, 0, 0, 1, 1, 0, 0, -7656.11, -1200.25, 222.732, 1.54283, 64800, 20, 0, 4276, 0, 1, 0, 0, 0, 0, 0, 0);
+
+/* Meng Meng & Luo Luo SAI added */
+UPDATE `creature_template` SET `AIName` = 'SmartAI', `ScriptName` = '' WHERE `entry` IN (68868,68869);
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (68868,68869) AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(68868, 0, 0, 4, 22, 0, 100, 0, 56, 0, 0, 0, 56, 93314, 1, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Meng Meng - Add Magic Bamboo Shoot on receive hug"),
+(68868, 0, 1, 4, 22, 0, 100, 0, 225, 0, 0, 0, 56, 93314, 1, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Meng Meng - Add Magic Bamboo Shoot on receive love"),
+(68868, 0, 2, 4, 22, 0, 100, 0, 364, 0, 0, 0, 56, 93314, 1, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Meng Meng - Add Magic Bamboo Shoot on receive pat"),
+(68868, 0, 3, 4, 22, 0, 100, 0, 410, 0, 0, 0, 56, 93314, 1, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Meng Meng - Add Magic Bamboo Shoot on receive pet"),
+(68868, 0, 4, 0, 61, 0, 100, 0, 0, 0, 0, 0, 80, 5571500, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Meng Meng - Run script on receive emote"),
+
+(68869, 0, 0, 4, 22, 0, 100, 0, 56, 0, 0, 0, 56, 93314, 1, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Luo Luo - Add Magic Bamboo Shoot on receive hug"),
+(68869, 0, 1, 4, 22, 0, 100, 0, 225, 0, 0, 0, 56, 93314, 1, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Luo Luo - Add Magic Bamboo Shoot on receive love"),
+(68869, 0, 2, 4, 22, 0, 100, 0, 364, 0, 0, 0, 56, 93314, 1, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Luo Luo - Add Magic Bamboo Shoot on receive pat"),
+(68869, 0, 3, 4, 22, 0, 100, 0, 410, 0, 0, 0, 56, 93314, 1, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Luo Luo - Add Magic Bamboo Shoot on receive pet"),
+(68869, 0, 4, 0, 61, 0, 100, 0, 0, 0, 0, 0, 80, 5571500, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Luo Luo - Run script on receive emote");

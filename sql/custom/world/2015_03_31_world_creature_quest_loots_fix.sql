@@ -336,3 +336,6 @@ INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`mo
 DELETE FROM `creature` WHERE `id`=50850;
 INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
 (50850, 870, 0, 0, 1, 1, 0, 0, 1912.4, -1568.35, 203.052, 1.08917, 600, 100, 0, 387450, 0, 1, 0, 0, 0, 0, 0, 0);
+
+/* Sha-Infested Prowler level fixed now have the correct HPs */
+UPDATE `creature_template` SET `minlevel` = 84, `maxlevel` = 84 WHERE `entry` = 66668;

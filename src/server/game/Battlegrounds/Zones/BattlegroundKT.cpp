@@ -99,6 +99,9 @@ void BattlegroundKT::StartingEventCloseDoors()
     SpawnBGObject(BG_KT_OBJECT_A_DOOR, RESPAWN_IMMEDIATELY);
     SpawnBGObject(BG_KT_OBJECT_H_DOOR, RESPAWN_IMMEDIATELY);
 
+    SpawnBGObject(BG_KT_OBJECT_BERSERK_1, RESPAWN_ONE_DAY);
+    SpawnBGObject(BG_KT_OBJECT_BERSERK_2, RESPAWN_ONE_DAY);
+
     DoorClose(BG_KT_OBJECT_A_DOOR);
     DoorClose(BG_KT_OBJECT_H_DOOR);
 
@@ -113,6 +116,9 @@ void BattlegroundKT::StartingEventOpenDoors()
 
     for (uint8 i = 0; i < 4; ++i)
         SpawnBGObject(BG_KT_OBJECT_ORB_1 + i, RESPAWN_IMMEDIATELY);
+
+    SpawnBGObject(BG_KT_OBJECT_BERSERK_1, RESPAWN_IMMEDIATELY);
+    SpawnBGObject(BG_KT_OBJECT_BERSERK_2, RESPAWN_IMMEDIATELY);
 
     // Players that join battleground after start are not eligible to get achievement.
     StartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, BG_KT_EVENT_START_BATTLE);
@@ -272,6 +278,11 @@ bool BattlegroundKT::SetupBattleground()
 
     if (   !AddSpiritGuide(BG_KT_CREATURE_SPIRIT_1, BG_KT_SpiritPositions[0][0], BG_KT_SpiritPositions[0][1], BG_KT_SpiritPositions[0][2], BG_KT_SpiritPositions[0][3], ALLIANCE)
         || !AddSpiritGuide(BG_KT_CREATURE_SPIRIT_2, BG_KT_SpiritPositions[1][0], BG_KT_SpiritPositions[1][1], BG_KT_SpiritPositions[1][2], BG_KT_SpiritPositions[1][3], HORDE))
+        return false;
+
+    // Buffs
+   if (!AddObject(BG_KT_OBJECT_BERSERK_1, BG_KT_OBJECT_BERSERK_1_ENTRY, 1710.955f, 1333.474f, 10.55556f, 0.01868847f, 0.0f, 0.0f, 0.0f, 1.0f)
+        || !AddObject(BG_KT_OBJECT_BERSERK_2, BG_KT_OBJECT_BERSERK_2_ENTRY, 1855.502f, 1333.37f, 10.55556f, 3.150754f, 0.0f, 0.0f, 0.0f, 1.0f))
         return false;
 
     // Orbs

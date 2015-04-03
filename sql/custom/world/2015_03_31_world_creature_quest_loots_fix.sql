@@ -347,3 +347,8 @@ INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`mo
 
 /* Kung Din passive react fix */
 UPDATE `creature_template` SET `VehicleId` = 0 WHERE `entry` = 59037;
+
+/* Mishka missing spawn fixed */
+DELETE FROM `creature` WHERE `id`=54614;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(54614, 870, 0, 0, 1, 1, 0, 0, -267.254, -1766.12, 61.5928, 3.70309, 300, 0, 0, 156000, 0, 0, 0, 0, 0, 2048, 0, 0);

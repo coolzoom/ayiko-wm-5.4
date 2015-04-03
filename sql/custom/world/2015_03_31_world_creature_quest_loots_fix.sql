@@ -816,3 +816,6 @@ INSERT INTO `npc_vendor` VALUES
 ('30730', '0', '79249', '0', '0', '0', '1'),
 ('30730', '0', '79255', '0', '0', '2583', '1'),
 ('30730', '0', '79740', '0', '0', '0', '1');
+
+/* Gan'zulah passive react fix */
+UPDATE `creature_template` SET `VehicleId` = 0 WHERE `entry` = 1061;

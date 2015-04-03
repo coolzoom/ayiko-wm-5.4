@@ -652,7 +652,7 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
                 break;
             case BATTLEGROUND_KT:
                 *data << uint32(((BattleGroundKTScore*)itr2->second)->OrbHandles);
-                *data << uint32(((BattleGroundKTScore*)itr2->second)->Score * 10);
+                *data << uint32(((BattleGroundKTScore*)itr2->second)->Score);
                 break;
             default:
                 break;

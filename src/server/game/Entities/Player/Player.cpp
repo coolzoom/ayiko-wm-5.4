@@ -18705,6 +18705,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *charHolder, SQLQueryHolder 
 
     GetSession()->SetPlayer(this);
 
+    bool playerWasInBattleground = false;
     MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
     if (!mapEntry || !IsPositionValid())
     {
@@ -18737,6 +18738,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *charHolder, SQLQueryHolder 
         // Bg was not found - go to Entry Point
         else
         {
+            playerWasInBattleground = true;
             // leave bg
             if (player_at_bg)
                 currentBg->RemovePlayerAtLeave(GetGUID(), false, true);
@@ -19217,6 +19219,13 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *charHolder, SQLQueryHolder 
     SetUInt32Value(PLAYER_FIELD_VIRTUAL_PLAYER_REALM, realmID);
 
     _LoadLFRLootBinds(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_LFR_LOOT_BOUND));
+
+    // Remove Brutal / Focused Assault after a server crash for example.
+    if (playerWasInBattleground)
+    {
+        RemoveAurasDueToSpell(46392);
+        RemoveAurasDueToSpell(46393);
+    }
 
     return true;
 }

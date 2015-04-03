@@ -136,7 +136,7 @@ void BattlegroundWS::PostUpdateImpl(uint32 diff)
         if (_bothFlagsKept)
         {
             _flagSpellForceTimer += diff;
-            if (_flagDebuffState == 0 && _flagSpellForceTimer >= 3*MINUTE*IN_MILLISECONDS)  //3 minutes for first focused assault
+            if (_flagDebuffState == 0 && _flagSpellForceTimer >= MINUTE*IN_MILLISECONDS)  //1 minutes for first focused assault
             {
                 if (Player* player = ObjectAccessor::FindPlayer(m_FlagKeepers[0]))
                     player->CastSpell(player, WS_SPELL_FOCUSED_ASSAULT, true);
@@ -145,7 +145,7 @@ void BattlegroundWS::PostUpdateImpl(uint32 diff)
                 _flagDebuffState = 1;
                 _flagSpellForceTimer = 0;
             }
-            else if (_flagDebuffState > 0 && _flagDebuffState < 4 && _flagSpellForceTimer >= MINUTE*IN_MILLISECONDS) // Every 1 minute after spell cast stack it
+            else if (_flagDebuffState > 0 && _flagDebuffState < 4 && _flagSpellForceTimer >= 30*IN_MILLISECONDS) // Every 30 seconds after spell cast stack it
             {
                 if (Player* player = ObjectAccessor::FindPlayer(m_FlagKeepers[0]))
                     player->CastSpell(player, WS_SPELL_FOCUSED_ASSAULT, true);
@@ -154,7 +154,7 @@ void BattlegroundWS::PostUpdateImpl(uint32 diff)
                 _flagSpellForceTimer = 0;
                 _flagDebuffState++;
             }
-            else if (_flagDebuffState > 3 && _flagSpellForceTimer >= MINUTE*IN_MILLISECONDS) // After 7 minutes apply Brutal Assault
+            else if (_flagDebuffState > 3 && _flagSpellForceTimer >= 30*IN_MILLISECONDS) // After 7 minutes apply Brutal Assault
             {
                 if (Player* player = ObjectAccessor::FindPlayer(m_FlagKeepers[0]))
                 {

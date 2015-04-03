@@ -143,7 +143,7 @@ void BattlegroundTP::PostUpdateImpl(uint32 diff)
         if (m_BothFlagsKept)
         {
             m_FlagSpellForceTimer += diff;
-            if (m_FlagDebuffState == 0 && m_FlagSpellForceTimer >= 600000)  // 10 minutes
+            if (m_FlagDebuffState == 0 && m_FlagSpellForceTimer >= MINUTE*IN_MILLISECONDS)  //1 minutes for first focused assault
             {
                 if (Player * player = ObjectAccessor::FindPlayer(_flagKeepers[0]))
                     player->CastSpell(player, TP_SPELL_FOCUSED_ASSAULT, true);
@@ -152,25 +152,54 @@ void BattlegroundTP::PostUpdateImpl(uint32 diff)
                     player->CastSpell(player, TP_SPELL_FOCUSED_ASSAULT, true);
 
                 m_FlagDebuffState = 1;
+                m_FlagSpellForceTimer = 0;
             }
-            else if (m_FlagDebuffState == 1 && m_FlagSpellForceTimer >= 900000) // 15 minutes
+            else if (m_FlagDebuffState > 0 && m_FlagDebuffState < 4 && m_FlagSpellForceTimer >= 30 *IN_MILLISECONDS) // Every 30 seconds after spell cast stack it
             {
                 if (Player * player = ObjectAccessor::FindPlayer(_flagKeepers[0]))
-                {
-                    player->RemoveAurasDueToSpell(TP_SPELL_FOCUSED_ASSAULT);
-                    player->CastSpell(player, TP_SPELL_BRUTAL_ASSAULT, true);
-                }
+                    player->CastSpell(player, TP_SPELL_FOCUSED_ASSAULT, true);
 
                 if (Player * player = ObjectAccessor::FindPlayer(_flagKeepers[1]))
+                    player->CastSpell(player, TP_SPELL_FOCUSED_ASSAULT, true);
+
+                m_FlagSpellForceTimer = 0;
+                m_FlagDebuffState++;
+            }
+            else if (m_FlagDebuffState > 3 && m_FlagSpellForceTimer >= 30 * IN_MILLISECONDS) // After 7 minutes apply Brutal Assault
+            {
+                if (Player* player = ObjectAccessor::FindPlayer(_flagKeepers[0]))
                 {
                     player->RemoveAurasDueToSpell(TP_SPELL_FOCUSED_ASSAULT);
-                    player->CastSpell(player, TP_SPELL_BRUTAL_ASSAULT, true);
+                    // At change to Brutal Assault it start from 5 stacks
+                    uint8 stacks = (m_FlagDebuffState == 4) ? 5 : 1;
+                    for (uint8 i = 0; i < stacks; ++i)
+                        player->CastSpell(player, TP_SPELL_BRUTAL_ASSAULT, true);
                 }
-                m_FlagDebuffState = 2;
+                if (Player* player = ObjectAccessor::FindPlayer(_flagKeepers[1]))
+                {
+                    player->RemoveAurasDueToSpell(TP_SPELL_FOCUSED_ASSAULT);
+                    // At change to Brutal Assault it start from 5 stacks
+                    uint8 stacks = (m_FlagDebuffState == 4) ? 5 : 1;
+                    for (uint8 i = 0; i < stacks; ++i)
+                        player->CastSpell(player, TP_SPELL_BRUTAL_ASSAULT, true);
+                }
+                m_FlagSpellForceTimer = 0;
+                m_FlagDebuffState++;
             }
         }
         else
         {
+            if (Player* player = ObjectAccessor::FindPlayer(_flagKeepers[0]))
+            {
+                player->RemoveAurasDueToSpell(TP_SPELL_FOCUSED_ASSAULT);
+                player->RemoveAurasDueToSpell(TP_SPELL_BRUTAL_ASSAULT);
+            }
+            if (Player* player = ObjectAccessor::FindPlayer(_flagKeepers[1]))
+            {
+                player->RemoveAurasDueToSpell(TP_SPELL_FOCUSED_ASSAULT);
+                player->RemoveAurasDueToSpell(TP_SPELL_BRUTAL_ASSAULT);
+            }
+
             m_FlagSpellForceTimer = 0; // reset timer.
             m_FlagDebuffState = 0;
         }

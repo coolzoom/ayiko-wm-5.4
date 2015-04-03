@@ -188,6 +188,7 @@ class BattlegroundTP : public Battleground
         void RemovePlayer(Player *player, uint64 guid, uint32);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
         void HandleKillPlayer(Player *player, Player *killer);
+        void UpdateFlagAreaTriggers();
         bool SetupBattleground();
         virtual void Reset();
         void EndBattleground(uint32 winner);

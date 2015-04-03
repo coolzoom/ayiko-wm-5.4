@@ -269,6 +269,9 @@ void BattlegroundTP::RespawnFlag(uint32 Team, bool captured)
         SendMessageToAll(LANG_BG_TP_F_PLACED, CHAT_MSG_BG_SYSTEM_NEUTRAL);
         PlaySoundToAll(BG_TP_SOUND_FLAGS_RESPAWNED);        // flag respawned sound...
     }
+    else
+        UpdateFlagAreaTriggers();
+
     m_BothFlagsKept = false;
 }
 
@@ -636,6 +639,33 @@ void BattlegroundTP::EventPlayerClickedOnFlag(Player *Source, GameObject* target
 
     SendMessageToAll(message_id, type, Source);
     Source->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
+}
+
+void BattlegroundTP::UpdateFlagAreaTriggers()
+{
+    if (Player* player = ObjectAccessor::FindPlayer(GetHordeFlagPickerGUID()))
+    {
+        AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(5904);
+        if (atEntry->radius > 0)
+        {
+            // if we have radius check it
+            float dist = player->GetDistance(atEntry->x, atEntry->y, atEntry->z);
+            if (dist < (atEntry->radius))
+                HandleAreaTrigger(player, atEntry->id);
+        }
+    }
+
+    if (Player* player = ObjectAccessor::FindPlayer(GetAllianceFlagPickerGUID()))
+    {
+        AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(5905);
+        if (atEntry->radius > 0)
+        {
+            // if we have radius check it
+            float dist = player->GetDistance(atEntry->x, atEntry->y, atEntry->z);
+            if (dist < (atEntry->radius))
+                HandleAreaTrigger(player, atEntry->id);
+        }
+    }
 }
 
 void BattlegroundTP::RemovePlayer(Player *player, uint64 guid, uint32)

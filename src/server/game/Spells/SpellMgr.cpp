@@ -3555,6 +3555,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 spellInfo->AttributesEx6 |= SPELL_ATTR6_CASTABLE_WHILE_ON_VEHICLE;
                 break;
                 // Throne of Thunder
+            case 136991:    // Biting Cold (Damage)
+                spellInfo->AttributesEx2 |= SPELL_ATTR2_CANT_CRIT;
+                break;
             case 136992:    // Biting Cold
                 spellInfo->StackAmount = 1;
                 break;

@@ -1131,3 +1131,6 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 
 /* Quest: Strongarm Tactics */
 UPDATE `creature_template` SET faction_A = 14, faction_H = 14 WHERE entry IN (65882, 65883);
+
+/* Stormwind Royal Guard too high melee damage fixed */
+UPDATE `creature_template` SET `dmg_multiplier` = 2 WHERE `entry` = 1756;

@@ -143,10 +143,7 @@ public:
                     me->SetReactState(REACT_PASSIVE);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     me->NearTeleportTo(SnowdriftPos[0].GetPositionX(), SnowdriftPos[0].GetPositionY(), SnowdriftPos[0].GetPositionZ(), 4.114f);
-
                 }
-                else if(instance->GetBossState(DATA_MASTER_SNOWDRIFT != DONE))
-                    me->SetReactState(REACT_AGGRESSIVE);
 
                 if(instance->GetBossState(DATA_MASTER_SNOWDRIFT) == DONE)
                 {
@@ -168,13 +165,15 @@ public:
             {
                 if(instance->GetBossState(DATA_MASTER_SNOWDRIFT) != DONE)
                     _Reset();
+
+                if (instance->GetBossState(DATA_SNOWDRIFT_STATE) == DONE && instance->GetBossState(DATA_MASTER_SNOWDRIFT) != DONE)
+                    me->SetReactState(REACT_AGGRESSIVE);
             }
 
             events.Reset();
             nonCombatEvents.Reset();
             me->setRegeneratingHealth(true);
-            me->SetHealth(me->GetMaxHealth());
-            me->SetReactState(REACT_AGGRESSIVE);
+            me->SetHealth(me->GetMaxHealth());      
             phase = PHASE_FIGHT_1;
             isBossSummoned = false;
             aggroDone = false;

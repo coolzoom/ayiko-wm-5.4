@@ -1140,3 +1140,9 @@ DELETE FROM `npc_vendor` WHERE `entry` IN (71621,71624) AND `item` IN (99892,999
 INSERT INTO `npc_vendor` VALUES 
 (71621, 0, 99980, 0, 0, 3882, 1),
 (71624, 0, 99892, 0, 0, 3882, 1);
+
+/* Honor vendor missing enchant added */
+DELETE FROM `npc_vendor` WHERE `entry` IN (71621,71624) AND `item` = 98163;
+INSERT INTO `npc_vendor` VALUES 
+(71621, 0, 98163, 0, 0, 4709, 1),
+(71624, 0, 98163, 0, 0, 4709, 1);

@@ -32,6 +32,10 @@ DELETE FROM `smart_scripts` WHERE (`entryorguid`=63796 AND `source_type`=0);
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
 (63796, 0, 0, 0, 0, 0, 100, 0, 5000, 7000, 15000, 20000, 11, 124515, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Needlebeak - Cast Beak Barrage"),
 (63796, 0, 1, 0, 0, 0, 100, 0, 1, 2500, 15000, 30000, 11, 124517, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Needlebeak - Cast Needle Torpedo");
+-- Wrong spawns fix
+DELETE FROM `creature` WHERE `id`=63796;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(63796, 870, 6134, 6010, 1, 1, 0, 0, -736.076, -12.5609, 30.5636, 4.43155, 120, 7.786, 0, 1, 0, 1, 0, 0, 32768, 0, 0, 0);
 
 /* Yi-Mo Longbrow wrong visual/model fix */
 DELETE FROM `creature_template_aura` WHERE `entry` = 58376;
@@ -118,7 +122,7 @@ INSERT INTO creature_template_aura VALUES
 (64267,124986),
 (64267,142391);
 
-DELETE FROM `smart_scripts` WHERE (`entryorguid`=50749 AND `source_type`=0);
+DELETE FROM `smart_scripts` WHERE `entryorguid`=50749 AND `source_type`= 0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
 (50749, 0, 0, 0, 0, 0, 100, 0, 8000, 10000, 20000, 25000, 11, 125370, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Kal'tik the Blight - Cast Blade Flurry"),
 (50749, 0, 1, 0, 0, 0, 100, 0, 16000, 22000, 25000, 30000, 11, 125398, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, "Kal'tik the Blight - Cast Tornado on a random target"),
@@ -180,9 +184,9 @@ INSERT INTO `creature_loot_template` VALUES
 (50780, 87640, 0, 1, 1, 1, 1);
 
 -- SAIs
-UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` IN (50349,50359,50749,50780,50806,50822);
+UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` IN (50349,50359,50806,50822);
 UPDATE `creature_template` SET `AIName` = 'SmartAI', `ScriptName` = '' WHERE `entry` = 64014;
-DELETE FROM `smart_scripts` WHERE `entryorguid` IN (50349,50359,50749,50780,50806,50822,64014) AND `source_type`= 0;
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (50349,50359,50806,50822,64014) AND `source_type`= 0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
 -- Moldo One-Eye
 (50806, 0, 0, 0, 9, 0, 100, 0, 20, 60, 7000, 9000, 11, 125623, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Moldo One-Eye - Cast Grappling Hook"),
@@ -926,3 +930,204 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (68869, 0, 2, 4, 22, 0, 100, 0, 364, 0, 0, 0, 56, 93314, 1, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Luo Luo - Add Magic Bamboo Shoot on receive pat"),
 (68869, 0, 3, 4, 22, 0, 100, 0, 410, 0, 0, 0, 56, 93314, 1, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Luo Luo - Add Magic Bamboo Shoot on receive pet"),
 (68869, 0, 4, 0, 61, 0, 100, 0, 0, 0, 0, 0, 80, 5571500, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Luo Luo - Run script on receive emote");
+
+-- Vengeful Gurthani Spirit SmartAI missing --
+UPDATE `creature_template` SET `AIName` = 'SmartAI', `InhabitType` = 4 WHERE `entry` = 65452;
+DELETE FROM `smart_scripts` WHERE (`entryorguid`=65452 AND `source_type`=0);
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(65452, 0, 0, 0, 0, 0, 100, 0, 1000, 2000, 7000, 11000, 11, 131034, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Vengeful Gurthani Spirit - Cast Vengeful Blast");
+
+/* Quest: Psycho Mantid */
+-- Marksman Lann Web aura --
+DELETE FROM `creature_template_aura` WHERE `entry` = 62166; 
+INSERT INTO `creature_template_aura` VALUES (62166,120953);
+-- Marksman Lann correct location and spawntime
+UPDATE `creature` SET `position_x` = 394.238, `position_y` = 2254.08, `position_z` = 235.403, `orientation` = 1.68565, `spawntimesecs` = 1 WHERE `id` = 62166;
+-- Waypoints Marksman Lann on Quest: Psycho Mantid --
+DELETE FROM `waypoints` WHERE `entry`= 62166;
+INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `point_comment`) VALUES
+(62166, 1, 394.20, 2254.34, 235.381, "Marksman Lann - Move1 on Quest: Psycho Mantid"),
+(62166, 2, 394.59, 2254.86, 235.532, "Marksman Lann - Move2 on Quest: Psycho Mantid"),
+(62166, 3, 407.80, 2266.71, 236.669, "Marksman Lann - Move3 on Quest: Psycho Mantid");
+-- Speeches Marksman Lann on Quest: Psycho Mantid --
+DELETE FROM creature_text WHERE entry = 62166; 
+INSERT INTO `creature_text` VALUES 
+('62166', '0', '0', 'Hrgghh', '12', '0', '100', '1', '0', '28828', 'Marksman Lann - Say 1'),
+('62166', '1', '0', 'Thanks for the assist, friend. I\'d better report back to Bowmistress Li.', '12', '0', '100', '1', '0', '0', 'Marksman Lann - Say 2');
+-- SmartAI Marksman Lann on Quest: Psycho Mantid --
+UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` = 62166;
+DELETE FROM `smart_scripts` WHERE (`entryorguid`=62166 AND `source_type`=0);
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(62166, 0, 0, 1, 19, 0, 100, 0, 31003, 0, 0, 0, 1, 0, 3000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Marksman Lann - Speak1 on accepting quest"),
+(62166, 0, 1, 0, 61, 0, 100, 0, 0, 0, 0, 0, 67, 1, 2000, 2000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Marksman Lann - Speak1 on accepting quest"),
+(62166, 0, 2, 3, 59, 0, 100, 0, 1, 0, 0, 0, 28, 120953, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Marksman Lann - Remove Auras on accepting quest"),
+(62166, 0, 3, 4, 61, 0, 100, 0, 0, 0, 0, 0, 5, 53, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Marksman Lann - Play emote roar on remove aura"),
+(62166, 0, 4, 0, 61, 0, 100, 0, 0, 0, 0, 0, 53, 0, 62166, 0, 31003, 15000, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Marksman Lann - StartWP on accepting quest"),
+(62166, 0, 5, 0, 40, 0, 100, 0, 1, 0, 0, 0, 54, 3000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Marksman Lann - PauseWP on say1"),
+(62166, 0, 6, 0, 40, 0, 100, 0, 2, 0, 0, 0, 1, 1, 7000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Marksman Lann - Speak2 on walk"),
+(62166, 0, 7, 0, 40, 0, 100, 0, 3, 0, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Marksman Lann - Despawn on WP3 reached");
+
+-- Klaxxi'va Tik Amber Ward Aura --
+DELETE FROM `creature_template_aura` WHERE `entry` =62203;
+INSERT INTO `creature_template_aura` VALUES (62203,128398);
+-- Klaxxi'va Tik Amber Stun Emote --
+DELETE FROM `creature_template_emote` WHERE `entry` =62203;
+INSERT INTO `creature_template_emote` VALUES (62203,64);
+-- Speeches Klaxxi'va Tik on Quest: Psycho Mantid --
+DELETE FROM creature_text WHERE entry = 62203; 
+INSERT INTO `creature_text` VALUES 
+('62203', '1', '0', 'It is... the empress who has betrayed... our people...', '12', '0', '100', '0', '0', '0', 'Klaxxi\'va Tik - Say on aggro'),
+('62203', '3', '0', '$C... approach me...', '12', '0', '100', '0', '0', '0', 'Klaxxi\'va Tik - Say on Adjunct\'s Death');
+-- Klaxxi'va Tik spawntime edit --
+UPDATE `creature` SET `spawntimesecs` = 10 WHERE `id` = 62203;
+--  SmartAI Klaxxi'va Tik on Quest: Psycho Mantid --
+UPDATE `creature_template` SET `dynamicflags` = 0, `AIName` = 'SmartAI' WHERE `entry` = 62203;
+DELETE FROM `smart_scripts` WHERE (`entryorguid`=62203 AND `source_type`=0);
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(62203, 0, 0, 0, 1, 0, 100, 1, 1, 1, 0, 0, 11, 128398, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Klaxxi'va Tik - Cast Amber Ward on spawn"),
+(62203, 0, 1, 0, 19, 0, 100, 0, 31004, 0, 0, 0, 41, 3000, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Klaxxi'va Tik - Despawn in 3 secs on accepting quest"),
+(62203, 0, 2, 0, 19, 0, 100, 0, 31004, 0, 0, 0, 11, 119073, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Klaxxi'va Tik - Cast Feign Death on accepting quest");
+
+-- Speeches Adjunct Kree'zot on Quest: Psycho Mantid --
+DELETE FROM `creature_text` WHERE `entry` = 62301; 
+INSERT INTO `creature_text` VALUES 
+('62301', '0', '0', 'What\'s this?! Now they come over the wall to oppose us? The fools!', '12', '0', '100', '1', '0', '0', 'Adjunct Kree\'zot - Say on aggro'),
+('62301', '2', '0', 'How DARE you question her will!', '12', '0', '100', '1', '0', '0', 'Adjunct Kree\'zot - Say on combat');
+-- SmartAI Adjunct Kree'zot on Quest: Psycho Mantid --
+UPDATE `creature_template` SET `AIName` = 'SmartAI', `ScriptName` = '', `dmg_multiplier` = 3 WHERE `entry` = 62301;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=62301 AND `source_type`= 0;
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(62301, 0, 0, 0, 1, 0, 100, 1, 1, 1, 0, 0, 11, 128395, 4, 0, 0, 0, 0, 10, 624539, 62203, 0, 0, 0, 0, 0, "Adjunct Kree'zot - Cast OOC Wrath of the Empress on Klaxxi'va Tik"),
+(62301, 0, 1, 0, 0, 0, 100, 0, 1, 1, 3600000, 3600000, 1, 0, 6000, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Adjunct Kree'zot - Say 1 on aggro"),
+(62301, 0, 2, 0, 0, 0, 100, 0, 2, 2, 3600000, 3600000, 1, 1, 10000, 0, 0, 0, 0, 10, 624539, 62203, 0, 0, 0, 0, 0, "Klaxxi'va Tik - Say 1 on Aggro"),
+(62301, 0, 3, 0, 0, 0, 100, 0, 10000, 10000, 30000, 30000, 1, 2, 6000, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Adjunct Kree'zot - Say 2 on combat"),
+(62301, 0, 4, 0, 0, 0, 100, 0, 3000, 5000, 25000, 30000, 11, 126790, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Adjunct Kree'zot - Cast Sha Spit"),
+(62301, 0, 5, 0, 0, 0, 100, 0, 3000, 5000, 9000, 12000, 11, 126799, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Adjunct Kree'zot - Cast Sha Spit"),
+(62301, 0, 6, 0, 6, 0, 100, 0, 0, 0, 0, 0, 1, 3, 6000, 0, 0, 0, 0, 10, 624539, 62203, 0, 0, 0, 0, 0, "Klaxxi'va Tik - Say 2 on Adjunct's Death");
+
+/* Infernal Attack with wrong modelid now is targetable */
+UPDATE `creature_template` SET `modelid2` = 0 WHERE `entry` IN (21419,21786);
+
+/* Veneratus the Many wrong faction now is attackable */
+UPDATE `creature_template` SET `faction_A` = 1813, `faction_H` = 1813 WHERE `entry` = 20427;
+
+/* Keeper of the Cistern wrong spawntime was too high */
+UPDATE `creature` SET `spawntimesecs` = 120 WHERE `id` = 20795;
+
+/* Npc Korven the Prime (Quest Giver) wrong faction fix'd */
+UPDATE `creature_template` SET `faction_A` = 2552, `faction_H` = 2552 WHERE `entry` = 62180;
+
+/* NPCs wrong flags,models and other stuff */
+UPDATE `creature` SET `spawndist` = 0, `MovementType` = 0 WHERE `id` IN (62517,62518,62519,62521,65396,65397,65398,65753,67160);
+UPDATE `creature_template` SET `modelid1` = 11686, `modelid2` = 0, `InhabitType` = 4 WHERE `entry` = 65521;
+UPDATE `creature_template` SET `unit_flags` = 524298, `ScriptName` = 'guard_generic' WHERE `entry` = 67160;
+UPDATE `creature_template` SET `modelid1` = 11686, `modelid2` = 0 WHERE `entry` = 61982;
+
+/* Kill Sapfly give no XP (Exploit for exping) */
+UPDATE `creature_template` SET `flags_extra` = 64 WHERE `entry` = 62386;
+
+/* SmartAI Dreadspinner Tender */
+UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` = 61981;
+DELETE FROM `smart_scripts` WHERE (`entryorguid`=61981 AND `source_type`=0);
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(61981, 0, 0, 0, 0, 0, 100, 0, 2000, 4000, 12000, 17000, 11, 128079, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Dreadspinner Tender - Cast Dread Webbing");
+
+/* Ancient Guardian SmartAI, faction, positions and flags fix */
+UPDATE `creature` SET `spawndist` = 0, `MovementType` = 0 WHERE `id` = 65450;
+UPDATE `creature_template` SET `faction_A` = 2478, `faction_H` = 2478, `unit_flags` = 33587200, `AIName` = 'SmartAI' WHERE `entry` = 65450;
+DELETE FROM `smart_scripts` WHERE (`entryorguid`=65450 AND `source_type`=0);
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(65450, 0, 0, 0, 1, 0, 100, 1, 1, 1, 0, 0, 11, 128449, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Ancient Guardian - Cast Gurthan's Watchdog when OOC"),
+(65450, 0, 1, 0, 1, 0, 100, 1, 2, 2, 0, 0, 18, 33587200, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Ancient Guardian - Set UnitFlag Untargetable OOC"),
+(65450, 0, 2, 0, 0, 0, 100, 1, 1, 1, 0, 0, 19, 33554432, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Ancient Guardian - Remove UnitFlags Untargetable on combat"),
+(65450, 0, 3, 0, 0, 0, 100, 0, 3000, 5000, 5000, 7000, 11, 126793, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Ancient Guardian - Cast Stone Claw"),
+(65450, 0, 5, 0, 0, 0, 100, 0, 7000, 8000, 6000, 7000, 11, 127157, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Ancient Guardian - Cast Crush Armor");
+
+/* Quest: Nope Fix - Shado-Pan Dragon Gun Quest Item Exploit Fix */
+DELETE FROM `creature_questender` WHERE `id` = 62112 AND `quest` = 31002;
+
+UPDATE `conditions` SET `ConditionTypeOrReference` = 29, `ConditionTarget` = 0, `ConditionValue1` = 62077, `ConditionValue2` = 5 WHERE `SourceTypeOrReferenceId` = 17 AND `SourceEntry` = 120754;
+UPDATE `disables` SET `entry` = 120876 WHERE `entry` = 120754;
+DELETE FROM `disables` WHERE `entry` = 120751;
+INSERT INTO `disables` VALUES
+(0,120751,1,'','','Bug quest item');
+
+-- SmartAI Dreadspinner Egg correct flags and SAI  --
+UPDATE `creature_template` SET `unit_flags` = 131076, `unit_flags2` = 32768, `dynamicflags` = 8, `AIName` = 'SmartAI' WHERE `entry` = 62077;
+DELETE FROM `smart_scripts` WHERE (`entryorguid`=62077 AND `source_type`=0);
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(62077, 0, 0, 1, 8, 0, 100, 0, 124347, 0, 1000, 1000, 33, 62077, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Dreadspinner Egg - Killed Monster on Spell hit"),
+(62077, 0, 1, 0, 61, 0, 100, 0, 0, 0, 0, 0, 37, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Dreadspinner Egg - Die on Spell hit");
+
+/* Quest: Extending Our Coverage */
+UPDATE `creature_template` SET `modelid1` = 11686, `modelid2` = 0, `flags_extra` = 0, `AIName` = 'SmartAI' WHERE `entry` = 65328;
+DELETE FROM `smart_scripts` WHERE (`entryorguid`=65328 AND `source_type`=0);
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(65328, 0, 0, 0, 10, 0, 100, 0, 1, 15, 500, 500, 33, 65328, 0, 0, 0, 0, 0, 17, 0, 15, 0, 0, 0, 0, 0, "Discover Amberglow Bunny - Gives Kill Credit on Near Players");
+
+/* Quest: You Otter Know */
+DELETE FROM `conditions` WHERE `SourceEntry` = 123803;
+INSERT INTO `conditions` VALUES
+(17,0,123803,0,0,31,1,3,63376,0,0,0,0,'','Bag of Clams targets Coldwhisker Otter');
+
+UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` = 63376;
+DELETE FROM `smart_scripts` WHERE (`entryorguid`=63376 AND `source_type`=0);
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(63376, 0, 0, 1, 8, 0, 100, 1, 123803, 0, 0, 0, 33, 63376, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Coldwhisker Otter - Give credit on spellhit"),
+(63376, 0, 1, 0, 61, 0, 100, 0, 0, 0, 0, 0, 41, 5000, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Coldwhisker Otter - Despawn after the Kill Credit");
+
+/* Quest: Love's Labor */
+UPDATE `creature_template` SET `faction_A` = 35, `faction_H` = 35 WHERE `entry` IN (59392 ,59395, 59397, 59401);
+-- Kitemaster Shoku SAI
+UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`= 59392;
+DELETE FROM `smart_scripts` WHERE `entryorguid`= 59392 AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(59392, 0, 0, 1, 64, 0, 100, 0, 0, 0, 0, 0, 33, 59392, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Kitemaster Shoku - Kill Credit On Gossip Hello"),
+(59392, 0, 1, 0, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Kitemaster Shoku - Close Gossip On Gossip Hello");
+-- Historian Dinh SAI
+UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`= 59395;
+DELETE FROM `smart_scripts` WHERE `entryorguid`= 59395 AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(59395, 0, 0, 1, 64, 0, 100, 0, 0, 0, 0, 0, 33, 59395, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Historian Dinh - Kill Credit On Gossip Hello"),
+(59395, 0, 1, 2, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Historian Dinh - Close Gossip On Gossip Hello"),
+(59395, 0, 2, 0, 61, 0, 100, 0, 0, 0, 0, 0, 1, 0, 3000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Historian Dinh - Say after the Kill Credit");
+-- Taskmaster Emi SAI
+UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`= 59397;
+DELETE FROM `smart_scripts` WHERE `entryorguid`= 59397 AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(59397, 0, 0, 1, 64, 0, 100, 0, 0, 0, 0, 0, 33, 59397, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Taskmaster Emi - Kill Credit On Gossip Hello"),
+(59397, 0, 1, 2, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Taskmaster Emi - Close Gossip On Gossip Hello"),
+(59397, 0, 2, 0, 61, 0, 100, 0, 0, 0, 0, 0, 1, 0, 3000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Taskmaster Emi - Say after the Kill Credit");
+-- Surveyor Sawa SAI
+UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`= 59401;
+DELETE FROM `smart_scripts` WHERE `entryorguid`= 59401 AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(59401, 0, 0, 1, 64, 0, 100, 0, 0, 0, 0, 0, 33, 59401, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Surveyor Sawa - Kill Credit On Gossip Hello'"),
+(59401, 0, 1, 2, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Surveyor Sawa -  Close Gossip On Gossip Hello"),
+(59401, 0, 2, 0, 61, 0, 100, 0, 0, 0, 0, 0, 1, 0, 3000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Surveyor Sawa - Say after the Kill Credit");
+
+DELETE FROM `creature_text` WHERE `entry` IN (59395,59397,59401);
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES 
+(59395, 0, 0, 'Lovely, beautiful! If you have time, you should also visit the East Temple. You may gain further insight into our great statue, and its importance to our way of life.', 12, 0, 100, 1, 0, 0, 'Love\'s Labor'),
+(59397, 0, 0, 'Wonderful! Just look at it. A hundred years to produce this incredible monument for the Jade Serpent. And now, you too have contributed to this masterpiece.', 12, 0, 100, 1, 0, 0, 'Love\'s Labor'),
+(59401, 0, 0, 'Unbelievable! You\'ve just saved my neck, $n. Oh ho, and just look at this luster.', 12, 0, 100, 1, 0, 0, 'Love\'s Labor');
+
+/* Quest: The Wayward Dead */
+UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`= 55290;
+DELETE FROM `smart_scripts` WHERE (`entryorguid`=55290 AND `source_type`=0);
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(55290, 0, 0, 0, 8, 0, 100, 1, 104596, 0, 0, 0, 67, 1, 3000, 3000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Wayward Ancestor - Create Timed Event on spell hit"),
+(55290, 0, 1, 2, 59, 0, 100, 0, 1, 0, 0, 0, 33, 61290, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Wayward Ancestor - Kill Credit after cast"),
+(55290, 0, 2, 0, 61, 0, 100, 0, 0, 0, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Wayward Ancestor - Despawn instant after Kill credit");
+ 
+/* Quest: Snapclaw */
+UPDATE `quest_template` SET `Title` = 'Snapclaw', `CompletedText` = 'Bring the Snapclaw\'s Claw to Angler Shen at Narsong Trench.', `Objectives` = 'Kill Snapclaw in a cave at the bottom of Narsong Trench and return with his claw as proof.', `Details` = 'A giant, poisonous crab is wrecking havoc on our local abalone stores.  I need you to go down into narsong trench and take it out! ', `EndText` = 'Return to Angler Shen in Krasarang Wilds.', `OfferRewardText` = 'That is quite the claw, Snapclaw must be bigger than I thought!  No matter, job well done $n!', `RequestItemsText` = 'Did you take out that nasty crawler?' WHERE `Id` = 30700;
+
+/* Quest: You're Either With Us Or... */
+UPDATE `creature_template` SET `AIName`="SmartAI", `npcflag` = 1 WHERE `entry`= 66220;
+DELETE FROM `smart_scripts` WHERE `entryorguid`= 66220 AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(66220, 0, 0, 0, 64, 0, 100, 0, 0, 0, 0, 0, 33, 66220, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Mayor Honeydew - Kill Credit On Gossip Hello");
+
+/* Quest: Strongarm Tactics */
+UPDATE `creature_template` SET faction_A = 14, faction_H = 14 WHERE entry IN (65882, 65883);

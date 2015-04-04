@@ -1134,3 +1134,9 @@ UPDATE `creature_template` SET faction_A = 14, faction_H = 14 WHERE entry IN (65
 
 /* Stormwind Royal Guard too high melee damage fixed */
 UPDATE `creature_template` SET `dmg_multiplier` = 2 WHERE `entry` = 1756;
+
+/* Honor vendor missing polearm added */
+DELETE FROM `npc_vendor` WHERE `entry` IN (71621,71624) AND `item` IN (99892,99980);
+INSERT INTO `npc_vendor` VALUES 
+(71621, 0, 99980, 0, 0, 3882, 1),
+(71624, 0, 99892, 0, 0, 3882, 1);

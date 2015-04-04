@@ -1193,3 +1193,8 @@ INSERT INTO `npc_vendor` VALUES
 (30733, 0, 79249, 0, 0, 0, 1),
 (30733, 0, 79255, 0, 0, 2583, 1),
 (30733, 0, 79740, 0, 0, 0, 1);
+
+/* Vanity item vendor fixed */
+DELETE FROM `npc_vendor` WHERE `entry` = 18756 AND `item` = 71037;
+INSERT INTO `npc_vendor` VALUES 
+(18756, 0, 71037, 0, 0, 0, 1);

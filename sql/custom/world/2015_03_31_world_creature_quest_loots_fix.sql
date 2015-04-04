@@ -1581,7 +1581,7 @@ INSERT INTO `npc_vendor` VALUES
 /* Hara Alebelly vendor fixed */
 DELETE FROM `npc_vendor` WHERE `entry` = 64042 AND `item` =74636;
 INSERT INTO `npc_vendor` VALUES 
-('64042','0','74636',0,'0',0);
+('64042','0','74636','0','0','0','1');
 
 /* Murphy Diremoor vendor fixed*/
 DELETE FROM `npc_vendor` WHERE `entry` = 64092;

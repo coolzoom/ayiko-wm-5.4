@@ -1577,3 +1577,8 @@ INSERT INTO `npc_vendor` VALUES
 ('71304', '0', '88648', 0, '0', '0', '1'),
 ('71304', '0', '88649', 0, '0', '0', '1'),
 ('71304', '0', '88667', 0, '0', '0', '1');
+
+/* Hara Alebelly vendor fixed */
+DELETE FROM `npc_vendor` WHERE `entry` = 64042 AND `item` =74636;
+INSERT INTO `npc_vendor` VALUES 
+('64042','0','74636',0,'0',0);

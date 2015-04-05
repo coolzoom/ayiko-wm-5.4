@@ -384,14 +384,11 @@ class spell_warr_second_wind final : public SpellScriptLoader
     {
         PrepareAuraScript(script_impl);
 
-        bool checkProc(ProcEventInfo &)
+        bool checkProc(ProcEventInfo & info)
         {
             Unit * const caster = GetCaster();
-            if (!caster || caster->HasAura(WARRIOR_SPELL_SECOND_WIND_REGEN) || caster->GetHealthPct() >= 35)
+            if (!caster || caster->HasAura(WARRIOR_SPELL_SECOND_WIND_REGEN) || !caster->HealthBelowPctDamaged(35, info.GetDamageInfo()->GetDamage()))
                 return false;
-
-            if (!caster->HasAura(WARRIOR_SPELL_SECOND_WIND_DUMMY))
-                caster->CastSpell(caster, WARRIOR_SPELL_SECOND_WIND_DUMMY, true);
 
             return true;
         }
@@ -415,6 +412,48 @@ public:
     {
         return new script_impl();
     }
+};
+
+class spell_warr_second_wind_aura : public SpellScriptLoader
+{
+    public:
+        spell_warr_second_wind_aura() : SpellScriptLoader("spell_warr_second_wind_aura") { }
+
+        class spell_warr_second_wind_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_warr_second_wind_AuraScript);
+
+            void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* caster = GetCaster())
+                    caster->AddAura(125667, caster);
+            }
+
+            void OnRemove(const AuraEffect* aurEff, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* caster = GetCaster())
+                    if (caster->HasAura(125667))
+                        caster->RemoveAura(125667);
+            }
+
+            void OnTick(AuraEffect const* aurEff)
+            {
+                if (Unit* caster = GetCaster())
+                    caster->AddAura(125667, caster);
+            }
+
+            void Register()
+            {
+                OnEffectApply += AuraEffectApplyFn(spell_warr_second_wind_AuraScript::OnApply, EFFECT_0, SPELL_AURA_OBS_MOD_HEALTH, AURA_EFFECT_HANDLE_REAL);
+                OnEffectRemove += AuraEffectRemoveFn(spell_warr_second_wind_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_OBS_MOD_HEALTH, AURA_EFFECT_HANDLE_REAL);
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_warr_second_wind_AuraScript::OnTick, EFFECT_0, SPELL_AURA_OBS_MOD_HEALTH);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_warr_second_wind_AuraScript();
+        }
 };
 
 // Unbridled Wrath - 143268
@@ -1662,4 +1701,5 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_sweeping_strikes();
     new spell_warr_unshackled_fury();
     new spell_warr_storm_bolt_damage();
+    new spell_warr_second_wind_aura();
 }

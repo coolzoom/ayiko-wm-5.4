@@ -11071,7 +11071,7 @@ void Unit::ModifyAuraState(AuraStateType flag, bool apply)
                 SpellInfo const* spellProto = (*itr).second->GetBase()->GetSpellInfo();
                 if (!spellProto)
                     continue;
-                if (spellProto->CasterAuraState == uint32(flag)) // Don't remove Second Wind, implemented in ::HandlePeriodicHealAurasTick
+                if (spellProto->CasterAuraState == uint32(flag))
                     RemoveAura(itr);
                 else
                     ++itr;

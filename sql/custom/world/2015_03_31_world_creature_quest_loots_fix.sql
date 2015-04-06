@@ -1654,3 +1654,6 @@ UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `exp` = 4 WHERE
 
 /* Deer fixed */
 UPDATE `creature_template` SET `minlevel` = 1, `maxlevel` = 1, `flags_extra` = 64 WHERE `entry` = 883;
+
+/* Springtail Gnasher fixed */
+UPDATE `creature_template` SET `minlevel` = 86 WHERE `entry` = 57413;

@@ -1605,3 +1605,5 @@ DELETE FROM `creature` WHERE `id`=50809;
 INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
 (50809, 0, 0, 0, 1, 1, 0, 0, 1844.34, -1100.73, 61.9001, 3.48107, 28800, 50, 0, 2918, 0, 1, 0, 0, 0, 0, 0, 0);
 
+/* Ashtail spawn time fixed */
+UPDATE `creature` SET `spawntimesecs` = 5400 WHERE `id` = 45380;

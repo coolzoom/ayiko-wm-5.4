@@ -1769,7 +1769,8 @@ void Spell::SelectImplicitCasterObjectTargets(SpellEffIndex effIndex, SpellImpli
 void Spell::SelectImplicitTargetObjectTargets(SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType)
 {
     // Persistent auras should cast trigger spells when they is activated on target
-    if (m_spellInfo->HasPersistenAura())
+    // Wtf is this
+    if (m_spellInfo->HasPersistenAura() && m_spellInfo->Id != 78675)
         return;
 
     ASSERT((m_targets.GetObjectTarget() || m_targets.GetItemTarget() || m_targets.GetUnitTarget()) && "Spell::SelectImplicitTargetObjectTargets - no explicit object or item target available!");

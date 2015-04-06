@@ -1695,68 +1695,43 @@ class spell_dru_ursols_vortex : public SpellScriptLoader
         }
 };
 
-// Solar beam - 78675
-// Solar beam (Symbiosis) - 113286
-class spell_dru_solar_beam final : public SpellScriptLoader
+// 983 - Solar Beam
+class sat_druid_solar_beam : public SpellAreaTriggerScript
 {
-    class script_impl final : public AuraScript
+public:
+    sat_druid_solar_beam() : SpellAreaTriggerScript("sat_druid_solar_beam") {}
+
+    class sat_druid_solar_beam_interface : public IAreaTriggerAura
     {
-        PrepareAuraScript(script_impl)
-
-        enum
+        bool CheckTriggering(WorldObject* triggering) override
         {
-            SOLAR_BEAM_SILENCE          = 129889,
-            SOLAR_BEAM_FOR_AMPLITUDE    = 133899,
-        };
-
-        int32 amplitude_;
-
-        bool Load() final
-        {
-            auto const spellInfo = sSpellMgr->GetSpellInfo(SOLAR_BEAM_FOR_AMPLITUDE);
-            if (!spellInfo || spellInfo->Effects.size() < EFFECT_2)
+            Unit* unit = triggering->ToUnit();
+            if (!unit)
                 return false;
 
-            amplitude_ = spellInfo->Effects[EFFECT_2].Amplitude;
+            if (!m_target->IsWithinDistInMap(unit, m_range))
+                return false;
+
+            if (!m_caster->_IsValidAttackTarget(unit, m_spellInfo, m_target))
+                return false;
+
             return true;
         }
 
-        void onCalcPeriodic(AuraEffect const *, bool &isPeriodic, int32 &amplitude)
+        void OnTriggeringApply(WorldObject* triggering) override
         {
-            isPeriodic = true;
-            amplitude = amplitude_;
+            m_caster->AddAura(81261, triggering->ToUnit());
         }
 
-        void onTick(AuraEffect const *)
+        void OnTriggeringRemove(WorldObject* triggering) override
         {
-            PreventDefaultAction();
-
-            auto const caster = GetCaster();
-            if (!caster)
-                return;
-
-            auto const obj = caster->GetDynObject(GetId());
-            if (!obj)
-                return;
-
-            caster->CastSpell(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), SOLAR_BEAM_SILENCE, true);
-        }
-
-        void Register() final
-        {
-            DoEffectCalcPeriodic += AuraEffectCalcPeriodicFn(script_impl::onCalcPeriodic, EFFECT_2, SPELL_AURA_DUMMY);
-            OnEffectPeriodic += AuraEffectPeriodicFn(script_impl::onTick, EFFECT_2, SPELL_AURA_DUMMY);
+            triggering->ToUnit()->RemoveAura(81261, m_caster->GetGUID());
         }
     };
 
-public:
-    spell_dru_solar_beam()
-        : SpellScriptLoader("spell_dru_solar_beam")
-    { }
-
-    AuraScript * GetAuraScript() const final
+    IAreaTrigger* GetInterface() const override
     {
-        return new script_impl;
+        return new sat_druid_solar_beam_interface();
     }
 };
 
@@ -4025,7 +4000,7 @@ void AddSC_druid_spell_scripts()
     new spell_dru_cenarion_ward();
     new spell_dru_ursols_vortex_snare();
     new spell_dru_ursols_vortex();
-    new spell_dru_solar_beam();
+    new sat_druid_solar_beam();
     new spell_dru_dash();
     new spell_dru_rip_duration();
     new spell_dru_savage_defense();

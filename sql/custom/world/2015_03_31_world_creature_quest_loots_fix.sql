@@ -1663,3 +1663,6 @@ UPDATE `creature_template` SET `unit_flags` = 32768, `dynamicflags` = 0 WHERE `e
 
 /* Coldbite Crocolisk fixed */
 UPDATE `creature_template` SET `unit_flags` = 32768, `dynamicflags` = 0 WHERE `entry` = 62023;
+
+/* Escaped Shagskin fixed */
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `faction_A` = 35, `faction_H` = 35 WHERE `entry` = 59491;

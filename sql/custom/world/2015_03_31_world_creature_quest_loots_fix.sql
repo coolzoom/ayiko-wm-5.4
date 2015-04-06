@@ -1669,3 +1669,8 @@ UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `faction_A` = 3
 
 /* Kor'kron Outrider fixed */
 UPDATE `creature_template` SET `faction_H` = 7 WHERE `entry` IN (71010,71011);
+
+/* Lieutenant Palliter wrong spawns fix */
+DELETE FROM `creature` WHERE `id`=39269;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(39269, 1, 14, 372, 1, 1, 0, 0, -241.994, -5106.11, 41.3468, 4.45628, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0);

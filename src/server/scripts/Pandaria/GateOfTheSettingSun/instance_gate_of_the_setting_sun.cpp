@@ -31,10 +31,22 @@ public:
         return new instance_gate_setting_sun_InstanceMapScript(map);
     }
 
+    enum eEvents
+    {
+        EVENT_ACTIVATE_SPAWNER   = 1
+    };
+
+    enum eSpells
+    {
+        SPELL_SPAWNER = 115141
+    };
+
     struct instance_gate_setting_sun_InstanceMapScript : public InstanceScript
     {
+        EventMap events;
         bool fallEvent;
 
+        uint8 playersInInstanceCnt;
         uint32 cornerAstate;
         uint32 cornerBstate;
         uint32 cornerCstate;
@@ -70,6 +82,7 @@ public:
         std::list<uint64> artilleryGUIDs;
         std::list<uint64> artilleryToWallGUIDs;
         std::list<uint64> ropeGUIDs;
+        std::list<uint64> spawnerTargetGUIDs;
 
         instance_gate_setting_sun_InstanceMapScript(Map* map) : InstanceScript(map) {}
 
@@ -79,30 +92,31 @@ public:
             LoadDoorData(doorData);
             memset(dataStorage, 0, MAX_DATA * sizeof(uint32));
 
-            cornerAstate = NOT_STARTED;
-            cornerBstate = NOT_STARTED;
-            cornerCstate = NOT_STARTED;
-            firstDoorstate = NOT_STARTED;
-            braiserState = NOT_STARTED;
-            fallEvent = false;
-            kiptilakGuid = 0;
-            gadokGuid = 0;
-            rimokGuid = 0;
-            raigonnGuid = 0;
-            raigonWeakGuid = 0;
-            explosionTarget1GUID = 0;
-            explosionTarget2GUID = 0;
-            firstDoorGuid = 0;
-            wallCGuid = 0;
-            wallAGUID = 0;
-            wallBGUID = 0;
-            portalTempGadokGuid = 0;
-            defenderAGUID = 0;
-            defenderBGUID = 0;
-            traineeGUID = 0;
-            fireSignalGuid = 0;
-            greatDoorGUID = 0;
-            greatDoor2GUID = 0;
+            cornerAstate          = NOT_STARTED;
+            cornerBstate          = NOT_STARTED;
+            cornerCstate          = NOT_STARTED;
+            firstDoorstate        = NOT_STARTED;
+            braiserState          = NOT_STARTED;
+            fallEvent             = false;
+            playersInInstanceCnt  = 0;
+            kiptilakGuid          = 0;
+            gadokGuid             = 0;
+            rimokGuid             = 0;
+            raigonnGuid           = 0;
+            raigonWeakGuid        = 0;
+            explosionTarget1GUID  = 0;
+            explosionTarget2GUID  = 0;
+            firstDoorGuid         = 0;
+            wallCGuid             = 0;
+            wallAGUID             = 0;
+            wallBGUID             = 0;
+            portalTempGadokGuid   = 0;
+            defenderAGUID         = 0;
+            defenderBGUID         = 0;
+            traineeGUID           = 0;
+            fireSignalGuid        = 0;
+            greatDoorGUID         = 0;
+            greatDoor2GUID        = 0;
 
             bombarderGuids.clear();
             fallDefendersGUIDS.clear();
@@ -112,12 +126,38 @@ public:
             artilleryGUIDs.clear();
             artilleryToWallGUIDs.clear();
             ropeGUIDs.clear();
+            spawnerTargetGUIDs.clear();
         }
 
-        void OnDestroy(InstanceMap* pMap)
+        void OnPlayerEnter(Player* player) override
         {
-            if (Creature* weakSpot = instance->GetCreature(GetData64(NPC_WEAK_SPOT)))
-                weakSpot->_ExitVehicle();
+            if (playersInInstanceCnt == 0)
+                events.ScheduleEvent(EVENT_ACTIVATE_SPAWNER, 1 * IN_MILLISECONDS);
+
+            ++playersInInstanceCnt;
+        }
+
+        void OnPlayerLeave(Player* /*player*/) override
+        {
+            if (--playersInInstanceCnt == 0)
+            {
+                for (auto spawner : spawnerTargetGUIDs)
+                     if (auto cSpawner = instance->GetCreature(spawner))
+                          cSpawner->RemoveAura(SPELL_SPAWNER);
+            }
+        }
+
+        void Update(uint32 diff)
+        {
+            events.Update(diff);
+
+            if (events.ExecuteEvent() == EVENT_ACTIVATE_SPAWNER)
+            {
+                for (auto spawner : spawnerTargetGUIDs)
+                     if (auto cSpawner = instance->GetCreature(spawner))
+                         if (!cSpawner->HasAura(SPELL_SPAWNER))
+                               cSpawner->CastSpell(cSpawner, SPELL_SPAWNER, false);
+            }
         }
 
         void OnCreatureCreate(Creature* creature)
@@ -170,6 +210,7 @@ public:
                 traineeGUID = creature->GetGUID();
                 break;
             case NPC_ARCHER_TARGET_SPAWNER:
+                spawnerTargetGUIDs.push_back(creature->GetGUID());
                 creature->setActive(true);
                 break;
             case NPC_ROPE:
@@ -180,9 +221,8 @@ public:
 
         void OnCreatureRemove(Creature* creature)
         {
-            switch (creature->GetEntry())
+            if (creature->GetEntry() == NPC_KRITHUK_BOMBARDER)
             {
-            case NPC_KRITHUK_BOMBARDER:
                 for (std::list<uint64>::iterator it = bombarderGuids.begin(); it != bombarderGuids.end(); ++it)
                 {
                     if (*it == creature->GetGUID())
@@ -191,9 +231,6 @@ public:
                         break;
                     }
                 }
-                break;
-            default:                                                                           
-                return;
             }
         }
 
@@ -234,8 +271,6 @@ public:
             case GO_GREAT_DOOR_PHASE_2:
                 greatDoor2GUID = go->GetGUID();
                 break;
-            default:
-                return;
             }
         }
 
@@ -296,8 +331,6 @@ public:
                                  go->SetPhaseMask(1, true);
                          }
                     }
-                    break;
-                default:
                     break;
             }
 
@@ -486,8 +519,6 @@ public:
             {
             case NPC_WEAK_SPOT:
                 raigonWeakGuid = value;
-                break;
-            default:
                 break;
             }
         }

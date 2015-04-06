@@ -744,13 +744,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 (@GUID + 9, 59886, 962, 5976, 5976, 6, 1, 0, 0, 809.818, 2537.77, 414.671, 0, 604800, 0, 0, 1, 0, 0, 0, 33554432, 0),
 (@GUID + 10, 59886, 962, 5976, 5976, 6, 1, 0, 0, 868.352, 2516.59, 402.279, 0, 604800, 0, 0, 1, 0, 0, 0, 33554432, 0);
 
-DELETE FROM `creature_template_aura` WHERE `entry` = 59886;
-INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES 
-(59886, 115141);
-
-DELETE FROM `creature_template_aura` WHERE `entry` = 150056;
-INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES 
-(150056, 115141);
+DELETE FROM `creature_template_aura` WHERE `entry` IN (59886, 150056);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/

@@ -653,6 +653,8 @@ void Map::Update(const uint32 diff)
 
 void Map::RemovePlayerFromMap(Player* player, bool remove)
 {
+    sScriptMgr->OnPlayerLeaveMap(this, player);
+
     player->RemoveFromWorld();
     SendRemoveTransports(player);
 
@@ -663,10 +665,7 @@ void Map::RemovePlayerFromMap(Player* player, bool remove)
         ASSERT(remove); //maybe deleted in logoutplayer when player is not in a map
 
     if (remove)
-    {
         DeleteFromWorld(player);
-        sScriptMgr->OnPlayerLeaveMap(this, player);
-    }
 }
 
 template<class T>
@@ -2529,6 +2528,10 @@ void InstanceMap::RemovePlayerFromMap(Player* player, bool remove)
     if (!m_unloadTimer && m_mapRefManager.getSize() == 1)
         m_unloadTimer = m_unloadWhenEmpty ? MIN_UNLOAD_DELAY : std::max(sWorld->getIntConfig(CONFIG_INSTANCE_UNLOAD_DELAY), (uint32)MIN_UNLOAD_DELAY);
     Map::RemovePlayerFromMap(player, remove);
+
+    if (i_data)
+        i_data->OnPlayerLeave(player);
+
     // for normal instances schedule the reset after all players have left
     SetResetSchedule(true);
 }

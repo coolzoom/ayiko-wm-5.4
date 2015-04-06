@@ -1651,3 +1651,6 @@ UPDATE `creature_template` SET `exp` = 3, `Health_mod` = 15.245 WHERE `entry` = 
 
 /* Huntress Ravenoak fixed */
 UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `exp` = 4 WHERE `entry` = 14379;
+
+/* Deer fixed */
+UPDATE `creature_template` SET `minlevel` = 1, `maxlevel` = 1, `flags_extra` = 64 WHERE `entry` = 883;

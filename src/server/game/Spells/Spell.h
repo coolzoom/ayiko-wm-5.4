@@ -470,6 +470,7 @@ class Spell
         void TakeRunePower(bool didHit);
         void TakeReagents();
         void TakeCastItem();
+        void HandleGenericAfterCast();
 
         SpellCastResult CheckCast(bool strict);
         SpellCastResult CheckPetCast(Unit* target);

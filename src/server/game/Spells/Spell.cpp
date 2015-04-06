@@ -1769,7 +1769,8 @@ void Spell::SelectImplicitCasterObjectTargets(SpellEffIndex effIndex, SpellImpli
 void Spell::SelectImplicitTargetObjectTargets(SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType)
 {
     // Persistent auras should cast trigger spells when they is activated on target
-    if (m_spellInfo->HasPersistenAura())
+    // Wtf is this
+    if (m_spellInfo->HasPersistenAura() && m_spellInfo->Id != 78675)
         return;
 
     ASSERT((m_targets.GetObjectTarget() || m_targets.GetItemTarget() || m_targets.GetUnitTarget()) && "Spell::SelectImplicitTargetObjectTargets - no explicit object or item target available!");
@@ -2244,12 +2245,6 @@ void Spell::SearchChainTargets(std::list<WorldObject*>& targets, uint32 chainTar
                                 break;
                             }
                 }
-
-                // Drop charges
-                if (foundItr != tempTargets.end())
-                    if (Aura* havoc = m_caster->GetAura(80240))
-                        havoc->ModStackAmount(m_spellInfo->Id == 116858 ? -3 : -1);
-
             }
             else
             {
@@ -3835,6 +3830,25 @@ void Spell::cast(bool skipCheck)
                 m_caster->CastSpell(m_targets.GetUnitTarget() ? m_targets.GetUnitTarget() : m_caster, *i, true);
     }
 
+    HandleGenericAfterCast();
+
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        // Remove spell mods after cast
+        if (m_spellInfo->Speed && !m_spellInfo->IsChanneled())
+            m_caster->ToPlayer()->RemoveSpellMods(*this);
+
+        m_caster->ToPlayer()->SetSpellModTakingSpell(this, false);
+        //Clear spell cooldowns after every spell is cast if .cheat cooldown is enabled.
+        if (m_caster->ToPlayer()->GetCommandStatus(CHEAT_COOLDOWN))
+            m_caster->ToPlayer()->RemoveSpellCooldown(m_spellInfo->Id, true);
+    }
+
+    SetExecutedCurrently(false);
+}
+
+void Spell::HandleGenericAfterCast()
+{
     Unit::AuraEffectList swaps = m_caster->GetAuraEffectsByType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS);
     Unit::AuraEffectList const& swaps2 = m_caster->GetAuraEffectsByType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2);
     if (!swaps2.empty())
@@ -3894,19 +3908,16 @@ void Spell::cast(bool skipCheck)
         j++;
     }
 
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    switch (m_spellInfo->SpellFamilyName)
     {
-        // Remove spell mods after cast
-        if (m_spellInfo->Speed && !m_spellInfo->IsChanneled())
-            m_caster->ToPlayer()->RemoveSpellMods(*this);
-
-        m_caster->ToPlayer()->SetSpellModTakingSpell(this, false);
-        //Clear spell cooldowns after every spell is cast if .cheat cooldown is enabled.
-        if (m_caster->ToPlayer()->GetCommandStatus(CHEAT_COOLDOWN))
-            m_caster->ToPlayer()->RemoveSpellCooldown(m_spellInfo->Id, true);
+        case SPELLFAMILY_WARLOCK:
+            // Havoc
+            if (AuraEffect* aurEff = m_caster->GetAuraEffect(80240, EFFECT_1))
+                if (aurEff->GetSpellEffectInfo().SpellClassMask & m_spellInfo->SpellFamilyFlags)
+                    if (GetUnitTarget() && !GetUnitTarget()->HasAura(80240))
+                        aurEff->GetBase()->ModStackAmount(m_spellInfo->Id == 116858 ? -3 : -1);
+            break;
     }
-
-    SetExecutedCurrently(false);
 }
 
 void Spell::handle_immediate()
@@ -6409,12 +6420,17 @@ SpellCastResult Spell::CheckCast(bool strict)
         auto const player = m_caster->ToPlayer();
 
         //can cast triggered (by aura only?) spells while have this flag
-        if (!(_triggeredCastFlags & TRIGGERED_IGNORE_CASTER_AURASTATE) && player->HasFlag(PLAYER_FLAGS, PLAYER_ALLOW_ONLY_ABILITY)
-            && !(m_caster->HasAura(46924) && (m_spellInfo->Id == 469 || m_spellInfo->Id == 6673 || m_spellInfo->Id == 97462 || m_spellInfo->Id == 5246 || m_spellInfo->Id == 12323
-            || m_spellInfo->Id == 107566 || m_spellInfo->Id == 102060 || m_spellInfo->Id == 1160))) // Hack fix Bladestorm - caster should be able to cast only shout spells during bladestorm
+        if (!(_triggeredCastFlags & TRIGGERED_IGNORE_CASTER_AURASTATE) && player->HasFlag(PLAYER_FLAGS, PLAYER_ALLOW_ONLY_ABILITY))
         {
-            if (m_spellInfo->Id != 108839)
-                return SPELL_FAILED_SPELL_IN_PROGRESS;
+            Unit::AuraEffectList const& allowedAb = m_caster->GetAuraEffectsByType(SPELL_AURA_ALLOW_ONLY_ABILITY);
+            for (Unit::AuraEffectList::const_iterator i = allowedAb.begin(); i != allowedAb.end(); ++i)
+            {
+                if (!(*i)->GetSpellEffectInfo().SpellClassMask)
+                    return SPELL_FAILED_SPELL_IN_PROGRESS;
+
+                if (!((*i)->GetSpellEffectInfo().SpellClassMask & m_spellInfo->SpellFamilyFlags))
+                    return SPELL_FAILED_SPELL_IN_PROGRESS;
+            }
         }
 
         if (player->HasSpellCooldown(m_spellInfo->Id) && !player->HasAuraTypeWithAffectMask(SPELL_AURA_ALLOW_CAST_WHILE_IN_COOLDOWN, m_spellInfo))

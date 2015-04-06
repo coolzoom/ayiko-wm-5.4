@@ -1636,3 +1636,41 @@ INSERT INTO `creature_loot_template` VALUES
 
 /* Dook Ookem spawn time fixed */
 UPDATE `creature` SET `spawntimesecs` = 300 WHERE `id` = 55622;
+
+/* Wyrmrest Protectors fixed */
+UPDATE `creature_template` SET `exp` = 3 WHERE `entry` = 27953;
+
+/* Gish The Unmoving level fixed */
+UPDATE `creature_template` SET `minlevel` = 41, `maxlevel` = 41 WHERE `entry` = 10825;
+
+/* Skarr fixed */ 
+UPDATE `creature_template` SET `exp` = 4 WHERE `entry` = 50815;
+
+/* Silvermoon Dragonhawk fixed */
+UPDATE `creature_template` SET `exp` = 3, `Health_mod` = 15.245 WHERE `entry` = 27946;
+
+/* Huntress Ravenoak fixed */
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `exp` = 4 WHERE `entry` = 14379;
+
+/* Deer fixed */
+UPDATE `creature_template` SET `minlevel` = 1, `maxlevel` = 1, `flags_extra` = 64 WHERE `entry` = 883;
+
+/* Springtail Gnasher fixed */
+UPDATE `creature_template` SET `minlevel` = 86 WHERE `entry` = 57413;
+
+/* Fishgorged Crane fixed */
+UPDATE `creature_template` SET `unit_flags` = 32768, `dynamicflags` = 0 WHERE `entry` = 73297;
+
+/* Coldbite Crocolisk fixed */
+UPDATE `creature_template` SET `unit_flags` = 32768, `dynamicflags` = 0 WHERE `entry` = 62023;
+
+/* Escaped Shagskin fixed */
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `faction_A` = 35, `faction_H` = 35 WHERE `entry` = 59491;
+
+/* Kor'kron Outrider fixed */
+UPDATE `creature_template` SET `faction_H` = 7 WHERE `entry` IN (71010,71011);
+
+/* Lieutenant Palliter wrong spawns fix */
+DELETE FROM `creature` WHERE `id`=39269;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(39269, 1, 14, 372, 1, 1, 0, 0, -241.994, -5106.11, 41.3468, 4.45628, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0);

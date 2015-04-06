@@ -1639,3 +1639,6 @@ UPDATE `creature` SET `spawntimesecs` = 300 WHERE `id` = 55622;
 
 /* Wyrmrest Protectors fixed */
 UPDATE `creature_template` SET `exp` = 3 WHERE `entry` = 27953;
+
+/* Gish The Unmoving level fixed */
+UPDATE `creature_template` SET `minlevel` = 41, `maxlevel` = 41 WHERE `entry` = 10825;

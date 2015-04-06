@@ -1648,3 +1648,6 @@ UPDATE `creature_template` SET `exp` = 4 WHERE `entry` = 50815;
 
 /* Silvermoon Dragonhawk fixed */
 UPDATE `creature_template` SET `exp` = 3, `Health_mod` = 15.245 WHERE `entry` = 27946;
+
+/* Huntress Ravenoak fixed */
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `exp` = 4 WHERE `entry` = 14379;

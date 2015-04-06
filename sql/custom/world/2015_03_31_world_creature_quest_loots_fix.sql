@@ -1660,3 +1660,6 @@ UPDATE `creature_template` SET `minlevel` = 86 WHERE `entry` = 57413;
 
 /* Fishgorged Crane fixed */
 UPDATE `creature_template` SET `unit_flags` = 32768, `dynamicflags` = 0 WHERE `entry` = 73297;
+
+/* Coldbite Crocolisk fixed */
+UPDATE `creature_template` SET `unit_flags` = 32768, `dynamicflags` = 0 WHERE `entry` = 62023;

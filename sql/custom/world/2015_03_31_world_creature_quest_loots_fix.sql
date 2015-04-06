@@ -1666,3 +1666,6 @@ UPDATE `creature_template` SET `unit_flags` = 32768, `dynamicflags` = 0 WHERE `e
 
 /* Escaped Shagskin fixed */
 UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `faction_A` = 35, `faction_H` = 35 WHERE `entry` = 59491;
+
+/* Kor'kron Outrider fixed */
+UPDATE `creature_template` SET `faction_H` = 7 WHERE `entry` = 71010;

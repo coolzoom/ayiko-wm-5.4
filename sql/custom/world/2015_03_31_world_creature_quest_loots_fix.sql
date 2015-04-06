@@ -1636,3 +1636,6 @@ INSERT INTO `creature_loot_template` VALUES
 
 /* Dook Ookem spawn time fixed */
 UPDATE `creature` SET `spawntimesecs` = 300 WHERE `id` = 55622;
+
+/* Wyrmrest Protectors fixed */
+UPDATE `creature_template` SET `exp` = 3 WHERE `entry` = 27953;

@@ -1657,3 +1657,6 @@ UPDATE `creature_template` SET `minlevel` = 1, `maxlevel` = 1, `flags_extra` = 6
 
 /* Springtail Gnasher fixed */
 UPDATE `creature_template` SET `minlevel` = 86 WHERE `entry` = 57413;
+
+/* Fishgorged Crane fixed */
+UPDATE `creature_template` SET `unit_flags` = 32768, `dynamicflags` = 0 WHERE `entry` = 73297;

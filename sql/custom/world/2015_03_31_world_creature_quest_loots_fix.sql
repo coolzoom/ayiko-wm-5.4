@@ -1615,3 +1615,6 @@ UPDATE `creature_template` SET `faction_A` = 14, `faction_H` = 14 WHERE `entry` 
 DELETE FROM `creature` WHERE `id`=58408;
 INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
 (58408, 870, 0, 0, 1, 1, 0, 58408, 1212.05, 1042.57, 417.915, 4.3352, 10, 0, 0, 1969705, 0, 0, 0, 0, 0, 2048, 0, 0);
+
+/* Drake Dealer Hurlunk and other Netherwing's NPCs faction fixed now players can buy the mount */
+UPDATE `creature_template` SET `faction_A` = 1824, `faction_H` = 1824 WHERE `entry` IN (23139,23140,23141,23143,23145,23146,23150,23291,23340,23344,23348,23427,23489,28402);

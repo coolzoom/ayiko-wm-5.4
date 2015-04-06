@@ -260,6 +260,10 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint32 spellid
                             charmInfo->SetIsReturning(false);
 
                             pet->ToCreature()->AI()->AttackStart(TargetUnit);
+                            if (Player* owner = pet->GetOwner()->ToPlayer())
+                                for (Unit::ControlList::iterator itr = owner->m_Controlled.begin(); itr != owner->m_Controlled.end(); ++itr)
+                                    if ((*itr)->isGuardian() && (*itr)->IsAIEnabled)
+                                        (*itr)->ToCreature()->AI()->AttackStart(TargetUnit);
 
                             //10% chance to play special pet attack talk, else growl
                             if (pet->ToCreature()->isPet() && ((Pet*)pet)->getPetType() == SUMMON_PET && pet != TargetUnit && urand(0, 100) < 10)

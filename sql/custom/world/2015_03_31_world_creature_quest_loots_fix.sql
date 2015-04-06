@@ -1642,3 +1642,6 @@ UPDATE `creature_template` SET `exp` = 3 WHERE `entry` = 27953;
 
 /* Gish The Unmoving level fixed */
 UPDATE `creature_template` SET `minlevel` = 41, `maxlevel` = 41 WHERE `entry` = 10825;
+
+/* Skarr fixed */ 
+UPDATE `creature_template` SET `exp` = 4 WHERE `entry` = 50815;

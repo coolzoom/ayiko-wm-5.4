@@ -6420,12 +6420,17 @@ SpellCastResult Spell::CheckCast(bool strict)
         auto const player = m_caster->ToPlayer();
 
         //can cast triggered (by aura only?) spells while have this flag
-        if (!(_triggeredCastFlags & TRIGGERED_IGNORE_CASTER_AURASTATE) && player->HasFlag(PLAYER_FLAGS, PLAYER_ALLOW_ONLY_ABILITY)
-            && !(m_caster->HasAura(46924) && (m_spellInfo->Id == 469 || m_spellInfo->Id == 6673 || m_spellInfo->Id == 97462 || m_spellInfo->Id == 5246 || m_spellInfo->Id == 12323
-            || m_spellInfo->Id == 107566 || m_spellInfo->Id == 102060 || m_spellInfo->Id == 1160))) // Hack fix Bladestorm - caster should be able to cast only shout spells during bladestorm
+        if (!(_triggeredCastFlags & TRIGGERED_IGNORE_CASTER_AURASTATE) && player->HasFlag(PLAYER_FLAGS, PLAYER_ALLOW_ONLY_ABILITY))
         {
-            if (m_spellInfo->Id != 108839)
-                return SPELL_FAILED_SPELL_IN_PROGRESS;
+            Unit::AuraEffectList const& allowedAb = m_caster->GetAuraEffectsByType(SPELL_AURA_ALLOW_ONLY_ABILITY);
+            for (Unit::AuraEffectList::const_iterator i = allowedAb.begin(); i != allowedAb.end(); ++i)
+            {
+                if (!(*i)->GetSpellEffectInfo().SpellClassMask)
+                    return SPELL_FAILED_SPELL_IN_PROGRESS;
+
+                if (!((*i)->GetSpellEffectInfo().SpellClassMask & m_spellInfo->SpellFamilyFlags))
+                    return SPELL_FAILED_SPELL_IN_PROGRESS;
+            }
         }
 
         if (player->HasSpellCooldown(m_spellInfo->Id) && !player->HasAuraTypeWithAffectMask(SPELL_AURA_ALLOW_CAST_WHILE_IN_COOLDOWN, m_spellInfo))

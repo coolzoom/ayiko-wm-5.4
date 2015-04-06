@@ -2244,12 +2244,6 @@ void Spell::SearchChainTargets(std::list<WorldObject*>& targets, uint32 chainTar
                                 break;
                             }
                 }
-
-                // Drop charges
-                if (foundItr != tempTargets.end())
-                    if (Aura* havoc = m_caster->GetAura(80240))
-                        havoc->ModStackAmount(m_spellInfo->Id == 116858 ? -3 : -1);
-
             }
             else
             {
@@ -3835,6 +3829,25 @@ void Spell::cast(bool skipCheck)
                 m_caster->CastSpell(m_targets.GetUnitTarget() ? m_targets.GetUnitTarget() : m_caster, *i, true);
     }
 
+    HandleGenericAfterCast();
+
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        // Remove spell mods after cast
+        if (m_spellInfo->Speed && !m_spellInfo->IsChanneled())
+            m_caster->ToPlayer()->RemoveSpellMods(*this);
+
+        m_caster->ToPlayer()->SetSpellModTakingSpell(this, false);
+        //Clear spell cooldowns after every spell is cast if .cheat cooldown is enabled.
+        if (m_caster->ToPlayer()->GetCommandStatus(CHEAT_COOLDOWN))
+            m_caster->ToPlayer()->RemoveSpellCooldown(m_spellInfo->Id, true);
+    }
+
+    SetExecutedCurrently(false);
+}
+
+void Spell::HandleGenericAfterCast()
+{
     Unit::AuraEffectList swaps = m_caster->GetAuraEffectsByType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS);
     Unit::AuraEffectList const& swaps2 = m_caster->GetAuraEffectsByType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2);
     if (!swaps2.empty())
@@ -3894,19 +3907,16 @@ void Spell::cast(bool skipCheck)
         j++;
     }
 
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    switch (m_spellInfo->SpellFamilyName)
     {
-        // Remove spell mods after cast
-        if (m_spellInfo->Speed && !m_spellInfo->IsChanneled())
-            m_caster->ToPlayer()->RemoveSpellMods(*this);
-
-        m_caster->ToPlayer()->SetSpellModTakingSpell(this, false);
-        //Clear spell cooldowns after every spell is cast if .cheat cooldown is enabled.
-        if (m_caster->ToPlayer()->GetCommandStatus(CHEAT_COOLDOWN))
-            m_caster->ToPlayer()->RemoveSpellCooldown(m_spellInfo->Id, true);
+        case SPELLFAMILY_WARLOCK:
+            // Havoc
+            if (AuraEffect* aurEff = m_caster->GetAuraEffect(80240, EFFECT_1))
+                if (aurEff->GetSpellEffectInfo().SpellClassMask & m_spellInfo->SpellFamilyFlags)
+                    if (GetUnitTarget() && !GetUnitTarget()->HasAura(80240))
+                        aurEff->GetBase()->ModStackAmount(m_spellInfo->Id == 116858 ? -3 : -1);
+            break;
     }
-
-    SetExecutedCurrently(false);
 }
 
 void Spell::handle_immediate()

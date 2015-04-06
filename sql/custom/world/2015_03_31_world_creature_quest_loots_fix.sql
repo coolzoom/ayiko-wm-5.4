@@ -1598,3 +1598,10 @@ INSERT INTO `npc_vendor` VALUES
 ('64092', '0', '39684', '0', '0', '0', '1'),
 ('64092', '0', '40533', '0', '0', '0', '1'),
 ('64092', '0', '90146', '0', '0', '0', '1');
+
+/* Heress template and missing spawn fixed */
+UPDATE `creature_template` SET `faction_A` = 14, `faction_H` = 14, `dmg_multiplier` = 2, `InhabitType` = 4, `modelid1` = 37536 WHERE `entry` = 50809;
+DELETE FROM `creature` WHERE `id`=50809;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(50809, 0, 0, 0, 1, 1, 0, 0, 1844.34, -1100.73, 61.9001, 3.48107, 28800, 50, 0, 2918, 0, 1, 0, 0, 0, 0, 0, 0);
+

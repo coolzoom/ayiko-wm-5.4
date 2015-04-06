@@ -1610,3 +1610,8 @@ UPDATE `creature` SET `spawntimesecs` = 5400 WHERE `id` = 45380;
 
 /* Skarr &  Deth'tilac faction fixed now horde players can tame them */
 UPDATE `creature_template` SET `faction_A` = 14, `faction_H` = 14 WHERE `entry` IN (50815,54322);
+
+/* Leven Dawnblade missing spawn fixed now players can start and finish quests */
+DELETE FROM `creature` WHERE `id`=58408;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(58408, 870, 0, 0, 1, 1, 0, 58408, 1212.05, 1042.57, 417.915, 4.3352, 10, 0, 0, 1969705, 0, 0, 0, 0, 0, 2048, 0, 0);

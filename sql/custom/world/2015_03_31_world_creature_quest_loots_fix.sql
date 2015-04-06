@@ -1645,3 +1645,6 @@ UPDATE `creature_template` SET `minlevel` = 41, `maxlevel` = 41 WHERE `entry` = 
 
 /* Skarr fixed */ 
 UPDATE `creature_template` SET `exp` = 4 WHERE `entry` = 50815;
+
+/* Silvermoon Dragonhawk fixed */
+UPDATE `creature_template` SET `exp` = 3, `Health_mod` = 15.245 WHERE `entry` = 27946;

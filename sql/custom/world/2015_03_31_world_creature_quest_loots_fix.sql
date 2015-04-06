@@ -1628,3 +1628,8 @@ DELETE FROM creature_questender WHERE id = 58919 AND quest IN (30277,30280);
 INSERT INTO creature_questender VALUES
 (58919,30277),
 (58919,30280);
+
+/* Willy Wilder's loot fixed */
+DELETE FROM `creature_loot_template` WHERE `entry`= 70126;
+INSERT INTO `creature_loot_template` VALUES 
+(70126, 93194, 100, 1, 0, 1, 1);

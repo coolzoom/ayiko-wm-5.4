@@ -1607,3 +1607,6 @@ INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`mo
 
 /* Ashtail spawn time fixed */
 UPDATE `creature` SET `spawntimesecs` = 5400 WHERE `id` = 45380;
+
+/* Skarr &  Deth'tilac faction fixed now horde players can tame them */
+UPDATE `creature_template` SET `faction_A` = 14, `faction_H` = 14 WHERE `entry` IN (50815,54322);

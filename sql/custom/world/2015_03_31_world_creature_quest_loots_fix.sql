@@ -1618,3 +1618,13 @@ INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`mo
 
 /* Drake Dealer Hurlunk and other Netherwing's NPCs faction fixed now players can buy the mount */
 UPDATE `creature_template` SET `faction_A` = 1824, `faction_H` = 1824 WHERE `entry` IN (23139,23140,23141,23143,23145,23146,23150,23291,23340,23344,23348,23427,23489,28402);
+
+/* Anji Autumnlight fixed now players can start and finish his quests */
+DELETE FROM creature_queststarter WHERE id =  58919 AND quest IN (30277,30280);
+INSERT INTO creature_queststarter VALUES
+(58919,30277),
+(58919,30280);
+DELETE FROM creature_questender WHERE id = 58919 AND quest IN (30277,30280);
+INSERT INTO creature_questender VALUES
+(58919,30277),
+(58919,30280);

@@ -1633,3 +1633,6 @@ INSERT INTO creature_questender VALUES
 DELETE FROM `creature_loot_template` WHERE `entry`= 70126;
 INSERT INTO `creature_loot_template` VALUES 
 (70126, 93194, 100, 1, 0, 1, 1);
+
+/* Dook Ookem spawn time fixed */
+UPDATE `creature` SET `spawntimesecs` = 300 WHERE `id` = 55622;

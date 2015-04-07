@@ -1064,6 +1064,9 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 
 /* Quest: Extending Our Coverage */
 UPDATE `creature_template` SET `modelid1` = 11686, `modelid2` = 0, `flags_extra` = 0, `AIName` = 'SmartAI' WHERE `entry` = 65328;
+DELETE FROM `creature` WHERE `id`=65328;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(65328, 870, 0, 0, 1, 1, 0, 0, -469.075, 3655.47, 74.2522, 5.50896, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0);
 DELETE FROM `smart_scripts` WHERE (`entryorguid`=65328 AND `source_type`=0);
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
 (65328, 0, 0, 0, 10, 0, 100, 0, 1, 15, 500, 500, 33, 65328, 0, 0, 0, 0, 0, 17, 0, 15, 0, 0, 0, 0, 0, "Discover Amberglow Bunny - Gives Kill Credit on Near Players");

@@ -474,3 +474,6 @@ INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`mo
 
 /* Harvester Swarm fixed */
 UPDATE `creature_template` SET `faction_A` = 14, `faction_H` = 14, `mindmg` = 34, `maxdmg` = 46, `attackpower` = 84 WHERE `entry` = 65936;
+
+/* Osul Sharphorn fixed */
+DELETE FROM `creature_template_bytes` WHERE `entry` = 60647;

@@ -288,7 +288,7 @@ class boss_megaera : public CreatureScript
                 if (!summonsList.empty())
                     for (std::list<Creature*>::iterator summs = summonsList.begin(); summs != summonsList.end(); summs++)
                         if ((*summs)->IsAlive())
-                            count++;
+                            ++count;
 
                 // Check if we have a single head of that type, no counting needed.
                 if (count <= 1)
@@ -1356,38 +1356,19 @@ class npc_cinders_megaera : public CreatureScript
         {
             npc_cinders_megaeraAI(Creature* creature) : ScriptedAI(creature)
             {
-                instance = creature->GetInstanceScript();
             }
 
-            InstanceScript* instance;
-            bool despawned;
-
-            void IsSummonedBy(Unit* /*summoner*/)
+            void IsSummonedBy(Unit* /*summoner*/) override
             {
                 me->AddAura(SPELL_CINDERS_AURA, me);
-                Reset();
             }
 
-            void Reset()
+            void Reset() override
             {
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
-                me->SetInCombatWithZone();
                 me->SetReactState(REACT_PASSIVE);
-                // me->DespawnOrUnsummon(60000); - Summon spell already has 1 minute duration.
-
-                despawned = false;
             }
 
-            void UpdateAI(uint32 const diff)
-            {
-                if (me->FindNearestCreature(NPC_TORRENT_OF_ICE, 5.0f, true) && !despawned)
-                {
-                    me->DespawnOrUnsummon(200);
-                    despawned = true;
-                }
-
-                // No melee.
-            }
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -1419,10 +1400,8 @@ class npc_icy_ground_megaera : public CreatureScript
                 Reset();
                 me->AddAura(SPELL_ICY_GROUND_VISUAL, me);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
-                me->SetInCombatWithZone();
                 me->SetReactState(REACT_PASSIVE);
 
-                events.ScheduleEvent(EVENT_CHECK_ICY_GROUND_AND_CINDERS, 300);
                 if (me->GetMap()->IsHeroic())
                     events.ScheduleEvent(EVENT_ICY_GROUND_GROW, 1000);
             }
@@ -1443,51 +1422,10 @@ class npc_icy_ground_megaera : public CreatureScript
                 {
                     switch (eventId)
                     {
-                        case EVENT_CHECK_ICY_GROUND_AND_CINDERS:
-                        {
-                            Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
-                            if (!PlayerList.isEmpty())
-                            {
-                                for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                                {
-                                    if (Player* player = i->GetSource())
-                                    {
-                                        if (me->GetDistance(player) <= 5.0f)
-                                        {
-                                            // Handle Icy Ground addition.
-                                            if (!player->HasAura(SPELL_ICY_GROUND_AURA))
-                                                me->AddAura(SPELL_ICY_GROUND_AURA, player);
-
-                                            // Handle Cinders touching.
-                                            if (player->HasAura(SPELL_CINDERS) && !despawned)
-                                            {
-                                                if (me->GetMap()->IsHeroic())
-                                                    events.CancelEvent(EVENT_ICY_GROUND_GROW);
-
-                                                me->DespawnOrUnsummon(200);
-                                                despawned = true;
-                                            }
-                                        }
-                                        else
-                                        {
-                                            // Handle Icy Ground removal.
-                                            if (!player->FindNearestCreature(NPC_ICY_GROUND, 5.0f, true))
-                                                if (player->HasAura(SPELL_ICY_GROUND_AURA))
-                                                    player->RemoveAurasDueToSpell(SPELL_ICY_GROUND_AURA);
-                                        }
-                                    }
-                                }
-                            }
-
-                            events.ScheduleEvent(EVENT_CHECK_ICY_GROUND_AND_CINDERS, 300);
-                            break;
-                        }
-
                         case EVENT_ICY_GROUND_GROW:
                             me->SetObjectScale(1.0f + (0.017f * growTicks));
                             events.ScheduleEvent(EVENT_ICY_GROUND_GROW, 1000);
                             break;
-
                         default: break;
                     }
                 }
@@ -1818,7 +1756,7 @@ class spell_cinders_megaera : public SpellScriptLoader
                 if (caster->GetMap()->IsHeroic())
                     return;
 
-                target->CastSpell(target, SPELL_CINDERS_SUMMON, true);
+                caster->CastSpell(*target, SPELL_CINDERS_SUMMON, true);
             }
 
             void Register()
@@ -1915,6 +1853,69 @@ class spell_acid_glob_megaera : public SpellScriptLoader
         {
             return new spell_acid_glob_megaera_SpellScript();
         }
+};
+
+class sat_icy_ground : public SpellAreaTriggerScript
+{
+public:
+    sat_icy_ground() : SpellAreaTriggerScript("sat_icy_ground") {}
+
+    class sat_impl : public IAreaTriggerAura
+    {
+        bool CheckTriggering(WorldObject* triggering) override
+        {
+            Player* pPlayer = triggering->ToPlayer();
+
+            if (!pPlayer)
+                return false;
+
+            return pPlayer->IsAlive() && (m_target->GetExactDist2d(pPlayer) < m_range);
+        }
+
+        void OnTriggeringApply(WorldObject* triggering) override
+        {
+            Unit* pTarget = triggering->ToUnit();
+
+            if (pTarget)
+            {
+                if (pTarget->HasAura(SPELL_CINDERS))
+                {
+                    if (Creature* pOwner = m_target->ToCreature())
+                    {
+                        pOwner->DespawnOrUnsummon();
+                        return;
+                    }
+                }
+                
+                if (Aura* pAura = pTarget->GetAura(SPELL_ICY_GROUND_AURA))
+                    pAura->RefreshDuration(false);
+                else
+                    pTarget->AddAura(SPELL_ICY_GROUND_AURA, pTarget);
+            }
+        }
+
+        void OnTriggeringRemove(WorldObject* triggering) override
+        {
+            Unit* pTarget = triggering->ToUnit();
+
+            if (pTarget)
+            {
+                if (Aura* pAura = pTarget->GetAura(SPELL_ICY_GROUND_AURA))
+                    pAura->Remove(AURA_REMOVE_BY_EXPIRE);
+            }
+        }
+
+        void OnTriggeringUpdate(WorldObject* triggering) override
+        {
+            Unit* pTarget = triggering->ToUnit();
+
+            if (pTarget)
+            {
+                if (Aura* pAura = pTarget->GetAura(SPELL_ICY_GROUND_AURA))
+                    pAura->RefreshDuration(false);
+            }
+        }
+    };
 };
 
 void AddSC_boss_megaera()

@@ -625,6 +625,7 @@ REPLACE INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconN
 (217752, 5, 13509, 'Garde-périmètre, poteau de Kun-Lai', '', '', '', 0, 0, 1.35, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 1),
 (217758, 10, 13584, 'Sunreaver Perimeter Ward', '', 'Destruction', '', 0, 0, 0.4, 0, 0, 0, 0, 0, 0, 0, 32634, 0, 0, 136610, 1, 0, 0, 24585, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 1);
 
+DELETE FROM `spell_area` WHERE spell=59073 AND area=5842;
 REPLACE INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `aura_spell`, `racemask`, `gender`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES 
 (59073, 5842, 32680, 0, 0, 0, 2, 1, 66, 11),
 (59073, 5842, 32681, 0, 0, 0, 2, 1, 66, 11);
@@ -6515,12 +6516,13 @@ INSERT INTO `spell_target_position` (`id`, `effIndex`, `target_map`, `target_pos
 (138815, 0, 870, 1921.75, 4224.25, 132.41, 2.82),
 (138818, 0, 870, 1753.55, 4166.26, 159.5, 5.7);
 
--DELETE FROM `creature_aura` WHERE guid IN(993500, 993501, 350953, 350954);
--INSERT INTO `creature_aura` (`guid`, `aura`) VALUES
+DELETE FROM `creature_aura` WHERE guid IN(993500, 993501, 350953, 350954);
+INSERT INTO `creature_aura` (`guid`, `aura`) VALUES
 (993500, 137503),
 (993501, 137503),
 (350953, 137503),
 (350954, 137503);
 
+DELETE FROM `event_scripts` WHERE id IN(216991);
 INSERT INTO `event_scripts` (`id`, `delay`, `command`, `datalong`, `datalong2`, `dataint`, `x`, `y`, `z`, `o`) VALUES 
 (216991, 0, 8, 69160, 1, 0, 0, 0, 0, 0);

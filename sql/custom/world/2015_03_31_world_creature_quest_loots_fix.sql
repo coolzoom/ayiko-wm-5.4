@@ -989,6 +989,9 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (62203, 0, 2, 0, 19, 0, 100, 0, 31004, 0, 0, 0, 11, 119073, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Klaxxi'va Tik - Cast Feign Death on accepting quest");
 
 -- Speeches Adjunct Kree'zot on Quest: Psycho Mantid --
+DELETE FROM `creature` WHERE `id`=62301;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(62301, 870, 0, 0, 1, 1, 0, 0, 439.667, 2213.73, 247.331, 4.27817, 30, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0);
 DELETE FROM `creature_text` WHERE `entry` = 62301; 
 INSERT INTO `creature_text` VALUES 
 ('62301', '0', '0', 'What\'s this?! Now they come over the wall to oppose us? The fools!', '12', '0', '100', '1', '0', '0', 'Adjunct Kree\'zot - Say on aggro'),

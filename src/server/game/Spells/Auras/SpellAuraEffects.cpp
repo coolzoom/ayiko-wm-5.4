@@ -1352,6 +1352,15 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
             // Dampening
             if (AuraEffect* aurEff = caster->GetAuraEffect(110310, EFFECT_0))
                 AddPct(amount, -aurEff->GetAmount());
+
+            // Apply Power PvP healing bonus
+            if (amount > 0
+                    && caster->GetTypeId() == TYPEID_PLAYER
+                    && caster->GetMap()->IsBattlegroundOrArena()
+                    && (target->GetTypeId() == TYPEID_PLAYER || (target->isPet() && IS_PLAYER_GUID(target->GetOwnerGUID()))))
+            {
+                AddPct(amount, caster->GetFloatValue(PLAYER_FIELD_PVP_POWER_HEALING));
+            }
         }
     }
 

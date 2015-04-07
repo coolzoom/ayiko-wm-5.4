@@ -425,3 +425,12 @@ INSERT INTO `npc_vendor` VALUES
 ('69971', '0', '77144', '0', '0', '3824', '1'),
 ('69971', '0', '77154', '0', '0', '3824', '1'),
 ('69971', '0', '88170', '0', '0', '2956', '1');
+
+/* Greatback Mushan fixed */
+DELETE FROM creature_template_aura WHERE entry = 62029;
+DELETE FROM creature_template_bytes WHERE entry = 62029;
+DELETE FROM creature_template_emote WHERE entry = 62029;
+
+UPDATE `creature` SET `unit_flags` = 67108864, `dynamicflags` = 0,`unit_flags2` = 2048 WHERE `id` = 62029;
+UPDATE `creature_template` SET `unit_flags` = 67108864, `dynamicflags` = 0, `unit_flags2` = 2048 WHERE `entry` = 62029;
+

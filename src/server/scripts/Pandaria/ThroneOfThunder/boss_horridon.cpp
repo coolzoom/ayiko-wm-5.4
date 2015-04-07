@@ -774,7 +774,7 @@ public:
                             for (uint8 i = 0; i < maxSummonsPerPhase; ++i)
                             {
                                 uint32 uiSummonEntry = Trinity::Containers::SelectRandomContainerElement(entries);
-                                me->SummonCreature(uiSummonEntry, summonPositions[urand(0, 2)]);
+                                me->SummonCreature(uiSummonEntry, summonPositions[maxSummonsPerPhase]);
                             }
 
                             if (GameObject *pDoor = GetDoorByPhase((eTrashPhases)uiTrashPhase, me))
@@ -1371,7 +1371,7 @@ public:
                             DoCast(pTarget, SPELL_CHARGE);
                             Talk(EMOTE_CHARGE, pTarget->GetGUID());
                         }
-                        events.ScheduleEvent(EVENT_HORRIDON_CHARGE, urand(15, 25) * IN_MILLISECONDS);
+                        events.ScheduleEvent(EVENT_HORRIDON_CHARGE, 26000 + rand() % 14000);
                         break;
 
                     case EVENT_DIRE_CALL:

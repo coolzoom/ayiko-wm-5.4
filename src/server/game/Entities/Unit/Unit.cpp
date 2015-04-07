@@ -7250,7 +7250,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                     if (effIndex != EFFECT_0 || procFlag & PROC_FLAG_DONE_OFFHAND_ATTACK || !roll_chance_f(triggeredByAura->GetAmount()))
                         return false;
 
-                    if (procSpell && procSpell->Id == 86392)
+                    if (procSpell && (procSpell->Id == 86392 || procSpell->Id == 22482))
                         return false;
 
                     triggered_spell_id = 86392;

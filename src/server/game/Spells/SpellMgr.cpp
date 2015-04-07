@@ -3614,6 +3614,9 @@ void SpellMgr::LoadSpellCustomAttr()
             case 134920:    // Quake Stomp
                 spellInfo->Effects[EFFECT_2].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
                 break;
+            case 139834:    // Cinders
+                spellInfo->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+                break;
             case 139433:    // Rampage Fire Cast.
                 spellInfo->Effects[0].Effect = SPELL_EFFECT_TRIGGER_MISSILE;
                 spellInfo->Effects[0].TargetA = TARGET_DEST_TARGET_ENEMY;
@@ -3646,6 +3649,13 @@ void SpellMgr::LoadSpellCustomAttr()
                 break;
             case 139866:    // Torrent of Ice.
                 spellInfo->Effects[0].TargetA = TARGET_UNIT_TARGET_ANY;
+                break;
+            case 134339:    // Ji kun wings stuff
+            case 140014:
+            case 140013:
+            case 133755:
+                spellInfo->AuraInterruptFlags = 0x0;
+                spellInfo->AreaGroupId = 0;
                 break;
                 // Throne of Thunder end
 #if 1 // Gilneas

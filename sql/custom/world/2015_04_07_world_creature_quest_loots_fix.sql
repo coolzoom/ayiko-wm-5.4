@@ -434,3 +434,5 @@ DELETE FROM creature_template_emote WHERE entry = 62029;
 UPDATE `creature` SET `unit_flags` = 67108864, `dynamicflags` = 0,`unit_flags2` = 2048 WHERE `id` = 62029;
 UPDATE `creature_template` SET `unit_flags` = 67108864, `dynamicflags` = 0, `unit_flags2` = 2048 WHERE `entry` = 62029;
 
+/* Blackrock Spy fixed */
+UPDATE `creature_template` SET `npcflag` = 0 WHERE `entry` = 49874;

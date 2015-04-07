@@ -732,7 +732,7 @@ void Player::UpdateMasteryPercentage()
     {
         Aura * aura = iter->second->GetBase();
 
-        if (!(aura->GetSpellInfo()->AttributesEx8 & SPELL_ATTR8_MASTERY_SPECIALIZATION))
+        if (!(aura->GetSpellInfo()->AttributesEx8 & SPELL_ATTR8_MASTERY_SPECIALIZATION) )
             continue; // this is not our mastery aura
 
         aura->RecalculateAmountOfEffects();

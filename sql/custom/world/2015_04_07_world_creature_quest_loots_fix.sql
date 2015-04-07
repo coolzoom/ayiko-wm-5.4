@@ -471,3 +471,6 @@ DELETE FROM `creature` WHERE `id` IN (69318,69322);
 INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
 (69318, 571, 0, 0, 1, 1, 0, 0, 5751.53, 586.883, 614.969, 0.466526, 300, 0, 0, 10635, 0, 0, 0, 0, 0, 2048, 0, 0),
 (69322, 1, 0, 0, 1, 1, 0, 0, -7117.94, -3781.52, 8.72876, 0.0658036, 300, 0, 0, 8982, 0, 0, 0, 0, 0, 2048, 0, 0);
+
+/* Harvester Swarm fixed */
+UPDATE `creature_template` SET `faction_A` = 14, `faction_H` = 14, `mindmg` = 34, `maxdmg` = 46, `attackpower` = 84 WHERE `entry` = 65936;

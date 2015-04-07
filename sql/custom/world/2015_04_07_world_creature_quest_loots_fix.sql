@@ -461,3 +461,7 @@ INSERT INTO `npc_vendor` VALUES
 ('30729', '0', '79249', '0', '0', '0', '1'),
 ('30729', '0', '79255', '0', '0', '2583', '1'),
 ('30729', '0', '79740', '0', '0', '0', '1');
+
+/* Kor'thik Fleetwing fixed */
+UPDATE `creature_template` SET `unit_flags` = 0, `unit_flags2` = 2048, `dynamicflags` = 0, `type_flags` = 0 WHERE `entry` = 62128;
+UPDATE `creature` SET `unit_flags` = 0, `unit_flags2` = 0, `dynamicflags` = 0 WHERE `id` = 62128;

@@ -1157,7 +1157,7 @@ void WorldSession::HandlePlayerLogin(CharLoginQueryHolder *charHolder, AuthLogin
         }
     }
 
-    if (!pCurrChar->GetMap()->AddPlayerToMap(pCurrChar) || !pCurrChar->CheckInstanceLoginValid())
+    if (!pCurrChar->CheckInstanceLoginValid() || !pCurrChar->GetMap()->AddPlayerToMap(pCurrChar))
     {
         AreaTriggerStruct const* at = sObjectMgr->GetGoBackTrigger(pCurrChar->GetMapId());
         if (at)

@@ -5959,10 +5959,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 1949: // Hellfire
                     spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_PERIODIC_TRIGGER_SPELL;
                     break;
-                case 125667: // Second Wind Dummy
-                    spellInfo->CasterAuraState = AURA_STATE_HEALTHLESS_35_PERCENT;
-                    spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(21); // -1s
-                    break;
                 case 759: // Conjure Mana Gem
                     spellInfo->Effects[EFFECT_1].BasePoints = 54408;
                     break;

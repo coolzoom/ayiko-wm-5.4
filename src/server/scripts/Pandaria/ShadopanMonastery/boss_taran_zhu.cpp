@@ -47,7 +47,8 @@ public:
         EVENT_SHA_BLAST              = 3,
         EVENT_SUMMON_GRIPPING_HATRED = 4,
         EVENT_GRIP_OF_HATE           = 5,
-        EVENT_OUTRO                  = 6
+        EVENT_OUTRO                  = 6,
+        EVENT_CHEST                  = 7
     };
 
     enum eSpells
@@ -91,8 +92,12 @@ public:
                     me->SetReactState(REACT_PASSIVE);
                     me->SetUInt32Value(UNIT_FIELD_BYTES_1, UNIT_STAND_STATE_KNEEL);
                     me->SummonCreature(NPC_SNOWDRIFT_QUESTENDER, 3855.144f, 2632.581f, 754.541f, 4.964f);
-                    if(auto const cache = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_TARAN_ZHU_CACHE)))
-                        cache->SetPhaseMask(1, true);
+                    nonCombatEvents.ScheduleEvent(EVENT_CHEST, 1 * IN_MILLISECONDS);
+
+                    float x, y, z;
+                    z = me->GetPositionZ();
+                    GetPositionWithDistInOrientation(me, -5.0f, me->GetOrientation(), x, y);
+                    me->NearTeleportTo(x, y, z, me->GetOrientation());
                 }
             }
 
@@ -103,9 +108,15 @@ public:
         {
             if(instance)
             {
-                if(instance->GetBossState(DATA_TARAN_ZHU) != DONE)
+                if (instance->GetBossState(DATA_TARAN_ZHU) != DONE)
+                {
                     _Reset();
+                    events.Reset();
+                    nonCombatEvents.Reset();
+                    me->SetReactState(REACT_AGGRESSIVE);
+                }
             }
+            
             newPower = 0;
         }
 
@@ -175,6 +186,9 @@ public:
                     {
                         instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                         instance->SetData(DATA_TARAN_ZHU, DONE);
+
+                        if (auto const snowdrift = Unit::GetCreature(*me, instance->GetData64(DATA_MASTER_SNOWDRIFT)))
+                            snowdrift->SetPhaseMask(2, true);
                     }
 
                     std::list<Player*> playerList;
@@ -194,7 +208,7 @@ public:
         {
             if(who->ToPlayer())
             {
-                if(me->GetDistance(who) < 51.0f && !introStarted)
+                if(me->GetDistance(who) < 51.0f && !introStarted && instance->GetBossState(DATA_TARAN_ZHU) != DONE)
                 {
                     introStarted = true;
                     Talk(TALK_INTRO);
@@ -204,10 +218,19 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if(nonCombatEvents.ExecuteEvent() == EVENT_OUTRO)
+            if (uint32 eventId = nonCombatEvents.ExecuteEvent())
             {
-                Talk(TALK_OUTRO);
-                me->SetUInt32Value(UNIT_FIELD_BYTES_1, UNIT_STAND_STATE_KNEEL);
+                switch (eventId)
+                {
+                    case EVENT_OUTRO:
+                        Talk(TALK_OUTRO);
+                        me->SetUInt32Value(UNIT_FIELD_BYTES_1, UNIT_STAND_STATE_KNEEL);
+                        break;
+                    case EVENT_CHEST:
+                        if (auto const cache = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_TARAN_ZHU_CACHE)))
+                            cache->SetPhaseMask(1, true);
+                        break;
+                }
             }
 
             nonCombatEvents.Update(diff);

@@ -85,7 +85,8 @@ public:
         EVENT_OUTRO_END      = 11,
         EVENT_CHECK_DEST     = 12,
         EVENT_CHECK_WIPE     = 13,
-        EVENT_PHASE_2        = 14
+        EVENT_PHASE_2        = 14,
+        EVENT_POSSESIONS     = 15
     };
 
     enum ePhases
@@ -150,9 +151,15 @@ public:
                     me->setFaction(35);
                     me->SetReactState(REACT_PASSIVE);
                     me->SetUInt32Value(UNIT_FIELD_BYTES_1, UNIT_STAND_STATE_KNEEL);    
+                    nonCombatEvents.ScheduleEvent(EVENT_POSSESIONS, 1 * IN_MILLISECONDS);
 
-                    if(auto const possesions = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_POSSESSIONS)))
-                        possesions->SetPhaseMask(1, true);
+                    float x, y, z;
+                    z = me->GetPositionZ();
+                    GetPositionWithDistInOrientation(me, -5.0f, me->GetOrientation(), x, y);
+                    me->NearTeleportTo(x, y, z, me->GetOrientation());
+
+                    if (instance->GetBossState(DATA_TARAN_ZHU) == DONE)
+                        me->SetPhaseMask(2, true);
                 }
             }
 
@@ -163,15 +170,15 @@ public:
         {
             if(instance)
             {
-                if(instance->GetBossState(DATA_MASTER_SNOWDRIFT) != DONE)
-                    _Reset();
-
                 if (instance->GetBossState(DATA_SNOWDRIFT_STATE) == DONE && instance->GetBossState(DATA_MASTER_SNOWDRIFT) != DONE)
+                {
+                    _Reset();
+                    events.Reset();
+                    nonCombatEvents.Reset();
                     me->SetReactState(REACT_AGGRESSIVE);
+                }
             }
 
-            events.Reset();
-            nonCombatEvents.Reset();
             me->setRegeneratingHealth(true);
             me->SetHealth(me->GetMaxHealth());      
             phase = PHASE_FIGHT_1;
@@ -340,6 +347,10 @@ public:
             {
                 switch(eventId)
                 {
+                    case EVENT_POSSESIONS:
+                        if (auto const possesions = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_POSSESSIONS)))
+                            possesions->SetPhaseMask(1, true);
+                        break;
                     case EVENT_INTRO_1:
                         Talk(TALK_INTRO_1);
                         nonCombatEvents.ScheduleEvent(EVENT_INTRO_2, 7.4 * IN_MILLISECONDS);

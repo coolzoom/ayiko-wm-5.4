@@ -7869,11 +7869,17 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
 
     if (GetAuraType() == SPELL_AURA_OBS_MOD_HEALTH)
     {
-        // Mend Pet
-        if (m_spellInfo->Id == 136)
-            if (caster->HasAura(19573)) // Glyph of Mend Pet
-                if (roll_chance_i(50))
+        switch (m_spellInfo->Id)
+        {
+            case 136:
+                if (caster->HasAura(19573) && roll_chance_i(50)) // Glyph of Mend Pet
                     caster->CastSpell(target, 24406, true); // Dispel
+                break;
+            case 16491:
+                if (caster->GetHealthPct() > 35.0f)
+                    return;
+                break;
+        }
 
         damage = uint32(target->CountPctFromMaxHealth(damage));
 

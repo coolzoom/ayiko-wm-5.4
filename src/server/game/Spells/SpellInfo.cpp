@@ -1685,6 +1685,11 @@ SpellCastResult SpellInfo::CheckLocation(uint32 map_id, uint32 zone_id, uint32 a
     // spell checks
     switch (Id)
     {
+        case 134339:                                        // Ji kun stuff
+        case 140014:
+        case 140013:
+        case 133755:
+            return (area_id == 6622) ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
         case 29534:                                         // Traces of Silithyst
             return zone_id == 1377 ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
         case 23333:                                         // Warsong Flag

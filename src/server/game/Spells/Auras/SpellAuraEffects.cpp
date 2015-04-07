@@ -1567,7 +1567,7 @@ void AuraEffect::ChangeAmount(int32 newAmount, bool mark, bool onStackOrReapply)
 {
     // Reapply if amount change
     uint8 handleMask = 0;
-    if (newAmount != GetAmount())
+    if (newAmount != GetAmount() || m_floatAmount)
         handleMask |= AURA_EFFECT_HANDLE_CHANGE_AMOUNT;
     if (onStackOrReapply)
         handleMask |= AURA_EFFECT_HANDLE_REAPPLY;

@@ -483,3 +483,6 @@ DELETE FROM `gameobject` WHERE `map` = 870 AND `id` IN (197186,206726);
 INSERT INTO `gameobject` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`spawntimesecs`,`animprogress`,`state`,`isActive`) VALUES
 (197186, 870, 0, 0, 1, 1, 219.768, 2191.29, 271.387, 2.82453, 0, 0, 0.98746, 0.157869, 300, 0, 1, 0),
 (206726, 870, 0, 0, 1, 1, 2130.75, 2601.38, 542.151, 1.36062, 0, 0, 0.629033, 0.777378, 300, 0, 1, 0);
+
+/* Juvenile faction fixed */
+UPDATE `creature_template` SET `faction_A` = 14, `faction_H` = 14 WHERE `entry` = 69836;

@@ -878,13 +878,13 @@ class spell_mastery_icicles final : public SpellScriptLoader
                         // If all icicles are stored, fire last and replace it with new
                         if (i == 4)
                         {
-                            if (auto icicle = caster->GetAuraEffect(ICICLE_STORE + i, EFFECT_0))
+                            if (auto icicle = caster->GetAuraEffect(ICICLE_STORE, EFFECT_0))
                             {
                                 int32 amount = icicle->GetAmount();
-                                caster->CastCustomSpell(GetHitUnit(), ICICILE_VISUAL+i, &amount, NULL, NULL, true);
+                                caster->CastCustomSpell(GetHitUnit(), ICICILE_VISUAL, &amount, NULL, NULL, true);
                                 caster->CastCustomSpell(GetHitUnit(), ICICLE_DAMAGE, &amount, NULL, NULL, true);
-                                caster->RemoveAurasDueToSpell(ICICLE_STORE + i);
-                                caster->CastCustomSpell(caster, ICICLE_STORE+i, &damage, NULL, NULL, true);
+                                caster->RemoveAurasDueToSpell(ICICLE_STORE);
+                                caster->CastCustomSpell(caster, ICICLE_STORE, &damage, NULL, NULL, true);
                                 break;
                             }
                         }

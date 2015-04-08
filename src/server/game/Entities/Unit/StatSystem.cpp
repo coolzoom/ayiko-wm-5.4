@@ -732,7 +732,7 @@ void Player::UpdateMasteryPercentage()
     {
         Aura * aura = iter->second->GetBase();
 
-        if (!(aura->GetSpellInfo()->AttributesEx8 & SPELL_ATTR8_MASTERY_SPECIALIZATION))
+        if (!(aura->GetSpellInfo()->AttributesEx8 & SPELL_ATTR8_MASTERY_SPECIALIZATION) )
             continue; // this is not our mastery aura
 
         aura->RecalculateAmountOfEffects();
@@ -894,21 +894,39 @@ void Player::UpdateManaRegen()
 
     // CombatRegen = 2-5% of Base Mana depending on class
     // Warlock and Mage have 5% default regen
-    if (getClass() == CLASS_MAGE || getClass() == CLASS_WARLOCK)
+    switch (getClass())
     {
-        pctPerSec = 0.01f;
-        
-        // According to reports by QA, Nether Attunement should give a 65% regen boost
-        if (HasAura(117957))
-            netherBonus = 1.13f;
+        case CLASS_MAGE:
+            // According to reports by QA, Nether Attunement should give a 65% regen boost
+            if (HasAura(117957))
+                netherBonus = 1.13f;
 
-        // Additionally add haste to the mana regen for Warlocks and Mages
-        if (HasAuraType(SPELL_AURA_MOD_MANA_REGEN_BY_HASTE))
-            regenRate = GetFloatValue(UNIT_MOD_HASTE_REGEN);
+        case CLASS_WARLOCK:
+            // Base percent per second is higher for mages and warlocks
+            pctPerSec = 0.01f;
+
+            // Additionally add haste to the mana regen for Warlocks and Mages
+            if (HasAuraType(SPELL_AURA_MOD_MANA_REGEN_BY_HASTE))
+                regenRate = GetFloatValue(UNIT_MOD_HASTE_REGEN);
+            break;
+        case CLASS_DRUID:
+            // Druids should be calculated based off their mana pool after they gain Natural Insight
+            if (HasAura(112857))
+                baseMana *= 5;
+            break;
+        case CLASS_PALADIN:
+            // Paladins should be calculated based off their mana pool after they gain Holy Insight
+            if (HasAura(112859))
+                baseMana *= 5;
+            break;
+        case CLASS_SHAMAN:
+            // Shamans should be calculated based off their mana pool after they gain Spiritual Insight (also elemental shamans)
+            if (HasAura(112858) || HasAura(123099))
+                baseMana *= 5;
+            break;
+        default:
+            break;
     }
-    // Druids should be calculated based off their mana pool after they gain Natural Insight
-    else if (getClass() == CLASS_DRUID && HasAura(112857))
-        baseMana *= 5;
 
     float base_regen = baseMana * pctPerSec * netherBonus / regenRate + GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_POWER_REGEN, POWER_MANA) / 5.0f;
 

@@ -786,3 +786,8 @@ INSERT INTO `npc_trainer` VALUES
 ('65098', '136273', '33333', '755', '550', '0'),
 ('65098', '136274', '33333', '755', '550', '0'),
 ('65098', '136275', '33333', '755', '550', '0');
+
+/* Ragepaw spawn fixed */
+DELETE FROM `creature` WHERE `id`=14342;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(14342, 1, 361, 1761, 1, 1, 1012, 0, 3642.38, -1150.15, 210.116, 0.89578, 28800, 8, 0, 3696, 0, 1, 0, 0, 0, 0, 0, 0);

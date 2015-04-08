@@ -815,3 +815,6 @@ INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`mo
 (48038, 1, 0, 0, 1, 1, 0, 0, 6120.15, -1115.94, 377.097, 3.38702, 120, 10, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
 (48038, 1, 0, 0, 1, 1, 0, 0, 5976.20, -1174.80, 379.441, 3.77187, 120, 10, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
 (48038, 1, 0, 0, 1, 1, 0, 0, 5997.30, -1258.66, 379.036,0.458272, 120, 10, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0);
+
+/* Sharptalon now drop correctly his QI */
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`= 1 AND `SourceGroup` = 12676 AND `SourceEntry`=16305;

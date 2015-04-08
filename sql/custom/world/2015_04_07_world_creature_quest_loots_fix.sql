@@ -486,3 +486,6 @@ INSERT INTO `gameobject` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`
 
 /* Juvenile faction fixed */
 UPDATE `creature_template` SET `faction_A` = 14, `faction_H` = 14 WHERE `entry` = 69836;
+
+/* Fledgling faction and level fixed */
+UPDATE `creature_template` SET `minlevel` = 92, `maxlevel` = 92, `faction_A` = 14, `faction_H` = 14 WHERE `entry` = 68193;

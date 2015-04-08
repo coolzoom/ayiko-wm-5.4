@@ -489,3 +489,6 @@ UPDATE `creature_template` SET `faction_A` = 14, `faction_H` = 14 WHERE `entry` 
 
 /* Fledgling faction and level fixed */
 UPDATE `creature_template` SET `minlevel` = 92, `maxlevel` = 92, `faction_A` = 14, `faction_H` = 14 WHERE `entry` = 68193;
+
+/* Hatchling faction and level fixed */
+UPDATE `creature_template` SET `minlevel` = 92, `maxlevel` = 92, `faction_A` = 14, `faction_H` = 14 WHERE `entry` = 73193;

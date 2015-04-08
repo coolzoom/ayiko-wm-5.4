@@ -989,6 +989,9 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (62203, 0, 2, 0, 19, 0, 100, 0, 31004, 0, 0, 0, 11, 119073, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Klaxxi'va Tik - Cast Feign Death on accepting quest");
 
 -- Speeches Adjunct Kree'zot on Quest: Psycho Mantid --
+DELETE FROM `creature` WHERE `id`=62301;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(62301, 870, 0, 0, 1, 1, 0, 0, 439.667, 2213.73, 247.331, 4.27817, 30, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0);
 DELETE FROM `creature_text` WHERE `entry` = 62301; 
 INSERT INTO `creature_text` VALUES 
 ('62301', '0', '0', 'What\'s this?! Now they come over the wall to oppose us? The fools!', '12', '0', '100', '1', '0', '0', 'Adjunct Kree\'zot - Say on aggro'),
@@ -1061,6 +1064,9 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 
 /* Quest: Extending Our Coverage */
 UPDATE `creature_template` SET `modelid1` = 11686, `modelid2` = 0, `flags_extra` = 0, `AIName` = 'SmartAI' WHERE `entry` = 65328;
+DELETE FROM `creature` WHERE `id`=65328;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(65328, 870, 0, 0, 1, 1, 0, 0, -469.075, 3655.47, 74.2522, 5.50896, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0);
 DELETE FROM `smart_scripts` WHERE (`entryorguid`=65328 AND `source_type`=0);
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
 (65328, 0, 0, 0, 10, 0, 100, 0, 1, 15, 500, 500, 33, 65328, 0, 0, 0, 0, 0, 17, 0, 15, 0, 0, 0, 0, 0, "Discover Amberglow Bunny - Gives Kill Credit on Near Players");
@@ -1651,6 +1657,10 @@ UPDATE `creature_template` SET `exp` = 3, `Health_mod` = 15.245 WHERE `entry` = 
 
 /* Huntress Ravenoak fixed */
 UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90, `exp` = 4 WHERE `entry` = 14379;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=14379 AND `source_type`= 0;
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(14379, 0, 0, 0, 9, 0, 100, 0, 4, 30, 3000, 5000, 11, 14030, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Huntress Ravenoak - Cast Hooked Net"),
+(14379, 0, 1, 0, 0, 0, 100, 0, 5000, 8000, 16000, 18000, 11, 15572, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Huntress Ravenoak - Cast Sunder Armor");
 
 /* Deer fixed */
 UPDATE `creature_template` SET `minlevel` = 1, `maxlevel` = 1, `flags_extra` = 64 WHERE `entry` = 883;

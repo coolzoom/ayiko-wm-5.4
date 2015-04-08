@@ -624,7 +624,7 @@ Unit::AuraApplicationList AuraEffect::GetApplicationList() const
     return applicationList;
 }
 
-int32 AuraEffect::CalculateAmount(Unit* caster)
+int32 AuraEffect::CalculateAmount(Unit* caster, bool recalculate)
 {
     int32 amount = 0;
 
@@ -651,7 +651,8 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
 
                 //Compute the whole data and set it
                 float masteryTotal = (float(baseMastery) + points) * GetSpellEffectInfo().BonusMultiplier;
-                m_floatAmount = masteryTotal;
+                if (!recalculate)
+                    m_floatAmount = masteryTotal;
                 amount = (int32)masteryTotal;
 
                 // Update the player visual (round it to upper decimal)
@@ -686,7 +687,8 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                     Item* offItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
                     if (!mainItem && !offItem)
                     {
-                        m_floatAmount = 0.0f;
+                        if (!recalculate)
+                            m_floatAmount = 0.0f;
                         amount = 0;
                     }
 
@@ -694,7 +696,8 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                         break;
 
                     amount = 0;
-                    m_floatAmount = 0.0f;
+                    if (!recalculate)
+                        m_floatAmount = 0.0f;
                 }
             }
         }
@@ -1294,7 +1297,7 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
     GetBase()->CallScriptEffectCalcAmountHandlers(this, amount, m_canBeRecalculated);
     amount *= GetBase()->GetStackAmount();
 
-    if (!amount)
+    if (!amount && !recalculate)
         m_floatAmount = 0;
 
     // Fixate damage for periodic damage auras
@@ -1352,6 +1355,15 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
             // Dampening
             if (AuraEffect* aurEff = caster->GetAuraEffect(110310, EFFECT_0))
                 AddPct(amount, -aurEff->GetAmount());
+
+            // Apply Power PvP healing bonus
+            if (amount > 0
+                    && caster->GetTypeId() == TYPEID_PLAYER
+                    && caster->GetMap()->IsBattlegroundOrArena()
+                    && (target->GetTypeId() == TYPEID_PLAYER || (target->isPet() && IS_PLAYER_GUID(target->GetOwnerGUID()))))
+            {
+                AddPct(amount, caster->GetFloatValue(PLAYER_FIELD_PVP_POWER_HEALING));
+            }
         }
     }
 
@@ -1555,7 +1567,7 @@ void AuraEffect::ChangeAmount(int32 newAmount, bool mark, bool onStackOrReapply)
 {
     // Reapply if amount change
     uint8 handleMask = 0;
-    if (newAmount != GetAmount())
+    if (newAmount != GetAmount() || m_floatAmount)
         handleMask |= AURA_EFFECT_HANDLE_CHANGE_AMOUNT;
     if (onStackOrReapply)
         handleMask |= AURA_EFFECT_HANDLE_REAPPLY;
@@ -1574,6 +1586,9 @@ void AuraEffect::ChangeAmount(int32 newAmount, bool mark, bool onStackOrReapply)
             m_amount = newAmount;
         else
             SetAmount(newAmount);
+
+        // Very unoptimal, need to change the float handling to something more proper
+        CalculateAmount(GetCaster());
 
         CalculateSpellMod();
     }
@@ -8549,4 +8564,20 @@ void AuraEffect::HandleChangeSpellVisualEffect(AuraApplication const* aurApp, ui
     /*Похоже на то, что близы трактуруют значение из полей в зависимости от их номера, и названия это взяты не из клиента (PLAYER_DYNAMIC_RESEARCH_SITES)*/
     player->SetDynamicUInt32Value(PLAYER_DYNAMIC_RESEARCH_SITES, 0, spellToReplace);
     player->SetDynamicUInt32Value(PLAYER_DYNAMIC_RESEARCH_SITES, 1, replacer);
+}
+
+void AuraEffect::RecalculateAmount(Unit* caster)
+{
+    if (!CanBeRecalculated())
+        return;
+    
+    ChangeAmount(CalculateAmount(caster, true), false);
+}
+
+void AuraEffect::RecalculateAmount(bool reapplyingEffects)
+{ 
+    if (!CanBeRecalculated())
+        return;
+    
+    ChangeAmount(CalculateAmount(GetCaster(), true), false, reapplyingEffects);
 }

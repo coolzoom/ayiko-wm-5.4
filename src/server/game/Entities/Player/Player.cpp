@@ -9768,6 +9768,7 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8
         spell->m_cast_count = cast_count;                   // set count of casts
         spell->m_glyphIndex = glyphIndex;                   // glyph index
         spell->prepare(&targets, NULL, 0, true);
+        SpellContainer.push_back(spell);
 
         ++count;
     }

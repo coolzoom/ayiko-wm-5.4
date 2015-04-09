@@ -2921,7 +2921,7 @@ DELETE FROM areatrigger_scripts WHERE entry = 8937;
 INSERT INTO areatrigger_scripts VALUES
 (8937,'at_tortos_intro');
 
-DELETE FROM spell_areatrigger_template WHERE entry IN (832, 575);
+DELETE FROM spell_areatrigger_template WHERE Entry IN (832, 575);
 INSERT INTO spell_areatrigger_template (Entry, Flags, CollisionType, Radius, ScaleX, ScaleY, ScriptName) VALUES
 (832, 0, 0, 8.0, 8.0, 8.0, 'sat_waterspout'),
 (575, 0, 0, 5.0, 5.0, 5.0, 'sat_shell_spin');
@@ -2969,7 +2969,19 @@ REPLACE INTO spell_script_names VALUES
 (139552, 'spell_rampage_arcane_head_megaera'),
 (139822, 'spell_cinders_megaera'),
 (139843, 'spell_arctic_freeze_megaera'),
-(134343, 'spell_acid_glob_megaera');
+(134343, 'spell_acid_glob_megaera'),
+(139877, 'spell_icy_ground_dummy');
+
+DELETE FROM spell_areatrigger_template WHERE Entry IN (853);
+INSERT INTO spell_areatrigger_template (Entry, Flags, CollisionType, Radius, ScaleX, ScaleY, ScriptName) VALUES
+(853, 0, 0, 9.4, 9.4, 9.4, 'sat_icy_ground');
+
+/*---------------------------------------------------------------------------------------------------------------*/
+
+-- Megaera Conditions
+DELETE FROM conditions WHERE SourceEntry IN (139877);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES 
+('13','1','139877','0','0','31','0','3','70432','0','0','0','','Icy Ground - Remove Cinders');
 
 /*---------------------------------------------------------------------------------------------------------------*/
 
@@ -3614,7 +3626,21 @@ INSERT INTO `waypoint_data` VALUES
 (@CGUID+566, 14,  6177.05, 4894.25, -87.3037, 0, 0, 0, 0, 100, 0);
 /*---------------------------------------------------------------------------------------------------------------*/
 
+
 /*---------------------------------------------------------------------------------------------------------------*/
+-- Creature Auras
+DELETE FROM creature_template_aura WHERE entry IN (70212, 70235, 70247, 70252);
+INSERT INTO creature_template_aura VALUES
+(70212, 139832),
+(70235, 139832),
+(70247, 139832),
+(70252, 139832);
+
+/*---------------------------------------------------------------------------------------------------------------*/
+
+
+/*---------------------------------------------------------------------------------------------------------------*/
+
 -- Creature Speeches
 DELETE FROM creature_text WHERE entry = 68065;
 INSERT INTO creature_text VALUES

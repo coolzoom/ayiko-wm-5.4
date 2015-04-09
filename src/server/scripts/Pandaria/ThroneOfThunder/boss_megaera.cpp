@@ -19,6 +19,7 @@
 #include "Map.h"
 #include "VehicleDefines.h"
 #include "SpellInfo.h"
+#include <utility>
 
 #include "throne_of_thunder.h"
 
@@ -32,7 +33,7 @@ enum Yells
 enum Spells
 {
     // Boss
-    SPELL_SUBMERGE              = 121541, // Submerge visual (when casted makes head submerge).
+    SPELL_SUBMERGE              = 103963, // Submerge visual (when casted makes head submerge).
     SPELL_EMERGE                = 139832, // Submerged visual (when removed makes head emerge).
 
     SPELL_CONCEALING_FOG        = 137973, // Dummy on eff 0 for attackable state (body + back head).
@@ -143,6 +144,8 @@ enum Events
     EVENT_EMERGE,
     EVENT_BERSERK,
 
+    EVENT_RELOCATE_HEAD,
+
     // Heads - General
     EVENT_CHECK_MEGAERAS_RAGE,
 
@@ -184,25 +187,35 @@ enum Actions
     ACTION_MEGAERAS_RAGE
 };
 
-// Front Head positions.
-Position const headPositions[2] = 
+enum HeadPositions
 {
-    { 6414.79f, 4511.80f, -210.245f }, // Right.
-    { 6430.56f, 4538.10f, -210.234f }, // Left.
+    VENOMOUS_HEAD,
+    FROZEN_HEAD,
+    FLAMING_HEAD,
+    ARCANE_HEAD
+};
+
+// Front Head positions.
+Position const headPositions[4] = 
+{
+    { 6394.10f, 4497.44f, -210.24f, 1.56f },    // VENOMOUS
+    { 6417.99f, 4507.41f, -210.58f, 2.18f },    // FROZEN
+    { 6437.47f, 4535.20f, -210.62f, 2.62f },    // FLAMING
+    { 6435.48f, 4565.67f, -210.57f, 3.34f }     // ARCANE
 };
 
 // Concealing Fog Head positions.
 Position const concealingPositions[7] =
 {
-    { 6457.16f, 4489.78f, -210.032f }, // Middle.
+    { 6457.16f, 4489.78f, -210.032f, 2.46f}, // Middle.
 
-    { 6447.39f, 4481.54f, -210.032f }, // Right.
-    { 6436.35f, 4473.30f, -210.032f },
-    { 6410.10f, 4471.53f, -210.032f },
+    { 6447.39f, 4481.54f, -210.032f, 2.38f}, // Right.
+    { 6436.35f, 4473.30f, -210.032f, 1.79f},
+    { 6410.10f, 4471.53f, -210.032f, 1.71f},
 
-    { 6468.27f, 4503.42f, -210.032f }, // Left.
-    { 6472.02f, 4524.07f, -210.032f },
-    { 6465.45f, 4545.15f, -210.032f },
+    { 6468.27f, 4503.42f, -210.032f, 2.58f}, // Left.
+    { 6472.02f, 4524.07f, -210.032f, 2.94f},
+    { 6465.45f, 4545.15f, -210.032f, 3.13f},
 };
 
 // Front Head orientations.
@@ -226,6 +239,31 @@ float concealingOrientations[7] =
     3.13f
 };
 
+class HeadPair
+{
+private:
+    Position position;
+    uint64 uiGuid;
+
+public:
+    HeadPair(Position pos, uint64 guid) : uiGuid(guid), position(pos) {}
+
+    Position GetPosition() const
+    {
+        return position;
+    }
+
+    uint64 GetGUID() const
+    {
+        return uiGuid;
+    }
+
+    void SetGUID(uint64 _guid)
+    {
+        uiGuid = _guid;
+    }
+};
+
 // Megaera spawn / original body position.
 Position const bossSpawnPos = { 6442.61f, 4599.18f, -210.032f };
 
@@ -237,150 +275,235 @@ class boss_megaera : public CreatureScript
 
         struct boss_megaeraAI : public BossAI
         {
-            boss_megaeraAI(Creature* creature) : BossAI(creature, DATA_MEGAERA), summons(me)
+            boss_megaeraAI(Creature* creature) : BossAI(creature, DATA_MEGAERA)
             {
                 instance  = creature->GetInstanceScript();
             }
 
             InstanceScript* instance;
-            SummonList summons;
-            EventMap events;
-            uint8 headKills, rampageCount;
-            bool isRaging, isRampaging;
+            uint8 headKills;
+            uint8 rampageCount;
+            bool isRaging;
+            bool isRampaging;
+            std::vector<std::pair<HeadPair*, bool>> pairv;
+            std::pair<uint32, uint32> activeHeadEntries;
+
+            uint32 killedHeads[4];
+            uint64 movingHeadGuid;
 
             /*** SPECIFIC AI FUNCTIONS ***/
+
+            void FillPairVector()
+            {
+                movingHeadGuid = 0;
+
+                pairv.clear();
+
+                for (uint8 i = 0; i < 7; ++i)
+                {
+                    pairv.push_back(std::make_pair(new HeadPair(concealingPositions[i], 0), false));
+
+                    if (i < 4)
+                        killedHeads[i] = 0;
+                }
+            }
 
             // Used to add Hydra Frenzy to all heads of a type and heal them.
             void AddHydraFrenzy(uint32 entry)
             {
-                std::list<Creature*> summonsList;
-                GetCreatureListWithEntryInGrid(summonsList, me, entry, 200.0f);
-                if (!summonsList.empty())
+                std::list<Creature*> heads;
+
+                GetCreatureListWithEntryInGrid(heads, me, entry, 300.0f);
+
+                heads.remove_if([this](Creature const* pCreature) -> bool
                 {
-                    for (std::list<Creature*>::iterator summs = summonsList.begin(); summs != summonsList.end(); summs++)
-                    {
-                        if ((*summs)->IsAlive())
-                        {
-                            if (!(*summs)->HasAura(SPELL_CONCEALING_FOG))
-                            {
-                                if (!(*summs)->HasAura(SPELL_HYDRA_FRENZY))
-                                    (*summs)->AddAura(SPELL_HYDRA_FRENZY, *summs);
-                                else
-                                {
-                                    if (Aura* frenzy = (*summs)->GetAura(SPELL_HYDRA_FRENZY))
-                                        frenzy->SetStackAmount(frenzy->GetStackAmount() + 1);
-                                }
-                                (*summs)->SetFullHealth();
-                            }
-                        }
-                    }
+                    return !pCreature->IsAlive();
+                });
+
+                for (auto pCreature : heads)
+                {
+                    pCreature->SetFullHealth();
+
+                    if (!pCreature->HasAura(SPELL_CONCEALING_FOG))
+                        pCreature->CastSpell(pCreature, SPELL_HYDRA_FRENZY, true);
                 }
             }
 
             // Used to retrieve number of surplus heads of a certain type (for use in Elemental Bonds aura stacks addition and Rampage damage calculations).
             int32 GetExtraHeadsCount(uint32 entry)
             {
-                int32 count = 0;
+                std::list<Creature*> heads;
+                GetCreatureListWithEntryInGrid(heads, me, entry, 300.0f);
 
-                std::list<Creature*> summonsList;
-                GetCreatureListWithEntryInGrid(summonsList, me, entry, 200.0f);
+                heads.remove_if([this](Creature const* pCreature) -> bool 
+                {
+                    return !pCreature->IsAlive();
+                });
 
-                if (!summonsList.empty())
-                    for (std::list<Creature*>::iterator summs = summonsList.begin(); summs != summonsList.end(); summs++)
-                        if ((*summs)->IsAlive())
-                            ++count;
-
-                // Check if we have a single head of that type, no counting needed.
-                if (count <= 1)
-                    return 0; 
-
-                // First head is excluded from the count.
-                count -= 1;
-
-                return count;
+                return heads.size() - 1;
             }
 
             // Used to add Elemental Bonds to all extra heads of a type.
             void AddElementalBonds(uint32 entry)
             {
-                int32 headCount = GetExtraHeadsCount(entry);
+                std::list<Creature*> heads;
 
-                // No extra heads, no aura addition needed.
-                if (headCount == 0)
-                    return;
+                GetCreatureListWithEntryInGrid(heads, me, entry, 300.0f);
 
-                std::list<Creature*> summonsList;
-                GetCreatureListWithEntryInGrid(summonsList, me, entry, 200.0f);
-
-                // Now add the aura properly.
-                if (!summonsList.empty())
+                heads.remove_if([this](Creature const* pCreature) -> bool
                 {
-                    for (std::list<Creature*>::iterator summs = summonsList.begin(); summs != summonsList.end(); summs++)
+                    return !pCreature->IsAlive();
+                });
+
+                uint32 spell;
+                uint32 offset;
+                
+                switch (entry)
+                {
+                case NPC_VENOMOUS_HEAD:
+                    spell = SPELL_ELEMENTAL_BONDS_VENOM;
+                    offset = killedHeads[VENOMOUS_HEAD];
+                    break;
+                case NPC_FROZEN_HEAD:
+                    spell = SPELL_ELEMENTAL_BONDS_FROST;
+                    offset = killedHeads[FROZEN_HEAD];
+                    break;
+                case NPC_FLAMING_HEAD:
+                    spell = SPELL_ELEMENTAL_BONDS_FIRE;
+                    offset = killedHeads[FLAMING_HEAD];
+                    break;
+                case NPC_ARCANE_HEAD:
+                    spell = SPELL_ELEMENTAL_BONDS_ARCAN;
+                    offset = killedHeads[ARCANE_HEAD];
+                    break;
+                }
+
+                for (auto pCreature : heads)
+                {
+                    if (Aura* pAura = pCreature->GetAura(spell))
                     {
-                        if ((*summs)->IsAlive())
-                        {
-                            if (entry == NPC_FLAMING_HEAD)
-                            {
-                                if (!(*summs)->HasAura(SPELL_ELEMENTAL_BONDS_FIRE))
-                                {
-                                    if (Aura* elemFire = (*summs)->AddAura(SPELL_ELEMENTAL_BONDS_FIRE, *summs))
-                                        elemFire->SetStackAmount(headCount);
-                                }
-                                else
-                                {
-                                    if (Aura* elemFire = (*summs)->GetAura(SPELL_ELEMENTAL_BONDS_FIRE))
-                                        elemFire->SetStackAmount(headCount);
-                                }
-                            }
-                            else if (entry == NPC_FROZEN_HEAD)
-                            {
-                                if (!(*summs)->HasAura(SPELL_ELEMENTAL_BONDS_FROST))
-                                {
-                                    if (Aura* elemFrost = (*summs)->AddAura(SPELL_ELEMENTAL_BONDS_FROST, *summs))
-                                        elemFrost->SetStackAmount(headCount);
-                                }
-                                else
-                                {
-                                    if (Aura* elemFrost = (*summs)->GetAura(SPELL_ELEMENTAL_BONDS_FROST))
-                                        elemFrost->SetStackAmount(headCount);
-                                }
-                            }
-                            else if (entry == NPC_VENOMOUS_HEAD)
-                            {
-                                if (!(*summs)->HasAura(SPELL_ELEMENTAL_BONDS_VENOM))
-                                {
-                                    if (Aura* elemVenom = (*summs)->AddAura(SPELL_ELEMENTAL_BONDS_VENOM, *summs))
-                                        elemVenom->SetStackAmount(headCount);
-                                }
-                                else
-                                {
-                                    if (Aura* elemVenom = (*summs)->GetAura(SPELL_ELEMENTAL_BONDS_VENOM))
-                                        elemVenom->SetStackAmount(headCount);
-                                }
-                            }
-                            else if (entry == NPC_ARCANE_HEAD)
-                            {
-                                if (!(*summs)->HasAura(SPELL_ELEMENTAL_BONDS_ARCAN))
-                                {
-                                    if (Aura* elemArcane = (*summs)->AddAura(SPELL_ELEMENTAL_BONDS_ARCAN, *summs))
-                                        elemArcane->SetStackAmount(headCount);
-                                }
-                                else
-                                {
-                                    if (Aura* elemArcane = (*summs)->GetAura(SPELL_ELEMENTAL_BONDS_ARCAN))
-                                        elemArcane->SetStackAmount(headCount);
-                                }
-                            }
-                            else 
-                                return; // Error! :))
-                        }
+                        pAura->ModStackAmount(offset - pAura->GetStackAmount());
                     }
+                    else if (Aura* pAura = pCreature->AddAura(spell, pCreature))
+                    {
+                        pAura->ModStackAmount(offset - 1);
+                    }
+                }
+            }
+
+            Creature* SpawnNewHead(uint32 uiEntry, bool concealing)
+            {
+                Position headPos;
+                uint8 offset = urand(0, pairv.size() - 1);
+
+                switch (uiEntry)
+                {
+                case NPC_VENOMOUS_HEAD:
+                    headPos = headPositions[VENOMOUS_HEAD];
+                    break;
+                case NPC_FROZEN_HEAD:
+                    headPos = headPositions[FROZEN_HEAD];
+                    break;
+                case NPC_FLAMING_HEAD:
+                    headPos = headPositions[FLAMING_HEAD];
+                    break;
+                case NPC_ARCANE_HEAD:
+                    headPos = headPositions[ARCANE_HEAD];
+                    break;
+                default:
+                    headPos = me->GetPosition();
+                    break;
+                }
+
+                if (concealing)
+                    headPos = me->GetPosition();
+
+                if (Creature* pHead = me->SummonCreature(uiEntry, headPos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 6000))
+                {
+                    if (concealing)
+                    {
+                        bool use_offset = false;
+
+                        std::vector<std::pair<HeadPair*, bool>>::iterator itr = pairv.begin();
+                        std::advance(itr, offset);
+
+                        if (!itr->second)
+                        {
+                            headPos = itr->first->GetPosition();
+                            itr->first->SetGUID(pHead->GetGUID());
+                            itr->second = true;
+                            use_offset = true;
+                        }
+                        else
+                        {
+                            itr = pairv.begin();
+                            for (; itr != pairv.end(); ++itr)
+                            {
+                                if (!itr->second)
+                                {
+                                    headPos = itr->first->GetPosition();
+                                    itr->first->SetGUID(pHead->GetGUID());
+                                    itr->second = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        pHead->NearTeleportTo(headPos.GetPositionX(), headPos.GetPositionY(), headPos.GetPositionZ(), headPos.GetOrientation());
+                        pHead->SetFacingTo(use_offset ? concealingOrientations[offset] : headPos.GetOrientation());
+                        me->AddAura(SPELL_CONCEALING_FOG, pHead);
+                    }
+                    else
+                        pHead->SetFacingTo(headPos.GetOrientation());
+
+                    AddElementalBonds(uiEntry);
+                    return pHead;
+                }
+
+                return nullptr;
+            }
+
+            void RelocateHead()
+            {
+                if (Creature* pHead = ObjectAccessor::GetCreature(*me, movingHeadGuid))
+                {
+                    Position headPos;
+                    switch (pHead->GetEntry())
+                    {
+                    case NPC_VENOMOUS_HEAD:
+                        headPos = headPositions[VENOMOUS_HEAD];
+                        break;
+                    case NPC_FROZEN_HEAD:
+                        headPos = headPositions[FROZEN_HEAD];
+                        break;
+                    case NPC_FLAMING_HEAD:
+                        headPos = headPositions[FLAMING_HEAD];
+                        break;
+                    case NPC_ARCANE_HEAD:
+                        headPos = headPositions[ARCANE_HEAD];
+                        break;
+                    default:
+                        headPos = me->GetPosition();
+                        break;
+                    }
+
+                    pHead->NearTeleportTo(headPos.GetPositionX(), headPos.GetPositionY(), headPos.GetPositionZ(), headPos.GetOrientation());
+
+                    if (Aura* pAura = pHead->AddAura(SPELL_EMERGE, pHead))
+                    {
+                        pAura->SetDuration(2000);
+                    }
+
+                    pHead->RemoveAurasDueToSpell(SPELL_CONCEALING_FOG);
+                    instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, pHead);
                 }
             }
 
             // Selection of the three starting heads (from those available according to difficulty).
             void SpawnStartingHeads()
             {
+                FillPairVector();
+
                 uint32 concealingHead = 0;
                 uint32 firstHead      = 0;
                 uint32 secondHead     = 0;
@@ -403,102 +526,88 @@ class boss_megaera : public CreatureScript
                 }
 
                 // Summon the front heads.
-                if (Creature* fiHead  = me->SummonCreature(firstHead, headPositions[0], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 4000))
+                if (Creature* fiHead = SpawnNewHead(NPC_VENOMOUS_HEAD, false))
                 {
-                    fiHead->SetFacingTo(headOrientations[0]);
                     fiHead->AddAura(SPELL_WATER_WALK, fiHead);
                     fiHead->SetReactState(REACT_DEFENSIVE);
+                    fiHead->RemoveAurasDueToSpell(SPELL_EMERGE);
 			    }
 
-                if (Creature* secHead = me->SummonCreature(secondHead, headPositions[1], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 4000))
+                if (Creature* secHead = SpawnNewHead(NPC_FROZEN_HEAD, false))
                 {
-                    secHead->SetFacingTo(headOrientations[1]);
                     secHead->AddAura(SPELL_WATER_WALK, secHead);
                     secHead->SetReactState(REACT_DEFENSIVE);
+                    secHead->RemoveAurasDueToSpell(SPELL_EMERGE);
 			    }
 
                 // Summon the Concealing Fog head and add the aura to it.
-                if (Creature* concealing = me->SummonCreature(concealingHead, concealingPositions[0], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 4000))
+                if (Creature* concealing = SpawnNewHead(me->GetMap()->IsHeroic() ? NPC_ARCANE_HEAD : NPC_FLAMING_HEAD, true))
                 {
-                    concealing->SetFacingTo(concealingOrientations[0]);
-                    me->AddAura(SPELL_CONCEALING_FOG, concealing);
                     concealing->AddAura(SPELL_WATER_WALK, concealing);
                     concealing->SetReactState(REACT_DEFENSIVE);
+                    concealing->RemoveAurasDueToSpell(SPELL_EMERGE);
                 }
+
+                activeHeadEntries.first = NPC_VENOMOUS_HEAD;
+                activeHeadEntries.second = NPC_FROZEN_HEAD;
             }
 
             // Selection of the next two heads when one dies (from those available according to difficulty).
-            void SpawnNextHeads(uint32 deadHead, uint8 frontHeadPosition)
+            void SpawnNextHeads(uint32 deadHead, uint32 nextHead)
             {
-                // Just a sanity check.
+                // For sanity... I guess
                 if (headKills == 0 || headKills == 7)
                     return;
 
-                uint32 firstNewHead  = 0;
-                uint32 secondNewTwoHeads = 0;
+                std::list<Creature*> concealedHeads;
 
-                std::list<Creature*> summonsList;
-                std::list<Creature*> farheadslist;
-                Position RandomHeadPosition;
-                GetCreatureListWithEntryInGrid(summonsList, me, NPC_ARCANE_HEAD, 200.0f);
-                GetCreatureListWithEntryInGrid(summonsList, me, NPC_FLAMING_HEAD, 200.0f);
-                GetCreatureListWithEntryInGrid(summonsList, me, NPC_FROZEN_HEAD, 200.0f);
-                GetCreatureListWithEntryInGrid(summonsList, me, NPC_VENOMOUS_HEAD, 200.0f);
+                GetCreatureListWithEntryInGrid(concealedHeads, me, nextHead, 300.f);
 
-                for (auto head : summonsList)
-                    for (uint8 i = 0; i<7; ++i)
-                        if (head->GetPositionX() == concealingPositions[i].GetPositionX() && head->GetPositionY() == concealingPositions[i].GetPositionY())
-                            farheadslist.push_back(head);
+                concealedHeads.remove_if([this](Creature const* pCreature) -> bool
+                {
+                    return !pCreature->HasAura(SPELL_CONCEALING_FOG);
+                });
 
-                if (!farheadslist.empty())
-                    if (Creature* RandomHead = Trinity::Containers::SelectRandomContainerElement(farheadslist))
+                if (!concealedHeads.empty())
+                {
+                    if (Creature* pHead = Trinity::Containers::SelectRandomContainerElement(concealedHeads))
                     {
-                        firstNewHead = RandomHead->GetEntry();
-                        RandomHead->GetPosition(&RandomHeadPosition);
-                        RandomHead->DespawnOrUnsummon();
+                        pHead->InterruptNonMeleeSpells(true);
+                        pHead->CastSpell(pHead, SPELL_SUBMERGE);
+                        movingHeadGuid = pHead->GetGUID();
+
+                        events.ScheduleEvent(EVENT_RELOCATE_HEAD, 2000);
+
+                        for (std::vector<std::pair<HeadPair*, bool>>::iterator itr = pairv.begin(); itr != pairv.end(); ++itr)
+                        {
+                            uint32 i = itr->second ? 1 : 0;
+                            TC_LOG_ERROR("scripts", "Position occupied %u", i);
+                            if (pHead->GetGUID() == itr->first->GetGUID())
+                            {
+                                itr->first->SetGUID(0);
+                                itr->second = false;
+                            }
+                        }
                     }
-
-                // Second head to spawn is same as the dead one, but summoned in the fog.
-                secondNewTwoHeads = deadHead;
-
-                // Now do the checks and spawn them.
-                if (!firstNewHead || !secondNewTwoHeads)
-                {
-                    // Throw some error or shit.
-                    TC_LOG_ERROR("scripts", "Cannot complete SpawnNextHeads() function on Megaera encounter (TOT) - Head spawns are bad / missing!");
-                    return;
                 }
 
-                // Summon front head and add the Encounter frame for it.
-                if (Creature* fiNewHead   = me->SummonCreature(firstNewHead, headPositions[frontHeadPosition], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 4000))
+                for (uint8 i = 0; i < 2; ++i)
                 {
-                    fiNewHead->SetFacingTo(headOrientations[frontHeadPosition]);
-                    if (instance) instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, fiNewHead);
-                    fiNewHead->AddAura(SPELL_WATER_WALK, fiNewHead);
-                    me->AddAura(SPELL_SUBMERGE, fiNewHead);
-                }
+                    if (Creature* backHead = SpawnNewHead(deadHead, true))
+                    {
+                        if (Aura* pAura = backHead->GetAura(SPELL_EMERGE))
+                        {
+                            pAura->SetDuration(2000);
+                        }
+                        else if (Aura* pAura = backHead->AddAura(SPELL_EMERGE, backHead))
+                            pAura->SetDuration(2000);
 
-                // Summon Concealing Fog head + add the aura to it.
-                if (Creature* secNewHead  = me->SummonCreature(secondNewTwoHeads, concealingPositions[headKills], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 4000))
-                {
-                    secNewHead->SetFacingTo(concealingOrientations[headKills]);
-                    me->AddAura(SPELL_CONCEALING_FOG, secNewHead);
-                    secNewHead->AddAura(SPELL_WATER_WALK, secNewHead);
-                    me->AddAura(SPELL_SUBMERGE, secNewHead);
-                }
+                        backHead->AddAura(SPELL_WATER_WALK, backHead);
+                        backHead->SetReactState(REACT_DEFENSIVE);
 
-                // Summon Concealing Fog head + add the aura to it.
-                if (Creature* secNewHead  = me->SummonCreature(secondNewTwoHeads, RandomHeadPosition, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 4000))
-                {
-                    secNewHead->SetFacingTo(concealingOrientations[headKills]);
-                    me->AddAura(SPELL_CONCEALING_FOG, secNewHead);
-                    secNewHead->AddAura(SPELL_WATER_WALK, secNewHead);
-                    me->AddAura(SPELL_SUBMERGE, secNewHead);
+                        DoZoneInCombat(backHead, 200.f);
+                    }
                 }
-
-                // Add Elemental Bonds to the heads.
-                AddElementalBonds(firstNewHead);
-                AddElementalBonds(secondNewTwoHeads);
             }
 
             // Used to remove Encounter frames from all the heads.
@@ -644,29 +753,53 @@ class boss_megaera : public CreatureScript
                 }
             };
 
-            void SpellHit(Unit* caster, SpellInfo const* spell)
+            uint32 FindNewHeadEntry(uint32 summonEntry)
             {
-                if (!instance)
-                    return;
+                uint32 headEntry = 0;
 
-                if (instance->GetData(DATA_MEGAERA) == DONE)
-                    return;
-
-                // Handle Emerge / Submerge mechanics.
-                if (spell->Id == SPELL_SUBMERGE)
+                switch (summonEntry)
                 {
-                    AddSummonAura(SPELL_EMERGE, NPC_FLAMING_HEAD);
-                    AddSummonAura(SPELL_EMERGE, NPC_FROZEN_HEAD);
-                    AddSummonAura(SPELL_EMERGE, NPC_VENOMOUS_HEAD);
-                    if (me->GetMap()->IsHeroic())
-                        AddSummonAura(SPELL_EMERGE, NPC_ARCANE_HEAD);
-
-                    RemoveSummonAura(SPELL_SUBMERGE, NPC_FLAMING_HEAD);
-                    RemoveSummonAura(SPELL_SUBMERGE, NPC_FROZEN_HEAD);
-                    RemoveSummonAura(SPELL_SUBMERGE, NPC_VENOMOUS_HEAD);
-                    if (me->GetMap()->IsHeroic())
-                        RemoveSummonAura(SPELL_SUBMERGE, NPC_ARCANE_HEAD);
+                case NPC_VENOMOUS_HEAD:
+                    if (summonEntry == activeHeadEntries.first)
+                    {
+                        headEntry = activeHeadEntries.second == NPC_FROZEN_HEAD ? NPC_FLAMING_HEAD : NPC_FROZEN_HEAD;
+                        activeHeadEntries.first = headEntry;
+                    }
+                    else if (summonEntry == activeHeadEntries.second)
+                    {
+                        headEntry = activeHeadEntries.first == NPC_FROZEN_HEAD ? NPC_FLAMING_HEAD : NPC_FROZEN_HEAD;
+                        activeHeadEntries.second = headEntry;
+                    }
+                    break;
+                case NPC_FROZEN_HEAD:
+                    if (summonEntry == activeHeadEntries.first)
+                    {
+                        headEntry = activeHeadEntries.second == NPC_VENOMOUS_HEAD ? NPC_FLAMING_HEAD : NPC_VENOMOUS_HEAD;
+                        activeHeadEntries.first = headEntry;
+                    }
+                    if (summonEntry == activeHeadEntries.second)
+                    {
+                        headEntry = activeHeadEntries.first == NPC_VENOMOUS_HEAD ? NPC_FLAMING_HEAD : NPC_VENOMOUS_HEAD;
+                        activeHeadEntries.second = headEntry;
+                    }
+                    break;
+                case NPC_FLAMING_HEAD:
+                    if (summonEntry == activeHeadEntries.first)
+                    {
+                        headEntry = activeHeadEntries.second == NPC_FROZEN_HEAD ? NPC_VENOMOUS_HEAD : NPC_FROZEN_HEAD;
+                        activeHeadEntries.first = headEntry;
+                    }
+                    if (summonEntry == activeHeadEntries.second)
+                    {
+                        headEntry = activeHeadEntries.first == NPC_FROZEN_HEAD ? NPC_VENOMOUS_HEAD : NPC_FROZEN_HEAD;
+                        activeHeadEntries.second = headEntry;
+                    }
+                    break;
+                case NPC_ARCANE_HEAD:
+                    break;
                 }
+                
+                return headEntry;
             }
 
 			void EnterEvadeMode()
@@ -710,6 +843,11 @@ class boss_megaera : public CreatureScript
                 _JustReachedHome();
             }
 
+            void SummonedCreatureDespawn(Creature* pSummoned) override
+            {
+                summons.Despawn(pSummoned);
+            }
+
             void JustSummoned(Creature* summon)
             {
                 summons.Summon(summon);
@@ -735,31 +873,34 @@ class boss_megaera : public CreatureScript
                     if (instance)
                         instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, summon); // Remove
 
-                    // Submerge (Reappear 4 seconds later with all heads).
-                    HeadsCastSpell(SPELL_SUBMERGE, NPC_FLAMING_HEAD);
-                    HeadsCastSpell(SPELL_SUBMERGE, NPC_FROZEN_HEAD);
-                    HeadsCastSpell(SPELL_SUBMERGE, NPC_VENOMOUS_HEAD);
-                    if (me->GetMap()->IsHeroic())
-                        HeadsCastSpell(SPELL_SUBMERGE, NPC_ARCANE_HEAD);
-
-                    events.ScheduleEvent(EVENT_SUBMERGE, 100);
-                    events.ScheduleEvent(EVENT_EMERGE, 4000);
-
                     // Increase killed heads count.
-                    headKills++;
+                    ++headKills;
 
                     // Remove 15% health each time a head is killed.
                     me->SetHealth(me->GetMaxHealth() - ((0.15 * me->GetMaxHealth()) * headKills));
 
                     // Check the head positions and find the right position on which to summon the new ones.
-                    uint8 summonPos = (summon->GetPositionX() == headPositions[0].GetPositionX() ? 0 : 1);
                     uint32 summonEntry = summon->GetEntry();
+                    uint32 newHeadEntry = FindNewHeadEntry(summonEntry);
 
-                    // Now we can safely despawn the head.
-                    summons.Despawn(summon);
+                    switch (summonEntry)
+                    {
+                    case NPC_VENOMOUS_HEAD:
+                        killedHeads[VENOMOUS_HEAD] += 1;
+                        break;
+                    case NPC_FROZEN_HEAD:
+                        killedHeads[FROZEN_HEAD] += 1;
+                        break;
+                    case NPC_FLAMING_HEAD:
+                        killedHeads[FLAMING_HEAD] += 1;
+                        break;
+                    case NPC_ARCANE_HEAD:
+                        killedHeads[ARCANE_HEAD] += 1;
+                        break;
+                    }
 
                     // And spawn the next ones.
-                    SpawnNextHeads(summonEntry, summonPos);
+                    SpawnNextHeads(summonEntry, newHeadEntry);
 
                     // Hydra Frenzy - set remaining heads + 1 stacks + heal them.
                     AddHydraFrenzy(NPC_FLAMING_HEAD);
@@ -820,107 +961,97 @@ class boss_megaera : public CreatureScript
                 {
                     switch (eventId)
                     {
-                        case EVENT_SUBMERGE:
-                            DoCast(me, SPELL_SUBMERGE);
-                            break;
-
-                        case EVENT_EMERGE:
-                            me->RemoveAurasDueToSpell(SPELL_EMERGE);
-                            RemoveSummonAura(SPELL_EMERGE, NPC_FLAMING_HEAD);
-                            RemoveSummonAura(SPELL_EMERGE, NPC_FROZEN_HEAD);
-                            RemoveSummonAura(SPELL_EMERGE, NPC_VENOMOUS_HEAD);
-                            if (me->GetMap()->IsHeroic())
-                                RemoveSummonAura(SPELL_EMERGE, NPC_ARCANE_HEAD);
-                            break;
-
-                        case EVENT_RAMPAGE:
-                            if (rampageCount < 20)
+                    case EVENT_RELOCATE_HEAD:
+                        RelocateHead();
+                        break;
+                    case EVENT_RAMPAGE:
+                        if (rampageCount < 20)
+                        {
+                            // Check and add the auras.
+                            if (!me->HasAura(SPELL_RAMPAGE))
                             {
-                                // Check and add the auras.
-                                if (!me->HasAura(SPELL_RAMPAGE))
-                                {
-                                    Talk(ANN_RAMPAGE);
+                                Talk(ANN_RAMPAGE);
 
-                                    me->AddAura(SPELL_RAMPAGE, me);
+                                me->AddAura(SPELL_RAMPAGE, me);
 
-                                    AddSummonAura(SPELL_RAMPAGE, NPC_FLAMING_HEAD);
-                                    AddSummonAura(SPELL_RAMPAGE, NPC_FROZEN_HEAD);
-                                    AddSummonAura(SPELL_RAMPAGE, NPC_VENOMOUS_HEAD);
-                                    if (me->GetMap()->IsHeroic())
-                                        AddSummonAura(SPELL_RAMPAGE, NPC_ARCANE_HEAD);
-                                }
-
-                                // Have each of the specific heads cast the spell (in order).
-                                if (!me->GetMap()->IsHeroic())
-                                {
-                                    if (rampageCount == 0 || rampageCount == 3 || rampageCount == 6 || rampageCount == 9 || rampageCount == 12 || rampageCount == 15 || rampageCount == 18)
-                                        HeadsCastSpell(SPELL_RAMPAGE_FIRE_CAST, NPC_FLAMING_HEAD, true);
-                                    if (rampageCount == 1 || rampageCount == 4 || rampageCount == 7 || rampageCount == 10 || rampageCount == 13 || rampageCount == 16 || rampageCount == 19)
-                                        HeadsCastSpell(SPELL_RAMPAGE_FROST_CAST, NPC_FROZEN_HEAD, true);
-                                    if (rampageCount == 2 || rampageCount == 5 || rampageCount == 8 || rampageCount == 11 || rampageCount == 14 || rampageCount == 17)
-                                        HeadsCastSpell(SPELL_RAMPAGE_POISON_CAST, NPC_VENOMOUS_HEAD, true);
-                                }
-                                else // Heroic!
-                                {
-                                    if (rampageCount == 0 || rampageCount == 4 || rampageCount == 8 || rampageCount == 12 || rampageCount == 16)
-                                        HeadsCastSpell(SPELL_RAMPAGE_FIRE_CAST, NPC_FLAMING_HEAD, true);
-                                    if (rampageCount == 1 || rampageCount == 5 || rampageCount == 9 || rampageCount == 13 || rampageCount == 17)
-                                        HeadsCastSpell(SPELL_RAMPAGE_FROST_CAST, NPC_FROZEN_HEAD, true);
-                                    if (rampageCount == 2 || rampageCount == 6 || rampageCount == 10 || rampageCount == 14 || rampageCount == 18)
-                                        HeadsCastSpell(SPELL_RAMPAGE_POISON_CAST, NPC_VENOMOUS_HEAD, true);
-                                    if (rampageCount == 3 || rampageCount == 7 || rampageCount == 11 || rampageCount == 15 || rampageCount == 19)
-                                        HeadsCastSpell(SPELL_RAMPAGE_ARCANE_CAST, NPC_ARCANE_HEAD, true);
-                                }
-
-                                // Increase the count and reschedule the event.
-                                rampageCount++;
-                                events.ScheduleEvent(EVENT_RAMPAGE, 1000);
-                            }
-                            else
-                            {
-                                // Check and remove the auras.
-                                if (me->HasAura(SPELL_RAMPAGE))
-                                {
-                                    Talk(ANN_SUBSIDE);
-
-                                    me->RemoveAurasDueToSpell(SPELL_RAMPAGE);
-
-                                    RemoveSummonAura(SPELL_RAMPAGE, NPC_FLAMING_HEAD);
-                                    RemoveSummonAura(SPELL_RAMPAGE, NPC_FROZEN_HEAD);
-                                    RemoveSummonAura(SPELL_RAMPAGE, NPC_VENOMOUS_HEAD);
-                                    if (me->GetMap()->IsHeroic())
-                                        RemoveSummonAura(SPELL_RAMPAGE, NPC_ARCANE_HEAD);
-                                }
-
-                                rampageCount = 0;
-                                isRampaging = false;
-                            }
-                            break;
-
-                        case EVENT_MEGAERAS_RAGE:
-                            if (isRaging)
-                            {
-                                // Have each of the specific heads cast the spell (in order).
-                                HeadsCastSpell(SPELL_MEGAERAS_RAGE_FIRE, NPC_FLAMING_HEAD, true);
-                                HeadsCastSpell(SPELL_MEGAERAS_RAGE_FROST, NPC_FROZEN_HEAD, true);
-                                HeadsCastSpell(SPELL_MEGAERAS_RAGE_POISON, NPC_VENOMOUS_HEAD, true);
+                                AddSummonAura(SPELL_RAMPAGE, NPC_FLAMING_HEAD);
+                                AddSummonAura(SPELL_RAMPAGE, NPC_FROZEN_HEAD);
+                                AddSummonAura(SPELL_RAMPAGE, NPC_VENOMOUS_HEAD);
                                 if (me->GetMap()->IsHeroic())
-                                    HeadsCastSpell(SPELL_MEGAERAS_RAGE_ARCANE, NPC_ARCANE_HEAD, true);
-
-                                isRaging = false;
+                                    AddSummonAura(SPELL_RAMPAGE, NPC_ARCANE_HEAD);
                             }
-                            break;
 
-                        case EVENT_BERSERK:
-				            DoCast(me, SPELL_BERSERK);
-                            HeadsCastSpell(SPELL_BERSERK, NPC_FLAMING_HEAD);
-                            HeadsCastSpell(SPELL_BERSERK, NPC_FROZEN_HEAD);
-                            HeadsCastSpell(SPELL_BERSERK, NPC_VENOMOUS_HEAD);
+                            // Have each of the specific heads cast the spell (in order).
+                            if (!me->GetMap()->IsHeroic())
+                            {
+                                if (rampageCount == 0 || rampageCount == 3 || rampageCount == 6 || rampageCount == 9 || rampageCount == 12 || rampageCount == 15 || rampageCount == 18)
+                                    HeadsCastSpell(SPELL_RAMPAGE_FIRE_CAST, NPC_FLAMING_HEAD, true);
+                                if (rampageCount == 1 || rampageCount == 4 || rampageCount == 7 || rampageCount == 10 || rampageCount == 13 || rampageCount == 16 || rampageCount == 19)
+                                    HeadsCastSpell(SPELL_RAMPAGE_FROST_CAST, NPC_FROZEN_HEAD, true);
+                                if (rampageCount == 2 || rampageCount == 5 || rampageCount == 8 || rampageCount == 11 || rampageCount == 14 || rampageCount == 17)
+                                    HeadsCastSpell(SPELL_RAMPAGE_POISON_CAST, NPC_VENOMOUS_HEAD, true);
+                            }
+                            else // Heroic!
+                            {
+                                if (rampageCount == 0 || rampageCount == 4 || rampageCount == 8 || rampageCount == 12 || rampageCount == 16)
+                                    HeadsCastSpell(SPELL_RAMPAGE_FIRE_CAST, NPC_FLAMING_HEAD, true);
+                                if (rampageCount == 1 || rampageCount == 5 || rampageCount == 9 || rampageCount == 13 || rampageCount == 17)
+                                    HeadsCastSpell(SPELL_RAMPAGE_FROST_CAST, NPC_FROZEN_HEAD, true);
+                                if (rampageCount == 2 || rampageCount == 6 || rampageCount == 10 || rampageCount == 14 || rampageCount == 18)
+                                    HeadsCastSpell(SPELL_RAMPAGE_POISON_CAST, NPC_VENOMOUS_HEAD, true);
+                                if (rampageCount == 3 || rampageCount == 7 || rampageCount == 11 || rampageCount == 15 || rampageCount == 19)
+                                    HeadsCastSpell(SPELL_RAMPAGE_ARCANE_CAST, NPC_ARCANE_HEAD, true);
+                            }
+
+                            // Increase the count and reschedule the event.
+                            rampageCount++;
+                            events.ScheduleEvent(EVENT_RAMPAGE, 1000);
+                        }
+                        else
+                        {
+                            // Check and remove the auras.
+                            if (me->HasAura(SPELL_RAMPAGE))
+                            {
+                                Talk(ANN_SUBSIDE);
+
+                                me->RemoveAurasDueToSpell(SPELL_RAMPAGE);
+
+                                RemoveSummonAura(SPELL_RAMPAGE, NPC_FLAMING_HEAD);
+                                RemoveSummonAura(SPELL_RAMPAGE, NPC_FROZEN_HEAD);
+                                RemoveSummonAura(SPELL_RAMPAGE, NPC_VENOMOUS_HEAD);
+                                if (me->GetMap()->IsHeroic())
+                                    RemoveSummonAura(SPELL_RAMPAGE, NPC_ARCANE_HEAD);
+                            }
+
+                            rampageCount = 0;
+                            isRampaging = false;
+                        }
+                        break;
+
+                    case EVENT_MEGAERAS_RAGE:
+                        if (isRaging)
+                        {
+                            // Have each of the specific heads cast the spell (in order).
+                            HeadsCastSpell(SPELL_MEGAERAS_RAGE_FIRE, NPC_FLAMING_HEAD, true);
+                            HeadsCastSpell(SPELL_MEGAERAS_RAGE_FROST, NPC_FROZEN_HEAD, true);
+                            HeadsCastSpell(SPELL_MEGAERAS_RAGE_POISON, NPC_VENOMOUS_HEAD, true);
                             if (me->GetMap()->IsHeroic())
-                                HeadsCastSpell(SPELL_BERSERK, NPC_ARCANE_HEAD);
-                            break;
+                                HeadsCastSpell(SPELL_MEGAERAS_RAGE_ARCANE, NPC_ARCANE_HEAD, true);
 
-                        default: break;
+                            isRaging = false;
+                        }
+                        break;
+
+                    case EVENT_BERSERK:
+                        DoCast(me, SPELL_BERSERK);
+                        HeadsCastSpell(SPELL_BERSERK, NPC_FLAMING_HEAD);
+                        HeadsCastSpell(SPELL_BERSERK, NPC_FROZEN_HEAD);
+                        HeadsCastSpell(SPELL_BERSERK, NPC_VENOMOUS_HEAD);
+                        if (me->GetMap()->IsHeroic())
+                            HeadsCastSpell(SPELL_BERSERK, NPC_ARCANE_HEAD);
+                        break;
+
+                    default: break;
                     }
                 }
 
@@ -955,6 +1086,17 @@ class npc_flaming_head_megaera : public CreatureScript
                 events.Reset();
             }
 
+            void SpellHit(Unit* pCaster, SpellInfo const* pSpell) override
+            {
+                if (pSpell->Id == SPELL_SUBMERGE)
+                {
+                    if (!me->HasAura(SPELL_EMERGE))
+                        me->AddAura(SPELL_EMERGE, me);
+
+                    me->RemoveAurasDueToSpell(SPELL_SUBMERGE);
+                }
+            }
+
             void EnterCombat(Unit* /*who*/)
             {
                 events.ScheduleEvent(EVENT_CHECK_MEGAERAS_RAGE, 18000);
@@ -968,7 +1110,7 @@ class npc_flaming_head_megaera : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
-                if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING))
+                if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING) || me->HasAura(SPELL_EMERGE))
                     return;
 
                 events.Update(diff);
@@ -1054,6 +1196,17 @@ class npc_frozen_head_megaera : public CreatureScript
                 events.Reset();
             }
 
+            void SpellHit(Unit* pCaster, SpellInfo const* pSpell) override
+            {
+                if (pSpell->Id == SPELL_SUBMERGE)
+                {
+                    if (!me->HasAura(SPELL_EMERGE))
+                        me->AddAura(SPELL_EMERGE, me);
+
+                    me->RemoveAurasDueToSpell(SPELL_SUBMERGE);
+                }
+            }
+
             void EnterCombat(Unit* /*who*/)
             {
                 events.ScheduleEvent(EVENT_CHECK_MEGAERAS_RAGE, 18900);
@@ -1067,7 +1220,7 @@ class npc_frozen_head_megaera : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
-                if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING))
+                if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING) || me->HasAura(SPELL_EMERGE))
                     return;
 
                 events.Update(diff);
@@ -1097,7 +1250,7 @@ class npc_frozen_head_megaera : public CreatureScript
                                 {
                                     if (CAST_AI(boss_megaera::boss_megaeraAI, Megaera->AI())->isRampaging == false)
                                     {
-                                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true, -SPELL_CINDERS))
                                         {
                                             me->AddAura(SPELL_TORRENT_OF_ICE_TARGET, target);
                                             if (Creature* torrent = me->SummonCreature(NPC_TORRENT_OF_ICE, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 9500))
@@ -1169,6 +1322,17 @@ class npc_venomous_head_megaera : public CreatureScript
                 events.Reset();
             }
 
+            void SpellHit(Unit* pCaster, SpellInfo const* pSpell) override
+            {
+                if (pSpell->Id == SPELL_SUBMERGE)
+                {
+                    if (!me->HasAura(SPELL_EMERGE))
+                        me->AddAura(SPELL_EMERGE, me);
+
+                    me->RemoveAurasDueToSpell(SPELL_SUBMERGE);
+                }
+            }
+
             void EnterCombat(Unit* /*who*/)
             {
                 events.ScheduleEvent(EVENT_CHECK_MEGAERAS_RAGE, 19800);
@@ -1182,7 +1346,7 @@ class npc_venomous_head_megaera : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
-                if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING))
+                if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING) || me->HasAura(SPELL_EMERGE))
                     return;
 
                 events.Update(diff);
@@ -1268,6 +1432,17 @@ class npc_arcane_head_megaera : public CreatureScript
                 events.Reset();
             }
 
+            void SpellHit(Unit* pCaster, SpellInfo const* pSpell) override
+            {
+                if (pSpell->Id == SPELL_SUBMERGE)
+                {
+                    if (!me->HasAura(SPELL_EMERGE))
+                        me->AddAura(SPELL_EMERGE, me);
+
+                    me->RemoveAurasDueToSpell(SPELL_SUBMERGE);
+                }
+            }
+
             void EnterCombat(Unit* /*who*/)
             {
                 events.ScheduleEvent(EVENT_CHECK_MEGAERAS_RAGE, 20600);
@@ -1281,7 +1456,7 @@ class npc_arcane_head_megaera : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
-                if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING))
+                if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING) || me->HasAura(SPELL_EMERGE))
                     return;
 
                 events.Update(diff);
@@ -1724,6 +1899,25 @@ class spell_cinders_megaera : public SpellScriptLoader
     public:
         spell_cinders_megaera() : SpellScriptLoader("spell_cinders_megaera") { }
 
+        class spell_impl : public SpellScript
+        {
+            PrepareSpellScript(spell_impl);
+
+            void SelectTargets(std::list<WorldObject*>&targets)
+            {
+                targets.remove_if([this](WorldObject* target) -> bool
+                {
+                    return target->ToPlayer() && !target->ToPlayer()->HasAura(SPELL_TORRENT_OF_ICE_TARGET);
+                });
+            }
+
+            void Register()
+            {
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_impl::SelectTargets, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_impl::SelectTargets, EFFECT_1, SPELL_EFFECT_APPLY_AURA);
+            }
+        };
+
         class spell_cinders_megaera_AuraScript : public AuraScript
         {
             PrepareAuraScript(spell_cinders_megaera_AuraScript);
@@ -1741,7 +1935,7 @@ class spell_cinders_megaera : public SpellScriptLoader
                     return;
 
                 if (aurEff->GetTickNumber() % 3 == 0)
-                    target->CastSpell(target, SPELL_CINDERS_SUMMON, true);
+                    caster->CastSpell(*target, SPELL_CINDERS_SUMMON, true);
             }
 
             void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
@@ -1765,6 +1959,11 @@ class spell_cinders_megaera : public SpellScriptLoader
                 OnEffectRemove += AuraEffectRemoveFn(spell_cinders_megaera_AuraScript::OnRemove, EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
             }
         };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_impl();
+        }
 
         AuraScript* GetAuraScript() const
         {
@@ -1855,6 +2054,33 @@ class spell_acid_glob_megaera : public SpellScriptLoader
         }
 };
 
+class spell_icy_ground_dummy : public SpellScriptLoader
+{
+public:
+    spell_icy_ground_dummy() : SpellScriptLoader("spell_icy_ground_dummy") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void HandleEffectHitTarget(SpellEffIndex /*eff_idx*/)
+        {
+            if (Creature* pCreature = GetHitCreature())
+                pCreature->DespawnOrUnsummon(500);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_impl::HandleEffectHitTarget, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
 class sat_icy_ground : public SpellAreaTriggerScript
 {
 public:
@@ -1882,7 +2108,7 @@ public:
                 {
                     if (Creature* pOwner = m_target->ToCreature())
                     {
-                        pOwner->DespawnOrUnsummon();
+                        pOwner->DespawnOrUnsummon(500);
                         return;
                     }
                 }
@@ -1916,6 +2142,11 @@ public:
             }
         }
     };
+
+    IAreaTrigger* GetInterface() const override
+    {
+        return new sat_impl();
+    }
 };
 
 void AddSC_boss_megaera()
@@ -1936,4 +2167,6 @@ void AddSC_boss_megaera()
     new spell_cinders_megaera();
     new spell_arctic_freeze_megaera();
     new spell_acid_glob_megaera();
+    new spell_icy_ground_dummy();
+    new sat_icy_ground();
 }

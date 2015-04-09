@@ -3617,6 +3617,10 @@ void SpellMgr::LoadSpellCustomAttr()
             case 139834:    // Cinders
                 spellInfo->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
                 break;
+            case 139832:    // Submerged (kinda hacky idk)
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(35);
+                spellInfo->AuraInterruptFlags = 0x0;
+                break;
             case 139433:    // Rampage Fire Cast.
                 spellInfo->Effects[0].Effect = SPELL_EFFECT_TRIGGER_MISSILE;
                 spellInfo->Effects[0].TargetA = TARGET_DEST_TARGET_ENEMY;

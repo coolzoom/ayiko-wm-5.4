@@ -830,3 +830,6 @@ UPDATE `creature_template` SET `minlevel` = 1, `maxlevel` = 1 WHERE `entry` = 49
 
 /* Megs Dreadshredder (quest giver) fix */
 DELETE FROM `creature_queststarter` WHERE `id` = 38534 AND `quest` IN (27447,28509);
+
+/* Pozzik (quest giver) fix */
+DELETE FROM `creature_queststarter` WHERE `id` = 40028 AND `quest` = 28161;

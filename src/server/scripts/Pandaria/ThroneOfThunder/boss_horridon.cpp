@@ -649,7 +649,7 @@ public:
         {
             if (Creature* pHorridon = GetHorridon(me))
             {
-                return (pHorridon->IsInCombat() && pHorridon->getThreatManager().isThreatListEmpty());
+                return ((pHorridon->IsInCombat() || pHorridon->GetVictim()) && pHorridon->getThreatManager().isThreatListEmpty());
             }
 
             return true;
@@ -1284,6 +1284,8 @@ public:
                 if (CreatureAI* pHelperAI = pHorridonHelper->AI())
                     pHelperAI->DoAction(ACTION_FIGHT_BEGIN);
             }
+
+            DoZoneInCombat(me, 200.f);
         }
 
         void EnterEvadeModeIfRequired()
@@ -1341,7 +1343,7 @@ public:
                 return;
 
             if (me->HasUnitState(UNIT_STATE_CANNOT_TURN) && !me->HasAura(SPELL_HEADACHE))
-                me->SetControlled(false, UNIT_STATE_CANNOT_TURN);
+                me->ClearUnitState(UNIT_STATE_CANNOT_TURN);
 
             while (uint32 uiEventId = events.ExecuteEvent())
             {
@@ -1456,8 +1458,8 @@ void npc_horridon_event_helper::npc_horridon_event_helper_AI::ForceHorridonToEva
 {
     if (Creature* pHorridon = GetHorridon(me))
     {
-        pHorridon->SetControlled(false, UNIT_STATE_CANNOT_TURN);
-        pHorridon->SetControlled(false, UNIT_STATE_STUNNED);
+        pHorridon->ClearUnitState(UNIT_STATE_CANNOT_TURN);
+        pHorridon->ClearUnitState(UNIT_STATE_STUNNED);
 
         if (HorridonAI* pAI = dynamic_cast<HorridonAI*>(pHorridon->AI()))
             pAI->EnterEvadeMode();

@@ -821,3 +821,6 @@ DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`= 1 AND `SourceGroup` = 
 
 /* Shadumbra now drop correctly his QI */
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`= 1 AND `SourceGroup` = 12677 AND `SourceEntry`=16304;
+
+/* Ursangous now drop correctly his QI */
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`= 1 AND `SourceGroup` = 12678 AND `SourceEntry`=16303;

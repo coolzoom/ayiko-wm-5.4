@@ -847,3 +847,8 @@ UPDATE `creature_template` SET `faction_A` = 14, `faction_H` = 14 WHERE `entry` 
 DELETE FROM `creature` WHERE `id`=45817;
 INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
 (45817, 230, 0, 0, 2, 1, 0, 0, 837.494, -134.253, -54.101, 1.00787, 7200, 0, 0, 5742, 0, 0, 0, 0, 0, 0, 0, 0);
+
+/* Galamav the Marksman missing spawn added */
+DELETE FROM `creature` WHERE `id`=45839;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(45839, 230, 0, 0, 2, 1, 0, 0, 488.255, 4.58772, -70.4265, 2.36387, 7200, 0, 0, 4594, 2289, 0, 0, 0, 0, 0, 0, 0);

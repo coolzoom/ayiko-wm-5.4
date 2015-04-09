@@ -89,13 +89,13 @@
 
 namespace {
 
-void createXML(uint32 activeClientsNum, uint32 queuedClientsNum, std::string const &upTime)
+void createXML(uint32 activeClientsNum, uint32 queuedClientsNum, std::string const &upTime, uint32 serverDiffAverage)
 {
     if (auto const pxmlFile = fopen("stats.xml", "w"))
     {
         fprintf(pxmlFile, "<?xml version='1.0' encoding='utf-8' ?>"
-                "<root><activeClientsNum>%u</activeClientsNum><queuedClientsNum>%u</queuedClientsNum><upTime>%s</upTime></root>",
-                activeClientsNum, queuedClientsNum, upTime.c_str());
+                "<root><activeClientsNum>%u</activeClientsNum><queuedClientsNum>%u</queuedClientsNum><upTime>%s</upTime><serverDiffAverage>%u</serverDiffAverage></root>",
+                activeClientsNum, queuedClientsNum, upTime.c_str(), serverDiffAverage);
         fclose(pxmlFile);
     }
 }
@@ -2328,7 +2328,7 @@ void World::Update(uint32 diff)
         uint32 activeClientsNum = GetActiveSessionCount();
         uint32 queuedClientsNum = GetQueuedSessionCount();
 
-        createXML(activeClientsNum, queuedClientsNum, secsToTimeString(GetUptime()));
+        createXML(activeClientsNum, queuedClientsNum, secsToTimeString(GetUptime()), m_updateTimeAverage);
 
         ///- Handle expired auctions
         sAuctionMgr->Update();

@@ -818,3 +818,6 @@ INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`mo
 
 /* Sharptalon now drop correctly his QI */
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`= 1 AND `SourceGroup` = 12676 AND `SourceEntry`=16305;
+
+/* Shadumbra now drop correctly his QI */
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`= 1 AND `SourceGroup` = 12677 AND `SourceEntry`=16304;

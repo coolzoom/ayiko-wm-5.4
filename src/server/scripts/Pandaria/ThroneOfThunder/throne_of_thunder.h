@@ -125,6 +125,7 @@ enum ObjectsIds
     GOB_COUNCIL_EXIT                        = 218657,
     GOB_TORTOS_DOOR                         = 218980,
     GOB_TORTOS_COLLISION                    = 218987,
+    GOB_MEGAERA_EXIT                        = 218746,
  
     GOB_TRIBAL_DOOR_GURUBASHI               = 218670,
     GOB_TRIBAL_DOOR_DRAKKARI                = 218671,
@@ -137,6 +138,7 @@ enum ObjectsIds
     GOB_MOGU_STATUE_4                       = 218678,
 
     GOB_JIKUN_FEATHER                       = 218543,
+    GOB_MEGAERA_CHEST                       = 218805
 };
 
 #endif

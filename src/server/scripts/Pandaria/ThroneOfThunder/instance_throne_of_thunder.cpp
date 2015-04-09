@@ -10,9 +10,10 @@ DoorData const doorData[] =
     { GOB_HORRIDON_EXIT, DATA_HORRIDON, DOOR_TYPE_PASSAGE, },
     { GOB_COUNCIL_ENTRANCE1, DATA_COUNCIL_OF_ELDERS, DOOR_TYPE_ROOM, },
     { GOB_COUNCIL_ENTRANCE2, DATA_COUNCIL_OF_ELDERS, DOOR_TYPE_ROOM, },
-    //{ GOB_COUNCIL_EXIT, DATA_COUNCIL_OF_ELDERS, DOOR_TYPE_PASSAGE, },
+    { GOB_COUNCIL_EXIT, DATA_COUNCIL_OF_ELDERS, DOOR_TYPE_PASSAGE, },
     { GOB_TORTOS_DOOR, DATA_TORTOS, DOOR_TYPE_PASSAGE },
     { GOB_TORTOS_COLLISION, DATA_TORTOS, DOOR_TYPE_SPAWN_HOLE },
+    { GOB_MEGAERA_EXIT, DATA_MEGAERA, DOOR_TYPE_PASSAGE}
 };
 
 typedef std::unordered_map<uint32, uint64> EntryGuidMap;
@@ -33,9 +34,8 @@ public:
         EntryGuidMap m_mGoGuidStorage;
         EventMap m_mEvents;
 
-        uint64 eventHelperGuid;
-        uint64 twistedFateHelperGuid;
         uint64 horridonHelperGuid;
+        uint64 megaeraChestGuid;
 
         uint32 m_auiEncounter[MAX_TYPES];
         std::string strSaveData;
@@ -87,12 +87,6 @@ public:
                 case NPC_HORRIDON_EVENT_HELPER:
                     horridonHelperGuid = pCreature->GetGUID();
                     break;
-                case NPC_TWISTED_FATE_HELPER:
-                    twistedFateHelperGuid = pCreature->GetGUID();
-                    break;
-                case NPC_COUNCIL_EVENT_HELPER:
-                    eventHelperGuid = pCreature->GetGUID();
-                    break;
                 default:
                     break;
             }
@@ -125,6 +119,12 @@ public:
                 case GOB_JIKUN_FEATHER:
                 case GOB_JIN_ROKH_PREDOOR:
                     m_mGoGuidStorage.insert(std::make_pair(pGo->GetEntry(), pGo->GetGUID()));
+                    break;
+                case 218805: // Megaera chests
+                case 218806:
+                case 218807:
+                case 218808:
+                    megaeraChestGuid = pGo->GetGUID();
                     break;
                 default:
                     break;
@@ -303,31 +303,6 @@ public:
             }
 
             return m_auiEncounter[uiType];
-            /*
-            switch (uiType)
-            {
-                case TYPE_JINROKH:
-                case TYPE_JINROKH_INTRO:
-                case TYPE_HORRIDON:
-                case TYPE_COUNCIL:
-                case TYPE_TORTOS_INTRO:
-                case TYPE_TORTOS:
-                case TYPE_MEGAERA:
-                case TYPE_DURUMU:
-                case TYPE_JI_KUN:
-                case TYPE_PRIMORDIUS:
-                case TYPE_DARK_ANIMUS:
-                case TYPE_IRON_QON:
-                case TYPE_LEI_SHEN:
-                case TYPE_TWIN_CONSORTS:
-                case TYPE_RA_DEN:
-                    return m_auiEncounter[uiType];
-                default:
-                    return 0;
-            }
-
-            return 0;
-            */
         }
 
         uint64 GetData64(uint32 uiType) override
@@ -391,6 +366,8 @@ public:
                         return find->second;
                     return 0;
                 }
+                case GOB_MEGAERA_CHEST:
+                    return megaeraChestGuid;
                 default:
                     return 0;
             }

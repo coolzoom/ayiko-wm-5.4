@@ -3654,6 +3654,15 @@ void SpellMgr::LoadSpellCustomAttr()
             case 139866:    // Torrent of Ice.
                 spellInfo->Effects[0].TargetA = TARGET_UNIT_TARGET_ANY;
                 break;
+            case 139870:    // Torrent of Ice summon
+                spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(245);
+                break;
+            case 139758:    // Megaera's Rage
+            case 139816:
+            case 139818:
+            case 139820:
+                spellInfo->MaxAffectedTargets = 1;
+                break;
             case 134339:    // Ji kun wings stuff
             case 140014:
             case 140013:

@@ -495,11 +495,12 @@ class boss_megaera : public CreatureScript
 
                     pHead->NearTeleportTo(headPos.GetPositionX(), headPos.GetPositionY(), headPos.GetPositionZ(), headPos.GetOrientation());
 
-                    if (Aura* pAura = pHead->GetAura(SPELL_EMERGE))//, //pHead))
+                    if (Aura* pAura = pHead->GetAura(SPELL_EMERGE))
                     {
-                        TC_LOG_ERROR("scripts", "found head aura");
                         pAura->SetDuration(4000);
                     }
+                    else if (Aura* pAura = pHead->AddAura(SPELL_EMERGE, pHead))
+                        pAura->SetDuration(4000);
 
                     pHead->RemoveAurasDueToSpell(SPELL_CONCEALING_FOG);
                     instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, pHead);
@@ -597,7 +598,6 @@ class boss_megaera : public CreatureScript
                     if (heads.size() > 1)
                         heads.resize(1);
                     
-
                     return heads.front();
                 }
                 return nullptr;
@@ -702,10 +702,16 @@ class boss_megaera : public CreatureScript
             }
 
             // Used to make all same-type heads cast certain spells.
-            void HeadsCastSpell(uint32 spellId, uint32 entry, bool randomTarget = false, bool triggered = false)
+            void HeadsCastSpell(uint32 spellId, uint32 entry, bool randomTarget = false, bool triggered = false, bool front_only = false)
             {
                 std::list<Creature*> summonsList;
                 GetCreatureListWithEntryInGrid(summonsList, me, entry, 200.0f);
+                if (front_only)
+                    summonsList.remove_if([this](Creature const* pCreature) -> bool
+                {
+                    return pCreature->HasAura(SPELL_CONCEALING_FOG);
+                });
+
                 if (summonsList.empty())
                     return;
                 int32 num = urand(2,3);
@@ -862,8 +868,7 @@ class boss_megaera : public CreatureScript
                     break;
                 case NPC_ARCANE_HEAD:
                     break;
-                }
-                
+                }                
                 return headEntry;
             }
 
@@ -975,7 +980,7 @@ class boss_megaera : public CreatureScript
                         AddHydraFrenzy(NPC_ARCANE_HEAD);
 
                     // A head died - schedule Rampage
-                    events.ScheduleEvent(EVENT_RAMPAGE, 15000);
+                    events.ScheduleEvent(EVENT_RAMPAGE, 7500);
                     isRampaging = true;
                 }
                 else
@@ -998,15 +1003,20 @@ class boss_megaera : public CreatureScript
                 if (me->GetMap()->IsHeroic())
                     RemoveSummonFrame(NPC_ARCANE_HEAD);
 
-                summons.DespawnAll();
-
                 if (instance)
                 {
                     instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                     instance->SetData(DATA_MEGAERA, DONE);
+                    instance->DoRespawnGameObject(instance->GetData64(GOB_MEGAERA_CHEST), 86400);
                 }
 
                 _JustDied();
+
+                for (SummonList::iterator itr = summons.begin(); itr != summons.end(); ++itr)
+                {
+                    if (Unit* pHead = ObjectAccessor::GetCreature(*me, *itr))
+                        pHead->Kill(pHead);
+                }
             }
 
             void UpdateAI(uint32 const diff)
@@ -1103,11 +1113,11 @@ class boss_megaera : public CreatureScript
                         if (isRaging)
                         {
                             // Have each of the specific heads cast the spell (in order).
-                            HeadsCastSpell(SPELL_MEGAERAS_RAGE_FIRE, NPC_FLAMING_HEAD, true);
-                            HeadsCastSpell(SPELL_MEGAERAS_RAGE_FROST, NPC_FROZEN_HEAD, true);
-                            HeadsCastSpell(SPELL_MEGAERAS_RAGE_POISON, NPC_VENOMOUS_HEAD, true);
+                            HeadsCastSpell(SPELL_MEGAERAS_RAGE_FIRE, NPC_FLAMING_HEAD, true, false, true);
+                            HeadsCastSpell(SPELL_MEGAERAS_RAGE_FROST, NPC_FROZEN_HEAD, true, false, true);
+                            HeadsCastSpell(SPELL_MEGAERAS_RAGE_POISON, NPC_VENOMOUS_HEAD, true, false, true);
                             if (me->GetMap()->IsHeroic())
-                                HeadsCastSpell(SPELL_MEGAERAS_RAGE_ARCANE, NPC_ARCANE_HEAD, true);
+                                HeadsCastSpell(SPELL_MEGAERAS_RAGE_ARCANE, NPC_ARCANE_HEAD, true, false, true);
 
                             isRaging = false;
                         }
@@ -1222,7 +1232,10 @@ class npc_flaming_head_megaera : public CreatureScript
                                 if (!me->HasAura(SPELL_CONCEALING_FOG) && !me->HasAura(SPELL_EMERGE))
                                 {
                                     if (CAST_AI(boss_megaera::boss_megaeraAI, Megaera->AI())->isRampaging == false)
-                                        DoCast(me, SPELL_IGNITE_FLESH);
+                                    {
+                                        me->SetFacingToObject(me->GetVictim());
+                                        DoCast(me->GetVictim(), SPELL_IGNITE_FLESH);
+                                    }
                                     events.ScheduleEvent(EVENT_IGNITE_FLESH, urand(18000, 23000));
                                 }
                             }
@@ -1331,7 +1344,8 @@ class npc_frozen_head_megaera : public CreatureScript
                                                 torrent->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                                                 torrent->Attack(target, false);
                                                 torrent->GetMotionMaster()->MoveChase(target, 2.0f);
-                                                torrent->AddAura(SPELL_TORRENT_OF_ICE_NPC_A, torrent);
+                                                if (Aura* pAura = torrent->AddAura(SPELL_TORRENT_OF_ICE_NPC_A, torrent))
+                                                    pAura->SetDuration(8000);
                                                 torrent->SetReactState(REACT_PASSIVE);
                                                 DoCast(torrent, SPELL_TORRENT_OF_ICE);
                                             }
@@ -1348,7 +1362,10 @@ class npc_frozen_head_megaera : public CreatureScript
                                 if (!me->HasAura(SPELL_CONCEALING_FOG) && !me->HasAura(SPELL_EMERGE))
                                 {
                                     if (CAST_AI(boss_megaera::boss_megaeraAI, Megaera->AI())->isRampaging == false)
-                                        DoCast(me, SPELL_ARCTIC_FREEZE);
+                                    {
+                                        me->SetFacingToObject(me->GetVictim());
+                                        DoCast(me->GetVictim(), SPELL_ARCTIC_FREEZE);
+                                    }
                                     events.ScheduleEvent(EVENT_ARCTIC_FREEZE, urand(18000, 23000));
                                 }
                             }
@@ -1458,7 +1475,10 @@ class npc_venomous_head_megaera : public CreatureScript
                                 if (!me->HasAura(SPELL_CONCEALING_FOG) && !me->HasAura(SPELL_EMERGE))
                                 {
                                     if (CAST_AI(boss_megaera::boss_megaeraAI, Megaera->AI())->isRampaging == false)
-                                        DoCast(me, SPELL_ROT_ARMOR);
+                                    {
+                                        me->SetFacingToObject(me->GetVictim());
+                                        DoCast(me->GetVictim(), SPELL_ROT_ARMOR);
+                                    }
                                     events.ScheduleEvent(EVENT_ROT_ARMOR, urand(18000, 23000));
                                 }
                             }
@@ -1568,7 +1588,10 @@ class npc_arcane_head_megaera : public CreatureScript
                                 if (!me->HasAura(SPELL_CONCEALING_FOG) && !me->HasAura(SPELL_EMERGE))
                                 {
                                     if (CAST_AI(boss_megaera::boss_megaeraAI, Megaera->AI())->isRampaging == false)
-                                        DoCast(me, SPELL_DIFFUSION);
+                                    {
+                                        me->SetFacingToObject(me->GetVictim());
+                                        DoCast(me->GetVictim(), SPELL_DIFFUSION);
+                                    }
                                     events.ScheduleEvent(EVENT_DIFFUSION, urand(18000, 23000));
                                 }
                             }
@@ -2177,7 +2200,7 @@ public:
             {
                 if (pTarget->HasAura(SPELL_CINDERS))
                 {
-                    if (Creature* pOwner = m_target->ToCreature())
+                    if (Creature* pOwner = m_caster->ToCreature())
                     {
                         pOwner->DespawnOrUnsummon(500);
                         return;
@@ -2187,7 +2210,7 @@ public:
                 if (Aura* pAura = pTarget->GetAura(SPELL_ICY_GROUND_AURA))
                     pAura->RefreshDuration(false);
                 else
-                    pTarget->AddAura(SPELL_ICY_GROUND_AURA, pTarget);
+                    m_caster->AddAura(SPELL_ICY_GROUND_AURA, pTarget);
             }
         }
 
@@ -2209,7 +2232,7 @@ public:
             if (pTarget)
             {
                 if (Aura* pAura = pTarget->GetAura(SPELL_ICY_GROUND_AURA))
-                    pAura->RefreshDuration(false);
+                    pAura->RefreshDuration();
             }
         }
     };

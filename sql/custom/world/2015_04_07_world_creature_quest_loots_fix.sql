@@ -824,3 +824,6 @@ DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`= 1 AND `SourceGroup` = 
 
 /* Ursangous now drop correctly his QI */
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`= 1 AND `SourceGroup` = 12678 AND `SourceEntry`=16303;
+
+/* Dung Beetle fixed */
+UPDATE `creature_template` SET `minlevel` = 1, `maxlevel` = 1 WHERE `entry` = 49743;

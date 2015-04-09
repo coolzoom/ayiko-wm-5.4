@@ -986,7 +986,7 @@ class boss_megaera : public CreatureScript
                 else
                 {
                     JustDied(killer);
-                    me->DespawnOrUnsummon(1000);
+                    me->DespawnOrUnsummon(9000);
                 }
             }
 
@@ -1206,7 +1206,7 @@ class npc_flaming_head_megaera : public CreatureScript
                             {
                                 // Find boss and check for melee distance to victim + unscheduled boss action.
 				                if (Creature* Megaera = me->FindNearestCreature(BOSS_MEGAERA, 200.0f, true))
-                                    if (!me->IsWithinDistInMap(me->GetVictim(), me->GetAttackDistance(me->GetVictim())))
+                                    if (!me->IsWithinMeleeRange(me->GetVictim()))
                                         if (CAST_AI(boss_megaera::boss_megaeraAI, Megaera->AI())->isRaging == false)
                                             Megaera->AI()->DoAction(ACTION_MEGAERAS_RAGE);
 
@@ -1319,7 +1319,7 @@ class npc_frozen_head_megaera : public CreatureScript
                             {
                                 // Find boss and check for melee distance to victim + unscheduled boss action.
 				                if (Creature* Megaera = me->FindNearestCreature(BOSS_MEGAERA, 200.0f, true))
-                                    if (!me->IsWithinDistInMap(me->GetVictim(), me->GetAttackDistance(me->GetVictim())))
+                                    if (!me->IsWithinMeleeRange(me->GetVictim()))
                                         if (CAST_AI(boss_megaera::boss_megaeraAI, Megaera->AI())->isRaging == false)
                                             Megaera->AI()->DoAction(ACTION_MEGAERAS_RAGE);
 
@@ -1449,7 +1449,7 @@ class npc_venomous_head_megaera : public CreatureScript
                             {
                                 // Find boss and check for melee distance to victim + unscheduled boss action.
 				                if (Creature* Megaera = me->FindNearestCreature(BOSS_MEGAERA, 200.0f, true))
-                                    if (!me->IsWithinDistInMap(me->GetVictim(), me->GetAttackDistance(me->GetVictim())))
+                                    if (!me->IsWithinMeleeRange(me->GetVictim()))
                                         if (CAST_AI(boss_megaera::boss_megaeraAI, Megaera->AI())->isRaging == false)
                                             Megaera->AI()->DoAction(ACTION_MEGAERAS_RAGE);
 
@@ -1562,7 +1562,7 @@ class npc_arcane_head_megaera : public CreatureScript
                             {
                                 // Find boss and check for melee distance to victim + unscheduled boss action.
 				                if (Creature* Megaera = me->FindNearestCreature(BOSS_MEGAERA, 200.0f, true))
-                                    if (!me->IsWithinDistInMap(me->GetVictim(), me->GetAttackDistance(me->GetVictim())))
+                                    if (!me->IsWithinMeleeRange(me->GetVictim()))
                                         if (CAST_AI(boss_megaera::boss_megaeraAI, Megaera->AI())->isRaging == false)
                                             Megaera->AI()->DoAction(ACTION_MEGAERAS_RAGE);
 

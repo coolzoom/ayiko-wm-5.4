@@ -868,3 +868,44 @@ UPDATE `creature_template` SET `speed_walk` = 1, `speed_run` = 1.15 WHERE `entry
 
 /* Warden Thelwater fixed */
 UPDATE `creature` SET `MovementType` = 0 WHERE `id` = 46409;
+
+/* Hardened Steel Skycaller fixed */
+DELETE FROM `smart_scripts` WHERE (`entryorguid`=28580 AND `source_type`=0);
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(28580, 0, 0, 1, 4, 0, 100, 3, 0, 0, 0, 0, 21, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Stop Moving on Aggro"),
+(28580, 0, 1, 2, 61, 0, 100, 3, 0, 0, 0, 0, 11, 16100, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Cast Shoot on Aggro"),
+(28580, 0, 2, 3, 61, 0, 100, 3, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Stop Melee Attack on Aggro"),
+(28580, 0, 3, 0, 61, 0, 100, 3, 0, 0, 0, 0, 22, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Set Phase 1 on Aggro"),
+(28580, 0, 4, 5, 9, 1, 100, 2, 5, 30, 2300, 3900, 11, 16100, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Cast Shoot"),
+(28580, 0, 5, 0, 61, 1, 100, 2, 0, 0, 0, 0, 40, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Set Ranged Weapon Model"),
+(28580, 0, 6, 7, 9, 1, 100, 2, 30, 80, 0, 0, 21, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Start Moving when not in Shoot Range"),
+(28580, 0, 7, 0, 61, 1, 100, 2, 0, 0, 0, 0, 20, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Start Melee Attack when not in Shoot Range"),
+(28580, 0, 8, 9, 9, 1, 100, 2, 0, 10, 0, 0, 21, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Start Moving when not in Shoot Range"),
+(28580, 0, 9, 10, 61, 1, 100, 2, 0, 0, 0, 0, 40, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Set Melee Weapon Model when not in Shoot Range"),
+(28580, 0, 10, 0, 61, 1, 100, 2, 0, 0, 0, 0, 20, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Start Melee Attack when not in Shoot Range"),
+(28580, 0, 11, 12, 9, 1, 100, 2, 11, 25, 0, 0, 21, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Stop Moving at 25 Yards"),
+(28580, 0, 12, 13, 61, 1, 100, 2, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Stop Melee Attack at 25 Yards"),
+(28580, 0, 13, 0, 61, 1, 100, 2, 0, 0, 0, 0, 40, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Set Ranged Weapon Model at 25 Yards"),
+(28580, 0, 14, 15, 7, 1, 100, 3, 0, 0, 0, 0, 40, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Set Melee Weapon Model on Evade"),
+(28580, 0, 15, 0, 61, 1, 100, 3, 0, 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Reset on Evade"),
+(28580, 0, 16, 17, 4, 0, 100, 5, 0, 0, 0, 0, 21, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Stop Moving on Aggro"),
+(28580, 0, 17, 18, 61, 0, 100, 5, 0, 0, 0, 0, 11, 61515, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Cast Shoot on Aggro"),
+(28580, 0, 18, 19, 61, 0, 100, 5, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Stop Melee Attack on Aggro"),
+(28580, 0, 19, 0, 61, 0, 100, 5, 0, 0, 0, 0, 22, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Set Phase 1 on Aggro"),
+(28580, 0, 20, 21, 9, 1, 100, 4, 5, 30, 2300, 3900, 11, 61515, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Cast Shoot"),
+(28580, 0, 21, 0, 61, 1, 100, 4, 0, 0, 0, 0, 40, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Set Ranged Weapon Model"),
+(28580, 0, 22, 23, 9, 1, 100, 4, 30, 80, 0, 0, 21, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Start Moving when not in Shoot Range"),
+(28580, 0, 23, 0, 61, 1, 100, 4, 0, 0, 0, 0, 20, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Start Melee Attack when not in Shoot Range"),
+(28580, 0, 24, 25, 9, 1, 100, 4, 0, 10, 0, 0, 21, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Start Moving when not in Shoot Range"),
+(28580, 0, 25, 26, 61, 1, 100, 4, 0, 0, 0, 0, 40, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Set Melee Weapon Model when not in Shoot Range"),
+(28580, 0, 26, 0, 61, 1, 100, 4, 0, 0, 0, 0, 20, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Start Melee Attack when not in Shoot Range"),
+(28580, 0, 27, 28, 9, 1, 100, 4, 11, 25, 0, 0, 21, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Stop Moving at 25 Yards"),
+(28580, 0, 28, 29, 61, 1, 100, 4, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Stop Melee Attack at 25 Yards"),
+(28580, 0, 29, 0, 61, 1, 100, 4, 0, 0, 0, 0, 40, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Set Ranged Weapon Model at 25 Yards"),
+(28580, 0, 30, 31, 7, 1, 100, 5, 0, 0, 0, 0, 40, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Set Melee Weapon Model on Evade"),
+(28580, 0, 31, 0, 61, 1, 100, 5, 0, 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Reset on Evade"),
+(28580, 0, 32, 21, 9, 1, 100, 2, 5, 30, 15000, 20000, 11, 52754, 1, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, "Cast Impact Shot"),
+(28580, 0, 33, 21, 9, 1, 100, 2, 5, 30, 12000, 18000, 11, 52755, 1, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, "Cast Impact Multi-Shot"),
+(28580, 0, 34, 21, 9, 1, 100, 4, 5, 30, 15000, 20000, 11, 59148, 1, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, "Cast Impact Shot"),
+(28580, 0, 35, 21, 9, 1, 100, 4, 5, 30, 12000, 18000, 11, 59147, 1, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, "Cast Impact Multi-Shot"),
+(28580, 0, 36, 0, 9, 1, 100, 6, 0, 5, 6000, 9000, 11, 61507, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Cast Disengage on Close");

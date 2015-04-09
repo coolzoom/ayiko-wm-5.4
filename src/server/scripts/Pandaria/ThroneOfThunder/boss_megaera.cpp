@@ -145,6 +145,8 @@ enum Events
     EVENT_BERSERK,
 
     EVENT_RELOCATE_HEAD,
+    EVENT_REEMERGE_HEAD,
+    EVENT_SUBMERGE_HEAD,
 
     // Heads - General
     EVENT_CHECK_MEGAERAS_RAGE,
@@ -288,14 +290,18 @@ class boss_megaera : public CreatureScript
             std::vector<std::pair<HeadPair*, bool>> pairv;
             std::pair<uint32, uint32> activeHeadEntries;
 
+            uint32 remainingHead;
             uint32 killedHeads[4];
             uint64 movingHeadGuid;
+            uint64 activeHeadGuid;
 
             /*** SPECIFIC AI FUNCTIONS ***/
 
             void FillPairVector()
             {
                 movingHeadGuid = 0;
+                activeHeadGuid = 0;
+                remainingHead  = 0;
 
                 pairv.clear();
 
@@ -489,12 +495,37 @@ class boss_megaera : public CreatureScript
 
                     pHead->NearTeleportTo(headPos.GetPositionX(), headPos.GetPositionY(), headPos.GetPositionZ(), headPos.GetOrientation());
 
-                    if (Aura* pAura = pHead->AddAura(SPELL_EMERGE, pHead))
+                    if (Aura* pAura = pHead->GetAura(SPELL_EMERGE))//, //pHead))
                     {
-                        pAura->SetDuration(2000);
+                        TC_LOG_ERROR("scripts", "found head aura");
+                        pAura->SetDuration(4000);
                     }
 
                     pHead->RemoveAurasDueToSpell(SPELL_CONCEALING_FOG);
+                    instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, pHead);
+                }
+            }
+
+            void SubmergeHead()
+            {
+                if (Creature* pHead = ObjectAccessor::GetCreature(*me, activeHeadGuid))
+                {
+                    instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, pHead);
+
+                    pHead->InterruptNonMeleeSpells(true);
+                    pHead->CastSpell(pHead, SPELL_SUBMERGE);
+
+                    events.ScheduleEvent(EVENT_REEMERGE_HEAD, 2200);
+                }
+            }
+
+            void ReEmergeHead()
+            {
+                if (Creature* pHead = ObjectAccessor::GetCreature(*me, activeHeadGuid))
+                {
+                    if (Aura* pAura = pHead->GetAura(SPELL_EMERGE))
+                        pAura->SetDuration(1900);
+
                     instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, pHead);
                 }
             }
@@ -552,6 +583,26 @@ class boss_megaera : public CreatureScript
                 activeHeadEntries.second = NPC_FROZEN_HEAD;
             }
 
+            Creature* FindAliveActiveHead(uint32 entry) const
+            {
+                std::list<Creature*> heads;
+                GetCreatureListWithEntryInGrid(heads, me, entry, 300.f);
+                heads.remove_if([this](Creature const* pCreature) -> bool
+                {
+                    return pCreature->HasAura(SPELL_CONCEALING_FOG);
+                });
+
+                if (!heads.empty())
+                {
+                    if (heads.size() > 1)
+                        heads.resize(1);
+                    
+
+                    return heads.front();
+                }
+                return nullptr;
+            }
+
             // Selection of the next two heads when one dies (from those available according to difficulty).
             void SpawnNextHeads(uint32 deadHead, uint32 nextHead)
             {
@@ -560,7 +611,8 @@ class boss_megaera : public CreatureScript
                     return;
 
                 std::list<Creature*> concealedHeads;
-
+                std::list<Creature*> remainingFrontHead;
+                
                 GetCreatureListWithEntryInGrid(concealedHeads, me, nextHead, 300.f);
 
                 concealedHeads.remove_if([this](Creature const* pCreature) -> bool
@@ -576,12 +628,12 @@ class boss_megaera : public CreatureScript
                         pHead->CastSpell(pHead, SPELL_SUBMERGE);
                         movingHeadGuid = pHead->GetGUID();
 
-                        events.ScheduleEvent(EVENT_RELOCATE_HEAD, 2000);
+                        events.ScheduleEvent(EVENT_RELOCATE_HEAD, 2200);
 
                         for (std::vector<std::pair<HeadPair*, bool>>::iterator itr = pairv.begin(); itr != pairv.end(); ++itr)
                         {
                             uint32 i = itr->second ? 1 : 0;
-                            TC_LOG_ERROR("scripts", "Position occupied %u", i);
+
                             if (pHead->GetGUID() == itr->first->GetGUID())
                             {
                                 itr->first->SetGUID(0);
@@ -589,6 +641,13 @@ class boss_megaera : public CreatureScript
                             }
                         }
                     }
+                }
+
+                if (Creature* pActiveHead = FindAliveActiveHead(remainingHead))
+                {
+                    activeHeadGuid = pActiveHead->GetGUID();
+
+                    events.ScheduleEvent(EVENT_SUBMERGE_HEAD, 2000);
                 }
 
                 for (uint8 i = 0; i < 2; ++i)
@@ -764,11 +823,13 @@ class boss_megaera : public CreatureScript
                     {
                         headEntry = activeHeadEntries.second == NPC_FROZEN_HEAD ? NPC_FLAMING_HEAD : NPC_FROZEN_HEAD;
                         activeHeadEntries.first = headEntry;
+                        remainingHead = activeHeadEntries.second;
                     }
                     else if (summonEntry == activeHeadEntries.second)
                     {
                         headEntry = activeHeadEntries.first == NPC_FROZEN_HEAD ? NPC_FLAMING_HEAD : NPC_FROZEN_HEAD;
                         activeHeadEntries.second = headEntry;
+                        remainingHead = activeHeadEntries.first;
                     }
                     break;
                 case NPC_FROZEN_HEAD:
@@ -776,11 +837,13 @@ class boss_megaera : public CreatureScript
                     {
                         headEntry = activeHeadEntries.second == NPC_VENOMOUS_HEAD ? NPC_FLAMING_HEAD : NPC_VENOMOUS_HEAD;
                         activeHeadEntries.first = headEntry;
+                        remainingHead = activeHeadEntries.second;
                     }
                     if (summonEntry == activeHeadEntries.second)
                     {
                         headEntry = activeHeadEntries.first == NPC_VENOMOUS_HEAD ? NPC_FLAMING_HEAD : NPC_VENOMOUS_HEAD;
                         activeHeadEntries.second = headEntry;
+                        remainingHead = activeHeadEntries.first;
                     }
                     break;
                 case NPC_FLAMING_HEAD:
@@ -788,11 +851,13 @@ class boss_megaera : public CreatureScript
                     {
                         headEntry = activeHeadEntries.second == NPC_FROZEN_HEAD ? NPC_VENOMOUS_HEAD : NPC_FROZEN_HEAD;
                         activeHeadEntries.first = headEntry;
+                        remainingHead = activeHeadEntries.second;
                     }
                     if (summonEntry == activeHeadEntries.second)
                     {
                         headEntry = activeHeadEntries.first == NPC_FROZEN_HEAD ? NPC_VENOMOUS_HEAD : NPC_FROZEN_HEAD;
                         activeHeadEntries.second = headEntry;
+                        remainingHead = activeHeadEntries.first;
                     }
                     break;
                 case NPC_ARCANE_HEAD:
@@ -961,6 +1026,12 @@ class boss_megaera : public CreatureScript
                 {
                     switch (eventId)
                     {
+                    case EVENT_SUBMERGE_HEAD:
+                        SubmergeHead();
+                        break;
+                    case EVENT_REEMERGE_HEAD:
+                        ReEmergeHead();
+                        break;
                     case EVENT_RELOCATE_HEAD:
                         RelocateHead();
                         break;

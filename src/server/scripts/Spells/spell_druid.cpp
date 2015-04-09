@@ -2853,11 +2853,7 @@ class spell_dru_celestial_alignment : public SpellScriptLoader
                     if (GetHitUnit())
                     {
                         player->SetEclipsePower(0);
-
-                        player->CastSpell(player, SPELL_DRUID_SOLAR_ECLIPSE, true, 0); // Cast Solar Eclipse
-                        player->CastSpell(player, SPELL_DRUID_LUNAR_ECLIPSE, true, 0); // Cast Lunar Eclipse
                         player->CastSpell(player, SPELL_DRUID_NATURES_GRACE, true); // Cast Nature's Grace
-                        player->CastSpell(player, SPELL_DRUID_ECLIPSE_GENERAL_ENERGIZE, true); // Cast Eclipse - Give 35% of POWER_MANA
                         player->CastSpell(player, SPELL_DRUID_LUNAR_ECLIPSE_OVERRIDE, true);
 
                         if (player->HasSpellCooldown(SPELL_DRUID_STARFALL))
@@ -2885,8 +2881,6 @@ class spell_dru_celestial_alignment : public SpellScriptLoader
             {
                 if (Unit* caster = GetCaster())
                 {
-                    caster->RemoveAura(SPELL_DRUID_SOLAR_ECLIPSE);
-                    caster->RemoveAura(SPELL_DRUID_LUNAR_ECLIPSE);
                     caster->RemoveAura(SPELL_DRUID_NATURES_GRACE);
                     caster->RemoveAura(SPELL_DRUID_LUNAR_ECLIPSE_OVERRIDE);
                 }

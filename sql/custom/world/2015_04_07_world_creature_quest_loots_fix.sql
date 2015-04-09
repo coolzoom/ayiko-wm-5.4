@@ -865,3 +865,6 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 
 /* Ban'thalos fixed */
 UPDATE `creature_template` SET `speed_walk` = 1, `speed_run` = 1.15 WHERE `entry` = 54320;
+
+/* Warden Thelwater fixed */
+UPDATE `creature` SET `MovementType` = 0 WHERE `id` = 46409;

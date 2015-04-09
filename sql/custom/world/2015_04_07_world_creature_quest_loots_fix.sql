@@ -947,3 +947,8 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (28579, 0, 31, 0, 61, 1, 100, 5, 0, 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Reset on Evade"),
 (28579, 0, 32, 0, 2, 0, 100, 7, 0, 30, 0, 0, 11, 61369, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Cast Enrage at 30% HP"),
 (28579, 0, 33, 0, 2, 0, 100, 7, 0, 30, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Say Text at 30% HP");
+
+/* Holgom missing spawn added */
+DELETE FROM `creature` WHERE `id`=37153;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(37153, 1, 0, 0, 1, 1, 0, 0, -618.625, -1429.13, 155.722, 2.3703, 60, 0, 0, 2537, 0, 0, 0, 0, 0, 0, 0, 0);
